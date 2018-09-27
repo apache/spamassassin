@@ -322,17 +322,39 @@ sub bgsend_and_start_lookup {
 
   else {  # no existing query, open a new DNS query
     $dns_query_info = $self->{all_lookups}{$dnskey} = {};  # new query needed
-    my($id, $blocked);
+    my($id, $blocked, $check_dbrdom);
+    # dns_query_restriction
+    my $blocked_by = 'dns_query_restriction';
     my $dns_query_blockages = $self->{main}->{conf}->{dns_query_blocked};
-    if ($dns_query_blockages) {
+    # dns_block_rule
+    my $dns_block_domains = $self->{main}->{conf}->{dns_block_rule_domains};
+    if ($dns_query_blockages || $dns_block_domains) {
       my $search_list = domain_to_search_list($domain);
       foreach my $parent_domain (@$search_list) {
-        $blocked = $dns_query_blockages->{$parent_domain};
-        last if defined $blocked; # stop at first defined, can be true or false
+        if ($dns_query_blockages) {
+          $blocked = $dns_query_blockages->{$parent_domain};
+          last if defined $blocked; # stop at first defined, can be true or false
+        } elsif ($dns_block_domains->{$parent_domain}) {
+          # save for later check.. ps. untainted already
+          $check_dbrdom = $dns_block_domains->{$parent_domain};
+        }
+      }
+    }
+    if (!$blocked && $check_dbrdom) {
+      my $blockfile =
+        $self->{main}->sed_path("__userstate__/dnsblock_${check_dbrdom}");
+      if (my $mtime = (stat($blockfile))[9]) {
+        if (time - $mtime <= $self->{main}->{conf}->{dns_block_time}) {
+          $blocked = 1;
+          $blocked_by = 'dns_block_rule';
+        } else {
+          dbg("async: dns_block_rule removing expired $blockfile");
+          unlink($blockfile);
+        }
       }
     }
     if ($blocked) {
-      dbg("async: blocked by dns_query_restriction: %s", $dnskey);
+      dbg("async: blocked by %s: %s", $blocked_by, $dnskey);
     } else {
       dbg("async: launching %s for %s", $dnskey, $key);
       $id = $self->{main}->{resolver}->bgsend($domain, $type, $class, sub {

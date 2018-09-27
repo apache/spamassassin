@@ -1965,6 +1965,55 @@ options, leaving the list empty, i.e. allowing DNS queries for any domain
     }
   });
 
+=item dns_block_rule RULE domain
+
+If rule named RULE is hit, DNS queries to specified domain are
+I<temporarily> blocked. Intended to be used with rules that check
+RBL return codes for specific blocked status.  For example:
+
+  urirhssub URIBL_BLOCKED multi.uribl.com. A 1
+  dns_block_rule URIBL_BLOCKED multi.uribl.com
+
+Block status is maintained across all processes by empty statefile in
+userstate directory (~/.spamassassin/dnsblock_multi.uribl.com).
+
+=cut
+
+  push (@cmds, {
+    setting => 'dns_block_rule',
+    type => $CONF_TYPE_STRING,
+    code => sub {
+      my ($self, $key, $value, $line) = @_;
+      defined $value && $value =~ /^(\S+)\s+(.+)$/
+        or return $INVALID_VALUE;
+      my $rule = $1;
+      foreach my $domain (split(/\s+/, lc($2))) {
+        $domain =~ s/^\.//; $domain =~ s/\.\z//;  # strip dots
+        if ($domain !~ /^[a-z0-9.-]+$/) {
+          return $INVALID_VALUE;
+        }
+        $domain = untaint_var($domain); # will be in filename!
+        # got_hit() uses this
+        $self->{dns_block_rule}{$rule}{$domain} = 1;
+        # bgsend_and_start_lookup() uses this
+        $self->{dns_block_rule_domains}{$domain} = $domain;
+      }
+    }
+  });
+
+=item dns_block_time   (default: 300)
+
+dns_block_rule query blockage will last this many seconds.
+
+=cut
+
+  push (@cmds, {
+    setting => 'dns_block_time',
+    is_admin => 1,
+    default => 60,
+    type => $CONF_TYPE_NUMERIC,
+  });
+
 =back
 
 =head2 LEARNING OPTIONS
@@ -5422,6 +5471,7 @@ sub feature_edns { 1 }  # supports 'dns_options edns' config option
 sub feature_dns_query_restriction { 1 }  # supported config option
 sub feature_registryboundaries { 1 } # replaces deprecated registrarboundaries
 sub feature_geodb { 1 } # if needed for some reason
+sub feature_dns_block_rule { 1 } # supports 'dns_block_rule' config option
 sub perl_min_version_5010000 { return $] >= 5.010000 }  # perl version check ("perl_version" not neatly backwards-compatible)
 
 ###########################################################################
