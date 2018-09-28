@@ -222,7 +222,7 @@ sub check_main {
   if ($pms->{conf}->{dns_block_rule}) {
     foreach my $rule (keys %{$pms->{conf}->{dns_block_rule}}) {
       next if !$pms->{tests_already_hit}->{$rule}; # hit?
-      foreach my $domain (keys %{$conf_ref->{dns_block_rule}{$rule}}) {
+      foreach my $domain (keys %{$pms->{conf}->{dns_block_rule}{$rule}}) {
         my $blockfile = $self->{main}->sed_path("__global_state_dir__/dnsblock_$domain");
         next if -f $blockfile; # no need to warn and create again..
         warn("check: dns_block_rule $rule hit, creating $blockfile\n");
