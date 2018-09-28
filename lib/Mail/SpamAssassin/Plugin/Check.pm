@@ -217,6 +217,19 @@ sub check_main {
   undef $bodytext;
   undef $fulltext;
 
+  # check dns_block_rule (bug 6728)
+  # TODO No idea yet what would be the most logical place to do all these..
+  if ($pms->{conf}->{dns_block_rule}) {
+    foreach my $rule (keys %{$pms->{conf}->{dns_block_rule}}) {
+      next if !$pms->{tests_already_hit}->{$rule}; # hit?
+      my $domain = $pms->{conf}->{dns_block_rule}{$rule};
+      my $blockfile = $self->{main}->sed_path("__global_state_dir__/dnsblock_$domain");
+      next if -f $blockfile; # no need to warn and create again..
+      warn("check: dns_block_rule $rule hit, creating $blockfile\n");
+      Mail::SpamAssassin::Util::touch_file($blockfile, { create_exclusive => 1 });
+    }
+  }
+
   if ($pms->{deadline_exceeded}) {
   # dbg("check: exceeded time limit, skipping auto-learning");
   } elsif ($master_deadline && time > $master_deadline) {

@@ -1163,6 +1163,7 @@ my $spamtest = Mail::SpamAssassin->new(
     paranoid             => ( $opt{'paranoid'} || 0 ),
     require_rules        => 1,
     skip_prng_reseeding  => 1,  # let us do the reseeding by ourselves
+    spamd                => 1,  # make spamd_child_after_non_root known
     home_dir_for_helpers => (
       defined $opt{'home_dir_for_helpers'}
       ? $opt{'home_dir_for_helpers'}
@@ -1397,6 +1398,9 @@ sub spawn {
         die "spamd: setuid to uid $uuid failed (> = $>, < = $<)\n";
       }
     }
+
+    # main() will also run this to set global_state_dir
+    $spamtest->call_plugins("spamd_child_after_non_root");
 
     # set process name where supported
     # this will help make it clear via process listing which is child/parent

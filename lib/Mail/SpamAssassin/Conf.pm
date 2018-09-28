@@ -1974,9 +1974,10 @@ RBL return codes for specific blocked status.  For example:
   urirhssub URIBL_BLOCKED multi.uribl.com. A 1
   dns_block_rule URIBL_BLOCKED multi.uribl.com
 
-Block status is maintained across all processes by empty statefile in local
-state dir (/var/lib/spamassassin/dnsblock_multi.uribl.com) or userstate_dir
-(~/.spamassassin/...), depending on which is writable.
+Block status is maintained across all processes by empty statefile named
+"dnsblock_multi.uribl.com" in global state dir:
+home_dir_for_helpers/.spamassassin, $HOME/.spamassassin,
+/var/lib/spamassassin (localstate), depending which is found and writable.
 
 =cut
 

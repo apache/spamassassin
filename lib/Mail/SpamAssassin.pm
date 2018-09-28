@@ -440,15 +440,6 @@ sub new {
     $self->{username} = (Mail::SpamAssassin::Util::portable_getpwuid ($>))[0];
   }
 
-  # Try if our localstate_dir is writable (useful info for some plugins etc)
-  {  
-    my $n = ".sawritetest$$".Mail::SpamAssassin::Util::pseudo_random_string(6);
-    my $file = File::Spec->catdir($self->{LOCAL_STATE_DIR}, $n);
-    $self->{local_state_is_writable} =
-      Mail::SpamAssassin::Util::touch_file($file, { create_exclusive => 1 });
-    unlink($file);
-  }
-
   $self->create_locker();
 
   $self;
@@ -1671,6 +1662,11 @@ sub init {
   # Note that this PID has run init()
   $self->{_initted} = $$;
 
+  # if spamd, wait for spamd_child_after_non_root
+  if (!$self->{spamd}) {
+    $self->set_global_state_dir();
+  }
+
   #fix spamd reading root prefs file
   if (!defined $use_user_pref) {
     $use_user_pref = 1;
@@ -1919,12 +1915,48 @@ sub get_and_create_userstate_dir {
   $fname;
 }
 
-# try to find the most global writable state dir available
-sub get_writable_state_dir {
+# find the most global writable state dir
+# used by dns_block_rule state files etc
+sub set_global_state_dir {
   my ($self) = @_;
-  return $self->{local_state_is_writable} ?
-      $self->{LOCAL_STATE_DIR} :
-      $self->get_and_create_userstate_dir() || '';
+
+  my $prev = '';
+  if ($self->{home_dir_for_helpers}) {
+    my $dir = File::Spec->catdir($self->{home_dir_for_helpers}, ".spamassassin");
+    $self->test_global_state_dir($dir);
+    $prev = $dir;
+  }
+  if (!$self->{global_state_dir}) {
+    my $home = (Mail::SpamAssassin::Util::portable_getpwuid ($>))[7];
+    # home_dir_for_helpers default == home, skip if checked already..
+    if ($home && $home ne $prev) {
+      my $dir = File::Spec->catdir($home, ".spamassassin");
+      $self->test_global_state_dir($dir);
+    }
+  }
+  if (!$self->{global_state_dir}) {
+    $self->test_global_state_dir($self->{LOCAL_STATE_DIR});
+  }
+  if (!$self->{global_state_dir}) {
+    # fallback to userstate
+    $self->{global_state_dir} = $self->get_and_create_userstate_dir();
+    dbg("config: global_state_dir falled back to userstate_dir");
+  }
+}
+
+sub test_global_state_dir {
+    my ($self, $dir) = @_;
+    eval { mkpath($dir, 0, 0700); }; # just a single stat if exists already
+    my $n = ".sawritetest$$".Mail::SpamAssassin::Util::pseudo_random_string(6);
+    my $file = File::Spec->catdir($dir, $n);
+    if (Mail::SpamAssassin::Util::touch_file($file, { create_exclusive => 1 })) {
+      dbg("config: global_state_dir set to $dir");
+      $self->{global_state_dir} = $dir;
+      unlink($file);
+      return 1;
+    }
+    unlink($file); # just in case?
+    return 0;
 }
 
 =item $fullpath = $f->find_rule_support_file ($filename)
@@ -2052,9 +2084,9 @@ sub sed_path {
   $path =~ s/__def_rules_dir__/$self->{DEF_RULES_DIR} || ''/ges;
   $path =~ s{__prefix__}{$self->{PREFIX} || $Config{prefix} || '/usr'}ges;
   $path =~ s{__userstate__}{$self->get_and_create_userstate_dir() || ''}ges;
+  $path =~ s/__global_state_dir__/$self->{global_state_dir} || ''/ges;
   $path =~ s{__perl_major_ver__}{$self->get_perl_major_version()}ges;
   $path =~ s/__version__/${VERSION}/gs;
-  $path =~ s/__writable_state_dir__/$self->get_writable_state_dir()/ges;
   $path =~ s/^\~([^\/]*)/$self->expand_name($1)/es;
 
   $path = Mail::SpamAssassin::Util::untaint_file_path ($path);
@@ -2139,14 +2171,20 @@ sub have_plugin {
 
 sub call_plugins {
   my $self = shift;
+  my $subname = shift;
 
   # We could potentially get called after a finish(), so just return.
   return unless $self->{plugins};
 
+  # Use some calls ourself too
+  if ($self->{spamd} && $subname eq 'spamd_child_after_non_root') {
+    # set global dir now if spamd
+    $self->set_global_state_dir();
+  }
+
   # safety net in case some plugin changes global settings, Bug 6218
   local $/ = $/;  # prevent underlying modules from changing the global $/
 
-  my $subname = shift;
   return $self->{plugins}->callback($subname, @_);
 }
 

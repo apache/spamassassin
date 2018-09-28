@@ -872,6 +872,11 @@ Indicate if the call is being made from a command line interface.
 
 Called in each new child process when it starts up under spamd.
 
+=item $plugin->spamd_child_after_non_root ()
+
+Called in each new child process after spamd possibly dropped root privs.
+The running user will not change anymore.
+
 =item $plugin->log_scan_result ( { options ... } )
 
 Called when spamd has completed scanning a message.  Currently,
