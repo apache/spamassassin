@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: darxus ena-week0 ena-week1 ena-week4 giovanni grenier hege jarif jbrooks mmiroslaw-mails-ham mmiroslaw-mails-spam sihde thendrikx; day 2: ena-week1 ena-week4 jarif jbrooks llanga mmiroslaw-mails-ham mmiroslaw-mails-spam sihde; day 3: ena-week1 ena-week4 jbrooks llanga mmiroslaw-mails-ham mmiroslaw-mails-spam sihde
+# with results from: day 1: darxus ena-week0 ena-week1 ena-week4 giovanni grenier hege jarif jbrooks mmiroslaw-mails-ham mmiroslaw-mails-spam sihde thendrikx; day 2: ena-week1 ena-week4 jarif jbrooks llanga mmiroslaw-mails-ham mmiroslaw-mails-spam sihde; day 3: ena-week1 ena-week4 jarif jbrooks llanga mmiroslaw-mails-ham mmiroslaw-mails-spam sihde
 
 # tflags publish
 AC_BR_BONANZA
@@ -305,6 +305,9 @@ FROM_WORDY
 FROM_WORDY_SHORT
 
 # good enough
+FROM_WSP_TRAIL
+
+# good enough
 FSL_CTYPE_WIN1251
 
 # good enough
@@ -425,6 +428,9 @@ HK_LOTTO
 HK_NAME_FM_MR_MRS
 
 # good enough
+HK_NAME_FROM
+
+# good enough
 HK_PNIS
 
 # good enough
@@ -434,10 +440,10 @@ HK_RANDOM_ENVFROM
 HK_SCAM_N2
 
 # good enough
-HK_SCAM_N4
+HK_SCAM_N8
 
 # good enough
-HK_SCAM_N8
+HK_SCAM_S7
 
 # tflags userconf
 HTML_CHARSET_FARAWAY
@@ -932,55 +938,55 @@ TVD_SPACE_ENCODED
 TW_GIBBERISH_MANY
 
 # good enough
-ADVANCE_FEE_3_NEW_FRM_MNY
+ADMITS_SPAM
 
 # good enough
-ADVANCE_FEE_5_NEW_FRM_MNY
+ADVANCE_FEE_2_NEW_FRM_MNY
 
 # good enough
-AXB_XMAILER_MIMEOLE_OL_1ECD5
+ADVANCE_FEE_4_NEW_FRM_MNY
 
 # good enough
-BIGNUM_EMAILS
+ADVANCE_FEE_4_NEW_MONEY
 
 # good enough
-DATE_IN_FUTURE_96_Q
+ADVANCE_FEE_5_NEW
 
 # good enough
-DEAR_BENEFICIARY
+BODY_SINGLE_URI
 
 # good enough
-FILL_THIS_FORM_LONG
+FILL_THIS_FORM_LOAN
 
 # good enough
-FROM_MISSP_DYNIP
+FROM_MISSPACED
 
 # good enough
-FROM_MISSP_TO_UNDISC
+FROM_MISSP_USER
 
 # good enough
-FROM_WSP_TRAIL
+HK_NAME_MR_MRS
 
 # good enough
-HK_NAME_FROM
+HK_SCAM_N15
 
 # good enough
-HK_SCAM_S7
+HK_SCAM_N3
 
 # good enough
-LOTTO_AGENT
+LIST_PARTIAL_SHORT_MSG
 
 # good enough
-MONEY_ATM_CARD
+MILLION_USD
 
 # good enough
-NSL_RCVD_HELO_USER
+MONEY_BARRISTER
 
 # good enough
-SERGIO_SUBJECT_VIAGRA01
+NSL_RCVD_FROM_USER
 
 # good enough
-TO_EQ_FM_DIRECT_MX
+PDS_FROM_2_EMAILS
 
 # tflags publish
 UC_GIBBERISH_OBFU
