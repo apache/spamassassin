@@ -542,7 +542,7 @@ foreach my $channel (@channels) {
       if (defined shift @mirs) {
         dbg("channel: no updates available, skipping channel");
       } else {
-        channel_failed("channel: no 'mirrors.$channel' record found");
+        channel_failed("channel '$channel': no 'mirrors.$channel' record found");
       }
       next;
     }
@@ -623,7 +623,7 @@ foreach my $channel (@channels) {
       } else {
         # protection error, misconfiguration, file system error, ...
         warn "error: error accessing mirrors file $mirby_path: $!\n";
-        channel_failed("channel: error accessing mirrors file $mirby_path: $!");
+        channel_failed("channel '$channel': error accessing mirrors file $mirby_path: $!");
         next;
       }
     } elsif (-z _) {
@@ -648,15 +648,18 @@ foreach my $channel (@channels) {
       my @mirrors = do_dns_query("mirrors.$channel");
       unless (@mirrors) {
         warn "error: no mirror data available for channel $channel\n";
-        channel_failed("channel: MIRRORED.BY file URL was not in DNS");
+        channel_failed("channel '$channel': MIRRORED.BY file URL was not in DNS");
         next;
       }
       foreach my $mirror (@mirrors) {
-        my $result_fname;
-        $result_fname =
+        my ($result_fname, $http_ok) =
           http_get($mirror, $UPDDir, $mirby_path, $mirby_force_reload);
+        if (!$http_ok) {
+          dbg("channel: no mirror data available for channel %s from %s",
+              $channel, $mirror);
+          next;
+        }
         $mirby = read_content($result_fname, 0);
-
         if ($mirby) {
           dbg("channel: MIRRORED.BY file for channel %s retrieved", $channel);
           $mirby_file_is_ok = 1;
@@ -671,8 +674,6 @@ foreach my $channel (@channels) {
 
           last;
         }
-        dbg("channel: no mirror data available for channel %s from %s",
-            $channel, $mirror);
       }
       if ($mirby_force_reload) {  # not refreshed?
         warn "error: unable to refresh mirrors file for channel $channel, ".
@@ -682,13 +683,13 @@ foreach my $channel (@channels) {
 
     if (!$mirby_file_is_ok) {
       warn "error: no mirror data available for channel $channel\n";
-      channel_failed("channel: MIRRORED.BY file contents were missing");
+      channel_failed("channel '$channel': MIRRORED.BY file contents were missing");
       next;
     } elsif ($mirby) {
       # file contents already in memory, no need to read it from a file
     } elsif (!open(MIRBY, $mirby_path)) {
       warn "error: error opening mirrors file $mirby_path: $!\n";
-      channel_failed("channel: error opening mirrors file $mirby_path: $!");
+      channel_failed("channel '$channel': error opening mirrors file $mirby_path: $!");
       next;
     } else {
       dbg("channel: reading MIRRORED.BY file %s", $mirby_path);
@@ -729,7 +730,7 @@ foreach my $channel (@channels) {
 
     unless (%mirrors) {
       warn "error: no mirrors available for channel $channel\n";
-      channel_failed("channel: no mirrors available");
+      channel_failed("channel '$channel': no mirrors available");
       next;
     }
 
@@ -740,7 +741,7 @@ foreach my $channel (@channels) {
     # if the archive get fails, choose another mirror,
     # if the get for the hash or gpg signature files fails, the channel fails
     while (my $mirror = choose_mirror(\%mirrors)) {
-      my $result_fname;
+      my ($result_fname, $http_ok);
       # Grab the data hash for this mirror, then remove it from the list
       my $mirror_info = $mirrors{$mirror};
       delete $mirrors{$mirror};
@@ -758,39 +759,49 @@ foreach my $channel (@channels) {
       dbg("channel: selected mirror $mirror");
 
       # Actual archive file
-      $result_fname = http_get("$mirror/$newV.tar.gz", $UPDDir);
+      ($result_fname, $http_ok) = http_get("$mirror/$newV.tar.gz", $UPDDir);
+      if (!$http_ok) {
+        dbg("channel: failed to get from mirror $mirror, %s",
+          %mirrors ? 'trying next' : 'no mirrors left');
+        next;
+      }
       $content = read_content($result_fname, 1);
       next unless $content;
       $preserve_files{$result_fname} = 1;
 
       # SHA512 of the archive file
-      $result_fname = http_get("$mirror/$newV.tar.gz.sha512", $UPDDir);
-      if ( -s $result_fname) {
+      ($result_fname, $http_ok) = http_get("$mirror/$newV.tar.gz.sha512", $UPDDir);
+      if (!$http_ok || !-s $result_fname) {
+        undef $SHA512;
+        dbg("channel: No sha512 file available from $mirror");
+      } else {
         $SHA512 = read_content($result_fname, 0);
         last unless $SHA512;
         $preserve_files{$result_fname} = 1;
-      } else {
-        undef $SHA512;
-        dbg("channel: No sha512 file available from $mirror");
       }
 
       # SHA256 of the archive file
-      $result_fname = http_get("$mirror/$newV.tar.gz.sha256", $UPDDir);
-      if ( -s $result_fname) {
+      ($result_fname, $http_ok) = http_get("$mirror/$newV.tar.gz.sha256", $UPDDir);
+      if (!$http_ok || !-s $result_fname) {
+        undef $SHA256;
+        dbg("channel: No sha256 file available from $mirror");
+      } else {
         $SHA256 = read_content($result_fname, 0);
         last unless $SHA256;
         $preserve_files{$result_fname} = 1;
-      } else {
-        undef $SHA256;
-        dbg("channel: No sha256 file available from $mirror");
       }
 
       # if GPG is enabled, the GPG detached signature of the archive file
       if ($GPG_ENABLED) {
-        $result_fname = http_get("$mirror/$newV.tar.gz.asc", $UPDDir);
-        $GPG = read_content($result_fname, 0);
-        last unless $GPG;
-        $preserve_files{$result_fname} = 1;
+        ($result_fname, $http_ok) = http_get("$mirror/$newV.tar.gz.asc", $UPDDir);
+        if (!$http_ok || !-s $result_fname) {
+          undef $GPG;
+          dbg("channel: No GPG/asc file available from $mirror");
+        } else {
+          $GPG = read_content($result_fname, 0);
+          last unless $GPG;
+          $preserve_files{$result_fname} = 1;
+        }
       }
       last;
     }
@@ -798,7 +809,7 @@ foreach my $channel (@channels) {
   }
 
   unless ($content && ( $SHA512 || $SHA256 ) && (!$GPG_ENABLED || $GPG)) {
-    channel_failed("channel: could not find working mirror");
+    channel_failed("channel '$channel': could not find working mirror");
     next;
   }
 
@@ -812,7 +823,7 @@ foreach my $channel (@channels) {
     dbg("sha512: verification wanted: $SHA512");
     dbg("sha512: verification result: $digest");
     unless ($digest eq $SHA512) {
-      channel_failed("channel: SHA512 verification failed");
+      channel_failed("channel '$channel': SHA512 verification failed");
       next;
     }
   }
@@ -827,7 +838,7 @@ foreach my $channel (@channels) {
     dbg("sha256: verification wanted: $SHA256");
     dbg("sha256: verification result: $digest");
     unless ($digest eq $SHA256) {
-      channel_failed("channel: SHA256 verification failed");
+      channel_failed("channel '$channel': SHA256 verification failed");
       next;
     }
   }
@@ -953,7 +964,7 @@ ENDOFVALIDATIONERR
 
       }
 
-      channel_failed("channel: GPG validation failed");
+      channel_failed("channel '$channel': GPG validation failed");
       next;
     }
   }
@@ -963,14 +974,14 @@ ENDOFVALIDATIONERR
 
   dbg("channel: extracting archive");
   if (!taint_safe_archive_extract($UPDTmp, $content_file)) {
-    channel_failed("channel: archive extraction failed");
+    channel_failed("channel '$channel': archive extraction failed");
     next;
   }
 
   # check --lint
 
   if (!lint_check_dir($UPDTmp)) {
-    channel_failed("channel: lint check of update failed");
+    channel_failed("channel '$channel': lint check of update failed");
     next;
   }
 
@@ -1026,7 +1037,7 @@ ENDOFVALIDATIONERR
       'try' => sub {
         # extract the files again for the last time
         if (!taint_safe_archive_extract($UPDDir, $content_file)) {
-          channel_failed("channel: archive extraction failed");
+          channel_failed("channel '$channel': archive extraction failed");
 	  return 0;
         }
 
@@ -1112,11 +1123,11 @@ ENDOFVALIDATIONERR
 
         # Finally, write out the files to include the update files
         if (!write_channel_file($PREFile, \@PRE)) {
-          channel_failed("channel: writing of $PREFile failed");
+          channel_failed("channel '$channel': writing of $PREFile failed");
           return 0;
         }
         if (!write_channel_file($CFFile, \@CF)) {
-          channel_failed("channel: writing of $CFFile failed");
+          channel_failed("channel '$channel': writing of $CFFile failed");
           return 0;
         }
 
@@ -1543,7 +1554,7 @@ sub http_get {
       $out_fh->print($content) or die "Error writing to $out_fname: $!";
     }
     $out_fh->close or die "Error closing file $out_fname: $!";
-    return $out_fname;
+    return ($out_fname, 1);
   } else {
     die "http: no downloading tool available";
   }
@@ -1586,7 +1597,7 @@ sub http_get {
            $ext_prog, $url, exit_status_str($child_stat,0));
   }
 
-  return $out_fname;
+  return ($out_fname, $child_stat == 0);
 }
 
 # Read the content of a (downloaded) file. The subroutine expects a file name
@@ -1595,20 +1606,26 @@ sub http_get {
 # mode. Returns the content of the file as a string.
 sub read_content {
   my ($file_name, $binary_mode) = @_;
-  my $content;
 
   my $file = IO::File->new;
-  $file->open($file_name, '<') or die "Cannot open file $file_name: $!";
+  if (!$file->open($file_name, '<')) {
+    dbg("read_content: Cannot open file $file_name: $!");
+    return undef;
+  }
   if ($binary_mode) {
     binmode $file;
   }
+
   my($number_of_bytes,$buffer);
-  $content = '';
+  my $content = '';
   while (($number_of_bytes = $file->read($buffer, 16384)) > 0) {
     $content .= $buffer;
   }
-  defined $number_of_bytes or die "Error reading from file $file_name: $!";
-  $file->close or die "Error closing $file_name: $!";
+  if (!defined $number_of_bytes) {
+    dbg("read_content: Error reading from file $file_name: $!");
+    return undef;
+  }
+  $file->close;
 
   return $content;
 }
