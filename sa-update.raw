@@ -1659,6 +1659,7 @@ sub check_mirror_af {
     my($a_rr, $aaaa_rr);
       # RFC 3986:  scheme = ALPHA *( ALPHA / DIGIT / "+" / "-" / "." )
     $mirror =~ s{^[a-z][a-z0-9.+-]*://}{}si;  # strip scheme like http://
+    $mirror =~ s{[:/].*}{}s;  # strip all starting from :port or /path
     return 1 if $have_inet4 && do_dns_query($mirror, "A");
     return 1 if $have_inet6 && do_dns_query($mirror, "AAAA");
     return 0;
