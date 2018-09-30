@@ -1318,7 +1318,7 @@ sub is_meta_valid {
     }
     # WTF is it? Just warn, for now. Bug #7557
     else {
-      $self->lint_warn("config: Strange rule token: $token", $name);
+      $self->lint_warn("config: Strange rule $name token: $token", $name);
       $meta .= "$token ";
     }
   }
