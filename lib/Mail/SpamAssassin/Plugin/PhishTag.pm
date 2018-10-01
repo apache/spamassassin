@@ -25,7 +25,7 @@ use Errno qw(EBADF);
 use Mail::SpamAssassin;
 use Mail::SpamAssassin::Logger;
 
-our our @ISA = qw(Mail::SpamAssassin::Plugin);
+our @ISA = qw(Mail::SpamAssassin::Plugin);
 
 sub new{
   my ($class, $mailsa)=@_;
