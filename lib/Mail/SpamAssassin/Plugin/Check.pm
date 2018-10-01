@@ -231,6 +231,9 @@ sub check_main {
     }
   }
 
+  # last chance to handle left callbacks, make rule hits etc
+  $self->{main}->call_plugins ("check_cleanup", { permsgstatus => $pms });
+
   if ($pms->{deadline_exceeded}) {
   # dbg("check: exceeded time limit, skipping auto-learning");
   } elsif ($master_deadline && time > $master_deadline) {
