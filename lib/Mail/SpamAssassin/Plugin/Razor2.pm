@@ -50,7 +50,7 @@ use warnings;
 use re 'taint';
 
 use Storable;
-use POSIX qw(PIPE_BUF WNOHANG);
+use POSIX qw(PIPE_BUF WNOHANG _exit);
 
 our @ISA = qw(Mail::SpamAssassin::Plugin);
 
@@ -432,6 +432,8 @@ sub check_razor2 {
 
   my $pid = fork();
   if (!$pid) {
+    # Must be set so DESTROY blocks etc can ignore us when exiting
+    $pms->{main}->{is_forked_helper_process} = 1;
     dbg("razor2: child process $$ forked");
     $pms->{razor2_backchannel}->setup_backchannel_child_post_fork();
     (undef, my @results) =
@@ -442,12 +444,12 @@ sub check_razor2 {
     };
     if ($@) {
       dbg("razor2: child return value freeze failed: $@");
-      exit;
+      _exit(0); # prevent touching filehandles as per perlfork(1)
     }
     if (!syswrite($pms->{razor2_backchannel}->{parent}, $backmsg)) {
       dbg("razor2: child backchannel write failed: $!");
     }
-    exit;
+    _exit(0); # prevent touching filehandles as per perlfork(1)
   }
 
   eval {

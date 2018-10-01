@@ -309,8 +309,12 @@ sub new {
 
 sub DESTROY {
   my ($self) = shift;
-  local $@;
-  eval { $self->delete_fulltext_tmpfile() };  # Bug 5808
+
+  # Ignore exiting helper processes (razor_fork etc)
+  if (!$self->{main}->{is_forked_helper_process}) {
+    local $@;
+    eval { $self->delete_fulltext_tmpfile() };  # Bug 5808
+  }
 }
 
 ###########################################################################
