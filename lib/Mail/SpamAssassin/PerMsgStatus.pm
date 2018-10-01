@@ -2536,7 +2536,7 @@ sub clear_test_state {
     %{$self->{test_log_msgs}} = ();
 }
 
-# internal API, called only by get_hit()
+# internal API, called only by got_hit()
 # TODO: refactor and merge this into that function
 sub _handle_hit {
     my ($self, $rule, $score, $area, $ruletype, $desc) = @_;
