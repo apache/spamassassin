@@ -480,7 +480,7 @@ sub _check_forked_result {
   # if $finish, force waiting for the child
   my $pid = waitpid($kid_pid, $finish ? 0 : WNOHANG);
   if ($pid == 0) {
-    dbg("razor2: child process $kid_pid not finished yet, trying later");
+    #dbg("razor2: child process $kid_pid not finished yet, trying later");
     return 0;
   } elsif ($pid == -1) {
     # child does not exist?
@@ -586,11 +586,13 @@ sub check_razor2_range {
         [$engine, $min, $max, $rulename];
       return 0;
     }
-  }
-
-  # If Razor2 hasn't been checked yet, go ahead and run it.
-  if (!$pms->{razor2_running}) {
-    $self->check_razor2($pms, $body);
+  } else {
+    # If Razor2 hasn't been checked yet, go ahead and run it.
+    # (only if we are non-forking.. forking will handle these in
+    # callbacks)
+    if (!$pms->{razor2_running}) {
+      $self->check_razor2($pms, $body);
+    }
   }
 
   my $cf = 0;
