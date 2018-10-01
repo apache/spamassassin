@@ -611,7 +611,7 @@ sub do_meta_tests {
           warn "no meta_dependencies defined for $metas[$i]";
         }
         my $alldeps = join ' ', grep {
-                defined $tflags->{$_} && $tflags->{$_} =~ /\bnet\b/
+                ($tflags->{$_}||'') =~ /\bnet\b/
               } split (' ', $conf->{meta_dependencies}->{ $metas[$i] } );
 
         if ($alldeps ne '') {
