@@ -3,8 +3,10 @@
 #### Basic stuff
 ####
 
-header		HK_CTE_RAW		Content-Transfer-Encoding =~ /^raw$/
+ifplugin Mail::SpamAssassin::Plugin::MIMEHeader
+mimeheader	HK_CTE_RAW		Content-Transfer-Encoding =~ /^raw$/
 score		HK_CTE_RAW		1
+endif
 
 header		HK_RCVD_IP_MULTICAST	X-Spam-Relays-External =~ / ip=(?:22[4-9]|23[0-9])\./
 score		HK_RCVD_IP_MULTICAST	1
