@@ -12,7 +12,7 @@ use Test::More;
 plan skip_all => "Net tests disabled" unless conf_bool('run_net_tests');
 plan skip_all => "Needs Razor2" unless HAS_RAZOR2;
 plan skip_all => "Needs Razor2 Identity File Needed. razor-register / razor-admin -register has not been run, or identity file ($ENV{'HOME'}/.razor/identity) is unreadable." unless HAS_RAZOR2_IDENT;
-plan tests => 2;
+plan tests => 4;
 
 diag('Note: Failures may not be an SpamAssassin bug, as Razor tests can fail due to problems with the Razor servers.');
 
@@ -39,6 +39,9 @@ loadplugin Mail::SpamAssassin::Plugin::Razor2
 
 sarun ("-t < data/spam/razor2", \&patterns_run_cb);
 ok_all_patterns();
+# Same with fork
+sarun ("--cf='razor_fork 1' -t < data/spam/razor2", \&patterns_run_cb);
+ok_all_patterns();
 
 #TESTING FOR HAM
 %patterns = ();
@@ -47,4 +50,7 @@ ok_all_patterns();
 		 );
 
 sarun ("-t < data/nice/001", \&patterns_run_cb);
+ok_all_patterns();
+# same with fork
+sarun ("--cf='razor_fork 1' -t < data/nice/001", \&patterns_run_cb);
 ok_all_patterns();
