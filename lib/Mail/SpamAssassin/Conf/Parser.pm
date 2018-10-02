@@ -1312,8 +1312,9 @@ sub is_meta_valid {
     if ($token =~ /^[_[:alpha:]]\w+\z/s) {
       $meta .= "0 ";
     }
-    # if it is a number or a string of 1 or 2 punctuation characters (i.e. operators) tack it onto the degenerate rule
-    elsif ( $token =~ /^(\d+|[[:punct:]]{1,2})\z/s ) {
+    # if it is a (decial) number or a string of 1 or 2 punctuation
+    # characters (i.e. operators) tack it onto the degenerate rule
+    elsif ( $token =~ /^(\d+(?:\.\d+)?|[[:punct:]]{1,2})\z/s ) {
       $meta .= "$token ";
     }
     # WTF is it? Just warn, for now. Bug #7557
