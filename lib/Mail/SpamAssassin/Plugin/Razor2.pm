@@ -433,7 +433,7 @@ sub check_razor2 {
   my $pid = fork();
   if (!$pid) {
     # Must be set so DESTROY blocks etc can ignore us when exiting
-    $pms->{main}->{is_forked_helper_process} = 1;
+    $ENV{'IS_FORKED_HELPER_PROCESS'} = 1;
     dbg("razor2: child process $$ forked");
     $pms->{razor2_backchannel}->setup_backchannel_child_post_fork();
     (undef, my @results) =

@@ -59,6 +59,10 @@ sub new {
 
 sub DESTROY {
   my($self) = shift;
+
+  # Ignore exiting helper processes (razor_fork etc)
+  return if defined $ENV{'IS_FORKED_HELPER_PROCESS'};
+
   if (exists $self->{cache}) {
     local($@, $!, $_);  # protect outer layers from a potential surprise
     my($hits, $attempts) = ($self->{cache_hits}, $self->{cache_attempts});

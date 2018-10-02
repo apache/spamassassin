@@ -77,6 +77,10 @@ sub new {
 
 sub DESTROY {
   my $self = shift;
+
+  # Ignore exiting helper processes (razor_fork etc)
+  return if defined $ENV{'IS_FORKED_HELPER_PROCESS'};
+
   $self->_close_db;
 }
 

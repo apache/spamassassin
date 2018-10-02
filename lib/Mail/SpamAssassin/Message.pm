@@ -679,6 +679,10 @@ sub finish {
 # temporary files are deleted even if the finish() method is omitted
 sub DESTROY {
   my $self = shift;
+
+  # Ignore exiting helper processes (razor_fork etc)
+  return if defined $ENV{'IS_FORKED_HELPER_PROCESS'};
+
   # best practices: prevent potential calls to eval and to system routines
   # in code of a DESTROY method from clobbering global variables $@ and $! 
   local($@,$!);  # keep outer error handling unaffected by DESTROY
