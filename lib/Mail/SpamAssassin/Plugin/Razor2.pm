@@ -578,10 +578,14 @@ sub check_razor2_range {
   return unless $self->{razor2_available};
   return unless $self->{main}->{conf}->{use_razor2};
 
+  # Check if callback overriding rulename
+  if (!defined $rulename) {
+    $rulename = $pms->get_current_eval_rule_name();
+  }
+
   # If forked, call back later unless results are in
   if ($self->{main}->{conf}->{razor_fork}) {
     if (!defined $pms->{razor2_result}) {
-      my $rulename = $pms->get_current_eval_rule_name();
       dbg("razor2: delaying check_razor2_range call for $rulename");
       # array matches check_razor2_range() argument order
       push @{$pms->{razor2_range_callbacks}},
