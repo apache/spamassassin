@@ -366,15 +366,17 @@ sub debug_diagnostics {
 #   sub Net::Ident::_export_hooks;
 # ';
 
-  foreach my $moddef (@MODULES, @OPTIONAL_MODULES) {
+  my $prefix = '';
+  foreach my $moddef (@MODULES, 'optional', @OPTIONAL_MODULES) {
+    if ($moddef eq 'optional') { $prefix = 'optional '; next; }
     my $module = $moddef->{module};
     my $modver;
     if (eval ' require '.$module.'; $modver = $'.$module.'::VERSION; 1;')
     {
       $modver ||= '(undef)';
-      $out .= "module installed: $module, version $modver\n";
+      $out .= "${prefix}module installed: $module, version $modver\n";
     } else {
-      $out .= "module not installed: $module ('require' failed)\n";
+      $out .= "${prefix}module not installed: $module ('require' failed)\n";
     }
   }
   return $out;
