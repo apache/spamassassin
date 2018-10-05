@@ -255,8 +255,27 @@ filled-in with a query ID.
 
 =cut
 
+sub launch_queue {
+  my($self) = @_;
+  if ($self->{bgsend_queue}) {
+    dbg("async: launching queued lookups");
+    foreach (@{$self->{bgsend_queue}}) {
+      $self->bgsend_and_start_lookup(@$_);
+    }
+    delete $self->{bgsend_queue};
+  }
+}
+
 sub bgsend_and_start_lookup {
-  my($self, $domain, $type, $class, $ent, $cb, %options) = @_;
+  my $self = shift;
+  my($domain, $type, $class, $ent, $cb, %options) = @_;
+
+  # Waiting for priority -100 to launch?
+  if ($self->{wait_launch}) {
+    push @{$self->{bgsend_queue}}, [@_];
+    dbg("async: dns priority not reached, queueing lookup: $_[0] $_[1]");
+    return $ent;
+  }
 
   # At this point the $domain should already be encoded to UTF-8 and
   # IDN converted to ASCII-compatible encoding (ACE).  Make sure this is

@@ -325,6 +325,11 @@ sub new {
   return $self;
 }
 
+# this is just a placeholder; in fact the results are dealt with later	 
+sub check_uridnsbl {	 
+  return 0;	 
+}	 
+
 # ---------------------------------------------------------------------------
 
 # once the metadata is parsed, we can access the URI list.  So start off
@@ -333,12 +338,9 @@ sub new {
 #
 # only parse and run after first check_uridnsbl call
 #
-sub check_uridnsbl {
-  my ($self, $pms, @args) = @_;
-
-  # only parse once
-  return 0  if $pms->{uridnsbl_done};
-  $pms->{uridnsbl_done} = 1;
+sub parsed_metadata {
+  my ($self, $opts) = @_;
+  my $pms = $opts->{permsgstatus};
 
   my $conf = $pms->{conf};
 
@@ -495,7 +497,7 @@ sub check_uridnsbl {
   # and query
   $self->query_hosts_or_domains($pms, \%hostlist);
 
-  return 0;
+  return 1;
 }
 
 # Accepts argument in one of the following forms: m, n1-n2, or n/m,

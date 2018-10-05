@@ -37,7 +37,6 @@ uridnssub       URIBL_SBL        zen.spamhaus.org.       A   127.0.0.2
 body            URIBL_SBL        eval:check_uridnsbl('URIBL_SBL')
 describe        URIBL_SBL        Contains an URL's NS IP listed in the Spamhaus SBL blocklist
 tflags          URIBL_SBL        net
-priority        URIBL_SBL        -100
 reuse           URIBL_SBL
 
 if (version >= 3.004000)
@@ -47,7 +46,6 @@ if (version >= 3.004000)
     body            URIBL_SBL_A    eval:check_uridnsbl('URIBL_SBL_A')
     describe        URIBL_SBL_A    Contains URL's A record listed in the Spamhaus SBL blocklist
     tflags          URIBL_SBL_A    net a
-    priority        URIBL_SBL_A    -100
     reuse           URIBL_SBL_A
   endif
 endif
@@ -61,63 +59,54 @@ urirhssub       URIBL_DBL_SPAM   	dbl.spamhaus.org.       A   127.0.1.2
 body            URIBL_DBL_SPAM   	eval:check_uridnsbl('URIBL_DBL_SPAM')
 describe        URIBL_DBL_SPAM   	Contains a spam URL listed in the Spamhaus DBL blocklist
 tflags          URIBL_DBL_SPAM   	net domains_only
-priority        URIBL_DBL_SPAM  	-100
 reuse           URIBL_DBL_SPAM
 
 urirhssub       URIBL_DBL_PHISH  	dbl.spamhaus.org.       A   127.0.1.4
 body            URIBL_DBL_PHISH	 	eval:check_uridnsbl('URIBL_DBL_PHISH')
 describe        URIBL_DBL_PHISH	 	Contains a Phishing URL listed in the Spamhaus DBL blocklist
 tflags          URIBL_DBL_PHISH  	net domains_only
-priority        URIBL_DBL_PHISH         -100
 reuse           URIBL_DBL_PHISH
 
 urirhssub       URIBL_DBL_MALWARE  	dbl.spamhaus.org.       A   127.0.1.5
 body            URIBL_DBL_MALWARE  	eval:check_uridnsbl('URIBL_DBL_MALWARE')
 describe        URIBL_DBL_MALWARE  	Contains a malware URL listed in the Spamhaus DBL blocklist
 tflags          URIBL_DBL_MALWARE  	net domains_only
-priority        URIBL_DBL_MALWARE       -100
 reuse           URIBL_DBL_MALWARE
 
 urirhssub       URIBL_DBL_BOTNETCC  	dbl.spamhaus.org.       A   127.0.1.6
 body            URIBL_DBL_BOTNETCC	eval:check_uridnsbl('URIBL_DBL_BOTNETCC')
 describe        URIBL_DBL_BOTNETCC	Contains a botned C&C URL listed in the Spamhaus DBL blocklist
 tflags          URIBL_DBL_BOTNETCC	net domains_only
-priority        URIBL_DBL_BOTNETCC      -100
 reuse           URIBL_DBL_BOTNETCC
 
 urirhssub       URIBL_DBL_ABUSE_SPAM  	dbl.spamhaus.org.       A   127.0.1.102
 body            URIBL_DBL_ABUSE_SPAM	eval:check_uridnsbl('URIBL_DBL_ABUSE_SPAM')
 describe        URIBL_DBL_ABUSE_SPAM	Contains an abused spamvertized URL listed in the Spamhaus DBL blocklist
 tflags          URIBL_DBL_ABUSE_SPAM	net domains_only
-priority        URIBL_DBL_ABUSE_SPAM    -100
 reuse           URIBL_DBL_ABUSE_SPAM
 
 urirhssub       URIBL_DBL_ABUSE_REDIR  	dbl.spamhaus.org.       A   127.0.1.103
 body            URIBL_DBL_ABUSE_REDIR  	eval:check_uridnsbl('URIBL_DBL_ABUSE_REDIR')
 describe        URIBL_DBL_ABUSE_REDIR  	Contains an abused redirector URL listed in the Spamhaus DBL blocklist
 tflags          URIBL_DBL_ABUSE_REDIR  	net domains_only
-priority        URIBL_DBL_ABUSE_REDIR   -100
 reuse           URIBL_DBL_ABUSE_REDIR
 
 urirhssub       URIBL_DBL_ABUSE_PHISH  	dbl.spamhaus.org.       A   127.0.1.104
 body            URIBL_DBL_ABUSE_PHISH	eval:check_uridnsbl('URIBL_DBL_ABUSE_PHISH')
 describe        URIBL_DBL_ABUSE_PHISH	Contains an abused phishing URL listed in the Spamhaus DBL blocklist
 tflags          URIBL_DBL_ABUSE_PHISH	net domains_only
-priority        URIBL_DBL_ABUSE_PHISH   -100
 reuse           URIBL_DBL_ABUSE_PHISH
 
 urirhssub       URIBL_DBL_ABUSE_MALW  	dbl.spamhaus.org.       A   127.0.1.105
 body            URIBL_DBL_ABUSE_MALW	eval:check_uridnsbl('URIBL_DBL_ABUSE_MALW')
 describe        URIBL_DBL_ABUSE_MALW	Contains an abused malware URL listed in the Spamhaus DBL blocklist
 tflags          URIBL_DBL_ABUSE_MALW	net domains_only
-priority        URIBL_DBL_ABUSE_MALW    -100
 reuse           URIBL_DBL_ABUSE_MALW
 
 urirhssub       URIBL_DBL_ABUSE_BOTCC  	dbl.spamhaus.org.       A   127.0.1.106
 body            URIBL_DBL_ABUSE_BOTCC  	eval:check_uridnsbl('URIBL_DBL_ABUSE_BOTCC')
 describe        URIBL_DBL_ABUSE_BOTCC  	Contains an abused botnet C&C URL listed in the Spamhaus DBL blocklist
 tflags          URIBL_DBL_ABUSE_BOTCC  	net domains_only
-priority        URIBL_DBL_ABUSE_BOTCC   -100
 reuse           URIBL_DBL_ABUSE_BOTCC
 
 
@@ -127,7 +116,6 @@ urirhssub       URIBL_DBL_ERROR  dbl.spamhaus.org.       A   127.0.1.255
 body            URIBL_DBL_ERROR  eval:check_uridnsbl('URIBL_DBL_ERROR')
 describe        URIBL_DBL_ERROR  Error: queried the Spamhaus DBL blocklist for an IP
 tflags          URIBL_DBL_ERROR  net domains_only
-priority        URIBL_DBL_ERROR  -100
 reuse           URIBL_DBL_ERROR
 
 endif
@@ -140,35 +128,30 @@ endif
 #body            URIBL_SC_SURBL  eval:check_uridnsbl('URIBL_SC_SURBL')
 #describe        URIBL_SC_SURBL  Contains an URL listed in the SC SURBL blocklist
 #tflags          URIBL_SC_SURBL  net
-#priority        URIBL_SC_SURBL  -100
 #reuse           URIBL_SC_SURBL
 
 urirhssub       URIBL_WS_SURBL  multi.surbl.org.        A   4
 body            URIBL_WS_SURBL  eval:check_uridnsbl('URIBL_WS_SURBL')
 describe        URIBL_WS_SURBL  Contains an URL listed in the WS SURBL blocklist
 tflags          URIBL_WS_SURBL  net
-priority        URIBL_WS_SURBL  -100
 reuse           URIBL_WS_SURBL
 
 urirhssub       URIBL_PH_SURBL  multi.surbl.org.        A   8
 body            URIBL_PH_SURBL  eval:check_uridnsbl('URIBL_PH_SURBL')
 describe        URIBL_PH_SURBL  Contains an URL listed in the PH SURBL blocklist
 tflags          URIBL_PH_SURBL  net
-priority        URIBL_PH_SURBL  -100
 reuse           URIBL_PH_SURBL
 
 urirhssub       URIBL_MW_SURBL  multi.surbl.org.        A   16
 body            URIBL_MW_SURBL  eval:check_uridnsbl('URIBL_MW_SURBL')
 describe        URIBL_MW_SURBL  Contains a URL listed in the MW SURBL blocklist
 tflags          URIBL_MW_SURBL  net
-priority        URIBL_MW_SURBL  -100
 reuse           URIBL_MW_SURBL
 
 urirhssub       URIBL_CR_SURBL  multi.surbl.org.        A   128
 body            URIBL_CR_SURBL  eval:check_uridnsbl('URIBL_CR_SURBL')
 describe        URIBL_CR_SURBL  Contains an URL listed in the CR SURBL blocklist
 tflags          URIBL_CR_SURBL  net
-priority        URIBL_CR_SURBL  -100
 reuse           URIBL_CR_SURBL
 
 #MERGED INTO BIT 64 per bug 7279
@@ -183,7 +166,6 @@ urirhssub       URIBL_ABUSE_SURBL  multi.surbl.org.        A   64
 body            URIBL_ABUSE_SURBL  eval:check_uridnsbl('URIBL_ABUSE_SURBL')
 describe        URIBL_ABUSE_SURBL  Contains an URL listed in the ABUSE SURBL blocklist
 tflags          URIBL_ABUSE_SURBL  net
-priority        URIBL_ABUSE_SURBL  -100
 reuse           URIBL_ABUSE_SURBL
 
 #SURBL BLOCK RULES - Bit 1 means your DNS has been blocked and this rule should be triggered to notify you.
@@ -191,7 +173,6 @@ urirhssub       SURBL_BLOCKED   multi.surbl.org.        A   1
 body            SURBL_BLOCKED   eval:check_uridnsbl('SURBL_BLOCKED')
 describe        SURBL_BLOCKED   ADMINISTRATOR NOTICE: The query to SURBL was blocked.  See http://wiki.apache.org/spamassassin/DnsBlocklists\#dnsbl-block for more information.
 tflags          SURBL_BLOCKED   net noautolearn
-priority        SURBL_BLOCKED   -100
 reuse           SURBL_BLOCKED
 
 ###########################################################################
@@ -201,21 +182,18 @@ urirhssub       URIBL_BLACK     multi.uribl.com.        A   2
 body            URIBL_BLACK     eval:check_uridnsbl('URIBL_BLACK')
 describe        URIBL_BLACK     Contains an URL listed in the URIBL blacklist
 tflags          URIBL_BLACK     net
-priority        URIBL_BLACK     -100
 reuse           URIBL_BLACK
 
 urirhssub       URIBL_GREY      multi.uribl.com.        A   4
 body            URIBL_GREY      eval:check_uridnsbl('URIBL_GREY')
 describe        URIBL_GREY      Contains an URL listed in the URIBL greylist
 tflags          URIBL_GREY      net
-priority        URIBL_GREY      -100
 reuse           URIBL_GREY
 
 urirhssub       URIBL_RED       multi.uribl.com.        A   8
 body            URIBL_RED       eval:check_uridnsbl('URIBL_RED')
 describe        URIBL_RED       Contains an URL listed in the URIBL redlist
 tflags          URIBL_RED       net
-priority        URIBL_RED       -100
 reuse           URIBL_RED
 
 #URIBL BLOCK RULES - Bit 1 means your DNS has been blocked and this rule should be triggered to notify you.
@@ -223,7 +201,6 @@ urirhssub       URIBL_BLOCKED   multi.uribl.com.        A   1
 body            URIBL_BLOCKED   eval:check_uridnsbl('URIBL_BLOCKED')
 describe        URIBL_BLOCKED   ADMINISTRATOR NOTICE: The query to URIBL was blocked.  See http://wiki.apache.org/spamassassin/DnsBlocklists\#dnsbl-block for more information.
 tflags          URIBL_BLOCKED   net noautolearn
-priority        URIBL_BLOCKED   -100
 reuse           URIBL_BLOCKED
 
 

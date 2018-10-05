@@ -5,7 +5,6 @@ meta		DKIMWL_WL_HIGH	__DKIMWL_WL_HI && !(FREEMAIL_FROM || FREEMAIL_REPLYTO || FR
 tflags		DKIMWL_WL_HIGH	nice net
 describe	DKIMWL_WL_HIGH	DKIMwl.org - Whitelisted High sender
 score		DKIMWL_WL_HIGH	-7.5
-priority	DKIMWL_WL_HIGH	-100
 reuse		DKIMWL_WL_HIGH
 
 askdns		__DKIMWL_WL_MED	_DKIMDOMAIN_.lookup.dkimwl.org A /^127\.\d+\.\d+\.3$/
@@ -13,14 +12,12 @@ meta		DKIMWL_WL_MED	__DKIMWL_WL_MED && !(FREEMAIL_FROM || FREEMAIL_REPLYTO || FR
 tflags		DKIMWL_WL_MED	nice net
 describe	DKIMWL_WL_MED	DKIMwl.org - Whitelisted Medium sender
 score		DKIMWL_WL_MED	-3.5
-priority	DKIMWL_WL_MED	-100
 reuse		DKIMWL_WL_MED
 
 askdns		DKIMWL_BL	_DKIMDOMAIN_.lookup.dkimwl.org A /^127\.\d+\.\d+\.0$/
 tflags		DKIMWL_BL	nice net
 describe	DKIMWL_BL	DKIMwl.org - Blacklisted sender
 score		DKIMWL_BL	7.5
-priority	DKIMWL_BL	-100
 reuse		DKIMWL_BL
 
 endif

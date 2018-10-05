@@ -50,6 +50,9 @@ sub check_main {
 
   my $pms = $args->{permsgstatus};
 
+  # Make AsyncLoop wait permission for launching queries
+  $pms->{async}->{wait_launch} = 1;
+
   my $suppl_attrib = $pms->{msg}->{suppl_attrib};
   if (ref $suppl_attrib && ref $suppl_attrib->{rule_hits}) {
     my @caller_rule_hits = @{$suppl_attrib->{rule_hits}};
@@ -88,7 +91,11 @@ sub check_main {
 
   my @uris = $pms->get_uri_list();
 
+  # Make sure priority -100 exists for launching DNS
+  $pms->{conf}->{priorities}->{-100} ||= 1;
+
   foreach my $priority (sort { $a <=> $b } keys %{$pms->{conf}->{priorities}}) {
+    dbg("FOO running priority $priority");
     # no need to run if there are no priorities at this level.  This can
     # happen in Conf.pm when we switch a rule from one priority to another
     next unless ($pms->{conf}->{priorities}->{$priority} > 0);
@@ -111,6 +118,8 @@ sub check_main {
     # unneeded DNS queries.
     if (!$rbls_running && $priority >= -100) {
       $rbls_running = 1;
+      $pms->{async}->{wait_launch} = 0; # permission granted
+      $pms->{async}->launch_queue(); # check if something was queued
       $self->run_rbl_eval_tests($pms);
     }
 
@@ -137,56 +146,56 @@ sub check_main {
       $pms->{resolver}->finish_socket() if $pms->{resolver};
     }
 
-    $pms->harvest_completed_queries();
+    $pms->harvest_completed_queries() if $rbls_running;
     # allow other, plugin-defined rule types to be called here
     $self->{main}->call_plugins ("check_rules_at_priority",
         { permsgstatus => $pms, priority => $priority, checkobj => $self });
 
     # do head tests
     $self->do_head_tests($pms, $priority);
-    $pms->harvest_completed_queries();
+    $pms->harvest_completed_queries() if $rbls_running;
     last if $pms->{deadline_exceeded};
 
     $self->do_head_eval_tests($pms, $priority);
-    $pms->harvest_completed_queries();
+    $pms->harvest_completed_queries() if $rbls_running;
     last if $pms->{deadline_exceeded};
 
     $self->do_body_tests($pms, $priority, $decoded);
-    $pms->harvest_completed_queries();
+    $pms->harvest_completed_queries() if $rbls_running;
     last if $pms->{deadline_exceeded};
 
     $self->do_uri_tests($pms, $priority, @uris);
-    $pms->harvest_completed_queries();
+    $pms->harvest_completed_queries() if $rbls_running;
     last if $pms->{deadline_exceeded};
 
     $self->do_body_eval_tests($pms, $priority, $decoded);
-    $pms->harvest_completed_queries();
+    $pms->harvest_completed_queries() if $rbls_running;
     last if $pms->{deadline_exceeded};
   
     $self->do_rawbody_tests($pms, $priority, $bodytext);
-    $pms->harvest_completed_queries();
+    $pms->harvest_completed_queries() if $rbls_running;
     last if $pms->{deadline_exceeded};
 
     $self->do_rawbody_eval_tests($pms, $priority, $bodytext);
-    $pms->harvest_completed_queries();
+    $pms->harvest_completed_queries() if $rbls_running;
     last if $pms->{deadline_exceeded};
   
     $self->do_full_tests($pms, $priority, \$fulltext);
-    $pms->harvest_completed_queries();
+    $pms->harvest_completed_queries() if $rbls_running;
     last if $pms->{deadline_exceeded};
 
     $self->do_full_eval_tests($pms, $priority, \$fulltext);
-    $pms->harvest_completed_queries();
+    $pms->harvest_completed_queries() if $rbls_running;
     last if $pms->{deadline_exceeded};
 
     $self->do_meta_tests($pms, $priority);
-    $pms->harvest_completed_queries();
+    $pms->harvest_completed_queries() if $rbls_running;
     last if $pms->{deadline_exceeded};
 
     # we may need to call this more often than once through the loop, but
     # it needs to be done at least once, either at the beginning or the end.
     $self->{main}->call_plugins ("check_tick", { permsgstatus => $pms });
-    $pms->harvest_completed_queries();
+    $pms->harvest_completed_queries() if $rbls_running;
     last if $pms->{deadline_exceeded};
   }
 
