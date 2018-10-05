@@ -95,7 +95,6 @@ sub check_main {
   $pms->{conf}->{priorities}->{-100} ||= 1;
 
   foreach my $priority (sort { $a <=> $b } keys %{$pms->{conf}->{priorities}}) {
-    dbg("FOO running priority $priority");
     # no need to run if there are no priorities at this level.  This can
     # happen in Conf.pm when we switch a rule from one priority to another
     next unless ($pms->{conf}->{priorities}->{$priority} > 0);
