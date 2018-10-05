@@ -12,7 +12,7 @@ score		HK_XOIP_3SINGLES	1
 header		HK_XOIP_0FRONT		X-Originating-IP =~ /(?:^\[?|\.)0[1-9]/
 score		HK_XOIP_0FRONT		1
 
-header		HK_XOIP_0		X-Originating-IP =~ /(?:^\[?|\.)0+\./
+header		HK_XOIP_0		X-Originating-IP =~ /(?:^\[?|\.)0+(?:\.|\]?$)/
 score		HK_XOIP_0		1
 
 header		HK_EMPTY_DKIM_S		DKIM-Signature =~ /[\s;]s=\s*;/
