@@ -3,10 +3,14 @@
 #### Basic stuff
 ####
 
-ifplugin Mail::SpamAssassin::Plugin::MIMEHeader
-mimeheader	HK_CTE_RAW		Content-Transfer-Encoding =~ /^raw$/
-score		HK_CTE_RAW		1
-endif
+header		HK_XOIP_4SINGLES	X-Originating-IP =~ /^\d\.\d\.\d\.\d$/
+score		HK_XOIP_3SINGLES	1
+
+header		HK_XOIP_3SINGLES	X-Originating-IP =~ /^(?:\d\d+\.\d\.\d\.\d|\d\.\d\d+\.\d\.\d|\d\.\d\.\d\d+\.\d|\d\.\d\.\d\.\d\d+)$/
+score		HK_XOIP_3SINGLES	1
+
+header		HK_XOIP_0FRONT		X-Originating-IP =~ /(?:^|\.)0[1-9]/
+score		HK_XOIP_0FRONT		1
 
 header		HK_EMPTY_DKIM_S		DKIM-Signature =~ /[\s;]s=\s*;/
 score		HK_EMPTY_DKIM_S		1
@@ -167,6 +171,9 @@ ifplugin Mail::SpamAssassin::Plugin::MIMEHeader
 mimeheader	__HK_SPAMMY_CTFN	Content-Type =~ /name=.*?(?:lot(?:eri[ej]|t(?:ery|o))|award|prize|winn(?:er|ing)|microsoft|congrat|urgent)/mi
 mimeheader	__HK_SPAMMY_CDFN	Content-Disposition =~ /name=.*?(?:lot(?:eri[ej]|t(?:ery|o))|award|prize|winn(?:er|ing)|microsoft|congrat|urgent)/mi
 meta		HK_SPAMMY_FILENAME	__HK_SPAMMY_CTFN || __HK_SPAMMY_CDFN
+
+mimeheader	HK_CTE_RAW		Content-Transfer-Encoding =~ /^raw$/
+score		HK_CTE_RAW		1
 
 endif
 
