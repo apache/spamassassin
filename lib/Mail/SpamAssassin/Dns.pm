@@ -37,7 +37,7 @@ use POSIX ":sys_wait_h";
 
 
 our $KNOWN_BAD_DIALUP_RANGES; # Nothing uses this var???
-our $LAST_DNS_CHECK;
+our $LAST_DNS_CHECK = 0;
 
 # use very well-connected domains (fast DNS response, many DNS servers,
 # geographical distribution is a plus, TTL of at least 3600s)
@@ -516,22 +516,27 @@ sub lookup_ns {
 sub is_dns_available {
   my ($self) = @_;
   my $dnsopt = $self->{conf}->{dns_available};
-  my $dnsint = $self->{conf}->{dns_test_interval} || 600;
-  my @domains;
 
-  $LAST_DNS_CHECK ||= 0;
-  my $diff = time() - $LAST_DNS_CHECK;
+  # Fast response for the most common cases
+  return 1 if $IS_DNS_AVAILABLE && $dnsopt eq "yes";
+  return 0 if defined $IS_DNS_AVAILABLE && $dnsopt eq "no";
 
   # undef $IS_DNS_AVAILABLE if we should be testing for
   # working DNS and our check interval time has passed
-  if ($dnsopt eq "test" && $diff > $dnsint) {
-    $IS_DNS_AVAILABLE = undef;
-    dbg("dns: is_dns_available() last checked %.1f seconds ago; re-checking",
-        $diff);
+  if ($dnsopt eq "test") {
+    my $diff = time - $LAST_DNS_CHECK;
+    if ($diff > ($self->{conf}->{dns_test_interval}||600)) {
+      $IS_DNS_AVAILABLE = undef;
+      if ($LAST_DNS_CHECK) {
+        dbg("dns: is_dns_available() last checked %.1f seconds ago; re-checking", $diff);
+      } else {
+        dbg("dns: is_dns_available() initial check");
+      }
+    }
+    $LAST_DNS_CHECK = time;
   }
 
-  return $IS_DNS_AVAILABLE if (defined $IS_DNS_AVAILABLE);
-  $LAST_DNS_CHECK = time();
+  return $IS_DNS_AVAILABLE if defined $IS_DNS_AVAILABLE;
 
   $IS_DNS_AVAILABLE = 0;
   if ($dnsopt eq "no") {
@@ -575,6 +580,7 @@ sub is_dns_available {
     return $IS_DNS_AVAILABLE;
   }
 
+  my @domains;
   if ($dnsopt =~ /^test:\s*(\S.*)$/) {
     @domains = split (/\s+/, $1);
     dbg("dns: looking up NS records for user specified domains: %s",
