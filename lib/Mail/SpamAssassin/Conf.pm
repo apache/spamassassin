@@ -4439,8 +4439,9 @@ GeoIP/GeoIP2 searches these files/directories:
     default => {},
     code => sub {
       my ($self, $key, $value, $line) = @_;
-      foreach my $option (split (/\s+/, lc $value)) {
-        my ($option, $db) = split(/:/, $option, 2);        
+      foreach my $option (split (/\s+/, $value)) {
+        my ($option, $db) = split(/:/, $option, 2);
+        $option = lc($option);
         if ($option eq 'reset') {
           $self->{geodb}->{options} = {};
         } elsif ($option eq 'country') {
