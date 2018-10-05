@@ -390,6 +390,9 @@ sub check_uri_local_bl {
     }
   }
 
+  # bail out now if dns not available
+  return 0 if !$pms->is_dns_available();
+
   foreach my $host (keys %found_hosts) {
     # launch dns
     $pms->{async}->bgsend_and_start_lookup("$host.", 'A', undef,
