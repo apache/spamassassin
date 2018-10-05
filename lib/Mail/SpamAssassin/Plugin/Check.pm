@@ -79,7 +79,7 @@ sub check_main {
   # rbl calls.
   $pms->extract_message_metadata();
 
-  my $needs_dnsbl_harvest_p = 1; # harvest needs to be run
+  my $do_dns = $pms->is_dns_available();
   my $rbls_running = 0;
 
   my $decoded = $pms->get_decoded_stripped_body_text_array();
@@ -92,7 +92,7 @@ sub check_main {
   my @uris = $pms->get_uri_list();
 
   # Make sure priority -100 exists for launching DNS
-  $pms->{conf}->{priorities}->{-100} ||= 1;
+  $pms->{conf}->{priorities}->{-100} ||= 1 if $do_dns;
 
   foreach my $priority (sort { $a <=> $b } keys %{$pms->{conf}->{priorities}}) {
     # no need to run if there are no priorities at this level.  This can
@@ -115,7 +115,7 @@ sub check_main {
     # inspect the message.  We try to launch all DNS queries at priority
     # -100, so one can shortcircuit tests at lower priority and not launch
     # unneeded DNS queries.
-    if (!$rbls_running && $priority >= -100) {
+    if ($do_dns && !$rbls_running && $priority >= -100) {
       $rbls_running = 1;
       $pms->{async}->{wait_launch} = 0; # permission granted
       $pms->{async}->launch_queue(); # check if something was queued
@@ -124,26 +124,6 @@ sub check_main {
 
     my $timer = $self->{main}->time_method("tests_pri_".$priority);
     dbg("check: running tests for priority: $priority");
-
-    # only harvest the dnsbl queries once priority HARVEST_DNSBL_PRIORITY
-    # has been reached and then only run once
-    #
-    # TODO: is this block still needed here? is HARVEST_DNSBL_PRIORITY used?
-    #
-    if ($priority >= HARVEST_DNSBL_PRIORITY
-        && $needs_dnsbl_harvest_p
-        && !$self->{main}->call_plugins("have_shortcircuited",
-                                        { permsgstatus => $pms }))
-    {
-      # harvest the DNS results
-      $pms->harvest_dnsbl_queries();
-      $needs_dnsbl_harvest_p = 0;
-
-      # finish the DNS results
-      $pms->rbl_finish();
-      $self->{main}->call_plugins("check_post_dnsbl", { permsgstatus => $pms });
-      $pms->{resolver}->finish_socket() if $pms->{resolver};
-    }
 
     $pms->harvest_completed_queries() if $rbls_running;
     # allow other, plugin-defined rule types to be called here
@@ -198,17 +178,14 @@ sub check_main {
     last if $pms->{deadline_exceeded};
   }
 
-  # sanity check, it is possible that no rules >= HARVEST_DNSBL_PRIORITY ran so the harvest
-  # may not have run yet.  Check, and if so, go ahead and harvest here.
-  if ($needs_dnsbl_harvest_p) {
+  # Finish DNS results
+  if ($do_dns) {
     if (!$self->{main}->call_plugins("have_shortcircuited",
                                         { permsgstatus => $pms }))
     {
-      # harvest the DNS results
       $pms->harvest_dnsbl_queries();
     }
 
-    # finish the DNS results
     $pms->rbl_finish();
     $self->{main}->call_plugins ("check_post_dnsbl", { permsgstatus => $pms });
     $pms->{resolver}->finish_socket() if $pms->{resolver};
@@ -282,12 +259,6 @@ sub finish_tests {
 sub run_rbl_eval_tests {
   my ($self, $pms) = @_;
   my ($rulename, $pat, @args);
-
-  # XXX - possible speed up, moving this check out of the subroutine into Check->new()
-  if ($self->{main}->{local_tests_only}) {
-    dbg("rules: local tests only, ignoring RBL eval");
-    return 0;
-  }
 
   while (my ($rulename, $test) = each %{$pms->{conf}->{rbl_evals}}) {
     my $score = $pms->{conf}->{scores}->{$rulename};
