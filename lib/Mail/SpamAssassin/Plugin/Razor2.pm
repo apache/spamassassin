@@ -393,6 +393,21 @@ sub plugin_revoke {
   }
 }
 
+sub finish_parsing_start {
+  my ($self, $opts) = @_;
+
+  # If forking, hard adjust priority -100 to launch early
+  if ($opts->{conf}->{razor_fork}) {
+    # Ugly hardcoded names, but iterating through {tests}
+    # looking for these is silly expensive. Works for most.
+    foreach ('RAZOR2_CHECK','RAZOR2_CF_RANGE_51_100') {
+      if (exists $opts->{conf}->{tests}->{$_}) {
+        $opts->{conf}->{priority}->{$_} = -100;
+      }
+    }
+  }
+}
+
 sub check_razor2 {
   my ($self, $pms, $full) = @_;
 
