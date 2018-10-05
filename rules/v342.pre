@@ -23,7 +23,6 @@
 # do not exceed specified CPU or memory limit
 # loadplugin Mail::SpamAssassin::Plugin::ResourceLimits
 
-
 # FromNameSpoof - help stop spam that tries to spoof other domains using 
 # the from name
 # loadplugin Mail::SpamAssassin::Plugin::FromNameSpoof
@@ -32,5 +31,3 @@
 # OpenPhish or PhishTank feeds.
 # loadplugin Mail::SpamAssassin::Plugin::Phishing
 
-# allow URI rules to look at DKIM headers if they exist
-parse_dkim_uris 1
