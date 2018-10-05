@@ -372,7 +372,7 @@ sub extract_metadata {
   my $pms = $opts->{permsgstatus};
   my $conf = $pms->{conf};
 
-  return if !$pms->is_dns_available;
+  return if !$pms->is_dns_available();
   $pms->{askdns_map_dnskey_to_rules} = {};
 
   # walk through all collected askdns rules, obtain tag values whenever
