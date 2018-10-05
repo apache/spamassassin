@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: darxus ena-week0 ena-week1 ena-week4 giovanni grenier hege jarif jbrooks mmiroslaw-mails-ham mmiroslaw-mails-spam sihde thendrikx; day 2: ena-week0 ena-week4 jarif jbrooks llanga mmiroslaw-mails-ham mmiroslaw-mails-spam sihde; day 3: ena-week0 ena-week4 jbrooks llanga mmiroslaw-mails-ham mmiroslaw-mails-spam sihde
+# with results from: day 1: darxus ena-week0 ena-week1 ena-week4 giovanni grenier hege jbrooks mmiroslaw-mails-ham mmiroslaw-mails-spam sihde thendrikx; day 2: jarif llanga; day 3: ena-week0 ena-week4 jarif jbrooks llanga mmiroslaw-mails-ham mmiroslaw-mails-spam sihde
 
 # tflags publish
 AC_BR_BONANZA
@@ -155,15 +155,6 @@ DKIMDOMAIN_IN_DWL
 DKIMDOMAIN_IN_DWL_UNKNOWN
 
 # tflags net
-DKIMWL_BL
-
-# tflags net
-DKIMWL_WL_HIGH
-
-# tflags net
-DKIMWL_WL_MED
-
-# tflags net
 DKIM_ADSP_ALL
 
 # tflags net
@@ -189,9 +180,6 @@ DKIM_VALID
 
 # tflags net
 DKIM_VALID_AU
-
-# tflags net
-DKIM_VALID_EF
 
 # tflags publish
 DOS_ANAL_SPAM_MAILER
@@ -302,9 +290,6 @@ FROM_WORDY
 FROM_WORDY_SHORT
 
 # good enough
-FROM_WSP_LEAD
-
-# good enough
 FROM_WSP_TRAIL
 
 # good enough
@@ -397,6 +382,9 @@ HASHCASH_2SPEND
 # tflags userconf
 HASHCASH_HIGH
 
+# good enough
+HDRS_MISSP
+
 # tflags publish
 HDR_ORDER_FTSDMCXX_DIRECT
 
@@ -417,12 +405,6 @@ HELO_MISC_IP
 
 # tflags publish
 HEXHASH_WORD
-
-# good enough
-HK_LOTTO
-
-# good enough
-HK_NAME_FM_MR_MRS
 
 # good enough
 HK_PNIS
@@ -447,9 +429,6 @@ IMG_ONLY_FM_DOM_INFO
 
 # good enough
 KB_FORGED_MOZ4
-
-# good enough
-KHOP_DYNAMIC
 
 # tflags publish
 LIST_PRTL_PUMPDUMP
@@ -508,9 +487,6 @@ MONEY_FRAUD_8
 # good enough
 MONEY_FROM_41
 
-# good enough
-MONEY_FROM_MISSP
-
 # tflags publish
 MSM_PRIO_REPTO
 
@@ -534,9 +510,6 @@ OBFU_JVSCR_ESC
 
 # tflags publish
 OBFU_TEXT_ATTACH
-
-# good enough
-PDS_FROM_2_EMAILS
 
 # good enough
 PHOTO_EDITING_FREEM
@@ -799,6 +772,9 @@ SB_GIF_AND_NO_URIS
 # good enough
 SERGIO_SUBJECT_PORN014
 
+# good enough
+SHORTENED_URL_SRC
+
 # tflags publish
 SINGLETS_LOW_CONTRAST
 
@@ -929,61 +905,52 @@ TVD_SPACE_ENCODED
 TW_GIBBERISH_MANY
 
 # good enough
-ADMITS_SPAM
+ADVANCE_FEE_3_NEW_FRM_MNY
 
 # good enough
-ADVANCE_FEE_2_NEW_FRM_MNY
+ADVANCE_FEE_5_NEW_FRM_MNY
 
 # good enough
-ADVANCE_FEE_4_NEW_FRM_MNY
+AXB_XMAILER_MIMEOLE_OL_1ECD5
 
 # good enough
-ADVANCE_FEE_4_NEW_MONEY
+BIGNUM_EMAILS
 
 # good enough
-ADVANCE_FEE_5_NEW
+DATE_IN_FUTURE_96_Q
 
 # good enough
-BODY_SINGLE_URI
+DEAR_BENEFICIARY
 
 # good enough
-DUP_SUSP_HDR
+DEAR_NOBODY
 
 # good enough
-FILL_THIS_FORM_LOAN
+FILL_THIS_FORM_LONG
 
 # good enough
-FROM_MISSPACED
+FORGED_RELAY_MUA_TO_MX
 
 # good enough
-FROM_MISSP_USER
+FROM_MISSP_DYNIP
 
 # good enough
-HDRS_MISSP
+FROM_MISSP_TO_UNDISC
 
 # good enough
-HK_NAME_MR_MRS
+LOTTO_AGENT
 
 # good enough
-HK_SCAM_N3
+MONEY_ATM_CARD
 
 # good enough
-LIST_PARTIAL_SHORT_MSG
+NSL_RCVD_HELO_USER
 
 # good enough
-MILLION_USD
+SERGIO_SUBJECT_VIAGRA01
 
 # good enough
-MONEY_BARRISTER
-
-# good enough
-NSL_RCVD_FROM_USER
-
-# good enough
-SHARE_50_50
-
-# good enough
-SHORTENED_URL_SRC
+TO_EQ_FM_DIRECT_MX
 
 # tflags publish
 UC_GIBBERISH_OBFU
