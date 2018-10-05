@@ -1341,6 +1341,11 @@ EOT
 
 sub hash_line_for_rule {
   my ($self, $pms, $rulename) = @_;
+  # I have no idea why evals are being cluttered by "hashlines" ??
+  # Nobody cares about source_file unless keep_config_parsing_metadata is set!
+  # If you are debugging hanging rule, then simply uncomment this..
+  #return "\ndbg(\"rules: will run %s\", q(".$rulename."));\n";
+  return '' if !%{$pms->{conf}->{source_file}};
   # using tainted subr. argument may taint the whole expression, avoid
   my $u = untaint_var($pms->{conf}->{source_file}->{$rulename});
   return sprintf("\n#line 1 \"%s, rule %s,\"", $u, $rulename);

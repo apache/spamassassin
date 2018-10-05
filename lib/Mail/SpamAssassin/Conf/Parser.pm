@@ -1244,9 +1244,12 @@ sub add_test {
     $conf->{priority}->{$name} ||= 0;
   }
   $conf->{priority}->{$name} ||= 0;
-  $conf->{source_file}->{$name} = $self->{currentfile};
 
   if ($conf->{main}->{keep_config_parsing_metadata}) {
+    # {source_file} eats lots of memory and is unused unless
+    # keep_config_parsing_metadata is set (ruleqa stuff)
+    $conf->{source_file}->{$name} = $self->{currentfile};
+
     $conf->{if_stack}->{$name} = $self->get_if_stack_as_string();
 
     if ($self->{file_scoped_attrs}->{testrules}) {
