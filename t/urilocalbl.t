@@ -104,7 +104,7 @@ if (defined $has{GEOIP2}) {
       %patterns = %patterns_ipv4;
       warn "skipping IPv6 DNS lookup tests (run_ipv6_dns_tests=n)\n";
     }
-    ok sarun ("-L -t < data/spam/urilocalbl_net.eml", \&patterns_run_cb);
+    ok sarun ("-t < data/spam/urilocalbl_net.eml", \&patterns_run_cb);
     ok_all_patterns();
     clear_pattern_counters();
   } else {
@@ -127,7 +127,7 @@ if (defined $has{GEOIP}) {
   clear_pattern_counters();
 
   if ($net) {
-    ok sarun ("-L -t < data/spam/urilocalbl_net.eml", \&patterns_run_cb);
+    ok sarun ("-t < data/spam/urilocalbl_net.eml", \&patterns_run_cb);
     ok_all_patterns();
     clear_pattern_counters();
   } else {
@@ -159,7 +159,7 @@ if (defined $has{DB_FILE}) {
       %patterns = %patterns_ipv4;
       warn "skipping IPv6 DNS lookup tests (run_ipv6_dns_tests=n)\n";
     }
-    ok sarun ("-L -t < data/spam/urilocalbl_net.eml", \&patterns_run_cb);
+    ok sarun ("-t < data/spam/urilocalbl_net.eml", \&patterns_run_cb);
     ok_all_patterns();
     clear_pattern_counters();
   } else {
@@ -181,7 +181,7 @@ if (defined $has{FAST}) {
   clear_pattern_counters();
 
   if ($net) {
-    ok sarun ("-L -t < data/spam/urilocalbl_net.eml", \&patterns_run_cb);
+    ok sarun ("-t < data/spam/urilocalbl_net.eml", \&patterns_run_cb);
     ok_all_patterns();
     clear_pattern_counters();
   } else {
