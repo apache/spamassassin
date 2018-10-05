@@ -34,6 +34,9 @@ our @ISA = qw();
 
 use Mail::SpamAssassin::Logger;
 use Mail::SpamAssassin::Util qw(idn_to_ascii);
+use Mail::SpamAssassin::Constants qw(:ip);
+
+my $IP_ADDRESS = IP_ADDRESS;
 
 # called from SpamAssassin->init() to create $self->{util_rb}
 sub new {
@@ -229,7 +232,7 @@ sub uri_to_domain {
   my $host = $uri;  # unstripped/full domain name
 
   # keep IPs intact
-  if ($uri !~ /^\d+\.\d+\.\d+\.\d+$/) { 
+  if ($uri !~ /^$IP_ADDRESS$/) {
     # get rid of hostname part of domain, understanding delegation
     $uri = $self->trim_domain($uri);
 
