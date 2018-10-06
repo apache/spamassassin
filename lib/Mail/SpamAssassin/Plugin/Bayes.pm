@@ -94,6 +94,7 @@ our $IGNORED_HDRS = qr{(?: (?:X-)?Sender    # misc noise
   |X-eGroups-(?:Return|From)
   |X-MDMailing-List
   |X-XEmacs-List
+  |X-Sympa-To
 
   # gatewayed through mailing list (thanks to Allen Smith)
   |(?:X-)?Resent-(?:From|To|Date)
