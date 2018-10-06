@@ -1872,10 +1872,16 @@ describe       BTC_ORG          Bitcoin wallet ID + unusual header
 # __BTC_OBFU_4 may duplicate (to a degree) FUZZY_BITCOIN, clean up if this performs well
 body           __BTC_OBFU_2     /\b\W{0,10}b(?!itcoin)\W{0,10}i\W{0,10}t\W{0,10}c\W{0,10}o\W{0,10}i\W{0,10}n\W{0,10}\b/i
 body           __BTC_OBFU_3     /\b\W{0,10}b(?!tc\b)\W{0,10}t\W{0,10}c\W{0,10}\b/i
-body           __BTC_OBFU_4     /\bb[i\x{0456}]t[c\x{0441}][o\x{043E}][i\x{0456}]n\b/i
+body           __BTC_OBFU_4     /\bb(?!itcoin)[i\x{0456}]t[c\x{0441}][o\x{043E}][i\x{0456}]n\b/i
 meta           OBFU_BITCOIN     ( __BITCOIN_ID && ( __BTC_OBFU_2 || __BTC_OBFU_3 || __BTC_OBFU_4 ) )
 describe       OBFU_BITCOIN     Obfuscated BitCoin references
 score          OBFU_BITCOIN     2.000	# limit
+
+ifplugin Mail::SpamAssassin::Plugin::ReplaceTags
+  # for masscheck comparison
+  meta           T_OBFU_BITCOIN_FUZZY   ( __BITCOIN_ID && ( __BTC_OBFU_2 || __BTC_OBFU_3 || FUZZY_BITCOIN ) )
+endif
+
 
 
 #body          NUM_FREE         /\b\d+free/i
