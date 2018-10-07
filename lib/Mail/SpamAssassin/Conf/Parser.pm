@@ -1326,41 +1326,48 @@ sub is_meta_valid {
 sub is_delimited_regexp_valid {
   my ($self, $name, $re) = @_;
 
-  if (!$re || $re !~ /^\s*m?(\W).*(?:\1|>|}|\)|\])[a-z]*\s*$/) {
-    $re ||= '';
-    $self->lint_warn("config: invalid regexp for rule $name: $re: missing or invalid delimiters\n", $name);
+  local ($1,$2);
+  $re ||= '';
+  # Check most common delimiter format first
+  # Make re/mods args here for is_regexp_valid, so it doesn't need to again
+  if ($re =~ m!^/(.*)/([a-z]*)$!) {
+      return $self->is_regexp_valid($name, $1, $2, $re);
+  }
+  # Check other delimiters
+  if ($re !~ /^m([\W]).*(?:\1|>|}|\)|\])[a-z]*$/) {
+    $self->lint_warn("config: invalid regexp for rule $name: $re: missing or invalid delimiters\n");
     return 0;
   }
   return $self->is_regexp_valid($name, $re);
 }
 
 sub is_regexp_valid {
-  my ($self, $name, $re) = @_;
+  my ($self, $name, $re, $mods, $origre) = @_;
 
   # OK, try to remove any normal perl-style regexp delimiters at
   # the start and end, and modifiers at the end if present,
   # so we can validate those too.
-  my $origre = $re;
-  my $safere = $re;
-  my $mods = '';
-  local ($1,$2);
-  if ($re =~ s/^m\{//) {
-    $re =~ s/\}([a-z]*)\z//; $mods = $1;
-  }
-  elsif ($re =~ s/^m\(//) {
-    $re =~ s/\)([a-z]*)\z//; $mods = $1;
-  }
-  elsif ($re =~ s/^m<//) {
-    $re =~ s/>([a-z]*)\z//; $mods = $1;
-  }
-  elsif ($re =~ s/^m(\W)//) {
-    $re =~ s/\Q$1\E([a-z]*)\z//; $mods = $1;
-  }
-  elsif ($re =~ s{^/(.*)/([a-z]*)\z}{$1}) {
-    $mods = $2;
-  }
-  else {
-    $safere = "m#".$re."#";
+  if (!defined $origre) {
+    local ($1,$2);
+    $origre = $re;
+    if ($re =~ s{^/(.*)/([a-z]*)\z}{$1}) {
+      $mods = $2;
+    }
+    elsif ($re =~ s/^m\{// && $re =~ s/\}([a-z]*)\z//) {
+      $mods = $1;
+    }
+    elsif ($re =~ s/^m\[// && $re =~ s/\]([a-z]*)\z//) {
+      $mods = $1;
+    }
+    elsif ($re =~ s/^m\(// && $re =~ s/\)([a-z]*)\z//) {
+      $mods = $1;
+    }
+    elsif ($re =~ s/^m<// && $re =~ s/>([a-z]*)\z//) {
+      $mods = $1;
+    }
+    elsif ($re =~ s/^m(\W)(.*)\1([a-z]*)\z/$2/) {
+      $mods = $3;
+    }
   }
 
   if ($self->{conf}->{lint_rules} ||
