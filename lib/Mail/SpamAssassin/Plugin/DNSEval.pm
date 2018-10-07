@@ -36,6 +36,9 @@ use re 'taint';
 
 our @ISA = qw(Mail::SpamAssassin::Plugin);
 
+my $IP_ADDRESS = IP_ADDRESS;
+my $IP_PRIVATE = IP_PRIVATE;
+
 # constructor: register the eval rule
 sub new {
   my $class = shift;
@@ -81,11 +84,10 @@ sub ip_list_uniq_and_strip_private {
   my ($self, @origips) = @_;
   my @ips;
   my %seen;
-  my $IP_PRIVATE = IP_PRIVATE;
   foreach my $ip (@origips) {
     next unless $ip;
     next if (exists ($seen{$ip})); $seen{$ip} = 1;
-    next if ($ip =~ /$IP_PRIVATE/o);
+    next if ($ip =~ /^$IP_PRIVATE$/o);
     push(@ips, $ip);
   }
   return @ips;
@@ -152,9 +154,7 @@ sub check_rbl_backend {
   return 0 unless $pms->is_dns_available();
   $pms->load_resolver();
 
-  if (($rbl_server !~ /^(\d+)\.(\d+)\.(\d+)\.(\d+)$/) &&
-      (index($rbl_server, '.') >= 0) &&
-      ($rbl_server !~ /\.$/)) {
+  if ($rbl_server !~ /^$IP_ADDRESS$/o) {
     $rbl_server .= ".";
   }
 
@@ -175,7 +175,6 @@ sub check_rbl_backend {
   # Make sure a header significantly improves results before adding here
   # X-Sender-Ip: could be worth using (very low occurance for me)
   # X-Sender: has a very low bang-for-buck for me
-  my $IP_ADDRESS = IP_ADDRESS;
   my @originating;
   for my $header (@{$pms->{conf}->{originating_ip_headers}}) {
     my $str = $pms->get($header,undef);

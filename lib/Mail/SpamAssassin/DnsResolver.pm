@@ -64,6 +64,8 @@ BEGIN {
   }
 }
 
+my $IPV4_ADDRESS = IPV4_ADDRESS;
+
 ###########################################################################
 
 sub new {
@@ -237,13 +239,12 @@ sub available_nameservers {
   }
   if ($self->{force_ipv4} || $self->{force_ipv6}) {
     # filter the list according to a chosen protocol family
-    my $ip4_re = IPV4_ADDRESS;
     my(@filtered_addr_port);
     for (@{$self->{available_dns_servers}}) {
       local($1,$2);
       /^ \[ (.*) \] : (\d+) \z/xs  or next;
       my($addr,$port) = ($1,$2);
-      if ($addr =~ /^${ip4_re}\z/o) {
+      if ($addr =~ /^$IPV4_ADDRESS\z/o) {
         push(@filtered_addr_port, $_)  unless $self->{force_ipv6};
       } elsif ($addr =~ /:.*:/) {
         push(@filtered_addr_port, $_)  unless $self->{force_ipv4};
@@ -378,13 +379,12 @@ sub connect_sock {
   # is unspecified, causing EINVAL failure when automatically assigned local
   # IP address and a remote address do not belong to the same address family.
   # Let's choose a suitable source address if possible.
-  my $ip4_re = IPV4_ADDRESS;
   my $srcaddr;
   if ($self->{force_ipv4}) {
     $srcaddr = "0.0.0.0";
   } elsif ($self->{force_ipv6}) {
     $srcaddr = "::";
-  } elsif ($ns_addr =~ /^${ip4_re}\z/o) {
+  } elsif ($ns_addr =~ /^$IPV4_ADDRESS\z/o) {
     $srcaddr = "0.0.0.0";
   } elsif ($ns_addr =~ /:.*:/) {
     $srcaddr = "::";

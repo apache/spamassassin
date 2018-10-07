@@ -305,6 +305,9 @@ our @ISA = qw(Mail::SpamAssassin::Plugin);
 
 use constant LOG_COMPLETION_TIMES => 0;
 
+my $IPV4_ADDRESS = IPV4_ADDRESS;
+my $IP_PRIVATE = IP_PRIVATE;
+
 # constructor
 sub new {
   my $class = shift;
@@ -840,8 +843,6 @@ sub query_hosts_or_domains {
 
     my ($is_ip, $single_dnsbl);
     if ($host =~ /^\d+\.\d+\.\d+\.\d+$/) {
-      my $IPV4_ADDRESS = IPV4_ADDRESS;
-      my $IP_PRIVATE = IP_PRIVATE;
       # only look up the IP if it is public and valid
       if ($host =~ /^$IPV4_ADDRESS$/o && $host !~ /^$IP_PRIVATE$/o) {
         my $obj = { dom => $host };
@@ -934,8 +935,6 @@ sub complete_ns_lookup {
   my $conf = $pms->{conf};
   my @answer = $pkt->answer;
 
-  my $IPV4_ADDRESS = IPV4_ADDRESS;
-  my $IP_PRIVATE = IP_PRIVATE;
   my $nsrhsblrules = $pms->{uridnsbl_active_rules_nsrhsbl};
   my $fullnsrhsblrules = $pms->{uridnsbl_active_rules_fullnsrhsbl};
   my $seen_lookups = $pms->{'uridnsbl_seen_lookups'};
