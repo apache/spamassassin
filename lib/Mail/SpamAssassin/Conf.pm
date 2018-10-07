@@ -87,7 +87,6 @@ use Mail::SpamAssassin::NetSet;
 use Mail::SpamAssassin::Constants qw(:sa :ip);
 use Mail::SpamAssassin::Conf::Parser;
 use Mail::SpamAssassin::Logger;
-use Mail::SpamAssassin::Util::TieOneStringHash;
 use Mail::SpamAssassin::Util qw(untaint_var);
 use File::Spec;
 
@@ -4598,8 +4597,12 @@ sub new {
 
   # keep descriptions in a slow but space-efficient single-string
   # data structure
-  tie %{$self->{descriptions}}, 'Mail::SpamAssassin::Util::TieOneStringHash'
-    or warn "tie failed";
+  # NOTE: Deprecated usage of TieOneStringHash as of 10/2018, it's an
+  # absolute pig, doubling config parse time, while benchmarks indicate
+  # no difference in resident memory size!
+  $self->{descriptions} = { };
+  #tie %{$self->{descriptions}}, 'Mail::SpamAssassin::Util::TieOneStringHash'
+  #  or warn "tie failed";
 
   # after parsing, tests are refiled into these hashes for each test type.
   # this allows e.g. a full-text test to be rewritten as a body test in
