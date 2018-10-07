@@ -470,7 +470,6 @@ failed_line:
   }
 
   delete $self->{if_stack};
-  delete $self->{command_luts};
 
   $self->lint_check();
   $self->set_default_scores();
