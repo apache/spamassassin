@@ -123,11 +123,6 @@ Set to 1 if this setting can only be set in the system-wide config when run
 from spamd.  (All settings can be used by local programs run directly by the
 user.)
 
-=item is_frequent
-
-Set to 1 if this value occurs frequently in the config. this means it's looked
-up first for speed.
-
 =back
 
 =cut
@@ -159,8 +154,6 @@ sub new {
   };
 
   $self->{command_luts} = { };
-  $self->{command_luts}->{frequent} = { };
-  $self->{command_luts}->{remaining} = { };
 
   bless ($self, $class);
   $self;
@@ -194,20 +187,13 @@ sub build_command_luts {
 
   my $conf = $self->{conf};
 
-  my $set;
   foreach my $cmd (@{$arrref}) {
-    # first off, decide what set this is in.
-    if ($cmd->{is_frequent}) { $set = 'frequent'; }
-    else { $set = 'remaining'; }
-
-    # next, its priority (used to ensure frequently-used params
-    # are parsed first)
     my $cmdname = $cmd->{command} || $cmd->{setting};
-    $self->{command_luts}->{$set}->{$cmdname} = $cmd;
+    $self->{command_luts}->{$cmdname} = $cmd;
 
     if ($cmd->{aliases} && scalar @{$cmd->{aliases}} > 0) {
       foreach my $name (@{$cmd->{aliases}}) {
-        $self->{command_luts}->{$set}->{$name} = $cmd;
+        $self->{command_luts}->{$name} = $cmd;
       }
     }
   }
@@ -240,8 +226,7 @@ sub parse {
   }                            # (eg. .utf8 or @euro)
 
   # get fast-access handles on the command lookup tables
-  my $lut_frequent = $self->{command_luts}->{frequent};
-  my $lut_remaining = $self->{command_luts}->{remaining};
+  my $lut = $self->{command_luts};
   my %migrated_keys = map { $_ => 1 }
             @Mail::SpamAssassin::Conf::MIGRATED_SETTINGS;
 
@@ -296,8 +281,28 @@ sub parse {
 
     my $parse_error;       # undef by default, may be overridden
 
-    # File/line number assertions
-    if ($key eq 'file') {
+    # $key if/elsif blocks sorted by most commonly used
+    if ($key eq 'endif') {
+      my $lastcond = pop @if_stack;
+      if (!defined $lastcond) {
+        $parse_error = "config: found endif without matching conditional";
+        goto failed_line;
+      }
+
+      $skip_parsing = $lastcond->{skip_parsing};
+      next;
+    }
+    elsif ($key eq 'ifplugin') {
+      $self->handle_conditional ($key, "plugin ($value)",
+                        \@if_stack, \$skip_parsing);
+      next;
+    }
+    elsif ($key eq 'if') {
+      $self->handle_conditional ($key, $value,
+                        \@if_stack, \$skip_parsing);
+      next;
+    }
+    elsif ($key eq 'file') {
       if ($value =~ /^start\s+(.+)$/) {
         push (@curfile_stack, $self->{currentfile});
         $self->{currentfile} = $1;
@@ -335,27 +340,12 @@ sub parse {
         next;
       }
     }
-
-    # now handle the commands.
     elsif ($key eq 'include') {
       $value = $self->fix_path_relative_to_current_file($value);
       my $text = $conf->{main}->read_cf($value, 'included file');
       unshift (@conf_lines, split (/\n/, $text));
       next;
     }
-
-    elsif ($key eq 'ifplugin') {
-      $self->handle_conditional ($key, "plugin ($value)",
-                        \@if_stack, \$skip_parsing);
-      next;
-    }
-
-    elsif ($key eq 'if') {
-      $self->handle_conditional ($key, $value,
-                        \@if_stack, \$skip_parsing);
-      next;
-    }
-
     elsif ($key eq 'else') {
       # TODO: if/else/else won't get flagged here :(
       if (!@if_stack) {
@@ -364,18 +354,6 @@ sub parse {
       }
 
       $skip_parsing = !$skip_parsing;
-      next;
-    }
-
-    # and the endif statement:
-    elsif ($key eq 'endif') {
-      my $lastcond = pop @if_stack;
-      if (!defined $lastcond) {
-        $parse_error = "config: found endif without matching conditional";
-        goto failed_line;
-      }
-
-      $skip_parsing = $lastcond->{skip_parsing};
       next;
     }
 
@@ -409,10 +387,7 @@ sub parse {
       next;
     }
 
-    my $cmd = $lut_frequent->{$key}; # check the frequent command set
-    if (!$cmd) {
-      $cmd = $lut_remaining->{$key}; # no? try the rest
-    }
+    my $cmd = $lut->{$key};
 
     # we've either fallen through with no match, in which case this
     # if() will fail, or we have a match.
@@ -435,22 +410,23 @@ sub parse {
       }
 
       my $ret = &{$cmd->{code}} ($conf, $cmd->{setting}, $value, $line);
+      next if !$ret;
 
-      if ($ret && $ret eq $Mail::SpamAssassin::Conf::INVALID_VALUE)
+      if ($ret eq $Mail::SpamAssassin::Conf::INVALID_VALUE)
       {
         $parse_error = "config: SpamAssassin failed to parse line, ".
                         "\"$value\" is not valid for \"$key\", ".
                         "skipping: $line";
         goto failed_line;
       }
-      elsif ($ret && $ret eq $Mail::SpamAssassin::Conf::INVALID_HEADER_FIELD_NAME)
+      elsif ($ret eq $Mail::SpamAssassin::Conf::INVALID_HEADER_FIELD_NAME)
       {
         $parse_error = "config: SpamAssassin failed to parse line, ".
                        "it does not specify a valid header field name, ".
                        "skipping: $line";
         goto failed_line;
       }
-      elsif ($ret && $ret eq $Mail::SpamAssassin::Conf::MISSING_REQUIRED_VALUE)
+      elsif ($ret eq $Mail::SpamAssassin::Conf::MISSING_REQUIRED_VALUE)
       {
         $parse_error = "config: SpamAssassin failed to parse line, ".
                         "no value provided for \"$key\", ".
@@ -494,6 +470,7 @@ failed_line:
   }
 
   delete $self->{if_stack};
+  delete $self->{command_luts};
 
   $self->lint_check();
   $self->set_default_scores();
@@ -512,7 +489,7 @@ sub handle_conditional {
   my $eval = '';
   my $bad = 0;
   foreach my $token (@tokens) {
-    if ($token =~ /^(?:\W+|[+-]?\d+(?:\.\d+)?)$/) {
+    if ($token eq '(' || $token eq ')' || $token eq '!') {
       # using tainted subr. argument may taint the whole expression, avoid
       my $u = untaint_var($token);
       $eval .= $u . " ";
@@ -520,6 +497,10 @@ sub handle_conditional {
     elsif ($token eq 'plugin') {
       # replace with a method call
       $eval .= '$self->cond_clause_plugin_loaded';
+    }
+    elsif ($token =~ /^Mail::SpamAssassin::\w[\w\:]+$/) { # class name
+      my $u = untaint_var($token);
+      $eval .= '"' . $u . '" ';
     }
     elsif ($token eq 'can') {
       # replace with a method call
@@ -534,6 +515,11 @@ sub handle_conditional {
     }
     elsif ($token eq 'perl_version') {
       $eval .= $]." ";
+    }
+    elsif ($token =~ /^(?:\W+|[+-]?\d+(?:\.\d+)?)$/) {
+      # using tainted subr. argument may taint the whole expression, avoid
+      my $u = untaint_var($token);
+      $eval .= $u . " ";
     }
     elsif ($token =~ /^\w[\w\:]+$/) { # class name
       my $u = untaint_var($token);

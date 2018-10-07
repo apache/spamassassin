@@ -86,7 +86,6 @@ use Mail::SpamAssassin::NetSet;
 use Mail::SpamAssassin::Constants qw(:sa :ip);
 use Mail::SpamAssassin::Conf::Parser;
 use Mail::SpamAssassin::Logger;
-use Mail::SpamAssassin::Util::TieOneStringHash;
 use Mail::SpamAssassin::Util qw(untaint_var idn_to_ascii);
 use File::Spec;
 
@@ -216,7 +215,6 @@ it from running.
 
   push (@cmds, {
     setting => 'score',
-    is_frequent => 1,
     code => sub {
       my ($self, $key, $value, $line) = @_;
       my($rule, @scores) = split(/\s+/, $value);
@@ -2607,7 +2605,6 @@ length to no more than 50 characters.
   push (@cmds, {
     command => 'describe',
     setting => 'descriptions',
-    is_frequent => 1,
     type => $CONF_TYPE_HASH_KEY_VALUE,
   });
 
@@ -3079,7 +3076,6 @@ name.
 
   push (@cmds, {
     setting => 'header',
-    is_frequent => 1,
     is_priv => 1,
     code => sub {
       my ($self, $key, $value, $line) = @_;
@@ -3141,7 +3137,6 @@ Define a body eval test.  See above.
 
   push (@cmds, {
     setting => 'body',
-    is_frequent => 1,
     is_priv => 1,
     code => sub {
       my ($self, $key, $value, $line) = @_;
@@ -3216,7 +3211,6 @@ Define a raw-body eval test.  See above.
 
   push (@cmds, {
     setting => 'rawbody',
-    is_frequent => 1,
     is_priv => 1,
     code => sub {
       my ($self, $key, $value, $line) = @_;
@@ -3303,7 +3297,6 @@ ignore these for scoring.
 
   push (@cmds, {
     setting => 'meta',
-    is_frequent => 1,
     is_priv => 1,
     code => sub {
       my ($self, $key, $value, $line) = @_;
@@ -3456,7 +3449,6 @@ it is documented there.
 
   push (@cmds, {
     setting => 'tflags',
-    is_frequent => 1,
     is_priv => 1,
     type => $CONF_TYPE_HASH_KEY_VALUE,
   });
@@ -4875,8 +4867,12 @@ sub new {
 
   # keep descriptions in a slow but space-efficient single-string
   # data structure
-  tie %{$self->{descriptions}}, 'Mail::SpamAssassin::Util::TieOneStringHash'
-    or warn "tie failed";
+  # NOTE: Deprecated usage of TieOneStringHash as of 10/2018, it's an
+  # absolute pig, doubling config parsing time, while benchmarks indicate
+  # no difference in resident memory size!
+  $self->{descriptions} = { };
+  #tie %{$self->{descriptions}}, 'Mail::SpamAssassin::Util::TieOneStringHash'
+  #  or warn "tie failed";
 
   # after parsing, tests are refiled into these hashes for each test type.
   # this allows e.g. a full-text test to be rewritten as a body test in
