@@ -427,6 +427,20 @@ The C<Mail::SpamAssassin::PerMsgStatus> context object for this scan.
 
 =back
 
+=item $plugin->check_dnsbl ( { options ... } )
+
+Called when DNSBL or other network lookups are being launched, implying
+current running priority of -100.  This is the place to start your own
+asynchronously-started network lookups.
+
+=over 4
+
+=item permsgstatus
+
+The C<Mail::SpamAssassin::PerMsgStatus> context object for this scan.
+
+=back
+
 =item $plugin->check_post_dnsbl ( { options ... } )
 
 Called after the DNSBL results have been harvested.  This is a good

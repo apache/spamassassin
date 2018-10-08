@@ -16,6 +16,8 @@ Note for Users Upgrading to SpamAssassin 4.0.0
   that refer to check_rbl* or other network rules. They will never hit.
   (Bug 5930)
 
+- new plugin callback method check_dnsbl (to launch lookups at priority -100)
+
 - freemail_import_whitelist_auth, freemail_import_def_whitelist_auth added (Bug 6451)
 
 - body_part_scan_size 50000, rawbody_part_scan_size 500000 defaults added (Bug 6582)

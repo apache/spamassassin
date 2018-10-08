@@ -120,6 +120,7 @@ sub check_main {
       $pms->{async}->{wait_launch} = 0; # permission granted
       $pms->{async}->launch_queue(); # check if something was queued
       $self->run_rbl_eval_tests($pms);
+      $self->{main}->call_plugins ("check_dnsbl", { permsgstatus => $pms });
     }
 
     my $timer = $self->{main}->time_method("tests_pri_".$priority);
