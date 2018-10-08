@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: darxus ena-week0 ena-week1 ena-week4 giovanni grenier hege jarif jbrooks mmiroslaw-mails-ham mmiroslaw-mails-spam sihde thendrikx; day 2: ena-week0 ena-week4 jbrooks llanga mmiroslaw-mails-ham mmiroslaw-mails-spam sihde; day 3: jarif llanga
+# with results from: day 1: darxus ena-week0 ena-week1 ena-week4 giovanni grenier hege jarif jbrooks mmiroslaw-mails-ham mmiroslaw-mails-spam sihde thendrikx; day 2: ena-week0 ena-week1 ena-week4 jarif jbrooks llanga mmiroslaw-mails-ham mmiroslaw-mails-spam sihde; day 3: ena-week0 ena-week4 jbrooks llanga mmiroslaw-mails-ham mmiroslaw-mails-spam sihde
 
 # tflags publish
 AC_BR_BONANZA
@@ -106,9 +106,6 @@ BAYES_99
 # tflags learn
 BAYES_999
 
-# good enough
-BODY_SINGLE_WORD
-
 # tflags publish
 BODY_URI_ONLY
 
@@ -155,6 +152,15 @@ DKIMDOMAIN_IN_DWL
 DKIMDOMAIN_IN_DWL_UNKNOWN
 
 # tflags net
+DKIMWL_BL
+
+# tflags net
+DKIMWL_WL_HIGH
+
+# tflags net
+DKIMWL_WL_MED
+
+# tflags net
 DKIM_ADSP_ALL
 
 # tflags net
@@ -189,9 +195,6 @@ DOS_ANAL_SPAM_MAILER
 
 # good enough
 DOS_OE_TO_MX
-
-# good enough
-DOS_OUTLOOK_TO_MX
 
 # tflags publish
 DX_TEXT_02
@@ -386,6 +389,9 @@ HASHCASH_2SPEND
 HASHCASH_HIGH
 
 # good enough
+HDRS_LCASE_IMGONLY
+
+# good enough
 HDRS_MISSP
 
 # tflags publish
@@ -401,9 +407,6 @@ HEADER_FROM_DIFFERENT_DOMAINS
 HEAD_LONG
 
 # good enough
-HELO_LOCALHOST
-
-# good enough
 HELO_MISC_IP
 
 # tflags publish
@@ -411,9 +414,6 @@ HEXHASH_WORD
 
 # good enough
 HK_LOTTO
-
-# good enough
-HK_PNIS
 
 # good enough
 HK_SCAM_N2
@@ -552,9 +552,6 @@ PYZOR_CHECK
 
 # tflags publish
 RAND_HEADER_MANY
-
-# good enough
-RATWARE_NO_RDNS
 
 # tflags net
 RAZOR2_CF_RANGE_51_100
@@ -871,9 +868,6 @@ TO_EQ_FM_SPF_FAIL
 # tflags publish
 TO_IN_SUBJ
 
-# tflags publish
-TO_NAME_SUBJ_NO_RDNS
-
 # good enough
 TO_NO_BRKTS_FROM_MSSP
 
@@ -908,61 +902,49 @@ TVD_SPACE_ENCODED
 TW_GIBBERISH_MANY
 
 # good enough
-ADMITS_SPAM
+ADVANCE_FEE_3_NEW_FRM_MNY
 
 # good enough
-ADVANCE_FEE_2_NEW_FRM_MNY
+ADVANCE_FEE_5_NEW_FRM_MNY
 
 # good enough
-ADVANCE_FEE_4_NEW_FRM_MNY
+AXB_XMAILER_MIMEOLE_OL_1ECD5
 
 # good enough
-ADVANCE_FEE_4_NEW_MONEY
+BIGNUM_EMAILS
 
 # good enough
-ADVANCE_FEE_5_NEW
-
-# tflags net
-DKIMWL_BL
-
-# tflags net
-DKIMWL_WL_HIGH
-
-# tflags net
-DKIMWL_WL_MED
+BTC_ORG
 
 # good enough
-FILL_THIS_FORM_LOAN
+DATE_IN_FUTURE_96_Q
 
 # good enough
-FROM_MISSPACED
+DEAR_BENEFICIARY
 
 # good enough
-FROM_MISSP_USER
+FILL_THIS_FORM_LONG
 
 # good enough
-HDRS_LCASE_IMGONLY
+FROM_MISSP_DYNIP
 
 # good enough
-HK_NAME_MR_MRS
+FROM_MISSP_TO_UNDISC
 
 # good enough
-HK_SCAM_N3
+LOTTO_AGENT
 
 # good enough
-MILLION_USD
+MONEY_ATM_CARD
 
 # good enough
-MONEY_BARRISTER
+NSL_RCVD_HELO_USER
 
 # good enough
-MONEY_FROM_MISSP
+SERGIO_SUBJECT_VIAGRA01
 
 # good enough
-NSL_RCVD_FROM_USER
-
-# good enough
-SHARE_50_50
+TO_EQ_FM_DIRECT_MX
 
 # tflags publish
 UC_GIBBERISH_OBFU
