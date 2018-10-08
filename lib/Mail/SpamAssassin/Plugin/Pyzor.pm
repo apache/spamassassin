@@ -319,6 +319,9 @@ sub pyzor_lookup {
     proc_status_ok($?,$errno)
       or info("pyzor: [%s] error: %s", $pid, exit_status_str($?,$errno));
   }
+
+  $permsgstatus->delete_fulltext_tmpfile();
+
   $permsgstatus->leave_helper_run_mode();
 
   if ($timer->timed_out()) {
