@@ -329,34 +329,23 @@ sub new {
 }
 
 # this is just a placeholder; in fact the results are dealt with later	 
-sub check_uridnsbl {	 
-  return 0;	 
-}	 
+sub check_uridnsbl {
+  return 0;
+}
 
 # ---------------------------------------------------------------------------
 
-# once the metadata is parsed, we can access the URI list.  So start off
-# the lookups here!
+# once the metadata is parsed, we can access the URI list.
+# Use check_dnsbl hook to launch lookups at correct time (priority -100)
 
-#
-# only parse and run after first check_uridnsbl call
-#
-sub parsed_metadata {
+sub check_dnsbl {
   my ($self, $opts) = @_;
-  my $pms = $opts->{permsgstatus};
 
+  my $pms = $opts->{permsgstatus};
   my $conf = $pms->{conf};
 
-  return 0  if $conf->{skip_uribl_checks};
-
-  if (!$pms->is_dns_available()) {
-    $self->{dns_not_available} = 1;
-    return 0;
-  } else {
-    # due to re-testing dns may become available after being unavailable
-    # DOS: I don't think dns_not_available is even used anymore
-    $self->{dns_not_available} = 0;
-  }
+  return if $conf->{skip_uribl_checks};
+  return if !$pms->is_dns_available();
 
   $pms->{'uridnsbl_activerules'} = { };
   $pms->{'uridnsbl_hits'} = { };
@@ -499,8 +488,6 @@ sub parsed_metadata {
 
   # and query
   $self->query_hosts_or_domains($pms, \%hostlist);
-
-  return 1;
 }
 
 # Accepts argument in one of the following forms: m, n1-n2, or n/m,
