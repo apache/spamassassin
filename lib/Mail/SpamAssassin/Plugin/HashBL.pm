@@ -28,6 +28,7 @@ HashBL - seearch email addresses in HashBL blocklists
   loadplugin Mail::SpamAssassin::Plugin::HashBL
   header   HASHBL_EMAIL       eval:check_hashbl_emails('ebl.msbl.org')
   describe HASHBL_EMAIL       Message contains email address found on EBL
+  priority HASHBL_EMAIL       -100 # must use priority -100 to launch async lookups
 
 =head1 DESCRIPTION
 
