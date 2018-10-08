@@ -107,7 +107,7 @@ filtering might require a paid subscription database like GeoIPISP.
 package Mail::SpamAssassin::Plugin::URILocalBL;
 use Mail::SpamAssassin::Plugin;
 use Mail::SpamAssassin::Constants qw(:ip);
-use Mail::SpamAssassin::Util qw(untaint_var);
+use Mail::SpamAssassin::Util qw(untaint_var idn_to_ascii);
 use Mail::SpamAssassin::GeoDB;
 use Mail::SpamAssassin::NetSet;
 
@@ -186,6 +186,7 @@ sub set_config {
       dbg("config: uri_block_cc $name added: ".join(' ', @added));
       $self->{parser}->add_test($name, 'check_uri_local_bl()',
         $Mail::SpamAssassin::Conf::TYPE_BODY_EVALS);
+      $self->{parser}->{conf}->{priority}->{$name} = -100;
     }
   });
 
@@ -226,6 +227,7 @@ sub set_config {
       dbg("config: uri_block_cont $name added: ".join(' ', @added));
       $self->{parser}->add_test($name, 'check_uri_local_bl()',
         $Mail::SpamAssassin::Conf::TYPE_BODY_EVALS);
+      $self->{parser}->{conf}->{priority}->{$name} = -100;
     }
   });
   
@@ -258,6 +260,7 @@ sub set_config {
       dbg("config: uri_block_isp $name added: ". join(', ', @added));
       $self->{parser}->add_test($name, 'check_uri_local_bl()',
         $Mail::SpamAssassin::Conf::TYPE_BODY_EVALS);
+      $self->{parser}->{conf}->{priority}->{$name} = -100;
     }
   });
 
@@ -283,6 +286,7 @@ sub set_config {
 
       $self->{parser}->add_test($name, 'check_uri_local_bl()',
         $Mail::SpamAssassin::Conf::TYPE_BODY_EVALS);
+      $self->{parser}->{conf}->{priority}->{$name} = -100;
     }
   });
 
@@ -304,6 +308,7 @@ sub set_config {
 
       $self->{parser}->add_test($name, 'check_uri_local_bl()',
         $Mail::SpamAssassin::Conf::TYPE_BODY_EVALS);
+      $self->{parser}->{conf}->{priority}->{$name} = -100;
     }
   });
 
@@ -394,6 +399,8 @@ sub check_uri_local_bl {
   return 0 if !$pms->is_dns_available();
 
   foreach my $host (keys %found_hosts) {
+    dbg("launching A/AAAA lookup for $host");
+    $host = idn_to_ascii($host);
     # launch dns
     $pms->{async}->bgsend_and_start_lookup("$host.", 'A', undef,
       { key => "urilocalbl:$host:A", host => $host, rulename => $rulename },
