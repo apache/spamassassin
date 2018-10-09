@@ -397,11 +397,17 @@ sub finish_parsing_start {
   my ($self, $opts) = @_;
 
   # If forking, hard adjust priority -100 to launch early
+  # Find rulenames from eval_to_rule mappings
   if ($opts->{conf}->{razor_fork}) {
-    # Ugly hardcoded names, but iterating through {tests}
-    # looking for these is silly expensive. Works for most.
-    foreach ('RAZOR2_CHECK','RAZOR2_CF_RANGE_51_100') {
+    foreach (@{$opts->{conf}->{eval_to_rule}->{check_razor2}}) {
       if (exists $opts->{conf}->{tests}->{$_}) {
+        dbg("razor2: adjusting rule $_ priority to -100");
+        $opts->{conf}->{priority}->{$_} = -100;
+      }
+    }
+    foreach (@{$opts->{conf}->{eval_to_rule}->{check_razor2_range}}) {
+      if (exists $opts->{conf}->{tests}->{$_}) {
+        dbg("razor2: adjusting rule $_ priority to -100");
         $opts->{conf}->{priority}->{$_} = -100;
       }
     }
