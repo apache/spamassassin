@@ -816,6 +816,9 @@ sub do_body_tests {
   my ($self, $pms, $priority, $textary) = @_;
   my $loopid = 0;
 
+  # this is called often, cache
+  my $would_log_rules_all = would_log('dbg', 'rules-all') == 2;
+
   $self->run_generic_tests ($pms, $priority,
     consttype => $Mail::SpamAssassin::Conf::TYPE_BODY_TESTS,
     type => 'body',
@@ -826,7 +829,7 @@ sub do_body_tests {
     my ($self, $pms, $conf, $rulename, $pat, %opts) = @_;
     $pat = untaint_var($pat);  # presumably checked
     my $sub = '';
-    if (would_log('dbg', 'rules-all') == 2) {
+    if ($would_log_rules_all) {
       $sub .= '
       dbg("rules-all: running body rule %s", q{'.$rulename.'});
       ';
@@ -898,6 +901,10 @@ sub do_body_tests {
 sub do_uri_tests {
   my ($self, $pms, $priority, @uris) = @_;
   my $loopid = 0;
+
+  # this is called often, cache
+  my $would_log_rules_all = would_log('dbg', 'rules-all') == 2;
+
   $self->run_generic_tests ($pms, $priority,
     consttype => $Mail::SpamAssassin::Conf::TYPE_URI_TESTS,
     type => 'uri',
@@ -908,7 +915,7 @@ sub do_uri_tests {
     my ($self, $pms, $conf, $rulename, $pat, %opts) = @_;
     $pat = untaint_var($pat);  # presumably checked
     my $sub = '';
-    if (would_log('dbg', 'rules-all') == 2) {
+    if ($would_log_rules_all) {
       $sub .= '
       dbg("rules-all: running uri rule %s", q{'.$rulename.'});
       ';

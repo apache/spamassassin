@@ -332,17 +332,17 @@ The facility argument is optional.
 sub would_log {
   my ($level, $facility) = @_;
 
-  if ($level eq "info") {
-    return $LOG_SA{level} >= INFO;
-  }
-  if ($level eq "dbg") {
+  if ($level eq 'dbg') {
     return 0 if $LOG_SA{level} < DBG;
     return 1 if !$facility;
     return ($LOG_SA{facility}->{$facility} ? 2 : 0)
       if exists $LOG_SA{facility}->{$facility};
     return 1 if $LOG_SA{facility}->{all};
     return 0;
+  } elsif ($level eq 'info') {
+    return $LOG_SA{level} >= INFO;
   }
+
   warn "logger: would_log called with unknown level: $level\n";
   return 0;
 }
