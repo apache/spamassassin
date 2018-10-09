@@ -365,6 +365,8 @@ sub plugin_report {
   return unless $self->{main}->{conf}->{use_razor2};
   return if $options->{report}->{options}->{dont_report_to_razor};
 
+  my $timer = $self->{main}->time_method("razor2_report");
+
   if ($self->razor2_access($options->{text}, 'report', undef)) {
     $options->{report}->{report_available} = 1;
     info('reporter: spam reported to Razor');
@@ -377,6 +379,8 @@ sub plugin_report {
 
 sub plugin_revoke {
   my ($self, $options) = @_;
+
+  my $timer = $self->{main}->time_method("razor2_revoke");
 
   return unless $self->{razor2_available};
   return if $self->{main}->{local_tests_only};
@@ -425,10 +429,11 @@ sub check_razor2 {
   return 0 if $pms->{razor2_running};
   $pms->{razor2_running} = 1;
 
+  my $timer = $self->{main}->time_method("check_razor2");
+
   ## non-forking method
 
   if (!$self->{main}->{conf}->{razor_fork}) {
-    my $timer = $self->{main}->time_method("check_razor2");
     # TODO: check for cache header, set results appropriately
     # do it this way to make it easier to get out the results later from the
     # netcache plugin ... what netcache plugin?
@@ -498,6 +503,8 @@ sub _check_forked_result {
   my ($self, $pms, $finish) = @_;
 
   return 0 if !$pms->{razor2_backchannel};
+
+  my $timer = $self->{main}->time_method("check_razor2");
 
   my $kid_pid = (keys %{$pms->{razor2_backchannel}->{kids}})[0];
   # if $finish, force waiting for the child
