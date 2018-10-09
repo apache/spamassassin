@@ -87,6 +87,7 @@ use Mail::SpamAssassin::Util qw(untaint_var untaint_file_path
                                 proc_status_ok exit_status_str);
 use Errno qw(ENOENT EACCES);
 use IO::Socket;
+use IO::Select;
 
 our @ISA = qw(Mail::SpamAssassin::Plugin);
 
@@ -111,7 +112,7 @@ sub new {
 
   # are network tests enabled?
   if ($mailsaobject->{local_tests_only}) {
-    $self->{use_dcc} = 0;
+    $self->{dcc_disabled} = 1;
     dbg("dcc: local tests only, disabling DCC");
   }
   else {
@@ -408,9 +409,6 @@ SpamAssassin spam threshold to DCC as spam.
   $conf->{parser}->register_commands(\@cmds);
 }
 
-
-
-
 sub ck_dir {
   my ($self, $dir, $tgt, $src) = @_;
 
@@ -442,7 +440,6 @@ sub find_dcc_home {
 
   my $conf = $self->{main}->{conf};
 
-
   # Get the DCC software version for talking to dccifd and formating the
   # dccifd options and the built-in DCC homedir.  Use -q to prevent delays.
   my $cdcc_home;
@@ -452,7 +449,8 @@ sub find_dcc_home {
     my $cdcc_output = do { local $/ = undef; <CDCC> };
     close CDCC;
 
-    $cdcc_output =~ s/\n/ /g;		# everything in 1 line for debugging
+    $cdcc_output =~ s/\s+/ /gs;		# everything in 1 line for debugging
+    $cdcc_output =~ s/\s+$//;
     dbg("dcc: `%s %s` reports '%s'", $cdcc, $cmd, $cdcc_output);
     $self->{dcc_version} = ($cdcc_output =~ /^(\d+\.\d+\.\d+)/) ? $1 : '';
     $cdcc_home = ($cdcc_output =~ /\s+homedir=(\S+)/) ? $1 : '';
@@ -538,10 +536,11 @@ sub dcc_pgm_path {
 
 sub is_dccifd_available {
   my ($self) = @_;
-  my $conf = $self->{main}->{conf};
 
   # dccifd remains available until it breaks
   return $self->{dccifd_available} if $self->{dccifd_available};
+
+  my $conf = $self->{main}->{conf};
 
   # deal with configured INET or INET6 socket
   if (defined $conf->{dcc_dccifd_host}) {
@@ -574,7 +573,7 @@ sub is_dccproc_available {
   my $conf = $self->{main}->{conf};
 
   # dccproc remains (un)available so check only once
-  return $self->{dccproc_available} if  defined $self->{dccproc_available};
+  return $self->{dccproc_available} if defined $self->{dccproc_available};
 
   my $dccproc = $conf->{dcc_path};
   if (!defined $dccproc || $dccproc eq '') {
@@ -619,74 +618,235 @@ sub dccifd_connect {
 # check for dccifd every time in case enough uses of dccproc starts dccifd
 sub get_dcc_interface {
   my ($self) = @_;
-  my $conf = $self->{main}->{conf};
 
-  if (!$conf->{use_dcc}) {
-    $self->{dcc_disabled} = 1;
-    return;
-  }
-
-  $self->find_dcc_home();
   if (!$self->is_dccifd_available() && !$self->is_dccproc_available()) {
-    dbg("dcc: dccifd and dccproc are not available");
-    $self->{dcc_disabled} = 1;
+    dbg("dcc: dccifd or dccproc is not available");
+    return 0;
   }
 
-  $self->{dcc_disabled} = 0;
+  return 1;
 }
 
-sub dcc_query {
-  my ($self, $permsgstatus, $fulltext) = @_;
+sub check_tick {
+  my ($self, $opts) = @_;
 
-  $permsgstatus->{dcc_checked} = 1;
+  $self->_check_async($opts, 0);
+}
 
-  if (!$self->{main}->{conf}->{use_dcc}) {
-    dbg("dcc: DCC is not available: use_dcc is 0");
-    return;
+sub check_cleanup {
+  my ($self, $opts) = @_;
+
+  $self->_check_async($opts, 1);
+
+  my $pms = $opts->{permsgstatus};
+
+  # Finish callbacks
+  if ($pms->{dcc_range_callbacks}) {
+    foreach (@{$pms->{dcc_range_callbacks}}) {
+      $self->check_dcc_reputation_range($pms, @$_);
+    }
+  }
+}
+
+sub _check_async {
+  my ($self, $opts, $timeout) = @_;
+  my $pms = $opts->{permsgstatus};
+
+  return if !$pms->{dcc_sock};
+
+  my $timer = $self->{main}->time_method("check_dcc");
+
+  if ($pms->{deadline_exceeded}) {
+    $timeout = 1;
+  } elsif ($timeout) {
+    # Calculate how much time left from original timeout
+    $timeout = $self->{main}->{conf}->{dcc_timeout} -
+      (time - $pms->{dcc_async_start});
+    $timeout = 1 if $timeout < 1;
+    $timeout = 20 if $timeout > 20; # hard sanity check
+    dbg("dcc: final wait for dccifd, timeout in $timeout sec");
   }
 
+  if (IO::Select->new($pms->{dcc_sock})->can_read($timeout)) {
+    dbg("dcc: reading dccifd response");
+    my @resp;
+    # if DCC is ready, should never block? timeout 1s just in case
+    my $timer = Mail::SpamAssassin::Timeout->new({ secs => 1 });
+    my $err = $timer->run_and_catch(sub {
+      local $SIG{PIPE} = sub { die "__brokenpipe__ignore__\n" };
+      @resp = $pms->{dcc_sock}->getlines();
+    });
+    delete $pms->{dcc_sock};
+    $pms->{dcc_result} = 0;
+    if ($timer->timed_out()) {
+      info("dcc: dccifd read failed");
+    } elsif ($err) {
+      chomp $err;
+      info("dcc: dccifd read failed: $err");
+    } else {
+      shift @resp; shift @resp; # ignore status/multistatus line
+      if (@resp) {
+        ($pms->{dcc_x_result}, $pms->{dcc_cksums}) =
+          $self->parse_dcc_response(\@resp, 'dccifd');
+        if ($pms->{dcc_x_result}) {
+          dbg("dcc: dccifd responded with '$pms->{dcc_x_result}'");
+          $pms->{dcc_result} = $self->check_dcc_result($pms, $pms->{dcc_x_result});
+          if ($pms->{dcc_result}) {
+            $pms->got_hit($pms->{dcc_rulename}, "", ruletype => 'eval');
+          }
+        }
+      } else {
+        info("dcc: empty response from dccifd?");
+      }
+    }
+  } elsif ($timeout) {
+    dbg("dcc: no response from dccifd, timed out");
+    delete $pms->{dcc_sock};
+  } else {
+    dbg("dcc: still waiting for dccifd response");
+  }
+}
+
+sub finish_parsing_start {
+  my ($self, $opts) = @_;
+
+  # If using dccifd, hard adjust priority -100 to launch early async
+  $self->find_dcc_home();
+  if ($self->is_dccifd_available()) {
+    foreach (@{$opts->{conf}->{eval_to_rule}->{check_dcc}}) {
+      if (exists $opts->{conf}->{tests}->{$_}) {
+        dbg("dcc: adjusting rule $_ priority to -100");
+        $opts->{conf}->{priority}->{$_} = -100;
+      }
+    }
+    foreach (@{$opts->{conf}->{eval_to_rule}->{check_dcc_reputation_range}}) {
+      if (exists $opts->{conf}->{tests}->{$_}) {
+        dbg("dcc: adjusting rule $_ priority to -100");
+        $opts->{conf}->{priority}->{$_} = -100;
+      }
+    }
+  }
+}
+
+sub check_dcc {
+  my ($self, $pms, $fulltext, $rulename) = @_;
+
+  return 0 if $self->{dcc_disabled};
+  return 0 if !$self->{main}->{conf}->{use_dcc};
+
+  return $pms->{dcc_result} if defined $pms->{dcc_result};
+
+  return 0 if $pms->{dcc_running};
+  $pms->{dcc_running} = 1;
+
+  my $timer = $self->{main}->time_method("check_dcc");
+
   # initialize valid tags
-  $permsgstatus->{tag_data}->{DCCB} = "";
-  $permsgstatus->{tag_data}->{DCCR} = "";
-  $permsgstatus->{tag_data}->{DCCREP} = "";
+  $pms->{tag_data}->{DCCB} = '';
+  $pms->{tag_data}->{DCCR} = '';
+  $pms->{tag_data}->{DCCREP} = '';
 
   if ($$fulltext eq '') {
     dbg("dcc: empty message; skipping dcc check");
-    return;
+    return 0;
   }
 
-  if ($permsgstatus->get('ALL') =~ /^(X-DCC-.*-Metrics:.*)$/m) {
-    $permsgstatus->{dcc_raw_x_dcc} = $1;
+  if ($pms->get('ALL-TRUSTED') =~ /^(X-DCC-[^:]*?-Metrics: .*)$/m) {
     # short-circuit if there is already a X-DCC header with value of
     # "bulk" from an upstream DCC check
     # require "bulk" because then at least one body checksum will be "many"
     # and so we know the X-DCC header is not forged by spammers
-    return if $permsgstatus->{dcc_raw_x_dcc} =~ / bulk /;
+    #if ($1 =~ / bulk /) {
+    #  return $self->check_dcc_result($pms, $1);
+    #}
   }
 
-  my $timer = $self->{main}->time_method("check_dcc");
+  $pms->{dcc_rulename} = $pms->get_current_eval_rule_name();
 
-  $self->get_dcc_interface();
-  return if $self->{dcc_disabled};
+  return 0 if !$self->get_dcc_interface();
 
-  my $envelope = $permsgstatus->{relays_external}->[0];
-  ($permsgstatus->{dcc_raw_x_dcc},
-   $permsgstatus->{dcc_cksums}) = $self->ask_dcc("dcc:", $permsgstatus,
-						 $fulltext, $envelope);
+  my $envelope = $pms->{relays_external}->[0];
+  ($pms->{dcc_x_result}, $pms->{dcc_cksums}) =
+    $self->ask_dcc('dcc:', $pms, $fulltext, $envelope);
+  if (!defined $pms->{dcc_x_result}) {
+    $pms->{dcc_result} = 0;
+  } elsif ($pms->{dcc_x_result} eq 'async') {
+    return 0; # read result later
+  } else {
+    $pms->{dcc_result} =
+      $self->check_dcc_result($pms, $pms->{dcc_x_result});
+  }
+
+  return $pms->{dcc_result};
 }
 
-sub check_dcc {
-  my ($self, $permsgstatus, $full) = @_;
-  my $conf = $self->{main}->{conf};
+sub check_dcc_reputation_range {
+  my ($self, $pms, $fulltext, $min, $max, $rulename) = @_;
 
-  $self->dcc_query($permsgstatus, $full)  if !$permsgstatus->{dcc_checked};
+  return 0 if $self->{dcc_disabled};
+  return 0 if !$self->{main}->{conf}->{use_dcc};
 
-  my $x_dcc = $permsgstatus->{dcc_raw_x_dcc};
-  return 0  if !defined $x_dcc || $x_dcc eq '';
+  # Check if callback overriding rulename
+  my $cb;
+  if (!defined $rulename) {
+    $rulename = $pms->get_current_eval_rule_name();
+  } else {
+    $cb = 1;
+  }
 
-  if ($x_dcc =~ /^X-DCC-(.*)-Metrics: (.*)$/) {
-    $permsgstatus->set_tag('DCCB', $1);
-    $permsgstatus->set_tag('DCCR', $2);
+  if (!defined $pms->{dcc_result}) {
+    dbg("dcc: delaying check_dcc_reputation_range call for $rulename");
+    # array matches check_dcc_reputation_range() argument order
+    push @{$pms->{dcc_range_callbacks}}, [$fulltext, $min, $max, $rulename];
+    return 0;
+  }
+
+  next if !defined $pms->{dcc_x_result};
+
+  # this is called several times per message, so parse the X-DCC header once
+  if (!defined $pms->{dcc_rep}) {
+    my $dcc_rep;
+    if ($pms->{dcc_x_result} =~ /\brep=(\d+)/) {
+      $dcc_rep = $1+0;
+      $pms->set_tag('DCCREP', $dcc_rep);
+    } else {
+      $dcc_rep = -1;
+    }
+    $pms->{dcc_rep} = $dcc_rep;
+  }
+
+  # no X-DCC header or no reputation in the X-DCC header, perhaps for lack
+  # of data in the DCC Reputation server
+  return 0 if $pms->{dcc_rep} < 0;
+
+  # cover the entire range of reputations if not told otherwise
+  $min = 0   if !defined $min;
+  $max = 100 if !defined $max;
+
+  my $result = $pms->{dcc_rep} >= $min && $pms->{dcc_rep} <= $max ? 1 : 0;
+  dbg("dcc: dcc_rep %s, min %s, max %s => result=%s",
+      $pms->{dcc_rep}, $min, $max, $result ? 'YES' : 'no');
+
+  if ($cb) {
+    # Callback needs to got_hit()
+    if ($result) {
+      $pms->got_hit($rulename, "", ruletype => 'eval');
+    }
+  } else {
+    return $result;
+  }
+}
+
+sub check_dcc_result {
+  my ($self, $pms, $x_dcc) = @_;
+
+  return 0 if !defined $x_dcc || $x_dcc eq '';
+
+  my $conf = $pms->{main}->{conf};
+
+  if ($x_dcc =~ /^X-DCC-([^:]*?)-Metrics: (.*)$/) {
+    $pms->set_tag('DCCB', $1);
+    $pms->set_tag('DCCR', $2);
   }
   $x_dcc =~ s/many/999999/ig;
   $x_dcc =~ s/ok\d?/0/ig;
@@ -721,40 +881,9 @@ sub check_dcc {
   return 0;
 }
 
-sub check_dcc_reputation_range {
-  my ($self, $permsgstatus, $fulltext, $min, $max) = @_;
-
-  # this is called several times per message, so parse the X-DCC header once
-  my $dcc_rep = $permsgstatus->{dcc_rep};
-  if (!defined $dcc_rep) {
-    $self->dcc_query($permsgstatus, $fulltext)  if !$permsgstatus->{dcc_checked};
-    my $x_dcc = $permsgstatus->{dcc_raw_x_dcc};
-    if (defined $x_dcc && $x_dcc =~ /\brep=(\d+)/) {
-      $dcc_rep = $1+0;
-      $permsgstatus->set_tag('DCCREP', $dcc_rep);
-    } else {
-      $dcc_rep = -1;
-    }
-    $permsgstatus->{dcc_rep} = $dcc_rep;
-  }
-
-  # no X-DCC header or no reputation in the X-DCC header, perhaps for lack
-  # of data in the DCC Reputation server
-  return 0 if $dcc_rep < 0;
-
-  # cover the entire range of reputations if not told otherwise
-  $min = 0   if !defined $min;
-  $max = 100 if !defined $max;
-
-  my $result = $dcc_rep >= $min && $dcc_rep <= $max ? 1 : 0;
-  dbg("dcc: dcc_rep %s, min %s, max %s => result=%s",
-      $dcc_rep, $min, $max, $result?'YES':'no');
-  return $result;
-}
-
 # get the X-DCC header line and save the checksums from dccifd or dccproc
 sub parse_dcc_response {
-  my ($self, $resp) = @_;
+  my ($self, $resp, $pgm) = @_;
   my ($raw_x_dcc, $cksums);
 
   # The first line is the header we want.  It uses SMTP folded whitespace
@@ -773,175 +902,211 @@ sub parse_dcc_response {
     $cksums .= $v;
   }
 
+  if (!defined $raw_x_dcc || $raw_x_dcc !~ /^X-DCC/) {
+    info("dcc: instead of X-DCC header, $pgm returned '%s'", $raw_x_dcc||'');
+  }
+
   return ($raw_x_dcc, $cksums);
 }
 
 sub ask_dcc {
-  my ($self, $tag, $permsgstatus, $fulltext, $envelope) = @_;
+  my ($self, $tag, $pms, $fulltext, $envelope) = @_;
+
   my $conf = $self->{main}->{conf};
-  my ($pgm, $err, $sock, $pid, @resp);
-  my ($client, $clientname, $helo, $opts);
-
-  $permsgstatus->enter_helper_run_mode();
-
   my $timeout = $conf->{dcc_timeout};
-  my $timer = Mail::SpamAssassin::Timeout->new(
-	  { secs => $timeout, deadline => $permsgstatus->{master_deadline} });
 
-  $err = $timer->run_and_catch(sub {
-    local $SIG{PIPE} = sub { die "__brokenpipe__ignore__\n" };
+  if ($self->is_dccifd_available()) {
+    my @resp;
+    my $timer = Mail::SpamAssassin::Timeout->new(
+      { secs => $timeout, deadline => $pms->{master_deadline} });
+    my $err = $timer->run_and_catch(sub {
+      local $SIG{PIPE} = sub { die "__brokenpipe__ignore__\n" };
 
-    # prefer dccifd to dccproc
-    if ($self->{dccifd_available}) {
-      $pgm = 'dccifd';
-
-      $sock = $self->dccifd_connect($tag);
-      if (!$sock) {
+      $pms->{dcc_sock} = $self->dccifd_connect($tag);
+      if (!$pms->{dcc_sock}) {
 	$self->{dccifd_available} = 0;
-	die("dccproc not available") if (!$self->is_dccproc_available());
-
 	# fall back on dccproc if the socket is an orphan from
 	# a killed dccifd daemon or some other obvious (no timeout) problem
-	dbg("$tag fall back on dccproc");
+	dbg("$tag dccifd failed: trying dccproc as fallback");
+	return;
       }
-    }
-
-    if ($self->{dccifd_available}) {
 
       # send the options and other parameters to the daemon
-      $client = $envelope->{ip};
-      $clientname = $envelope->{rdns};
+      my $client = $envelope->{ip};
+      my $clientname = $envelope->{rdns};
       if (!defined $client) {
 	$client = '';
       } else {
 	$client .= ("\r" . $clientname) if defined $clientname;
       }
-      $helo = $envelope->{helo} || '';
-      if ($tag ne "dcc:") {
-	$opts = $self->{dccifd_report_options}
-      } else {
+      my $helo = $envelope->{helo} || '';
+      my $opts;
+      if ($tag eq 'dcc:') {
 	$opts = $self->{dccifd_lookup_options};
-	if (defined $permsgstatus->{dcc_raw_x_dcc}) {
+	if (defined $pms->{dcc_x_result}) {
 	  # only query if there is an X-DCC header
 	  $opts =~ s/grey-off/grey-off query/;
 	}
+      } else {
+	$opts = $self->{dccifd_report_options};
       }
 
-      $sock->print($opts)	   or die "failed write options\n";
-      $sock->print($client . "\n") or die "failed write SMTP client\n";
-      $sock->print($helo . "\n")   or die "failed write HELO value\n";
-      $sock->print("\n")	   or die "failed write sender\n";
-      $sock->print("unknown\n\n")  or die "failed write 1 recipient\n";
-      $sock->print($$fulltext)     or die "failed write mail message\n";
-      $sock->shutdown(1) or die "failed socket shutdown: $!";
+      $pms->{dcc_sock}->print($opts)  or die "failed write options\n";
+      $pms->{dcc_sock}->print("$client\n")  or die "failed write SMTP client\n";
+      $pms->{dcc_sock}->print("$helo\n")  or die "failed write HELO value\n";
+      $pms->{dcc_sock}->print("\n")  or die "failed write sender\n";
+      $pms->{dcc_sock}->print("unknown\n\n")  or die "failed write 1 recipient\n";
+      $pms->{dcc_sock}->print($$fulltext)  or die "failed write mail message\n";
+      $pms->{dcc_sock}->shutdown(1)  or die "failed socket shutdown: $!";
 
-      $sock->getline()   or die "failed read status\n";
-      $sock->getline()   or die "failed read multistatus\n";
+      # don't async report and learn
+      if ($tag ne 'dcc:') {
+        @resp = $pms->{dcc_sock}->getlines();
+        delete $pms->{dcc_sock};
+        shift @resp; shift @resp; # ignore status/multistatus line
+        if (!@resp) {
+          die("no response");
+        }
+      } else {
+        $pms->{dcc_async_start} = time;
+      }
+    });
 
-      @resp = $sock->getlines();
-      die "failed to read dccifd response\n" if !@resp;
+    if ($timer->timed_out()) {
+      delete $pms->{dcc_sock};
+      dbg("$tag dccifd timed out after $timeout seconds");
+      return (undef, undef);
+    } elsif ($err) {
+      delete $pms->{dcc_sock};
+      chomp $err;
+      info("$tag dccifd failed: $err");
+      return (undef, undef);
+    }
 
-    } else {
-      $pgm = 'dccproc';
+    # report, learn
+    if ($tag ne 'dcc:') {
+      my ($raw_x_dcc, $cksums) = $self->parse_dcc_response(\@resp, 'dccifd');
+      if ($raw_x_dcc) {
+        dbg("$tag dccifd responded with '$raw_x_dcc'");
+        return ($raw_x_dcc, $cksums);
+      } else {
+        return (undef, undef);
+      }
+    }
+
+    # async lookup
+    return ('async', undef) if $pms->{dcc_async_start};
+
+    # or falling back to dccproc..
+  }
+
+  if ($self->is_dccproc_available()) {
+    $pms->enter_helper_run_mode();
+
+    my $pid;
+    my @resp;
+    my $timer = Mail::SpamAssassin::Timeout->new(
+      { secs => $timeout, deadline => $pms->{master_deadline} });
+    my $err = $timer->run_and_catch(sub {
+      local $SIG{PIPE} = sub { die "__brokenpipe__ignore__\n" };
+
       # use a temp file -- open2() is unreliable, buffering-wise, under spamd
-      # first ensure that we do not hit a stray file from some other filter.
-      $permsgstatus->delete_fulltext_tmpfile();
-      my $tmpf = $permsgstatus->create_fulltext_tmpfile($fulltext);
+      my $tmpf = $pms->create_fulltext_tmpfile($fulltext);
 
-      my $path = $conf->{dcc_path};
-      $opts = $conf->{dcc_options};
-      my @opts = !defined $opts ? () : split(' ',$opts);
+      my @opts = split(/\s+/, $conf->{dcc_options} || '');
       untaint_var(\@opts);
       unshift(@opts, '-w', 'whiteclnt');
-      $client = $envelope->{ip};
+      my $client = $envelope->{ip};
       if ($client) {
-	unshift(@opts, '-a', untaint_var($client));
+        unshift(@opts, '-a', untaint_var($client));
       } else {
-	# get external relay IP address from Received: header if not available
-	unshift(@opts, '-R');
+        # get external relay IP address from Received: header if not available
+        unshift(@opts, '-R');
       }
-      if ($tag eq "dcc:") {
-	# query instead of report if there is an X-DCC header from upstream
-	unshift(@opts, '-Q') if defined $permsgstatus->{dcc_raw_x_dcc};
+      if ($tag eq 'dcc:') {
+        # query instead of report if there is an X-DCC header from upstream
+        unshift(@opts, '-Q') if defined $pms->{dcc_x_result};
       } else {
-	# learn or report spam
-	unshift(@opts, '-t', 'many');
+        # learn or report spam
+        unshift(@opts, '-t', 'many');
       }
       if ($conf->{dcc_home}) {
         # set home directory explicitly
         unshift(@opts, '-h', $conf->{dcc_home});
-      };
+      }
 
-      defined $path  or die "no dcc_path found\n";
       dbg("$tag opening pipe to " .
-	  join(' ', $path, "-C", "-x", "0", @opts, "<$tmpf"));
+        join(' ', $conf->{dcc_path}, "-C", "-x", "0", @opts, "<$tmpf"));
 
       $pid = Mail::SpamAssassin::Util::helper_app_pipe_open(*DCC,
-		$tmpf, 1, $path, "-C", "-x", "0", @opts);
+        $tmpf, 1, $conf->{dcc_path}, "-C", "-x", "0", @opts);
       $pid or die "DCC: $!\n";
 
       # read+split avoids a Perl I/O bug (Bug 5985)
-      my($inbuf,$nread,$resp); $resp = '';
-      while ( $nread=read(DCC,$inbuf,8192) ) { $resp .= $inbuf }
+      my($inbuf, $nread);
+      my $resp = '';
+      while ($nread = read(DCC, $inbuf, 8192)) { $resp .= $inbuf }
       defined $nread  or die "error reading from pipe: $!";
-      @resp = split(/^/m, $resp, -1);  undef $resp;
+      @resp = split(/^/m, $resp, -1);
 
-      my $errno = 0;  close DCC or $errno = $!;
+      my $errno = 0;
+      close DCC or $errno = $!;
       proc_status_ok($?,$errno)
-	  or info("$tag [%s] finished: %s", $pid, exit_status_str($?,$errno));
+        or info("$tag [%s] finished: %s", $pid, exit_status_str($?,$errno));
 
       die "failed to read X-DCC header from dccproc\n" if !@resp;
-    }
-  });
 
-  if (defined $pgm && $pgm eq 'dccproc') {
-    if (defined(fileno(*DCC))) {	# still open
+    });
+
+    if (defined(fileno(*DCC))) { # still open
       if ($pid) {
-	if (kill('TERM',$pid)) {
+        if (kill('TERM', $pid)) {
 	  dbg("$tag killed stale dccproc process [$pid]")
 	} else {
 	  dbg("$tag killing dccproc process [$pid] failed: $!")
 	}
       }
-      my $errno = 0;  close(DCC) or $errno = $!;
+      my $errno = 0;
+      close(DCC) or $errno = $!;
       proc_status_ok($?,$errno) or info("$tag [%s] dccproc terminated: %s",
 					$pid, exit_status_str($?,$errno));
     }
+
+    $pms->delete_fulltext_tmpfile();
+
+    $pms->leave_helper_run_mode();
+
+    if ($timer->timed_out()) {
+      dbg("$tag dccproc timed out after $timeout seconds");
+      return (undef, undef);
+    } elsif ($err) {
+      chomp $err;
+      info("$tag dccproc failed: $err");
+      return (undef, undef);
+    }
+
+    my ($raw_x_dcc, $cksums) = $self->parse_dcc_response(\@resp, 'dccproc');
+    if ($raw_x_dcc) {
+      dbg("$tag dccproc responded with '$raw_x_dcc'");
+      return ($raw_x_dcc, $cksums);
+    } else {
+      info("$tag instead of X-DCC header, dccproc returned '$raw_x_dcc'");
+      return (undef, undef);
+    }
   }
 
-  $permsgstatus->leave_helper_run_mode();
-
-  if ($timer->timed_out()) {
-    dbg("$tag %s timed out after %d seconds", $pgm||'', $timeout);
-    return (undef, undef);
-  }
-
-  if ($err) {
-    chomp $err;
-    info("$tag %s failed: %s", $pgm||'', $err);
-    return (undef, undef);
-  }
-
-  my ($raw_x_dcc, $cksums) = $self->parse_dcc_response(\@resp);
-  if (!defined $raw_x_dcc || $raw_x_dcc !~ /^X-DCC/) {
-    info("$tag instead of X-DCC header, $pgm returned '$raw_x_dcc'");
-    return (undef, undef);
-  }
-  dbg("$tag $pgm responded with '$raw_x_dcc'");
-  return ($raw_x_dcc, $cksums);
+  return (undef, undef);
 }
 
 # tell DCC server that the message is spam according to SpamAssassin
 sub check_post_learn {
-  my ($self, $options) = @_;
+  my ($self, $opts) = @_;
+
+  return if $self->{dcc_disabled};
+  return if !$self->{main}->{conf}->{use_dcc};
 
   # learn only if allowed
-  return if $self->{learn_disabled};
   my $conf = $self->{main}->{conf};
-  if (!$conf->{use_dcc}) {
-    $self->{learn_disabled} = 1;
-    return;
-  }
   my $learn_score = $conf->{dcc_learn_score};
   if (!defined $learn_score || $learn_score eq '') {
     dbg("dcc: DCC learning not enabled by dcc_learn_score");
@@ -951,10 +1116,10 @@ sub check_post_learn {
 
   # and if SpamAssassin concluded that the message is spam
   # worse than our threshold
-  my $permsgstatus = $options->{permsgstatus};
-  if ($permsgstatus->is_spam()) {
-    my $score = $permsgstatus->get_score();
-    my $required_score = $permsgstatus->get_required_score();
+  my $pms = $opts->{permsgstatus};
+  if ($pms->is_spam()) {
+    my $score = $pms->get_score();
+    my $required_score = $pms->get_required_score();
     if ($score < $required_score + $learn_score) {
       dbg("dcc: score=%d required_score=%d dcc_learn_score=%d",
 	  $score, $required_score, $learn_score);
@@ -963,33 +1128,32 @@ sub check_post_learn {
   }
 
   # and if we checked the message
-  return if (!defined $permsgstatus->{dcc_raw_x_dcc});
+  return if (!defined $pms->{dcc_x_result});
 
   # and if the DCC server thinks it was not spam
-  if ($permsgstatus->{dcc_raw_x_dcc} !~ /\b(Body|Fuz1|Fuz2)=\d/) {
-    dbg("dcc: already known as spam; no need to learn");
+  if ($pms->{dcc_x_result} !~ /\b(Body|Fuz1|Fuz2)=\d/) {
+    dbg("dcc: already known as spam; no need to learn: $pms->{dcc_x_result}");
     return;
   }
 
+  my $timer = $self->{main}->time_method("dcc_learn");
+
   # dccsight is faster than dccifd or dccproc if we have checksums,
   #   which we do not have with dccifd before 1.3.123
-  my $old_cksums = $permsgstatus->{dcc_cksums};
-  return if ($old_cksums && $self->dccsight_learn($permsgstatus, $old_cksums));
+  my $old_cksums = $pms->{dcc_cksums};
+  return if ($old_cksums && $self->dccsight_learn($pms, $old_cksums));
 
   # Fall back on dccifd or dccproc without saved checksums or dccsight.
   # get_dcc_interface() was called when the message was checked
-
-  # is getting the full text this way kosher?  Is get_pristine() public?
-  my $fulltext = $permsgstatus->{msg}->get_pristine();
-  my $envelope = $permsgstatus->{relays_external}->[0];
-  my ($raw_x_dcc, $cksums) = $self->ask_dcc("dcc: learn:", $permsgstatus,
+  my $fulltext = $pms->{msg}->get_pristine();
+  my $envelope = $pms->{relays_external}->[0];
+  my ($raw_x_dcc, undef) = $self->ask_dcc('dcc: learn:', $pms,
 					    \$fulltext, $envelope);
   dbg("dcc: learned as spam") if defined $raw_x_dcc;
 }
 
 sub dccsight_learn {
-  my ($self, $permsgstatus, $old_cksums) = @_;
-  my ($raw_x_dcc, $new_cksums);
+  my ($self, $pms, $old_cksums) = @_;
 
   return 0 if !$old_cksums;
 
@@ -999,17 +1163,17 @@ sub dccsight_learn {
     return 0;
   }
 
-  $permsgstatus->enter_helper_run_mode();
+  $pms->enter_helper_run_mode();
 
   # use a temp file here -- open2() is unreliable, buffering-wise, under spamd
-  # ensure that we do not hit a stray file from some other filter.
-  $permsgstatus->delete_fulltext_tmpfile();
-  my $tmpf = $permsgstatus->create_fulltext_tmpfile(\$old_cksums);
+  my $tmpf = $pms->create_fulltext_tmpfile(\$old_cksums);
+
+  my ($raw_x_dcc, $new_cksums);
   my $pid;
 
   my $timeout = $self->{main}->{conf}->{dcc_timeout};
   my $timer = Mail::SpamAssassin::Timeout->new(
-	   { secs => $timeout, deadline => $permsgstatus->{master_deadline} });
+	   { secs => $timeout, deadline => $pms->{master_deadline} });
   my $err = $timer->run_and_catch(sub {
     local $SIG{PIPE} = sub { die "__brokenpipe__ignore__\n" };
 
@@ -1021,47 +1185,51 @@ sub dccsight_learn {
     $pid or die "$!\n";
 
     # read+split avoids a Perl I/O bug (Bug 5985)
-    my($inbuf,$nread,$resp); $resp = '';
-    while ( $nread=read(DCC,$inbuf,8192) ) { $resp .= $inbuf }
+    my($inbuf, $nread);
+    my $resp = '';
+    while ($nread = read(DCC, $inbuf, 8192)) { $resp .= $inbuf }
     defined $nread  or die "error reading from pipe: $!";
-    my @resp = split(/^/m, $resp, -1);  undef $resp;
+    my @resp = split(/^/m, $resp, -1);
 
-    my $errno = 0;  close DCC or $errno = $!;
+    my $errno = 0;
+    close DCC or $errno = $!;
     proc_status_ok($?,$errno)
 	  or info("dcc: [%s] finished: %s", $pid, exit_status_str($?,$errno));
 
     die "dcc: failed to read learning response\n" if !@resp;
 
-    ($raw_x_dcc, $new_cksums) = $self->parse_dcc_response(\@resp);
+    ($raw_x_dcc, $new_cksums) = $self->parse_dcc_response(\@resp, 'dccsight');
   });
 
   if (defined(fileno(*DCC))) {	  # still open
     if ($pid) {
-      if (kill('TERM',$pid)) {
-	dbg("dcc: killed stale dccsight process [$pid]")
+      if (kill('TERM', $pid)) {
+	dbg("dcc: killed stale dccsight process [$pid]");
       } else {
-	dbg("dcc: killing stale dccsight process [$pid] failed: $!") }
+	dbg("dcc: killing stale dccsight process [$pid] failed: $!");
+      }
     }
-    my $errno = 0;  close(DCC) or $errno = $!;
+    my $errno = 0;
+    close(DCC) or $errno = $!;
     proc_status_ok($?,$errno) or info("dcc: dccsight [%s] terminated: %s",
 				      $pid, exit_status_str($?,$errno));
   }
-  $permsgstatus->delete_fulltext_tmpfile();
-  $permsgstatus->leave_helper_run_mode();
+
+  $pms->delete_fulltext_tmpfile();
+
+  $pms->leave_helper_run_mode();
 
   if ($timer->timed_out()) {
     dbg("dcc: dccsight timed out after $timeout seconds");
     return 0;
-  }
-
-  if ($err) {
+  } elsif ($err) {
     chomp $err;
     info("dcc: dccsight failed: $err\n");
     return 0;
   }
 
-  if ($raw_x_dcc) {
-    dbg("dcc: learned response: %s", $raw_x_dcc);
+  if ($raw_x_dcc ne '') { #TODO check if working
+    dbg("dcc: learned response: $raw_x_dcc");
     return 1;
   }
 
@@ -1069,22 +1237,26 @@ sub dccsight_learn {
 }
 
 sub plugin_report {
-  my ($self, $options) = @_;
+  my ($self, $opts) = @_;
 
-  return if $options->{report}->{options}->{dont_report_to_dcc};
-  $self->get_dcc_interface();
   return if $self->{dcc_disabled};
+  return if !$self->{main}->{conf}->{use_dcc};
+  return if $opts->{report}->{options}->{dont_report_to_dcc};
+
+  return if !$self->get_dcc_interface();
+
+  my $report = $opts->{report};
+
+  my $timer = $self->{main}->time_method("dcc_report");
 
   # get the metadata from the message so we can report the external relay
-  $options->{msg}->extract_message_metadata($options->{report}->{main});
-  my $envelope = $options->{msg}->{metadata}->{relays_external}->[0];
-  my ($raw_x_dcc, $cksums) = $self->ask_dcc("reporter:", $options->{report},
-					    $options->{text}, $envelope);
-
+  $opts->{msg}->extract_message_metadata($report->{main});
+  my $envelope = $opts->{msg}->{metadata}->{relays_external}->[0];
+  my ($raw_x_dcc, undef) = $self->ask_dcc('reporter:', $report,
+					    $opts->{text}, $envelope);
   if (defined $raw_x_dcc) {
-    $options->{report}->{report_available} = 1;
+    $report->{report_available} = $report->{report_return} = 1;
     info("reporter: spam reported to DCC");
-    $options->{report}->{report_return} = 1;
   } else {
     info("reporter: could not report spam to DCC");
   }
