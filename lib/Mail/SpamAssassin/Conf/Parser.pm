@@ -472,8 +472,7 @@ failed_line:
   delete $self->{if_stack};
 
   $self->lint_check();
-  $self->set_default_scores();
-  $self->check_for_missing_descriptions();
+  $self->fix_tests();
 
   delete $self->{scoresonly};
 }
@@ -613,16 +612,19 @@ sub lint_check {
   }
 }
 
-# we should set a default score for all valid rules...  Do this here
-# instead of add_test because mostly 'score' occurs after the rule is
-# specified, so why set the scores to default, then set them again at
-# 'score'?
-# 
-sub set_default_scores {
+# Iterate through tests and check/fix things
+sub fix_tests {
   my ($self) = @_;
+
   my $conf = $self->{conf};
+  my $would_log_dbg = would_log('dbg');
 
   while ( my $k = each %{$conf->{tests}} ) {
+    # we should set a default score for all valid rules...  Do this here
+    # instead of add_test because mostly 'score' occurs after the rule is
+    # specified, so why set the scores to default, then set them again at
+    # 'score'?
+    # 
     if ( ! exists $conf->{scores}->{$k} ) {
       # T_ rules (in a testing probationary period) get low, low scores
       my $set_score = ($k =~/^T_/) ? 0.01 : 1.0;
@@ -632,17 +634,10 @@ sub set_default_scores {
         $conf->{scoreset}->[$index]->{$k} = $set_score;
       }
     }
-  }
-}
 
-# loop through all the tests and if we are missing a description with debug
-# set, throw a warning except for testing T_ or meta __ rules.
-sub check_for_missing_descriptions {
-  my ($self) = @_;
-  my $conf = $self->{conf};
-
-  while ( my $k = each %{$conf->{tests}} ) {
-    if ($k !~ m/^(?:T_|__)/i) {
+    # loop through all the tests and if we are missing a description with debug
+    # set, throw a warning except for testing T_ or meta __ rules.
+    if ($would_log_dbg && $k !~ m/^(?:T_|__)/i) {
       if ( ! exists $conf->{descriptions}->{$k} ) {
         dbg("config: warning: no description set for $k");
       }
@@ -1191,13 +1186,13 @@ sub add_test {
 
   # all of these rule types are regexps
   if ($type == $Mail::SpamAssassin::Conf::TYPE_BODY_TESTS ||
-      $type == $Mail::SpamAssassin::Conf::TYPE_FULL_TESTS ||
+      $type == $Mail::SpamAssassin::Conf::TYPE_URI_TESTS ||
       $type == $Mail::SpamAssassin::Conf::TYPE_RAWBODY_TESTS ||
-      $type == $Mail::SpamAssassin::Conf::TYPE_URI_TESTS)
+      $type == $Mail::SpamAssassin::Conf::TYPE_FULL_TESTS)
   {
     return unless $self->is_delimited_regexp_valid($name, $text);
   }
-  if ($type == $Mail::SpamAssassin::Conf::TYPE_HEAD_TESTS)
+  elsif ($type == $Mail::SpamAssassin::Conf::TYPE_HEAD_TESTS)
   {
     # RFC 5322 section 3.6.8, ftext printable US-ASCII chars not including ":"
     # no re "strict";  # since perl 5.21.8: Ranges of ASCII printables...
@@ -1213,6 +1208,12 @@ sub add_test {
   {
     return unless $self->is_meta_valid($name, $text);
   }
+  elsif (($type & 1) == 1) { # *_EVALS
+    # create eval_to_rule mappings
+    if (my ($function) = ($text =~ m/(.*?)\s*\(.*?\)\s*$/)) {
+      push @{$conf->{eval_to_rule}->{$function}}, $name;
+    }
+  }
 
   $conf->{tests}->{$name} = $text;
   $conf->{test_types}->{$name} = $type;
@@ -1221,7 +1222,6 @@ sub add_test {
      dbg("config: auto-learn: $name has type $type = $conf->{test_types}->{$name} during add_test\n");
   }
 
-  
   if ($type == $Mail::SpamAssassin::Conf::TYPE_META_TESTS) {
     $conf->{priority}->{$name} ||= 500;
   }
