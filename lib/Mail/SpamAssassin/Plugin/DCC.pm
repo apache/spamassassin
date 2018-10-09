@@ -147,6 +147,21 @@ Whether to use DCC, if it is available.
     type => $Mail::SpamAssassin::Conf::CONF_TYPE_BOOL,
   });
 
+=item use_dcc_rep (0|1)		(default: 1)
+
+Whether to use the commercial DCC Reputation feature, if it is available. 
+Default is 1 for backwards compatibility.  If you don't have commercial
+license, you can disable this to ignore check_dcc_reputation_range rules and
+save a few CPU cycles.
+
+=cut
+
+  push(@cmds, {
+    setting => 'use_dcc_rep',
+    default => 1,
+    type => $Mail::SpamAssassin::Conf::CONF_TYPE_BOOL,
+  });
+
 =item dcc_body_max NUMBER
 
 =item dcc_fuz1_max NUMBER
@@ -719,10 +734,12 @@ sub finish_parsing_start {
         $opts->{conf}->{priority}->{$_} = -100;
       }
     }
-    foreach (@{$opts->{conf}->{eval_to_rule}->{check_dcc_reputation_range}}) {
-      if (exists $opts->{conf}->{tests}->{$_}) {
-        dbg("dcc: adjusting rule $_ priority to -100");
-        $opts->{conf}->{priority}->{$_} = -100;
+    if ($opts->{conf}->{use_dcc_rep}) {
+      foreach (@{$opts->{conf}->{eval_to_rule}->{check_dcc_reputation_range}}) {
+        if (exists $opts->{conf}->{tests}->{$_}) {
+          dbg("dcc: adjusting rule $_ priority to -100");
+          $opts->{conf}->{priority}->{$_} = -100;
+        }
       }
     }
   }
@@ -785,6 +802,7 @@ sub check_dcc_reputation_range {
 
   return 0 if $self->{dcc_disabled};
   return 0 if !$self->{main}->{conf}->{use_dcc};
+  return 0 if !$self->{main}->{conf}->{use_dcc_rep};
 
   # Check if callback overriding rulename
   my $cb;
