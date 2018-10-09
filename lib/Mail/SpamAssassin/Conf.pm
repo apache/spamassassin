@@ -4891,6 +4891,9 @@ sub new {
   $self->{eval_plugins} = { };
   $self->{duplicate_rules} = { };
 
+  # map eval function names to rulenames
+  $self->{eval_to_rule} = {};
+
   # testing stuff
   $self->{regression_tests} = { };
 
