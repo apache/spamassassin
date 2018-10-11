@@ -64,7 +64,7 @@ B<Note> that FromNameSpoof detects the "owner" of a domain by the following sear
 By default FromNameSpoof will ignore the TLD when testing if From:addr is spoofed.
 Default 1
 
-  dns_check 1
+  fns_check 1
 
 Check levels:
 
