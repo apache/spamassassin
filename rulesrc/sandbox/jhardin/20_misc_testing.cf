@@ -1383,7 +1383,7 @@ tflags      FORM_LOW_CONTRAST     publish
 
 
 # try to FP-reduce HTML_FONT_LOW_CONTRAST
-#ifplugin Mail::SpamAssassin::Plugin::DKIM
+ifplugin Mail::SpamAssassin::Plugin::DKIM
   meta        __HTML_FONT_LOW_CONTRAST_MINFP	HTML_FONT_LOW_CONTRAST && !__HAS_SENDER && !__THREADED && !__HAS_THREAD_INDEX && !ALL_TRUSTED && !__NOT_SPOOFED && !__HDRS_LCASE_KNOWN && !DKIM_VALID
 else
   meta        __HTML_FONT_LOW_CONTRAST_MINFP	HTML_FONT_LOW_CONTRAST && !__HAS_SENDER && !__THREADED && !__HAS_THREAD_INDEX && !ALL_TRUSTED && !__NOT_SPOOFED && !__HDRS_LCASE_KNOWN
