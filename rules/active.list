@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: darxus ena-week0 ena-week1 ena-week4 giovanni grenier hege jarif jbrooks mmiroslaw-mails-ham mmiroslaw-mails-spam sihde thendrikx; day 2: ena-week0 ena-week1 ena-week4 jarif jbrooks llanga mmiroslaw-mails-ham mmiroslaw-mails-spam sihde; day 3: darxus ena-week0 ena-week1 ena-week4 giovanni grenier hege jarif jbrooks mmiroslaw-mails-ham mmiroslaw-mails-spam sihde thendrikx
+# with results from: day 1: darxus ena-week0 ena-week1 ena-week4 giovanni grenier hege jarif jbrooks mmiroslaw-mails-ham mmiroslaw-mails-spam sihde thendrikx; day 2: ena-week0 ena-week1 ena-week4 jbrooks llanga mmiroslaw-mails-ham mmiroslaw-mails-spam sihde; day 3: ena-week0 ena-week1 ena-week4 jarif jbrooks llanga mmiroslaw-mails-ham mmiroslaw-mails-spam sihde
 
 # tflags publish
 AC_BR_BONANZA
@@ -208,6 +208,9 @@ DOS_ANAL_SPAM_MAILER
 # good enough
 DOS_OE_TO_MX
 
+# good enough
+DOS_OUTLOOK_TO_MX
+
 # tflags publish
 DX_TEXT_02
 
@@ -413,6 +416,9 @@ HEADER_FROM_DIFFERENT_DOMAINS
 HEAD_LONG
 
 # good enough
+HELO_LOCALHOST
+
+# good enough
 HELO_MISC_IP
 
 # tflags publish
@@ -426,9 +432,6 @@ HK_SCAM_N2
 
 # good enough
 HK_SCAM_N8
-
-# good enough
-HK_SCAM_S7
 
 # tflags userconf
 HTML_CHARSET_FARAWAY
@@ -456,6 +459,9 @@ LONG_IMG_URI
 
 # tflags publish
 LOTS_OF_MONEY
+
+# good enough
+LOTTO_AGENT_RPLY
 
 # tflags publish
 LUCRATIVE
@@ -917,49 +923,58 @@ TVD_SPACE_ENCODED
 TW_GIBBERISH_MANY
 
 # good enough
-ADVANCE_FEE_3_NEW_FRM_MNY
+ADVANCE_FEE_2_NEW_FRM_MNY
 
 # good enough
-ADVANCE_FEE_5_NEW_FRM_MNY
+ADVANCE_FEE_4_NEW_FRM_MNY
 
 # good enough
-AXB_XMAILER_MIMEOLE_OL_1ECD5
+ADVANCE_FEE_4_NEW_MONEY
 
 # good enough
-BIGNUM_EMAILS
+ADVANCE_FEE_5_NEW
 
 # good enough
-DATE_IN_FUTURE_96_Q
+BODY_SINGLE_WORD
 
 # good enough
-DEAR_BENEFICIARY
+FILL_THIS_FORM_LOAN
 
 # good enough
-FILL_THIS_FORM_LONG
+FROM_MISSPACED
 
 # good enough
-FROM_MISSP_DYNIP
+FROM_MISSP_USER
 
 # good enough
-FROM_MISSP_TO_UNDISC
+FROM_WSP_LEAD
 
 # good enough
-LOTTO_AGENT
+HK_NAME_MR_MRS
 
 # good enough
-LOTTO_AGENT_RPLY
+HK_SCAM_N3
 
 # good enough
-MONEY_ATM_CARD
+KHOP_DYNAMIC
 
 # good enough
-NSL_RCVD_HELO_USER
+MILLION_USD
 
 # good enough
-SERGIO_SUBJECT_VIAGRA01
+MONEY_BARRISTER
 
 # good enough
-TO_EQ_FM_DIRECT_MX
+MONEY_FROM_MISSP
+
+# good enough
+NSL_RCVD_FROM_USER
+
+# good enough
+RATWARE_NO_RDNS
+
+# good enough
+SHARE_50_50
 
 # tflags publish
 UC_GIBBERISH_OBFU
