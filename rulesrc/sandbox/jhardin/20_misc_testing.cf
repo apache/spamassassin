@@ -1389,7 +1389,7 @@ else
   meta        __HTML_FONT_LOW_CONTRAST_MINFP	HTML_FONT_LOW_CONTRAST && !__HAS_SENDER && !__THREADED && !__HAS_THREAD_INDEX && !ALL_TRUSTED && !__NOT_SPOOFED && !__HDRS_LCASE_KNOWN
 endif
 
-# some no-ham combinations
+# some no-ham (at the time) combinations
 meta        GAPPY_LOW_CONTRAST    HTML_FONT_LOW_CONTRAST && __GAPPY_SUBJECT 
 describe    GAPPY_LOW_CONTRAST    Gappy subject + hidden text
 score       GAPPY_LOW_CONTRAST    2.500   # limit
@@ -1409,6 +1409,11 @@ meta        STOCK_LOW_CONTRAST    (__HTML_FONT_LOW_CONTRAST_MINFP && __FB_S_STOC
 describe    STOCK_LOW_CONTRAST    Stocks + hidden text
 score       STOCK_LOW_CONTRAST    2.500   # limit
 tflags      STOCK_LOW_CONTRAST    publish
+
+meta        NORDNS_LOW_CONTRAST   (__HTML_FONT_LOW_CONTRAST_MINFP && __RDNS_NONE) && !ALL_TRUSTED
+describe    NORDNS_LOW_CONTRAST   No rDNS + hidden text
+score       NORDNS_LOW_CONTRAST   2.500   # limit
+
 
 uri         __URI_DOM_DOTDOT      m,://[^/]+\.\.,
 
