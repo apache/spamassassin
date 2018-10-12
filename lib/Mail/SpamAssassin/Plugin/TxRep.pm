@@ -225,8 +225,6 @@ sub new {                       # constructor: register the eval rule
   $self->{main}          = $main;
   $self->{conf}          = $main->{conf};
   $self->{factor}        = $main->{conf}->{txrep_factor};
-  $self->{ipv4_mask_len} = $main->{conf}->{txrep_ipv4_mask_len};
-  $self->{ipv6_mask_len} = $main->{conf}->{txrep_ipv6_mask_len};
   $self->register_eval_rule("check_senders_reputation");
   $self->set_config($main->{conf});
 
@@ -1739,7 +1737,7 @@ sub ip_to_awl_key {
   if (!defined $origip) {
     # could not find an IP address to use
   } elsif ($origip =~ /^ (\d{1,3} \. \d{1,3}) \. \d{1,3} \. \d{1,3} $/xs) {
-    my $mask_len = $self->{ipv4_mask_len};
+    my $mask_len = $self->{conf}->{txrep_ipv4_mask_len};
     $mask_len = 16  if !defined $mask_len;
     # handle the default and easy cases manually
     if    ($mask_len == 32) {$result = $origip;}
@@ -1757,7 +1755,7 @@ sub ip_to_awl_key {
            $origip =~
            /^ [0-9a-f]{0,4} (?: : [0-9a-f]{0,4} | \. [0-9]{1,3} ){2,9} $/xsi) {
     # looks like an IPv6 address
-    my $mask_len = $self->{ipv6_mask_len};
+    my $mask_len = $self->{conf}->{txrep_ipv6_mask_len};
     $mask_len = 48  if !defined $mask_len;
     my $origip_obj = NetAddr::IP->new6($origip . '/' . $mask_len);
     if (!defined $origip_obj) {                         # invalid IPv6 address
