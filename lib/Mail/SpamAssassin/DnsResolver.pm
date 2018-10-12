@@ -547,7 +547,7 @@ sub new_dns_packet {
   eval {
 
     if (utf8::is_utf8($domain)) {  # since Perl 5.8.1
-      info("dns: new_dns_packet: domain is utf8 flagged: %s", $domain);
+      dbg("dns: new_dns_packet: domain is utf8 flagged: %s", $domain);
     }
 
     $domain =~ s/\.*\z/./s;
