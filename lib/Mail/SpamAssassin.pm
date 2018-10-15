@@ -1801,6 +1801,21 @@ sub init {
   # should be called only after configuration has been parsed
   $self->{resolver} = Mail::SpamAssassin::DnsResolver->new($self);
 
+  # load GeoDB if some plugin wants it
+  if ($self->{geodb_wanted}) {
+    eval '
+      use Mail::SpamAssassin::GeoDB;
+      $self->{geodb} = Mail::SpamAssassin::GeoDB->new({
+        conf => $self->{conf}->{geodb},
+        wanted => $self->{geodb_wanted},
+      });
+      1;
+    ';
+    if ($@ || !$self->{geodb}) {
+      dbg("config: GeoDB disabled: $@");
+    }
+  }
+
   # TODO -- open DNS cache etc. if necessary
 }
 

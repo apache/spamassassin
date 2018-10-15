@@ -108,7 +108,6 @@ package Mail::SpamAssassin::Plugin::URILocalBL;
 use Mail::SpamAssassin::Plugin;
 use Mail::SpamAssassin::Constants qw(:ip);
 use Mail::SpamAssassin::Util qw(untaint_var idn_to_ascii);
-use Mail::SpamAssassin::GeoDB;
 use Mail::SpamAssassin::NetSet;
 
 use Socket;
@@ -141,6 +140,10 @@ sub new {
 
   $self->register_eval_rule("check_uri_local_bl");
   $self->set_config($mailsaobject->{conf});
+
+  # we need GeoDB country/isp
+  $self->{main}->{geodb_wanted}->{country} = 1;
+  $self->{main}->{geodb_wanted}->{isp} = 1;
 
   return $self;
 }
@@ -339,29 +342,18 @@ sub finish_parsing_end {
   }
 }
 
-sub _init_geodb {
-  my ($self, $pms) = @_;
-  if (!$self->{geodb}) {
-    eval {
-      $self->{geodb} = Mail::SpamAssassin::GeoDB->new({
-        conf => $pms->{conf}->{geodb},
-        wanted => { country => 1, city => 1, isp => 1 },
-      });
-    };
-    if (!$self->{geodb}) {
-      dbg("plugin disabled: $@");
-      $self->{urilocalbl_disabled} = 1;
-      return 0;
-    }
-  }
-  return 1;
-}
-
 sub check_uri_local_bl {
   my ($self, $pms) = @_;
 
   return 0 if $self->{urilocalbl_disabled};
-  return 0 if !$self->_init_geodb($pms);
+
+  if (!$self->{main}->{geodb} ||
+        (!$self->{main}->{geodb}->can('country') &&
+         !$self->{main}->{geodb}->can('isp'))) {
+    dbg("plugin disabled, GeoDB country/isp not available");
+    $self->{urilocalbl_disabled} = 1;
+    return 0;
+  }
 
   my $rulename = $pms->get_current_eval_rule_name();
   my $ruleconf = $pms->{conf}->{urilocalbl}->{$rulename};
@@ -414,7 +406,7 @@ sub check_uri_local_bl {
       sub { my($ent, $pkt) = @_;
             $self->_finish_lookup($pms, $ent, $pkt); },
       master_deadline => $pms->{master_deadline}
-    ) if $self->{geodb}->can('country_v6');
+    ) if $self->{main}->{geodb}->can('country_v6');
   }
 }
 
@@ -453,6 +445,7 @@ sub _check_host {
   my ($self, $pms, $rulename, $host, $addrs) = @_;
 
   my $ruleconf = $pms->{conf}->{urilocalbl}->{$rulename};
+  my $geodb = $self->{main}->{geodb};
 
   if ($host ne $addrs->[0]) {
     dbg("resolved $host: ".join(', ', @$addrs));
@@ -474,7 +467,7 @@ sub _check_host {
       dbg("checking $host for countries: $testcc");
     }
     foreach my $ip (@$addrs) {
-      my $cc = $self->{geodb}->get_country($ip);
+      my $cc = $geodb->get_country($ip);
       if ( (!$neg && defined $ruleconf->{countries}{$cc}) ||
            ($neg && !defined $ruleconf->{countries}{$cc}) ) {
         dbg("$host ($ip) country $cc - HIT");
@@ -496,7 +489,7 @@ sub _check_host {
       dbg("checking $host for continents: $testcont");
     }
     foreach my $ip (@$addrs) {
-      my $cc = $self->{geodb}->get_continent($ip);
+      my $cc = $geodb->get_continent($ip);
       if ( (!$neg && defined $ruleconf->{continents}{$cc}) ||
            ($neg && !defined $ruleconf->{continents}{$cc}) ) {
         dbg("$host ($ip) continent $cc - HIT");
@@ -510,12 +503,12 @@ sub _check_host {
   }
 
   if (defined $ruleconf->{isps}) {
-    if ($self->{geodb}->can('isp')) {
+    if ($geodb->can('isp')) {
       my $testisp = join(', ', map {"\"$_\""} sort values %{$ruleconf->{isps}});
       dbg("checking $host for isps: $testisp");
 
       foreach my $ip (@$addrs) {
-        my $isp = $self->{geodb}->get_isp($ip);
+        my $isp = $geodb->get_isp($ip);
         next unless defined $isp;
         my $ispkey = uc($isp); $ispkey =~ s/\s+//gs;
         if (defined $ruleconf->{isps}{$ispkey}) {
