@@ -65,8 +65,10 @@ my %geoip_default_files = (
 );
 
 my %geoip2_default_files = (
-  'city' => ['GeoIP2-City.mmdb','GeoLite2-City.mmdb'],
-  'country' => ['GeoIP2-Country.mmdb','GeoLite2-Country.mmdb'],
+  'city' => ['GeoIP2-City.mmdb','GeoLite2-City.mmdb',
+             'dbip-city.mmdb','dbip-city-lite.mmdb'],
+  'country' => ['GeoIP2-Country.mmdb','GeoLite2-Country.mmdb',
+                'dbip-country.mmdb','dbip-country-lite.mmdb'],
   'isp' => ['GeoIP2-ISP.mmdb','GeoLite2-ISP.mmdb'],
   'asn' => ['GeoIP2-ASN.mmdb','GeoLite2-ASN.mmdb'],
 );
