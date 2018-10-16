@@ -37,6 +37,10 @@ Note for Users Upgrading to SpamAssassin 4.0.0
   Commercial reputation rules can be ignored with use_dcc_rep 0, to save few
   CPU cycles.
 
+- Pyzor pyzor_fork option added. It will fork separate Pyzor process and
+  read in the results later asynchronously, increasing throughput.
+  Renamed pyzor_max setting to pyzor_count_min. Added pyzor_whitelist_min
+  and pyzor_whitelist_factor setting. Also try to ignore "empty body" FPs.
 
 Note for Users Upgrading to SpamAssassin 3.4.2
 ----------------------------------------------
