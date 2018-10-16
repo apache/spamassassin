@@ -1019,10 +1019,11 @@ sub complete_a_lookup {
 sub lookup_dnsbl_for_ip {
   my ($self, $pms, $obj, $ip) = @_;
 
-  local($1,$2,$3,$4);
-  $ip =~ /^(\d+)\.(\d+)\.(\d+)\.(\d+)$/
-    or warn "lookup_dnsbl_for_ip: not an IPv4 address: $ip\n";
-  my $revip = "$4.$3.$2.$1";
+  if ($ip !~ /^$IPV4_ADDRESS$/o) {
+    warn "lookup_dnsbl_for_ip: not an IPv4 address: $ip\n";
+    return;
+  }
+  my $revip = reverse_ip_address($ip);
 
   my $conf = $pms->{conf};
   my $tflags = $conf->{tflags};
