@@ -360,9 +360,8 @@ sub _check_rbl_addresses {
 
   $pms->load_resolver();
 
-  if (($rbl_server !~ /^(\d+)\.(\d+)\.(\d+)\.(\d+)$/) &&
-      (index($rbl_server, '.') >= 0) &&
-      ($rbl_server !~ /\.$/)) {
+  if ($rbl_server !~ /\.$/ &&
+      $rbl_server !~ /^$IP_ADDRESS$/o) {
     $rbl_server .= ".";
   }
   dbg("dns: _check_rbl_addresses RBL $rbl_server, set $set");
