@@ -154,7 +154,8 @@ sub check_rbl_backend {
   return 0 unless $pms->is_dns_available();
   $pms->load_resolver();
 
-  if ($rbl_server !~ /^$IP_ADDRESS$/o) {
+  if ($rbl_server !~ /\.$/ &&
+      $rbl_server !~ /^$IP_ADDRESS$/o) {
     $rbl_server .= ".";
   }
 
