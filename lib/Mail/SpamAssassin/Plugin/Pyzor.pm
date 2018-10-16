@@ -172,7 +172,7 @@ For default setting this means: 50 reports requires 10 whitelistings.
 
 =over 4
 
-=item pyzor_timeout n		(default: 3.5)
+=item pyzor_timeout n		(default: 5)
 
 How many seconds you wait for Pyzor to complete, before scanning continues
 without the Pyzor results. A numeric value is optionally suffixed by a
@@ -200,7 +200,7 @@ removing one of them.
   push (@cmds, {
     setting => 'pyzor_timeout',
     is_admin => 1,
-    default => 3.5,
+    default => 5,
     type => $Mail::SpamAssassin::Conf::CONF_TYPE_DURATION
   });
 

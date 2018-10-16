@@ -215,7 +215,7 @@ The default is C<90>.
 
 =over 4
 
-=item dcc_timeout n		(default: 8)
+=item dcc_timeout n		(default: 5)
 
 How many seconds you wait for DCC to complete, before scanning continues
 without the DCC results. A numeric value is optionally suffixed by a
@@ -227,7 +227,7 @@ days, weeks).
   push (@cmds, {
     setting => 'dcc_timeout',
     is_admin => 1,
-    default => 8,
+    default => 5,
     type => $Mail::SpamAssassin::Conf::CONF_TYPE_DURATION,
   });
 
