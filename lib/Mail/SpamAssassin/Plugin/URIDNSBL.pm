@@ -294,7 +294,7 @@ package Mail::SpamAssassin::Plugin::URIDNSBL;
 
 use Mail::SpamAssassin::Plugin;
 use Mail::SpamAssassin::Constants qw(:ip);
-use Mail::SpamAssassin::Util qw(idn_to_ascii);
+use Mail::SpamAssassin::Util qw(idn_to_ascii reverse_ip_address);
 use Mail::SpamAssassin::Logger;
 use strict;
 use warnings;
@@ -520,7 +520,7 @@ sub parse_and_canonicalize_subtest {
         # ok, already a decimal number
       } elsif (/^0x[0-9a-zA-Z]{1,8}\z/) {
         $_ = hex($_);  # hex -> number
-      } elsif (/^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\z/) {
+      } elsif (/^$IPV4_ADDRESS\z/o) {
         $_ = Mail::SpamAssassin::Util::my_inet_aton($_);  # quad-dot -> number
         $any_quad_dot = 1;
       } else {
@@ -835,12 +835,9 @@ sub query_hosts_or_domains {
         my $obj = { dom => $host };
         $self->lookup_dnsbl_for_ip($pms, $obj, $host);
         # and check the IP in RHSBLs too
-        local($1,$2,$3,$4);
-        if ($host =~ /^(\d+)\.(\d+)\.(\d+)\.(\d+)$/) {
-          $domain = "$4.$3.$2.$1";
-          $single_dnsbl = 1;
-          $is_ip = 1;
-        }
+        $domain = reverse_ip_address($host);
+        $single_dnsbl = 1;
+        $is_ip = 1;
       }
     }
     else {
@@ -1092,7 +1089,7 @@ sub complete_dnsbl_lookup {
       # Net::DNS::RR::A::address() is available since Net::DNS 0.69
       $rdatastr = $rr->UNIVERSAL::can('address') ? $rr->address
                                                  : $rr->rdatastr;
-      if ($rdatastr =~ m/^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$/) {
+      if ($rdatastr =~ m/^$IPV4_ADDRESS$/o) {
         $rdatanum = Mail::SpamAssassin::Util::my_inet_aton($rdatastr);
       }
     } elsif ($rr_type eq 'TXT') {
