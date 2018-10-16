@@ -45,7 +45,8 @@ require 5.008001;  # needs utf8::is_utf8()
 use Mail::SpamAssassin;
 use Mail::SpamAssassin::Logger;
 use Mail::SpamAssassin::Constants qw(:ip);
-use Mail::SpamAssassin::Util qw(untaint_var decode_dns_question_entry idn_to_ascii);
+use Mail::SpamAssassin::Util qw(untaint_var decode_dns_question_entry
+                                idn_to_ascii reverse_ip_address);
 
 use Socket;
 use Errno qw(EADDRINUSE EACCES);
@@ -534,9 +535,8 @@ sub new_dns_packet {
 
   # construct a PTR query if it looks like an IPv4 address
   if (!defined($type) || $type eq 'PTR') {
-    local($1,$2,$3,$4);
-    if ($domain =~ /^(\d+)\.(\d+)\.(\d+)\.(\d+)$/) {
-      $domain = "$4.$3.$2.$1.in-addr.arpa.";
+    if ($domain =~ /^$IPV4_ADDRESS$/o) {
+      $domain = reverse_ip_address($domain).".in-addr.arpa.";
       $type = 'PTR';
     }
   }
