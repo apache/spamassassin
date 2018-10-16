@@ -71,6 +71,7 @@ sub new {
   if (! @nm) {
     if (!defined $mailsaobject->{languages_filename}) {
       warn "textcat: languages filename not defined\n";
+      $self->{textcat_disabled} = 1;
     }
     else {
       load_models($mailsaobject->{languages_filename});
@@ -522,6 +523,8 @@ sub create_lm {
 sub extract_metadata {
   my ($self, $opts) = @_;
 
+  return if $self->{textcat_disabled};
+
   my $msg = $opts->{msg};
 
   my $body = $msg->get_rendered_body_text_array();
@@ -563,6 +566,8 @@ sub extract_metadata {
 sub check_language {
   my ($self, $scan) = @_;
 
+  return 0 if $self->{textcat_disabled};
+
   my $msg = $scan->{msg};
 
   my @languages = split(' ', $scan->{conf}->{ok_languages});
@@ -602,6 +607,8 @@ sub check_language {
 
 sub check_body_8bits {
   my ($self, $scan, $body) = @_;
+
+  return 0 if $self->{textcat_disabled};
 
   my @languages = split(' ', $scan->{conf}->{ok_languages});
 
