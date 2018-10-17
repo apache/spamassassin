@@ -45,6 +45,13 @@ Note for Users Upgrading to SpamAssassin 4.0.0
   pyzor_max setting to pyzor_count_min.  Added pyzor_whitelist_min and
   pyzor_whitelist_factor setting.  Also try to ignore "empty body" FPs.
 
+- API: deprecated register_async_rule_start/finish calls (they can be left
+  in code for backwards compatibility).  Plugins should only use
+  bgsend_and_start_lookup which handles required things automatically
+  (direct calls to bgsend or start_lookup should not be used),
+  bgsend_and_start_lookup should always contain $ent->{rulename} for correct
+  meta dependency handling.
+
 Note for Users Upgrading to SpamAssassin 3.4.2
 ----------------------------------------------
 

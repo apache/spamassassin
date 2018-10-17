@@ -27,7 +27,7 @@ package Mail::SpamAssassin::Plugin::DNSEval;
 use Mail::SpamAssassin::Plugin;
 use Mail::SpamAssassin::Logger;
 use Mail::SpamAssassin::Constants qw(:ip);
-use Mail::SpamAssassin::Util qw(reverse_ip_address);
+use Mail::SpamAssassin::Util qw(reverse_ip_address idn_to_ascii);
 
 use strict;
 use warnings;
@@ -80,14 +80,58 @@ sub check_start {
   }
 }
 
+sub parsed_metadata {
+  my ($self, $opts) = @_;
+
+  my $pms = $opts->{permsgstatus};
+
+  # Process relaylists only once, not everytime in check_rbl_backend
+  #
+  # ok, make a list of all the IPs in the untrusted set
+  my @fullips = map { $_->{ip} } @{$pms->{relays_untrusted}};
+  # now, make a list of all the IPs in the external set, for use in
+  # notfirsthop testing.  This will often be more IPs than found
+  # in @fullips.  It includes the IPs that are trusted, but
+  # not in internal_networks.
+  my @fullexternal = map {
+	(!$_->{internal}) ? ($_->{ip}) : ()
+      } @{$pms->{relays_trusted}};
+  push @fullexternal, @fullips; # add untrusted set too
+  # Make sure a header significantly improves results before adding here
+  # X-Sender-Ip: could be worth using (very low occurance for me)
+  # X-Sender: has a very low bang-for-buck for me
+  my @originating;
+  foreach my $header (@{$pms->{conf}->{originating_ip_headers}}) {
+    my $str = $pms->get($header, undef);
+    next unless defined $str && $str ne '';
+    push @originating, ($str =~ m/($IP_ADDRESS)/g);
+  }
+  # Let's go ahead and trim away all private ips (KLC)
+  # also uniq the list and strip dups. (jm)
+  my @ips = $self->ip_list_uniq_and_strip_private(@fullips);
+  # if there's no untrusted IPs, it means we trust all the open-internet
+  # relays, so we skip checks
+  if (scalar @ips + scalar @originating > 0) {
+    dbg("dns: IPs found: full-external: ".join(", ", @fullexternal).
+      " untrusted: ".join(", ", @ips).
+      " originating: ".join(", ", @originating));
+    @{$pms->{dnseval_fullexternal}} = @fullexternal;
+    @{$pms->{dnseval_ips}} = @ips;
+    @{$pms->{dnseval_originating}} = @originating;
+  }
+
+  return 1;
+}
+
 sub ip_list_uniq_and_strip_private {
   my ($self, @origips) = @_;
   my @ips;
   my %seen;
   foreach my $ip (@origips) {
     next unless $ip;
-    next if (exists ($seen{$ip})); $seen{$ip} = 1;
-    next if ($ip =~ /^$IP_PRIVATE$/o);
+    next if exists $seen{$ip};
+    $seen{$ip} = 1;
+    next if $ip =~ /^$IP_PRIVATE$/o;
     push(@ips, $ip);
   }
   return @ips;
@@ -99,6 +143,9 @@ sub ip_list_uniq_and_strip_private {
 #
 sub check_rbl_accreditor {
   my ($self, $pms, $rule, $set, $rbl_server, $subtest, $accreditor) = @_;
+
+  return 0 if $self->{main}->{conf}->{skip_rbl_checks};
+  return 0 if !$pms->is_dns_available();
 
   if (!defined $pms->{accreditor_tag}) {
     $self->message_accreditor_tag($pms);
@@ -147,55 +194,14 @@ sub message_accreditor_tag {
 
 sub check_rbl_backend {
   my ($self, $pms, $rule, $set, $rbl_server, $type, $subtest) = @_;
-  local ($_);
 
-  # First check that DNS is available, if not do not perform this check
-  return 0 if $self->{main}->{conf}->{skip_rbl_checks};
-  return 0 unless $pms->is_dns_available();
-  $pms->load_resolver();
+  return if !exists $pms->{dnseval_ips}; # no untrusted ips
 
-  if ($rbl_server !~ /\.$/ &&
-      $rbl_server !~ /^$IP_ADDRESS$/o) {
-    $rbl_server .= ".";
-  }
-
+  $rbl_server =~ s/\.+\z//; # strip unneeded trailing dot
   dbg("dns: checking RBL $rbl_server, set $set");
 
-  # ok, make a list of all the IPs in the untrusted set
-  my @fullips = map { $_->{ip} } @{$pms->{relays_untrusted}};
-
-  # now, make a list of all the IPs in the external set, for use in
-  # notfirsthop testing.  This will often be more IPs than found
-  # in @fullips.  It includes the IPs that are trusted, but
-  # not in internal_networks.
-  my @fullexternal = map {
-	(!$_->{internal}) ? ($_->{ip}) : ()
-      } @{$pms->{relays_trusted}};
-  push (@fullexternal, @fullips);	# add untrusted set too
-
-  # Make sure a header significantly improves results before adding here
-  # X-Sender-Ip: could be worth using (very low occurance for me)
-  # X-Sender: has a very low bang-for-buck for me
-  my @originating;
-  for my $header (@{$pms->{conf}->{originating_ip_headers}}) {
-    my $str = $pms->get($header,undef);
-    next unless defined $str && $str ne '';
-    push (@originating, ($str =~ m/($IP_ADDRESS)/g));
-  }
-
-  # Let's go ahead and trim away all private ips (KLC)
-  # also uniq the list and strip dups. (jm)
-  my @ips = $self->ip_list_uniq_and_strip_private(@fullips);
-
-  # if there's no untrusted IPs, it means we trust all the open-internet
-  # relays, so we can return right now.
-  return 0 unless (scalar @ips + scalar @originating > 0);
-
-  dbg("dns: IPs found: full-external: ".join(", ", @fullexternal).
-	" untrusted: ".join(", ", @ips).
-	" originating: ".join(", ", @originating));
-
   my $trusted = $self->{main}->{conf}->{trusted_networks};
+  my @ips = @{$pms->{dnseval_ips}};
 
   # If name is foo-notfirsthop, check all addresses except for
   # the originating one.  Suitable for use with dialup lists, like the PDL.
@@ -211,9 +217,9 @@ sub check_rbl_backend {
     # specified some third-party relays as trusted.  Also, don't use
     # @originating; those headers are added by a phase of relaying through
     # a server like Hotmail, which is not going to be in dialup lists anyway.
-    @ips = $self->ip_list_uniq_and_strip_private(@fullexternal);
+    @ips = $self->ip_list_uniq_and_strip_private(@{$pms->{dnseval_fullexternal}});
     if ($1 eq "lastexternal") {
-      @ips = (defined $ips[0]) ? ($ips[0]) : ();
+      @ips = defined $ips[0] ? ($ips[0]) : ();
     } else {
 	pop @ips if (scalar @ips > 1);
     }
@@ -225,14 +231,14 @@ sub check_rbl_backend {
   elsif ($set =~ /-(first|un)trusted$/)
   {
     my @tips;
-    foreach my $ip (@originating) {
+    foreach my $ip (@{$pms->{dnseval_originating}}) {
       if ($ip && !$trusted->contains_ip($ip)) {
         push(@tips, $ip);
       }
     }
-    @ips = $self->ip_list_uniq_and_strip_private (@ips, @tips);
+    @ips = $self->ip_list_uniq_and_strip_private(@ips, @tips);
     if ($1 eq "first") {
-      @ips = (defined $ips[0]) ? ($ips[0]) : ();
+      @ips = defined $ips[0] ? ($ips[0]) : ();
     } else {
       shift @ips;
     }
@@ -240,7 +246,7 @@ sub check_rbl_backend {
   else
   {
     my @tips;
-    foreach my $ip (@originating) {
+    foreach my $ip (@{$pms->{dnseval_originating}}) {
       if ($ip && !$trusted->contains_ip($ip)) {
         push(@tips, $ip);
       }
@@ -251,7 +257,7 @@ sub check_rbl_backend {
   }
 
   # How many IPs max you check in the received lines
-  my $checklast=$self->{main}->{conf}->{num_check_received};
+  my $checklast = $self->{main}->{conf}->{num_check_received};
 
   if (scalar @ips > $checklast) {
     splice (@ips, $checklast);	# remove all others
@@ -272,13 +278,11 @@ sub check_rbl_backend {
 
   dbg("dns: only inspecting the following IPs: ".join(", ", @ips));
 
-  eval {
-    foreach my $ip (@ips) {
-      my $revip = reverse_ip_address($ip);
-      $pms->do_rbl_lookup($rule, $set, $type,
-                          $revip.'.'.$rbl_server, $subtest) if defined $revip;
-    }
-  };
+  foreach my $ip (@ips) {
+    my $revip = reverse_ip_address($ip);
+    $pms->do_rbl_lookup($rule, $set, $type,
+      $revip.'.'.$rbl_server, $subtest) if defined $revip;
+  }
 
   # note that results are not handled here, hits are handled directly
   # as DNS responses are harvested
@@ -287,42 +291,45 @@ sub check_rbl_backend {
 
 sub check_rbl {
   my ($self, $pms, $rule, $set, $rbl_server, $subtest) = @_;
+
+  return 0 if $self->{main}->{conf}->{skip_rbl_checks};
+  return 0 if !$pms->is_dns_available();
   $self->check_rbl_backend($pms, $rule, $set, $rbl_server, 'A', $subtest);
 }
 
 sub check_rbl_txt {
   my ($self, $pms, $rule, $set, $rbl_server, $subtest) = @_;
+
+  return 0 if $self->{main}->{conf}->{skip_rbl_checks};
+  return 0 if !$pms->is_dns_available();
+
   $self->check_rbl_backend($pms, $rule, $set, $rbl_server, 'TXT', $subtest);
 }
 
-# run for first message 
 sub check_rbl_sub {
-  my ($self, $pms, $rule, $set, $subtest) = @_;
-
-  return 0 if $self->{main}->{conf}->{skip_rbl_checks};
-  return 0 unless $pms->is_dns_available();
-
-  $pms->register_rbl_subtest($rule, $set, $subtest);
-}
-
-# backward compatibility
-sub check_rbl_results_for {
-  #warn "dns: check_rbl_results_for() is deprecated, use check_rbl_sub()\n";
-  check_rbl_sub(@_);
+  # just a dummy, check_dnsbl handles the subs
+  return 0;
 }
 
 # this only checks the address host name and not the domain name because
 # using the domain name had much worse results for dsn.rfc-ignorant.org
 sub check_rbl_from_host {
   my ($self, $pms, $rule, $set, $rbl_server, $subtest) = @_; 
-  _check_rbl_addresses($self, $pms, $rule, $set, $rbl_server, $subtest, $_[1]->all_from_addrs_domains());
+
+  return 0 if $self->{main}->{conf}->{skip_rbl_checks};
+  return 0 if !$pms->is_dns_available();
+
+  $self->_check_rbl_addresses($pms, $rule, $set, $rbl_server,
+    $subtest, $_[1]->all_from_addrs_domains());
 }
 
 =over 4
 
 =item check_rbl_from_domain
 
-This checks all the from addrs domain names as an alternate to check_rbl_from_host.  As of v3.4.1, it has been improved to include a subtest for a specific octet.
+This checks all the from addrs domain names as an alternate to
+check_rbl_from_host.  As of v3.4.1, it has been improved to include a
+subtest for a specific octet.
 
 =back
 
@@ -330,40 +337,46 @@ This checks all the from addrs domain names as an alternate to check_rbl_from_ho
 
 sub check_rbl_from_domain {
   my ($self, $pms, $rule, $set, $rbl_server, $subtest) = @_;
-  _check_rbl_addresses($self, $pms, $rule, $set, $rbl_server, $subtest, $_[1]->all_from_addrs_domains());
+
+  return 0 if $self->{main}->{conf}->{skip_rbl_checks};
+  return 0 if !$pms->is_dns_available();
+
+  $self->_check_rbl_addresses($pms, $rule, $set, $rbl_server,
+    $subtest, $_[1]->all_from_addrs_domains());
 }
 
 # this only checks the address host name and not the domain name because
 # using the domain name had much worse results for dsn.rfc-ignorant.org
 sub check_rbl_envfrom {
   my ($self, $pms, $rule, $set, $rbl_server, $subtest) = @_; 
-  _check_rbl_addresses($self, $pms, $rule, $set, $rbl_server, $subtest, $_[1]->get('EnvelopeFrom:addr',undef));
+
+  return 0 if $self->{main}->{conf}->{skip_rbl_checks};
+  return 0 if !$pms->is_dns_available();
+
+  $self->_check_rbl_addresses($pms, $rule, $set, $rbl_server,
+    $subtest, $_[1]->get('EnvelopeFrom:addr',undef));
 }
 
 sub _check_rbl_addresses {
   my ($self, $pms, $rule, $set, $rbl_server, $subtest, @addresses) = @_;
   
-  return 0 if $self->{main}->{conf}->{skip_rbl_checks};
-  return 0 unless $pms->is_dns_available();
+  $rbl_server =~ s/\.+\z//; # strip unneeded trailing dot
 
   my %hosts;
   for (@addresses) {
-    next if !defined($_) || !/ \@ ( [^\@\s]+ )/x;
+    next if !defined($_) || !/\@([^\@\s]+)/;
     my $address = $1;
     # strip leading & trailing dots (as seen in some e-mail addresses)
-    $address =~ s/^\.+//; $address =~ s/\.+\z//;
+    $address =~ s/^\.+//;
+    $address =~ s/\.+\z//;
     # squash duplicate dots to avoid an invalid DNS query with a null label
-    $address =~ tr/.//s;
-    $hosts{lc($address)} = 1  if $address =~ /\./;  # must by a FQDN
+    # Also checks it's FQDN
+    if ($address =~ tr/.//s) {
+      $hosts{lc($address)} = 1;
+    }
   }
   return unless scalar keys %hosts;
 
-  $pms->load_resolver();
-
-  if ($rbl_server !~ /\.$/ &&
-      $rbl_server !~ /^$IP_ADDRESS$/o) {
-    $rbl_server .= ".";
-  }
   dbg("dns: _check_rbl_addresses RBL $rbl_server, set $set");
 
   for my $host (keys %hosts) {
@@ -375,22 +388,19 @@ sub _check_rbl_addresses {
 sub check_dns_sender {
   my ($self, $pms, $rule) = @_;
 
-  my $host;
-  for my $from ($pms->get('EnvelopeFrom:addr',undef)) {
-    next unless defined $from;
+  return 0 if $self->{main}->{conf}->{skip_rbl_checks};
+  return 0 if !$pms->is_dns_available();
 
-    $from =~ tr/././s;		# bug 3366
-    if ($from =~ m/ \@ ( [^\@\s]+ \. [^\@\s]+ )/x ) {
+  my $host;
+  foreach my $from ($pms->get('EnvelopeFrom:addr', undef)) {
+    next unless defined $from;
+    $from =~ tr/.//s; # bug 3366
+    if ($from =~ m/\@([^\@\s]+\.[^\@\s]+)/) {
       $host = lc($1);
       last;
     }
   }
   return 0 unless defined $host;
-
-  # First check that DNS is available, if not do not perform this check
-  # TODO: need a way to skip DNS checks as a whole in configuration
-  return 0 unless $pms->is_dns_available();
-  $pms->load_resolver();
 
   if ($host eq 'compiling.spamassassin.taint.org') {
     # only used when compiling
@@ -399,13 +409,41 @@ sub check_dns_sender {
 
   dbg("dns: checking A and MX for host $host");
 
-  $pms->do_dns_lookup($rule, 'A', $host);
-  $pms->do_dns_lookup($rule, 'MX', $host);
-
-  # cache name of host for later checking
-  $pms->{sender_host} = $host;
+  $host = idn_to_ascii($host);
+  $self->do_sender_lookup($pms, $rule, 'A', $host);
+  $self->do_sender_lookup($pms, $rule, 'MX', $host);
 
   return 0;
+}
+
+sub do_sender_lookup {
+  my ($self, $pms, $rule, $type, $host) = @_;
+
+  my $key = "dns:$type:$host";
+  my $ent = {
+    key => $key,
+    zone => $host,
+    type => "DNSBL-".$type,
+    rulename => $rule,
+  };
+  $pms->{async}->bgsend_and_start_lookup(
+    $host, $type, undef, $ent, sub {
+      my ($ent, $pkt) = @_;
+      return if !$pkt;
+      foreach my $answer ($pkt->answer) {
+        next if !$answer;
+        next if $answer->type ne 'A' && $answer->type ne 'MX';
+        if ($pkt->header->rcode eq 'NXDOMAIN' ||
+            $pkt->header->rcode eq 'SERVFAIL')
+        {
+          if (++$pms->{sender_host_fail} == 2) {
+            $pms->got_hit($ent->{rulename}, "DNS: ", ruletype => "dns")
+          }
+        }
+      }
+    },
+    master_deadline => $self->{master_deadline},
+  );
 }
 
 1;

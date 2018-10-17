@@ -394,19 +394,23 @@ sub check_uri_local_bl {
     dbg("launching A/AAAA lookup for $host");
     $host = idn_to_ascii($host);
     # launch dns
-    $pms->{async}->bgsend_and_start_lookup("$host.", 'A', undef,
-      { key => "urilocalbl:$host:A", host => $host, rulename => $rulename },
+    my $key = "urilocalbl:$host:A";
+    my $ent = $pms->{async}->bgsend_and_start_lookup($host, 'A', undef,
+      { key => $key, host => $host, rulename => $rulename },
       sub { my($ent, $pkt) = @_;
             $self->_finish_lookup($pms, $ent, $pkt); },
       master_deadline => $pms->{master_deadline}
     );
     # also IPv6 if database supports
-    $pms->{async}->bgsend_and_start_lookup("$host.", 'AAAA', undef,
-      { key => "urilocalbl:$host:AAAA", host => $host, rulename => $rulename },
-      sub { my($ent, $pkt) = @_;
-            $self->_finish_lookup($pms, $ent, $pkt); },
-      master_deadline => $pms->{master_deadline}
-    ) if $self->{main}->{geodb}->can('country_v6');
+    if ($self->{main}->{geodb}->can('country_v6')) {
+      $key = "urilocalbl:$host:AAAA";
+      $ent = $pms->{async}->bgsend_and_start_lookup($host, 'AAAA', undef,
+        { key => $key, host => $host, rulename => $rulename },
+        sub { my($ent, $pkt) = @_;
+              $self->_finish_lookup($pms, $ent, $pkt); },
+        master_deadline => $pms->{master_deadline}
+      );
+    }
   }
 }
 
@@ -435,7 +439,6 @@ sub _finish_lookup {
 
   if (@addrs) {
     if ($self->_check_host($pms, $rulename, $host, \@addrs)) {
-      $pms->register_async_rule_finish($rulename);
       $pms->{urilocalbl_finished}->{$rulename} = 1;
     }
   }

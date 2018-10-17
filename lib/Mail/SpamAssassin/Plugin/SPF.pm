@@ -557,7 +557,8 @@ sub _check_spf {
   # skip SPF checks if the A/MX records are nonexistent for the From
   # domain, anyway, to avoid crappy messages from slowing us down
   # (bug 3016)
-  return if $scanner->check_for_from_dns();
+  # TODO: this will only work if the queries are ready before SPF, so never?
+  return if $scanner->{sender_host_fail} && $scanner->{sender_host_fail} == 2;
 
   if ($ishelo) {
     # SPF HELO-checking variant

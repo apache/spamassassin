@@ -111,6 +111,9 @@ sub check_main {
       last;
     }
 
+    my $timer = $self->{main}->time_method("tests_pri_".$priority);
+    dbg("check: running tests for priority: $priority");
+
     # Here, we launch all the DNS RBL queries and let them run while we
     # inspect the message.  We try to launch all DNS queries at priority
     # -100, so one can shortcircuit tests at lower priority and not launch
@@ -122,9 +125,6 @@ sub check_main {
       $self->run_rbl_eval_tests($pms);
       $self->{main}->call_plugins ("check_dnsbl", { permsgstatus => $pms });
     }
-
-    my $timer = $self->{main}->time_method("tests_pri_".$priority);
-    dbg("check: running tests for priority: $priority");
 
     $pms->harvest_completed_queries() if $rbls_running;
     # allow other, plugin-defined rule types to be called here
@@ -259,7 +259,8 @@ sub finish_tests {
 
 sub run_rbl_eval_tests {
   my ($self, $pms) = @_;
-  my ($rulename, $pat, @args);
+
+  $pms->init_rbl_subs();
 
   while (my ($rulename, $test) = each %{$pms->{conf}->{rbl_evals}}) {
     my $score = $pms->{conf}->{scores}->{$rulename};

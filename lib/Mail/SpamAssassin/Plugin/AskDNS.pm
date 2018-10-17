@@ -489,13 +489,10 @@ OUTER:
         # lauch a new DNS query for $query_type and $query_domain
         my $ent = $pms->{async}->bgsend_and_start_lookup(
           $query_domain, $query_type, undef,
-          { key => $dnskey, zone => $query_domain },
+          { key => $dnskey, zone => $query_domain, rulename => \@rulenames },
           sub { my ($ent2,$pkt) = @_;
                 $self->process_response_packet($pms, $ent2, $pkt, $dnskey) },
           master_deadline => $pms->{master_deadline} );
-        # these rules are now underway;  unless the rule hits, these will
-        # not be considered "finished" until harvest_dnsbl_queries() completes
-        $pms->register_async_rule_start($dnskey) if $ent;
       }
 
       last  if !@templ_tags;
@@ -513,7 +510,6 @@ sub process_response_packet {
   my($self, $pms, $ent, $pkt, $dnskey) = @_;
 
   my $conf = $pms->{conf};
-  my %rulenames_hit;
 
   # map a dnskey back to info on queries which caused this DNS lookup
   my $queries_ref = $pms->{askdns_map_dnskey_to_rules}{$dnskey};
@@ -647,13 +643,10 @@ sub process_response_packet {
         if ($match) {
           $self->askdns_hit($pms, $ent->{query_domain}, $qtype,
                             $rr_rdatastr, $rulename);
-          $rulenames_hit{$rulename} = 1;
         }
       }
     }
   }
-  # these rules have completed (since they got at least 1 hit)
-  $pms->register_async_rule_finish($_)  for keys %rulenames_hit;
 }
 
 sub askdns_hit {
@@ -665,7 +658,7 @@ sub askdns_hit {
 
   # only the first hit will show in the test log report, even if
   # an answer section matches more than once - got_hit() handles this
-  $pms->clear_test_state;
+  $pms->clear_test_state();
   $pms->test_log(sprintf("%s %s:%s", $query_domain,$qtype,$rr_rdatastr));
   $pms->got_hit($rulename, 'ASKDNS: ', ruletype => 'askdns');  # score=>$score
 }

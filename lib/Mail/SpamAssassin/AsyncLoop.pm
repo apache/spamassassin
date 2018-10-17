@@ -74,6 +74,7 @@ sub new {
     total_queries_started   => 0,
     total_queries_completed => 0,
     pending_lookups     => { },
+    pending_rules	=> { },
     timing_by_query     => { },
     all_lookups         => { },  # keyed by "rr_type/domain"
   };
@@ -111,6 +112,8 @@ sub domain_to_search_list {
 # ---------------------------------------------------------------------------
 
 =item $ent = $async->start_lookup($ent, $master_deadline)
+
+DIRECT USE DISCOURAGED, please use bgsend_and_start_lookup in plugins.
 
 Register the start of a long-running asynchronous lookup operation.
 C<$ent> is a hash reference containing the following items:
@@ -253,6 +256,9 @@ A common idiom: calls C<bgsend>, followed by a call to C<start_lookup>,
 returning the argument $ent object as modified by C<start_lookup> and
 filled-in with a query ID.
 
+$ent->{rulename} should always be defined, so meta dependencies pending
+checks work correctly.
+
 =cut
 
 sub launch_queue {
@@ -275,6 +281,10 @@ sub bgsend_and_start_lookup {
     push @{$self->{bgsend_queue}}, [@_];
     dbg("async: dns priority not reached, queueing lookup: $_[0] $_[1]");
     return $ent;
+  }
+
+  if (!defined $ent->{rulename}) {
+    info("async: bgsend_and_start_lookup called without rulename: $domain/$type");
   }
 
   # At this point the $domain should already be encoded to UTF-8 and
@@ -300,6 +310,7 @@ sub bgsend_and_start_lookup {
   $cb = $ent->{completed_callback}  if !$cb;  # compatibility with SA < 3.4
 
   my $key = $ent->{key} || '';
+  my $rulename = $ent->{rulename};
 
   my $dnskey = uc($type) . '/' . lc($domain);
   my $dns_query_info = $self->{all_lookups}{$dnskey};
@@ -315,12 +326,22 @@ sub bgsend_and_start_lookup {
     if (!$pkt) {  # DNS query underway, still waiting for results
       # just add our query to the existing one
       push(@{$dns_query_info->{applicants}}, [$ent,$cb]);
+      if (ref($rulename) eq 'ARRAY') {
+        $self->{pending_rules}->{$_}{$key} = 1 foreach (@$rulename);
+      } else {
+        $self->{pending_rules}->{$rulename}{$key} = 1 if $rulename;
+      }
       dbg("async: query %s already underway, adding no.%d %s",
           $id, scalar @{$dns_query_info->{applicants}},
-          $ent->{rulename} || $key);
+          $rulename || $key);
 
     } else {  # DNS query already completed, re-use results
       # answer already known, just do the callback and be done with it
+      if (ref($rulename) eq 'ARRAY') {
+        delete $self->{pending_rules}->{$_}{$key} foreach (@$rulename);
+      } else {
+        delete $self->{pending_rules}->{$rulename}{$key};
+      }
       if (!$cb) {
         dbg("async: query %s already done, re-using for %s", $id, $key);
       } else {
@@ -379,7 +400,7 @@ sub bgsend_and_start_lookup {
       $id = $self->{main}->{resolver}->bgsend($domain, $type, $class, sub {
           my($pkt, $pkt_id, $timestamp) = @_;
           # this callback sub is called from DnsResolver::poll_responses()
-        # dbg("async: in a bgsend_and_start_lookup callback, id %s", $pkt_id);
+          # dbg("async: in a bgsend_and_start_lookup callback, id %s", $pkt_id);
           if ($pkt_id ne $id) {
             warn "async: mismatched dns id: got $pkt_id, expected $id\n";
             return;
@@ -389,10 +410,19 @@ sub bgsend_and_start_lookup {
           my $cb_count = 0;
           foreach my $tuple (@{$dns_query_info->{applicants}}) {
             my($appl_ent, $appl_cb) = @$tuple;
+            my $rulename = $appl_ent->{rulename};
+            if (ref($rulename) eq 'ARRAY') {
+              delete $self->{pending_rules}->{$_}{$appl_ent->{key}}
+                foreach (@$rulename);
+            } else {
+              delete $self->{pending_rules}->{$rulename}{$appl_ent->{key}}
+                if defined $rulename;
+            }
             if ($appl_cb) {
               dbg("async: calling callback on key %s%s", $key,
-                  !defined $appl_ent->{rulename} ? ''
-                    : ", rule ".$appl_ent->{rulename});
+                  !defined $rulename ? ''
+                    : ", rules: ".(ref($rulename) eq 'ARRAY' ?
+                      join(', ', @$rulename) : $rulename));
               $cb_count++;
               eval {
                 $appl_cb->($appl_ent, $pkt); 1;
@@ -412,6 +442,11 @@ sub bgsend_and_start_lookup {
     return if !defined $id;
     $dns_query_info->{id} = $ent->{id} = $id;
     push(@{$dns_query_info->{applicants}}, [$ent,$cb]);
+    if (ref($rulename) eq 'ARRAY') {
+      $self->{pending_rules}->{$_}{$key} = 1 foreach (@$rulename);
+    } else {
+      $self->{pending_rules}->{$rulename}{$key} = 1 if $rulename;
+    }
     $self->start_lookup($ent, $options{master_deadline});
   }
   return $ent;
@@ -599,6 +634,8 @@ sub abort_remaining_lookups {
   my $pending = $self->{pending_lookups};
   my $foundcnt = 0;
   my $now = time;
+
+  $self->{pending_rules} = {};
 
   while (my($key,$ent) = each %$pending) {
     dbg("async: aborting after %.3f s, %s: %s",

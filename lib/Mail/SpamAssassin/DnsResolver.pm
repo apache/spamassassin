@@ -659,6 +659,8 @@ sub _packet_id {
 
 =item $id = $res->bgsend($domain, $type, $class, $cb)
 
+DIRECT USE DISCOURAGED, please use bgsend_and_start_lookup in plugins.
+
 Quite similar to C<Net::DNS::Resolver::bgsend>, except that when a reply
 packet eventually arrives, and C<poll_responses> is called, the callback
 sub reference C<$cb> will be called.

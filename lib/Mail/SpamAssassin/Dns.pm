@@ -102,45 +102,20 @@ sub do_rbl_lookup {
   my ($self, $rule, $set, $type, $host, $subtest) = @_;
 
   $host = idn_to_ascii($host);
-  $host =~ s/\.\z//s;  # strip a redundant trailing dot
   my $key = "dns:$type:$host";
-  my $existing_ent = $self->{async}->get_lookup($key);
 
-  # only make a specific query once
-  if (!$existing_ent) {
-    my $ent = {
-      key => $key,
-      zone => $host,  # serves to fetch other per-zone settings
-      type => "DNSBL-".$type,
-      sets => [ ],  # filled in below
-      rules => [ ], # filled in below
-      # id is filled in after we send the query below
-    };
-    $existing_ent = $self->{async}->bgsend_and_start_lookup(
+  my $ent = {
+    key => $key,
+    zone => $host,  # serves to fetch other per-zone settings
+    type => "DNSBL-".$type,
+    set => $set,
+    subtest => $subtest,
+    rulename => $rule,
+  };
+  $ent = $self->{async}->bgsend_and_start_lookup(
         $host, $type, undef, $ent,
         sub { my($ent, $pkt) = @_; $self->process_dnsbl_result($ent, $pkt) },
       master_deadline => $self->{master_deadline} );
-  }
-
-  if ($existing_ent) {
-    # always add set
-    push @{$existing_ent->{sets}}, $set;
-
-    # sometimes match or always match
-    if (defined $subtest) {
-      $self->{dnspost}->{$set}->{$subtest} = $rule;
-    } else {
-      push @{$existing_ent->{rules}}, $rule;
-    }
-
-    $self->{rule_to_rblkey}->{$rule} = $key;
-  }
-}
-
-# TODO: these are constant so they should only be added once at startup
-sub register_rbl_subtest {
-  my ($self, $rule, $set, $subtest) = @_;
-  $self->{dnspost}->{$set}->{$subtest} = $rule;
 }
 
 sub do_dns_lookup {
@@ -182,16 +157,16 @@ sub dnsbl_hit {
     $log =~ s{ (?<! [<(\[] ) (https? : // \S+)}{<$1>}xgi;
   } else {  # assuming $answer->type eq 'A'
     local($1,$2,$3,$4,$5);
-    if ($question->string =~ m/^((?:[0-9a-fA-F]\.){32})(\S+\w)/) {
+    if ($question->string =~ /^((?:[0-9a-fA-F]\.){32})(\S+\w)/) {
       $log = ' listed in ' . lc($2);
       my $ipv6addr = join('', reverse split(/\./, lc $1));
       $ipv6addr =~ s/\G(....)/$1:/g;  chop $ipv6addr;
       $ipv6addr =~ s/:0{1,3}/:/g;
       $log = $ipv6addr . $log;
-    } elsif ($question->string =~ m/^(\d+)\.(\d+)\.(\d+)\.(\d+)\.(\S+\w)/) {
+    } elsif ($question->string =~ /^(\d+)\.(\d+)\.(\d+)\.(\d+)\.(\S+\w)/) {
       $log = "$4.$3.$2.$1 listed in " . lc($5);
-    } else {
-      $log = 'listed in ' . $question->string;
+    } elsif ($question->string =~ /^(\S+)(?<!\.)/) {
+      $log = "listed in $1";
     }
   }
 
@@ -244,8 +219,8 @@ sub dnsbl_uri {
     push(@vals, "class=$qclass") if $qclass ne "IN";
     push(@vals, "type=$qtype") if $qtype ne "A";
     my $uri = "dns:$qname" . (@vals ? "?" . join(";", @vals) : "");
-    push @{ $self->{dnsuri}->{$uri} }, $rdatastr;
 
+    $self->{dnsuri}{$uri}{$rdatastr} = 1;
     dbg("dns: hit <$uri> $rdatastr");
   }
 }
@@ -259,22 +234,6 @@ sub process_dnsbl_result {
   my $question = ($pkt->question)[0];
   return if !$question;
 
-  my $sets = $ent->{sets} || [];
-  my $rules = $ent->{rules};
-
-  # NO_DNS_FOR_FROM
-  if ($self->{sender_host} &&
-        # fishy, qname should have been "RFC 1035 zone format" -decoded first
-      lc($question->qname) eq lc($self->{sender_host}) &&
-      $question->qtype =~ /^(?:A|MX)$/ &&
-      $pkt->header->rcode =~ /^(?:NXDOMAIN|SERVFAIL)$/ &&
-      ++$self->{sender_host_fail} == 2)
-  {
-    for my $rule (@{$rules}) {
-      $self->got_hit($rule, "DNS: ", ruletype => "dns");
-    }
-  }
-
   # DNSBL tests are here
   foreach my $answer ($pkt->answer) {
     next if !$answer;
@@ -282,7 +241,7 @@ sub process_dnsbl_result {
     $self->dnsbl_uri($question, $answer);
     my $answ_type = $answer->type;
     # TODO: there are some CNAME returns that might be useful
-    next if ($answ_type ne 'A' && $answ_type ne 'TXT');
+    next if $answ_type ne 'A' && $answ_type ne 'TXT';
     if ($answ_type eq 'A') {
       # Net::DNS::RR::A::address() is available since Net::DNS 0.69
       my $ip_address = $answer->UNIVERSAL::can('address') ? $answer->address
@@ -290,13 +249,9 @@ sub process_dnsbl_result {
       # skip any A record that isn't on 127.0.0.0/8
       next if $ip_address !~ /^127\./;
     }
-    for my $rule (@{$rules}) {
-      $self->dnsbl_hit($rule, $question, $answer);
-    }
-    for my $set (@{$sets}) {
-      if ($self->{dnspost}->{$set}) {
-	$self->process_dnsbl_set($set, $question, $answer);
-      }
+    $self->dnsbl_hit($ent->{rulename}, $question, $answer);
+    if (defined $self->{rbl_subs}{$ent->{set}}) {
+      $self->process_dnsbl_set($ent->{set}, $question, $answer);
     }
   }
   return 1;
@@ -325,7 +280,7 @@ sub process_dnsbl_set {
   # ASCII text is unnecessarily flagged as perl native characters.
   utf8::encode($rdatastr)  if utf8::is_utf8($rdatastr);
 
-  while (my ($subtest, $rule) = each %{ $self->{dnspost}->{$set} }) {
+  while (my ($subtest, $rule) = each %{$self->{rbl_subs}{$set}}) {
     next if $self->{tests_already_hit}->{$rule};
 
     if ($subtest =~ /^\d+\.\d+\.\d+\.\d+$/) {
@@ -422,7 +377,6 @@ sub harvest_dnsbl_queries {
   # explicitly abort anything left
   $self->{async}->abort_remaining_lookups();
   $self->{async}->log_lookups_timing();
-  $self->mark_all_async_rules_complete();
   1;
 }
 
@@ -446,12 +400,14 @@ sub harvest_completed_queries {
 sub set_rbl_tag_data {
   my ($self) = @_;
 
+  return if !$self->{dnsuri};
+
   # DNS URIs
   my $rbl_tag = $self->{tag_data}->{RBL};  # just in case, should be empty
   $rbl_tag = ''  if !defined $rbl_tag;
-  while (my ($dnsuri, $answers) = each %{ $self->{dnsuri} }) {
+  while (my ($dnsuri, $answers) = each %{$self->{dnsuri}}) {
     # when parsing, look for elements of \".*?\" or \S+ with ", " as separator
-    $rbl_tag .= "<$dnsuri>" . " [" . join(", ", @{ $answers }) . "]\n";
+    $rbl_tag .= "<$dnsuri>" . " [" . join(", ", keys %$answers) . "]\n";
   }
   if (defined $rbl_tag && $rbl_tag ne '') {
     chomp $rbl_tag;
@@ -461,12 +417,25 @@ sub set_rbl_tag_data {
 
 ###########################################################################
 
+sub init_rbl_subs {
+  my ($self) = @_;
+
+  if (!$self->{rbl_subs}) {
+    foreach my $rule (@{$self->{conf}->{eval_to_rule}->{check_rbl_sub}}) {
+      next if !exists $self->{conf}->{rbl_evals}->{$rule};
+      next if !$self->{conf}->{scores}->{$rule};
+      (undef, my @args) = @{$self->{conf}->{rbl_evals}->{$rule}};
+      $self->{rbl_subs}{$args[0]}{$args[1]} = $rule;
+    }
+  }
+}
+
 sub rbl_finish {
   my ($self) = @_;
 
   $self->set_rbl_tag_data();
 
-  delete $self->{dnspost};
+  delete $self->{rbl_subs};
   delete $self->{dnsuri};
 }
 
@@ -725,55 +694,22 @@ sub cleanup_kids {
 
 ###########################################################################
 
-sub register_async_rule_start {
-  my ($self, $rule) = @_;
-  dbg("dns: $rule lookup start");
-  $self->{rule_to_rblkey}->{$rule} = '*ASYNC_START';
-}
-
-sub register_async_rule_finish {
-  my ($self, $rule) = @_;
-  dbg("dns: $rule lookup finished");
-  delete $self->{rule_to_rblkey}->{$rule};
-}
-
-sub mark_all_async_rules_complete {
-  my ($self) = @_;
-  $self->{rule_to_rblkey} = { };
-}
+# Deprecated async functions, everything is handled automatically
+# now by bgsend .. $self->{async}->{pending_rules}
+sub register_async_rule_start {}
+sub register_async_rule_finish {}
+sub mark_all_async_rules_complete {}
 
 sub is_rule_complete {
   my ($self, $rule) = @_;
 
-  my $key = $self->{rule_to_rblkey}->{$rule};
-  if (!defined $key) {
-    # dbg("dns: $rule lookup complete, not in list");
-    return 1;
-  }
+  return 1 if !exists $self->{async}->{pending_rules}{$rule};
+  return 1 if !%{$self->{async}->{pending_rules}{$rule}};
 
-  if ($key eq '*ASYNC_START') {
-    dbg("dns: $rule lookup not yet complete");
-    return 0;       # not yet complete
-  }
-
-  my $ent = $self->{async}->get_lookup($key);
-  if (!defined $ent) {
-    dbg("dns: $rule lookup complete, $key no longer pending");
-    return 1;
-  }
-
-  dbg("dns: $rule lookup not yet complete");
-  return 0;         # not yet complete
+  dbg("dns: $rule is not complete yet");
+  return 0;
 }
 
 ###########################################################################
-
-# interface called by SPF plugin
-sub check_for_from_dns {
-  my ($self, $pms) = @_;
-  if (defined $pms->{sender_host_fail}) {
-    return ($pms->{sender_host_fail} == 2); # both MX and A need to fail
-  }
-}
 
 1;

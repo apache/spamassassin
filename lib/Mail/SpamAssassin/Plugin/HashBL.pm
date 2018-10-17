@@ -194,7 +194,7 @@ sub _submit_email_query {
     elsif (uc($type) eq 'MD5') {
         $hash = md5_hex($email);
     }
-    $lookup = "$hash.$list.";
+    $lookup = "$hash.$list";
     my $obj = { email => $email };
     dbg("list: $list, type: $type, email: $email, hash: $hash, lookup: $lookup");
     $key = "HASHBL_EMAIL:$lookup";
@@ -232,7 +232,6 @@ sub _finish_email_lookup {
   foreach my $rr (@answer) {
       if ($rr->address =~ /^127\./) {
           $self->_got_hit($pms, $ent->{rulename}, $email);
-          $pms->register_async_rule_finish($ent->{rulename});
       }
   }
 }

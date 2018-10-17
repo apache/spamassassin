@@ -299,7 +299,7 @@ sub parsed_metadata {
     my $key = "asnlookup-${zone_index}-$entry->{zone}";
     my $ent = $pms->{async}->bgsend_and_start_lookup(
         $zone, 'TXT', undef,
-        { key => $key, zone => $zone },
+        { key => $key, zone => $zone, rulename => 'asn_lookup' },
         sub { my($ent, $pkt) = @_;
               $self->process_dns_result($pms, $pkt, $zone_index) },
       master_deadline => $pms->{master_deadline} );

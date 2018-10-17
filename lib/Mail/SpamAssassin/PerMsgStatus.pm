@@ -2499,7 +2499,9 @@ sub ensure_rules_are_complete {
       dbg("rules: rule $r is still not complete; exited early?");
     }
     elsif ($elapsed > 0) {
-      info("rules: $r took $elapsed seconds to complete, for $metarule");
+      my $txt = "rules: $r took $elapsed seconds to complete, for $metarule";
+      # Info only if something took over 1 sec to wait, prevent log flood
+      if ($elapsed >= 1) { info($txt); } else { dbg($txt); }
     }
   }
 }

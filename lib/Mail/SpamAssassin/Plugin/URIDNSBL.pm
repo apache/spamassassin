@@ -859,16 +859,11 @@ sub query_hosts_or_domains {
         my $rulecf = $conf->{uridnsbls}->{$rulename};
         $self->lookup_single_dnsbl($pms, $obj, $rulename,
                                    $domain, $rulecf->{zone}, $rulecf->{type});
-
-        # note that these rules are now underway.   important: unless the
-        # rule hits, in the current design, these will not be considered
-        # "finished" until harvest_dnsbl_queries() completes
-        $pms->register_async_rule_start($rulename);
       }
 
       # perform NS+A or A queries to look up the domain in the non-RHSBL subset,
       # but only if there are active reverse-IP-URIBL rules
-      if ($host !~ /^\d+\.\d+\.\d+\.\d+$/) {
+      if ($host !~ /^$IPV4_ADDRESS$/o) {
         if ( !$seen_lookups->{'NS:'.$domain} &&
              (%$nsreviprules || %$nsrhsblrules || %$fullnsrhsblrules) ) {
           $seen_lookups->{'NS:'.$domain} = 1;
@@ -878,7 +873,6 @@ sub query_hosts_or_domains {
           $seen_lookups->{'A:'.$host} = 1;
           my $obj = { dom => $host };
           $self->lookup_a_record($pms, $obj, $host);
-          $pms->register_async_rule_start($_)  for keys %$areviprules;
         }
       }
     }
@@ -888,13 +882,13 @@ sub query_hosts_or_domains {
 # ---------------------------------------------------------------------------
 
 sub lookup_domain_ns {
-  my ($self, $pms, $obj, $dom, $rulename) = @_;
+  my ($self, $pms, $obj, $dom) = @_;
 
   $dom = idn_to_ascii($dom);
   my $key = "NS:" . $dom;
   my $ent = {
     key => $key, zone => $dom, obj => $obj, type => "URI-NS",
-    rulename => $rulename,
+    rulename => 'uribl_ns',
   };
   # dig $dom ns
   $ent = $pms->{async}->bgsend_and_start_lookup(
@@ -902,7 +896,6 @@ sub lookup_domain_ns {
     sub { my ($ent2,$pkt) = @_;
           $self->complete_ns_lookup($pms, $ent2, $pkt, $dom) },
     master_deadline => $pms->{master_deadline} );
-
   return $ent;
 }
 
@@ -954,16 +947,12 @@ sub complete_ns_lookup {
         my $rulecf = $conf->{uridnsbls}->{$rulename};
         $self->lookup_single_dnsbl($pms, $ent->{obj}, $rulename,
                                   $nsrhblstr, $rulecf->{zone}, $rulecf->{type});
-
-        $pms->register_async_rule_start($rulename);
       }
 
       foreach my $rulename (keys %{$fullnsrhsblrules}) {
         my $rulecf = $conf->{uridnsbls}->{$rulename};
         $self->lookup_single_dnsbl($pms, $ent->{obj}, $rulename,
                                   $fullnsrhblstr, $rulecf->{zone}, $rulecf->{type});
-
-        $pms->register_async_rule_start($rulename);
       }
     }
   }
@@ -972,13 +961,13 @@ sub complete_ns_lookup {
 # ---------------------------------------------------------------------------
 
 sub lookup_a_record {
-  my ($self, $pms, $obj, $hname, $rulename) = @_;
+  my ($self, $pms, $obj, $hname) = @_;
 
   $hname = idn_to_ascii($hname);
   my $key = "A:" . $hname;
   my $ent = {
     key => $key, zone => $hname, obj => $obj, type => "URI-A",
-    rulename => $rulename,
+    rulename => 'uribl_a',
   };
   # dig $hname a
   $ent = $pms->{async}->bgsend_and_start_lookup(
@@ -986,7 +975,6 @@ sub lookup_a_record {
     sub { my ($ent2,$pkt) = @_;
           $self->complete_a_lookup($pms, $ent2, $pkt, $hname) },
     master_deadline => $pms->{master_deadline} );
-
   return $ent;
 }
 
@@ -1057,7 +1045,6 @@ sub lookup_single_dnsbl {
     sub { my ($ent2,$pkt) = @_;
           $self->complete_dnsbl_lookup($pms, $ent2, $pkt) },
     master_deadline => $pms->{master_deadline} );
-
   return $ent;
 }
 
@@ -1165,9 +1152,6 @@ sub got_dnsbl_hit {
     my $uris = join (' ', keys %{$pms->{uridnsbl_hits}->{$rulename}});
     $pms->test_log ("URIs: $uris");
     $pms->got_hit ($rulename, "");
-
-    # note that this rule has completed (since it got at least 1 hit)
-    $pms->register_async_rule_finish($rulename);
   }
 }
 
