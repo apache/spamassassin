@@ -207,6 +207,9 @@ reuse           URIBL_BLOCKED
 ###########################################################################
 ## DOMAINS TO SKIP (KNOWN GOOD)
 
+# Linting
+uridnsbl_skip_domain taint.org
+
 # Don't bother looking for example domains as per RFC 2606.
 uridnsbl_skip_domain example.com example.net example.org
 
