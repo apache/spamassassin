@@ -1410,7 +1410,7 @@ describe    STOCK_LOW_CONTRAST    Stocks + hidden text
 score       STOCK_LOW_CONTRAST    2.500   # limit
 tflags      STOCK_LOW_CONTRAST    publish
 
-meta        NORDNS_LOW_CONTRAST   (__HTML_FONT_LOW_CONTRAST_MINFP && __RDNS_NONE) && !ALL_TRUSTED
+meta        NORDNS_LOW_CONTRAST   (__HTML_FONT_LOW_CONTRAST_MINFP && __RDNS_NONE) && !ALL_TRUSTED && !__HAS_CID 
 describe    NORDNS_LOW_CONTRAST   No rDNS + hidden text
 score       NORDNS_LOW_CONTRAST   2.500   # limit
 
