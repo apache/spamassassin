@@ -23,6 +23,12 @@
 #
 ###########################################################################
 
+##
+## SpamAssassin 4.0.0 note:
+##   RAZOR rule priorities are automatically adjusted to -100 when razor_fork
+##   option is enabled (async lookup)
+##
+
 ifplugin Mail::SpamAssassin::Plugin::Razor2
 
 full RAZOR2_CHECK	eval:check_razor2()
@@ -54,7 +60,7 @@ lang pl describe RAZOR2_CHECK	Na li¶cie Razor2 (http://razor.sf.net/)
 
 full    RAZOR2_CF_RANGE_51_100  eval:check_razor2_range('','51','100')
 tflags  RAZOR2_CF_RANGE_51_100	net
-priority RAZOR2_CF_RANGE_51_100 10
+priority RAZOR2_CF_RANGE_51_100 20
 reuse 	RAZOR2_CF_RANGE_51_100
 describe RAZOR2_CF_RANGE_51_100	Razor2 gives confidence level above 50%
 

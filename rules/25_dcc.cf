@@ -23,6 +23,12 @@
 #
 ###########################################################################
 
+##
+## SpamAssassin 4.0.0 note:
+##   DCC rule priorities are automatically adjusted to -100 when dccifd in use
+##   (async lookup)
+##
+
 ifplugin Mail::SpamAssassin::Plugin::DCC
 
 full     DCC_CHECK	eval:check_dcc()

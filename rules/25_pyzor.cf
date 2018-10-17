@@ -23,6 +23,12 @@
 #
 ###########################################################################
 
+##
+## SpamAssassin 4.0.0 note:
+##   PYZOR rule priorities are automatically adjusted to -100 when pyzor_fork
+##   option is enabled (async lookup)
+##
+
 ifplugin Mail::SpamAssassin::Plugin::Pyzor
 
 full PYZOR_CHECK	eval:check_pyzor()
