@@ -270,6 +270,7 @@ sub new {
     'async'             => Mail::SpamAssassin::AsyncLoop->new($main),
     'master_deadline'   => $msg->{master_deadline},  # dflt inherited from msg
     'deadline_exceeded' => 0,  # time limit exceeded, skipping further tests
+    'tmpfiles'          => { },
   };
   #$self->{main}->{use_rule_subs} = 1;
 
@@ -310,11 +311,13 @@ sub new {
 sub DESTROY {
   my ($self) = shift;
 
-  # Ignore exiting helper processes (razor_fork etc)
-  return if defined $ENV{'IS_FORKED_HELPER_PROCESS'};
-
-  local $@;
-  eval { $self->delete_fulltext_tmpfile() };  # Bug 5808
+  # best practices: prevent potential calls to eval and to system routines
+  # in code of a DESTROY method from clobbering global variables $@ and $! 
+  local($@,$!);  # keep outer error handling unaffected by DESTROY
+  # Bug 5808 - cleanup tmpfiles
+  foreach my $fn (keys %{$self->{tmpfiles}}) {
+    unlink($fn) or dbg("check: cannot unlink $fn: $!");
+  }
 }
 
 ###########################################################################
@@ -2983,26 +2986,31 @@ sub sa_die { Mail::SpamAssassin::sa_die(@_); }
 =item $status->create_fulltext_tmpfile (fulltext_ref)
 
 This function creates a temporary file containing the passed scalar
-reference data (typically the full/pristine text of the message).
-This is typically used by external programs like pyzor and dccproc, to
-avoid hangs due to buffering issues.   Methods that need this, should
-call $self->create_fulltext_tmpfile($fulltext) to retrieve the temporary
-filename; it will be created if it has not already been.
+reference data.  If no scalar is passed, full/pristine message text is
+assumed.  This is typically used by external programs like pyzor and
+dccproc, to avoid hangs due to buffering issues.
 
-Note: This can only be called once until $status->delete_fulltext_tmpfile() is
-called.
+All tempfiles are automatically cleaned up by PerMsgStatus destructor.
 
 =cut
 
 sub create_fulltext_tmpfile {
   my ($self, $fulltext) = @_;
 
-  if (defined $self->{fulltext_tmpfile}) {
-    return $self->{fulltext_tmpfile};
+  my $pristine;
+  if (!defined $fulltext) {
+    if (defined $self->{fulltext_tmpfile}) {
+      return $self->{fulltext_tmpfile};
+    }
+    $fulltext = \$self->{msg}->get_pristine();
+    $pristine = 1;
   }
 
   my ($tmpf, $tmpfh) = Mail::SpamAssassin::Util::secure_tmpfile();
   $tmpfh  or die "failed to create a temporary file";
+
+  # record all created files so we can remove on DESTROY
+  $self->{tmpfiles}->{$tmpf} = 1;
 
   # PerlIO's buffered print writes in 8 kB chunks - which can be slow.
   #   print $tmpfh $$fulltext  or die "error writing to $tmpf: $!";
@@ -3016,30 +3024,33 @@ sub create_fulltext_tmpfile {
   }
   close $tmpfh  or die "error closing $tmpf: $!";
 
-  $self->{fulltext_tmpfile} = $tmpf;
+  $self->{fulltext_tmpfile} = $tmpf  if $pristine;
 
   dbg("check: create_fulltext_tmpfile, written %d bytes to file %s",
       length($$fulltext), $tmpf);
 
-  return $self->{fulltext_tmpfile};
+  return $tmpf;
 }
 
-=item $status->delete_fulltext_tmpfile ()
+=item $status->delete_fulltext_tmpfile (tmpfile)
 
 Will cleanup after a $status->create_fulltext_tmpfile() call.  Deletes the
-temporary file and uncaches the filename.
+temporary file and uncaches the filename.  Generally there no need to call
+this, PerMsgStatus destructor cleans up all tmpfiles.
 
 =cut
 
 sub delete_fulltext_tmpfile {
-  my ($self) = @_;
-  if (defined $self->{fulltext_tmpfile}) {
-    if (!unlink $self->{fulltext_tmpfile}) {
-      my $msg = sprintf("cannot unlink %s: %s", $self->{fulltext_tmpfile}, $!);
-      # don't fuss too much if file is missing, perhaps it wasn't even created
-      if ($! == ENOENT) { warn $msg } else { die $msg }
+  my ($self, $tmpfile) = @_;
+
+  $tmpfile = $self->{fulltext_tmpfile} if !defined $tmpfile;
+  if (defined $tmpfile && $self->{tmpfiles}->{$tmpfile}) {
+    unlink($tmpfile) or dbg("cannot unlink $tmpfile: $!");
+    if ($self->{fulltext_tmpfile} &&
+          $tmpfile eq $self->{fulltext_tmpfile}) {
+      delete $self->{fulltext_tmpfile};
     }
-    $self->{fulltext_tmpfile} = undef;
+    delete $self->{tmpfiles}->{$tmpfile};
   }
 }
 

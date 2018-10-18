@@ -307,10 +307,13 @@ sub check_pyzor {
   # initialize valid tags
   $pms->{tag_data}->{PYZOR} = '';
 
+  # create fulltext tmpfile now (before possible forking)
+  $pms->{pyzor_tmpfile} = $pms->create_fulltext_tmpfile();
+
   ## non-forking method
 
   if (!$self->{main}->{conf}->{pyzor_fork}) {
-    my @results = $self->pyzor_lookup($pms, $full);
+    my @results = $self->pyzor_lookup($pms);
     return $self->_check_result($pms, \@results);
   }
 
@@ -329,25 +332,38 @@ sub check_pyzor {
   };
 
   my $pid = fork();
+  if (!defined $pid) {
+    info("pyzor: child fork failed: $!");
+    delete $pms->{pyzor_backchannel};
+    return 0;
+  }
   if (!$pid) {
-    # Must be set so DESTROY blocks etc can ignore us when exiting
-    $ENV{'IS_FORKED_HELPER_PROCESS'} = 1;
+    $0 = "$0 (pyzor)";
+    $SIG{CHLD} = 'DEFAULT';
+    $SIG{PIPE} = 'IGNORE';
+    $SIG{$_} = sub {
+      eval { dbg("pyzor: child process $$ caught signal $_[0]"); };
+      _exit(6);  # avoid END and destructor processing
+      kill('KILL',$$);  # still kicking? die!
+      } foreach qw(INT HUP TERM TSTP QUIT USR1 USR2);
     dbg("pyzor: child process $$ forked");
     $pms->{pyzor_backchannel}->setup_backchannel_child_post_fork();
-    my @results = $self->pyzor_lookup($pms, $full);
+    my @results = $self->pyzor_lookup($pms);
     my $backmsg;
     eval {
       $backmsg = Storable::freeze(\@results);
     };
     if ($@) {
       dbg("pyzor: child return value freeze failed: $@");
-      _exit(0); # prevent touching filehandles as per perlfork(1)
+      _exit(0); # avoid END and destructor processing
     }
     if (!syswrite($pms->{pyzor_backchannel}->{parent}, $backmsg)) {
       dbg("pyzor: child backchannel write failed: $!");
     }
-    _exit(0); # prevent touching filehandles as per perlfork(1)
+    _exit(0); # avoid END and destructor processing
   }
+
+  $pms->{pyzor_pid} = $pid;
 
   eval {
     $pms->{pyzor_backchannel}->setup_backchannel_parent_post_fork($pid);
@@ -361,7 +377,7 @@ sub check_pyzor {
 }
 
 sub pyzor_lookup {
-  my ($self, $pms, $fulltext) = @_;
+  my ($self, $pms) = @_;
 
   my $conf = $self->{main}->{conf};
   my $timeout = $conf->{pyzor_timeout};
@@ -369,9 +385,6 @@ sub pyzor_lookup {
   # note: not really tainted, this came from system configuration file
   my $path = untaint_file_path($conf->{pyzor_path});
   my $opts = untaint_var($conf->{pyzor_options}) || '';
-
-  # use a temp file here -- open2() is unreliable, buffering-wise, under spamd
-  my $tmpf = $pms->create_fulltext_tmpfile($fulltext);
 
   $pms->enter_helper_run_mode();
 
@@ -382,10 +395,11 @@ sub pyzor_lookup {
   my $err = $timer->run_and_catch(sub {
     local $SIG{PIPE} = sub { die "__brokenpipe__ignore__\n" };
 
-    dbg("pyzor: opening pipe: " . join(' ', $path, $opts, "check", "<$tmpf"));
+    dbg("pyzor: opening pipe: ".
+      join(' ', $path, $opts, "check", "<".$pms->{pyzor_tmpfile}));
 
     $pid = Mail::SpamAssassin::Util::helper_app_pipe_open(*PYZOR,
-	$tmpf, 1, $path, split(' ', $opts), "check");
+	$pms->{pyzor_tmpfile}, 1, $path, split(' ', $opts), "check");
     $pid or die "$!\n";
 
     # read+split avoids a Perl I/O bug (Bug 5985)
@@ -421,8 +435,6 @@ sub pyzor_lookup {
       or info("pyzor: [%s] error: %s", $pid, exit_status_str($?, $errno));
   }
 
-  $pms->delete_fulltext_tmpfile();
-
   $pms->leave_helper_run_mode();
 
   if ($timer->timed_out()) {
@@ -451,14 +463,31 @@ sub _check_forked_result {
   my ($self, $pms, $finish) = @_;
 
   return 0 if !$pms->{pyzor_backchannel};
+  return 0 if !$pms->{pyzor_pid};
 
   my $timer = $self->{main}->time_method("check_pyzor");
 
-  my $kid_pid = (keys %{$pms->{pyzor_backchannel}->{kids}})[0];
+  $pms->{pyzor_abort} = $pms->{deadline_exceeded} || $pms->{shortcircuited};
+
+  my $kid_pid = $pms->{pyzor_pid};
   # if $finish, force waiting for the child
-  my $pid = waitpid($kid_pid, $finish ? 0 : WNOHANG);
+  my $pid = waitpid($kid_pid, $finish && !$pms->{pyzor_abort} ? 0 : WNOHANG);
   if ($pid == 0) {
     #dbg("pyzor: child process $kid_pid not finished yet, trying later");
+    if ($pms->{pyzor_abort}) {
+      dbg("pyzor: bailing out due to deadline/shortcircuit");
+      kill('TERM', $kid_pid);
+      if (waitpid($kid_pid, WNOHANG) == 0) {
+        sleep(1);
+        if (waitpid($kid_pid, WNOHANG) == 0) {
+          dbg("pyzor: child process $kid_pid still alive, KILL");
+          kill('KILL', $kid_pid);
+          waitpid($kid_pid, 0);
+        }
+      }
+      delete $pms->{pyzor_pid};
+      delete $pms->{pyzor_backchannel};
+    }
     return 0;
   } elsif ($pid == -1) {
     # child does not exist?
@@ -573,7 +602,7 @@ sub plugin_report {
   else {
     info("reporter: could not report spam to Pyzor");
   }
-  $options->{report}->delete_fulltext_tmpfile();
+  $options->{report}->delete_fulltext_tmpfile($tmpf);
 
   return 1;
 }

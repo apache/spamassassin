@@ -671,8 +671,10 @@ sub _check_async {
 
   my $timer = $self->{main}->time_method("check_dcc");
 
-  if ($pms->{deadline_exceeded}) {
-    $timeout = 1;
+  $pms->{dcc_abort} = $pms->{deadline_exceeded} || $pms->{shortcircuited};
+
+  if ($pms->{dcc_abort}) {
+    $timeout = 0;
   } elsif ($timeout) {
     # Calculate how much time left from original timeout
     $timeout = $self->{main}->{conf}->{dcc_timeout} -
@@ -714,9 +716,14 @@ sub _check_async {
         info("dcc: empty response from dccifd?");
       }
     }
+  } elsif ($pms->{dcc_abort}) {
+    dbg("dcc: bailing out due to deadline/shortcircuit");
+    delete $pms->{dcc_sock};
+    delete $pms->{dcc_range_callbacks};
   } elsif ($timeout) {
     dbg("dcc: no response from dccifd, timed out");
     delete $pms->{dcc_sock};
+    delete $pms->{dcc_range_callbacks};
   } else {
     dbg("dcc: still waiting for dccifd response");
   }
@@ -803,6 +810,7 @@ sub check_dcc_reputation_range {
   return 0 if $self->{dcc_disabled};
   return 0 if !$self->{main}->{conf}->{use_dcc};
   return 0 if !$self->{main}->{conf}->{use_dcc_rep};
+  return 0 if $pms->{dcc_abort};
 
   # Check if callback overriding rulename
   my $cb;
@@ -1029,7 +1037,7 @@ sub ask_dcc {
       local $SIG{PIPE} = sub { die "__brokenpipe__ignore__\n" };
 
       # use a temp file -- open2() is unreliable, buffering-wise, under spamd
-      my $tmpf = $pms->create_fulltext_tmpfile($fulltext);
+      my $tmpf = $pms->create_fulltext_tmpfile();
 
       my @opts = split(/\s+/, $conf->{dcc_options} || '');
       untaint_var(\@opts);
@@ -1090,8 +1098,6 @@ sub ask_dcc {
 					$pid, exit_status_str($?,$errno));
     }
 
-    $pms->delete_fulltext_tmpfile();
-
     $pms->leave_helper_run_mode();
 
     if ($timer->timed_out()) {
@@ -1123,6 +1129,9 @@ sub check_post_learn {
   return if $self->{dcc_disabled};
   return if !$self->{main}->{conf}->{use_dcc};
 
+  my $pms = $opts->{permsgstatus};
+  return if $pms->{dcc_abort};
+
   # learn only if allowed
   my $conf = $self->{main}->{conf};
   my $learn_score = $conf->{dcc_learn_score};
@@ -1134,7 +1143,6 @@ sub check_post_learn {
 
   # and if SpamAssassin concluded that the message is spam
   # worse than our threshold
-  my $pms = $opts->{permsgstatus};
   if ($pms->is_spam()) {
     my $score = $pms->get_score();
     my $required_score = $pms->get_required_score();
@@ -1233,7 +1241,7 @@ sub dccsight_learn {
 				      $pid, exit_status_str($?,$errno));
   }
 
-  $pms->delete_fulltext_tmpfile();
+  $pms->delete_fulltext_tmpfile($tmpf);
 
   $pms->leave_helper_run_mode();
 

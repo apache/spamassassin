@@ -457,9 +457,20 @@ sub check_razor2 {
   };
 
   my $pid = fork();
+  if (!defined $pid) {
+    info("razor2: child fork failed: $!");
+    delete $pms->{razor2_backchannel};
+    return 0;
+  }
   if (!$pid) {
-    # Must be set so DESTROY blocks etc can ignore us when exiting
-    $ENV{'IS_FORKED_HELPER_PROCESS'} = 1;
+    $0 = "$0 (razor2)";
+    $SIG{CHLD} = 'DEFAULT';
+    $SIG{PIPE} = 'IGNORE';
+    $SIG{$_} = sub {
+      eval { dbg("razor2: child process $$ caught signal $_[0]"); };
+      _exit(6);  # avoid END and destructor processing
+      kill('KILL',$$);  # still kicking? die!
+      } foreach qw(INT HUP TERM TSTP QUIT USR1 USR2);
     dbg("razor2: child process $$ forked");
     $pms->{razor2_backchannel}->setup_backchannel_child_post_fork();
     (undef, my @results) =
@@ -470,13 +481,15 @@ sub check_razor2 {
     };
     if ($@) {
       dbg("razor2: child return value freeze failed: $@");
-      _exit(0); # prevent touching filehandles as per perlfork(1)
+      _exit(0); # avoid END and destructor processing
     }
     if (!syswrite($pms->{razor2_backchannel}->{parent}, $backmsg)) {
       dbg("razor2: child backchannel write failed: $!");
     }
-    _exit(0); # prevent touching filehandles as per perlfork(1)
+    _exit(0); # avoid END and destructor processing
   }
+
+  $pms->{razor2_pid} = $pid;
 
   eval {
     $pms->{razor2_backchannel}->setup_backchannel_parent_post_fork($pid);
@@ -503,14 +516,31 @@ sub _check_forked_result {
   my ($self, $pms, $finish) = @_;
 
   return 0 if !$pms->{razor2_backchannel};
+  return 0 if !$pms->{razor2_pid};
 
   my $timer = $self->{main}->time_method("check_razor2");
 
-  my $kid_pid = (keys %{$pms->{razor2_backchannel}->{kids}})[0];
+  $pms->{razor2_abort} = $pms->{deadline_exceeded} || $pms->{shortcircuited};
+
+  my $kid_pid = $pms->{razor2_pid};
   # if $finish, force waiting for the child
-  my $pid = waitpid($kid_pid, $finish ? 0 : WNOHANG);
+  my $pid = waitpid($kid_pid, $finish && !$pms->{razor2_abort} ? 0 : WNOHANG);
   if ($pid == 0) {
     #dbg("razor2: child process $kid_pid not finished yet, trying later");
+    if ($pms->{razor2_abort}) {
+      dbg("razor2: bailing out due to deadline/shortcircuit");
+      kill('TERM', $kid_pid);
+      if (waitpid($kid_pid, WNOHANG) == 0) {
+        sleep(1);
+        if (waitpid($kid_pid, WNOHANG) == 0) {
+          dbg("razor2: child process $kid_pid still alive, KILL");
+          kill('KILL', $kid_pid);
+          waitpid($kid_pid, 0);
+        }
+      }
+      delete $pms->{razor2_pid};
+      delete $pms->{razor2_backchannel};
+    }
     return 0;
   } elsif ($pid == -1) {
     # child does not exist?
@@ -605,6 +635,7 @@ sub check_razor2_range {
   # continue.
   return unless $self->{razor2_available};
   return unless $self->{main}->{conf}->{use_razor2};
+  return if $pms->{razor2_abort};
 
   # Check if callback overriding rulename
   if (!defined $rulename) {
