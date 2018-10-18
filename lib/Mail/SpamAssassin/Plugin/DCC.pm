@@ -822,7 +822,7 @@ sub check_dcc_reputation_range {
     return 0;
   }
 
-  next if !defined $pms->{dcc_x_result};
+  return 0 if !defined $pms->{dcc_x_result};
 
   # this is called several times per message, so parse the X-DCC header once
   if (!defined $pms->{dcc_rep}) {
