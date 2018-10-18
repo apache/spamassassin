@@ -181,12 +181,7 @@ sub check_main {
 
   # Finish DNS results
   if ($do_dns) {
-    if (!$self->{main}->call_plugins("have_shortcircuited",
-                                        { permsgstatus => $pms }))
-    {
-      $pms->harvest_dnsbl_queries();
-    }
-
+    $pms->harvest_dnsbl_queries();
     $pms->rbl_finish();
     $self->{main}->call_plugins ("check_post_dnsbl", { permsgstatus => $pms });
     $pms->{resolver}->finish_socket() if $pms->{resolver};
