@@ -1287,7 +1287,8 @@ If it cannot open a file after 20 tries, it returns C<undef>.
 
 # thanks to http://www2.picante.com:81/~gtaylor/autobuse/ for this code
 sub secure_tmpfile {
-  my $tmpdir = untaint_file_path($ENV{'TMPDIR'} || File::Spec->tmpdir());
+  my $tmpenv = am_running_on_windows() ? 'TMP' : 'TMPDIR';
+  my $tmpdir = untaint_file_path($ENV{$tmpenv} || File::Spec->tmpdir());
 
   defined $tmpdir && $tmpdir ne ''
     or die "util: cannot find a temporary directory, set TMP or TMPDIR in environment";
