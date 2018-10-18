@@ -560,7 +560,7 @@ sub plugin_report {
 
   return if !$self->{pyzor_available};
   return if !$self->{main}->{conf}->{use_pyzor};
-  return if !$options->{report}->{options}->{dont_report_to_pyzor};
+  return if $options->{report}->{options}->{dont_report_to_pyzor};
   return if !$self->is_pyzor_available();
 
   # use temporary file: open2() is unreliable due to buffering under spamd
