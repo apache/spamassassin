@@ -656,7 +656,7 @@ sub check_cleanup {
   my $pms = $opts->{permsgstatus};
 
   # Finish callbacks
-  if ($pms->{dcc_range_callbacks}) {
+  if ($pms->{dcc_x_result} && $pms->{dcc_range_callbacks}) {
     foreach (@{$pms->{dcc_range_callbacks}}) {
       $self->check_dcc_reputation_range($pms, @$_);
     }
@@ -812,15 +812,10 @@ sub check_dcc_reputation_range {
   return 0 if !$self->{main}->{conf}->{use_dcc_rep};
   return 0 if $pms->{dcc_abort};
 
-  # Check if callback overriding rulename
-  my $cb;
-  if (!defined $rulename) {
+  # Check if callback (overrides rulename)
+  my $cb = defined $rulename;
+  if (!$cb) {
     $rulename = $pms->get_current_eval_rule_name();
-  } else {
-    $cb = 1;
-  }
-
-  if (!defined $pms->{dcc_result}) {
     dbg("dcc: delaying check_dcc_reputation_range call for $rulename");
     # array matches check_dcc_reputation_range() argument order
     push @{$pms->{dcc_range_callbacks}}, [$fulltext, $min, $max, $rulename];
