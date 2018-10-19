@@ -29,6 +29,11 @@ This plugin checks a message against Sender Policy Framework (SPF)
 records published by the domain owners in DNS to fight email address
 forgery and make it easier to identify spams.
 
+It's recommended to use MTA filter (pypolicyd-spf / spf-engine etc), so this
+plugin can reuse the Received-SPF header results as is.  Otherwise
+throughput could suffer, DNS lookups done by this plugin are not
+asynchronous.
+
 =cut
 
 package Mail::SpamAssassin::Plugin::SPF;
@@ -147,38 +152,6 @@ days, weeks).
     type => $Mail::SpamAssassin::Conf::CONF_TYPE_DURATION
   });
 
-=item do_not_use_mail_spf (0|1)		(default: 0)
-
-By default the plugin will try to use the Mail::SPF module for SPF checks if
-it can be loaded.  If Mail::SPF cannot be used the plugin will fall back to
-using the legacy Mail::SPF::Query module if it can be loaded.
-
-Use this option to stop the plugin from using Mail::SPF and cause it to try to
-use Mail::SPF::Query instead.
-
-=cut
-
-  push(@cmds, {
-    setting => 'do_not_use_mail_spf',
-    is_admin => 1,
-    default => 0,
-    type => $Mail::SpamAssassin::Conf::CONF_TYPE_BOOL,
-  });
-
-=item do_not_use_mail_spf_query (0|1)	(default: 0)
-
-As above, but instead stop the plugin from trying to use Mail::SPF::Query and
-cause it to only try to use Mail::SPF.
-
-=cut
-
-  push(@cmds, {
-    setting => 'do_not_use_mail_spf_query',
-    is_admin => 1,
-    default => 0,
-    type => $Mail::SpamAssassin::Conf::CONF_TYPE_BOOL,
-  });
-
 =item ignore_received_spf_header (0|1)	(default: 0)
 
 By default, to avoid unnecessary DNS lookups, the plugin will try to use the
@@ -224,9 +197,22 @@ working downwards until results are successfully parsed.
     type => $Mail::SpamAssassin::Conf::CONF_TYPE_BOOL,
   });
 
+  # Deprecated since 4.0.0, leave for backwards compatibility
+  push(@cmds, {
+    setting => 'do_not_use_mail_spf',
+    is_admin => 1,
+    default => 0,
+    type => $Mail::SpamAssassin::Conf::CONF_TYPE_BOOL,
+  });
+  push(@cmds, {
+    setting => 'do_not_use_mail_spf_query',
+    is_admin => 1,
+    default => 1,
+    type => $Mail::SpamAssassin::Conf::CONF_TYPE_BOOL,
+  });
+
   $conf->{parser}->register_commands(\@cmds);
 }
-
 
 =item has_check_for_spf_errors
 
@@ -498,8 +484,6 @@ sub _check_spf {
   unless (defined $self->{has_mail_spf}) {
     my $eval_stat;
     eval {
-      die("Mail::SPF disabled by admin setting\n") if $scanner->{conf}->{do_not_use_mail_spf};
-
       require Mail::SPF;
       if (!defined $Mail::SPF::VERSION || $Mail::SPF::VERSION < 2.001) {
 	die "Mail::SPF 2.001 or later required, this is ".
@@ -521,38 +505,12 @@ sub _check_spf {
       dbg("spf: using Mail::SPF for SPF checks");
       $self->{has_mail_spf} = 1;
     } else {
-      # strip the @INC paths... users are going to see it and think there's a problem even though
-      # we're going to fall back to Mail::SPF::Query (which will display the same paths if it fails)
-      $eval_stat =~ s#^Can't locate Mail/SPFd.pm in \@INC .*#Can't locate Mail/SPFd.pm#;
-      dbg("spf: cannot load Mail::SPF module or create Mail::SPF::Server object: $eval_stat");
-      dbg("spf: attempting to use legacy Mail::SPF::Query module instead");
-
-      undef $eval_stat;
-      eval {
-	die("Mail::SPF::Query disabled by admin setting\n") if $scanner->{conf}->{do_not_use_mail_spf_query};
-
-	require Mail::SPF::Query;
-	if (!defined $Mail::SPF::Query::VERSION || $Mail::SPF::Query::VERSION < 1.996) {
-	  die "Mail::SPF::Query 1.996 or later required, this is ".
-	    (defined $Mail::SPF::Query::VERSION ? $Mail::SPF::Query::VERSION : 'unknown')."\n";
-	}
-        1;
-      } or do {
-        $eval_stat = $@ ne '' ? $@ : "errno=$!";  chomp $eval_stat;
-      };
-
-      if (!defined($eval_stat)) {
-	dbg("spf: using Mail::SPF::Query for SPF checks");
-	$self->{has_mail_spf} = 0;
-      } else {
-	dbg("spf: cannot load Mail::SPF::Query module: $eval_stat");
-	dbg("spf: one of Mail::SPF or Mail::SPF::Query is required for SPF checks, SPF checks disabled");
-	$self->{no_spf_module} = 1;
-	return;
-      }
+      dbg("spf: cannot load Mail::SPF: module: $eval_stat");
+      dbg("spf: Mail::SPF is required for SPF checks, SPF checks disabled");
+      $self->{no_spf_module} = 1;
+      return;
     }
   }
-
 
   # skip SPF checks if the A/MX records are nonexistent for the From
   # domain, anyway, to avoid crappy messages from slowing us down
@@ -632,88 +590,45 @@ sub _check_spf {
 
   my ($result, $comment, $text, $err);
 
-  # use Mail::SPF if it was available, otherwise use the legacy Mail::SPF::Query
-  if ($self->{has_mail_spf}) {
+  # TODO: currently we won't get to here for a mfrom check with a null sender
+  my $identity = $ishelo ? $helo : ($scanner->{sender}); # || $helo);
 
-    # TODO: currently we won't get to here for a mfrom check with a null sender
-    my $identity = $ishelo ? $helo : ($scanner->{sender}); # || $helo);
+  unless ($identity) {
+    dbg("spf: cannot determine %s identity, skipping %s SPF check",
+        ($ishelo ? 'helo' : 'mfrom'),  ($ishelo ? 'helo' : 'mfrom') );
+    return;
+  }
+  $helo ||= 'unknown';  # only used for macro expansion in the mfrom explanation
 
-    unless ($identity) {
-      dbg("spf: cannot determine %s identity, skipping %s SPF check",
-          ($ishelo ? 'helo' : 'mfrom'),  ($ishelo ? 'helo' : 'mfrom') );
-      return;
-    }
-    $helo ||= 'unknown';  # only used for macro expansion in the mfrom explanation
+  my $request;
+  eval {
+    $request = Mail::SPF::Request->new( scope         => $ishelo ? 'helo' : 'mfrom',
+			  identity      => $identity,
+			  ip_address    => $ip,
+			  helo_identity => $helo );
+    1;
+  } or do {
+    my $eval_stat = $@ ne '' ? $@ : "errno=$!";  chomp $eval_stat;
+    dbg("spf: cannot create Mail::SPF::Request object: $eval_stat");
+    return;
+  };
 
-    my $request;
-    eval {
-      $request = Mail::SPF::Request->new( scope         => $ishelo ? 'helo' : 'mfrom',
-					  identity      => $identity,
-					  ip_address    => $ip,
-					  helo_identity => $helo );
-      1;
-    } or do {
-      my $eval_stat = $@ ne '' ? $@ : "errno=$!";  chomp $eval_stat;
-      dbg("spf: cannot create Mail::SPF::Request object: $eval_stat");
-      return;
-    };
+  my $timeout = $scanner->{conf}->{spf_timeout};
 
-    my $timeout = $scanner->{conf}->{spf_timeout};
-
-    my $timer = Mail::SpamAssassin::Timeout->new(
-                { secs => $timeout, deadline => $scanner->{master_deadline} });
-    $err = $timer->run_and_catch(sub {
-
-      my $query = $self->{spf_server}->process($request);
-
-      $result = $query->code;
-      $comment = $query->authority_explanation if $query->can("authority_explanation");
-      $text = $query->text;
-
-    });
-
-
-  } else {
-
-    if (!$helo) {
-      dbg("spf: cannot get HELO, cannot use Mail::SPF::Query, consider installing Mail::SPF");
-      return;
-    }
-
-    # TODO: if we start doing checks on the null sender using the helo domain
-    # be sure to fix this so that it uses the correct sender identity
-    my $query;
-    eval {
-      $query = Mail::SPF::Query->new (ip => $ip,
-				    sender => $scanner->{sender},
-				    helo => $helo,
-				    debug => 0,
-				    trusted => 0);
-      1;
-    } or do {
-      my $eval_stat = $@ ne '' ? $@ : "errno=$!";  chomp $eval_stat;
-      dbg("spf: cannot create Mail::SPF::Query object: $eval_stat");
-      return;
-    };
-
-    my $timeout = $scanner->{conf}->{spf_timeout};
-
-    my $timer = Mail::SpamAssassin::Timeout->new(
-                { secs => $timeout, deadline => $scanner->{master_deadline} });
-    $err = $timer->run_and_catch(sub {
-
-      ($result, $comment) = $query->result();
-
-    });
-
-  } # end of differences between Mail::SPF and Mail::SPF::Query
+  my $timer_spf = Mail::SpamAssassin::Timeout->new(
+              { secs => $timeout, deadline => $scanner->{master_deadline} });
+  $err = $timer_spf->run_and_catch(sub {
+    my $query = $self->{spf_server}->process($request);
+    $result = $query->code;
+    $comment = $query->authority_explanation if $query->can("authority_explanation");
+    $text = $query->text;
+  });
 
   if ($err) {
     chomp $err;
     warn("spf: lookup failed: $err\n");
     return 0;
   }
-
 
   $result ||= 'timeout';	# bug 5077
   $comment ||= '';
