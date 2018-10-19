@@ -1823,7 +1823,8 @@ etc.  If C<default_value> is given, it will be used if the requested
 C<header_name> does not exist.
 
 Appending C<:raw> to the header name will inhibit decoding of quoted-printable
-or base-64 encoded strings.
+or base-64 encoded strings. If used with pseudo-header ALL*, folding will
+be preserved.
 
 Appending a modifier C<:addr> to a header field name will cause everything
 except the first email address to be removed from the header field.  It is
@@ -1937,33 +1938,37 @@ sub _get {
 
   # ALL: entire pristine or semi-raw headers
   if ($request eq 'ALL') {
-    $result = $getraw ? $self->{msg}->get_pristine_header()
-                      : $self->{msg}->get_all_headers(1);
+    return ($getraw ? $self->{msg}->get_pristine_header()
+                    : $self->{msg}->get_all_headers(1));
   }
   # ALL-TRUSTED: entire trusted raw headers
   elsif ($request eq 'ALL-TRUSTED') {
     # '+1' since we added the received header even though it's not considered
     # trusted, so we know that those headers can be trusted too
     return $self->get_all_hdrs_in_rcvd_index_range(
-			undef, $self->{last_trusted_relay_index}+1);
+			undef, $self->{last_trusted_relay_index}+1,
+			undef, undef, $getraw);
   }
   # ALL-INTERNAL: entire internal raw headers
   elsif ($request eq 'ALL-INTERNAL') {
     # '+1' for the same reason as in ALL-TRUSTED above
     return $self->get_all_hdrs_in_rcvd_index_range(
-			undef,	$self->{last_internal_relay_index}+1);
+			undef, $self->{last_internal_relay_index}+1,
+			undef, undef, $getraw);
   }
   # ALL-UNTRUSTED: entire untrusted raw headers
   elsif ($request eq 'ALL-UNTRUSTED') {
     # '+1' for the same reason as in ALL-TRUSTED above
     return $self->get_all_hdrs_in_rcvd_index_range(
-			$self->{last_trusted_relay_index}+1, undef);
+			$self->{last_trusted_relay_index}+1, undef,
+			undef, undef, $getraw);
   }
   # ALL-EXTERNAL: entire external raw headers
   elsif ($request eq 'ALL-EXTERNAL') {
     # '+1' for the same reason as in ALL-TRUSTED above
     return $self->get_all_hdrs_in_rcvd_index_range(
-			$self->{last_internal_relay_index}+1, undef);
+			$self->{last_internal_relay_index}+1, undef,
+			undef, undef, $getraw);
   }
   # EnvelopeFrom: the SMTP MAIL FROM: address
   elsif ($request_lc eq "\LEnvelopeFrom") {
@@ -2946,7 +2951,7 @@ ok:
 # indicate you don't want to include the received header found at the start or
 # end indexes... basically toggles between [s,e], [s,e), (s,e], (s,e).
 sub get_all_hdrs_in_rcvd_index_range {
-  my ($self, $start_rcvd, $end_rcvd, $include_start_rcvd, $include_end_rcvd) = @_;
+  my ($self, $start_rcvd, $end_rcvd, $include_start_rcvd, $include_end_rcvd, $getraw) = @_;
 
   # prevent bad input causing us to return the first header found
   return if (defined $end_rcvd && $end_rcvd < 0);
@@ -2957,7 +2962,14 @@ sub get_all_hdrs_in_rcvd_index_range {
   my $cur_rcvd_index = -1;  # none found yet
   my $result = '';
 
-  foreach my $hdr (split(/^/m, $self->{msg}->get_pristine_header())) {
+  my @hdrs;
+  if ($getraw) {
+    @hdrs = $self->{msg}->get_pristine_header() =~ /^([^ \t].*?\n)(?![ \t])/smgi;
+  } else {
+    @hdrs = split(/^/m, $self->{msg}->get_all_headers(1));
+  }
+
+  foreach my $hdr (@hdrs) {
     if ($hdr =~ /^Received:/i) {
       $cur_rcvd_index++;
       next if (defined $start_rcvd && !$include_start_rcvd &&
@@ -2967,10 +2979,10 @@ sub get_all_hdrs_in_rcvd_index_range {
     }
     if ((!defined $start_rcvd || $start_rcvd <= $cur_rcvd_index) &&
 	(!defined $end_rcvd || $cur_rcvd_index < $end_rcvd)) {
-      $result .= $hdr."\n";
+      $result .= $hdr;
     }
     elsif (defined $end_rcvd && $cur_rcvd_index == $end_rcvd) {
-      $result .= $hdr."\n";
+      $result .= $hdr;
       last;
     }
   }
