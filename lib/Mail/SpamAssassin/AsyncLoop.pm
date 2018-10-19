@@ -71,8 +71,6 @@ sub new {
     main                => $main,
     queries_started     => 0,
     queries_completed   => 0,
-    total_queries_started   => 0,
-    total_queries_completed => 0,
     pending_lookups     => { },
     pending_rules	=> { },
     timing_by_query     => { },
@@ -240,7 +238,6 @@ sub start_lookup {
   $self->{pending_lookups}->{$key} = $ent;
 
   $self->{queries_started}++;
-  $self->{total_queries_started}++;
   dbg("async: starting: %s (timeout %.1fs, min %.1fs)%s",
       $ent->{display_id}, $ent->{timeout_initial}, $ent->{timeout_min},
       !$clipped_by_master_deadline ? '' : ', capped by time limit');
@@ -506,18 +503,16 @@ sub complete_lookups {
   my %typecount;
 
   my $pending = $self->{pending_lookups};
-  $self->{queries_started} = 0;
-  $self->{queries_completed} = 0;
 
   my $now = time;
 
   if (defined $timeout && $timeout > 0 &&
-      %$pending && $self->{total_queries_started} > 0)
+      %$pending && $self->{queries_started} > 0)
   {
     # shrink a 'select' timeout if a caller specified unnecessarily long
     # value beyond the latest deadline of any outstanding request;
     # can save needless wait time (up to 1 second in harvest_dnsbl_queries)
-    my $r = $self->{total_queries_completed} / $self->{total_queries_started};
+    my $r = $self->{queries_completed} / $self->{queries_started};
     my $r2 = $r * $r;  # 0..1
     my $max_deadline;
     while (my($key,$ent) = each %$pending) {
@@ -548,9 +543,9 @@ sub complete_lookups {
 
     if (%$pending) {  # any outstanding requests still?
       $self->{last_poll_responses_time} = $now;
-      my $nfound = $self->{main}->{resolver}->poll_responses($timeout);
-      dbg("async: select found %s responses ready (t.o.=%.1f)",
-          !$nfound ? 'no' : $nfound,  $timeout);
+      my ($nfound, $ncb) = $self->{main}->{resolver}->poll_responses($timeout);
+      dbg("async: select found %d responses ready (t.o.=%.1f), did %d callbacks",
+          $nfound, $timeout, $ncb);
     }
     $now = time;  # capture new timestamp, after possible sleep in 'select'
 
@@ -569,15 +564,14 @@ sub complete_lookups {
         dbg("async: completed in %.3f s: %s", $elapsed, $ent->{display_id});
         $self->{timing_by_query}->{". $key"} += $elapsed;
         $self->{queries_completed}++;
-        $self->{total_queries_completed}++;
         delete $pending->{$key};
       }
     }
 
     if (%$pending) {  # still any requests outstanding? are they expired?
       my $r =
-        !$allow_aborting_of_expired || !$self->{total_queries_started} ? 1.0
-        : $self->{total_queries_completed} / $self->{total_queries_started};
+        !$allow_aborting_of_expired || !$self->{queries_started} ? 1.0
+        : $self->{queries_completed} / $self->{queries_started};
       my $r2 = $r * $r;  # 0..1
       while (my($key,$ent) = each %$pending) {
         $typecount{$ent->{type}}++;
@@ -587,8 +581,6 @@ sub complete_lookups {
         $dt = 1 + int $dt  if $timer_resolution == 1 && $dt > int $dt;
         $allexpired = 0  if $now <= $ent->{start_time} + $dt;
       }
-      dbg("async: queries completed: %d, started: %d",
-          $self->{queries_completed}, $self->{queries_started});
     }
 
     # ensure we don't get stuck if a request gets lost in the ether.
@@ -602,9 +594,9 @@ sub complete_lookups {
       $alldone = 1;
     }
     else {
-      dbg("async: queries active: %s%s at %s",
+      dbg("async: queries still pending: %s%s",
           join (' ', map { "$_=$typecount{$_}" } sort keys %typecount),
-          $allexpired ? ', all expired' : '', scalar(localtime(time)));
+          $allexpired ? ', all expired' : '');
       $alldone = 0;
     }
     1;

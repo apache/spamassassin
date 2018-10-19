@@ -770,6 +770,7 @@ sub poll_responses {
   return if $self->{no_resolver};
   return if !$self->{sock};
   my $cnt = 0;
+  my $cnt_cb = 0;
 
   my $rin = $self->{sock_as_vec};
   my $rout;
@@ -790,16 +791,17 @@ sub poll_responses {
       # most likely due to an alarm signal, resignal if so
       die "dns: (2) $eval_stat\n"  if $eval_stat =~ /__alarm__ignore__\(.*\)/s;
       warn "dns: select aborted: $eval_stat\n";
-      return;
+      last;
     } elsif (!defined $nfound || $nfound < 0) {
       if ($!) { warn "dns: select failed: $!\n" }
       else    { info("dns: select interrupted") }  # shouldn't happen
-      return;
+      last;
     } elsif (!$nfound) {
       if (!defined $timeout) { warn("dns: select returned empty-handed\n") }
       elsif ($timeout > 0) { dbg("dns: select timed out %.3f s", $timeout) }
-      return;
+      last;
     }
+    $cnt += $nfound;
 
     my $now = time;
     $timeout = 0;  # next time around collect whatever is available, then exit
@@ -856,7 +858,7 @@ sub poll_responses {
 
         if ($cb) {
           $cb->($packet, $id, $now);
-          $cnt++;
+          $cnt_cb++;
         } else {  # no match, report the problem
           if ($rcode eq 'REFUSED' || $id =~ m{^\d+/NO_QUESTION_IN_PACKET\z}) {
             # the failure was already reported above
@@ -882,7 +884,7 @@ sub poll_responses {
     }
   }
 
-  return $cnt;
+  return ($cnt, $cnt_cb);
 }
 
 ###########################################################################
