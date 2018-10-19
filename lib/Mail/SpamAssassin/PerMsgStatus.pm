@@ -2891,7 +2891,7 @@ sub get_envelope_from {
   if ($envf = $self->get("X-Envelope-From")) {
     # heuristic: this could have been relayed via a list which then used
     # a *new* Envelope-from.  check
-    if ($self->get("ALL:raw") =~ /^Received:.*^X-Envelope-From:/smi) {
+    if ($self->get("ALL") =~ /^Received:.*^X-Envelope-From:/smi) {
       dbg("message: X-Envelope-From header found after 1 or more Received lines, cannot trust envelope-from");
       return;
     } else {
@@ -2903,7 +2903,7 @@ sub get_envelope_from {
   if ($envf = $self->get("Envelope-Sender")) {
     # heuristic: this could have been relayed via a list which then used
     # a *new* Envelope-from.  check
-    if ($self->get("ALL:raw") =~ /^Received:.*^Envelope-Sender:/smi) {
+    if ($self->get("ALL") =~ /^Received:.*^Envelope-Sender:/smi) {
       dbg("message: Envelope-Sender header found after 1 or more Received lines, cannot trust envelope-from");
     } else {
       goto ok;
@@ -2920,7 +2920,7 @@ sub get_envelope_from {
   if ($envf = $self->get("Return-Path")) {
     # heuristic: this could have been relayed via a list which then used
     # a *new* Envelope-from.  check
-    if ($self->get("ALL:raw") =~ /^Received:.*^Return-Path:/smi) {
+    if ($self->get("ALL") =~ /^Received:.*^Return-Path:/smi) {
       dbg("message: Return-Path header found after 1 or more Received lines, cannot trust envelope-from");
     } else {
       goto ok;
