@@ -1,3 +1,17 @@
+Note for Users Upgrading to SpamAssassin 3.4.3
+----------------------------------------------
+
+- TxRep and Awl plugins has been modified to be compatible 
+  with latest Postgresql versions.
+  You should upgrade your sql database running the following command:
+  MySQL:
+  "ALTER TABLE `txrep` CHANGE `count` `msgcount` INT(11) NOT NULL DEFAULT '0';"
+  "ALTER TABLE `awl` CHANGE `count` `msgcount` INT(11) NOT NULL DEFAULT '0';"
+  PostgreSQL:
+  "ALTER TABLE txrep RENAME COLUMN count TO msgcount;"
+  "ALTER TABLE awl RENAME COLUMN count TO msgcount;"
+
+
 Note for Users Upgrading to SpamAssassin 3.4.2
 ----------------------------------------------
 

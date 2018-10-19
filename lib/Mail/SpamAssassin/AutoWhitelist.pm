@@ -128,35 +128,35 @@ sub check_address {
   my $entry = $self->{checker}->get_addr_entry ($fulladdr, $signedby);
   $self->{entry} = $entry;
 
-  if (!$entry->{count}) {
+  if (!$entry->{msgcount}) {
     # no entry found
     if (defined $origip) {
       # try upgrading a default entry (probably from "add-addr-to-foo")
       my $noipaddr = $self->pack_addr ($addr, undef);
       my $noipent = $self->{checker}->get_addr_entry ($noipaddr, undef);
 
-      if (defined $noipent->{count} && $noipent->{count} > 0) {
+      if (defined $noipent->{msgcount} && $noipent->{msgcount} > 0) {
 	dbg("auto-whitelist: found entry w/o IP address for $addr: replacing with $origip");
 	$self->{checker}->remove_entry($noipent);
         # Now assign proper entry the count and totscore values of the
         # no-IP entry instead of assigning the whole value to avoid
         # wiping out any information added to the previous entry.
-	$entry->{count} = $noipent->{count};
+	$entry->{msgcount} = $noipent->{msgcount};
 	$entry->{totscore} = $noipent->{totscore};
       }
     }
   }
 
-  if ($entry->{count} < 0 ||
-      $entry->{count} != $entry->{count} ||  # test for NaN
+  if ($entry->{msgcount} < 0 ||
+      $entry->{msgcount} != $entry->{msgcount} ||  # test for NaN
       $entry->{totscore} != $entry->{totscore})
   {
     warn "auto-whitelist: resetting bad data for ($addr, $origip), ".
-         "count: $entry->{count}, totscore: $entry->{totscore}\n";
-    $entry->{count} = $entry->{totscore} = 0;
+         "count: $entry->{msgcount}, totscore: $entry->{totscore}\n";
+    $entry->{msgcount} = $entry->{totscore} = 0;
   }
 
-  return !$entry->{count} ? undef : $entry->{totscore} / $entry->{count};
+  return !$entry->{msgcount} ? undef : $entry->{totscore} / $entry->{msgcount};
 }
 
 ###########################################################################
@@ -170,7 +170,7 @@ whitelist correction.
 
 sub count {
   my $self = shift;
-  return $self->{entry}->{count};
+  return $self->{entry}->{msgcount};
 }
 
 
@@ -195,7 +195,7 @@ sub add_score {
     return;		# don't try to add a NaN
   }
 
-  $self->{entry}->{count} ||= 0;
+  $self->{entry}->{msgcount} ||= 0;
   $self->{checker}->add_score($self->{entry}, $score);
 }
 

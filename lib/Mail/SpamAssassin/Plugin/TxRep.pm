@@ -1522,7 +1522,7 @@ sub check_reputation {
 #--------------------------------------------------------------------------
 
 ###########################################################################
-sub count {my $self=shift;  return (defined $self->{checker})? $self->{entry}->{count}    : undef;}
+sub count {my $self=shift;  return (defined $self->{checker})? $self->{entry}->{msgcount}    : undef;}
 sub total {my $self=shift;  return (defined $self->{checker})? $self->{entry}->{totscore} : undef;}
 ###########################################################################
 
@@ -1539,11 +1539,11 @@ sub get_sender {
   $self->{entry} = $entry;
   $origip        = $origip || 'none';
 
-  if ($entry->{count}<0 || $entry->{count}=~/^(nan|)$/ || $entry->{totscore}=~/^(nan|)$/) {
-    warn "TxRep: resetting bad data for ($addr, $origip), count: $entry->{count}, totscore: $entry->{totscore}\n";
-    $self->{entry}->{count} = $self->{entry}->{totscore} = 0;
+  if ($entry->{msgcount}<0 || $entry->{msgcount}=~/^(nan|)$/ || $entry->{totscore}=~/^(nan|)$/) {
+    warn "TxRep: resetting bad data for ($addr, $origip), count: $entry->{msgcount}, totscore: $entry->{totscore}\n";
+    $self->{entry}->{msgcount} = $self->{entry}->{totscore} = 0;
   }
-  return $self->{entry}->{count};
+  return $self->{entry}->{msgcount};
 }
 
 
@@ -1558,7 +1558,7 @@ sub add_score {
     warn "TxRep: attempt to add a $score to TxRep entry ignored\n";
     return;                                       # don't try to add a NaN
   }
-  $self->{entry}->{count} ||= 0;
+  $self->{entry}->{msgcount} ||= 0;
 
   # performing the dilution aging correction
   if (defined $self->total() && defined $self->count() && defined $self->{txrep_dilution_factor}) {
@@ -1588,9 +1588,9 @@ sub remove_score {
   }
   # no reversal dilution aging correction (not easily possible),
   # just removing the original message score
-  if ($self->{entry}->{count} > 2)
-        {$self->{entry}->{count} -= 2;}
-  else  {$self->{entry}->{count}  = 0;}
+  if ($self->{entry}->{msgcount} > 2)
+        {$self->{entry}->{msgcount} -= 2;}
+  else  {$self->{entry}->{msgcount}  = 0;}
   # substract 2, and add a score; hence decrementing by 1
   $self->{checker}->add_score($self->{entry}, -1*$score);
 }
