@@ -11,7 +11,7 @@ plan skip_all => "Net tests disabled" unless conf_bool('run_net_tests');
 plan skip_all => "Need Mail::SPF" unless HAS_MAILSPF;
 plan skip_all => "Can't use Net::DNS Safely" unless can_use_net_dns_safely();
 
-plan tests => 56;
+plan tests => 64;
 
 # ---------------------------------------------------------------------------
 
@@ -377,6 +377,9 @@ tstprefs("
 
 sarun ("-t < data/nice/spf3-received-spf", \&patterns_run_cb);
 ok_all_patterns();
+# Test same with nonfolded headers
+sarun ("-t < data/nice/spf4-received-spf-nofold", \&patterns_run_cb);
+ok_all_patterns();
 
 
 # test usage of Received-SPF headers added by internal relays
@@ -399,6 +402,9 @@ tstprefs("
 
 sarun ("-t < data/nice/spf3-received-spf", \&patterns_run_cb);
 ok_all_patterns();
+# Test same with nonfolded headers
+sarun ("-t < data/nice/spf4-received-spf-nofold", \&patterns_run_cb);
+ok_all_patterns();
 
 
 # test usage of Received-SPF headers added by internal relays
@@ -419,6 +425,9 @@ tstprefs("
 );
 
 sarun ("-t < data/nice/spf3-received-spf", \&patterns_run_cb);
+ok_all_patterns();
+# Test same with nonfolded headers
+sarun ("-t < data/nice/spf4-received-spf-nofold", \&patterns_run_cb);
 ok_all_patterns();
 
 
@@ -441,6 +450,8 @@ tstprefs("
 );
 
 sarun ("-t < data/nice/spf3-received-spf", \&patterns_run_cb);
-
+ok_all_patterns();
+# Test same with nonfolded headers
+sarun ("-t < data/nice/spf4-received-spf-nofold", \&patterns_run_cb);
 ok_all_patterns();
 
