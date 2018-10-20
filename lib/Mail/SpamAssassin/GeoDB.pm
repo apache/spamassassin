@@ -780,7 +780,7 @@ sub _get {
     $self->{cache} = ();
   }
 
-  if (!defined $self->{cache}{$ip}{$type}) {
+  if (!exists $self->{cache}{$ip}{$type}) {
     if ($self->{dbapi}->{$type}) {
       $self->{cache}{$ip}{$type} = $self->{dbapi}->{$type}->($self,$ip);
     } else {
