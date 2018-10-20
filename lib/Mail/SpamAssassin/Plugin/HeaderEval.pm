@@ -272,8 +272,7 @@ sub check_illegal_chars {
 
   # avoid overlap between tests
   if ($header eq "ALL") {
-    # fix continuation lines, then remove Subject and From
-    $str =~ s/\n[ \t]+/  /gs;
+    # Remove Subject and From
     $str =~ s/^(?:Subject|From):.*$//gmi;
   }
 
@@ -1035,7 +1034,6 @@ sub check_unresolved_template {
   my ($self, $pms) = @_;
 
   my $all = $pms->get('ALL');	# cached access
-  $all =~ s/\n[ \t]+/ /gs;	# fix continuation lines
   
   for my $header (split(/\n/, $all)) {
     # slightly faster to test in this order
@@ -1070,7 +1068,7 @@ sub check_ratware_envelope_from {
   return 0 if $from eq '' || $to eq '';
   return 0 if $from =~ /^SRS\d=/;
 
-  if ($to =~ /^([^@]+)@(.+)$/) {
+  if ($to =~ /^([^@]+)\@(.+)$/) {
     my($user,$dom) = ($1,$2);
     $dom = $self->{main}->{registryboundaries}->trim_domain($dom);
     return unless
