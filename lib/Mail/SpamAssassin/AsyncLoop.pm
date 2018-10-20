@@ -630,7 +630,7 @@ sub abort_remaining_lookups {
   $self->{pending_rules} = {};
 
   while (my($key,$ent) = each %$pending) {
-    dbg("async: aborting after %.3f s, %s: %s",
+    info("async: aborting after %.3f s, %s: %s",
         $now - $ent->{start_time},
         (defined $ent->{timeout_initial} &&
          $now > $ent->{start_time} + $ent->{timeout_initial}
