@@ -12,8 +12,7 @@ Note for Users Upgrading to SpamAssassin 3.4.3
   "ALTER TABLE awl RENAME COLUMN count TO msgcount;"
 
 - ALL pseudo-header now returns decoded headers, so it's usage is consistent
-  with single header matching (:raw returns undecoded and unfolded like
-  before).
+  with single header matching (:raw returns undecoded and folded like before).
 
 Note for Users Upgrading to SpamAssassin 3.4.2
 ----------------------------------------------
