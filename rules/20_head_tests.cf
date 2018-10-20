@@ -123,7 +123,7 @@ describe FORGED_MSGID_YAHOO	Message-ID is forged, (yahoo.com)
 
 ###########################################################################
 
-header __MSGID_BEFORE_RECEIVED	ALL:raw =~ /^Message-Id:.*^Received:/msi
+header __MSGID_BEFORE_RECEIVED	ALL =~ /^Message-Id:.*?^Received:/msi
 header __MSGID_BEFORE_OKAY	Message-Id =~ /\@[a-z0-9.-]+\.(?:yahoo|wanadoo)(?:\.[a-z]{2,3}){1,2}>/
 
 meta MSGID_FROM_MTA_HEADER	(__MSGID_BEFORE_RECEIVED && !__MSGID_BEFORE_OKAY && !__FROM_HOTMAIL_COM)
@@ -166,10 +166,10 @@ test INVALID_DATE ok      Thurs, 31 Jul 2002 16:41:57 +0200
 header INVALID_DATE_TZ_ABSURD	Date =~ /[-+](?!(?:0\d|1[0-4])(?:[03]0|[14]5))\d{4}$/
 describe INVALID_DATE_TZ_ABSURD	Invalid Date: header (timezone does not exist)
 
-header INVALID_TZ_CST		ALL:raw =~ /[+-]\d\d[30]0(?<!-0600|-0500|\+0800|\+0930|\+1030)\s+(?:\bCST\b|\(CST\))/
+header INVALID_TZ_CST		ALL =~ /[+-]\d\d[30]0(?<!-0600|-0500|\+0800|\+0930|\+1030)\s+(?:\bCST\b|\(CST\))/
 describe INVALID_TZ_CST		Invalid date in header (wrong CST timezone)
 
-header INVALID_TZ_EST		ALL:raw =~ /[+-]\d\d[30]0(?<!-0500|-0300|\+1000|\+1100)\s+(?:\bEST\b|\(EST\))/
+header INVALID_TZ_EST		ALL =~ /[+-]\d\d[30]0(?<!-0500|-0300|\+1000|\+1100)\s+(?:\bEST\b|\(EST\))/
 describe INVALID_TZ_EST		Invalid date in header (wrong EST timezone)
 
 
@@ -404,7 +404,7 @@ describe FROM_LOCAL_DIGITS	From: localpart has long digit sequence
 
 header __TOCC_EXISTS		exists:ToCc
 
-header X_PRIORITY_CC		ALL:raw =~ /^X-Priority:[^\n]{0,80}^Cc:/msi
+header X_PRIORITY_CC		ALL =~ /^X-Priority:[^\n]{0,80}^Cc:/msi
 describe X_PRIORITY_CC		Cc: after X-Priority: (bulk email fingerprint)
 
 # catch non-RFC2047 compliant messages
