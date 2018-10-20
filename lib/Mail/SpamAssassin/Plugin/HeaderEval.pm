@@ -266,15 +266,9 @@ sub word_is_in_dictionary {
 sub check_illegal_chars {
   my ($self, $pms, $header, $ratio, $count) = @_;
 
-  $header .= ":raw" unless ($header eq "ALL" || $header =~ /:raw$/);
+  $header .= ":raw" unless $header =~ /:raw$/;
   my $str = $pms->get($header);
   return 0 if !defined $str || $str eq '';
-
-  # avoid overlap between tests
-  if ($header eq "ALL") {
-    # Remove Subject and From
-    $str =~ s/^(?:Subject|From):.*$//gmi;
-  }
 
   # count illegal substrings (RFC 2045)
   # (non-ASCII + C0 controls except TAB, NL, CR)
