@@ -68,6 +68,10 @@ Note for Users Upgrading to SpamAssassin 4.0.0
   filter (pypolicyd-spf / spf-engine etc), from which generated Received-SPF
   header can be parsed by SpamAssassin.
 
+- ALL pseudo-header now returns decoded headers, so it's usage is consistent
+  with single header matching (:raw returns undecoded and unfolded like
+  before).
+
 Note for Users Upgrading to SpamAssassin 3.4.2
 ----------------------------------------------
 

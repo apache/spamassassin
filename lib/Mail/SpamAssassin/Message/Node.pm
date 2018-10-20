@@ -1068,7 +1068,7 @@ sub get_all_headers {
 	$self->{'truncated_header'} = 1;
 	last HEADER;
       }
-      $lines[$position] = $self->{header_order}->[$position].":".$contents;
+      $lines[$position] = $self->{header_order}->[$position].": ".$contents;
     }
   }
 
