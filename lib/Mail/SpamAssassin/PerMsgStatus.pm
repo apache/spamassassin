@@ -1831,6 +1831,7 @@ There are several special pseudo-headers that can be specified:
 =over 4
 
 =item C<ALL> can be used to mean the text of all the message's headers.
+Each header is decoded and unfolded to single line, unless called with :raw.
 
 =item C<ALL-TRUSTED> can be used to mean the text of all the message's headers
 that could only have been added by trusted relays.
@@ -1892,7 +1893,7 @@ sub _get {
   # ALL: entire pristine or semi-raw headers
   if ($request eq 'ALL') {
     return ($getraw ? $self->{msg}->get_pristine_header()
-                    : $self->{msg}->get_all_headers(1));
+                    : $self->{msg}->get_all_headers(0));
   }
   # ALL-TRUSTED: entire trusted raw headers
   elsif ($request eq 'ALL-TRUSTED') {
@@ -2842,7 +2843,7 @@ sub get_envelope_from {
   if ($envf = $self->get("X-Envelope-From")) {
     # heuristic: this could have been relayed via a list which then used
     # a *new* Envelope-from.  check
-    if ($self->get("ALL:raw") =~ /^Received:.*^X-Envelope-From:/smi) {
+    if ($self->get("ALL") =~ /^Received:.*?^X-Envelope-From:/smi) {
       dbg("message: X-Envelope-From header found after 1 or more Received lines, cannot trust envelope-from");
       return;
     } else {
@@ -2854,7 +2855,7 @@ sub get_envelope_from {
   if ($envf = $self->get("Envelope-Sender")) {
     # heuristic: this could have been relayed via a list which then used
     # a *new* Envelope-from.  check
-    if ($self->get("ALL:raw") =~ /^Received:.*^Envelope-Sender:/smi) {
+    if ($self->get("ALL") =~ /^Received:.*?^Envelope-Sender:/smi) {
       dbg("message: Envelope-Sender header found after 1 or more Received lines, cannot trust envelope-from");
     } else {
       goto ok;
@@ -2871,7 +2872,7 @@ sub get_envelope_from {
   if ($envf = $self->get("Return-Path")) {
     # heuristic: this could have been relayed via a list which then used
     # a *new* Envelope-from.  check
-    if ($self->get("ALL:raw") =~ /^Received:.*^Return-Path:/smi) {
+    if ($self->get("ALL") =~ /^Received:.*?^Return-Path:/smi) {
       dbg("message: Return-Path header found after 1 or more Received lines, cannot trust envelope-from");
     } else {
       goto ok;
@@ -2917,7 +2918,7 @@ sub get_all_hdrs_in_rcvd_index_range {
   if ($getraw) {
     @hdrs = $self->{msg}->get_pristine_header() =~ /^([^ \t].*?\n)(?![ \t])/smgi;
   } else {
-    @hdrs = split(/^/m, $self->{msg}->get_all_headers(1));
+    @hdrs = split(/^/m, $self->{msg}->get_all_headers(0));
   }
 
   foreach my $hdr (@hdrs) {

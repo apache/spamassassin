@@ -11,6 +11,9 @@ Note for Users Upgrading to SpamAssassin 3.4.3
   "ALTER TABLE txrep RENAME COLUMN count TO msgcount;"
   "ALTER TABLE awl RENAME COLUMN count TO msgcount;"
 
+- ALL pseudo-header now returns decoded headers, so it's usage is consistent
+  with single header matching (:raw returns undecoded and unfolded like
+  before).
 
 Note for Users Upgrading to SpamAssassin 3.4.2
 ----------------------------------------------
