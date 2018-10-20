@@ -2356,9 +2356,9 @@ if can(Mail::SpamAssassin::Conf::feature_bug6558_free)
   describe   PHOTO_EDITING_FREEM        Image editing service, freemail or CHN replyto
   score      PHOTO_EDITING_FREEM        3.750	# limit
 
-  meta       PHOTO_EDITING_DIRECT       (__PHOTO_RETOUCHING && __DOS_DIRECT_TO_MX) && !ALL_TRUSTED
+  meta       PHOTO_EDITING_DIRECT       (__PHOTO_RETOUCHING && __DOS_DIRECT_TO_MX) && !ALL_TRUSTED && !__HAS_HREF
   describe   PHOTO_EDITING_DIRECT       Image editing service, direct to MX
-  score      PHOTO_EDITING_DIRECT       2.000	# limit
+  score      PHOTO_EDITING_DIRECT       3.000	# limit
 endif
 
 ## not performing well in masscheck
