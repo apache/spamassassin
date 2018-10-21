@@ -1378,7 +1378,7 @@ sub is_regexp_valid {
       if ($self->{conf}->{lint_rules}) {
         $self->lint_warn($msg, $name);
       } else {
-        warn $msg;
+        warn "$msg\n";
         return 0;
       }
     }
@@ -1406,7 +1406,10 @@ sub is_regexp_valid {
 sub is_always_matching_regexp {
   my ($self, $name, $re) = @_;
 
-  if ($re =~ /(?<!\\)\|\|/) {
+  if ($re eq '') {
+    return "config: empty regexp for rule $name always matches";
+  }
+  elsif ($re =~ /(?<!\\)\|\|/) {
     return "config: regexp for rule $name always matches due to '||'";
   }
   elsif ($re =~ /^\|/) {
