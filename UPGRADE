@@ -7,9 +7,11 @@ Note for Users Upgrading to SpamAssassin 3.4.3
   MySQL:
   "ALTER TABLE `txrep` CHANGE `count` `msgcount` INT(11) NOT NULL DEFAULT '0';"
   "ALTER TABLE `awl` CHANGE `count` `msgcount` INT(11) NOT NULL DEFAULT '0';"
+  "ALTER TABLE `awl` ADD last_hit timestamp NOT NULL default CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP;"
   PostgreSQL:
   "ALTER TABLE txrep RENAME COLUMN count TO msgcount;"
   "ALTER TABLE awl RENAME COLUMN count TO msgcount;"
+  "ALTER TABLE awl ADD last_hit timestamp NOT NULL default CURRENT_TIMESTAMP;"
 
 - ALL pseudo-header now returns decoded headers, so it's usage is consistent
   with single header matching (:raw returns undecoded and folded like before).
