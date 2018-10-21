@@ -1218,7 +1218,7 @@ sub add_test {
   $conf->{tests}->{$name} = $text;
   $conf->{test_types}->{$name} = $type;
 
-  if ($name =~ /AUTOLEARNTEST/i) {
+  if ($name =~ /^AUTOLEARNTEST/) {
      dbg("config: auto-learn: $name has type $type = $conf->{test_types}->{$name} during add_test\n");
   }
 
