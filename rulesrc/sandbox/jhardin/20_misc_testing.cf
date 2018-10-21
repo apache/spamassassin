@@ -1916,6 +1916,15 @@ meta           BITCOIN_SPAM_04  __BITCOIN_ID && __freemail_hdr_replyto
 describe       BITCOIN_SPAM_04  BitCoin spam pattern 04
 score          BITCOIN_SPAM_04  1.500	# limit
 
+meta           BITCOIN_SPAM_05  __BITCOIN_ID && __SPOOFED_FREEMAIL 
+describe       BITCOIN_SPAM_05  BitCoin spam pattern 05
+score          BITCOIN_SPAM_05  2.500	# limit
+
+meta           BITCOIN_SPAM_06  __BITCOIN_ID && TVD_RCVD_SPACE_BRACKET
+describe       BITCOIN_SPAM_06  BitCoin spam pattern 06
+score          BITCOIN_SPAM_06  1.500	# limit
+
+
 ifplugin Mail::SpamAssassin::Plugin::ReplaceTags
   body           __MY_VICTIM            /(?:<H><I>|<H><E><L><L><O>),?(?:\s<M><Y>)?\s<V><I><C><T><I><M>/i
   replace_rules  __MY_VICTIM
@@ -1940,9 +1949,13 @@ else
   body           __YOUR_PERSONAL        /\byour\spersonal\s(?:info(?:rmation)?|data)\b/i
   body           __HOURS_DEADLINE       /\bgive\syou\s\d+\shours\b/i
 endif
-meta           BITCOIN_EXTORT_01      __BITCOIN_ID && __MY_VICTIM && __MY_MALWARE && __PAY_ME && ( __YOUR_WEBCAM + __YOUR_ONAN + __YOUR_PERSONAL + __HOURS_DEADLINE) > 2
+meta           BITCOIN_EXTORT_01      __BITCOIN_ID && __MY_MALWARE && __PAY_ME && ( __MY_VICTIM + __YOUR_WEBCAM + __YOUR_ONAN + __YOUR_PERSONAL + __HOURS_DEADLINE) > 2
 describe       BITCOIN_EXTORT_01      Extortion spam, pay via bitcoin
 score          BITCOIN_EXTORT_01      4.750	# limit
+
+meta           BITCOIN_PAY_ME         __BITCOIN_ID && __PAY_ME
+describe       BITCOIN_PAY_ME         Pay me via bitcoin
+score          BITCOIN_PAY_ME         2.500	# limit
 
 
 #body          NUM_FREE         /\b\d+free/i
