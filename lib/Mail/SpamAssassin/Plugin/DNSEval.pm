@@ -263,10 +263,8 @@ sub check_rbl_backend {
     splice (@ips, $checklast);	# remove all others
   }
 
-  my $tflags = $pms->{conf}->{tflags}->{$rule};
-
   # Trusted relays should only be checked against nice rules (dnswls)
-  if (defined $tflags && $tflags !~ /\bnice\b/) {
+  if (($pms->{conf}->{tflags}->{$rule}||'') !~ /\bnice\b/) {
     # remove trusted hosts from beginning
     while (@ips && $trusted->contains_ip($ips[0])) { shift @ips }
   }

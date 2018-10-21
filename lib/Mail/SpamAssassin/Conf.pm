@@ -5233,7 +5233,7 @@ sub maybe_header_only {
   my($self,$rulename) = @_;
   my $type = $self->{test_types}->{$rulename};
 
-  if ($rulename =~ /AUTOLEARNTEST/i) {
+  if ($rulename =~ /^AUTOLEARNTEST/) {
     dbg("config: auto-learn: $rulename - Test type is $self->{test_types}->{$rulename}.");
   }
  
@@ -5243,9 +5243,7 @@ sub maybe_header_only {
     return 1;
 
   } elsif ($type == $TYPE_META_TESTS) {
-    my $tflags = $self->{tflags}->{$rulename}; 
-    $tflags ||= '';
-    if ($tflags =~ m/\bnet\b/i) {
+    if (($self->{tflags}->{$rulename}||'') =~ /\bnet\b/) {
       return 0;
     } else {
       return 1;
@@ -5259,7 +5257,7 @@ sub maybe_body_only {
   my($self,$rulename) = @_;
   my $type = $self->{test_types}->{$rulename};
 
-  if ($rulename =~ /AUTOLEARNTEST/i) {
+  if ($rulename =~ /^AUTOLEARNTEST/) {
     dbg("config: auto-learn: $rulename - Test type is $self->{test_types}->{$rulename}.");
   }
 
@@ -5272,8 +5270,7 @@ sub maybe_body_only {
     return 1;
 
   } elsif ($type == $TYPE_META_TESTS) {
-    my $tflags = $self->{tflags}->{$rulename}; $tflags ||= '';
-    if ($tflags =~ m/\bnet\b/i) {
+    if (($self->{tflags}->{$rulename}||'') =~ /\bnet\b/) {
       return 0;
     } else {
       return 1;
