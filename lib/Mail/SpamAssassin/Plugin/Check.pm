@@ -779,9 +779,9 @@ sub do_head_tests {
               $ifwhile = 'while';
               $hitdone = 'last';
               $matchg = 'g';
-              my ($max) = ($pms->{conf}->{tflags}->{$rulename}||'') =~ /\bmaxhits=(\d+)\b/;
-              $max = untaint_var($max);
-              $whlimit = ' && $hits++ < '.$max if $max;
+              if ($conf->{tflags}->{$rulename} =~ /\bmaxhits=(\d+)\b/) {
+                $whlimit = ' && $hits++ < '.untaint_var($1);
+              }
             }
             $expr = '$hval ' . $op . ' ' . $pat . $matchg;
           }
@@ -834,7 +834,7 @@ sub do_body_tests {
     {
       # support multiple matches
       $loopid++;
-      my ($max) = ($pms->{conf}->{tflags}->{$rulename}||'') =~ /\bmaxhits=(\d+)\b/;
+      my ($max) = $conf->{tflags}->{$rulename} =~ /\bmaxhits=(\d+)\b/;
       $max = untaint_var($max);
       $sub .= '
       $hits = 0;
@@ -918,7 +918,7 @@ sub do_uri_tests {
     }
     if (($conf->{tflags}->{$rulename}||'') =~ /\bmultiple\b/) {
       $loopid++;
-      my ($max) = ($pms->{conf}->{tflags}->{$rulename}||'') =~ /\bmaxhits=(\d+)\b/;
+      my ($max) = $conf->{tflags}->{$rulename} =~ /\bmaxhits=(\d+)\b/;
       $max = untaint_var($max);
       $sub .= '
       $hits = 0;
@@ -993,11 +993,11 @@ sub do_rawbody_tests {
       dbg("rules-all: running rawbody rule %s", q{'.$rulename.'});
       ';
     }
-    if (($pms->{conf}->{tflags}->{$rulename}||'') =~ /\bmultiple\b/)
+    if (($conf->{tflags}->{$rulename}||'') =~ /\bmultiple\b/)
     {
       # support multiple matches
       $loopid++;
-      my ($max) = ($pms->{conf}->{tflags}->{$rulename}||'') =~ /\bmaxhits=(\d+)\b/;
+      my ($max) = $conf->{tflags}->{$rulename} =~ /\bmaxhits=(\d+)\b/;
       $max = untaint_var($max);
       $sub .= '
       $hits = 0;
@@ -1074,7 +1074,7 @@ sub do_full_tests {
   {
     my ($self, $pms, $conf, $rulename, $pat, %opts) = @_;
     $pat = untaint_var($pat);  # presumably checked
-    my ($max) = ($pms->{conf}->{tflags}->{$rulename}||'') =~ /\bmaxhits=(\d+)\b/;
+    my ($max) = ($conf->{tflags}->{$rulename}||'') =~ /\bmaxhits=(\d+)\b/;
     $max = untaint_var($max);
     $self->add_evalstr($pms, '
       if ($scoresptr->{q{'.$rulename.'}}) {
