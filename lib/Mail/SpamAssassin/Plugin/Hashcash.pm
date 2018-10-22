@@ -324,8 +324,6 @@ sub _check_hashcash_resource {
   my ($self, $scanner, $list, $addr) = @_;
   $addr = lc $addr;
   if (defined ($list->{$addr})) { return 1; }
-  study $addr;  # study is a no-op since perl 5.16.0, eliminating related bugs
-
   foreach my $regexp (values %{$list})
   {
     # allow %u == current username
