@@ -765,7 +765,7 @@ sub set_string_list {
     return $Mail::SpamAssassin::Conf::MISSING_REQUIRED_VALUE;
   }
 
-  push(@{$conf->{$key}}, split(' ', $value));
+  push(@{$conf->{$key}}, split(/\s+/, $value));
 }
 
 sub set_ipaddr_list {
@@ -775,7 +775,7 @@ sub set_ipaddr_list {
     return $Mail::SpamAssassin::Conf::MISSING_REQUIRED_VALUE;
   }
 
-  foreach my $net (split(' ', $value)) {
+  foreach my $net (split(/\s+/, $value)) {
     $conf->{$key}->add_cidr($net);
   }
   $conf->{$key.'_configured'} = 1;
@@ -798,7 +798,7 @@ sub set_addrlist_value {
   unless (defined $value && $value !~ /^$/) {
     return $Mail::SpamAssassin::Conf::MISSING_REQUIRED_VALUE;
   }
-  $conf->{parser}->add_to_addrlist ($key, split (' ', $value));  # keep tainted
+  $conf->{parser}->add_to_addrlist ($key, split(/\s+/, $value));  # keep tainted
 }
 
 sub remove_addrlist_value {
@@ -807,7 +807,7 @@ sub remove_addrlist_value {
   unless (defined $value && $value !~ /^$/) {
     return $Mail::SpamAssassin::Conf::MISSING_REQUIRED_VALUE;
   }
-  $conf->{parser}->remove_from_addrlist ($key, split (' ', $value));
+  $conf->{parser}->remove_from_addrlist ($key, split(/\s+/, $value));
 }
 
 sub set_template_append {
