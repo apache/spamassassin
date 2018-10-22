@@ -1535,7 +1535,7 @@ tflags      XPRIO              publish
 # some no-ham combinations
 
 meta        __XPRIO_SHORT_SUBJ __XPRIO && __SUBJ_SHORT 
-meta        XPRIO_SHORT_SUBJ   __XPRIO_SHORT_SUBJ && !__UNPARSEABLE_RELAY_COUNT && !__DKIM_EXISTS && !__RP_MATCHES_RCVD && !__SUBSCRIPTION_INFO && !__FROM_ENCODED_QP 
+meta        XPRIO_SHORT_SUBJ   __XPRIO_SHORT_SUBJ && !__UNPARSEABLE_RELAY_COUNT && !__DKIM_EXISTS && !__RP_MATCHES_RCVD && !__SUBSCRIPTION_INFO && !__FROM_ENCODED_QP && !ALL_TRUSTED
 describe    XPRIO_SHORT_SUBJ   Has X-Priority header + short subject
 score       XPRIO_SHORT_SUBJ   2.500	# limit
 tflags      XPRIO_SHORT_SUBJ   publish
@@ -2448,11 +2448,16 @@ tflags     USB_DRIVES                 publish
 #header     __SUBJ_CUSTOM_WITH_LOGO    Subject =~ /^(?=.*\bcustom\b).*(?:printed |with )+(?:your )?logos?\b/i
 
 full       __FROM_NAME_IN_MSG         /^From:\s+([^<]\S+\s\S+)\s(?=.{1,1024}^\1$)/sm
-meta       FRNAME_IN_MSG_XPRIO        (__FROM_NAME_IN_MSG && __XPRIO) && !__DKIM_EXISTS  && !__SUBJ_NOT_SHORT 
+meta       FRNAME_IN_MSG_XPRIO_NO_SUB (__FROM_NAME_IN_MSG && __XPRIO && (__SUBJECT_EMPTY || __SUBJ_SHORT)) && !__DKIM_EXISTS  && !__SUBJ_NOT_SHORT && !ALL_TRUSTED
+describe   FRNAME_IN_MSG_XPRIO_NO_SUB From name in message + X-Priority + short or no subject
+score      FRNAME_IN_MSG_XPRIO_NO_SUB 2.500	# limit
+
+meta       FRNAME_IN_MSG_XPRIO        (__FROM_NAME_IN_MSG && __XPRIO && !(__SUBJECT_EMPTY || __SUBJ_SHORT)) && !__DKIM_EXISTS  && !__SUBJ_NOT_SHORT && !ALL_TRUSTED
 describe   FRNAME_IN_MSG_XPRIO        From name in message + X-Priority
 score      FRNAME_IN_MSG_XPRIO        2.500	# limit
 tflags     FRNAME_IN_MSG_XPRIO        publish
-meta       FRNAME_IN_MSG_NO_SUBJ      __FROM_NAME_IN_MSG && (__SUBJECT_EMPTY || __XPRIO_SHORT_SUBJ) && !__DKIM_EXISTS && !__ANY_IMAGE_ATTACH 
+
+meta       FRNAME_IN_MSG_NO_SUBJ      (__FROM_NAME_IN_MSG && (__SUBJECT_EMPTY || __SUBJ_SHORT) && !__XPRIO) && !__DKIM_EXISTS && !__ANY_IMAGE_ATTACH && !ALL_TRUSTED
 describe   FRNAME_IN_MSG_NO_SUBJ      From name in message + short or no subject
 score      FRNAME_IN_MSG_NO_SUBJ      2.500	# limit
 tflags     FRNAME_IN_MSG_NO_SUBJ      publish
