@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: darxus ena-week0 ena-week1 ena-week4 giovanni grenier hege jarif jbrooks mmiroslaw-mails-ham mmiroslaw-mails-spam sihde thendrikx; day 2: ena-week1 ena-week4 jarif jbrooks llanga mmiroslaw-mails-ham mmiroslaw-mails-spam sihde; day 3: ena-week1 ena-week4 jarif jbrooks llanga mmiroslaw-mails-ham mmiroslaw-mails-spam sihde
+# with results from: day 1: darxus ena-week0 ena-week1 ena-week4 giovanni grenier hege jarif jbrooks mmiroslaw-mails-ham mmiroslaw-mails-spam sihde thendrikx; day 2: ena-week1 jbrooks llanga mmiroslaw-mails-ham mmiroslaw-mails-spam sihde; day 3: ena-week1 ena-week4 jarif jbrooks llanga mmiroslaw-mails-ham mmiroslaw-mails-spam sihde
 
 # tflags publish
 AC_BR_BONANZA
@@ -107,16 +107,7 @@ BAYES_99
 BAYES_999
 
 # good enough
-BITCOIN_SPAM_01
-
-# good enough
 BITCOIN_SPAM_02
-
-# good enough
-BITCOIN_SPAM_03
-
-# good enough
-BITCOIN_SPAM_04
 
 # good enough
 BODY_SINGLE_WORD
@@ -222,9 +213,6 @@ ENCRYPTED_MESSAGE
 
 # tflags userconf
 ENV_AND_HDR_SPF_MATCH
-
-# good enough
-FAKE_REPLY_C
 
 # tflags publish
 FBI_MONEY
@@ -397,12 +385,6 @@ HASHCASH_2SPEND
 # tflags userconf
 HASHCASH_HIGH
 
-# good enough
-HDRS_LCASE_IMGONLY
-
-# good enough
-HDRS_MISSP
-
 # tflags publish
 HDR_ORDER_FTSDMCXX_DIRECT
 
@@ -414,9 +396,6 @@ HEADER_FROM_DIFFERENT_DOMAINS
 
 # tflags userconf
 HEAD_LONG
-
-# good enough
-HELO_LOCALHOST
 
 # good enough
 HELO_MISC_IP
@@ -435,9 +414,6 @@ HK_PNIS
 
 # good enough
 HK_SCAM_N2
-
-# good enough
-HK_SCAM_N4
 
 # good enough
 HK_SCAM_N8
@@ -474,9 +450,6 @@ LONG_IMG_URI
 
 # tflags publish
 LOTS_OF_MONEY
-
-# good enough
-LOTTO_AGENT_RPLY
 
 # tflags publish
 LUCRATIVE
@@ -549,6 +522,12 @@ OBFU_JVSCR_ESC
 
 # tflags publish
 OBFU_TEXT_ATTACH
+
+# good enough
+PDS_FROM_2_EMAILS
+
+# good enough
+PHOTO_EDITING_DIRECT
 
 # good enough
 PHOTO_EDITING_FREEM
@@ -929,9 +908,6 @@ TO_NO_BRKTS_NORDNS_HTML
 TO_NO_BRKTS_PCNT
 
 # good enough
-TVD_INCREASE_SIZE
-
-# good enough
 TVD_PH_BODY_META
 
 # good enough
@@ -947,55 +923,55 @@ TVD_SPACE_ENCODED
 TW_GIBBERISH_MANY
 
 # good enough
-ADVANCE_FEE_2_NEW_FRM_MNY
+ADVANCE_FEE_3_NEW_FRM_MNY
 
 # good enough
-ADVANCE_FEE_4_NEW_FRM_MNY
+ADVANCE_FEE_5_NEW_FRM_MNY
 
 # good enough
-ADVANCE_FEE_4_NEW_MONEY
+AXB_XMAILER_MIMEOLE_OL_1ECD5
 
 # good enough
-ADVANCE_FEE_5_NEW
+BIGNUM_EMAILS
 
 # good enough
-BODY_SINGLE_URI
+DEAR_BENEFICIARY
 
 # good enough
-DATE_IN_FUTURE_96_Q
+FILL_THIS_FORM_FRAUD_PHISH
 
 # good enough
-FILL_THIS_FORM_LOAN
+FILL_THIS_FORM_LONG
 
 # good enough
-FROM_MISSPACED
+FROM_MISSP_DYNIP
 
 # good enough
-FROM_MISSP_USER
+FROM_MISSP_TO_UNDISC
+
+# tflags publish
+FSL_BULK_SIG
+
+# tflags publish
+FUZZY_BTC_WALLET
 
 # good enough
-HK_NAME_MR_MRS
+LOTTO_AGENT
 
 # good enough
-HK_SCAM_N3
+MONEY_ATM_CARD
 
 # good enough
-MILLION_USD
+NSL_RCVD_HELO_USER
 
 # good enough
-MONEY_BARRISTER
+SERGIO_SUBJECT_VIAGRA01
 
 # good enough
-MONEY_FROM_MISSP
+TO_EQ_FM_DIRECT_MX
 
 # good enough
-NSL_RCVD_FROM_USER
-
-# good enough
-PDS_FROM_2_EMAILS
-
-# good enough
-PHOTO_EDITING_DIRECT
+TVD_SPACE_RATIO_MINFP
 
 # tflags publish
 UC_GIBBERISH_OBFU
