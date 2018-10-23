@@ -2836,7 +2836,7 @@ sub get_envelope_from {
     # make sure we get the most recent copy - there can be only one EnvelopeSender.
     $envf = $self->get($self->{conf}->{envelope_sender_header}.":addr",undef);
     # ok if it contains an "@" sign, or is "" (ie. "<>" without the < and >)
-    goto ok if defined $envf && ($envf =~ /\@/ || $envf eq '');
+    goto ok if defined $envf && (index($envf, '@') > 0 || $envf eq '');
     # Warn them if it's configured, but not there or not usable.
     if (defined $envf) {
       chomp $envf;
@@ -2856,17 +2856,19 @@ sub get_envelope_from {
   # if possible... use the last untrusted header, in case there's
   # trusted headers.
   my $lasthop = $self->{relays_untrusted}->[0];
+  my $lasthop_str = 'last untrusted';
   if (!defined $lasthop) {
     # no untrusted headers?  in that case, the message is ALL_TRUSTED.
     # use the first trusted header (ie. the oldest, originating one).
     $lasthop = $self->{relays_trusted}->[-1];
+    $lasthop_str = 'first trusted';
   }
 
   if (defined $lasthop) {
     $envf = $lasthop->{envfrom};
-    # TODO FIXME: Received.pm puts both null senders and absence-of-sender
-    # into the relays array as '', so we can't distinguish them :(
-    if ($envf && ($envf =~ /\@/)) {
+    # ok if it contains an "@" sign, or is "" (ie. "<>" without the < and >)
+    if (defined $envf && (index($envf, '@') > 0 || $envf eq '')) {
+      dbg("message: using $lasthop_str relay envelope-from as EnvelopeFrom: '$envf'");
       goto ok;
     }
   }
@@ -2895,6 +2897,7 @@ sub get_envelope_from {
       dbg("message: X-Envelope-From header found after 1 or more Received lines, cannot trust envelope-from");
       return;
     } else {
+      dbg("message: using X-Envelope-From header as EnvelopeFrom: '$envf'");
       goto ok;
     }
   }
@@ -2906,6 +2909,7 @@ sub get_envelope_from {
     if ($self->get("ALL") =~ /^Received:.*?^Envelope-Sender:/smi) {
       dbg("message: Envelope-Sender header found after 1 or more Received lines, cannot trust envelope-from");
     } else {
+      dbg("message: using Envelope-Sender header as EnvelopeFrom: '$envf'");
       goto ok;
     }
   }
@@ -2923,6 +2927,7 @@ sub get_envelope_from {
     if ($self->get("ALL") =~ /^Received:.*?^Return-Path:/smi) {
       dbg("message: Return-Path header found after 1 or more Received lines, cannot trust envelope-from");
     } else {
+      dbg("message: using Return-Path header as EnvelopeFrom: '$envf'");
       goto ok;
     }
   }
