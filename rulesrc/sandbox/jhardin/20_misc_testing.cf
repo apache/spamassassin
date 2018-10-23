@@ -1903,26 +1903,32 @@ tflags         OBFU_BITCOIN     publish
 meta           BITCOIN_SPAM_01  __BITCOIN_ID && HTML_MIME_NO_HTML_TAG
 describe       BITCOIN_SPAM_01  BitCoin spam pattern 01
 score          BITCOIN_SPAM_01  2.500	# limit
+tflags         BITCOIN_SPAM_01  publish
 
 meta           BITCOIN_SPAM_02  __BITCOIN_ID && __BOTH_INR_AND_REF 
 describe       BITCOIN_SPAM_02  BitCoin spam pattern 02
 score          BITCOIN_SPAM_02  2.500	# limit
+tflags         BITCOIN_SPAM_02  publish
 
 meta           BITCOIN_SPAM_03  __BITCOIN_ID && __SINGLE_WORD_SUBJ
 describe       BITCOIN_SPAM_03  BitCoin spam pattern 03
 score          BITCOIN_SPAM_03  1.500	# limit
+tflags         BITCOIN_SPAM_03  publish
 
 meta           BITCOIN_SPAM_04  __BITCOIN_ID && __freemail_hdr_replyto
 describe       BITCOIN_SPAM_04  BitCoin spam pattern 04
 score          BITCOIN_SPAM_04  1.500	# limit
+tflags         BITCOIN_SPAM_04  publish
 
 meta           BITCOIN_SPAM_05  __BITCOIN_ID && __SPOOFED_FREEMAIL 
 describe       BITCOIN_SPAM_05  BitCoin spam pattern 05
 score          BITCOIN_SPAM_05  2.500	# limit
+tflags         BITCOIN_SPAM_05  publish
 
 meta           BITCOIN_SPAM_06  __BITCOIN_ID && TVD_RCVD_SPACE_BRACKET
 describe       BITCOIN_SPAM_06  BitCoin spam pattern 06
 score          BITCOIN_SPAM_06  1.500	# limit
+tflags         BITCOIN_SPAM_06  publish
 
 
 ifplugin Mail::SpamAssassin::Plugin::ReplaceTags
@@ -1950,12 +1956,18 @@ else
   body           __HOURS_DEADLINE       /\bgive\syou\s\d+\shours\b/i
 endif
 meta           BITCOIN_EXTORT_01      __BITCOIN_ID && __MY_MALWARE && __PAY_ME && ( __MY_VICTIM + __YOUR_WEBCAM + __YOUR_ONAN + __YOUR_PERSONAL + __HOURS_DEADLINE) > 2
-describe       BITCOIN_EXTORT_01      Extortion spam, pay via bitcoin
+describe       BITCOIN_EXTORT_01      Extortion spam, pay via BitCoin
 score          BITCOIN_EXTORT_01      4.750	# limit
 
 meta           BITCOIN_PAY_ME         __BITCOIN_ID && __PAY_ME
-describe       BITCOIN_PAY_ME         Pay me via bitcoin
+describe       BITCOIN_PAY_ME         Pay me via BitCoin
 score          BITCOIN_PAY_ME         2.500	# limit
+tflags         BITCOIN_PAY_ME         publish
+
+meta           BITCOIN_MALWARE        __BITCOIN_ID && __MY_MALWARE && !__NOT_SPOOFED
+describe       BITCOIN_MALWARE        BitCoin + malware
+score          BITCOIN_MALWARE        3.000	# limit
+tflags         BITCOIN_MALWARE        publish
 
 
 #body          NUM_FREE         /\b\d+free/i
@@ -2563,7 +2575,6 @@ if can(Mail::SpamAssassin::Conf::feature_bug6558_free)
   tflags     __UNICODE_OBFU_ZW          multiple maxhits=10
   meta       __UNICODE_OBFU_ZW_MANY     __UNICODE_OBFU_ZW > 9
 endif
-
 
 
 
