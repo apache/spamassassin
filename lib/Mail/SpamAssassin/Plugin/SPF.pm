@@ -222,6 +222,14 @@ Adds capability check for "if can()" for check_for_spf_permerror, check_for_spf_
 
 sub has_check_for_spf_errors { 1 }
 
+sub parsed_metadata {
+  my ($self, $opts) = @_;
+
+  $self->_get_sender($opts->{permsgstatus});
+
+  return 1;
+}
+
 # SPF support
 sub check_for_spf_pass {
   my ($self, $scanner) = @_;
@@ -542,7 +550,7 @@ sub _check_spf {
     $scanner->{spf_failure_comment} = undef;
   }
 
-  my $lasthop = $self->_get_relay($scanner);
+  my $lasthop = $scanner->{relays_external}->[0];
   if (!defined $lasthop) {
     dbg("spf: no suitable relay for spf use found, skipping SPF%s check",
         $ishelo ? '-helo' : '');
@@ -551,7 +559,6 @@ sub _check_spf {
 
   my $ip = $lasthop->{ip};	# always present
   my $helo = $lasthop->{helo};	# could be missing
-  $scanner->{sender} = '' unless $scanner->{sender_got};
 
   if ($ishelo) {
     unless ($helo) {
@@ -560,19 +567,17 @@ sub _check_spf {
     }
     dbg("spf: checking HELO (helo=$helo, ip=$ip)");
   } else {
-    $self->_get_sender($scanner) unless $scanner->{sender_got};
-
     # TODO: we're supposed to use the helo domain as the sender identity (for
     # mfrom checks) if the sender is the null sender, however determining that
     # it's the null sender, and not just a failure to get the envelope isn't
     # exactly trivial... so for now we'll just skip the check
 
-    if (!$scanner->{sender}) {
+    if (!$scanner->{spf_sender}) {
       # we already dbg'd that we couldn't get an Envelope-From and can't do SPF
       return;
     }
     dbg("spf: checking EnvelopeFrom (helo=%s, ip=%s, envfrom=%s)",
-        ($helo ? $helo : ''), $ip, $scanner->{sender});
+        ($helo ? $helo : ''), $ip, $scanner->{spf_sender});
   }
 
   # this test could probably stand to be more strict, but try to test
@@ -591,7 +596,7 @@ sub _check_spf {
   my ($result, $comment, $text, $err);
 
   # TODO: currently we won't get to here for a mfrom check with a null sender
-  my $identity = $ishelo ? $helo : ($scanner->{sender}); # || $helo);
+  my $identity = $ishelo ? $helo : ($scanner->{spf_sender}); # || $helo);
 
   unless ($identity) {
     dbg("spf: cannot determine %s identity, skipping %s SPF check",
@@ -602,7 +607,7 @@ sub _check_spf {
 
   my $request;
   eval {
-    $request = Mail::SPF::Request->new( scope         => $ishelo ? 'helo' : 'mfrom',
+    $request = Mail::SPF::Request->new( scope => $ishelo ? 'helo' : 'mfrom',
 			  identity      => $identity,
 			  ip_address    => $ip,
 			  helo_identity => $helo );
@@ -664,52 +669,52 @@ sub _check_spf {
     }
   }
 
-  dbg("spf: query for $scanner->{sender}/$ip/$helo: result: $result, comment: $comment, text: $text");
-}
-
-sub _get_relay {
-  my ($self, $scanner) = @_;
-
-  # dos: first external relay, not first untrusted
-  return $scanner->{relays_external}->[0];
+  if ($ishelo) {
+    dbg("spf: query for $ip/$helo: result: $result, comment: $comment, text: $text");
+  } else {
+    dbg("spf: query for $scanner->{spf_sender}/$ip/$helo: result: $result, comment: $comment, text: $text");
+  }
 }
 
 sub _get_sender {
   my ($self, $scanner) = @_;
-  my $sender;
 
-  $scanner->{sender_got} = 1;
-  $scanner->{sender} = '';
-
-  my $relay = $self->_get_relay($scanner);
+  my $relay = $scanner->{relays_external}->[0];
   if (defined $relay) {
-    $sender = $relay->{envfrom};
+    my $sender = $relay->{envfrom};
+    if (defined $sender) {
+      dbg("spf: found EnvelopeFrom '$sender' in first external Received header");	
+      $scanner->{spf_sender} = lc $sender;
+    } else {
+      dbg("spf: EnvelopeFrom not found in first external Received header");
+    }
   }
 
-  if ($sender) {
-    dbg("spf: found Envelope-From in first external Received header");
-  }
-  else {
+  if (!exists $scanner->{spf_sender}) {
     # We cannot use the env-from data, since it went through 1 or more relays 
     # since the untrusted sender and they may have rewritten it.
-    if ($scanner->{num_relays_trusted} > 0 && !$scanner->{conf}->{always_trust_envelope_sender}) {
-      dbg("spf: relayed through one or more trusted relays, cannot use header-based Envelope-From, skipping");
-      return;
+    if ($scanner->{num_relays_trusted} > 0 &&
+          !$scanner->{conf}->{always_trust_envelope_sender}) {
+      dbg("spf: relayed through one or more trusted relays, ".
+            "cannot use header-based EnvelopeFrom");
+    } else {
+      # we can (apparently) use whatever the current EnvelopeFrom was,
+      # from the Return-Path, X-Envelope-From, or whatever header.
+      # it's better to get it from Received though, as that is updated
+      # hop-by-hop.
+      my $sender = $scanner->get("EnvelopeFrom:addr");
+      if (defined $sender) {
+        dbg("spf: found EnvelopeFrom '$sender' from header");
+        $scanner->{spf_sender} = lc $sender;
+      } else {
+        dbg("spf: EnvelopeFrom header not found");
+      }
     }
-
-    # we can (apparently) use whatever the current Envelope-From was,
-    # from the Return-Path, X-Envelope-From, or whatever header.
-    # it's better to get it from Received though, as that is updated
-    # hop-by-hop.
-    $sender = $scanner->get("EnvelopeFrom:addr");
   }
 
-  if (!$sender) {
-    dbg("spf: cannot get Envelope-From, cannot use SPF");
-    return;  # avoid setting $scanner->{sender} to undef
+  if (!exists $scanner->{spf_sender}) {
+    dbg("spf: cannot get EnvelopeFrom, cannot use SPF by DNS");
   }
-
-  return $scanner->{sender} = lc $sender;
 }
 
 sub _check_spf_whitelist {
@@ -725,28 +730,25 @@ sub _check_spf_whitelist {
     return;
   }
 
-  $self->_get_sender($scanner) unless $scanner->{sender_got};
-
-  unless ($scanner->{sender}) {
-    dbg("spf: spf_whitelist_from: could not find useable envelope sender");
+  if (!$scanner->{spf_sender}) {
+    dbg("spf: spf_whitelist_from: no EnvelopeFrom available for whitelist check");
     return;
   }
 
-  $scanner->{spf_whitelist_from} = $self->_wlcheck($scanner,'whitelist_from_spf');
-  if (!$scanner->{spf_whitelist_from}) {
-    $scanner->{spf_whitelist_from} = $self->_wlcheck($scanner, 'whitelist_auth');
-  }
+  $scanner->{spf_whitelist_from} =
+    $self->_wlcheck($scanner, 'whitelist_from_spf') ||
+    $self->_wlcheck($scanner, 'whitelist_auth');
 
   # if the message doesn't pass SPF validation, it can't pass an SPF whitelist
   if ($scanner->{spf_whitelist_from}) {
     if ($self->check_for_spf_pass($scanner)) {
-      dbg("spf: whitelist_from_spf: $scanner->{sender} is in user's WHITELIST_FROM_SPF and passed SPF check");
+      dbg("spf: whitelist_from_spf: $scanner->{spf_sender} is in user's WHITELIST_FROM_SPF and passed SPF check");
     } else {
-      dbg("spf: whitelist_from_spf: $scanner->{sender} is in user's WHITELIST_FROM_SPF but failed SPF check");
+      dbg("spf: whitelist_from_spf: $scanner->{spf_sender} is in user's WHITELIST_FROM_SPF but failed SPF check");
       $scanner->{spf_whitelist_from} = 0;
     }
   } else {
-    dbg("spf: whitelist_from_spf: $scanner->{sender} is not in user's WHITELIST_FROM_SPF");
+    dbg("spf: whitelist_from_spf: $scanner->{spf_sender} is not in user's WHITELIST_FROM_SPF");
   }
 }
 
@@ -763,39 +765,35 @@ sub _check_def_spf_whitelist {
     return;
   }
 
-  $self->_get_sender($scanner) unless $scanner->{sender_got};
-
-  unless ($scanner->{sender}) {
+  if (!$scanner->{spf_sender}) {
     dbg("spf: def_spf_whitelist_from: could not find useable envelope sender");
     return;
   }
 
-  $scanner->{def_spf_whitelist_from} = $self->_wlcheck($scanner,'def_whitelist_from_spf');
-  if (!$scanner->{def_spf_whitelist_from}) {
-    $scanner->{def_spf_whitelist_from} = $self->_wlcheck($scanner, 'def_whitelist_auth');
-  }
+  $scanner->{def_spf_whitelist_from} =
+    $self->_wlcheck($scanner, 'def_whitelist_from_spf') ||
+    $self->_wlcheck($scanner, 'def_whitelist_auth');
 
   # if the message doesn't pass SPF validation, it can't pass an SPF whitelist
   if ($scanner->{def_spf_whitelist_from}) {
     if ($self->check_for_spf_pass($scanner)) {
-      dbg("spf: def_whitelist_from_spf: $scanner->{sender} is in DEF_WHITELIST_FROM_SPF and passed SPF check");
+      dbg("spf: def_whitelist_from_spf: $scanner->{spf_sender} is in DEF_WHITELIST_FROM_SPF and passed SPF check");
     } else {
-      dbg("spf: def_whitelist_from_spf: $scanner->{sender} is in DEF_WHITELIST_FROM_SPF but failed SPF check");
+      dbg("spf: def_whitelist_from_spf: $scanner->{spf_sender} is in DEF_WHITELIST_FROM_SPF but failed SPF check");
       $scanner->{def_spf_whitelist_from} = 0;
     }
   } else {
-    dbg("spf: def_whitelist_from_spf: $scanner->{sender} is not in DEF_WHITELIST_FROM_SPF");
+    dbg("spf: def_whitelist_from_spf: $scanner->{spf_sender} is not in DEF_WHITELIST_FROM_SPF");
   }
 }
 
 sub _wlcheck {
   my ($self, $scanner, $param) = @_;
-  if (defined ($scanner->{conf}->{$param}->{$scanner->{sender}})) {
+  if (defined ($scanner->{conf}->{$param}->{$scanner->{spf_sender}})) {
     return 1;
   } else {
-    study $scanner->{sender};  # study is a no-op since perl 5.16.0
     foreach my $regexp (values %{$scanner->{conf}->{$param}}) {
-      if ($scanner->{sender} =~ qr/$regexp/i) {
+      if ($scanner->{spf_sender} =~ /$regexp/) {
         return 1;
       }
     }
