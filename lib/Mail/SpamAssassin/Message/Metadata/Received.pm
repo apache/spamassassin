@@ -977,7 +977,7 @@ sub parse_received_line {
     # Received: from customer254-217.iplannetworks.net (HELO AGAMENON) 
     # (baldusi@200.69.254.217 with plain) by smtp.mail.vip.sc5.yahoo.com with
     # SMTP; 11 Mar 2003 21:03:28 -0000
-    if (/^(\S+) \((?:HELO|EHLO) (\S*)\) \((\S+\@)?(${IP_ADDRESS}).*?\) by (\S+) with /) {
+    if (/^(\S+) \((?:HELO|EHLO) (\S*)\) \((?:(\S+)\@)?(${IP_ADDRESS}).*?\) by (\S+) with /) {
       $mta_looked_up_dns = 1;
       $rdns = $1; $helo = $2; $ip = $4; $by = $5;
       $ident = $3 if defined $3;
