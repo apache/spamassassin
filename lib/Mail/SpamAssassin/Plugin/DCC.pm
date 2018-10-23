@@ -736,17 +736,13 @@ sub finish_parsing_start {
   $self->find_dcc_home();
   if ($self->is_dccifd_available()) {
     foreach (@{$opts->{conf}->{eval_to_rule}->{check_dcc}}) {
-      if (exists $opts->{conf}->{tests}->{$_}) {
-        dbg("dcc: adjusting rule $_ priority to -100");
-        $opts->{conf}->{priority}->{$_} = -100;
-      }
+      dbg("dcc: adjusting rule $_ priority to -100");
+      $opts->{conf}->{priority}->{$_} = -100;
     }
     if ($opts->{conf}->{use_dcc_rep}) {
       foreach (@{$opts->{conf}->{eval_to_rule}->{check_dcc_reputation_range}}) {
-        if (exists $opts->{conf}->{tests}->{$_}) {
-          dbg("dcc: adjusting rule $_ priority to -100");
-          $opts->{conf}->{priority}->{$_} = -100;
-        }
+        dbg("dcc: adjusting rule $_ priority to -100");
+        $opts->{conf}->{priority}->{$_} = -100;
       }
     }
   }

@@ -404,16 +404,12 @@ sub finish_parsing_start {
   # Find rulenames from eval_to_rule mappings
   if ($opts->{conf}->{razor_fork}) {
     foreach (@{$opts->{conf}->{eval_to_rule}->{check_razor2}}) {
-      if (exists $opts->{conf}->{tests}->{$_}) {
-        dbg("razor2: adjusting rule $_ priority to -100");
-        $opts->{conf}->{priority}->{$_} = -100;
-      }
+      dbg("razor2: adjusting rule $_ priority to -100");
+      $opts->{conf}->{priority}->{$_} = -100;
     }
     foreach (@{$opts->{conf}->{eval_to_rule}->{check_razor2_range}}) {
-      if (exists $opts->{conf}->{tests}->{$_}) {
-        dbg("razor2: adjusting rule $_ priority to -100");
-        $opts->{conf}->{priority}->{$_} = -100;
-      }
+      dbg("razor2: adjusting rule $_ priority to -100");
+      $opts->{conf}->{priority}->{$_} = -100;
     }
   }
 }

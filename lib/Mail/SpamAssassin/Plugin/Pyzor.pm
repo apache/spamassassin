@@ -283,10 +283,8 @@ sub finish_parsing_start {
   # Find rulenames from eval_to_rule mappings
   if ($opts->{conf}->{pyzor_fork}) {
     foreach (@{$opts->{conf}->{eval_to_rule}->{check_pyzor}}) {
-      if (exists $opts->{conf}->{tests}->{$_}) {
-        dbg("pyzor: adjusting rule $_ priority to -100");
-        $opts->{conf}->{priority}->{$_} = -100;
-      }
+      dbg("pyzor: adjusting rule $_ priority to -100");
+      $opts->{conf}->{priority}->{$_} = -100;
     }
   }
 }
