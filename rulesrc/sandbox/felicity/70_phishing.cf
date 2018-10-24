@@ -48,7 +48,7 @@ describe TVD_SUBJ_ACC_NUM	Subject has spammy looking monetary reference
 
 # bug 4457
 # this may be dealt with by other/less complex rules
-header __LOCAL_PP_S_UPD		Subject: =~ m'(?:confirm|update) (?:your|the) (?:billing )?(?:records?|information|account)'i
+header __LOCAL_PP_S_UPD		Subject =~ m'(?:confirm|update) (?:your|the) (?:billing )?(?:records?|information|account)'i
 body __LOCAL_PP_B_UPD		m'(?:confirm|update|verify) (?:your|the) (?:(?:current|billing) )?(?:records?|information|account|identity)'i
 body __LOCAL_PP_PPCGIURL	m'https?://www.paypal.com/cgi-bin/webscr\?'i
 uri __LOCAL_PP_NONPPURL		m'https?://(?:[A-Za-z0-9-_]+)\.(?!paypal\.com)(?:[A-Za-z0-9-_\.]+)'i
