@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: darxus ena-week0 ena-week1 ena-week4 giovanni grenier hege jarif jbrooks mmiroslaw-mails-ham mmiroslaw-mails-spam sihde thendrikx; day 2: ena-week1 jbrooks llanga mmiroslaw-mails-ham mmiroslaw-mails-spam sihde; day 3: ena-week1 jbrooks llanga mmiroslaw-mails-ham mmiroslaw-mails-spam sihde
+# with results from: day 1: darxus ena-week0 ena-week1 ena-week4 giovanni grenier hege jarif jbrooks mmiroslaw-mails-ham mmiroslaw-mails-spam sihde thendrikx; day 2: ena-week1 ena-week4 jarif jbrooks llanga mmiroslaw-mails-ham mmiroslaw-mails-spam sihde; day 3: ena-week1 jbrooks llanga mmiroslaw-mails-ham mmiroslaw-mails-spam sihde
 
 # tflags publish
 AC_BR_BONANZA
@@ -106,8 +106,26 @@ BAYES_99
 # tflags learn
 BAYES_999
 
-# good enough
+# tflags publish
+BITCOIN_PAY_ME
+
+# tflags publish
+BITCOIN_SPAM_01
+
+# tflags publish
 BITCOIN_SPAM_02
+
+# tflags publish
+BITCOIN_SPAM_03
+
+# tflags publish
+BITCOIN_SPAM_04
+
+# tflags publish
+BITCOIN_SPAM_05
+
+# tflags publish
+BITCOIN_SPAM_06
 
 # good enough
 BODY_SINGLE_WORD
@@ -430,6 +448,9 @@ HTML_CHARSET_FARAWAY
 # tflags publish
 HTML_OFF_PAGE
 
+# good enough
+HTML_TAG_BALANCE_CENTER
+
 # tflags publish
 IMG_ONLY_FM_DOM_INFO
 
@@ -531,9 +552,6 @@ PDS_FROM_2_EMAILS
 
 # good enough
 PHOTO_EDITING_DIRECT
-
-# good enough
-PHOTO_EDITING_FREEM
 
 # tflags publish
 PHP_NOVER_MUA
@@ -926,76 +944,64 @@ TVD_SPACE_ENCODED
 TW_GIBBERISH_MANY
 
 # good enough
-ADVANCE_FEE_2_NEW_FRM_MNY
+ACCT_PHISHING
 
 # good enough
-ADVANCE_FEE_4_NEW_FRM_MNY
+ADVANCE_FEE_3_NEW_FRM_MNY
 
 # good enough
-ADVANCE_FEE_4_NEW_MONEY
+ADVANCE_FEE_5_NEW_FRM_MNY
 
 # good enough
-ADVANCE_FEE_5_NEW
+AXB_XMAILER_MIMEOLE_OL_1ECD5
 
 # good enough
-BITCOIN_PAY_ME
+BIGNUM_EMAILS
+
+# tflags publish
+BITCOIN_MALWARE
 
 # good enough
-BITCOIN_SPAM_01
+DEAR_BENEFICIARY
 
 # good enough
-BITCOIN_SPAM_03
+FILL_THIS_FORM_FRAUD_PHISH
 
 # good enough
-BITCOIN_SPAM_04
+FILL_THIS_FORM_LONG
 
 # good enough
-BITCOIN_SPAM_05
+FRNAME_IN_MSG_XPRIO_NO_SUB
 
 # good enough
-BITCOIN_SPAM_06
+FROM_MISSP_DYNIP
 
 # good enough
-BODY_SINGLE_URI
-
-# good enough
-DATE_IN_FUTURE_96_Q
-
-# good enough
-FILL_THIS_FORM_LOAN
-
-# good enough
-FROM_MISSPACED
-
-# good enough
-FROM_MISSP_USER
+FROM_MISSP_TO_UNDISC
 
 # tflags publish
 FSL_BULK_SIG
 
 # good enough
-HK_CTE_RAW
+LIST_PARTIAL_SHORT_MSG
 
 # good enough
-HK_NAME_MR_MRS
+LOTTO_AGENT
 
 # good enough
-HK_SCAM_N3
+MONEY_ATM_CARD
 
 # good enough
-HTML_TAG_BALANCE_CENTER
+NSL_RCVD_HELO_USER
 
 # good enough
-MILLION_USD
+SERGIO_SUBJECT_VIAGRA01
 
 # good enough
-MONEY_BARRISTER
+TO_EQ_FM_DIRECT_MX
 
 # good enough
-MONEY_FROM_MISSP
-
-# good enough
-NSL_RCVD_FROM_USER
+TVD_SPACE_RATIO_MINFP
 
 # tflags publish
 UC_GIBBERISH_OBFU
