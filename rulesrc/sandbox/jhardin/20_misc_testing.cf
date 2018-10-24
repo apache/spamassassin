@@ -2463,16 +2463,17 @@ full       __FROM_NAME_IN_MSG         /^From:\s+([^<]\S+\s\S+)\s(?=.{1,1024}^\1$
 meta       FRNAME_IN_MSG_XPRIO_NO_SUB (__FROM_NAME_IN_MSG && __XPRIO && (__SUBJECT_EMPTY || __SUBJ_SHORT)) && !__DKIM_EXISTS  && !__SUBJ_NOT_SHORT && !ALL_TRUSTED
 describe   FRNAME_IN_MSG_XPRIO_NO_SUB From name in message + X-Priority + short or no subject
 score      FRNAME_IN_MSG_XPRIO_NO_SUB 2.500	# limit
+tflags     FRNAME_IN_MSG_XPRIO_NO_SUB publish
 
-meta       FRNAME_IN_MSG_XPRIO        (__FROM_NAME_IN_MSG && __XPRIO && !(__SUBJECT_EMPTY || __SUBJ_SHORT)) && !__DKIM_EXISTS  && !__SUBJ_NOT_SHORT && !ALL_TRUSTED
-describe   FRNAME_IN_MSG_XPRIO        From name in message + X-Priority
-score      FRNAME_IN_MSG_XPRIO        2.500	# limit
-tflags     FRNAME_IN_MSG_XPRIO        publish
+meta       __FRNAME_IN_MSG_XPRIO      (__FROM_NAME_IN_MSG && __XPRIO && !(__SUBJECT_EMPTY || __SUBJ_SHORT))
+#describe   FRNAME_IN_MSG_XPRIO        From name in message + X-Priority
+#score      FRNAME_IN_MSG_XPRIO        2.500	# limit
+#tflags     FRNAME_IN_MSG_XPRIO        publish
 
-meta       FRNAME_IN_MSG_NO_SUBJ      (__FROM_NAME_IN_MSG && (__SUBJECT_EMPTY || __SUBJ_SHORT) && !__XPRIO) && !__DKIM_EXISTS && !__ANY_IMAGE_ATTACH && !ALL_TRUSTED
-describe   FRNAME_IN_MSG_NO_SUBJ      From name in message + short or no subject
-score      FRNAME_IN_MSG_NO_SUBJ      2.500	# limit
-tflags     FRNAME_IN_MSG_NO_SUBJ      publish
+meta       __FRNAME_IN_MSG_NO_SUBJ    (__FROM_NAME_IN_MSG && (__SUBJECT_EMPTY || __SUBJ_SHORT) && !__XPRIO)
+#describe   FRNAME_IN_MSG_NO_SUBJ      From name in message + short or no subject
+#score      FRNAME_IN_MSG_NO_SUBJ      2.500	# limit
+#tflags     FRNAME_IN_MSG_NO_SUBJ      publish
 
 
 rawbody    __HTTP_REFRESH             /<meta\s[^>]{0,200}"refresh"/ism
