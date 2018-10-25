@@ -494,6 +494,8 @@ sub check_uri_local_bl {
     dbg("check: uri_local_bl evaluating rule %s\n", $test);
   }
 
+  my $dns_available = $permsg->is_dns_available();
+
   while (my ($raw, $info) = each %uri_detail) {
 
     next unless $info->{hosts};
@@ -510,6 +512,10 @@ sub check_uri_local_bl {
       }
 
       if($host !~ /^$IP_ADDRESS$/) {
+       if (!$dns_available) {
+         dbg("check: uri_local_bl skipping $host, dns not available");
+         next;
+       }
        # this would be best cached from prior lookups
        @addrs = gethostbyname($host);
        # convert to string values address list
