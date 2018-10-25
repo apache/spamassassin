@@ -673,13 +673,9 @@ sub check_razor2_range {
 
   if ($cf >= $min && $cf <= $max) {
     my $cf_str = sprintf("cf: %3d", $cf);
+    $pms->test_log($cf_str);
     if ($self->{main}->{conf}->{razor_fork}) {
-      # TODO why doesn't test_log accept rulename as parameter?
-      my $desc = $pms->{conf}->{descriptions}->{$rulename} || '';
-      $desc .= " [$cf_str]"; $desc =~ s/^\s+//s;
-      $pms->got_hit($rulename, "", description => $desc, ruletype => 'eval');
-    } else {
-      $pms->test_log($cf_str);
+      $pms->got_hit($rulename, "", ruletype => 'eval');
     }
     return 1;
   }
