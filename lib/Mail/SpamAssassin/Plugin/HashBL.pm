@@ -174,14 +174,11 @@ sub _parse_body {
 }
 
 sub _got_hit {
-    my ($self, $pms, $rulename, $email, $desc) = @_;
-
-    if (defined $pms->{conf}->{descriptions}->{$rulename}) {
-        $desc = $pms->{conf}->{descriptions}->{$rulename};
-    }
+    my ($self, $pms, $rulename, $email) = @_;
 
     $email =~ s/\@/[at]/g;
-    $pms->got_hit($rulename, "", description => $desc." ($email)", ruletype => 'eval');
+    $pms->test_log($email);
+    $pms->got_hit($rulename, "", ruletype => 'eval');
 }
 
 sub _submit_email_query {
@@ -262,7 +259,6 @@ sub check_hashbl_emails {
     $#emails = 9 if (scalar @emails > 10);
 
     foreach my $email (@emails) {
-        #$self->_got_hit($pms, $email, "Email found in list $list");
         dbg("BODY: $email");
         $self->_submit_email_query($pms, $list, (($type) ? $type : 'SHA1'), $email);
     }

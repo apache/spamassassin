@@ -419,11 +419,10 @@ sub _got_hit {
 
     if ($pms->{main}->{conf}->{freemail_add_describe_email}) {
         $email =~ s/\@/[at]/g;
-        $pms->got_hit($rulename, "", description => $desc." ($email)", ruletype => 'eval');
+        $pms->test_log($email);
     }
-    else {
-        $pms->got_hit($rulename, "", description => $desc, ruletype => 'eval');
-    }
+
+    $pms->got_hit($rulename, "", description => $desc, ruletype => 'eval');
 }
 
 sub check_freemail_header {

@@ -170,15 +170,11 @@ sub _read_configfile {
 sub check_phishing {
   my ($self, $pms) = @_;
 
-  my $desc;
   my $feedname;
   my $domain;
   my $uris = $pms->get_uri_detail_list();
 
   my $rulename = $pms->get_current_eval_rule_name();
-  if (defined $pms->{conf}->{descriptions}->{$rulename}) {
-    $desc = $pms->{conf}->{descriptions}->{$rulename};
-  }
 
   while (my($uri, $info) = each %{$uris}) {
     # we want to skip mailto: uris
@@ -194,7 +190,8 @@ sub check_phishing {
              $domain = $self->{main}->{registryboundaries}->uri_to_domain($cluri);
              $feedname = $pms->{PHISHING}->{phishinfo}->{$domain}[0];
              dbg("HIT! $domain [$cluri] found in $feedname feed");
-             $pms->got_hit($rulename, "", description => $desc . " $feedname ($domain)", ruletype => 'eval');
+             $pms->test_log("$feedname ($domain)");
+             $pms->got_hit($rulename, "", ruletype => 'eval');
              return 1;
            }
         }
