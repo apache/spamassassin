@@ -1316,7 +1316,7 @@ sub taint_safe_archive_extract {
         }
 
         # other stuff never allowed for safety
-        $content =~ s/^\s*(dns_servers)/#(commented by sa-update, not allowed)# $1/gm;
+        $content =~ s/^\s*(dns_server)/#(commented by sa-update, not allowed)# $1/gm;
       }
 
       print OUT $content
