@@ -111,7 +111,6 @@ use Mail::SpamAssassin::Util qw(untaint_var idn_to_ascii);
 use Mail::SpamAssassin::NetSet;
 
 use Socket;
-use Data::Dumper;
 
 use strict;
 use warnings;

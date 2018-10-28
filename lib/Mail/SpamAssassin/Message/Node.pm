@@ -379,7 +379,6 @@ sub decode {
 
 # Detect endianness of UTF-16 encoded data
 sub detect_utf16 {
-	use Data::Dumper;
 	my $data = $_[0];  # could not avoid copying large strings
 	my $utf16le_clues = 0;
 	my $utf16be_clues = 0;
