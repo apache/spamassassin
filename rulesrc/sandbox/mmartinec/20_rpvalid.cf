@@ -1,7 +1,7 @@
 # SpamAssassin rules file: trustworthiness of a Return-Path (MailFrom)
 
 # subrule version for metas
-if version >= 3.003000
+if (version >= 3.003000)
 ifplugin Mail::SpamAssassin::Plugin::WLBLEval
   header      __RP_MATCHES_RCVD      eval:check_mailfrom_matches_rcvd()
 else

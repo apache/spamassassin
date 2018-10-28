@@ -28,7 +28,7 @@ describe KHOP_FAKE_EBAY 	Sender falsely claims to be from eBay
 # 0.0095/0.0246 spam/ham, 0.278 s/o @ 20100517
 
 # masscheck doesn't cover ifplugin lines.  It takes the first hit anyway.
-#if ! plugin (Mail::SpamAssassin::Plugin::URIDetail)
+#if !plugin(Mail::SpamAssassin::Plugin::URIDetail)
 #  rawbody    KHOP_FOREIGN_CLICK	m{\bhref=[^>]{9,199}>[^<]{0,80}(?:<(?!/a\b)[^>]{0,299}>[^<]{0,80}){0,9}[^<]{0,80}\b(?:cli(?:quez\W|ck\Wa)ici\b|cli(?:cca\W|c\Wa|que\Wa)qu[^<.,a ]|klie?k(?:\Whi?er|ni(?:j|nite)\Wtu[tk]aj)\b)}si
 #else
   # uri_detail doesn't support m{foo}i notation

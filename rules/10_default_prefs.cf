@@ -134,13 +134,13 @@ bayes_auto_learn                        1
 report_safe           1
 
 # Headers to parse for originating IP address
-if (can(Mail::SpamAssassin::Conf::feature_originating_ip_headers))
+if can(Mail::SpamAssassin::Conf::feature_originating_ip_headers)
 clear_originating_ip_headers
 originating_ip_headers X-Yahoo-Post-IP X-Originating-IP X-Apparently-From
 originating_ip_headers X-SenderIP X-AOL-IP
 endif
 
-if (can(Mail::SpamAssassin::Conf::feature_dns_local_ports_permit_avoid))
+if can(Mail::SpamAssassin::Conf::feature_dns_local_ports_permit_avoid)
 # leave out the more densely populated port number ranges
 dns_local_ports_avoid 0-11000
 # leave out some ephemeral ports, making them available to other programs

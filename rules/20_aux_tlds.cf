@@ -33,7 +33,7 @@
 
 # Let's clear the internal TLD list, we only want to read from this config
 # file and ignore possible old hardcoded lists.
-if (can(Mail::SpamAssassin::Conf::feature_registryboundaries))
+if can(Mail::SpamAssassin::Conf::feature_registryboundaries)
 clear_util_rb
 endif
 
@@ -55,7 +55,7 @@ endif
 # Since version 4.0 the util_rb_tld also accepts Unicode IDN labels (encoded as UTF-8), e.g.:
 #  wget http://data.iana.org/TLD/tlds-alpha-by-domain.txt -q -O - | grep -i '^xn--' | idn -u | tr '\n' ' ' | fold -w 80 -s | perl -pe 'chomp; s/.*/util_rb_tld \L$_\n/'
 
-if (can(Mail::SpamAssassin::Conf::feature_registryboundaries))
+if can(Mail::SpamAssassin::Conf::feature_registryboundaries)
 util_rb_tld xn--11b4c3d xn--1ck2e1b xn--1qqw23a xn--2scrj9c xn--30rr7y xn--3bst00m 
 util_rb_tld xn--3ds443g xn--3e0b707e xn--3hcrj9c xn--3oq18vl8pn36a xn--3pxu8k xn--42c2d9a 
 util_rb_tld xn--45br5cyl xn--45brj9c xn--45q11c xn--4gbrim xn--54b7fta0cc xn--55qw42g 

@@ -30,7 +30,7 @@
 ## Note, encrypted pgp/mime data will trigger EMPTY_MESSAGE
 #
 ## 2007/02/27 - Syntax taken from the OpenPGP standard, RFC 2440 section 6.2
-#if ! plugin (Mail::SpamAssassin::Plugin::OpenPGP)
+#if !plugin(Mail::SpamAssassin::Plugin::OpenPGP)
 #  # moved from rawbody to body 20091021
 #  body     __KHOP_PGP_I1       /-----BEGIN PGP (?:SIGNATURE|MESSAGE|PUBLIC|PRIVATE)(?:, PART [0-9]{1,4}\/[0-9]{1,4}| KEY BLOCK)?-----/
 #  tflags   __KHOP_PGP_I1       nice

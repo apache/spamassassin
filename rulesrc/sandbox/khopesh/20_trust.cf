@@ -25,7 +25,7 @@ tflags	 __DKIM_EXISTS	nice
 #         leaving the below block intact.  I'll try using its own syntax...
 
 ##{ __NOT_SPOOFED
-if ! plugin (Mail::SpamAssassin::Plugin::DKIM)
+if !plugin(Mail::SpamAssassin::Plugin::DKIM)
  ifplugin Mail::SpamAssassin::Plugin::SPF
    meta __NOT_SPOOFED  SPF_PASS || __DKIM_EXISTS || !__LAST_EXTERNAL_RELAY_NO_AUTH || ALL_TRUSTED	# no DKIM, yes SPF
  else
