@@ -147,7 +147,7 @@ use strict;
 use warnings;
 # use bytes;
 use Digest::MD5 qw(md5_hex);
-use MIME::QuotedPrint;
+#use MIME::QuotedPrint; # use Util::qp_decode instead
 
 our @ISA = qw(Mail::SpamAssassin::Plugin);
 
@@ -188,7 +188,7 @@ my %get_details = (
     my $data = '';
 
     if ($type eq 'quoted-printable') {
-      $data = decode_qp($data); # use QuotedPrint->decode_qp
+      $data = Mail::SpamAssassin::Util::qp_decode($data);
     }
     else {
       $data = $part->decode();  # just use built in base64 decoder
