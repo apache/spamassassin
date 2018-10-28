@@ -487,13 +487,13 @@ sub handle_conditional {
 
   # If we have already successfully evaled the $value,
   # just do what we would do then
-  if (exists $self->{cond_cache}{$key.$value}) {
+  if (exists $self->{cond_cache}{"$key $value"}) {
     push (@{$if_stack_ref}, {
         type => 'if',
         conditional => $value,
         skip_parsing => $$skip_parsing_ref
       });
-    if ($self->{cond_cache}{$key.$value} == 0) {
+    if ($self->{cond_cache}{"$key $value"} == 0) {
       $$skip_parsing_ref = 1;
     }
     return;
@@ -558,12 +558,12 @@ sub handle_conditional {
     });
 
   if (eval $eval) {
-    $self->{cond_cache}{$key.$value} = 1;
+    $self->{cond_cache}{"$key $value"} = 1;
     # leave $skip_parsing as-is; we may not be parsing anyway in this block.
     # in other words, support nested 'if's and 'require_version's
   } else {
     warn "config: error in $key - $eval: $@" if $@ ne '';
-    $self->{cond_cache}{$key.$value} = 0;
+    $self->{cond_cache}{"$key $value"} = 0;
     $$skip_parsing_ref = 1;
   }
 }
