@@ -167,8 +167,8 @@ sub header {
   my $key    = lc($rawkey);
 
   # Trim whitespace off of the header keys
-  $key       =~ s/^\s+//;
-  $key       =~ s/\s+$//;
+  #$key       =~ s/^\s+//;
+  #$key       =~ s/\s+$//;
 
   if (@_) {
     my $raw_value = shift;
@@ -398,11 +398,11 @@ sub detect_utf16 {
 		$sum_h_o += hex $msg_h[$i+1];
 		$sum_l_e += hex $msg_l[$i];
 		$sum_l_o += hex $msg_l[$i+1];
-		if( $check_char =~ /20 00/ ) {
+		if (index($check_char, '20 00') >= 0) {
 			# UTF-16LE space char detected
 			$utf16le_clues++;
 		}
-		if( $check_char =~ /00 20/ ) {
+		if (index($check_char, '00 20') >= 0) {
 			# UTF-16BE space char detected
 			$utf16be_clues++;
 		}
