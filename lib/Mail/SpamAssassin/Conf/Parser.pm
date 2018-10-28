@@ -142,6 +142,8 @@ use re 'taint';
 
 our @ISA = qw();
 
+my $ARITH_EXPRESSION_LEXER = ARITH_EXPRESSION_LEXER;
+
 ###########################################################################
 
 sub new {
@@ -237,6 +239,7 @@ sub parse {
   my @conf_lines = split (/\n/, $_[1]);
   my $line;
   $self->{if_stack} = \@if_stack;
+  $self->{cond_cache} = { };
   $self->{file_scoped_attrs} = { };
 
   my $keepmetadata = $conf->{main}->{keep_config_parsing_metadata};
@@ -470,6 +473,7 @@ failed_line:
   }
 
   delete $self->{if_stack};
+  delete $self->{cond_cache};
 
   $self->lint_check();
   $self->fix_tests();
@@ -481,8 +485,21 @@ sub handle_conditional {
   my ($self, $key, $value, $if_stack_ref, $skip_parsing_ref) = @_;
   my $conf = $self->{conf};
 
-  my $lexer = ARITH_EXPRESSION_LEXER;
-  my @tokens = ($value =~ m/($lexer)/og);
+  # If we have already successfully evaled the $value,
+  # just do what we would do then
+  if (exists $self->{cond_cache}{$key.$value}) {
+    push (@{$if_stack_ref}, {
+        type => 'if',
+        conditional => $value,
+        skip_parsing => $$skip_parsing_ref
+      });
+    if ($self->{cond_cache}{$key.$value} == 0) {
+      $$skip_parsing_ref = 1;
+    }
+    return;
+  }
+
+  my @tokens = ($value =~ /($ARITH_EXPRESSION_LEXER)/og);
 
   my $eval = '';
   my $bad = 0;
@@ -541,10 +558,12 @@ sub handle_conditional {
     });
 
   if (eval $eval) {
+    $self->{cond_cache}{$key.$value} = 1;
     # leave $skip_parsing as-is; we may not be parsing anyway in this block.
     # in other words, support nested 'if's and 'require_version's
   } else {
     warn "config: error in $key - $eval: $@" if $@ ne '';
+    $self->{cond_cache}{$key.$value} = 0;
     $$skip_parsing_ref = 1;
   }
 }
@@ -966,8 +985,7 @@ sub _meta_deps_recurse {
   return unless $rule;
 
   # Lex the rule into tokens using a rather simple RE method ...
-  my $lexer = ARITH_EXPRESSION_LEXER;
-  my @tokens = ($rule =~ m/$lexer/og);
+  my @tokens = ($rule =~ /($ARITH_EXPRESSION_LEXER)/og);
 
   # Go through each token in the meta rule
   my $conf_tests = $conf->{tests};
@@ -1287,8 +1305,7 @@ sub is_meta_valid {
   }
 
   # Lex the rule into tokens using a rather simple RE method ...
-  my $lexer = ARITH_EXPRESSION_LEXER;
-  my @tokens = ($rule =~ m/$lexer/og);
+  my @tokens = ($rule =~ /($ARITH_EXPRESSION_LEXER)/og);
   if (length($name) == 1) {
     for (@tokens) {
       print "$name $_\n "  or die "Error writing token: $!";
