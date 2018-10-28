@@ -28,7 +28,8 @@ Note for Users Upgrading to SpamAssassin 4.0.0
   that refer to check_rbl* or other network rules. They will never hit.
   (Bug 5930)
 
-- new plugin callback method check_dnsbl (to launch lookups at priority -100)
+- new plugin callback method check_dnsbl (to launch lookups at priority -100),
+  check_post_dnsbl (to harvest own network lookups)
 
 - freemail_import_whitelist_auth, freemail_import_def_whitelist_auth added (Bug 6451)
 
@@ -70,8 +71,10 @@ Note for Users Upgrading to SpamAssassin 4.0.0
   filter (pypolicyd-spf / spf-engine etc), from which generated Received-SPF
   header can be parsed by SpamAssassin.
 
-- ALL pseudo-header now returns decoded headers, so it's usage is consistent
+- "ALL" pseudo-header now returns decoded headers, so it's usage is consistent
   with single header matching (:raw returns undecoded and folded like before).
+
+- New dns_block_rule option handles blocked DNSBLs
 
 Note for Users Upgrading to SpamAssassin 3.4.2
 ----------------------------------------------

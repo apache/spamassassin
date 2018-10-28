@@ -1985,6 +1985,7 @@ home_dir_for_helpers/.spamassassin, $HOME/.spamassassin,
     type => $CONF_TYPE_STRING,
     code => sub {
       my ($self, $key, $value, $line) = @_;
+      local($1,$2);
       defined $value && $value =~ /^(\S+)\s+(.+)$/
         or return $INVALID_VALUE;
       my $rule = $1;
@@ -1993,8 +1994,9 @@ home_dir_for_helpers/.spamassassin, $HOME/.spamassassin,
         if ($domain !~ /^[a-z0-9.-]+$/) {
           return $INVALID_VALUE;
         }
-        $domain = untaint_var($domain); # will be in filename!
-        # got_hit() uses this
+        # will end up in filename, do not allow / etc in above regex!
+        $domain = untaint_var($domain);
+        # Check.pm check_main() uses this
         $self->{dns_block_rule}{$rule}{$domain} = 1;
         # bgsend_and_start_lookup() uses this
         $self->{dns_block_rule_domains}{$domain} = $domain;
@@ -2011,7 +2013,7 @@ dns_block_rule query blockage will last this many seconds.
   push (@cmds, {
     setting => 'dns_block_time',
     is_admin => 1,
-    default => 60,
+    default => 300,
     type => $CONF_TYPE_NUMERIC,
   });
 
