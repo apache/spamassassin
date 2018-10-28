@@ -175,6 +175,10 @@ describe        SURBL_BLOCKED   ADMINISTRATOR NOTICE: The query to SURBL was blo
 tflags          SURBL_BLOCKED   net noautolearn
 reuse           SURBL_BLOCKED
 
+if can(Mail::SpamAssassin::Conf::feature_dns_block_rule)
+dns_block_rule SURBL_BLOCKED multi.surbl.org
+endif
+
 ###########################################################################
 ## URIBL
 
@@ -203,6 +207,9 @@ describe        URIBL_BLOCKED   ADMINISTRATOR NOTICE: The query to URIBL was blo
 tflags          URIBL_BLOCKED   net noautolearn
 reuse           URIBL_BLOCKED
 
+if can(Mail::SpamAssassin::Conf::feature_dns_block_rule)
+dns_block_rule URIBL_BLOCKED multi.uribl.com
+endif
 
 ###########################################################################
 ## DOMAINS TO SKIP (KNOWN GOOD)

@@ -63,4 +63,8 @@ describe RCVD_IN_DNSWL_BLOCKED	ADMINISTRATOR NOTICE: The query to DNSWL was bloc
 tflags RCVD_IN_DNSWL_BLOCKED	net noautolearn
 reuse  RCVD_IN_DNSWL_BLOCKED
 
+if can(Mail::SpamAssassin::Conf::feature_dns_block_rule)
+dns_block_rule RCVD_IN_DNSWL_BLOCKED list.dnswl.org
+endif
+
 endif
