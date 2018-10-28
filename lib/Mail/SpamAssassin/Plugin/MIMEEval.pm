@@ -359,7 +359,7 @@ sub _check_attachments {
 
     $part++;
     $part_type[$part] = $ctype;
-    $part_bytes[$part] = 0 if $cd !~ /attachment/;
+    $part_bytes[$part] = 0 if index($cd, 'attachment') == -1;
 
     my $cte_is_base64 = $cte =~ /base64/i;
     my $previous = '';
@@ -378,7 +378,7 @@ sub _check_attachments {
       # if ($pms->{mime_html_no_charset} && $ctype eq 'text/html' && defined $charset) {
       # $pms->{mime_html_no_charset} = 0;
       # }
-      if ($pms->{mime_multipart_alternative} && $cd !~ /attachment/ &&
+      if ($pms->{mime_multipart_alternative} && index($cd, 'attachment') == -1 &&
           ($ctype eq 'text/plain' || $ctype eq 'text/html')) {
 	$part_bytes[$part] += length;
       }
