@@ -1982,7 +1982,7 @@ home_dir_for_helpers/.spamassassin, $HOME/.spamassassin,
   push (@cmds, {
     setting => 'dns_block_rule',
     is_admin => 1,
-    type => $CONF_TYPE_STRING,
+    type => $CONF_TYPE_HASH_KEY_VALUE,
     code => sub {
       my ($self, $key, $value, $line) = @_;
       local($1,$2);
