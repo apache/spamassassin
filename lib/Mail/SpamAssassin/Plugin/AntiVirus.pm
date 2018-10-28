@@ -107,7 +107,7 @@ sub _check_attachments {
       # file extension indicates an executable
       $pms->{antivirus_microsoft_exe} = 1;
     }
-    elsif ($cte =~ /base64/ && defined $p->raw()->[0] &&
+    elsif (index($cte, 'base64') >= 0 && defined $p->raw()->[0] &&
 	   $p->raw()->[0] =~ /^TV[opqr].A..[AB].[AQgw][A-H].A/)
     {
       # base64-encoded executable

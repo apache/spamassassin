@@ -1104,7 +1104,7 @@ sub _fn_envelope {
 		$self->{conf}->{txrep_weight_helo};
   my $sign = $args->{signedby};
   my $id     = $args->{address};
-  if ($args->{address} =~ /,/) {
+  if (index($args->{address}, ',') >= 0) {
     $sign = $args->{address};
     $sign =~ s/^.*,//g;
     $id   =~ s/,.*$//g;
@@ -1115,9 +1115,9 @@ sub _fn_envelope {
 	{$factor /= $self->{conf}->{txrep_weight_helo}; $sign = 'helo';}
   elsif ($id =~ /^[a-f\d\.:]+$/ && $self->{conf}->{txrep_weight_ip})
 	{$factor /= $self->{conf}->{txrep_weight_ip};}
-  elsif ($id =~ /@/ && $self->{conf}->{txrep_weight_email})
+  elsif (index($id, '@') >= 0 && $self->{conf}->{txrep_weight_email})
 	{$factor /= $self->{conf}->{txrep_weight_email};}
-  elsif ($id !~ /@/ && $self->{conf}->{txrep_weight_domain})
+  elsif (index($id, '@') == -1 && $self->{conf}->{txrep_weight_domain})
 	{$factor /= $self->{conf}->{txrep_weight_domain};}
   else	{$factor  = 1;}
 
@@ -1659,15 +1659,15 @@ sub open_storages {
 	# TODO: add an a method to the handler class instead
 	my ($storage_type, $is_global);
 	
-	if (ref($factory) =~ /SQLBasedAddrList/) {
+	if (index(ref($factory), 'SQLBasedAddrList') >= 0) {
 	    $is_global    = defined $self->{conf}->{user_awl_sql_override_username};
 	    $storage_type = 'SQL';
 	    if ($is_global && $self->{conf}->{user_awl_sql_override_username} eq $self->{main}->{username}) {
 		# skip double storage if current user same as the global override
 		$self->{user_storage} = $self->{global_storage} = $self->{default_storage};
 	    }
-	} elsif (ref($factory) =~ /DBBasedAddrList/) {
-	    $is_global    = $self->{conf}->{auto_whitelist_path} !~ /__userstate__/;
+	} elsif (index(ref($factory), 'DBBasedAddrList') >= 0) {
+	    $is_global    = index($self->{conf}->{auto_whitelist_path}, '__userstate__') == -1;
 	    $storage_type = 'DB';
 	}
 	if (!defined $self->{global_storage}) {
@@ -1751,7 +1751,7 @@ sub ip_to_awl_key {
         $result =~s/(\.0){1,3}\z//;                     # truncate zero tail
       }
     }
-  } elsif ($origip =~ /:/ &&                            # triage
+  } elsif (index($origip, ':') >= 0 &&                            # triage
            $origip =~
            /^ [0-9a-f]{0,4} (?: : [0-9a-f]{0,4} | \. [0-9]{1,3} ){2,9} $/xsi) {
     # looks like an IPv6 address

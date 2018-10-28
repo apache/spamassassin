@@ -1037,7 +1037,7 @@ sub reverse_ip_address {
   local($1,$2,$3,$4);
   if ($ip =~ /^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})\z/) {
     $revip = "$4.$3.$2.$1";
-  } elsif ($ip !~ /:/ || $ip !~ /^[0-9a-fA-F:.]{2,}\z/) {  # triage
+  } elsif (index($ip, ':') == -1 || $ip !~ /^[0-9a-fA-F:.]{2,}\z/) {  # triage
     # obviously unrecognized syntax
   } elsif (!NetAddr::IP->can('full6')) {  # since NetAddr::IP 4.010
     info("util: version of NetAddr::IP is too old, IPv6 not supported");

@@ -237,7 +237,7 @@ my %get_details = (
       $encrypted=1 if ($line =~ m/^\/Encrypt/);
 
       # once we hit the first stream, we stop collecting data for fuzzy md5
-      $no_more_fuzzy = 1 if ($line =~ m/stream/);
+      $no_more_fuzzy = 1 if (index($line, 'stream') >= 0);
 
       # From a v1.3 pdf
       # [12234] dbg: pdfinfo: line=630 0 0 149 0 0 cm

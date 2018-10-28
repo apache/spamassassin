@@ -301,7 +301,7 @@ sub ip_to_awl_key {
         $result =~s/(\.0){1,3}\z//;  # truncate zero tail
       }
     }
-  } elsif ($origip =~ /:/ &&  # triage
+  } elsif (index($origip, ':') >= 0 &&  # triage
            $origip =~
            /^ [0-9a-f]{0,4} (?: : [0-9a-f]{0,4} | \. [0-9]{1,3} ){2,9} $/xsi) {
     # looks like an IPv6 address

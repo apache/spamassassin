@@ -445,7 +445,7 @@ sub simplify_and_qr_regexp {
   }
   else {
     die "case-i" if $rule =~ /\(\?i\)/;
-    die "case-i" if $mods =~ /i/;
+    die "case-i" if index($mods, 'i') >= 0;
 
     # always case-i: /A(?i:ct) N(?i:ow)/ => /Act Now/
     $rule =~ s/(?<!\\)\(\?i\:(.*?)\)/$1/gs and die "case-i";

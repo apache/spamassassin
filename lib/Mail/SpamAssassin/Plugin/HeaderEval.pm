@@ -571,7 +571,7 @@ sub check_for_forged_juno_received_headers {
     # New style Juno has no X-Originating-IP header, and other changes
     if($rcvd !~ /from.*\b(?:juno|untd)\.com.*[\[\(]$IP_ADDRESS[\]\)].*by/
         && $rcvd !~ / cookie\.(?:juno|untd)\.com /) { return 1; }
-    if($xmailer !~ /Juno /) { return 1; }
+    if(index($xmailer, 'Juno ') == -1) { return 1; }
   } else {
     if($rcvd =~ /from.*\bmail\.com.*\[$IP_ADDRESS\].*by/) {
       if($xmailer !~ /\bmail\.com/) { return 1; }

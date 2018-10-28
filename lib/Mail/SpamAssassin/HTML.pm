@@ -516,7 +516,7 @@ sub text_style {
 	    my $whcolor = $1 ? 'bgcolor' : 'fgcolor';
 	    my $value = lc $2;
 
-	    if ($value =~ /rgb/) {
+	    if (index($value, 'rgb') >= 0) {
 	      $value =~ tr/0-9,//cd;
 	      my @rgb = split(/,/, $value);
               $new{$whcolor} = sprintf("#%02x%02x%02x",
@@ -1136,7 +1136,7 @@ sub _merge_uri {
     return "/" . $r_path;
   }
   else {
-    if ($base_path =~ m|/|) {
+    if (index($base_path, '/') >= 0) {
       $base_path =~ s|(?<=/)[^/]*$||;
     }
     else {
