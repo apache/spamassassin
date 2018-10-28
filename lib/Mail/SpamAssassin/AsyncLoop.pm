@@ -371,7 +371,8 @@ sub bgsend_and_start_lookup {
         if ($dns_query_blockages) {
           $blocked = $dns_query_blockages->{$parent_domain};
           last if defined $blocked; # stop at first defined, can be true or false
-        } elsif ($dns_block_domains->{$parent_domain}) {
+        }
+        if (exists $dns_block_domains->{$parent_domain}) {
           # save for later check.. ps. untainted already
           $check_dbrdom = $dns_block_domains->{$parent_domain};
         }
