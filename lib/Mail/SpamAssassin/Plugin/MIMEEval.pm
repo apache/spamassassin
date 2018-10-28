@@ -226,19 +226,19 @@ sub _check_mime_header {
     $pms->{mime_body_text_count}++;
   }
 
-  if ($cte =~ /base64/) {
+  if (index($cte, 'base64') != -1) {
     $pms->{mime_base64_count}++;
   }
-  elsif ($cte =~ /quoted-printable/) {
+  elsif (index($cte, 'quoted-printable') != -1) {
     $pms->{mime_qp_count}++;
   }
 
-  if ($cd && $cd =~ /attachment/) {
+  if ($cd && index($cd, 'attachment') != -1) {
     $pms->{mime_attachment}++;
   }
 
   if ($ctype =~ /^text/ &&
-      $cte =~ /base64/ &&
+      index($cte, 'base64') != -1 &&
       (!$charset || $charset =~ /(?:us-ascii|ansi_x3\.4-1968|iso-ir-6|ansi_x3\.4-1986|iso_646\.irv:1991|ascii|iso646-us|us|ibm367|cp367|csascii)/) &&
       !($cd && $cd =~ /^(?:attachment|inline)/))
   {
