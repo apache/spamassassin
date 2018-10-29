@@ -20,13 +20,18 @@ if (-e 'test_dir') {            # running from test directory, not ..
 use strict;
 use lib '.'; use lib 't';
 use SATest; sa_t_init("uri_text");
-use Test::More tests => 683;
+use Test::More tests => 682;
 use Mail::SpamAssassin;
 use vars qw(%patterns %anti_patterns);
 
 # initialize SpamAssassin
-my $sa = create_saobj({dont_copy_prefs => 1});
-
+my $sa = create_saobj({
+    require_rules => 1,
+    site_rules_filename => "$prefix/t/log/localrules.tmp",
+    rules_filename => "$prefix/rules",
+    local_tests_only => 1,
+    dont_copy_prefs => 1,
+});
 $sa->init(0); # parse rules
 
 # load tests and write mail
@@ -207,7 +212,6 @@ cmd.exe			!cmd\.exe
 
 commander		!commander
 aaacomaaa		!aaacomaaa
-aaa.com.aaa		!aaa\.com\.aaa
 com.foo.web		!com\.foo\.web
 
 # IPs for www.yahoo.com
