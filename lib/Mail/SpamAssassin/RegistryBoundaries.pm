@@ -54,7 +54,7 @@ sub new {
       join('|', keys %{$self->{conf}->{valid_tlds}}).
       '(?!(?:[a-zA-Z0-9-]|\.[a-zA-Z0-9]))'; # make sure it ends
     # Perl 5.10+ trie optimizes lists, no need for fancy regex optimizing
-    if (eval { $self->{valid_tlds_re} = qr/$tlds/; 1; }) {
+    if (eval { $self->{valid_tlds_re} = qr/$tlds/i; 1; }) {
       dbg("config: registryboundaries: %d tlds loaded",
         scalar keys %{$self->{conf}->{valid_tlds}});
     } else {
