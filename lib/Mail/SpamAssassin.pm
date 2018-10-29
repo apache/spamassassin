@@ -1661,8 +1661,8 @@ sub init {
   # Note that this PID has run init()
   $self->{_initted} = $$;
 
-  # if spamd, wait for spamd_child_after_non_root
-  if (!$self->{spamd}) {
+  # if spamd or other forking, wait for spamd_child_init
+  if ($self->{skip_prng_reseeding}) {
     $self->set_global_state_dir();
   }
 
@@ -2191,7 +2191,7 @@ sub call_plugins {
   return unless $self->{plugins};
 
   # Use some calls ourself too
-  if ($self->{spamd} && $subname eq 'spamd_child_after_non_root') {
+  if ($subname eq 'spamd_child_init') {
     # set global dir now if spamd
     $self->set_global_state_dir();
   } elsif ($subname eq 'finish_parsing_end') {

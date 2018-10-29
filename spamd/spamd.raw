@@ -1163,7 +1163,6 @@ my $spamtest = Mail::SpamAssassin->new(
     paranoid             => ( $opt{'paranoid'} || 0 ),
     require_rules        => 1,
     skip_prng_reseeding  => 1,  # let us do the reseeding by ourselves
-    spamd                => 1,  # make spamd_child_after_non_root known
     home_dir_for_helpers => (
       defined $opt{'home_dir_for_helpers'}
       ? $opt{'home_dir_for_helpers'}
@@ -1354,8 +1353,6 @@ sub spawn {
     }
 
     srand;  # reseed pseudorandom number generator soon for each child process
-    $spamtest->call_plugins("spamd_child_init");
-
     if ($sockets_access_lock_tempfile) {
       # A lock will be required across select+accept in a child processes,
       # Bug 6996. Need to have a per-child filehandle on the same lock file
@@ -1399,12 +1396,13 @@ sub spawn {
       }
     }
 
-    # main() will also run this to set global_state_dir
-    $spamtest->call_plugins("spamd_child_after_non_root");
-
     # set process name where supported
     # this will help make it clear via process listing which is child/parent
     $0 = 'spamd child';
+
+    # Let's call spamd_child_init only after root privs are dropped
+    # Mail::SpamAssassin::main() will also run this to set global_state_dir
+    $spamtest->call_plugins("spamd_child_init");
 
     $backchannel->setup_backchannel_child_post_fork();
     if ($scaling) {     # only do this once, for efficiency; $$ is a syscall
