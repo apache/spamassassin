@@ -111,7 +111,6 @@ package Mail::SpamAssassin::Plugin::FromNameSpoof;
 my $VERSION = 0.9;
 
 use Mail::SpamAssassin::Plugin;
-use List::Util ();
 use Mail::SpamAssassin::Util;
 
 use vars qw(@ISA);
