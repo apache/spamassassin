@@ -5189,7 +5189,7 @@ sub free_uncompiled_rule_source {
   if (!$self->{main}->{keep_config_parsing_metadata} &&
         !$self->{allow_user_rules})
   {
-    delete $self->{if_stack};
+    #delete $self->{if_stack}; # it's Parser not Conf?
     #delete $self->{source_file};
     #delete $self->{meta_dependencies};
   }

@@ -474,6 +474,7 @@ failed_line:
 
   delete $self->{if_stack};
   delete $self->{cond_cache};
+  delete $self->{command_luts} if $self->{scoresonly};
 
   $self->lint_check();
   $self->fix_tests();
