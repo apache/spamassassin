@@ -428,7 +428,6 @@ sub new {
   }
 
   $self->{conf} ||= new Mail::SpamAssassin::Conf ($self);
-  $self->{registryboundaries} = Mail::SpamAssassin::RegistryBoundaries->new ($self);
   $self->{plugins} = Mail::SpamAssassin::PluginHandler->new ($self);
 
   $self->{save_pattern_hits} ||= 0;
@@ -2195,6 +2194,11 @@ sub call_plugins {
   if ($self->{spamd} && $subname eq 'spamd_child_after_non_root') {
     # set global dir now if spamd
     $self->set_global_state_dir();
+  } elsif ($subname eq 'finish_parsing_end') {
+    # Initialize RegistryBoundaries, now that util_rb_tld etc from config is
+    # read.  Plugins can also now use {valid_tlds_re} to one time compile
+    # regexes in finish_parsing_end.
+    $self->{registryboundaries} = Mail::SpamAssassin::RegistryBoundaries->new ($self);
   }
 
   # safety net in case some plugin changes global settings, Bug 6218
