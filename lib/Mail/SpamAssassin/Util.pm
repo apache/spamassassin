@@ -68,7 +68,6 @@ use IO::Handle;
 use File::Spec;
 use File::Basename;
 use Time::Local;
-use Sys::Hostname (); # don't import hostname() into this namespace!
 use NetAddr::IP 4.000;
 use Scalar::Util qw(tainted);
 use Fcntl;
@@ -960,7 +959,8 @@ sub extract_ipv4_addr_from_string {
 # Sys::Hostname thinks our hostname is, might also be a full qualified one)
   sub hostname {
     return $hostname if defined($hostname);
-
+    # Load only when required
+    require Sys::Hostname;
     # Sys::Hostname isn't taint safe and might fall back to `hostname`. So we've
     # got to clean PATH before we may call it.
     clean_path_in_taint_mode();
