@@ -429,7 +429,6 @@ sub new {
   }
 
   $self->{conf} ||= new Mail::SpamAssassin::Conf ($self);
-  $self->{registryboundaries} = Mail::SpamAssassin::RegistryBoundaries->new ($self);
   $self->{plugins} = Mail::SpamAssassin::PluginHandler->new ($self);
 
   $self->{save_pattern_hits} ||= 0;
@@ -2120,14 +2119,22 @@ sub have_plugin {
 
 sub call_plugins {
   my $self = shift;
+  my $subname = shift;
 
   # We could potentially get called after a finish(), so just return.
   return unless $self->{plugins};
 
+  # Use some calls ourself too
+  if ($subname eq 'finish_parsing_end') {
+    # Initialize RegistryBoundaries, now that util_rb_tld etc from config is
+    # read.  Plugins can also now use {valid_tlds_re} to one time compile
+    # regexes in finish_parsing_end.
+    $self->{registryboundaries} = Mail::SpamAssassin::RegistryBoundaries->new ($self);
+  }
+
   # safety net in case some plugin changes global settings, Bug 6218
   local $/ = $/;  # prevent underlying modules from changing the global $/
 
-  my $subname = shift;
   return $self->{plugins}->callback($subname, @_);
 }
 

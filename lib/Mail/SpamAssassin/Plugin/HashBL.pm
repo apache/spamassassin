@@ -77,7 +77,26 @@ sub new {
     $self->set_config($mailsa->{conf});
     $self->register_eval_rule("check_hashbl_emails");
 
-    # Need to init the regex here, utilizing registryboundaries->valid_tlds_re
+    return $self;
+}
+
+sub finish_parsing_end {
+    my ($self, $opts) = @_;
+
+    # valid_tlds_re will be available at finish_parsing_end, compile it now,
+    # we only need to do it once and before possible forking
+    if ($self->{hashbl_available} && !$self->{email_regex}) {
+      $self->_init_email_regex();
+    }
+
+    return 0;
+}
+
+sub _init_email_regex {
+    my ($self) = @_;
+
+    dbg("initializing email regex");
+
     # Some regexp tips courtesy of http://www.regular-expressions.info/email.html
     # full email regex v0.02
     $self->{email_regex} = qr/
@@ -90,10 +109,7 @@ sub new {
       (?:[a-z0-9](?:[a-z0-9-]{0,59}[a-z0-9])?\.){1,4} # max 4x61 char parts (should be enough?)
       $self->{main}->{registryboundaries}->{valid_tlds_re}	# ends with valid tld
       )
-      (?!(?:[a-z0-9-]|\.[a-z0-9]))		# make sure domain ends here
     /xi;
-
-    return $self;
 }
 
 sub set_config {

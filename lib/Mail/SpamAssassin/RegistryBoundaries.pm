@@ -32,6 +32,8 @@ use re 'taint';
 
 our @ISA = qw();
 
+use Mail::SpamAssassin::Logger;
+
 # called from SpamAssassin->init() to create $self->{util_rb}
 sub new {
   my $class = shift;
@@ -45,14 +47,25 @@ sub new {
   bless ($self, $class);
 
   # Initialize valid_tlds_re for schemeless uri parsing, FreeMail etc
-  if ($self->{conf}->{valid_tlds}) {
-    my $tlds = join('|', keys %{$self->{conf}->{valid_tlds}});
+  if ($self->{conf}->{valid_tlds} && %{$self->{conf}->{valid_tlds}}) {
+    # International domain names are already in ASCII-compatible encoding (ACE)
+    my $tlds = 
+      '(?<![a-zA-Z0-9-])'. # make sure tld starts at boundary
+      join('|', keys %{$self->{conf}->{valid_tlds}}).
+      '(?!(?:[a-zA-Z0-9-]|\.[a-zA-Z0-9]))'; # make sure it ends
     # Perl 5.10+ trie optimizes lists, no need for fancy regex optimizing
-    $self->{valid_tlds_re} = qr/(?:$tlds)/i;
+    if (eval { $self->{valid_tlds_re} = qr/$tlds/; 1; }) {
+      dbg("config: registryboundaries: %d tlds loaded",
+        scalar keys %{$self->{conf}->{valid_tlds}});
+    } else {
+      warn "config: registryboundaries: failed to compile valid_tlds_re: $@\n";
+      $self->{valid_tlds_re} = qr/no_tlds_defined/;
+    }
   }
   else {
     # Failsafe in case no tlds defined, we don't want this to match everything..
     $self->{valid_tlds_re} = qr/no_tlds_defined/;
+    warn "config: registryboundaries: no tlds defined, need to run sa-update\n";
   }
 
   $self;
