@@ -3084,7 +3084,6 @@ name.
       local ($1,$2);
       if ($value =~ /^(\S+)\s+(?:rbl)?eval:(.*)$/) {
         my ($rulename, $fn) = ($1, $2);
-        dbg("config: header eval rule name is $rulename function is $fn");
         if ($fn !~ /^\w+(\(.*\))?$/) {
           return $INVALID_VALUE;
         }
@@ -3145,8 +3144,6 @@ Define a body eval test.  See above.
       local ($1,$2);
       if ($value =~ /^(\S+)\s+eval:(.*)$/) {
         my ($rulename, $fn) = ($1, $2);
-        dbg("config: body eval rule name is $rulename function is $fn");
-
         if ($fn !~ /^\w+(\(.*\))?$/) {
           return $INVALID_VALUE;
         }
