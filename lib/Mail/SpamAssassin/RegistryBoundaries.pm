@@ -54,9 +54,9 @@ sub new {
   if ($self->{conf}->{valid_tlds} && %{$self->{conf}->{valid_tlds}}) {
     # International domain names are already in ASCII-compatible encoding (ACE)
     my $tlds = 
-      '(?<![a-zA-Z0-9-])'. # make sure tld starts at boundary
+      '(?<![a-zA-Z0-9-])(?:'. # make sure tld starts at boundary
       join('|', keys %{$self->{conf}->{valid_tlds}}).
-      '(?!(?:[a-zA-Z0-9-]|\.[a-zA-Z0-9]))'; # make sure it ends
+      ')(?!(?:[a-zA-Z0-9-]|\.[a-zA-Z0-9]))'; # make sure it ends
     # Perl 5.10+ trie optimizes lists, no need for fancy regex optimizing
     if (eval { $self->{valid_tlds_re} = qr/$tlds/i; 1; }) {
       dbg("config: registryboundaries: %d tlds loaded",
@@ -69,7 +69,8 @@ sub new {
   else {
     # Failsafe in case no tlds defined, we don't want this to match everything..
     $self->{valid_tlds_re} = qr/no_tlds_defined/;
-    warn "config: registryboundaries: no tlds defined, need to run sa-update\n";
+    warn "config: registryboundaries: no tlds defined, need to run sa-update\n"
+      if !$self->{main}->{ignore_site_cf_files};
   }
 
   $self;
