@@ -97,10 +97,7 @@ use Fcntl;
 use File::Path;
 use File::Basename;
 
-BEGIN {
-  eval { require Digest::SHA; import Digest::SHA qw(sha1); 1 }
-  or do { require Digest::SHA1; import Digest::SHA1 qw(sha1) }
-}
+use Digest::SHA qw(sha1);
 
 our @ISA = qw(Mail::SpamAssassin::Plugin);
 

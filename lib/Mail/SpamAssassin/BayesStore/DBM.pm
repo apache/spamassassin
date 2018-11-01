@@ -27,11 +27,7 @@ use Errno qw(EBADF);
 use File::Basename;
 use File::Spec;
 use File::Path;
-
-BEGIN {
-  eval { require Digest::SHA; import Digest::SHA qw(sha1); 1 }
-  or do { require Digest::SHA1; import Digest::SHA1 qw(sha1) }
-}
+use Digest::SHA qw(sha1);
 
 use Mail::SpamAssassin;
 use Mail::SpamAssassin::Util qw(untaint_var am_running_on_windows);

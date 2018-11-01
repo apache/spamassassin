@@ -46,10 +46,7 @@ use strict;
 use warnings;
 use re 'taint';
 
-BEGIN {
-  eval { require Digest::SHA; import Digest::SHA qw(sha1 sha1_hex); 1 }
-  or do { require Digest::SHA1; import Digest::SHA1 qw(sha1 sha1_hex) }
-}
+use Digest::SHA qw(sha1 sha1_hex);
 
 use Mail::SpamAssassin;
 use Mail::SpamAssassin::Message::Node;

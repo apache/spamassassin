@@ -14,11 +14,7 @@ my $hashes3 = { };
 my $hashes4 = { };
 
 use File::Find;
-
-BEGIN {
-  eval { require Digest::SHA; import Digest::SHA qw(sha1_base64); 1 }
-  or do { require Digest::SHA1; import Digest::SHA1 qw(sha1_base64) }
-}
+use Digest::SHA qw(sha1_base64);
 
 my @files = ();
 foreach my $file (@ARGV) {
