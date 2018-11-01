@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-ninja darxus ena-week0 ena-week1 ena-week2 ena-week3 ena-week4 giovanni grenier hege jarif jbrooks sihde thendrikx; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-ninja ena-week0 ena-week1 ena-week2 ena-week3 jarif llanga mmiroslaw-mails-ham mmiroslaw-mails-spam; day 3: ena-week2 jarif llanga mmiroslaw-mails-ham mmiroslaw-mails-spam
+# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-ninja darxus ena-week0 ena-week1 ena-week2 ena-week3 ena-week4 giovanni grenier hege jbrooks mmiroslaw-mails-ham mmiroslaw-mails-spam sihde thendrikx; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-ninja darxus ena-week0 ena-week1 ena-week2 ena-week3 ena-week4 giovanni grenier hege jarif jbrooks mmiroslaw-mails-ham mmiroslaw-mails-spam sihde thendrikx; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-ninja ena-week0 ena-week1 ena-week2 ena-week3 jarif llanga mmiroslaw-mails-ham mmiroslaw-mails-spam
 
 # tflags publish
 AC_BR_BONANZA
@@ -176,15 +176,6 @@ DKIMDOMAIN_IN_DWL
 DKIMDOMAIN_IN_DWL_UNKNOWN
 
 # tflags net
-DKIMWL_BL
-
-# tflags net
-DKIMWL_WL_HIGH
-
-# tflags net
-DKIMWL_WL_MED
-
-# tflags net
 DKIM_ADSP_ALL
 
 # tflags net
@@ -210,9 +201,6 @@ DKIM_VALID
 
 # tflags net
 DKIM_VALID_AU
-
-# tflags net
-DKIM_VALID_EF
 
 # tflags publish
 DOS_ANAL_SPAM_MAILER
@@ -309,9 +297,6 @@ FROM_WORDY_SHORT
 
 # good enough
 FSL_CTYPE_WIN1251
-
-# good enough
-FSL_HELO_BARE_IP_1
 
 # good enough
 FSL_HELO_FAKE
@@ -884,55 +869,76 @@ TVD_SPACE_ENCODED
 TW_GIBBERISH_MANY
 
 # good enough
-ADVANCE_FEE_2_NEW_FRM_MNY
+ADVANCE_FEE_5_NEW
 
 # good enough
-ADVANCE_FEE_3_NEW_FRM_MNY
+BODY_SINGLE_URI
 
 # good enough
-ADVANCE_FEE_4_NEW_FRM_MNY
+DATE_IN_FUTURE_96_Q
 
 # good enough
-ADVANCE_FEE_5_NEW_FRM_MNY
+FILL_THIS_FORM_LOAN
 
 # good enough
-AXB_XMAILER_MIMEOLE_OL_1ECD5
+FROM_MISSPACED
 
 # good enough
-BIGNUM_EMAILS
+FROM_MISSP_EH_MATCH
 
 # good enough
-DEAR_BENEFICIARY
+FROM_MISSP_PHISH
 
 # good enough
-FILL_THIS_FORM_LONG
-
-# good enough
-FROM_MISSP_TO_UNDISC
+FROM_MISSP_USER
 
 # tflags publish
 FSL_BULK_SIG
 
 # good enough
-HK_NAME_MR_MRS
+HDRS_LCASE
 
 # good enough
-LOTTO_AGENT
+HK_RANDOM_FROM
 
 # good enough
-MONEY_ATM_CARD
+HK_SCAM_N3
 
 # good enough
-MONEY_BARRISTER
+HK_SCAM_N8
 
 # good enough
-NSL_RCVD_HELO_USER
+MANY_HDRS_LCASE
 
 # good enough
-SERGIO_SUBJECT_VIAGRA01
+MILLION_USD
 
 # good enough
-TO_EQ_FM_DIRECT_MX
+NSL_RCVD_FROM_USER
+
+# good enough
+PDS_TO_EQ_FROM_NAME
+
+# good enough
+RATWARE_NO_RDNS
+
+# good enough
+SUBJ_OBFU_PUNCT_MANY
+
+# good enough
+SUBJ_UNNEEDED_HTML
+
+# tflags publish
+TO_NAME_SUBJ_NO_RDNS
+
+# good enough
+TO_NO_BRKTS_FROM_MSSP
+
+# good enough
+TVD_SPACE_RATIO_MINFP
+
+# good enough
+YOU_INHERIT
 
 # tflags publish
 UC_GIBBERISH_OBFU
