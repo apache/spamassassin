@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-ninja darxus ena-week0 ena-week1 ena-week2 ena-week3 ena-week4 giovanni grenier hege jarif jbrooks sihde thendrikx; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-ninja ena-week2 llanga mmiroslaw-mails-ham mmiroslaw-mails-spam; day 3: jarif
+# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-ninja darxus ena-week0 ena-week1 ena-week2 ena-week3 ena-week4 giovanni grenier hege jarif jbrooks mmiroslaw-mails-ham mmiroslaw-mails-spam sihde thendrikx; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-ninja ena-week2 llanga mmiroslaw-mails-ham mmiroslaw-mails-spam; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-ninja ena-week2 llanga mmiroslaw-mails-ham mmiroslaw-mails-spam
 
 # tflags publish
 AC_BR_BONANZA
@@ -173,6 +173,15 @@ DKIMDOMAIN_IN_DWL
 DKIMDOMAIN_IN_DWL_UNKNOWN
 
 # tflags net
+DKIMWL_BL
+
+# tflags net
+DKIMWL_WL_HIGH
+
+# tflags net
+DKIMWL_WL_MED
+
+# tflags net
 DKIM_ADSP_ALL
 
 # tflags net
@@ -207,6 +216,9 @@ DOS_ANAL_SPAM_MAILER
 
 # good enough
 DOS_OE_TO_MX
+
+# good enough
+DOS_OUTLOOK_TO_MX
 
 # tflags publish
 DX_TEXT_02
@@ -284,9 +296,6 @@ FROM_MISSP_FREEMAIL
 FROM_MISSP_MSFT
 
 # good enough
-FROM_MISSP_PHISH
-
-# good enough
 FROM_MISSP_REPLYTO
 
 # tflags net
@@ -303,9 +312,6 @@ FROM_WORDY_SHORT
 
 # good enough
 FSL_CTYPE_WIN1251
-
-# good enough
-FSL_HELO_BARE_IP_1
 
 # good enough
 FSL_HELO_FAKE
@@ -402,6 +408,9 @@ HEADER_FROM_DIFFERENT_DOMAINS
 
 # tflags userconf
 HEAD_LONG
+
+# good enough
+HELO_LOCALHOST
 
 # good enough
 HELO_MISC_IP
@@ -827,6 +836,9 @@ SUBJECT_IN_BLACKLIST
 SUBJECT_IN_WHITELIST
 
 # good enough
+SUBJ_OBFU_PUNCT_FEW
+
+# good enough
 SUBJ_OBFU_PUNCT_MANY
 
 # good enough
@@ -890,76 +902,58 @@ TVD_SPACE_ENCODED
 TW_GIBBERISH_MANY
 
 # good enough
-ADVANCE_FEE_2_NEW_FRM_MNY
+ADVANCE_FEE_5_NEW
 
 # good enough
-ADVANCE_FEE_3_NEW_FRM_MNY
+BODY_SINGLE_URI
 
 # good enough
-ADVANCE_FEE_4_NEW_FRM_MNY
+DATE_IN_FUTURE_96_Q
 
 # good enough
-ADVANCE_FEE_4_NEW_MONEY
+FILL_THIS_FORM_LOAN
 
 # good enough
-ADVANCE_FEE_5_NEW_FRM_MNY
+FROM_MISSPACED
 
 # good enough
-AXB_XMAILER_MIMEOLE_OL_1ECD5
-
-# good enough
-BIGNUM_EMAILS
-
-# good enough
-COMPENSATION
-
-# good enough
-DEAR_BENEFICIARY
-
-# tflags net
-DKIMWL_BL
-
-# tflags net
-DKIMWL_WL_HIGH
-
-# tflags net
-DKIMWL_WL_MED
-
-# good enough
-FILL_THIS_FORM_LONG
-
-# good enough
-FROM_MISSP_TO_UNDISC
+FROM_MISSP_USER
 
 # tflags publish
 FSL_BULK_SIG
 
 # good enough
-HK_NAME_MR_MRS
+HDRS_LCASE
 
 # good enough
-LOTTO_AGENT
+HK_RANDOM_FROM
 
 # good enough
-MONEY_ATM_CARD
+KHOP_DYNAMIC
 
 # good enough
-MONEY_BARRISTER
+MILLION_USD
 
 # good enough
-MONEY_FROM_MISSP
+MONEY_FROM_41
 
 # good enough
-NSL_RCVD_HELO_USER
+NORDNS_LOW_CONTRAST
 
 # good enough
-SERGIO_SUBJECT_VIAGRA01
+NSL_RCVD_FROM_USER
 
 # good enough
-SUBJ_OBFU_PUNCT_FEW
+PDS_TO_EQ_FROM_NAME
 
 # good enough
-TO_EQ_FM_DIRECT_MX
+RATWARE_NO_RDNS
+
+# good enough
+TO_NO_BRKTS_FROM_MSSP
+
+# good enough
+TVD_SPACE_RATIO_MINFP
 
 # tflags publish
 UC_GIBBERISH_OBFU
