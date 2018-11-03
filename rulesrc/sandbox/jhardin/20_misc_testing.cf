@@ -1934,28 +1934,31 @@ tflags         BITCOIN_SPAM_06  publish
 ifplugin Mail::SpamAssassin::Plugin::ReplaceTags
   body           __MY_VICTIM            /(?:<H><I>|<H><E><L><L><O>),?(?:\s<M><Y>)?\s<V><I><C><T><I><M>/i
   replace_rules  __MY_VICTIM
-  body           __MY_MALWARE           /\s<M><Y>\s(?:<M><A><L><W><A><R><E>|<V><I><R><U><S>)\s/i
+  body           __MY_MALWARE           /\s<M><Y>\s(?:<P><E><R><S><O><N><A><L>\s)?(?:<M><A><L><W><A><R><E>|<V><I><R><U><S>)/i
   replace_rules  __MY_MALWARE
   body           __PAY_ME               /\s<P><A><Y>\s<M><E>\s/i
   replace_rules  __PAY_ME
-  body           __YOUR_WEBCAM          /\s<Y><O><U><R>\s<W><E><B><C><A><M>\s/i
+  body           __YOUR_PASSWORD        /\s<Y><O><U><R>\s<P><A><S><S><W><O><R><D>/i
+  replace_rules  __YOUR_PASSWORD
+  body           __YOUR_WEBCAM          /\s(?:<F><R><O><M>|<Y><O><U><R>)\s<W><E><B><C><A><M>/i
   replace_rules  __YOUR_WEBCAM
-  body           __YOUR_ONAN            /\s<Y><O><U><R>\s(?:<M><A><S><T><U><R><B><A><T><I><O><N>|<O><N><A><N><I><S><M>)/i
+  body           __YOUR_ONAN            /\s<Y><O><U><R>?\s(?:<M><A><S><T><U><R><B><A><T><I>(?:<O><N>|<N><G>)|<O><N><A><N><I><S><M>)/i
   replace_rules  __YOUR_ONAN
-  body           __YOUR_PERSONAL        /\s<Y><O><U><R>\s<P><E><R><S><O><N><A><L>\s(?:<I><N><F><O>(?:<R><M><A><T><I><O><N>)?|<D><A><T><A>)\s/i
+  body           __YOUR_PERSONAL        /\s<Y><O><U><R>\s<P><E><R><S><O><N><A><L>\s(?:<I><N><F><O>(?:<R><M><A><T><I><O><N>)?|<D><A><T><A>\s)/i
   replace_rules  __YOUR_PERSONAL
-  body           __HOURS_DEADLINE       /\s<G><I><V><E>\s<Y><O><U>\s\d+\s<H><O><U><R><S>\s/i
+  body           __HOURS_DEADLINE       /\s(?:<G><I><V><E>\s<Y><O><U>|<Y><O><U>\s<H><A><V><E>)\s\d+\s<H><O><U><R><S>/i
   replace_rules  __HOURS_DEADLINE
 else
   body           __MY_VICTIM            /\b(?:hi|hello),?(?:\smy)?\svictim\b/i
-  body           __MY_MALWARE           /\bmy\s(?:malware|virus)\b/i
+  body           __MY_MALWARE           /\bmy\s(?:personal\s)?(?:malware|virus)\b/i
   body           __PAY_ME               /\bpay\sme\b/i
-  body           __YOUR_WEBCAM          /\byour\swebcam\b/i
-  body           __YOUR_ONAN            /\byour\s(?:masturbation|onanism)\b/i
+  body           __YOUR_PASSWORD        /\byour\spassword\b/i
+  body           __YOUR_WEBCAM          /\b(?:from|your)\swebcam\b/i
+  body           __YOUR_ONAN            /\byour?\s(?:masturbati(?:on|ng)|onanism)\b/i
   body           __YOUR_PERSONAL        /\byour\spersonal\s(?:info(?:rmation)?|data)\b/i
-  body           __HOURS_DEADLINE       /\bgive\syou\s\d+\shours\b/i
+  body           __HOURS_DEADLINE       /\b(?:give\syou|you\shave)\s\d+\shours\b/i
 endif
-meta           BITCOIN_EXTORT_01      __BITCOIN_ID && __MY_MALWARE && __PAY_ME && ( __MY_VICTIM + __YOUR_WEBCAM + __YOUR_ONAN + __YOUR_PERSONAL + __HOURS_DEADLINE) > 2
+meta           BITCOIN_EXTORT_01      __BITCOIN_ID && __MY_MALWARE && __PAY_ME && ( __MY_VICTIM + __YOUR_WEBCAM + __YOUR_ONAN + __YOUR_PERSONAL + __HOURS_DEADLINE + __YOUR_PASSWORD + LOCALPART_IN_SUBJECT) > 2
 describe       BITCOIN_EXTORT_01      Extortion spam, pay via BitCoin
 score          BITCOIN_EXTORT_01      4.750	# limit
 
