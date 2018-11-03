@@ -1535,7 +1535,7 @@ tflags      XPRIO              publish
 # some no-ham combinations
 
 meta        __XPRIO_SHORT_SUBJ __XPRIO && __SUBJ_SHORT 
-meta        XPRIO_SHORT_SUBJ   __XPRIO_SHORT_SUBJ && !__UNPARSEABLE_RELAY_COUNT && !__DKIM_EXISTS && !__RP_MATCHES_RCVD && !__SUBSCRIPTION_INFO && !__FROM_ENCODED_QP && !ALL_TRUSTED
+meta        XPRIO_SHORT_SUBJ   __XPRIO_SHORT_SUBJ && !__UNPARSEABLE_RELAY_COUNT && !__DKIM_EXISTS && !__RP_MATCHES_RCVD && !__SUBSCRIPTION_INFO && !__FROM_ENCODED_QP && !ALL_TRUSTED && !__NAKED_TO
 describe    XPRIO_SHORT_SUBJ   Has X-Priority header + short subject
 score       XPRIO_SHORT_SUBJ   2.500	# limit
 tflags      XPRIO_SHORT_SUBJ   publish
@@ -1929,6 +1929,16 @@ meta           BITCOIN_SPAM_06  __BITCOIN_ID && TVD_RCVD_SPACE_BRACKET
 describe       BITCOIN_SPAM_06  BitCoin spam pattern 06
 score          BITCOIN_SPAM_06  1.500	# limit
 tflags         BITCOIN_SPAM_06  publish
+
+meta           BITCOIN_SPAM_07  __BITCOIN_ID && __TO_EQ_FROM
+describe       BITCOIN_SPAM_07  BitCoin spam pattern 07
+score          BITCOIN_SPAM_07  1.500	# limit
+tflags         BITCOIN_SPAM_07  publish
+
+meta           BITCOIN_SPAM_08  __BITCOIN_ID && __TO_IN_SUBJ 
+describe       BITCOIN_SPAM_08  BitCoin spam pattern 08
+score          BITCOIN_SPAM_08  1.500	# limit
+tflags         BITCOIN_SPAM_08  publish
 
 
 ifplugin Mail::SpamAssassin::Plugin::ReplaceTags
