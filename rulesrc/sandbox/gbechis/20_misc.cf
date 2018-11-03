@@ -4,3 +4,8 @@ describe MALWARE_DROPBOX_JAR_URI Dropbox that forces user to download jar file
 
 uri GOOGLE_OBFU	/^https:\/\/www\.google\.([a-z]{2,3})\/url\?sa=t\&rct=j\&q=\&esrc=s\&source=web\&cd=([0-9])+\&cad=rja\&uact=([0-9]+)\&ved=(.*)\&url=https?:\/\/(.*)&usg=(.*)/
 describe GOOGLE_OBFU	Obfuscate url through Google redirect
+
+uri             __URI_SHORT     /https?:\/\/(?:j\.mp|bit\.ly|goo\.gl|x\.co|t\.co|t\.cn|tinyurl\.com|hop\.kz|urla\.ru|fw\.to|back\.ly)(\/)/i
+header          __COPY_OF       Subject =~ /Copy of:/
+meta            COPY_OF_SHORT   ( __URI_SHORT && __COPY_OF && __KAM_BODY_LENGTH_LT_1024 )
+describe        COPY_OF_SHORT   Url shortnener spam
