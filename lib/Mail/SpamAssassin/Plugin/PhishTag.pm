@@ -22,7 +22,8 @@ package Mail::SpamAssassin::Plugin::PhishTag;
 use strict;
 use warnings;
 use Errno qw(EBADF);
-use Mail::SpamAssassin;
+
+use Mail::SpamAssassin::Plugin;
 use Mail::SpamAssassin::Logger;
 
 our @ISA = qw(Mail::SpamAssassin::Plugin);

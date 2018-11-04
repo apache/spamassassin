@@ -26,7 +26,7 @@ use Errno qw(EBADF);
 use Mail::SpamAssassin::Plugin;
 use Mail::SpamAssassin::Locales;
 use Mail::SpamAssassin::Util qw(get_my_locales parse_rfc822_date
-                                idn_to_ascii is_valid_utf_8);
+                                is_valid_utf_8);
 use Mail::SpamAssassin::Logger;
 use Mail::SpamAssassin::Constants qw(:sa :ip);
 

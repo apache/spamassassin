@@ -49,7 +49,6 @@ SpamAssasin; it is not guaranteed to work with other versions of SpamAssassin.
 
 package Mail::SpamAssassin::Plugin::ReplaceTags;
 
-use Mail::SpamAssassin;
 use Mail::SpamAssassin::Plugin;
 use Mail::SpamAssassin::Logger;
 
