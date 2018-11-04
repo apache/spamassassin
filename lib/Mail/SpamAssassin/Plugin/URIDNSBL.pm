@@ -1059,6 +1059,10 @@ sub lookup_dnsbl_for_ip {
 sub lookup_single_dnsbl {
   my ($self, $pms, $obj, $rulename, $lookupstr, $dnsbl, $qtype) = @_;
 
+  my $qkey = "$rulename:$lookupstr:$dnsbl:$qtype";
+  return if exists $pms->{uridnsbl_seen_lookups}{$qkey};
+  $pms->{uridnsbl_seen_lookups}{$qkey} = 1;
+
   my $key = "DNSBL:" . $lookupstr . ':' . $dnsbl;
   my $ent = {
     key => $key, zone => $dnsbl, obj => $obj, type => 'URI-DNSBL',
