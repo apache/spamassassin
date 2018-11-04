@@ -886,7 +886,7 @@ sub query_hosts_or_domains {
         }
         if (%$areviprules && !$seen_lookups->{'A:'.$host}) {
           $seen_lookups->{'A:'.$host} = 1;
-          my $obj = { dom => $host };
+          my $obj = { dom => $host, is_arevip => 1 };
           $self->lookup_a_record($pms, $obj, $host);
           $pms->register_async_rule_start($_)  for keys %$areviprules;
         }
@@ -898,12 +898,11 @@ sub query_hosts_or_domains {
 # ---------------------------------------------------------------------------
 
 sub lookup_domain_ns {
-  my ($self, $pms, $obj, $dom, $rulename) = @_;
+  my ($self, $pms, $obj, $dom) = @_;
 
   my $key = "NS:" . $dom;
   my $ent = {
     key => $key, zone => $dom, obj => $obj, type => "URI-NS",
-    rulename => $rulename,
   };
   # dig $dom ns
   $ent = $pms->{async}->bgsend_and_start_lookup(
@@ -983,12 +982,11 @@ sub complete_ns_lookup {
 # ---------------------------------------------------------------------------
 
 sub lookup_a_record {
-  my ($self, $pms, $obj, $hname, $rulename) = @_;
+  my ($self, $pms, $obj, $hname) = @_;
 
   my $key = "A:" . $hname;
   my $ent = {
     key => $key, zone => $hname, obj => $obj, type => "URI-A",
-    rulename => $rulename,
   };
   # dig $hname a
   $ent = $pms->{async}->bgsend_and_start_lookup(
@@ -1039,15 +1037,19 @@ sub lookup_dnsbl_for_ip {
   my $revip = "$4.$3.$2.$1";
 
   my $conf = $pms->{conf};
-  my $tflags = $conf->{tflags};
-  my $cfns = $pms->{uridnsbl_active_rules_nsrevipbl};
-  my $cfa  = $pms->{uridnsbl_active_rules_arevipbl};
-  foreach my $rulename (keys %$cfa, keys %$cfns) {
+
+  my @rulenames;
+  if ($obj->{is_arevip}) {
+    @rulenames = keys %{$pms->{uridnsbl_active_rules_arevipbl}};
+  } else {
+    @rulenames = keys %{$pms->{uridnsbl_active_rules_nsrevipbl}};
+  }
+  foreach my $rulename (@rulenames) {
     my $rulecf = $conf->{uridnsbls}->{$rulename};
 
+    my $tflags = $conf->{tflags}->{$rulename} || '';
     # ips_only/domains_only lookups should not act on this kind of BL
-    next  if defined $tflags->{$rulename} &&
-             $tflags->{$rulename} =~ /\b(?:ips_only|domains_only)\b/;
+    next if $tflags =~ /\b(?:ips_only|domains_only)\b/;
 
     $self->lookup_single_dnsbl($pms, $obj, $rulename,
 			       $revip, $rulecf->{zone}, $rulecf->{type});
@@ -1187,5 +1189,6 @@ sub got_dnsbl_hit {
 sub has_tflags_domains_only { 1 }
 sub has_subtest_for_ranges { 1 }
 sub has_uridnsbl_for_a { 1 }  # uridnsbl rules recognize tflags 'a' and 'ns'
+sub has_uridnsbl_a_ns { 1 }  # has an actually working 'a' flag, unlike above :-(
 
 1;
