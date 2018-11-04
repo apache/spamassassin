@@ -495,7 +495,7 @@ meta           __TO_EQ_FM_DIRECT_MX __TO_EQ_FROM && __DOS_DIRECT_TO_MX
 meta           TO_EQ_FM_DIRECT_MX   __TO_EQ_FM_DIRECT_MX && !__THREAD_INDEX_GOOD && !__IS_EXCH && !__CTYPE_MULTIPART_MIXED 
 describe       TO_EQ_FM_DIRECT_MX   To == From and direct-to-MX
 score          TO_EQ_FM_DIRECT_MX   2.500	# limit
-#tflags         TO_EQ_FM_DIRECT_MX   publish
+tflags         TO_EQ_FM_DIRECT_MX   publish
 
 # Why __HUSH_HUSH hits ham on this in masscheck I don't know. Legit bank emails maybe?
 meta           __TO_EQ_FM_HTML_DIRECT __TO_EQ_FM_DIRECT_MX && MIME_HTML_ONLY
@@ -1971,6 +1971,7 @@ endif
 meta           BITCOIN_EXTORT_01      __BITCOIN_ID && __MY_MALWARE && __PAY_ME && ( __MY_VICTIM + __YOUR_WEBCAM + __YOUR_ONAN + __YOUR_PERSONAL + __HOURS_DEADLINE + __YOUR_PASSWORD + LOCALPART_IN_SUBJECT) > 2
 describe       BITCOIN_EXTORT_01      Extortion spam, pay via BitCoin
 score          BITCOIN_EXTORT_01      4.750	# limit
+tflags         BITCOIN_EXTORT_01      publish
 
 meta           BITCOIN_PAY_ME         __BITCOIN_ID && __PAY_ME
 describe       BITCOIN_PAY_ME         Pay me via BitCoin
