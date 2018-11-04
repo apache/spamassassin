@@ -39,15 +39,25 @@ describe        URIBL_SBL        Contains an URL's NS IP listed in the Spamhaus 
 tflags          URIBL_SBL        net
 reuse           URIBL_SBL
 
-if (version >= 3.004000)
-  ifplugin Mail::SpamAssassin::Plugin::URIDNSBL
+uridnssub       URIBL_CSS        zen.spamhaus.org.       A   127.0.0.3
+body            URIBL_CSS        eval:check_uridnsbl('URIBL_CSS')
+describe        URIBL_CSS        Contains an URL's NS IP listed in the Spamhaus CSS blocklist
+tflags          URIBL_CSS        net
+reuse           URIBL_CSS
 
-    uridnsbl        URIBL_SBL_A    sbl.spamhaus.org.   A
-    body            URIBL_SBL_A    eval:check_uridnsbl('URIBL_SBL_A')
-    describe        URIBL_SBL_A    Contains URL's A record listed in the Spamhaus SBL blocklist
-    tflags          URIBL_SBL_A    net a
-    reuse           URIBL_SBL_A
-  endif
+# Only works correctly from 3.4.3, earlier versions basically run as URIBL_SBL duplicate
+if can(Mail::SpamAssassin::Plugin::URIDNSBL::has_uridnsbl_for_a)
+  uridnssub       URIBL_SBL_A      zen.spamhaus.org.       A   127.0.0.2
+  body            URIBL_SBL_A      eval:check_uridnsbl('URIBL_SBL_A')
+  describe        URIBL_SBL_A      Contains URL's A record listed in the Spamhaus SBL blocklist
+  tflags          URIBL_SBL_A      net a
+  reuse           URIBL_SBL_A
+
+  uridnssub       URIBL_CSS_A      zen.spamhaus.org.       A   127.0.0.3
+  body            URIBL_CSS_A      eval:check_uridnsbl('URIBL_CSS_A')
+  describe        URIBL_CSS_A      Contains URL's A record listed in the Spamhaus CSS blocklist
+  tflags          URIBL_CSS_A      net a
+  reuse           URIBL_CSS_A
 endif
 
 # DBL, http://www.spamhaus.org/dbl/
