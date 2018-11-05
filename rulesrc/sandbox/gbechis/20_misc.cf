@@ -6,6 +6,6 @@ uri GOOGLE_OBFU	/^https:\/\/www\.google\.([a-z]{2,3})\/url\?sa=t\&rct=j\&q=\&esr
 describe GOOGLE_OBFU	Obfuscate url through Google redirect
 
 uri             __URI_SHORT     /https?:\/\/(?:j\.mp|bit\.ly|goo\.gl|x\.co|t\.co|t\.cn|tinyurl\.com|hop\.kz|urla\.ru|fw\.to|back\.ly)(\/)/i
-header          __COPY_OF       Subject =~ /Copy of:/
+header          __COPY_OF       Subject =~ /Copy of:|offers for you/
 meta            COPY_OF_SHORT   ( __URI_SHORT && __COPY_OF && __KAM_BODY_LENGTH_LT_1024 )
 describe        COPY_OF_SHORT   Url shortnener spam
