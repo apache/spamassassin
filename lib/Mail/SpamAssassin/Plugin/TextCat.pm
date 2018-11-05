@@ -476,9 +476,11 @@ sub create_lm {
   # Note that $$inputptr may or may not be in perl characters (utf8 flag set)
   my $is_unicode = utf8::is_utf8($$inputptr);
 
-  # my $non_word_characters = qr/[0-9\s]/;
-  for my $word (split(/[0-9\s]+/, $$inputptr))
+  # "Split the text into separate tokens consisting only of letters and
+  # apostrophes. Digits and punctuation are discarded."
+  while ($$inputptr =~ /([^0-9\s\-!"#\$\%\&()*+,.\/:;<=>?\@\[\\\]\^_`{|}~]+)/gs)
   {
+    my $word = $1;
     # Bug 6229: Current TextCat database only works well with lowercase input
     if ($is_unicode) {
       # Unicode rules are used for the case change
@@ -492,8 +494,7 @@ sub create_lm {
     $word = "\000" . $word . "\000";
     my $len = length($word);
     my $flen = $len;
-    my $i;
-    for ($i = 0; $i < $flen; $i++) {
+    for (my $i = 0; $i < $flen; $i++) {
       $len--;
       $ngram{substr($word, $i, 1)}++;
       ($len < 1) ? next : $ngram{substr($word, $i, 2)}++;
@@ -508,10 +509,10 @@ sub create_lm {
     # up sorting by removing singletons, however I have very bad
     # results for short inputs, this way
     @sorted = sort { $ngram{$b} <=> $ngram{$a} }
-		   (grep { $ngram{$_} > $conf->{textcat_optimal_ngrams} } keys %ngram);
+      (grep { $ngram{$_} > $conf->{textcat_optimal_ngrams} } sort keys %ngram);
   }
   else {
-    @sorted = sort { $ngram{$b} <=> $ngram{$a} } keys %ngram;
+    @sorted = sort { $ngram{$b} <=> $ngram{$a} } sort keys %ngram;
   }
   splice(@sorted, $conf->{textcat_max_ngrams}) if (@sorted > $conf->{textcat_max_ngrams});
 
@@ -530,6 +531,10 @@ sub extract_metadata {
   my $body = $msg->get_rendered_body_text_array();
   $body = join("\n", @{$body});
   $body =~ s/^Subject://i;
+
+  # Strip anything that looks like url or email, enhances results
+  $body =~ s{https?://\S+}{ }gs;
+  $body =~ s{\S+?\@[a-zA-Z]\S+}{ }gs;
 
   my $len = length($body);
   # truncate after 10k; that should be plenty to classify it
