@@ -368,12 +368,12 @@ sub check_uri_local_bl {
     next unless defined $info->{types}->{a};
 
     my %hosts = %{$info->{hosts}}; # evade hash reset by copy
-    HOST: while (my($host, $domain) = each %hosts) {
+    while (my($host, $domain) = each %hosts) {
       if (defined $ruleconf->{exclusions}{lc($domain)}) {
         dbg("excluded $host, domain $domain matches");
-        next HOST;
+        next;
       }
-      if ($host =~ /^$IP_ADDRESS$/o) {
+      elsif ($host =~ /^$IP_ADDRESS$/o) {
         if ($self->_check_host($pms, $rulename, $host, [$host])) {
           # if hit, rule is done
           return 0;
@@ -390,23 +390,19 @@ sub check_uri_local_bl {
   return 0 if !$pms->is_dns_available();
 
   foreach my $host (keys %found_hosts) {
-    dbg("launching A/AAAA lookup for $host");
     $host = idn_to_ascii($host);
+    dbg("launching A/AAAA lookup for $host");
     # launch dns
-    my $key = "urilocalbl:$host:A";
-    my $ent = $pms->{async}->bgsend_and_start_lookup($host, 'A', undef,
-      { key => $key, host => $host, rulename => $rulename },
-      sub { my($ent, $pkt) = @_;
-            $self->_finish_lookup($pms, $ent, $pkt); },
+    $pms->{async}->bgsend_and_start_lookup($host, 'A', undef,
+      { rulename => $rulename, host => $host, type => 'URILocalBL' },
+      sub { my($ent, $pkt) = @_; $self->_finish_lookup($pms, $ent, $pkt); },
       master_deadline => $pms->{master_deadline}
     );
     # also IPv6 if database supports
     if ($self->{main}->{geodb}->can('country_v6')) {
-      $key = "urilocalbl:$host:AAAA";
-      $ent = $pms->{async}->bgsend_and_start_lookup($host, 'AAAA', undef,
-        { key => $key, host => $host, rulename => $rulename },
-        sub { my($ent, $pkt) = @_;
-              $self->_finish_lookup($pms, $ent, $pkt); },
+      $pms->{async}->bgsend_and_start_lookup($host, 'AAAA', undef,
+        { rulename => $rulename, host => $host, type => 'URILocalBL' },
+        sub { my($ent, $pkt) = @_; $self->_finish_lookup($pms, $ent, $pkt); },
         master_deadline => $pms->{master_deadline}
       );
     }

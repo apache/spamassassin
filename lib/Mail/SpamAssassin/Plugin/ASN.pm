@@ -115,13 +115,15 @@ package Mail::SpamAssassin::Plugin::ASN;
 use strict;
 use warnings;
 use re 'taint';
-use Mail::SpamAssassin;
+
 use Mail::SpamAssassin::Plugin;
 use Mail::SpamAssassin::Logger;
 use Mail::SpamAssassin::Util qw(reverse_ip_address);
 use Mail::SpamAssassin::Dns;
 
 our @ISA = qw(Mail::SpamAssassin::Plugin);
+
+our $txtdata_can_provide_a_list;
 
 sub new {
   my ($class, $mailsa) = @_;
@@ -130,6 +132,10 @@ sub new {
   bless ($self, $class);
 
   $self->set_config($mailsa->{conf});
+
+  #$txtdata_can_provide_a_list = Net::DNS->VERSION >= 0.69;
+  #more robust version check from Damyan Ivanov - Bug 7095
+  $txtdata_can_provide_a_list = version->parse(Net::DNS->VERSION) >= version->parse('0.69');
 
   return $self;
 }
@@ -297,11 +303,10 @@ sub parsed_metadata {
     my $zone_index = $index;
     my $zone = $reversed_ip . '.' . $entry->{zone};
     my $key = "asnlookup-${zone_index}-$entry->{zone}";
-    my $ent = $pms->{async}->bgsend_and_start_lookup(
-        $zone, 'TXT', undef,
-        { key => $key, zone => $zone, rulename => 'asn_lookup' },
-        sub { my($ent, $pkt) = @_;
-              $self->process_dns_result($pms, $pkt, $zone_index) },
+    my $ent = $pms->{async}->bgsend_and_start_lookup($zone, 'TXT', undef,
+      { rulename => 'asn_lookup', type => 'ASN' },
+      sub { my($ent, $pkt) = @_;
+            $self->process_dns_result($pms, $pkt, $zone_index) },
       master_deadline => $pms->{master_deadline} );
     if ($ent) {
       dbg("asn: launched DNS TXT query for %s.%s in background",
@@ -357,8 +362,8 @@ sub process_dns_result {
   foreach my $rr (@answer) {
     dbg("asn: %s: lookup result packet: %s", $zone, $rr->string);
     next if $rr->type ne 'TXT';
-    my @strings = Net::DNS->VERSION >= 0.69 ? $rr->txtdata
-                                            : $rr->char_str_list;
+    my @strings = $txtdata_can_provide_a_list ? $rr->txtdata :
+      $rr->char_str_list; # historical
     next if !@strings;
     for (@strings) { utf8::encode($_) if utf8::is_utf8($_) }
 

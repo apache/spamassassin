@@ -63,7 +63,7 @@ Note for Users Upgrading to SpamAssassin 4.0.0
   bgsend_and_start_lookup which handles required things automatically
   (direct calls to bgsend or start_lookup should not be used),
   bgsend_and_start_lookup should always contain $ent->{rulename} for correct
-  meta dependency handling.
+  meta dependency handling. Deprecated also start_lookup, get_lookup.
 
 - SPF: Mail::SPF is now only supported.  Mail::SPF::Query use is deprecated,
   along with settings do_not_use_mail_spf, do_not_use_mail_spf_query.  SPF

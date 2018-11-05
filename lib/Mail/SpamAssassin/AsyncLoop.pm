@@ -42,6 +42,7 @@ use Time::HiRes qw(time);
 
 use Mail::SpamAssassin;
 use Mail::SpamAssassin::Logger;
+use Mail::SpamAssassin::Util qw(idn_to_ascii);
 
 our @ISA = qw();
 
@@ -109,40 +110,52 @@ sub domain_to_search_list {
 
 # ---------------------------------------------------------------------------
 
-=item $ent = $async->start_lookup($ent, $master_deadline)
+=item $ent = $async->bgsend_and_start_lookup($name, $type, $class, $ent, $cb, %options)
 
-DIRECT USE DISCOURAGED, please use bgsend_and_start_lookup in plugins.
+Launch async DNS lookups.  This is the only official method supported for
+plugins since version 4.0.0.  Do not use bgsend and start_lookup separately.
 
-Register the start of a long-running asynchronous lookup operation.
-C<$ent> is a hash reference containing the following items:
+Merges duplicate queries automatically, only launches one and calls all
+related callbacks on answer.
 
 =over 4
 
-=item key (required)
+=item $name (required)
 
-A key string, unique to this lookup.  This is what is reported in
-debug messages, used as the key for C<get_lookup()>, etc.
+Name to query.
 
-=item id (required)
+=item $type (required)
 
-An ID string, also unique to this lookup.  Typically, this is the DNS packet ID
-as returned by DnsResolver's C<bgsend> method.  Sadly, the Net::DNS
-architecture forces us to keep a separate ID string for this task instead of
-reusing C<key> -- if you are not using DNS lookups through DnsResolver, it
-should be OK to just reuse C<key>.
+Type to query, A, TXT, NS, etc.
 
-=item type (required)
+=item $class (required/deprecated)
+
+Deprecated, ignored, set as undef.
+
+=item C<$ent> is a required hash reference containing the following items:
+
+=over 4
+
+=item $ent->{rulename} (required)
+
+The rulename that started and/or depends on this query.  Required for rule
+dependencies to work correctly.  Can be a single rulename, or array of
+multiple rulenames.
+
+=item $ent->{type} (optional)
 
 A string, typically one word, used to describe the type of lookup in log
-messages, such as C<DNSBL>, C<MX>, C<TXT>.
+messages, such as C<DNSBL>, C<URIBL-A>.  If not defined, default is value of
+$type.
 
-=item zone (optional)
+=item $ent->{zone} (optional)
 
-A zone specification (typically a DNS zone name - e.g. host, domain, or RBL)
-which may be used as a key to look up per-zone settings. No semantics on this
-parameter is imposed by this module. Currently used to fetch by-zone timeouts.
+A zone specification (typically a DNS zone name - e.g.  host, domain, or
+RBL) which may be used as a key to look up per-zone settings.  No semantics
+on this parameter is imposed by this module.  Currently used to fetch
+by-zone timeouts (from rbl_timeout setting).  Defaults to $name.
 
-=item timeout_initial (optional)
+=item $ent->{timeout_initial} (optional)
 
 An initial value of elapsed time for which we are willing to wait for a
 response (time in seconds, floating point value is allowed). When elapsed
@@ -159,102 +172,37 @@ variable rbl_timeout.
 If a value of the timeout_initial parameter is below timeout_min, the initial
 timeout is set to timeout_min.
 
-=item timeout_min (optional)
+=item $ent->{timeout_min} (optional)
 
 A lower bound (in seconds) to which the actual timeout approaches as the
 number of queries completed approaches the number of all queries started.
 Defaults to 0.2 * timeout_initial.
 
+=item $ent->{key}, $ent->{id} (deprecated)
+
+Deprecated, ignored, automatically generated since 4.0.0.
+
+=item $ent->{YOUR_OWN_ITEM}
+
+Any other custom values/objects that you want to pass on to the answer
+callback.
+
 =back
 
-C<$ent> is returned by this method, with its contents augmented by additional
-information.
+=item $cb (required)
 
-=cut
+Callback function for answer, called as $cb->($ent, $pkt).  C<$ent> is the
+same object that bgsend_and_start_lookup was called with.  C<$pkt> is the
+packet object for the response, Net::DNS:RR objects can be found from
+$pkt->answer.
 
-sub start_lookup {
-  my ($self, $ent, $master_deadline) = @_;
+=item %options (required)
 
-  my $id  = $ent->{id};
-  my $key = $ent->{key};
-  defined $id && $id ne ''  or die "oops, no id";
-  $key                      or die "oops, no key";
-  $ent->{type}              or die "oops, no type";
+Hash of options. Only supported and required option is master_deadline:
 
-  my $now = time;
-  $ent->{start_time} = $now  if !defined $ent->{start_time};
+  master_deadline => $pms->{master_deadline}
 
-  # are there any applicable per-zone settings?
-  my $zone = $ent->{zone};
-  my $settings;  # a ref to a by-zone or to global settings
-  my $conf_by_zone = $self->{main}->{conf}->{by_zone};
-  if (defined $zone && $conf_by_zone) {
-  # dbg("async: searching for by_zone settings for $zone");
-    $zone =~ s/^\.//;  $zone =~ s/\.\z//;  # strip leading and trailing dot
-    for (;;) {  # 2.10.example.com, 10.example.com, example.com, com, ''
-      if (exists $conf_by_zone->{$zone}) {
-        $settings = $conf_by_zone->{$zone};
-        last;
-      } elsif ($zone eq '') {
-        last;
-      } else {  # strip one level, careful with address literals
-        $zone = ($zone =~ /^( (?: [^.] | \[ (?: \\. | [^\]\\] )* \] )* )
-                            \. (.*) \z/xs) ? $2 : '';
-      }
-    }
-  }
-
-  dbg("async: applying by_zone settings for %s", $zone)  if $settings;
-
-  my $t_init = $ent->{timeout_initial};  # application-specified has precedence
-  $t_init = $settings->{rbl_timeout}  if $settings && !defined $t_init;
-  $t_init = $self->{main}->{conf}->{rbl_timeout}  if !defined $t_init;
-  $t_init = 0  if !defined $t_init;      # last-resort default, just in case
-
-  my $t_end = $ent->{timeout_min};       # application-specified has precedence
-  $t_end = $settings->{rbl_timeout_min}  if $settings && !defined $t_end;
-  $t_end = $self->{main}->{conf}->{rbl_timeout_min}  if !defined $t_end; # added for bug 7070
-  $t_end = 0.2 * $t_init  if !defined $t_end;
-  $t_end = 0  if $t_end < 0;  # just in case
-  $t_init = $t_end  if $t_init < $t_end;
-
-  my $clipped_by_master_deadline = 0;
-  if (defined $master_deadline) {
-    my $time_avail = $master_deadline - time;
-    $time_avail = 0.5  if $time_avail < 0.5;  # give some slack
-    if ($t_init > $time_avail) {
-      $t_init = $time_avail; $clipped_by_master_deadline = 1;
-      $t_end  = $time_avail  if $t_end > $time_avail;
-    }
-  }
-  $ent->{timeout_initial} = $t_init;
-  $ent->{timeout_min} = $t_end;
-
-  $ent->{display_id} =  # identifies entry in debug logging and similar
-    join(", ", grep { defined }
-               map { ref $ent->{$_} ? @{$ent->{$_}} : $ent->{$_} }
-               qw(sets rules rulename type key) );
-
-  $self->{pending_lookups}->{$key} = $ent;
-
-  $self->{queries_started}++;
-  dbg("async: starting: %s (timeout %.1fs, min %.1fs)%s",
-      $ent->{display_id}, $ent->{timeout_initial}, $ent->{timeout_min},
-      !$clipped_by_master_deadline ? '' : ', capped by time limit');
-
-  $ent;
-}
-
-# ---------------------------------------------------------------------------
-
-=item $ent = $async->bgsend_and_start_lookup($domain, $type, $class, $ent, $cb, %options)
-
-A common idiom: calls C<bgsend>, followed by a call to C<start_lookup>,
-returning the argument $ent object as modified by C<start_lookup> and
-filled-in with a query ID.
-
-$ent->{rulename} should always be defined, so meta dependencies pending
-checks work correctly.
+=back
 
 =cut
 
@@ -276,13 +224,16 @@ sub bgsend_and_start_lookup {
   # Waiting for priority -100 to launch?
   if ($self->{wait_launch}) {
     push @{$self->{bgsend_queue}}, [@_];
-    dbg("async: dns priority not reached, queueing lookup: $_[0] $_[1]");
+    dbg("async: dns priority not reached, queueing lookup: $domain/$type");
     return $ent;
   }
 
   if (!defined $ent->{rulename}) {
     info("async: bgsend_and_start_lookup called without rulename: $domain/$type");
   }
+
+  $domain =~ s/\.+\z//s;  # strip trailing dots, these sometimes still sneak in
+  $domain = idn_to_ascii($domain);
 
   # At this point the $domain should already be encoded to UTF-8 and
   # IDN converted to ASCII-compatible encoding (ACE).  Make sure this is
@@ -298,19 +249,20 @@ sub bgsend_and_start_lookup {
          "called from %s line %d", $domain, $package, $line);
   }
 
+  my $dnskey = uc($type).'/'.lc($domain);
+  my $dns_query_info = $self->{all_lookups}{$dnskey};
+
   $ent = {}  if !$ent;
-  $domain =~ s/\.+\z//s;  # strip trailing dots, these sometimes still sneak in
   $ent->{id} = undef;
+  $ent->{key} = $dnskey  if !exists $ent->{key};
   $ent->{query_type} = $type;
   $ent->{query_domain} = $domain;
   $ent->{type} = $type  if !exists $ent->{type};
+  $ent->{zone} = $domain  if !exists $ent->{zone};
   $cb = $ent->{completed_callback}  if !$cb;  # compatibility with SA < 3.4
 
-  my $key = $ent->{key} || '';
+  my $key = $ent->{key};
   my $rulename = $ent->{rulename};
-
-  my $dnskey = uc($type) . '/' . lc($domain);
-  my $dns_query_info = $self->{all_lookups}{$dnskey};
 
   if ($dns_query_info) {  # DNS query already underway or completed
     my $id = $ent->{id} = $dns_query_info->{id};  # re-use existing query
@@ -445,26 +397,112 @@ sub bgsend_and_start_lookup {
     } else {
       $self->{pending_rules}->{$rulename}{$key} = 1 if $rulename;
     }
-    $self->start_lookup($ent, $options{master_deadline});
+    $self->_start_lookup($ent, $options{master_deadline});
   }
   return $ent;
 }
 
 # ---------------------------------------------------------------------------
 
+=item $ent = $async->start_lookup($ent, $master_deadline)
+
+DIRECT USE DEPRECATED since 4.0.0, please use bgsend_and_start_lookup.
+
+=cut
+
+sub start_lookup {
+  my $self = shift;
+  warn "deprecated start_lookup called, please use bgsend_and_start_lookup"
+    if !$self->{start_lookup_warned};
+  $self->{start_lookup_warned} = 1;
+  $self->_start_lookup(@_);
+}
+
+# Internal use not deprecated. :-)
+sub _start_lookup {
+  my ($self, $ent, $master_deadline) = @_;
+
+  my $id  = $ent->{id};
+  my $key = $ent->{key};
+  defined $id && $id ne ''  or die "oops, no id";
+  $key                      or die "oops, no key";
+  $ent->{type}              or die "oops, no type";
+
+  my $now = time;
+  $ent->{start_time} = $now  if !defined $ent->{start_time};
+
+  # are there any applicable per-zone settings?
+  my $zone = $ent->{zone};
+  my $settings;  # a ref to a by-zone or to global settings
+  my $conf_by_zone = $self->{main}->{conf}->{by_zone};
+  if (defined $zone && $conf_by_zone) {
+  # dbg("async: searching for by_zone settings for $zone");
+    $zone =~ s/^\.//;  $zone =~ s/\.\z//;  # strip leading and trailing dot
+    for (;;) {  # 2.10.example.com, 10.example.com, example.com, com, ''
+      if (exists $conf_by_zone->{$zone}) {
+        $settings = $conf_by_zone->{$zone};
+        last;
+      } elsif ($zone eq '') {
+        last;
+      } else {  # strip one level, careful with address literals
+        $zone = ($zone =~ /^( (?: [^.] | \[ (?: \\. | [^\]\\] )* \] )* )
+                            \. (.*) \z/xs) ? $2 : '';
+      }
+    }
+  }
+
+  dbg("async: applying by_zone settings for %s", $zone)  if $settings;
+
+  my $t_init = $ent->{timeout_initial};  # application-specified has precedence
+  $t_init = $settings->{rbl_timeout}  if $settings && !defined $t_init;
+  $t_init = $self->{main}->{conf}->{rbl_timeout}  if !defined $t_init;
+  $t_init = 0  if !defined $t_init;      # last-resort default, just in case
+
+  my $t_end = $ent->{timeout_min};       # application-specified has precedence
+  $t_end = $settings->{rbl_timeout_min}  if $settings && !defined $t_end;
+  $t_end = $self->{main}->{conf}->{rbl_timeout_min}  if !defined $t_end; # added for bug 7070
+  $t_end = 0.2 * $t_init  if !defined $t_end;
+  $t_end = 0  if $t_end < 0;  # just in case
+  $t_init = $t_end  if $t_init < $t_end;
+
+  my $clipped_by_master_deadline = 0;
+  if (defined $master_deadline) {
+    my $time_avail = $master_deadline - time;
+    $time_avail = 0.5  if $time_avail < 0.5;  # give some slack
+    if ($t_init > $time_avail) {
+      $t_init = $time_avail; $clipped_by_master_deadline = 1;
+      $t_end  = $time_avail  if $t_end > $time_avail;
+    }
+  }
+  $ent->{timeout_initial} = $t_init;
+  $ent->{timeout_min} = $t_end;
+
+  $ent->{display_id} =  # identifies entry in debug logging and similar
+    join(", ", grep { defined }
+               map { ref $ent->{$_} ? @{$ent->{$_}} : $ent->{$_} }
+               qw(sets rules rulename type key) );
+
+  $self->{pending_lookups}->{$key} = $ent;
+
+  $self->{queries_started}++;
+  dbg("async: starting: %s (timeout %.1fs, min %.1fs)%s",
+      $ent->{display_id}, $ent->{timeout_initial}, $ent->{timeout_min},
+      !$clipped_by_master_deadline ? '' : ', capped by time limit');
+
+  $ent;
+}
+
+# ---------------------------------------------------------------------------
+
 =item $ent = $async->get_lookup($key)
 
-Retrieve the pending-lookup object for the given key C<$key>.
-
-If the lookup is complete, this will return C<undef>.
-
-Note that a lookup is still considered "pending" until C<complete_lookups()> is
-called, even if it has been reported as complete via C<set_response_packet()>.
+DEPRECATED since 4.0.0. Do not use.
 
 =cut
 
 sub get_lookup {
   my ($self, $key) = @_;
+  warn("deprecated get_lookup function used");
   return $self->{pending_lookups}->{$key};
 }
 
@@ -563,7 +601,7 @@ sub complete_lookups {
         $ent->{finish_time} = $now  if !defined $ent->{finish_time};
         my $elapsed = $ent->{finish_time} - $ent->{start_time};
         dbg("async: completed in %.3f s: %s", $elapsed, $ent->{display_id});
-        $self->{timing_by_query}->{". $key"} += $elapsed;
+        $self->{timing_by_query}->{". $key ($ent->{type})"} += $elapsed;
         $self->{queries_completed}++;
         delete $pending->{$key};
       }
@@ -680,6 +718,8 @@ sub abort_remaining_lookups {
 
 =item $async->set_response_packet($id, $pkt, $key, $timestamp)
 
+For internal use, do not call from plugins.
+
 Register a "response packet" for a given query.  C<$id> is the ID for the
 query, and must match the C<id> supplied in C<start_lookup()>. C<$pkt> is the
 packet object for the response. A parameter C<$key> identifies an entry in a
@@ -730,6 +770,8 @@ sub set_response_packet {
 }
 
 =item $async->report_id_complete($id,$key,$key,$timestamp)
+
+DEPRECATED since 4.0.0. Do not use.
 
 Legacy. Equivalent to $self->set_response_packet($id,undef,$key,$timestamp),
 i.e. providing undef as a response packet. Register that a query has

@@ -29,7 +29,7 @@ use Mail::SpamAssassin::Conf;
 use Mail::SpamAssassin::PerMsgStatus;
 use Mail::SpamAssassin::AsyncLoop;
 use Mail::SpamAssassin::Constants qw(:ip);
-use Mail::SpamAssassin::Util qw(untaint_var am_running_on_windows idn_to_ascii);
+use Mail::SpamAssassin::Util qw(untaint_var am_running_on_windows);
 
 use File::Spec;
 use IO::Socket;
@@ -101,42 +101,30 @@ BEGIN {
 sub do_rbl_lookup {
   my ($self, $rule, $set, $type, $host, $subtest) = @_;
 
-  $host = idn_to_ascii($host);
-  my $key = "dns:$type:$host";
-
   my $ent = {
-    key => $key,
-    zone => $host,  # serves to fetch other per-zone settings
-    type => "DNSBL-".$type,
+    rulename => $rule,
+    type => "DNSBL",
     set => $set,
     subtest => $subtest,
-    rulename => $rule,
   };
-  $ent = $self->{async}->bgsend_and_start_lookup(
-        $host, $type, undef, $ent,
-        sub { my($ent, $pkt) = @_; $self->process_dnsbl_result($ent, $pkt) },
-      master_deadline => $self->{master_deadline} );
+  $self->{async}->bgsend_and_start_lookup($host, $type, undef, $ent,
+    sub { my($ent, $pkt) = @_; $self->process_dnsbl_result($ent, $pkt) },
+    master_deadline => $self->{master_deadline}
+  );
 }
 
+# Deprecated, was only used from DNSEval.pm?
 sub do_dns_lookup {
   my ($self, $rule, $type, $host) = @_;
 
-  $host = idn_to_ascii($host);
-  $host =~ s/\.\z//s;  # strip a redundant trailing dot
-  my $key = "dns:$type:$host";
-
   my $ent = {
-    key => $key,
-    zone => $host,  # serves to fetch other per-zone settings
-    type => "DNSBL-".$type,
-    rules => [ $rule ],
-    # id is filled in after we send the query below
+    rulename => $rule,
+    type => "DNSBL",
   };
-  $ent = $self->{async}->bgsend_and_start_lookup(
-      $host, $type, undef, $ent,
-      sub { my($ent, $pkt) = @_; $self->process_dnsbl_result($ent, $pkt) },
-    master_deadline => $self->{master_deadline} );
-  $ent;
+  $self->{async}->bgsend_and_start_lookup($host, $type, undef, $ent,
+    sub { my($ent, $pkt) = @_; $self->process_dnsbl_result($ent, $pkt) },
+    master_deadline => $self->{master_deadline}
+  );
 }
 
 ###########################################################################

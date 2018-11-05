@@ -405,9 +405,9 @@ sub check_dns_sender {
     return 0;
   }
 
+  $host = idn_to_ascii($host);
   dbg("dns: checking A and MX for host $host");
 
-  $host = idn_to_ascii($host);
   $self->do_sender_lookup($pms, $rule, 'A', $host);
   $self->do_sender_lookup($pms, $rule, 'MX', $host);
 
@@ -417,12 +417,9 @@ sub check_dns_sender {
 sub do_sender_lookup {
   my ($self, $pms, $rule, $type, $host) = @_;
 
-  my $key = "dns:$type:$host";
   my $ent = {
-    key => $key,
-    zone => $host,
-    type => "DNSBL-".$type,
     rulename => $rule,
+    type => "DNSBL-Sender",
   };
   $pms->{async}->bgsend_and_start_lookup(
     $host, $type, undef, $ent, sub {

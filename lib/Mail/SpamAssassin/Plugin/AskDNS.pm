@@ -471,9 +471,8 @@ OUTER:
                         { defined $current_tag_val{$1} ? $current_tag_val{$1}
                                                        : '' }ge;
       $query_domain = idn_to_ascii($query_domain);
-
-      # the $dnskey identifies this query in AsyncLoop's pending_lookups
-      my $dnskey = join(':', 'askdns', $query_type, $query_domain);
+      # used by process_response_packet
+      my $dnskey = "askdns:$query_type:$query_domain";
       dbg("askdns: expanded query %s, dns key %s", $query_domain, $dnskey);
 
       if ($query_domain eq '') {
@@ -487,12 +486,13 @@ OUTER:
                [$query_type, $answer_types_ref, $rules] );
         }
         # lauch a new DNS query for $query_type and $query_domain
-        my $ent = $pms->{async}->bgsend_and_start_lookup(
+        $pms->{async}->bgsend_and_start_lookup(
           $query_domain, $query_type, undef,
-          { key => $dnskey, zone => $query_domain, rulename => \@rulenames },
-          sub { my ($ent2,$pkt) = @_;
-                $self->process_response_packet($pms, $ent2, $pkt, $dnskey) },
-          master_deadline => $pms->{master_deadline} );
+          { rulename => \@rulenames, type => 'AskDNS' },
+          sub { my ($ent,$pkt) = @_;
+                $self->process_response_packet($pms, $ent, $pkt, $dnskey) },
+          master_deadline => $pms->{master_deadline}
+        );
       }
 
       last  if !@templ_tags;
