@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-ninja darxus ena-week0 ena-week1 ena-week2 ena-week3 ena-week4 giovanni grenier hege jarif jbrooks sihde thendrikx; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-ninja llanga mmiroslaw-mails-ham mmiroslaw-mails-spam; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-ninja ena-week2 llanga mmiroslaw-mails-ham mmiroslaw-mails-spam
+# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-ninja darxus ena-week1 ena-week2 ena-week3 ena-week4 giovanni grenier hege jarif jbrooks sihde thendrikx; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-ninja ena-week0 llanga mmiroslaw-mails-ham mmiroslaw-mails-spam sihde; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-ninja llanga mmiroslaw-mails-ham mmiroslaw-mails-spam
 
 # tflags publish
 AC_BR_BONANZA
@@ -129,6 +129,12 @@ BITCOIN_SPAM_05
 
 # tflags publish
 BITCOIN_SPAM_06
+
+# tflags publish
+BITCOIN_SPAM_07
+
+# tflags publish
+BITCOIN_SPAM_08
 
 # good enough
 BODY_SINGLE_WORD
@@ -511,9 +517,6 @@ OBFU_JVSCR_ESC
 # tflags publish
 OBFU_TEXT_ATTACH
 
-# good enough
-PHOTO_EDITING_FREEM
-
 # tflags publish
 PHP_NOVER_MUA
 
@@ -763,9 +766,6 @@ RDNS_NUM_TLD_ATCHNX
 # tflags publish
 RDNS_NUM_TLD_XM
 
-# good enough
-REPLYTO_WITHOUT_TO_CC
-
 # tflags publish
 SINGLETS_LOW_CONTRAST
 
@@ -853,6 +853,9 @@ TEQF_USR_MSGID_MALF
 # tflags publish
 THIS_AD
 
+# tflags publish
+TO_EQ_FM_DIRECT_MX
+
 # tflags net
 TO_EQ_FM_DOM_SPF_FAIL
 
@@ -893,55 +896,52 @@ TVD_SPACE_ENCODED
 TW_GIBBERISH_MANY
 
 # good enough
-ADVANCE_FEE_3_NEW_FRM_MNY
-
-# good enough
-ADVANCE_FEE_4_NEW_MONEY
-
-# good enough
-ADVANCE_FEE_5_NEW_FRM_MNY
-
-# good enough
-BIGNUM_EMAILS
+ADVANCE_FEE_5_NEW
 
 # tflags publish
-BITCOIN_SPAM_07
-
-# tflags publish
-BITCOIN_SPAM_08
+BITCOIN_EXTORT_01
 
 # good enough
-COMPENSATION
+BODY_SINGLE_URI
 
 # good enough
-DEAR_BENEFICIARY
+DATE_IN_FUTURE_96_Q
 
 # good enough
-FILL_THIS_FORM_LONG
+FILL_THIS_FORM_LOAN
 
 # good enough
-FROM_MISSP_TO_UNDISC
+FROM_MISSPACED
+
+# good enough
+FROM_MISSP_USER
 
 # tflags publish
 FSL_BULK_SIG
 
 # good enough
-LOTTO_AGENT
+HDRS_LCASE
 
 # good enough
-MONEY_ATM_CARD
+HK_RANDOM_FROM
 
 # good enough
-MONEY_FROM_MISSP
+HK_SCAM_N2
 
 # good enough
-NSL_RCVD_HELO_USER
+MILLION_USD
 
 # good enough
-SERGIO_SUBJECT_VIAGRA01
+NSL_RCVD_FROM_USER
 
 # good enough
-TO_EQ_FM_DIRECT_MX
+PHOTO_EDITING_DIRECT
+
+# good enough
+TO_NO_BRKTS_FROM_MSSP
+
+# good enough
+TVD_SPACE_RATIO_MINFP
 
 # tflags publish
 UC_GIBBERISH_OBFU
