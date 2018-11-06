@@ -280,6 +280,11 @@ both queries will be performed.
 
 The maximum number of domains to look up.
 
+=item parse_dkim_uris ( 0 / 1 )
+
+Include DKIM uris in lookups. This option is documented in
+Mail::SpamAssassin::Conf.
+
 =back
 
 =head1 NOTES
