@@ -3,6 +3,12 @@
 #### Basic stuff
 ####
 
+body		HK_FIRST_NAME_TMPL	/__FIRST_NAME__/
+score		HK_FIRST_NAME_TMPL	1
+
+body		HK_UNSUB_TMPL		/__UNSUBSCRIBE_/
+score		HK_UNSUB_TMPL		1
+
 header		HK_XOIP_4SINGLES	X-Originating-IP =~ /^\[?\d\.\d\.\d\.\d\]?$/
 score		HK_XOIP_3SINGLES	1
 
