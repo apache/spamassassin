@@ -22,16 +22,12 @@ setup_masscheck() {
   [ ! -d "$WORKDIR/$TYPE/masses/spamassassin" ] && mkdir -p "$WORKDIR/$TYPE/masses/spamassassin"
   cd "$WORKDIR/$TYPE/masses" || { echo "ERROR: cd $WORKDIR/$TYPE/masses failed" >&2; exit 1; }
   rm -f spamassassin/*
-  echo "bayes_auto_learn 0" > spamassassin/user_prefs
-  echo "lock_method flock" >> spamassassin/user_prefs
-  echo "bayes_store_module Mail::SpamAssassin::BayesStore::SDBM" >> spamassassin/user_prefs
-  echo "use_auto_whitelist 0" >> spamassassin/user_prefs
-  echo "whitelist_bounce_relays example.com" >> spamassassin/user_prefs
-  echo "score ANY_BOUNCE_MESSAGE 0" >> spamassassin/user_prefs
-  echo "score BOUNCE_MESSAGE 0" >> spamassassin/user_prefs
-  [ -n "${TRUSTED_NETWORKS}" ] && echo "trusted_networks ${TRUSTED_NETWORKS}" >> spamassassin/user_prefs
-  [ -n "${INTERNAL_NETWORKS}" ] && echo "internal_networks ${INTERNAL_NETWORKS}" >> spamassassin/user_prefs
-  [ -n "${CUSTOM_PREFS}" ] && cat ${CUSTOM_PREFS} >> spamassassin/user_prefs
+  echo "" > spamassassin/user_prefs # not used, local.cf works better for admin commands also
+  echo "score ANY_BOUNCE_MESSAGE 0" >> spamassassin/local.cf
+  echo "score BOUNCE_MESSAGE 0" >> spamassassin/local.cf
+  [ -n "${TRUSTED_NETWORKS}" ] && echo "trusted_networks ${TRUSTED_NETWORKS}" >> spamassassin/local.cf
+  [ -n "${INTERNAL_NETWORKS}" ] && echo "internal_networks ${INTERNAL_NETWORKS}" >> spamassassin/local.cf
+  [ -n "${CUSTOM_PREFS}" ] && cat ${CUSTOM_PREFS} >> spamassassin/local.cf
   rm -f "$WORKDIR/$TYPE/rules/99_custom.cf"
   [ -n "${CUSTOM_RULES}" ] && cat ${CUSTOM_RULES} > "$WORKDIR/$TYPE/rules/99_custom.cf"
 }
