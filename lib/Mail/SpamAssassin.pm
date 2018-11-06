@@ -1662,7 +1662,7 @@ sub init {
   $self->{_initted} = $$;
 
   # if spamd or other forking, wait for spamd_child_init
-  if ($self->{skip_prng_reseeding}) {
+  if (!$self->{skip_prng_reseeding}) {
     $self->set_global_state_dir();
   }
 
