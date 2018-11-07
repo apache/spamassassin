@@ -23,8 +23,13 @@ setup_masscheck() {
   cd "$WORKDIR/$TYPE/masses" || { echo "ERROR: cd $WORKDIR/$TYPE/masses failed" >&2; exit 1; }
   rm -f spamassassin/*
   echo "" > spamassassin/user_prefs # not used, local.cf works better for admin commands also
+  echo "bayes_auto_learn 0" > spamassassin/local.cf
+  echo "lock_method flock" >> spamassassin/local.cf
   echo "score ANY_BOUNCE_MESSAGE 0" >> spamassassin/local.cf
   echo "score BOUNCE_MESSAGE 0" >> spamassassin/local.cf
+  [ -n "${TRUSTED_NETWORKS}" -o -n "${INTERNAL_NETWORKS}" ] && \
+    echo "clear_trusted_networks
+clear_internal_networks" >> spamassassin/local.cf
   [ -n "${TRUSTED_NETWORKS}" ] && echo "trusted_networks ${TRUSTED_NETWORKS}" >> spamassassin/local.cf
   [ -n "${INTERNAL_NETWORKS}" ] && echo "internal_networks ${INTERNAL_NETWORKS}" >> spamassassin/local.cf
   [ -n "${CUSTOM_PREFS}" ] && cat ${CUSTOM_PREFS} >> spamassassin/local.cf
