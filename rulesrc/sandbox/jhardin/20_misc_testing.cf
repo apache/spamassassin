@@ -1940,6 +1940,11 @@ describe       BITCOIN_SPAM_08  BitCoin spam pattern 08
 score          BITCOIN_SPAM_08  1.500	# limit
 tflags         BITCOIN_SPAM_08  publish
 
+meta           BITCOIN_SPAM_09  __BITCOIN_ID && __DESTROY_ME
+describe       BITCOIN_SPAM_09  BitCoin spam pattern 09
+score          BITCOIN_SPAM_09  1.500	# limit
+tflags         BITCOIN_SPAM_09  publish
+
 
 ifplugin Mail::SpamAssassin::Plugin::ReplaceTags
   body           __MY_VICTIM            /(?:<H><I>|<H><E><L><L><O>),?(?:\s<M><Y>)?\s<V><I><C><T><I><M>/i
@@ -1968,17 +1973,17 @@ else
   body           __YOUR_PERSONAL        /\byour\spersonal\s(?:info(?:rmation)?|data)\b/i
   body           __HOURS_DEADLINE       /\b(?:give\syou|you\shave)\s\d+\shours\b/i
 endif
-meta           BITCOIN_EXTORT_01      __BITCOIN_ID && __MY_MALWARE && __PAY_ME && ( __MY_VICTIM + __YOUR_WEBCAM + __YOUR_ONAN + __YOUR_PERSONAL + __HOURS_DEADLINE + __YOUR_PASSWORD + LOCALPART_IN_SUBJECT) > 2
+meta           BITCOIN_EXTORT_01      __BITCOIN_ID && __MY_MALWARE && ( __PAY_ME + __MY_VICTIM + __YOUR_WEBCAM + __YOUR_ONAN + __YOUR_PERSONAL + __HOURS_DEADLINE + __YOUR_PASSWORD + LOCALPART_IN_SUBJECT + __DESTROY_ME ) > 2
 describe       BITCOIN_EXTORT_01      Extortion spam, pay via BitCoin
-score          BITCOIN_EXTORT_01      4.750	# limit
+score          BITCOIN_EXTORT_01      5.000	# limit
 tflags         BITCOIN_EXTORT_01      publish
 
-meta           BITCOIN_PAY_ME         __BITCOIN_ID && __PAY_ME
+meta           BITCOIN_PAY_ME         __BITCOIN_ID && __PAY_ME && !BITCOIN_EXTORT_01
 describe       BITCOIN_PAY_ME         Pay me via BitCoin
 score          BITCOIN_PAY_ME         2.500	# limit
 tflags         BITCOIN_PAY_ME         publish
 
-meta           BITCOIN_MALWARE        __BITCOIN_ID && __MY_MALWARE && !__NOT_SPOOFED
+meta           BITCOIN_MALWARE        __BITCOIN_ID && __MY_MALWARE && !BITCOIN_EXTORT_01 && !__NOT_SPOOFED
 describe       BITCOIN_MALWARE        BitCoin + malware
 score          BITCOIN_MALWARE        3.000	# limit
 tflags         BITCOIN_MALWARE        publish
