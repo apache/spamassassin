@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-ninja darxus ena-week1 ena-week2 ena-week3 ena-week4 giovanni grenier hege jarif jbrooks sihde thendrikx; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-ninja ena-week0 llanga mmiroslaw-mails-ham mmiroslaw-mails-spam sihde; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-ninja llanga mmiroslaw-mails-ham mmiroslaw-mails-spam
+# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-ninja darxus ena-week1 ena-week2 ena-week3 ena-week4 giovanni grenier hege jarif sihde thendrikx; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-ninja jbrooks llanga mmiroslaw-mails-ham mmiroslaw-mails-spam; day 3: ena-week0 llanga
 
 # tflags publish
 AC_BR_BONANZA
@@ -58,9 +58,6 @@ ADVANCE_FEE_3_NEW_MONEY
 # tflags publish
 ADVANCE_FEE_4_NEW
 
-# good enough
-ADVANCE_FEE_5_NEW_MONEY
-
 # tflags publish
 AD_PREFS
 
@@ -105,6 +102,9 @@ BAYES_99
 
 # tflags learn
 BAYES_999
+
+# tflags publish
+BITCOIN_EXTORT_01
 
 # tflags publish
 BITCOIN_MALWARE
@@ -830,9 +830,6 @@ SUBJECT_IN_WHITELIST
 SUBJ_OBFU_PUNCT_FEW
 
 # good enough
-SUBJ_OBFU_PUNCT_MANY
-
-# good enough
 SUBJ_UNNEEDED_HTML
 
 # tflags net
@@ -896,52 +893,31 @@ TVD_SPACE_ENCODED
 TW_GIBBERISH_MANY
 
 # good enough
-ADVANCE_FEE_5_NEW
-
-# tflags publish
-BITCOIN_EXTORT_01
+ADVANCE_FEE_3_NEW_FRM_MNY
 
 # good enough
-BODY_SINGLE_URI
+ADVANCE_FEE_5_NEW_FRM_MNY
 
 # good enough
-DATE_IN_FUTURE_96_Q
+DEAR_BENEFICIARY
 
 # good enough
-FILL_THIS_FORM_LOAN
+FILL_THIS_FORM_LONG
 
 # good enough
-FROM_MISSPACED
-
-# good enough
-FROM_MISSP_USER
+FROM_MISSP_TO_UNDISC
 
 # tflags publish
 FSL_BULK_SIG
 
 # good enough
-HDRS_LCASE
+MONEY_ATM_CARD
 
 # good enough
-HK_RANDOM_FROM
+MONEY_FROM_MISSP
 
 # good enough
-HK_SCAM_N2
-
-# good enough
-MILLION_USD
-
-# good enough
-NSL_RCVD_FROM_USER
-
-# good enough
-PHOTO_EDITING_DIRECT
-
-# good enough
-TO_NO_BRKTS_FROM_MSSP
-
-# good enough
-TVD_SPACE_RATIO_MINFP
+PHOTO_EDITING_FREEM
 
 # tflags publish
 UC_GIBBERISH_OBFU
