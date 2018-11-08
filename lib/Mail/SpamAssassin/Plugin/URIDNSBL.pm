@@ -1001,25 +1001,25 @@ sub complete_a_lookup {
                                                     : $rr->rdatastr;
     dbg("uridnsbl: complete_a_lookup got(%d) A for %s: %s",
         $j, $ent->{lookup}, $ip_address);
-    $self->lookup_dnsbl_for_ip($pms, $ip_address, $ent->{rulename});
+    $self->lookup_dnsbl_for_ip($pms, $ip_address, $ent);
   }
 }
 
 # ---------------------------------------------------------------------------
 
 sub lookup_dnsbl_for_ip {
-  my ($self, $pms, $ip, $rules) = @_;
+  my ($self, $pms, $ip, $ent) = @_;
 
   my $conf = $pms->{conf};
-  foreach my $rulename (@$rules) {
+  foreach my $rulename (@{$ent->{rulename}}) {
     my $rulecf = $conf->{uridnsbls}->{$rulename};
     $self->lookup_single_dnsbl($pms, $ip, $rulename,
-      $rulecf->{zone}, $rulecf->{type});
+      $rulecf->{zone}, $rulecf->{type}, $ent->{domain});
   }
 }
 
 sub lookup_single_dnsbl {
-  my ($self, $pms, $lookup, $rulename, $zone, $type) = @_;
+  my ($self, $pms, $lookup, $rulename, $zone, $type, $orig_domain) = @_;
 
   $lookup = idn_to_ascii($lookup);
 
@@ -1039,6 +1039,7 @@ sub lookup_single_dnsbl {
     type => "URIBL",
     lookup => $lookup,
     domain => $domain,
+    orig_domain => $orig_domain,
   };
   $pms->{async}->bgsend_and_start_lookup("$lookup.$zone", $type, undef, $ent,
     sub { my ($ent,$pkt) = @_; $self->complete_dnsbl_lookup($pms, $ent, $pkt) },
@@ -1133,8 +1134,12 @@ sub got_dnsbl_hit {
 
   # TODO: this needs to handle multiple domain hits per rule
   $pms->clear_test_state();
-  my $uris = join(' ', keys %{$pms->{uridnsbl_hits}->{$rulename}});
-  $pms->test_log("URIs: $uris");
+  #my $uris = join(' ', keys %{$pms->{uridnsbl_hits}->{$rulename}});
+  if (defined $ent->{orig_domain}) {
+    $pms->test_log("URIs: $ent->{orig_domain}/$ent->{domain}");
+  } else {
+    $pms->test_log("URIs: $ent->{domain}");
+  }
   $pms->got_hit($rulename, '', ruletype => 'eval');
 }
 
