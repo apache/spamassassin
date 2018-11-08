@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-ninja darxus ena-week1 ena-week2 ena-week3 ena-week4 giovanni grenier hege jarif sihde thendrikx; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-ninja jbrooks llanga mmiroslaw-mails-ham mmiroslaw-mails-spam; day 3: ena-week0 llanga
+# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-ninja darxus ena-week2 ena-week3 giovanni grenier hege jarif sihde thendrikx; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-ninja ena-week1 ena-week4 jarif llanga mmiroslaw-mails-ham mmiroslaw-mails-spam sihde; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-ninja jbrooks llanga mmiroslaw-mails-ham mmiroslaw-mails-spam
 
 # tflags publish
 AC_BR_BONANZA
@@ -827,9 +827,6 @@ SUBJECT_IN_BLACKLIST
 SUBJECT_IN_WHITELIST
 
 # good enough
-SUBJ_OBFU_PUNCT_FEW
-
-# good enough
 SUBJ_UNNEEDED_HTML
 
 # tflags net
@@ -893,31 +890,58 @@ TVD_SPACE_ENCODED
 TW_GIBBERISH_MANY
 
 # good enough
-ADVANCE_FEE_3_NEW_FRM_MNY
+ADMITS_SPAM
 
 # good enough
-ADVANCE_FEE_5_NEW_FRM_MNY
+ADVANCE_FEE_4_NEW_MONEY
 
 # good enough
-DEAR_BENEFICIARY
+ADVANCE_FEE_5_NEW_MONEY
 
 # good enough
-FILL_THIS_FORM_LONG
+BIGNUM_EMAILS
+
+# tflags publish
+BITCOIN_SPAM_09
 
 # good enough
-FROM_MISSP_TO_UNDISC
+BODY_SINGLE_URI
+
+# good enough
+DATE_IN_FUTURE_96_Q
+
+# good enough
+FILL_THIS_FORM_LOAN
+
+# good enough
+FROM_MISSPACED
+
+# good enough
+FROM_MISSP_USER
 
 # tflags publish
 FSL_BULK_SIG
 
 # good enough
-MONEY_ATM_CARD
+HDRS_LCASE
 
 # good enough
-MONEY_FROM_MISSP
+HK_RANDOM_FROM
 
 # good enough
-PHOTO_EDITING_FREEM
+LOTTO_AGENT
+
+# good enough
+NSL_RCVD_FROM_USER
+
+# good enough
+NSL_RCVD_HELO_USER
+
+# good enough
+TO_NO_BRKTS_FROM_MSSP
+
+# good enough
+TVD_SPACE_RATIO_MINFP
 
 # tflags publish
 UC_GIBBERISH_OBFU
