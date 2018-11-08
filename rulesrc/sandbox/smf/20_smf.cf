@@ -118,31 +118,31 @@ score    FSL_NO_RCVD_1		0.01
 rawbody  __FSL_HTML_BLOCKS      /<((?:div|span))[^>]+>.{1,10}?<\/\1[^>]*>.{0,20}?<\1/si
 tflags   __FSL_HTML_BLOCKS      multiple
 
-meta     FSL_HTML_BLOCK_LOTS_1  (__FSL_HTML_BLOCKS > __FSL_BODY_TEXT_LINE)
-describe FSL_HTML_BLOCK_LOTS_1  More <div> or <span> blocks than lines
-score    FSL_HTML_BLOCK_LOTS_1  0.01
+#meta     FSL_HTML_BLOCK_LOTS_1  (__FSL_HTML_BLOCKS > __FSL_BODY_TEXT_LINE)
+#describe FSL_HTML_BLOCK_LOTS_1  More <div> or <span> blocks than lines
+#score    FSL_HTML_BLOCK_LOTS_1  0.01
 
-meta     FSL_HTML_BLOCK_LOTS_2  (__FSL_HTML_BLOCKS > (__FSL_BODY_TEXT_LINE * 2))
-describe FSL_HTML_BLOCK_LOTS_2  More <div> or <span> blocks than twice the amount of lines
-score    FSL_HTML_BLOCK_LOTS_2  0.01
+#meta     FSL_HTML_BLOCK_LOTS_2  (__FSL_HTML_BLOCKS > (__FSL_BODY_TEXT_LINE * 2))
+#describe FSL_HTML_BLOCK_LOTS_2  More <div> or <span> blocks than twice the amount of lines
+#score    FSL_HTML_BLOCK_LOTS_2  0.01
 
-meta     FSL_HTML_BLOCK_LOTS_3  (__FSL_HTML_BLOCKS > (__FSL_BODY_TEXT_LINE * 4))
-describe FSL_HTML_BLOCK_LOTS_3  More <div> or <span> blocks than 4x the amount of lines
-score    FSL_HTML_BLOCK_LOTS_3  0.01
+#meta     FSL_HTML_BLOCK_LOTS_3  (__FSL_HTML_BLOCKS > (__FSL_BODY_TEXT_LINE * 4))
+#describe FSL_HTML_BLOCK_LOTS_3  More <div> or <span> blocks than 4x the amount of lines
+#score    FSL_HTML_BLOCK_LOTS_3  0.01
 
-rawbody  __FSL_HTML_ENTITIES    /\&(?!(?:nbsp|cent|pound|yen|copy|reg|\#1[678][0-9];|\#x[AB][0-9A-F];))(?:\#(?:x[a-f0-9]+|\d{3,4})|[a-zA-Z]+)\;/si
-tflags   __FSL_HTML_ENTITIES    multiple
+#rawbody  __FSL_HTML_ENTITIES    /\&(?!(?:nbsp|cent|pound|yen|copy|reg|\#1[678][0-9];|\#x[AB][0-9A-F];))(?:\#(?:x[a-f0-9]+|\d{3,4})|[a-zA-Z]+)\;/si
+#tflags   __FSL_HTML_ENTITIES    multiple
 
-meta     FSL_HTML_ENT_LOTS_1    (__FSL_HTML_ENTITIES > (__FSL_BODY_TEXT_LINE * 2))
-describe FSL_HTML_ENT_LOTS_1    Lots of HTML entities x2
-score    FSL_HTML_ENT_LOTS_1    0.01
+#meta     FSL_HTML_ENT_LOTS_1    (__FSL_HTML_ENTITIES > (__FSL_BODY_TEXT_LINE * 2))
+#describe FSL_HTML_ENT_LOTS_1    Lots of HTML entities x2
+#score    FSL_HTML_ENT_LOTS_1    0.01
 
-meta     FSL_HTML_ENT_LOTS_2    (__FSL_HTML_ENTITIES > (__FSL_BODY_TEXT_LINE * 8))
-describe FSL_HTML_ENT_LOTS_2    Lots of HTML entities x8
-score    FSL_HTML_ENT_LOTS_2    0.01
+#meta     FSL_HTML_ENT_LOTS_2    (__FSL_HTML_ENTITIES > (__FSL_BODY_TEXT_LINE * 8))
+#describe FSL_HTML_ENT_LOTS_2    Lots of HTML entities x8
+#score    FSL_HTML_ENT_LOTS_2    0.01
 
-meta     FSL_HTML_ENT_LOTS_3    (__FSL_HTML_ENTITIES > (__FSL_BODY_TEXT_LINE * 24))
-describe FSL_HTML_ENT_LOTS_3    Lots of HTML entities x24
-score    FSL_HTML_ENT_LOTS_3    0.01
+#meta     FSL_HTML_ENT_LOTS_3    (__FSL_HTML_ENTITIES > (__FSL_BODY_TEXT_LINE * 24))
+#describe FSL_HTML_ENT_LOTS_3    Lots of HTML entities x24
+#score    FSL_HTML_ENT_LOTS_3    0.01
 
 
