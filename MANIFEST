@@ -75,6 +75,7 @@ lib/Mail/SpamAssassin/Plugin/ASN.pm
 lib/Mail/SpamAssassin/Plugin/AWL.pm
 lib/Mail/SpamAssassin/Plugin/AccessDB.pm
 lib/Mail/SpamAssassin/Plugin/AntiVirus.pm
+lib/Mail/SpamAssassin/Plugin/AuthRes.pm
 lib/Mail/SpamAssassin/Plugin/AutoLearnThreshold.pm
 lib/Mail/SpamAssassin/Plugin/Bayes.pm
 lib/Mail/SpamAssassin/Plugin/BodyEval.pm
@@ -230,6 +231,7 @@ t/README
 t/SATest.pl
 t/SATest.pm
 t/all_modules.t
+t/authres.t
 t/autolearn.t
 t/autolearn_force.t
 t/autolearn_force_fail.t
@@ -325,6 +327,7 @@ t/data/nice/013
 t/data/nice/014
 t/data/nice/015
 t/data/nice/016
+t/data/nice/authres
 t/data/nice/base64.txt
 t/data/nice/crlf-endings
 t/data/nice/dkim/AddedVtag_07

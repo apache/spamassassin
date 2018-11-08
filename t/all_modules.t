@@ -56,6 +56,7 @@ loadplugin Mail::SpamAssassin::Plugin::HashBL
 loadplugin Mail::SpamAssassin::Plugin::ResourceLimits
 loadplugin Mail::SpamAssassin::Plugin::FromNameSpoof
 loadplugin Mail::SpamAssassin::Plugin::Phishing
+loadplugin Mail::SpamAssassin::Plugin::AuthRes
 ");
 
 tstprefs("
