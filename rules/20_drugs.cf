@@ -209,8 +209,8 @@ body __DRUGS_SLEEP4	/\b_{0,3}H[_\W]?[a4\xE0-\xE6@][_\W]?l[_\W]?c[_\W]?i[_\W]?[o0
 meta __DRUGS_SLEEP (__DRUGS_SLEEP1 || __DRUGS_SLEEP2 || __DRUGS_SLEEP3 ||__DRUGS_SLEEP4)
 
 #muscle relaxants
-#soma
-body __DRUGS_MUSCLE1	/(?:\b|\s)[_\W]{0,3}s[_\W]{0,3}[o0\xF2-\xF6][_\W]{0,3}m[_\W]{0,3}[a4\xE0-\xE3\xE5\xE6@][_\W]{0,3}(?:\b|\s)/i
+#soma - removed due to Bug 7612
+#body __DRUGS_MUSCLE1	/(?:\b|\s)[_\W]{0,3}s[_\W]{0,3}[o0\xF2-\xF6][_\W]{0,3}m[_\W]{0,3}[a4\xE0-\xE3\xE5\xE6@][_\W]{0,3}(?:\b|\s)/i
 #cyclobenzaprine
 body __DRUGS_MUSCLE2	/\b_{0,3}cycl[o0\xF2-\xF6]b[e3\xE8-\xEB]nz[a4\xE0-\xE6@]pr[i1!|l\xEC-\xEF]n[e3\xE8-\xEB]_{0,3}(?:\b|\s)/i
 #flexeril
@@ -219,7 +219,7 @@ body __DRUGS_MUSCLE3	/\b_{0,3}f[_\W]?l[_\W]?[e3\xE8-\xEB][_\W]?x[_\W]?[e3\xE8-\x
 body __DRUGS_MUSCLE4	/\b_{0,3}z[_\W]?a[_\W]?n[_\W]?a[_\W]?f[_\W]?l[_\W]?e[_\W]?x_{0,3}\b/i
 #skelaxin
 body __DRUGS_MUSCLE5	/\bskelaxin\b/i
-meta DRUGS_MUSCLE (__DRUGS_MUSCLE1 || __DRUGS_MUSCLE2 || __DRUGS_MUSCLE3 || __DRUGS_MUSCLE4 ||__DRUGS_MUSCLE5 )
+meta DRUGS_MUSCLE (__DRUGS_MUSCLE2 || __DRUGS_MUSCLE3 || __DRUGS_MUSCLE4 ||__DRUGS_MUSCLE5 )
 describe DRUGS_MUSCLE 	Refers to a muscle relaxant
 #anti-anxiety
 #these two rules are used to differentiate between obfu and non-obfu spellings
