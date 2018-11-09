@@ -366,7 +366,7 @@ if ($GPG_ENABLED || $opt{'import'}) {
   }
 
   # does the sa-update keyring exist?  if not, import it
-  if(!-f File::Spec->catfile($opt{'gpghomedir'}, "secring.gpg")) {
+  if(!-f File::Spec->catfile($opt{'gpghomedir'}, "trustdb.gpg")) {
     import_default_keyring();
     # attempt to continue even if this fails, anyway
   }
@@ -1740,10 +1740,21 @@ sub interpolate_gpghomedir {
 
 ##############################################################################
 
+sub check_gpghomedir {
+  unless (-d $opt{gpghomedir}) {
+    dbg("gpg: creating gpg home dir ".$opt{gpghomedir});
+    # use 0700 to avoid "unsafe permissions" warning
+    mkpath([$opt{gpghomedir}], 0, 0700)
+      or die "cannot mkpath $opt{gpghomedir}: $!";
+  } 
+}
+
+##############################################################################
 sub import_gpg_key {
   my $keyfile = shift;
 
   my $gpghome = interpolate_gpghomedir();
+  check_gpghomedir();
 
   my $CMD = "$GPGPath $gpghome --batch ".
       "--no-tty --status-fd=1 -q --logger-fd=1 --import";
@@ -1783,11 +1794,7 @@ sub import_default_keyring {
   }
 
   dbg("gpg: importing default keyring to ".$opt{gpghomedir});
-  unless (-d $opt{gpghomedir}) {
-    # use 0700 to avoid "unsafe permissions" warning
-    mkpath([$opt{'gpghomedir'}], 0, 0700)
-      or die "cannot mkpath $opt{gpghomedir}: $!";
-  } 
+  check_gpghomedir();
   import_gpg_key($defkey);
 }
 
