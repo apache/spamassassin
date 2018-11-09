@@ -2597,5 +2597,6 @@ if can(Mail::SpamAssassin::Conf::feature_bug6558_free)
 endif
 
 
+body       __AC_HTML_ENTITY_BONANZA    /(?:&(?:[A-Za-z0-9]{2,}|\#(?:[0-9]{2,5}|x[0-9A-F]{2,4}));\s{0,64}){20}/
 
 
