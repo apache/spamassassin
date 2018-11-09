@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-ninja darxus ena-week2 ena-week3 giovanni grenier hege jarif sihde thendrikx; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-ninja ena-week1 ena-week4 jarif llanga mmiroslaw-mails-ham mmiroslaw-mails-spam sihde; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-ninja jbrooks llanga mmiroslaw-mails-ham mmiroslaw-mails-spam
+# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-ninja darxus ena-week0 ena-week1 ena-week2 ena-week3 ena-week4 grenier hege jarif sihde thendrikx; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-ninja ena-week2 giovanni jarif mmiroslaw-mails-ham mmiroslaw-mails-spam sihde; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-ninja ena-week1 ena-week4 jarif llanga mmiroslaw-mails-ham mmiroslaw-mails-spam sihde
 
 # tflags publish
 AC_BR_BONANZA
@@ -136,6 +136,9 @@ BITCOIN_SPAM_07
 # tflags publish
 BITCOIN_SPAM_08
 
+# tflags publish
+BITCOIN_SPAM_09
+
 # good enough
 BODY_SINGLE_WORD
 
@@ -267,9 +270,6 @@ FOUND_YOU
 
 # tflags userconf
 FRAGMENTED_MESSAGE
-
-# good enough
-FREEMAIL_DISPTO
 
 # tflags publish
 FREEMAIL_FORGED_FROMDOMAIN
@@ -432,9 +432,6 @@ IMG_ONLY_FM_DOM_INFO
 
 # good enough
 KB_FORGED_MOZ4
-
-# good enough
-KHOP_DYNAMIC
 
 # tflags publish
 LIST_PRTL_PUMPDUMP
@@ -890,58 +887,34 @@ TVD_SPACE_ENCODED
 TW_GIBBERISH_MANY
 
 # good enough
-ADMITS_SPAM
+ADVANCE_FEE_3_NEW_FRM_MNY
 
 # good enough
-ADVANCE_FEE_4_NEW_MONEY
+ADVANCE_FEE_5_NEW_FRM_MNY
 
 # good enough
-ADVANCE_FEE_5_NEW_MONEY
+DEAR_BENEFICIARY
 
 # good enough
-BIGNUM_EMAILS
-
-# tflags publish
-BITCOIN_SPAM_09
+FILL_THIS_FORM_LONG
 
 # good enough
-BODY_SINGLE_URI
-
-# good enough
-DATE_IN_FUTURE_96_Q
-
-# good enough
-FILL_THIS_FORM_LOAN
-
-# good enough
-FROM_MISSPACED
-
-# good enough
-FROM_MISSP_USER
+FROM_MISSP_TO_UNDISC
 
 # tflags publish
 FSL_BULK_SIG
 
 # good enough
-HDRS_LCASE
+MILLION_USD
 
 # good enough
-HK_RANDOM_FROM
+MONEY_ATM_CARD
 
 # good enough
-LOTTO_AGENT
+MONEY_FROM_MISSP
 
 # good enough
-NSL_RCVD_FROM_USER
-
-# good enough
-NSL_RCVD_HELO_USER
-
-# good enough
-TO_NO_BRKTS_FROM_MSSP
-
-# good enough
-TVD_SPACE_RATIO_MINFP
+PHOTO_EDITING_FREEM
 
 # tflags publish
 UC_GIBBERISH_OBFU
