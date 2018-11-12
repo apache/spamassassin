@@ -178,9 +178,6 @@ Use strongly recommended, possibly along with authres_networks all.
     }
   });
 
-  $conf->{parser}->register_commands(\@cmds);
-}
-
 =item authres_ignored_authserv authservid1 id2 ...   (default: none)
 
 Ignored authentication server IDs (the domain-name-like first word of
@@ -205,6 +202,9 @@ Any A-R header is ignored if match is found.
       }
     }
   });
+
+  $conf->{parser}->register_commands(\@cmds);
+}
 
 =head1 METADATA
 
