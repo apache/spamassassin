@@ -46,11 +46,13 @@ our @ISA = qw(Mail::SpamAssassin::Plugin);
 
 # list of valid methods and values
 # https://www.iana.org/assignments/email-auth/email-auth.xhtml
+# some others not in that list:
+#   dkim-atps=neutral
 my %method_result = (
   'auth' => {'fail'=>1,'none'=>1,'pass'=>1,'permerror'=>1,'temperror'=>1},
   'dkim' => {'fail'=>1,'neutral'=>1,'none'=>1,'pass'=>1,'permerror'=>1,'policy'=>1,'temperror'=>1},
   'dkim-adsp' => {'discard'=>1,'fail'=>1,'none'=>1,'nxdomain'=>1,'pass'=>1,'permerror'=>1,'temperror'=>1,'unknown'=>1},
-  'dkim-atps' => {'fail'=>1,'none'=>1,'pass'=>1,'permerror'=>1,'temperror'=>1},
+  'dkim-atps' => {'fail'=>1,'none'=>1,'pass'=>1,'permerror'=>1,'temperror'=>1,'neutral'=>1},
   'dmarc' => {'fail'=>1,'none'=>1,'pass'=>1,'permerror'=>1,'temperror'=>1},
   'domainkeys' => {'fail'=>1,'neutral'=>1,'none'=>1,'permerror'=>1,'policy'=>1,'pass'=>1,'temperror'=>1},
   'iprev' => {'fail'=>1,'pass'=>1,'permerror'=>1,'temperror'=>1},
