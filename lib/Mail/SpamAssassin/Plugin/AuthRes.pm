@@ -25,6 +25,9 @@ Mail::SpamAssassin::Plugin::AuthRes - use Authentication-Results header fields
 
 loadplugin     Mail::SpamAssassin::Plugin::AuthRes
 
+authres_trusted_authserv  myserv.example.com
+authres_networks  all
+
 =head1 DESCRIPTION
 
 This plugin parses Authentication-Results header fields and can supply the
@@ -112,16 +115,18 @@ sub set_config {
 
 Process Authenticated-Results headers set by servers from these networks
 (refers to SpamAssassin *_networks zones).  Any header outside this is
-completely ignored and affects any module settings.
+completely ignored (affects all module settings).
 
  internal   = internal_networks
  trusted    = internal_networks + trusted_networks
  all        = all above + all external
 
-Setting "all" makes sense only if your MX servers filter properly all
-incoming A-R headers.  Even then it might be safer to just extend SA
-trusted_networks to any external servers whose A-R you want to see, and use
-the "trusted" setting.
+Setting "all" is safe only if your MX servers filter properly all incoming
+A-R headers, and you use authres_trusted_authserv to match your authserv-id. 
+This is suitable for default OpenDKIM for example.  These settings might
+also be required if your filters do not insert A-R header to correct
+position above the internal Received header (some known offenders: OpenDKIM,
+OpenDMARC, amavisd-milter).
 
 =cut
 
@@ -143,6 +148,38 @@ the "trusted" setting.
       }
     }
   });
+
+=item authres_trusted_authserv authservid1 id2 ...   (default: none)
+
+Trusted authentication server IDs (the domain-name-like first word of
+Authentication-Results field, also known as C<authserv-id>).
+
+Note that if set, ALL A-R headers are ignored unless a match is found.
+
+Use strongly recommended, possibly along with authres_networks all.
+
+=back
+
+=cut
+
+  push (@cmds, {
+    setting => 'authres_trusted_authserv',
+    is_admin => 1,
+    default => {},
+    type => $Mail::SpamAssassin::Conf::CONF_TYPE_HASH_KEY_VALUE,
+    code => sub {
+      my ($self, $key, $value, $line) = @_;
+      if (!defined $value || $value =~ /^$/) {
+        return $Mail::SpamAssassin::Conf::MISSING_REQUIRED_VALUE;
+      }
+      foreach my $id (split(/\s+/, lc $value)) {
+        $self->{authres_trusted_authserv}->{$id} = 1;
+      }
+    }
+  });
+
+  $conf->{parser}->register_commands(\@cmds);
+}
 
 =item authres_ignored_authserv authservid1 id2 ...   (default: none)
 
@@ -168,36 +205,6 @@ Any A-R header is ignored if match is found.
       }
     }
   });
-
-=item authres_trusted_authserv authservid1 id2 ...   (default: none)
-
-Trusted authentication server IDs (the domain-name-like first word of
-Authentication-Results field, also known as C<authserv-id>).
-
-Note that if set, ALL A-R headers are ignored unless a match is found.
-
-=back
-
-=cut
-
-  push (@cmds, {
-    setting => 'authres_trusted_authserv',
-    is_admin => 1,
-    default => {},
-    type => $Mail::SpamAssassin::Conf::CONF_TYPE_HASH_KEY_VALUE,
-    code => sub {
-      my ($self, $key, $value, $line) = @_;
-      if (!defined $value || $value =~ /^$/) {
-        return $Mail::SpamAssassin::Conf::MISSING_REQUIRED_VALUE;
-      }
-      foreach my $id (split(/\s+/, lc $value)) {
-        $self->{authres_trusted_authserv}->{$id} = 1;
-      }
-    }
-  });
-
-  $conf->{parser}->register_commands(\@cmds);
-}
 
 =head1 METADATA
 
