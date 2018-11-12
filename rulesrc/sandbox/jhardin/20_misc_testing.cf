@@ -2597,22 +2597,27 @@ if can(Mail::SpamAssassin::Conf::feature_bug6558_free)
 endif
 
 
+# HTML entity obfuscation per list discussion 11/2018 (thanks AC and RW)
+# Broad non-ASCII didn't pan out
 # body       __AC_HTML_ENTITY_BONANZA_BODY    /(?:&(?:[A-Z0-9]{2,}|\#(?:[0-9]{2,5}|x[0-9A-F]{2,4}));\s{0,64}){20}/i
 # rawbody    __AC_HTML_ENTITY_BONANZA_RAW     /(?:&(?:[A-Z0-9]{2,}|\#(?:[0-9]{2,5}|x[0-9A-F]{2,4}));\s{0,64}){20}/i
 # body       __AC_HTML_ENTITY_BONANZA_SHRT_BODY    /(?:&[A-Z0-9\#]{2,};\s{0,64}){20}/i
 # rawbody    __AC_HTML_ENTITY_BONANZA_SHRT_RAW     /(?:&[A-Z0-9\#]{2,};\s{0,64}){20}/i
-rawbody    __RW_HTML_ENTITY_ASCII_RAW       /(?:&\#(?:(?:\d{1,2}|1[01]\d|12[0-7])|x[0-7][0-9a-f])\s{0,64};\s{0,64}){20}/i
-rawbody    __RW_HTML_ENTITY_ASCII_RAW_FEW   /(?:&\#(?:(?:\d{1,2}|1[01]\d|12[0-7])|x[0-7][0-9a-f])\s{0,64};\s{0,64}){10}/i
+# meta       __AC_HTML_ENTITY_BONANZA_MINFP   __AC_HTML_ENTITY_BONANZA_SHRT_RAW && !__RCD_RDNS_MTA_MESSY && !__JM_REACTOR_DATE && !__RCD_RDNS_MTA 
 
-#meta       __AC_HTML_ENTITY_BONANZA_MINFP   __AC_HTML_ENTITY_BONANZA_SHRT_RAW && !__RCD_RDNS_MTA_MESSY && !__JM_REACTOR_DATE && !__RCD_RDNS_MTA 
-meta       __RW_HTML_ENTITY_ASCII_MINFP     __RW_HTML_ENTITY_ASCII_RAW && !__DKIM_EXISTS && !__RCD_RDNS_SMTP && !__RCD_RDNS_SMTP_MESSY && !__JM_REACTOR_DATE && !__HAS_ERRORS_TO && !__L_BODY_8BITS && !__RCD_RDNS_MAIL_MESSY 
-meta       __RW_HTML_ENTITY_ASCII_FEW_MINFP  __RW_HTML_ENTITY_ASCII_RAW_FEW && !__DKIM_EXISTS && !__RCD_RDNS_SMTP && !__RCD_RDNS_SMTP_MESSY && !__JM_REACTOR_DATE && !__HAS_ERRORS_TO && !__L_BODY_8BITS && !__RCD_RDNS_MAIL_MESSY 
+# rawbody    __RW_HTML_ENTITY_ASCII_MANY       /(?:&\#(?:(?:\d{1,2}|1[01]\d|12[0-7])|x[0-7][0-9a-f])\s{0,64};\s{0,64}){20}/i
+# meta       __RW_HTML_ENTITY_ASCII_MANY_MINFP     __HTML_ENTITY_ASCII_MANY && !__DKIM_EXISTS && !__RCD_RDNS_SMTP && !__RCD_RDNS_SMTP_MESSY && !__JM_REACTOR_DATE && !__HAS_ERRORS_TO && !__L_BODY_8BITS && !__RCD_RDNS_MAIL_MESSY 
 
-meta       RW_HTML_ENTITY_ASCII             __RW_HTML_ENTITY_ASCII_FEW_MINFP
-describe   RW_HTML_ENTITY_ASCII             ASCII encoded for obfuscation
-score      RW_HTML_ENTITY_ASCII             3.000	# limit
+rawbody    __HTML_ENTITY_ASCII         /(?:&\#(?:(?:\d{1,2}|1[01]\d|12[0-7])|x[0-7][0-9a-f])\s{0,64};\s{0,64}){10}/i
+meta       __HTML_ENTITY_ASCII_MINFP   __HTML_ENTITY_ASCII && !__DKIM_EXISTS && !__RCD_RDNS_SMTP && !__RCD_RDNS_SMTP_MESSY && !__JM_REACTOR_DATE && !__HAS_ERRORS_TO && !__L_BODY_8BITS && !__RCD_RDNS_MAIL_MESSY 
 
-meta       RW_HTML_ENTITY_ASCII_TINY        __RW_HTML_ENTITY_ASCII_FEW_MINFP && __HTML_FONT_TINY_01 
-describe   RW_HTML_ENTITY_ASCII_TINY        Encoded ASCII, tiny fonts
-score      RW_HTML_ENTITY_ASCII_TINY        3.000	# limit
+meta       HTML_ENTITY_ASCII           __HTML_ENTITY_ASCII_MINFP
+describe   HTML_ENTITY_ASCII           Obfuscated ASCII
+score      HTML_ENTITY_ASCII           3.000	# limit
+tflags     HTML_ENTITY_ASCII           publish
+
+meta       HTML_ENTITY_ASCII_TINY      __HTML_ENTITY_ASCII_MINFP && __HTML_FONT_TINY_01 
+describe   HTML_ENTITY_ASCII_TINY      Obfuscated ASCII + tiny fonts
+score      HTML_ENTITY_ASCII_TINY      3.000	# limit
+tflags     HTML_ENTITY_ASCII_TINY      publish
 
