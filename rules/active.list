@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-ninja darxus ena-week0 ena-week1 ena-week2 ena-week3 ena-week4 grenier hege jarif sihde thendrikx; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-ninja llanga mmiroslaw-mails-ham mmiroslaw-mails-spam; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-ninja jarif llanga mmiroslaw-mails-ham mmiroslaw-mails-spam
+# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-ninja darxus ena-week0 ena-week1 ena-week2 ena-week3 ena-week4 grenier hege jarif sihde thendrikx; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-ninja jarif llanga mmiroslaw-mails-ham mmiroslaw-mails-spam; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-ninja llanga mmiroslaw-mails-ham mmiroslaw-mails-spam
 
 # tflags publish
 AC_BR_BONANZA
@@ -422,6 +422,12 @@ HEXHASH_WORD
 HTML_CHARSET_FARAWAY
 
 # tflags publish
+HTML_ENTITY_ASCII
+
+# tflags publish
+HTML_ENTITY_ASCII_TINY
+
+# tflags publish
 HTML_OFF_PAGE
 
 # tflags publish
@@ -447,6 +453,9 @@ LOTS_OF_MONEY
 
 # tflags publish
 LUCRATIVE
+
+# good enough
+MAILER_EQ_ORG
 
 # tflags publish
 MALF_HTML_B64
@@ -869,6 +878,12 @@ TO_NO_BRKTS_NORDNS_HTML
 TO_NO_BRKTS_PCNT
 
 # good enough
+TVD_PH_BODY_ACCOUNTS_POST
+
+# good enough
+TVD_PH_BODY_META_ALL
+
+# good enough
 TVD_RCVD_IP
 
 # good enough
@@ -881,49 +896,46 @@ TVD_SPACE_ENCODED
 TW_GIBBERISH_MANY
 
 # good enough
-ADVANCE_FEE_3_NEW_FRM_MNY
+ADVANCE_FEE_5_NEW_MONEY
 
 # good enough
-ADVANCE_FEE_4_NEW_MONEY
+BODY_SINGLE_URI
 
 # good enough
-ADVANCE_FEE_5_NEW_FRM_MNY
+DATE_IN_FUTURE_96_Q
 
 # good enough
-DEAR_BENEFICIARY
+FREEMAIL_DISPTO
 
 # good enough
-FILL_THIS_FORM_LONG
+FROM_MISSP_USER
 
 # tflags publish
 FSL_BULK_SIG
 
 # good enough
-HK_SCAM_N2
-
-# tflags publish
-HTML_ENTITY_ASCII
-
-# tflags publish
-HTML_ENTITY_ASCII_TINY
+HDRS_LCASE
 
 # good enough
-MAILER_EQ_ORG
+HK_RANDOM_FROM
 
 # good enough
-MONEY_ATM_CARD
+LIST_PARTIAL_SHORT_MSG
 
 # good enough
-MONEY_FROM_MISSP
+MONEY_FORM
 
 # good enough
-NSL_RCVD_HELO_USER
+NSL_RCVD_FROM_USER
 
 # good enough
-TVD_PH_BODY_ACCOUNTS_POST
+SERGIO_SUBJECT_VIAGRA01
 
 # good enough
-TVD_PH_BODY_META_ALL
+TO_NO_BRKTS_FROM_MSSP
+
+# good enough
+TVD_SPACE_RATIO_MINFP
 
 # tflags publish
 UC_GIBBERISH_OBFU
