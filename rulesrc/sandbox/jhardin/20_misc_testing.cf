@@ -2602,8 +2602,9 @@ endif
 # body       __AC_HTML_ENTITY_BONANZA_BODY    /(?:&(?:[A-Z0-9]{2,}|\#(?:[0-9]{2,5}|x[0-9A-F]{2,4}));\s{0,64}){20}/i
 # rawbody    __AC_HTML_ENTITY_BONANZA_RAW     /(?:&(?:[A-Z0-9]{2,}|\#(?:[0-9]{2,5}|x[0-9A-F]{2,4}));\s{0,64}){20}/i
 # body       __AC_HTML_ENTITY_BONANZA_SHRT_BODY    /(?:&[A-Z0-9\#]{2,};\s{0,64}){20}/i
-# rawbody    __AC_HTML_ENTITY_BONANZA_SHRT_RAW     /(?:&[A-Z0-9\#]{2,};\s{0,64}){20}/i
-# meta       __AC_HTML_ENTITY_BONANZA_MINFP   __AC_HTML_ENTITY_BONANZA_SHRT_RAW && !__RCD_RDNS_MTA_MESSY && !__JM_REACTOR_DATE && !__RCD_RDNS_MTA 
+rawbody    __AC_HTML_ENTITY_BONANZA_SHRT_RAW_MANY     /(?:&[A-Z0-9\#]{2,};\s{0,64}){20}/i
+rawbody    __AC_HTML_ENTITY_BONANZA_SHRT_RAW          /(?:&[A-Z0-9\#]{2,};\s{0,64}){10}/i
+# meta       __AC_HTML_ENTITY_BONANZA_MINFP   __AC_HTML_ENTITY_BONANZA_SHRT_RAW_MANY && !__RCD_RDNS_MTA_MESSY && !__JM_REACTOR_DATE && !__RCD_RDNS_MTA 
 
 # rawbody    __RW_HTML_ENTITY_ASCII_MANY       /(?:&\#(?:(?:\d{1,2}|1[01]\d|12[0-7])|x[0-7][0-9a-f])\s{0,64};\s{0,64}){20}/i
 # meta       __RW_HTML_ENTITY_ASCII_MANY_MINFP     __HTML_ENTITY_ASCII_MANY && !__DKIM_EXISTS && !__RCD_RDNS_SMTP && !__RCD_RDNS_SMTP_MESSY && !__JM_REACTOR_DATE && !__HAS_ERRORS_TO && !__L_BODY_8BITS && !__RCD_RDNS_MAIL_MESSY 
