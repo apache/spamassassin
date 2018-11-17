@@ -579,8 +579,11 @@ sub _normalize {
     return $_[0];  # is all-ASCII, no need for decoding
 
   } elsif (!defined $rv && $enc_w1252 &&
-      #             ASCII  NBSP (c) SHY  '   "  ...   '".-   TM
-      $_[0] !~ tr/\x00-\x7F\xA0\xA9\xAD\x82\x84\x85\x91-\x97\x99//c)
+     #             ASCII  NBSP (c) SHY  '   "  ...   '".-   TM
+     #$_[0] !~ tr/\x00-\x7F\xA0\xA9\xAD\x82\x84\x85\x91-\x97\x99//c)
+     # Bug 7656: Include latin1 diacritic letters to Windows-1252 autodetection,
+     # Encode::Detect::Detector might identify them as Windows-1255 (Hebrew!)
+      $_[0] !~ tr/\x00-\x7f\xa0\xa9\xad\x82\x84\x85\x91-\x97\x99\xc0-\xd6\xd8-\xde\xe0-\xf6\xf8-\xfe//c)
   { # ASCII + NBSP + SHY + some punctuation characters
     # NBSP (A0) and SHY (AD) are at the same position in ISO-8859-* too
     # consider also: AE (r), 80 Euro
