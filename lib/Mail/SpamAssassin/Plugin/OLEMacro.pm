@@ -785,6 +785,11 @@ sub _check_markers {
     dbg('XML macros marker found');
     return 1;
   }
+
+  if (index($data, 'vbaProject.bin.rels') > -1) {
+    dbg('XML macros marker found');
+    return 1;
+  }
 }
 
 sub _find_malice_bins {
