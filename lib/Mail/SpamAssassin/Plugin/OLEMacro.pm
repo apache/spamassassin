@@ -217,7 +217,7 @@ Configure the largest file that the plugin will decode from the MIME objects
 
   push(@cmds, {
     setting => 'olemacro_exts',
-    default => '(?:doc|dot|pot|ppa|pps|ppt|rtf|sldm|xl|xla|xls|xlt|xslb)$',
+    default => '(?:doc|docx|dot|pot|ppa|pps|ppt|rtf|sldm|xl|xla|xls|xlsx|xlt|xslb)$',
     type => $Mail::SpamAssassin::Conf::CONF_TYPE_STRING,
     code => sub {
       my ($self, $key, $value, $line) = @_;
@@ -232,7 +232,7 @@ Configure the largest file that the plugin will decode from the MIME objects
 
 =over 4
 
-=item olemacro_exts (default: (?:doc|dot|pot|ppa|pps|ppt|rtf|sldm|xl|xla|xls|xlt|xslb)$)
+=item olemacro_exts (default: (?:doc|docx|dot|pot|ppa|pps|ppt|rtf|sldm|xl|xla|xls|xlsx|xlt|xslb)$)
 
 Set the regexp used to configure the extensions the plugin targets for macro scanning
 
@@ -267,7 +267,7 @@ Set the regexp used to configure the extensions the plugin treats as containing 
 
   push(@cmds, {
     setting => 'olemacro_skip_exts',
-    default => '(?:docx|dotx|potx|ppsx|pptx|sldx|xlsx|xltx)$',
+    default => '(?:dotx|potx|ppsx|pptx|sldx|xltx)$',
     type => $Mail::SpamAssassin::Conf::CONF_TYPE_STRING,
     code => sub {
       my ($self, $key, $value, $line) = @_;
@@ -282,7 +282,7 @@ Set the regexp used to configure the extensions the plugin treats as containing 
 
 =over 4
 
-=item olemacro_skip_exts (default: (?:docx|dotx|potx|ppsx|pptx|sldx|xlsx|xltx)$)
+=item olemacro_skip_exts (default: (?:dotx|potx|ppsx|pptx|sldx|xltx)$)
 
 Set the regexp used to configure extensions for the plugin to skip entirely, these should only be guaranteed macro free files
 
