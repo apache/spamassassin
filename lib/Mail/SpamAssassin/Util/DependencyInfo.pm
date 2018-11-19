@@ -283,6 +283,18 @@ our @OPTIONAL_MODULES = (
   desc => 'BSD::Resource provides BSD process resource limit and priority 
   functions.  It is used by the optional ResourceLimits Plugin.',
 },
+{
+  module => 'Archive::Zip',
+  version => 0,
+  desc => 'Archive::Zip provides an interface to ZIP archive files.
+  It is used by the optional OLEMacro Plugin.',
+},
+{
+  module => 'IO::String',
+  version => 0,
+  desc => 'IO::String emulates file interface for in-core strings.
+  It is used by the optional OLEMacro Plugin.',
+},
 );
 
 our @BINARIES = ();

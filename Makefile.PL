@@ -1132,6 +1132,7 @@ conf__install:
 	$(PERL) -MFile::Copy -e "copy(q[rules/v340.pre], q[$(B_CONFDIR)/v340.pre]) unless -f q[$(B_CONFDIR)/v340.pre]"
 	$(PERL) -MFile::Copy -e "copy(q[rules/v341.pre], q[$(B_CONFDIR)/v341.pre]) unless -f q[$(B_CONFDIR)/v341.pre]"
 	$(PERL) -MFile::Copy -e "copy(q[rules/v342.pre], q[$(B_CONFDIR)/v342.pre]) unless -f q[$(B_CONFDIR)/v342.pre]"
+	$(PERL) -MFile::Copy -e "copy(q[rules/v400.pre], q[$(B_CONFDIR)/v400.pre]) unless -f q[$(B_CONFDIR)/v400.pre]"
   
 
 data__install:
