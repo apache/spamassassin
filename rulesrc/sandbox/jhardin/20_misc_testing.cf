@@ -2594,6 +2594,10 @@ if can(Mail::SpamAssassin::Conf::feature_bug6558_free)
   body       __UNICODE_OBFU_ZW          /[a-z]\x9d+[a-z]{1,5}\x9d+[a-z]/
   tflags     __UNICODE_OBFU_ZW          multiple maxhits=10
   meta       __UNICODE_OBFU_ZW_MANY     __UNICODE_OBFU_ZW > 9
+  meta       UNICODE_OBFU_ZW            __UNICODE_OBFU_ZW_MANY
+  describe   UNICODE_OBFU_ZW            Obfuscating text with hidden characters
+  score      UNICODE_OBFU_ZW            3.500	# limit
+  tflags     UNICODE_OBFU_ZW            publish
 endif
 
 
