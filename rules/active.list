@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-ninja darxus ena-week0 ena-week1 ena-week2 ena-week3 ena-week4 grenier hege jarif sihde thendrikx; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-ninja llanga mmiroslaw-mails-ham mmiroslaw-mails-spam; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-ninja llanga mmiroslaw-mails-ham mmiroslaw-mails-spam
+# with results from: day 1: axb-coi-bulk darxus ena-week0 ena-week1 ena-week2 ena-week3 ena-week4 giovanni-ham giovanni-spamcur giovanni-spammy giovanni-spamnew grenier hege jarif sihde thendrikx; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-ninja llanga mmiroslaw-mails-ham mmiroslaw-mails-spam; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-ninja llanga mmiroslaw-mails-ham mmiroslaw-mails-spam
 
 # tflags publish
 AC_BR_BONANZA
@@ -312,6 +312,9 @@ FROM_WORDY_SHORT
 
 # good enough
 FSL_CTYPE_WIN1251
+
+# good enough
+FSL_HELO_BARE_IP_1
 
 # good enough
 FSL_HELO_FAKE
@@ -896,40 +899,22 @@ TVD_SPACE_ENCODED
 TW_GIBBERISH_MANY
 
 # good enough
-ADVANCE_FEE_5_NEW_MONEY
+ADVANCE_FEE_4_NEW_MONEY
 
 # good enough
-BODY_SINGLE_URI
-
-# good enough
-DATE_IN_FUTURE_96_Q
-
-# good enough
-FROM_MISSP_USER
+FREEMAIL_DISPTO
 
 # tflags publish
 FSL_BULK_SIG
 
 # good enough
-HDRS_LCASE
+HK_SCAM_N2
 
 # good enough
-HK_RANDOM_FROM
+MONEY_FROM_MISSP
 
 # good enough
-LIST_PARTIAL_SHORT_MSG
-
-# good enough
-NSL_RCVD_FROM_USER
-
-# good enough
-SERGIO_SUBJECT_VIAGRA01
-
-# good enough
-TO_NO_BRKTS_FROM_MSSP
-
-# good enough
-TVD_SPACE_RATIO_MINFP
+NSL_RCVD_HELO_USER
 
 # tflags publish
 UC_GIBBERISH_OBFU
