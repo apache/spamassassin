@@ -2598,6 +2598,18 @@ if can(Mail::SpamAssassin::Conf::feature_bug6558_free)
   describe   UNICODE_OBFU_ZW            Obfuscating text with hidden characters
   score      UNICODE_OBFU_ZW            3.500	# limit
   tflags     UNICODE_OBFU_ZW            publish
+
+  meta       ZW_OBFU_BITCOIN            __UNICODE_OBFU_ZW && __BITCOIN_ID
+  describe   ZW_OBFU_BITCOIN            Obfuscated text + bitcoin ID - possible extortion
+  score      ZW_OBFU_BITCOIN            2.500	# limit
+
+  meta       ZW_OBFU_FROMTOSUBJ         __UNICODE_OBFU_ZW && FROM_IN_TO_AND_SUBJ 
+  describe   ZW_OBFU_FROMTOSUBJ         Obfuscated text + from in to and subject
+  score      ZW_OBFU_FROMTOSUBJ         2.000	# limit
+
+  meta       ZW_OBFU_FREEM              __UNICODE_OBFU_ZW && __freemail_hdr_replyto 
+  describe   ZW_OBFU_FREEM              Obfuscated text + freemail
+  score      ZW_OBFU_FREEM              2.000	# limit
 endif
 
 
