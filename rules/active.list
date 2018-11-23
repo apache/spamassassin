@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-ninja darxus ena-week0 ena-week1 ena-week2 ena-week3 ena-week4 giovanni-ham giovanni-spam giovanni-spammy grenier hege jarif mmiroslaw-mails-ham mmiroslaw-mails-spam sihde thendrikx; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-ninja llanga mmiroslaw-mails-ham mmiroslaw-mails-spam; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-ninja giovanni-spamcur llanga mmiroslaw-mails-ham mmiroslaw-mails-spam
+# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-ninja darxus ena-week0 ena-week1 ena-week2 ena-week3 ena-week4 giovanni-ham giovanni-spam giovanni-spammy grenier hege jarif mmiroslaw-mails-ham mmiroslaw-mails-spam sihde thendrikx; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-ninja llanga mmiroslaw-mails-ham mmiroslaw-mails-spam; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-ninja llanga mmiroslaw-mails-ham mmiroslaw-mails-spam
 
 # tflags publish
 AC_BR_BONANZA
@@ -271,6 +271,9 @@ FOUND_YOU
 # tflags userconf
 FRAGMENTED_MESSAGE
 
+# good enough
+FREEMAIL_DISPTO
+
 # tflags publish
 FREEMAIL_FORGED_FROMDOMAIN
 
@@ -309,6 +312,9 @@ FROM_WORDY
 
 # tflags publish
 FROM_WORDY_SHORT
+
+# good enough
+FROM_WSP_TRAIL
 
 # good enough
 FSL_CTYPE_WIN1251
@@ -420,6 +426,12 @@ HELO_MISC_IP
 
 # tflags publish
 HEXHASH_WORD
+
+# good enough
+HK_NAME_DRUGS
+
+# good enough
+HK_SCAM_S7
 
 # tflags userconf
 HTML_CHARSET_FARAWAY
@@ -905,58 +917,28 @@ TVD_VISIT_PHARMA
 TW_GIBBERISH_MANY
 
 # good enough
-ADVANCE_FEE_5_NEW_MONEY
+ADVANCE_FEE_4_NEW_MONEY
 
 # good enough
-BIGNUM_EMAILS
+BODY_EMPTY
 
 # good enough
-BODY_SINGLE_URI
-
-# good enough
-DATE_IN_FUTURE_96_Q
-
-# good enough
-FILL_THIS_FORM_LONG
-
-# good enough
-FREEMAIL_DISPTO
-
-# good enough
-FROM_MISSP_USER
-
-# good enough
-FROM_WSP_TRAIL
+FROM_MISSP_TO_UNDISC
 
 # tflags publish
 FSL_BULK_SIG
 
 # good enough
-HDRS_LCASE
+HK_SCAM_N2
 
 # good enough
-HK_RANDOM_FROM
+MILLION_USD
 
 # good enough
-HK_SCAM_S7
+MONEY_FROM_MISSP
 
 # good enough
-LIST_PARTIAL_SHORT_MSG
-
-# good enough
-MONEY_FROM_41
-
-# good enough
-NSL_RCVD_FROM_USER
-
-# good enough
-SERGIO_SUBJECT_VIAGRA01
-
-# good enough
-TO_NO_BRKTS_FROM_MSSP
-
-# good enough
-TVD_SPACE_RATIO_MINFP
+NSL_RCVD_HELO_USER
 
 # tflags publish
 UC_GIBBERISH_OBFU
