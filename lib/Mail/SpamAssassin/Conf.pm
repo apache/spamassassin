@@ -2912,7 +2912,8 @@ There are several special pseudo-headers that can be specified:
 Note that all whitespace inside the headers, at line folds, is currently
 compressed into a single space (' ') character. To obtain a pristine
 (unmodified) header section, use C<ALL:raw> - the :raw modifier is documented
-above.
+above. Also similar that return headers added by specific relays: ALL-TRUSTED,
+ALL-INTERNAL, ALL-UNTRUSTED, ALL-EXTERNAL.
 
 =item C<ToCc> can be used to mean the contents of both the 'To' and 'Cc'
 headers.
