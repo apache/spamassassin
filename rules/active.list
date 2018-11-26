@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-ninja darxus ena-week0 ena-week1 ena-week2 ena-week3 ena-week4 giovanni-ham giovanni-spam giovanni-spammy grenier hege jarif mmiroslaw-mails-ham mmiroslaw-mails-spam sihde thendrikx; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-ninja llanga mmiroslaw-mails-ham mmiroslaw-mails-spam; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-ninja llanga mmiroslaw-mails-ham mmiroslaw-mails-spam
+# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-ninja darxus ena-week0 ena-week1 ena-week2 ena-week3 ena-week4 giovanni-ham giovanni-spam giovanni-spammy grenier hege jarif jbrooks mmiroslaw-mails-ham mmiroslaw-mails-spam sihde thendrikx; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-ninja llanga mmiroslaw-mails-ham mmiroslaw-mails-spam; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-ninja llanga mmiroslaw-mails-ham mmiroslaw-mails-spam
 
 # tflags publish
 AC_BR_BONANZA
@@ -469,14 +469,8 @@ LOTS_OF_MONEY
 # tflags publish
 LUCRATIVE
 
-# good enough
-MAILER_EQ_ORG
-
 # tflags publish
 MALF_HTML_B64
-
-# good enough
-MANY_HDRS_LCASE
 
 # tflags publish
 MANY_SPAN_IN_TEXT
@@ -564,9 +558,6 @@ PYZOR_CHECK
 
 # tflags publish
 RAND_HEADER_MANY
-
-# good enough
-RATWARE_NO_RDNS
 
 # tflags net
 RAZOR2_CF_RANGE_51_100
@@ -784,6 +775,9 @@ RDNS_NUM_TLD_XM
 # good enough
 REPLYTO_WITHOUT_TO_CC
 
+# good enough
+SB_GIF_AND_NO_URIS
+
 # tflags publish
 SINGLETS_LOW_CONTRAST
 
@@ -896,12 +890,6 @@ TO_NO_BRKTS_NORDNS_HTML
 TO_NO_BRKTS_PCNT
 
 # good enough
-TVD_PH_BODY_ACCOUNTS_POST
-
-# good enough
-TVD_PH_BODY_META_ALL
-
-# good enough
 TVD_RCVD_IP
 
 # good enough
@@ -917,58 +905,37 @@ TVD_VISIT_PHARMA
 TW_GIBBERISH_MANY
 
 # good enough
-ADVANCE_FEE_5_NEW_MONEY
+BODY_EMPTY
 
 # good enough
-BIGNUM_EMAILS
+FROM_MISSP_TO_UNDISC
 
 # good enough
-BODY_SINGLE_URI
-
-# good enough
-DATE_IN_FUTURE_96_Q
-
-# good enough
-FILL_THIS_FORM_LONG
-
-# good enough
-FROM_MISSP_USER
+FROM_WSP_LEAD
 
 # tflags publish
 FSL_BULK_SIG
 
 # good enough
-HDRS_LCASE
+HK_CTE_RAW
 
 # good enough
-HK_RANDOM_FROM
+HK_SCAM_N2
 
 # good enough
-HK_SCAM_N3
+MILLION_USD
 
 # good enough
-LIST_PARTIAL_SHORT_MSG
+MONEY_FROM_MISSP
 
 # good enough
-MONEY_FROM_41
+NSL_RCVD_HELO_USER
 
 # good enough
-NSL_RCVD_FROM_USER
+SUBJ_OBFU_PUNCT_FEW
 
 # good enough
-SERGIO_SUBJECT_VIAGRA01
-
-# good enough
-TO_NO_BRKTS_FROM_MSSP
-
-# good enough
-TVD_SPACE_RATIO_MINFP
-
-# good enough
-ZW_OBFU_BITCOIN
-
-# good enough
-ZW_OBFU_FROMTOSUBJ
+UNICODE_OBFU_DOM_NO_BODY
 
 # tflags publish
 UC_GIBBERISH_OBFU
@@ -1143,6 +1110,12 @@ XPRIO
 
 # tflags publish
 XPRIO_SHORT_SUBJ
+
+# good enough
+ZW_OBFU_BITCOIN
+
+# good enough
+ZW_OBFU_FROMTOSUBJ
 
 # tflags net
 __DKIMDOMAIN_IN_DWL_ANY
