@@ -2591,7 +2591,7 @@ if can(Mail::SpamAssassin::Conf::feature_bug6558_free)
 endif
 
 if can(Mail::SpamAssassin::Conf::feature_bug6558_free)
-  body       __UNICODE_OBFU_ZW          /[a-z\s](?:\x9d|\xe2\x80\x8c)+[a-z]{1,8}(?:\x9d|\xe2\x80\x8c)+[a-z\s]/i
+  body       __UNICODE_OBFU_ZW          /[a-z0-9\s](?:\x9d|\xe2\x80[\x8b\x8c\x8d]|\xef\xbb\xbf)+[a-z0-9]{1,8}(?:\x9d|\xe2\x80[\x8b\x8c\x8d]|\xef\xbb\xbf)+[a-z0-9\s]/i
   tflags     __UNICODE_OBFU_ZW          multiple maxhits=10
   meta       __UNICODE_OBFU_ZW_MANY     __UNICODE_OBFU_ZW > 9
   meta       UNICODE_OBFU_ZW            __UNICODE_OBFU_ZW_MANY
