@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-ninja darxus ena-week0 ena-week1 ena-week2 ena-week3 ena-week4 giovanni-ham giovanni-spam giovanni-spammy grenier hege jarif jbrooks mmiroslaw-mails-ham mmiroslaw-mails-spam sihde thendrikx; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-ninja llanga mmiroslaw-mails-ham mmiroslaw-mails-spam; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-ninja llanga mmiroslaw-mails-ham mmiroslaw-mails-spam
+# with results from: day 1: ena-week0 ena-week3 grenier hege jbrooks mmiroslaw-mails-ham mmiroslaw-mails-spam thendrikx; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-ninja darxus ena-week1 ena-week2 ena-week4 giovanni-ham giovanni-spam giovanni-spammy jarif llanga mmiroslaw-mails-ham mmiroslaw-mails-spam sihde thendrikx; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-ninja llanga mmiroslaw-mails-ham mmiroslaw-mails-spam
 
 # tflags publish
 AC_BR_BONANZA
@@ -63,9 +63,6 @@ AD_PREFS
 
 # tflags userconf
 ALL_TRUSTED
-
-# tflags publish
-APP_DEVELOPMENT_FREEM
 
 # tflags publish
 APP_DEVELOPMENT_NORDNS
@@ -182,15 +179,6 @@ DKIMDOMAIN_IN_DWL
 DKIMDOMAIN_IN_DWL_UNKNOWN
 
 # tflags net
-DKIMWL_BL
-
-# tflags net
-DKIMWL_WL_HIGH
-
-# tflags net
-DKIMWL_WL_MED
-
-# tflags net
 DKIM_ADSP_ALL
 
 # tflags net
@@ -217,17 +205,11 @@ DKIM_VALID
 # tflags net
 DKIM_VALID_AU
 
-# tflags net
-DKIM_VALID_EF
-
 # tflags publish
 DOS_ANAL_SPAM_MAILER
 
 # good enough
 DOS_OE_TO_MX
-
-# good enough
-DOS_OE_TO_MX_IMAGE
 
 # tflags publish
 DX_TEXT_02
@@ -314,9 +296,6 @@ FROM_WORDY
 FROM_WORDY_SHORT
 
 # good enough
-FROM_WSP_LEAD
-
-# good enough
 FROM_WSP_TRAIL
 
 # good enough
@@ -335,13 +314,7 @@ FSL_NEW_HELO_USER
 FUZZY_ANDROID
 
 # tflags publish
-FUZZY_BITCOIN
-
-# tflags publish
 FUZZY_BROWSER
-
-# tflags publish
-FUZZY_BTC_WALLET
 
 # tflags publish
 FUZZY_CLICK_HERE
@@ -435,9 +408,6 @@ HK_NAME_DRUGS
 
 # good enough
 HK_NAME_FM_MR_MRS
-
-# good enough
-HK_SCAM_S7
 
 # tflags userconf
 HTML_CHARSET_FARAWAY
@@ -788,9 +758,6 @@ RDNS_NUM_TLD_XM
 REPLYTO_WITHOUT_TO_CC
 
 # good enough
-SB_GIF_AND_NO_URIS
-
-# good enough
 SERGIO_SUBJECT_PORN014
 
 # tflags publish
@@ -852,9 +819,6 @@ SUBJECT_IN_BLACKLIST
 
 # tflags userconf
 SUBJECT_IN_WHITELIST
-
-# good enough
-SUBJ_UNNEEDED_HTML
 
 # tflags net
 SURBL_BLOCKED
@@ -920,58 +884,31 @@ TVD_VISIT_PHARMA
 TW_GIBBERISH_MANY
 
 # good enough
-ADVANCE_FEE_4_NEW_MONEY
+ADVANCE_FEE_5_NEW
 
 # good enough
-ADVANCE_FEE_5_NEW_MONEY
+ADVANCE_FEE_5_NEW_FRM_MNY
 
 # good enough
-BIGNUM_EMAILS
+DEAR_BENEFICIARY
 
 # good enough
-BODY_SINGLE_URI
-
-# good enough
-DATE_IN_FUTURE_96_Q
-
-# good enough
-FILL_THIS_FORM_LOAN
-
-# good enough
-FILL_THIS_FORM_LONG
-
-# good enough
-FROM_MISSP_USER
+FROM_MISSP_TO_UNDISC
 
 # tflags publish
 FSL_BULK_SIG
 
-# tflags publish
-GAPPY_SALES_LEADS_FREEM
+# good enough
+HK_SCAM_N2
 
 # good enough
-HK_SCAM_N3
+MILLION_USD
 
 # good enough
-IMG_ALT_HSPACE_CID_ALIGN
+MONEY_FROM_MISSP
 
 # good enough
-LIST_PARTIAL_SHORT_MSG
-
-# good enough
-MONEY_FROM_41
-
-# good enough
-NSL_RCVD_FROM_USER
-
-# good enough
-SERGIO_SUBJECT_VIAGRA01
-
-# good enough
-TO_NO_BRKTS_FROM_MSSP
-
-# good enough
-TVD_SPACE_RATIO_MINFP
+NSL_RCVD_HELO_USER
 
 # tflags publish
 UC_GIBBERISH_OBFU
@@ -993,12 +930,6 @@ URIBL_BLOCKED
 
 # tflags net
 URIBL_CR_SURBL
-
-# tflags net
-URIBL_CSS
-
-# tflags net
-URIBL_CSS_A
 
 # tflags net
 URIBL_DBL_ABUSE_BOTCC
