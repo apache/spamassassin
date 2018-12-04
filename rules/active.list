@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: ena-week0 ena-week3 grenier hege jbrooks mmiroslaw-mails-ham mmiroslaw-mails-spam thendrikx; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-ninja darxus ena-week1 ena-week2 ena-week4 giovanni-ham giovanni-spam giovanni-spammy jarif llanga mmiroslaw-mails-ham mmiroslaw-mails-spam sihde thendrikx; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-ninja llanga mmiroslaw-mails-ham mmiroslaw-mails-spam
+# with results from: day 1: ena-week0 ena-week3 grenier hege jbrooks mmiroslaw-mails-ham mmiroslaw-mails-spam sihde thendrikx; day 2: ena-week0 ena-week3 grenier hege jbrooks mmiroslaw-mails-ham mmiroslaw-mails-spam thendrikx; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-ninja darxus ena-week1 ena-week2 ena-week4 giovanni-ham giovanni-spam giovanni-spammy jarif llanga mmiroslaw-mails-ham mmiroslaw-mails-spam sihde thendrikx
 
 # tflags publish
 AC_BR_BONANZA
@@ -169,6 +169,9 @@ COMMENT_GIBBERISH
 # tflags publish
 CORRUPT_FROM_LINE_IN_HDRS
 
+# good enough
+DEAR_WINNER
+
 # tflags net
 DIGEST_MULTIPLE
 
@@ -225,6 +228,9 @@ ENCRYPTED_MESSAGE
 
 # tflags userconf
 ENV_AND_HDR_SPF_MATCH
+
+# good enough
+FAKE_REPLY_C
 
 # tflags publish
 FBI_MONEY
@@ -884,31 +890,103 @@ TVD_VISIT_PHARMA
 TW_GIBBERISH_MANY
 
 # good enough
-ADVANCE_FEE_5_NEW
+ADVANCE_FEE_2_NEW_FRM_MNY
 
 # good enough
-ADVANCE_FEE_5_NEW_FRM_MNY
+ADVANCE_FEE_3_NEW_FRM_MNY
 
 # good enough
-DEAR_BENEFICIARY
+ADVANCE_FEE_4_NEW_FRM_MNY
 
 # good enough
-FROM_MISSP_TO_UNDISC
+ADVANCE_FEE_4_NEW_MONEY
+
+# good enough
+ADVANCE_FEE_5_NEW_MONEY
+
+# good enough
+AXB_XMAILER_MIMEOLE_OL_1ECD5
+
+# good enough
+BIGNUM_EMAILS
+
+# good enough
+BODY_SINGLE_URI
+
+# good enough
+DATE_IN_FUTURE_96_Q
+
+# good enough
+FILL_THIS_FORM_LOAN
+
+# good enough
+FILL_THIS_FORM_LONG
+
+# good enough
+FROM_MISSP_DYNIP
+
+# good enough
+FROM_MISSP_EH_MATCH
+
+# good enough
+FROM_MISSP_PHISH
+
+# good enough
+FROM_MISSP_USER
 
 # tflags publish
 FSL_BULK_SIG
 
 # good enough
-HK_SCAM_N2
+HDRS_LCASE_IMGONLY
 
 # good enough
-MILLION_USD
+HK_NAME_MR_MRS
 
 # good enough
-MONEY_FROM_MISSP
+HK_SCAM_N3
 
 # good enough
-NSL_RCVD_HELO_USER
+HK_SCAM_N4
+
+# good enough
+HK_SCAM_N8
+
+# good enough
+LIST_PARTIAL_SHORT_MSG
+
+# good enough
+LOTTO_AGENT
+
+# good enough
+MONEY_ATM_CARD
+
+# good enough
+MONEY_BARRISTER
+
+# good enough
+MONEY_FORM
+
+# good enough
+MONEY_FROM_41
+
+# good enough
+NSL_RCVD_FROM_USER
+
+# good enough
+PHOTO_EDITING_DIRECT
+
+# good enough
+RP_8BIT
+
+# good enough
+SERGIO_SUBJECT_VIAGRA01
+
+# good enough
+SHORTENED_URL_SRC
+
+# good enough
+TO_NO_BRKTS_FROM_MSSP
 
 # tflags publish
 UC_GIBBERISH_OBFU
