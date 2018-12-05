@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: ena-week0 ena-week3 grenier hege jbrooks mmiroslaw-mails-ham mmiroslaw-mails-spam sihde thendrikx; day 2: ena-week0 ena-week3 grenier hege jbrooks mmiroslaw-mails-ham mmiroslaw-mails-spam thendrikx; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-ninja darxus ena-week1 ena-week2 ena-week4 giovanni-ham giovanni-spam giovanni-spammy jarif llanga mmiroslaw-mails-ham mmiroslaw-mails-spam sihde thendrikx
+# with results from: day 1: ena-week0 grenier hege jarif jbrooks mmiroslaw-mails-ham mmiroslaw-mails-spam thendrikx; day 2: ena-week0 ena-week3 llanga mmiroslaw-mails-ham mmiroslaw-mails-spam sihde thendrikx; day 3: ena-week0 ena-week3 grenier hege jbrooks mmiroslaw-mails-ham mmiroslaw-mails-spam thendrikx
 
 # tflags publish
 AC_BR_BONANZA
@@ -208,6 +208,9 @@ DKIM_VALID
 # tflags net
 DKIM_VALID_AU
 
+# tflags net
+DKIM_VALID_EF
+
 # tflags publish
 DOS_ANAL_SPAM_MAILER
 
@@ -284,10 +287,16 @@ FROM_IN_TO_AND_SUBJ
 FROM_LOCAL_NOVOWEL
 
 # good enough
+FROM_MISSP_EH_MATCH
+
+# good enough
 FROM_MISSP_FREEMAIL
 
 # good enough
 FROM_MISSP_MSFT
+
+# good enough
+FROM_MISSP_PHISH
 
 # tflags net
 FROM_MISSP_SPF_FAIL
@@ -300,9 +309,6 @@ FROM_WORDY
 
 # tflags publish
 FROM_WORDY_SHORT
-
-# good enough
-FROM_WSP_TRAIL
 
 # good enough
 FSL_CTYPE_WIN1251
@@ -388,6 +394,9 @@ HASHCASH_2SPEND
 # tflags userconf
 HASHCASH_HIGH
 
+# good enough
+HDRS_LCASE_IMGONLY
+
 # tflags publish
 HDR_ORDER_FTSDMCXX_DIRECT
 
@@ -410,19 +419,19 @@ HELO_MISC_IP
 HEXHASH_WORD
 
 # good enough
+HK_LOTTO
+
+# good enough
 HK_NAME_DRUGS
 
 # good enough
-HK_NAME_FM_MR_MRS
+HK_SCAM_N8
 
 # tflags userconf
 HTML_CHARSET_FARAWAY
 
 # tflags publish
 HTML_ENTITY_ASCII
-
-# tflags publish
-HTML_ENTITY_ASCII_TINY
 
 # tflags publish
 HTML_OFF_PAGE
@@ -510,6 +519,9 @@ OBFU_JVSCR_ESC
 
 # tflags publish
 OBFU_TEXT_ATTACH
+
+# good enough
+PHOTO_EDITING_DIRECT
 
 # tflags publish
 PHP_NOVER_MUA
@@ -764,7 +776,13 @@ RDNS_NUM_TLD_XM
 REPLYTO_WITHOUT_TO_CC
 
 # good enough
+RP_8BIT
+
+# good enough
 SERGIO_SUBJECT_PORN014
+
+# good enough
+SHORTENED_URL_SRC
 
 # tflags publish
 SINGLETS_LOW_CONTRAST
@@ -890,103 +908,58 @@ TVD_VISIT_PHARMA
 TW_GIBBERISH_MANY
 
 # good enough
-ADVANCE_FEE_2_NEW_FRM_MNY
+ADVANCE_FEE_5_NEW
 
 # good enough
-ADVANCE_FEE_3_NEW_FRM_MNY
+ADVANCE_FEE_5_NEW_FRM_MNY
 
 # good enough
-ADVANCE_FEE_4_NEW_FRM_MNY
+DEAR_BENEFICIARY
+
+# tflags net
+DKIMWL_BL
+
+# tflags net
+DKIMWL_WL_HIGH
+
+# tflags net
+DKIMWL_WL_MED
 
 # good enough
-ADVANCE_FEE_4_NEW_MONEY
+FROM_MISSPACED
 
 # good enough
-ADVANCE_FEE_5_NEW_MONEY
+FROM_MISSP_REPLYTO
 
 # good enough
-AXB_XMAILER_MIMEOLE_OL_1ECD5
-
-# good enough
-BIGNUM_EMAILS
-
-# good enough
-BODY_SINGLE_URI
-
-# good enough
-DATE_IN_FUTURE_96_Q
-
-# good enough
-FILL_THIS_FORM_LOAN
-
-# good enough
-FILL_THIS_FORM_LONG
-
-# good enough
-FROM_MISSP_DYNIP
-
-# good enough
-FROM_MISSP_EH_MATCH
-
-# good enough
-FROM_MISSP_PHISH
-
-# good enough
-FROM_MISSP_USER
+FROM_MISSP_TO_UNDISC
 
 # tflags publish
 FSL_BULK_SIG
 
 # good enough
-HDRS_LCASE_IMGONLY
+FSL_THIS_IS_ADV
 
 # good enough
-HK_NAME_MR_MRS
+HK_CTE_RAW
 
 # good enough
-HK_SCAM_N3
+HK_PNIS
 
 # good enough
-HK_SCAM_N4
+HK_SCAM_N2
 
 # good enough
-HK_SCAM_N8
+MILLION_USD
 
 # good enough
-LIST_PARTIAL_SHORT_MSG
+MONEY_FROM_MISSP
 
 # good enough
-LOTTO_AGENT
+NSL_RCVD_HELO_USER
 
 # good enough
-MONEY_ATM_CARD
-
-# good enough
-MONEY_BARRISTER
-
-# good enough
-MONEY_FORM
-
-# good enough
-MONEY_FROM_41
-
-# good enough
-NSL_RCVD_FROM_USER
-
-# good enough
-PHOTO_EDITING_DIRECT
-
-# good enough
-RP_8BIT
-
-# good enough
-SERGIO_SUBJECT_VIAGRA01
-
-# good enough
-SHORTENED_URL_SRC
-
-# good enough
-TO_NO_BRKTS_FROM_MSSP
+PDS_FROM_2_EMAILS
 
 # tflags publish
 UC_GIBBERISH_OBFU
@@ -1008,6 +981,12 @@ URIBL_BLOCKED
 
 # tflags net
 URIBL_CR_SURBL
+
+# tflags net
+URIBL_CSS
+
+# tflags net
+URIBL_CSS_A
 
 # tflags net
 URIBL_DBL_ABUSE_BOTCC
@@ -1155,9 +1134,6 @@ XPRIO
 
 # tflags publish
 XPRIO_SHORT_SUBJ
-
-# good enough
-ZW_OBFU_BITCOIN
 
 # tflags net
 __DKIMDOMAIN_IN_DWL_ANY
