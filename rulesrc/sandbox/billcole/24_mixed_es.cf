@@ -1,7 +1,11 @@
-body            __LOWER_E       /e/i
-tflags          __LOWER_E       multiple
-replace_rules   __E_LIKE_LETTER
-body            __E_LIKE_LETTER /<E>/
-tflags          __E_LIKE_LETTER multiple
-meta            MIXED_ES        ( __LOWER_E > 20 ) && ( __E_LIKE_LETTER > ( (__LOWER_E * 14 ) / 10) ) && ( ( __E_LIKE_LETTER / __LOWER_E ) < 10 )
-describe        MIXED_ES        Too many es are not es
+if can(Mail::SpamAssassin::Conf::feature_bug6558_free)
+  ifplugin Mail::SpamAssassin::Plugin::ReplaceTags
+    body            __LOWER_E       /e/i
+    tflags          __LOWER_E       multiple
+    replace_rules   __E_LIKE_LETTER
+    body            __E_LIKE_LETTER /<E>/
+    tflags          __E_LIKE_LETTER multiple
+    meta            MIXED_ES        ( __LOWER_E > 20 ) && ( __E_LIKE_LETTER > ( (__LOWER_E * 14 ) / 10) ) && ( ( __E_LIKE_LETTER / __LOWER_E ) < 10 )
+    describe        MIXED_ES        Too many es are not es
+  endif
+endif
