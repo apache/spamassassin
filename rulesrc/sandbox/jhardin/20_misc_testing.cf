@@ -1947,9 +1947,9 @@ tflags         BITCOIN_SPAM_09  publish
 
 
 ifplugin Mail::SpamAssassin::Plugin::ReplaceTags
-  body           __MY_VICTIM            /(?:<H><I>|<H><E><L><L><O>),?(?:\s<M><Y>)?\s<V><I><C><T><I><M>/i
+  body           __MY_VICTIM            /(?:<H><I>|<H><E><L><L><O>),?(?:\s<M><Y>)?\s(?:<V><I><C><T><I><M>|<P><R><E><Y>)/i
   replace_rules  __MY_VICTIM
-  body           __MY_MALWARE           /\s<M><Y>\s(?:<P><E><R><S><O><N><A><L>\s)?(?:<M><A><L><W><A><R><E>|<V><I><R><U><S>)/i
+  body           __MY_MALWARE           /\s(?:<I>\s<P><U><T>\s<A>\s|<M><Y>\s(?:<P><E><R><S><O><N><A><L>\s)?)(?:<M><A><L><W><A><R><E>|<V><I><R><U><S>)/i
   replace_rules  __MY_MALWARE
   body           __PAY_ME               /\s<P><A><Y>\s<M><E>\s/i
   replace_rules  __PAY_ME
@@ -1957,19 +1957,19 @@ ifplugin Mail::SpamAssassin::Plugin::ReplaceTags
   replace_rules  __YOUR_PASSWORD
   body           __YOUR_WEBCAM          /\s(?:<F><R><O><M>|<Y><O><U><R>)\s<W><E><B><C><A><M>/i
   replace_rules  __YOUR_WEBCAM
-  body           __YOUR_ONAN            /\s<Y><O><U><R>?\s(?:<M><A><S><T><U><R><B><A><T><I>(?:<O><N>|<N><G>)|<O><N><A><N><I><S><M>)/i
+  body           __YOUR_ONAN            /\s<Y><O><U><R>?\s(?:<M><A><S><T><U><R><B><A><T><I>(?:<O><N>|<N><G>)|<O><N><A><N><I><S><M>|<S><O><L><I><T><A><R><Y>\s<S><E><X>)/i
   replace_rules  __YOUR_ONAN
   body           __YOUR_PERSONAL        /\s<Y><O><U><R>\s<P><E><R><S><O><N><A><L>\s(?:<I><N><F><O>(?:<R><M><A><T><I><O><N>)?|<D><A><T><A>\s)/i
   replace_rules  __YOUR_PERSONAL
   body           __HOURS_DEADLINE       /\s(?:<G><I><V><E>\s<Y><O><U>|<Y><O><U>\s<H><A><V><E>)\s\d+\s<H><O><U><R><S>/i
   replace_rules  __HOURS_DEADLINE
 else
-  body           __MY_VICTIM            /\b(?:hi|hello),?(?:\smy)?\svictim\b/i
-  body           __MY_MALWARE           /\bmy\s(?:personal\s)?(?:malware|virus)\b/i
+  body           __MY_VICTIM            /\b(?:hi|hello),?(?:\smy)?\s(?:victim|prey)\b/i
+  body           __MY_MALWARE           /\b(?:I\sput\sa\s|my\s(?:personal\s)?)(?:malware|virus)\b/i
   body           __PAY_ME               /\bpay\sme\b/i
   body           __YOUR_PASSWORD        /\byour\spassword\b/i
   body           __YOUR_WEBCAM          /\b(?:from|your)\swebcam\b/i
-  body           __YOUR_ONAN            /\byour?\s(?:masturbati(?:on|ng)|onanism)\b/i
+  body           __YOUR_ONAN            /\byour?\s(?:masturbati(?:on|ng)|onanism|solitary\ssex)\b/i
   body           __YOUR_PERSONAL        /\byour\spersonal\s(?:info(?:rmation)?|data)\b/i
   body           __HOURS_DEADLINE       /\b(?:give\syou|you\shave)\s\d+\shours\b/i
 endif
@@ -2598,6 +2598,10 @@ if can(Mail::SpamAssassin::Conf::feature_bug6558_free)
   describe   UNICODE_OBFU_ZW            Obfuscating text with hidden characters
   score      UNICODE_OBFU_ZW            3.500	# limit
   tflags     UNICODE_OBFU_ZW            publish
+
+  body       __UNICODE_OBFU_ASC         /[a-z0-9\s](?:\xd0[\xb0\xb5\xbe]|\xd1[\x80\x81])+[a-z0-9]{1,8}(?:\xd0[\xb0\xb5\xbe]|\xd1[\x80\x81])+[a-z0-9\s]/i
+  tflags     __UNICODE_OBFU_ASC         multiple maxhits=10
+  meta       __UNICODE_OBFU_ASC_MANY    __UNICODE_OBFU_ASC > 9
 
   meta       ZW_OBFU_BITCOIN            __UNICODE_OBFU_ZW && __BITCOIN_ID
   describe   ZW_OBFU_BITCOIN            Obfuscated text + bitcoin ID - possible extortion
