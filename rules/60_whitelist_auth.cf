@@ -98,7 +98,24 @@ def_whitelist_auth *@indeed.com
 def_whitelist_auth *@docusign.net
 def_whitelist_auth *@*.docusign.com
 
-# Senders consistently scoring low with advanced tuned SA to help default SA configurations
+# Senders consistently scoring low with advanced tuned SA to help default SA configurations.
+#
+# Criteria to be listed below:
+# - minimum of 100 emails over a week and
+# - use a subdomain or specific left-half address and
+# - not be a human mailbox that can be compromised and
+# - average score for the week is low and
+# - hit SPF_PASS and/or DKIM_VALID_AU and
+# - not hit DMARC_FAIL or DMARC_REJECT (from OpenDMARC milter)
+#
+# These listings are intended to:
+# - promote mass mailer sending from a subdomain
+# - encourage system-generated to be sent from a subdomain
+# - reward senders that send with good SPF, DKIM, and DMARC
+# - allow for phishing/spoofed/fake emails to stand out more
+#   so local rules can be setup to add points without blocking
+#   authentic emails
+#
 def_whitelist_auth *@*.indeed.com
 def_whitelist_auth *@*.hyatt.com
 def_whitelist_auth *@*.sears.com
@@ -894,6 +911,10 @@ def_whitelist_auth *@*.dia.co
 def_whitelist_auth *@*.blackfriday.com
 def_whitelist_auth *@*.olay.com
 def_whitelist_auth confirmation@aircanada.ca
+def_whitelist_auth no-reply@enterprise.com
+def_whitelist_auth *@*.hubspotstarter.net
+def_whitelist_auth *@*.serverchamber.com
+def_whitelist_auth *@*.msbrooksclass.com
 
 endif # Mail::SpamAssassin::Plugin::SPF
 
