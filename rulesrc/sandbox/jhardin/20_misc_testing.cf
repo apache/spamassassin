@@ -2594,7 +2594,7 @@ if can(Mail::SpamAssassin::Conf::feature_bug6558_free)
   body       __UNICODE_OBFU_ZW          /[a-z0-9\s](?:\x9d|\xe2\x80[\x8b\x8c\x8d]|\xef\xbb\xbf)+[a-z0-9]{1,8}(?:\x9d|\xe2\x80[\x8b\x8c\x8d]|\xef\xbb\xbf)+[a-z0-9\s]/i
   tflags     __UNICODE_OBFU_ZW          multiple maxhits=10
   meta       __UNICODE_OBFU_ZW_MANY     __UNICODE_OBFU_ZW > 9
-  meta       UNICODE_OBFU_ZW            __UNICODE_OBFU_ZW_MANY && !__USING_VERP1 
+  meta       UNICODE_OBFU_ZW            __UNICODE_OBFU_ZW_MANY && !__USING_VERP1 && __DOS_LINK
   describe   UNICODE_OBFU_ZW            Obfuscating text with hidden characters
   score      UNICODE_OBFU_ZW            3.500	# limit
   tflags     UNICODE_OBFU_ZW            publish
@@ -2602,6 +2602,10 @@ if can(Mail::SpamAssassin::Conf::feature_bug6558_free)
   body       __UNICODE_OBFU_ASC         /[a-z0-9\s](?:\xd0[\xb0\xb5\xbe]|\xd1[\x80\x81])+[a-z0-9]{1,8}(?:\xd0[\xb0\xb5\xbe]|\xd1[\x80\x81])+[a-z0-9\s]/i
   tflags     __UNICODE_OBFU_ASC         multiple maxhits=10
   meta       __UNICODE_OBFU_ASC_MANY    __UNICODE_OBFU_ASC > 9
+  meta       UNICODE_OBFU_ASC           __UNICODE_OBFU_ASC && !__SPAN_BEG_TEXT && !HTML_IMAGE_ONLY_32 && !__RCD_RDNS_MAIL 
+  describe   UNICODE_OBFU_ASC           Obfuscating text with unicode
+  score      UNICODE_OBFU_ASC           2.500	# limit
+  tflags     UNICODE_OBFU_ASC           publish
 
   meta       ZW_OBFU_BITCOIN            __UNICODE_OBFU_ZW && __BITCOIN_ID
   describe   ZW_OBFU_BITCOIN            Obfuscated text + bitcoin ID - possible extortion
@@ -2632,7 +2636,7 @@ rawbody    __AC_HTML_ENTITY_BONANZA_SHRT_RAW          /(?:&[A-Z0-9\#]{2,};\s{0,6
 # meta       __RW_HTML_ENTITY_ASCII_MANY_MINFP     __HTML_ENTITY_ASCII_MANY && !__DKIM_EXISTS && !__RCD_RDNS_SMTP && !__RCD_RDNS_SMTP_MESSY && !__JM_REACTOR_DATE && !__HAS_ERRORS_TO && !__L_BODY_8BITS && !__RCD_RDNS_MAIL_MESSY 
 
 rawbody    __HTML_ENTITY_ASCII         /(?:&\#(?:(?:\d{1,2}|1[01]\d|12[0-7])|x[0-7][0-9a-f])\s{0,64};\s{0,64}){10}/i
-meta       __HTML_ENTITY_ASCII_MINFP   __HTML_ENTITY_ASCII && !__DKIM_EXISTS && !__RCD_RDNS_SMTP && !__RCD_RDNS_SMTP_MESSY && !__JM_REACTOR_DATE && !__HAS_ERRORS_TO && !__L_BODY_8BITS && !__RCD_RDNS_MAIL_MESSY 
+meta       __HTML_ENTITY_ASCII_MINFP   __HTML_ENTITY_ASCII && !__DKIM_EXISTS && !__RCD_RDNS_SMTP && !__RCD_RDNS_SMTP_MESSY && !__JM_REACTOR_DATE && !__HAS_ERRORS_TO && !__L_BODY_8BITS && !__RCD_RDNS_MAIL_MESSY && !__VIA_ML 
 
 meta       HTML_ENTITY_ASCII           __HTML_ENTITY_ASCII_MINFP
 describe   HTML_ENTITY_ASCII           Obfuscated ASCII
