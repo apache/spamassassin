@@ -1,19 +1,19 @@
 # These are oddities seen in Other People's Spam, i.e. I have no hits in my test corpora 
 
 describe	__HAS_IMG_SRC	Has an img tag on a non-quoted line
-rawbody		__HAS_IMG_SRC	/^[^>].*<img src=/i
+rawbody		__HAS_IMG_SRC	/^[^>].*?<img src=/i
 tflags		__HAS_IMG_SRC	multiple maxhits=100
 
 describe	__HAS_HREF	Has an anchor tag with a href attribute in non-quoted line
-rawbody		__HAS_HREF	/^[^>].*<a href=/i
+rawbody		__HAS_HREF	/^[^>].*?<a href=/i
 tflags		__HAS_HREF	multiple maxhits=100
 
 describe	__HAS_IMG_SRC_ONECASE	Has an img tag on a non-quoted line with consistent case
-rawbody		__HAS_IMG_SRC_ONECASE	/^[^>].*<(img src|IMG SRC)=/
+rawbody		__HAS_IMG_SRC_ONECASE	/^[^>].*?<(img src|IMG SRC)=/
 tflags		__HAS_IMG_SRC_ONECASE	multiple maxhits=100
 
 describe	__HAS_HREF_ONECASE	Has an anchor tag with a href attribute in non-quoted line with consistent case
-rawbody		__HAS_HREF_ONECASE	/^[^>].*<(a href|A HREF)=/
+rawbody		__HAS_HREF_ONECASE	/^[^>].*?<(a href|A HREF)=/
 tflags		__HAS_HREF_ONECASE	multiple maxhits=100
 
 describe	__MIXED_IMG_CASE	Has img tags with mixed-up cases in non-quoted lines
