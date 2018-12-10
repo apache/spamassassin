@@ -39,6 +39,9 @@ plan tests => 37;
 
 tstlocalrules('
 
+# suppress RB warnings
+util_rb_tld com
+
 # Check that order of reuse/body lines for BODY_RULE_* does not matter
 reuse  BODY_RULE_1
 
@@ -140,6 +143,9 @@ ok_all_patterns();
 clear_pattern_counters();
 
 tstlocalrules('
+
+# suppress RB warnings
+util_rb_tld com
 
 meta META_RULE_1 RULE_A && !RULE_B
 

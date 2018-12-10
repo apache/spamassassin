@@ -458,7 +458,10 @@ sub try_extraction {
   # remove all rules and plugins; we want just our stuff
   unlink(<log/test_rules_copy/*.pre>);
   unlink(<log/test_rules_copy/*.pm>);
+  # keep 20_aux_tlds.cf to suppress RB warnings
+  rename("log/test_rules_copy/20_aux_tlds.cf", "log/test_rules_copy/20_aux_tlds.cf.tmp");
   unlink(<log/test_rules_copy/*.cf>);
+  rename("log/test_rules_copy/20_aux_tlds.cf.tmp", "log/test_rules_copy/20_aux_tlds.cf");
 
   { # suppress unnecessary warning:
     #   "Filehandle STDIN reopened as STDOUT only for output"
