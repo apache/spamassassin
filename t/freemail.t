@@ -30,7 +30,7 @@ tstprefs ("
 ");
 
 %patterns = (
-        q{ FREEMAIL_FROM },
+        q{ FREEMAIL_FROM }, 'FREEMAIL_FROM',
             );
 
 ok sarun ("-L -t < data/spam/relayUS.eml", \&patterns_run_cb);
@@ -41,7 +41,7 @@ clear_pattern_counters();
 
 %patterns = ();
 %anti_patterns = (
-        q{ FREEMAIL_FROM },
+        q{ FREEMAIL_FROM }, 'FREEMAIL_FROM',
             );
 
 tstprefs ("
