@@ -16,6 +16,11 @@ Note for Users Upgrading to SpamAssassin 3.4.3
 - ALL pseudo-header now returns decoded headers, so it's usage is consistent
   with single header matching (:raw returns undecoded and folded like before).
 
+- RegistryBoundaries did not load 20_aux_tlds.cf properly in older versions. 
+  Old hardcoded list is now removed and RB will print "no tlds defined, need
+  to run sa-update" unless it can find list from config files.
+
+
 Note for Users Upgrading to SpamAssassin 3.4.2
 ----------------------------------------------
 
