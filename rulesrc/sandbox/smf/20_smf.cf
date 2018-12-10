@@ -115,8 +115,8 @@ meta     FSL_RCVD_EX_GT_5       (__FSL_COUNT_EXTERN > 5)
 meta     FSL_NO_RCVD_1          (__FSL_COUNT_TRUST > 0 && __FSL_COUNT_UNTRUST == 0)
 score    FSL_NO_RCVD_1		0.01
 
-rawbody  __FSL_HTML_BLOCKS      /<((?:div|span))[^>]+>.{1,10}?<\/\1[^>]*>.{0,20}?<\1/si
-tflags   __FSL_HTML_BLOCKS      multiple
+#rawbody  __FSL_HTML_BLOCKS      /<((?:div|span))[^>]+>.{1,10}?<\/\1[^>]*>.{0,20}?<\1/si
+#tflags   __FSL_HTML_BLOCKS      multiple
 
 #meta     FSL_HTML_BLOCK_LOTS_1  (__FSL_HTML_BLOCKS > __FSL_BODY_TEXT_LINE)
 #describe FSL_HTML_BLOCK_LOTS_1  More <div> or <span> blocks than lines
