@@ -2163,9 +2163,9 @@ endif
 rawbody   __HTML_SINGLET                />\s*(?:[a-z"]|&\#(?:\d+|x[0-9a-f]+);)\s*</i
 tflags    __HTML_SINGLET                multiple, maxhits=21
 meta      __HTML_SINGLET_MANY           __HTML_SINGLET > 20
-#meta      HTML_SINGLET_MANY             __HTML_SINGLET_MANY
-#describe  HTML_SINGLET_MANY             Many single-letter HTML format blocks
-#score     HTML_SINGLET_MANY             1.000   # limit
+meta      HTML_SINGLET_MANY             __HTML_SINGLET_MANY && !__STY_INVIS && !ALL_TRUSTED
+describe  HTML_SINGLET_MANY             Many single-letter HTML format blocks
+score     HTML_SINGLET_MANY             2.500   # limit
 
 meta      SINGLETS_LOW_CONTRAST         __HTML_SINGLET_MANY && __HTML_FONT_LOW_CONTRAST_MINFP
 describe  SINGLETS_LOW_CONTRAST         Single-letter formatted HTML + hidden text
@@ -2548,6 +2548,10 @@ if can(Mail::SpamAssassin::Conf::feature_bug6558_free)
   rawbody    __HTML_SHRT_CMNT_OBFU       /\w<!--\s*\w+\s*-->\w/
   tflags     __HTML_SHRT_CMNT_OBFU       multiple maxhits=10
   meta       __HTML_SHRT_CMNT_OBFU_MANY  __HTML_SHRT_CMNT_OBFU > 9 && HTML_MESSAGE
+  meta       HTML_SHRT_CMNT_OBFU_MANY    __HTML_SHRT_CMNT_OBFU_MANY
+  describe   HTML_SHRT_CMNT_OBFU_MANY    Obfuscation with many short HTML comments
+  score      HTML_SHRT_CMNT_OBFU_MANY    2.500	# limit
+  tflags     HTML_SHRT_CMNT_OBFU_MANY    publish
 endif
 
 header     __FROM_ADDR_WS              From:addr =~ /\s/
@@ -2602,7 +2606,7 @@ if can(Mail::SpamAssassin::Conf::feature_bug6558_free)
   body       __UNICODE_OBFU_ASC         /[a-z0-9\s](?:\xd0[\xb0\xb5\xbe]|\xd1[\x80\x81])+[a-z0-9]{1,8}(?:\xd0[\xb0\xb5\xbe]|\xd1[\x80\x81])+[a-z0-9\s]/i
   tflags     __UNICODE_OBFU_ASC         multiple maxhits=10
   meta       __UNICODE_OBFU_ASC_MANY    __UNICODE_OBFU_ASC > 9
-  meta       UNICODE_OBFU_ASC           __UNICODE_OBFU_ASC && !__SPAN_BEG_TEXT && !HTML_IMAGE_ONLY_32 && !__RCD_RDNS_MAIL 
+  meta       UNICODE_OBFU_ASC           __UNICODE_OBFU_ASC && !__SPAN_BEG_TEXT && !HTML_IMAGE_ONLY_32
   describe   UNICODE_OBFU_ASC           Obfuscating text with unicode
   score      UNICODE_OBFU_ASC           2.500	# limit
   tflags     UNICODE_OBFU_ASC           publish
