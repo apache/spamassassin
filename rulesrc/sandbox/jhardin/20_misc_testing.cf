@@ -2163,7 +2163,7 @@ endif
 rawbody   __HTML_SINGLET                />\s*(?:[a-z"]|&\#(?:\d+|x[0-9a-f]+);)\s*</i
 tflags    __HTML_SINGLET                multiple, maxhits=21
 meta      __HTML_SINGLET_MANY           __HTML_SINGLET > 20
-meta      HTML_SINGLET_MANY             __HTML_SINGLET_MANY && !__STY_INVIS && !ALL_TRUSTED
+meta      HTML_SINGLET_MANY             __HTML_SINGLET_MANY && !__STY_INVIS && !__NOT_SPOOFED && !ALL_TRUSTED
 describe  HTML_SINGLET_MANY             Many single-letter HTML format blocks
 score     HTML_SINGLET_MANY             2.500   # limit
 tflags    HTML_SINGLET_MANY             publish
