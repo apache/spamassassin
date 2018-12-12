@@ -2166,6 +2166,7 @@ meta      __HTML_SINGLET_MANY           __HTML_SINGLET > 20
 meta      HTML_SINGLET_MANY             __HTML_SINGLET_MANY && !__STY_INVIS && !ALL_TRUSTED
 describe  HTML_SINGLET_MANY             Many single-letter HTML format blocks
 score     HTML_SINGLET_MANY             2.500   # limit
+tflags    HTML_SINGLET_MANY             publish
 
 meta      SINGLETS_LOW_CONTRAST         __HTML_SINGLET_MANY && __HTML_FONT_LOW_CONTRAST_MINFP
 describe  SINGLETS_LOW_CONTRAST         Single-letter formatted HTML + hidden text
