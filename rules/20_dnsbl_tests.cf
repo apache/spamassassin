@@ -210,21 +210,21 @@ reuse RCVD_IN_RP_RNBL
 
 endif
 
-
-ifplugin Mail::SpamAssassin::Plugin::AskDNS
-
-askdns   DKIMDOMAIN_IN_DWL  _DKIMDOMAIN_._vouch.dwl.spamhaus.org TXT /^([a-z]+ )*(transaction|list|all)( [a-z]+)*$/
-tflags   DKIMDOMAIN_IN_DWL  net nice
-describe DKIMDOMAIN_IN_DWL  Signing domain listed in Spamhaus DWL
-reuse    DKIMDOMAIN_IN_DWL
-
-askdns   __DKIMDOMAIN_IN_DWL_ANY  _DKIMDOMAIN_._vouch.dwl.spamhaus.org TXT
-tflags   __DKIMDOMAIN_IN_DWL_ANY  net nice
-describe __DKIMDOMAIN_IN_DWL_ANY  Any TXT response received from a Spamhaus DWL
-reuse    __DKIMDOMAIN_IN_DWL_ANY
-
-meta     DKIMDOMAIN_IN_DWL_UNKNOWN  __DKIMDOMAIN_IN_DWL_ANY && !DKIMDOMAIN_IN_DWL
-tflags   DKIMDOMAIN_IN_DWL_UNKNOWN  net nice
-describe DKIMDOMAIN_IN_DWL_UNKNOWN  Unrecognized response from Spamhaus DWL
-
-endif
+#These are old and useless - The zones are no longer supported by SpamHaus 2018-12-12
+#ifplugin Mail::SpamAssassin::Plugin::AskDNS
+#
+#askdns   DKIMDOMAIN_IN_DWL  _DKIMDOMAIN_._vouch.dwl.spamhaus.org TXT /^([a-z]+ )*(transaction|list|all)( [a-z]+)*$/
+#tflags   DKIMDOMAIN_IN_DWL  net nice
+#describe DKIMDOMAIN_IN_DWL  Signing domain listed in Spamhaus DWL
+#reuse    DKIMDOMAIN_IN_DWL
+#
+#askdns   __DKIMDOMAIN_IN_DWL_ANY  _DKIMDOMAIN_._vouch.dwl.spamhaus.org TXT
+#tflags   __DKIMDOMAIN_IN_DWL_ANY  net nice
+#describe __DKIMDOMAIN_IN_DWL_ANY  Any TXT response received from a Spamhaus DWL
+#reuse    __DKIMDOMAIN_IN_DWL_ANY
+#
+#meta     DKIMDOMAIN_IN_DWL_UNKNOWN  __DKIMDOMAIN_IN_DWL_ANY && !DKIMDOMAIN_IN_DWL
+#tflags   DKIMDOMAIN_IN_DWL_UNKNOWN  net nice
+#describe DKIMDOMAIN_IN_DWL_UNKNOWN  Unrecognized response from Spamhaus DWL
+#
+#endif
