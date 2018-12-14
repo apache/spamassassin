@@ -40,6 +40,16 @@ use warnings;
 # use bytes;
 use re 'taint';
 
+# Not a constant hashref for 5.6 compat
+use constant SLOT_BASE => 0;
+use constant SLOT_NAME => 1;
+use constant SLOT_ORIG => 2;
+use constant SLOT_LEN_BASE => 3;
+use constant SLOT_BASE_INITIAL => 4;
+use constant SLOT_HAS_MULTIPLE => 5;
+
+use constant CLOBBER => '';
+
 our @ISA = qw(Mail::SpamAssassin::Plugin);
 
 use constant DEBUG_RE_PARSING => 0;     # noisy!
@@ -295,66 +305,71 @@ NEXT_RULE:
   # this bit is annoyingly O(N^2).  Rewrite the data -- the @good_bases
   # array -- into a more efficient format, using arrays and with a little
   # bit of precomputation, to go (quite a bit) faster
-
   my @rewritten;
   foreach my $set1 (@good_bases) {
     my $base = $set1->{base};
     next if (!$base || !$set1->{name});
     push @rewritten, [
-      $base,                # 0
-      $set1->{name},        # 1
-      $set1->{orig},        # 2
-      length $base,         # 3
-      qr/\Q$base\E/,        # 4
-      0                     # 5, has_multiple flag
+      $base,                # 0 - SLOT_BASE
+      $set1->{name},        # 1 - SLOT_NAME
+      $set1->{orig},        # 2 - SLOT_ORIG
+      length $base,         # 3 - SLOT_LEN_BASE
+      $base,                # 4 - SLOT_BASE_INITIAL
+      0                     # 5 - SLOT_HAS_MULTIPLE, has_multiple flag
     ];
   }
-  @good_bases = @rewritten;
 
-  foreach my $set1 (@good_bases) {
+  @good_bases = sort {
+    $b->[SLOT_LEN_BASE] <=> $a->[SLOT_LEN_BASE] ||
+    $a->[SLOT_BASE] cmp $b->[SLOT_BASE] ||
+    $a->[SLOT_NAME] cmp $b->[SLOT_NAME] ||
+    $a->[SLOT_ORIG] cmp $b->[SLOT_ORIG]
+  } @rewritten;
+
+
+  my $base_orig =  $conf->{base_orig}->{$ruletype};
+  my $next_base_position = 0;
+  for my $set1 (@good_bases) {
+    $next_base_position++;
     $self->{show_progress} and $progress and $progress->update(++$count);
+    my $base1 = $set1->[SLOT_BASE] or next;  # got clobbered
+    my $name1 = $set1->[SLOT_NAME];
+    my $orig1 = $set1->[SLOT_ORIG];
+    my $len1 = $set1->[SLOT_LEN_BASE];
+    $base_orig->{$name1} = $orig1;
 
-    my $base1 = $set1->[0]; next unless $base1;
-    my $name1 = $set1->[1];
-    my $orig1 = $set1->[2];
-    $conf->{base_orig}->{$ruletype}->{$name1} = $orig1;
-    my $len1 = $set1->[3];
-
-    foreach my $set2 (@good_bases) {
-      next if ($set1 == $set2);
-
-      my $base2 = $set2->[0]; next unless $base2;
-      my $name2 = $set2->[1];
-
-      # clobber exact dups; this can happen if a regexp outputs the 
+    foreach my $set2 (@good_bases[$next_base_position .. $#good_bases]) { # order from smallest to largest
+      # clobber false and exact dups; this can happen if a regexp outputs the
       # same base string multiple times
-      if ($base1 eq $base2 &&
-          $name1 eq $name2 &&
-          $orig1 eq $set2->[2])
+      if (!$set2->[SLOT_BASE] ||
+		(
+		  $base1 eq $set2->[SLOT_BASE] &&
+		  $name1 eq $set2->[SLOT_NAME] &&
+		  $orig1 eq $set2->[SLOT_ORIG]
+		)
+	)
       {
-        $set2->[0] = '';       # clobber
+        #dbg("clobbering: [base2][$set2->[SLOT_BASE]][name2][$set2->[SLOT_NAME]][orig][$set2->[SLOT_ORIG]]");
+        $set2->[SLOT_BASE] = CLOBBER;       # clobber
         next;
       }
 
-      # skip if it's too short to contain the other base string
-      next if ($len1 < $set2->[3]);
+      # Cannot be a subset if it does not contain the other base string
+      next if index($base1,$set2->[SLOT_BASE_INITIAL]) == -1;
 
       # skip if either already contains the other rule's name
       # optimize: this can only happen if the base has more than
       # one rule already attached, ie [5]
-      next if ($set2->[5] && $name2 =~ /(?: |^)\Q$name1\E(?: |$)/);
+      next if ($set2->[SLOT_HAS_MULTIPLE] && index($set2->[SLOT_NAME],$name1) > -1 && $set2->[SLOT_NAME] =~ /(?: |^)\Q$name1\E(?: |$)/);
 
       # don't use $name1 here, since another base in the set2 loop
       # may have added $name2 since we set that
-      next if ($set1->[5] && $set1->[1] =~ /(?: |^)\Q$name2\E(?: |$)/);
+      next if ($set1->[SLOT_HAS_MULTIPLE] && index($set1->[SLOT_NAME],$set2->[SLOT_NAME]) > -1 && $set1->[SLOT_NAME] =~ /(?: |^)\Q$set2->[SLOT_NAME]\E(?: |$)/);
 
-      # and finally check to see if it *does* contain the other base string
-      next if ($base1 !~ $set2->[4]);
-
-      # base2 is just a subset of base1
-      # dbg("zoom: subsuming '$base2' ($name2) into '$base1': [1]=$set1->[1] [5]=$set1->[5]");
-      $set1->[1] .= " ".$name2;
-      $set1->[5] = 1;
+      # $set2->[SLOT_BASE] is just a subset of base1
+      #dbg("zoom: subsuming '$set2->[SLOT_BASE]' ($set2->[SLOT_NAME]) into '$base1': [SLOT_BASE]=$set1->[SLOT_BASE] [SLOT_HAS_MULTIPLE]=$set1->[SLOT_HAS_MULTIPLE]");
+      $set1->[SLOT_NAME] .= " ".$set2->[SLOT_NAME];
+      $set1->[SLOT_HAS_MULTIPLE] = 1;
     }
   }
 
@@ -374,14 +389,16 @@ NEXT_RULE:
   }
   undef @good_bases;
 
+  my $base_string =  $conf->{base_string}->{$ruletype};
   foreach my $base (keys %bases) {
     # uniq the list, since there are probably dup rules listed
     my %u;
     for my $i (split ' ', $bases{$base}) {
       next if exists $u{$i}; undef $u{$i}; 
     }
-    $conf->{base_string}->{$ruletype}->{$base} = join ' ', sort keys %u;
+    $base_string->{$base} = join ' ', sort keys %u;
   }
+
   $self->{show_progress} and $progress and $progress->final();
 
   if ($cachefile) {
