@@ -142,7 +142,7 @@ package Mail::SpamAssassin::Plugin::PDFInfo;
 
 use Mail::SpamAssassin::Plugin;
 use Mail::SpamAssassin::Logger;
-use Mail::SpamAssassin::Util;
+use Mail::SpamAssassin::Util qw(compile_regexp);
 use strict;
 use warnings;
 # use bytes;
@@ -471,16 +471,15 @@ sub pdf_name_regex {
   return 0 if (exists $pms->{'pdfinfo'}->{'no_parts'});
   return 0 unless (exists $pms->{'pdfinfo'}->{"names_pdf"});
 
+  my ($rec, $err) = compile_regexp($re, 2);
+  if (!$rec) {
+    info("pdfinfo: invalid regexp '$re': $err");
+    return 0;
+  }
+
   my $hit = 0;
   foreach my $name (keys %{$pms->{'pdfinfo'}->{"names_pdf"}}) {
-    eval {
-        my $regex = Mail::SpamAssassin::Util::make_qr($re);
-        if ( $name =~ m/$regex/ ) {
-            $hit = 1;
-        }
-    };
-    dbg("pdfinfo: error in regex $re - $@") if $@;
-    if ($hit) {
+    if ($name =~ $rec) {
       dbg("pdfinfo: pdf_name_regex hit on $name");
       return 1;
     }
@@ -722,15 +721,13 @@ sub pdf_match_details {
   my $check_value = $pms->{pdfinfo}->{details}->{$detail};
   return unless $check_value;
 
-  my $hit = 0;
-  eval {
-      my $re = Mail::SpamAssassin::Util::make_qr($regex);
-      if ( $check_value =~ m/$re/ ) {
-          $hit = 1;
-      }
-  };
-  dbg("pdfinfo: error in regex $regex - $@") if $@;
-  if ($hit) {
+  my ($rec, $err) = compile_regexp($regex, 2);
+  if (!$rec) {
+    info("pdfinfo: invalid regexp '$regex': $err");
+    return 0;
+  }
+
+  if ($check_value =~ $rec) {
     dbg("pdfinfo: pdf_match_details $detail $regex matches $check_value");
     return 1;
   }

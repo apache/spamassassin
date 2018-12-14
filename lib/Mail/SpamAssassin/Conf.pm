@@ -82,12 +82,11 @@ use warnings;
 # use bytes;
 use re 'taint';
 
-use Mail::SpamAssassin::Util;
 use Mail::SpamAssassin::NetSet;
 use Mail::SpamAssassin::Constants qw(:sa :ip);
 use Mail::SpamAssassin::Conf::Parser;
 use Mail::SpamAssassin::Logger;
-use Mail::SpamAssassin::Util qw(untaint_var);
+use Mail::SpamAssassin::Util qw(untaint_var compile_regexp);
 use File::Spec;
 
 our @ISA = qw();
@@ -2733,24 +2732,23 @@ Example: http://chkpt.zdnet.com/chkpt/whatever/spammer.domain/yo/dude
   push (@cmds, {
     setting => 'redirector_pattern',
     is_priv => 1,
+    default => [],
+    type => $CONF_TYPE_STRINGLIST,
     code => sub {
       my ($self, $key, $value, $line) = @_;
+
+      $value =~ s/^\s+//;
       if ($value eq '') {
 	return $MISSING_REQUIRED_VALUE;
       }
-      elsif (!$self->{parser}->is_delimited_regexp_valid("redirector_pattern", $value)) {
+
+      my ($rec, $err) = compile_regexp($value, 1);
+      if (!$rec) {
+        dbg("config: invalid redirector_pattern '$value': $err");
 	return $INVALID_VALUE;
       }
 
-      # convert to qr// while including modifiers
-      local ($1,$2,$3);
-      $value =~ /^m?(\W)(.*)(?:\1|>|}|\)|\])(.*?)$/;
-      my $pattern = $2;
-      $pattern = "(?".$3.")".$pattern if $3;
-      $pattern = qr/$pattern/;
-
-      push @{$self->{main}->{conf}->{redirector_patterns}}, $pattern;
-      # dbg("config: adding redirector regex: " . $value);
+      push @{$self->{main}->{conf}->{redirector_patterns}}, $rec;
     }
   });
 
@@ -2983,11 +2981,9 @@ why the IP is listed, typically a hyperlink to a database entry.
 Create a sub-test for 'set'.  If you want to look up a multi-meaning zone
 like relays.osirusoft.com, you can then query the results from that zone
 using the zone ID from the original query.  The sub-test may either be an
-IPv4 dotted address for RBLs that return multiple A records or a
+IPv4 dotted address for RBLs that return multiple A records, or a
 non-negative decimal number to specify a bitmask for RBLs that return a
-single A record containing a bitmask of results, a SenderBase test
-beginning with "sb:", or (if none of the preceding options seem to fit) a
-regular expression.
+single A record containing a bitmask of results, or a regular expression.
 
 Note: the set name must be exactly the same for as the main query rule,
 including selections like '-notfirsthop' appearing at the end of the set
@@ -3001,11 +2997,17 @@ name.
     is_priv => 1,
     code => sub {
       my ($self, $key, $value, $line) = @_;
-      local ($1,$2);
-      if ($value =~ /^(\S+)\s+(?:rbl)?eval:(.*)$/) {
-        my ($rulename, $fn) = ($1, $2);
-        dbg("config: header eval rule name is $rulename function is $fn");
-        if ($fn !~ /^\w+(\(.*\))?$/) {
+      local($1);
+      if ($value !~ s/^(\S+)\s+//) {
+        return $INVALID_VALUE;
+      }
+      my $rulename = $1;
+      if ($value eq '') {
+        return $MISSING_REQUIRED_VALUE;
+      }
+      if ($value =~ /^(?:rbl)?eval:(.*)$/) {
+        my $fn = $1;
+        if ($fn !~ /^\w+\(.*\)$/) {
           return $INVALID_VALUE;
         }
         if ($fn =~ /^check_(?:rbl|dns)/) {
@@ -3015,25 +3017,9 @@ name.
           $self->{parser}->add_test ($rulename, $fn, $TYPE_HEAD_EVALS);
         }
       }
-      elsif ($value =~ /^(\S+)\s+exists:(.*)$/) {
-        my ($rulename, $header_name) = ($1, $2);
-        # RFC 5322 section 3.6.8, ftext printable US-ASCII ch not including ":"
-        if ($header_name !~ /\S/) {
-	  return $MISSING_REQUIRED_VALUE;
-      # } elsif ($header_name !~ /^([!-9;-\176]+)$/) {
-        } elsif ($header_name !~ /^([^: \t]+)$/) {  # be generous
-          return $INVALID_HEADER_FIELD_NAME;
-        }
-        $self->{parser}->add_test ($rulename, "defined($header_name)",
-                                   $TYPE_HEAD_TESTS);
-        $self->{descriptions}->{$rulename} = "Found a $header_name header";
-      }
       else {
-	my @values = split(/\s+/, $value, 2);
-	if (@values != 2) {
-	  return $MISSING_REQUIRED_VALUE;
-	}
-        $self->{parser}->add_test (@values, $TYPE_HEAD_TESTS);
+        # Detailed parsing in add_test
+        $self->{parser}->add_test ($rulename, $value, $TYPE_HEAD_TESTS);
       }
     }
   });
@@ -3063,22 +3049,22 @@ Define a body eval test.  See above.
     is_priv => 1,
     code => sub {
       my ($self, $key, $value, $line) = @_;
-      local ($1,$2);
-      if ($value =~ /^(\S+)\s+eval:(.*)$/) {
-        my ($rulename, $fn) = ($1, $2);
-        dbg("config: body eval rule name is $rulename function is $fn");
-
-        if ($fn !~ /^\w+(\(.*\))?$/) {
+      local($1);
+      if ($value !~ s/^(\S+)\s+//) {
+        return $INVALID_VALUE;
+      }
+      my $rulename = $1;
+      if ($value eq '') {
+        return $MISSING_REQUIRED_VALUE;
+      }
+      if ($value =~ /^eval:(.*)$/) {
+        my $fn = $1;
+        if ($fn !~ /^\w+\(.*\)$/) {
           return $INVALID_VALUE;
         }
         $self->{parser}->add_test ($rulename, $fn, $TYPE_BODY_EVALS);
-      }
-      else {
-	my @values = split(/\s+/, $value, 2);
-	if (@values != 2) {
-	  return $MISSING_REQUIRED_VALUE;
-	}
-        $self->{parser}->add_test (@values, $TYPE_BODY_TESTS);
+      } else {
+        $self->{parser}->add_test ($rulename, $value, $TYPE_BODY_TESTS);
       }
     }
   });
@@ -3107,11 +3093,15 @@ points of the URI, and will also be faster.
     is_priv => 1,
     code => sub {
       my ($self, $key, $value, $line) = @_;
-      my @values = split(/\s+/, $value, 2);
-      if (@values != 2) {
+      local($1);
+      if ($value !~ s/^(\S+)\s+//) {
+        return $INVALID_VALUE;
+      }
+      my $rulename = $1;
+      if ($value eq '') {
         return $MISSING_REQUIRED_VALUE;
       }
-      $self->{parser}->add_test (@values, $TYPE_URI_TESTS);
+      $self->{parser}->add_test ($rulename, $value, $TYPE_URI_TESTS);
     }
   });
 
@@ -3138,15 +3128,22 @@ Define a raw-body eval test.  See above.
     is_priv => 1,
     code => sub {
       my ($self, $key, $value, $line) = @_;
-      local ($1,$2);
-      if ($value =~ /^(\S+)\s+eval:(.*)$/) {
-        $self->{parser}->add_test ($1, $2, $TYPE_RAWBODY_EVALS);
+      local($1);
+      if ($value !~ s/^(\S+)\s+//) {
+        return $INVALID_VALUE;
+      }
+      my $rulename = $1;
+      if ($value eq '') {
+        return $MISSING_REQUIRED_VALUE;
+      }
+      if ($value =~ /^eval:(.*)$/) {
+        my $fn = $1;
+        if ($fn !~ /^\w+\(.*\)$/) {
+          return $INVALID_VALUE;
+        }
+        $self->{parser}->add_test ($rulename, $fn, $TYPE_RAWBODY_EVALS);
       } else {
-	my @values = split(/\s+/, $value, 2);
-	if (@values != 2) {
-	  return $MISSING_REQUIRED_VALUE;
-	}
-        $self->{parser}->add_test (@values, $TYPE_RAWBODY_TESTS);
+        $self->{parser}->add_test ($rulename, $value, $TYPE_RAWBODY_TESTS);
       }
     }
   });
@@ -3172,15 +3169,22 @@ Define a full message eval test.  See above.
     is_priv => 1,
     code => sub {
       my ($self, $key, $value, $line) = @_;
-      local ($1,$2);
-      if ($value =~ /^(\S+)\s+eval:(.*)$/) {
-        $self->{parser}->add_test ($1, $2, $TYPE_FULL_EVALS);
+      local($1);
+      if ($value !~ s/^(\S+)\s+//) {
+        return $INVALID_VALUE;
+      }
+      my $rulename = $1;
+      if ($value eq '') {
+        return $MISSING_REQUIRED_VALUE;
+      }
+      if ($value =~ /^eval:(.*)$/) {
+        my $fn = $1;
+        if ($fn !~ /^\w+\(.*\)$/) {
+          return $INVALID_VALUE;
+        }
+        $self->{parser}->add_test ($rulename, $fn, $TYPE_FULL_EVALS);
       } else {
-	my @values = split(/\s+/, $value, 2);
-	if (@values != 2) {
-	  return $MISSING_REQUIRED_VALUE;
-	}
-        $self->{parser}->add_test (@values, $TYPE_FULL_TESTS);
+        $self->{parser}->add_test ($rulename, $value, $TYPE_FULL_TESTS);
       }
     }
   });
@@ -3225,15 +3229,19 @@ ignore these for scoring.
     is_priv => 1,
     code => sub {
       my ($self, $key, $value, $line) = @_;
-      my @values = split(/\s+/, $value, 2);
-      if (@values != 2) {
+      local($1);
+      if ($value !~ s/^(\S+)\s+//) {
+        return $INVALID_VALUE;
+      }
+      my $rulename = $1;
+      if ($value eq '') {
         return $MISSING_REQUIRED_VALUE;
       }
-      if ($values[1] =~ /\*\s*\*/) {
+      if ($value =~ /\*\s*\*/) {
 	info("config: found invalid '**' or '* *' operator in meta command");
         return $INVALID_VALUE;
       }
-      $self->{parser}->add_test (@values, $TYPE_META_TESTS);
+      $self->{parser}->add_test ($rulename, $value, $TYPE_META_TESTS);
     }
   });
 
@@ -3933,12 +3941,15 @@ from SQL or LDAP, instead of passing the message through unprocessed.
     type => $CONF_TYPE_BOOL,
   });
 
-=item loadplugin PluginModuleName [/path/module.pm]
+=item loadplugin [Mail::SpamAssassin::Plugin::]ModuleName [/path/module.pm]
 
-Load a SpamAssassin plugin module.  The C<PluginModuleName> is the perl module
+Load a SpamAssassin plugin module.  The C<ModuleName> is the perl module
 name, used to create the plugin object itself.
 
-C</path/to/module.pm> is the file to load, containing the module's perl code;
+Module naming is strict, name must only contain alphanumeric characters or
+underscores.  File must have .pm extension.
+
+C</path/module.pm> is the file to load, containing the module's perl code;
 if it's specified as a relative path, it's considered to be relative to the
 current configuration file.  If it is omitted, the module will be loaded
 using perl's search path (the C<@INC> array).
@@ -3957,20 +3968,16 @@ See C<Mail::SpamAssassin::Plugin> for more details on writing plugins.
       }
       my ($package, $path);
       local ($1,$2);
-      if ($value =~ /^(\S+)\s+(\S+)$/) {
+      if ($value =~ /^((?:\w+::){0,10}\w+)(?:\s+(\S+\.pm))?$/i) {
         ($package, $path) = ($1, $2);
-      } elsif ($value =~ /^\S+$/) {
-        ($package, $path) = ($value, undef);
       } else {
 	return $INVALID_VALUE;
       }
-      # is blindly untainting safe?  it is no worse than before
-      $_ = untaint_var($_)  for ($package,$path);
       $self->load_plugin ($package, $path);
     }
   });
 
-=item tryplugin PluginModuleName [/path/module.pm]
+=item tryplugin ModuleName [/path/module.pm]
 
 Same as C<loadplugin>, but silently ignored if the .pm file cannot be found in
 the filesystem.
@@ -3987,15 +3994,11 @@ the filesystem.
       }
       my ($package, $path);
       local ($1,$2);
-      if ($value =~ /^(\S+)\s+(\S+)$/) {
+      if ($value =~ /^((?:\w+::){0,10}\w+)(?:\s+(\S+\.pm))?$/i) {
         ($package, $path) = ($1, $2);
-      } elsif ($value =~ /^\S+$/) {
-        ($package, $path) = ($value, undef);
       } else {
 	return $INVALID_VALUE;
       }
-      # is blindly untainting safe?  it is no worse than before
-      $_ = untaint_var($_)  for ($package,$path);
       $self->load_plugin ($package, $path, 1);
     }
   });
@@ -4777,12 +4780,7 @@ sub maybe_body_only {
 
 sub load_plugin {
   my ($self, $package, $path, $silent) = @_;
-  if ($path) {
-    $path = $self->{parser}->fix_path_relative_to_current_file($path);
-  }
-  # it wouldn't hurt to do some checking on validity of $package
-  # and $path before untainting them
-  $self->{main}->{plugins}->load_plugin(untaint_var($package), $path, $silent);
+  $self->{main}->{plugins}->load_plugin($package, $path, $silent);
 }
 
 sub load_plugin_succeeded {
@@ -4963,6 +4961,7 @@ sub feature_bug6558_free { 1 }
 sub feature_edns { 1 }  # supports 'dns_options edns' config option
 sub feature_dns_query_restriction { 1 }  # supported config option
 sub feature_registryboundaries { 1 } # replaces deprecated registrarboundaries
+sub feature_compile_regexp { 1 } # Util::compile_regexp
 sub perl_min_version_5010000 { return $] >= 5.010000 }  # perl version check ("perl_version" not neatly backwards-compatible)
 
 ###########################################################################

@@ -21,6 +21,11 @@ Note for Users Upgrading to SpamAssassin 3.4.3
   to run sa-update" unless it can find list from config files.
 
 
+- Deprecated functions: Parser::is_delimited_regexp_valid(),
+  Parser::is_regexp_valid(), Util::regexp_remove_delimiters(),
+  Util::make_qr().  These all are combined into new Util::compile_regexp().
+
+
 Note for Users Upgrading to SpamAssassin 3.4.2
 ----------------------------------------------
 

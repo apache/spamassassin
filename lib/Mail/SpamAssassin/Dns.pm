@@ -139,6 +139,12 @@ sub do_rbl_lookup {
 # TODO: these are constant so they should only be added once at startup
 sub register_rbl_subtest {
   my ($self, $rule, $set, $subtest) = @_;
+
+  if ($subtest =~ /^sb:/) {
+    warn("dns: ignored $rule, SenderBase rules are deprecated\n");
+    return 0;
+  }
+
   $self->{dnspost}->{$set}->{$subtest} = $rule;
 }
 
@@ -306,30 +312,6 @@ sub process_dnsbl_set {
     if ($subtest =~ /^\d+\.\d+\.\d+\.\d+$/) {
       # test for exact equality, not a regexp (an IPv4 address)
       $self->dnsbl_hit($rule, $question, $answer)  if $subtest eq $rdatastr;
-    }
-    # senderbase
-    elsif ($subtest =~ s/^sb://) {
-      # SB rules are not available to users
-      if ($self->{conf}->{user_defined_rules}->{$rule}) {
-        dbg("dns: skipping rule '$rule': not supported when user-defined");
-        next;
-      }
-
-      $rdatastr =~ s/^\d+-//;
-      my %sb = ($rdatastr =~ m/(?:^|\|)(\d+)=([^|]+)/g);
-      my $undef = 0;
-      while ($subtest =~ m/\bS(\d+)\b/g) {
-	if (!defined $sb{$1}) {
-	  $undef = 1;
-	  last;
-	}
-	$subtest =~ s/\bS(\d+)\b/\$sb{$1}/;
-      }
-
-      # untaint. (bug 3325)
-      $subtest = untaint_var($subtest);
-
-      $self->got_hit($rule, "SenderBase: ", ruletype => "dnsbl") if !$undef && eval $subtest;
     }
     # bitmask
     elsif ($subtest =~ /^\d+$/) {

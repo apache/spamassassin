@@ -269,7 +269,6 @@ sub new {
     'master_deadline'   => $msg->{master_deadline},  # dflt inherited from msg
     'deadline_exceeded' => 0,  # time limit exceeded, skipping further tests
   };
-  #$self->{main}->{use_rule_subs} = 1;
 
   dbg("check: pms new, time limit in %.3f s",
       $self->{master_deadline} - time)  if $self->{master_deadline};

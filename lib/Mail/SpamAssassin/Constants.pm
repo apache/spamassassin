@@ -32,7 +32,7 @@ our(@BAYES_VARS, @IP_VARS, @SA_VARS, %EXPORT_TAGS, @EXPORT_OK);
 
 # NOTE: Unless you need these to be available at BEGIN time, you're better with this out of a BEGIN block with a simple our statement.
 BEGIN { 
-    @IP_VARS = qw(
+  @IP_VARS = qw(
 	IP_IN_RESERVED_RANGE IP_PRIVATE LOCALHOST IPV4_ADDRESS IP_ADDRESS
   );
   @BAYES_VARS = qw(
@@ -43,7 +43,7 @@ BEGIN {
 	HARVEST_DNSBL_PRIORITY MBX_SEPARATOR
 	MAX_BODY_LINE_LENGTH MAX_HEADER_KEY_LENGTH MAX_HEADER_VALUE_LENGTH
 	MAX_HEADER_LENGTH ARITH_EXPRESSION_LEXER AI_TIME_UNKNOWN
-	CHARSETS_LIKELY_TO_FP_AS_CAPS MAX_URI_LENGTH
+	CHARSETS_LIKELY_TO_FP_AS_CAPS MAX_URI_LENGTH RULENAME_RE
   );
 
   %EXPORT_TAGS = (
@@ -401,5 +401,8 @@ use constant AI_TIME_UNKNOWN => 0;
 use constant CHARSETS_LIKELY_TO_FP_AS_CAPS => qr{[-_a-z0-9]*(?:
 	  koi|jp|jis|euc|gb|big5|isoir|cp1251|windows-1251|georgianps|pt154|tis
 	)[-_a-z0-9]*}ix;
+
+# Allowed rulename format
+use constant RULENAME_RE => qr([_a-zA-Z][_a-zA-Z0-9]{0,127});
 
 1;
