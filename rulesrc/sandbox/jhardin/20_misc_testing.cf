@@ -1992,9 +1992,19 @@ score          BITCOIN_MALWARE        3.000	# limit
 tflags         BITCOIN_MALWARE        publish
 
 meta           BITCOIN_BOMB           __BITCOIN_ID && __EXPLOSIVE_DEVICE && !BITCOIN_EXTORT_01
-describe       BITCOIN_BOMB           BitCoin + bomb threat
+describe       BITCOIN_BOMB           BitCoin + bomb
 score          BITCOIN_BOMB           3.000	# limit
 tflags         BITCOIN_BOMB           publish
+
+meta           BOMB_FREEM             __EXPLOSIVE_DEVICE && __freemail_hdr_replyto 
+describe       BOMB_FREEM             Bomb + freemail
+score          BOMB_FREEM             2.000	# limit
+tflags         BOMB_FREEM             publish
+
+meta           BOMB_MONEY             __EXPLOSIVE_DEVICE && ( __ADVANCE_FEE_3_NEW || __ADVANCE_FEE_4_NEW || __ADVANCE_FEE_5_NEW )
+describe       BOMB_MONEY             Bomb + money: bomb threat?
+score          BOMB_MONEY             2.500	# limit
+tflags         BOMB_MONEY             publish
 
 
 #body          NUM_FREE         /\b\d+free/i
