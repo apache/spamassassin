@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: darxus ena-week0 ena-week1 ena-week2 ena-week3 ena-week4 giovanni-ham giovanni-spam giovanni-spammy grenier hege jarif jbrooks mmiroslaw-mails-ham mmiroslaw-mails-spam sihde thendrikx; day 2: ena-week2 llanga mmiroslaw-mails-ham mmiroslaw-mails-spam; day 3: ena-week2 llanga mmiroslaw-mails-ham mmiroslaw-mails-spam
+# with results from: day 1: darxus ena-week0 ena-week1 ena-week2 ena-week3 ena-week4 giovanni-ham giovanni-spam giovanni-spammy grenier hege jarif jbrooks sihde thendrikx; day 2: ena-week2 llanga mmiroslaw-mails-ham mmiroslaw-mails-spam; day 3: ena-week2 llanga mmiroslaw-mails-ham mmiroslaw-mails-spam
 
 # tflags publish
 AC_BR_BONANZA
@@ -238,9 +238,6 @@ ENCRYPTED_MESSAGE
 # tflags userconf
 ENV_AND_HDR_SPF_MATCH
 
-# good enough
-FAKE_REPLY_C
-
 # tflags publish
 FBI_MONEY
 
@@ -474,6 +471,9 @@ HTML_OFF_PAGE
 
 # tflags publish
 HTML_SHRT_CMNT_OBFU_MANY
+
+# tflags publish
+HTML_SINGLET_MANY
 
 # tflags publish
 IMG_ONLY_FM_DOM_INFO
@@ -959,43 +959,79 @@ TVD_VISIT_PHARMA
 TW_GIBBERISH_MANY
 
 # good enough
-ADVANCE_FEE_4_NEW_MONEY
+ADVANCE_FEE_2_NEW_FRM_MNY
 
 # good enough
-ADVANCE_FEE_5_NEW
+ADVANCE_FEE_3_NEW_FRM_MNY
 
 # good enough
-ADVANCE_FEE_5_NEW_FRM_MNY
+ADVANCE_FEE_4_NEW_FRM_MNY
 
 # good enough
-DEAR_BENEFICIARY
+ADVANCE_FEE_5_NEW_MONEY
 
 # good enough
-FROM_MISSP_TO_UNDISC
+AXB_XMAILER_MIMEOLE_OL_1ECD5
+
+# good enough
+BIGNUM_EMAILS
+
+# good enough
+BODY_SINGLE_URI
+
+# good enough
+DATE_IN_FUTURE_96_Q
+
+# good enough
+FILL_THIS_FORM_FRAUD_PHISH
+
+# good enough
+FILL_THIS_FORM_LOAN
+
+# good enough
+FILL_THIS_FORM_LONG
+
+# good enough
+FROM_MISSP_DYNIP
+
+# good enough
+FROM_MISSP_USER
 
 # tflags publish
 FSL_BULK_SIG
 
 # good enough
-HK_CTE_RAW
+HK_NAME_MR_MRS
 
 # good enough
-HK_SCAM_N2
-
-# tflags publish
-HTML_SINGLET_MANY
+HK_SCAM_N3
 
 # good enough
-MILLION_USD
+LIST_PARTIAL_SHORT_MSG
 
 # good enough
-MONEY_FROM_MISSP
+LOTTO_AGENT
 
 # good enough
-NSL_RCVD_HELO_USER
+MONEY_ATM_CARD
 
 # good enough
-TVD_SPACE_RATIO_MINFP
+MONEY_BARRISTER
+
+# good enough
+MONEY_FORM
+
+# good enough
+MONEY_FROM_41
+
+# good enough
+NSL_RCVD_FROM_USER
+
+# good enough
+SERGIO_SUBJECT_VIAGRA01
+
+# good enough
+TO_NO_BRKTS_FROM_MSSP
 
 # tflags publish
 UC_GIBBERISH_OBFU
