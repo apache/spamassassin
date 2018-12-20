@@ -213,14 +213,7 @@ sub lint_output_files {
   foreach my $file (keys %{$files_to_lint}) {
     my $text = join("\n", "file start $file", $output_file_text->{$file}, "file end $file");
     if (lint_rule_text($text) != 0) {
-      warn "\nERROR: LINT FAILED, suppressing output: $file\n\n";
-
-      # don't suppress entirely, otherwise 'make distcheck'/'disttest'
-      # will fail since the MANIFEST-listed output files will be 
-      # empty.
-
-      # delete $output_file_text->{$file};
-      $output_file_text->{$file} = '';
+      die "\nERROR: LINT FAILED, suppressing output: $file\n\n";
     }
   }
 }
