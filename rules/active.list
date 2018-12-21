@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-ninja darxus ena-week0 ena-week1 ena-week2 ena-week3 ena-week4 giovanni-ham giovanni-spam giovanni-spammy grenier hege jarif jbrooks mmiroslaw-mails-ham mmiroslaw-mails-spam sihde thendrikx; day 2: darxus ena-week0 ena-week1 ena-week2 ena-week3 ena-week4 giovanni-ham giovanni-spam giovanni-spammy grenier hege jarif jbrooks mmiroslaw-mails-ham mmiroslaw-mails-spam sihde thendrikx; day 3: ena-week2 llanga mmiroslaw-mails-ham mmiroslaw-mails-spam
+# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-ninja darxus ena-week0 ena-week1 ena-week2 ena-week3 ena-week4 giovanni-ham giovanni-spam giovanni-spammy grenier hege jarif jbrooks mmiroslaw-mails-ham mmiroslaw-mails-spam sihde thendrikx; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-ninja darxus ena-week1 ena-week2 ena-week4 giovanni-ham giovanni-spam giovanni-spammy hege jarif jbrooks llanga mmiroslaw-mails-ham mmiroslaw-mails-spam sihde; day 3: darxus ena-week0 ena-week1 ena-week2 ena-week3 ena-week4 giovanni-ham giovanni-spam giovanni-spammy grenier hege jarif jbrooks mmiroslaw-mails-ham mmiroslaw-mails-spam sihde thendrikx
 
 # tflags publish
 AC_BR_BONANZA
@@ -704,22 +704,73 @@ TO_NO_BRKTS_PCNT
 TW_GIBBERISH_MANY
 
 # good enough
-AXB_XMAILER_MIMEOLE_OL_1ECD5
+AXB_XMAILER_MIMEOLE_OL_024C2
 
 # good enough
-BIGNUM_EMAILS
+CK_HELO_DYNAMIC_SPLIT_IP
+
+# good enough
+CK_HELO_GENERIC
+
+# tflags publish
+FRNAME_IN_MSG_XPRIO_NO_SUB
+
+# tflags publish
+FROM_ADDR_WS
 
 # tflags publish
 FSL_BULK_SIG
 
 # good enough
-HK_SCAM_N3
+FSL_CTYPE_WIN1251
 
 # good enough
-NSL_RCVD_FROM_USER
+GOOGLE_OBFU
 
 # good enough
-SERGIO_SUBJECT_VIAGRA01
+HELO_MISC_IP
+
+# good enough
+HK_SCAM_N2
+
+# tflags publish
+HTML_ENTITY_ASCII
+
+# tflags publish
+HTML_ENTITY_ASCII_TINY
+
+# tflags publish
+IMG_ONLY_FM_DOM_INFO
+
+# tflags publish
+MALF_HTML_B64
+
+# good enough
+MILLION_USD
+
+# good enough
+NSL_RCVD_HELO_USER
+
+# tflags publish
+RDNS_NUM_TLD_XM
+
+# good enough
+SERGIO_SUBJECT_PORN014
+
+# tflags publish
+SPOOFED_FREEM_REPTO_RUS
+
+# tflags publish
+TO_NAME_SUBJ_NO_RDNS
+
+# good enough
+TVD_SPACE_ENCODED
+
+# good enough
+TVD_SPACE_RATIO_MINFP
+
+# tflags publish
+USB_DRIVES
 
 # tflags publish
 UC_GIBBERISH_OBFU
@@ -888,6 +939,9 @@ XPRIO
 
 # tflags publish
 XPRIO_SHORT_SUBJ
+
+# tflags publish
+__HTTP_REFRESH
 
 # tflags net
 __RCVD_IN_DNSWL
