@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-ninja darxus ena-week0 ena-week1 ena-week2 ena-week3 ena-week4 giovanni-ham giovanni-spam giovanni-spammy grenier hege jarif jbrooks sihde thendrikx; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-ninja darxus ena-week0 ena-week1 ena-week2 ena-week3 ena-week4 giovanni-ham giovanni-spam giovanni-spammy hege jarif jbrooks llanga mmiroslaw-mails-ham mmiroslaw-mails-spam sihde; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-ninja darxus ena-week1 ena-week2 ena-week4 giovanni-ham giovanni-spam giovanni-spammy hege jarif jbrooks llanga mmiroslaw-mails-ham mmiroslaw-mails-spam sihde
+# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-ninja darxus ena-week0 ena-week1 ena-week2 ena-week3 ena-week4 giovanni-ham giovanni-spam giovanni-spammy grenier hege jarif jbrooks sihde thendrikx; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-ninja ena-week2 llanga mmiroslaw-mails-ham mmiroslaw-mails-spam; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-ninja darxus ena-week0 ena-week1 ena-week2 ena-week3 ena-week4 giovanni-ham giovanni-spam giovanni-spammy hege jarif jbrooks llanga mmiroslaw-mails-ham mmiroslaw-mails-spam sihde
 
 # tflags publish
 AC_BR_BONANZA
@@ -64,6 +64,12 @@ AD_PREFS
 # tflags userconf
 ALL_TRUSTED
 
+# tflags publish
+APP_DEVELOPMENT_FREEM
+
+# tflags publish
+APP_DEVELOPMENT_NORDNS
+
 # tflags learn
 BAYES_00
 
@@ -95,10 +101,55 @@ BAYES_99
 BAYES_999
 
 # tflags publish
+BITCOIN_BOMB
+
+# tflags publish
+BITCOIN_EXTORT_01
+
+# tflags publish
+BITCOIN_MALWARE
+
+# tflags publish
+BITCOIN_PAY_ME
+
+# tflags publish
+BITCOIN_SPAM_01
+
+# tflags publish
+BITCOIN_SPAM_02
+
+# tflags publish
+BITCOIN_SPAM_03
+
+# tflags publish
+BITCOIN_SPAM_04
+
+# tflags publish
+BITCOIN_SPAM_05
+
+# tflags publish
+BITCOIN_SPAM_06
+
+# tflags publish
+BITCOIN_SPAM_07
+
+# tflags publish
+BITCOIN_SPAM_08
+
+# tflags publish
+BITCOIN_SPAM_09
+
+# tflags publish
 BODY_URI_ONLY
 
 # tflags publish
 BOGUS_MSM_HDRS
+
+# tflags publish
+BOMB_FREEM
+
+# tflags publish
+BOMB_MONEY
 
 # tflags publish
 CANT_SEE_AD
@@ -120,6 +171,15 @@ CORRUPT_FROM_LINE_IN_HDRS
 
 # tflags net
 DIGEST_MULTIPLE
+
+# tflags net
+DKIMWL_BL
+
+# tflags net
+DKIMWL_WL_HIGH
+
+# tflags net
+DKIMWL_WL_MED
 
 # tflags net
 DKIM_ADSP_ALL
@@ -193,8 +253,14 @@ FOUND_YOU
 # tflags userconf
 FRAGMENTED_MESSAGE
 
+# good enough
+FREEMAIL_DISPTO
+
 # tflags publish
 FREEMAIL_FORGED_FROMDOMAIN
+
+# tflags publish
+FREEM_FRNUM_UNICD_EMPTY
 
 # tflags publish
 FRNAME_IN_MSG_XPRIO_NO_SUB
@@ -220,6 +286,12 @@ FROM_WORDY
 # tflags publish
 FROM_WORDY_SHORT
 
+# good enough
+FROM_WSP_LEAD
+
+# good enough
+FROM_WSP_TRAIL
+
 # tflags publish
 FSL_NEW_HELO_USER
 
@@ -227,7 +299,13 @@ FSL_NEW_HELO_USER
 FUZZY_ANDROID
 
 # tflags publish
+FUZZY_BITCOIN
+
+# tflags publish
 FUZZY_BROWSER
+
+# tflags publish
+FUZZY_BTC_WALLET
 
 # tflags publish
 FUZZY_CLICK_HERE
@@ -252,6 +330,12 @@ FUZZY_SECURITY
 
 # tflags publish
 FUZZY_UNSUBSCRIBE
+
+# tflags publish
+FUZZY_WALLET
+
+# tflags publish
+GAPPY_SALES_LEADS_FREEM
 
 # tflags publish
 GOOGLE_DOCS_PHISH
@@ -296,6 +380,12 @@ HASHCASH_2SPEND
 HASHCASH_HIGH
 
 # tflags publish
+HDR_ORDER_FTSDMCXX_DIRECT
+
+# tflags publish
+HDR_ORDER_FTSDMCXX_NORDNS
+
+# tflags publish
 HEADER_FROM_DIFFERENT_DOMAINS
 
 # tflags userconf
@@ -317,6 +407,15 @@ HTML_ENTITY_ASCII_TINY
 HTML_OFF_PAGE
 
 # tflags publish
+HTML_SHRT_CMNT_OBFU_MANY
+
+# tflags publish
+HTML_SINGLET_MANY
+
+# good enough
+IMG_ALT_HSPACE_CID_ALIGN
+
+# tflags publish
 IMG_ONLY_FM_DOM_INFO
 
 # tflags publish
@@ -336,6 +435,9 @@ LOTS_OF_MONEY
 
 # tflags publish
 LUCRATIVE
+
+# good enough
+L_8BIT_MISMATCH
 
 # tflags publish
 MALF_HTML_B64
@@ -367,8 +469,14 @@ MONEY_FRAUD_8
 # tflags publish
 MSM_PRIO_REPTO
 
+# good enough
+NORDNS_LOW_CONTRAST
+
 # tflags net
 NO_DNS_FOR_FROM
+
+# tflags publish
+NO_FM_NAME_IP_HOSTN
 
 # tflags userconf
 NO_RECEIVED
@@ -377,10 +485,19 @@ NO_RECEIVED
 NO_RELAYS
 
 # tflags publish
+OBFU_BITCOIN
+
+# tflags publish
 OBFU_JVSCR_ESC
 
 # tflags publish
 OBFU_TEXT_ATTACH
+
+# good enough
+PHOTO_EDITING_DIRECT
+
+# good enough
+PHOTO_EDITING_FREEM
 
 # tflags publish
 PHP_NOVER_MUA
@@ -414,6 +531,9 @@ PYZOR_CHECK
 
 # tflags publish
 RAND_HEADER_MANY
+
+# good enough
+RATWARE_NO_RDNS
 
 # tflags net
 RAZOR2_CF_RANGE_51_100
@@ -623,6 +743,9 @@ RCVD_IN_SORBS_ZOMBIE
 RCVD_IN_XBL
 
 # tflags publish
+RDNS_NUM_TLD_ATCHNX
+
+# tflags publish
 RDNS_NUM_TLD_XM
 
 # good enough
@@ -737,259 +860,61 @@ TO_NO_BRKTS_PCNT
 TW_GIBBERISH_MANY
 
 # good enough
-ADVANCE_FEE_2_NEW_FRM_MNY
+AXB_XMAILER_MIMEOLE_OL_024C2
 
 # good enough
-ADVANCE_FEE_3_NEW_FRM_MNY
+CK_HELO_DYNAMIC_SPLIT_IP
 
 # good enough
-ADVANCE_FEE_4_NEW_FRM_MNY
-
-# good enough
-ADVANCE_FEE_4_NEW_MONEY
-
-# good enough
-ADVANCE_FEE_5_NEW
-
-# good enough
-ADVANCE_FEE_5_NEW_FRM_MNY
-
-# good enough
-ADVANCE_FEE_5_NEW_MONEY
-
-# tflags publish
-APP_DEVELOPMENT_FREEM
-
-# tflags publish
-APP_DEVELOPMENT_NORDNS
-
-# good enough
-AXB_XMAILER_MIMEOLE_OL_1ECD5
-
-# good enough
-BIGNUM_EMAILS
-
-# tflags publish
-BITCOIN_BOMB
-
-# tflags publish
-BITCOIN_EXTORT_01
-
-# tflags publish
-BITCOIN_MALWARE
-
-# tflags publish
-BITCOIN_PAY_ME
-
-# tflags publish
-BITCOIN_SPAM_01
-
-# tflags publish
-BITCOIN_SPAM_02
-
-# tflags publish
-BITCOIN_SPAM_03
-
-# tflags publish
-BITCOIN_SPAM_04
-
-# tflags publish
-BITCOIN_SPAM_05
-
-# tflags publish
-BITCOIN_SPAM_06
-
-# tflags publish
-BITCOIN_SPAM_07
-
-# tflags publish
-BITCOIN_SPAM_08
-
-# tflags publish
-BITCOIN_SPAM_09
-
-# good enough
-BODY_EMPTY
-
-# good enough
-BODY_SINGLE_URI
-
-# tflags publish
-BOMB_FREEM
-
-# tflags publish
-BOMB_MONEY
-
-# good enough
-COMPENSATION
-
-# good enough
-DATE_IN_FUTURE_96_Q
-
-# good enough
-DEAR_BENEFICIARY
-
-# tflags net
-DKIMWL_BL
-
-# tflags net
-DKIMWL_WL_HIGH
-
-# tflags net
-DKIMWL_WL_MED
-
-# good enough
-FAKE_REPLY_A1
-
-# good enough
-FILL_THIS_FORM_LOAN
-
-# good enough
-FILL_THIS_FORM_LONG
-
-# good enough
-FREEMAIL_DISPTO
-
-# tflags publish
-FREEM_FRNUM_UNICD_EMPTY
-
-# good enough
-FROM_MISSPACED
-
-# good enough
-FROM_MISSP_DYNIP
-
-# good enough
-FROM_MISSP_FREEMAIL
-
-# good enough
-FROM_MISSP_MSFT
-
-# good enough
-FROM_MISSP_REPLYTO
-
-# good enough
-FROM_MISSP_TO_UNDISC
-
-# good enough
-FROM_MISSP_USER
-
-# good enough
-FROM_MISSP_XPRIO
-
-# good enough
-FROM_WSP_LEAD
-
-# good enough
-FROM_WSP_TRAIL
+CK_HELO_GENERIC
 
 # tflags publish
 FSL_BULK_SIG
 
-# tflags publish
-FUZZY_BITCOIN
-
-# tflags publish
-FUZZY_BTC_WALLET
-
-# tflags publish
-FUZZY_WALLET
-
-# tflags publish
-GAPPY_SALES_LEADS_FREEM
-
-# tflags publish
-HDR_ORDER_FTSDMCXX_DIRECT
-
-# tflags publish
-HDR_ORDER_FTSDMCXX_NORDNS
+# good enough
+FSL_CTYPE_WIN1251
 
 # good enough
-HK_NAME_MR_MRS
+FSL_HELO_FAKE
 
 # good enough
-HK_SCAM_N3
-
-# tflags publish
-HTML_SHRT_CMNT_OBFU_MANY
-
-# tflags publish
-HTML_SINGLET_MANY
+FSL_THIS_IS_ADV
 
 # good enough
-IMG_ALT_HSPACE_CID_ALIGN
+HELO_MISC_IP
 
 # good enough
-LIST_PARTIAL_SHORT_MSG
+HK_PNIS
 
 # good enough
-LOTTO_AGENT
+HK_SCAM_N2
 
 # good enough
-L_8BIT_MISMATCH
+HK_SCAM_N8
 
 # good enough
-MONEY_ATM_CARD
+KB_FORGED_MOZ4
 
 # good enough
-MONEY_BARRISTER
+MILLION_USD
 
 # good enough
-MONEY_FORM
+NSL_RCVD_HELO_USER
 
 # good enough
-MONEY_FROM_41
+RP_8BIT
 
 # good enough
-MONEY_FROM_MISSP
-
-# good enough
-NORDNS_LOW_CONTRAST
+TVD_SPACE_ENCODED
 
 # tflags publish
-NO_FM_NAME_IP_HOSTN
-
-# good enough
-NSL_RCVD_FROM_USER
-
-# tflags publish
-OBFU_BITCOIN
-
-# good enough
-PHOTO_EDITING_DIRECT
-
-# good enough
-PHOTO_EDITING_FREEM
-
-# good enough
-RATWARE_NO_RDNS
-
-# tflags publish
-RDNS_NUM_TLD_ATCHNX
-
-# good enough
-SERGIO_SUBJECT_VIAGRA01
-
-# good enough
-TEQF_USR_POLITE
-
-# good enough
-TO_NO_BRKTS_DYNIP
-
-# good enough
-TO_NO_BRKTS_FROM_MSSP
-
-# good enough
-TO_NO_BRKTS_MSFT
+UC_GIBBERISH_OBFU
 
 # tflags publish
 UNICODE_OBFU_ASC
 
 # tflags publish
 UNICODE_OBFU_ZW
-
-# tflags publish
-UC_GIBBERISH_OBFU
 
 # tflags userconf
 UNPARSEABLE_RELAY
