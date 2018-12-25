@@ -28,7 +28,7 @@ my @DAYS_REQUIRED = (1, 2, 3);
 
 ###########################################################################
 
-my $cgi_url = "http://ruleqa.spamassassin.org/";
+my $cgi_url = "https://ruleqa.spamassassin.org/";
 my @doc = ();
 my $cache = 'ruleqa.cache.';
 my $submitters = '';
@@ -42,7 +42,8 @@ with_new_offset:
     $url = $cgi_url.($day+$dayoffset)."-days-ago?xml=1";
     warn "HTTP get: $url\n";
 
-    $doc[$day] = get ($url);
+#    $doc[$day] = get ($url);
+    $doc[$day] = `curl -L $url` ;
     if (!$doc[$day]) {
       die "HTTP get failed: $doc[$day]\n";
     }
