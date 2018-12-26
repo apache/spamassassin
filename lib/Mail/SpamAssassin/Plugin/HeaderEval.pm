@@ -1072,7 +1072,7 @@ sub check_ratware_envelope_from {
   my $from = $pms->get('EnvelopeFrom:addr');
 
   return 0 if $from eq '' || $to eq '';
-  return 0 if $from =~ /^SRS\d=/;
+  return 0 if $from =~ /^SRS\d=/i;
 
   if ($to =~ /^([^@]+)\@(.+)$/) {
     my($user,$dom) = ($1,$2);
