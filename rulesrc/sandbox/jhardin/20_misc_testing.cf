@@ -1986,6 +1986,11 @@ describe       BITCOIN_PAY_ME         Pay me via BitCoin
 score          BITCOIN_PAY_ME         2.500	# limit
 tflags         BITCOIN_PAY_ME         publish
 
+meta           BITCOIN_DEADLINE       __BITCOIN_ID && __HOURS_DEADLINE && !BITCOIN_EXTORT_01
+describe       BITCOIN_DEADLINE       BitCoin with a deadline
+score          BITCOIN_DEADLINE       2.500	# limit
+tflags         BITCOIN_DEADLINE       publish
+
 meta           BITCOIN_MALWARE        __BITCOIN_ID && __MY_MALWARE && !BITCOIN_EXTORT_01 && !__NOT_SPOOFED
 describe       BITCOIN_MALWARE        BitCoin + malware
 score          BITCOIN_MALWARE        3.000	# limit
@@ -2181,7 +2186,7 @@ endif
 rawbody   __HTML_SINGLET                />\s*(?:[a-z"]|&\#(?:\d+|x[0-9a-f]+);)\s*</i
 tflags    __HTML_SINGLET                multiple, maxhits=21
 meta      __HTML_SINGLET_MANY           __HTML_SINGLET > 20
-meta      HTML_SINGLET_MANY             __HTML_SINGLET_MANY && !__STY_INVIS_MANY && !__RCD_RDNS_MTA_MESSY && !__NOT_SPOOFED && !ALL_TRUSTED
+meta      HTML_SINGLET_MANY             __HTML_SINGLET_MANY && !__STY_INVIS_MANY && !__RCD_RDNS_MTA_MESSY && !__NOT_SPOOFED && !__FEES && !ALL_TRUSTED
 describe  HTML_SINGLET_MANY             Many single-letter HTML format blocks
 score     HTML_SINGLET_MANY             2.500   # limit
 tflags    HTML_SINGLET_MANY             publish
@@ -2470,7 +2475,7 @@ describe   UNICODE_OBFU_DOM_NO_BODY   Unicode/chinese obfuscated domain + no bod
 #uri        __URI_PHP_LOGIN            /\blogin\.php/i
 
 meta       __FREEM_FRNUM_UNICD_EMPTY  FREEMAIL_FROM && __FROM_ALL_NUMS && __FROM_ENCODED_B64 && __SUBJECT_ENCODED_B64 && __EMPTY_BODY
-#header     __SUB_END_NUMSCOM          Subject =~ /[0-9]{6,}c[0o]m$/i
+header     __SUB_END_NUMSCOM          Subject =~ /[0-9]{6,}[-\s]?c[-\s]?[o0][-\s]?m$/i
 
 #meta       FREEM_FRNUM_UNICD_EMPTY    __FREEM_FRNUM_UNICD_EMPTY && !__SUB_END_NUMSCOM
 meta       FREEM_FRNUM_UNICD_EMPTY    __FREEM_FRNUM_UNICD_EMPTY
