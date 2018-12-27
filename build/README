@@ -558,7 +558,7 @@ APACHE SPAMASSASSIN RELEASE PROCEDURE
 
         #Checkout the current release
         cd /tmp
-        svn checkout http://svn.apache.org/repos/asf/spamassassin/tags/spamassassin_release_3_4_2/ release
+        svn checkout https://svn.apache.org/repos/asf/spamassassin/tags/spamassassin_release_3_4_2/ release
         cd /tmp/release
         #link your rules and rulesrc
         ln -s ~/usr/src/Mail-SpamAssassin/trunk/rules

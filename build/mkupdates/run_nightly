@@ -75,7 +75,7 @@ make_tarball_for_version() {
   rm rules/70_sandbox.cf rules/70_inactive.cf
 
   # need to put the latest 72_scores.cf in the update.tgz
-  svn co http://svn.apache.org/repos/asf/spamassassin/trunk/rulesrc
+  svn co https://svn.apache.org/repos/asf/spamassassin/trunk/rulesrc
   cp -a rulesrc/scores/72_scores.cf rules/
   rm -rf rulesrc
 
