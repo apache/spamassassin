@@ -1,11 +1,11 @@
 if can(Mail::SpamAssassin::Conf::feature_bug6558_free)
   ifplugin Mail::SpamAssassin::Plugin::ReplaceTags
-    replace_tag e (?:e|\xc3[\xa8\xa9\xaa\xab]|\xc4[\x93\x95\x97\x99\x9b]|\xc8[\x85\x87\x80]|\xcf\xb5|\xd0\xb5|\xd1[\x90\x91\x94\xb3]|\xd2[\xbc\xbd\xbe\xbf]|\xd3[\x07\xa9\xab])
+    replace_tag lcase_e (?:e|\xc3[\xa8\xa9\xaa\xab]|\xc4[\x93\x95\x97\x99\x9b]|\xc8[\x85\x87\x80]|\xcf\xb5|\xd0\xb5|\xd1[\x90\x91\x94\xb3]|\xd2[\xbc\xbd\xbe\xbf]|\xd3[\x07\xa9\xab])
     body            __LOWER_E       /e/
     tflags          __LOWER_E       multiple maxhits=230
-    replace_rules   __E_LIKE_LETTER 
-    body            __E_LIKE_LETTER /<e>/
+    body            __E_LIKE_LETTER /<lcase_e>/
     tflags          __E_LIKE_LETTER multiple maxhits=320
+    replace_rules   __E_LIKE_LETTER 
     meta            MIXED_ES        ( __LOWER_E > 20 ) && ( __E_LIKE_LETTER > ( (__LOWER_E * 14 ) / 10) ) && ( __E_LIKE_LETTER < ( 10 * __LOWER_E ) )
     describe        MIXED_ES        Too many es are not es
   endif
