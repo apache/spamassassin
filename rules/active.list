@@ -1,5 +1,5 @@
-# active ruleset list, automatically generated from https://ruleqa.spamassassin.org/
-# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-ninja darxus ena-week0 ena-week1 ena-week2 ena-week3 ena-week4 giovanni-ham giovanni-spam giovanni-spammy grenier hege jarif jbrooks sihde thendrikx; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-ninja ena-week2 llanga mmiroslaw-mails-ham mmiroslaw-mails-spam; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-ninja ena-week2 llanga mmiroslaw-mails-ham mmiroslaw-mails-spam
+# active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
+# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-ninja darxus ena-week0 ena-week1 ena-week2 ena-week3 ena-week4 giovanni-ham giovanni-spam giovanni-spammy grenier hege jarif jbrooks sihde thendrikx; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-ninja ena-week2 giovanni-ham giovanni-spam giovanni-spammy llanga mmiroslaw-mails-ham mmiroslaw-mails-spam; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-ninja ena-week2 llanga mmiroslaw-mails-ham mmiroslaw-mails-spam
 
 # tflags publish
 AC_BR_BONANZA
@@ -63,6 +63,9 @@ AD_PREFS
 
 # tflags userconf
 ALL_TRUSTED
+
+# good enough
+ANY_PILL_PRICE
 
 # tflags publish
 APP_DEVELOPMENT_FREEM
@@ -370,12 +373,6 @@ GOOGLE_OBFU
 # tflags publish
 GOOG_MALWARE_DNLD
 
-# good enough
-GOOG_REDIR_HTML_ONLY
-
-# good enough
-GOOG_REDIR_NORDNS
-
 # tflags publish
 GOOG_REDIR_SHORT
 
@@ -429,6 +426,9 @@ HEXHASH_WORD
 
 # good enough
 HK_NAME_DRUGS
+
+# good enough
+HK_NAME_FM_MR_MRS
 
 # good enough
 HK_PNIS
@@ -923,49 +923,109 @@ TVD_VISIT_PHARMA
 TW_GIBBERISH_MANY
 
 # good enough
-ADMITS_SPAM
+ADVANCE_FEE_4_NEW_FRM_MNY
 
 # good enough
-ANY_PILL_PRICE
+ADVANCE_FEE_4_NEW_MONEY
 
 # good enough
-AXB_XMAILER_MIMEOLE_OL_024C2
+ADVANCE_FEE_5_NEW_FRM_MNY
 
 # good enough
-CK_HELO_DYNAMIC_SPLIT_IP
+ADVANCE_FEE_5_NEW_MONEY
 
 # good enough
-CK_HELO_GENERIC
+BIGNUM_EMAILS
+
+# tflags publish
+BITCOIN_DEADLINE
+
+# good enough
+BODY_EMPTY
+
+# good enough
+BODY_SINGLE_URI
+
+# good enough
+DATE_IN_FUTURE_96_Q
+
+# good enough
+DEAR_BENEFICIARY
+
+# good enough
+FILL_THIS_FORM_LOAN
+
+# good enough
+FROM_MISSPACED
+
+# good enough
+FROM_MISSP_DYNIP
+
+# good enough
+FROM_MISSP_FREEMAIL
+
+# good enough
+FROM_MISSP_MSFT
+
+# good enough
+FROM_MISSP_REPLYTO
+
+# good enough
+FROM_MISSP_TO_UNDISC
+
+# good enough
+FROM_MISSP_USER
+
+# good enough
+FROM_MISSP_XPRIO
 
 # tflags publish
 FSL_BULK_SIG
 
 # good enough
-FSL_CTYPE_WIN1251
+HK_NAME_MR_MRS
 
 # good enough
-HELO_MISC_IP
+LIST_PARTIAL_SHORT_MSG
 
 # good enough
-HK_NAME_FM_MR_MRS
+LOTTO_AGENT
 
 # good enough
-HK_SCAM_N2
+MONEY_ATM_CARD
 
 # good enough
-MILLION_USD
+MONEY_BARRISTER
 
 # good enough
-NSL_RCVD_HELO_USER
+MONEY_FORM
 
 # good enough
-PHOTO_EDITING_DIRECT
+MONEY_FROM_41
 
 # good enough
-PHOTO_EDITING_FREEM
+MONEY_FROM_MISSP
 
 # good enough
-TVD_SPACE_ENCODED
+NSL_RCVD_FROM_USER
+
+# good enough
+SERGIO_SUBJECT_VIAGRA01
+
+# good enough
+TEQF_USR_POLITE
+
+# good enough
+TO_NO_BRKTS_DYNIP
+
+# good enough
+TO_NO_BRKTS_FROM_MSSP
+
+# good enough
+TO_NO_BRKTS_MSFT
+
+# good enough
+TVD_SPACE_RATIO_MINFP
 
 # tflags publish
 UC_GIBBERISH_OBFU
