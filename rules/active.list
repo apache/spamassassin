@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-ninja darxus ena-week0 ena-week1 ena-week2 ena-week3 ena-week4 giovanni-ham giovanni-spam giovanni-spammy grenier hege jarif jbrooks sihde thendrikx; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-ninja ena-week2 giovanni-ham giovanni-spam giovanni-spammy jarif llanga mmiroslaw-mails-ham mmiroslaw-mails-spam; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-ninja ena-week2 giovanni-ham giovanni-spam giovanni-spammy llanga mmiroslaw-mails-ham mmiroslaw-mails-spam
+# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-ninja darxus ena-week0 ena-week1 ena-week2 ena-week3 ena-week4 giovanni-ham giovanni-spam giovanni-spammy grenier hege jarif jbrooks sihde thendrikx; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-ninja llanga mmiroslaw-mails-ham mmiroslaw-mails-spam; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-ninja ena-week2 giovanni-ham giovanni-spam giovanni-spammy jarif llanga mmiroslaw-mails-ham mmiroslaw-mails-spam
 
 # tflags publish
 AC_BR_BONANZA
@@ -179,7 +179,7 @@ COMMENT_GIBBERISH
 CORRUPT_FROM_LINE_IN_HDRS
 
 # good enough
-DEAR_WINNER
+CTYPE_NULL
 
 # tflags net
 DIGEST_MULTIPLE
@@ -301,9 +301,6 @@ FROM_IN_TO_AND_SUBJ
 # tflags userconf
 FROM_LOCAL_NOVOWEL
 
-# good enough
-FROM_MISSP_EH_MATCH
-
 # tflags net
 FROM_MISSP_SPF_FAIL
 
@@ -312,6 +309,12 @@ FROM_WORDY
 
 # tflags publish
 FROM_WORDY_SHORT
+
+# good enough
+FROM_WSP_LEAD
+
+# good enough
+FROM_WSP_TRAIL
 
 # good enough
 FSL_HELO_BARE_IP_1
@@ -370,9 +373,6 @@ GOOGLE_DOCS_PHISH
 # tflags publish
 GOOGLE_DOCS_PHISH_MANY
 
-# good enough
-GOOGLE_OBFU
-
 # tflags publish
 GOOG_MALWARE_DNLD
 
@@ -406,9 +406,6 @@ HASHCASH_2SPEND
 # tflags userconf
 HASHCASH_HIGH
 
-# good enough
-HDRS_LCASE_IMGONLY
-
 # tflags publish
 HDR_ORDER_FTSDMCXX_DIRECT
 
@@ -431,10 +428,7 @@ HEXHASH_WORD
 HK_NAME_DRUGS
 
 # good enough
-HK_PNIS
-
-# good enough
-HK_SCAM_N8
+HK_NAME_FM_DR
 
 # tflags userconf
 HTML_CHARSET_FARAWAY
@@ -478,9 +472,6 @@ LOTS_OF_MONEY
 # tflags publish
 LUCRATIVE
 
-# good enough
-MALFORMED_FREEMAIL
-
 # tflags publish
 MALF_HTML_B64
 
@@ -516,9 +507,6 @@ MSM_PRIO_REPTO
 
 # good enough
 MSOE_MID_WRONG_CASE
-
-# good enough
-NORDNS_LOW_CONTRAST
 
 # tflags net
 NO_DNS_FOR_FROM
@@ -794,9 +782,6 @@ RDNS_NUM_TLD_XM
 REPLYTO_WITHOUT_TO_CC
 
 # good enough
-RP_8BIT
-
-# good enough
 SB_GIF_AND_NO_URIS
 
 # good enough
@@ -920,55 +905,109 @@ TVD_VISIT_PHARMA
 TW_GIBBERISH_MANY
 
 # good enough
-ADMITS_SPAM
+ADVANCE_FEE_4_NEW_FRM_MNY
 
 # good enough
-AXB_XMAILER_MIMEOLE_OL_024C2
+ADVANCE_FEE_4_NEW_MONEY
 
 # good enough
-CK_HELO_DYNAMIC_SPLIT_IP
+ADVANCE_FEE_5_NEW_FRM_MNY
 
 # good enough
-CK_HELO_GENERIC
+ADVANCE_FEE_5_NEW_MONEY
 
 # good enough
-CTYPE_NULL
+BIGNUM_EMAILS
 
 # good enough
-FROM_WSP_LEAD
+BODY_EMPTY
 
 # good enough
-FROM_WSP_TRAIL
+BODY_SINGLE_URI
+
+# good enough
+DATE_IN_FUTURE_96_Q
+
+# good enough
+DEAR_BENEFICIARY
+
+# good enough
+FILL_THIS_FORM_LOAN
+
+# good enough
+FILL_THIS_FORM_LONG
+
+# good enough
+FROM_MISSPACED
+
+# good enough
+FROM_MISSP_DYNIP
+
+# good enough
+FROM_MISSP_FREEMAIL
+
+# good enough
+FROM_MISSP_MSFT
+
+# good enough
+FROM_MISSP_REPLYTO
+
+# good enough
+FROM_MISSP_TO_UNDISC
+
+# good enough
+FROM_MISSP_USER
+
+# good enough
+FROM_MISSP_XPRIO
 
 # tflags publish
 FSL_BULK_SIG
 
 # good enough
-FSL_CTYPE_WIN1251
+HK_NAME_MR_MRS
 
 # good enough
-HELO_MISC_IP
+LIST_PARTIAL_SHORT_MSG
 
 # good enough
-HK_NAME_FM_DR
+LOTTO_AGENT
 
 # good enough
-HK_SCAM_N2
+MONEY_ATM_CARD
 
 # good enough
-MILLION_USD
+MONEY_BARRISTER
 
 # good enough
-NSL_RCVD_HELO_USER
+MONEY_FORM
 
 # good enough
-PHOTO_EDITING_DIRECT
+MONEY_FROM_41
 
 # good enough
-PHOTO_EDITING_FREEM
+MONEY_FROM_MISSP
 
 # good enough
-TVD_SPACE_ENCODED
+NSL_RCVD_FROM_USER
+
+# good enough
+SERGIO_SUBJECT_VIAGRA01
+
+# good enough
+TEQF_USR_POLITE
+
+# good enough
+TO_NO_BRKTS_DYNIP
+
+# good enough
+TO_NO_BRKTS_FROM_MSSP
+
+# good enough
+TO_NO_BRKTS_MSFT
+
+# good enough
+TVD_SPACE_RATIO_MINFP
 
 # tflags publish
 UC_GIBBERISH_OBFU
