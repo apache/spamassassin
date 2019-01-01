@@ -4,9 +4,9 @@ if can(Mail::SpamAssassin::Conf::feature_bug6558_free)
     body            __LOWER_E       /e/
     tflags          __LOWER_E       multiple maxhits=230
     body            __E_LIKE_LETTER /<lcase_e>/
-    tflags          __E_LIKE_LETTER multiple maxhits=320
+    tflags          __E_LIKE_LETTER multiple maxhits=320 publish
     replace_rules   __E_LIKE_LETTER 
-    meta            MIXED_ES        ( __LOWER_E > 20 ) && ( __E_LIKE_LETTER > ( (__LOWER_E * 14 ) / 10) ) && ( __E_LIKE_LETTER < ( 10 * __LOWER_E ) )
+    meta            MIXED_ES        ( ! HTML_IMAGE_ONLY_16 ) && ( __LOWER_E > 20 ) && ( __E_LIKE_LETTER > ( (__LOWER_E * 14 ) / 10) ) && ( __E_LIKE_LETTER < ( 10 * __LOWER_E ) )
     describe        MIXED_ES        Too many es are not es
   endif
 endif
