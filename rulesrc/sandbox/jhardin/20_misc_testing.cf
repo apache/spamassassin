@@ -1912,7 +1912,7 @@ tflags         BITCOIN_SPAM_02  publish
 
 meta           BITCOIN_SPAM_03  __BITCOIN_ID && __SINGLE_WORD_SUBJ
 describe       BITCOIN_SPAM_03  BitCoin spam pattern 03
-score          BITCOIN_SPAM_03  1.500	# limit
+score          BITCOIN_SPAM_03  2.500	# limit
 tflags         BITCOIN_SPAM_03  publish
 
 meta           BITCOIN_SPAM_04  __BITCOIN_ID && __freemail_hdr_replyto
@@ -1932,26 +1932,27 @@ tflags         BITCOIN_SPAM_06  publish
 
 meta           BITCOIN_SPAM_07  __BITCOIN_ID && __TO_EQ_FROM
 describe       BITCOIN_SPAM_07  BitCoin spam pattern 07
-score          BITCOIN_SPAM_07  1.500	# limit
+score          BITCOIN_SPAM_07  3.000	# limit
 tflags         BITCOIN_SPAM_07  publish
 
 meta           BITCOIN_SPAM_08  __BITCOIN_ID && __TO_IN_SUBJ 
 describe       BITCOIN_SPAM_08  BitCoin spam pattern 08
-score          BITCOIN_SPAM_08  1.500	# limit
+score          BITCOIN_SPAM_08  2.500	# limit
 tflags         BITCOIN_SPAM_08  publish
 
-meta           BITCOIN_SPAM_09  __BITCOIN_ID && __DESTROY_ME
+body           __DESTROY_YOU    /\bdestroy\syou/i
+
+meta           BITCOIN_SPAM_09  __BITCOIN_ID && ( __DESTROY_ME || __DESTROY_YOU )
 describe       BITCOIN_SPAM_09  BitCoin spam pattern 09
 score          BITCOIN_SPAM_09  1.500	# limit
 tflags         BITCOIN_SPAM_09  publish
 
-
 ifplugin Mail::SpamAssassin::Plugin::ReplaceTags
   body           __MY_VICTIM            /(?:<H><I>|<H><E><L><L><O>),?(?:\s<M><Y>)?\s(?:<V><I><C><T><I><M>|<P><R><E><Y>)/i
   replace_rules  __MY_VICTIM
-  body           __MY_MALWARE           /\s(?:<I>\s<P><U><T>\s<A>\s|<M><Y>\s(?:<P><E><R><S><O><N><A><L>\s)?)(?:<M><A><L><W><A><R><E>|<V><I><R><U><S>)/i
+  body           __MY_MALWARE           /\s(?:(?:<I>\s<P><U><T>\s<A>\s|<M><Y>\s(?:<P><E><R><S><O><N><A><L>\s)?)(?:<M><A><L><W><A><R><E>|<V><I><R><U><S>)|<A><P><P><L><I><C><A><T><I><O><N>[a-z\s]{1,30}<E><N><A><B><L><E><D>\s<M><E>\s<T><O>\s(?:<A><C><C><E><S><S>|<C><O><N><T><R><O><L>))\s/i
   replace_rules  __MY_MALWARE
-  body           __PAY_ME               /\s(?:<P><A><Y>\s<M><E>|<S><E><N><D>\s<M><E>\s[\d,'.]+\s(?:<U><S><D>|<E><U><R>))\s/i
+  body           __PAY_ME               /\s(?:<P><A><Y>\s<M><E>|(?:<S><E><N><D>\s<M><E>|<T><R><A><N><S><F><E><R>\s<T><H><E>\s<A><M><O><U><N><T>\s<O><F>)\s[\d,'.]+\s(?:<U><S><D>|<E><U><R>))\s/i
   replace_rules  __PAY_ME
   body           __YOUR_PASSWORD        /\s<Y><O><U><R>\s<P><A><S><S><W><O><R><D>/i
   replace_rules  __YOUR_PASSWORD
@@ -1967,8 +1968,8 @@ ifplugin Mail::SpamAssassin::Plugin::ReplaceTags
   replace_rules  __EXPLOSIVE_DEVICE
 else
   body           __MY_VICTIM            /\b(?:hi|hello),?(?:\smy)?\s(?:victim|prey)\b/i
-  body           __MY_MALWARE           /\b(?:I\sput\sa\s|my\s(?:personal\s)?)(?:malware|virus)\b/i
-  body           __PAY_ME               /\b(?:pay\sme|send\sme\s[\d,'.]+\s(?:usd|eur))\b/i
+  body           __MY_MALWARE           /\b(?:(?:I\sput\sa\s|my\s(?:personal\s)?)(?:malware|virus)|application[a-z\s]{1,30}enabled\sme\sto\s(?:access|control))\b/i
+  body           __PAY_ME               /\b(?:pay\sme|(?:send\sme|transfer\sthe\samount\sof)\s[\d,'.]+\s(?:usd|eur))\b/i
   body           __YOUR_PASSWORD        /\byour\spassword\b/i
   body           __YOUR_WEBCAM          /\b(?:from|your)\swebcam\b/i
   body           __YOUR_ONAN            /\byour?\s(?:masturbati(?:on|ng)|onanism|solitary\ssex)\b/i
@@ -1976,19 +1977,19 @@ else
   body           __HOURS_DEADLINE       /\b(?:(?:give\syou|you\shave)\s\d+\shours|(?:by|to|until|before)\sthe\send\sof\sthe\s(?:work(?:ing)?\s)?day)\b/i
   body           __EXPLOSIVE_DEVICE     /\b(?:explosive\sdevice|bomb)\b/i
 endif
-meta           BITCOIN_EXTORT_01      __BITCOIN_ID && (__MY_MALWARE + __PAY_ME + __MY_VICTIM + __YOUR_WEBCAM + __YOUR_ONAN + __YOUR_PERSONAL + __HOURS_DEADLINE + __YOUR_PASSWORD + LOCALPART_IN_SUBJECT + __DESTROY_ME + __EXPLOSIVE_DEVICE) > 2
+meta           BITCOIN_EXTORT_01      __BITCOIN_ID && (__MY_MALWARE + __PAY_ME + __MY_VICTIM + __YOUR_WEBCAM + __YOUR_ONAN + __YOUR_PERSONAL + __HOURS_DEADLINE + __YOUR_PASSWORD + LOCALPART_IN_SUBJECT + __DESTROY_ME + __DESTROY_YOU + __EXPLOSIVE_DEVICE) > 2
 describe       BITCOIN_EXTORT_01      Extortion spam, pay via BitCoin
 score          BITCOIN_EXTORT_01      5.000	# limit
 tflags         BITCOIN_EXTORT_01      publish
 
 meta           BITCOIN_PAY_ME         __BITCOIN_ID && __PAY_ME && !BITCOIN_EXTORT_01
 describe       BITCOIN_PAY_ME         Pay me via BitCoin
-score          BITCOIN_PAY_ME         2.500	# limit
+score          BITCOIN_PAY_ME         3.000	# limit
 tflags         BITCOIN_PAY_ME         publish
 
 meta           BITCOIN_DEADLINE       __BITCOIN_ID && __HOURS_DEADLINE && !BITCOIN_EXTORT_01
 describe       BITCOIN_DEADLINE       BitCoin with a deadline
-score          BITCOIN_DEADLINE       2.500	# limit
+score          BITCOIN_DEADLINE       3.000	# limit
 tflags         BITCOIN_DEADLINE       publish
 
 meta           BITCOIN_MALWARE        __BITCOIN_ID && __MY_MALWARE && !BITCOIN_EXTORT_01 && !__NOT_SPOOFED
