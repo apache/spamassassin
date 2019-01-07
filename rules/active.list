@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-ninja darxus ena-week0 ena-week1 ena-week2 ena-week3 ena-week4 giovanni-ham giovanni-spam giovanni-spammy grenier hege jarif jbrooks sihde thendrikx; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-ninja giovanni-ham giovanni-spam giovanni-spammy jarif llanga mmiroslaw-mails-ham mmiroslaw-mails-spam; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-ninja ena-week2 giovanni-ham giovanni-spam giovanni-spammy llanga mmiroslaw-mails-ham mmiroslaw-mails-spam
+# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-ninja darxus ena-week0 ena-week1 ena-week2 ena-week3 ena-week4 giovanni-ham giovanni-spam giovanni-spammy grenier hege jarif jbrooks sihde thendrikx; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-ninja llanga mmiroslaw-mails-ham mmiroslaw-mails-spam; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-ninja giovanni-ham giovanni-spam giovanni-spammy jarif llanga mmiroslaw-mails-ham mmiroslaw-mails-spam
 
 # tflags publish
 AC_BR_BONANZA
@@ -305,12 +305,6 @@ FROM_WORDY
 FROM_WORDY_SHORT
 
 # good enough
-FROM_WSP_LEAD
-
-# good enough
-FROM_WSP_TRAIL
-
-# good enough
 FSL_HELO_BARE_IP_1
 
 # good enough
@@ -318,9 +312,6 @@ FSL_HELO_FAKE
 
 # tflags publish
 FSL_NEW_HELO_USER
-
-# good enough
-FSL_THIS_IS_ADV
 
 # tflags publish
 FUZZY_ANDROID
@@ -367,9 +358,6 @@ GOOGLE_DOCS_PHISH
 # tflags publish
 GOOGLE_DOCS_PHISH_MANY
 
-# good enough
-GOOGLE_OBFU
-
 # tflags publish
 GOOG_MALWARE_DNLD
 
@@ -403,9 +391,6 @@ HASHCASH_2SPEND
 # tflags userconf
 HASHCASH_HIGH
 
-# good enough
-HDRS_LCASE_IMGONLY
-
 # tflags publish
 HDR_ORDER_FTSDMCXX_DIRECT
 
@@ -426,9 +411,6 @@ HEXHASH_WORD
 
 # good enough
 HK_NAME_DRUGS
-
-# good enough
-HK_NAME_FM_DR
 
 # tflags userconf
 HTML_CHARSET_FARAWAY
@@ -489,6 +471,9 @@ MIME_NO_TEXT
 
 # tflags userconf
 MISSING_HB_SEP
+
+# tflags publish
+MIXED_ES
 
 # good enough
 MONEY_FORM_SHORT
@@ -902,43 +887,85 @@ TVD_VISIT_PHARMA
 TW_GIBBERISH_MANY
 
 # good enough
-ADMITS_SPAM
+ADVANCE_FEE_5_NEW_FRM_MNY
 
 # good enough
-AXB_XMAILER_MIMEOLE_OL_024C2
+ADVANCE_FEE_5_NEW_MONEY
 
 # good enough
-CK_HELO_DYNAMIC_SPLIT_IP
+BIGNUM_EMAILS
 
 # good enough
-CK_HELO_GENERIC
+BODY_EMPTY
 
 # good enough
-FILL_THIS_FORM_LONG
+BODY_SINGLE_URI
+
+# good enough
+DEAR_BENEFICIARY
+
+# good enough
+FILL_THIS_FORM_LOAN
+
+# good enough
+FROM_MISSPACED
+
+# good enough
+FROM_MISSP_FREEMAIL
+
+# good enough
+FROM_MISSP_MSFT
+
+# good enough
+FROM_MISSP_REPLYTO
+
+# good enough
+FROM_MISSP_TO_UNDISC
+
+# good enough
+FROM_MISSP_USER
+
+# good enough
+FROM_MISSP_XPRIO
 
 # tflags publish
 FSL_BULK_SIG
 
 # good enough
-FSL_CTYPE_WIN1251
+LIST_PARTIAL_SHORT_MSG
 
 # good enough
-HELO_MISC_IP
+MONEY_FORM
 
 # good enough
-HK_RANDOM_FROM
+MONEY_FROM_MISSP
 
 # good enough
-MILLION_USD
-
-# tflags publish
-MIXED_ES
+NSL_RCVD_FROM_USER
 
 # good enough
-NSL_RCVD_HELO_USER
+PHOTO_EDITING_DIRECT
 
 # good enough
-TVD_SPACE_ENCODED
+PHOTO_EDITING_FREEM
+
+# good enough
+SERGIO_SUBJECT_VIAGRA01
+
+# good enough
+SUBJ_UNNEEDED_HTML
+
+# good enough
+TO_NO_BRKTS_DYNIP
+
+# good enough
+TO_NO_BRKTS_FROM_MSSP
+
+# good enough
+TO_NO_BRKTS_MSFT
+
+# good enough
+TVD_SPACE_RATIO_MINFP
 
 # tflags publish
 UC_GIBBERISH_OBFU
