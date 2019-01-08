@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-ninja darxus ena-week0 ena-week1 ena-week2 ena-week3 ena-week4 giovanni-ham giovanni-spam giovanni-spammy grenier hege jarif jbrooks sihde thendrikx; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-ninja llanga mmiroslaw-mails-ham mmiroslaw-mails-spam; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-ninja giovanni-ham giovanni-spam giovanni-spammy jarif llanga mmiroslaw-mails-ham mmiroslaw-mails-spam
+# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-ninja darxus ena-week0 ena-week1 ena-week2 ena-week3 ena-week4 giovanni-ham giovanni-spam giovanni-spammy grenier hege jarif jbrooks sihde thendrikx; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-ninja ena-week2 giovanni-ham giovanni-spam giovanni-spammy llanga mmiroslaw-mails-ham mmiroslaw-mails-spam; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-ninja llanga mmiroslaw-mails-ham mmiroslaw-mails-spam
 
 # tflags publish
 AC_BR_BONANZA
@@ -225,6 +225,9 @@ DOS_ANAL_SPAM_MAILER
 
 # good enough
 DOS_OE_TO_MX
+
+# good enough
+DOS_OUTLOOK_TO_MX
 
 # tflags publish
 DX_TEXT_02
@@ -513,6 +516,12 @@ OBFU_JVSCR_ESC
 
 # tflags publish
 OBFU_TEXT_ATTACH
+
+# good enough
+PHOTO_EDITING_DIRECT
+
+# good enough
+PHOTO_EDITING_FREEM
 
 # tflags publish
 PHP_NOVER_MUA
@@ -829,6 +838,9 @@ SUBJECT_IN_BLACKLIST
 # tflags userconf
 SUBJECT_IN_WHITELIST
 
+# good enough
+SUBJ_UNNEEDED_HTML
+
 # tflags net
 SURBL_BLOCKED
 
@@ -887,85 +899,70 @@ TVD_VISIT_PHARMA
 TW_GIBBERISH_MANY
 
 # good enough
-ADVANCE_FEE_5_NEW_FRM_MNY
+ADMITS_SPAM
 
 # good enough
-ADVANCE_FEE_5_NEW_MONEY
+ADVANCE_FEE_4_NEW_FRM_MNY
 
 # good enough
-BIGNUM_EMAILS
+ADVANCE_FEE_4_NEW_MONEY
 
 # good enough
-BODY_EMPTY
+ADVANCE_FEE_5_NEW
 
 # good enough
-BODY_SINGLE_URI
+AXB_XMAILER_MIMEOLE_OL_024C2
 
 # good enough
-DEAR_BENEFICIARY
+CK_HELO_DYNAMIC_SPLIT_IP
 
 # good enough
-FILL_THIS_FORM_LOAN
+CK_HELO_GENERIC
 
 # good enough
-FROM_MISSPACED
+FILL_THIS_FORM_LONG
 
 # good enough
-FROM_MISSP_FREEMAIL
-
-# good enough
-FROM_MISSP_MSFT
-
-# good enough
-FROM_MISSP_REPLYTO
-
-# good enough
-FROM_MISSP_TO_UNDISC
-
-# good enough
-FROM_MISSP_USER
-
-# good enough
-FROM_MISSP_XPRIO
+FROM_MISSP_DYNIP
 
 # tflags publish
 FSL_BULK_SIG
 
 # good enough
-LIST_PARTIAL_SHORT_MSG
+FSL_CTYPE_WIN1251
 
 # good enough
-MONEY_FORM
+GOOGLE_OBFU
 
 # good enough
-MONEY_FROM_MISSP
+HELO_MISC_IP
 
 # good enough
-NSL_RCVD_FROM_USER
+HK_RANDOM_FROM
 
 # good enough
-PHOTO_EDITING_DIRECT
+HK_SCAM_N2
 
 # good enough
-PHOTO_EDITING_FREEM
+KHOP_DYNAMIC
 
 # good enough
-SERGIO_SUBJECT_VIAGRA01
+LOTTO_AGENT
 
 # good enough
-SUBJ_UNNEEDED_HTML
+MILLION_USD
 
 # good enough
-TO_NO_BRKTS_DYNIP
+MONEY_ATM_CARD
 
 # good enough
-TO_NO_BRKTS_FROM_MSSP
+MONEY_BARRISTER
 
 # good enough
-TO_NO_BRKTS_MSFT
+SUBJ_OBFU_PUNCT_FEW
 
 # good enough
-TVD_SPACE_RATIO_MINFP
+TVD_SPACE_ENCODED
 
 # tflags publish
 UC_GIBBERISH_OBFU
