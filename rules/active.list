@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-coi-bulk darxus ena-week0 ena-week1 ena-week2 ena-week3 ena-week4 giovanni-ham giovanni-spam giovanni-spammy grenier hege jarif jbrooks sihde thendrikx; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-ninja ena-week2 giovanni-ham giovanni-spam giovanni-spammy llanga; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-ninja ena-week2 giovanni-ham giovanni-spam giovanni-spammy llanga mmiroslaw-mails-ham mmiroslaw-mails-spam
+# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-ninja darxus ena-week0 ena-week1 ena-week2 ena-week3 ena-week4 giovanni-ham giovanni-spam giovanni-spammy grenier hege jarif jbrooks sihde thendrikx; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-ninja ena-week2 giovanni-ham giovanni-spam giovanni-spammy llanga; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-ninja ena-week2 giovanni-ham giovanni-spam giovanni-spammy llanga
 
 # tflags publish
 AC_BR_BONANZA
@@ -223,6 +223,12 @@ DOS_ANAL_SPAM_MAILER
 # good enough
 DOS_OE_TO_MX
 
+# good enough
+DOS_OE_TO_MX_IMAGE
+
+# good enough
+DOS_OUTLOOK_TO_MX
+
 # tflags publish
 DX_TEXT_02
 
@@ -231,6 +237,9 @@ DX_TEXT_03
 
 # good enough
 DYN_RDNS_AND_INLINE_IMAGE
+
+# good enough
+DYN_RDNS_SHORT_HELO_HTML
 
 # tflags publish
 ENCRYPTED_MESSAGE
@@ -288,6 +297,9 @@ FROM_IN_TO_AND_SUBJ
 
 # tflags userconf
 FROM_LOCAL_NOVOWEL
+
+# good enough
+FROM_MISSP_EH_MATCH
 
 # tflags net
 FROM_MISSP_SPF_FAIL
@@ -352,9 +364,6 @@ GOOGLE_DOCS_PHISH
 # tflags publish
 GOOGLE_DOCS_PHISH_MANY
 
-# good enough
-GOOGLE_OBFU
-
 # tflags publish
 GOOG_MALWARE_DNLD
 
@@ -410,7 +419,7 @@ HEXHASH_WORD
 HK_NAME_DRUGS
 
 # good enough
-HK_RANDOM_ENVFROM
+HK_NAME_FM_MR_MRS
 
 # tflags userconf
 HTML_CHARSET_FARAWAY
@@ -776,7 +785,13 @@ RDNS_NUM_TLD_XM
 REPLYTO_WITHOUT_TO_CC
 
 # good enough
+RP_8BIT
+
+# good enough
 SB_GIF_AND_NO_URIS
+
+# good enough
+SERGIO_SUBJECT_PORN014
 
 # tflags publish
 SINGLETS_LOW_CONTRAST
@@ -896,94 +911,82 @@ TVD_VISIT_PHARMA
 TW_GIBBERISH_MANY
 
 # good enough
-ADVANCE_FEE_5_NEW_FRM_MNY
+ADMITS_SPAM
 
 # good enough
-ADVANCE_FEE_5_NEW_MONEY
+ADVANCE_FEE_4_NEW_FRM_MNY
 
 # good enough
-BIGNUM_EMAILS
+ADVANCE_FEE_4_NEW_MONEY
 
 # good enough
-BODY_SINGLE_URI
+ADVANCE_FEE_5_NEW
 
 # good enough
-DEAR_BENEFICIARY
+AXB_XMAILER_MIMEOLE_OL_024C2
 
 # good enough
-FILL_THIS_FORM_LOAN
+BODY_EMPTY
 
 # good enough
-FORGED_RELAY_MUA_TO_MX
+CK_HELO_DYNAMIC_SPLIT_IP
 
 # good enough
-FROM_MISSPACED
+CK_HELO_GENERIC
 
 # good enough
-FROM_MISSP_EH_MATCH
+FILL_THIS_FORM_LONG
 
 # good enough
-FROM_MISSP_FREEMAIL
+FROM_MISSP_DYNIP
 
 # good enough
-FROM_MISSP_MSFT
+FROM_WSP_LEAD
 
 # good enough
-FROM_MISSP_REPLYTO
-
-# good enough
-FROM_MISSP_TO_UNDISC
-
-# good enough
-FROM_MISSP_USER
-
-# good enough
-FROM_MISSP_XPRIO
+FROM_WSP_TRAIL
 
 # tflags publish
 FSL_BULK_SIG
 
 # good enough
-HK_CTE_RAW
+FSL_CTYPE_WIN1251
+
+# tflags publish
+FUZZY_BTC_WALLET
 
 # good enough
-HK_NAME_FM_MR_MRS
+HDRS_LCASE_IMGONLY
 
 # good enough
-LIST_PARTIAL_SHORT_MSG
+HELO_MISC_IP
 
 # good enough
-MONEY_FORM
+HK_NAME_FM_DR
 
 # good enough
-MONEY_FROM_MISSP
+HK_RANDOM_FROM
 
 # good enough
-NSL_RCVD_FROM_USER
+HK_SCAM_N2
 
 # good enough
-NSL_RCVD_HELO_USER
+IMG_ALT_HSPACE_CID_ALIGN
 
 # good enough
-RP_8BIT
+LOTTO_AGENT
 
 # good enough
-SERGIO_SUBJECT_PORN014
+MILLION_USD
 
 # good enough
-SERGIO_SUBJECT_VIAGRA01
+MONEY_ATM_CARD
 
 # good enough
-TO_NO_BRKTS_FROM_MSSP
+MONEY_BARRISTER
 
 # good enough
-TO_NO_BRKTS_MSFT
-
-# good enough
-TVD_SPACE_RATIO_MINFP
-
-# good enough
-YOU_INHERIT
+TVD_SPACE_ENCODED
 
 # tflags publish
 UC_GIBBERISH_OBFU
@@ -1161,6 +1164,9 @@ XPRIO
 
 # tflags publish
 XPRIO_SHORT_SUBJ
+
+# good enough
+YOU_INHERIT
 
 # tflags publish
 __HTTP_REFRESH
