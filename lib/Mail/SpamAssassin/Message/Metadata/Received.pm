@@ -1305,7 +1305,7 @@ enough:
     }
   }
 
-  if ($rdns =~ /^unknown$/i) {
+  if ($rdns =~ /^unknown$/i || $rdns =~ /^\[/) {
     $rdns = '';		# some MTAs seem to do this
   }
   
