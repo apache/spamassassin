@@ -53,7 +53,7 @@ To avoid download limits a registration is required.
 package Mail::SpamAssassin::Plugin::Phishing;
 use strict;
 use warnings;
-my $VERSION = 1.0;
+my $VERSION = 1.1;
 
 use Errno qw(EBADF);
 use Mail::SpamAssassin::Plugin;
@@ -97,12 +97,8 @@ sub check_start{
   my ($self, $params) = @_;
   my $pms = $params->{permsgstatus};
 
-  #initialize the PHISHING data structure for 
-  #saving configuration information
+  # initialize the PHISHING data structure
   $pms->{PHISHING} = {};
-  $pms->{PHISHING}->{phishurl} = [];
-  $pms->{PHISHING}->{phishdomain} = [];
-  $pms->{PHISHING}->{phishinfo} = {};
 
   #read the configuration info
   $self->_read_configfile($params);
@@ -122,9 +118,8 @@ sub _read_configfile {
         next if(/^\s*\#/);
           my $phishdomain = $self->{main}->{registryboundaries}->uri_to_domain($_);
           if ( defined $phishdomain ) {
-            push @{$pms->{PHISHING}->{phishurl}}, $_;
-            push @{$pms->{PHISHING}->{phishdomain}}, $phishdomain;
-            push @{$pms->{PHISHING}->{phishinfo}->{$phishdomain}}, "OpenPhish";
+            push @{$pms->{PHISHING}->{$_}->{phishdomain}}, $phishdomain;
+            push @{$pms->{PHISHING}->{$_}->{phishinfo}->{$phishdomain}}, "OpenPhish";
           }
     }
 
@@ -154,9 +149,8 @@ sub _read_configfile {
         $phtank_ln[1] =~ s/\"//g;
         my $phishdomain = $self->{main}->{registryboundaries}->uri_to_domain($phtank_ln[1]);
         if ( defined $phishdomain ) {
-          push @{$pms->{PHISHING}->{phishurl}}, $phtank_ln[1];
-          push @{$pms->{PHISHING}->{phishdomain}}, $phishdomain;
-          push @{$pms->{PHISHING}->{phishinfo}->{$phishdomain}}, "PhishTank";
+          push @{$pms->{PHISHING}->{$phtank_ln[1]}->{phishdomain}}, $phishdomain;
+          push @{$pms->{PHISHING}->{$phtank_ln[1]}->{phishinfo}->{$phishdomain}}, "PhishTank";
         }
     }
 
@@ -185,16 +179,14 @@ sub check_phishing {
     if (($info->{types}->{a}) || ($info->{types}->{parsed})) {
       # check url
       foreach my $cluri (@{$info->{cleaned}}) {
-        if (length $cluri) {
-           if ( grep { $cluri eq $_ } @{$pms->{PHISHING}->{phishurl}} ) {
-             $domain = $self->{main}->{registryboundaries}->uri_to_domain($cluri);
-             $feedname = $pms->{PHISHING}->{phishinfo}->{$domain}[0];
-             dbg("HIT! $domain [$cluri] found in $feedname feed");
-             $pms->test_log("$feedname ($domain)");
-             $pms->got_hit($rulename, "", ruletype => 'eval');
-             return 1;
-           }
-        }
+         if ( exists $pms->{PHISHING}->{$cluri} ) {
+           $domain = $self->{main}->{registryboundaries}->uri_to_domain($cluri);
+           $feedname = $pms->{PHISHING}->{$cluri}->{phishinfo}->{$domain}[0];
+           dbg("HIT! $domain [$cluri] found in $feedname feed");
+           $pms->test_log("$feedname ($domain)");
+           $pms->got_hit($rulename, "", ruletype => 'eval');
+           return 1;
+         }
       }
     }
    }
