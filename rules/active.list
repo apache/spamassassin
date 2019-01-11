@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-ninja darxus ena-week0 ena-week1 ena-week2 ena-week3 ena-week4 giovanni-ham giovanni-spam giovanni-spammy grenier hege jarif jbrooks sihde thendrikx; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-ninja ena-week2 giovanni-ham giovanni-spam giovanni-spammy llanga; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-ninja ena-week2 giovanni-ham giovanni-spam giovanni-spammy llanga
+# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-ninja darxus ena-week0 ena-week1 ena-week2 ena-week3 ena-week4 grenier hege jarif jbrooks sihde thendrikx; day 2: axb-coi-bulk axb-generic axb-ham-misc axb-ninja ena-week2 giovanni-ham giovanni-spam giovanni-spammy llanga mmiroslaw-mails-ham mmiroslaw-mails-spam; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-ninja ena-week2 giovanni-ham giovanni-spam giovanni-spammy llanga
 
 # tflags publish
 AC_BR_BONANZA
@@ -311,6 +311,9 @@ FROM_WORDY
 FROM_WORDY_SHORT
 
 # good enough
+FROM_WSP_TRAIL
+
+# good enough
 FSL_HELO_BARE_IP_1
 
 # good enough
@@ -327,6 +330,9 @@ FUZZY_BITCOIN
 
 # tflags publish
 FUZZY_BROWSER
+
+# tflags publish
+FUZZY_BTC_WALLET
 
 # tflags publish
 FUZZY_CLICK_HERE
@@ -397,6 +403,9 @@ HASHCASH_2SPEND
 # tflags userconf
 HASHCASH_HIGH
 
+# good enough
+HDRS_LCASE_IMGONLY
+
 # tflags publish
 HDR_ORDER_FTSDMCXX_DIRECT
 
@@ -418,9 +427,6 @@ HEXHASH_WORD
 # good enough
 HK_NAME_DRUGS
 
-# good enough
-HK_NAME_FM_MR_MRS
-
 # tflags userconf
 HTML_CHARSET_FARAWAY
 
@@ -438,6 +444,9 @@ HTML_SHRT_CMNT_OBFU_MANY
 
 # tflags publish
 HTML_SINGLET_MANY
+
+# good enough
+IMG_ALT_HSPACE_CID_ALIGN
 
 # tflags publish
 IMG_ONLY_FM_DOM_INFO
@@ -911,82 +920,76 @@ TVD_VISIT_PHARMA
 TW_GIBBERISH_MANY
 
 # good enough
-ADMITS_SPAM
+ADVANCE_FEE_5_NEW_FRM_MNY
 
 # good enough
-ADVANCE_FEE_4_NEW_FRM_MNY
+ADVANCE_FEE_5_NEW_MONEY
 
 # good enough
-ADVANCE_FEE_4_NEW_MONEY
+BIGNUM_EMAILS
 
 # good enough
-ADVANCE_FEE_5_NEW
+BODY_SINGLE_URI
 
 # good enough
-AXB_XMAILER_MIMEOLE_OL_024C2
+DEAR_BENEFICIARY
 
 # good enough
-BODY_EMPTY
+FILL_THIS_FORM_LOAN
 
 # good enough
-CK_HELO_DYNAMIC_SPLIT_IP
+FROM_MISSPACED
 
 # good enough
-CK_HELO_GENERIC
+FROM_MISSP_FREEMAIL
 
 # good enough
-FILL_THIS_FORM_LONG
+FROM_MISSP_MSFT
 
 # good enough
-FROM_MISSP_DYNIP
+FROM_MISSP_REPLYTO
 
 # good enough
-FROM_WSP_LEAD
+FROM_MISSP_TO_UNDISC
 
 # good enough
-FROM_WSP_TRAIL
+FROM_MISSP_USER
+
+# good enough
+FROM_MISSP_XPRIO
 
 # tflags publish
 FSL_BULK_SIG
 
 # good enough
-FSL_CTYPE_WIN1251
-
-# tflags publish
-FUZZY_BTC_WALLET
+HDRS_LCASE
 
 # good enough
-HDRS_LCASE_IMGONLY
+LIST_PARTIAL_SHORT_MSG
 
 # good enough
-HELO_MISC_IP
+MONEY_FORM
 
 # good enough
-HK_NAME_FM_DR
+MONEY_FROM_MISSP
 
 # good enough
-HK_RANDOM_FROM
+NSL_RCVD_FROM_USER
 
 # good enough
-HK_SCAM_N2
+NSL_RCVD_HELO_USER
 
 # good enough
-IMG_ALT_HSPACE_CID_ALIGN
+SERGIO_SUBJECT_VIAGRA01
 
 # good enough
-LOTTO_AGENT
+TO_NO_BRKTS_FROM_MSSP
 
 # good enough
-MILLION_USD
+TO_NO_BRKTS_MSFT
 
 # good enough
-MONEY_ATM_CARD
-
-# good enough
-MONEY_BARRISTER
-
-# good enough
-TVD_SPACE_ENCODED
+TVD_SPACE_RATIO_MINFP
 
 # tflags publish
 UC_GIBBERISH_OBFU
@@ -1164,9 +1167,6 @@ XPRIO
 
 # tflags publish
 XPRIO_SHORT_SUBJ
-
-# good enough
-YOU_INHERIT
 
 # tflags publish
 __HTTP_REFRESH
