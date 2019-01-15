@@ -3507,6 +3507,7 @@ contains any characters except a-z and 0-9. C<null> disables logging completely
 (used internally).
 
 Examples:
+
 	spamd -s mail                 # use syslog, facility mail (default)
 	spamd -s ./mail               # log to file ./mail
 	spamd -s stderr 2>/dev/null   # log to stderr, throw messages away
