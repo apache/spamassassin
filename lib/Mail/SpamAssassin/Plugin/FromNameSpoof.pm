@@ -94,6 +94,7 @@ use in reports, header fields, other plugins, etc.:
 
   _FNSFADDROWNER_
     Actual From:addr detected owner
+
 =head1 EXAMPLE 
 
 header   __PLUGIN_FROMNAME_SPOOF eval:check_fromname_spoof()
