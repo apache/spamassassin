@@ -3610,6 +3610,8 @@ subdomain of the specified zone.
 
 =item util_rb_tld tld1 tld2 ...
 
+=encoding utf8
+
 This option maintains a list of valid TLDs in the RegistryBoundaries code. 
 Top level domains (TLD) include things like com, net, org, xn--p1ai, рф, ...
 International domain names may be specified in ASCII-compatible encoding (ACE),

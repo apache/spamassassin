@@ -128,6 +128,8 @@ also be required if your filters do not insert A-R header to correct
 position above the internal Received header (some known offenders: OpenDKIM,
 OpenDMARC, amavisd-milter).
 
+=back
+
 =cut
 
   push (@cmds, {
@@ -148,6 +150,8 @@ OpenDMARC, amavisd-milter).
       }
     }
   });
+
+=over
 
 =item authres_trusted_authserv authservid1 id2 ...   (default: none)
 
@@ -178,12 +182,16 @@ Use strongly recommended, possibly along with authres_networks all.
     }
   });
 
+=over
+
 =item authres_ignored_authserv authservid1 id2 ...   (default: none)
 
 Ignored authentication server IDs (the domain-name-like first word of
 Authentication-Results field, also known as C<authserv-id>).
 
 Any A-R header is ignored if match is found.
+
+=back
 
 =cut
 
