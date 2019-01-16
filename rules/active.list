@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: darxus ena-week0 ena-week1 ena-week2 ena-week3 ena-week4 giovanni-ham giovanni-spam giovanni-spammy grenier hege jarif jbrooks mmiroslaw-mails-ham mmiroslaw-mails-spam sihde thendrikx; day 2: giovanni-ham giovanni-spam giovanni-spammy llanga mmiroslaw-mails-ham mmiroslaw-mails-spam; day 3: axb-coi-bulk axb-generic axb-ham-misc axb-ninja giovanni-ham giovanni-spam giovanni-spammy jarif llanga mmiroslaw-mails-ham mmiroslaw-mails-spam
+# with results from: day 1: darxus ena-week0 ena-week1 ena-week2 ena-week3 ena-week4 giovanni-ham giovanni-spam giovanni-spammy grenier hege jarif jbrooks mmiroslaw-mails-ham mmiroslaw-mails-spam sihde thendrikx; day 2: giovanni-ham giovanni-spam giovanni-spammy llanga mmiroslaw-mails-ham mmiroslaw-mails-spam; day 3: giovanni-ham giovanni-spam giovanni-spammy llanga mmiroslaw-mails-ham mmiroslaw-mails-spam
 
 # tflags publish
 AC_BR_BONANZA
@@ -299,6 +299,9 @@ FROM_WORDY
 FROM_WORDY_SHORT
 
 # good enough
+FROM_WSP_LEAD
+
+# good enough
 FSL_HELO_BARE_IP_1
 
 # good enough
@@ -318,6 +321,9 @@ FUZZY_BITCOIN
 
 # tflags publish
 FUZZY_BROWSER
+
+# tflags publish
+FUZZY_BTC_WALLET
 
 # tflags publish
 FUZZY_CLICK_HERE
@@ -354,6 +360,9 @@ GOOGLE_DOCS_PHISH
 
 # tflags publish
 GOOGLE_DOCS_PHISH_MANY
+
+# good enough
+GOOGLE_OBFU
 
 # tflags publish
 GOOG_MALWARE_DNLD
@@ -411,6 +420,9 @@ HEXHASH_WORD
 
 # good enough
 HK_NAME_DRUGS
+
+# good enough
+HK_NAME_FM_DR
 
 # good enough
 HK_RANDOM_ENVFROM
@@ -498,6 +510,9 @@ MSM_PRIO_REPTO
 
 # good enough
 MSOE_MID_WRONG_CASE
+
+# good enough
+NORDNS_LOW_CONTRAST
 
 # tflags net
 NO_DNS_FOR_FROM
@@ -832,6 +847,9 @@ STOCK_LOW_CONTRAST
 # tflags publish
 STOCK_TIP
 
+# good enough
+STOX_REPLY_TYPE_WITHOUT_QUOTES
+
 # tflags publish
 STYLE_GIBBERISH
 
@@ -899,49 +917,112 @@ TVD_VISIT_PHARMA
 TW_GIBBERISH_MANY
 
 # good enough
-ADMITS_SPAM
+ADVANCE_FEE_4_NEW_MONEY
 
 # good enough
-AXB_XMAILER_MIMEOLE_OL_024C2
+ADVANCE_FEE_5_NEW
 
 # good enough
-CK_HELO_DYNAMIC_SPLIT_IP
+ADVANCE_FEE_5_NEW_FRM_MNY
 
 # good enough
-CK_HELO_GENERIC
+ADVANCE_FEE_5_NEW_MONEY
 
 # good enough
-COMPENSATION
+AXB_XMAILER_MIMEOLE_OL_1ECD5
 
 # good enough
-FILL_THIS_FORM_LONG
+BIGNUM_EMAILS
 
 # good enough
-FROM_WSP_LEAD
+BODY_SINGLE_URI
+
+# good enough
+DEAR_BENEFICIARY
+
+# good enough
+FILL_THIS_FORM_LOAN
+
+# good enough
+FROM_MISSPACED
+
+# good enough
+FROM_MISSP_DYNIP
+
+# good enough
+FROM_MISSP_FREEMAIL
+
+# good enough
+FROM_MISSP_MSFT
+
+# good enough
+FROM_MISSP_REPLYTO
+
+# good enough
+FROM_MISSP_USER
+
+# good enough
+FROM_MISSP_XPRIO
+
+# good enough
+FROM_WSP_TRAIL
 
 # tflags publish
 FSL_BULK_SIG
 
 # good enough
-FSL_CTYPE_WIN1251
-
-# tflags publish
-FUZZY_BTC_WALLET
+HK_CTE_RAW
 
 # good enough
-GOOGLE_OBFU
+HK_NAME_FM_MR_MRS
 
 # good enough
-HELO_MISC_IP
+HK_SCAM_N2
 
 # good enough
-HK_NAME_FM_DR
+HK_SCAM_N8
 
 # good enough
-NORDNS_LOW_CONTRAST
+LIST_PARTIAL_SHORT_MSG
 
 # good enough
-TVD_SPACE_ENCODED
+MILLION_USD
+
+# good enough
+MONEY_ATM_CARD
+
+# good enough
+MONEY_BARRISTER
+
+# good enough
+MONEY_FORM
+
+# good enough
+MONEY_FROM_41
+
+# good enough
+MONEY_FROM_MISSP
+
+# good enough
+NSL_RCVD_FROM_USER
+
+# good enough
+NSL_RCVD_HELO_USER
+
+# good enough
+SERGIO_SUBJECT_VIAGRA01
+
+# good enough
+TO_NO_BRKTS_FROM_MSSP
+
+# good enough
+TO_NO_BRKTS_MSFT
+
+# good enough
+TVD_SPACE_RATIO_MINFP
+
+# good enough
+ZW_OBFU_BITCOIN
 
 # tflags publish
 UC_GIBBERISH_OBFU
