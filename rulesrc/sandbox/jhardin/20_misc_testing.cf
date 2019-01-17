@@ -1958,11 +1958,11 @@ ifplugin Mail::SpamAssassin::Plugin::ReplaceTags
   replace_rules  __YOUR_PASSWORD
   body           __YOUR_WEBCAM          /\s(?:<F><R><O><M>|<Y><O><U><R>)\s<W><E><B><C><A><M>/i
   replace_rules  __YOUR_WEBCAM
-  body           __YOUR_ONAN            /\s<Y><O><U><R>?\s(?:<M><A><S><T><U><R><B><A><T><I>(?:<O><N>|<N><G>)|<O><N><A><N><I><S><M>|<S><O><L><I><T><A><R><Y>\s<S><E><X>)/i
+  body           __YOUR_ONAN            /\s<Y><O><U><R>?\s(?:<M><A><S><T>(?:<U>|<R>){2}<B><A><T><I>(?:<O><N>|<N><G>)|<O><N><A><N><I><S><M>|<S><O><L><I><T><A><R><Y>\s<S><E><X>)/i
   replace_rules  __YOUR_ONAN
   body           __YOUR_PERSONAL        /\s<Y><O><U><R>\s<P><E><R><S><O><N><A><L>\s(?:<I><N><F><O>(?:<R><M><A><T><I><O><N>)?|<D><A><T><A>\s)/i
   replace_rules  __YOUR_PERSONAL
-  body           __HOURS_DEADLINE       /\s(?:(?:<G><I><V><E>\s<Y><O><U>|<Y><O><U>\s<H><A><V><E>)\s\d+\s<H><O><U><R><S>|(?:<B><Y>|<T><O>|<U><N><T><I><L>|<B><E><F><O><R><E>)\s<T><H><E>\s<E><N><D>\s<O><F>\s<T><H><E>\s(?:<W><O><R><K>(?:<I><N><G>)?\s)?<D><A><Y>)/i
+  body           __HOURS_DEADLINE       /\s(?:(?:<G><I><V><E>\s<Y><O><U>|<Y><O><U>\s<H><A><V><E>(?:\s<O><N><L><Y>|\s<J><U><S><T>)?)\s\d+\s<H><O><U><R><S>|(?:<B><Y>|<T><O>|<U><N><T><I><L>|<B><E><F><O><R><E>)\s<T><H><E>\s<E><N><D>\s<O><F>\s<T><H><E>\s(?:<W><O><R><K>(?:<I><N><G>)?\s)?<D><A><Y>)/i
   replace_rules  __HOURS_DEADLINE
   body           __EXPLOSIVE_DEVICE     /\s(?:<E><X><P><L><O><S><I><V><E>\s<D><E><V><I><C><E>|<B><O><M><B>)\s/i
   replace_rules  __EXPLOSIVE_DEVICE
@@ -1972,9 +1972,9 @@ else
   body           __PAY_ME               /\b(?:pay\sme|(?:send\sme|transfer\sthe\samount\sof)\s[\d,'.]+\s(?:usd|eur))\b/i
   body           __YOUR_PASSWORD        /\byour\spassword\b/i
   body           __YOUR_WEBCAM          /\b(?:from|your)\swebcam\b/i
-  body           __YOUR_ONAN            /\byour?\s(?:masturbati(?:on|ng)|onanism|solitary\ssex)\b/i
+  body           __YOUR_ONAN            /\byour?\s(?:mast[ur]{2}bati(?:on|ng)|onanism|solitary\ssex)\b/i
   body           __YOUR_PERSONAL        /\byour\spersonal\s(?:info(?:rmation)?|data)\b/i
-  body           __HOURS_DEADLINE       /\b(?:(?:give\syou|you\shave)\s\d+\shours|(?:by|to|until|before)\sthe\send\sof\sthe\s(?:work(?:ing)?\s)?day)\b/i
+  body           __HOURS_DEADLINE       /\b(?:(?:give\syou|you\shave(?:\sonly|\sjust)?)\s\d+\shours|(?:by|to|until|before)\sthe\send\sof\sthe\s(?:work(?:ing)?\s)?day)\b/i
   body           __EXPLOSIVE_DEVICE     /\b(?:explosive\sdevice|bomb)\b/i
 endif
 meta           BITCOIN_EXTORT_01      __BITCOIN_ID && (__MY_MALWARE + __PAY_ME + __MY_VICTIM + __YOUR_WEBCAM + __YOUR_ONAN + __YOUR_PERSONAL + __HOURS_DEADLINE + __YOUR_PASSWORD + LOCALPART_IN_SUBJECT + __DESTROY_ME + __DESTROY_YOU + __EXPLOSIVE_DEVICE) > 2
