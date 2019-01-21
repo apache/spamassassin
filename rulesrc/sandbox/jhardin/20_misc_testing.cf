@@ -1968,13 +1968,13 @@ tflags         BITCOIN_SPAM_09  publish
 #   replace_rules  __EXPLOSIVE_DEVICE
 # else
   body           __MY_VICTIM            /\b(?:hi|hello),?(?:\smy)?\s(?:victim|prey)\b/i
-  body           __MY_MALWARE           /\b(?:(?:I\sput\sa\s|my\s(?:personal\s)?)(?:malware|virus)|application[a-z\s]{1,30}(?:enabled|allows)\sme\sto\s(?:access|control)|Anwendung\s[^\.]{1,40}\sich\sauf\salle\sIhre\sdarauf\sgespeicherten\sDateien\szugreifen\skann)\b/i
-  body           __PAY_ME               /\b(?:pay\sme|(?:send\sme|transfer\sthe\samount\sof|den\sbetrag\svon)\s[\d,'.]+\s?(?:usd|eur))\b/i
+  body           __MY_MALWARE           /\b(?:(?:I\sput\sa\s|my\s(?:personal\s)?)(?:malware|virus|spy\s?ware)|application[a-z\s]{1,30}(?:enabled|allows)\sme\sto\s(?:access|control)|Anwendung\s[^\.]{1,40}\sich\sauf\salle\sIhre\sdarauf\sgespeicherten\sDateien\szugreifen\skann)\b/i
+  body           __PAY_ME               /\b(?:pay\sme|(?:send\sme|transfer\sthe\samount\sof|den\sbetrag\svon)\s(?:[\d,'.]+\s?(?:usd|eur)|bitcoin))\b/i
   body           __YOUR_PASSWORD        /\byour\spassword\b/i
   body           __YOUR_WEBCAM          /\b(?:from|your)\swebcam\b/i
   body           __YOUR_ONAN            /\byour?\s(?:mast[ur]{2}bati(?:on|ng)|onanism|solitary\ssex)\b/i
   body           __YOUR_PERSONAL        /\byour\spersonal\s(?:info(?:rmation)?|data)\b/i
-  body           __HOURS_DEADLINE       /\b(?:(?:give\syou|you\shave(?:\sonly|\sjust)?)\s\d+\shours|(?:by|to|until|before)\sthe\send\sof\sthe\s(?:work(?:ing)?\s)?day|Ich\sgebe\sIhnen\s\d+\sStunden)\b/i
+  body           __HOURS_DEADLINE       /\b(?:(?:give\syou|you\shave(?:\sonly|\sjust)?)(?:\sthe\slast)?\s\d+\shours|(?:by|to|until|before)\sthe\send\sof\sthe\s(?:work(?:ing)?\s)?day|Ich\sgebe\sIhnen\s\d+\sStunden)\b/i
   body           __EXPLOSIVE_DEVICE     /\b(?:explosive\sdevice|bomb)\b/i
 # endif
 meta           BITCOIN_EXTORT_01      __BITCOIN_ID && (__MY_MALWARE + __PAY_ME + __MY_VICTIM + __YOUR_WEBCAM + __YOUR_ONAN + __YOUR_PERSONAL + __HOURS_DEADLINE + __YOUR_PASSWORD + LOCALPART_IN_SUBJECT + __DESTROY_ME + __DESTROY_YOU + __EXPLOSIVE_DEVICE) > 2
