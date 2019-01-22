@@ -2681,3 +2681,8 @@ rawbody    __HTML_URI_NO_PROTOCOL      /<a\s+href\s*=(?:3d)?\s*"[a-z0-9][-a-z0-9
 
 header     __AC_FROM_MANY_DOTS         From =~ /<(?:\w{2,}\.){2,}\w+@/
 
+uri        __URI_BUFFLY                m,//buff\.ly/,i
+meta       __IMG_BUFFLY                __URI_BUFFLY && HTML_SHORT_LINK_IMG_1
+
+
+
