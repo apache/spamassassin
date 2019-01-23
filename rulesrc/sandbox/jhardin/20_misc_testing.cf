@@ -2682,7 +2682,12 @@ rawbody    __HTML_URI_NO_PROTOCOL      /<a\s+href\s*=(?:3d)?\s*"[a-z0-9][-a-z0-9
 header     __AC_FROM_MANY_DOTS         From =~ /<(?:\w{2,}\.){2,}\w+@/
 
 uri        __URI_BUFFLY                m,//buff\.ly/,i
-meta       __IMG_BUFFLY                __URI_BUFFLY && HTML_SHORT_LINK_IMG_1
+meta       URI_BUFFLY                  __URI_BUFFLY && !__DKIM_EXISTS 
+describe   URI_BUFFLY                  buff.ly redirector URI
+score      URI_BUFFLY                  2.000	# limit
 
+meta       SHORT_BUFFLY_IMG            __URI_BUFFLY && HTML_SHORT_LINK_IMG_1
+describe   SHORT_BUFFLY_IMG            Short HTML + image + buff.ly redirector
+score      SHORT_BUFFLY_IMG            2.000	# limit
 
 
