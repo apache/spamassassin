@@ -1,6 +1,6 @@
 #
 # Author: Giovanni Bechis <gbechis@apache.org>
-# Copyright 2018 Giovanni Bechis
+# Copyright 2018,2019 Giovanni Bechis
 #
 # <@LICENSE>
 # Licensed to the Apache Software Foundation (ASF) under one or more
@@ -92,35 +92,28 @@ sub set_config {
     $conf->{parser}->register_commands(\@cmds);
 }
 
-#prepare the plugin
-sub check_start{
-  my ($self, $params) = @_;
-  my $pms = $params->{permsgstatus};
-
-  # initialize the PHISHING data structure
-  $pms->{PHISHING} = {};
-
-  #read the configuration info
-  $self->_read_configfile($params);
+sub finish_parsing_end {
+  my ($self, $opts) = @_;
+  $self->_read_configfile($self);
 }
 
 sub _read_configfile {
-  my ($self, $params) = @_;
-  my $pms = $params->{permsgstatus};
+  my ($self) = @_;
+  my $conf = $self->{main}->{registryboundaries}->{conf};
   my @phtank_ln;
 
   local *F;
-  if ( defined($pms->{conf}->{phishing_openphish_feed}) && ( -f $pms->{conf}->{phishing_openphish_feed} ) ) {
-    open(F, '<', $pms->{conf}->{phishing_openphish_feed});
+  if ( defined($conf->{phishing_openphish_feed}) && ( -f $conf->{phishing_openphish_feed} ) ) {
+    open(F, '<', $conf->{phishing_openphish_feed});
     for ($!=0; <F>; $!=0) {
         chomp;
         #lines that start with pound are comments
         next if(/^\s*\#/);
-          my $phishdomain = $self->{main}->{registryboundaries}->uri_to_domain($_);
-          if ( defined $phishdomain ) {
-            push @{$pms->{PHISHING}->{$_}->{phishdomain}}, $phishdomain;
-            push @{$pms->{PHISHING}->{$_}->{phishinfo}->{$phishdomain}}, "OpenPhish";
-          }
+        my $phishdomain = $self->{main}->{registryboundaries}->uri_to_domain($_);
+        if ( defined $phishdomain ) {
+          push @{$self->{PHISHING}->{$_}->{phishdomain}}, $phishdomain;
+          push @{$self->{PHISHING}->{$_}->{phishinfo}->{$phishdomain}}, "OpenPhish";
+        }
     }
 
     defined $_ || $!==0  or
@@ -129,8 +122,8 @@ sub _read_configfile {
     close(F) or die "error closing config file: $!";
   }
 
-  if ( defined($pms->{conf}->{phishing_phishtank_feed}) && (-f $pms->{conf}->{phishing_phishtank_feed} ) ) {
-    open(F, '<', $pms->{conf}->{phishing_phishtank_feed});
+  if ( defined($conf->{phishing_phishtank_feed}) && (-f $conf->{phishing_phishtank_feed} ) ) {
+    open(F, '<', $conf->{phishing_phishtank_feed});
     for ($!=0; <F>; $!=0) {
         #skip first line
         next if ( $. eq 1);
@@ -139,18 +132,12 @@ sub _read_configfile {
         next if(/^\s*\#/);
 
         @phtank_ln = split(/,/, $_);
-
-        # XXX Exclude a Phishing category
-        #
-        # Count commas to get last field
-        # my $cnt_comma = ($_ =~ tr/\,//);
-        # next if( $phtank_ln[$cnt_comma] eq "Other" );
-
         $phtank_ln[1] =~ s/\"//g;
+
         my $phishdomain = $self->{main}->{registryboundaries}->uri_to_domain($phtank_ln[1]);
         if ( defined $phishdomain ) {
-          push @{$pms->{PHISHING}->{$phtank_ln[1]}->{phishdomain}}, $phishdomain;
-          push @{$pms->{PHISHING}->{$phtank_ln[1]}->{phishinfo}->{$phishdomain}}, "PhishTank";
+          push @{$self->{PHISHING}->{$phtank_ln[1]}->{phishdomain}}, $phishdomain;
+          push @{$self->{PHISHING}->{$phtank_ln[1]}->{phishinfo}->{$phishdomain}}, "PhishTank";
         }
     }
 
@@ -179,14 +166,14 @@ sub check_phishing {
     if (($info->{types}->{a}) || ($info->{types}->{parsed})) {
       # check url
       foreach my $cluri (@{$info->{cleaned}}) {
-         if ( exists $pms->{PHISHING}->{$cluri} ) {
-           $domain = $self->{main}->{registryboundaries}->uri_to_domain($cluri);
-           $feedname = $pms->{PHISHING}->{$cluri}->{phishinfo}->{$domain}[0];
-           dbg("HIT! $domain [$cluri] found in $feedname feed");
-           $pms->test_log("$feedname ($domain)");
-           $pms->got_hit($rulename, "", ruletype => 'eval');
-           return 1;
-         }
+        if ( exists $self->{PHISHING}->{$cluri} ) {
+          $domain = $self->{main}->{registryboundaries}->uri_to_domain($cluri);
+          $feedname = $self->{PHISHING}->{$cluri}->{phishinfo}->{$domain}[0];
+          dbg("HIT! $domain [$cluri] found in $feedname feed");
+          $pms->test_log("$feedname ($domain)");
+          $pms->got_hit($rulename, "", ruletype => 'eval');
+          return 1;
+        }
       }
     }
    }
