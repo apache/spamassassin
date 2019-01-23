@@ -2682,7 +2682,7 @@ rawbody    __HTML_URI_NO_PROTOCOL      /<a\s+href\s*=(?:3d)?\s*"[a-z0-9][-a-z0-9
 header     __AC_FROM_MANY_DOTS         From =~ /<(?:\w{2,}\.){2,}\w+@/
 
 uri        __URI_BUFFLY                m,//buff\.ly/,i
-meta       URI_BUFFLY                  __URI_BUFFLY && !__DKIM_EXISTS 
+meta       URI_BUFFLY                  __URI_BUFFLY && !__DOS_HAS_LIST_UNSUB
 describe   URI_BUFFLY                  buff.ly redirector URI
 score      URI_BUFFLY                  2.000	# limit
 
