@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-ninja darxus ena-week0 ena-week1 ena-week2 ena-week3 ena-week4 giovanni-ham giovanni-spam giovanni-spammy grenier hege jarif jbrooks sihde thendrikx; day 2: ena-week2 llanga mmiroslaw-mails-ham mmiroslaw-mails-spam; day 3: ena-week2 llanga mmiroslaw-mails-ham mmiroslaw-mails-spam
+# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-ninja darxus ena-week0 ena-week1 ena-week2 ena-week3 ena-week4 grenier hege jarif jbrooks sihde thendrikx; day 2: ena-week2 giovanni-ham giovanni-spam giovanni-spammy llanga mmiroslaw-mails-ham mmiroslaw-mails-spam; day 3: ena-week2 llanga mmiroslaw-mails-ham mmiroslaw-mails-spam
 
 # tflags publish
 AC_BR_BONANZA
@@ -419,6 +419,9 @@ HEXHASH_WORD
 HK_NAME_DRUGS
 
 # good enough
+HK_NAME_FM_MR_MRS
+
+# good enough
 HK_RANDOM_ENVFROM
 
 # good enough
@@ -796,6 +799,9 @@ SB_GIF_AND_NO_URIS
 # good enough
 SERGIO_SUBJECT_PORN014
 
+# good enough
+SHORT_BUFFLY_IMG
+
 # tflags publish
 SINGLETS_LOW_CONTRAST
 
@@ -902,6 +908,9 @@ TO_NO_BRKTS_NORDNS_HTML
 TO_NO_BRKTS_PCNT
 
 # good enough
+TT_MSGID_TRUNC
+
+# good enough
 TVD_RCVD_IP
 
 # good enough
@@ -914,118 +923,46 @@ TVD_VISIT_PHARMA
 TW_GIBBERISH_MANY
 
 # good enough
-ADVANCE_FEE_3_NEW_FRM_MNY
+ADMITS_SPAM
 
 # good enough
-ADVANCE_FEE_4_NEW_FRM_MNY
+ADVANCE_FEE_4_NEW_MONEY
 
 # good enough
-ADVANCE_FEE_5_NEW
+AXB_XMAILER_MIMEOLE_OL_024C2
 
 # good enough
-ADVANCE_FEE_5_NEW_FRM_MNY
+BODY_SINGLE_URI
 
 # good enough
-ADVANCE_FEE_5_NEW_MONEY
+CK_HELO_DYNAMIC_SPLIT_IP
 
 # good enough
-AXB_XMAILER_MIMEOLE_OL_1ECD5
+CK_HELO_GENERIC
 
 # good enough
-BIGNUM_EMAILS
+FILL_THIS_FORM_LONG
 
 # good enough
-DEAR_BENEFICIARY
-
-# good enough
-FILL_THIS_FORM_LOAN
-
-# good enough
-FROM_MISSPACED
-
-# good enough
-FROM_MISSP_DYNIP
-
-# good enough
-FROM_MISSP_FREEMAIL
-
-# good enough
-FROM_MISSP_MSFT
-
-# good enough
-FROM_MISSP_REPLYTO
-
-# good enough
-FROM_MISSP_USER
-
-# good enough
-FROM_MISSP_XPRIO
+FROM_MISSP_TO_UNDISC
 
 # tflags publish
 FSL_BULK_SIG
 
 # good enough
-HK_NAME_FM_MR_MRS
+FSL_CTYPE_WIN1251
 
 # good enough
-HK_NAME_MR_MRS
+HELO_MISC_IP
 
 # good enough
-HK_SCAM_N2
+KHOP_DYNAMIC
 
 # good enough
-LIST_PARTIAL_SHORT_MSG
+MONEY_FROM_41
 
 # good enough
-LOTTO_AGENT
-
-# good enough
-MILLION_USD
-
-# good enough
-MONEY_ATM_CARD
-
-# good enough
-MONEY_BARRISTER
-
-# good enough
-MONEY_FORM
-
-# good enough
-MONEY_FROM_MISSP
-
-# good enough
-NSL_RCVD_FROM_USER
-
-# good enough
-NSL_RCVD_HELO_USER
-
-# good enough
-SERGIO_SUBJECT_VIAGRA01
-
-# good enough
-SHARE_50_50
-
-# good enough
-SHORT_BUFFLY_IMG
-
-# good enough
-TO_NO_BRKTS_FROM_MSSP
-
-# good enough
-TO_NO_BRKTS_MSFT
-
-# good enough
-TVD_SPACE_RATIO_MINFP
-
-# good enough
-UNICODE_OBFU_DOM_NO_BODY
-
-# good enough
-URI_BUFFLY
-
-# good enough
-YOU_INHERIT
+TVD_SPACE_ENCODED
 
 # tflags publish
 UC_GIBBERISH_OBFU
@@ -1110,6 +1047,9 @@ URIBL_SBL_A
 
 # tflags net
 URIBL_WS_SURBL
+
+# good enough
+URI_BUFFLY
 
 # tflags publish
 URI_DATA
@@ -1203,6 +1143,9 @@ XPRIO
 
 # tflags publish
 XPRIO_SHORT_SUBJ
+
+# good enough
+YOU_INHERIT
 
 # good enough
 ZW_OBFU_BITCOIN
