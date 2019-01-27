@@ -2167,20 +2167,21 @@ if can(Mail::SpamAssassin::Conf::feature_bug6558_free)
   rawbody   __STY_INVIS                   /\bstyle\s*=\s*"[^">]{0,80}(?:visibility\s*:\s*hidden\s*;|display\s*:\s*none\s*;)/i
   tflags    __STY_INVIS                   multiple, maxhits=6
   meta      __STY_INVIS_MANY              __STY_INVIS > 5
-  #meta      HTML_TEXT_INVISIBLE           __STY_INVIS_MANY
-  #describe  HTML_TEXT_INVISIBLE           Hidden text
-  #score     HTML_TEXT_INVISIBLE           2.000   # limit
+  meta      HTML_TEXT_INVISIBLE_STYLE     __STY_INVIS_MANY && (__HDRS_LCASE || __UNSUB_EMAIL ||  __ADMITS_SPAM || __FROM_DOM_INFO || __HTML_TAG_BALANCE_CENTER )
+  describe  HTML_TEXT_INVISIBLE_STYLE     HTML hidden text + other spam signs
+  score     HTML_TEXT_INVISIBLE_STYLE     3.500   # limit
 endif
 # try it on span tags only...
-rawbody   __SPAN_INVIS                  /<span\s[^>]{0,200}style\s*=\s*"[^">]{0,80}(?:visibility\s*:\s*hidden\s*;|display\s*:\s*none\s*;)[^>]{1,200}>\w/i
+# rawbody   __SPAN_INVIS                  /<span\s[^>]{0,200}style\s*=\s*"[^">]{0,80}(?:visibility\s*:\s*hidden\s*;|display\s*:\s*none\s*;)[^>]{1,200}>\w/i
 
 if can(Mail::SpamAssassin::Conf::feature_bug6558_free)
   rawbody   __FONT_INVIS                  /<font\s[^>]{1,80}(?:font-size\s*:\s*[01]px\s*;|color\s*:\s*transparent\s*;)[^>]{1,80}>\w/i
   tflags    __FONT_INVIS                  multiple, maxhits=6
   meta      __FONT_INVIS_MANY             __FONT_INVIS > 5
-  #meta      HTML_TEXT_INVISIBLE           __FONT_INVIS
-  #describe  HTML_TEXT_INVISIBLE           Hidden text
-  #score     HTML_TEXT_INVISIBLE           2.000   # limit
+  meta      HTML_TEXT_INVISIBLE_FONT      __FONT_INVIS_MANY
+  describe  HTML_TEXT_INVISIBLE_FONT      HTML hidden text
+  score     HTML_TEXT_INVISIBLE_FONT      3.000   # limit
+  tflags    HTML_TEXT_INVISIBLE_FONT      publish
 endif
 
 # Adapted from SARE rules __SARE_HTML_SINGLET*
@@ -2680,7 +2681,7 @@ tflags     HTML_ENTITY_ASCII_TINY      publish
 rawbody    __HTML_URI_NO_PROTOCOL      /<a\s+href\s*=(?:3d)?\s*"[a-z0-9][-a-z0-9_]{1,64}(?:\.[a-z0-9][-a-z0-9_]{1,64}){1,5}\s*"/i
 
 header     __AC_FROM_MANY_DOTS         From =~ /<(?:\w{2,}\.){2,}\w+@/
-meta       __AC_FROM_MANY_DOTS_MINFP   __AC_FROM_MANY_DOTS && !FREEMAIL_FORGED_FROMDOMAIN && !FORGED_GMAIL_RCVD && !__UNSUB_LINK && !__XM_VBULLETIN && !__RDNS_SHORT 
+meta       __AC_FROM_MANY_DOTS_MINFP   __AC_FROM_MANY_DOTS && !FREEMAIL_FORGED_FROMDOMAIN && !FORGED_GMAIL_RCVD && !__UNSUB_LINK && !__XM_VBULLETIN && !__RDNS_SHORT && !__REPTO_QUOTE 
 
 uri        __URI_BUFFLY                m,//buff\.ly/,i
 meta       URI_BUFFLY                  __URI_BUFFLY && !__DOS_HAS_LIST_UNSUB
@@ -2690,5 +2691,10 @@ score      URI_BUFFLY                  2.000	# limit
 meta       SHORT_BUFFLY_IMG            __URI_BUFFLY && HTML_SHORT_LINK_IMG_1
 describe   SHORT_BUFFLY_IMG            Short HTML + image + buff.ly redirector
 score      SHORT_BUFFLY_IMG            2.000	# limit
+
+header     __DATA_ENTRY_SERVICE        Subject =~ /\bdata entry services?\b/i
+meta       FREEM_DATA_ENTRY            __DATA_ENTRY_SERVICE && __freemail_hdr_replyto
+describe   FREEM_DATA_ENTRY            Data entry services too cheap to buy a real domain
+score      FREEM_DATA_ENTRY            2.000	# limit
 
 
