@@ -1950,31 +1950,31 @@ tflags         BITCOIN_SPAM_09  publish
 ifplugin Mail::SpamAssassin::Plugin::ReplaceTags
   body           __MY_VICTIM            /(?:<H><I>|<H><E><L><L><O>),?(?:\s<M><Y>)?\s(?:<V><I><C><T><I><M>|<P><R><E><Y>)/i
   replace_rules  __MY_VICTIM
-  body           __MY_MALWARE           /\s(?:(?:<I>\s<P><U><T>\s<A>\s|<M><Y>\s(?:<P><E><R><S><O><N><A><L>\s)?)(?:<M><A><L><W><A><R><E>|<V><I><R><U><S>|<S><P><Y>\s?<W><A><R><E>)|<A><P><P><L><I><C><A><T><I><O><N>[^\.]{1,30}(?:<E><N><A><B><L><E>(?:<D>|<S>)|<A><L><L><O><W>)\s<M><E>\s<T><O>\s(?:<A><C><C><E><S><S>|<C><O><N><T><R><O><L>)|<I>\s(?:<C><O><N><T><A><M><I><N><A><T><E><D>|<I><N><F><E><C><T><E><D>)\s<Y><O><U><R>\s(?:<M><A><C><H><I><N><E>|<C><O><M><P><U><T><E><R>)|Anwendung\s[^\.]{1,50}\sich\sauf\salle\sIhre\sdarauf\sgespeicherten\sDateien\szugreifen\skann)[\s\.,]/i
+  body           __MY_MALWARE           /\s(?:(?:<I>\s(?:<P><U><T><|><S><E><T>\s?<U><P>|<I><N><S><T><A><L><L><E><D>)\s<A>\s|<M><Y>\s(?:<P><E><R><S><O><N><A><L>\s)?)(?:<M><A><L><W><A><R><E>|<V><I><R><U><S>|<S><P><Y>\s?<W><A><R><E>|<P><R><O><G><R><A><M>\s<R><E><C><O><R><D><E><D>)|<A><P><P><L><I><C><A><T><I><O><N>[^\.]{1,30}(?:<E><N><A><B><L><E>(?:<D>|<S>)|<A><L><L><O><W>)\s<M><E>\s<T><O>\s(?:<A><C><C><E><S><S>|<C><O><N><T><R><O><L>)|<I>\s(?:<C><O><N><T><A><M><I><N><A><T><E><D>|<I><N><F><E><C><T><E><D>|<H><A><C><K><E><D>)\s<Y><O><U><R>\s(?:<M><A><C><H><I><N><E>|<C><O><M><P><U><T><E><R>)|Anwendung\s[^\.]{1,50}\sich\sauf\salle\sIhre\sdarauf\sgespeicherten\sDateien\szugreifen\skann)[\s\.,]/i
   replace_rules  __MY_MALWARE
-  body           __PAY_ME               /\s(?:<P><A><Y>\s<M><E>|(?:(?:<S><E><N><D>|<T><R><A><N><S><M><I><T>)\s<M><E>|<T><R><A><N><S><F><E><R>\s<T><H><E>\s<A><M><O><U><N><T>\s<O><F>|<D><E><N>\s<B><E><T><R><A><G>\s<V><O><N>)\s(?:[\d,'.]+\s?(?:<U><S><D>|<E><U><R>?(?:<O><S>)?)|<B><I><T><C><O><I><N>))\s/i
+  body           __PAY_ME               /\s(?:<P><A><Y>\s<M><E>|(?:(?:<S><E><N><D>|<T><R><A><N><S><M><I><T>)\s<M><E>|<T><R><A><N><S><F><E><R>\s<T><H><E>\s<A><M><O><U><N><T>\s<O><F>|<I>\s<W><A><N><T>|<D><E><N>\s<B><E><T><R><A><G>\s<V><O><N>)\s(?:[\d,'.]+\s?(?:<U><S><D>|<E><U><R>?(?:<O><S>)?)|<B><I><T><C><O><I><N>)|<M><A><K><E>\s<T><H><E>\s<P><A><Y><M><E><N><T>)[\s\.,]/i
   replace_rules  __PAY_ME
   body           __YOUR_PASSWORD        /\s<Y><O><U><R>\s<P><A><S><S><W><O><R><D>/i
   replace_rules  __YOUR_PASSWORD
-  body           __YOUR_WEBCAM          /\s(?:<F><R><O><M>|<Y><O><U><R>)\s<W><E><B><C><A><M>/i
+  body           __YOUR_WEBCAM          /\s(?:<F><R><O><M>|<Y><O><U><R>)\s(?:<S><C><R><E><E><N>\s<A><N><D>\s)?<W><E><B>\s?<C><A><M>/i
   replace_rules  __YOUR_WEBCAM
   body           __YOUR_ONAN            /\s<Y><O><U><R>?\s(?:<M><A><S><T>(?:<U>|<R>){2}<B><A><T><I>(?:<O><N>|<N><G>)|<O><N><A><N><I><S><M>|<S><O><L><I><T><A><R><Y>\s<S><E><X>|<H><A><N><D>\s<F><U><C><K><I><N><G>)/i
   replace_rules  __YOUR_ONAN
-  body           __YOUR_PERSONAL        /\s<Y><O><U><R>\s(?:<P><E><R><S><O><N><A><L>|<S><O><C><I><A><L>\s<C><O><N><T><A><C><T>)\s(?:<I><N><F><O>(?:<R><M><A><T><I><O><N>)?|<D><A><T><A>\s)/i
+  body           __YOUR_PERSONAL        /\s(?:<Y><O><U><R>\s(?:<P><E><R><S><O><N><A><L>|<S><O><C><I><A><L>\s<C><O><N><T><A><C><T>)\s(?:<I><N><F><O>(?:<R><M><A><T><I><O><N>)?|<D><A><T><A>)|<A><L><L>\s<Y><O><U><R>\s<F><I><L><E><S>)\s/i
   replace_rules  __YOUR_PERSONAL
-  body           __HOURS_DEADLINE       /\s(?:(?:<G><I><V><E>\s<Y><O><U>|<Y><O><U>\s<H><A><V><E>(?:\s<O><N><L><Y>|\s<J><U><S><T>)?)(?:\s<T><H><E>\s<L><A><S><T>)?\s\d+\s(?:<H><O><U><R><S>|<H><R>\s?<S>)|(?:<B><Y>|<T><O>|<U><N><T><I><L>|<B><E><F><O><R><E>)\s<T><H><E>\s<E><N><D>\s<O><F>\s<T><H><E>\s(?:<W><O><R><K>(?:<I><N><G>)?\s)?<D><A><Y>|Ich\sgebe\sIhnen\s\d+\sStunden)/i
+  body           __HOURS_DEADLINE       /\s(?:(?:<G><I><V><E>\s<Y><O><U>|<Y><O><U>\s<H><A><V><E>(?:\s<O><N><L><Y>|\s<J><U><S><T>)?)(?:\s<T><H><E>\s<L><A><S><T>)?\s\d+\s(?:<H><O><U><R><S>?|<H><R>\s?<S>?)|(?:<B><Y>|<T><O>|<U><N><T><I><L>|<B><E><F><O><R><E>)\s<T><H><E>\s<E><N><D>\s<O><F>\s<T><H><E>\s(?:<W><O><R><K>(?:<I><N><G>)?\s)?<D><A><Y>|Ich\sgebe\sIhnen\s\d+\sStunden|\d+\s<H><O><U><R><S>?\s<B><E><F><O><R><E>\s(?:<S><E><N><D><I><N><G>|<R><E><L><E><A><S><I><N><G>|<E><X><P><O><S><I><N><G>))/i
   replace_rules  __HOURS_DEADLINE
   body           __EXPLOSIVE_DEVICE     /\s(?:<E><X><P><L><O><S><I><V><E>\s<D><E><V><I><C><E>|<B><O><M><B>)\s/i
   replace_rules  __EXPLOSIVE_DEVICE
 else
   body           __MY_VICTIM            /\b(?:hi|hello),?(?:\smy)?\s(?:victim|prey)\b/i
-  body           __MY_MALWARE           /\b(?:(?:I\sput\sa\s|my\s(?:personal\s)?)(?:malware|virus|spy\s?ware)|application[^\.]{1,30}(?:enable[sd]|allows)\sme\sto\s(?:access|control)|I\s(?:contaminated|infected)\syour\s(?:machine|computer)|Anwendung\s[^\.]{1,50}\sich\sauf\salle\sIhre\sdarauf\sgespeicherten\sDateien\szugreifen\skann)\b/i
-  body           __PAY_ME               /\b(?:pay\sme|(?:(?:send|transmit)\sme|transfer\sthe\samount\sof|den\sbetrag\svon)\s(?:[\d,'.]+\s?(?:usd|eur?(?:os)?)|bitcoin))\b/i
+  body           __MY_MALWARE           /\b(?:(?:I\s(?:put|set\s?up|installed)\sa\s|my\s(?:personal\s)?)(?:malware|virus|spy\s?ware|program\srecorded)|application[^\.]{1,30}(?:enable[sd]|allows)\sme\sto\s(?:access|control)|I\s(?:contaminated|infected|hacked)\syour\s(?:machine|computer)|Anwendung\s[^\.]{1,50}\sich\sauf\salle\sIhre\sdarauf\sgespeicherten\sDateien\szugreifen\skann)\b/i
+  body           __PAY_ME               /\b(?:pay\sme|(?:(?:send|transmit)\sme|transfer\sthe\samount\sof|I\swant|den\sbetrag\svon)\s(?:[\d,'.]+\s?(?:usd|eur?(?:os)?)|bitcoin)|make\sthe\spayment)\b/i
   body           __YOUR_PASSWORD        /\byour\spassword\b/i
-  body           __YOUR_WEBCAM          /\b(?:from|your)\swebcam\b/i
+  body           __YOUR_WEBCAM          /\b(?:from|your)\s(?:screen\sand\s)?web\s?cam\b/i
   body           __YOUR_ONAN            /\byour?\s(?:mast[ur]{2}bati(?:on|ng)|onanism|solitary\ssex|hand\sfucking)\b/i
-  body           __YOUR_PERSONAL        /\byour\s(?:personal|social\scontact)\s(?:info(?:rmation)?|data)\b/i
-  body           __HOURS_DEADLINE       /\b(?:(?:give\syou|you\shave(?:\sonly|\sjust)?)(?:\sthe\slast)?\s\d+\s(?:hours|hr\s?s)|(?:by|to|until|before)\sthe\send\sof\sthe\s(?:work(?:ing)?\s)?day|Ich\sgebe\sIhnen\s\d+\sStunden)\b/i
+  body           __YOUR_PERSONAL        /\b(?:your\s(?:personal|social\scontact)\s(?:info(?:rmation)?|data)|all\syour\sfiles)\b/i
+  body           __HOURS_DEADLINE       /\b(?:(?:give\syou|you\shave(?:\sonly|\sjust)?)(?:\sthe\slast)?\s\d+\s(?:hours?|hr(?:\s?s)?)|(?:by|to|until|before)\sthe\send\sof\sthe\s(?:work(?:ing)?\s)?day|Ich\sgebe\sIhnen\s\d+\sStunden|\d+\shours?\sbefore\s(?:sending|releasing|exposing))\b/i
   body           __EXPLOSIVE_DEVICE     /\b(?:explosive\sdevice|bomb)\b/i
 endif
 meta           BITCOIN_EXTORT_01      __BITCOIN_ID && (__MY_MALWARE + __PAY_ME + __MY_VICTIM + __YOUR_WEBCAM + __YOUR_ONAN + __YOUR_PERSONAL + __HOURS_DEADLINE + __YOUR_PASSWORD + LOCALPART_IN_SUBJECT + __DESTROY_ME + __DESTROY_YOU + __EXPLOSIVE_DEVICE) > 2
@@ -2166,10 +2166,13 @@ score     GOOG_REDIR_HTML_ONLY          2.000	# limit
 if can(Mail::SpamAssassin::Conf::feature_bug6558_free)
   rawbody   __STY_INVIS                   /\bstyle\s*=\s*"[^">]{0,80}(?:visibility\s*:\s*hidden\s*;|display\s*:\s*none\s*;)/i
   tflags    __STY_INVIS                   multiple, maxhits=6
+  meta      __STY_INVIS_2                 __STY_INVIS > 1
+  meta      __STY_INVIS_3                 __STY_INVIS > 2
   meta      __STY_INVIS_MANY              __STY_INVIS > 5
-  meta      HTML_TEXT_INVISIBLE_STYLE     __STY_INVIS_MANY && (__HDRS_LCASE || __UNSUB_EMAIL ||  __ADMITS_SPAM || __FROM_DOM_INFO || __HTML_TAG_BALANCE_CENTER || __MSGID_RANDY ) && !__RDNS_LONG 
+  meta      HTML_TEXT_INVISIBLE_STYLE     __STY_INVIS_MANY && (__RDNS_NONE || __HDRS_LCASE || __UNSUB_EMAIL ||  __ADMITS_SPAM || __FROM_DOM_INFO || __HTML_TAG_BALANCE_CENTER || __MSGID_RANDY ) && !__RDNS_LONG && !__RCD_RDNS_MTA 
   describe  HTML_TEXT_INVISIBLE_STYLE     HTML hidden text + other spam signs
   score     HTML_TEXT_INVISIBLE_STYLE     3.500   # limit
+  tflags    HTML_TEXT_INVISIBLE_STYLE     publish
 endif
 # try it on span tags only...
 # rawbody   __SPAN_INVIS                  /<span\s[^>]{0,200}style\s*=\s*"[^">]{0,80}(?:visibility\s*:\s*hidden\s*;|display\s*:\s*none\s*;)[^>]{1,200}>\w/i
@@ -2626,8 +2629,8 @@ if can(Mail::SpamAssassin::Conf::feature_bug6558_free)
   meta       __UNICODE_OBFU_ZW_2        __UNICODE_OBFU_ZW > 1
   meta       __UNICODE_OBFU_ZW_3        __UNICODE_OBFU_ZW > 2
   meta       __UNICODE_OBFU_ZW_5        __UNICODE_OBFU_ZW > 4
-  meta       __UNICODE_OBFU_ZW_MANY     __UNICODE_OBFU_ZW > 9
-  meta       UNICODE_OBFU_ZW            __UNICODE_OBFU_ZW_MANY && !__USING_VERP1 && __DOS_LINK
+  meta       __UNICODE_OBFU_ZW_10       __UNICODE_OBFU_ZW > 9
+  meta       UNICODE_OBFU_ZW            __UNICODE_OBFU_ZW_5 && !__SUBSCRIPTION_INFO && !__RCD_RDNS_MAIL_MESSY && !__DOS_HAS_LIST_ID && !__USING_VERP1 
   describe   UNICODE_OBFU_ZW            Obfuscating text with hidden characters
   score      UNICODE_OBFU_ZW            3.500	# limit
   tflags     UNICODE_OBFU_ZW            publish
@@ -2684,7 +2687,7 @@ tflags     HTML_ENTITY_ASCII_TINY      publish
 rawbody    __HTML_URI_NO_PROTOCOL      /<a\s+href\s*=(?:3d)?\s*"[a-z0-9][-a-z0-9_]{1,64}(?:\.[a-z0-9][-a-z0-9_]{1,64}){1,5}\s*"/i
 
 header     __AC_FROM_MANY_DOTS         From =~ /<(?:\w{2,}\.){2,}\w+@/
-meta       __AC_FROM_MANY_DOTS_MINFP   __AC_FROM_MANY_DOTS && !FREEMAIL_FORGED_FROMDOMAIN && !FORGED_GMAIL_RCVD && !__UNSUB_LINK && !__XM_VBULLETIN && !__RDNS_SHORT && !__REPTO_QUOTE 
+meta       __AC_FROM_MANY_DOTS_MINFP   __AC_FROM_MANY_DOTS && !FREEMAIL_FORGED_FROMDOMAIN && !FORGED_GMAIL_RCVD && !__UNSUB_LINK && !__XM_VBULLETIN && !__RDNS_SHORT && !__REPTO_QUOTE && !__FSL_RELAY_GOOGLE && !__HAS_IN_REPLY_TO 
 
 uri        __URI_BUFFLY                m,//buff\.ly/,i
 meta       URI_BUFFLY                  __URI_BUFFLY && !__DOS_HAS_LIST_UNSUB
@@ -2693,11 +2696,11 @@ score      URI_BUFFLY                  2.000	# limit
 
 meta       SHORT_BUFFLY_IMG            __URI_BUFFLY && HTML_SHORT_LINK_IMG_1
 describe   SHORT_BUFFLY_IMG            Short HTML + image + buff.ly redirector
-score      SHORT_BUFFLY_IMG            2.000	# limit
+score      SHORT_BUFFLY_IMG            2.500	# limit
 
 header     __DATA_ENTRY_SERVICE        Subject =~ /\bdata entry services?\b/i
 meta       FREEM_DATA_ENTRY            __DATA_ENTRY_SERVICE && __freemail_hdr_replyto
 describe   FREEM_DATA_ENTRY            Data entry services too cheap to buy a real domain
-score      FREEM_DATA_ENTRY            2.000	# limit
+score      FREEM_DATA_ENTRY            2.500	# limit
 
 
