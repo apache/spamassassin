@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from http://ruleqa.spamassassin.org/
-# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-ninja darxus ena-week0 ena-week1 ena-week2 ena-week3 ena-week4 giovanni-ham giovanni-spam giovanni-spammy grenier hege jarif jbrooks llanga sihde thendrikx; day 2: ena-week2 mmiroslaw-mails-ham mmiroslaw-mails-spam; day 3: axb-generic axb-ham-misc axb-ninja ena-week2 mmiroslaw-mails-ham mmiroslaw-mails-spam
+# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc axb-ninja darxus ena-week0 ena-week1 ena-week3 ena-week4 grenier hege jarif jbrooks llanga sihde thendrikx; day 2: ena-week2 giovanni-ham giovanni-spam giovanni-spammy mmiroslaw-mails-ham mmiroslaw-mails-spam; day 3: ena-week2 mmiroslaw-mails-ham mmiroslaw-mails-spam
 
 # tflags publish
 AC_BR_BONANZA
@@ -317,9 +317,6 @@ FROM_WORDY
 FROM_WORDY_SHORT
 
 # good enough
-FROM_WSP_LEAD
-
-# good enough
 FROM_WSP_TRAIL
 
 # good enough
@@ -480,6 +477,9 @@ KB_CTYPE_SP_MOZ
 
 # good enough
 KB_FORGED_MOZ4
+
+# good enough
+KHOP_DYNAMIC
 
 # tflags publish
 LIST_PRTL_PUMPDUMP
@@ -953,64 +953,97 @@ TVD_VISIT_PHARMA
 TW_GIBBERISH_MANY
 
 # good enough
-ADMITS_SPAM
+ADVANCE_FEE_3_NEW_FRM_MNY
 
 # good enough
-ADVANCE_FEE_2_NEW_FRM_MNY
+ADVANCE_FEE_4_NEW_FRM_MNY
 
 # good enough
-ADVANCE_FEE_4_NEW_MONEY
+ADVANCE_FEE_5_NEW
 
 # good enough
-AXB_XMAILER_MIMEOLE_OL_024C2
+ADVANCE_FEE_5_NEW_FRM_MNY
 
 # good enough
-AXB_XMAILER_MIMEOLE_OL_1ECD5
+ADVANCE_FEE_5_NEW_MONEY
 
 # good enough
-BODY_SINGLE_URI
+BIGNUM_EMAILS
 
 # good enough
-CK_HELO_DYNAMIC_SPLIT_IP
+DEAR_BENEFICIARY
 
 # good enough
-CK_HELO_GENERIC
+FILL_THIS_FORM_LOAN
 
 # good enough
-COMPENSATION
+FROM_MISSPACED
 
 # good enough
-FILL_THIS_FORM_LONG
+FROM_MISSP_DYNIP
 
 # good enough
-FROM_MISSP_TO_UNDISC
+FROM_MISSP_FREEMAIL
+
+# good enough
+FROM_MISSP_MSFT
+
+# good enough
+FROM_MISSP_REPLYTO
+
+# good enough
+FROM_MISSP_USER
+
+# good enough
+FROM_MISSP_XPRIO
 
 # tflags publish
 FSL_BULK_SIG
 
 # good enough
-FSL_CTYPE_WIN1251
+HK_NAME_MR_MRS
 
 # good enough
-HELO_MISC_IP
+HK_SCAM_N2
 
 # good enough
-HK_RANDOM_FROM
+LIST_PARTIAL_SHORT_MSG
 
 # good enough
-HK_SCAM_N3
+LOTTO_AGENT
 
 # good enough
-KHOP_DYNAMIC
+MILLION_USD
 
 # good enough
-MONEY_FROM_41
+MONEY_ATM_CARD
 
 # good enough
-MSGID_NOFQDN1
+MONEY_BARRISTER
 
 # good enough
-TVD_SPACE_ENCODED
+MONEY_FORM
+
+# good enough
+MONEY_FROM_MISSP
+
+# good enough
+NSL_RCVD_FROM_USER
+
+# good enough
+NSL_RCVD_HELO_USER
+
+# good enough
+SERGIO_SUBJECT_VIAGRA01
+
+# good enough
+TO_NO_BRKTS_FROM_MSSP
+
+# good enough
+TO_NO_BRKTS_MSFT
+
+# good enough
+TVD_SPACE_RATIO_MINFP
 
 # tflags publish
 UC_GIBBERISH_OBFU
