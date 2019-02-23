@@ -2696,9 +2696,9 @@ meta       URI_BUFFLY                  __URI_BUFFLY && !__DOS_HAS_LIST_UNSUB
 describe   URI_BUFFLY                  buff.ly redirector URI
 score      URI_BUFFLY                  2.000	# limit
 
-meta       SHORT_BUFFLY_IMG            __URI_BUFFLY && HTML_SHORT_LINK_IMG_1
-describe   SHORT_BUFFLY_IMG            Short HTML + image + buff.ly redirector
-score      SHORT_BUFFLY_IMG            2.500	# limit
+meta       SHORTENER_SHORT_IMG         __URL_SHORTENER && HTML_SHORT_LINK_IMG_1
+describe   SHORTENER_SHORT_IMG         Short HTML + image + URL shortener
+score      SHORTENER_SHORT_IMG         2.500	# limit
 
 header     __DATA_ENTRY_SERVICE        Subject =~ /\bdata entry services?\b/i
 meta       FREEM_DATA_ENTRY            __DATA_ENTRY_SERVICE && __freemail_hdr_replyto
