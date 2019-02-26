@@ -38,6 +38,8 @@ system_or_die "cd $builddir && mv Mail-SpamAssassin-* x";
 my $binpath = $Config{sitebinexp};
 $binpath =~ s|^\Q$Config{siteprefixexp}\E/||;
 
+my $installarchlib = $Config{installarchlib};
+
 #Fix for RH/Fedora using lib64 instead of lib - bug 6609
 $x64_bit_lib_test = 0;
 if (-e '/bin/rpm') {
@@ -99,6 +101,8 @@ ok -d "$prefix/$binpath";
 if ($x64_bit_lib_test) {
   #print "testing for $prefix/lib64";
   ok -d "$prefix/lib64";
+} elsif ( $installarchlib =~ '/libdata/' ) {
+  ok -d "$prefix/libdata";
 } else {
   ok -d "$prefix/lib";
 }
@@ -156,6 +160,8 @@ ok -d "$prefix/$binpath";
 ok -d "$prefix/etc/mail/spamassassin";
 if ($x64_bit_lib_test) {
   ok -d "$prefix/lib64";
+} elsif ( $installarchlib =~ '/libdata/' ) {
+  ok -d "$prefix/libdata";
 } else {
   ok -d "$prefix/lib";
 }
