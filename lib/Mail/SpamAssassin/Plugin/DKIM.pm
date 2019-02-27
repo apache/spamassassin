@@ -114,11 +114,11 @@ are provided as a space-separated list, although this behaviour may change.
 
 C<Mail::DKIM>, C<Mail::SpamAssassin::Plugin>
 
-  http://jason.long.name/dkimproxy/
-  http://tools.ietf.org/rfc/rfc4871.txt
-  http://tools.ietf.org/rfc/rfc4870.txt
-  http://tools.ietf.org/rfc/rfc5617.txt
-  http://ietf.org/html.charters/dkim-charter.html
+  http://dkimproxy.sourceforge.net/
+  https://tools.ietf.org/rfc/rfc4871.txt
+  https://tools.ietf.org/rfc/rfc4870.txt
+  https://tools.ietf.org/rfc/rfc5617.txt
+  https://datatracker.ietf.org/group/dkim/about/
 
 =cut
 

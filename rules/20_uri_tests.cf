@@ -25,7 +25,7 @@
 
 require_version @@VERSION@@
 
-# possible IDN spoofing attack: http://www.shmoo.com/idn/homograph.txt
+# possible IDN spoofing attack: https://web.archive.org/web/20141006091906/https://www.shmoo.com/idn/homograph.txt
 # not expecting any hits on this (yet)
 uri HIGH_CODEPAGE_URI	       /^https?:\/\/[^\/]*\&\#(?:\d{4,}|[3456789]\d\d);/i
 tflags HIGH_CODEPAGE_URI       userconf

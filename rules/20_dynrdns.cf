@@ -168,7 +168,7 @@ header __RDNS_DYNAMIC_VIRTUA  X-Spam-Relays-External =~ /^[^\]]+ rdns=\d+\.cps\.
 header __RDNS_DYNAMIC_SPACELAN X-Spam-Relays-External =~ /^[^\]]+ rdns=\S+-[a-z]\d+-\d+\./i
 
 # rDNS host-type indicators, as per
-# http://tools.ietf.org/wg/dnsop/draft-msullivan-dnsop-generic-naming-schemes-00.txt
+# https://tools.ietf.org/id/draft-msullivan-dnsop-generic-naming-schemes-00.txt
 header __RDNS_INDICATOR_DYN   X-Spam-Relays-External =~ /^[^\]]+ rdns=\S+[\-\.]dyn(?:amic)?[\-\.]/i
 
 # surprisingly large ham hitrate

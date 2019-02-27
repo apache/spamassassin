@@ -2247,7 +2247,7 @@ the raw_uri.  I<parsed> is a faked type which specifies that the
 raw_uri was seen in the rendered text.
 
 C<cleaned> is an array of the raw and canonicalized version of the raw_uri
-(http://spamassassin.apache%2Eorg/, http://spamassassin.apache.org/).
+(http://spamassassin.apache%2Eorg/, https://spamassassin.apache.org/).
 
 C<anchor_text> is an array of the anchor text (text between <a> and
 </a>), if any, which linked to the URI.

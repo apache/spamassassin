@@ -355,7 +355,7 @@ $makefile{META_MERGE} = {
 
   resources => {
     license     => 'http://www.apache.org/licenses/LICENSE-2.0.html',
-    homepage    => 'http://spamassassin.apache.org/',
+    homepage    => 'https://spamassassin.apache.org/',
     bugtracker  => 'https://issues.apache.org/SpamAssassin/',
     repository  => { 
 			url=>'http://svn.apache.org/repos/asf/spamassassin/',

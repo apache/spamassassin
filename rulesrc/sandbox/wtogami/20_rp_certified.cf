@@ -8,14 +8,14 @@
 #ifplugin Mail::SpamAssassin::Plugin::DNSEval # {
 
 # Return Path Certified:
-# http://www.returnpath.net/internetserviceprovider/certification/
+# https://www.returnpath.net/internetserviceprovider/certification/
 # (replaces RCVD_IN_BSP_TRUSTED, RCVD_IN_BSP_OTHER, RCVD_IN_SSC_TRUSTED_COI)
 #header RCVD_IN_RP_CERTIFIED     eval:check_rbl_txt('ssc-firsttrusted', 'sa-trusted.bondedsender.org.')
 #describe RCVD_IN_RP_CERTIFIED   Sender in ReturnPath Certified - Contact cert-sa@returnpath.net
 #tflags RCVD_IN_RP_CERTIFIED     net nice
 
 # Return Path Safe:
-# http://www.returnpath.net/internetserviceprovider/certification/
+# https://www.returnpath.net/internetserviceprovider/certification/
 # (replaces HABEAS_ACCREDITED_COI, HABEAS_ACCREDITED_SOI, HABEAS_CHECKED)
 #header RCVD_IN_RP_SAFE     eval:check_rbl_txt('ssc-firsttrusted','sa-accredit.habeas.com.')
 #describe RCVD_IN_RP_SAFE   Sender in ReturnPath Safe - Contact safe-sa@returnpath.net

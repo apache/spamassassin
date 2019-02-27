@@ -256,7 +256,7 @@ http://umut.topkara.org/PhishTag/PhishTag.cf
 
 Check the list of tests performed by SpamAssassin to modify the
 configuration file to match your needs from 
-http://spamassassin.apache.org/tests.html
+https://spamassassin.apache.org/tests.html
 
 =head1 AUTHOR
 

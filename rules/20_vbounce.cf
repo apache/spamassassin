@@ -39,7 +39,7 @@
 # details.
 #
 # This ruleset is substantially based on
-# http://www.timj.co.uk/linux/bogus-virus-warnings.cf ; the main difference is
+# https://www.timj.co.uk/linux/bogus-virus-warnings.cf ; the main difference is
 # that I (jm) prefer to keep bounces and spam separate, so it now uses a single
 # rule for each type of message, instead of having multiple individual rules
 # with high scores.  That way, you can spot the individual rule names, as
@@ -156,7 +156,7 @@ meta __CRBOUNCE_0SPAM    (__CRBOUNCE_0SPAM1 && __CRBOUNCE_0SPAM2)
 
 header __CRBOUNCE_SPAMARREST exists:X-Spamarrest-noauth
 
-# http://mailinblack.com , a French C/R system with no other reliable
+# https://mailinblack.com , a French C/R system with no other reliable
 # signatures.  annoying!
 header __CRBOUNCE_MIB    Content-Type =~ /mUlTiPaRtBoUnDaRy_MailInBlack/
 

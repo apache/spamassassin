@@ -15,7 +15,7 @@
 ### Frequent updates are needed for these rules, so they are marked 'nopublish'
 ### This keeps them from being automatically promoted to SpamAssassin proper
 ### from the testing system, which affirms their usefulness.  You can check
-### their efficiency at http://ruleqa.spamassassin.org/?rule=%2FKHOP_SC
+### their efficiency at https://ruleqa.spamassassin.org/?rule=%2FKHOP_SC
 #
 #meta   __KHOP_SC_EXCLUSIONS    __VIA_ML || __freemail_safe || __RCVD_IN_DNSWL || RCVD_IN_HOSTKARMA_WL
 #
@@ -160,7 +160,7 @@
 ## 2.9091/0.0056 0.998 20130705@376k
 #
 #
-## Spamhaus DROP, http://www.spamhaus.org/drop/
+## Spamhaus DROP, https://www.spamhaus.org/drop/
 #header  KHOP_SPAMHAUS_DROP     X-Spam-Relays-Untrusted =~ /___ FAILED TO POPULATE ___/
 #describe KHOP_SPAMHAUS_DROP    Relay listed in Spamhaus Don't Route Or Peer List
 #tflags  KHOP_SPAMHAUS_DROP     nopublish
@@ -193,7 +193,7 @@
 ## 0.4298/0      1.000 20130629@465k net
 ## 1.0958/0      1.000 20130705@376k
 #
-## test for ruleqa, 20100409, http://ruleqa.spamassassin.org/?rule=/KHOP_SPAMMY
+## test for ruleqa, 20100409, https://ruleqa.spamassassin.org/?rule=/KHOP_SPAMMY
 #meta __KHOP_SPAMMY_CIDR24  KHOP_PSBL_CIDR24||KHOP_SC_CIDR24||KHOP_SC_TOP_CIDR24
 ## est. 1.2/0.0050@.996, floor: 1.0/0.0112@.989, ceiling: 1.4/0@1
 ##   spam/ham     s/o   corpus

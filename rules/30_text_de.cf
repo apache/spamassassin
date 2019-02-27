@@ -86,8 +86,8 @@ lang de describe RCVD_IN_SORBS_WEB SORBS: Senderechner ist ein ungesicherter WWW
 lang de describe RCVD_IN_SORBS_BLOCK SORBS: Senderechner verweigert Tests
 lang de describe RCVD_IN_SORBS_ZOMBIE SORBS: Senderechner in Liste "entführter" Adressblöcke
 lang de describe RCVD_IN_SORBS_DUL SORBS: Senderechner nur temporär mit Internet verbunden
-lang de describe RCVD_IN_SBL Transportiert via Rechner in SBL-Liste (http://www.spamhaus.org/sbl/)
-lang de describe RCVD_IN_XBL Transportiert via Rechner in XBL-Liste (http://www.spamhaus.org/xbl/)
+lang de describe RCVD_IN_SBL Transportiert via Rechner in SBL-Liste (https://www.spamhaus.org/sbl/)
+lang de describe RCVD_IN_XBL Transportiert via Rechner in XBL-Liste (https://www.spamhaus.org/xbl/)
 lang de describe RCVD_IN_BL_SPAMCOP_NET Transportiert via Rechner in Liste von www.spamcop.net
 lang de describe RCVD_IN_MAPS_RBL Transportiert via Rechner in Liste von http://www.mail-abuse.org/rbl/
 lang de describe RCVD_IN_MAPS_DUL Transportiert via Rechner in Liste von http://www.mail-abuse.org/dul/
@@ -357,7 +357,7 @@ lang de describe SPF_HELO_SOFTFAIL HELO-Name entspricht nicht SPF-Datensatz (sof
 endif
 
 ifplugin Mail::SpamAssassin::Plugin::URIDNSBL
-lang de describe URIBL_SBL Enthält URL in SBL-Liste (http://www.spamhaus.org/sbl/)
+lang de describe URIBL_SBL Enthält URL in SBL-Liste (https://www.spamhaus.org/sbl/)
 #lang de describe URIBL_SC_SURBL Enthält URL in SC-Liste  (www.surbl.org) - removed bug 7279
 lang de describe URIBL_WS_SURBL Enthält URL in WS-Liste (www.surbl.org)
 lang de describe URIBL_PH_SURBL Enthält URL in PH-Liste (www.surbl.org)

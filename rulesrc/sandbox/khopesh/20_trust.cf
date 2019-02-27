@@ -6,7 +6,7 @@
 ## khopesh on irc://irc.freenode.net/#spamassassin
 ## 
 ## This file is fully vetted by the Spamassassin Rule QA testing system at
-## http://ruleqa.spamassassin.org/?srcpath=20_trust.cf
+## https://ruleqa.spamassassin.org/?srcpath=20_trust.cf
 
 # Detect milter-greylist, postgrey, SQLgrey, scam-grey, and hopefully others
 header	 __GREYLISTING	ALL =~ /(?:^|\n)X-(?:Scam-Grey|Greylist(?:ing)?):\s/m

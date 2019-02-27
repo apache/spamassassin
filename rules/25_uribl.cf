@@ -60,8 +60,8 @@ if can(Mail::SpamAssassin::Plugin::URIDNSBL::has_uridnsbl_for_a)
   reuse           URIBL_CSS_A
 endif
 
-# DBL, http://www.spamhaus.org/dbl/
-# changes axb 05-17-2014: as per http://www.spamhaus.org/news/article/713/
+# DBL, https://www.spamhaus.org/dbl/
+# changes axb 05-17-2014: as per https://www.spamhaus.org/news/article/713/
 # SH changes effective 06-01-2014
 if can(Mail::SpamAssassin::Plugin::URIDNSBL::has_tflags_domains_only)
 

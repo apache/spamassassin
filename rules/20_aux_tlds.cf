@@ -43,7 +43,7 @@ endif
 #
 
 # Basic list can be obtained with the following command:
-#  wget http://data.iana.org/TLD/tlds-alpha-by-domain.txt -q -O - | tail -n+2 | perl -ne 'print lc'
+#  wget https://data.iana.org/TLD/tlds-alpha-by-domain.txt -q -O - | tail -n+2 | perl -ne 'print lc'
 # Current list may include more or less.. TODO easier maintenance?
 
 # util_rb_tld only accepts alpha (a-z) input before RegistryBoundaries was
@@ -51,9 +51,9 @@ endif
 # this block
 #
 # For an up to date list of IDN TLDs that can be pasted into this block, run this command:
-#  wget http://data.iana.org/TLD/tlds-alpha-by-domain.txt -q -O - | grep -i '^xn--' | tr '\n' ' ' | fold -w 80 -s | perl -pe 'chomp; s/.*/util_rb_tld \L$_\n/'
+#  wget https://data.iana.org/TLD/tlds-alpha-by-domain.txt -q -O - | grep -i '^xn--' | tr '\n' ' ' | fold -w 80 -s | perl -pe 'chomp; s/.*/util_rb_tld \L$_\n/'
 # Since version 4.0 the util_rb_tld also accepts Unicode IDN labels (encoded as UTF-8), e.g.:
-#  wget http://data.iana.org/TLD/tlds-alpha-by-domain.txt -q -O - | grep -i '^xn--' | idn -u | tr '\n' ' ' | fold -w 80 -s | perl -pe 'chomp; s/.*/util_rb_tld \L$_\n/'
+#  wget https://data.iana.org/TLD/tlds-alpha-by-domain.txt -q -O - | grep -i '^xn--' | idn -u | tr '\n' ' ' | fold -w 80 -s | perl -pe 'chomp; s/.*/util_rb_tld \L$_\n/'
 
 if can(Mail::SpamAssassin::Conf::feature_registryboundaries)
 util_rb_tld xn--11b4c3d xn--1ck2e1b xn--1qqw23a xn--2scrj9c xn--30rr7y xn--3bst00m 
@@ -87,7 +87,7 @@ endif
 
 # Standard List
 # For an up to date list of TLDs that can be pasted into this block, run this command:
-#  wget http://data.iana.org/TLD/tlds-alpha-by-domain.txt -q -O - | tail -n+2 | grep -vi '^xn--' | tr '\n' ' ' | fold -w 80 -s | perl -pe 'chomp; s/.*/util_rb_tld \L$_\n/'
+#  wget https://data.iana.org/TLD/tlds-alpha-by-domain.txt -q -O - | tail -n+2 | grep -vi '^xn--' | tr '\n' ' ' | fold -w 80 -s | perl -pe 'chomp; s/.*/util_rb_tld \L$_\n/'
 
 util_rb_tld aaa aarp abarth abb abbott abbvie abc able abogado abudhabi ac academy 
 util_rb_tld accenture accountant accountants aco active actor ad adac ads adult ae aeg aero 
@@ -210,7 +210,7 @@ util_rb_tld zappos zara zero zip zippo zm zone zuerich zw
 # updated as per bug 5815
 # cleanup in progress per bug 6795 (axb)
 # Unsorted sources:
-# .ua : http://hostmaster.ua
+# .ua : https://hostmaster.ua
 # .hu : http://www.domain.hu/domain/English/szabalyzat/sld.html
 
 util_rb_2tld com.ac edu.ac gov.ac mil.ac net.ac org.ac

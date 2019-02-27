@@ -72,11 +72,11 @@ use constant DUMP_BACKUP => 8;
 # from them; however we do not, so we should ignore them.
 # 
 # sources:
-#   IANA  = <http://www.iana.org/numbers>,
-#   5735  = <http://tools.ietf.org/html/rfc5735>
-#   6598  = <http://tools.ietf.org/html/rfc6598>
-#   4193  = <http://tools.ietf.org/html/rfc4193>
-#   CYMRU = <http://www.cymru.com/Documents/bogon-list.html>
+#   IANA  = <https://www.iana.org/numbers>,
+#   5735  = <https://tools.ietf.org/html/rfc5735>
+#   6598  = <https://tools.ietf.org/html/rfc6598>
+#   4193  = <https://tools.ietf.org/html/rfc4193>
+#   CYMRU = <https://www.team-cymru.com/bogon-reference.html>
 #
 # This includes:
 #   host-local address space 127.0.0.0/8 and ::1,

@@ -430,7 +430,7 @@ header   __ML_TURNS_SP_TO_TAB  Received =~ /\(ORCPT <rfc822;/
 describe __ML_TURNS_SP_TO_TAB  A mailing list changing a space to a TAB
 
 
-# must keep it in sync with http://www.iana.org/assignments/ipv4-address-space/
+# must keep it in sync with https://www.iana.org/assignments/ipv4-address-space/
 header RCVD_ILLEGAL_IP		X-Spam-Relays-Untrusted =~ / (?:by|ip)=(?=\d+\.\d+\.\d+\.\d+ )(?:(?:0|2(?:2[4-9]|[3-5]\d)|192\.0\.2|198\.51\.100|203\.0\.113)\.|(?:\d+\.){0,3}(?!(?:2(?:[0-4]\d|5[0-5])|[01]?\d\d?)\b))/
 describe RCVD_ILLEGAL_IP	Received: contains illegal IP address
 

@@ -45,7 +45,7 @@ rendered text.
 
 C<cleaned> is a list including the raw URI and various cleaned
 versions of the raw URI (http://spamassassin.apache%2Eorg/,
-http://spamassassin.apache.org/).
+https://spamassassin.apache.org/).
 
 C<text> is the anchor text(s) (text between <a> and </a>) that
 linked to the raw URI.
