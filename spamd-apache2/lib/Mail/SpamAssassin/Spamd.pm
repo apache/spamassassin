@@ -49,7 +49,7 @@ See the source code of C<spamd(1)> and C<Mail::SpamAssassin::Spamd::Apache2(3)>.
 
 =head1 AUTHORS
 
-The SpamAssassin(tm) Project E<lt>http://spamassassin.apache.org/E<gt>
+The SpamAssassin(tm) Project E<lt>https://spamassassin.apache.org/E<gt>
 
 =head1 COPYRIGHT
 

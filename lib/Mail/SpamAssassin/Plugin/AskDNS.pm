@@ -116,7 +116,7 @@ Currently recognized RR types in the rr_type parameter are: ANY, A, AAAA,
 MX, TXT, PTR, NAPTR, NS, SOA, CERT, CNAME, DNAME, DHCID, HINFO, MINFO,
 RP, HIP, IPSECKEY, KX, LOC, SRV, SSHFP, SPF.
 
-http://www.iana.org/assignments/dns-parameters/dns-parameters.xml
+https://www.iana.org/assignments/dns-parameters/dns-parameters.xml
 
 The last optional parameter of a rule is a filtering expression, a.k.a. a
 subrule. Its function is much like the subrule in URIDNSBL plugin rules,
@@ -173,7 +173,7 @@ Some typical examples of a numeric filtering parameter are: 127.0.1.2,
 Lastly, the filtering parameter can be a comma-separated list of DNS status
 codes (rcode), enclosed in square brackets. Rcodes can be represented either
 by their numeric decimal values (0=NOERROR, 3=NXDOMAIN, ...), or their names.
-See http://www.iana.org/assignments/dns-parameters for the list of names. When
+See https://www.iana.org/assignments/dns-parameters for the list of names. When
 testing for a rcode where rcode is nonzero, a RR type parameter is ignored
 as a filter, as there is typically no answer section in a DNS reply when
 rcode indicates an error.  Example: [NXDOMAIN], or [FormErr,ServFail,4,5] .
@@ -195,7 +195,7 @@ use version 0.77;
 
 our @ISA = qw(Mail::SpamAssassin::Plugin);
 
-our %rcode_value = (  # http://www.iana.org/assignments/dns-parameters, RFC 6195
+our %rcode_value = (  # https://www.iana.org/assignments/dns-parameters, RFC 6195
   NOERROR => 0,  FORMERR => 1, SERVFAIL => 2, NXDOMAIN => 3, NOTIMP => 4,
   REFUSED => 5,  YXDOMAIN => 6, YXRRSET => 7, NXRRSET => 8, NOTAUTH => 9,
   NOTZONE => 10, BADVERS => 16, BADSIG => 16, BADKEY => 17, BADTIME => 18,
@@ -322,7 +322,7 @@ sub set_config {
         $query_type = 'A' if !defined $query_type;
         $query_type = uc $query_type;
         my @answer_types = split(/,/, $query_type);
-        # http://www.iana.org/assignments/dns-parameters/dns-parameters.xml
+        # https://www.iana.org/assignments/dns-parameters/dns-parameters.xml
         if (grep(!/^(?:ANY|A|AAAA|MX|TXT|PTR|NAPTR|NS|SOA|CERT|CNAME|DNAME|
                        DHCID|HINFO|MINFO|RP|HIP|IPSECKEY|KX|LOC|SRV|
                        SSHFP|SPF)\z/x, @answer_types)) {

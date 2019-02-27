@@ -2904,10 +2904,10 @@ zone.  There's a few things to note:
 
 Duplicated IPs are only queried once and reserved IPs are not queried.
 Private IPs are those listed in
-<http://www.iana.org/assignments/ipv4-address-space>,
+<https://www.iana.org/assignments/ipv4-address-space>,
 <http://duxcw.com/faq/network/privip.htm>,
 <http://duxcw.com/faq/network/autoip.htm>, or
-<http://tools.ietf.org/html/rfc5735> as private.
+<https://tools.ietf.org/html/rfc5735> as private.
 
 =item the 'set' argument
 
