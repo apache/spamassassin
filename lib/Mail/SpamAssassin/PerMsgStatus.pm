@@ -1303,7 +1303,9 @@ sub _process_header {
       # use '!!' instead of ': ' so it doesn't wrap on the space
       my $hdr = "X-Spam-$hdr_name!!$hdr_data";
       $hdr = Mail::SpamAssassin::Util::wrap($hdr, "\t", "", 79, 0, '(?<=[\s,])');
-      $hdr =~ s/^\t\n//gm;
+      # make sure there are no blank lines in headers
+      # buggy wrap might not prefix blank lines with \t, so use \s* (bug 7672)
+      $hdr =~ s/^\s*\n//gm;
       return (split (/!!/, $hdr, 2))[1]; # just return the data part
     }
   }
