@@ -1947,6 +1947,11 @@ describe       BITCOIN_SPAM_09  BitCoin spam pattern 09
 score          BITCOIN_SPAM_09  1.500	# limit
 tflags         BITCOIN_SPAM_09  publish
 
+meta           BITCOIN_SPAM_10  __BITCOIN_ID && ( HTML_IMAGE_ONLY_04 || HTML_IMAGE_ONLY_08 )
+describe       BITCOIN_SPAM_10  BitCoin spam pattern 10
+score          BITCOIN_SPAM_10  2.500	# limit
+tflags         BITCOIN_SPAM_10  publish
+
 ifplugin Mail::SpamAssassin::Plugin::ReplaceTags
   body           __MY_VICTIM            /(?:<H><I>|<H><E><L><L><O>),?(?:\s<M><Y>)?\s(?:<V><I><C><T><I><M>|<P><R><E><Y>)/i
   replace_rules  __MY_VICTIM
