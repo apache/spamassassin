@@ -15,6 +15,7 @@ use lib '.'; use lib 't';
 use SATest; sa_t_init("urilocalbl");
 
 $tests = 0;
+use constant HAS_CIDR_LITE => eval { require Net::CIDR::Lite; };
 eval { require GeoIP2::Database::Reader; $tests += 8; $has{GEOIP2}  = 1 };
 eval { require Geo::IP;                  $tests += 8; $has{GEOIP}   = 1 };
 eval { require IP::Country::DB_File;     $tests += 8; $has{DB_FILE} = 1 };
@@ -22,6 +23,7 @@ eval { require IP::Country::Fast;        $tests += 8; $has{FAST}    = 1 };
 
 use Test::More;
 
+plan skip_all => "Net::CIDR::Lite not installed" unless HAS_CIDR_LITE;
 plan skip_all => "No supported GeoDB module installed" unless $tests;
 
 $net = conf_bool('run_net_tests');
