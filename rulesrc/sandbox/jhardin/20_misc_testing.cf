@@ -1932,7 +1932,7 @@ tflags         BITCOIN_SPAM_06  publish
 
 meta           BITCOIN_SPAM_07  __BITCOIN_ID && __TO_EQ_FROM
 describe       BITCOIN_SPAM_07  BitCoin spam pattern 07
-score          BITCOIN_SPAM_07  3.000	# limit
+score          BITCOIN_SPAM_07  3.500	# limit
 tflags         BITCOIN_SPAM_07  publish
 
 meta           BITCOIN_SPAM_08  __BITCOIN_ID && __TO_IN_SUBJ 
@@ -1999,7 +1999,7 @@ tflags         BITCOIN_DEADLINE       publish
 
 meta           BITCOIN_MALWARE        __BITCOIN_ID && __MY_MALWARE && !BITCOIN_EXTORT_01 && !__NOT_SPOOFED
 describe       BITCOIN_MALWARE        BitCoin + malware
-score          BITCOIN_MALWARE        3.000	# limit
+score          BITCOIN_MALWARE        3.500	# limit
 tflags         BITCOIN_MALWARE        publish
 
 meta           BITCOIN_BOMB           __BITCOIN_ID && __EXPLOSIVE_DEVICE && !BITCOIN_EXTORT_01
