@@ -1,0 +1,18 @@
+ifplugin Mail::SpamAssassin::Plugin::DNSEval
+
+header     T_FROM_NEWDOMAIN_FMBLA    eval:check_rbl_from_domain('fmbla', 'bl.fmb.la.', '127.2.0.2')
+describe   T_FROM_NEWDOMAIN_FMBLA    From domain was registered in last 7 days
+tflags     T_FROM_NEWDOMAIN_FMBLA    net
+reuse      T_FROM_NEWDOMAIN_FMBLA
+
+endif
+
+ifplugin Mail::SpamAssassin::Plugin::URIDNSBL
+
+urirhssub  T_URIBL_NEWDOMAIN_FMBLA    bl.fmb.la. A 127.2.0.2
+body       T_URIBL_NEWDOMAIN_FMBLA    eval:check_uridnsbl('T_URIBL_NEWDOMAIN_FMBLA')
+describe   T_URIBL_NEWDOMAIN_FMBLA    Body contains domain which was registered in last 7 days
+tflags     T_URIBL_NEWDOMAIN_FMBLA    net
+reuse      T_URIBL_NEWDOMAIN_FMBLA
+
+endif
