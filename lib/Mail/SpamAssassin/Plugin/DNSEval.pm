@@ -318,7 +318,7 @@ sub check_rbl_from_host {
   return 0 if !$pms->is_dns_available();
 
   $self->_check_rbl_addresses($pms, $rule, $set, $rbl_server,
-    $subtest, $_[1]->all_from_addrs_domains());
+    $subtest, $_[1]->all_from_addrs());
 }
 
 =over 4
