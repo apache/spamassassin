@@ -315,7 +315,7 @@ sub check_rbl_results_for {
 # using the domain name had much worse results for dsn.rfc-ignorant.org
 sub check_rbl_from_host {
   my ($self, $pms, $rule, $set, $rbl_server, $subtest) = @_; 
-  _check_rbl_addresses($self, $pms, $rule, $set, $rbl_server, $subtest, $_[1]->all_from_addrs_domains());
+  _check_rbl_addresses($self, $pms, $rule, $set, $rbl_server, $subtest, $_[1]->all_from_addrs());
 }
 
 =over 4
