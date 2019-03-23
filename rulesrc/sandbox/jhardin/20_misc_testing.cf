@@ -1952,6 +1952,17 @@ describe       BITCOIN_SPAM_10  BitCoin spam pattern 10
 score          BITCOIN_SPAM_10  2.500	# limit
 tflags         BITCOIN_SPAM_10  publish
 
+meta           BITCOIN_SPAM_11  __BITCOIN_ID && HTML_MESSAGE && __HTML_SHRT_CMNT_OBFU
+describe       BITCOIN_SPAM_11  BitCoin spam pattern 11
+score          BITCOIN_SPAM_11  2.500	# limit
+tflags         BITCOIN_SPAM_11  publish
+
+meta           BITCOIN_SPAM_12  __BITCOIN_ID && __BOGUS_MIME_HDR_MANY
+describe       BITCOIN_SPAM_12  BitCoin spam pattern 12
+score          BITCOIN_SPAM_12  2.500	# limit
+tflags         BITCOIN_SPAM_12  publish
+
+
 ifplugin Mail::SpamAssassin::Plugin::ReplaceTags
   body           __MY_VICTIM            /(?:<H><I>|<H><E><L><L><O>),?(?:\s<M><Y>)?\s(?:<V><I><C><T><I><M>|<P><R><E><Y>)/i
   replace_rules  __MY_VICTIM
@@ -2583,7 +2594,7 @@ if can(Mail::SpamAssassin::Conf::feature_bug6558_free)
   # more-precise version of __OBFUSCATING_COMMENT_A
   rawbody    __HTML_SHRT_CMNT_OBFU       /\w<!--\s*\w+\s*-->\w/
   tflags     __HTML_SHRT_CMNT_OBFU       multiple maxhits=10
-  meta       __HTML_SHRT_CMNT_OBFU_MANY  __HTML_SHRT_CMNT_OBFU > 9 && HTML_MESSAGE
+  meta       __HTML_SHRT_CMNT_OBFU_MANY  __HTML_SHRT_CMNT_OBFU > 5 && HTML_MESSAGE
   meta       HTML_SHRT_CMNT_OBFU_MANY    __HTML_SHRT_CMNT_OBFU_MANY
   describe   HTML_SHRT_CMNT_OBFU_MANY    Obfuscation with many short HTML comments
   score      HTML_SHRT_CMNT_OBFU_MANY    2.500	# limit
@@ -2661,6 +2672,10 @@ if can(Mail::SpamAssassin::Conf::feature_bug6558_free)
   meta       ZW_OBFU_FREEM              __UNICODE_OBFU_ZW && __freemail_hdr_replyto 
   describe   ZW_OBFU_FREEM              Obfuscated text + freemail
   score      ZW_OBFU_FREEM              2.000	# limit
+
+  full       __BOGUS_MIME_HDR            /\bContent-[XYZ]-[a-z]{6,15}:\s+[a-z]{6,15}\b/
+  tflags     __BOGUS_MIME_HDR            multiple maxhits=8
+  meta       __BOGUS_MIME_HDR_MANY       __BOGUS_MIME_HDR > 7
 endif
 
 
