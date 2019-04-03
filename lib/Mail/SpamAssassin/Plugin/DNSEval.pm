@@ -19,8 +19,22 @@
 
 DNSEVAL - look up URLs against DNS blocklists
 
-=cut
+=head1 SYNOPSIS
 
+ loadplugin Mail::SpamAssassin::Plugin::DNSEval
+
+ rbl_headers EnvelopeFrom,Reply-To,Disposition-Notification-To
+ header     RBL_IP    eval:check_rbl_headers('rbl', 'rbl.example.com.', '127.0.0.2')
+ describe   RBL_IP    From address associated with spam domains
+ tflags     RBL_IP    net
+ reuse      RBL_IP
+
+=head1 DESCRIPTION
+
+The DNSEval plugin queries dns to see if a domain or an ip address
+present on one of email's headers is on a particular rbl.
+
+=cut
 
 package Mail::SpamAssassin::Plugin::DNSEval;
 
@@ -35,6 +49,9 @@ use warnings;
 use re 'taint';
 
 our @ISA = qw(Mail::SpamAssassin::Plugin);
+
+my $IP_ADDRESS = IP_ADDRESS;
+my $IP_PRIVATE = IP_PRIVATE;
 
 # constructor: register the eval rule
 sub new {
@@ -58,14 +75,74 @@ sub new {
     'check_rbl_from_host',
     'check_rbl_from_domain',
     'check_rbl_envfrom',
+    'check_rbl_headers',
     'check_dns_sender',
   ];
 
+  $self->set_config($mailsaobject->{conf});
   foreach(@{$self->{'evalrules'}}) {
     $self->register_eval_rule($_);
   }
 
   return $self;
+}
+
+=head1 USER PREFERENCES
+
+The following options can be used in both site-wide (C<local.cf>) and
+user-specific (C<user_prefs>) configuration files to customize how
+SpamAssassin handles incoming email messages.
+
+=over
+
+=item rbl_headers
+
+ This option tells SpamAssassin in which headers to check for content
+ used to query the specified rbl.
+ If on the headers content there is an email address, an ip address
+ or a domain name, it will be checked on the specified rbl.
+ The configuration option can be overridden by passing an headers list as
+ last parameter to check_rbl_headers.
+ The default headers checked are:
+
+=back
+
+=over
+
+=item *
+
+EnvelopeFrom
+
+=item *
+
+Reply-To
+
+=item *
+
+Disposition-Notification-To
+
+=item *
+
+X-WebmailclientIP
+
+=item *
+
+X-Source-IP
+
+=back
+
+=cut
+
+sub set_config {
+    my ($self, $conf) = @_;
+    my @cmds;
+    push(@cmds, {
+        setting => 'rbl_headers',
+        default => 'EnvelopeFrom,Reply-To,Disposition-Notification-To,X-WebmailclientIP,X-Source-IP',
+        type => $Mail::SpamAssassin::Conf::CONF_TYPE_STRING,
+        }
+    );
+    $conf->{parser}->register_commands(\@cmds);
 }
 
 # this is necessary because PMS::run_rbl_eval_tests() calls these functions
@@ -317,6 +394,35 @@ sub check_rbl_results_for {
 sub check_rbl_from_host {
   my ($self, $pms, $rule, $set, $rbl_server, $subtest) = @_; 
   _check_rbl_addresses($self, $pms, $rule, $set, $rbl_server, $subtest, $_[1]->all_from_addrs());
+}
+
+sub check_rbl_headers {
+  my ($self, $pms, $rule, $set, $rbl_server, $subtest, $test_headers) = @_;
+
+  my @env_hdr;
+  my $conf = $self->{main}->{conf};
+
+  if ( defined $test_headers ) {
+    @env_hdr = split(/,/, $test_headers);
+  } else {
+    @env_hdr = split(/,/, $conf->{rbl_headers});
+  }
+
+  foreach my $rbl_headers (@env_hdr) {
+    my $addr = $_[1]->get($rbl_headers.':addr', undef);
+    if ( defined $addr && $addr =~ /\@([^\@\s]+)/ ) {
+      $self->_check_rbl_addresses($pms, $rule, $set, $rbl_server,
+        $subtest, $addr);
+    } else {
+      my $host = $pms->get($rbl_headers);
+      chomp($host);
+      if($host =~ /^$IP_ADDRESS/ ) {
+        $host = reverse_ip_address($host);
+      }
+      $pms->do_rbl_lookup($rule, $set, 'A',
+        "$host.$rbl_server", $subtest) if ( defined $host and $host ne "");
+    }
+  }
 }
 
 =over 4
