@@ -497,6 +497,46 @@ sub check_rbl_ns_from {
   }
 }
 
+=over 4
+
+=item check_rbl_rcvd
+
+This checks all received headers domains or ip addresses against a specific rbl.
+It is possible to include a subtest for a specific octet.
+
+=back
+
+=cut
+
+sub check_rbl_rcvd {
+  my ($self, $pms, $rule, $set, $rbl_server, $subtest) = @_;
+  my %seen;
+  my $host;
+
+  my $rcvd = $pms->{relays_untrusted}->[$pms->{num_relays_untrusted} - 1];
+  my @dnsrcvd = ( $rcvd->{ip}, $rcvd->{by}, $rcvd->{helo}, $rcvd->{rdns} );
+  # unique values
+  my @udnsrcvd = grep { !$seen{$_}++ } @dnsrcvd;
+
+  foreach $host ( @udnsrcvd ) {
+    $host = $rcvd->{rdns};
+    if((defined $host) and ($host ne "")) {
+      chomp($host);
+      if($host =~ /^$IP_ADDRESS/ ) {
+        $host = reverse_ip_address($host);
+      }
+      if ( defined $subtest ) {
+        dbg("dns: checking [$host] / $rule / $set / $rbl_server / $subtest");
+      } else {
+        dbg("dns: checking [$host] / $rule / $set / $rbl_server");
+      }
+      $pms->do_rbl_lookup($rule, $set, 'A',
+        "$host.$rbl_server", $subtest) if ( defined $host and $host ne "");
+    }
+  }
+  return 0;
+}
+
 # this only checks the address host name and not the domain name because
 # using the domain name had much worse results for dsn.rfc-ignorant.org
 sub check_rbl_envfrom {
