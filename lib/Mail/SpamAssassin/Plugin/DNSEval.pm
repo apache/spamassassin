@@ -51,6 +51,7 @@ sub new {
   $self->{'evalrules'} = [
     'check_rbl_accreditor',
     'check_rbl',
+    'check_rbl_ns_from',
     'check_rbl_txt',
     'check_rbl_sub',
     'check_rbl_results_for',
@@ -331,6 +332,57 @@ This checks all the from addrs domain names as an alternate to check_rbl_from_ho
 sub check_rbl_from_domain {
   my ($self, $pms, $rule, $set, $rbl_server, $subtest) = @_;
   _check_rbl_addresses($self, $pms, $rule, $set, $rbl_server, $subtest, $_[1]->all_from_addrs_domains());
+}
+
+=over 4
+
+=item check_rbl_ns_from
+
+This checks the dns server of the from addrs domain name.
+It is possible to include a subtest for a specific octet.
+
+=back
+
+=cut
+
+sub check_rbl_ns_from {
+  my ($self, $pms, $rule, $set, $rbl_server, $subtest) = @_;
+  my $host;
+  my @nshost = ();
+
+  return 0 unless $pms->is_dns_available();
+  $pms->load_resolver();
+
+  for my $from ($_[1]->get('EnvelopeFrom:addr',undef)) {
+    next unless defined $from;
+
+    $from =~ tr/././s;          # bug 3366
+    if ($from =~ m/ \@ ( [^\@\s]+ \. [^\@\s]+ )/x ) {
+      $host = lc($1);
+      last;
+    }
+  }
+  return 0 unless defined $host;
+
+  dbg("dns: checking NS for host $host");
+
+  my @ns = $pms->lookup_ns($host);
+  my @rd_ns = $ns[0];
+
+  for my $count ( 0 .. ( @rd_ns + 1 ) ) {
+    my $nshost = $ns[0][$count];
+    if(defined($nshost)) {
+      chomp($nshost);
+      if ( defined $subtest ) {
+        dbg("dns: checking [$nshost] / $rule / $set / $rbl_server / $subtest");
+      } else {
+        dbg("dns: checking [$nshost] / $rule / $set / $rbl_server");
+      }
+      $pms->do_rbl_lookup($rule, $set, 'A',
+        "$nshost.$rbl_server", $subtest) if ( defined $nshost and $nshost ne "");
+      $count++;
+    }
+  }
 }
 
 # this only checks the address host name and not the domain name because
