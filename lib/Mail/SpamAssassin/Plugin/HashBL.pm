@@ -32,6 +32,10 @@ HashBL - query hashed (and unhashed) DNS blocklists
   describe HASHBL_OSENDR Message contains email address found on HASHBL
   tflags  HASHBL_OSENDR  net
 
+  body     HASHBL_BTC eval:check_hashbl_bodyre('btcbl.foo.bar', 'sha1/max=10/shuffle', '\b([13][a-km-zA-HJ-NP-Z1-9]{25,34})\b')
+  describe HASHBL_BTC Message contains BTC address found on BTCBL
+  priority HASHBL_BTC -100 # required priority to launch async lookups
+
 =head1 DESCRIPTION
 
 This plugin support multiple types of hashed or unhashed DNS blocklists.
@@ -84,12 +88,20 @@ For existing public email blacklist, see: http://msbl.org/ebl.html
   header HASHBL_EBL check_hashbl_emails('ebl.msbl.org')
   priority HASHBL_EBL -100 # required for async query
 
+=item body RULE check_hashbl_bodyre('bl.example.com/A', 'OPTS', '\b(match)\b', '^127\.')
+
+Search body for matching regexp and query the string captured.  Regexp must
+have a single capture ( ) for the string ($1).  Optional subtest regexp to
+match DNS answer.  Note that eval rule type must be "body" or "rawbody".
+
+=back
+
 =cut
 
 package Mail::SpamAssassin::Plugin::HashBL;
 use strict;
 use warnings;
-my $VERSION = 0.90;
+my $VERSION = 0.100;
 
 use Mail::SpamAssassin::Plugin;
 use Mail::SpamAssassin::PerMsgStatus;
@@ -118,6 +130,7 @@ sub new {
   }
 
   $self->register_eval_rule("check_hashbl_emails");
+  $self->register_eval_rule("check_hashbl_bodyre");  
   $self->set_config($mailsa->{conf});
 
   return $self;
@@ -390,6 +403,81 @@ sub check_hashbl_emails {
   return 0;
 }
 
+sub check_hashbl_bodyre {
+  my ($self, $pms, $bodyref, $list, $opts, $re, $subtest) = @_;
+
+  return 0 if !$self->{hashbl_available};
+
+  my $rulename = $pms->get_current_eval_rule_name();
+
+  if (!defined $list) {
+    info("HashBL: $rulename blocklist argument missing");
+    return 0;
+  }
+
+  if (!$re || !eval { $re = qr/$re/ }) {
+    info("HashBL: $rulename invalid body regex: $@");
+    return 0;
+  }
+
+  if ($subtest && !eval { $subtest = qr/$subtest/ }) {
+    info("HashBL: $rulename invalid subtext regex: $@");
+    return 0;
+  }
+
+  # Defaults
+  $opts = 'sha1/max=10/shuffle' if !$opts;
+
+  my $keep_case = $opts =~ /\bcase\b/i;
+
+  # Search body
+  my @matches;
+  my %seen;
+  if (ref($bodyref) eq 'ARRAY') {
+    # body, rawbody
+    foreach (@$bodyref) {
+      while ($_ =~ /$re/gs) {
+        next if !defined $1;
+        my $match = $keep_case ? $1 : lc($1);
+        next if exists $seen{$match};
+        $seen{$match} = 1;
+        push @matches, $match;
+      }
+    }
+  } else {
+    # full
+    while ($$bodyref =~ /$re/gs) {
+      next if !defined $1;
+      my $match = $keep_case ? $1 : lc($1);
+      next if exists $seen{$match};
+      $seen{$match} = 1;
+      push @matches, $match;
+    }
+  }
+
+  if (!@matches) {
+    dbg("$rulename: no matches found");
+    return 0;
+  } else {
+    dbg("$rulename: matches found: '".join("', '", @matches)."'");
+  }
+
+  # Randomize order
+  if ($opts =~ /\bshuffle\b/) {
+    Mail::SpamAssassin::Util::fisher_yates_shuffle(\@matches);
+  }
+
+  # Truncate list
+  my $max = $opts =~ /\bmax=(\d+)\b/ ? $1 : 10;
+  $#matches = $max if scalar @matches > $max;
+
+  foreach my $match (@matches) {
+    $self->_submit_query($pms, $rulename, $match, $list, $opts, $subtest);
+  }
+
+  return 0;
+}
+
 sub _hash {
   my ($self, $opts, $value) = @_;
 
@@ -453,6 +541,7 @@ sub _finish_query {
 }
 
 # Version features
-sub has_hashbl_ignore { 1 }
+sub has_hashbl_bodyre { 1 }
+sub has_hashbl_ignore { 0 }
 
 1;
