@@ -25,7 +25,11 @@ HashBL - query hashed (and unhashed) DNS blocklists
 
   header   HASHBL_EMAIL eval:check_hashbl_emails('ebl.msbl.org')
   describe HASHBL_EMAIL Message contains email address found on EBL
-  priority HASHBL_EMAIL -100 # required priority to launch async lookups
+
+  hashbl_acl_freemail gmail.com
+  header  HASHBL_OSENDR  eval:check_hashbl_emails('rbl.example.com/A', 'md5/max=10/shuffle', 'X-Original-Sender', '^127\.', 'freemail')
+  describe HASHBL_OSENDR Message contains email address found on HASHBL
+  tflags  HASHBL_OSENDR  net
 
   body     HASHBL_BTC eval:check_hashbl_bodyre('btcbl.foo.bar', 'sha1/max=10/shuffle', '\b([13][a-km-zA-HJ-NP-Z1-9]{25,34})\b')
   describe HASHBL_BTC Message contains BTC address found on BTCBL
@@ -88,13 +92,6 @@ For existing public email blacklist, see: http://msbl.org/ebl.html
 Search body for matching regexp and query the string captured.  Regexp must
 have a single capture ( ) for the string ($1).  Optional subtest regexp to
 match DNS answer.  Note that eval rule type must be "body" or "rawbody".
-
-Default OPTS: sha1/max=10/shuffle
-
-=item hashbl_ignore string string2 ...
-
-Ignore (do not query) specified emails or captured strings.
-Both raw and hashed values are checked.
 
 =back
 
@@ -163,6 +160,59 @@ sub set_config {
   $conf->{parser}->register_commands(\@cmds);
 }
 
+sub _parse_args {
+    my ($self, $acl) = @_;
+
+    if (not defined $acl) {
+      return ();
+    }
+    $acl =~ s/\s+//g;
+    if ($acl !~ /^[a-z0-9]{1,32}$/) {
+        warn("invalid acl name: $acl");
+        return ();
+    }
+    if ($acl eq 'all') {
+        return ();
+    }
+    if (defined $self->{hashbl_acl}{$acl}) {
+        warn("no such acl defined: $acl");
+        return ();
+    }
+}
+
+sub parse_config {
+    my ($self, $opt) = @_;
+
+    if ($opt->{key} =~ /^hashbl_acl_([a-z0-9]{1,32})$/i) {
+        $self->inhibit_further_callbacks();
+        return 1 unless $self->{hashbl_available};
+
+        my $acl = lc($1);
+        my @opts = split(/\s+/, $opt->{value});
+        foreach my $tmp (@opts)
+        {
+            if ($tmp =~ /^(\!)?(\S+)$/i) {
+                my $neg = $1;
+                my $value = lc($2);
+
+                if (defined $neg) {
+                    $self->{hashbl_acl}{$acl}{$value} = 0;
+                } else {
+                    next if $acl eq 'all';
+                    # exclusions overrides
+                    if ( not defined $self->{hashbl_acl}{$acl}{$value} ) {
+                      $self->{hashbl_acl}{$acl}{$value} = 1
+                    }
+                }
+            } else {
+                warn("invalid acl: $tmp");
+            }
+        }
+        return 1;
+    }
+    return 0;
+}
+
 sub finish_parsing_end {
   my ($self, $opts) = @_;
 
@@ -193,19 +243,44 @@ sub _init_email_re {
     $self->{main}->{registryboundaries}->{valid_tlds_re} # ends with valid tld
     )
   /xi;
+
+  # default email whitelist
+  $self->{email_whitelist} = qr/
+    ^(?:
+        abuse|support|sales|info|helpdesk|contact|kontakt
+      | (?:post|host|domain)master
+      | undisclosed.*                     # yahoo.com etc(?)
+      | request-[a-f0-9]{16}              # live.com
+      | bounced?-                         # yahoo.com etc
+      | [a-f0-9]{8}(?:\.[a-f0-9]{8}|-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}) # gmail msgids?
+      | .+=.+=.+                          # gmail forward
+    )\@
+  /xi;  
 }
 
 sub _get_emails {
-  my ($self, $pms, $opts, $from) = @_;
+  my ($self, $pms, $opts, $from, $acl) = @_;
 
   my @emails; # keep find order
   my %seen;
-  foreach my $hdr (split(/\W+/, $from)) {
+  my @tmp_email;
+  my $domain;
+
+  foreach my $hdr (split(/\//, $from)) {
     my $parsed_emails = $self->_parse_emails($pms, $opts, $hdr);
     foreach (@$parsed_emails) {
       next if exists $seen{$_};
-      push @emails, $_;
-      $seen{$_} = 1;
+      my @tmp_email = split('@', $_);
+      my $domain = $tmp_email[1];
+      if (defined($acl) and ($acl ne "all")) {
+        if (defined($self->{hashbl_acl}{$acl}{$domain}) and ($self->{hashbl_acl}{$acl}{$domain} eq 1)) {
+          push @emails, $_;
+          $seen{$_} = 1;
+        }
+      } else {
+        push @emails, $_;
+        $seen{$_} = 1;
+      }
     }
   }
 
@@ -222,6 +297,18 @@ sub _parse_emails {
   if ($hdr eq 'ALLFROM') {
     my @emails = $pms->all_from_addrs();
     return $pms->{hashbl_email_cache}{$hdr} = \@emails;
+  }
+
+  if (not defined $pms->{hashbl_whitelist}) {
+    %{$pms->{hashbl_whitelist}} = map { lc($_) => 1 }
+        ( $pms->get("X-Original-To:addr"),
+          $pms->get("Apparently-To:addr"),
+          $pms->get("Delivered-To:addr"),
+          $pms->get("Envelope-To:addr"),
+        );
+    if ( defined $pms->{hashbl_whitelist}{''} ) {
+      delete $pms->{hashbl_whitelist}{''};
+    }
   }
 
   my $str = '';
@@ -254,6 +341,7 @@ sub _parse_emails {
 
   my @emails; # keep find order
   my %seen;
+
   while ($str =~ /($self->{email_re})/g) {
     next if exists $seen{$1};
     push @emails, $1;
@@ -263,7 +351,7 @@ sub _parse_emails {
 }
 
 sub check_hashbl_emails {
-  my ($self, $pms, $list, $opts, $from, $subtest) = @_;
+  my ($self, $pms, $list, $opts, $from, $subtest, $acl) = @_;
 
   return 0 if !$self->{hashbl_available};
   return 0 if !$self->{email_re};
@@ -286,7 +374,7 @@ sub check_hashbl_emails {
   $from = 'ALLFROM/Reply-To/body' if !$from;
 
   # Find all emails
-  my $emails = $self->_get_emails($pms, $opts, $from);
+  my $emails = $self->_get_emails($pms, $opts, $from, $acl);
   if (!@$emails) {
     dbg("$rulename: no emails found ($from)");
     return 0;
@@ -302,6 +390,10 @@ sub check_hashbl_emails {
   my %seen;
   foreach my $email (@$emails) {
     next if exists $seen{$email};
+    if (($email =~ $self->{email_whitelist}) or defined ($pms->{hashbl_whitelist}{$email})) {
+      dbg("Address whitelisted: $email");
+      next;
+    }
     if ($nodot || $notag) {
       my ($username, $domain) = ($email =~ /(.*)(\@.*)/);
       $username =~ tr/.//d if $nodot;
