@@ -76,6 +76,7 @@ sub new {
     'check_rbl_from_domain',
     'check_rbl_envfrom',
     'check_rbl_headers',
+    'check_rbl_rcvd',
     'check_dns_sender',
   ];
 
