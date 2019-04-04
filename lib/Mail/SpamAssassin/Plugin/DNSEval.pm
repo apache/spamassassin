@@ -454,30 +454,57 @@ It is possible to include a subtest for a specific octet.
 
 sub check_rbl_ns_from {
   my ($self, $pms, $rule, $set, $rbl_server, $subtest) = @_;
-  my $host;
+  my $domain;
   my @nshost = ();
 
   return 0 unless $pms->is_dns_available();
   $pms->load_resolver();
 
-  for my $from ($_[1]->get('EnvelopeFrom:addr',undef)) {
+  for my $from ($pms->get('EnvelopeFrom:addr')) {
     next unless defined $from;
-
     $from =~ tr/././s;          # bug 3366
     if ($from =~ m/ \@ ( [^\@\s]+ \. [^\@\s]+ )/x ) {
-      $host = lc($1);
+      $domain = lc($1);
       last;
     }
   }
-  return 0 unless defined $host;
+  return 0 unless defined $domain;
 
-  dbg("dns: checking NS for host $host");
+  dbg("dns: checking NS for host $domain");
 
-  my @ns = $pms->lookup_ns($host);
-  my @rd_ns = $ns[0];
+  my $key = "NS:" . $domain;
+  my $obj = { dom => $domain, rule => $rule, set => $set, rbl_server => $rbl_server, subtest => $subtest };
+  my $ent = {
+    key => $key, zone => $domain, obj => $obj, type => "URI-NS",
+  };
+  # dig $dom ns
+  $ent = $pms->{async}->bgsend_and_start_lookup(
+    $domain, 'NS', undef, $ent,
+    sub { my ($ent2,$pkt) = @_;
+          $self->complete_ns_lookup($pms, $ent2, $pkt, $domain) },
+    master_deadline => $pms->{master_deadline} );
+  return $ent;
+}
 
-  for my $count ( 0 .. ( @rd_ns + 1 ) ) {
-    my $nshost = $ns[0][$count];
+sub complete_ns_lookup {
+  my ($self, $pms, $ent, $pkt, $host) = @_;
+
+  my $rule = $ent->{obj}->{rule};
+  my $set = $ent->{obj}->{set};
+  my $rbl_server = $ent->{obj}->{rbl_server};
+  my $subtest = $ent->{obj}->{subtest};
+
+  if (!$pkt) {
+    # $pkt will be undef if the DNS query was aborted (e.g. timed out)
+    dbg("DNSEval: complete_ns_lookup aborted %s", $ent->{key});
+    return;
+  }
+
+  dbg("DNSEval: complete_ns_lookup %s", $ent->{key});
+  my @ns = $pkt->answer;
+
+  foreach my $rr (@ns) {
+    my $nshost = $rr->nsdname;
     if(defined($nshost)) {
       chomp($nshost);
       if ( defined $subtest ) {
@@ -487,7 +514,6 @@ sub check_rbl_ns_from {
       }
       $pms->do_rbl_lookup($rule, $set, 'A',
         "$nshost.$rbl_server", $subtest) if ( defined $nshost and $nshost ne "");
-      $count++;
     }
   }
 }
