@@ -1,20 +1,20 @@
-# check_rbl_from_domain subtest implemented only from 3.4.1
+# _SENDERDOMAIN_ implemented only from 3.4.1
 if (version >= 3.004001)
-ifplugin Mail::SpamAssassin::Plugin::DNSEval
+ifplugin Mail::SpamAssassin::Plugin::AskDNS
 
-header     FROM_FMBLA_NEWDOM    eval:check_rbl_from_domain('freshfmbla', 'fresh.fmb.la.', '127.2.0.2')
+askdns     FROM_FMBLA_NEWDOM    _SENDERDOMAIN_.fresh.fmb.la. A 127.2.0.2
 describe   FROM_FMBLA_NEWDOM    From domain was registered in last 7 days
 tflags     FROM_FMBLA_NEWDOM    net
 score      FROM_FMBLA_NEWDOM    1.5
 reuse      FROM_FMBLA_NEWDOM
 
-header     FROM_FMBLA_NEWDOM14  eval:check_rbl_from_domain('freshfmbla', 'fresh.fmb.la.', '127.2.0.14')
+askdns     FROM_FMBLA_NEWDOM14  _SENDERDOMAIN_.fresh.fmb.la. A 127.2.0.14
 describe   FROM_FMBLA_NEWDOM14  From domain was registered in last 7-14 days
 tflags     FROM_FMBLA_NEWDOM14  net
 score      FROM_FMBLA_NEWDOM14  1.0
 reuse      FROM_FMBLA_NEWDOM14
 
-header     FROM_FMBLA_NDBLOCKED  eval:check_rbl_from_domain('freshfmbla', 'fresh.fmb.la.', '127.255.255.255')
+askdns     FROM_FMBLA_NDBLOCKED  _SENDERDOMAIN_.fresh.fmb.la. A 127.255.255.255
 describe   FROM_FMBLA_NDBLOCKED  ADMINISTRATOR NOTICE: The query to fresh.fmb.la was blocked. See http://wiki.apache.org/spamassassin/DnsBlocklists\#dnsbl-block for more information.
 tflags     FROM_FMBLA_NDBLOCKED  net
 score      FROM_FMBLA_NDBLOCKED  0.001 # limit
