@@ -507,10 +507,10 @@ sub complete_ns_lookup {
   }
 
   dbg("DNSEval: complete_ns_lookup %s", $ent->{key});
-  my @ns = $pkt->answer;
+  my @ns = $pkt->authority;
 
   foreach my $rr (@ns) {
-    my $nshost = $rr->nsdname;
+    my $nshost = $rr->mname;
     if(defined($nshost)) {
       chomp($nshost);
       if ( defined $subtest ) {
