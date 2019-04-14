@@ -5,4 +5,4 @@ header  __FORGED_MUA_POSTFIX0	User-Agent =~ /Postfix/
 header  __FORGED_MUA_POSTFIX1	X-Mailer =~ /Postfix/
 meta	FORGED_MUA_POSTFIX	( __FORGED_MUA_POSTFIX0 || __FORGED_MUA_POSTFIX1 )
 describe	FORGED_MUA_POSTFIX	Forged Postfix mua headers
-score	1.0 # limit
+score	FORGED_MUA_POSTFIX	1.0 # limit
