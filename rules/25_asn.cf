@@ -35,6 +35,6 @@ ifplugin Mail::SpamAssassin::Plugin::ASN
 
  # IPv6 support (Bug 7211)
  #if can(Mail::SpamAssassin::Plugin::ASN::has_asn_lookup_ipv6)
- #  asn_lookup origin6.asn.cymru.com _ASN_ _ASNCIDR_
+ #  asn_lookup_ipv6 origin6.asn.cymru.com _ASN_ _ASNCIDR_
  #endif
 endif	# Mail::SpamAssassin::Plugin::ASN
