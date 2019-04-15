@@ -34,7 +34,7 @@ my @ignored_commands = qw(
   version_tag uri_detail uridnssub uridnsbl urirhsbl urirhssub urinsrhsbl
   urinsrhssub urifullnsrhsbl urifullnsrhssub add_header remove_header
   redirector_pattern reuse mimeheader rbl_timeout uridnsbl_timeout
-  util_rb_tld util_rb_2tld util_rb_3tld shortcircuit asn_lookup
+  util_rb_tld util_rb_2tld util_rb_3tld shortcircuit asn_lookup asn_lookup_ipv6
 
 );
 
