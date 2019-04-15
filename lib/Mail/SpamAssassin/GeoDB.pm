@@ -185,6 +185,13 @@ sub init_database {
   if (!$dbapi->{country_v6} && $dbapi->{city_v6}) {
     $dbapi->{country_v6} = $dbapi->{city_v6}
   }
+  # asn can be aliased to isp
+  if (!$dbapi->{asn} && $dbapi->{isp}) {
+    $dbapi->{asn} = $dbapi->{isp};
+  }
+  if (!$dbapi->{asn_v6} && $dbapi->{isp_v6}) {
+    $dbapi->{asn_v6} = $dbapi->{isp_v6}
+  }
 
   $self->{db} = $db;
   $self->{dbapi} = $dbapi;
@@ -210,14 +217,13 @@ sub load_geoip2 {
 
   my %path;
   foreach my $dbtype (@geoip_types) {
-    # only autosearch if no absolute path given
-    next if $geodb_opts->{dbs} && !exists $geodb_opts->{dbs}->{$dbtype};
-    # skip if not needed
-    next if $geodb_opts->{wanted} && !$geodb_opts->{wanted}->{$dbtype};
     # skip country if city already loaded
     next if $dbtype eq 'country' && $db->{city};
     # skip asn if isp already loaded
     next if $dbtype eq 'asn' && $db->{isp};
+    # skip if not needed
+    next if $geodb_opts->{wanted} && !$geodb_opts->{wanted}->{$dbtype};
+    # only autosearch if no absolute path given
     if (!defined $geodb_opts->{dbs}->{$dbtype}) {
       # Try some default locations
       PATHS_GEOIP2: foreach my $p (@{$geodb_opts->{search_path}}) {
@@ -402,14 +408,13 @@ sub load_geoip {
 
   my %path;
   foreach my $dbtype (@geoip_types) {
-    # only autosearch if no absolute path given
-    next if $geodb_opts->{dbs} && !exists $geodb_opts->{dbs}->{$dbtype};
-    # skip if not needed
-    next if $geodb_opts->{wanted} && !$geodb_opts->{wanted}->{$dbtype};
     # skip country if city already loaded
     next if $dbtype eq 'country' && $db->{city};
     # skip asn if isp already loaded
     next if $dbtype eq 'asn' && $db->{isp};
+    # skip if not needed
+    next if $geodb_opts->{wanted} && !$geodb_opts->{wanted}->{$dbtype};
+    # only autosearch if no absolute path given
     if (!defined $geodb_opts->{dbs}->{$dbtype}) {
       # Try some default locations
       PATHS_GEOIP: foreach my $p (@{$geodb_opts->{search_path}}) {
@@ -708,6 +713,20 @@ sub get_isp {
 
   if ($self->{dbapi}->{isp}) {
     return $self->_get('isp',$ip)->{isp};
+  } else {
+    return undef;
+  }
+}
+
+sub get_asn {
+  my ($self, $ip) = @_;
+
+  return undef if !defined $ip || $ip !~ /\S/;
+
+  if ($self->{dbapi}->{isp}) {
+    return $self->_get('isp',$ip)->{asn};
+  } elsif ($self->{dbapi}->{asn}) {
+    return $self->_get('asn',$ip)->{asn};
   } else {
     return undef;
   }
