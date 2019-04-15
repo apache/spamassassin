@@ -150,27 +150,31 @@ sub init_database {
       $opts->{conf}->{geodb_search_path} : \@geoip_default_path,
   };
 
-  my ($db, $dbapi);
+  my ($db, $dbapi, $loaded);
 
   ## GeoIP2
   if (!$db && (!$geodb_opts->{module} || $geodb_opts->{module} eq 'geoip2')) {
     ($db, $dbapi) = $self->load_geoip2($geodb_opts);
+    $loaded = 'geoip2' if $db;
   }
 
   ## Geo::IP
   if (!$db && (!$geodb_opts->{module} || $geodb_opts->{module} eq 'geoip')) {
     ($db, $dbapi) = $self->load_geoip($geodb_opts);
+    $loaded = 'geoip' if $db;
   }
 
   ## IP::Country::DB_File
   if (!$db && $geodb_opts->{module} && $geodb_opts->{module} eq 'dbfile') {
     # Only try if geodb_module and path to ipcc.db specified
     ($db, $dbapi) = $self->load_dbfile($geodb_opts);
+    $loaded = 'dbfile' if $db;
   }
 
   ## IP::Country::Fast
   if (!$db && (!$geodb_opts->{module} || $geodb_opts->{module} eq 'fast')) {
     ($db, $dbapi) = $self->load_fast($geodb_opts);
+    $loaded = 'fast' if $db;
   }
 
   if (!$db) {
@@ -185,12 +189,14 @@ sub init_database {
   if (!$dbapi->{country_v6} && $dbapi->{city_v6}) {
     $dbapi->{country_v6} = $dbapi->{city_v6}
   }
-  # asn can be aliased to isp
-  if (!$dbapi->{asn} && $dbapi->{isp}) {
-    $dbapi->{asn} = $dbapi->{isp};
-  }
-  if (!$dbapi->{asn_v6} && $dbapi->{isp_v6}) {
-    $dbapi->{asn_v6} = $dbapi->{isp_v6}
+  # GeoIP2 asn can be aliased to isp
+  if ($loaded eq 'geoip2') {
+    if (!$dbapi->{asn} && $dbapi->{isp}) {
+      $dbapi->{asn} = $dbapi->{isp};
+    }
+    if (!$dbapi->{asn_v6} && $dbapi->{isp_v6}) {
+      $dbapi->{asn_v6} = $dbapi->{isp_v6}
+    }
   }
 
   $self->{db} = $db;
@@ -557,6 +563,27 @@ sub load_geoip {
     return $res;
   };
 
+  # asn()
+  $db->{asn} and $dbapi->{asn} = sub {
+    my $res = {};
+    my $asn;
+    eval {
+      if ($_[1] =~ /^$IPV4_ADDRESS$/o) {
+        $asn = $_[0]->{db}->{asn}->isp_by_addr($_[1]);
+      } else {
+        # TODO?
+        return $res;
+      }
+      1;
+    };
+    if (!defined $asn || $asn !~ /^AS(\d+)/) {
+      dbg("geodb: GeoIP asn query failed for $_[1]");
+      return $res;
+    };
+    $res->{asn} = $1;
+    return $res;
+  };
+
   return ($db, $dbapi);
 }
 
@@ -723,10 +750,10 @@ sub get_asn {
 
   return undef if !defined $ip || $ip !~ /\S/;
 
-  if ($self->{dbapi}->{isp}) {
-    return $self->_get('isp',$ip)->{asn};
-  } elsif ($self->{dbapi}->{asn}) {
+  if ($self->{dbapi}->{asn}) {
     return $self->_get('asn',$ip)->{asn};
+  } elsif ($self->{dbapi}->{isp}) {
+    return $self->_get('isp',$ip)->{asn};
   } else {
     return undef;
   }
