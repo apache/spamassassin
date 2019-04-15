@@ -32,4 +32,9 @@
 ifplugin Mail::SpamAssassin::Plugin::ASN
  asn_lookup asn.routeviews.org _ASN_ _ASNCIDR_
  add_header all ASN _ASN_ _ASNCIDR_
+
+ # IPv6 support (Bug 7211)
+ #if can(Mail::SpamAssassin::Plugin::ASN::has_asn_lookup_ipv6)
+ #  asn_lookup origin6.asn.cymru.com _ASN_ _ASNCIDR_
+ #endif
 endif	# Mail::SpamAssassin::Plugin::ASN

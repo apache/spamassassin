@@ -39,7 +39,7 @@
 # (e.g. from cymru.com). This form of a response is handled as well.
 #
 # Some zones also support IPv6 lookups, for example:
-#   asn_lookup origin6.asn.cymru.com [_ASN_ _ASNCIDR_]
+#   asn_lookup_ipv6 origin6.asn.cymru.com [_ASN_ _ASNCIDR_]
 
 =head1 NAME
 
@@ -51,6 +51,8 @@ Autonomous System Number (ASN) of the connecting IP address.
  loadplugin Mail::SpamAssassin::Plugin::ASN
 
  asn_lookup asn.routeviews.org _ASN_ _ASNCIDR_
+ 
+ asn_lookup_ipv6 origin6.asn.cymru.com _ASN_ _ASNCIDR_
 
  add_header all ASN _ASN_ _ASNCIDR_
 
@@ -120,10 +122,13 @@ use Mail::SpamAssassin::Plugin;
 use Mail::SpamAssassin::Logger;
 use Mail::SpamAssassin::Util qw(reverse_ip_address);
 use Mail::SpamAssassin::Dns;
+use Mail::SpamAssassin::Constants qw(:ip);
 
 our @ISA = qw(Mail::SpamAssassin::Plugin);
 
 our $txtdata_can_provide_a_list;
+
+my $IPV4_ADDRESS = IPV4_ADDRESS;
 
 sub new {
   my ($class, $mailsa) = @_;
@@ -153,7 +158,7 @@ sub set_config {
 =item asn_lookup asn-zone.example.com [ _ASNTAG_ _ASNCIDRTAG_ ]
 
 Use this to lookup the ASN info in the specified zone for the first external
-IP address and add the AS number to the first specified tag and routing info
+IPv4 address and add the AS number to the first specified tag and routing info
 to the second specified tag.
 
 If no tags are specified the AS number will be added to the _ASN_ tag and the
@@ -179,6 +184,12 @@ Examples:
   asn_lookup in1tag.example.net _ASNDATA_ _ASNDATA_
 
 =back
+
+=item asn_lookup_ipv6 asn-zone6.example.com [_ASN_ _ASNCIDR_]
+
+Use specified zone for lookups of IPv6 addresses.  If zone supports both
+IPv4 and IPv6 queries, use both asn_lookup and asn_lookup_ipv6 for the same
+zone.
 
 =over 4
 
@@ -223,6 +234,26 @@ need not be) enclosed in single or double quotes for clarity.
   });
 
   push (@cmds, {
+    setting => 'asn_lookup_ipv6',
+    is_admin => 1,
+    code => sub {
+      my ($conf, $key, $value, $line) = @_;
+      unless (defined $value && $value !~ /^$/) {
+        return $Mail::SpamAssassin::Conf::MISSING_REQUIRED_VALUE;
+      }
+      local($1,$2,$3);
+      unless ($value =~ /^(\S+?)\.?(?:\s+_(\S+)_\s+_(\S+)_)?$/) {
+        return $Mail::SpamAssassin::Conf::INVALID_VALUE;
+      }
+      my ($zone, $asn_tag, $route_tag) = ($1, $2, $3);
+      $asn_tag   = 'ASN'     if !defined $asn_tag;
+      $route_tag = 'ASNCIDR' if !defined $route_tag;
+      push @{$conf->{asnlookups_ipv6}},
+           { zone=>$zone, asn_tag=>$asn_tag, route_tag=>$route_tag };
+    }
+  });
+
+  push (@cmds, {
     setting => 'clear_asn_lookups',
     is_admin => 1,
     type => $Mail::SpamAssassin::Conf::CONF_TYPE_NOARGS,
@@ -232,6 +263,7 @@ need not be) enclosed in single or double quotes for clarity.
         return $Mail::SpamAssassin::Conf::INVALID_VALUE;
       }
       delete $conf->{asnlookups};
+      delete $conf->{asnlookups_ipv6};
     }
   });
 
@@ -259,60 +291,81 @@ sub parsed_metadata {
   my $pms = $opts->{permsgstatus};
   my $conf = $self->{main}->{conf};
 
-  unless ($conf->{asnlookups}) {
-    dbg("asn: no asn_lookup configured, skipping ASN lookups");
-    return; # no asn_lookups mean no tags need to be initialized
+  if (!$pms->is_dns_available()) {
+    dbg("asn: DNS is not available, skipping ASN checks");
+    return;
+  }
+
+  if (!$conf->{asnlookups} && !$conf->{asnlookups_ipv6}) {
+    dbg("asn: no asn_lookups configured, skipping ASN lookups");
+    return;
+  }
+
+  # initialize the tag data so that if no result is returned from the DNS
+  # query we won't end up with a missing tag.  Don't use $pms->set_tag()
+  # here to avoid triggering any tag-dependent action unnecessarily
+  if ($conf->{asnlookups}) {
+    foreach my $entry (@{$conf->{asnlookups}}) {
+      $pms->{tag_data}->{$entry->{asn_tag}} ||= '';
+      $pms->{tag_data}->{$entry->{route_tag}} ||= '';
+    }
+  }
+  if ($conf->{asnlookups_ipv6}) {
+    foreach my $entry (@{$conf->{asnlookups_ipv6}}) {
+      $pms->{tag_data}->{$entry->{asn_tag}} ||= '';
+      $pms->{tag_data}->{$entry->{route_tag}} ||= '';
+    }
   }
 
   # get reversed IP address of last external relay to lookup
   # don't return until we've initialized the template tags
-  my($ip,$reversed_ip);
   my $relay = $pms->{relays_external}->[0];
-  $ip = $relay->{ip}  if defined $relay;
-  if (!$pms->is_dns_available()) {
-    dbg("asn: DNS is not available, skipping ASN checks");
-  } elsif (!defined $ip) {
+  if (!defined $relay) {
     dbg("asn: no first external relay IP available, skipping ASN check");
+    return;
   } elsif ($relay->{ip_private}) {
     dbg("asn: first external relay is a private IP, skipping ASN check");
-  } else {
-    $reversed_ip = reverse_ip_address($ip);
-    if (defined $reversed_ip) {
-      dbg("asn: using first external relay IP for lookups: %s", $ip);
-    } else {
-      dbg("asn: could not parse first external relay IP: %s, skipping", $ip);
-    }
+    return;
   }
 
+  my $ip = $relay->{ip};
+  my $reversed_ip = reverse_ip_address($ip);
+  if (defined $reversed_ip) {
+    dbg("asn: using first external relay IP for lookups: %s", $ip);
+  } else {
+    dbg("asn: could not parse first external relay IP: %s, skipping", $ip);
+    return;
+  }
+
+  my $lookup_zone;
+  if ($ip =~ /^$IPV4_ADDRESS$/o) {
+    if (!defined $conf->{asnlookups}) {
+      dbg("asn: asn_lookup for IPv4 not defined, skipping");
+      return;
+    }
+    $lookup_zone = "asnlookups";
+  } else {
+    if (!defined $conf->{asnlookups_ipv6}) {
+      dbg("asn: asn_lookup_ipv6 for IPv6 not defined, skipping");
+      return;
+    }
+    $lookup_zone = "asnlookups_ipv6";
+  }
+  
   # we use arrays and array indices rather than hashes and hash keys
   # in case someone wants the same zone added to multiple sets of tags
   my $index = 0;
-  foreach my $entry (@{$conf->{asnlookups}}) {
-    # initialize the tag data so that if no result is returned from the DNS
-    # query we won't end up with a missing tag.  Don't use $pms->set_tag()
-    # here to avoid triggering any tag-dependent action unnecessarily
-    unless (defined $pms->{tag_data}->{$entry->{asn_tag}}) {
-      $pms->{tag_data}->{$entry->{asn_tag}} = '';
-    }
-    unless (defined $pms->{tag_data}->{$entry->{route_tag}}) {
-      $pms->{tag_data}->{$entry->{route_tag}} = '';
-    }
-    next unless $reversed_ip;
-
+  foreach my $entry (@{$conf->{$lookup_zone}}) {
     # do the DNS query, have the callback process the result
     my $zone_index = $index;
     my $zone = $reversed_ip . '.' . $entry->{zone};
-    my $key = "asnlookup-${zone_index}-$entry->{zone}";
-    my $ent = $pms->{async}->bgsend_and_start_lookup($zone, 'TXT', undef,
+    $pms->{async}->bgsend_and_start_lookup($zone, 'TXT', undef,
       { rulename => 'asn_lookup', type => 'ASN' },
       sub { my($ent, $pkt) = @_;
-            $self->process_dns_result($pms, $pkt, $zone_index) },
-      master_deadline => $pms->{master_deadline} );
-    if ($ent) {
-      dbg("asn: launched DNS TXT query for %s.%s in background",
-          $reversed_ip, $entry->{zone});
-      $index++;
-    }
+            $self->process_dns_result($pms, $pkt, $zone_index, $lookup_zone) },
+      master_deadline => $pms->{master_deadline}
+    );
+    $index++;
   }
 }
 
@@ -327,13 +380,13 @@ sub parsed_metadata {
 #       be no CIDR field in that case.
 #
 sub process_dns_result {
-  my ($self, $pms, $pkt, $zone_index) = @_;
+  my ($self, $pms, $pkt, $zone_index, $lookup_zone) = @_;
 
   my $conf = $self->{main}->{conf};
 
-  my $zone = $conf->{asnlookups}[$zone_index]->{zone};
-  my $asn_tag = $conf->{asnlookups}[$zone_index]->{asn_tag};
-  my $route_tag = $conf->{asnlookups}[$zone_index]->{route_tag};
+  my $zone = $conf->{$lookup_zone}[$zone_index]->{zone};
+  my $asn_tag = $conf->{$lookup_zone}[$zone_index]->{asn_tag};
+  my $route_tag = $conf->{$lookup_zone}[$zone_index]->{route_tag};
 
   my($any_asn_updates, $any_route_updates, $tag_value);
 
@@ -360,7 +413,7 @@ sub process_dns_result {
   my @answer = !defined $pkt ? () : $pkt->answer;
 
   foreach my $rr (@answer) {
-    dbg("asn: %s: lookup result packet: %s", $zone, $rr->string);
+    #dbg("asn: %s: lookup result packet: %s", $zone, $rr->string);
     next if $rr->type ne 'TXT';
     my @strings = $txtdata_can_provide_a_list ? $rr->txtdata :
       $rr->char_str_list; # historical
@@ -436,5 +489,8 @@ sub process_dns_result {
                   @route_tag_data == 1 ? $route_tag_data[0] : \@route_tag_data);
   }
 }
+
+# Version features
+sub has_asn_lookup_ipv6 { 1 }
 
 1;
