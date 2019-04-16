@@ -80,6 +80,10 @@ Note for Users Upgrading to SpamAssassin 4.0.0
 
 - Add check_hashbl_bodyre and hashbl_ignore to HashBL.pm
 
+- DNSEval: add check_rbl_headers to check specific headers in rbl
+
+- DNSEval: add check_rbl_ns_from to check against an rbl for dns serv
+
 - ASN: Support IPv6 with asn_lookup_ipv6 (Bug 7211). Support GeoDB for ASN
   lookups (asn_use_geodb, asn_prefer_geodb, asn_use_dns).
 
