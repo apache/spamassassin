@@ -24,6 +24,12 @@ Note for Users Upgrading to SpamAssassin 3.4.3
   Parser::is_regexp_valid(), Util::regexp_remove_delimiters(),
   Util::make_qr().  These all are combined into new Util::compile_regexp().
 
+- DNSEval: add check_rbl_headers to check specific headers in rbl
+
+- DNSEval: add check_rbl_ns_from to check against an rbl for dns servers
+
+- Add check_hashbl_bodyre to HashBL.pm
+
 - ASN: Support IPv6 with asn_lookup_ipv6 (Bug 7211)
 
 
