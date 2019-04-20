@@ -1,0 +1,24 @@
+if can(Mail::SpamAssassin::Conf::enlist_addrlist) 
+ifplugin Mail::SpamAssassin::Plugin::WLBLEval
+
+enlist_addrlist (PAYPAL) *@paypal.com *@paypal.co.uk *@paypal.de *@paypal.com.au *@paypal.it
+enlist_addrlist (PAYPAL) *@paypal.es *@paypal.fr *@paypal.de *@paypal.com.hk
+enlist_addrlist (PAYPAL) *@*.paypal.com *@*.paypal.co.uk
+
+header   __FROM_ADDRLIST_PAYPAL   eval:check_from_in_list('PAYPAL')
+reuse    __FROM_ADDRLIST_PAYPAL
+
+meta     FROM_PAYPAL_SPOOF  !__NOT_SPOOFED && __FROM_ADDRLIST_PAYPAL && (! NO_RELAYS && ! ALL_TRUSTED)
+tflags   FROM_PAYPAL_SPOOF  publish
+describe FROM_PAYPAL_SPOOF  From PayPal domain but matches SPOOFED
+score    FROM_PAYPAL_SPOOF  1.6 # limit
+reuse    FROM_PAYPAL_SPOOF
+
+meta     FROM_PAYPAL_REPLYTO_FREEMAIL FREEMAIL_FORGED_REPLYTO && __FROM_ADDRLIST_PAYPAL
+tflags   FROM_PAYPAL_REPLYTO_FREEMAIL publish
+describe FROM_PAYPAL_REPLYTO_FREEMAIL From PayPal domain but ReplyTo is FREEMAIL
+score    FROM_PAYPAL_REPLYTO_FREEMAIL 2.0
+reuse    FROM_PAYPAL_REPLYTO_FREEMAIL
+
+endif
+endif
