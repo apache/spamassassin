@@ -2,29 +2,58 @@
 if (version >= 3.004001)
 ifplugin Mail::SpamAssassin::Plugin::AskDNS
 
-askdns     FROM_FMBLA_NEWDOM    _SENDERDOMAIN_.fresh.fmb.la. A /^127\.2\.0\.2$/
+askdns    __SENDER_FMBLA_NEWDOM   _SENDERDOMAIN_.fresh.fmb.la. A /^127\.2\.0\.2$/
+tflags    __SENDER_FMBLA_NEWDOM   net
+reuse     __SENDER_FMBLA_NEWDOM
+
+askdns    __SENDER_FMBLA_NEWDOM14 _SENDERDOMAIN_.fresh.fmb.la. A /^127\.2\.0\.14$/
+tflags    __SENDER_FMBLA_NEWDOM14 net
+reuse     __SENDER_FMBLA_NEWDOM14
+
+askdns    __SENDER_FMBLA_NEWDOM28 _SENDERDOMAIN_.fresh.fmb.la. A /^127\.2\.0\.28$/
+tflags    __SENDER_FMBLA_NEWDOM28 net
+reuse     __SENDER_FMBLA_NEWDOM28
+
+askdns    __SENDER_FMBLA_BLOCKED  _SENDERDOMAIN_.fresh.fmb.la. A /^127\.255\.255\.255$/
+tflags    __SENDER_FMBLA_BLOCKED  net
+reuse     __SENDER_FMBLA_BLOCKED
+
+meta       FROM_FMBLA_NEWDOM    __SENDER_FMBLA_NEWDOM
 describe   FROM_FMBLA_NEWDOM    From domain was registered in last 7 days
-tflags     FROM_FMBLA_NEWDOM    net publish
+tflags     FROM_FMBLA_NEWDOM    publish
 score      FROM_FMBLA_NEWDOM    1.5 # limit
 reuse      FROM_FMBLA_NEWDOM
 
-askdns     FROM_FMBLA_NEWDOM14  _SENDERDOMAIN_.fresh.fmb.la. A /^127\.2\.0\.14$/
+meta       FROM_FMBLA_NEWDOM14  __SENDER_FMBLA_NEWDOM14
 describe   FROM_FMBLA_NEWDOM14  From domain was registered in last 7-14 days
-tflags     FROM_FMBLA_NEWDOM14  net publish
+tflags     FROM_FMBLA_NEWDOM14  publish
 score      FROM_FMBLA_NEWDOM14  1.0 # limit
 reuse      FROM_FMBLA_NEWDOM14
 
-askdns     FROM_FMBLA_NEWDOM28  _SENDERDOMAIN_.fresh.fmb.la. A /^127\.2\.0\.28$/
+meta       FROM_FMBLA_NEWDOM28  __SENDER_FMBLA_NEWDOM28
 describe   FROM_FMBLA_NEWDOM28  From domain was registered in last 14-28 days
-tflags     FROM_FMBLA_NEWDOM28  net publish
+tflags     FROM_FMBLA_NEWDOM28  publish
 score      FROM_FMBLA_NEWDOM28  0.8 # limit
 reuse      FROM_FMBLA_NEWDOM28
 
-askdns     FROM_FMBLA_NDBLOCKED  _SENDERDOMAIN_.fresh.fmb.la. A /^127\.255\.255\.255$/
-describe   FROM_FMBLA_NDBLOCKED  ADMINISTRATOR NOTICE: The query to fresh.fmb.la was blocked. See http://wiki.apache.org/spamassassin/DnsBlocklists\#dnsbl-block for more information.
-tflags     FROM_FMBLA_NDBLOCKED  net publish
-score      FROM_FMBLA_NDBLOCKED  0.001 # limit
+meta       FROM_FMBLA_NDBLOCKED __SENDER_FMBLA_BLOCKED
+describe   FROM_FMBLA_NDBLOCKED ADMINISTRATOR NOTICE: The query to fresh.fmb.la was blocked. See http://wiki.apache.org/spamassassin/DnsBlocklists\#dnsbl-block for more information.
+tflags     FROM_FMBLA_NDBLOCKED publish
+score      FROM_FMBLA_NDBLOCKED 0.001 # limit
 reuse      FROM_FMBLA_NDBLOCKED
 
+header   __NUMBERONLY_TLD From:addr =~ /\@[0-9]{4,}\.[a-z]+$/i
+reuse    __NUMBERONLY_TLD
+
+meta     __PDS_NEWDOMAIN  (__SENDER_FMBLA_NEWDOM || __SENDER_FMBLA_NEWDOM14 || __SENDER_FMBLA_NEWDOM28)
+reuse    __PDS_NEWDOMAIN
+
+meta     FROM_NUMBERO_NEWDOMAIN __NUMBERONLY_TLD && __PDS_NEWDOMAIN
+describe FROM_NUMBERO_NEWDOMAIN Fingerprint and newtld
+score    FROM_NUMBERO_NEWDOMAIN 2.0 # limit
+tflags   FROM_NUMBERO_NEWDOMAIN publish
+reuse    FROM_NUMBERO_NEWDOMAIN
+
 endif
+
 endif
