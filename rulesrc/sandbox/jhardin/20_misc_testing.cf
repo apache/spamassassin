@@ -2040,7 +2040,8 @@ meta           __MALWARE_NORDNS       __MY_MALWARE && __RDNS_NONE
 #uri           __FSL_LINK_AWS_S3_WEB_LOOSE       m,^https?://(?:[^./]+\.)*s3[^./]+\.amazonaws\.com,i
 
 
-uri            URI_DQ_UNSUB     m;^[a-z]+://(?:\d+\.){3}\d+/.*unsubscribe;i
+uri            __URI_DQ_UNSUB   m;^[a-z]+://(?:\d+\.){3}\d+/.*unsubscribe;i
+meta           URI_DQ_UNSUB     __URI_DQ_UNSUB
 describe       URI_DQ_UNSUB     IP-address unsubscribe URI
 tflags         URI_DQ_UNSUB     publish
 
@@ -2724,5 +2725,12 @@ header     __DATA_ENTRY_SERVICE        Subject =~ /\bdata entry services?\b/i
 meta       FREEM_DATA_ENTRY            __DATA_ENTRY_SERVICE && __freemail_hdr_replyto
 describe   FREEM_DATA_ENTRY            Data entry services too cheap to buy a real domain
 score      FREEM_DATA_ENTRY            2.500	# limit
+
+header     __HDR_RCVD_EBAY             X-Spam-Relays-External =~ /rdns=\S+\.ebay\.com\s/
+uri        __URI_IMG_EBAY              m,://[^/?]+\.ebayimg\.com/,i
+meta       __EBAY_IMG_NOT_RCVD_EBAY    __URI_IMG_EBAY && !__HDR_RCVD_EBAY
+meta       __EBAY_IMG_DQ_UNSUB         __URI_IMG_EBAY && __URI_DQ_UNSUB
+meta       __EBAY_IMG_DIRECT_MX        __URI_IMG_EBAY && __DOS_DIRECT_TO_MX
+
 
 
