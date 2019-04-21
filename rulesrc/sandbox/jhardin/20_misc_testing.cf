@@ -2707,10 +2707,20 @@ describe   HTML_ENTITY_ASCII_TINY      Obfuscated ASCII + tiny fonts
 score      HTML_ENTITY_ASCII_TINY      3.000	# limit
 tflags     HTML_ENTITY_ASCII_TINY      publish
 
+
 rawbody    __HTML_URI_NO_PROTOCOL      /<a\s+href\s*=(?:3d)?\s*"[a-z0-9][-a-z0-9_]{1,64}(?:\.[a-z0-9][-a-z0-9_]{1,64}){1,5}\s*"/i
 
+meta       URI_GIBB_NO_PROTO           __HTML_URI_NO_PROTOCOL && __128_ALNUM_URI 
+score      URI_GIBB_NO_PROTO           3.000	# limit
+describe   URI_GIBB_NO_PROTO           Long, gibberish, no-protocol URI
+
+
 header     __AC_FROM_MANY_DOTS         From =~ /<(?:\w{2,}\.){2,}\w+@/
-meta       __AC_FROM_MANY_DOTS_MINFP   __AC_FROM_MANY_DOTS && !FREEMAIL_FORGED_FROMDOMAIN && !FORGED_GMAIL_RCVD && !__UNSUB_LINK && !__XM_VBULLETIN && !__RDNS_SHORT && !__REPTO_QUOTE && !__FSL_RELAY_GOOGLE && !__HAS_IN_REPLY_TO 
+meta       __AC_FROM_MANY_DOTS_MINFP   __AC_FROM_MANY_DOTS && !FREEMAIL_FORGED_FROMDOMAIN && !FORGED_GMAIL_RCVD && !__UNSUB_LINK && !__XM_VBULLETIN && !__RDNS_SHORT && !__REPTO_QUOTE && !__FSL_RELAY_GOOGLE && !__HAS_IN_REPLY_TO && !__RCD_RDNS_SMTP && !__HAS_THREAD_INDEX
+meta       AC_FROM_MANY_DOTS           __AC_FROM_MANY_DOTS_MINFP
+score      AC_FROM_MANY_DOTS           3.000	# limit
+describe   AC_FROM_MANY_DOTS           Multiple periods in From user name
+
 
 uri        __URI_BUFFLY                m,//buff\.ly/,i
 meta       URI_BUFFLY                  __URI_BUFFLY && !__DOS_HAS_LIST_UNSUB
@@ -2726,19 +2736,42 @@ meta       FREEM_DATA_ENTRY            __DATA_ENTRY_SERVICE && __freemail_hdr_re
 describe   FREEM_DATA_ENTRY            Data entry services too cheap to buy a real domain
 score      FREEM_DATA_ENTRY            2.500	# limit
 
+
+
 header     __HDR_RCVD_EBAY             X-Spam-Relays-External =~ /rdns=\S+\.ebay\.com\s/
 uri        __URI_IMG_EBAY              m,://[^/?]+\.ebayimg\.com/,i
+
 meta       __EBAY_IMG_NOT_RCVD_EBAY    __URI_IMG_EBAY && !__HDR_RCVD_EBAY
+meta       EBAY_IMG_NOT_RCVD_EBAY      __EBAY_IMG_NOT_RCVD_EBAY && !__URI_MAILTO
+score      EBAY_IMG_NOT_RCVD_EBAY      3.000	# limit
+describe   EBAY_IMG_NOT_RCVD_EBAY      E-bay hosted image but message not from E-bay
+
 meta       __EBAY_IMG_DQ_UNSUB         __URI_IMG_EBAY && __URI_DQ_UNSUB
 meta       __EBAY_IMG_DIRECT_MX        __URI_IMG_EBAY && __DOS_DIRECT_TO_MX
 
+
 header     __HDR_RCVD_AMAZON           X-Spam-Relays-External =~ /rdns=\S+\.amazon(?:ses)?\.com\s/
 uri        __URI_IMG_AMAZON            m,://[^/?]+\.(?:ssl-)?images-amazon\.com/,i
+
 meta       __AMAZON_IMG_NOT_RCVD_AMZN  __URI_IMG_AMAZON && !__HDR_RCVD_AMAZON
+meta       AMAZON_IMG_NOT_RCVD_AMZN    __AMAZON_IMG_NOT_RCVD_AMZN && !__HAS_ERRORS_TO 
+score      AMAZON_IMG_NOT_RCVD_AMZN    2.000	# limit
+describe   AMAZON_IMG_NOT_RCVD_AMZN    Amazon hosted image but message not from Amazon
+
 meta       __AMAZON_IMG_DQ_UNSUB       __URI_IMG_AMAZON && __URI_DQ_UNSUB
 meta       __AMAZON_IMG_DIRECT_MX      __URI_IMG_AMAZON && __DOS_DIRECT_TO_MX
 
+
 meta       __HOSTED_IMG_DQ_UNSUB       __URI_DQ_UNSUB && ( __URI_IMG_EBAY || __URI_IMG_AMAZON )
+meta       HOSTED_IMG_DQ_UNSUB         __HOSTED_IMG_DQ_UNSUB
+score      HOSTED_IMG_DQ_UNSUB         2.500	# limit
+describe   HOSTED_IMG_DQ_UNSUB         Image hosted at large ecomm site, IP addr unsub link
+
 meta       __HOSTED_IMG_DIRECT_MX      __DOS_DIRECT_TO_MX && ( __URI_IMG_EBAY || __URI_IMG_AMAZON )
+meta       HOSTED_IMG_DIRECT_MX        __HOSTED_IMG_DIRECT_MX && !__DKIM_EXISTS 
+score      HOSTED_IMG_DIRECT_MX        3.500	# limit
+describe   HOSTED_IMG_DIRECT_MX        Image hosted at large ecomm site, message direct-to-mx
+
+meta       __HOSTED_IMG_FREEM_REPTO    FREEMAIL_REPLYTO && ( __URI_IMG_EBAY || __URI_IMG_AMAZON ) 
 
 
