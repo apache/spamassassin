@@ -2745,33 +2745,41 @@ meta       __EBAY_IMG_NOT_RCVD_EBAY    __URI_IMG_EBAY && !__HDR_RCVD_EBAY
 meta       EBAY_IMG_NOT_RCVD_EBAY      __EBAY_IMG_NOT_RCVD_EBAY && !__URI_MAILTO
 score      EBAY_IMG_NOT_RCVD_EBAY      3.000	# limit
 describe   EBAY_IMG_NOT_RCVD_EBAY      E-bay hosted image but message not from E-bay
+tflags     EBAY_IMG_NOT_RCVD_EBAY      publish
 
-meta       __EBAY_IMG_DQ_UNSUB         __URI_IMG_EBAY && __URI_DQ_UNSUB
-meta       __EBAY_IMG_DIRECT_MX        __URI_IMG_EBAY && __DOS_DIRECT_TO_MX
+#meta       __EBAY_IMG_DQ_UNSUB         __URI_IMG_EBAY && __URI_DQ_UNSUB
+#meta       __EBAY_IMG_DIRECT_MX        __URI_IMG_EBAY && __DOS_DIRECT_TO_MX
 
 
 header     __HDR_RCVD_AMAZON           X-Spam-Relays-External =~ /rdns=\S+\.amazon(?:ses)?\.com\s/
 uri        __URI_IMG_AMAZON            m,://[^/?]+\.(?:ssl-)?images-amazon\.com/,i
 
 meta       __AMAZON_IMG_NOT_RCVD_AMZN  __URI_IMG_AMAZON && !__HDR_RCVD_AMAZON
-meta       AMAZON_IMG_NOT_RCVD_AMZN    __AMAZON_IMG_NOT_RCVD_AMZN && !__HAS_ERRORS_TO 
-score      AMAZON_IMG_NOT_RCVD_AMZN    2.000	# limit
+meta       AMAZON_IMG_NOT_RCVD_AMZN    __AMAZON_IMG_NOT_RCVD_AMZN && !__HAS_ERRORS_TO && !__MSGID_LIST 
+score      AMAZON_IMG_NOT_RCVD_AMZN    2.500	# limit
 describe   AMAZON_IMG_NOT_RCVD_AMZN    Amazon hosted image but message not from Amazon
+tflags     AMAZON_IMG_NOT_RCVD_AMZN    publish
 
-meta       __AMAZON_IMG_DQ_UNSUB       __URI_IMG_AMAZON && __URI_DQ_UNSUB
-meta       __AMAZON_IMG_DIRECT_MX      __URI_IMG_AMAZON && __DOS_DIRECT_TO_MX
+#meta       __AMAZON_IMG_DQ_UNSUB       __URI_IMG_AMAZON && __URI_DQ_UNSUB
+#meta       __AMAZON_IMG_DIRECT_MX      __URI_IMG_AMAZON && __DOS_DIRECT_TO_MX
 
 
 meta       __HOSTED_IMG_DQ_UNSUB       __URI_DQ_UNSUB && ( __URI_IMG_EBAY || __URI_IMG_AMAZON )
 meta       HOSTED_IMG_DQ_UNSUB         __HOSTED_IMG_DQ_UNSUB
-score      HOSTED_IMG_DQ_UNSUB         2.500	# limit
+score      HOSTED_IMG_DQ_UNSUB         3.500	# limit
 describe   HOSTED_IMG_DQ_UNSUB         Image hosted at large ecomm site, IP addr unsub link
+tflags     HOSTED_IMG_DQ_UNSUB         publish
 
 meta       __HOSTED_IMG_DIRECT_MX      __DOS_DIRECT_TO_MX && ( __URI_IMG_EBAY || __URI_IMG_AMAZON )
 meta       HOSTED_IMG_DIRECT_MX        __HOSTED_IMG_DIRECT_MX && !__DKIM_EXISTS 
 score      HOSTED_IMG_DIRECT_MX        3.500	# limit
 describe   HOSTED_IMG_DIRECT_MX        Image hosted at large ecomm site, message direct-to-mx
+tflags     HOSTED_IMG_DIRECT_MX        publish
 
 meta       __HOSTED_IMG_FREEM_REPTO    FREEMAIL_REPLYTO && ( __URI_IMG_EBAY || __URI_IMG_AMAZON ) 
+meta       HOSTED_IMG_FREEM_REPTO      __HOSTED_IMG_FREEM_REPTO
+score      HOSTED_IMG_FREEM_REPTO      3.500	# limit
+describe   HOSTED_IMG_FREEM_REPTO      Image hosted at large ecomm site, freemail reply-to
+tflags     HOSTED_IMG_FREEM_REPTO      publish
 
 
