@@ -51,5 +51,20 @@ describe SEO_SUSP_NTLD SEO offer from suspicious TLD
 score    SEO_SUSP_NTLD 1.2 # limit
 reuse    SEO_SUSP_NTLD
 
+body     __PDS_THIS_IS_ADV  /This is an advertisement\./
+reuse    __PDS_THIS_IS_ADV
+
+meta     THIS_IS_ADV_SUSP_NTLD FROM_SUSPICIOUS_NTLD && __PDS_THIS_IS_ADV
+tflags   THIS_IS_ADV_SUSP_NTLD publish
+describe THIS_IS_ADV_SUSP_NTLD This is an advertisement from a suspicious TLD
+score    THIS_IS_ADV_SUSP_NTLD 1.5 # limit
+reuse    THIS_IS_ADV_SUSP_NTLD
+
+meta     BULK_RE_SUSP_NTLD __SUBJ_RE && __ML1 && FROM_SUSPICIOUS_NTLD
+tflags   BULK_RE_SUSP_NTLD publish
+describe BULK_RE_SUSP_NTLD Precedence bulk and RE: from a suspicious TLD
+score    BULK_RE_SUSP_NTLD 1.0 # limit
+reuse    BULK_RE_SUSP_NTLD
+
 endif
 endif
