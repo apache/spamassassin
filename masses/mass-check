@@ -694,6 +694,11 @@ sub wanted {
         && $x_spam_status !~ /\bshortcircuit=(?:ham|spam|default)\b/)
     {
       my @previous = split(/,/, $1);
+      # Bug 7709
+      # Amavis X-Spam-Status rules include score and are enclosed in []
+      # Amavis: [RULENAME=0.01,RULENAME_2=0.01]
+      # Spamassassin: RULENAME,RULENAME_2
+      s/[\[\]]//, s/=.*// foreach (@previous);
       $ma->{metadata}->{reuse_tests_hit} = { map {$_ => 1} @previous };
       $reusing = 1;
     }
