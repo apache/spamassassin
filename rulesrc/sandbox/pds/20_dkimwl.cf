@@ -2,31 +2,38 @@ ifplugin Mail::SpamAssassin::Plugin::AskDNS
 
 askdns    __DKIMWL_FREEMAIL _DKIMDOMAIN_.lookup.dkimwl.org A /^127\.\d+\.3\.\d+$/
 tflags    __DKIMWL_FREEMAIL net
-reuse     __DKIMWL_FREEMAIL
+# reuse && net && __META seems to cause masscheck --net --reuse to miss these rules
+#reuse     __DKIMWL_FREEMAIL
 
 askdns    __DKIMWL_BULKMAIL _DKIMDOMAIN_.lookup.dkimwl.org A /^127\.\d+\.2\.\d+$/
 tflags    __DKIMWL_BULKMAIL net
-reuse     __DKIMWL_BULKMAIL
+# reuse && net && __META seems to cause masscheck --net --reuse to miss these rules
+#reuse     __DKIMWL_BULKMAIL
 
 askdns    __DKIMWL_WL_HI    _DKIMDOMAIN_.lookup.dkimwl.org A /^127\.\d+\.\d+\.5$/
 tflags    __DKIMWL_WL_HI    net
-reuse     __DKIMWL_WL_HI
+# reuse && net && __META seems to cause masscheck --net --reuse to miss these rules
+#reuse     __DKIMWL_WL_HI
 
 askdns    __DKIMWL_WL_MEDHI _DKIMDOMAIN_.lookup.dkimwl.org A /^127\.\d+\.\d+\.4$/
 tflags    __DKIMWL_WL_MEDHI net
-reuse     __DKIMWL_WL_MEDHI
+# reuse && net && __META seems to cause masscheck --net --reuse to miss these rules
+#reuse     __DKIMWL_WL_MEDHI
 
 askdns    __DKIMWL_WL_MED   _DKIMDOMAIN_.lookup.dkimwl.org A /^127\.\d+\.\d+\.3$/
 tflags    __DKIMWL_WL_MED   net
-reuse     __DKIMWL_WL_MED
+# reuse && net && __META seems to cause masscheck --net --reuse to miss these rules
+#reuse     __DKIMWL_WL_MED
 
 askdns    __DKIMWL_WL_BL   _DKIMDOMAIN_.lookup.dkimwl.org A /^127\.\d+\.\d+\.0$/
 tflags    __DKIMWL_WL_BL   net
-reuse     __DKIMWL_WL_BL
+# reuse && net && __META seems to cause masscheck --net --reuse to miss these rules
+#reuse     __DKIMWL_WL_BL
 
 askdns    __DKIMWL_BLOCKED  _DKIMDOMAIN_.lookup.dkimwl.org A /^127\.255\.255\.255$/
 tflags    __DKIMWL_BLOCKED  net
-reuse     __DKIMWL_BLOCKED
+# reuse && net && __META seems to cause masscheck --net --reuse to miss these rules
+#reuse     __DKIMWL_BLOCKED
 
 meta      DKIMWL_WL_HIGH  __DKIMWL_WL_HI && !(FREEMAIL_FROM || FREEMAIL_REPLYTO || FREEMAIL_FORGED_REPLYTO || __DKIMWL_FREEMAIL || __DKIMWL_BULKMAIL)
 tflags    DKIMWL_WL_HIGH  nice publish
@@ -59,3 +66,4 @@ score     DKIMWL_BLOCKED  0.001 # limit
 reuse     DKIMWL_BLOCKED
 
 endif
+
