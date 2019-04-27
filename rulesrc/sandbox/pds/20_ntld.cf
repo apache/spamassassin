@@ -1,0 +1,44 @@
+if (version >= 3.004002)
+ifplugin Mail::SpamAssassin::Plugin::WLBLEval
+
+enlist_addrlist (SUSP_NTLD) *@*.icu
+enlist_addrlist (SUSP_NTLD) *@*.online
+enlist_addrlist (SUSP_NTLD) *@*.work
+enlist_addrlist (SUSP_NTLD) *@*.date
+enlist_addrlist (SUSP_NTLD) *@*.top
+enlist_addrlist (SUSP_NTLD) *@*.life
+enlist_addrlist (SUSP_NTLD) *@*.review
+enlist_addrlist (SUSP_NTLD) *@*.xyz
+
+header   __FROM_ADDRLIST_SUSPNTLD eval:check_from_in_list('SUSP_NTLD')
+reuse    __FROM_ADDRLIST_SUSPNTLD
+
+header   __REPLYTO_ADDRLIST_SUSPNTLD eval:check_replyto_in_list('SUSP_NTLD')
+reuse    __REPLYTO_ADDRLIST_SUSPNTLD
+
+meta     FROM_SUSPICIOUS_NTLD __FROM_ADDRLIST_SUSPNTLD
+tflags   FROM_SUSPICIOUS_NTLD publish
+describe FROM_SUSPICIOUS_NTLD From abused NTLD
+score    FROM_SUSPICIOUS_NTLD 0.5 # limit
+reuse    FROM_SUSPICIOUS_NTLD
+
+meta     FROM_NTLD_REPLY_FREEMAIL FREEMAIL_FORGED_REPLYTO && FROM_SUSPICIOUS_NTLD
+tflags   FROM_NTLD_REPLY_FREEMAIL publish
+describe FROM_NTLD_REPLY_FREEMAIL From abused NTLD and Reply-To is FREEMAIL
+score    FROM_NTLD_REPLY_FREEMAIL 2.0 # limit
+reuse    FROM_NTLD_REPLY_FREEMAIL
+
+meta     FROM_NTLD_LINKBAIT __KAM_BODY_LENGTH_LT_512 && FROM_SUSPICIOUS_NTLD && __BODY_URI_ONLY
+tflags   FROM_NTLD_LINKBAIT publish
+describe FROM_NTLD_LINKBAIT From abused NTLD with little more than a URI
+score    FROM_NTLD_LINKBAIT 2.0 # limit
+reuse    FROM_NTLD_LINKBAIT
+
+meta     GOOGLE_DRIVE_REPLY_BAD_NTLD __GOOGLE_DRIVE_SHARE && __REPLYTO_ADDRLIST_SUSPNTLD
+tflags   GOOGLE_DRIVE_REPLY_BAD_NTLD publish
+describe GOOGLE_DRIVE_REPLY_BAD_NTLD From Google Drive and From is from a BAD_TLD
+score    GOOGLE_DRIVE_REPLY_BAD_NTLD 1.0 # limit
+reuse    GOOGLE_DRIVE_REPLY_BAD_NTLD
+
+endif
+endif
