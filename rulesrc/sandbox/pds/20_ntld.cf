@@ -28,7 +28,7 @@ describe FROM_NTLD_REPLY_FREEMAIL From abused NTLD and Reply-To is FREEMAIL
 score    FROM_NTLD_REPLY_FREEMAIL 2.0 # limit
 reuse    FROM_NTLD_REPLY_FREEMAIL
 
-meta     FROM_NTLD_LINKBAIT __KAM_BODY_LENGTH_LT_512 && FROM_SUSPICIOUS_NTLD && __BODY_URI_ONLY
+meta     FROM_NTLD_LINKBAIT __LCL__KAM_BODY_LENGTH_LT_512 && FROM_SUSPICIOUS_NTLD && __BODY_URI_ONLY
 tflags   FROM_NTLD_LINKBAIT publish
 describe FROM_NTLD_LINKBAIT From abused NTLD with little more than a URI
 score    FROM_NTLD_LINKBAIT 2.0 # limit
@@ -36,9 +36,20 @@ reuse    FROM_NTLD_LINKBAIT
 
 meta     GOOGLE_DRIVE_REPLY_BAD_NTLD __GOOGLE_DRIVE_SHARE && __REPLYTO_ADDRLIST_SUSPNTLD
 tflags   GOOGLE_DRIVE_REPLY_BAD_NTLD publish
-describe GOOGLE_DRIVE_REPLY_BAD_NTLD From Google Drive and From is from a BAD_TLD
+describe GOOGLE_DRIVE_REPLY_BAD_NTLD From Google Drive and Reply-To is from a suspicious TLD
 score    GOOGLE_DRIVE_REPLY_BAD_NTLD 1.0 # limit
 reuse    GOOGLE_DRIVE_REPLY_BAD_NTLD
+
+body     __PDS_SEO1 /(?:top|first page|1st) (?:(?:results|rank(?:ing)?) )?(?:in|of|on) (?:Google|MSN|Yahoo|Bing)|rank number one|top page rank|guarantee you 1st|link.building/i
+reuse    __PDS_SEO1
+body     __PDS_SEO2 /losing your [a-z]+ (?:ranking|results)|rank well on [a-z]+\b/i
+reuse    __PDS_SEO2
+
+meta     SEO_SUSP_NTLD FROM_SUSPICIOUS_NTLD && (__PDS_SEO1 + __PDS_SEO2 >= 1)
+tflags   SEO_SUSP_NTLD publish
+describe SEO_SUSP_NTLD SEO offer from suspicious TLD
+score    SEO_SUSP_NTLD 1.2 # limit
+reuse    SEO_SUSP_NTLD
 
 endif
 endif
