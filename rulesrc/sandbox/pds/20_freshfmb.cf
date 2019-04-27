@@ -20,7 +20,7 @@ tflags     FROM_FMBLA_NEWDOM28  net publish
 score      FROM_FMBLA_NEWDOM28  0.8 # limit
 reuse      FROM_FMBLA_NEWDOM28
 
-meta       FROM_FMBLA_NDBLOCKED _AUTHORDOMAIN_.fresh.fmb.la. A /^127\.255\.255\.255$/
+askdns     FROM_FMBLA_NDBLOCKED _AUTHORDOMAIN_.fresh.fmb.la. A /^127\.255\.255\.255$/
 describe   FROM_FMBLA_NDBLOCKED ADMINISTRATOR NOTICE: The query to fresh.fmb.la was blocked. See http://wiki.apache.org/spamassassin/DnsBlocklists\#dnsbl-block for more information.
 tflags     FROM_FMBLA_NDBLOCKED net publish
 score      FROM_FMBLA_NDBLOCKED 0.001 # limit
