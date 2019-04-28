@@ -1,3 +1,4 @@
+# new TLDs used for spamming
 if (version >= 3.004002)
 ifplugin Mail::SpamAssassin::Plugin::WLBLEval
 
@@ -9,6 +10,7 @@ enlist_addrlist (SUSP_NTLD) *@*.top
 enlist_addrlist (SUSP_NTLD) *@*.life
 enlist_addrlist (SUSP_NTLD) *@*.review
 enlist_addrlist (SUSP_NTLD) *@*.xyz
+enlist_addrlist (SUSP_NTLD) *@*.bid
 
 header   __FROM_ADDRLIST_SUSPNTLD eval:check_from_in_list('SUSP_NTLD')
 reuse    __FROM_ADDRLIST_SUSPNTLD
@@ -42,7 +44,7 @@ reuse    GOOGLE_DRIVE_REPLY_BAD_NTLD
 
 body     __PDS_SEO1 /(?:top|first page|1st) (?:(?:results|rank(?:ing)?) )?(?:in|of|on) (?:Google|MSN|Yahoo|Bing)|rank number one|top page rank|guarantee you 1st|link.building/i
 reuse    __PDS_SEO1
-body     __PDS_SEO2 /losing your [a-z]+ (?:ranking|results)|rank well on [a-z]+\b/i
+body     __PDS_SEO2 /losing your (?:[a-z]+ )?(?:rank(?:ing)?|results)|rank well on [a-z]+\b/i
 reuse    __PDS_SEO2
 
 meta     SEO_SUSP_NTLD FROM_SUSPICIOUS_NTLD && (__PDS_SEO1 + __PDS_SEO2 >= 1)
@@ -65,6 +67,12 @@ tflags   BULK_RE_SUSP_NTLD publish
 describe BULK_RE_SUSP_NTLD Precedence bulk and RE: from a suspicious TLD
 score    BULK_RE_SUSP_NTLD 1.0 # limit
 reuse    BULK_RE_SUSP_NTLD
+
+meta     SHORT_IMG_SUSP_NTLD __LCL__KAM_BODY_LENGTH_LT_1024 && __HTML_LINK_IMAGE && FROM_SUSPICIOUS_NTLD
+tflags   SHORT_IMG_SUSP_NTLD publish
+describe SHORT_IMG_SUSP_NTLD Short HTML + image + suspicious TLD
+score    SHORT_IMG_SUSP_NTLD 1.5 # limit
+reuse    SHORT_IMG_SUSP_NTLD
 
 endif
 endif
