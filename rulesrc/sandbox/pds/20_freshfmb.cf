@@ -30,12 +30,13 @@ header   __NUMBERONLY_TLD From:addr =~ /\@[0-9]{4,}\.[a-z]+$/i
 reuse    __NUMBERONLY_TLD
 
 meta     __PDS_NEWDOMAIN  (AUTHOR_FMBLA_NEWDOM || AUTHOR_FMBLA_NEWDOM14 || AUTHOR_FMBLA_NEWDOM28)
+tflags   __PDS_NEWDOMAIN  net
 reuse    __PDS_NEWDOMAIN
 
 meta     FROM_NUMBERO_NEWDOMAIN __NUMBERONLY_TLD && __PDS_NEWDOMAIN
 describe FROM_NUMBERO_NEWDOMAIN Fingerprint and new domain
 score    FROM_NUMBERO_NEWDOMAIN 2.0 # limit
-tflags   FROM_NUMBERO_NEWDOMAIN publish
+tflags   FROM_NUMBERO_NEWDOMAIN net publish
 reuse    FROM_NUMBERO_NEWDOMAIN
 
 endif
