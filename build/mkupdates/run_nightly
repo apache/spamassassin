@@ -25,6 +25,8 @@ promote_active_rules() {
   cat $REPDIR/LATEST
 
   echo "Committing promotions in rules/active.list..."
+  # Accept any conflicts on the file with our working copy
+  svn resolve --accept working rules/active.list
   svn commit -m 'promotions validated' rules/active.list
 
   # create a list of "bad" rules in the current sandboxes, updated daily
