@@ -120,7 +120,7 @@ fi
 rm -f corpus/usable-corpus-set${SCORESET}/*cthielen.log
 
 # Get the majority SVN revision
-REVISION=`head -5 corpus/usable-corpus-set${SCORESET}/*.log | awk '/SVN revision:/ {print $4}' | uniq -c | sort -rn | head -1 | awk '{print $2}'`
+REVISION=`head -5 corpus/usable-corpus-set${SCORESET}/*.log | awk '/SVN revision:/ {print $4}' | sort -rn | uniq -c | sort -rn | head -1 | awk '{print $2}'`
 if [[ -z "$REVISION" ]]; then
   echo "No logs for scoreset"
   exit 1
