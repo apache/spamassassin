@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from https://ruleqa.spamassassin.org/
-# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc darxus ena-week0 ena-week1 ena-week3 ena-week4 giovanni-ham giovanni-spam giovanni-spammy grenier hege jarif jbrooks sihde spamsponge thendrikx; day 2: axb-coi-bulk axb-generic axb-ham-misc ena-week3 ena-week4 giovanni-ham giovanni-spam giovanni-spammy jarif jbrooks llanga pds sihde; day 3: axb-coi-bulk axb-generic axb-ham-misc darxus ena-week0 ena-week1 ena-week3 ena-week4 giovanni-ham giovanni-spam giovanni-spammy grenier hege jarif jbrooks mmiroslaw-mails-ham mmiroslaw-mails-spam pds sihde thendrikx
+# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc darxus ena-week0 ena-week1 ena-week3 ena-week4 giovanni-ham giovanni-spam giovanni-spammy grenier hege jarif jbrooks pds sihde spamsponge thendrikx; day 2: axb-coi-bulk axb-generic axb-ham-misc ena-week1 ena-week3 ena-week4 giovanni-ham giovanni-spam giovanni-spammy jarif jbrooks llanga mmiroslaw-mails-ham mmiroslaw-mails-spam pds sihde; day 3: axb-coi-bulk axb-generic axb-ham-misc ena-week3 ena-week4 giovanni-ham giovanni-spam giovanni-spammy jarif jbrooks llanga pds sihde
 
 # tflags publish
 AC_BR_BONANZA
@@ -154,8 +154,8 @@ BITCOIN_SPAM_08
 # tflags publish
 BITCOIN_SPAM_09
 
-# good enough
-BODY_SINGLE_WORD
+# tflags publish
+BITCOIN_SPAM_10
 
 # tflags publish
 BODY_URI_ONLY
@@ -259,6 +259,9 @@ FILL_THIS_FORM
 # good enough
 FILL_THIS_FORM_LOAN
 
+# good enough
+FORGED_RELAY_MUA_TO_MX
+
 # tflags publish
 FORM_FRAUD
 
@@ -289,6 +292,9 @@ FREEM_FRNUM_UNICD_EMPTY
 # tflags publish
 FRNAME_IN_MSG_XPRIO_NO_SUB
 
+# good enough
+FROMSPACE
+
 # tflags publish
 FROM_ADDR_WS
 
@@ -314,9 +320,6 @@ FROM_MISSP_FREEMAIL
 FROM_MISSP_MSFT
 
 # good enough
-FROM_MISSP_PHISH
-
-# good enough
 FROM_MISSP_REPLYTO
 
 # tflags net
@@ -327,6 +330,9 @@ FROM_MISSP_USER
 
 # good enough
 FROM_MISSP_XPRIO
+
+# good enough
+FROM_UNBAL1
 
 # tflags publish
 FROM_WORDY
@@ -391,8 +397,14 @@ GOOGLE_DOCS_PHISH
 # tflags publish
 GOOGLE_DOCS_PHISH_MANY
 
+# good enough
+GOOGLE_OBFU
+
 # tflags publish
 GOOG_MALWARE_DNLD
+
+# good enough
+GOOG_REDIR_HTML_ONLY
 
 # good enough
 GOOG_REDIR_NORDNS
@@ -585,9 +597,6 @@ OBFU_JVSCR_ESC
 
 # tflags publish
 OBFU_TEXT_ATTACH
-
-# good enough
-PHOTO_EDITING_FREEM
 
 # tflags publish
 PHP_NOVER_MUA
@@ -977,73 +986,13 @@ TVD_VISIT_PHARMA
 TW_GIBBERISH_MANY
 
 # good enough
-AXB_XMAILER_MIMEOLE_OL_024C2
-
-# tflags publish
-BITCOIN_SPAM_10
-
-# good enough
-BODY_EMPTY
-
-# good enough
-BODY_SINGLE_URI
-
-# good enough
-CK_HELO_DYNAMIC_SPLIT_IP
-
-# good enough
-CK_HELO_GENERIC
-
-# good enough
-COMPENSATION
-
-# good enough
-DATE_IN_FUTURE_96_Q
-
-# good enough
-FORGED_RELAY_MUA_TO_MX
-
-# good enough
-FROMSPACE
-
-# good enough
-FROM_MISSP_TO_UNDISC
-
-# good enough
-FROM_UNBAL1
+ADVANCE_FEE_4_NEW_FRM_MNY
 
 # tflags publish
 FSL_BULK_SIG
 
 # good enough
-FSL_CTYPE_WIN1251
-
-# good enough
-GOOGLE_OBFU
-
-# good enough
-GOOG_REDIR_HTML_ONLY
-
-# good enough
-HELO_MISC_IP
-
-# good enough
-HK_RANDOM_FROM
-
-# good enough
-HK_SCAM_N3
-
-# good enough
-PDS_TO_EQ_FROM_NAME
-
-# good enough
-SUBJ_ATTENTION
-
-# good enough
-TVD_SPACE_ENCODED
-
-# good enough
-ZW_OBFU_FROMTOSUBJ
+HK_SCAM_N2
 
 # tflags publish
 UC_GIBBERISH_OBFU
@@ -1227,6 +1176,9 @@ XPRIO_SHORT_SUBJ
 
 # good enough
 ZW_OBFU_BITCOIN
+
+# good enough
+ZW_OBFU_FROMTOSUBJ
 
 # tflags publish
 __HTTP_REFRESH
