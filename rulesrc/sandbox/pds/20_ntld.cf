@@ -24,13 +24,13 @@ describe FROM_SUSPICIOUS_NTLD From abused NTLD
 score    FROM_SUSPICIOUS_NTLD 0.5 # limit
 reuse    FROM_SUSPICIOUS_NTLD
 
-meta     FROM_NTLD_REPLY_FREEMAIL FREEMAIL_FORGED_REPLYTO && FROM_SUSPICIOUS_NTLD
+meta     FROM_NTLD_REPLY_FREEMAIL FREEMAIL_FORGED_REPLYTO && __FROM_ADDRLIST_SUSPNTLD
 tflags   FROM_NTLD_REPLY_FREEMAIL publish
 describe FROM_NTLD_REPLY_FREEMAIL From abused NTLD and Reply-To is FREEMAIL
 score    FROM_NTLD_REPLY_FREEMAIL 2.0 # limit
 reuse    FROM_NTLD_REPLY_FREEMAIL
 
-meta     FROM_NTLD_LINKBAIT __LCL__KAM_BODY_LENGTH_LT_512 && FROM_SUSPICIOUS_NTLD && __BODY_URI_ONLY
+meta     FROM_NTLD_LINKBAIT __LCL__KAM_BODY_LENGTH_LT_512 && __FROM_ADDRLIST_SUSPNTLD && __BODY_URI_ONLY
 tflags   FROM_NTLD_LINKBAIT publish
 describe FROM_NTLD_LINKBAIT From abused NTLD with little more than a URI
 score    FROM_NTLD_LINKBAIT 2.0 # limit
@@ -47,7 +47,7 @@ reuse    __PDS_SEO1
 body     __PDS_SEO2 /losing your (?:[a-z]+ )?(?:rank(?:ing)?|results)|rank well on [a-z]+\b/i
 reuse    __PDS_SEO2
 
-meta     SEO_SUSP_NTLD FROM_SUSPICIOUS_NTLD && (__PDS_SEO1 + __PDS_SEO2 >= 1)
+meta     SEO_SUSP_NTLD __FROM_ADDRLIST_SUSPNTLD && (__PDS_SEO1 + __PDS_SEO2 >= 1)
 tflags   SEO_SUSP_NTLD publish
 describe SEO_SUSP_NTLD SEO offer from suspicious TLD
 score    SEO_SUSP_NTLD 1.2 # limit
@@ -56,19 +56,19 @@ reuse    SEO_SUSP_NTLD
 body     __PDS_THIS_IS_ADV  /This is an advertisement\./
 reuse    __PDS_THIS_IS_ADV
 
-meta     THIS_IS_ADV_SUSP_NTLD FROM_SUSPICIOUS_NTLD && __PDS_THIS_IS_ADV
+meta     THIS_IS_ADV_SUSP_NTLD __FROM_ADDRLIST_SUSPNTLD && __PDS_THIS_IS_ADV
 tflags   THIS_IS_ADV_SUSP_NTLD publish
 describe THIS_IS_ADV_SUSP_NTLD This is an advertisement from a suspicious TLD
 score    THIS_IS_ADV_SUSP_NTLD 1.5 # limit
 reuse    THIS_IS_ADV_SUSP_NTLD
 
-meta     BULK_RE_SUSP_NTLD __SUBJ_RE && __ML1 && FROM_SUSPICIOUS_NTLD
+meta     BULK_RE_SUSP_NTLD __SUBJ_RE && __ML1 && __FROM_ADDRLIST_SUSPNTLD
 tflags   BULK_RE_SUSP_NTLD publish
 describe BULK_RE_SUSP_NTLD Precedence bulk and RE: from a suspicious TLD
 score    BULK_RE_SUSP_NTLD 1.0 # limit
 reuse    BULK_RE_SUSP_NTLD
 
-meta     SHORT_IMG_SUSP_NTLD __LCL__KAM_BODY_LENGTH_LT_1024 && __HTML_LINK_IMAGE && FROM_SUSPICIOUS_NTLD
+meta     SHORT_IMG_SUSP_NTLD __LCL__KAM_BODY_LENGTH_LT_1024 && __HTML_LINK_IMAGE && __FROM_ADDRLIST_SUSPNTLD
 tflags   SHORT_IMG_SUSP_NTLD publish
 describe SHORT_IMG_SUSP_NTLD Short HTML + image + suspicious TLD
 score    SHORT_IMG_SUSP_NTLD 1.5 # limit
@@ -77,7 +77,7 @@ reuse    SHORT_IMG_SUSP_NTLD
 header   __VPSNUMBERONLY_TLD From:addr =~ /\@vps[0-9]{4,}\.[a-z]+$/i
 reuse    __VPSNUMBERONLY_TLD
 
-meta     VPS_NO_NTLD __VPSNUMBERONLY_TLD && FROM_SUSPICIOUS_NTLD
+meta     VPS_NO_NTLD __VPSNUMBERONLY_TLD && __FROM_ADDRLIST_SUSPNTLD
 describe VPS_NO_NTLD vps[0-9] domain at a suspiscious TLD
 score    VPS_NO_NTLD 1.0 # limit
 reuse    VPS_NO_NTLD
