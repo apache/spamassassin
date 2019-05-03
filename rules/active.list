@@ -1,5 +1,5 @@
 # active ruleset list, automatically generated from https://ruleqa.spamassassin.org/
-# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc darxus ena-week0 ena-week1 ena-week3 ena-week4 giovanni-ham giovanni-spam giovanni-spammy grenier hege jarif jbrooks pds sihde spamsponge thendrikx; day 2: axb-coi-bulk axb-generic axb-ham-misc ena-week1 ena-week3 ena-week4 giovanni-ham giovanni-spam giovanni-spammy jarif jbrooks llanga mmiroslaw-mails-ham mmiroslaw-mails-spam pds sihde; day 3: axb-coi-bulk axb-generic axb-ham-misc ena-week3 ena-week4 giovanni-ham giovanni-spam giovanni-spammy jarif jbrooks llanga pds sihde
+# with results from: day 1: axb-coi-bulk axb-generic axb-ham-misc darxus ena-week0 ena-week1 ena-week3 ena-week4 giovanni-ham giovanni-spam giovanni-spammy grenier hege jarif jbrooks pds sihde spamsponge thendrikx; day 2: axb-coi-bulk axb-generic axb-ham-misc ena-week3 ena-week4 giovanni-ham giovanni-spam giovanni-spammy jarif llanga mmiroslaw-mails-ham mmiroslaw-mails-spam; day 3: axb-coi-bulk axb-generic axb-ham-misc ena-week1 ena-week3 ena-week4 giovanni-ham giovanni-spam giovanni-spammy jarif jbrooks llanga mmiroslaw-mails-ham mmiroslaw-mails-spam pds sihde
 
 # tflags publish
 AC_BR_BONANZA
@@ -59,9 +59,6 @@ ADVANCE_FEE_3_NEW_MONEY
 ADVANCE_FEE_4_NEW
 
 # good enough
-ADVANCE_FEE_5_NEW
-
-# good enough
 ADVANCE_FEE_5_NEW_FRM_MNY
 
 # good enough
@@ -111,9 +108,6 @@ BAYES_999
 
 # good enough
 BIGNUM_EMAILS
-
-# tflags publish
-BITCOIN_BOMB
 
 # tflags publish
 BITCOIN_DEADLINE
@@ -974,6 +968,9 @@ TO_NO_BRKTS_NORDNS_HTML
 TO_NO_BRKTS_PCNT
 
 # good enough
+TVD_RCVD_IP
+
+# good enough
 TVD_RCVD_SPACE_BRACKET
 
 # good enough
@@ -986,13 +983,52 @@ TVD_VISIT_PHARMA
 TW_GIBBERISH_MANY
 
 # good enough
-ADVANCE_FEE_4_NEW_FRM_MNY
+ANY_PILL_PRICE
+
+# good enough
+AXB_XMAILER_MIMEOLE_OL_024C2
+
+# good enough
+BODY_EMPTY
+
+# good enough
+CK_HELO_DYNAMIC_SPLIT_IP
+
+# good enough
+CK_HELO_GENERIC
+
+# good enough
+COMPENSATION
+
+# good enough
+DATE_IN_FUTURE_96_Q
+
+# good enough
+FROM_MISSP_TO_UNDISC
 
 # tflags publish
 FSL_BULK_SIG
 
 # good enough
-HK_SCAM_N2
+FSL_CTYPE_WIN1251
+
+# good enough
+HELO_MISC_IP
+
+# good enough
+HK_RANDOM_FROM
+
+# good enough
+HK_SCAM_N3
+
+# good enough
+PDS_TO_EQ_FROM_NAME
+
+# good enough
+PHOTO_EDITING_FREEM
+
+# good enough
+TVD_SPACE_ENCODED
 
 # tflags publish
 UC_GIBBERISH_OBFU
