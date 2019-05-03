@@ -74,5 +74,13 @@ describe SHORT_IMG_SUSP_NTLD Short HTML + image + suspicious TLD
 score    SHORT_IMG_SUSP_NTLD 1.5 # limit
 reuse    SHORT_IMG_SUSP_NTLD
 
+header   __VPSNUMBERONLY_TLD From:addr =~ /\@vps[0-9]{4,}\.[a-z]+$/i
+reuse    __VPSNUMBERONLY_TLD
+
+meta     VPS_NO_NTLD __VPSNUMBERONLY_TLD && FROM_SUSPICIOUS_NTLD
+describe VPS_NO_NTLD vps[0-9] domain at a suspiscious TLD
+score    VPS_NO_NTLD 1.0 # limit
+reuse    VPS_NO_NTLD
+
 endif
 endif
