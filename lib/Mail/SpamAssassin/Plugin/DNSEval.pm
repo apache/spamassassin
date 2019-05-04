@@ -539,14 +539,21 @@ sub check_rbl_rcvd {
   my ($self, $pms, $rule, $set, $rbl_server, $subtest) = @_;
   my %seen;
   my $host;
+  my @udnsrcvd = ();
+
+  return 0 if $self->{main}->{conf}->{skip_rbl_checks};
+  return 0 if !$pms->is_dns_available();
 
   my $rcvd = $pms->{relays_untrusted}->[$pms->{num_relays_untrusted} - 1];
   my @dnsrcvd = ( $rcvd->{ip}, $rcvd->{by}, $rcvd->{helo}, $rcvd->{rdns} );
   # unique values
-  my @udnsrcvd = grep { !$seen{$_}++ } @dnsrcvd;
+  foreach my $value (@dnsrcvd) {
+    if ( ( defined $value ) && (! $seen{$value}++ ) ) {
+      push @udnsrcvd, $value;
+    }
+  }
 
   foreach $host ( @udnsrcvd ) {
-    $host = $rcvd->{rdns};
     if((defined $host) and ($host ne "")) {
       chomp($host);
       if($host =~ /^$IP_ADDRESS/ ) {
