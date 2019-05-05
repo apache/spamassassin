@@ -273,7 +273,7 @@ my $spamtest = new Mail::SpamAssassin(
 if ($opt{'lint'}) {
   $spamtest->debug_diagnostics();
   my $res = $spamtest->lint_rules();
-  warn "lint: $res issues detected, please rerun with debug enabled for more information\n" if ($res);
+  warn "lint: $res issues detected, please rerun with debug enabled for more information\n" if ($res and !$opt{'debug'});
   # make sure we notice any write errors while flushing output buffer
   close STDOUT  or die "error closing STDOUT: $!";
   close STDIN   or die "error closing STDIN: $!";
