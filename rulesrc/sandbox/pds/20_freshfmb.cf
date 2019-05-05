@@ -1,3 +1,9 @@
+header   __NUMBERONLY_TLD From:addr =~ /\@[0-9]{4,}(\.[a-z]{2,4})?\.[a-z]+$/i
+reuse    __NUMBERONLY_TLD
+
+header   __NUMBEREND_TLD From:addr =~ /\@[a-z]{2,}[0-9]{4,}(\.[a-z]{2,4})?\.[a-z]+$/i
+reuse    __NUMBEREND_TLD
+
 # _AUTHORDOMAIN_ implemented only from 3.4.1
 if (version >= 3.004001)
 ifplugin Mail::SpamAssassin::Plugin::AskDNS
@@ -37,9 +43,6 @@ describe   FROM_FMBLA_NDBLOCKED ADMINISTRATOR NOTICE: The query to fresh.fmb.la 
 tflags     FROM_FMBLA_NDBLOCKED net publish
 score      FROM_FMBLA_NDBLOCKED 0.001 # limit
 reuse      FROM_FMBLA_NDBLOCKED
-
-header   __NUMBERONLY_TLD From:addr =~ /\@[0-9]{4,}\.[a-z]+$/i
-reuse    __NUMBERONLY_TLD
 
 meta     __PDS_NEWDOMAIN  (__FROM_FMBLA_NEWDOM || __FROM_FMBLA_NEWDOM14 || __FROM_FMBLA_NEWDOM28)
 tflags   __PDS_NEWDOMAIN  net
