@@ -505,7 +505,7 @@ sub check_uri_local_bl {
     next unless $info->{hosts};
 
     # look for W3 links only
-    next unless (defined $info->{types}->{a});
+    next unless (defined $info->{types}->{a} || defined $info->{types}->{parsed});
 
     while (my($host, $domain) = each %{$info->{hosts}}) {
 
