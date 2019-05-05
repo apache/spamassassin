@@ -272,7 +272,7 @@ sub _get_emails {
       next if exists $seen{$_};
       my @tmp_email = split('@', $_);
       my $domain = $tmp_email[1];
-      if (defined($acl) and ($acl ne "all")) {
+      if (defined($acl) and ($acl ne "all") and defined($domain)) {
         if (defined($self->{hashbl_acl}{$acl}{$domain}) and ($self->{hashbl_acl}{$acl}{$domain} eq 1)) {
           push @emails, $_;
           $seen{$_} = 1;
