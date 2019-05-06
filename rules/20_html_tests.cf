@@ -56,7 +56,7 @@ describe HTML_MISSING_CTYPE	Message is HTML without HTML Content-Type
 ###########################################################################
 # rawbody HTML tests
 
-rawbody HIDE_WIN_STATUS		/<[^>]+onMouseOver=[^>]+window\.status=/i
+rawbody HIDE_WIN_STATUS		/<[^>]{1,1000}onMouseOver=[^>]{1,1000}window\.status=/i
 describe HIDE_WIN_STATUS	Javascript to hide URLs in browser
 
 rawbody __OBFUSCATING_COMMENT_A	/\w(?:<![^>]*>)+\w/
