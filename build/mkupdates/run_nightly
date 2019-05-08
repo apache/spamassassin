@@ -15,7 +15,12 @@ cd /usr/local/spamassassin/automc/svn/trunk
 # ---------------------------------------------------------------------------
 
 promote_active_rules() {
+  # should be in ~/svn/trunk
   pwd
+ 
+  # Make sure we have the source, since listpromotable assumes we do. 
+  # Also, make_tarball_for_version removes rulesrc
+  svn co https://svn.apache.org/repos/asf/spamassassin/trunk/rulesrc
 
   $PERL build/mkupdates/listpromotable > rules/active.list.new || exit $?
   mv rules/active.list.new rules/active.list
