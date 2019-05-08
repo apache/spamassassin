@@ -1,93 +1,90 @@
-# Using score set 0 logs for revision 1858760 from:
+# Using score set 0 logs for revision 1858833 from:
 # ham-axb-coi-bulk.log ham-axb-generic.log ham-axb-ham-misc.log ham-darxus.log ham-ena-week0.log ham-ena-week1.log ham-ena-week2.log ham-ena-week3.log ham-ena-week4.log ham-giovanni-ham.log ham-giovanni-spam.log ham-giovanni-spammy.log ham-grenier.log ham-hege.log ham-jarif.log ham-jbrooks.log ham-pds.log ham-sihde.log ham-spamsponge.log ham-thendrikx.log spam-axb-coi-bulk.log spam-axb-generic.log spam-axb-ham-misc.log spam-darxus.log spam-ena-week0.log spam-ena-week1.log spam-ena-week2.log spam-ena-week3.log spam-ena-week4.log spam-giovanni-ham.log spam-giovanni-spam.log spam-giovanni-spammy.log spam-grenier.log spam-hege.log spam-jarif.log spam-jbrooks.log spam-pds.log spam-sihde.log spam-spamsponge.log spam-thendrikx.log
 
 score AC_BR_BONANZA                  0.001
 score AC_DIV_BONANZA                 0.001
 score AC_HTML_NONSENSE_TAGS          1.999
 score ADVANCE_FEE_2_NEW_MONEY        1.999
-score ADVANCE_FEE_3_NEW              3.001
-score ADVANCE_FEE_3_NEW_MONEY        2.999
+score ADVANCE_FEE_3_NEW              2.997
+score ADVANCE_FEE_3_NEW_MONEY        3.099
 score ADVANCE_FEE_4_NEW              2.599
-score AD_PREFS                       0.502
+score AD_PREFS                       0.558
 score BITCOIN_DEADLINE               2.999
 score BITCOIN_EXTORT_01              5.000
-score BITCOIN_MALWARE                3.477
-score BITCOIN_PAY_ME                 2.972
+score BITCOIN_MALWARE                3.499
+score BITCOIN_PAY_ME                 2.079
 score BITCOIN_SPAM_01                0.001
 score BITCOIN_SPAM_02                0.195
-score BITCOIN_SPAM_03                2.373
-score BITCOIN_SPAM_05                0.001
+score BITCOIN_SPAM_03                2.237
+score BITCOIN_SPAM_05                2.499
 score BITCOIN_SPAM_06                0.001
-score BITCOIN_SPAM_07                1.594
+score BITCOIN_SPAM_07                0.701
 score BITCOIN_SPAM_08                2.499
 score BITCOIN_SPAM_09                1.499
-score BITCOIN_SPAM_10                2.465
-score BODY_URI_ONLY                  0.999
-score BOGUS_MSM_HDRS                 2.674
-score DX_TEXT_03                     0.536
-score FILL_THIS_FORM                 1.800
-score FORM_FRAUD                     1.000
+score BITCOIN_SPAM_10                2.426
+score BODY_URI_ONLY                  1.000
+score BOGUS_MSM_HDRS                 2.671
+score DX_TEXT_03                     0.531
+score FILL_THIS_FORM                 1.794
+score FORM_FRAUD                     0.999
 score FORM_FRAUD_3                   2.799
-score FORM_FRAUD_5                   0.001
+score FORM_FRAUD_5                   0.001 # force non-zero
 score FOUND_YOU                      3.249
 score FREEMAIL_FORGED_FROMDOMAIN     0.249
 score FROM_ADDR_WS                   2.999
 score FROM_IN_TO_AND_SUBJ            0.001
 score FSL_NEW_HELO_USER              0.001
-score FUZZY_BITCOIN                  2.691
 score FUZZY_CLICK_HERE               2.499
 score FUZZY_UNSUBSCRIBE              3.199
-score FUZZY_WALLET                   1.587
 score HDR_ORDER_FTSDMCXX_DIRECT      1.999
-score HDR_ORDER_FTSDMCXX_NORDNS      3.156
+score HDR_ORDER_FTSDMCXX_NORDNS      2.831
 score HEADER_FROM_DIFFERENT_DOMAINS  0.001 # force non-zero
 score HTML_OFF_PAGE                  2.999
 score HTML_SHRT_CMNT_OBFU_MANY       0.001
-score HTML_SINGLET_MANY              1.886
+score HTML_SINGLET_MANY              1.665
 score HTML_TEXT_INVISIBLE_STYLE      0.001
-score IMG_ONLY_FM_DOM_INFO           1.811
+score IMG_ONLY_FM_DOM_INFO           1.813
 score LIST_PRTL_SAME_USER            0.001 # force non-zero
 score LONG_HEX_URI                   0.711
-score LONG_IMG_URI                   0.001
+score LONG_IMG_URI                   0.001 # force non-zero
 score LOTS_OF_MONEY                  0.001 # force non-zero
-score MALF_HTML_B64                  0.001
-score MIMEOLE_DIRECT_TO_MX           0.348
+score MALF_HTML_B64                  0.001 # force non-zero
+score MIMEOLE_DIRECT_TO_MX           0.487
 score MIME_NO_TEXT                   1.999
-score MIXED_ES                       2.792
-score MONEY_FRAUD_3                  2.551
-score MONEY_FRAUD_5                  1.149
-score MONEY_FRAUD_8                  1.799
-score MSM_PRIO_REPTO                 2.499
-score NO_FM_NAME_IP_HOSTN            2.359
+score MIXED_ES                       2.797
+score MONEY_FRAUD_3                  2.601
+score MONEY_FRAUD_5                  0.686
+score MONEY_FRAUD_8                  1.798
+score NO_FM_NAME_IP_HOSTN            2.198
 score OBFU_BITCOIN                   0.001
 score PHP_ORIG_SCRIPT                2.499
 score PP_MIME_FAKE_ASCII_TEXT        0.999
-score RDNS_NUM_TLD_ATCHNX            2.122
+score RDNS_NUM_TLD_ATCHNX            2.833
 score RDNS_NUM_TLD_XM                2.999
-score SINGLETS_LOW_CONTRAST          0.001
-score SPOOFED_FREEM_REPTO            2.500
+score SINGLETS_LOW_CONTRAST          0.221
+score SPOOFED_FREEM_REPTO            2.499
 score STATIC_XPRIO_OLE               1.999
-score STOCK_LOW_CONTRAST             1.161
-score STYLE_GIBBERISH                1.886
-score TEQF_USR_IMAGE                 2.699
-score THIS_AD                        0.001 # force non-zero
-score TO_EQ_FM_DIRECT_MX             1.003
+score STOCK_LOW_CONTRAST             1.268
+score STYLE_GIBBERISH                1.699
+score TEQF_USR_IMAGE                 2.599
+score THIS_AD                        0.001
+score TO_EQ_FM_DIRECT_MX             2.100
 score TO_IN_SUBJ                     0.100
 score TO_NAME_SUBJ_NO_RDNS           0.001 # force non-zero
-score TO_NO_BRKTS_HTML_IMG           0.717
-score TO_NO_BRKTS_HTML_ONLY          1.600
-score TO_NO_BRKTS_NORDNS_HTML        0.001
+score TO_NO_BRKTS_HTML_IMG           0.718
+score TO_NO_BRKTS_HTML_ONLY          0.160
+score TO_NO_BRKTS_NORDNS_HTML        0.001 # force non-zero
 score TO_NO_BRKTS_PCNT               2.499
 score UNICODE_OBFU_ASC               2.499
 score UNICODE_OBFU_ZW                0.001
 score URI_GOOGLE_PROXY               0.001
-score URI_ONLY_MSGID_MALF            2.000
-score URI_PHISH                      2.696
-score URI_TRY_3LD                    0.001
+score URI_ONLY_MSGID_MALF            1.999
+score URI_PHISH                      2.798
+score URI_TRY_3LD                    0.001 # force non-zero
 score URI_WPADMIN                    2.699
 score URI_WP_DIRINDEX                3.499
 score URI_WP_HACKED                  3.499
-score URI_WP_HACKED_2                1.990
+score URI_WP_HACKED_2                1.923
 score XPRIO                          2.249
 score XPRIO_SHORT_SUBJ               2.499
 score AC_SPAMMY_URI_PATTERNS1        1.000
@@ -125,6 +122,7 @@ score HTML_ENTITY_ASCII_TINY         1.000
 score HTML_TEXT_INVISIBLE_FONT       1.000
 score LIST_PRTL_PUMPDUMP             1.000
 score LUCRATIVE                      1.000
+score MSM_PRIO_REPTO                 1.000
 score PHP_NOVER_MUA                  1.000
 score PHP_SCRIPT_MUA                 1.000
 score PP_TOO_MUCH_UNICODE02          0.500
