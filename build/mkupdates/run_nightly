@@ -82,7 +82,8 @@ make_tarball_for_version() {
   # need to put the latest 72_scores.cf in the update.tgz
   svn co https://svn.apache.org/repos/asf/spamassassin/trunk/rulesrc
   cp -a rulesrc/scores/72_scores.cf rules/
-  rm -rf rulesrc
+  # I think this is problematic. I don't see how it is needed HERE. 
+  #rm -rf rulesrc
 
   # double check we still lint without those 2 files
   ./spamassassin --lint                   || exit $?
