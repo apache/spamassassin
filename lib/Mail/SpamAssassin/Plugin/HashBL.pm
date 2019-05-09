@@ -342,12 +342,12 @@ sub check_hashbl_emails {
   my $rulename = $pms->get_current_eval_rule_name();
 
   if (!defined $list) {
-    info("HashBL: $rulename blocklist argument missing");
+    Mail::SpamAssassin::Logger::info("HashBL: $rulename blocklist argument missing");
     return 0;
   }
 
   if ($subtest && !eval { $subtest = qr/$subtest/ }) {
-    info("HashBL: $rulename invalid subtest regex: $@");
+    Mail::SpamAssassin::Logger::info("HashBL: $rulename invalid subtest regex: $@");
     return 0;
   }
 
@@ -411,17 +411,17 @@ sub check_hashbl_bodyre {
   my $rulename = $pms->get_current_eval_rule_name();
 
   if (!defined $list) {
-    info("HashBL: $rulename blocklist argument missing");
+    Mail::SpamAssassin::Logger::info("HashBL: $rulename blocklist argument missing");
     return 0;
   }
 
   if (!$re || !eval { $re = qr/$re/ }) {
-    info("HashBL: $rulename invalid body regex: $@");
+    Mail::SpamAssassin::Logger::info("HashBL: $rulename invalid body regex: $@");
     return 0;
   }
 
   if ($subtest && !eval { $subtest = qr/$subtest/ }) {
-    info("HashBL: $rulename invalid subtext regex: $@");
+    Mail::SpamAssassin::Logger::info("HashBL: $rulename invalid subtext regex: $@");
     return 0;
   }
 
