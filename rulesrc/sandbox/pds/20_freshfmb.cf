@@ -4,6 +4,16 @@ reuse    __NUMBERONLY_TLD
 header   __NUMBEREND_TLD From:addr =~ /\@[a-z]{2,}[0-9]{4,}(\.[a-z]{2,4})?\.[a-z]+$/i
 reuse    __NUMBEREND_TLD
 
+meta     NUMBEREND_LINKBAIT __NUMBEREND_TLD && __LCL__KAM_BODY_LENGTH_LT_1024 && __BODY_URI_ONLY
+describe NUMBEREND_LINKBAIT Domain ends in a large number and very short body with link
+score    NUMBEREND_LINKBAIT 1.0 # limit
+reuse    NUMBEREND_LINKBAIT
+
+meta     NUMBERONLY_LINKBAIT __NUMBERONLY_TLD && __LCL__KAM_BODY_LENGTH_LT_1024 && __BODY_URI_ONLY
+describe NUMBERONLY_LINKBAIT Domain ends in a large number and very short body with link
+score    NUMBERONLY_LINKBAIT 1.0 # limit
+reuse    NUMBERONLY_LINKBAIT
+
 # _AUTHORDOMAIN_ implemented only from 3.4.1
 if (version >= 3.004001)
 ifplugin Mail::SpamAssassin::Plugin::AskDNS
