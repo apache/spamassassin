@@ -9,10 +9,10 @@ describe NUMBEREND_LINKBAIT Domain ends in a large number and very short body wi
 score    NUMBEREND_LINKBAIT 1.0 # limit
 reuse    NUMBEREND_LINKBAIT
 
-meta     NUMBERONLY_LINKBAIT __NUMBERONLY_TLD && __LCL__KAM_BODY_LENGTH_LT_1024 && __BODY_URI_ONLY
-describe NUMBERONLY_LINKBAIT Domain ends in a large number and very short body with link
-score    NUMBERONLY_LINKBAIT 1.0 # limit
-reuse    NUMBERONLY_LINKBAIT
+meta     NUMBERONLY_BITCOIN_EXP __NUMBERONLY_TLD && __BITCOIN_ID && __NAKED_TO
+describe NUMBERONLY_BITCOIN_EXP Domain ends in a large number and very short body with link
+score    NUMBERONLY_BITCOIN_EXP 1.0 # limit
+reuse    NUMBERONLY_BITCOIN_EXP
 
 # _AUTHORDOMAIN_ implemented only from 3.4.1
 if (version >= 3.004001)
