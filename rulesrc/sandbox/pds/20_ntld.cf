@@ -1,6 +1,9 @@
 # new TLDs used for spamming
 # https://www.spamhaus.org/statistics/tlds/
 # http://www.surbl.org/tld
+# https://ntldstats.com/fraud
+# https://dnslytics.com/tld
+
 if (version >= 3.004002)
 ifplugin Mail::SpamAssassin::Plugin::WLBLEval
 
@@ -9,12 +12,16 @@ enlist_addrlist (SUSP_NTLD) *@*.online
 enlist_addrlist (SUSP_NTLD) *@*.work
 enlist_addrlist (SUSP_NTLD) *@*.date
 enlist_addrlist (SUSP_NTLD) *@*.top
+enlist_addrlist (SUSP_NTLD) *@*.fun
 enlist_addrlist (SUSP_NTLD) *@*.life
 enlist_addrlist (SUSP_NTLD) *@*.review
 enlist_addrlist (SUSP_NTLD) *@*.xyz
 enlist_addrlist (SUSP_NTLD) *@*.bid
 enlist_addrlist (SUSP_NTLD) *@*.stream
 enlist_addrlist (SUSP_NTLD) *@*.site
+enlist_addrlist (SUSP_NTLD) *@*.space
+enlist_addrlist (SUSP_NTLD) *@*.gdn
+enlist_addrlist (SUSP_NTLD) *@*.click
 
 header   __FROM_ADDRLIST_SUSPNTLD eval:check_from_in_list('SUSP_NTLD')
 reuse    __FROM_ADDRLIST_SUSPNTLD
