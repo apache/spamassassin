@@ -35,6 +35,9 @@ HashBL - query hashed (and unhashed) DNS blocklists
   describe HASHBL_BTC Message contains BTC address found on BTCBL
   priority HASHBL_BTC -100 # required priority to launch async lookups
 
+  header   HASHBL_URI eval:check_hashbl_uris('rbl.foo.bar', 'sha1', '127.0.0.32')
+  describe HASHBL_URI Message contains uri found on rbl
+
 =head1 DESCRIPTION
 
 This plugin support multiple types of hashed or unhashed DNS blocklists.
@@ -49,7 +52,7 @@ OPTS refers to multiple generic options:
   max=x	   maximum number of queries
   shuffle  if max exceeded, random shuffle queries before truncating to limit
 
-Multiple options can be separated with slash or other non-word character. 
+Multiple options can be separated with slash or other non-word character.
 If OPTS is empty ('') or missing, default is used.
 
 HEADERS referes to slash separated list of Headers to process:
@@ -86,6 +89,19 @@ For existing public email blacklist, see: http://msbl.org/ebl.html
 
   header HASHBL_EBL check_hashbl_emails('ebl.msbl.org')
   priority HASHBL_EBL -100 # required for async query
+
+=over 4
+
+=item header RULE check_hashbl_uris('bl.example.com/A', 'OPTS', '^127\.')
+
+Check uris from DNS list, optional subtest regexp to match DNS
+answer.
+
+DNS query type can be appended to list with /A (default) or /TXT.
+
+Default OPTS: sha1/max=10/shuffle
+
+=back
 
 =item body RULE check_hashbl_bodyre('bl.example.com/A', 'OPTS', '\b(match)\b', '^127\.')
 
@@ -131,6 +147,7 @@ sub new {
   }
 
   $self->register_eval_rule("check_hashbl_emails");
+  $self->register_eval_rule("check_hashbl_uris");
   $self->register_eval_rule("check_hashbl_bodyre");
   $self->set_config($mailsa->{conf});
 
@@ -255,7 +272,7 @@ sub _init_email_re {
       | [a-f0-9]{8}(?:\.[a-f0-9]{8}|-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}) # gmail msgids?
       | .+=.+=.+                          # gmail forward
     )\@
-  /xi;  
+  /xi;
 }
 
 sub _get_emails {
@@ -418,6 +435,69 @@ sub check_hashbl_emails {
   }
 
   return 0;
+}
+
+sub check_hashbl_uris {
+  my ($self, $pms, $list, $opts, $subtest) = @_;
+  my %uri;
+  my %seen;
+  my @filtered_uris;
+
+  return 0 if !$self->{hashbl_available};
+
+  my $rulename = $pms->get_current_eval_rule_name();
+
+  if (!defined $list) {
+    Mail::SpamAssassin::Logger::info("HashBL: $rulename blocklist argument missing");
+    return 0;
+  }
+
+  if ($subtest && !eval { $subtest = qr/$subtest/ }) {
+    Mail::SpamAssassin::Logger::info("HashBL: $rulename invalid subtest regex: $@");
+    return 0;
+  }
+
+  # Defaults
+  $opts = 'sha1/max=10/shuffle' if !$opts;
+
+  # Filter list
+  my $keep_case = $opts =~ /\bcase\b/i;
+
+  if($opts =~ /.*raw.*/) {
+    Mail::SpamAssassin::Logger::info("HashBL: raw option invalid");
+    return 0;
+  }
+
+  my $uris = $pms->get_uri_detail_list();
+
+  while (my($uri, $info) = each %{$uris}) {
+    # we want to skip mailto: uris
+    next if ($uri =~ /^mailto:/i);
+    next if exists $seen{$uri};
+
+    # no hosts/domains were found via this uri, so skip
+    next unless ($info->{hosts});
+    if (($info->{types}->{a}) || ($info->{types}->{parsed})) {
+      # check url
+      push @filtered_uris, $keep_case ? $uri : lc($uri);
+    }
+    $seen{$uri} = 1;
+  }
+
+  # Randomize order
+  if ($opts =~ /\bshuffle\b/) {
+    Mail::SpamAssassin::Util::fisher_yates_shuffle(\@filtered_uris);
+  }
+
+  # Truncate list
+  my $max = $opts =~ /\bmax=(\d+)\b/ ? $1 : 10;
+  $#filtered_uris = $max if scalar @filtered_uris > $max;
+
+  foreach my $furi (@filtered_uris) {
+    $self->_submit_query($pms, $rulename, $furi, $list, $opts, $subtest);
+  }
+
+ return 0;
 }
 
 sub check_hashbl_bodyre {
