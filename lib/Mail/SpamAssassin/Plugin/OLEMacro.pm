@@ -38,6 +38,9 @@ Mail::SpamAssassin::Plugin::OLEMacro - search attached documents for evidence of
 
     body     OLEMACRO_ZIP_PW eval:check_olemacro_zip_password()
     describe OLEMACRO_ZIP_PW Has an Office doc that is password protected in a zip
+
+    body     OLEMACRO_CSV eval:check_olemacro_csv()
+    describe OLEMACRO_CSV Malicious csv file that tries to exec cmd.exe detected
   endif
 
 =head1 DESCRIPTION
@@ -97,6 +100,7 @@ sub new {
   $self->set_config($mailsaobject->{conf});
 
   $self->register_eval_rule("check_olemacro");
+  $self->register_eval_rule("check_olemacro_csv");
   $self->register_eval_rule("check_olemacro_malice");
   $self->register_eval_rule("check_olemacro_renamed");
   $self->register_eval_rule("check_olemacro_encrypted");
@@ -350,6 +354,35 @@ sub check_olemacro {
   _check_attachments(@_) unless exists $pms->{olemacro_exists};
 
   return $pms->{olemacro_exists};
+}
+
+sub check_olemacro_csv {
+  my ($self,$pms,$body,$name) = @_;
+
+  my $chunk_size = $pms->{conf}->{olemacro_max_file};
+
+  foreach my $part ($pms->{msg}->find_parts(qr/./, 1)) {
+
+    next unless ($part->{type} eq "text/plain");
+
+    my ($ctt, $ctd, $cte, $name) = _get_part_details($pms, $part);
+    next unless defined $ctt;
+
+    next if $name eq '';
+
+    # we skipped what we need/want to
+    my $data = undef;
+
+    # if name extension is csv - return true
+    if ($name =~ /\.csv/i) {
+      dbg("Found csv file with name $name");
+      $data = $part->decode($chunk_size) unless defined $data;
+      if($data =~ /MSEXCEL|.*Windows\\System32\\cmd\\.exe/) {
+        $pms->{olemacro_csv} = 1;
+      }
+    }
+  }
+  return $pms->{olemacro_csv};
 }
 
 sub check_olemacro_malice {
