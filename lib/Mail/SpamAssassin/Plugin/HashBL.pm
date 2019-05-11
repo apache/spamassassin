@@ -512,10 +512,11 @@ sub _submit_query {
     value => $value,
     subtest => $subtest,
   };
-  $pms->{async}->bgsend_and_start_lookup($lookup, $type, undef, $ent,
+  $ent = $pms->{async}->bgsend_and_start_lookup($lookup, $type, undef, $ent,
     sub { my ($ent, $pkt) = @_; $self->_finish_query($pms, $ent, $pkt); },
     master_deadline => $pms->{master_deadline}
   );
+  $pms->register_async_rule_start($rulename) if $ent;
 }
 
 sub _finish_query {
@@ -535,6 +536,7 @@ sub _finish_query {
       $ent->{value} =~ s/\@/[at]/g;
       $pms->test_log($ent->{value});
       $pms->got_hit($ent->{rulename}, '', ruletype => 'eval');
+      $pms->register_async_rule_finish($ent->{rulename});
       return;
     }
   }
