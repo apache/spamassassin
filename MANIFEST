@@ -229,6 +229,7 @@ sql/userpref_mysql.sql
 sql/userpref_pg.sql
 sql/txrep_mysql.sql
 sql/txrep_pg.sql
+sql/txrep_sqlite.sql
 t/README
 t/SATest.pl
 t/SATest.pm
@@ -429,6 +430,11 @@ t/data/whitelists/ryanairmail.com
 t/data/whitelists/sf.net
 t/data/whitelists/winxpnews.com
 t/data/whitelists/yahoo-inc.com
+t/data/phishing/openphish-feed.txt
+t/data/phishing/phishtank-feed.csv
+t/data/spam/phishing_openphish.eml
+t/data/spam/phishing_phishtank.eml
+t/phishing.t
 t/date.t
 t/db_awl_path.t
 t/db_awl_perms.t
