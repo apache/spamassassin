@@ -2,6 +2,7 @@ if (version >= 3.004001)
 ifplugin Mail::SpamAssassin::Plugin::AskDNS
 
 askdns   __PDS_SPF_ONLYALL _SENDERDOMAIN_ TXT /^v=spf1 \+all$/
+tflags   __PDS_SPF_ONLYALL net
 
 meta     BITCOIN_SPF_ONLYALL __PDS_SPF_ONLYALL && __BITCOIN_ID
 tflags   BITCOIN_SPF_ONLYALL net publish
