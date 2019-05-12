@@ -265,6 +265,8 @@ sub add {
   my $name = lc($params{method});
   my $class = ucfirst($name);
 
+  return 0 if $class !~ /^\w+$/; # be paranoid
+
   eval 'use Mail::SpamAssassin::Logger::'.$class.'; 1'
   or do {
     my $eval_stat = $@ ne '' ? $@ : "errno=$!";  chomp $eval_stat;

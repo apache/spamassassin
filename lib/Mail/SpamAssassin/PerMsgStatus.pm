@@ -272,7 +272,6 @@ sub new {
     'deadline_exceeded' => 0,  # time limit exceeded, skipping further tests
     'tmpfiles'          => { },
   };
-  #$self->{main}->{use_rule_subs} = 1;
 
   dbg("check: pms new, time limit in %.3f s",
       $self->{master_deadline} - time)  if $self->{master_deadline};

@@ -29,7 +29,7 @@ package Mail::SpamAssassin::Plugin::BodyRuleBaseExtractor;
 
 use Mail::SpamAssassin::Plugin;
 use Mail::SpamAssassin::Logger;
-use Mail::SpamAssassin::Util qw(untaint_var);
+use Mail::SpamAssassin::Util qw(untaint_var qr_to_string);
 use Mail::SpamAssassin::Util::Progress;
 
 use Errno qw(ENOENT EACCES EEXIST);
@@ -162,8 +162,12 @@ NEXT_RULE:
   foreach my $name (keys %{$rules}) {
     $self->{show_progress} and $progress and $progress->update(++$count);
 
-    my $rule = $rules->{$name};
-    my $cachekey = join "#", $name, $rule;
+    #my $rule = $rules->{$name};
+    my $rule = qr_to_string($conf->{test_qrs}->{$name});
+    if (!defined $rule) {
+      die "zoom: error: regexp for $rule not found\n";
+    }
+    my $cachekey = $name.'#'.$rule;
 
     my $cent = $cached->{rule_bases}->{$cachekey};
     if (defined $cent) {
@@ -187,7 +191,7 @@ NEXT_RULE:
     }
 
     # ignore ReplaceTags rules
-    my $is_a_replacetags_rule = $conf->{rules_to_replace}->{$name};
+    my $is_a_replacetags_rule = $conf->{replace_rules}->{$name};
     my ($minlen, $lossy, @bases);
 
     if (!$is_a_replacetags_rule) {
@@ -424,11 +428,14 @@ sub simplify_and_qr_regexp {
   my $rule = shift;
 
   my $main = $self->{main};
-  $rule = Mail::SpamAssassin::Util::regexp_remove_delimiters($rule);
+
+
+  my $mods = '';
 
   # remove the regexp modifiers, keep for later
-  my $mods = '';
-  while ($rule =~ s/^\(\?([a-z]*)\)//) { $mods .= $1; }
+  while ($rule =~ s/^\(\?([a-z]*)\)//) {
+    $mods .= $1;
+  }
 
   # modifier removal
   while ($rule =~ s/^\(\?-([a-z]*)\)//) {
@@ -702,7 +709,7 @@ sub extract_hints {
     $add_candidate->();
 
     if (!$longestexact) {
-      die "no long-enough string found in $rawrule";
+      die "no long-enough string found in $rawrule\n";
       # all unrolled versions must have a long string, otherwise
       # we cannot reliably match all variants of the rule
     } else {

@@ -132,7 +132,7 @@ package Mail::SpamAssassin::Conf::Parser;
 use Mail::SpamAssassin::Conf;
 use Mail::SpamAssassin::Constants qw(:sa);
 use Mail::SpamAssassin::Logger;
-use Mail::SpamAssassin::Util qw(untaint_var);
+use Mail::SpamAssassin::Util qw(untaint_var compile_regexp);
 use Mail::SpamAssassin::NetSet;
 
 use strict;
@@ -142,6 +142,7 @@ use re 'taint';
 
 our @ISA = qw();
 
+my $RULENAME_RE = RULENAME_RE;
 my $ARITH_EXPRESSION_LEXER = ARITH_EXPRESSION_LEXER;
 
 ###########################################################################
@@ -513,10 +514,6 @@ sub handle_conditional {
       # replace with a method call
       $eval .= '$self->cond_clause_plugin_loaded';
     }
-    elsif ($token =~ /^Mail::SpamAssassin::\w[\w\:]+$/) { # class name
-      my $u = untaint_var($token);
-      $eval .= '"' . $u . '" ';
-    }
     elsif ($token eq 'can') {
       # replace with a method call
       $eval .= '$self->cond_clause_can';
@@ -531,23 +528,31 @@ sub handle_conditional {
     elsif ($token eq 'perl_version') {
       $eval .= $]." ";
     }
-    elsif ($token =~ /^(?:\W+|[+-]?\d+(?:\.\d+)?)$/) {
+    elsif ($token =~ /^(?:\W{1,5}|[+-]?\d+(?:\.\d+)?)$/) {
       # using tainted subr. argument may taint the whole expression, avoid
       my $u = untaint_var($token);
       $eval .= $u . " ";
     }
     elsif ($token =~ /^\w[\w\:]+$/) { # class name
-      my $u = untaint_var($token);
-      $eval .= '"' . $u . '" ';
+      # Strictly controlled form:
+      if ($token =~ /^(?:\w+::){0,10}\w+$/) {
+        my $u = untaint_var($token);
+        $eval .= "'$u'";
+      } else {
+        warn "config: illegal name '$token' in 'if $value'\n";
+        $bad++;
+        last;
+      }
     }
     else {
       $bad++;
       warn "config: unparseable chars in 'if $value': '$token'\n";
+      last;
     }
   }
 
   if ($bad) {
-    $self->lint_warn("bad 'if' line, in \"$self->{currentfile}\"", undef);
+    $self->lint_warn("config: bad 'if' line, in \"$self->{currentfile}\"", undef);
     return -1;
   }
 
@@ -575,7 +580,7 @@ sub cond_clause_plugin_loaded {
 
 sub cond_clause_can {
   my ($self, $method) = @_;
-  if ($self->{currentfile} =~ q!/user_prefs$! ) {
+  if ($self->{currentfile} =~ q!\buser_prefs$! ) {
     warn "config: 'if can $method' not available in user_prefs";
     return 0
   }
@@ -592,7 +597,7 @@ sub cond_clause_can_or_has {
 
   local($1,$2);
   if (!defined $method) {
-    $self->lint_warn("bad 'if' line, no argument to $fn_name(), ".
+    $self->lint_warn("config: bad 'if' line, no argument to $fn_name(), ".
                      "in \"$self->{currentfile}\"", undef);
   } elsif ($method =~ /^(.*)::([^:]+)$/) {
     no strict "refs";
@@ -600,7 +605,7 @@ sub cond_clause_can_or_has {
     return 1  if $module->can($meth) &&
                  ( $fn_name eq 'has' || &{$method}() );
   } else {
-    $self->lint_warn("bad 'if' line, cannot find '::' in $fn_name($method), ".
+    $self->lint_warn("config: bad 'if' line, cannot find '::' in $fn_name($method), ".
                      "in \"$self->{currentfile}\"", undef);
   }
   return;
@@ -875,39 +880,40 @@ sub finish_parsing {
 
     # eval type handling
     if (($type & 1) == 1) {
-      if (my ($function, $args) = ($text =~ m/(.*?)\s*\((.*?)\)\s*$/)) {
-        my ($packed, $argsref) =
-                $self->pack_eval_method($function, $args, $name, $text);
-
-        if (!$packed) {
-          # we've already warned about this
+      if (my ($function, $args) = ($text =~ /^(\w+)\((.*?)\)$/)) {
+        my $argsref = $self->pack_eval_args($args);
+        if (!defined $argsref) {
+          $self->lint_warn("syntax error for eval function $name: $text");
+          next;
         }
         elsif ($type == $Mail::SpamAssassin::Conf::TYPE_BODY_EVALS) {
-          $conf->{body_evals}->{$priority}->{$name} = $packed;
+          $conf->{body_evals}->{$priority}->{$name} = [ $function, [@$argsref] ];
         }
         elsif ($type == $Mail::SpamAssassin::Conf::TYPE_HEAD_EVALS) {
-          $conf->{head_evals}->{$priority}->{$name} = $packed;
+          $conf->{head_evals}->{$priority}->{$name} = [ $function, [@$argsref] ];
         }
         elsif ($type == $Mail::SpamAssassin::Conf::TYPE_RBL_EVALS) {
           # We don't do priorities for $Mail::SpamAssassin::Conf::TYPE_RBL_EVALS
           # we also use the arrayref instead of the packed string
-          $conf->{rbl_evals}->{$name} = [ $function, @$argsref ];
+          $conf->{rbl_evals}->{$name} = [ $function, [@$argsref] ];
         }
         elsif ($type == $Mail::SpamAssassin::Conf::TYPE_RAWBODY_EVALS) {
-          $conf->{rawbody_evals}->{$priority}->{$name} = $packed;
+          $conf->{rawbody_evals}->{$priority}->{$name} = [ $function, [@$argsref] ];
         }
         elsif ($type == $Mail::SpamAssassin::Conf::TYPE_FULL_EVALS) {
-          $conf->{full_evals}->{$priority}->{$name} = $packed;
+          $conf->{full_evals}->{$priority}->{$name} = [ $function, [@$argsref] ];
         }
         #elsif ($type == $Mail::SpamAssassin::Conf::TYPE_URI_EVALS) {
-        #  $conf->{uri_evals}->{$priority}->{$name} = $packed;
+        #  $conf->{uri_evals}->{$priority}->{$name} = [ $function, [@$argsref] ];
         #}
         else {
           $self->lint_warn("unknown type $type for $name: $text", $name);
+          next;
         }
       }
       else {
         $self->lint_warn("syntax error for eval function $name: $text", $name);
+        next;
       }
     }
     # non-eval tests
@@ -934,6 +940,7 @@ sub finish_parsing {
       }
       else {
         $self->lint_warn("unknown type $type for $name: $text", $name);
+        next;
       }
     }
   }
@@ -1084,40 +1091,36 @@ sub find_dup_rules {
   }
 }
 
+# Deprecated function
 sub pack_eval_method {
-  my ($self, $function, $args, $name, $text) = @_;
+  warn "deprecated function pack_eval_method() used\n";
+  return ('',undef);
+}
 
+sub pack_eval_args {
+  my ($self, $args) = @_;
+
+  return [] if $args =~ /^\s+$/;
+
+  # bug 4419: Parse quoted strings, unquoted alphanumerics/floats,
+  # unquoted IPv4 and IPv6 addresses, and unquoted common domain names.
+  # s// is used so that we can determine whether or not we successfully
+  # parsed ALL arguments.
   my @args;
-  if (defined $args) {
-    # bug 4419: Parse quoted strings, unquoted alphanumerics/floats,
-    # unquoted IPv4 and IPv6 addresses, and unquoted common domain names.
-    # s// is used so that we can determine whether or not we successfully
-    # parsed ALL arguments.
-    local($1,$2,$3);
-    while ($args =~ s/^\s* (?: (['"]) (.*?) \1 | ( [\d\.:A-Za-z-]+? ) )
-                       \s* (?: , \s* | $ )//x) {
-      if (defined $2) {
-        push @args, $2;
-      }
-      else {
-        push @args, $3;
-      }
-    }
+  local($1,$2,$3);
+  while ($args =~ s/^\s* (?: (['"]) (.*?) \1 | ( [\d\.:A-Za-z-]+? ) )
+                     \s* (?: , \s* | $ )//x) {
+    # DO NOT UNTAINT THESE ARGS
+    # The eval function that handles these should do that as necessary,
+    # we have no idea what acceptable arguments look like here.
+    push @args, defined $2 ? $2 : $3;
   }
 
   if ($args ne '') {
-    $self->lint_warn("syntax error (unparsable argument: $args) for eval function: $name: $text", $name);
-    return;
+    return undef;
   }
 
-  my $argstr = $function;
-  $argstr =~ s/\s+//gs;
-
-  if (@args > 0) {
-    $argstr .= ',' . join(', ',
-              map { my $s = $_; $s =~ s/\#/[HASH]/gs; 'q#' . $s . '#' } @args);
-  }
-  return ($argstr, \@args);
+  return \@args;
 }
 
 ###########################################################################
@@ -1179,7 +1182,7 @@ sub add_test {
   my $conf = $self->{conf};
 
   # Don't allow invalid names ...
-  if ($name !~ /^[_[:alpha:]]\w*$/) {
+  if ($name !~ /^${RULENAME_RE}$/) {
     $self->lint_warn("config: error: rule '$name' has invalid characters ".
 	   "(not Alphanumeric + Underscore + starting with a non-digit)\n", $name);
     return;
@@ -1202,29 +1205,68 @@ sub add_test {
     }
   }
 
+  # parameter to compile_regexp()
+  my $ignore_amre =
+    $self->{conf}->{lint_rules} ||
+    $self->{conf}->{ignore_always_matching_regexps};
+
   # all of these rule types are regexps
   if ($type == $Mail::SpamAssassin::Conf::TYPE_BODY_TESTS ||
       $type == $Mail::SpamAssassin::Conf::TYPE_URI_TESTS ||
       $type == $Mail::SpamAssassin::Conf::TYPE_RAWBODY_TESTS ||
       $type == $Mail::SpamAssassin::Conf::TYPE_FULL_TESTS)
   {
-    return unless $self->is_delimited_regexp_valid($name, $text);
+    my ($rec, $err) = compile_regexp($text, 1, $ignore_amre);
+    if (!$rec) {
+      $self->lint_warn("config: invalid regexp for $name '$text': $err", $name);
+      return;
+    }
+    $conf->{test_qrs}->{$name} = $rec;
   }
   elsif ($type == $Mail::SpamAssassin::Conf::TYPE_HEAD_TESTS)
   {
+    local($1,$2,$3);
     # RFC 5322 section 3.6.8, ftext printable US-ASCII chars not including ":"
     # no re "strict";  # since perl 5.21.8: Ranges of ASCII printables...
-    if ($text =~ /^!?defined\([!-9;-\176]+\)$/) {
-      # fine, implements 'exists:'
+    if ($text =~ /^exists:(.*)/) {
+      my $hdr = $1;
+      # never evaled, so can be quite generous with the name
+      # check :addr etc header options
+      if ($hdr !~ /^[^:\s]+:?$/) {
+        $self->lint_warn("config: invalid head test $name header: $hdr");
+        return;
+      }
+      $hdr =~ s/:$//;
+      $conf->{test_opt_header}->{$name} = $hdr;
+      $conf->{test_opt_exists}->{$name} = 1;
     } else {
-      my ($pat) = ($text =~ /^\s*\S+\s*(?:\=|\!)\~\s*(\S.*?\S)\s*$/);
-      if ($pat) { $pat =~ s/\s+\[if-unset:\s+(.+)\]\s*$//; }
-      return unless $self->is_delimited_regexp_valid($name, $pat);
+      if ($text !~ /^([^:\s]+(?:\:|(?:\:[a-z]+){1,2})?)\s*([=!]~)\s*(.+)$/) {
+        $self->lint_warn("config: invalid head test $name: $text");
+        return;
+      }
+      my ($hdr, $op, $pat) = ($1, $2, $3);
+      $hdr =~ s/:$//;
+      if ($pat =~ s/\s+\[if-unset:\s+(.+)\]$//) {
+        $conf->{test_opt_unset}->{$name} = $1;
+      }
+      my ($rec, $err) = compile_regexp($pat, 1, $ignore_amre);
+      if (!$rec) {
+        $self->lint_warn("config: invalid regexp for $name '$pat': $err", $name);
+        return;
+      }
+      $conf->{test_qrs}->{$name} = $rec;
+      $conf->{test_opt_header}->{$name} = $hdr;
+      $conf->{test_opt_neg}->{$name} = 1 if $op eq '!~';
     }
   }
   elsif ($type == $Mail::SpamAssassin::Conf::TYPE_META_TESTS)
   {
-    return unless $self->is_meta_valid($name, $text);
+    if ($self->is_meta_valid($name, $text)) {
+      # Untaint now once and not repeatedly later
+      $text = untaint_var($text);
+    } else {
+      return;
+    }
   }
   elsif (($type & 1) == 1) { # *_EVALS
     # create eval_to_rule mappings
@@ -1297,10 +1339,10 @@ sub is_meta_valid {
 
   # $meta is a degenerate translation of the rule, replacing all variables (i.e. rule names) with 0. 
   my $meta = '';
-  $rule = untaint_var($rule);  # must be careful below
-  # Bug #7557 code injection
-  if ( $rule =~ /\S(::|->)\S/ )  {
-    warn("is_meta_valid: Bogus rule $name: $rule") ;
+
+  # Paranoid check (Bug #7557)
+  if ($rule =~ /(?:\:\:|->)/)  {
+    warn("config: invalid meta $name rule: $rule") ;
     return 0;
   }
 
@@ -1311,24 +1353,27 @@ sub is_meta_valid {
       print "$name $_\n "  or die "Error writing token: $!";
     }
   }
+
   # Go through each token in the meta rule
   foreach my $token (@tokens) {
     # If the token is a syntactically legal rule name, make it zero
-    if ($token =~ /^[_[:alpha:]]\w+\z/s) {
+    if ($token =~ /^${RULENAME_RE}\z/s) {
       $meta .= "0 ";
     }
     # if it is a (decimal) number or a string of 1 or 2 punctuation
     # characters (i.e. operators) tack it onto the degenerate rule
-    elsif ( $token =~ /^(\d+(?:\.\d+)?|[[:punct:]]{1,2})\z/s ) {
+    elsif ($token =~ /^(\d+(?:\.\d+)?|[[:punct:]]{1,2})\z/s) {
       $meta .= "$token ";
     }
-    # WTF is it? Just warn, for now. Bug #7557
+    # Skip anything unknown (Bug #7557)
     else {
-      $self->lint_warn("config: Strange rule $name token: $token", $name);
-      $meta .= "$token ";
+      $self->lint_warn("config: invalid meta $name token: $token", $name);
+      return 0;
     }
   }
-  my $evalstr = 'my $x = ' . $meta . '; 1;';
+
+  $meta = untaint_var($meta); # was carefully checked
+  my $evalstr = 'my $x = '.$meta.'; 1;';
   if (eval $evalstr) {
     return 1;
   }
@@ -1339,104 +1384,21 @@ sub is_meta_valid {
   return 0;
 }
 
+# Deprecated functions, leave just in case..
 sub is_delimited_regexp_valid {
-  my ($self, $name, $re) = @_;
-
-  local ($1,$2);
-  $re ||= '';
-  # Check most common delimiter format first
-  # Make re/mods args here for is_regexp_valid, so it doesn't need to again
-  if ($re =~ m!^/(.*)/([a-z]*)$!) {
-      return $self->is_regexp_valid($name, $1, $2, $re);
-  }
-  # Check other delimiters
-  if ($re !~ /^m([\W]).*(?:\1|>|}|\)|\])[a-z]*$/) {
-    $self->lint_warn("config: invalid regexp for rule $name: $re: missing or invalid delimiters\n");
-    return 0;
-  }
-  return $self->is_regexp_valid($name, $re);
+  my ($self, $rule, $re) = @_;
+  warn "deprecated is_delimited_regexp_valid() called, use compile_regexp()\n";
+  my ($rec, $err) = compile_regexp($re, 1, 1);
+  return $rec;
 }
-
 sub is_regexp_valid {
-  my ($self, $name, $re, $mods, $origre) = @_;
-
-  # OK, try to remove any normal perl-style regexp delimiters at
-  # the start and end, and modifiers at the end if present,
-  # so we can validate those too.
-  if (!defined $origre) {
-    local ($1,$2);
-    $origre = $re;
-    if ($re =~ s{^/(.*)/([a-z]*)\z}{$1}) {
-      $mods = $2;
-    }
-    elsif ($re =~ s/^m\{// && $re =~ s/\}([a-z]*)\z//) {
-      $mods = $1;
-    }
-    elsif ($re =~ s/^m\[// && $re =~ s/\]([a-z]*)\z//) {
-      $mods = $1;
-    }
-    elsif ($re =~ s/^m\(// && $re =~ s/\)([a-z]*)\z//) {
-      $mods = $1;
-    }
-    elsif ($re =~ s/^m<// && $re =~ s/>([a-z]*)\z//) {
-      $mods = $1;
-    }
-    elsif ($re =~ s/^m(\W)(.*)\1([a-z]*)\z/$2/) {
-      $mods = $3;
-    }
-  }
-
-  if ($self->{conf}->{lint_rules} ||
-      $self->{conf}->{ignore_always_matching_regexps})
-  {
-    my $msg = $self->is_always_matching_regexp($name, $re);
-
-    if (defined $msg) {
-      if ($self->{conf}->{lint_rules}) {
-        $self->lint_warn($msg, $name);
-      } else {
-        warn "$msg\n";
-        return 0;
-      }
-    }
-  }
-
-  # now prepend the modifiers, in order to check if they're valid
-  if ($mods) {
-    $re = "(?" . $mods . ")" . $re;
-  }
-
-  # note: this MUST use m/...${re}.../ in some form or another, ie.
-  # interpolation of the $re variable into a code regexp, in order to test the
-  # security of the regexp.  simply using ("" =~ $re) will NOT do that, and
-  # will therefore open a hole!
-  { # no re "strict";  # since perl 5.21.8: Ranges of ASCII printables...
-    if (eval { ("" =~ m{$re}); 1; }) { return 1 }
-  }
-  my $err = $@ ne '' ? $@ : "errno=$!";  chomp $err;
-  $err =~ s/ at .*? line \d.*$//;
-  $self->lint_warn("config: invalid regexp for rule $name: $origre: $err\n", $name);
-  return 0;
+  my ($self, $rule, $re) = @_;
+  warn "deprecated is_regexp_valid() called, use compile_regexp()\n";
+  my ($rec, $err) = compile_regexp($re, 1, 1);
+  return $rec;
 }
-
-# check the pattern for some basic errors, and warn if found
 sub is_always_matching_regexp {
-  my ($self, $name, $re) = @_;
-
-  if ($re eq '') {
-    return "config: empty regexp for rule $name always matches";
-  }
-  elsif ($re =~ /(?<!\\)\|\|/) {
-    return "config: regexp for rule $name always matches due to '||'";
-  }
-  elsif ($re =~ /^\|/) {
-    return "config: regexp for rule $name always matches due to " .
-      "pattern starting with '|'";
-  }
-  elsif ($re =~ /\|(?<!\\\|)$/) {
-    return "config: regexp for rule $name always matches due to " .
-      "pattern ending with '|'";
-  }
+  warn "deprecated is_always_matching_regexp() called\n";
   return;
 }
 

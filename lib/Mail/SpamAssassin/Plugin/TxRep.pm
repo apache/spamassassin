@@ -1413,7 +1413,7 @@ sub check_reputation {
   my ($self, $storage, $pms, $key, $id, $ip, $signedby, $msgscore) = @_;
 
   my $delta  = 0;
-  my $weight = ($key eq 'MSG_ID')? 1 : eval('$pms->{main}->{conf}->{txrep_weight_'.lc($key).'}');
+  my $weight = ($key eq 'MSG_ID') ? 1 : $pms->{main}->{conf}->{'txrep_weight_'.lc($key)};
 
 #  {
 #    #Bug 7164, trying to find out reason for these: _WARN: Use of uninitialized value $msgscore in addition (+) at /usr/share/perl5/vendor_perl/Mail/SpamAssassin/Plugin/TxRep.pm line 1415.
@@ -1638,12 +1638,13 @@ sub open_storages {
     $factory = $self->{main}->{pers_addr_list_factory};
   } else {
     my $type = $self->{conf}->{txrep_factory};
-    if ($type =~ /^([_A-Za-z0-9:]+)$/) {
+    if ($type =~ /^[_A-Za-z0-9:]+$/) {
         $type = untaint_var($type);
-        eval 'require    '.$type.';
-            $factory = '.$type.'->new();
-            1;'
-        or do {
+        eval '
+          require '.$type.';
+          $factory = '.$type.'->new();
+          1;
+        ' or do {
             my $eval_stat = $@ ne '' ? $@ : "errno=$!";  chomp $eval_stat;
             warn "TxRep: $eval_stat\n";
             undef $factory;

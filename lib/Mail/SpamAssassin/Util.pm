@@ -54,12 +54,12 @@ use Exporter ();
 our @ISA = qw(Exporter);
 our @EXPORT = ();
 our @EXPORT_OK = qw(&local_tz &base64_decode &base64_encode
-                  &untaint_var &untaint_file_path
-                  &exit_status_str &proc_status_ok &am_running_on_windows
-                  &reverse_ip_address &decode_dns_question_entry &touch_file
-                  &secure_tmpfile &secure_tmpdir &uri_list_canonicalize
-                  &get_my_locales &parse_rfc822_date &idn_to_ascii
-                  &is_valid_utf_8 &get_user_groups);
+                  &untaint_var &untaint_file_path &exit_status_str
+                  &proc_status_ok &am_running_on_windows &reverse_ip_address
+                  &decode_dns_question_entry &touch_file &secure_tmpfile
+                  &secure_tmpdir &uri_list_canonicalize &get_my_locales
+                  &parse_rfc822_date &idn_to_ascii &is_valid_utf_8
+                  &get_user_groups &compile_regexp &qr_to_string);
 
 our $AM_TAINTED;
 
@@ -1221,7 +1221,8 @@ with Perl.
 sub first_available_module {
   my (@packages) = @_;
   foreach my $mod (@packages) {
-    if (eval 'require '.$mod.'; 1; ') {
+    next if $mod !~ /^[\w:]+$/; # be paranoid
+    if (eval 'require '.$mod.'; 1;') {
       return $mod;
     }
   }
@@ -1399,6 +1400,8 @@ sub secure_tmpdir {
 ## DEPRECATED FUNCTION, sub uri_to_domain removed.
 ## Replaced with Mail::SpamAssassin::RegistryBoundaries::uri_to_domain.
 ##
+
+###########################################################################
 
 *uri_list_canonify = \&uri_list_canonicalize;  # compatibility alias
 sub uri_list_canonicalize {
@@ -1852,6 +1855,157 @@ sub trap_sigalrm_fully {
 
 ###########################################################################
 
+# returns ($compiled_re, $error)
+# if any errors, $compiled_re = undef, $error has string
+# args:
+# - regexp
+# - strip_delimiters (default: 1) (value 2 means, try strip, but don't error)
+# - ignore_always_matching (default: 0)
+sub compile_regexp {
+  my ($re, $strip_delimiters, $ignore_always_matching) = @_;
+  local($1);
+
+  # Do not allow already compiled regexes or other funky refs
+  if (ref($re)) {
+    return (undef, 'ref passed');
+  }
+
+  # try stripping by default
+  $strip_delimiters = 1 if !defined $strip_delimiters;
+
+  # OK, try to remove any normal perl-style regexp delimiters at
+  # the start and end, and modifiers at the end if present,
+  # so we can validate those too.
+  my $origre = $re;
+  my $delim_end = '';
+
+  if ($strip_delimiters >= 1) {
+    # most common delimiter
+    if ($re =~ s{^/}{}) {
+      $delim_end = '/';
+    }
+    # symmetric delimiters
+    elsif ($re =~ s/^(?:m|qr)([\{\(\<\[])//) {
+      ($delim_end = $1) =~ tr/\{\(\<\[/\}\)\>\]/;
+    }
+    # any non-wordchar delimiter, but let's ignore backslash..
+    elsif ($re =~ s/^(?:m|qr)(\W)//) {
+      $delim_end = $1;
+      if ($delim_end eq '\\') {
+        return (undef, 'backslash delimiter not allowed');
+      }
+    }
+    elsif ($strip_delimiters != 2) {
+      return (undef, 'missing regexp delimiters');
+    }
+  }
+
+  # cut end delimiter, mods
+  my $mods;
+  if ($delim_end) {
+    # Ignore e because paranoid
+    if ($re =~ s/\Q${delim_end}\E([a-df-z]*)\z//) {
+      $mods = $1;
+    } else {
+      return (undef, 'invalid end delimiter/mods');
+    }
+  }
+
+  # paranoid check for eval exec (?{foo}), in case someone
+  # actually put "use re 'eval'" somewhere..
+  if ($re =~ /\(\?\??\{/) {
+    return (undef, 'eval (?{}) found');
+  }
+
+  # check unescaped delimiter, but only if it's not symmetric,
+  # those will fp on .{0,10} [xyz] etc, no need for so strict checks
+  # since these regexes don't end up in eval strings anyway
+  if ($delim_end && $delim_end !~ tr/\}\)\]//) {
+    # first we remove all escaped backslashes "\\"
+    my $dbs_stripped = $re;
+    $dbs_stripped =~ s/\\\\//g;
+    # now we can properly check if something is unescaped
+    if ($dbs_stripped =~ /(?<!\\)\Q${delim_end}\E/) {
+      return (undef, "unquoted delimiter '$delim_end' found");
+    }
+  }
+
+  if ($ignore_always_matching) {
+    if (my $err = is_always_matching_regexp($re)) {
+      return (undef, "always matching regexp: $err");
+    }
+  }
+
+  # now prepend the modifiers, in order to check if they're valid
+  if ($mods) {
+    $re = '(?'.$mods.')'.$re;
+  }
+
+  # no re "strict";  # since perl 5.21.8: Ranges of ASCII printables...
+  my $compiled_re;
+  $re = untaint_var($re);
+  my $ok = eval {
+    # don't dump deprecated warnings to user STDERR
+    # but die on any other warning for safety?
+    local $SIG{__WARN__} = sub {
+      if ($_[0] !~ /deprecated/i) {
+        die "$_[0]\n";
+      }
+    };
+    $compiled_re = qr/$re/; 1;
+  };
+  if ($ok && ref($compiled_re) eq 'Regexp') {
+    #$origre = untaint_var($origre);
+    #dbg("config: accepted regex '%s' => '%s'", $origre, $compiled_re);
+    return ($compiled_re, '');
+  } else {
+    my $err = $@ ne '' ? $@ : "errno=$!"; chomp $err;
+    $err =~ s/ at .*? line \d.*$//;
+    return (undef, $err);
+  }
+}
+
+sub is_always_matching_regexp {
+  my ($re) = @_;
+
+  if ($re eq '') {
+    return "empty";
+  }
+  elsif ($re =~ /(?<!\\)\|\|/) {
+    return "contains '||'";
+  }
+  elsif ($re =~ /^\|/) {
+    return "starts with '|'";
+  }
+  elsif ($re =~ /\|(?<!\\\|)$/) {
+    return "ends with '|'";
+  }
+
+  return undef;
+}
+
+# convert compiled regexp (?^i:foo) to string (?i)foo
+sub qr_to_string {
+  my ($re) = @_;
+
+  return undef unless ref($re) eq 'Regexp';
+  $re = "".$re; # stringify
+
+  local($1);
+  $re =~ s/^\(\?\^([a-z]*)://;
+  my $mods = $1;
+  $re =~ s/\)\z//;
+
+  return ($mods ? "(?$mods)$re" : $re);
+}
+
+###########################################################################
+
+###
+### regexp_remove_delimiters and make_qr DEPRECATED, to be removed
+### compile_regexp() should be used everywhere
+###
+
 # Removes any normal perl-style regexp delimiters at
 # the start and end, and modifiers at the end (if present).
 # If modifiers are found, they are inserted into the pattern using
@@ -1860,27 +2014,33 @@ sub trap_sigalrm_fully {
 sub regexp_remove_delimiters {
   my ($re) = @_;
 
+  warn("deprecated Util regexp_remove_delimiters() called\n");
+
   my $delim;
   if (!defined $re || $re eq '') {
-    warn "cannot remove delimiters from null regexp";
-    return;  # invalid
+    return undef;
   }
-  elsif ($re =~ s/^m\{//) {             # m{foo/bar}
+  elsif ($re =~ s/^m?\{//) {             # m{foo/bar}
     $delim = '}';
   }
-  elsif ($re =~ s/^m\(//) {             # m(foo/bar)
+  elsif ($re =~ s/^m?\[//) {             # m[foo/bar]
+    $delim = ']';
+  }
+  elsif ($re =~ s/^m?\(//) {             # m(foo/bar)
     $delim = ')';
   }
-  elsif ($re =~ s/^m<//) {              # m<foo/bar>
+  elsif ($re =~ s/^m?<//) {              # m<foo/bar>
     $delim = '>';
   }
-  elsif ($re =~ s/^m(\W)//) {           # m#foo/bar#
+  elsif ($re =~ s/^m?(\W)//) {           # m#foo/bar#
     $delim = $1;
   } else {                              # /foo\/bar/ or !foo/bar!
-    $re =~ s/^(\W)//; $delim = $1;
+    return undef; # invalid    
   }
 
-  $re =~ s/\Q${delim}\E([imsx]*)$// or warn "unbalanced re: $re";
+  if ($re !~ s/\Q${delim}\E([imsx]*)$//) {
+    return undef;
+  }
 
   my $mods = $1;
   if ($mods) {
@@ -1894,9 +2054,20 @@ sub regexp_remove_delimiters {
 
 sub make_qr {
   my ($re) = @_;
+
+  warn("deprecated Util make_qr() called\n");
+
   $re = regexp_remove_delimiters($re);
-  return qr/$re/;
+  return undef if !defined $re || $re eq '';
+  my $compiled_re;
+  if (eval { $compiled_re = qr/$re/; 1; } && ref($compiled_re) eq 'Regexp') {
+    return $compiled_re;
+  } else {
+    return undef;
+  }
 }
+
+###########################################################################
 
 ###########################################################################
 

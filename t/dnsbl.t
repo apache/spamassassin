@@ -7,7 +7,7 @@ use Test::More;
 plan skip_all => "Long running tests disabled" unless conf_bool('run_long_tests');
 plan skip_all => "Net tests disabled" unless conf_bool('run_net_tests');
 plan skip_all => "Can't use Net::DNS Safely" unless can_use_net_dns_safely();
-plan tests => 23;
+plan tests => 17;
 
 # ---------------------------------------------------------------------------
 # bind configuration currently used to support this test
@@ -54,7 +54,6 @@ EOF
  q{ <dns:14.35.17.212.dnsbltest.spamassassin.org> [127.0.0.1] } => 'P_4',
  q{ <dns:226.149.120.193.dnsbltest.spamassassin.org> [127.0.0.1] } => 'P_5',
  q{ <dns:example.com.dnsbltest.spamassassin.org> [127.0.0.2] } => 'P_6',
- q{ <dns:134.88.73.210.sb.dnsbltest.spamassassin.org?type=TXT> } => 'P_7',
  q{,DNSBL_TEST_TOP,} => 'P_8',
  q{,DNSBL_TEST_WHITELIST,} => 'P_9',
  q{,DNSBL_TEST_DYNAMIC,} => 'P_10',
@@ -63,16 +62,11 @@ EOF
  q{,DNSBL_TXT_TOP,} => 'P_13',
  q{,DNSBL_TXT_RE,} => 'P_14',
  q{,DNSBL_RHS,} => 'P_15',
- q{,DNSBL_SB_TIME,} => 'P_16',
- q{,DNSBL_SB_FLOAT,} => 'P_17',
- q{,DNSBL_SB_STR,} => 'P_18',
 );
 
 %anti_patterns = (
  q{,DNSBL_TEST_MISS,} => 'P_19',
  q{,DNSBL_TXT_MISS,} => 'P_20',
- q{,DNSBL_SB_UNDEF,} => 'P_21',
- q{,DNSBL_SB_MISS,} => 'P_22',
  q{ launching DNS A query for 14.35.17.212.untrusted.dnsbltest.spamassassin.org. } => 'untrusted',
 );
 
@@ -135,28 +129,6 @@ header DNSBL_RHS	eval:check_rbl_from_host('r', 'dnsbltest.spamassassin.org.')
 describe DNSBL_RHS	DNSBL RHS match
 tflags DNSBL_RHS	net
 
-header __TEST_SENDERBASE	eval:check_rbl_txt('sb', 'sb.dnsbltest.spamassassin.org.')
-tflags __TEST_SENDERBASE	net
-
-header DNSBL_SB_TIME	eval:check_rbl_sub('sb', 'sb:S6 == 1060085863 && S6 < time')
-describe DNSBL_SB_TIME	DNSBL SenderBase time
-tflags DNSBL_SB_TIME	net
-
-header DNSBL_SB_FLOAT	eval:check_rbl_sub('sb', 'sb:S3 > 7.0 && S3 < 7.2')
-describe DNSBL_SB_FLOAT	DNSBL SenderBase floating point
-tflags DNSBL_SB_FLOAT	net
-
-header DNSBL_SB_STR	eval:check_rbl_sub('sb', 'sb:S1 eq \"Spammer Networks\" && S49 !~ /Y/ && index(S21, \".com\") > 0')
-describe DNSBL_SB_STR	DNSBL SenderBase strings
-tflags DNSBL_SB_STR	net
-
-header DNSBL_SB_UNDEF	eval:check_rbl_sub('sb', 'sb:S98 =~ /foo/ && S99 > 10')
-describe DNSBL_SB_UNDEF	DNSBL SenderBase undefined
-tflags DNSBL_SB_UNDEF	net
-
-header DNSBL_SB_MISS	eval:check_rbl_sub('sb', 'sb:S2 < 3.0')
-describe DNSBL_SB_MISS	DNSBL SenderBase miss
-tflags DNSBL_SB_MISS	net
 ");
 
 # The -D clobbers test performance but some patterns & antipatterns depend on debug output

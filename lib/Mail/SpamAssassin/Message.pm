@@ -187,14 +187,34 @@ sub new {
     @message = split(/^/m, $message, -1);
   }
 
-  # Pull off mbox and mbx separators
-  # also deal with null messages
+  # Deal with null message
   if (!@message) {
     # bug 4884:
     # if we get here, it means that the input was null, so fake the message
     # content as a single newline...
     @message = ("\n");
-  } elsif ($message[0] =~ /^From\s+(?!:)/) {
+  }
+
+  # Bug 7648:
+  # Make sure the message is tainted. When linting, @testmsg is not, so this
+  # handles that. Perhaps 3rd party tools could call this with untainted
+  # messages? Tainting the message is important because it prevents certain
+  # exploits later.
+  if (Mail::SpamAssassin::Util::am_running_in_taint_mode() &&
+        grep { !Scalar::Util::tainted($_) } @message) {
+    local($_);
+    # To preserve newlines, no joining and splitting here, process each line
+    # directly as is.
+    foreach (@message) {
+      $_ = Mail::SpamAssassin::Util::taint_var($_);
+    }
+    if (grep { !Scalar::Util::tainted($_) } @message) {
+      die "Mail::SpamAssassin::Message failed to enforce message taintness";
+    }
+  }
+
+  # Pull off mbox and mbx separators
+  if ($message[0] =~ /^From\s+(?!:)/) {
     # careful not to confuse with obsolete syntax which allowed WSP before ':'
     # mbox formated mailbox
     $self->{'mbox_sep'} = shift @message;

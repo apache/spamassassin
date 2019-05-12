@@ -78,11 +78,10 @@ sub new {
     if ($type =~ /^([_A-Za-z0-9:]+)$/) {
       $type = untaint_var($type);
       eval '
-  	    require '.$type.';
-            $factory = '.$type.'->new();
-            1;
-           '
-      or do {
+  	require '.$type.';
+        $factory = '.$type.'->new();
+        1;
+      ' or do {
 	my $eval_stat = $@ ne '' ? $@ : "errno=$!";  chomp $eval_stat;
 	warn "auto-whitelist: $eval_stat\n";
 	undef $factory;
