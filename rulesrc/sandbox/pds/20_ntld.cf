@@ -89,6 +89,7 @@ header   __VPSNUMBERONLY_TLD From:addr =~ /\@vps[0-9]{4,}\.[a-z]+$/i
 reuse    __VPSNUMBERONLY_TLD
 
 meta     VPS_NO_NTLD __VPSNUMBERONLY_TLD && __FROM_ADDRLIST_SUSPNTLD
+tflags   VPS_NO_NTLD publish
 describe VPS_NO_NTLD vps[0-9] domain at a suspiscious TLD
 score    VPS_NO_NTLD 1.0 # limit
 reuse    VPS_NO_NTLD
