@@ -150,7 +150,7 @@ sub proc_text_spam {
     $text = substr $text, 0, $opt{maxtextread};      # chop!
   }
 
-  $text =~ s/  +/ /gs;          # single spaces, please
+  $text =~ s/  +/ /gs;                  # single spaces, please
 
   # we only need to save spam samples in memory, ignore ham samples
   push @text_string, $text;
@@ -300,7 +300,7 @@ sub filter_into_message_subsets {
   }
 
   logmsg "message subsets found: ".(scalar
-               keys %{$asmstate->{all_patterns_for_set}});
+                                keys %{$asmstate->{all_patterns_for_set}});
 
   $asmstate->{ngram_count} = \%ngram_count;
   $asmstate->{msg_subset_hit} = \%msg_subset_hit;
@@ -363,8 +363,8 @@ sub assemble_regexps {
   my $count = 0;
   my $count_out = 0;
   foreach my $id (sort {
-         $asmstate->{ngram_count}->{$b} <=> $asmstate->{ngram_count}->{$a}
-     } keys %{$asmstate->{ngram_count}})
+              $asmstate->{ngram_count}->{$b} <=> $asmstate->{ngram_count}->{$a}
+          } keys %{$asmstate->{ngram_count}})
   {
     my $set = $asmstate->{msg_subset_hit}->{$id};
     next if $done_set{$set}; $done_set{$set}++;
@@ -391,14 +391,22 @@ sub assemble_regexps {
     foreach my $pat (@pats) {
       my $subsumed = 0;
       foreach my $done (@done_pats, @pats_new) {
-   # pattern == existing pattern, or existing pattern is contained by
-   # pattern, or pattern is contained in existing pattern
-        if ($pat eq $done || $pat =~ /\Q${done}\E/ || $done =~ /\Q${pat}\E/)
-                   { $subsumed=1; last; }
-   # or one pattern contains the other (but interpreted as a regexp!)
-   # this deals with /foo.{0,10} bar/ vs /foo ish bar/
-        if ($pat =~ /$done/) { $subsumed=1; last; }
-        if ($done =~ /$pat/) { $subsumed=1; last; }
+        # pattern == existing pattern, or existing pattern is contained by
+        # pattern, or pattern is contained in existing pattern
+        if ($pat eq $done || $pat =~ /\Q${done}\E/ || $done =~ /\Q${pat}\E/) { 
+          $subsumed=1; 
+          last; 
+        }
+        # or one pattern contains the other (but interpreted as a regexp!)
+        # this deals with /foo.{0,10} bar/ vs /foo ish bar/
+        if ($pat =~ /$done/) { 
+          $subsumed=1; 
+          last; 
+        }
+        if ($done =~ /$pat/) { 
+          $subsumed=1; 
+          last; 
+        }
       }
       next if $subsumed;
 
@@ -434,15 +442,15 @@ sub assemble_regexps {
       foreach my $pat (sort @pats) {
         my $name = generate_rule_name($pat);
 
-   if ($opt{ruletype} eq 'header') {
-     # deal with header-specific munging.
-     # "\[\\n\]" is the result of "[\n]", at this stage
-     $pat =~ s/\Q\[\\n\]\E/\\n/gs;
-     $pat =~ s/\Q\[\\t\]\E/\\t/gs;
-   }
+        if ($opt{ruletype} eq 'header') {
+          # deal with header-specific munging.
+          # "\[\\n\]" is the result of "[\n]", at this stage
+          $pat =~ s/\Q\[\\n\]\E/\\n/gs;
+          $pat =~ s/\Q\[\\t\]\E/\\t/gs;
+        }
 
         print "$opt{ruletype} $opt{ruleprefix}${name}  /$pat/\n";
-   $count_out++;
+        $count_out++;
       }
 
     } else {
