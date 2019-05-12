@@ -63,7 +63,7 @@ the module handles attached documents
 package Mail::SpamAssassin::Plugin::OLEMacro;
 
 use Mail::SpamAssassin::Plugin;
-use Mail::SpamAssassin::Util;
+use Mail::SpamAssassin::Util qw(compile_regexp);
 
 BEGIN
 {
@@ -228,8 +228,12 @@ Configure the largest file that the plugin will decode from the MIME objects
       unless (defined $value && $value !~ /^$/) {
         return $Mail::SpamAssassin::Conf::MISSING_REQUIRED_VALUE;
       }
-      return $Mail::SpamAssassin::Conf::INVALID_VALUE unless $self->{parser}->is_delimited_regexp_valid('TESTING', '/'.$value.'/');
-      $self->{olemacro_exts} = $value;
+      my ($rec, $err) = compile_regexp($value, 1);
+      if (!$rec) {
+       dbg("config: invalid olemacro_exts '$value': $err");
+       return $Mail::SpamAssassin::Conf::INVALID_VALUE;
+      }
+      $self->{olemacro_exts} = $rec;
       },
     }
   );
@@ -253,9 +257,12 @@ Set the regexp used to configure the extensions the plugin targets for macro sca
       unless (defined $value && $value !~ /^$/) {
         return $Mail::SpamAssassin::Conf::MISSING_REQUIRED_VALUE;
       }
-      return $Mail::SpamAssassin::Conf::INVALID_VALUE unless $self->{parser}->is_delimited_regexp_valid('TESTING', '/'.$value.'/');
-
-      $self->{olemacro_macro_exts} = $value;
+      my ($rec, $err) = compile_regexp($value, 1);
+      if (!$rec) {
+       dbg("config: invalid olemacro_macro_exts '$value': $err");
+       return $Mail::SpamAssassin::Conf::INVALID_VALUE;
+      }
+      $self->{olemacro_macro_exts} = $rec;
     },
   });
 
@@ -278,9 +285,13 @@ Set the regexp used to configure the extensions the plugin treats as containing 
       unless (defined $value && $value !~ /^$/) {
         return $Mail::SpamAssassin::Conf::MISSING_REQUIRED_VALUE;
       }
-      return $Mail::SpamAssassin::Conf::INVALID_VALUE unless $self->{parser}->is_delimited_regexp_valid('TESTING', '/'.$value.'/');
+      my ($rec, $err) = compile_regexp($value, 1);
+      if (!$rec) {
+       dbg("config: invalid olemacro_skip_exts '$value': $err");
+       return $Mail::SpamAssassin::Conf::INVALID_VALUE;
+      }
 
-      $self->{olemacro_skip_exts} = $value;
+      $self->{olemacro_skip_exts} = $rec;
     },
   });
 
@@ -303,9 +314,13 @@ Set the regexp used to configure extensions for the plugin to skip entirely, the
       unless (defined $value && $value !~ /^$/) {
         return $Mail::SpamAssassin::Conf::MISSING_REQUIRED_VALUE;
       }
-      return $Mail::SpamAssassin::Conf::INVALID_VALUE unless $self->{parser}->is_delimited_regexp_valid('TESTING', '/'.$value.'/');
+      my ($rec, $err) = compile_regexp($value, 1);
+      if (!$rec) {
+       dbg("config: invalid olemacro_skip_ctypes '$value': $err");
+       return $Mail::SpamAssassin::Conf::INVALID_VALUE;
+      }
 
-      $self->{olemacro_skip_ctypes} = $value;
+      $self->{olemacro_skip_ctypes} = $rec;
     },
   });
 
@@ -328,9 +343,13 @@ Set the regexp used to configure content types for the plugin to skip entirely, 
       unless (defined $value && $value !~ /^$/) {
         return $Mail::SpamAssassin::Conf::MISSING_REQUIRED_VALUE;
       }
-      return $Mail::SpamAssassin::Conf::INVALID_VALUE unless $self->{parser}->is_delimited_regexp_valid('TESTING', '/'.$value.'/');
+      my ($rec, $err) = compile_regexp($value, 1);
+      if (!$rec) {
+       dbg("config: invalid olemacro_zips '$value': $err");
+       return $Mail::SpamAssassin::Conf::INVALID_VALUE;
+      }
 
-      $self->{olemacro_zips} = $value;
+      $self->{olemacro_zips} = $rec;
     },
   });
 
@@ -433,19 +452,19 @@ sub _check_attachments {
 
   foreach my $part ($pms->{msg}->find_parts(qr/./, 1)) {
 
-    next if ($part->{type} =~ qr/$pms->{conf}->{olemacro_skip_ctypes}/);
+    next if ($part->{type} =~ $pms->{conf}->{olemacro_skip_ctypes});
 
     my ($ctt, $ctd, $cte, $name) = _get_part_details($pms, $part);
     next unless defined $ctt;
 
     next if $name eq '';
-    next if ($name =~ qr/$pms->{conf}->{olemacro_skip_exts}/i);
+    next if (lc($name) =~ $pms->{conf}->{olemacro_skip_exts});
 
     # we skipped what we need/want to
     my $data = undef;
 
     # if name is macrotype - return true
-    if ($name =~ qr/$pms->{conf}->{olemacro_macro_exts}/i) {
+    if (lc($name) =~ $pms->{conf}->{olemacro_macro_exts}) {
       dbg("Found macrotype attachment with name $name");
       $pms->{olemacro_exists} = 1;
 
@@ -458,7 +477,7 @@ sub _check_attachments {
     }
 
     # if name is ext type - check and return true if needed
-    if ($name =~ qr/$pms->{conf}->{olemacro_exts}/i) {
+    if (lc($name) =~ $pms->{conf}->{olemacro_exts}) {
       dbg("Found attachment with name $name");
       $data = $part->decode($chunk_size) unless defined $data;
 
@@ -472,7 +491,7 @@ sub _check_attachments {
       return 1 if $pms->{olemacro_exists} == 1;
     }
 
-    if ($name =~ qr/$pms->{conf}->{olemacro_zips}/i) {
+    if (lc($name) =~ $pms->{conf}->{olemacro_zips}) {
       dbg("Found zip attachment with name $name");
       $data = $part->decode($chunk_size) unless defined $data;
 
@@ -535,13 +554,13 @@ sub _check_zip {
   # - check if a zip
   foreach my $member (@members){
     my $mname = lc $member->fileName();
-    next if ($mname =~ qr/$pms->{conf}->{olemacro_skip_exts}/i);
+    next if ($mname =~ $pms->{conf}->{olemacro_skip_exts});
 
     my $data = undef;
     my $status = undef;
 
     # if name is macrotype - return true
-    if ($mname =~ qr/$pms->{conf}->{olemacro_macro_exts}/i) {
+    if ($mname =~ $pms->{conf}->{olemacro_macro_exts}) {
       dbg("Found macrotype zip member $mname");
       $pms->{olemacro_exists} = 1;
 
@@ -560,7 +579,7 @@ sub _check_zip {
       return 1 if $pms->{olemacro_exists} == 1;
     }
 
-    if ($mname =~ qr/$pms->{conf}->{olemacro_exts}/i) {
+    if ($mname =~ $pms->{conf}->{olemacro_exts}) {
       dbg("Found zip member $mname");
 
       if ($member->isEncrypted()) {
@@ -584,7 +603,7 @@ sub _check_zip {
 
     }
 
-    if ($mname =~ qr/$pms->{conf}->{olemacro_zips}/i) {
+    if ($mname =~ $pms->{conf}->{olemacro_zips}) {
       dbg("Found zippy zip member $mname");
       ( $data, $status ) = $member->contents() unless defined $data;
       next unless $status == AZ_OK;
