@@ -417,7 +417,7 @@ sub check_rbl_headers {
     } else {
       my $host = $pms->get($rbl_headers);
       chomp($host);
-      if($host =~ /^$IP_ADDRESS/ ) {
+      if($host =~ /^$IP_ADDRESS$/ ) {
         $host = reverse_ip_address($host);
       }
       $pms->do_rbl_lookup($rule, $set, 'A',
@@ -550,7 +550,7 @@ sub check_rbl_rcvd {
   foreach $host ( @udnsrcvd ) {
     if((defined $host) and ($host ne "")) {
       chomp($host);
-      if($host =~ /^$IP_ADDRESS/ ) {
+      if($host =~ /^$IP_ADDRESS$/ ) {
         $host = reverse_ip_address($host);
       }
       if ( defined $subtest ) {
