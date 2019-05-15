@@ -1,4 +1,6 @@
-header   __PDS_PHP_EVAL X-PHP-Originating-Script =~ /eval..'d code/i
-meta     PDS_PHP_EVAL __PDS_BADPHP1
+header   __PDS_PHP_EVAL1 X-PHP-Originating-Script =~ /eval..'d code/i
+header   __PDS_PHP_EVAL2 X-PHP-Originating-Script =~ /runtime-created function/
+
+meta     PDS_PHP_EVAL (__PDS_PHP_EVAL1 || __PDS_PHP_EVAL2)
 describe PDS_PHP_EVAL PHP header shows eval'd code
 score    PDS_PHP_EVAL 3.0
