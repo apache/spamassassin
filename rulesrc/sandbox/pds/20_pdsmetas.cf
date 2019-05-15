@@ -3,4 +3,21 @@ header   __PDS_PHP_EVAL2 X-PHP-Originating-Script =~ /runtime-created function/
 
 meta     PDS_PHP_EVAL (__PDS_PHP_EVAL1 || __PDS_PHP_EVAL2)
 describe PDS_PHP_EVAL PHP header shows eval'd code
-score    PDS_PHP_EVAL 3.0
+score    PDS_PHP_EVAL 1.5
+reuse    PDS_PHP_EVAL
+
+header   __PDS_X_PHP_WPCONTENT  X-PHP-Script =~ /\/wp-content\/(themes|uploads)\/[\S]+\.php for/i
+header   __PDS_X_PHP_WPINCLUDES X-PHP-Script =~ /\/wp-includes\/(js|css)\/[\S]+\.php for/i
+header   __PDS_X_PHP_WPADMIN    X-PHP-Script =~ /\/wp-admin\/(css|themes|js)\/[\S]+\.php for/i
+
+meta     PDS_X_PHP_WP_EXP (__PDS_X_PHP_WPCONTENT || __PDS_X_PHP_WPINCLUDES || __PDS_X_PHP_WPADMIN)
+describe PDS_X_PHP_WP_EXP X-PHP-Script shows sent from a Wordpress PHP script where you would not expect one
+score    PDS_X_PHP_WP_EXP 1.5
+reuse    PDS_X_PHP_WP_EXP
+
+header   __PDS_X_PHP_WELLKNOWN   X-PHP-Script =~ /\/\.well-known\/pki-validation\//
+
+meta     PDS_X_PHP_WELLKNOWN __PDS_X_PHP_WELLKNOWN
+describe PDS_X_PHP_WELLKNOWN X-PHP-Script shows sent from a PHP script in the /.well-known/pki-validation/ dir
+score    PDS_X_PHP_WELLKNOWN 1.0
+reuse    PDS_X_PHP_WELLKNOWN
