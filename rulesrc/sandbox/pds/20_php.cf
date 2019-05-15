@@ -1,10 +1,15 @@
 header   __PDS_PHP_EVAL1 X-PHP-Originating-Script =~ /eval..'d code/i
 header   __PDS_PHP_EVAL2 X-PHP-Originating-Script =~ /runtime-created function/
 
-meta     PDS_PHP_EVAL (__PDS_PHP_EVAL1 || __PDS_PHP_EVAL2)
+meta     PDS_PHP_EVAL __PDS_PHP_EVAL1
 describe PDS_PHP_EVAL PHP header shows eval'd code
 score    PDS_PHP_EVAL 1.5
 reuse    PDS_PHP_EVAL
+
+meta     PDS_PHP_RUNTIME_FUNC __PDS_PHP_EVAL2 && !__PDS_PHP_EVAL1
+describe PDS_PHP_RUNTIME_FUNC PHP header shows runtime-created function
+score    PDS_PHP_RUNTIME_FUNC 1.5
+reuse    PDS_PHP_RUNTIME_FUNC
 
 header   __PDS_X_PHP_WPCONTENT  X-PHP-Script =~ /\/wp-content\/(themes|uploads)\/[\S]+\.php for/i
 header   __PDS_X_PHP_WPINCLUDES X-PHP-Script =~ /\/wp-includes\/(js|css)\/[\S]+\.php for/i
