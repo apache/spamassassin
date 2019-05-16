@@ -14,11 +14,11 @@ describe FROM_PAYPAL_SPOOF  From PayPal domain but matches SPOOFED
 score    FROM_PAYPAL_SPOOF  1.6 # limit
 reuse    FROM_PAYPAL_SPOOF
 
-meta     FROM_PAYPAL_REPLYTO_FREEMAIL FREEMAIL_FORGED_REPLYTO && __FROM_ADDRLIST_PAYPAL && !DKIM_VALID_AU
-tflags   FROM_PAYPAL_REPLYTO_FREEMAIL publish net
-describe FROM_PAYPAL_REPLYTO_FREEMAIL From PayPal domain but ReplyTo is FREEMAIL
-score    FROM_PAYPAL_REPLYTO_FREEMAIL 2.0
-reuse    FROM_PAYPAL_REPLYTO_FREEMAIL
+#meta     FROM_PAYPAL_REPLYTO_FREEMAIL FREEMAIL_FORGED_REPLYTO && __FROM_ADDRLIST_PAYPAL && !DKIM_VALID_AU
+#tflags   FROM_PAYPAL_REPLYTO_FREEMAIL publish net
+#describe FROM_PAYPAL_REPLYTO_FREEMAIL From PayPal domain but ReplyTo is FREEMAIL
+#score    FROM_PAYPAL_REPLYTO_FREEMAIL 2.0
+#reuse    FROM_PAYPAL_REPLYTO_FREEMAIL
 
 enlist_addrlist (BANKS) *@abbey.co.uk *@abbey.com *@abbeyinternational.com *@abbeyinternational.co.uk *@abbeynational.com *@abbeynational.co.uk
 enlist_addrlist (BANKS) *@allianceleicester.com *@allianceleicester.co.uk *@alliance-leicester.com *@alliance-leicester.co.uk
@@ -40,7 +40,7 @@ enlist_addrlist (BANKS) *@ybonline.co.uk *@ybonline.com
 header   __FROM_ADDRLIST_BANKS eval:check_from_in_list('BANKS')
 reuse    __FROM_ADDRLIST_BANKS
 
-meta     FROM_BANK_NOAUTH  __FROM_ADDRLIST_BANKS && (! NO_RELAYS && ! ALL_TRUSTED) && !(SPF_PASS || DKIM_VALID_AU)
+meta     FROM_BANK_NOAUTH  __FROM_ADDRLIST_BANKS && (! NO_RELAYS && ! ALL_TRUSTED) && (! SPF_PASS && ! DKIM_VALID_AU)
 tflags   FROM_BANK_NOAUTH  publish net
 describe FROM_BANK_NOAUTH  From Bank domain but no SPF or DKIM
 score    FROM_BANK_NOAUTH  1.0 # limit
