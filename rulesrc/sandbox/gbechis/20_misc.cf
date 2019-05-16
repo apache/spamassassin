@@ -9,3 +9,8 @@ score GOOGLE_OBFU 0.25 # limit
 header          __COPY_OF       Subject =~ /Copy of:|offers for you/
 meta            COPY_OF_SHORT   ( __URL_SHORTENER && __COPY_OF && __KAM_BODY_LENGTH_LT_1024 )
 describe        COPY_OF_SHORT   Url shortnener spam
+
+ifplugin Mail::SpamAssassin::Plugin::FromNameSpoof
+  meta     FROMNAME_SPOOFED_EMAIL_IP  ( FROMNAME_SPOOFED_EMAIL && !__NOT_SPOOFED )
+  describe FROMNAME_SPOOFED_EMAIL_IP  From:name looks like a spoofed email from a spoofed ip
+endif
