@@ -552,6 +552,8 @@ sub check_rbl_rcvd {
       chomp($host);
       if($host =~ /^$IP_ADDRESS$/ ) {
         $host = reverse_ip_address($host);
+      } else {
+        $host =~ s/\.$//;
       }
       if ( defined $subtest ) {
         dbg("dns: checking [$host] / $rule / $set / $rbl_server / $subtest");
