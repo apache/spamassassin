@@ -2783,3 +2783,8 @@ describe   HOSTED_IMG_FREEM            Image hosted at large ecomm site, freemai
 tflags     HOSTED_IMG_FREEM            publish
 
 
+header     __BOGUS_MIME_VER_01         MIME-Version =~ /^(?!\s*1\.0).+/
+header     __BOGUS_MIME_VER_02         MIME-Version =~ /^(?!.*\b1\.0\b).+/
+
+
+

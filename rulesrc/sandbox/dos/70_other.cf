@@ -208,6 +208,7 @@ header __DOS_HAS_MAILING_LIST	exists:Mailing-List
 # we complete ignore(!) received headers we can't get "useful" info from, which screws up detecting direct-to-mx
 header __DOS_RELAYED_EXT	ALL-EXTERNAL =~ /(?:^|\n)[Rr][eE][cC][eE][iI][vV][eE][dD]:\s.+\n[Rr][eE][cC][eE][iI][vV][eE][dD]:\s/s
 meta __DOS_DIRECT_TO_MX		__DOS_SINGLE_EXT_RELAY && !__DOS_HAS_LIST_ID && !__DOS_HAS_LIST_UNSUB && !__DOS_HAS_MAILING_LIST && !__DOS_RELAYED_EXT
+meta __DOS_DIRECT_TO_MX_UNTRUSTED	__DOS_DIRECT_TO_MX && !ALL_TRUSTED
 
 meta DOS_OUTLOOK_TO_MX		__ANY_OUTLOOK_MUA && !__OE_MUA && __DOS_DIRECT_TO_MX && !DOS_OUTLOOK_TO_MX_IMAGE
 describe DOS_OUTLOOK_TO_MX	Delivered direct to MX with Outlook headers
