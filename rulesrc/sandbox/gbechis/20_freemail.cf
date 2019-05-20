@@ -4,3 +4,8 @@ ifplugin Mail::SpamAssassin::Plugin::FreeMail
   describe FREEMAIL_DISPTO  Disposition-Notification-To/From or Disposition-Notification-To/body contain different freemails
   score    FREEMAIL_DISPTO  0.25 # limit
 endif
+
+ifplugin Mail::SpamAssassin::Plugin::FreeMail
+  meta     FREEMAIL_IADB   ( RCVD_IN_IADB_VOUCHED && ( FORGED_GMAIL_RCVD || FORGED_YAHOO_RCVD ) )
+  describe FREEMAIL_IADB   Forged freemail in IADB
+endif
