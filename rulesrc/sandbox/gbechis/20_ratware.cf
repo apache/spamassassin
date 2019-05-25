@@ -6,3 +6,9 @@ header  __FORGED_MUA_POSTFIX1	X-Mailer =~ /Postfix/
 meta	FORGED_MUA_POSTFIX	( __FORGED_MUA_POSTFIX0 || __FORGED_MUA_POSTFIX1 )
 describe	FORGED_MUA_POSTFIX	Forged Postfix mua headers
 score	FORGED_MUA_POSTFIX	1.0 # limit
+
+header  __FORGED_ML_HEADER	Mailing-List =~ /^$/
+header  __FORGED_UNSUB_HEADER	List-Unsubscribe =~ /^$/
+meta	FORGED_MAILING_LIST	( __FORGED_ML_HEADER && __FORGED_UNSUB_HEADER && !MAILING_LIST_MULTI )
+describe FORGED_MAILING_LIST	improper use of mailing list headers
+score   FORGED_MAILING_LIST	0.75 # limit
