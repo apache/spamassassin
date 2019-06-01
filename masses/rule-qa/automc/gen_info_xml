@@ -141,7 +141,7 @@ sub read_submitters {
     if (/^# spam results used for .+?: (.*)$/) {
       my $sub = $1;
       $sub =~ s/\bspam-/ /gs;
-      $sub =~ s/\.r[0-9]+\.log\b/ /gs;
+      $sub =~ s/(\.r[0-9]+)?\.log\b/ /gs;
       $sub =~ s/\s+/ /gs;
       $sub =~ s/^ //gs;
       $sub =~ s/ $//gs;
