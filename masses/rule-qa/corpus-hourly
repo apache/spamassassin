@@ -31,10 +31,12 @@ my %revision = ();
 my %logs_by_rev = ();
 my %is_net_revision = ();
 my %time = ();
+my %revision_date = ();
 my @files;
 my @tmps = ();
 my $skip = '';
 my $time_start = time;
+$time_start -= ($time_start % 3600);
 my $output_revpath;
 
 &configure;
@@ -130,20 +132,26 @@ sub locate {
   closedir(CORPUS);
 
   @files = grep {
-    /^(?:spam|ham)-(?:net-)?[-\w]+\.log$/ && -f "$corpusdir/$_" && -M _ < 10 
+    /^(?:spam|ham)-(?:net-)?[-\w]+\.r[0-9]+\.log$/ && -f "$corpusdir/$_" && -M _ < 10 
   } @files;
 
   foreach my $file (@files) {
     # my $time = 0;
     my $tag = 0;
+    my $revtime;
     open(FILE, "$corpusdir/$file") or warn "cannot read $corpusdir/$file";
     while (my $line = <FILE>) {
       last if $line !~ /^#/;
-      if ($line =~ /, on (... ... .. )(..)(:..:.. ... ....)/) {
-        my ($datepre, $hh, $datepost) = ($1,$2,$3);
-        
-        my $timet = Time::ParseDate::parsedate($datepre.$hh.$datepost,
-                    GMT => 1, PREFER_PAST => 1);
+      if ($line =~ m/^# Date:\s*(\S+)/) {
+        my $date_line = $1;
+        my ($yyyy, $mm, $dd, $h, $m, $s) = $date_line =~ /(\d\d\d\d)(\d\d)(\d\d)T(\d\d)(\d\d)(\d\d)Z/;
+
+        my $timet = Time::ParseDate::parsedate("${yyyy}/${mm}/${dd} ${h}:${m}:${s} GMT+0",
+                  GMT => 1, PREFER_PAST => 1);
+
+        $revtime = Time::ParseDate::parsedate("${yyyy}/${mm}/${dd} 09:00:00 GMT+0",
+                  GMT => 1, PREFER_PAST => 1);
+
         $time{$file} = $timet;
         print "$corpusdir/$file: time=$timet\n";
 
@@ -166,6 +174,14 @@ sub locate {
       }
     }
     close(FILE);
+    if ($revtime) {
+      my $rev = $revision{$file};
+      $revision_date{$rev} = $revtime unless defined $revision_date{$rev};
+
+      if ($revtime < $revision_date{$rev}) {
+        $revision_date{$rev} = $revtime;
+      }
+    }
     # if (!$time) {
     # $skip .= "# skipped $_: time is between 0800 UTC and 0900 UTC\n";
     # }
@@ -189,10 +205,10 @@ sub sort_all {
 }
 
 sub time_filter {
-  my ($after, $before) = @_;
+  my ($target, $after, $before) = @_;
   if (/time=(\d+)/) {
-	return (($time_start - $1 >= WEEK * $after) &&
-		($time_start - $1 < WEEK * $before));
+	return (($target - $1 >= WEEK * $after) &&
+		($target - $1 < WEEK * $before));
   }
   return 0;
 }
@@ -245,10 +261,10 @@ sub gen_class {
     my %ham;
     
     for my $file (@spam) {
-      $spam{$1}++ if ($file =~ m/-(\w[-\w]+)\.log$/);
+      $spam{$1}++ if ($file =~ m/-(\w[-\w]+)\.r[0-9]+\.log$/);
     }
     for my $file (@ham) {
-      $ham{$1}++ if ($file =~ m/-(\w[-\w]+)\.log$/);
+      $ham{$1}++ if ($file =~ m/-(\w[-\w]+)\.r[0-9]+\.log$/);
     }
     while (my ($user, $count) = each %ham) {
       if ($count > 1) {
@@ -301,15 +317,14 @@ sub gen_class {
     return;
   }
 
-  my $time = $time{$ham[0]};        # use the ham file's time
+  my $time = $revision_date{$rev};
   my $dir = create_outputdir($rev, $time);
 
   my $fname = "$dir/$class.$age";
-
   # now, if the target file already exists, check to see if it's newer
   # than all the sources, make-style
   if (-f $fname) {
-    my $targetfreshness = (-M $fname);
+    my $targetfreshness = (-M $fname) + (6*3600);
     my $needsrebuild = 0;
 
     foreach my $srcfile (@spam, @ham) {
@@ -347,6 +362,12 @@ sub gen_class {
                     warn "cannot rename $zf.$$ to $zf";
       $bytes += (-s $zf);
     }
+    # reduce the number of times that the raw logs are copied over
+    my $tmpfname = "$fname.$$";
+    open(OUT, "> $tmpfname") or warn "cannot write to $tmpfname";
+    print OUT "$$ : $time_start";
+    close(OUT);
+    rename($tmpfname, $fname) or warn "cannot rename $tmpfname to $fname";
   }
   else {
     my $tmpfname = "$fname.$$";
@@ -378,10 +399,10 @@ sub gen_class {
       my @output;
       
       for my $file (@spam) {
-        $spam{$1} = $file if ($file =~ m/-(\w[-\w]+)\.log$/);
+        $spam{$1} = $file if ($file =~ m/-(\w[-\w]+)\.r[0-9]+\.log$/);
       }
       for my $file (@ham) {
-        $ham{$1} = $file if ($file =~ m/-(\w[-\w]+)\.log$/);
+        $ham{$1} = $file if ($file =~ m/-(\w[-\w]+)\.r[0-9]+\.log$/);
       }
       unlink "$opt{tmp}/ham.log.$$";
       unlink "$opt{tmp}/spam.log.$$";
@@ -423,7 +444,7 @@ sub gen_class {
           for my $file (@array) {
             open(IN, $file) or warn "cannot read $file";
             while (<IN>) {
-              print TMP $_ if time_filter($after, $before);
+              print TMP $_ if time_filter($time, $after, $before);
             }
             close(IN);
           }
