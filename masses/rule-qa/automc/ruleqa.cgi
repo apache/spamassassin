@@ -876,7 +876,7 @@ sub summarise_head {
   }
 
   map {
-    s/^ham-//; s/\.log$//;
+    s/^ham-//; s/\.r[0-9]+\.log$//;
   } @mcfiles;
 
   my $who = join(', ', @mcfiles);
