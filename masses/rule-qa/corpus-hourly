@@ -336,7 +336,7 @@ sub gen_class {
   }
 
   foreach my $srcfile (@spam, @ham) {
-    my $file_time = $time{$srcfile};
+    my $file_time = (stat($srcfile))[9];
     if ($file_time >= $last_build) {
       $needs_rebuild = 1;
       last;
