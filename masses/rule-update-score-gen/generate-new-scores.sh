@@ -88,25 +88,25 @@ rm -rf corpus/usable-corpus-set$SCORESET
 mkdir corpus/usable-corpus-set$SCORESET || exit $?
 
 if [ $SCORESET -eq 3 ]; then
-  for FILE in `find corpus -type f -name "*am-bayes-net-*"`; do
+  for FILE in `find corpus -type f -mtime -7 -name "*am-bayes-net-*"`; do
     FILE=`echo $FILE | cut -d"/" -f2-`
     ln corpus/$FILE corpus/usable-corpus-set${SCORESET}/$FILE || exit $?
     echo "Linked $FILE to corpus/usable-corpus-set${SCORESET}/$FILE"
   done
 elif [ $SCORESET -eq 2 ]; then
-  for FILE in `find corpus -type f -name "*am-bayes-*" | grep -v net-`; do
+  for FILE in `find corpus -type f -mtime -1 -name "*am-bayes-*" | grep -v net-`; do
     FILE=`echo $FILE | cut -d"/" -f2-`
     ln corpus/$FILE corpus/usable-corpus-set${SCORESET}/$FILE || exit $?
     echo "Linked $FILE to corpus/usable-corpus-set${SCORESET}/$FILE"
   done
 elif [ $SCORESET -eq 1 ]; then
-  for FILE in `find corpus -type f -name "*am-net-*"`; do
+  for FILE in `find corpus -type f -mtime -7 -name "*am-net-*"`; do
     FILE=`echo $FILE | cut -d"/" -f2-`
     ln corpus/$FILE corpus/usable-corpus-set${SCORESET}/$FILE || exit $?
     echo "Linked $FILE to corpus/usable-corpus-set${SCORESET}/$FILE"
   done
 elif [ $SCORESET -eq 0 ]; then
-  for FILE in `find corpus -type f -name "*am-*" | grep -v net- | grep -v bayes-`; do
+  for FILE in `find corpus -type f -mtime -1 -name "*am-*" | grep -v net- | grep -v bayes-`; do
     FILE=`echo $FILE | cut -d"/" -f2-`
     ln corpus/$FILE corpus/usable-corpus-set${SCORESET}/$FILE || exit $?
     echo "Linked $FILE to corpus/usable-corpus-set${SCORESET}/$FILE"
