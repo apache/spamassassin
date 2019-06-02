@@ -343,7 +343,7 @@ sub gen_class {
     }
   }
 
-  if (!$needs_rebuild) {
+  if ((!$needs_rebuild) && ($last_build != $time_start)) {
     print "last buildtime is fresher than sources\n";
     return;
   }
