@@ -324,12 +324,12 @@ sub gen_class {
   # now, if the target file already exists, check to see if it's newer
   # than all the sources, make-style
   if (-f $fname) {
-    my $targetfreshness = (-M $fname) + (6*3600);
+    my $targetfreshness = (-M $fname);
     my $needsrebuild = 0;
 
     foreach my $srcfile (@spam, @ham) {
       my $srcfreshness = (-M $srcfile);
-      if ($targetfreshness > $srcfreshness) {     # src is fresher
+      if (($srcfreshness-$targetfreshness) < 0.25) {
         print "$fname is older than $srcfile: $targetfreshness > $srcfreshness\n";
         $needsrebuild = 1;
         last;
