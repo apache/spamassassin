@@ -136,7 +136,6 @@ sub locate {
   } @files;
 
   foreach my $file (@files) {
-    # my $time = 0;
     my $tag = 0;
     my $revtime;
     open(FILE, "$corpusdir/$file") or warn "cannot read $corpusdir/$file";
@@ -155,7 +154,6 @@ sub locate {
         $time{$file} = $timet;
         print "$corpusdir/$file: time=$timet\n";
 
-        # if ($hh != 8) { $time++; }
       }
       if ($line =~ m/^# SVN revision:\s*(\S+)/) {
         my $rev = $1;
@@ -182,9 +180,6 @@ sub locate {
         $revision_date{$rev} = $revtime;
       }
     }
-    # if (!$time) {
-    # $skip .= "# skipped $_: time is between 0800 UTC and 0900 UTC\n";
-    # }
   }
 }
 
@@ -317,37 +312,47 @@ sub gen_class {
     return;
   }
 
-  my $time = $revision_date{$rev};
-  my $dir = create_outputdir($rev, $time);
+  my $crev_time = $revision_date{$rev};
+  my $dir = create_outputdir($rev, $crev_time);
 
   my $fname = "$dir/$class.$age";
 
-  # Only rebuild files where revision is < 1.2 days
-  if (($time_start - $time) > 86400*1.2) {
-    print "$rev is over 1.2 days old, skipping\n";
+  # Look through corpus for files that have been added since last full build
+  # Update all class files on this
+
+  my $buildfile = "$dir/.buildtime";
+  my $last_build = 0;
+  my $needs_rebuild = 0;
+
+  if (-f $buildfile) {
+    open(BFILE, "$buildfile") or warn "cannot read $buildfile";
+    while (my $line = <BFILE>) {
+      last if $line !~ /^#/;
+      if ($line =~ m/^# BuildTime:\s*(\S+)/) {
+        $last_build = $1;
+      }      
+    }
+    close(BFILE);
+  }
+
+  foreach my $srcfile (@spam, @ham) {
+    my $file_time = $time{$srcfile};
+    if ($file_time >= $last_build) {
+      $needs_rebuild = 1;
+      last;
+    }
+  }
+
+  if (!$needs_rebuild) {
+    print "last buildtime is fresher than sources\n";
     return;
   }
 
-  # now, if the target file already exists, check to see if it's newer
-  # than all the sources, make-style
-  # if (-f $fname) {
-  #  my $targetfreshness = (-M $fname);
-  #  my $needsrebuild = 0;
-
-  #  foreach my $srcfile (@spam, @ham) {
-  #    my $srcfreshness = (-M $srcfile);
-  #    if (($srcfreshness-$targetfreshness) < 0.25) {
-  #      print "$fname is older than $srcfile: $targetfreshness > $srcfreshness\n";
-  #      $needsrebuild = 1;
-  #      last;
-  #    }
-  #  }
-
-  #  if (!$needsrebuild) {
-  #    print "existing: $fname, fresher than sources\n";
-  #    return;
-  #  }
-  #}
+  if ($last_build != $time_start) {
+    open(BFILE, "> $buildfile") or warn "cannot write to $buildfile";
+    print BFILE "# BuildTime: $time_start\n";
+    close(BFILE);
+  }
 
   my $when = scalar localtime time;
   print qq{creating: $fname
@@ -451,7 +456,7 @@ sub gen_class {
           for my $file (@array) {
             open(IN, $file) or warn "cannot read $file";
             while (<IN>) {
-              print TMP $_ if time_filter($time, $after, $before);
+              print TMP $_ if time_filter($crev_time, $after, $before);
             }
             close(IN);
           }
