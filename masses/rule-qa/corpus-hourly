@@ -321,26 +321,33 @@ sub gen_class {
   my $dir = create_outputdir($rev, $time);
 
   my $fname = "$dir/$class.$age";
+
+  # Only rebuild files where revision is < 1.2 days
+  if (($time_start - $time) > 86400*1.2) {
+    print "$rev is over 1.2 days old, skipping\n";
+    return;
+  }
+
   # now, if the target file already exists, check to see if it's newer
   # than all the sources, make-style
-  if (-f $fname) {
-    my $targetfreshness = (-M $fname);
-    my $needsrebuild = 0;
+  # if (-f $fname) {
+  #  my $targetfreshness = (-M $fname);
+  #  my $needsrebuild = 0;
 
-    foreach my $srcfile (@spam, @ham) {
-      my $srcfreshness = (-M $srcfile);
-      if (($srcfreshness-$targetfreshness) < 0.25) {
-        print "$fname is older than $srcfile: $targetfreshness > $srcfreshness\n";
-        $needsrebuild = 1;
-        last;
-      }
-    }
+  #  foreach my $srcfile (@spam, @ham) {
+  #    my $srcfreshness = (-M $srcfile);
+  #    if (($srcfreshness-$targetfreshness) < 0.25) {
+  #      print "$fname is older than $srcfile: $targetfreshness > $srcfreshness\n";
+  #      $needsrebuild = 1;
+  #      last;
+  #    }
+  #  }
 
-    if (!$needsrebuild) {
-      print "existing: $fname, fresher than sources\n";
-      return;
-    }
-  }
+  #  if (!$needsrebuild) {
+  #    print "existing: $fname, fresher than sources\n";
+  #    return;
+  #  }
+  #}
 
   my $when = scalar localtime time;
   print qq{creating: $fname
