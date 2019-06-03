@@ -335,15 +335,20 @@ sub gen_class {
     close(BFILE);
   }
 
-  foreach my $srcfile (@spam, @ham) {
-    my $file_time = (stat($srcfile))[9];
-    if ($file_time >= $last_build) {
-      $needs_rebuild = 1;
-      last;
+  if (!$last_build || $last_build == $time_start) {
+    # No last build or we've already done the loop below
+    $needs_rebuild = 1;
+  } else {
+    foreach my $srcfile (@spam, @ham) {
+      my $file_time = (stat($srcfile))[9];
+      if ($file_time >= $last_build) {
+        $needs_rebuild = 1;
+        last;
+      }
     }
   }
 
-  if ((!$needs_rebuild) && ($last_build != $time_start)) {
+  if (!$needs_rebuild) {
     print "last buildtime is fresher than sources\n";
     return;
   }
@@ -374,12 +379,6 @@ sub gen_class {
                     warn "cannot rename $zf.$$ to $zf";
       $bytes += (-s $zf);
     }
-    # reduce the number of times that the raw logs are copied over
-    my $tmpfname = "$fname.$$";
-    open(OUT, "> $tmpfname") or warn "cannot write to $tmpfname";
-    print OUT "$$ : $time_start";
-    close(OUT);
-    rename($tmpfname, $fname) or warn "cannot rename $tmpfname to $fname";
   }
   else {
     my $tmpfname = "$fname.$$";
