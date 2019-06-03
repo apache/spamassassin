@@ -32,13 +32,13 @@ tflags     __FROM_FMBLA_NDBLOCKED net
 
 meta       FROM_FMBLA_NEWDOM    __FROM_FMBLA_NEWDOM
 describe   FROM_FMBLA_NEWDOM    From domain was registered in last 7 days
-tflags     FROM_FMBLA_NEWDOM    net publish
+tflags     FROM_FMBLA_NEWDOM    net
 score      FROM_FMBLA_NEWDOM    1.5 # limit
 reuse      FROM_FMBLA_NEWDOM
 
 meta       FROM_FMBLA_NEWDOM14  __FROM_FMBLA_NEWDOM14
 describe   FROM_FMBLA_NEWDOM14  From domain was registered in last 7-14 days
-tflags     FROM_FMBLA_NEWDOM14  net publish
+tflags     FROM_FMBLA_NEWDOM14  publish net
 score      FROM_FMBLA_NEWDOM14  1.0 # limit
 reuse      FROM_FMBLA_NEWDOM14
 
