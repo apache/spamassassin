@@ -235,8 +235,8 @@ foreach my $plistkey (sort keys %{$plist->[1]}) {
   # ie a rule must be promotable in all 3, to be listed.  (Also allow
   # rules that weren't in existence in the earlier mass-checks.)
   next unless ($plist->[1]->{$plistkey}->{promo});
-  next unless ($plist->[2]->{$plistkey}->{promo} or $plist->[2]->{"T_$plistkey"}->{promo} or !defined($plist->[2]->{$plistkey}->{promo}));
-  next unless ($plist->[3]->{$plistkey}->{promo} or $plist->[3]->{"T_$plistkey"}->{promo} or !defined($plist->[3]->{$plistkey}->{promo}));
+  next unless ($plist->[2]->{$name}->{promo} or $plist->[2]->{"T_$name"}->{promo} or !defined($plist->[2]->{$plistkey}->{promo}));
+  next unless ($plist->[3]->{$name}->{promo} or $plist->[3]->{"T_$name"}->{promo} or !defined($plist->[3]->{$plistkey}->{promo}));
 
   # only rules from "rulesrc" dirs
   my $src = $mailsa->{conf}->{source_file}->{$name};
