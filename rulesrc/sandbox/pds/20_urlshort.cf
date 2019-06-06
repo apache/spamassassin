@@ -1,0 +1,19 @@
+if (version >= 3.004002)
+
+enlist_uri_host (URL_SHORTENER) bit.ly buff.ly tinyurl.com
+enlist_uri_host (URL_SHORTENER) ow.ly owl.li is.gd tumble.com
+enlist_uri_host (URL_SHORTENER) ff.im
+enlist_uri_host (URL_SHORTENER) formspring.me
+enlist_uri_host (URL_SHORTENER) cli.gs
+enlist_uri_host (URL_SHORTENER) tl.gd
+enlist_uri_host (URL_SHORTENER) yfrog.com
+enlist_uri_host (URL_SHORTENER) lnk.ms su.pr alturl.com wp.me ping.fm post.ly twurl.nl tiny.cc 4sq.com
+enlist_uri_host (URL_SHORTENER) cc.uz
+enlist_uri_host (URL_SHORTENER) short.to
+enlist_uri_host (URL_SHORTENER) om.ly
+enlist_uri_host (URL_SHORTENER) back.ly
+
+header   __PDS_URL_SHORTENER eval:check_uri_host_listed('URL_SHORTENER')
+
+endif
+
