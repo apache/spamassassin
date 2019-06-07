@@ -61,6 +61,10 @@ my %log_level = (
 # global shared object
 our %LOG_SA;
 our $LOG_ENTERED;  # to avoid recursion on die or warn from within logging
+# duplicate message line suppressor
+our $LOG_DUPMIN = 10; # only start suppressing after x duplicate lines
+our $LOG_DUPLINE = ''; # remembers last log line
+our $LOG_DUPCNT = 0; # counts duplicates
 
 # defaults
 $LOG_SA{level} = WARNING;       # log info, warnings and errors
@@ -167,6 +171,25 @@ sub log_message {
 
   my $message = join(" ", @message);
   $message =~ s/[\r\n]+$//;		# remove any trailing newlines
+
+  # suppress duplicate loglines
+  if ($message eq $LOG_DUPLINE) {
+    $LOG_DUPCNT++;
+    # only start suppressing after x identical lines
+    if ($LOG_DUPCNT >= $LOG_DUPMIN) {
+      $LOG_ENTERED = 0;
+      return;
+    }
+  } else {
+    if ($LOG_DUPCNT >= $LOG_DUPMIN) {
+      $LOG_DUPCNT -= $LOG_DUPMIN - 1;
+      while (my ($name, $object) = each %{ $LOG_SA{method} }) {
+        $object->log_message($level, "--- last message repeated $LOG_DUPCNT times ---");
+      }
+    }
+    $LOG_DUPCNT = 0;
+    $LOG_DUPLINE = $message;
+  }
 
   # split on newlines and call log_message multiple times; saves
   # the subclasses having to understand multi-line logs
