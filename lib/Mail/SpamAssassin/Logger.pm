@@ -41,6 +41,7 @@ use warnings;
 use re 'taint';
 
 use Exporter ();
+use Time::HiRes ();
 
 our @ISA = qw(Exporter);
 our @EXPORT = qw(dbg info would_log);
@@ -64,6 +65,7 @@ our $LOG_ENTERED;  # to avoid recursion on die or warn from within logging
 # duplicate message line suppressor
 our $LOG_DUPMIN = 10; # only start suppressing after x duplicate lines
 our $LOG_DUPLINE = ''; # remembers last log line
+our $LOG_DUPTIME; # remembers last log line timestamp
 our $LOG_DUPCNT = 0; # counts duplicates
 
 # defaults
@@ -172,9 +174,12 @@ sub log_message {
   my $message = join(" ", @message);
   $message =~ s/[\r\n]+$//;		# remove any trailing newlines
 
+  my $now = Time::HiRes::time;
+
   # suppress duplicate loglines
   if ($message eq $LOG_DUPLINE) {
     $LOG_DUPCNT++;
+    $LOG_DUPTIME = $now;
     # only start suppressing after x identical lines
     if ($LOG_DUPCNT >= $LOG_DUPMIN) {
       $LOG_ENTERED = 0;
@@ -184,7 +189,7 @@ sub log_message {
     if ($LOG_DUPCNT >= $LOG_DUPMIN) {
       $LOG_DUPCNT -= $LOG_DUPMIN - 1;
       while (my ($name, $object) = each %{ $LOG_SA{method} }) {
-        $object->log_message($level, "--- last message repeated $LOG_DUPCNT times ---");
+        $object->log_message($level, "--- last message repeated $LOG_DUPCNT times ---", $LOG_DUPTIME);
       }
     }
     $LOG_DUPCNT = 0;
@@ -205,7 +210,7 @@ sub log_message {
       $line =~ s/^([^:]+?):/$1: [...]/;
     }
     while (my ($name, $object) = each %{ $LOG_SA{method} }) {
-      $object->log_message($level, $line);
+      $object->log_message($level, $line, $now);
     }
   }
   $LOG_ENTERED = 0;

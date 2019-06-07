@@ -87,16 +87,17 @@ sub init {
 }
 
 sub log_message {
-  my ($self, $level, $msg) = @_;
+  my ($self, $level, $msg, $ts) = @_;
 
   my $timestamp;
   my $fmt = $self->{timestamp_fmt};
+  my $now = defined $ts ? $ts : Time::HiRes::time;
   if (!defined $fmt) {
-    $timestamp = scalar localtime;  # default, backward compatibility
+    $timestamp = scalar localtime($now);  # default, backward compatibility
   } elsif ($fmt eq '') {
     $timestamp = '';
   } else {
-    $timestamp = POSIX::strftime($fmt, localtime(Time::HiRes::time));
+    $timestamp = POSIX::strftime($fmt, localtime($now));
   }
   $timestamp .= ' '  if $timestamp ne '';
 
