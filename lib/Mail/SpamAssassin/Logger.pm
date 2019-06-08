@@ -188,8 +188,9 @@ sub log_message {
   } else {
     if ($LOG_DUPCNT >= $LOG_DUPMIN) {
       $LOG_DUPCNT -= $LOG_DUPMIN - 1;
+      my $dupmsg = $LOG_DUPCNT > 1 ? " [... logline repeated $LOG_DUPCNT times]" : "";
       while (my ($name, $object) = each %{ $LOG_SA{method} }) {
-        $object->log_message($level, "$LOG_DUPLINE [... logline repeated $LOG_DUPCNT times]", $LOG_DUPTIME);
+        $object->log_message($level, "$LOG_DUPLINE$dupmsg", $LOG_DUPTIME);
       }
     }
     $LOG_DUPCNT = 0;
