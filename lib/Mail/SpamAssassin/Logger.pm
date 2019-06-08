@@ -41,6 +41,7 @@ use warnings;
 use re 'taint';
 
 use Exporter ();
+use Time::HiRes ();
 
 our @ISA = qw(Exporter);
 our @EXPORT = qw(dbg info would_log);
@@ -61,6 +62,11 @@ my %log_level = (
 # global shared object
 our %LOG_SA;
 our $LOG_ENTERED;  # to avoid recursion on die or warn from within logging
+# duplicate message line suppressor
+our $LOG_DUPMIN = 10; # only start suppressing after x duplicate lines
+our $LOG_DUPLINE = ''; # remembers last log line
+our $LOG_DUPTIME; # remembers last log line timestamp
+our $LOG_DUPCNT = 0; # counts duplicates
 
 # defaults
 $LOG_SA{level} = WARNING;       # log info, warnings and errors
@@ -152,7 +158,7 @@ sub log_message {
 
   if ($level eq "error") {
     # don't log alarm timeouts or broken pipes of various plugins' network checks
-    return if ($message[0] =~ /__ignore__/);
+    return if (index($message[0], '__ignore__') != -1);
 
     # dos: we can safely ignore any die's that we eval'd in our own modules so
     # don't log them -- this is caller 0, the use'ing package is 1, the eval is 2
@@ -168,6 +174,29 @@ sub log_message {
   my $message = join(" ", @message);
   $message =~ s/[\r\n]+$//;		# remove any trailing newlines
 
+  my $now = Time::HiRes::time;
+
+  # suppress duplicate loglines
+  if ($message eq $LOG_DUPLINE) {
+    $LOG_DUPCNT++;
+    $LOG_DUPTIME = $now;
+    # only start suppressing after x identical lines
+    if ($LOG_DUPCNT >= $LOG_DUPMIN) {
+      $LOG_ENTERED = 0;
+      return;
+    }
+  } else {
+    if ($LOG_DUPCNT >= $LOG_DUPMIN) {
+      $LOG_DUPCNT -= $LOG_DUPMIN - 1;
+      my $dupmsg = $LOG_DUPCNT > 1 ? " [... logline repeated $LOG_DUPCNT times]" : "";
+      while (my ($name, $object) = each %{ $LOG_SA{method} }) {
+        $object->log_message($level, "$LOG_DUPLINE$dupmsg", $LOG_DUPTIME);
+      }
+    }
+    $LOG_DUPCNT = 0;
+    $LOG_DUPLINE = $message;
+  }
+
   # split on newlines and call log_message multiple times; saves
   # the subclasses having to understand multi-line logs
   my $first = 1;
@@ -182,7 +211,7 @@ sub log_message {
       $line =~ s/^([^:]+?):/$1: [...]/;
     }
     while (my ($name, $object) = each %{ $LOG_SA{method} }) {
-      $object->log_message($level, $line);
+      $object->log_message($level, $line, $now);
     }
   }
   $LOG_ENTERED = 0;
@@ -334,17 +363,17 @@ The facility argument is optional.
 sub would_log {
   my ($level, $facility) = @_;
 
-  if ($level eq "info") {
-    return $LOG_SA{level} >= INFO;
-  }
-  if ($level eq "dbg") {
+  if ($level eq 'dbg') {
     return 0 if $LOG_SA{level} < DBG;
     return 1 if !$facility;
     return ($LOG_SA{facility}->{$facility} ? 2 : 0)
       if exists $LOG_SA{facility}->{$facility};
     return 1 if $LOG_SA{facility}->{all};
     return 0;
+  } elsif ($level eq 'info') {
+    return $LOG_SA{level} >= INFO;
   }
+
   warn "logger: would_log called with unknown level: $level\n";
   return 0;
 }

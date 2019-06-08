@@ -64,13 +64,13 @@ sub new {
 }
 
 sub log_message {
-  my ($self, $level, $msg) = @_;
+  my ($self, $level, $msg, $ts) = @_;
 
   my $timestamp;
   my $fmt = $self->{timestamp_fmt};
+  my $now = defined $ts ? $ts : Time::HiRes::time;
   if (!defined $fmt) {
     # default since 3.3.0
-    my $now = Time::HiRes::time;
     my $datetime = POSIX::strftime("%b %d %H:%M", localtime($now));
     utf8::encode($datetime)  if utf8::is_utf8($datetime);  # Bug 7305
     $timestamp = sprintf("%s:%06.3f", $datetime, $now-int($now/60)*60);
@@ -79,7 +79,7 @@ sub log_message {
   } elsif ($fmt eq '') {
     $timestamp = '';
   } else {
-    $timestamp = POSIX::strftime($fmt, localtime(Time::HiRes::time));
+    $timestamp = POSIX::strftime($fmt, localtime($now));
   }
   $timestamp .= ' '  if $timestamp ne '';
 
