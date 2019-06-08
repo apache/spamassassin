@@ -1,4 +1,5 @@
-if (version >= 3.004002)
+ifplugin Mail::SpamAssassin::Plugin::WLBLEval
+if (version >= 3.004000)
 
 enlist_uri_host (URL_SHORTENER) owl.li
 enlist_uri_host (URL_SHORTENER) formspring.me
@@ -725,4 +726,4 @@ enlist_uri_host (URL_SHORTENER) zzang.kr
 header   __PDS_URL_SHORTENER eval:check_uri_host_listed('URL_SHORTENER')
 
 endif
-
+endif
