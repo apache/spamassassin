@@ -189,7 +189,7 @@ sub log_message {
     if ($LOG_DUPCNT >= $LOG_DUPMIN) {
       $LOG_DUPCNT -= $LOG_DUPMIN - 1;
       while (my ($name, $object) = each %{ $LOG_SA{method} }) {
-        $object->log_message($level, "--- last message repeated $LOG_DUPCNT times ---", $LOG_DUPTIME);
+        $object->log_message($level, "$LOG_DUPLINE [... logline repeated $LOG_DUPCNT times]", $LOG_DUPTIME);
       }
     }
     $LOG_DUPCNT = 0;
