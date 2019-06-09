@@ -335,7 +335,7 @@ sub gen_class {
     close(BFILE);
   }
 
-  if (!$last_build || $last_build == $time_start) {
+  if ( !(-f $fname) || !$last_build || $last_build == $time_start) {
     # No last build or we've already done the loop below
     $needs_rebuild = 1;
   } else {
