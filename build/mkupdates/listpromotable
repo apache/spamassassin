@@ -80,7 +80,7 @@ with_new_offset:
     # it's the weekly --net run.  That generally contains a much
     # smaller set of logs (since it takes longer to run mass-check --net)
     # so the results are untrustworthy.
-    if ($daysubs =~ /(?:^|\s)net-/) {
+    if (($daysubs =~ /(?:^|\s)net-/) && ((localtime(time))[6])) {
       warn "day $day contains a --net mass-check! offsetting by an extra day\n";
       $dayoffset++; goto with_new_offset;
     }
