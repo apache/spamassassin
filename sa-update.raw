@@ -1676,9 +1676,16 @@ sub choose_mirror {
 
 sub check_mirror_af {
     my ($mirror) = @_;
-    my($a_rr, $aaaa_rr);
-      # RFC 3986:  scheme = ALPHA *( ALPHA / DIGIT / "+" / "-" / "." )
-    $mirror =~ s{^[a-z][a-z0-9.+-]*://}{}si;  # strip scheme like http://
+    # RFC 3986:  scheme = ALPHA *( ALPHA / DIGIT / "+" / "-" / "." )
+    $mirror =~ s{^([a-z][a-z0-9.+-]*)://}{}si;  # strip scheme like http://
+    my $scheme = lc($1);
+    # No DNS check needed for proxied connections (caveat: no_proxy is not checked)
+    my $http_proxy = (defined $ENV{"http_proxy"} && $ENV{"http_proxy"} =~ /\S/) ||
+                     (defined $ENV{"HTTP_PROXY"} && $ENV{"HTTP_PROXY"} =~ /\S/);
+    my $https_proxy = (defined $ENV{"https_proxy"} && $ENV{"https_proxy"} =~ /\S/) ||
+                      (defined $ENV{"HTTPS_PROXY"} && $ENV{"HTTPS_PROXY"} =~ /\S/);
+    return 1 if $scheme eq "http" && $http_proxy;
+    return 1 if $scheme eq "https" && $https_proxy;
     # No DNS check needed for IPv4 or IPv6 address literal
     return 1 if $mirror =~ m{^\d+\.\d+\.\d+\.\d+(?:[:/]|$)};
     return 1 if $mirror =~ m{^\[};
