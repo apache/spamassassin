@@ -189,6 +189,7 @@ GetOptions(
   'checkonly'                           => \$opt{'checkonly'},
   'allowplugins'                        => \$opt{'allowplugins'},
   'refreshmirrors'                      => \$opt{'refreshmirrors'},
+  'httputil=s'                          => \$opt{'httputil'},
 
   # allow multiple of these on the commandline
   'gpgkey=s'				=> $opt{'gpgkey'},
@@ -225,6 +226,10 @@ if ( $opt{'force_pf'} && $opt{'force_pf'} eq 'inet' && !$have_inet4 ) {
 if ( $opt{'force_pf'} && $opt{'force_pf'} eq 'inet6' && !$have_inet6 ) {
   warn "Option -6 specified but support for the ".
        "INET6 protocol family is not available.\n";
+}
+
+if ( defined $opt{'httputil'} && $opt{'httputil'} !~ /^(curl|wget|fetch|lwp)$/ ) {
+  warn "Invalid parameter for --httputil, curl|wget|fetch|lwp wanted\n";
 }
 
 # Figure out what version of SpamAssassin we're using, and also figure out the
@@ -1520,9 +1525,23 @@ sub http_get {
       !$out_fname_exists ? 'new' : $force_reload ? 'replace' : 'update');
 
   my($ext_prog, $cmd, @args);
-  foreach my $try_prog ('curl', 'wget', 'fetch') {
-    $cmd = Mail::SpamAssassin::Util::find_executable_in_env_path($try_prog);
-    if (defined $cmd && $cmd ne '') { $ext_prog = $try_prog; last }
+  if (defined $opt{'httputil'}) {
+    if ($opt{'httputil'} eq 'lwp') {
+      if (!$have_lwp) {
+        die "http: module LWP not available, download failed";
+      }
+    } else {
+      $ext_prog = $opt{'httputil'};
+      $cmd = Mail::SpamAssassin::Util::find_executable_in_env_path($ext_prog);
+      if (!defined $cmd || $cmd eq '') {
+        die "http: $ext_prog utility not found, download failed";
+      }
+    }
+  } else {
+    foreach my $try_prog ('curl', 'wget', 'fetch') {
+      $cmd = Mail::SpamAssassin::Util::find_executable_in_env_path($try_prog);
+      if (defined $cmd && $cmd ne '') { $ext_prog = $try_prog; last }
+    }
   }
 
   if (defined $ext_prog && $ext_prog eq 'curl') {
@@ -1920,6 +1939,8 @@ Options:
                           SpamAssassin site rules directory
                           (default: @@LOCAL_STATE_DIR@@/@@VERSION@@)
   --refreshmirrors        Force the MIRRORED.BY file to be updated
+  --httputil util         Force used download tool. By default first found
+                          from these is used: curl, wget, fetch, lwp
   -D, --debug [area=n,...]  Print debugging messages
   -v, --verbose           Be verbose, like print updated channel names;
                           For more verbosity specify multiple times
