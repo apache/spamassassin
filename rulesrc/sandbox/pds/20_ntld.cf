@@ -94,5 +94,19 @@ describe VPS_NO_NTLD vps[0-9] domain at a suspiscious TLD
 score    VPS_NO_NTLD 1.0 # limit
 reuse    VPS_NO_NTLD
 
+body     __PDS_OFFER_ONLY_AMERICA /This offer (is )?(only )?for United States/i
+
+meta     OFFER_ONLY_AMERICA __FROM_ADDRLIST_SUSPNTLD && __PDS_OFFER_ONLY_AMERICA
+describe OFFER_ONLY_AMERICA Offer only available to US
+score    OFFER_ONLY_AMERICA 2.0 # limit
+reuse    OFFER_ONLY_AMERICA
+
+body     __PDS_SENT_TO_EMAIL_ADDR /This message was sent to Email Address\./i
+
+meta     SENT_TO_EMAIL_ADDR __FROM_ADDRLIST_SUSPNTLD && __PDS_SENT_TO_EMAIL_ADDR
+describe SENT_TO_EMAIL_ADDR Email was sent to email address
+score    SENT_TO_EMAIL_ADDR 2.0 # limit
+reuse    SENT_TO_EMAIL_ADDR
+
 endif
 endif
