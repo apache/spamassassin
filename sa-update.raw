@@ -1906,7 +1906,7 @@ Options:
   --install filename      Install updates directly from this file. Signature
                           verification will use "file.asc", "file.sha256",
                           and "file.sha512".
-  --allowplugins          Allow updates to load plugin code
+  --allowplugins          Allow updates to load plugin code (DANGEROUS)
   --gpgkey key            Trust the key id to sign releases
                           Use multiple times for multiple keys
   --gpgkeyfile file       Trust the key ids in the file to sign releases
@@ -2001,6 +2001,9 @@ B<--channel> and B<--install> switches, e.g.:
 Allow downloaded updates to activate plugins.  The default is not to
 activate plugins; any C<loadplugin> or C<tryplugin> lines will be commented
 in the downloaded update rules files.
+
+You should never enable this for 3rd party update channels, since plugins
+can execute unrestricted code on your system!
 
 =item B<--gpg>, B<--nogpg>
 
