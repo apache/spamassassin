@@ -331,6 +331,7 @@ my $test;
 foreach $test (keys %freq) {
   my $parsed_rules_entry = $rules{$test};
 
+  # Allow nice T_ rules to be detected
   my $no_t = $test;
   if ($no_t =~ s/^T_//) {
     if (defined $rules{$no_t}) {
@@ -482,6 +483,14 @@ if ($opt_T) {
 
 foreach $test (sort { $ranking{$b} <=> $ranking{$a} } @tests) {
   my $parsed_rules_entry = $rules{$test};
+
+  # Allow nice T_ rules to be detected
+  my $no_t = $test;
+  if ($no_t =~ s/^T_//) {
+    if (defined $rules{$no_t}) {
+      $parsed_rules_entry = $rules{$no_t};
+    }
+  }
 
   # do not require 'tmp/rules.pl' to have been built from the
   # exact same ruleset version; this assumption screws up nightly
