@@ -978,24 +978,29 @@ sub trace_meta_dependencies {
   foreach my $name (keys %{$conf->{tests}}) {
     next unless ($conf->{test_types}->{$name}
                     == $Mail::SpamAssassin::Conf::TYPE_META_TESTS);
-
-    my $deps = [ ];
-    my $alreadydone = { };
-    $self->_meta_deps_recurse($conf, $name, $name, $deps, $alreadydone);
-    $conf->{meta_dependencies}->{$name} = join (' ', @{$deps});
+    my $alreadydone = {};
+    $self->_meta_deps_recurse($conf, $name, $name, $alreadydone);
   }
 }
 
 sub _meta_deps_recurse {
-  my ($self, $conf, $toprule, $name, $deps, $alreadydone) = @_;
+  my ($self, $conf, $toprule, $name, $alreadydone) = @_;
 
-  # Only do each rule once per top-level meta; avoid infinite recursion
-  return if $alreadydone->{$name};
-  $alreadydone->{$name} = 1;
+  # Avoid recomputing the dependencies of a rule
+  return split(' ', $conf->{meta_dependencies}->{$name}) if defined $conf->{meta_dependencies}->{$name};
 
   # Obviously, don't trace empty or nonexistent rules
   my $rule = $conf->{tests}->{$name};
-  return unless $rule;
+  unless ($rule) {
+      $conf->{meta_dependencies}->{$name} = '';
+      return ( );
+  }
+
+  # Avoid infinite recursion
+  return ( ) if exists $alreadydone->{$name};
+  $alreadydone->{$name} = ( );
+
+  my %deps;
 
   # Lex the rule into tokens using a rather simple RE method ...
   my @tokens = ($rule =~ /($ARITH_EXPRESSION_LEXER)/og);
@@ -1010,9 +1015,12 @@ sub _meta_deps_recurse {
     next unless exists $conf_tests->{$token};
 
     # add and recurse
-    push(@{$deps}, untaint_var($token));
-    $self->_meta_deps_recurse($conf, $toprule, $token, $deps, $alreadydone);
+    $deps{untaint_var($token)} = ( );
+    my @subdeps = $self->_meta_deps_recurse($conf, $toprule, $token, $alreadydone);
+    @deps{@subdeps} = ( );
   }
+  $conf->{meta_dependencies}->{$name} = join (' ', keys %deps);
+  return keys %deps;
 }
 
 sub fix_priorities {
