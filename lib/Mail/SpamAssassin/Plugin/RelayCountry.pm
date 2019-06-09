@@ -51,11 +51,6 @@ use re 'taint';
 
 our @ISA = qw(Mail::SpamAssassin::Plugin);
 
-my $db;
-my $dbv6;
-my $db_info;  # will hold database info
-my $db_type;  # will hold database type
-
 # constructor: register the eval rule
 sub new {
   my $class = shift;
@@ -165,6 +160,11 @@ If not defined, GeoIP2 default search includes:
 
 sub extract_metadata {
   my ($self, $opts) = @_;
+
+  my $db;
+  my $dbv6;
+  my $db_info;  # will hold database info
+  my $db_type;  # will hold database type
 
   my $country_db_type = $opts->{conf}->{country_db_type};
   my $country_db_path = $opts->{conf}->{country_db_path};
@@ -322,10 +322,10 @@ sub extract_metadata {
 sub parsed_metadata {
   my ($self, $opts) = @_;
 
-  return 1 unless $db;
-
   my $countries =
     $opts->{permsgstatus}->get_message->get_metadata('X-Relay-Countries');
+  return 1 if !defined $countries;
+
   my @c_list = split(' ', $countries);
   $opts->{permsgstatus}->set_tag("RELAYCOUNTRY",
                                  @c_list == 1 ? $c_list[0] : \@c_list);
