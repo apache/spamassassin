@@ -788,6 +788,7 @@ sub get_names_of_subtests_hit {
     my (%subtest_names_hit, $i, $key, @keys, @sorted, $string, $rule, $total_hits, $deduplicated_hits);  
   
     $total_hits = scalar(@{$self->{subtest_names_hit}});
+    return '' if !$total_hits;
   
     for ($i=0; $i < $total_hits; $i++) {
       $rule = ${$self->{subtest_names_hit}}[$i]; 
