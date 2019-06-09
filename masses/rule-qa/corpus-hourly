@@ -379,6 +379,11 @@ sub gen_class {
                     warn "cannot rename $zf.$$ to $zf";
       $bytes += (-s $zf);
     }
+    my $tmpfname = "$fname.$$";
+    open(OUT, "> $tmpfname") or warn "cannot write to $tmpfname";
+    print OUT "# $$ \n";
+    close(OUT);
+    rename($tmpfname, $fname) or warn "cannot rename $tmpfname to $fname";
   }
   else {
     my $tmpfname = "$fname.$$";
