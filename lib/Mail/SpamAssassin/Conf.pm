@@ -3298,6 +3298,24 @@ count towards the final score unless the entire meta-rule matches, give the
 sub-rules names that start with '__' (two underscores).  SpamAssassin will
 ignore these for scoring.
 
+=item meta SYMBOLIC_TEST_NAME ... rules_matching(RULEGLOB) ...
+
+Special function that will expand to list of matching rulenames.  Can be
+used anywhere in expressions.  Argument supports glob style rulename
+matching (* = anything, ? = one character).  Matching is case-sensitive.
+
+For example, this will hit if atleast two __FOO_* rule hits:
+
+ body __FOO_1  /xxx/
+ body __FOO_2  /yyy/
+ body __FOO_3  /zzz/
+ meta FOO_META  rules_matching(__FOO_*) >= 2
+
+Which would be the same as:
+
+ meta FOO_META  (__FOO_1 + __FOO_2 + __FOO_3) >= 2
+
+
 =cut
 
   push (@cmds, {
@@ -5236,6 +5254,7 @@ sub feature_registryboundaries { 1 } # replaces deprecated registrarboundaries
 sub feature_geodb { 1 } # if needed for some reason
 sub feature_dns_block_rule { 1 } # supports 'dns_block_rule' config option
 sub feature_compile_regexp { 1 } # Util::compile_regexp
+sub feature_meta_rules_matching { 1 } # meta rules_matching() expression
 sub perl_min_version_5010000 { return $] >= 5.010000 }  # perl version check ("perl_version" not neatly backwards-compatible)
 
 ###########################################################################

@@ -142,8 +142,9 @@ use re 'taint';
 
 our @ISA = qw();
 
-my $RULENAME_RE = RULENAME_RE;
 my $ARITH_EXPRESSION_LEXER = ARITH_EXPRESSION_LEXER;
+my $RULENAME_RE = RULENAME_RE;
+my $META_RULES_MATCHING_RE = META_RULES_MATCHING_RE;
 
 ###########################################################################
 
@@ -1353,6 +1354,9 @@ sub is_meta_valid {
     warn("config: invalid meta $name rule: $rule") ;
     return 0;
   }
+
+  # Process expandable functions before lexing
+  $rule =~ s/${META_RULES_MATCHING_RE}/ 0 /g;
 
   # Lex the rule into tokens using a rather simple RE method ...
   my @tokens = ($rule =~ /($ARITH_EXPRESSION_LEXER)/og);

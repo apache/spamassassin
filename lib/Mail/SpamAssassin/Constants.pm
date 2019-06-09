@@ -44,6 +44,7 @@ BEGIN {
 	MAX_BODY_LINE_LENGTH MAX_HEADER_KEY_LENGTH MAX_HEADER_VALUE_LENGTH
 	MAX_HEADER_LENGTH ARITH_EXPRESSION_LEXER AI_TIME_UNKNOWN
 	CHARSETS_LIKELY_TO_FP_AS_CAPS MAX_URI_LENGTH RULENAME_RE
+	META_RULES_MATCHING_RE
   );
 
   %EXPORT_TAGS = (
@@ -402,5 +403,8 @@ use constant CHARSETS_LIKELY_TO_FP_AS_CAPS => qr{[-_a-z0-9]*(?:
 
 # Allowed rulename format
 use constant RULENAME_RE => qr([_a-zA-Z][_a-zA-Z0-9]{0,127});
+
+# meta function rules_matching(), takes argument RULENAME_RE with glob *? characters
+use constant META_RULES_MATCHING_RE => qr/(?<!_)\brules_matching\(\s*([_a-zA-Z*?][_a-zA-Z0-9*?]{0,127})\s*\)/;
 
 1;
