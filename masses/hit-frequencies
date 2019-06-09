@@ -331,6 +331,13 @@ my $test;
 foreach $test (keys %freq) {
   my $parsed_rules_entry = $rules{$test};
 
+  my $no_t = $test;
+  if ($no_t =~ s/^T_//) {
+    if (defined $rules{$no_t}) {
+      $parsed_rules_entry = $rules{$no_t};
+    }
+  }
+
   # do not require 'tmp/rules.pl' to have been built from the
   # exact same ruleset version; this assumption screws up nightly
   # mass-check reports if they are generated with a different SVN rev
