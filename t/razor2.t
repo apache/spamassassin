@@ -30,7 +30,7 @@ tstpre ("
 loadplugin Mail::SpamAssassin::Plugin::Razor2
 ");
 
-#RAZOR2 file was from real-world spam in August 2018
+#RAZOR2 file was from real-world spam in June 2019
 
 #TESTING FOR SPAM
 %patterns = (
