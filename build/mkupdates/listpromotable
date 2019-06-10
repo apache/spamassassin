@@ -234,6 +234,8 @@ foreach my $netrule (sort keys %{$netlist}) {
   my $name = $netrule;
   my $notes = '';
 
+  next if ($name =~ /^__/);
+
   my $no_t = $name;
   if ($no_t =~ s/^T_//) {
     if (defined $mailsa->{conf}->{scores}->{$no_t}) {
