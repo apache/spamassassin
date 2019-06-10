@@ -321,6 +321,8 @@ sub check_pyzor {
 
   # create socketpair for communication
   $pms->{pyzor_backchannel} = Mail::SpamAssassin::SubProcBackChannel->new();
+  my $back_selector = '';
+  $pms->{pyzor_backchannel}->set_selector(\$back_selector);
   eval {
     $pms->{pyzor_backchannel}->setup_backchannel_parent_pre_fork();
   } or do {

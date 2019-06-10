@@ -444,6 +444,8 @@ sub check_razor2 {
 
   # create socketpair for communication
   $pms->{razor2_backchannel} = Mail::SpamAssassin::SubProcBackChannel->new();
+  my $back_selector = '';
+  $pms->{razor2_backchannel}->set_selector(\$back_selector);
   eval {
     $pms->{razor2_backchannel}->setup_backchannel_parent_pre_fork();
   } or do {
