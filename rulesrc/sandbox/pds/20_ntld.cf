@@ -22,6 +22,8 @@ enlist_addrlist (SUSP_NTLD) *@*.site
 enlist_addrlist (SUSP_NTLD) *@*.space
 enlist_addrlist (SUSP_NTLD) *@*.gdn
 enlist_addrlist (SUSP_NTLD) *@*.click
+enlist_addrlist (SUSP_NTLD) *@*.pro
+enlist_addrlist (SUSP_NTLD) *@*.world
 
 header   __FROM_ADDRLIST_SUSPNTLD eval:check_from_in_list('SUSP_NTLD')
 reuse    __FROM_ADDRLIST_SUSPNTLD
@@ -94,7 +96,7 @@ describe VPS_NO_NTLD vps[0-9] domain at a suspiscious TLD
 score    VPS_NO_NTLD 1.0 # limit
 reuse    VPS_NO_NTLD
 
-body     __PDS_OFFER_ONLY_AMERICA /This offer (is )?(only )?for United States/i
+body     __PDS_OFFER_ONLY_AMERICA /This offer (is )?(only )?for (United States|USA)/i
 
 meta     OFFER_ONLY_AMERICA __FROM_ADDRLIST_SUSPNTLD && __PDS_OFFER_ONLY_AMERICA
 describe OFFER_ONLY_AMERICA Offer only available to US
