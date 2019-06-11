@@ -2743,7 +2743,7 @@ header     __HDR_RCVD_EBAY             X-Spam-Relays-External =~ /rdns=\S+\.ebay
 uri        __URI_IMG_EBAY              m,://[^/?]+\.ebayimg\.com/,i
 
 meta       __EBAY_IMG_NOT_RCVD_EBAY    __URI_IMG_EBAY && !__HDR_RCVD_EBAY
-meta       EBAY_IMG_NOT_RCVD_EBAY      __EBAY_IMG_NOT_RCVD_EBAY && !__URI_MAILTO
+meta       EBAY_IMG_NOT_RCVD_EBAY      __EBAY_IMG_NOT_RCVD_EBAY && !__URI_MAILTO && !__RCD_RDNS_MAIL 
 score      EBAY_IMG_NOT_RCVD_EBAY      3.000	# limit
 describe   EBAY_IMG_NOT_RCVD_EBAY      E-bay hosted image but message not from E-bay
 tflags     EBAY_IMG_NOT_RCVD_EBAY      publish
