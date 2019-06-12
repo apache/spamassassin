@@ -1,5 +1,13 @@
 body    __PDS_HIDDEN_UK_BUSINESSLOAN /style="[^"]*display:none[^"]*">.*UK's [a-z]+ rates for business loans/
 
-meta    PDS_HIDDEN_UK_BUSINESSLOAN __PDS_HIDDEN_UK_BUSINESSLOAN
+meta     PDS_HIDDEN_UK_BUSINESSLOAN __PDS_HIDDEN_UK_BUSINESSLOAN
 describe PDS_HIDDEN_UK_BUSINESSLOAN UK's <word> rates for business loans
-score   PDS_HIDDEN_UK_BUSINESSLOAN 2.0 # limit
+score    PDS_HIDDEN_UK_BUSINESSLOAN 2.0 # limit
+reuse    PDS_HIDDEN_UK_BUSINESSLOAN
+
+uri  __PDS_DOUBLE_URL ;https?://[\S]+(?:\?|=)https?://[\S]+[\w]+$;
+
+meta     DOUBLE_URL __PDS_DOUBLE_URL
+describe DOUBLE_URL URL that ends with a URL
+score    DOUBLE_URL 1.0 # limit
+reuse    DOUBLE_URL
