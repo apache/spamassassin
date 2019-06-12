@@ -114,10 +114,11 @@ match DNS answer.  Note that eval rule type must be "body" or "rawbody".
 =cut
 
 package Mail::SpamAssassin::Plugin::HashBL;
-my $VERSION = 0.100;
-
 use strict;
 use warnings;
+
+my $VERSION = 0.100;
+
 use Digest::MD5 qw(md5_hex);
 use Digest::SHA qw(sha1_hex sha256_hex);
 

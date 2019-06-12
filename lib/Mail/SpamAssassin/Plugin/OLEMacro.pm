@@ -61,6 +61,8 @@ the module handles attached documents
 =cut
 
 package Mail::SpamAssassin::Plugin::OLEMacro;
+use strict;
+use warnings;
 
 use Mail::SpamAssassin::Plugin;
 use Mail::SpamAssassin::Util qw(compile_regexp);
@@ -73,8 +75,6 @@ BEGIN
           import  IO::String } ;
 }
 
-use strict;
-use warnings;
 use re 'taint';
 
 use vars qw(@ISA);
@@ -652,10 +652,10 @@ sub _get_part_details {
     #https://github.com/mikel/mail/pull/464
 
     my $ctt = $part->get_header('content-type');
-    return undef unless defined $ctt;
+    return undef unless defined $ctt; ## no critic (ProhibitExplicitReturnUndef)
 
     my $cte = lc($part->get_header('content-transfer-encoding') || '');
-    return undef unless ($cte =~ /^(?:base64|quoted\-printable)$/);
+    return undef unless ($cte =~ /^(?:base64|quoted\-printable)$/); ## no critic (ProhibitExplicitReturnUndef)
 
     $ctt = _decode_part_header($part, $ctt || '');
 

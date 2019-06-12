@@ -538,7 +538,6 @@ It is possible to include a subtest for a specific octet.
 sub check_rbl_rcvd {
   my ($self, $pms, $rule, $set, $rbl_server, $subtest) = @_;
   my %seen;
-  my $host;
   my @udnsrcvd = ();
 
   return 0 if $self->{main}->{conf}->{skip_rbl_checks};
@@ -553,7 +552,7 @@ sub check_rbl_rcvd {
     }
   }
 
-  foreach $host ( @udnsrcvd ) {
+  foreach my $host ( @udnsrcvd ) {
     if((defined $host) and ($host ne "")) {
       chomp($host);
       if($host =~ /^$IP_ADDRESS$/ ) {

@@ -378,9 +378,9 @@ sub taint_var {
 # returns true if the provided string of octets represents a syntactically
 # valid UTF-8 string, otherwise a false is returned
 #
-sub is_valid_utf_8($) {
+sub is_valid_utf_8 {
 # my $octets = $_[0];
-  return undef if !defined $_[0];
+  return undef if !defined $_[0]; ## no critic (ProhibitExplicitReturnUndef)
   #
   # RFC 6532: UTF8-non-ascii = UTF8-2 / UTF8-3 / UTF8-4
   # RFC 3629 section 4: Syntax of UTF-8 Byte Sequences
@@ -418,9 +418,9 @@ sub is_valid_utf_8($) {
 # The result is always in octets (utf8 flag off) even if the argument was in
 # Unicode characters.
 #
-sub idn_to_ascii($) {
+sub idn_to_ascii {
   no bytes;  # make sure there is no 'use bytes' in effect
-  return undef  if !defined $_[0];
+  return undef  if !defined $_[0]; ## no critic (ProhibitExplicitReturnUndef)
   my $s = "$_[0]";  # stringify
   # propagate taintedness of the argument, but not its utf8 flag
   my $t = tainted($s);  # taintedness of the argument
@@ -1981,14 +1981,14 @@ sub is_always_matching_regexp {
     return "ends with '|'";
   }
 
-  return undef;
+  return "";
 }
 
 # convert compiled regexp (?^i:foo) to string (?i)foo
 sub qr_to_string {
   my ($re) = @_;
 
-  return undef unless ref($re) eq 'Regexp';
+  return undef unless ref($re) eq 'Regexp'; ## no critic (ProhibitExplicitReturnUndef)
   $re = "".$re; # stringify
 
   local($1);
@@ -2018,7 +2018,7 @@ sub regexp_remove_delimiters {
 
   my $delim;
   if (!defined $re || $re eq '') {
-    return undef;
+    return undef; ## no critic (ProhibitExplicitReturnUndef)
   }
   elsif ($re =~ s/^m?\{//) {             # m{foo/bar}
     $delim = '}';
@@ -2035,11 +2035,12 @@ sub regexp_remove_delimiters {
   elsif ($re =~ s/^m?(\W)//) {           # m#foo/bar#
     $delim = $1;
   } else {                              # /foo\/bar/ or !foo/bar!
-    return undef; # invalid    
+    # invalid
+    return undef; ## no critic (ProhibitExplicitReturnUndef)
   }
 
   if ($re !~ s/\Q${delim}\E([imsx]*)$//) {
-    return undef;
+    return undef; ## no critic (ProhibitExplicitReturnUndef)
   }
 
   my $mods = $1;
@@ -2058,12 +2059,12 @@ sub make_qr {
   warn("deprecated Util make_qr() called\n");
 
   $re = regexp_remove_delimiters($re);
-  return undef if !defined $re || $re eq '';
+  return undef if !defined $re || $re eq ''; ## no critic (ProhibitExplicitReturnUndef)
   my $compiled_re;
   if (eval { $compiled_re = qr/$re/; 1; } && ref($compiled_re) eq 'Regexp') {
     return $compiled_re;
   } else {
-    return undef;
+    return undef; ## no critic (ProhibitExplicitReturnUndef)
   }
 }
 

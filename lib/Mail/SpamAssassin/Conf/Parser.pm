@@ -1126,7 +1126,7 @@ sub pack_eval_args {
   }
 
   if ($args ne '') {
-    return undef;
+    return undef; ## no critic (ProhibitExplicitReturnUndef)
   }
 
   return \@args;
