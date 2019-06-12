@@ -25,6 +25,8 @@ loadplugin Mail::SpamAssassin::Plugin::FreeMail
 ");
 
 tstprefs ("
+        header FREEMAIL_FROM eval:check_freemail_from()
+        freemail_domains gmail.com
         freemail_import_whitelist_auth 0
         whitelist_auth test\@gmail.com
 ");
@@ -45,6 +47,8 @@ clear_pattern_counters();
             );
 
 tstprefs ("
+        header FREEMAIL_FROM eval:check_freemail_from()
+        freemail_domains gmail.com
         freemail_import_whitelist_auth 1
         whitelist_auth test\@gmail.com
 ");
