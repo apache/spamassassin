@@ -7,7 +7,7 @@ reuse    PDS_HIDDEN_UK_BUSINESSLOAN
 
 uri  __PDS_DOUBLE_URL ;https?://[\S]+(?:\?|=)https?://[\S]+[\w]+$;
 
-meta     DOUBLE_URL __PDS_DOUBLE_URL
-describe DOUBLE_URL URL that ends with a URL
-score    DOUBLE_URL 1.0 # limit
-reuse    DOUBLE_URL
+meta     PDS_DOUBLE_URL __PDS_DOUBLE_URL
+describe PDS_DOUBLE_URL URL that ends with a URL
+score    PDS_DOUBLE_URL 1.0 # limit
+reuse    PDS_DOUBLE_URL
