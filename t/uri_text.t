@@ -26,7 +26,7 @@ use vars qw(%patterns %anti_patterns);
 
 # initialize SpamAssassin
 my $sa = create_saobj({
-    require_rules => 1,
+    require_rules => 0,
     site_rules_filename => "$prefix/t/log/localrules.tmp",
     rules_filename => "$prefix/rules",
     local_tests_only => 1,
