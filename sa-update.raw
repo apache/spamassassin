@@ -1632,7 +1632,7 @@ sub read_content {
   my $file = IO::File->new;
   if (!$file->open($file_name, '<')) {
     dbg("read_content: Cannot open file $file_name: $!");
-    return undef;
+    return undef; ## no critic (ProhibitExplicitReturnUndef)
   }
   if ($binary_mode) {
     binmode $file;
@@ -1645,7 +1645,7 @@ sub read_content {
   }
   if (!defined $number_of_bytes) {
     dbg("read_content: Error reading from file $file_name: $!");
-    return undef;
+    return undef; ## no critic (ProhibitExplicitReturnUndef)
   }
   $file->close;
 

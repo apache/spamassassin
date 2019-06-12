@@ -775,40 +775,28 @@ sub get_names_of_subtests_hit {
   my ($self, $mode) = @_;
 
   if (defined $mode && $mode eq 'dbg') {
-    #This routine prints only one instance of a subrule hit with a count of how many times it hit if greater than 1
-    my (%subtest_names_hit, $i, $key, @keys, @sorted, $string, $rule, $total_hits, $deduplicated_hits);  
-  
-    $total_hits = scalar(@{$self->{subtest_names_hit}});
+    # This routine prints only one instance of a subrule hit with a count of how many times it hit if greater than 1
+    my $total_hits = scalar(@{$self->{subtest_names_hit}});
     return '' if !$total_hits;
   
-    for ($i=0; $i < $total_hits; $i++) {
-      $rule = ${$self->{subtest_names_hit}}[$i]; 
-      $subtest_names_hit{$rule}++; 
-    }
-  
-    foreach $key (keys %subtest_names_hit) {
-      push (@keys, $key);
-    }
-    @sorted = sort @keys;
-  
-    $deduplicated_hits = scalar(@sorted);
-  
-    for ($i=0; $i < $deduplicated_hits; $i++) {
-      $string .= $sorted[$i];
-      if ($subtest_names_hit{$sorted[$i]} > 1) {
-        $string .= "($subtest_names_hit{$sorted[$i]})"
-      }
-      $string .= ",";
-    }
-  
-    $string =~ s/,$//;
-  
-    $string .= " (Total Subtest Hits: $total_hits / Deduplicated Total Hits: $deduplicated_hits)";
-  
-    return $string;
+    my %subtest_names_hit;
+    $subtest_names_hit{$_}++ foreach @{$self->{subtest_names_hit}};
 
+    my @subtests = sort keys %subtest_names_hit;
+    my $deduplicated_hits = scalar(@subtests);
+
+    my @result;
+    foreach my $rule (@subtests) {
+      if ($subtest_names_hit{$rule} > 1) {
+        push @result, "$rule($subtest_names_hit{$rule})";
+      } else {
+        push @result, $rule;
+      }
+    }
+  
+    return join(',', @result)." (Total Subtest Hits: $total_hits / Deduplicated Total Hits: $deduplicated_hits)";
   } else {
-    #return the simpler string with duplicates and commas
+    # Return the simpler string with duplicates and commas
     return join(',', sort @{$self->{subtest_names_hit}});
   }
 }
