@@ -110,5 +110,12 @@ describe SENT_TO_EMAIL_ADDR Email was sent to email address
 score    SENT_TO_EMAIL_ADDR 2.0 # limit
 reuse    SENT_TO_EMAIL_ADDR
 
+body     __PDS_EXPIRATION_NOTICE /\bexpiration (notice|alert|date)\b/i
+
+meta     SUSPNTLD_EXPIRATION_EXTORT LOTS_OF_MONEY && __PDS_EXPIRATION_NOTICE && __FROM_ADDRLIST_SUSPNTLD
+describe SUSPNTLD_EXPIRATION_EXTORT Susp NTLD with an expiration notice and lotsa money
+score    SUSPNTLD_EXPIRATION_EXTORT 2.0 # limit
+reuse    SUSPNTLD_EXPIRATION_EXTORT
+
 endif
 endif
