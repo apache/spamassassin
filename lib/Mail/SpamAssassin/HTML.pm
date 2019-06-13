@@ -750,7 +750,10 @@ sub html_text {
   my $invisible_for_bayes = 0;
 
   # NBSP:  UTF-8: C2 A0, ISO-8859-*: A0
-  if ($text !~ /^(?:[ \t\n\r\f\x0b]|\xc2\xa0)*\z/s) {
+  # Bug 7374 - regex recursion limit exceeded
+  #if ($text !~ /^(?:[ \t\n\r\f\x0b]|\xc2\xa0)*\z/s) {
+  # .. alternative way, remove from string and see if there's anything left
+  if (do {(my $tmp = $text) =~ s/(?:[ \t\n\r\f\x0b]|\xc2\xa0)//gs; length($tmp)}) {
     $invisible_for_bayes = $self->html_font_invisible($text);
   }
 
