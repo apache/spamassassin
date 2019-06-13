@@ -2716,7 +2716,7 @@ describe   URI_GIBB_NO_PROTO           Long, gibberish, no-protocol URI
 
 
 header     __AC_FROM_MANY_DOTS         From =~ /<(?:\w{2,}\.){2,}\w+@/
-meta       __AC_FROM_MANY_DOTS_MINFP   __AC_FROM_MANY_DOTS && !FREEMAIL_FORGED_FROMDOMAIN && !FORGED_GMAIL_RCVD && !__UNSUB_LINK && !__XM_VBULLETIN && !__RDNS_SHORT && !__REPTO_QUOTE && !__FSL_RELAY_GOOGLE && !__HAS_IN_REPLY_TO && !__RCD_RDNS_SMTP && !__HAS_THREAD_INDEX && !__RCD_RDNS_MX_MESSY 
+meta       __AC_FROM_MANY_DOTS_MINFP   __AC_FROM_MANY_DOTS && !FREEMAIL_FORGED_FROMDOMAIN && !FORGED_GMAIL_RCVD && !__UNSUB_LINK && !__XM_VBULLETIN && !__RDNS_SHORT && !__REPTO_QUOTE && !__FSL_RELAY_GOOGLE && !__HAS_IN_REPLY_TO && !__RCD_RDNS_SMTP && !__HAS_THREAD_INDEX && !__RCD_RDNS_MX_MESSY && !__CTYPE_MULTIPART_MIXED 
 meta       AC_FROM_MANY_DOTS           __AC_FROM_MANY_DOTS_MINFP
 score      AC_FROM_MANY_DOTS           3.000	# limit
 describe   AC_FROM_MANY_DOTS           Multiple periods in From user name
@@ -2784,8 +2784,11 @@ describe   HOSTED_IMG_FREEM            Image hosted at large ecomm site, freemai
 tflags     HOSTED_IMG_FREEM            publish
 
 
-header     __BOGUS_MIME_VER_01         MIME-Version =~ /^(?!\s*1\.0).+/
+#header     __BOGUS_MIME_VER_01         MIME-Version =~ /^(?!\s*1\.0).+/
 header     __BOGUS_MIME_VER_02         MIME-Version =~ /^(?!.*\b1\.0\b).+/
-
+meta       BOGUS_MIME_VERSION          __BOGUS_MIME_VER_02
+score      BOGUS_MIME_VERSION          3.500	# limit
+describe   BOGUS_MIME_VERSION          Mime version header is bogus
+tflags     BOGUS_MIME_VERSION          publish
 
 
