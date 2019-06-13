@@ -1,3 +1,4 @@
+
 rawbody    __PDS_HIDDEN_UK_BUSINESSLOAN /style="[^"]*display:none[^"]*">.*UK's [a-z]+ rates for business loans/
 
 meta     PDS_HIDDEN_UK_BUSINESSLOAN __PDS_HIDDEN_UK_BUSINESSLOAN
@@ -11,3 +12,18 @@ meta     PDS_DOUBLE_URL __PDS_DOUBLE_URL
 describe PDS_DOUBLE_URL URL that ends with a URL
 score    PDS_DOUBLE_URL 1.0 # limit
 reuse    PDS_DOUBLE_URL
+
+meta     PDS_DBL_URL_LINKBAIT __BODY_URI_ONLY && __PDS_DOUBLE_URL
+describe PDS_DBL_URL_LINKBAIT Linkbait double-url
+score    PDS_DBL_URL_LINKBAIT 2.5 # limit
+reuse    PDS_DBL_URL_LINKBAIT
+
+meta     PDS_DBL_URL_TNB_RUNON __TO_NO_BRKTS_FROM_RUNON && __PDS_DOUBLE_URL
+describe PDS_DBL_URL_TNB_RUNON Double-url and To no arrows, from runon
+score    PDS_DBL_URL_TNB_RUNON 2.0
+reuse    PDS_DBL_URL_TNB_RUNON
+
+meta     PDS_DBL_URL_ILLEGAL_CHARS SUBJ_ILLEGAL_CHARS && __PDS_DOUBLE_URL
+describe PDS_DBL_URL_ILLEGAL_CHARS Double url illegal subject characters
+score    PDS_DBL_URL_ILLEGAL_CHARS 2.0
+reuse    PDS_DBL_URL_ILLEGAL_CHARS
