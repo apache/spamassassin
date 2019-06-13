@@ -6,8 +6,9 @@ set -ex
 
 MAINDISTVNAME=$DISTVNAME
 
-rm -rf $WEBDIR/doc
-tar cf - --exclude='.#*' doc | ( cd $WEBDIR ; tar xf - )
+#I think this was to publish the latest docs on the website
+#rm -rf $WEBDIR/doc
+#tar cf - --exclude='.#*' doc | ( cd $WEBDIR ; tar xf - )
 
 . build/repackage_latest_update_rules
 
