@@ -16,7 +16,7 @@ use SATest; sa_t_init("urilocalbl");
 
 use constant HAS_CIDR_LITE => eval { require Net::CIDR::Lite; };
 use constant HAS_GEOIP => eval { require Geo::IP; };
-use constant HAS_GEOIP_CONF => eval { Geo::IP->new(GEOIP_MEMORY_CACHE | GEOIP_CHECK_CACHE); };
+use constant HAS_GEOIP_CONF => eval { Geo::IP->new(); };
 
 use Test::More;
 
