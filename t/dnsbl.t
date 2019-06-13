@@ -85,6 +85,9 @@ clear_trusted_networks
 trusted_networks 10.
 trusted_networks 150.51.53.1
 
+# make ,DNSBL, pattern matches work (never allow it first in the tests= list)
+meta AAA 1
+
 header DNSBL_TEST_TOP	eval:check_rbl('test', 'dnsbltest.spamassassin.org.')
 describe DNSBL_TEST_TOP	DNSBL A record match
 tflags DNSBL_TEST_TOP	net
