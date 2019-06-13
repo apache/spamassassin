@@ -1862,7 +1862,10 @@ sub is_always_matching_regexp {
   return "";
 }
 
-# convert compiled regexp (?^i:foo) to string (?i)foo
+# convert compiled regexp (?^i:foo) presentation to string (?i)foo
+# NOTE: This function is mainly used for Rule2XSBody purposes, since it
+# expects "(?i)foo" formatted strings.  Generally there should NOT be need
+# to use this function.  If you need a string, try "".$re / "".qr(foo.*bar).
 sub qr_to_string {
   my ($re) = @_;
 
@@ -1870,9 +1873,17 @@ sub qr_to_string {
   $re = "".$re; # stringify
 
   local($1);
-  $re =~ s/^\(\?\^([a-z]*)://;
-  my $mods = $1;
-  $re =~ s/\)\z//;
+  my $mods;
+  # perl >=5.14 (?^i:foo)
+  if ($re =~ s/^\(\?\^([a-z]*)://) {
+    $mods = $1;
+    $re =~ s/\)\s*\z//;
+  }
+  # perl <5.14 (?i-xsm:foo)
+  elsif ($re =~ s/^\(\?([a-z]*)-[a-z]*://) {
+    $mods = $1;
+    $re =~ s/\)\s*\z//;
+  }
 
   return ($mods ? "(?$mods)$re" : $re);
 }
