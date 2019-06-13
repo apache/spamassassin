@@ -112,7 +112,7 @@ are provided as a space-separated list, although this behaviour may change.
 
 =head1 SEE ALSO
 
-C<Mail::DKIM>, C<Mail::SpamAssassin::Plugin>
+C<Mail::DKIM> Mail::SpamAssassin::Plugin(3)
 
   http://dkimproxy.sourceforge.net/
   https://tools.ietf.org/rfc/rfc4871.txt

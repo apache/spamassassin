@@ -3182,6 +3182,6 @@ __END__
 
 =head1 SEE ALSO
 
-C<Mail::SpamAssassin>
-C<spamassassin>
+Mail::SpamAssassin(3)
+spamassassin(1)
 

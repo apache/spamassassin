@@ -1215,9 +1215,9 @@ __END__
 
 =head1 SEE ALSO
 
-C<Mail::SpamAssassin>
-C<spamassassin>
-C<mass-check>
+Mail::SpamAssassin(3)
+spamassassin(1)
+mass-check(1)
 
 =cut
 

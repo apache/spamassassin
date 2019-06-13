@@ -4980,8 +4980,8 @@ C<lang pt_BR>, or just the language, e.g. C<lang de>.
 
 =head1 SEE ALSO
 
-C<Mail::SpamAssassin>
-C<spamassassin>
-C<spamd>
+Mail::SpamAssassin(3)
+spamassassin(1)
+spamd(1)
 
 =cut
