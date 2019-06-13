@@ -35,7 +35,7 @@ tstprefs ("
 
 # Check for country of gmail.com mail server
 %patterns = (
-        q{ X-Spam-Relay-Country: US },
+        q{ X-Spam-Relay-Country: US }, '',
             );
 
 ok sarun ("-L -t < data/spam/relayUS.eml", \&patterns_run_cb);
