@@ -67,11 +67,11 @@ body     __LOTTO_WINNINGS   /\b(?:claim|process(?:ing)?|transfert?(?:\s\w+)?|red
 
 body     __LOTTO_WIN_01     /\bwin+ing\s(?:prize|number|notification|draw|check|cheque|details|information|payment)/i
 
-body     __YOU_WON_01    /\byou(?:r|'re|'ve|'ll|\shave|\sdid)?\s(?:e-?mail\s)?(?:\w+\s){0,2}(?:a\s)?w[io]n+(?:er|ing)?(?!\xe2\x80\x99t)(?![`']t)\b/i
+body     __YOU_WON_01    /\byou(?:r|'re|'ve|'ll|\shave|\sdid)?\s(?:e-?mail\s)?(?:\w+\s){0,2}(?:a\s)?w[io]n+(?:er|ing)?(?!\xe2\x80\x99t)(?![`'\x92]t)\b/i
 body     __YOU_WON_02    /\bw[io]n\s(?:(?:for|by)\s)?your?\b/i
 body     __YOU_WON_03    /\b(?:your?|win+ing|win+ers?|beneficiaries|participants?|individuals?|address(?:es)?|accounts?|emails?)(?:\s[-a-z\s]{4,40})?\s(?:w(?:ere|as)|ha(?:ve|s) be(?:en)?)\s(?:automatically\s)?(?:(?:randomly|raffly)\s(?:selected|cho+sen|cho+sing|picked)|(?:selected|cho+sen|cho+sing|picked)\s(?:[a-z\s]{2,40}?\srandom(?:ly)?|online|lottery|computer\s(?:ballot|wahlgang))|(?:selected|cho+sen|cho+sing|picked)(?:\sas?|\sthe){0,3}\swin+er)/i 
 body     __YOU_WON_04    /\bqu[ei]\s?(?:vous (?:[\xc3][\xaa]|=C3=AA|[\xea]|e)tes\s?gagnant|en\scons(?:e|=E9|[\xe9]|[\xc3][\xa9])quence\sgagne)\b/i
-body     __YOU_WON_05    /\bI won(?!\xe2\x80\x99t)(?![`']t)\b/i
+body     __YOU_WON_05    /\bI won(?!\xe2\x80\x99t)(?![`'\x92]t)\b/i
 body     __HAS_WON_01    /\bque ha ganado\b/i
 meta     __YOU_WON       __YOU_WON_01 || __YOU_WON_02 || __YOU_WON_03 || __YOU_WON_04 || __HAS_WON_01 || (__YOU_WON_05 && (__MOVE_MONEY || __GIVE_MONEY))
 
