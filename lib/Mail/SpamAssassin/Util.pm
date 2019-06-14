@@ -124,8 +124,8 @@ BEGIN {
   eval { require Net::LibIDN } and do { $have_libidn = 1 };
 }
 
-$have_libidn or warn "INFO: module Net::LibIDN not available,\n".
-  "  internationalized domain names with U-labels will not be recognized!\n";
+#$have_libidn or warn "INFO: module Net::LibIDN not available,\n".
+#  "  internationalized domain names with U-labels will not be recognized!\n";
 
 ###########################################################################
 
