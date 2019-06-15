@@ -29,6 +29,10 @@ DNSEVAL - look up URLs against DNS blocklists
  tflags     RBL_IP    net
  reuse      RBL_IP
 
+ Supported extra tflags from SpamAssassin 3.4.3:
+  domains_only - only non-IP-address "host" components are queried
+  ips_only - only IP addresses as the "host" component will be queried
+
 =head1 DESCRIPTION
 
 The DNSEval plugin queries dns to see if a domain or an ip address
@@ -418,7 +422,10 @@ sub check_rbl_headers {
       my $host = $pms->get($rbl_headers);
       chomp($host);
       if($host =~ /^$IP_ADDRESS$/ ) {
+        return if ($conf->{tflags}->{$rule}||'') =~ /\bdomains_only\b/;
         $host = reverse_ip_address($host);
+      } else {
+        return if ($conf->{tflags}->{$rule}||'') =~ /\bips_only\b/;
       }
       $pms->do_rbl_lookup($rule, $set, 'A',
         "$host.$rbl_server", $subtest) if ( defined $host and $host ne "");
@@ -550,8 +557,10 @@ sub check_rbl_rcvd {
     if((defined $host) and ($host ne "")) {
       chomp($host);
       if($host =~ /^$IP_ADDRESS$/ ) {
+        next if ($pms->{conf}->{tflags}->{$rule}||'') =~ /\bdomains_only\b/;
         $host = reverse_ip_address($host);
       } else {
+        next if ($pms->{conf}->{tflags}->{$rule}||'') =~ /\bips_only\b/;
         $host =~ s/\.$//;
       }
       if ( defined $subtest ) {
@@ -598,9 +607,14 @@ sub _check_rbl_addresses {
       ($rbl_server !~ /\.$/)) {
     $rbl_server .= ".";
   }
-  dbg("dns: _check_rbl_addresses RBL $rbl_server, set $set");
 
   for my $host (keys %hosts) {
+    if ($host =~ /^$IP_ADDRESS$/) {
+      next if ($pms->{conf}->{tflags}->{$rule}||'') =~ /\bdomains_only\b/;
+      $host = reverse_ip_address($host);
+    } else {
+      next if ($pms->{conf}->{tflags}->{$rule}||'') =~ /\bips_only\b/;
+    }
     dbg("dns: checking [$host] / $rule / $set / $rbl_server");
     $pms->do_rbl_lookup($rule, $set, 'A', "$host.$rbl_server", $subtest);
   }
@@ -641,5 +655,10 @@ sub check_dns_sender {
 
   return 0;
 }
+
+# capability checks for "if can(Mail::SpamAssassin::Plugin::DNSEval::XXX)":
+#
+sub has_tflags_domains_only { 1 }
+sub has_tflags_ips_only { 1 }
 
 1;
