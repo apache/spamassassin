@@ -86,3 +86,20 @@ score RP_MATCHES_RCVD           -0.001
 # until rule or rescoring issues sorted, hits 20%+ ham
 score STYLE_GIBBERISH 0.1
 
+# jhardin
+# Limit some network scores until rule changes can be evaluated by weekly net masscheck
+# Dangit, relative scores are broken - see bug#7721
+#score FROM_IN_TO_AND_SUBJ    (0) 0.001 (0) 0.001
+#score OBFU_TEXT_ATTACH       (0) 0.001 (0) 0.001
+#score MIME_NO_TEXT           (0) 0.001 (0) 0.001
+#score AD_PREFS               (0) 0.001 (0) 0.001
+#score URI_WP_HACKED_2        (0) 0.001 (0) 0.001
+#score STYLE_GIBBERISH        (0) 0.001 (0) 0.001
+#score UC_GIBBERISH_OBFU      (0) 0.001 (0) 0.001
+#score LUCRATIVE              (0) 0.001 (0) 0.001
+#score HEXHASH_WORD           (0) 0.001 (0) 0.001
+#score FROM_WORDY             (0) 0.001 (0) 0.001
+#score AC_HTML_NONSENSE_TAGS  (0) 0.001 (0) 0.001
+#score LONG_HEX_URI           (0) 0.001 (0) 0.001
+#score FROM_PAYPAL_SPOOF      (0) 0.001 (0) 0.001
+
