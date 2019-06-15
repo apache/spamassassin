@@ -648,6 +648,9 @@ BODY_SINGLE_WORD
 BODY_URI_ONLY
 
 # tflags publish
+BOGUS_MIME_VERSION
+
+# tflags publish
 BOGUS_MSM_HDRS
 
 # tflags publish
@@ -734,11 +737,17 @@ DKIM_VALID_EF
 # tflags publish
 DOS_ANAL_SPAM_MAILER
 
+# good enough
+DOS_OE_TO_MX
+
 # tflags publish
 DX_TEXT_02
 
 # tflags publish
 DX_TEXT_03
+
+# good enough
+DYN_RDNS_AND_INLINE_IMAGE
 
 # tflags publish
 EBAY_IMG_NOT_RCVD_EBAY
@@ -748,6 +757,9 @@ ENCRYPTED_MESSAGE
 
 # tflags userconf
 ENV_AND_HDR_SPF_MATCH
+
+# good enough
+FAKE_REPLY_C
 
 # tflags publish
 FBI_MONEY
@@ -1011,10 +1023,19 @@ HEADER_FROM_DIFFERENT_DOMAINS
 HEAD_LONG
 
 # good enough
+HELO_LOCALHOST
+
+# good enough
 HELO_MISC_IP
 
 # tflags publish
 HEXHASH_WORD
+
+# good enough
+HK_NAME_DRUGS
+
+# good enough
+HK_RANDOM_ENVFROM
 
 # good enough
 HK_RANDOM_FROM
@@ -1140,6 +1161,9 @@ MONEY_FROM_MISSP
 MSM_PRIO_REPTO
 
 # good enough
+MSOE_MID_WRONG_CASE
+
+# good enough
 NORDNS_LOW_CONTRAST
 
 # tflags net
@@ -1161,6 +1185,9 @@ NSL_RCVD_FROM_USER
 NSL_RCVD_HELO_USER
 
 # good enough
+NULL_IN_BODY
+
+# good enough
 NUMBERONLY_BITCOIN_EXP
 
 # tflags publish
@@ -1174,6 +1201,9 @@ OBFU_TEXT_ATTACH
 
 # good enough
 ONLINE_MKTG_CNSLT
+
+# good enough
+PDS_HIDDEN_UK_BUSINESSLOAN
 
 # good enough
 PDS_PHP_EVAL
@@ -1434,6 +1464,9 @@ RDNS_NUM_TLD_ATCHNX
 RDNS_NUM_TLD_XM
 
 # good enough
+REPLYTO_WITHOUT_TO_CC
+
+# good enough
 RISK_FREE
 
 # tflags publish
@@ -1508,6 +1541,9 @@ STOCK_LOW_CONTRAST
 # tflags publish
 STOCK_TIP
 
+# good enough
+STOX_REPLY_TYPE_WITHOUT_QUOTES
+
 # tflags publish
 STYLE_GIBBERISH
 
@@ -1581,6 +1617,15 @@ TO_NO_BRKTS_PCNT
 TVD_APP_LOAN
 
 # good enough
+TVD_QUAL_MEDS
+
+# good enough
+TVD_RCVD_IP
+
+# good enough
+TVD_RCVD_SPACE_BRACKET
+
+# good enough
 TVD_SPACE_ENCODED
 
 # good enough
@@ -1589,14 +1634,74 @@ TVD_SPACE_RATIO_MINFP
 # good enough
 TVD_SUBJ_APPR_LOAN
 
+# good enough
+TVD_VISIT_PHARMA
+
 # tflags publish
 TW_GIBBERISH_MANY
 
-# tflags publish
-BOGUS_MIME_VERSION
+# good enough
+ANY_PILL_PRICE
 
 # good enough
-PDS_HIDDEN_UK_BUSINESSLOAN
+COMPENSATION
+
+# good enough
+CTYPE_NULL
+
+# good enough
+DATE_IN_FUTURE_96_Q
+
+# good enough
+DEAR_BENEFICIARY
+
+# good enough
+FILL_THIS_FORM_LOAN
+
+# good enough
+FILL_THIS_FORM_LONG
+
+# good enough
+FREEMAIL_DISPTO
+
+# good enough
+FROM_MISSP_FREEMAIL
+
+# good enough
+HDRS_LCASE
+
+# good enough
+HK_NAME_FM_MR_MRS
+
+# good enough
+HK_NAME_MR_MRS
+
+# good enough
+LOTTO_AGENT
+
+# good enough
+OFFER_ONLY_AMERICA
+
+# good enough
+PDS_DBL_URL_ILLEGAL_CHARS
+
+# good enough
+PDS_DBL_URL_LINKBAIT
+
+# good enough
+PDS_DBL_URL_TNB_RUNON
+
+# good enough
+PDS_TO_EQ_FROM_NAME
+
+# good enough
+PHOTO_EDITING_DIRECT
+
+# good enough
+PHOTO_EDITING_FREEM
+
+# good enough
+ZW_OBFU_BITCOIN
 
 # tflags publish
 UC_GIBBERISH_OBFU
