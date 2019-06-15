@@ -473,7 +473,7 @@ describe       __TO_EQ_FROM         To: same as From:
 
 # Suggested by Hans-Werner Friedemann on users list 09/30/2010
 header         __SUBJ_HAS_FROM_1    ALL =~ /\nFrom:\s+(?:[^\n<]{0,80}<)?([^\n\s>]+)>?\n(?:[^\n]{1,100}\n)*Subject:\s+[^\n]{0,100}\1[>,\s\n]/ism
-meta           FROM_IN_TO_AND_SUBJ  (__TO_EQ_FROM && __SUBJ_HAS_FROM_1)
+meta           FROM_IN_TO_AND_SUBJ  (__TO_EQ_FROM && __SUBJ_HAS_FROM_1) && !__HAS_LIST_ID 
 describe       FROM_IN_TO_AND_SUBJ  From address is in To and Subject
 tflags         FROM_IN_TO_AND_SUBJ  publish
 
@@ -1501,7 +1501,7 @@ tflags      URI_WP_DIRINDEX    publish
 
 # this has some overlap with URI_WP_HACKED
 uri         __PS_TEST_LOC_WP   m;/(?:wp-content/plugins|wp-content/themes|wp-includes|modules/mod_wdbanners|includes/|google_recommends|mt-static|data/module)/.{1,128}(?!\.gif|\.jpg|\.png|\.bmp|\.ico|\.pdf)[^?]{4}(?:\?[^?]{1,5})?$;i
-meta        URI_WP_HACKED_2    (__PS_TEST_LOC_WP && !URI_WP_HACKED) && !__TO_EQ_FROM && !__THREADED 
+meta        URI_WP_HACKED_2    (__PS_TEST_LOC_WP && !URI_WP_HACKED) && !__TO_EQ_FROM && !__THREADED && !__USING_VERP1 
 describe    URI_WP_HACKED_2    URI for compromised WordPress site, possible malware
 score       URI_WP_HACKED_2    2.500   # limit
 tflags      URI_WP_HACKED_2    publish
@@ -1605,7 +1605,7 @@ meta        __HEXHASH_2        __HEXHASHWORD_S2EU > 1
 meta        __HEXHASH_3        __HEXHASHWORD_S2EU > 2
 meta        __HEXHASH_4        __HEXHASHWORD_S2EU > 3
 #meta        __HEXHASH_5        __HEXHASHWORD_S2EU > 4
-meta        HEXHASH_WORD       (__HEXHASHWORD_S2EU > 1) && !ALL_TRUSTED && !__DKIM_EXISTS && !__RP_MATCHES_RCVD && !__LCL__ENV_AND_HDR_FROM_MATCH && !__LYRIS_EZLM_REMAILER && !__THREADED && !__HDRS_LCASE && !__MSGID_HEXISH && !__RDNS_SHORT 
+meta        HEXHASH_WORD       (__HEXHASHWORD_S2EU > 1) && !ALL_TRUSTED && !__LYRIS_EZLM_REMAILER && !__MSGID_HEXISH && !__RDNS_SHORT && !__CTYPE_MULTIPART_MIXED && !__RCD_RDNS_MAIL && !__HAS_X_REF 
 describe    HEXHASH_WORD       Multiple instances of word + hexadecimal hash
 score       HEXHASH_WORD       3.000	# limit
 tflags      HEXHASH_WORD       publish
@@ -1767,8 +1767,10 @@ meta        THIS_AD           __THIS_AD && !__MOZILLA_MSGID && !__FROM_ENCODED_Q
 describe    THIS_AD           "This ad" and variants
 tflags      THIS_AD           publish
 
+# low S/O, legit subscribed marketing in masscheck corpus?
 body        AD_PREFS          /(?:\b|_)(?:ad(?:vert[i1l]s[i1l]ng)?|promo(?:tion)?|marketing)[- _](?:pref(?:s|erences)|settings)(?:\b|_)/i
 describe    AD_PREFS          Advertising preferences
+score       AD_PREFS          0.500	# limit
 tflags      AD_PREFS          publish
 
 #body        OPT_OUT           /\bOpt-Out Here\b/i
@@ -2382,7 +2384,7 @@ header     __FROM_WORDY                From:addr =~ /^(?:(?:[A-Z][A-Za-z]+|or|&)
 header     __FROM_WORDY_3              From:addr =~ /(?:(?:[A-Z][A-Za-z]+|or|&)\.){2,}[A-Z][A-Za-z]+\@/
 
 meta       __FROM_WORDY_SONLY          __FROM_WORDY && (__XPRIO_MINFP || __TO_NO_BRKTS_MSFT || __FILL_THIS_FORM_SHORT || __HAS_MSMAIL_PRI || DEAR_FRIEND ||  __TO_NO_BRKTS_FROM_MSSP || FREEMAIL_REPLYTO )
-meta       FROM_WORDY                  ((__FROM_WORDY_SONLY || __FROM_WORDY_3) && !__HTML_LENGTH_0000_1024) && !__HAS_TNEF && !__USING_VERP1 && !__HDRS_LCASE_KNOWN 
+meta       FROM_WORDY                  ((__FROM_WORDY_SONLY && !__DKIM_EXISTS) || __FROM_WORDY_3) && !__HAS_TNEF && !__USING_VERP1 && !__HAS_THREAD_INDEX && !__HAS_LIST_ID && !__RCD_RDNS_MTA 
 describe   FROM_WORDY                  From address looks like a sentence
 score      FROM_WORDY                  2.500	# limit
 tflags     FROM_WORDY                  publish
@@ -2792,7 +2794,10 @@ score      BOGUS_MIME_VERSION          3.500	# limit
 describe   BOGUS_MIME_VERSION          Mime version header is bogus
 tflags     BOGUS_MIME_VERSION          publish
 
-uri        __URI_HEX_IP                m,://0x[0-9A-F]+/,
-
+# also hits NORMAL_HTTP_TO_IP but should be punished harder
+uri        __URI_HEX_IP                m;://0x[0-9A-F]{8,}/;i
+meta       URI_HEX_IP                  __URI_HEX_IP
+score      URI_HEX_IP                  2.500	# limit
+describe   URI_HEX_IP                  URI with hex-encoded IP-address host
 
 
