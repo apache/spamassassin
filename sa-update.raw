@@ -536,7 +536,7 @@ foreach my $channel (@channels) {
     my $dnsV = join(' ', do_dns_query($DNSQ));
     local($1);
     if (defined $dnsV && $dnsV =~ /^(\d+)/) {
-      $newV = $1 if (!defined $newV || $1 > $newV);
+      $newV = untaint_var($1) if (!defined $newV || $1 > $newV);
       dbg("dns: $DNSQ => $dnsV, parsed as $1");
     }
 
@@ -741,15 +741,27 @@ foreach my $channel (@channels) {
 
     # Now that we've laid the foundation, go grab the appropriate files
     #
+    my $path_content = File::Spec->catfile($UPDDir, "$newV.tar.gz");
+    my $path_sha512 =  File::Spec->catfile($UPDDir, "$newV.tar.gz.sha512");
+    my $path_sha256 =  File::Spec->catfile($UPDDir, "$newV.tar.gz.sha256");
+    my $path_asc =     File::Spec->catfile($UPDDir, "$newV.tar.gz.asc");
 
     # Loop through all available mirrors, choose from them randomly
-    # if the archive get fails, choose another mirror,
-    # if the get for the hash or gpg signature files fails, the channel fails
+    # if any get fails, choose another mirror to retry _all_ files again
+    # sleep $tries*2 seconds for every retry (10 mirrors = max 110sec total)
+    my $download_ok = 0;
+    my $tries = 0;
     while (my $mirror = choose_mirror(\%mirrors)) {
       my ($result_fname, $http_ok);
       # Grab the data hash for this mirror, then remove it from the list
       my $mirror_info = $mirrors{$mirror};
       delete $mirrors{$mirror};
+
+      # Make sure we start without files from existing tries
+      unlink($path_content);
+      unlink($path_sha512);
+      unlink($path_sha256);
+      unlink($path_asc);
 
       if (!check_mirror_af($mirror)) {
         my @my_af;
@@ -763,38 +775,28 @@ foreach my $channel (@channels) {
 
       dbg("channel: selected mirror $mirror");
 
+      my $sleep_sec = ++$tries * 2;
+
       # Actual archive file
       ($result_fname, $http_ok) = http_get("$mirror/$newV.tar.gz", $UPDDir);
-      if (!$http_ok) {
-        dbg("channel: failed to get from mirror $mirror, %s",
-          %mirrors ? 'trying next' : 'no mirrors left');
+      if (!$http_ok || !-s $result_fname) {
+        dbg("channel: failed to get $newV.tar.gz from mirror $mirror, %s",
+          %mirrors ? "sleeping $sleep_sec sec and trying next" : 'no mirrors left');
+        sleep($sleep_sec) if %mirrors;
         next;
       }
-      $content = read_content($result_fname, 1);
-      next unless $content;
-      $preserve_files{$result_fname} = 1;
 
       # SHA512 of the archive file
       ($result_fname, $http_ok) = http_get("$mirror/$newV.tar.gz.sha512", $UPDDir);
       if (!$http_ok || !-s $result_fname) {
-        undef $SHA512;
-        dbg("channel: No sha512 file available from $mirror");
-      } else {
-        $SHA512 = read_content($result_fname, 0);
-        last unless $SHA512;
-        $preserve_files{$result_fname} = 1;
-      }
-
-      # SHA256 of the archive file (only if SHA512 not found)
-      if (!$SHA512) {
+        # If not found, try SHA256 instead
         ($result_fname, $http_ok) = http_get("$mirror/$newV.tar.gz.sha256", $UPDDir);
         if (!$http_ok || !-s $result_fname) {
-          undef $SHA256;
-          dbg("channel: No sha256 file available from $mirror");
-        } else {
-          $SHA256 = read_content($result_fname, 0);
-          last unless $SHA256;
-          $preserve_files{$result_fname} = 1;
+          my $ssec = ++$tries * 2;
+          dbg("channel: No sha512 or sha256 file available from $mirror, %s",
+            %mirrors ? "sleeping $sleep_sec sec and trying next" : 'no mirrors left');
+          sleep($sleep_sec) if %mirrors;
+          next;
         }
       }
 
@@ -802,17 +804,35 @@ foreach my $channel (@channels) {
       if ($GPG_ENABLED) {
         ($result_fname, $http_ok) = http_get("$mirror/$newV.tar.gz.asc", $UPDDir);
         if (!$http_ok || !-s $result_fname) {
-          undef $GPG;
-          dbg("channel: No GPG/asc file available from $mirror");
-        } else {
-          $GPG = read_content($result_fname, 0);
-          last unless $GPG;
-          $preserve_files{$result_fname} = 1;
+          dbg("channel: No GPG/asc file available from $mirror, %s",
+            %mirrors ? "sleeping $sleep_sec sec and trying next" : 'no mirrors left');
+          sleep($sleep_sec) if %mirrors;
+          next;
         }
       }
+
+      $download_ok = 1;
       last;
     }
 
+    if ($download_ok) {
+      if (-s $path_content) {
+        $content = read_content($path_content, 1); # binary
+        $preserve_files{$path_content} = 1;
+      }
+      if (-s $path_sha512) {
+        $SHA512 = read_content($path_sha512, 0); # ascii
+        $preserve_files{$path_sha512} = 1;
+      }
+      if (-s $path_sha256) {
+        $SHA256 = read_content($path_sha256, 0); # ascii
+        $preserve_files{$path_sha256} = 1;
+      }
+      if (-s $path_asc) {
+        $GPG = read_content($path_asc, 0); # ascii
+        $preserve_files{$path_asc} = 1;
+      }
+    }
   }
 
   unless ($content && ( $SHA512 || $SHA256 ) && (!$GPG_ENABLED || $GPG)) {
