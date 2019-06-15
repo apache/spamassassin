@@ -1343,9 +1343,9 @@ sub taint_safe_archive_extract {
         $content =~ s/\@\@([^\@]+)\@\@/$MACRO_VALUES{$1} || "\@\@$1\@\@"/ge;
 
         # also, if --allowplugins is not specified, comment out
-        # all loadplugin or tryplugin lines
+        # all loadplugin or tryplugin lines (and others that can load code)
         if ( !$opt{'allowplugins'} ) {
-          $content =~ s{^\s*((?:load|try)plugin|bayes_store_module|auto_whitelist_factory)\b}
+          $content =~ s{^\s*((?:load|try)plugin|\S+_modules?|\S+_factory)\s}
             {#(commented by sa-update, no --allowplugins switch specified)# $1}gmx;
         }
 
