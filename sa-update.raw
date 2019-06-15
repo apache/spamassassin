@@ -785,15 +785,17 @@ foreach my $channel (@channels) {
         $preserve_files{$result_fname} = 1;
       }
 
-      # SHA256 of the archive file
-      ($result_fname, $http_ok) = http_get("$mirror/$newV.tar.gz.sha256", $UPDDir);
-      if (!$http_ok || !-s $result_fname) {
-        undef $SHA256;
-        dbg("channel: No sha256 file available from $mirror");
-      } else {
-        $SHA256 = read_content($result_fname, 0);
-        last unless $SHA256;
-        $preserve_files{$result_fname} = 1;
+      # SHA256 of the archive file (only if SHA512 not found)
+      if (!$SHA512) {
+        ($result_fname, $http_ok) = http_get("$mirror/$newV.tar.gz.sha256", $UPDDir);
+        if (!$http_ok || !-s $result_fname) {
+          undef $SHA256;
+          dbg("channel: No sha256 file available from $mirror");
+        } else {
+          $SHA256 = read_content($result_fname, 0);
+          last unless $SHA256;
+          $preserve_files{$result_fname} = 1;
+        }
       }
 
       # if GPG is enabled, the GPG detached signature of the archive file
@@ -1558,7 +1560,7 @@ sub http_get {
     push(@args, qw(-q -n -a -w 20 -m -o), $out_fname_short);
     push(@args, '-m')  if $out_fname_exists && !$force_reload;
   } elsif ($have_lwp) {
-    dbg("http: no external tool for download, fallback to using LWP");
+    dbg("http: no external tool for download, fallback to using LWP") if !$opt{'httputil'};
     my $ims;
     if ($out_fname_exists && !$force_reload) {
       my @out_fname_stat = stat($out_fname);
