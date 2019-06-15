@@ -188,6 +188,7 @@ GetOptions(
   'verbose|v+'                          => \$opt{'verbose'},
   'checkonly'                           => \$opt{'checkonly'},
   'allowplugins'                        => \$opt{'allowplugins'},
+  'reallyallowplugins'                  => \$opt{'reallyallowplugins'},
   'refreshmirrors'                      => \$opt{'refreshmirrors'},
   'httputil=s'                          => \$opt{'httputil'},
 
@@ -217,6 +218,12 @@ if ( defined $opt{'help'} ) {
 if ( defined $opt{'version'} ) {            
   print_version();
   exit(0);
+}
+
+if ( $opt{'allowplugins'} && !$opt{'reallyallowplugins'} ) {
+  warn "Security warning: dangerous option --allowplugins used:\n".
+       "- there should never be need to use this option, see man sa-update(1)\n".
+       "- specify --reallyallowplugins to allow activating plugins\n";
 }
 
 if ( $opt{'force_pf'} && $opt{'force_pf'} eq 'inet' && !$have_inet4 ) {
@@ -2046,7 +2053,11 @@ activate plugins; any C<loadplugin> or C<tryplugin> lines will be commented
 in the downloaded update rules files.
 
 You should never enable this for 3rd party update channels, since plugins
-can execute unrestricted code on your system!
+can execute unrestricted code on your system, even possibly as root! This
+includes spamassassin official updates, which have no need to include
+running code.
+
+Use --reallyallowplugins option to bypass warnings and make it work.
 
 =item B<--gpg>, B<--nogpg>
 
