@@ -30,6 +30,7 @@ our @ISA = qw(Mail::SpamAssassin::Plugin);
 
 my $ARITH_EXPRESSION_LEXER = ARITH_EXPRESSION_LEXER;
 my $RULENAME_RE = RULENAME_RE;
+my $META_RULES_MATCHING_RE = META_RULES_MATCHING_RE;
 
 # methods defined by the compiled ruleset; deleted in finish_tests()
 our @TEMPORARY_METHODS;
@@ -525,6 +526,30 @@ sub add_temporary_method {
 
 ###########################################################################
 
+# Returns all rulenames matching glob (FOO_*)
+sub expand_ruleglob {
+  my ($self, $ruleglob, $pms, $conf, $rulename) = @_;
+  my $expanded;
+  if (exists $pms->{ruleglob_cache}{$ruleglob}) {
+    $expanded = $pms->{ruleglob_cache}{$ruleglob};
+  } else {
+    my $reglob = $ruleglob;
+    $reglob =~ s/\?/./g;
+    $reglob =~ s/\*/.*?/g;
+    # Glob rules, but do not match ourselves..
+    my @rules = grep {/^${reglob}$/ && $_ ne $rulename} keys %{$conf->{scores}};
+    if (@rules) {
+      $expanded = join('+', sort @rules);
+    } else {
+      $expanded = '0';
+    }
+  }
+  my $logstr = $expanded eq '0' ? 'no matches' : $expanded;
+  dbg("rules: meta $rulename rules_matching($ruleglob) expanded: $logstr");
+  $pms->{ruleglob_cache}{$ruleglob} = $expanded;
+  return " ($expanded) ";
+};
+
 sub do_meta_tests {
   my ($self, $pms, $priority) = @_;
   my (%rule_deps, %meta, $rulename);
@@ -537,6 +562,9 @@ sub do_meta_tests {
     loop_body => sub
   {
     my ($self, $pms, $conf, $rulename, $rule, %opts) = @_;
+
+    # Expand meta rules_matching() before lexing
+    $rule =~ s/${META_RULES_MATCHING_RE}/$self->expand_ruleglob($1,$pms,$conf,$rulename)/ge;
 
     # Lex the rule into tokens using a rather simple RE method ...
     my @tokens = ($rule =~ /$ARITH_EXPRESSION_LEXER/og);
