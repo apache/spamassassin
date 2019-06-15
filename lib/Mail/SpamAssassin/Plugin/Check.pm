@@ -528,7 +528,7 @@ sub add_temporary_method {
 
 # Returns all rulenames matching glob (FOO_*)
 sub expand_ruleglob {
-  my ($self, $ruleglob, $pms, $conf) = @_;
+  my ($self, $ruleglob, $pms, $conf, $rulename) = @_;
   my $expanded;
   if (exists $pms->{ruleglob_cache}{$ruleglob}) {
     $expanded = $pms->{ruleglob_cache}{$ruleglob};
@@ -564,7 +564,7 @@ sub do_meta_tests {
     my ($self, $pms, $conf, $rulename, $rule, %opts) = @_;
 
     # Expand meta rules_matching() before lexing
-    $rule =~ s/${META_RULES_MATCHING_RE}/$self->expand_ruleglob($1,$pms,$conf)/ge;
+    $rule =~ s/${META_RULES_MATCHING_RE}/$self->expand_ruleglob($1,$pms,$conf,$rulename)/ge;
 
     # Lex the rule into tokens using a rather simple RE method ...
     my @tokens = ($rule =~ /$ARITH_EXPRESSION_LEXER/og);
