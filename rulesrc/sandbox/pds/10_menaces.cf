@@ -27,3 +27,8 @@ meta     PDS_DBL_URL_ILLEGAL_CHARS SUBJ_ILLEGAL_CHARS && __PDS_DOUBLE_URL
 describe PDS_DBL_URL_ILLEGAL_CHARS Double url illegal subject characters
 score    PDS_DBL_URL_ILLEGAL_CHARS 2.0
 reuse    PDS_DBL_URL_ILLEGAL_CHARS
+
+meta     FROM_2_EMAILS_SHORT __LCL__KAM_BODY_LENGTH_LT_512 && __PDS_FROM_2_EMAILS
+describe FROM_2_EMAILS_SHORT Short body and From looks like 2 different emails
+score    FROM_2_EMAILS_SHORT 2.0 # limit
+reuse    FROM_2_EMAILS_SHORT
