@@ -33,6 +33,7 @@ my @doc = ();
 my $cache = 'ruleqa.cache.';
 my $submitters = '';
 my $last_net;
+my %outputs;
 
 if (!$FROM_CACHE || !-f "${cache}net" || (-M "${cache}net") > 0.5) {
   my $neturl = $cgi_url."last-net?xml=1";
@@ -269,8 +270,7 @@ foreach my $netrule (sort keys %{$netlist}) {
   next;
 publish:
 
-  print "\n# $notes\n$name\n";
-
+  $outputs{$name} = $notes unless defined $outputs{$name};
 }
 
 # base most of our decisions off day 1 (last night's mass-checks)
@@ -359,7 +359,11 @@ foreach my $plistkey (sort keys %{$plist->[1]}) {
 
 publish:
 
-  print "\n# $notes\n$name\n";
+  $outputs{$name} = $notes unless defined $outputs{$name};
+}
+
+foreach my $key (sort(keys %outputs)) {
+  print "\n# ", $outputs{$key}, "\n", $key, "\n";
 }
 exit;
 
