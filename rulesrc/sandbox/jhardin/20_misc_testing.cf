@@ -1501,7 +1501,7 @@ tflags      URI_WP_DIRINDEX    publish
 
 # this has some overlap with URI_WP_HACKED
 uri         __PS_TEST_LOC_WP   m;/(?:wp-content/plugins|wp-content/themes|wp-includes|modules/mod_wdbanners|includes/|google_recommends|mt-static|data/module)/.{1,128}(?!\.gif|\.jpg|\.png|\.bmp|\.ico|\.pdf)[^?]{4}(?:\?[^?]{1,5})?$;i
-meta        URI_WP_HACKED_2    (__PS_TEST_LOC_WP && !URI_WP_HACKED) && !__TO_EQ_FROM && !__THREADED && !__USING_VERP1 
+meta        URI_WP_HACKED_2    (__PS_TEST_LOC_WP && !URI_WP_HACKED) && !__HAS_LIST_ID && !__THREADED && !__USING_VERP1 
 describe    URI_WP_HACKED_2    URI for compromised WordPress site, possible malware
 score       URI_WP_HACKED_2    2.500   # limit
 tflags      URI_WP_HACKED_2    publish
@@ -1605,7 +1605,7 @@ meta        __HEXHASH_2        __HEXHASHWORD_S2EU > 1
 meta        __HEXHASH_3        __HEXHASHWORD_S2EU > 2
 meta        __HEXHASH_4        __HEXHASHWORD_S2EU > 3
 #meta        __HEXHASH_5        __HEXHASHWORD_S2EU > 4
-meta        HEXHASH_WORD       (__HEXHASHWORD_S2EU > 1) && !ALL_TRUSTED && !__LYRIS_EZLM_REMAILER && !__MSGID_HEXISH && !__RDNS_SHORT && !__CTYPE_MULTIPART_MIXED && !__RCD_RDNS_MAIL && !__HAS_X_REF 
+meta        HEXHASH_WORD       (__HEXHASHWORD_S2EU > 1) && !ALL_TRUSTED && !__LYRIS_EZLM_REMAILER && !__MSGID_HEXISH && !__RDNS_SHORT && !__CTYPE_MULTIPART_MIXED && !__HAS_X_REF && !__HAS_IMG_SRC_ONECASE
 describe    HEXHASH_WORD       Multiple instances of word + hexadecimal hash
 score       HEXHASH_WORD       3.000	# limit
 tflags      HEXHASH_WORD       publish
@@ -2384,7 +2384,7 @@ header     __FROM_WORDY                From:addr =~ /^(?:(?:[A-Z][A-Za-z]+|or|&)
 header     __FROM_WORDY_3              From:addr =~ /(?:(?:[A-Z][A-Za-z]+|or|&)\.){2,}[A-Z][A-Za-z]+\@/
 
 meta       __FROM_WORDY_SONLY          __FROM_WORDY && (__XPRIO_MINFP || __TO_NO_BRKTS_MSFT || __FILL_THIS_FORM_SHORT || __HAS_MSMAIL_PRI || DEAR_FRIEND ||  __TO_NO_BRKTS_FROM_MSSP || FREEMAIL_REPLYTO )
-meta       FROM_WORDY                  ((__FROM_WORDY_SONLY && !__DKIM_EXISTS) || __FROM_WORDY_3) && !__HAS_TNEF && !__USING_VERP1 && !__HAS_THREAD_INDEX && !__HAS_LIST_ID && !__RCD_RDNS_MTA 
+meta       FROM_WORDY                  ((__FROM_WORDY_SONLY && !__DKIM_EXISTS) || __FROM_WORDY_3) && !__HAS_TNEF && !__USING_VERP1 && !__HAS_THREAD_INDEX && !__HAS_LIST_ID && !__RCD_RDNS_MTA  && !__RCD_RDNS_MX 
 describe   FROM_WORDY                  From address looks like a sentence
 score      FROM_WORDY                  2.500	# limit
 tflags     FROM_WORDY                  publish

@@ -140,6 +140,7 @@ tflags   KHOP_HELO_AS_VICTIM    nopublish # confirm license with author first fo
 
 meta     HELO_NO_DOMAIN	__HELO_NO_DOMAIN && !HELO_LOCALHOST
 describe HELO_NO_DOMAIN	Relay reports its domain incorrectly
+tflags   HELO_NO_DOMAIN	publish
 #score	 HELO_NO_DOMAIN	2.375 0.327 1.497 0.884
 # scores derived from 90% of RDNS_DYNAMIC's sa3.3 proposal (attachment 4565)
 # because they have such similar definitions, numbers, and merits
