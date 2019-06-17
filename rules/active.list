@@ -2,429 +2,6 @@
 # active ruleset list, automatically generated from https://ruleqa.spamassassin.org/
 # with results from: last-net: net-axb-coi-bulk net-axb-generic net-axb-ham-misc net-darxus net-ena-week0 net-ena-week1 net-ena-week2 net-ena-week3 net-ena-week4 net-giovanni-ham net-giovanni-spam net-giovanni-spammy net-grenier net-hege net-jarif net-jbrooks net-llanga net-mmiroslaw-mails-ham net-mmiroslaw-mails-spam net-npiazzi net-pds net-sihde net-spamsponge net-thendrikx; day 1: axb-coi-bulk axb-generic axb-ham-misc darxus ena-week0 ena-week1 ena-week2 ena-week3 ena-week4 giovanni-ham giovanni-spam giovanni-spammy grenier hege jarif jbrooks llanga mmiroslaw-mails-ham mmiroslaw-mails-spam npiazzi pds sihde spamsponge thendrikx; day 2: axb-coi-bulk axb-generic axb-ham-misc darxus ena-week0 ena-week1 ena-week2 ena-week3 ena-week4 giovanni-ham giovanni-spam giovanni-spammy grenier hege jarif jbrooks llanga mmiroslaw-mails-ham mmiroslaw-mails-spam npiazzi pds sihde spamsponge thendrikx; day 3: axb-coi-bulk axb-generic axb-ham-misc darxus ena-week0 ena-week1 ena-week2 ena-week3 ena-week4 giovanni-ham giovanni-spam giovanni-spammy grenier hege jarif jbrooks llanga mmiroslaw-mails-ham mmiroslaw-mails-spam npiazzi pds sihde spamsponge thendrikx
 
-# tflags net
-BITCOIN_SPF_ONLYALL
-
-# tflags net
-DIGEST_MULTIPLE
-
-# tflags net
-DKIMWL_BL
-
-# tflags net
-DKIMWL_BLOCKED
-
-# tflags net
-DKIMWL_WL_HIGH
-
-# tflags net
-DKIMWL_WL_MED
-
-# tflags net
-DKIMWL_WL_MEDHI
-
-# tflags net
-DKIM_ADSP_ALL
-
-# tflags net
-DKIM_ADSP_CUSTOM_HIGH
-
-# tflags net
-DKIM_ADSP_CUSTOM_LOW
-
-# tflags net
-DKIM_ADSP_CUSTOM_MED
-
-# tflags net
-DKIM_ADSP_DISCARD
-
-# tflags net
-DKIM_ADSP_NXDOMAIN
-
-# tflags net
-DKIM_SIGNED
-
-# tflags net
-DKIM_VALID
-
-# tflags net
-DKIM_VALID_AU
-
-# tflags net
-DKIM_VALID_EF
-
-# tflags net
-ENV_AND_HDR_SPF_MATCH
-
-# tflags net
-FROM_BANK_NOAUTH
-
-# tflags net
-FROM_FMBLA_NDBLOCKED
-
-# tflags net
-FROM_FMBLA_NEWDOM
-
-# tflags net
-FROM_FMBLA_NEWDOM14
-
-# tflags net
-FROM_FMBLA_NEWDOM28
-
-# tflags net
-FROM_GOV_DKIM_AU
-
-# tflags net
-FROM_GOV_REPLYTO_FREEMAIL
-
-# tflags net
-FROM_GOV_SPOOF
-
-# tflags net
-FROM_MISSP_SPF_FAIL
-
-# tflags net
-FROM_NUMBERO_NEWDOMAIN
-
-# tflags net
-FROM_PAYPAL_SPOOF
-
-# tflags net
-FSL_BULK_SIG
-
-# tflags net
-NO_DNS_FOR_FROM
-
-# tflags net
-PYZOR_CHECK
-
-# tflags net
-RAZOR2_CF_RANGE_51_100
-
-# tflags net
-RAZOR2_CHECK
-
-# tflags net
-RCVD_IN_BL_SPAMCOP_NET
-
-# tflags net
-RCVD_IN_DNSWL_BLOCKED
-
-# tflags net
-RCVD_IN_DNSWL_HI
-
-# tflags net
-RCVD_IN_DNSWL_LOW
-
-# tflags net
-RCVD_IN_DNSWL_MED
-
-# tflags net
-RCVD_IN_DNSWL_NONE
-
-# tflags net
-RCVD_IN_IADB_DK
-
-# tflags net
-RCVD_IN_IADB_DOPTIN
-
-# tflags net
-RCVD_IN_IADB_DOPTIN_GT50
-
-# tflags net
-RCVD_IN_IADB_DOPTIN_LT50
-
-# tflags net
-RCVD_IN_IADB_EDDB
-
-# tflags net
-RCVD_IN_IADB_EPIA
-
-# tflags net
-RCVD_IN_IADB_GOODMAIL
-
-# tflags net
-RCVD_IN_IADB_LISTED
-
-# tflags net
-RCVD_IN_IADB_LOOSE
-
-# tflags net
-RCVD_IN_IADB_MI_CPEAR
-
-# tflags net
-RCVD_IN_IADB_MI_CPR_30
-
-# tflags net
-RCVD_IN_IADB_MI_CPR_MAT
-
-# tflags net
-RCVD_IN_IADB_ML_DOPTIN
-
-# tflags net
-RCVD_IN_IADB_NOCONTROL
-
-# tflags net
-RCVD_IN_IADB_OOO
-
-# tflags net
-RCVD_IN_IADB_OPTIN
-
-# tflags net
-RCVD_IN_IADB_OPTIN_GT50
-
-# tflags net
-RCVD_IN_IADB_OPTIN_LT50
-
-# tflags net
-RCVD_IN_IADB_OPTOUTONLY
-
-# tflags net
-RCVD_IN_IADB_RDNS
-
-# tflags net
-RCVD_IN_IADB_SENDERID
-
-# tflags net
-RCVD_IN_IADB_SPF
-
-# tflags net
-RCVD_IN_IADB_UNVERIFIED_1
-
-# tflags net
-RCVD_IN_IADB_UNVERIFIED_2
-
-# tflags net
-RCVD_IN_IADB_UT_CPEAR
-
-# tflags net
-RCVD_IN_IADB_UT_CPR_30
-
-# tflags net
-RCVD_IN_IADB_UT_CPR_MAT
-
-# tflags net
-RCVD_IN_IADB_VOUCHED
-
-# tflags net
-RCVD_IN_MAPS_DUL
-
-# tflags net
-RCVD_IN_MAPS_NML
-
-# tflags net
-RCVD_IN_MAPS_OPS
-
-# tflags net
-RCVD_IN_MAPS_RBL
-
-# tflags net
-RCVD_IN_MAPS_RSS
-
-# tflags net
-RCVD_IN_MSPIKE_BL
-
-# tflags net
-RCVD_IN_MSPIKE_H2
-
-# tflags net
-RCVD_IN_MSPIKE_H3
-
-# tflags net
-RCVD_IN_MSPIKE_H4
-
-# tflags net
-RCVD_IN_MSPIKE_H5
-
-# tflags net
-RCVD_IN_MSPIKE_L2
-
-# tflags net
-RCVD_IN_MSPIKE_L3
-
-# tflags net
-RCVD_IN_MSPIKE_L4
-
-# tflags net
-RCVD_IN_MSPIKE_L5
-
-# tflags net
-RCVD_IN_MSPIKE_WL
-
-# tflags net
-RCVD_IN_MSPIKE_ZBI
-
-# tflags net
-RCVD_IN_PBL
-
-# tflags net
-RCVD_IN_PSBL
-
-# tflags net
-RCVD_IN_RP_CERTIFIED
-
-# tflags net
-RCVD_IN_RP_RNBL
-
-# tflags net
-RCVD_IN_RP_SAFE
-
-# tflags net
-RCVD_IN_SBL
-
-# tflags net
-RCVD_IN_SBL_CSS
-
-# tflags net
-RCVD_IN_SORBS_BLOCK
-
-# tflags net
-RCVD_IN_SORBS_DUL
-
-# tflags net
-RCVD_IN_SORBS_HTTP
-
-# tflags net
-RCVD_IN_SORBS_MISC
-
-# tflags net
-RCVD_IN_SORBS_SMTP
-
-# tflags net
-RCVD_IN_SORBS_SOCKS
-
-# tflags net
-RCVD_IN_SORBS_WEB
-
-# tflags net
-RCVD_IN_SORBS_ZOMBIE
-
-# tflags net
-RCVD_IN_XBL
-
-# tflags net
-SPF_FAIL
-
-# tflags net
-SPF_HELO_FAIL
-
-# tflags net
-SPF_HELO_NEUTRAL
-
-# tflags net
-SPF_HELO_NONE
-
-# tflags net
-SPF_HELO_PASS
-
-# tflags net
-SPF_HELO_SOFTFAIL
-
-# tflags net
-SPF_NEUTRAL
-
-# tflags net
-SPF_NONE
-
-# tflags net
-SPF_PASS
-
-# tflags net
-SPF_SOFTFAIL
-
-# tflags net
-SURBL_BLOCKED
-
-# tflags net
-TO_EQ_FM_DOM_SPF_FAIL
-
-# tflags net
-TO_EQ_FM_SPF_FAIL
-
-# tflags net
-URIBL_ABUSE_SURBL
-
-# tflags net
-URIBL_BLACK
-
-# tflags net
-URIBL_BLOCKED
-
-# tflags net
-URIBL_CR_SURBL
-
-# tflags net
-URIBL_CSS
-
-# tflags net
-URIBL_CSS_A
-
-# tflags net
-URIBL_DBL_ABUSE_BOTCC
-
-# tflags net
-URIBL_DBL_ABUSE_MALW
-
-# tflags net
-URIBL_DBL_ABUSE_PHISH
-
-# tflags net
-URIBL_DBL_ABUSE_REDIR
-
-# tflags net
-URIBL_DBL_ABUSE_SPAM
-
-# tflags net
-URIBL_DBL_BOTNETCC
-
-# tflags net
-URIBL_DBL_ERROR
-
-# tflags net
-URIBL_DBL_MALWARE
-
-# tflags net
-URIBL_DBL_PHISH
-
-# tflags net
-URIBL_DBL_SPAM
-
-# tflags net
-URIBL_GREY
-
-# tflags net
-URIBL_MW_SURBL
-
-# tflags net
-URIBL_PH_SURBL
-
-# tflags net
-URIBL_RED
-
-# tflags net
-URIBL_RHS_DOB
-
-# tflags net
-URIBL_SBL
-
-# tflags net
-URIBL_SBL_A
-
-# tflags net
-URIBL_WS_SURBL
-
-# tflags net
-USER_IN_DEF_DKIM_WL
-
-# tflags net
-USER_IN_DEF_SPF_WL
-
-# tflags net
-USER_IN_DKIM_WHITELIST
-
-# tflags net
-USER_IN_SPF_WHITELIST
-
 # tflags publish
 AC_BR_BONANZA
 
@@ -511,6 +88,9 @@ ALL_TRUSTED
 
 # tflags publish
 AMAZON_IMG_NOT_RCVD_AMZN
+
+# good enough
+ANY_PILL_PRICE
 
 # tflags publish
 APP_DEVELOPMENT_FREEM
@@ -602,7 +182,7 @@ BITCOIN_SPAM_11
 # tflags publish
 BITCOIN_SPAM_12
 
-# tflags publish
+# tflags net
 BITCOIN_SPF_ONLYALL
 
 # good enough
@@ -653,25 +233,37 @@ CN_B2B_SPAMMER
 # tflags publish
 COMMENT_GIBBERISH
 
+# good enough
+COMPENSATION
+
 # tflags publish
 CORRUPT_FROM_LINE_IN_HDRS
+
+# good enough
+CTYPE_NULL
+
+# good enough
+DATE_IN_FUTURE_96_Q
+
+# good enough
+DEAR_BENEFICIARY
 
 # tflags net
 DIGEST_MULTIPLE
 
-# tflags publish
+# tflags net
 DKIMWL_BL
 
-# tflags publish
+# tflags net
 DKIMWL_BLOCKED
 
-# tflags publish
+# tflags net
 DKIMWL_WL_HIGH
 
-# tflags publish
+# tflags net
 DKIMWL_WL_MED
 
-# tflags publish
+# tflags net
 DKIMWL_WL_MEDHI
 
 # tflags net
@@ -725,7 +317,7 @@ EBAY_IMG_NOT_RCVD_EBAY
 # tflags publish
 ENCRYPTED_MESSAGE
 
-# tflags userconf
+# tflags net
 ENV_AND_HDR_SPF_MATCH
 
 # good enough
@@ -739,6 +331,12 @@ FBI_SPOOF
 
 # tflags publish
 FILL_THIS_FORM
+
+# good enough
+FILL_THIS_FORM_LOAN
+
+# good enough
+FILL_THIS_FORM_LONG
 
 # tflags publish
 FORGED_MUA_POSTFIX
@@ -764,6 +362,9 @@ FOUND_YOU
 # tflags userconf
 FRAGMENTED_MESSAGE
 
+# good enough
+FREEMAIL_DISPTO
+
 # tflags publish
 FREEMAIL_FORGED_FROMDOMAIN
 
@@ -779,31 +380,31 @@ FROMSPACE
 # tflags publish
 FROM_ADDR_WS
 
-# tflags publish
+# tflags net
 FROM_BANK_NOAUTH
 
 # tflags userconf
 FROM_DOMAIN_NOVOWEL
 
-# tflags publish
+# tflags net
 FROM_FMBLA_NDBLOCKED
 
 # tflags net
 FROM_FMBLA_NEWDOM
 
-# tflags publish
+# tflags net
 FROM_FMBLA_NEWDOM14
 
-# tflags publish
+# tflags net
 FROM_FMBLA_NEWDOM28
 
-# tflags publish
+# tflags net
 FROM_GOV_DKIM_AU
 
-# tflags publish
+# tflags net
 FROM_GOV_REPLYTO_FREEMAIL
 
-# tflags publish
+# tflags net
 FROM_GOV_SPOOF
 
 # tflags publish
@@ -816,7 +417,13 @@ FROM_LOCAL_NOVOWEL
 FROM_MISSPACED
 
 # good enough
+FROM_MISSP_DYNIP
+
+# good enough
 FROM_MISSP_EH_MATCH
+
+# good enough
+FROM_MISSP_FREEMAIL
 
 # good enough
 FROM_MISSP_MSFT
@@ -848,13 +455,13 @@ FROM_NTLD_LINKBAIT
 # tflags publish
 FROM_NTLD_REPLY_FREEMAIL
 
-# tflags publish
+# tflags net
 FROM_NUMBERO_NEWDOMAIN
 
 # good enough
 FROM_NUMERIC_TLD
 
-# tflags publish
+# tflags net
 FROM_PAYPAL_SPOOF
 
 # tflags publish
@@ -869,7 +476,7 @@ FROM_WORDY_SHORT
 # good enough
 FROM_WSP_TRAIL
 
-# tflags publish
+# tflags net
 FSL_BULK_SIG
 
 # good enough
@@ -978,6 +585,9 @@ HASHCASH_2SPEND
 HASHCASH_HIGH
 
 # good enough
+HDRS_LCASE
+
+# good enough
 HDRS_LCASE_IMGONLY
 
 # tflags publish
@@ -1003,6 +613,12 @@ HEXHASH_WORD
 
 # good enough
 HK_NAME_DRUGS
+
+# good enough
+HK_NAME_FM_MR_MRS
+
+# good enough
+HK_NAME_MR_MRS
 
 # good enough
 HK_RANDOM_ENVFROM
@@ -1079,8 +695,14 @@ LONG_IMG_URI
 # tflags publish
 LOTS_OF_MONEY
 
+# good enough
+LOTTO_AGENT
+
 # tflags publish
 LUCRATIVE
+
+# good enough
+MALFORMED_FREEMAIL
 
 # tflags publish
 MALF_HTML_B64
@@ -1170,7 +792,19 @@ OBFU_JVSCR_ESC
 OBFU_TEXT_ATTACH
 
 # good enough
+OFFER_ONLY_AMERICA
+
+# good enough
 ONLINE_MKTG_CNSLT
+
+# good enough
+PDS_DBL_URL_ILLEGAL_CHARS
+
+# good enough
+PDS_DBL_URL_LINKBAIT
+
+# good enough
+PDS_DBL_URL_TNB_RUNON
 
 # good enough
 PDS_HIDDEN_UK_BUSINESSLOAN
@@ -1182,7 +816,16 @@ PDS_PHP_EVAL
 PDS_PHP_RUNTIME_FUNC
 
 # good enough
+PDS_TO_EQ_FROM_NAME
+
+# good enough
 PDS_X_PHP_WP_EXP
+
+# good enough
+PHOTO_EDITING_DIRECT
+
+# good enough
+PHOTO_EDITING_FREEM
 
 # tflags publish
 PHP_NOVER_MUA
@@ -1475,7 +1118,7 @@ SPF_HELO_NEUTRAL
 # tflags net
 SPF_HELO_NONE
 
-# tflags userconf
+# tflags net
 SPF_HELO_PASS
 
 # tflags net
@@ -1487,7 +1130,7 @@ SPF_NEUTRAL
 # tflags net
 SPF_NONE
 
-# tflags userconf
+# tflags net
 SPF_PASS
 
 # tflags net
@@ -1607,69 +1250,6 @@ TVD_VISIT_PHARMA
 # tflags publish
 TW_GIBBERISH_MANY
 
-# good enough
-ANY_PILL_PRICE
-
-# good enough
-COMPENSATION
-
-# good enough
-CTYPE_NULL
-
-# good enough
-DATE_IN_FUTURE_96_Q
-
-# good enough
-DEAR_BENEFICIARY
-
-# good enough
-FILL_THIS_FORM_LOAN
-
-# good enough
-FILL_THIS_FORM_LONG
-
-# good enough
-FREEMAIL_DISPTO
-
-# good enough
-FROM_MISSP_FREEMAIL
-
-# good enough
-HDRS_LCASE
-
-# good enough
-HK_NAME_FM_MR_MRS
-
-# good enough
-HK_NAME_MR_MRS
-
-# good enough
-LOTTO_AGENT
-
-# good enough
-OFFER_ONLY_AMERICA
-
-# good enough
-PDS_DBL_URL_ILLEGAL_CHARS
-
-# good enough
-PDS_DBL_URL_LINKBAIT
-
-# good enough
-PDS_DBL_URL_TNB_RUNON
-
-# good enough
-PDS_TO_EQ_FROM_NAME
-
-# good enough
-PHOTO_EDITING_DIRECT
-
-# good enough
-PHOTO_EDITING_FREEM
-
-# good enough
-ZW_OBFU_BITCOIN
-
 # tflags publish
 UC_GIBBERISH_OBFU
 
@@ -1766,6 +1346,9 @@ URI_DQ_UNSUB
 # tflags publish
 URI_GOOGLE_PROXY
 
+# good enough
+URI_HEX_IP
+
 # tflags userconf
 URI_HOST_IN_BLACKLIST
 
@@ -1820,7 +1403,7 @@ USER_IN_BLACKLIST_TO
 # tflags net
 USER_IN_DEF_DKIM_WL
 
-# tflags userconf
+# tflags net
 USER_IN_DEF_SPF_WL
 
 # tflags userconf
@@ -1832,7 +1415,7 @@ USER_IN_DKIM_WHITELIST
 # tflags userconf
 USER_IN_MORE_SPAM_TO
 
-# tflags userconf
+# tflags net
 USER_IN_SPF_WHITELIST
 
 # tflags userconf
@@ -1855,6 +1438,9 @@ XPRIO_SHORT_SUBJ
 
 # good enough
 YOU_INHERIT
+
+# good enough
+ZW_OBFU_BITCOIN
 
 # tflags net
 __DKIMWL_BLOCKED
