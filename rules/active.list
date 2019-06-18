@@ -44,9 +44,6 @@ AC_SPAMMY_URI_PATTERNS9
 # tflags publish
 ADMAIL
 
-# good enough
-ADMITS_SPAM
-
 # tflags publish
 ADVANCE_FEE_2_NEW_FORM
 
@@ -341,9 +338,6 @@ FILL_THIS_FORM_LONG
 # tflags publish
 FORGED_MUA_POSTFIX
 
-# good enough
-FORGED_RELAY_MUA_TO_MX
-
 # tflags publish
 FORM_FRAUD
 
@@ -376,6 +370,9 @@ FRNAME_IN_MSG_XPRIO_NO_SUB
 
 # good enough
 FROMSPACE
+
+# good enough
+FROM_2_EMAILS_SHORT
 
 # tflags publish
 FROM_ADDR_WS
@@ -585,9 +582,6 @@ HASHCASH_2SPEND
 HASHCASH_HIGH
 
 # good enough
-HDRS_LCASE
-
-# good enough
 HDRS_LCASE_IMGONLY
 
 # tflags publish
@@ -607,6 +601,9 @@ HELO_LOCALHOST
 
 # good enough
 HELO_MISC_IP
+
+# tflags publish
+HELO_NO_DOMAIN
 
 # tflags publish
 HEXHASH_WORD
@@ -646,6 +643,9 @@ HOSTED_IMG_DQ_UNSUB
 
 # tflags publish
 HOSTED_IMG_FREEM
+
+# good enough
+HTML_ATTACH
 
 # tflags userconf
 HTML_CHARSET_FARAWAY
@@ -709,6 +709,9 @@ MALF_HTML_B64
 
 # tflags publish
 MANY_SPAN_IN_TEXT
+
+# good enough
+MILLION_USD
 
 # tflags publish
 MIMEOLE_DIRECT_TO_MX
@@ -1345,9 +1348,6 @@ URI_DQ_UNSUB
 
 # tflags publish
 URI_GOOGLE_PROXY
-
-# good enough
-URI_HEX_IP
 
 # tflags userconf
 URI_HOST_IN_BLACKLIST
