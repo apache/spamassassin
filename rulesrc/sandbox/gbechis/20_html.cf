@@ -1,2 +1,2 @@
-rawbody       T_HIDDEN_WORD             /[a-z]+<div style="display: none">.{1,20}<\/div>[a-z]+/i
+rawbody       T_HIDDEN_WORD             /<div style="display:\s?none.{1,200}>/i
 describe      T_HIDDEN_WORD             hidden word
