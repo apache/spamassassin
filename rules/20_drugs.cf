@@ -47,8 +47,9 @@ describe SUBJECT_DRUG_GAP_L	Subject contains a gappy version of 'levitra'
 header SUBJECT_DRUG_GAP_S	Subject =~ /\bs.{0,1}o.{0,1}m.{0,1}a\b/i
 describe SUBJECT_DRUG_GAP_S	Subject contains a gappy version of 'soma'
 
-header SUBJECT_DRUG_GAP_VA	Subject =~ /v.{0,2}a.{0,2}l.{0,2}i.{0,2}u.{0,2}m/i
-describe SUBJECT_DRUG_GAP_VA	Subject contains a gappy version of 'valium'
+# Bug 5396 - Hits visa and random finnish words
+#header SUBJECT_DRUG_GAP_VA	Subject =~ /v.{0,2}a.{0,2}l.{0,2}i.{0,2}u.{0,2}m/i
+#describe SUBJECT_DRUG_GAP_VA	Subject contains a gappy version of 'valium'
 
 
 header SUBJECT_DRUG_GAP_X	Subject =~ /x.{0,2}a.{0,2}n.{0,2}a.{0,2}x/i
