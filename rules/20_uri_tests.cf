@@ -41,7 +41,7 @@ redirector_pattern	/^http:\/\/(?:.*?\.)?adtech\.de\/.*(?:;|\|)link=(.*?)(?:;|$)/
 redirector_pattern	m'^http.*?/redirect\.php\?.*(?<=[?&])goto=(.*?)(?:$|[&\#])'i
 redirector_pattern      m'^https?:/*(?:[^/]+\.)?emf\d\.com/r\.cfm.*?&r=(.*)'i
 
-uri NUMERIC_HTTP_ADDR		/^https?\:\/\/\d{7}/is
+uri NUMERIC_HTTP_ADDR		m{^https?://[\d.]+(?:[:/?\#]|$)}i
 describe NUMERIC_HTTP_ADDR	Uses a numeric IP address in URL
 
 # Theo sez:
