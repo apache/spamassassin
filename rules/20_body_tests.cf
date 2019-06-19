@@ -124,8 +124,9 @@ describe __MIME_BASE64		Includes a base64 attachment
 rawbody __MIME_QP		eval:check_for_mime('mime_qp_count')
 describe __MIME_QP		Includes a quoted-printable attachment
 
-rawbody MIME_BASE64_BLANKS	eval:check_for_mime('mime_base64_blanks')
-describe MIME_BASE64_BLANKS	Extra blank lines in base64 encoding
+# No longer used in MIMEEval
+#rawbody MIME_BASE64_BLANKS	eval:check_for_mime('mime_base64_blanks')
+#describe MIME_BASE64_BLANKS	Extra blank lines in base64 encoding
 
 
 rawbody MIME_BASE64_TEXT	eval:check_for_mime('mime_base64_encoded_text')
