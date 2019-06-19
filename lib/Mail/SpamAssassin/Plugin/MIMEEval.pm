@@ -117,7 +117,8 @@ All mainstream MTA's get this right.
 sub check_for_ascii_text_illegal {
   my ($self, $pms) = @_;
 
-  $self->_check_attachments($pms) unless exists $pms->{mime_ascii_text_illegal};
+  $self->_check_attachments($pms) unless exists $pms->{mime_checked_attachments};
+  return 0 unless exists $pms->{mime_ascii_text_illegal};
   return ($pms->{mime_ascii_text_illegal} > 0);
 }
 
@@ -143,7 +144,8 @@ sub check_abundant_unicode_ratio {
   # validate ratio?
   return 0 unless ($ratio =~ /^\d{0,3}\.\d{1,3}$/);
 
-  $self->_check_attachments($pms) unless exists $pms->{mime_text_unicode_ratio};
+  $self->_check_attachments($pms) unless exists $pms->{mime_checked_attachments};
+  return 0 unless exists $pms->{mime_text_unicode_ratio};
   return ($pms->{mime_text_unicode_ratio} >= $ratio);
 }
 
@@ -178,7 +180,8 @@ sub check_for_faraway_charset {
 sub check_for_mime {
   my ($self, $pms, undef, $test) = @_;
 
-  $self->_check_attachments($pms) unless exists $pms->{$test};
+  $self->_check_attachments($pms) unless exists $pms->{mime_checked_attachments};
+  return 0 unless exists $pms->{$test};
   return $pms->{$test};
 }
 
@@ -189,7 +192,8 @@ sub check_for_mime_html {
   my $ctype = $pms->get('Content-Type');
   return 1 if $ctype =~ m{^text/html}i;
 
-  $self->_check_attachments($pms) unless exists $pms->{mime_body_html_count};
+  $self->_check_attachments($pms) unless exists $pms->{mime_checked_attachments};
+  return 0 unless exists $pms->{mime_body_html_count};
   return ($pms->{mime_body_html_count} > 0);
 }
 
@@ -200,7 +204,9 @@ sub check_for_mime_html_only {
   my $ctype = $pms->get('Content-Type');
   return 1 if $ctype =~ m{^text/html}i;
 
-  $self->_check_attachments($pms) unless exists $pms->{mime_body_html_count};
+  $self->_check_attachments($pms) unless exists $pms->{mime_checked_attachments};
+  return 0 unless exists $pms->{mime_body_html_count};
+  return 0 unless exists $pms->{mime_body_text_count};
   return ($pms->{mime_body_html_count} > 0 &&
 	  $pms->{mime_body_text_count} == 0);
 }
@@ -208,8 +214,8 @@ sub check_for_mime_html_only {
 sub check_mime_multipart_ratio {
   my ($self, $pms, undef, $min, $max) = @_;
 
-  $self->_check_attachments($pms) unless exists $pms->{mime_multipart_alternative};
-
+  $self->_check_attachments($pms) unless exists $pms->{mime_checked_attachments};
+  return 0 unless exists $pms->{mime_multipart_ratio};
   return ($pms->{mime_multipart_ratio} >= $min &&
 	  $pms->{mime_multipart_ratio} < $max);
 }
@@ -517,6 +523,7 @@ sub check_qp_ratio {
   my ($self, $pms, undef, $min) = @_;
 
   $self->_check_attachments($pms) unless exists $pms->{mime_checked_attachments};
+  return 0 unless exists $pms->{mime_qp_ratio};
 
   my $qp_ratio = $pms->{mime_qp_ratio};
 
