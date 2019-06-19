@@ -6,11 +6,6 @@ ifplugin Mail::SpamAssassin::Plugin::FreeMail
 endif
 
 ifplugin Mail::SpamAssassin::Plugin::FreeMail
-  meta     FREEMAIL_IADB   ( RCVD_IN_IADB_VOUCHED && ( FORGED_GMAIL_RCVD || FORGED_YAHOO_RCVD ) )
-  describe FREEMAIL_IADB   Forged freemail in IADB
-endif
-
-ifplugin Mail::SpamAssassin::Plugin::FreeMail
   ifplugin Mail::SpamAssassin::Plugin::FromNameSpoof
     header   __FROM_EQ_REPLY         eval:check_fromname_equals_replyto()
     meta     FREEM_FROM_NOT_REPLY    ( !__FROM_EQ_REPLY && FREEMAIL_FROM && FREEMAIL_REPLYTO )
