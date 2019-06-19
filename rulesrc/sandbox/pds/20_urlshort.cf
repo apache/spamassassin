@@ -723,7 +723,12 @@ enlist_uri_host (PDS_URISHORTENER) zurl.ws
 enlist_uri_host (PDS_URISHORTENER) zz.gd
 enlist_uri_host (PDS_URISHORTENER) zzang.kr
 
-header   __PDS_PDS_URISHORTENER eval:check_uri_host_listed('PDS_URISHORTENER')
+header   __PDS_URISHORTENER eval:check_uri_host_listed('PDS_URISHORTENER')
+
+meta     DRUGS_ERECTILE_SHORT_SHORTNER __KAM_BODY_LENGTH_LT_1024 && (__PDS_URISHORTENER || __URL_SHORTENER) && DRUGS_ERECTILE
+describe DRUGS_ERECTILE_SHORT_SHORTNER Short erectile drugs advert with URL_SHORTENER
+score    DRUGS_ERECTILE_SHORT_SHORTNER 1.5 # limit
+reuse    DRUGS_ERECTILE_SHORT_SHORTNER
 
 endif
 endif
