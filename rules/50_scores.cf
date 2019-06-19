@@ -831,11 +831,11 @@ endif # Mail::SpamAssassin::Plugin::URIDNSBL
 ifplugin Mail::SpamAssassin::Plugin::ReplaceTags
 # <gen:mutable>
 score FUZZY_AFFORDABLE 0 # n=0 n=1 n=2 n=3
-score FUZZY_AMBIEN 0.1
+#score FUZZY_AMBIEN 0.1
 score FUZZY_BILLION 0 # n=0 n=1 n=2 n=3
 score FUZZY_CPILL 0.001 0.001 0.001 0.001
 score FUZZY_CREDIT 1.699 1.413 0.601 1.678
-score FUZZY_ERECT 0.1
+#score FUZZY_ERECT 0.1
 score FUZZY_GUARANTEE 0 # n=0 n=1 n=2 n=3
 score FUZZY_MEDICATION 0 # n=0 n=1 n=2 n=3
 score FUZZY_MERIDIA 0 # n=0 n=1 n=2 n=3
@@ -850,7 +850,7 @@ score FUZZY_PRESCRIPT 0 # n=0 n=1 n=2 n=3
 score FUZZY_PRICES 1.821 0.720 2.210 2.311
 score FUZZY_REFINANCE 0 # n=0 n=1 n=2 n=3
 score FUZZY_REMOVE 0 # n=0 n=1 n=2 n=3
-score FUZZY_ROLEX 0.1
+#score FUZZY_ROLEX 0.1
 score FUZZY_SOFTWARE 0 # n=0 n=1 n=2 n=3
 score FUZZY_THOUSANDS 0 # n=0 n=1 n=2 n=3
 score FUZZY_VLIUM 0 # n=0 n=1 n=2 n=3
