@@ -43,7 +43,7 @@ ifplugin Mail::SpamAssassin::Plugin::MIMEHeader
 
 # more general, hits massive amounts of GIF spam
 mimeheader __PART_STOCK_CID Content-ID =~ /^<[a-f0-9]{12}\$[a-f0-9]{8}\$[a-f0-9]{8}\@[^\s\.]+>$/
-mimeheader __ANY_IMAGE_ATTACH Content-Type =~ /\bimage\//
+mimeheader __ANY_IMAGE_ATTACH Content-Type =~ /\bimage\//i
 mimeheader __PART_STOCK_CL Content-Location =~ /./
 mimeheader __PART_STOCK_CD_F Content-Disposition =~ /filename/
 
