@@ -66,8 +66,8 @@ describe RCVD_FORGED_WROTE  Forged 'Received' header found ('wrote:' spam)
 
 header __MIMEOLE_1106   X-MimeOLE =~ /^Produced By Microsoft MimeOLE V6.00.2800.1106$/
 header __MAILER_OL_5510 X-Mailer =~ /^Microsoft Office Outlook, Build 11.0.5510$/
-meta DRUGS_STOCK_MIMEOLE (__MIMEOLE_1106 && __MAILER_OL_5510)
-describe DRUGS_STOCK_MIMEOLE Stock-spam forged headers found (5510)
+#meta DRUGS_STOCK_MIMEOLE (__MIMEOLE_1106 && __MAILER_OL_5510)
+#describe DRUGS_STOCK_MIMEOLE Stock-spam forged headers found (5510)
 ## score DRUGS_STOCK_MIMEOLE   2.0
 
 # Suresh: 'Finding "mail.com", "post.com" etc in a received header is ALWAYS bogus'
