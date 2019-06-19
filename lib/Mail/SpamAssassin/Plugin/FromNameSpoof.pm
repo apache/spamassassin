@@ -363,6 +363,7 @@ sub _check_fromnamespoof
 
   $fad{'addr'} = lc $pms->get("From:addr");
   my @toaddrs = $pms->all_to_addrs();
+  return 0 unless @toaddrs;
 
   $tod{'addr'} = lc $toaddrs[0];
 
