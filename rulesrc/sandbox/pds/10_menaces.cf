@@ -33,7 +33,7 @@ describe FROM_2_EMAILS_SHORT Short body and From looks like 2 different emails
 score    FROM_2_EMAILS_SHORT 2.0 # limit
 reuse    FROM_2_EMAILS_SHORT
 
-body     __PDS_BODY_QUOTE / [\w\s,\.]+ - ([A-Z][a-z'\.]+ ?){1,3}/
+body     __PDS_BODY_QUOTE / [\w\s,\.]+ - ([A-Z][a-z'\.]+ ?){1,4}/
 header   __PDS_SUBJECT_QUOTE Subject =~ /\bquotes?\b/i
 
 meta     SHORT_BODY_QUOTE  __PDS_SUBJECT_QUOTE && __PDS_BODY_QUOTE && __KAM_BODY_LENGTH_LT_256
