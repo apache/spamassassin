@@ -10,6 +10,12 @@ plan tests => 5;
 
 # ---------------------------------------------------------------------------
 
+my $plugins = '';
+
+if (eval { require BSD::Resource; }) {
+    $plugins .= "loadplugin Mail::SpamAssassin::Plugin::ResourceLimits\n"
+}
+
 tstpre ("
 loadplugin Mail::SpamAssassin::Plugin::RelayCountry
 loadplugin Mail::SpamAssassin::Plugin::URIDNSBL
@@ -53,9 +59,9 @@ loadplugin Mail::SpamAssassin::Plugin::TxRep
 loadplugin Mail::SpamAssassin::Plugin::URILocalBL
 loadplugin Mail::SpamAssassin::Plugin::PDFInfo
 loadplugin Mail::SpamAssassin::Plugin::HashBL
-loadplugin Mail::SpamAssassin::Plugin::ResourceLimits
 loadplugin Mail::SpamAssassin::Plugin::FromNameSpoof
 loadplugin Mail::SpamAssassin::Plugin::Phishing
+$plugins
 ");
 
 tstprefs("
