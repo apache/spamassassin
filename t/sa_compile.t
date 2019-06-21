@@ -39,10 +39,13 @@ my $instbase = "$cwd/log/d.$testname/inst";
 
 print "\nMaking tar dist file and then untarring it.\n";
 
-system_or_die "cd .. && make tardist 2>&1 > /dev/null";
+my $tardist = `cd .. && make tardist 2>&1`;
+$? == 0  or die "tardist failed: $?";
+$tardist =~ /^Created (Mail-SpamAssassin-[\d.]+\.tar\.gz)$/m  or die "tardist parse failed: $tardist";
+my $tarfile = $1;
 system("rm -rf $builddir");
 system("mkdir -p $builddir");
-system_or_die "cd $builddir && gunzip -c $cwd/../Mail-SpamAssassin-*.tar.gz | tar xf - ";
+system_or_die "cd $builddir && gunzip -c $cwd/../$tarfile | tar xf - ";
 system_or_die "cd $builddir && mv Mail-SpamAssassin-* x";
 
 &new_instdir("basic");
@@ -73,6 +76,7 @@ clear_pattern_counters();
 # -------------------------------------------------------------------
 
 print "\nRunning spam checks compiled\n";
+system "rm -rf \$HOME/.spamassassin/sa-compile.cache"; # reset test
 system_or_die "$instdir/$temp_binpath/sa-compile --keep-tmps 2>&1";  # --debug
 %patterns = (
 
@@ -85,6 +89,11 @@ $scr_localrules_args = $scr_cf_args = "";      # use the default rules dir, from
 
 ok sarun ("-D -Lt < $cwd/data/spam/001 2>&1", \&patterns_run_cb);
 ok_all_patterns();
+
+# -------------------------------------------------------------------
+
+# Cleanup after testing (todo, sa-compile should have option for userstatedir)
+system "rm -rf \$HOME/.spamassassin/sa-compile.cache";
 
 # -------------------------------------------------------------------
 

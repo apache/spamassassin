@@ -30,8 +30,11 @@ system("rm -rf $instbase $builddir");
 system("mkdir -p $instbase $builddir");
 
 sub system_or_die;
-system_or_die "cd .. && make tardist";
-system_or_die "cd $builddir && gunzip -cd $cwd/../Mail-SpamAssassin-*.tar.gz | tar xf -";
+my $tardist = `cd .. && make tardist 2>&1`;
+$? == 0  or die "tardist failed: $?";
+$tardist =~ /^Created (Mail-SpamAssassin-[\d.]+\.tar\.gz)$/m  or die "tardist parse failed: $tardist";
+my $tarfile = $1;
+system_or_die "cd $builddir && gunzip -cd $cwd/../$tarfile | tar xf -";
 system_or_die "cd $builddir && mv Mail-SpamAssassin-* x";
 
 # Figure out where 'bin' really is
