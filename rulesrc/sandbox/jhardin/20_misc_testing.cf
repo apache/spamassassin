@@ -2801,4 +2801,14 @@ score      URI_HEX_IP                  2.500	# limit
 describe   URI_HEX_IP                  URI with hex-encoded IP-address host
 tflags     URI_HEX_IP                  publish
 
+uri        URI_PHP_REDIR               m;/redirect\.php\?;i
+
+if can(Mail::SpamAssassin::Conf::feature_bug6558_free)
+  body       __DAY_I_EARNED            /day,?\sI\s(?:earned|got|received|made)\s\$\s?\d{3}/i
+  tflags     __DAY_I_EARNED            multiple maxhits=4
+  meta       __DAY_I_EARNED_1          __DAY_I_EARNED == 1
+  meta       __DAY_I_EARNED_2          __DAY_I_EARNED == 2
+  meta       __DAY_I_EARNED_3          __DAY_I_EARNED > 2
+endif
+
 
