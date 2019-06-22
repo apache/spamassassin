@@ -1,4 +1,4 @@
-#!/usr/bin/perl
+#!/usr/bin/perl -T
 #
 # test for http://issues.apache.org/SpamAssassin/show_bug.cgi?id=5574#c12 .
 # run with:   sudo prove -v t/root_spamd*

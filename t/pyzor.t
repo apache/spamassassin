@@ -1,11 +1,11 @@
-#!/usr/bin/perl
+#!/usr/bin/perl -T
 
 use lib '.'; 
 use lib 't';
 use SATest; 
 sa_t_init("pyzor");
 
-use constant HAS_PYZOR => eval { $_ = `which pyzor`; chomp; -x };
+use constant HAS_PYZOR => eval { $_ = untaint_cmd("which pyzor"); chomp; -x };
 
 use Test::More;
 plan skip_all => "Net tests disabled" unless conf_bool('run_net_tests');
@@ -19,6 +19,7 @@ diag('Note: Failures may not be an SpamAssassin bug, as Pyzor tests can fail due
 tstpre ("
 loadplugin Mail::SpamAssassin::Plugin::Pyzor
 pyzor_timeout 10
+dns_available no
 ");
 
 #PYZOR file was from real-world spam in October 2018

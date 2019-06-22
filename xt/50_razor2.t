@@ -1,7 +1,7 @@
 
 #!/usr/bin/perl
   (-d "../t") and chdir "..";
-  system( "$^X", "t/razor2.t",
+  system( "$^X", "-T", "t/razor2.t",
         "--override", "run_net_tests", "1", @ARGV);
   ($? >> 8 == 0) or die "exec failed";
   

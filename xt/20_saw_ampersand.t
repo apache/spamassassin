@@ -1,4 +1,4 @@
-#!/usr/bin/perl
+#!/usr/bin/perl -T
 
 # detect use of dollar-ampersand somewhere in the perl interpreter;
 # once it is used once, it slows down every regexp match thereafter.
@@ -165,7 +165,7 @@ tryone (0, "");
 print "\ntrying net with all default non-local rule plugins\n";
 
 # TODO: unportable
-system "perl -pi.bak -e 's/^###loadplugin/loadplugin/g' ".
+untaint_system "perl -pi.bak -e 's/^###loadplugin/loadplugin/g' ".
                 " log/localrules.tmp/*.pre log/test_rules_copy/*.pre";
 
 ($? >> 8 != 0) and die "perl failed";

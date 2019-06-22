@@ -1,4 +1,4 @@
-#!/usr/bin/perl
+#!/usr/bin/perl -T
 
 # Leave this part, or else it'll use the live modules which is BAD!
 BEGIN {

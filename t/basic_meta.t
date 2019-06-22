@@ -1,4 +1,4 @@
-#!/usr/bin/perl -w
+#!/usr/bin/perl -w -T
 
 BEGIN {
   if (-e 't/test_dir') { # if we are running "t/rule_names.t", kluge around ...
@@ -41,7 +41,7 @@ for (my $scoreset = 0; $scoreset < 4; $scoreset++) {
   unlink $output || die;
   %rules = ();
   %scores = ();
-  if (system("$perl_path $prefix/build/parse-rules-for-masses -o $output -d \"$prefix/rules\" -s $scoreset -x")) {
+  if (untaint_system("$perl_path $prefix/build/parse-rules-for-masses -o $output -d \"$prefix/rules\" -s $scoreset -x")) {
     warn "parse-rules-for-masses failed!";
   }
   eval {

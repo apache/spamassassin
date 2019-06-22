@@ -1,4 +1,4 @@
-#!/usr/bin/perl
+#!/usr/bin/perl -T
 
 # run with:   sudo prove -v t/root_spamd*
 

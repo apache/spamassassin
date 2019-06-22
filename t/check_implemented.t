@@ -1,4 +1,4 @@
-#!/usr/bin/perl
+#!/usr/bin/perl -T
 
 # detect use of dollar-ampersand somewhere in the perl interpreter;
 # once it is used once, it slows down every regexp match thereafter.
@@ -35,6 +35,7 @@ require Mail::SpamAssassin;
 foreach my $file 
         (<log/localrules.tmp/*.pre>, <log/test_rules_copy/*.pre>) #*/
 {
+  $file = main::untaint_var($file);
   rename $file, "$file.bak" or die "rename $file failed";
   open IN, "<$file.bak" or die "cannot read $file.bak";
   open OUT, ">$file" or die "cannot write $file";

@@ -1,4 +1,4 @@
-#!/usr/bin/perl
+#!/usr/bin/perl -T
 
 BEGIN {
   if (-e 't/test_dir') { # if we are running "t/priorities.t", kluge around ...

@@ -1,4 +1,4 @@
-#!/usr/bin/perl
+#!/usr/bin/perl -T
 
 use lib '.'; use lib 't';
 use SATest; sa_t_init("db_awl_path");

@@ -1,4 +1,4 @@
-#!/usr/bin/perl
+#!/usr/bin/perl -T
 
 use lib '.'; 
 use lib 't';
@@ -39,12 +39,12 @@ my $instbase = "$cwd/log/d.$testname/inst";
 
 print "\nMaking tar dist file and then untarring it.\n";
 
-my $tardist = `cd .. && make tardist 2>&1`;
+my $tardist = untaint_cmd("cd .. && make tardist 2>&1");
 $? == 0  or die "tardist failed: $?";
 $tardist =~ /^Created (Mail-SpamAssassin-[\d.]+\.tar\.gz)$/m  or die "tardist parse failed: $tardist";
 my $tarfile = $1;
-system("rm -rf $builddir");
-system("mkdir -p $builddir");
+untaint_system("rm -rf $builddir");
+untaint_system("mkdir -p $builddir");
 system_or_die "cd $builddir && gunzip -c $cwd/../$tarfile | tar xf - ";
 system_or_die "cd $builddir && mv Mail-SpamAssassin-* x";
 
@@ -59,7 +59,7 @@ $scr_localrules_args = $scr_cf_args = "";      # use the default rules dir, from
 &set_rules("body FOO /You have been selected to receive/");
 
 # ensure we don't use compiled rules
-system("rm -rf $instdir/var/spamassassin/compiled");
+untaint_system("rm -rf $instdir/var/spamassassin/compiled");
 
 %patterns = (
 
@@ -76,7 +76,7 @@ clear_pattern_counters();
 # -------------------------------------------------------------------
 
 print "\nRunning spam checks compiled\n";
-system "rm -rf \$HOME/.spamassassin/sa-compile.cache"; # reset test
+untaint_system "rm -rf \$HOME/.spamassassin/sa-compile.cache"; # reset test
 system_or_die "$instdir/$temp_binpath/sa-compile --keep-tmps 2>&1";  # --debug
 %patterns = (
 
@@ -93,14 +93,14 @@ ok_all_patterns();
 # -------------------------------------------------------------------
 
 # Cleanup after testing (todo, sa-compile should have option for userstatedir)
-system "rm -rf \$HOME/.spamassassin/sa-compile.cache";
+untaint_system "rm -rf \$HOME/.spamassassin/sa-compile.cache";
 
 # -------------------------------------------------------------------
 
 sub re2c_version_new_enough {
   #check if re2c exiss and if it is 0.12.0 or greater
 
-  my $re2c_ver = `re2c -V 2>&1`;
+  my $re2c_ver = untaint_cmd("re2c -V 2>&1");
   if (!defined $re2c_ver || $re2c_ver =~ /^$/) {
     print "re2c not found, or 're2c -V' not supported, skipping test\n";
     return;
@@ -113,9 +113,9 @@ sub re2c_version_new_enough {
 }
 
 sub new_instdir {
-  $instdir = $instbase.".".(shift);
+  $instdir = untaint_var($instbase.".".(shift));
   print "\nsetting new instdir: $instdir\n";
-  system("rm -rf $instdir; mkdir $instdir");
+  untaint_system("rm -rf $instdir; mkdir $instdir");
 }
 
 sub run_makefile_pl {

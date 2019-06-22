@@ -1,4 +1,4 @@
-#!/usr/bin/perl -w
+#!/usr/bin/perl -w -T
 
 BEGIN {
   if (-e 't/test_dir') { # if we are running "t/rule_tests.t", kluge around ...
@@ -217,7 +217,7 @@ sub ok_system {
     my $cmd = shift;
 
     print "\t$cmd\n";
-    system($cmd);
+    untaint_system($cmd);
     my $exit_code = ($?>>8);
     ok ($exit_code == 0)
 

@@ -1,4 +1,4 @@
-#!/usr/bin/perl
+#!/usr/bin/perl -w -T
 
 # supporting tests for: Bug 6362 - Change urirhssub mask syntax
 
