@@ -1,4 +1,4 @@
-#!/usr/bin/perl
+#!/usr/bin/perl -T
 
 use lib '.'; use lib 't';
 use SATest; sa_t_init("sa_awl");
@@ -20,8 +20,8 @@ tstprefs ("
 sarun("--add-addr-to-whitelist whitelist_test\@whitelist.spamassassin.taint.org",
       \&patterns_run_cb);
 
-system("pwd");
-system("../sa-awl --clean --min 9999 ./log/awltest");
+untaint_system("pwd");
+untaint_system("../sa-awl --clean --min 9999 ./log/awltest");
 
 sarun ("-L -t < data/spam/004", \&patterns_run_cb);
 ok_all_patterns();

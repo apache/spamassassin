@@ -1,4 +1,4 @@
-#!/usr/bin/perl
+#!/usr/bin/perl -T
 
 use constant HAVE_DEVEL_CYCLE => eval { require Devel::Cycle; };
 

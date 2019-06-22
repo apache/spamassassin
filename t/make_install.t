@@ -26,11 +26,11 @@ use Cwd;
 my $cwd = getcwd;
 my $builddir = "$cwd/log/d.$testname/build";
 my $instbase = "$cwd/log/d.$testname/inst";
-system("rm -rf $instbase $builddir");
-system("mkdir -p $instbase $builddir");
+untaint_system("rm -rf $instbase $builddir");
+untaint_system("mkdir -p $instbase $builddir");
 
 sub system_or_die;
-my $tardist = `cd .. && make tardist 2>&1`;
+my $tardist = untaint_cmd("cd .. && make tardist 2>&1");
 $? == 0  or die "tardist failed: $?";
 $tardist =~ /^Created (Mail-SpamAssassin-[\d.]+\.tar\.gz)$/m  or die "tardist parse failed: $tardist";
 my $tarfile = $1;
@@ -50,7 +50,7 @@ if (-e '/bin/rpm') {
   #Are we running an RPM version of Perl?
   $command = "/bin/rpm -qf $^X";
  
-  $output = `$command`;
+  $output = untaint_cmd($command);
   if ($output =~ /not owned by any package/i) {
     #WE AREN'T RUNNING AN RPM VERSION OF PERL SO WILL ASSUME NO LIB64 DIR
     #is there a test we can run for this?
@@ -58,10 +58,10 @@ if (-e '/bin/rpm') {
 
     $command = '/bin/rpm --showrc';
 
-    @output = `$command`;
+    $output = untaint_cmd($command);
 
-    foreach $output (@output) {
-      if ($output =~ /-\d+: _lib(dir)?\t(.*)$/) {
+    foreach (split("\n", $output)) {
+      if (/-\d+: _lib(dir)?\t(.*)$/) {
         if ($2 && $2 =~ /64/) {
           $x64_bit_lib_test++;
         }
@@ -84,7 +84,7 @@ if ($x64_bit_lib_test) {
 sub new_instdir {
   $instdir = $instbase.".".(shift);
   print "\nsetting new instdir: $instdir\n";
-  system("rm -rf $instdir; mkdir $instdir");
+  untaint_system("rm -rf $instdir; mkdir $instdir");
 }
 
 sub run_makefile_pl {

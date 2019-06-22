@@ -1,4 +1,4 @@
-#!/usr/bin/perl -w
+#!/usr/bin/perl -w -T
 
 # test URIs as grabbed from text/plain messages
 

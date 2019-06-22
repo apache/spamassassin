@@ -1,4 +1,4 @@
-#!/usr/bin/perl
+#!/usr/bin/perl -T
 
 use lib '.'; use lib 't';
 use SATest; sa_t_init("db_awl_perms");
@@ -22,7 +22,7 @@ umask 022;
 sarun("--add-addr-to-whitelist whitelist_test\@example.org",
       \&patterns_run_cb);
 
-system "ls -l log/user_state";          # for the logs
+untaint_system "ls -l log/user_state";          # for the logs
 
 sub checkmode {
   my $fname = shift;

@@ -1,4 +1,4 @@
-#!/usr/bin/perl
+#!/usr/bin/perl -T
 #
 # NOTE: requires setup as per ldap/README.testing in advance
 
