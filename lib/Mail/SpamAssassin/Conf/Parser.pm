@@ -624,7 +624,7 @@ sub lint_check {
     # Check for description and score issues in lint fashion
     while ( my $k = each %{$conf->{descriptions}} ) {
       if (!exists $conf->{tests}->{$k}) {
-        $self->lint_warn("config: warning: description exists for non-existent rule $k\n", $k);
+        dbg("config: warning: description exists for non-existent rule $k");
       }
     }
 
