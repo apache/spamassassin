@@ -91,7 +91,7 @@ use Archive::Tar 1.23;
 use IO::Zlib 1.04;
 use Mail::SpamAssassin::Logger qw(:DEFAULT info log_message);
 
-our ($have_lwp, $io_socket_module_name, $have_inet4, $have_inet6, $have_sha256, $have_sha512);
+our ($have_lwp, $io_socket_module_name, $have_inet4, $use_inet4, $have_inet6, $use_inet6, $have_sha256, $have_sha512);
 
 BEGIN {
   # Deal with optional modules
@@ -225,6 +225,9 @@ if ( $opt{'allowplugins'} && !$opt{'reallyallowplugins'} ) {
        "- there should never be need to use this option, see man sa-update(1)\n".
        "- specify --reallyallowplugins to allow activating plugins\n";
 }
+
+$use_inet4 = $have_inet4 && ( !$opt{'force_pf'} || $opt{'force_pf'} eq 'inet' );
+$use_inet6 = $have_inet6 && ( !$opt{'force_pf'} || $opt{'force_pf'} eq 'inet6' );
 
 if ( $opt{'force_pf'} && $opt{'force_pf'} eq 'inet' && !$have_inet4 ) {
   warn "Option -4 specified but support for the ".
@@ -772,11 +775,12 @@ foreach my $channel (@channels) {
 
       if (!check_mirror_af($mirror)) {
         my @my_af;
-        push(@my_af, "IPv4") if $have_inet4;
-        push(@my_af, "IPv6") if $have_inet6;
+        push(@my_af, "IPv4") if $use_inet4;
+        push(@my_af, "IPv6") if $use_inet6;
         push(@my_af, "no IP service") if !@my_af;
         dbg("reject mirror %s: no common address family (%s)",
             $mirror, join(" ", @my_af));
+        sleep(1);
         next;
       }
 
@@ -1735,11 +1739,11 @@ sub check_mirror_af {
     return 1 if $scheme eq "http" && $http_proxy;
     return 1 if $scheme eq "https" && $https_proxy;
     # No DNS check needed for IPv4 or IPv6 address literal
-    return 1 if $mirror =~ m{^\d+\.\d+\.\d+\.\d+(?:[:/]|$)};
-    return 1 if $mirror =~ m{^\[};
+    return 1 if $use_inet4 && $mirror =~ m{^\d+\.\d+\.\d+\.\d+(?:[:/]|$)};
+    return 1 if $use_inet6 && $mirror =~ m{^\[};
     $mirror =~ s{[:/].*}{}s;  # strip all starting from :port or /path
-    return 1 if $have_inet4 && do_dns_query($mirror, "A");
-    return 1 if $have_inet6 && do_dns_query($mirror, "AAAA");
+    return 1 if $use_inet4 && do_dns_query($mirror, "A");
+    return 1 if $use_inet6 && do_dns_query($mirror, "AAAA");
     return 0;
 }
 
