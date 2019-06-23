@@ -56,6 +56,11 @@ BEGIN {
     $sock->close or die "error closing inet6 socket: $!"  if $sock;
     $sock ? 1 : undef;
   };
+
+  # Clean PATH so taint doesn't complain
+  $ENV{'PATH'} = '/bin:/usr/bin:/usr/local/bin';
+  # Remove tainted envs, atleast ENV used in FreeBSD
+  delete @ENV{qw(IFS CDPATH ENV BASH_ENV)};
 }
 
 # Set up for testing. Exports (as global vars):
@@ -245,7 +250,6 @@ sub probably_unused_spamd_port {
 
   my $port;
   my @nstat;
-  local $ENV{'PATH'} = '/bin:/usr/bin:/usr/local/bin';  # must not be tainted
   if (!open(NSTAT, "netstat -a -n 2>&1 |")) {
     # not too bad if failing on some architecture, with some luck should be alright
   } else {
@@ -1118,7 +1122,6 @@ sub untaint_var {
 
 # untainted system()
 sub untaint_system {
-    local $ENV{'PATH'} = '/bin:/usr/bin:/usr/local/bin';  # must not be tainted
     my @args;
     push @args, untaint_var($_) foreach (@_);
     return system(@args);
@@ -1126,7 +1129,6 @@ sub untaint_system {
 
 # untainted version of `shell command`
 sub untaint_cmd {
-    local $ENV{'PATH'} = '/bin:/usr/bin:/usr/local/bin';  # must not be tainted
     if (open(CMD, untaint_var($_[0])."|")) {
       my $stdout = do { local($/); <CMD> };
       close CMD;
