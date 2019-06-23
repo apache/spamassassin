@@ -15,6 +15,9 @@ my $plugins = '';
 if (eval { require BSD::Resource; }) {
     $plugins .= "loadplugin Mail::SpamAssassin::Plugin::ResourceLimits\n"
 }
+if (eval { require Net::CIDR::Lite; }) {
+    $plugins .= "loadplugin Mail::SpamAssassin::Plugin::URILocalBL\n";
+}
 
 tstpre ("
 loadplugin Mail::SpamAssassin::Plugin::RelayCountry
@@ -56,7 +59,6 @@ loadplugin Mail::SpamAssassin::Plugin::PhishTag
 loadplugin Mail::SpamAssassin::Plugin::FreeMail
 loadplugin Mail::SpamAssassin::Plugin::AskDNS
 loadplugin Mail::SpamAssassin::Plugin::TxRep
-loadplugin Mail::SpamAssassin::Plugin::URILocalBL
 loadplugin Mail::SpamAssassin::Plugin::PDFInfo
 loadplugin Mail::SpamAssassin::Plugin::HashBL
 loadplugin Mail::SpamAssassin::Plugin::FromNameSpoof
