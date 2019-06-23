@@ -758,9 +758,8 @@ foreach my $channel (@channels) {
 
     # Loop through all available mirrors, choose from them randomly
     # if any get fails, choose another mirror to retry _all_ files again
-    # sleep $tries*2 seconds for every retry (10 mirrors = max 110sec total)
+    # sleep few seconds on retries
     my $download_ok = 0;
-    my $tries = 0;
     while (my $mirror = choose_mirror(\%mirrors)) {
       my ($result_fname, $http_ok);
       # Grab the data hash for this mirror, then remove it from the list
@@ -773,20 +772,21 @@ foreach my $channel (@channels) {
       unlink($path_sha256);
       unlink($path_asc);
 
+      my $sleep_sec = 2;
+
       if (!check_mirror_af($mirror)) {
         my @my_af;
         push(@my_af, "IPv4") if $use_inet4;
         push(@my_af, "IPv6") if $use_inet6;
         push(@my_af, "no IP service") if !@my_af;
-        dbg("reject mirror %s: no common address family (%s)",
-            $mirror, join(" ", @my_af));
-        sleep(1);
+        dbg("reject mirror %s: no common address family (%s), %s",
+            $mirror, join(" ", @my_af),
+            %mirrors ? "sleeping $sleep_sec sec and trying next" : 'no mirrors left');
+        sleep($sleep_sec) if %mirrors;
         next;
       }
 
       dbg("channel: selected mirror $mirror");
-
-      my $sleep_sec = ++$tries * 2;
 
       # Actual archive file
       ($result_fname, $http_ok) = http_get("$mirror/$newV.tar.gz", $UPDDir);
@@ -803,7 +803,6 @@ foreach my $channel (@channels) {
         # If not found, try SHA256 instead
         ($result_fname, $http_ok) = http_get("$mirror/$newV.tar.gz.sha256", $UPDDir);
         if (!$http_ok || !-s $result_fname) {
-          my $ssec = ++$tries * 2;
           dbg("channel: No sha512 or sha256 file available from $mirror, %s",
             %mirrors ? "sleeping $sleep_sec sec and trying next" : 'no mirrors left');
           sleep($sleep_sec) if %mirrors;
