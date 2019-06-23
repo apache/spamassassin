@@ -29,11 +29,10 @@ my $instbase = "$cwd/log/d.$testname/inst";
 untaint_system("rm -rf $instbase $builddir");
 untaint_system("mkdir -p $instbase $builddir");
 
-sub system_or_die;
-my $tardist = untaint_cmd("cd .. && make tardist 2>&1");
+untaint_system("cd .. && make tardist >/dev/null");
 $? == 0  or die "tardist failed: $?";
-$tardist =~ /^Created (Mail-SpamAssassin-[\d.]+\.tar\.gz)$/m  or die "tardist parse failed: $tardist";
-my $tarfile = $1;
+my $tarfile = untaint_cmd("cd .. && ls -tr Mail-SpamAssassin-*.tar* | tail -1");
+chomp($tarfile);
 system_or_die "cd $builddir && gunzip -cd $cwd/../$tarfile | tar xf -";
 system_or_die "cd $builddir && mv Mail-SpamAssassin-* x";
 
