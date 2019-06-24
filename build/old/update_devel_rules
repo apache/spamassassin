@@ -13,6 +13,9 @@ RELDIR=$HOME/public_html/devel
 mkdir -p $RELDIR
 
 DISTNAME=Mail-SpamAssassin-rules
+
+echo 'Making SpamAssassin';
+
 make || perl Makefile.PL < /dev/null || exit $?
 make || exit $?
 make version.env || exit $?
@@ -34,10 +37,12 @@ rm -f rules/70_*.cf
 # rm rules/60_somerandomfeature.cf
 
 # and ensure the ruleset lints!
+echo 'Linting the rules...'
 ./spamassassin --lint                    || exit $?
 
 rulesdir=rules
 
+echo 'Tarring the rules...'
 (
   cd $rulesdir
 
@@ -49,9 +54,12 @@ rulesdir=rules
 
 ) | gzip -9 > $tmpdir/rules.tgz         || exit $?
 
+echo 'Make sure rules file is not empty...'
 # ensure non-empty
 [ -s $tmpdir/rules.tgz ] || exit 3
 
+
+echo 'Testing the rules file archive integrity...'
 linttmp=$tmpdir/lintdir
 rm -rf $linttmp
 mkdir $linttmp
@@ -68,16 +76,35 @@ cp rules/*.pre $sitetmp
 
 # now, ensure the ruleset (entirely as distributed) lints, also.
 # use "-p /dev/null" so any user_prefs data is ignored.
+echo 'Checking the distributed ruleset will lint...'
 ./spamassassin -x --configpath=$linttmp --siteconfigpath=$sitetmp \
                -p /dev/null --lint \
                 || exit $?
 
 # sign and get sums
 rm -f $tmpdir/rules.*.asc
-ssh updatesd@spamassassin.zones.apache.org \
-        . /etc/profile \; \
-        gpg --homedir /home/updatesd/key -bsa - \
-        < $tmpdir/rules.tgz > $tmpdir/rules.tgz.asc || exit $?
+
+#Adding information to run gpg-agent so a non-privileged user can sign - There should be a check to see if this is done
+gpg-agent --homedir $HOME/sabuildtools/rulessigningkey --daemon --write-env-file "${HOME}/sabuildtools/rulessigningkey/.gpg-agent-info"
+
+#for ext in tar.bz2 tar.gz zip ; do
+#  cp $DISTVNAME.$ext $RELDIR
+#
+#  perl build/sha256sum.pl $DISTVNAME.$ext > $RELDIR/$DISTVNAME.$ext.sha256 || exit $?
+#  perl build/sha512sum.pl $DISTVNAME.$ext > $RELDIR/$DISTVNAME.$ext.sha512 || exit $?
+#
+#  rm -f $DISTVNAME.$ext.asc*
+  if [ -d $HOME/sabuildtools/rulessigningkey ]; then
+    gpg --homedir $HOME/sabuildtools/rulessigningkey --detach-sign --sign --armor  < $tmpdir/rules.tgz > $tmpdir/rules.tgz.asc || exit $?
+    #mv $DISTVNAME.$ext.asc $RELDIR/$DISTVNAME.$ext.asc || exit $?
+  fi
+
+  #rm -f $DISTVNAME.$ext
+done
+
+
+#gpg --homedir /home/updatesd/key -bsa - \
+#        < $tmpdir/rules.tgz > $tmpdir/rules.tgz.asc || exit $?
 
 (
   cd $tmpdir

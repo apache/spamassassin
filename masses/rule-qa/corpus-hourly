@@ -31,12 +31,10 @@ my %revision = ();
 my %logs_by_rev = ();
 my %is_net_revision = ();
 my %time = ();
-my %revision_date = ();
 my @files;
 my @tmps = ();
 my $skip = '';
 my $time_start = time;
-$time_start -= ($time_start % 3600);
 my $output_revpath;
 
 &configure;
@@ -132,28 +130,24 @@ sub locate {
   closedir(CORPUS);
 
   @files = grep {
-    /^(?:spam|ham)-(?:net-)?[-\w]+\.r[0-9]+\.log$/ && -f "$corpusdir/$_" && -M _ < 10 
+    /^(?:spam|ham)-(?:net-)?[-\w]+\.log$/ && -f "$corpusdir/$_" && -M _ < 10 
   } @files;
 
   foreach my $file (@files) {
+    # my $time = 0;
     my $tag = 0;
-    my $revtime;
     open(FILE, "$corpusdir/$file") or warn "cannot read $corpusdir/$file";
     while (my $line = <FILE>) {
       last if $line !~ /^#/;
-      if ($line =~ m/^# Date:\s*(\S+)/) {
-        my $date_line = $1;
-        my ($yyyy, $mm, $dd, $h, $m, $s) = $date_line =~ /(\d\d\d\d)(\d\d)(\d\d)T(\d\d)(\d\d)(\d\d)Z/;
-
-        my $timet = Time::ParseDate::parsedate("${yyyy}/${mm}/${dd} ${h}:${m}:${s} GMT+0",
-                  GMT => 1, PREFER_PAST => 1);
-
-        $revtime = Time::ParseDate::parsedate("${yyyy}/${mm}/${dd} 09:00:00 GMT+0",
-                  GMT => 1, PREFER_PAST => 1);
-
+      if ($line =~ /, on (... ... .. )(..)(:..:.. ... ....)/) {
+        my ($datepre, $hh, $datepost) = ($1,$2,$3);
+        
+        my $timet = Time::ParseDate::parsedate($datepre.$hh.$datepost,
+                    GMT => 1, PREFER_PAST => 1);
         $time{$file} = $timet;
         print "$corpusdir/$file: time=$timet\n";
 
+        # if ($hh != 8) { $time++; }
       }
       if ($line =~ m/^# SVN revision:\s*(\S+)/) {
         my $rev = $1;
@@ -172,14 +166,9 @@ sub locate {
       }
     }
     close(FILE);
-    if ($revtime) {
-      my $rev = $revision{$file};
-      $revision_date{$rev} = $revtime unless defined $revision_date{$rev};
-
-      if ($revtime < $revision_date{$rev}) {
-        $revision_date{$rev} = $revtime;
-      }
-    }
+    # if (!$time) {
+    # $skip .= "# skipped $_: time is between 0800 UTC and 0900 UTC\n";
+    # }
   }
 }
 
@@ -200,10 +189,10 @@ sub sort_all {
 }
 
 sub time_filter {
-  my ($target, $after, $before) = @_;
+  my ($after, $before) = @_;
   if (/time=(\d+)/) {
-	return (($target - $1 >= WEEK * $after) &&
-		($target - $1 < WEEK * $before));
+	return (($time_start - $1 >= WEEK * $after) &&
+		($time_start - $1 < WEEK * $before));
   }
   return 0;
 }
@@ -256,10 +245,10 @@ sub gen_class {
     my %ham;
     
     for my $file (@spam) {
-      $spam{$1}++ if ($file =~ m/-(\w[-\w]+)\.r[0-9]+\.log$/);
+      $spam{$1}++ if ($file =~ m/-(\w[-\w]+)\.log$/);
     }
     for my $file (@ham) {
-      $ham{$1}++ if ($file =~ m/-(\w[-\w]+)\.r[0-9]+\.log$/);
+      $ham{$1}++ if ($file =~ m/-(\w[-\w]+)\.log$/);
     }
     while (my ($user, $count) = each %ham) {
       if ($count > 1) {
@@ -312,51 +301,30 @@ sub gen_class {
     return;
   }
 
-  my $crev_time = $revision_date{$rev};
-  my $dir = create_outputdir($rev, $crev_time);
+  my $time = $time{$ham[0]};        # use the ham file's time
+  my $dir = create_outputdir($rev, $time);
 
   my $fname = "$dir/$class.$age";
 
-  # Look through corpus for files that have been added since last full build
-  # Update all class files on this
+  # now, if the target file already exists, check to see if it's newer
+  # than all the sources, make-style
+  if (-f $fname) {
+    my $targetfreshness = (-M $fname);
+    my $needsrebuild = 0;
 
-  my $buildfile = "$dir/.buildtime";
-  my $last_build = 0;
-  my $needs_rebuild = 0;
-
-  if (-f $buildfile) {
-    open(BFILE, "$buildfile") or warn "cannot read $buildfile";
-    while (my $line = <BFILE>) {
-      last if $line !~ /^#/;
-      if ($line =~ m/^# BuildTime:\s*(\S+)/) {
-        $last_build = $1;
-      }      
-    }
-    close(BFILE);
-  }
-
-  if ( !(-f $fname) || !$last_build || $last_build == $time_start) {
-    # No last build or we've already done the loop below
-    $needs_rebuild = 1;
-  } else {
     foreach my $srcfile (@spam, @ham) {
-      my $file_time = (stat($srcfile))[9];
-      if ($file_time >= $last_build) {
-        $needs_rebuild = 1;
+      my $srcfreshness = (-M $srcfile);
+      if ($targetfreshness > $srcfreshness) {     # src is fresher
+        print "$fname is older than $srcfile: $targetfreshness > $srcfreshness\n";
+        $needsrebuild = 1;
         last;
       }
     }
-  }
 
-  if (!$needs_rebuild) {
-    print "last buildtime is fresher than sources\n";
-    return;
-  }
-
-  if ($last_build != $time_start) {
-    open(BFILE, "> $buildfile") or warn "cannot write to $buildfile";
-    print BFILE "# BuildTime: $time_start\n";
-    close(BFILE);
+    if (!$needsrebuild) {
+      print "existing: $fname, fresher than sources\n";
+      return;
+    }
   }
 
   my $when = scalar localtime time;
@@ -379,11 +347,6 @@ sub gen_class {
                     warn "cannot rename $zf.$$ to $zf";
       $bytes += (-s $zf);
     }
-    my $tmpfname = "$fname.$$";
-    open(OUT, "> $tmpfname") or warn "cannot write to $tmpfname";
-    print OUT "# $$ \n";
-    close(OUT);
-    rename($tmpfname, $fname) or warn "cannot rename $tmpfname to $fname";
   }
   else {
     my $tmpfname = "$fname.$$";
@@ -415,10 +378,10 @@ sub gen_class {
       my @output;
       
       for my $file (@spam) {
-        $spam{$1} = $file if ($file =~ m/-(\w[-\w]+)\.r[0-9]+\.log$/);
+        $spam{$1} = $file if ($file =~ m/-(\w[-\w]+)\.log$/);
       }
       for my $file (@ham) {
-        $ham{$1} = $file if ($file =~ m/-(\w[-\w]+)\.r[0-9]+\.log$/);
+        $ham{$1} = $file if ($file =~ m/-(\w[-\w]+)\.log$/);
       }
       unlink "$opt{tmp}/ham.log.$$";
       unlink "$opt{tmp}/spam.log.$$";
@@ -460,7 +423,7 @@ sub gen_class {
           for my $file (@array) {
             open(IN, $file) or warn "cannot read $file";
             while (<IN>) {
-              print TMP $_ if time_filter($crev_time, $after, $before);
+              print TMP $_ if time_filter($after, $before);
             }
             close(IN);
           }

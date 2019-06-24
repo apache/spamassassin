@@ -40,7 +40,7 @@ BEGIN {
   );
   # These are generic constants that may be used across several modules
   @SA_VARS = qw(
-	MBX_SEPARATOR
+	HARVEST_DNSBL_PRIORITY MBX_SEPARATOR
 	MAX_BODY_LINE_LENGTH MAX_HEADER_KEY_LENGTH MAX_HEADER_VALUE_LENGTH
 	MAX_HEADER_LENGTH ARITH_EXPRESSION_LEXER AI_TIME_UNKNOWN
 	CHARSETS_LIKELY_TO_FP_AS_CAPS MAX_URI_LENGTH RULENAME_RE
@@ -347,6 +347,8 @@ use constant IP_ADDRESS => qr/
 		  /oxi;
 
 # ---------------------------------------------------------------------------
+
+use constant HARVEST_DNSBL_PRIORITY =>  500;
 
 # regular expression that matches message separators in The University of
 # Washington's MBX mailbox format

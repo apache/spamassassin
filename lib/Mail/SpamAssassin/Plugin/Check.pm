@@ -54,9 +54,6 @@ sub check_main {
 
   my $pms = $args->{permsgstatus};
 
-  # Make AsyncLoop wait permission for launching queries
-  $pms->{async}->{wait_launch} = 1;
-
   my $suppl_attrib = $pms->{msg}->{suppl_attrib};
   if (ref $suppl_attrib && ref $suppl_attrib->{rule_hits}) {
     my @caller_rule_hits = @{$suppl_attrib->{rule_hits}};
@@ -83,8 +80,10 @@ sub check_main {
   # rbl calls.
   $pms->extract_message_metadata();
 
-  my $do_dns = $pms->is_dns_available();
-  my $rbls_running = 0;
+  # Here, we launch all the DNS RBL queries and let them run while we
+  # inspect the message
+  $self->run_rbl_eval_tests($pms);
+  my $needs_dnsbl_harvest_p = 1; # harvest needs to be run
 
   my $decoded = $pms->get_decoded_stripped_body_text_array();
   my $bodytext = $pms->get_decoded_body_text_array();
@@ -94,9 +93,6 @@ sub check_main {
       $master_deadline - time)  if $master_deadline;
 
   my @uris = $pms->get_uri_list();
-
-  # Make sure priority -100 exists for launching DNS
-  $pms->{conf}->{priorities}->{-100} ||= 1 if $do_dns;
 
   foreach my $priority (sort { $a <=> $b } keys %{$pms->{conf}->{priorities}}) {
     # no need to run if there are no priorities at this level.  This can
@@ -118,74 +114,90 @@ sub check_main {
     my $timer = $self->{main}->time_method("tests_pri_".$priority);
     dbg("check: running tests for priority: $priority");
 
-    # Here, we launch all the DNS RBL queries and let them run while we
-    # inspect the message.  We try to launch all DNS queries at priority
-    # -100, so one can shortcircuit tests at lower priority and not launch
-    # unneeded DNS queries.
-    if ($do_dns && !$rbls_running && $priority >= -100) {
-      $rbls_running = 1;
-      $pms->{async}->{wait_launch} = 0; # permission granted
-      $pms->{async}->launch_queue(); # check if something was queued
-      $self->run_rbl_eval_tests($pms);
-      $self->{main}->call_plugins ("check_dnsbl", { permsgstatus => $pms });
+    # only harvest the dnsbl queries once priority HARVEST_DNSBL_PRIORITY
+    # has been reached and then only run once
+    #
+    # TODO: is this block still needed here? is HARVEST_DNSBL_PRIORITY used?
+    #
+    if ($priority >= HARVEST_DNSBL_PRIORITY
+        && $needs_dnsbl_harvest_p
+        && !$self->{main}->call_plugins("have_shortcircuited",
+                                        { permsgstatus => $pms }))
+    {
+      # harvest the DNS results
+      $pms->harvest_dnsbl_queries();
+      $needs_dnsbl_harvest_p = 0;
+
+      # finish the DNS results
+      $pms->rbl_finish();
+      $self->{main}->call_plugins("check_post_dnsbl", { permsgstatus => $pms });
+      $pms->{resolver}->finish_socket() if $pms->{resolver};
     }
 
-    $pms->harvest_completed_queries() if $rbls_running;
+    $pms->harvest_completed_queries();
     # allow other, plugin-defined rule types to be called here
     $self->{main}->call_plugins ("check_rules_at_priority",
         { permsgstatus => $pms, priority => $priority, checkobj => $self });
 
     # do head tests
     $self->do_head_tests($pms, $priority);
-    $pms->harvest_completed_queries() if $rbls_running;
+    $pms->harvest_completed_queries();
     last if $pms->{deadline_exceeded};
 
     $self->do_head_eval_tests($pms, $priority);
-    $pms->harvest_completed_queries() if $rbls_running;
+    $pms->harvest_completed_queries();
     last if $pms->{deadline_exceeded};
 
     $self->do_body_tests($pms, $priority, $decoded);
-    $pms->harvest_completed_queries() if $rbls_running;
+    $pms->harvest_completed_queries();
     last if $pms->{deadline_exceeded};
 
     $self->do_uri_tests($pms, $priority, @uris);
-    $pms->harvest_completed_queries() if $rbls_running;
+    $pms->harvest_completed_queries();
     last if $pms->{deadline_exceeded};
 
     $self->do_body_eval_tests($pms, $priority, $decoded);
-    $pms->harvest_completed_queries() if $rbls_running;
+    $pms->harvest_completed_queries();
     last if $pms->{deadline_exceeded};
   
     $self->do_rawbody_tests($pms, $priority, $bodytext);
-    $pms->harvest_completed_queries() if $rbls_running;
+    $pms->harvest_completed_queries();
     last if $pms->{deadline_exceeded};
 
     $self->do_rawbody_eval_tests($pms, $priority, $bodytext);
-    $pms->harvest_completed_queries() if $rbls_running;
+    $pms->harvest_completed_queries();
     last if $pms->{deadline_exceeded};
   
     $self->do_full_tests($pms, $priority, \$fulltext);
-    $pms->harvest_completed_queries() if $rbls_running;
+    $pms->harvest_completed_queries();
     last if $pms->{deadline_exceeded};
 
     $self->do_full_eval_tests($pms, $priority, \$fulltext);
-    $pms->harvest_completed_queries() if $rbls_running;
+    $pms->harvest_completed_queries();
     last if $pms->{deadline_exceeded};
 
     $self->do_meta_tests($pms, $priority);
-    $pms->harvest_completed_queries() if $rbls_running;
+    $pms->harvest_completed_queries();
     last if $pms->{deadline_exceeded};
 
     # we may need to call this more often than once through the loop, but
     # it needs to be done at least once, either at the beginning or the end.
     $self->{main}->call_plugins ("check_tick", { permsgstatus => $pms });
-    $pms->harvest_completed_queries() if $rbls_running;
+    $pms->harvest_completed_queries();
     last if $pms->{deadline_exceeded};
   }
 
-  # Finish DNS results
-  if ($do_dns) {
-    $pms->harvest_dnsbl_queries();
+  # sanity check, it is possible that no rules >= HARVEST_DNSBL_PRIORITY ran so the harvest
+  # may not have run yet.  Check, and if so, go ahead and harvest here.
+  if ($needs_dnsbl_harvest_p) {
+    if (!$self->{main}->call_plugins("have_shortcircuited",
+                                        { permsgstatus => $pms }))
+    {
+      # harvest the DNS results
+      $pms->harvest_dnsbl_queries();
+    }
+
+    # finish the DNS results
     $pms->rbl_finish();
     $self->{main}->call_plugins ("check_post_dnsbl", { permsgstatus => $pms });
     $pms->{resolver}->finish_socket() if $pms->{resolver};
@@ -201,23 +213,6 @@ sub check_main {
   undef $decoded;
   undef $bodytext;
   undef $fulltext;
-
-  # check dns_block_rule (bug 6728)
-  # TODO No idea yet what would be the most logical place to do all these..
-  if ($pms->{conf}->{dns_block_rule}) {
-    foreach my $rule (keys %{$pms->{conf}->{dns_block_rule}}) {
-      next if !$pms->{tests_already_hit}->{$rule}; # hit?
-      foreach my $domain (keys %{$pms->{conf}->{dns_block_rule}{$rule}}) {
-        my $blockfile = $self->{main}->sed_path("__global_state_dir__/dnsblock_$domain");
-        next if -f $blockfile; # no need to warn and create again..
-        warn("check: dns_block_rule $rule hit, creating $blockfile\n");
-        Mail::SpamAssassin::Util::touch_file($blockfile, { create_exclusive => 1 });
-      }
-    }
-  }
-
-  # last chance to handle left callbacks, make rule hits etc
-  $self->{main}->call_plugins ("check_cleanup", { permsgstatus => $pms });
 
   if ($pms->{deadline_exceeded}) {
   # dbg("check: exceeded time limit, skipping auto-learning");
@@ -258,8 +253,13 @@ sub finish_tests {
 
 sub run_rbl_eval_tests {
   my ($self, $pms) = @_;
+  my ($rulename, $pat, @args);
 
-  $pms->init_rbl_subs();
+  # XXX - possible speed up, moving this check out of the subroutine into Check->new()
+  if ($self->{main}->{local_tests_only}) {
+    dbg("rules: local tests only, ignoring RBL eval");
+    return 0;
+  }
 
   while (my ($rulename, $test) = each %{$pms->{conf}->{rbl_evals}}) {
     my $score = $pms->{conf}->{scores}->{$rulename};
@@ -278,7 +278,7 @@ sub run_rbl_eval_tests {
       $result = $pms->$function($rulename, @{$test->[1]});  1;
     } or do {
       my $eval_stat = $@ ne '' ? $@ : "errno=$!";  chomp $eval_stat;
-      die "rules: $eval_stat\n"  if index($eval_stat, '__alarm__ignore__') >= 0;
+      die "rules: $eval_stat\n"  if $eval_stat =~ /__alarm__ignore__/;
       warn "rules: failed to run $rulename RBL test, skipping:\n".
            "\t($eval_stat)\n";
       $pms->{rule_errors}++;
@@ -766,9 +766,9 @@ sub do_head_tests {
               $ifwhile = 'while';
               $hitdone = 'last';
               $matchg = 'g';
-              if ($conf->{tflags}->{$rulename} =~ /\bmaxhits=(\d+)\b/) {
-                $whlimit = ' && $hits++ < '.untaint_var($1);
-              }
+              my ($max) = ($pms->{conf}->{tflags}->{$rulename}||'') =~ /\bmaxhits=(\d+)\b/;
+              $max = untaint_var($max);
+              $whlimit = ' && $hits++ < '.$max if $max;
             }
             if ($matchg) {
               $expr = '$hval '.$op.' /$qrptr->{q{'.$rulename.'}}/g';
@@ -802,9 +802,6 @@ sub do_body_tests {
   my ($self, $pms, $priority, $textary) = @_;
   my $loopid = 0;
 
-  # this is called often, cache
-  my $would_log_rules_all = would_log('dbg', 'rules-all') == 2;
-
   $self->run_generic_tests ($pms, $priority,
     consttype => $Mail::SpamAssassin::Conf::TYPE_BODY_TESTS,
     type => 'body',
@@ -814,7 +811,7 @@ sub do_body_tests {
   {
     my ($self, $pms, $conf, $rulename, $pat, %opts) = @_;
     my $sub = '';
-    if ($would_log_rules_all) {
+    if (would_log('dbg', 'rules-all') == 2) {
       $sub .= '
       dbg("rules-all: running body rule %s", q{'.$rulename.'});
       ';
@@ -823,14 +820,14 @@ sub do_body_tests {
     {
       # support multiple matches
       $loopid++;
-      my ($max) = $conf->{tflags}->{$rulename} =~ /\bmaxhits=(\d+)\b/;
+      my ($max) = ($pms->{conf}->{tflags}->{$rulename}||'') =~ /\bmaxhits=(\d+)\b/;
       $max = untaint_var($max);
       $sub .= '
       $hits = 0;
       body_'.$loopid.': foreach my $l (@_) {
         pos $l = 0;
         '.$self->hash_line_for_rule($pms, $rulename).'
-        while ($l =~ /$qrptr->{q{'.$rulename.'}}/g'. ($max? ' && $hits++ < '.$max:'') .') {
+        while ($l =~ /$qrptr->{q{'.$rulename.'}}/g'. ($max? ' && $hits++ < '.$max:'') .') { 
           $self->got_hit(q{'.$rulename.'}, "BODY: ", ruletype => "body"); 
           '. $self->hit_rule_plugin_code($pms, $rulename, 'body',
 					 "last body_".$loopid) . '
@@ -845,8 +842,8 @@ sub do_body_tests {
       $sub .= '
       foreach my $l (@_) {
         '.$self->hash_line_for_rule($pms, $rulename).'
-        if ($l =~ $qrptr->{q{'.$rulename.'}}) {
-          $self->got_hit(q{'.$rulename.'}, "BODY: ", ruletype => "body");
+        if ($l =~ $qrptr->{q{'.$rulename.'}}) { 
+          $self->got_hit(q{'.$rulename.'}, "BODY: ", ruletype => "body"); 
           '. $self->hit_rule_plugin_code($pms, $rulename, "body", "last") .'
         }
       }
@@ -859,6 +856,9 @@ sub do_body_tests {
         '.$self->ran_rule_plugin_code($rulename, "body").'
       }
     ');
+
+    return if ($opts{doing_user_rules} &&
+            !$self->is_user_rule_sub($rulename.'_body_test'));
   }
   );
 }
@@ -868,10 +868,6 @@ sub do_body_tests {
 sub do_uri_tests {
   my ($self, $pms, $priority, @uris) = @_;
   my $loopid = 0;
-
-  # this is called often, cache
-  my $would_log_rules_all = would_log('dbg', 'rules-all') == 2;
-
   $self->run_generic_tests ($pms, $priority,
     consttype => $Mail::SpamAssassin::Conf::TYPE_URI_TESTS,
     type => 'uri',
@@ -881,21 +877,21 @@ sub do_uri_tests {
   {
     my ($self, $pms, $conf, $rulename, $pat, %opts) = @_;
     my $sub = '';
-    if ($would_log_rules_all) {
+    if (would_log('dbg', 'rules-all') == 2) {
       $sub .= '
       dbg("rules-all: running uri rule %s", q{'.$rulename.'});
       ';
     }
     if (($conf->{tflags}->{$rulename}||'') =~ /\bmultiple\b/) {
       $loopid++;
-      my ($max) = $conf->{tflags}->{$rulename} =~ /\bmaxhits=(\d+)\b/;
+      my ($max) = ($pms->{conf}->{tflags}->{$rulename}||'') =~ /\bmaxhits=(\d+)\b/;
       $max = untaint_var($max);
       $sub .= '
       $hits = 0;
       uri_'.$loopid.': foreach my $l (@_) {
         pos $l = 0;
         '.$self->hash_line_for_rule($pms, $rulename).'
-        while ($l =~ /$qrptr->{q{'.$rulename.'}}/g'. ($max? ' && $hits++ < '.$max:'') .') {
+        while ($l =~ /$qrptr->{q{'.$rulename.'}}/g'. ($max? ' && $hits++ < '.$max:'') .') { 
            $self->got_hit(q{'.$rulename.'}, "URI: ", ruletype => "uri");
            '. $self->hit_rule_plugin_code($pms, $rulename, "uri",
 					  "last uri_".$loopid) . '
@@ -907,7 +903,7 @@ sub do_uri_tests {
       $sub .= '
       foreach my $l (@_) {
         '.$self->hash_line_for_rule($pms, $rulename).'
-          if ($l =~ $qrptr->{q{'.$rulename.'}}) {
+        if ($l =~ $qrptr->{q{'.$rulename.'}}) { 
            $self->got_hit(q{'.$rulename.'}, "URI: ", ruletype => "uri");
            '. $self->hit_rule_plugin_code($pms, $rulename, "uri", "last") .'
         }
@@ -921,6 +917,9 @@ sub do_uri_tests {
         '.$self->ran_rule_plugin_code($rulename, "uri").'
       }
     ');
+
+    return if ($opts{doing_user_rules} &&
+            !$self->is_user_rule_sub($rulename.'_uri_test'));
   }
   );
 }
@@ -944,11 +943,11 @@ sub do_rawbody_tests {
       dbg("rules-all: running rawbody rule %s", q{'.$rulename.'});
       ';
     }
-    if (($conf->{tflags}->{$rulename}||'') =~ /\bmultiple\b/)
+    if (($pms->{conf}->{tflags}->{$rulename}||'') =~ /\bmultiple\b/)
     {
       # support multiple matches
       $loopid++;
-      my ($max) = $conf->{tflags}->{$rulename} =~ /\bmaxhits=(\d+)\b/;
+      my ($max) = ($pms->{conf}->{tflags}->{$rulename}||'') =~ /\bmaxhits=(\d+)\b/;
       $max = untaint_var($max);
       $sub .= '
       $hits = 0;
@@ -1009,7 +1008,7 @@ sub do_full_tests {
                 loop_body => sub
   {
     my ($self, $pms, $conf, $rulename, $pat, %opts) = @_;
-    my ($max) = ($conf->{tflags}->{$rulename}||'') =~ /\bmaxhits=(\d+)\b/;
+    my ($max) = ($pms->{conf}->{tflags}->{$rulename}||'') =~ /\bmaxhits=(\d+)\b/;
     $max = untaint_var($max);
     $self->add_evalstr($pms, '
       if ($scoresptr->{q{'.$rulename.'}}) {
@@ -1139,7 +1138,7 @@ sub run_eval_tests {
         next if (($scoreset & 2) == 0);
       }
     }
- 
+
     # skip if score zeroed
     next if !$scoresref->{$rulename};
  
@@ -1148,7 +1147,7 @@ sub run_eval_tests {
       warn "rules: error: no eval function defined for $rulename";
       next;
     }
- 
+
     if (!exists $conf->{eval_plugins}->{$function}) {
       warn("rules: error: unknown eval '$function' for $rulename\n");
       next;
@@ -1189,7 +1188,7 @@ sub run_eval_tests {
         $result = $self->'.$function.'(@extraevalargs, @{$testptr->{q#'.$rulename.'#}->[1]}); 1;
       } or do {
         $result = 0;
-        die "rules: $@\n"  if index($@, "__alarm__ignore__") >= 0;
+        die "rules: $@\n"  if $@ =~ /__alarm__ignore__/;
         $self->handle_eval_rule_errors($rulename);
       };
 ';
@@ -1270,11 +1269,6 @@ EOT
 
 sub hash_line_for_rule {
   my ($self, $pms, $rulename) = @_;
-  # I have no idea why evals are being cluttered by "hashlines" ??
-  # Nobody cares about source_file unless keep_config_parsing_metadata is set!
-  # If you are debugging hanging rule, then simply uncomment this..
-  #return "\ndbg(\"rules: will run %s\", q(".$rulename."));\n";
-  return '' if !%{$pms->{conf}->{source_file}};
   # using tainted subr. argument may taint the whole expression, avoid
   my $u = untaint_var($pms->{conf}->{source_file}->{$rulename});
   return sprintf("\n#line 1 \"%s, rule %s,\"", $u, $rulename);
@@ -1319,8 +1313,7 @@ sub hit_rule_plugin_code {
     $match = '"<YES>"'; # nothing better to report, $& is not set by this rule
   } else {
     # simple, but suffers from 'user data interpreted as a boolean', Bug 6360
-    # ... which is fixed now with "defined $&" stanza
-    $match = '(defined $' . '& ? $' . '& : "negative match")';
+    $match = '(defined $'.'& ? $'.'& : "negative match")';
   }
 
   my $debug_code = '';

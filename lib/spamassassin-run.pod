@@ -43,7 +43,6 @@ Options:
  --siteconfigpath=path             Path for site configs
                                    (def: /etc/mail/spamassassin)
  --cf='config line'                Additional line of configuration
- --pre='config line'               Additional line of ".pre" (prepended to configuration)
  -x, --nocreate-prefs              Don't create user preferences file
  -e, --exit-code                   Exit with a non-zero exit code if the
                                    tested message was spam
@@ -251,15 +250,6 @@ used, and each will be considered a separate line of configuration.  For
 example:
 
         spamassassin -t --cf="body NEWRULE /text/" --cf="score NEWRULE 3.0"
-
-=item B<--pre='config line'>
-
-Add additional lines of .pre configuration directly from the command-line,
-parsed before the configuration files are read.  Multiple B<--pre> arguments
-can be used, and each will be considered a separate line of configuration. 
-For example:
-
-        spamassassin -t --pre="loadplugin Mail::SpamAssassin::Plugin::Foobar"
 
 =item B<-p> I<prefs>, B<--prefspath>=I<prefs>, B<--prefs-file>=I<prefs>
 

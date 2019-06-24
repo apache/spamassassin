@@ -119,12 +119,16 @@ use warnings;
 # use bytes;
 use re 'taint';
 use Errno qw(EBADF);
-use Digest::SHA qw(sha1);
-
-use Mail::SpamAssassin::BayesStore;
-use Mail::SpamAssassin::Logger;
-use Mail::SpamAssassin::Timeout;
 use Mail::SpamAssassin::Util qw(untaint_var);
+use Mail::SpamAssassin::Timeout;
+
+BEGIN {
+  eval { require Digest::SHA; import Digest::SHA qw(sha1); 1 }
+  or do { require Digest::SHA1; import Digest::SHA1 qw(sha1) }
+}
+
+use Mail::SpamAssassin::Logger;
+use Mail::SpamAssassin::BayesStore;
 use Mail::SpamAssassin::Util::TinyRedis;
 
 our $VERSION = 0.09;

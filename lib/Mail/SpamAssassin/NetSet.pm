@@ -59,7 +59,6 @@ sub new {
 
 sub DESTROY {
   my($self) = shift;
-
   if (exists $self->{cache}) {
     local($@, $!, $_);  # protect outer layers from a potential surprise
     my($hits, $attempts) = ($self->{cache_hits}, $self->{cache_attempts});

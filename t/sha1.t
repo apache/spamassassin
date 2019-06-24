@@ -18,7 +18,11 @@ if (-e 'test_dir') {            # running from test directory, not ..
 use strict;
 
 use Mail::SpamAssassin;
-use Digest::SHA qw(sha1_hex);
+
+BEGIN {
+  eval { require Digest::SHA; import Digest::SHA qw(sha1_hex); 1 }
+  or do { require Digest::SHA1; import Digest::SHA1 qw(sha1_hex) }
+}
 
 use Test::More tests => 15;
 
@@ -26,7 +30,7 @@ sub try {
   my ($data, $want) = @_;
 
   if ($want ne sha1_hex($data)) {
-    print "Digest::SHA sha1 mismatch\n";
+    print "Digest::SHA(1) sha1 mismatch\n";
     return 0;
   }
   return 1;

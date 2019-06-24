@@ -66,7 +66,7 @@ my %elements_whitespace = map {; $_ => 1 }
 
 # elements that push URIs
 my %elements_uri = map {; $_ => 1 }
-  qw( body table tr td a area link img frame iframe embed script form base bgsound meta ),
+  qw( body table tr td a area link img frame iframe embed script form base bgsound ),
 ;
 
 # style attribute not accepted
@@ -403,17 +403,6 @@ sub html_uri {
       }
     }
   }
-  elsif ($tag eq "meta" &&
-    exists $attr->{'http-equiv'} &&
-    exists $attr->{content} &&
-    $attr->{'http-equiv'} =~ /refresh/i &&
-    $attr->{content} =~ /\burl\s*=/i)
-  {
-      my $uri = $attr->{content};
-      $uri =~ s/^.*\burl\s*=\s*//i;
-      $uri =~ s/\s*;.*//i;
-      $self->push_uri($tag, $uri);
-  }
 }
 
 # this might not be quite right, may need to pay attention to table nesting
@@ -516,7 +505,7 @@ sub text_style {
 	    my $whcolor = $1 ? 'bgcolor' : 'fgcolor';
 	    my $value = lc $2;
 
-	    if (index($value, 'rgb') >= 0) {
+	    if ($value =~ /rgb/) {
 	      $value =~ tr/0-9,//cd;
 	      my @rgb = split(/,/, $value);
               $new{$whcolor} = sprintf("#%02x%02x%02x",
@@ -688,8 +677,6 @@ sub html_tests {
   {
     $self->{charsets} .= exists $self->{charsets} ? " $1" : $1;
   }
-
-  # todo: capture URI from meta refresh tag
 }
 
 sub display_text {
@@ -1139,7 +1126,7 @@ sub _merge_uri {
     return "/" . $r_path;
   }
   else {
-    if (index($base_path, '/') >= 0) {
+    if ($base_path =~ m|/|) {
       $base_path =~ s|(?<=/)[^/]*$||;
     }
     else {

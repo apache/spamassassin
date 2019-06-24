@@ -43,14 +43,10 @@ package Mail::SpamAssassin::Plugin::Razor2;
 use Mail::SpamAssassin::Plugin;
 use Mail::SpamAssassin::Logger;
 use Mail::SpamAssassin::Timeout;
-use Mail::SpamAssassin::SubProcBackChannel;
 use strict;
 use warnings;
 # use bytes;
 use re 'taint';
-
-use Storable;
-use POSIX qw(PIPE_BUF WNOHANG _exit);
 
 our @ISA = qw(Mail::SpamAssassin::Plugin);
 
@@ -98,20 +94,6 @@ Whether to use Razor2, if it is available.
   push(@cmds, {
     setting => 'use_razor2',
     default => 1,
-    type => $Mail::SpamAssassin::Conf::CONF_TYPE_NUMERIC,
-  });
-
-=item razor_fork (0|1)		(default: 0)
-
-Instead of running Razor2 synchronously, fork separate process for it and
-read the results in later (similar to async DNS lookups).  Increases
-throughput.  Experimental.
-
-=cut
-
-  push(@cmds, {
-    setting => 'razor_fork',
-    default => 0,
     type => $Mail::SpamAssassin::Conf::CONF_TYPE_NUMERIC,
   });
 
@@ -365,8 +347,6 @@ sub plugin_report {
   return unless $self->{main}->{conf}->{use_razor2};
   return if $options->{report}->{options}->{dont_report_to_razor};
 
-  my $timer = $self->{main}->time_method("razor2_report");
-
   if ($self->razor2_access($options->{text}, 'report', undef)) {
     $options->{report}->{report_available} = 1;
     info('reporter: spam reported to Razor');
@@ -379,8 +359,6 @@ sub plugin_report {
 
 sub plugin_revoke {
   my ($self, $options) = @_;
-
-  my $timer = $self->{main}->time_method("razor2_revoke");
 
   return unless $self->{razor2_available};
   return if $self->{main}->{local_tests_only};
@@ -397,190 +375,34 @@ sub plugin_revoke {
   }
 }
 
-sub finish_parsing_start {
-  my ($self, $opts) = @_;
-
-  # If forking, hard adjust priority -100 to launch early
-  # Find rulenames from eval_to_rule mappings
-  if ($opts->{conf}->{razor_fork}) {
-    foreach (@{$opts->{conf}->{eval_to_rule}->{check_razor2}}) {
-      dbg("razor2: adjusting rule $_ priority to -100");
-      $opts->{conf}->{priority}->{$_} = -100;
-    }
-    foreach (@{$opts->{conf}->{eval_to_rule}->{check_razor2_range}}) {
-      dbg("razor2: adjusting rule $_ priority to -100");
-      $opts->{conf}->{priority}->{$_} = -100;
-    }
-  }
-}
-
 sub check_razor2 {
-  my ($self, $pms, $full) = @_;
+  my ($self, $permsgstatus, $full) = @_;
 
-  return 0 unless $self->{razor2_available};
-  return 0 unless $self->{main}->{conf}->{use_razor2};
+  return $permsgstatus->{razor2_result} if (defined $permsgstatus->{razor2_result});
+  $permsgstatus->{razor2_result} = 0;
+  $permsgstatus->{razor2_cf_score} = { '4' => 0, '8' => 0 };
 
-  return $pms->{razor2_result} if (defined $pms->{razor2_result});
-
-  return 0 if $pms->{razor2_running};
-  $pms->{razor2_running} = 1;
-
-  my $timer = $self->{main}->time_method("check_razor2");
-
-  ## non-forking method
-
-  if (!$self->{main}->{conf}->{razor_fork}) {
-    # TODO: check for cache header, set results appropriately
-    # do it this way to make it easier to get out the results later from the
-    # netcache plugin ... what netcache plugin?
-    (undef, my @results) =
-      $self->razor2_access($full, 'check', $pms->{master_deadline});
-    return $self->_check_result($pms, \@results);
-  }
-
-  ## forking method
-
-  $pms->{razor2_rulename} = $pms->get_current_eval_rule_name();
-
-  # create socketpair for communication
-  $pms->{razor2_backchannel} = Mail::SpamAssassin::SubProcBackChannel->new();
-  my $back_selector = '';
-  $pms->{razor2_backchannel}->set_selector(\$back_selector);
-  eval {
-    $pms->{razor2_backchannel}->setup_backchannel_parent_pre_fork();
-  } or do {
-    dbg("razor2: backchannel pre-setup failed: $@");
-    delete $pms->{razor2_backchannel};
-    return 0;
-  };
-
-  my $pid = fork();
-  if (!defined $pid) {
-    info("razor2: child fork failed: $!");
-    delete $pms->{razor2_backchannel};
-    return 0;
-  }
-  if (!$pid) {
-    $0 = "$0 (razor2)";
-    $SIG{CHLD} = 'DEFAULT';
-    $SIG{PIPE} = 'IGNORE';
-    $SIG{$_} = sub {
-      eval { dbg("razor2: child process $$ caught signal $_[0]"); };
-      _exit(6);  # avoid END and destructor processing
-      kill('KILL',$$);  # still kicking? die!
-      } foreach qw(INT HUP TERM TSTP QUIT USR1 USR2);
-    dbg("razor2: child process $$ forked");
-    $pms->{razor2_backchannel}->setup_backchannel_child_post_fork();
-    (undef, my @results) =
-      $self->razor2_access($full, 'check', $pms->{master_deadline});
-    my $backmsg;
-    eval {
-      $backmsg = Storable::freeze(\@results);
-    };
-    if ($@) {
-      dbg("razor2: child return value freeze failed: $@");
-      _exit(0); # avoid END and destructor processing
-    }
-    if (!syswrite($pms->{razor2_backchannel}->{parent}, $backmsg)) {
-      dbg("razor2: child backchannel write failed: $!");
-    }
-    _exit(0); # avoid END and destructor processing
-  }
-
-  $pms->{razor2_pid} = $pid;
-
-  eval {
-    $pms->{razor2_backchannel}->setup_backchannel_parent_post_fork($pid);
-  } or do {
-    dbg("razor2: backchannel post-setup failed: $@");
-    delete $pms->{razor2_backchannel};
-    return 0;
-  };
-
-  return 0;
-}
-
-sub check_tick {
-  my ($self, $opts) = @_;
-  $self->_check_forked_result($opts->{permsgstatus}, 0);
-}
-
-sub check_cleanup {
-  my ($self, $opts) = @_;
-  $self->_check_forked_result($opts->{permsgstatus}, 1);
-}
-
-sub _check_forked_result {
-  my ($self, $pms, $finish) = @_;
-
-  return 0 if !$pms->{razor2_backchannel};
-  return 0 if !$pms->{razor2_pid};
+  return unless $self->{razor2_available};
+  return unless $self->{main}->{conf}->{use_razor2};
 
   my $timer = $self->{main}->time_method("check_razor2");
 
-  $pms->{razor2_abort} = $pms->{deadline_exceeded} || $pms->{shortcircuited};
+  my $return;
+  my @results;
 
-  my $kid_pid = $pms->{razor2_pid};
-  # if $finish, force waiting for the child
-  my $pid = waitpid($kid_pid, $finish && !$pms->{razor2_abort} ? 0 : WNOHANG);
-  if ($pid == 0) {
-    #dbg("razor2: child process $kid_pid not finished yet, trying later");
-    if ($pms->{razor2_abort}) {
-      dbg("razor2: bailing out due to deadline/shortcircuit");
-      kill('TERM', $kid_pid);
-      if (waitpid($kid_pid, WNOHANG) == 0) {
-        sleep(1);
-        if (waitpid($kid_pid, WNOHANG) == 0) {
-          dbg("razor2: child process $kid_pid still alive, KILL");
-          kill('KILL', $kid_pid);
-          waitpid($kid_pid, 0);
-        }
-      }
-      delete $pms->{razor2_pid};
-      delete $pms->{razor2_backchannel};
-    }
-    return 0;
-  } elsif ($pid == -1) {
-    # child does not exist?
-    dbg("razor2: child process $kid_pid already handled?");
-    delete $pms->{razor2_backchannel};
-    return 0;
-  }
+  # TODO: check for cache header, set results appropriately
 
-  dbg("razor2: child process $kid_pid finished, reading results");
-
-  my $backmsg;
-  my $ret = sysread($pms->{razor2_backchannel}->{latest_kid_fh}, $backmsg, PIPE_BUF);
-  if (!defined $ret || $ret == 0) {
-    dbg("razor2: could not read result from child: ".($ret == 0 ? 0 : $!));
-    delete $pms->{razor2_backchannel};
-    return 0;
-  }
-
-  delete $pms->{razor2_backchannel};
-
-  my $results;
-  eval {
-    $results = Storable::thaw($backmsg);
-  };
-  if ($@) {
-    dbg("razor2: child return value thaw failed: $@");
-    return;
-  }
-
-  $self->_check_result($pms, $results);
-}
-
-sub _check_result {
-  my ($self, $pms, $results) = @_;
-
+  # do it this way to make it easier to get out the results later from the
+  # netcache plugin
+  ($return, @results) =
+    $self->razor2_access($full, 'check', $permsgstatus->{master_deadline});
   $self->{main}->call_plugins ('process_razor_result',
-  	{ results => $results, permsgstatus => $pms }
+  	{ results => \@results, permsgstatus => $permsgstatus }
   );
 
-  foreach my $result (@$results) {
+  foreach my $result (@results) {
     if (exists $result->{result}) {
-      $pms->{razor2_result} = $result->{result} if $result->{result};
+      $permsgstatus->{razor2_result} = $result->{result} if $result->{result};
     }
     elsif ($result->{noresponse}) {
       dbg('razor2: part=' . $result->{part} . ' noresponse');
@@ -593,80 +415,46 @@ sub _check_result {
 
       next if $result->{contested};
 
-      my $cf = $pms->{razor2_cf_score}->{$result->{engine}} || 0;
+      my $cf = $permsgstatus->{razor2_cf_score}->{$result->{engine}} || 0;
       if ($result->{confidence} > $cf) {
-        $pms->{razor2_cf_score}->{$result->{engine}} = $result->{confidence};
+        $permsgstatus->{razor2_cf_score}->{$result->{engine}} = $result->{confidence};
       }
     }
   }
 
-  $pms->{razor2_result} ||= 0;
-  $pms->{razor2_cf_score} ||= {};
-
-  dbg("razor2: results: spam? " . $pms->{razor2_result});
-  while(my ($engine, $cf) = each %{$pms->{razor2_cf_score}}) {
+  dbg("razor2: results: spam? " . $permsgstatus->{razor2_result});
+  while(my ($engine, $cf) = each %{$permsgstatus->{razor2_cf_score}}) {
     dbg("razor2: results: engine $engine, highest cf score: $cf");
   }
 
-  if ($self->{main}->{conf}->{razor_fork}) {
-    # forked needs to run got_hit()
-    if ($pms->{razor2_rulename} && $pms->{razor2_result}) {
-      $pms->got_hit($pms->{razor2_rulename}, "", ruletype => 'eval');
-    }
-    # forked needs to run range callbacks
-    if ($pms->{razor2_range_callbacks}) {
-      foreach (@{$pms->{razor2_range_callbacks}}) {
-        $self->check_razor2_range($pms, '', @$_);
-      }
-    }
-  }
-
-  return $pms->{razor2_result};
+  return $permsgstatus->{razor2_result};
 }
 
 # Check the cf value of a given message and return if it's within the
 # given range
 sub check_razor2_range {
-  my ($self, $pms, $body, $engine, $min, $max, $rulename) = @_;
+  my ($self, $permsgstatus, $body, $engine, $min, $max) = @_;
 
   # If Razor2 isn't available, or the general test is disabled, don't
   # continue.
   return unless $self->{razor2_available};
   return unless $self->{main}->{conf}->{use_razor2};
-  return if $pms->{razor2_abort};
+  return unless $self->{main}->{conf}->{scores}->{'RAZOR2_CHECK'};
 
-  # Check if callback overriding rulename
-  if (!defined $rulename) {
-    $rulename = $pms->get_current_eval_rule_name();
-  }
-
-  # If forked, call back later unless results are in
-  if ($self->{main}->{conf}->{razor_fork}) {
-    if (!defined $pms->{razor2_result}) {
-      dbg("razor2: delaying check_razor2_range call for $rulename");
-      # array matches check_razor2_range() argument order
-      push @{$pms->{razor2_range_callbacks}},
-        [$engine, $min, $max, $rulename];
-      return 0;
-    }
-  } else {
-    # If Razor2 hasn't been checked yet, go ahead and run it.
-    # (only if we are non-forking.. forking will handle these in
-    # callbacks)
-    if (!$pms->{razor2_running}) {
-      $self->check_razor2($pms, $body);
-    }
+  # If Razor2 hasn't been checked yet, go ahead and run it.
+  unless (defined $permsgstatus->{razor2_result}) {
+    $self->check_razor2($permsgstatus, $body);
   }
 
   my $cf = 0;
   if ($engine) {
-    $cf = $pms->{razor2_cf_score}->{$engine};
-    return 0 unless defined $cf;
+    $cf = $permsgstatus->{razor2_cf_score}->{$engine};
+    return unless defined $cf;
   }
   else {
     # If no specific engine was given to the rule, find the highest cf
     # determined and use that
-    while(my ($engine, $ecf) = each %{$pms->{razor2_cf_score}}) {
+    while(my ($engine, $ecf) = each %{$permsgstatus->{razor2_cf_score}}) {
       if ($ecf > $cf) {
         $cf = $ecf;
       }
@@ -674,15 +462,11 @@ sub check_razor2_range {
   }
 
   if ($cf >= $min && $cf <= $max) {
-    my $cf_str = sprintf("cf: %3d", $cf);
-    $pms->test_log($cf_str);
-    if ($self->{main}->{conf}->{razor_fork}) {
-      $pms->got_hit($rulename, "", ruletype => 'eval');
-    }
+    $permsgstatus->test_log(sprintf("cf: %3d", $cf));
     return 1;
   }
 
-  return 0;
+  return;
 }
 
 1;

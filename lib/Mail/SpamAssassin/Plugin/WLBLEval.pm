@@ -407,6 +407,7 @@ sub _check_whitelist {
   my ($self, $list, $addr) = @_;
   $addr = lc $addr;
   if (defined ($list->{$addr})) { return 1; }
+  study $addr;  # study is a no-op since perl 5.16.0, eliminating related bugs
   foreach my $regexp (values %{$list}) {
     if ($addr =~ qr/$regexp/i) {
       dbg("rules: address $addr matches whitelist or blacklist regexp: $regexp");

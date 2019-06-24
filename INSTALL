@@ -243,7 +243,11 @@ SpamAssassin build directory.
 The list of required modules that do not ship with Perl and must be
 installed:
 
-  - Digest::SHA1 (from CPAN)
+  - Digest::SHA1 (from CPAN),
+    or the newer Digest::SHA which is a perl base module since Perl 5.10.0
+
+    The Digest::SHA1 module is used as a cryptographic hash for some
+    tests and the Bayes subsystem if Digest::SHA module is not available.
 
     An external perl module razor-agents-2.84 as used by a Razor2 plugin
     seems to be the only remaining component depending on Digest::SHA1
@@ -285,6 +289,11 @@ installed:
     Debian/Ubuntu: apt-get install libnetaddr-ip-perl
     Fedora: yum install perl-NetAddr-IP
 
+  - Time::HiRes (from CPAN)
+
+    Used by asynchronous DNS lookups to operate timeouts with subsecond
+    precision and to report processing times accurately.
+
   - LWP (aka libwww-perl) (from CPAN)
 
     This set of modules will include both the LWP::UserAgent and
@@ -296,6 +305,19 @@ installed:
 
     Used by sa-update to deal with certain Date requests.
 
+  - IO::Zlib (from CPAN)
+
+    Used by sa-update to uncompress update archives.
+    Version 1.04 or later is required.
+
+    Fedora: yum install perl-IO-Zlib
+
+  - Archive::Tar (from CPAN)
+
+    Used by sa-update to expand update archives.
+    Version 1.23 or later is required.
+
+    Fedora: yum install perl-Archive-Tar
 
 
 Optional Modules
@@ -335,7 +357,8 @@ version is too low for them to be used.
   - Mail::SPF (from CPAN)
 
     Used to check DNS Sender Policy Framework (SPF) records to fight email
-    address forgery and make it easier to identify spams.
+    address forgery and make it easier to identify spams.  This module
+    makes Mail::SPF::Query obsolete.
 
     Net::DNS version 0.58 or higher is required.
 

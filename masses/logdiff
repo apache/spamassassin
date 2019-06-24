@@ -18,16 +18,12 @@ my $tmp2 = "/tmp/logdiff.$$.2";
 fixfile($l1, $tmp1);
 fixfile($l2, $tmp2);
 
-system "diff", @diffargs, $tmp1, $tmp2;
-unlink($tmp1);
-unlink($tmp2);
-exit;
+exec "diff", @diffargs, $tmp1, $tmp2;
 
 sub fixfile {
   my $inf = shift;
   my $outf = shift;
-  die "cannot find $inf" unless -f $inf;
-  open (IN, "-|", "sort \"$inf\"") or die "cannot open $inf";
+  open (IN, "<$inf") or die "cannot open $inf";
   open (OUT, ">$outf") or die "cannot open $outf";
   while (<IN>) {
     if (!/^([\.Y]\s+\S+\s+\S+)\s+(\S+)\s+(.+)/) {
@@ -49,4 +45,3 @@ sub fixfile {
   close IN;
   close OUT;
 }
-

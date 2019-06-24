@@ -78,10 +78,11 @@ sub new {
     if ($type =~ /^([_A-Za-z0-9:]+)$/) {
       $type = untaint_var($type);
       eval '
-  	require '.$type.';
-        $factory = '.$type.'->new();
-        1;
-      ' or do {
+  	    require '.$type.';
+            $factory = '.$type.'->new();
+            1;
+           '
+      or do {
 	my $eval_stat = $@ ne '' ? $@ : "errno=$!";  chomp $eval_stat;
 	warn "auto-whitelist: $eval_stat\n";
 	undef $factory;
@@ -300,7 +301,7 @@ sub ip_to_awl_key {
         $result =~s/(\.0){1,3}\z//;  # truncate zero tail
       }
     }
-  } elsif (index($origip, ':') >= 0 &&  # triage
+  } elsif ($origip =~ /:/ &&  # triage
            $origip =~
            /^ [0-9a-f]{0,4} (?: : [0-9a-f]{0,4} | \. [0-9]{1,3} ){2,9} $/xsi) {
     # looks like an IPv6 address

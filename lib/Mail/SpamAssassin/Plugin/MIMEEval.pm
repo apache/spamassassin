@@ -232,19 +232,19 @@ sub _check_mime_header {
     $pms->{mime_body_text_count}++;
   }
 
-  if (index($cte, 'base64') >= 0) {
+  if ($cte =~ /base64/) {
     $pms->{mime_base64_count}++;
   }
-  elsif (index($cte, 'quoted-printable') >= 0) {
+  elsif ($cte =~ /quoted-printable/) {
     $pms->{mime_qp_count}++;
   }
 
-  if ($cd && index($cd, 'attachment') >= 0) {
+  if ($cd && $cd =~ /attachment/) {
     $pms->{mime_attachment}++;
   }
 
   if ($ctype =~ /^text/ &&
-      index($cte, 'base64') >= 0 &&
+      $cte =~ /base64/ &&
       (!$charset || $charset =~ /(?:us-ascii|ansi_x3\.4-1968|iso-ir-6|ansi_x3\.4-1986|iso_646\.irv:1991|ascii|iso646-us|us|ibm367|cp367|csascii)/) &&
       !($cd && $cd =~ /^(?:attachment|inline)/))
   {
@@ -365,9 +365,9 @@ sub _check_attachments {
 
     $part++;
     $part_type[$part] = $ctype;
-    $part_bytes[$part] = 0 if index($cd, 'attachment') == -1;
+    $part_bytes[$part] = 0 if $cd !~ /attachment/;
 
-    my $cte_is_base64 = index($cte, 'base64') >= 0;
+    my $cte_is_base64 = $cte =~ /base64/i;
     my $previous = '';
     foreach (@{$p->raw()}) {
 
@@ -384,7 +384,7 @@ sub _check_attachments {
       # if ($pms->{mime_html_no_charset} && $ctype eq 'text/html' && defined $charset) {
       # $pms->{mime_html_no_charset} = 0;
       # }
-      if ($pms->{mime_multipart_alternative} && index($cd, 'attachment') == -1 &&
+      if ($pms->{mime_multipart_alternative} && $cd !~ /attachment/ &&
           ($ctype eq 'text/plain' || $ctype eq 'text/html')) {
 	$part_bytes[$part] += length;
       }
@@ -414,7 +414,7 @@ sub _check_attachments {
         # }
 
         # count excessive QP bytes
-        if (index($_, '=') >= 0) {
+        if (index($_, '=') != -1) {
 	  # whoever wrote this next line is an evil hacker -- jm
 	  my $qp = () = m/=(?:09|3[0-9ABCEF]|[2456][0-9A-F]|7[0-9A-E])/g;
 	  if ($qp) {

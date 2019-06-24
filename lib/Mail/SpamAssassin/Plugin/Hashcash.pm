@@ -97,7 +97,10 @@ use Fcntl;
 use File::Path;
 use File::Basename;
 
-use Digest::SHA qw(sha1);
+BEGIN {
+  eval { require Digest::SHA; import Digest::SHA qw(sha1); 1 }
+  or do { require Digest::SHA1; import Digest::SHA1 qw(sha1) }
+}
 
 our @ISA = qw(Mail::SpamAssassin::Plugin);
 
@@ -321,6 +324,8 @@ sub _check_hashcash_resource {
   my ($self, $scanner, $list, $addr) = @_;
   $addr = lc $addr;
   if (defined ($list->{$addr})) { return 1; }
+  study $addr;  # study is a no-op since perl 5.16.0, eliminating related bugs
+
   foreach my $regexp (values %{$list})
   {
     # allow %u == current username

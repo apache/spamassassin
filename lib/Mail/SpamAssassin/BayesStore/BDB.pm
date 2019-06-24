@@ -35,7 +35,11 @@ use Errno qw(EBADF);
 #use Data::Dumper;
 use File::Basename;
 use File::Path;
-use Digest::SHA qw(sha1);
+
+BEGIN {
+  eval { require Digest::SHA; import Digest::SHA qw(sha1); 1 }
+  or do { require Digest::SHA1; import Digest::SHA1 qw(sha1) }
+}
 
 use Mail::SpamAssassin::BayesStore;
 use Mail::SpamAssassin::Logger;
@@ -73,7 +77,6 @@ sub new {
 
 sub DESTROY {
   my $self = shift;
-
   $self->_close_db;
 }
 

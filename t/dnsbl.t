@@ -82,6 +82,7 @@ add_header all Trusted _RELAYSTRUSTED_
 add_header all Untrusted _RELAYSUNTRUSTED_
 
 clear_trusted_networks
+trusted_networks 127.
 trusted_networks 10.
 trusted_networks 150.51.53.1
 

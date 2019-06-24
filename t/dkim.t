@@ -114,7 +114,6 @@ $spamassassin_obj = Mail::SpamAssassin->new({
   require_rules       => 1,
 # debug               => 'dkim',
   post_config_text => q{
-    dns_available yes
     use_auto_whitelist 0
     use_bayes 0
     use_razor2 0

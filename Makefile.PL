@@ -7,10 +7,6 @@ use Config;
 
 use ExtUtils::MakeMaker;
 
-#Check the version of perl.  4.0 requires 5.14.0 or greater
-if ($] < 5.014000) {
-  die "Apache SpamAssassin requires at least Perl 5.14.0"; 
-}
 # avoid stupid 'Argument "6.30_01" isn't numeric in numeric ge (>=)' warnings;
 my $mm_version = eval $ExtUtils::MakeMaker::VERSION;
 
@@ -182,6 +178,7 @@ my %makefile = (
     # be quite explicit about this; afaik CPAN.pm is sensible using this
     # also see CURRENT_PM below
     'PREREQ_PM' => {
+        'Digest::SHA1'         => 0,             # 2.0 is oldest tested version
         'File::Spec'           => 0.8,           # older versions lack some routines we need
         'File::Copy'           => 2.02,          # this version is shipped with 5.005_03, the oldest version known to work
         'Pod::Usage'           => 1.10,          # all versions prior to this do seem to be buggy
@@ -1132,7 +1129,6 @@ conf__install:
 	$(PERL) -MFile::Copy -e "copy(q[rules/v340.pre], q[$(B_CONFDIR)/v340.pre]) unless -f q[$(B_CONFDIR)/v340.pre]"
 	$(PERL) -MFile::Copy -e "copy(q[rules/v341.pre], q[$(B_CONFDIR)/v341.pre]) unless -f q[$(B_CONFDIR)/v341.pre]"
 	$(PERL) -MFile::Copy -e "copy(q[rules/v342.pre], q[$(B_CONFDIR)/v342.pre]) unless -f q[$(B_CONFDIR)/v342.pre]"
-	$(PERL) -MFile::Copy -e "copy(q[rules/v400.pre], q[$(B_CONFDIR)/v400.pre]) unless -f q[$(B_CONFDIR)/v400.pre]"
   
 
 data__install:

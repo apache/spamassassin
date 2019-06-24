@@ -147,7 +147,7 @@ use strict;
 use warnings;
 # use bytes;
 use Digest::MD5 qw(md5_hex);
-#use MIME::QuotedPrint; # use Util::qp_decode instead
+use MIME::QuotedPrint;
 
 our @ISA = qw(Mail::SpamAssassin::Plugin);
 
@@ -188,7 +188,7 @@ my %get_details = (
     my $data = '';
 
     if ($type eq 'quoted-printable') {
-      $data = Mail::SpamAssassin::Util::qp_decode($data);
+      $data = decode_qp($data); # use QuotedPrint->decode_qp
     }
     else {
       $data = $part->decode();  # just use built in base64 decoder
@@ -237,7 +237,7 @@ my %get_details = (
       $encrypted=1 if ($line =~ m/^\/Encrypt/);
 
       # once we hit the first stream, we stop collecting data for fuzzy md5
-      $no_more_fuzzy = 1 if (index($line, 'stream') >= 0);
+      $no_more_fuzzy = 1 if ($line =~ m/stream/);
 
       # From a v1.3 pdf
       # [12234] dbg: pdfinfo: line=630 0 0 149 0 0 cm

@@ -2,8 +2,7 @@
 
 use lib '.'; use lib 't';
 use SATest; sa_t_init("reportheader");
-
-use Test::More tests => 3;
+use Test::More tests => 2;
 
 $ENV{'LANGUAGE'} = $ENV{'LC_ALL'} = 'C';             # a cheat, but we need the patterns to work
 
@@ -11,16 +10,15 @@ $ENV{'LANGUAGE'} = $ENV{'LC_ALL'} = 'C';             # a cheat, but we need the 
 
 %patterns = (
 
-  q{/(?m)^X-Spam-Report:\s*$/}, 'qp-encoded-hdr',
-  q{/(?m)^\t\*\s+[0-9.-]+ INVALID_DATE\s+Invalid Date: header =\?UTF-8\?B\?wq4gwq8gwrA=\?= foo$/}, 'qp-encoded-desc',
-  q{/(?m)^ [0-9.-]+ INVALID_DATE\s+Invalid Date: header ® ¯ ° foo$/}, 'report-desc',
+    q{X-Spam-Report: =?ISO-8859-1?Q? }, 'qp-encoded-hdr',
+    q{ Invalid Date: header =ae =af =b0 foo }, 'qp-encoded-desc',
 
 );
 
 tstprefs ("
         $default_cf_lines
         report_safe 0
-	describe INVALID_DATE	Invalid Date: header ® ¯ ° foo
+	describe INVALID_DATE	Invalid Date: header \xae \xaf \xb0 foo
 	");
 
 sarun ("-L -t < data/spam/001", \&patterns_run_cb);

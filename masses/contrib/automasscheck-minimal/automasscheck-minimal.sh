@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 # Licensed to the Apache Software Foundation (ASF) under one
 # or more contributor license agreements.  See the NOTICE file
@@ -19,89 +19,100 @@
 
 
 setup_masscheck() {
-  [ ! -d "$WORKDIR/$TYPE/masses/spamassassin" ] && mkdir -p "$WORKDIR/$TYPE/masses/spamassassin"
-  cd "$WORKDIR/$TYPE/masses" || { echo "ERROR: cd $WORKDIR/$TYPE/masses failed" >&2; exit 1; }
-  rm -f spamassassin/*
-  echo "" > spamassassin/user_prefs # not used, local.cf works better for admin commands also
-  echo "bayes_auto_learn 0" > spamassassin/local.cf
-  echo "lock_method flock" >> spamassassin/local.cf
-  echo "score ANY_BOUNCE_MESSAGE 0" >> spamassassin/local.cf
-  echo "score BOUNCE_MESSAGE 0" >> spamassassin/local.cf
-  [ -n "${TRUSTED_NETWORKS}" -o -n "${INTERNAL_NETWORKS}" ] && \
-    echo "clear_trusted_networks
-clear_internal_networks" >> spamassassin/local.cf
-  [ -n "${TRUSTED_NETWORKS}" ] && echo "trusted_networks ${TRUSTED_NETWORKS}" >> spamassassin/local.cf
-  [ -n "${INTERNAL_NETWORKS}" ] && echo "internal_networks ${INTERNAL_NETWORKS}" >> spamassassin/local.cf
-  [ -n "${CUSTOM_PREFS}" ] && cat ${CUSTOM_PREFS} >> spamassassin/local.cf
-  rm -f "$WORKDIR/$TYPE/rules/99_custom.cf"
-  [ -n "${CUSTOM_RULES}" ] && cat ${CUSTOM_RULES} > "$WORKDIR/$TYPE/rules/99_custom.cf"
+    mkdir -p spamassassin
+    rm -f spamassassin/*
+    echo "bayes_auto_learn 0" > spamassassin/user_prefs
+    echo "lock_method flock" >> spamassassin/user_prefs
+    echo "bayes_store_module Mail::SpamAssassin::BayesStore::SDBM" >> spamassassin/user_prefs
+    echo "use_auto_whitelist 0" >> spamassassin/user_prefs
+    echo "whitelist_bounce_relays example.com" >> spamassassin/user_prefs
+    echo " score ANY_BOUNCE_MESSAGE 0" >> spamassassin/user_prefs
+    echo " score BOUNCE_MESSAGE 0" >> spamassassin/user_prefs
+    if [ -n "${TRUSTED_NETWORKS}" ]; then
+        echo "trusted_networks ${TRUSTED_NETWORKS}" >> spamassassin/user_prefs
+    fi
+    if [ -n "${INTERNAL_NETWORKS}" ]; then
+        echo "internal_networks ${INTERNAL_NETWORKS}" >> spamassassin/user_prefs
+    fi
 }
 
 setup_checktype() {
-  [ ! -d "$WORKDIR" ] && mkdir "$WORKDIR"
-  DOW=$(date +%w)
-  if [ "$DOW" -ne 6 ] || [ "$1" = "--nightly" ]; then
-    # Run nightly_mass_check
-    TYPE=nightly_mass_check
-    echo "Syncing $TYPE"
-    rsync -qrz --delete rsync://rsync.spamassassin.org/tagged_builds/$TYPE/ "$WORKDIR/$TYPE/"
-    RC=$?
-    NET=
-    LOGTYPE=
-  else
-    # If Saturday, run the weekly_mass_check
-    TYPE=weekly_mass_check
-    echo "Syncing $TYPE"
-    rsync -qrz --delete rsync://rsync.spamassassin.org/tagged_builds/$TYPE/ "$WORKDIR/$TYPE/"
-    RC=$?
-    NET=--net
-    [ ! -z "$REUSE" ] && NET="$REUSE $NET"
-    LOGTYPE=net-
-  fi
-  if [ "$RC" -ne 0 ]; then
-    echo "ERROR: rsync failure $RC, aborting..." >&2
-    exit 1
-  else
-    SVNREV=$(awk '/Revision:/ {print $2}' "$WORKDIR/$TYPE/masses/svninfo.tmp")
-    [ ! -z "$SVNREV" ] && echo "SVN revision = $SVNREV"
-  fi
+    unset NET LOGTYPE
+    export RSYNC_PASSWORD
+    [ ! -d $WORKDIR ] && mkdir $WORKDIR
+if [ "$1" == "--nightly" ]; then
+        # Run nightly_mass_check
+        TYPE=nightly_mass_check
+        echo "Syncing $TYPE"
+        rsync -qrz --delete rsync://rsync.spamassassin.org/tagged_builds/$TYPE/ $WORKDIR/$TYPE/
+        retval=$?
+        JOBS=${JOBS}
+        LOGTYPE=
+        RSYNCMOD=corpus
+   elif date +%w |grep -q ^6; then
+        # If Saturday, run the weekly_mass_check
+        TYPE=weekly_mass_check
+        echo "Syncing $TYPE"
+        rsync -qrz --delete rsync://rsync.spamassassin.org/tagged_builds/$TYPE/ $WORKDIR/$TYPE/
+        retval=$?
+        JOBS=${JOBS}
+        NET=--net
+        LOGTYPE=net-
+        RSYNCMOD=corpus
+    else
+        # Run nightly_mass_check
+        TYPE=nightly_mass_check
+        echo "Syncing $TYPE"
+        rsync -qrz --delete rsync://rsync.spamassassin.org/tagged_builds/$TYPE/ $WORKDIR/$TYPE/
+        retval=$?
+        JOBS=${JOBS}
+        LOGTYPE=
+        RSYNCMOD=corpus
+    fi
+    if [ $retval -ne 0 ]; then
+        echo "ERROR: rsync failed in some way, aborting..."
+        exit 1
+    fi
 }
 
 run_masscheck() {
-  CORPUSNAME=$1
-  shift
-  if [ "$CORPUSNAME" = "single-corpus" ]; then
-    # Use this if you have only a single corpus
-    LOGSUFFIX=
-  else
-    LOGSUFFIX="-${CORPUSNAME}"
-  fi
-  LOGFILE=${LOGTYPE}${LOGPREFIX}${LOGSUFFIX}.log
-  rm -f ham-${LOGFILE} spam-${LOGFILE}
-  set -x
-  $PERL ./mass-check --hamlog=ham-${LOGFILE} --spamlog=spam-${LOGFILE} \
-             -j $JOBS $NET --progress \
+    CORPUSNAME=$1
+    shift
+    if [ "$CORPUSNAME" == "single-corpus" ]; then
+        # Use this if you have only a single corpus
+        LOGSUFFIX=
+    else
+        LOGSUFFIX="-${CORPUSNAME}"
+    fi
+    LOGNAME=${LOGTYPE}${LOGPREFIX}${LOGSUFFIX}.log
+    rm -f ham-${LOGNAME} spam-${LOGNAME}
+    set -x
+    ./mass-check --hamlog=ham-${LOGNAME} --spamlog=spam-${LOGNAME} \
+             -j $JOBS $NET --progress  \
              "$@"
-  LOGLIST="$LOGLIST ham-${LOGFILE} spam-${LOGFILE}"
-  set +x
-  ln -s ham-${LOGFILE} ham.log
-  ln -s spam-${LOGFILE} spam.log
+    LOGLIST="$LOGLIST ham-${LOGNAME} spam-${LOGNAME}"
+    set +x
+    ln -s ham-${LOGNAME} ham.log
+    ln -s spam-${LOGNAME} spam.log
 }
 
 upload_results() {
-  # Occasionally rsync server fails to respond on first attempt,
-  # so attempt upload a few times before giving up.
-  if [ -z "$RSYNC_PASSWORD" ] || [ "$RSYNC_PASSWORD" = "YOUR-PASSWORD" ]; then
-    return 0
-  fi
-  TRY=0
-  while [ "$TRY" -le 5 ]; do
-    TRY=$((TRY+1))
-    ARGS="-qPcvz $LOGLIST $RSYNC_USERNAME@rsync.spamassassin.org::corpus/"
-    echo "rsync $ARGS"
-    RSYNC_PASSWORD=$RSYNC_PASSWORD rsync $ARGS && break
-    sleep 5m
-  done
+    # Occasionally rsync server fails to respond on first attempt,
+    # so attempt upload a few times before giving up.
+    [ -z "$RSYNCMOD" ] && return 0
+    if [ -z "$RSYNC_PASSWORD" ] || [ "$RSYNC_PASSWORD" == "YOUR-PASSWORD" ]; then
+        return 0
+    fi
+    for num in `seq 1 5`; do
+        ARGS="-qPcvz $LOGLIST $RSYNC_USERNAME@rsync.spamassassin.org::$RSYNCMOD/"
+        echo "rsync $ARGS"
+        rsync $ARGS
+        retval=$?
+        if [ $retval -eq 0 ]; then
+            break
+        fi
+        sleep 5m
+    done
 }
 
 # Sanitize Environment
@@ -110,20 +121,22 @@ unset RSYNC_USERNAME
 unset RSYNC_PASSWORD
 unset WORKDIR
 unset CHECKDIR
-unset REUSE
 
 # Configure
-if [ -e "$HOME/.automasscheck.cf" ]; then
-  . $HOME/.automasscheck.cf
+if [ -e ~/.auto-mass-check.cf ]; then
+    . ~/.auto-mass-check.cf
 else
-  echo "ERROR: Configuration file expected at $HOME/.automasscheck.cf" >&2
-  echo "       See https://wiki.apache.org/spamassassin/NightlyMassCheck" >&2
-  exit 255
+    echo "ERROR: Configuration file expected at ~/.auto-mass-check.cf"
+    echo "       See https://fedorahosted.org/amc/"
+    exit 255
 fi
 
 # Run
 JOBS=${JOBS:=8}
-setup_checktype "$@"
+setup_checktype $@
+mkdir -p $WORKDIR/$TYPE
+cd $WORKDIR/$TYPE
+cd masses
 setup_masscheck
 unset LOGLIST
 run_all_masschecks

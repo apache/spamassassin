@@ -27,7 +27,7 @@ use Pod::Usage;
 our (
   $opt_c, $opt_s, $opt_f, $opt_a, $opt_p, $opt_x, $opt_m, $opt_t, $opt_M,
   $opt_X, $opt_L, $opt_l, $opt_i, $opt_T, $opt_o, $opt_S, $opt_P, $opt_d,
-  $opt_g
+  $opt_g, $sorting
 );
 
 GetOptions("c|cffile=s" => \$opt_c,
@@ -331,14 +331,6 @@ my $test;
 foreach $test (keys %freq) {
   my $parsed_rules_entry = $rules{$test};
 
-  # Allow nice T_ rules to be detected
-  my $no_t = $test;
-  if ($no_t =~ s/^T_//) {
-    if (defined $rules{$no_t}) {
-      $parsed_rules_entry = $rules{$no_t};
-    }
-  }
-
   # do not require 'tmp/rules.pl' to have been built from the
   # exact same ruleset version; this assumption screws up nightly
   # mass-check reports if they are generated with a different SVN rev
@@ -483,14 +475,6 @@ if ($opt_T) {
 
 foreach $test (sort { $ranking{$b} <=> $ranking{$a} } @tests) {
   my $parsed_rules_entry = $rules{$test};
-
-  # Allow nice T_ rules to be detected
-  my $no_t = $test;
-  if ($no_t =~ s/^T_//) {
-    if (defined $rules{$no_t}) {
-      $parsed_rules_entry = $rules{$no_t};
-    }
-  }
 
   # do not require 'tmp/rules.pl' to have been built from the
   # exact same ruleset version; this assumption screws up nightly

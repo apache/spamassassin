@@ -25,8 +25,7 @@ use Errno qw(EBADF);
 
 use Mail::SpamAssassin::Plugin;
 use Mail::SpamAssassin::Locales;
-use Mail::SpamAssassin::Util qw(get_my_locales parse_rfc822_date
-                                is_valid_utf_8);
+use Mail::SpamAssassin::Util qw(get_my_locales parse_rfc822_date);
 use Mail::SpamAssassin::Logger;
 use Mail::SpamAssassin::Constants qw(:sa :ip);
 
@@ -141,6 +140,7 @@ sub check_for_unique_subject_id {
   my ($self, $pms) = @_;
   local ($_);
   $_ = lc $pms->get('Subject');
+  study;  # study is a no-op since perl 5.16.0, eliminating related bugs
 
   my $id = 0;
   if (/[-_\.\s]{7,}([-a-z0-9]{4,})$/
@@ -269,17 +269,6 @@ sub check_illegal_chars {
   $header .= ":raw" unless $header =~ /:raw$/;
   my $str = $pms->get($header);
   return 0 if !defined $str || $str eq '';
-
-  if ($str =~ tr/\x00-\x7F//c && is_valid_utf_8($str)) {
-    # is non-ASCII and is valid UTF-8
-    if ($str =~ tr/\x00-\x08\x0B\x0C\x0E-\x1F//) {
-      dbg("eval: %s is valid UTF-8 but contains controls: %s", $header, $str);
-    } else {
-      # todo: only with a SMTPUTF8 mail
-      dbg("eval: %s is valid UTF-8: %s", $header, $str);
-      return 0;
-    }
-  }
 
   # count illegal substrings (RFC 2045)
   # (non-ASCII + C0 controls except TAB, NL, CR)
@@ -571,7 +560,7 @@ sub check_for_forged_juno_received_headers {
     # New style Juno has no X-Originating-IP header, and other changes
     if($rcvd !~ /from.*\b(?:juno|untd)\.com.*[\[\(]$IP_ADDRESS[\]\)].*by/
         && $rcvd !~ / cookie\.(?:juno|untd)\.com /) { return 1; }
-    if(index($xmailer, 'Juno ') == -1) { return 1; }
+    if($xmailer !~ /Juno /) { return 1; }
   } else {
     if($rcvd =~ /from.*\bmail\.com.*\[$IP_ADDRESS\].*by/) {
       if($xmailer !~ /\bmail\.com/) { return 1; }
@@ -604,7 +593,6 @@ sub check_for_forged_gmail_received_headers {
   if ($received =~ /by smtp\.googlemail\.com with ESMTPSA id \S+/) {
     return 0;
   }
-
   if ( (length($xgms) >= GOOGLE_MESSAGE_STATE_LENGTH_MIN) && 
     (length($xss) >= GOOGLE_SMTP_SOURCE_LENGTH_MIN)) {
       return 0;

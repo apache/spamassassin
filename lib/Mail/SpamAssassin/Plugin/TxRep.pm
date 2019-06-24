@@ -1104,7 +1104,7 @@ sub _fn_envelope {
 		$self->{conf}->{txrep_weight_helo};
   my $sign = $args->{signedby};
   my $id     = $args->{address};
-  if (index($args->{address}, ',') >= 0) {
+  if ($args->{address} =~ /,/) {
     $sign = $args->{address};
     $sign =~ s/^.*,//g;
     $id   =~ s/,.*$//g;
@@ -1115,9 +1115,9 @@ sub _fn_envelope {
 	{$factor /= $self->{conf}->{txrep_weight_helo}; $sign = 'helo';}
   elsif ($id =~ /^[a-f\d\.:]+$/ && $self->{conf}->{txrep_weight_ip})
 	{$factor /= $self->{conf}->{txrep_weight_ip};}
-  elsif (index($id, '@') >= 0 && $self->{conf}->{txrep_weight_email})
+  elsif ($id =~ /@/ && $self->{conf}->{txrep_weight_email})
 	{$factor /= $self->{conf}->{txrep_weight_email};}
-  elsif (index($id, '@') == -1 && $self->{conf}->{txrep_weight_domain})
+  elsif ($id !~ /@/ && $self->{conf}->{txrep_weight_domain})
 	{$factor /= $self->{conf}->{txrep_weight_domain};}
   else	{$factor  = 1;}
 
@@ -1413,7 +1413,7 @@ sub check_reputation {
   my ($self, $storage, $pms, $key, $id, $ip, $signedby, $msgscore) = @_;
 
   my $delta  = 0;
-  my $weight = ($key eq 'MSG_ID') ? 1 : $pms->{main}->{conf}->{'txrep_weight_'.lc($key)};
+  my $weight = ($key eq 'MSG_ID')? 1 : eval('$pms->{main}->{conf}->{txrep_weight_'.lc($key).'}');
 
 #  {
 #    #Bug 7164, trying to find out reason for these: _WARN: Use of uninitialized value $msgscore in addition (+) at /usr/share/perl5/vendor_perl/Mail/SpamAssassin/Plugin/TxRep.pm line 1415.
@@ -1638,13 +1638,12 @@ sub open_storages {
     $factory = $self->{main}->{pers_addr_list_factory};
   } else {
     my $type = $self->{conf}->{txrep_factory};
-    if ($type =~ /^[_A-Za-z0-9:]+$/) {
+    if ($type =~ /^([_A-Za-z0-9:]+)$/) {
         $type = untaint_var($type);
-        eval '
-          require '.$type.';
-          $factory = '.$type.'->new();
-          1;
-        ' or do {
+        eval 'require    '.$type.';
+            $factory = '.$type.'->new();
+            1;'
+        or do {
             my $eval_stat = $@ ne '' ? $@ : "errno=$!";  chomp $eval_stat;
             warn "TxRep: $eval_stat\n";
             undef $factory;
@@ -1660,15 +1659,15 @@ sub open_storages {
 	# TODO: add an a method to the handler class instead
 	my ($storage_type, $is_global);
 	
-	if (index(ref($factory), 'SQLBasedAddrList') >= 0) {
+	if (ref($factory) =~ /SQLBasedAddrList/) {
 	    $is_global    = defined $self->{conf}->{user_awl_sql_override_username};
 	    $storage_type = 'SQL';
 	    if ($is_global && $self->{conf}->{user_awl_sql_override_username} eq $self->{main}->{username}) {
 		# skip double storage if current user same as the global override
 		$self->{user_storage} = $self->{global_storage} = $self->{default_storage};
 	    }
-	} elsif (index(ref($factory), 'DBBasedAddrList') >= 0) {
-	    $is_global    = index($self->{conf}->{auto_whitelist_path}, '__userstate__') == -1;
+	} elsif (ref($factory) =~ /DBBasedAddrList/) {
+	    $is_global    = $self->{conf}->{auto_whitelist_path} !~ /__userstate__/;
 	    $storage_type = 'DB';
 	}
 	if (!defined $self->{global_storage}) {
@@ -1752,7 +1751,7 @@ sub ip_to_awl_key {
         $result =~s/(\.0){1,3}\z//;                     # truncate zero tail
       }
     }
-  } elsif (index($origip, ':') >= 0 &&                            # triage
+  } elsif ($origip =~ /:/ &&                            # triage
            $origip =~
            /^ [0-9a-f]{0,4} (?: : [0-9a-f]{0,4} | \. [0-9]{1,3} ){2,9} $/xsi) {
     # looks like an IPv6 address

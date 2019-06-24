@@ -127,7 +127,6 @@ package Mail::SpamAssassin::Plugin::DKIM;
 use Mail::SpamAssassin::Plugin;
 use Mail::SpamAssassin::Logger;
 use Mail::SpamAssassin::Timeout;
-use Mail::SpamAssassin::Util qw(idn_to_ascii);
 
 use strict;
 use warnings;
@@ -668,7 +667,8 @@ sub _dkim_load_modules {
 
   if (!$self->{tried_loading}) {
     $self->{service_available} = 0;
-    my $timemethod = $self->{main}->time_method("dkim_load_modules");
+    my $timemethod = $self->{main}->UNIVERSAL::can("time_method") &&
+                     $self->{main}->time_method("dkim_load_modules");
     my $eval_stat;
     eval {
       # Have to do this so that RPM doesn't find these as required perl modules.
@@ -804,7 +804,8 @@ sub _check_dkim_signature {
     # Mail::DKIM module not available
   } else {
     # signature objects not provided by the caller, must verify for ourselves
-    my $timemethod = $self->{main}->time_method("check_dkim_signature");
+    my $timemethod = $self->{main}->UNIVERSAL::can("time_method") &&
+                     $self->{main}->time_method("check_dkim_signature");
     if (Mail::DKIM::Verifier->VERSION >= 0.40) {
       my $edns = $conf->{dns_options}->{edns};
       if ($edns && $edns >= 1024) {
@@ -1061,7 +1062,8 @@ sub _check_dkim_adsp {
           dbg("dkim: adsp not retrieved, module Mail::DKIM not available");
 
         } else {  # do the ADSP DNS lookup
-          my $timemethod = $self->{main}->time_method("check_dkim_adsp");
+          my $timemethod = $self->{main}->UNIVERSAL::can("time_method") &&
+                           $self->{main}->time_method("check_dkim_adsp");
 
           my $practices;  # author domain signing practices object
           my $timeout = $pms->{conf}->{dkim_timeout};
@@ -1070,13 +1072,12 @@ sub _check_dkim_adsp {
           my $err = $timer->run_and_catch(sub {
             eval {
               if (Mail::DKIM::AuthorDomainPolicy->UNIVERSAL::can("fetch")) {
-                my $author_domain_ace = idn_to_ascii($author_domain);
                 dbg("dkim: adsp: performing lookup on _adsp._domainkey.%s",
-                    $author_domain_ace);
+                    $author_domain);
                 # get our Net::DNS::Resolver object
                 my $res = $self->{main}->{resolver}->get_resolver;
                 $practices = Mail::DKIM::AuthorDomainPolicy->fetch(
-                               Protocol => "dns", Domain => $author_domain_ace,
+                               Protocol => "dns", Domain => $author_domain,
                                DnsResolver => $res);
               }
               1;

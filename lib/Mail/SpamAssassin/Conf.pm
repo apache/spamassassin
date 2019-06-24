@@ -86,7 +86,7 @@ use Mail::SpamAssassin::NetSet;
 use Mail::SpamAssassin::Constants qw(:sa :ip);
 use Mail::SpamAssassin::Conf::Parser;
 use Mail::SpamAssassin::Logger;
-use Mail::SpamAssassin::Util qw(untaint_var idn_to_ascii compile_regexp);
+use Mail::SpamAssassin::Util qw(untaint_var compile_regexp);
 use File::Spec;
 
 our @ISA = qw();
@@ -215,6 +215,7 @@ it from running.
 
   push (@cmds, {
     setting => 'score',
+    is_frequent => 1,
     code => sub {
       my ($self, $key, $value, $line) = @_;
       my($rule, @scores) = split(/\s+/, $value);
@@ -1094,14 +1095,14 @@ the original mail into tagged messages.
 
 =item report_wrap_width (default: 70) 
 
-This option sets the wrap width for description lines in the X-Spam-Report
+This option sets the wrap width for description lines in the X-Spam-Report 
 header, not accounting for tab width. 
 
 =cut
 
   push (@cmds, {
     setting => 'report_wrap_width',
-    default => '75',
+    default => '70',
     type => $CONF_TYPE_NUMERIC,
   });
 
@@ -1214,37 +1215,6 @@ it will be used if it is available.
 	    return $INVALID_VALUE;
 	}
     }
-  });
-
-
-=item body_part_scan_size               (default: 50000)
-
-Per mime-part scan size limit in bytes for "body" type rules.
-The decoded/stripped mime-part is truncated approx to this size.
-Helps scanning large messages safely, so it's not necessary to
-skip them completely. Disabled with 0.
-
-=cut
-
-  push (@cmds, {
-    setting => 'body_part_scan_size',
-    is_admin => 1,
-    default => 50000,
-    type => $CONF_TYPE_NUMERIC,
-  });
-
-
-=item rawbody_part_scan_size               (default: 500000)
-
-Like body_part_scan_size, for "rawbody" type rules.
-
-=cut
-
-  push (@cmds, {
-    setting => 'rawbody_part_scan_size',
-    is_admin => 1,
-    default => 500000,
-    type => $CONF_TYPE_NUMERIC,
   });
 
 
@@ -1963,60 +1933,6 @@ options, leaving the list empty, i.e. allowing DNS queries for any domain
     }
   });
 
-=item dns_block_rule RULE domain
-
-If rule named RULE is hit, DNS queries to specified domain are
-I<temporarily> blocked. Intended to be used with rules that check
-RBL return codes for specific blocked status.  For example:
-
-  urirhssub URIBL_BLOCKED multi.uribl.com. A 1
-  dns_block_rule URIBL_BLOCKED multi.uribl.com
-
-Block status is maintained across all processes by empty statefile named
-"dnsblock_multi.uribl.com" in global state dir:
-home_dir_for_helpers/.spamassassin, $HOME/.spamassassin,
-/var/lib/spamassassin (localstate), depending which is found and writable.
-
-=cut
-
-  push (@cmds, {
-    setting => 'dns_block_rule',
-    is_admin => 1,
-    type => $CONF_TYPE_HASH_KEY_VALUE,
-    code => sub {
-      my ($self, $key, $value, $line) = @_;
-      local($1,$2);
-      defined $value && $value =~ /^(\S+)\s+(.+)$/
-        or return $INVALID_VALUE;
-      my $rule = $1;
-      foreach my $domain (split(/\s+/, lc($2))) {
-        $domain =~ s/^\.//; $domain =~ s/\.\z//;  # strip dots
-        if ($domain !~ /^[a-z0-9.-]+$/) {
-          return $INVALID_VALUE;
-        }
-        # will end up in filename, do not allow / etc in above regex!
-        $domain = untaint_var($domain);
-        # Check.pm check_main() uses this
-        $self->{dns_block_rule}{$rule}{$domain} = 1;
-        # bgsend_and_start_lookup() uses this
-        $self->{dns_block_rule_domains}{$domain} = $domain;
-      }
-    }
-  });
-
-=item dns_block_time   (default: 300)
-
-dns_block_rule query blockage will last this many seconds.
-
-=cut
-
-  push (@cmds, {
-    setting => 'dns_block_time',
-    is_admin => 1,
-    default => 300,
-    type => $CONF_TYPE_NUMERIC,
-  });
-
 =back
 
 =head2 LEARNING OPTIONS
@@ -2607,10 +2523,11 @@ length to no more than 50 characters.
   push (@cmds, {
     command => 'describe',
     setting => 'descriptions',
+    is_frequent => 1,
     type => $CONF_TYPE_HASH_KEY_VALUE,
   });
 
-=item report_charset CHARSET		(default: UTF-8)
+=item report_charset CHARSET		(default: unset)
 
 Set the MIME Content-Type charset used for the text/plain report which
 is attached to spam mail messages.
@@ -2619,7 +2536,7 @@ is attached to spam mail messages.
 
   push (@cmds, {
     setting => 'report_charset',
-    default => 'UTF-8',
+    default => '',
     type => $CONF_TYPE_STRING,
   });
 
@@ -2819,15 +2736,18 @@ Example: http://chkpt.zdnet.com/chkpt/whatever/spammer.domain/yo/dude
     type => $CONF_TYPE_STRINGLIST,
     code => sub {
       my ($self, $key, $value, $line) = @_;
+
       $value =~ s/^\s+//;
       if ($value eq '') {
 	return $MISSING_REQUIRED_VALUE;
       }
+
       my ($rec, $err) = compile_regexp($value, 1);
       if (!$rec) {
         dbg("config: invalid redirector_pattern '$value': $err");
 	return $INVALID_VALUE;
       }
+
       push @{$self->{main}->{conf}->{redirector_patterns}}, $rec;
     }
   });
@@ -3073,6 +2993,7 @@ name.
 
   push (@cmds, {
     setting => 'header',
+    is_frequent => 1,
     is_priv => 1,
     code => sub {
       my ($self, $key, $value, $line) = @_;
@@ -3124,6 +3045,7 @@ Define a body eval test.  See above.
 
   push (@cmds, {
     setting => 'body',
+    is_frequent => 1,
     is_priv => 1,
     code => sub {
       my ($self, $key, $value, $line) = @_;
@@ -3202,6 +3124,7 @@ Define a raw-body eval test.  See above.
 
   push (@cmds, {
     setting => 'rawbody',
+    is_frequent => 1,
     is_priv => 1,
     code => sub {
       my ($self, $key, $value, $line) = @_;
@@ -3320,6 +3243,7 @@ Which would be the same as:
 
   push (@cmds, {
     setting => 'meta',
+    is_frequent => 1,
     is_priv => 1,
     code => sub {
       my ($self, $key, $value, $line) = @_;
@@ -3476,6 +3400,7 @@ it is documented there.
 
   push (@cmds, {
     setting => 'tflags',
+    is_frequent => 1,
     is_priv => 1,
     type => $CONF_TYPE_HASH_KEY_VALUE,
   });
@@ -3637,13 +3562,8 @@ subdomain of the specified zone.
 
 =item util_rb_tld tld1 tld2 ...
 
-=encoding utf8
-
-This option maintains a list of valid TLDs in the RegistryBoundaries code. 
-Top level domains (TLD) include things like com, net, org, xn--p1ai, рф, ...
-International domain names may be specified in ASCII-compatible encoding (ACE),
-e.g. xn--p1ai, xn--qxam, or with Unicode labels encoded as UTF-8 octets,
-e.g. рф, ελ.
+This option maintains list of valid TLDs in the RegistryBoundaries code. 
+TLDs include things like com, net, org, etc.
 
 =cut
 
@@ -3659,7 +3579,7 @@ e.g. рф, ελ.
 	return $INVALID_VALUE;
       }
       foreach (split(/\s+/, $value)) {
-        $self->{valid_tlds}{idn_to_ascii($_)} = 1;
+        $self->{valid_tlds}{lc $_} = 1;
       }
     }
   });
@@ -3667,9 +3587,7 @@ e.g. рф, ελ.
 =item util_rb_2tld 2tld-1.tld 2tld-2.tld ...
 
 This option maintains list of valid 2nd-level TLDs in the RegistryBoundaries
-code.  2TLDs include things like co.uk, fed.us, etc.  International domain
-names may be specified in ASCII-compatible encoding (ACE), or with Unicode
-labels encoded as UTF-8 octets.
+code.  2TLDs include things like co.uk, fed.us, etc.
 
 =cut
 
@@ -3685,7 +3603,7 @@ labels encoded as UTF-8 octets.
 	return $INVALID_VALUE;
       }
       foreach (split(/\s+/, $value)) {
-        $self->{two_level_domains}{idn_to_ascii($_)} = 1;
+        $self->{two_level_domains}{lc $_} = 1;
       }
     }
   });
@@ -3693,9 +3611,7 @@ labels encoded as UTF-8 octets.
 =item util_rb_3tld 3tld1.some.tld 3tld2.other.tld ...
 
 This option maintains list of valid 3rd-level TLDs in the RegistryBoundaries
-code.  3TLDs include things like demon.co.uk, plc.co.im, etc.  International
-domain names may be specified in ASCII-compatible encoding (ACE), or with
-Unicode labels encoded as UTF-8 octets.
+code.  3TLDs include things like demon.co.uk, plc.co.im, etc.
 
 =cut
 
@@ -3711,7 +3627,7 @@ Unicode labels encoded as UTF-8 octets.
 	return $INVALID_VALUE;
       }
       foreach (split(/\s+/, $value)) {
-        $self->{three_level_domains}{idn_to_ascii($_)} = 1;
+        $self->{three_level_domains}{lc $_} = 1;
       }
     }
   });
@@ -3732,9 +3648,9 @@ standard lists supplied by sa-update.
       unless (!defined $value || $value eq '') {
         return $INVALID_VALUE;
       }
-      undef $self->{valid_tlds};
-      undef $self->{two_level_domains};
-      undef $self->{three_level_domains};
+      $self->{valid_tlds} = ();
+      $self->{two_level_domains} = ();
+      $self->{three_level_domains} = ();
       dbg("config: cleared tld lists");
     }
   });
@@ -4120,194 +4036,6 @@ end with a '|'.  Also ignore rules with C<some> combinatorial explosions.
     type     => $CONF_TYPE_BOOL,
   });
 
-=item geodb_module STRING
-
-This option tells SpamAssassin which geolocation module to use. 
-If not specified, all supported ones are tried in this order:
-
-Plugins can override this internally if required.
-
- GeoIP2::Database::Reader
- Geo::IP
- IP::Country::DB_File  (not used unless geodb_options path set)
- IP::Country::Fast
-
-=cut
-
-  push (@cmds, {
-    setting => 'geodb_module',
-    is_admin => 1,
-    default => undef,
-    type => $Mail::SpamAssassin::Conf::CONF_TYPE_STRING,
-    code => sub {
-      my ($self, $key, $value, $line) = @_;
-      if ($value eq 'GeoIP2::Database::Reader' || $value eq 'GeoIP2') {
-        $self->{geodb}->{module} = 'geoip2';
-      } elsif ($value eq 'Geo::IP' || $value eq 'GeoIP') {
-        $self->{geodb}->{module} = 'geoip';
-      } elsif ($value eq 'IP::Country::DB_File' || $value eq 'DB_File') {
-        $self->{geodb}->{module} = 'dbfile';
-      } elsif ($value eq 'IP::Country::Fast' || $value eq 'Fast') {
-        $self->{geodb}->{module} = 'fast';
-      } else {
-        return $Mail::SpamAssassin::Conf::INVALID_VALUE;
-      }
-    }
-  });
-
-  # support deprecated RelayCountry setting
-  push (@cmds, {
-    setting => 'country_db_type',
-    is_admin => 1,
-    default => undef,
-    type => $Mail::SpamAssassin::Conf::CONF_TYPE_STRING,
-    code => sub {
-      my ($self, $key, $value, $line) = @_;
-      warn("deprecated setting used, change country_db_type to geodb_module");
-      if ($value =~ /GeoIP2/i) {
-        $self->{geodb}->{module} = 'geoip2';
-      } elsif ($value =~ /Geo/i) {
-        $self->{geodb}->{module} = 'geoip';
-      } elsif ($value =~ /Fast/i) {
-        $self->{geodb}->{module} = 'fast';
-      } else {
-        return $Mail::SpamAssassin::Conf::INVALID_VALUE;
-      }
-    }
-  });
-
-=item geodb_options dbtype:/path/to/db ...
-
-Supported dbtypes:
-
-I<city> - use City database
-I<country> - use Country database
-I<isp> - try loading ISP database
-I<asn> - try loading ASN database
-
-Append full database path with colon, for example:
-I<isp:/opt/geoip/isp.mmdb>
-
-Plugins can internally request all types they require, geodb_options is only
-needed if the default location search (described below) does not work.
-
-GeoIP/GeoIP2 searches these files/directories:
-
- country:
-   GeoIP2-Country.mmdb, GeoLite2-Country.mmdb
-   GeoIP.dat (and v6 version)
- city:
-   GeoIP2-City.mmdb, GeoLite2-City.mmdb
-   GeoIPCity.dat, GeoLiteCity.dat (and v6 versions)
- isp:
-   GeoIP2-ISP.mmdb
-   GeoIPISP.dat, GeoLiteISP.dat (and v6 versions)
- directories:
-   /usr/local/share/GeoIP
-   /usr/share/GeoIP
-   /var/lib/GeoIP
-   /opt/share/GeoIP
-
-=cut
-
-  push (@cmds, {
-    setting => 'geodb_options',
-    is_admin => 1,
-    type => $CONF_TYPE_HASH_KEY_VALUE,
-    default => {},
-    code => sub {
-      my ($self, $key, $value, $line) = @_;
-      foreach my $option (split (/\s+/, $value)) {
-        my ($option, $db) = split(/:/, $option, 2);
-        $option = lc($option);
-        if ($option eq 'reset') {
-          $self->{geodb}->{options} = {};
-        } elsif ($option eq 'country') {
-          $self->{geodb}->{options}->{country} = $db || undef;
-        } elsif ($option eq 'city') {
-          $self->{geodb}->{options}->{city} = $db || undef;
-        } elsif ($option eq 'isp') {
-          $self->{geodb}->{options}->{isp} = $db || undef;
-        } else {
-          return $INVALID_VALUE;
-        }
-      }
-    }
-  });
-
-=item geodb_search_path /path/to/GeoIP ...
-
-Alternative to geodb_options. Overrides the default list of directories to
-search for default filenames.
-
-=cut
-
-  push (@cmds, {
-    setting => 'geodb_search_path',
-    is_admin => 1,
-    default => [],
-    type => $CONF_TYPE_STRINGLIST,
-    code => sub {
-      my ($self, $key, $value, $line) = @_;
-      if ($value eq 'reset') {
-        $self->{geodb}->{geodb_search_path} = [];
-      } elsif ($value eq '') {
-        return $MISSING_REQUIRED_VALUE;
-      } else {
-        push(@{$self->{geodb}->{geodb_search_path}}, split(/\s+/, $value));
-      }
-    }
-  });
-
-  # support deprecated RelayCountry setting
-  push (@cmds, {
-    setting => 'country_db_path',
-    is_admin => 1,
-    default => undef,
-    type => $Mail::SpamAssassin::Conf::CONF_TYPE_STRING,
-    code => sub {
-      my ($self, $key, $value, $line) = @_;
-      warn("deprecated setting used, change country_db_path to geodb_options");
-      if ($value ne '') {
-        $self->{geodb}->{options}->{country} = $value;
-      } else {
-        return $Mail::SpamAssassin::Conf::INVALID_VALUE;
-      }
-    }
-  });
-  # support deprecated URILocalBL setting
-  push (@cmds, {
-    setting => 'uri_country_db_path',
-    is_admin => 1,
-    default => undef,
-    type => $Mail::SpamAssassin::Conf::CONF_TYPE_STRING,
-    code => sub {
-      my ($self, $key, $value, $line) = @_;
-      warn("deprecated setting used, change uri_country_db_path to geodb_options");
-      if ($value ne '') {
-        $self->{geodb}->{options}->{country} = $value;
-      } else {
-        return $Mail::SpamAssassin::Conf::INVALID_VALUE;
-      }
-    }
-  });
-  # support deprecated URILocalBL setting
-  push (@cmds, {
-    setting => 'uri_country_db_isp_path',
-    is_admin => 1,
-    default => undef,
-    type => $Mail::SpamAssassin::Conf::CONF_TYPE_STRING,
-    code => sub {
-      my ($self, $key, $value, $line) = @_;
-      warn("deprecated setting used, change uri_country_db_isp_path to geodb_options");
-      if ($value ne '') {
-        $self->{geodb}->{options}->{isp} = $value;
-      } else {
-        return $Mail::SpamAssassin::Conf::INVALID_VALUE;
-      }
-    }
-  });
-
 =back
 
 =head1 PREPROCESSING OPTIONS
@@ -4654,7 +4382,7 @@ sub new {
   # keep descriptions in a slow but space-efficient single-string
   # data structure
   # NOTE: Deprecated usage of TieOneStringHash as of 10/2018, it's an
-  # absolute pig, doubling config parsing time, while benchmarks indicate
+  # absolute pig, doubling config parse time, while benchmarks indicate
   # no difference in resident memory size!
   $self->{descriptions} = { };
   #tie %{$self->{descriptions}}, 'Mail::SpamAssassin::Util::TieOneStringHash'
@@ -4676,9 +4404,6 @@ sub new {
   $self->{meta_tests} = { };
   $self->{eval_plugins} = { };
   $self->{duplicate_rules} = { };
-
-  # map eval function names to rulenames
-  $self->{eval_to_rule} = {};
 
   # testing stuff
   $self->{regression_tests} = { };
@@ -5019,7 +4744,7 @@ sub maybe_header_only {
   my($self,$rulename) = @_;
   my $type = $self->{test_types}->{$rulename};
 
-  if ($rulename =~ /^AUTOLEARNTEST/) {
+  if ($rulename =~ /AUTOLEARNTEST/i) {
     dbg("config: auto-learn: $rulename - Test type is $self->{test_types}->{$rulename}.");
   }
  
@@ -5029,7 +4754,9 @@ sub maybe_header_only {
     return 1;
 
   } elsif ($type == $TYPE_META_TESTS) {
-    if (($self->{tflags}->{$rulename}||'') =~ /\bnet\b/) {
+    my $tflags = $self->{tflags}->{$rulename}; 
+    $tflags ||= '';
+    if ($tflags =~ m/\bnet\b/i) {
       return 0;
     } else {
       return 1;
@@ -5043,7 +4770,7 @@ sub maybe_body_only {
   my($self,$rulename) = @_;
   my $type = $self->{test_types}->{$rulename};
 
-  if ($rulename =~ /^AUTOLEARNTEST/) {
+  if ($rulename =~ /AUTOLEARNTEST/i) {
     dbg("config: auto-learn: $rulename - Test type is $self->{test_types}->{$rulename}.");
   }
 
@@ -5056,7 +4783,8 @@ sub maybe_body_only {
     return 1;
 
   } elsif ($type == $TYPE_META_TESTS) {
-    if (($self->{tflags}->{$rulename}||'') =~ /\bnet\b/) {
+    my $tflags = $self->{tflags}->{$rulename}; $tflags ||= '';
+    if ($tflags =~ m/\bnet\b/i) {
       return 0;
     } else {
       return 1;
@@ -5209,7 +4937,7 @@ sub free_uncompiled_rule_source {
   if (!$self->{main}->{keep_config_parsing_metadata} &&
         !$self->{allow_user_rules})
   {
-    #delete $self->{if_stack}; # it's Parser not Conf?
+    delete $self->{if_stack};
     #delete $self->{source_file};
     #delete $self->{meta_dependencies};
   }
@@ -5251,8 +4979,6 @@ sub feature_bug6558_free { 1 }
 sub feature_edns { 1 }  # supports 'dns_options edns' config option
 sub feature_dns_query_restriction { 1 }  # supported config option
 sub feature_registryboundaries { 1 } # replaces deprecated registrarboundaries
-sub feature_geodb { 1 } # if needed for some reason
-sub feature_dns_block_rule { 1 } # supports 'dns_block_rule' config option
 sub feature_compile_regexp { 1 } # Util::compile_regexp
 sub feature_meta_rules_matching { 1 } # meta rules_matching() expression
 sub perl_min_version_5010000 { return $] >= 5.010000 }  # perl version check ("perl_version" not neatly backwards-compatible)

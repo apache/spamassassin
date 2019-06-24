@@ -1,0 +1,77 @@
+#!/bin/sh
+
+# Cron script for "release".  See "backend/nitemc/crontab.txt"
+
+RSYNC_DIR=/home/corpus-rsync/tagged_builds
+REPO_URL=http://svn.apache.org/repos/asf/spamassassin/trunk
+#switched to system perl for spamassassin-vm and system svn
+PERL=/usr/bin/perl
+SVN=/usr/bin/svn
+#PERL=/local/perl586/bin/perl
+#SVN=/opt/subversion-current/bin/svn
+
+
+type="$1"
+versfile="$2"
+
+if [ -z "$type" ]; then
+  echo "Type not specified" >&2
+  exit 1
+fi
+
+if [ ! -f $versfile ]; then
+  echo "Version file not specified" >&2
+  exit 1
+fi
+
+subdir=${type}_mass_check
+
+# No Idea why this command is here even AFTER reading the docs...
+# bash man for set
+#
+# Without options, the name and value of each shell variable are displayed in a format that can be reused as input for setting or resetting the currently-set variables.  Read-only variables  cannot  be
+#              reset.   In posix mode, only shell variables are listed.  The output is sorted according to the current locale.  When options are specified, they set or unset shell attributes.  Any arguments remain-
+#              ing after option processing are treated as values for the positional parameters and are assigned, in order, to $1, $2, ...  $n.  Options, if specified, have the following meanings:
+#              -e      Exit immediately if a pipeline (which may consist of a single simple command),  a subshell command enclosed in parentheses, or one of the commands executed as part of a command list  enclosed
+#                      by  braces  (see  SHELL GRAMMAR above) exits with a non-zero status.  The shell does not exit if the command that fails is part of the command list immediately following a while or until key-
+#                      word, part of the test following the if or elif reserved words, part of any command executed in a && or ││ list except the command following the final && or ││, any command in a pipeline  but
+#                      the  last,  or  if the command’s return value is being inverted with !.  A trap on ERR, if set, is executed before the shell exits.  This option applies to the shell environment and each sub-
+#                      shell environment separately (see COMMAND EXECUTION ENVIRONMENT above), and may cause subshells to exit before executing all the commands in the subshell.
+#              -x      After expanding each simple command, for command, case command, select command, or arithmetic for command, display the expanded value of PS4, followed by the command and  its  expanded  argu-
+#                      ments or associated word list.
+set -ex
+
+echo "Type: $type"
+echo "Version File: $versfile"
+echo "Subdir: $subdir"
+
+REV=`tail -1 $versfile | awk '{print $2}'`
+
+echo "Revision: $REV"
+
+for retry in 1 2 3 4 5 6 7 8 9 10 ; do
+
+    # export the main repo:
+    rm -rf $RSYNC_DIR/$subdir
+    echo Command: $SVN export --non-interactive \
+            -r $REV $REPO_URL $RSYNC_DIR/$subdir
+    $SVN export --non-interactive -r $REV $REPO_URL $RSYNC_DIR/$subdir \
+            || continue
+
+    cd $RSYNC_DIR/$subdir
+    $PERL build/mkrules --out rules > /dev/null || continue
+
+    # create "svn info" file for mass-check
+    # we assume that the current directory was updated via cron to the correct
+    # revision, so just info it. (can't do remote info with the svn version
+    # installed on the zones machine, nor will it accept "--non-interactive")
+    $SVN info $HOME/versions/trunk \
+            > $RSYNC_DIR/$subdir/masses/svninfo.tmp \
+            < /dev/null || continue
+
+    exit               # assume success at this point
+done
+
+echo "FAILED to extract to rsync dir" 1>&2
+exit 2
+

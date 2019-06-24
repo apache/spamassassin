@@ -1,5 +1,5 @@
-#!/usr/bin/perl -w
-my $automcdir = "/usr/local/spamassassin/automc/svn/masses/rule-qa/automc";
+#!/local/perl586/bin/perl -w
+my $automcdir = "/export/home/svn-trunk/masses/rule-qa/automc";
 
 # need this to ensure that 'svn log' will include ALL changes
 my $svn_checkins_root = "http://svn.apache.org/repos/asf/spamassassin/";
@@ -141,7 +141,7 @@ sub read_submitters {
     if (/^# spam results used for .+?: (.*)$/) {
       my $sub = $1;
       $sub =~ s/\bspam-/ /gs;
-      $sub =~ s/(\.r[0-9]+)?\.log\b/ /gs;
+      $sub =~ s/\.log\b/ /gs;
       $sub =~ s/\s+/ /gs;
       $sub =~ s/^ //gs;
       $sub =~ s/ $//gs;

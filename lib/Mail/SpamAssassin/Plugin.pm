@@ -427,39 +427,10 @@ The C<Mail::SpamAssassin::PerMsgStatus> context object for this scan.
 
 =back
 
-=item $plugin->check_dnsbl ( { options ... } )
-
-Called when DNSBL or other network lookups are being launched, implying
-current running priority of -100.  This is the place to start your own
-asynchronously-started network lookups.
-
-=over 4
-
-=item permsgstatus
-
-The C<Mail::SpamAssassin::PerMsgStatus> context object for this scan.
-
-=back
-
 =item $plugin->check_post_dnsbl ( { options ... } )
 
 Called after the DNSBL results have been harvested.  This is a good
 place to harvest your own asynchronously-started network lookups.
-
-=over 4
-
-=item permsgstatus
-
-The C<Mail::SpamAssassin::PerMsgStatus> context object for this scan.
-
-=back
-
-=item $plugin->check_cleanup ( { options ... } )
-
-Called just before message check is finishing and before possible
-auto-learning.  This is guaranteed to be always called, unlike check_tick
-and check_post_dnsbl.  Used for cleaning up left callbacks or forked
-children etc, last chance to make rules hit.
 
 =over 4
 

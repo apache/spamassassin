@@ -49,6 +49,7 @@ use warnings;
 # use bytes;
 use re 'taint';
 
+use constant HAS_NET_DNS => eval { require Net::DNS; };
 use constant HAS_NET_SMTP => eval { require Net::SMTP; };
 
 our @ISA = qw(Mail::SpamAssassin::Plugin);
@@ -62,7 +63,7 @@ sub new {
   bless ($self, $class);
 
   # are network tests enabled?
-  if (!$mailsaobject->{local_tests_only} && HAS_NET_SMTP) {
+  if (!$mailsaobject->{local_tests_only} && HAS_NET_DNS && HAS_NET_SMTP) {
     $self->{spamcop_available} = 1;
     dbg("reporter: network tests on, attempting SpamCop");
   }

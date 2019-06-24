@@ -1,0 +1,8 @@
+header		APOSTROPHE_FROM	From:addr =~ /'/
+describe	APOSTROPHE_FROM	From address contains an apostrophe
+
+header		APOSTROPHE_TOCC	ToCc:addr =~ /'/
+describe	APOSTROPHE_TOCC	To or CC address contains an apostrophe
+
+header		STUDDLYCAPS	Subject =~ /(?:[A-Z][a-z]+){3}/
+describe	STUDDLYCAPS	ContainsThreeWordsLikeThis

@@ -20,7 +20,11 @@ use strict;
 
 use Test::More tests => 33;
 use Mail::SpamAssassin;
-use Digest::SHA qw(sha1_hex);
+
+BEGIN {
+  eval { require Digest::SHA; import Digest::SHA qw(sha1_hex); 1 }
+  or do { require Digest::SHA1; import Digest::SHA1 qw(sha1_hex) }
+}
 
 my %files = (
 	"$prefix/t/data/nice/mime1" => [

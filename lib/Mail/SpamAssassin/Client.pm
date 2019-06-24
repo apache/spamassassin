@@ -270,10 +270,10 @@ sub learn {
   close $remote  or die "error closing socket: $!";
 
   if ($learntype == 0 || $learntype == 1) {
-    return index($did_set, 'local') >= 0;
+    return $did_set =~ /local/;
   }
   else { #safe since we've already checked the $learntype values
-    return index($did_remove, 'local') >= 0;
+    return $did_remove =~ /local/;
   }
 }
 

@@ -24,7 +24,6 @@ use warnings;
 # use bytes;
 use re 'taint';
 use Errno qw();
-use Scalar::Util qw(blessed);
 
 use Mail::SpamAssassin::Util qw(am_running_on_windows);
 use Mail::SpamAssassin::Logger;
@@ -529,9 +528,6 @@ sub wait_for_child_to_accept {
       return;
     }
     else {
-      if( Scalar::Util::blessed($self->{server_fh}[0]) eq 'IO::Socket::SSL' ) {
-        warn "prefork: SSL connection protocol error";
-      }
       warn "prefork: ordered child $kid to accept, but they reported state '$state', killing rogue";
       $self->child_error_kill($kid, $sock);
       $self->adapt_num_children();

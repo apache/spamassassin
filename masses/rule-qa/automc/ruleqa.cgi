@@ -1,5 +1,5 @@
-#!/usr/bin/perl
-my $automcdir = "/usr/local/spamassassin/automc/svn/masses/rule-qa/automc";
+#!/local/perl586/bin/perl
+my $automcdir = "/export/home/svn-trunk/masses/rule-qa/automc";
 
 ###!/usr/bin/perl
 ##my $automcdir = "/home/jm/ftp/spamassassin/masses/rule-qa/automc";
@@ -36,11 +36,15 @@ package Mail::SpamAssassin::CGI::RuleQaApp;
 use CGI;
 use CGI::Carp 'fatalsToBrowser';
 use Date::Manip;
+use XML::Simple;
 use URI::Escape;
 use Time::Local;
 use POSIX qw();
-use Storable qw(nfreeze thaw);
-use Compress::LZ4 qw(compress decompress);
+
+# require XML::Parser; it avoids the awful "balloon to 4GB of RAM in an
+# infinite loop" XML/UTF-8 bug that Daryl found
+use XML::Parser;
+$XML::Simple::PREFERRED_PARSER = "XML::Parser";
 
 # daterevs -- e.g. "20060429/r239832-r" -- are aligned to just before
 # the time of day when the mass-check tagging occurs; that's 0850 GMT,
@@ -75,10 +79,7 @@ sub new {
   $self->read_automc_global_conf();
 
   die "no directory set in automc config for 'html'" unless $AUTOMC_CONF{html};
-  $self->{cachefile} = "$AUTOMC_CONF{html}/ruleqa.scache";
-
-  $self->{scache_keep_time} = defined $AUTOMC_CONF{scache_keep_time} ?
-    $AUTOMC_CONF{scache_keep_time} : 60*60*24*14; # default 2 weeks
+  $self->{cachefile} = "$AUTOMC_CONF{html}/ruleqa.cache";
 
   if ($refresh_cache) {
     $self->refresh_cache();
@@ -96,7 +97,7 @@ sub read_automc_global_conf {
   my ($self) = @_;
 
   open (CF, "<$automcdir/config") or return;
-  while(<CF>) { /^(?!#)(\S+)=(\S+)/ and $AUTOMC_CONF{$1} = $2; }
+  while(<CF>) { /^(\S+)=(\S+)/ and $AUTOMC_CONF{$1} = $2; }
   close CF;
 }
 
@@ -252,9 +253,9 @@ sub ui_get_rules {
   $self->{srcpath} = $self->{q}->param('srcpath') || '';
   $self->{mtime} = $self->{q}->param('mtime') || '';
 
-  $self->{freqs}{head} = { };
-  $self->{freqs}{data} = { };
-  $self->{freqs}{ordr} = { };
+  $self->{freqs_head} = { };
+  $self->{freqs_data} = { };
+  $self->{freqs_ordr} = { };
   $self->{line_counter} = 0;
 }
 
@@ -294,17 +295,17 @@ sub show_default_header {
   my ($self, $title) = @_;
 
   # replaced with use of main, off-zone host:
-  # <!-- <link href="/ruleqa.css" rel="stylesheet" type="text/css"> <script src="https://ruleqa.spamassassin.org/sorttable.js"></script> --> 
+  # <!-- <link href="/ruleqa.css" rel="stylesheet" type="text/css"> <script src="http://ruleqa.spamassassin.org/sorttable.js"></script> --> 
 
   my $hdr = q{<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN"
-                    "https://www.w3.org/TR/html4/strict.dtd">
-  <html xmlns="https://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+                    "http://www.w3.org/TR/html4/strict.dtd">
+  <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
   <head><meta http-equiv="Content-type" content="text/html; charset=utf-8">
-  <link rel="icon" href="https://spamassassin.apache.org/images/favicon.ico">
+  <link rel="icon" href="http://spamassassin.apache.org/images/favicon.ico">
   <title>}.$title.q{: SpamAssassin Rule QA</title>
 
-  <link href="https://ruleqa.spamassassin.org/ruleqa.css" rel="stylesheet" type="text/css">
-  <script src="https://ruleqa.spamassassin.org/sorttable.js"></script>
+  <link href="http://SpamAssassin.apache.org/ruleqa/ruleqa.css" rel="stylesheet" type="text/css">
+  <script src="http://SpamAssassin.apache.org/ruleqa/sorttable.js"></script>
 
   <script type="text/javascript"><!--
 
@@ -320,12 +321,12 @@ sub show_default_header {
           <h1>SpamAssassin Rule QA</h1>
         </td> <td valign=top>
           <p align="right">
-            <a href="https://wiki.apache.org/spamassassin/RuleQaApp">help</a>
+            <a href="http://wiki.apache.org/spamassassin/RuleQaApp">help</a>
           </p>
         </td> </tr> </table>
 
   };
-  #<br> <a href="https://bbmass.spamassassin.org:8011/">preflight mass-check progress</a>
+  #<br> <a href="http://bbmass.spamassassin.org:8011/">preflight mass-check progress</a>
   return $hdr;
 }
 
@@ -373,7 +374,7 @@ sub show_default_view {
   <tr>
   <td width='100%'>
   <div class='ui_label'>
-    Or, <a href="https://wiki.apache.org/spamassassin/DateRev">DateRev</a>
+    Or, <a href="http://wiki.apache.org/spamassassin/DateRev">DateRev</a>
     to display: <input type='textfield' name='daterev' value="!daterev!">
   </div>
   <div class='ui_label'>
@@ -527,7 +528,7 @@ sub show_default_view {
     my $rev = $self->get_rev_for_daterev($self->{daterev});
     my $md = $self->get_rule_metadata($rev);
     my $src = eval { $md->{rulemds}->{$self->{rule}}->{src} } || '(not found)';
-    my $srchref = "https://svn.apache.org/viewvc/spamassassin/trunk/$src?revision=$rev\&view=markup";
+    my $srchref = "http://svn.apache.org/viewvc/spamassassin/trunk/$src?revision=$rev\&view=markup";
 
     my $lastmod = eval {
           POSIX::strftime "%Y-%m-%d %H:%M:%S UTC", gmtime $md->{rulemds}->{$self->{rule}}->{srcmtime}
@@ -633,7 +634,7 @@ sub show_default_view {
       <div class='ui_label'>
       <p>Note: the freqs tables are sortable.  Click on the headers to resort them
       by that column.  <a
-      href="https://www.kryogenix.org/code/browser/sorttable/">(thanks!)</a></p>
+      href="http://www.kryogenix.org/code/browser/sorttable/">(thanks!)</a></p>
       </div>
 
   </body></html>
@@ -860,7 +861,7 @@ sub showfreqsubset {
 
   if ($filename eq 'DETAILS.new') {
     # report which sets we used
-    $self->summarise_head($self->{freqs}{head}{$filename},
+    $self->summarise_head($self->{freqs_head}{$filename},
                     $filename, $strdate, $self->{rule});
   }
 
@@ -876,7 +877,7 @@ sub summarise_head {
   }
 
   map {
-    s/^ham-//; s/\.r[0-9]+\.log$//;
+    s/^ham-//; s/\.log$//;
   } @mcfiles;
 
   my $who = join(', ', @mcfiles);
@@ -889,59 +890,20 @@ sub summarise_head {
 }
 
 sub read_freqs_file {
-  my ($self, $key, $refresh) = @_;
+  my ($self, $key) = @_;
 
-  $refresh ||= 0;
   my $file = $self->{datadir}.$key;
-
-  # storable cache file
-  my $scache = "$file.scache";
-
-  if (!-f $file) {
-    # try gz if not found
-    if (-f "$file.gz") {
-      $file = "$file.gz";
-    } else {
-      warn "missing file $file";
-    }
-  }
-
-  if (-f $scache) {
-    # is fresh?
-    if (mtime($scache) >= mtime($file)) {
-      return if $refresh; # just -refresh
-      eval {
-        $self->{freqs} = thaw(decompress(readfile($scache)));
-      };
-      if ($@ || !defined $self->{freqs}) {
-        warn "cache retrieve failed $scache: $@ $!";
-        # remove bad file
-        unlink($scache);
-      }
-      else {
-        return;
-      }
-    }
-    else {
-      # remove stale cache
-      unlink($scache);
-    }
-  }
-
-  if ($file =~ /\.gz$/) {
+  if (!open (IN, "<$file")) {
     $file =~ s/'//gs;
-    if (!open (IN, "gunzip -cd < '$file' |")) {
+    if (!-f "$file.gz" || !open (IN, "gunzip -cd < '$file.gz' |")) {
       warn "cannot read $file";
       return;
     }
   }
-  elsif (!open (IN, "<$file")) {
-    warn "cannot read $file";
-  }
 
-  $self->{freqs}{head}{$key}=<IN>;
-  $self->{freqs}{data}{$key} = { };
-  $self->{freqs}{ordr}{$key} = [ ];
+  $self->{freqs_head}{$key}=<IN>;
+  $self->{freqs_data}{$key} = { };
+  $self->{freqs_ordr}{$key} = [ ];
   my $lastrule;
 
   my $subset_is_user = 0;
@@ -950,19 +912,19 @@ sub read_freqs_file {
   if ($file =~ /\.all/) { $subset_is_user = 1; }
 
   while (<IN>) {
-    if (/^#/ || / \(all messages/ || /OVERALL%/) {
-      $self->{freqs}{head}{$key} .= $_;
+    if (/(?: \(all messages| results used|OVERALL\%|<mclogmd|was at r\d+)/) {
+      $self->{freqs_head}{$key} .= $_;
     }
-    elsif (/^\s*MSEC/) {
+    elsif (/MSEC/) {
       next;	# just ignored for now
     }
-    elsif (/^\s*scoremap (.*)$/) {
-      $self->{freqs}{data}{$key}{$lastrule}{scoremap} .= $_;
+    elsif (/\s+scoremap (.*)$/) {
+      $self->{freqs_data}{$key}{$lastrule}{scoremap} .= $_;
     }
-    elsif (/^\s*overlap (.*)$/) {
-      $self->{freqs}{data}{$key}{$lastrule}{overlap} .= $_;
+    elsif (/\s+overlap (.*)$/) {
+      $self->{freqs_data}{$key}{$lastrule}{overlap} .= $_;
     }
-    elsif (/ (?:([\+\-])\s+)?(\S+?)(\:\S+)?\s*$/) {
+    elsif (/ ([\+\-])? *(\S+?)(\:\S+)?\s*$/) {
       my $promochar = $1;
       $lastrule = $2;
       my $subset = $3;
@@ -980,9 +942,9 @@ sub read_freqs_file {
       }
 
       my @vals = split;
-      if (!exists $self->{freqs}{data}{$key}{$lastrule}) {
-        push (@{$self->{freqs}{ordr}{$key}}, $lastrule);
-        $self->{freqs}{data}{$key}{$lastrule} = {
+      if (!exists $self->{freqs_data}{$key}{$lastrule}) {
+        push (@{$self->{freqs_ordr}{$key}}, $lastrule);
+        $self->{freqs_data}{$key}{$lastrule} = {
           lines => [ ]
         };
       }
@@ -999,7 +961,7 @@ sub read_freqs_file {
         age => ($subset_is_age ? $subset : undef),
         promotable => $promo ? '1' : '0',
       };
-      push @{$self->{freqs}{data}{$key}{$lastrule}{lines}}, $line;
+      push @{$self->{freqs_data}{$key}{$lastrule}{lines}}, $line;
     }
     elsif (!/\S/) {
       # silently ignore empty lines
@@ -1009,18 +971,6 @@ sub read_freqs_file {
     }
   }
   close IN;
-
-  if ($refresh && !-f $scache) {
-    eval {
-      open (OUT, ">$scache.$$") or die "open failed: $@";
-      print OUT compress(nfreeze(\%{$self->{freqs}}));
-      close OUT;
-    };
-    if ($@ || !rename("$scache.$$", $scache)) {
-      warn "cache store failed $scache: $@";
-      unlink("$scache.$$");
-    }
-  }
 }
 
 sub get_freqs_for_rule {
@@ -1046,8 +996,8 @@ sub get_freqs_for_rule {
 
   };
 
-  my $heads = $self->sub_freqs_head_line($self->{freqs}{head}{$key});
-  my $header_context = $self->extract_freqs_head_info($self->{freqs}{head}{$key});
+  my $heads = $self->sub_freqs_head_line($self->{freqs_head}{$key});
+  my $header_context = $self->extract_freqs_head_info($self->{freqs_head}{$key});
 
   my $headers_id = $key; $headers_id =~ s/[^A-Za-z0-9]/_/gs;
 
@@ -1090,7 +1040,7 @@ sub get_freqs_for_rule {
   $ruleslist ||= '';
   my @rules = split (' ', $ruleslist);
 
-  if (ref $self->{freqs}{ordr}{$key} ne 'ARRAY') {
+  if (ref $self->{freqs_ordr}{$key} ne 'ARRAY') {
     print qq(
       <h3 class='freqs_title'>$desc</h3>
       <table><p><i>('$key' not yet available)</i></p></table>
@@ -1099,11 +1049,11 @@ sub get_freqs_for_rule {
   }
 
   if ($self->{rules_all}) {
-    push @rules, @{$self->{freqs}{ordr}{$key}};
+    push @rules, @{$self->{freqs_ordr}{$key}};
   }
   elsif ($self->{rules_grep} && $ruleslist =~ /^\/(.*)$/) {
     my $regexp = $1;
-    foreach my $r (@{$self->{freqs}{ordr}{$key}}) {
+    foreach my $r (@{$self->{freqs_ordr}{$key}}) {
       next unless ($r =~/${regexp}/i);
       push @rules, $r;
     }
@@ -1152,12 +1102,12 @@ sub get_freqs_for_rule {
              #       0   0.0216   0.0763   0.221    0.52    2.84  X_IP  
   
   foreach my $rule (@rules) {
-    if ($rule && defined $self->{freqs}{data}{$key}{$rule}) {
+    if ($rule && defined $self->{freqs_data}{$key}{$rule}) {
       $comment .= $self->rule_anchor($key,$rule);
-      $comment .= $self->output_freqs_data_line($self->{freqs}{data}{$key}{$rule},
+      $comment .= $self->output_freqs_data_line($self->{freqs_data}{$key}{$rule},
                 \$FREQS_LINE_TEMPLATE,
                 $header_context);
-      $texts .= $self->output_freqs_data_line($self->{freqs}{data}{$key}{$rule},
+      $texts .= $self->output_freqs_data_line($self->{freqs_data}{$key}{$rule},
                 \$FREQS_LINE_TEXT_TEMPLATE,
                 $header_context);
     }
@@ -1421,7 +1371,7 @@ sub generate_scoremap_chart {
   my $xgrid = (100/($max_x||0.0001)) * 5;
   my $ygrid = (100/($max_y||0.0001)) * 10;
 
-  # https://code.google.com/apis/chart/ , woo
+  # http://code.google.com/apis/chart/ , woo
   my $chartsetup = 
       "cht=lxy"             # line chart with x- and y-axis coords
       ."\&amp;chs=400x200"
@@ -1435,7 +1385,7 @@ sub generate_scoremap_chart {
       ."\&amp;chxt=x,y";
 
   $$outref .= "<div class='scoremap_chart'>
-       <img src='https://chart.apis.google.com/chart?$chartsetup'
+       <img src='http://chart.apis.google.com/chart?$chartsetup'
          class='scoremap_chart' width='400' height='200' align='right'
        /></div>\n";
 }
@@ -1571,7 +1521,7 @@ sub get_rev_for_daterev {
 sub assemble_url {
   my ($self, @orig) = @_;
 
-  # e.g. https://buildbot.spamassassin.org/ruleqa?
+  # e.g. http://buildbot.spamassassin.org/ruleqa?
   #     daterev=20060120-r370897-b&rule=T_PH_SEC&s_detail=1
 
   # we support special treatment for 'daterev' and 'rule'
@@ -1611,7 +1561,7 @@ sub assemble_url {
   $url =~ s,^/+,/,;
 
   # now, a much more readable
-  # https://ruleqa.spamassassin.org/
+  # http://ruleqa.spamassassin.org/
   #      20060120-r370897-b/T_PH_SEC/detail
 
   return $url;
@@ -1809,9 +1759,9 @@ sub get_daterev_html_table {
       $colidx = 1;
     }
 
-    # use the daterev number as the row key
-    $rows->{$meta->{daterev}} ||= [ ];
-    $rows->{$meta->{daterev}}->[$colidx] = $meta;
+    # use the rev number as the row key
+    $rows->{$meta->{rev}} ||= [ ];
+    $rows->{$meta->{rev}}->[$colidx] = $meta;
   }
 
   my @rowkeys = sort keys %{$rows};
@@ -1932,8 +1882,9 @@ sub get_rule_metadata {
   my $fname = $AUTOMC_CONF{html}."/rulemetadata/$rev/rulemetadata.xml";
   if (-f $fname) {
     eval {
-      $meta->{rulemds} = parse_rulemetadataxml($fname);
-      #use Data::Dumper; print STDERR Dumper $meta->{rulemds};
+      my $md = XMLin($fname);
+      # use Data::Dumper; print Dumper $md;
+      $meta->{rulemds} = $md->{rulemetadata};
 
       # '__CTYPE_HTML' => {
       # 'srcmtime' => '1154348696',
@@ -1942,8 +1893,8 @@ sub get_rule_metadata {
 
     };
 
-    if ($@ || !defined $meta->{rulemds}) {
-      warn "rev rulemetadata.xml read failed: $@";
+    if ($@) {
+      warn "rev rulemetadata.xml: $@";
     } else {
       return $meta;
     }
@@ -1958,16 +1909,18 @@ sub get_rule_metadata {
 
 sub read_cache {
   my ($self) = @_;
-  if (!-f $self->{cachefile}) {
-    warn "missing $self->{cachefile}, run -refresh";
-    return;
+  if (open(IN, "<".$self->{cachefile})) {
+    my $str = join("", <IN>);
+    close IN;
+
+    my $VAR1;                 # Data::Dumper
+    if (eval $str) {
+      $self->{cached} = $VAR1;        # Data::Dumper's naming
+      return;
+    }
   }
-  eval {
-    $self->{cached} = thaw(decompress(readfile($self->{cachefile})));
-  };
-  if ($@ || !defined $self->{cached}) {
-    warn "cannot read $self->{cachefile}: $@ $!";
-  }
+
+  $self->{cached} = { };
 }
 
 # ---------------------------------------------------------------------------
@@ -1984,15 +1937,16 @@ sub refresh_cache {
     $self->refresh_daterev_metadata($dr);
   }
 
-  eval {
-    open (OUT, ">".$self->{cachefile}.".$$") or die "open failed: $@";
-    print OUT compress(nfreeze(\%{$self->{cached}}));
-    close OUT;
-  };
-  if ($@ || !rename($self->{cachefile}.".$$", $self->{cachefile})) {
-    unlink($self->{cachefile}.".$$");
-    die "cannot write $self->{cachefile}: $@";
-  }
+  use Data::Dumper;
+  my $dump = Data::Dumper->new ([ $self->{cached} ]);
+  $dump->Deepcopy(1);
+  $dump->Purity(1);
+  $dump->Indent(1);
+  my $text = $dump->Dump.";1;";
+
+  open (OUT, ">$self->{cachefile}") or die "cannot write $self->{cachefile}";
+  print OUT $text;
+  close OUT or die "cannot write $self->{cachefile}";
 }
 
 sub refresh_daterev_metadata {
@@ -2009,31 +1963,12 @@ sub refresh_daterev_metadata {
   my $rev = $2;
   my $tag = $3;
 
-  my $datadir = $self->get_datadir_for_daterev($dr);
-  $self->{datadir} = $datadir;
-
-  # update scache for all freqfiles
-  foreach my $f (keys %FREQS_FILENAMES) {
-    my $file = -f $datadir.$f ? $datadir.$f :
-      -f $datadir."$f.gz" ? $datadir."$f.gz" : undef;
-    if (defined $file) {
-      if (time - mtime($file) <= $self->{scache_keep_time}) {
-        $self->read_freqs_file($f, 1);
-      }
-      else {
-        # remove too old cachefiles
-        $file =~ s/\.gz$//;
-        unlink("$file.scache");
-      }
-    }
-  }
-
-  my $fname = "$datadir/info.xml";
-  my $fastfname = "$datadir/fastinfo.xml";
+  my $fname = $self->get_datadir_for_daterev($dr)."/info.xml";
+  my $fastfname = $self->get_datadir_for_daterev($dr)."/fastinfo.xml";
 
   if (-f $fname && -f $fastfname) {
     eval {
-      my $fastinfo = parse_infoxml($fastfname);
+      my $fastinfo = XMLin($fastfname);
       $meta->{rev} = $rev;
       $meta->{tag} = $tag;
       $meta->{mclogmds} = $fastinfo->{mclogmds};
@@ -2056,7 +1991,7 @@ sub refresh_daterev_metadata {
       $meta->{type} = $type;
 
 
-      my $info = parse_infoxml($fname);
+      my $info = XMLin($fname);
       # use Data::Dumper; print Dumper $info;
       my $cdate = $info->{checkin_date};
       $cdate =~ s/T(\S+)\.\d+Z$/ $1/;
@@ -2093,68 +2028,6 @@ sub refresh_daterev_metadata {
       $meta->{tag} = $tag;
       $meta->{type} = 'preflight';  # default
   }
-}
-
-# return file modification time
-sub mtime {
-  return (stat $_[0])[9];
-}
-
-# slurp'a'file
-sub readfile {
-  my $file = shift;
-  my $str;
-  eval {
-    open(IN, $file) or die $@;
-    { local($/); $str = <IN> }
-    close(IN);
-  };
-  if ($@) {
-    warn "read failed $file: $@";
-    return undef;
-  }
-  return $str;
-}
-
-# fast simple xml parser, since we know what to expect
-sub parse_rulemetadataxml {
-  my $file = shift;
-  my $xmlstr = readfile($file);
-  my $md = {};
-  while ($xmlstr =~ m!<rulemetadata>(.*?)</rulemetadata>!gs) {
-    my $rmd = $1;
-    my %attrs;
-    while ($rmd =~ m!<([A-Za-z0-9_]{1,50})>(.*?)</\1>!gs) {
-      $attrs{$1} = $2;
-    }
-    if (defined $attrs{name}) {
-      foreach (keys %attrs) {
-        next if $_ eq 'name';
-        $md->{$attrs{name}}->{$_} = $attrs{$_};
-      }
-    }
-  }
-  if (!%$md) {
-    warn "xml parse failed $file";
-  }
-  return $md;
-}
-
-sub parse_infoxml {
-  my $file = shift;
-  my $xmlstr = readfile($file);
-  my $opt = {};
-  if ($xmlstr =~ m!<opt (.*?)/>!s) {
-    my $optstr = $1;
-    my %attrs;
-    while ($optstr =~ m!\b([A-Za-z0-9_]{1,50})="([^"]*)"!gs) {
-      $opt->{$1} = $2;
-    }
-  }
-  if (!%$opt) {
-    warn "xml parse failed $file";
-  }
-  return $opt;
 }
 
 =cut

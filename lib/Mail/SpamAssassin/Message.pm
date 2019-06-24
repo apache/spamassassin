@@ -46,7 +46,10 @@ use strict;
 use warnings;
 use re 'taint';
 
-use Digest::SHA qw(sha1 sha1_hex);
+BEGIN {
+  eval { require Digest::SHA; import Digest::SHA qw(sha1 sha1_hex); 1 }
+  or do { require Digest::SHA1; import Digest::SHA1 qw(sha1 sha1_hex) }
+}
 
 use Mail::SpamAssassin;
 use Mail::SpamAssassin::Message::Node;
@@ -116,8 +119,6 @@ sub new {
   $self->{line_ending} =	"\012";
   $self->{master_deadline} = $opts->{'master_deadline'};
   $self->{suppl_attrib} = $opts->{'suppl_attrib'};
-  $self->{body_part_scan_size} = $opts->{'body_part_scan_size'} || 0;
-  $self->{rawbody_part_scan_size} = $opts->{'rawbody_part_scan_size'} || 0;
 
   if ($self->{suppl_attrib}) {  # caller-provided additional information
     # pristine_body_length is currently used by an eval test check_body_length
@@ -640,8 +641,6 @@ sub finish {
   delete $self->{'mime_boundary_state'};
   delete $self->{'mbox_sep'};
   delete $self->{'normalize'};
-  delete $self->{'body_part_scan_size'};
-  delete $self->{'rawbody_part_scan_size'};
   delete $self->{'pristine_body'};
   delete $self->{'pristine_headers'};
   delete $self->{'line_ending'};
@@ -696,7 +695,6 @@ sub finish {
 # temporary files are deleted even if the finish() method is omitted
 sub DESTROY {
   my $self = shift;
-
   # best practices: prevent potential calls to eval and to system routines
   # in code of a DESTROY method from clobbering global variables $@ and $! 
   local($@,$!);  # keep outer error handling unaffected by DESTROY
@@ -1069,6 +1067,9 @@ sub _parse_normal {
   elsif ($ct[3]) {
     $msg->{'name'} = $ct[3];
   }
+  if ($msg->{'name'}) {
+    $msg->{'name'} = Encode::decode("MIME-Header", $msg->{'name'});
+  }
 
   $msg->{'boundary'} = $boundary;
 
@@ -1151,24 +1152,7 @@ sub get_body_text_array_common {
     my($type, $rnd) = $p->$method_name();  # decode this part
     if ( defined $rnd ) {
       # Only text/* types are rendered ...
-      if ($self->{body_part_scan_size} && length($rnd) > $self->{body_part_scan_size}) {
-        # try truncating at boundary, nearest 1k block is fine
-        my $idx = index($rnd, "\n", $self->{body_part_scan_size});
-        if ($idx >= 0 && $idx - $self->{body_part_scan_size} <= 1024) {
-          $text .= substr($rnd, 0, $idx)."\n";
-        }
-        else {
-          $idx = index($rnd, ' ', $self->{body_part_scan_size});
-          if ($idx >= 0 && $idx - $self->{body_part_scan_size} <= 1024) {
-            $text .= substr($rnd, 0, $idx)."\n";
-          }
-          else {
-            $text .= substr($rnd, 0, $self->{body_part_scan_size})."\n";
-          }
-        }
-      } else {
-        $text .= $rnd;          
-      }
+      $text .= $rnd;
 
       # TVD - if there are multiple parts, what should we do?
       # right now, just use the last one.  we may need to give some priority
@@ -1181,13 +1165,11 @@ sub get_body_text_array_common {
   }
 
   # whitespace handling (warning: small changes have large effects!)
-  $text =~ s/\n+\s*\n+/\x00/gs;		# double newlines => null
+  $text =~ s/\n+\s*\n+/\f/gs;		# double newlines => form feed
 # $text =~ tr/ \t\n\r\x0b\xa0/ /s;	# whitespace (incl. VT, NBSP) => space
-# $text =~ tr/ \t\n\r\x0b/ /s;		# whitespace (incl. VT) => single space
-  $text =~ s/\s+/ /gs;		        # Unicode whitespace => single space
-  $text =~ tr/\x00/\n/;			# null => newline
+  $text =~ tr/ \t\n\r\x0b/ /s;		# whitespace (incl. VT) => space
+  $text =~ tr/\f/\n/;			# form feeds => newline
 
-  utf8::encode($text) if utf8::is_utf8($text);
   my @textary = split_into_array_of_short_lines($text);
   $self->{$key} = \@textary;
 
@@ -1230,8 +1212,7 @@ sub get_decoded_body_text_array {
     next if ($parts[$pt]->{'type'} eq 'text/calendar');
 
     push(@{$self->{text_decoded}},
-         split_into_array_of_short_paragraphs($parts[$pt]->decode(),
-             $self->{rawbody_part_scan_size}));
+         split_into_array_of_short_paragraphs($parts[$pt]->decode()));
   }
 
   return $self->{text_decoded};
@@ -1258,7 +1239,6 @@ sub split_into_array_of_short_lines {
 
 # split a text into array of paragraphs of sizes between
 # $chunk_size and 2 * $chunk_size, returning the resulting array
-# optional argument to limit returned length
 
 sub split_into_array_of_short_paragraphs {
   my @result;
@@ -1272,7 +1252,6 @@ sub split_into_array_of_short_paragraphs {
       if ($j < 0) { $j = $ofs+$chunk_size }
     }
     push(@result, substr($_[0], $ofs, $j-$ofs+1));
-    return @result if (defined $_[1] && $_[1] && $ofs >= $_[1]);
   }
   push(@result, substr($_[0], $ofs))  if $ofs < $text_l;
   @result;

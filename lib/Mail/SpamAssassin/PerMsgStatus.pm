@@ -55,13 +55,11 @@ use re 'taint';
 
 use Errno qw(ENOENT);
 use Time::HiRes qw(time);
-use Encode;
 
 use Mail::SpamAssassin::Constants qw(:sa);
 use Mail::SpamAssassin::AsyncLoop;
 use Mail::SpamAssassin::Conf;
-use Mail::SpamAssassin::Util qw(untaint_var base64_encode idn_to_ascii
-                                uri_list_canonicalize);
+use Mail::SpamAssassin::Util qw(untaint_var uri_list_canonicalize);
 use Mail::SpamAssassin::Timeout;
 use Mail::SpamAssassin::Logger;
 
@@ -270,7 +268,6 @@ sub new {
     'async'             => Mail::SpamAssassin::AsyncLoop->new($main),
     'master_deadline'   => $msg->{master_deadline},  # dflt inherited from msg
     'deadline_exceeded' => 0,  # time limit exceeded, skipping further tests
-    'tmpfiles'          => { },
   };
 
   dbg("check: pms new, time limit in %.3f s",
@@ -309,14 +306,8 @@ sub new {
 
 sub DESTROY {
   my ($self) = shift;
-
-  # best practices: prevent potential calls to eval and to system routines
-  # in code of a DESTROY method from clobbering global variables $@ and $! 
-  local($@,$!);  # keep outer error handling unaffected by DESTROY
-  # Bug 5808 - cleanup tmpfiles
-  foreach my $fn (keys %{$self->{tmpfiles}}) {
-    unlink($fn) or dbg("check: cannot unlink $fn: $!");
-  }
+  local $@;
+  eval { $self->delete_fulltext_tmpfile() };  # Bug 5808
 }
 
 ###########################################################################
@@ -1039,7 +1030,7 @@ sub _get_added_headers {
   foreach my $hf_ref (@{$self->{conf}->{$which}}) {
     my($hfname, $hfbody) = @$hf_ref;
     my $line = $self->_process_header($hfname,$hfbody);
-    $line = $self->mime_encode_header($line);
+    $line = $self->qp_encode_header($line);
     $str .= "X-Spam-$hfname: $line\n";
   }
   return $str;
@@ -1059,23 +1050,21 @@ sub rewrite_report_safe {
   # This is the new message.
   my $newmsg = '';
 
-  # the character set of a report
-  my $report_charset = $self->{conf}->{report_charset} || "UTF-8";
+  # the report charset
+  my $report_charset = "; charset=iso-8859-1";
+  if ($self->{conf}->{report_charset}) {
+    $report_charset = "; charset=" . $self->{conf}->{report_charset};
+  }
 
   # the SpamAssassin report
   my $report = $self->get_report();
 
-  if (!utf8::is_utf8($report)) {
-    # already in octets
-  } else {
-    # encode to octets
-    if (uc $report_charset eq 'UTF-8') {
-      dbg("check: encoding report to $report_charset");
-      utf8::encode($report);  # very fast
-    } else {
-      dbg("check: encoding report to $report_charset. Slow, to be avoided!");
-      $report = Encode::encode($report_charset, $report);  # slow
-    }
+  # If there are any wide characters, need to MIME-encode in UTF-8
+  # TODO: If $report_charset is something other than iso-8859-1/us-ascii, then
+  # we could try converting to that charset if possible
+  unless ($] < 5.008 || utf8::downgrade($report, 1)) {
+      $report_charset = "; charset=utf-8";
+      utf8::encode($report);
   }
 
   # get original headers, "pristine" if we can do it
@@ -1188,7 +1177,7 @@ Content-Type: multipart/mixed; boundary="$boundary"
 This is a multi-part message in MIME format.
 
 --$boundary
-Content-Type: text/plain; charset=$report_charset
+Content-Type: text/plain$report_charset
 Content-Disposition: inline
 Content-Transfer-Encoding: 8bit
 
@@ -1303,59 +1292,35 @@ sub rewrite_no_report_safe {
   return $newmsg.$self->{msg}->get_pristine_body();
 }
 
-# encode a header field body into ASCII as per RFC 2047
-#
-sub mime_encode_header {
+sub qp_encode_header {
   my ($self, $text) = @_;
 
-  utf8::encode($text)  if utf8::is_utf8($text);
+  # return unchanged if there are no 8-bit characters
+  return $text  if $text !~ tr/\x00-\x7F//c;
 
-  my $result = '';
-  for my $line (split(/^/, $text)) {
-
-    if ($line =~ /^[\x09\x20-\x7E]*\r?\n\z/s) {
-      $result .= $line;  # no need for encoding
-
-    } else {
-      my $prefix = '';
-      my $suffix = '';
-
-      local $1;
-      if ($line =~ s/( (?: ^ | [ \t] ) [\x09\x20-\x7E]* (?: \r?\n )? ) \z//xs) {
-        $suffix = $1;
-      } elsif ($line =~ s/(\r?\n)\z//s) {
-        $suffix = $1;
-      }
-
-      if ($line =~ s/^ ( [\x09\x20-\x7E]* (?: [ \t] | \z ) )//xs) {
-        $prefix = $1;
-      }
-
-      if ($line eq '') {
-        $result .= $prefix . $suffix;
-      } else {
-        my $qp_enc_count = $line =~ tr/=?_\x00-\x1F\x7F-\xFF//;
-        if (length($line) + $qp_enc_count*2 <= 4 * int(length($line)+2)/3) {
-          # RFC 2047: Upper case should be used for hex digits A through F
-          $line =~ s{ ( [=?_\x00-\x20\x7F-\xFF] ) }
-                    { $1 eq ' ' ? '_' : sprintf("=%02X", ord $1) }xges;
-          $result .= $prefix . '=?UTF-8?Q?' . $line;
-        } else {
-          $result .= $prefix . '=?UTF-8?B?' . base64_encode($line);
-        }
-        $result .= '?=' . $suffix;
-      }
-    }
+  my $cs = 'ISO-8859-1';
+  if ($self->{report_charset}) {
+    $cs = $self->{report_charset};
   }
 
-  dbg("markup: mime_encode_header: %s", $result);
-  return $result;
+  my @hexchars = split('', '0123456789abcdef');
+  my $ord;
+  local $1;
+  $text =~ s{([\x80-\xff])}{
+		$ord = ord $1;
+		'='.$hexchars[($ord & 0xf0) >> 4].$hexchars[$ord & 0x0f]
+	}ges;
+
+  $text = '=?'.$cs.'?Q?'.$text.'?=';
+
+  dbg("markup: encoding header in $cs: $text");
+  return $text;
 }
 
 sub _process_header {
   my ($self, $hdr_name, $hdr_data) = @_;
 
-  $hdr_data = $self->_replace_tags($hdr_data);  # as octets
+  $hdr_data = $self->_replace_tags($hdr_data);
   $hdr_data =~ s/(?:\r?\n)+$//; # make sure there are no trailing newlines ...
 
   if ($self->{conf}->{fold_headers}) {
@@ -1395,13 +1360,7 @@ sub _replace_tags {
           # _get_tag on an attempt to use such tag in add_header template
         } else {
           $result = $self->get_tag_raw($tag,$3);
-          if (!ref $result) {
-            utf8::encode($result) if utf8::is_utf8($result);
-          } elsif (ref $result eq 'ARRAY') {
-            my @values = @$result;  # avoid modifying referenced array
-            for (@values) { utf8::encode($_) if utf8::is_utf8($_) }
-            $result = join(' ', @values);
-          }
+          $result = join(' ',@$result)  if ref $result eq 'ARRAY';
         }
         defined $result ? $result : $full;
       }ge;
@@ -1763,28 +1722,23 @@ sub extract_message_metadata {
     $self->{$item} = $self->{msg}->{metadata}->{$item};
   }
 
-  # International domain names (UTF-8) must be converted to ASCII-compatible
-  # encoding (ACE) for the purpose of setting the SENDERDOMAIN and AUTHORDOMAIN
-  # tags (explicitly required for DMARC, RFC 7489)
+  # TODO: International domain names (UTF-8) must be converted to
+  # ASCII-compatible encoding (ACE) for the purpose of setting the
+  # SENDERDOMAIN and AUTHORDOMAIN tags (and probably for other uses too).
+  # (explicitly required for DMARC, draft-kucherawy-dmarc-base sect. 5.6.1)
   #
   { local $1;
     my $addr = $self->get('EnvelopeFrom:addr', undef);
     # collect a FQDN, ignoring potential trailing WSP
     if (defined $addr && $addr =~ /\@([^@. \t]+\.[^@ \t]+?)[ \t]*\z/s) {
-      my $d = idn_to_ascii($1);
-      $self->set_tag('SENDERDOMAIN', $d);
-      $self->{msg}->put_metadata("X-SenderDomain", $d);
-      dbg("metadata: X-SenderDomain: %s", $d);
+      $self->set_tag('SENDERDOMAIN', lc $1);
     }
     # TODO: the get ':addr' only returns the first address; this should be
     # augmented to be able to return all addresses in a header field, multiple
     # addresses in a From header field are allowed according to RFC 5322
     $addr = $self->get('From:addr', undef);
     if (defined $addr && $addr =~ /\@([^@. \t]+\.[^@ \t]+?)[ \t]*\z/s) {
-      my $d = idn_to_ascii($1);
-      $self->set_tag('AUTHORDOMAIN', $d);
-      $self->{msg}->put_metadata("X-AuthorDomain", $d);
-      dbg("metadata: X-AuthorDomain: %s", $d);
+      $self->set_tag('AUTHORDOMAIN', lc $1);
     }
   }
 
@@ -2537,9 +2491,7 @@ sub ensure_rules_are_complete {
       dbg("rules: rule $r is still not complete; exited early?");
     }
     elsif ($elapsed > 0) {
-      my $txt = "rules: $r took $elapsed seconds to complete, for $metarule";
-      # Info only if something took over 1 sec to wait, prevent log flood
-      if ($elapsed >= 1) { info($txt); } else { dbg($txt); }
+      info("rules: $r took $elapsed seconds to complete, for $metarule");
     }
   }
 }
@@ -2866,7 +2818,7 @@ sub get_envelope_from {
     # make sure we get the most recent copy - there can be only one EnvelopeSender.
     $envf = $self->get($self->{conf}->{envelope_sender_header}.":addr",undef);
     # ok if it contains an "@" sign, or is "" (ie. "<>" without the < and >)
-    goto ok if defined $envf && (index($envf, '@') > 0 || $envf eq '');
+    goto ok if defined $envf && ($envf =~ /\@/ || $envf eq '');
     # Warn them if it's configured, but not there or not usable.
     if (defined $envf) {
       chomp $envf;
@@ -2886,19 +2838,17 @@ sub get_envelope_from {
   # if possible... use the last untrusted header, in case there's
   # trusted headers.
   my $lasthop = $self->{relays_untrusted}->[0];
-  my $lasthop_str = 'last untrusted';
   if (!defined $lasthop) {
     # no untrusted headers?  in that case, the message is ALL_TRUSTED.
     # use the first trusted header (ie. the oldest, originating one).
     $lasthop = $self->{relays_trusted}->[-1];
-    $lasthop_str = 'first trusted';
   }
 
   if (defined $lasthop) {
     $envf = $lasthop->{envfrom};
-    # ok if it contains an "@" sign, or is "" (ie. "<>" without the < and >)
-    if (defined $envf && (index($envf, '@') > 0 || $envf eq '')) {
-      dbg("message: using $lasthop_str relay envelope-from as EnvelopeFrom: '$envf'");
+    # TODO FIXME: Received.pm puts both null senders and absence-of-sender
+    # into the relays array as '', so we can't distinguish them :(
+    if ($envf && ($envf =~ /\@/)) {
       goto ok;
     }
   }
@@ -2927,7 +2877,6 @@ sub get_envelope_from {
       dbg("message: X-Envelope-From header found after 1 or more Received lines, cannot trust envelope-from");
       return;
     } else {
-      dbg("message: using X-Envelope-From header as EnvelopeFrom: '$envf'");
       goto ok;
     }
   }
@@ -2939,7 +2888,6 @@ sub get_envelope_from {
     if ($self->get("ALL") =~ /^Received:.*?^Envelope-Sender:/smi) {
       dbg("message: Envelope-Sender header found after 1 or more Received lines, cannot trust envelope-from");
     } else {
-      dbg("message: using Envelope-Sender header as EnvelopeFrom: '$envf'");
       goto ok;
     }
   }
@@ -2957,7 +2905,6 @@ sub get_envelope_from {
     if ($self->get("ALL") =~ /^Received:.*?^Return-Path:/smi) {
       dbg("message: Return-Path header found after 1 or more Received lines, cannot trust envelope-from");
     } else {
-      dbg("message: using Return-Path header as EnvelopeFrom: '$envf'");
       goto ok;
     }
   }
@@ -3033,31 +2980,26 @@ sub sa_die { Mail::SpamAssassin::sa_die(@_); }
 =item $status->create_fulltext_tmpfile (fulltext_ref)
 
 This function creates a temporary file containing the passed scalar
-reference data.  If no scalar is passed, full/pristine message text is
-assumed.  This is typically used by external programs like pyzor and
-dccproc, to avoid hangs due to buffering issues.
+reference data (typically the full/pristine text of the message).
+This is typically used by external programs like pyzor and dccproc, to
+avoid hangs due to buffering issues.   Methods that need this, should
+call $self->create_fulltext_tmpfile($fulltext) to retrieve the temporary
+filename; it will be created if it has not already been.
 
-All tempfiles are automatically cleaned up by PerMsgStatus destructor.
+Note: This can only be called once until $status->delete_fulltext_tmpfile() is
+called.
 
 =cut
 
 sub create_fulltext_tmpfile {
   my ($self, $fulltext) = @_;
 
-  my $pristine;
-  if (!defined $fulltext) {
-    if (defined $self->{fulltext_tmpfile}) {
-      return $self->{fulltext_tmpfile};
-    }
-    $fulltext = \$self->{msg}->get_pristine();
-    $pristine = 1;
+  if (defined $self->{fulltext_tmpfile}) {
+    return $self->{fulltext_tmpfile};
   }
 
   my ($tmpf, $tmpfh) = Mail::SpamAssassin::Util::secure_tmpfile();
   $tmpfh  or die "failed to create a temporary file";
-
-  # record all created files so we can remove on DESTROY
-  $self->{tmpfiles}->{$tmpf} = 1;
 
   # PerlIO's buffered print writes in 8 kB chunks - which can be slow.
   #   print $tmpfh $$fulltext  or die "error writing to $tmpf: $!";
@@ -3071,33 +3013,30 @@ sub create_fulltext_tmpfile {
   }
   close $tmpfh  or die "error closing $tmpf: $!";
 
-  $self->{fulltext_tmpfile} = $tmpf  if $pristine;
+  $self->{fulltext_tmpfile} = $tmpf;
 
   dbg("check: create_fulltext_tmpfile, written %d bytes to file %s",
       length($$fulltext), $tmpf);
 
-  return $tmpf;
+  return $self->{fulltext_tmpfile};
 }
 
-=item $status->delete_fulltext_tmpfile (tmpfile)
+=item $status->delete_fulltext_tmpfile ()
 
 Will cleanup after a $status->create_fulltext_tmpfile() call.  Deletes the
-temporary file and uncaches the filename.  Generally there no need to call
-this, PerMsgStatus destructor cleans up all tmpfiles.
+temporary file and uncaches the filename.
 
 =cut
 
 sub delete_fulltext_tmpfile {
-  my ($self, $tmpfile) = @_;
-
-  $tmpfile = $self->{fulltext_tmpfile} if !defined $tmpfile;
-  if (defined $tmpfile && $self->{tmpfiles}->{$tmpfile}) {
-    unlink($tmpfile) or dbg("cannot unlink $tmpfile: $!");
-    if ($self->{fulltext_tmpfile} &&
-          $tmpfile eq $self->{fulltext_tmpfile}) {
-      delete $self->{fulltext_tmpfile};
+  my ($self) = @_;
+  if (defined $self->{fulltext_tmpfile}) {
+    if (!unlink $self->{fulltext_tmpfile}) {
+      my $msg = sprintf("cannot unlink %s: %s", $self->{fulltext_tmpfile}, $!);
+      # don't fuss too much if file is missing, perhaps it wasn't even created
+      if ($! == ENOENT) { warn $msg } else { die $msg }
     }
-    delete $self->{tmpfiles}->{$tmpfile};
+    $self->{fulltext_tmpfile} = undef;
   }
 }
 

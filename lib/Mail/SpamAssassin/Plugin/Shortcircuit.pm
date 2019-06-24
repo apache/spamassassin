@@ -256,8 +256,6 @@ sub hit_rule {
     $scscore = $score;
   }
 
-  $scan->{shortcircuited} = 1;
-
   # bug 5256: if we short-circuit, don't do auto-learning
   $scan->{disable_auto_learning} = 1;
   $scan->got_hit('SHORTCIRCUIT', '', score => $scscore);

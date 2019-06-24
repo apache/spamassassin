@@ -33,10 +33,6 @@ use re 'taint';
 our @ISA = qw();
 
 use Mail::SpamAssassin::Logger;
-use Mail::SpamAssassin::Util qw(idn_to_ascii);
-use Mail::SpamAssassin::Constants qw(:ip);
-
-my $IP_ADDRESS = IP_ADDRESS;
 
 # called from SpamAssassin->init() to create $self->{util_rb}
 sub new {
@@ -102,9 +98,9 @@ Examples:
 =cut
 
 sub split_domain {
-  my ($self, $domain) = @_;
+  my $self = shift;
+  my $domain = lc shift;
 
-  $domain = idn_to_ascii($domain);
   my $hostname = '';
 
   if (defined $domain && $domain ne '') {
@@ -120,11 +116,16 @@ sub split_domain {
     my @hostname;
 
     while (@domparts > 1) { # go until we find the TLD
-      if (@domparts == 2) {
-        # co.uk, etc.
-        my $temp = join(".", @domparts);
-        # International domain names in ASCII-compatible encoding (ACE)
-        last if ($self->{conf}->{two_level_domains}{$temp});
+      if (@domparts == 4) {
+        if ($domparts[3] eq 'us' &&
+            (($domparts[0] eq 'pvt' && $domparts[1] eq 'k12') ||
+             ($domparts[0] =~ /^c[io]$/)))
+        {
+          # http://www.neustar.us/policies/docs/rfc_1480.txt
+          # "Fire-Dept.CI.Los-Angeles.CA.US"
+          # "<school-name>.PVT.K12.<state>.US"
+          last if ($US_STATES{$domparts[2]});
+        }
       }
       elsif (@domparts == 3) {
         # http://www.neustar.us/policies/docs/rfc_1480.txt
@@ -136,20 +137,13 @@ sub split_domain {
         }
         else {
           my $temp = join(".", @domparts);
-          # International domain names in ASCII-compatible encoding (ACE)
           last if ($self->{conf}->{three_level_domains}{$temp});
         }
       }
-      elsif (@domparts == 4) {
-        if ($domparts[3] eq 'us' &&
-            (($domparts[0] eq 'pvt' && $domparts[1] eq 'k12') ||
-             ($domparts[0] =~ /^c[io]$/)))
-        {
-          # http://www.neustar.us/policies/docs/rfc_1480.txt
-          # "Fire-Dept.CI.Los-Angeles.CA.US"
-          # "<school-name>.PVT.K12.<state>.US"
-          last if ($US_STATES{$domparts[2]});
-        }
+      elsif (@domparts == 2) {
+        # co.uk, etc.
+        my $temp = join(".", @domparts);
+        last if ($self->{conf}->{two_level_domains}{$temp});
       }
       push(@hostname, shift @domparts);
     }
@@ -185,7 +179,7 @@ sub trim_domain {
   my $self = shift;
   my $domain = shift;
 
-  my (undef, $dom) = $self->split_domain($domain);
+  my ($host, $dom) = $self->split_domain($domain);
   return $dom;
 }
 
@@ -202,12 +196,11 @@ uses a valid TLD or ccTLD.
 =cut
 
 sub is_domain_valid {
-  my ($self, $dom) = @_;
+  my $self = shift;
+  my $dom = lc shift;
 
   # domains don't have whitespace
   return 0 if ($dom =~ /\s/);
-
-  $dom = idn_to_ascii($dom);
 
   # ensure it ends in a known-valid TLD, and has at least 1 dot
   return 0 unless ($dom =~ /\.([^.]+)$/);
@@ -243,7 +236,7 @@ sub uri_to_domain {
   my $host = $uri;  # unstripped/full domain name
 
   # keep IPs intact
-  if ($uri !~ /^$IP_ADDRESS$/) {
+  if ($uri !~ /^\d+\.\d+\.\d+\.\d+$/) { 
     # get rid of hostname part of domain, understanding delegation
     $uri = $self->trim_domain($uri);
 

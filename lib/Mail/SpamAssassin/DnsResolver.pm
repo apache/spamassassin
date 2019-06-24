@@ -45,8 +45,7 @@ require 5.008001;  # needs utf8::is_utf8()
 use Mail::SpamAssassin;
 use Mail::SpamAssassin::Logger;
 use Mail::SpamAssassin::Constants qw(:ip);
-use Mail::SpamAssassin::Util qw(untaint_var decode_dns_question_entry
-                                idn_to_ascii reverse_ip_address);
+use Mail::SpamAssassin::Util qw(untaint_var decode_dns_question_entry);
 
 use Socket;
 use Errno qw(EADDRINUSE EACCES);
@@ -64,8 +63,6 @@ BEGIN {
     $io_socket_module_name = 'IO::Socket::INET';
   }
 }
-
-my $IPV4_ADDRESS = IPV4_ADDRESS;
 
 ###########################################################################
 
@@ -240,12 +237,13 @@ sub available_nameservers {
   }
   if ($self->{force_ipv4} || $self->{force_ipv6}) {
     # filter the list according to a chosen protocol family
+    my $ip4_re = IPV4_ADDRESS;
     my(@filtered_addr_port);
     for (@{$self->{available_dns_servers}}) {
       local($1,$2);
       /^ \[ (.*) \] : (\d+) \z/xs  or next;
       my($addr,$port) = ($1,$2);
-      if ($addr =~ /^$IPV4_ADDRESS\z/o) {
+      if ($addr =~ /^${ip4_re}\z/o) {
         push(@filtered_addr_port, $_)  unless $self->{force_ipv6};
       } elsif ($addr =~ /:.*:/) {
         push(@filtered_addr_port, $_)  unless $self->{force_ipv4};
@@ -380,12 +378,13 @@ sub connect_sock {
   # is unspecified, causing EINVAL failure when automatically assigned local
   # IP address and a remote address do not belong to the same address family.
   # Let's choose a suitable source address if possible.
+  my $ip4_re = IPV4_ADDRESS;
   my $srcaddr;
   if ($self->{force_ipv4}) {
     $srcaddr = "0.0.0.0";
   } elsif ($self->{force_ipv6}) {
     $srcaddr = "::";
-  } elsif ($ns_addr =~ /^$IPV4_ADDRESS\z/o) {
+  } elsif ($ns_addr =~ /^${ip4_re}\z/o) {
     $srcaddr = "0.0.0.0";
   } elsif ($ns_addr =~ /:.*:/) {
     $srcaddr = "::";
@@ -535,8 +534,9 @@ sub new_dns_packet {
 
   # construct a PTR query if it looks like an IPv4 address
   if (!defined($type) || $type eq 'PTR') {
-    if ($domain =~ /^$IPV4_ADDRESS$/o) {
-      $domain = reverse_ip_address($domain).".in-addr.arpa.";
+    local($1,$2,$3,$4);
+    if ($domain =~ /^(\d+)\.(\d+)\.(\d+)\.(\d+)$/) {
+      $domain = "$4.$3.$2.$1.in-addr.arpa.";
       $type = 'PTR';
     }
   }
@@ -659,8 +659,6 @@ sub _packet_id {
 
 =item $id = $res->bgsend($domain, $type, $class, $cb)
 
-DIRECT USE DISCOURAGED, please use bgsend_and_start_lookup in plugins.
-
 Quite similar to C<Net::DNS::Resolver::bgsend>, except that when a reply
 packet eventually arrives, and C<poll_responses> is called, the callback
 sub reference C<$cb> will be called.
@@ -676,7 +674,7 @@ be used, like so:
 
   my $id = $self->{resolver}->bgsend($domain, $type, undef, sub {
         my ($reply, $reply_id, $timestamp) = @_;
-        $self->got_a_reply($reply, $reply_id);
+        $self->got_a_reply ($reply, $reply_id);
       });
 
 The callback can ignore the reply as an invalid packet sent to the listening
@@ -770,7 +768,6 @@ sub poll_responses {
   return if $self->{no_resolver};
   return if !$self->{sock};
   my $cnt = 0;
-  my $cnt_cb = 0;
 
   my $rin = $self->{sock_as_vec};
   my $rout;
@@ -791,17 +788,16 @@ sub poll_responses {
       # most likely due to an alarm signal, resignal if so
       die "dns: (2) $eval_stat\n"  if $eval_stat =~ /__alarm__ignore__\(.*\)/s;
       warn "dns: select aborted: $eval_stat\n";
-      last;
+      return;
     } elsif (!defined $nfound || $nfound < 0) {
       if ($!) { warn "dns: select failed: $!\n" }
       else    { info("dns: select interrupted") }  # shouldn't happen
-      last;
+      return;
     } elsif (!$nfound) {
       if (!defined $timeout) { warn("dns: select returned empty-handed\n") }
       elsif ($timeout > 0) { dbg("dns: select timed out %.3f s", $timeout) }
-      last;
+      return;
     }
-    $cnt += $nfound;
 
     my $now = time;
     $timeout = 0;  # next time around collect whatever is available, then exit
@@ -858,14 +854,13 @@ sub poll_responses {
 
         if ($cb) {
           $cb->($packet, $id, $now);
-          $cnt_cb++;
+          $cnt++;
         } else {  # no match, report the problem
           if ($rcode eq 'REFUSED' || $id =~ m{^\d+/NO_QUESTION_IN_PACKET\z}) {
             # the failure was already reported above
           } else {
-            info("dns: no callback for id $id, ignored, packet on next debug line");
-            # prevent filling normal logs with huge packet dumps
-            dbg("dns: %s", $packet ? $packet->string : "undef");
+            info("dns: no callback for id %s, ignored; packet: %s",
+                 $id,  $packet ? $packet->string : "undef" );
           }
           # report a likely matching query for diagnostic purposes
           local $1;
@@ -884,7 +879,7 @@ sub poll_responses {
     }
   }
 
-  return ($cnt, $cnt_cb);
+  return $cnt;
 }
 
 ###########################################################################
@@ -925,9 +920,8 @@ sub send {
   # using some arbitrary encoding (they are normally just 7-bit ascii
   # characters anyway, just need to get rid of the utf8 flag).  Bug 6959
   # Most if not all af these come from a SPF plugin.
-  #   (was a call to utf8::encode($name), now we prefer a proper idn_to_ascii)
   #
-  $name = idn_to_ascii($name);
+  utf8::encode($name);
 
   my $retrans = $self->{retrans};
   my $retries = $self->{retry};

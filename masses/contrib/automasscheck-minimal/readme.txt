@@ -28,9 +28,9 @@ http://wiki.apache.org/spamassassin/NightlyMassCheck
 
 # Usage··
 
-cp automasscheck-minimal.cf.dist ~/.automasscheck.cf
+cp automasscheck-minimal.cf.dist ~/.automasscheck-minimal.cf
 
-edit ~/.automasscheck.cf
+edit ~/.automasscheck-minimal.cf
 
 cp automasscheck-minimal.sh ~/bin/automasscheck-minimal.sh
 

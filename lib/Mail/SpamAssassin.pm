@@ -87,14 +87,15 @@ use Time::HiRes qw(time);
 use Cwd;
 use Config;
 
-our $VERSION = "4.000000";      # update after release (same format as perl $])
-our $IS_DEVEL_BUILD = 1;        # 1 for devel build 
-#our $IS_DEVEL_BUILD = 0;        # 0 for release versions including rc & pre releases
+our $VERSION = "3.004003";      # update after release (same format as perl $])
+#our $IS_DEVEL_BUILD = 1;        # 1 for devel build 
+our $IS_DEVEL_BUILD = 0;        # 0 for release versions including rc & pre releases
+
 
 # Used during the prerelease/release-candidate part of the official release
 # process. If you hacked up your SA, you should add a version_tag to your .cf
 # files; this variable should not be modified.
-our @EXTRA_VERSION = qw();
+our @EXTRA_VERSION = qw(rc3);
 
 our @ISA = qw();
 
@@ -546,8 +547,6 @@ sub parse {
   my $msg = Mail::SpamAssassin::Message->new({
     message=>$message, parsenow=>$parsenow,
     normalize=>$self->{conf}->{normalize_charset},
-    body_part_scan_size=>$self->{conf}->{body_part_scan_size},
-    rawbody_part_scan_size=>$self->{conf}->{rawbody_part_scan_size},
     master_deadline=>$master_deadline, suppl_attrib=>$suppl_attrib });
 
   # bug 5069: The goal here is to get rendering plugins to do things
@@ -1661,11 +1660,6 @@ sub init {
   # Note that this PID has run init()
   $self->{_initted} = $$;
 
-  # if spamd or other forking, wait for spamd_child_init
-  if (!$self->{skip_prng_reseeding}) {
-    $self->set_global_state_dir();
-  }
-
   #fix spamd reading root prefs file
   if (!defined $use_user_pref) {
     $use_user_pref = 1;
@@ -1800,21 +1794,6 @@ sub init {
   # should be called only after configuration has been parsed
   $self->{resolver} = Mail::SpamAssassin::DnsResolver->new($self);
 
-  # load GeoDB if some plugin wants it
-  if ($self->{geodb_wanted}) {
-    eval '
-      use Mail::SpamAssassin::GeoDB;
-      $self->{geodb} = Mail::SpamAssassin::GeoDB->new({
-        conf => $self->{conf}->{geodb},
-        wanted => $self->{geodb_wanted},
-      });
-      1;
-    ';
-    if ($@ || !$self->{geodb}) {
-      dbg("config: GeoDB disabled: $@");
-    }
-  }
-
   # TODO -- open DNS cache etc. if necessary
 }
 
@@ -1927,50 +1906,6 @@ sub get_and_create_userstate_dir {
   }
 
   $fname;
-}
-
-# find the most global writable state dir
-# used by dns_block_rule state files etc
-sub set_global_state_dir {
-  my ($self) = @_;
-
-  my $prev = '';
-  if ($self->{home_dir_for_helpers}) {
-    my $dir = File::Spec->catdir($self->{home_dir_for_helpers}, ".spamassassin");
-    $self->test_global_state_dir($dir);
-    $prev = $dir;
-  }
-  if (!$self->{global_state_dir}) {
-    my $home = (Mail::SpamAssassin::Util::portable_getpwuid ($>))[7];
-    # home_dir_for_helpers default == home, skip if checked already..
-    if ($home && $home ne $prev) {
-      my $dir = File::Spec->catdir($home, ".spamassassin");
-      $self->test_global_state_dir($dir);
-    }
-  }
-  if (!$self->{global_state_dir}) {
-    $self->test_global_state_dir($self->{LOCAL_STATE_DIR});
-  }
-  if (!$self->{global_state_dir}) {
-    # fallback to userstate
-    $self->{global_state_dir} = $self->get_and_create_userstate_dir();
-    dbg("config: global_state_dir falled back to userstate_dir");
-  }
-}
-
-sub test_global_state_dir {
-    my ($self, $dir) = @_;
-    eval { mkpath($dir, 0, 0700); }; # just a single stat if exists already
-    my $n = ".sawritetest$$".Mail::SpamAssassin::Util::pseudo_random_string(6);
-    my $file = File::Spec->catdir($dir, $n);
-    if (Mail::SpamAssassin::Util::touch_file($file, { create_exclusive => 1 })) {
-      dbg("config: global_state_dir set to $dir");
-      $self->{global_state_dir} = $dir;
-      unlink($file);
-      return 1;
-    }
-    unlink($file); # just in case?
-    return 0;
 }
 
 =item $fullpath = $f->find_rule_support_file ($filename)
@@ -2098,7 +2033,6 @@ sub sed_path {
   $path =~ s/__def_rules_dir__/$self->{DEF_RULES_DIR} || ''/ges;
   $path =~ s{__prefix__}{$self->{PREFIX} || $Config{prefix} || '/usr'}ges;
   $path =~ s{__userstate__}{$self->get_and_create_userstate_dir() || ''}ges;
-  $path =~ s/__global_state_dir__/$self->{global_state_dir} || ''/ges;
   $path =~ s{__perl_major_ver__}{$self->get_perl_major_version()}ges;
   $path =~ s/__version__/${VERSION}/gs;
   $path =~ s/^\~([^\/]*)/$self->expand_name($1)/es;
@@ -2191,10 +2125,7 @@ sub call_plugins {
   return unless $self->{plugins};
 
   # Use some calls ourself too
-  if ($subname eq 'spamd_child_init') {
-    # set global dir now if spamd
-    $self->set_global_state_dir();
-  } elsif ($subname eq 'finish_parsing_end') {
+  if ($subname eq 'finish_parsing_end') {
     # Initialize RegistryBoundaries, now that util_rb_tld etc from config is
     # read.  Plugins can also now use {valid_tlds_re} to one time compile
     # regexes in finish_parsing_end.

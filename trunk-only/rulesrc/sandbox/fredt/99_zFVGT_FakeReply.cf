@@ -1,0 +1,190 @@
+#From Michel Arboi <michel.arboi@gmail.com>
+header   __MISSING_REPLY	In-Reply-To =~ /^UNSET$/ [if-unset: UNSET]
+header   __MISSING_REF		References =~ /^UNSET$/ [if-unset: UNSET]
+header   __MISSING_THREAD	Thread-Index =~ /^UNSET$/ [if-unset: UNSET]
+
+#From FreddyT
+header   __SUBJ_RE		Subject =~ /^R[eE]:/
+#header   __SUBJ_FW		Subject =~ /^F[wW][dD]?:/
+
+#From http://marc2.theaimsgroup.com/?l=fop-dev&m=104335769809427&w=2
+#Both In-Reply-To and References:
+header   __XM_BALSA		X-Mailer =~ /^Balsa \d/
+header   __XM_CALYPSO		X-Mailer =~ /^Calypso/
+header   __XM_FORTE		X-Mailer =~ /^Forte Agent \d/
+header   __XM_MHE		X-Mailer =~ /^mh-e \d/
+header   __XM_SQRLMAIL		X-Mailer =~ /^SquirrelMail/
+header   __XM_SYLPHEED		X-Mailer =~ /^Sylpheed/
+header   __XM_THEBAT		X-Mailer =~ /^The Bat!/
+header   __XM_VM		X-Mailer =~ /^VM \d/
+header   __XM_XIMEVOL		X-Mailer =~ /^Ximian Evolution/
+header   __UA_KMAIL		User-Agent =~ /^KMail/
+header   __UA_MOZ5		User-Agent =~ /^Mozilla\/5/
+header   __UA_OPERA7		User-Agent =~ /^Opera7/
+meta     __BOTH_INR_AND_REF	(__XM_BALSA || __XM_CALYPSO || __XM_FORTE || __XM_MHE || __XM_SQRLMAIL || __XM_SYLPHEED || __XM_THEBAT || __XM_VM || __XM_XIMEVOL || __UA_KMAIL || __UA_MOZ5 || __UA_OPERA7)
+
+meta     NICE_REPLY_A		(__SUBJ_RE && !__MISSING_REPLY && !__MISSING_REF && __BOTH_INR_AND_REF)
+describe NICE_REPLY_A		Looks like a legit relpy (A)
+## score    NICE_REPLY_A		-0.444
+tflags     NICE_REPLY_A		nopublish
+#counts   NICE_REPLY_A             0s/45h of 43776 corpus (34010s/9766h FVGT) 11/29/06
+
+
+meta     FAKE_REPLY_A1		(__SUBJ_RE && __MISSING_REPLY && __MISSING_REF && __BOTH_INR_AND_REF)
+## score    FAKE_REPLY_A1		0.972
+#counts   FAKE_REPLY_A1            75s/0h of 43776 corpus (34010s/9766h FVGT) 11/29/06
+
+
+
+
+#In-Reply-To but but no References
+header   __XM_IMAIL		X-Mailer =~ /^<IMail v\d/
+header   __XM_APPLEMAIL		X-Mailer =~ /^Apple Mail/
+header   __XM_COMMUNIG		X-Mailer =~ /^CommuniGate/
+header   __XM_EDMAX		X-Mailer =~ /^EdMax/
+header   __XM_ELM		X-Mailer =~ /^ELM/
+header   __XM_EMUMAIL		X-Mailer =~ /^EMUmail/
+header   __XM_EXMH		X-Mailer =~ /^exmh/
+header   __XM_LOTUSN		X-Mailer =~ /^Lotus Notes/
+header   __XM_MAILCITY		X-Mailer =~ /^MailCity Service/
+header   __XM_MAILSMITH		X-Mailer =~ /^Mailsmith /
+header   __XM_MSCDO		X-Mailer =~ /^Microsoft CDO/
+header   __XM_MSOUT		X-Mailer =~ /^Microsoft Outlook[, ]?\s?[BIC]/ #Build, IMO, CWS
+header   __XM_MIMETOOLS		X-Mailer =~ /^MIME-tools \d/i
+header   __XM_OPERA6		X-Mailer =~ /^Opera 6/
+header   __XM_PEGASUS		X-Mailer =~ /^Pegasus Mail/
+header   __XM_QUALCOM		X-Mailer =~ /^QUALCOMM Windows Eudora/
+header   __UA_IMP		User-Agent =~ /^Internet Messaging Program/
+header   __UA_MSOEMAC		User-Agent =~ /^Microsoft-Outlook-Express-Mac/
+header   __UA_MSENTOUR		User-Agent =~ /^Microsoft-Entourage/
+#duplicate above?
+#header   __UA_OPERA7		User-Agent =~ /^Opera7/
+meta     __INR_AND_NO_REF	(__XM_IMAIL || __XM_APPLEMAIL || __XM_COMMUNIG || __XM_EDMAX || __XM_ELM || __XM_EMUMAIL || __XM_EXMH || __XM_LOTUSN || __XM_MAILCITY || __XM_MAILSMITH || __XM_MSCDO || __XM_MSOUT || __XM_MIMETOOLS || __XM_OPERA6 || __XM_PEGASUS || __XM_QUALCOM || __UA_IMP || __UA_MSOEMAC || __UA_MSENTOUR || __UA_OPERA7)
+
+meta     NICE_REPLY_B		(__SUBJ_RE && !__MISSING_REPLY && __MISSING_REF && __INR_AND_NO_REF)
+tflags     NICE_REPLY_B		nopublish
+## score    NICE_REPLY_B		-0.333
+#counts   NICE_REPLY_B             1s/156h of 43776 corpus (34010s/9766h FVGT) 11/29/06
+
+meta     FAKE_REPLY_B		(__SUBJ_RE && __MISSING_REPLY && __INR_AND_NO_REF)
+## score    FAKE_REPLY_B		0.001
+#counts   FAKE_REPLY_B             8s/18h of 43776 corpus (34010s/9766h FVGT) 11/29/06
+
+#test validity of claims
+#This should hit nothing, according to claim, they always lack references, this would claim they have one!
+meta     TEST_REPLY_B		(__SUBJ_RE && !__MISSING_REF && __INR_AND_NO_REF)
+## score    TEST_REPLY_B		0.001
+tflags    TEST_REPLY_B		nopublish
+#counts   TEST_REPLY_B             4s/26h of 43776 corpus (34010s/9766h FVGT) 11/29/06
+
+
+
+
+
+
+#References but no In-Reply-To
+header   __XM_GNUS		X-Mailer =~ /^Gnus v/
+header   __XM_MSOE5		X-Mailer =~ /^Microsoft Outlook Express 5/
+header   __XM_MSOE6		X-Mailer =~ /^Microsoft Outlook Express 6/
+header   __XM_MOZ4		X-Mailer =~ /^Mozilla 4/
+header   __XM_SKYRI		X-Mailer =~ /^SKYRiXgreen/
+header   __XM_WWWMAIL		X-Mailer =~ /^WWW-Mail \d/
+header   __UA_GNUS		User-Agent =~ /^Gnus/
+header   __UA_KNODE		User-Agent =~ /^KNode/
+header   __UA_MUTT		User-Agent =~ /^Mutt/
+header   __UA_PAN		User-Agent =~ /^Pan/
+header   __UA_XNEWS		User-Agent =~ /^Xnews/
+meta     __NO_INR_YES_REF	(__XM_GNUS || __XM_MSOE5 || __XM_MSOE6 || __XM_MOZ4 || __XM_SKYRI || __XM_WWWMAIL || __UA_GNUS || __UA_KNODE || __UA_MUTT || __UA_PAN || __UA_XNEWS)
+
+meta     NICE_REPLY_C		(__SUBJ_RE && __MISSING_REPLY && !__MISSING_REF && __NO_INR_YES_REF)
+tflags    NICE_REPLY_C		nopublish
+## score    NICE_REPLY_C		-0.444
+#counts   NICE_REPLY_C             3s/544h of 43776 corpus (34010s/9766h FVGT) 11/29/06
+
+meta     FAKE_REPLY_C		(__SUBJ_RE && __MISSING_REF && __NO_INR_YES_REF)
+## score    FAKE_REPLY_C		1.666
+#counts   FAKE_REPLY_C             7896s/6h of 43776 corpus (34010s/9766h FVGT) 11/29/06
+
+#test to ensure they don't contain a reply-to address.
+meta     TEST_REPLY_C		(__SUBJ_RE && !__MISSING_REPLY && __NO_INR_YES_REF)
+## score    TEST_REPLY_C		0.001
+#counts   TEST_REPLY_C             0s/4h of 43776 corpus (34010s/9766h FVGT) 11/29/06
+
+
+
+
+
+#Not ok:
+header   __XM_AOL		X-Mailer =~ /^AOL /
+header   __XM_DTMAIL		X-Mailer =~ /^dtmail 1/
+header   __XM_FREEMAIL		X-Mailer =~ /^freemail 0/
+header   __XM_LOTUSN5		X-Mailer =~ /^Lotus Notes Release 5\.0\.\d/
+header   __XM_MSOE4		X-Mailer =~ /^Microsoft Outlook Express 4/
+header   __XM_NETMAIL		X-Mailer =~ /^NetMail ModWeb Module/
+header   __XM_NETSCAPEW		X-Mailer =~ /^Netscape Webmail/
+header   __XM_NOVELL		X-Mailer =~ /^Novell GroupWise/
+header   __XM_OPENWEB		X-Mailer =~ /^Open WebMail 1/
+header   __XM_POSTMAN		X-Mailer =~ /^Postman 1/
+header   __XM_WEBMAIL5		X-Mailer =~ /^Web Mail 5/
+meta     __BROKE_MUAS		(__XM_AOL || __XM_DTMAIL || __XM_FREEMAIL || __XM_LOTUSN5 || __XM_MSOE4 || __XM_NETMAIL || __XM_NETSCAPEW || __XM_NOVELL || __XM_OPENWEB || __XM_POSTMAN || __XM_WEBMAIL5)
+
+
+
+
+
+
+meta     FAKE_REPLY_SURE_A	(__SUBJ_RE && (!FAKE_REPLY_A && !FAKE_REPLY_A1 && !FAKE_REPLY_A2 && !FAKE_REPLY_B && !FAKE_REPLY_C) && (!NICE_REPLY_A && !NICE_REPLY_B && !NICE_REPLY_C) && !__BROKE_MUAS && __MISSING_THREAD)
+## score    FAKE_REPLY_SURE_A	0.001
+#counts   FAKE_REPLY_SURE_A        468s/823h of 43776 corpus (34010s/9766h FVGT) 11/29/06
+
+meta     FAKE_REPLY_SURE_B	(__SUBJ_RE && (!FAKE_REPLY_A && !FAKE_REPLY_A1 && !FAKE_REPLY_A2 && !FAKE_REPLY_B && !FAKE_REPLY_C) && (!NICE_REPLY_A && !NICE_REPLY_B && !NICE_REPLY_C) && !__BROKE_MUAS)
+## score    FAKE_REPLY_SURE_B	0.001
+#counts   FAKE_REPLY_SURE_B        552s/969h of 43776 corpus (34010s/9766h FVGT) 11/29/06
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#OVERALL%   SPAM%     HAM%     S/O    RANK  SCORE  NAME
+#  43776    34010     9766    0.777   0.00   0.00  (all messages)
+#   7902     7896        6    0.997   1.00   0.00  FAKE_REPLY_C
+#     75       75        0    1.000   0.89   0.00  FAKE_REPLY_A1
+#     26        8       18    0.113   0.54   0.00  FAKE_REPLY_B
+#     30        4       26    0.042   0.36   0.00  TEST_REPLY_B
+#      4        0        4    0.000   0.34   0.00  TEST_REPLY_C
+#   1521      552      969    0.141   0.32   0.00  FAKE_REPLY_SURE_B
+#   1291      468      823    0.140   0.31   0.00  FAKE_REPLY_SURE_A
+#    547        3      544    0.002   0.02  -0.44  NICE_REPLY_C
+#    157        1      156    0.002   0.01  -0.33  NICE_REPLY_B
+#     45        0       45    0.000   0.00  -0.44  NICE_REPLY_A
+
+
+
+
+
+
+
+
+
+
+
+
+
+#EOF

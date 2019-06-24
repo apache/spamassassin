@@ -1,0 +1,13 @@
+# SpamAssassin rules file: trustworthiness of a Return-Path (MailFrom)
+
+if version >= 3.003000
+ifplugin Mail::SpamAssassin::Plugin::WLBLEval
+
+header   RP_MATCHES_RCVD  eval:check_mailfrom_matches_rcvd()
+describe RP_MATCHES_RCVD  Envelope sender domain matches handover relay domain
+tflags   RP_MATCHES_RCVD  nice
+
+#score   RP_MATCHES_RCVD  -0.1
+
+endif
+endif

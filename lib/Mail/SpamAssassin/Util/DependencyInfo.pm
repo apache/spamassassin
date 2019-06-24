@@ -119,42 +119,22 @@ our @OPTIONAL_MODULES = (
   desc => 'Used when manually reporting spam to SpamCop with "spamassassin -r".',
 },
 {
-  'module' => 'Net::LibIDN',
-  'version' => 0,
-  'desc' => "Provides mapping between Internationalized Domain Names (IDN) in
-  Unicode and ASCII-compatible encoding (ACE) for use in DNS and comparisions.
-  The module is optional, but without it Unicode IDN names found in mail will
-  not be suitable for DNS queries and white/blacklisting.",
-},
-{
   module => 'Mail::SPF',
   version => 0,
   desc => 'Used to check DNS Sender Policy Framework (SPF) records to fight email
   address forgery and make it easier to identify spams.',
 },
 {
-  module => 'GeoIP2::Database::Reader',
-  version => 0,
-  desc => 'Used by the RelayCountry plugin (not enabled by default) to
-  determine the domain country codes of each relay in the path of an email. 
-  Also used by the URILocalBL plugin (not enabled by default) to provide ISP
-  and Country code based filtering.',
-},
-{
   module => 'Geo::IP',
   version => 0,
-  desc => 'Used by the RelayCountry plugin (not enabled by default) to
-  determine the domain country codes of each relay in the path of an email. 
-  Also used by the URILocalBL plugin (not enabled by default) to provide ISP
-  and Country code based filtering.',
+  desc => 'Used by the RelayCountry plugin (not enabled by default) to determine
+  the domain country codes of each relay in the path of an email.  Also used by 
+  the URILocalBL plugin to provide ISP and Country code based filtering.',
 },
 {
-  module => 'IP::Country::DB_File',
+  module => 'Net::CIDR::Lite',
   version => 0,
-  desc => 'Used by the RelayCountry plugin (not enabled by default) to
-  determine the domain country codes of each relay in the path of an email. 
-  Also used by the URILocalBL plugin (not enabled by default) to provide
-  Country code based filtering.',
+  desc => 'Used by the URILocalBL plugin to process IP address ranges.',
 },
 {
   module => 'Razor2::Client::Agent',
@@ -282,18 +262,6 @@ our @OPTIONAL_MODULES = (
   version => 0,
   desc => 'BSD::Resource provides BSD process resource limit and priority 
   functions.  It is used by the optional ResourceLimits Plugin.',
-},
-{
-  module => 'Archive::Zip',
-  version => 0,
-  desc => 'Archive::Zip provides an interface to ZIP archive files.
-  It is used by the optional OLEMacro Plugin.',
-},
-{
-  module => 'IO::String',
-  version => 0,
-  desc => 'IO::String emulates file interface for in-core strings.
-  It is used by the optional OLEMacro Plugin.',
 },
 );
 

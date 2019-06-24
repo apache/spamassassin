@@ -142,9 +142,6 @@ sub new {
   #more robust version check from Damyan Ivanov - Bug 7095
   $txtdata_can_provide_a_list = version->parse(Net::DNS->VERSION) >= version->parse('0.69');
 
-  # we need GeoDB ASN
-  $self->{main}->{geodb_wanted}->{asn} = 1;
-
   return $self;
 }
 
@@ -186,15 +183,23 @@ Examples:
 
   asn_lookup in1tag.example.net _ASNDATA_ _ASNDATA_
 
+=back
+
 =item asn_lookup_ipv6 asn-zone6.example.com [_ASN_ _ASNCIDR_]
 
 Use specified zone for lookups of IPv6 addresses.  If zone supports both
 IPv4 and IPv6 queries, use both asn_lookup and asn_lookup_ipv6 for the same
 zone.
 
+=over 4
+
 =item clear_asn_lookups
 
+=back
+
 Removes any previously declared I<asn_lookup> entries from a list of queries.
+
+=over 4
 
 =item asn_prefix 'prefix_string'       (default: 'AS')
 
@@ -203,25 +208,6 @@ it as a tag. This prefix is rather redundant, but its default value 'AS'
 is kept for backward compatibility with versions of SpamAssassin earlier
 than 3.4.0. A sensible setting is an empty string. The argument may be (but
 need not be) enclosed in single or double quotes for clarity.
-
-=item asn_use_geodb ( 0 / 1 )          (default: 1)
-
-Use Mail::SpamAssassin::GeoDB module to lookup ASN numbers.  You need
-suitable supported module like GeoIP2 or GeoIP with ISP or ASN database
-installed (for example, add EditionIDs GeoLite2-ASN in GeoIP.conf for
-geoipupdate program).
-
-GeoDB can only set _ASN_ tag, it has no data for _ASNCIDR_.  If you need
-both, then set asn_prefer_geodb 0 so DNS rules are tried.
-
-=item asn_prefer_geodb ( 0 / 1 )       (default: 1)
-
-If set, DNS lookups (asn_lookup rules) will not be run if GeoDB successfully
-finds ASN. Set this to 0 to get _ASNCIDR_ even if GeoDB finds _ASN_.
-
-=item asn_use_dns ( 0 / 1 )            (default: 1)
-
-Set to 0 to never allow DNS queries.
 
 =back
 
@@ -294,27 +280,6 @@ Set to 0 to never allow DNS queries.
     }
   });
 
-  push (@cmds, {
-    setting => 'asn_use_geodb',
-    default => 1,
-    is_admin => 1,
-    type => $Mail::SpamAssassin::Conf::CONF_TYPE_BOOL,
-  });
-
-  push (@cmds, {
-    setting => 'asn_prefer_geodb',
-    default => 1,
-    is_admin => 1,
-    type => $Mail::SpamAssassin::Conf::CONF_TYPE_BOOL,
-  });
-
-  push (@cmds, {
-    setting => 'asn_use_dns',
-    default => 1,
-    is_admin => 1,
-    type => $Mail::SpamAssassin::Conf::CONF_TYPE_BOOL,
-  });
-
   $conf->{parser}->register_commands(\@cmds);
 }
 
@@ -324,18 +289,16 @@ sub parsed_metadata {
   my ($self, $opts) = @_;
 
   my $pms = $opts->{permsgstatus};
-  my $conf = $pms->{conf};
+  my $conf = $self->{main}->{conf};
 
-  my $geodb = $self->{main}->{geodb};
-  my $has_geodb = $conf->{asn_use_geodb} && $geodb && $geodb->can('asn');
-  if ($has_geodb) {
-    dbg("asn: using GeoDB ASN for lookups");
-  } else {
-    dbg("asn: GeoDB ASN not available");
-    if (!$conf->{asn_use_dns} || !$pms->is_dns_available()) {
-      dbg("asn: DNS is not available, skipping ASN check");
-      return;
-    }
+  if (!$pms->is_dns_available()) {
+    dbg("asn: DNS is not available, skipping ASN checks");
+    return;
+  }
+
+  if (!$conf->{asnlookups} && !$conf->{asnlookups_ipv6}) {
+    dbg("asn: no asn_lookups configured, skipping ASN lookups");
+    return;
   }
 
   # initialize the tag data so that if no result is returned from the DNS
@@ -354,7 +317,8 @@ sub parsed_metadata {
     }
   }
 
-  # get IP address of last external relay to lookup
+  # get reversed IP address of last external relay to lookup
+  # don't return until we've initialized the template tags
   my $relay = $pms->{relays_external}->[0];
   if (!defined $relay) {
     dbg("asn: no first external relay IP available, skipping ASN check");
@@ -363,36 +327,16 @@ sub parsed_metadata {
     dbg("asn: first external relay is a private IP, skipping ASN check");
     return;
   }
+
   my $ip = $relay->{ip};
-  dbg("asn: using first external relay IP for lookups: %s", $ip);
-
-  # GeoDB lookup
-  my $asn_found;
-  if ($has_geodb) {
-    my $asn = $geodb->get_asn($ip);
-    if (!defined $asn) {
-      dbg("asn: GeoDB ASN lookup failed");
-    } else {
-      $asn_found = 1;
-      dbg("asn: GeoDB found ASN $asn");
-      $pms->set_tag('ASN', $conf->{asn_prefix}.$asn);
-      # For Bayes
-      $pms->{msg}->put_metadata('X-ASN', $asn);
-    }
-  }
-
-  # No point continuing without DNS from now on
-  if (!$conf->{asn_use_dns} || !$pms->is_dns_available()) {
-    dbg("asn: skipping disabled DNS lookups");
-    return;
-  }
-  # Skip DNS if GeoDB was successful and preferred
-  if ($asn_found && $conf->{asn_prefer_geodb}) {
-    dbg("asn: GeoDB lookup successful, skipping DNS lookups");
+  my $reversed_ip = reverse_ip_address($ip);
+  if (defined $reversed_ip) {
+    dbg("asn: using first external relay IP for lookups: %s", $ip);
+  } else {
+    dbg("asn: could not parse first external relay IP: %s, skipping", $ip);
     return;
   }
 
-  dbg("asn: using DNS for lookups");
   my $lookup_zone;
   if ($ip =~ /^$IPV4_ADDRESS$/o) {
     if (!defined $conf->{asnlookups}) {
@@ -408,12 +352,6 @@ sub parsed_metadata {
     $lookup_zone = "asnlookups_ipv6";
   }
   
-  my $reversed_ip = reverse_ip_address($ip);
-  if (!defined $reversed_ip) {
-    dbg("asn: could not parse IP: %s, skipping", $ip);
-    return;
-  }
-
   # we use arrays and array indices rather than hashes and hash keys
   # in case someone wants the same zone added to multiple sets of tags
   my $index = 0;
@@ -421,12 +359,14 @@ sub parsed_metadata {
     # do the DNS query, have the callback process the result
     my $zone_index = $index;
     my $zone = $reversed_ip . '.' . $entry->{zone};
-    $pms->{async}->bgsend_and_start_lookup($zone, 'TXT', undef,
-      { rulename => 'asn_lookup', type => 'ASN' },
+    my $key = "asnlookup-${lookup_zone}-${zone_index}-".$entry->{zone};
+    my $ent = $pms->{async}->bgsend_and_start_lookup($zone, 'TXT', undef,
+      { type => 'ASN', key => $key, zone => $lookup_zone },
       sub { my($ent, $pkt) = @_;
             $self->process_dns_result($pms, $pkt, $zone_index, $lookup_zone) },
       master_deadline => $pms->{master_deadline}
     );
+    $pms->register_async_rule_start($key) if $ent;
     $index++;
   }
 }
@@ -555,6 +495,5 @@ sub process_dns_result {
 
 # Version features
 sub has_asn_lookup_ipv6 { 1 }
-sub has_asn_geodb { 1 }
 
 1;
