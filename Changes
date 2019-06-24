@@ -1,4 +1,195 @@
 ------------------------------------------------------------------------
+r1861944 | hege | 2019-06-23 18:24:45 +0000 (Sun, 23 Jun 2019) | 2 lines
+ 
+ Update skipped files
+ 
+------------------------------------------------------------------------
+r1861942 | hege | 2019-06-23 16:20:48 +0000 (Sun, 23 Jun 2019) | 2 lines
+ 
+ Remove unneeded t/mkrules*.t from 3.4
+ 
+------------------------------------------------------------------------
+r1861937 | hege | 2019-06-23 14:37:54 +0000 (Sun, 23 Jun 2019) | 2 lines
+ 
+ Some taint fixes
+ 
+------------------------------------------------------------------------
+r1861932 | hege | 2019-06-23 13:51:31 +0000 (Sun, 23 Jun 2019) | 2 lines
+ 
+ Apparently make tardist doesn't always output "Created xyz.tar.gz", try 
+to find latest tarfile with ls -tr instead
+ 
+------------------------------------------------------------------------
+r1861926 | hege | 2019-06-23 13:10:00 +0000 (Sun, 23 Jun 2019) | 2 lines
+ 
+ Fix URILocalBL requiring Net::CIDR::Lite
+ 
+------------------------------------------------------------------------
+r1861909 | hege | 2019-06-23 09:47:18 +0000 (Sun, 23 Jun 2019) | 2 lines
+ 
+ Remove exponential sleeps, they don't make much sense, basically 
+check_mirror_af is the one that croaks if our network is down. There's 
+already bunch of retries also on external wget/curl commands. Just sleep 
+few seconds between tries, should be enough.
+ 
+------------------------------------------------------------------------
+r1861908 | hege | 2019-06-23 09:26:37 +0000 (Sun, 23 Jun 2019) | 2 lines
+ 
+ Few trivial ipv4/ipv6 fixes, handle forcing better
+ 
+------------------------------------------------------------------------
+r1861891 | hege | 2019-06-22 18:00:35 +0000 (Sat, 22 Jun 2019) | 2 lines
+ 
+ Skip left brace regexp tests which depend on Perl version
+ 
+------------------------------------------------------------------------
+r1861889 | hege | 2019-06-22 17:53:31 +0000 (Sat, 22 Jun 2019) | 2 lines
+ 
+ Trivial change, don't fail lint on description for non-existent rule 
+(similar to bug 5514)
+ 
+------------------------------------------------------------------------
+r1861877 | hege | 2019-06-22 16:00:42 +0000 (Sat, 22 Jun 2019) | 2 lines
+ 
+ Bug 7726 - Enable taint for all tests
+ 
+------------------------------------------------------------------------
+r1861762 | hege | 2019-06-21 08:35:21 +0000 (Fri, 21 Jun 2019) | 2 lines
+ 
+ Bug 7725 - Perl taint bug with URIDNSBL netmask calculations
+ 
+------------------------------------------------------------------------
+r1861758 | hege | 2019-06-21 08:23:02 +0000 (Fri, 21 Jun 2019) | 2 lines
+ 
+ Some trivial fixes, always latest tardist file, reset sa-compile cache
+ 
+------------------------------------------------------------------------
+r1861744 | hege | 2019-06-21 06:26:00 +0000 (Fri, 21 Jun 2019) | 2 lines
+ 
+ Fix t/all_modules.t
+ 
+------------------------------------------------------------------------
+r1861634 | hege | 2019-06-19 15:43:30 +0000 (Wed, 19 Jun 2019) | 2 lines
+ 
+ Bug 7723 - FromNameSpoof warnings with missing To-header
+ 
+------------------------------------------------------------------------
+r1861633 | hege | 2019-06-19 15:41:21 +0000 (Wed, 19 Jun 2019) | 2 lines
+ 
+ Bug 7724 - MIMEEval state not checked properly
+ 
+------------------------------------------------------------------------
+r1861513 | hege | 2019-06-17 14:28:24 +0000 (Mon, 17 Jun 2019) | 2 lines
+ 
+ Add --reallyallowplugins in upgrade notes
+ 
+------------------------------------------------------------------------
+r1861431 | hege | 2019-06-15 19:34:46 +0000 (Sat, 15 Jun 2019) | 2 lines
+ 
+ Tighten up --allowplugins allowed settings
+ 
+------------------------------------------------------------------------
+r1861429 | hege | 2019-06-15 19:13:30 +0000 (Sat, 15 Jun 2019) | 2 lines
+ 
+ Print warning about --allowplugins usage, only allow it with 
+--reallyallowplugins
+ 
+------------------------------------------------------------------------
+r1861424 | hege | 2019-06-15 18:42:17 +0000 (Sat, 15 Jun 2019) | 2 lines
+ 
+ Bug 6944 - t/dcc.t fails to check if dcc is installed or not before 
+testing
+ 
+------------------------------------------------------------------------
+r1861423 | hege | 2019-06-15 18:34:48 +0000 (Sat, 15 Jun 2019) | 2 lines
+ 
+ Retry even if sha/asc download fails, sleep a bit between mirror retries
+ 
+------------------------------------------------------------------------
+r1861404 | hege | 2019-06-15 15:29:54 +0000 (Sat, 15 Jun 2019) | 2 lines
+ 
+ Skip downloading sha256 file needlessly if already having sha512
+ 
+------------------------------------------------------------------------
+r1861402 | hege | 2019-06-15 14:52:03 +0000 (Sat, 15 Jun 2019) | 2 lines
+ 
+ Bug 7089 - add domains_only function to DNSEval.pm
+ 
+------------------------------------------------------------------------
+r1861377 | hege | 2019-06-15 12:01:00 +0000 (Sat, 15 Jun 2019) | 2 lines
+ 
+ Bug 5258 - implement rules_matching() meta expression
+ 
+------------------------------------------------------------------------
+r1861375 | hege | 2019-06-15 11:55:02 +0000 (Sat, 15 Jun 2019) | 2 lines
+ 
+ Add t/add_modules.t
+ 
+------------------------------------------------------------------------
+r1861357 | hege | 2019-06-14 16:28:44 +0000 (Fri, 14 Jun 2019) | 2 lines
+ 
+ Add Finnish VS: reply prefix
+ 
+------------------------------------------------------------------------
+r1861317 | gbechis | 2019-06-14 07:57:14 +0000 (Fri, 14 Jun 2019) | 3 
+lines
+ 
+ Revert part of commit r1831073 that sneak in by fault
+ fixes #7657, thanks to hege@ for debugging this
+ 
+------------------------------------------------------------------------
+r1861265 | hege | 2019-06-13 15:03:40 +0000 (Thu, 13 Jun 2019) | 2 lines
+ 
+ Bug 7374 - Some e-mails create "Complex regular subexpression recursion 
+limit (32766) exceeded" warning
+ 
+------------------------------------------------------------------------
+r1861259 | hege | 2019-06-13 13:57:59 +0000 (Thu, 13 Jun 2019) | 2 lines
+ 
+ Bug 7681 - Use standard SEE ALSOs
+ 
+------------------------------------------------------------------------
+r1861237 | hege | 2019-06-13 08:05:08 +0000 (Thu, 13 Jun 2019) | 2 lines
+ 
+ Fix harmless hash assignment warnings in relaycountry tests
+ 
+------------------------------------------------------------------------
+r1861236 | hege | 2019-06-13 07:59:37 +0000 (Thu, 13 Jun 2019) | 2 lines
+ 
+ Fix harmless warning for test if Geo::IP not available
+ 
+------------------------------------------------------------------------
+r1861234 | hege | 2019-06-13 07:53:26 +0000 (Thu, 13 Jun 2019) | 2 lines
+ 
+ Fix qr_to_string for Perl <5.14
+ 
+------------------------------------------------------------------------
+r1861222 | hege | 2019-06-13 06:22:31 +0000 (Thu, 13 Jun 2019) | 2 lines
+ 
+ Remove t/spamc_H.t from manifest since Bug 7046 is not fixed (and 
+probably wont for 3.4 branch)
+ 
+------------------------------------------------------------------------
+r1861221 | hege | 2019-06-13 06:19:19 +0000 (Thu, 13 Jun 2019) | 2 lines
+ 
+ Fix possible t/dnsbl.t failure
+ 
+------------------------------------------------------------------------
+r1861220 | hege | 2019-06-13 06:10:14 +0000 (Thu, 13 Jun 2019) | 2 lines
+ 
+ Define DKIM_INVALID for tests
+ 
+------------------------------------------------------------------------
+r1861219 | hege | 2019-06-13 06:09:44 +0000 (Thu, 13 Jun 2019) | 2 lines
+ 
+ Add t/all_modules.t to manifest
+ 
+------------------------------------------------------------------------
+r1861214 | kmcgrail | 2019-06-13 02:49:23 +0000 (Thu, 13 Jun 2019) | 1 
+line
+ 
+ Preparing to release 3.4.3
+------------------------------------------------------------------------
 r1861181 | hege | 2019-06-12 18:33:01 +0000 (Wed, 12 Jun 2019) | 2 lines
  
  Fix 60_perlcritic.t warnings
