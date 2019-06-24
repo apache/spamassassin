@@ -24,7 +24,7 @@ my $PROMOTABLE_PLUGINS_RE = "^" . join("|", @def_plugins) . "\$";
 # new rules that didn't exist on previous days, however, so new rules
 # can be published quickly to handle sudden outbreaks without requiring
 # manual update work)
-my @DAYS_REQUIRED = (1, 2, 3);
+my @DAYS_REQUIRED = (1, 2, 3, 4, 5);
 
 ###########################################################################
 
@@ -110,7 +110,7 @@ with_new_offset:
 ###########################################################################
 
   # the HTML looks like:
-  # 
+  #
   #   <span class="daterev_masscheck_description" class="mcviewing">
   #   ...
   #   <em><span class="mcsubmitters"> ....... </span></em>
@@ -152,6 +152,7 @@ with_new_offset:
 # <detailhref>ruleqa%3Fdaterev%3Dlast-night%26rule%3D__HIGHBITS%26s_detail%3D1</detailhref></rule>
 
 my $plist;
+my %ruleslist;
 foreach my $day (@DAYS_REQUIRED) {
   while ($doc[$day] =~ m!<rule>(.*?)</rule>!xg) {
     my $xml = $1;
@@ -165,6 +166,7 @@ foreach my $day (@DAYS_REQUIRED) {
     }
 
     my $name = $obj->{test};
+    $ruleslist{$name} = 1;
     $obj->{detailhref} = $cgi_url.$obj->{detailhref};
 
     $plist->[$day]->{$name} = $obj;
@@ -173,6 +175,19 @@ foreach my $day (@DAYS_REQUIRED) {
   if (!scalar keys %{$plist->[$day]}) {
     loghtml_die("no rules found? on day $day");
   }
+}
+
+sub median_array {
+    my @vals = sort {$a <=> $b} @_;
+    my $len = @vals;
+    if($len%2) #odd?
+    {
+        return $vals[int($len/2)];
+    }
+    else #even
+    {
+        return ($vals[int($len/2)-1] + $vals[int($len/2)])/2;
+    }
 }
 
 ###########################################################################
@@ -273,10 +288,10 @@ publish:
   $outputs{$name} = $notes unless defined $outputs{$name};
 }
 
-# base most of our decisions off day 1 (last night's mass-checks)
-foreach my $plistkey (sort keys %{$plist->[1]}) {
-  my $name = $plistkey;
-  my $plistobj = $plist->[1]->{$plistkey};
+foreach my $name (keys %ruleslist) {
+  next if $name =~ /^__/;
+
+  my $plistobj = $plist->[1]->{$name};
   my $notes = '';
 
   # rules in sandboxes without a T_ prefix, will be renamed during the
@@ -293,7 +308,7 @@ foreach my $plistkey (sort keys %{$plist->[1]}) {
   # now that it's ok to have sandbox rules without a T_ prefix,
   # "T_" prefix implies "tflags nopublish"
   next if ($name =~ /^T_/);
-  
+
   # ignore rules that don't exist (if they have a desc or score,
   # they exist according to the Conf parser)
   next unless ($mailsa->{conf}->{descriptions}->{$name}
@@ -325,19 +340,28 @@ foreach my $plistkey (sort keys %{$plist->[1]}) {
     goto publish;
   }
 
-  # ignore rules that are not marked as promotable in ANY of the days.
-  # ie a rule must be promotable in all 3, to be listed.  (Also allow
-  # rules that weren't in existence in the earlier mass-checks.)
-  next unless ($plist->[1]->{$plistkey}->{promo});
-  next unless ($plist->[2]->{$plistkey}->{promo} or $plist->[2]->{"T_$plistkey"}->{promo} or !defined($plist->[2]->{$plistkey}->{promo}));
-  next unless ($plist->[3]->{$plistkey}->{promo} or $plist->[3]->{"T_$plistkey"}->{promo} or !defined($plist->[3]->{$plistkey}->{promo}));
-
   # only rules from "rulesrc" dirs
   my $src = $mailsa->{conf}->{source_file}->{$name};
   next if (!$src || $src !~ /rulesrc/);
 
   # rules that fail lint
   next if $rules_with_errors{$name};
+
+  # base active on DAYS_REQUIRED days of checks
+  # Find median for promo
+  my @promo_arr;
+  foreach my $day (@DAYS_REQUIRED) {
+    if (defined $plist->[$day]->{$name}) {
+      push (@promo_arr, $plist->[$day]->{$name}{promo});
+    }
+    if (defined $plist->[$day]->{"T_$name"}) {
+      push (@promo_arr, $plist->[$day]->{"T_$name"}{promo});
+    }
+  }
+
+  my $is_promo = median_array(@promo_arr);
+
+  next unless $is_promo gt 0;
 
   # that require a plugin we won't have
   my $skip = 0;
@@ -370,4 +394,3 @@ exit;
 sub loghtml_die {
   die "$_[0]\nURL: $url\n";
 }
-
