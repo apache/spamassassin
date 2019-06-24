@@ -119,6 +119,8 @@ sub new {
   $self->{line_ending} =	"\012";
   $self->{master_deadline} = $opts->{'master_deadline'};
   $self->{suppl_attrib} = $opts->{'suppl_attrib'};
+  $self->{body_part_scan_size} = $opts->{'body_part_scan_size'} || 0;
+  $self->{rawbody_part_scan_size} = $opts->{'rawbody_part_scan_size'} || 0;
 
   if ($self->{suppl_attrib}) {  # caller-provided additional information
     # pristine_body_length is currently used by an eval test check_body_length
@@ -641,6 +643,8 @@ sub finish {
   delete $self->{'mime_boundary_state'};
   delete $self->{'mbox_sep'};
   delete $self->{'normalize'};
+  delete $self->{'body_part_scan_size'};
+  delete $self->{'rawbody_part_scan_size'};
   delete $self->{'pristine_body'};
   delete $self->{'pristine_headers'};
   delete $self->{'line_ending'};
@@ -1152,7 +1156,24 @@ sub get_body_text_array_common {
     my($type, $rnd) = $p->$method_name();  # decode this part
     if ( defined $rnd ) {
       # Only text/* types are rendered ...
-      $text .= $rnd;
+      if ($self->{body_part_scan_size} && length($rnd) > $self->{body_part_scan_size}) {
+        # try truncating at boundary, nearest 1k block is fine
+        my $idx = index($rnd, "\n", $self->{body_part_scan_size});
+        if ($idx >= 0 && $idx - $self->{body_part_scan_size} <= 1024) {
+          $text .= substr($rnd, 0, $idx)."\n";
+        }
+        else {
+          $idx = index($rnd, ' ', $self->{body_part_scan_size});
+          if ($idx >= 0 && $idx - $self->{body_part_scan_size} <= 1024) {
+            $text .= substr($rnd, 0, $idx)."\n";
+          }
+          else {
+            $text .= substr($rnd, 0, $self->{body_part_scan_size})."\n";
+          }
+        }
+      } else {
+        $text .= $rnd;          
+      }
 
       # TVD - if there are multiple parts, what should we do?
       # right now, just use the last one.  we may need to give some priority
@@ -1212,7 +1233,8 @@ sub get_decoded_body_text_array {
     next if ($parts[$pt]->{'type'} eq 'text/calendar');
 
     push(@{$self->{text_decoded}},
-         split_into_array_of_short_paragraphs($parts[$pt]->decode()));
+         split_into_array_of_short_paragraphs($parts[$pt]->decode(),
+             $self->{rawbody_part_scan_size}));
   }
 
   return $self->{text_decoded};
@@ -1239,6 +1261,7 @@ sub split_into_array_of_short_lines {
 
 # split a text into array of paragraphs of sizes between
 # $chunk_size and 2 * $chunk_size, returning the resulting array
+# optional argument to limit returned length
 
 sub split_into_array_of_short_paragraphs {
   my @result;
@@ -1252,6 +1275,7 @@ sub split_into_array_of_short_paragraphs {
       if ($j < 0) { $j = $ofs+$chunk_size }
     }
     push(@result, substr($_[0], $ofs, $j-$ofs+1));
+    return @result if (defined $_[1] && $_[1] && $ofs >= $_[1]);
   }
   push(@result, substr($_[0], $ofs))  if $ofs < $text_l;
   @result;

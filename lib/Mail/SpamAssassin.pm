@@ -547,6 +547,8 @@ sub parse {
   my $msg = Mail::SpamAssassin::Message->new({
     message=>$message, parsenow=>$parsenow,
     normalize=>$self->{conf}->{normalize_charset},
+    body_part_scan_size=>$self->{conf}->{body_part_scan_size},
+    rawbody_part_scan_size=>$self->{conf}->{rawbody_part_scan_size},
     master_deadline=>$master_deadline, suppl_attrib=>$suppl_attrib });
 
   # bug 5069: The goal here is to get rendering plugins to do things

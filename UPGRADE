@@ -18,6 +18,9 @@ Note for Users Upgrading to SpamAssassin 3.4.3
   "ALTER TABLE awl RENAME COLUMN count TO msgcount;"
   "ALTER TABLE awl ADD last_hit timestamp NOT NULL default CURRENT_TIMESTAMP;"
 
+- body_part_scan_size 50000, rawbody_part_scan_size 500000 defaults added (Bug 6582)
+  These enable safer and faster scanning of large emails.
+
 - ALL pseudo-header now returns decoded headers, so it's usage is consistent
   with single header matching (:raw returns undecoded and folded like before).
 
@@ -42,6 +45,7 @@ Note for Users Upgrading to SpamAssassin 3.4.3
 - Add rules_matching() expression to meta rules
 
 - Add tflags domains_only/ips_only to DNSEval.pm functions
+
 
 Note for Users Upgrading to SpamAssassin 3.4.2
 ----------------------------------------------
