@@ -71,6 +71,7 @@ print "\ntrying net with only local rule plugins\n";
 foreach my $file 
         (<log/localrules.tmp/*.pre>, <log/test_rules_copy/*.pre>) #*/
 {
+  $file = untaint_var($file);
   rename $file, "$file.bak" or die "rename $file failed";
   open IN, "<$file.bak" or die "cannot read $file.bak: $!";
   open OUT, ">$file" or die "cannot write $file: $!";
