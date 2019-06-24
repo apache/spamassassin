@@ -98,6 +98,7 @@ my $plugins = q{
   loadplugin Mail::SpamAssassin::Plugin::URIEval
   loadplugin Mail::SpamAssassin::Plugin::WLBLEval
   loadplugin Mail::SpamAssassin::Plugin::VBounce
+  loadplugin Mail::SpamAssassin::Plugin::ReplaceTags
 };
 write_plugin_pre($plugins);
 tryone (0, "");
