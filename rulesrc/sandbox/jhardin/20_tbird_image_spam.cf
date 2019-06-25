@@ -5,7 +5,7 @@
 # with input from Alex Broens and Karsten Bräckelmann
 
 ifplugin Mail::SpamAssassin::Plugin::MIMEHeader
-  mimeheader __JPEG_ATTACH           Content-Type =~ /image\/jpeg/i
+  mimeheader __JPEG_ATTACH           Content-Type =~ /image\/jpe?g/i
 endif
 
 header     __MUA_TBIRD             User-Agent =~ /^Mozilla\/(.*) Thunderbird/
