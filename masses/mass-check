@@ -170,7 +170,6 @@ use FindBin;
 use lib "$FindBin::Bin/../lib";
 use lib "$FindBin::Bin/../blib/lib";
 
-eval "use bytes";
 use IO::Select;
 use IO::Socket;
 use Socket qw();
