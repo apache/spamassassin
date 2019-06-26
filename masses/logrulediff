@@ -1,0 +1,63 @@
+#!/usr/bin/perl
+
+use warnings;
+use strict;
+
+# Compare hit rule differences for two logfiles from similar mass-check
+# runs.  Might be used after tweaking some code and checking if anything
+# changed.  Assumed that the exact same corpus is used for both runs.
+
+# $ ./logrulediff ham-hege.log.old ham-hege.log
+# ham/0d055650bfee6a5a0a1b43944f73eb7bb7fa7d39 +NEW_RULE -DISAPPEARED_RULE
+
+die "Usage: $0 <logfile1> <logfile2>"
+  unless -f $ARGV[0] && -f $ARGV[1];
+
+my %rules1;
+open(IN, $ARGV[0]) or die;
+while (<IN>) {
+  next if /^#/;
+  next unless /^[.Y]\s+-?\d+\s+(\S+)\s+(\S+)/;
+  $rules1{$1}{$_}++ foreach split(',', $2);
+}
+close IN;
+
+my %rules2;
+open(IN, $ARGV[1]) or die;
+while (<IN>) {
+  next if /^#/;
+  next unless /^[.Y]\s+-?\d+\s+(\S+)\s+(\S+)/;
+  $rules2{$1}{$_}++ foreach split(',', $2);
+}
+close IN;
+
+foreach my $f (sort keys %rules1) {
+  if (!defined $rules2{$f}) {
+    print STDERR "!!! $f not found in second logfile\n";
+    next;
+  }
+  my @adds;
+  my @subs;
+  foreach my $rule (keys %{$rules1{$f}}) {
+    next if exists $rules2{$f}{$rule};
+    push @subs, $rule;
+  }
+  foreach my $rule (keys %{$rules2{$f}}) {
+    next if exists $rules1{$f}{$rule};
+    push @adds, $rule;
+  }
+
+  if (@adds + @subs > 0) {
+    print "$f ";
+    print "+$_ " foreach (@adds);
+    print "-$_ " foreach (@subs);
+    print "\n";
+  }
+}
+
+foreach my $f (sort keys %rules2) {
+  if (!defined $rules1{$f}) {
+    print STDERR "!!! $f not found in first logfile\n";
+    next;
+  }
+}
