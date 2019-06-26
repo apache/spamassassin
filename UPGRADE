@@ -7,6 +7,9 @@ Note for Users Upgrading to SpamAssassin 4.0.0
   This is to make sure all the legacy installations and wiki guides etc
   still using it needlessly get fixed.
 
+- HashCash module and support has been removed completely, as it has been
+  long since deprecated
+
 - TxRep and Awl plugins has been modified to be compatible 
   with latest Postgresql versions.
   You should upgrade your sql database running the following command:

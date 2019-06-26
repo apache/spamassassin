@@ -113,15 +113,6 @@ Other Installation Notes
 ------------------------
 
   
-  - Hashcash is a useful system; it requires that senders exercise a
-    CPU-intensive task before they can send mail to you, so we give that
-    some bonus points.  However, it requires that you list what addresses
-    you expect to receive mail for, by adding 'hashcash_accept' lines to
-    your ~/.spamassassin/user_prefs or /etc/mail/spamassassin/local.cf
-    files.  See the Mail::SpamAssassin::Plugin::Hashcash manual page for
-    details on how to specify these.
-
-
   - SpamAssassin now uses a temporary file in /tmp (or $TMPDIR, if that's
     set in the environment) for Pyzor and DCC checks.  Make sure that this
     directory is either (a) not writable by other users, or (b) not shared

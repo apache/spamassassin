@@ -336,17 +336,6 @@ lang de describe USER_IN_WHITELIST_TO Empfängeradresse steht in Ihrer persönlich
 lang de describe USER_IN_MORE_SPAM_TO Empfängeradresse soll fast alle (Spam-) Nachrichten erhalten
 lang de describe USER_IN_ALL_SPAM_TO Empfängeradresse soll alle (Spam-) Nachrichten erhalten
 
-ifplugin Mail::SpamAssassin::Plugin::Hashcash
-lang de describe HASHCASH_20 Enthält korrekte Hashcash-Kennzeichnung (20 bits)
-lang de describe HASHCASH_21 Enthält korrekte Hashcash-Kennzeichnung (21 bits)
-lang de describe HASHCASH_22 Enthält korrekte Hashcash-Kennzeichnung (22 bits)
-lang de describe HASHCASH_23 Enthält korrekte Hashcash-Kennzeichnung (23 bits)
-lang de describe HASHCASH_24 Enthält korrekte Hashcash-Kennzeichnung (24 bits)
-lang de describe HASHCASH_25 Enthält korrekte Hashcash-Kennzeichnung (25 bits)
-lang de describe HASHCASH_HIGH Enthält korrekte Hashcash-Kennzeichnung (> 25 bits)
-lang de describe HASHCASH_2SPEND Hashcash-Markierung bereits in anderer Nachricht verwendet
-endif
-
 ifplugin Mail::SpamAssassin::Plugin::SPF
 lang de describe SPF_PASS SPF: Senderechner entspricht SPF-Datensatz
 lang de describe SPF_FAIL SPF: Senderechner entspricht nicht SPF-Datensatz (fail)

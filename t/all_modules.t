@@ -19,7 +19,6 @@ if (eval { require BSD::Resource; }) {
 tstpre ("
 loadplugin Mail::SpamAssassin::Plugin::RelayCountry
 loadplugin Mail::SpamAssassin::Plugin::URIDNSBL
-loadplugin Mail::SpamAssassin::Plugin::Hashcash
 loadplugin Mail::SpamAssassin::Plugin::SPF
 loadplugin Mail::SpamAssassin::Plugin::DCC
 loadplugin Mail::SpamAssassin::Plugin::Pyzor
