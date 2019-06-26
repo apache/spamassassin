@@ -853,8 +853,8 @@ foreach my $channel (@channels) {
   if ( $SHA512 ) {
     # Validate the SHA512 signature
     { local($1);
-      $SHA512 =~ /^([a-fA-F0-9]{128})/;
-      $SHA512 = $1 || 'INVALID';
+      $SHA512 =~ /^([a-fA-F0-9]{128})\b/;
+      $SHA512 = lc($1) || 'INVALID';
     }
     my $digest = sha512_hex($content);
     dbg("sha512: verification wanted: $SHA512");
@@ -868,8 +868,8 @@ foreach my $channel (@channels) {
   if ( $SHA256 ) {
     # Validate the SHA256 signature
     { local($1);
-      $SHA256 =~ /^([a-fA-F0-9]{64})/;
-      $SHA256 = $1 || 'INVALID';
+      $SHA256 =~ /^([a-fA-F0-9]{64})\b/;
+      $SHA256 = lc($1) || 'INVALID';
     }
     my $digest = sha256_hex($content);
     dbg("sha256: verification wanted: $SHA256");
