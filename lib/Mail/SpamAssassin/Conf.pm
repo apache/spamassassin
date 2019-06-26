@@ -2941,6 +2941,10 @@ rules are not supported, even if you use C<x> as a modifier.  Also note that
 the C<#> character must be escaped (C<\#>) or else it will be considered to be
 the start of a comment and not part of the regexp.
 
+If the header specified matches multiple headers, their text will be
+concatenated with embedded \n's. Therefore you may wish to use C</m> if you
+use C<^> or C<$> in your regular expression.
+
 If the C<[if-unset: STRING]> tag is present, then C<STRING> will
 be used if the header is not found in the mail message.
 
