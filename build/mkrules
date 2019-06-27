@@ -239,6 +239,7 @@ sub lint_rule_text {
   my $pretext = q{
     loadplugin Mail::SpamAssassin::Plugin::Check
     loadplugin Mail::SpamAssassin::Plugin::URIDNSBL
+    util_rb_tld com # skip "need to run sa-update" warn
     use_bayes 0
   };
 
