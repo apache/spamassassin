@@ -3,6 +3,7 @@ ifplugin Mail::SpamAssassin::Plugin::FreeMail
   meta     GB_FREEMAIL_DISPTO  ( __FREEMAIL_DISPTO && !__freemail_safe )
   describe GB_FREEMAIL_DISPTO  Disposition-Notification-To/From or Disposition-Notification-To/body contain different freemails
   score    GB_FREEMAIL_DISPTO  0.50 # limit
+  tflags   GB_FREEMAIL_DISPTO  publish
 endif
 
 ifplugin Mail::SpamAssassin::Plugin::FreeMail
