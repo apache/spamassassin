@@ -1,9 +1,9 @@
-header	FORGED_MUA_TBIRD	User-Agent =~ /^User-Agent\: Mozilla\/(.*) Thunderbird/
-describe	FORGED_MUA_TBIRD	Forged Thunderbird Mua
+header	     GB_FORGED_MUA_TBIRD	User-Agent =~ /^User-Agent\: Mozilla\/(.*) Thunderbird/
+describe     GB_FORGED_MUA_TBIRD	Forged Thunderbird Mua
 
-header  __FORGED_MUA_POSTFIX0	User-Agent =~ /Postfix/
-header  __FORGED_MUA_POSTFIX1	X-Mailer =~ /Postfix/
-meta	FORGED_MUA_POSTFIX	( __FORGED_MUA_POSTFIX0 || __FORGED_MUA_POSTFIX1 )
-describe	FORGED_MUA_POSTFIX	Forged Postfix mua headers
-tflags  FORGED_MUA_POSTFIX      publish
-score	FORGED_MUA_POSTFIX	2.0 # limit
+header       __FORGED_MUA_POSTFIX0	User-Agent =~ /Postfix/
+header       __FORGED_MUA_POSTFIX1	X-Mailer =~ /Postfix/
+meta	     GB_FORGED_MUA_POSTFIX	( __FORGED_MUA_POSTFIX0 || __FORGED_MUA_POSTFIX1 )
+describe     GB_FORGED_MUA_POSTFIX	Forged Postfix mua headers
+tflags       GB_FORGED_MUA_POSTFIX      publish
+score	     GB_FORGED_MUA_POSTFIX	2.0 # limit

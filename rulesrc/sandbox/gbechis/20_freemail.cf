@@ -1,14 +1,14 @@
 ifplugin Mail::SpamAssassin::Plugin::FreeMail
-  header   __freemail_dispto  eval:check_freemail_header('Disposition-Notification-To')
-  meta     FREEMAIL_DISPTO  ( __freemail_dispto && !__freemail_safe )
-  describe FREEMAIL_DISPTO  Disposition-Notification-To/From or Disposition-Notification-To/body contain different freemails
-  score    FREEMAIL_DISPTO  0.50 # limit
+  header   __FREEMAIL_DISPTO   eval:check_freemail_header('Disposition-Notification-To')
+  meta     GB_FREEMAIL_DISPTO  ( __FREEMAIL_DISPTO && !__freemail_safe )
+  describe GB_FREEMAIL_DISPTO  Disposition-Notification-To/From or Disposition-Notification-To/body contain different freemails
+  score    GB_FREEMAIL_DISPTO  0.50 # limit
 endif
 
 ifplugin Mail::SpamAssassin::Plugin::FreeMail
   ifplugin Mail::SpamAssassin::Plugin::FromNameSpoof
-    header   __FROM_EQ_REPLY         eval:check_fromname_equals_replyto()
-    meta     FREEM_FROM_NOT_REPLY    ( !__FROM_EQ_REPLY && FREEMAIL_FROM && FREEMAIL_REPLYTO )
-    describe FREEM_FROM_NOT_REPLY    From: and Reply-To: have different freemail domains
+    header   __FROM_EQ_REPLY            eval:check_fromname_equals_replyto()
+    meta     GB_FREEM_FROM_NOT_REPLY    ( !__FROM_EQ_REPLY && FREEMAIL_FROM && FREEMAIL_REPLYTO )
+    describe GB_FREEM_FROM_NOT_REPLY    From: and Reply-To: have different freemail domains
   endif
 endif
