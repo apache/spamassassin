@@ -15,3 +15,14 @@ ifplugin Mail::SpamAssassin::Plugin::FromNameSpoof
   meta      GB_FROMNAME_SPOOFED_EMAIL_IP  ( FROMNAME_SPOOFED_EMAIL && !__NOT_SPOOFED )
   describe  GB_FROMNAME_SPOOFED_EMAIL_IP  From:name looks like a spoofed email from a spoofed ip
 endif
+
+header     __HDR_RCVD_GOOGLE           X-Spam-Relays-External =~ /rdns=mail-\S+\.google\.com\s/
+uri        __URI_IMG_GDRIVE            /^https:\/\/www\.google\.com\/drive\/static\/images\/drive\/logo-drive\.png/
+uri        __URI_IMG_GPHOTO            /^https:\/\/www\.google\.com\/photos\/about\/static\/images\/logo_photos_64dp\.svg/
+
+meta       __GDRIVE_IMG_NOT_RCVD_GOOG  __URI_IMG_GDRIVE && !__HDR_RCVD_GOOGLE
+meta       __GPHOTO_IMG_NOT_RCVD_GOOG  __URI_IMG_GPHOTO && !__HDR_RCVD_GOOGLE
+meta       GB_GOOG_IMG_NOT_RCVD_GOOG   ( __GDRIVE_IMG_NOT_RCVD_GOOG || __GPHOTO_IMG_NOT_RCVD_GOOG ) && !__HAS_ERRORS_TO && !__MSGID_LIST && !__MSGID_GUID && !__RCD_RDNS_SMTP
+score      GB_GOOG_IMG_NOT_RCVD_GOOG   2.500    # limit
+describe   GB_GOOG_IMG_NOT_RCVD_GOOG   Google hosted image but message not from Google
+# tflags     GB_GOOG_IMG_NOT_RCVD_GOOG   publish
