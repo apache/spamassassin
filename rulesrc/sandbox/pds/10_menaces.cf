@@ -52,3 +52,5 @@ meta     PDS_URI_HIDDEN_HELO_NO_DOMAIN __HELO_NO_DOMAIN && __KHOP_URI_HIDDEN
 describe PDS_URI_HIDDEN_HELO_NO_DOMAIN Hidden URI, HELO not domain
 score    PDS_URI_HIDDEN_HELO_NO_DOMAIN 2.0
 reuse    PDS_URI_HIDDEN_HELO_NO_DOMAIN
+
+header   __PDS_TONAME_EQ_TOLOCAL To:raw =~ /^['"]?([^'"]+)['"]? <\1@/
