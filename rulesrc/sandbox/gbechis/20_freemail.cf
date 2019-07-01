@@ -7,6 +7,11 @@ ifplugin Mail::SpamAssassin::Plugin::FreeMail
 endif
 
 ifplugin Mail::SpamAssassin::Plugin::FreeMail
+  meta     GB_FREEMAIL_DISPTO_NOTFREEM  ( __FREEMAIL_DISPTO && !__freemail_safe && !FREEMAIL_FROM )
+  describe GB_FREEMAIL_DISPTO_NOTFREEM  Disposition-Notification-To/From contain different freemails but mailfrom is not a freemail
+endif
+
+ifplugin Mail::SpamAssassin::Plugin::FreeMail
   ifplugin Mail::SpamAssassin::Plugin::FromNameSpoof
     header   __FROM_EQ_REPLY            eval:check_fromname_equals_replyto()
     meta     GB_FREEM_FROM_NOT_REPLY    ( !__FROM_EQ_REPLY && FREEMAIL_FROM && FREEMAIL_REPLYTO )
