@@ -1979,7 +1979,7 @@ ifplugin Mail::SpamAssassin::Plugin::ReplaceTags
   replace_rules  __YOUR_WEBCAM
   body           __YOUR_ONAN            /(?:^|\s)<Y><O><U><R>?\s(?:<M><A><S><T>(?:<U>|<R>){2}<B><A><T><I>(?:<O><N>|<N><G>)|<O><N><A><N><I><S><M>|<S><O><L><I><T><A><R><Y>\s<S><E><X>|<H><A><N><D>\s<F><U><C><K><I><N><G>)/i
   replace_rules  __YOUR_ONAN
-  body           __YOUR_PERSONAL        /(?:^|\s)(?:<Y><O><U><R>\s(?:<P><E><R><S><O><N><A><L>|<S><O><C><I><A><L>\s<C><O><N><T><A><C><T>|<A><D><D><R><E><S><S>)\s(?:<I><N><F><O>(?:<R><M><A><T><I><O><N>)?|<D><A><T><A>|<D><E><T><A><I><L><S>|<B><O><O><K>)|<A><L><L>\s<Y><O><U><R>\s<F><I><L><E><S>)\s/i
+  body           __YOUR_PERSONAL        /(?:^|\s)(?:<Y><O><U><R>\s(?:<P><E><R><S><O><N><A><L>|<S><O><C><I><A><L>\s<C><O><N><T><A><C><T>|<A><D><D><R><E><S><S>)\s(?:<I><N><F><O>(?:<R><M><A><T><I><O><N>)?|<D><A><T><A>|<D><E><T><A><I><L><S>|<B><O><O><K>|<S><E><C><R><E><T><S>)|<A><L><L>\s<Y><O><U><R>\s<F><I><L><E><S>)\s/i
   replace_rules  __YOUR_PERSONAL
   body           __HOURS_DEADLINE       /(?:^|\s)(?:(?:<G><I><V><E>\s<Y><O><U>|<Y><O><U>\s(?:<W><I><L><L>\s)?<H><A><V><E>(?:\s<O><N><L><Y>|\s<J><U><S><T>)?)(?:\s<T><H><E>\s<L><A><S><T>)?\s(?:\d+|<O><N><E>|<T><W><O>|<T><H><R><E><E>)\s?(?:<H><O><U><R><S>?|<H><R>\s?<S>?|<D><A><Y><S>?)|(?:<B><Y>|<T><O>|<U><N><T><I><L>|<B><E><F><O><R><E>)\s<T><H><E>\s<E><N><D>\s<O><F>\s<T><H><E>\s(?:<W><O><R><K>(?:<I><N><G>)?\s)?<D><A><Y>|Ich\sgebe\sIhnen\s\d+\sStunden|\d+\s<H><O><U><R><S>?\s<B><E><F><O><R><E>\s(?:<S><E><N><D><I><N><G>|<R><E><L><E><A><S><I><N><G>|<E><X><P><O><S><I><N><G>|<P><U><B><L><I><S><H><I><N><G>)|(?:<T><H><E>|<Y><O><U><R>)\s<D><E><A><D><L><I><N><E>\s(?:<I><S>|<W><I><L><L>\s<B><E>))/i
   replace_rules  __HOURS_DEADLINE
@@ -1992,7 +1992,7 @@ else
   body           __YOUR_PASSWORD        /\b(?:your|(?:change|modify|update|reset|alter|fix)\sthe)\s(?:password|pswd)\b/i
   body           __YOUR_WEBCAM          /\b(?:from|your)\s(?:(?:screen|desktop)\sand\s|own\s)?(?:web[-\s]?|front[-\s]?|network\s)cam\b/i
   body           __YOUR_ONAN            /\byour?\s(?:mast[ur]{2}bati(?:on|ng)|onanism|solitary\ssex|hand\sfucking)\b/i
-  body           __YOUR_PERSONAL        /\b(?:your\s(?:personal|social\scontact|address)\s(?:info(?:rmation)?|data|details|book)|all\syour\sfiles)\b/i
+  body           __YOUR_PERSONAL        /\b(?:your\s(?:personal|social\scontact|address)\s(?:info(?:rmation)?|data|details|book|secrets)|all\syour\sfiles)\b/i
   body           __HOURS_DEADLINE       /\b(?:(?:give\syou|you\s(?:will\s)?have(?:\sonly|\sjust)?)(?:\sthe\slast)?\s(?:\d+|one|two|three)\s?(?:hours?|hr(?:\s?s)?|days?)|(?:by|to|until|before)\sthe\send\sof\sthe\s(?:work(?:ing)?\s)?day|Ich\sgebe\sIhnen\s\d+\sStunden|\d+\shours?\sbefore\s(?:sending|releasing|exposing|publishing)|(?:the|your)\sdeadline\s(?:is|will\sbe))\b/i
   body           __EXPLOSIVE_DEVICE     /\b(?:explosive\sdevice|bomb)\b/i
 endif
