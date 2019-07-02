@@ -14,9 +14,9 @@ ifplugin Mail::SpamAssassin::Plugin::AskDNS
 
 askdns   __HELO_RECORD _LASTEXTERNALHELO_ A /./
 
-meta     PDS_HELO_NORDNS (__HELO_HIGHPROFILE && !__HELO_RECORD)
-describe PDS_HELO_NORDNS High profile HELO but no A record
-score    PDS_HELO_NORDNS 2.0
-reuse    PDS_HELO_NORDNS
+meta     PDS_NO_HELO_DNS (__HELO_HIGHPROFILE && !__HELO_RECORD)
+describe PDS_NO_HELO_DNS High profile HELO but no A record
+score    PDS_NO_HELO_DNS 2.0
+reuse    PDS_NO_HELO_DNS
 
 endif
