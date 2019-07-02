@@ -5,6 +5,11 @@ describe PDS_HELO_SPF_FAIL High profile HELO that fails SPF
 score    PDS_HELO_SPF_FAIL 2.0
 reuse    PDS_HELO_SPF_FAIL
 
+meta     PDS_HP_HELO_NORDNS RDNS_NONE && __HELO_HIGHPROFILE
+describe PDS_HP_HELO_NORDNS High profile HELO with no sender rDNS
+score    PDS_HP_HELO_NORDNS 1.0
+reuse    PDS_HP_HELO_NORDNS
+
 ifplugin Mail::SpamAssassin::Plugin::AskDNS
 
 askdns   __HELO_RECORD _LASTEXTERNALHELO_ A /./
