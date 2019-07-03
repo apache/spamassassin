@@ -9,6 +9,8 @@ endif
 ifplugin Mail::SpamAssassin::Plugin::FreeMail
   meta     GB_FREEMAIL_DISPTO_NOTFREEM  ( __FREEMAIL_DISPTO && !__freemail_safe && !FREEMAIL_FROM )
   describe GB_FREEMAIL_DISPTO_NOTFREEM  Disposition-Notification-To/From contain different freemails but mailfrom is not a freemail
+  score    GB_FREEMAIL_DISPTO_NOTFREEM  0.50 # limit
+  tflags   GB_FREEMAIL_DISPTO_NOTFREEM  publish
 endif
 
 ifplugin Mail::SpamAssassin::Plugin::FreeMail
