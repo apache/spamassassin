@@ -1605,7 +1605,7 @@ meta        __HEXHASH_2        __HEXHASHWORD_S2EU > 1
 meta        __HEXHASH_3        __HEXHASHWORD_S2EU > 2
 meta        __HEXHASH_4        __HEXHASHWORD_S2EU > 3
 #meta        __HEXHASH_5        __HEXHASHWORD_S2EU > 4
-meta        HEXHASH_WORD       (__HEXHASHWORD_S2EU > 1) && !ALL_TRUSTED && !__LYRIS_EZLM_REMAILER && !__MSGID_HEXISH && !__RDNS_SHORT && !__CTYPE_MULTIPART_MIXED && !__HAS_X_REF && !__HAS_IMG_SRC_ONECASE
+meta        HEXHASH_WORD       (__HEXHASHWORD_S2EU > 1) && !ALL_TRUSTED && !__LYRIS_EZLM_REMAILER && !__MSGID_HEXISH && !__RDNS_SHORT && !__CTYPE_MULTIPART_MIXED && !__HAS_X_REF && !__HAS_IMG_SRC_ONECASE && !__RCD_RDNS_MAIL_MESSY
 describe    HEXHASH_WORD       Multiple instances of word + hexadecimal hash
 score       HEXHASH_WORD       3.000	# limit
 tflags      HEXHASH_WORD       publish
@@ -2719,7 +2719,7 @@ describe   URI_GIBB_NO_PROTO           Long, gibberish, no-protocol URI
 
 
 header     __AC_FROM_MANY_DOTS         From =~ /<(?:\w{2,}\.){2,}\w+@/
-meta       __AC_FROM_MANY_DOTS_MINFP   __AC_FROM_MANY_DOTS && !FREEMAIL_FORGED_FROMDOMAIN && !FORGED_GMAIL_RCVD && !__UNSUB_LINK && !__XM_VBULLETIN && !__RDNS_SHORT && !__REPTO_QUOTE && !__FSL_RELAY_GOOGLE && !__HAS_IN_REPLY_TO && !__RCD_RDNS_SMTP && !__HAS_THREAD_INDEX && !__RCD_RDNS_MX_MESSY && !__CTYPE_MULTIPART_MIXED && !__RCD_RDNS_MTA && !__VIA_ML 
+meta       __AC_FROM_MANY_DOTS_MINFP   __AC_FROM_MANY_DOTS && !ALL_TRUSTED && !FREEMAIL_FORGED_FROMDOMAIN && !FORGED_GMAIL_RCVD && !__UNSUB_LINK && !__XM_VBULLETIN && !__RDNS_SHORT && !__REPTO_QUOTE && !__FSL_RELAY_GOOGLE && !__HAS_IN_REPLY_TO && !__RCD_RDNS_SMTP && !__HAS_THREAD_INDEX && !__RCD_RDNS_MX_MESSY && !__CTYPE_MULTIPART_MIXED && !__RCD_RDNS_MTA && !__VIA_ML 
 meta       AC_FROM_MANY_DOTS           __AC_FROM_MANY_DOTS_MINFP
 score      AC_FROM_MANY_DOTS           3.000	# limit
 describe   AC_FROM_MANY_DOTS           Multiple periods in From user name
