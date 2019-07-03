@@ -16,6 +16,7 @@ ifplugin Mail::SpamAssassin::Plugin::AskDNS
 
 askdns   __HELO_RECORD _LASTEXTERNALHELO_ A /./
 tflags   __HELO_RECORD net
+reuse    __HELO_RECORD
 
 meta     PDS_NO_HELO_DNS (__HELO_HIGHPROFILE && !__HELO_RECORD)
 describe PDS_NO_HELO_DNS High profile HELO but no A record
