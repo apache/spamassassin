@@ -28,7 +28,7 @@ describe PDS_DBL_URL_ILLEGAL_CHARS Double url illegal subject characters
 score    PDS_DBL_URL_ILLEGAL_CHARS 2.0
 reuse    PDS_DBL_URL_ILLEGAL_CHARS
 
-meta     FROM_2_EMAILS_SHORT __LCL__KAM_BODY_LENGTH_LT_512 && __PDS_FROM_2_EMAILS
+meta     FROM_2_EMAILS_SHORT __KAM_BODY_LENGTH_LT_512 && __PDS_FROM_2_EMAILS
 describe FROM_2_EMAILS_SHORT Short body and From looks like 2 different emails
 score    FROM_2_EMAILS_SHORT 2.0 # limit
 reuse    FROM_2_EMAILS_SHORT
@@ -40,6 +40,11 @@ meta     SHORT_BODY_QUOTE  __PDS_SUBJECT_QUOTE && __PDS_BODY_QUOTE && __KAM_BODY
 describe SHORT_BODY_QUOTE Short body with quote - used for warming up domains
 score    SHORT_BODY_QUOTE 2.0
 reuse    SHORT_BODY_QUOTE
+
+meta     BODY_QUOTE_MALF_MSGID __MSGID_NOFQDN2 && __PDS_BODY_QUOTE
+describe BODY_QUOTE_MALF_MSGID Malformed MSGID with quote
+score    BODY_QUOTE_MALF_MSGID 2.0
+reuse    BODY_QUOTE_MALF_MSGID
 
 meta     SPOOFED_FREEMAIL_NO_RDNS __SPOOFED_FREEMAIL && __RDNS_NONE
 describe SPOOFED_FREEMAIL_NO_RDNS From SPOOFED_FREEMAIL and no rDNS
@@ -53,4 +58,5 @@ describe PDS_URI_HIDDEN_HELO_NO_DOMAIN Hidden URI, HELO not domain
 score    PDS_URI_HIDDEN_HELO_NO_DOMAIN 2.0
 reuse    PDS_URI_HIDDEN_HELO_NO_DOMAIN
 
-header   __PDS_TONAME_EQ_TOLOCAL To:raw =~ /^['"]?([^'"]+)['"]? <\1@/
+header   __PDS_TONAME_EQ_TOLOCAL To:raw =~ /^['"]?([^'"]+)['"]? <?\1\@/
+
