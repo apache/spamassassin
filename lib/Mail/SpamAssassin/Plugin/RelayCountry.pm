@@ -48,7 +48,8 @@ Following metadata headers and tags are added:
  X-Relay-Countries-Auth      _RELAYCOUNTRYAUTH_
    Auth will contain all relays starting from the first relay that used
    authentication. For example, this could be used to check for hacked
-   local users coming in from unexpected countries.
+   local users coming in from unexpected countries. If there are no
+   authenticated relays, this will be empty.
 
 =head1 REQUIREMENT
 
