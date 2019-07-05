@@ -27,8 +27,14 @@ RelayCountry - add message metadata indicating the country code of each relay
 
 The RelayCountry plugin attempts to determine the domain country codes
 of each relay used in the delivery path of messages and add that information
-to the message metadata as "X-Relay-Countries", or the C<_RELAYCOUNTRY_>
-header markup.
+to the message metadata.
+
+Following metadata headers and tags are added:
+
+ X-Relay-Countries           _RELAYCOUNTRY_     all untrusted relays
+ X-Relay-Countries-External  _RELAYCOUNTRYEXT_  all external relays
+ X-Relay-Countries-MUA       _RELAYCOUNTRYMUA_  all relays after first MSA
+ X-Relay-Countries-All       _RELAYCOUNTRYALL_  all relays
 
 =head1 REQUIREMENT
 
@@ -158,6 +164,51 @@ If not defined, GeoIP2 default search includes:
   $conf->{parser}->register_commands(\@cmds);
 }
 
+sub get_country {
+    my ($self, $ip, $db, $dbv6, $country_db_type) = @_;
+    my $cc;
+    my $IP_PRIVATE = IP_PRIVATE;
+    my $IPV4_ADDRESS = IPV4_ADDRESS;
+
+    # Private IPs will always be returned as '**'
+    if ($ip =~ /^$IP_PRIVATE$/o) {
+      $cc = "**";
+    }
+    elsif ($country_db_type eq "GeoIP") {
+      if ($ip =~ /^$IPV4_ADDRESS$/o) {
+        $cc = $db->country_code_by_addr($ip);
+      } elsif (defined $dbv6) {
+        $cc = $dbv6->country_code_by_addr_v6($ip);
+      }
+    }
+    elsif ($country_db_type eq "GeoIP2") {
+      my ($country, $country_rec);
+      eval {
+        $country = $db->country( ip => $ip );
+        $country_rec = $country->country();
+        $cc = $country_rec->iso_code();
+        1;
+      } or do {
+        $@ =~ s/\s+Trace begun.*//s;
+        dbg("metadata: RelayCountry: GeoIP2 failed: $@");
+      }
+    }
+    elsif ($country_db_type eq "DB_File") {
+      if ($ip =~ /^$IPV4_ADDRESS$/o ) {
+        $cc = $db->inet_atocc($ip);
+      } else {
+        $cc = $db->inet6_atocc($ip);
+      }
+    }
+    elsif ($country_db_type eq "Fast") {
+      $cc = $db->inet_atocc($ip);
+    }
+
+    $cc ||= 'XX';
+
+    return $cc;
+}
+
 sub extract_metadata {
   my ($self, $opts) = @_;
 
@@ -267,54 +318,56 @@ sub extract_metadata {
   dbg("metadata: RelayCountry: Using database: ".$db_info->());
   my $msg = $opts->{msg};
 
-  my $countries = '';
-  my $IP_PRIVATE = IP_PRIVATE;
-  my $IPV4_ADDRESS = IPV4_ADDRESS;
+  my @cc_untrusted;
   foreach my $relay (@{$msg->{metadata}->{relays_untrusted}}) {
     my $ip = $relay->{ip};
-    my $cc;
-
-    # Private IPs will always be returned as '**'
-    if ($ip =~ /^$IP_PRIVATE$/o) {
-      $cc = "**";
-    }
-    elsif ($country_db_type eq "GeoIP") {
-      if ($ip =~ /^$IPV4_ADDRESS$/o) {
-        $cc = $db->country_code_by_addr($ip);
-      } elsif (defined $dbv6) {
-        $cc = $dbv6->country_code_by_addr_v6($ip);
-      }
-    }
-    elsif ($country_db_type eq "GeoIP2") {
-      my ($country, $country_rec);
-      eval {
-        $country = $db->country( ip => $ip );
-        $country_rec = $country->country();
-        $cc = $country_rec->iso_code();
-        1;
-      } or do {
-        $@ =~ s/\s+Trace begun.*//s;
-        dbg("metadata: RelayCountry: GeoIP2 failed: $@");
-      }
-    }
-    elsif ($country_db_type eq "DB_File") {
-      if ($ip =~ /^$IPV4_ADDRESS$/o ) {
-        $cc = $db->inet_atocc($ip);
-      } else {
-        $cc = $db->inet6_atocc($ip);
-      }
-    }
-    elsif ($country_db_type eq "Fast") {
-      $cc = $db->inet_atocc($ip);
-    }
-
-    $cc ||= 'XX';
-    $countries .= $cc." ";
+    my $cc = $self->get_country($ip, $db, $dbv6, $country_db_type);
+    push @cc_untrusted, $cc;
   }
 
-  chop $countries;
-  $msg->put_metadata("X-Relay-Countries", $countries);
-  dbg("metadata: X-Relay-Countries: $countries");
+  my @cc_external;
+  foreach my $relay (@{$msg->{metadata}->{relays_external}}) {
+    my $ip = $relay->{ip};
+    my $cc = $self->get_country($ip, $db, $dbv6, $country_db_type);
+    push @cc_external, $cc;
+  }
+
+  my @cc_mua;
+  my $found_msa;
+  foreach my $relay (@{$msg->{metadata}->{relays_trusted}}) {
+    if ($relay->{msa}) {
+      $found_msa = 1;
+      next;
+    }
+    if ($found_msa) {
+      my $ip = $relay->{ip};
+      my $cc = $self->get_country($ip, $db, $dbv6, $country_db_type);
+      push @cc_mua, $cc;
+    }
+  }
+
+  my @cc_all;
+  foreach my $relay (@{$msg->{metadata}->{relays_internal}}, @{$msg->{metadata}->{relays_external}}) {
+    my $ip = $relay->{ip};
+    my $cc = $self->get_country($ip, $db, $dbv6, $country_db_type);
+    push @cc_all, $cc;
+  }
+
+  my $ccstr = join(' ', @cc_untrusted);
+  $msg->put_metadata("X-Relay-Countries", $ccstr);
+  dbg("metadata: X-Relay-Countries: $ccstr");
+
+  $ccstr = join(' ', @cc_external);
+  $msg->put_metadata("X-Relay-Countries-External", $ccstr);
+  dbg("metadata: X-Relay-Countries-External: $ccstr");
+
+  $ccstr = join(' ', @cc_mua);
+  $msg->put_metadata("X-Relay-Countries-MUA", $ccstr);
+  dbg("metadata: X-Relay-Countries-MUA: $ccstr");
+
+  $ccstr = join(' ', @cc_all);
+  $msg->put_metadata("X-Relay-Countries-All", $ccstr);
+  dbg("metadata: X-Relay-Countries-All: $ccstr");
 
   return 1;
 }
@@ -322,13 +375,26 @@ sub extract_metadata {
 sub parsed_metadata {
   my ($self, $opts) = @_;
 
-  my $countries =
-    $opts->{permsgstatus}->get_message->get_metadata('X-Relay-Countries');
-  return 1 if !defined $countries;
-
-  my @c_list = split(' ', $countries);
+  my @c_list = split(' ',
+    $opts->{permsgstatus}->get_message->get_metadata('X-Relay-Countries'));
   $opts->{permsgstatus}->set_tag("RELAYCOUNTRY",
                                  @c_list == 1 ? $c_list[0] : \@c_list);
+
+  @c_list = split(' ',
+    $opts->{permsgstatus}->get_message->get_metadata('X-Relay-Countries-External'));
+  $opts->{permsgstatus}->set_tag("RELAYCOUNTRYEXT",
+                                 @c_list == 1 ? $c_list[0] : \@c_list);
+
+  @c_list = split(' ',
+    $opts->{permsgstatus}->get_message->get_metadata('X-Relay-Countries-MUA'));
+  $opts->{permsgstatus}->set_tag("RELAYCOUNTRYMUA",
+                                 @c_list == 1 ? $c_list[0] : \@c_list);
+
+  @c_list = split(' ',
+    $opts->{permsgstatus}->get_message->get_metadata('X-Relay-Countries-All'));
+  $opts->{permsgstatus}->set_tag("RELAYCOUNTRYALL",
+                                 @c_list == 1 ? $c_list[0] : \@c_list);
+
   return 1;
 }
 
