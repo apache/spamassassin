@@ -27,8 +27,14 @@ RelayCountry - add message metadata indicating the country code of each relay
 
 The RelayCountry plugin attempts to determine the domain country codes
 of each relay used in the delivery path of messages and add that information
-to the message metadata as "X-Relay-Countries", or the C<_RELAYCOUNTRY_>
-header markup.
+to the message metadata.
+
+Following metadata headers and tags are added:
+
+X-Relay-Countries           _RELAYCOUNTRY_     all untrusted relays
+X-Relay-Countries-External  _RELAYCOUNTRYEXT_  all external relays
+X-Relay-Countries-MUA       _RELAYCOUNTRYMUA_  all relays after first MSA
+X-Relay-Countries-All       _RELAYCOUNTRYALL_  all relays
 
 =head1 REQUIREMENT
 
@@ -84,16 +90,56 @@ sub extract_metadata {
   my $msg = $opts->{msg};
   my $geodb = $self->{main}->{geodb};
 
-  my $countries = '';
+  my @cc_untrusted;
   foreach my $relay (@{$msg->{metadata}->{relays_untrusted}}) {
     my $ip = $relay->{ip};
     my $cc = $geodb->get_country($ip);
-    $countries .= $cc." ";
+    push @cc_untrusted, $cc;
   }
 
-  chop $countries;
-  $msg->put_metadata("X-Relay-Countries", $countries);
-  dbg("metadata: X-Relay-Countries: $countries");
+  my @cc_external;
+  foreach my $relay (@{$msg->{metadata}->{relays_external}}) {
+    my $ip = $relay->{ip};
+    my $cc = $geodb->get_country($ip);
+    push @cc_external, $cc;
+  }
+
+  my @cc_mua;
+  my $found_msa;
+  foreach my $relay (@{$msg->{metadata}->{relays_trusted}}) {
+    if ($relay->{msa}) {
+      $found_msa = 1;
+      next;
+    }
+    if ($found_msa) {
+      my $ip = $relay->{ip};
+      my $cc = $geodb->get_country($ip);
+      push @cc_mua, $cc;
+    }
+  }
+
+  my @cc_all;
+  foreach my $relay (@{$msg->{metadata}->{relays_internal}}, @{$msg->{metadata}->{relays_external}}) {
+    my $ip = $relay->{ip};
+    my $cc = $geodb->get_country($ip);
+    push @cc_all, $cc;
+  }
+
+  my $ccstr = join(' ', @cc_untrusted);
+  $msg->put_metadata("X-Relay-Countries", $ccstr);
+  dbg("metadata: X-Relay-Countries: $ccstr");
+
+  $ccstr = join(' ', @cc_external);
+  $msg->put_metadata("X-Relay-Countries-External", $ccstr);
+  dbg("metadata: X-Relay-Countries-External: $ccstr");
+
+  $ccstr = join(' ', @cc_mua);
+  $msg->put_metadata("X-Relay-Countries-MUA", $ccstr);
+  dbg("metadata: X-Relay-Countries-MUA: $ccstr");
+
+  $ccstr = join(' ', @cc_all);
+  $msg->put_metadata("X-Relay-Countries-All", $ccstr);
+  dbg("metadata: X-Relay-Countries-All: $ccstr");
 }
 
 sub parsed_metadata {
@@ -101,11 +147,26 @@ sub parsed_metadata {
 
   return 1 if $self->{relaycountry_disabled};
 
-  my $countries =
-    $opts->{permsgstatus}->get_message->get_metadata('X-Relay-Countries');
-  my @c_list = split(' ', $countries);
+  my @c_list = split(' ',
+    $opts->{permsgstatus}->get_message->get_metadata('X-Relay-Countries'));
   $opts->{permsgstatus}->set_tag("RELAYCOUNTRY",
                                  @c_list == 1 ? $c_list[0] : \@c_list);
+
+  @c_list = split(' ',
+    $opts->{permsgstatus}->get_message->get_metadata('X-Relay-Countries-External'));
+  $opts->{permsgstatus}->set_tag("RELAYCOUNTRYEXT",
+                                 @c_list == 1 ? $c_list[0] : \@c_list);
+
+  @c_list = split(' ',
+    $opts->{permsgstatus}->get_message->get_metadata('X-Relay-Countries-MUA'));
+  $opts->{permsgstatus}->set_tag("RELAYCOUNTRYMUA",
+                                 @c_list == 1 ? $c_list[0] : \@c_list);
+
+  @c_list = split(' ',
+    $opts->{permsgstatus}->get_message->get_metadata('X-Relay-Countries-All'));
+  $opts->{permsgstatus}->set_tag("RELAYCOUNTRYALL",
+                                 @c_list == 1 ? $c_list[0] : \@c_list);
+
   return 1;
 }
 
