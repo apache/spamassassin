@@ -84,8 +84,10 @@ our $VERSION = '0.52';
 
 # https://www.openoffice.org/sc/compdocfileformat.pdf
 # http://blog.rootshell.be/2015/01/08/searching-for-microsoft-office-files-containing-macro/
+# embedded object in rtf files (https://www.biblioscape.com/rtf15_spec.htm)
 my $marker1 = "\xd0\xcf\x11\xe0";
 my $marker2 = "\x00\x41\x74\x74\x72\x69\x62\x75\x74\x00";
+my $marker3 = "\x5c\x6f\x62\x6a\x65\x6d\x62";
 
 # constructor: register the eval rule
 sub new {
@@ -829,6 +831,11 @@ sub _check_markers {
   my ($data) = @_;
 
   if (index($data, $marker1) == 0 && index($data, $marker2) > -1) {
+    dbg('Marker found');
+    return 1;
+  }
+
+  if (index($data, $marker3) > -1) {
     dbg('Marker found');
     return 1;
   }
