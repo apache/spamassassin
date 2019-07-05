@@ -31,10 +31,10 @@ to the message metadata.
 
 Following metadata headers and tags are added:
 
-X-Relay-Countries           _RELAYCOUNTRY_     all untrusted relays
-X-Relay-Countries-External  _RELAYCOUNTRYEXT_  all external relays
-X-Relay-Countries-MUA       _RELAYCOUNTRYMUA_  all relays after first MSA
-X-Relay-Countries-All       _RELAYCOUNTRYALL_  all relays
+ X-Relay-Countries           _RELAYCOUNTRY_     all untrusted relays
+ X-Relay-Countries-External  _RELAYCOUNTRYEXT_  all external relays
+ X-Relay-Countries-MUA       _RELAYCOUNTRYMUA_  all relays after first MSA
+ X-Relay-Countries-All       _RELAYCOUNTRYALL_  all relays
 
 =head1 REQUIREMENT
 
