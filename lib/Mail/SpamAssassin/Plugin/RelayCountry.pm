@@ -313,7 +313,10 @@ sub extract_metadata {
     }
   }
 
-  return 1 unless $db;
+  if (!$db) {
+    $self->{relaycountry_disabled} = 1;
+    return 1;
+  }
 
   dbg("metadata: RelayCountry: Using database: ".$db_info->());
   my $msg = $opts->{msg};
@@ -374,6 +377,8 @@ sub extract_metadata {
 
 sub parsed_metadata {
   my ($self, $opts) = @_;
+
+  return 1 if $self->{relaycountry_disabled};
 
   my @c_list = split(' ',
     $opts->{permsgstatus}->get_message->get_metadata('X-Relay-Countries'));
