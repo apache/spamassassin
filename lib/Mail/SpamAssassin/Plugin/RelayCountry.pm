@@ -31,10 +31,24 @@ to the message metadata.
 
 Following metadata headers and tags are added:
 
- X-Relay-Countries           _RELAYCOUNTRY_     all untrusted relays
- X-Relay-Countries-External  _RELAYCOUNTRYEXT_  all external relays
- X-Relay-Countries-MUA       _RELAYCOUNTRYMUA_  all relays after first MSA
- X-Relay-Countries-All       _RELAYCOUNTRYALL_  all relays
+ X-Relay-Countries           _RELAYCOUNTRY_
+   All untrusted relays. Contains all relays starting from the
+   trusted_networks border. This method has been used by default since
+   early SA versions.
+
+ X-Relay-Countries-External  _RELAYCOUNTRYEXT_
+   All external relays. Contains all relays starting from the
+   internal_networks border. Could be useful in some cases when
+   trusted/msa_networks extend beyond the internal border and those
+   need to be checked too.
+
+ X-Relay-Countries-All       _RELAYCOUNTRYALL_
+   All possible relays (internal + external).
+
+ X-Relay-Countries-Auth      _RELAYCOUNTRYAUTH_
+   Auth will contain all relays starting from the first relay that used
+   authentication. For example, this could be used to check for hacked
+   local users coming in from unexpected countries.
 
 =head1 REQUIREMENT
 
@@ -335,17 +349,16 @@ sub extract_metadata {
     push @cc_external, $cc;
   }
 
-  my @cc_mua;
-  my $found_msa;
+  my @cc_auth;
+  my $found_auth;
   foreach my $relay (@{$msg->{metadata}->{relays_trusted}}) {
-    if ($relay->{msa}) {
-      $found_msa = 1;
-      next;
+    if ($relay->{auth}) {
+      $found_auth = 1;
     }
-    if ($found_msa) {
+    if ($found_auth) {
       my $ip = $relay->{ip};
       my $cc = $self->get_country($ip, $db, $dbv6, $country_db_type);
-      push @cc_mua, $cc;
+      push @cc_auth, $cc;
     }
   }
 
@@ -364,9 +377,9 @@ sub extract_metadata {
   $msg->put_metadata("X-Relay-Countries-External", $ccstr);
   dbg("metadata: X-Relay-Countries-External: $ccstr");
 
-  $ccstr = join(' ', @cc_mua);
-  $msg->put_metadata("X-Relay-Countries-MUA", $ccstr);
-  dbg("metadata: X-Relay-Countries-MUA: $ccstr");
+  $ccstr = join(' ', @cc_auth);
+  $msg->put_metadata("X-Relay-Countries-Auth", $ccstr);
+  dbg("metadata: X-Relay-Countries-Auth: $ccstr");
 
   $ccstr = join(' ', @cc_all);
   $msg->put_metadata("X-Relay-Countries-All", $ccstr);
@@ -391,8 +404,8 @@ sub parsed_metadata {
                                  @c_list == 1 ? $c_list[0] : \@c_list);
 
   @c_list = split(' ',
-    $opts->{permsgstatus}->get_message->get_metadata('X-Relay-Countries-MUA'));
-  $opts->{permsgstatus}->set_tag("RELAYCOUNTRYMUA",
+    $opts->{permsgstatus}->get_message->get_metadata('X-Relay-Countries-Auth'));
+  $opts->{permsgstatus}->set_tag("RELAYCOUNTRYAUTH",
                                  @c_list == 1 ? $c_list[0] : \@c_list);
 
   @c_list = split(' ',
