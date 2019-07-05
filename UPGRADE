@@ -1,6 +1,8 @@
 Note for Users Upgrading to SpamAssassin 3.4.3
 ----------------------------------------------
 
+- New OLEMacro plugin to detect OLE Macro inside documents attached to emails
+
 - Due to the dangerous nature of sa-update --allowplugins option, it
   now prints a warning that --reallyallowplugins is required to use it.
   This is to make sure all the legacy installations and wiki guides etc
