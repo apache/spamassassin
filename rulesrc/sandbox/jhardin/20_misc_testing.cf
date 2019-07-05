@@ -1889,13 +1889,16 @@ score          BTC_ORG          2.500	# limit
 body           __BTC_OBFU_2     /\b\W{0,10}b(?!itcoin)\W{0,10}i\W{0,10}t\W{0,10}c\W{0,10}o\W{0,10}i\W{0,10}n\W{0,10}\b/i
 body           __BTC_OBFU_3     /\b\W{0,10}b(?!tc\b)\W{0,10}t\W{0,10}c\W{0,10}\b/i
 
+# seen in sloppy spam
+body           __BTC_OBFU_5     /&\#x62;&\#x69;&\#x74;&\#x63;&\#x6F;&\#x69;&\#x6E;/i
+
 # __BTC_OBFU_4 duplicates (to a degree) FUZZY_BITCOIN
 # Use FUZZY_BITCOIN (more hits) if possible
 ifplugin Mail::SpamAssassin::Plugin::ReplaceTags
-  meta           __OBFU_BITCOIN   ( __BITCOIN_ID && ( __BTC_OBFU_2 || __BTC_OBFU_3 || FUZZY_BITCOIN ) )
+  meta           __OBFU_BITCOIN   ( __BITCOIN_ID && ( __BTC_OBFU_2 || __BTC_OBFU_3 || FUZZY_BITCOIN || __BTC_OBFU_5 ) )
 else
   body           __BTC_OBFU_4     /\bb(?!itcoin)[i\x{0456}]t[c\x{0441}][o\x{043E}][i\x{0456}]n\b/i
-  meta           __OBFU_BITCOIN   ( __BITCOIN_ID && ( __BTC_OBFU_2 || __BTC_OBFU_3 || __BTC_OBFU_4 ) )
+  meta           __OBFU_BITCOIN   ( __BITCOIN_ID && ( __BTC_OBFU_2 || __BTC_OBFU_3 || __BTC_OBFU_4 || __BTC_OBFU_5 ) )
 endif
 
 meta           OBFU_BITCOIN     __OBFU_BITCOIN
