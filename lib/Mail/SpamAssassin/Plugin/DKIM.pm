@@ -1215,7 +1215,7 @@ sub _wlcheck_author_signature {
   my $wl_ref = $pms->{conf}->{$wl};
   foreach my $author (@{$pms->{dkim_author_addresses}}) {
     foreach my $white_addr (keys %$wl_ref) {
-      my $re = $wl_ref->{$white_addr};
+      my $re = qr/$wl_ref->{$white_addr}/i;
     # dbg("dkim: WL %s %s", $wl, $white_addr);
       if ($author =~ $re) {
         push(@$acceptable_sdid_tuples_ref, [$author,undef,$wl,$re]);
