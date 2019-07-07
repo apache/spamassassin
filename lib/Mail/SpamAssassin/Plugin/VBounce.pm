@@ -167,7 +167,7 @@ sub _relay_is_in_list {
   if (defined $list->{$relay}) { return 1; }
 
   foreach my $regexp (values %{$list}) {
-    if ($relay =~ qr/$regexp/i) {
+    if ($relay =~ $regexp) {
       dbg("rules: relay $relay matches regexp: $regexp");
       return 1;
     }

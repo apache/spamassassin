@@ -1427,7 +1427,12 @@ sub add_to_addrlist {
     $re =~ s/([^\*\?_a-zA-Z0-9])/\\$1/g;	# escape any possible metachars
     $re =~ tr/?/./;				# "?" -> "."
     $re =~ s/\*+/\.\*/g;			# "*" -> "any string"
-    $conf->{$singlelist}->{$addr} = "^${re}\$";
+    my ($rec, $err) = compile_regexp("^${re}\$", 0);
+    if (!$rec) {
+      warn "could not compile $singlelist '$addr': $err";
+      return;
+    }
+    $conf->{$singlelist}->{$addr} = $rec;
   }
 }
 
@@ -1446,7 +1451,12 @@ sub add_to_addrlist_rcvd {
     $re =~ s/([^\*\?_a-zA-Z0-9])/\\$1/g;	# escape any possible metachars
     $re =~ tr/?/./;				# "?" -> "."
     $re =~ s/\*+/\.\*/g;			# "*" -> "any string"
-    $conf->{$listname}->{$addr}{re} = "^${re}\$";
+    my ($rec, $err) = compile_regexp("^${re}\$", 0);
+    if (!$rec) {
+      warn "could not compile $listname '$addr': $err";
+      return;
+    }
+    $conf->{$listname}->{$addr}{re} = $rec;
     $conf->{$listname}->{$addr}{domain} = [ $domain ];
   }
 }

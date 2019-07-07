@@ -411,8 +411,7 @@ sub _find_address_owner
   my ($self, $check, $list_refs) = @_;
   foreach my $owner (keys %{$list_refs}) {
     foreach my $white_addr (keys %{$list_refs->{$owner}}) {
-      my $regexp = qr/$list_refs->{$owner}{$white_addr}/i;
-      if ($check =~ /$regexp/)  {
+      if ($check =~ $list_refs->{$owner}{$white_addr}) {
         $owner =~ s/^FNS_//i;
         return lc $owner;
       }

@@ -44,6 +44,7 @@ similar to the other whitelist_* config options.
 package Mail::SpamAssassin::Plugin::WhiteListSubject;
 
 use Mail::SpamAssassin::Plugin;
+use Mail::SpamAssassin::Util qw(compile_regexp);
 use strict;
 use warnings;
 # use bytes;
@@ -82,11 +83,15 @@ sub set_config {
 
 		 $value = lc $value;
 		 my $re = $value;
-		 $re =~ s/[\000\\\(]/_/gs;                   # paranoia
 		 $re =~ s/([^\*\?_a-zA-Z0-9])/\\$1/g;        # escape any possible metachars
 		 $re =~ tr/?/./;                             # "?" -> "."
                  $re =~ s/\*+/\.\*/g;                        # "*" -> "any string"
-		 $conf->{$key}->{$value} = ${re};
+                 my ($rec, $err) = compile_regexp($re, 0);
+                 if (!$rec) {
+                   warn "could not compile $key '$value': $err";
+                   return;
+                 }
+ 		 $conf->{$key}->{$value} = $rec;
 	       }});
 
   push(@cmds, {
@@ -98,11 +103,15 @@ sub set_config {
 
 		 $value = lc $value;
 		 my $re = $value;
-		 $re =~ s/[\000\\\(]/_/gs;                   # paranoia
 		 $re =~ s/([^\*\?_a-zA-Z0-9])/\\$1/g;        # escape any possible metachars
 		 $re =~ tr/?/./;                             # "?" -> "."
                  $re =~ s/\*+/\.\*/g;                        # "*" -> "any string"
-		 $conf->{$key}->{$value} = ${re};
+                 my ($rec, $err) = compile_regexp($re, 0);
+                 if (!$rec) {
+                   warn "could not compile $key '$value': $err";
+                   return;
+                 }
+ 		 $conf->{$key}->{$value} = $rec;
 	       }});
 
   $conf->{parser}->register_commands(\@cmds);
@@ -136,7 +145,7 @@ sub _check_subject {
   return 1 if defined($list->{$subject});
 
   foreach my $regexp (values %{$list}) {
-    if ($subject =~ qr/$regexp/i) {
+    if ($subject =~ $regexp) {
       return 1;
     }
   }

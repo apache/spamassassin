@@ -1193,12 +1193,12 @@ sub _wlcheck_acceptable_signature {
   foreach my $author (@{$pms->{dkim_author_addresses}}) {
     foreach my $white_addr (keys %$wl_ref) {
       my $wl_addr_ref = $wl_ref->{$white_addr};
-      my $re = qr/$wl_addr_ref->{re}/i;
+      my $re = $wl_addr_ref->{re};
     # dbg("dkim: WL %s %s, d: %s", $wl, $white_addr,
     #     join(", ", map { $_ eq '' ? "''" : $_ } @{$wl_addr_ref->{domain}}));
-      if ($author =~ $re) {
+      if (lc($author) =~ $re) {
         foreach my $sdid (@{$wl_addr_ref->{domain}}) {
-          push(@$acceptable_sdid_tuples_ref, [$author,$sdid,$wl,$re]);
+          push(@$acceptable_sdid_tuples_ref, [$author,$sdid,$wl,$white_addr]);
         }
       }
     }
@@ -1216,8 +1216,8 @@ sub _wlcheck_author_signature {
     foreach my $white_addr (keys %$wl_ref) {
       my $re = $wl_ref->{$white_addr};
     # dbg("dkim: WL %s %s", $wl, $white_addr);
-      if ($author =~ $re) {
-        push(@$acceptable_sdid_tuples_ref, [$author,undef,$wl,$re]);
+      if (lc($author) =~ $re) {
+        push(@$acceptable_sdid_tuples_ref, [$author,undef,$wl,$white_addr]);
       }
     }
   }
@@ -1257,8 +1257,8 @@ sub _wlcheck_list {
 
     my %tried_authors;
     foreach my $entry (@$acceptable_sdid_tuples_ref) {
-      my($author, $acceptable_sdid, $wl, $re) = @$entry;
-      # $re and $wl are here for logging purposes only, $re already checked.
+      my($author, $acceptable_sdid, $wl, $white_addr) = @$entry;
+      # $white_addr and $wl are here for logging purposes only, already checked.
       # The $acceptable_sdid is a verifier-acceptable signing domain
       # identifier (to be matched against a 'd' tag in signatures).
       # When $acceptable_sdid is undef or an empty string it implies
@@ -1299,10 +1299,10 @@ sub _wlcheck_list {
         if (would_log("dbg","dkim")) {
           if ($sdid eq $author_domain) {
             dbg("dkim: %s author domain signature by %s, MATCHES %s %s",
-                $info, $sdid, $wl, $re);
+                $info, $sdid, $wl, $white_addr);
           } else {
             dbg("dkim: %s third-party signature by %s, author domain %s, ".
-                "MATCHES %s %s", $info, $sdid, $author_domain, $wl, $re);
+                "MATCHES %s %s", $info, $sdid, $author_domain, $wl, $white_addr);
           }
         }
         # a defined value indicates at least a match, not necessarily valid

@@ -328,7 +328,7 @@ sub _check_whitelist_rcvd {
   $addr = lc $addr;
   my $found_forged = 0;
   foreach my $white_addr (keys %{$list}) {
-    my $regexp = qr/$list->{$white_addr}{re}/i;
+    my $regexp = $list->{$white_addr}{re};
     foreach my $domain (@{$list->{$white_addr}{domain}}) {
       # $domain is a second param in whitelist_from_rcvd: a domain name or an IP address
       
@@ -408,7 +408,7 @@ sub _check_whitelist {
   $addr = lc $addr;
   if (defined ($list->{$addr})) { return 1; }
   foreach my $regexp (values %{$list}) {
-    if ($addr =~ qr/$regexp/i) {
+    if ($addr =~ $regexp) {
       dbg("rules: address $addr matches whitelist or blacklist regexp: $regexp");
       return 1;
     }

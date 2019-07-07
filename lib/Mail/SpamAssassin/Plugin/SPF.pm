@@ -793,7 +793,7 @@ sub _wlcheck {
     return 1;
   } else {
     foreach my $regexp (values %{$scanner->{conf}->{$param}}) {
-      if ($scanner->{spf_sender} =~ /$regexp/) {
+      if ($scanner->{spf_sender} =~ $regexp) {
         return 1;
       }
     }
