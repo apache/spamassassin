@@ -6,7 +6,7 @@
 # (the "License"); you may not use this file except in compliance with
 # the License.  You may obtain a copy of the License at:
 #
-#     http://www.apache.org/licenses/LICENSE-2.0
+#   http://www.apache.org/licenses/LICENSE-2.0
 #
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
@@ -14,7 +14,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # </@LICENSE>
-#
 
 =head1 NAME
 
@@ -36,6 +35,9 @@ HashBL - query hashed (and unhashed) DNS blocklists
   describe HASHBL_BTC Message contains BTC address found on BTCBL
   priority HASHBL_BTC -100 # required priority to launch async lookups
 
+  header   HASHBL_URI eval:check_hashbl_uris('rbl.foo.bar', 'sha1', '127.0.0.32')
+  describe HASHBL_URI Message contains uri found on rbl
+
 =head1 DESCRIPTION
 
 This plugin support multiple types of hashed or unhashed DNS blocklists.
@@ -50,7 +52,7 @@ OPTS refers to multiple generic options:
   max=x	   maximum number of queries
   shuffle  if max exceeded, random shuffle queries before truncating to limit
 
-Multiple options can be separated with slash or other non-word character. 
+Multiple options can be separated with slash or other non-word character.
 If OPTS is empty ('') or missing, default is used.
 
 HEADERS referes to slash separated list of Headers to process:
@@ -88,6 +90,19 @@ For existing public email blacklist, see: http://msbl.org/ebl.html
   header HASHBL_EBL check_hashbl_emails('ebl.msbl.org')
   priority HASHBL_EBL -100 # required for async query
 
+=over 4
+
+=item header RULE check_hashbl_uris('bl.example.com/A', 'OPTS', '^127\.')
+
+Check uris from DNS list, optional subtest regexp to match DNS
+answer.
+
+DNS query type can be appended to list with /A (default) or /TXT.
+
+Default OPTS: sha1/max=10/shuffle
+
+=back
+
 =item body RULE check_hashbl_bodyre('bl.example.com/A', 'OPTS', '\b(match)\b', '^127\.')
 
 Search body for matching regexp and query the string captured.  Regexp must
@@ -101,18 +116,21 @@ match DNS answer.  Note that eval rule type must be "body" or "rawbody".
 package Mail::SpamAssassin::Plugin::HashBL;
 use strict;
 use warnings;
-my $VERSION = 0.100;
+
+my $VERSION = 0.101;
+
+use Digest::MD5 qw(md5_hex);
+use Digest::SHA qw(sha1_hex sha256_hex);
 
 use Mail::SpamAssassin::Plugin;
-use Mail::SpamAssassin::PerMsgStatus;
-use Mail::SpamAssassin::Util;
-use Digest::SHA qw(sha1_hex);
-use Digest::MD5 qw(md5_hex);
+use Mail::SpamAssassin::Util qw(compile_regexp);
 
-use vars qw(@ISA $email_whitelist $skip_replyto_envfrom);
-@ISA = qw(Mail::SpamAssassin::Plugin);
+our @ISA = qw(Mail::SpamAssassin::Plugin);
 
-sub dbg { Mail::SpamAssassin::Plugin::dbg ("HashBL: @_"); }
+sub dbg {
+  my $msg = shift;
+  Mail::SpamAssassin::Plugin::dbg("HashBL: $msg", @_);
+}
 
 sub new {
   my ($class, $mailsa) = @_;
@@ -130,7 +148,8 @@ sub new {
   }
 
   $self->register_eval_rule("check_hashbl_emails");
-  $self->register_eval_rule("check_hashbl_bodyre");  
+  $self->register_eval_rule("check_hashbl_uris");
+  $self->register_eval_rule("check_hashbl_bodyre");
   $self->set_config($mailsa->{conf});
 
   return $self;
@@ -138,7 +157,23 @@ sub new {
 
 sub set_config {
   my($self, $conf) = @_;
-  my @cmds = ();
+  my @cmds;
+
+  push (@cmds, {
+    setting => 'hashbl_ignore',
+    is_admin => 1,
+    type => $Mail::SpamAssassin::Conf::CONF_TYPE_HASH_KEY_VALUE,
+    default => {},
+    code => sub {
+      my ($self, $key, $value, $line) = @_;
+      if (!defined $value || $value eq '') {
+        return $Mail::SpamAssassin::Conf::MISSING_REQUIRED_VALUE;
+      }
+      foreach my $str (split (/\s+/, $value)) {
+        $self->{hashbl_ignore}->{lc $str} = 1;
+      }
+    }
+  });
 
   $conf->{parser}->register_commands(\@cmds);
 }
@@ -197,24 +232,24 @@ sub parse_config {
 }
 
 sub finish_parsing_end {
-    my ($self, $opts) = @_;
+  my ($self, $opts) = @_;
 
-    # valid_tlds_re will be available at finish_parsing_end, compile it now,
-    # we only need to do it once and before possible forking
-    if ($self->{hashbl_available} && !$self->{email_regex}) {
-      $self->_init_email_regex();
-    }
+  return 0 if !$self->{hashbl_available};
 
-    return 0;
+  # valid_tlds_re will be available at finish_parsing_end, compile it now,
+  # we only need to do it once and before possible forking
+  if (!exists $self->{email_re}) {
+    $self->_init_email_re();
+  }
+
+  return 0;
 }
 
-sub _init_email_regex {
-    my ($self) = @_;
+sub _init_email_re {
+  my ($self) = @_;
 
-    dbg("initializing email regex");
-
-    # Some regexp tips courtesy of http://www.regular-expressions.info/email.html
-    # full email regex v0.02
+  # Some regexp tips courtesy of http://www.regular-expressions.info/email.html
+  # full email regex v0.02
   $self->{email_re} = qr/
     (?=.{0,64}\@)			# limit userpart to 64 chars (and speed up searching?)
     (?<![a-z0-9!#\$%&'*+\/=?^_`{|}~-])	# start boundary
@@ -342,13 +377,17 @@ sub check_hashbl_emails {
   my $rulename = $pms->get_current_eval_rule_name();
 
   if (!defined $list) {
-    Mail::SpamAssassin::Logger::info("HashBL: $rulename blocklist argument missing");
+    warn "HashBL: $rulename blocklist argument missing\n";
     return 0;
   }
 
-  if ($subtest && !eval { $subtest = qr/$subtest/ }) {
-    Mail::SpamAssassin::Logger::info("HashBL: $rulename invalid subtest regex: $@");
-    return 0;
+  if ($subtest) {
+    my ($rec, $err) = compile_regexp($subtest, 0);
+    if (!$rec) {
+      warn "HashBL: $rulename invalid subtest regex: $@\n";
+      return 0;
+    }
+    $subtest = $rec;
   }
 
   # Defaults
@@ -394,10 +433,77 @@ sub check_hashbl_emails {
 
   # Truncate list
   my $max = $opts =~ /\bmax=(\d+)\b/ ? $1 : 10;
-  $#filtered_emails = $max if scalar @filtered_emails > $max;
+  $#filtered_emails = $max-1 if scalar @filtered_emails > $max;
 
   foreach my $email (@filtered_emails) {
     $self->_submit_query($pms, $rulename, $email, $list, $opts, $subtest);
+  }
+
+  return 0;
+}
+
+sub check_hashbl_uris {
+  my ($self, $pms, $list, $opts, $subtest) = @_;
+  my %uri;
+  my %seen;
+  my @filtered_uris;
+
+  return 0 if !$self->{hashbl_available};
+
+  my $rulename = $pms->get_current_eval_rule_name();
+
+  if (!defined $list) {
+    warn "HashBL: $rulename blocklist argument missing\n";
+    return 0;
+  }
+
+  if ($subtest) {
+    my ($rec, $err) = compile_regexp($subtest, 0);
+    if (!$rec) {
+      warn "HashBL: $rulename invalid subtest regex: $@\n";
+      return 0;
+    }
+    $subtest = $rec;
+  }
+
+  # Defaults
+  $opts = 'sha1/max=10/shuffle' if !$opts;
+
+  # Filter list
+  my $keep_case = $opts =~ /\bcase\b/i;
+
+  if ($opts =~ /raw/) {
+    warn "HashBL: $rulename raw option invalid\n";
+    return 0;
+  }
+
+  my $uris = $pms->get_uri_detail_list();
+
+  while (my($uri, $info) = each %{$uris}) {
+    # we want to skip mailto: uris
+    next if ($uri =~ /^mailto:/i);
+    next if exists $seen{$uri};
+
+    # no hosts/domains were found via this uri, so skip
+    next unless ($info->{hosts});
+    if (($info->{types}->{a}) || ($info->{types}->{parsed})) {
+      # check url
+      push @filtered_uris, $keep_case ? $uri : lc($uri);
+    }
+    $seen{$uri} = 1;
+  }
+
+  # Randomize order
+  if ($opts =~ /\bshuffle\b/) {
+    Mail::SpamAssassin::Util::fisher_yates_shuffle(\@filtered_uris);
+  }
+
+  # Truncate list
+  my $max = $opts =~ /\bmax=(\d+)\b/ ? $1 : 10;
+  $#filtered_uris = $max-1 if scalar @filtered_uris > $max;
+
+  foreach my $furi (@filtered_uris) {
+    $self->_submit_query($pms, $rulename, $furi, $list, $opts, $subtest);
   }
 
   return 0;
@@ -411,18 +517,28 @@ sub check_hashbl_bodyre {
   my $rulename = $pms->get_current_eval_rule_name();
 
   if (!defined $list) {
-    Mail::SpamAssassin::Logger::info("HashBL: $rulename blocklist argument missing");
+    warn "HashBL: $rulename blocklist argument missing\n";
     return 0;
   }
 
-  if (!$re || !eval { $re = qr/$re/ }) {
-    Mail::SpamAssassin::Logger::info("HashBL: $rulename invalid body regex: $@");
+  if (!$re) {
+    warn "HashBL: $rulename missing body regex\n";
     return 0;
   }
-
-  if ($subtest && !eval { $subtest = qr/$subtest/ }) {
-    Mail::SpamAssassin::Logger::info("HashBL: $rulename invalid subtext regex: $@");
+  my ($rec, $err) = compile_regexp($re, 0);
+  if (!$rec) {
+    warn "HashBL: $rulename invalid body regex: $@\n";
     return 0;
+  }
+  $re = $rec;
+
+  if ($subtest) {
+    my ($rec, $err) = compile_regexp($subtest, 0);
+    if (!$rec) {
+      warn "HashBL: $rulename invalid subtest regex: $@\n";
+      return 0;
+    }
+    $subtest = $rec;
   }
 
   # Defaults
@@ -469,7 +585,7 @@ sub check_hashbl_bodyre {
 
   # Truncate list
   my $max = $opts =~ /\bmax=(\d+)\b/ ? $1 : 10;
-  $#matches = $max if scalar @matches > $max;
+  $#matches = $max-1 if scalar @matches > $max;
 
   foreach my $match (@matches) {
     $self->_submit_query($pms, $rulename, $match, $list, $opts, $subtest);
@@ -496,8 +612,18 @@ sub _hash {
 sub _submit_query {
   my ($self, $pms, $rulename, $value, $list, $opts, $subtest) = @_;
 
+  if (exists $pms->{conf}->{hashbl_ignore}->{lc $value}) {
+    dbg("query skipped, ignored string: $value");
+    return 1;
+  }
+
   my $hash = $self->_hash($opts, $value);
   dbg("querying $value ($hash) from $list");
+
+  if (exists $pms->{conf}->{hashbl_ignore}->{$hash}) {
+    dbg("query skipped, ignored hash: $value");
+    return 1;
+  }
 
   my $type = $list =~ s,/(A|TXT)$,,i ? uc($1) : 'A';
   my $lookup = "$hash.$list";
@@ -536,7 +662,6 @@ sub _finish_query {
       $ent->{value} =~ s/\@/[at]/g;
       $pms->test_log($ent->{value});
       $pms->got_hit($ent->{rulename}, '', ruletype => 'eval');
-      $pms->register_async_rule_finish($ent->{rulename});
       return;
     }
   }
@@ -544,6 +669,6 @@ sub _finish_query {
 
 # Version features
 sub has_hashbl_bodyre { 1 }
-sub has_hashbl_ignore { 0 }
+sub has_hashbl_ignore { 1 }
 
 1;
