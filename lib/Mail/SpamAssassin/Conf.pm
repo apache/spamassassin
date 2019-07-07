@@ -806,7 +806,7 @@ Please see directives enlist_uri_host and delist_uri_host for details.
     type => $CONF_TYPE_ADDRLIST,
     code => sub {
       my($conf, $key, $value, $line) = @_;
-      foreach my $host ( split(' ', lc $value) ) {
+      foreach my $host ( split(/\s+/, lc $value) ) {
         my $v = $host =~ s/^!// ? 0 : 1;
         $conf->{uri_host_lists}{'BLACK'}{$host} = $v;
       }
@@ -827,7 +827,7 @@ Please see directives enlist_uri_host and delist_uri_host for details.
     type => $CONF_TYPE_ADDRLIST,
     code => sub {
       my($conf, $key, $value, $line) = @_;
-      foreach my $host ( split(' ', lc $value) ) {
+      foreach my $host ( split(/\s+/, lc $value) ) {
         my $v = $host =~ s/^!// ? 0 : 1;
         $conf->{uri_host_lists}{'WHITE'}{$host} = $v;
       }
@@ -1937,7 +1937,7 @@ Example:
       defined $value && $value =~ s/^(allow|deny)\s+//i
         or return $INVALID_VALUE;
       my $blocked = lc($1) eq 'deny' ? 1 : 0;
-      foreach my $domain (split(' ', $value)) {
+      foreach my $domain (split(/\s+/, $value)) {
         $domain =~ s/^\.//; $domain =~ s/\.\z//;  # strip dots
         $self->{dns_query_blocked}{lc $domain} = $blocked;
       }
@@ -2139,7 +2139,7 @@ as they appear in their order in C<bayes_token_sources> directive(s).
       return $MISSING_REQUIRED_VALUE  if $value eq '';
       my $h = ($self->{bayes_token_sources} ||= {});
       my %all_kw = map(($_,1), qw(header visible invisible uri mimepart));
-      foreach (split(' ', lc $value)) {
+      foreach (split(/\s+/, lc $value)) {
         if (/^(none|noall)\z/) {
           %$h = ();
         } elsif ($_ eq 'all') {
