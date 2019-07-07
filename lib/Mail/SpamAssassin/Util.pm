@@ -1962,7 +1962,7 @@ sub make_qr {
 sub get_my_locales {
   my ($ok_locales) = @_;
 
-  my @locales = split(' ', $ok_locales);
+  my @locales = split(/\s+/, $ok_locales);
   my $lang = $ENV{'LC_ALL'};
   $lang ||= $ENV{'LANGUAGE'};
   $lang ||= $ENV{'LC_MESSAGES'};
