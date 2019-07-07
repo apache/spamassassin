@@ -117,13 +117,13 @@ package Mail::SpamAssassin::Plugin::HashBL;
 use strict;
 use warnings;
 
-my $VERSION = 0.100;
+my $VERSION = 0.101;
 
 use Digest::MD5 qw(md5_hex);
 use Digest::SHA qw(sha1_hex sha256_hex);
 
 use Mail::SpamAssassin::Plugin;
-use Mail::SpamAssassin::Util;
+use Mail::SpamAssassin::Util qw(compile_regexp);
 
 our @ISA = qw(Mail::SpamAssassin::Plugin);
 
@@ -377,13 +377,17 @@ sub check_hashbl_emails {
   my $rulename = $pms->get_current_eval_rule_name();
 
   if (!defined $list) {
-    Mail::SpamAssassin::Logger::info("HashBL: $rulename blocklist argument missing");
+    warn "HashBL: $rulename blocklist argument missing\n";
     return 0;
   }
 
-  if ($subtest && !eval { $subtest = qr/$subtest/ }) {
-    Mail::SpamAssassin::Logger::info("HashBL: $rulename invalid subtest regex: $@");
-    return 0;
+  if ($subtest) {
+    my ($rec, $err) = compile_regexp($subtest, 0);
+    if (!$rec) {
+      warn "HashBL: $rulename invalid subtest regex: $@\n";
+      return 0;
+    }
+    $subtest = $rec;
   }
 
   # Defaults
@@ -429,7 +433,7 @@ sub check_hashbl_emails {
 
   # Truncate list
   my $max = $opts =~ /\bmax=(\d+)\b/ ? $1 : 10;
-  $#filtered_emails = $max if scalar @filtered_emails > $max;
+  $#filtered_emails = $max-1 if scalar @filtered_emails > $max;
 
   foreach my $email (@filtered_emails) {
     $self->_submit_query($pms, $rulename, $email, $list, $opts, $subtest);
@@ -449,13 +453,17 @@ sub check_hashbl_uris {
   my $rulename = $pms->get_current_eval_rule_name();
 
   if (!defined $list) {
-    Mail::SpamAssassin::Logger::info("HashBL: $rulename blocklist argument missing");
+    warn "HashBL: $rulename blocklist argument missing\n";
     return 0;
   }
 
-  if ($subtest && !eval { $subtest = qr/$subtest/ }) {
-    Mail::SpamAssassin::Logger::info("HashBL: $rulename invalid subtest regex: $@");
-    return 0;
+  if ($subtest) {
+    my ($rec, $err) = compile_regexp($subtest, 0);
+    if (!$rec) {
+      warn "HashBL: $rulename invalid subtest regex: $@\n";
+      return 0;
+    }
+    $subtest = $rec;
   }
 
   # Defaults
@@ -464,8 +472,8 @@ sub check_hashbl_uris {
   # Filter list
   my $keep_case = $opts =~ /\bcase\b/i;
 
-  if($opts =~ /.*raw.*/) {
-    Mail::SpamAssassin::Logger::info("HashBL: raw option invalid");
+  if ($opts =~ /raw/) {
+    warn "HashBL: $rulename raw option invalid\n";
     return 0;
   }
 
@@ -492,13 +500,13 @@ sub check_hashbl_uris {
 
   # Truncate list
   my $max = $opts =~ /\bmax=(\d+)\b/ ? $1 : 10;
-  $#filtered_uris = $max if scalar @filtered_uris > $max;
+  $#filtered_uris = $max-1 if scalar @filtered_uris > $max;
 
   foreach my $furi (@filtered_uris) {
     $self->_submit_query($pms, $rulename, $furi, $list, $opts, $subtest);
   }
 
- return 0;
+  return 0;
 }
 
 sub check_hashbl_bodyre {
@@ -509,18 +517,28 @@ sub check_hashbl_bodyre {
   my $rulename = $pms->get_current_eval_rule_name();
 
   if (!defined $list) {
-    Mail::SpamAssassin::Logger::info("HashBL: $rulename blocklist argument missing");
+    warn "HashBL: $rulename blocklist argument missing\n";
     return 0;
   }
 
-  if (!$re || !eval { $re = qr/$re/ }) {
-    Mail::SpamAssassin::Logger::info("HashBL: $rulename invalid body regex: $@");
+  if (!$re) {
+    warn "HashBL: $rulename missing body regex\n";
     return 0;
   }
-
-  if ($subtest && !eval { $subtest = qr/$subtest/ }) {
-    Mail::SpamAssassin::Logger::info("HashBL: $rulename invalid subtext regex: $@");
+  my ($rec, $err) = compile_regexp($re, 0);
+  if (!$rec) {
+    warn "HashBL: $rulename invalid body regex: $@\n";
     return 0;
+  }
+  $re = $rec;
+
+  if ($subtest) {
+    my ($rec, $err) = compile_regexp($subtest, 0);
+    if (!$rec) {
+      warn "HashBL: $rulename invalid subtest regex: $@\n";
+      return 0;
+    }
+    $subtest = $rec;
   }
 
   # Defaults
@@ -567,7 +585,7 @@ sub check_hashbl_bodyre {
 
   # Truncate list
   my $max = $opts =~ /\bmax=(\d+)\b/ ? $1 : 10;
-  $#matches = $max if scalar @matches > $max;
+  $#matches = $max-1 if scalar @matches > $max;
 
   foreach my $match (@matches) {
     $self->_submit_query($pms, $rulename, $match, $list, $opts, $subtest);
