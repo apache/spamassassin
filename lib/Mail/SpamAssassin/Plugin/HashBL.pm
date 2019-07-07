@@ -662,6 +662,7 @@ sub _finish_query {
       $ent->{value} =~ s/\@/[at]/g;
       $pms->test_log($ent->{value});
       $pms->got_hit($ent->{rulename}, '', ruletype => 'eval');
+      $pms->register_async_rule_finish($ent->{rulename});
       return;
     }
   }
