@@ -688,13 +688,13 @@ but the names 'BLACK' and 'WHITE' are otherwise not special or reserved.
     code => sub {
       my($conf, $key, $value, $line) = @_;
       local($1,$2);
-      if ($value !~ /^ \( (.*?) \) \s+ (.*) \z/sx) {
+      if ($value !~ /^ \( (.+?) \) \s+ (.+) \z/sx) {
         return $MISSING_REQUIRED_VALUE;
       }
       my $listname = $1;  # corresponds to arg in check_uri_host_in_wblist()
       # note: must not factor out dereferencing, as otherwise
       # subhashes would spring up in a copy and be lost
-      foreach my $host ( split(' ', lc $2) ) {
+      foreach my $host ( split(/\s+/, lc $2) ) {
         my $v = $host =~ s/^!// ? 0 : 1;
         $conf->{uri_host_lists}{$listname}{$host} = $v;
       }
@@ -726,11 +726,11 @@ name and has no meaning here.
     code => sub {
       my($conf, $key, $value, $line) = @_;
       local($1,$2);
-      if ($value !~ /^ (?: \( (.*?) \) \s+ )? (.*) \z/sx) {
+      if ($value !~ /^ (?: \( (.+?) \) \s+ )? (.+) \z/sx) {
         return $MISSING_REQUIRED_VALUE;
       }
       my @listnames = defined $1 ? $1 : keys %{$conf->{uri_host_lists}};
-      my @args = split(' ', lc $2);
+      my @args = split(/\s+/, lc $2);
       foreach my $listname (@listnames) {
         foreach my $host (@args) {
           my $v = $host =~ s/^!// ? 0 : 1;
@@ -782,7 +782,7 @@ e.g.
     code => sub {
       my($conf, $key, $value, $line) = @_;
       local($1,$2);
-      if ($value !~ /^ \( (.*?) \) \s+ (.*) \z/sx) {
+      if ($value !~ /^ \( (.+?) \) \s+ (.+) \z/sx) {
         return $MISSING_REQUIRED_VALUE;
       }
       my $listname = $1;  # corresponds to arg in check_uri_host_in_wblist()
