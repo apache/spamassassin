@@ -189,7 +189,7 @@ use warnings;
 use re 'taint';
 
 use Mail::SpamAssassin::Plugin;
-use Mail::SpamAssassin::Util qw(decode_dns_question_entry idn_to_ascii);
+use Mail::SpamAssassin::Util qw(decode_dns_question_entry idn_to_ascii compile_regexp);
 use Mail::SpamAssassin::Logger;
 use version 0.77;
 
@@ -253,20 +253,14 @@ sub parse_and_canonicalize_subtest {
   my $result;
 
   local($1,$2,$3);
-  # modifiers /a, /d, /l, /u in suffix form were added with perl 5.13.10 (5.14)
-  # currently known modifiers are [msixoadlu], but let's not be too picky here
-  if (     $subtest =~ m{^       /  (.+) /  ([a-z]*) \z}xs) {
-    $result = $2 ne '' ? qr{(?$2)$1} : qr{$1};
-  } elsif ($subtest =~ m{^ m \s* \( (.+) \) ([a-z]*) \z}xs) {
-    $result = $2 ne '' ? qr{(?$2)$1} : qr{$1};
-  } elsif ($subtest =~ m{^ m \s* \[ (.+) \] ([a-z]*) \z}xs) {
-    $result = $2 ne '' ? qr{(?$2)$1} : qr{$1};
-  } elsif ($subtest =~ m{^ m \s* \{ (.+) \} ([a-z]*) \z}xs) {
-    $result = $2 ne '' ? qr{(?$2)$1} : qr{$1};
-  } elsif ($subtest =~ m{^ m \s*  < (.+)  > ([a-z]*) \z}xs) {
-    $result = $2 ne '' ? qr{(?$2)$1} : qr{$1};
-  } elsif ($subtest =~ m{^ m \s* (\S) (.+) \1 ([a-z]*) \z}xs) {
-    $result = $2 ne '' ? qr{(?$2)$1} : qr{$1};
+  if ($subtest =~ m{^/ .+ / [a-z]* \z}xs ||
+      $subtest =~ m{^m (\W) .+ (\W) [a-z]* \z}xs) {
+    my ($rec, $err) = compile_regexp($subtest, 1);
+    if (!$rec) {
+      warn "askdns: subtest compile failed: '$subtest': $err\n";
+    } else {
+      $result = $rec;
+    }
   } elsif ($subtest =~ m{^ (["']) (.*) \1 \z}xs) {  # quoted string
     $result = $2;
   } elsif ($subtest =~ m{^ \[ ( (?:[A-Z]+|\d+)
