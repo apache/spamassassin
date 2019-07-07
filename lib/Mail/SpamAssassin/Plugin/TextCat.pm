@@ -550,8 +550,8 @@ sub extract_metadata {
   if ($len >= 256) {
     # generate list of languages to skip
     my %skip;
-    $skip{$_} = 1 for split(' ', $opts->{conf}->{inactive_languages});
-    delete $skip{$_} for split(' ', $opts->{conf}->{ok_languages});
+    $skip{$_} = 1 for split(/\s+/, $opts->{conf}->{inactive_languages});
+    delete $skip{$_} for split(/\s+/, $opts->{conf}->{ok_languages});
     dbg("textcat: classifying, skipping: " . join(" ", keys %skip));
     @matches = classify(\$body, $opts, %skip);
   }
@@ -575,7 +575,7 @@ sub check_language {
 
   my $msg = $scan->{msg};
 
-  my @languages = split(' ', $scan->{conf}->{ok_languages});
+  my @languages = split(/\s+/, $scan->{conf}->{ok_languages});
 
   if (grep { $_ eq "all" } @languages) {
     return 0;
@@ -615,7 +615,7 @@ sub check_body_8bits {
 
   return 0 if $self->{textcat_disabled};
 
-  my @languages = split(' ', $scan->{conf}->{ok_languages});
+  my @languages = split(/\s+/, $scan->{conf}->{ok_languages});
 
   for (@languages) {
     return 0 if $_ eq "all";

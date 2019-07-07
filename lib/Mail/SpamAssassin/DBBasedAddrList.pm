@@ -53,7 +53,7 @@ sub new_checker {
     'locked_file'	=> ''
   };
 
-  my @order = split (' ', $main->{conf}->{auto_whitelist_db_modules});
+  my @order = split(/\s+/, $main->{conf}->{auto_whitelist_db_modules});
   untaint_var(\@order);
   my $dbm_module = Mail::SpamAssassin::Util::first_available_module (@order);
   if (!$dbm_module) {
