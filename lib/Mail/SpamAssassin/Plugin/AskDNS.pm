@@ -628,8 +628,8 @@ sub process_response_packet {
             !defined $n2  ? ($rdatanum & $n1) &&                  # mask only
                               (($rdatanum & 0xff000000) == 0x7f000000)  # 127/8
           : $delim eq '-' ? $rdatanum >= $n1 && $rdatanum <= $n2  # range
-          : $delim eq '/' ? ($rdatanum & $n2) == ($n1 & $n2)      # value/mask
-          : 0;  
+          : $delim eq '/' ? ($rdatanum & $n2) == (int($n1) & $n2) # value/mask
+          : 0; # notice int($n1) to fix perl ~5.14 taint bug (Bug 7725)
         }
         if ($match) {
           $self->askdns_hit($pms, $ent->{query_domain}, $qtype,
