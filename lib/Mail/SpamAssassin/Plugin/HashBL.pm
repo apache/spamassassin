@@ -670,6 +670,8 @@ sub _finish_query {
 
 # Version features
 sub has_hashbl_bodyre { 1 }
+sub has_hashbl_emails { 1 }
+sub has_hashbl_uris { 1 }
 sub has_hashbl_ignore { 1 }
 
 1;
