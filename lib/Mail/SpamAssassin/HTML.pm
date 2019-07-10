@@ -627,7 +627,16 @@ sub html_tests {
   my ($self, $tag, $attr, $num) = @_;
 
   if ($tag eq "font" && exists $attr->{face}) {
-    if ($attr->{face} !~ /^'?[a-z ][a-z -]*[a-z](?:,\s*[a-z][a-z -]*[a-z])*'?$/i) {
+    # Fixes from Bug 5956, 7312
+    # Examples seen in ham:
+    #  "Tahoma", Verdana, Arial, sans-serif
+    #  'Montserrat', sans-serif
+    #  Arial,Helvetica,Sans-Serif;
+    #  .SFUIDisplay
+    #  hirakakupro-w3
+    # TODO: There's still the problem completely foreign unicode strings,
+    # probably this rule should be deprecated.
+    if ($attr->{face} !~ /^\s*["'.]?[a-z ][a-z -]*[a-z]\d?["']?(?:,\s*["']?[a-z][a-z -]*[a-z]\d?["']?)*;?$/i) {
       $self->put_results(font_face_bad => 1);
     }
   }
