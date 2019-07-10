@@ -57,11 +57,11 @@ use Errno qw(ENOENT);
 use Time::HiRes qw(time);
 use Encode;
 
-use Mail::SpamAssassin::Constants qw(:sa);
+use Mail::SpamAssassin::Constants qw(:sa :ip);
 use Mail::SpamAssassin::AsyncLoop;
 use Mail::SpamAssassin::Conf;
 use Mail::SpamAssassin::Util qw(untaint_var base64_encode idn_to_ascii
-                                uri_list_canonicalize);
+                                uri_list_canonicalize reverse_ip_address);
 use Mail::SpamAssassin::Timeout;
 use Mail::SpamAssassin::Logger;
 
@@ -245,6 +245,8 @@ BEGIN {
 
   );
 }
+
+my $IP_ADDRESS = IP_ADDRESS;
 
 sub new {
   my $class = shift;
@@ -1430,31 +1432,43 @@ sub action_depends_on_tags {
     or die "action_depends_on_tags: argument must be a subroutine ref";
 
   # tag names on which the given action depends
-  my @dep_tags = !ref $tags ? uc $tags : map(uc($_),@$tags);
+  my @dep_tags = !ref $tags ? $tags : @$tags;
 
-  # @{$self->{tagrun_subs}}            list of all submitted subroutines
-  # @{$self->{tagrun_actions}{$tag}}   bitmask of action indices blocked by tag
-  # $self->{tagrun_tagscnt}[$action_ind]  count of tags still pending
+  # uppercase tag, but not args, f.e. HEADER(foo)
+  local($1,$2);
+  foreach (@dep_tags) {
+    if (/^ ([^\(]+) (\(.*)? $/x) {
+      $_ = uc($1).(defined $2 ? $2 : '');
+    }
+  }
 
-  # store action details, obtain its index
-  push(@{$self->{tagrun_subs}}, [$code,@args]);
-  my $action_ind = $#{$self->{tagrun_subs}};
+  # list dependency tag names which are not already satisfied
+  my @blocking_tags;
+  foreach (@dep_tags) {
+    my $data = $self->get_tag($_);
+    if (!defined $data || $data eq '') {
+      push @blocking_tags, $_;
+    }
+  }
 
-  # list dependency tag names which are not already satistied
-  my @blocking_tags =
-    grep(!defined $self->{tag_data}{$_} || $self->{tag_data}{$_} eq '',
-         @dep_tags);
+  if (!@blocking_tags) {
+    dbg("check: tagrun - tag %s was ready, runnable immediately: %s",
+        join(', ',@dep_tags), join(', ',$code,@args));
+    &$code($self, @args);
+  } else {
+    # @{$self->{tagrun_subs}}            list of all submitted subroutines
+    # @{$self->{tagrun_actions}{$tag}}   bitmask of action indices blocked by tag
+    # $self->{tagrun_tagscnt}[$action_ind]  count of tags still pending
 
-  $self->{tagrun_tagscnt}[$action_ind] = scalar @blocking_tags;
-  $self->{tagrun_actions}{$_}[$action_ind] = 1  for @blocking_tags;
+    # store action details, obtain its index
+    push(@{$self->{tagrun_subs}}, [$code,@args]);
+    my $action_ind = $#{$self->{tagrun_subs}};
 
-  if (@blocking_tags) {
+    $self->{tagrun_tagscnt}[$action_ind] = scalar @blocking_tags;
+    $self->{tagrun_actions}{$_}[$action_ind] = 1  for @blocking_tags;
+
     dbg("check: tagrun - action %s blocking on tags %s",
         $action_ind, join(', ',@blocking_tags));
-  } else {
-    dbg("check: tagrun - tag %s was ready, action %s runnable immediately: %s",
-        join(', ',@dep_tags), $action_ind, join(', ',$code,@args));
-    &$code($self, @args);
   }
 }
 
@@ -1473,7 +1487,7 @@ sub tag_is_ready {
   $tag = uc $tag;
 
   if (would_log('dbg', 'check')) {
-    my $tag_val = $self->{tag_data}{$tag};
+    my $tag_val = $self->{tag_data}->{$tag};
     dbg("check: tagrun - tag %s is now ready, value: %s",
          $tag, !defined $tag_val ? '<UNDEF>'
                : ref $tag_val ne 'ARRAY' ? $tag_val
@@ -1571,7 +1585,14 @@ sub get_tag {
   my($self, $tag, @args) = @_;
 
   return if !defined $tag;
+
+  # handle atleast HEADER(arg)
+  local($1);
+  if ($tag =~ s/\(([a-zA-Z0-9:-]+)\)$//) {
+    @args = ($1);
+  }
   $tag = uc $tag;
+
   my $data;
   if (exists $common_tags{$tag}) {
     # tag data from traditional pre-defined tag subroutines
@@ -1600,6 +1621,13 @@ sub get_tag_raw {
   my($self, $tag, @args) = @_;
 
   return if !defined $tag;
+
+  # handle atleast HEADER(arg)
+  local($1);
+  if ($tag =~ s/\(([a-zA-Z0-9:-]+)\)$//) {
+    @args = ($1);
+  }
+
   my $data;
   if (exists $common_tags{$tag}) {
     # tag data from traditional pre-defined tag subroutines
@@ -1902,6 +1930,23 @@ single quotes is stripped too, as it is often seen.
 
 =back
 
+Appending a modifier C<:host> to a header field name will return the first
+hostname-looking string that ends with a valid TLD. First it tries to find a
+match after @ character (possible email), then from any part of the header.
+Normal use of this would be for example 'From:addr:host' to return the
+hostname portion of a From-address.
+
+Appending a modifier C<:domain> to a header field name implies C<:host>,
+but will return only domain part of the hostname, as returned by
+RegistryBoundaries::trim_domain.
+
+Appending a modifier C<:ip> to a header field name, will return the first
+IPv4 or IPv6 address string found. Could be used for example as
+'X-Originating-IP:ip'.
+
+Appending a modifier C<:revip> to a header field name implies C<:ip>,
+but will return the found IP in reverse (usually for DNSBL usage).
+
 There are several special pseudo-headers that can be specified:
 
 =over 4
@@ -1954,14 +1999,22 @@ sub _get {
   my $getaddr = 0;
   my $getname = 0;
   my $getraw = 0;
+  my $gethost = 0;
+  my $getdomain = 0;
+  my $getip = 0;
+  my $getrevip = 0;
 
   # special queries - process and strip modifiers
   if (index($request,':') >= 0) {  # triage
     local $1;
     while ($request =~ s/:([^:]*)//) {
-      if    ($1 eq 'raw')  { $getraw  = 1 }
-      elsif ($1 eq 'addr') { $getaddr = $getraw = 1 }
-      elsif ($1 eq 'name') { $getname = 1 }
+      if    ($1 eq 'raw')    { $getraw  = 1 }
+      elsif ($1 eq 'addr')   { $getaddr = $getraw = 1 }
+      elsif ($1 eq 'name')   { $getname = 1 }
+      elsif ($1 eq 'host')   { $gethost = 1 }
+      elsif ($1 eq 'domain') { $gethost = $getdomain = 1 }
+      elsif ($1 eq 'ip')     { $getip = 1 }
+      elsif ($1 eq 'revip')  { $getip = $getrevip = 1 }
     }
   }
   my $request_lc = lc $request;
@@ -2115,6 +2168,27 @@ sub _get {
       $result =~ s/^ \s* ' \s* (.*?) \s* ' \s* \z/$1/sx;
     }
   }
+
+  # special host/domain
+  if (defined $result && ($gethost || $getdomain || $getip)) {
+    my $host;
+    if ($gethost) {
+      my $tldsRE = $self->{main}->{registryboundaries}->{valid_tlds_re};
+      my $hostRE = qr/(?<![._-])\b([a-z\d][a-z\d._-]{0,251}\.${tldsRE})\b(?![._-])/i;
+      # try grabbing email domain first, otherwise try anything looking host
+      if ($result =~ /(?:.*\@)?${hostRE}/i) {
+        $host = $getdomain ? $self->{main}->{registryboundaries}->trim_domain($1)
+                           : $1;
+      }
+    } else {
+      my $ipRE = qr/(?<!\.)\b(${IP_ADDRESS})\b(?!\.)/;
+      if ($result =~ $ipRE) {
+        $host = $getrevip ? reverse_ip_address($1) : $1;
+      }
+    }
+    $result = $host;
+  }
+
   return $result;
 }
 

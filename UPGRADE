@@ -2,6 +2,11 @@
 Note for Users Upgrading to SpamAssassin 4.0.0
 ----------------------------------------------
 
+- Header names support new :host :domain :ip :revip modifiers
+
+- AskDNS: tag HEADER(hdrname) supported to query any header content
+  similarly to header rules
+
 - Due to the dangerous nature of sa-update --allowplugins option, it
   now prints a warning that --reallyallowplugins is required to use it.
   This is to make sure all the legacy installations and wiki guides etc

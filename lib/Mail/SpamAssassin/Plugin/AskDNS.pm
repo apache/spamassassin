@@ -64,10 +64,16 @@ for querying DNS, which ignores any 'search' or 'domain' DNS resolver options.
 Domain names in DNS queries are case-insensitive.
 
 A tag name is a string of capital letters, preceded and followed by an
-underscore character. This syntax mirrors the add_header setting, except that
-tags cannot have parameters in parenthesis when used in askdns templates.
-Tag names may appear anywhere in the template - each queried DNS zone
-prescribes how a query should be formed.
+underscore character.  This syntax mirrors the add_header setting, except
+that tags cannot have parameters in parenthesis when used in askdns
+templates (exceptions found below).  Tag names may appear anywhere in the
+template - each queried DNS zone prescribes how a query should be formed.
+
+Special supported tag HEADER() can be used to query any header content,
+using same header names/modifiers that as header rules support.  For example
+_HEADER(Reply-To:addr:domain)_ can be used to query the trimmed domain part
+of Reply-To address.  See Mail::SpamAssassin::Conf documentation about
+header rules.
 
 A query template may contain any number of tag names including none,
 although in the most common anticipated scenario exactly one tag name would
@@ -191,6 +197,7 @@ use re 'taint';
 use Mail::SpamAssassin::Plugin;
 use Mail::SpamAssassin::Util qw(decode_dns_question_entry idn_to_ascii compile_regexp);
 use Mail::SpamAssassin::Logger;
+use Mail::SpamAssassin::Constants qw(:ip);
 use version 0.77;
 
 our @ISA = qw(Mail::SpamAssassin::Plugin);
@@ -203,6 +210,8 @@ our %rcode_value = (  # https://www.iana.org/assignments/dns-parameters, RFC 619
 );
 
 our $txtdata_can_provide_a_list;
+
+my $IP_ADDRESS = IP_ADDRESS;
 
 sub new {
   my($class,$sa_main) = @_;
@@ -328,25 +337,19 @@ sub set_config {
           $subtest = parse_and_canonicalize_subtest($subtest);
           defined $subtest or return $Mail::SpamAssassin::Conf::INVALID_VALUE;
         }
+
+        # initialize rule structure
+        $self->{askdns}{$rulename}{query} = $query_template;
+        $self->{askdns}{$rulename}{q_type} = $query_type;
+        $self->{askdns}{$rulename}{a_types} = \@answer_types;
+        $self->{askdns}{$rulename}{subtest} = $subtest;
+        $self->{askdns}{$rulename}{tags} = ();
+
         # collect tag names as used in each query template
-        my @tags = $query_template =~ /_([A-Z][A-Z0-9]*)_/g;
-        my %seen; @tags = grep(!$seen{$_}++, @tags);  # filter out duplicates
-
-        # group rules by tag names used in them (to be used as a hash key)
-        my $depends_on_tags = !@tags ? '' : join(',',@tags);
-
-        # subgroup rules by a DNS RR type and a nonexpanded query template
-        my $query_template_key = $query_type . ':' . $query_template;
-
-        $self->{askdns}{$depends_on_tags}{$query_template_key} ||=
-          { query => $query_template, rules => {}, q_type => $query_type,
-            a_types =>  # optimization: undef means "same as q_type"
-              @answer_types == 1 && $answer_types[0] eq $query_type ? undef
-                                                           : \@answer_types };
-        $self->{askdns}{$depends_on_tags}{$query_template_key}{rules}{$rulename}
-          = $subtest;
-      # dbg("askdns: rule: %s, config dep: %s, domkey: %s, subtest: %s",
-      #     $rulename, $depends_on_tags, $query_template_key, $subtest);
+        # also support common HEADER(arg) tag which does $pms->get(arg)
+        my @tags = $query_template =~ /_([A-Z][A-Z0-9]*|HEADER\([a-zA-Z0-9:-]+\))_/g;
+        # save rule to tag dependencies
+        $self->{askdns}{$rulename}{tags}{$_} = 1 foreach (@tags);
 
         # just define the test so that scores and lint works
         $self->{parser}->add_test($rulename, undef,
@@ -361,152 +364,93 @@ sub set_config {
 # run as early as possible, launching DNS queries as soon as their
 # dependencies are fulfilled
 #
-sub extract_metadata {
+sub check_dnsbl {
   my($self, $opts) = @_;
+
   my $pms = $opts->{permsgstatus};
   my $conf = $pms->{conf};
 
   return if !$pms->is_dns_available();
-  $pms->{askdns_map_dnskey_to_rules} = {};
 
   # walk through all collected askdns rules, obtain tag values whenever
   # they may become available, and launch DNS queries right after
-  #
-  for my $depends_on_tags (keys %{$conf->{askdns}}) {
-    my @tags;
-    @tags = split(/,/, $depends_on_tags)  if $depends_on_tags ne '';
-
-    if (would_log("dbg","askdns")) {
-      while ( my($query_template_key, $struct) =
-                each %{$conf->{askdns}{$depends_on_tags}} ) {
-        my($query_template, $query_type, $answer_types_ref, $rules) =
-          @$struct{qw(query q_type a_types rules)};
-        dbg("askdns: depend on tags %s, rules: %s ",
-            $depends_on_tags, join(', ', keys %$rules));
-      }
+  foreach my $rulename (keys %{$conf->{askdns}}) {
+    if (!$conf->{scores}->{$rulename}) {
+      dbg("askdns: skipping disabled rule $rulename");
+      next;
     }
-
-    if (!@tags) {
-      # no dependencies on tags, just call directly
-      $self->launch_queries($pms,$depends_on_tags);
-    } else {
-      # enqueue callback for tags needed
+    my @tags = sort keys %{$conf->{askdns}{$rulename}{tags}};
+    if (@tags) {
+      dbg("askdns: rule %s depends on tags: %s", $rulename,
+          join(', ', @tags));
       $pms->action_depends_on_tags(@tags == 1 ? $tags[0] : \@tags,
-              sub { my($pms,@args) = @_;
-                    $self->launch_queries($pms,$depends_on_tags) }
+            sub { my($pms,@args) = @_;
+                  $self->launch_queries($pms,$rulename,\@tags) }
       );
+    } else {
+      # no dependencies on tags, just call directly
+      $self->launch_queries($pms,$rulename,[]);
     }
   }
 }
 
-# generate DNS queries - called for each set of rules
-# when their tag dependencies are met
+# generate DNS queries - called for each rule when it's tag dependencies
+# are met
 #
 sub launch_queries {
-  my($self, $pms, $depends_on_tags) = @_;
-  my $conf = $pms->{conf};
+  my($self, $pms, $rulename, $tags) = @_;
 
-  my %tags;
-  # obtain tag/value pairs of tags we depend upon in this set of rules
-  if ($depends_on_tags ne '') {
-    %tags = map( ($_,$pms->get_tag($_)), split(/,/,$depends_on_tags) );
-  }
-  dbg("askdns: preparing queries which depend on tags: %s",
-      join(', ', map($_.' => '.$tags{$_}, keys %tags)));
-
-  # replace tag names in a query template with actual tag values
-  # and launch DNS queries
-  while ( my($query_template_key, $struct) =
-            each %{$conf->{askdns}{$depends_on_tags}} ) {
-    my($query_template, $query_type, $answer_types_ref, $rules) =
-      @$struct{qw(query q_type a_types rules)};
-
-    my @rulenames = keys %$rules;
-    if (grep($conf->{scores}->{$_}, @rulenames)) {
-      dbg("askdns: query template %s, type %s, rules: %s",
-          $query_template,
-          !$answer_types_ref ? $query_type
-            : $query_type.'/'.join(',',@$answer_types_ref),
-          join(', ', @rulenames));
-    } else {
-      dbg("askdns: query template %s, type %s, all rules disabled: %s",
-          $query_template, $query_type, join(', ', @rulenames));
-      next;
-    }
-
-    # collect all tag names from a template, each may occur more than once
-    my @templ_tags = $query_template =~ /_([A-Z][A-Z0-9]*)_/gs;
-
-    # filter out duplicate tag names, and tags with undefined or empty value
-    my %seen;
-    @templ_tags = grep(!$seen{$_}++ && defined $tags{$_} && $tags{$_} ne '',
-                       @templ_tags);
-
-    my %templ_vals;  # values that each tag takes
-    for my $t (@templ_tags) {
-      my %seen;
-      # a tag value may be a space-separated list,
-      # store it as an arrayref, removing duplicate values
-      $templ_vals{$t} = [ grep(!$seen{$_}++, split(' ',$tags{$t})) ];
-    }
-
-    # count through all tag value tuples
-    my @digit = (0) x @templ_tags;  # counting accumulator
-OUTER:
-    for (;;) {
-      my %current_tag_val;  # maps a tag name to its current iteration value
-      for my $j (0 .. $#templ_tags) {
-        my $t = $templ_tags[$j];
-        $current_tag_val{$t} = $templ_vals{$t}[$digit[$j]];
-      }
-      local $1;
-      my $query_domain = $query_template;
-      $query_domain =~ s{_([A-Z][A-Z0-9]*)_}
-                        { defined $current_tag_val{$1} ? $current_tag_val{$1}
-                                                       : '' }ge;
-      $query_domain = idn_to_ascii($query_domain);
-      # used by process_response_packet
-      my $dnskey = "askdns:$query_type:$query_domain";
-      dbg("askdns: expanded query %s, dns key %s", $query_domain, $dnskey);
-
-      if ($query_domain eq '') {
-        # ignore, just in case
-      } else {
-        if (!exists $pms->{askdns_map_dnskey_to_rules}{$dnskey}) {
-          $pms->{askdns_map_dnskey_to_rules}{$dnskey} =
-             [ [$query_type, $answer_types_ref, $rules] ];
-        } else {
-          push(@{$pms->{askdns_map_dnskey_to_rules}{$dnskey}},
-               [$query_type, $answer_types_ref, $rules] );
+  my $arule = $pms->{conf}->{askdns}{$rulename};
+  my $query_tmpl = $arule->{query};
+  my $queries;
+  if (@$tags) {
+    if (!exists $pms->{askdns_qtmpl_cache}{$query_tmpl}) {
+      # replace tags in query template
+      # iterate through each tag, replacing list of strings as we go
+      my %q_iter = ( "$query_tmpl" => 1 );
+      foreach my $tag (@$tags) {
+        # cache tag values locally
+        if (!exists $pms->{askdns_tag_cache}{$tag}) {
+          $pms->{askdns_tag_cache}{$tag} = $pms->get_tag($tag);
         }
-        # lauch a new DNS query for $query_type and $query_domain
-        $pms->{async}->bgsend_and_start_lookup(
-          $query_domain, $query_type, undef,
-          { rulename => \@rulenames, type => 'AskDNS' },
-          sub { my ($ent,$pkt) = @_;
-                $self->process_response_packet($pms, $ent, $pkt, $dnskey) },
-          master_deadline => $pms->{master_deadline}
-        );
+        my %q_iter_new;
+        foreach my $q (keys %q_iter) {
+          # handle space separated multi-valued tags
+          foreach my $val (split(' ', $pms->{askdns_tag_cache}{$tag})) {
+            my $qtmp = $q;
+            $qtmp =~ s/\Q_${tag}_\E/${val}/g;
+            $q_iter_new{$qtmp} = 1;
+          }
+        }
+        %q_iter = %q_iter_new;
       }
-
-      last  if !@templ_tags;
-      # increment accumulator, little-endian
-      for (my $j = 0;  ; $j++) {
-        last  if ++$digit[$j] <= $#{$templ_vals{$templ_tags[$j]}};
-        $digit[$j] = 0;  # and carry
-        last OUTER  if $j >= $#templ_tags;
-      }
+      # cache idn'd queries
+      my @q_arr;
+      push @q_arr, idn_to_ascii($_) foreach (keys %q_iter);
+      $pms->{askdns_qtmpl_cache}{$query_tmpl} = \@q_arr;
     }
+    $queries = $pms->{askdns_qtmpl_cache}{$query_tmpl};
+  } else {
+    push @$queries, idn_to_ascii($query_tmpl);
+  }
+
+  foreach my $query (@$queries) {
+    dbg("askdns: launching query (%s): $query", $rulename);
+    $pms->{async}->bgsend_and_start_lookup(
+      $query, $arule->{q_type}, undef,
+        { rulename => $rulename, type => 'AskDNS' },
+        sub { my ($ent,$pkt) = @_;
+              $self->process_response_packet($pms, $ent, $pkt, $rulename) },
+        master_deadline => $pms->{master_deadline}
+    );
   }
 }
 
 sub process_response_packet {
-  my($self, $pms, $ent, $pkt, $dnskey) = @_;
+  my($self, $pms, $ent, $pkt, $rulename) = @_;
 
   my $conf = $pms->{conf};
-
-  # map a dnskey back to info on queries which caused this DNS lookup
-  my $queries_ref = $pms->{askdns_map_dnskey_to_rules}{$dnskey};
+  my $arule = $conf->{askdns}{$rulename};
 
   my($header, @question, @answer, $qtype, $rcode);
   # NOTE: $pkt will be undef if the DNS query was aborted (e.g. timed out)
@@ -518,8 +462,8 @@ sub process_response_packet {
     $rcode = uc $header->rcode  if $header;  # 'NOERROR', 'NXDOMAIN', ...
 
     # NOTE: qname is encoded in RFC 1035 zone format, decode it
-    dbg("askdns: answer received, rcode %s, query %s, answer has %d records",
-        $rcode,
+    dbg("askdns: answer received (%s), rcode %s, query %s, answer has %d records",
+        $rulename, $rcode,
         join(', ', map(join('/', decode_dns_question_entry($_)), @question)),
         scalar @answer);
 
@@ -594,51 +538,45 @@ sub process_response_packet {
                                                        : $rr->rdatastr;
         utf8::encode($rr_rdatastr)  if utf8::is_utf8($rr_rdatastr);
       }
-    # dbg("askdns: received rr type %s, data: %s", $rr_type, $rr_rdatastr);
+      # dbg("askdns: received rr type %s, data: %s", $rr_type, $rr_rdatastr);
     }
 
-    my $j = 0;
-    for my $q_tuple (!ref $queries_ref ? () : @$queries_ref) {
-      next  if !$q_tuple;
-      my($query_type, $answer_types_ref, $rules) = @$q_tuple;
+    my $query_type = $arule->{q_type};
+    return if !defined $qtype || $query_type ne $qtype;
 
-      next  if !defined $qtype || $query_type ne $qtype;
-      $answer_types_ref = [$query_type]  if !defined $answer_types_ref;
+    my $answer_types_ref = $arule->{a_types};
+    $answer_types_ref = [$query_type]  if !@$answer_types_ref;
 
-      # mark rule as done
-      $pms->{askdns_map_dnskey_to_rules}{$dnskey}[$j++] = undef;
+    my $subtest = $arule->{subtest};
 
-      while (my($rulename,$subtest) = each %$rules) {
-        my $match;
-        local($1,$2,$3);
-        if (ref $subtest eq 'HASH') {  # a list of DNS rcodes (as hash keys)
-          $match = 1  if $subtest->{$rcode};
-        } elsif ($rcode != 0) {
-          # skip remaining tests on DNS error
-        } elsif (!defined($rr_type) ||
-                 !grep($_ eq 'ANY' || $_ eq $rr_type, @$answer_types_ref) ) {
-          # skip remaining tests on wrong RR type
-        } elsif (!defined $subtest) {
-          $match = 1;  # any valid response of the requested RR type matches
-        } elsif (ref $subtest eq 'Regexp') {  # a regular expression
-          $match = 1  if $rr_rdatastr =~ $subtest;
-        } elsif ($rr_rdatastr eq $subtest) {  # exact equality
-          $match = 1;
-        } elsif (defined $rdatanum &&
-                 $subtest =~ m{^ (\d+) (?: ([/-]) (\d+) )? \z}x) {
-          my($n1,$delim,$n2) = ($1,$2,$3);
-          $match =
-            !defined $n2  ? ($rdatanum & $n1) &&                  # mask only
-                              (($rdatanum & 0xff000000) == 0x7f000000)  # 127/8
-          : $delim eq '-' ? $rdatanum >= $n1 && $rdatanum <= $n2  # range
-          : $delim eq '/' ? ($rdatanum & $n2) == (int($n1) & $n2) # value/mask
-          : 0; # notice int($n1) to fix perl ~5.14 taint bug (Bug 7725)
-        }
-        if ($match) {
-          $self->askdns_hit($pms, $ent->{query_domain}, $qtype,
-                            $rr_rdatastr, $rulename);
-        }
-      }
+    my $match;
+    local($1,$2,$3);
+    if (ref $subtest eq 'HASH') {  # a list of DNS rcodes (as hash keys)
+      $match = 1  if $subtest->{$rcode};
+    } elsif ($rcode != 0) {
+      # skip remaining tests on DNS error
+    } elsif (!defined($rr_type) ||
+             !grep($_ eq 'ANY' || $_ eq $rr_type, @$answer_types_ref) ) {
+      # skip remaining tests on wrong RR type
+    } elsif (!defined $subtest) {
+      $match = 1;  # any valid response of the requested RR type matches
+    } elsif (ref $subtest eq 'Regexp') {  # a regular expression
+      $match = 1  if $rr_rdatastr =~ $subtest;
+    } elsif ($rr_rdatastr eq $subtest) {  # exact equality
+      $match = 1;
+    } elsif (defined $rdatanum &&
+             $subtest =~ m{^ (\d+) (?: ([/-]) (\d+) )? \z}x) {
+      my($n1,$delim,$n2) = ($1,$2,$3);
+      $match =
+        !defined $n2 ? ($rdatanum & $n1) &&                     # mask only
+                       (($rdatanum & 0xff000000) == 0x7f000000) # 127/8
+        : $delim eq '-' ? $rdatanum >= $n1 && $rdatanum <= $n2  # range
+        : $delim eq '/' ? ($rdatanum & $n2) == (int($n1) & $n2) # value/mask
+        : 0; # notice int($n1) to fix perl ~5.14 taint bug (Bug 7725)
+    }
+    if ($match) {
+      $self->askdns_hit($pms, $ent->{query_domain}, $qtype,
+                        $rr_rdatastr, $rulename);
     }
   }
 }
@@ -656,5 +594,8 @@ sub askdns_hit {
   $pms->test_log(sprintf("%s %s:%s", $query_domain,$qtype,$rr_rdatastr));
   $pms->got_hit($rulename, 'ASKDNS: ', ruletype => 'askdns');  # score=>$score
 }
+
+# Version features
+sub has_tag_header { 1 } # HEADER() was implemented together with Conf::feature_get_host # Bug 7734
 
 1;
