@@ -11,17 +11,3 @@ describe PDS_HP_HELO_NORDNS High profile HELO with no sender rDNS
 score    PDS_HP_HELO_NORDNS 1.0
 tflags   PDS_HP_HELO_NORDNS net
 reuse    PDS_HP_HELO_NORDNS
-
-ifplugin Mail::SpamAssassin::Plugin::AskDNS
-
-askdns   __HELO_RECORD _LASTEXTERNALHELO_ A /./
-tflags   __HELO_RECORD net
-reuse    __HELO_RECORD
-
-meta     PDS_NO_HELO_DNS (__HELO_HIGHPROFILE && !__HELO_RECORD)
-describe PDS_NO_HELO_DNS High profile HELO but no A record
-score    PDS_NO_HELO_DNS 2.0
-tflags   PDS_NO_HELO_DNS net
-reuse    PDS_NO_HELO_DNS
-
-endif
