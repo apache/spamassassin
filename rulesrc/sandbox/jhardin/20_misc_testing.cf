@@ -2770,6 +2770,10 @@ tflags     AMAZON_IMG_NOT_RCVD_AMZN    publish
 #meta       __AMAZON_IMG_DQ_UNSUB       __URI_IMG_AMAZON && __URI_DQ_UNSUB
 #meta       __AMAZON_IMG_DIRECT_MX      __URI_IMG_AMAZON && __DOS_DIRECT_TO_MX
 
+header     __HDR_RCVD_ALIBABA          X-Spam-Relays-External =~ /rdns=\S+\.alibaba\.com\s/
+uri        __URI_IMG_ALICDN            m;//(?:[^/.]+\.)*alicdn\.com/.*\.(?:jpe?g|gif|png)$;i
+
+meta       __ALIBABA_IMG_NOT_RCVD_ALI  __URI_IMG_ALICDN && !__HDR_RCVD_ALIBABA
 
 meta       __HOSTED_IMG_DQ_UNSUB       __URI_DQ_UNSUB && ( __URI_IMG_EBAY || __URI_IMG_AMAZON )
 meta       HOSTED_IMG_DQ_UNSUB         __HOSTED_IMG_DQ_UNSUB
