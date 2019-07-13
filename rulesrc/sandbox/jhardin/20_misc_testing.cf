@@ -1517,7 +1517,7 @@ header      __DATE_LOWER       ALL =~ /date:\s\S{5}/
 
 # duplicates __XPRIO
 #header      __FH_HAS_XPRIORITY exists:X-Priority
-meta        __XPRIO_MINFP      __XPRIO && !__CT_ENCRYPTED && !ALL_TRUSTED && !__HAS_ERRORS_TO && !__THREADED && !__LONGLINE && !__MAIL_LINK && !__RCD_RDNS_SMTP && !__PDF_ATTACH && !__USING_VERP1 && !__HAS_DOMAINKEY_SIG && !__LIST_PARTIAL && !__RCD_RDNS_MX_MESSY && !__XM_VBULLETIN && !__PHPMAILER_MUA && !__HAS_HREF && !__HAS_IMG_SRC && !__SURVEY && !__RCD_RDNS_MAIL_MESSY && !__HAS_DKIM_SIGHD && !__SUBSCRIPTION_INFO && !__HAS_SENDER
+meta        __XPRIO_MINFP      __XPRIO && !__CT_ENCRYPTED && !ALL_TRUSTED && !__HAS_ERRORS_TO && !__THREADED && !__LONGLINE && !__MAIL_LINK && !__RCD_RDNS_SMTP && !__USING_VERP1 && !__RCD_RDNS_MX_MESSY && !__XM_VBULLETIN && !__HAS_HREF && !__HAS_IMG_SRC && !__RCD_RDNS_MAIL_MESSY && !__HAS_SENDER && !__THREAD_INDEX_GOOD && __VIA_ML && !__PHPMAILER_MUA 
 
 ifplugin Mail::SpamAssassin::Plugin::DKIM
   ifplugin Mail::SpamAssassin::Plugin::SPF
@@ -1605,7 +1605,7 @@ meta        __HEXHASH_2        __HEXHASHWORD_S2EU > 1
 meta        __HEXHASH_3        __HEXHASHWORD_S2EU > 2
 meta        __HEXHASH_4        __HEXHASHWORD_S2EU > 3
 #meta        __HEXHASH_5        __HEXHASHWORD_S2EU > 4
-meta        HEXHASH_WORD       (__HEXHASHWORD_S2EU > 1) && !ALL_TRUSTED && !__LYRIS_EZLM_REMAILER && !__MSGID_HEXISH && !__RDNS_SHORT && !__CTYPE_MULTIPART_MIXED && !__HAS_X_REF && !__HAS_IMG_SRC_ONECASE && !__RCD_RDNS_MAIL_MESSY
+meta        HEXHASH_WORD       (__HEXHASHWORD_S2EU > 1) && !ALL_TRUSTED && !__LYRIS_EZLM_REMAILER && !__MSGID_HEXISH && !__RDNS_SHORT && !__CTYPE_MULTIPART_MIXED && !__HAS_X_REF && !__HAS_IMG_SRC_ONECASE && !__RCD_RDNS_MAIL_MESSY && !__VIA_ML && !__HAS_SENDER 
 describe    HEXHASH_WORD       Multiple instances of word + hexadecimal hash
 score       HEXHASH_WORD       3.000	# limit
 tflags      HEXHASH_WORD       publish
@@ -2655,7 +2655,7 @@ if can(Mail::SpamAssassin::Conf::feature_bug6558_free)
   meta       __UNICODE_OBFU_ZW_3        __UNICODE_OBFU_ZW > 2
   meta       __UNICODE_OBFU_ZW_5        __UNICODE_OBFU_ZW > 4
   meta       __UNICODE_OBFU_ZW_10       __UNICODE_OBFU_ZW > 9
-  meta       UNICODE_OBFU_ZW            __UNICODE_OBFU_ZW_2 && !__SUBSCRIPTION_INFO && !__RCD_RDNS_MAIL_MESSY && !__DOS_HAS_LIST_ID && !__USING_VERP1 && !__DOS_HAS_LIST_UNSUB && !__RCD_RDNS_SMTP 
+  meta       UNICODE_OBFU_ZW            __UNICODE_OBFU_ZW_2 && !__SUBSCRIPTION_INFO && !__RCD_RDNS_MAIL_MESSY && !__DOS_HAS_LIST_ID && !__USING_VERP1 && !__DOS_HAS_LIST_UNSUB && !__RCD_RDNS_SMTP && !__DKIM_EXISTS 
   describe   UNICODE_OBFU_ZW            Obfuscating text with hidden characters
   score      UNICODE_OBFU_ZW            3.500	# limit
   tflags     UNICODE_OBFU_ZW            publish
@@ -2722,7 +2722,7 @@ describe   URI_GIBB_NO_PROTO           Long, gibberish, no-protocol URI
 
 
 header     __AC_FROM_MANY_DOTS         From =~ /<(?:\w{2,}\.){2,}\w+@/
-meta       __AC_FROM_MANY_DOTS_MINFP   __AC_FROM_MANY_DOTS && !ALL_TRUSTED && !FREEMAIL_FORGED_FROMDOMAIN && !FORGED_GMAIL_RCVD && !__UNSUB_LINK && !__XM_VBULLETIN && !__RDNS_SHORT && !__REPTO_QUOTE && !__FSL_RELAY_GOOGLE && !__HAS_IN_REPLY_TO && !__RCD_RDNS_SMTP && !__HAS_THREAD_INDEX && !__RCD_RDNS_MX_MESSY && !__CTYPE_MULTIPART_MIXED && !__RCD_RDNS_MTA && !__VIA_ML 
+meta       __AC_FROM_MANY_DOTS_MINFP   __AC_FROM_MANY_DOTS && !ALL_TRUSTED && !FREEMAIL_FORGED_FROMDOMAIN && !FORGED_GMAIL_RCVD && !__UNSUB_LINK && !__XM_VBULLETIN && !__RDNS_SHORT && !__REPTO_QUOTE && !__FSL_RELAY_GOOGLE && !__HAS_IN_REPLY_TO && !__RCD_RDNS_SMTP && !__HAS_THREAD_INDEX && !__RCD_RDNS_MX_MESSY && !__CTYPE_MULTIPART_MIXED && !__RCD_RDNS_MTA && !__VIA_ML && !__HAS_ERRORS_TO 
 meta       AC_FROM_MANY_DOTS           __AC_FROM_MANY_DOTS_MINFP
 score      AC_FROM_MANY_DOTS           3.000	# limit
 describe   AC_FROM_MANY_DOTS           Multiple periods in From user name
