@@ -7,9 +7,3 @@ meta	     GB_FORGED_MUA_POSTFIX	( __FORGED_MUA_POSTFIX0 || __FORGED_MUA_POSTFIX1
 describe     GB_FORGED_MUA_POSTFIX	Forged Postfix mua headers
 tflags       GB_FORGED_MUA_POSTFIX      publish
 score	     GB_FORGED_MUA_POSTFIX	2.0 # limit
-
-header       __CODEIGNITER_MUA          X-Mailer =~ /CodeIgniter/
-header       __CODEIGNITER_USERAGENT    User-Agent =~ /CodeIgniter/
-meta         GB_CODEIGNITER             ( __CODEIGNITER_MUA && __CODEIGNITER_USERAGENT )
-describe     GB_CODEIGNITER             CodeIgniter Mua
-score        GB_CODEIGNITER             1.0 # limit
