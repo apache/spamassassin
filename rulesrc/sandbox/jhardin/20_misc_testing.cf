@@ -2774,9 +2774,10 @@ header     __HDR_RCVD_ALIBABA          X-Spam-Relays-External =~ /rdns=\S+\.alib
 uri        __URI_IMG_ALICDN            m;//(?:[^/.]+\.)*alicdn\.com/.*\.(?:jpe?g|gif|png)$;i
 
 meta       __ALIBABA_IMG_NOT_RCVD_ALI  __URI_IMG_ALICDN && !__HDR_RCVD_ALIBABA
-
-# WordPress "image accelerator" - abused for obfuscating hosted spamvertised product images
-uri        __URI_IMG_WP_REDIR          m;://i[02]\.wp\.com/.*\.(?:jpe?g|gif|png)$;i
+meta       ALIBABA_IMG_NOT_RCVD_ALI    __ALIBABA_IMG_NOT_RCVD_ALI && !__YOUR_PASSWORD && !__UNSUB_LINK && !__RCD_RDNS_MAIL_MESSY
+score      ALIBABA_IMG_NOT_RCVD_ALI    2.500	# limit
+describe   ALIBABA_IMG_NOT_RCVD_ALI    Alibaba hosted image but message not from Alibaba
+tflags     ALIBABA_IMG_NOT_RCVD_ALI    publish
 
 meta       __HOSTED_IMG_DQ_UNSUB       __URI_DQ_UNSUB && ( __URI_IMG_EBAY || __URI_IMG_AMAZON || __URI_IMG_ALICDN )
 meta       HOSTED_IMG_DQ_UNSUB         __HOSTED_IMG_DQ_UNSUB
@@ -2796,6 +2797,12 @@ score      HOSTED_IMG_FREEM            3.500	# limit
 describe   HOSTED_IMG_FREEM            Image hosted at large ecomm site, freemail from or reply-to
 tflags     HOSTED_IMG_FREEM            publish
 
+# WordPress "image accelerator" - abused for obfuscating hosted spamvertised product images
+uri        __URI_IMG_WP_REDIR          m;://i[02]\.wp\.com/.*\.(?:jpe?g|gif|png)$;i
+meta       URI_IMG_WP_REDIR            __URI_IMG_WP_REDIR
+score      URI_IMG_WP_REDIR            3.000	# limit
+describe   URI_IMG_WP_REDIR            Image via WordPress "accelerator" proxy
+tflags     URI_IMG_WP_REDIR            publish
 
 #header     __BOGUS_MIME_VER_01         MIME-Version =~ /^(?!\s*1\.0).+/
 header     __BOGUS_MIME_VER_02         MIME-Version =~ /^(?!.*\b1\.0\b).+/
