@@ -430,6 +430,7 @@ sub check_uri_local_bl {
   # If country_db_path is set I am using GeoIP2 api
   if ( HAS_GEOIP2 and ( ( defined $conf_country_db_path ) or ( defined $conf_country_db_isp_path ) ) ) {
 
+   eval {
     $self->{geoip} = GeoIP2::Database::Reader->new(
   		file	=> $conf_country_db_path,
   		locales	=> [ 'en' ]
@@ -447,6 +448,13 @@ sub check_uri_local_bl {
       warn "$conf_country_db_isp_path not found" unless $self->{geoisp};
     }
     $self->{use_geoip2} = 1;
+   };
+   if ($@ || !($self->{geoip} || $self->{geoisp})) {
+     $@ =~ s/\s+Trace begun.*//s;
+     warn "URILocalBL: GeoIP2 load failed: $@\n";
+     return 0;
+   }
+
   } elsif ( HAS_GEOIP ) {
     BEGIN {
       Geo::IP->import( qw(GEOIP_MEMORY_CACHE GEOIP_CHECK_CACHE GEOIP_ISP_EDITION) );
@@ -466,6 +474,7 @@ sub check_uri_local_bl {
     eval '$flag_silent = Geo::IP::GEOIP_SILENCE' if ($gip_wanted >= $gip_have);
     eval '$flag_isp = GEOIP_ISP_EDITION' if ($gip_wanted >= $gip_have);
 
+   eval {
     if ($flag_silent && $gic_wanted >= $gic_have) {
       $self->{geoip} = Geo::IP->new($flags | $flag_silent);
       $self->{geoisp} = Geo::IP->open_type($flag_isp | $flag_silent | $flags);
@@ -477,7 +486,14 @@ sub check_uri_local_bl {
       open(STDERR, ">&OLDERR");
       close(OLDERR);
     }
-  $db_info = sub { return "Geo::IP " . ($self->{geoip}->database_info || '?') };
+   };
+    if ($@ || !($self->{geoip} || $self->{geoisp})) {
+      $@ =~ s/\s+Trace begun.*//s;
+      warn "URILocalBL: GeoIP load failed: $@\n";
+      return 0;
+    }
+
+    $db_info = sub { return "Geo::IP " . ($self->{geoip}->database_info || '?') };
   } else {
     dbg("No GeoIP module available");
     return 0;
