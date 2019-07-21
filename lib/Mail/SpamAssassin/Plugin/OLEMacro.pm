@@ -244,7 +244,8 @@ Configure the largest file that the plugin will decode from the MIME objects
 
 =item olemacro_exts (default: (?:doc|docx|dot|pot|ppa|pps|ppt|rtf|sldm|xl|xla|xls|xlsx|xlt|xslb)$)
 
-Set the regexp used to configure the extensions the plugin targets for macro scanning
+Set the case-insensitive regexp used to configure the extensions the plugin
+targets for macro scanning
 
 =back
 
@@ -272,7 +273,8 @@ Set the regexp used to configure the extensions the plugin targets for macro sca
 
 =item olemacro_macro_exts (default: (?:docm|dotm|ppam|potm|ppst|ppsm|pptm|sldm|xlm|xlam|xlsb|xlsm|xltm|xps)$)
 
-Set the regexp used to configure the extensions the plugin treats as containing a macro
+Set the case-insensitive regexp used to configure the extensions the plugin
+treats as containing a macro
 
 =back
 
@@ -301,7 +303,8 @@ Set the regexp used to configure the extensions the plugin treats as containing 
 
 =item olemacro_skip_exts (default: (?:dotx|potx|ppsx|pptx|sldx|xltx)$)
 
-Set the regexp used to configure extensions for the plugin to skip entirely, these should only be guaranteed macro free files
+Set the case-insensitive regexp used to configure extensions for the plugin
+to skip entirely, these should only be guaranteed macro free files
 
 =back
 
@@ -330,7 +333,8 @@ Set the regexp used to configure extensions for the plugin to skip entirely, the
 
 =item olemacro_skip_ctypes (default: ^(?:(audio|image|text)\/|application\/(?:pdf)))
 
-Set the regexp used to configure content types for the plugin to skip entirely, these should only be guaranteed macro free
+Set the case-insensitive regexp used to configure content types for the
+plugin to skip entirely, these should only be guaranteed macro free
 
 =back
 
@@ -359,8 +363,8 @@ Set the regexp used to configure content types for the plugin to skip entirely, 
 
 =item olemacro_zips (default: (?:zip)$)
 
-Set the regexp used to configure extensions for the plugin to target as zip files, 
-files listed in configs above are also tested for zip
+Set the case-insensitive regexp used to configure extensions for the plugin
+to target as zip files, files listed in configs above are also tested for zip
 
 =back
 
@@ -454,7 +458,7 @@ sub _check_attachments {
 
   foreach my $part ($pms->{msg}->find_parts(qr/./, 1)) {
 
-    next if (lc($part->{type}) =~ $pms->{conf}->{olemacro_skip_ctypes});
+    next if ($part->{type} =~ /$pms->{conf}->{olemacro_skip_ctypes}/i);
 
     my ($ctt, $ctd, $cte, $name) = _get_part_details($pms, $part);
     next unless defined $ctt;
