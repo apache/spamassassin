@@ -223,14 +223,14 @@ Configure the largest file that the plugin will decode from the MIME objects
 
   push(@cmds, {
     setting => 'olemacro_exts',
-    default => '(?:doc|docx|dot|pot|ppa|pps|ppt|rtf|sldm|xl|xla|xls|xlsx|xlt|xslb)$',
+    default => qr/(?:doc|docx|dot|pot|ppa|pps|ppt|rtf|sldm|xl|xla|xls|xlsx|xlt|xslb)$/,
     type => $Mail::SpamAssassin::Conf::CONF_TYPE_STRING,
     code => sub {
       my ($self, $key, $value, $line) = @_;
       unless (defined $value && $value !~ /^$/) {
         return $Mail::SpamAssassin::Conf::MISSING_REQUIRED_VALUE;
       }
-      my ($rec, $err) = compile_regexp($value, 1);
+      my ($rec, $err) = compile_regexp($value, 0);
       if (!$rec) {
        dbg("config: invalid olemacro_exts '$value': $err");
        return $Mail::SpamAssassin::Conf::INVALID_VALUE;
@@ -252,14 +252,14 @@ Set the regexp used to configure the extensions the plugin targets for macro sca
 
   push(@cmds, {
     setting => 'olemacro_macro_exts',
-    default => '(?:docm|dotm|ppam|potm|ppst|ppsm|pptm|sldm|xlm|xlam|xlsb|xlsm|xltm|xps)$',
+    default => qr/(?:docm|dotm|ppam|potm|ppst|ppsm|pptm|sldm|xlm|xlam|xlsb|xlsm|xltm|xps)$/,
     type => $Mail::SpamAssassin::Conf::CONF_TYPE_STRING,
     code => sub {
       my ($self, $key, $value, $line) = @_;
       unless (defined $value && $value !~ /^$/) {
         return $Mail::SpamAssassin::Conf::MISSING_REQUIRED_VALUE;
       }
-      my ($rec, $err) = compile_regexp($value, 1);
+      my ($rec, $err) = compile_regexp($value, 0);
       if (!$rec) {
        dbg("config: invalid olemacro_macro_exts '$value': $err");
        return $Mail::SpamAssassin::Conf::INVALID_VALUE;
@@ -280,14 +280,14 @@ Set the regexp used to configure the extensions the plugin treats as containing 
 
   push(@cmds, {
     setting => 'olemacro_skip_exts',
-    default => '(?:dotx|potx|ppsx|pptx|sldx|xltx)$',
+    default => qr/(?:dotx|potx|ppsx|pptx|sldx|xltx)$/,
     type => $Mail::SpamAssassin::Conf::CONF_TYPE_STRING,
     code => sub {
       my ($self, $key, $value, $line) = @_;
       unless (defined $value && $value !~ /^$/) {
         return $Mail::SpamAssassin::Conf::MISSING_REQUIRED_VALUE;
       }
-      my ($rec, $err) = compile_regexp($value, 1);
+      my ($rec, $err) = compile_regexp($value, 0);
       if (!$rec) {
        dbg("config: invalid olemacro_skip_exts '$value': $err");
        return $Mail::SpamAssassin::Conf::INVALID_VALUE;
@@ -309,14 +309,14 @@ Set the regexp used to configure extensions for the plugin to skip entirely, the
 
   push(@cmds, {
     setting => 'olemacro_skip_ctypes',
-    default => '^(?:(audio|image|text)\/|application\/(?:pdf))',
+    default => qr/^(?:(audio|image|text)\/|application\/(?:pdf))/,
     type => $Mail::SpamAssassin::Conf::CONF_TYPE_STRING,
     code => sub {
       my ($self, $key, $value, $line) = @_;
       unless (defined $value && $value !~ /^$/) {
         return $Mail::SpamAssassin::Conf::MISSING_REQUIRED_VALUE;
       }
-      my ($rec, $err) = compile_regexp($value, 1);
+      my ($rec, $err) = compile_regexp($value, 0);
       if (!$rec) {
        dbg("config: invalid olemacro_skip_ctypes '$value': $err");
        return $Mail::SpamAssassin::Conf::INVALID_VALUE;
@@ -338,14 +338,14 @@ Set the regexp used to configure content types for the plugin to skip entirely, 
 
   push(@cmds, {
     setting => 'olemacro_zips',
-    default => '(?:zip)$',
+    default => qr/(?:zip)$/,
     type => $Mail::SpamAssassin::Conf::CONF_TYPE_STRING,
     code => sub {
       my ($self, $key, $value, $line) = @_;
       unless (defined $value && $value !~ /^$/) {
         return $Mail::SpamAssassin::Conf::MISSING_REQUIRED_VALUE;
       }
-      my ($rec, $err) = compile_regexp($value, 1);
+      my ($rec, $err) = compile_regexp($value, 0);
       if (!$rec) {
        dbg("config: invalid olemacro_zips '$value': $err");
        return $Mail::SpamAssassin::Conf::INVALID_VALUE;
@@ -454,19 +454,19 @@ sub _check_attachments {
 
   foreach my $part ($pms->{msg}->find_parts(qr/./, 1)) {
 
-    next if ($part->{type} =~ $pms->{conf}->{olemacro_skip_ctypes});
+    next if (lc($part->{type}) =~ $pms->{conf}->{olemacro_skip_ctypes});
 
     my ($ctt, $ctd, $cte, $name) = _get_part_details($pms, $part);
     next unless defined $ctt;
 
     next if $name eq '';
-    next if (lc($name) =~ $pms->{conf}->{olemacro_skip_exts});
+    next if ($name =~ /$pms->{conf}->{olemacro_skip_exts}/i);
 
     # we skipped what we need/want to
     my $data = undef;
 
     # if name is macrotype - return true
-    if (lc($name) =~ $pms->{conf}->{olemacro_macro_exts}) {
+    if ($name =~ /$pms->{conf}->{olemacro_macro_exts}/i) {
       dbg("Found macrotype attachment with name $name");
       $pms->{olemacro_exists} = 1;
 
@@ -479,7 +479,7 @@ sub _check_attachments {
     }
 
     # if name is ext type - check and return true if needed
-    if (lc($name) =~ $pms->{conf}->{olemacro_exts}) {
+    if ($name =~ /$pms->{conf}->{olemacro_exts}/i) {
       dbg("Found attachment with name $name");
       $data = $part->decode($chunk_size) unless defined $data;
 
@@ -493,7 +493,7 @@ sub _check_attachments {
       return 1 if $pms->{olemacro_exists} == 1;
     }
 
-    if (lc($name) =~ $pms->{conf}->{olemacro_zips}) {
+    if ($name =~ /$pms->{conf}->{olemacro_zips}/i) {
       dbg("Found zip attachment with name $name");
       $data = $part->decode($chunk_size) unless defined $data;
 
@@ -556,13 +556,13 @@ sub _check_zip {
   # - check if a zip
   foreach my $member (@members){
     my $mname = lc $member->fileName();
-    next if ($mname =~ $pms->{conf}->{olemacro_skip_exts});
+    next if ($mname =~ /$pms->{conf}->{olemacro_skip_exts}/i);
 
     my $data = undef;
     my $status = undef;
 
     # if name is macrotype - return true
-    if ($mname =~ $pms->{conf}->{olemacro_macro_exts}) {
+    if ($mname =~ /$pms->{conf}->{olemacro_macro_exts}/i) {
       dbg("Found macrotype zip member $mname");
       $pms->{olemacro_exists} = 1;
 
@@ -581,7 +581,7 @@ sub _check_zip {
       return 1 if $pms->{olemacro_exists} == 1;
     }
 
-    if ($mname =~ $pms->{conf}->{olemacro_exts}) {
+    if ($mname =~ /$pms->{conf}->{olemacro_exts}/i) {
       dbg("Found zip member $mname");
 
       if ($member->isEncrypted()) {
@@ -605,7 +605,7 @@ sub _check_zip {
 
     }
 
-    if ($mname =~ $pms->{conf}->{olemacro_zips}) {
+    if ($mname =~ /$pms->{conf}->{olemacro_zips}/i) {
       dbg("Found zippy zip member $mname");
       ( $data, $status ) = $member->contents() unless defined $data;
       next unless $status == AZ_OK;
@@ -823,7 +823,7 @@ sub _is_zip_file {
   if (index($data, 'PK') == 0) {
     return 1;
   } else {
-    return($name =~ /(?:zip)$/);
+    return($name =~ /(?:zip)$/i);
   }
 }
 
