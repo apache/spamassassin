@@ -226,6 +226,7 @@ sub get_country {
 
 sub extract_metadata {
   my ($self, $opts) = @_;
+  my $pms = $opts->{permsgstatus};
 
   my $db;
   my $dbv6;
@@ -329,7 +330,6 @@ sub extract_metadata {
   }
 
   if (!$db) {
-    $self->{relaycountry_disabled} = 1;
     return 1;
   }
 
@@ -373,46 +373,22 @@ sub extract_metadata {
   my $ccstr = join(' ', @cc_untrusted);
   $msg->put_metadata("X-Relay-Countries", $ccstr);
   dbg("metadata: X-Relay-Countries: $ccstr");
+  $pms->set_tag("RELAYCOUNTRY", @cc_untrusted == 1 ? $cc_untrusted[0] : \@cc_untrusted);
 
   $ccstr = join(' ', @cc_external);
   $msg->put_metadata("X-Relay-Countries-External", $ccstr);
   dbg("metadata: X-Relay-Countries-External: $ccstr");
+  $pms->set_tag("RELAYCOUNTRYEXT", @cc_external == 1 ? $cc_external[0] : \@cc_external);
 
   $ccstr = join(' ', @cc_auth);
   $msg->put_metadata("X-Relay-Countries-Auth", $ccstr);
   dbg("metadata: X-Relay-Countries-Auth: $ccstr");
+  $pms->set_tag("RELAYCOUNTRYAUTH", @cc_auth == 1 ? $cc_auth[0] : \@cc_auth);
 
   $ccstr = join(' ', @cc_all);
   $msg->put_metadata("X-Relay-Countries-All", $ccstr);
   dbg("metadata: X-Relay-Countries-All: $ccstr");
-
-  return 1;
-}
-
-sub parsed_metadata {
-  my ($self, $opts) = @_;
-
-  return 1 if $self->{relaycountry_disabled};
-
-  my @c_list = split(' ',
-    $opts->{permsgstatus}->get_message->get_metadata('X-Relay-Countries'));
-  $opts->{permsgstatus}->set_tag("RELAYCOUNTRY",
-                                 @c_list == 1 ? $c_list[0] : \@c_list);
-
-  @c_list = split(' ',
-    $opts->{permsgstatus}->get_message->get_metadata('X-Relay-Countries-External'));
-  $opts->{permsgstatus}->set_tag("RELAYCOUNTRYEXT",
-                                 @c_list == 1 ? $c_list[0] : \@c_list);
-
-  @c_list = split(' ',
-    $opts->{permsgstatus}->get_message->get_metadata('X-Relay-Countries-Auth'));
-  $opts->{permsgstatus}->set_tag("RELAYCOUNTRYAUTH",
-                                 @c_list == 1 ? $c_list[0] : \@c_list);
-
-  @c_list = split(' ',
-    $opts->{permsgstatus}->get_message->get_metadata('X-Relay-Countries-All'));
-  $opts->{permsgstatus}->set_tag("RELAYCOUNTRYALL",
-                                 @c_list == 1 ? $c_list[0] : \@c_list);
+  $pms->set_tag("RELAYCOUNTRYALL", @cc_all == 1 ? $cc_all[0] : \@cc_all);
 
   return 1;
 }
