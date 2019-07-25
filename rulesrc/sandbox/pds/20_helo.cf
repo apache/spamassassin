@@ -11,3 +11,5 @@ describe PDS_HP_HELO_NORDNS High profile HELO with no sender rDNS
 score    PDS_HP_HELO_NORDNS 1.0
 tflags   PDS_HP_HELO_NORDNS net
 reuse    PDS_HP_HELO_NORDNS
+
+header   __HELO_HIGHPROFILE_2  X-Spam-Relays-External =~ /^[^\]]+rdns= helo=\S*(?:hotmail|gmail|google|yahoo|msn|microsoft|outlook|xxx)\.[\w]+\b/i
