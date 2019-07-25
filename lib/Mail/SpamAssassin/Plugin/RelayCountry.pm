@@ -133,7 +133,6 @@ If not defined, GeoIP2 default search includes:
  /usr/local/share/GeoIP/GeoLite2-Country.mmdb
  /usr/share/GeoIP/GeoLite2-Country.mmdb
  /var/lib/GeoIP/GeoLite2-Country.mmdb
- (and same paths again for -City.mmdb)
 
 =back
 
@@ -166,12 +165,6 @@ If not defined, GeoIP2 default search includes:
       '/usr/local/share/GeoIP/GeoLite2-Country.mmdb',
       '/usr/share/GeoIP/GeoLite2-Country.mmdb',
       '/var/lib/GeoIP/GeoLite2-Country.mmdb',
-      '/usr/local/share/GeoIP/GeoIP2-City.mmdb',
-      '/usr/share/GeoIP/GeoIP2-City.mmdb',
-      '/var/lib/GeoIP/GeoIP2-City.mmdb',
-      '/usr/local/share/GeoIP/GeoLite2-City.mmdb',
-      '/usr/share/GeoIP/GeoLite2-City.mmdb',
-      '/var/lib/GeoIP/GeoLite2-City.mmdb',
       ],
     type => $Mail::SpamAssassin::Conf::CONF_TYPE_STRINGLIST,
     code => sub {
