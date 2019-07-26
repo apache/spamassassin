@@ -36,6 +36,7 @@ package Mail::SpamAssassin::Plugin::Reuse;
 # use bytes;
 use strict;
 use warnings;
+use re 'taint';
 
 use Mail::SpamAssassin::Conf;
 use Mail::SpamAssassin::Logger;

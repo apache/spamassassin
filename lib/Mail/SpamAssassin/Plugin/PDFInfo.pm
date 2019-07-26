@@ -145,6 +145,7 @@ use Mail::SpamAssassin::Logger;
 use Mail::SpamAssassin::Util qw(compile_regexp);
 use strict;
 use warnings;
+use re 'taint';
 # use bytes;
 use Digest::MD5 qw(md5_hex);
 #use MIME::QuotedPrint; # use Util::qp_decode instead

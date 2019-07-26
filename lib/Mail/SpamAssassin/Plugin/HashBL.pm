@@ -116,6 +116,7 @@ match DNS answer.  Note that eval rule type must be "body" or "rawbody".
 package Mail::SpamAssassin::Plugin::HashBL;
 use strict;
 use warnings;
+use re 'taint';
 
 my $VERSION = 0.101;
 

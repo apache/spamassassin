@@ -75,6 +75,7 @@ use Mail::SpamAssassin::Constants qw(:sa);
 
 use strict;
 use warnings;
+use re 'taint';
 
 use BSD::Resource qw(RLIMIT_RSS RLIMIT_AS RLIMIT_CPU);
 

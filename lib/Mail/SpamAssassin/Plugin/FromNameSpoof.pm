@@ -106,10 +106,12 @@ score    FROMNAME_SPOOF_EQUALS_TO 1.2
 
 =cut
 
-use strict;
-
 package Mail::SpamAssassin::Plugin::FromNameSpoof;
 my $VERSION = 0.9;
+
+use strict;
+use warnings;
+use re 'taint';
 
 use Mail::SpamAssassin::Plugin;
 use Mail::SpamAssassin::Util;

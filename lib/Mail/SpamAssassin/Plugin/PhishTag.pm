@@ -21,6 +21,7 @@ package Mail::SpamAssassin::Plugin::PhishTag;
 
 use strict;
 use warnings;
+use re 'taint';
 use Errno qw(EBADF);
 
 use Mail::SpamAssassin::Plugin;

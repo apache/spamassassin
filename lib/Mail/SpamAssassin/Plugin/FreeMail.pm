@@ -18,6 +18,8 @@
 package Mail::SpamAssassin::Plugin::FreeMail;
 use strict;
 use warnings;
+use re 'taint';
+
 my $VERSION = 2.003;
 
 =head1 NAME
