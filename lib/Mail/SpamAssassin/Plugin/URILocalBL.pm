@@ -358,7 +358,7 @@ sub set_config {
 =item uri_country_db_path STRING
 
 This option tells SpamAssassin where to find the MaxMind country GeoIP2 
-database.
+database. Country or City database are both supported.
 
 =back
 
@@ -557,7 +557,12 @@ sub check_uri_local_bl {
           dbg("check: uri_local_bl countries %s\n", join(' ', sort keys %{$rule->{countries}}));
 
           if ( $self->{use_geoip2} == 1 ) {
-            my $country = $self->{geoip}->country( ip => $ip );
+            my $country;
+            if (index($self->{geoip}->metadata()->description()->{en}, 'City') != -1) {
+              $country = $self->{geoip}->city( ip => $ip );
+            } else {
+              $country = $self->{geoip}->country( ip => $ip );
+            }
             my $country_rec = $country->country();
             $cc = $country_rec->iso_code();
           } else {
