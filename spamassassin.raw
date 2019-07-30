@@ -450,6 +450,7 @@ my $mail;       # global, so signal handler can clean it up; bug 5626
 
 # make sure it only returns false values so that result_sub() isn't called...
 sub wanted {
+  $spamtest->timer_reset; # reset timers for each AI message
   my $dataref = $_[3];
   $mail       = $spamtest->parse($dataref);
   $count++;
