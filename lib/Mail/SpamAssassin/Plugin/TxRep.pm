@@ -940,8 +940,7 @@ across all users.
     code         => sub {
         my ($self, $key, $value, $line) = @_;
         unless (defined $value && $value !~ /^$/) {return $Mail::SpamAssassin::Conf::MISSING_REQUIRED_VALUE;}
-        if (-d $value)                            {return $Mail::SpamAssassin::Conf::INVALID_VALUE; }
-        $self->{txrep_path} = $value;
+        $self->{auto_whitelist_path} = $value;
     }
   });
 
@@ -994,7 +993,7 @@ not have any execute bits set (the umask is set to 0111).
         if ($value !~ /^0?[0-7]{3}$/) {
             return $Mail::SpamAssassin::Conf::INVALID_VALUE;
         }
-        $self->{txrep_file_mode} = untaint_var($value);
+        $self->{auto_whitelist_file_mode} = untaint_var($value);
     }
   });
 
