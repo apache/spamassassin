@@ -2315,6 +2315,6 @@ described in the file C<LICENSE> included with the distribution.
 The latest version of this library is likely to be available from CPAN
 as well as:
 
-  E<lt>https://spamassassin.apache.org/E<gt>
+E<lt>https://spamassassin.apache.org/E<gt>
 
 =cut
