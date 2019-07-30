@@ -1,5 +1,6 @@
 #!/usr/bin/perl -w
 use strict;
+use MIME::Base64;
 
 #
 # <@LICENSE>
@@ -1088,6 +1089,7 @@ sub start_children {
 	  $line = Mail::SpamAssassin::ArchiveIterator::_index_pack($date, $class, $format, $where);
         }
 
+	$result = encode_base64($result);
 	send_line($parent,"$result\0RESULT $line");
       }
       exit;
@@ -1618,7 +1620,7 @@ sub run_through_messages {
           $select->remove($socket);
         }
         elsif ($line =~ /^([^\0]*)\0RESULT (.+)$/s) {
-	  my $result = $1;
+	  my $result = decode_base64($1);
 	  my ($date,$class,$type) = Mail::SpamAssassin::ArchiveIterator::_index_unpack($2);
 	  aidbg "mass-check: $class, $type, $date\n";
 
