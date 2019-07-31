@@ -92,34 +92,8 @@ endif
 # Please do not add unmoderated public mailing lists here.  They are
 # too easily abused by spammers.
 
-def_whitelist_from_rcvd  billing@networksolutions.com           networksolutions.com
-def_whitelist_from_rcvd  outbound-response@networksolutions.com networksolutions.com
-def_whitelist_from_rcvd  hostmaster@internic.net                internic.net
-def_whitelist_from_rcvd  support@register.com                   register.com
+# Should really not be used these days, use def_whitelist_auth if possible.
 
-def_whitelist_from_rcvd  petitions@petitiononline.com           petitiononline.com
-def_whitelist_from_rcvd  *@online.telstra.com.au                telstra.com.au
-def_whitelist_from_rcvd  *@yahoo-inc.com                        yahoo-inc.com
-def_whitelist_from_rcvd  *@yahoo-inc.com                        yahoo.com
-def_whitelist_from_rcvd  *@orbitz.com                           orbitz.com
-
-def_whitelist_from_rcvd  *@LISTSERV.NTBUGTRAQ.COM                  lsoft.com
-def_whitelist_from_rcvd  freshmeat-news-admin@lists.freshmeat.net  freshmeat.net
-def_whitelist_from_rcvd  *@mailer.whitehat.com                     whitehat.com
-def_whitelist_from_rcvd  *@spamex.com                              spamex.com
-def_whitelist_from_rcvd  *enotify@usenix.org                       voyager.usenix.org
-
-# internet.com lists
-def_whitelist_from_rcvd  listsupport@internet.com               lyris.net
-
-# FT.com newsletters
-def_whitelist_from_rcvd  *@newsbyemail.ft.com                   lodo.exactis.com
-
-# Friends re-united (popular UK old-school-network)
-def_whitelist_from_rcvd  *@friendsreunited.co.uk                friendsreunited.co.uk
-
-# RFC Editor mails
-def_whitelist_from_rcvd  rfc-editor@rfc-editor.org              isi.edu
-def_whitelist_from_rcvd  *@*.nsi-direct.com                     e-dialog.com
+# def_whitelist_from_rcvd  *@foo.com  foo.com
 
 endif
