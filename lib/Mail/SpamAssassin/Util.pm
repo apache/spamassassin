@@ -447,7 +447,7 @@ sub idn_to_ascii {
     # U+3002 (ideographic full stop), U+FF0E (fullwidth full stop),
     # U+FF61 (halfwidth ideographic full stop).
     if ($s =~ s/$ALT_FULLSTOP_UTF8_RE/./gso) {
-      dbg("util: idn_to_ascii: alternative dots normalized: /%s/ -> /%s/",
+      dbg("util: idn_to_ascii: alternative dots normalized: '%s' -> '%s'",
            $_[0], $s);
     }
     $charset = 'UTF-8';
@@ -461,16 +461,16 @@ sub idn_to_ascii {
     # to ASCII-compatible encoding (ACE), lowercased
     my $sa = Net::LibIDN::idn_to_ascii($s, $charset);
     if (!defined $sa) {
-      info("util: idn_to_ascii: conversion to ACE failed: /%s/ (charset %s)",
+      info("util: idn_to_ascii: conversion to ACE failed: '%s' (charset %s)",
         $s, $charset);
     } else {
-      dbg("util: idn_to_ascii: converted to ACE: /%s/ -> /%s/ (charset %s)",
+      dbg("util: idn_to_ascii: converted to ACE: '%s' -> '%s' (charset %s)",
         $s, $sa, $charset);
       $s = $sa;
     }
   } else {
     my($package, $filename, $line) = caller;
-    info("util: idn_to_ascii: valid charset not detected: /%s/, called from %s line %d",
+    info("util: idn_to_ascii: valid charset not detected: '%s', called from %s line %d",
          $s, $package, $line);
     $s = lc $s;  # garbage-in / garbage-out
   }
@@ -1776,7 +1776,7 @@ sub helper_app_pipe_open_unix {
   eval {
     # go setuid...
     setuid_to_euid();
-    info("util: setuid: ruid=$< euid=$> rgid=$( egid=$) ");
+    dbg("util: setuid: ruid=$< euid=$> rgid=$( egid=$) ");
 
     # now set up the fds.  due to some wierdness, we may have to ensure that
     # we *really* close the correct fd number, since some other code may have
