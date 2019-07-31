@@ -33,6 +33,9 @@ use re 'taint';
 our @ISA = qw();
 
 use Mail::SpamAssassin::Logger;
+use Mail::SpamAssassin::Constants qw(:ip);
+
+my $IP_ADDRESS = IP_ADDRESS;
 
 # called from SpamAssassin->init() to create $self->{util_rb}
 sub new {
@@ -216,18 +219,25 @@ sub uri_to_domain {
   my $uri = lc shift;
 
   # Javascript is not going to help us, so return.
-  return if ($uri =~ /^javascript:/);
+  # Likewise ignore cid:
+  return if ($uri =~ /^(?:javascript|cid):/);
 
-  $uri =~ s{\#.*$}{}gs;			# drop fragment
-  $uri =~ s{^[a-z]+:/{0,2}}{}gs;	# drop the protocol
-  $uri =~ s{^[^/]*\@}{}gs;		# username/passwd
+  if ($uri =~ s/^mailto://) { # handle mailto: specially
+    $uri =~ s/\?.*//;			# drop parameters ?subject= etc
+    return unless $uri =~ s/.*@//;	# drop username or abort
+  } else {
+    $uri =~ s{\#.*$}{}gs;		# drop fragment
+    $uri =~ s{^[a-z]+:/{0,2}}{}gs;	# drop the protocol
+    $uri =~ s{^[^/]*\@}{}gs;		# username/passwd
+    # strip path and CGI params.  note: bug 4213 shows that "&" should
+    # *not* be likewise stripped here -- it's permitted in hostnames by
+    # some common MUAs!
+    $uri =~ s{[/?].*$}{}gs;              
+    $uri =~ s{:\d*$}{}gs;		# port, bug 4191: sometimes the # is missing
+  }
 
-  # strip path and CGI params.  note: bug 4213 shows that "&" should
-  # *not* be likewise stripped here -- it's permitted in hostnames by
-  # some common MUAs!
-  $uri =~ s{[/?].*$}{}gs;              
-
-  $uri =~ s{:\d*$}{}gs;		# port, bug 4191: sometimes the # is missing
+  # return if there's not atleast a dot
+  return if $uri !~ /\./;
 
   # skip undecoded URIs if the encoded bits shouldn't be.
   # we'll see the decoded version as well.  see url_encode()
@@ -236,12 +246,12 @@ sub uri_to_domain {
   my $host = $uri;  # unstripped/full domain name
 
   # keep IPs intact
-  if ($uri !~ /^\d+\.\d+\.\d+\.\d+$/) { 
-    # get rid of hostname part of domain, understanding delegation
-    $uri = $self->trim_domain($uri);
-
+  if ($uri !~ /^$IP_ADDRESS$/) { 
     # ignore invalid domains
     return unless ($self->is_domain_valid($uri));
+
+    # get rid of hostname part of domain, understanding delegation
+    $uri = $self->trim_domain($uri);
   }
   
   # $uri is now the domain only, optionally return unstripped host name
