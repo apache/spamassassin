@@ -224,6 +224,7 @@ sub uri_to_domain {
 
   if ($uri =~ s/^mailto://) { # handle mailto: specially
     $uri =~ s/\?.*//;			# drop parameters ?subject= etc
+    return if $uri =~ /\@.*?\@/;	# abort if multiple @
     return unless $uri =~ s/.*@//;	# drop username or abort
   } else {
     $uri =~ s{\#.*$}{}gs;		# drop fragment
