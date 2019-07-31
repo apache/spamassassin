@@ -2605,7 +2605,7 @@ sub ensure_rules_are_complete {
 
     my $start = time;
     $self->harvest_until_rule_completes($r);
-    my $elapsed = time - $start;
+    my $elapsed = sprintf "%.2f", time - $start;
 
     if (!$self->is_rule_complete($r)) {
       dbg("rules: rule $r is still not complete; exited early?");
