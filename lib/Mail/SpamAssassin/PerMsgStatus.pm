@@ -2252,9 +2252,9 @@ sub _tbirdurire {
   return $self->{tbirdurire} if $self->{tbirdurire};
 
   # a hybrid of tbird and oe's  version of uri parsing
-  my $tbirdstartdelim = '><"\'`,{[(|\s'  . "\x1b";  # The \x1b as per bug 4522
+  my $tbirdstartdelim = '><"\'`,{[(|\s'  . "\x1b\xa0";  # The \x1b as per bug 4522 # \xa0 (nbsp) added 7/2019
   my $iso2022shift = "\x1b" . '\(.';  # bug 4522
-  my $tbirdenddelim = '><"`}\]{[|\s' . "\x1b" . "\xa0";  # The \x1b as per bug 4522 # \xa0 (nbsp) added 7/2019
+  my $tbirdenddelim = '><"`}\]{[|\s' . "\x1b\xa0";  # The \x1b as per bug 4522 # \xa0 (nbsp) added 7/2019
   my $nonASCII    = '\x80-\xff';
 
   # bug 7100: we allow a comma to delimit the end of an email address because it will never appear in a domain name, and
