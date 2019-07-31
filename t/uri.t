@@ -15,10 +15,20 @@ if (-e 'test_dir') {            # running from test directory, not ..
   $prefix = '..';
 }
 
+my $have_libidn;
+BEGIN {
+  eval { require Net::LibIDN } and do { $have_libidn = 1 };
+}
+
 use strict;
-use Test::More tests => 98;
+use Test::More;
 use lib '.'; use lib 't';
 use SATest; sa_t_init("uri");
+
+my $tests = 98;
+$tests += 5 if $have_libidn;
+
+plan tests => $tests;
 
 use Mail::SpamAssassin;
 use Mail::SpamAssassin::HTML;
@@ -108,6 +118,14 @@ ok(try_domains('longer.url.but.not.spamassassin.txt', undef));
 ok(try_domains('http://ebg&vosxfov.com.munged-rxspecials.net/b/Tr3f0amG','munged-rxspecials.net'));
 ok(try_domains('http://blah.blah.com:/', 'blah.com'));
 ok(try_domains('http://example.com.%20.host.example.info/', 'example.info'));
+
+if ($have_libidn) {
+  ok(try_domains('Cinéma.ca', 'xn--cinma-dsa.ca'));
+  ok(try_domains('marcaespaña.es', 'xn--marcaespaa-19a.es'));
+  ok(try_domains('äkäslompolo.fi', 'xn--kslompolo-u2ab.fi'));
+  ok(try_domains('foo.xn--fiqs8s', 'foo.xn--fiqs8s'));
+  ok(try_domains("foo\x2e\xe9\xa6\x99\xe6\xb8\xaf", 'foo.xn--j6w193g'));
+}
 
 ##############################################
 

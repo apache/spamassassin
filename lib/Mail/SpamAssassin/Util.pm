@@ -422,43 +422,59 @@ sub idn_to_ascii {
   no bytes;  # make sure there is no 'use bytes' in effect
   return undef  if !defined $_[0]; ## no critic (ProhibitExplicitReturnUndef)
   my $s = "$_[0]";  # stringify
-  # propagate taintedness of the argument, but not its utf8 flag
-  my $t = tainted($s);  # taintedness of the argument
-  if ($t) {  # untaint $s, avoids taint-related bugs in LibIDN or in old perl
-    no re 'taint';  local $1;  $s =~ /^(.*)\z/s;
-  }
+
   # encode chars to UTF-8, leave octets unchanged (not necessarily valid UTF-8)
-  utf8::encode($s)  if utf8::is_utf8($s);
-  if ($s !~ tr/\x00-\x7F//c) {  # is all-ASCII (including IP address literal)
-    $s = lc $s;
-  } elsif (!is_valid_utf_8($s)) {
-    my($package, $filename, $line) = caller;
-    info("util: idn_to_ascii: not valid UTF-8: /%s/, called from %s line %d",
-         $s, $package, $line);
-    $s = lc $s;  # garbage-in / garbage-out
-  } else {  # is valid UTF-8 but not all-ASCII
-    my $chars;
+  utf8::encode($s)  if utf8::is_utf8($s); # i.e. remove utf-8 flag if set
+
+  # Rapid return for most common case, all-ASCII (including IP address literal),
+  # no conversion needed. Also if we don't have LibIDN, nothing more we can do.
+  if ($s !~ tr/a-zA-Z0-9_.:[]-//c || !$have_libidn) {
+    return lc $s; # retains taintedness
+  }
+
+  # propagate taintedness of the argument
+  my $t = tainted($s);
+  if ($t) {  # untaint $s, avoids taint-related bugs in LibIDN or in old perl
+    $s = untaint_var($s);
+  }
+
+  my $charset;
+
+  # Check for valid UTF-8
+  if (is_valid_utf_8($s)) {
     # RFC 3490 (IDNA): Whenever dots are used as label separators, the
     # following characters MUST be recognized as dots: U+002E (full stop),
     # U+3002 (ideographic full stop), U+FF0E (fullwidth full stop),
     # U+FF61 (halfwidth ideographic full stop).
     if ($s =~ s/$ALT_FULLSTOP_UTF8_RE/./gso) {
-      info("util: idn_to_ascii: alternative dots normalized: /%s/ -> /%s/",
+      dbg("util: idn_to_ascii: alternative dots normalized: /%s/ -> /%s/",
            $_[0], $s);
     }
-    if (!$have_libidn) {
-      $s = lc $s;
-    } else {
-      # to ASCII-compatible encoding (ACE), lowercased
-      my $sa = Net::LibIDN::idn_to_ascii($s, 'UTF-8');
-      if (!defined $sa) {
-        info("util: idn_to_ascii: conversion to ACE failed: /%s/", $s);
-      } else {
-        info("util: idn_to_ascii: converted to ACE: /%s/ -> /%s/", $s, $sa);
-        $s = $sa;
-      }
-    }
+    $charset = 'UTF-8';
   }
+  # Check for valid extended ISO-8859-1 including diacritics
+  elsif ($s !~ tr/a-zA-Z0-9\xc0-\xd6\xd8-\xde\xe0-\xf6\xf8-\xfe_.-//c) {
+    $charset = 'ISO-8859-1';
+  }
+
+  if ($charset) {
+    # to ASCII-compatible encoding (ACE), lowercased
+    my $sa = Net::LibIDN::idn_to_ascii($s, $charset);
+    if (!defined $sa) {
+      info("util: idn_to_ascii: conversion to ACE failed: /%s/ (charset %s)",
+        $s, $charset);
+    } else {
+      dbg("util: idn_to_ascii: converted to ACE: /%s/ -> /%s/ (charset %s)",
+        $s, $sa, $charset);
+      $s = $sa;
+    }
+  } else {
+    my($package, $filename, $line) = caller;
+    info("util: idn_to_ascii: valid charset not detected: /%s/, called from %s line %d",
+         $s, $package, $line);
+    $s = lc $s;  # garbage-in / garbage-out
+  }
+
   $t ? taint_var($s) : $s;  # propagate taintedness of the argument
 }
 
@@ -1482,7 +1498,10 @@ sub uri_list_canonicalize {
       # bug 4146: deal with non-US ASCII 7-bit chars in the host portion
       # of the URI according to RFC 1738 that's invalid, and the tested
       # browsers (Firefox, IE) remove them before usage...
-      if ($host =~ tr/\000-\040\200-\377//d) {
+      #if ($host =~ tr/\000-\040\200-\377//d) {
+      # Fixed 7/2019 to not strip extended chars, since they can be used in
+      # IDN domains. Stripping control chars should be enough?
+      if ($host =~ tr/\x00-\x20//d) {
         push(@nuris, join ('', $proto, $host, $rest));
       }
 
