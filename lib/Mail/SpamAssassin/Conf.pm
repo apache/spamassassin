@@ -67,6 +67,9 @@ C<~user/> are supported.
 
 Where appropriate below, default values are listed in parentheses.
 
+Test names ("SYMBOLIC_TEST_NAME") can only contain alphanumerics/underscores,
+can not start with digit, and must be less than 128 characters.
+
 =head1 USER PREFERENCES
 
 The following options can be used in both site-wide (C<local.cf>) and
