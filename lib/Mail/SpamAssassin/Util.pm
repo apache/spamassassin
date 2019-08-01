@@ -1483,11 +1483,8 @@ sub uri_list_canonicalize {
     }
 
     # deal with wierd hostname parts, remove user/pass, etc.
-    if ($nuri =~ m{^(https?://)([^/]+?)((?::\d*)?\/.*)?$}i) {
+    if ($nuri =~ m{^(https?://)(?:[^\@/?#]*\@)?([^/?#:]+)(.*)$}i) {
       my($proto, $host, $rest) = ($1,$2,$3);
-
-      # not required
-      $rest ||= '';
 
       my $nhost = idn_to_ascii($host);
       if (defined $nhost && $nhost ne lc $host) {

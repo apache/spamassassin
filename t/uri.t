@@ -25,7 +25,7 @@ use Test::More;
 use lib '.'; use lib 't';
 use SATest; sa_t_init("uri");
 
-my $tests = 98;
+my $tests = 101;
 $tests += 5 if $have_libidn;
 
 plan tests => $tests;
@@ -118,6 +118,9 @@ ok(try_domains('longer.url.but.not.spamassassin.txt', undef));
 ok(try_domains('http://ebg&vosxfov.com.munged-rxspecials.net/b/Tr3f0amG','munged-rxspecials.net'));
 ok(try_domains('http://blah.blah.com:/', 'blah.com'));
 ok(try_domains('http://example.com.%20.host.example.info/', 'example.info'));
+ok(try_domains('http://foo..bar@example.com', 'example.com'));
+ok(try_domains('bar..example.com', undef));
+ok(try_domains('http://example..com', undef));
 
 if ($have_libidn) {
   ok(try_domains('Cinéma.ca', 'xn--cinma-dsa.ca'));

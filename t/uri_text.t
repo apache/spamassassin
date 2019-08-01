@@ -20,7 +20,7 @@ if (-e 'test_dir') {            # running from test directory, not ..
 use strict;
 use lib '.'; use lib 't';
 use SATest; sa_t_init("uri_text");
-use Test::More tests => 682;
+use Test::More tests => 685;
 use Mail::SpamAssassin;
 use vars qw(%patterns %anti_patterns);
 
@@ -152,12 +152,15 @@ joe@koja3fui.koja3fui	!koja3fui
 
 http://www.example.com/about/wahfah7d.html	wahfah7d
 http://www.example.com?xa1kaLuo			\?xa1kaLuo
+http://www.example.com#xa1kaLup			\#xa1kaLup
 http://www.lap7thob.com/			^http://www\.lap7thob\.com/$
 
 www.phoh1Koh.com/			^www\.phoh1Koh\.com/$
 www.Tar4caeg.com:80			http://www\.Tar4caeg\.com:80
 www.Coo4mowe.com:80/foo/foo.html	^www\.Coo4mowe\.com:80/foo/foo\.html
 www.Nee2quae.com:80/			^www\.Nee2quae\.com:80/$
+www.foo@Qii3mafs.com:80			http://www\.foo\@Qii3mafs\.com:80$
+www.foo:bar@Qii3maft.com:80		http://www\.foo:bar\@Qii3maft\.com:80$
 
 HAETEI3D.com	HAETEI3D
 CUK3VEIZ.us	CUK3VEIZ
