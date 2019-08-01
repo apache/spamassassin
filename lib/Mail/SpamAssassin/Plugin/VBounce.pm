@@ -66,10 +66,10 @@ SpamAssassin handles incoming email messages.
 =item whitelist_bounce_relays hostname [hostname2 ...]
 
 This is used to 'rescue' legitimate bounce messages that were generated in
-response to mail you really *did* send.  List the MTA relays that your outbound
-mail is delivered through.  If a bounce message is found, and it contains one
-of these hostnames in a 'Received' header, it will not be marked as a blowback
-virus-bounce.
+response to mail you really *did* send. List the MTA relay hostnames that
+your outbound mail is delivered through. If a bounce message is found, and
+it contains one of these hostnames in a 'Received' header found the in the
+message body, it will not be marked as a blowback virus-bounce.
 
 The hostnames can be file-glob-style patterns, so C<relay*.isp.com> will work.
 Specifically, C<*> and C<?> are allowed, but all other metacharacters are not.
