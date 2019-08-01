@@ -51,11 +51,7 @@
 ifplugin Mail::SpamAssassin::Plugin::VBounce
 
 body __MY_SERVERS_FOUND       eval:check_whitelist_bounce_relays()
-tflags __MY_SERVERS_FOUND     nice
-score __MY_SERVERS_FOUND      -0.001
-
 body __HAVE_BOUNCE_RELAYS     eval:have_any_bounce_relays()
-tflags __HAVE_BOUNCE_RELAYS   nice
 
 endif
 
@@ -91,12 +87,6 @@ header   __BOUNCE_MAILDELFAIL Subject =~ /^Mail delivery failed: /
 header   __BOUNCE_MSGDELFAIL Subject =~ /^Message Delivery Failure/
 body     __BOUNCE_ESMTP /^This messages was created automatically by mail delivery software/
 # JM: prev versions used "automaticly", that was a typo
-
-body  __BOUNCE_OOO_2  /\bI ?.m away until .{10,20} and am unable to read your message\b/
-body  __BOUNCE_OOO_3  /\bI am currently out of the office\b/
-header __BOUNCE_OOO_H1   Subject =~ /^Mensaje de respuesta autom.tica/
-header __BOUNCE_OOO_H2   Subject =~ /^R.ponse automatique d'absence du bureau/
-header __BOUNCE_OOO_H3   Subject =~ / \(away from the office\)$/
 
 body  __BOUNCE_NEVER_SEE  /\bThis is an autoresponder. I'll never see your message\b/i
 body  __BOUNCE_NONWORKING  /\bYou have reached a non.?working address.  Please check\b/i
@@ -136,9 +126,41 @@ body __BOUNCE_NO_RESEND  /\bPlease do not resend your original message\./
 
 header   __BOUNCE_AUTO_REPLY Subject =~ /\b(automatic reply|AutoReply)\b/
 
-meta BOUNCE_MESSAGE         __HAVE_BOUNCE_RELAYS && (!__MY_SERVERS_FOUND && !ALL_TRUSTED && !__NONBOUNCE_READ_RECEIPT && (__BOUNCE_FROM_DAEMON || (__BOUNCE_RPATH_NULL && !__BOUNCE_READ_NOTIFICATION) || __BOUNCE_RPATH_MD || __BOUNCE_AUTO_GENERATED || __BOUNCE_Y_AUTOGEN || __BOUNCE_SYMANTEC || __BOUNCE_X_ERR_STAT || __BOUNCE_RETURNED || __BOUNCE_MAILDELFAIL || __BOUNCE_MSGDELFAIL || __BOUNCE_ESMTP || __BOUNCE_OOO_2 || __BOUNCE_NEVER_SEE || __BOUNCE_NONWORKING || __BOUNCE_UNDELIVERABLE || __BOUNCE_UNDELIVERABLE_ML || __BOUNCE_NOTDEL || __BOUNCE_CTYPE || __BOUNCE_DEL_FAIL || __BOUNCE_STAT_FAIL || __BOUNCE_ADDR_ERR || __BOUNCE_NO_VAL || __BOUNCE_DATA_FORMAT || __BOUNCE_COULD_NOT || __BOUNCE_UNDEL_MSG || __BOUNCE_OOO_H1 || __BOUNCE_OOO_H2 || __BOUNCE_OOO_H3 || __BOUNCE_RPATH_ERRMAIL || __BOUNCE_OOO_3 || __BOUNCE_INTERSCAN || __BOUNCE_ETRUST || __BOUNCE_AUTO_RESPONSE || __BOUNCE_AUTO_RESPOND || __BOUNCE_NO_RESEND || __BOUNCE_NOTIF || __BOUNCE_RET_MAIL || __BOUNCE_DEL_FAIL || __BOUNCE_MAIL_DEL_FAIL || __BOUNCE_AUTO_REPLY))
+meta BOUNCE_MESSAGE         __HAVE_BOUNCE_RELAYS && !OOOBOUNCE_MESSAGE && !__MY_SERVERS_FOUND && !ALL_TRUSTED && !__NONBOUNCE_READ_RECEIPT && (__BOUNCE_FROM_DAEMON || (__BOUNCE_RPATH_NULL && !__BOUNCE_READ_NOTIFICATION) || __BOUNCE_RPATH_MD || __BOUNCE_AUTO_GENERATED || __BOUNCE_Y_AUTOGEN || __BOUNCE_SYMANTEC || __BOUNCE_X_ERR_STAT || __BOUNCE_RETURNED || __BOUNCE_MAILDELFAIL || __BOUNCE_MSGDELFAIL || __BOUNCE_ESMTP || __BOUNCE_NEVER_SEE || __BOUNCE_NONWORKING || __BOUNCE_UNDELIVERABLE || __BOUNCE_UNDELIVERABLE_ML || __BOUNCE_NOTDEL || __BOUNCE_CTYPE || __BOUNCE_DEL_FAIL || __BOUNCE_STAT_FAIL || __BOUNCE_ADDR_ERR || __BOUNCE_NO_VAL || __BOUNCE_DATA_FORMAT || __BOUNCE_COULD_NOT || __BOUNCE_UNDEL_MSG || __BOUNCE_RPATH_ERRMAIL || __BOUNCE_INTERSCAN || __BOUNCE_ETRUST || __BOUNCE_AUTO_RESPONSE || __BOUNCE_AUTO_RESPOND || __BOUNCE_NO_RESEND || __BOUNCE_NOTIF || __BOUNCE_RET_MAIL || __BOUNCE_DEL_FAIL || __BOUNCE_MAIL_DEL_FAIL || __BOUNCE_AUTO_REPLY)
 
 describe BOUNCE_MESSAGE     MTA bounce message
+
+# ---------------------------------------------------------------------------
+# Out Of Office bounces
+
+# Do not use subject/body rules without checking for autoreply headers also
+header __AUTOREPLY_XAR  X-Autoreply =~ /\byes/i
+header __AUTOREPLY_PRE  Precedence =~ /\bauto_reply/i
+header __AUTOREPLY_XPR  X-Precedence =~ /\bauto_reply/i
+header __AUTOREPLY_ASU  Auto-Submitted =~ /\bauto-(?:replied|generated)(?! \(rejected\))/i
+meta __BOUNCE_OOO_ARHDR  __AUTOREPLY_XAR || __AUTOREPLY_PRE || __AUTOREPLY_XPR || __AUTOREPLY_ASU
+
+# Standalone subjects that are clearly out of office
+header __BOUNCE_OOO_S1  Subject =~ /^R.ponse automatique d'absence du bureau/
+header __BOUNCE_OOO_S2  Subject =~ / \(away from the office\)$/
+header __BOUNCE_OOO_S3  Subject =~ /^Out Of Office\b/
+meta __BOUNCE_OOO_SUBJECT  __BOUNCE_OOO_S1 || __BOUNCE_OOO_S2 || __BOUNCE_OOO_S3
+
+# Standalone body clauses that are clearly out of office
+body  __BOUNCE_OOO_B1  /\bI ?.m away until .{10,20} and am unable to read your message\b/
+body  __BOUNCE_OOO_B2  /\bI am currently out of the office\b/
+meta __BOUNCE_OOO_BODY  __BOUNCE_OOO_B1 || __BOUNCE_OOO_B2
+
+# Combined subject+body checks
+header __BOUNCE_OOO_CS1  Subject =~ /^Automa(?:tic reply|attinen vastaus):/
+body __BOUNCE_OOO_CB1  /\bout of (?:the )?office\b/i
+body __BOUNCE_OOO_CB2  /\bon (?:vacation|holiday)\b/i
+body __BOUNCE_OOO_CB3  /\bolen lomalla\b/i
+meta __BOUNCE_OOO_SUBJBODY  __BOUNCE_OOO_CS1 && (__BOUNCE_OOO_CB1 || __BOUNCE_OOO_CB2 || __BOUNCE_OOO_CB3)
+
+meta OOOBOUNCE_MESSAGE  __BOUNCE_OOO_ARHDR && (__BOUNCE_OOO_SUBJECT || __BOUNCE_OOO_BODY || __BOUNCE_OOO_SUBJBODY)
+
+describe OOOBOUNCE_MESSAGE  Out Of Office bounce message
 
 # ---------------------------------------------------------------------------
 # Challenge/Response bounces
@@ -300,9 +322,8 @@ meta VBOUNCE_MESSAGE        !__MY_SERVERS_FOUND && (__VBOUNCE_MSGLABS || __VBOUN
 describe VBOUNCE_MESSAGE    Virus-scanner bounce message
 
 # ---------------------------------------------------------------------------
-
 # a catch-all type for all the above
 
-meta     ANY_BOUNCE_MESSAGE (CRBOUNCE_MESSAGE||BOUNCE_MESSAGE||VBOUNCE_MESSAGE)
+meta     ANY_BOUNCE_MESSAGE (CRBOUNCE_MESSAGE||BOUNCE_MESSAGE||VBOUNCE_MESSAGE||OOOBOUNCE_MESSAGE)
 describe ANY_BOUNCE_MESSAGE Message is some kind of bounce message
 
