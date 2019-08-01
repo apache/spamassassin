@@ -4560,7 +4560,7 @@ sub get_rule_value {
 
   # special case rbl_evals since they do not have a priority
   if ($test_type eq 'rbl_evals') {
-    return keys(%{$self->{$test_type}->{$rulename}});
+    return @{$self->{$test_type}->{$rulename}};
   }
 
   if (defined($priority)) {
@@ -4605,19 +4605,24 @@ sub delete_rule {
 sub trim_rules {
   my ($self, $regexp) = @_;
 
+  my ($rec, $err) = compile_regexp($regexp, 0);
+  if (!$rec) {
+    die "config: trim_rules: invalid regexp '$regexp': $err";
+  }
+
   my @all_rules;
 
   foreach my $rule_type ($self->get_rule_types()) {
     push(@all_rules, $self->get_rule_keys($rule_type));
   }
 
-  my @rules_to_keep = grep(/$regexp/, @all_rules);
+  my @rules_to_keep = grep(/$rec/, @all_rules);
 
   if (@rules_to_keep == 0) {
     die "config: trim_rules: all rules excluded, nothing to test\n";
   }
 
-  my @meta_tests    = grep(/$regexp/, $self->get_rule_keys('meta_tests'));
+  my @meta_tests    = grep(/$rec/, $self->get_rule_keys('meta_tests'));
   foreach my $meta (@meta_tests) {
     push(@rules_to_keep, $self->add_meta_depends($meta))
   }
