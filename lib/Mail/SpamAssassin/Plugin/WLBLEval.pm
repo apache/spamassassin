@@ -109,7 +109,7 @@ sub check_to_in_all_spam {
 
 sub check_from_in_list {
   my ($self, $pms, $list) = @_;
-  my $list_ref = $self->{main}{conf}{$list};
+  my $list_ref = $pms->{conf}->{$list};
   unless (defined $list_ref) {
     warn "eval: could not find list $list";
     return;
@@ -126,7 +126,7 @@ sub check_from_in_list {
 
 sub check_replyto_in_list {
   my ($self, $pms, $list) = @_;
-  my $list_ref = $self->{main}{conf}{$list};
+  my $list_ref = $pms->{conf}->{$list};
   unless (defined $list_ref) {
     warn "eval: could not find list $list";
     return;
@@ -163,7 +163,7 @@ sub check_wb_list {
 
 sub check_to_in_list {
   my ($self,$pms,$list) = @_;
-  my $list_ref = $self->{main}{conf}{$list};
+  my $list_ref = $pms->{conf}->{$list};
   unless (defined $list_ref) {
     warn "eval: could not find list $list";
     return;
@@ -390,9 +390,9 @@ sub _check_whitelist_rcvd {
     }
   }
   if ($found_forged) { # might be forgery. check if in list of exempted
-    my $wlist = $self->{main}->{conf}->{whitelist_allows_relays};
-    foreach my $fuzzy_addr (values %{$wlist}) {
-      if ($addr =~ /$fuzzy_addr/i) {
+    my $wlist = $pms->{conf}->{whitelist_allows_relays};
+    foreach my $regexp (values %{$wlist}) {
+      if ($addr =~ $regexp) {
         $found_forged = 0;
         last;
       }
@@ -450,7 +450,7 @@ sub _check_uri_host_listed {
     return $pms->{'uri_host_enlisted'};  # just provide a cached result
   }
 
-  my $uri_lists_href = $self->{main}{conf}{uri_host_lists};
+  my $uri_lists_href = $pms->{conf}->{uri_host_lists};
   if (!$uri_lists_href || !%$uri_lists_href) {
     $pms->{'uri_host_enlisted'} = {};  # no URI host lists
     return $pms->{'uri_host_enlisted'};

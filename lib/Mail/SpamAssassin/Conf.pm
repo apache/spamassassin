@@ -687,7 +687,7 @@ but the names 'BLACK' and 'WHITE' are otherwise not special or reserved.
   push (@cmds, {
     command => 'enlist_uri_host',
     setting => 'uri_host_lists',
-    type => $CONF_TYPE_ADDRLIST,
+    type => $CONF_TYPE_HASH_KEY_VALUE,
     code => sub {
       my($conf, $key, $value, $line) = @_;
       local($1,$2);
@@ -725,7 +725,7 @@ name and has no meaning here.
   push (@cmds, {
     command => 'delist_uri_host',
     setting => 'uri_host_lists',
-    type => $CONF_TYPE_ADDRLIST,
+    type => $CONF_TYPE_HASH_KEY_VALUE,
     code => sub {
       my($conf, $key, $value, $line) = @_;
       local($1,$2);
@@ -806,7 +806,7 @@ Please see directives enlist_uri_host and delist_uri_host for details.
   push (@cmds, {
     command => 'blacklist_uri_host',
     setting => 'uri_host_lists',
-    type => $CONF_TYPE_ADDRLIST,
+    type => $CONF_TYPE_HASH_KEY_VALUE,
     code => sub {
       my($conf, $key, $value, $line) = @_;
       foreach my $host ( split(/\s+/, lc $value) ) {
@@ -827,7 +827,7 @@ Please see directives enlist_uri_host and delist_uri_host for details.
   push (@cmds, {
     command => 'whitelist_uri_host',
     setting => 'uri_host_lists',
-    type => $CONF_TYPE_ADDRLIST,
+    type => $CONF_TYPE_HASH_KEY_VALUE,
     code => sub {
       my($conf, $key, $value, $line) = @_;
       foreach my $host ( split(/\s+/, lc $value) ) {
