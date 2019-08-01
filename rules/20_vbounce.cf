@@ -152,11 +152,12 @@ body  __BOUNCE_OOO_B2  /\bI am currently out of the office\b/
 meta __BOUNCE_OOO_BODY  __BOUNCE_OOO_B1 || __BOUNCE_OOO_B2
 
 # Combined subject+body checks
-header __BOUNCE_OOO_CS1  Subject =~ /^Automa(?:tic reply|attinen vastaus):/
+header __BOUNCE_OOO_CS1  Subject =~ /^Automa(?:tic reply|attinen vastaus|tisch antwoord):/
 body __BOUNCE_OOO_CB1  /\bout of (?:the )?office\b/i
 body __BOUNCE_OOO_CB2  /\bon (?:vacation|holiday)\b/i
 body __BOUNCE_OOO_CB3  /\bolen lomalla\b/i
-meta __BOUNCE_OOO_SUBJBODY  __BOUNCE_OOO_CS1 && (__BOUNCE_OOO_CB1 || __BOUNCE_OOO_CB2 || __BOUNCE_OOO_CB3)
+body __BOUNCE_OOO_CB4  /\breturn to (?:the )?office\b/i
+meta __BOUNCE_OOO_SUBJBODY  __BOUNCE_OOO_CS1 && (__BOUNCE_OOO_CB1 || __BOUNCE_OOO_CB2 || __BOUNCE_OOO_CB3 || __BOUNCE_OOO_CB4)
 
 meta OOOBOUNCE_MESSAGE  __BOUNCE_OOO_ARHDR && (__BOUNCE_OOO_SUBJECT || __BOUNCE_OOO_BODY || __BOUNCE_OOO_SUBJBODY)
 
