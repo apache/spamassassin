@@ -302,8 +302,7 @@ describe JM_REACTOR_MAILER Header patterns indicative of "Reactor Mailer" ratwar
 # 'Just got a report about a false negative, which was caught by
 # ACommercialSpamFilter by using a rule which had high "points" given to the
 # mail because it has contained a reply-to but neither To nor Cc.'
-header __REPLYTO_EXISTS             exists:Reply-To
-meta REPLYTO_WITHOUT_TO_CC     (__REPLYTO_EXISTS && !__TOCC_EXISTS)
+meta REPLYTO_WITHOUT_TO_CC     (__HAS_REPLY_TO && !__TOCC_EXISTS)
 
 # thanks to Suresh for these tips
 # header FAKE_OUTBLAZE_RCVD_168     X-Spam-Relays-External =~ /^[^\]]+168city\./

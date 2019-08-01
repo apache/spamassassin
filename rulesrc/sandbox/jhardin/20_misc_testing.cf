@@ -231,7 +231,7 @@ describe       FROM_MISSP_TO_UNDISC  From misspaced, To undisclosed
 #  meta         __FROM_MISSP_DKIM     0
 #endif
 
-meta           __FROM_MISSP_REPLYTO  __FROM_RUNON && __REPLYTO_EXISTS
+meta           __FROM_MISSP_REPLYTO  __FROM_RUNON && __HAS_REPLY_TO
 meta           FROM_MISSP_REPLYTO    __FROM_MISSP_REPLYTO && !__NOT_SPOOFED && !__RCD_RDNS_MTA_MESSY && !__TO___LOWER && !__COMMENT_EXISTS && !__UNSUB_LINK && !__MIME_QP && !__CTYPE_MULTIPART_ALT && !__JM_REACTOR_DATE && !__PLING_QUERY
 describe       FROM_MISSP_REPLYTO    From misspaced, has Reply-To
 score          FROM_MISSP_REPLYTO    2.500	# limit
@@ -1191,7 +1191,7 @@ score       SUBJ_ATTENTION       0.500	# limit
 header      __IRS_FM_NAME        From:name =~ /internal\srevenue\sservice/i
 header      __IRS_FM_DOM         From:addr =~ /\birs\.gov$/
 header      __IRS_RCVD_DOM       X-Spam-Relays-External =~ / rdns=\S+\birs\.gov /
-meta        __IRS_SPOOF          (__IRS_FM_NAME || __IRS_FM_DOM) && !__IRS_RCVD_DOM && __REPLYTO_EXISTS
+meta        __IRS_SPOOF          (__IRS_FM_NAME || __IRS_FM_DOM) && !__IRS_RCVD_DOM && __HAS_REPLY_TO
 meta        IRS_SPOOF            __IRS_SPOOF
 describe    IRS_SPOOF            Claims to be IRS, but not from IRS domain
 score       IRS_SPOOF            2.00	# limit
@@ -1202,7 +1202,7 @@ header      __FBI_FM_DOM         From:addr =~ /\bfbi\.gov$/
 header      __FBI_RCVD_DOM       X-Spam-Relays-External =~ / rdns=\S+\bfbi\.gov /
 body        __FBI_BODY_SHOUT_1   /^FEDERAL BUREAU OF INVESTIGATIONS?\b/
 rawbody     __FBI_BODY_SHOUT_2   /^FEDERAL BUREAU OF INVESTIGATIONS?\b/m
-meta        __FBI_SPOOF          (__FBI_FM_NAME || __FBI_FM_DOM || __FBI_BODY_SHOUT_1 || __FBI_BODY_SHOUT_2) && !__FBI_RCVD_DOM && __REPLYTO_EXISTS
+meta        __FBI_SPOOF          (__FBI_FM_NAME || __FBI_FM_DOM || __FBI_BODY_SHOUT_1 || __FBI_BODY_SHOUT_2) && !__FBI_RCVD_DOM && __HAS_REPLY_TO
 meta        FBI_SPOOF            __FBI_SPOOF
 describe    FBI_SPOOF            Claims to be FBI, but not from FBI domain
 score       FBI_SPOOF            2.00	# limit
@@ -2315,7 +2315,7 @@ tflags     BOGUS_MSM_HDRS               publish
 #meta       __BOGUS_MSM_PRIO             __HAS_MSMAIL_PRI && __HDR_ORDER_FTSDMCXXXX
 #meta       __BOGUS_MSM_PRIO_MINFP       __BOGUS_MSM_PRIO && !__BOGUS_MSM_HDRS && !__MSGID_NOFQDN2 && !__ANY_OUTLOOK_MUA && !__RCD_RDNS_MAIL_MESSY
 
-meta       __MSM_PRIO_REPTO             __HAS_MSMAIL_PRI && __REPLYTO_EXISTS && __SUBJ_SHORT 
+meta       __MSM_PRIO_REPTO             __HAS_MSMAIL_PRI && __HAS_REPLY_TO && __SUBJ_SHORT 
 meta       MSM_PRIO_REPTO              __MSM_PRIO_REPTO && !__ENV_AND_HDR_FROM_MATCH 
 describe   MSM_PRIO_REPTO              MSMail priority header + Reply-to + short subject
 score      MSM_PRIO_REPTO              2.500	# limit

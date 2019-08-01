@@ -15,13 +15,12 @@ header   __XM_FORTE		X-Mailer =~ /^Forte Agent \d/
 header   __XM_MHE		X-Mailer =~ /^mh-e \d/
 header   __XM_SQRLMAIL		X-Mailer =~ /^SquirrelMail/
 header   __XM_SYLPHEED		X-Mailer =~ /^Sylpheed/
-header   __XM_THEBAT		X-Mailer =~ /^The Bat!/
 header   __XM_VM		X-Mailer =~ /^VM \d/
 header   __XM_XIMEVOL		X-Mailer =~ /^Ximian Evolution/
 header   __UA_KMAIL		User-Agent =~ /^KMail/
 header   __UA_MOZ5		User-Agent =~ /^Mozilla\/5/
 header   __UA_OPERA7		User-Agent =~ /^Opera7/
-meta     __BOTH_INR_AND_REF	(__XM_BALSA || __XM_CALYPSO || __XM_FORTE || __XM_MHE || __XM_SQRLMAIL || __XM_SYLPHEED || __XM_THEBAT || __XM_VM || __XM_XIMEVOL || __UA_KMAIL || __UA_MOZ5 || __UA_OPERA7)
+meta     __BOTH_INR_AND_REF	(__XM_BALSA || __XM_CALYPSO || __XM_FORTE || __XM_MHE || __XM_SQRLMAIL || __XM_SYLPHEED || __THEBAT_MUA || __XM_VM || __XM_XIMEVOL || __UA_KMAIL || __UA_MOZ5 || __UA_OPERA7)
 
 meta     NICE_REPLY_A		(__SUBJ_RE && !__MISSING_REPLY && !__MISSING_REF && __BOTH_INR_AND_REF)
 describe NICE_REPLY_A		Looks like a legit relpy (A)
