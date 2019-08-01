@@ -16,7 +16,7 @@ if (-e 'test_dir') {            # running from test directory, not ..
 }
 
 use strict;
-use Test::More tests => 98;
+use Test::More tests => 101;
 use lib '.'; use lib 't';
 use SATest; sa_t_init("uri");
 
@@ -108,6 +108,9 @@ ok(try_domains('longer.url.but.not.spamassassin.txt', undef));
 ok(try_domains('http://ebg&vosxfov.com.munged-rxspecials.net/b/Tr3f0amG','munged-rxspecials.net'));
 ok(try_domains('http://blah.blah.com:/', 'blah.com'));
 ok(try_domains('http://example.com.%20.host.example.info/', 'example.info'));
+ok(try_domains('http://foo..bar@example.com', 'example.com'));
+ok(try_domains('bar..example.com', undef));
+ok(try_domains('http://example..com', undef));
 
 ##############################################
 

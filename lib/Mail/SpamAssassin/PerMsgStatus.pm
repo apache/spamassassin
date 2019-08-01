@@ -2395,10 +2395,13 @@ sub _get_parsed_uri_list {
       local($1,$2,$3);
       while (/$tbirdurire/igo) {
         my $rawuri = $1||$2||$3;
+        my $rawtype = defined $1 ? 'scheme' : defined $2 ? 'mail' : 'schemeless';
         $rawuri =~ s/(^[^(]*)\).*$/$1/;  # as per ThunderBird, ) is an end delimiter if there is no ( preceeding it
         $rawuri =~ s/[-~!@#^&*()_+=:;\'?,.]*$//; # remove trailing string of punctuations that TBird ignores
+        dbg("uri: found rawuri ($rawtype): $rawuri");
+
         # skip if there is '..' in the hostname portion of the URI, something we can't catch in the general URI regexp
-        next if $rawuri =~ /^(?:(?:https?|ftp|mailto):(?:\/\/)?)?[a-z\d.-]*\.\./i;
+        next if $rawuri =~ m{^(?:(?:https?|ftp|mailto):(?://)?)?(?:[^\@/?#]*\@)?[^/?#:]*\.\.}i;
 
         # If it's a hostname that was just sitting out in the
         # open, without a protocol, and not inside of an HTML tag,

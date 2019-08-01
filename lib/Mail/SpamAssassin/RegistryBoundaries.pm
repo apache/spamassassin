@@ -219,26 +219,28 @@ sub uri_to_domain {
   my $uri = lc shift;
 
   # Javascript is not going to help us, so return.
-  # Likewise ignore cid:
-  return if ($uri =~ /^(?:javascript|cid):/);
+  # Likewise ignore cid, file
+  return if ($uri =~ /^(?:javascript|cid|file):/);
 
   if ($uri =~ s/^mailto://) { # handle mailto: specially
     $uri =~ s/\?.*//;			# drop parameters ?subject= etc
     return if $uri =~ /\@.*?\@/;	# abort if multiple @
     return unless $uri =~ s/.*@//;	# drop username or abort
   } else {
-    $uri =~ s{\#.*$}{}gs;		# drop fragment
     $uri =~ s{^[a-z]+:/{0,2}}{}gs;	# drop the protocol
-    $uri =~ s{^[^/]*\@}{}gs;		# username/passwd
-    # strip path and CGI params.  note: bug 4213 shows that "&" should
+    # strip path, CGI params, fragment.  note: bug 4213 shows that "&" should
     # *not* be likewise stripped here -- it's permitted in hostnames by
     # some common MUAs!
-    $uri =~ s{[/?].*$}{}gs;              
+    $uri =~ s{[/?#].*}{}gs;              
+    $uri =~ s{^[^/]*\@}{}gs;		# drop username/passwd
     $uri =~ s{:\d*$}{}gs;		# port, bug 4191: sometimes the # is missing
   }
 
   # return if there's not atleast a dot
-  return if $uri !~ /\./;
+  return if index($uri, '.') == -1;
+
+  # return if there's consecutive dots
+  return if index($uri, '..') != -1;
 
   # skip undecoded URIs if the encoded bits shouldn't be.
   # we'll see the decoded version as well.  see url_encode()
