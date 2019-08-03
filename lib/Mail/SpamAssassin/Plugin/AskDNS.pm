@@ -195,7 +195,8 @@ use warnings;
 use re 'taint';
 
 use Mail::SpamAssassin::Plugin;
-use Mail::SpamAssassin::Util qw(decode_dns_question_entry idn_to_ascii compile_regexp);
+use Mail::SpamAssassin::Util qw(decode_dns_question_entry idn_to_ascii
+                                compile_regexp is_fqdn_valid);
 use Mail::SpamAssassin::Logger;
 use Mail::SpamAssassin::Constants qw(:ip);
 use version 0.77;
@@ -435,7 +436,11 @@ sub launch_queries {
   }
 
   foreach my $query (@$queries) {
-    dbg("askdns: launching query (%s): $query", $rulename);
+    if (!is_fqdn_valid($query)) {
+      dbg("askdns: skipping invalid query ($rulename): $query");
+      next;
+    }
+    dbg("askdns: launching query ($rulename): $query");
     $pms->{async}->bgsend_and_start_lookup(
       $query, $arule->{q_type}, undef,
         { rulename => $rulename, type => 'AskDNS' },
