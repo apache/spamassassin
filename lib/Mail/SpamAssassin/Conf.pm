@@ -1211,11 +1211,6 @@ it will be used if it is available.
 	    $self->{normalize_charset} = 0;
 	    return $INVALID_VALUE;
 	}
-	unless (eval 'require Encode') {
-	    $self->{parser}->lint_warn("config: normalize_charset requires Encode");
-	    $self->{normalize_charset} = 0;
-	    return $INVALID_VALUE;
-	}
     }
   });
 
