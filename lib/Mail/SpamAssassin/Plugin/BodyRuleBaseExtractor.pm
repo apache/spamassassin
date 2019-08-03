@@ -205,10 +205,10 @@ NEXT_RULE:
         dbg("zoom: giving up on regexp: $eval_stat");
       };
 
-      if ($lossy && ($tflags->{$name}||'') =~ /\bmultiple\b/) {
-        warn "\nzoom: rule $name will loop on SpamAssassin older than 3.3.2 ".
-             "running under Perl 5.12 or older, Bug 6558\n";
-      }
+      #if ($lossy && ($tflags->{$name}||'') =~ /\bmultiple\b/) {
+      #  warn "\nzoom: $vers rule $name will loop on SpamAssassin older than 3.3.2 ".
+      #       "running under Perl 5.12 or older, Bug 6558\n";
+      #}
 
       # if any of the extracted hints in a set are too short, the entire
       # set is invalid; this is because each set of N hints represents just
@@ -1048,12 +1048,15 @@ sub write_cachefile {
   $dump->Deepcopy(1);
   $dump->Purity(1);
   $dump->Indent(1);
-  if (mkdir($self->{main}->{bases_cache_dir})) {
+
+  my $cachedir = $self->{main}->{bases_cache_dir};
+  if (mkdir($cachedir)) {
     # successfully created
   } elsif ($! == EEXIST) {
     dbg("zoom: ok, cache directory already existed");
   } else {
-    warn "cannot create a directory: $!";
+    warn "zoom: could not create cache directory: $cachedir ($!)\n";
+    return;
   }
   open(CACHE, ">$cachefile")  or warn "cannot write to $cachefile";
   print CACHE ($dump->Dump, ";1;")  or die "error writing: $!";
