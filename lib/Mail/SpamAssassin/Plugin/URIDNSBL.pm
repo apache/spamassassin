@@ -487,10 +487,10 @@ sub parsed_metadata {
     }
   }
 
-  my @hnames = keys %hostlist;
+  my @hnames = sort keys %hostlist;
   $pms->set_tag('URIHOSTS',
                 @hnames == 1 ? $hnames[0] : \@hnames)  if @hnames;
-  my @dnames = values %hostlist;
+  my @dnames = do { my %seen; grep { !$seen{$_}++ } sort values %hostlist };
   $pms->set_tag('URIDOMAINS',
                 @dnames == 1 ? $dnames[0] : \@dnames)  if @dnames;
 
