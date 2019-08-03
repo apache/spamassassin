@@ -436,7 +436,7 @@ sub launch_queries {
   }
 
   foreach my $query (@$queries) {
-    if (!is_fqdn_valid($query)) {
+    if (!is_fqdn_valid($query, 1)) {
       dbg("askdns: skipping invalid query ($rulename): $query");
       next;
     }
