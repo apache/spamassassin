@@ -47,7 +47,6 @@ OPTS refers to multiple generic options:
   raw      do not hash data, query as is
   md5      hash query with MD5
   sha1     hash query with SHA1
-  sha256   hash query with SHA256
   case     keep case before hashing, default is to lowercase
   max=x	   maximum number of queries
   shuffle  if max exceeded, random shuffle queries before truncating to limit
@@ -120,7 +119,7 @@ use warnings;
 my $VERSION = 0.101;
 
 use Digest::MD5 qw(md5_hex);
-use Digest::SHA qw(sha1_hex sha256_hex);
+use Digest::SHA qw(sha1_hex);
 
 use Mail::SpamAssassin::Plugin;
 use Mail::SpamAssassin::Util qw(compile_regexp);
@@ -597,11 +596,9 @@ sub check_hashbl_bodyre {
 sub _hash {
   my ($self, $opts, $value) = @_;
 
-  my $hashtype = $opts =~ /\b(raw|sha1|sha256|md5)\b/i ? lc($1) : 'sha1';
+  my $hashtype = $opts =~ /\b(raw|sha1|md5)\b/i ? lc($1) : 'sha1';
   if ($hashtype eq 'sha1') {
     return sha1_hex($value);
-  } elsif ($hashtype eq 'sha256') {
-    return sha256_hex($value);
   } elsif ($hashtype eq 'md5') {
     return md5_hex($value);
   } else {
