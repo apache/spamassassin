@@ -444,9 +444,6 @@ sub check_dnsbl {
       if ($skip_domains->{$domain}) {
         dbg("uridnsbl: domain $domain in skip list, host $host");
       } else {
-        # skip invalid domains with underscore like 72_active.cf
-        # (second level part can not contain _, but third+ level can)
-        next if $domain =~ /_[^.]*\.[^.]+$/;
         # use hostname as a key, and drag along the stripped domain name part
         $uri_ordered[$entry]->{$host} = $domain;
       }

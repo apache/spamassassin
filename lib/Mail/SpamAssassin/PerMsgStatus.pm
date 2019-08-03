@@ -61,7 +61,8 @@ use Mail::SpamAssassin::Constants qw(:sa :ip);
 use Mail::SpamAssassin::AsyncLoop;
 use Mail::SpamAssassin::Conf;
 use Mail::SpamAssassin::Util qw(untaint_var base64_encode idn_to_ascii
-                                uri_list_canonicalize reverse_ip_address);
+                                uri_list_canonicalize reverse_ip_address
+                                is_fqdn_valid);
 use Mail::SpamAssassin::Timeout;
 use Mail::SpamAssassin::Logger;
 
@@ -273,6 +274,7 @@ sub new {
     'master_deadline'   => $msg->{master_deadline},  # dflt inherited from msg
     'deadline_exceeded' => 0,  # time limit exceeded, skipping further tests
     'tmpfiles'          => { },
+    'uri_detail_list'   => { },
   };
 
   dbg("check: pms new, time limit in %.3f s",
@@ -2175,10 +2177,21 @@ sub _get {
     if ($gethost) {
       my $tldsRE = $self->{main}->{registryboundaries}->{valid_tlds_re};
       my $hostRE = qr/(?<![._-])\b([a-z\d][a-z\d._-]{0,251}\.${tldsRE})\b(?![._-])/i;
-      # try grabbing email domain first, otherwise try anything looking host
-      if ($result =~ /(?:.*\@)?${hostRE}/i) {
-        $host = $getdomain ? $self->{main}->{registryboundaries}->trim_domain($1)
-                           : $1;
+      # try grabbing email/msgid domain first, because user part might look like
+      # a valid host..
+      if ($result =~ /.*\@${hostRE}/i && is_fqdn_valid($1)) {
+        $host = $1;
+      } else {
+        # otherwise try hard to find a valid host
+        while ($result =~ /${hostRE}/ig) {
+          if (is_fqdn_valid($1)) {
+            $host = $1;
+            last;
+          }
+        }
+      }
+      if ($host && $getdomain) {
+        $host = $self->{main}->{registryboundaries}->trim_domain($1, 1);
       }
     } else {
       my $ipRE = qr/(?<!\.)\b(${IP_ADDRESS})\b(?!\.)/;
@@ -2249,7 +2262,7 @@ sub _tbirdurire {
   my ($self) = @_;
 
   # Cached?
-  return $self->{tbirdurire} if $self->{tbirdurire};
+  return $self->{tbirdurire} if exists $self->{tbirdurire};
 
   # a hybrid of tbird and oe's  version of uri parsing
   my $tbirdstartdelim = '><"\'`,{[(|\s'  . "\x1b\xa0";  # The \x1b as per bug 4522 # \xa0 (nbsp) added 7/2019
@@ -2268,7 +2281,7 @@ sub _tbirdurire {
   # knownscheme regexp looks for either a https?: or ftp: scheme, or www\d*\. or ftp\. prefix, i.e., likely to start a URL
   # schemeless regexp looks for a valid TLD at the end of what may be a FQDN, followed by optional ., optional :portnum, optional /rest_of_uri
   my $urischemeless = qr/[a-z\d][a-z\d._-]{0,251}\.${tldsRE}\.?(?::\d{1,5})?(?:\/[^$tbirdenddelim]{1,251})?/io;
-  my $uriknownscheme = qr/(?:(?:(?:(?:https?)|(?:ftp)):(?:\/\/)?)|(?:(?:www\d{0,2}|ftp)\.))[^$tbirdenddelim]{1,251}/io;
+  my $uriknownscheme = qr/(?:(?:(?:https?|ftp):(?:\/\/)?)|(?:(?:www\d{0,2}|ftp)\.))[^$tbirdenddelim]{1,251}/io;
   my $urimailscheme = qr/(?:mailto:)?[^$tbirdenddelimplusat]{1,251}@[^$tbirdenddelimemail]{1,251}/io;
 
   $self->{tbirdurire} = qr/(?:\b|(?<=$iso2022shift)|(?<=[$tbirdstartdelim]))
@@ -2297,18 +2310,18 @@ sub get_uri_list {
   my ($self) = @_;
 
   # use cached answer if available
-  if (defined $self->{uri_list}) {
+  if (exists $self->{uri_list}) {
     return @{$self->{uri_list}};
   }
 
-  my @uris;
+  my %uris;
   # $self->{redirect_num} = 0;
 
-  # get URIs from HTML parsing
+  # get URIs from text/HTML parsing
   while(my($uri, $info) = each %{ $self->get_uri_detail_list() }) {
     if ($info->{cleaned}) {
       foreach (@{$info->{cleaned}}) {
-        push(@uris, $_);
+        $uris{$_} = 1;
 
         # count redirection attempts and log it
         # if (my @http = m{\b(https?:/{0,2})}gi) {
@@ -2318,10 +2331,10 @@ sub get_uri_list {
     }
   }
 
-  $self->{uri_list} = \@uris;
+  @{$self->{uri_list}} = keys %uris;
 # $self->set_tag('URILIST', @uris == 1 ? $uris[0] : \@uris)  if @uris;
 
-  return @uris;
+  return @{$self->{uri_list}};
 }
 
 =item $status->get_uri_detail_list ()
@@ -2331,24 +2344,31 @@ various data about where the URIs were found in the message.  It takes a
 combination of the URIs found in the rendered (decoded and HTML stripped)
 body and the URIs found when parsing the HTML in the message.  Will also
 set $status->{uri_detail_list} (the hash reference as returned by this
-function).  This function will also set $status->{uri_domain_count} (count of
-unique domains).
+function).  This function will also set $status->{uri_domain_count}
+(count of unique domains).
 
 The hash format looks something like this:
 
   raw_uri => {
-    types => { a => 1, img => 1, parsed => 1 },
+    types => { a => 1, img => 1, parsed => 1, domainkeys => 1,
+               unlinked => 1, schemeless => 1 },
     cleaned => [ canonicalized_uri ],
     anchor_text => [ "click here", "no click here" ],
     domains => { domain1 => 1, domain2 => 1 },
+    hosts => { host1 => domain1, host2 => domain2 },
   }
 
 C<raw_uri> is whatever the URI was in the message itself
-(http://spamassassin.apache%2Eorg/).
+(http://spamassassin.apache%2Eorg/).  Uris parsed from text will be prefixed
+with scheme if missing (http://, mailto: etc).  HTML uris are as found.
 
-C<types> is a hash of the HTML tags (lowercase) which referenced
-the raw_uri.  I<parsed> is a faked type which specifies that the
-raw_uri was seen in the rendered text.
+C<types> is a hash of the HTML tags (lowercase) which referenced the
+raw_uri.  I<parsed> is a faked type which specifies that the raw_uri was
+seen in the rendered text.  I<domainkeys> is defined when raw_uri was found
+from DK/DKIM d= field.  I<unlinked> is defined when it's assumed that MUA
+will not linkify uri (found in body without scheme or www. prefix). 
+I<schemeless> is always added for uris without scheme, regardless of
+linkifying (i.e. email address found in body without mailto:).
 
 C<cleaned> is an array of the raw and canonicalized version of the raw_uri
 (http://spamassassin.apache%2Eorg/, https://spamassassin.apache.org/).
@@ -2366,18 +2386,115 @@ as hash keys, with their domain part stored as a value of each hash entry.
 sub get_uri_detail_list {
   my ($self) = @_;
 
-  # use cached answer if available
-  if (defined $self->{uri_detail_list}) {
+  # process only once, use unique uri_detail_list_run flag,
+  # in case add_uri_detail_list has already been called
+  if ($self->{uri_detail_list_run}) {
     return $self->{uri_detail_list};
   }
+  $self->{uri_detail_list_run} = 1;
 
   my $timer = $self->{main}->time_method("get_uri_detail_list");
 
-  $self->{uri_domain_count} = 0;
+  # process text parsed uris
+  $self->_process_text_uri_list();
+  # process html uris
+  $self->_process_html_uri_list();
+  # process dkim uris
+  $self->_process_dkim_uri_list();
 
-  # do this so we're sure metadata->html is setup
-  my %parsed = map { $_ => 'parsed' } $self->_get_parsed_uri_list();
+  return $self->{uri_detail_list};
+}
 
+sub _process_text_uri_list {
+  my ($self) = @_;
+
+  # Use decoded stripped body, which does not contain HTML
+  my $textary = $self->get_decoded_stripped_body_text_array();
+  my $tbirdurire = $self->_tbirdurire;
+  my %seen;
+
+  foreach my $text (@$textary) {
+    # a workaround for [perl #69973] bug:
+    # Invalid and tainted utf-8 char crashes perl 5.10.1 in regexp evaluation
+    # Bug 6225, regexp and string should both be utf8, or none of them;
+    # untainting string also seems to avoid the crash
+    #
+    # Bug 6225: untaint the string in an attempt to work around a perl crash
+    local $_ = untaint_var($text);
+
+    local($1,$2,$3);
+    while (/$tbirdurire/igo) {
+      my $rawuri = $1||$2||$3;
+      my $rawtype = defined $1 ? 'scheme' : defined $2 ? 'mail' : 'schemeless';
+      $rawuri =~ s/(^[^(]*)\).*$/$1/;  # as per ThunderBird, ) is an end delimiter if there is no ( preceeding it
+      $rawuri =~ s/[-~!@#^&*()_+=:;\'?,.]*$//; # remove trailing string of punctuations that TBird ignores
+
+      next if exists $seen{$rawuri};
+      $seen{$rawuri} = 1;
+      dbg("uri: found rawuri from text ($rawtype): $rawuri");
+
+      my $types = {parsed => 1};
+
+      # If it's a hostname that was just sitting out in the
+      # open, without a protocol, and not inside of an HTML tag,
+      # the we should add the proper protocol in front, rather
+      # than using the base URI.
+      my $uri = $rawuri;
+      if ($uri !~ /^(?:https?|ftp|mailto):/i) {
+        if ($uri =~ /^ftp\./i) {
+          $uri = "ftp://$uri";
+        }
+        elsif ($uri =~ /^www\d{0,2}\./i) {
+          $uri = "http://$uri";
+        }
+        elsif ($uri =~ /\@/) {
+          $uri = "mailto:$uri";
+        }
+        else {
+          # some spammers are using unschemed URIs to escape filters
+          # flag that this is a URI that MUAs don't linkify so only use for RBLs
+          # (TODO: why only use for RBLs?? why not uri rules? Use tflags to choose?)
+          $uri = "http://$uri";
+          $types->{unlinked} = 1;
+        }
+        # Mark any of those schemeless
+        $types->{schemeless} = 1;
+      }
+
+      if ($uri =~ /^mailto:/i) {
+        # skip a mail link that does not have a valid TLD or @ after decoding any URLEncoded characters
+        $uri = Mail::SpamAssassin::Util::url_encode($uri) if ($uri =~ /\%(?:2[1-9a-fA-F]|[3-6][0-9a-fA-F]|7[0-9a-eA-E])/);
+      }
+
+      $self->add_uri_detail_list($uri, $types, 'parsed', 1);
+    }
+  }
+}
+
+sub _process_html_uri_list {
+  my ($self) = @_;
+
+  # get URIs from HTML parsing
+  # use the metadata version since $self->{html} may not be setup
+  my $detail = $self->{msg}->{metadata}->{html}->{uri_detail} || { };
+  $self->{'uri_truncated'} = 1 if $self->{msg}->{metadata}->{html}->{uri_truncated};
+
+  # canonicalize the HTML parsed URIs
+  while(my($uri, $info) = each %{ $detail }) {
+    if ($self->add_uri_detail_list($uri, $info->{types}, 'html', 0)) {
+      # Need also to copy and uniq anchor text
+      if (exists $info->{anchor_text}) {
+        my %seen;
+        foreach (grep { !$seen{$_}++ } @{$info->{anchor_text}}) {
+          push @{$self->{uri_detail_list}->{$uri}->{anchor_text}}, $_;
+        }
+      }
+    }
+  }
+}
+
+sub _process_dkim_uri_list {
+  my ($self) = @_;
 
   # This parses of DKIM for URIs disagrees with documentation and bug 6700 votes to disable
   # this functionality
@@ -2387,209 +2504,102 @@ sub get_uri_detail_list {
   # 2014-10-06
 
   # Look for the domain in DK/DKIM headers
-  if ( $self->{conf}->{parse_dkim_uris} ) {
-    my $dk = join(" ", grep {defined} ( $self->get('DomainKey-Signature',undef),
+  if ($self->{conf}->{parse_dkim_uris}) {
+    my $dk = join(" ", grep {defined} ( $self->get('DomainKey-Signature',undef ),
                                         $self->get('DKIM-Signature',undef) ));
     while ($dk =~ /\bd\s*=\s*([^;]+)/g) {
-      my $dom = $1;
-      $dom =~ s/\s+//g;
-      $parsed{$dom} = 'domainkeys';
+      my $d = $1;
+      $d =~ s/\s+//g;
+      # prefix with domainkeys: so it doesn't merge with identical keys
+      $self->add_uri_detail_list("domainkeys:$d",
+        {'domainkeys'=>1, 'nocanon'=>1, 'noclean'=>1},
+        'domainkeys', 1);
     }
   }
-
-  # get URIs from HTML parsing
-  # use the metadata version since $self->{html} may not be setup
-  my $detail = $self->{msg}->{metadata}->{html}->{uri_detail} || { };
-  $self->{'uri_truncated'} = 1 if $self->{msg}->{metadata}->{html}->{uri_truncated};
-
-  # don't keep dereferencing ...
-  my $redirector_patterns = $self->{conf}->{redirector_patterns};
-
-  # canonicalize the HTML parsed URIs
-  while(my($uri, $info) = each %{ $detail }) {
-    my @tmp = uri_list_canonicalize($redirector_patterns, $uri);
-    $info->{cleaned} = \@tmp;
-
-    foreach (@tmp) {
-      my($domain,$host) = $self->{main}->{registryboundaries}->uri_to_domain($_);
-      if (defined $host && $host ne '' && !$info->{hosts}->{$host}) {
-        # unstripped full host name as a key, and its domain part as a value
-        $info->{hosts}->{$host} = $domain;
-        if (defined $domain && $domain ne '' && !$info->{domains}->{$domain}) {
-          $info->{domains}->{$domain} = 1;  # stripped to domain boundary
-          $self->{uri_domain_count}++;
-        }
-      }
-    }
-
-    if (would_log('dbg', 'uri') == 2) {
-      dbg("uri: html uri found, $uri");
-      foreach my $nuri (@tmp) {
-        dbg("uri: cleaned html uri, $nuri");
-      }
-      if ($info->{hosts} && $info->{domains}) {
-        for my $host (keys %{$info->{hosts}}) {
-          dbg("uri: html host %s, domain %s", $host, $info->{hosts}->{$host});
-        }
-      }
-    }
-  }
-
-  # canonicalize the text parsed URIs
-  while (my($uri, $type) = each %parsed) {
-    $detail->{$uri}->{types}->{$type} = 1;
-    my $info = $detail->{$uri};
-
-    my @uris;
-
-    if (!exists $info->{cleaned}) {
-      if ($type eq 'parsed') {
-        @uris = uri_list_canonicalize($redirector_patterns, $uri);
-      }
-      else {
-        @uris = ( $uri );
-      }
-      $info->{cleaned} = \@uris;
-
-      foreach (@uris) {
-        my($domain,$host) = $self->{main}->{registryboundaries}->uri_to_domain($_);
-        if (defined $host && $host ne '' && !$info->{hosts}->{$host}) {
-          # unstripped full host name as a key, and its domain part as a value
-          $info->{hosts}->{$host} = $domain;
-          if (defined $domain && $domain ne '' && !$info->{domains}->{$domain}){
-            $info->{domains}->{$domain} = 1;
-            $self->{uri_domain_count}++;
-          }
-        }
-      }
-    }
-
-    if (would_log('dbg', 'uri') == 2) {
-      dbg("uri: parsed uri found of type $type, $uri");
-      foreach my $nuri (@uris) {
-        dbg("uri: cleaned parsed uri, $nuri");
-      }
-      if ($info->{hosts} && $info->{domains}) {
-        for my $host (keys %{$info->{hosts}}) {
-          dbg("uri: parsed host %s, domain %s", $host, $info->{hosts}->{$host});
-        }
-      }
-    }
-  }
-
-  # setup the cache
-  $self->{uri_detail_list} = $detail;
-
-  return $detail;
 }
 
-sub _get_parsed_uri_list {
-  my ($self) = @_;
+=item $status->add_uri_detail_list ($raw_uri, $types, $source, $valid_domain)
 
-  # use cached answer if available
-  unless (defined $self->{parsed_uri_list}) {
-    # TVD: we used to use decoded_body which is fine, except then we'll
-    # try parsing URLs out of HTML, which is what the HTML code is going
-    # to do (note: we know the HTML parsing occurs, because we call for the
-    # rendered text which does HTML parsing...)  trying to get URLs out of
-    # HTML w/out parsing causes issues, so let's not do it.
-    # also, if we allow $textary to be passed in, we need to invalidate
-    # the cache first. fyi.
-    my $textary = $self->get_decoded_stripped_body_text_array();
-    my $redirector_patterns = $self->{conf}->{redirector_patterns};
+Adds values to internal uri_detail_list.  When used from Plugins, recommended
+to call from parsed_metadata (along with register_method_priority, -10) so
+other Plugins calling get_uri_detail_list() will see it.
 
-    my ($rulename, $pat, @uris);
-    my $text;
-    my $tbirdurire = $self->_tbirdurire;
+C<raw_uri> is the URI to be added. The only required parameter.
 
-    for my $entry (@$textary) {
+C<types> is an optional hash reference, contents are added to
+uri_detail_list->{types} (see get_uri_detail_list for known keys). 
+I<parsed> is default is no hash given.  I<nocanon> does not run
+uri_list_canonicalize (no redirector, uri fixing).  I<noclean> skips adding
+uri_detail_list->{cleaned}, so it would not be used in "uri" rule checks,
+but domain/hosts would still be used for URIBL/RBL purposes.
 
-      # a workaround for [perl #69973] bug:
-      # Invalid and tainted utf-8 char crashes perl 5.10.1 in regexp evaluation
-      # Bug 6225, regexp and string should both be utf8, or none of them;
-      # untainting string also seems to avoid the crash
-      #
-      # Bug 6225: untaint the string in an attempt to work around a perl crash
-      local $_ = untaint_var($entry);
+C<source> is an optional simple string, only used for debug logging purposes
+to identify where uri originates from (default: "parsed").
 
-      local($1,$2,$3);
-      while (/$tbirdurire/igo) {
-        my $rawuri = $1||$2||$3;
-        my $rawtype = defined $1 ? 'scheme' : defined $2 ? 'mail' : 'schemeless';
-        $rawuri =~ s/(^[^(]*)\).*$/$1/;  # as per ThunderBird, ) is an end delimiter if there is no ( preceeding it
-        $rawuri =~ s/[-~!@#^&*()_+=:;\'?,.]*$//; # remove trailing string of punctuations that TBird ignores
-        dbg("uri: found rawuri ($rawtype): $rawuri");
+C<valid_domain> is an optional boolean (0/1).  If true, uri will not be
+added unless hostname/domain is in valid format and contains a valid TLD. 
+(default: 0)
 
-        # skip if there is '..' in the hostname portion of the URI, something we can't catch in the general URI regexp
-        next if $rawuri =~ m{^(?:(?:https?|ftp|mailto):(?://)?)?(?:[^\@/?#]*\@)?[^/?#:]*\.\.}i;
+=cut
 
-        # If it's a hostname that was just sitting out in the
-        # open, without a protocol, and not inside of an HTML tag,
-        # the we should add the proper protocol in front, rather
-        # than using the base URI.
-        my $uri = $rawuri;
-        my $rblonly;
-        if ($uri !~ /^(?:https?|ftp|mailto|javascript|file):/i) {
-          if ($uri =~ /^ftp\./i) {
-            $uri = "ftp://$uri";
-          }
-          elsif ($uri =~ /^www\d{0,2}\./i) {
-            $uri = "http://$uri";
-          }
-          elsif ($uri =~ /\@/) {
-            $uri = "mailto:$uri";
-          }
-          else {
-            # some spammers are using unschemed URIs to escape filters
-            $rblonly = 1;    # flag that this is a URI that MUAs don't linkify so only use for RBLs
-            $uri = "http://$uri";
-          }
-        }
+sub add_uri_detail_list {
+  my ($self, $uri, $types, $source, $valid_domain) = @_;
 
-        if ($uri =~ /^mailto:/i) {
-          # skip a mail link that does not have a valid TLD or @ after decoding any URLEncoded characters
-          $uri = Mail::SpamAssassin::Util::url_encode($uri) if ($uri =~ /\%(?:2[1-9a-fA-F]|[3-6][0-9a-fA-F]|7[0-9a-eA-E])/);
-          next unless $uri =~ /\@/;
-          my $domuri = $self->{main}->{registryboundaries}->uri_to_domain($uri);
-          next unless $domuri;
-          push (@uris, $rawuri);
-          push (@uris, $uri) unless ($rawuri eq $uri);
-        }
+  $types = {'parsed' => 1} unless defined $types;
+  $source ||= 'parsed';
 
-        next unless ($uri =~/^(?:https?|ftp):/i);  # at this point only valid if one or the other of these
+  my (%domains, %hosts, %cleaned);
+  my $udl = $self->{uri_detail_list};
 
-        my @tmp = uri_list_canonicalize($redirector_patterns, $uri);
-        my $goodurifound = 0;
-        foreach my $cleanuri (@tmp) {
-          my $domain = $self->{main}->{registryboundaries}->uri_to_domain($cleanuri);
-          if ($domain) {
-            # bug 5780: Stop after domain to avoid FP, but do that after all deobfuscation of urlencoding and redirection
-            if ($rblonly) {
-              local $1;
-              $cleanuri =~ s/^(https?:\/\/[^:\/]+).*$/$1/i;
-            }
-            push (@uris, $cleanuri);
-            $goodurifound = 1;
-          }
-        }
-        next unless $goodurifound;
-        push @uris, $rawuri unless $rblonly;
-      }
-    }
+  dbg("uri: canonicalizing $source uri: $uri");
 
+  my @uris;
+  if ($types->{nocanon}) {
+    push @uris, $uri;
+  } else {
+    @uris = uri_list_canonicalize($self->{conf}->{redirector_patterns}, $uri);
+  }
+  foreach my $cleanuri (@uris) {
     # Make sure all the URIs are nice and short
-    foreach my $uri ( @uris ) {
-      if (length $uri > MAX_URI_LENGTH) {
-        $self->{'uri_truncated'} = 1;
-        $uri = substr $uri, 0, MAX_URI_LENGTH;
-      }
+    if (length($cleanuri) > MAX_URI_LENGTH) {
+      $self->{'uri_truncated'} = 1;
+      $cleanuri = substr($cleanuri, 0, MAX_URI_LENGTH);
     }
-
-    # setup the cache and return
-    $self->{parsed_uri_list} = \@uris;
+    dbg("uri: cleaned uri: $cleanuri");
+    $cleaned{$cleanuri} = 1;
+    my ($domain, $host) = $self->{main}->{registryboundaries}->uri_to_domain($cleanuri);
+    if (defined $domain) {
+      dbg("uri: added host: $host domain: $domain");
+      $domains{$domain} = 1;
+      $hosts{$host} = $domain;
+    }
   }
 
-  return @{$self->{parsed_uri_list}};
+  # Bail out if no good uri found
+  return unless %cleaned;
+
+  # Bail out if no domains/hosts found?
+  return if $valid_domain && !%domains;
+
+  # Merge cleaned
+  if (!$types->{noclean}) {
+    if ($udl->{$uri}->{cleaned}) {
+      $cleaned{$_} = 1 foreach (@{$udl->{$uri}->{cleaned}});
+    }
+    @{$udl->{$uri}->{cleaned}} = keys %cleaned;
+  }
+
+  # Domains/hosts (there might not be any)
+  $udl->{$uri}->{domains}->{$_} = 1 foreach keys %domains;
+  $udl->{$uri}->{hosts}->{$_} = $hosts{$_} foreach keys %hosts;
+
+  # Types
+  $udl->{$uri}->{types}->{$_} = 1 foreach keys %$types;
+
+  # Invalidate uri_list cache
+  delete $self->{uri_list};
+
+  return 1;
 }
 
 ###########################################################################
