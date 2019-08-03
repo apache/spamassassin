@@ -34,6 +34,7 @@ our @ISA = qw();
 
 use Mail::SpamAssassin::Logger;
 use Mail::SpamAssassin::Constants qw(:ip);
+use Mail::SpamAssassin::Util qw(is_fqdn_valid);
 
 my $IP_ADDRESS = IP_ADDRESS;
 
@@ -236,29 +237,25 @@ sub uri_to_domain {
     $uri =~ s{:\d*$}{}gs;		# port, bug 4191: sometimes the # is missing
   }
 
-  # return if there's not atleast a dot
-  return if index($uri, '.') == -1;
-
-  # return if there's consecutive dots
-  return if index($uri, '..') != -1;
-
   # skip undecoded URIs if the encoded bits shouldn't be.
   # we'll see the decoded version as well.  see url_encode()
   return if $uri =~ /\%(?:2[1-9a-f]|[3-6][0-9a-f]|7[0-9a-e])/;
 
   my $host = $uri;  # unstripped/full domain name
+  my $domain = $host;
 
   # keep IPs intact
-  if ($uri !~ /^$IP_ADDRESS$/) { 
-    # ignore invalid domains
-    return unless ($self->is_domain_valid($uri));
-
+  if ($host !~ /^$IP_ADDRESS$/) { 
+    # check that it's a valid hostname/fqdn
+    return unless is_fqdn_valid($host);
+    # ignore invalid TLDs
+    return unless $self->is_domain_valid($host);
     # get rid of hostname part of domain, understanding delegation
-    $uri = $self->trim_domain($uri);
+    $domain = $self->trim_domain($host);
   }
   
   # $uri is now the domain only, optionally return unstripped host name
-  return !wantarray ? $uri : ($uri, $host);
+  return !wantarray ? $domain : ($domain, $host);
 }
 
 1;

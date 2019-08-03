@@ -59,7 +59,7 @@ use Time::HiRes qw(time);
 use Mail::SpamAssassin::Constants qw(:sa);
 use Mail::SpamAssassin::AsyncLoop;
 use Mail::SpamAssassin::Conf;
-use Mail::SpamAssassin::Util qw(untaint_var uri_list_canonicalize);
+use Mail::SpamAssassin::Util qw(untaint_var uri_list_canonicalize is_fqdn_valid);
 use Mail::SpamAssassin::Timeout;
 use Mail::SpamAssassin::Logger;
 
@@ -2273,6 +2273,8 @@ sub get_uri_detail_list {
     while ($dk =~ /\bd\s*=\s*([^;]+)/g) {
       my $dom = $1;
       $dom =~ s/\s+//g;
+      next if !is_fqdn_valid($dom);
+      next if !$self->{main}->{registryboundaries}->is_domain_valid($dom);
       $parsed{$dom} = 'domainkeys';
     }
   }

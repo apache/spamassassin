@@ -586,8 +586,7 @@ sub new_dns_packet {
     my $eval_stat = $@ ne '' ? $@ : "errno=$!";  chomp $eval_stat;
     # resignal if alarm went off
     die "dns: (1) $eval_stat\n"  if $eval_stat =~ /__alarm__ignore__\(.*\)/s;
-    warn sprintf(
-           "dns: new_dns_packet (domain=%s type=%s class=%s) failed: %s\n",
+    info("dns: new_dns_packet (domain=%s type=%s class=%s) failed: %s",
            $domain, $type, $class, $eval_stat);
   };
 

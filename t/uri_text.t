@@ -241,7 +241,7 @@ file://www.luzoop5k.com		!file://www\.luzoop5k\.com
 # //<user>:<password>@<host>:<port>/<url-path>
 http://user:pass@jiefeet4.com:80/x/y	http://user:pass\@jiefeet4\.com:80/x/y
 
-www.liy8quei:80				!liy8quei
+www.liy8quei:80				www\.liy8quei\.com
 www.veibi6cu:443			!veibi6cu
 puahi8si.com:80				!puahi8si\.com:80
 chop8tan.com:443			!chop8tan\.com:443

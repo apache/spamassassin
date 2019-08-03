@@ -58,7 +58,7 @@ our @EXPORT_OK = qw(&local_tz &base64_decode &untaint_var &untaint_file_path
                   &reverse_ip_address &decode_dns_question_entry &touch_file
                   &get_my_locales &parse_rfc822_date &get_user_groups
                   &secure_tmpfile &secure_tmpdir &uri_list_canonicalize
-                  &compile_regexp &qr_to_string);
+                  &compile_regexp &qr_to_string &is_fqdn_valid);
 
 our $AM_TAINTED;
 
@@ -338,6 +338,44 @@ sub taint_var {
   # $^X is apparently "always tainted".
   # Concatenating an empty tainted string taints the result.
   return $v . substr($^X, 0, 0);
+}
+
+###########################################################################
+
+# Check for full hostname / FQDN / DNS name validity.  IP addresses must be
+# validated with other functions like $IP_ADDRESS.  Does not check for valid
+# TLD, use $self->{main}->{registryboundaries}->is_domain_valid()
+# additionally for that.
+sub is_fqdn_valid {
+  my ($host) = @_;
+  return if !defined $host;
+
+  # remove trailing dots
+  $host =~ s/\.+\z//;
+
+  # max total length 255
+  return if length($host) > 255;
+
+  # validate dot separated components/labels
+  my @labels = split(/\./, lc $host);
+  my $cnt = scalar @labels;
+  return unless $cnt > 1; # atleast two labels required
+  foreach my $label (@labels) {
+    # length of 1-63
+    return if length($label) < 1;
+    return if length($label) > 63;
+    # alphanumeric, - allowed only in middle part
+    # underscores are allowed in DNS queries, so we allow here
+    return if $label !~ /^[a-z0-9_](?:[a-z0-9_-]*[a-z0-9_])?$/;
+    # 1st-2nd level part can not contain _, only third+ can
+    if ($cnt == 2 || $cnt == 1) {
+      return if index($label, '_') != -1;
+    }
+    $cnt--;
+  }
+
+  # is good
+  return 1;
 }
 
 ###########################################################################
@@ -1322,7 +1360,8 @@ sub uri_list_canonicalize {
     }
 
     # http://www.foo.biz?id=3 -> http://www.foo.biz/?id=3
-    $nuri =~ s{^(https?://[^/?]+)\?}{$1/?}i;
+    # http://www.foo.biz#id=3 -> http://www.foo.biz/#id=3
+    $nuri =~ s{^(https?://[^/?#]+)([?#])}{$1/$2}i;
 
     # deal with encoding of chars, this is just the set of printable
     # chars minus ' ' (that is, dec 33-126, hex 21-7e)
@@ -1335,8 +1374,25 @@ sub uri_list_canonicalize {
     }
 
     # deal with wierd hostname parts, remove user/pass, etc.
-    if ($nuri =~ m{^(https?://)(?:[^\@/?#]*\@)?([^/?#:]+)(.*)$}i) {
-      my($proto, $host, $rest) = ($1,$2,$3);
+    if ($nuri =~ m{^(https?://)([^\@/?#]*\@)?([^/?#:]+)((?::(\d*))?.*)$}i) {
+      my($proto, $host, $rest) = ($1,$3,$4);
+      my $auth = defined $2 ? $2 : '';
+      my $port = defined $5 ? $5 : '';
+
+      my $rest_noport;
+      if ($port eq '') {
+        $port = $proto eq 'http://' ? 80 : 443;
+      } else {
+        $rest_noport = $rest;
+        # Strip default ports from url and add to list
+        if ($proto eq 'http://') {
+          if ($rest_noport =~ s/^:80\b//) {
+            push(@nuris, join('', $proto, $host, $rest_noport));
+          }
+        } elsif ($rest_noport =~ s/^:443\b//) {
+          push(@nuris, join('', $proto, $host, $rest_noport));
+        }
+      }
 
       # Bug 6751:
       # RFC 3490 (IDNA): Whenever dots are used as label separators, the
@@ -1352,12 +1408,17 @@ sub uri_list_canonicalize {
       if ($host =~ s{(?: \xE3\x80\x82 | \xEF\xBC\x8E | \xEF\xBD\xA1 |
                          \xEF\xB9\x92 | \xE2\x80\xA4 )}{.}xgs) {
         push(@nuris, join ('', $proto, $host, $rest));
+        # Also add noport variant
+        push(@nuris, join('', $proto, $host, $rest_noport)) if $rest_noport;
       }
 
       # bug 4146: deal with non-US ASCII 7-bit chars in the host portion
       # of the URI according to RFC 1738 that's invalid, and the tested
       # browsers (Firefox, IE) remove them before usage...
-      if ($host =~ tr/\000-\040\200-\377//d) {
+      #if ($host =~ tr/\000-\040\200-\377//d) {
+      # Fixed 7/2019 to not strip extended chars, since they can be used in
+      # IDN domains. Stripping control chars should be enough?
+      if ($host =~ tr/\x00-\x20//d) {
         push(@nuris, join ('', $proto, $host, $rest));
       }
 
@@ -1381,7 +1442,7 @@ sub uri_list_canonicalize {
       if (!$found_redirector_match) {
         # try generic https? check if redirector pattern matching failed
         # bug 3308: redirectors like yahoo only need one '/' ... <grrr>
-        if ($rest =~ m{(https?:/{0,2}.+)$}i) {
+        if ($rest =~ m{(https?:/{0,2}[^&#]+)}i) {
           push(@uris, $1);
           dbg("uri: parsed uri found: $1 in hard-coded redirector");
         }
@@ -1441,6 +1502,14 @@ sub uri_list_canonicalize {
         push(@nuris, join ('', $proto, decode_ulong_to_ip($host), $rest));
       }
 
+      # http://foobar -> http://www.foobar.com as Firefox does (Bug 6596)
+      # (do this here so we don't trip on those 0x123 IPs etc..)
+      # https://hg.mozilla.org/mozilla-central/file/tip/docshell/base/nsDefaultURIFixup.cpp
+      elsif ($proto eq 'http://' && $auth eq '' &&
+             $host ne 'localhost' && $port eq '80' &&
+             $host =~ /^(?:www\.)?([^.]+)$/) {
+        push(@nuris, join('', $proto, 'www.', $1, '.com', $rest));
+      }
     }
   }
 
