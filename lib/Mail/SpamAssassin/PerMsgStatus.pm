@@ -2933,10 +2933,12 @@ sub _test_log_line {
 
 ###########################################################################
 
-# helper for get().  Do not call directly, as get() caches its results
-# and this does not!
+# helper for get()
 sub get_envelope_from {
   my ($self) = @_;
+
+  # Cached?
+  return $self->{envelopefrom} if exists $self->{envelopefrom};
 
   # bug 2142:
   # Get the SMTP MAIL FROM:, aka. the "envelope sender", if our
@@ -2953,17 +2955,22 @@ sub get_envelope_from {
     # make sure we get the most recent copy - there can be only one EnvelopeSender.
     $envf = $self->get($self->{conf}->{envelope_sender_header}.":addr",undef);
     # ok if it contains an "@" sign, or is "" (ie. "<>" without the < and >)
-    goto ok if defined $envf && (index($envf, '@') > 0 || $envf eq '');
+    if (defined $envf && (index($envf, '@') > 0 || $envf eq '')) {
+      dbg("message: using envelope_sender_header '%s' as EnvelopeFrom: '%s'",
+          $self->{conf}->{envelope_sender_header}, $envf);
+      $self->{envelopefrom} = $envf;
+      return $envf;
+    }
     # Warn them if it's configured, but not there or not usable.
     if (defined $envf) {
-      chomp $envf;
-      dbg("message: envelope_sender_header '%s: %s' is not an FQDN, ignoring",
+      dbg("message: envelope_sender_header '%s': '%s' is not valid, ignoring",
           $self->{conf}->{envelope_sender_header}, $envf);
     } else {
       dbg("message: envelope_sender_header '%s' not found in message",
           $self->{conf}->{envelope_sender_header});
     }
     # Couldn't get envelope-sender using the configured header.
+    $self->{envelopefrom} = undef;
     return;
   }
 
@@ -2986,7 +2993,8 @@ sub get_envelope_from {
     # ok if it contains an "@" sign, or is "" (ie. "<>" without the < and >)
     if (defined $envf && (index($envf, '@') > 0 || $envf eq '')) {
       dbg("message: using $lasthop_str relay envelope-from as EnvelopeFrom: '$envf'");
-      goto ok;
+      $self->{envelopefrom} = $envf;
+      return $envf;
     }
   }
 
@@ -2998,36 +3006,40 @@ sub get_envelope_from {
   # lines, we cannot trust any Envelope-From headers, since they're likely to
   # be incorrect fetchmail guesses.
 
-  if ($self->get("X-Sender") =~ /\@/) {
+  if (index($self->get("X-Sender"), '@') != -1) {
     my $rcvd = join(' ', $self->get("Received"));
-    if ($rcvd =~ /\(fetchmail/) {
+    if (index($rcvd, '(fetchmail') != -1) {
       dbg("message: X-Sender and fetchmail signatures found, cannot trust envelope-from");
+      $self->{envelopefrom} = undef;
       return;
     }
   }
 
   # procmailrc notes this (we now recommend adding it to Received instead)
-  if ($envf = $self->get("X-Envelope-From")) {
+  if (defined($envf = $self->get("X-Envelope-From:addr",undef))) {
     # heuristic: this could have been relayed via a list which then used
     # a *new* Envelope-from.  check
     if ($self->get("ALL") =~ /^Received:.*?^X-Envelope-From:/smi) {
       dbg("message: X-Envelope-From header found after 1 or more Received lines, cannot trust envelope-from");
+      $self->{envelopefrom} = undef;
       return;
     } else {
       dbg("message: using X-Envelope-From header as EnvelopeFrom: '$envf'");
-      goto ok;
+      $self->{envelopefrom} = $envf;
+      return $envf;
     }
   }
 
   # qmail, new-inject(1)
-  if ($envf = $self->get("Envelope-Sender")) {
+  if (defined($envf = $self->get("Envelope-Sender:addr",undef))) {
     # heuristic: this could have been relayed via a list which then used
     # a *new* Envelope-from.  check
     if ($self->get("ALL") =~ /^Received:.*?^Envelope-Sender:/smi) {
       dbg("message: Envelope-Sender header found after 1 or more Received lines, cannot trust envelope-from");
     } else {
       dbg("message: using Envelope-Sender header as EnvelopeFrom: '$envf'");
-      goto ok;
+      $self->{envelopefrom} = $envf;
+      return $envf;
     }
   }
 
@@ -3038,25 +3050,21 @@ sub get_envelope_from {
   #   data.  This use of return-path is required; mail systems MUST support
   #   it.  The return-path line preserves the information in the <reverse-
   #   path> from the MAIL command.
-  if ($envf = $self->get("Return-Path")) {
+  if (defined($envf = $self->get("Return-Path:addr",undef))) {
     # heuristic: this could have been relayed via a list which then used
     # a *new* Envelope-from.  check
     if ($self->get("ALL") =~ /^Received:.*?^Return-Path:/smi) {
       dbg("message: Return-Path header found after 1 or more Received lines, cannot trust envelope-from");
     } else {
       dbg("message: using Return-Path header as EnvelopeFrom: '$envf'");
-      goto ok;
+      $self->{envelopefrom} = $envf;
+      return $envf;
     }
   }
 
   # give up.
+  $self->{envelopefrom} = undef;
   return;
-
-ok:
-  $envf =~ s/^<*//s;            # remove <
-  $envf =~ s/>*\s*\z//s;        # remove >, whitespace, newlines
-
-  return $envf;
 }
 
 ###########################################################################
