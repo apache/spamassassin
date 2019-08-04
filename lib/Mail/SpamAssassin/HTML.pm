@@ -259,7 +259,15 @@ sub parse {
         $utf8_mode ? "on (assumed UTF-8 octets)"
                    : "off (default, assumed Unicode characters)");
   }
-  $self->SUPER::parse($text);
+
+  eval {
+    local $SIG{__WARN__} = sub {
+      my $err = $_[0];
+      $err =~ s/\s+/ /gs; $err =~ s/(.*) at .*/$1/s;
+      info("message: HTML::Parser warning: $err");
+    };
+    $self->SUPER::parse($text);
+  };
 
   # bug 7437: deal gracefully with HTML::Parser misbehavior on unclosed <style> and <script> tags
   # (typically from not passing the entire message to spamc, but possibly a DoS attack)

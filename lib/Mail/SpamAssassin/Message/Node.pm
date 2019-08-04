@@ -494,8 +494,13 @@ sub _normalize {
       $rv .= $data_taint;  # carry taintedness over, avoid Encode bug
       return $rv;  # decoded
     } else {
-      dbg("message: failed decoding as declared charset UTF-8");
-    };
+      my $err = '';
+      if ($@) {
+        $err = $@; $err =~ s/\s+/ /gs; $err =~ s/(.*) at .*/$1/;
+        $err = " ($err)";
+      }
+      dbg("message: failed decoding as declared charset UTF-8 ($err)");
+    }
 
   } elsif ($charset_declared =~ /^UTF[ -]?16/i) {
     # Handle cases where spammers use UTF-16 encoding without including a BOM
@@ -509,7 +514,12 @@ sub _normalize {
       $rv .= $data_taint;  # carry taintedness over, avoid Encode bug
       return $rv;  # decoded
     } else {
-      dbg("message: failed decoding as declared charset $charset_declared");
+      my $err = '';
+      if ($@) {
+        $err = $@; $err =~ s/\s+/ /gs; $err =~ s/(.*) at .*/$1/;
+        $err = " ($err)";
+      }
+      dbg("message: failed decoding as declared charset %s%s", $charset_declared, $err);
     };
 
   } elsif ($cnt_8bits &&
@@ -555,14 +565,19 @@ sub _normalize {
       dbg("message: failed decoding, no decoder for a declared charset %s",
           $chset);
     } else {
+      my $err = '';
       eval { $rv = $decoder->decode($_[0], 1|8) };  # FB_CROAK | LEAVE_SRC
+      if ($@) {
+        $err = $@; $err =~ s/\s+/ /gs; $err =~ s/(.*) at .*/$1/;
+        $err = " ($err)";
+      }
       if (lc $chset eq lc $charset_declared) {
-        dbg("message: %s as declared charset %s",
-            defined $rv ? 'decoded' : 'failed decoding', $charset_declared);
+        dbg("message: %s as declared charset %s%s",
+            defined $rv ? 'decoded' : 'failed decoding', $charset_declared, $err);
       } else {
-        dbg("message: %s as charset %s, declared %s",
+        dbg("message: %s as charset %s, declared %s%s",
             defined $rv ? 'decoded' : 'failed decoding',
-            $chset, $charset_declared);
+            $chset, $charset_declared, $err);
       }
     }
   }
@@ -587,11 +602,16 @@ sub _normalize {
   { # ASCII + NBSP + SHY + some punctuation characters
     # NBSP (A0) and SHY (AD) are at the same position in ISO-8859-* too
     # consider also: AE (r), 80 Euro
+    my $err = '';
     eval { $rv = $enc_w1252->decode($_[0], 1|8) };  # FB_CROAK | LEAVE_SRC
+    if ($@) {
+      $err = $@; $err =~ s/\s+/ /gs; $err =~ s/(.*) at .*/$1/;
+      $err = " ($err)";
+    }
     # the above can't fail, but keep code general just in case
-    dbg("message: %s as guessed charset %s, declared %s",
+    dbg("message: %s as guessed charset %s, declared %s%s",
         defined $rv ? 'decoded' : 'failed decoding',
-        'Windows-1252', $charset_declared);
+        'Windows-1252', $charset_declared, $err);
   }
 
   # If we were unsuccessful so far, try some guesswork
@@ -615,20 +635,30 @@ sub _normalize {
         dbg("message: failed decoding, no decoder for a detected charset %s",
             $charset_detected);
       } else {
+        my $err = '';
         eval { $rv = $decoder->decode($_[0], 1|8) };  # FB_CROAK | LEAVE_SRC
-        dbg("message: %s as detected charset %s, declared %s",
+        if ($@) {
+          $err = $@; $err =~ s/\s+/ /gs; $err =~ s/(.*) at .*/$1/;
+          $err = " ($err)";
+        }
+        dbg("message: %s as detected charset %s, declared %s%s",
             defined $rv ? 'decoded' : 'failed decoding',
-            $charset_detected, $charset_declared);
+            $charset_detected, $charset_declared, $err);
       }
     }
   }
 
   if (!defined $rv) {  # all decoding attempts failed so far, probably garbage
     # go for Windows-1252 which can't fail
+    my $err = '';
     eval { $rv = $enc_w1252->decode($_[0]) };
-    dbg("message: %s as last-resort charset %s, declared %s",
+    if ($@) {
+      $err = $@; $err =~ s/\s+/ /gs; $err =~ s/(.*) at .*/$1/;
+      $err = " ($err)";
+    }
+    dbg("message: %s as last-resort charset %s, declared %s%s",
         defined $rv ? 'decoded' : 'failed decoding',
-        'Windows-1252', $charset_declared);
+        'Windows-1252', $charset_declared, $err);
   }
 
   if (!defined $rv) {  # just in case - all decoding attempts failed so far
