@@ -487,14 +487,28 @@ sub _normalize {
   # Try first to strictly decode based on a declared character set.
 
   my $rv;
-  if ($cnt_8bits && !$insist_on_declared_charset &&
-      eval { $rv = $enc_utf8->decode($_[0], 1|8); defined $rv }) {
-    dbg("message: decoded as charset UTF-8, declared %s", $charset_declared);
-    return $_[0]  if !$return_decoded;
-    $rv .= $data_taint;  # carry taintedness over, avoid Encode bug
-    return $rv;  # decoded
 
-  } elsif ($charset_declared =~ /^(?:US-)?ASCII\z/i
+  # Try first as UTF-8 ignoring declaring?
+  my $tried_utf8;
+  if ($cnt_8bits && !$insist_on_declared_charset) {
+    if (eval { $rv = $enc_utf8->decode($_[0], 1|8); defined $rv }) {
+      dbg("message: decoded as charset UTF-8, declared %s", $charset_declared);
+      return $_[0]  if !$return_decoded;
+      $rv .= $data_taint;  # carry taintedness over, avoid Encode bug
+      return $rv;  # decoded
+    } else {
+      my $err = '';
+      if ($@) {
+        $err = $@; $err =~ s/\s+/ /gs; $err =~ s/(.*) at .*/$1/;
+        $err = " ($err)";
+      }
+      dbg("message: attempt to decode as UTF-8 failed, declared %s%s",
+        $charset_declared, $err);
+      $tried_utf8 = 1;
+    }
+  }
+
+  if ($charset_declared =~ /^(?:US-)?ASCII\z/i
            && !$insist_on_declared_charset) {
     # declared as US-ASCII but contains 8-bit characters, makes no sense
     # to attempt decoding first as strict US-ASCII as we know it would fail
@@ -511,7 +525,12 @@ sub _normalize {
       $rv .= $data_taint;  # carry taintedness over, avoid Encode bug
       return $rv;  # decoded
     } else {
-      dbg("message: failed decoding as declared charset $charset_declared");
+      my $err = '';
+      if ($@) {
+        $err = $@; $err =~ s/\s+/ /gs; $err =~ s/(.*) at .*/$1/;
+        $err = " ($err)";
+      }
+      dbg("message: failed decoding as declared charset %s%s", $charset_declared, $err);
     };
   } else {
     # try decoding as a declared character set
@@ -547,17 +566,26 @@ sub _normalize {
     if (!$decoder) {
       dbg("message: failed decoding, no decoder for a declared charset %s",
           $chset);
-    } else {
+    }
+    elsif ($tried_utf8 && $chset eq 'UTF-8') {
+      # was already tried initially, no point doing again
+    }
+    else {
       my $check_flags = Encode::LEAVE_SRC;  # 0x0008
       $check_flags |= Encode::FB_CROAK  unless $insist_on_declared_charset;
+      my $err = '';
       eval { $rv = $decoder->decode($_[0], $check_flags) };
+      if ($@) {
+        $err = $@; $err =~ s/\s+/ /gs; $err =~ s/(.*) at .*/$1/;
+        $err = " ($err)";
+      }
       if (lc $chset eq lc $charset_declared) {
-        dbg("message: %s as declared charset %s",
-            defined $rv ? 'decoded' : 'failed decoding', $charset_declared);
+        dbg("message: %s as declared charset %s%s",
+            defined $rv ? 'decoded' : 'failed decoding', $charset_declared, $err);
       } else {
-        dbg("message: %s as charset %s, declared %s",
+        dbg("message: %s as charset %s, declared %s%s",
             defined $rv ? 'decoded' : 'failed decoding',
-            $chset, $charset_declared);
+            $chset, $charset_declared, $err);
       }
     }
   }
@@ -582,11 +610,16 @@ sub _normalize {
   { # ASCII + NBSP + SHY + some punctuation characters
     # NBSP (A0) and SHY (AD) are at the same position in ISO-8859-* too
     # consider also: AE (r), 80 Euro
+    my $err = '';
     eval { $rv = $enc_w1252->decode($_[0], 1|8) };  # FB_CROAK | LEAVE_SRC
+    if ($@) {
+      $err = $@; $err =~ s/\s+/ /gs; $err =~ s/(.*) at .*/$1/;
+      $err = " ($err)";
+    }
     # the above can't fail, but keep code general just in case
-    dbg("message: %s as guessed charset %s, declared %s",
+    dbg("message: %s as guessed charset %s, declared %s%s",
         defined $rv ? 'decoded' : 'failed decoding',
-        'Windows-1252', $charset_declared);
+        'Windows-1252', $charset_declared, $err);
   }
 
   # If we were unsuccessful so far, try some guesswork
@@ -610,20 +643,30 @@ sub _normalize {
         dbg("message: failed decoding, no decoder for a detected charset %s",
             $charset_detected);
       } else {
+        my $err = '';
         eval { $rv = $decoder->decode($_[0], 1|8) };  # FB_CROAK | LEAVE_SRC
-        dbg("message: %s as detected charset %s, declared %s",
+        if ($@) {
+          $err = $@; $err =~ s/\s+/ /gs; $err =~ s/(.*) at .*/$1/;
+          $err = " ($err)";
+        }
+        dbg("message: %s as detected charset %s, declared %s%s",
             defined $rv ? 'decoded' : 'failed decoding',
-            $charset_detected, $charset_declared);
+            $charset_detected, $charset_declared, $err);
       }
     }
   }
 
   if (!defined $rv) {  # all decoding attempts failed so far, probably garbage
     # go for Windows-1252 which can't fail
+    my $err = '';
     eval { $rv = $enc_w1252->decode($_[0]) };
-    dbg("message: %s as last-resort charset %s, declared %s",
+    if ($@) {
+      $err = $@; $err =~ s/\s+/ /gs; $err =~ s/(.*) at .*/$1/;
+      $err = " ($err)";
+    }
+    dbg("message: %s as last-resort charset %s, declared %s%s",
         defined $rv ? 'decoded' : 'failed decoding',
-        'Windows-1252', $charset_declared);
+        'Windows-1252', $charset_declared, $err);
   }
 
   if (!defined $rv) {  # just in case - all decoding attempts failed so far
@@ -685,13 +728,20 @@ sub rendered {
                $self->{charset} =~ /^(?:US-ASCII|UTF-8)\z/i) {
         if ($text !~ tr/\x00-\x7F//c) {
           # all-ASCII, keep as octets (utf8 flag off)
+          dbg("message: rendered: text is all ASCII, keeping as octets");
         } else { # non-ASCII, try UTF-8
           my $rv;
           # with some luck input can be interpreted as UTF-8
           if (eval { $rv = $enc_utf8->decode($text, 1|8); defined $rv }) {
             $text = $rv;  # decoded to perl characters
             $character_semantics = 1;  # $text will be in characters
-          };
+          } else {
+            my $err = '';
+            if ($@) {
+              $err = $@; $err =~ s/\s+/ /gs; $err =~ s/(.*) at .*/$1/;
+            }
+            dbg("message: rendered: failed to decode text as UTF-8 ($err)");
+          }
         }
       } else {
         dbg("message: 'normalize_charset' is off, encoding will likely ".
