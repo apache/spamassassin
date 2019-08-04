@@ -458,10 +458,6 @@ sub _normalize {
   # workaround for Encode::decode taint laundering bug [rt.cpan.org #84879]
   my $data_taint = substr($_[0], 0, 0);  # empty string, tainted like $data
 
-  if (!defined $charset_declared || $charset_declared eq '') {
-    $charset_declared = 'us-ascii';
-  }
-
   # number of characters with code above 127
   my $cnt_8bits = $_[0] =~ tr/\x00-\x7F//c;
 
@@ -470,7 +466,8 @@ sub _normalize {
         /^(?: (?:US-)?ASCII | ANSI[_ ]? X3\.4- (?:1986|1968) |
               ISO646-US )\z/xsi)
   { # declared as US-ASCII (a.k.a. ANSI X3.4-1986) and it really is
-    dbg("message: kept, charset is US-ASCII as declared");
+    dbg("message: contains only US-ASCII characters, declared %s, not decoding",
+      $charset_declared);
     return $_[0];  # is all-ASCII, no need for decoding
   }
 
@@ -480,7 +477,8 @@ sub _normalize {
               UTF-?8 | (KOI8|EUC)-[A-Z]{1,2} |
               Big5 | GBK | GB[ -]?18030 (?:-20\d\d)? )\z/xsi)
   { # declared as extended ASCII, but it is actually a plain 7-bit US-ASCII
-    dbg("message: kept, charset is US-ASCII, declared %s", $charset_declared);
+    dbg("message: contains only US-ASCII characters, declared %s, not decoding",
+      $charset_declared);
     return $_[0];  # is all-ASCII, no need for decoding
   }
 
@@ -492,7 +490,8 @@ sub _normalize {
   my $tried_utf8;
   if ($cnt_8bits && !$insist_on_declared_charset) {
     if (eval { $rv = $enc_utf8->decode($_[0], 1|8); defined $rv }) {
-      dbg("message: decoded as charset UTF-8, declared %s", $charset_declared);
+      dbg("message: decoded as charset UTF-8, declared %s",
+        $charset_declared);
       return $_[0]  if !$return_decoded;
       $rv .= $data_taint;  # carry taintedness over, avoid Encode bug
       return $rv;  # decoded
@@ -502,7 +501,7 @@ sub _normalize {
         $err = $@; $err =~ s/\s+/ /gs; $err =~ s/(.*) at .*/$1/;
         $err = " ($err)";
       }
-      dbg("message: attempt to decode as UTF-8 failed, declared %s%s",
+      dbg("message: failed decoding as charset UTF-8, declared %s%s",
         $charset_declared, $err);
       $tried_utf8 = 1;
     }
@@ -520,7 +519,8 @@ sub _normalize {
 
     my $decoder = detect_utf16( $_[0] );
     if (eval { $rv = $decoder->decode($_[0], 1|8); defined $rv }) {
-      dbg("message: declared charset %s decoded as charset %s", $charset_declared, $decoder->name);
+      dbg("message: decoded as charset %s, declared %s",
+        $decoder->name, $charset_declared);
       return $_[0]  if !$return_decoded;
       $rv .= $data_taint;  # carry taintedness over, avoid Encode bug
       return $rv;  # decoded
@@ -530,7 +530,8 @@ sub _normalize {
         $err = $@; $err =~ s/\s+/ /gs; $err =~ s/(.*) at .*/$1/;
         $err = " ($err)";
       }
-      dbg("message: failed decoding as declared charset %s%s", $charset_declared, $err);
+      dbg("message: failed decoding as charset %s, declared %s%s",
+        $decoder->name, $charset_declared, $err);
     };
   } else {
     # try decoding as a declared character set
@@ -574,18 +575,16 @@ sub _normalize {
       my $check_flags = Encode::LEAVE_SRC;  # 0x0008
       $check_flags |= Encode::FB_CROAK  unless $insist_on_declared_charset;
       my $err = '';
-      eval { $rv = $decoder->decode($_[0], $check_flags) };
-      if ($@) {
-        $err = $@; $err =~ s/\s+/ /gs; $err =~ s/(.*) at .*/$1/;
-        $err = " ($err)";
-      }
-      if (lc $chset eq lc $charset_declared) {
-        dbg("message: %s as declared charset %s%s",
-            defined $rv ? 'decoded' : 'failed decoding', $charset_declared, $err);
+      if (eval { $rv = $decoder->decode($_[0], $check_flags); defined $rv }) {
+        dbg("message: decoded as charset %s, declared %s",
+          $decoder->name, $charset_declared);
       } else {
-        dbg("message: %s as charset %s, declared %s%s",
-            defined $rv ? 'decoded' : 'failed decoding',
-            $chset, $charset_declared, $err);
+        if ($@) {
+          $err = $@; $err =~ s/\s+/ /gs; $err =~ s/(.*) at .*/$1/;
+          $err = " ($err)";
+        }
+        dbg("message: failed decoding as charset %s, declared %s%s",
+          $decoder->name, $charset_declared, $err);
       }
     }
   }
@@ -597,7 +596,7 @@ sub _normalize {
   # Note that Windows-1252 is a proper superset of ISO-8859-1.
   #
   if (!defined $rv && !$cnt_8bits) {
-    dbg("message: kept, guessed charset is US-ASCII, declared %s",
+    dbg("message: contains only US-ASCII characters, declared %s, not decoding",
         $charset_declared);
     return $_[0];  # is all-ASCII, no need for decoding
 
@@ -694,114 +693,138 @@ or whatever the original type was), and the rendered text.
 sub rendered {
   my ($self) = @_;
 
-  if (!exists $self->{rendered}) {
-    # We only know how to render text/plain and text/html ...
-    # Note: for bug 4843, make sure to skip text/calendar parts
-    # we also want to skip things like text/x-vcard
-    # text/x-aol is ignored here, but looks like text/html ...
-    return(undef,undef) unless ( $self->{'type'} =~ /^text\/(?:plain|html)$/i );
+  # Cached?
+  if (exists $self->{rendered}) {
+    return ($self->{rendered_type}, $self->{rendered});
+  }
 
-    my $text = $self->decode;  # QP and Base64 decoding, bytes
-    my $text_len = length($text);  # num of bytes in original charset encoding
+  # We only know how to render text/plain and text/html ...
+  # Note: for bug 4843, make sure to skip text/calendar parts
+  # we also want to skip things like text/x-vcard
+  # text/x-aol is ignored here, but looks like text/html ...
+  my $type = lc $self->{'type'};
+  unless ($type eq 'text/plain' || $type eq 'text/html') {
+    return (undef,undef);
+  }
 
-    # render text/html always, or any other text|text/plain part as text/html
-    # based on a heuristic which simulates a certain common mail client
-    if ($text ne '' && ($self->{'type'} =~ m{^text/html$}i ||
-		        ($self->{'type'} =~ m{^text/plain$}i &&
-		         _html_render(substr($text, 0, 23)))))
-    {
-      $self->{rendered_type} = 'text/html';
+  my $text = $self->decode;  # QP and Base64 decoding, bytes
+  my $text_len = length($text);  # num of bytes in original charset encoding
 
-      # will input text to HTML::Parser be provided as Unicode characters?
-      my $character_semantics = 0;  # $text is in bytes
-      if ($self->{normalize} && $enc_utf8) {  # charset decoding requested
-        # Provide input to HTML::Parser as Unicode characters
-        # which avoids a HTML::Parser bug in utf8_mode
-        #   https://rt.cpan.org/Public/Bug/Display.html?id=99755
-        #   Note: the above bug was fixed in HTML-Parser 3.72, January 2016.
-        # Avoid unnecessary step of encoding-then-decoding by telling
-        # subroutine _normalize() to return Unicode text.  See Bug 7133
-        #
-        $character_semantics = 1;  # $text will be in characters
-        $text = _normalize($text, $self->{charset}, 1); # bytes to chars
-      } elsif (!defined $self->{charset} ||
-               $self->{charset} =~ /^(?:US-ASCII|UTF-8)\z/i) {
-        if ($text !~ tr/\x00-\x7F//c) {
-          # all-ASCII, keep as octets (utf8 flag off)
-          dbg("message: rendered: text is all ASCII, keeping as octets");
-        } else { # non-ASCII, try UTF-8
-          my $rv;
-          # with some luck input can be interpreted as UTF-8
-          if (eval { $rv = $enc_utf8->decode($text, 1|8); defined $rv }) {
-            $text = $rv;  # decoded to perl characters
-            $character_semantics = 1;  # $text will be in characters
-          } else {
-            my $err = '';
-            if ($@) {
-              $err = $@; $err =~ s/\s+/ /gs; $err =~ s/(.*) at .*/$1/;
-            }
-            dbg("message: rendered: failed to decode text as UTF-8 ($err)");
+  my $charset = $self->{charset};
+  if (!defined $charset) {
+    dbg("message: no charset declared, using us-ascii");
+    $charset = 'us-ascii';
+  }
+
+  # render text/html always, or any other text|text/plain part as text/html
+  # based on a heuristic which simulates a certain common mail client
+  if ($text ne '' && ($type eq 'text/html' ||
+       ($type eq 'text/plain' && _html_render(substr($text, 0, 23)))))
+  {
+    $self->{rendered_type} = 'text/html';
+
+    # will input text to HTML::Parser be provided as Unicode characters?
+    my $character_semantics = 0;  # $text is in bytes
+    if ($self->{normalize} && $enc_utf8) {  # charset decoding requested
+      # Provide input to HTML::Parser as Unicode characters
+      # which avoids a HTML::Parser bug in utf8_mode
+      #   https://rt.cpan.org/Public/Bug/Display.html?id=99755
+      #   Note: the above bug was fixed in HTML-Parser 3.72, January 2016.
+      # Avoid unnecessary step of encoding-then-decoding by telling
+      # subroutine _normalize() to return Unicode text.  See Bug 7133
+      #
+      $character_semantics = 1;  # $text will be in characters
+      $text = _normalize($text, $charset, 1); # bytes to chars
+    } elsif ($charset =~ /^(?:US-ASCII|UTF-8)\z/i) {
+      if ($text !~ tr/\x00-\x7F//c) {
+        # all-ASCII, keep as octets (utf8 flag off)
+        dbg("message: contains only US-ASCII characters, declared %s, not decoding",
+          $charset);
+      } else { # non-ASCII, try UTF-8
+        my $rv;
+        # with some luck input can be interpreted as UTF-8
+        if (eval { $rv = $enc_utf8->decode($text, 1|8); defined $rv }) {
+          $text = $rv;  # decoded to perl characters
+          $character_semantics = 1;  # $text will be in characters
+          dbg("message: decoded as charset UTF-8, declared %s", $charset);
+        } else {
+          my $err = '';
+          if ($@) {
+            $err = $@; $err =~ s/\s+/ /gs; $err =~ s/(.*) at .*/$1/;
+            $err = " ($err)";
           }
-        }
-      } else {
-        dbg("message: 'normalize_charset' is off, encoding will likely ".
-            "be misinterpreted; declared charset: %s", $self->{charset});
-      }
-      # the 1 requires decoded HTML results to be in characters (utf8 flag on)
-      my $html = Mail::SpamAssassin::HTML->new($character_semantics,1); # object
-
-      $html->parse($text);  # parse+render text
-
-      # resulting HTML-decoded text is in perl characters (utf8 flag on)
-      $self->{rendered} = $html->get_rendered_text();
-      $self->{visible_rendered} = $html->get_rendered_text(invisible => 0);
-      $self->{invisible_rendered} = $html->get_rendered_text(invisible => 1);
-      $self->{html_results} = $html->get_results();
-
-      # end-of-document result values that require looking at the text
-      my $r = $self->{html_results};	# temporary reference for brevity
-
-      # count the number of spaces in the rendered text
-      my $space;
-      if (utf8::is_utf8($self->{rendered})) {
-        my $str = $self->{rendered};
-        $str =~ s/\S+//g;  # delete non-whitespace Unicode characters
-        $space = length $str;  # count remaining Unicode space characters
-        undef $str;  # deallocate storage
-        dbg("message: spaces (Unicode) in HTML: %d out of %d%s",
-            $space, length $self->{rendered},
-            $character_semantics ? '' : ', octets!?');
-      } else {
-        $space = $self->{rendered} =~ tr/ \t\n\r\x0b//;
-        dbg("message: spaces (octets) in HTML: %d out of %d%s",
-            $space, length $self->{rendered},
-            $character_semantics ? ', chars!?' : '');
-      }
-      # we may want to add the count of other Unicode whitespace characters
-
-      $r->{html_length} = length $self->{rendered};  # perl characters count
-      $r->{non_space_len} = $r->{html_length} - $space;
-      $r->{ratio} = ($text_len - $r->{html_length}) / $text_len  if $text_len;
-    }
-
-    else {  # plain text
-      if ($self->{normalize} && $enc_utf8) {
-        # request transcoded result as UTF-8 octets!
-        $text = _normalize($text, $self->{charset}, 1); # bytes to chars
-      } elsif (!defined $self->{charset} ||
-               $self->{charset} =~ /^(?:US-ASCII|UTF-8)\z/i) {
-        if ($text =~ tr/\x00-\x7F//c) {  # non-ASCII, try UTF-8
-          my $rv;
-          # with some luck input can be interpreted as UTF-8
-          if (eval { $rv = $enc_utf8->decode($text, 1|8); defined $rv }) {
-            $text = $rv;  # decoded to perl characters
-          };
+          dbg("message: failed decoding as charset UTF-8, declared %s%s",
+            $charset, $err);
         }
       }
-      $self->{rendered_type} = $self->{type};
-      $self->{rendered} = $self->{'visible_rendered'} = $text;
-      $self->{'invisible_rendered'} = '';
+    } else {
+      dbg("message: 'normalize_charset' is off, encoding will likely ".
+          "be misinterpreted; declared charset: %s", $charset);
     }
+    # the 1 requires decoded HTML results to be in characters (utf8 flag on)
+    my $html = Mail::SpamAssassin::HTML->new($character_semantics,1); # object
+
+    $html->parse($text);  # parse+render text
+
+    # resulting HTML-decoded text is in perl characters (utf8 flag on)
+    $self->{rendered} = $html->get_rendered_text();
+    $self->{visible_rendered} = $html->get_rendered_text(invisible => 0);
+    $self->{invisible_rendered} = $html->get_rendered_text(invisible => 1);
+    $self->{html_results} = $html->get_results();
+
+    # end-of-document result values that require looking at the text
+    my $r = $self->{html_results};	# temporary reference for brevity
+
+    # count the number of spaces in the rendered text
+    my $space;
+    if (utf8::is_utf8($self->{rendered})) {
+      my $str = $self->{rendered};
+      $str =~ s/\S+//g;  # delete non-whitespace Unicode characters
+      $space = length $str;  # count remaining Unicode space characters
+      undef $str;  # deallocate storage
+      dbg("message: spaces (Unicode) in HTML: %d out of %d%s",
+          $space, length $self->{rendered},
+          $character_semantics ? '' : ', octets!?');
+    } else {
+      $space = $self->{rendered} =~ tr/ \t\n\r\x0b//;
+      dbg("message: spaces (octets) in HTML: %d out of %d%s",
+          $space, length $self->{rendered},
+          $character_semantics ? ', chars!?' : '');
+    }
+    # we may want to add the count of other Unicode whitespace characters
+
+    $r->{html_length} = length $self->{rendered};  # perl characters count
+    $r->{non_space_len} = $r->{html_length} - $space;
+    $r->{ratio} = ($text_len - $r->{html_length}) / $text_len  if $text_len;
+  }
+  else {  # plain text
+    if ($self->{normalize} && $enc_utf8) {
+      # request transcoded result as UTF-8 octets!
+      $text = _normalize($text, $charset, 1); # bytes to chars
+    } elsif ($charset =~ /^(?:US-ASCII|UTF-8)\z/i) {
+      if ($text =~ tr/\x00-\x7F//c) {  # non-ASCII, try UTF-8
+        my $rv;
+        # with some luck input can be interpreted as UTF-8
+        if (eval { $rv = $enc_utf8->decode($text, 1|8); defined $rv }) {
+          $text = $rv;  # decoded to perl characters
+          dbg("message: decoded as charset UTF-8, declared %s", $charset);
+        } else {
+          my $err = '';
+          if ($@) {
+            $err = $@; $err =~ s/\s+/ /gs; $err =~ s/(.*) at .*/$1/;
+            $err = " ($err)";
+          }
+          dbg("message: failed decoding as charset UTF-8, declared %s%s",
+            $charset, $err);
+        }
+      } else {
+        dbg("message: contains only US-ASCII characters, declared %s, not decoding",
+          $charset);
+      }
+    }
+    $self->{rendered_type} = $type;
+    $self->{rendered} = $self->{visible_rendered} = $text;
+    $self->{invisible_rendered} = '';
   }
 
   return ($self->{rendered_type}, $self->{rendered});
