@@ -1521,6 +1521,8 @@ sub uri_list_canonicalize {
     # chars minus ' ' (that is, dec 33-126, hex 21-7e)
     $nuri =~ s/\&\#0*(3[3-9]|[4-9]\d|1[01]\d|12[0-6]);/sprintf "%c",$1/ge;
     $nuri =~ s/\&\#x0*(2[1-9]|[3-6][a-fA-F0-9]|7[0-9a-eA-E]);/sprintf "%c",hex($1)/ge;
+    # handle other unicode dots (U+002E U+3002 U+FF0E U+FF61) -> .
+    $nuri =~ s/\&\#(?:x2e|12290|x3002|65294|xff0e|65377|xff61);/./gi;
 
     # put the new URI on the new list if it's different
     if ($nuri ne $uri) {
@@ -1575,7 +1577,7 @@ sub uri_list_canonicalize {
       my $found_redirector_match;
       foreach my $re (@{$redirector_patterns}) {
         if ("$proto$host$rest" =~ $re) {
-          next unless defined $1;
+          next unless defined $1 && index($1, '.') != -1;
           dbg("uri: parsed uri pattern: $re");
           dbg("uri: parsed uri found: $1 in redirector: $proto$host$rest");
           push (@uris, $1);
@@ -1586,7 +1588,7 @@ sub uri_list_canonicalize {
       if (!$found_redirector_match) {
         # try generic https? check if redirector pattern matching failed
         # bug 3308: redirectors like yahoo only need one '/' ... <grrr>
-        if ($rest =~ m{(https?:/{0,2}[^&#]+)}i) {
+        if ($rest =~ m{(https?:/{0,2}[^&#]+)}i && index($1, '.') != -1) {
           push(@uris, $1);
           dbg("uri: parsed uri found: $1 in hard-coded redirector");
         }
