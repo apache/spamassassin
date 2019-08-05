@@ -309,9 +309,6 @@ our @ISA = qw(Mail::SpamAssassin::Plugin);
 
 use constant LOG_COMPLETION_TIMES => 0;
 
-my $IPV4_ADDRESS = IPV4_ADDRESS;
-my $IP_PRIVATE = IP_PRIVATE;
-
 # constructor
 sub new {
   my $class = shift;
@@ -521,7 +518,7 @@ sub parse_and_canonicalize_subtest {
         # ok, already a decimal number
       } elsif (/^0x[0-9a-zA-Z]{1,8}\z/) {
         $_ = hex($_);  # hex -> number
-      } elsif (/^$IPV4_ADDRESS\z/o) {
+      } elsif ($_ =~ IS_IPV4_ADDRESS) {
         $_ = Mail::SpamAssassin::Util::my_inet_aton($_);  # quad-dot -> number
         $any_quad_dot = 1;
       } else {
@@ -840,7 +837,7 @@ sub query_hosts_or_domains {
     # IPv4 look-a-like / IPv6 address literal?
     if ($host =~ /^\d+\.\d+\.\d+\.\d+$/ || $host =~ /^\[/) {
       # only look up the IPv4 if it is public and valid
-      if ($host =~ /^$IPV4_ADDRESS$/o && $host !~ /^$IP_PRIVATE$/o) {
+      if ($host =~ IS_IPV4_ADDRESS && $host !~ IS_IP_PRIVATE) {
         # Use IP in RHSBL lookups
         $domain = $host;
       } else {
@@ -927,7 +924,7 @@ sub complete_ns_lookup {
       # misconfigure. Bind doesn't even allow that..
       if ($nsmatch =~ /^\d+\.\d+\.\d+\.\d+$/ || index($nsmatch, ':') >= 0) {
 	# only look up the IP if it is public and valid
-	if ($nsmatch =~ /^$IPV4_ADDRESS$/o && $nsmatch !~ /^$IP_PRIVATE$/o) {
+	if ($nsmatch =~ IS_IPV4_ADDRESS && $nsmatch !~ IS_IP_PRIVATE) {
           # Use IP in RHSBL lookups
           #$nsrhblstr = $nsmatch; # already set
         } else {
@@ -1070,7 +1067,7 @@ sub complete_dnsbl_lookup {
       # Net::DNS::RR::A::address() is available since Net::DNS 0.69
       $rdatastr = $rr->UNIVERSAL::can('address') ? $rr->address
                                                  : $rr->rdatastr;
-      if ($rdatastr =~ /^$IPV4_ADDRESS$/o) {
+      if ($rdatastr =~ IS_IPV4_ADDRESS) {
         $rdatanum = Mail::SpamAssassin::Util::my_inet_aton($rdatastr);
       }
     } elsif ($rr_type eq 'TXT') {

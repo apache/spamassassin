@@ -128,8 +128,6 @@ our @ISA = qw(Mail::SpamAssassin::Plugin);
 
 our $txtdata_can_provide_a_list;
 
-my $IPV4_ADDRESS = IPV4_ADDRESS;
-
 sub new {
   my ($class, $mailsa) = @_;
   $class = ref($class) || $class;
@@ -394,7 +392,7 @@ sub parsed_metadata {
 
   dbg("asn: using DNS for lookups");
   my $lookup_zone;
-  if ($ip =~ /^$IPV4_ADDRESS$/o) {
+  if ($ip =~ IS_IPV4_ADDRESS) {
     if (!defined $conf->{asnlookups}) {
       dbg("asn: asn_lookup for IPv4 not defined, skipping");
       return;

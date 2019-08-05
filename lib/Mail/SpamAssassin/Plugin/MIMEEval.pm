@@ -629,7 +629,7 @@ sub get_charset_from_ct_line {
 sub check_ma_non_text {
   my($self, $pms) = @_;
 
-  foreach my $map ($pms->{msg}->find_parts(qr@^multipart/alternative$@i)) {
+  foreach my $map ($pms->{msg}->find_parts(qr@^multipart/alternative$@)) {
     foreach my $p ($map->find_parts(qr/./, 1, 0)) {
       next if (lc $p->{'type'} eq 'multipart/related');
       next if (lc $p->{'type'} eq 'application/rtf');

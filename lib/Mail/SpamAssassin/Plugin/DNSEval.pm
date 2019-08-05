@@ -55,7 +55,6 @@ use re 'taint';
 our @ISA = qw(Mail::SpamAssassin::Plugin);
 
 my $IP_ADDRESS = IP_ADDRESS;
-my $IP_PRIVATE = IP_PRIVATE;
 
 # constructor: register the eval rule
 sub new {
@@ -211,7 +210,7 @@ sub ip_list_uniq_and_strip_private {
     next unless $ip;
     next if exists $seen{$ip};
     $seen{$ip} = 1;
-    next if $ip =~ /^$IP_PRIVATE$/o;
+    next if $ip =~ IS_IP_PRIVATE;
     push(@ips, $ip);
   }
   return @ips;
@@ -421,7 +420,7 @@ sub check_rbl_headers {
     } else {
       my $host = $pms->get($rbl_headers);
       chomp($host);
-      if($host =~ /^$IP_ADDRESS$/ ) {
+      if ($host =~ IS_IP_ADDRESS) {
         return if ($conf->{tflags}->{$rule}||'') =~ /\bdomains_only\b/;
         $host = reverse_ip_address($host);
       } else {
@@ -562,7 +561,7 @@ sub check_rbl_rcvd {
   foreach my $host ( @udnsrcvd ) {
     if((defined $host) and ($host ne "")) {
       chomp($host);
-      if($host =~ /^$IP_ADDRESS$/ ) {
+      if ($host =~ IS_IP_ADDRESS) {
         next if ($pms->{conf}->{tflags}->{$rule}||'') =~ /\bdomains_only\b/;
         $host = reverse_ip_address($host);
       } else {
@@ -614,7 +613,7 @@ sub _check_rbl_addresses {
   return unless scalar keys %hosts;
 
   for my $host (keys %hosts) {
-    if ($host =~ /^$IP_ADDRESS$/) {
+    if ($host =~ IS_IP_ADDRESS) {
       next if ($pms->{conf}->{tflags}->{$rule}||'') =~ /\bdomains_only\b/;
       $host = reverse_ip_address($host);
     } else {

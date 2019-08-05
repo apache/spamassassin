@@ -2280,14 +2280,14 @@ sub _tbirdurire {
 
   # knownscheme regexp looks for either a https?: or ftp: scheme, or www\d*\. or ftp\. prefix, i.e., likely to start a URL
   # schemeless regexp looks for a valid TLD at the end of what may be a FQDN, followed by optional ., optional :portnum, optional /rest_of_uri
-  my $urischemeless = qr/[a-z\d][a-z\d._-]{0,251}\.${tldsRE}\.?(?::\d{1,5})?(?:\/[^$tbirdenddelim]{1,251})?/io;
-  my $uriknownscheme = qr/(?:(?:(?:https?|ftp):(?:\/\/)?)|(?:(?:www\d{0,2}|ftp)\.))[^$tbirdenddelim]{1,251}/io;
-  my $urimailscheme = qr/(?:mailto:)?[^$tbirdenddelimplusat]{1,251}@[^$tbirdenddelimemail]{1,251}/io;
+  my $urischemeless = qr/[a-z\d][a-z\d._-]{0,251}\.${tldsRE}\.?(?::\d{1,5})?(?:\/[^$tbirdenddelim]{1,251})?/i;
+  my $uriknownscheme = qr/(?:(?:(?:https?|ftp):(?:\/\/)?)|(?:(?:www\d{0,2}|ftp)\.))[^$tbirdenddelim]{1,251}/i;
+  my $urimailscheme = qr/(?:mailto:)?[^$tbirdenddelimplusat]{1,251}@[^$tbirdenddelimemail]{1,251}/i;
 
   $self->{tbirdurire} = qr/(?:\b|(?<=$iso2022shift)|(?<=[$tbirdstartdelim]))
                         (?:(?:($uriknownscheme)(?=(?:[$tbirdenddelim]|\z))) |
                         (?:($urimailscheme)(?=(?:[$tbirdenddelimemail]|\z))) |
-                        (?:\b($urischemeless)(?=(?:[$tbirdenddelim]|\z))))/xo;
+                        (?:\b($urischemeless)(?=(?:[$tbirdenddelim]|\z))))/x;
 
   return $self->{tbirdurire};
 }
@@ -2447,7 +2447,7 @@ sub _process_text_uri_list {
         elsif ($uri =~ /^www\d{0,2}\./i) {
           $uri = "http://$uri";
         }
-        elsif ($uri =~ /\@/) {
+        elsif (index($uri, '@') != -1) {
           $uri = "mailto:$uri";
         }
         else {

@@ -153,7 +153,7 @@ sub new {
   if (ref $message eq 'ARRAY') {
      @message = @{$message};
   }
-  elsif (ref($message) eq 'GLOB' || ref($message) =~ /^IO::/) {
+  elsif (ref($message) eq 'GLOB' || index(ref($message), 'IO::') == 0) {
     if (defined fileno $message) {
 
       # sysread+split avoids a Perl I/O bug (Bug 5985)
@@ -250,7 +250,7 @@ sub new {
   # bug 4363
   # Check to see if we should do CRLF instead of just LF
   # For now, just check the first and last line and do whatever it does
-  if (@message && ($message[0] =~ /\015\012/ || $message[-1] =~ /\015\012/)) {
+  if (@message && (index($message[0], "\015\012") != -1 || index($message[-1], "\015\012") != -1)) {
     $self->{line_ending} = "\015\012";
     dbg("message: line ending changed to CRLF");
   }
@@ -300,7 +300,7 @@ sub new {
         }
       }
 
-      if ($current =~ /^\r?$/) {  # a regular end of a header section
+      if ($current eq "\012" || $current eq "\015\012") {  # a regular end of a header section
 	if ($eof) {
 	  $self->{'missing_head_body_separator'} = 1;
 	} else {
@@ -386,7 +386,7 @@ sub new {
   # either a blank line or the boundary (if defined), insert a blank line
   # to ensure proper parsing - do not consider MIME headers at the beginning of the body
   # to be part of the message headers.
-  if ($self->{'type'} =~ /^multipart\//i && $#message > 0 && $message[0] =~ /\S/)
+  if (index($self->{'type'}, 'multipart/') == 0 && $#message > 0 && $message[0] =~ /\S/)
   {
     if (!defined $boundary || $message[0] !~ /^--\Q$boundary\E/)
     {
@@ -765,7 +765,7 @@ sub parse_body {
     #
     my ($msg, $boundary, $body, $subparse) = @$toparse;
 
-    if ($msg->{'type'} =~ m{^multipart/}i && defined $boundary && $subparse > 0) {
+    if (index($msg->{'type'}, 'multipart/') == 0 && defined $boundary && $subparse > 0) {
       $self->_parse_multipart($toparse);
     }
     else {
@@ -773,7 +773,8 @@ sub parse_body {
       $self->_parse_normal($toparse);
 
       # bug 5041: process message/*, but exclude message/partial content types
-      if ($msg->{'type'} =~ m{^message/(?!partial\z)}i && $subparse > 0)
+      if (index($msg->{'type'}, 'message/') == 0 &&
+          $msg->{'type'} ne 'message/partial' && $subparse > 0)
       {
         # Just decode the part, but we don't need the resulting string here.
         $msg->decode(0);
@@ -789,7 +790,7 @@ sub parse_body {
         # bug 5051, bug 3748: check $msg->{decoded}: sometimes message/* parts
         # have no content, and we get stuck waiting for STDIN, which is bad. :(
 
-        if ($msg->{'type'} =~ m{^message/(?:rfc822|global)\z}i &&
+        if (($msg->{'type'} eq 'message/rfc822' || $msg->{'type'} eq 'message/global') &&
             defined $msg->{'decoded'} && $msg->{'decoded'} ne '')
         {
 	  # Ok, so this part is still semi-recursive, since M::SA::Message
@@ -1058,7 +1059,7 @@ sub _parse_normal {
 
   # multipart sections are required to have a boundary set ...  If this
   # one doesn't, assume it's malformed and revert to text/plain
-  $msg->{'type'} = ($ct[0] !~ m@^multipart/@i || defined $boundary ) ? $ct[0] : 'text/plain';
+  $msg->{'type'} = (index($ct[0], 'multipart/') != 0 || defined $boundary) ? $ct[0] : 'text/plain';
   $msg->{'charset'} = $ct[2];
 
   # attempt to figure out a name for this attachment if there is one ...
@@ -1076,7 +1077,8 @@ sub _parse_normal {
   # ahead and write the part data out to a temp file -- why keep sucking
   # up RAM with something we're not going to use?
   #
-  if ($msg->{'type'} !~ m@^(?:text/(?:plain|html)$|message\b)@) {
+  unless ($msg->{'type'} eq 'text/plain' || $msg->{'type'} eq 'text/html' ||
+          index($msg->{'type'}, 'message/') == 0) {
     my($filepath, $fh);
     eval {
       ($filepath, $fh) = Mail::SpamAssassin::Util::secure_tmpfile();  1;
@@ -1111,7 +1113,7 @@ sub get_mimepart_digests {
   if (!exists $self->{mimepart_digests}) {
     # traverse all parts which are leaves, recursively
     $self->{mimepart_digests} =
-      [ map(sha1_hex($_->decode) . ':' . lc($_->{type}||''),
+      [ map(sha1_hex($_->decode) . ':' . ($_->{type}||''),
             $self->find_parts(qr/^/,1,1)) ];
   }
   return $self->{mimepart_digests};
@@ -1220,7 +1222,7 @@ sub get_decoded_body_text_array {
   $self->{text_decoded} = [ ];
 
   # Find all parts which are leaves
-  my @parts = $self->find_parts(qr/^(?:text|message)\b/i,1);
+  my @parts = $self->find_parts(qr/^(?:text|message)\b/,1);
   return $self->{text_decoded} unless @parts;
 
   # Go through each part

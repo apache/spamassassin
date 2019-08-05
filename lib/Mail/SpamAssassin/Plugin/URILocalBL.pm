@@ -373,7 +373,7 @@ sub check_uri_local_bl {
         dbg("excluded $host, domain $domain matches");
         next;
       }
-      elsif ($host =~ /^$IP_ADDRESS$/o) {
+      elsif ($host =~ IS_IP_ADDRESS) {
         if ($self->_check_host($pms, $rulename, $host, [$host])) {
           # if hit, rule is done
           return 0;

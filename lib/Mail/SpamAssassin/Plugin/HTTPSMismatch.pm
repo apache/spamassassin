@@ -49,8 +49,6 @@ sub new {
 sub check_https_http_mismatch {
   my ($self, $permsgstatus, undef, $minanchors, $maxanchors) = @_;
 
-  my $IP_ADDRESS = IP_ADDRESS;
-
   $minanchors ||= 1;
 
   if (!exists $permsgstatus->{chhm_hit}) {
@@ -65,10 +63,10 @@ sub check_https_http_mismatch {
       next unless (exists $v->{anchor_text} && @{$v->{anchor_text}});
 
       my $uri;
-      if ($k =~ m@^https?://([^/:]+)@i) {
+      if ($k =~ m@^https?://([^/:?#]+)@i) {
         $uri = $1;
         # Skip IPs since there's another rule to catch that already
-        if ($uri =~ /^$IP_ADDRESS+$/) {
+        if ($uri =~ IS_IP_ADDRESS) {
           undef $uri;
           next;
         } 
@@ -82,12 +80,12 @@ sub check_https_http_mismatch {
       $permsgstatus->{chhm_anchors}++ if exists $v->{anchor_text};
 
       foreach (@{$v->{anchor_text}}) {
-        if (m@https://([^/:]+)@i) {
+        if (m@https://([^/:?#]+)@i) {
           my $https = $1;
 
 	  # want to compare whole hostnames instead of domains?
 	  # comment this next section to the blank line.
-          if ($https !~ /^$IP_ADDRESS+$/) {
+          if ($https !~ IS_IP_ADDRESS) {
 	    $https = $self->{main}->{registryboundaries}->trim_domain($https);
             undef $https unless ($self->{main}->{registryboundaries}->is_domain_valid($https));
           }

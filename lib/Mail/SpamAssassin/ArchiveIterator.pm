@@ -25,7 +25,7 @@ use warnings;
 use re 'taint';
 
 use Errno qw(ENOENT EACCES EBADF);
-use Mail::SpamAssassin::Util;
+use Mail::SpamAssassin::Util qw(compile_regexp);
 use Mail::SpamAssassin::Constants qw(:sa);
 use Mail::SpamAssassin::Logger;
 use Mail::SpamAssassin::AICache;
@@ -432,7 +432,7 @@ sub _run_mailbox {
   my $size = 0;
   for ($!=0; <INPUT>; $!=0) {
     #Changed Regex to use option Per bug 6703
-    last if (substr($_,0,5) eq "From " && @msg && /$self->{opt_from_regex}/o);
+    last if (/^From / && @msg && $_ =~ $self->{opt_from_regex});
     $size += length($_);
     push (@msg, $_);
 
@@ -663,11 +663,15 @@ sub _set_default_message_selection_opts {
   $self->{opt_want_date} = 1 unless (defined $self->{opt_want_date});
   $self->{opt_cache} = 0 unless (defined $self->{opt_cache});
   #Changed Regex to include boundaries for Communigate Pro versions (5.2.x and later). per Bug 6413
-  $self->{opt_from_regex} = '^From \S+  ?(\S\S\S \S\S\S .?\d .?\d:\d\d:\d\d \d{4}|.?\d-\d\d-\d{4}_\d\d:\d\d:\d\d_)' unless (defined $self->{opt_from_regex});
-
-  #STRIP LEADING AND TRAILING / FROM REGEX FOR OPTION
-  $self->{opt_from_regex} =~ s/^\///;
-  $self->{opt_from_regex} =~ s/\/$//;
+  if (!defined $self->{opt_from_regex}) {
+    $self->{opt_from_regex} = qr/^From \S+  ?(\S\S\S \S\S\S .?\d .?\d:\d\d:\d\d \d{4}|.?\d-\d\d-\d{4}_\d\d:\d\d:\d\d_)/;
+  } elsif (ref($self->{opt_from_regex}) ne 'Regexp') {
+    my ($rec, $err) = compile_regexp($self->{opt_from_regex}, 1);
+    if (!$rec) {
+      die "fatal: invalid mbox_format_from_regex '$self->{opt_from_regex}': $err\n";
+    }
+    $self->{opt_from_regex} = $rec;
+  }
 
   dbg("archive-iterator: _set_default_message_selection_opts After: Scanprob[$self->{opt_scanprob}], want_date[$self->{opt_want_date}], cache[$self->{opt_cache}], from_regex[$self->{opt_from_regex}]");
 
@@ -966,7 +970,7 @@ sub _scan_mailbox {
 	    }
 	  }
           #Changed Regex to use option Per bug 6703
-	  if (substr($_,0,5) eq "From " && /$self->{opt_from_regex}/o) {
+	  if (/^From / && $_ =~ $self->{opt_from_regex}) {
 	    $in_header = 1;
 	    $first = $_;
 	    $start = $where;
@@ -1093,10 +1097,9 @@ sub _scan_mbx {
 
       # skip mbx headers to the first email...
       seek(INPUT,2048,0)  or die "cannot reposition file to 2048: $!";
-      my $sep = MBX_SEPARATOR;
 
       for ($!=0; <INPUT>; $!=0) {
-        if ($_ =~ /$sep/) {
+        if ($_ =~ MBX_SEPARATOR) {
 	  my $offset = tell INPUT;
           $offset >= 0  or die "cannot obtain file position: $!";
 	  my $size = $2;

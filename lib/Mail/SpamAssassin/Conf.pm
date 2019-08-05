@@ -1642,8 +1642,7 @@ documentation for details.
       }
       my $scope = '';  # scoped IP address?
       $scope = $1  if $address =~ s/ ( % [A-Z0-9._~-]* ) \z//xsi;
-      my $IP_ADDRESS = IP_ADDRESS;  # IP_ADDRESS regexp does not handle scope
-      if ($address =~ /$IP_ADDRESS/ && $port >= 1 && $port <= 65535) {
+      if ($address =~ IS_IP_ADDRESS && $port >= 1 && $port <= 65535) {
         $self->{dns_servers} = []  if !$self->{dns_servers};
         # checked, untainted, stored in a normalized form
         push(@{$self->{dns_servers}}, untaint_var("[$address$scope]:$port"));
@@ -4143,13 +4142,14 @@ Plugins can override this internally if required.
     type => $Mail::SpamAssassin::Conf::CONF_TYPE_STRING,
     code => sub {
       my ($self, $key, $value, $line) = @_;
-      if ($value eq 'GeoIP2::Database::Reader' || $value eq 'GeoIP2') {
+      $value = lc $value;
+      if ($value eq 'geoip2::database::reader' || $value eq 'geoip2') {
         $self->{geodb}->{module} = 'geoip2';
-      } elsif ($value eq 'Geo::IP' || $value eq 'GeoIP') {
+      } elsif ($value eq 'geo::ip' || $value eq 'geoip') {
         $self->{geodb}->{module} = 'geoip';
-      } elsif ($value eq 'IP::Country::DB_File' || $value eq 'DB_File') {
+      } elsif ($value eq 'ip::country::db_file' || $value eq 'db_file') {
         $self->{geodb}->{module} = 'dbfile';
-      } elsif ($value eq 'IP::Country::Fast' || $value eq 'Fast') {
+      } elsif ($value eq 'ip::country::fast' || $value eq 'fast') {
         $self->{geodb}->{module} = 'fast';
       } else {
         return $Mail::SpamAssassin::Conf::INVALID_VALUE;
@@ -4857,13 +4857,13 @@ sub trim_rules {
     push(@all_rules, $self->get_rule_keys($rule_type));
   }
 
-  my @rules_to_keep = grep(/$rec/, @all_rules);
+  my @rules_to_keep = grep(/$rec/o, @all_rules);
 
   if (@rules_to_keep == 0) {
     die "config: trim_rules: all rules excluded, nothing to test\n";
   }
 
-  my @meta_tests    = grep(/$rec/, $self->get_rule_keys('meta_tests'));
+  my @meta_tests    = grep(/$rec/o, $self->get_rule_keys('meta_tests'));
   foreach my $meta (@meta_tests) {
     push(@rules_to_keep, $self->add_meta_depends($meta))
   }

@@ -2069,15 +2069,15 @@ sub expand_name {
   if (am_running_on_windows()) {
     my $userprofile = $ENV{USERPROFILE} || '';
 
-    return $userprofile if ($userprofile && $userprofile =~ m/^[a-z]\:[\/\\]/oi);
-    return $userprofile if ($userprofile =~ m/^\\\\/o);
+    return $userprofile if ($userprofile && $userprofile =~ m/^[a-z]\:[\/\\]/i);
+    return $userprofile if ($userprofile =~ m/^\\\\/);
 
-    return $home if ($home && $home =~ m/^[a-z]\:[\/\\]/oi);
-    return $home if ($home =~ m/^\\\\/o);
+    return $home if ($home && $home =~ m/^[a-z]\:[\/\\]/i);
+    return $home if ($home =~ m/^\\\\/);
 
     return '';
   } else {
-    return $home if ($home && $home =~ /\//o);
+    return $home if ($home && index($home, '/') != -1);
     return (getpwnam($name))[7] if ($name ne '');
     return (getpwuid($>))[7];
   }
@@ -2244,8 +2244,8 @@ sub find_all_addrs_in_line {
   my ($self, $line) = @_;
 
   # a more permissive pattern based on "dot-atom" as per RFC2822
-  my $ID_PATTERN   = '[-a-z0-9_\+\:\=\!\#\$\%\&\*\^\?\{\}\|\~\/\.]+';
-  my $HOST_PATTERN = '[-a-z0-9_\+\:\/]+';
+  my $ID_PATTERN   = qr/[-a-zA-Z0-9_\+\:\=\!\#\$\%\&\*\^\?\{\}\|\~\/\.]+/;
+  my $HOST_PATTERN = qr/[-a-zA-Z0-9_\+\:\/]+/;
 
   my @addrs;
   my %seen;

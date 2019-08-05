@@ -118,10 +118,6 @@ my %country_to_continent = (
 'JE'=>'EU','BL'=>'NA','MF'=>'NA','BQ'=>'NA','SS'=>'AF','**'=>'**',
 );
 
-my $IP_PRIVATE = IP_PRIVATE;
-my $IP_ADDRESS = IP_ADDRESS;
-my $IPV4_ADDRESS = IPV4_ADDRESS;
-
 sub new {
   my ($class, $conf) = @_;
   $class = ref($class) || $class;
@@ -500,7 +496,7 @@ sub load_geoip {
   $db->{city} and $dbapi->{city} = sub {
     my $res = {};
     my $city;
-    if ($_[1] =~ /^$IPV4_ADDRESS$/o) {
+    if ($_[1] =~ IS_IPV4_ADDRESS) {
       $city = $_[0]->{db}->{city}->record_by_addr($_[1]);
     } elsif ($_[0]->{db}->{city_v6}) {
       $city = $_[0]->{db}->{city_v6}->country_code_by_addr_v6($_[1]);
@@ -525,7 +521,7 @@ sub load_geoip {
     my $res = {};
     my $country;
     eval {
-      if ($_[1] =~ /^$IPV4_ADDRESS$/o) {
+      if ($_[1] =~ IS_IPV4_ADDRESS) {
         $country = $_[0]->{db}->{country}->country_code_by_addr($_[1]);
       } elsif ($_[0]->{db}->{country_v6}) {
         $country = $_[0]->{db}->{country_v6}->country_code_by_addr_v6($_[1]);
@@ -547,7 +543,7 @@ sub load_geoip {
     my $res = {};
     my $isp;
     eval {
-      if ($_[1] =~ /^$IPV4_ADDRESS$/o) {
+      if ($_[1] =~ IS_IPV4_ADDRESS) {
         $isp = $_[0]->{db}->{isp}->isp_by_addr($_[1]);
       } else {
         # TODO?
@@ -568,7 +564,7 @@ sub load_geoip {
     my $res = {};
     my $asn;
     eval {
-      if ($_[1] =~ /^$IPV4_ADDRESS$/o) {
+      if ($_[1] =~ IS_IPV4_ADDRESS) {
         $asn = $_[0]->{db}->{asn}->isp_by_addr($_[1]);
       } else {
         # TODO?
@@ -622,7 +618,7 @@ sub load_dbfile {
   $db->{country} and $dbapi->{country} = $dbapi->{country_v6} = sub {
     my $res = {};
     my $country;
-    if ($_[1] =~ /^$IPV4_ADDRESS$/o) {
+    if ($_[1] =~ IS_IPV4_ADDRESS) {
       $country = $_[0]->{db}->{country}->inet_atocc($_[1]);
     } else {
       $country = $_[0]->{db}->{country}->inet6_atocc($_[1]);
@@ -663,7 +659,7 @@ sub load_fast {
   $db->{country} and $dbapi->{country} = sub {
     my $res = {};
     my $country;
-    if ($_[1] =~ /^$IPV4_ADDRESS$/o) {
+    if ($_[1] =~ IS_IPV4_ADDRESS) {
       $country = $_[0]->{db}->{country}->inet_atocc($_[1]);
     } else {
       return $res
@@ -696,11 +692,11 @@ sub get_country {
 
   return undef if !defined $ip || $ip !~ /\S/; ## no critic (ProhibitExplicitReturnUndef)
 
-  if ($ip =~ /^$IP_PRIVATE$/o) {
+  if ($ip =~ IS_IP_PRIVATE) {
     return '**';
   }
 
-  if ($ip !~ /^$IP_ADDRESS$/o) {
+  if ($ip !~ IS_IP_ADDRESS) {
     $ip = name_to_ip($ip);
     return 'XX' if !defined $ip;
   }
@@ -766,11 +762,11 @@ sub get_all {
 
   my $all = {};
 
-  if ($ip =~ /^$IP_PRIVATE$/o) {
+  if ($ip =~ IS_IP_PRIVATE) {
     return { 'country' => '**' };
   }
 
-  if ($ip !~ /^$IP_ADDRESS$/o) {
+  if ($ip !~ IS_IP_ADDRESS) {
     $ip = name_to_ip($ip);
     if (!defined $ip) {
       return { 'country' => 'XX' };

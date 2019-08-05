@@ -131,7 +131,7 @@ our $IGNORED_HDRS = qr{(?: (?:X-)?Sender    # misc noise
   | X-Gnus-Mail-Source
   | Xref
 
-)}x;
+)}ix;
 
 # Note only the presence of these headers, in order to reduce the
 # hapaxen they generate.
@@ -1172,7 +1172,7 @@ sub _tokenize_line {
     # tokens, so the SQL BayesStore returns undef.  I really want a way
     # of optimizing that out, but I haven't come up with anything yet.
     #
-    next if ( defined $magic_re && $token =~ /$magic_re/ );
+    next if ( defined $magic_re && $token =~ /$magic_re/o );
 
     # *do* keep 3-byte tokens; there's some solid signs in there
     my $len = length($token);

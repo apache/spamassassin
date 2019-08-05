@@ -65,8 +65,6 @@ BEGIN {
   }
 }
 
-my $IPV4_ADDRESS = IPV4_ADDRESS;
-
 ###########################################################################
 
 sub new {
@@ -245,7 +243,7 @@ sub available_nameservers {
       local($1,$2);
       /^ \[ (.*) \] : (\d+) \z/xs  or next;
       my($addr,$port) = ($1,$2);
-      if ($addr =~ /^$IPV4_ADDRESS\z/o) {
+      if ($addr =~ IS_IPV4_ADDRESS) {
         push(@filtered_addr_port, $_)  unless $self->{force_ipv6};
       } elsif ($addr =~ /:.*:/) {
         push(@filtered_addr_port, $_)  unless $self->{force_ipv4};
@@ -385,7 +383,7 @@ sub connect_sock {
     $srcaddr = "0.0.0.0";
   } elsif ($self->{force_ipv6}) {
     $srcaddr = "::";
-  } elsif ($ns_addr =~ /^$IPV4_ADDRESS\z/o) {
+  } elsif ($ns_addr =~ IS_IPV4_ADDRESS) {
     $srcaddr = "0.0.0.0";
   } elsif ($ns_addr =~ /:.*:/) {
     $srcaddr = "::";
@@ -535,7 +533,7 @@ sub new_dns_packet {
 
   # construct a PTR query if it looks like an IPv4 address
   if (!defined($type) || $type eq 'PTR') {
-    if ($domain =~ /^$IPV4_ADDRESS$/o) {
+    if ($domain =~ IS_IPV4_ADDRESS) {
       $domain = reverse_ip_address($domain).".in-addr.arpa.";
       $type = 'PTR';
     }
@@ -871,7 +869,7 @@ sub poll_responses {
           if ($id =~ m{^(\d+)/}) {
             my $dnsid = $1;  # the raw DNS packet id
             my @matches =
-              grep(m{^\Q$dnsid\E/}, keys %{$self->{id_to_callback}});
+              grep(m{^\Q$dnsid\E/}o, keys %{$self->{id_to_callback}});
             if (!@matches) {
               info("dns: no likely matching queries for id %s", $dnsid);
             } else {

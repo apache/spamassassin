@@ -36,8 +36,6 @@ use Mail::SpamAssassin::Logger;
 use Mail::SpamAssassin::Util qw(idn_to_ascii is_fqdn_valid);
 use Mail::SpamAssassin::Constants qw(:ip);
 
-my $IP_ADDRESS = IP_ADDRESS;
-
 # called from SpamAssassin->init() to create $self->{util_rb}
 sub new {
   my $class = shift;
@@ -255,7 +253,7 @@ sub uri_to_domain {
   my $domain = $host;
 
   # keep IPs intact
-  if ($host !~ /^$IP_ADDRESS$/) {
+  if ($host !~ IS_IP_ADDRESS) {
     # check that it's a valid hostname/fqdn
     return unless is_fqdn_valid($host, 1);
     # ignore invalid TLDs

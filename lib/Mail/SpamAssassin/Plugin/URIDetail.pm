@@ -32,7 +32,7 @@ rules apply to all URIs found in the message.
 
 The format for defining a rule is as follows:
 
-  uri_detail SYMBOLIC_TEST_NAME key1 =~ /value1/  key2 !~ /value2/ ...
+  uri_detail SYMBOLIC_TEST_NAME key1 =~ /value1/i  key2 !~ /value2/ ...
 
 Supported keys are:
 

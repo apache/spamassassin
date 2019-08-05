@@ -913,12 +913,12 @@ Delete the specified header (decoded and raw) from the Node information.
 sub delete_header {
   my($self, $hdr) = @_;
 
-  foreach ( grep(/^${hdr}$/i, keys %{$self->{'headers'}}) ) {
+  foreach ( grep(/^${hdr}$/io, keys %{$self->{'headers'}}) ) {
     delete $self->{'headers'}->{$_};
     delete $self->{'raw_headers'}->{$_};
   }
   
-  my @neworder = grep(!/^${hdr}$/i, @{$self->{'header_order'}});
+  my @neworder = grep(!/^${hdr}$/io, @{$self->{'header_order'}});
   $self->{'header_order'} = \@neworder;
 }
 
@@ -984,7 +984,7 @@ sub _decode_header {
     # Bug 6945: some header fields must not be processed for MIME encoding
     # Bug 7249: leave out the Content-*
 
-  } elsif ($header_field_body =~ /=\?/) {  # triage for possible encoded-words
+  } elsif (index($header_field_body, '=?') != -1) {  # triage for possible encoded-words
     local($1,$2,$3,$4);
 
     # Multiple encoded sections must ignore the interim whitespace.

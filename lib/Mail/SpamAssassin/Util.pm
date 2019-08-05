@@ -79,7 +79,7 @@ use POSIX qw(:sys_wait_h WIFEXITED WIFSIGNALED WIFSTOPPED WEXITSTATUS
 ###########################################################################
 
 use constant HAS_MIME_BASE64 => eval { require MIME::Base64; };
-use constant RUNNING_ON_WINDOWS => ($^O =~ /^(?:mswin|dos|os2)/oi);
+use constant RUNNING_ON_WINDOWS => ($^O =~ /^(?:mswin|dos|os2)/i);
 
 # These are only defined as stubs on Windows (see bugs 6798 and 6470).
 BEGIN {
@@ -115,7 +115,7 @@ BEGIN {
   no bytes;  # make sure there is no 'use bytes' in effect
   my $dot_chars = "\x{2024}\x{3002}\x{FF0E}\x{FF61}\x{FE52}";  # \x{002E}
   my $dot_bytes = join('|', split(//,$dot_chars));  utf8::encode($dot_bytes);
-  $ALT_FULLSTOP_UTF8_RE = qr/$dot_bytes/so;
+  $ALT_FULLSTOP_UTF8_RE = qr/$dot_bytes/s;
 }
 
 ###########################################################################
@@ -275,7 +275,7 @@ sub untaint_file_path {
   # Also return '' if input is '', as it is a safe path.
   # Bug 7264: allow also parenthesis, e.g. "C:\Program Files (x86)"
   my $chars = '-_A-Za-z0-9.%=+,/:()\\@\\xA0-\\xFF\\\\';
-  my $re = qr{^\s*([$chars][${chars}~ ]*)\z}o;
+  my $re = qr{^\s*([$chars][${chars}~ ]*)\z};
 
   if ($path =~ $re) {
     $path = $1;
@@ -377,8 +377,8 @@ sub taint_var {
 ###########################################################################
 
 # Check for full hostname / FQDN / DNS name validity.  IP addresses must be
-# validated with other functions like $IP_ADDRESS.  Does not check for valid
-# TLD, use $self->{main}->{registryboundaries}->is_domain_valid()
+# validated with other functions like Constants::IP_ADDRESS.  Does not check
+# for valid TLD, use $self->{main}->{registryboundaries}->is_domain_valid()
 # additionally for that.  If $is_ascii given and true, skip idn_to_ascii()
 # conversion.
 sub is_fqdn_valid {
@@ -490,7 +490,7 @@ sub idn_to_ascii {
     # following characters MUST be recognized as dots: U+002E (full stop),
     # U+3002 (ideographic full stop), U+FF0E (fullwidth full stop),
     # U+FF61 (halfwidth ideographic full stop).
-    if ($s =~ s/$ALT_FULLSTOP_UTF8_RE/./gso) {
+    if ($s =~ s/$ALT_FULLSTOP_UTF8_RE/./gs) {
       dbg("util: idn_to_ascii: alternative dots normalized: '%s' -> '%s'",
            $_[0], $s);
     }
@@ -996,11 +996,11 @@ sub extract_ipv4_addr_from_string {
   return unless defined($str);
 
   if ($str =~ /\b(
-			(?:1\d\d|2[0-4]\d|25[0-5]|[1-9]\d|\d)\.
-			(?:1\d\d|2[0-4]\d|25[0-5]|[1-9]\d|\d)\.
-			(?:1\d\d|2[0-4]\d|25[0-5]|[1-9]\d|\d)\.
-			(?:1\d\d|2[0-4]\d|25[0-5]|[1-9]\d|\d)
-		      )\b/ix)
+                       (?:1\d\d|2[0-4]\d|25[0-5]|[1-9]\d|\d)\.
+                       (?:1\d\d|2[0-4]\d|25[0-5]|[1-9]\d|\d)\.
+                       (?:1\d\d|2[0-4]\d|25[0-5]|[1-9]\d|\d)\.
+                       (?:1\d\d|2[0-4]\d|25[0-5]|[1-9]\d|\d)
+                     )\b/ix)
   {
     if (defined $1) { return $1; }
   }
@@ -1035,7 +1035,7 @@ sub extract_ipv4_addr_from_string {
     return $fq_hostname if defined($fq_hostname);
 
     $fq_hostname = hostname();
-    if ($fq_hostname !~ /\./) { # hostname doesn't contain a dot, so it can't be a FQDN
+    if (index($fq_hostname, '.') == -1) { # hostname doesn't contain a dot, so it can't be a FQDN
       my @names = grep(/^\Q${fq_hostname}.\E/o,                         # grep only FQDNs
                     map { split } (gethostbyname($fq_hostname))[0 .. 1] # from all aliases
                   );
@@ -1954,8 +1954,8 @@ sub compile_regexp {
   local($1);
 
   # Do not allow already compiled regexes or other funky refs
-  if (ref($re)) {
-    return (undef, 'ref passed');
+  if (ref($re) ne '') {
+    return (undef, 'ref passed: '.ref($re));
   }
 
   # try stripping by default

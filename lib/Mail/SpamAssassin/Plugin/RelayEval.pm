@@ -28,6 +28,8 @@ use re 'taint';
 
 our @ISA = qw(Mail::SpamAssassin::Plugin);
 
+my $IPV4_ADDRESS = IPV4_ADDRESS;
+
 # constructor: register the eval rule
 sub new {
   my $class = shift;
@@ -84,12 +86,10 @@ sub check_for_numeric_helo {
   my $rcvd = $pms->{relays_untrusted_str};
 
   if ($rcvd) {
-    my $IP_ADDRESS = IPV4_ADDRESS;
-    my $IP_PRIVATE = IP_PRIVATE;
     local $1;
     # no re "strict";  # since perl 5.21.8: Ranges of ASCII printables...
-    if ($rcvd =~ /\bhelo=($IP_ADDRESS)(?=[\000-\040,;\[()<>]|\z)/i  # Bug 5878
-        && $1 !~ /$IP_PRIVATE/) {
+    if ($rcvd =~ /\bhelo=($IPV4_ADDRESS)(?=[\000-\040,;\[()<>]|\z)/i  # Bug 5878
+        && $1 !~ IS_IP_PRIVATE) {
       return 1;
     }
   }
@@ -108,23 +108,21 @@ sub check_for_illegal_ip {
 # due to bug in pure IPv6 address regular expression
 sub helo_ip_mismatch {
   my ($self, $pms) = @_;
-  my $IP_ADDRESS = IPV4_ADDRESS;
-  my $IP_PRIVATE = IP_PRIVATE;
 
   for my $relay (@{$pms->{relays_untrusted}}) {
     # is HELO usable?
-    next unless ($relay->{helo} =~ m/^$IP_ADDRESS$/ &&
-		 $relay->{helo} !~ /$IP_PRIVATE/);
+    next unless ($relay->{helo} =~ IS_IPV4_ADDRESS &&
+		 $relay->{helo} !~ IS_IP_PRIVATE);
     # compare HELO with IP
-    return 1 if ($relay->{ip} =~ m/^$IP_ADDRESS$/ &&
-		 $relay->{ip} !~ m/$IP_PRIVATE/ &&
+    return 1 if ($relay->{ip} =~ IS_IPV4_ADDRESS &&
+		 $relay->{ip} !~ IS_IP_PRIVATE &&
 		 $relay->{helo} ne $relay->{ip} &&
 		 # different IP is okay if in same /24
 		 $relay->{helo} =~ /^(\d+\.\d+\.\d+\.)/ &&
 		 index($relay->{ip}, $1) != 0);
   }
 
-  0;
+  return 0;
 }
 
 ###########################################################################
@@ -346,7 +344,7 @@ sub _check_for_forged_received {
 	# allow private IP addrs here, could be a legit screwup
 	if ($hclassb && $fclassb && 
 		$hclassb ne $fclassb &&
-		!($hlo =~ /$IP_PRIVATE/o))
+		$hlo !~ IS_IP_PRIVATE)
 	{
 	  dbg2("eval: forged-HELO: massive mismatch on IP-addr HELO: '$hlo' != '$fip'");
 	  $pms->{mismatch_ip_helo}++;

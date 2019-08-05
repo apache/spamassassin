@@ -77,7 +77,7 @@ sub _multipart_alternative_difference {
   my $msg = $pms->{msg};
 
   # Find all multipart/alternative parts in the message
-  my @ma = $msg->find_parts(qr@^multipart/alternative\b@i);
+  my @ma = $msg->find_parts(qr@^multipart/alternative\b@);
 
   # If there are no multipart/alternative sections, skip this test.
   return if (!@ma);
@@ -100,7 +100,7 @@ sub _multipart_alternative_difference {
     my %text;
 
     # limit our search to text-based parts
-    my @txt = $part->find_parts(qr@^text\b@i);
+    my @txt = $part->find_parts(qr@^text\b@);
     foreach my $text (@txt) {
       # we only care about the rendered version of the part
       my ($type, $rnd) = $text->rendered();
@@ -237,7 +237,7 @@ sub _check_stock_info {
   $pms->{stock_info} = 0;
 
   # Find all multipart/alternative parts in the message
-  my @parts = $pms->{msg}->find_parts(qr@^text/plain$@i);
+  my @parts = $pms->{msg}->find_parts(qr@^text/plain$@);
   return if (!@parts);
 
   # Go through each of the multipart parts

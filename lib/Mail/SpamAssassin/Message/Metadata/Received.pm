@@ -50,6 +50,10 @@ use Mail::SpamAssassin::Dns;
 use Mail::SpamAssassin::PerMsgStatus;
 use Mail::SpamAssassin::Constants qw(:ip);
 
+my $IP_ADDRESS = IP_ADDRESS;
+my $IP_PRIVATE = IP_PRIVATE;
+my $LOCALHOST = LOCALHOST;
+
 # ---------------------------------------------------------------------------
 
 sub parse_received_headers {
@@ -115,10 +119,6 @@ sub parse_received_headers {
 	  'configuration for trusted_networks');
     }
   }
-
-  my $IP_ADDRESS = IP_ADDRESS;
-  my $IP_PRIVATE = IP_PRIVATE;
-  my $LOCALHOST = LOCALHOST;
 
   my @hdrs = $msg->get_header('Received');
 
@@ -335,9 +335,6 @@ sub parse_received_line {
   my $ident = '';
   my $envfrom = undef;
   my $mta_looked_up_dns = 0;
-  my $IP_ADDRESS = IP_ADDRESS;
-  my $IP_PRIVATE = IP_PRIVATE;
-  my $LOCALHOST = LOCALHOST;
   my $auth = '';
 
 # ---------------------------------------------------------------------------
@@ -429,7 +426,7 @@ sub parse_received_line {
     $auth = "GMX ($4 / $3)";
   }
   # Critical Path Messaging Server
-  elsif (/ \(authenticated as /&&/\) by .+ \(\d{1,2}\.\d\.\d{3}(?:\.\d{1,3})?\) \(authenticated as .+\) id /) {
+  elsif (/ \(authenticated as / && /\) by .+ \(\d{1,2}\.\d\.\d{3}(?:\.\d{1,3})?\) \(authenticated as .+\) id /) {
     $auth = 'CriticalPath';
   }
   # Postfix 2.3 and later with "smtpd_sasl_authenticated_header yes"
@@ -803,7 +800,7 @@ sub parse_received_line {
     
     # Received: from [193.220.176.134] by web40310.mail.yahoo.com via HTTP;
     # Wed, 12 Feb 2003 14:22:21 PST
-    if (/ via HTTP$/&&/^\[(${IP_ADDRESS})\] by (\S+) via HTTP$/) {
+    if (/ via HTTP$/ && /^\[(${IP_ADDRESS})\] by (\S+) via HTTP$/) {
       $ip = $1; $by = $2; goto enough;
     }
 
@@ -922,13 +919,13 @@ sub parse_received_line {
 
     # Received: from [129.24.215.125] by ws1-7.us4.outblaze.com with http for
     # _bushisevil_@mail.com; Thu, 13 Feb 2003 15:59:28 -0500
-    if (/ with http for /&&/^\[(${IP_ADDRESS})\] by (\S+) with http for /) {
+    if (/ with http for / && /^\[(${IP_ADDRESS})\] by (\S+) with http for /) {
       $ip = $1; $by = $2; goto enough;
     }
 
     # Received: from snake.corp.yahoo.com(216.145.52.229) by x.x.org via smap (V1.3)
     # id xma093673; Wed, 26 Mar 03 20:43:24 -0600
-    if (/ via smap /&&/^(\S+)\((${IP_ADDRESS})\) by (\S+) via smap /) {
+    if (/ via smap / && /^(\S+)\((${IP_ADDRESS})\) by (\S+) via smap /) {
       $mta_looked_up_dns = 1;
       $rdns = $1; $ip = $2; $by = $3; goto enough;
     }
@@ -943,13 +940,13 @@ sub parse_received_line {
     # Received: from [192.168.0.71] by web01-nyc.clicvu.com (Post.Office MTA
     # v3.5.3 release 223 ID# 0-64039U1000L100S0V35) with SMTP id com for
     # <x@x.org>; Tue, 25 Mar 2003 11:42:04 -0500
-    if (/ \(Post/&&/^\[(${IP_ADDRESS})\] by (\S+) \(Post/) {
+    if (/ \(Post/ && /^\[(${IP_ADDRESS})\] by (\S+) \(Post/) {
       $ip = $1; $by = $2; goto enough;
     }
 
     # Received: from [127.0.0.1] by euphoria (ArGoSoft Mail Server 
     # Freeware, Version 1.8 (1.8.2.5)); Sat, 8 Feb 2003 09:45:32 +0200
-    if (/ \(ArGoSoft/&&/^\[(${IP_ADDRESS})\] by (\S+) \(ArGoSoft/) {
+    if (/ \(ArGoSoft/ && /^\[(${IP_ADDRESS})\] by (\S+) \(ArGoSoft/) {
       $ip = $1; $by = $2; goto enough;
     }
 
@@ -962,7 +959,7 @@ sub parse_received_line {
 
     # Received: from faerber.muc.de by slarti.muc.de with BSMTP (rsmtp-qm-ot 0.4)
     # for asrg@ietf.org; 7 Mar 2003 21:10:38 -0000
-    if (/ with BSMTP/&&/^\S+ by \S+ with BSMTP/) {
+    if (/ with BSMTP/ && /^\S+ by \S+ with BSMTP/) {
       return 0;	# BSMTP != a TCP/IP handover, ignore it
     }
 

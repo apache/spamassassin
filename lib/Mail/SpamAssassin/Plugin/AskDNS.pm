@@ -212,8 +212,6 @@ our %rcode_value = (  # https://www.iana.org/assignments/dns-parameters, RFC 619
 
 our $txtdata_can_provide_a_list;
 
-my $IP_ADDRESS = IP_ADDRESS;
-
 sub new {
   my($class,$sa_main) = @_;
 

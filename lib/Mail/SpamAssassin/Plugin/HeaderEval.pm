@@ -32,6 +32,8 @@ use Mail::SpamAssassin::Constants qw(:sa :ip);
 
 our @ISA = qw(Mail::SpamAssassin::Plugin);
 
+my $IP_ADDRESS = IP_ADDRESS;
+
 # constructor: register the eval rule
 sub new {
   my $class = shift;
@@ -347,7 +349,6 @@ sub _check_for_forged_hotmail_received_headers {
   return if $self->check_for_msn_groups_headers($pms);
 
   my $ip = $pms->get('X-Originating-Ip',undef);
-  my $IP_ADDRESS = IP_ADDRESS;
   my $orig = $pms->get('X-OriginatorOrg',undef);
   my $ORIGINATOR = 'hotmail.com';
 
@@ -476,7 +477,6 @@ sub check_for_forged_eudoramail_received_headers {
   $rcvd =~ s/\s+/ /gs;		# just spaces, simplify the regexp
 
   my $ip = $pms->get('X-Sender-Ip',undef);
-  my $IP_ADDRESS = IP_ADDRESS;
   if (defined $ip && $ip =~ /$IP_ADDRESS/) { $ip = 1; } else { $ip = 0; }
 
   # Eudoramail formats its received headers like this:
@@ -529,7 +529,6 @@ sub check_for_forged_yahoo_received_headers {
   if ($rcvd =~ /by web\S+\.mail\S*\.yahoo\.com via HTTP/) { return 0; }
   if ($rcvd =~ /by sonic\S+\.consmr\.mail\S*\.yahoo\.com with HTTP/) { return 0; }
   if ($rcvd =~ /by smtp\S+\.yahoo\.com with SMTP/) { return 0; }
-  my $IP_ADDRESS = IP_ADDRESS;
   if ($rcvd =~
       /from \[$IP_ADDRESS\] by \S+\.(?:groups|scd|dcn)\.yahoo\.com with NNFMP/) {
     return 0;
@@ -565,7 +564,6 @@ sub check_for_forged_juno_received_headers {
   my $xorig = $pms->get('X-Originating-IP');
   my $xmailer = $pms->get('X-Mailer');
   my $rcvd = $pms->get('Received');
-  my $IP_ADDRESS = IP_ADDRESS;
 
   if ($xorig ne '') {
     # New style Juno has no X-Originating-IP header, and other changes
