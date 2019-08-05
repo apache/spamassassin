@@ -1896,8 +1896,7 @@ sub compile_regexp {
         die "$_[0]\n";
       }
     };
-    # Bug 6802 - force ascii semantics with /aa
-    $compiled_re = $] >= 5.014000 ? qr/$re/aa : qr/$re/;
+    $compiled_re = qr/$re/;
     1;
   };
   if ($ok && ref($compiled_re) eq 'Regexp') {
