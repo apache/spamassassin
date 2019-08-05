@@ -143,7 +143,6 @@ use re 'taint';
 our @ISA = qw();
 
 my $ARITH_EXPRESSION_LEXER = ARITH_EXPRESSION_LEXER;
-my $RULENAME_RE = RULENAME_RE;
 my $META_RULES_MATCHING_RE = META_RULES_MATCHING_RE;
 
 ###########################################################################
@@ -1191,7 +1190,7 @@ sub add_test {
   my $conf = $self->{conf};
 
   # Don't allow invalid names ...
-  if ($name !~ /^${RULENAME_RE}$/) {
+  if ($name !~ IS_RULENAME) {
     $self->lint_warn("config: error: rule '$name' has invalid characters ".
 	   "(not Alphanumeric + Underscore + starting with a non-digit)\n", $name);
     return;
@@ -1369,7 +1368,7 @@ sub is_meta_valid {
   # Go through each token in the meta rule
   foreach my $token (@tokens) {
     # If the token is a syntactically legal rule name, make it zero
-    if ($token =~ /^${RULENAME_RE}\z/s) {
+    if ($token =~ IS_RULENAME) {
       $meta .= "0 ";
     }
     # if it is a (decimal) number or a string of 1 or 2 punctuation

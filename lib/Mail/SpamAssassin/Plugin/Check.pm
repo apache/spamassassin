@@ -29,7 +29,6 @@ use Mail::SpamAssassin::Constants qw(:sa);
 our @ISA = qw(Mail::SpamAssassin::Plugin);
 
 my $ARITH_EXPRESSION_LEXER = ARITH_EXPRESSION_LEXER;
-my $RULENAME_RE = RULENAME_RE;
 my $META_RULES_MATCHING_RE = META_RULES_MATCHING_RE;
 
 # methods defined by the compiled ruleset; deleted in finish_tests()
@@ -579,7 +578,7 @@ sub do_meta_tests {
     foreach my $token (@tokens) {
 
       # ... rulename?
-      if ($token =~ /^${RULENAME_RE}\z/) {
+      if ($token =~ IS_RULENAME) {
         # the " || 0" formulation is to avoid "use of uninitialized value"
         # warnings; this is better than adding a 0 to a hash for every
         # rule referred to in a meta...
@@ -771,9 +770,9 @@ sub do_head_tests {
               }
             }
             if ($matchg) {
-              $expr = '$hval '.$op.' /$qrptr->{q{'.$rulename.'}}/g';
+              $expr = '$hval '.$op.' /$qrptr->{q{'.$rulename.'}}/go';
             } else {
-              $expr = '$hval '.$op.' $qrptr->{q{'.$rulename.'}}';
+              $expr = '$hval '.$op.' /$qrptr->{q{'.$rulename.'}}/o';
             }
           }
 
@@ -830,8 +829,8 @@ sub do_body_tests {
       body_'.$loopid.': foreach my $l (@_) {
         pos $l = 0;
         '.$self->hash_line_for_rule($pms, $rulename).'
-        while ($l =~ /$qrptr->{q{'.$rulename.'}}/g'. ($max? ' && $hits++ < '.$max:'') .') {
-          $self->got_hit(q{'.$rulename.'}, "BODY: ", ruletype => "body"); 
+        while ($l =~ /$qrptr->{q{'.$rulename.'}}/go'. ($max? ' && $hits++ < '.$max:'') .') {
+          $self->got_hit(q{'.$rulename.'}, "BODY: ", ruletype => "body");
           '. $self->hit_rule_plugin_code($pms, $rulename, 'body',
 					 "last body_".$loopid) . '
         }
@@ -845,7 +844,7 @@ sub do_body_tests {
       $sub .= '
       foreach my $l (@_) {
         '.$self->hash_line_for_rule($pms, $rulename).'
-        if ($l =~ $qrptr->{q{'.$rulename.'}}) {
+        if ($l =~ /$qrptr->{q{'.$rulename.'}}/o) {
           $self->got_hit(q{'.$rulename.'}, "BODY: ", ruletype => "body");
           '. $self->hit_rule_plugin_code($pms, $rulename, "body", "last") .'
         }
@@ -895,7 +894,7 @@ sub do_uri_tests {
       uri_'.$loopid.': foreach my $l (@_) {
         pos $l = 0;
         '.$self->hash_line_for_rule($pms, $rulename).'
-        while ($l =~ /$qrptr->{q{'.$rulename.'}}/g'. ($max? ' && $hits++ < '.$max:'') .') {
+        while ($l =~ /$qrptr->{q{'.$rulename.'}}/go'. ($max? ' && $hits++ < '.$max:'') .') {
            $self->got_hit(q{'.$rulename.'}, "URI: ", ruletype => "uri");
            '. $self->hit_rule_plugin_code($pms, $rulename, "uri",
 					  "last uri_".$loopid) . '
@@ -907,7 +906,7 @@ sub do_uri_tests {
       $sub .= '
       foreach my $l (@_) {
         '.$self->hash_line_for_rule($pms, $rulename).'
-          if ($l =~ $qrptr->{q{'.$rulename.'}}) {
+          if ($l =~ /$qrptr->{q{'.$rulename.'}}/o) {
            $self->got_hit(q{'.$rulename.'}, "URI: ", ruletype => "uri");
            '. $self->hit_rule_plugin_code($pms, $rulename, "uri", "last") .'
         }
@@ -955,7 +954,7 @@ sub do_rawbody_tests {
       rawbody_'.$loopid.': foreach my $l (@_) {
         pos $l = 0;
         '.$self->hash_line_for_rule($pms, $rulename).'
-        while ($l =~ /$qrptr->{q{'.$rulename.'}}/g'. ($max? ' && $hits++ < '.$max:'') .') { 
+        while ($l =~ /$qrptr->{q{'.$rulename.'}}/go'. ($max? ' && $hits++ < '.$max:'') .') {
            $self->got_hit(q{'.$rulename.'}, "RAW: ", ruletype => "rawbody");
            '. $self->hit_rule_plugin_code($pms, $rulename, "rawbody",
 					  "last rawbody_".$loopid) . '
@@ -968,7 +967,7 @@ sub do_rawbody_tests {
       $sub .= '
       foreach my $l (@_) {
         '.$self->hash_line_for_rule($pms, $rulename).'
-        if ($l =~ $qrptr->{q{'.$rulename.'}}) { 
+        if ($l =~ /$qrptr->{q{'.$rulename.'}}/o) {
            $self->got_hit(q{'.$rulename.'}, "RAW: ", ruletype => "rawbody");
            '. $self->hit_rule_plugin_code($pms, $rulename, "rawbody", "last") . '
         }
