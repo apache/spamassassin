@@ -234,7 +234,6 @@ sub finish_parsing_end {
   my ($self, $opts) = @_;
 
   return 0 if !$self->{hashbl_available};
-  return 0 if !$opts->{permsgstatus}->is_dns_available();
 
   # valid_tlds_re will be available at finish_parsing_end, compile it now,
   # we only need to do it once and before possible forking
