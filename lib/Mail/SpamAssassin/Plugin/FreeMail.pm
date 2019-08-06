@@ -18,6 +18,8 @@
 package Mail::SpamAssassin::Plugin::FreeMail;
 use strict;
 use warnings;
+use re 'taint';
+
 my $VERSION = 2.003;
 
 =head1 NAME
@@ -109,6 +111,7 @@ header FREEMAIL_BODY eval:check_freemail_body(['regex'])
 
 use Mail::SpamAssassin::Plugin;
 use Mail::SpamAssassin::PerMsgStatus;
+use Mail::SpamAssassin::Util qw(compile_regexp);
 
 our @ISA = qw(Mail::SpamAssassin::Plugin);
 
@@ -333,7 +336,7 @@ sub _is_freemail {
     foreach my $list ('whitelist_auth','def_whitelist_auth') {
         if ($pms->{conf}->{"freemail_import_$list"}) {
             foreach my $regexp (values %{$pms->{conf}->{$list}}) {
-                if ($email =~ /$regexp/) {
+                if ($email =~ /$regexp/o) {
                     dbg("whitelisted email, $list: $email");
                     return 0;
                 }
@@ -362,7 +365,7 @@ sub _parse_body {
         my $parsed = $pms->get_uri_detail_list();
         while (my($uri, $info) = each %{$parsed}) {
             if (defined $info->{types}->{a} and not defined $info->{types}->{parsed}) {
-                if ($uri =~ /^(?:(?i)mailto):$self->{email_regex}/) {
+                if ($uri =~ /^(?:(?i)mailto):$self->{email_regex}/o) {
                     my $email = lc($1);
                     push(@body_emails, $email) unless defined $seen{$email};
                     $seen{$email} = 1;
@@ -451,11 +454,12 @@ sub check_freemail_header {
 
     my $re;
     if (defined $regex) {
-        $re = eval { qr/$regex/; };
-        if ($@) {
-            warn("invalid regex: $@");
+        my ($rec, $err) = compile_regexp($regex, 0);
+        if (!$rec) {
+            warn "freemail: invalid regexp for $rulename '$regex': $err\n";
             return 0;
         }
+        $re = $rec;
     }
 
     my @emails = map (lc, $pms->{main}->find_all_addrs_in_line ($pms->get($header)));
@@ -469,7 +473,7 @@ sub check_freemail_header {
     foreach my $email (@emails) {    
         if ($self->_is_freemail($email, $pms)) {
             if (defined $re) {
-                next unless $email =~ $re;
+                next unless $email =~ /$re/o;
                 dbg("HIT! $email is freemail and matches regex");
             }
             else {
@@ -495,16 +499,17 @@ sub check_freemail_body {
 
     my $re;
     if (defined $regex) {
-        $re = eval { qr/$regex/; };
-        if ($@) {
-            warn("invalid regex: $@");
+        my ($rec, $err) = compile_regexp($regex, 0);
+        if (!$rec) {
+            warn "freemail: invalid regexp for $rulename '$regex': $err\n";
             return 0;
         }
+        $re = $rec;
     }
 
     if (defined $re) {
         foreach my $email (keys %{$pms->{freemail_cache}{body}}) {
-            if ($email =~ $re) {
+            if ($email =~ /$re/o) {
                 dbg("HIT! email from body is freemail and matches regex: $email");
                 $self->_got_hit($pms, $email, "Email from body is freemail");
                 return 0;
@@ -531,11 +536,12 @@ sub check_freemail_from {
 
     my $re;
     if (defined $regex) {
-        $re = eval { qr/$regex/; };
-        if ($@ or not defined $re) {
-            warn("invalid regex: $@");
+        my ($rec, $err) = compile_regexp($regex, 0);
+        if (!$rec) {
+            warn "freemail: invalid regexp for $rulename '$regex': $err\n";
             return 0;
         }
+        $re = $rec;
     }
 
     my %from_addrs = map { lc($_) => 1 } ($pms->all_from_addrs());
@@ -551,7 +557,7 @@ sub check_freemail_from {
     foreach my $email (keys %from_addrs) {
         next unless $self->_is_freemail($email, $pms);
         if (defined $re) {
-            next unless $email =~ $re;
+            next unless $email =~ /$re/o;
             dbg("HIT! $email is freemail and matches regex");
         }
         else {
