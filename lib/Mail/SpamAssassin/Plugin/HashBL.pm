@@ -234,6 +234,7 @@ sub finish_parsing_end {
   my ($self, $opts) = @_;
 
   return 0 if !$self->{hashbl_available};
+  return 0 if !$opts->{permsgstatus}->is_dns_available();
 
   # valid_tlds_re will be available at finish_parsing_end, compile it now,
   # we only need to do it once and before possible forking
@@ -371,6 +372,7 @@ sub check_hashbl_emails {
   my ($self, $pms, $list, $opts, $from, $subtest, $acl) = @_;
 
   return 0 if !$self->{hashbl_available};
+  return 0 if !$pms->is_dns_available();
   return 0 if !$self->{email_re};
 
   my $rulename = $pms->get_current_eval_rule_name();
@@ -448,6 +450,7 @@ sub check_hashbl_uris {
   my @filtered_uris;
 
   return 0 if !$self->{hashbl_available};
+  return 0 if !$pms->is_dns_available();
 
   my $rulename = $pms->get_current_eval_rule_name();
 
@@ -512,6 +515,7 @@ sub check_hashbl_bodyre {
   my ($self, $pms, $bodyref, $list, $opts, $re, $subtest) = @_;
 
   return 0 if !$self->{hashbl_available};
+  return 0 if !$pms->is_dns_available();
 
   my $rulename = $pms->get_current_eval_rule_name();
 

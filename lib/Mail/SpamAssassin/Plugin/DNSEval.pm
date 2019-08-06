@@ -233,7 +233,6 @@ sub check_rbl_backend {
   # First check that DNS is available, if not do not perform this check
   return 0 if $self->{main}->{conf}->{skip_rbl_checks};
   return 0 unless $pms->is_dns_available();
-  $pms->load_resolver();
 
   if (($rbl_server !~ /^(\d+)\.(\d+)\.(\d+)\.(\d+)$/) &&
       (index($rbl_server, '.') >= 0) &&
@@ -404,6 +403,9 @@ sub check_rbl_from_host {
 sub check_rbl_headers {
   my ($self, $pms, $rule, $set, $rbl_server, $subtest, $test_headers) = @_;
 
+  return 0 if $self->{main}->{conf}->{skip_rbl_checks};
+  return 0 if !$pms->is_dns_available();
+
   my @env_hdr;
   my $conf = $self->{main}->{conf};
 
@@ -464,8 +466,8 @@ sub check_rbl_ns_from {
   my $domain;
   my @nshost = ();
 
+  return 0 if $self->{main}->{conf}->{skip_rbl_checks};
   return 0 unless $pms->is_dns_available();
-  $pms->load_resolver();
 
   for my $from ($pms->get('EnvelopeFrom:addr')) {
     next unless defined $from;
@@ -600,8 +602,6 @@ sub _check_rbl_addresses {
   }
   return unless scalar keys %hosts;
 
-  $pms->load_resolver();
-
   if (($rbl_server !~ /^(\d+)\.(\d+)\.(\d+)\.(\d+)$/) &&
       (index($rbl_server, '.') >= 0) &&
       ($rbl_server !~ /\.$/)) {
@@ -623,6 +623,9 @@ sub _check_rbl_addresses {
 sub check_dns_sender {
   my ($self, $pms, $rule) = @_;
 
+  return 0 if $self->{main}->{conf}->{skip_rbl_checks};
+  return 0 unless $pms->is_dns_available();
+
   my $host;
   for my $from ($pms->get('EnvelopeFrom:addr',undef)) {
     next unless defined $from;
@@ -634,11 +637,6 @@ sub check_dns_sender {
     }
   }
   return 0 unless defined $host;
-
-  # First check that DNS is available, if not do not perform this check
-  # TODO: need a way to skip DNS checks as a whole in configuration
-  return 0 unless $pms->is_dns_available();
-  $pms->load_resolver();
 
   if ($host eq 'compiling.spamassassin.taint.org') {
     # only used when compiling
