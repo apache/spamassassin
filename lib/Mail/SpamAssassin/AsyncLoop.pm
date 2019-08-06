@@ -221,6 +221,8 @@ sub bgsend_and_start_lookup {
   my $self = shift;
   my($domain, $type, $class, $ent, $cb, %options) = @_;
 
+  return if $self->{main}->{resolver}->{no_resolver};
+
   # Waiting for priority -100 to launch?
   if ($self->{wait_launch}) {
     push @{$self->{bgsend_queue}}, [@_];
@@ -302,7 +304,7 @@ sub bgsend_and_start_lookup {
           chomp $@;
           # resignal if alarm went off
           die "async: (1) $@\n"  if $@ =~ /__alarm__ignore__\(.*\)/s;
-          warn sprintf("query %s completed, callback %s failed: %s\n",
+          warn sprintf("async: query %s completed, callback %s failed: %s\n",
                        $id, $key, $@);
         };
       }
@@ -380,7 +382,7 @@ sub bgsend_and_start_lookup {
                 chomp $@;
                 # resignal if alarm went off
                 die "async: (2) $@\n"  if $@ =~ /__alarm__ignore__\(.*\)/s;
-                warn sprintf("query %s completed, callback %s failed: %s\n",
+                warn sprintf("async: query %s completed, callback %s failed: %s\n",
                              $id, $appl_ent->{key}, $@);
               };
             }
@@ -412,9 +414,12 @@ DIRECT USE DEPRECATED since 4.0.0, please use bgsend_and_start_lookup.
 
 sub start_lookup {
   my $self = shift;
-  warn "deprecated start_lookup called, please use bgsend_and_start_lookup"
+
+  warn "async: deprecated start_lookup called, please use bgsend_and_start_lookup\n"
     if !$self->{start_lookup_warned};
   $self->{start_lookup_warned} = 1;
+
+  return if $self->{main}->{resolver}->{no_resolver};
   $self->_start_lookup(@_);
 }
 
@@ -502,7 +507,7 @@ DEPRECATED since 4.0.0. Do not use.
 
 sub get_lookup {
   my ($self, $key) = @_;
-  warn("deprecated get_lookup function used");
+  warn("async: deprecated get_lookup function used\n");
   return $self->{pending_lookups}->{$key};
 }
 
@@ -699,7 +704,7 @@ sub abort_remaining_lookups {
           chomp $@;
           # resignal if alarm went off
           die "async: (2) $@\n"  if $@ =~ /__alarm__ignore__\(.*\)/s;
-          warn sprintf("query %s aborted, callback %s failed: %s\n",
+          warn sprintf("async: query %s aborted, callback %s failed: %s\n",
                        $dnskey, $ent->{key}, $@);
         };
       }

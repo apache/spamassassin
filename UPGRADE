@@ -89,7 +89,7 @@ Note for Users Upgrading to SpamAssassin 4.0.0
   bgsend_and_start_lookup which handles required things automatically
   (direct calls to bgsend or start_lookup should not be used),
   bgsend_and_start_lookup should always contain $ent->{rulename} for correct
-  meta dependency handling. Deprecated also start_lookup, get_lookup.
+  meta dependency handling. Deprecated also start_lookup, get_lookup, lookup_ns.
 
 - SPF: Mail::SPF is now only supported.  Mail::SPF::Query use is deprecated,
   along with settings do_not_use_mail_spf, do_not_use_mail_spf_query.  SPF
@@ -121,6 +121,9 @@ Note for Users Upgrading to SpamAssassin 4.0.0
 - Add rules_matching() expression to meta rules
 
 - Add tflags domains_only/ips_only to DNSEval.pm functions
+
+- New dns_options nov4, nov6 (must set nov6 if resolver is filtering AAAA
+  replies).
 
 Note for Users Upgrading to SpamAssassin 3.4.2
 ----------------------------------------------

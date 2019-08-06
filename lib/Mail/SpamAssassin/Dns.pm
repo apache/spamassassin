@@ -41,26 +41,20 @@ our $LAST_DNS_CHECK = 0;
 
 # use very well-connected domains (fast DNS response, many DNS servers,
 # geographical distribution is a plus, TTL of at least 3600s)
+# these MUST contain both A/AAAA records so we can test dns_options v6
+# Updated 8/2019 from https://ip6.nl/#!list?db=alexa500
+# 
 our @EXISTING_DOMAINS = qw{
-  adelphia.net
   akamai.com
-  apache.org
-  cingular.com
-  colorado.edu
-  comcast.net
-  doubleclick.com
-  ebay.com
-  gmx.net
+  bing.com
+  cloudflare.net
+  digitalpoint.com
+  facebook.com
   google.com
-  intel.com
-  kernel.org
-  linux.org
-  mit.edu
-  motorola.com
-  msn.com
-  sourceforge.net
-  sun.com
-  w3.org
+  linkedin.com
+  netflix.com
+  php.net
+  wikipedia.org
   yahoo.com
 };
 
@@ -426,32 +420,62 @@ sub clear_resolver {
   return 0;
 }
 
+# Deprecated since 4.0.0
 sub lookup_ns {
+  warn "dns: deprecated lookup_ns called, query ignored\n";
+  return;
+}
+
+sub test_dns_a_aaaa {
   my ($self, $dom) = @_;
 
-  return unless $self->load_resolver();
   return if ($self->server_failed_to_respond_for_domain ($dom));
 
-  my $nsrecords;
-  dbg("dns: looking up NS for '$dom'");
+  my ($a, $aaaa) = (0, 0);
 
-  eval {
-    my $query = $self->{resolver}->send($dom, 'NS');
-    my @nses;
-    if ($query) {
-      foreach my $rr ($query->answer) {
-        if ($rr->type eq "NS") { push (@nses, $rr->nsdname); }
+  if ($self->{conf}->{dns_options}->{v4}) {
+    eval {
+      my $query = $self->{resolver}->send($dom, 'A');
+      if ($query) {
+        foreach my $rr ($query->answer) {
+          if ($rr->type eq 'A') { $a = 1; last; }
+        }
       }
+      1;
+    } or do {
+      my $eval_stat = $@ ne '' ? $@ : "errno=$!";  chomp $eval_stat;
+      dbg("dns: test A lookup failed horribly, perhaps bad resolv.conf setting? (%s)", $eval_stat);
+      return (undef, undef);
+    };
+    if (!$a) {
+      dbg("dns: test A lookup returned no results, use \"dns_options nov4\" if resolver doesn't support A queries");
     }
-    $nsrecords = [ @nses ];
-    1;
-  } or do {
-    my $eval_stat = $@ ne '' ? $@ : "errno=$!";  chomp $eval_stat;
-    dbg("dns: NS lookup failed horribly, perhaps bad resolv.conf setting? (%s)", $eval_stat);
-    return;
-  };
+  } else {
+    $a = 1;
+  }
 
-  $nsrecords;
+  if ($self->{conf}->{dns_options}->{v6}) {
+    eval {
+      my $query = $self->{resolver}->send($dom, 'AAAA');
+      if ($query) {
+        foreach my $rr ($query->answer) {
+          if ($rr->type eq 'AAAA') { $aaaa = 1; last; }
+        }
+      }
+      1;
+    } or do {
+      my $eval_stat = $@ ne '' ? $@ : "errno=$!";  chomp $eval_stat;
+      dbg("dns: test AAAA lookup failed horribly, perhaps bad resolv.conf setting? (%s)", $eval_stat);
+      return (undef, undef);
+    };
+    if (!$aaaa) {
+      dbg("dns: test AAAA lookup returned no results, use \"dns_options nov6\" if resolver doesn't support AAAA queries");
+    }
+  } else {
+    $aaaa = 1;
+  }
+
+  return ($a, $aaaa);
 }
 
 sub is_dns_available {
@@ -461,6 +485,18 @@ sub is_dns_available {
   # Fast response for the most common cases
   return 1 if $IS_DNS_AVAILABLE && $dnsopt eq "yes";
   return 0 if defined $IS_DNS_AVAILABLE && $dnsopt eq "no";
+
+  # croak on misconfigured flags
+  if (!$self->{conf}->{dns_options}->{v4} &&
+      !$self->{conf}->{dns_options}->{v6})
+  {
+    warn 'dns: error: dns_options "nov4" and "nov6" are both set, '.
+         ' only use either, or use "dns_available no" to really disable DNS'.
+         "\n";
+    $IS_DNS_AVAILABLE = 0;
+    $self->{conf}->{dns_available} = "no";
+    return 0;
+  }
 
   # undef $IS_DNS_AVAILABLE if we should be testing for
   # working DNS and our check interval time has passed
@@ -480,6 +516,7 @@ sub is_dns_available {
   return $IS_DNS_AVAILABLE if defined $IS_DNS_AVAILABLE;
 
   $IS_DNS_AVAILABLE = 0;
+
   if ($dnsopt eq "no") {
     dbg("dns: dns_available set to no in config file, skipping test");
     return $IS_DNS_AVAILABLE;
@@ -487,26 +524,32 @@ sub is_dns_available {
 
   # Even if "dns_available" is explicitly set to "yes", we want to ignore
   # DNS if we're only supposed to be looking at local tests.
-  goto done if ($self->{main}->{local_tests_only});
+  if ($self->{main}->{local_tests_only}) {
+    dbg("dns: using local tests only, DNS not available");
+    return $IS_DNS_AVAILABLE;
+  }
 
   # Check version numbers - runtime check only
   if (defined $Net::DNS::VERSION) {
     if (am_running_on_windows()) {
       if ($Net::DNS::VERSION < 0.46) {
-	warn("dns: Net::DNS version is $Net::DNS::VERSION, but need 0.46 for Win32");
+	warn("dns: Net::DNS version is $Net::DNS::VERSION, but need 0.46 for Win32\n");
 	return $IS_DNS_AVAILABLE;
       }
     }
     else {
       if ($Net::DNS::VERSION < 0.34) {
-	warn("dns: Net::DNS version is $Net::DNS::VERSION, but need 0.34");
+	warn("dns: Net::DNS version is $Net::DNS::VERSION, but need 0.34\n");
 	return $IS_DNS_AVAILABLE;
       }
     }
   }
 
-  $self->clear_resolver();
-  goto done unless $self->load_resolver();
+  #$self->clear_resolver();
+  if (!$self->load_resolver()) {
+    dbg("dns: could not load resolver, DNS not available");
+    return $IS_DNS_AVAILABLE;
+  }
 
   if ($dnsopt eq "yes") {
     # optionally shuffle the list of nameservers to distribute the load
@@ -522,13 +565,17 @@ sub is_dns_available {
   }
 
   my @domains;
+  my @rtypes;
+  push @rtypes, 'A' if $self->{main}->{conf}->{dns_options}->{v4};
+  push @rtypes, 'AAAA' if $self->{main}->{conf}->{dns_options}->{v6};
   if ($dnsopt =~ /^test:\s*(\S.*)$/) {
     @domains = split (/\s+/, $1);
-    dbg("dns: looking up NS records for user specified domains: %s",
-        join(", ", @domains));
+    dbg("dns: testing %s records for user specified domains: %s",
+        join("/", @rtypes), join(", ", @domains));
   } else {
     @domains = @EXISTING_DOMAINS;
-    dbg("dns: looking up NS records for built-in domains");
+    dbg("dns: testing %s records for built-in domains: %s",
+        join("/", @rtypes), join(", ", @domains));
   }
 
   # do the test with a full set of configured nameservers
@@ -546,19 +593,19 @@ sub is_dns_available {
   my @good_nameservers;
   foreach my $ns (@nameservers) {
     $self->{resolver}->available_nameservers($ns);  # try just this one
-    for (my $retry = 3; $retry > 0 && @domains; $retry--) {
+    for (my $retry = 0; $retry < 3 && @domains; $retry++) {
       my $domain = splice(@domains, rand(@domains), 1);
-      dbg("dns: trying ($retry) $domain, server $ns ...");
-      my $result = $self->lookup_ns($domain);
+      dbg("dns: trying $domain, server $ns ..." .
+          ($retry ? " (retry $retry)" : ""));
+      my ($ok_a, $ok_aaaa) = $self->test_dns_a_aaaa($domain);
       $self->{resolver}->finish_socket();
-      if (!$result) {
-        dbg("dns: NS lookup of $domain using $ns failed horribly, ".
-            "may not be a valid nameserver");
+      if (!defined $ok_a || !defined $ok_aaaa) {
+        # error printed already
         last;
-      } elsif (!@$result) {
-        dbg("dns: NS lookup of $domain using $ns failed, no results found");
+      } elsif (!$ok_a && !$ok_aaaa) {
+        dbg("dns: lookup of $domain using $ns failed, no results found");
       } else {
-        dbg("dns: NS lookup of $domain using $ns succeeded => DNS available".
+        dbg("dns: lookup of $domain using $ns succeeded => DNS available".
             " (set dns_available to override)");
         push(@good_nameservers, $ns);
         last;
@@ -575,8 +622,6 @@ sub is_dns_available {
     $self->{resolver}->available_nameservers(@good_nameservers);
   }
 
-done:
-  # jm: leaving this in!
   dbg("dns: is DNS available? " . $IS_DNS_AVAILABLE);
   return $IS_DNS_AVAILABLE;
 }

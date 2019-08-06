@@ -209,7 +209,10 @@ sub check_main {
       foreach my $domain (keys %{$pms->{conf}->{dns_block_rule}{$rule}}) {
         my $blockfile = $self->{main}->sed_path("__global_state_dir__/dnsblock_$domain");
         next if -f $blockfile; # no need to warn and create again..
-        warn("check: dns_block_rule $rule hit, creating $blockfile\n");
+        warn("check: dns_block_rule $rule hit, creating $blockfile ".
+             "(This means dnsbl blocked you due to too many queries. ".
+             "Set all affected rules score to 0, or use ".
+             "\"dns_query_restriction deny $domain\" to disable queries)\n");
         Mail::SpamAssassin::Util::touch_file($blockfile, { create_exclusive => 1 });
       }
     }

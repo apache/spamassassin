@@ -95,8 +95,8 @@ Load the C<Net::DNS::Resolver> object.  Returns 0 if Net::DNS cannot be used,
 sub load_resolver {
   my ($self) = @_;
 
-  if ($self->{res}) { return 1; }
-  $self->{no_resolver} = 1;
+  return 0 if $self->{no_resolver};
+  return 1 if $self->{res};
 
   # force only ipv4 if no IO::Socket::INET6 or ipv6 doesn't work
   my $force_ipv4 = $self->{main}->{force_ipv4};
@@ -113,7 +113,7 @@ sub load_resolver {
       if ($io_socket_module_name) {
         $sock6 = $io_socket_module_name->new(LocalAddr=>'::', Proto=>'udp');
       }
-      if ($sock6) { $sock6->close() or warn "error closing socket: $!" }
+      if ($sock6) { $sock6->close() or warn "dns: error closing socket: $!\n" }
       $sock6;
     } or do {
       dbg("dns: socket module %s is available, but no host support for IPv6",
@@ -130,7 +130,6 @@ sub load_resolver {
     # or API change will cause an error here
     my $res = $self->{res} = Net::DNS::Resolver->new(force_v4 => $force_ipv4);
     if ($res) {
-      $self->{no_resolver} = 0;
       $self->{force_ipv4} = $force_ipv4;
       $self->{force_ipv6} = $force_ipv6;
       $self->{retry} = 1;       # retries for non-backgrounded query
@@ -174,12 +173,13 @@ sub load_resolver {
       $self->{force_ipv4} ? ', forced IPv4' :
       $self->{force_ipv6} ? ', forced IPv6' : '');
   dbg("dns: is Net::DNS::Resolver available? %s",
-      $self->{no_resolver} ? "no" : "yes" );
-  if (!$self->{no_resolver} && defined $Net::DNS::VERSION) {
+      $self->{res} ? "yes" : "no" );
+  if ($self->{res} && defined $Net::DNS::VERSION) {
     dbg("dns: Net::DNS version: %s", $Net::DNS::VERSION);
   }
 
-  return (!$self->{no_resolver});
+  $self->{no_resolver} = !$self->{res};
+  return defined $self->{res};
 }
 
 =item $resolver = $res->get_resolver()
@@ -248,7 +248,7 @@ sub available_nameservers {
       } elsif ($addr =~ /:.*:/) {
         push(@filtered_addr_port, $_)  unless $self->{force_ipv4};
       } else {
-        warn "Unrecognized DNS server specification: $_";
+        warn "dns: Unrecognized DNS server specification: $_\n";
       }
     }
     if (@filtered_addr_port < @{$self->{available_dns_servers}}) {
@@ -361,7 +361,7 @@ sub connect_sock {
 
   if ($self->{sock}) {
     $self->{sock}->close()
-      or info("connect_sock: error closing socket %s: %s", $self->{sock}, $!);
+      or info("dns: connect_sock: error closing socket %s: %s", $self->{sock}, $!);
     $self->{sock} = undef;
   }
   my $sock;
@@ -399,10 +399,10 @@ sub connect_sock {
     $lport = $self->pick_random_available_port();
     if (!defined $lport) {
       $lport = 0;
-      dbg("no configured local ports for DNS queries, letting OS choose");
+      dbg("dns: no configured local ports for DNS queries, letting OS choose");
     }
     if ($attempts+1 > 50) {  # sanity check
-      warn "could not create a DNS resolver socket in $attempts attempts\n";
+      warn "dns: could not create a DNS resolver socket in $attempts attempts\n";
       $errno = 0;
       last;
     }
@@ -430,12 +430,12 @@ sub connect_sock {
         $self->disable_available_port($lport);
       }
     } else {
-      warn "error creating a DNS resolver socket: $errno";
+      warn "dns: error creating a DNS resolver socket: $errno";
       goto no_sock;
     }
   }
   if (!$sock) {
-    warn "could not create a DNS resolver socket in $attempts attempts: $errno";
+    warn "dns: could not create a DNS resolver socket in $attempts attempts: $errno\n";
     goto no_sock;
   }
 
@@ -747,7 +747,7 @@ sub bgread {
   $answerpkt or die "bgread: decoding DNS packet failed: $@";
   $answerpkt->answerfrom($peerhost);
   if (defined $decoded_length && $decoded_length ne "" && $decoded_length != length($data)) {
-    warn sprintf("bgread: received a %d bytes packet from %s, decoded %d bytes\n",
+    warn sprintf("dns: bgread: received a %d bytes packet from %s, decoded %d bytes\n",
                  length($data), $peerhost, $decoded_length);
   }
   return $answerpkt;
@@ -988,7 +988,7 @@ sub finish_socket {
   my ($self) = @_;
   if ($self->{sock}) {
     $self->{sock}->close()
-      or warn "finish_socket: error closing socket $self->{sock}: $!";
+      or warn "dns: finish_socket: error closing socket $self->{sock}: $!\n";
     undef $self->{sock};
   }
 }
@@ -1017,7 +1017,7 @@ sub fhs_to_vec {
   foreach my $sock (@fhlist) {
     my $fno = fileno($sock);
     if (!defined $fno) {
-      warn "dns: oops! fileno now undef for $sock";
+      warn "dns: oops! fileno now undef for $sock\n";
     } else {
       vec ($rin, $fno, 1) = 1;
     }

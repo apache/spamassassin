@@ -1811,14 +1811,20 @@ indicating seconds (default), minutes, hours, days, weeks).
     type => $CONF_TYPE_DURATION,
   });
 
-=item dns_options opts   (default: norotate, nodns0x20, edns=4096)
+=item dns_options opts   (default: v4, v6, norotate, nodns0x20, edns=4096)
 
-Provides a (whitespace or comma -separated) list of options applying
-to DNS resolving. Available options are: I<rotate>, I<dns0x20> and
-I<edns> (or I<edns0>). Option name may be negated by prepending a I<no>
-(e.g. I<norotate>, I<NoEDNS>) to counteract a previously enabled option.
-Option names are not case-sensitive. The I<dns_options> directive may
+Provides a (whitespace or comma -separated) list of options applying to DNS
+resolving.  Available options are: I<v4>, I<v6>, I<rotate>, I<dns0x20> and
+I<edns> (or I<edns0>).  Option name may be negated by prepending a I<no>
+(e.g.  I<norotate>, I<NoEDNS>) to counteract a previously enabled option. 
+Option names are not case-sensitive.  The I<dns_options> directive may
 appear in configuration files multiple times, the last setting prevails.
+
+Option I<v4> declares resolver capable of returning IPv4 (A) records. 
+Option I<v6> declares resolver capable of returning IPv6 (AAAA) records. 
+One would set I<nov6> if the resolver is filtering AAAA responses.  NOTE:
+these options only refer to I<resolving capabilies>, there is no other
+meaning like whether the IP address of resolver itself is IPv4 or IPv6.
 
 Option I<edns> (or I<edsn0>) may take a value which specifies a requestor's
 acceptable UDP payload size according to EDNS0 specifications (RFC 6891,
@@ -1861,15 +1867,19 @@ do not work for no apparent reason.
   push (@cmds, {
     setting => 'dns_options',
     type => $CONF_TYPE_HASH_KEY_VALUE,
+    # RFC 6891: A good compromise may be the use of an EDNS maximum payload size
+    # of 4096 octets as a starting point.
+    default => { 'v4' => 1, 'v6' => 1,
+                 'rotate' => 0, 'dns0x20' => 0, 'edns' => 4096 },
     code => sub {
       my ($self, $key, $value, $line) = @_;
       foreach my $option (split (/[\s,]+/, lc $value)) {
         local($1,$2);
-        if ($option =~ /^no(rotate|dns0x20)\z/) {
+        if ($option =~ /^no(rotate|dns0x20|v4|v6)\z/) {
           $self->{dns_options}->{$1} = 0;
         } elsif ($option =~ /^no(edns)0?\z/) {
           $self->{dns_options}->{$1} = 0;
-        } elsif ($option =~ /^(rotate|dns0x20)\z/) {
+        } elsif ($option =~ /^(rotate|dns0x20|v4|v6)\z/) {
           $self->{dns_options}->{$1} = 1;
         } elsif ($option =~ /^(edns)0? (?: = (\d+) )? \z/x) {
           # RFC 6891 (ex RFC 2671) - EDNS0, value is a requestor's UDP payload
@@ -4165,7 +4175,7 @@ Plugins can override this internally if required.
     type => $Mail::SpamAssassin::Conf::CONF_TYPE_STRING,
     code => sub {
       my ($self, $key, $value, $line) = @_;
-      warn("deprecated setting used, change country_db_type to geodb_module");
+      warn("config: deprecated setting used, change country_db_type to geodb_module\n");
       if ($value =~ /GeoIP2/i) {
         $self->{geodb}->{module} = 'geoip2';
       } elsif ($value =~ /Geo/i) {
@@ -4269,7 +4279,7 @@ search for default filenames.
     type => $Mail::SpamAssassin::Conf::CONF_TYPE_STRING,
     code => sub {
       my ($self, $key, $value, $line) = @_;
-      warn("deprecated setting used, change country_db_path to geodb_options");
+      warn("config: deprecated setting used, change country_db_path to geodb_options\n");
       if ($value ne '') {
         $self->{geodb}->{options}->{country} = $value;
       } else {
@@ -4285,7 +4295,7 @@ search for default filenames.
     type => $Mail::SpamAssassin::Conf::CONF_TYPE_STRING,
     code => sub {
       my ($self, $key, $value, $line) = @_;
-      warn("deprecated setting used, change uri_country_db_path to geodb_options");
+      warn("config: deprecated setting used, change uri_country_db_path to geodb_options\n");
       if ($value ne '') {
         $self->{geodb}->{options}->{country} = $value;
       } else {
@@ -4301,7 +4311,7 @@ search for default filenames.
     type => $Mail::SpamAssassin::Conf::CONF_TYPE_STRING,
     code => sub {
       my ($self, $key, $value, $line) = @_;
-      warn("deprecated setting used, change uri_country_db_isp_path to geodb_options");
+      warn("config: deprecated setting used, change uri_country_db_isp_path to geodb_options\n");
       if ($value ne '') {
         $self->{geodb}->{options}->{isp} = $value;
       } else {
@@ -4720,10 +4730,6 @@ sub new {
     push(@{$self->{headers_spam}}, $r);
     push(@{$self->{headers_ham}},  $r);
   }
-
-  # RFC 6891: A good compromise may be the use of an EDNS maximum payload size
-  # of 4096 octets as a starting point.
-  $self->{dns_options}->{edns} = 4096;
 
   # these should potentially be settable by end-users
   # perhaps via plugin?
