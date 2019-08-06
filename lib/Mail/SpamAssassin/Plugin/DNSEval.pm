@@ -191,7 +191,7 @@ sub parsed_metadata {
   # if there's no untrusted IPs, it means we trust all the open-internet
   # relays, so we skip checks
   if (scalar @ips + scalar @originating > 0) {
-    dbg("dns: IPs found: full-external: ".join(", ", @fullexternal).
+    dbg("dnseval: IPs found: full-external: ".join(", ", @fullexternal).
       " untrusted: ".join(", ", @ips).
       " originating: ".join(", ", @originating));
     @{$pms->{dnseval_fullexternal}} = @fullexternal;
@@ -277,7 +277,7 @@ sub check_rbl_backend {
   return if !exists $pms->{dnseval_ips}; # no untrusted ips
 
   $rbl_server =~ s/\.+\z//; # strip unneeded trailing dot
-  dbg("dns: checking RBL $rbl_server, set $set");
+  dbg("dnseval: checking RBL $rbl_server, set $set");
 
   my $trusted = $self->{main}->{conf}->{trusted_networks};
   my @ips = @{$pms->{dnseval_ips}};
@@ -349,11 +349,11 @@ sub check_rbl_backend {
   }
 
   unless (scalar @ips > 0) {
-    dbg("dns: no untrusted IPs to check");
+    dbg("dnseval: no untrusted IPs to check");
     return 0;
   }
 
-  dbg("dns: only inspecting the following IPs: ".join(", ", @ips));
+  dbg("dnseval: only inspecting the following IPs: ".join(", ", @ips));
 
   foreach my $ip (@ips) {
     my $revip = reverse_ip_address($ip);
@@ -470,7 +470,6 @@ sub check_rbl_ns_from {
   my @nshost = ();
 
   return 0 unless $pms->is_dns_available();
-  $pms->load_resolver();
 
   for my $from ($pms->get('EnvelopeFrom:addr')) {
     next unless defined $from;
@@ -482,7 +481,7 @@ sub check_rbl_ns_from {
   }
   return 0 unless defined $domain;
 
-  dbg("dns: checking NS for host $domain");
+  dbg("dnseval: checking NS for host $domain");
 
   my $key = "NS:" . $domain;
   my $obj = { dom => $domain, rule => $rule, set => $set, rbl_server => $rbl_server, subtest => $subtest };
@@ -508,11 +507,11 @@ sub complete_ns_lookup {
 
   if (!$pkt) {
     # $pkt will be undef if the DNS query was aborted (e.g. timed out)
-    dbg("DNSEval: complete_ns_lookup aborted %s", $ent->{key});
+    dbg("dnseval: complete_ns_lookup aborted %s", $ent->{key});
     return;
   }
 
-  dbg("DNSEval: complete_ns_lookup %s", $ent->{key});
+  dbg("dnseval: complete_ns_lookup %s", $ent->{key});
   my @ns = $pkt->authority;
 
   foreach my $rr (@ns) {
@@ -520,9 +519,9 @@ sub complete_ns_lookup {
     if(defined($nshost)) {
       chomp($nshost);
       if ( defined $subtest ) {
-        dbg("dns: checking [$nshost] / $rule / $set / $rbl_server / $subtest");
+        dbg("dnseval: checking [$nshost] / $rule / $set / $rbl_server / $subtest");
       } else {
-        dbg("dns: checking [$nshost] / $rule / $set / $rbl_server");
+        dbg("dnseval: checking [$nshost] / $rule / $set / $rbl_server");
       }
       $pms->do_rbl_lookup($rule, $set, 'A',
         "$nshost.$rbl_server", $subtest) if ( defined $nshost and $nshost ne "");
@@ -569,9 +568,9 @@ sub check_rbl_rcvd {
         $host =~ s/\.$//;
       }
       if ( defined $subtest ) {
-        dbg("dns: checking [$host] / $rule / $set / $rbl_server / $subtest");
+        dbg("dnseval: checking [$host] / $rule / $set / $rbl_server / $subtest");
       } else {
-        dbg("dns: checking [$host] / $rule / $set / $rbl_server");
+        dbg("dnseval: checking [$host] / $rule / $set / $rbl_server");
       }
       $pms->do_rbl_lookup($rule, $set, 'A',
         "$host.$rbl_server", $subtest) if ( defined $host and $host ne "");
@@ -619,7 +618,7 @@ sub _check_rbl_addresses {
     } else {
       next if ($pms->{conf}->{tflags}->{$rule}||'') =~ /\bips_only\b/;
     }
-    dbg("dns: checking [$host] / $rule / $set / $rbl_server");
+    dbg("dnseval: checking [$host] / $rule / $set / $rbl_server");
     $pms->do_rbl_lookup($rule, $set, 'A', "$host.$rbl_server", $subtest);
   }
 }
@@ -647,7 +646,7 @@ sub check_dns_sender {
   }
 
   $host = idn_to_ascii($host);
-  dbg("dns: checking A and MX for host $host");
+  dbg("dnseval: checking A and MX for host $host");
 
   $self->do_sender_lookup($pms, $rule, 'A', $host);
   $self->do_sender_lookup($pms, $rule, 'MX', $host);
