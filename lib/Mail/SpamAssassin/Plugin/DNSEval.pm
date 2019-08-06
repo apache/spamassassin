@@ -164,6 +164,9 @@ sub parsed_metadata {
 
   my $pms = $opts->{permsgstatus};
 
+  return 1 if $self->{main}->{conf}->{skip_rbl_checks};
+  return 1 if !$pms->is_dns_available();
+
   # Process relaylists only once, not everytime in check_rbl_backend
   #
   # ok, make a list of all the IPs in the untrusted set
@@ -371,6 +374,7 @@ sub check_rbl {
 
   return 0 if $self->{main}->{conf}->{skip_rbl_checks};
   return 0 if !$pms->is_dns_available();
+
   $self->check_rbl_backend($pms, $rule, $set, $rbl_server, 'A', $subtest);
 }
 
@@ -402,6 +406,9 @@ sub check_rbl_from_host {
 
 sub check_rbl_headers {
   my ($self, $pms, $rule, $set, $rbl_server, $subtest, $test_headers) = @_;
+
+  return 0 if $self->{main}->{conf}->{skip_rbl_checks};
+  return 0 if !$pms->is_dns_available();
 
   my @env_hdr;
   my $conf = $self->{main}->{conf};
@@ -469,6 +476,7 @@ sub check_rbl_ns_from {
   my $domain;
   my @nshost = ();
 
+  return 0 if $self->{main}->{conf}->{skip_rbl_checks};
   return 0 unless $pms->is_dns_available();
 
   for my $from ($pms->get('EnvelopeFrom:addr')) {
