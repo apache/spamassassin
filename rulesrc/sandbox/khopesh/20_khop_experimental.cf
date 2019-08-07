@@ -181,7 +181,7 @@ meta	 FORGED_HOTMAIL_RCVD3	__HOST_HOTMAIL && (!__HOTMAIL_HELO || __DOS_SINGLE_EX
 
 # A blend of sidney's UPPERCASE_HTTP and jhardin's URI_UC for bug 6408
 # This one avoids Http: which I think is the biggest problem.
-uri	 UPPERCASE_URI	/^[^:A-Z]+[A-Z]/
+uri	 UPPERCASE_URI	/^[^:A-Z]+[A-Z][a-zA-Z]*:/
 describe UPPERCASE_URI	Link protocol has unexpected mixed case
 
 
