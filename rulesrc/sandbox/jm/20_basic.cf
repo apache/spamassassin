@@ -31,7 +31,7 @@ header JM_RCVD_QMAILV1     Received =~ /by \S+ \(Qmailv1\) with ESMTP/
 #   From address@example.com  Mon Jun 19 14:15:23 2006
 #   Header2: blah
 
-body __BODY_STARTS_WITH_FROM_LINE /^From \S+ \S\S\S \S\S\S .. ..:..:.. \S+\s+\S+\: /s
+body __BODY_STARTS_WITH_FROM_LINE /^(?:[^\n]*\n)?From \S+ \S\S\S \S\S\S .. ..:..:.. \S+\s+\S+\: /s
 meta CORRUPT_FROM_LINE_IN_HDRS (MISSING_HEADERS && __BODY_STARTS_WITH_FROM_LINE && MISSING_DATE && NO_RELAYS)
 describe CORRUPT_FROM_LINE_IN_HDRS Informational: message is corrupt, with a From line in its headers
 
