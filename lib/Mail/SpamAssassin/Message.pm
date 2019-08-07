@@ -1263,15 +1263,14 @@ sub split_into_array_of_short_lines {
 # optional argument to limit returned length
 
 sub split_into_array_of_short_paragraphs {
-  my @result;
-  my $chunk_size = 1024;
   my $text_l = length($_[0]);
-  my($j,$ofs);
-  for ($ofs = 0;  $text_l - $ofs > 2 * $chunk_size;  $ofs = $j+1) {
-    $j = index($_[0], "\n", $ofs+$chunk_size);
+  return ($_[0]) if $text_l <= BODY_SPLIT_CHUNK_SIZE;
+  my(@result,$j,$ofs);
+  for ($ofs = 0;  $text_l - $ofs > 2 * BODY_SPLIT_CHUNK_SIZE;  $ofs = $j+1) {
+    $j = index($_[0], "\n", $ofs+BODY_SPLIT_CHUNK_SIZE);
     if ($j < 0) {
-      $j = index($_[0], " ", $ofs+$chunk_size);
-      if ($j < 0) { $j = $ofs+$chunk_size }
+      $j = index($_[0], " ", $ofs+BODY_SPLIT_CHUNK_SIZE);
+      if ($j < 0) { $j = $ofs+BODY_SPLIT_CHUNK_SIZE }
     }
     push(@result, substr($_[0], $ofs, $j-$ofs+1));
     return @result if (defined $_[1] && $_[1] && $ofs >= $_[1]);
