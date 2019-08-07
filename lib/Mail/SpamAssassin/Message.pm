@@ -1132,6 +1132,8 @@ sub get_body_text_array_common {
 
   $self->{$key} = [];
 
+  my $scansize = $self->{body_part_scan_size};
+
   # Find all parts which are leaves
   my @parts = $self->find_parts(qr/./,1);
   return $self->{$key} unless @parts;
@@ -1151,26 +1153,30 @@ sub get_body_text_array_common {
     $text .= "\n"  if $text ne '';
 
     my($type, $rnd) = $p->$method_name();  # decode this part
-    if ( defined $rnd ) {
-      # Only text/* types are rendered ...
-      if ($self->{body_part_scan_size} && length($rnd) > $self->{body_part_scan_size}) {
-        # try truncating at boundary, nearest 1k block is fine
-        my $idx = index($rnd, "\n", $self->{body_part_scan_size});
-        if ($idx >= 0 && $idx - $self->{body_part_scan_size} <= 1024) {
-          $text .= substr($rnd, 0, $idx)."\n";
+    # Only text/* types are rendered ...
+    if (defined $rnd) {
+      # Truncate to body_part_scan_size
+      if ($scansize && length($rnd) > $scansize) {
+        # Try truncating at boundary, nearest 1k block is fine
+        # Newline first
+        my $idx = index($rnd, "\n", $scansize);
+        if ($idx >= 0 && $idx - $scansize <= 1024) {
+          substr($rnd, $idx+1) = ''; # truncate
         }
         else {
-          $idx = index($rnd, ' ', $self->{body_part_scan_size});
-          if ($idx >= 0 && $idx - $self->{body_part_scan_size} <= 1024) {
-            $text .= substr($rnd, 0, $idx)."\n";
+          # Space is fine too for rendered
+          $idx = index($rnd, " ", $scansize);
+          if ($idx >= 0 && $idx - $scansize <= 1024) {
+            substr($rnd, $idx+1) = ''; # truncate
           }
           else {
-            $text .= substr($rnd, 0, $self->{body_part_scan_size})."\n";
+            substr($rnd, $scansize) = ''; # truncate
           }
         }
-      } else {
-        $text .= $rnd;          
       }
+
+      # Add to rendered text
+      $text .= $rnd;
 
       # TVD - if there are multiple parts, what should we do?
       # right now, just use the last one.  we may need to give some priority
@@ -1221,6 +1227,8 @@ sub get_decoded_body_text_array {
   if (defined $self->{text_decoded}) { return $self->{text_decoded}; }
   $self->{text_decoded} = [ ];
 
+  my $scansize = $self->{rawbody_part_scan_size};
+
   # Find all parts which are leaves
   my @parts = $self->find_parts(qr/^(?:text|message)\b/,1);
   return $self->{text_decoded} unless @parts;
@@ -1231,9 +1239,38 @@ sub get_decoded_body_text_array {
     # and not displayed
     next if ($parts[$pt]->{'type'} eq 'text/calendar');
 
+    my $rawbody = $parts[$pt]->decode();
+    my $rawlen = length($rawbody);
+
+    # Truncate to rawbody_part_scan_size
+    if ($scansize && $rawlen > $scansize) {
+      # Try truncating at boundary, nearest 1k block is fine
+      # Newline first
+      my $idx = index($rawbody, "\n", $scansize);
+      if ($idx >= 0 && $idx - $scansize <= 1024) {
+        substr($rawbody, $idx+1) = ''; # truncate
+      }
+      else {
+        # Try > next, might be html
+        $idx = index($rawbody, '>', $scansize);
+        if ($idx >= 0 && $idx - $scansize <= 1024) {
+          substr($rawbody, $idx+1) = ''; # truncate
+        }
+        else {
+          # Space as last effort
+          $idx = index($rawbody, ' ', $scansize);
+          if ($idx >= 0 && $idx - $scansize <= 1024) {
+            substr($rawbody, $idx+1) = ''; # truncate
+          }
+          else {
+            substr($rawbody, $scansize) = ''; # truncate
+          }
+        }
+      }
+    }
+
     push(@{$self->{text_decoded}},
-         split_into_array_of_short_paragraphs($parts[$pt]->decode(),
-             $self->{rawbody_part_scan_size}));
+         split_into_array_of_short_paragraphs($rawbody));
   }
 
   return $self->{text_decoded};
@@ -1258,22 +1295,27 @@ sub split_into_array_of_short_lines {
 
 # ---------------------------------------------------------------------------
 
-# split a text into array of paragraphs of sizes between
-# $chunk_size and 2 * $chunk_size, returning the resulting array
-# optional argument to limit returned length
+# Split a text into array of paragraphs of sizes between
+# 1-2 * MAX_BODY_LINE_LENGTH, returning the resulting array.
+# Mainly used for rawbody splitting purposes
 
 sub split_into_array_of_short_paragraphs {
   my $text_l = length($_[0]);
-  return ($_[0]) if $text_l <= BODY_SPLIT_CHUNK_SIZE;
+  return ($_[0]) if $text_l <= MAX_BODY_LINE_LENGTH;
   my(@result,$j,$ofs);
-  for ($ofs = 0;  $text_l - $ofs > 2 * BODY_SPLIT_CHUNK_SIZE;  $ofs = $j+1) {
-    $j = index($_[0], "\n", $ofs+BODY_SPLIT_CHUNK_SIZE);
-    if ($j < 0) {
-      $j = index($_[0], " ", $ofs+BODY_SPLIT_CHUNK_SIZE);
-      if ($j < 0) { $j = $ofs+BODY_SPLIT_CHUNK_SIZE }
+  # Try to split in order \n, > (html?), space
+  for ($ofs = 0; $text_l - $ofs > 2 * MAX_BODY_LINE_LENGTH; $ofs = $j+1) {
+    $j = index($_[0], "\n", $ofs + MAX_BODY_LINE_LENGTH);
+    if ($j < 0 || $j-$ofs+1 > 2 * MAX_BODY_LINE_LENGTH) {
+      $j = index($_[0], ">", $ofs + MAX_BODY_LINE_LENGTH);
+      if ($j < 0 || $j-$ofs+1 > 2 * MAX_BODY_LINE_LENGTH) {
+        $j = index($_[0], " ", $ofs + MAX_BODY_LINE_LENGTH);
+        if ($j < 0 || $j-$ofs+1 > 2 * MAX_BODY_LINE_LENGTH) {
+          $j = $ofs + MAX_BODY_LINE_LENGTH;
+        }
+      }
     }
     push(@result, substr($_[0], $ofs, $j-$ofs+1));
-    return @result if (defined $_[1] && $_[1] && $ofs >= $_[1]);
   }
   push(@result, substr($_[0], $ofs))  if $ofs < $text_l;
   @result;

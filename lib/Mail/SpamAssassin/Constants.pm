@@ -45,7 +45,7 @@ BEGIN {
 	MAX_BODY_LINE_LENGTH MAX_HEADER_KEY_LENGTH MAX_HEADER_VALUE_LENGTH
 	MAX_HEADER_LENGTH ARITH_EXPRESSION_LEXER AI_TIME_UNKNOWN
 	CHARSETS_LIKELY_TO_FP_AS_CAPS MAX_URI_LENGTH RULENAME_RE IS_RULENAME
-	META_RULES_MATCHING_RE BODY_SPLIT_CHUNK_SIZE
+	META_RULES_MATCHING_RE
   );
 
   %EXPORT_TAGS = (
@@ -420,8 +420,5 @@ use constant IS_RULENAME => qr/^${\(RULENAME_RE)}$/;
 
 # meta function rules_matching(), takes argument RULENAME_RE with glob *? characters
 use constant META_RULES_MATCHING_RE => qr/(?<!_)\brules_matching\(\s*([_a-zA-Z*?][_a-zA-Z0-9*?]{0,127})\s*\)/;
-
-# chunk size for split_into_array_of_short_paragraphs
-use constant BODY_SPLIT_CHUNK_SIZE => 1024;
 
 1;
