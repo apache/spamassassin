@@ -3,7 +3,10 @@
 # Rawbody matches qp/base64 etc decoded long html,
 # need full here to check pristine message lines!!
 #rawbody  __LONGLINE	/^.{998}[^\r\n]/
-full     __LONGLINE	/^(?=.*?\r?\n\r?\n.*?(?<=\n)[^\r\n]{998})/s
+# To check only body
+#full     __LONGLINE	/^(?=.*?\r?\n\r?\n.*?(?<=\n)[^\r\n]{998})/s
+# Might as well include headers, they are "SMTP lines" as well
+full     __LONGLINE	/^[^\r\n]{998}/m
 meta     LONGLINE	__LONGLINE
 describe LONGLINE	Line length exceeds 998 character limit, RFC 5322
 
