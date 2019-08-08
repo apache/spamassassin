@@ -696,8 +696,7 @@ sub rendered {
     my $text = $self->decode;  # QP and Base64 decoding, bytes
     my $text_len = length($text);  # num of bytes in original charset encoding
 
-    # render text/html always, or any other text|text/plain part as text/html
-    # based on a heuristic which simulates a certain common mail client
+    # render text/html always
     if ($text ne '' && $self->{'type'} =~ m{^text/html$}i)
     {
       $self->{rendered_type} = 'text/html';
