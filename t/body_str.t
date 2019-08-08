@@ -110,14 +110,14 @@ ok(run_sa(
   "<html><body><p>FIRST LAST</p></body></html>",
   0,
   qr!^<html><body><p>FIRST LAST</p></body></html>\z!,
-  qr/^SUBJECT X\nFIRST LAST\x0a\z/
+  qr!^SUBJECT X\n<html><body><p>FIRST LAST</p></body></html>\z!
   ));
 
 ok(run_sa(
   "<html><body><p>FIRST X<p><p>LAST</p></body></html>",
   0,
   qr!^<html><body><p>FIRST X<p><p>LAST</p></body></html>\z!,
-  qr/^SUBJECT X\nFIRST X\x0aLAST\x0a\z/
+  qr!^SUBJECT X\n<html><body><p>FIRST X<p><p>LAST</p></body></html>\z!
   ));
 
 ok(run_sa(
@@ -145,7 +145,7 @@ ok(run_sa(
   "<html><body><p>FIRST LAST</p></body></html>",
   11,
   qr/^<html><body>\z/,
-  qr/^SUBJECT X\nFIRST LAST \z/
+  qr/^SUBJECT X\n<html><body><p>FIRST \z/
   ));
 
 ok(run_sa(
