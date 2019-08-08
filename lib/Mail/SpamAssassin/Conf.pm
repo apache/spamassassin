@@ -3066,12 +3066,19 @@ Define a body pattern test.  C<pattern> is a Perl regular expression.  Note:
 as per the header tests, C<#> must be escaped (C<\#>) or else it is considered
 the beginning of a comment.
 
-The 'body' in this case is the textual parts of the message body;
-any non-text MIME parts are stripped, and the message decoded from
-Quoted-Printable or Base-64-encoded format if necessary.  The message
-Subject header is considered part of the body and becomes the first
-paragraph when running the rules.  All HTML tags and line breaks will
-be removed before matching.
+The 'body' in this case is the textual parts of the message body; any
+non-text MIME parts are stripped, and the message decoded from
+Quoted-Printable or Base-64-encoded format if necessary.  Parts declared as
+text/html will be rendered from HTML to text.
+
+All body paragraphs (double-newline-separated blocks text) are turned into a
+line breaks removed, whitespace normalized single line.  Any lines longer
+than 2kB are split into shorter separate lines (from a boundary when
+possible), this may unexpectedly prevent pattern from matching.  Patterns
+are matched independently against each of these lines.
+
+Note that the message Subject header is considered part of the body and
+becomes the first line when running the rules.
 
 =item body SYMBOLIC_TEST_NAME eval:name_of_eval_method([args])
 
@@ -3151,6 +3158,10 @@ The 'raw body' of a message is the raw data inside all textual parts. The
 text will be decoded from base64 or quoted-printable encoding, but HTML
 tags and line breaks will still be present.  Multiline expressions will
 need to be used to match strings that are broken by line breaks.
+
+Note that the text is split into 2-4kB chunks (from a word boundary when
+possible), this may unexpectedly prevent pattern from matching.  Patterns
+are matched independently against each of these chunks.
 
 =item rawbody SYMBOLIC_TEST_NAME eval:name_of_eval_method([args])
 
