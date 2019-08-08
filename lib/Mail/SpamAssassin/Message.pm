@@ -942,8 +942,20 @@ sub _parse_multipart {
         $part_array = [];
       }
 
-      my($p_boundary);
-      ($part_msg->{'type'}, $p_boundary) = Mail::SpamAssassin::Util::parse_content_type($part_msg->header('content-type'));
+      ($part_msg->{'type'}, my $p_boundary, undef, undef, my $ct_was_missing) =
+          Mail::SpamAssassin::Util::parse_content_type($part_msg->header('content-type'));
+
+      # bug 5741: if ct was missing and parent == multipart/digest, then
+      # type should be set as message/rfc822
+      if ($ct_was_missing) {
+        if ($msg->{'type'} eq 'multipart/digest') {
+          dbg("message: missing type, setting multipart/digest child as message/rfc822");
+          $part_msg->{'type'} = 'message/rfc822';
+        } else {
+          dbg("message: missing type, setting as default text/plain");
+        }
+      }
+
       $p_boundary ||= $boundary;
       dbg("message: found part of type ".$part_msg->{'type'}.", boundary: ".(defined $p_boundary ? $p_boundary : ''));
 
@@ -1054,12 +1066,18 @@ sub _parse_normal {
 
   dbg("message: parsing normal part");
 
-  # 0: content-type, 1: boundary, 2: charset, 3: filename
+  # 0: content-type, 1: boundary, 2: charset, 3: filename 4: ct_missing
   my @ct = Mail::SpamAssassin::Util::parse_content_type($msg->header('content-type'));
 
   # multipart sections are required to have a boundary set ...  If this
   # one doesn't, assume it's malformed and revert to text/plain
-  $msg->{'type'} = (index($ct[0], 'multipart/') != 0 || defined $boundary) ? $ct[0] : 'text/plain';
+  # bug 5741: don't overwrite the default type assigned by _parse_multipart()
+  if (!$ct[4]) {
+    $msg->{'type'} = (index($ct[0], 'multipart/') != 0 || defined $boundary) ?
+      $ct[0] : 'text/plain'
+  } else {
+    dbg("message: missing type, setting previous multipart type: %s", $msg->{'type'});
+  }
   $msg->{'charset'} = $ct[2];
 
   # attempt to figure out a name for this attachment if there is one ...

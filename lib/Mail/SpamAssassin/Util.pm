@@ -1147,7 +1147,8 @@ sub parse_content_type {
   # but it happens), MUAs seem to take the last one and so that's what we
   # should do here.
   #
-  my $ct = $_[-1] || 'text/plain; charset=us-ascii';
+  my $missing; # flag missing content-type, even though we force it text/plain
+  my $ct = $_[-1] || do { $missing = 1; 'text/plain; charset=us-ascii' };
 
   # This could be made a bit more rigid ...
   # the actual ABNF, BTW (RFC 1521, section 7.2.1):
@@ -1208,6 +1209,7 @@ sub parse_content_type {
   # bug 4298: If at this point we don't have a content-type, assume text/plain;
   # also, bug 5399: if the content-type *starts* with "text", and isn't in a 
   # list of known bad/non-plain formats, do likewise.
+  $missing = 1 if !$ct; # flag missing content-type
   if (!$ct ||
         ($ct =~ /^text\b/ && $ct !~ /^text\/(?:x-vcard|calendar|html)$/))
   {
@@ -1220,8 +1222,10 @@ sub parse_content_type {
   # Now that the header has been parsed, return the requested information.
   # In scalar context, just the MIME type, in array context the
   # four important data parts (type, boundary, charset, and filename).
+  # Added fifth array member $missing, if caller wants to know ct was
+  # missing/invalid, even though we forced it as text/plain.
   #
-  return wantarray ? ($ct,$boundary,$charset,$name) : $ct;
+  return wantarray ? ($ct,$boundary,$charset,$name,$missing) : $ct;
 }
 
 ###########################################################################
