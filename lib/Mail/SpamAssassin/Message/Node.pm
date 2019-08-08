@@ -716,8 +716,7 @@ sub rendered {
     $charset = 'us-ascii';
   }
 
-  # render text/html always, or any other text|text/plain part as text/html
-  # based on a heuristic which simulates a certain common mail client
+  # render text/html always
   if ($text ne '' && $type eq 'text/html')
   {
     $self->{rendered_type} = 'text/html';
