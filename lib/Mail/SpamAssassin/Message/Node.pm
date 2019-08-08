@@ -698,9 +698,7 @@ sub rendered {
 
     # render text/html always, or any other text|text/plain part as text/html
     # based on a heuristic which simulates a certain common mail client
-    if ($text ne '' && ($self->{'type'} =~ m{^text/html$}i ||
-		        ($self->{'type'} =~ m{^text/plain$}i &&
-		         _html_render(substr($text, 0, 23)))))
+    if ($text ne '' && $self->{'type'} =~ m{^text/html$}i)
     {
       $self->{rendered_type} = 'text/html';
 
