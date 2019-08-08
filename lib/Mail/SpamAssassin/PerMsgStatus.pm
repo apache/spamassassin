@@ -1845,8 +1845,10 @@ sub extract_message_metadata {
 Returns the message body, with B<base64> or B<quoted-printable> encodings
 decoded, and non-text parts or non-inline attachments stripped.
 
-It is returned as an array of strings, with each string representing
-one newline-separated line of the body.
+This is the same result text as used in 'rawbody' rules.
+
+It is returned as an array of strings, with each string being a 2-4kB chunk
+of the body, split from boundaries if possible.
 
 =cut
 
@@ -1859,6 +1861,8 @@ sub get_decoded_body_text_array {
 Returns the message body, decoded (as described in
 get_decoded_body_text_array()), with HTML rendered, and with whitespace
 normalized.
+
+This is the same result text as used in 'body' rules.
 
 It will always render text/html, and will use a heuristic to determine if other
 text/* parts should be considered text/html.
