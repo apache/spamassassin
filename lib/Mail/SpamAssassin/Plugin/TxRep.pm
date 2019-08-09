@@ -1245,9 +1245,7 @@ sub check_senders_reputation {
   my $timer    = $self->{main}->time_method("total_txrep");
   my $msgscore = (defined $self->{learning})? $self->{learning} : $pms->get_autolearn_points();
   my $date     = $pms->{msg}->receive_date() || $pms->{date_header_time};
-  my $msg_id   = $self->{msgid} ||
-                 Mail::SpamAssassin::Plugin::Bayes->get_msgid($pms->{msg}) ||
-                 $pms->get('Message-Id') || $pms->get('Message-ID') || $pms->get('MESSAGE-ID') || $pms->get('MESSAGEID');
+  my $msg_id   = $self->{msgid} || $pms->{msg}->generate_msgid();
 
   my $from   = lc $pms->get('From:addr') || $pms->get('EnvelopeFrom:addr');;
   return 0 unless $from =~ /\S/;

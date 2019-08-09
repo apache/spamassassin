@@ -62,11 +62,12 @@ my $toks = getimpl->tokenize($mail, $body);
 
 ok(scalar(keys %{$toks}) > 0);
 
-my($msgid,$msgid_hdr) = getimpl->get_msgid($mail);
+my $msgid = $mail->generate_msgid();
+my $msgid_hdr = $mail->get_msgid();
 
 # $msgid is the generated hash messageid
 # $msgid_hdr is the Message-Id header
-ok($msgid eq '4cf5cc4d53b22e94d3e55932a606b18641a54041@sa_generated')
+ok($msgid eq '71f849915d7e469ddc1890cd8175f6876843f99e@sa_generated')
     or warn "got: [$msgid]";
 ok($msgid_hdr eq '9PS291LhupY');
 

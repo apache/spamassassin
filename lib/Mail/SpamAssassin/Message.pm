@@ -528,6 +528,77 @@ sub get_pristine_body {
   return $self->{pristine_body};
 }
 
+=item get_pristine_body_digest()
+
+Returns SHA1 hex digest of the pristine message body.
+CRLF line endings are normalized to LF before hashing.
+
+=cut
+
+sub get_pristine_body_digest {
+  my ($self) = @_;
+
+  return $self->{pristine_body_digest} if exists $self->{pristine_body_digest};
+
+  if ($self->{line_ending} eq "\015\012") {
+    # Don't make a copy, process line by line to save memory
+    # CRLF should be exception, so it's not that critical here
+    my $sha = Digest::SHA->new('sha1');
+    while ($self->{pristine_body} =~ /(.*?)(\015\012)?/gs) {
+      $sha->add($1.(defined $2 ? "\012" : ""));
+    }
+    $self->{pristine_body_digest} = $sha->hexdigest;
+  } else {
+    $self->{pristine_body_digest} = sha1_hex($self->{pristine_body});
+  }
+
+  dbg("message: pristine body digest: ".$self->{pristine_body_digest});
+  return $self->{pristine_body_digest};
+}
+
+# ---------------------------------------------------------------------------
+
+=item get_msgid()
+
+Returns Message-ID header for the message, with <> and surrounding
+whitespace removed. Returns undef, if nothing found between <>.
+
+=cut
+
+sub get_msgid {
+  my ($self) = @_;
+
+  my $msgid = $self->get_header("Message-Id");
+  if (defined $msgid && $msgid =~ /^\s*<(.+)>\s*$/s) {
+    return $1;
+  } else {
+    return undef;
+  }
+}
+
+=item generate_msgid()
+
+Generate a calculated "Message-ID" in B<sha1hex@sa_generated> format, using
+To, Date headers and pristine body as source for hashing.
+
+=cut
+
+sub generate_msgid {
+  my ($self) = @_;
+
+  return $self->{msgid_generated} if exists $self->{msgid_generated};
+
+  # See Bug 5185, not using Received headers etc anymore
+  my $to = $self->get_header("To") || '';
+  my $date = $self->get_header("Date") || '';
+  my $body_digest = $self->get_pristine_body_digest();
+
+  $self->{msgid_generated} =
+    sha1_hex($to."\000".$date."\000".$body_digest).'@sa_generated';
+
+  return $self->{msgid_generated};
+}
+
 # ---------------------------------------------------------------------------
 
 =item extract_message_metadata($permsgstatus)

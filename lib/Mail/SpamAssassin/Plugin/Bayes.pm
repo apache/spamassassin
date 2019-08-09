@@ -406,10 +406,11 @@ sub _learn_trapped {
   my @msgid = ( $msgid );
 
   if (!defined $msgid) {
-    @msgid = $self->get_msgid($msg);
+    @msgid = ( $msg->generate_msgid(), $msg->get_msgid() );
   }
 
   foreach my $msgid_t ( @msgid ) {
+    next if !defined $msgid_t;
     my $seen = $self->{store}->seen_get ($msgid_t);
 
     if (defined ($seen)) {
@@ -541,7 +542,7 @@ sub _forget_trapped {
   my $isspam;
 
   if (!defined $msgid) {
-    @msgid = $self->get_msgid($msg);
+    @msgid = ( $msg->generate_msgid(), $msg->get_msgid() );
   }
 
   while( $msgid = shift @msgid ) {
@@ -960,49 +961,6 @@ sub learner_dump_database {
 ###########################################################################
 # TODO: these are NOT public, but the test suite needs to call them.
 
-sub get_msgid {
-  my ($self, $msg) = @_;
-
-  my @msgid;
-
-  my $msgid = $msg->get_header("Message-Id");
-  if (defined $msgid && $msgid ne '' && $msgid !~ /^\s*<\s*(?:\@sa_generated)?>.*$/) {
-    # remove \r and < and > prefix/suffixes
-    chomp $msgid;
-    $msgid =~ s/^<//; $msgid =~ s/>.*$//g;
-    push(@msgid, $msgid);
-  }
-
-  # Modified 2012-01-17  per bug 5185 to remove last received from msg_id calculation
-
-  # Use sha1_hex(Date: and top N bytes of body)
-  # where N is MIN(1024 bytes, 1/2 of body length)
-  #
-  my $date = $msg->get_header("Date");
-  $date = "None" if (!defined $date || $date eq ''); # No Date?
-
-  #Removed per bug 5185
-  #my @rcvd = $msg->get_header("Received");
-  #my $rcvd = $rcvd[$#rcvd];
-  #$rcvd = "None" if (!defined $rcvd || $rcvd eq ''); # No Received?
-
-  # Make a copy since pristine_body is a reference ...
-  my $body = join('', $msg->get_pristine_body());
-
-  if (length($body) > 64) { # Small Body?
-    my $keep = ( length $body > 2048 ? 1024 : int(length($body) / 2) );
-    substr($body, $keep) = '';
-  }
-
-  #Stripping all CR and LF so that testing midstream from MTA and post delivery don't 
-  #generate different id's simply because of LF<->CR<->CRLF changes.
-  $body =~ s/[\r\n]//g;
-
-  unshift(@msgid, sha1_hex($date."\000".$body).'@sa_generated');
-
-  return wantarray ? @msgid : $msgid[0];
-}
-
 sub get_body_from_msg {
   my ($self, $msg) = @_;
 
@@ -1020,7 +978,7 @@ sub get_body_from_msg {
 
   if (!defined $msgdata) {
     # why?!
-    warn "bayes: failed to get body for ".scalar($self->get_msgid($self->{msg}))."\n";
+    warn "bayes: failed to get body for ".scalar($self->{msg}->generate_msgid())."\n";
     return { };
   }
 

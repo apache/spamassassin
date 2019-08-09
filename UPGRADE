@@ -125,6 +125,14 @@ Note for Users Upgrading to SpamAssassin 4.0.0
 - New dns_options nov4, nov6 (must set nov6 if resolver is filtering AAAA
   replies).
 
+- API: Added Message::get_pristine_body_digest(), Message::get_msgid(),
+  Message::generate_msgid() functions, removed deprecated private
+  Plugin::Bayes::get_msgid() function.
+
+- Bayes and TxRep seen (Message-ID tracking) hashing method changed.
+  No actions are required. If re-learning some old messages, they might
+  be learned twice. Old IDs should expire automatically.
+
 Note for Users Upgrading to SpamAssassin 3.4.2
 ----------------------------------------------
 
