@@ -2348,8 +2348,7 @@ various data about where the URIs were found in the message.  It takes a
 combination of the URIs found in the rendered (decoded and HTML stripped)
 body and the URIs found when parsing the HTML in the message.  Will also
 set $status->{uri_detail_list} (the hash reference as returned by this
-function).  This function will also set $status->{uri_domain_count}
-(count of unique domains).
+function).
 
 The hash format looks something like this:
 
