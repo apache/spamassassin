@@ -153,6 +153,7 @@ sub set_config {
 
   push (@cmds, {
     setting => 'uri_block_cc',
+    type => $Mail::SpamAssassin::Conf::CONF_TYPE_HASH_KEY_VALUE,
     is_priv => 1,
     code => sub {
       my ($self, $key, $value, $line) = @_;
@@ -194,6 +195,7 @@ sub set_config {
 
   push (@cmds, {
     setting => 'uri_block_cont',
+    type => $Mail::SpamAssassin::Conf::CONF_TYPE_HASH_KEY_VALUE,
     is_priv => 1,
     code => sub {
       my ($self, $key, $value, $line) = @_;
@@ -235,6 +237,7 @@ sub set_config {
   
   push (@cmds, {
     setting => 'uri_block_isp',
+    type => $Mail::SpamAssassin::Conf::CONF_TYPE_HASH_KEY_VALUE,
     is_priv => 1,
     code => sub {
       my ($self, $key, $value, $line) = @_;
@@ -268,6 +271,7 @@ sub set_config {
 
   push (@cmds, {
     setting => 'uri_block_cidr',
+    type => $Mail::SpamAssassin::Conf::CONF_TYPE_HASH_KEY_VALUE,
     is_priv => 1,
     code => sub {
       my ($self, $key, $value, $line) = @_;
@@ -294,6 +298,7 @@ sub set_config {
 
   push (@cmds, {
     setting => 'uri_block_exclude',
+    type => $Mail::SpamAssassin::Conf::CONF_TYPE_HASH_KEY_VALUE,
     is_priv => 1,
     code => sub {
       my ($self, $key, $value, $line) = @_;
