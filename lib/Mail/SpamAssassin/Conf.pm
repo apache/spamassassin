@@ -3131,8 +3131,9 @@ than 2kB are split into shorter separate lines (from a boundary when
 possible), this may unexpectedly prevent pattern from matching.  Patterns
 are matched independently against each of these lines.
 
-Note that the message Subject header is considered part of the body and
-becomes the first line when running the rules.
+Note that by default the message Subject header is considered part of the
+body and becomes the first line when running the rules. If you don't want
+to match Subject along with body text, use "tflags RULENAME nosubject".
 
 =item body SYMBOLIC_TEST_NAME eval:name_of_eval_method([args])
 
@@ -3471,6 +3472,11 @@ For example:
   meta __KAM_HAS_5_URIS (__KAM_COUNT_URIS >= 5)
   meta __KAM_HAS_10_URIS (__KAM_COUNT_URIS >= 10)
   meta __KAM_HAS_15_URIS (__KAM_COUNT_URIS >= 15)
+
+=item  nosubject
+
+Used only for B<body> rules.  If specified, Subject header will not be a
+part of the matched body text.  See I<body> for more info.
 
 =item  ips_only
 
@@ -5280,6 +5286,7 @@ sub feature_dns_block_rule { 1 } # supports 'dns_block_rule' config option
 sub feature_compile_regexp { 1 } # Util::compile_regexp
 sub feature_meta_rules_matching { 1 } # meta rules_matching() expression
 sub feature_get_host { 1 } # $pms->get() :host :domain :ip :revip # was implemented together with AskDNS::has_tag_header # Bug 7734
+sub has_tflags_nosubject { 1 } # tflags nosubject
 sub perl_min_version_5010000 { return $] >= 5.010000 }  # perl version check ("perl_version" not neatly backwards-compatible)
 
 ###########################################################################

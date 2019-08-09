@@ -821,6 +821,12 @@ sub do_body_tests {
       dbg("rules-all: running body rule %s", q{'.$rulename.'});
       ';
     }
+    my $nosubject = ($conf->{tflags}->{$rulename}||'') =~ /\bnosubject\b/;
+    if ($nosubject) {
+      $sub .= '
+      my $nosubj = 1;
+      ';
+    }
     if (($conf->{tflags}->{$rulename}||'') =~ /\bmultiple\b/)
     {
       # support multiple matches
@@ -830,6 +836,13 @@ sub do_body_tests {
       $sub .= '
       $hits = 0;
       body_'.$loopid.': foreach my $l (@_) {
+      ';
+      if ($nosubject) {
+        $sub .= '
+        if ($nosubj) { $nosubj = 0; next; }
+        ';
+      }
+      $sub .= '
         pos $l = 0;
         '.$self->hash_line_for_rule($pms, $rulename).'
         while ($l =~ /$qrptr->{q{'.$rulename.'}}/go'. ($max? ' && $hits++ < '.$max:'') .') {
@@ -846,6 +859,13 @@ sub do_body_tests {
       # instead of if() etc., shaves off 8 perl OPs.
       $sub .= '
       foreach my $l (@_) {
+      ';
+      if ($nosubject) {
+        $sub .= '
+        if ($nosubj) { $nosubj = 0; next; }
+        ';
+      }
+      $sub .= '
         '.$self->hash_line_for_rule($pms, $rulename).'
         if ($l =~ /$qrptr->{q{'.$rulename.'}}/o) {
           $self->got_hit(q{'.$rulename.'}, "BODY: ", ruletype => "body");
