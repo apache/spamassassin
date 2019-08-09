@@ -263,7 +263,7 @@ sub new {
     'subtest_names_hit' => [ ],
     'spamd_result_log_items' => [ ],
     'tests_already_hit' => { },
-    'c'                 => { },
+    'get_cache'         => { },
     'tag_data'          => { },
     'rule_errors'       => 0,
     'disable_auto_learning' => 0,
@@ -401,7 +401,7 @@ sub check_timed {
 
   # now that we've finished checking the mail, clear out this cache
   # to avoid unforeseen side-effects.
-  $self->{c} = { };
+  $self->{get_cache} = { };
 
   # Round the score to 3 decimal places to avoid rounding issues
   # We assume required_score to be properly rounded already.
@@ -2214,7 +2214,7 @@ sub _get {
 # $_[1] is request
 # $_[2] is defval
 sub get {
-  my $cache = $_[0]->{c};
+  my $cache = $_[0]->{get_cache};
   my $found;
   if (exists $cache->{$_[1]}) {
     # return cache entry if it is known
