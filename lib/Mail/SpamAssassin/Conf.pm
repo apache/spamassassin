@@ -5201,6 +5201,9 @@ sub clone {
     elsif ($i eq 'HASH') {
       %{$dest->{$k}} = %{$v};
     }
+    elsif ($i eq 'Regexp') {
+      $dest->{$k} = $v;
+    }
     else {
       # throw a warning for debugging -- should never happen in normal usage
       warn "config: dup unknown type $k, $i\n";
