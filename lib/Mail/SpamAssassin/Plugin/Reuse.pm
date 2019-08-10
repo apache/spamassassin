@@ -40,8 +40,11 @@ use re 'taint';
 
 use Mail::SpamAssassin::Conf;
 use Mail::SpamAssassin::Logger;
+use Mail::SpamAssassin::Constants qw(:sa);
 
 our @ISA = qw(Mail::SpamAssassin::Plugin);
+
+my $RULENAME_RE = RULENAME_RE;
 
 # constructor
 sub new {
@@ -68,34 +71,35 @@ sub set_config {
   # e.g.
   # reuse NET_TEST_V1 NET_TEST_V0
 
-  push (@cmds, { setting => 'reuse',
-                 code => sub {
-                   my ($conf, $key, $value, $line) = @_;
+  push (@cmds, {
+    setting => 'reuse',
+    type => $Mail::SpamAssassin::Conf::CONF_TYPE_HASH_KEY_VALUE,
+    code => sub {
+      my ($conf, $key, $value, $line) = @_;
 
-                   if ($value !~ /\s*(\w+)(?:\s+(\w+(?:\s+\w+)*))?\s*$/) {
-                     return $Mail::SpamAssassin::Conf::INVALID_VALUE;
-                   }
+      if ($value !~ /^\s*(${RULENAME_RE})(?:\s+(${RULENAME_RE}(?:\s+${RULENAME_RE})*))?\s*$/) {
+        return $Mail::SpamAssassin::Conf::INVALID_VALUE;
+      }
 
-                   my $new_name = $1;
-		   my @old_names = ($new_name);
-		   if ($2) {
-		     push @old_names, split (' ', $2);
-		   }
+      my $new_name = $1;
+      my @old_names = ($new_name);
+      if (defined $2) {
+        push @old_names, split (/\s+/, $2);
+      }
 
-                   dbg("reuse: read rule, old: @old_names new: $new_name");
+      dbg("reuse: read rule, old: %s new: %s", join(' ', @old_names), $new_name);
+  
+      foreach my $old (@old_names) {
+        push @{$conf->{reuse_tests}->{$new_name}}, $old;
+      }
+    }
+  });
 
-                   foreach my $old (@old_names) {
-                     push @{$conf->{reuse_tests}->{$new_name}}, $old;
-                   }
-                 }
-               },
-               { setting => 'run_reuse_tests_only',
-                 code => sub {
-                   my ($conf, $key, $value, $line) = @_;
-                   $conf->{run_reuse_tests_only} = 1 if $value;
-                 }
-               });
-
+  push(@cmds, {
+    setting => 'run_reuse_tests_only',
+    default => 0,
+    type => $Mail::SpamAssassin::Conf::CONF_TYPE_BOOL,
+  });
 
   $conf->{parser}->register_commands(\@cmds);
 }
@@ -162,28 +166,29 @@ sub check_start {
   # need to be disabled
   foreach my $rule (keys %{$pms->{conf}->{reuse_tests}}) {
 
-    dbg("reuse: looking at rule $rule");
     my ($priority, $stage) = @{$pms->{conf}->{reuse_tests_order}->{$rule}};
 
     # score set could change after check_start but before we add hits,
     # so we need to disable the rule in all sets
+    my @dis;
     foreach my $ss (0..3) {
       if (exists $pms->{conf}->{scoreset}->[$ss]->{$rule}) {
-	dbg("reuse: disabling rule $rule in score set $ss");
-	$pms->{reuse_old_scores}->{$rule}->[$ss] =
-	  $pms->{conf}->{scoreset}->[$ss]->{$rule};
-	$pms->{conf}->{scoreset}->[$ss]->{$rule} = 0;
+        $pms->{reuse_old_scores}->{$rule}->[$ss] =
+          $pms->{conf}->{scoreset}->[$ss]->{$rule};
+        $pms->{conf}->{scoreset}->[$ss]->{$rule} = 0;
+        push @dis, $ss;
       }
     }
+    dbg("reuse: disabling rule $rule in score sets %s",
+      join(',', @dis)) if @dis;
 
     # now, check for hits
-  OLD: foreach my $old_test (@{$pms->{conf}->{reuse_tests}->{$rule}}) {
-      dbg("reuse: looking for rule $old_test");
+    foreach my $old_test (@{$pms->{conf}->{reuse_tests}->{$rule}}) {
       if ($old_hash->{$old_test}) {
         push @{$pms->{reuse_hits_to_add}->{"$priority $stage"}}, $rule;
         dbg("reuse: rule $rule hit, will add at priority $priority, stage " .
-	    "$stage");
-        last OLD;
+           "$stage");
+        last;
       }
     }
   }
@@ -229,7 +234,7 @@ sub _add_hits {
       $pms->{reuse_old_scores}->{$rule}->[$ss] || 0.001;
 
     dbg("reuse: registering hit for $rule: score: " .
-	$pms->{conf}->{scores}->{$rule});
+       $pms->{conf}->{scores}->{$rule});
     $pms->got_hit($rule);
 
     $pms->{conf}->{scores}->{$rule} = 0;
@@ -238,19 +243,19 @@ sub _add_hits {
 }
 
 my %type_to_stage = (
-		     $Mail::SpamAssassin::Conf::TYPE_HEAD_TESTS    => "head",
-		     $Mail::SpamAssassin::Conf::TYPE_HEAD_EVALS    => "eval",
-		     $Mail::SpamAssassin::Conf::TYPE_BODY_TESTS    => "body",
-		     $Mail::SpamAssassin::Conf::TYPE_BODY_EVALS    => "eval",
-		     $Mail::SpamAssassin::Conf::TYPE_FULL_TESTS    => "full",
-		     $Mail::SpamAssassin::Conf::TYPE_FULL_EVALS    => "eval",
-		     $Mail::SpamAssassin::Conf::TYPE_RAWBODY_TESTS => "rawbody",
-		     $Mail::SpamAssassin::Conf::TYPE_RAWBODY_EVALS => "eval",
-		     $Mail::SpamAssassin::Conf::TYPE_URI_TESTS     => "uri",
-		     $Mail::SpamAssassin::Conf::TYPE_URI_EVALS     => "eval",
-		     $Mail::SpamAssassin::Conf::TYPE_META_TESTS    => "meta",
-		     $Mail::SpamAssassin::Conf::TYPE_RBL_EVALS     => "eval",
-		    );
+  $Mail::SpamAssassin::Conf::TYPE_HEAD_TESTS    => "head",
+  $Mail::SpamAssassin::Conf::TYPE_HEAD_EVALS    => "eval",
+  $Mail::SpamAssassin::Conf::TYPE_BODY_TESTS    => "body",
+  $Mail::SpamAssassin::Conf::TYPE_BODY_EVALS    => "eval",
+  $Mail::SpamAssassin::Conf::TYPE_FULL_TESTS    => "full",
+  $Mail::SpamAssassin::Conf::TYPE_FULL_EVALS    => "eval",
+  $Mail::SpamAssassin::Conf::TYPE_RAWBODY_TESTS => "rawbody",
+  $Mail::SpamAssassin::Conf::TYPE_RAWBODY_EVALS => "eval",
+  $Mail::SpamAssassin::Conf::TYPE_URI_TESTS     => "uri",
+  $Mail::SpamAssassin::Conf::TYPE_URI_EVALS     => "eval",
+  $Mail::SpamAssassin::Conf::TYPE_META_TESTS    => "meta",
+  $Mail::SpamAssassin::Conf::TYPE_RBL_EVALS     => "eval",
+);
 
 sub _get_stage_from_rule {
   my  ($self, $conf, $rule) = @_;
@@ -274,4 +279,4 @@ sub _get_stage_from_rule {
   }
 }
 
-
+1;
