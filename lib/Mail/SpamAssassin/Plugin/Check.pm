@@ -34,6 +34,9 @@ my $META_RULES_MATCHING_RE = META_RULES_MATCHING_RE;
 # methods defined by the compiled ruleset; deleted in finish_tests()
 our @TEMPORARY_METHODS;
 
+# will cache would_log('dbg', 'rules-all') later
+my $would_log_rules_all = 0;
+
 # constructor
 sub new {
   my $class = shift;
@@ -52,6 +55,7 @@ sub check_main {
   my ($self, $args) = @_;
 
   my $pms = $args->{permsgstatus};
+  $would_log_rules_all = would_log('dbg', 'rules-all') == 2;
 
   # Make AsyncLoop wait permission for launching queries
   $pms->{async}->{wait_launch} = 1;
@@ -803,9 +807,6 @@ sub do_body_tests {
   my ($self, $pms, $priority, $textary) = @_;
   my $loopid = 0;
 
-  # this is called often, cache
-  my $would_log_rules_all = would_log('dbg', 'rules-all') == 2;
-
   $self->run_generic_tests ($pms, $priority,
     consttype => $Mail::SpamAssassin::Conf::TYPE_BODY_TESTS,
     type => 'body',
@@ -889,9 +890,6 @@ sub do_uri_tests {
   my ($self, $pms, $priority, @uris) = @_;
   my $loopid = 0;
 
-  # this is called often, cache
-  my $would_log_rules_all = would_log('dbg', 'rules-all') == 2;
-
   $self->run_generic_tests ($pms, $priority,
     consttype => $Mail::SpamAssassin::Conf::TYPE_URI_TESTS,
     type => 'uri',
@@ -958,7 +956,7 @@ sub do_rawbody_tests {
   {
     my ($self, $pms, $conf, $rulename, $pat, %opts) = @_;
     my $sub = '';
-    if (would_log('dbg', 'rules-all') == 2) {
+    if ($would_log_rules_all) {
       $sub .= '
       dbg("rules-all: running rawbody rule %s", q{'.$rulename.'});
       ';
@@ -1163,7 +1161,7 @@ sub run_eval_tests {
  
     # skip if score zeroed
     next if !$scoresref->{$rulename};
- 
+
     my $function = untaint_var($test->[0]); # was validated with \w+
     if (!$function) {
       warn "rules: error: no eval function defined for $rulename";
@@ -1176,7 +1174,7 @@ sub run_eval_tests {
     }
 
     $evalstr .= '
-    {
+    if ($scoresptr->{q{'.$rulename.'}}) {
       $rulename = q#'.$rulename.'#;
       %{$self->{test_log_msgs}} = ();
 ';
@@ -1203,6 +1201,12 @@ sub run_eval_tests {
               });
 
 ';
+    }
+
+    if ($would_log_rules_all) {
+      $evalstr .= '
+      dbg("rules-all: running eval rule %s (%s)", q{'.$rulename.'}, q{'.$function.'});
+      ';
     }
 
     $evalstr .= '
@@ -1246,6 +1250,7 @@ sub run_eval_tests {
     my (\$self, \@extraevalargs) = \@_;
 
     my \$testptr = \$self->{conf}->{$evalname}->{$priority};
+    my \$scoresptr = \$self->{conf}->{scores};
     my \$prepend2desc = q#$prepend2desc#;
     my \$rulename;
     my \$result;
