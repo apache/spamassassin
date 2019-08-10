@@ -110,6 +110,7 @@ sub new {
   my $self = $class->SUPER::new({normalize=>$normalize});
 
   $self->{tmpfiles} =           [];
+  $self->{pristine_msg} = 	'';
   $self->{pristine_headers} =	'';
   $self->{pristine_body} =	'';
   $self->{mime_boundary_state} = {};
@@ -346,6 +347,9 @@ sub new {
     $self->{'pristine_body_length'} = length $self->{'pristine_body'};
   }
 
+  # Store complete message, get_pristine() is used a lot, avoid making copies
+  $self->{'pristine_msg'} = $self->{'pristine_headers'} . $self->{'pristine_body'};
+
   # iterate over lines in reverse order
   # merge multiple blank lines into a single one
   my $start;
@@ -514,7 +518,7 @@ Returns a scalar of the entire pristine message.
 
 sub get_pristine {
   my ($self) = @_;
-  return $self->{pristine_headers} . $self->{pristine_body};
+  return $self->{pristine_msg};
 }
 
 =item get_pristine_body()
@@ -713,6 +717,7 @@ sub finish {
   delete $self->{'normalize'};
   delete $self->{'body_part_scan_size'};
   delete $self->{'rawbody_part_scan_size'};
+  delete $self->{'pristine_msg'};
   delete $self->{'pristine_body'};
   delete $self->{'pristine_headers'};
   delete $self->{'line_ending'};
