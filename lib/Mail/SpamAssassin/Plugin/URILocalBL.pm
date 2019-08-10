@@ -104,7 +104,6 @@ use Mail::SpamAssassin::Logger;
 use Mail::SpamAssassin::Constants qw(:ip);
 use Mail::SpamAssassin::Util qw(untaint_var);
 
-use Net::CIDR::Lite;
 use Socket;
 
 use strict;
@@ -117,6 +116,7 @@ our @ISA = qw(Mail::SpamAssassin::Plugin);
 
 use constant HAS_GEOIP => eval { require Geo::IP; };
 use constant HAS_GEOIP2 => eval { require GeoIP2::Database::Reader; };
+use constant HAS_CIDR => eval { require Net::CIDR::Lite; };
 
 # constructor
 sub new {
@@ -276,6 +276,11 @@ sub set_config {
     is_priv => 1,
     code => sub {
       my ($self, $key, $value, $line) = @_;
+
+      if (!HAS_CIDR) {
+        warn "config: uri_block_cidr not supported, required module Net::CIDR::Lite missing\n";
+        return $Mail::SpamAssassin::Conf::INVALID_VALUE;
+      }
 
       if ($value !~ /^(\S+)\s+(.+)$/) {
 	return $Mail::SpamAssassin::Conf::INVALID_VALUE;
