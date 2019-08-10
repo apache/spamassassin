@@ -1199,12 +1199,12 @@ sub _wlcheck_acceptable_signature {
   my ($self, $pms, $acceptable_sdid_tuples_ref, $wl) = @_;
   my $wl_ref = $pms->{conf}->{$wl};
   foreach my $author (@{$pms->{dkim_author_addresses}}) {
+    my $author_lc = lc($author);
     foreach my $white_addr (keys %$wl_ref) {
       my $wl_addr_ref = $wl_ref->{$white_addr};
-      my $re = $wl_addr_ref->{re};
     # dbg("dkim: WL %s %s, d: %s", $wl, $white_addr,
     #     join(", ", map { $_ eq '' ? "''" : $_ } @{$wl_addr_ref->{domain}}));
-      if (lc($author) =~ $re) {
+      if ($author_lc =~ /$wl_addr_ref->{re}/) {
         foreach my $sdid (@{$wl_addr_ref->{domain}}) {
           push(@$acceptable_sdid_tuples_ref, [$author,$sdid,$wl,$white_addr]);
         }
@@ -1221,10 +1221,10 @@ sub _wlcheck_author_signature {
   my ($self, $pms, $acceptable_sdid_tuples_ref, $wl) = @_;
   my $wl_ref = $pms->{conf}->{$wl};
   foreach my $author (@{$pms->{dkim_author_addresses}}) {
+    my $author_lc = lc($author);
     foreach my $white_addr (keys %$wl_ref) {
-      my $re = $wl_ref->{$white_addr};
     # dbg("dkim: WL %s %s", $wl, $white_addr);
-      if (lc($author) =~ $re) {
+      if ($author_lc =~ /$wl_ref->{$white_addr}/) {
         push(@$acceptable_sdid_tuples_ref, [$author,undef,$wl,$white_addr]);
       }
     }
