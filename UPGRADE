@@ -56,6 +56,9 @@ Note for Users Upgrading to SpamAssassin 3.4.3
 - RelayCountry: Added new metadata: X-Spam-Countries-External (_RELAYCOUNTRYEXT_),
   X-Spam-Countries-Auth (_RELAYCOUNTRYAUTH_), X-Spam-Countries-All (_RELAYCOUNTRYALL_)
 
+- New tflag "nosubject" for 'body' rules, to stop matching the Subject
+  header which is part of the body text.
+
 Note for Users Upgrading to SpamAssassin 3.4.2
 ----------------------------------------------
 
