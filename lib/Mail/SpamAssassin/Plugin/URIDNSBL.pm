@@ -479,10 +479,10 @@ sub check_dnsbl {
 
   my @hnames = sort keys %hostlist;
   $pms->set_tag('URIHOSTS',
-                @hnames == 1 ? $hnames[0] : \@hnames)  if @hnames;
+                @hnames == 1 ? $hnames[0] : \@hnames);
   my @dnames = do { my %seen; grep { !$seen{$_}++ } sort values %hostlist };
   $pms->set_tag('URIDOMAINS',
-                @dnames == 1 ? $dnames[0] : \@dnames)  if @dnames;
+                @dnames == 1 ? $dnames[0] : \@dnames);
 
   # and query
   $self->query_hosts_or_domains($pms, \%hostlist);
