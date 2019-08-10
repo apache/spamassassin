@@ -345,15 +345,7 @@ sub parsed_metadata {
   my $conf = $pms->{conf};
 
   return 0  if $conf->{skip_uribl_checks};
-
-  if (!$pms->is_dns_available()) {
-    $self->{dns_not_available} = 1;
-    return 0;
-  } else {
-    # due to re-testing dns may become available after being unavailable
-    # DOS: I don't think dns_not_available is even used anymore
-    $self->{dns_not_available} = 0;
-  }
+  return 0  if !$pms->is_dns_available();
 
   $pms->{'uridnsbl_activerules'} = { };
   $pms->{'uridnsbl_hits'} = { };
@@ -489,10 +481,10 @@ sub parsed_metadata {
 
   my @hnames = sort keys %hostlist;
   $pms->set_tag('URIHOSTS',
-                @hnames == 1 ? $hnames[0] : \@hnames)  if @hnames;
+                @hnames == 1 ? $hnames[0] : \@hnames);
   my @dnames = do { my %seen; grep { !$seen{$_}++ } sort values %hostlist };
   $pms->set_tag('URIDOMAINS',
-                @dnames == 1 ? $dnames[0] : \@dnames)  if @dnames;
+                @dnames == 1 ? $dnames[0] : \@dnames);
 
   # and query
   $self->query_hosts_or_domains($pms, \%hostlist);
