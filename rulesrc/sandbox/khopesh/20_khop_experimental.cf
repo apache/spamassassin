@@ -206,7 +206,7 @@ describe UPPERCASE_URI	Link protocol has unexpected mixed case
 ifplugin Mail::SpamAssassin::Plugin::MIMEHeader # {
   # probably all over the place, indicating only a MS document is attached,
   # which might hit only ham and virii
-  full	__BASE64_MDAW	/^(?:MDAw){12}/
+  #full	__BASE64_MDAW	/^(?:MDAw){12}/
 
   meta	__REMOTE_IMAGE	(__HTML_IMG_ONLY || __HTML_LINK_IMAGE) && !(__SUBSCRIPTION_INFO || __VIA_ML || __SENDER_BOT || __ANY_IMAGE_ATTACH)
   meta	REMOTE_IMAGE	__REMOTE_IMAGE
