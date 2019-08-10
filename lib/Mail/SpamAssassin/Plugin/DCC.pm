@@ -979,7 +979,6 @@ sub check_post_learn {
   # Fall back on dccifd or dccproc without saved checksums or dccsight.
   # get_dcc_interface() was called when the message was checked
 
-  # is getting the full text this way kosher?  Is get_pristine() public?
   my $fulltext = $permsgstatus->{msg}->get_pristine();
   my $envelope = $permsgstatus->{relays_external}->[0];
   my ($raw_x_dcc, $cksums) = $self->ask_dcc("dcc: learn:", $permsgstatus,

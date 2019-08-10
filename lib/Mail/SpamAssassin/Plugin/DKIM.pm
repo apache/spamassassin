@@ -830,10 +830,17 @@ sub _check_dkim_signature {
     # note: bug 5179 comment 28: perl does silly things on non-Unix platforms
     # unless we use \015\012 instead of \r\n
     eval {
-      my $str = $pms->{msg}->get_pristine;
-      $str =~ s/\r?\n/\015\012/sg;  # ensure \015\012 ending
-      # feeding large chunks to Mail::DKIM is much faster than line-by-line
-      $verifier->PRINT($str);
+      my $str = $pms->{msg}->get_pristine();
+      if ($pms->{msg}->{line_ending} eq "\015\012") {
+        # message already CRLF, just feed it
+        $verifier->PRINT($str);
+      } else {
+        # feeding large chunk to Mail::DKIM is _much_ faster than line-by-line
+        my $str2 = $str; # make a copy, sigh
+        $str2 =~ s/\012/\015\012/gs; # LF -> CRLF
+        $verifier->PRINT($str2);
+        undef $str2;
+      }
       1;
     } or do {  # intercept die() exceptions and render safe
       my $eval_stat = $@ ne '' ? $@ : "errno=$!";  chomp $eval_stat;
