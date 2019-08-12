@@ -214,7 +214,7 @@ sub _log_message {
   foreach my $line (split(/\n/, $_[1])) {
     # replace control characters with "_", tabs and spaces get
     # replaced with a single space.
-    # Deprecated here, see new Bug 7305 escaping in Logger/*.pm modules
+    # Deprecated here, see new Bug 6583 escaping in Logger/*.pm modules
     #$line =~ tr/\x09\x20\x00-\x1f/  _/s;
 
     if ($first) {

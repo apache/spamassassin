@@ -86,7 +86,7 @@ sub log_message {
 
   if ($self->{escape}) {
     local $1;
-    # Bug 7305:
+    # Bug 6583:
     # Quote non-ascii characters as \x{XX} or \x{XXXX} (Unicode)
     # Also quote backslash, so the log can be unescaped properly
     $msg =~ s{([^\x20-\x5b\x5d-\x7e])}{ $1 eq '\\' ? '\\\\' :
