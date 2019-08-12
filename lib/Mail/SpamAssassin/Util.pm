@@ -1949,6 +1949,14 @@ sub trap_sigalrm_fully {
 
 ###########################################################################
 
+# Bug 6802 helper function, use /aa for perl 5.16+
+my $qr_sa;
+if ($] >= 5.016) {
+  eval '$qr_sa = sub { return qr/$_[0]/aa; }';
+} else {
+  eval '$qr_sa = sub { return qr/$_[0]/; }';
+}
+
 # returns ($compiled_re, $error)
 # if any errors, $compiled_re = undef, $error has string
 # args:
@@ -2046,7 +2054,7 @@ sub compile_regexp {
         die "$_[0]\n";
       }
     };
-    $compiled_re = qr/$re/;
+    $compiled_re = $qr_sa->($re);
     1;
   };
   if ($ok && ref($compiled_re) eq 'Regexp') {
