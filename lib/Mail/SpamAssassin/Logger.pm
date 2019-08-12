@@ -188,19 +188,29 @@ sub log_message {
   } else {
     if ($LOG_DUPCNT >= $LOG_DUPMIN) {
       $LOG_DUPCNT -= $LOG_DUPMIN - 1;
-      my $dupmsg = $LOG_DUPCNT > 1 ? " [... logline repeated $LOG_DUPCNT times]" : "";
-      while (my ($name, $object) = each %{ $LOG_SA{method} }) {
-        $object->log_message($level, "$LOG_DUPLINE$dupmsg", $LOG_DUPTIME);
+      if ($LOG_DUPCNT > 1) {
+        _log_message($level,
+                     "$LOG_DUPLINE [... logline repeated $LOG_DUPCNT times]",
+                     $LOG_DUPTIME);
+      } else {
+        _log_message($level, $LOG_DUPLINE, $LOG_DUPTIME);
       }
     }
     $LOG_DUPCNT = 0;
     $LOG_DUPLINE = $message;
   }
 
+  _log_message($level, $message, $now);
+
+  $LOG_ENTERED = 0;
+}
+
+# Private helper
+sub _log_message {
   # split on newlines and call log_message multiple times; saves
   # the subclasses having to understand multi-line logs
   my $first = 1;
-  foreach my $line (split(/\n/, $message)) {
+  foreach my $line (split(/\n/, $_[1])) {
     # replace control characters with "_", tabs and spaces get
     # replaced with a single space.
     $line =~ tr/\x09\x20\x00-\x1f/  _/s;
@@ -211,10 +221,9 @@ sub log_message {
       $line =~ s/^([^:]+?):/$1: [...]/;
     }
     while (my ($name, $object) = each %{ $LOG_SA{method} }) {
-      $object->log_message($level, $line, $now);
+      $object->log_message($_[0], $line, $_[2]);
     }
   }
-  $LOG_ENTERED = 0;
 }
 
 =item dbg("facility: message")
