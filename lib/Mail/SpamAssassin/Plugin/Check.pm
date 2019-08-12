@@ -775,9 +775,9 @@ sub do_head_tests {
               }
             }
             if ($matchg) {
-              $expr = '$hval '.$op.' /$qrptr->{q{'.$rulename.'}}/go';
+              $expr = '$hval '.$op.' /$qrptr->{q{'.$rulename.'}}/gop';
             } else {
-              $expr = '$hval '.$op.' /$qrptr->{q{'.$rulename.'}}/o';
+              $expr = '$hval '.$op.' /$qrptr->{q{'.$rulename.'}}/op';
             }
           }
 
@@ -845,7 +845,7 @@ sub do_body_tests {
       $sub .= '
         pos $l = 0;
         '.$self->hash_line_for_rule($pms, $rulename).'
-        while ($l =~ /$qrptr->{q{'.$rulename.'}}/go) {
+        while ($l =~ /$qrptr->{q{'.$rulename.'}}/gop) {
           $self->got_hit(q{'.$rulename.'}, "BODY: ", ruletype => "body");
           '. $self->hit_rule_plugin_code($pms, $rulename, "body", "") . '
           '. ($max? 'last body_'.$loopid.' if ++$hits >= '.$max.';' : '') .'
@@ -866,7 +866,7 @@ sub do_body_tests {
       }
       $sub .= '
         '.$self->hash_line_for_rule($pms, $rulename).'
-        if ($l =~ /$qrptr->{q{'.$rulename.'}}/o) {
+        if ($l =~ /$qrptr->{q{'.$rulename.'}}/op) {
           $self->got_hit(q{'.$rulename.'}, "BODY: ", ruletype => "body");
           '. $self->hit_rule_plugin_code($pms, $rulename, "body", "last") .'
         }
@@ -913,7 +913,7 @@ sub do_uri_tests {
       uri_'.$loopid.': foreach my $l (@_) {
         pos $l = 0;
         '.$self->hash_line_for_rule($pms, $rulename).'
-        while ($l =~ /$qrptr->{q{'.$rulename.'}}/go) {
+        while ($l =~ /$qrptr->{q{'.$rulename.'}}/gop) {
            $self->got_hit(q{'.$rulename.'}, "URI: ", ruletype => "uri");
            '. $self->hit_rule_plugin_code($pms, $rulename, "uri", "") . '
            '. ($max? 'last uri_'.$loopid.' if ++$hits >= '.$max.';' : '') .'
@@ -924,7 +924,7 @@ sub do_uri_tests {
       $sub .= '
       foreach my $l (@_) {
         '.$self->hash_line_for_rule($pms, $rulename).'
-          if ($l =~ /$qrptr->{q{'.$rulename.'}}/o) {
+          if ($l =~ /$qrptr->{q{'.$rulename.'}}/op) {
            $self->got_hit(q{'.$rulename.'}, "URI: ", ruletype => "uri");
            '. $self->hit_rule_plugin_code($pms, $rulename, "uri", "last") .'
         }
@@ -972,7 +972,7 @@ sub do_rawbody_tests {
       rawbody_'.$loopid.': foreach my $l (@_) {
         pos $l = 0;
         '.$self->hash_line_for_rule($pms, $rulename).'
-        while ($l =~ /$qrptr->{q{'.$rulename.'}}/go) {
+        while ($l =~ /$qrptr->{q{'.$rulename.'}}/gop) {
            $self->got_hit(q{'.$rulename.'}, "RAW: ", ruletype => "rawbody");
            '. $self->hit_rule_plugin_code($pms, $rulename, "rawbody", "") . '
            '. ($max? 'last rawbody_'.$loopid.' if ++$hits >= '.$max.';' : '') .'
@@ -984,7 +984,7 @@ sub do_rawbody_tests {
       $sub .= '
       foreach my $l (@_) {
         '.$self->hash_line_for_rule($pms, $rulename).'
-        if ($l =~ /$qrptr->{q{'.$rulename.'}}/o) {
+        if ($l =~ /$qrptr->{q{'.$rulename.'}}/op) {
            $self->got_hit(q{'.$rulename.'}, "RAW: ", ruletype => "rawbody");
            '. $self->hit_rule_plugin_code($pms, $rulename, "rawbody", "last") . '
         }
@@ -1034,7 +1034,7 @@ sub do_full_tests {
         '.$self->hash_line_for_rule($pms, $rulename).'
         dbg("rules-all: running full rule %s", q{'.$rulename.'});
         $hits = 0;
-        while ($$fullmsgref =~ /$qrptr->{q{'.$rulename.'}}/g) {
+        while ($$fullmsgref =~ /$qrptr->{q{'.$rulename.'}}/gp) {
           $self->got_hit(q{'.$rulename.'}, "FULL: ", ruletype => "full");
           '. $self->hit_rule_plugin_code($pms, $rulename, "full", "last") . '
           last if ++$hits >= '.$max.';
@@ -1342,11 +1342,11 @@ sub hit_rule_plugin_code {
   # doesn't impose that hit anyway (just in case)
   my $match;
   if ($matching_string_unavailable) {
-    $match = '"<YES>"'; # nothing better to report, $& is not set by this rule
+    $match = '"<YES>"'; # nothing better to report, match is not set by this rule
   } else {
     # simple, but suffers from 'user data interpreted as a boolean', Bug 6360
-    # ... which is fixed now with "defined $&" stanza
-    $match = '(defined $' . '& ? $' . '& : "negative match")';
+    # ... which is fixed now with defined stanza
+    $match = '(defined ${^MATCH} ? ${^MATCH} : "<negative match>")';
   }
 
   my $debug_code = '';
