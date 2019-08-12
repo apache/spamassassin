@@ -925,14 +925,13 @@ sub get_content_preview {
   my ($self) = @_;
 
   my $str = '';
-  my $ary = $self->get_decoded_stripped_body_text_array();
-  shift @{$ary};                # drop the subject line
+  my @ary = @{$self->get_decoded_stripped_body_text_array()};
+  shift @ary;                # drop the subject line
 
   my $numlines = 3;
-  while (length ($str) < 200 && @{$ary} && $numlines-- > 0) {
-    $str .= shift @{$ary};
+  while (length ($str) < 200 && @ary && $numlines-- > 0) {
+    $str .= shift @ary;
   }
-  undef $ary;
 
   # in case the last line was huge, trim it back to around 200 chars
   local $1;
@@ -944,6 +943,10 @@ sub get_content_preview {
   $str =~ s/This is a multi-part message in MIME format\.//gs;
   $str =~ s/[-_*.]{10,}//gs;
   $str =~ s/\s+/ /gs;
+
+  # escape non-ascii stuff like Logger does
+  $str =~ s{([^\n\x20-\x5b\x5d-\x7e])}{ $1 eq '\\' ? '\\\\' :
+    sprintf(ord($1) > 255 ? '\\x{%04X}' : '\\x{%02X}', ord($1)) }egs;
 
   # add "Content preview:" ourselves, so that the text aligns
   # correctly with the template -- then trim it off.  We don't
