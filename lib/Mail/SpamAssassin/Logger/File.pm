@@ -58,6 +58,7 @@ sub new {
   my %params = @_;
   $self->{filename} = $params{filename} || 'spamassassin.log';
   $self->{timestamp_fmt} = $params{timestamp_fmt};
+  $self->{escape} = $params{escape} if exists $params{escape};
 
   if (! $self->init()) {
     die "logger: file initialization failed$eol";
@@ -100,6 +101,20 @@ sub log_message {
     $timestamp = POSIX::strftime($fmt, localtime($now));
   }
   $timestamp .= ' '  if $timestamp ne '';
+
+  if ($self->{escape}) {
+    local $1;
+    # Bug 7305:
+    # Quote non-ascii characters as \x{XX} or \x{XXXX} (Unicode)
+    # Also quote backslash, so the log can be unescaped properly
+    $msg =~ s{([^\x20-\x5b\x5d-\x7e])}{ $1 eq '\\' ? '\\\\' :
+      sprintf(ord($1) > 255 ? '\\x{%04X}' : '\\x{%02X}', ord($1)) }egs;
+  } elsif (!exists $self->{escape}) {
+    # Backwards compatible pre-4.0 escaping, if $escape not given.
+    # replace control characters with "_", tabs and spaces get
+    # replaced with a single space.
+    $msg =~ tr/\x09\x20\x00-\x1f/  _/s;
+  }
 
   my($nwrite) = syswrite(STDLOG, sprintf("%s[%s] %s: %s%s",
                                          $timestamp, $$, $level, $msg, $eol));

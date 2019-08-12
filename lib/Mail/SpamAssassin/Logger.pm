@@ -74,7 +74,8 @@ $LOG_SA{facility} = {};		# no dbg facilities turned on
 
 # always log to stderr initially
 use Mail::SpamAssassin::Logger::Stderr;
-$LOG_SA{method}->{stderr} = Mail::SpamAssassin::Logger::Stderr->new();
+$LOG_SA{method}->{stderr} =
+  Mail::SpamAssassin::Logger::Stderr->new(escape => 1);
 
 =head1 METHODS
 
@@ -164,7 +165,7 @@ sub log_message {
     # don't log them -- this is caller 0, the use'ing package is 1, the eval is 2
     my @caller = caller 2;
     return if (defined $caller[3] && defined $caller[0] &&
-		       $caller[3] =~ /^\(eval\)$/ &&
+		       $caller[3] eq '(eval)' &&
 		       $caller[0] =~ m#^Mail::SpamAssassin(?:$|::)#);
   }
 
@@ -188,33 +189,44 @@ sub log_message {
   } else {
     if ($LOG_DUPCNT >= $LOG_DUPMIN) {
       $LOG_DUPCNT -= $LOG_DUPMIN - 1;
-      my $dupmsg = $LOG_DUPCNT > 1 ? " [... logline repeated $LOG_DUPCNT times]" : "";
-      while (my ($name, $object) = each %{ $LOG_SA{method} }) {
-        $object->log_message($level, "$LOG_DUPLINE$dupmsg", $LOG_DUPTIME);
+      if ($LOG_DUPCNT > 1) {
+        _log_message($level,
+                     "$LOG_DUPLINE [... logline repeated $LOG_DUPCNT times]",
+                     $LOG_DUPTIME);
+      } else {
+        _log_message($level, $LOG_DUPLINE, $LOG_DUPTIME);
       }
     }
     $LOG_DUPCNT = 0;
     $LOG_DUPLINE = $message;
   }
 
+  _log_message($level, $message, $now);
+
+  $LOG_ENTERED = 0;
+}
+
+# Private helper
+sub _log_message {
   # split on newlines and call log_message multiple times; saves
   # the subclasses having to understand multi-line logs
   my $first = 1;
-  foreach my $line (split(/\n/, $message)) {
+  foreach my $line (split(/\n/, $_[1])) {
     # replace control characters with "_", tabs and spaces get
     # replaced with a single space.
-    $line =~ tr/\x09\x20\x00-\x1f/  _/s;
+    # Deprecated here, see new Bug 7305 escaping in Logger/*.pm modules
+    #$line =~ tr/\x09\x20\x00-\x1f/  _/s;
+
     if ($first) {
       $first = 0;
     } else {
-      local $1;
       $line =~ s/^([^:]+?):/$1: [...]/;
     }
+
     while (my ($name, $object) = each %{ $LOG_SA{method} }) {
-      $object->log_message($level, $line, $now);
+      $object->log_message($_[0], $line, $_[2]);
     }
   }
-  $LOG_ENTERED = 0;
 }
 
 =item dbg("facility: message")
@@ -273,18 +285,27 @@ sub _log {
   log_message(($level == INFO ? "info" : "dbg"), $message);
 }
 
-=item add(method => 'syslog', socket => $socket, facility => $facility)
+=item add(method => 'syslog', socket => $socket, facility => $facility, escape => $escape)
 
 C<socket> is the type the syslog ("unix" or "inet").  C<facility> is the
-syslog facility (typically "mail").
+syslog facility (typically "mail").  If optional C<escape> is true, all
+non-ascii characters are escaped for safe output.  If C<escape> is not
+defined, pre-4.0 style sanitizing is used.
 
-=item add(method => 'file', filename => $file)
+=item add(method => 'file', filename => $file, escape => $escape)
 
-C<filename> is the name of the log file.
+C<filename> is the name of the log file.  If optional C<escape> is true,
+escape all non-ascii characters are escaped for safe output.  If C<escape>
+is not defined, pre-4.0 style sanitizing is used.
 
-=item add(method => 'stderr')
+=item add(method => 'stderr', escape => $escape)
 
-No options are needed for stderr logging, just don't close stderr first.
+No options are needed for stderr logging, just don't close stderr first.  If
+optional C<escape> is true, all non-ascii characters are escaped for safe
+output.  If C<escape> is not defined, pre-4.0 style sanitizing is used.
+
+Escape method changes backslashes to \\ and non-ascii chars to \x{XX} or
+\x{XXXX} (Unicode).  Pre-4.0 style is tr/\x09\x20\x00-\x1f/ _/s.
 
 =cut
 

@@ -2,6 +2,12 @@
 Note for Users Upgrading to SpamAssassin 4.0.0
 ----------------------------------------------
 
+- All log output (stderr, file, syslog) is now binary safe,
+  non-ascii characters are escaped as \x{XX} or \x{XXXX}, backslashes escaped
+  as \\. Whitespace is not normalized anymore like in pre-4.0 versions.
+
+- API: Logger::add() has new optional 'escape' parameter.
+
 - API: New $pms->add_uri_detail_list() function.  Also new uri_detail_list
   types: unlinked, schemeless
 

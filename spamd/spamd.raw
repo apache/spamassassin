@@ -462,7 +462,8 @@ if (defined $log_timestamp_fmt) {
   # a nondefault timestamp format was specified, need to reopen stderr logger
   Mail::SpamAssassin::Logger::remove('stderr');
   Mail::SpamAssassin::Logger::add(method => 'stderr',
-				  timestamp_fmt => $log_timestamp_fmt);
+				  timestamp_fmt => $log_timestamp_fmt,
+				  escape => 1);
 }
 
 # Enable debugging, if any areas were specified.  We do this already here,
@@ -602,7 +603,8 @@ if ($log_socket ne 'file' && $log_facility ne 'null') {
 				       socket => $log_socket,
 				       facility => $log_facility,
 				       ident => 'spamd',
-				       timestamp_fmt => $log_timestamp_fmt))
+				       timestamp_fmt => $log_timestamp_fmt,
+				       escape => 1))
   {
     # syslog method failed 
     $log_facility = 'stderr';
@@ -612,7 +614,8 @@ if ($log_socket ne 'file' && $log_facility ne 'null') {
 elsif ($log_facility eq 'file') {
   if (!Mail::SpamAssassin::Logger::add(method => 'file',
 				       filename => $log_file,
-				       timestamp_fmt => $log_timestamp_fmt))
+				       timestamp_fmt => $log_timestamp_fmt,
+				       escape => 1))
   {
     # file method failed
     $log_facility = 'stderr';
