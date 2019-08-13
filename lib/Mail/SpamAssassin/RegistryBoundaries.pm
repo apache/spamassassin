@@ -233,6 +233,9 @@ sub uri_to_domain {
 
   if ($uri =~ s/^mailto://) { # handle mailto: specially
     $uri =~ s/\?.*//;			# drop parameters ?subject= etc
+    # note above, Outlook linkifies foo@bar%2Ecom&x.com to foo@bar.com !!
+    # uri_list_canonicalize should have made versions without ? &
+    # Keep testing with & here just in case..
     return if $uri =~ /\@.*?\@/;	# abort if multiple @
     return unless $uri =~ s/.*@//;	# drop username or abort
   } else {
