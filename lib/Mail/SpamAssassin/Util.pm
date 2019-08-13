@@ -385,8 +385,13 @@ sub is_fqdn_valid {
   my ($host, $is_ascii) = @_;
   return if !defined $host;
 
-  # convert to ascii, handles Unicode dot normalization also
-  $host = idn_to_ascii($host) if !$is_ascii;
+  if ($is_ascii) {
+    utf8::encode($host)  if utf8::is_utf8($host); # force octets
+    $host = lc $host;
+  } else {
+    # convert to ascii, handles Unicode dot normalization also
+    $host = idn_to_ascii($host);
+  }
 
   # remove trailing dots
   $host =~ s/\.+\z//;

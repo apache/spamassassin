@@ -2436,7 +2436,7 @@ sub _process_text_uri_list {
       $seen{$rawuri} = 1;
 
       # Quick ignore if schemeless host not valid
-      next if defined $schost && !is_fqdn_valid(lc $schost, 1);
+      next if defined $schost && !is_fqdn_valid($schost, 1);
 
       # Ignore cid: mid: as they can be mistaken for emails,
       # these should not be parsed from stripped body in any case.
