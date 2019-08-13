@@ -11,11 +11,12 @@ describe PDS_PHP_RUNTIME_FUNC PHP header shows runtime-created function
 score    PDS_PHP_RUNTIME_FUNC 1.5
 reuse    PDS_PHP_RUNTIME_FUNC
 
-header   __PDS_X_PHP_WPCONTENT  X-PHP-Script =~ m;/wp-content/(themes|uploads)/[\S]+\.php for;i
-header   __PDS_X_PHP_WPINCLUDES X-PHP-Script =~ m;/wp-includes/(js|css)/[\S]+\.php for;i
-header   __PDS_X_PHP_WPADMIN    X-PHP-Script =~ m;/wp-admin/(css|themes|js)/[\S]+\.php for;i
+header   __PDS_X_PHP_WPCONTENT  X-PHP-Script =~ m;/wp-content/(?:themes|uploads)/[\S]+\.php for;i
+header   __PDS_X_PHP_WPINCLUDES X-PHP-Script =~ m;/wp-includes/(?:css|fonts|js|pomo|Text|theme-compat)/[\S]+\.php for;i
+header   __PDS_X_PHP_WPADMIN    X-PHP-Script =~ m;/wp-admin/(?:css|themes|js|images|user|maint)/[\S]+\.php for;i
+header   __PDS_X_PHP_WPJS       X-PHP-Script =~ m;/js/[\S]+\.php for;i
 
-meta     PDS_X_PHP_WP_EXP (__PDS_X_PHP_WPCONTENT || __PDS_X_PHP_WPINCLUDES || __PDS_X_PHP_WPADMIN)
+meta     PDS_X_PHP_WP_EXP (__PDS_X_PHP_WPCONTENT || __PDS_X_PHP_WPINCLUDES || __PDS_X_PHP_WPADMIN || __PDS_X_PHP_WPJS)
 describe PDS_X_PHP_WP_EXP X-PHP-Script shows sent from a Wordpress PHP script where you would not expect one
 score    PDS_X_PHP_WP_EXP 1.5
 reuse    PDS_X_PHP_WP_EXP
