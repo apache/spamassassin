@@ -150,12 +150,8 @@ sub log_message {
   }
 
   if ($self->{escape}) {
-    local $1;
-    # Bug 6583:
-    # Quote non-ascii characters as \x{XX} or \x{XXXX} (Unicode)
-    # Also quote backslash, so the log can be unescaped properly
-    $msg =~ s{([^\x20-\x5b\x5d-\x7e])}{ $1 eq '\\' ? '\\\\' :
-      sprintf(ord($1) > 255 ? '\\x{%04X}' : '\\x{%02X}', ord($1)) }egs;
+    # Bug 6583, escape
+    Mail::SpamAssassin::Logger::escape_str($msg);
   } elsif (!exists $self->{escape}) {
     # Backwards compatible pre-4.0 escaping, if $escape not given
     # replace control characters with "_", tabs and spaces get

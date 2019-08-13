@@ -944,10 +944,6 @@ sub get_content_preview {
   $str =~ s/[-_*.]{10,}//gs;
   $str =~ s/\s+/ /gs;
 
-  # escape non-ascii stuff like Logger does
-  $str =~ s{([^\n\x20-\x5b\x5d-\x7e])}{ $1 eq '\\' ? '\\\\' :
-    sprintf(ord($1) > 255 ? '\\x{%04X}' : '\\x{%02X}', ord($1)) }egs;
-
   # add "Content preview:" ourselves, so that the text aligns
   # correctly with the template -- then trim it off.  We don't
   # have to get this *exactly* right, but it's nicer if we
