@@ -2435,6 +2435,11 @@ sub _process_text_uri_list {
       $seen{$rawuri} = 1;
       dbg("uri: found rawuri from text ($rawtype): $rawuri");
 
+      # Ignore cid: mid: as they can be mistaken for emails,
+      # these should not be parsed from stripped body in any case.
+      # Example: [cid:image001.png@01D4986E.E3459640]
+      next if $rawuri =~ /^[cm]id:/i;
+
       my $types = {parsed => 1};
 
       # If it's a hostname that was just sitting out in the
