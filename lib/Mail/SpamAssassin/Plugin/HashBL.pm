@@ -398,7 +398,11 @@ sub check_hashbl_emails {
   # Find all emails
   my $emails = $self->_get_emails($pms, $opts, $from, $acl);
   if (!@$emails) {
-    dbg("$rulename: no emails found ($from)");
+    if(defined $acl) {
+      dbg("$rulename: no emails found ($from) on acl $acl");
+    } else {
+      dbg("$rulename: no emails found ($from)");
+    }
     return 0;
   } else {
     dbg("$rulename: raw emails found: ".join(', ', @$emails));
