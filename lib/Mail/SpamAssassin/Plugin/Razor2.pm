@@ -685,6 +685,9 @@ sub check_razor2_range {
   return 0;
 }
 
+# Version features
+sub has_fork { 1 }
+
 1;
 
 =back

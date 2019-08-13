@@ -668,6 +668,9 @@ sub pyzor_report {
   return 1;
 }
 
+# Version features
+sub has_fork { 1 }
+
 1;
 
 =back
