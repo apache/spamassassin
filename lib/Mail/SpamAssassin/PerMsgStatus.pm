@@ -2440,6 +2440,9 @@ sub _process_text_uri_list {
       # Example: [cid:image001.png@01D4986E.E3459640]
       next if $rawuri =~ /^[cm]id:/i;
 
+      # Ignore empty uris
+      next if $rawuri =~ /^\w+:\/{0,2}$/i;
+
       my $types = {parsed => 1};
 
       # If it's a hostname that was just sitting out in the
