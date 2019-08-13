@@ -2283,14 +2283,14 @@ sub _tbirdurire {
 
   # knownscheme regexp looks for either a https?: or ftp: scheme, or www\d*\. or ftp\. prefix, i.e., likely to start a URL
   # schemeless regexp looks for a valid TLD at the end of what may be a FQDN, followed by optional ., optional :portnum, optional /rest_of_uri
-  my $urischemeless = qr/[a-z\d][a-z\d._-]{0,251}\.${tldsRE}\.?(?::\d{1,5})?(?:\/[^$tbirdenddelim]{1,251})?/i;
+  my $urischemeless = qr/([a-z\d][a-z\d._-]{0,251}\.${tldsRE})\.?(?::\d{1,5})?(?:\/[^$tbirdenddelim]{1,251})?/i;
   my $uriknownscheme = qr/(?:(?:(?:https?|ftp):(?:\/\/)?)|(?:(?:www\d{0,2}|ftp)\.))[^$tbirdenddelim]{1,251}/i;
-  my $urimailscheme = qr/(?:mailto:)?[^$tbirdenddelimplusat]{1,251}@[^$tbirdenddelimemail]{1,251}/i;
+  my $urimailscheme = qr/(?:mailto:)?[^$tbirdenddelimplusat]{1,251}\@[^$tbirdenddelimemail]{1,251}/i;
 
   $self->{tbirdurire} = qr/(?:\b|(?<=$iso2022shift)|(?<=[$tbirdstartdelim]))
                         (?:(?:($uriknownscheme)(?=(?:[$tbirdenddelim]|\z))) |
                         (?:($urimailscheme)(?=(?:[$tbirdenddelimemail]|\z))) |
-                        (?:\b($urischemeless)(?=(?:[$tbirdenddelim]|\z))))/x;
+                        (?:(?<![a-z\d._-])($urischemeless)(?=(?:[$tbirdenddelim]|\z))))/x;
 
   return $self->{tbirdurire};
 }
@@ -2427,13 +2427,16 @@ sub _process_text_uri_list {
     local($1,$2,$3);
     while (/$tbirdurire/igo) {
       my $rawuri = $1||$2||$3;
+      my $schost = $4;
       my $rawtype = defined $1 ? 'scheme' : defined $2 ? 'mail' : 'schemeless';
       $rawuri =~ s/(^[^(]*)\).*$/$1/;  # as per ThunderBird, ) is an end delimiter if there is no ( preceeding it
       $rawuri =~ s/[-~!@#^&*()_+=:;\'?,.]*$//; # remove trailing string of punctuations that TBird ignores
 
       next if exists $seen{$rawuri};
       $seen{$rawuri} = 1;
-      dbg("uri: found rawuri from text ($rawtype): $rawuri");
+
+      # Quick ignore if schemeless host not valid
+      next if defined $schost && !is_fqdn_valid(lc $schost, 1);
 
       # Ignore cid: mid: as they can be mistaken for emails,
       # these should not be parsed from stripped body in any case.
@@ -2443,6 +2446,7 @@ sub _process_text_uri_list {
       # Ignore empty uris
       next if $rawuri =~ /^\w+:\/{0,2}$/i;
 
+      dbg("uri: found rawuri from text ($rawtype): $rawuri");
       my $types = {parsed => 1};
 
       # If it's a hostname that was just sitting out in the
