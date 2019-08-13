@@ -2411,6 +2411,9 @@ sub _get_parsed_uri_list {
         # Example: [cid:image001.png@01D4986E.E3459640]
         next if $rawuri =~ /^[cm]id:/i;
 
+        # Ignore empty uris
+        next if $rawuri =~ /^\w+:\/{0,2}$/i;
+
         # skip if there is '..' in the hostname portion of the URI, something we can't catch in the general URI regexp
         next if $rawuri =~ m{^(?:(?:https?|ftp|mailto):(?://)?)?(?:[^\@/?#]*\@)?[^/?#:]*\.\.}i;
 
