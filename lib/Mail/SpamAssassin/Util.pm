@@ -1317,10 +1317,6 @@ sub uri_list_canonicalize {
   # make sure we catch bad encoding tricks
   my @nuris;
   for my $uri (@uris) {
-    # we're interested in http:// and so on, skip mailto: and
-    # email addresses with no protocol
-    next if $uri =~ /^mailto:/i || $uri =~ /^[^:]*\@/;
-
     # sometimes we catch URLs on multiple lines
     $uri =~ s/\n//g;
 
@@ -1333,6 +1329,20 @@ sub uri_list_canonicalize {
 
     # Make a copy so we don't trash the original in the array
     my $nuri = $uri;
+
+    # Handle emails differently
+    if ($uri =~ /^mailto:/i || $uri =~ /^[^:]*\@/) {
+      # Strip ?subject= parameters and obfuscations
+      # Outlook linkifies foo@bar%2Ecom&x.com to foo@bar.com !!
+      if ($nuri =~ /^(.*?)\?/) {
+        push @nuris, $1;
+      }
+      if ($nuri =~ /^(.*?)\&/) {
+        push @nuris, $1
+      }
+      # End email processing
+      next;
+    }
 
     # bug 4390: certain MUAs treat back slashes as front slashes.
     # since backslashes are supposed to be encoded in a URI, swap non-encoded

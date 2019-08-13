@@ -2436,8 +2436,9 @@ sub _get_parsed_uri_list {
             # This is not linkified by MUAs: foo@bar%2Ecom
             # This IS linkified: foo@bar%2Ebar.com
             # And this is linkified: foo@bar%2Ecom?foo.com&bar  (woot??)
-            # Don't test when ? exists, seems too complicated otherwise.
-            if (index($uri, '?') == -1 && $uri =~ /\@(.*)/) {
+            # And this is linkified with Outlook: foo@bar%2Ecom&foo  (woot??)
+            # Don't test when ? or & exists, canonicalizing will handle later.
+            if ($uri !~ tr/?&// && $uri =~ /\@(.*)/) {
               next unless $self->{main}->{registryboundaries}->is_domain_valid($1);
             }
             $uri = "mailto:$uri";
