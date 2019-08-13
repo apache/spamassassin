@@ -2406,6 +2406,11 @@ sub _get_parsed_uri_list {
         $rawuri =~ s/[-~!@#^&*()_+=:;\'?,.]*$//; # remove trailing string of punctuations that TBird ignores
         dbg("uri: found rawuri ($rawtype): $rawuri");
 
+        # Ignore cid: mid: as they can be mistaken for emails,
+        # these should not be parsed from stripped body in any case.
+        # Example: [cid:image001.png@01D4986E.E3459640]
+        next if $rawuri =~ /^[cm]id:/i;
+
         # skip if there is '..' in the hostname portion of the URI, something we can't catch in the general URI regexp
         next if $rawuri =~ m{^(?:(?:https?|ftp|mailto):(?://)?)?(?:[^\@/?#]*\@)?[^/?#:]*\.\.}i;
 
