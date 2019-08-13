@@ -2443,6 +2443,7 @@ sub _get_parsed_uri_list {
             # And this is linkified: foo@bar%2Ecom?foo.com&bar  (woot??)
             # And this is linkified with Outlook: foo@bar%2Ecom&foo  (woot??)
             # Don't test when ? or & exists, canonicalizing will handle later.
+            $uri =~ s/^(?:skype|e?-?mail)?:+//ig; # strip common misparses
             if ($uri !~ tr/?&// && $uri =~ /\@(.*)/) {
               next unless $self->{main}->{registryboundaries}->is_domain_valid($1);
             }
