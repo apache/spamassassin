@@ -2458,6 +2458,15 @@ sub _process_text_uri_list {
           $uri = "http://$uri";
         }
         elsif (index($uri, '@') != -1) {
+          # Ignore schemeless emails without valid tld, matches crap like
+          # Vi@gra. No urldecoding is done for tld test which is fine.
+          # This is not linkified by MUAs: foo@bar%2Ecom
+          # This IS linkified: foo@bar%2Ebar.com
+          # And this is linkified: foo@bar%2Ecom?foo.com&bar  (woot??)
+          # Don't test when ? exists, seems too complicated otherwise.
+          if (index($uri, '?') == -1 && $uri =~ /\@(.*)/) {
+            next unless $self->{main}->{registryboundaries}->is_domain_valid($1);
+          }
           $uri = "mailto:$uri";
         }
         else {
