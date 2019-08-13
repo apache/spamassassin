@@ -1496,10 +1496,10 @@ sub uri_list_canonicalize {
     if ($uri =~ /^mailto:/i || $uri =~ /^[^:]*\@/) {
       # Strip ?subject= parameters and obfuscations
       # Outlook linkifies foo@bar%2Ecom&x.com to foo@bar.com !!
-      if ($nuri =~ /^(.*?)\?/) {
+      if ($nuri =~ /^([^@]+\@[^?]+)\?/) {
         push @nuris, $1;
       }
-      if ($nuri =~ /^(.*?)\&/) {
+      if ($nuri =~ /^([^@]+\@[^&]+)\&/) {
         push @nuris, $1
       }
       # End email processing
