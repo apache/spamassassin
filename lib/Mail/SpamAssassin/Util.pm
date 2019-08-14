@@ -1493,14 +1493,19 @@ sub uri_list_canonicalize {
     my $nuri = $uri;
 
     # Handle emails differently
-    if ($uri =~ /^mailto:/i || $uri =~ /^[^:]*\@/) {
+    if ($nuri =~ /^mailto:/i || $nuri =~ /^[^:]*\@/) {
       # Strip ?subject= parameters and obfuscations
       # Outlook linkifies foo@bar%2Ecom&x.com to foo@bar.com !!
       if ($nuri =~ /^([^\@]+\@[^?]+)\?/) {
         push @nuris, $1;
       }
-      if ($nuri =~ /^([^\@]+\@[^&]+)\&/) {
+      if ($nuri =~ /^([^\@]+\@[^?&]+)\&/) {
         push @nuris, $1
+      }
+      # Address must be trimmed of %20
+      if ($nuri =~ tr/%20// &&
+          $nuri =~ /^(?:mailto:)?(?:%20)*([^\@]+\@[^?&%]+)/) {
+        push @nuris, "mailto:$1";
       }
       # mailto:"Foo%20Bar"%20<foo.bar@example.com>
       if ($nuri =~ /^[^?&]*<([^\@>]+\@[^>]+)>/) {

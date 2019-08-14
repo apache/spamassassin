@@ -2463,20 +2463,16 @@ sub _process_text_uri_list {
           $uri = "http://$uri";
         }
         elsif (index($uri, '@') != -1) {
-          # Ignore schemeless emails without valid tld, matches crap like
-          # Vi@gra. No urldecoding is done for tld test which is fine.
           # This is not linkified by MUAs: foo@bar%2Ecom
           # This IS linkified: foo@bar%2Ebar.com
           # And this is linkified: foo@bar%2Ecom?foo.com&bar  (woot??)
           # And this is linkified with Outlook: foo@bar%2Ecom&foo  (woot??)
-          # Don't test when ? or & exists, canonicalizing will handle later.
-          if ($uri !~ tr/?&// && $uri =~ /\@(.*)/) {
-            next unless $self->{main}->{registryboundaries}->is_domain_valid($1);
-          }
+          # ...
+          # Skip if no dot found after @, tested without urldecoding,
+          # quick skip for crap like Vi@gra.
+          next unless $uri =~ /\@.+?\./;
           next if index($uri, '&nbsp;') != -1; # ignore garbled
           $uri =~ s/^(?:skype|e?-?mail)?:+//i; # strip common misparses
-          # Urldecode now
-          $uri = Mail::SpamAssassin::Util::url_encode($uri) if $uri =~ /\%[0-9a-f]{2}/i;
           $uri = "mailto:$uri";
         }
         else {
@@ -2489,11 +2485,13 @@ sub _process_text_uri_list {
         # Mark any of those schemeless
         $types->{schemeless} = 1;
       }
-      elsif ($uri =~ /^mailto:/i) { # Schemed mailto: handled different from schemeless
+
+      if ($uri =~ /^mailto:/i) {
         # MUAs linkify and urldecode mailto:foo%40bar%2Fcom
         $uri = Mail::SpamAssassin::Util::url_encode($uri) if $uri =~ /\%[0-9a-f]{2}/i;
         # Skip unless @ found after decoding, then check tld is valid
         next unless $uri =~ /\@([^?&>]*)/;
+        my $host = $1; $host =~ s/(?:%20)+$//; # strip trailing %20 from host
         next unless $self->{main}->{registryboundaries}->is_domain_valid($1);
       }
 
