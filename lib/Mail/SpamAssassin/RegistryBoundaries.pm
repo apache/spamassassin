@@ -106,7 +106,7 @@ sub split_domain {
 
   if ($is_ascii) {
     utf8::encode($domain)  if utf8::is_utf8($domain); # force octets
-    $host = lc $domain;
+    $domain = lc $domain;
   } else {
     # convert to ascii, handles Unicode dot normalization also
     $domain = idn_to_ascii($domain);
