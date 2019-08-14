@@ -1788,8 +1788,7 @@ normalized.
 
 This is the same result text as used in 'body' rules.
 
-It will always render text/html, and will use a heuristic to determine if other
-text/* parts should be considered text/html.
+It will always render text/html.
 
 It is returned as an array of strings, with each string representing one
 'paragraph'.  Paragraphs, in plain-text mails, are double-newline-separated
