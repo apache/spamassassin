@@ -104,7 +104,14 @@ If $is_ascii given and true, skip idn_to_ascii() conversion
 sub split_domain {
   my ($self, $domain, $is_ascii) = @_;
 
-  $domain = idn_to_ascii($domain) if !$is_ascii;
+  if ($is_ascii) {
+    utf8::encode($domain)  if utf8::is_utf8($domain); # force octets
+    $host = lc $domain;
+  } else {
+    # convert to ascii, handles Unicode dot normalization also
+    $domain = idn_to_ascii($domain);
+  }
+
   my $hostname = '';
 
   if (defined $domain && $domain ne '') {
@@ -209,7 +216,13 @@ additionally be used.
 sub is_domain_valid {
   my ($self, $dom, $is_ascii) = @_;
 
-  $dom = idn_to_ascii($dom) if !$is_ascii;
+  if ($is_ascii) {
+    utf8::encode($dom)  if utf8::is_utf8($dom); # force octets
+    $dom = lc $dom;
+  } else {
+    # convert to ascii, handles Unicode dot normalization also
+    $dom = idn_to_ascii($dom);
+  }
 
   # domains don't have whitespace
   return 0 if ($dom =~ /\s/);
