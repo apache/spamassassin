@@ -2152,7 +2152,7 @@ sub _tbirdurire {
   # schemeless regexp looks for a valid TLD at the end of what may be a FQDN, followed by optional ., optional :portnum, optional /rest_of_uri
   my $urischemeless = qr/([a-z\d][a-z\d._-]{0,251}\.${tldsRE})\.?(?::\d{1,5})?(?:\/[^$tbirdenddelim]{1,251})?/i;
   my $uriknownscheme = qr/(?:(?:https?|ftp):\/\/|(?:www\d{0,2}|ftp)\.)[^$tbirdenddelim]{1,251}/i;
-  my $urimailscheme = qr/(?:mailto:)?[^$tbirdenddelimplusat]{1,251}\@[^$tbirdenddelimemail]{1,251}/i;
+  my $urimailscheme = qr/(?:mailto:[^$tbirdenddelimemail]{1,2048}|[^$tbirdenddelimplusat]{1,251}\@[^$tbirdenddelimemail]{1,251})/i;
 
   $self->{tbirdurire} = qr/(?:\b|(?<=$iso2022shift)|(?<=[$tbirdstartdelim]))
                         (?:(?:($uriknownscheme)(?=(?:[$tbirdenddelim]|\z))) |
@@ -2386,8 +2386,10 @@ sub _get_parsed_uri_list {
     my ($rulename, $pat, @uris);
     my $text;
     my $tbirdurire = $self->_tbirdurire;
+    my %seen;
+    my $would_log_uri_all = would_log('dbg', 'uri-all') == 2; # cache
 
-    for my $entry (@$textary) {
+    foreach my $entry (@$textary) {
 
       # a workaround for [perl #69973] bug:
       # Invalid and tainted utf-8 char crashes perl 5.10.1 in regexp evaluation
@@ -2405,6 +2407,11 @@ sub _get_parsed_uri_list {
         $rawuri =~ s/(^[^(]*)\).*$/$1/;  # as per ThunderBird, ) is an end delimiter if there is no ( preceeding it
         $rawuri =~ s/[-~!@#^&*()_+=:;\'?,.]*$//; # remove trailing string of punctuations that TBird ignores
 
+        next if exists $seen{$rawuri};
+        $seen{$rawuri} = 1;
+
+        dbg("uri: found rawuri from text ($rawtype): $rawuri") if $would_log_uri_all;
+
         # Quick ignore if schemeless host not valid
         next if defined $schost && !is_fqdn_valid($schost);
 
@@ -2418,8 +2425,6 @@ sub _get_parsed_uri_list {
 
         # skip if there is '..' in the hostname portion of the URI, something we can't catch in the general URI regexp
         next if $rawuri =~ m{^(?:(?:https?|ftp|mailto):(?://)?)?(?:[^\@/?#]*\@)?[^/?#:]*\.\.}i;
-
-        dbg("uri: found rawuri ($rawtype): $rawuri");
 
         # If it's a hostname that was just sitting out in the
         # open, without a protocol, and not inside of an HTML tag,
@@ -2442,10 +2447,11 @@ sub _get_parsed_uri_list {
             # And this is linkified: foo@bar%2Ecom?foo.com&bar  (woot??)
             # And this is linkified with Outlook: foo@bar%2Ecom&foo  (woot??)
             # Don't test when ? or & exists, canonicalizing will handle later.
-            $uri =~ s/^(?:skype|e?-?mail)?:+//i; # strip common misparses
             if ($uri !~ tr/?&// && $uri =~ /\@(.*)/) {
               next unless $self->{main}->{registryboundaries}->is_domain_valid($1);
             }
+            next if index($uri, '&nbsp;') != -1; # ignore garbled
+            $uri =~ s/^(?:skype|e?-?mail)?:+//i; # strip common misparses
             $uri = "mailto:$uri";
           }
           else {
@@ -2455,10 +2461,13 @@ sub _get_parsed_uri_list {
           }
         }
 
-        if ($uri =~ /^mailto:/i) {
-          # skip a mail link that does not have a valid TLD or @ after decoding any URLEncoded characters
-          $uri = Mail::SpamAssassin::Util::url_encode($uri) if ($uri =~ /\%(?:2[1-9a-fA-F]|[3-6][0-9a-fA-F]|7[0-9a-eA-E])/);
-          next unless $uri =~ /\@/;
+        if ($uri =~ /^mailto:/i) { # Schemed mailto: handled different from schemeless
+          # MUAs linkify and urldecode mailto:foo%40bar%2Fcom
+          $uri = Mail::SpamAssassin::Util::url_encode($uri) if $uri =~ /\%[0-9a-f]{2}/i;
+          # Skip unless @ found after decoding, then check tld is valid
+          next unless $uri =~ /\@([^?&>]*)/;
+          next unless $self->{main}->{registryboundaries}->is_domain_valid($1);
+          # SA 3.4 legacy code continues
           my $domuri = $self->{main}->{registryboundaries}->uri_to_domain($uri);
           next unless $domuri;
           push (@uris, $rawuri);
