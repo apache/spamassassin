@@ -1517,7 +1517,7 @@ header      __DATE_LOWER       ALL =~ /date:\s\S{5}/
 
 # duplicates __XPRIO
 #header      __FH_HAS_XPRIORITY exists:X-Priority
-meta        __XPRIO_MINFP      __XPRIO && !__CT_ENCRYPTED && !ALL_TRUSTED && !__HAS_ERRORS_TO && !__THREADED && !__LONGLINE && !__MAIL_LINK && !__RCD_RDNS_SMTP && !__USING_VERP1 && !__RCD_RDNS_MX_MESSY && !__XM_VBULLETIN && !__HAS_HREF && !__HAS_IMG_SRC && !__RCD_RDNS_MAIL_MESSY && !__HAS_SENDER && !__THREAD_INDEX_GOOD && !__VIA_ML && !__PHPMAILER_MUA 
+meta        __XPRIO_MINFP      __XPRIO && !__CT_ENCRYPTED && !ALL_TRUSTED && !__HAS_ERRORS_TO && !__THREADED && !__LONGLINE && !__MAIL_LINK && !__RCD_RDNS_SMTP && !__USING_VERP1 && !__RCD_RDNS_MX_MESSY && !__XM_VBULLETIN && !__HAS_HREF && !__HAS_IMG_SRC && !__RCD_RDNS_MAIL_MESSY && !__HAS_SENDER && !__THREAD_INDEX_GOOD && !__VIA_ML && !__PHPMAILER_MUA && !__FROM_WEB_DAEMON 
 
 ifplugin Mail::SpamAssassin::Plugin::DKIM
   ifplugin Mail::SpamAssassin::Plugin::SPF
