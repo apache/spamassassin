@@ -353,8 +353,8 @@ sub is_fqdn_valid {
   # remove trailing dots
   $host =~ s/\.+\z//;
 
-  # max total length 255
-  return if length($host) > 255;
+  # max total length 253
+  return if length($host) > 253;
 
   # validate dot separated components/labels
   my @labels = split(/\./, lc $host);
@@ -1342,7 +1342,7 @@ sub uri_list_canonicalize {
       }
       # Address must be trimmed of %20
       if ($nuri =~ tr/%20// &&
-          $nuri =~ /^(?:mailto:)?(?:%20)*([^\@]+\@[^?&%]+)/) {
+          $nuri =~ /^(?:mailto:)?(?:\%20)*([^\@]+\@[^?&%]+)/) {
         push @nuris, "mailto:$1";
       }
       # mailto:"Foo%20Bar"%20<foo.bar@example.com>
