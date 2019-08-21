@@ -2482,6 +2482,7 @@ sub _process_text_uri_list {
           # some spammers are using unschemed URIs to escape filters
           # flag that this is a URI that MUAs don't linkify so only use for RBLs
           # (TODO: why only use for RBLs?? why not uri rules? Use tflags to choose?)
+          next if index($uri, '.') == -1; # skip unless dot found, garbage
           $uri = "http://$uri";
           $types->{unlinked} = 1;
         }
