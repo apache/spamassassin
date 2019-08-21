@@ -117,5 +117,10 @@ describe SUSPNTLD_EXPIRATION_EXTORT Susp NTLD with an expiration notice and lots
 score    SUSPNTLD_EXPIRATION_EXTORT 2.0 # limit
 reuse    SUSPNTLD_EXPIRATION_EXTORT
 
+meta     PDS_BTC_NTLD ( __BITCOIN_ID && __FROM_ADDRLIST_SUSPNTLD )
+describe PDS_BTC_NTLD Bitcoin suspect NTLD
+score    PDS_BTC_NTLD 2.0 # limit
+reuse    PDS_BTC_NTLD
+
 endif
 endif
