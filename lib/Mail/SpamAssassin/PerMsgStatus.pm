@@ -2272,6 +2272,9 @@ sub _tbirdurire {
   my $tbirdenddelim = '><"`}\]{[|\s' . "\x1b\xa0";  # The \x1b as per bug 4522 # \xa0 (nbsp) added 7/2019
   my $nonASCII    = '\x80-\xff';
 
+  # schemeless uri start delimiter, combo of most punctuations and delims above
+  my $scstartdelim = qr/[\!\"\#\$\&\'\(\)\*\+\,\/\:\;\<\=\>\?\@\[\\\]\^\`\{\|\}\~\s\x1b\xa0]/;
+
   # bug 7100: we allow a comma to delimit the end of an email address because it will never appear in a domain name, and
   # it's a common thing to find in text
   my $tbirdenddelimemail = $tbirdenddelim . ',(\'' . $nonASCII;  # tbird ignores non-ASCII mail addresses for now, until RFC changes
@@ -2289,7 +2292,7 @@ sub _tbirdurire {
   $self->{tbirdurire} = qr/(?:\b|(?<=$iso2022shift)|(?<=[$tbirdstartdelim]))
                         (?:(?:($uriknownscheme)(?=(?:[$tbirdenddelim]|\z))) |
                         (?:($urimailscheme)(?=(?:[$tbirdenddelimemail]|\z))) |
-                        (?:(?<![a-z\d._-])($urischemeless)(?=(?:[$tbirdenddelim]|\z))))/ix;
+                        (?:(?:^|(?<=$scstartdelim))($urischemeless)(?=(?:[$tbirdenddelim]|\z))))/ix;
 
   return $self->{tbirdurire};
 }
