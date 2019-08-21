@@ -2150,8 +2150,8 @@ sub _tbirdurire {
 
   # knownscheme regexp looks for either a https?: or ftp: scheme, or www\d*\. or ftp\. prefix, i.e., likely to start a URL
   # schemeless regexp looks for a valid TLD at the end of what may be a FQDN, followed by optional ., optional :portnum, optional /rest_of_uri
-  my $urischemeless = qr/([a-z\d][a-z\d._-]{0,251}\.${tldsRE})\.?(?::\d{1,5})?(?:\/[^$tbirdenddelim]{1,251})?/i;
-  my $uriknownscheme = qr/(?:(?:https?|ftp):\/\/|(?:www\d{0,2}|ftp)\.)[^$tbirdenddelim]{1,251}/i;
+  my $urischemeless = qr/([a-z\d][a-z\d._-]{0,251}\.${tldsRE})\.?(?::\d{1,5})?(?:\/[^$tbirdenddelim]{1,2048})?/i;
+  my $uriknownscheme = qr/(?:(?:https?|ftp):\/\/|(?:www\d{0,2}|ftp)\.)[^$tbirdenddelim]{1,2048}/i;
   my $urimailscheme = qr/(?:mailto:[^$tbirdenddelimemail]{1,2048}|[^$tbirdenddelimplusat]{1,251}\@[^$tbirdenddelimemail]{1,251})/i;
 
   $self->{tbirdurire} = qr/(?:\b|(?<=$iso2022shift)|(?<=[$tbirdstartdelim]))
