@@ -1,18 +1,20 @@
+meta     __PDS_BTC_ID        ( __BITCOIN_ID && !__URL_BTC_ID )
+
 body     __COPY_PASTE_FR     /copier et coller/i
-meta     PDS_BITCOIN_CP_FR   ( __BITCOIN_ID && __COPY_PASTE_FR )
+meta     PDS_BITCOIN_CP_FR   ( __PDS_BTC_ID && __COPY_PASTE_FR )
 describe PDS_BITCOIN_CP_FR   Bitcoin copy/paste French variant
 score    PDS_BITCOIN_CP_FR   2.0 # limit
 reuse    PDS_BITCOIN_CP_FR
 
 body     __COPY_PASTE_SE     /kopiera och klistra/i
-meta     PDS_BITCOIN_CP_SE   ( __BITCOIN_ID && __COPY_PASTE_FR )
+meta     PDS_BITCOIN_CP_SE   ( __PDS_BTC_ID && __COPY_PASTE_SE )
 describe PDS_BITCOIN_CP_SE   Bitcoin copy/paste Swedish variant
 score    PDS_BITCOIN_CP_SE   2.0 # limit
 reuse    PDS_BITCOIN_CP_SE
 
 header   __HACKER_FROM      From:name =~ /h\xc9\x91cker/i
 
-meta     PDS_BITCOIN_HACKER ( __BITCOIN_ID && __HACKER_FROM )
+meta     PDS_BITCOIN_HACKER ( __PDS_BTC_ID && __HACKER_FROM )
 describe PDS_BITCOIN_HACKER Hacker BTC
 score    PDS_BITCOIN_HACKER 2.0
 reuse    PDS_BITCOIN_HACKER
@@ -25,12 +27,12 @@ ifplugin Mail::SpamAssassin::Plugin::ReplaceTags
   header   __PDS_BTC_HACKER   From:name =~ /h<A>ck<E>r/i
   header   __PDS_BTC_PIRATE   From:name =~ /p<I>r<A>t<E>/i
 
-  meta     PDS_BTC_AHACKER ( __BITCOIN_ID && __PDS_BTC_HACKER && __PDS_BTC_ANON )
+  meta     PDS_BTC_AHACKER ( __PDS_BTC_ID && __PDS_BTC_HACKER && __PDS_BTC_ANON )
   describe PDS_BTC_AHACKER Bitcoin Hacker
   score    PDS_BTC_AHACKER 3.0 # limit
   reuse    PDS_BTC_AHACKER
 
-  meta     PDS_BTC_HACKER ( __BITCOIN_ID && __PDS_BTC_ANON && !__PDS_BTC_HACKER )
+  meta     PDS_BTC_HACKER ( __PDS_BTC_ID && __PDS_BTC_ANON && !__PDS_BTC_HACKER )
   describe PDS_BTC_HACKER Bitcoin Hacker
   score    PDS_BTC_HACKER 1.0 # limit
   reuse    PDS_BTC_HACKER
