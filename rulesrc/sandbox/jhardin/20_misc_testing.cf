@@ -1875,7 +1875,7 @@ ifplugin Mail::SpamAssassin::Plugin::ReplaceTags
 
 endif
 
-uri            __URL_BTC_ID     m;/[13][a-km-zA-HJ-NP-Z1-9]{25,34}(?:/|$);
+uri            __URL_BTC_ID     m;[/.][13][a-km-zA-HJ-NP-Z1-9]{25,34}(?:/|$);
 body           __BITCOIN_ID     /\b(?<!=)[13][a-km-zA-HJ-NP-Z1-9]{25,34}\b/
 
 ifplugin Mail::SpamAssassin::Plugin::DKIM
