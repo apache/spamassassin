@@ -27,12 +27,14 @@ ifplugin Mail::SpamAssassin::Plugin::ReplaceTags
   header   __PDS_BTC_HACKER   From:name =~ /h<A>ck<E>r/i
   header   __PDS_BTC_PIRATE   From:name =~ /p<I>r<A>t<E>/i
 
-  meta     PDS_BTC_AHACKER ( __PDS_BTC_ID && __PDS_BTC_HACKER && __PDS_BTC_ANON )
+  meta     __PDS_BTC_BADFROM     ( __PDS_BTC_HACKER || __PDS_BTC_PIRATE )
+
+  meta     PDS_BTC_AHACKER ( __PDS_BTC_ID && __PDS_BTC_BADFROM && __PDS_BTC_ANON )
   describe PDS_BTC_AHACKER Bitcoin Hacker
   score    PDS_BTC_AHACKER 3.0 # limit
   reuse    PDS_BTC_AHACKER
 
-  meta     PDS_BTC_HACKER ( __PDS_BTC_ID && __PDS_BTC_ANON && !__PDS_BTC_HACKER )
+  meta     PDS_BTC_HACKER ( __PDS_BTC_ID && __PDS_BTC_ANON && !__PDS_BTC_BADFROM )
   describe PDS_BTC_HACKER Bitcoin Hacker
   score    PDS_BTC_HACKER 1.0 # limit
   reuse    PDS_BTC_HACKER
