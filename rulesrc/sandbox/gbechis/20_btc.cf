@@ -1,15 +1,19 @@
 body     __COPY_PASTE_DE     /Kopieren Sie es und f(?:\xfc|\xc3\xbc)gen Sie es ein/
 meta     GB_BITCOIN_CP_DE   ( __BITCOIN_ID && !__URL_BTC_ID && __COPY_PASTE_DE )
+describe GB_BITCOIN_CP_DE   German Bitcoin scam
 score    GB_BITCOIN_CP_DE   2.0 # limit
 
-body     __COPY_PASTE_EN     /Copy and paste/i
+body     __COPY_PASTE_EN     /Copy (and|\+) paste/i
 meta     GB_BITCOIN_CP_EN   ( __BITCOIN_ID && !__URL_BTC_ID && __COPY_PASTE_EN )
+describe GB_BITCOIN_CP_EN   English Bitcoin scam
 score    GB_BITCOIN_CP_EN   2.0 # limit
 
 body     __COPY_PASTE_IT     /copialo e incollalo/
 meta     GB_BITCOIN_CP_IT   ( __BITCOIN_ID && !__URL_BTC_ID && __COPY_PASTE_IT )
+describe GB_BITCOIN_CP_IT   Italian Bitcoin scam
 score    GB_BITCOIN_CP_IT   2.0 # limit
 
 body     __COPY_PASTE_NL     /kopieer en plak het/
 meta     GB_BITCOIN_CP_NL   ( __BITCOIN_ID && !__URL_BTC_ID && __COPY_PASTE_NL )
+describe GB_BITCOIN_CP_NL   Dutch Bitcoin scam
 score    GB_BITCOIN_CP_NL   2.0 # limit
