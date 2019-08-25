@@ -1,4 +1,4 @@
-body     __COPY_PASTE_DE      /Kopieren Sie es und f(?:\xfc|\xc3\xbc)gen Sie es ein/
+body     __COPY_PASTE_DE      /Kopieren Sie es und f(?:\xfc|\xc3\xbc)gen Sie es ein/i
 meta     __GB_BITCOIN_CP_DE   ( __BITCOIN_ID && !__URL_BTC_ID && __COPY_PASTE_DE )
 describe __GB_BITCOIN_CP_DE   German Bitcoin scam
 
@@ -6,11 +6,11 @@ body     __COPY_PASTE_EN      /Copy (and|\+) paste/i
 meta     __GB_BITCOIN_CP_EN   ( __BITCOIN_ID && !__URL_BTC_ID && __COPY_PASTE_EN )
 describe __GB_BITCOIN_CP_EN   English Bitcoin scam
 
-body     __COPY_PASTE_IT      /copialo e incollalo/
+body     __COPY_PASTE_IT      /copialo e incollalo/i
 meta     __GB_BITCOIN_CP_IT   ( __BITCOIN_ID && !__URL_BTC_ID && __COPY_PASTE_IT )
 describe __GB_BITCOIN_CP_IT   Italian Bitcoin scam
 
-body     __COPY_PASTE_NL      /kopieer en plak het/
+body     __COPY_PASTE_NL      /kopieer en plak het/i
 meta     __GB_BITCOIN_CP_NL   ( __BITCOIN_ID && !__URL_BTC_ID && __COPY_PASTE_NL )
 describe __GB_BITCOIN_CP_NL   Dutch Bitcoin scam
 
@@ -18,7 +18,7 @@ meta     GB_BITCOIN_CP        ( __GB_BITCOIN_CP_DE || __GB_BITCOIN_CP_EN || __GB
 describe GB_BITCOIN_CP        Localized Bitcoin scam
 score    GB_BITCOIN_CP        2.0 # limit
 
-body     __NEVER_HEAR_EN      /never hear me again/
+body     __NEVER_HEAR_EN      /never hear me again/i
 meta     GB_BITCOIN_NH        ( __BITCOIN_ID && !__URL_BTC_ID && __NEVER_HEAR_EN )
 describe GB_BITCOIN_NH        Localized Bitcoin scam
 score    GB_BITCOIN_NH        2.0 # limit
