@@ -141,6 +141,13 @@ our @OPTIONAL_MODULES = (
   and Country code based filtering.',
 },
 {
+  module => 'MaxMind::DB::Reader::XS',
+  version => 0,
+
+  desc => 'Recommended much faster version of the optional MaxMind::DB::Reader module,
+  used by RelayCountry / URILocalBL plugins.',
+},
+{
   module => 'Geo::IP',
   version => 0,
   desc => 'Used by the RelayCountry plugin (not enabled by default) to
