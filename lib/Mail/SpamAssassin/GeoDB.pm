@@ -211,9 +211,9 @@ sub load_geoip2 {
   my ($db, $dbapi, $ok);
 
   eval {
-    require GeoIP2::Database::Reader;
+    require MaxMind::DB::Reader;
   } or do {
-    dbg("geodb: GeoIP2::Database::Reader module load failed: $@");
+    dbg("geodb: MaxMind::DB::Reader (GeoIP2) module load failed: $@");
     return (undef, undef);
   };
 
@@ -248,9 +248,8 @@ sub load_geoip2 {
 
     if (defined $path{$dbtype}) {
       eval {
-        $db->{$dbtype} = GeoIP2::Database::Reader->new(
+        $db->{$dbtype} = MaxMind::DB::Reader->new(
           file => $path{$dbtype},
-          locales => [ 'en' ]
         );
         die "unknown error" unless $db->{$dbtype};
         1;
@@ -273,19 +272,19 @@ sub load_geoip2 {
 
   # dbinfo_DBTYPE()
   $db->{city} and $dbapi->{dbinfo_city} = sub {
-    my $m = $_[0]->{db}->{city}->metadata;
+    my $m = $_[0]->{db}->{city}->metadata();
     return "GeoIP2 city: ".$m->description()->{en}." / ".localtime($m->build_epoch());
   };
   $db->{country} and $dbapi->{dbinfo_country} = sub {
-    my $m = $_[0]->{db}->{country}->metadata;
+    my $m = $_[0]->{db}->{country}->metadata();
     return "GeoIP2 country: ".$m->description()->{en}." / ".localtime($m->build_epoch());
   };
   $db->{isp} and $dbapi->{dbinfo_isp} = sub {
-    my $m = $_[0]->{db}->{isp}->metadata;
+    my $m = $_[0]->{db}->{isp}->metadata();
     return "GeoIP2 isp: ".$m->description()->{en}." / ".localtime($m->build_epoch());
   };
   $db->{asn} and $dbapi->{dbinfo_asn} = sub {
-    my $m = $_[0]->{db}->{asn}->metadata;
+    my $m = $_[0]->{db}->{asn}->metadata();
     return "GeoIP2 asn: ".$m->description()->{en}." / ".localtime($m->build_epoch());
   };
 
@@ -294,7 +293,7 @@ sub load_geoip2 {
     my $res = {};
     my $city;
     eval {
-      $city = $_[0]->{db}->{city}->city(ip=>$_[1]);
+      $city = $_[0]->{db}->{city}->record_for_address($_[1]);
       1;
     } or do {
       $@ =~ s/\s+Trace begun.*//s;
@@ -302,11 +301,11 @@ sub load_geoip2 {
       return $res;
     };
     eval {
-      $res->{city_name} = $city->{raw}->{city}->{names}->{en};
-      $res->{country} = $city->{raw}->{country}->{iso_code};
-      $res->{country_name} = $city->{raw}->{country}->{names}->{en};
-      $res->{continent} = $city->{raw}->{continent}->{code};
-      $res->{continent_name} = $city->{raw}->{continent}->{names}->{en};
+      $res->{city_name} = $city->{city}->{names}->{en};
+      $res->{country} = $city->{country}->{iso_code};
+      $res->{country_name} = $city->{country}->{names}->{en};
+      $res->{continent} = $city->{continent}->{code};
+      $res->{continent_name} = $city->{continent}->{names}->{en};
       1;
     };
     return $res;
@@ -317,7 +316,7 @@ sub load_geoip2 {
     my $res = {};
     my $country;
     eval {
-      $country = $_[0]->{db}->{country}->country(ip=>$_[1]);
+      $country = $_[0]->{db}->{country}->record_for_address($_[1]);
       1;
     } or do {
       $@ =~ s/\s+Trace begun.*//s;
@@ -325,10 +324,10 @@ sub load_geoip2 {
       return $res;
     };
     eval {
-      $res->{country} = $country->{raw}->{country}->{iso_code};
-      $res->{country_name} = $country->{raw}->{country}->{names}->{en};
-      $res->{continent} = $country->{raw}->{continent}->{code};
-      $res->{continent_name} = $country->{raw}->{continent}->{names}->{en};
+      $res->{country} = $country->{country}->{iso_code};
+      $res->{country_name} = $country->{country}->{names}->{en};
+      $res->{continent} = $country->{continent}->{code};
+      $res->{continent_name} = $country->{continent}->{names}->{en};
       1;
     };
     return $res;
@@ -339,7 +338,7 @@ sub load_geoip2 {
     my $res = {};
     my $isp;
     eval {
-      $isp = $_[0]->{db}->{isp}->isp(ip=>$_[1]);
+      $isp = $_[0]->{db}->{isp}->record_for_address($_[1]);
       1;
     } or do {
       $@ =~ s/\s+Trace begun.*//s;
@@ -347,10 +346,10 @@ sub load_geoip2 {
       return $res;
     };
     eval {
-      $res->{asn} = $isp->autonomous_system_number();
-      $res->{asn_organization} = $isp->autonomous_system_organization();
-      $res->{isp} = $isp->isp();
-      $res->{organization} = $isp->organization();
+      $res->{asn} = $isp->{autonomous_system_number};
+      $res->{asn_organization} = $isp->{autonomous_system_organization};
+      $res->{isp} = $isp->{isp};
+      $res->{organization} = $isp->{organization};
       1;
     };
     return $res;
@@ -361,7 +360,7 @@ sub load_geoip2 {
     my $res = {};
     my $asn;
     eval {
-      $asn = $_[0]->{db}->{asn}->asn(ip=>$_[1]);
+      $asn = $_[0]->{db}->{asn}->record_for_address($_[1]);
       1;
     } or do {
       $@ =~ s/\s+Trace begun.*//s;
@@ -369,8 +368,8 @@ sub load_geoip2 {
       return $res;
     };
     eval {
-      $res->{asn} = $asn->autonomous_system_number();
-      $res->{asn_organization} = $asn->autonomous_system_organization();
+      $res->{asn} = $asn->{autonomous_system_number};
+      $res->{asn_organization} = $asn->{autonomous_system_organization};
       1;
     };
     return $res;

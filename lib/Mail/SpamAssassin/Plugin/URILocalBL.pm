@@ -99,7 +99,7 @@ applicable to CIDR and ISP blocks as well.
 =head1 DEPENDENCIES
 
 The Country-Code based filtering can use any Mail::SpamAssassin::GeoDB
-supported module like GeoIP2::Database::Reader or Geo::IP.  ISP based
+supported module like MaxMind::DB::Reader (GeoIP2) or Geo::IP.  ISP based
 filtering might require a paid subscription database like GeoIPISP.
 
 =cut

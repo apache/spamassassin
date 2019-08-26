@@ -54,7 +54,7 @@ Following metadata headers and tags are added:
 =head1 REQUIREMENT
 
 This plugin uses Mail::SpamAssassin::GeoDB and requires a module supported
-by it, for example GeoIP2::Database::Reader.
+by it, for example MaxMind::DB::Reader (GeoIP2).
 
 =cut
 

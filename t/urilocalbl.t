@@ -15,10 +15,10 @@ use lib '.'; use lib 't';
 use SATest; sa_t_init("urilocalbl");
 
 $tests = 0;
-eval { require GeoIP2::Database::Reader; $tests += 8; $has{GEOIP2}  = 1 };
-eval { require Geo::IP;                  $tests += 8; $has{GEOIP}   = 1 };
-eval { require IP::Country::DB_File;     $tests += 8; $has{DB_FILE} = 1 };
-eval { require IP::Country::Fast;        $tests += 8; $has{FAST}    = 1 };
+eval { require MaxMind::DB::Reader;   $tests += 8; $has{GEOIP2}  = 1 };
+eval { require Geo::IP;               $tests += 8; $has{GEOIP}   = 1 };
+eval { require IP::Country::DB_File;  $tests += 8; $has{DB_FILE} = 1 };
+eval { require IP::Country::Fast;     $tests += 8; $has{FAST}    = 1 };
 
 use Test::More;
 
@@ -111,7 +111,7 @@ if (defined $has{GEOIP2}) {
     warn "skipping DNS lookup tests (run_net_tests=n)\n";
   }
 } else {
-  warn "skipping GeoIP2::Database::Reader tests (not installed)\n";
+  warn "skipping MaxMind::DB::Reader (GeoIP2) tests (not installed)\n";
 }
 
 

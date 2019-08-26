@@ -16,10 +16,10 @@ use SATest; sa_t_init("relaycountry");
 
 my $tests = 0;
 my %has;
-eval { require GeoIP2::Database::Reader; $tests += 2; $has{GEOIP2}  = 1 };
-eval { require Geo::IP;                  $tests += 2; $has{GEOIP}   = 1 };
-eval { require IP::Country::DB_File;     $tests += 2; $has{DB_FILE} = 1 };
-eval { require IP::Country::Fast;        $tests += 2; $has{FAST}    = 1 };
+eval { require MaxMind::DB::Reader;   $tests += 2; $has{GEOIP2}  = 1 };
+eval { require Geo::IP;               $tests += 2; $has{GEOIP}   = 1 };
+eval { require IP::Country::DB_File;  $tests += 2; $has{DB_FILE} = 1 };
+eval { require IP::Country::Fast;     $tests += 2; $has{FAST}    = 1 };
 
 use Test::More;
 
@@ -51,7 +51,7 @@ ok_all_patterns();
 clear_pattern_counters();
 
 } else {
-  warn("skipping missing GeoIP2::Database::Reader\n");
+  warn "skipping MaxMind::DB::Reader (GeoIP2) tests (not installed)\n";
 }
 
 
@@ -78,7 +78,7 @@ ok_all_patterns();
 clear_pattern_counters();
 
 } else {
-  warn("skipping missing Geo::IP\n");
+  warn "skipping Geo::IP tests (not installed)\n";
 }
 
 
@@ -105,7 +105,7 @@ ok_all_patterns();
 clear_pattern_counters();
 
 } else {
-  warn("skipping missing IP::Country::DB_File\n");
+  warn "skipping IP::Country::DB_File tests (not installed)\n";
 }
 
 
@@ -131,6 +131,6 @@ ok_all_patterns();
 clear_pattern_counters();
 
 } else {
-  warn("skipping missing IP::Country::Fast\n");
+  warn "skipping IP::Country::Fast tests (not installed)\n";
 }
 
