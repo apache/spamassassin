@@ -191,6 +191,8 @@ GetOptions(
   'reallyallowplugins'                  => \$opt{'reallyallowplugins'},
   'refreshmirrors'                      => \$opt{'refreshmirrors'},
   'httputil=s'                          => \$opt{'httputil'},
+  'score-multiplier=s'                  => \$opt{'score-multiplier'},
+  'score-limit=s'                       => \$opt{'score-limit'},
 
   # allow multiple of these on the commandline
   'gpgkey=s'				=> $opt{'gpgkey'},
@@ -240,6 +242,13 @@ if ( $opt{'force_pf'} && $opt{'force_pf'} eq 'inet6' && !$have_inet6 ) {
 
 if ( defined $opt{'httputil'} && $opt{'httputil'} !~ /^(curl|wget|fetch|lwp)$/ ) {
   warn "Invalid parameter for --httputil, curl|wget|fetch|lwp wanted\n";
+}
+
+if ( defined $opt{'score-multiplier'} && $opt{'score-multiplier'} !~ /^\d+(?:\.\d+)?$/ ) {
+  die "Invalid parameter for --score-multiplier, integer or float expected.\n";
+}
+if ( defined $opt{'score-limit'} && $opt{'score-limit'} !~ /^\d+(?:\.\d+)?$/ ) {
+  die "Invalid parameter for --score-limit, integer or float expected.\n";
 }
 
 # Figure out what version of SpamAssassin we're using, and also figure out the
@@ -1354,6 +1363,35 @@ sub taint_safe_archive_extract {
 
         # other stuff never allowed for safety
         $content =~ s/^\s*(dns_server)/#(commented by sa-update, not allowed)# $1/gm;
+
+        # adjust scores
+        if ($opt{'score-multiplier'} || $opt{'score-limit'}) {
+          my $adjust_score = sub {
+            my @scores = split(/\s+/, $_[1]);
+            my $touched = 0;
+            foreach (@scores) {
+              next if $_ == 0; # Can't adjust if zero..
+              my $old = $_;
+              $_ = $_ * $opt{'score-multiplier'} if $opt{'score-multiplier'};
+              $_ = $opt{'score-limit'} if $opt{'score-limit'} && $_ > $opt{'score-limit'};
+              if ($old != $_) {
+                if ($_ == 0) { # Prevent zeroing scores
+                  $_ = $old < 0 ? "-0.001" : "0.001"
+                } else {
+                  $_ = sprintf("%.3f", $_);
+                }
+                $touched++ if $old != $_;
+              }
+            }
+            if ($touched) {
+              return $_[0].join(' ', @scores)." #(score adjusted by sa-update, $_[1])#".$_[2];
+            } else {
+              return $_[0].$_[1].$_[2];
+            }
+          };
+          $content =~ s/^(\s*score\s+\w+\s+)(-?\d+(?:\.\d+)?(?:\s+-?\d+(?:\.\d+)?)*)(.*)$
+            /$adjust_score->($1,$2,$3)/igmex;
+        }
       }
 
       print OUT $content
@@ -1976,6 +2014,11 @@ Options:
   --refreshmirrors        Force the MIRRORED.BY file to be updated
   --httputil util         Force used download tool. By default first found
                           from these is used: curl, wget, fetch, lwp
+  --score-multiplier x.x  Adjust all scores from update channel, multiply
+                          with given value (integer or float).
+  --score-limit x.x       Adjust all scores from update channel, limit
+                          to given value (integer or float). Limiting
+                          is done after possible multiply operation.
   -D, --debug [area=n,...]  Print debugging messages
   -v, --verbose           Be verbose, like print updated channel names;
                           For more verbosity specify multiple times
