@@ -12,18 +12,16 @@ describe PDS_BITCOIN_CP_SE   Bitcoin copy/paste Swedish variant
 score    PDS_BITCOIN_CP_SE   2.0 # limit
 reuse    PDS_BITCOIN_CP_SE
 
-header   __HACKER_FROM      From:name =~ /h\xc9\x91cker/i
-
-meta     PDS_BITCOIN_HACKER ( __PDS_BTC_ID && __HACKER_FROM )
-describe PDS_BITCOIN_HACKER Hacker BTC
-score    PDS_BITCOIN_HACKER 2.0
-reuse    PDS_BITCOIN_HACKER
+meta     PDS_TO_EQ_FROM_BTC  ( __PDS_BTC_ID && __TO_EQ_FROM )
+describe PDS_TO_EQ_FROM_BTC  Bitcoin To: equals From:
+score    PDS_TO_EQ_FROM_BTC  1.5
+reuse    PDS_TO_EQ_FROM_BTC
 
 ifplugin Mail::SpamAssassin::Plugin::ReplaceTags
 
   replace_rules   __PDS_BTC_HACKER __PDS_BTC_PIRATE
 
-  header   __PDS_BTC_ANON     From:name =~ /^Anon/
+  header   __PDS_BTC_ANON     From:name =~ /\bAnon/
   header   __PDS_BTC_HACKER   From:name =~ /h<A>ck<E>r/i
   header   __PDS_BTC_PIRATE   From:name =~ /p<I>r<A>t<E>/i
 
@@ -36,7 +34,7 @@ ifplugin Mail::SpamAssassin::Plugin::ReplaceTags
 
   meta     PDS_BTC_HACKER ( __PDS_BTC_ID && __PDS_BTC_ANON && !__PDS_BTC_BADFROM )
   describe PDS_BTC_HACKER Bitcoin Hacker
-  score    PDS_BTC_HACKER 1.0 # limit
+  score    PDS_BTC_HACKER 2.0 # limit
   reuse    PDS_BTC_HACKER
 
 endif
