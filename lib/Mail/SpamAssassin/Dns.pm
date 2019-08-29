@@ -329,7 +329,7 @@ sub harvest_dnsbl_queries {
     my ($alldone,$anydone) =
       $self->{async}->complete_lookups($first ? 0 : 1.0,  1);
 
-    last  if $alldone || $self->{deadline_exceeded};
+    last  if $alldone || $self->{deadline_exceeded} || $self->{shortcircuited};
 
     dbg("dns: harvest_dnsbl_queries - check_tick");
     $self->{main}->call_plugins ("check_tick", { permsgstatus => $self });

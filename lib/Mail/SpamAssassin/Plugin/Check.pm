@@ -115,6 +115,7 @@ sub check_main {
     } elsif ($self->{main}->call_plugins("have_shortcircuited",
                                          { permsgstatus => $pms })) {
       # if shortcircuiting is hit, we skip all other priorities...
+      $pms->{shortcircuited} = 1;
       last;
     }
 
@@ -141,49 +142,48 @@ sub check_main {
     # do head tests
     $self->do_head_tests($pms, $priority);
     $pms->harvest_completed_queries() if $rbls_running;
-    last if $pms->{deadline_exceeded};
+    last if $pms->{deadline_exceeded} || $pms->{shortcircuited};
 
     $self->do_head_eval_tests($pms, $priority);
     $pms->harvest_completed_queries() if $rbls_running;
-    last if $pms->{deadline_exceeded};
+    last if $pms->{deadline_exceeded} || $pms->{shortcircuited};
 
     $self->do_body_tests($pms, $priority, $decoded);
     $pms->harvest_completed_queries() if $rbls_running;
-    last if $pms->{deadline_exceeded};
+    last if $pms->{deadline_exceeded} || $pms->{shortcircuited};
 
     $self->do_uri_tests($pms, $priority, @uris);
     $pms->harvest_completed_queries() if $rbls_running;
-    last if $pms->{deadline_exceeded};
+    last if $pms->{deadline_exceeded} || $pms->{shortcircuited};
 
     $self->do_body_eval_tests($pms, $priority, $decoded);
     $pms->harvest_completed_queries() if $rbls_running;
-    last if $pms->{deadline_exceeded};
+    last if $pms->{deadline_exceeded} || $pms->{shortcircuited};
   
     $self->do_rawbody_tests($pms, $priority, $bodytext);
     $pms->harvest_completed_queries() if $rbls_running;
-    last if $pms->{deadline_exceeded};
+    last if $pms->{deadline_exceeded} || $pms->{shortcircuited};
 
     $self->do_rawbody_eval_tests($pms, $priority, $bodytext);
     $pms->harvest_completed_queries() if $rbls_running;
-    last if $pms->{deadline_exceeded};
+    last if $pms->{deadline_exceeded} || $pms->{shortcircuited};
   
     $self->do_full_tests($pms, $priority, \$fulltext);
     $pms->harvest_completed_queries() if $rbls_running;
-    last if $pms->{deadline_exceeded};
+    last if $pms->{deadline_exceeded} || $pms->{shortcircuited};
 
     $self->do_full_eval_tests($pms, $priority, \$fulltext);
     $pms->harvest_completed_queries() if $rbls_running;
-    last if $pms->{deadline_exceeded};
+    last if $pms->{deadline_exceeded} || $pms->{shortcircuited};
 
     $self->do_meta_tests($pms, $priority);
     $pms->harvest_completed_queries() if $rbls_running;
-    last if $pms->{deadline_exceeded};
+    last if $pms->{deadline_exceeded} || $pms->{shortcircuited};
 
     # we may need to call this more often than once through the loop, but
     # it needs to be done at least once, either at the beginning or the end.
     $self->{main}->call_plugins ("check_tick", { permsgstatus => $pms });
     $pms->harvest_completed_queries() if $rbls_running;
-    last if $pms->{deadline_exceeded};
   }
 
   # Finish DNS results
@@ -307,6 +307,7 @@ sub run_generic_tests {
     return;
   } elsif ($self->{main}->call_plugins("have_shortcircuited",
                                         { permsgstatus => $pms })) {
+    $pms->{shortcircuited} = 1;
     return;
   }
 
@@ -1093,6 +1094,7 @@ sub run_eval_tests {
     return;
   } elsif ($self->{main}->call_plugins("have_shortcircuited",
                                         { permsgstatus => $pms })) {
+    $pms->{shortcircuited} = 1;
     return;
   }
 
