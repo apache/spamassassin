@@ -2792,7 +2792,7 @@ tflags     ALIBABA_IMG_NOT_RCVD_ALI    publish
 header     __HDR_RCVD_WALMART          X-Spam-Relays-External =~ /rdns=\S+\.walmart\.com\s/
 uri        __URI_IMG_WALMART           m,://[^/?]+\.walmartimages\.com/,i
 
-meta       __WALMART_IMG_NOT_RCVD_ALI  __URI_IMG_WALMART && !__HDR_RCVD_WALMART
+meta       __WALMART_IMG_NOT_RCVD_WAL  __URI_IMG_WALMART && !__HDR_RCVD_WALMART
 
 meta       __HOSTED_IMG_DQ_UNSUB       __URI_DQ_UNSUB && ( __URI_IMG_EBAY || __URI_IMG_AMAZON || __URI_IMG_ALICDN || __URI_IMG_WALMART )
 meta       HOSTED_IMG_DQ_UNSUB         __HOSTED_IMG_DQ_UNSUB
