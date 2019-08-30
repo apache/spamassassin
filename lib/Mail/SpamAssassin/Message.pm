@@ -975,6 +975,7 @@ sub _parse_multipart {
   my $header;
   my $part_array;
   my $found_end_boundary;
+  my $partcnt = 0;
 
   my $line_count = @{$body};
   foreach ( @{$body} ) {
@@ -1057,6 +1058,13 @@ sub _parse_multipart {
 	  # to be a mime header.  if it's not, mark it.
 	  $self->{'missing_mime_headers'} = 1;
 	}
+      }
+
+      # Maximum parts to process
+      if (++$partcnt == 1000) {
+        dbg("message: mimepart limit exceeded, stopping parsing");
+        $self->{'mimepart_limit_exceeded'} = 1;
+        return;
       }
 
       # make sure we start with a new clean node

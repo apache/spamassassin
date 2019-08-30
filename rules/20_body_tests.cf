@@ -151,6 +151,9 @@ rawbody __MIME_CHARSET_FARAWAY	eval:check_for_mime('mime_faraway_charset')
 body MIME_BAD_ISO_CHARSET	eval:check_for_mime('mime_bad_iso_charset')
 describe MIME_BAD_ISO_CHARSET	MIME character set is an unknown ISO charset
 
+body MIMEPART_LIMIT_EXCEEDED	eval:check_for_mime('mimepart_limit_exceeded')
+describe MIMEPART_LIMIT_EXCEEDED Message has too many MIME parts
+
 endif
 
 ###########################################################################
