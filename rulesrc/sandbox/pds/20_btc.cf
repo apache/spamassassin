@@ -1,16 +1,16 @@
 meta     __PDS_BTC_ID        ( __BITCOIN_ID && !__URL_BTC_ID )
 
-body     __COPY_PASTE_FR     /copier et coller/i
-meta     PDS_BITCOIN_CP_FR   ( __PDS_BTC_ID && __COPY_PASTE_FR )
-describe PDS_BITCOIN_CP_FR   Bitcoin copy/paste French variant
-score    PDS_BITCOIN_CP_FR   2.0 # limit
-reuse    PDS_BITCOIN_CP_FR
+#body     __COPY_PASTE_FR     /copier et coller/i
+#meta     PDS_BITCOIN_CP_FR   ( __PDS_BTC_ID && __COPY_PASTE_FR )
+#describe PDS_BITCOIN_CP_FR   Bitcoin copy/paste French variant
+#score    PDS_BITCOIN_CP_FR   2.0 # limit
+#reuse    PDS_BITCOIN_CP_FR
 
-body     __COPY_PASTE_SE     /kopiera och klistra/i
-meta     PDS_BITCOIN_CP_SE   ( __PDS_BTC_ID && __COPY_PASTE_SE )
-describe PDS_BITCOIN_CP_SE   Bitcoin copy/paste Swedish variant
-score    PDS_BITCOIN_CP_SE   2.0 # limit
-reuse    PDS_BITCOIN_CP_SE
+#body     __COPY_PASTE_SE     /kopiera och klistra/i
+#meta     PDS_BITCOIN_CP_SE   ( __PDS_BTC_ID && __COPY_PASTE_SE )
+#describe PDS_BITCOIN_CP_SE   Bitcoin copy/paste Swedish variant
+#score    PDS_BITCOIN_CP_SE   2.0 # limit
+#reuse    PDS_BITCOIN_CP_SE
 
 meta     PDS_TO_EQ_FROM_BTC  ( __PDS_BTC_ID && __TO_EQ_FROM )
 describe PDS_TO_EQ_FROM_BTC  Bitcoin To: equals From:
