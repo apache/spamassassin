@@ -83,22 +83,10 @@ my %escape_map =
 sub escape_str {
   # Things are already forced as octets by _log, no utf8::encode needed
   # Control chars, DEL, backslash
-  if ($_[0] =~ tr/\x00-\x1F\x7F\\//) { # triage helps a lot
-    $_[0] =~ s@
-      ( [\x00-\x1F\x7F\\] )
-      @ $escape_map{$1} || sprintf("\\x{%02X}",ord($1))
-      @egsx;
-  }
-  # Also escape UTF-8 sequences for logs, so stuff outputting on
-  # terminals doesn't depend on charset
-  if ($_[0] =~ tr/\xC0-\xF7//) { # triage helps a lot
-    $_[0] =~ s@
-      ( [\xC0-\xDF][\x80-\xBF] |    # Loose UTF-8
-        [\xE0-\xEF][\x80-\xBF]{2} | # ...
-        [\xF0-\xF7][\x80-\xBF]{3} ) # ...
-      @ join('', map {sprintf("\\x{%02X}",ord($_))} split(//, $1))
-      @egsx;
-  }
+  $_[0] =~ s@
+    ( [\x00-\x1F\x7F\x80-\xFF\\] )
+    @ $escape_map{$1} || sprintf("\\x{%02X}",ord($1))
+    @egsx;
 }
 
 =head1 METHODS
