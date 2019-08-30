@@ -674,14 +674,15 @@ sub abort_remaining_lookups {
   $self->{pending_rules} = {};
 
   while (my($key,$ent) = each %$pending) {
-    info("async: aborting after %.3f s, %s: %s",
-        $now - $ent->{start_time},
+    my $dur = $now - $ent->{start_time};
+    my $msg = sprintf( "async: aborting after %.3f s, %s: %s", $dur,
         (defined $ent->{timeout_initial} &&
          $now > $ent->{start_time} + $ent->{timeout_initial}
            ? 'past original deadline' : 'deadline shrunk'),
         $ent->{display_id} );
+    $dur > 1 ? info($msg) : dbg($msg);
     $foundcnt++;
-    $self->{timing_by_query}->{"X $key"} = $now - $ent->{start_time};
+    $self->{timing_by_query}->{"X $key"} = $dur;
     $ent->{finish_time} = $now  if !defined $ent->{finish_time};
     delete $pending->{$key};
   }
