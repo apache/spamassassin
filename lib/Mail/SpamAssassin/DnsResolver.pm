@@ -884,6 +884,31 @@ sub poll_responses {
   return ($cnt, $cnt_cb);
 }
 
+# Used to flush stale DNS responses, which we don't need to process
+sub flush_responses {
+  my ($self) = @_;
+  return if $self->{no_resolver};
+  return if !$self->{sock};
+
+  my $rin = $self->{sock_as_vec};
+  my $rout;
+  my $nfound;
+
+  my $packetsize = $self->{res}->udppacketsize;
+  $packetsize = 512  if $packetsize < 512;  # just in case
+
+  for (;;) {
+    eval {  # use eval to catch alarm signal
+      ($nfound, undef) = select($rout=$rin, undef, undef, 0);
+      1;
+    } or do {
+      return;
+    };
+    return if !$nfound;
+    return if !$self->{sock}->recv(my $data, $packetsize+256, MSG_DONTWAIT);
+  }
+}
+
 ###########################################################################
 
 =item $res->bgabort()

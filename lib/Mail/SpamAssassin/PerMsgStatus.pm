@@ -355,6 +355,9 @@ sub check_timed {
   $self->{head_only_points} = 0;
   $self->{score} = 0;
 
+  # flush any old stale DNS responses
+  $self->{main}->{resolver}->flush_responses();
+
   # clear NetSet cache before every check to prevent it growing too large
   foreach my $nset_name (qw(internal_networks trusted_networks msa_networks)) {
     my $netset = $self->{conf}->{$nset_name};
