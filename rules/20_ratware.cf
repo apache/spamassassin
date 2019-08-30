@@ -125,7 +125,8 @@ tflags MAILING_LIST_MULTI	nice
 # updated to fix bugs 2047, 2598, 2654
 # NOTE: this is the *only* spammish Eudora MUA pattern that wasn't
 # ignored using __OLD_EUDORA1 and __OLD_EUDORA2 under previous rules.
-header __EUDORA_MUA             X-Mailer =~ /^QUALCOMM Windows Eudora (?:Pro |Light )?Version [34567]\./
+# v7 can't be tested, as it sometimes doesn't generate MID
+header __EUDORA_MUA             X-Mailer =~ /^QUALCOMM Windows Eudora (?:Pro |Light )?Version [3456]\./
 header __EUDORA_MSGID		MESSAGEID =~ /^<(?:\d\d?\.){3,5}\d{14}\.[a-f0-9]{8}\@\S+(?:\sport\s\d+)?>$/m
 meta FORGED_MUA_EUDORA          __EUDORA_MUA && !( __EUDORA_MSGID || __UNUSABLE_MSGID || MAILING_LIST_MULTI || MSGID_FROM_MTA_HEADER )
 describe FORGED_MUA_EUDORA	Forged mail pretending to be from Eudora
