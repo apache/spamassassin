@@ -12,10 +12,10 @@ meta     __PDS_BTC_ID        ( __BITCOIN_ID && !__URL_BTC_ID )
 #score    PDS_BITCOIN_CP_SE   2.0 # limit
 #reuse    PDS_BITCOIN_CP_SE
 
-meta     PDS_TO_EQ_FROM_BTC  ( __PDS_BTC_ID && __TO_EQ_FROM )
-describe PDS_TO_EQ_FROM_BTC  Bitcoin To: equals From:
-score    PDS_TO_EQ_FROM_BTC  1.5
-reuse    PDS_TO_EQ_FROM_BTC
+#meta     PDS_TO_EQ_FROM_BTC  ( __PDS_BTC_ID && __TO_EQ_FROM )
+#describe PDS_TO_EQ_FROM_BTC  Bitcoin To: equals From:
+#score    PDS_TO_EQ_FROM_BTC  1.5
+#reuse    PDS_TO_EQ_FROM_BTC
 
 ifplugin Mail::SpamAssassin::Plugin::ReplaceTags
 
