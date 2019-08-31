@@ -740,7 +740,8 @@ sub check_dnsbl {
 
   # Check that rules are active
   return 0 if !grep {$pms->{conf}->{scores}->{$_}}
-    @{$pms->{conf}->{eval_to_rule}->{check_dcc}};
+    ( @{$pms->{conf}->{eval_to_rule}->{check_dcc}},
+      @{$pms->{conf}->{eval_to_rule}->{check_dcc_reputation_range}} );
 
   # Launch async only if dccifd found
   $self->find_dcc_home();
