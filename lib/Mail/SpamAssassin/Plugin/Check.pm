@@ -1137,7 +1137,6 @@ sub run_eval_tests {
   my $tflagsref = $conf->{tflags};
   my $scoresref = $conf->{scores};
   my $eval_pluginsref = $conf->{eval_plugins};
-  my $have_start_rules = $self->{main}->have_plugin("start_rules");
   my $have_ran_rule = $self->{main}->have_plugin("ran_rule");
 
   # the buffer for the evaluated code 
@@ -1147,6 +1146,17 @@ sub run_eval_tests {
   my $dbgstr = '';
   if (would_log('dbg')) {
     $dbgstr = 'dbg("rules: ran eval rule $rulename ======> got hit ($result)");';
+  }
+
+  if ($self->{main}->have_plugin("start_rules")) {
+    # XXX - should we use helper function here?
+    $evalstr .= '
+      $self->{main}->call_plugins("start_rules", {
+              permsgstatus => $self,
+              ruletype => "eval",
+              priority => '.$priority.'
+            });
+';
   }
 
   while (my ($rulename, $test) = each %{$evalhash}) {
@@ -1188,20 +1198,6 @@ sub run_eval_tests {
       $evalstr .= '
       $self->{current_rule_name} = $rulename;
       $self->register_plugin_eval_glue(q#'.$function.'#);
-';
-    }
-
-    # this stuff is quite slow, and totally superfluous if
-    # no plugin is loaded for those hooks
-    if ($have_start_rules) {
-      # XXX - should we use helper function here?
-      $evalstr .= '
-        $self->{main}->call_plugins("start_rules", {
-                permsgstatus => $self,
-                ruletype => "eval",
-                priority => '.$priority.'
-              });
-
 ';
     }
 
