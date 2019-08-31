@@ -64,6 +64,12 @@ score    FROM_NUMBERO_NEWDOMAIN 2.0 # limit
 tflags   FROM_NUMBERO_NEWDOMAIN net publish
 reuse    FROM_NUMBERO_NEWDOMAIN
 
+meta     FROM_NEWDOM_BTC __PDS_BTC_ID && __PDS_NEWDOMAIN
+describe FROM_NEWDOM_BTC Newdomain with Bitcoin ID
+score    FROM_NEWDOM_BTC 2.0 # limit
+tflags   FROM_NEWDOM_BTC net
+reuse    FROM_NEWDOM_BTC
+
 endif
 
 endif
