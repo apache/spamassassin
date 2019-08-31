@@ -864,6 +864,7 @@ sub finish_parsing {
 
   $self->trace_meta_dependencies();
   $self->fix_priorities();
+  $self->fix_tflags();
 
   # don't do this if allow_user_rules is active, since it deletes entries
   # from {tests}
@@ -1042,6 +1043,25 @@ sub fix_priorities {
       if ($deppri > $basepri) {
         dbg("rules: $rule (pri $basepri) requires $dep (pri $deppri): fixed");
         $pri->{$dep} = $basepri;
+      }
+    }
+  }
+}
+
+sub fix_tflags {
+  my ($self) = @_;
+  my $conf = $self->{conf};
+  my $tflags = $conf->{tflags};
+
+  # Inherit net tflags from dependencies
+  while (my($rulename,$deps) = each %{$conf->{meta_dependencies}}) {
+    my $tfl = $tflags->{$rulename}||'';
+    next if $tfl =~ /\bnet\b/;
+    foreach my $deprule (split(' ', $deps)) {
+      if (($tflags->{$deprule}||'') =~ /\bnet\b/) {
+        dbg("rules: meta $rulename inherits tflag net, depends on $deprule");
+        $tflags->{$rulename} = $tfl eq '' ? 'net' : "$tfl net";
+        last;
       }
     }
   }
