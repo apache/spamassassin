@@ -63,8 +63,9 @@ my %log_level = (
 our %LOG_SA;
 our $LOG_ENTERED;  # to avoid recursion on die or warn from within logging
 # duplicate message line suppressor
-our $LOG_DUPMIN = 10; # only start suppressing after x duplicate lines
+our $LOG_DUPMIN = 3; # only start suppressing after x duplicate lines
 our $LOG_DUPLINE = ''; # remembers last log line
+our $LOG_DUPLEVEL = ''; # remembers last log level
 our $LOG_DUPTIME; # remembers last log line timestamp
 our $LOG_DUPCNT = 0; # counts duplicates
 
@@ -189,15 +190,16 @@ sub log_message {
     if ($LOG_DUPCNT >= $LOG_DUPMIN) {
       $LOG_DUPCNT -= $LOG_DUPMIN - 1;
       if ($LOG_DUPCNT > 1) {
-        _log_message($level,
+        _log_message($LOG_DUPLEVEL,
                      "$LOG_DUPLINE [... logline repeated $LOG_DUPCNT times]",
                      $LOG_DUPTIME);
       } else {
-        _log_message($level, $LOG_DUPLINE, $LOG_DUPTIME);
+        _log_message($LOG_DUPLEVEL, $LOG_DUPLINE, $LOG_DUPTIME);
       }
     }
     $LOG_DUPCNT = 0;
     $LOG_DUPLINE = $message;
+    $LOG_DUPLEVEL = $level;
   }
 
   _log_message($level, $message, $now);
