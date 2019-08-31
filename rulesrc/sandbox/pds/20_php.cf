@@ -27,3 +27,15 @@ meta     PDS_X_PHP_WELLKNOWN __PDS_X_PHP_WELLKNOWN
 describe PDS_X_PHP_WELLKNOWN X-PHP-Script shows sent from a PHP script in the /.well-known/ dir
 score    PDS_X_PHP_WELLKNOWN 1.0
 reuse    PDS_X_PHP_WELLKNOWN
+
+meta     __PDS_SHORT_URL __SHORT_URL && !(__URL_SHORTENER || __PDS_URISHORTENER) && !ALL_TRUSTED
+
+meta     PDS_PHPE_SHORT_URL __PDS_SHORT_URL && (__PDS_PHP_EVAL1 || __PDS_PHP_EVAL2)
+describe PDS_PHPE_SHORT_URL Short URL that isn't a shortener and sent by PHP exploit
+score    PDS_PHPE_SHORT_URL 2.0 # limit
+reuse    PDS_PHPE_SHORT_URL
+
+meta     PDS_PHPE_URISHORTENER (__PDS_PHP_EVAL1 || __PDS_PHP_EVAL2) && (__URL_SHORTENER || __PDS_URISHORTENER)
+describe PDS_PHPE_URISHORTENER URI Shortener with PHP eval
+score    PDS_PHPE_URISHORTENER 2.0 # limit
+reuse    PDS_PHPE_URISHORTENER
