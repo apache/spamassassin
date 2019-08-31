@@ -2812,7 +2812,7 @@ describe   HOSTED_IMG_DIRECT_MX        Image hosted at large ecomm site, message
 tflags     HOSTED_IMG_DIRECT_MX        publish
 
 meta       __HOSTED_IMG_FREEM          ( FREEMAIL_REPLYTO || FREEMAIL_FROM ) && ( __URI_IMG_EBAY || __URI_IMG_AMAZON || __URI_IMG_ALICDN || __URI_IMG_WALMART || __URI_IMG_NEWEGG ) 
-meta       HOSTED_IMG_FREEM            __HOSTED_IMG_FREEM
+meta       HOSTED_IMG_FREEM            __HOSTED_IMG_FREEM && !__THREADED 
 score      HOSTED_IMG_FREEM            3.500	# limit
 describe   HOSTED_IMG_FREEM            Image hosted at large ecomm site, freemail from or reply-to
 tflags     HOSTED_IMG_FREEM            publish
