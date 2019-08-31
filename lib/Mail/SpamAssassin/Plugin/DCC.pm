@@ -150,9 +150,8 @@ Whether to use DCC, if it is available.
 =item use_dcc_rep (0|1)		(default: 1)
 
 Whether to use the commercial DCC Reputation feature, if it is available. 
-Default is 1 for backwards compatibility.  If you don't have commercial
-license, you can disable this to ignore check_dcc_reputation_range rules and
-save a few CPU cycles.
+Note that reputation data is free for all starting from DCC 2.x version,
+where it's automatically used.
 
 =cut
 
@@ -176,15 +175,16 @@ The default is C<999999> for all these options.
 
 =item dcc_rep_percent NUMBER
 
-Only the commercial DCC software provides DCC Reputations.  A DCC Reputation
-is the percentage of bulk mail received from the last untrusted relay in the
-path taken by a mail message as measured by all commercial DCC installations.
-See http://www.rhyolite.com/dcc/reputations.html
-You C<must> whitelist your trusted relays or MX servers with MX or
-MXDCC lines in /var/dcc/whiteclnt as described in the main DCC man page
-to avoid seeing your own MX servers as sources of bulk mail.
-See https://www.dcc-servers.net/dcc/dcc-tree/dcc.html#White-and-Blacklists
-The default is C<90>.
+Only the commercial DCC software provides DCC Reputations (but starting from
+DCC 2.x version it is available for all).  A DCC Reputation is the
+percentage of bulk mail received from the last untrusted relay in the path
+taken by a mail message as measured by all commercial DCC installations. 
+See http://www.rhyolite.com/dcc/reputations.html You C<must> whitelist your
+trusted relays or MX servers with MX or MXDCC lines in /var/dcc/whiteclnt as
+described in the main DCC man page to avoid seeing your own MX servers as
+sources of bulk mail.  See
+https://www.dcc-servers.net/dcc/dcc-tree/dcc.html#White-and-Blacklists The
+default is C<90>.
 
 =cut
 
@@ -703,10 +703,11 @@ sub _check_async {
     } else {
       shift @resp; shift @resp; # ignore status/multistatus line
       if (@resp) {
+        dbg("dcc: dccifd raw response: ".join("", @resp));
         ($pms->{dcc_x_result}, $pms->{dcc_cksums}) =
           $self->parse_dcc_response(\@resp, 'dccifd');
         if ($pms->{dcc_x_result}) {
-          dbg("dcc: dccifd responded with '$pms->{dcc_x_result}'");
+          dbg("dcc: dccifd parsed response: $pms->{dcc_x_result}");
           $pms->{dcc_result} = $self->check_dcc_result($pms, $pms->{dcc_x_result});
           if ($pms->{dcc_result}) {
             $pms->got_hit($pms->{dcc_rulename}, "", ruletype => 'eval');

@@ -39,6 +39,8 @@ reuse    DCC_CHECK
 
 
 # to receive reputation data from DCC servers requires a commercial license
+# Update 2019: reputation data is free starting from DCC 2.x version
+
 full     DCC_REPUT_00_12  eval:check_dcc_reputation_range(00,12)
 describe DCC_REPUT_00_12  DCC reputation between 0 and 12 %  (mostly ham)
 tflags   DCC_REPUT_00_12  nice net noautolearn
