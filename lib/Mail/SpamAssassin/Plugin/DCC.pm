@@ -115,9 +115,6 @@ sub new {
     $self->{dcc_disabled} = 1;
     dbg("dcc: local tests only, disabling DCC");
   }
-  else {
-    dbg("dcc: network tests on, registering DCC");
-  }
 
   $self->register_eval_rule("check_dcc");
   $self->register_eval_rule("check_dcc_reputation_range");
@@ -656,7 +653,7 @@ sub check_cleanup {
   my $pms = $opts->{permsgstatus};
 
   # Finish callbacks
-  if ($pms->{dcc_x_result} && $pms->{dcc_range_callbacks}) {
+  if ($pms->{dcc_range_callbacks}) {
     foreach (@{$pms->{dcc_range_callbacks}}) {
       $self->check_dcc_reputation_range($pms, @$_);
     }
@@ -671,7 +668,8 @@ sub _check_async {
 
   my $timer = $self->{main}->time_method("check_dcc");
 
-  $pms->{dcc_abort} = $pms->{deadline_exceeded} || $pms->{shortcircuited};
+  $pms->{dcc_abort} =
+    $pms->{dcc_abort} || $pms->{deadline_exceeded} || $pms->{shortcircuited};
 
   if ($pms->{dcc_abort}) {
     $timeout = 0;
@@ -694,7 +692,6 @@ sub _check_async {
       @resp = $pms->{dcc_sock}->getlines();
     });
     delete $pms->{dcc_sock};
-    $pms->{dcc_result} = 0;
     if ($timer->timed_out()) {
       info("dcc: dccifd read failed");
     } elsif ($err) {
@@ -708,9 +705,12 @@ sub _check_async {
           $self->parse_dcc_response(\@resp, 'dccifd');
         if ($pms->{dcc_x_result}) {
           dbg("dcc: dccifd parsed response: $pms->{dcc_x_result}");
-          $pms->{dcc_result} = $self->check_dcc_result($pms, $pms->{dcc_x_result});
+          ($pms->{dcc_result}, $pms->{dcc_rep}) =
+            $self->check_dcc_result($pms, $pms->{dcc_x_result});
           if ($pms->{dcc_result}) {
-            $pms->got_hit($pms->{dcc_rulename}, "", ruletype => 'eval');
+            foreach (@{$pms->{conf}->{eval_to_rule}->{check_dcc}}) {
+              $pms->got_hit($_, "", ruletype => 'eval');
+            }
           }
         }
       } else {
@@ -730,34 +730,29 @@ sub _check_async {
   }
 }
 
-sub finish_parsing_start {
-  my ($self, $opts) = @_;
-
-  # If using dccifd, hard adjust priority -100 to launch early async
-  $self->find_dcc_home();
-  if ($self->is_dccifd_available()) {
-    foreach (@{$opts->{conf}->{eval_to_rule}->{check_dcc}}) {
-      dbg("dcc: adjusting rule $_ priority to -100");
-      $opts->{conf}->{priority}->{$_} = -100;
-    }
-    if ($opts->{conf}->{use_dcc_rep}) {
-      foreach (@{$opts->{conf}->{eval_to_rule}->{check_dcc_reputation_range}}) {
-        dbg("dcc: adjusting rule $_ priority to -100");
-        $opts->{conf}->{priority}->{$_} = -100;
-      }
-    }
-  }
-}
-
-sub check_dcc {
-  my ($self, $pms, $fulltext, $rulename) = @_;
+sub check_dnsbl {
+  my($self, $opts) = @_;
 
   return 0 if $self->{dcc_disabled};
   return 0 if !$self->{main}->{conf}->{use_dcc};
 
-  return $pms->{dcc_result} if defined $pms->{dcc_result};
+  my $pms = $opts->{permsgstatus};
 
-  return 0 if $pms->{dcc_running};
+  # Check that rules are active
+  return 0 if !grep {$pms->{conf}->{scores}->{$_}}
+    @{$pms->{conf}->{eval_to_rule}->{check_dcc}};
+
+  # Launch async only if dccifd found
+  $self->find_dcc_home();
+  if ($self->is_dccifd_available()) {
+    $self->_launch_dcc($pms);
+  }
+}
+
+sub _launch_dcc {
+  my ($self, $pms) = @_;
+
+  return if $pms->{dcc_running};
   $pms->{dcc_running} = 1;
 
   my $timer = $self->{main}->time_method("check_dcc");
@@ -767,9 +762,18 @@ sub check_dcc {
   $pms->{tag_data}->{DCCR} = '';
   $pms->{tag_data}->{DCCREP} = '';
 
-  if ($$fulltext eq '') {
+  my $fulltext = $pms->{msg}->get_pristine();
+  if ($fulltext eq '') {
     dbg("dcc: empty message; skipping dcc check");
-    return 0;
+    $pms->{dcc_result} = 0;
+    $pms->{dcc_abort} = 1;
+    return;
+  }
+
+  if (!$self->get_dcc_interface()) {
+    $pms->{dcc_result} = 0;
+    $pms->{dcc_abort} = 1;
+    return;
   }
 
   if ($pms->get('ALL-TRUSTED') =~ /^(X-DCC-[^:]*?-Metrics: .*)$/m) {
@@ -782,85 +786,95 @@ sub check_dcc {
     #}
   }
 
-  $pms->{dcc_rulename} = $pms->get_current_eval_rule_name();
-
-  return 0 if !$self->get_dcc_interface();
-
   my $envelope = $pms->{relays_external}->[0];
+
   ($pms->{dcc_x_result}, $pms->{dcc_cksums}) =
-    $self->ask_dcc('dcc:', $pms, $fulltext, $envelope);
+    $self->ask_dcc('dcc:', $pms, \$fulltext, $envelope);
+
+  return;
+}
+
+sub check_dcc {
+  my ($self, $pms) = @_;
+
+  return 0 if $self->{dcc_disabled};
+  return 0 if !$pms->{conf}->{use_dcc};
+  return 0 if $pms->{dcc_abort};
+  return 0 if $pms->{dcc_async_start}; # async already handling?
+
+  return $pms->{dcc_result} if defined $pms->{dcc_result};
+
+  $self->_launch_dcc($pms);
+
   if (!defined $pms->{dcc_x_result}) {
-    $pms->{dcc_result} = 0;
-  } elsif ($pms->{dcc_x_result} eq 'async') {
-    return 0; # read result later
-  } else {
-    $pms->{dcc_result} =
-      $self->check_dcc_result($pms, $pms->{dcc_x_result});
+    $pms->{dcc_abort} = 1;
+    return 0;
   }
+
+  ($pms->{dcc_result}, $pms->{dcc_rep}) =
+    $self->check_dcc_result($pms, $pms->{dcc_x_result});
 
   return $pms->{dcc_result};
 }
 
 sub check_dcc_reputation_range {
-  my ($self, $pms, $fulltext, $min, $max, $rulename) = @_;
+  my ($self, $pms, undef, $min, $max, $cb_rulename) = @_;
 
   return 0 if $self->{dcc_disabled};
-  return 0 if !$self->{main}->{conf}->{use_dcc};
-  return 0 if !$self->{main}->{conf}->{use_dcc_rep};
+  return 0 if !$pms->{conf}->{use_dcc};
+  return 0 if !$pms->{conf}->{use_dcc_rep};
   return 0 if $pms->{dcc_abort};
 
-  # Check if callback (overrides rulename)
-  my $cb = defined $rulename;
-  if (!$cb) {
-    $rulename = $pms->get_current_eval_rule_name();
-    dbg("dcc: delaying check_dcc_reputation_range call for $rulename");
-    # array matches check_dcc_reputation_range() argument order
-    push @{$pms->{dcc_range_callbacks}}, [$fulltext, $min, $max, $rulename];
-    return 0;
-  }
+  my $timer = $self->{main}->time_method("check_dcc");
 
-  return 0 if !defined $pms->{dcc_x_result};
+  if (exists $pms->{dcc_rep}) {
+    my $result;
 
-  # this is called several times per message, so parse the X-DCC header once
-  if (!defined $pms->{dcc_rep}) {
-    my $dcc_rep;
-    if ($pms->{dcc_x_result} =~ /\brep=(\d+)/) {
-      $dcc_rep = $1+0;
-      $pms->set_tag('DCCREP', $dcc_rep);
+    # Process result
+    if ($pms->{dcc_rep} < 0) {
+      # Not used or missing reputation
+      $result = 0;
     } else {
-      $dcc_rep = -1;
+      # cover the entire range of reputations if not told otherwise
+      $min = 0   if !defined $min;
+      $max = 100 if !defined $max;
+      $result = $pms->{dcc_rep} >= $min && $pms->{dcc_rep} <= $max ? 1 : 0;
+      dbg("dcc: dcc_rep %s, min %s, max %s => result=%s",
+        $pms->{dcc_rep}, $min, $max, $result ? 'YES' : 'no');
     }
-    $pms->{dcc_rep} = $dcc_rep;
-  }
 
-  # no X-DCC header or no reputation in the X-DCC header, perhaps for lack
-  # of data in the DCC Reputation server
-  return 0 if $pms->{dcc_rep} < 0;
-
-  # cover the entire range of reputations if not told otherwise
-  $min = 0   if !defined $min;
-  $max = 100 if !defined $max;
-
-  my $result = $pms->{dcc_rep} >= $min && $pms->{dcc_rep} <= $max ? 1 : 0;
-  dbg("dcc: dcc_rep %s, min %s, max %s => result=%s",
-      $pms->{dcc_rep}, $min, $max, $result ? 'YES' : 'no');
-
-  if ($cb) {
-    # Callback needs to got_hit()
-    if ($result) {
-      $pms->got_hit($rulename, "", ruletype => 'eval');
+    if (defined $cb_rulename) {
+      # If callback, use got_hit()
+      if ($result) {
+        $pms->got_hit($cb_rulename, "", ruletype => 'eval');
+      }
+      return 0;
+    } else {
+      return $result;
     }
   } else {
-    return $result;
+    # Install callback if waiting for async result
+    if (!defined $cb_rulename) {
+      my $rulename = $pms->get_current_eval_rule_name();
+      # array matches check_dcc_reputation_range() argument order
+      push @{$pms->{dcc_range_callbacks}}, [undef, $min, $max, $rulename];
+    }
   }
+
+  return 0;
 }
 
 sub check_dcc_result {
   my ($self, $pms, $x_dcc) = @_;
 
-  return 0 if !defined $x_dcc || $x_dcc eq '';
+  my $dcc_result = 0;
+  my $dcc_rep = -1;
 
-  my $conf = $pms->{main}->{conf};
+  if (!defined $x_dcc || $x_dcc eq '') {
+    return ($dcc_result, $dcc_rep);
+  }
+
+  my $conf = $pms->{conf};
 
   if ($x_dcc =~ /^X-DCC-([^:]*?)-Metrics: (.*)$/) {
     $pms->set_tag('DCCB', $1);
@@ -879,8 +893,10 @@ sub check_dcc_result {
   if ($x_dcc =~ /\bFuz2=(\d+)/) {
     $count{fuz2} = $1+0;
   }
-  if ($x_dcc =~ /\brep=(\d+)/) {
+  if ($pms->{conf}->{use_dcc_rep} && $x_dcc =~ /\brep=(\d+)/) {
     $count{rep}  = $1+0;
+    $dcc_rep = $count{rep};
+    $pms->set_tag('DCCREP', $dcc_rep);
   }
   if ($count{body} >= $conf->{dcc_body_max} ||
       $count{fuz1} >= $conf->{dcc_fuz1_max} ||
@@ -894,9 +910,10 @@ sub check_dcc_result {
 		  $count{fuz2}, $conf->{dcc_fuz2_max},
 		  $count{rep},  $conf->{dcc_rep_percent})
 		));
-    return 1;
+    $dcc_result = 1;
   }
-  return 0;
+
+  return ($dcc_result, $dcc_rep);
 }
 
 # get the X-DCC header line and save the checksums from dccifd or dccproc
@@ -930,7 +947,7 @@ sub parse_dcc_response {
 sub ask_dcc {
   my ($self, $tag, $pms, $fulltext, $envelope) = @_;
 
-  my $conf = $self->{main}->{conf};
+  my $conf = $pms->{conf};
   my $timeout = $conf->{dcc_timeout};
 
   if ($self->is_dccifd_available()) {
