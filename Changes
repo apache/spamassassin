@@ -1,4 +1,520 @@
 ------------------------------------------------------------------------
+r1866128 | hege | 2019-08-30 07:49:30 +0000 (Fri, 30 Aug 2019) | 2 lines
+ 
+ Bug 7747 - Limit checked mime parts
+ 
+------------------------------------------------------------------------
+r1865616 | hege | 2019-08-21 10:53:07 +0000 (Wed, 21 Aug 2019) | 2 lines
+ 
+ Skip more misparsed uri garbage
+ 
+------------------------------------------------------------------------
+r1865612 | hege | 2019-08-21 09:19:39 +0000 (Wed, 21 Aug 2019) | 2 lines
+ 
+ Improve schemeless uri parser start boundary
+ 
+------------------------------------------------------------------------
+r1865609 | hege | 2019-08-21 08:40:41 +0000 (Wed, 21 Aug 2019) | 2 lines
+ 
+ Make uri parser find longer uris (up to 2k) which are common these days
+ 
+------------------------------------------------------------------------
+r1865409 | hege | 2019-08-19 04:19:58 +0000 (Mon, 19 Aug 2019) | 2 lines
+ 
+ DNS name max length is actually 253 chars. Quote % for uniformity.
+ 
+------------------------------------------------------------------------
+r1865107 | hege | 2019-08-14 11:35:47 +0000 (Wed, 14 Aug 2019) | 2 lines
+ 
+ More uri email parser tweaks
+ 
+------------------------------------------------------------------------
+r1865102 | hege | 2019-08-14 09:37:00 +0000 (Wed, 14 Aug 2019) | 2 lines
+ 
+ Commit all uri parser changes from trunk to 3.4
+ 
+------------------------------------------------------------------------
+r1865095 | hege | 2019-08-14 08:34:58 +0000 (Wed, 14 Aug 2019) | 2 lines
+ 
+ More email uri parser tweaks
+ 
+------------------------------------------------------------------------
+r1865086 | hege | 2019-08-14 05:17:00 +0000 (Wed, 14 Aug 2019) | 2 lines
+ 
+ Update html render docs
+ 
+------------------------------------------------------------------------
+r1865051 | hege | 2019-08-13 17:09:47 +0000 (Tue, 13 Aug 2019) | 2 lines
+ 
+ More uri parser cleanups
+ 
+------------------------------------------------------------------------
+r1865044 | hege | 2019-08-13 13:54:37 +0000 (Tue, 13 Aug 2019) | 2 lines
+ 
+ Remove accidental /g
+ 
+------------------------------------------------------------------------
+r1865043 | hege | 2019-08-13 13:53:12 +0000 (Tue, 13 Aug 2019) | 2 lines
+ 
+ Strip common schemeless skype: email: prefixes from mails
+ 
+------------------------------------------------------------------------
+r1865041 | gbechis | 2019-08-13 13:41:52 +0000 (Tue, 13 Aug 2019) | 2 
+lines
+ 
+ improve debug message
+ 
+------------------------------------------------------------------------
+r1865039 | hege | 2019-08-13 13:15:38 +0000 (Tue, 13 Aug 2019) | 2 lines
+ 
+ Schemeless uri parser improvements
+ 
+------------------------------------------------------------------------
+r1865030 | hege | 2019-08-13 11:58:14 +0000 (Tue, 13 Aug 2019) | 2 lines
+ 
+ Further email parsing and canonicalizing fixes
+ 
+------------------------------------------------------------------------
+r1865025 | hege | 2019-08-13 11:09:53 +0000 (Tue, 13 Aug 2019) | 2 lines
+ 
+ Ignore schemeless emails without valid tld
+ 
+------------------------------------------------------------------------
+r1865018 | hege | 2019-08-13 09:10:33 +0000 (Tue, 13 Aug 2019) | 2 lines
+ 
+ Ignore empty uris from stripped body
+ 
+------------------------------------------------------------------------
+r1865015 | hege | 2019-08-13 08:31:18 +0000 (Tue, 13 Aug 2019) | 2 lines
+ 
+ Skip invalid cid: "emails" in schemeless parser
+ 
+------------------------------------------------------------------------
+r1864941 | hege | 2019-08-12 07:30:28 +0000 (Mon, 12 Aug 2019) | 2 lines
+ 
+ Fix duplicate supressor logic to escape duplicated message properly
+ 
+------------------------------------------------------------------------
+r1864890 | hege | 2019-08-10 16:45:56 +0000 (Sat, 10 Aug 2019) | 2 lines
+ 
+ Let URIDNSBL set URIDOMAINS/URIHOSTS tag even if empty
+ 
+------------------------------------------------------------------------
+r1864886 | hege | 2019-08-10 16:08:10 +0000 (Sat, 10 Aug 2019) | 2 lines
+ 
+ Fail more gracefully if missing Net::CIDR::Lite
+ 
+------------------------------------------------------------------------
+r1864880 | hege | 2019-08-10 15:48:37 +0000 (Sat, 10 Aug 2019) | 2 lines
+ 
+ Don't load OLEMacro, floods unnecessary warnings if Archive::Zip not 
+installed..
+ 
+------------------------------------------------------------------------
+r1864877 | hege | 2019-08-10 15:20:39 +0000 (Sat, 10 Aug 2019) | 2 lines
+ 
+ Bug 7729 - body rules to match body only, not including the Subject (new 
+tflag nosubject)
+ 
+------------------------------------------------------------------------
+r1864875 | hege | 2019-08-10 13:22:28 +0000 (Sat, 10 Aug 2019) | 2 lines
+ 
+ Improve logic in tflags multiple
+ 
+------------------------------------------------------------------------
+r1864870 | hege | 2019-08-10 10:54:28 +0000 (Sat, 10 Aug 2019) | 2 lines
+ 
+ Use fixed string for Message::get_pristine(), save lots of memory
+ 
+------------------------------------------------------------------------
+r1864819 | hege | 2019-08-09 15:43:02 +0000 (Fri, 09 Aug 2019) | 2 lines
+ 
+ Fix some tests, test more non-default modules too
+ 
+------------------------------------------------------------------------
+r1864805 | hege | 2019-08-09 13:57:25 +0000 (Fri, 09 Aug 2019) | 2 lines
+ 
+ More Bug 7740 fixes
+ 
+------------------------------------------------------------------------
+r1864760 | hege | 2019-08-09 05:55:28 +0000 (Fri, 09 Aug 2019) | 2 lines
+ 
+ Fix phishing test
+ 
+------------------------------------------------------------------------
+r1864730 | hege | 2019-08-08 19:34:39 +0000 (Thu, 08 Aug 2019) | 2 lines
+ 
+ Fix html tests from bug 7743 changes
+ 
+------------------------------------------------------------------------
+r1864713 | hege | 2019-08-08 15:14:13 +0000 (Thu, 08 Aug 2019) | 2 lines
+ 
+ Update comments too..
+ 
+------------------------------------------------------------------------
+r1864712 | hege | 2019-08-08 15:12:20 +0000 (Thu, 08 Aug 2019) | 2 lines
+ 
+ Bug 7743 - Remove legacy HTML parsing
+ 
+------------------------------------------------------------------------
+r1864686 | hege | 2019-08-08 08:11:36 +0000 (Thu, 08 Aug 2019) | 2 lines
+ 
+ Bug 7670 - Documentation about rawbody rules should be changed
+ 
+------------------------------------------------------------------------
+r1864685 | hege | 2019-08-08 07:28:25 +0000 (Thu, 08 Aug 2019) | 2 lines
+ 
+ TMPDIR fix from trunk
+ 
+------------------------------------------------------------------------
+r1864621 | hege | 2019-08-07 13:24:20 +0000 (Wed, 07 Aug 2019) | 2 lines
+ 
+ Cleanup body_part_scan_size, split_into_array_of_short_paragraphs, chunk 
+size handling. Rawbody splitting did not even work properly previously, 
+sometimes outputting huge parts. Added new t/body_str.t test for splits.
+ 
+------------------------------------------------------------------------
+r1864595 | hege | 2019-08-07 06:03:44 +0000 (Wed, 07 Aug 2019) | 2 lines
+ 
+ Optimize split_into_array_of_short_paragraphs
+ 
+------------------------------------------------------------------------
+r1864510 | hege | 2019-08-06 11:24:29 +0000 (Tue, 06 Aug 2019) | 2 lines
+ 
+ Sigh, final fix, finish_parsing_end does not have $pms..
+ 
+------------------------------------------------------------------------
+r1864489 | hege | 2019-08-06 10:09:01 +0000 (Tue, 06 Aug 2019) | 2 lines
+ 
+ Fix some dns availability checks
+ 
+------------------------------------------------------------------------
+r1864461 | hege | 2019-08-06 06:44:42 +0000 (Tue, 06 Aug 2019) | 2 lines
+ 
+ Sync FreeMail from trunk
+ 
+------------------------------------------------------------------------
+r1864424 | hege | 2019-08-05 09:26:17 +0000 (Mon, 05 Aug 2019) | 2 lines
+ 
+ Add some unicode dot normalizations to uri_list_canonicalize
+ 
+------------------------------------------------------------------------
+r1864418 | hege | 2019-08-05 08:28:40 +0000 (Mon, 05 Aug 2019) | 2 lines
+ 
+ Set User-Agent for wget/curl/fetch
+ 
+------------------------------------------------------------------------
+r1864417 | hege | 2019-08-05 07:37:08 +0000 (Mon, 05 Aug 2019) | 2 lines
+ 
+ Rollback Bug 6802, was buggy and needs some more throught
+ 
+------------------------------------------------------------------------
+r1864416 | hege | 2019-08-05 06:47:21 +0000 (Mon, 05 Aug 2019) | 2 lines
+ 
+ 5% overall speedup from Check.pm regex //o, add IS_RULENAME constant
+ 
+------------------------------------------------------------------------
+r1864377 | hege | 2019-08-04 11:43:10 +0000 (Sun, 04 Aug 2019) | 2 lines
+ 
+ Better logging of charset decoding warnings, Bug 7520 related
+ 
+------------------------------------------------------------------------
+r1864341 | hege | 2019-08-03 15:08:46 +0000 (Sat, 03 Aug 2019) | 2 lines
+ 
+ Bug 7039 - sa-compile notes inability to write in home dir even though 
+it successfully uses a /tmp dir
+ 
+------------------------------------------------------------------------
+r1864340 | hege | 2019-08-03 14:40:38 +0000 (Sat, 03 Aug 2019) | 2 lines
+ 
+ Fix _URIDOMAINS_ duplicates (Bug 6966)
+ 
+------------------------------------------------------------------------
+r1864337 | hege | 2019-08-03 14:10:07 +0000 (Sat, 03 Aug 2019) | 2 lines
+ 
+ Remove hashbl sha256 support, since DNS can't hand 64 character label, 
+duh..
+ 
+------------------------------------------------------------------------
+r1864336 | hege | 2019-08-03 13:55:00 +0000 (Sat, 03 Aug 2019) | 12 lines
+ 
+ 3.4 & trunk:
+ - new Util::is_fqdn_valid() function to validate hostname (DNS name) 
+format (Bug 7736).  To check if a name contains valid TLD, it's still 
+needed to additionally use RegistryBoundaries::is_domain_valid().
+ - uri_list_canonicalize fixes: fragments, logins, ports (strip :80 
+:443), firefox like canon http://foobar -> http://www.foobar.com (Bug 
+6596)
+ - reduce DNS errors from warn to info
+ 
+ trunk only:
+ - new $pms->add_uri_detail_list function
+ - improve get_uri_detail_list, documentation
+ - new uri_detail_list types: unlinked, schemeless
+ - split_domain, trim_domain, is_domain_valid: new $is_ascii arg skips 
+idn_to_ascii() conversion to save redundant calls
+ - improve get() :host :domain
+ 
+------------------------------------------------------------------------
+r1864328 | hege | 2019-08-03 12:17:37 +0000 (Sat, 03 Aug 2019) | 2 lines
+ 
+ Fix dkim test
+ 
+------------------------------------------------------------------------
+r1864157 | hege | 2019-08-01 14:54:18 +0000 (Thu, 01 Aug 2019) | 2 lines
+ 
+ Some uri parser enhancements/fixes
+ 
+------------------------------------------------------------------------
+r1864152 | hege | 2019-08-01 13:01:43 +0000 (Thu, 01 Aug 2019) | 2 lines
+ 
+ Don't croak on empty selector
+ 
+------------------------------------------------------------------------
+r1864149 | hege | 2019-08-01 12:28:38 +0000 (Thu, 01 Aug 2019) | 2 lines
+ 
+ Bug 5971 - M:SA:Conf::get_rule_value('rbl_evals') tries to coerce array 
+to hash
+ 
+------------------------------------------------------------------------
+r1864140 | hege | 2019-08-01 11:15:10 +0000 (Thu, 01 Aug 2019) | 2 lines
+ 
+ Recommend Redis for Bayes
+ 
+------------------------------------------------------------------------
+r1864132 | hege | 2019-08-01 08:33:48 +0000 (Thu, 01 Aug 2019) | 2 lines
+ 
+ Bug 6030 - whitelist_bounce_relays documentation enhancement
+ 
+------------------------------------------------------------------------
+r1864120 | gbechis | 2019-08-01 07:45:09 +0000 (Thu, 01 Aug 2019) | 2 
+lines
+ 
+ fix sought body rules generation
+ 
+------------------------------------------------------------------------
+r1864044 | hege | 2019-07-31 11:11:02 +0000 (Wed, 31 Jul 2019) | 2 lines
+ 
+ Fix ignoring @@ in mailto
+ 
+------------------------------------------------------------------------
+r1864043 | hege | 2019-07-31 10:43:49 +0000 (Wed, 31 Jul 2019) | 2 lines
+ 
+ uri_to_domain - ignore cid:, fix mailto: parameter handling
+ 
+------------------------------------------------------------------------
+r1864032 | hege | 2019-07-31 05:04:11 +0000 (Wed, 31 Jul 2019) | 2 lines
+ 
+ Bug 6233 - What values are valid/recommended for SYMBOLIC_TEST_NAME?
+ 
+------------------------------------------------------------------------
+r1864015 | hege | 2019-07-30 17:46:25 +0000 (Tue, 30 Jul 2019) | 2 lines
+ 
+ Bug 5619 - auto-generated spamassassin(1) man page repetition
+ 
+------------------------------------------------------------------------
+r1864014 | hege | 2019-07-30 17:15:34 +0000 (Tue, 30 Jul 2019) | 2 lines
+ 
+ Bug 7383 - auto_whitelist_path from config not used
+ 
+------------------------------------------------------------------------
+r1863985 | hege | 2019-07-30 10:10:16 +0000 (Tue, 30 Jul 2019) | 2 lines
+ 
+ Fix timers when running spamassassin against a folder of files
+ 
+------------------------------------------------------------------------
+r1863981 | hege | 2019-07-30 07:50:22 +0000 (Tue, 30 Jul 2019) | 2 lines
+ 
+ Bug 5620 - missing item and raw HTML on man pages
+ 
+------------------------------------------------------------------------
+r1863980 | hege | 2019-07-30 07:28:04 +0000 (Tue, 30 Jul 2019) | 2 lines
+ 
+ Update TextCat documentation a bit
+ 
+------------------------------------------------------------------------
+r1863788 | hege | 2019-07-26 09:20:57 +0000 (Fri, 26 Jul 2019) | 2 lines
+ 
+ Bug 6802 - force regex ascii semantics
+ 
+------------------------------------------------------------------------
+r1863776 | hege | 2019-07-26 07:27:39 +0000 (Fri, 26 Jul 2019) | 2 lines
+ 
+ Bug 7741 - Support City database now properly
+ 
+------------------------------------------------------------------------
+r1863742 | hege | 2019-07-25 15:56:36 +0000 (Thu, 25 Jul 2019) | 2 lines
+ 
+ Revert Bug 7741
+ 
+------------------------------------------------------------------------
+r1863531 | hege | 2019-07-21 17:12:07 +0000 (Sun, 21 Jul 2019) | 2 lines
+ 
+ Check for GeoIP2 City.mmdb also
+ 
+------------------------------------------------------------------------
+r1863527 | hege | 2019-07-21 15:49:38 +0000 (Sun, 21 Jul 2019) | 2 lines
+ 
+ Simplify settings tags a bit
+ 
+------------------------------------------------------------------------
+r1863526 | hege | 2019-07-21 15:08:35 +0000 (Sun, 21 Jul 2019) | 2 lines
+ 
+ Bug 7741 - Invalid database type 0 error when enabling URILocalBL
+ 
+------------------------------------------------------------------------
+r1863525 | hege | 2019-07-21 13:53:39 +0000 (Sun, 21 Jul 2019) | 2 lines
+ 
+ Missed on regex fix, also clarify documentation about case-insensitivity
+ 
+------------------------------------------------------------------------
+r1863524 | hege | 2019-07-21 13:48:27 +0000 (Sun, 21 Jul 2019) | 2 lines
+ 
+ Bug 7740 - Cannot set OLEMacro regex options, and other small regex 
+cleanups
+ 
+------------------------------------------------------------------------
+r1862889 | hege | 2019-07-10 17:10:34 +0000 (Wed, 10 Jul 2019) | 2 lines
+ 
+ HTML_FONT_FACE_BAD fixes from Bug 5956, 7312
+ 
+------------------------------------------------------------------------
+r1862748 | hege | 2019-07-08 13:32:37 +0000 (Mon, 08 Jul 2019) | 2 lines
+ 
+ Add Bug 7725 fix to AskDNS too
+ 
+------------------------------------------------------------------------
+r1862718 | hege | 2019-07-08 07:30:39 +0000 (Mon, 08 Jul 2019) | 2 lines
+ 
+ Add some has_* features just in case
+ 
+------------------------------------------------------------------------
+r1862690 | hege | 2019-07-07 11:25:00 +0000 (Sun, 07 Jul 2019) | 2 lines
+ 
+ Add HashBL changes
+ 
+------------------------------------------------------------------------
+r1862689 | hege | 2019-07-07 11:12:36 +0000 (Sun, 07 Jul 2019) | 2 lines
+ 
+ Clarify documentation
+ 
+------------------------------------------------------------------------
+r1862686 | hege | 2019-07-07 10:53:50 +0000 (Sun, 07 Jul 2019) | 2 lines
+ 
+ Add missing register_async_rule_finish
+ 
+------------------------------------------------------------------------
+r1862685 | hege | 2019-07-07 10:50:05 +0000 (Sun, 07 Jul 2019) | 2 lines
+ 
+ Sync with trunk version (check_hashbl_uris, hashbl_ignore), use 
+compile_regexp, fix max=x truncating, logging cleanup
+ 
+------------------------------------------------------------------------
+r1862683 | hege | 2019-07-07 09:44:35 +0000 (Sun, 07 Jul 2019) | 2 lines
+ 
+ Few more parameter whitespace fixes
+ 
+------------------------------------------------------------------------
+r1862682 | hege | 2019-07-07 09:34:49 +0000 (Sun, 07 Jul 2019) | 2 lines
+ 
+ Few more parameter whitespace fixes
+ 
+------------------------------------------------------------------------
+r1862681 | hege | 2019-07-07 09:31:49 +0000 (Sun, 07 Jul 2019) | 2 lines
+ 
+ Tighten up addrlist parameter checks
+ 
+------------------------------------------------------------------------
+r1862678 | hege | 2019-07-07 08:13:38 +0000 (Sun, 07 Jul 2019) | 2 lines
+ 
+ Fix regex case sensitive
+ 
+------------------------------------------------------------------------
+r1862625 | gbechis | 2019-07-05 17:40:10 +0000 (Fri, 05 Jul 2019) | 2 
+lines
+ 
+ sync dependencies check with reality
+ 
+------------------------------------------------------------------------
+r1862624 | gbechis | 2019-07-05 17:26:47 +0000 (Fri, 05 Jul 2019) | 3 
+lines
+ 
+ Add OLEMacro plugin to 3.4.3 and rename rules/v*.pre
+ accordingly
+ 
+------------------------------------------------------------------------
+r1862622 | hege | 2019-07-05 16:33:55 +0000 (Fri, 05 Jul 2019) | 2 lines
+ 
+ Small X-Relay-Countries-Auth documentation add
+ 
+------------------------------------------------------------------------
+r1862620 | hege | 2019-07-05 15:08:59 +0000 (Fri, 05 Jul 2019) | 2 lines
+ 
+ More Bug 7731 tweaks, rename MUA to X-Relay-Countries-Auth
+ 
+------------------------------------------------------------------------
+r1862608 | hege | 2019-07-05 12:07:13 +0000 (Fri, 05 Jul 2019) | 2 lines
+ 
+ Fix handling when geoip not loaded
+ 
+------------------------------------------------------------------------
+r1862607 | hege | 2019-07-05 12:00:21 +0000 (Fri, 05 Jul 2019) | 2 lines
+ 
+ Bug 7731 - Add external and msa metadata to RelayCountry
+ 
+------------------------------------------------------------------------
+r1862111 | hege | 2019-06-26 08:49:22 +0000 (Wed, 26 Jun 2019) | 2 lines
+ 
+ Bug 5639 - document multiple header matching better
+ 
+------------------------------------------------------------------------
+r1862107 | hege | 2019-06-26 08:05:59 +0000 (Wed, 26 Jun 2019) | 2 lines
+ 
+ Remove use bytes from mass-check (Bug 7613)
+ 
+------------------------------------------------------------------------
+r1862103 | hege | 2019-06-26 06:53:33 +0000 (Wed, 26 Jun 2019) | 2 lines
+ 
+ Fix previous commit logic..
+ 
+------------------------------------------------------------------------
+r1862102 | hege | 2019-06-26 06:49:51 +0000 (Wed, 26 Jun 2019) | 2 lines
+ 
+ Handle SHA signatures a bit more carefully
+ 
+------------------------------------------------------------------------
+r1862101 | gbechis | 2019-06-26 06:27:31 +0000 (Wed, 26 Jun 2019) | 3 
+lines
+ 
+ skip regression test if sudo(8) is not installed
+ fix bz #6665
+ 
+------------------------------------------------------------------------
+r1862057 | hege | 2019-06-25 12:51:45 +0000 (Tue, 25 Jun 2019) | 2 lines
+ 
+ Also parse image/jpg (commonly used even if not standard)
+ 
+------------------------------------------------------------------------
+r1862009 | hege | 2019-06-24 14:46:44 +0000 (Mon, 24 Jun 2019) | 2 lines
+ 
+ Bug 6582: Implement body_part_scan_size / rawbody_part_scan_size limits
+ 
+------------------------------------------------------------------------
+r1861977 | hege | 2019-06-24 06:32:24 +0000 (Mon, 24 Jun 2019) | 2 lines
+ 
+ Fix 20_saw_ampersand.t
+ 
+------------------------------------------------------------------------
+r1861976 | hege | 2019-06-24 06:24:57 +0000 (Mon, 24 Jun 2019) | 2 lines
+ 
+ Fix 20_saw_ampersand.t
+ 
+------------------------------------------------------------------------
+r1861961 | kmcgrail | 2019-06-24 00:34:10 +0000 (Mon, 24 Jun 2019) | 1 
+line
+ 
+ preparing to release 3.4.3-rc3
+------------------------------------------------------------------------
 r1861944 | hege | 2019-06-23 18:24:45 +0000 (Sun, 23 Jun 2019) | 2 lines
  
  Update skipped files
