@@ -57,9 +57,9 @@ sub new {
   bless ($self, $class);
 
   $self->set_config($samain->{conf});
-  # make sure we run last (or close) of the finish_parsing_start since
+  # make sure we run last (or close) of the finish_parsing_end since
   # we need all other rules to be defined
-  $self->register_method_priority("finish_parsing_start", 100);
+  $self->register_method_priority("finish_parsing_end", 100);
   return $self;
 }
 
@@ -104,12 +104,18 @@ sub set_config {
   $conf->{parser}->register_commands(\@cmds);
 }
 
-sub finish_parsing_start {
+sub finish_parsing_end {
   my ($self, $opts) = @_;
 
   my $conf = $opts->{conf};
+  my $tflags = $conf->{tflags};
 
-  dbg("reuse: finish_parsing_start called");
+  while (my($rulename,$tfl) = each %{$tflags}) {
+    if ($tfl =~ /\bnet\b/ && !exists $conf->{reuse_tests}->{$rulename}) {
+      dbg("reuse: forcing reuse of net rule $rulename");
+      push @{$conf->{reuse_tests}->{$rulename}}, $rulename;
+    }
+  }
 
   return 0 if (!exists $conf->{reuse_tests});
 
@@ -132,7 +138,7 @@ sub finish_parsing_start {
     }
     if (!exists $conf->{scores}->{$rule_name}) {
       my $set_score = ($rule_name =~/^T_/) ? 0.01 : 1.0;
-      $set_score = -$set_score if ( ($conf->{tflags}->{$rule_name}||'') =~ /\bnice\b/ );
+      $set_score = -$set_score if ( ($tflags->{$rule_name}||'') =~ /\bnice\b/ );
       foreach my $ss (0..3) {
         $conf->{scoreset}->[$ss]->{$rule_name} = $set_score;
       }
@@ -140,7 +146,7 @@ sub finish_parsing_start {
 
     # Figure out when to add any hits -- grab priority and "stage"
     my $priority = $conf->{priority}->{$rule_name} || 0;
-    my $stage = $self->_get_stage_from_rule($opts->{conf}, $rule_name);
+    my $stage = $self->_get_stage_from_rule($conf, $rule_name);
     $conf->{reuse_tests_order}->{$rule_name} = [ $priority, $stage ];
 
   }
@@ -150,8 +156,10 @@ sub check_start {
   my ($self, $opts) = @_;
 
   my $pms = $opts->{permsgstatus};
+  my $conf = $pms->{conf};
+  my $scoreset = $conf->{scoreset};
 
-  return 0 if $pms->{conf}->{run_reuse_tests_only};
+  return 0 if $conf->{run_reuse_tests_only};
 
   # Can we reuse?
   my $msg = $pms->get_message();
@@ -164,18 +172,18 @@ sub check_start {
 
   # now go through the rules and priorities and figure out which ones
   # need to be disabled
-  foreach my $rule (keys %{$pms->{conf}->{reuse_tests}}) {
+  foreach my $rule (keys %{$conf->{reuse_tests}}) {
 
-    my ($priority, $stage) = @{$pms->{conf}->{reuse_tests_order}->{$rule}};
+    my ($priority, $stage) = @{$conf->{reuse_tests_order}->{$rule}};
 
     # score set could change after check_start but before we add hits,
     # so we need to disable the rule in all sets
     my @dis;
     foreach my $ss (0..3) {
-      if (exists $pms->{conf}->{scoreset}->[$ss]->{$rule}) {
+      if (exists $scoreset->[$ss]->{$rule}) {
         $pms->{reuse_old_scores}->{$rule}->[$ss] =
-          $pms->{conf}->{scoreset}->[$ss]->{$rule};
-        $pms->{conf}->{scoreset}->[$ss]->{$rule} = 0;
+          $scoreset->[$ss]->{$rule};
+        $scoreset->[$ss]->{$rule} = 0;
         push @dis, $ss;
       }
     }
@@ -183,7 +191,7 @@ sub check_start {
       join(',', @dis)) if @dis;
 
     # now, check for hits
-    foreach my $old_test (@{$pms->{conf}->{reuse_tests}->{$rule}}) {
+    foreach my $old_test (@{$conf->{reuse_tests}->{$rule}}) {
       if ($old_hash->{$old_test}) {
         push @{$pms->{reuse_hits_to_add}->{"$priority $stage"}}, $rule;
         dbg("reuse: rule $rule hit, will add at priority $priority, stage " .
@@ -198,13 +206,15 @@ sub check_end {
   my ($self, $opts) = @_;
 
   my $pms = $opts->{permsgstatus};
+  my $conf = $pms->{conf};
+  my $scoreset = $conf->{scoreset};
 
-  return 0 if $pms->{conf}->{run_reuse_tests_only};
+  return 0 if $conf->{run_reuse_tests_only};
 
   foreach my $disabled_rule (keys %{$pms->{reuse_old_scores}}) {
     foreach my $ss (0..3) {
-      next unless exists $pms->{conf}->{scoreset}->[$ss]->{$disabled_rule};
-      $pms->{conf}->{scoreset}->[$ss]->{$disabled_rule} =
+      next unless exists $scoreset->[$ss]->{$disabled_rule};
+      $scoreset->[$ss]->{$disabled_rule} =
         $pms->{reuse_old_scores}->{$disabled_rule}->[$ss];
     }
   }
