@@ -63,7 +63,7 @@ my %log_level = (
 our %LOG_SA;
 our $LOG_ENTERED;  # to avoid recursion on die or warn from within logging
 # duplicate message line suppressor
-our $LOG_DUPMIN = 3; # only start suppressing after x duplicate lines
+our $LOG_DUPMIN = 10; # only start suppressing after x duplicate lines
 our $LOG_DUPLINE = ''; # remembers last log line
 our $LOG_DUPLEVEL = ''; # remembers last log level
 our $LOG_DUPTIME; # remembers last log line timestamp
