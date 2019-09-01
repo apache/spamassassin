@@ -2858,4 +2858,7 @@ if can(Mail::SpamAssassin::Conf::feature_bug6558_free)
 endif
 
 
+# test rule suggested by list discussion
+meta       __NORDNS_SPOOFED            __RDNS_NONE && !__NOT_SPOOFED
+
 
