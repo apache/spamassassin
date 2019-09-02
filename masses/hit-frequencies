@@ -23,7 +23,6 @@ use warnings;
 use FindBin;
 use Getopt::Long qw(:config bundling auto_help);
 use Pod::Usage;
-use POSIX;
 
 our (
   $opt_c, $opt_s, $opt_f, $opt_a, $opt_p, $opt_x, $opt_m, $opt_t, $opt_M,
@@ -956,9 +955,9 @@ sub _hmap_to_overlap_ratio {
   my $a2 = unpack("%32b*", $hmap2);
   my $a1_and_a2 = unpack("%32b*", ($hmap1 & $hmap2));
 
-  # use ceil() so that <= 0.999% is not reported as "no overlap"
-  my $a1_in_a2 = ceil (($a1_and_a2 / ($a2 || 0.0001))*100);
-  my $a2_in_a1 = ceil (($a1_and_a2 / ($a1 || 0.0001))*100);
+  # round rather than truncate
+  my $a1_in_a2 = int ((($a1_and_a2 / ($a2 || 0.0001))*100) + 0.50);
+  my $a2_in_a1 = int ((($a1_and_a2 / ($a1 || 0.0001))*100) + 0.50);
 
   return ($a1_in_a2, $a2_in_a1);
 }
