@@ -740,6 +740,10 @@ describe SHORT_SHORTNER Short body with little more than a link to a shortener
 score    SHORT_SHORTNER 2.0 # limit
 reuse    SHORT_SHORTNER
 
+meta     TONOM_EQ_TOLOC_SHRT_SHRTNER __PDS_URISHORTENER && __PDS_TONAME_EQ_TOLOCAL && __KAM_BODY_LENGTH_LT_1024
+describe TONOM_EQ_TOLOC_SHRT_SHRTNER Short email with shortener and To:name eq To:local
+score    TONOM_EQ_TOLOC_SHRT_SHRTNER 1.5 # limit
+reuse    TONOM_EQ_TOLOC_SHRT_SHRTNER
 
 endif
 endif
