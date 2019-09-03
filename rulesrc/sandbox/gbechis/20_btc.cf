@@ -1,9 +1,11 @@
+# I hereby give permission for any other committer to change rules in this file
+# see pds/20_btc.cf for other BTC rules
+
 body     __COPY_PASTE_DE      /Kopieren Sie es und f(?:\xfc|\xc3\xbc)gen Sie es ein/i
 meta     __GB_BITCOIN_CP_DE   ( __BITCOIN_ID && !__URL_BTC_ID && __COPY_PASTE_DE )
 describe __GB_BITCOIN_CP_DE   German Bitcoin scam
 
-# rule in pds/20_btc.cf
-# body     __COPY_PASTE_FR      /le copier et le coller/i
+body     __COPY_PASTE_FR      /le copier et le coller/i
 meta     __GB_BITCOIN_CP_FR   ( __BITCOIN_ID && !__URL_BTC_ID && __COPY_PASTE_FR )
 describe __GB_BITCOIN_CP_FR   French Bitcoin scam
 
@@ -19,8 +21,7 @@ body     __COPY_PASTE_NL      /kopieer en plak het/i
 meta     __GB_BITCOIN_CP_NL   ( __BITCOIN_ID && !__URL_BTC_ID && __COPY_PASTE_NL )
 describe __GB_BITCOIN_CP_NL   Dutch Bitcoin scam
 
-# rule in pds/20_btc.cf
-# body     __COPY_PASTE_SE      /kopiera den och klistra in/i
+body     __COPY_PASTE_SE      /kopiera den och klistra in/i
 meta     __GB_BITCOIN_CP_SE   ( __BITCOIN_ID && !__URL_BTC_ID && __COPY_PASTE_SE )
 describe __GB_BITCOIN_CP_SE   Swedish Bitcoin scam
 
