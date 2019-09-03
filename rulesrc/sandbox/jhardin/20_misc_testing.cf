@@ -2759,29 +2759,22 @@ header     __HDR_RCVD_EBAY             X-Spam-Relays-External =~ /rdns=\S+\.ebay
 uri        __URI_IMG_EBAY              m,://[^/?]+\.ebayimg\.com/,i
 
 meta       __EBAY_IMG_NOT_RCVD_EBAY    __URI_IMG_EBAY && !__HDR_RCVD_EBAY
-meta       EBAY_IMG_NOT_RCVD_EBAY      __EBAY_IMG_NOT_RCVD_EBAY && !__URI_MAILTO && !__RCD_RDNS_MAIL 
+meta       EBAY_IMG_NOT_RCVD_EBAY      __EBAY_IMG_NOT_RCVD_EBAY && !__URI_MAILTO && !__RCD_RDNS_MAIL && !__DKIM_EXISTS
 score      EBAY_IMG_NOT_RCVD_EBAY      3.000	# limit
 describe   EBAY_IMG_NOT_RCVD_EBAY      E-bay hosted image but message not from E-bay
 tflags     EBAY_IMG_NOT_RCVD_EBAY      publish
-
-#meta       __EBAY_IMG_DQ_UNSUB         __URI_IMG_EBAY && __URI_DQ_UNSUB
-#meta       __EBAY_IMG_DIRECT_MX        __URI_IMG_EBAY && __DOS_DIRECT_TO_MX
-
 
 header     __HDR_RCVD_AMAZON           X-Spam-Relays-External =~ /rdns=\S+\.amazon(?:ses)?\.com\s/
 uri        __URI_IMG_AMAZON            m,://[^/?]+\.(?:ssl-)?images-amazon\.com/,i
 
 meta       __AMAZON_IMG_NOT_RCVD_AMZN  __URI_IMG_AMAZON && !__HDR_RCVD_AMAZON
-meta       AMAZON_IMG_NOT_RCVD_AMZN    __AMAZON_IMG_NOT_RCVD_AMZN && !__HAS_ERRORS_TO && !__MSGID_LIST && !__MSGID_GUID && !__RCD_RDNS_SMTP 
+meta       AMAZON_IMG_NOT_RCVD_AMZN    __AMAZON_IMG_NOT_RCVD_AMZN && !__URI_DBL_DOM && !__RCD_RDNS_SMTP 
 score      AMAZON_IMG_NOT_RCVD_AMZN    2.500	# limit
 describe   AMAZON_IMG_NOT_RCVD_AMZN    Amazon hosted image but message not from Amazon
 tflags     AMAZON_IMG_NOT_RCVD_AMZN    publish
 
-#meta       __AMAZON_IMG_DQ_UNSUB       __URI_IMG_AMAZON && __URI_DQ_UNSUB
-#meta       __AMAZON_IMG_DIRECT_MX      __URI_IMG_AMAZON && __DOS_DIRECT_TO_MX
-
 header     __HDR_RCVD_ALIBABA          X-Spam-Relays-External =~ /rdns=\S+\.alibaba\.com\s/
-uri        __URI_IMG_ALICDN            m;//(?:[^/.]+\.)*alicdn\.com/.*\.(?:jpe?g|gif|png)$;i
+uri        __URI_IMG_ALICDN            m;//(?:[^/.]+\.)*alicdn\.com/.+\.(?:jpe?g|gif|png)$;i
 
 meta       __ALIBABA_IMG_NOT_RCVD_ALI  __URI_IMG_ALICDN && !__HDR_RCVD_ALIBABA
 meta       ALIBABA_IMG_NOT_RCVD_ALI    __ALIBABA_IMG_NOT_RCVD_ALI && !__YOUR_PASSWORD && !__UNSUB_LINK && !__RCD_RDNS_MAIL_MESSY
@@ -2793,29 +2786,45 @@ header     __HDR_RCVD_WALMART          X-Spam-Relays-External =~ /rdns=\S+\.walm
 uri        __URI_IMG_WALMART           m,://[^/?]+\.walmartimages\.com/,i
 
 meta       __WALMART_IMG_NOT_RCVD_WAL  __URI_IMG_WALMART && !__HDR_RCVD_WALMART
+meta       WALMART_IMG_NOT_RCVD_WAL    __WALMART_IMG_NOT_RCVD_WAL && !__DKIM_EXISTS
+score      WALMART_IMG_NOT_RCVD_WAL    2.500	# limit
+describe   WALMART_IMG_NOT_RCVD_WAL    Walmart hosted image but message not from Walmart
+tflags     WALMART_IMG_NOT_RCVD_WAL    publish
 
 header     __HDR_RCVD_NEWEGG           X-Spam-Relays-External =~ /rdns=\S+\.newegg\.com\s/
 uri        __URI_IMG_NEWEGG            m,://[^/?]+\.neweggimages\.com/,i
 
 meta       __NEWEGG_IMG_NOT_RCVD_NEGG  __URI_IMG_NEWEGG && !__HDR_RCVD_NEWEGG
+meta       NEWEGG_IMG_NOT_RCVD_NEGG    __NEWEGG_IMG_NOT_RCVD_NEGG
+score      NEWEGG_IMG_NOT_RCVD_NEGG    2.500	# limit
+describe   NEWEGG_IMG_NOT_RCVD_NEGG    Newegg hosted image but message not from Newegg
+tflags     NEWEGG_IMG_NOT_RCVD_NEGG    publish
 
-meta       __HOSTED_IMG_DQ_UNSUB       __URI_DQ_UNSUB && ( __URI_IMG_EBAY || __URI_IMG_AMAZON || __URI_IMG_ALICDN || __URI_IMG_WALMART || __URI_IMG_NEWEGG )
+header     __HDR_RCVD_SHOPIFY          X-Spam-Relays-External =~ /rdns=\S+\.shopify\.com\s/
+uri        __URI_IMG_SHOPIFY           m,://cdn\.shopify\.com/.+\.(?:jpe?g|gif|png),i
+
+meta       __SHOPIFY_IMG_NOT_RCVD_SFY  __URI_IMG_SHOPIFY && !__HDR_RCVD_SHOPIFY
+
+meta       __HOSTED_IMG_DQ_UNSUB       __URI_DQ_UNSUB && ( __URI_IMG_EBAY || __URI_IMG_AMAZON || __URI_IMG_ALICDN || __URI_IMG_WALMART || __URI_IMG_NEWEGG || __URI_IMG_SHOPIFY )
 meta       HOSTED_IMG_DQ_UNSUB         __HOSTED_IMG_DQ_UNSUB
 score      HOSTED_IMG_DQ_UNSUB         3.500	# limit
 describe   HOSTED_IMG_DQ_UNSUB         Image hosted at large ecomm site, IP addr unsub link
 tflags     HOSTED_IMG_DQ_UNSUB         publish
 
-meta       __HOSTED_IMG_DIRECT_MX      __DOS_DIRECT_TO_MX && ( __URI_IMG_EBAY || __URI_IMG_AMAZON || __URI_IMG_ALICDN  || __URI_IMG_WALMART || __URI_IMG_NEWEGG )
+meta       __HOSTED_IMG_DIRECT_MX      __DOS_DIRECT_TO_MX && ( __URI_IMG_EBAY || __URI_IMG_AMAZON || __URI_IMG_ALICDN  || __URI_IMG_WALMART || __URI_IMG_NEWEGG || __URI_IMG_SHOPIFY )
 meta       HOSTED_IMG_DIRECT_MX        __HOSTED_IMG_DIRECT_MX && !__DKIM_EXISTS 
 score      HOSTED_IMG_DIRECT_MX        3.500	# limit
 describe   HOSTED_IMG_DIRECT_MX        Image hosted at large ecomm site, message direct-to-mx
 tflags     HOSTED_IMG_DIRECT_MX        publish
 
-meta       __HOSTED_IMG_FREEM          ( FREEMAIL_REPLYTO || FREEMAIL_FROM ) && ( __URI_IMG_EBAY || __URI_IMG_AMAZON || __URI_IMG_ALICDN || __URI_IMG_WALMART || __URI_IMG_NEWEGG ) 
+meta       __HOSTED_IMG_FREEM          ( FREEMAIL_REPLYTO || FREEMAIL_FROM ) && ( __URI_IMG_EBAY || __URI_IMG_AMAZON || __URI_IMG_ALICDN || __URI_IMG_WALMART || __URI_IMG_NEWEGG || __URI_IMG_SHOPIFY ) 
 meta       HOSTED_IMG_FREEM            __HOSTED_IMG_FREEM && !__THREADED 
 score      HOSTED_IMG_FREEM            3.500	# limit
 describe   HOSTED_IMG_FREEM            Image hosted at large ecomm site, freemail from or reply-to
 tflags     HOSTED_IMG_FREEM            publish
+
+meta       __HOSTED_IMG_MULTI          ( __URI_IMG_EBAY + __URI_IMG_AMAZON + __URI_IMG_ALICDN + __URI_IMG_WALMART + __URI_IMG_NEWEGG + __URI_IMG_SHOPIFY ) > 1
+
 
 # WordPress "image accelerator" - abused for obfuscating hosted spamvertised product images
 uri        __URI_IMG_WP_REDIR          m;://i[02]\.wp\.com/.*\.(?:jpe?g|gif|png)$;i
