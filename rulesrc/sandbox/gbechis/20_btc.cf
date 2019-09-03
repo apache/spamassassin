@@ -5,6 +5,10 @@ body     __COPY_PASTE_DE      /Kopieren Sie es und f(?:\xfc|\xc3\xbc)gen Sie es 
 meta     __GB_BITCOIN_CP_DE   ( __BITCOIN_ID && !__URL_BTC_ID && __COPY_PASTE_DE )
 describe __GB_BITCOIN_CP_DE   German Bitcoin scam
 
+body     __COPY_PASTE_ES      /copiarlo y pegarlo/i
+meta     __GB_BITCOIN_CP_ES   ( __BITCOIN_ID && !__URL_BTC_ID && __COPY_PASTE_DE )
+describe __GB_BITCOIN_CP_ES   Spanish Bitcoin scam
+
 body     __COPY_PASTE_FR      /le copier (et le|\+) coller/i
 meta     __GB_BITCOIN_CP_FR   ( __BITCOIN_ID && !__URL_BTC_ID && __COPY_PASTE_FR )
 describe __GB_BITCOIN_CP_FR   French Bitcoin scam
@@ -25,7 +29,7 @@ body     __COPY_PASTE_SE      /kopiera den och klistra in/i
 meta     __GB_BITCOIN_CP_SE   ( __BITCOIN_ID && !__URL_BTC_ID && __COPY_PASTE_SE )
 describe __GB_BITCOIN_CP_SE   Swedish Bitcoin scam
 
-meta     GB_BITCOIN_CP        ( __GB_BITCOIN_CP_DE || __GB_BITCOIN_CP_EN || __GB_BITCOIN_CP_FR || __GB_BITCOIN_CP_IT || __GB_BITCOIN_CP_NL || __GB_BITCOIN_CP_SE )
+meta     GB_BITCOIN_CP        ( __GB_BITCOIN_CP_DE || __GB_BITCOIN_CP_ES || __GB_BITCOIN_CP_EN || __GB_BITCOIN_CP_FR || __GB_BITCOIN_CP_IT || __GB_BITCOIN_CP_NL || __GB_BITCOIN_CP_SE )
 describe GB_BITCOIN_CP        Localized Bitcoin scam
 score    GB_BITCOIN_CP        2.0 # limit
 
