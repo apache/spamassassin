@@ -552,6 +552,7 @@ sub is_dccifd_available {
   # dccifd remains available until it breaks
   return $self->{dccifd_available} if $self->{dccifd_available};
 
+  $self->find_dcc_home();
   my $conf = $self->{main}->{conf};
 
   # deal with configured INET or INET6 socket
@@ -587,6 +588,7 @@ sub is_dccproc_available {
   # dccproc remains (un)available so check only once
   return $self->{dccproc_available} if defined $self->{dccproc_available};
 
+  $self->find_dcc_home();
   my $dccproc = $conf->{dcc_path};
   if (!defined $dccproc || $dccproc eq '') {
     $dccproc = $self->dcc_pgm_path('dccproc');
@@ -744,7 +746,6 @@ sub check_dnsbl {
       @{$pms->{conf}->{eval_to_rule}->{check_dcc_reputation_range}} );
 
   # Launch async only if dccifd found
-  $self->find_dcc_home();
   if ($self->is_dccifd_available()) {
     $self->_launch_dcc($pms);
   }
