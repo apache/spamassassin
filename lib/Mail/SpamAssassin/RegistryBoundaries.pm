@@ -216,6 +216,7 @@ additionally be used.
 sub is_domain_valid {
   my ($self, $dom, $is_ascii) = @_;
 
+  return 0 unless defined $dom;
   if ($is_ascii) {
     utf8::encode($dom)  if utf8::is_utf8($dom); # force octets
     $dom = lc $dom;

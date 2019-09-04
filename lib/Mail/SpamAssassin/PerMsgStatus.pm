@@ -2499,7 +2499,7 @@ sub _process_text_uri_list {
         # Skip unless @ found after decoding, then check tld is valid
         next unless $uri =~ /\@([^?&>]*)/;
         my $host = $1; $host =~ s/(?:\%20)+$//; # strip trailing %20 from host
-        next unless $self->{main}->{registryboundaries}->is_domain_valid($1);
+        next unless $self->{main}->{registryboundaries}->is_domain_valid($host);
       }
 
       dbg("uri: parsed uri from text ($rawtype): $uri") if $would_log_uri_all;
