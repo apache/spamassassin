@@ -59,7 +59,7 @@ sub new {
   $self->set_config($samain->{conf});
   # make sure we run last (or close) of the finish_parsing_end since
   # we need all other rules to be defined
-  $self->register_method_priority("finish_parsing_end", 100);
+  $self->register_method_priority("finish_parsing_start", 100);
   return $self;
 }
 
@@ -104,7 +104,7 @@ sub set_config {
   $conf->{parser}->register_commands(\@cmds);
 }
 
-sub finish_parsing_end {
+sub finish_parsing_start {
   my ($self, $opts) = @_;
 
   my $conf = $opts->{conf};
