@@ -223,7 +223,7 @@ Configure the largest file that the plugin will decode from the MIME objects
 
   push(@cmds, {
     setting => 'olemacro_exts',
-    default => qr/(?:doc|docx|dot|pot|ppa|pps|ppt|rtf|sldm|xl|xla|xls|xlsx|xlt|xslb)$/,
+    default => qr/(?:doc|docx|dot|pot|ppa|pps|ppt|rtf|sldm|xl|xla|xls|xlsx|xlt|xltx|xslb)$/,
     type => $Mail::SpamAssassin::Conf::CONF_TYPE_STRING,
     code => sub {
       my ($self, $key, $value, $line) = @_;
@@ -242,7 +242,7 @@ Configure the largest file that the plugin will decode from the MIME objects
 
 =over 4
 
-=item olemacro_exts (default: (?:doc|docx|dot|pot|ppa|pps|ppt|rtf|sldm|xl|xla|xls|xlsx|xlt|xslb)$)
+=item olemacro_exts (default: (?:doc|docx|dot|pot|ppa|pps|ppt|rtf|sldm|xl|xla|xls|xlsx|xlt|xltx|xslb)$)
 
 Set the case-insensitive regexp used to configure the extensions the plugin
 targets for macro scanning
@@ -253,7 +253,7 @@ targets for macro scanning
 
   push(@cmds, {
     setting => 'olemacro_macro_exts',
-    default => qr/(?:docm|dotm|ppam|potm|ppst|ppsm|pptm|sldm|xlm|xlam|xlsb|xlsm|xltm|xps)$/,
+    default => qr/(?:docm|dotm|ppam|potm|ppst|ppsm|pptm|sldm|xlm|xlam|xlsb|xlsm|xltm|xltx|xps)$/,
     type => $Mail::SpamAssassin::Conf::CONF_TYPE_STRING,
     code => sub {
       my ($self, $key, $value, $line) = @_;
@@ -271,7 +271,7 @@ targets for macro scanning
 
 =over 4
 
-=item olemacro_macro_exts (default: (?:docm|dotm|ppam|potm|ppst|ppsm|pptm|sldm|xlm|xlam|xlsb|xlsm|xltm|xps)$)
+=item olemacro_macro_exts (default: (?:docm|dotm|ppam|potm|ppst|ppsm|pptm|sldm|xlm|xlam|xlsb|xlsm|xltm|xltx|xps)$)
 
 Set the case-insensitive regexp used to configure the extensions the plugin
 treats as containing a macro
@@ -282,7 +282,7 @@ treats as containing a macro
 
   push(@cmds, {
     setting => 'olemacro_skip_exts',
-    default => qr/(?:dotx|potx|ppsx|pptx|sldx|xltx)$/,
+    default => qr/(?:dotx|potx|ppsx|pptx|sldx)$/,
     type => $Mail::SpamAssassin::Conf::CONF_TYPE_STRING,
     code => sub {
       my ($self, $key, $value, $line) = @_;
@@ -728,6 +728,7 @@ sub _check_macrotype_doc {
     'word/vbaproject.bin' => 'word2k7',
     'macros/vba/_vba_project' => 'word97',
     'xl/vbaproject.bin' => 'xl2k7',
+    'xl/embeddings/oleObject1.bin' => 'xl2k13',
     '_vba_project_cur/vba/_vba_project' => 'xl97',
     'ppt/vbaproject.bin' => 'ppt2k7',
   );
