@@ -2804,7 +2804,14 @@ header     __HDR_RCVD_SHOPIFY          X-Spam-Relays-External =~ /rdns=\S+\.shop
 uri        __URI_IMG_SHOPIFY           m,://cdn\.shopify\.com/.+\.(?:jpe?g|gif|png),i
 
 meta       __SHOPIFY_IMG_NOT_RCVD_SFY  __URI_IMG_SHOPIFY && !__HDR_RCVD_SHOPIFY
-meta       __SHOPIFY_IMG_NOT_RCVD_SFY_MINFP  __SHOPIFY_IMG_NOT_RCVD_SFY && !__HAS_CAMPAIGN && !MIME_QP_LONG_LINE && !__JM_REACTOR_DATE && !__RCD_RDNS_MTA_MESSY 
+meta       SHOPIFY_IMG_NOT_RCVD_SFY    __SHOPIFY_IMG_NOT_RCVD_SFY && !__HAS_CAMPAIGN && !MIME_QP_LONG_LINE && !__JM_REACTOR_DATE && !__RCD_RDNS_MTA_MESSY && !__USING_VERP1 
+score      SHOPIFY_IMG_NOT_RCVD_SFY    2.500	# limit
+describe   SHOPIFY_IMG_NOT_RCVD_SFY    Shopify hosted image but message not from Shopify
+tflags     SHOPIFY_IMG_NOT_RCVD_SFY    publish
+
+uri        __URI_IMG_YTIMG             m,://[^/?]+\.ytimg\.com/,i
+uri        __URI_IMG_JOOMCDN           m,://img\.joomcdn\.net/,i
+
 
 meta       __HOSTED_IMG_DQ_UNSUB       __URI_DQ_UNSUB && ( __URI_IMG_EBAY || __URI_IMG_AMAZON || __URI_IMG_ALICDN || __URI_IMG_WALMART || __URI_IMG_NEWEGG || __URI_IMG_SHOPIFY )
 meta       HOSTED_IMG_DQ_UNSUB         __HOSTED_IMG_DQ_UNSUB
