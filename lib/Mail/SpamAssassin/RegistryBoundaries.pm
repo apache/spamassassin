@@ -200,15 +200,16 @@ uses a valid TLD or ccTLD.
 =cut
 
 sub is_domain_valid {
-  my $self = shift;
-  my $dom = lc shift;
+  my ($self, $dom) = @_;
+
+  return 0 unless defined $dom;
 
   # domains don't have whitespace
   return 0 if ($dom =~ /\s/);
 
   # ensure it ends in a known-valid TLD, and has at least 1 dot
   return 0 unless ($dom =~ /\.([^.]+)$/);
-  return 0 unless ($self->{conf}->{valid_tlds}{$1});
+  return 0 unless ($self->{conf}->{valid_tlds}{lc $1});
 
   return 1;     # nah, it's ok.
 }
