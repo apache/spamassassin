@@ -2768,7 +2768,7 @@ header     __HDR_RCVD_AMAZON           X-Spam-Relays-External =~ /rdns=\S+\.amaz
 uri        __URI_IMG_AMAZON            m,://[^/?]+\.(?:ssl-)?images-amazon\.com/,i
 
 meta       __AMAZON_IMG_NOT_RCVD_AMZN  __URI_IMG_AMAZON && !__HDR_RCVD_AMAZON
-meta       AMAZON_IMG_NOT_RCVD_AMZN    __AMAZON_IMG_NOT_RCVD_AMZN && !__URI_DBL_DOM && !__RCD_RDNS_SMTP && !__RCD_RDNS_MTA 
+meta       AMAZON_IMG_NOT_RCVD_AMZN    __AMAZON_IMG_NOT_RCVD_AMZN && !__URI_DBL_DOM && !__RCD_RDNS_SMTP && !__RCD_RDNS_MTA && !__DATE_LOWER && !__MSGID_LIST 
 score      AMAZON_IMG_NOT_RCVD_AMZN    2.500	# limit
 describe   AMAZON_IMG_NOT_RCVD_AMZN    Amazon hosted image but message not from Amazon
 tflags     AMAZON_IMG_NOT_RCVD_AMZN    publish
@@ -2804,7 +2804,7 @@ header     __HDR_RCVD_SHOPIFY          X-Spam-Relays-External =~ /rdns=\S+\.shop
 uri        __URI_IMG_SHOPIFY           m,://cdn\.shopify\.com/.+\.(?:jpe?g|gif|png),i
 
 meta       __SHOPIFY_IMG_NOT_RCVD_SFY  __URI_IMG_SHOPIFY && !__HDR_RCVD_SHOPIFY
-meta       SHOPIFY_IMG_NOT_RCVD_SFY    __SHOPIFY_IMG_NOT_RCVD_SFY && !__HAS_CAMPAIGN && !MIME_QP_LONG_LINE && !__JM_REACTOR_DATE && !__RCD_RDNS_MTA_MESSY && !__USING_VERP1 
+meta       SHOPIFY_IMG_NOT_RCVD_SFY    __SHOPIFY_IMG_NOT_RCVD_SFY && !__HAS_CAMPAIGN && !MIME_QP_LONG_LINE && !__JM_REACTOR_DATE && !__RCD_RDNS_MTA_MESSY && !__USING_VERP1 && !__AC_UNSUB_URI && !__HAS_CAMPAIGNID && !__HAS_SENDER 
 score      SHOPIFY_IMG_NOT_RCVD_SFY    2.500	# limit
 describe   SHOPIFY_IMG_NOT_RCVD_SFY    Shopify hosted image but message not from Shopify
 tflags     SHOPIFY_IMG_NOT_RCVD_SFY    publish
