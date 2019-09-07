@@ -2774,7 +2774,7 @@ describe   AMAZON_IMG_NOT_RCVD_AMZN    Amazon hosted image but message not from 
 tflags     AMAZON_IMG_NOT_RCVD_AMZN    publish
 
 header     __HDR_RCVD_ALIBABA          X-Spam-Relays-External =~ /rdns=\S+\.alibaba\.com\s/
-uri        __URI_IMG_ALICDN            m;//(?:[^/.]+\.)*alicdn\.com/.+\.(?:jpe?g|gif|png)$;i
+uri        __URI_IMG_ALICDN            m,//(?:[^/.]+\.)*alicdn\.com/.+\.(?:jpe?g|gif|png),i
 
 meta       __ALIBABA_IMG_NOT_RCVD_ALI  __URI_IMG_ALICDN && !__HDR_RCVD_ALIBABA
 meta       ALIBABA_IMG_NOT_RCVD_ALI    __ALIBABA_IMG_NOT_RCVD_ALI && !__YOUR_PASSWORD && !__UNSUB_LINK && !__MSGID_BEFORE_RECEIVED 
