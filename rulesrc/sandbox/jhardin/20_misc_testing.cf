@@ -2777,7 +2777,7 @@ header     __HDR_RCVD_ALIBABA          X-Spam-Relays-External =~ /rdns=\S+\.alib
 uri        __URI_IMG_ALICDN            m;//(?:[^/.]+\.)*alicdn\.com/.+\.(?:jpe?g|gif|png)$;i
 
 meta       __ALIBABA_IMG_NOT_RCVD_ALI  __URI_IMG_ALICDN && !__HDR_RCVD_ALIBABA
-meta       ALIBABA_IMG_NOT_RCVD_ALI    __ALIBABA_IMG_NOT_RCVD_ALI && !__YOUR_PASSWORD && !__UNSUB_LINK && !__RCD_RDNS_MAIL_MESSY
+meta       ALIBABA_IMG_NOT_RCVD_ALI    __ALIBABA_IMG_NOT_RCVD_ALI && !__YOUR_PASSWORD && !__UNSUB_LINK && !__MSGID_BEFORE_RECEIVED 
 score      ALIBABA_IMG_NOT_RCVD_ALI    2.500	# limit
 describe   ALIBABA_IMG_NOT_RCVD_ALI    Alibaba hosted image but message not from Alibaba
 tflags     ALIBABA_IMG_NOT_RCVD_ALI    publish
