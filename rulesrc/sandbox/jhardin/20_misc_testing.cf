@@ -1974,7 +1974,7 @@ ifplugin Mail::SpamAssassin::Plugin::ReplaceTags
   replace_rules  __MY_MALWARE
   body           __PAY_ME               /(?:^|\s)(?:<P><A><Y>\s<M><E>|(?:(?:<S><E><N><D>|<T><R><A><N><S><M><I><T>|<G><I><V><E>)\s<M><E>|<T><R><A><N><S><F><E><R>\s(?:<T><H><E>\s<A><M><O><U><N><T>\s<O><F>|<E><X><A><C><T><L><Y>)|<I>\s<W><A><N><T>|<D><E><N>\s<B><E><T><R><A><G>\s<V><O><N>|<P><A><Y><M><E><N><T>\s<O><F>)\s(?:[\d,'.\$£]+\s?(?:<U><S><D>?|<E><U><R>?(?:<O><S>)?|<G><B><P>)?|<B><I><T><C><O><I><N>)|(?:<M><A><K><E>|<P><E><R><F><O><R><M>|<S><E><N><D>|<T><R><A><N><S><M><I><T>)\s<T><H><E>\s<P><A><Y><M><E><N><T>|<A><M><O><U><N><T>\s<F><O><R>\s<M><Y>\s<S><I><L><E><N><C><E>)[\s\.,]/i
   replace_rules  __PAY_ME
-  body           __YOUR_PASSWORD        /(?:^|\s)(?:<Y><O><U><R>|(?:<C><H><A><N><G><E>|<M><O><D><I><F><Y>|<U><P><D><A><T><E>|<R><E><S><E><T>|<A><L><T><E><R>|<F><I><X>)\s<T><H><E>)\s(?:<P><A><S><S><W><O><R><D>|<P><S><W><D>\s)/i
+  body           __YOUR_PASSWORD        /(?:^|\s)(?:<Y><O><U><R>|(?:<C><H><A><N><G><E>|<M><O><D><I><F><Y>|<U><P><D><A><T><E>|<R><E><S><E><T>|<A><L><T><E><R>|<F><I><X>)\s<T><H><E>)\s(?:<P><A><S><S>[-\s_]<W><O><R><D>|<P><S><W><D>\s)/i
   replace_rules  __YOUR_PASSWORD
   body           __YOUR_WEBCAM          /(?:^|\s)(?:<F><R><O><M>|<Y><O><U><R>|<W><I><T><H>)\s(?:(?:<S><C><R><E><E><N>|<D><E><S><K><T><O><P>)\s<A><N><D>\s|<O><W><N>\s)?(?:<W><E><B>[-\s]?|<F><R><O><N><T>[-\s]?|<N><E><T><W><O><R><K>\s)<C><A><M>/i
   replace_rules  __YOUR_WEBCAM
@@ -1990,7 +1990,7 @@ else
   body           __MY_VICTIM            /\b(?:hi|hello),?(?:\smy)?\s(?:victim|prey)\b/i
   body           __MY_MALWARE           /\b(?:(?:I(?:'ve|\shave)?\s(?:put|set\s?up|installed|buil[td]\sin|placed)\s(?:a\s)?|my\s(?:personal\s)?)(?:malware|virus|spy\s?ware|trojan|program\srecorded|expl[o0]it)|application[^\.]{1,30}(?:enable[sd]|allows)\sme\sto\s(?:access|control)|I\s(?:contaminated|infected|hacked|toxified|poisoned)\syour\s(?:machine|computer|gadget|(?:smart\s?)?phone|device)|Anwendung\s[^\.]{1,50}\sich\sauf\salle\sIhre\sdarauf\sgespeicherten\sDateien\szugreifen\skann|I\s?am\s?a\s?hacker|(?:(?:trojan|virus|spyware|malware)\s)+giv(?:es|ing)\sme)\b/i
   body           __PAY_ME               /\b(?:pay\sme|(?:(?:send|transmit|give)\sme|transfer\s(?:the\samount\sof|exactly)|I\swant|den\sbetrag\svon|payment\sof)\s(?:[\d,'.\$£]+\s?(?:usd?|eur?(?:os)?|gbp)?|bitcoin)|(?:make|perform|send|transmit)\sthe\spayment|amount\sfor\smy\ssilence)\b/i
-  body           __YOUR_PASSWORD        /\b(?:your|(?:change|modify|update|reset|alter|fix)\sthe)\s(?:password|pswd)\b/i
+  body           __YOUR_PASSWORD        /\b(?:your|(?:change|modify|update|reset|alter|fix)\sthe)\s(?:pass[-\s_]word|pswd)\b/i
   body           __YOUR_WEBCAM          /\b(?:from|your|with)\s(?:(?:screen|desktop)\sand\s|own\s)?(?:web[-\s]?|front[-\s]?|network\s)cam\b/i
   body           __YOUR_ONAN            /\byour?\s(?:mast[ur]{2}bati(?:on|ng)|onanism|solitary\ssex|hand\sfucking)\b/i
   body           __YOUR_PERSONAL        /\b(?:your\s(?:personal|social\scontact|address)\s(?:info(?:rmation)?|data|details|book|secrets)|all\syour\sfiles)\b/i
@@ -2886,6 +2886,7 @@ body       __PASSWORD                  /\bpass[-\s_]?word\b/i
 meta       __UNAME_PASSWD_PDF          __PASSWORD && LOCALPART_IN_SUBJECT && __PDF_ATTACH
 
 
-
+meta       __MALWARE_PASSWORD          __MY_MALWARE && __PASSWORD 
+meta       __MALWARE_IP_NORDNS         __MY_MALWARE && __HELO_MISC_IP && __RDNS_NONE 
 
 
