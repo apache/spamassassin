@@ -124,7 +124,8 @@ ifplugin Mail::SpamAssassin::Plugin::MIMEHeader
   describe     MALW_ATTACH         Attachment filename suspicious, probable malware exploit
 
   mimeheader   __ISO_ATTACH        Content-Disposition =~ m,\bfilename="?[^"]+\.iso[";$],i
-  meta         ISO_ATTACH          __ISO_ATTACH
+  mimeheader   __ISO_ATTACH_MT     Content-Type =~ m,\bapplication/x-iso9660-image\b,i
+  meta         ISO_ATTACH          __ISO_ATTACH || __ISO_ATTACH_MT
   describe     ISO_ATTACH          ISO attachment - possible malware delivery
   score        ISO_ATTACH          3.000	# limit
 else
@@ -137,6 +138,7 @@ else
   meta         __MALW_ATTACH_01_01 0
   meta         __MALW_ATTACH_01_02 0
   meta         __ISO_ATTACH        0
+  meta         __ISO_ATTACH_MT     0
 endif
 
 # general case of spample observation
