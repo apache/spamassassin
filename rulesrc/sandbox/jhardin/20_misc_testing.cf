@@ -1911,10 +1911,11 @@ describe       BITCOIN_SPAM_01  BitCoin spam pattern 01
 score          BITCOIN_SPAM_01  2.500	# limit
 tflags         BITCOIN_SPAM_01  publish
 
-meta           BITCOIN_SPAM_02  __BITCOIN_ID && __BOTH_INR_AND_REF 
-describe       BITCOIN_SPAM_02  BitCoin spam pattern 02
-score          BITCOIN_SPAM_02  2.500	# limit
-tflags         BITCOIN_SPAM_02  publish
+meta           __BITCOIN_SPAM_02  __BITCOIN_ID && __BOTH_INR_AND_REF 
+meta           BITCOIN_SPAM_02    __BITCOIN_SPAM_02 && !__URL_BTC_ID 
+describe       BITCOIN_SPAM_02    BitCoin spam pattern 02
+score          BITCOIN_SPAM_02    2.500	# limit
+tflags         BITCOIN_SPAM_02    publish
 
 meta           BITCOIN_SPAM_03  __BITCOIN_ID && __SINGLE_WORD_SUBJ
 describe       BITCOIN_SPAM_03  BitCoin spam pattern 03
@@ -1926,20 +1927,22 @@ describe       BITCOIN_SPAM_04  BitCoin spam pattern 04
 score          BITCOIN_SPAM_04  1.500	# limit
 tflags         BITCOIN_SPAM_04  publish
 
-meta           BITCOIN_SPAM_05  __BITCOIN_ID && __SPOOFED_FREEMAIL 
-describe       BITCOIN_SPAM_05  BitCoin spam pattern 05
-score          BITCOIN_SPAM_05  2.500	# limit
-tflags         BITCOIN_SPAM_05  publish
+meta           __BITCOIN_SPAM_05  __BITCOIN_ID && __SPOOFED_FREEMAIL 
+meta           BITCOIN_SPAM_05    __BITCOIN_SPAM_05 && !__HAS_IN_REPLY_TO 
+describe       BITCOIN_SPAM_05    BitCoin spam pattern 05
+score          BITCOIN_SPAM_05    2.500	# limit
+tflags         BITCOIN_SPAM_05    publish
 
 meta           BITCOIN_SPAM_06  __BITCOIN_ID && TVD_RCVD_SPACE_BRACKET
 describe       BITCOIN_SPAM_06  BitCoin spam pattern 06
 score          BITCOIN_SPAM_06  1.500	# limit
 tflags         BITCOIN_SPAM_06  publish
 
-meta           BITCOIN_SPAM_07  __BITCOIN_ID && __TO_EQ_FROM
-describe       BITCOIN_SPAM_07  BitCoin spam pattern 07
-score          BITCOIN_SPAM_07  3.500	# limit
-tflags         BITCOIN_SPAM_07  publish
+meta           __BITCOIN_SPAM_07  __BITCOIN_ID && __TO_EQ_FROM
+meta           BITCOIN_SPAM_07    __BITCOIN_SPAM_07 && !__DKIM_EXISTS 
+describe       BITCOIN_SPAM_07    BitCoin spam pattern 07
+score          BITCOIN_SPAM_07    3.500	# limit
+tflags         BITCOIN_SPAM_07    publish
 
 meta           BITCOIN_SPAM_08  __BITCOIN_ID && __TO_IN_SUBJ 
 describe       BITCOIN_SPAM_08  BitCoin spam pattern 08
@@ -2015,7 +2018,7 @@ score          BITCOIN_DEADLINE       3.000	# limit
 tflags         BITCOIN_DEADLINE       publish
 
 meta           BITCOIN_MALWARE        __BITCOIN_ID && __MY_MALWARE && !BITCOIN_EXTORT_01 && !__NOT_SPOOFED
-describe       BITCOIN_MALWARE        BitCoin + malware
+describe       BITCOIN_MALWARE        BitCoin + malware bragging
 score          BITCOIN_MALWARE        3.500	# limit
 tflags         BITCOIN_MALWARE        publish
 
@@ -2035,6 +2038,20 @@ score          BOMB_MONEY             2.500	# limit
 tflags         BOMB_MONEY             publish
 
 meta           __MALWARE_NORDNS       __MY_MALWARE && __RDNS_NONE 
+meta           MALWARE_NORDNS         __MALWARE_NORDNS && !BITCOIN_EXTORT_01 && !__DKIM_EXISTS 
+describe       MALWARE_NORDNS         Malware bragging + no rDNS
+score          MALWARE_NORDNS         3.500	# limit
+tflags         MALWARE_NORDNS         publish
+
+# 100% overlap with __MALWARE_NORDNS
+#meta           __MALWARE_IP_NORDNS    __MY_MALWARE && __HELO_MISC_IP && __RDNS_NONE 
+
+meta           __MALWARE_PASSWORD     __MY_MALWARE && __PASSWORD 
+meta           MALWARE_PASSWORD       __MALWARE_PASSWORD && !BITCOIN_EXTORT_01
+describe       MALWARE_PASSWORD       Malware bragging + "password"
+score          MALWARE_PASSWORD       3.500	# limit
+tflags         MALWARE_PASSWORD       publish
+
 
 
 #body          NUM_FREE         /\b\d+free/i
@@ -2889,7 +2906,5 @@ body       __PASSWORD                  /\bpass[-\s_]?word\b/i
 meta       __UNAME_PASSWD_PDF          __PASSWORD && LOCALPART_IN_SUBJECT && __PDF_ATTACH
 
 
-meta       __MALWARE_PASSWORD          __MY_MALWARE && __PASSWORD 
-meta       __MALWARE_IP_NORDNS         __MY_MALWARE && __HELO_MISC_IP && __RDNS_NONE 
 
 
