@@ -384,9 +384,9 @@ sub gen_class {
     # compress for certain classes
     if ($class eq "OVERLAP") {
       $fname =~ s/'//gs;
-      runcmd ("rm '$fname.gz'; gzip '$fname'"); 
+      runcmd ("rm '$fname.gz'; pigz '$fname'"); 
       # takes care of keeping the original around so we don't have to
-      if ($? >> 8 != 0) { warn "gzip '$fname' failed"; }
+      if ($? >> 8 != 0) { warn "pigz '$fname' failed"; }
     }
   }
 
@@ -563,9 +563,9 @@ sub gen_report_logs {
     $f =~ s/[^-\._A-Za-z0-9]+/_/gs;    # sanitize!
     my $zf = "$fname-$f.gz";
 
-    runcmd("gzip -c < $f > $zf.$$");
+    runcmd("pigz -c < $f > $zf.$$");
     if ($? >> 8 != 0) {
-      warn "gzip -c < $f > $zf.$$ failed";
+      warn "pigz -c < $f > $zf.$$ failed";
     }
 
     rename("$zf.$$", $zf) or

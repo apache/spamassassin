@@ -370,9 +370,9 @@ sub gen_class {
       $f =~ s/[^-\._A-Za-z0-9]+/_/gs;    # sanitize!
       my $zf = "$fname-$f.gz";
 
-      system("gzip -c < $f > $zf.$$");
+      system("pigz -c < $f > $zf.$$");
       if ($? >> 8 != 0) {
-        warn "gzip -c < $f > $zf.$$ failed";
+        warn "pigz -c < $f > $zf.$$ failed";
       }
 
       rename("$zf.$$", $zf) or

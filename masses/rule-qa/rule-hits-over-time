@@ -296,7 +296,7 @@ sub read_logs {
   $seen_n = 0;
 
   if ($file =~ /\.gz$/) {
-    open (IN, "gunzip -cd '$file'|") or die "cannot gunzip $file";
+    open (IN, "pigz -cd '$file'|") or die "cannot gunzip $file";
   } else {
     open (IN, "<$file") or die "cannot read $file";
   }

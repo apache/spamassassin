@@ -817,7 +817,7 @@ sub show_mclog {
     die "cannot open $gzfile";
   }
 
-  open (GZ, "gunzip -cd < $gzfile |") or die "cannot gunzip '$gzfile'";
+  open (GZ, "pigz -cd < $gzfile |") or die "cannot gunzip '$gzfile'";
   while (<GZ>) {
     /^[\.Y]\s+\S+\s+\S+\s+(?:\S*,|)\Q$saferule\E[, ]/ or next;
 
@@ -932,7 +932,7 @@ sub read_freqs_file {
 
   if ($file =~ /\.gz$/) {
     $file =~ s/'//gs;
-    if (!open (IN, "gunzip -cd < '$file' |")) {
+    if (!open (IN, "pigz -cd < '$file' |")) {
       warn "cannot read $file";
       return;
     }
