@@ -802,6 +802,8 @@ sub show_mclog {
   # logs now include the daterev, too
   $self->{daterev} =~ /([-\.\,_0-9a-zA-Z\/]+)/; my $safedaterev = $1;
   $safedaterev =~ s/\//-/gs;
+  $safedaterev =~ s/^\d+-//; # no date in logfile
+  $safedaterev =~ s/-n$//;
 
   # outright block possibly-hostile stuff here:
   # no "../" path traversal
