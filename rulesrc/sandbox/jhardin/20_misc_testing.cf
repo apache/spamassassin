@@ -1872,10 +1872,18 @@ ifplugin Mail::SpamAssassin::Plugin::ReplaceTags
   describe      FUZZY_BTC_WALLET    Heavily obfuscated "bitcoin wallet"
   tflags        FUZZY_BTC_WALLET    publish
 
+  body          FUZZY_MONERO        /<M>(?!onero)<O><N><E><R><O>/i
+  replace_rules FUZZY_MONERO    
+  describe      FUZZY_MONERO        Obfuscated "Monero"
+  tflags        FUZZY_MONERO        publish
+
 endif
 
 uri            __URL_BTC_ID     m;[/.][13][a-km-zA-HJ-NP-Z1-9]{25,34}(?:/|$);
 body           __BITCOIN_ID     /\b(?<!=)[13][a-km-zA-HJ-NP-Z1-9]{25,34}\b/
+
+body           __MONERO         /Monero \(XMR\)/
+uri            __URI_MONERO     /buy-monero/i
 
 ifplugin Mail::SpamAssassin::Plugin::DKIM
   meta           BTC_ORG          (__BITCOIN_ID && __HAS_ORGANIZATION) && !ALL_TRUSTED && __DOS_HAS_MAILING_LIST && !DKIM_SIGNED
@@ -2002,7 +2010,9 @@ else
   body           __HOURS_DEADLINE       /\b(?:(?:give\syou|you\s(?:will\s)?have(?:\sonly|\sjust)?)(?:\sthe\slast)?\s(?:\d+|one|two|three)\s?(?:hours?|hr(?:\s?s)?|days?)|(?:by|to|until|before)\sthe\send\sof\sthe\s(?:work(?:ing)?\s)?day|Ich\sgebe\sIhnen\s\d+\sStunden|\d+\shours?\sbefore\s(?:sending|releasing|exposing|publishing)|(?:the|your)\sdeadline\s(?:is|will\sbe))\b/i
   body           __EXPLOSIVE_DEVICE     /\b(?:explosive\sdevice|bomb)\b/i
 endif
-meta           BITCOIN_EXTORT_01      __BITCOIN_ID && (__MY_MALWARE + __PAY_ME + __MY_VICTIM + __YOUR_WEBCAM + __YOUR_ONAN + __YOUR_PERSONAL + __HOURS_DEADLINE + __YOUR_PASSWORD + LOCALPART_IN_SUBJECT + __DESTROY_ME + __DESTROY_YOU + __EXPLOSIVE_DEVICE) > 2
+meta           __EXTORT_MANY          (__MY_MALWARE + __PAY_ME + __MY_VICTIM + __YOUR_WEBCAM + __YOUR_ONAN + __YOUR_PERSONAL + __HOURS_DEADLINE + __YOUR_PASSWORD + LOCALPART_IN_SUBJECT + __DESTROY_ME + __DESTROY_YOU + __EXPLOSIVE_DEVICE) > 2
+
+meta           BITCOIN_EXTORT_01      __BITCOIN_ID && __EXTORT_MANY
 describe       BITCOIN_EXTORT_01      Extortion spam, pay via BitCoin
 score          BITCOIN_EXTORT_01      5.000	# limit
 tflags         BITCOIN_EXTORT_01      publish
@@ -2026,6 +2036,12 @@ meta           BITCOIN_BOMB           __BITCOIN_ID && __EXPLOSIVE_DEVICE && !BIT
 describe       BITCOIN_BOMB           BitCoin + bomb
 score          BITCOIN_BOMB           3.000	# limit
 tflags         BITCOIN_BOMB           publish
+
+meta           MONERO_EXTORT_01       (__MONERO || __URI_MONERO) && __EXTORT_MANY
+describe       MONERO_EXTORT_01       Extortion spam, pay via Monero
+score          MONERO_EXTORT_01       5.000	# limit
+tflags         MONERO_EXTORT_01       publish
+
 
 meta           BOMB_FREEM             __EXPLOSIVE_DEVICE && __freemail_hdr_replyto 
 describe       BOMB_FREEM             Bomb + freemail
