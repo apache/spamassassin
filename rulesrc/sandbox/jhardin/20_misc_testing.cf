@@ -2864,7 +2864,7 @@ score      HOSTED_IMG_FREEM            3.500	# limit
 describe   HOSTED_IMG_FREEM            Image hosted at large ecomm site or redirected, freemail from or reply-to
 tflags     HOSTED_IMG_FREEM            publish
 
-meta       __HOSTED_IMG_MULTI          ( __URI_IMG_EBAY + __URI_IMG_AMAZON + __URI_IMG_ALICDN + __URI_IMG_WALMART + __URI_IMG_NEWEGG + __URI_IMG_SHOPIFY || __URI_IMG_YTIMG || __URI_IMG_JOOMCDN || __URI_IMG_WISH || __URI_IMG_WP_REDIR ) > 1
+meta       __HOSTED_IMG_MULTI          ( __URI_IMG_EBAY + __URI_IMG_AMAZON + __URI_IMG_ALICDN + __URI_IMG_WALMART + __URI_IMG_NEWEGG + __URI_IMG_SHOPIFY + __URI_IMG_YTIMG + __URI_IMG_JOOMCDN + __URI_IMG_WISH + __URI_IMG_WP_REDIR ) > 1
 meta       HOSTED_IMG_MULTI            __HOSTED_IMG_MULTI && !__DKIM_EXISTS 
 score      HOSTED_IMG_MULTI            3.000	# limit
 describe   HOSTED_IMG_MULTI            Multiple images hosted at different large ecomm sites or redirected
@@ -2918,7 +2918,7 @@ meta       __NORDNS_SPOOFED            __RDNS_NONE && !__NOT_SPOOFED
 
 
 # potential bitcoin extortion obfuscation
-body       __PASSWORD                  /\bpass[-\s_]?word\b/i
+body       __PASSWORD                  /\bp[-\s_]?a[-\s_]?s[-\s_]?s[-\s_]?w[-\s_]?o[-\s_]?r[-\s_]?d\b/i
 meta       __UNAME_PASSWD_PDF          __PASSWORD && LOCALPART_IN_SUBJECT && __PDF_ATTACH
 
 
