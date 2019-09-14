@@ -1295,10 +1295,10 @@ sub create_mclog_href {
   my $who = $line->{username};
   return '' unless $who;
 
-  my $net = ($self->{daterev_md}->{includes_net}) ? '-net' : '';
+  #my $net = ($self->{daterev_md}->{includes_net}) ? '-net' : '';
 
   my $href = $self->assemble_url(
-            "mclog=".(($isspam ? "spam" : "ham")."$net-$who"),
+            "mclog=".(($isspam ? "spam" : "ham")."-$who"),
             "rule=".$line->{name},
            "daterev=".$self->{daterev},
             $self->get_params_except(qw( mclog rule s_detail )));
