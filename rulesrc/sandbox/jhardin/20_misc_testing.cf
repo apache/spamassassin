@@ -1872,18 +1872,24 @@ ifplugin Mail::SpamAssassin::Plugin::ReplaceTags
   describe      FUZZY_BTC_WALLET    Heavily obfuscated "bitcoin wallet"
   tflags        FUZZY_BTC_WALLET    publish
 
-  body          FUZZY_MONERO        /<M>(?!onero)<O><N><E><R><O>/i
-  replace_rules FUZZY_MONERO    
-  describe      FUZZY_MONERO        Obfuscated "Monero"
-  tflags        FUZZY_MONERO        publish
+  body          __FUZZY_MONERO      /<M>(?!onero)<O><N><E><R><O>/i
+  replace_rules __FUZZY_MONERO
 
+else
+  meta          __FUZZY_MONERO      0
 endif
 
 uri            __URL_BTC_ID     m;[/.][13][a-km-zA-HJ-NP-Z1-9]{25,34}(?:/|$);
 body           __BITCOIN_ID     /\b(?<!=)[13][a-km-zA-HJ-NP-Z1-9]{25,34}\b/
 
-body           __MONERO         /Monero \(XMR\)/
+meta          FUZZY_MONERO        __FUZZY_MONERO
+describe      FUZZY_MONERO        Obfuscated "Monero"
+tflags        FUZZY_MONERO        publish
+
+body           __MONERO_ID      /\b4[0-9AB][1-9A-HJ-NP-Za-km-z]{93,104}\b/
+body           __MONERO_CURNCY  /Monero \(XMR\)/
 uri            __URI_MONERO     /buy-monero/i
+meta           __MONERO         (__MONERO_ID || __MONERO_CURNCY || __URI_MONERO || __FUZZY_MONERO)
 
 ifplugin Mail::SpamAssassin::Plugin::DKIM
   meta           BTC_ORG          (__BITCOIN_ID && __HAS_ORGANIZATION) && !ALL_TRUSTED && __DOS_HAS_MAILING_LIST && !DKIM_SIGNED
@@ -1993,7 +1999,7 @@ ifplugin Mail::SpamAssassin::Plugin::ReplaceTags
   replace_rules  __YOUR_WEBCAM
   body           __YOUR_ONAN            /(?:^|\s)<Y><O><U><R>?\s(?:<M><A><S><T>(?:<U>|<R>){2}<B><A><T><I>(?:<O><N>|<N><G>)|<O><N><A><N><I><S><M>|<S><O><L><I><T><A><R><Y>\s<S><E><X>|<H><A><N><D>\s<F><U><C><K><I><N><G>)/i
   replace_rules  __YOUR_ONAN
-  body           __YOUR_PERSONAL        /(?:^|\s)(?:<Y><O><U><R>\s(?:<P><E><R><S><O><N><A><L>|<S><O><C><I><A><L>\s<C><O><N><T><A><C><T>|<A><D><D><R><E><S><S>)\s(?:<I><N><F><O>(?:<R><M><A><T><I><O><N>)?|<D><A><T><A>|<D><E><T><A><I><L><S>|<B><O><O><K>|<S><E><C><R><E><T><S>)|<A><L><L>\s<Y><O><U><R>\s<F><I><L><E><S>)\s/i
+  body           __YOUR_PERSONAL        /(?:^|\s)(?:<Y><O><U><R>\s(?:<P><E><R><S><O><N><A><L>|<P><R><I><V><A><T><E>|<S><O><C><I><A><L>\s<C><O><N><T><A><C><T>|<A><D><D><R><E><S><S>)\s(?:<I><N><F><O>(?:<R><M><A><T><I><O><N>)?|<D><A><T><A>|<D><E><T><A><I><L><S>|<B><O><O><K>|<S><E><C><R><E><T><S>)|<A><L><L>\s<Y><O><U><R>\s<F><I><L><E><S>)\s/i
   replace_rules  __YOUR_PERSONAL
   body           __HOURS_DEADLINE       /(?:^|\s)(?:(?:<G><I><V><E>\s<Y><O><U>|<Y><O><U>\s(?:<W><I><L><L>\s)?<H><A><V><E>(?:\s<O><N><L><Y>|\s<J><U><S><T>)?)(?:\s<T><H><E>\s<L><A><S><T>)?\s(?:\d+|<O><N><E>|<T><W><O>|<T><H><R><E><E>)\s?(?:<H><O><U><R><S>?|<H><R>\s?<S>?|<D><A><Y><S>?)|(?:<B><Y>|<T><O>|<U><N><T><I><L>|<B><E><F><O><R><E>)\s<T><H><E>\s<E><N><D>\s<O><F>\s<T><H><E>\s(?:<W><O><R><K>(?:<I><N><G>)?\s)?<D><A><Y>|Ich\sgebe\sIhnen\s\d+\sStunden|\d+\s<H><O><U><R><S>?\s<B><E><F><O><R><E>\s(?:<S><E><N><D><I><N><G>|<R><E><L><E><A><S><I><N><G>|<E><X><P><O><S><I><N><G>|<P><U><B><L><I><S><H><I><N><G>)|(?:<T><H><E>|<Y><O><U><R>)\s<D><E><A><D><L><I><N><E>\s(?:<I><S>|<W><I><L><L>\s<B><E>))/i
   replace_rules  __HOURS_DEADLINE
@@ -2006,7 +2012,7 @@ else
   body           __YOUR_PASSWORD        /\b(?:your|(?:change|modify|update|reset|alter|fix)\sthe)\s(?:pass[-\s_]word|pswd)\b/i
   body           __YOUR_WEBCAM          /\b(?:from|your|with)\s(?:(?:screen|desktop)\sand\s|own\s)?(?:web[-\s]?|front[-\s]?|network\s)cam\b/i
   body           __YOUR_ONAN            /\byour?\s(?:mast[ur]{2}bati(?:on|ng)|onanism|solitary\ssex|hand\sfucking)\b/i
-  body           __YOUR_PERSONAL        /\b(?:your\s(?:personal|social\scontact|address)\s(?:info(?:rmation)?|data|details|book|secrets)|all\syour\sfiles)\b/i
+  body           __YOUR_PERSONAL        /\b(?:your\s(?:personal|private|social\scontact|address)\s(?:info(?:rmation)?|data|details|book|secrets)|all\syour\sfiles)\b/i
   body           __HOURS_DEADLINE       /\b(?:(?:give\syou|you\s(?:will\s)?have(?:\sonly|\sjust)?)(?:\sthe\slast)?\s(?:\d+|one|two|three)\s?(?:hours?|hr(?:\s?s)?|days?)|(?:by|to|until|before)\sthe\send\sof\sthe\s(?:work(?:ing)?\s)?day|Ich\sgebe\sIhnen\s\d+\sStunden|\d+\shours?\sbefore\s(?:sending|releasing|exposing|publishing)|(?:the|your)\sdeadline\s(?:is|will\sbe))\b/i
   body           __EXPLOSIVE_DEVICE     /\b(?:explosive\sdevice|bomb)\b/i
 endif
@@ -2037,11 +2043,25 @@ describe       BITCOIN_BOMB           BitCoin + bomb
 score          BITCOIN_BOMB           3.000	# limit
 tflags         BITCOIN_BOMB           publish
 
-meta           MONERO_EXTORT_01       (__MONERO || __URI_MONERO) && __EXTORT_MANY
-describe       MONERO_EXTORT_01       Extortion spam, pay via Monero
+meta           MONERO_EXTORT_01       __MONERO && __EXTORT_MANY
+describe       MONERO_EXTORT_01       Extortion spam, pay via Monero cryptocurrency
 score          MONERO_EXTORT_01       5.000	# limit
 tflags         MONERO_EXTORT_01       publish
 
+meta           MONERO_PAY_ME          __MONERO && __PAY_ME && !MONERO_EXTORT_01
+describe       MONERO_PAY_ME          Pay me via Monero cryptocurrency
+score          MONERO_PAY_ME          3.000	# limit
+tflags         MONERO_PAY_ME          publish
+
+meta           MONERO_DEADLINE        __MONERO && __HOURS_DEADLINE && !MONERO_EXTORT_01
+describe       MONERO_DEADLINE        Monero cryptocurrency with a deadline
+score          MONERO_DEADLINE        3.000	# limit
+tflags         MONERO_DEADLINE        publish
+
+meta           MONERO_MALWARE         __MONERO && __MY_MALWARE && !MONERO_EXTORT_01
+describe       MONERO_MALWARE         Monero cryptocurrency + malware bragging
+score          MONERO_MALWARE         3.500	# limit
+tflags         MONERO_MALWARE         publish
 
 meta           BOMB_FREEM             __EXPLOSIVE_DEVICE && __freemail_hdr_replyto 
 describe       BOMB_FREEM             Bomb + freemail
@@ -2054,7 +2074,7 @@ score          BOMB_MONEY             2.500	# limit
 tflags         BOMB_MONEY             publish
 
 meta           __MALWARE_NORDNS       __MY_MALWARE && __RDNS_NONE 
-meta           MALWARE_NORDNS         __MALWARE_NORDNS && !BITCOIN_EXTORT_01 && !__DKIM_EXISTS 
+meta           MALWARE_NORDNS         __MALWARE_NORDNS && !BITCOIN_EXTORT_01 && !MONERO_EXTORT_01
 describe       MALWARE_NORDNS         Malware bragging + no rDNS
 score          MALWARE_NORDNS         3.500	# limit
 tflags         MALWARE_NORDNS         publish
@@ -2063,7 +2083,7 @@ tflags         MALWARE_NORDNS         publish
 #meta           __MALWARE_IP_NORDNS    __MY_MALWARE && __HELO_MISC_IP && __RDNS_NONE 
 
 meta           __MALWARE_PASSWORD     __MY_MALWARE && __PASSWORD 
-meta           MALWARE_PASSWORD       __MALWARE_PASSWORD && !BITCOIN_EXTORT_01
+meta           MALWARE_PASSWORD       __MALWARE_PASSWORD && !BITCOIN_EXTORT_01 && !MONERO_EXTORT_01
 describe       MALWARE_PASSWORD       Malware bragging + "password"
 score          MALWARE_PASSWORD       3.500	# limit
 tflags         MALWARE_PASSWORD       publish
