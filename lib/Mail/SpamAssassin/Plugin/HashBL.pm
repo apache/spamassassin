@@ -448,9 +448,6 @@ sub check_hashbl_emails {
 
 sub check_hashbl_uris {
   my ($self, $pms, $list, $opts, $subtest) = @_;
-  my %uri;
-  my %seen;
-  my @filtered_uris;
 
   return 0 if !$self->{hashbl_available};
   return 0 if !$pms->is_dns_available();
@@ -483,6 +480,8 @@ sub check_hashbl_uris {
   }
 
   my $uris = $pms->get_uri_detail_list();
+  my %seen;
+  my @filtered_uris;
 
   while (my($uri, $info) = each %{$uris}) {
     # we want to skip mailto: uris
@@ -490,8 +489,10 @@ sub check_hashbl_uris {
     next if exists $seen{$uri};
 
     # no hosts/domains were found via this uri, so skip
-    next unless ($info->{hosts});
-    if (($info->{types}->{a}) || ($info->{types}->{parsed})) {
+    next unless $info->{hosts};
+    next unless $info->{cleaned};
+    next unless $info->{types}->{a} || $info->{types}->{parsed};
+    foreach my $uri (@{$info->{cleaned}}) {
       # check url
       push @filtered_uris, $keep_case ? $uri : lc($uri);
     }
