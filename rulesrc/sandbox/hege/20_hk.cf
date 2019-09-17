@@ -5,6 +5,13 @@ rawbody __HTML_UTF7 /<meta [^>]{0,200}\bcharset=.?utf-7\b/i
 #### Basic stuff
 ####
 
+uri		URI_IN_URI_5		/(?::\/\/.*?){5}/
+describe	URI_IN_URI_5		Multiple URIs inside URI
+uri		URI_IN_URI_10		/(?::\/\/.*?){10}/
+describe	URI_IN_URI_10		Multiple URIs inside URI
+uri		URI_IN_URI_20		/(?::\/\/.*?){20}/
+describe	URI_IN_URI_20		Multiple URIs inside URI
+
 body		MILLION_HUNDRED		/Million\s+\S+\s+Hundred/i
 describe	MILLION_HUNDRED		Million "One to Nine" Hundred
 tflags		MILLION_HUNDRED		publish
