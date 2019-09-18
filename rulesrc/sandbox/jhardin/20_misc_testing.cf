@@ -1945,7 +1945,7 @@ meta           __BITCOIN_SPAM_05  __BITCOIN_ID && __SPOOFED_FREEMAIL
 meta           BITCOIN_SPAM_05    __BITCOIN_SPAM_05 && !__HAS_IN_REPLY_TO 
 describe       BITCOIN_SPAM_05    BitCoin spam pattern 05
 score          BITCOIN_SPAM_05    2.500	# limit
-tflags         BITCOIN_SPAM_05    publish
+tflags         BITCOIN_SPAM_05    net publish
 
 meta           BITCOIN_SPAM_06  __BITCOIN_ID && TVD_RCVD_SPACE_BRACKET
 describe       BITCOIN_SPAM_06  BitCoin spam pattern 06
@@ -2305,23 +2305,24 @@ body      __RAW_TOKEN_BODY              /\#(?:(?:First|Last)Name|Email)\#/i
 header    __REPTO_CHN_FREEM             Reply-To =~ /\@(?:sina|aliyun)\.com/i
 
 meta      __SPOOFED_FREEM_REPTO         __SPOOFED_FREEMAIL && FREEMAIL_REPLYTO
+tflags    __SPOOFED_FREEM_REPTO         net
 
 meta      SPOOFED_FREEM_REPTO_CHN       (__SPOOFED_FREEM_REPTO || FORGED_YAHOO_RCVD) && __REPTO_CHN_FREEM
 describe  SPOOFED_FREEM_REPTO_CHN       Forged freemail sender with Chinese freemail reply-to
 score     SPOOFED_FREEM_REPTO_CHN       3.500
-tflags    SPOOFED_FREEM_REPTO_CHN       publish
+tflags    SPOOFED_FREEM_REPTO_CHN       net publish
 
 header    __REPTO_RUS_FREEM             Reply-To =~ /\@mail\.ru/i
 
 meta      SPOOFED_FREEM_REPTO_RUS       (__SPOOFED_FREEM_REPTO || FORGED_YAHOO_RCVD) && __REPTO_RUS_FREEM
 describe  SPOOFED_FREEM_REPTO_RUS       Forged freemail sender with Russian freemail reply-to
 score     SPOOFED_FREEM_REPTO_RUS       3.500
-tflags    SPOOFED_FREEM_REPTO_RUS       publish
+tflags    SPOOFED_FREEM_REPTO_RUS       net publish
 
 meta      SPOOFED_FREEM_REPTO           __SPOOFED_FREEM_REPTO && !__THREADED
 describe  SPOOFED_FREEM_REPTO           Forged freemail sender with freemail reply-to
 score     SPOOFED_FREEM_REPTO           2.500
-tflags    SPOOFED_FREEM_REPTO           publish
+tflags    SPOOFED_FREEM_REPTO           net publish
 
 
 #header    __VERY_LONG_REPTO             Reply-To =~ /[^<\s\@]{25,}\@/

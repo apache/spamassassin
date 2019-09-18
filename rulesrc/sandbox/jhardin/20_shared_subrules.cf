@@ -9,7 +9,9 @@ rawbody  __BUGGED_IMG	m{<img\b[^>]{0,100}\ssrc=.?https?://[^>]{6,80}(?:\?[^>]{8}
 # originally from khopesh/20_s25r.cf
 # Sanity check:  how much freemail lacks spf or dkim?
 # JHardin: convert to subrule and scored meta
-meta	 __SPOOFED_FREEMAIL	!__NOT_SPOOFED && FREEMAIL_FROM
-meta	 SPOOFED_FREEMAIL	__SPOOFED_FREEMAIL && !__FS_SUBJ_RE
+meta     __SPOOFED_FREEMAIL     !__NOT_SPOOFED && FREEMAIL_FROM
+meta     SPOOFED_FREEMAIL       __SPOOFED_FREEMAIL && !__FS_SUBJ_RE
+score    SPOOFED_FREEMAIL       2.000	# limit
+tflags   SPOOFED_FREEMAIL       net
 
 
