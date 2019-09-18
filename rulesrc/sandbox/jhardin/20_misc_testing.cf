@@ -2458,7 +2458,7 @@ tflags     PHP_SCRIPT_MUA              publish
 meta       __PHP_SCRIPT_MIMENEEDED     __HAS_PHP_SCRIPT && __FROM_NEEDS_MIME 
 
 meta       __PHP_ORIG_SCRIPT_SONLY     __HAS_PHP_ORIG_SCRIPT && (__TVD_SPACE_RATIO || __SINGLE_WORD_SUBJ || __OBFUSCATING_COMMENT_B)
-meta       PHP_ORIG_SCRIPT             __PHP_ORIG_SCRIPT_SONLY && !ALL_TRUSTED && !__SUBSCRIPTION_INFO 
+meta       PHP_ORIG_SCRIPT             __PHP_ORIG_SCRIPT_SONLY && !ALL_TRUSTED && !__SUBSCRIPTION_INFO && !__MSGID_BEFORE_RECEIVED && !MSGID_FROM_MTA_HEADER
 describe   PHP_ORIG_SCRIPT             Sent by bot & other signs
 score      PHP_ORIG_SCRIPT             2.500	# limit
 tflags     PHP_ORIG_SCRIPT             publish
