@@ -35,3 +35,10 @@ meta       GB_LINKED_IMG_NOT_RCVD_LINK   __LINKED_IMG_NOT_RCVD_LINK && !__HAS_ER
 describe   GB_LINKED_IMG_NOT_RCVD_LINK   Linkedin hosted image but message not from Linkedin
 score      GB_LINKED_IMG_NOT_RCVD_LINK   2.500    # limit
 tflags     GB_LINKED_IMG_NOT_RCVD_LINK   publish
+
+header     __HDR_RCVD_PAYPAL		 X-Spam-Relays-External =~ /rdns=mx\S+\.slc\.paypal\.com\s/
+uri        __URI_IMG_PAYPAL		 /^https:\/\/www\.paypalobjects\.com\/en_US\/i\/logo\/logo_emailheader_113wx46h\.gif/
+meta       __PAYPAL_IMG_NOT_RCVD_LINK    __URI_IMG_PAYPAL && !__HDR_RCVD_PAYPAL
+meta       GB_PAYPAL_IMG_NOT_RCVD_LINK   __PAYPAL_IMG_NOT_RCVD_LINK && !__HAS_ERRORS_TO && !__MSGID_LIST && !__MSGID_GUID && !__RCD_RDNS_SMTP
+describe   GB_PAYPAL_IMG_NOT_RCVD_LINK   Paypal hosted image but message not from Paypal
+score      GB_PAYPAL_IMG_NOT_RCVD_LINK   2.500    # limit
