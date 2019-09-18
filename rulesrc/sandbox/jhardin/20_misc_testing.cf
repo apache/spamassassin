@@ -2829,7 +2829,7 @@ header     __HDR_RCVD_ALIBABA          X-Spam-Relays-External =~ /rdns=\S+\.alib
 uri        __URI_IMG_ALICDN            m,//(?:[^/.]+\.)*alicdn\.com/.+\.(?:jpe?g|gif|png),i
 
 meta       __ALIBABA_IMG_NOT_RCVD_ALI  __URI_IMG_ALICDN && !__HDR_RCVD_ALIBABA
-meta       ALIBABA_IMG_NOT_RCVD_ALI    __ALIBABA_IMG_NOT_RCVD_ALI && !__YOUR_PASSWORD && !__UNSUB_LINK && !__MSGID_BEFORE_RECEIVED 
+meta       ALIBABA_IMG_NOT_RCVD_ALI    __ALIBABA_IMG_NOT_RCVD_ALI && !__YOUR_PASSWORD && !__UNSUB_LINK && !__MSGID_BEFORE_RECEIVED && !__HAS_HREF_ONECASE 
 score      ALIBABA_IMG_NOT_RCVD_ALI    2.500	# limit
 describe   ALIBABA_IMG_NOT_RCVD_ALI    Alibaba hosted image but message not from Alibaba
 tflags     ALIBABA_IMG_NOT_RCVD_ALI    publish
@@ -2939,7 +2939,7 @@ meta       __NORDNS_SPOOFED            __RDNS_NONE && !__NOT_SPOOFED
 
 # potential bitcoin extortion obfuscation
 body       __PASSWORD                  /\bp[-\s_]?a[-\s_]?s[-\s_]?s[-\s_]?w[-\s_]?o[-\s_]?r[-\s_]?d\b/i
-meta       __UNAME_PASSWD_PDF          __PASSWORD && LOCALPART_IN_SUBJECT && __PDF_ATTACH
+meta       __UNAME_PASSWD_PDF          ( __PASSWORD || __YOUR_PASSWORD ) && LOCALPART_IN_SUBJECT && __PDF_ATTACH
 
 
 
