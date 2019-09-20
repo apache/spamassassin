@@ -2943,5 +2943,6 @@ body       __PASSWORD                  /\bp[-\s_]?a[-\s_]?s[-\s_]?s[-\s_]?w[-\s_
 meta       __UNAME_PASSWD_PDF          ( __PASSWORD || __YOUR_PASSWORD ) && LOCALPART_IN_SUBJECT && __PDF_ATTACH
 
 
+uri        __URI_DOTGOV                m;^https?://(?:[^./]+\.)+gov/;i
 
 
