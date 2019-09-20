@@ -2156,8 +2156,9 @@ sub _get {
       # "'Foo Blah'" <jm@foo>
       #
       local $1;
-      # does not handle mailbox-list or address-list well, to be improved
-      if ($result =~ /^ \s* (.*?) \s* < [^<>]* >/sx) {
+      # does not handle mailbox-list or address-list or quotes well, to be improved
+      if ($result =~ /^ \s* " (.*?) (?<!\\)" \s* < [^<>]* >/sx ||
+          $result =~ /^ \s* (.*?) \s* < [^<>]* >/sx) {
         $result = $1;  # display-name, RFC 5322
         # name-addr    = [display-name] angle-addr
         # display-name = phrase
