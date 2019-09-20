@@ -2167,6 +2167,7 @@ sub _get {
         # obs-phrase   = word *(word / "." / CFWS)
         $result =~ s{ " ( (?: [^"\\] | \\. )* ) " }
                 { my $s=$1; $s=~s{\\(.)}{$1}gs; $s }gsxe;
+        $result =~ s/\\"/"/gs;
       } elsif ($result =~ /^ [^(,]*? \( (.*?) \) /sx) {  # legacy form
         # nested comments are not handled, to be improved
         $result = $1;
