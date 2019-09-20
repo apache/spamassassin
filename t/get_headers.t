@@ -97,7 +97,7 @@ ok(try('To11:name', ''));
 ok(try('To12:addr', 'jm@foo'));
 ok(try('To12:name', 'Some User <jm@bar>'));
 ok(try('To13:addr', 'jm@foo'));
-ok(try('To13:name', 'Some User <\"Some User\"@bar>'));
+ok(try('To13:name', 'Some User <"Some User"@bar>'));
 ok(try('Hdr1', "foo   bar baz\n"));
 ok(try('Hdr1:raw', "    foo  \n  bar\n\tbaz \n  \n"));
 ok(try('To_bug5201_a:addr', 'jm@foo'));
