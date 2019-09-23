@@ -2948,9 +2948,9 @@ meta       __UNAME_PASSWD_PDF          ( __PASSWORD || __YOUR_PASSWORD ) && LOCA
 uri        __URI_DOTGOV                m;^https?://(?:[^./]+\.)+gov/;i
 
 meta       __DOTGOV_FREEMAIL           __URI_DOTGOV && __freemail_hdr_replyto
-meta       __DOTGOV_MONEY              __URI_DOTGOV && ( __XFER_MONEY || __MONEY_FRAUD || __YOUR_FUND || __BENEFICIARY || __COMPENSATION || __LOTSA_MONEY_01 || __LOTSA_MONEY_04 )
-meta       __DOTGOV_QTD                __URI_DOTGOV && __CTYPE_CHARSET_QUOTED 
-meta       __DOTGOV_NOTRUSTED          __URI_DOTGOV && __NO_TRUSTED_RELAY 
+#meta       __DOTGOV_MONEY              __URI_DOTGOV && ( __XFER_MONEY || __MONEY_FRAUD || __YOUR_FUND || __BENEFICIARY || __COMPENSATION || __LOTSA_MONEY_01 || __LOTSA_MONEY_04 )
+meta       __DOTGOV_MONEY              __URI_DOTGOV && ( __YOUR_FUND )
+meta       __DOTGOV_IMAGE              __URI_DOTGOV && __REMOTE_IMAGE 
 
 meta       __DOTGOV_NXDKIM             __URI_DOTGOV && DKIM_ADSP_NXDOMAIN 
 meta       __DOTGOV_NXDKIM             net
