@@ -2319,7 +2319,7 @@ describe  SPOOFED_FREEM_REPTO_RUS       Forged freemail sender with Russian free
 score     SPOOFED_FREEM_REPTO_RUS       3.500
 tflags    SPOOFED_FREEM_REPTO_RUS       net publish
 
-meta      SPOOFED_FREEM_REPTO           __SPOOFED_FREEM_REPTO && !__THREADED
+meta      SPOOFED_FREEM_REPTO           __SPOOFED_FREEM_REPTO && !__AC_TINY_FONT && !__HAS_IN_REPLY_TO && !__HAS_THREAD_INDEX 
 describe  SPOOFED_FREEM_REPTO           Forged freemail sender with freemail reply-to
 score     SPOOFED_FREEM_REPTO           2.500
 tflags    SPOOFED_FREEM_REPTO           net publish
