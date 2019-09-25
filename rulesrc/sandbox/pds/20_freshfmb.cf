@@ -11,8 +11,13 @@ reuse    NUMBEREND_LINKBAIT
 
 meta     NUMBERONLY_BITCOIN_EXP __NUMBERONLY_TLD && __BITCOIN_ID && __NAKED_TO
 describe NUMBERONLY_BITCOIN_EXP Domain ends in a large number and very short body with link
-score    NUMBERONLY_BITCOIN_EXP 1.0 # limit
+score    NUMBERONLY_BITCOIN_EXP 2.0 # limit
 reuse    NUMBERONLY_BITCOIN_EXP
+
+meta     PDS_NAKED_TO_NUMERO __NAKED_TO && __NUMBERONLY_TLD
+describe PDS_NAKED_TO_NUMERO Naked-to, numberonly domain
+score    PDS_NAKED_TO_NUMERO 2.0
+reuse    PDS_NAKED_TO_NUMERO
 
 # _AUTHORDOMAIN_ implemented only from 3.4.1
 if (version >= 3.004001)
