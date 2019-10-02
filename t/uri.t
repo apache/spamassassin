@@ -16,7 +16,7 @@ if (-e 'test_dir') {            # running from test directory, not ..
 }
 
 use strict;
-use Test::More tests => 101;
+use Test::More tests => 102;
 use lib '.'; use lib 't';
 use SATest; sa_t_init("uri");
 
@@ -275,6 +275,14 @@ ok(try_canon([
    ], [
    'http://0xcc.0x50.0x89.0xf/',
    'http://204.80.137.15/',
+       ]));
+
+# Firefox like foo -> www.foo.com rewrite
+ok (try_canon([
+   'http://foo/',
+   ], [
+   'http://foo/',
+   'http://www.foo.com/',
        ]));
 
 ##############################################
