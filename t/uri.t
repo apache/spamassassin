@@ -25,7 +25,7 @@ use Test::More;
 use lib '.'; use lib 't';
 use SATest; sa_t_init("uri");
 
-my $tests = 101;
+my $tests = 102;
 $tests += 5 if $have_libidn;
 
 plan tests => $tests;
@@ -293,6 +293,14 @@ ok(try_canon([
    ], [
    'http://0xcc.0x50.0x89.0xf/',
    'http://204.80.137.15/',
+       ]));
+
+# Firefox like foo -> www.foo.com rewrite
+ok (try_canon([
+   'http://foo/',
+   ], [
+   'http://foo/',
+   'http://www.foo.com/',
        ]));
 
 ##############################################
