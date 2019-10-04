@@ -25,7 +25,7 @@ meta       __GPHOTO_IMG_NOT_RCVD_GOOG  __URI_IMG_GPHOTO && !__HDR_RCVD_GOOGLE
 meta       GB_GOOG_IMG_NOT_RCVD_GOOG   ( __GDRIVE_IMG_NOT_RCVD_GOOG || __GPHOTO_IMG_NOT_RCVD_GOOG ) && !__HAS_ERRORS_TO && !__MSGID_LIST && !__MSGID_GUID && !__RCD_RDNS_SMTP
 describe   GB_GOOG_IMG_NOT_RCVD_GOOG   Google hosted image but message not from Google
 score      GB_GOOG_IMG_NOT_RCVD_GOOG   2.500    # limit
-tflags     GB_GOOG_IMG_NOT_RCVD_GOOG   publish
+# tflags     GB_GOOG_IMG_NOT_RCVD_GOOG   publish
 
 header     __HDR_RCVD_LINKEDIN           X-Spam-Relays-External =~ /rdns=mail\S+\-\S+\.linkedin\.com\s/
 uri        __URI_IMG_LINKEDIN            /^https:\/\/static\.licdn\.com\/scds\/common\/u\/images\/email\/artdeco\/illustrations\/56\/magnifying-glass\.png/
