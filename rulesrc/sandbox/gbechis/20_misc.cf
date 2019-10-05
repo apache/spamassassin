@@ -43,6 +43,6 @@ meta       GB_PAYPAL_IMG_NOT_RCVD_LINK   __PAYPAL_IMG_NOT_RCVD_LINK && !__HAS_ER
 describe   GB_PAYPAL_IMG_NOT_RCVD_LINK   Paypal hosted image but message not from Paypal
 score      GB_PAYPAL_IMG_NOT_RCVD_LINK   2.500    # limit
 
-header     GB_PHP_BADVERSION		 X-Mailer =~ /PHP/' . phpversion();/
+header     GB_PHP_BADVERSION		 X-Mailer =~ /PHP\/' \. phpversion\(\);/
 describe   GB_PHP_BADVERSION		 Impossible Php version
 score      GB_PHP_BADVERSION		 1.000	 # limit
