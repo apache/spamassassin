@@ -152,14 +152,14 @@ reuse           URIBL_DBL_ERROR
 urirhssub       URIBL_DBL_BLOCKED_OPENDNS  dbl.spamhaus.org.       A   127.255.255.254
 body            URIBL_DBL_BLOCKED_OPENDNS  eval:check_uridnsbl('URIBL_DBL_BLOCKED_OPENDNS')
 describe        URIBL_DBL_BLOCKED_OPENDNS  ADMINISTRATOR NOTICE: The query to zen.spamhaus.org was blocked due to usage of an open resolver. See https://www.spamhaus.org/returnc/pub/
-tflags          URIBL_DBL_BLOCKED_OPENDNS  net
+tflags          URIBL_DBL_BLOCKED_OPENDNS  net domains_only
 reuse           URIBL_DBL_BLOCKED_OPENDNS
 
 # New blocked checks 10/2019
 urirhssub       URIBL_DBL_BLOCKED  dbl.spamhaus.org.       A   127.255.255.255
 body            URIBL_DBL_BLOCKED  eval:check_uridnsbl('URIBL_DBL_BLOCKED')
 describe        URIBL_DBL_BLOCKED  ADMINISTRATOR NOTICE: The query to zen.spamhaus.org was blocked. See https://www.spamhaus.org/returnc/vol/
-tflags          URIBL_DBL_BLOCKED  net
+tflags          URIBL_DBL_BLOCKED  net domains_only
 reuse           URIBL_DBL_BLOCKED
 
 endif
