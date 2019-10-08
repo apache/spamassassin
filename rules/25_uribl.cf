@@ -60,6 +60,26 @@ if can(Mail::SpamAssassin::Plugin::URIDNSBL::has_uridnsbl_for_a)
   reuse           URIBL_CSS_A
 endif
 
+# New blocked checks 10/2019
+uridnssub URIBL_ZEN_BLOCKED_OPENDNS  zen.spamhaus.org.       A   127.255.255.254
+body      URIBL_ZEN_BLOCKED_OPENDNS  eval:check_uridnsbl('URIBL_ZEN_BLOCKED_OPENDNS')
+describe  URIBL_ZEN_BLOCKED_OPENDNS  ADMINISTRATOR NOTICE: The query to zen.spamhaus.org was blocked due to usage of an open resolver. See https://www.spamhaus.org/returnc/pub/
+tflags    URIBL_ZEN_BLOCKED_OPENDNS  net
+reuse     URIBL_ZEN_BLOCKED_OPENDNS
+
+# New blocked checks 10/2019
+uridnssub URIBL_ZEN_BLOCKED  zen.spamhaus.org.       A   127.255.255.255
+body      URIBL_ZEN_BLOCKED  eval:check_uridnsbl('URIBL_ZEN_BLOCKED')
+describe  URIBL_ZEN_BLOCKED  ADMINISTRATOR NOTICE: The query to zen.spamhaus.org was blocked. See https://www.spamhaus.org/returnc/vol/
+tflags    URIBL_ZEN_BLOCKED  net
+reuse     URIBL_ZEN_BLOCKED
+
+if can(Mail::SpamAssassin::Conf::feature_dns_block_rule)
+dns_block_rule URIBL_ZEN_BLOCKED_OPENDNS zen.spamhaus.org
+dns_block_rule URIBL_ZEN_BLOCKED zen.spamhaus.org
+endif
+
+
 # DBL, https://www.spamhaus.org/dbl/
 # changes axb 05-17-2014: as per https://www.spamhaus.org/news/article/713/
 # SH changes effective 06-01-2014
@@ -127,6 +147,20 @@ body            URIBL_DBL_ERROR  eval:check_uridnsbl('URIBL_DBL_ERROR')
 describe        URIBL_DBL_ERROR  Error: queried the Spamhaus DBL blocklist for an IP
 tflags          URIBL_DBL_ERROR  net domains_only
 reuse           URIBL_DBL_ERROR
+
+# New blocked checks 10/2019
+urirhssub       URIBL_DBL_BLOCKED_OPENDNS  dbl.spamhaus.org.       A   127.255.255.254
+body            URIBL_DBL_BLOCKED_OPENDNS  eval:check_uridnsbl('URIBL_DBL_BLOCKED_OPENDNS')
+describe        URIBL_DBL_BLOCKED_OPENDNS  ADMINISTRATOR NOTICE: The query to zen.spamhaus.org was blocked due to usage of an open resolver. See https://www.spamhaus.org/returnc/pub/
+tflags          URIBL_DBL_BLOCKED_OPENDNS  net
+reuse           URIBL_DBL_BLOCKED_OPENDNS
+
+# New blocked checks 10/2019
+urirhssub       URIBL_DBL_BLOCKED  dbl.spamhaus.org.       A   127.255.255.255
+body            URIBL_DBL_BLOCKED  eval:check_uridnsbl('URIBL_DBL_BLOCKED')
+describe        URIBL_DBL_BLOCKED  ADMINISTRATOR NOTICE: The query to zen.spamhaus.org was blocked. See https://www.spamhaus.org/returnc/vol/
+tflags          URIBL_DBL_BLOCKED  net
+reuse           URIBL_DBL_BLOCKED
 
 endif
 

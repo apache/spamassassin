@@ -132,6 +132,24 @@ describe RCVD_IN_SBL_CSS	Received via a relay in Spamhaus SBL-CSS
 tflags RCVD_IN_SBL_CSS		net
 reuse  RCVD_IN_SBL_CSS
 
+# New blocked checks 10/2019
+header RCVD_IN_ZEN_BLOCKED_OPENDNS	eval:check_rbl('zen-lastexternal', 'zen.spamhaus.org.', '^127\.255\.255\.254$')
+describe RCVD_IN_ZEN_BLOCKED_OPENDNS	ADMINISTRATOR NOTICE: The query to zen.spamhaus.org was blocked due to usage of an open resolver. See https://www.spamhaus.org/returnc/pub/
+tflags RCVD_IN_ZEN_BLOCKED_OPENDNS	net
+reuse RCVD_IN_ZEN_BLOCKED_OPENDNS
+
+# New blocked checks 10/2019
+header RCVD_IN_ZEN_BLOCKED	eval:check_rbl('zen-lastexternal', 'zen.spamhaus.org.', '^127\.255\.255\.255$')
+describe RCVD_IN_ZEN_BLOCKED	ADMINISTRATOR NOTICE: The query to zen.spamhaus.org was blocked. See https://www.spamhaus.org/returnc/vol/
+tflags RCVD_IN_ZEN_BLOCKED	net
+reuse RCVD_IN_ZEN_BLOCKED
+
+if can(Mail::SpamAssassin::Conf::feature_dns_block_rule)
+dns_block_rule RCVD_IN_ZEN_BLOCKED_OPENDNS zen.spamhaus.org
+dns_block_rule RCVD_IN_ZEN_BLOCKED zen.spamhaus.org
+endif
+
+
 # Now, single zone BLs follow:
 
 # ---------------------------------------------------------------------------

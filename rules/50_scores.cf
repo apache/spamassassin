@@ -517,6 +517,9 @@ score RCVD_IN_SBL_CSS 0 3.558 0 3.335 # n=0 n=2
 score NO_DNS_FOR_FROM 0 0.379 0 0.001 # n=0 n=2
 # </gen:mutable>
 
+score RCVD_IN_ZEN_BLOCKED_OPENDNS 0 0.001 0 0.001
+score RCVD_IN_ZEN_BLOCKED 0 0.001 0 0.001
+
 # ReturnPath Certified
 # https://www.returnpath.net/internetserviceprovider/certification/
 # CERTIFIED is a subset of SAFE, thus the score is cumulative.
@@ -813,6 +816,10 @@ score URIBL_DBL_ABUSE_BOTCC 0 2.5 0 2.5
 score URIBL_RED 0 0.001 0 0.001
 score URIBL_BLOCKED 0 0.001 0 0.001
 score URIBL_DBL_ERROR 0 0.001 0 0.001
+score URIBL_ZEN_BLOCKED_OPENDNS 0 0.001 0 0.001
+score URIBL_ZEN_BLOCKED 0 0.001 0 0.001
+score URIBL_DBL_BLOCKED_OPENDNS 0 0.001 0 0.001
+score URIBL_DBL_BLOCKED 0 0.001 0 0.001
 endif # Mail::SpamAssassin::Plugin::URIDNSBL
 
 # ReplaceTags
