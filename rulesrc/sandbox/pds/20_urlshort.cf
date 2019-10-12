@@ -725,6 +725,8 @@ enlist_uri_host (PDS_URISHORTENER) zzang.kr
 
 header   __PDS_URISHORTENER eval:check_uri_host_listed('PDS_URISHORTENER')
 
+meta     __PDS_SHORT_URL __SHORT_URL && !(__URL_SHORTENER || __PDS_URISHORTENER) && !ALL_TRUSTED
+
 meta     DRUGS_ERECTILE_SHORT_SHORTNER __KAM_BODY_LENGTH_LT_1024 && (__PDS_URISHORTENER || __URL_SHORTENER) && DRUGS_ERECTILE
 describe DRUGS_ERECTILE_SHORT_SHORTNER Short erectile drugs advert with URL_SHORTENER
 score    DRUGS_ERECTILE_SHORT_SHORTNER 1.5 # limit
@@ -744,6 +746,11 @@ meta     TONOM_EQ_TOLOC_SHRT_SHRTNER __PDS_URISHORTENER && __PDS_TONAME_EQ_TOLOC
 describe TONOM_EQ_TOLOC_SHRT_SHRTNER Short email with shortener and To:name eq To:local
 score    TONOM_EQ_TOLOC_SHRT_SHRTNER 1.5 # limit
 reuse    TONOM_EQ_TOLOC_SHRT_SHRTNER
+
+meta     TONOM_EQ_TOLOC_SHRT_PSHRTNER __PDS_SHORT_URL && __PDS_TONAME_EQ_TOLOCAL && __SUBJ_SHORT
+describe TONOM_EQ_TOLOC_SHRT_PSHRTNER Short subject with potential shortener and To:name eq To:local
+score    TONOM_EQ_TOLOC_SHRT_PSHRTNER 1.5 # limit
+reuse    TONOM_EQ_TOLOC_SHRT_PSHRTNER
 
 endif
 endif
