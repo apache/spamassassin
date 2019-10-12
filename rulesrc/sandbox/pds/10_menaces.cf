@@ -4,6 +4,10 @@ meta     PDS_FROM_NAME_TO_DOMAIN __PDS_FROM_NAME_TO_DOMAIN
 score    PDS_FROM_NAME_TO_DOMAIN 1.0
 describe PDS_FROM_NAME_TO_DOMAIN From:name looks like To:domain
 
+meta     PDS_FRNOM_TODOM_NAKED_TO __NAKED_TO && PDS_FROM_NAME_TO_DOMAIN
+describe PDS_FRNOM_TODOM_NAKED_TO Naked to From name equals to Domain
+score    PDS_FRNOM_TODOM_NAKED_TO 1.5
+
 rawbody    __PDS_HIDDEN_UK_BUSINESSLOAN /style="[^"]*display:none[^"]*">.*UK's [a-z]+ rates for business loans/
 
 meta     PDS_HIDDEN_UK_BUSINESSLOAN __PDS_HIDDEN_UK_BUSINESSLOAN
