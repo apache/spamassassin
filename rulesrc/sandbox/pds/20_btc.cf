@@ -1,6 +1,6 @@
 rawbody  __HAS_IMG_SRC_DATA  /^[^>].*?<img src=['"]data/im
 
-meta     __PDS_BTC_ID   ( __BITCOIN_ID && !__URL_BTC_ID && !__HAS_IMG_SRC_DATA)
+meta     __PDS_BTC_ID   ( __BITCOIN_ID && !__URL_BTC_ID && !__HAS_IMG_SRC_DATA && !__BUGGED_IMG)
 
 meta     PDS_BTC_ID __PDS_BTC_ID
 describe PDS_BTC_ID FP reduced Bitcoin ID
