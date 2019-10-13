@@ -265,8 +265,6 @@ sub finish_tests {
 sub run_rbl_eval_tests {
   my ($self, $pms) = @_;
 
-  $pms->init_rbl_subs();
-
   while (my ($rulename, $test) = each %{$pms->{conf}->{rbl_evals}}) {
     my $score = $pms->{conf}->{scores}->{$rulename};
     next unless $score;

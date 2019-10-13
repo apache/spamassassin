@@ -29,7 +29,7 @@ use Mail::SpamAssassin::Conf;
 use Mail::SpamAssassin::PerMsgStatus;
 use Mail::SpamAssassin::AsyncLoop;
 use Mail::SpamAssassin::Constants qw(:ip);
-use Mail::SpamAssassin::Util qw(untaint_var am_running_on_windows);
+use Mail::SpamAssassin::Util qw(untaint_var am_running_on_windows compile_regexp);
 
 use File::Spec;
 use IO::Socket;
@@ -94,6 +94,25 @@ BEGIN {
 
 sub do_rbl_lookup {
   my ($self, $rule, $set, $type, $host, $subtest) = @_;
+
+  if (defined $subtest) {
+    if ($subtest =~ /^sb:/) {
+      info("dns: ignored $rule, SenderBase rules are deprecated");
+      return;
+    }
+    # Compile as regex if not pure ip/bitmask (same check in process_dnsbl_result)
+    if ($subtest !~ /^\d+(?:\.\d+\.\d+\.\d+)?$/) {
+      my ($rec, $err) = compile_regexp($subtest, 0);
+      if (!$rec) {
+        warn("dns: invalid rule $rule subtest regexp '$subtest': $err\n");
+        return;
+      }
+      $subtest = $rec;
+    }
+  }
+
+  dbg("dns: launching rule %s, set %s, type %s, %s", $rule, $set, $type,
+    defined $subtest ? "subtest $subtest" : 'no subtest');
 
   my $ent = {
     rulename => $rule,
@@ -166,6 +185,7 @@ sub dnsbl_hit {
   }
 
   if (!$self->{tests_already_hit}->{$rule}) {
+    dbg("dns: rbl rule $rule hit");
     $self->got_hit($rule, "RBL: ", ruletype => "dnsbl");
   }
 }
@@ -224,71 +244,87 @@ sub process_dnsbl_result {
     my $answ_type = $answer->type;
     # TODO: there are some CNAME returns that might be useful
     next if $answ_type ne 'A' && $answ_type ne 'TXT';
-    if ($answ_type eq 'A') {
-      # Net::DNS::RR::A::address() is available since Net::DNS 0.69
-      my $ip_address = $answer->UNIVERSAL::can('address') ? $answer->address
-                                                          : $answer->rdatastr;
-      # skip any A record that isn't on 127.0.0.0/8
-      next if $ip_address !~ /^127\./;
+
+    my $rdatastr;
+    if ($answer->UNIVERSAL::can('txtdata')) {
+      # txtdata returns a non- zone-file-format encoded result, unlike rdstring;
+      # avoid space-separated RDATA <character-string> fields if possible,
+      # txtdata provides a list of strings in a list context since Net::DNS 0.69
+      $rdatastr = join('',$answer->txtdata);
+    } else {
+      # rdatastr() is historical/undocumented, use rdstring() since Net::DNS 0.69
+      $rdatastr = $answer->UNIVERSAL::can('rdstring') ? $answer->rdstring
+                                                    : $answer->rdatastr;
+      # encoded in a RFC 1035 zone file format (escaped), decode it
+      $rdatastr =~ s{ \\ ( [0-9]{3} | (?![0-9]{3}) . ) }
+                    { length($1)==3 && $1 <= 255 ? chr($1) : $1 }xgse;
     }
-    $self->dnsbl_hit($ent->{rulename}, $question, $answer);
+
+    # Bug 7236: Net::DNS attempts to decode text strings in a TXT record as
+    # UTF-8 since version 0.69, which is undesired: octets failing the UTF-8
+    # decoding are converted to a Unicode "replacement character" U+FFFD, and
+    # ASCII text is unnecessarily flagged as perl native characters.
+    utf8::encode($rdatastr)  if utf8::is_utf8($rdatastr);
+
+    # skip any A record that isn't on 127.0.0.0/8
+    next if $answ_type eq 'A' && $rdatastr !~ /^127\./;
+
+    # check_rbl tests
+    if (defined $ent->{subtest}) {
+      if ($self->check_subtest($rdatastr, $ent->{subtest})) {
+        $self->dnsbl_hit($ent->{rulename}, $question, $answer);
+      }
+    } else {
+      $self->dnsbl_hit($ent->{rulename}, $question, $answer);
+    }
+
+    # check_rbl_sub tests
     if (defined $self->{rbl_subs}{$ent->{set}}) {
-      $self->process_dnsbl_set($ent->{set}, $question, $answer);
+      $self->process_dnsbl_set($ent->{set}, $question, $answer, $rdatastr);
     }
   }
   return 1;
 }
 
 sub process_dnsbl_set {
-  my ($self, $set, $question, $answer) = @_;
+  my ($self, $set, $question, $answer, $rdatastr) = @_;
 
-  my $rdatastr;
-  if ($answer->UNIVERSAL::can('txtdata')) {
-    # txtdata returns a non- zone-file-format encoded result, unlike rdstring;
-    # avoid space-separated RDATA <character-string> fields if possible,
-    # txtdata provides a list of strings in a list context since Net::DNS 0.69
-    $rdatastr = join('',$answer->txtdata);
-  } else {
-    # rdatastr() is historical/undocumented, use rdstring() since Net::DNS 0.69
-    $rdatastr = $answer->UNIVERSAL::can('rdstring') ? $answer->rdstring
-                                                    : $answer->rdatastr;
-    # encoded in a RFC 1035 zone file format (escaped), decode it
-    $rdatastr =~ s{ \\ ( [0-9]{3} | (?![0-9]{3}) . ) }
-                  { length($1)==3 && $1 <= 255 ? chr($1) : $1 }xgse;
-  }
-  # Bug 7236: Net::DNS attempts to decode text strings in a TXT record as
-  # UTF-8 since version 0.69, which is undesired: octets failing the UTF-8
-  # decoding are converted to a Unicode "replacement character" U+FFFD, and
-  # ASCII text is unnecessarily flagged as perl native characters.
-  utf8::encode($rdatastr)  if utf8::is_utf8($rdatastr);
-
-  while (my ($subtest, $rule) = each %{$self->{rbl_subs}{$set}}) {
+  foreach my $args (@{$self->{rbl_subs}{$set}}) {
+    my $subtest = $args->[0];
+    my $rule = $args->[1];
     next if $self->{tests_already_hit}->{$rule};
-
-    if ($subtest =~ /^\d+\.\d+\.\d+\.\d+$/) {
-      # test for exact equality, not a regexp (an IPv4 address)
-      $self->dnsbl_hit($rule, $question, $answer)  if $subtest eq $rdatastr;
-    }
-    # bitmask
-    elsif ($subtest =~ /^\d+$/) {
-      # Bug 6803: response should be within 127.0.0.0/8, ignore otherwise
-      if ($rdatastr =~ m/^127\.\d{1,3}\.\d{1,3}\.\d{1,3}$/ &&
-	  Mail::SpamAssassin::Util::my_inet_aton($rdatastr) & $subtest)
-      {
-	$self->dnsbl_hit($rule, $question, $answer);
-      }
-    }
-    # regular expression
-    else {
-      my $test;
-      eval { $test = qr/$subtest/; } or do {
-        dbg("dns: invalid rule $rule subtest regexp '$subtest'");
-      };
-      if ($test && $rdatastr =~ $test) {
-	$self->dnsbl_hit($rule, $question, $answer);
-      }
+    if ($self->check_subtest($rdatastr, $subtest)) {
+      $self->dnsbl_hit($rule, $question, $answer);
     }
   }
+}
+
+sub check_subtest {
+  my ($self, $rdatastr, $subtest) = @_;
+
+  # regular expression
+  if (ref($subtest) eq 'Regexp') {
+    if ($rdatastr =~ $subtest) {
+      return 1;
+    }
+  }
+  # bitmask
+  elsif ($subtest =~ /^\d+$/) {
+    # Bug 6803: response should be within 127.0.0.0/8, ignore otherwise
+    if ($rdatastr =~ m/^127\.\d{1,3}\.\d{1,3}\.\d{1,3}$/ &&
+        Mail::SpamAssassin::Util::my_inet_aton($rdatastr) & $subtest)
+    {
+      return 1;
+    }
+  }
+  else {
+    # test for exact equality (an IPv4 address)
+    if ($subtest eq $rdatastr) {
+      return 1;
+    }
+  }
+
+  return 0;
 }
 
 sub harvest_until_rule_completes {
@@ -377,24 +413,6 @@ sub set_rbl_tag_data {
 }
 
 ###########################################################################
-
-sub init_rbl_subs {
-  my ($self) = @_;
-
-  if (!$self->{rbl_subs}) {
-    foreach my $rule (@{$self->{conf}->{eval_to_rule}->{check_rbl_sub}}) {
-      next if !exists $self->{conf}->{rbl_evals}->{$rule};
-      next if !$self->{conf}->{scores}->{$rule};
-      # rbl_evals is [$function,[@args]]
-      my $args = $self->{conf}->{rbl_evals}->{$rule}->[1];
-      if ($args->[1] =~ /^sb:/) {
-        info("dns: ignored $rule, SenderBase rules are deprecated");
-        next;
-      }
-      $self->{rbl_subs}{$args->[0]}{$args->[1]} = $rule;
-    }
-  }
-}
 
 sub rbl_finish {
   my ($self) = @_;

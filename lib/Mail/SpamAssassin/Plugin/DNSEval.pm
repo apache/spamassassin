@@ -45,7 +45,7 @@ package Mail::SpamAssassin::Plugin::DNSEval;
 use Mail::SpamAssassin::Plugin;
 use Mail::SpamAssassin::Logger;
 use Mail::SpamAssassin::Constants qw(:ip);
-use Mail::SpamAssassin::Util qw(reverse_ip_address idn_to_ascii);
+use Mail::SpamAssassin::Util qw(reverse_ip_address idn_to_ascii compile_regexp);
 
 use strict;
 use warnings;
@@ -156,6 +156,44 @@ sub check_start {
 
   foreach(@{$self->{'evalrules'}}) {
     $opts->{'permsgstatus'}->register_plugin_eval_glue($_);
+  }
+
+  # Initialize check_rbl_sub tests
+  $self->init_rbl_subs($opts->{'permsgstatus'});
+}
+
+sub init_rbl_subs {
+  my ($self, $pms) = @_;
+
+  return if $pms->{rbl_subs};
+
+  # Very hacky stuff and direct rbl_evals usage for now, TODO rewrite everything
+  foreach my $rule (@{$pms->{conf}->{eval_to_rule}->{check_rbl_sub}}) {
+    next if !exists $pms->{conf}->{rbl_evals}->{$rule};
+    next if !$pms->{conf}->{scores}->{$rule};
+    # rbl_evals is [$function,[@args]]
+    my $args = $pms->{conf}->{rbl_evals}->{$rule}->[1];
+    my $set = $args->[0];
+    my $subtest = $args->[1];
+    if (!defined $subtest) {
+      warn("dnseval: missing subtest for rule $rule\n");
+      next;
+    }
+    if ($subtest =~ /^sb:/) {
+      info("dnseval: ignored $rule, SenderBase rules are deprecated");
+      next;
+    }
+    # Compile as regex if not pure ip/bitmask (same check in process_dnsbl_result)
+    if ($subtest !~ /^\d+(?:\.\d+\.\d+\.\d+)?$/) {
+      my ($rec, $err) = compile_regexp($subtest, 0);
+      if (!$rec) {
+        warn("dnseval: invalid rule $rule subtest regexp '$subtest': $err\n");
+        next;
+      }
+      $subtest = $rec;
+    }
+    dbg("dnseval: initialize check_rbl_sub for rule $rule, set $set, subtest $subtest");
+    push @{$pms->{rbl_subs}{$set}}, [$subtest, $rule];
   }
 }
 
@@ -280,7 +318,7 @@ sub check_rbl_backend {
   return if !exists $pms->{dnseval_ips}; # no untrusted ips
 
   $rbl_server =~ s/\.+\z//; # strip unneeded trailing dot
-  dbg("dnseval: checking RBL $rbl_server, set $set");
+  dbg("dnseval: checking RBL $rbl_server, set $set, rule $rule");
 
   my $trusted = $self->{main}->{conf}->{trusted_networks};
   my @ips = @{$pms->{dnseval_ips}};
@@ -388,7 +426,7 @@ sub check_rbl_txt {
 }
 
 sub check_rbl_sub {
-  # just a dummy, check_dnsbl handles the subs
+  # just a dummy, check_start / init_rbl_subs handles the subs
   return 0;
 }
 
