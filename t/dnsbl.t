@@ -7,7 +7,7 @@ use Test::More;
 plan skip_all => "Long running tests disabled" unless conf_bool('run_long_tests');
 plan skip_all => "Net tests disabled" unless conf_bool('run_net_tests');
 plan skip_all => "Can't use Net::DNS Safely" unless can_use_net_dns_safely();
-plan tests => 17;
+plan tests => 18;
 
 # ---------------------------------------------------------------------------
 # bind configuration currently used to support this test
@@ -67,6 +67,7 @@ EOF
 %anti_patterns = (
  q{,DNSBL_TEST_MISS,} => 'P_19',
  q{,DNSBL_TXT_MISS,} => 'P_20',
+ q{,DNSBL_TEST_WHITELIST_MISS,} => 'P_21',
  q{ launching DNS A query for 14.35.17.212.untrusted.dnsbltest.spamassassin.org. } => 'untrusted',
 );
 
@@ -95,6 +96,10 @@ tflags DNSBL_TEST_TOP	net
 header DNSBL_TEST_WHITELIST	eval:check_rbl('white-firsttrusted', 'dnsbltest.spamassassin.org.', '127.0.0.1')
 describe DNSBL_TEST_WHITELIST	DNSBL whitelist match
 tflags DNSBL_TEST_WHITELIST	net nice
+
+header DNSBL_TEST_WHITELIST_MISS	eval:check_rbl('white-firsttrusted', 'dnsbltest.spamassassin.org.', '127.0.0.255')
+describe DNSBL_TEST_WHITELIST_MISS	This rule should not match
+tflags DNSBL_TEST_WHITELIST_MISS	net
 
 header DNSBL_TEST_UNTRUSTED	eval:check_rbl('white-untrusted', 'untrusted.dnsbltest.spamassassin.org.', '127.0.0.1')
 describe DNSBL_TEST_UNTRUSTED	DNSBL untrusted match
