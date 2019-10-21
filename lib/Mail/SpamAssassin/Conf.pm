@@ -5285,8 +5285,7 @@ sub new_netset {
 
 sub finish {
   my ($self) = @_;
-  untie %{$self->{descriptions}};
-  untie %{$self->{subjprefix}};
+  #untie %{$self->{descriptions}};
   %{$self} = ();
 }
 
