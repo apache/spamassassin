@@ -899,6 +899,25 @@ header.
     }
   });
 
+=item subjprefix
+
+Add a prefix in emails Subject if a rule is matched.
+To enable this option "rewrite_header Subject" config
+option must be enabled as well.
+
+The check C<if can(Mail::SpamAssassin::Conf::feature_subjprefix)>
+should be used to silence warnings in previous
+SpamAssassin versions.
+
+=cut
+
+  push (@cmds, {
+    command => 'subjprefix',
+    setting => 'subjprefix',
+    is_frequent => 1,
+    type => $CONF_TYPE_HASH_KEY_VALUE,
+  });
+
 =item add_header { spam | ham | all } header_name string
 
 Customized headers can be added to the specified type of messages (spam,
@@ -4552,6 +4571,8 @@ optional, and the default is shown below.
  _LANGUAGES_       possible languages of mail
  _PREVIEW_         content preview
  _REPORT_          terse report of tests hit (for header reports)
+ _SUBJPREFIX_      subject prefix based on rules, to be prepended to Subject
+                   header by SpamAssassin caller
  _SUMMARY_         summary of tests hit for standard report (for body reports)
  _CONTACTADDRESS_  contents of the 'report_contact' setting
  _HEADER(NAME)_    includes the value of a message header.  value is the same
@@ -4689,6 +4710,7 @@ sub new {
   $self->{descriptions} = { };
   #tie %{$self->{descriptions}}, 'Mail::SpamAssassin::Util::TieOneStringHash'
   #  or warn "tie failed";
+  $self->{subjprefix} = { };
 
   # after parsing, tests are refiled into these hashes for each test type.
   # this allows e.g. a full-text test to be rewritten as a body test in
@@ -5264,6 +5286,7 @@ sub new_netset {
 sub finish {
   my ($self) = @_;
   untie %{$self->{descriptions}};
+  untie %{$self->{subjprefix}};
   %{$self} = ();
 }
 
@@ -5289,6 +5312,7 @@ sub feature_geodb { 1 } # if needed for some reason
 sub feature_dns_block_rule { 1 } # supports 'dns_block_rule' config option
 sub feature_compile_regexp { 1 } # Util::compile_regexp
 sub feature_meta_rules_matching { 1 } # meta rules_matching() expression
+sub feature_subjprefix { 1 } # add subject prefixes rule option
 sub feature_get_host { 1 } # $pms->get() :host :domain :ip :revip # was implemented together with AskDNS::has_tag_header # Bug 7734
 sub has_tflags_nosubject { 1 } # tflags nosubject
 sub perl_min_version_5010000 { return $] >= 5.010000 }  # perl version check ("perl_version" not neatly backwards-compatible)
