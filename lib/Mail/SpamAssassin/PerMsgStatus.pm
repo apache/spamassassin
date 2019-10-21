@@ -213,6 +213,11 @@ BEGIN {
       "\n" . ($pms->{tag_data}->{REPORT} || "");
     },
 
+    SUBJPREFIX => sub {
+      my $pms = shift;
+      ($pms->{tag_data}->{SUBJPREFIX} || "");
+    },
+
     HEADER => sub {
       my $pms = shift;
       my $hdr = shift;
@@ -269,6 +274,7 @@ sub new {
     'master_deadline'   => $msg->{master_deadline},  # dflt inherited from msg
     'deadline_exceeded' => 0,  # time limit exceeded, skipping further tests
     'uri_detail_list'   => { },
+    'subjprefix'        => "",
   };
 
   dbg("check: pms new, time limit in %.3f s",
@@ -293,7 +299,7 @@ sub new {
   # known valid tags that might not get their entry in pms->{tag_data}
   # in some circumstances
   my $tag_data_ref = $self->{tag_data};
-  foreach (qw(SUMMARY REPORT RBL)) { $tag_data_ref->{$_} = '' }
+  foreach (qw(SUMMARY REPORT SUBJPREFIX RBL)) { $tag_data_ref->{$_} = '' }
   foreach (qw(AWL AWLMEAN AWLCOUNT AWLPRESCORE
               DCCB DCCR DCCREP PYZOR DKIMIDENTITY DKIMDOMAIN
               BAYESTC BAYESTCLEARNED BAYESTCSPAMMY BAYESTCHAMMY
@@ -1042,6 +1048,8 @@ sub _get_added_headers {
 sub rewrite_report_safe {
   my ($self) = @_;
 
+  my $tag;
+
   # This is the original message.  We do not want to make any modifications so
   # we may recover it if necessary.  It will be put into the new message as a
   # message/rfc822 MIME part.
@@ -1079,8 +1087,15 @@ sub rewrite_report_safe {
   # possibilities right now, it's easier not to...
 
   if (defined $self->{conf}->{rewrite_header}->{Subject}) {
+    # Add a prefix to the subject if needed
+    if((defined $self->{subjprefix}) and ($self->{subjprefix} ne "")) {
+      $tag = $self->_replace_tags($self->{subjprefix});
+      $tag =~ s/\n/ /gs;
+      $subject = $tag . $subject;
+    }
+    # Add a **SPAM** prefix
     $subject = "\n" if !defined $subject;
-    my $tag = $self->_replace_tags($self->{conf}->{rewrite_header}->{Subject});
+    $tag = $self->_replace_tags($self->{conf}->{rewrite_header}->{Subject});
     $tag =~ s/\n/ /gs; # strip tag's newlines
     $subject =~ s/^(?:\Q${tag}\E )?/${tag} /g; # For some reason the tag may already be there!?
   }
@@ -1208,6 +1223,9 @@ EOM
 sub rewrite_no_report_safe {
   my ($self) = @_;
 
+  my $ntag;
+  my $pref_subject = 0;
+
   # put the pristine headers into an array
   # skip the X-Spam- headers, but allow the X-Spam-Prev headers to remain.
   # since there may be a missing header/body
@@ -1259,11 +1277,55 @@ sub rewrite_no_report_safe {
 	# The tag should be a comment for this header ...
 	$tag = "($tag)" if ($hdr =~ /^(?:From|To)$/);
 
-        local $1;
+        if((defined $self->{subjprefix}) and (defined $self->{conf}->{rewrite_header}->{Subject})) {
+	  if($self->{subjprefix} ne "") {
+            $ntag = $self->_replace_tags($self->{subjprefix});
+            $ntag =~ s/\n/ /gs;
+	    $ntag =~ s/\s+$//;
+
+            local $1;
+	    if(defined $ntag) {
+              s/^([^:]+:)[ \t]*(?:\Q${ntag}\E )?/$1 ${ntag} /i;
+	    }
+	  }
+        }
         s/^([^:]+:)[ \t]*(?:\Q${tag}\E )?/$1 ${tag} /i;
       }
 
       $addition = 'headers_spam';
+  } else {
+      # special-case: Subject lines.  ensure one exists, if we're
+      # supposed to mark it up.
+      my $created_subject = 0;
+      my $subject = $self->{msg}->get_pristine_header('Subject');
+      if (!defined($subject)
+            && exists $self->{conf}->{rewrite_header}->{'Subject'})
+      {
+        push(@pristine_headers, "Subject: \n");
+        $created_subject = 1;
+      }
+
+      # Deal with header rewriting
+      foreach (@pristine_headers) {
+        # if we're not going to do a rewrite, skip this header!
+        next if (!/^(Subject):/i);
+	my $hdr = ucfirst(lc($1));
+	next if (!defined $self->{conf}->{rewrite_header}->{$hdr});
+
+        if((defined $self->{subjprefix}) and (defined $self->{conf}->{rewrite_header}->{Subject})) {
+	  if($self->{subjprefix} ne "") {
+            $ntag = $self->_replace_tags($self->{subjprefix});
+            $ntag =~ s/\n/ /gs;
+	    $ntag =~ s/\s+$//;
+
+            local $1;
+	    if(defined $ntag) {
+              s/^([^:]+:)[ \t]*(?:\Q${ntag}\E )?/$1 ${ntag} /i;
+	    }
+	  }
+        }
+      }
+
   }
 
   # Break the pristine header set into two blocks; $new_hdrs_pre is the stuff
@@ -2666,6 +2728,9 @@ sub _handle_hit {
               $self->_wrap_desc($desc,
                   3+length($rule)+length($score)+length($area), " " x 28),
               ($self->{test_log_msgs}->{LONG} || ''));
+    if((defined $self->{subjprefix}) and ($self->{subjprefix} ne "")) {
+      $self->{tag_data}->{SUBJPREFIX} = $self->{subjprefix};
+    }
 }
 
 sub _wrap_desc {
@@ -2795,6 +2860,16 @@ sub got_hit {
   # Bug 6880 Set Rule Description to something that says no rule
   #$rule_descr = $rule  if !defined $rule_descr || $rule_descr eq '';
   $rule_descr = "No description available." if !defined $rule_descr || $rule_descr eq '';
+
+  if(defined $self->{conf}->{rewrite_header}->{Subject}) {
+    my $rule_subjprefix = $conf_ref->{subjprefix}->{$rule};
+    if (defined $rule_subjprefix) {
+      dbg("subjprefix: setting Subject prefix to $rule_subjprefix");
+      if($self->{subjprefix} !~ /\Q$rule_subjprefix\E/) {
+        $self->{subjprefix} .= $rule_subjprefix . " ";  # save dynamic subject prefix.
+      }
+    }
+  }
 
   $self->_handle_hit($rule,
             $score,

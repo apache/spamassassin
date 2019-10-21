@@ -1,6 +1,9 @@
 Note for Users Upgrading to SpamAssassin 3.4.3
 ----------------------------------------------
 
+- New subjprefix keyword added, this can be used to add a prefix to
+  email Subject if the original email matches a particular rule
+
 - New Util::is_fqdn_valid() function to validate hostname (DNS name) format
   (Bug 7736).  To check if a name contains valid TLD, it's still needed to
   additionally use RegistryBoundaries::is_domain_valid()
