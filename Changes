@@ -1,4 +1,94 @@
 ------------------------------------------------------------------------
+r1868693 | hege | 2019-10-21 10:58:45 +0000 (Mon, 21 Oct 2019) | 2 lines
+ 
+ Remove unused unties
+ 
+------------------------------------------------------------------------
+r1868685 | gbechis | 2019-10-21 09:34:51 +0000 (Mon, 21 Oct 2019) | 16 
+lines
+ 
+ Add a new subjprefix keyword.
+ 
+ This keyword will add a prefix in emails Subject if a rule is matched.
+ To enable this option "rewrite_header Subject" config option must be 
+enabled
+ as well.
+ 
+ The check "if can(Mail::SpamAssassin::Conf::feature_subjprefix)"
+ should be used to silence warnings in previous SpamAssassin
+ versions.
+ 
+ This feature could not work out-of-the box if the glue
+ software that calls SpamAssassin (MimeDefang, Amavisd-new, ...)
+ uses the original email instead of the one produced by SA.
+ Some improvements to those softwares may be needed before enabling
+ this feature.
+ 
+------------------------------------------------------------------------
+r1868631 | gbechis | 2019-10-19 15:33:18 +0000 (Sat, 19 Oct 2019) | 2 
+lines
+ 
+ fix sought header rules generation
+ 
+------------------------------------------------------------------------
+r1868412 | hege | 2019-10-13 19:49:26 +0000 (Sun, 13 Oct 2019) | 2 lines
+ 
+ Add test for check_rbl() negative subtest
+ 
+------------------------------------------------------------------------
+r1867881 | hege | 2019-10-02 10:25:18 +0000 (Wed, 02 Oct 2019) | 2 lines
+ 
+ Add uri test for http://foo/ Firefix like rewrite
+ 
+------------------------------------------------------------------------
+r1867230 | hege | 2019-09-20 14:13:18 +0000 (Fri, 20 Sep 2019) | 2 lines
+ 
+ Small fix for escaped quotes
+ 
+------------------------------------------------------------------------
+r1867225 | hege | 2019-09-20 13:15:30 +0000 (Fri, 20 Sep 2019) | 2 lines
+ 
+ Improve :name :addr parser (Bug 7753)
+ 
+------------------------------------------------------------------------
+r1867159 | gbechis | 2019-09-19 06:29:14 +0000 (Thu, 19 Sep 2019) | 2 
+lines
+ 
+ better ipv6 regexp
+ 
+------------------------------------------------------------------------
+r1867055 | hege | 2019-09-17 12:35:39 +0000 (Tue, 17 Sep 2019) | 2 lines
+ 
+ Use cleaned list for check_hashbl_uris
+ 
+------------------------------------------------------------------------
+r1866389 | hege | 2019-09-04 13:49:07 +0000 (Wed, 04 Sep 2019) | 2 lines
+ 
+ Avoid warning: Use of uninitialized value $dom in pattern match (m//) at 
+.../RegistryBoundaries.pm
+ 
+------------------------------------------------------------------------
+r1866203 | hege | 2019-08-31 11:47:09 +0000 (Sat, 31 Aug 2019) | 2 lines
+ 
+ Fix DUPMIN back to default 10.. duh.
+ 
+------------------------------------------------------------------------
+r1866202 | hege | 2019-08-31 11:43:17 +0000 (Sat, 31 Aug 2019) | 2 lines
+ 
+ Fix loglevel for duplicate logline suppressor
+ 
+------------------------------------------------------------------------
+r1866198 | gbechis | 2019-08-31 09:42:33 +0000 (Sat, 31 Aug 2019) | 2 
+lines
+ 
+ Install v343.pre as well
+ 
+------------------------------------------------------------------------
+r1866181 | kmcgrail | 2019-08-31 04:33:43 +0000 (Sat, 31 Aug 2019) | 1 
+line
+ 
+ preparing to release 3.4.3-rc4
+------------------------------------------------------------------------
 r1866128 | hege | 2019-08-30 07:49:30 +0000 (Fri, 30 Aug 2019) | 2 lines
  
  Bug 7747 - Limit checked mime parts
