@@ -910,6 +910,9 @@ The check C<if can(Mail::SpamAssassin::Conf::feature_subjprefix)>
 should be used to silence warnings in previous
 SpamAssassin versions.
 
+To be able to use this feature a C<add_header all Subjprefix _SUBJPREFIX_>
+configuration line could be needed on some setups.
+
 =cut
 
   push (@cmds, {
