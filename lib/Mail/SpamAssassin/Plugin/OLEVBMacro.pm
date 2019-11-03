@@ -17,13 +17,13 @@
 
 =head1 NAME
 
-Mail::SpamAssassin::Plugin::OLEMacro - search attached documents for evidence of containing an OLE Macro
+Mail::SpamAssassin::Plugin::OLEVBMacro - search attached documents for evidence of containing an OLE Macro
 
 =head1 SYNOPSIS
 
-  loadplugin Mail::SpamAssassin::Plugin::OLEMacro
+  loadplugin Mail::SpamAssassin::Plugin::OLEVBMacro
 
-  ifplugin Mail::SpamAssassin::Plugin::OLEMacro
+  ifplugin Mail::SpamAssassin::Plugin::OLEVBMacro
     body     OLEMACRO eval:check_olemacro()
     describe OLEMACRO Attachment has an Office Macro
 
@@ -60,7 +60,7 @@ the module handles attached documents
 
 =cut
 
-package Mail::SpamAssassin::Plugin::OLEMacro;
+package Mail::SpamAssassin::Plugin::OLEVBMacro;
 use strict;
 use warnings;
 
@@ -112,7 +112,7 @@ sub new {
 }
 
 sub dbg {
-  Mail::SpamAssassin::Plugin::dbg ("OLEMacro: @_");
+  Mail::SpamAssassin::Plugin::dbg ("OLEVBMacro: @_");
 }
 
 sub set_config {
