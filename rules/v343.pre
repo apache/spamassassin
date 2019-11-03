@@ -16,5 +16,8 @@
 # added to new files, named according to the release they're added in.
 ###########################################################################
 
-# OLEMacro - Detects macros in Office documents
+# OLEMacro - Detects both OLE macros and VB code inside Office documents
+#
+# It tries to discern between safe and malicious code but due to the threat
+# macros present to security, many places block these type of documents outright.
 # loadplugin Mail::SpamAssassin::Plugin::OLEMacro
