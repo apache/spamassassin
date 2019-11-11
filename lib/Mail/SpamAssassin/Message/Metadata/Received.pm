@@ -1201,7 +1201,7 @@ sub parse_received_line {
 
     # Local unix socket handover from Cyrus, tested with v2.3.14
     # Received: from testintranator.net.vm ([unix socket])_ by testintranator.net.vm (Cyrus v2.3.14) with LMTPA;_ Tue, 21 Jul 2009 14:34:14 +0200
-    # Attention: Actually the received header is parsed as "testintranator.net.vm ([unix socket]) by testintranator.net.vm (Cyrus v2.3.14) with LMTPA", "from" is omited.
+    # Attention: Actually the received header is parsed as "testintranator.net.vm ([unix socket]) by testintranator.net.vm (Cyrus v2.3.14) with LMTPA", "from" is omitted.
     if (/^\S+ \(\[unix socket\]\) by \S+ \(Cyrus v[0-9]*?\.[0-9]*?\.[0-9]*?\) with LMTPA/) { return 0; }
 
     # HANDOVERS WE KNOW WE CAN'T DEAL WITH: TCP transmission, but to MTAs that
