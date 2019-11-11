@@ -701,7 +701,7 @@ sub _get_part_details {
 
 sub _open_zip_handle {
   my ($data) = @_;
-  # open our archive from raw datas
+  # open our archive from raw data
   my $SH = IO::String->new($data);
 
   Archive::Zip::setErrorHandler( \&_zip_error_handler );

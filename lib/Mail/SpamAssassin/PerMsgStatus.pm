@@ -636,7 +636,7 @@ sub _get_autolearn_points {
   $self->{autolearn_points} = 0;
 
   # This function needs to use use sum($score[scoreset % 2]) not just {score}.
-  # otherwise we shift what we autolearn on and it gets really wierd.  - tvd
+  # otherwise we shift what we autolearn on and it gets really weird.  - tvd
   my $orig_scoreset = $self->{conf}->get_score_set();
   my $new_scoreset = $orig_scoreset;
   my $scores = $self->{conf}->{scores};
@@ -2499,7 +2499,7 @@ sub _process_text_uri_list {
       my $rawuri = $1||$2||$3;
       my $schost = $4;
       my $rawtype = defined $1 ? 'scheme' : defined $2 ? 'mail' : 'schemeless';
-      $rawuri =~ s/(^[^(]*)\).*$/$1/;  # as per ThunderBird, ) is an end delimiter if there is no ( preceeding it
+      $rawuri =~ s/(^[^(]*)\).*$/$1/;  # as per ThunderBird, ) is an end delimiter if there is no ( preceding it
       $rawuri =~ s/[-~!@#^&*()_+=:;\'?,.]*$//; # remove trailing string of punctuations that TBird ignores
 
       next if exists $seen{$rawuri};

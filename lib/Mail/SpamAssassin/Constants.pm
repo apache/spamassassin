@@ -155,7 +155,7 @@ use constant IP_PRIVATE => qr{^(?:
       # 0000 in third up to (including) seventh omitted
       (?:0{1,4}:){2}(?::0{1,4}){0,4}:	0{0,3}1
       |
-      # 0000 in fouth up to (including) seventh omitted
+      # 0000 in fourth up to (including) seventh omitted
       (?:0{1,4}:){3}(?::0{1,4}){0,3}:	0{0,3}1
       |
       # 0000 in fifth up to (including) seventh omitted
@@ -236,7 +236,7 @@ use constant LOCALHOST => qr/
 			# 0000 in third up to (including) seventh omitted
 			(?:0{1,4}:){2}(?::0{1,4}){0,4}:	0{0,3}1
 			|
-			# 0000 in fouth up to (including) seventh omitted
+			# 0000 in fourth up to (including) seventh omitted
 			(?:0{1,4}:){3}(?::0{1,4}){0,3}:	0{0,3}1
 			|
 			# 0000 in fifth up to (including) seventh omitted
@@ -333,7 +333,7 @@ use constant IP_ADDRESS => qr/
 			# 0000 in third up to (including) seventh omitted
 			(?:[a-f0-9]{1,4}:){2}(?::[a-f0-9]{1,4}){1,5}
 			|
-			# 0000 in fouth up to (including) seventh omitted
+			# 0000 in fourth up to (including) seventh omitted
 			(?:[a-f0-9]{1,4}:){3}(?::[a-f0-9]{1,4}){1,4}
 			|
 			# 0000 in fifth up to (including) seventh omitted

@@ -240,7 +240,7 @@ sub parse {
 
   # # (outdated claim) HTML::Parser converts &nbsp; into a question mark ("?")
   # # for some reason, so convert them to spaces.  Confirmed in 3.31, at least.
-  # ... Actually it doesn't, it is correctly coverted into Unicode NBSP,
+  # ... Actually it doesn't, it is correctly converted into Unicode NBSP,
   # nevertheless it does not hurt to treat it as a space.
   $text =~ s/&nbsp;/ /g;
 

@@ -452,7 +452,7 @@ sub find_dcc_home {
 
   my $conf = $self->{main}->{conf};
 
-  # Get the DCC software version for talking to dccifd and formating the
+  # Get the DCC software version for talking to dccifd and formatting the
   # dccifd options and the built-in DCC homedir.  Use -q to prevent delays.
   my $cdcc_home;
   my $cdcc = $self->dcc_pgm_path('cdcc');

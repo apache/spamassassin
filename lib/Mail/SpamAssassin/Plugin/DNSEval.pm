@@ -218,7 +218,7 @@ sub parsed_metadata {
       } @{$pms->{relays_trusted}};
   push @fullexternal, @fullips; # add untrusted set too
   # Make sure a header significantly improves results before adding here
-  # X-Sender-Ip: could be worth using (very low occurance for me)
+  # X-Sender-Ip: could be worth using (very low occurence for me)
   # X-Sender: has a very low bang-for-buck for me
   my @originating;
   foreach my $header (@{$pms->{conf}->{originating_ip_headers}}) {

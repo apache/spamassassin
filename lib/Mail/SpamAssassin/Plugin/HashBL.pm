@@ -54,7 +54,7 @@ OPTS refers to multiple generic options:
 Multiple options can be separated with slash or other non-word character.
 If OPTS is empty ('') or missing, default is used.
 
-HEADERS referes to slash separated list of Headers to process:
+HEADERS refers to slash separated list of Headers to process:
 
   ALL           all headers
   ALLFROM       all From headers as returned by $pms->all_from_addrs()

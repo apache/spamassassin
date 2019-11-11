@@ -296,7 +296,7 @@ sub main_server_poll {
     {
       # this happens if the process is signalled during the select(),
       # for example if someone sends SIGHUP to reload the configuration.
-      # just return inmmediately
+      # just return immediately
       dbg("prefork: select returned err $selerr, probably signalled");
       return;
     }

@@ -209,7 +209,7 @@ our @OPTIONAL_MODULES = (
   spamd (the --ssl option to spamd), you need to install this
   module. (You will need the OpenSSL libraries and use the
   ENABLE_SSL="yes" argument to Makefile.PL to build and run an SSL
-  compatibile spamc.)',
+  compatible spamc.)',
 },
 {
   module => 'Compress::Zlib',

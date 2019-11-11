@@ -59,7 +59,7 @@ BEGIN {
 
   # Clean PATH so taint doesn't complain
   $ENV{'PATH'} = '/bin:/usr/bin:/usr/local/bin';
-  # Remove tainted envs, atleast ENV used in FreeBSD
+  # Remove tainted envs, at least ENV used in FreeBSD
   delete @ENV{qw(IFS CDPATH ENV BASH_ENV)};
 }
 
@@ -884,7 +884,7 @@ sub read_config {
     my $v = shift @ARGV;
 
     # Override only allows setting one variable.  Some xt tests need to set more
-    # config variables.  Adding : as a delimeter for config variable and value 
+    # config variables.  Adding : as a delimiter for config variable and value 
     # parameters
 
     @k = split (/:/,$k);

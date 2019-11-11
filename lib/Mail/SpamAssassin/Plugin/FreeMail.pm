@@ -50,7 +50,7 @@ freemail_domains domain ...
 
 freemail_whitelist email/domain ...
 
-   Emails or domains listed here are ignored (pretend they arent
+   Emails or domains listed here are ignored (pretend they aren't
    freemail). No wildcards!
 
 freemail_import_whitelist_auth 1/0

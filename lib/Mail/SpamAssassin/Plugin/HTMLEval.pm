@@ -128,7 +128,7 @@ sub html_eval {
   return 0 if $rawexpr !~ /^([\<\>\=\!\-\+ 0-9]+)$/;
   my $expr = untaint_var($1);
 
-  # workaround bug 3320: wierd perl bug where additional, very explicit
+  # workaround bug 3320: weird perl bug where additional, very explicit
   # untainting into a new var is required.
   my $tainted = $pms->{html}{$test};
   return 0 unless defined($tainted);

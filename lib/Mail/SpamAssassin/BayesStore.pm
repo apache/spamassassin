@@ -650,7 +650,7 @@ public instance (Integer, Integer, Time) tok_get (String $token)
 
 Description:
 This method retrieves the specified token (C<$token>) from storage and returns
-it's spam count, ham acount and last access time.
+it's spam count, ham count and last access time.
 
 =cut
 

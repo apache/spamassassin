@@ -260,7 +260,7 @@ if ($response == 1) {
   }
 
   # otherwise we got a timely ping response
-  printf("SPAMD OK: %.3f second ping repsonse time\n", $elapsed);
+  printf("SPAMD OK: %.3f second ping response time\n", $elapsed);
   exit EX_OK;
 }
 
@@ -408,7 +408,7 @@ Display version info on STDOUT.
 Warning ping response threshold in seconds.  If a spamd ping response takes
 longer than the value specified (in seconds), and does not exceed the
 B<critical> threshold value, the program will exit with a value of 1 to
-indicate the warning staus.
+indicate the warning status.
 
 This value must be no longer than the value specified for B<critical> and
 less than the value specified for B<timeout>.

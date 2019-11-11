@@ -315,7 +315,7 @@ sarun ("-t < data/nice/spf1", \&patterns_run_cb);
 ok_all_patterns();
 
 
-# 41-44: same as test 1-2 with some spf whitelist entires that don't match
+# 41-44: same as test 1-2 with some spf whitelist entries that don't match
 
 tstprefs("
   whitelist_from_spf *\@example.com

@@ -81,7 +81,7 @@ sub load_modules {		# static
 
 =item $f->load ($username)
 
-Read configuration paramaters from LDAP server and parse scores from it.
+Read configuration parameters from LDAP server and parse scores from it.
 
 =back
 

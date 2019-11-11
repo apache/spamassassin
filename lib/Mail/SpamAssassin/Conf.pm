@@ -658,7 +658,7 @@ The named list can then be consulted through a check_uri_host_listed()
 eval rule implemented by the WLBLEval plugin, which takes the list name as
 an argument. Parenthesis around a list name are literal - a required syntax.
 
-Host names may optionally be prefixed by an exclamantion mark '!', which
+Host names may optionally be prefixed by an exclamation mark '!', which
 produces false as a result if this entry matches. This makes it easier
 to exclude some subdomains when their superdomain is listed, for example:
 
@@ -849,7 +849,7 @@ By default, suspected spam messages will not have the C<Subject>,
 C<From> or C<To> lines tagged to indicate spam. By setting this option,
 the header will be tagged with C<STRING> to indicate that a message is
 spam. For the From or To headers, this will take the form of an RFC 2822
-comment following the address in parantheses. For the Subject header,
+comment following the address in parentheses. For the Subject header,
 this will be prepended to the original subject. Note that you should
 only use the _REQD_ and _SCORE_ tags when rewriting the Subject header
 if C<report_safe> is 0. Otherwise, you may not be able to remove
@@ -1308,7 +1308,7 @@ length) subnet is later specified in the list. This allows a subset of
 a wider network to be exempt. In case of specifying overlapping subnets,
 specify more specific subnets first (tighter matching, i.e. with a longer
 netmask length), followed by less specific (shorter netmask length) subnets
-to get predictable results regarless of the search algorithm used - when
+to get predictable results regardless of the search algorithm used - when
 Net::Patricia module is installed the search finds the tightest matching
 entry in the list, while a sequential search as used in absence of the
 module Net::Patricia will find the first matching entry in the list.
@@ -3349,7 +3349,7 @@ Special function that will expand to list of matching rulenames.  Can be
 used anywhere in expressions.  Argument supports glob style rulename
 matching (* = anything, ? = one character).  Matching is case-sensitive.
 
-For example, this will hit if atleast two __FOO_* rule hits:
+For example, this will hit if at least two __FOO_* rule hits:
 
  body __FOO_1  /xxx/
  body __FOO_2  /yyy/

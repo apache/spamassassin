@@ -232,7 +232,7 @@ sub check_syslog_sigpipe {
     syslog('debug', "%s", "syslog reopened");
     syslog('info', "%s", $msg);
 
-    # now report what happend
+    # now report what happened
     $msg = "SIGPIPE received, reopening log socket";
     dbg("log: $msg");
     syslog('info', "%s", $msg);

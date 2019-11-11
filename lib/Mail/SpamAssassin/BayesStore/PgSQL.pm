@@ -349,7 +349,7 @@ sub remove_running_expire_tok {
 public instance (Integer, Integer, Integer) tok_get (String $token)
 
 Description:
-This method retrieves a specificed token (C<$token>) from the database
+This method retrieves a specified token (C<$token>) from the database
 and returns it's spam_count, ham_count and last access time.
 
 =cut
@@ -398,7 +398,7 @@ public instance (\@) tok_get (@ $tokens)
 
 Description:
 This method retrieves the specified tokens (C<$tokens>) from storage and returns
-an array ref of arrays spam count, ham acount and last access time.
+an array ref of arrays spam count, ham count and last access time.
 
 =cut
 
@@ -800,7 +800,7 @@ sub tok_touch_all {
 public instance (Boolean) cleanup ()
 
 Description:
-This method perfoms any cleanup necessary before moving onto the next
+This method performs any cleanup necessary before moving onto the next
 operation.
 
 =cut

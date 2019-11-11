@@ -1166,7 +1166,7 @@ sub remove_spamassassin_markup {
   $hdrs =~ s/^\n//;
 
 ###########################################################################
-  # Backward Compatibilty, pre 3.0.x.
+  # Backward Compatibility, pre 3.0.x.
 
   # deal with rewritten headers w/out X-Spam-Prev- versions ...
   $self->init(1);
@@ -1273,7 +1273,7 @@ sub read_scoreonly_config {
 
 =item $f->load_scoreonly_sql ($username)
 
-Read configuration paramaters from SQL database and parse scores from it.  This
+Read configuration parameters from SQL database and parse scores from it.  This
 will only take effect if the perl C<DBI> module is installed, and the
 configuration parameters C<user_scores_dsn>, C<user_scores_sql_username>, and
 C<user_scores_sql_password> are set correctly.
@@ -1299,7 +1299,7 @@ sub load_scoreonly_sql {
 
 =item $f->load_scoreonly_ldap ($username)
 
-Read configuration paramaters from an LDAP server and parse scores from it.
+Read configuration parameters from an LDAP server and parse scores from it.
 This will only take effect if the perl C<Net::LDAP> and C<URI> modules are
 installed, and the configuration parameters C<user_scores_dsn>,
 C<user_scores_ldap_username>, and C<user_scores_ldap_password> are set
@@ -1348,7 +1348,7 @@ plan to fork() or start a new perl interpreter thread to process a message,
 this is suboptimal, as each process/thread will have to perform these actions.
 
 Call this function in the master thread or process to perform the actions
-straightaway, so that the sub-processes will not have to.
+straight away, so that the sub-processes will not have to.
 
 If C<$use_user_prefs> is 0, this will initialise the SpamAssassin
 configuration without reading the per-user configuration file and it will

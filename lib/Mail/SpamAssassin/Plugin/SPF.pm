@@ -766,7 +766,7 @@ sub _check_def_spf_whitelist {
   }
 
   if (!$scanner->{spf_sender}) {
-    dbg("spf: def_spf_whitelist_from: could not find useable envelope sender");
+    dbg("spf: def_spf_whitelist_from: could not find usable envelope sender");
     return;
   }
 
