@@ -484,7 +484,7 @@ OUTER:
           push(@{$pms->{askdns_map_dnskey_to_rules}{$dnskey}},
                [$query_type, $answer_types_ref, $rules] );
         }
-        # lauch a new DNS query for $query_type and $query_domain
+        # launch a new DNS query for $query_type and $query_domain
         my $ent = $pms->{async}->bgsend_and_start_lookup(
           $query_domain, $query_type, undef,
           { key => $dnskey, zone => $query_domain },

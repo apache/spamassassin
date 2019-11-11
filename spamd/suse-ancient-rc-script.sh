@@ -104,7 +104,7 @@ function my_getpid()
 # a process running with that pid.
 #  returns:
 #    0  spamd running at the printed pid
-#    1  some unspecified error occured
+#    1  some unspecified error occurred
 #    4  couldn't access a file
 #   10  found a pid but no process running there
 #   11  found a pid but it wasn't spamd running there

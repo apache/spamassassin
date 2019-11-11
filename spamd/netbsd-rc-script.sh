@@ -49,7 +49,7 @@ OPSYS=@OPSYS@
 INTERPRETER_SUPPORT=@INTERPRETER_SUPPORT@
 
 # A default limit of 64 on NetBSD may be too low for many
-# people (eg with addional RBL rules)
+# people (e.g. with additional RBL rules)
 SOFT_FDLIMIT=`ulimit -S -n`
 HARD_FDLIMIT=`ulimit -H -n`
 

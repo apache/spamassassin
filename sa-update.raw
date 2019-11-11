@@ -1247,7 +1247,7 @@ elsif (!$channel_failures) {
   $exit = $channel_successes ? 0 : 1;
 }
 else {  # at least some failures
-  # 3: some failures, but at least one channel suceeded
+  # 3: some failures, but at least one channel succeeded
   # 4 or higher means all channels failed
   $exit = $channel_successes ? 3 : 4;
 }
@@ -2197,7 +2197,7 @@ spamassassin(1)
 spamd(1)
 <http://wiki.apache.org/spamassassin/RuleUpdates>
 
-=head1 PREREQUESITES
+=head1 PREREQUISITES
 
 C<Mail::SpamAssassin>
 

@@ -1671,7 +1671,7 @@ sub restore_database {
   my $num_ham;
   my $error_p = 0;
   my $newest_token_age = 0;
-  # Kinda wierd I know, but we need a nice big value and we know there will be
+  # Kinda weird I know, but we need a nice big value and we know there will be
   # no tokens > time() since we reset atime if > time(), so use that with a
   # little buffer just in case.
   my $oldest_token_age = time() + 100000;

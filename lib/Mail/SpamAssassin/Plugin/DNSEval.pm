@@ -255,7 +255,7 @@ sub check_rbl_backend {
   push (@fullexternal, @fullips);	# add untrusted set too
 
   # Make sure a header significantly improves results before adding here
-  # X-Sender-Ip: could be worth using (very low occurance for me)
+  # X-Sender-Ip: could be worth using (very low occurence for me)
   # X-Sender: has a very low bang-for-buck for me
   my $IP_ADDRESS = IP_ADDRESS;
   my @originating;

@@ -262,7 +262,7 @@ sub parse_msgids {
 
 =item C<service_timeout('error message')>
 
-Send appropiate status line to the client and log the error.
+Send appropriate status line to the client and log the error.
 
 =cut
 

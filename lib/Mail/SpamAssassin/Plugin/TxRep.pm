@@ -681,7 +681,7 @@ the same authorized identity, and will not associate any IP address with it.
 Note: at domains that define the useless SPF +all (pass all), no IP would be
 ever associated with the email address, and all addresses (incl. the froged
 ones) would be treated as coming from the authorized source. However, such
-domains are hopefuly rare, and ask for this kind of treatment anyway.
+domains are hopefully rare, and ask for this kind of treatment anyway.
 
 =back
 
@@ -1163,7 +1163,7 @@ DKIM signing domain or the tag 'spf' after the ID in the following way:
 When a message contains both a DKIM signature and an SPF pass, the DKIM
 signature takes the priority, so the record bound to the 'spf' tag won't 
 be checked. Only email addresses and domains can be bound to DKIM or SPF.
-Records of IP adresses and HELO names are always without DKIM/SPF.
+Records of IP addresses and HELO names are always without DKIM/SPF.
 
 In case of dual storage, the black/whitelisting is performed only in the
 default storage.
@@ -1194,7 +1194,7 @@ sub remove_address    {my $self=shift; return $self->_fn_envelope(@_,undef, "rem
 5. No IP checking at signed emails (signature authenticates the email
    instead of the IP address)
 
-6. No IP checking at SPF pass (we assume the domain owner is responsable
+6. No IP checking at SPF pass (we assume the domain owner is responsible
    for all IP's he authorizes to send from, hence we use the same identity
    for all of them)
 
@@ -1590,7 +1590,7 @@ sub remove_score {
   if ($self->{entry}->{msgcount} > 2)
         {$self->{entry}->{msgcount} -= 2;}
   else  {$self->{entry}->{msgcount}  = 0;}
-  # substract 2, and add a score; hence decrementing by 1
+  # subtract 2, and add a score; hence decrementing by 1
   $self->{checker}->add_score($self->{entry}, -1*$score);
 }
 
@@ -1949,7 +1949,7 @@ MEMORY engine stores the entire table in the server memory, achieving
 performance similar to Redis. You would need to care about the replication
 of the RAM table to disk through a cronjob, to avoid loss of data at reboot.
 The InnoDB engine is used by default, offering high scalability (database
-size and concurence of accesses). In conjunction with a high value of
+size and concurrence of accesses). In conjunction with a high value of
 innodb_buffer_pool or with the memcached plugin (MySQL v5.6+) it can also
 offer performance comparable to Redis.
 

@@ -292,7 +292,7 @@ sub pick_random_available_port {
       Mail::SpamAssassin::Conf::set_ports_range(\$ports_bitset, 0, 0, 0);
       $conf->{dns_available_ports_bitset} = $ports_bitset;
     }
-    # prepare auxilliary data structure to speed up further free-port lookups;
+    # prepare auxiliary data structure to speed up further free-port lookups;
     # 256 buckets, each accounting for 256 ports: 8+8 = 16 bit port numbers;
     # each bucket holds a count of available ports in its range
     my @bucket_counts = (0) x 256;

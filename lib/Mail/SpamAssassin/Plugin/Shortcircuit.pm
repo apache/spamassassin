@@ -33,7 +33,7 @@ This plugin implements simple, test-based shortcircuiting.  Shortcircuiting a
 test will force all other pending rules to be skipped, if that test is hit.
 In addition, a symbolic rule, C<SHORTCIRCUIT>, will fire.
 
-Recomended usage is to use C<priority> to set rules with strong S/O values (ie.
+Recommended usage is to use C<priority> to set rules with strong S/O values (ie.
 1.0) to be run first, and make instant spam or ham classification based on
 that.
 
@@ -81,7 +81,7 @@ The following configuration settings are used to control shortcircuiting:
 Shortcircuiting a test will force all other pending rules to be skipped, if
 that test is hit.
 
-Recomended usage is to use C<priority> to set rules with strong S/O values (ie.
+Recommended usage is to use C<priority> to set rules with strong S/O values (ie.
 1.0) to be run first, and make instant spam or ham classification based on
 that.
 

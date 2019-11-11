@@ -220,7 +220,7 @@ sub new {
   # Pull off mbox and mbx separators
   if ($message[0] =~ /^From\s+(?!:)/) {
     # careful not to confuse with obsolete syntax which allowed WSP before ':'
-    # mbox formated mailbox
+    # mbox formatted mailbox
     $self->{'mbox_sep'} = shift @message;
   } elsif ($message[0] =~ MBX_SEPARATOR) {
     $_ = shift @message;

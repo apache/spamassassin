@@ -72,7 +72,7 @@ ok(sarun ("--remove-addr-from-whitelist whitelist_test\@whitelist.spamassassin.t
 # "print" commands that are present in the command line interface are not being printed
 # when you call the methods directly.  This is why we are manipulating STDOUT.
 
-open my $oldout, ">&STDOUT" || die "Cannnot dup STDOUT";
+open my $oldout, ">&STDOUT" || die "Cannot dup STDOUT";
 
 my $fh = IO::File->new_tmpfile();
 ok($fh);

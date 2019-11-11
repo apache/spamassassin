@@ -359,7 +359,7 @@ sub is_fqdn_valid {
   # validate dot separated components/labels
   my @labels = split(/\./, lc $host);
   my $cnt = scalar @labels;
-  return unless $cnt > 1; # atleast two labels required
+  return unless $cnt > 1; # at least two labels required
   foreach my $label (@labels) {
     # length of 1-63
     return if length($label) < 1;
@@ -1395,7 +1395,7 @@ sub uri_list_canonicalize {
       push(@nuris, $nuri);
     }
 
-    # deal with wierd hostname parts, remove user/pass, etc.
+    # deal with weird hostname parts, remove user/pass, etc.
     if ($nuri =~ m{^(https?://)([^\@/?#]*\@)?([^/?#:]+)((?::(\d*))?.*)$}i) {
       my($proto, $host, $rest) = ($1,$3,$4);
       my $auth = defined $2 ? $2 : '';
@@ -1483,7 +1483,7 @@ sub uri_list_canonicalize {
 
       # bug 3186: If in a sentence, we might pick up odd characters ...
       # ie: "visit http://example.biz." or "visit http://example.biz!!!"
-      # the host portion should end in some form of alpha-numeric, strip off
+      # the host portion should end in some form of alphanumeric, strip off
       # the rest.
       if ($host =~ s/[^0-9A-Za-z]+$//) {
         push(@nuris, join ('', $proto, $host, $rest));
@@ -1725,7 +1725,7 @@ sub helper_app_pipe_open_unix {
     setuid_to_euid();
     info("util: setuid: ruid=$< euid=$> rgid=$( egid=$) ");
 
-    # now set up the fds.  due to some wierdness, we may have to ensure that
+    # now set up the fds.  due to some weirdness, we may have to ensure that
     # we *really* close the correct fd number, since some other code may have
     # redirected the meaning of STDOUT/STDIN/STDERR it seems... (bug 3649).
     # use POSIX::close() for that. it's safe to call close() and POSIX::close()

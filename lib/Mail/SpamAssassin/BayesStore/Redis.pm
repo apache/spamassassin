@@ -21,7 +21,7 @@ Mail::SpamAssassin::BayesStore::Redis - Redis Bayesian Storage Module Implementa
 
 =head1 DESCRIPTION
 
-This module implementes a Redis based bayesian storage module.
+This module implements a Redis based bayesian storage module.
 
 Apache SpamAssassin v3.4.0 introduces support for keeping
 a Bayes database on a Redis server, either running locally, or accessed
@@ -638,7 +638,7 @@ sub remove_running_expire_tok {
 public instance (Integer, Integer, Integer) tok_get (String $token)
 
 Description:
-This method retrieves a specificed token (C<$token>) from the database
+This method retrieves a specified token (C<$token>) from the database
 and returns its spam_count, ham_count and last access time.
 
 =cut
@@ -924,7 +924,7 @@ sub tok_touch_all {
 public instance (Boolean) cleanup ()
 
 Description:
-This method perfoms any cleanup necessary before moving onto the next
+This method performs any cleanup necessary before moving onto the next
 operation.
 
 =cut
