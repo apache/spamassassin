@@ -177,9 +177,10 @@ Depth to recurse within Zip files
 
 =item olemacro_extended_scan ( 0 | 1 ) (default: 0)
 
-Scan more files for potential macros, the C<olemacro_skip_exts> parameter will still be honored
-This parameter is off by default and shouldn't be needed.
-If this is turned on consider adjusting values for C<olemacro_num_mime> and C<olemacro_num_zip> 
+Scan more files for potential macros, the C<olemacro_skip_exts> parameter will still be honored.
+This parameter is off by default, this option is needed only to run
+C<eval:check_olemacro_renamed> rule.
+If this is turned on consider adjusting values for C<olemacro_num_mime> and C<olemacro_num_zip>
 and prepare for more CPU overhead
 
 =back
