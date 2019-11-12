@@ -532,7 +532,7 @@ sub _check_attachments {
       dbg('MIME limit reached');
       last;
     }
-
+  dbg("No Marker of a Macro found in file $name");
   }
   return 0;
 }
