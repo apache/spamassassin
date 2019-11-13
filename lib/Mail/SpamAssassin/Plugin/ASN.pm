@@ -183,23 +183,15 @@ Examples:
 
   asn_lookup in1tag.example.net _ASNDATA_ _ASNDATA_
 
-=back
-
 =item asn_lookup_ipv6 asn-zone6.example.com [_ASN_ _ASNCIDR_]
 
 Use specified zone for lookups of IPv6 addresses.  If zone supports both
 IPv4 and IPv6 queries, use both asn_lookup and asn_lookup_ipv6 for the same
 zone.
 
-=over 4
-
 =item clear_asn_lookups
 
-=back
-
 Removes any previously declared I<asn_lookup> entries from a list of queries.
-
-=over 4
 
 =item asn_prefix 'prefix_string'       (default: 'AS')
 
