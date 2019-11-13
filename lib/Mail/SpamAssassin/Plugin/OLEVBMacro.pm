@@ -424,6 +424,10 @@ sub check_olemacro_renamed {
 
   _check_attachments(@_) unless exists $pms->{olemacro_renamed};
 
+  if ( $pms->{olemacro_renamed} == 1 ) {
+    dbg("Found Office document with a renamed macro");
+  }
+
   return $pms->{olemacro_renamed};
 }
 
