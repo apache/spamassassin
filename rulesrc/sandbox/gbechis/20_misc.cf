@@ -43,6 +43,9 @@ tflags     GB_LINKED_IMG_NOT_RCVD_LINK   publish
 # describe   GB_PAYPAL_IMG_NOT_RCVD_LINK   Paypal hosted image but message not from Paypal
 # score      GB_PAYPAL_IMG_NOT_RCVD_LINK   2.500    # limit
 
-# header     GB_PHP_BADVERSION		 X-Mailer =~ /PHP\/' \. phpversion\(\);/
-# describe   GB_PHP_BADVERSION		 Impossible Php version
-# score      GB_PHP_BADVERSION		 1.000	 # limit
+header     __HDR_RCVD_UNICREDIT		 X-Spam-Relays-External =~ /rdns=mx\d+\.unicredit\.eu\s/
+uri        __URI_IMG_UNICREDIT		 /^https:\/\/www\.unicreditgroup\.eu\/etc\/designs\/unicreditgroupn\/img\/static\/logoHiRes\.png/
+meta       __UNICR_IMG_NOT_RCVD_LINK     __URI_IMG_UNICREDIT && !__HDR_RCVD_UNICREDIT
+meta       GB_UNICR_IMG_NOT_RCVD_LINK    __UNICR_IMG_NOT_RCVD_LINK && !__HAS_ERRORS_TO && !__MSGID_LIST && !__MSGID_GUID && !__RCD_RDNS_SMTP
+describe   GB_UNICR_IMG_NOT_RCVD_LINK    Unicredit Bank hosted image but message not from Unicredit
+# score      GB_UNICR_IMG_NOT_RCVD_LINK    2.500    # limit
