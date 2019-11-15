@@ -67,12 +67,17 @@ use warnings;
 use Mail::SpamAssassin::Plugin;
 use Mail::SpamAssassin::Util qw(compile_regexp);
 
+use constant HAS_ARCHIVE_ZIP => eval { require Archive::Zip; };
+use constant HAS_IO_STRING => eval { require IO::String; };
+
 BEGIN
 {
-    eval{ require Archive::Zip ;
-           import Archive::Zip qw( :ERROR_CODES :CONSTANTS ) } ;
-    eval{ require IO::String ;
-          import  IO::String } ;
+    eval{
+      import Archive::Zip qw( :ERROR_CODES :CONSTANTS )
+    };
+    eval{
+      import  IO::String
+    };
 }
 
 use re 'taint';
@@ -88,6 +93,11 @@ our $VERSION = '0.52';
 my $marker1 = "\xd0\xcf\x11\xe0";
 my $marker2 = "\x00\x41\x74\x74\x72\x69\x62\x75\x74\x00";
 my $marker3 = "\x5c\x6f\x62\x6a\x65\x6d\x62";
+
+# this code burps an ugly message if it fails, but that's redirected elsewhere
+# AZ_OK is a constant exported by Archive::Zip
+my $az_ok;
+eval '$az_ok = AZ_OK';
 
 # constructor: register the eval rule
 sub new {
@@ -545,6 +555,10 @@ sub _check_attachments {
 sub _check_zip {
   my ($pms, $name, $data, $depth) = @_;
 
+  if (!HAS_ARCHIVE_ZIP) {
+    warn "check_zip not supported, required module Archive::Zip missing\n";
+    return 0;
+  }
   return 0 if $pms->{conf}->{olemacro_num_zip} == 0;
 
   $depth = $depth || 1;
@@ -582,7 +596,7 @@ sub _check_zip {
       }
 
       ( $data, $status ) = $member->contents() unless defined $data;
-      return 1 unless $status == AZ_OK;
+      return 1 unless $status == $az_ok;
 
       _check_encrypted_doc($pms, $name, $data);
       _check_macrotype_doc($pms, $name, $data);
@@ -600,7 +614,7 @@ sub _check_zip {
       }
 
       ( $data, $status ) = $member->contents() unless defined $data;
-      next unless $status == AZ_OK;
+      next unless $status == $az_ok;
 
 
       _check_encrypted_doc($pms, $name, $data);
@@ -617,7 +631,7 @@ sub _check_zip {
     if ($mname =~ /$pms->{conf}->{olemacro_zips}/i) {
       dbg("Found zippy zip member $mname");
       ( $data, $status ) = $member->contents() unless defined $data;
-      next unless $status == AZ_OK;
+      next unless $status == $az_ok;
 
       _check_zip($pms, $name, $data, $depth);
 
@@ -628,7 +642,7 @@ sub _check_zip {
     if ($pms->{conf}->{olemacro_extended_scan} == 1) {
       dbg("Extended scan attachment with member name $mname");
       ( $data, $status ) = $member->contents() unless defined $data;
-      next unless $status == AZ_OK;
+      next unless $status == $az_ok;
 
       if (_is_office_doc($data)) {
         dbg("Found $name to be an Office Doc!");
@@ -711,7 +725,7 @@ sub _open_zip_handle {
 
   Archive::Zip::setErrorHandler( \&_zip_error_handler );
   my $zip = Archive::Zip->new();
-  if($zip->readFromFileHandle( $SH ) != AZ_OK){
+  if($zip->readFromFileHandle( $SH ) != $az_ok){
     dbg("cannot read zipfile");
     # as we cannot read it its not a zip (or too big/corrupted)
     # so skip processing.
@@ -723,6 +737,10 @@ sub _open_zip_handle {
 sub _check_macrotype_doc {
   my ($pms, $name, $data) = @_;
 
+  if (!HAS_IO_STRING) {
+    warn "check_macrotype_doc not supported, required module IO::String missing\n";
+    return 0;
+  }
   return 0 unless _is_zip_file($name, $data);
 
   my $zip = _open_zip_handle($data);
@@ -755,7 +773,7 @@ sub _check_macrotype_doc {
     if (!$pms->{olemacro_exists}) {
       my ( $data, $status ) = $ctypesxml->contents();
 
-      if (($status == AZ_OK) && (_check_ctype_xml($data))) {
+      if (($status == $az_ok) && (_check_ctype_xml($data))) {
         $pms->{olemacro_exists} = 1;
       }
     }
@@ -868,7 +886,7 @@ sub _find_malice_bins {
 
   foreach my $member (@binfiles){
     my ( $data, $status ) = $member->contents();
-    next unless $status == AZ_OK;
+    next unless $status == $az_ok;
     if (_check_malice($data)) {
       return 1;
     }
