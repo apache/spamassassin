@@ -8,7 +8,8 @@ Note for Users Upgrading to SpamAssassin 3.4.3
   (Bug 7736).  To check if a name contains valid TLD, it's still needed to
   additionally use RegistryBoundaries::is_domain_valid()
 
-- New OLEMacro plugin to detect OLE Macro inside documents attached to emails
+- New OLEMacro plugin to detect OLE Macro inside documents attached to emails,
+  this plugin requires Archive::Zip and IO::String Perl modules to work.
 
 - Due to the dangerous nature of sa-update --allowplugins option, it
   now prints a warning that --reallyallowplugins is required to use it.
