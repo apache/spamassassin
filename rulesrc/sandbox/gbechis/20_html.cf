@@ -4,5 +4,5 @@
 # rawbody       GB_HIDDEN_FONT             /font-size\s*:\s*0\s*(?:em|pt|px|%)\s*;/
 # describe      GB_HIDDEN_FONT             hidden font
 
-rawbody       GB_YELLOW_BG      /<(?:div|span) style=.*mso-highlight:yellow">.{1,20}<\/(?:div|span)\b/i
+rawbody       GB_YELLOW_BG      /<(?:div|span) [^>]{0,100}style="[^"]{0,100}mso-highlight:yellow">.{1,20}<\/(?:div|span)\b/i
 describe      GB_YELLOW_BG      Yellow background on few words
