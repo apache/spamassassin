@@ -858,8 +858,9 @@ sub poll_responses {
           if ($rcode eq 'REFUSED' || $id =~ m{^\d+/NO_QUESTION_IN_PACKET\z}) {
             # the failure was already reported above
           } else {
-            info("dns: no callback for id %s, ignored; packet: %s",
-                 $id,  $packet ? $packet->string : "undef" );
+            info("dns: no callback for id $id, ignored, packet on next debug line");
+            # prevent filling normal logs with huge packet dumps
+            dbg("dns: %s", $packet ? $packet->string : "undef");
           }
           # report a likely matching query for diagnostic purposes
           local $1;
