@@ -256,6 +256,7 @@ t/config_text.t
 t/config_tree_recurse.t
 t/cpp_comments_in_spamc.t
 t/cross_user_config_leak.t
+t/olevbmacro.t
 t/data/01_test_rules.cf
 t/data/01_test_rules.pre
 t/data/Dumpheaders.pm
@@ -378,6 +379,13 @@ t/data/spam/bsmtpnull
 t/data/spam/dnsbl.eml
 t/data/spam/gtube.eml
 t/data/spam/gtubedcc.eml
+t/data/spam/olevbmacro/encrypted.eml
+t/data/spam/olevbmacro/goodcsv.eml
+t/data/spam/olevbmacro/macro.eml
+t/data/spam/olevbmacro/malicemacro.eml
+t/data/spam/olevbmacro/nomacro.eml
+t/data/spam/olevbmacro/renamedmacro.eml
+t/data/spam/olevbmacro/zippwmacro.eml
 t/data/spam/razor2
 t/data/spam/relayUS.eml
 t/data/spam/spf1
