@@ -198,6 +198,13 @@ BEGIN {
       join($arg, sort @{$pms->{subtest_names_hit}}) || "none";
     },
 
+    SUBTESTSCOLLAPSED => sub {
+      my $pms = shift;
+      my $arg = (shift || ',');
+      my ($total_hits, $deduplicated_hits, @subtests) = $pms->get_array_names_of_subtests_hit("dbg");
+      join($arg, sort @subtests) || "none";
+    },
+
     TESTSSCORES => sub {
       my $pms = shift;
       my $arg = (shift || ",");
@@ -798,9 +805,33 @@ sub get_names_of_subtests_hit {
 
   if (defined $mode && $mode eq 'dbg') {
     # This routine prints only one instance of a subrule hit with a count of how many times it hit if greater than 1
+    my ($total_hits, $deduplicated_hits, @result) = $self->get_array_names_of_subtests_hit($mode);
+
+    return join(',', @result)." (Total Subtest Hits: $total_hits / Deduplicated Total Hits: $deduplicated_hits)";
+  } else {
+    # Return the simpler string with duplicates and commas
+    return join(',', sort @{$self->{subtest_names_hit}});
+  }
+}
+
+=item $list = $status->get_array_names_of_subtests_hit ()
+
+After a mail message has been checked, this method can be called.  It will
+return an array, listing all the symbolic test names of the
+meta-rule sub-tests which were triggered by the mail.  Sub-tests are the
+normally-hidden rules, which score 0 and have names beginning with two
+underscores, used in meta rules.
+
+=cut
+
+sub get_array_names_of_subtests_hit {
+  my ($self, $mode) = @_;
+
+  if (defined $mode && $mode eq 'dbg') {
+    # This routine prints only one instance of a subrule hit with a count of how many times it hit if greater than 1
     my $total_hits = scalar(@{$self->{subtest_names_hit}});
     return '' if !$total_hits;
-  
+
     my %subtest_names_hit;
     $subtest_names_hit{$_}++ foreach @{$self->{subtest_names_hit}};
 
@@ -815,11 +846,11 @@ sub get_names_of_subtests_hit {
         push @result, $rule;
       }
     }
-  
-    return join(',', @result)." (Total Subtest Hits: $total_hits / Deduplicated Total Hits: $deduplicated_hits)";
+
+    return ($total_hits, $deduplicated_hits, @result);
   } else {
     # Return the simpler string with duplicates and commas
-    return join(',', sort @{$self->{subtest_names_hit}});
+    return (scalar(@{$self->{subtest_names_hit}}), scalar(@{$self->{subtest_names_hit}}), @{$self->{subtest_names_hit}});
   }
 }
 

@@ -4567,6 +4567,8 @@ optional, and the default is shown below.
  _TESTSSCORES(,)_  as above, except with scores appended (eg. AWL=-3.0,...)
  _SUBTESTS(,)_     subtests (start with "__") hit separated by ","
                    (or other separator)
+ _SUBTESTSCOLLAPSED(,)_ subtests (start with "__") hit separated by ","
+                   (or other separator) with duplicated rules collapsed
  _DCCB_            DCC's "Brand"
  _DCCR_            DCC's results
  _PYZOR_           Pyzor results
