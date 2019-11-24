@@ -826,11 +826,12 @@ underscores, used in meta rules.
 
 sub get_array_names_of_subtests_hit {
   my ($self, $mode) = @_;
+  my @result;
 
   if (defined $mode && $mode eq 'dbg') {
     # This routine prints only one instance of a subrule hit with a count of how many times it hit if greater than 1
     my $total_hits = scalar(@{$self->{subtest_names_hit}});
-    return '' if !$total_hits;
+    return (0,0,@result) if !$total_hits;
 
     my %subtest_names_hit;
     $subtest_names_hit{$_}++ foreach @{$self->{subtest_names_hit}};
@@ -838,7 +839,6 @@ sub get_array_names_of_subtests_hit {
     my @subtests = sort keys %subtest_names_hit;
     my $deduplicated_hits = scalar(@subtests);
 
-    my @result;
     foreach my $rule (@subtests) {
       if ($subtest_names_hit{$rule} > 1) {
         push @result, "$rule($subtest_names_hit{$rule})";
