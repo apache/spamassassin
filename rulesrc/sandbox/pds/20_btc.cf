@@ -54,12 +54,12 @@ ifplugin Mail::SpamAssassin::Plugin::ReplaceTags
   score    PDS_BTC_HACKER 2.0 # limit
   reuse    PDS_BTC_HACKER
 
-  meta     PDS_LTC_AHACKER ( __PDS_LTC_ID && __PDS_BTC_BADFROM && __PDS_BTC_ANON )
+  meta     PDS_LTC_AHACKER ( __PDS_LITECOIN_ID && __PDS_BTC_BADFROM && __PDS_BTC_ANON )
   describe PDS_LTC_AHACKER Litecoin Hacker
   score    PDS_LTC_AHACKER 3.0 # limit
   reuse    PDS_LTC_AHACKER
 
-  meta     PDS_LTC_HACKER ( __PDS_LTC_ID && __PDS_BTC_ANON && !__PDS_BTC_BADFROM )
+  meta     PDS_LTC_HACKER ( __PDS_LITECOIN_ID && __PDS_BTC_ANON && !__PDS_BTC_BADFROM )
   describe PDS_LTC_HACKER Litecoin Hacker
   score    PDS_LTC_HACKER 2.0 # limit
   reuse    PDS_LTC_HACKER
