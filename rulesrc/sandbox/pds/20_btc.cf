@@ -5,7 +5,7 @@ meta     __PDS_BTC_ID   ( __BITCOIN_ID && !__URL_BTC_ID && !__HAS_IMG_SRC_DATA &
 uri      __URL_LTC_ID     m;[/.][LM3][a-km-zA-HJ-NP-Z1-9]{26,33}(?:/|$);
 body     __LITECOIN_ID   /\b(?<!=)[LM3][a-km-zA-HJ-NP-Z1-9]{26,33}\b/
 
-meta     __PDS_LITECOIN_ID (__BITCOIN_ID && !__URL_LTC_ID && !__HAS_IMG_SRC_DATA && !__BUGGED_IMG)
+meta     __PDS_LITECOIN_ID (__LITECOIN_ID && !__URL_LTC_ID && !__HAS_IMG_SRC_DATA && !__BUGGED_IMG)
 
 meta     PDS_LITECOIN_ID __PDS_LITECOIN_ID
 describe PDS_LITECOIN_ID FP reduced Litecoin ID
