@@ -430,8 +430,9 @@ sub parse_received_line {
     $auth = 'CriticalPath';
   }
   # Postfix 2.3 and later with "smtpd_sasl_authenticated_header yes"
-  elsif (/\) \(Authenticated sender: \S+\) by \S+ \(Postfix\) with /) {
-    $auth = 'Postfix';
+  # Normally $1 is "Postfix", but could be changed with mail_name (Bug 5646)
+  elsif (/\) \(Authenticated sender: \S+\) by \S+ \(([^\)]+)\) with /) {
+    $auth = $1 eq 'Postfix' ? $1 : "Postfix ($1)";
   }
   # Communigate Pro - Bug 6495 adds HTTP as possible transmission method
   # 	Bug 7277: XIMSS used by Pronto and other custom apps, IMAP supports XMIT extension
