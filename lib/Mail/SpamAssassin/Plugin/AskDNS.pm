@@ -366,7 +366,7 @@ sub set_config {
 # run as early as possible, launching DNS queries as soon as their
 # dependencies are fulfilled
 #
-sub extract_metadata {
+sub parsed_metadata {
   my($self, $opts) = @_;
   my $pms = $opts->{permsgstatus};
   my $conf = $pms->{conf};
