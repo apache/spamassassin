@@ -1,7 +1,7 @@
 # I hereby give permission for any other committer to change rules in this file
 # see pds/20_btc.cf for other BTC rules
 
-body     __COPY_PASTE_DE      /Kopieren Sie es und f(?:\xfc|\xc3\xbc)gen Sie es ein/i
+body     __COPY_PASTE_DE      /Kopieren Sie es und f(?:\xfc|\xc3\xbc)gen Sie es ein|Kopieren \& Einf(?:\xfc|\xc3\xbc)gen/i
 meta     __GB_BITCOIN_CP_DE   ( __BITCOIN_ID && !__URL_BTC_ID && __COPY_PASTE_DE )
 describe __GB_BITCOIN_CP_DE   German Bitcoin scam
 
