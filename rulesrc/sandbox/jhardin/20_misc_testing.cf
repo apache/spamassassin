@@ -1880,7 +1880,7 @@ else
 endif
 
 uri            __URL_BTC_ID     m;[/.][13][a-km-zA-HJ-NP-Z1-9]{25,34}(?:/|$);
-body           __BITCOIN_ID     /\b(?<!=)[13](?:\s?[a-km-zA-HJ-NP-Z1-9]){25,34}\b/
+body           __BITCOIN_ID     /\b(?<!=)[13][a-km-zA-HJ-NP-Z1-9]{25,34}\b/
 
 meta          FUZZY_MONERO        __FUZZY_MONERO
 describe      FUZZY_MONERO        Obfuscated "Monero"
