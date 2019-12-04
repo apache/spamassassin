@@ -415,7 +415,7 @@ sub check_olemacro_csv {
     if ($name =~ /\.csv/i) {
       dbg("Found csv file with name $name");
       $data = $part->decode($chunk_size) unless defined $data;
-      if($data =~ /MSEXCEL|.*Windows\\System32\\cmd\\.exe/) {
+      if($data =~ /MSEXCEL\|.{1,20}Windows\\System32\\cmd\.exe/) {
         $pms->{olemacro_csv} = 1;
       }
     }
