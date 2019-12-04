@@ -149,13 +149,13 @@ Configure the maximum number of matching MIME parts the plugin will scan
 
   push(@cmds, {
     setting => 'olemacro_num_zip',
-    default => 5,
+    default => 8,
     type => $Mail::SpamAssassin::Conf::CONF_TYPE_NUMERIC,
   });
 
 =over 4
 
-=item olemacro_num_zip (default: 5)
+=item olemacro_num_zip (default: 8)
 
 Configure the maximum number of matching zip members the plugin will scan
 
@@ -217,13 +217,13 @@ Choose if the content-disposition header filename be preferred if ambiguity is e
 
   push(@cmds, {
     setting => 'olemacro_max_file',
-    default => 512000,
+    default => 1024000,
     type => $Mail::SpamAssassin::Conf::CONF_TYPE_NUMERIC,
   });
 
 =over 4
 
-=item olemacro_max_file (default: 512000)
+=item olemacro_max_file (default: 1024000)
 
 Configure the largest file that the plugin will decode from the MIME objects
 
@@ -325,7 +325,7 @@ to skip entirely, these should only be guaranteed macro free files
 
   push(@cmds, {
     setting => 'olemacro_skip_ctypes',
-    default => qr/^(?:(audio|image|text)\/|application\/(?:pdf))/,
+    default => qr/^(?:(text)\/)/,
     type => $Mail::SpamAssassin::Conf::CONF_TYPE_STRING,
     code => sub {
       my ($self, $key, $value, $line) = @_;
@@ -344,7 +344,7 @@ to skip entirely, these should only be guaranteed macro free files
 
 =over 4
 
-=item olemacro_skip_ctypes (default: ^(?:(audio|image|text)\/|application\/(?:pdf)))
+=item olemacro_skip_ctypes (default: ^(?:(text)\/))
 
 Set the case-insensitive regexp used to configure content types for the
 plugin to skip entirely, these should only be guaranteed macro free
