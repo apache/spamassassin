@@ -325,7 +325,7 @@ to skip entirely, these should only be guaranteed macro free files
 
   push(@cmds, {
     setting => 'olemacro_skip_ctypes',
-    default => qr/^(?:(text)\/)/,
+    default => qr/^(?:text\/)/,
     type => $Mail::SpamAssassin::Conf::CONF_TYPE_STRING,
     code => sub {
       my ($self, $key, $value, $line) = @_;
@@ -344,7 +344,7 @@ to skip entirely, these should only be guaranteed macro free files
 
 =over 4
 
-=item olemacro_skip_ctypes (default: ^(?:(text)\/))
+=item olemacro_skip_ctypes (default: ^(?:text\/))
 
 Set the case-insensitive regexp used to configure content types for the
 plugin to skip entirely, these should only be guaranteed macro free
