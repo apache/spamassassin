@@ -89,10 +89,12 @@ our $VERSION = '0.52';
 
 # https://www.openoffice.org/sc/compdocfileformat.pdf
 # http://blog.rootshell.be/2015/01/08/searching-for-microsoft-office-files-containing-macro/
-# embedded object in rtf files (https://www.biblioscape.com/rtf15_spec.htm)
 my $marker1 = "\xd0\xcf\x11\xe0";
 my $marker2 = "\x00\x41\x74\x74\x72\x69\x62\x75\x74\x00";
+# embedded object in rtf files (https://www.biblioscape.com/rtf15_spec.htm)
 my $marker3 = "\x5c\x6f\x62\x6a\x65\x6d\x62";
+my $marker4 = "\x5c\x6f\x62\x6a\x64\x61\x74";
+my $marker5 = "\x5c\x20\x6f\x62\x6a\x64\x61\x74";
 
 # this code burps an ugly message if it fails, but that's redirected elsewhere
 # AZ_OK is a constant exported by Archive::Zip
@@ -859,12 +861,22 @@ sub _check_markers {
   my ($data) = @_;
 
   if (index($data, $marker1) == 0 && index($data, $marker2) > -1) {
-    dbg('Marker found');
+    dbg('Marker 1 & 2 found');
     return 1;
   }
 
   if (index($data, $marker3) > -1) {
-    dbg('Marker found');
+    dbg('Marker 3 found');
+    return 1;
+  }
+
+  if (index($data, $marker4) > -1) {
+    dbg('Marker 4 found');
+    return 1;
+  }
+
+  if (index($data, $marker5) > -1) {
+    dbg('Marker 5 found');
     return 1;
   }
 
