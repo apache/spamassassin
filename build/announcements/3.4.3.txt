@@ -77,9 +77,36 @@ Security updates include XXX
 New configuration options
 -------------------------
 
-A new template tag  XXX
+A new subjprefix keyword used to add a prefix to the subject of the
+email if a rule is matched.
 
-A config option XXX
+A new template tag _SUBJPREFIX_ that maps to the subject prefix that
+has been added by the subjprefix keyword.
+
+A config option rbl_headers has been added to DNSEval plugin,
+this option is used to specify in which headers check_rbl_headers
+should check for content used to query the specified rbl.
+
+A new check_rbl_ns_from function has been added to check
+the dns server of the from addrs domain name against a specific rbl.
+
+A new check_rbl_rcvd function has been added to check
+all received headers domains or ip addresses against a
+specific rbl.
+
+New options has been added to check_hashbl_emails function
+has been added; it is now possible to specify in which headers
+the function should check for content used to query the
+specified rbl and an acl to filter the email addresses the rule
+should apply.
+
+A new check_hashbl_bodyre function has been added, it is now possible
+to search body for matching regexp and query the string captured
+against the specified rbl.
+
+A new check_hashbl_uris function has been added, it is now possible
+to match uris in email's body and query the uris against the
+specified rbl.
 
 XXX
 
