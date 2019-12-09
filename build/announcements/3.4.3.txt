@@ -6,38 +6,38 @@ Release Notes -- Apache SpamAssassin -- Version 3.4.3
 Introduction
 ------------
 
-Apache SpamAssassin 3.4.3 contains numerous tweaks and bug fixes as we prepare
-to move to version 4.0.0 with better, native UTF-8 handling.  
+Apache SpamAssassin 3.4.3 contains numerous tweaks and bug fixes as we
+prepare to move to version 4.0.0 with better, native UTF-8 handling.
 
-There are a number of functional patches, improvements as well as security 
-reasons to upgrade to 3.4.3.  In this release, there are bug fixes for two 
+There are a number of functional patches, improvements as well as security
+reasons to upgrade to 3.4.3.  In this release, there are bug fixes for two
 CVEs.
 
 *** On March 1, 2020, we will stop publishing rulesets with SHA-1 signatures.
-    If you do not update to 3.4.2 or later, you will be stuck at the last 
+    If you do not update to 3.4.2 or later, you will be stuck at the last
     ruleset with SHA-1 signatures. ***
 
 Many thanks to the committers, contributors, rule testers, mass checkers,
-and code testers who have made this release possible.  
+and code testers who have made this release possible.
 
 Happy Birthday
 --------------
 Apache SpamAssassin turned 18 on September 5th, 2019.
 
 Now in its 18th year, 15 of which as an Apache project, SpamAssassin is the
-world's most popular email anti-spam platform. Apache SpamAssassin can be 
-used on a wide variety of email systems including Postfix, procmail, qmail, 
-sendmail, and more. 
+world's most popular email anti-spam platform. Apache SpamAssassin can be
+used on a wide variety of email systems including Postfix, procmail, qmail,
+sendmail, and more.
 
-It serves as the spam-filtering and detection solution for numerous ISPs and 
-hosting providers, and is integrated in commercial software including Plesk, 
-cPanel, Vesta Control Panel, and many others. 
+It serves as the spam-filtering and detection solution for numerous ISPs and
+hosting providers, and is integrated in commercial software including Plesk,
+cPanel, Vesta Control Panel, and many others.
 
-SpamAssassin was originally created by Justin Mason, who had maintained a 
-number of patches against an earlier program named filter.plx by Mark 
-Jeftovic, which began in August 1997. Mason rewrote all of Jeftovic's code 
-from scratch and uploaded the resulting codebase to SourceForge on April 20, 
-2001. SpamAssassin entered the Apache Incubator in December 2003 and 
+SpamAssassin was originally created by Justin Mason, who had maintained a
+number of patches against an earlier program named filter.plx by Mark
+Jeftovic, which began in August 1997. Mason rewrote all of Jeftovic's code
+from scratch and uploaded the resulting codebase to SourceForge on April 20,
+2001. SpamAssassin entered the Apache Incubator in December 2003 and
 graduated as an Apache Top-Level Project in June 2004.
 
 Notable features:
@@ -50,29 +50,36 @@ There is 1 new plugin added with this release:
 # OLEVBMacro - Detects both OLE macros and VB code inside Office documents
 #
 # It tries to discern between safe and malicious code but due to the threat
-# macros present to security, many places block these type of documents outright.
+# macros present to security, many places block these type of documents
+# outright.
 #
 # For this plugin to work, Archive::Zip and IO::String modules are required.
 # loadplugin Mail::SpamAssassin::Plugin::OLEVBMacro
 
 
-This plugin is disabled by default. To enable, uncomment the loadplugin 
-configuration options in file v343.pre, or add it to some local .pre file such
-as local.pre.
+This plugin is disabled by default. To enable, uncomment the loadplugin
+configuration options in file v343.pre, or add it to some local .pre file
+such as local.pre.
 
 Notable changes
 ---------------
 
-XXX - Stuff needed here
+Safer and faster scanning of large emails using body_part_scan_size and
+rawbody_part_scan_size settings.
+
+New tflag "nosubject" for 'body' rules, to stop matching the Subject header
+which is part of the body text.
 
 Two CVE security bug fixes are included in this release:
 
   CVE-2019-12420 for Multipart Denial of Service Vulnerability
 
-  CVE-2018-11805 for nefarious CF files can be configured to 
+  CVE-2018-11805 for nefarious CF files can be configured to
   run system commands without any output or errors.
 
-Security updates include XXX
+Security updates include deprecation of the unsafe sa-update '--allowplugins'
+option, which now prints a warning that '--reallyallowplugins' is required
+to use it.
 
 New configuration options
 -------------------------
