@@ -83,6 +83,9 @@ email if a rule is matched.
 A new template tag _SUBJPREFIX_ that maps to the subject prefix that
 has been added by the subjprefix keyword.
 
+A new template tag _SUBTESTSCOLLAPSED(,)_ that maps to subtests that
+hits with duplicated rules collapsed.
+
 A config option rbl_headers has been added to DNSEval plugin,
 this option is used to specify in which headers check_rbl_headers
 should check for content used to query the specified rbl.
