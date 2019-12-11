@@ -1,11 +1,11 @@
-#!/usr/bin/perl
+#!/usr/bin/perl -T
 
 use constant HAVE_ZLIB => eval { require Compress::Zlib; };
 
 use lib '.'; use lib 't';
 use SATest; sa_t_init("spamc_z");
 
-system("$spamc -z < /dev/null");
+untaint_system("$spamc -z < /dev/null");
 my $SPAMC_Z_AVAILABLE = ($? >> 8 == 0);
 
 use Test::More;

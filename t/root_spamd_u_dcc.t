@@ -1,4 +1,4 @@
-#!/usr/bin/perl
+#!/usr/bin/perl -T
 #
 # test for http://issues.apache.org/SpamAssassin/show_bug.cgi?id=5574#c12 .
 # run with:   sudo prove -v t/root_spamd*
@@ -6,10 +6,13 @@
 use lib '.'; use lib 't';
 use SATest; sa_t_init("root_spamd_u_dcc");
 
+use constant HAS_SUDO => eval { $_ = untaint_cmd("which sudo 2>/dev/null"); chomp; -x };
+
 use Test::More;
 plan skip_all => "root tests disabled" unless conf_bool('run_root_tests');
 plan skip_all => "DCC tests disabled" unless conf_bool('run_dcc_tests');
 plan skip_all => "not running tests as root" unless eval { ($> == 0); };
+plan skip_all => "sudo executable not found in path" unless HAS_SUDO;
 plan tests => 23;
 
 # ---------------------------------------------------------------------------

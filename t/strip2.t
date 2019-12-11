@@ -1,4 +1,4 @@
-#!/usr/bin/perl
+#!/usr/bin/perl -T
 
 use lib '.'; use lib 't';
 use SATest; sa_t_init("strip2");
@@ -120,7 +120,7 @@ ok(!compare_text($input,$d_output))
 sub diffwarn {
   my ($f1, $f2) = @_;
   print "# Diff is as follows:\n";
-  system "diff -u $f1 $f2";
+  untaint_system "diff -u $f1 $f2";
   print "\n\n";
 }
 

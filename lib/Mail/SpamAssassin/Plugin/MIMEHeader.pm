@@ -65,11 +65,14 @@ use re 'taint';
 use Mail::SpamAssassin::Plugin;
 use Mail::SpamAssassin::Conf;
 use Mail::SpamAssassin::Logger;
-use Mail::SpamAssassin::Util qw(untaint_var);
+use Mail::SpamAssassin::Util qw(untaint_var compile_regexp);
+use Mail::SpamAssassin::Constants qw(:sa);
 
 our @ISA = qw(Mail::SpamAssassin::Plugin);
 
 our @TEMPORARY_METHODS;
+
+my $RULENAME_RE = RULENAME_RE;
 
 # ---------------------------------------------------------------------------
 
@@ -101,27 +104,37 @@ sub set_config {
     is_priv => 1,
     code => sub {
       my ($self, $key, $value, $line) = @_;
-      local ($1,$2,$3,$4);
-      if ($value !~ /^(\S+)\s+(\S+)\s*([\=\!]\~)\s*(.+)$/) {
+      local ($1,$2,$3);
+      if ($value !~ s/^(${RULENAME_RE})\s+//) {
         return $Mail::SpamAssassin::Conf::INVALID_VALUE;
       }
-
-      # provide stricter syntax for rule name!?
       my $rulename = untaint_var($1);
-      my $hdrname = $2;
-      my $negated = ($3 eq '!~') ? 1 : 0;
-      my $pattern = $4;
-
-      return unless $self->{parser}->is_delimited_regexp_valid($rulename, $pattern);
-
-      $pattern = Mail::SpamAssassin::Util::make_qr($pattern);
-      return $Mail::SpamAssassin::Conf::INVALID_VALUE unless $pattern;
+      if ($value eq '') {
+        return $Mail::SpamAssassin::Conf::MISSING_REQUIRED_VALUE;
+      }
+      # Take :raw to hdrname!
+      if ($value !~ /^([^:\s]+(?:\:(?:raw)?)?)\s*([=!]~)\s*(.+)$/) {
+        return $Mail::SpamAssassin::Conf::INVALID_VALUE;
+      }
+      my $hdrname = $1;
+      my $negated = $2 eq '!~' ? 1 : 0;
+      my $pattern = $3;
+      $hdrname =~ s/:$//;
+      my $if_unset = '';
+      if ($pattern =~ s/\s+\[if-unset:\s+(.+)\]$//) {
+         $if_unset = $1;
+      }
+      my ($rec, $err) = compile_regexp($pattern, 1);
+      if (!$rec) {
+        info("mimeheader: invalid regexp for $rulename '$pattern': $err");
+        return $Mail::SpamAssassin::Conf::INVALID_VALUE;
+      }
 
       $self->{mimeheader_tests}->{$rulename} = {
         hdr => $hdrname,
         negated => $negated,
-        if_unset => '',             # TODO!
-        pattern => $pattern
+        if_unset => $if_unset,
+        pattern => $rec
       };
 
       # now here's a hack; generate a fake eval rule function to
@@ -129,7 +142,6 @@ sub set_config {
       # TODO: we should have a more elegant way for new rule types to
       # be defined
       my $evalfn = "_mimeheader_eval_$rulename";
-      $evalfn =~ s/[^a-zA-Z0-9_]/_/gs;
 
       # don't redefine the subroutine if it already exists!
       # this causes lots of annoying warnings and such during things like
@@ -139,6 +151,7 @@ sub set_config {
       $self->{parser}->add_test($rulename, $evalfn."()",
                 $Mail::SpamAssassin::Conf::TYPE_BODY_EVALS);
 
+      # evalfn/rulename safe, sanitized by $RULENAME_RE
       my $evalcode = '
         sub Mail::SpamAssassin::Plugin::MIMEHeader::'.$evalfn.' {
           $_[0]->eval_hook_called($_[1], q{'.$rulename.'});
@@ -175,7 +188,7 @@ sub eval_hook_called {
 
 
   my $getraw;
-  if ($hdr =~ s/:raw$//i) {
+  if ($hdr =~ s/:raw$//) {
     $getraw = 1;
   } else {
     $getraw = 0;
@@ -188,9 +201,9 @@ sub eval_hook_called {
     } else {
       $val = $p->get_header($hdr);
     }
-    $val ||= $if_unset;
+    $val = $if_unset if !defined $val;
 
-    if ($val =~ ${pattern}) {
+    if ($val =~ $pattern) {
       return ($negated ? 0 : 1);
     }
   }

@@ -1,19 +1,10 @@
 #!/bin/sh
 
-#IF RUNNING ON ZONES
-WEBDIR=/var/www/buildbot.spamassassin.org/staging/website
-#WEBDIR=/usr/src/Mail-SpamAssassin/site
+WEBDIR=~/asf/spamassassin/site
 vers=3.4.x
 
-if [ -z "$PERL" ]; then
-  if [ -x /home/jm/perl584/bin/perl ]; then
-    PERL=/home/jm/perl584/bin/perl
-  else
-    #IF RUNNING ON ZONES
-    PERL=perl
-    #PERL=/usr/local/bin/perl
-  fi
-fi
+PERL=/usr/bin/perl
+#PERL=/usr/local/bin/perl
 
 fulldir=$WEBDIR/full/$vers
 [ -d $fulldir ] || mkdir -p $fulldir

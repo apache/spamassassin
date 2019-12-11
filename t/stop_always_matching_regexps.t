@@ -1,4 +1,4 @@
-#!/usr/bin/perl
+#!/usr/bin/perl -T
 
 BEGIN {
   if (-e 't/test_dir') { # if we are running "t/rule_tests.t", kluge around ...
@@ -13,20 +13,18 @@ BEGIN {
 
 use lib '.'; use lib 't';
 use SATest; sa_t_init("stop_always_matching_regexps");
-use Test::More tests => 13;
+use Test::More tests => 12;
 
 # ---------------------------------------------------------------------------
 
 use strict;
 require Mail::SpamAssassin;
-
-my $sa = create_saobj({'dont_copy_prefs' => 1});
-$sa->init(0);
-ok($sa);
+use Mail::SpamAssassin::Util qw(compile_regexp);
 
 sub is_caught {
   my ($re) = @_;
-  return $sa->{conf}->{parser}->is_always_matching_regexp($re, $re);
+  my ($rec, $err) = compile_regexp($re, 0, 1);
+  return !$rec;
 }
 
 ok !is_caught 'foo|bar';

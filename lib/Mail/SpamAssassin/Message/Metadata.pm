@@ -28,7 +28,7 @@ supplemental data inferred from the message, like the examples below.
 It is held in two forms:
 
 1. as name-value pairs of strings, presented in mail header format.  For
-  example, "X-Language" => "en".  This is the general form for simple
+  example, "X-Languages" => "en".  This is the general form for simple
   metadata that's useful as Bayes tokens, can be added to marked-up
   messages using "add_header", etc., such as the trusted-relay inference
   and language detection.

@@ -77,8 +77,8 @@ For security reasons SSLv3 support has been removed from spamc(1).
 
 The spamd(1) daemon now is faster to start, thanks to code optimizations.
 
-Four CVE security bugs are included in this release for PDFInfo.pm and the 
-SA core: 
+Four CVE security bug fixes are included in this release for PDFInfo.pm and 
+the SA core: 
  CVE-2017-15705, CVE-2016-1238, CVE-2018-11780 & CVE-2018-11781 
 
 In sa-update script, optional support for SHA-256 / SHA-512 in addition 
@@ -155,23 +155,23 @@ Downloading and availability
 
 Downloads are available from:
 
-http://spamassassin.apache.org/downloads.cgi
+https://spamassassin.apache.org/downloads.cgi
 
 sha256sum of archive files:
 
-  a2d9fd2376fef3364d43e406ae735a47d5e54d0f6eb10e23374fc39bd4a2b596  Mail-SpamAssassin-3.4.2-rc1.tar.bz2
-  1685868d5b92b53c9c8f2719289855747c9dfe597cae2e9b0a12a0cdfa1d4837  Mail-SpamAssassin-3.4.2-rc1.tar.gz
-  ff83da73c2c033975a376fda6657bec9251674cf969204a77a03a46e525e0a98  Mail-SpamAssassin-3.4.2-rc1.zip
-  30acaa486faa6b8106878d4c30f13506112dd3f20200ae1424fbef232c03813f  Mail-SpamAssassin-rules-3.4.2-rc1.r1840278.tgz
+  cf03045a4991752145eed007e75737f3e4c7f34cf225db411ce3fd359280e8da  Mail-SpamAssassin-3.4.2.tar.bz2
+  8a1c139ee08f140d3d3fdf13e03d98cf68a5cae27a082c4a614d154565a3c34f  Mail-SpamAssassin-3.4.2.tar.gz
+  c76841929fa53cf0adeb924797195c66da207ab6739553fd62634f94f2dcd875  Mail-SpamAssassin-3.4.2.zip
+  8d481a2081f1e62a2579238f66b58d2124f7a2e9f3cfa3d4aa2b03fe7b0199bb  Mail-SpamAssassin-rules-3.4.2.r1840640.tgz
 
 sha512sum of archive files:
 
-  45e343c33d28083e71a673bad35ff4487044f24df7e3f12c1a217b70e53304536756591ff7fe37dff42a00c20e3deb80173fc14ac8ae8b67ce61dc7987b787ff  Mail-SpamAssassin-3.4.2-rc1.tar.bz2
-  7e68ac29ed8b302421eb1818e051f2f8e1cabc6f9c8c177ea4973e563a5aa2010f26bbfb776f9b7c771000ebef36cbaf9174c8b930620c8656c119d8c0983535  Mail-SpamAssassin-3.4.2-rc1.tar.gz
-  ac307580c81be8727d31a50a435db0f628308f6058a66c26e85abc6f7fab1ddae333ac95fb969db942e90867fce6b969a8f232a55af6ee6ac9d4810fedc07750  Mail-SpamAssassin-3.4.2-rc1.zip
-  092032fd73223a9abb35c1940971e06a57096455e28f7ec6d5fa8e6dabe669c573fff6fdf022a7eaf25f6ddc6b1c32592baf3c435a8accf2855a2a1935aa8df2  Mail-SpamAssassin-rules-3.4.2-rc1.r1840278.tgz
+  fe3d9d1d7b9fed3063549afd071066729f1f4d998be91ded1e5afc29bb37c7a298dc5f8f99a282b75435d317b5b5072a81393134ccfe059a73d953e26a9c3885  Mail-SpamAssassin-3.4.2.tar.bz2
+  85e3d78bb885ad1d0bf2066d1bc919d6ad5e9f86795069397e7c28cc1ba02870566ec014c08c81f68e7ed03b7f60d2de0b9730b3415b35d848abde2c8920a28f  Mail-SpamAssassin-3.4.2.tar.gz
+  9545c1cd55c31f23ba8f8421f78306657a068004a27cab8cd094eb9bc7c8d94cdb4803089318f2c0cefb9b817fa3f1cfb7cb817913027c0c93b5d639937ee05c  Mail-SpamAssassin-3.4.2.zip
+  38b5f4dc6e6776937e787123c265ecd9a0a2f60aca1b57d6ed4a8f78cf81550478eddd0829b1255e9e8ce64421e06cc13ae82f1a597e893b65f0d07ba8c53a7f  Mail-SpamAssassin-rules-3.4.2.r1840640.tgz
 
-Note that the *-rules-*.tar.gz files are only necessary if you cannot,
+Note that the *-rules-*.tgz files are only necessary if you cannot,
 or do not wish to, run "sa-update" after install to download the latest
 fresh rules.
 
@@ -184,7 +184,7 @@ GPG Verification Procedure
 The release files also have a .asc accompanying them.  The file serves
 as an external GPG signature for the given release file.  The signing
 key is available via the wwwkeys.pgp.net key server, as well as
-http://www.apache.org/dist/spamassassin/KEYS
+https://www.apache.org/dist/spamassassin/KEYS
 
 The key information is:
 
@@ -207,7 +207,7 @@ Note that older versions of gnupg may not be able to complete the steps
 above. Specifically, GnuPG v1.0.6, 1.0.7 & 1.2.6 failed while v1.4.11
 worked flawlessly.
 
-See http://www.apache.org/info/verification.html for more information
+See https://www.apache.org/info/verification.html for more information
 on verifying Apache releases.
 
 
@@ -234,7 +234,7 @@ POSIX platforms.
 The server and the Perl library feels at home on Unix and Linux platforms
 and reportedly also works on MS Windows systems under ActivePerl.
 
-For more information, visit http://spamassassin.apache.org/
+For more information, visit https://spamassassin.apache.org/
 
 
 About The Apache Software Foundation
@@ -247,4 +247,4 @@ pragmatic Apache License enables individual and commercial users to
 easily deploy Apache software; the Foundation's intellectual property
 framework limits the legal exposure of its 2,500+ contributors.
 
-For more information, visit http://www.apache.org/
+For more information, visit https://www.apache.org/

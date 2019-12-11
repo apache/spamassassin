@@ -266,16 +266,9 @@ sub word_is_in_dictionary {
 sub check_illegal_chars {
   my ($self, $pms, $header, $ratio, $count) = @_;
 
-  $header .= ":raw" unless ($header eq "ALL" || $header =~ /:raw$/);
+  $header .= ":raw" unless $header =~ /:raw$/;
   my $str = $pms->get($header);
   return 0 if !defined $str || $str eq '';
-
-  # avoid overlap between tests
-  if ($header eq "ALL") {
-    # fix continuation lines, then remove Subject and From
-    $str =~ s/\n[ \t]+/  /gs;
-    $str =~ s/^(?:Subject|From):.*$//gmi;
-  }
 
   # count illegal substrings (RFC 2045)
   # (non-ASCII + C0 controls except TAB, NL, CR)
@@ -523,6 +516,7 @@ sub check_for_forged_yahoo_received_headers {
             { return 0; }
 
   if ($rcvd =~ /by web\S+\.mail\S*\.yahoo\.com via HTTP/) { return 0; }
+  if ($rcvd =~ /by sonic\S+\.consmr\.mail\S*\.yahoo\.com with HTTP/) { return 0; }
   if ($rcvd =~ /by smtp\S+\.yahoo\.com with SMTP/) { return 0; }
   my $IP_ADDRESS = IP_ADDRESS;
   if ($rcvd =~
@@ -595,7 +589,7 @@ sub check_for_forged_gmail_received_headers {
   my $received = $pms->get('Received');
 
   if ($xreceived =~ /by 10\.\S+ with SMTP id \S+/) { return 0; }
-  if ($xreceived =~ /by 2002\:\w\:\S+ with SMTP id \S+/) { return 0; }
+  if ($xreceived =~ /by 2002\:a\d\d\:\w+\:\S+ with SMTP id \S+/) { return 0; }
   if ($received =~ /by smtp\.googlemail\.com with ESMTPSA id \S+/) {
     return 0;
   }
@@ -928,7 +922,7 @@ sub subject_is_all_caps {
 
    $subject =~ s/^\s+//;
    $subject =~ s/\s+$//;
-   $subject =~ s/^(?:(?:Re|Fwd|Fw|Aw|Antwort|Sv):\s*)+//i;  # Bug 6805
+   $subject =~ s/^(?:(?:Re|Fwd|Fw|Aw|Antwort|Sv|VS):\s*)+//i;  # Bug 6805
    return 0 if $subject !~ /\s/;	# don't match one word subjects
    return 0 if (length $subject < 10);  # don't match short subjects
    $subject =~ s/[^a-zA-Z]//g;		# only look at letters
@@ -1034,7 +1028,6 @@ sub check_unresolved_template {
   my ($self, $pms) = @_;
 
   my $all = $pms->get('ALL');	# cached access
-  $all =~ s/\n[ \t]+/ /gs;	# fix continuation lines
   
   for my $header (split(/\n/, $all)) {
     # slightly faster to test in this order
@@ -1067,9 +1060,9 @@ sub check_ratware_envelope_from {
   my $from = $pms->get('EnvelopeFrom:addr');
 
   return 0 if $from eq '' || $to eq '';
-  return 0 if $from =~ /^SRS\d=/;
+  return 0 if $from =~ /^SRS\d[=+-]/i;
 
-  if ($to =~ /^([^@]+)@(.+)$/) {
+  if ($to =~ /^([^@]+)\@(.+)$/) {
     my($user,$dom) = ($1,$2);
     $dom = $self->{main}->{registryboundaries}->trim_domain($dom);
     return unless

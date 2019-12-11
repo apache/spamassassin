@@ -42,7 +42,7 @@ tagstamp=`date "+%Y%m%d%H%M%S"`
 DEST=svn.apache.org/repos/asf/spamassassin/tags/sa-update_${VERS}_${tagstamp}
 svn cp --username jm --non-interactive -m "tagging latest update release for $VERS" https://$SOURCE https://$DEST || exit 1
 
-svn -q co http://$DEST $DIR || exit 1
+svn -q co https://$DEST $DIR || exit 1
 #V=`svn info $DIR | awk '/^Last Changed Rev:/ { print $4 }'`
 V=`svnversion $DIR`
 cd $DIR

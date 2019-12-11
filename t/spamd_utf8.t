@@ -1,4 +1,4 @@
-#!/usr/bin/perl
+#!/usr/bin/perl -T
 
 use lib '.'; use lib 't';
 use SATest; sa_t_init("spamd_utf8");
@@ -11,6 +11,7 @@ BEGIN {
   $testlocale = 'en_US.UTF-8';
 
   my $havelocale = 1;
+  local $ENV{'PATH'} = '/bin:/usr/bin:/usr/local/bin';  # must not be tainted
   open (IN, "LANG=$testlocale perl -e 'exit 0' 2>&1 |");
   while (<IN>) {
     /Please check that your locale settings/ and ($havelocale = 0);

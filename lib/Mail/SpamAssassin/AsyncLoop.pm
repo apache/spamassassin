@@ -598,7 +598,7 @@ Register a "response packet" for a given query.  C<$id> is the ID for the
 query, and must match the C<id> supplied in C<start_lookup()>. C<$pkt> is the
 packet object for the response. A parameter C<$key> identifies an entry in a
 hash %{$self->{pending_lookups}} where the object which spawned this query can
-be found, and through which futher information about the query is accessible.
+be found, and through which further information about the query is accessible.
 
 C<$pkt> may be undef, indicating that no response packet is available, but a
 query has completed (e.g. was aborted or dismissed) and is no longer "pending".

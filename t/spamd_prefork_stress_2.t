@@ -1,4 +1,4 @@
-#!/usr/bin/perl
+#!/usr/bin/perl -T
 #
 # Warning: do not run this test on a live server; it will kill your
 # spamd children ;)
@@ -22,7 +22,7 @@ plan skip_all => "No pgrep available - $note" unless $pgrep;
 
 plan tests => 14;
 
-system($pgrep, "spamd child");
+untaint_system($pgrep, "spamd child");
 if ($? >> 8 == 0) {
   die "not running test: existing 'spamd child' processes would be killed.\n";
 }
@@ -48,7 +48,7 @@ ok_all_patterns();
 my $i = 0;
 for ($i = 0; $i < 1999; $i++) {
   print "killing [$i]\n";
-  system ($pkill, "-f", "spamd child");
+  untaint_system ($pkill, "-f", "spamd child");
 }
 
 sleep 1;        # give it time to start a new one

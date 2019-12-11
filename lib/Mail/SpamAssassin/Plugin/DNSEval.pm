@@ -19,8 +19,26 @@
 
 DNSEVAL - look up URLs against DNS blocklists
 
-=cut
+=head1 SYNOPSIS
 
+ loadplugin Mail::SpamAssassin::Plugin::DNSEval
+
+ rbl_headers EnvelopeFrom,Reply-To,Disposition-Notification-To
+ header     RBL_IP    eval:check_rbl_headers('rbl', 'rbl.example.com.', '127.0.0.2')
+ describe   RBL_IP    From address associated with spam domains
+ tflags     RBL_IP    net
+ reuse      RBL_IP
+
+ Supported extra tflags from SpamAssassin 3.4.3:
+  domains_only - only non-IP-address "host" components are queried
+  ips_only - only IP addresses as the "host" component will be queried
+
+=head1 DESCRIPTION
+
+The DNSEval plugin queries dns to see if a domain or an ip address
+present on one of email's headers is on a particular rbl.
+
+=cut
 
 package Mail::SpamAssassin::Plugin::DNSEval;
 
@@ -35,6 +53,9 @@ use warnings;
 use re 'taint';
 
 our @ISA = qw(Mail::SpamAssassin::Plugin);
+
+my $IP_ADDRESS = IP_ADDRESS;
+my $IP_PRIVATE = IP_PRIVATE;
 
 # constructor: register the eval rule
 sub new {
@@ -51,20 +72,82 @@ sub new {
   $self->{'evalrules'} = [
     'check_rbl_accreditor',
     'check_rbl',
+    'check_rbl_ns_from',
     'check_rbl_txt',
     'check_rbl_sub',
     'check_rbl_results_for',
     'check_rbl_from_host',
     'check_rbl_from_domain',
     'check_rbl_envfrom',
+    'check_rbl_headers',
+    'check_rbl_rcvd',
     'check_dns_sender',
   ];
 
+  $self->set_config($mailsaobject->{conf});
   foreach(@{$self->{'evalrules'}}) {
     $self->register_eval_rule($_);
   }
 
   return $self;
+}
+
+=head1 USER PREFERENCES
+
+The following options can be used in both site-wide (C<local.cf>) and
+user-specific (C<user_prefs>) configuration files to customize how
+SpamAssassin handles incoming email messages.
+
+=over
+
+=item rbl_headers
+
+ This option tells SpamAssassin in which headers to check for content
+ used to query the specified rbl.
+ If on the headers content there is an email address, an ip address
+ or a domain name, it will be checked on the specified rbl.
+ The configuration option can be overridden by passing an headers list as
+ last parameter to check_rbl_headers.
+ The default headers checked are:
+
+=back
+
+=over
+
+=item *
+
+EnvelopeFrom
+
+=item *
+
+Reply-To
+
+=item *
+
+Disposition-Notification-To
+
+=item *
+
+X-WebmailclientIP
+
+=item *
+
+X-Source-IP
+
+=back
+
+=cut
+
+sub set_config {
+    my ($self, $conf) = @_;
+    my @cmds;
+    push(@cmds, {
+        setting => 'rbl_headers',
+        default => 'EnvelopeFrom,Reply-To,Disposition-Notification-To,X-WebmailclientIP,X-Source-IP',
+        type => $Mail::SpamAssassin::Conf::CONF_TYPE_STRING,
+        }
+    );
+    $conf->{parser}->register_commands(\@cmds);
 }
 
 # this is necessary because PMS::run_rbl_eval_tests() calls these functions
@@ -150,7 +233,6 @@ sub check_rbl_backend {
   # First check that DNS is available, if not do not perform this check
   return 0 if $self->{main}->{conf}->{skip_rbl_checks};
   return 0 unless $pms->is_dns_available();
-  $pms->load_resolver();
 
   if (($rbl_server !~ /^(\d+)\.(\d+)\.(\d+)\.(\d+)$/) &&
       (index($rbl_server, '.') >= 0) &&
@@ -173,7 +255,7 @@ sub check_rbl_backend {
   push (@fullexternal, @fullips);	# add untrusted set too
 
   # Make sure a header significantly improves results before adding here
-  # X-Sender-Ip: could be worth using (very low occurance for me)
+  # X-Sender-Ip: could be worth using (very low occurence for me)
   # X-Sender: has a very low bang-for-buck for me
   my $IP_ADDRESS = IP_ADDRESS;
   my @originating;
@@ -315,7 +397,42 @@ sub check_rbl_results_for {
 # using the domain name had much worse results for dsn.rfc-ignorant.org
 sub check_rbl_from_host {
   my ($self, $pms, $rule, $set, $rbl_server, $subtest) = @_; 
-  _check_rbl_addresses($self, $pms, $rule, $set, $rbl_server, $subtest, $_[1]->all_from_addrs_domains());
+  _check_rbl_addresses($self, $pms, $rule, $set, $rbl_server, $subtest, $_[1]->all_from_addrs());
+}
+
+sub check_rbl_headers {
+  my ($self, $pms, $rule, $set, $rbl_server, $subtest, $test_headers) = @_;
+
+  return 0 if $self->{main}->{conf}->{skip_rbl_checks};
+  return 0 if !$pms->is_dns_available();
+
+  my @env_hdr;
+  my $conf = $self->{main}->{conf};
+
+  if ( defined $test_headers ) {
+    @env_hdr = split(/,/, $test_headers);
+  } else {
+    @env_hdr = split(/,/, $conf->{rbl_headers});
+  }
+
+  foreach my $rbl_headers (@env_hdr) {
+    my $addr = $_[1]->get($rbl_headers.':addr', undef);
+    if ( defined $addr && $addr =~ /\@([^\@\s]+)/ ) {
+      $self->_check_rbl_addresses($pms, $rule, $set, $rbl_server,
+        $subtest, $addr);
+    } else {
+      my $host = $pms->get($rbl_headers);
+      chomp($host);
+      if($host =~ /^$IP_ADDRESS$/ ) {
+        return if ($conf->{tflags}->{$rule}||'') =~ /\bdomains_only\b/;
+        $host = reverse_ip_address($host);
+      } else {
+        return if ($conf->{tflags}->{$rule}||'') =~ /\bips_only\b/;
+      }
+      $pms->do_rbl_lookup($rule, $set, 'A',
+        "$host.$rbl_server", $subtest) if ( defined $host and $host ne "");
+    }
+  }
 }
 
 =over 4
@@ -331,6 +448,133 @@ This checks all the from addrs domain names as an alternate to check_rbl_from_ho
 sub check_rbl_from_domain {
   my ($self, $pms, $rule, $set, $rbl_server, $subtest) = @_;
   _check_rbl_addresses($self, $pms, $rule, $set, $rbl_server, $subtest, $_[1]->all_from_addrs_domains());
+}
+
+=over 4
+
+=item check_rbl_ns_from
+
+This checks the dns server of the from addrs domain name.
+It is possible to include a subtest for a specific octet.
+
+=back
+
+=cut
+
+sub check_rbl_ns_from {
+  my ($self, $pms, $rule, $set, $rbl_server, $subtest) = @_;
+  my $domain;
+  my @nshost = ();
+
+  return 0 if $self->{main}->{conf}->{skip_rbl_checks};
+  return 0 unless $pms->is_dns_available();
+
+  for my $from ($pms->get('EnvelopeFrom:addr')) {
+    next unless defined $from;
+    $from =~ tr/././s;          # bug 3366
+    if ($from =~ m/ \@ ( [^\@\s]+ \. [^\@\s]+ )/x ) {
+      $domain = lc($1);
+      last;
+    }
+  }
+  return 0 unless defined $domain;
+
+  dbg("dns: checking NS for host $domain");
+
+  my $key = "NS:" . $domain;
+  my $obj = { dom => $domain, rule => $rule, set => $set, rbl_server => $rbl_server, subtest => $subtest };
+  my $ent = {
+    key => $key, zone => $domain, obj => $obj, type => "URI-NS",
+  };
+  # dig $dom ns
+  $ent = $pms->{async}->bgsend_and_start_lookup(
+    $domain, 'NS', undef, $ent,
+    sub { my ($ent2,$pkt) = @_;
+          $self->complete_ns_lookup($pms, $ent2, $pkt, $domain) },
+    master_deadline => $pms->{master_deadline} );
+  return $ent;
+}
+
+sub complete_ns_lookup {
+  my ($self, $pms, $ent, $pkt, $host) = @_;
+
+  my $rule = $ent->{obj}->{rule};
+  my $set = $ent->{obj}->{set};
+  my $rbl_server = $ent->{obj}->{rbl_server};
+  my $subtest = $ent->{obj}->{subtest};
+
+  if (!$pkt) {
+    # $pkt will be undef if the DNS query was aborted (e.g. timed out)
+    dbg("DNSEval: complete_ns_lookup aborted %s", $ent->{key});
+    return;
+  }
+
+  dbg("DNSEval: complete_ns_lookup %s", $ent->{key});
+  my @ns = $pkt->authority;
+
+  foreach my $rr (@ns) {
+    my $nshost = $rr->mname;
+    if(defined($nshost)) {
+      chomp($nshost);
+      if ( defined $subtest ) {
+        dbg("dns: checking [$nshost] / $rule / $set / $rbl_server / $subtest");
+      } else {
+        dbg("dns: checking [$nshost] / $rule / $set / $rbl_server");
+      }
+      $pms->do_rbl_lookup($rule, $set, 'A',
+        "$nshost.$rbl_server", $subtest) if ( defined $nshost and $nshost ne "");
+    }
+  }
+}
+
+=over 4
+
+=item check_rbl_rcvd
+
+This checks all received headers domains or ip addresses against a specific rbl.
+It is possible to include a subtest for a specific octet.
+
+=back
+
+=cut
+
+sub check_rbl_rcvd {
+  my ($self, $pms, $rule, $set, $rbl_server, $subtest) = @_;
+  my %seen;
+  my @udnsrcvd = ();
+
+  return 0 if $self->{main}->{conf}->{skip_rbl_checks};
+  return 0 if !$pms->is_dns_available();  
+
+  my $rcvd = $pms->{relays_untrusted}->[$pms->{num_relays_untrusted} - 1];
+  my @dnsrcvd = ( $rcvd->{ip}, $rcvd->{by}, $rcvd->{helo}, $rcvd->{rdns} );
+  # unique values
+  foreach my $value (@dnsrcvd) {
+    if ( ( defined $value ) && (! $seen{$value}++ ) ) {
+      push @udnsrcvd, $value;
+    }
+  }
+
+  foreach my $host ( @udnsrcvd ) {
+    if((defined $host) and ($host ne "")) {
+      chomp($host);
+      if($host =~ /^$IP_ADDRESS$/ ) {
+        next if ($pms->{conf}->{tflags}->{$rule}||'') =~ /\bdomains_only\b/;
+        $host = reverse_ip_address($host);
+      } else {
+        next if ($pms->{conf}->{tflags}->{$rule}||'') =~ /\bips_only\b/;
+        $host =~ s/\.$//;
+      }
+      if ( defined $subtest ) {
+        dbg("dns: checking [$host] / $rule / $set / $rbl_server / $subtest");
+      } else {
+        dbg("dns: checking [$host] / $rule / $set / $rbl_server");
+      }
+      $pms->do_rbl_lookup($rule, $set, 'A',
+        "$host.$rbl_server", $subtest) if ( defined $host and $host ne "");
+    }
+  }
+  return 0;
 }
 
 # this only checks the address host name and not the domain name because
@@ -358,16 +602,19 @@ sub _check_rbl_addresses {
   }
   return unless scalar keys %hosts;
 
-  $pms->load_resolver();
-
   if (($rbl_server !~ /^(\d+)\.(\d+)\.(\d+)\.(\d+)$/) &&
       (index($rbl_server, '.') >= 0) &&
       ($rbl_server !~ /\.$/)) {
     $rbl_server .= ".";
   }
-  dbg("dns: _check_rbl_addresses RBL $rbl_server, set $set");
 
   for my $host (keys %hosts) {
+    if ($host =~ /^$IP_ADDRESS$/) {
+      next if ($pms->{conf}->{tflags}->{$rule}||'') =~ /\bdomains_only\b/;
+      $host = reverse_ip_address($host);
+    } else {
+      next if ($pms->{conf}->{tflags}->{$rule}||'') =~ /\bips_only\b/;
+    }
     dbg("dns: checking [$host] / $rule / $set / $rbl_server");
     $pms->do_rbl_lookup($rule, $set, 'A', "$host.$rbl_server", $subtest);
   }
@@ -375,6 +622,9 @@ sub _check_rbl_addresses {
 
 sub check_dns_sender {
   my ($self, $pms, $rule) = @_;
+
+  return 0 if $self->{main}->{conf}->{skip_rbl_checks};
+  return 0 unless $pms->is_dns_available();
 
   my $host;
   for my $from ($pms->get('EnvelopeFrom:addr',undef)) {
@@ -387,11 +637,6 @@ sub check_dns_sender {
     }
   }
   return 0 unless defined $host;
-
-  # First check that DNS is available, if not do not perform this check
-  # TODO: need a way to skip DNS checks as a whole in configuration
-  return 0 unless $pms->is_dns_available();
-  $pms->load_resolver();
 
   if ($host eq 'compiling.spamassassin.taint.org') {
     # only used when compiling
@@ -408,5 +653,10 @@ sub check_dns_sender {
 
   return 0;
 }
+
+# capability checks for "if can(Mail::SpamAssassin::Plugin::DNSEval::XXX)":
+#
+sub has_tflags_domains_only { 1 }
+sub has_tflags_ips_only { 1 }
 
 1;

@@ -70,10 +70,12 @@ sub setup_test_set_pri {
 
   my $alternates = [];
   while (my ($rule, $pat) = each %{$conf->{body_tests}->{$pri}}) {
-    $pat = Mail::SpamAssassin::Util::regexp_remove_delimiters($pat);
-
     # ignore rules marked for ReplaceTags work!
-    next if ($conf->{rules_to_replace}->{$rule});
+    next if ($conf->{replace_rules}->{$rule});
+
+    #$pat = Mail::SpamAssassin::Util::regexp_remove_delimiters($pat);
+    $pat = qr_to_string($conf->{test_qrs}->{$rule});
+    next unless !$pat;
 
     # use the REGMARK feature:
     # see http://taint.org/2006/11/16/154546a.html#comment-1011

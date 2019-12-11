@@ -1,4 +1,4 @@
-#!/usr/bin/perl
+#!/usr/bin/perl -T
 
 use Data::Dumper;
 use lib '.'; use lib 't';

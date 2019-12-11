@@ -300,6 +300,7 @@ sub pyzor_lookup {
     if (!@response) {
       # this exact string is needed below
       warn("no response\n");	# yes, this is possible
+      return;
     }
     chomp for @response;
     dbg("pyzor: got response: " . join("\\n", @response));

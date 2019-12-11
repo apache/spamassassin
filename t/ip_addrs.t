@@ -1,4 +1,4 @@
-#!/usr/bin/perl
+#!/usr/bin/perl -T
 
 BEGIN {
   if (-e 't/test_dir') { # if we are running "t/rule_tests.t", kluge around ...
@@ -23,8 +23,13 @@ use Mail::SpamAssassin;
 use Mail::SpamAssassin::NetSet;
 
 my $sa = Mail::SpamAssassin->new({
+    require_rules => 1,
+    site_rules_filename => "$prefix/t/log/localrules.tmp",
     rules_filename => "$prefix/rules",
+    local_tests_only => 1,
+    dont_copy_prefs => 1,
 });
+$sa->init(0);
 
 sub tryone ($$) {
   my ($pat, $testip) = @_;

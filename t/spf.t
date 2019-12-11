@@ -1,4 +1,4 @@
-#!/usr/bin/perl
+#!/usr/bin/perl -T
 
 use lib '.'; use lib 't';
 use SATest; sa_t_init("spf");
@@ -358,7 +358,7 @@ for $disable_an_spf_module ('do_not_use_mail_spf 1', 'do_not_use_mail_spf_query 
   ok_all_patterns();
 
 
-  # 41-44: same as test 1-2 with some spf whitelist entires that don't match
+  # 41-44: same as test 1-2 with some spf whitelist entries that don't match
 
   tstprefs("
     whitelist_from_spf *\@example.com

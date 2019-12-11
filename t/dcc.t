@@ -1,10 +1,14 @@
-#!/usr/bin/perl
+#!/usr/bin/perl -T
 
 use lib '.'; use lib 't';
 use SATest; sa_t_init("dcc");
 
+use constant HAS_DCC => eval { $_ = untaint_cmd("which cdcc"); chomp; -x };
+
 use Test::More;
+plan skip_all => "Net tests disabled" unless conf_bool('run_net_tests');
 plan skip_all => "DCC tests disabled" unless conf_bool('run_dcc_tests');
+plan skip_all => "DCC executable not found in path" unless HAS_DCC;
 plan tests => 4;
 
 diag('Note: Failure may not be an SpamAssassin bug, as DCC tests can fail due to problems with the DCC servers.');

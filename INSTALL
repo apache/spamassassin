@@ -23,7 +23,7 @@ Using Linux:
 	Fedora: yum install spamassassin
 
 Alternatively download the tarfile, zipfile, and/or build your own RPM
-from http://spamassassin.apache.org/.  Building from tar/zip file is
+from https://spamassassin.apache.org/.  Building from tar/zip file is
 usually as simple as:
 
 	[unzip/untar the archive]
@@ -79,7 +79,7 @@ http://wiki.apache.org/spamassassin/SingleUserUnixInstall
 	make install
 
    Please see the file PACKAGING, sections "Changing paths in the Makefile"
-   and "Setting further options on the command line" for more informations
+   and "Setting further options on the command line" for more information
    on available command line variables.
 
 4. Install the SpamAssassin ruleset using "sa-update":
@@ -129,7 +129,7 @@ http://wiki.apache.org/spamassassin/UsedViaProcmail
    check to be sure it is marked as spam.  GTUBE is located in the
    sample-spam.txt message distributed with SpamAssassin and also at:
 
-     http://spamassassin.apache.org/gtube/
+     https://spamassassin.apache.org/gtube/
 
    If your test emails don't get through to you, immediately rename your
    .forward file until you figure out cause of the the problem, so you
@@ -169,7 +169,7 @@ Obtain all the following files:
 Save them all to the current directory.
 Obtain a rules-signing public key:
 
-    curl -O http://spamassassin.apache.org/updates/GPG.KEY
+    curl -O https://spamassassin.apache.org/updates/GPG.KEY
 
 Import the signing key to the SpamAssassin gpg keyring, so that the rules
 files can be verified safely:
@@ -397,7 +397,7 @@ version is too low for them to be used.
     spamd (the --ssl option to spamd), you need to install this
     module. (You will need the OpenSSL libraries and use the
     ENABLE_SSL="yes" argument to Makefile.PL to build and run an SSL
-    compatibile spamc.)
+    compatible spamc.)
 
     Fedora: yum install perl-IO-Socket-SSL
 

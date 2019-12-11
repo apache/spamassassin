@@ -273,7 +273,7 @@ my $spamtest = new Mail::SpamAssassin(
 if ($opt{'lint'}) {
   $spamtest->debug_diagnostics();
   my $res = $spamtest->lint_rules();
-  warn "lint: $res issues detected, please rerun with debug enabled for more information\n" if ($res);
+  warn "lint: $res issues detected, please rerun with debug enabled for more information\n" if ($res and !$opt{'debug'});
   # make sure we notice any write errors while flushing output buffer
   close STDOUT  or die "error closing STDOUT: $!";
   close STDIN   or die "error closing STDIN: $!";
@@ -450,6 +450,7 @@ my $mail;       # global, so signal handler can clean it up; bug 5626
 
 # make sure it only returns false values so that result_sub() isn't called...
 sub wanted {
+  $spamtest->timer_reset; # reset timers for each AI message
   my $dataref = $_[3];
   $mail       = $spamtest->parse($dataref);
   $count++;
@@ -479,10 +480,7 @@ sub wanted {
 
     # If we're not going to retest, just remove the markup and print it out
     if ( !$opt{'test-mode'} ) {
-      my $report = $spamtest->remove_spamassassin_markup ($mail);
-      # encode Unicode characters to UTF-8 octets
-      utf8::encode($report) if utf8::is_utf8($report);
-      print $report;
+      print $spamtest->remove_spamassassin_markup ($mail);
       $mail->finish();
       $mail = undef;
       return 1;
@@ -531,17 +529,10 @@ sub wanted {
 
   # OK, do checks and put out the message.
   my $status = $spamtest->check($mail);
-  { my $report = $status->rewrite_mail();
-    # encode Unicode characters to UTF-8 octets
-    utf8::encode($report) if utf8::is_utf8($report);
-    print $report  or die "error writing: $!";
-  }
+  print $status->rewrite_mail() or die "error writing: $!";
 
   if ( $opt{'test-mode'} ) {
-    my $report = $status->get_report();
-    # encode Unicode characters to UTF-8 octets
-    utf8::encode($report) if utf8::is_utf8($report);
-    print $report  or die "error writing: $!";
+    print $status->get_report() or die "error writing: $!";
   }
 
   # if this message was spam, set the exit value appropriately.
@@ -690,7 +681,7 @@ already been set.  This is loaded from the first existing directory in:
 
 =back
 
-From those three directories, SpamAssassin will first read files ending in
+From those directories, SpamAssassin will first read files ending in
 ".pre" in lexical order and then it will read files ending in ".cf" in
 lexical order (most files begin with two numbers to make the sorting
 order obvious).
@@ -801,7 +792,7 @@ SpamAssassin was run.
 
 =item X-Spam-Level: header
 
-A series of "*" charactes where each one represents a full score point.
+A series of "*" characters where each one represents a full score point.
 
 =item X-Spam-Status: header
 

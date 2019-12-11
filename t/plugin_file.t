@@ -1,4 +1,4 @@
-#!/usr/bin/perl
+#!/usr/bin/perl -T
 
 use lib '.'; use lib 't';
 use SATest; sa_t_init("plugin_file");
@@ -14,7 +14,7 @@ q{ registered myTestPlugin }, 'registered',
 q{ myTestPlugin eval test called }, 'test_called',
 q{ myTestPlugin finishing }, 'plugin_finished',
 
-q{ test: plugins loaded: Mail::SpamAssassin::Plugin::AWL=HASH }, 'plugins_loaded',
+q{ test: plugins loaded: Mail::SpamAssassin::Plugin::ASN=HASH }, 'plugins_loaded',
 q{ myTestPlugin=HASH }, 'plugins_loaded2',
 
 );

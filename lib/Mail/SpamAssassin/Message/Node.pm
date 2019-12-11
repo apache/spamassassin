@@ -379,7 +379,6 @@ sub decode {
 
 # Detect endianness of UTF-16 encoded data
 sub detect_utf16 {
-	use Data::Dumper;
 	my $data = $_[0];  # could not avoid copying large strings
 	my $utf16le_clues = 0;
 	my $utf16be_clues = 0;
@@ -495,8 +494,13 @@ sub _normalize {
       $rv .= $data_taint;  # carry taintedness over, avoid Encode bug
       return $rv;  # decoded
     } else {
-      dbg("message: failed decoding as declared charset UTF-8");
-    };
+      my $err = '';
+      if ($@) {
+        $err = $@; $err =~ s/\s+/ /gs; $err =~ s/(.*) at .*/$1/;
+        $err = " ($err)";
+      }
+      dbg("message: failed decoding as declared charset UTF-8 ($err)");
+    }
 
   } elsif ($charset_declared =~ /^UTF[ -]?16/i) {
     # Handle cases where spammers use UTF-16 encoding without including a BOM
@@ -510,7 +514,12 @@ sub _normalize {
       $rv .= $data_taint;  # carry taintedness over, avoid Encode bug
       return $rv;  # decoded
     } else {
-      dbg("message: failed decoding as declared charset $charset_declared");
+      my $err = '';
+      if ($@) {
+        $err = $@; $err =~ s/\s+/ /gs; $err =~ s/(.*) at .*/$1/;
+        $err = " ($err)";
+      }
+      dbg("message: failed decoding as declared charset %s%s", $charset_declared, $err);
     };
 
   } elsif ($cnt_8bits &&
@@ -556,14 +565,19 @@ sub _normalize {
       dbg("message: failed decoding, no decoder for a declared charset %s",
           $chset);
     } else {
+      my $err = '';
       eval { $rv = $decoder->decode($_[0], 1|8) };  # FB_CROAK | LEAVE_SRC
+      if ($@) {
+        $err = $@; $err =~ s/\s+/ /gs; $err =~ s/(.*) at .*/$1/;
+        $err = " ($err)";
+      }
       if (lc $chset eq lc $charset_declared) {
-        dbg("message: %s as declared charset %s",
-            defined $rv ? 'decoded' : 'failed decoding', $charset_declared);
+        dbg("message: %s as declared charset %s%s",
+            defined $rv ? 'decoded' : 'failed decoding', $charset_declared, $err);
       } else {
-        dbg("message: %s as charset %s, declared %s",
+        dbg("message: %s as charset %s, declared %s%s",
             defined $rv ? 'decoded' : 'failed decoding',
-            $chset, $charset_declared);
+            $chset, $charset_declared, $err);
       }
     }
   }
@@ -580,16 +594,24 @@ sub _normalize {
     return $_[0];  # is all-ASCII, no need for decoding
 
   } elsif (!defined $rv && $enc_w1252 &&
-      #             ASCII  NBSP (c) SHY  '   "  ...   '".-   TM
-      $_[0] !~ tr/\x00-\x7F\xA0\xA9\xAD\x82\x84\x85\x91-\x97\x99//c)
+     #             ASCII  NBSP (c) SHY  '   "  ...   '".-   TM
+     #$_[0] !~ tr/\x00-\x7F\xA0\xA9\xAD\x82\x84\x85\x91-\x97\x99//c)
+     # Bug 7656: Include latin1 diacritic letters to Windows-1252 autodetection,
+     # Encode::Detect::Detector might identify them as Windows-1255 (Hebrew!)
+      $_[0] !~ tr/\x00-\x7f\xa0\xa9\xad\x82\x84\x85\x91-\x97\x99\xc0-\xd6\xd8-\xde\xe0-\xf6\xf8-\xfe//c)
   { # ASCII + NBSP + SHY + some punctuation characters
     # NBSP (A0) and SHY (AD) are at the same position in ISO-8859-* too
     # consider also: AE (r), 80 Euro
+    my $err = '';
     eval { $rv = $enc_w1252->decode($_[0], 1|8) };  # FB_CROAK | LEAVE_SRC
+    if ($@) {
+      $err = $@; $err =~ s/\s+/ /gs; $err =~ s/(.*) at .*/$1/;
+      $err = " ($err)";
+    }
     # the above can't fail, but keep code general just in case
-    dbg("message: %s as guessed charset %s, declared %s",
+    dbg("message: %s as guessed charset %s, declared %s%s",
         defined $rv ? 'decoded' : 'failed decoding',
-        'Windows-1252', $charset_declared);
+        'Windows-1252', $charset_declared, $err);
   }
 
   # If we were unsuccessful so far, try some guesswork
@@ -613,20 +635,30 @@ sub _normalize {
         dbg("message: failed decoding, no decoder for a detected charset %s",
             $charset_detected);
       } else {
+        my $err = '';
         eval { $rv = $decoder->decode($_[0], 1|8) };  # FB_CROAK | LEAVE_SRC
-        dbg("message: %s as detected charset %s, declared %s",
+        if ($@) {
+          $err = $@; $err =~ s/\s+/ /gs; $err =~ s/(.*) at .*/$1/;
+          $err = " ($err)";
+        }
+        dbg("message: %s as detected charset %s, declared %s%s",
             defined $rv ? 'decoded' : 'failed decoding',
-            $charset_detected, $charset_declared);
+            $charset_detected, $charset_declared, $err);
       }
     }
   }
 
   if (!defined $rv) {  # all decoding attempts failed so far, probably garbage
     # go for Windows-1252 which can't fail
+    my $err = '';
     eval { $rv = $enc_w1252->decode($_[0]) };
-    dbg("message: %s as last-resort charset %s, declared %s",
+    if ($@) {
+      $err = $@; $err =~ s/\s+/ /gs; $err =~ s/(.*) at .*/$1/;
+      $err = " ($err)";
+    }
+    dbg("message: %s as last-resort charset %s, declared %s%s",
         defined $rv ? 'decoded' : 'failed decoding',
-        'Windows-1252', $charset_declared);
+        'Windows-1252', $charset_declared, $err);
   }
 
   if (!defined $rv) {  # just in case - all decoding attempts failed so far
@@ -664,11 +696,8 @@ sub rendered {
     my $text = $self->decode;  # QP and Base64 decoding, bytes
     my $text_len = length($text);  # num of bytes in original charset encoding
 
-    # render text/html always, or any other text|text/plain part as text/html
-    # based on a heuristic which simulates a certain common mail client
-    if ($text ne '' && ($self->{'type'} =~ m{^text/html$}i ||
-		        ($self->{'type'} =~ m{^text/plain$}i &&
-		         _html_render(substr($text, 0, 23)))))
+    # render text/html always
+    if ($text ne '' && $self->{'type'} =~ m{^text/html$}i)
     {
       $self->{rendered_type} = 'text/html';
 
@@ -979,7 +1008,7 @@ sub get_all_headers {
 	$self->{'truncated_header'} = 1;
 	last HEADER;
       }
-      $lines[$position] = $self->{header_order}->[$position].":".$contents;
+      $lines[$position] = $self->{header_order}->[$position].": ".$contents;
     }
   }
 

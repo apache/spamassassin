@@ -292,7 +292,7 @@ sub pick_random_available_port {
       Mail::SpamAssassin::Conf::set_ports_range(\$ports_bitset, 0, 0, 0);
       $conf->{dns_available_ports_bitset} = $ports_bitset;
     }
-    # prepare auxilliary data structure to speed up further free-port lookups;
+    # prepare auxiliary data structure to speed up further free-port lookups;
     # 256 buckets, each accounting for 256 ports: 8+8 = 16 bit port numbers;
     # each bucket holds a count of available ports in its range
     my @bucket_counts = (0) x 256;
@@ -547,7 +547,7 @@ sub new_dns_packet {
   eval {
 
     if (utf8::is_utf8($domain)) {  # since Perl 5.8.1
-      info("dns: new_dns_packet: domain is utf8 flagged: %s", $domain);
+      dbg("dns: new_dns_packet: domain is utf8 flagged: %s", $domain);
     }
 
     $domain =~ s/\.*\z/./s;
@@ -586,8 +586,7 @@ sub new_dns_packet {
     my $eval_stat = $@ ne '' ? $@ : "errno=$!";  chomp $eval_stat;
     # resignal if alarm went off
     die "dns: (1) $eval_stat\n"  if $eval_stat =~ /__alarm__ignore__\(.*\)/s;
-    warn sprintf(
-           "dns: new_dns_packet (domain=%s type=%s class=%s) failed: %s\n",
+    info("dns: new_dns_packet (domain=%s type=%s class=%s) failed: %s",
            $domain, $type, $class, $eval_stat);
   };
 
@@ -859,8 +858,9 @@ sub poll_responses {
           if ($rcode eq 'REFUSED' || $id =~ m{^\d+/NO_QUESTION_IN_PACKET\z}) {
             # the failure was already reported above
           } else {
-            info("dns: no callback for id %s, ignored; packet: %s",
-                 $id,  $packet ? $packet->string : "undef" );
+            info("dns: no callback for id $id, ignored, packet on next debug line");
+            # prevent filling normal logs with huge packet dumps
+            dbg("dns: %s", $packet ? $packet->string : "undef");
           }
           # report a likely matching query for diagnostic purposes
           local $1;

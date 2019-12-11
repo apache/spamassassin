@@ -79,7 +79,7 @@ sub load_modules {		# static
 
 =item $f->load ($username)
 
-Read configuration paramaters from SQL database and parse scores from it.
+Read configuration parameters from SQL database and parse scores from it.
 
 =back
 

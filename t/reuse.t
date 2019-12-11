@@ -1,4 +1,4 @@
-#!/usr/bin/perl -w
+#!/usr/bin/perl -w -T
 
 BEGIN {
   if (-e 't/test_dir') { # if we are running "t/rule_tests.t", kluge around ...
@@ -38,6 +38,9 @@ plan tests => 37;
 # - Rules defined only by "reuse" can have arbitrary scores and priorities set
 
 tstlocalrules('
+
+# suppress RB warnings
+util_rb_tld com
 
 # Check that order of reuse/body lines for BODY_RULE_* does not matter
 reuse  BODY_RULE_1
@@ -141,6 +144,9 @@ clear_pattern_counters();
 
 tstlocalrules('
 
+# suppress RB warnings
+util_rb_tld com
+
 meta META_RULE_1 RULE_A && !RULE_B
 
 body  RULE_A /./
@@ -211,7 +217,7 @@ sub ok_system {
     my $cmd = shift;
 
     print "\t$cmd\n";
-    system($cmd);
+    untaint_system($cmd);
     my $exit_code = ($?>>8);
     ok ($exit_code == 0)
 

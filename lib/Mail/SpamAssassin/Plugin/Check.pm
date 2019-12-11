@@ -28,6 +28,9 @@ use Mail::SpamAssassin::Constants qw(:sa);
 
 our @ISA = qw(Mail::SpamAssassin::Plugin);
 
+my $ARITH_EXPRESSION_LEXER = ARITH_EXPRESSION_LEXER;
+my $META_RULES_MATCHING_RE = META_RULES_MATCHING_RE;
+
 # methods defined by the compiled ruleset; deleted in finish_tests()
 our @TEMPORARY_METHODS;
 
@@ -263,11 +266,15 @@ sub run_rbl_eval_tests {
 
     %{$pms->{test_log_msgs}} = ();        # clear test state
 
-    my ($function, @args) = @{$test};
+    my $function = $test->[0];
+    if (!exists $pms->{conf}->{eval_plugins}->{$function}) {
+      warn("rules: unknown eval '$function' for $rulename, ignoring RBL eval\n");
+      return 0;
+    }
 
     my $result;
     eval {
-      $result = $pms->$function($rulename, @args);  1;
+      $result = $pms->$function($rulename, @{$test->[1]});  1;
     } or do {
       my $eval_stat = $@ ne '' ? $@ : "errno=$!";  chomp $eval_stat;
       die "rules: $eval_stat\n"  if $eval_stat =~ /__alarm__ignore__/;
@@ -334,6 +341,7 @@ sub run_generic_tests {
     $self->push_evalstr_prefix($pms, '
         # start_rules_plugin_code '.$ruletype.' '.$priority.'
         my $scoresptr = $self->{conf}->{scores};
+        my $qrptr = $self->{conf}->{test_qrs};
     ');
     if (defined $opts{pre_loop_body}) {
       $opts{pre_loop_body}->($self, $pms, $conf, %nopts);
@@ -517,6 +525,30 @@ sub add_temporary_method {
 
 ###########################################################################
 
+# Returns all rulenames matching glob (FOO_*)
+sub expand_ruleglob {
+  my ($self, $ruleglob, $pms, $conf, $rulename) = @_;
+  my $expanded;
+  if (exists $pms->{ruleglob_cache}{$ruleglob}) {
+    $expanded = $pms->{ruleglob_cache}{$ruleglob};
+  } else {
+    my $reglob = $ruleglob;
+    $reglob =~ s/\?/./g;
+    $reglob =~ s/\*/.*?/g;
+    # Glob rules, but do not match ourselves..
+    my @rules = grep {/^${reglob}$/ && $_ ne $rulename} keys %{$conf->{scores}};
+    if (@rules) {
+      $expanded = join('+', sort @rules);
+    } else {
+      $expanded = '0';
+    }
+  }
+  my $logstr = $expanded eq '0' ? 'no matches' : $expanded;
+  dbg("rules: meta $rulename rules_matching($ruleglob) expanded: $logstr");
+  $pms->{ruleglob_cache}{$ruleglob} = $expanded;
+  return " ($expanded) ";
+};
+
 sub do_meta_tests {
   my ($self, $pms, $priority) = @_;
   my (%rule_deps, %meta, $rulename);
@@ -529,11 +561,12 @@ sub do_meta_tests {
     loop_body => sub
   {
     my ($self, $pms, $conf, $rulename, $rule, %opts) = @_;
-    $rule = untaint_var($rule);  # presumably checked
+
+    # Expand meta rules_matching() before lexing
+    $rule =~ s/${META_RULES_MATCHING_RE}/$self->expand_ruleglob($1,$pms,$conf,$rulename)/ge;
 
     # Lex the rule into tokens using a rather simple RE method ...
-    my $lexer = ARITH_EXPRESSION_LEXER;
-    my @tokens = ($rule =~ m/$lexer/og);
+    my @tokens = ($rule =~ /$ARITH_EXPRESSION_LEXER/og);
 
     # Set the rule blank to start
     $meta{$rulename} = "";
@@ -544,15 +577,12 @@ sub do_meta_tests {
     # Go through each token in the meta rule
     foreach my $token (@tokens) {
 
-      # Numbers can't be rule names
-      if ($token =~ tr{A-Za-z0-9_}{}c || substr($token,0,1) =~ tr{A-Za-z_}{}c) {
-        $meta{$rulename} .= "$token ";
-      }
-      else {  # token is a rule name
+      # ... rulename?
+      if ($token =~ IS_RULENAME) {
         # the " || 0" formulation is to avoid "use of uninitialized value"
         # warnings; this is better than adding a 0 to a hash for every
         # rule referred to in a meta...
-        $meta{$rulename} .= "(\$h->{'$token'} || 0) ";
+        $meta{$rulename} .= "(\$h->{'$token'}||0) ";
       
         if (!exists $conf->{scores}->{$token}) {
           dbg("rules: meta test $rulename has undefined dependency '$token'");
@@ -571,6 +601,9 @@ sub do_meta_tests {
         # If the token is another meta rule, add it as a dependency
         push (@{ $rule_deps{$rulename} }, $token)
           if (exists $conf->{meta_tests}->{$opts{priority}}->{$token});
+      } else {
+        # ... number or operator
+        $meta{$rulename} .= "$token ";
       }
     }
   },
@@ -611,7 +644,7 @@ sub do_meta_tests {
           warn "no meta_dependencies defined for $metas[$i]";
         }
         my $alldeps = join ' ', grep {
-                index( ($tflags->{$_}||''),'net') > -1 && ($tflags->{$_}||'') =~ /\bnet\b/
+                ($tflags->{$_}||'') =~ /\bnet\b/
               } split (' ', $conf->{meta_dependencies}->{ $metas[$i] } );
 
         if ($alldeps ne '') {
@@ -666,66 +699,30 @@ sub do_head_tests {
     args => [ ],
     loop_body => sub
   {
-    my ($self, $pms, $conf, $rulename, $rule, %opts) = @_;
-    my $def;
-    $rule = untaint_var($rule);  # presumably checked
-    my ($hdrname, $op, $op_infix, $pat);
-    if ($rule =~ /^\s* (\S+) \s* ([=!]~) \s* (\S .*? \S) \s*$/x) {
-      ($hdrname, $op, $pat) = ($1,$2,$3);  # e.g.: Subject =~ /patt/
-      $op_infix = 1;
-      if (!defined $pat) {
-        warn "rules: invalid rule: $rulename\n";
-        $pms->{rule_errors}++;
-        next;
-      }
-      if ($pat =~ s/\s+\[if-unset:\s+(.+)\]\s*$//) { $def = $1 }
-    } elsif ($rule =~ /^\s* (\S+) \s* \( \s* (\S+) \s* \) \s*$/x) {
-      # implements exists:name_of_header (and similar function or prefix ops)
-      ($hdrname, $op) = ($2,$1);  # e.g.: !defined(Subject)
+    my ($self, $pms, $conf, $rulename, $pat, %opts) = @_;
+    my ($op, $op_infix);
+    my $hdrname = $conf->{test_opt_header}->{$rulename};
+    if (exists $conf->{test_opt_exists}->{$rulename}) {
       $op_infix = 0;
-    } else {
-      warn "rules: unrecognized rule: $rulename\n";
-      $pms->{rule_errors}++;
-      next;
+      if (exists $conf->{test_opt_neg}->{$rulename}) {
+        $op = '!defined';
+      } else {
+        $op = 'defined';
+      }
+    }
+    else {
+      $op_infix = 1;
+      $op = $conf->{test_opt_neg}->{$rulename} ? '!~' : '=~';
     }
 
+    my $def = $conf->{test_opt_unset}->{$rulename};
     push(@{ $ordered{$hdrname . (!defined $def ? '' : "\t".$def)} },
          $rulename);
 
-    next if ($opts{doing_user_rules} &&
+    return if ($opts{doing_user_rules} &&
             !$self->is_user_rule_sub($rulename.'_head_test'));
 
-    # caller can set this member of the Mail::SpamAssassin object to
-    # override this; useful for profiling rule runtimes, although I think
-    # the HitFreqsRuleTiming.pm plugin is probably better nowadays anyway
-    if ($self->{main}->{use_rule_subs}) {
-      my $matching_string_unavailable = 0;
-      my $expr;
-      if ($op =~ /^!?[A-Za-z_]+$/) {  # function or its negation
-        $expr = $op . '($text)';
-        $matching_string_unavailable = 1;
-      } else {  # infix operator
-        $expr = '$text ' . $op . ' ' . $pat;
-        if ($op eq '=~' || $op eq '!~') {
-          $expr .= 'g';
-        } else {
-          $matching_string_unavailable = 1;
-        }
-      }
-      $self->add_temporary_method ($rulename.'_head_test', '{
-          my($self,$text) = @_;
-          '.$self->hash_line_for_rule($pms, $rulename).'
-	    while ('.$expr.') {
-            $self->got_hit(q{'.$rulename.'}, "", ruletype => "header");
-            '. $self->hit_rule_plugin_code($pms, $rulename, "header", "last",
-                                           $matching_string_unavailable) . '
-            }
-        }');
-    }
-    else {
-      # store for use below
-      $testcode{$rulename} = [$op_infix, $op, $pat];
-    }
+    $testcode{$rulename} = [$op_infix, $op, $pat];
   },
     pre_loop_body => sub
   {
@@ -746,24 +743,14 @@ sub do_head_tests {
                            (!defined($def) ? 'undef' : 'q{'.$def.'}') . ');
       ');
       foreach my $rulename (@{$v}) {
-        if ($self->{main}->{use_rule_subs}) {
-          $self->add_evalstr($pms, '
-            if ($scoresptr->{q{'.$rulename.'}}) {
-              '.$rulename.'_head_test($self, $hval);
-              '.$self->ran_rule_plugin_code($rulename, "header").'
-            }
-          ');
-        }
-        else {
           my $tc_ref = $testcode{$rulename};
           my ($op_infix, $op, $pat);
           ($op_infix, $op, $pat) = @$tc_ref  if defined $tc_ref;
 
           my $posline = '';
           my $ifwhile = 'if';
-          my $hitdone = '';
           my $matchg = '';
-          my $whlimit = '';
+          my $whlast = '';
 
           my $matching_string_unavailable = 0;
           my $expr;
@@ -772,33 +759,34 @@ sub do_head_tests {
             $matching_string_unavailable = 1;
           }
           else {  # infix operator
-            if (! ($op eq '=~' || $op eq '!~') ) { # not a pattern matching op.
-              $matching_string_unavailable = 1;
-            } elsif ( ($conf->{tflags}->{$rulename}||'') =~ /\bmultiple\b/ ) {
+            if (($conf->{tflags}->{$rulename}||'') =~ /\bmultiple\b/) {
               $posline = 'pos $hval = 0; $hits = 0;';
               $ifwhile = 'while';
-              $hitdone = 'last';
               $matchg = 'g';
-              my ($max) = ($pms->{conf}->{tflags}->{$rulename}||'') =~ /\bmaxhits=(\d+)\b/;
-              $max = untaint_var($max);
-              $whlimit = ' && $hits++ < '.$max if $max;
+              if ($conf->{tflags}->{$rulename} =~ /\bmaxhits=(\d+)\b/) {
+                $whlast = 'last if ++$hits >= '.untaint_var($1).';';
+              }
             }
-            $expr = '$hval ' . $op . ' ' . $pat . $matchg;
+            if ($matchg) {
+              $expr = '$hval '.$op.' /$qrptr->{q{'.$rulename.'}}/go';
+            } else {
+              $expr = '$hval '.$op.' /$qrptr->{q{'.$rulename.'}}/o';
+            }
           }
 
           $self->add_evalstr($pms, '
           if ($scoresptr->{q{'.$rulename.'}}) {
             '.$posline.'
             '.$self->hash_line_for_rule($pms, $rulename).'
-            '.$ifwhile.' ('.$expr.$whlimit.') {
+            '.$ifwhile.' ('.$expr.') {
               $self->got_hit(q{'.$rulename.'}, "", ruletype => "header");
-              '.$self->hit_rule_plugin_code($pms, $rulename, "header", $hitdone,
+              '.$self->hit_rule_plugin_code($pms, $rulename, "header", "",
                                             $matching_string_unavailable).'
+              '.$whlast.'
             }
             '.$self->ran_rule_plugin_code($rulename, "header").'
           }
           ');
-        }
       }
       $self->pop_evalstr_prefix();
     }
@@ -820,11 +808,16 @@ sub do_body_tests {
     loop_body => sub
   {
     my ($self, $pms, $conf, $rulename, $pat, %opts) = @_;
-    $pat = untaint_var($pat);  # presumably checked
     my $sub = '';
     if (would_log('dbg', 'rules-all') == 2) {
       $sub .= '
       dbg("rules-all: running body rule %s", q{'.$rulename.'});
+      ';
+    }
+    my $nosubject = ($conf->{tflags}->{$rulename}||'') =~ /\bnosubject\b/;
+    if ($nosubject) {
+      $sub .= '
+      my $nosubj = 1;
       ';
     }
     if (($conf->{tflags}->{$rulename}||'') =~ /\bmultiple\b/)
@@ -836,14 +829,20 @@ sub do_body_tests {
       $sub .= '
       $hits = 0;
       body_'.$loopid.': foreach my $l (@_) {
+      ';
+      if ($nosubject) {
+        $sub .= '
+        if ($nosubj) { $nosubj = 0; next; }
+        ';
+      }
+      $sub .= '
         pos $l = 0;
         '.$self->hash_line_for_rule($pms, $rulename).'
-        while ($l =~ '.$pat.'g'. ($max? ' && $hits++ < '.$max:'') .') { 
-          $self->got_hit(q{'.$rulename.'}, "BODY: ", ruletype => "body"); 
-          '. $self->hit_rule_plugin_code($pms, $rulename, 'body',
-					 "last body_".$loopid) . '
+        while ($l =~ /$qrptr->{q{'.$rulename.'}}/go) {
+          $self->got_hit(q{'.$rulename.'}, "BODY: ", ruletype => "body");
+          '. $self->hit_rule_plugin_code($pms, $rulename, "body", "") . '
+          '. ($max? 'last body_'.$loopid.' if ++$hits >= '.$max.';' : '') .'
         }
-        '. ($max? 'last body_'.$loopid.' if $hits > '. $max .';':'') .'
       }
       ';
     }
@@ -852,39 +851,31 @@ sub do_body_tests {
       # instead of if() etc., shaves off 8 perl OPs.
       $sub .= '
       foreach my $l (@_) {
+      ';
+      if ($nosubject) {
+        $sub .= '
+        if ($nosubj) { $nosubj = 0; next; }
+        ';
+      }
+      $sub .= '
         '.$self->hash_line_for_rule($pms, $rulename).'
-        if ($l =~ '.$pat.') { 
-          $self->got_hit(q{'.$rulename.'}, "BODY: ", ruletype => "body"); 
+        if ($l =~ /$qrptr->{q{'.$rulename.'}}/o) {
+          $self->got_hit(q{'.$rulename.'}, "BODY: ", ruletype => "body");
           '. $self->hit_rule_plugin_code($pms, $rulename, "body", "last") .'
         }
       }
       ';
     }
 
-    if ($self->{main}->{use_rule_subs}) {
-      $self->add_evalstr($pms, '
-        if ($scoresptr->{q{'.$rulename.'}}) {
-          '.$rulename.'_body_test($self,@_); 
-          '.$self->ran_rule_plugin_code($rulename, "body").'
-        }
-      ');
-    }
-    else {
-      $self->add_evalstr($pms, '
-        if ($scoresptr->{q{'.$rulename.'}}) {
-          '.$sub.'
-          '.$self->ran_rule_plugin_code($rulename, "body").'
-        }
-      ');
-    }
+    $self->add_evalstr($pms, '
+      if ($scoresptr->{q{'.$rulename.'}}) {
+        '.$sub.'
+        '.$self->ran_rule_plugin_code($rulename, "body").'
+      }
+    ');
 
-    next if ($opts{doing_user_rules} &&
+    return if ($opts{doing_user_rules} &&
             !$self->is_user_rule_sub($rulename.'_body_test'));
-
-    if ($self->{main}->{use_rule_subs}) {
-      $self->add_temporary_method ($rulename.'_body_test',
-        '{ my $self = shift; '.$sub.' }');
-    }
   }
   );
 }
@@ -902,7 +893,6 @@ sub do_uri_tests {
     loop_body => sub
   {
     my ($self, $pms, $conf, $rulename, $pat, %opts) = @_;
-    $pat = untaint_var($pat);  # presumably checked
     my $sub = '';
     if (would_log('dbg', 'rules-all') == 2) {
       $sub .= '
@@ -918,19 +908,18 @@ sub do_uri_tests {
       uri_'.$loopid.': foreach my $l (@_) {
         pos $l = 0;
         '.$self->hash_line_for_rule($pms, $rulename).'
-        while ($l =~ '.$pat.'g'. ($max? ' && $hits++ < '.$max:'') .') { 
+        while ($l =~ /$qrptr->{q{'.$rulename.'}}/go) {
            $self->got_hit(q{'.$rulename.'}, "URI: ", ruletype => "uri");
-           '. $self->hit_rule_plugin_code($pms, $rulename, "uri",
-					  "last uri_".$loopid) . '
+           '. $self->hit_rule_plugin_code($pms, $rulename, "uri", "") . '
+           '. ($max? 'last uri_'.$loopid.' if ++$hits >= '.$max.';' : '') .'
         }
-        '. ($max? 'last uri_'.$loopid.' if $hits > '. $max .';':'') .'
       }
       ';
     } else {
       $sub .= '
       foreach my $l (@_) {
         '.$self->hash_line_for_rule($pms, $rulename).'
-        if ($l =~ '.$pat.') { 
+        if ($l =~ /$qrptr->{q{'.$rulename.'}}/o) {
            $self->got_hit(q{'.$rulename.'}, "URI: ", ruletype => "uri");
            '. $self->hit_rule_plugin_code($pms, $rulename, "uri", "last") .'
         }
@@ -938,30 +927,15 @@ sub do_uri_tests {
       ';
     }
 
-    if ($self->{main}->{use_rule_subs}) {
-      $self->add_evalstr($pms, '
-        if ($scoresptr->{q{'.$rulename.'}}) {
-          '.$rulename.'_uri_test($self, @_);
-          '.$self->ran_rule_plugin_code($rulename, "uri").'
-        }
-      ');
-    }
-    else {
-      $self->add_evalstr($pms, '
-        if ($scoresptr->{q{'.$rulename.'}}) {
-          '.$sub.'
-          '.$self->ran_rule_plugin_code($rulename, "uri").'
-        }
-      ');
-    }
+    $self->add_evalstr($pms, '
+      if ($scoresptr->{q{'.$rulename.'}}) {
+        '.$sub.'
+        '.$self->ran_rule_plugin_code($rulename, "uri").'
+      }
+    ');
 
-    next if ($opts{doing_user_rules} &&
+    return if ($opts{doing_user_rules} &&
             !$self->is_user_rule_sub($rulename.'_uri_test'));
-
-    if ($self->{main}->{use_rule_subs}) {
-      $self->add_temporary_method ($rulename.'_uri_test',
-        '{ my $self = shift; '.$sub.' }');
-    }
   }
   );
 }
@@ -979,7 +953,6 @@ sub do_rawbody_tests {
     loop_body => sub
   {
     my ($self, $pms, $conf, $rulename, $pat, %opts) = @_;
-    $pat = untaint_var($pat);  # presumably checked
     my $sub = '';
     if (would_log('dbg', 'rules-all') == 2) {
       $sub .= '
@@ -997,12 +970,11 @@ sub do_rawbody_tests {
       rawbody_'.$loopid.': foreach my $l (@_) {
         pos $l = 0;
         '.$self->hash_line_for_rule($pms, $rulename).'
-        while ($l =~ '.$pat.'g'. ($max? ' && $hits++ < '.$max:'') .') { 
+        while ($l =~ /$qrptr->{q{'.$rulename.'}}/go) {
            $self->got_hit(q{'.$rulename.'}, "RAW: ", ruletype => "rawbody");
-           '. $self->hit_rule_plugin_code($pms, $rulename, "rawbody",
-					  "last rawbody_".$loopid) . '
+           '. $self->hit_rule_plugin_code($pms, $rulename, "rawbody", "") . '
+           '. ($max? 'last rawbody_'.$loopid.' if ++$hits >= '.$max.';' : '') .'
         }
-        '. ($max? 'last rawbody_'.$loopid.' if $hits > '. $max .';':'') .'
       }
       ';
     }
@@ -1010,7 +982,7 @@ sub do_rawbody_tests {
       $sub .= '
       foreach my $l (@_) {
         '.$self->hash_line_for_rule($pms, $rulename).'
-        if ($l =~ '.$pat.') { 
+        if ($l =~ /$qrptr->{q{'.$rulename.'}}/o) {
            $self->got_hit(q{'.$rulename.'}, "RAW: ", ruletype => "rawbody");
            '. $self->hit_rule_plugin_code($pms, $rulename, "rawbody", "last") . '
         }
@@ -1018,30 +990,15 @@ sub do_rawbody_tests {
       ';
     }
 
-    if ($self->{main}->{use_rule_subs}) {
-      $self->add_evalstr($pms, '
-        if ($scoresptr->{q{'.$rulename.'}}) {
-           '.$rulename.'_rawbody_test($self, @_);
-           '.$self->ran_rule_plugin_code($rulename, "rawbody").'
-        }
-      ');
-    }
-    else {
-      $self->add_evalstr($pms, '
-        if ($scoresptr->{q{'.$rulename.'}}) {
-          '.$sub.'
-          '.$self->ran_rule_plugin_code($rulename, "rawbody").'
-        }
-      ');
-    }
+    $self->add_evalstr($pms, '
+      if ($scoresptr->{q{'.$rulename.'}}) {
+        '.$sub.'
+        '.$self->ran_rule_plugin_code($rulename, "rawbody").'
+      }
+    ');
 
-    next if ($opts{doing_user_rules} &&
+    return if ($opts{doing_user_rules} &&
             !$self->is_user_rule_sub($rulename.'_rawbody_test'));
-
-    if ($self->{main}->{use_rule_subs}) {
-      $self->add_temporary_method ($rulename.'_rawbody_test',
-        '{ my $self = shift; '.$sub.' }');
-    }
   }
   );
 }
@@ -1066,19 +1023,21 @@ sub do_full_tests {
                 loop_body => sub
   {
     my ($self, $pms, $conf, $rulename, $pat, %opts) = @_;
-    $pat = untaint_var($pat);  # presumably checked
     my ($max) = ($pms->{conf}->{tflags}->{$rulename}||'') =~ /\bmaxhits=(\d+)\b/;
     $max = untaint_var($max);
+    $max ||= 0;
     $self->add_evalstr($pms, '
       if ($scoresptr->{q{'.$rulename.'}}) {
         pos $$fullmsgref = 0;
         '.$self->hash_line_for_rule($pms, $rulename).'
         dbg("rules-all: running full rule %s", q{'.$rulename.'});
         $hits = 0;
-        while ($$fullmsgref =~ '.$pat.'g'. ($max? ' && $hits++ < '.$max:'') .') {
+        while ($$fullmsgref =~ /$qrptr->{q{'.$rulename.'}}/g) {
           $self->got_hit(q{'.$rulename.'}, "FULL: ", ruletype => "full");
           '. $self->hit_rule_plugin_code($pms, $rulename, "full", "last") . '
+          last if ++$hits >= '.$max.';
         }
+        pos $$fullmsgref = 0;
         '.$self->ran_rule_plugin_code($rulename, "full").'
       }
     ');
@@ -1093,7 +1052,7 @@ sub do_head_eval_tests {
   return unless (defined($pms->{conf}->{head_evals}->{$priority}));
   dbg("rules: running head_eval tests; score so far=".$pms->{score});
   $self->run_eval_tests ($pms, $Mail::SpamAssassin::Conf::TYPE_HEAD_EVALS,
-			 $pms->{conf}->{head_evals}->{$priority}, '', $priority);
+			 'head_evals', '', $priority);
 }
 
 sub do_body_eval_tests {
@@ -1101,8 +1060,7 @@ sub do_body_eval_tests {
   return unless (defined($pms->{conf}->{body_evals}->{$priority}));
   dbg("rules: running body_eval tests; score so far=".$pms->{score});
   $self->run_eval_tests ($pms, $Mail::SpamAssassin::Conf::TYPE_BODY_EVALS,
-			 $pms->{conf}->{body_evals}->{$priority}, 'BODY: ',
-			 $priority, $bodystring);
+			 'body_evals', 'BODY: ', $priority, $bodystring);
 }
 
 sub do_rawbody_eval_tests {
@@ -1110,8 +1068,7 @@ sub do_rawbody_eval_tests {
   return unless (defined($pms->{conf}->{rawbody_evals}->{$priority}));
   dbg("rules: running rawbody_eval tests; score so far=".$pms->{score});
   $self->run_eval_tests ($pms, $Mail::SpamAssassin::Conf::TYPE_RAWBODY_EVALS,
-			 $pms->{conf}->{rawbody_evals}->{$priority}, 'RAW: ',
-			 $priority, $bodystring);
+			 'rawbody_evals', 'RAW: ', $priority, $bodystring);
 }
 
 sub do_full_eval_tests {
@@ -1119,12 +1076,11 @@ sub do_full_eval_tests {
   return unless (defined($pms->{conf}->{full_evals}->{$priority}));
   dbg("rules: running full_eval tests; score so far=".$pms->{score});
   $self->run_eval_tests($pms, $Mail::SpamAssassin::Conf::TYPE_FULL_EVALS,
-			$pms->{conf}->{full_evals}->{$priority}, '',
-			$priority, $fullmsgref);
+			'full_evals', '', $priority, $fullmsgref);
 }
 
 sub run_eval_tests {
-  my ($self, $pms, $testtype, $evalhash, $prepend2desc, $priority, @extraevalargs) = @_;
+  my ($self, $pms, $testtype, $evalname, $prepend2desc, $priority, @extraevalargs) = @_;
  
   my $master_deadline = $pms->{master_deadline};
   if ($pms->{deadline_exceeded}) {
@@ -1159,7 +1115,7 @@ sub run_eval_tests {
       && !$doing_user_rules)
   {
     my $method = "${package_name}::${methodname}";
-  # dbg("rules: run_eval_tests - calling previously compiled %s", $method);
+    #dbg("rules: run_eval_tests - calling previously compiled %s", $method);
     my $t = Mail::SpamAssassin::Timeout->new({ deadline => $master_deadline });
     my $err = $t->run(sub {
       no strict "refs";
@@ -1173,24 +1129,23 @@ sub run_eval_tests {
   }
 
   # look these up once in advance to save repeated lookups in loop below
+  my $evalhash = $conf->{$evalname}->{$priority};
   my $tflagsref = $conf->{tflags};
+  my $scoresref = $conf->{scores};
   my $eval_pluginsref = $conf->{eval_plugins};
   my $have_start_rules = $self->{main}->have_plugin("start_rules");
   my $have_ran_rule = $self->{main}->have_plugin("ran_rule");
 
   # the buffer for the evaluated code 
-  my $evalstr = q{ };
-  $evalstr .= q{ my $function; };
- 
+  my $evalstr = '';
+
   # conditionally include the dbg in the eval str
-  my $dbgstr = q{ };
+  my $dbgstr = '';
   if (would_log('dbg')) {
-    $dbgstr = q{
-      dbg("rules: ran eval rule $rulename ======> got hit ($result)");
-    };
+    $dbgstr = 'dbg("rules: ran eval rule $rulename ======> got hit ($result)");';
   }
 
-  while (my ($rulename, $test) = each %{$evalhash})  { 
+  while (my ($rulename, $test) = each %{$evalhash}) {
     if ($tflagsref->{$rulename}) {
       # If the rule is a net rule, and we are in a non-net scoreset, skip it.
       if ($tflagsref->{$rulename} =~ /\bnet\b/) {
@@ -1201,34 +1156,35 @@ sub run_eval_tests {
         next if (($scoreset & 2) == 0);
       }
     }
- 
-    $test = untaint_var($test);  # presumably checked
-    my ($function, $argstr) = ($test,'');
-    if ($test =~ s/^([^,]+)(,.*)$//gs) {
-      ($function, $argstr) = ($1,$2);
-    }
 
+    # skip if score zeroed
+    next if !$scoresref->{$rulename};
+ 
+    my $function = untaint_var($test->[0]); # was validated with \w+
     if (!$function) {
-      warn "rules: error: no function defined for $rulename";
+      warn "rules: error: no eval function defined for $rulename";
       next;
     }
- 
+
+    if (!exists $conf->{eval_plugins}->{$function}) {
+      warn("rules: error: unknown eval '$function' for $rulename\n");
+      next;
+    }
+
     $evalstr .= '
-    if ($scoresptr->{q#'.$rulename.'#}) {
+    {
       $rulename = q#'.$rulename.'#;
       %{$self->{test_log_msgs}} = ();
-    ';
+';
  
     # only need to set current_rule_name for plugin evals
     if ($eval_pluginsref->{$function}) {
       # let plugins get the name of the rule that is currently being run,
       # and ensure their eval functions exist
       $evalstr .= '
-
-        $self->{current_rule_name} = $rulename;
-        $self->register_plugin_eval_glue(q#'.$function.'#);
-
-      ';
+      $self->{current_rule_name} = $rulename;
+      $self->register_plugin_eval_glue(q#'.$function.'#);
+';
     }
 
     # this stuff is quite slow, and totally superfluous if
@@ -1236,47 +1192,41 @@ sub run_eval_tests {
     if ($have_start_rules) {
       # XXX - should we use helper function here?
       $evalstr .= '
-
         $self->{main}->call_plugins("start_rules", {
                 permsgstatus => $self,
                 ruletype => "eval",
                 priority => '.$priority.'
               });
 
-      ';
+';
     }
- 
-    $evalstr .= '
 
+    $evalstr .= '
       eval {
-        $result = $self->' . $function . ' (@extraevalargs '. $argstr .' );  1;
+        $result = $self->'.$function.'(@extraevalargs, @{$testptr->{q#'.$rulename.'#}->[1]}); 1;
       } or do {
         $result = 0;
         die "rules: $@\n"  if $@ =~ /__alarm__ignore__/;
         $self->handle_eval_rule_errors($rulename);
       };
-
-    ';
+';
 
     if ($have_ran_rule) {
       # XXX - should we use helper function here?
       $evalstr .= '
-
         $self->{main}->call_plugins("ran_rule", {
             permsgstatus => $self, ruletype => "eval", rulename => $rulename
           });
-
-      ';
+';
     }
 
     $evalstr .= '
-
       if ($result) {
         $self->got_hit($rulename, $prepend2desc, ruletype => "eval", value => $result);
         '.$dbgstr.'
       }
     }
-    ';
+';
   }
 
   # don't free the eval ruleset here -- we need it in the compiled code!
@@ -1288,16 +1238,15 @@ sub run_eval_tests {
 {
   package $package_name;
 
-    sub ${methodname} {
-      my (\$self, \@extraevalargs) = \@_;
+  sub ${methodname} {
+    my (\$self, \@extraevalargs) = \@_;
 
-      my \$scoresptr = \$self->{conf}->{scores};
-      my \$prepend2desc = q#$prepend2desc#;
-      my \$rulename;
-      my \$result;
-
-      $evalstr
-    }
+    my \$testptr = \$self->{conf}->{$evalname}->{$priority};
+    my \$prepend2desc = q#$prepend2desc#;
+    my \$rulename;
+    my \$result;
+    $evalstr
+  }
 
   1;
 }
@@ -1382,7 +1331,7 @@ sub hit_rule_plugin_code {
     $match = '"<YES>"'; # nothing better to report, $& is not set by this rule
   } else {
     # simple, but suffers from 'user data interpreted as a boolean', Bug 6360
-    $match = '($' . '&' . '|| "negative match")';
+    $match = '(defined $'.'& ? $'.'& : "negative match")';
   }
 
   my $debug_code = '';
@@ -1403,7 +1352,8 @@ sub hit_rule_plugin_code {
   # if we're not running "tflags multiple", break out of the matching
   # loop this way
   my $multiple_code = '';
-  if (($pms->{conf}->{tflags}->{$rulename}||'') !~ /\bmultiple\b/) {
+  if ($loop_break_directive &&
+      ($pms->{conf}->{tflags}->{$rulename}||'') !~ /\bmultiple\b/) {
     $multiple_code = $loop_break_directive.';';
   }
 

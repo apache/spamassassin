@@ -1,4 +1,4 @@
-#!/usr/bin/perl
+#!/usr/bin/perl -T
 
 use strict;
 use warnings;
@@ -17,7 +17,7 @@ use constant HAS_DKIM_VERIFIER => eval {
 use Test::More;
 plan skip_all => "Net tests disabled" unless conf_bool('run_net_tests');
 plan skip_all => "Needs Mail::DKIM::Verifier >= 0.31" unless HAS_DKIM_VERIFIER ;
-plan tests => 199;
+plan tests => 226;
 
 BEGIN {
   if (-e 't/test_dir') {
@@ -71,8 +71,8 @@ sub test_samples($$) {
     my $el = $patt_antipatt_list->[0];
     shift @$patt_antipatt_list if @$patt_antipatt_list > 1; # last autorepeats
     my($patt,$anti) = split(m{\s* / \s*}x, $el, 2);
-    %patterns      = map { (" $_ ", $_) } split(' ',$patt);
-    %anti_patterns = map { (" $_ ", $_) } split(' ',$anti);
+    %patterns      = map { (" $_ ", " $_ $fn ") } split(' ',$patt);
+    %anti_patterns = map { (" $_ ", " $_ $fn ") } split(' ',$anti);
     print "Testing sample $fn\n";
     my $spam_report = process_sample_file($fn);
     clear_pattern_counters();
@@ -87,6 +87,7 @@ tstlocalrules("
   dkim_minimum_key_bits 512
   score DKIM_SIGNED          -0.1
   score DKIM_VALID           -0.1
+  score DKIM_INVALID	      0.1
   score DKIM_VALID_AU        -0.1
   score DKIM_ADSP_NXDOMAIN    0.1
   score DKIM_ADSP_DISCARD     0.1
@@ -95,6 +96,7 @@ tstlocalrules("
   score DKIM_ADSP_CUSTOM_MED  0.1
   score DKIM_ADSP_CUSTOM_HIGH 0.1
   header DKIM_ADSP_SEL_TEST   eval:check_dkim_adsp('*', .spamassassin.org)
+  priority DKIM_ADSP_SEL_TEST -100
   score  DKIM_ADSP_SEL_TEST   0.1
   score RAZOR2_CHECK 0
   score RAZOR2_CF_RANGE_51_100 0
@@ -112,6 +114,7 @@ $spamassassin_obj = Mail::SpamAssassin->new({
   require_rules       => 1,
 # debug               => 'dkim',
   post_config_text => q{
+    dns_available yes
     use_auto_whitelist 0
     use_bayes 0
     use_razor2 0
@@ -136,7 +139,7 @@ while (defined($fn = readdir(DIR))) {
 }
 closedir(DIR) or die "Error closing directory $dirname: $!";
 @patt_antipatt_list = (
-  'DKIM_SIGNED DKIM_VALID DKIM_VALID_AU / DKIM_ADSP_NXDOMAIN DKIM_ADSP_DISCARD DKIM_ADSP_ALL DKIM_ADSP_SEL_TEST'
+  'DKIM_SIGNED DKIM_VALID DKIM_VALID_AU / DKIM_INVALID DKIM_ADSP_NXDOMAIN DKIM_ADSP_DISCARD DKIM_ADSP_ALL DKIM_ADSP_SEL_TEST'
 );
 test_samples(\@test_filenames, \@patt_antipatt_list);
 
@@ -154,7 +157,7 @@ while (defined($fn = readdir(DIR))) {
   push(@test_filenames, "$dirname/$fn");
 }
 closedir(DIR) or die "Error closing directory $dirname: $!";
-@patt_antipatt_list = ( 'DKIM_SIGNED / DKIM_VALID' );
+@patt_antipatt_list = ( 'DKIM_SIGNED DKIM_INVALID / DKIM_VALID' );
 test_samples(\@test_filenames, \@patt_antipatt_list);
 
 # mail samples test-adsp* should all fail DKIM validation, testing ADSP

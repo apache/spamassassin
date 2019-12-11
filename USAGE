@@ -95,7 +95,7 @@ If you want to use SpamAssassin site-wide:
   - *PLEASE* consider setting it up as "off by default" for most accounts,
     and let users opt-in to using it.  Quite a few folks prefer not to
     have their mail filtered, presumably because they don't use their
-    email address publically and do not get much spam.
+    email address publicly and do not get much spam.
 
   - Note that procmail users adding spamc to /etc/procmailrc should 
     add the line 'DROPPRIVS=yes' at the top of the file.
@@ -229,7 +229,8 @@ Other Installation Notes
     If you are setting up a large 'spamd' system-wide installation, with
     Bayes and/or automatic reputation, we strongly recommend using SQL as
     storage.  It has proven more reliable than the default DB_File storage
-    backend at several large sites.
+    backend at several large sites.  For Bayes, you should always use the
+    new Redis backend (see Mail::SpamAssassin::BayesStore::Redis).
 
 
   - If you are running SpamAssassin under a disk quota, or are setting up

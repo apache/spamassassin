@@ -20,3 +20,22 @@ loadplugin Mail::SpamAssassin::Plugin::URIEval
 loadplugin Mail::SpamAssassin::Plugin::WLBLEval
 loadplugin Mail::SpamAssassin::Plugin::VBounce
 
+# Try to load some non-default plugins also
+loadplugin Mail::SpamAssassin::Plugin::RelayCountry
+loadplugin Mail::SpamAssassin::Plugin::DCC
+loadplugin Mail::SpamAssassin::Plugin::AntiVirus
+loadplugin Mail::SpamAssassin::Plugin::AWL
+#loadplugin Mail::SpamAssassin::Plugin::TextCat
+#loadplugin Mail::SpamAssassin::Plugin::AccessDB
+loadplugin Mail::SpamAssassin::Plugin::Shortcircuit
+#loadplugin Mail::SpamAssassin::Plugin::Rule2XSBody
+loadplugin Mail::SpamAssassin::Plugin::ASN
+#loadplugin Mail::SpamAssassin::Plugin::PhishTag
+#loadplugin Mail::SpamAssassin::Plugin::TxRep
+loadplugin Mail::SpamAssassin::Plugin::URILocalBL
+loadplugin Mail::SpamAssassin::Plugin::PDFInfo
+loadplugin Mail::SpamAssassin::Plugin::HashBL
+#loadplugin Mail::SpamAssassin::Plugin::ResourceLimits
+loadplugin Mail::SpamAssassin::Plugin::FromNameSpoof
+loadplugin Mail::SpamAssassin::Plugin::Phishing
+#loadplugin Mail::SpamAssassin::Plugin::OLEVBMacro

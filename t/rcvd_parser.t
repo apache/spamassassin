@@ -1,4 +1,4 @@
-#!/usr/bin/perl
+#!/usr/bin/perl -T
 
 BEGIN {
   if (-e 't/test_dir') { # if we are running "t/rule_tests.t", kluge around ...
@@ -336,7 +336,7 @@ my %data = (
   '[ ip=82.68.189.22 rdns=82-68-189-22.dsl.in-addr.zen.co.uk helo=!10.0.0.253! by=ensim.rackshack.net ident= envfrom= id=i8TAFAI25021 auth=Sendmail msa=0 ]',
 
   'from [213.174.165.187] (213.174.165.187) by vsmtp1.tin.it (7.0.027) (authenticated as mgiammarco@virgilio.it) id 416A525B0000A53B for linux-thinkpad@linux-thinkpad.org; Mon, 11 Oct 2004 12:52:46 +0200' =>
-  '[ ip=213.174.165.187 rdns=!213.174.165.187! helo=!213.174.165.187! by=vsmtp1.tin.it ident= envfrom= id=416A525B0000A53B auth=CriticalPath msa=0 ]',
+  '[ ip=213.174.165.187 rdns= helo=!213.174.165.187! by=vsmtp1.tin.it ident= envfrom= id=416A525B0000A53B auth=CriticalPath msa=0 ]',
 
   'from [10.10.10.215] (Collation_Software.demarc.cogentco.com [66.250.6.18]) (authenticated bits=0) by waste.org (8.12.3/8.12.3/Debian-6.6) with ESMTP id i46MehGO005108 for <fork@xent.com>; Thu, 6 May 2004 17:40:44-0500' =>
   '[ ip=66.250.6.18 rdns=Collation_Software.demarc.cogentco.com helo=!10.10.10.215! by=waste.org ident= envfrom= id=i46MehGO005108 auth=Sendmail msa=0 ]',

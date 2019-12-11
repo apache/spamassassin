@@ -55,9 +55,10 @@ our @ISA = qw(Exporter);
 our @EXPORT = ();
 our @EXPORT_OK = qw(&local_tz &base64_decode &untaint_var &untaint_file_path
                   &exit_status_str &proc_status_ok &am_running_on_windows
-                  &reverse_ip_address &decode_dns_question_entry
+                  &reverse_ip_address &decode_dns_question_entry &touch_file
                   &get_my_locales &parse_rfc822_date &get_user_groups
-                  &secure_tmpfile &secure_tmpdir &uri_list_canonicalize);
+                  &secure_tmpfile &secure_tmpdir &uri_list_canonicalize
+                  &compile_regexp &qr_to_string &is_fqdn_valid);
 
 our $AM_TAINTED;
 
@@ -337,6 +338,44 @@ sub taint_var {
   # $^X is apparently "always tainted".
   # Concatenating an empty tainted string taints the result.
   return $v . substr($^X, 0, 0);
+}
+
+###########################################################################
+
+# Check for full hostname / FQDN / DNS name validity.  IP addresses must be
+# validated with other functions like $IP_ADDRESS.  Does not check for valid
+# TLD, use $self->{main}->{registryboundaries}->is_domain_valid()
+# additionally for that.
+sub is_fqdn_valid {
+  my ($host) = @_;
+  return if !defined $host;
+
+  # remove trailing dots
+  $host =~ s/\.+\z//;
+
+  # max total length 253
+  return if length($host) > 253;
+
+  # validate dot separated components/labels
+  my @labels = split(/\./, lc $host);
+  my $cnt = scalar @labels;
+  return unless $cnt > 1; # at least two labels required
+  foreach my $label (@labels) {
+    # length of 1-63
+    return if length($label) < 1;
+    return if length($label) > 63;
+    # alphanumeric, - allowed only in middle part
+    # underscores are allowed in DNS queries, so we allow here
+    return if $label !~ /^[a-z0-9_](?:[a-z0-9_-]*[a-z0-9_])?$/;
+    # 1st-2nd level part can not contain _, only third+ can
+    if ($cnt == 2 || $cnt == 1) {
+      return if index($label, '_') != -1;
+    }
+    $cnt--;
+  }
+
+  # is good
+  return 1;
 }
 
 ###########################################################################
@@ -1097,11 +1136,51 @@ with Perl.
 sub first_available_module {
   my (@packages) = @_;
   foreach my $mod (@packages) {
-    if (eval 'require '.$mod.'; 1; ') {
+    next if $mod !~ /^[\w:]+$/; # be paranoid
+    if (eval 'require '.$mod.'; 1;') {
       return $mod;
     }
   }
   undef;
+}
+
+###########################################################################
+
+=item touch_file(file, { args });
+
+Touch or create a file.
+
+Possible args:
+
+create_exclusive => 1
+  Create a new empty file safely, only if not existing before
+
+=cut
+
+sub touch_file {
+  my ($file, $args) = @_;
+
+  $file = untaint_file_path($file);
+  $args ||= {};
+
+  return unless defined $file && $file ne '';
+
+  if ($args->{create_exclusive}) {
+    if (sysopen(my $fh, $file, O_CREAT|O_EXCL)) {
+      close $fh;
+      return 1;
+    }
+    return 1 if $! == EEXIST; # fine if it exists already
+    dbg("util: exclusive touch_file failed: $file: $!");
+    return 0;
+  }
+
+  if (!utime(undef,undef,$file)) {
+    dbg("util: touch_file failed: $file: $!");
+    return 0;
+  }
+
+  return 1;
 }
 
 ###########################################################################
@@ -1117,7 +1196,8 @@ If it cannot open a file after 20 tries, it returns C<undef>.
 
 # thanks to http://www2.picante.com:81/~gtaylor/autobuse/ for this code
 sub secure_tmpfile {
-  my $tmpdir = untaint_file_path($ENV{'TMPDIR'} || File::Spec->tmpdir());
+  my $tmpenv = am_running_on_windows() ? 'TMP' : 'TMPDIR';
+  my $tmpdir = untaint_file_path($ENV{$tmpenv} || File::Spec->tmpdir());
 
   defined $tmpdir && $tmpdir ne ''
     or die "util: cannot find a temporary directory, set TMP or TMPDIR in environment";
@@ -1228,6 +1308,8 @@ sub secure_tmpdir {
 ## Replaced with Mail::SpamAssassin::RegistryBoundaries::uri_to_domain.
 ##
 
+###########################################################################
+
 *uri_list_canonify = \&uri_list_canonicalize;  # compatibility alias
 sub uri_list_canonicalize {
   my($redirector_patterns, @uris) = @_;
@@ -1235,10 +1317,6 @@ sub uri_list_canonicalize {
   # make sure we catch bad encoding tricks
   my @nuris;
   for my $uri (@uris) {
-    # we're interested in http:// and so on, skip mailto: and
-    # email addresses with no protocol
-    next if $uri =~ /^mailto:/i || $uri =~ /^[^:]*\@/;
-
     # sometimes we catch URLs on multiple lines
     $uri =~ s/\n//g;
 
@@ -1251,6 +1329,29 @@ sub uri_list_canonicalize {
 
     # Make a copy so we don't trash the original in the array
     my $nuri = $uri;
+
+    # Handle emails differently
+    if ($nuri =~ /^mailto:/i || $nuri =~ /^[^:]*\@/) {
+      # Strip ?subject= parameters and obfuscations
+      # Outlook linkifies foo@bar%2Ecom&x.com to foo@bar.com !!
+      if ($nuri =~ /^([^\@]+\@[^?]+)\?/) {
+        push @nuris, $1;
+      }
+      if ($nuri =~ /^([^\@]+\@[^?&]+)\&/) {
+        push @nuris, $1
+      }
+      # Address must be trimmed of %20
+      if ($nuri =~ tr/%20// &&
+          $nuri =~ /^(?:mailto:)?(?:\%20)*([^\@]+\@[^?&%]+)/) {
+        push @nuris, "mailto:$1";
+      }
+      # mailto:"Foo%20Bar"%20<foo.bar@example.com>
+      if ($nuri =~ /^[^?&]*<([^\@>]+\@[^>]+)>/) {
+        push @nuris, "mailto:$1";
+      }
+      # End email processing
+      next;
+    }
 
     # bug 4390: certain MUAs treat back slashes as front slashes.
     # since backslashes are supposed to be encoded in a URI, swap non-encoded
@@ -1279,24 +1380,41 @@ sub uri_list_canonicalize {
     }
 
     # http://www.foo.biz?id=3 -> http://www.foo.biz/?id=3
-    $nuri =~ s{^(https?://[^/?]+)\?}{$1/?}i;
+    # http://www.foo.biz#id=3 -> http://www.foo.biz/#id=3
+    $nuri =~ s{^(https?://[^/?#]+)([?#])}{$1/$2}i;
 
     # deal with encoding of chars, this is just the set of printable
     # chars minus ' ' (that is, dec 33-126, hex 21-7e)
     $nuri =~ s/\&\#0*(3[3-9]|[4-9]\d|1[01]\d|12[0-6]);/sprintf "%c",$1/ge;
     $nuri =~ s/\&\#x0*(2[1-9]|[3-6][a-fA-F0-9]|7[0-9a-eA-E]);/sprintf "%c",hex($1)/ge;
+    # handle other unicode dots (U+002E U+3002 U+FF0E U+FF61) -> .
+    $nuri =~ s/\&\#(?:x2e|12290|x3002|65294|xff0e|65377|xff61);/./gi;
 
     # put the new URI on the new list if it's different
     if ($nuri ne $uri) {
       push(@nuris, $nuri);
     }
 
-    # deal with wierd hostname parts, remove user/pass, etc.
-    if ($nuri =~ m{^(https?://)([^/]+?)((?::\d*)?\/.*)?$}i) {
-      my($proto, $host, $rest) = ($1,$2,$3);
+    # deal with weird hostname parts, remove user/pass, etc.
+    if ($nuri =~ m{^(https?://)([^\@/?#]*\@)?([^/?#:]+)((?::(\d*))?.*)$}i) {
+      my($proto, $host, $rest) = ($1,$3,$4);
+      my $auth = defined $2 ? $2 : '';
+      my $port = defined $5 ? $5 : '';
 
-      # not required
-      $rest ||= '';
+      my $rest_noport;
+      if ($port eq '') {
+        $port = $proto eq 'http://' ? 80 : 443;
+      } else {
+        $rest_noport = $rest;
+        # Strip default ports from url and add to list
+        if ($proto eq 'http://') {
+          if ($rest_noport =~ s/^:80\b//) {
+            push(@nuris, join('', $proto, $host, $rest_noport));
+          }
+        } elsif ($rest_noport =~ s/^:443\b//) {
+          push(@nuris, join('', $proto, $host, $rest_noport));
+        }
+      }
 
       # Bug 6751:
       # RFC 3490 (IDNA): Whenever dots are used as label separators, the
@@ -1312,12 +1430,17 @@ sub uri_list_canonicalize {
       if ($host =~ s{(?: \xE3\x80\x82 | \xEF\xBC\x8E | \xEF\xBD\xA1 |
                          \xEF\xB9\x92 | \xE2\x80\xA4 )}{.}xgs) {
         push(@nuris, join ('', $proto, $host, $rest));
+        # Also add noport variant
+        push(@nuris, join('', $proto, $host, $rest_noport)) if $rest_noport;
       }
 
       # bug 4146: deal with non-US ASCII 7-bit chars in the host portion
       # of the URI according to RFC 1738 that's invalid, and the tested
       # browsers (Firefox, IE) remove them before usage...
-      if ($host =~ tr/\000-\040\200-\377//d) {
+      #if ($host =~ tr/\000-\040\200-\377//d) {
+      # Fixed 7/2019 to not strip extended chars, since they can be used in
+      # IDN domains. Stripping control chars should be enough?
+      if ($host =~ tr/\x00-\x20//d) {
         push(@nuris, join ('', $proto, $host, $rest));
       }
 
@@ -1330,7 +1453,7 @@ sub uri_list_canonicalize {
       my $found_redirector_match;
       foreach my $re (@{$redirector_patterns}) {
         if ("$proto$host$rest" =~ $re) {
-          next unless defined $1;
+          next unless defined $1 && index($1, '.') != -1;
           dbg("uri: parsed uri pattern: $re");
           dbg("uri: parsed uri found: $1 in redirector: $proto$host$rest");
           push (@uris, $1);
@@ -1341,7 +1464,7 @@ sub uri_list_canonicalize {
       if (!$found_redirector_match) {
         # try generic https? check if redirector pattern matching failed
         # bug 3308: redirectors like yahoo only need one '/' ... <grrr>
-        if ($rest =~ m{(https?:/{0,2}.+)$}i) {
+        if ($rest =~ m{(https?:/{0,2}[^&#]+)}i && index($1, '.') != -1) {
           push(@uris, $1);
           dbg("uri: parsed uri found: $1 in hard-coded redirector");
         }
@@ -1360,7 +1483,7 @@ sub uri_list_canonicalize {
 
       # bug 3186: If in a sentence, we might pick up odd characters ...
       # ie: "visit http://example.biz." or "visit http://example.biz!!!"
-      # the host portion should end in some form of alpha-numeric, strip off
+      # the host portion should end in some form of alphanumeric, strip off
       # the rest.
       if ($host =~ s/[^0-9A-Za-z]+$//) {
         push(@nuris, join ('', $proto, $host, $rest));
@@ -1401,6 +1524,14 @@ sub uri_list_canonicalize {
         push(@nuris, join ('', $proto, decode_ulong_to_ip($host), $rest));
       }
 
+      # http://foobar -> http://www.foobar.com as Firefox does (Bug 6596)
+      # (do this here so we don't trip on those 0x123 IPs etc..)
+      # https://hg.mozilla.org/mozilla-central/file/tip/docshell/base/nsDefaultURIFixup.cpp
+      elsif ($proto eq 'http://' && $auth eq '' &&
+             $host ne 'localhost' && $port eq '80' &&
+             $host =~ /^(?:www\.)?([^.]+)$/) {
+        push(@nuris, join('', $proto, 'www.', $1, '.com', $rest));
+      }
     }
   }
 
@@ -1483,13 +1614,13 @@ sub receive_date {
 ###########################################################################
 sub get_user_groups {
   my $suid = shift;
-  dbg("get_user_groups: uid is $suid\n");
+  dbg("util: get_user_groups: uid is $suid\n");
   my ( $user, $passwd, $uid, $gid, $quota, $comment, $gcos, $dir, $shell, $expire ) = getpwuid($suid);
   my $rgids="$gid ";
   while ( my($name,$pw,$gid,$members) = getgrent() ) {
     if ( $members =~ m/\b$user\b/ ) {
       $rgids .= "$gid ";
-      dbg("get_user_groups: added $gid ($name) to group list which is now: $rgids\n");
+      dbg("util: get_user_groups: added $gid ($name) to group list which is now: $rgids\n");
     }
   }
   endgrent;
@@ -1594,7 +1725,7 @@ sub helper_app_pipe_open_unix {
     setuid_to_euid();
     info("util: setuid: ruid=$< euid=$> rgid=$( egid=$) ");
 
-    # now set up the fds.  due to some wierdness, we may have to ensure that
+    # now set up the fds.  due to some weirdness, we may have to ensure that
     # we *really* close the correct fd number, since some other code may have
     # redirected the meaning of STDOUT/STDIN/STDERR it seems... (bug 3649).
     # use POSIX::close() for that. it's safe to call close() and POSIX::close()
@@ -1690,6 +1821,169 @@ sub trap_sigalrm_fully {
 
 ###########################################################################
 
+# returns ($compiled_re, $error)
+# if any errors, $compiled_re = undef, $error has string
+# args:
+# - regexp
+# - strip_delimiters (default: 1) (value 2 means, try strip, but don't error)
+# - ignore_always_matching (default: 0)
+sub compile_regexp {
+  my ($re, $strip_delimiters, $ignore_always_matching) = @_;
+  local($1);
+
+  # Do not allow already compiled regexes or other funky refs
+  if (ref($re)) {
+    return (undef, 'ref passed');
+  }
+
+  # try stripping by default
+  $strip_delimiters = 1 if !defined $strip_delimiters;
+
+  # OK, try to remove any normal perl-style regexp delimiters at
+  # the start and end, and modifiers at the end if present,
+  # so we can validate those too.
+  my $origre = $re;
+  my $delim_end = '';
+
+  if ($strip_delimiters >= 1) {
+    # most common delimiter
+    if ($re =~ s{^/}{}) {
+      $delim_end = '/';
+    }
+    # symmetric delimiters
+    elsif ($re =~ s/^(?:m|qr)([\{\(\<\[])//) {
+      ($delim_end = $1) =~ tr/\{\(\<\[/\}\)\>\]/;
+    }
+    # any non-wordchar delimiter, but let's ignore backslash..
+    elsif ($re =~ s/^(?:m|qr)(\W)//) {
+      $delim_end = $1;
+      if ($delim_end eq '\\') {
+        return (undef, 'backslash delimiter not allowed');
+      }
+    }
+    elsif ($strip_delimiters != 2) {
+      return (undef, 'missing regexp delimiters');
+    }
+  }
+
+  # cut end delimiter, mods
+  my $mods;
+  if ($delim_end) {
+    # Ignore e because paranoid
+    if ($re =~ s/\Q${delim_end}\E([a-df-z]*)\z//) {
+      $mods = $1;
+    } else {
+      return (undef, 'invalid end delimiter/mods');
+    }
+  }
+
+  # paranoid check for eval exec (?{foo}), in case someone
+  # actually put "use re 'eval'" somewhere..
+  if ($re =~ /\(\?\??\{/) {
+    return (undef, 'eval (?{}) found');
+  }
+
+  # check unescaped delimiter, but only if it's not symmetric,
+  # those will fp on .{0,10} [xyz] etc, no need for so strict checks
+  # since these regexes don't end up in eval strings anyway
+  if ($delim_end && $delim_end !~ tr/\}\)\]//) {
+    # first we remove all escaped backslashes "\\"
+    my $dbs_stripped = $re;
+    $dbs_stripped =~ s/\\\\//g;
+    # now we can properly check if something is unescaped
+    if ($dbs_stripped =~ /(?<!\\)\Q${delim_end}\E/) {
+      return (undef, "unquoted delimiter '$delim_end' found");
+    }
+  }
+
+  if ($ignore_always_matching) {
+    if (my $err = is_always_matching_regexp($re)) {
+      return (undef, "always matching regexp: $err");
+    }
+  }
+
+  # now prepend the modifiers, in order to check if they're valid
+  if ($mods) {
+    $re = '(?'.$mods.')'.$re;
+  }
+
+  # no re "strict";  # since perl 5.21.8: Ranges of ASCII printables...
+  my $compiled_re;
+  $re = untaint_var($re);
+  my $ok = eval {
+    # don't dump deprecated warnings to user STDERR
+    # but die on any other warning for safety?
+    local $SIG{__WARN__} = sub {
+      if ($_[0] !~ /deprecated/i) {
+        die "$_[0]\n";
+      }
+    };
+    $compiled_re = qr/$re/;
+    1;
+  };
+  if ($ok && ref($compiled_re) eq 'Regexp') {
+    #$origre = untaint_var($origre);
+    #dbg("config: accepted regex '%s' => '%s'", $origre, $compiled_re);
+    return ($compiled_re, '');
+  } else {
+    my $err = $@ ne '' ? $@ : "errno=$!"; chomp $err;
+    $err =~ s/ at .*? line \d.*$//;
+    return (undef, $err);
+  }
+}
+
+sub is_always_matching_regexp {
+  my ($re) = @_;
+
+  if ($re eq '') {
+    return "empty";
+  }
+  elsif ($re =~ /(?<!\\)\|\|/) {
+    return "contains '||'";
+  }
+  elsif ($re =~ /^\|/) {
+    return "starts with '|'";
+  }
+  elsif ($re =~ /\|(?<!\\\|)$/) {
+    return "ends with '|'";
+  }
+
+  return "";
+}
+
+# convert compiled regexp (?^i:foo) presentation to string (?i)foo
+# NOTE: This function is mainly used for Rule2XSBody purposes, since it
+# expects "(?i)foo" formatted strings.  Generally there should NOT be need
+# to use this function.  If you need a string, try "".$re / "".qr(foo.*bar).
+sub qr_to_string {
+  my ($re) = @_;
+
+  return undef unless ref($re) eq 'Regexp'; ## no critic (ProhibitExplicitReturnUndef)
+  $re = "".$re; # stringify
+
+  local($1);
+  my $mods;
+  # perl >=5.14 (?^i:foo)
+  if ($re =~ s/^\(\?\^([a-z]*)://) {
+    $mods = $1;
+    $re =~ s/\)\s*\z//;
+  }
+  # perl <5.14 (?i-xsm:foo)
+  elsif ($re =~ s/^\(\?([a-z]*)-[a-z]*://) {
+    $mods = $1;
+    $re =~ s/\)\s*\z//;
+  }
+
+  return ($mods ? "(?$mods)$re" : $re);
+}
+
+###########################################################################
+
+###
+### regexp_remove_delimiters and make_qr DEPRECATED, to be removed
+### compile_regexp() should be used everywhere
+###
+
 # Removes any normal perl-style regexp delimiters at
 # the start and end, and modifiers at the end (if present).
 # If modifiers are found, they are inserted into the pattern using
@@ -1698,27 +1992,34 @@ sub trap_sigalrm_fully {
 sub regexp_remove_delimiters {
   my ($re) = @_;
 
+  warn("deprecated Util regexp_remove_delimiters() called\n");
+
   my $delim;
   if (!defined $re || $re eq '') {
-    warn "cannot remove delimiters from null regexp";
-    return;  # invalid
+    return undef; ## no critic (ProhibitExplicitReturnUndef)
   }
-  elsif ($re =~ s/^m\{//) {             # m{foo/bar}
+  elsif ($re =~ s/^m?\{//) {             # m{foo/bar}
     $delim = '}';
   }
-  elsif ($re =~ s/^m\(//) {             # m(foo/bar)
+  elsif ($re =~ s/^m?\[//) {             # m[foo/bar]
+    $delim = ']';
+  }
+  elsif ($re =~ s/^m?\(//) {             # m(foo/bar)
     $delim = ')';
   }
-  elsif ($re =~ s/^m<//) {              # m<foo/bar>
+  elsif ($re =~ s/^m?<//) {              # m<foo/bar>
     $delim = '>';
   }
-  elsif ($re =~ s/^m(\W)//) {           # m#foo/bar#
+  elsif ($re =~ s/^m?(\W)//) {           # m#foo/bar#
     $delim = $1;
   } else {                              # /foo\/bar/ or !foo/bar!
-    $re =~ s/^(\W)//; $delim = $1;
+    # invalid
+    return undef; ## no critic (ProhibitExplicitReturnUndef)
   }
 
-  $re =~ s/\Q${delim}\E([imsx]*)$// or warn "unbalanced re: $re";
+  if ($re !~ s/\Q${delim}\E([imsx]*)$//) {
+    return undef; ## no critic (ProhibitExplicitReturnUndef)
+  }
 
   my $mods = $1;
   if ($mods) {
@@ -1732,8 +2033,17 @@ sub regexp_remove_delimiters {
 
 sub make_qr {
   my ($re) = @_;
+
+  warn("deprecated Util make_qr() called\n");
+
   $re = regexp_remove_delimiters($re);
-  return qr/$re/;
+  return undef if !defined $re || $re eq ''; ## no critic (ProhibitExplicitReturnUndef)
+  my $compiled_re;
+  if (eval { $compiled_re = qr/$re/; 1; } && ref($compiled_re) eq 'Regexp') {
+    return $compiled_re;
+  } else {
+    return undef; ## no critic (ProhibitExplicitReturnUndef)
+  }
 }
 
 ###########################################################################
@@ -1741,7 +2051,7 @@ sub make_qr {
 sub get_my_locales {
   my ($ok_locales) = @_;
 
-  my @locales = split(' ', $ok_locales);
+  my @locales = split(/\s+/, $ok_locales);
   my $lang = $ENV{'LC_ALL'};
   $lang ||= $ENV{'LANGUAGE'};
   $lang ||= $ENV{'LC_MESSAGES'};

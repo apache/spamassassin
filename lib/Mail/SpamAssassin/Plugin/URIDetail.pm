@@ -45,7 +45,7 @@ rendered text.
 
 C<cleaned> is a list including the raw URI and various cleaned
 versions of the raw URI (http://spamassassin.apache%2Eorg/,
-http://spamassassin.apache.org/).
+https://spamassassin.apache.org/).
 
 C<text> is the anchor text(s) (text between <a> and </a>) that
 linked to the raw URI.
@@ -68,7 +68,7 @@ Regular expressions should be delimited by slashes.
 package Mail::SpamAssassin::Plugin::URIDetail;
 use Mail::SpamAssassin::Plugin;
 use Mail::SpamAssassin::Logger;
-use Mail::SpamAssassin::Util qw(untaint_var);
+use Mail::SpamAssassin::Util qw(untaint_var compile_regexp);
 
 use strict;
 use warnings;
@@ -122,22 +122,23 @@ sub set_config {
 	if ($target !~ /^(?:raw|type|cleaned|text|domain)$/) {
 	    return $Mail::SpamAssassin::Conf::INVALID_VALUE;
 	}
-	if ($conf->{parser}->is_delimited_regexp_valid($name, $pattern)) {
-	    $pattern = $pluginobj->make_qr($pattern);
-	}
-	else {
-	    return $Mail::SpamAssassin::Conf::INVALID_VALUE;
+
+	my ($rec, $err) = compile_regexp($pattern, 1);
+	if (!$rec) {
+	  dbg("config: uri_detail invalid regexp '$pattern': $err");
+	  return $Mail::SpamAssassin::Conf::INVALID_VALUE;
 	}
 
-	dbg("config: uri_detail adding ($target $op /$pattern/) to $name");
+	dbg("config: uri_detail adding ($target $op /$rec/) to $name");
         $conf->{parser}->{conf}->{uri_detail}->{$name}->{$target} =
-          [$op, $pattern];
+          [$op, $rec];
 	$added_criteria = 1;
       }
 
       if ($added_criteria) {
 	dbg("config: uri_detail added $name\n");
-	$conf->{parser}->add_test($name, 'check_uri_detail()', $Mail::SpamAssassin::Conf::TYPE_BODY_EVALS);
+	$conf->{parser}->add_test($name, 'check_uri_detail()',
+	  $Mail::SpamAssassin::Conf::TYPE_BODY_EVALS);
       } 
       else {
 	warn "config: failed to add invalid rule $name";
@@ -163,8 +164,8 @@ sub check_uri_detail {
 
     if (exists $rule->{raw}) {
       my($op,$patt) = @{$rule->{raw}};
-      if ( ($op eq '=~' && $raw =~ /$patt/) ||
-           ($op eq '!~' && $raw !~ /$patt/) ) {
+      if ( ($op eq '=~' && $raw =~ $patt) ||
+           ($op eq '!~' && $raw !~ $patt) ) {
         dbg("uri: raw matched: '%s' %s /%s/", $raw,$op,$patt);
       } else {
         next;
@@ -176,8 +177,8 @@ sub check_uri_detail {
       my($op,$patt) = @{$rule->{type}};
       my $match;
       for my $text (keys %{ $info->{types} }) {
-        if ( ($op eq '=~' && $text =~ /$patt/) ||
-             ($op eq '!~' && $text !~ /$patt/) ) { $match = $text; last }
+        if ( ($op eq '=~' && $text =~ $patt) ||
+             ($op eq '!~' && $text !~ $patt) ) { $match = $text; last }
       }
       next unless defined $match;
       dbg("uri: type matched: '%s' %s /%s/", $match,$op,$patt);
@@ -188,8 +189,8 @@ sub check_uri_detail {
       my($op,$patt) = @{$rule->{cleaned}};
       my $match;
       for my $text (@{ $info->{cleaned} }) {
-        if ( ($op eq '=~' && $text =~ /$patt/) ||
-             ($op eq '!~' && $text !~ /$patt/) ) { $match = $text; last }
+        if ( ($op eq '=~' && $text =~ $patt) ||
+             ($op eq '!~' && $text !~ $patt) ) { $match = $text; last }
       }
       next unless defined $match;
       dbg("uri: cleaned matched: '%s' %s /%s/", $match,$op,$patt);
@@ -200,8 +201,8 @@ sub check_uri_detail {
       my($op,$patt) = @{$rule->{text}};
       my $match;
       for my $text (@{ $info->{anchor_text} }) {
-        if ( ($op eq '=~' && $text =~ /$patt/) ||
-             ($op eq '!~' && $text !~ /$patt/) ) { $match = $text; last }
+        if ( ($op eq '=~' && $text =~ $patt) ||
+             ($op eq '!~' && $text !~ $patt) ) { $match = $text; last }
       }
       next unless defined $match;
       dbg("uri: text matched: '%s' %s /%s/", $match,$op,$patt);
@@ -212,8 +213,8 @@ sub check_uri_detail {
       my($op,$patt) = @{$rule->{domain}};
       my $match;
       for my $text (keys %{ $info->{domains} }) {
-        if ( ($op eq '=~' && $text =~ /$patt/) ||
-             ($op eq '!~' && $text !~ /$patt/) ) { $match = $text; last }
+        if ( ($op eq '=~' && $text =~ $patt) ||
+             ($op eq '!~' && $text !~ $patt) ) { $match = $text; last }
       }
       next unless defined $match;
       dbg("uri: domain matched: '%s' %s /%s/", $match,$op,$patt);
@@ -232,30 +233,6 @@ sub check_uri_detail {
   }
 
   return 0;
-}
-
-# ---------------------------------------------------------------------------
-
-# turn "/foobar/i" into qr/(?i)foobar/
-sub make_qr {
-  my ($self, $pattern) = @_;
-
-  my $re_delim;
-  if ($pattern =~ s/^m(\W)//) {     # m!foo/bar!
-    $re_delim = $1;
-  } else {                          # /foo\/bar/ or !foo/bar!
-    $pattern =~ s/^(\W)//; $re_delim = $1;
-  }
-  if (!$re_delim) {
-    return;
-  }
-
-  $pattern =~ s/${re_delim}([imsx]*)$//;
-
-  my $mods = $1;
-  if ($mods) { $pattern = "(?".$mods.")".$pattern; }
-
-  return qr/$pattern/;
 }
 
 # ---------------------------------------------------------------------------

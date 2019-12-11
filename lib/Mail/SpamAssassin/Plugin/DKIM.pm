@@ -112,13 +112,13 @@ are provided as a space-separated list, although this behaviour may change.
 
 =head1 SEE ALSO
 
-C<Mail::DKIM>, C<Mail::SpamAssassin::Plugin>
+C<Mail::DKIM> Mail::SpamAssassin::Plugin(3)
 
-  http://jason.long.name/dkimproxy/
-  http://tools.ietf.org/rfc/rfc4871.txt
-  http://tools.ietf.org/rfc/rfc4870.txt
-  http://tools.ietf.org/rfc/rfc5617.txt
-  http://ietf.org/html.charters/dkim-charter.html
+  http://dkimproxy.sourceforge.net/
+  https://tools.ietf.org/rfc/rfc4871.txt
+  https://tools.ietf.org/rfc/rfc4870.txt
+  https://tools.ietf.org/rfc/rfc5617.txt
+  https://datatracker.ietf.org/group/dkim/about/
 
 =cut
 
@@ -830,10 +830,17 @@ sub _check_dkim_signature {
     # note: bug 5179 comment 28: perl does silly things on non-Unix platforms
     # unless we use \015\012 instead of \r\n
     eval {
-      my $str = $pms->{msg}->get_pristine;
-      $str =~ s/\r?\n/\015\012/sg;  # ensure \015\012 ending
-      # feeding large chunks to Mail::DKIM is much faster than line-by-line
-      $verifier->PRINT($str);
+      my $str = $pms->{msg}->get_pristine();
+      if ($pms->{msg}->{line_ending} eq "\015\012") {
+        # message already CRLF, just feed it
+        $verifier->PRINT($str);
+      } else {
+        # feeding large chunk to Mail::DKIM is _much_ faster than line-by-line
+        my $str2 = $str; # make a copy, sigh
+        $str2 =~ s/\012/\015\012/gs; # LF -> CRLF
+        $verifier->PRINT($str2);
+        undef $str2;
+      }
       1;
     } or do {  # intercept die() exceptions and render safe
       my $eval_stat = $@ ne '' ? $@ : "errno=$!";  chomp $eval_stat;
@@ -880,6 +887,7 @@ sub _check_dkim_signature {
     foreach my $signature (@signatures) {
       # old versions of Mail::DKIM would give undef for an invalid signature
       next if !defined $signature;
+      next if !$signature->selector; # empty selector
 
       $sig_result_supported = $signature->UNIVERSAL::can("result_detail");
       my($info, $valid, $expired);
@@ -1215,7 +1223,7 @@ sub _wlcheck_author_signature {
   my $wl_ref = $pms->{conf}->{$wl};
   foreach my $author (@{$pms->{dkim_author_addresses}}) {
     foreach my $white_addr (keys %$wl_ref) {
-      my $re = $wl_ref->{$white_addr};
+      my $re = qr/$wl_ref->{$white_addr}/i;
     # dbg("dkim: WL %s %s", $wl, $white_addr);
       if ($author =~ $re) {
         push(@$acceptable_sdid_tuples_ref, [$author,undef,$wl,$re]);
@@ -1236,6 +1244,7 @@ sub _wlcheck_list {
   foreach my $signature (@{$pms->{dkim_signatures}}) {
     # old versions of Mail::DKIM would give undef for an invalid signature
     next if !defined $signature;
+    next if !$signature->selector; # empty selector
 
     my $sig_result_supported = $signature->UNIVERSAL::can("result_detail");
     my($info, $valid, $expired, $key_size_weak);

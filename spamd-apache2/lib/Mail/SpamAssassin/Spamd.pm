@@ -49,7 +49,7 @@ See the source code of C<spamd(1)> and C<Mail::SpamAssassin::Spamd::Apache2(3)>.
 
 =head1 AUTHORS
 
-The SpamAssassin(tm) Project E<lt>http://spamassassin.apache.org/E<gt>
+The SpamAssassin(tm) Project E<lt>https://spamassassin.apache.org/E<gt>
 
 =head1 COPYRIGHT
 
@@ -262,7 +262,7 @@ sub parse_msgids {
 
 =item C<service_timeout('error message')>
 
-Send appropiate status line to the client and log the error.
+Send appropriate status line to the client and log the error.
 
 =cut
 

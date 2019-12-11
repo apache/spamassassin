@@ -1,4 +1,4 @@
-#!/usr/bin/perl
+#!/usr/bin/perl -T
 #
 # bug 6335: ensure that both domains_only and ips_only URIDNSBL rules can coexist
 

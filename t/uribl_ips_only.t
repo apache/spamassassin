@@ -1,4 +1,4 @@
-#!/usr/bin/perl
+#!/usr/bin/perl -T
 # bug 6335: ips_only URIDNSBL rules
 
 use lib '.'; use lib 't';

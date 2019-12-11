@@ -36,6 +36,8 @@ my $RULE_KEYWORDS_RE = qr{
         describe|tflags|reuse|score
     }x;
 
+my $fail_message = "";
+
 use strict;
 use File::Find;
 use File::Copy;
@@ -205,6 +207,10 @@ compile_output_files();
 lint_output_files();
 write_output_files();
 
+# mkrules.t relies on the script exiting cleanly Bug #7302 and Bug #7692
+exit if ($ENV{'TEST_ACTIVE'}) ;
+
+die "$fail_message" if ( $fail_message =~ m/./) ;
 exit;
 
 # ---------------------------------------------------------------------------
@@ -214,6 +220,7 @@ sub lint_output_files {
     my $text = join("\n", "file start $file", $output_file_text->{$file}, "file end $file");
     if (lint_rule_text($text) != 0) {
       warn "\nERROR: LINT FAILED, suppressing output: $file\n\n";
+      $fail_message =  $fail_message . "ERROR: LINT FAILED, suppressing output: $file\n";
 
       # don't suppress entirely, otherwise 'make distcheck'/'disttest'
       # will fail since the MANIFEST-listed output files will be 

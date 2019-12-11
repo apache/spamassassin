@@ -101,9 +101,9 @@ required.
 package Mail::SpamAssassin::Plugin::URILocalBL;
 use Mail::SpamAssassin::Plugin;
 use Mail::SpamAssassin::Logger;
+use Mail::SpamAssassin::Constants qw(:ip);
 use Mail::SpamAssassin::Util qw(untaint_var);
 
-use Net::CIDR::Lite;
 use Socket;
 
 use strict;
@@ -116,6 +116,7 @@ our @ISA = qw(Mail::SpamAssassin::Plugin);
 
 use constant HAS_GEOIP => eval { require Geo::IP; };
 use constant HAS_GEOIP2 => eval { require GeoIP2::Database::Reader; };
+use constant HAS_CIDR => eval { require Net::CIDR::Lite; };
 
 # constructor
 sub new {
@@ -147,6 +148,7 @@ sub set_config {
 
   push (@cmds, {
     setting => 'uri_block_cc',
+    type => $Mail::SpamAssassin::Conf::CONF_TYPE_HASH_KEY_VALUE,
     is_priv => 1,
     code => sub {
       my ($self, $key, $value, $line) = @_;
@@ -188,6 +190,7 @@ sub set_config {
 
   push (@cmds, {
     setting => 'uri_block_cont',
+    type => $Mail::SpamAssassin::Conf::CONF_TYPE_HASH_KEY_VALUE,
     is_priv => 1,
     code => sub {
       my ($self, $key, $value, $line) = @_;
@@ -229,6 +232,7 @@ sub set_config {
   
   push (@cmds, {
     setting => 'uri_block_isp',
+    type => $Mail::SpamAssassin::Conf::CONF_TYPE_HASH_KEY_VALUE,
     is_priv => 1,
     code => sub {
       my ($self, $key, $value, $line) = @_;
@@ -268,9 +272,15 @@ sub set_config {
 
   push (@cmds, {
     setting => 'uri_block_cidr',
+    type => $Mail::SpamAssassin::Conf::CONF_TYPE_HASH_KEY_VALUE,
     is_priv => 1,
     code => sub {
       my ($self, $key, $value, $line) = @_;
+
+      if (!HAS_CIDR) {
+        warn "config: uri_block_cidr not supported, required module Net::CIDR::Lite missing\n";
+        return $Mail::SpamAssassin::Conf::INVALID_VALUE;
+      }
 
       if ($value !~ /^(\S+)\s+(.+)$/) {
 	return $Mail::SpamAssassin::Conf::INVALID_VALUE;
@@ -313,6 +323,7 @@ sub set_config {
 
   push (@cmds, {
     setting => 'uri_block_exclude',
+    type => $Mail::SpamAssassin::Conf::CONF_TYPE_HASH_KEY_VALUE,
     is_priv => 1,
     code => sub {
       my ($self, $key, $value, $line) = @_;
@@ -357,7 +368,7 @@ sub set_config {
 =item uri_country_db_path STRING
 
 This option tells SpamAssassin where to find the MaxMind country GeoIP2 
-database.
+database. Country or City database are both supported.
 
 =back
 
@@ -429,6 +440,7 @@ sub check_uri_local_bl {
   # If country_db_path is set I am using GeoIP2 api
   if ( HAS_GEOIP2 and ( ( defined $conf_country_db_path ) or ( defined $conf_country_db_isp_path ) ) ) {
 
+   eval {
     $self->{geoip} = GeoIP2::Database::Reader->new(
   		file	=> $conf_country_db_path,
   		locales	=> [ 'en' ]
@@ -446,6 +458,13 @@ sub check_uri_local_bl {
       warn "$conf_country_db_isp_path not found" unless $self->{geoisp};
     }
     $self->{use_geoip2} = 1;
+   };
+   if ($@ || !($self->{geoip} || $self->{geoisp})) {
+     $@ =~ s/\s+Trace begun.*//s;
+     warn "URILocalBL: GeoIP2 load failed: $@\n";
+     return 0;
+   }
+
   } elsif ( HAS_GEOIP ) {
     BEGIN {
       Geo::IP->import( qw(GEOIP_MEMORY_CACHE GEOIP_CHECK_CACHE GEOIP_ISP_EDITION) );
@@ -459,20 +478,32 @@ sub check_uri_local_bl {
 
     # this code burps an ugly message if it fails, but that's redirected elsewhere
     my $flags = 0;
-    eval '$flags = Geo::IP::GEOIP_SILENCE' if ($gip_wanted >= $gip_have);
+    my $flag_isp = 0;
+    my $flag_silent = 0;
+    eval '$flags = GEOIP_MEMORY_CACHE | GEOIP_CHECK_CACHE' if ($gip_wanted >= $gip_have);
+    eval '$flag_silent = Geo::IP::GEOIP_SILENCE' if ($gip_wanted >= $gip_have);
+    eval '$flag_isp = GEOIP_ISP_EDITION' if ($gip_wanted >= $gip_have);
 
-    if ($flags && $gic_wanted >= $gic_have) {
-      $self->{geoip} = Geo::IP->new(GEOIP_MEMORY_CACHE | GEOIP_CHECK_CACHE | $flags);
-      $self->{geoisp} = Geo::IP->open_type(GEOIP_ISP_EDITION, GEOIP_MEMORY_CACHE | GEOIP_CHECK_CACHE | $flags);
+   eval {
+    if ($flag_silent && $gic_wanted >= $gic_have) {
+      $self->{geoip} = Geo::IP->new($flags | $flag_silent);
+      $self->{geoisp} = Geo::IP->open_type($flag_isp | $flag_silent | $flags);
     } else {
       open(OLDERR, ">&STDERR");
       open(STDERR, ">", "/dev/null");
-      $self->{geoip} = Geo::IP->new(GEOIP_MEMORY_CACHE | GEOIP_CHECK_CACHE);
-      $self->{geoisp} = Geo::IP->open_type(GEOIP_ISP_EDITION, GEOIP_MEMORY_CACHE | GEOIP_CHECK_CACHE);
+      $self->{geoip} = Geo::IP->new($flags);
+      $self->{geoisp} = Geo::IP->open_type($flag_isp);
       open(STDERR, ">&OLDERR");
       close(OLDERR);
     }
-  $db_info = sub { return "Geo::IP " . ($self->{geoip}->database_info || '?') };
+   };
+    if ($@ || !($self->{geoip} || $self->{geoisp})) {
+      $@ =~ s/\s+Trace begun.*//s;
+      warn "URILocalBL: GeoIP load failed: $@\n";
+      return 0;
+    }
+
+    $db_info = sub { return "Geo::IP " . ($self->{geoip}->database_info || '?') };
   } else {
     dbg("No GeoIP module available");
     return 0;
@@ -484,6 +515,8 @@ sub check_uri_local_bl {
 
   my %hit_tests;
   my $got_hit = 0;
+  my @addrs;
+  my $IP_ADDRESS = IP_ADDRESS;
   
   if ( defined $self->{geoip} ) {
     dbg("check: uri_local_bl evaluating rule %s using database %s\n", $test, $db_info->());
@@ -491,12 +524,14 @@ sub check_uri_local_bl {
     dbg("check: uri_local_bl evaluating rule %s\n", $test);
   }
 
+  my $dns_available = $permsg->is_dns_available();
+
   while (my ($raw, $info) = each %uri_detail) {
 
     next unless $info->{hosts};
 
     # look for W3 links only
-    next unless (defined $info->{types}->{a});
+    next unless (defined $info->{types}->{a} || defined $info->{types}->{parsed});
 
     while (my($host, $domain) = each %{$info->{hosts}}) {
 
@@ -506,11 +541,18 @@ sub check_uri_local_bl {
         next;
       }
 
-      # this would be best cached from prior lookups
-      my @addrs = gethostbyname($host);
-
-      # convert to string values address list
-      @addrs = map { inet_ntoa($_); } @addrs[4..$#addrs];
+      if($host !~ /^$IP_ADDRESS$/) {
+       if (!$dns_available) {
+         dbg("check: uri_local_bl skipping $host, dns not available");
+         next;
+       }
+       # this would be best cached from prior lookups
+       @addrs = gethostbyname($host);
+       # convert to string values address list
+       @addrs = map { inet_ntoa($_); } @addrs[4..$#addrs];
+      } else {
+       @addrs = ($host);
+      }
 
       dbg("check: uri_local_bl %s addrs %s\n", $host, join(', ', @addrs));
 
@@ -525,7 +567,12 @@ sub check_uri_local_bl {
           dbg("check: uri_local_bl countries %s\n", join(' ', sort keys %{$rule->{countries}}));
 
           if ( $self->{use_geoip2} == 1 ) {
-            my $country = $self->{geoip}->country( ip => $ip );
+            my $country;
+            if (index($self->{geoip}->metadata()->description()->{en}, 'City') != -1) {
+              $country = $self->{geoip}->city( ip => $ip );
+            } else {
+              $country = $self->{geoip}->country( ip => $ip );
+            }
             my $country_rec = $country->country();
             $cc = $country_rec->iso_code();
           } else {

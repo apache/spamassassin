@@ -1,3 +1,68 @@
+Note for Users Upgrading to SpamAssassin 3.4.3
+----------------------------------------------
+
+- New subjprefix keyword added, this can be used to add a prefix to
+  email Subject if the original email matches a particular rule
+
+- New Util::is_fqdn_valid() function to validate hostname (DNS name) format
+  (Bug 7736).  To check if a name contains valid TLD, it's still needed to
+  additionally use RegistryBoundaries::is_domain_valid()
+
+- New OLEVBMacro plugin to detect OLE Macro inside documents attached to emails,
+  this plugin requires Archive::Zip and IO::String Perl modules to work.
+
+- Due to the dangerous nature of sa-update --allowplugins option, it
+  now prints a warning that --reallyallowplugins is required to use it.
+  This is to make sure all the legacy installations and wiki guides etc
+  still using it needlessly get fixed.
+
+- TxRep and Awl plugins has been modified to be compatible 
+  with latest Postgresql versions.
+  You should upgrade your sql database running the following command:
+  MySQL:
+  "ALTER TABLE `txrep` CHANGE `count` `msgcount` INT(11) NOT NULL DEFAULT '0';"
+  "ALTER TABLE `awl` CHANGE `count` `msgcount` INT(11) NOT NULL DEFAULT '0';"
+  "ALTER TABLE `awl` ADD last_hit timestamp NOT NULL default CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP;"
+  PostgreSQL:
+  "ALTER TABLE txrep RENAME COLUMN count TO msgcount;"
+  "ALTER TABLE awl RENAME COLUMN count TO msgcount;"
+  "ALTER TABLE awl ADD last_hit timestamp NOT NULL default CURRENT_TIMESTAMP;"
+
+- body_part_scan_size 50000, rawbody_part_scan_size 500000 defaults added (Bug 6582)
+  These enable safer and faster scanning of large emails.
+
+- ALL pseudo-header now returns decoded headers, so it's usage is consistent
+  with single header matching (:raw returns undecoded and folded like before).
+
+- RegistryBoundaries did not load 20_aux_tlds.cf properly in older versions. 
+  Old hardcoded list is now removed and RB will print "no tlds defined, need
+  to run sa-update" unless it can find list from config files.
+
+- Deprecated functions: Parser::is_delimited_regexp_valid(),
+  Parser::is_regexp_valid(), Util::regexp_remove_delimiters(),
+  Util::make_qr().  These all are combined into new Util::compile_regexp().
+
+- DNSEval: add check_rbl_headers to check specific headers in rbl
+
+- DNSEval: add check_rbl_ns_from to check against an rbl for dns servers
+
+- HashBL: Add check_hashbl_bodyre, check_hashbl_emails, check_hashbl_uris,
+  hashbl_ignore
+
+- ASN: Support IPv6 with asn_lookup_ipv6 (Bug 7211)
+
+- sa-update: New option --httputil to force used download utility
+
+- Add rules_matching() expression to meta rules
+
+- Add tflags domains_only/ips_only to DNSEval.pm functions
+
+- RelayCountry: Added new metadata: X-Spam-Countries-External (_RELAYCOUNTRYEXT_),
+  X-Spam-Countries-Auth (_RELAYCOUNTRYAUTH_), X-Spam-Countries-All (_RELAYCOUNTRYALL_)
+
+- New tflag "nosubject" for 'body' rules, to stop matching the Subject
+  header which is part of the body text.
+
 Note for Users Upgrading to SpamAssassin 3.4.2
 ----------------------------------------------
 
@@ -7,6 +72,9 @@ Note for Users Upgrading to SpamAssassin 3.4.2
 to 3.4.2 is important.  sa-update no longer uses these signatures.
 
 See https://bz.apache.org/SpamAssassin/show_bug.cgi?id=7614
+
+- freemail_import_whitelist_auth, freemail_import_def_whitelist_auth added (Bug 6451)
+
 
 New plugins
 -----------
@@ -369,7 +437,7 @@ Note for Users Upgrading to SpamAssassin 3.0.x
 
 - The "sa-learn --rebuild" command has been deprecated; please use
   "sa-learn --sync" instead.  The --rebuild option will remain temporarily
-  for backward compatability.
+  for backward compatibility.
 
 - The Bayesian storage modules have been completely re-written and now
   include Berkeley DB (DBM) storage as well as SQL based storage (see

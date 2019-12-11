@@ -1,4 +1,4 @@
-#!/usr/bin/perl
+#!/usr/bin/perl -T
 
 use lib '.'; use lib 't';
 use SATest; sa_t_init("mkrules");
@@ -457,7 +457,7 @@ sub mkrun {
   print ("\t$scrargs\n");
 
   my $test_number = test_number();
-  system ("$scrargs > log/$testname.$test_number $post_redir");
+  untaint_system ("$scrargs > log/$testname.$test_number $post_redir");
   $mk_exitcode = ($?>>8);
   if ($mk_exitcode != 0) { return undef; }
   &checkfile ("$testname.$test_number", $read_sub) if (defined $read_sub);

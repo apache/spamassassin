@@ -67,6 +67,9 @@ C<~user/> are supported.
 
 Where appropriate below, default values are listed in parentheses.
 
+Test names ("SYMBOLIC_TEST_NAME") can only contain alphanumerics/underscores,
+can not start with digit, and must be less than 128 characters.
+
 =head1 USER PREFERENCES
 
 The following options can be used in both site-wide (C<local.cf>) and
@@ -82,13 +85,11 @@ use warnings;
 # use bytes;
 use re 'taint';
 
-use Mail::SpamAssassin::Util;
 use Mail::SpamAssassin::NetSet;
 use Mail::SpamAssassin::Constants qw(:sa :ip);
 use Mail::SpamAssassin::Conf::Parser;
 use Mail::SpamAssassin::Logger;
-use Mail::SpamAssassin::Util::TieOneStringHash;
-use Mail::SpamAssassin::Util qw(untaint_var);
+use Mail::SpamAssassin::Util qw(untaint_var compile_regexp);
 use File::Spec;
 
 our @ISA = qw();
@@ -658,7 +659,7 @@ The named list can then be consulted through a check_uri_host_listed()
 eval rule implemented by the WLBLEval plugin, which takes the list name as
 an argument. Parenthesis around a list name are literal - a required syntax.
 
-Host names may optionally be prefixed by an exclamantion mark '!', which
+Host names may optionally be prefixed by an exclamation mark '!', which
 produces false as a result if this entry matches. This makes it easier
 to exclude some subdomains when their superdomain is listed, for example:
 
@@ -691,13 +692,13 @@ but the names 'BLACK' and 'WHITE' are otherwise not special or reserved.
     code => sub {
       my($conf, $key, $value, $line) = @_;
       local($1,$2);
-      if ($value !~ /^ \( (.*?) \) \s+ (.*) \z/sx) {
+      if ($value !~ /^ \( (.+?) \) \s+ (.+) \z/sx) {
         return $MISSING_REQUIRED_VALUE;
       }
       my $listname = $1;  # corresponds to arg in check_uri_host_in_wblist()
       # note: must not factor out dereferencing, as otherwise
       # subhashes would spring up in a copy and be lost
-      foreach my $host ( split(' ', lc $2) ) {
+      foreach my $host ( split(/\s+/, lc $2) ) {
         my $v = $host =~ s/^!// ? 0 : 1;
         $conf->{uri_host_lists}{$listname}{$host} = $v;
       }
@@ -729,11 +730,11 @@ name and has no meaning here.
     code => sub {
       my($conf, $key, $value, $line) = @_;
       local($1,$2);
-      if ($value !~ /^ (?: \( (.*?) \) \s+ )? (.*) \z/sx) {
+      if ($value !~ /^ (?: \( (.+?) \) \s+ )? (.+) \z/sx) {
         return $MISSING_REQUIRED_VALUE;
       }
       my @listnames = defined $1 ? $1 : keys %{$conf->{uri_host_lists}};
-      my @args = split(' ', lc $2);
+      my @args = split(/\s+/, lc $2);
       foreach my $listname (@listnames) {
         foreach my $host (@args) {
           my $v = $host =~ s/^!// ? 0 : 1;
@@ -785,7 +786,7 @@ e.g.
     code => sub {
       my($conf, $key, $value, $line) = @_;
       local($1,$2);
-      if ($value !~ /^ \( (.*?) \) \s+ (.*) \z/sx) {
+      if ($value !~ /^ \( (.+?) \) \s+ (.+) \z/sx) {
         return $MISSING_REQUIRED_VALUE;
       }
       my $listname = $1;  # corresponds to arg in check_uri_host_in_wblist()
@@ -809,7 +810,7 @@ Please see directives enlist_uri_host and delist_uri_host for details.
     type => $CONF_TYPE_ADDRLIST,
     code => sub {
       my($conf, $key, $value, $line) = @_;
-      foreach my $host ( split(' ', lc $value) ) {
+      foreach my $host ( split(/\s+/, lc $value) ) {
         my $v = $host =~ s/^!// ? 0 : 1;
         $conf->{uri_host_lists}{'BLACK'}{$host} = $v;
       }
@@ -830,7 +831,7 @@ Please see directives enlist_uri_host and delist_uri_host for details.
     type => $CONF_TYPE_ADDRLIST,
     code => sub {
       my($conf, $key, $value, $line) = @_;
-      foreach my $host ( split(' ', lc $value) ) {
+      foreach my $host ( split(/\s+/, lc $value) ) {
         my $v = $host =~ s/^!// ? 0 : 1;
         $conf->{uri_host_lists}{'WHITE'}{$host} = $v;
       }
@@ -849,7 +850,7 @@ By default, suspected spam messages will not have the C<Subject>,
 C<From> or C<To> lines tagged to indicate spam. By setting this option,
 the header will be tagged with C<STRING> to indicate that a message is
 spam. For the From or To headers, this will take the form of an RFC 2822
-comment following the address in parantheses. For the Subject header,
+comment following the address in parentheses. For the Subject header,
 this will be prepended to the original subject. Note that you should
 only use the _REQD_ and _SCORE_ tags when rewriting the Subject header
 if C<report_safe> is 0. Otherwise, you may not be able to remove
@@ -897,6 +898,28 @@ header.
 	return $INVALID_VALUE;
       }
     }
+  });
+
+=item subjprefix
+
+Add a prefix in emails Subject if a rule is matched.
+To enable this option "rewrite_header Subject" config
+option must be enabled as well.
+
+The check C<if can(Mail::SpamAssassin::Conf::feature_subjprefix)>
+should be used to silence warnings in previous
+SpamAssassin versions.
+
+To be able to use this feature a C<add_header all Subjprefix _SUBJPREFIX_>
+configuration line could be needed on some setups.
+
+=cut
+
+  push (@cmds, {
+    command => 'subjprefix',
+    setting => 'subjprefix',
+    is_frequent => 1,
+    type => $CONF_TYPE_HASH_KEY_VALUE,
   });
 
 =item add_header { spam | ham | all } header_name string
@@ -1220,6 +1243,35 @@ it will be used if it is available.
   });
 
 
+=item body_part_scan_size               (default: 50000)
+
+Per mime-part scan size limit in bytes for "body" type rules.
+The decoded/stripped mime-part is truncated approx to this size.
+Helps scanning large messages safely, so it's not necessary to
+skip them completely. Disabled with 0.
+
+=cut
+
+  push (@cmds, {
+    setting => 'body_part_scan_size',
+    default => 50000,
+    type => $CONF_TYPE_NUMERIC,
+  });
+
+
+=item rawbody_part_scan_size               (default: 500000)
+
+Like body_part_scan_size, for "rawbody" type rules.
+
+=cut
+
+  push (@cmds, {
+    setting => 'rawbody_part_scan_size',
+    default => 500000,
+    type => $CONF_TYPE_NUMERIC,
+  });
+
+
 =back
 
 =head2 NETWORK TEST OPTIONS
@@ -1260,7 +1312,7 @@ length) subnet is later specified in the list. This allows a subset of
 a wider network to be exempt. In case of specifying overlapping subnets,
 specify more specific subnets first (tighter matching, i.e. with a longer
 netmask length), followed by less specific (shorter netmask length) subnets
-to get predictable results regarless of the search algorithm used - when
+to get predictable results regardless of the search algorithm used - when
 Net::Patricia module is installed the search finds the tightest matching
 entry in the list, while a sequential search as used in absence of the
 module Net::Patricia will find the first matching entry in the list.
@@ -1909,7 +1961,7 @@ Example:
       defined $value && $value =~ s/^(allow|deny)\s+//i
         or return $INVALID_VALUE;
       my $blocked = lc($1) eq 'deny' ? 1 : 0;
-      foreach my $domain (split(' ', $value)) {
+      foreach my $domain (split(/\s+/, $value)) {
         $domain =~ s/^\.//; $domain =~ s/\.\z//;  # strip dots
         $self->{dns_query_blocked}{lc $domain} = $blocked;
       }
@@ -2057,7 +2109,7 @@ as they appear in their order in C<bayes_token_sources> directive(s).
       return $MISSING_REQUIRED_VALUE  if $value eq '';
       my $h = ($self->{bayes_token_sources} ||= {});
       my %all_kw = map(($_,1), qw(header visible invisible uri mimepart));
-      foreach (split(' ', lc $value)) {
+      foreach (split(/\s+/, lc $value)) {
         if (/^(none|noall)\z/) {
           %$h = ();
         } elsif ($_ eq 'all') {
@@ -2734,24 +2786,23 @@ Example: http://chkpt.zdnet.com/chkpt/whatever/spammer.domain/yo/dude
   push (@cmds, {
     setting => 'redirector_pattern',
     is_priv => 1,
+    default => [],
+    type => $CONF_TYPE_STRINGLIST,
     code => sub {
       my ($self, $key, $value, $line) = @_;
+
+      $value =~ s/^\s+//;
       if ($value eq '') {
 	return $MISSING_REQUIRED_VALUE;
       }
-      elsif (!$self->{parser}->is_delimited_regexp_valid("redirector_pattern", $value)) {
+
+      my ($rec, $err) = compile_regexp($value, 1);
+      if (!$rec) {
+        dbg("config: invalid redirector_pattern '$value': $err");
 	return $INVALID_VALUE;
       }
 
-      # convert to qr// while including modifiers
-      local ($1,$2,$3);
-      $value =~ /^m?(\W)(.*)(?:\1|>|}|\)|\])(.*?)$/;
-      my $pattern = $2;
-      $pattern = "(?".$3.")".$pattern if $3;
-      $pattern = qr/$pattern/;
-
-      push @{$self->{main}->{conf}->{redirector_patterns}}, $pattern;
-      # dbg("config: adding redirector regex: " . $value);
+      push @{$self->{main}->{conf}->{redirector_patterns}}, $rec;
     }
   });
 
@@ -2831,7 +2882,8 @@ There are several special pseudo-headers that can be specified:
 Note that all whitespace inside the headers, at line folds, is currently
 compressed into a single space (' ') character. To obtain a pristine
 (unmodified) header section, use C<ALL:raw> - the :raw modifier is documented
-above.
+above. Also similar that return headers added by specific relays: ALL-TRUSTED,
+ALL-INTERNAL, ALL-UNTRUSTED, ALL-EXTERNAL.
 
 =item C<ToCc> can be used to mean the contents of both the 'To' and 'Cc'
 headers.
@@ -2862,6 +2914,10 @@ C<modifiers> as regexp modifiers in the usual style.   Note that multi-line
 rules are not supported, even if you use C<x> as a modifier.  Also note that
 the C<#> character must be escaped (C<\#>) or else it will be considered to be
 the start of a comment and not part of the regexp.
+
+If the header specified matches multiple headers, their text will be
+concatenated with embedded \n's. Therefore you may wish to use C</m> if you
+use C<^> or C<$> in your regular expression.
 
 If the C<[if-unset: STRING]> tag is present, then C<STRING> will
 be used if the header is not found in the mail message.
@@ -2906,10 +2962,10 @@ zone.  There's a few things to note:
 
 Duplicated IPs are only queried once and reserved IPs are not queried.
 Private IPs are those listed in
-<http://www.iana.org/assignments/ipv4-address-space>,
+<https://www.iana.org/assignments/ipv4-address-space>,
 <http://duxcw.com/faq/network/privip.htm>,
 <http://duxcw.com/faq/network/autoip.htm>, or
-<http://tools.ietf.org/html/rfc5735> as private.
+<https://tools.ietf.org/html/rfc5735> as private.
 
 =item the 'set' argument
 
@@ -2983,11 +3039,9 @@ why the IP is listed, typically a hyperlink to a database entry.
 Create a sub-test for 'set'.  If you want to look up a multi-meaning zone
 like relays.osirusoft.com, you can then query the results from that zone
 using the zone ID from the original query.  The sub-test may either be an
-IPv4 dotted address for RBLs that return multiple A records or a
+IPv4 dotted address for RBLs that return multiple A records, or a
 non-negative decimal number to specify a bitmask for RBLs that return a
-single A record containing a bitmask of results, a SenderBase test
-beginning with "sb:", or (if none of the preceding options seem to fit) a
-regular expression.
+single A record containing a bitmask of results, or a regular expression.
 
 Note: the set name must be exactly the same for as the main query rule,
 including selections like '-notfirsthop' appearing at the end of the set
@@ -3001,11 +3055,17 @@ name.
     is_priv => 1,
     code => sub {
       my ($self, $key, $value, $line) = @_;
-      local ($1,$2);
-      if ($value =~ /^(\S+)\s+(?:rbl)?eval:(.*)$/) {
-        my ($rulename, $fn) = ($1, $2);
-        dbg("config: header eval rule name is $rulename function is $fn");
-        if ($fn !~ /^\w+(\(.*\))?$/) {
+      local($1);
+      if ($value !~ s/^(\S+)\s+//) {
+        return $INVALID_VALUE;
+      }
+      my $rulename = $1;
+      if ($value eq '') {
+        return $MISSING_REQUIRED_VALUE;
+      }
+      if ($value =~ /^(?:rbl)?eval:(.*)$/) {
+        my $fn = $1;
+        if ($fn !~ /^\w+\(.*\)$/) {
           return $INVALID_VALUE;
         }
         if ($fn =~ /^check_(?:rbl|dns)/) {
@@ -3015,25 +3075,9 @@ name.
           $self->{parser}->add_test ($rulename, $fn, $TYPE_HEAD_EVALS);
         }
       }
-      elsif ($value =~ /^(\S+)\s+exists:(.*)$/) {
-        my ($rulename, $header_name) = ($1, $2);
-        # RFC 5322 section 3.6.8, ftext printable US-ASCII ch not including ":"
-        if ($header_name !~ /\S/) {
-	  return $MISSING_REQUIRED_VALUE;
-      # } elsif ($header_name !~ /^([!-9;-\176]+)$/) {
-        } elsif ($header_name !~ /^([^: \t]+)$/) {  # be generous
-          return $INVALID_HEADER_FIELD_NAME;
-        }
-        $self->{parser}->add_test ($rulename, "defined($header_name)",
-                                   $TYPE_HEAD_TESTS);
-        $self->{descriptions}->{$rulename} = "Found a $header_name header";
-      }
       else {
-	my @values = split(/\s+/, $value, 2);
-	if (@values != 2) {
-	  return $MISSING_REQUIRED_VALUE;
-	}
-        $self->{parser}->add_test (@values, $TYPE_HEAD_TESTS);
+        # Detailed parsing in add_test
+        $self->{parser}->add_test ($rulename, $value, $TYPE_HEAD_TESTS);
       }
     }
   });
@@ -3044,12 +3088,20 @@ Define a body pattern test.  C<pattern> is a Perl regular expression.  Note:
 as per the header tests, C<#> must be escaped (C<\#>) or else it is considered
 the beginning of a comment.
 
-The 'body' in this case is the textual parts of the message body;
-any non-text MIME parts are stripped, and the message decoded from
-Quoted-Printable or Base-64-encoded format if necessary.  The message
-Subject header is considered part of the body and becomes the first
-paragraph when running the rules.  All HTML tags and line breaks will
-be removed before matching.
+The 'body' in this case is the textual parts of the message body; any
+non-text MIME parts are stripped, and the message decoded from
+Quoted-Printable or Base-64-encoded format if necessary.  Parts declared as
+text/html will be rendered from HTML to text.
+
+All body paragraphs (double-newline-separated blocks text) are turned into a
+line breaks removed, whitespace normalized single line.  Any lines longer
+than 2kB are split into shorter separate lines (from a boundary when
+possible), this may unexpectedly prevent pattern from matching.  Patterns
+are matched independently against each of these lines.
+
+Note that by default the message Subject header is considered part of the
+body and becomes the first line when running the rules. If you don't want
+to match Subject along with body text, use "tflags RULENAME nosubject".
 
 =item body SYMBOLIC_TEST_NAME eval:name_of_eval_method([args])
 
@@ -3063,22 +3115,22 @@ Define a body eval test.  See above.
     is_priv => 1,
     code => sub {
       my ($self, $key, $value, $line) = @_;
-      local ($1,$2);
-      if ($value =~ /^(\S+)\s+eval:(.*)$/) {
-        my ($rulename, $fn) = ($1, $2);
-        dbg("config: body eval rule name is $rulename function is $fn");
-
-        if ($fn !~ /^\w+(\(.*\))?$/) {
+      local($1);
+      if ($value !~ s/^(\S+)\s+//) {
+        return $INVALID_VALUE;
+      }
+      my $rulename = $1;
+      if ($value eq '') {
+        return $MISSING_REQUIRED_VALUE;
+      }
+      if ($value =~ /^eval:(.*)$/) {
+        my $fn = $1;
+        if ($fn !~ /^\w+\(.*\)$/) {
           return $INVALID_VALUE;
         }
         $self->{parser}->add_test ($rulename, $fn, $TYPE_BODY_EVALS);
-      }
-      else {
-	my @values = split(/\s+/, $value, 2);
-	if (@values != 2) {
-	  return $MISSING_REQUIRED_VALUE;
-	}
-        $self->{parser}->add_test (@values, $TYPE_BODY_TESTS);
+      } else {
+        $self->{parser}->add_test ($rulename, $value, $TYPE_BODY_TESTS);
       }
     }
   });
@@ -3107,11 +3159,15 @@ points of the URI, and will also be faster.
     is_priv => 1,
     code => sub {
       my ($self, $key, $value, $line) = @_;
-      my @values = split(/\s+/, $value, 2);
-      if (@values != 2) {
+      local($1);
+      if ($value !~ s/^(\S+)\s+//) {
+        return $INVALID_VALUE;
+      }
+      my $rulename = $1;
+      if ($value eq '') {
         return $MISSING_REQUIRED_VALUE;
       }
-      $self->{parser}->add_test (@values, $TYPE_URI_TESTS);
+      $self->{parser}->add_test ($rulename, $value, $TYPE_URI_TESTS);
     }
   });
 
@@ -3126,6 +3182,10 @@ text will be decoded from base64 or quoted-printable encoding, but HTML
 tags and line breaks will still be present.  Multiline expressions will
 need to be used to match strings that are broken by line breaks.
 
+Note that the text is split into 2-4kB chunks (from a word boundary when
+possible), this may unexpectedly prevent pattern from matching.  Patterns
+are matched independently against each of these chunks.
+
 =item rawbody SYMBOLIC_TEST_NAME eval:name_of_eval_method([args])
 
 Define a raw-body eval test.  See above.
@@ -3138,15 +3198,22 @@ Define a raw-body eval test.  See above.
     is_priv => 1,
     code => sub {
       my ($self, $key, $value, $line) = @_;
-      local ($1,$2);
-      if ($value =~ /^(\S+)\s+eval:(.*)$/) {
-        $self->{parser}->add_test ($1, $2, $TYPE_RAWBODY_EVALS);
+      local($1);
+      if ($value !~ s/^(\S+)\s+//) {
+        return $INVALID_VALUE;
+      }
+      my $rulename = $1;
+      if ($value eq '') {
+        return $MISSING_REQUIRED_VALUE;
+      }
+      if ($value =~ /^eval:(.*)$/) {
+        my $fn = $1;
+        if ($fn !~ /^\w+\(.*\)$/) {
+          return $INVALID_VALUE;
+        }
+        $self->{parser}->add_test ($rulename, $fn, $TYPE_RAWBODY_EVALS);
       } else {
-	my @values = split(/\s+/, $value, 2);
-	if (@values != 2) {
-	  return $MISSING_REQUIRED_VALUE;
-	}
-        $self->{parser}->add_test (@values, $TYPE_RAWBODY_TESTS);
+        $self->{parser}->add_test ($rulename, $value, $TYPE_RAWBODY_TESTS);
       }
     }
   });
@@ -3172,15 +3239,22 @@ Define a full message eval test.  See above.
     is_priv => 1,
     code => sub {
       my ($self, $key, $value, $line) = @_;
-      local ($1,$2);
-      if ($value =~ /^(\S+)\s+eval:(.*)$/) {
-        $self->{parser}->add_test ($1, $2, $TYPE_FULL_EVALS);
+      local($1);
+      if ($value !~ s/^(\S+)\s+//) {
+        return $INVALID_VALUE;
+      }
+      my $rulename = $1;
+      if ($value eq '') {
+        return $MISSING_REQUIRED_VALUE;
+      }
+      if ($value =~ /^eval:(.*)$/) {
+        my $fn = $1;
+        if ($fn !~ /^\w+\(.*\)$/) {
+          return $INVALID_VALUE;
+        }
+        $self->{parser}->add_test ($rulename, $fn, $TYPE_FULL_EVALS);
       } else {
-	my @values = split(/\s+/, $value, 2);
-	if (@values != 2) {
-	  return $MISSING_REQUIRED_VALUE;
-	}
-        $self->{parser}->add_test (@values, $TYPE_FULL_TESTS);
+        $self->{parser}->add_test ($rulename, $value, $TYPE_FULL_TESTS);
       }
     }
   });
@@ -3217,6 +3291,24 @@ count towards the final score unless the entire meta-rule matches, give the
 sub-rules names that start with '__' (two underscores).  SpamAssassin will
 ignore these for scoring.
 
+=item meta SYMBOLIC_TEST_NAME ... rules_matching(RULEGLOB) ...
+
+Special function that will expand to list of matching rulenames.  Can be
+used anywhere in expressions.  Argument supports glob style rulename
+matching (* = anything, ? = one character).  Matching is case-sensitive.
+
+For example, this will hit if at least two __FOO_* rule hits:
+
+ body __FOO_1  /xxx/
+ body __FOO_2  /yyy/
+ body __FOO_3  /zzz/
+ meta FOO_META  rules_matching(__FOO_*) >= 2
+
+Which would be the same as:
+
+ meta FOO_META  (__FOO_1 + __FOO_2 + __FOO_3) >= 2
+
+
 =cut
 
   push (@cmds, {
@@ -3225,15 +3317,19 @@ ignore these for scoring.
     is_priv => 1,
     code => sub {
       my ($self, $key, $value, $line) = @_;
-      my @values = split(/\s+/, $value, 2);
-      if (@values != 2) {
+      local($1);
+      if ($value !~ s/^(\S+)\s+//) {
+        return $INVALID_VALUE;
+      }
+      my $rulename = $1;
+      if ($value eq '') {
         return $MISSING_REQUIRED_VALUE;
       }
-      if ($values[1] =~ /\*\s*\*/) {
+      if ($value =~ /\*\s*\*/) {
 	info("config: found invalid '**' or '* *' operator in meta command");
         return $INVALID_VALUE;
       }
-      $self->{parser}->add_test (@values, $TYPE_META_TESTS);
+      $self->{parser}->add_test ($rulename, $value, $TYPE_META_TESTS);
     }
   });
 
@@ -3347,6 +3443,11 @@ For example:
   meta __KAM_HAS_5_URIS (__KAM_COUNT_URIS >= 5)
   meta __KAM_HAS_10_URIS (__KAM_COUNT_URIS >= 10)
   meta __KAM_HAS_15_URIS (__KAM_COUNT_URIS >= 15)
+
+=item  nosubject
+
+Used only for B<body> rules.  If specified, Subject header will not be a
+part of the matched body text.  See I<body> for more info.
 
 =item  ips_only
 
@@ -3541,67 +3642,6 @@ TLDs include things like com, net, org, etc.
 
 =cut
 
-  # DO NOT UPDATE THIS HARDCODED LIST!! It is only as fallback for
-  # transitional period and to be removed later.  TLDs are now maintained in
-  # sa-update 20_aux_tlds.cf.
-  foreach (qw/
-    ac academy accountants active actor ad ae aero af ag agency ai airforce al am an
-    ao aq ar archi army arpa as asia associates at attorney au auction audio autos
-    aw ax axa az ba bar bargains bayern bb bd be beer berlin best bf bg bh bi bid
-    bike bio biz bj black blackfriday blue bm bmw bn bnpparibas bo boo boutique br
-    brussels bs bt build builders business buzz bv bw by bz bzh ca cab camera camp
-    cancerresearch capetown capital caravan cards care career careers cash cat
-    catering cc cd center ceo cern cf cg ch cheap christmas church ci citic city ck
-    cl claims cleaning click clinic clothing club cm cn co codes coffee college
-    cologne com community company computer condos construction consulting
-    contractors cooking cool coop country cr credit creditcard cruises cu cuisinella
-    cv cw cx cy cymru cz dad dance dating day de deals degree democrat dental
-    dentist desi diamonds diet digital direct directory discount dj dk dm dnp do
-    domains durban dz eat ec edu education ee eg email engineer engineering
-    enterprises equipment er es esq estate et eu eus events exchange expert exposed
-    fail farm feedback fi finance financial fish fishing fitness fj fk flights
-    florist fm fo foo foundation fr frl frogans fund furniture futbol ga gal gallery
-    gb gbiz gd ge gent gf gg gh gi gift gifts gives gl glass global globo gm gmail
-    gmo gn gop gov gp gq gr graphics gratis green gripe gs gt gu guide guitars guru
-    gw gy hamburg haus healthcare help here hiphop hiv hk hm hn holdings holiday
-    homes horse host hosting house how hr ht hu id ie il im immo immobilien in
-    industries info ing ink institute insure int international investments io iq ir
-    is it je jetzt jm jo jobs joburg jp juegos kaufen ke kg kh ki kim kitchen kiwi
-    km kn koeln kp kr krd kred kw ky kz la lacaixa land lawyer lb lc lease lgbt li
-    life lighting limited limo link lk loans london lotto lr ls lt ltda lu luxe
-    luxury lv ly ma maison management mango market marketing mc md me media meet
-    melbourne meme menu mg mh miami mil mini mk ml mm mn mo mobi moda moe monash
-    mortgage moscow motorcycles mov mp mq mr ms mt mu museum mv mw mx my mz na
-    nagoya name navy nc ne net network neustar new nf ng ngo nhk ni ninja nl no np
-    nr nra nrw nu nyc nz okinawa om ong onl ooo org organic otsuka ovh pa paris
-    partners parts pe pf pg ph photo photography photos physio pics pictures pink
-    pizza pk pl place plumbing pm pn post pr praxi press pro prod productions
-    properties property ps pt pub pw py qa qpon quebec re realtor recipes red rehab
-    reise reisen ren rentals repair report republican rest restaurant reviews rich
-    rio ro rocks rodeo rs rsvp ru ruhr rw ryukyu sa saarland sarl sb sc sca scb
-    schmidt schule scot sd se services sexy sg sh shiksha shoes si singles sj sk sl
-    sm sn so social software sohu solar solutions soy space spiegel sr st su
-    supplies supply support surf surgery suzuki sv sx sy systems sz tatar tattoo tax
-    tc td technology tel tf tg th tienda tips tirol tj tk tl tm tn to today tokyo
-    tools top town toys tr trade training travel tt tv tw tz ua ug uk university
-    uno uol us uy uz va vacations vc ve vegas ventures versicherung vet vg vi viajes
-    villas vision vlaanderen vn vodka vote voting voto voyage vu wales wang watch
-    webcam website wed wf whoswho wien wiki williamhill works ws wtc wtf xn--1qqw23a
-    xn--3bst00m xn--3ds443g xn--3e0b707e xn--45brj9c xn--4gbrim xn--55qw42g
-    xn--55qx5d xn--6frz82g xn--6qq986b3xl xn--80adxhks xn--80ao21a xn--80asehdb
-    xn--80aswg xn--90a3ac xn--c1avg xn--cg4bki xn--clchc0ea0b2g2a9gcd xn--czr694b
-    xn--czru2d xn--d1acj3b xn--fiq228c5hs xn--fiq64b xn--fiqs8s xn--fiqz9s
-    xn--fpcrj9c3d xn--fzc2c9e2c xn--gecrj9c xn--h2brj9c xn--i1b6b1a6a2e xn--io0a7i
-    xn--j1amh xn--j6w193g xn--kprw13d xn--kpry57d xn--kput3i xn--l1acc
-    xn--lgbbat1ad8j xn--mgb9awbf xn--mgba3a4f16a xn--mgbaam7a8h xn--mgbab2bd
-    xn--mgbayh7gpa xn--mgbbh1a71e xn--mgbc0a9azcg xn--mgberp4a5d4ar xn--mgbx4cd0ab
-    xn--ngbc5azd xn--nqv7f xn--nqv7fs00ema xn--o3cw4h xn--ogbpf8fl xn--p1ai
-    xn--pgbs0dh xn--q9jyb4c xn--rhqv96g xn--s9brj9c xn--ses554g xn--unup4y xn--vhquv
-    xn--wgbh1c xn--wgbl6a xn--xhq521b xn--xkc2al3hye2a xn--xkc2dl3a5ee0h
-    xn--yfro4i67o xn--ygbi2ammx xn--zfr164b xxx xyz yachts yandex ye yokohama
-    youtube yt za zm zone zw
-    /) { $self->{valid_tlds}{lc $_} = 1; }
-
   push (@cmds, {
     setting => 'util_rb_tld',
     is_admin => 1,
@@ -3616,7 +3656,6 @@ TLDs include things like com, net, org, etc.
       foreach (split(/\s+/, $value)) {
         $self->{valid_tlds}{lc $_} = 1;
       }
-      dbg("config: added tld list - $value");
     }
   });
 
@@ -3626,175 +3665,6 @@ This option maintains list of valid 2nd-level TLDs in the RegistryBoundaries
 code.  2TLDs include things like co.uk, fed.us, etc.
 
 =cut
-
-  # DO NOT UPDATE THIS HARDCODED LIST!! It is only as fallback for
-  # transitional period and to be removed later.  TLDs are now maintained in
-  # sa-update 20_aux_tlds.cf.
-  foreach (qw/
-    com.ac edu.ac gov.ac mil.ac net.ac org.ac nom.ad ac.ae co.ae com.ae gov.ae
-    mil.ae name.ae net.ae org.ae pro.ae sch.ae com.af edu.af gov.af net.af
-    co.ag com.ag net.ag nom.ag org.ag com.ai edu.ai gov.ai net.ai off.ai
-    org.ai com.al edu.al gov.al net.al org.al com.an edu.an net.an org.an
-    co.ao ed.ao gv.ao it.ao og.ao pb.ao com.ar edu.ar gov.ar int.ar mil.ar
-    net.ar org.ar e164.arpa in-addr.arpa ip6.arpa iris.arpa uri.arpa urn.arpa
-    ac.at co.at gv.at or.at priv.at act.au asn.au com.au conf.au csiro.au
-    edu.au gov.au id.au info.au net.au nsw.au nt.au org.au otc.au oz.au qld.au
-    sa.au tas.au telememo.au vic.au wa.au com.aw biz.az com.az edu.az gov.az
-    info.az int.az mil.az name.az net.az org.az pp.az co.ba com.ba edu.ba
-    gov.ba mil.ba net.ba org.ba rs.ba unbi.ba unsa.ba com.bb edu.bb gov.bb
-    net.bb org.bb ac.bd com.bd edu.bd gov.bd mil.bd net.bd org.bd ac.be
-    belgie.be dns.be fgov.be gov.bf biz.bh cc.bh com.bh edu.bh gov.bh info.bh
-    net.bh org.bh com.bm edu.bm gov.bm net.bm org.bm com.bn edu.bn net.bn
-    org.bn com.bo edu.bo gob.bo gov.bo int.bo mil.bo net.bo org.bo tv.bo
-    adm.br adv.br agr.br am.br arq.br art.br ato.br bio.br bmd.br cim.br
-    cng.br cnt.br com.br coop.br dpn.br eco.br ecn.br edu.br eng.br esp.br
-    etc.br eti.br far.br fm.br fnd.br fot.br fst.br g12.br ggf.br gov.br
-    imb.br ind.br inf.br jor.br lel.br mat.br med.br mil.br mus.br net.br
-    nom.br not.br ntr.br odo.br org.br ppg.br pro.br psc.br psi.br qsl.br
-    rec.br slg.br srv.br tmp.br trd.br tur.br tv.br vet.br zlg.br com.bs
-    net.bs org.bs com.bt edu.bt gov.bt net.bt org.bt co.bw org.bw gov.by
-    mil.by com.bz net.bz org.bz ab.ca bc.ca gc.ca mb.ca nb.ca nf.ca nl.ca
-    ns.ca nt.ca nu.ca on.ca pe.ca qc.ca sk.ca yk.ca co.ck edu.ck gov.ck net.ck
-    org.ck ac.cn ah.cn bj.cn com.cn cq.cn edu.cn fj.cn gd.cn gov.cn gs.cn
-    gx.cn gz.cn ha.cn hb.cn he.cn hi.cn hk.cn hl.cn hn.cn jl.cn js.cn jx.cn
-    ln.cn mo.cn net.cn nm.cn nx.cn org.cn qh.cn sc.cn sd.cn sh.cn sn.cn sx.cn
-    tj.cn tw.cn xj.cn xz.cn yn.cn zj.cn arts.co com.co edu.co firm.co gov.co
-    info.co int.co mil.co net.co nom.co org.co rec.co web.co lkd.co.im
-    ltd.co.im plc.co.im co.cm com.cm net.cm au.com br.com cn.com de.com eu.com
-    gb.com hu.com no.com qc.com ru.com sa.com se.com uk.com us.com uy.com
-    za.com ac.cr co.cr ed.cr fi.cr go.cr or.cr sa.cr com.cu edu.cu gov.cu
-    inf.cu net.cu org.cu gov.cx ac.cy biz.cy com.cy ekloges.cy gov.cy ltd.cy
-    name.cy net.cy org.cy parliament.cy press.cy pro.cy tm.cy co.dk com.dm
-    edu.dm gov.dm net.dm org.dm art.do com.do edu.do gob.do gov.do mil.do
-    net.do org.do sld.do web.do art.dz asso.dz com.dz edu.dz gov.dz net.dz
-    org.dz pol.dz com.ec edu.ec fin.ec gov.ec info.ec k12.ec med.ec mil.ec
-    net.ec org.ec pro.ec gob.ec co.ee com.ee edu.ee fie.ee med.ee org.ee
-    pri.ee com.eg edu.eg eun.eg gov.eg mil.eg net.eg org.eg sci.eg com.er
-    edu.er gov.er ind.er mil.er net.er org.er com.es edu.es gob.es nom.es
-    org.es biz.et com.et edu.et gov.et info.et name.et net.et org.et aland.fi
-    ac.fj biz.fj com.fj gov.fj id.fj info.fj mil.fj name.fj net.fj org.fj
-    pro.fj school.fj ac.fk co.fk com.fk gov.fk net.fk nom.fk org.fk tm.fr
-    asso.fr nom.fr prd.fr presse.fr com.fr gouv.fr com.ge edu.ge gov.ge mil.ge
-    net.ge org.ge pvt.ge ac.gg alderney.gg co.gg gov.gg guernsey.gg ind.gg
-    ltd.gg net.gg org.gg sark.gg sch.gg com.gh edu.gh gov.gh mil.gh org.gh
-    com.gi edu.gi gov.gi ltd.gi mod.gi org.gi ac.gn com.gn gov.gn net.gn
-    org.gn asso.gp com.gp edu.gp net.gp org.gp com.gr edu.gr gov.gr net.gr
-    org.gr com.gt edu.gt gob.gt ind.gt mil.gt net.gt org.gt com.gu edu.gu
-    gov.gu mil.gu net.gu org.gu com.hk edu.hk gov.hk idv.hk net.hk org.hk
-    com.hn edu.hn gob.hn mil.hn net.hn org.hn com.hr from.hr iz.hr name.hr
-    adult.ht art.ht asso.ht com.ht coop.ht edu.ht firm.ht gouv.ht info.ht
-    med.ht net.ht org.ht perso.ht pol.ht pro.ht rel.ht shop.ht 2000.hu
-    agrar.hu bolt.hu casino.hu city.hu co.hu erotica.hu erotika.hu film.hu
-    forum.hu games.hu hotel.hu info.hu ingatlan.hu jogasz.hu konyvelo.hu
-    lakas.hu media.hu news.hu org.hu priv.hu reklam.hu sex.hu shop.hu sport.hu
-    suli.hu szex.hu tm.hu tozsde.hu utazas.hu video.hu ac.id co.id go.id
-    mil.id net.id or.id sch.id web.id gov.ie ac.il co.il gov.il idf.il k12.il
-    muni.il net.il org.il ac.im co.im gov.im net.im nic.im org.im ac.in co.in
-    edu.in ernet.in firm.in gen.in gov.in ind.in mil.in net.in nic.in org.in
-    res.in com.io gov.io mil.io net.io org.io ac.ir co.ir gov.ir id.ir net.ir
-    org.ir sch.ir edu.it gov.it ac.je co.je gov.je ind.je jersey.je ltd.je
-    net.je org.je sch.je com.jm edu.jm gov.jm net.jm org.jm com.jo edu.jo
-    gov.jo mil.jo net.jo org.jo ac.jp ad.jp aichi.jp akita.jp aomori.jp
-    chiba.jp co.jp ed.jp ehime.jp fukui.jp fukuoka.jp fukushima.jp gifu.jp
-    go.jp gov.jp gr.jp gunma.jp hiroshima.jp hokkaido.jp hyogo.jp ibaraki.jp
-    ishikawa.jp iwate.jp kagawa.jp kagoshima.jp kanagawa.jp kanazawa.jp
-    kawasaki.jp kitakyushu.jp kobe.jp kochi.jp kumamoto.jp kyoto.jp lg.jp
-    matsuyama.jp mie.jp miyagi.jp miyazaki.jp nagano.jp nagasaki.jp nagoya.jp
-    nara.jp ne.jp net.jp niigata.jp oita.jp okayama.jp okinawa.jp or.jp org.jp
-    osaka.jp saga.jp saitama.jp sapporo.jp sendai.jp shiga.jp shimane.jp
-    shizuoka.jp takamatsu.jp tochigi.jp tokushima.jp tokyo.jp tottori.jp
-    toyama.jp utsunomiya.jp wakayama.jp yamagata.jp yamaguchi.jp yamanashi.jp
-    yokohama.jp ac.ke co.ke go.ke ne.ke new.ke or.ke sc.ke com.kg edu.kg
-    gov.kg mil.kg net.kg org.kg com.kh edu.kh gov.kh mil.kh net.kh org.kh
-    per.kh ac.kr busan.kr chungbuk.kr chungnam.kr co.kr daegu.kr daejeon.kr
-    es.kr gangwon.kr go.kr gwangju.kr gyeongbuk.kr gyeonggi.kr gyeongnam.kr
-    hs.kr incheon.kr jeju.kr jeonbuk.kr jeonnam.kr kg.kr kyonggi.kr mil.kr
-    ms.kr ne.kr or.kr pe.kr re.kr sc.kr seoul.kr ulsan.kr com.kw edu.kw gov.kw
-    mil.kw net.kw org.kw com.ky edu.ky gov.ky net.ky org.ky com.kz edu.kz
-    gov.kz mil.kz net.kz org.kz com.la net.la org.la com.lb edu.lb gov.lb
-    mil.lb net.lb org.lb com.lc edu.lc gov.lc net.lc org.lc assn.lk com.lk
-    edu.lk gov.lk grp.lk hotel.lk int.lk ltd.lk net.lk ngo.lk org.lk sch.lk
-    soc.lk web.lk com.lr edu.lr gov.lr net.lr org.lr co.ls org.ls gov.lt
-    mil.lt asn.lv com.lv conf.lv edu.lv gov.lv id.lv mil.lv net.lv org.lv
-    biz.ly com.ly edu.ly gov.ly id.ly med.ly net.ly org.ly plc.ly sch.ly ac.ma
-    co.ma gov.ma net.ma org.ma press.ma asso.mc tm.mc ac.me co.me edu.me
-    gov.me its.me net.me org.me priv.me com.mg edu.mg gov.mg mil.mg nom.mg
-    org.mg prd.mg tm.mg army.mil navy.mil com.mk org.mk com.mm edu.mm gov.mm
-    net.mm org.mm edu.mn gov.mn org.mn com.mo edu.mo gov.mo net.mo org.mo
-    music.mobi weather.mobi co.mp edu.mp gov.mp net.mp org.mp com.mt edu.mt
-    gov.mt net.mt org.mt tm.mt uu.mt co.mu com.mu aero.mv biz.mv com.mv
-    coop.mv edu.mv gov.mv info.mv int.mv mil.mv museum.mv name.mv net.mv
-    org.mv pro.mv ac.mw co.mw com.mw coop.mw edu.mw gov.mw int.mw museum.mw
-    net.mw org.mw com.mx edu.mx gob.mx net.mx org.mx com.my edu.my gov.my
-    mil.my name.my net.my org.my alt.na com.na cul.na edu.na net.na org.na
-    telecom.na unam.na com.nc net.nc org.nc de.net gb.net uk.net ac.ng com.ng
-    edu.ng gov.ng net.ng org.ng sch.ng ac.ni biz.ni com.ni edu.ni gob.ni in.ni
-    info.ni int.ni mil.ni net.ni nom.ni org.ni web.ni fhs.no folkebibl.no
-    fylkesbibl.no herad.no idrett.no kommune.no mil.no museum.no priv.no
-    stat.no tel.no vgs.no com.np edu.np gov.np mil.np net.np org.np biz.nr
-    co.nr com.nr edu.nr fax.nr gov.nr info.nr mob.nr mobil.nr mobile.nr net.nr
-    org.nr tel.nr tlf.nr ac.nz co.nz cri.nz geek.nz gen.nz govt.nz iwi.nz
-    maori.nz mil.nz net.nz org.nz school.nz ac.om biz.om co.om com.om edu.om
-    gov.om med.om mil.om mod.om museum.om net.om org.om pro.om sch.om dk.org
-    eu.org abo.pa ac.pa com.pa edu.pa gob.pa ing.pa med.pa net.pa nom.pa
-    org.pa sld.pa com.pe edu.pe gob.pe mil.pe net.pe nom.pe org.pe com.pf
-    edu.pf org.pf ac.pg com.pg net.pg com.ph edu.ph gov.ph mil.ph net.ph
-    ngo.ph org.ph biz.pk com.pk edu.pk fam.pk gob.pk gok.pk gon.pk gop.pk
-    gos.pk gov.pk net.pk org.pk web.pk art.pl biz.pl com.pl edu.pl gov.pl
-    info.pl mil.pl net.pl ngo.pl org.pl biz.pr com.pr edu.pr gov.pr info.pr
-    isla.pr name.pr net.pr org.pr pro.pr cpa.pro law.pro med.pro com.ps edu.ps
-    gov.ps net.ps org.ps plo.ps sec.ps com.pt edu.pt gov.pt int.pt net.pt
-    nome.pt org.pt publ.pt com.py edu.py gov.py net.py org.py com.qa edu.qa
-    gov.qa net.qa org.qa asso.re com.re nom.re arts.ro com.ro firm.ro info.ro
-    nom.ro nt.ro org.ro rec.ro store.ro tm.ro www.ro ac.rs co.rs edu.rs gov.rs
-    in.rs org.rs ac.ru com.ru edu.ru gov.ru int.ru mil.ru net.ru org.ru pp.ru
-    ac.rw co.rw com.rw edu.rw gouv.rw gov.rw int.rw mil.rw net.rw com.sa
-    edu.sa gov.sa med.sa net.sa org.sa pub.sa sch.sa com.sb edu.sb gov.sb
-    net.sb org.sb com.sc edu.sc gov.sc net.sc org.sc com.sd edu.sd gov.sd
-    info.sd med.sd net.sd org.sd sch.sd tv.sd ab.se ac.se bd.se brand.se c.se
-    d.se e.se f.se fh.se fhsk.se fhv.se g.se h.se i.se k.se komforb.se
-    kommunalforbund.se komvux.se lanarb.se lanbib.se m.se mil.se n.se
-    naturbruksgymn.se o.se org.se parti.se pp.se press.se s.se sshn.se t.se
-    tm.se u.se w.se x.se y.se z.se com.sg edu.sg gov.sg idn.sg net.sg org.sg
-    per.sg com.sh edu.sh gov.sh mil.sh net.sh org.sh edu.sk gov.sk mil.sk
-    co.st com.st consulado.st edu.st embaixada.st gov.st mil.st net.st org.st
-    principe.st saotome.st store.st com.sv edu.sv gob.sv org.sv red.sv com.sy
-    gov.sy net.sy org.sy at.tf bg.tf ca.tf ch.tf cz.tf de.tf edu.tf eu.tf
-    int.tf net.tf pl.tf ru.tf sg.tf us.tf ac.th co.th go.th in.th mi.th net.th
-    or.th ac.tj biz.tj co.tj com.tj edu.tj go.tj gov.tj int.tj mil.tj name.tj
-    net.tj org.tj web.tj com.tn edunet.tn ens.tn fin.tn gov.tn ind.tn info.tn
-    intl.tn nat.tn net.tn org.tn rnrt.tn rns.tn rnu.tn tourism.tn gov.to
-    av.tr bbs.tr bel.tr biz.tr com.tr dr.tr edu.tr gen.tr gov.tr
-    info.tr k12.tr mil.tr name.tr net.tr org.tr pol.tr tel.tr web.tr aero.tt
-    at.tt au.tt be.tt biz.tt ca.tt co.tt com.tt coop.tt de.tt dk.tt edu.tt
-    es.tt eu.tt fr.tt gov.tt info.tt int.tt it.tt jobs.tt mobi.tt museum.tt
-    name.tt net.tt nic.tt org.tt pro.tt se.tt travel.tt uk.tt us.tt co.tv
-    gov.tv club.tw com.tw ebiz.tw edu.tw game.tw gov.tw idv.tw mil.tw net.tw
-    org.tw ac.tz co.tz go.tz ne.tz or.tz cherkassy.ua chernigov.ua
-    chernovtsy.ua ck.ua cn.ua co.ua com.ua crimea.ua cv.ua dn.ua
-    dnepropetrovsk.ua donetsk.ua dp.ua edu.ua gov.ua if.ua in.ua
-    ivano-frankivsk.ua kh.ua kharkov.ua kherson.ua khmelnitskiy.ua kiev.ua
-    kirovograd.ua km.ua kr.ua ks.ua kv.ua lg.ua lugansk.ua lutsk.ua lviv.ua
-    mk.ua net.ua nikolaev.ua od.ua odessa.ua org.ua pl.ua poltava.ua rovno.ua
-    rv.ua sebastopol.ua sumy.ua te.ua ternopil.ua uzhgorod.ua vinnica.ua vn.ua
-    zaporizhzhe.ua zhitomir.ua zp.ua zt.ua ac.ug co.ug go.ug ne.ug or.ug sc.ug
-    ac.uk bl.uk british-library.uk co.uk edu.uk gov.uk icnet.uk jet.uk ltd.uk
-    me.uk mod.uk national-library-scotland.uk net.uk nhs.uk nic.uk nls.uk
-    org.uk parliament.uk plc.uk police.uk sch.uk ak.us al.us ar.us az.us ca.us
-    co.us ct.us dc.us de.us dni.us fed.us fl.us ga.us hi.us ia.us id.us il.us
-    in.us isa.us kids.us ks.us ky.us la.us ma.us md.us me.us mi.us mn.us mo.us
-    ms.us mt.us nc.us nd.us ne.us nh.us nj.us nm.us nsn.us nv.us ny.us oh.us
-    ok.us or.us pa.us ri.us sc.us sd.us tn.us tx.us ut.us va.us vt.us wa.us
-    wi.us wv.us wy.us com.uy edu.uy gub.uy mil.uy net.uy org.uy vatican.va
-    arts.ve bib.ve co.ve com.ve edu.ve firm.ve gov.ve info.ve int.ve mil.ve
-    net.ve nom.ve org.ve rec.ve store.ve tec.ve web.ve co.vi com.vi edu.vi
-    gov.vi net.vi org.vi ac.vn biz.vn com.vn edu.vn gov.vn health.vn info.vn
-    int.vn name.vn net.vn org.vn pro.vn ch.vu com.vu de.vu edu.vu fr.vu net.vu
-    org.vu com.ws edu.ws gov.ws net.ws org.ws com.ye edu.ye gov.ye mil.ye
-    net.ye org.ye ac.za alt.za bourse.za city.za co.za edu.za gov.za law.za
-    mil.za net.za ngo.za nom.za org.za school.za tm.za web.za ac.zm co.zm
-    com.zm edu.zm gov.zm org.zm sch.zm ac.zw co.zw gov.zw org.zw
-    /) { $self->{two_level_domains}{lc $_} = 1; }
 
   push (@cmds, {
     setting => 'util_rb_2tld',
@@ -3819,13 +3689,6 @@ This option maintains list of valid 3rd-level TLDs in the RegistryBoundaries
 code.  3TLDs include things like demon.co.uk, plc.co.im, etc.
 
 =cut
-
-  # DO NOT UPDATE THIS HARDCODED LIST!! It is only as fallback for
-  # transitional period and to be removed later.  TLDs are now maintained in
-  # sa-update 20_aux_tlds.cf.
-  foreach (qw/
-    demon.co.uk esc.edu.ar lkd.co.im plc.co.im
-    /) { $self->{three_level_domains}{lc $_} = 1; }
 
   push (@cmds, {
     setting => 'util_rb_3tld',
@@ -4171,12 +4034,15 @@ from SQL or LDAP, instead of passing the message through unprocessed.
     type => $CONF_TYPE_BOOL,
   });
 
-=item loadplugin PluginModuleName [/path/module.pm]
+=item loadplugin [Mail::SpamAssassin::Plugin::]ModuleName [/path/module.pm]
 
-Load a SpamAssassin plugin module.  The C<PluginModuleName> is the perl module
+Load a SpamAssassin plugin module.  The C<ModuleName> is the perl module
 name, used to create the plugin object itself.
 
-C</path/to/module.pm> is the file to load, containing the module's perl code;
+Module naming is strict, name must only contain alphanumeric characters or
+underscores.  File must have .pm extension.
+
+C</path/module.pm> is the file to load, containing the module's perl code;
 if it's specified as a relative path, it's considered to be relative to the
 current configuration file.  If it is omitted, the module will be loaded
 using perl's search path (the C<@INC> array).
@@ -4195,20 +4061,16 @@ See C<Mail::SpamAssassin::Plugin> for more details on writing plugins.
       }
       my ($package, $path);
       local ($1,$2);
-      if ($value =~ /^(\S+)\s+(\S+)$/) {
+      if ($value =~ /^((?:\w+::){0,10}\w+)(?:\s+(\S+\.pm))?$/i) {
         ($package, $path) = ($1, $2);
-      } elsif ($value =~ /^\S+$/) {
-        ($package, $path) = ($value, undef);
       } else {
 	return $INVALID_VALUE;
       }
-      # is blindly untainting safe?  it is no worse than before
-      $_ = untaint_var($_)  for ($package,$path);
       $self->load_plugin ($package, $path);
     }
   });
 
-=item tryplugin PluginModuleName [/path/module.pm]
+=item tryplugin ModuleName [/path/module.pm]
 
 Same as C<loadplugin>, but silently ignored if the .pm file cannot be found in
 the filesystem.
@@ -4225,15 +4087,11 @@ the filesystem.
       }
       my ($package, $path);
       local ($1,$2);
-      if ($value =~ /^(\S+)\s+(\S+)$/) {
+      if ($value =~ /^((?:\w+::){0,10}\w+)(?:\s+(\S+\.pm))?$/i) {
         ($package, $path) = ($1, $2);
-      } elsif ($value =~ /^\S+$/) {
-        ($package, $path) = ($value, undef);
       } else {
 	return $INVALID_VALUE;
       }
-      # is blindly untainting safe?  it is no worse than before
-      $_ = untaint_var($_)  for ($package,$path);
       $self->load_plugin ($package, $path, 1);
     }
   });
@@ -4460,6 +4318,8 @@ optional, and the default is shown below.
  _TESTSSCORES(,)_  as above, except with scores appended (eg. AWL=-3.0,...)
  _SUBTESTS(,)_     subtests (start with "__") hit separated by ","
                    (or other separator)
+ _SUBTESTSCOLLAPSED(,)_ subtests (start with "__") hit separated by ","
+                   (or other separator) with duplicated rules collapsed
  _DCCB_            DCC's "Brand"
  _DCCR_            DCC's results
  _PYZOR_           Pyzor results
@@ -4467,6 +4327,8 @@ optional, and the default is shown below.
  _LANGUAGES_       possible languages of mail
  _PREVIEW_         content preview
  _REPORT_          terse report of tests hit (for header reports)
+ _SUBJPREFIX_      subject prefix based on rules, to be prepended to Subject
+                   header by SpamAssassin caller
  _SUMMARY_         summary of tests hit for standard report (for body reports)
  _CONTACTADDRESS_  contents of the 'report_contact' setting
  _HEADER(NAME)_    includes the value of a message header.  value is the same
@@ -4598,8 +4460,13 @@ sub new {
 
   # keep descriptions in a slow but space-efficient single-string
   # data structure
-  tie %{$self->{descriptions}}, 'Mail::SpamAssassin::Util::TieOneStringHash'
-    or warn "tie failed";
+  # NOTE: Deprecated usage of TieOneStringHash as of 10/2018, it's an
+  # absolute pig, doubling config parse time, while benchmarks indicate
+  # no difference in resident memory size!
+  $self->{descriptions} = { };
+  #tie %{$self->{descriptions}}, 'Mail::SpamAssassin::Util::TieOneStringHash'
+  #  or warn "tie failed";
+  $self->{subjprefix} = { };
 
   # after parsing, tests are refiled into these hashes for each test type.
   # this allows e.g. a full-text test to be rewritten as a body test in
@@ -4737,7 +4604,7 @@ sub get_rule_value {
 
   # special case rbl_evals since they do not have a priority
   if ($test_type eq 'rbl_evals') {
-    return keys(%{$self->{$test_type}->{$rulename}});
+    return @{$self->{$test_type}->{$rulename}};
   }
 
   if (defined($priority)) {
@@ -4782,19 +4649,24 @@ sub delete_rule {
 sub trim_rules {
   my ($self, $regexp) = @_;
 
+  my ($rec, $err) = compile_regexp($regexp, 0);
+  if (!$rec) {
+    die "config: trim_rules: invalid regexp '$regexp': $err";
+  }
+
   my @all_rules;
 
   foreach my $rule_type ($self->get_rule_types()) {
     push(@all_rules, $self->get_rule_keys($rule_type));
   }
 
-  my @rules_to_keep = grep(/$regexp/, @all_rules);
+  my @rules_to_keep = grep(/$rec/, @all_rules);
 
   if (@rules_to_keep == 0) {
     die "config: trim_rules: all rules excluded, nothing to test\n";
   }
 
-  my @meta_tests    = grep(/$regexp/, $self->get_rule_keys('meta_tests'));
+  my @meta_tests    = grep(/$rec/, $self->get_rule_keys('meta_tests'));
   foreach my $meta (@meta_tests) {
     push(@rules_to_keep, $self->add_meta_depends($meta))
   }
@@ -5011,12 +4883,7 @@ sub maybe_body_only {
 
 sub load_plugin {
   my ($self, $package, $path, $silent) = @_;
-  if ($path) {
-    $path = $self->{parser}->fix_path_relative_to_current_file($path);
-  }
-  # it wouldn't hurt to do some checking on validity of $package
-  # and $path before untainting them
-  $self->{main}->{plugins}->load_plugin(untaint_var($package), $path, $silent);
+  $self->{main}->{plugins}->load_plugin($package, $path, $silent);
 }
 
 sub load_plugin_succeeded {
@@ -5117,6 +4984,9 @@ sub clone {
     elsif ($i eq 'HASH') {
       %{$dest->{$k}} = %{$v};
     }
+    elsif ($i eq 'Regexp') {
+      $dest->{$k} = $v;
+    }
     else {
       # throw a warning for debugging -- should never happen in normal usage
       warn "config: dup unknown type $k, $i\n";
@@ -5175,7 +5045,7 @@ sub new_netset {
 
 sub finish {
   my ($self) = @_;
-  untie %{$self->{descriptions}};
+  #untie %{$self->{descriptions}};
   %{$self} = ();
 }
 
@@ -5197,6 +5067,10 @@ sub feature_bug6558_free { 1 }
 sub feature_edns { 1 }  # supports 'dns_options edns' config option
 sub feature_dns_query_restriction { 1 }  # supported config option
 sub feature_registryboundaries { 1 } # replaces deprecated registrarboundaries
+sub feature_compile_regexp { 1 } # Util::compile_regexp
+sub feature_meta_rules_matching { 1 } # meta rules_matching() expression
+sub feature_subjprefix { 1 } # add subject prefixes rule option
+sub has_tflags_nosubject { 1 } # tflags nosubject
 sub perl_min_version_5010000 { return $] >= 5.010000 }  # perl version check ("perl_version" not neatly backwards-compatible)
 
 ###########################################################################
@@ -5215,8 +5089,8 @@ C<lang pt_BR>, or just the language, e.g. C<lang de>.
 
 =head1 SEE ALSO
 
-C<Mail::SpamAssassin>
-C<spamassassin>
-C<spamd>
+Mail::SpamAssassin(3)
+spamassassin(1)
+spamd(1)
 
 =cut

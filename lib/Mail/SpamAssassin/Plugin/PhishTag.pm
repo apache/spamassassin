@@ -25,7 +25,7 @@ use Errno qw(EBADF);
 use Mail::SpamAssassin;
 use Mail::SpamAssassin::Logger;
 
-our our @ISA = qw(Mail::SpamAssassin::Plugin);
+our @ISA = qw(Mail::SpamAssassin::Plugin);
 
 sub new{
   my ($class, $mailsa)=@_;
@@ -255,7 +255,7 @@ http://umut.topkara.org/PhishTag/PhishTag.cf
 
 Check the list of tests performed by SpamAssassin to modify the
 configuration file to match your needs from 
-http://spamassassin.apache.org/tests.html
+https://spamassassin.apache.org/tests.html
 
 =head1 AUTHOR
 

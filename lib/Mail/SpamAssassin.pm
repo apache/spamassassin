@@ -87,7 +87,7 @@ use Time::HiRes qw(time);
 use Cwd;
 use Config;
 
-our $VERSION = "3.004002";      # update after release (same format as perl $])
+our $VERSION = "3.004003";      # update after release (same format as perl $])
 #our $IS_DEVEL_BUILD = 1;        # 1 for devel build 
 our $IS_DEVEL_BUILD = 0;        # 0 for release versions including rc & pre releases
 
@@ -123,7 +123,7 @@ sub Version {
   return join('-', sprintf("%d.%d.%d", $1, $2, $3), @EXTRA_VERSION);
 }
 
-our $HOME_URL = "http://spamassassin.apache.org/";
+our $HOME_URL = "https://spamassassin.apache.org/";
 
 # note that the CWD takes priority.  This is required in case a user
 # is testing a new version of SpamAssassin on a machine with an older
@@ -429,7 +429,6 @@ sub new {
   }
 
   $self->{conf} ||= new Mail::SpamAssassin::Conf ($self);
-  $self->{registryboundaries} = Mail::SpamAssassin::RegistryBoundaries->new ($self);
   $self->{plugins} = Mail::SpamAssassin::PluginHandler->new ($self);
 
   $self->{save_pattern_hits} ||= 0;
@@ -548,6 +547,8 @@ sub parse {
   my $msg = Mail::SpamAssassin::Message->new({
     message=>$message, parsenow=>$parsenow,
     normalize=>$self->{conf}->{normalize_charset},
+    body_part_scan_size=>$self->{conf}->{body_part_scan_size},
+    rawbody_part_scan_size=>$self->{conf}->{rawbody_part_scan_size},
     master_deadline=>$master_deadline, suppl_attrib=>$suppl_attrib });
 
   # bug 5069: The goal here is to get rendering plugins to do things
@@ -1166,7 +1167,7 @@ sub remove_spamassassin_markup {
   $hdrs =~ s/^\n//;
 
 ###########################################################################
-  # Backward Compatibilty, pre 3.0.x.
+  # Backward Compatibility, pre 3.0.x.
 
   # deal with rewritten headers w/out X-Spam-Prev- versions ...
   $self->init(1);
@@ -1273,7 +1274,7 @@ sub read_scoreonly_config {
 
 =item $f->load_scoreonly_sql ($username)
 
-Read configuration paramaters from SQL database and parse scores from it.  This
+Read configuration parameters from SQL database and parse scores from it.  This
 will only take effect if the perl C<DBI> module is installed, and the
 configuration parameters C<user_scores_dsn>, C<user_scores_sql_username>, and
 C<user_scores_sql_password> are set correctly.
@@ -1299,7 +1300,7 @@ sub load_scoreonly_sql {
 
 =item $f->load_scoreonly_ldap ($username)
 
-Read configuration paramaters from an LDAP server and parse scores from it.
+Read configuration parameters from an LDAP server and parse scores from it.
 This will only take effect if the perl C<Net::LDAP> and C<URI> modules are
 installed, and the configuration parameters C<user_scores_dsn>,
 C<user_scores_ldap_username>, and C<user_scores_ldap_password> are set
@@ -1348,7 +1349,7 @@ plan to fork() or start a new perl interpreter thread to process a message,
 this is suboptimal, as each process/thread will have to perform these actions.
 
 Call this function in the master thread or process to perform the actions
-straightaway, so that the sub-processes will not have to.
+straight away, so that the sub-processes will not have to.
 
 If C<$use_user_prefs> is 0, this will initialise the SpamAssassin
 configuration without reading the per-user configuration file and it will
@@ -2120,14 +2121,22 @@ sub have_plugin {
 
 sub call_plugins {
   my $self = shift;
+  my $subname = shift;
 
   # We could potentially get called after a finish(), so just return.
   return unless $self->{plugins};
 
+  # Use some calls ourself too
+  if ($subname eq 'finish_parsing_end') {
+    # Initialize RegistryBoundaries, now that util_rb_tld etc from config is
+    # read.  Plugins can also now use {valid_tlds_re} to one time compile
+    # regexes in finish_parsing_end.
+    $self->{registryboundaries} = Mail::SpamAssassin::RegistryBoundaries->new ($self);
+  }
+
   # safety net in case some plugin changes global settings, Bug 6218
   local $/ = $/;  # prevent underlying modules from changing the global $/
 
-  my $subname = shift;
   return $self->{plugins}->callback($subname, @_);
 }
 
@@ -2278,8 +2287,8 @@ C<Sys::Syslog>
 
 =head1 MORE DOCUMENTATION
 
-See also E<lt>http://spamassassin.apache.org/E<gt> and
-E<lt>http://wiki.apache.org/spamassassin/E<gt> for more information.
+See also E<lt>https://spamassassin.apache.org/E<gt> and
+E<lt>https://wiki.apache.org/spamassassin/E<gt> for more information.
 
 =head1 SEE ALSO
 
@@ -2290,11 +2299,11 @@ sa-update(1)
 
 =head1 BUGS
 
-See E<lt>http://issues.apache.org/SpamAssassin/E<gt>
+See E<lt>https://issues.apache.org/SpamAssassin/E<gt>
 
 =head1 AUTHORS
 
-The SpamAssassin(tm) Project E<lt>http://spamassassin.apache.org/E<gt>
+The SpamAssassin(tm) Project E<lt>https://spamassassin.apache.org/E<gt>
 
 =head1 COPYRIGHT
 
@@ -2306,6 +2315,6 @@ described in the file C<LICENSE> included with the distribution.
 The latest version of this library is likely to be available from CPAN
 as well as:
 
-  E<lt>http://spamassassin.apache.org/E<gt>
+E<lt>https://spamassassin.apache.org/E<gt>
 
 =cut

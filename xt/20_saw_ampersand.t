@@ -1,4 +1,4 @@
-#!/usr/bin/perl
+#!/usr/bin/perl -T
 
 # detect use of dollar-ampersand somewhere in the perl interpreter;
 # once it is used once, it slows down every regexp match thereafter.
@@ -71,6 +71,7 @@ print "\ntrying net with only local rule plugins\n";
 foreach my $file 
         (<log/localrules.tmp/*.pre>, <log/test_rules_copy/*.pre>) #*/
 {
+  $file = untaint_var($file);
   rename $file, "$file.bak" or die "rename $file failed";
   open IN, "<$file.bak" or die "cannot read $file.bak: $!";
   open OUT, ">$file" or die "cannot write $file: $!";
@@ -97,6 +98,7 @@ my $plugins = q{
   loadplugin Mail::SpamAssassin::Plugin::URIEval
   loadplugin Mail::SpamAssassin::Plugin::WLBLEval
   loadplugin Mail::SpamAssassin::Plugin::VBounce
+  loadplugin Mail::SpamAssassin::Plugin::ReplaceTags
 };
 write_plugin_pre($plugins);
 tryone (0, "");
@@ -165,7 +167,7 @@ tryone (0, "");
 print "\ntrying net with all default non-local rule plugins\n";
 
 # TODO: unportable
-system "perl -pi.bak -e 's/^###loadplugin/loadplugin/g' ".
+untaint_system "perl -pi.bak -e 's/^###loadplugin/loadplugin/g' ".
                 " log/localrules.tmp/*.pre log/test_rules_copy/*.pre";
 
 ($? >> 8 != 0) and die "perl failed";

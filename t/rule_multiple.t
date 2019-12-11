@@ -1,8 +1,8 @@
-#!/usr/bin/perl
+#!/usr/bin/perl -T
 
 use lib '.'; use lib 't';
 use SATest; sa_t_init("rule_multiple");
-use Test::More tests => 20;
+use Test::More tests => 21;
 
 # ---------------------------------------------------------------------------
 
@@ -14,6 +14,7 @@ q{ META_BODY_RULE }, 'body',
 q{ META_RAWBODY_RULE }, 'rawbody',
 q{ META_FULL_RULE }, 'full',
 q{ META_META_RULE }, 'meta',
+q{ META_RULE_6 }, 'meta',
 q{ META_EVAL_RULE }, 'eval',
 
 q{ META_HEADER_RULE_MAX }, 'header_max',
@@ -49,22 +50,22 @@ meta META_HEADER_RULE_2 HEADER_RULE_2 > 1
 
 uri URI_RULE		/WWW.SUPERSITESCENTRAL.COM/i
 tflags URI_RULE	multiple
-meta META_URI_RULE URI_RULE > 1
+meta META_URI_RULE URI_RULE == 3
 
 body BODY_RULE		/WWW.SUPERSITESCENTRAL.COM/i
 tflags BODY_RULE	multiple
-meta META_BODY_RULE BODY_RULE > 2
+meta META_BODY_RULE BODY_RULE == 3
 
 rawbody RAWBODY_RULE	/WWW.SUPERSITESCENTRAL.COM/i
 tflags RAWBODY_RULE	multiple
-meta META_RAWBODY_RULE RAWBODY_RULE > 2
+meta META_RAWBODY_RULE RAWBODY_RULE == 3
 
 body BODY_RULE_2	/WWW.SUPERSITESCENTRAL.COM/i
 meta META_BODY_RULE_2 BODY_RULE_2 > 2
 
 full FULL_RULE		/WWW.SUPERSITESCENTRAL.COM/i
 tflags FULL_RULE	multiple
-meta META_FULL_RULE FULL_RULE > 2
+meta META_FULL_RULE FULL_RULE == 3
 
 full FULL_RULE_2		/WWW.SUPERSITESCENTRAL.COM/i
 meta META_FULL_RULE_2 FULL_RULE_2 > 2
@@ -87,7 +88,7 @@ meta META_URI_RULE_MAX_2 URI_RULE_MAX_2 > 1
 
 body BODY_RULE_MAX	/WWW.SUPERSITESCENTRAL.COM/i
 tflags BODY_RULE_MAX	multiple maxhits=3
-meta META_BODY_RULE_MAX BODY_RULE_MAX > 2
+meta META_BODY_RULE_MAX BODY_RULE_MAX == 3
 
 body BODY_RULE_MAX_2	/WWW.SUPERSITESCENTRAL.COM/i
 tflags BODY_RULE_MAX_2	multiple maxhits=2
@@ -95,7 +96,7 @@ meta META_BODY_RULE_MAX_2 BODY_RULE_MAX_2 > 2
 
 rawbody RAWBODY_RULE_MAX	/WWW.SUPERSITESCENTRAL.COM/i
 tflags RAWBODY_RULE_MAX	multiple maxhits=3
-meta META_RAWBODY_RULE_MAX RAWBODY_RULE_MAX > 2
+meta META_RAWBODY_RULE_MAX RAWBODY_RULE_MAX == 3
 
 rawbody RAWBODY_RULE_MAX_2	/WWW.SUPERSITESCENTRAL.COM/i
 tflags RAWBODY_RULE_MAX_2	multiple maxhits=2
@@ -103,15 +104,16 @@ meta META_RAWBODY_RULE_MAX_2 RAWBODY_RULE_MAX_2 > 2
 
 full FULL_RULE_MAX	/WWW.SUPERSITESCENTRAL.COM/i
 tflags FULL_RULE_MAX	multiple maxhits=3
-meta META_FULL_RULE_MAX FULL_RULE_MAX > 2
+meta META_FULL_RULE_MAX FULL_RULE_MAX == 3
 
 full FULL_RULE_MAX_2	/WWW.SUPERSITESCENTRAL.COM/i
 tflags FULL_RULE_MAX_2	multiple maxhits=2
 meta META_FULL_RULE_MAX_2 FULL_RULE_MAX_2 > 2
 
-
 meta META_RULE		META_BODY_RULE + META_RAWBODY_RULE
-meta META_META_RULE	META_RULE > 1
+meta META_META_RULE	META_RULE == 2
+
+meta META_RULE_6	META_BODY_RULE + META_RAWBODY_RULE == 6
 
 loadplugin myTestPlugin ../../data/testplugin.pm
 header EVAL_RULE	eval:check_return_2()

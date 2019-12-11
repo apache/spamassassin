@@ -616,6 +616,7 @@ combine_args(char *config_file, int argc, char **argv,
 	        fprintf(stderr,"Exceeded max line size (%d) in %s\n",
                         CONFIG_MAX_LINE_SIZE-2, config_file);
 	    }
+	    fclose(config);
 	    return EX_CONFIG;
 	}
 
@@ -629,6 +630,7 @@ combine_args(char *config_file, int argc, char **argv,
             if (*combo_argc >= COMBO_ARGV_SIZE) {
 	        fprintf(stderr,"Exceeded max number of arguments (%d) in %s\n",
 	                COMBO_ARGV_SIZE, config_file);
+		fclose(config);
 	        return EX_CONFIG;
             }
             combo_argv[*combo_argc] = strdup(tok);

@@ -64,7 +64,7 @@ B<Note> that FromNameSpoof detects the "owner" of a domain by the following sear
 By default FromNameSpoof will ignore the TLD when testing if From:addr is spoofed.
 Default 1
 
-  dns_check 1
+  fns_check 1
 
 Check levels:
 
@@ -94,6 +94,7 @@ use in reports, header fields, other plugins, etc.:
 
   _FNSFADDROWNER_
     Actual From:addr detected owner
+
 =head1 EXAMPLE 
 
 header   __PLUGIN_FROMNAME_SPOOF eval:check_fromname_spoof()
@@ -108,7 +109,7 @@ score    FROMNAME_SPOOF_EQUALS_TO 1.2
 use strict;
 
 package Mail::SpamAssassin::Plugin::FromNameSpoof;
-my $VERSION = 0.8;
+my $VERSION = 0.9;
 
 use Mail::SpamAssassin::Plugin;
 use List::Util ();
@@ -161,31 +162,32 @@ sub set_config {
 
   push (@cmds, {
     setting => 'fns_add_addrlist',
-    type => 5,
+    type => $Mail::SpamAssassin::Conf::CONF_TYPE_ADDRLIST,
     code => sub {
-      my($conf, $key, $value, $line) = @_;
+      my($self, $key, $value, $line) = @_;
       local($1,$2);
       if ($value !~ /^ \( (.*?) \) \s+ (.*) \z/sx) {
         return $Mail::SpamAssassin::Conf::MISSING_REQUIRED_VALUE;
       }
       my $listname = "FNS_$1";
       $value = $2;
-      $conf->{parser}->add_to_addrlist ($listname, split(/\s+/, $value));
+      $self->{parser}->add_to_addrlist ($listname, split(/\s+/, lc($value)));
+      $self->{fns_addrlists}{$listname} = 1;
     }
   });
 
   push (@cmds, {
     setting => 'fns_remove_addrlist',
-    type => 5,
+    type => $Mail::SpamAssassin::Conf::CONF_TYPE_ADDRLIST,
     code => sub {
-      my($conf, $key, $value, $line) = @_;
+      my($self, $key, $value, $line) = @_;
       local($1,$2);
       if ($value !~ /^ \( (.*?) \) \s+ (.*) \z/sx) {
         return $Mail::SpamAssassin::Conf::MISSING_REQUIRED_VALUE;
       }
       my $listname = "FNS_$1";
       $value = $2;
-      $conf->{parser}->remove_from_addrlist ($listname, split (/\s+/, $value));
+      $self->{parser}->remove_from_addrlist ($listname, split (/\s+/, $value));
     }
   });
 
@@ -197,29 +199,27 @@ sub set_config {
 
   push (@cmds, {
     setting => 'fns_ignore_dkim',
-    default => [],
-    type => $Mail::SpamAssassin::Conf::CONF_TYPE_STRINGLIST,
+    default => {},
+    type => $Mail::SpamAssassin::Conf::CONF_TYPE_HASH_KEY_VALUE,
     code => sub {
       my ($self, $key, $value, $line) = @_;
       if ($value eq '') {
         return $Mail::SpamAssassin::Conf::MISSING_REQUIRED_VALUE;
       }
-      $self->{fns_ignore_dkim} = {};
-      $self->{fns_ignore_dkim}->{$_} = 1 for (split(/\s+/, $value));
+      $self->{fns_ignore_dkim}->{$_} = 1 foreach (split(/\s+/, lc($value)));
     }
   });
 
   push (@cmds, {
     setting => 'fns_ignore_headers',
-    default => [],
-    type => $Mail::SpamAssassin::Conf::CONF_TYPE_STRINGLIST,
+    default => {},
+    type => $Mail::SpamAssassin::Conf::CONF_TYPE_HASH_KEY_VALUE,
     code => sub {
       my ($self, $key, $value, $line) = @_;
       if ($value eq '') {
         return $Mail::SpamAssassin::Conf::MISSING_REQUIRED_VALUE;
       }
-      $self->{fns_ignore_header} = {};
-      $self->{fns_ignore_header}->{$_} = 1 for (split(/\s+/, $value));
+      $self->{fns_ignore_header}->{$_} = 1 foreach (split(/\s+/, $value));
     }
   });
 
@@ -262,7 +262,7 @@ sub check_fromname_spoof
   my ($self, $pms, $check_lvl) = @_;
   $self->_check_fromnamespoof($pms);
 
-  $check_lvl //= $self->{main}{conf}{fns_check};
+  $check_lvl //= $pms->{conf}->{fns_check};
 
   my @array = (
     ($pms->{fromname_address_different}) ,
@@ -308,6 +308,8 @@ sub _check_fromnamespoof
 
   return if (defined $pms->{fromname_contains_email});
 
+  my $conf = $pms->{conf};
+
   $pms->{fromname_contains_email} = 0;
   $pms->{fromname_address_different} = 0;
   $pms->{fromname_equals_to_addr} = 0;
@@ -316,19 +318,28 @@ sub _check_fromnamespoof
   $pms->{fromname_equals_replyto} = 0;
 
   foreach my $addr (split / /, $pms->get_tag('DKIMDOMAIN') || '') {
-    return 0 if ($self->{main}{conf}{fns_ignore_dkim}{$addr});
+    if ($conf->{fns_ignore_dkim}->{lc($addr)}) {
+      dbg("ignoring, DKIM signed: $addr");
+      return 0;
+    }
   }
 
-  foreach my $iheader (keys %{$self->{main}{conf}{fns_ignore_header}}) {
-    return 0 if ($pms->get($iheader));
+  foreach my $iheader (keys %{$conf->{fns_ignore_header}}) {
+    if ($pms->get($iheader)) {
+      dbg("ignoring, header $iheader found");
+      return 0 if ($pms->get($iheader));
+    }
   }
 
   my $list_refs = {};
 
-  foreach my $conf (keys %{$self->{main}{conf}}) {
-    if ($conf =~ /^FNS_/) {
-      $list_refs->{$conf} = $self->{main}{conf}{$conf};
+  if ($conf->{fns_addrlists}) {
+    my @lists = keys %{$conf->{fns_addrlists}};
+    foreach my $list (@lists) {
+      $list_refs->{$list} = $conf->{$list};
     }
+    s/^FNS_// foreach (@lists);
+    dbg("using addrlists: ".join(', ', @lists));
   }
 
   my %fnd = ();
@@ -341,7 +352,7 @@ sub _check_fromnamespoof
     my $nochar = ($fnd{'addr'} =~ y/A-Za-z0-9//c);
     $nochar -= ($1 =~ y/A-Za-z0-9//c);
 
-    return 0 unless ((length($fnd{'addr'})+$nochar) - length($1) <= $self->{main}{conf}{'fns_extrachars'});
+    return 0 unless ((length($fnd{'addr'})+$nochar) - length($1) <= $conf->{'fns_extrachars'});
 
     $fnd{'addr'} = lc $1;
   } else {
@@ -352,6 +363,7 @@ sub _check_fromnamespoof
 
   $fad{'addr'} = lc $pms->get("From:addr");
   my @toaddrs = $pms->all_to_addrs();
+  return 0 unless @toaddrs;
 
   $tod{'addr'} = lc $toaddrs[0];
 
@@ -389,9 +401,9 @@ sub _check_fromnamespoof
     $pms->set_tag("FNSFNAMEDOMAIN", $fnd{'domain'});
     $pms->set_tag("FNSFADDRDOMAIN", $fad{'domain'});
 
-    dbg("From name spoof: $fnd{'addr'} $fnd{'domain'} $fnd{'owner'}");
-    dbg("Actual From: $fad{'addr'} $fad{'domain'} $fad{'owner'}");
-    dbg("To Address: $tod{'addr'} $tod{'domain'} $tod{'owner'}");
+    dbg("From name spoof: $fnd{addr} $fnd{domain} $fnd{owner}");
+    dbg("Actual From: $fad{addr} $fad{domain} $fad{owner}");
+    dbg("To Address: $tod{addr} $tod{domain} $tod{owner}");
   }
 }
 

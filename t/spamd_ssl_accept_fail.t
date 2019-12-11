@@ -1,4 +1,4 @@
-#!/usr/bin/perl
+#!/usr/bin/perl -T
 # bug 4107
 
 use lib '.'; use lib 't';

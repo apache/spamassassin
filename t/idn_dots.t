@@ -1,4 +1,4 @@
-#!/usr/bin/perl -w
+#!/usr/bin/perl -w -T
 
 # test URIs with UTF8 IDNA-equivalent dots between domains instead of ordinary '.'
 

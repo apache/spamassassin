@@ -397,12 +397,20 @@ sub assemble_regexps {
       foreach my $done (@done_pats, @pats_new) {
         # pattern == existing pattern, or existing pattern is contained by
         # pattern, or pattern is contained in existing pattern
-        if ($pat eq $done || $pat =~ /\Q${done}\E/ || $done =~ /\Q${pat}\E/)
-                                        { $subsumed=1; last; }
+        if ($pat eq $done || $pat =~ /\Q${done}\E/ || $done =~ /\Q${pat}\E/) { 
+          $subsumed=1; 
+          last; 
+        }
         # or one pattern contains the other (but interpreted as a regexp!)
         # this deals with /foo.{0,10} bar/ vs /foo ish bar/
-        if ($pat =~ /$done/) { $subsumed=1; last; }
-        if ($done =~ /$pat/) { $subsumed=1; last; }
+        if ($pat =~ /$done/) { 
+          $subsumed=1; 
+          last; 
+        }
+        if ($done =~ /$pat/) { 
+          $subsumed=1; 
+          last; 
+        }
       }
       next if $subsumed;
 
@@ -445,7 +453,11 @@ sub assemble_regexps {
           $pat =~ s/\Q\[\\t\]\E/\\t/gs;
         }
 
-        print "$opt{ruletype} $opt{ruleprefix}${name}  /$pat/\n";
+        if ($opt{ruletype} eq 'header') {
+          print "$opt{ruletype} $opt{ruleprefix}${name}  ALL =~ /$pat/\n";
+        } else {
+          print "$opt{ruletype} $opt{ruleprefix}${name}  /$pat/\n";
+        }
         $count_out++;
       }
 
@@ -674,8 +686,8 @@ sub expand_with_dots {
 sub ensure_reqpatlength {
   my @ret = @_;
   if ($opt{reqpatlength}) {
-        @ret = grep { (length($_) >= $opt{reqpatlength}) && (length($_) < $opt{maxreqpatlength}) } @ret;
-        return () unless @ret;
+    @ret = grep { (length($_) >= $opt{reqpatlength}) && (length($_) < $opt{maxreqpatlength}) } @ret;
+    return () unless @ret;
   }
   return @ret;
 }

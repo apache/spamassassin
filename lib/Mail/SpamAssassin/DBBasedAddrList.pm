@@ -53,7 +53,7 @@ sub new_checker {
     'locked_file'	=> ''
   };
 
-  my @order = split (' ', $main->{conf}->{auto_whitelist_db_modules});
+  my @order = split(/\s+/, $main->{conf}->{auto_whitelist_db_modules});
   untaint_var(\@order);
   my $dbm_module = Mail::SpamAssassin::Util::first_available_module (@order);
   if (!$dbm_module) {
@@ -125,10 +125,10 @@ sub get_addr_entry {
 	addr			=> $addr,
   };
 
-  $entry->{count} = $self->{accum}->{$addr} || 0;
+  $entry->{msgcount} = $self->{accum}->{$addr} || 0;
   $entry->{totscore} = $self->{accum}->{$addr.'|totscore'} || 0;
 
-  dbg("auto-whitelist: db-based $addr scores ".$entry->{count}.'/'.$entry->{totscore});
+  dbg("auto-whitelist: db-based $addr scores ".$entry->{msgcount}.'/'.$entry->{totscore});
   return $entry;
 }
 
@@ -137,15 +137,15 @@ sub get_addr_entry {
 sub add_score {
     my($self, $entry, $score) = @_;
 
-    $entry->{count} ||= 0;
+    $entry->{msgcount} ||= 0;
     $entry->{addr}  ||= '';
 
-    $entry->{count}++;
+    $entry->{msgcount}++;
     $entry->{totscore} += $score;
 
-    dbg("auto-whitelist: add_score: new count: ".$entry->{count}.", new totscore: ".$entry->{totscore});
+    dbg("auto-whitelist: add_score: new count: ".$entry->{msgcount}.", new totscore: ".$entry->{totscore});
 
-    $self->{accum}->{$entry->{addr}} = $entry->{count};
+    $self->{accum}->{$entry->{addr}} = $entry->{msgcount};
     $self->{accum}->{$entry->{addr}.'|totscore'} = $entry->{totscore};
     return $entry;
 }

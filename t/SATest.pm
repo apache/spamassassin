@@ -56,6 +56,11 @@ BEGIN {
     $sock->close or die "error closing inet6 socket: $!"  if $sock;
     $sock ? 1 : undef;
   };
+
+  # Clean PATH so taint doesn't complain
+  $ENV{'PATH'} = '/bin:/usr/bin:/usr/local/bin';
+  # Remove tainted envs, at least ENV used in FreeBSD
+  delete @ENV{qw(IFS CDPATH ENV BASH_ENV)};
 }
 
 # Set up for testing. Exports (as global vars):
@@ -164,8 +169,8 @@ sub sa_t_init {
                        ($RUNNING_ON_WINDOWS && !$ENV{'SPAMD_HOST'})); 
     $SSL_AVAILABLE = ((!$SKIP_SPAMC_TESTS) &&  # no SSL test if no spamc
                     (!$SKIP_SPAMD_TESTS) &&  # or if no local spamd
-                    (`$spamc -V` =~ /with SSL support/) &&
-                    (`$spamd --version` =~ /with SSL support/));
+                    (untaint_cmd("$spamc -V") =~ /with SSL support/) &&
+                    (untaint_cmd("$spamd --version") =~ /with SSL support/));
   }
   # do not remove prior test results!
   # rmtree ("log");
@@ -174,7 +179,10 @@ sub sa_t_init {
     mkdir ("log", 0755) or die ("Error creating log dir: $!");
   }
   chmod (0755, "log"); # set in case log already exists with wrong permissions
-  system("chacl -B log 2>/dev/null || setfacl -b log 2>/dev/null"); # remove acls that confuse test
+
+  if (!$RUNNING_ON_WINDOWS) {
+    untaint_system("chacl -B log 2>/dev/null || setfacl -b log 2>/dev/null"); # remove acls that confuse test
+  }
 
   rmtree ("log/user_state");
   rmtree ("log/outputdir.tmp");
@@ -242,7 +250,6 @@ sub probably_unused_spamd_port {
 
   my $port;
   my @nstat;
-  local $ENV{'PATH'} = '/bin:/usr/bin:/usr/local/bin';  # must not be tainted
   if (!open(NSTAT, "netstat -a -n 2>&1 |")) {
     # not too bad if failing on some architecture, with some luck should be alright
   } else {
@@ -345,7 +352,7 @@ sub sarun {
   
   my $test_number = test_number();
 
-  system ("$scrargs > log/d.$testname/$test_number $post_redir");
+  untaint_system("$scrargs > log/d.$testname/$test_number $post_redir");
   $sa_exitcode = ($?>>8);
   if ($sa_exitcode != 0) { return undef; }
   &checkfile ("d.$testname/$test_number", $read_sub) if (defined $read_sub);
@@ -382,7 +389,7 @@ sub salearnrun {
 
   my $test_number = test_number();
 
-  system ("$salearnargs > log/d.$testname/$test_number");
+  untaint_system("$salearnargs > log/d.$testname/$test_number");
   $salearn_exitcode = ($?>>8);
   if ($salearn_exitcode != 0) { return undef; }
   &checkfile ("d.$testname/$test_number", $read_sub) if (defined $read_sub);
@@ -430,9 +437,9 @@ sub spamcrun {
   my $test_number = test_number();
 
   if ($capture_stderr) {
-    system ("$spamcargs > log/d.$testname/out.$test_number 2>&1");
+    untaint_system ("$spamcargs > log/d.$testname/out.$test_number 2>&1");
   } else {
-    system ("$spamcargs > log/d.$testname/out.$test_number");
+    untaint_system ("$spamcargs > log/d.$testname/out.$test_number");
   }
 
   $sa_exitcode = ($?>>8);
@@ -474,7 +481,7 @@ sub spamcrun_background {
   (-d "log/d.$testname") or mkdir ("log/d.$testname", 0755);
   
   my $test_number = test_number();
-  system ("$spamcargs > log/d.$testname/bg.$test_number &") and return 0;
+  untaint_system ("$spamcargs > log/d.$testname/bg.$test_number &") and return 0;
 
   1;
 }
@@ -579,7 +586,7 @@ sub start_spamd {
   unlink ($spamd_stdout, $spamd_stderr, $spamd_stdlog, $spamd_pidfile);
   print ("\t${spamd_cmd}\n");
   my $startat = time;
-  system ($spamd_cmd);
+  untaint_system ($spamd_cmd);
 
   $spamd_pid = 0;
   # Find the PID, either in the pidfile or the log... 
@@ -590,7 +597,7 @@ sub start_spamd {
   sleep $wait ;
   while ($spamd_pid <= 0) {
     my $spamdlog = '';
-    my $pidstr = `cat $spamd_pidfile 2>/dev/null` ;
+    my $pidstr = untaint_cmd("cat $spamd_pidfile 2>/dev/null");
     if ($pidstr) {
        chomp $pidstr;
        $spamd_pid = $pidstr;
@@ -635,6 +642,7 @@ sub stop_spamd {
   die "NO_SPAMD_REQUIRED in stop_spamd! oops" if $NO_SPAMD_REQUIRED;
 
   $spamd_pid ||= 0;
+  $spamd_pid = untaint_var($spamd_pid);
   if ( $spamd_pid <= 1) {
     print ("Invalid spamd pid: $spamd_pid. Spamd not started/crashed?\n");
     return 0;
@@ -876,7 +884,7 @@ sub read_config {
     my $v = shift @ARGV;
 
     # Override only allows setting one variable.  Some xt tests need to set more
-    # config variables.  Adding : as a delimeter for config variable and value 
+    # config variables.  Adding : as a delimiter for config variable and value 
     # parameters
 
     @k = split (/:/,$k);
@@ -996,6 +1004,7 @@ sub read_from_pidfile {
     $npid = <PID>;
     if (defined $npid) { chomp $npid; }
     close(PID);
+    $npid = untaint_var($npid);
 
     if (!$npid || $npid < 1) {
       warn "failed to read anything sensible from $f, retrying read";
@@ -1015,7 +1024,7 @@ sub read_from_pidfile {
 sub system_or_die {
   my $cmd = $_[0];
   print ("\t$cmd\n");
-  system($cmd);
+  untaint_system($cmd);
   $? == 0  or die "'$cmd' failed: ".exit_status_str($?,0);
 }
 
@@ -1102,6 +1111,31 @@ sub debug_array {
 
 sub test_number {
   return Test::More->builder->current_test;
+}
+
+# Simple version of untaint_var for internal use
+sub untaint_var {
+    local($1);
+    $_[0] =~ /^(.*)\z/s;
+    return $1;
+}
+
+# untainted system()
+sub untaint_system {
+    my @args;
+    push @args, untaint_var($_) foreach (@_);
+    return system(@args);
+}
+
+# untainted version of `shell command`
+sub untaint_cmd {
+    if (open(CMD, untaint_var($_[0])."|")) {
+      my $stdout = do { local($/); <CMD> };
+      close CMD;
+      return $stdout;
+    } else {
+      return "";
+    }
 }
 
 1;

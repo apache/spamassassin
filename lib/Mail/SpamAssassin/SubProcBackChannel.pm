@@ -168,9 +168,9 @@ __END__
 
 =head1 SEE ALSO
 
-C<Mail::SpamAssassin>
-C<Mail::SpamAssassin::ArchiveIterator>
-C<Mail::SpamAssassin::SpamdPreforkScaling>
-C<spamassassin>
-C<spamd>
-C<mass-check>
+Mail::SpamAssassin(3)
+Mail::SpamAssassin::ArchiveIterator(3)
+Mail::SpamAssassin::SpamdPreforkScaling(3)
+spamassassin(1)
+spamd(1)
+mass-check(1)

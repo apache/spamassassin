@@ -1,4 +1,4 @@
-#!/usr/bin/perl
+#!/usr/bin/perl -T
 
 # Tests for Bug #7591, which is actually a bug seen in the EL7 build of Perl.
 # The real root cause is obscure, so we test for the bug not the Perl version.

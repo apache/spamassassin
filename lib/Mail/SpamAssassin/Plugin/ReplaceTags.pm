@@ -52,6 +52,7 @@ package Mail::SpamAssassin::Plugin::ReplaceTags;
 use Mail::SpamAssassin;
 use Mail::SpamAssassin::Plugin;
 use Mail::SpamAssassin::Logger;
+use Mail::SpamAssassin::Util qw(compile_regexp qr_to_string);
 
 use strict;
 use warnings;
@@ -73,6 +74,16 @@ sub new {
   return $self;
 }
 
+sub finish_parsing_start {
+  my ($self, $opts) = @_;
+
+  # keeps track of replaced rules
+  # don't have $pms in finish_parsing_end() so init this..
+  $self->{replace_rules_done} = {};
+
+  return 1;
+}
+
 sub finish_parsing_end {
   my ($self, $opts) = @_;
 
@@ -82,94 +93,96 @@ sub finish_parsing_end {
   my $start = $conf->{replace_start};
   my $end = $conf->{replace_end};
 
-  # this is the version-specific code
-  for my $type (qw|body_tests rawbody_tests head_tests full_tests uri_tests|) {
-    for my $priority (keys %{$conf->{$type}}) {
-      while (my ($rule, $re) = each %{$conf->{$type}->{$priority}}) {
-        # skip if not listed by replace_rules
-        next unless $conf->{rules_to_replace}{$rule};
+  foreach my $rule (keys %{$conf->{replace_rules}}) {
+    # process rules only once, mark to replace_rules_done,
+    # do NOT delete $conf->{replace_rules}, it's used by BodyRuleExtractor
+    next if exists $self->{replace_rules_done}->{$rule};
+    $self->{replace_rules_done}->{$rule} = 1;
 
-        if (would_log('dbg', 'replacetags') > 1) {
-          dbg("replacetags: replacing $rule: $re");
-        }
+    if (!exists $conf->{test_qrs}->{$rule}) {
+      dbg("replacetags: replace requested for non-existing rule: $rule\n");
+      next;
+    }
 
-        my $passes = 0;
-        my $doagain;
+    my $re = qr_to_string($conf->{test_qrs}->{$rule});
+    next unless defined $re;
+    my $origre = $re;
 
-        do {
-          my $pre_name;
-          my $post_name;
-          my $inter_name;
-          $doagain = 0;
+    my $passes = 0;
+    my $doagain;
 
-          # get modifier tags
-          if ($re =~ s/${start}pre (.+?)${end}//) {
-            $pre_name = $1;
-          }
-          if ($re =~ s/${start}post (.+?)${end}//) {
-            $post_name = $1;
-          }
-          if ($re =~ s/${start}inter (.+?)${end}//) {
-            $inter_name = $1;
-          }
+    do {
+      my $pre_name;
+      my $post_name;
+      my $inter_name;
+      $doagain = 0;
 
-          # this will produce an array of tags to be replaced
-          # for two adjacent tags, an element of "" will be between the two
-          my @re = split(/(<[^<>]+>)/, $re);
-
-          if ($pre_name) {
-            my $pre = $conf->{replace_pre}->{$pre_name};
-            if ($pre) {
-              s{($start.+?$end)}{$pre$1}  for @re;
-            }
-          }
-          if ($post_name) {
-            my $post = $conf->{replace_post}->{$post_name};
-            if ($post) {
-              s{($start.+?$end)}{$1$post}g  for @re;
-            }
-          }
-          if ($inter_name) {
-            my $inter = $conf->{replace_inter}->{$inter_name};
-            if ($inter) {
-              s{^$}{$inter}  for @re;
-            }
-          }
-          for (my $i = 0; $i < @re; $i++) {
-            if ($re[$i] =~ m|$start(.+?)$end|g) {
-              my $tag_name = $1;
-              # if the tag exists, replace it with the corresponding phrase
-              if ($tag_name) {
-                my $replacement = $conf->{replace_tag}->{$tag_name};
-                if ($replacement) {
-                  $re[$i] =~ s|$start$tag_name$end|$replacement|g;
-                  $doagain = 1 if !$doagain && $replacement =~ /<[^>]+>/;
-                }
-              }
-            }
-          }
-
-          $re = join('', @re);
-
-          # do the actual replacement
-          $conf->{$type}->{$priority}->{$rule} = $re;
-
-          if (would_log('dbg', 'replacetags') > 1) {
-            dbg("replacetags: replaced $rule: $re");
-          }
-
-          $passes++;
-        } while $doagain && $passes <= 5;
+      # get modifier tags
+      if ($re =~ s/${start}pre (.+?)${end}//) {
+        $pre_name = $1;
       }
+      if ($re =~ s/${start}post (.+?)${end}//) {
+        $post_name = $1;
+      }
+      if ($re =~ s/${start}inter (.+?)${end}//) {
+        $inter_name = $1;
+      }
+
+      # this will produce an array of tags to be replaced
+      # for two adjacent tags, an element of "" will be between the two
+      my @re = split(/(<[^<>]+>)/, $re);
+
+      if ($pre_name) {
+        my $pre = $conf->{replace_pre}->{$pre_name};
+        if ($pre) {
+          s{($start.+?$end)}{$pre$1}  for @re;
+         }
+      }
+      if ($post_name) {
+        my $post = $conf->{replace_post}->{$post_name};
+        if ($post) {
+          s{($start.+?$end)}{$1$post}g  for @re;
+        }
+      }
+      if ($inter_name) {
+        my $inter = $conf->{replace_inter}->{$inter_name};
+        if ($inter) {
+          s{^$}{$inter}  for @re;
+        }
+      }
+      for (my $i = 0; $i < @re; $i++) {
+        if ($re[$i] =~ m|$start(.+?)$end|g) {
+          my $tag_name = $1;
+          # if the tag exists, replace it with the corresponding phrase
+          if ($tag_name) {
+            my $replacement = $conf->{replace_tag}->{$tag_name};
+            if ($replacement) {
+              $re[$i] =~ s|$start$tag_name$end|$replacement|g;
+              $doagain = 1 if !$doagain && $replacement =~ /<[^>]+>/;
+            }
+          }
+        }
+      }
+
+      $re = join('', @re);
+
+      $passes++;
+    } while $doagain && $passes <= 5;
+
+    if ($re ne $origre) {
+      # do the actual replacement
+      my ($rec, $err) = compile_regexp($re, 0);
+      if (!$rec) {
+        info("replacetags: regexp compilation failed '$re': $err");
+        next;
+      }
+      $conf->{test_qrs}->{$rule} = $rec;
+      #dbg("replacetags: replaced $rule: '$origre' => '$re'");
+      dbg("replacetags: replaced $rule");
+    } else {
+      dbg("replacetags: nothing was replaced in $rule");
     }
   }
-
-  # free this up, if possible
-  if (!$conf->{allow_user_rules}) {
-    delete $conf->{rules_to_replace};
-  }
-
-  dbg("replacetags: done replacing tags");
 }
 
 sub user_conf_parsing_end {
@@ -250,6 +263,7 @@ body, header, uri, full, rawbody tests are supported.
   push(@cmds, {
     setting => 'replace_rules',
     is_priv => 1,
+    default => {},
     type => $Mail::SpamAssassin::Conf::CONF_TYPE_HASH_KEY_VALUE,
     code => sub {
       my ($self, $key, $value, $line) = @_;
@@ -259,8 +273,8 @@ body, header, uri, full, rawbody tests are supported.
       unless ($value =~ /\S+/) {
         return $Mail::SpamAssassin::Conf::INVALID_VALUE;
       }
-      foreach my $rule (split(' ', $value)) {
-        $conf->{rules_to_replace}->{$rule} = 1;
+      foreach my $rule (split(/\s+/, $value)) {
+        $self->{replace_rules}->{$rule} = 1;
       }
     }
   });

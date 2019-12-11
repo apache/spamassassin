@@ -74,6 +74,13 @@ sub new {
 sub load_plugin {
   my ($self, $package, $path, $silent) = @_;
 
+  # Strict name checking
+  if ($package !~ /^(?:\w+::){0,10}\w+$/) {
+    warn "plugin: illegal plugin name, not loading: $package\n";
+    return;
+  }
+  $package = Mail::SpamAssassin::Util::untaint_var($package);
+
   # Don't load the same plugin twice!
   # Do this *before* calling ->new(), otherwise eval rules will be
   # registered on a nonexistent object
@@ -86,6 +93,13 @@ sub load_plugin {
 
   my $ret;
   if ($path) {
+    if ($path !~ /^\S+\.pm/i) {
+      warn "plugin: illegal plugin filename, not loading: $path";
+      return;
+    }
+
+    $path = $self->{main}->{conf}->{parser}->fix_path_relative_to_current_file($path);
+
     # bug 3717:
     # At least Perl 5.8.0 seems to confuse $cwd internally at some point -- we
     # need to use an absolute path here else we get a "File not found" error.

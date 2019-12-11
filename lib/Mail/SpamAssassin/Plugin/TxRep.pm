@@ -225,8 +225,6 @@ sub new {                       # constructor: register the eval rule
   $self->{main}          = $main;
   $self->{conf}          = $main->{conf};
   $self->{factor}        = $main->{conf}->{txrep_factor};
-  $self->{ipv4_mask_len} = $main->{conf}->{txrep_ipv4_mask_len};
-  $self->{ipv6_mask_len} = $main->{conf}->{txrep_ipv6_mask_len};
   $self->register_eval_rule("check_senders_reputation");
   $self->set_config($main->{conf});
 
@@ -683,7 +681,7 @@ the same authorized identity, and will not associate any IP address with it.
 Note: at domains that define the useless SPF +all (pass all), no IP would be
 ever associated with the email address, and all addresses (incl. the froged
 ones) would be treated as coming from the authorized source. However, such
-domains are hopefuly rare, and ask for this kind of treatment anyway.
+domains are hopefully rare, and ask for this kind of treatment anyway.
 
 =back
 
@@ -942,8 +940,7 @@ across all users.
     code         => sub {
         my ($self, $key, $value, $line) = @_;
         unless (defined $value && $value !~ /^$/) {return $Mail::SpamAssassin::Conf::MISSING_REQUIRED_VALUE;}
-        if (-d $value)                            {return $Mail::SpamAssassin::Conf::INVALID_VALUE; }
-        $self->{txrep_path} = $value;
+        $self->{auto_whitelist_path} = $value;
     }
   });
 
@@ -996,7 +993,7 @@ not have any execute bits set (the umask is set to 0111).
         if ($value !~ /^0?[0-7]{3}$/) {
             return $Mail::SpamAssassin::Conf::INVALID_VALUE;
         }
-        $self->{txrep_file_mode} = untaint_var($value);
+        $self->{auto_whitelist_file_mode} = untaint_var($value);
     }
   });
 
@@ -1166,7 +1163,7 @@ DKIM signing domain or the tag 'spf' after the ID in the following way:
 When a message contains both a DKIM signature and an SPF pass, the DKIM
 signature takes the priority, so the record bound to the 'spf' tag won't 
 be checked. Only email addresses and domains can be bound to DKIM or SPF.
-Records of IP adresses and HELO names are always without DKIM/SPF.
+Records of IP addresses and HELO names are always without DKIM/SPF.
 
 In case of dual storage, the black/whitelisting is performed only in the
 default storage.
@@ -1197,7 +1194,7 @@ sub remove_address    {my $self=shift; return $self->_fn_envelope(@_,undef, "rem
 5. No IP checking at signed emails (signature authenticates the email
    instead of the IP address)
 
-6. No IP checking at SPF pass (we assume the domain owner is responsable
+6. No IP checking at SPF pass (we assume the domain owner is responsible
    for all IP's he authorizes to send from, hence we use the same identity
    for all of them)
 
@@ -1524,7 +1521,7 @@ sub check_reputation {
 #--------------------------------------------------------------------------
 
 ###########################################################################
-sub count {my $self=shift;  return (defined $self->{checker})? $self->{entry}->{count}    : undef;}
+sub count {my $self=shift;  return (defined $self->{checker})? $self->{entry}->{msgcount}    : undef;}
 sub total {my $self=shift;  return (defined $self->{checker})? $self->{entry}->{totscore} : undef;}
 ###########################################################################
 
@@ -1541,11 +1538,11 @@ sub get_sender {
   $self->{entry} = $entry;
   $origip        = $origip || 'none';
 
-  if ($entry->{count}<0 || $entry->{count}=~/^(nan|)$/ || $entry->{totscore}=~/^(nan|)$/) {
-    warn "TxRep: resetting bad data for ($addr, $origip), count: $entry->{count}, totscore: $entry->{totscore}\n";
-    $self->{entry}->{count} = $self->{entry}->{totscore} = 0;
+  if ($entry->{msgcount}<0 || $entry->{msgcount}=~/^(nan|)$/ || $entry->{totscore}=~/^(nan|)$/) {
+    warn "TxRep: resetting bad data for ($addr, $origip), count: $entry->{msgcount}, totscore: $entry->{totscore}\n";
+    $self->{entry}->{msgcount} = $self->{entry}->{totscore} = 0;
   }
-  return $self->{entry}->{count};
+  return $self->{entry}->{msgcount};
 }
 
 
@@ -1560,7 +1557,7 @@ sub add_score {
     warn "TxRep: attempt to add a $score to TxRep entry ignored\n";
     return;                                       # don't try to add a NaN
   }
-  $self->{entry}->{count} ||= 0;
+  $self->{entry}->{msgcount} ||= 0;
 
   # performing the dilution aging correction
   if (defined $self->total() && defined $self->count() && defined $self->{txrep_dilution_factor}) {
@@ -1590,10 +1587,10 @@ sub remove_score {
   }
   # no reversal dilution aging correction (not easily possible),
   # just removing the original message score
-  if ($self->{entry}->{count} > 2)
-        {$self->{entry}->{count} -= 2;}
-  else  {$self->{entry}->{count}  = 0;}
-  # substract 2, and add a score; hence decrementing by 1
+  if ($self->{entry}->{msgcount} > 2)
+        {$self->{entry}->{msgcount} -= 2;}
+  else  {$self->{entry}->{msgcount}  = 0;}
+  # subtract 2, and add a score; hence decrementing by 1
   $self->{checker}->add_score($self->{entry}, -1*$score);
 }
 
@@ -1739,7 +1736,7 @@ sub ip_to_awl_key {
   if (!defined $origip) {
     # could not find an IP address to use
   } elsif ($origip =~ /^ (\d{1,3} \. \d{1,3}) \. \d{1,3} \. \d{1,3} $/xs) {
-    my $mask_len = $self->{ipv4_mask_len};
+    my $mask_len = $self->{conf}->{txrep_ipv4_mask_len};
     $mask_len = 16  if !defined $mask_len;
     # handle the default and easy cases manually
     if    ($mask_len == 32) {$result = $origip;}
@@ -1757,7 +1754,7 @@ sub ip_to_awl_key {
            $origip =~
            /^ [0-9a-f]{0,4} (?: : [0-9a-f]{0,4} | \. [0-9]{1,3} ){2,9} $/xsi) {
     # looks like an IPv6 address
-    my $mask_len = $self->{ipv6_mask_len};
+    my $mask_len = $self->{conf}->{txrep_ipv6_mask_len};
     $mask_len = 48  if !defined $mask_len;
     my $origip_obj = NetAddr::IP->new6($origip . '/' . $mask_len);
     if (!defined $origip_obj) {                         # invalid IPv6 address
@@ -1952,7 +1949,7 @@ MEMORY engine stores the entire table in the server memory, achieving
 performance similar to Redis. You would need to care about the replication
 of the RAM table to disk through a cronjob, to avoid loss of data at reboot.
 The InnoDB engine is used by default, offering high scalability (database
-size and concurence of accesses). In conjunction with a high value of
+size and concurrence of accesses). In conjunction with a high value of
 innodb_buffer_pool or with the memcached plugin (MySQL v5.6+) it can also
 offer performance comparable to Redis.
 

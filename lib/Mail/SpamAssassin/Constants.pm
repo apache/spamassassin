@@ -32,7 +32,7 @@ our(@BAYES_VARS, @IP_VARS, @SA_VARS, %EXPORT_TAGS, @EXPORT_OK);
 
 # NOTE: Unless you need these to be available at BEGIN time, you're better with this out of a BEGIN block with a simple our statement.
 BEGIN { 
-    @IP_VARS = qw(
+  @IP_VARS = qw(
 	IP_IN_RESERVED_RANGE IP_PRIVATE LOCALHOST IPV4_ADDRESS IP_ADDRESS
   );
   @BAYES_VARS = qw(
@@ -43,7 +43,8 @@ BEGIN {
 	HARVEST_DNSBL_PRIORITY MBX_SEPARATOR
 	MAX_BODY_LINE_LENGTH MAX_HEADER_KEY_LENGTH MAX_HEADER_VALUE_LENGTH
 	MAX_HEADER_LENGTH ARITH_EXPRESSION_LEXER AI_TIME_UNKNOWN
-	CHARSETS_LIKELY_TO_FP_AS_CAPS MAX_URI_LENGTH
+	CHARSETS_LIKELY_TO_FP_AS_CAPS MAX_URI_LENGTH RULENAME_RE IS_RULENAME
+	META_RULES_MATCHING_RE
   );
 
   %EXPORT_TAGS = (
@@ -72,11 +73,11 @@ use constant DUMP_BACKUP => 8;
 # from them; however we do not, so we should ignore them.
 # 
 # sources:
-#   IANA  = <http://www.iana.org/numbers>,
-#   5735  = <http://tools.ietf.org/html/rfc5735>
-#   6598  = <http://tools.ietf.org/html/rfc6598>
-#   4193  = <http://tools.ietf.org/html/rfc4193>
-#   CYMRU = <http://www.cymru.com/Documents/bogon-list.html>
+#   IANA  = <https://www.iana.org/numbers>,
+#   5735  = <https://tools.ietf.org/html/rfc5735>
+#   6598  = <https://tools.ietf.org/html/rfc6598>
+#   4193  = <https://tools.ietf.org/html/rfc4193>
+#   CYMRU = <https://www.team-cymru.com/bogon-reference.html>
 #
 # This includes:
 #   host-local address space 127.0.0.0/8 and ::1,
@@ -153,7 +154,7 @@ use constant IP_PRIVATE => qr{^(?:
       # 0000 in third up to (including) seventh omitted
       (?:0{1,4}:){2}(?::0{1,4}){0,4}:	0{0,3}1
       |
-      # 0000 in fouth up to (including) seventh omitted
+      # 0000 in fourth up to (including) seventh omitted
       (?:0{1,4}:){3}(?::0{1,4}){0,3}:	0{0,3}1
       |
       # 0000 in fifth up to (including) seventh omitted
@@ -231,7 +232,7 @@ use constant LOCALHOST => qr/
 			# 0000 in third up to (including) seventh omitted
 			(?:0{1,4}:){2}(?::0{1,4}){0,4}:	0{0,3}1
 			|
-			# 0000 in fouth up to (including) seventh omitted
+			# 0000 in fourth up to (including) seventh omitted
 			(?:0{1,4}:){3}(?::0{1,4}){0,3}:	0{0,3}1
 			|
 			# 0000 in fifth up to (including) seventh omitted
@@ -323,7 +324,7 @@ use constant IP_ADDRESS => qr/
 			# 0000 in third up to (including) seventh omitted
 			(?:[a-f0-9]{1,4}:){2}(?::[a-f0-9]{1,4}){1,5}
 			|
-			# 0000 in fouth up to (including) seventh omitted
+			# 0000 in fourth up to (including) seventh omitted
 			(?:[a-f0-9]{1,4}:){3}(?::[a-f0-9]{1,4}){1,4}
 			|
 			# 0000 in fifth up to (including) seventh omitted
@@ -401,5 +402,13 @@ use constant AI_TIME_UNKNOWN => 0;
 use constant CHARSETS_LIKELY_TO_FP_AS_CAPS => qr{[-_a-z0-9]*(?:
 	  koi|jp|jis|euc|gb|big5|isoir|cp1251|windows-1251|georgianps|pt154|tis
 	)[-_a-z0-9]*}ix;
+
+# Allowed rulename format
+use constant RULENAME_RE => qr([_a-zA-Z][_a-zA-Z0-9]{0,127});
+# Exact match
+use constant IS_RULENAME => qr/^${\(RULENAME_RE)}$/;
+
+# meta function rules_matching(), takes argument RULENAME_RE with glob *? characters
+use constant META_RULES_MATCHING_RE => qr/(?<!_)\brules_matching\(\s*([_a-zA-Z*?][_a-zA-Z0-9*?]{0,127})\s*\)/;
 
 1;

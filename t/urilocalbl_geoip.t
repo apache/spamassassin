@@ -1,4 +1,4 @@
-#!/usr/bin/perl
+#!/usr/bin/perl -T
 
 BEGIN {
   if (-e 't/test_dir') { # if we are running "t/rule_tests.t", kluge around ...
@@ -14,11 +14,13 @@ BEGIN {
 use lib '.'; use lib 't';
 use SATest; sa_t_init("urilocalbl");
 
+use constant HAS_CIDR_LITE => eval { require Net::CIDR::Lite; };
 use constant HAS_GEOIP => eval { require Geo::IP; };
-use constant HAS_GEOIP_CONF => eval { Geo::IP->new(GEOIP_MEMORY_CACHE | GEOIP_CHECK_CACHE); };
+use constant HAS_GEOIP_CONF => eval { Geo::IP->new(); };
 
 use Test::More;
 
+plan skip_all => "Net::CIDR::Lite not installed" unless HAS_CIDR_LITE;
 plan skip_all => "Geo::IP not installed" unless HAS_GEOIP;
 plan skip_all => "Geo::IP not configured" unless HAS_GEOIP_CONF;
 plan tests => 3;
@@ -35,6 +37,7 @@ loadplugin Mail::SpamAssassin::Plugin::URILocalBL
 );
 
 tstlocalrules (q{
+  dns_available no
   uri_block_cc X_URIBL_USA us
   describe X_URIBL_USA uri located in USA
   

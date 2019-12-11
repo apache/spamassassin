@@ -137,7 +137,7 @@ sub init {
 }
 
 sub log_message {
-  my ($self, $level, $msg) = @_;
+  my ($self, $level, $msg, $ts) = @_;
 
   return if $self->{disabled};
 
@@ -160,7 +160,8 @@ sub log_message {
   my $timestamp = '';
   my $fmt = $self->{timestamp_fmt};
   if (defined $fmt && $fmt ne '') {  # for completeness, rarely used
-    $timestamp = POSIX::strftime($fmt, localtime(Time::HiRes::time));
+    my $now = defined $ts ? $ts : Time::HiRes::time;
+    $timestamp = POSIX::strftime($fmt, localtime($now));
   }
   $msg = $timestamp . ' ' . $msg  if $timestamp ne '';
 
@@ -220,7 +221,7 @@ sub check_syslog_sigpipe {
     syslog('debug', "%s", "syslog reopened");
     syslog('info', "%s", $msg);
 
-    # now report what happend
+    # now report what happened
     $msg = "SIGPIPE received, reopening log socket";
     dbg("log: $msg");
     syslog('info', "%s", $msg);

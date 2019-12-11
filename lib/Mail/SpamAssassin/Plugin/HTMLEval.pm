@@ -24,7 +24,7 @@ use re 'taint';
 
 use Mail::SpamAssassin::Plugin;
 use Mail::SpamAssassin::Locales;
-use Mail::SpamAssassin::Util qw(untaint_var);
+use Mail::SpamAssassin::Util qw(untaint_var compile_regexp);
 
 our @ISA = qw(Mail::SpamAssassin::Plugin);
 
@@ -57,13 +57,18 @@ sub new {
 
 sub html_tag_balance {
   my ($self, $pms, undef, $rawtag, $rawexpr) = @_;
-  $rawtag =~ /^([a-zA-Z0-9]+)$/; my $tag = $1;
-  $rawexpr =~ /^([\<\>\=\!\-\+ 0-9]+)$/; my $expr = $1;
+
+  return 0 if $rawtag !~ /^([a-zA-Z0-9]+)$/;
+  my $tag = $1;
 
   return 0 unless exists $pms->{html}{inside}{$tag};
 
+  return 0 if $rawexpr !~ /^([\<\>\=\!\-\+ 0-9]+)$/;
+  my $expr = untaint_var($1);
+
   $pms->{html}{inside}{$tag} =~ /^([\<\>\=\!\-\+ 0-9]+)$/;
-  my $val = $1;
+  my $val = untaint_var($1);
+
   return eval "\$val $expr";
 }
 
@@ -119,14 +124,14 @@ sub html_test {
 
 sub html_eval {
   my ($self, $pms, undef, $test, $rawexpr) = @_;
-  my $expr;
-  if ($rawexpr =~ /^[\<\>\=\!\-\+ 0-9]+$/) {
-    $expr = untaint_var($rawexpr);
-  }
-  # workaround bug 3320: wierd perl bug where additional, very explicit
+
+  return 0 if $rawexpr !~ /^([\<\>\=\!\-\+ 0-9]+)$/;
+  my $expr = untaint_var($1);
+
+  # workaround bug 3320: weird perl bug where additional, very explicit
   # untainting into a new var is required.
   my $tainted = $pms->{html}{$test};
-  return unless defined($tainted);
+  return 0 unless defined($tainted);
   my $val = $tainted;
 
   # just use the value in $val, don't copy it needlessly
@@ -135,8 +140,14 @@ sub html_eval {
 
 sub html_text_match {
   my ($self, $pms, undef, $text, $regexp) = @_;
-  for my $string (@{ $pms->{html}{$text} }) {
-    if (defined $string && $string =~ /${regexp}/) {
+  my ($rec, $err) = compile_regexp($regexp, 0);
+  if (!$rec) {
+    warn "htmleval: html_text_match invalid regexp '$regexp': $err";
+    return 0;
+  }
+  foreach my $string (@{$pms->{html}{$text}}) {
+    next unless defined $string;
+    if ($string =~ $rec) {
       return 1;
     }
   }

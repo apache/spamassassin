@@ -1506,7 +1506,7 @@ sub accept_from_any_server_socket {
 
       if ($sockets_access_lock_fh) {
         dbg("spamd: acquiring a lock over select+accept");
-        # with multipe sockets a lock across select+accept is needed, Bug 6996
+        # with multiple sockets a lock across select+accept is needed, Bug 6996
         flock($sockets_access_lock_fh, LOCK_EX)
           or die "Can't acquire lock access to sockets: $!";
         $locked = 1;
@@ -1526,7 +1526,7 @@ sub accept_from_any_server_socket {
         die "no fd ready, fd bit field $sel_mask_str";
       }
 
-      my(@ready_fd) =  # list of file desciptors ready for read
+      my(@ready_fd) =  # list of file descriptors ready for read
         grep(defined $_->{fd} && vec($fdvec, $_->{fd}, 1), @listen_sockets);
       if (!@ready_fd) {
         die "no file descriptors matching a bit field " . unpack('b*',$fdvec);
@@ -3335,7 +3335,7 @@ updated.
 
 Note that spamd always trusts the username passed in (unless
 B<--auth-ident> is used) so clients could maliciously learn messages
-for other users. (This is not ususally a concern with an SQL Bayes
+for other users. (This is not usually a concern with an SQL Bayes
 store as users will typically have read-write access directly to the
 database, and can also use C<sa-learn> with the B<-u> option to
 achieve the same result.)
@@ -3507,6 +3507,7 @@ contains any characters except a-z and 0-9. C<null> disables logging completely
 (used internally).
 
 Examples:
+
 	spamd -s mail                 # use syslog, facility mail (default)
 	spamd -s ./mail               # log to file ./mail
 	spamd -s stderr 2>/dev/null   # log to stderr, throw messages away
@@ -3833,7 +3834,7 @@ C<Mail::SpamAssassin>
 
 =head1 AUTHORS
 
-The SpamAssassin(tm) Project (http://spamassassin.apache.org/)
+The SpamAssassin(tm) Project (https://spamassassin.apache.org/)
 
 =head1 LICENSE
 

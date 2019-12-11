@@ -45,7 +45,7 @@ CREATE TABLE awl (
   username varchar(100) NOT NULL default '',
   email varchar(255) NOT NULL default '',
   ip varchar(40) NOT NULL default '',
-  count int(11) NOT NULL default '0',
+  msgcount int(11) NOT NULL default '0',
   totscore float NOT NULL default '0',
   signedby varchar(255) NOT NULL default '',
   PRIMARY KEY (username,email,signedby,ip)
@@ -191,7 +191,7 @@ sub get_addr_entry {
 
   my $entry = { addr     => $addr,
                 exists_p => 0,
-                count    => 0,
+                msgcount    => 0,
                 totscore => 0,
                 signedby => $signedby,
               };
@@ -200,7 +200,7 @@ sub get_addr_entry {
 
   return $entry  unless $email ne '' && (defined $ip || defined $signedby);
 
-  my $sql = "SELECT count, totscore FROM $self->{tablename} " .
+  my $sql = "SELECT msgcount, totscore FROM $self->{tablename} " .
             "WHERE username = ? AND email = ?";
   my @args = ( $email );
   if (!$self->{_with_awl_signer}) {
@@ -225,7 +225,7 @@ sub get_addr_entry {
   if (!$rc) { # there was an error, but try to go on
     info("auto-whitelist: sql-based get_addr_entry %s: SQL error: %s",
          join('|',@args), $sth->errstr);
-    $entry->{count} = 0;
+    $entry->{msgcount} = 0;
     $entry->{totscore} = 0;
   }
   else {
@@ -234,8 +234,8 @@ sub get_addr_entry {
     # how to combine data if there are several entries (like signed by
     # an author domain and by a remailer)?  for now just take an average
     while ( defined($aryref = $sth->fetchrow_arrayref()) ) {
-      if (defined $entry->{count} && defined $aryref->[1]) {
-        $entry->{count} = $aryref->[0];
+      if (defined $entry->{msgcount} && defined $aryref->[1]) {
+        $entry->{msgcount} = $aryref->[0];
         $entry->{totscore} = $aryref->[1];
       }
       $entry->{exists_p} = 1;
@@ -247,8 +247,8 @@ sub get_addr_entry {
   }
   $sth->finish();
 
-  dbg("auto-whitelist: sql-based %s scores %s, count %s",
-      join('|',@args), $entry->{totscore}, $entry->{count});
+  dbg("auto-whitelist: sql-based %s scores %s, msgcount %s",
+      join('|',@args), $entry->{totscore}, $entry->{msgcount});
 
   return $entry;
 }
@@ -275,7 +275,7 @@ sub add_score {
   
   my ($email, $ip) = $self->_unpack_addr($entry->{addr});
 
-  $entry->{count} += 1;
+  $entry->{msgcount} += 1;
   $entry->{totscore} += $score;
   my $signedby = $entry->{signedby};
   
@@ -286,7 +286,7 @@ sub add_score {
 
   my $inserted = 0;
 
-  { my @fields = qw(username email ip count totscore);
+  { my @fields = qw(username email ip msgcount totscore);
     my @signedby;
     if ($self->{_with_awl_signer}) {
       push(@fields, 'signedby');
@@ -327,9 +327,9 @@ sub add_score {
     # insert failed, assume primary key constraint, so try the update
 
     my $sql = "UPDATE $self->{tablename} ".
-              "SET count = ?, totscore = totscore + ? ".
+              "SET msgcount = ?, totscore = totscore + ? ".
               "WHERE username = ? AND email = ?";
-    my(@args) = ($entry->{count}, $score, $self->{_username}, $email);
+    my(@args) = ($entry->{msgcount}, $score, $self->{_username}, $email);
     if ($self->{_with_awl_signer}) {
       my @signedby = !defined $signedby ? () : split(' ', lc $signedby);
       if (!@signedby) {
@@ -352,8 +352,8 @@ sub add_score {
            join('|',@args), $sth->errstr);
     } else {
       dbg("auto-whitelist: sql-based add_score/update ".
-          "new count: %s, new totscore: %s for %s",
-          $entry->{count}, $entry->{totscore}, join('|',@args));
+          "new msgcount: %s, new totscore: %s for %s",
+          $entry->{msgcount}, $entry->{totscore}, join('|',@args));
       $entry->{exists_p} = 1;
     }
   }

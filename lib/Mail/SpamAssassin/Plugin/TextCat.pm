@@ -29,9 +29,10 @@ This plugin will try to guess the language used in the message body text.
 
 You can use the "ok_languages" directive to set which languages are
 considered okay for incoming mail and if the guessed language is not okay,
-C<UNWANTED_LANGUAGE_BODY> is triggered.
+C<UNWANTED_LANGUAGE_BODY> is triggered. Alternatively you can use the
+X-Languages metadata header directly in rules.
 
-It will always add the results to a "X-Language" name-value pair in the
+It will always add the results to a "X-Languages" name-value pair in the
 message metadata data structure. This may be useful as Bayes tokens and
 can also be used in rules for scoring. The results can also be added to
 marked-up messages using "add_header", with the _LANGUAGES_ tag. See
@@ -42,6 +43,14 @@ In that case, no action is taken.
 
 You can use _TEXTCATRESULTS_ tag to view the internal ngram-scoring, it
 might help fine-tuning settings.
+
+Examples of using X-Languages header directly in rules:
+
+ header OK_LANGS X-Languages =~ /\ben\b/
+ score OK_LANGS -1
+
+ header BAD_LANGS X-Languages =~ /\b(?:ja|zh)\b/
+ score BAD_LANGS 1
 
 =cut
 
@@ -542,8 +551,8 @@ sub extract_metadata {
   if ($len >= 256) {
     # generate list of languages to skip
     my %skip;
-    $skip{$_} = 1 for split(' ', $opts->{conf}->{inactive_languages});
-    delete $skip{$_} for split(' ', $opts->{conf}->{ok_languages});
+    $skip{$_} = 1 for split(/\s+/, $opts->{conf}->{inactive_languages});
+    delete $skip{$_} for split(/\s+/, $opts->{conf}->{ok_languages});
     dbg("textcat: classifying, skipping: " . join(" ", keys %skip));
     @matches = classify(\$body, $opts, %skip);
   }
@@ -565,7 +574,7 @@ sub check_language {
 
   my $msg = $scan->{msg};
 
-  my @languages = split(' ', $scan->{conf}->{ok_languages});
+  my @languages = split(/\s+/, $scan->{conf}->{ok_languages});
 
   if (grep { $_ eq "all" } @languages) {
     return 0;
@@ -603,7 +612,7 @@ sub check_language {
 sub check_body_8bits {
   my ($self, $scan, $body) = @_;
 
-  my @languages = split(' ', $scan->{conf}->{ok_languages});
+  my @languages = split(/\s+/, $scan->{conf}->{ok_languages});
 
   for (@languages) {
     return 0 if $_ eq "all";

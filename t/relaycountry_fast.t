@@ -1,4 +1,4 @@
-#!/usr/bin/perl
+#!/usr/bin/perl -T
 
 BEGIN {
   if (-e 't/test_dir') { # if we are running "t/rule_tests.t", kluge around ...
@@ -28,15 +28,15 @@ loadplugin Mail::SpamAssassin::Plugin::RelayCountry
 ");
 
 tstprefs ("
-        $default_cf_lines
+        dns_available no
         country_db_type Fast
         add_header all Relay-Country _RELAYCOUNTRY_
         ");
 
 # Check for country of gmail.com mail server
 %patterns = (
-        q{ X-Spam-Relay-Country: US },
+        q{ X-Spam-Relay-Country: US }, '',
             );
 
-ok sarun ("-t < data/spam/relayUS.eml", \&patterns_run_cb);
+ok sarun ("-L -t < data/spam/relayUS.eml", \&patterns_run_cb);
 ok_all_patterns();

@@ -1,4 +1,4 @@
-#!/usr/bin/perl
+#!/usr/bin/perl -w -T
 
 # supporting tests for: Bug 6362 - Change urirhssub mask syntax
 
@@ -332,9 +332,8 @@ if (!$pid) {  # child
 sleep 1;
 
 $spamassassin_obj = Mail::SpamAssassin->new({
-# rules_filename      => "$prefix/t/log/test_rules_copy",
-# require_rules       => 1,
-  rules_filename      => "/dev/null",
+  rules_filename      => "$prefix/t/log/test_rules_copy",
+  require_rules       => 1,
   site_rules_filename => "$prefix/t/log/localrules.tmp",
   userprefs_filename  => "$prefix/masses/spamassassin/user_prefs",
   post_config_text    => $local_conf,

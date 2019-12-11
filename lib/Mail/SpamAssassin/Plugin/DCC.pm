@@ -47,19 +47,19 @@ The DCC or Distributed Checksum Clearinghouse is a system of servers
 collecting and counting checksums of millions of mail messages.
 The counts can be used by SpamAssassin to detect and filter spam.
 
-See http://www.dcc-servers.net/dcc/ for more information about DCC.
+See https://www.dcc-servers.net/dcc/ for more information about DCC.
 
 Note that DCC is disabled by default in C<v310.pre> because its use requires
 software that is not distributed with SpamAssassin and that has license
 restrictions for certain commercial uses.
-See the DCC license at http://www.dcc-servers.net/dcc/LICENSE for details.
+See the DCC license at https://www.dcc-servers.net/dcc/LICENSE for details.
 
 Enable it by uncommenting the "loadplugin Mail::SpamAssassin::Plugin::DCC"
 confdir/v310.pre or by adding this line to your local.pre.  It might also
 be necessary to install a DCC package, port, rpm, or equivalent from your
 operating system distributor or a tarball from the primary DCC source
-at http://www.dcc-servers.net/dcc/#download
-See also http://www.dcc-servers.net/dcc/INSTALL.html
+at https://www.dcc-servers.net/dcc/#download
+See also https://www.dcc-servers.net/dcc/INSTALL.html
 
 =head1 TAGS
 
@@ -167,7 +167,7 @@ See http://www.rhyolite.com/dcc/reputations.html
 You C<must> whitelist your trusted relays or MX servers with MX or
 MXDCC lines in /var/dcc/whiteclnt as described in the main DCC man page
 to avoid seeing your own MX servers as sources of bulk mail.
-See http://www.dcc-servers.net/dcc/dcc-tree/dcc.html#White-and-Blacklists
+See https://www.dcc-servers.net/dcc/dcc-tree/dcc.html#White-and-Blacklists
 The default is C<90>.
 
 =cut
@@ -443,7 +443,7 @@ sub find_dcc_home {
   my $conf = $self->{main}->{conf};
 
 
-  # Get the DCC software version for talking to dccifd and formating the
+  # Get the DCC software version for talking to dccifd and formatting the
   # dccifd options and the built-in DCC homedir.  Use -q to prevent delays.
   my $cdcc_home;
   my $cdcc = $self->dcc_pgm_path('cdcc');
@@ -485,7 +485,7 @@ sub find_dcc_home {
     if ($1 < 3 || ($1 == 3 && $2 < 50)) {
       info("dcc: DCC version $self->{dcc_version} is years old, ".
            "obsolete, and likely to cause problems.  ".
-           "See http://www.dcc-servers.net/dcc/old-versions.html");
+           "See https://www.dcc-servers.net/dcc/old-versions.html");
     }
     $self->{dccifd_lookup_options} = "header " . $opts;
     $self->{dccifd_report_options} = "header spam " . $opts;
@@ -979,7 +979,6 @@ sub check_post_learn {
   # Fall back on dccifd or dccproc without saved checksums or dccsight.
   # get_dcc_interface() was called when the message was checked
 
-  # is getting the full text this way kosher?  Is get_pristine() public?
   my $fulltext = $permsgstatus->{msg}->get_pristine();
   my $envelope = $permsgstatus->{relays_external}->[0];
   my ($raw_x_dcc, $cksums) = $self->ask_dcc("dcc: learn:", $permsgstatus,

@@ -1,6 +1,6 @@
 #
 # Author: Giovanni Bechis <gbechis@apache.org>
-# Copyright 2018 Giovanni Bechis
+# Copyright 2018,2019 Giovanni Bechis
 #
 # <@LICENSE>
 # Licensed to the Apache Software Foundation (ASF) under one or more
@@ -53,7 +53,7 @@ To avoid download limits a registration is required.
 package Mail::SpamAssassin::Plugin::Phishing;
 use strict;
 use warnings;
-my $VERSION = 1.0;
+my $VERSION = 1.1;
 
 use Errno qw(EBADF);
 use Mail::SpamAssassin::Plugin;
@@ -92,40 +92,28 @@ sub set_config {
     $conf->{parser}->register_commands(\@cmds);
 }
 
-#prepare the plugin
-sub check_start{
-  my ($self, $params) = @_;
-  my $pms = $params->{permsgstatus};
-
-  #initialize the PHISHING data structure for 
-  #saving configuration information
-  $pms->{PHISHING} = {};
-  $pms->{PHISHING}->{phishurl} = [];
-  $pms->{PHISHING}->{phishdomain} = [];
-  $pms->{PHISHING}->{phishinfo} = {};
-
-  #read the configuration info
-  $self->_read_configfile($params);
+sub finish_parsing_end {
+  my ($self, $opts) = @_;
+  $self->_read_configfile($self);
 }
 
 sub _read_configfile {
-  my ($self, $params) = @_;
-  my $pms = $params->{permsgstatus};
+  my ($self) = @_;
+  my $conf = $self->{main}->{registryboundaries}->{conf};
   my @phtank_ln;
 
   local *F;
-  if ( defined($pms->{conf}->{phishing_openphish_feed}) && ( -f $pms->{conf}->{phishing_openphish_feed} ) ) {
-    open(F, '<', $pms->{conf}->{phishing_openphish_feed});
+  if ( defined($conf->{phishing_openphish_feed}) && ( -f $conf->{phishing_openphish_feed} ) ) {
+    open(F, '<', $conf->{phishing_openphish_feed});
     for ($!=0; <F>; $!=0) {
         chomp;
         #lines that start with pound are comments
         next if(/^\s*\#/);
-          my $phishdomain = $self->{main}->{registryboundaries}->uri_to_domain($_);
-          if ( defined $phishdomain ) {
-            push @{$pms->{PHISHING}->{phishurl}}, $_;
-            push @{$pms->{PHISHING}->{phishdomain}}, $phishdomain;
-            push @{$pms->{PHISHING}->{phishinfo}->{$phishdomain}}, "OpenPhish";
-          }
+        my $phishdomain = $self->{main}->{registryboundaries}->uri_to_domain($_);
+        if ( defined $phishdomain ) {
+          push @{$self->{PHISHING}->{$_}->{phishdomain}}, $phishdomain;
+          push @{$self->{PHISHING}->{$_}->{phishinfo}->{$phishdomain}}, "OpenPhish";
+        }
     }
 
     defined $_ || $!==0  or
@@ -134,8 +122,8 @@ sub _read_configfile {
     close(F) or die "error closing config file: $!";
   }
 
-  if ( defined($pms->{conf}->{phishing_phishtank_feed}) && (-f $pms->{conf}->{phishing_phishtank_feed} ) ) {
-    open(F, '<', $pms->{conf}->{phishing_phishtank_feed});
+  if ( defined($conf->{phishing_phishtank_feed}) && (-f $conf->{phishing_phishtank_feed} ) ) {
+    open(F, '<', $conf->{phishing_phishtank_feed});
     for ($!=0; <F>; $!=0) {
         #skip first line
         next if ( $. eq 1);
@@ -144,19 +132,12 @@ sub _read_configfile {
         next if(/^\s*\#/);
 
         @phtank_ln = split(/,/, $_);
-
-        # XXX Exclude a Phishing category
-        #
-        # Count commas to get last field
-        # my $cnt_comma = ($_ =~ tr/\,//);
-        # next if( $phtank_ln[$cnt_comma] eq "Other" );
-
         $phtank_ln[1] =~ s/\"//g;
+
         my $phishdomain = $self->{main}->{registryboundaries}->uri_to_domain($phtank_ln[1]);
         if ( defined $phishdomain ) {
-          push @{$pms->{PHISHING}->{phishurl}}, $phtank_ln[1];
-          push @{$pms->{PHISHING}->{phishdomain}}, $phishdomain;
-          push @{$pms->{PHISHING}->{phishinfo}->{$phishdomain}}, "PhishTank";
+          push @{$self->{PHISHING}->{$phtank_ln[1]}->{phishdomain}}, $phishdomain;
+          push @{$self->{PHISHING}->{$phtank_ln[1]}->{phishinfo}->{$phishdomain}}, "PhishTank";
         }
     }
 
@@ -170,15 +151,11 @@ sub _read_configfile {
 sub check_phishing {
   my ($self, $pms) = @_;
 
-  my $desc;
   my $feedname;
   my $domain;
   my $uris = $pms->get_uri_detail_list();
 
   my $rulename = $pms->get_current_eval_rule_name();
-  if (defined $pms->{conf}->{descriptions}->{$rulename}) {
-    $desc = $pms->{conf}->{descriptions}->{$rulename};
-  }
 
   while (my($uri, $info) = each %{$uris}) {
     # we want to skip mailto: uris
@@ -189,14 +166,13 @@ sub check_phishing {
     if (($info->{types}->{a}) || ($info->{types}->{parsed})) {
       # check url
       foreach my $cluri (@{$info->{cleaned}}) {
-        if (length $cluri) {
-           if ( grep { $cluri eq $_ } @{$pms->{PHISHING}->{phishurl}} ) {
-             $domain = $self->{main}->{registryboundaries}->uri_to_domain($cluri);
-             $feedname = $pms->{PHISHING}->{phishinfo}->{$domain}[0];
-             dbg("HIT! $domain [$cluri] found in $feedname feed");
-             $pms->got_hit($rulename, "", description => $desc . " $feedname ($domain)", ruletype => 'eval');
-             return 1;
-           }
+        if ( exists $self->{PHISHING}->{$cluri} ) {
+          $domain = $self->{main}->{registryboundaries}->uri_to_domain($cluri);
+          $feedname = $self->{PHISHING}->{$cluri}->{phishinfo}->{$domain}[0];
+          dbg("HIT! $domain [$cluri] found in $feedname feed");
+          $pms->test_log("$feedname ($domain)");
+          $pms->got_hit($rulename, "", ruletype => 'eval');
+          return 1;
         }
       }
     }

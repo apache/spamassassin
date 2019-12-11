@@ -34,10 +34,12 @@ Mail::SpamAssassin::Plugin::WhiteListSubject - whitelist by Subject header
 
 =head1 DESCRIPTION
 
-This SpamAssassin plugin module provides eval tests for whitelisting and blacklisting
-particular strings in the Subject header.  The value for whitelist_subject or
-blacklist_subject are strings which may contain file -glob -style patterns,
-similar to the other whitelist_* config options.
+This SpamAssassin plugin module provides eval tests for whitelisting and
+blacklisting particular strings in the Subject header. String will match
+anywhere in the subject. The value for whitelist_subject or blacklist_subject
+are strings which may contain file -glob -style patterns, similar to the
+other whitelist_* config options. Note that each subject/string must be a
+separate *_subject command, all whitespace is included in the string.
 
 =cut
 

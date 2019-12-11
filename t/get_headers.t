@@ -1,4 +1,4 @@
-#!/usr/bin/perl -w
+#!/usr/bin/perl -w -T
 
 BEGIN {
   if (-e 't/test_dir') { # if we are running "t/rule_tests.t", kluge around ...
@@ -21,7 +21,7 @@ use lib '.'; use lib 't';
 use SATest; sa_t_init("get_headers");
 use Mail::SpamAssassin;
 
-use Test::More tests => 16;
+use Test::More tests => 22;
 
 ##############################################
 
@@ -65,12 +65,14 @@ To6: Foo Blah <jm@foo>
 To7: "Foo Blah" <jm@foo>
 To8: "'Foo Blah'" <jm@foo>
 To9: "_$B!z8=6b$=$N>l$GEv$?$j!*!zEv_(B_$B$?$k!*!)$/$8!z7|>^%\%s%P!<!z_(B" <jm@foo>
-To10: "Some User" <"Some User"@foo>
+To10: "Some User" <"Another User"@foo>
+To11: "Some User"@foo
+To12: "Some User <jm@bar>" <jm@foo>
+To13: "Some User <\"Some User\"@bar>" <jm@foo>
 Hdr1:    foo  
   bar
 	baz 
   
-To11: "Some User"@foo
 To_bug5201_a: =?ISO-2022-JP?B?GyRCQjw+ZRsoQiAbJEI1V0JlGyhC?= <jm@foo>
 To_bug5201_b: =?ISO-2022-JP?B?GyRCNiVHTyM3JSQlcyU1JSQlQCE8PnBKcxsoQg==?= <jm@foo>
 To_bug5201_c: "joe+<blah>@example.com"
@@ -88,8 +90,14 @@ ok(try('To6:addr', 'jm@foo'));
 ok(try('To7:addr', 'jm@foo'));
 ok(try('To8:addr', 'jm@foo'));
 ok(try('To9:addr', 'jm@foo'));
-ok(try('To10:addr', '"Some User"@foo'));
+ok(try('To10:addr', '"Another User"@foo'));
+ok(try('To10:name', 'Some User'));
 ok(try('To11:addr', '"Some User"@foo'));
+ok(try('To11:name', ''));
+ok(try('To12:addr', 'jm@foo'));
+ok(try('To12:name', 'Some User <jm@bar>'));
+ok(try('To13:addr', 'jm@foo'));
+ok(try('To13:name', 'Some User <"Some User"@bar>'));
 ok(try('Hdr1', "foo   bar baz\n"));
 ok(try('Hdr1:raw', "    foo  \n  bar\n\tbaz \n  \n"));
 ok(try('To_bug5201_a:addr', 'jm@foo'));

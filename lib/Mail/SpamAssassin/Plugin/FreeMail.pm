@@ -1,95 +1,3 @@
-package Mail::SpamAssassin::Plugin::FreeMail;
-use strict;
-use warnings;
-my $VERSION = 2.002;
-
-### About:
-#
-# If From-address is freemail, and Reply-To or address found in mail body is
-# a different freemail address, return success. Good sign of Nigerian scams
-# etc. Test idea from Marc Perkel.
-#
-# Also separate functions to check various portions of message for freemails.
-#
-
-### Install:
-#
-# Please add loadplugin to init.pre (so it's loaded before cf files!):
-#
-# loadplugin Mail::SpamAssassin::Plugin::FreeMail FreeMail.pm
-#
-
-### Supported .cf clauses:
-#
-# freemail_domains domain ...
-#
-#    List of domains to be used in checks.
-#
-#    Regexp is not supported, but following wildcards work:
-#
-#    ? for single character (does not match a dot)
-#    * for multiple characters (does not match a dot)
-#
-#    For example:
-#    freemail_domains hotmail.com hotmail.co.?? yahoo.* yahoo.*.*
-#
-# freemail_whitelist email/domain ...
-#
-#    Emails or domains listed here are ignored (pretend they arent
-#    freemail). No wildcards!
-#
-# header FREEMAIL_REPLYTO eval:check_freemail_replyto(['option'])
-#
-#    Checks/compares freemail addresses found from headers and body.
-#
-#    Possible options:
-#
-#    replyto	From: or body address is different than Reply-To
-#		(this is the default)
-#    reply	as above, but if no Reply-To header is found,
-#		compares From: and body
-#
-# header FREEMAIL_FROM eval:check_freemail_from(['regex'])
-#
-#    Checks all possible "from" headers to see if sender is freemail.
-#    Uses SA all_from_addrs() function (includes 'Resent-From', 'From',
-#    'EnvelopeFrom' etc).
-#
-#    Add optional regex to match the found email address(es). For example,
-#    to see if user ends in digit: check_freemail_from('\d@')
-#
-#    If you use multiple check_freemail_from rules with regexes, remember
-#    that they might hit different emails from different heades. To match
-#    a certain header only, use check_freemail_header.
-#
-# header FREEMAIL_HDRX eval:check_freemail_header('header' [, 'regex'])
-#
-#    Searches defined header for freemail address. Optional regex to match
-#    the found address (like in check_freemail_from).
-#
-# header FREEMAIL_BODY eval:check_freemail_body(['regex'])
-#
-#    Searches body for freemail address. With optional regex to match.
-#
-
-### Changelog:
-#
-# 1.995 - public beta version, revamped whole code, moved default
-#         domains to separate file: http://sa.hege.li/freemail_domains.cf
-# 1.996 - fix freemail_skip_bulk_envfrom
-# 1.997 - set freemail_skip_when_over_max to 1 by default
-# 1.998 - don't warn about missing freemail_domains when linting
-# 1.999 - default whitelist undisclosed-recipient@yahoo.com etc
-# 2.000 - some cleaning up
-# 2.001 - fix freemail_whitelist
-# 2.002 - _add_desc -> _got_hit, fix description email append bug
-#
-
-### Blah:
-#
-# Author: Henrik Krohns <sa@hege.li>
-# Copyright 2009 Henrik Krohns
-#
 # <@LICENSE>
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
@@ -106,10 +14,104 @@ my $VERSION = 2.002;
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # </@LICENSE>
-#
+
+package Mail::SpamAssassin::Plugin::FreeMail;
+use strict;
+use warnings;
+use re 'taint';
+
+my $VERSION = 2.003;
+
+=head1 NAME
+
+FreeMail - check message headers/body for freemail-domains
+
+=head1 SYNOPSIS
+
+If for example From-address is freemail, and Reply-To or address found in mail body is
+different freemail address, return success.  Good sign of Nigerian scams
+etc.  Test idea from Marc Perkel.
+
+Also separate functions to check various portions of message for freemails.
+
+=head1 CONFIGURATION
+
+freemail_domains domain ...
+
+   List of domains to be used in checks.
+
+   Regexp is not supported, but following wildcards work:
+
+   ? for single character (does not match a dot)
+   * for multiple characters (does not match a dot)
+
+   For example:
+   freemail_domains hotmail.com hotmail.co.?? yahoo.* yahoo.*.*
+
+freemail_whitelist email/domain ...
+
+   Emails or domains listed here are ignored (pretend they aren't
+   freemail). No wildcards!
+
+freemail_import_whitelist_auth 1/0
+
+   Entries in whitelist_auth will also be used to whitelist emails
+   or domains from being freemail.  Default is 0.
+
+freemail_import_def_whitelist_auth 1/0
+
+   Entries in def_whitelist_auth will also be used to whitelist emails
+   or domains from being freemail.  Default is 0.
+
+header FREEMAIL_REPLYTO eval:check_freemail_replyto(['option'])
+
+   Checks/compares freemail addresses found from headers and body.
+
+   Possible options:
+
+   replyto	From: or body address is different than Reply-To
+		(this is the default)
+   reply	as above, but if no Reply-To header is found,
+		compares From: and body
+
+header FREEMAIL_FROM eval:check_freemail_from(['regex'])
+
+   Checks all possible "from" headers to see if sender is freemail.
+   Uses SA all_from_addrs() function (includes 'Resent-From', 'From',
+   'EnvelopeFrom' etc).
+
+   Add optional regex to match the found email address(es). For example,
+   to see if user ends in digit: check_freemail_from('\d@')
+
+   If you use multiple check_freemail_from rules with regexes, remember
+   that they might hit different emails from different heades. To match
+   a certain header only, use check_freemail_header.
+
+header FREEMAIL_HDRX eval:check_freemail_header('header' [, 'regex'])
+
+   Searches defined header for freemail address. Optional regex to match
+   the found address (like in check_freemail_from).
+
+header FREEMAIL_BODY eval:check_freemail_body(['regex'])
+
+   Searches body for freemail address. With optional regex to match.
+
+=head1 CHANGELOG
+
+ 1.996 - fix freemail_skip_bulk_envfrom
+ 1.997 - set freemail_skip_when_over_max to 1 by default
+ 1.998 - don't warn about missing freemail_domains when linting
+ 1.999 - default whitelist undisclosed-recipient@yahoo.com etc
+ 2.000 - some cleaning up
+ 2.001 - fix freemail_whitelist
+ 2.002 - _add_desc -> _got_hit, fix description email append bug
+ 2.003 - freemail_import_(def_)whitelist_auth
+
+=cut
 
 use Mail::SpamAssassin::Plugin;
 use Mail::SpamAssassin::PerMsgStatus;
+use Mail::SpamAssassin::Util qw(compile_regexp);
 
 our @ISA = qw(Mail::SpamAssassin::Plugin);
 
@@ -156,7 +158,14 @@ sub new {
     $self->register_eval_rule("check_freemail_header");
     $self->register_eval_rule("check_freemail_body");
 
-    # Need to init the regex here, utilizing registryboundaries->valid_tlds_re
+    return $self;
+}
+
+sub _init_email_regex {
+    my ($self) = @_;
+
+    dbg("initializing email regex");
+
     # Some regexp tips courtesy of http://www.regular-expressions.info/email.html
     # full email regex v0.02
     $self->{email_regex} = qr/
@@ -169,10 +178,7 @@ sub new {
       (?:[a-z0-9](?:[a-z0-9-]{0,59}[a-z0-9])?\.){1,4} # max 4x61 char parts (should be enough?)
       $self->{main}->{registryboundaries}->{valid_tlds_re}	# ends with valid tld
       )
-      (?!(?:[a-z0-9-]|\.[a-z0-9]))		# make sure domain ends here
     /xi;
-
-    return $self;
 }
 
 sub set_config {
@@ -205,6 +211,18 @@ sub set_config {
     push(@cmds, {
         setting => 'freemail_add_describe_email',
         default => 1,
+        type => $Mail::SpamAssassin::Conf::CONF_TYPE_NUMERIC,
+        }
+    );
+    push(@cmds, {
+        setting => 'freemail_import_whitelist_auth',
+        default => 0,
+        type => $Mail::SpamAssassin::Conf::CONF_TYPE_NUMERIC,
+        }
+    );
+    push(@cmds, {
+        setting => 'freemail_import_def_whitelist_auth',
+        default => 0,
         type => $Mail::SpamAssassin::Conf::CONF_TYPE_NUMERIC,
         }
     );
@@ -265,7 +283,8 @@ sub finish_parsing_end {
         my $doms = join('|', @domains);
         $self->{freemail_domains_re} = qr/\@(?:${doms})$/;
         $wcount = scalar @domains;
-        undef %{$self->{freemail_temp_wc}};
+        undef $self->{freemail_temp_wc};
+        delete $self->{freemail_temp_wc};
     }
 
     my $count = scalar keys %{$self->{freemail_domains}};
@@ -282,11 +301,17 @@ sub finish_parsing_end {
         $self->{freemail_available} = 0;
     }
 
+    # valid_tlds_re will be available at finish_parsing_end, compile it now,
+    # we only need to do it once and before possible forking
+    if ($self->{freemail_available} && !$self->{email_regex}) {
+        $self->_init_email_regex();
+    }
+
     return 0;
 }
 
 sub _is_freemail {
-    my ($self, $email) = @_;
+    my ($self, $email, $pms) = @_;
 
     return 0 if $email eq '';
 
@@ -302,10 +327,23 @@ sub _is_freemail {
         dbg("whitelisted domain: $domain");
         return 0;
     }
+
     if ($email =~ $email_whitelist) {
         dbg("whitelisted email, default: $email");
         return 0;
     }
+
+    foreach my $list ('whitelist_auth','def_whitelist_auth') {
+        if ($pms->{conf}->{"freemail_import_$list"}) {
+            foreach my $regexp (values %{$pms->{conf}->{$list}}) {
+                if ($email =~ /$regexp/o) {
+                    dbg("whitelisted email, $list: $email");
+                    return 0;
+                }
+            }
+        }
+    }
+ 
     if (defined $self->{freemail_domains}{$domain}
         or ( defined $self->{freemail_domains_re}
              and $email =~ $self->{freemail_domains_re} )) {
@@ -327,7 +365,7 @@ sub _parse_body {
         my $parsed = $pms->get_uri_detail_list();
         while (my($uri, $info) = each %{$parsed}) {
             if (defined $info->{types}->{a} and not defined $info->{types}->{parsed}) {
-                if ($uri =~ /^(?:(?i)mailto):$self->{email_regex}/) {
+                if ($uri =~ /^(?:(?i)mailto):$self->{email_regex}/o) {
                     my $email = lc($1);
                     push(@body_emails, $email) unless defined $seen{$email};
                     $seen{$email} = 1;
@@ -362,7 +400,7 @@ sub _parse_body {
                     return 0;
                 }
             }
-            next unless $self->_is_freemail($email);
+            next unless $self->_is_freemail($email, $pms);
             if (++$count_fm == $pms->{main}->{conf}->{freemail_max_body_freemails}) {
                 if ($pms->{main}->{conf}->{freemail_skip_when_over_max}) {
                     $pms->{freemail_skip_body} = 1;
@@ -395,11 +433,10 @@ sub _got_hit {
 
     if ($pms->{main}->{conf}->{freemail_add_describe_email}) {
         $email =~ s/\@/[at]/g;
-        $pms->got_hit($rulename, "", description => $desc." ($email)", ruletype => 'eval');
+        $pms->test_log($email);
     }
-    else {
-        $pms->got_hit($rulename, "", description => $desc, ruletype => 'eval');
-    }
+
+    $pms->got_hit($rulename, "", description => $desc, ruletype => 'eval');
 }
 
 sub check_freemail_header {
@@ -417,11 +454,12 @@ sub check_freemail_header {
 
     my $re;
     if (defined $regex) {
-        $re = eval { qr/$regex/; };
-        if ($@) {
-            warn("invalid regex: $@");
+        my ($rec, $err) = compile_regexp($regex, 0);
+        if (!$rec) {
+            warn "freemail: invalid regexp for $rulename '$regex': $err\n";
             return 0;
         }
+        $re = $rec;
     }
 
     my @emails = map (lc, $pms->{main}->find_all_addrs_in_line ($pms->get($header)));
@@ -433,9 +471,9 @@ sub check_freemail_header {
     dbg("addresses from header $header: ".join(';',@emails));
 
     foreach my $email (@emails) {    
-        if ($self->_is_freemail($email)) {
+        if ($self->_is_freemail($email, $pms)) {
             if (defined $re) {
-                next unless $email =~ $re;
+                next unless $email =~ /$re/o;
                 dbg("HIT! $email is freemail and matches regex");
             }
             else {
@@ -461,16 +499,17 @@ sub check_freemail_body {
 
     my $re;
     if (defined $regex) {
-        $re = eval { qr/$regex/; };
-        if ($@) {
-            warn("invalid regex: $@");
+        my ($rec, $err) = compile_regexp($regex, 0);
+        if (!$rec) {
+            warn "freemail: invalid regexp for $rulename '$regex': $err\n";
             return 0;
         }
+        $re = $rec;
     }
 
     if (defined $re) {
         foreach my $email (keys %{$pms->{freemail_cache}{body}}) {
-            if ($email =~ $re) {
+            if ($email =~ /$re/o) {
                 dbg("HIT! email from body is freemail and matches regex: $email");
                 $self->_got_hit($pms, $email, "Email from body is freemail");
                 return 0;
@@ -497,11 +536,12 @@ sub check_freemail_from {
 
     my $re;
     if (defined $regex) {
-        $re = eval { qr/$regex/; };
-        if ($@ or not defined $re) {
-            warn("invalid regex: $@");
+        my ($rec, $err) = compile_regexp($regex, 0);
+        if (!$rec) {
+            warn "freemail: invalid regexp for $rulename '$regex': $err\n";
             return 0;
         }
+        $re = $rec;
     }
 
     my %from_addrs = map { lc($_) => 1 } ($pms->all_from_addrs());
@@ -515,9 +555,9 @@ sub check_freemail_from {
     dbg("all from-addresses: ".join(', ', keys %from_addrs));
 
     foreach my $email (keys %from_addrs) {
-        next unless $self->_is_freemail($email);
+        next unless $self->_is_freemail($email, $pms);
         if (defined $re) {
-            next unless $email =~ $re;
+            next unless $email =~ /$re/o;
             dbg("HIT! $email is freemail and matches regex");
         }
         else {
@@ -559,8 +599,8 @@ sub check_freemail_replyto {
 
     my $from = lc($pms->get("From:addr"));
     my $replyto = lc($pms->get("Reply-To:addr"));
-    my $from_is_fm = $self->_is_freemail($from);
-    my $replyto_is_fm = $self->_is_freemail($replyto);
+    my $from_is_fm = $self->_is_freemail($from, $pms);
+    my $replyto_is_fm = $self->_is_freemail($replyto, $pms);
 
     dbg("From address: $from") if $from ne '';
     dbg("Reply-To address: $replyto") if $replyto ne '';

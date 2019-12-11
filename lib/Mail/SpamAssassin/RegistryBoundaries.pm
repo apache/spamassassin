@@ -32,6 +32,12 @@ use re 'taint';
 
 our @ISA = qw();
 
+use Mail::SpamAssassin::Logger;
+use Mail::SpamAssassin::Constants qw(:ip);
+use Mail::SpamAssassin::Util qw(is_fqdn_valid);
+
+my $IP_ADDRESS = IP_ADDRESS;
+
 # called from SpamAssassin->init() to create $self->{util_rb}
 sub new {
   my $class = shift;
@@ -45,14 +51,26 @@ sub new {
   bless ($self, $class);
 
   # Initialize valid_tlds_re for schemeless uri parsing, FreeMail etc
-  if ($self->{conf}->{valid_tlds}) {
-    my $tlds = join('|', keys %{$self->{conf}->{valid_tlds}});
+  if ($self->{conf}->{valid_tlds} && %{$self->{conf}->{valid_tlds}}) {
+    # International domain names are already in ASCII-compatible encoding (ACE)
+    my $tlds = 
+      '(?<![a-zA-Z0-9-])(?:'. # make sure tld starts at boundary
+      join('|', keys %{$self->{conf}->{valid_tlds}}).
+      ')(?!(?:[a-zA-Z0-9-]|\.[a-zA-Z0-9]))'; # make sure it ends
     # Perl 5.10+ trie optimizes lists, no need for fancy regex optimizing
-    $self->{valid_tlds_re} = qr/(?:$tlds)/i;
+    if (eval { $self->{valid_tlds_re} = qr/$tlds/i; 1; }) {
+      dbg("config: registryboundaries: %d tlds loaded",
+        scalar keys %{$self->{conf}->{valid_tlds}});
+    } else {
+      warn "config: registryboundaries: failed to compile valid_tlds_re: $@\n";
+      $self->{valid_tlds_re} = qr/no_tlds_defined/;
+    }
   }
   else {
     # Failsafe in case no tlds defined, we don't want this to match everything..
     $self->{valid_tlds_re} = qr/no_tlds_defined/;
+    warn "config: registryboundaries: no tlds defined, need to run sa-update\n"
+      if !$self->{main}->{ignore_site_cf_files};
   }
 
   $self;
@@ -182,15 +200,16 @@ uses a valid TLD or ccTLD.
 =cut
 
 sub is_domain_valid {
-  my $self = shift;
-  my $dom = lc shift;
+  my ($self, $dom) = @_;
+
+  return 0 unless defined $dom;
 
   # domains don't have whitespace
   return 0 if ($dom =~ /\s/);
 
   # ensure it ends in a known-valid TLD, and has at least 1 dot
   return 0 unless ($dom =~ /\.([^.]+)$/);
-  return 0 unless ($self->{conf}->{valid_tlds}{$1});
+  return 0 unless ($self->{conf}->{valid_tlds}{lc $1});
 
   return 1;     # nah, it's ok.
 }
@@ -202,36 +221,45 @@ sub uri_to_domain {
   my $uri = lc shift;
 
   # Javascript is not going to help us, so return.
-  return if ($uri =~ /^javascript:/);
+  # Likewise ignore cid, file
+  return if ($uri =~ /^(?:javascript|cid|file):/);
 
-  $uri =~ s{\#.*$}{}gs;			# drop fragment
-  $uri =~ s{^[a-z]+:/{0,2}}{}gs;	# drop the protocol
-  $uri =~ s{^[^/]*\@}{}gs;		# username/passwd
-
-  # strip path and CGI params.  note: bug 4213 shows that "&" should
-  # *not* be likewise stripped here -- it's permitted in hostnames by
-  # some common MUAs!
-  $uri =~ s{[/?].*$}{}gs;              
-
-  $uri =~ s{:\d*$}{}gs;		# port, bug 4191: sometimes the # is missing
+  if ($uri =~ s/^mailto://) { # handle mailto: specially
+    $uri =~ s/\?.*//;			# drop parameters ?subject= etc
+    # note above, Outlook linkifies foo@bar%2Ecom&x.com to foo@bar.com !!
+    # uri_list_canonicalize should have made versions without ? &
+    # Keep testing with & here just in case..
+    return if $uri =~ /\@.*?\@/;	# abort if multiple @
+    return unless $uri =~ s/.*@//;	# drop username or abort
+  } else {
+    $uri =~ s{^[a-z]+:/{0,2}}{}gs;	# drop the protocol
+    # strip path, CGI params, fragment.  note: bug 4213 shows that "&" should
+    # *not* be likewise stripped here -- it's permitted in hostnames by
+    # some common MUAs!
+    $uri =~ s{[/?#].*}{}gs;              
+    $uri =~ s{^[^/]*\@}{}gs;		# drop username/passwd
+    $uri =~ s{:\d*$}{}gs;		# port, bug 4191: sometimes the # is missing
+  }
 
   # skip undecoded URIs if the encoded bits shouldn't be.
   # we'll see the decoded version as well.  see url_encode()
   return if $uri =~ /\%(?:2[1-9a-f]|[3-6][0-9a-f]|7[0-9a-e])/;
 
   my $host = $uri;  # unstripped/full domain name
+  my $domain = $host;
 
   # keep IPs intact
-  if ($uri !~ /^\d+\.\d+\.\d+\.\d+$/) { 
+  if ($host !~ /^$IP_ADDRESS$/) { 
+    # check that it's a valid hostname/fqdn
+    return unless is_fqdn_valid($host);
+    # ignore invalid TLDs
+    return unless $self->is_domain_valid($host);
     # get rid of hostname part of domain, understanding delegation
-    $uri = $self->trim_domain($uri);
-
-    # ignore invalid domains
-    return unless ($self->is_domain_valid($uri));
+    $domain = $self->trim_domain($host);
   }
   
   # $uri is now the domain only, optionally return unstripped host name
-  return !wantarray ? $uri : ($uri, $host);
+  return !wantarray ? $domain : ($domain, $host);
 }
 
 1;

@@ -408,7 +408,7 @@ sub parse_received_line {
   # with HTTPU is used by Communigate Pro with Pronto! webmail interface
   # with HTTPS is used by Horde adjusts the Received header to say "HTTPS" when
   # a connection is made over HTTPS
-  # IANA registry: http://www.iana.org/assignments/mail-parameters/mail-parameters.xhtml
+  # IANA registry: https://www.iana.org/assignments/mail-parameters/mail-parameters.xhtml
   if (/ by / && / with ((?:ES|L|UTF8S|UTF8L)MTPS?A|ASMTP|HTTP[SU]?)(?: |;|$)/i) {
     $auth = $1;
   }
@@ -434,8 +434,9 @@ sub parse_received_line {
     $auth = 'CriticalPath';
   }
   # Postfix 2.3 and later with "smtpd_sasl_authenticated_header yes"
-  elsif (/\) \(Authenticated sender: \S+\) by \S+ \(Postfix\) with /) {
-    $auth = 'Postfix';
+  # Normally $1 is "Postfix", but could be changed with mail_name (Bug 5646)
+  elsif (/\) \(Authenticated sender: \S+\) by \S+ \(([^\)]+)\) with /) {
+    $auth = $1 eq 'Postfix' ? $1 : "Postfix ($1)";
   }
   # Communigate Pro - Bug 6495 adds HTTP as possible transmission method
   # 	Bug 7277: XIMSS used by Pronto and other custom apps, IMAP supports XMIT extension
@@ -499,6 +500,21 @@ sub parse_received_line {
       # Microsoft SMTPSVC; Thu, 13 Feb 2003 19:05:39 -0500
       if (/^mail pickup service by (\S+) with Microsoft SMTPSVC$/) {
         return 0;
+      }
+    }
+
+    # Microsoft SMTP Server
+    elsif (/ with (?:Microsoft SMTP Server|mapi id) (?:\([^\)]+\) )?\d+\.\d+\.\d+\.\d+(?:$| )/) {
+      # Received: from EXC-DAG-02.global.net (10.45.252.152) by EXC-DAG-02.global.net
+      #  (10.45.252.152) with Microsoft SMTP Server (version=TLS1_2,
+      #  cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id 15.1.1261.35;
+      #  Mon, 29 Oct 2018 11:17:19 +0100
+      # Received: from AM5PR0402MB2836.eurprd04.prod.outlook.com
+      #  ([fe80::19bd:c588:dd17:5226]) by AM5PR0402MB2836.eurprd04.prod.outlook.com
+      #  ([fe80::19bd:c588:dd17:5226%6]) with mapi id 15.20.1943.023;
+      #  Wed, 5 Jun 2019 10:17:08 +0000
+      if (/^(\S+) \(\[?(${IP_ADDRESS})(?:%[A-Z0-9._~-]*)?\]?\) by (\S+) /) {
+        $helo = $1; $ip = $2; $by = $3; $id = ''; goto enough;
       }
     }
 
@@ -711,7 +727,7 @@ sub parse_received_line {
     # Wed, 24 Jul 2002 16:36:44 GMT
     if (/by (\S+\.hotmail\.msn\.com) /) {
       $by = $1;
-      /^(\S+) / and $ip = $1;
+      /^(${IP_ADDRESS}) / and $ip = $1;
       goto enough;
     }
 
@@ -832,10 +848,15 @@ sub parse_received_line {
     }
 
     # Received: from acecomms [202.83.84.95] by mailscan.acenet.net.au [202.83.84.27] with SMTP (MDaemon.PRO.v5.0.6.R) for <spamassassin-talk@lists.sourceforge.net>; Fri, 21 Feb 2003 09:32:27 +1000
-    if (/^(\S+) \[(${IP_ADDRESS})\] by (\S+) \[(\S+)\] with /) {
+    if (/^(\S+) \[(${IP_ADDRESS})\] by (\S+) \[${IP_ADDRESS}\] with /) {
       $mta_looked_up_dns = 1;
-      $helo = $1; $ip = $2;
-      $by = $4; # use the IP addr for "by", more useful?
+      $helo = $1; $ip = $2; $by = $3;
+      goto enough;
+    }
+
+    # Received: smtp510.aspkunden.de [(134.97.4.21)] by mail.aspemail.de (134.97.4.24) (MDaemon PRO v19.0.2)  with ESMTP id md50018233933.msg; Tue, 16 Jul 2019 11:39:22 +0200
+    if (/^(\S+) \[\((${IP_ADDRESS})\)\] by (\S+) \(${IP_ADDRESS}\) /) {
+      $helo = $1; $ip = $2; $by = $3;
       goto enough;
     }
 
@@ -977,10 +998,10 @@ sub parse_received_line {
     # Received: from customer254-217.iplannetworks.net (HELO AGAMENON) 
     # (baldusi@200.69.254.217 with plain) by smtp.mail.vip.sc5.yahoo.com with
     # SMTP; 11 Mar 2003 21:03:28 -0000
-    if (/^(\S+) \((?:HELO|EHLO) (\S*)\) \((\S+).*?\) by (\S+) with /) {
+    if (/^(\S+) \((?:HELO|EHLO) (\S*)\) \((?:(\S+)\@)?(${IP_ADDRESS}).*?\) by (\S+) with /) {
       $mta_looked_up_dns = 1;
-      $rdns = $1; $helo = $2; $ip = $3; $by = $4;
-      $ip =~ s/([^\@]*)\@//g and $ident = $1;	# remove IDENT lookups
+      $rdns = $1; $helo = $2; $ip = $4; $by = $5;
+      $ident = $3 if defined $3;
       goto enough;
     }
 
@@ -1019,7 +1040,7 @@ sub parse_received_line {
 
     # Received: from 01al10015010057.ad.bls.com ([90.152.5.141] [90.152.5.141])
     # by aismtp3g.bls.com with ESMTP; Mon, 10 Mar 2003 11:10:41 -0500
-    if (/^(\S+) \(\[(\S+)\] \[(\S+)\]\) by (\S+) with /) {
+    if (/^(\S+) \(\[(${IP_ADDRESS})\] \[(\S+)\]\) by (\S+) with /) {
       # not sure what $3 is ;)
       $helo = $1; $ip = $2; $by = $4;
       goto enough;
@@ -1120,7 +1141,7 @@ sub parse_received_line {
 
     # a synthetic header, generated internally:
     # Received: X-Originating-IP: 1.2.3.4
-    if (/^X-Originating-IP: (\S+)$/) {
+    if (/^X-Originating-IP: (${IP_ADDRESS})$/) {
       $ip = $1; $by = ''; goto enough;
     }
 
@@ -1201,7 +1222,7 @@ sub parse_received_line {
 
     # Local unix socket handover from Cyrus, tested with v2.3.14
     # Received: from testintranator.net.vm ([unix socket])_ by testintranator.net.vm (Cyrus v2.3.14) with LMTPA;_ Tue, 21 Jul 2009 14:34:14 +0200
-    # Attention: Actually the received header is parsed as "testintranator.net.vm ([unix socket]) by testintranator.net.vm (Cyrus v2.3.14) with LMTPA", "from" is ommited.
+    # Attention: Actually the received header is parsed as "testintranator.net.vm ([unix socket]) by testintranator.net.vm (Cyrus v2.3.14) with LMTPA", "from" is omitted.
     if (/^\S+ \(\[unix socket\]\) by \S+ \(Cyrus v[0-9]*?\.[0-9]*?\.[0-9]*?\) with LMTPA/) { return 0; }
 
     # HANDOVERS WE KNOW WE CAN'T DEAL WITH: TCP transmission, but to MTAs that
@@ -1221,7 +1242,24 @@ sub parse_received_line {
 
     # from DL1GSPMX02 (dl1gspmx02.gamestop.com) by email.ebgames.com (LSMTP for Windows NT v1.1b) with SMTP id <21.000575A0@email.ebgames.com>; Tue, 12 Sep 2006 21:06:43 -0500
     if (/\(LSMTP for/) { return 0; }
+
+    # from ([127.0.0.1]) with MailEnable ESMTP; Wed, 10 Jul 2019 10:29:59 +0300
+    if (/^\(\[${LOCALHOST}\]\) with MailEnable /) { return 0; }
+
+    # from facebook.com (RrlQsUbrndsQ6/zbJaSzSPcmy3GwqE5h6IukkE5GGBIJgonAFnoQE3L+9tv2TU3e 2401:db00:1110:50e8:face:0000:002f:0000)
+    #  by facebook.com with Thrift id 423753524b5011e9a83e248a0796a3b2-169bd530; Wed, 20 Mar 2019 13:39:29 -0700
+    if (/^facebook\.com \([^\)]+\) by facebook\.com with Thrift id \S+$/) { return 0; }
+
+    # from 384836569573 named unknown by gmailapi.google.com with HTTPREST; Wed, 6 Mar 2019 03:39:24 -0500
+    if (/^\S+ named \S+ by gmailapi\.google\.com with HTTPREST$/) { return 0; }
+
+    # from mail.payex.com id <B5b8f11e30004>; Wed, 05 Sep 2018 01:14:43 +0200
+    if (/^\S+ id \S+$/) { return 0; }
   
+    # from [<4124973-137966-3089@be2.maropost.com>] ([<4124973-137966-3089@be2.maropost.com>] helo=maropost.com)  by 643852-mailer2 (envelope-from 4124973-137966-3089@be2.maropost.com)
+    #  (Jetsend MTA 0.0.1 with ESMTP; Fri Sep 14 14:36:56 EDT 2018
+    if (/^\[<.*? \(Jetsend/) { return 0; }
+
     # if at this point we still haven't figured out the HELO string, see if we
     # can't just guess
     if (!$helo && /^(\S+)[^-A-Za-z0-9\.]/) { $helo = $1; }
@@ -1236,9 +1274,13 @@ sub parse_received_line {
     #  BY madman.mr.itd.umich.edu ID 434B508E.174A6.13932 ; 11 Oct 2005 01:41:34 -0400
     # Received: FROM [192.168.1.24] (s233-64-90-216.try.wideopenwest.com [64.233.216.90])
     #  BY hackers.mr.itd.umich.edu ID 434B5051.8CDE5.15436 ; 11 Oct 2005 01:40:33 -0400
-    if (/^(\S+) \((\S+) \[(${IP_ADDRESS})\]\) BY (\S+) ID (\S+)$/ ) {
+    # Received: FROM helo (1.2.3.4 [1.2.3.4]) BY xxx.com (Rockliffe SMTPRA 10.3.0)
+    #  WITH SMTP ID <B0065361981@xxx.com> FOR <foo@bar.net>; Tue, 6 Nov 2018 07:41:26 +0200
+
+    if (/^(\S+) \((\S+) \[(${IP_ADDRESS})\]\) BY (\S+) (?:\([^\)]+\) WITH SMTP )?ID <?(\S+?)>?(?: FOR <[^>]+>)?$/ ) {
       $mta_looked_up_dns = 1;
       $helo = $1; $rdns = $2; $ip = $3; $by = $4; $id = $5;
+      $rdns = '' if $rdns eq 'unverified';
       goto enough;
     }
   }
@@ -1303,7 +1345,7 @@ enough:
     }
   }
 
-  if ($rdns =~ /^unknown$/i) {
+  if ($rdns =~ /^unknown$/i || $rdns =~ /^\[/) {
     $rdns = '';		# some MTAs seem to do this
   }
   

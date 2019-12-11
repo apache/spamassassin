@@ -94,6 +94,7 @@ our $IGNORED_HDRS = qr{(?: (?:X-)?Sender    # misc noise
   |X-eGroups-(?:Return|From)
   |X-MDMailing-List
   |X-XEmacs-List
+  |X-Sympa-To
 
   # gatewayed through mailing list (thanks to Allen Smith)
   |(?:X-)?Resent-(?:From|To|Date)
@@ -1644,8 +1645,14 @@ sub learner_new {
   my ($self) = @_;
 
   my $store;
-  my $module = untaint_var($self->{conf}->{bayes_store_module});
-  $module = 'Mail::SpamAssassin::BayesStore::DBM'  if !$module;
+  my $module = $self->{conf}->{bayes_store_module};
+  if (!$module) {
+    $module = 'Mail::SpamAssassin::BayesStore::DBM';
+  } elsif ($module =~ /^([_A-Za-z0-9:]+)$/) {
+    $module = untaint_var($module);
+  } else {
+    die "bayes: invalid module: $module\n";
+  }
 
   dbg("bayes: learner_new self=%s, bayes_store_module=%s", $self,$module);
   undef $self->{store};  # DESTROYs previous object, if any

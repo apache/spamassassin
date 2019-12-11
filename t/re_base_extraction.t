@@ -1,4 +1,4 @@
-#!/usr/bin/perl
+#!/usr/bin/perl -T
 
 # Test regular expression base-string extraction in
 # Mail::SpamAssassin::Plugin::BodyRuleBaseExtractor
@@ -456,9 +456,12 @@ sub try_extraction {
   ok($sa);
 
   # remove all rules and plugins; we want just our stuff
-  unlink(<log/test_rules_copy/*.pre>);
-  unlink(<log/test_rules_copy/*.pm>);
-  unlink(<log/test_rules_copy/*.cf>);
+  untaint_system("rm -f log/test_rules_copy/*.pre");
+  untaint_system("rm -f log/test_rules_copy/*.pm");
+  # keep 20_aux_tlds.cf to suppress RB warnings
+  rename("log/test_rules_copy/20_aux_tlds.cf", "log/test_rules_copy/20_aux_tlds.cf.tmp");
+  untaint_system("rm -f log/test_rules_copy/*.cf");
+  rename("log/test_rules_copy/20_aux_tlds.cf.tmp", "log/test_rules_copy/20_aux_tlds.cf");
 
   { # suppress unnecessary warning:
     #   "Filehandle STDIN reopened as STDOUT only for output"

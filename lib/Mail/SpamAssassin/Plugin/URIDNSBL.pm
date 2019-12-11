@@ -281,6 +281,11 @@ both queries will be performed.
 
 The maximum number of domains to look up.
 
+=item parse_dkim_uris ( 0 / 1 )
+
+Include DKIM uris in lookups. This option is documented in
+Mail::SpamAssassin::Conf.
+
 =back
 
 =head1 NOTES
@@ -340,15 +345,7 @@ sub parsed_metadata {
   my $conf = $pms->{conf};
 
   return 0  if $conf->{skip_uribl_checks};
-
-  if (!$pms->is_dns_available()) {
-    $self->{dns_not_available} = 1;
-    return 0;
-  } else {
-    # due to re-testing dns may become available after being unavailable
-    # DOS: I don't think dns_not_available is even used anymore
-    $self->{dns_not_available} = 0;
-  }
+  return 0  if !$pms->is_dns_available();
 
   $pms->{'uridnsbl_activerules'} = { };
   $pms->{'uridnsbl_hits'} = { };
@@ -482,12 +479,12 @@ sub parsed_metadata {
     }
   }
 
-  my @hnames = keys %hostlist;
+  my @hnames = sort keys %hostlist;
   $pms->set_tag('URIHOSTS',
-                @hnames == 1 ? $hnames[0] : \@hnames)  if @hnames;
-  my @dnames = values %hostlist;
+                @hnames == 1 ? $hnames[0] : \@hnames);
+  my @dnames = do { my %seen; grep { !$seen{$_}++ } sort values %hostlist };
   $pms->set_tag('URIDOMAINS',
-                @dnames == 1 ? $dnames[0] : \@dnames)  if @dnames;
+                @dnames == 1 ? $dnames[0] : \@dnames);
 
   # and query
   $self->query_hosts_or_domains($pms, \%hostlist);
@@ -886,7 +883,7 @@ sub query_hosts_or_domains {
         }
         if (%$areviprules && !$seen_lookups->{'A:'.$host}) {
           $seen_lookups->{'A:'.$host} = 1;
-          my $obj = { dom => $host };
+          my $obj = { dom => $host, is_arevip => 1 };
           $self->lookup_a_record($pms, $obj, $host);
           $pms->register_async_rule_start($_)  for keys %$areviprules;
         }
@@ -898,12 +895,11 @@ sub query_hosts_or_domains {
 # ---------------------------------------------------------------------------
 
 sub lookup_domain_ns {
-  my ($self, $pms, $obj, $dom, $rulename) = @_;
+  my ($self, $pms, $obj, $dom) = @_;
 
   my $key = "NS:" . $dom;
   my $ent = {
     key => $key, zone => $dom, obj => $obj, type => "URI-NS",
-    rulename => $rulename,
   };
   # dig $dom ns
   $ent = $pms->{async}->bgsend_and_start_lookup(
@@ -983,12 +979,11 @@ sub complete_ns_lookup {
 # ---------------------------------------------------------------------------
 
 sub lookup_a_record {
-  my ($self, $pms, $obj, $hname, $rulename) = @_;
+  my ($self, $pms, $obj, $hname) = @_;
 
   my $key = "A:" . $hname;
   my $ent = {
     key => $key, zone => $hname, obj => $obj, type => "URI-A",
-    rulename => $rulename,
   };
   # dig $hname a
   $ent = $pms->{async}->bgsend_and_start_lookup(
@@ -1039,15 +1034,19 @@ sub lookup_dnsbl_for_ip {
   my $revip = "$4.$3.$2.$1";
 
   my $conf = $pms->{conf};
-  my $tflags = $conf->{tflags};
-  my $cfns = $pms->{uridnsbl_active_rules_nsrevipbl};
-  my $cfa  = $pms->{uridnsbl_active_rules_arevipbl};
-  foreach my $rulename (keys %$cfa, keys %$cfns) {
+
+  my @rulenames;
+  if ($obj->{is_arevip}) {
+    @rulenames = keys %{$pms->{uridnsbl_active_rules_arevipbl}};
+  } else {
+    @rulenames = keys %{$pms->{uridnsbl_active_rules_nsrevipbl}};
+  }
+  foreach my $rulename (@rulenames) {
     my $rulecf = $conf->{uridnsbls}->{$rulename};
 
+    my $tflags = $conf->{tflags}->{$rulename} || '';
     # ips_only/domains_only lookups should not act on this kind of BL
-    next  if defined $tflags->{$rulename} &&
-             $tflags->{$rulename} =~ /\b(?:ips_only|domains_only)\b/;
+    next if $tflags =~ /\b(?:ips_only|domains_only)\b/;
 
     $self->lookup_single_dnsbl($pms, $obj, $rulename,
 			       $revip, $rulecf->{zone}, $rulecf->{type});
@@ -1056,6 +1055,10 @@ sub lookup_dnsbl_for_ip {
 
 sub lookup_single_dnsbl {
   my ($self, $pms, $obj, $rulename, $lookupstr, $dnsbl, $qtype) = @_;
+
+  my $qkey = "$rulename:$lookupstr:$dnsbl:$qtype";
+  return if exists $pms->{uridnsbl_seen_lookups}{$qkey};
+  $pms->{uridnsbl_seen_lookups}{$qkey} = 1;
 
   my $key = "DNSBL:" . $lookupstr . ':' . $dnsbl;
   my $ent = {
@@ -1136,8 +1139,8 @@ sub complete_dnsbl_lookup {
         !defined $n2  ? ($rdatanum & $n1) &&                  # mask only
                           (($rdatanum & 0xff000000) == 0x7f000000)  # 127/8
       : $delim eq '-' ? $rdatanum >= $n1 && $rdatanum <= $n2  # range
-      : $delim eq '/' ? ($rdatanum & $n2) == ($n1 & $n2)      # value/mask
-      : 0;  
+      : $delim eq '/' ? ($rdatanum & $n2) == (int($n1) & $n2) # value/mask
+      : 0; # notice int($n1) to fix perl ~5.14 taint bug (Bug 7725)
 
       dbg("uridnsbl: %s . %s -> %s, %s, %08x %s %s",
           $dom, $zone, $rdatastr, $rulename, $rdatanum,
@@ -1187,5 +1190,6 @@ sub got_dnsbl_hit {
 sub has_tflags_domains_only { 1 }
 sub has_subtest_for_ranges { 1 }
 sub has_uridnsbl_for_a { 1 }  # uridnsbl rules recognize tflags 'a' and 'ns'
+sub has_uridnsbl_a_ns { 1 }  # has an actually working 'a' flag, unlike above :-(
 
 1;

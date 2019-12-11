@@ -38,6 +38,7 @@ package Mail::SpamAssassin::Plugin::Rule2XSBody;
 use Mail::SpamAssassin::Plugin;
 use Mail::SpamAssassin::Logger;
 use Mail::SpamAssassin::Plugin::OneLineBodyRuleType;
+use Mail::SpamAssassin::Util qw(qr_to_string);
 
 use strict;
 use warnings;
@@ -120,24 +121,25 @@ sub setup_test_set_pri {
 
   my $found = 0;
   foreach my $name (keys %{$rules}) {
-    my $rule = $rules->{$name};
+    #my $rule = $rules->{$name};
+    my $rule = qr_to_string($conf->{test_qrs}->{$name});
     my $comprule = $hasrules->{$longname{$name} || ''};
     $rule =~ s/\#/\[hash\]/gs;
 
-    if (!$comprule) { 
+    if (!$comprule) {
       # this is pretty common, based on rule complexity; don't warn
       # dbg "zoom: skipping rule $name, not in compiled ruleset";
       next;
     }
     if ($comprule ne $rule) {
-      dbg "zoom: skipping rule $name, code differs in compiled ruleset";
+      dbg "zoom: skipping rule $name, code differs in compiled ruleset '$comprule' '$rule'";
       next;
     }
 
     # ignore rules marked for ReplaceTags work!
     # TODO: we should be able to order the 'finish_parsing_end'
     # plugin calls to do this.
-    if ($conf->{rules_to_replace}->{$name}) {
+    if ($conf->{replace_rules}->{$name}) {
       dbg "zoom: skipping rule $name, ReplaceTags";
       next;
     }

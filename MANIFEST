@@ -92,6 +92,7 @@ lib/Mail/SpamAssassin/Plugin/HeaderEval.pm
 lib/Mail/SpamAssassin/Plugin/ImageInfo.pm
 lib/Mail/SpamAssassin/Plugin/MIMEEval.pm
 lib/Mail/SpamAssassin/Plugin/MIMEHeader.pm
+lib/Mail/SpamAssassin/Plugin/OLEVBMacro.pm
 lib/Mail/SpamAssassin/Plugin/OneLineBodyRuleType.pm
 lib/Mail/SpamAssassin/Plugin/Phishing.pm
 lib/Mail/SpamAssassin/Plugin/PhishTag.pm
@@ -146,6 +147,7 @@ rules/v330.pre
 rules/v340.pre
 rules/v341.pre
 rules/v342.pre
+rules/v343.pre
 rules/20_aux_tlds.cf
 sa-awl.raw
 sa-check_spamd.raw
@@ -224,15 +226,18 @@ sql/userpref_mysql.sql
 sql/userpref_pg.sql
 sql/txrep_mysql.sql
 sql/txrep_pg.sql
+sql/txrep_sqlite.sql
 t/README
 t/SATest.pl
 t/SATest.pm
+t/all_modules.t
 t/autolearn.t
 t/autolearn_force.t
 t/autolearn_force_fail.t
 t/basic_lint.t
 t/basic_lint_without_sandbox.t
 t/basic_meta.t
+t/basic_meta2.t
 t/basic_obj_api.t
 t/bayesbdb.t
 t/bayesdbm.t
@@ -242,6 +247,7 @@ t/bayessdbm_seen_delete.t
 t/bayessql.t
 t/blacklist_autolearn.t
 t/body_mod.t
+t/body_str.t
 t/check_implemented.t
 t/cidrs.t
 t/config.dist
@@ -250,6 +256,7 @@ t/config_text.t
 t/config_tree_recurse.t
 t/cpp_comments_in_spamc.t
 t/cross_user_config_leak.t
+t/olevbmacro.t
 t/data/01_test_rules.cf
 t/data/01_test_rules.pre
 t/data/Dumpheaders.pm
@@ -372,6 +379,13 @@ t/data/spam/bsmtpnull
 t/data/spam/dnsbl.eml
 t/data/spam/gtube.eml
 t/data/spam/gtubedcc.eml
+t/data/spam/olevbmacro/encrypted.eml
+t/data/spam/olevbmacro/goodcsv.eml
+t/data/spam/olevbmacro/macro.eml
+t/data/spam/olevbmacro/malicemacro.eml
+t/data/spam/olevbmacro/nomacro.eml
+t/data/spam/olevbmacro/renamedmacro.eml
+t/data/spam/olevbmacro/zippwmacro.eml
 t/data/spam/razor2
 t/data/spam/relayUS.eml
 t/data/spam/spf1
@@ -407,6 +421,11 @@ t/data/whitelists/ryanairmail.com
 t/data/whitelists/sf.net
 t/data/whitelists/winxpnews.com
 t/data/whitelists/yahoo-inc.com
+t/data/phishing/openphish-feed.txt
+t/data/phishing/phishtank-feed.csv
+t/data/spam/phishing_openphish.eml
+t/data/spam/phishing_phishtank.eml
+t/phishing.t
 t/date.t
 t/db_awl_path.t
 t/db_awl_perms.t
@@ -419,6 +438,7 @@ t/dkim.t
 t/dnsbl.t
 t/dnsbl_sc_meta.t
 t/duplicates.t
+t/freemail.t
 t/get_all_headers.t
 t/get_headers.t
 t/gtube.t
@@ -439,8 +459,6 @@ t/metadata.t
 t/mimeheader.t
 t/mimeparse.t
 t/missing_hb_separator.t
-t/mkrules.t
-t/mkrules_else.t
 t/nonspam.t
 t/originating_ip_hdr.t
 t/plugin.t
@@ -457,6 +475,7 @@ t/recursion.t
 t/regexp_valid.t
 t/relaycountry_fast.t
 t/relaycountry_geoip.t
+t/relaycountry_geoip2.t
 t/relative_scores.t
 t/report_safe.t
 t/reportheader.t
@@ -485,7 +504,6 @@ t/spam.t
 t/spamc.t
 t/spamc_B.t
 t/spamc_E.t
-t/spamc_H.t
 t/spamc_c.t
 t/spamc_c_stdout_closed.t
 t/spamc_cf.t

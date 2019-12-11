@@ -16,7 +16,7 @@ process messages.  By default, spamd listens on port 783, but this is
 specifiable on the command line.
 
 /*
- * FIXME: The following paragraph(s) have to be updated as childs are now 
+ * FIXME: The following paragraph(s) have to be updated as children are now 
  *        pre-spawned
  */
 When spamd receives a connection, it spawns a child to handle the request.
@@ -144,7 +144,7 @@ configuration:              Mysql           .spamassassin/user_prefs
 can users connect?      yes      no           yes     no
                          |        |           /        |
                          |        |          /         |
-                       unsafe     |         /     root prefered
+                       unsafe     |         /     root preferred
                                   |        /
                                safe as non-root
                                           |

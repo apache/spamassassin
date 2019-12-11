@@ -1212,9 +1212,9 @@ C<Mail::SpamAssassin::PerMsgStatus>.
 
 =head1 SEE ALSO
 
-C<Mail::SpamAssassin>
+Mail::SpamAssassin(3)
 
-C<Mail::SpamAssassin::PerMsgStatus>
+Mail::SpamAssassin::PerMsgStatus(3)
 
 http://wiki.apache.org/spamassassin/PluginWritingTips
 

@@ -1,4 +1,4 @@
-#!/usr/bin/perl
+#!/usr/bin/perl -T
 #
 # ensure the rules files work without rules/70_sandbox.cf
 

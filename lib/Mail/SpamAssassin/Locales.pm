@@ -35,7 +35,7 @@ use re 'taint';
 our %charsets_for_locale = (
 
   # Japanese: Peter Evans writes: iso-2022-jp = rfc approved, rfc 1468, created
-  # by Jun Murai in 1993 back when he didnt have white hair!  rfc approved.
+  # by Jun Murai in 1993 back when he didn't have white hair!  rfc approved.
   # (rfc 2237) <-- by M$. 
   'ja' => 'EUCJP JISX020119760 JISX020819830 JISX020819900 JISX020819970 '.
 	'JISX021219900 JISX021320001 JISX021320002 SHIFT_JIS SHIFTJIS '.

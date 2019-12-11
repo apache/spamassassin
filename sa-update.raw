@@ -91,7 +91,7 @@ use Archive::Tar 1.23;
 use IO::Zlib 1.04;
 use Mail::SpamAssassin::Logger qw(:DEFAULT info log_message);
 
-our ($have_lwp, $io_socket_module_name, $have_inet4, $have_inet6, $have_sha256, $have_sha512);
+our ($have_lwp, $io_socket_module_name, $have_inet4, $use_inet4, $have_inet6, $use_inet6, $have_sha256, $have_sha512);
 
 BEGIN {
   # Deal with optional modules
@@ -188,7 +188,9 @@ GetOptions(
   'verbose|v+'                          => \$opt{'verbose'},
   'checkonly'                           => \$opt{'checkonly'},
   'allowplugins'                        => \$opt{'allowplugins'},
+  'reallyallowplugins'                  => \$opt{'reallyallowplugins'},
   'refreshmirrors'                      => \$opt{'refreshmirrors'},
+  'httputil=s'                          => \$opt{'httputil'},
 
   # allow multiple of these on the commandline
   'gpgkey=s'				=> $opt{'gpgkey'},
@@ -218,6 +220,15 @@ if ( defined $opt{'version'} ) {
   exit(0);
 }
 
+if ( $opt{'allowplugins'} && !$opt{'reallyallowplugins'} ) {
+  warn "Security warning: dangerous option --allowplugins used:\n".
+       "- there should never be need to use this option, see man sa-update(1)\n".
+       "- specify --reallyallowplugins to allow activating plugins\n";
+}
+
+$use_inet4 = $have_inet4 && ( !$opt{'force_pf'} || $opt{'force_pf'} eq 'inet' );
+$use_inet6 = $have_inet6 && ( !$opt{'force_pf'} || $opt{'force_pf'} eq 'inet6' );
+
 if ( $opt{'force_pf'} && $opt{'force_pf'} eq 'inet' && !$have_inet4 ) {
   warn "Option -4 specified but support for the ".
        "INET protocol family is not available.\n";
@@ -225,6 +236,10 @@ if ( $opt{'force_pf'} && $opt{'force_pf'} eq 'inet' && !$have_inet4 ) {
 if ( $opt{'force_pf'} && $opt{'force_pf'} eq 'inet6' && !$have_inet6 ) {
   warn "Option -6 specified but support for the ".
        "INET6 protocol family is not available.\n";
+}
+
+if ( defined $opt{'httputil'} && $opt{'httputil'} !~ /^(curl|wget|fetch|lwp)$/ ) {
+  warn "Invalid parameter for --httputil, curl|wget|fetch|lwp wanted\n";
 }
 
 # Figure out what version of SpamAssassin we're using, and also figure out the
@@ -366,7 +381,7 @@ if ($GPG_ENABLED || $opt{'import'}) {
   }
 
   # does the sa-update keyring exist?  if not, import it
-  if(!-f File::Spec->catfile($opt{'gpghomedir'}, "secring.gpg")) {
+  if(!-f File::Spec->catfile($opt{'gpghomedir'}, "trustdb.gpg")) {
     import_default_keyring();
     # attempt to continue even if this fails, anyway
   }
@@ -531,7 +546,7 @@ foreach my $channel (@channels) {
     my $dnsV = join(' ', do_dns_query($DNSQ));
     local($1);
     if (defined $dnsV && $dnsV =~ /^(\d+)/) {
-      $newV = $1 if (!defined $newV || $1 > $newV);
+      $newV = untaint_var($1) if (!defined $newV || $1 > $newV);
       dbg("dns: $DNSQ => $dnsV, parsed as $1");
     }
 
@@ -542,7 +557,7 @@ foreach my $channel (@channels) {
       if (defined shift @mirs) {
         dbg("channel: no updates available, skipping channel");
       } else {
-        channel_failed("channel: no 'mirrors.$channel' record found");
+        channel_failed("channel '$channel': no 'mirrors.$channel' record found");
       }
       next;
     }
@@ -623,7 +638,7 @@ foreach my $channel (@channels) {
       } else {
         # protection error, misconfiguration, file system error, ...
         warn "error: error accessing mirrors file $mirby_path: $!\n";
-        channel_failed("channel: error accessing mirrors file $mirby_path: $!");
+        channel_failed("channel '$channel': error accessing mirrors file $mirby_path: $!");
         next;
       }
     } elsif (-z _) {
@@ -648,15 +663,18 @@ foreach my $channel (@channels) {
       my @mirrors = do_dns_query("mirrors.$channel");
       unless (@mirrors) {
         warn "error: no mirror data available for channel $channel\n";
-        channel_failed("channel: MIRRORED.BY file URL was not in DNS");
+        channel_failed("channel '$channel': MIRRORED.BY file URL was not in DNS");
         next;
       }
       foreach my $mirror (@mirrors) {
-        my $result_fname;
-        $result_fname =
+        my ($result_fname, $http_ok) =
           http_get($mirror, $UPDDir, $mirby_path, $mirby_force_reload);
+        if (!$http_ok) {
+          dbg("channel: no mirror data available for channel %s from %s",
+              $channel, $mirror);
+          next;
+        }
         $mirby = read_content($result_fname, 0);
-
         if ($mirby) {
           dbg("channel: MIRRORED.BY file for channel %s retrieved", $channel);
           $mirby_file_is_ok = 1;
@@ -671,8 +689,6 @@ foreach my $channel (@channels) {
 
           last;
         }
-        dbg("channel: no mirror data available for channel %s from %s",
-            $channel, $mirror);
       }
       if ($mirby_force_reload) {  # not refreshed?
         warn "error: unable to refresh mirrors file for channel $channel, ".
@@ -682,13 +698,13 @@ foreach my $channel (@channels) {
 
     if (!$mirby_file_is_ok) {
       warn "error: no mirror data available for channel $channel\n";
-      channel_failed("channel: MIRRORED.BY file contents were missing");
+      channel_failed("channel '$channel': MIRRORED.BY file contents were missing");
       next;
     } elsif ($mirby) {
       # file contents already in memory, no need to read it from a file
     } elsif (!open(MIRBY, $mirby_path)) {
       warn "error: error opening mirrors file $mirby_path: $!\n";
-      channel_failed("channel: error opening mirrors file $mirby_path: $!");
+      channel_failed("channel '$channel': error opening mirrors file $mirby_path: $!");
       next;
     } else {
       dbg("channel: reading MIRRORED.BY file %s", $mirby_path);
@@ -729,90 +745,122 @@ foreach my $channel (@channels) {
 
     unless (%mirrors) {
       warn "error: no mirrors available for channel $channel\n";
-      channel_failed("channel: no mirrors available");
+      channel_failed("channel '$channel': no mirrors available");
       next;
     }
 
     # Now that we've laid the foundation, go grab the appropriate files
     #
+    my $path_content = File::Spec->catfile($UPDDir, "$newV.tar.gz");
+    my $path_sha512 =  File::Spec->catfile($UPDDir, "$newV.tar.gz.sha512");
+    my $path_sha256 =  File::Spec->catfile($UPDDir, "$newV.tar.gz.sha256");
+    my $path_asc =     File::Spec->catfile($UPDDir, "$newV.tar.gz.asc");
 
     # Loop through all available mirrors, choose from them randomly
-    # if the archive get fails, choose another mirror,
-    # if the get for the hash or gpg signature files fails, the channel fails
+    # if any get fails, choose another mirror to retry _all_ files again
+    # sleep few seconds on retries
+    my $download_ok = 0;
     while (my $mirror = choose_mirror(\%mirrors)) {
-      my $result_fname;
+      my ($result_fname, $http_ok);
       # Grab the data hash for this mirror, then remove it from the list
       my $mirror_info = $mirrors{$mirror};
       delete $mirrors{$mirror};
 
+      # Make sure we start without files from existing tries
+      unlink($path_content);
+      unlink($path_sha512);
+      unlink($path_sha256);
+      unlink($path_asc);
+
+      my $sleep_sec = 2;
+
       if (!check_mirror_af($mirror)) {
         my @my_af;
-        push(@my_af, "IPv4") if $have_inet4;
-        push(@my_af, "IPv6") if $have_inet6;
+        push(@my_af, "IPv4") if $use_inet4;
+        push(@my_af, "IPv6") if $use_inet6;
         push(@my_af, "no IP service") if !@my_af;
-        dbg("reject mirror %s: no common address family (%s)",
-            $mirror, join(" ", @my_af));
+        dbg("reject mirror %s: no common address family (%s), %s",
+            $mirror, join(" ", @my_af),
+            %mirrors ? "sleeping $sleep_sec sec and trying next" : 'no mirrors left');
+        sleep($sleep_sec) if %mirrors;
         next;
       }
 
       dbg("channel: selected mirror $mirror");
 
       # Actual archive file
-      $result_fname = http_get("$mirror/$newV.tar.gz", $UPDDir);
-      $content = read_content($result_fname, 1);
-      next unless $content;
-      $preserve_files{$result_fname} = 1;
-
-      # SHA512 of the archive file
-      $result_fname = http_get("$mirror/$newV.tar.gz.sha512", $UPDDir);
-      if ( -s $result_fname) {
-        $SHA512 = read_content($result_fname, 0);
-        last unless $SHA512;
-        $preserve_files{$result_fname} = 1;
-      } else {
-        undef $SHA512;
-        dbg("channel: No sha512 file available from $mirror");
+      ($result_fname, $http_ok) = http_get("$mirror/$newV.tar.gz", $UPDDir);
+      if (!$http_ok || !-s $result_fname) {
+        dbg("channel: failed to get $newV.tar.gz from mirror $mirror, %s",
+          %mirrors ? "sleeping $sleep_sec sec and trying next" : 'no mirrors left');
+        sleep($sleep_sec) if %mirrors;
+        next;
       }
 
-      # SHA256 of the archive file
-      $result_fname = http_get("$mirror/$newV.tar.gz.sha256", $UPDDir);
-      if ( -s $result_fname) {
-        $SHA256 = read_content($result_fname, 0);
-        last unless $SHA256;
-        $preserve_files{$result_fname} = 1;
-      } else {
-        undef $SHA256;
-        dbg("channel: No sha256 file available from $mirror");
+      # SHA512 of the archive file
+      ($result_fname, $http_ok) = http_get("$mirror/$newV.tar.gz.sha512", $UPDDir);
+      if (!$http_ok || !-s $result_fname) {
+        # If not found, try SHA256 instead
+        ($result_fname, $http_ok) = http_get("$mirror/$newV.tar.gz.sha256", $UPDDir);
+        if (!$http_ok || !-s $result_fname) {
+          dbg("channel: No sha512 or sha256 file available from $mirror, %s",
+            %mirrors ? "sleeping $sleep_sec sec and trying next" : 'no mirrors left');
+          sleep($sleep_sec) if %mirrors;
+          next;
+        }
       }
 
       # if GPG is enabled, the GPG detached signature of the archive file
       if ($GPG_ENABLED) {
-        $result_fname = http_get("$mirror/$newV.tar.gz.asc", $UPDDir);
-        $GPG = read_content($result_fname, 0);
-        last unless $GPG;
-        $preserve_files{$result_fname} = 1;
+        ($result_fname, $http_ok) = http_get("$mirror/$newV.tar.gz.asc", $UPDDir);
+        if (!$http_ok || !-s $result_fname) {
+          dbg("channel: No GPG/asc file available from $mirror, %s",
+            %mirrors ? "sleeping $sleep_sec sec and trying next" : 'no mirrors left');
+          sleep($sleep_sec) if %mirrors;
+          next;
+        }
       }
+
+      $download_ok = 1;
       last;
     }
 
+    if ($download_ok) {
+      if (-s $path_content) {
+        $content = read_content($path_content, 1); # binary
+        $preserve_files{$path_content} = 1;
+      }
+      if (-s $path_sha512) {
+        $SHA512 = read_content($path_sha512, 0); # ascii
+        $preserve_files{$path_sha512} = 1;
+      }
+      if (-s $path_sha256) {
+        $SHA256 = read_content($path_sha256, 0); # ascii
+        $preserve_files{$path_sha256} = 1;
+      }
+      if (-s $path_asc) {
+        $GPG = read_content($path_asc, 0); # ascii
+        $preserve_files{$path_asc} = 1;
+      }
+    }
   }
 
   unless ($content && ( $SHA512 || $SHA256 ) && (!$GPG_ENABLED || $GPG)) {
-    channel_failed("channel: could not find working mirror");
+    channel_failed("channel '$channel': could not find working mirror");
     next;
   }
 
   if ( $SHA512 ) {
     # Validate the SHA512 signature
     { local($1);
-      $SHA512 =~ /^([a-fA-F0-9]{128})/;
-      $SHA512 = $1 || 'INVALID';
+      $SHA512 =~ /^([a-fA-F0-9]{128})\b/;
+      $SHA512 = defined $1 ? lc($1) : 'INVALID';
     }
     my $digest = sha512_hex($content);
     dbg("sha512: verification wanted: $SHA512");
     dbg("sha512: verification result: $digest");
     unless ($digest eq $SHA512) {
-      channel_failed("channel: SHA512 verification failed");
+      channel_failed("channel '$channel': SHA512 verification failed");
       next;
     }
   }
@@ -820,14 +868,14 @@ foreach my $channel (@channels) {
   if ( $SHA256 ) {
     # Validate the SHA256 signature
     { local($1);
-      $SHA256 =~ /^([a-fA-F0-9]{64})/;
-      $SHA256 = $1 || 'INVALID';
+      $SHA256 =~ /^([a-fA-F0-9]{64})\b/;
+      $SHA256 = defined $1 ? lc($1) : 'INVALID';
     }
     my $digest = sha256_hex($content);
     dbg("sha256: verification wanted: $SHA256");
     dbg("sha256: verification result: $digest");
     unless ($digest eq $SHA256) {
-      channel_failed("channel: SHA256 verification failed");
+      channel_failed("channel '$channel': SHA256 verification failed");
       next;
     }
   }
@@ -939,7 +987,7 @@ key.  Instead, it was signed with the following keys:
 
 Perhaps you need to import the channel's GPG key?  For example:
 
-    wget http://spamassassin.apache.org/updates/GPG.KEY
+    wget https://spamassassin.apache.org/updates/GPG.KEY
     sa-update --import GPG.KEY
 
 ENDOFVALIDATIONERR
@@ -953,7 +1001,7 @@ ENDOFVALIDATIONERR
 
       }
 
-      channel_failed("channel: GPG validation failed");
+      channel_failed("channel '$channel': GPG validation failed");
       next;
     }
   }
@@ -963,14 +1011,14 @@ ENDOFVALIDATIONERR
 
   dbg("channel: extracting archive");
   if (!taint_safe_archive_extract($UPDTmp, $content_file)) {
-    channel_failed("channel: archive extraction failed");
+    channel_failed("channel '$channel': archive extraction failed");
     next;
   }
 
   # check --lint
 
   if (!lint_check_dir($UPDTmp)) {
-    channel_failed("channel: lint check of update failed");
+    channel_failed("channel '$channel': lint check of update failed");
     next;
   }
 
@@ -1026,7 +1074,7 @@ ENDOFVALIDATIONERR
       'try' => sub {
         # extract the files again for the last time
         if (!taint_safe_archive_extract($UPDDir, $content_file)) {
-          channel_failed("channel: archive extraction failed");
+          channel_failed("channel '$channel': archive extraction failed");
 	  return 0;
         }
 
@@ -1112,11 +1160,11 @@ ENDOFVALIDATIONERR
 
         # Finally, write out the files to include the update files
         if (!write_channel_file($PREFile, \@PRE)) {
-          channel_failed("channel: writing of $PREFile failed");
+          channel_failed("channel '$channel': writing of $PREFile failed");
           return 0;
         }
         if (!write_channel_file($CFFile, \@CF)) {
-          channel_failed("channel: writing of $CFFile failed");
+          channel_failed("channel '$channel': writing of $CFFile failed");
           return 0;
         }
 
@@ -1199,7 +1247,7 @@ elsif (!$channel_failures) {
   $exit = $channel_successes ? 0 : 1;
 }
 else {  # at least some failures
-  # 3: some failures, but at least one channel suceeded
+  # 3: some failures, but at least one channel succeeded
   # 4 or higher means all channels failed
   $exit = $channel_successes ? 3 : 4;
 }
@@ -1298,11 +1346,14 @@ sub taint_safe_archive_extract {
         $content =~ s/\@\@([^\@]+)\@\@/$MACRO_VALUES{$1} || "\@\@$1\@\@"/ge;
 
         # also, if --allowplugins is not specified, comment out
-        # all loadplugin or tryplugin lines
+        # all loadplugin or tryplugin lines (and others that can load code)
         if ( !$opt{'allowplugins'} ) {
-          $content =~ s{^\s*((?:load|try)plugin|bayes_store_module|auto_whitelist_factory)\b}
+          $content =~ s{^\s*((?:load|try)plugin|\S+_modules?|\S+_factory)\s}
             {#(commented by sa-update, no --allowplugins switch specified)# $1}gmx;
         }
+
+        # other stuff never allowed for safety
+        $content =~ s/^\s*(dns_server)/#(commented by sa-update, not allowed)# $1/gm;
       }
 
       print OUT $content
@@ -1506,9 +1557,23 @@ sub http_get {
       !$out_fname_exists ? 'new' : $force_reload ? 'replace' : 'update');
 
   my($ext_prog, $cmd, @args);
-  foreach my $try_prog ('curl', 'wget', 'fetch') {
-    $cmd = Mail::SpamAssassin::Util::find_executable_in_env_path($try_prog);
-    if (defined $cmd && $cmd ne '') { $ext_prog = $try_prog; last }
+  if (defined $opt{'httputil'}) {
+    if ($opt{'httputil'} eq 'lwp') {
+      if (!$have_lwp) {
+        die "http: module LWP not available, download failed";
+      }
+    } else {
+      $ext_prog = $opt{'httputil'};
+      $cmd = Mail::SpamAssassin::Util::find_executable_in_env_path($ext_prog);
+      if (!defined $cmd || $cmd eq '') {
+        die "http: $ext_prog utility not found, download failed";
+      }
+    }
+  } else {
+    foreach my $try_prog ('curl', 'wget', 'fetch') {
+      $cmd = Mail::SpamAssassin::Util::find_executable_in_env_path($try_prog);
+      if (defined $cmd && $cmd ne '') { $ext_prog = $try_prog; last }
+    }
   }
 
   if (defined $ext_prog && $ext_prog eq 'curl') {
@@ -1516,16 +1581,19 @@ sub http_get {
                    --connect-timeout 30 --max-time 300
                    --fail -o), $out_fname_short);
     push(@args, '-z', $out_fname_short)  if $out_fname_exists && !$force_reload;
+    push(@args, '-A', "sa-update/$VERSION/$SAVersion");
   } elsif (defined $ext_prog && $ext_prog eq 'wget') {
     push(@args, qw(-q --max-redirect=2 --tries=3
                    --dns-timeout=20 --connect-timeout=30 --read-timeout=300));
     push(@args, defined $suggested_out_fname ? ('-O', $out_fname_short)
                 : $force_reload ? () : ('-N') );
+    push(@args, '-U', "sa-update/$VERSION/$SAVersion");
   } elsif (defined $ext_prog && $ext_prog eq 'fetch') {
     push(@args, qw(-q -n -a -w 20 -m -o), $out_fname_short);
     push(@args, '-m')  if $out_fname_exists && !$force_reload;
+    push(@args, "--user-agent=sa-update/$VERSION/$SAVersion");
   } elsif ($have_lwp) {
-    dbg("http: no external tool for download, fallback to using LWP");
+    dbg("http: no external tool for download, fallback to using LWP") if !$opt{'httputil'};
     my $ims;
     if ($out_fname_exists && !$force_reload) {
       my @out_fname_stat = stat($out_fname);
@@ -1543,7 +1611,7 @@ sub http_get {
       $out_fh->print($content) or die "Error writing to $out_fname: $!";
     }
     $out_fh->close or die "Error closing file $out_fname: $!";
-    return $out_fname;
+    return ($out_fname, 1);
   } else {
     die "http: no downloading tool available";
   }
@@ -1586,7 +1654,7 @@ sub http_get {
            $ext_prog, $url, exit_status_str($child_stat,0));
   }
 
-  return $out_fname;
+  return ($out_fname, $child_stat == 0);
 }
 
 # Read the content of a (downloaded) file. The subroutine expects a file name
@@ -1595,20 +1663,26 @@ sub http_get {
 # mode. Returns the content of the file as a string.
 sub read_content {
   my ($file_name, $binary_mode) = @_;
-  my $content;
 
   my $file = IO::File->new;
-  $file->open($file_name, '<') or die "Cannot open file $file_name: $!";
+  if (!$file->open($file_name, '<')) {
+    dbg("read_content: Cannot open file $file_name: $!");
+    return undef; ## no critic (ProhibitExplicitReturnUndef)
+  }
   if ($binary_mode) {
     binmode $file;
   }
+
   my($number_of_bytes,$buffer);
-  $content = '';
+  my $content = '';
   while (($number_of_bytes = $file->read($buffer, 16384)) > 0) {
     $content .= $buffer;
   }
-  defined $number_of_bytes or die "Error reading from file $file_name: $!";
-  $file->close or die "Error closing $file_name: $!";
+  if (!defined $number_of_bytes) {
+    dbg("read_content: Error reading from file $file_name: $!");
+    return undef; ## no critic (ProhibitExplicitReturnUndef)
+  }
+  $file->close;
 
   return $content;
 }
@@ -1656,11 +1730,22 @@ sub choose_mirror {
 
 sub check_mirror_af {
     my ($mirror) = @_;
-    my($a_rr, $aaaa_rr);
-      # RFC 3986:  scheme = ALPHA *( ALPHA / DIGIT / "+" / "-" / "." )
-    $mirror =~ s{^[a-z][a-z0-9.+-]*://}{}si;  # strip scheme like http://
-    return 1 if $have_inet4 && do_dns_query($mirror, "A");
-    return 1 if $have_inet6 && do_dns_query($mirror, "AAAA");
+    # RFC 3986:  scheme = ALPHA *( ALPHA / DIGIT / "+" / "-" / "." )
+    $mirror =~ s{^([a-z][a-z0-9.+-]*)://}{}si;  # strip scheme like http://
+    my $scheme = lc($1);
+    # No DNS check needed for proxied connections (caveat: no_proxy is not checked)
+    my $http_proxy = (defined $ENV{"http_proxy"} && $ENV{"http_proxy"} =~ /\S/) ||
+                     (defined $ENV{"HTTP_PROXY"} && $ENV{"HTTP_PROXY"} =~ /\S/);
+    my $https_proxy = (defined $ENV{"https_proxy"} && $ENV{"https_proxy"} =~ /\S/) ||
+                      (defined $ENV{"HTTPS_PROXY"} && $ENV{"HTTPS_PROXY"} =~ /\S/);
+    return 1 if $scheme eq "http" && $http_proxy;
+    return 1 if $scheme eq "https" && $https_proxy;
+    # No DNS check needed for IPv4 or IPv6 address literal
+    return 1 if $use_inet4 && $mirror =~ m{^\d+\.\d+\.\d+\.\d+(?:[:/]|$)};
+    return 1 if $use_inet6 && $mirror =~ m{^\[};
+    $mirror =~ s{[:/].*}{}s;  # strip all starting from :port or /path
+    return 1 if $use_inet4 && do_dns_query($mirror, "A");
+    return 1 if $use_inet6 && do_dns_query($mirror, "AAAA");
     return 0;
 }
 
@@ -1716,10 +1801,21 @@ sub interpolate_gpghomedir {
 
 ##############################################################################
 
+sub check_gpghomedir {
+  unless (-d $opt{gpghomedir}) {
+    dbg("gpg: creating gpg home dir ".$opt{gpghomedir});
+    # use 0700 to avoid "unsafe permissions" warning
+    mkpath([$opt{gpghomedir}], 0, 0700)
+      or die "cannot mkpath $opt{gpghomedir}: $!";
+  } 
+}
+
+##############################################################################
 sub import_gpg_key {
   my $keyfile = shift;
 
   my $gpghome = interpolate_gpghomedir();
+  check_gpghomedir();
 
   my $CMD = "$GPGPath $gpghome --batch ".
       "--no-tty --status-fd=1 -q --logger-fd=1 --import";
@@ -1759,11 +1855,7 @@ sub import_default_keyring {
   }
 
   dbg("gpg: importing default keyring to ".$opt{gpghomedir});
-  unless (-d $opt{gpghomedir}) {
-    # use 0700 to avoid "unsafe permissions" warning
-    mkpath([$opt{'gpghomedir'}], 0, 0700)
-      or die "cannot mkpath $opt{gpghomedir}: $!";
-  } 
+  check_gpghomedir();
   import_gpg_key($defkey);
 }
 
@@ -1868,7 +1960,7 @@ Options:
   --install filename      Install updates directly from this file. Signature
                           verification will use "file.asc", "file.sha256",
                           and "file.sha512".
-  --allowplugins          Allow updates to load plugin code
+  --allowplugins          Allow updates to load plugin code (DANGEROUS)
   --gpgkey key            Trust the key id to sign releases
                           Use multiple times for multiple keys
   --gpgkeyfile file       Trust the key ids in the file to sign releases
@@ -1882,6 +1974,8 @@ Options:
                           SpamAssassin site rules directory
                           (default: @@LOCAL_STATE_DIR@@/@@VERSION@@)
   --refreshmirrors        Force the MIRRORED.BY file to be updated
+  --httputil util         Force used download tool. By default first found
+                          from these is used: curl, wget, fetch, lwp
   -D, --debug [area=n,...]  Print debugging messages
   -v, --verbose           Be verbose, like print updated channel names;
                           For more verbosity specify multiple times
@@ -1963,6 +2057,13 @@ B<--channel> and B<--install> switches, e.g.:
 Allow downloaded updates to activate plugins.  The default is not to
 activate plugins; any C<loadplugin> or C<tryplugin> lines will be commented
 in the downloaded update rules files.
+
+You should never enable this for 3rd party update channels, since plugins
+can execute unrestricted code on your system, even possibly as root! This
+includes spamassassin official updates, which have no need to include
+running code.
+
+Use --reallyallowplugins option to bypass warnings and make it work.
 
 =item B<--gpg>, B<--nogpg>
 
@@ -2096,7 +2197,7 @@ spamassassin(1)
 spamd(1)
 <http://wiki.apache.org/spamassassin/RuleUpdates>
 
-=head1 PREREQUESITES
+=head1 PREREQUISITES
 
 C<Mail::SpamAssassin>
 
@@ -2106,7 +2207,7 @@ See <http://issues.apache.org/SpamAssassin/>
 
 =head1 AUTHORS
 
-The Apache SpamAssassin(tm) Project <http://spamassassin.apache.org/>
+The Apache SpamAssassin(tm) Project <https://spamassassin.apache.org/>
 
 =head1 LICENSE AND COPYRIGHT
 

@@ -240,7 +240,7 @@ sub parse {
 
   # # (outdated claim) HTML::Parser converts &nbsp; into a question mark ("?")
   # # for some reason, so convert them to spaces.  Confirmed in 3.31, at least.
-  # ... Actually it doesn't, it is correctly coverted into Unicode NBSP,
+  # ... Actually it doesn't, it is correctly converted into Unicode NBSP,
   # nevertheless it does not hurt to treat it as a space.
   $text =~ s/&nbsp;/ /g;
 
@@ -259,7 +259,15 @@ sub parse {
         $utf8_mode ? "on (assumed UTF-8 octets)"
                    : "off (default, assumed Unicode characters)");
   }
-  $self->SUPER::parse($text);
+
+  eval {
+    local $SIG{__WARN__} = sub {
+      my $err = $_[0];
+      $err =~ s/\s+/ /gs; $err =~ s/(.*) at .*/$1/s;
+      info("message: HTML::Parser warning: $err");
+    };
+    $self->SUPER::parse($text);
+  };
 
   # bug 7437: deal gracefully with HTML::Parser misbehavior on unclosed <style> and <script> tags
   # (typically from not passing the entire message to spamc, but possibly a DoS attack)
@@ -616,7 +624,16 @@ sub html_tests {
   my ($self, $tag, $attr, $num) = @_;
 
   if ($tag eq "font" && exists $attr->{face}) {
-    if ($attr->{face} !~ /^'?[a-z ][a-z -]*[a-z](?:,\s*[a-z][a-z -]*[a-z])*'?$/i) {
+    # Fixes from Bug 5956, 7312
+    # Examples seen in ham:
+    #  "Tahoma", Verdana, Arial, sans-serif
+    #  'Montserrat', sans-serif
+    #  Arial,Helvetica,Sans-Serif;
+    #  .SFUIDisplay
+    #  hirakakupro-w3
+    # TODO: There's still the problem completely foreign unicode strings,
+    # probably this rule should be deprecated.
+    if ($attr->{face} !~ /^\s*["'.]?[a-z ][a-z -]*[a-z]\d?["']?(?:,\s*["']?[a-z][a-z -]*[a-z]\d?["']?)*;?$/i) {
       $self->put_results(font_face_bad => 1);
     }
   }
@@ -750,7 +767,10 @@ sub html_text {
   my $invisible_for_bayes = 0;
 
   # NBSP:  UTF-8: C2 A0, ISO-8859-*: A0
-  if ($text !~ /^(?:[ \t\n\r\f\x0b]|\xc2\xa0)*\z/s) {
+  # Bug 7374 - regex recursion limit exceeded
+  #if ($text !~ /^(?:[ \t\n\r\f\x0b]|\xc2\xa0)*\z/s) {
+  # .. alternative way, remove from string and see if there's anything left
+  if (do {(my $tmp = $text) =~ s/(?:[ \t\n\r\f\x0b]|\xc2\xa0)//gs; length($tmp)}) {
     $invisible_for_bayes = $self->html_font_invisible($text);
   }
 

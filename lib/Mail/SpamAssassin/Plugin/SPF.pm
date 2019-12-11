@@ -812,7 +812,7 @@ sub _check_spf_whitelist {
   $self->_get_sender($scanner) unless $scanner->{sender_got};
 
   unless ($scanner->{sender}) {
-    dbg("spf: spf_whitelist_from: could not find useable envelope sender");
+    dbg("spf: spf_whitelist_from: could not find usable envelope sender");
     return;
   }
 
@@ -850,7 +850,7 @@ sub _check_def_spf_whitelist {
   $self->_get_sender($scanner) unless $scanner->{sender_got};
 
   unless ($scanner->{sender}) {
-    dbg("spf: def_spf_whitelist_from: could not find useable envelope sender");
+    dbg("spf: def_spf_whitelist_from: could not find usable envelope sender");
     return;
   }
 

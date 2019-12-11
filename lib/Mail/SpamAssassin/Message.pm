@@ -113,12 +113,15 @@ sub new {
   my $self = $class->SUPER::new({normalize=>$normalize});
 
   $self->{tmpfiles} =           [];
+  $self->{pristine_msg} = 	'';
   $self->{pristine_headers} =	'';
   $self->{pristine_body} =	'';
   $self->{mime_boundary_state} = {};
   $self->{line_ending} =	"\012";
   $self->{master_deadline} = $opts->{'master_deadline'};
   $self->{suppl_attrib} = $opts->{'suppl_attrib'};
+  $self->{body_part_scan_size} = $opts->{'body_part_scan_size'} || 0;
+  $self->{rawbody_part_scan_size} = $opts->{'rawbody_part_scan_size'} || 0;
 
   if ($self->{suppl_attrib}) {  # caller-provided additional information
     # pristine_body_length is currently used by an eval test check_body_length
@@ -188,16 +191,36 @@ sub new {
     @message = split(/^/m, $message, -1);
   }
 
-  # Pull off mbox and mbx separators
-  # also deal with null messages
+  # Deal with null message
   if (!@message) {
     # bug 4884:
     # if we get here, it means that the input was null, so fake the message
     # content as a single newline...
     @message = ("\n");
-  } elsif ($message[0] =~ /^From\s+(?!:)/) {
+  }
+
+  # Bug 7648:
+  # Make sure the message is tainted. When linting, @testmsg is not, so this
+  # handles that. Perhaps 3rd party tools could call this with untainted
+  # messages? Tainting the message is important because it prevents certain
+  # exploits later.
+  if (Mail::SpamAssassin::Util::am_running_in_taint_mode() &&
+        grep { !Scalar::Util::tainted($_) } @message) {
+    local($_);
+    # To preserve newlines, no joining and splitting here, process each line
+    # directly as is.
+    foreach (@message) {
+      $_ = Mail::SpamAssassin::Util::taint_var($_);
+    }
+    if (grep { !Scalar::Util::tainted($_) } @message) {
+      die "Mail::SpamAssassin::Message failed to enforce message taintness";
+    }
+  }
+
+  # Pull off mbox and mbx separators
+  if ($message[0] =~ /^From\s+(?!:)/) {
     # careful not to confuse with obsolete syntax which allowed WSP before ':'
-    # mbox formated mailbox
+    # mbox formatted mailbox
     $self->{'mbox_sep'} = shift @message;
   } elsif ($message[0] =~ MBX_SEPARATOR) {
     $_ = shift @message;
@@ -326,6 +349,9 @@ sub new {
   if (!defined $self->{pristine_body_length}) {
     $self->{'pristine_body_length'} = length $self->{'pristine_body'};
   }
+
+  # Store complete message, get_pristine() is used a lot, avoid making copies
+  $self->{'pristine_msg'} = $self->{'pristine_headers'} . $self->{'pristine_body'};
 
   # iterate over lines in reverse order
   # merge multiple blank lines into a single one
@@ -495,7 +521,7 @@ Returns a scalar of the entire pristine message.
 
 sub get_pristine {
   my ($self) = @_;
-  return $self->{pristine_headers} . $self->{pristine_body};
+  return $self->{pristine_msg};
 }
 
 =item get_pristine_body()
@@ -621,6 +647,9 @@ sub finish {
   delete $self->{'mime_boundary_state'};
   delete $self->{'mbox_sep'};
   delete $self->{'normalize'};
+  delete $self->{'body_part_scan_size'};
+  delete $self->{'rawbody_part_scan_size'};
+  delete $self->{'pristine_msg'};
   delete $self->{'pristine_body'};
   delete $self->{'pristine_headers'};
   delete $self->{'line_ending'};
@@ -876,6 +905,7 @@ sub _parse_multipart {
   my $header;
   my $part_array;
   my $found_end_boundary;
+  my $partcnt = 0;
 
   my $line_count = @{$body};
   foreach ( @{$body} ) {
@@ -946,6 +976,13 @@ sub _parse_multipart {
 	  # to be a mime header.  if it's not, mark it.
 	  $self->{'missing_mime_headers'} = 1;
 	}
+      }
+
+      # Maximum parts to process
+      if (++$partcnt == 1000) {
+        dbg("message: mimepart limit exceeded, stopping parsing");
+        $self->{'mimepart_limit_exceeded'} = 1;
+        return;
       }
 
       # make sure we start with a new clean node
@@ -1111,6 +1148,8 @@ sub get_body_text_array_common {
 
   $self->{$key} = [];
 
+  my $scansize = $self->{body_part_scan_size};
+
   # Find all parts which are leaves
   my @parts = $self->find_parts(qr/./,1);
   return $self->{$key} unless @parts;
@@ -1130,8 +1169,29 @@ sub get_body_text_array_common {
     $text .= "\n"  if $text ne '';
 
     my($type, $rnd) = $p->$method_name();  # decode this part
-    if ( defined $rnd ) {
-      # Only text/* types are rendered ...
+    # Only text/* types are rendered ...
+    if (defined $rnd) {
+      # Truncate to body_part_scan_size
+      if ($scansize && length($rnd) > $scansize) {
+        # Try truncating at boundary, nearest 1k block is fine
+        # Newline first
+        my $idx = index($rnd, "\n", $scansize);
+        if ($idx >= 0 && $idx - $scansize <= 1024) {
+          substr($rnd, $idx+1) = ''; # truncate
+        }
+        else {
+          # Space is fine too for rendered
+          $idx = index($rnd, " ", $scansize);
+          if ($idx >= 0 && $idx - $scansize <= 1024) {
+            substr($rnd, $idx+1) = ''; # truncate
+          }
+          else {
+            substr($rnd, $scansize) = ''; # truncate
+          }
+        }
+      }
+
+      # Add to rendered text
       $text .= $rnd;
 
       # TVD - if there are multiple parts, what should we do?
@@ -1181,6 +1241,8 @@ sub get_decoded_body_text_array {
   if (defined $self->{text_decoded}) { return $self->{text_decoded}; }
   $self->{text_decoded} = [ ];
 
+  my $scansize = $self->{rawbody_part_scan_size};
+
   # Find all parts which are leaves
   my @parts = $self->find_parts(qr/^(?:text|message)\b/i,1);
   return $self->{text_decoded} unless @parts;
@@ -1191,8 +1253,38 @@ sub get_decoded_body_text_array {
     # and not displayed
     next if ($parts[$pt]->{'type'} eq 'text/calendar');
 
+    my $rawbody = $parts[$pt]->decode();
+    my $rawlen = length($rawbody);
+
+    # Truncate to rawbody_part_scan_size
+    if ($scansize && $rawlen > $scansize) {
+      # Try truncating at boundary, nearest 1k block is fine
+      # Newline first
+      my $idx = index($rawbody, "\n", $scansize);
+      if ($idx >= 0 && $idx - $scansize <= 1024) {
+        substr($rawbody, $idx+1) = ''; # truncate
+      }
+      else {
+        # Try > next, might be html
+        $idx = index($rawbody, '>', $scansize);
+        if ($idx >= 0 && $idx - $scansize <= 1024) {
+          substr($rawbody, $idx+1) = ''; # truncate
+        }
+        else {
+          # Space as last effort
+          $idx = index($rawbody, ' ', $scansize);
+          if ($idx >= 0 && $idx - $scansize <= 1024) {
+            substr($rawbody, $idx+1) = ''; # truncate
+          }
+          else {
+            substr($rawbody, $scansize) = ''; # truncate
+          }
+        }
+      }
+    }
+
     push(@{$self->{text_decoded}},
-         split_into_array_of_short_paragraphs($parts[$pt]->decode()));
+         split_into_array_of_short_paragraphs($rawbody));
   }
 
   return $self->{text_decoded};
@@ -1217,19 +1309,25 @@ sub split_into_array_of_short_lines {
 
 # ---------------------------------------------------------------------------
 
-# split a text into array of paragraphs of sizes between
-# $chunk_size and 2 * $chunk_size, returning the resulting array
+# Split a text into array of paragraphs of sizes between
+# 1-2 * MAX_BODY_LINE_LENGTH, returning the resulting array.
+# Mainly used for rawbody splitting purposes
 
 sub split_into_array_of_short_paragraphs {
-  my @result;
-  my $chunk_size = 1024;
   my $text_l = length($_[0]);
-  my($j,$ofs);
-  for ($ofs = 0;  $text_l - $ofs > 2 * $chunk_size;  $ofs = $j+1) {
-    $j = index($_[0], "\n", $ofs+$chunk_size);
-    if ($j < 0) {
-      $j = index($_[0], " ", $ofs+$chunk_size);
-      if ($j < 0) { $j = $ofs+$chunk_size }
+  return ($_[0]) if $text_l <= MAX_BODY_LINE_LENGTH;
+  my(@result,$j,$ofs);
+  # Try to split in order \n, > (html?), space
+  for ($ofs = 0; $text_l - $ofs > 2 * MAX_BODY_LINE_LENGTH; $ofs = $j+1) {
+    $j = index($_[0], "\n", $ofs + MAX_BODY_LINE_LENGTH);
+    if ($j < 0 || $j-$ofs+1 > 2 * MAX_BODY_LINE_LENGTH) {
+      $j = index($_[0], ">", $ofs + MAX_BODY_LINE_LENGTH);
+      if ($j < 0 || $j-$ofs+1 > 2 * MAX_BODY_LINE_LENGTH) {
+        $j = index($_[0], " ", $ofs + MAX_BODY_LINE_LENGTH);
+        if ($j < 0 || $j-$ofs+1 > 2 * MAX_BODY_LINE_LENGTH) {
+          $j = $ofs + MAX_BODY_LINE_LENGTH;
+        }
+      }
     }
     push(@result, substr($_[0], $ofs, $j-$ofs+1));
   }
