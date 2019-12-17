@@ -47,7 +47,8 @@ describe NUMERIC_HTTP_ADDR	Uses a numeric IP address in URL
 # Theo sez:
 # Have gotten FPs off this, and whitespace can't be in the host, so...
 # %    Visit my homepage: http://i.like.foo.com %
-uri HTTP_ESCAPED_HOST           /^https?\:\/\/[^\/\s\?\']*%[0-9a-fA-F][0-9a-fA-F]/
+# Also ignore some bad parses like http://foo.bar%20http://foo.bar
+uri HTTP_ESCAPED_HOST           /^https?\:\/\/[^\/\s\?\&\#\']*(?!%(?:20|3[cCeE])(?:https?:|mailto:))%[0-9a-fA-F][0-9a-fA-F]/
 describe HTTP_ESCAPED_HOST	Uses %-escapes inside a URL's hostname
 
 # look for URI with escaped 0-9, A-Z, or a-z characters (all other safe
@@ -96,10 +97,10 @@ describe SPOOF_COM2COM 	URI contains ".com" in middle and end
 uri SPOOF_NET2COM	m{^https?://(?:\w+\.)+?(?:net|org)\.(?!(?:[a-z]{2}\.)?s3\.amazonaws\.com)(?:\w+\.)+?com\b}i
 describe SPOOF_NET2COM 	URI contains ".net" or ".org", then ".com"
 
-uri URI_HEX		m%^https?://[^/?]*\b(?![0-9a-f]{0,12}[a-f]{3})[0-9a-f]{6,}\b%i
+uri URI_HEX		m%^https?://[^/?&\#]*\b(?![0-9a-f]{0,12}[a-f]{3})[0-9a-f]{6,}\b%i
 describe URI_HEX	URI hostname has long hexadecimal sequence
 
-uri URI_NOVOWEL		m%^https?://[^/?]*[bcdfgjklmnpqrstvwxz]{7}%i
+uri URI_NOVOWEL		m%^https?://[^/?&\#]*[bcdfgjklmnpqrstvwxz]{7}%i
 describe URI_NOVOWEL	URI hostname has long non-vowel sequence
 tflags URI_NOVOWEL      userconf     # lock scores low
 
