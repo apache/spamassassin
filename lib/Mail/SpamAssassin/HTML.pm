@@ -509,7 +509,7 @@ sub text_style {
         $new{style} = $attr->{style};
 	my @parts = split(/;/, $new{style});
 	foreach (@parts) {
-	  if (/^\s*(background-)?color:\s*(.+)\s*$/i) {
+	  if (/^\s*(background-)?color:\s*(.+?)\s*$/i) {
 	    my $whcolor = $1 ? 'bgcolor' : 'fgcolor';
 	    my $value = lc $2;
 
