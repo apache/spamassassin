@@ -531,6 +531,10 @@ sub text_style {
                                        map { !$_ ? 0 : $_ > 255 ? 255 : $_ }
                                            @rgb[0..2]);
             }
+            elsif ($value eq 'inherit') {
+              # do nothing, just prevent parsing of the valid
+              # CSS3 property value as 'invalid color' (Bug 7778)
+            }
 	    else {
 	      $new{$whcolor} = name_to_rgb($value);
 	    }
