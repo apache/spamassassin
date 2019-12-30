@@ -43,7 +43,8 @@ if (version >= 3.004003)
   ifplugin Mail::SpamAssassin::Plugin::HashBL
     body          __HASHBL_BTC eval:check_hashbl_bodyre('bl.btcblack.it', 'raw/max=10/shuffle', '(?:\s|^)([13][a-km-zA-HJ-NP-Z1-9]{25,34})(?:\s|$)')
     priority      __HASHBL_BTC -100
-    tflags        __HASHBL_BTC net
+    tflags        __HASHBL_BTC net publish
+    reuse         __HASHBL_BTC
     meta          BTC_HASHBL_BLACK ( __HASHBL_BTC  && __BITCOIN_ID && !__URL_BTC_ID )
     describe      BTC_HASHBL_BLACK Message contains BTC address found on BTCBL
     score         BTC_HASHBL_BLACK 5.0 # limit
