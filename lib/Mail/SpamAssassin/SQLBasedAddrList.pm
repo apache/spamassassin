@@ -296,10 +296,20 @@ sub add_score {
     my @args = ($self->{_username}, $email, $ip, 1, $score);
     my $sql = sprintf("INSERT INTO %s (%s) VALUES (%s)", $self->{tablename},
                       join(',', @fields),  join(',', ('?') x @fields));
+    if ($self->{dsn} =~ /DBI:pg/i) {
+       $sql .= " ON CONFLICT (username, email, signedby, ip) DO UPDATE set msgcount = ?, totscore = ?";
+    } elsif ($self->{dsn} =~ /DBI:mysql/i) {
+       $sql .= " ON DUPLICATE KEY UPDATE msgcount = ?, totscore = ?";
+    }
     my $sth = $self->{dbh}->prepare($sql);
 
     if (!$self->{_with_awl_signer}) {
-      my $rc = $sth->execute(@args);
+      my $rc;
+      if ($self->{dsn} =~ /DBI:(pg|mysql)/i) {
+          $rc = $sth->execute(@args, $entry->{msgcount}, $score);
+      } else {
+          $rc = $sth->execute(@args);
+      }
       if (!$rc) {
         dbg("auto-whitelist: sql-based add_score/insert %s: SQL error: %s",
              join('|',@args), $sth->errstr);
@@ -310,7 +320,12 @@ sub add_score {
       }
     } else {
       for my $s (@signedby) {
-        my $rc = $sth->execute(@args, $s);
+        my $rc;
+	if ($self->{dsn} =~ /DBI:(pg|mysql)/i) {
+          $rc = $sth->execute(@args, $s, $entry->{msgcount}, $score);
+	} else {
+	  $rc = $sth->execute(@args, $s);
+	}
         if (!$rc) {
           dbg("auto-whitelist: sql-based add_score/insert %s: SQL error: %s",
               join('|',@args,$s), $sth->errstr);
@@ -323,7 +338,7 @@ sub add_score {
     }
   }
 
-  if (!$inserted) {
+  if (!$inserted && $self->{dsn} !~ /DBI:(pg|mysql)/i) {
     # insert failed, assume primary key constraint, so try the update
 
     my $sql = "UPDATE $self->{tablename} ".
@@ -346,7 +361,7 @@ sub add_score {
 
     my $sth = $self->{dbh}->prepare($sql);
     my $rc = $sth->execute(@args);
-    
+
     if (!$rc) {
       info("auto-whitelist: sql-based add_score/update %s: SQL error: %s",
            join('|',@args), $sth->errstr);
@@ -357,7 +372,7 @@ sub add_score {
       $entry->{exists_p} = 1;
     }
   }
-  
+
   return $entry;
 }
 
