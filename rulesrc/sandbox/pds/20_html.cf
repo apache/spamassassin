@@ -1,6 +1,6 @@
 ifplugin Mail::SpamAssassin::Plugin::HTMLEval
 
-body __PDS_HTML_LENGTH_LT_1024          eval:html_eval('length', '< 1024')
-body __PDS_HTML_LENGTH_LT_2048          eval:html_eval('length', '< 2048')
+meta __PDS_HTML_LENGTH_1024 __HTML_LENGTH_0000_1024
+meta __PDS_HTML_LENGTH_2048 __HTML_LENGTH_0000_1024 || __HTML_LENGTH_1024_1536 || __HTML_LENGTH_1536_2048
 
 endif
