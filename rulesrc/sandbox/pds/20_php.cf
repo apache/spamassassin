@@ -4,12 +4,10 @@ header   __PDS_PHP_EVAL2 X-PHP-Originating-Script =~ /runtime-created function/
 meta     PDS_PHP_EVAL __PDS_PHP_EVAL1
 describe PDS_PHP_EVAL PHP header shows eval'd code
 score    PDS_PHP_EVAL 1.5
-reuse    PDS_PHP_EVAL
 
 meta     PDS_PHP_RUNTIME_FUNC __PDS_PHP_EVAL2 && !__PDS_PHP_EVAL1
 describe PDS_PHP_RUNTIME_FUNC PHP header shows runtime-created function
 score    PDS_PHP_RUNTIME_FUNC 1.5
-reuse    PDS_PHP_RUNTIME_FUNC
 
 header   __PDS_X_PHP_WPCONTENT  X-PHP-Script =~ m;/wp-content/(?:themes|uploads)/[\S]+\.php for;i
 header   __PDS_X_PHP_WPINCLUDES X-PHP-Script =~ m;/wp-includes/(?:css|fonts|js|pomo|Text|theme-compat)/[\S]+\.php for;i
@@ -19,26 +17,21 @@ header   __PDS_X_PHP_WPJS       X-PHP-Script =~ m;/js/[\S]+\.php for;i
 meta     PDS_X_PHP_WP_EXP (__PDS_X_PHP_WPCONTENT || __PDS_X_PHP_WPINCLUDES || __PDS_X_PHP_WPADMIN || __PDS_X_PHP_WPJS)
 describe PDS_X_PHP_WP_EXP X-PHP-Script shows sent from a Wordpress PHP script where you would not expect one
 score    PDS_X_PHP_WP_EXP 1.5
-reuse    PDS_X_PHP_WP_EXP
 
 header   __PDS_X_PHP_WELLKNOWN   X-PHP-Script =~ m;/\.well-known/;
 
 meta     PDS_X_PHP_WELLKNOWN __PDS_X_PHP_WELLKNOWN
 describe PDS_X_PHP_WELLKNOWN X-PHP-Script shows sent from a PHP script in the /.well-known/ dir
 score    PDS_X_PHP_WELLKNOWN 1.0
-reuse    PDS_X_PHP_WELLKNOWN
 
 meta     PDS_PHPE_SHORT_URL __PDS_SHORT_URL && (__PDS_PHP_EVAL1 || __PDS_PHP_EVAL2)
 describe PDS_PHPE_SHORT_URL Short URL that isn't a shortener and sent by PHP exploit
 score    PDS_PHPE_SHORT_URL 2.0 # limit
-reuse    PDS_PHPE_SHORT_URL
 
 meta     PDS_PHPE_URISHORTENER (__PDS_PHP_EVAL1 || __PDS_PHP_EVAL2) && (__URL_SHORTENER || __PDS_URISHORTENER)
 describe PDS_PHPE_URISHORTENER URI Shortener with PHP eval
 score    PDS_PHPE_URISHORTENER 2.0 # limit
-reuse    PDS_PHPE_URISHORTENER
 
 meta     PDS_PHPEXP_BOT __SENDER_BOT && (__PDS_TONAME_EQ_TOLOCAL + __NAKED_TO >= 1) && (__PDS_PHP_EVAL2 + __PDS_PHP_EVAL1 + PDS_X_PHP_WP_EXP + __PDS_X_PHP_WELLKNOWN >= 1)
 describe PDS_PHPEXP_BOT PHP exploit bot sender
 score    PDS_PHPEXP_BOT 1.5
-reuse    PDS_PHPEXP_BOT

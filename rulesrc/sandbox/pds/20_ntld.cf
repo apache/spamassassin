@@ -44,19 +44,16 @@ meta     FROM_SUSPICIOUS_NTLD_FP __FROM_ADDRLIST_SUSPNTLD && !__HAS_SENDER && !_
 tflags   FROM_SUSPICIOUS_NTLD_FP publish
 describe FROM_SUSPICIOUS_NTLD_FP From abused NTLD
 score    FROM_SUSPICIOUS_NTLD_FP 2.0 # limit
-reuse    FROM_SUSPICIOUS_NTLD_FP
 
 meta     FROM_NTLD_REPLY_FREEMAIL FREEMAIL_FORGED_REPLYTO && __FROM_ADDRLIST_SUSPNTLD
 tflags   FROM_NTLD_REPLY_FREEMAIL publish
 describe FROM_NTLD_REPLY_FREEMAIL From abused NTLD and Reply-To is FREEMAIL
 score    FROM_NTLD_REPLY_FREEMAIL 2.0 # limit
-reuse    FROM_NTLD_REPLY_FREEMAIL
 
 meta     FROM_NTLD_LINKBAIT __LCL__KAM_BODY_LENGTH_LT_512 && __FROM_ADDRLIST_SUSPNTLD && __BODY_URI_ONLY
 tflags   FROM_NTLD_LINKBAIT publish
 describe FROM_NTLD_LINKBAIT From abused NTLD with little more than a URI
 score    FROM_NTLD_LINKBAIT 2.0 # limit
-reuse    FROM_NTLD_LINKBAIT
 
 meta     GOOGLE_DRIVE_REPLY_BAD_NTLD __PDS_GOOGLE_DRIVE_SHARE && __REPLYTO_ADDRLIST_SUSPNTLD
 tflags   GOOGLE_DRIVE_REPLY_BAD_NTLD publish
@@ -65,39 +62,31 @@ score    GOOGLE_DRIVE_REPLY_BAD_NTLD 1.0 # limit
 reuse    GOOGLE_DRIVE_REPLY_BAD_NTLD
 
 body     __PDS_SEO1 /(?:top|first page|1st) (?:(?:results|rank(?:ing)?) )?(?:in|of|on) (?:Google|MSN|Yahoo|Bing)|rank number one|top page rank|guarantee you 1st|link.building/i
-reuse    __PDS_SEO1
 body     __PDS_SEO2 /losing your (?:[a-z]+ )?(?:rank(?:ing)?|results)|rank well on [a-z]+\b/i
-reuse    __PDS_SEO2
 
 meta     SEO_SUSP_NTLD __FROM_ADDRLIST_SUSPNTLD && (__PDS_SEO1 + __PDS_SEO2 >= 1)
 tflags   SEO_SUSP_NTLD publish
 describe SEO_SUSP_NTLD SEO offer from suspicious TLD
 score    SEO_SUSP_NTLD 1.2 # limit
-reuse    SEO_SUSP_NTLD
 
-body     __PDS_THIS_IS_ADV  /This is an advertisement\./
-reuse    __PDS_THIS_IS_ADV
+body     __PDS_THIS_IS_ADV  /This is an advert(?:isement)?/i
 
 meta     THIS_IS_ADV_SUSP_NTLD __FROM_ADDRLIST_SUSPNTLD && __PDS_THIS_IS_ADV
 tflags   THIS_IS_ADV_SUSP_NTLD publish
 describe THIS_IS_ADV_SUSP_NTLD This is an advertisement from a suspicious TLD
 score    THIS_IS_ADV_SUSP_NTLD 1.5 # limit
-reuse    THIS_IS_ADV_SUSP_NTLD
 
 meta     BULK_RE_SUSP_NTLD __SUBJ_RE && __ML1 && __FROM_ADDRLIST_SUSPNTLD
 tflags   BULK_RE_SUSP_NTLD publish
 describe BULK_RE_SUSP_NTLD Precedence bulk and RE: from a suspicious TLD
 score    BULK_RE_SUSP_NTLD 1.0 # limit
-reuse    BULK_RE_SUSP_NTLD
 
 meta     SHORT_IMG_SUSP_NTLD __LCL__KAM_BODY_LENGTH_LT_1024 && __HTML_LINK_IMAGE && __FROM_ADDRLIST_SUSPNTLD
 tflags   SHORT_IMG_SUSP_NTLD publish
 describe SHORT_IMG_SUSP_NTLD Short HTML + image + suspicious TLD
 score    SHORT_IMG_SUSP_NTLD 1.5 # limit
-reuse    SHORT_IMG_SUSP_NTLD
 
 header   __VPSNUMBERONLY_TLD From:addr =~ /\@vps[0-9]{4,}\.[a-z]+$/i
-reuse    __VPSNUMBERONLY_TLD
 
 meta     VPS_NO_NTLD __VPSNUMBERONLY_TLD && __FROM_ADDRLIST_SUSPNTLD
 tflags   VPS_NO_NTLD publish
@@ -110,26 +99,22 @@ body     __PDS_OFFER_ONLY_AMERICA /This offer (is )?(only )?for (United States|U
 meta     OFFER_ONLY_AMERICA __FROM_ADDRLIST_SUSPNTLD && __PDS_OFFER_ONLY_AMERICA
 describe OFFER_ONLY_AMERICA Offer only available to US
 score    OFFER_ONLY_AMERICA 2.0 # limit
-reuse    OFFER_ONLY_AMERICA
 
 body     __PDS_SENT_TO_EMAIL_ADDR /This message was sent to Email Address\./i
 
 meta     SENT_TO_EMAIL_ADDR __FROM_ADDRLIST_SUSPNTLD && __PDS_SENT_TO_EMAIL_ADDR
 describe SENT_TO_EMAIL_ADDR Email was sent to email address
 score    SENT_TO_EMAIL_ADDR 2.0 # limit
-reuse    SENT_TO_EMAIL_ADDR
 
 body     __PDS_EXPIRATION_NOTICE /\bexpiration (notice|alert|date)\b/i
 
 meta     SUSPNTLD_EXPIRATION_EXTORT LOTS_OF_MONEY && __PDS_EXPIRATION_NOTICE && __FROM_ADDRLIST_SUSPNTLD
 describe SUSPNTLD_EXPIRATION_EXTORT Susp NTLD with an expiration notice and lotsa money
 score    SUSPNTLD_EXPIRATION_EXTORT 2.0 # limit
-reuse    SUSPNTLD_EXPIRATION_EXTORT
 
 meta     PDS_BTC_NTLD ( __BITCOIN_ID && __FROM_ADDRLIST_SUSPNTLD )
 describe PDS_BTC_NTLD Bitcoin suspect NTLD
 score    PDS_BTC_NTLD 2.0 # limit
-reuse    PDS_BTC_NTLD
 
 endif
 endif

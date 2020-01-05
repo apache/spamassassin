@@ -1,5 +1,9 @@
 header   __PDS_FROM_NAME_TO_DOMAIN  ALL =~ /From: ["']?([a-z0-9\.-]+\.[0-9a-z\.-]+)["']? [^\n]+\nTo:[^\n]+\@\1/ism
 
+meta     PDS_SHORT_BOGUS_MSM_HDRS __PDS_HTML_LENGTH_1024 && __BOGUS_MSM_HDRS
+score    PDS_SHORT_BOGUS_MSM_HDRS 2.0
+describe PDS_SHORT_BOGUS_MSM_HDRS Short HTML email with bogus MSM headers
+
 meta     PDS_FROM_NAME_TO_DOMAIN __PDS_FROM_NAME_TO_DOMAIN
 score    PDS_FROM_NAME_TO_DOMAIN 1.0
 describe PDS_FROM_NAME_TO_DOMAIN From:name looks like To:domain
