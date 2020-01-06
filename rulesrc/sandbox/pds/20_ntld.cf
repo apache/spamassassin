@@ -28,11 +28,36 @@ enlist_addrlist (SUSP_NTLD) *@*.fit
 enlist_addrlist (SUSP_NTLD) *@*.ooo
 enlist_addrlist (SUSP_NTLD) *@*.faith
 
+enlist_uri_host (SUSP_URI_NTLD) icu
+enlist_uri_host (SUSP_URI_NTLD) online
+enlist_uri_host (SUSP_URI_NTLD) work
+enlist_uri_host (SUSP_URI_NTLD) date
+enlist_uri_host (SUSP_URI_NTLD) top
+enlist_uri_host (SUSP_URI_NTLD) fun
+enlist_uri_host (SUSP_URI_NTLD) life
+enlist_uri_host (SUSP_URI_NTLD) review
+enlist_uri_host (SUSP_URI_NTLD) xyz
+enlist_uri_host (SUSP_URI_NTLD) bid
+enlist_uri_host (SUSP_URI_NTLD) stream
+enlist_uri_host (SUSP_URI_NTLD) site
+enlist_uri_host (SUSP_URI_NTLD) space
+enlist_uri_host (SUSP_URI_NTLD) gdn
+enlist_uri_host (SUSP_URI_NTLD) click
+enlist_uri_host (SUSP_URI_NTLD) pro
+enlist_uri_host (SUSP_URI_NTLD) world
+enlist_uri_host (SUSP_URI_NTLD) fit
+enlist_uri_host (SUSP_URI_NTLD) ooo
+enlist_uri_host (SUSP_URI_NTLD) faith
+
 header   __FROM_ADDRLIST_SUSPNTLD eval:check_from_in_list('SUSP_NTLD')
 reuse    __FROM_ADDRLIST_SUSPNTLD
 
 header   __REPLYTO_ADDRLIST_SUSPNTLD eval:check_replyto_in_list('SUSP_NTLD')
 reuse    __REPLYTO_ADDRLIST_SUSPNTLD
+
+header   PDS_OTHER_BAD_TLD eval:check_uri_host_listed('SUSP_URI_NTLD')
+score    PDS_OTHER_BAD_TLD 2.0
+describe PDS_OTHER_BAD_TLD Untrustworthy TLDs
 
 meta     FROM_SUSPICIOUS_NTLD __FROM_ADDRLIST_SUSPNTLD
 tflags   FROM_SUSPICIOUS_NTLD publish
