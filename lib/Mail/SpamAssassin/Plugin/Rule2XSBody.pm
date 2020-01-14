@@ -219,8 +219,11 @@ sub run_body_fast_scan {
 
   {
     no strict "refs";
+    my $lineidx;
     foreach my $line (@{$params->{lines}})
     {
+      $lineidx++;
+
       # unfortunately, calling lc() here seems to be the fastest
       # way to support this and still work with UTF-8 ok
       my $results = &{$modname.'::scan'}(lc $line);
@@ -237,6 +240,11 @@ sub run_body_fast_scan {
 
         # ignore 0-scored rules, of course
         next unless $scoresptr->{$rulename};
+
+        # skip first line if nosubject tflag
+        if ($lineidx == 1 && ($conf->{tflags}->{$rulename}||'') =~ /\bnosubject\b/) {
+          next;
+        }
 
         # non-lossy rules; the re2c version matches exactly what
         # the perl regexp matches, so we don't need to perform
