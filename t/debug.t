@@ -29,7 +29,7 @@ plan tests => 3;
 my %facility = map( ($_, 1),
   qw( accessdb archive-iterator async auto-whitelist bayes check config daemon
       dcc dkim askdns dns dnseval eval generic https_http_mismatch facility FreeMail
-      ident ignore info ldap learn locker log logger markup
+      ident ignore info ldap learn locker log logger markup HashBL
       message metadata mimeheader netset plugin prefork progress pyzor razor2
       received-header replacetags reporter rules rules-all spamd spf textcat
       timing TxRep uri uridnsbl util pdfinfo asn geodb ));
