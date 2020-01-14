@@ -8,6 +8,7 @@ rawbody __L_BODY_8BITS          /[\x80-\xff]/
 # if the message claims to be text/plain, and there's no CTE (defaulting to
 # '7bit') or the CTE is explicitly '7bit', then there should be no 8-bit
 # characters in the message body.
-meta L_8BIT_MISMATCH            (__CT_TEXT_PLAIN && (!__CTE || __L_CTE_7BIT) && __L_BODY_8BITS)
-describe L_8BIT_MISMATCH        Header says 7bits but body disagrees
-score L_8BIT_MISMATCH           0.01
+meta CTE_8BIT_MISMATCH            (__CT_TEXT_PLAIN && (!__CTE || __L_CTE_7BIT) && __L_BODY_8BITS)
+describe CTE_8BIT_MISMATCH        Header says 7bits but body disagrees
+score CTE_8BIT_MISMATCH           1
+tflags CTE_8BIT_MISMATCH          publish
