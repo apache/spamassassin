@@ -4,7 +4,7 @@ header   __MISSING_REF		References =~ /^UNSET$/ [if-unset: UNSET]
 header   __MISSING_THREAD	Thread-Index =~ /^UNSET$/ [if-unset: UNSET]
 
 #From FreddyT
-header   __SUBJ_RE		Subject =~ /^R[eE]:/
+header   __SUBJ_RE		Subject =~ /^(?:R[eE]|S[vV]|V[sS]|A[wW]):/
 #header   __SUBJ_FW		Subject =~ /^F[wW][dD]?:/
 
 #From http://marc2.theaimsgroup.com/?l=fop-dev&m=104335769809427&w=2
@@ -23,9 +23,9 @@ header   __UA_OPERA7		User-Agent =~ /^Opera7/
 meta     __BOTH_INR_AND_REF	(__XM_BALSA || __XM_CALYPSO || __XM_FORTE || __XM_MHE || __XM_SQRLMAIL || __XM_SYLPHEED || __THEBAT_MUA || __XM_VM || __XM_XIMEVOL || __UA_KMAIL || __UA_MOZ5 || __UA_OPERA7)
 
 meta     NICE_REPLY_A		(__SUBJ_RE && !__MISSING_REPLY && !__MISSING_REF && __BOTH_INR_AND_REF)
-describe NICE_REPLY_A		Looks like a legit relpy (A)
+describe NICE_REPLY_A		Looks like a legit reply (A)
 ## score    NICE_REPLY_A		-0.444
-tflags     NICE_REPLY_A		nopublish
+tflags   NICE_REPLY_A		nice
 #counts   NICE_REPLY_A             0s/45h of 43776 corpus (34010s/9766h FVGT) 11/29/06
 
 
@@ -61,7 +61,7 @@ header   __UA_MSENTOUR		User-Agent =~ /^Microsoft-Entourage/
 meta     __INR_AND_NO_REF	(__XM_IMAIL || __XM_APPLEMAIL || __XM_COMMUNIG || __XM_EDMAX || __XM_ELM || __XM_EMUMAIL || __XM_EXMH || __XM_LOTUSN || __XM_MAILCITY || __XM_MAILSMITH || __XM_MSCDO || __XM_MSOUT || __XM_MIMETOOLS || __XM_OPERA6 || __XM_PEGASUS || __XM_QUALCOM || __UA_IMP || __UA_MSOEMAC || __UA_MSENTOUR || __UA_OPERA7)
 
 meta     NICE_REPLY_B		(__SUBJ_RE && !__MISSING_REPLY && __MISSING_REF && __INR_AND_NO_REF)
-tflags     NICE_REPLY_B		nopublish
+tflags     NICE_REPLY_B		nice
 ## score    NICE_REPLY_B		-0.333
 #counts   NICE_REPLY_B             1s/156h of 43776 corpus (34010s/9766h FVGT) 11/29/06
 
@@ -96,7 +96,7 @@ header   __UA_XNEWS		User-Agent =~ /^Xnews/
 meta     __NO_INR_YES_REF	(__XM_GNUS || __XM_MSOE5 || __XM_MSOE6 || __XM_MOZ4 || __XM_SKYRI || __XM_WWWMAIL || __UA_GNUS || __UA_KNODE || __UA_MUTT || __UA_PAN || __UA_XNEWS)
 
 meta     NICE_REPLY_C		(__SUBJ_RE && __MISSING_REPLY && !__MISSING_REF && __NO_INR_YES_REF)
-tflags    NICE_REPLY_C		nopublish
+tflags    NICE_REPLY_C		nice
 ## score    NICE_REPLY_C		-0.444
 #counts   NICE_REPLY_C             3s/544h of 43776 corpus (34010s/9766h FVGT) 11/29/06
 
@@ -132,11 +132,11 @@ meta     __BROKE_MUAS		(__XM_AOL || __XM_DTMAIL || __XM_FREEMAIL || __XM_LOTUSN5
 
 
 
-meta     FAKE_REPLY_SURE_A	(__SUBJ_RE && (!FAKE_REPLY_A && !FAKE_REPLY_A1 && !FAKE_REPLY_A2 && !FAKE_REPLY_B && !FAKE_REPLY_C) && (!NICE_REPLY_A && !NICE_REPLY_B && !NICE_REPLY_C) && !__BROKE_MUAS && __MISSING_THREAD)
+#meta     FAKE_REPLY_SURE_A	(__SUBJ_RE && (!FAKE_REPLY_A1 && !FAKE_REPLY_B && !FAKE_REPLY_C) && (!NICE_REPLY_A && !NICE_REPLY_B && !NICE_REPLY_C) && !__BROKE_MUAS && __MISSING_THREAD)
 ## score    FAKE_REPLY_SURE_A	0.001
 #counts   FAKE_REPLY_SURE_A        468s/823h of 43776 corpus (34010s/9766h FVGT) 11/29/06
 
-meta     FAKE_REPLY_SURE_B	(__SUBJ_RE && (!FAKE_REPLY_A && !FAKE_REPLY_A1 && !FAKE_REPLY_A2 && !FAKE_REPLY_B && !FAKE_REPLY_C) && (!NICE_REPLY_A && !NICE_REPLY_B && !NICE_REPLY_C) && !__BROKE_MUAS)
+#meta     FAKE_REPLY_SURE_B	(__SUBJ_RE && (!FAKE_REPLY_A1 && !FAKE_REPLY_B && !FAKE_REPLY_C) && (!NICE_REPLY_A && !NICE_REPLY_B && !NICE_REPLY_C) && !__BROKE_MUAS)
 ## score    FAKE_REPLY_SURE_B	0.001
 #counts   FAKE_REPLY_SURE_B        552s/969h of 43776 corpus (34010s/9766h FVGT) 11/29/06
 

@@ -177,7 +177,7 @@ meta	 SUBJ_ALL_CAPS3	SUBJ_ALL_CAPS && __SUBJ_4LOWER && __SUBJ_2UPPER && !(__SUBJ
 header	 __HOTMAIL_HELO	Received =~ /from ([A-Z]{3})\d[^.]+ [^\n]+ by \1\d+-[^\n ]+\.\1\d+\.hotmail\.com with Microsoft/i
 tflags	 __HOTMAIL_HELO 	nice
 # 1 & 2 are in 20_head_tests.cf ... this one doesn't use eval rules
-meta	 FORGED_HOTMAIL_RCVD3	__HOST_HOTMAIL && (!__HOTMAIL_HELO || __DOS_SINGLE_EXT_RELAY)
+#meta	 FORGED_HOTMAIL_RCVD3	__HOST_HOTMAIL && (!__HOTMAIL_HELO || __DOS_SINGLE_EXT_RELAY)
 
 # A blend of sidney's UPPERCASE_HTTP and jhardin's URI_UC for bug 6408
 # This one avoids Http: which I think is the biggest problem.
