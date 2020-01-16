@@ -1254,6 +1254,7 @@ skip them completely. Disabled with 0.
 
   push (@cmds, {
     setting => 'body_part_scan_size',
+    is_admin => 1,
     default => 50000,
     type => $CONF_TYPE_NUMERIC,
   });
@@ -1267,6 +1268,7 @@ Like body_part_scan_size, for "rawbody" type rules.
 
   push (@cmds, {
     setting => 'rawbody_part_scan_size',
+    is_admin => 1,
     default => 500000,
     type => $CONF_TYPE_NUMERIC,
   });
