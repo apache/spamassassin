@@ -89,9 +89,9 @@ sub do_one_line_body_tests {
     loop_body => sub
   {
     my ($self, $pms, $conf, $rulename, $pat, %opts) = @_;
-    $pat = untaint_var($pat);
     my $sub = '
       my ($self, $line) = @_;
+      my $qrptr = $self->{main}->{conf}->{test_qrs};
     ';
 
     if (($conf->{tflags}->{$rulename}||'') =~ /\bmultiple\b/)
@@ -111,7 +111,7 @@ sub do_one_line_body_tests {
       my $lref = \$line;
       pos $$lref = 0;
       '.$self->hash_line_for_rule($pms, $rulename).'
-      while ($$lref =~ '.$pat.'g) {
+      while ($$lref =~ /$qrptr->{q{'.$rulename.'}}/gop) {
         $self->got_hit(q{'.$rulename.'}, "BODY: ", ruletype => "one_line_body");
         '. $self->hit_rule_plugin_code($pms, $rulename, "one_line_body", "") . '
         '. ($max? 'last if $self->{tests_already_hit}->{q{'.$rulename.'}} >= '.$max.';' : '') . '
@@ -121,7 +121,7 @@ sub do_one_line_body_tests {
     } else {
       $sub .= '
       '.$self->hash_line_for_rule($pms, $rulename).'
-      if ($line =~ '.$pat.') {
+      if ($line =~ /$qrptr->{q{'.$rulename.'}}/op) {
         $self->got_hit(q{'.$rulename.'}, "BODY: ", ruletype => "one_line_body");
         '. $self->hit_rule_plugin_code($pms, $rulename, "one_line_body", "return 1") . '
       }
