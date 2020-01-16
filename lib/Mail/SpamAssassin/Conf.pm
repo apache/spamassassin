@@ -3496,6 +3496,20 @@ internally, and should not be used.
     setting => 'priority',
     is_priv => 1,
     type => $CONF_TYPE_HASH_KEY_VALUE,
+    code => sub {
+      my ($self, $key, $value, $line) = @_;
+      my ($rulename, $priority) = split(/\s+/, $value, 2);
+      unless (defined $priority) {
+        return $MISSING_REQUIRED_VALUE;
+      }
+      unless ($rulename =~ IS_RULENAME) {
+        return $INVALID_VALUE;
+      }
+      unless ($priority =~ /^-?\d+$/) {
+        return $INVALID_VALUE;
+      }
+      $self->{priority}->{$rulename} = $priority;
+    }
   });
 
 =back
