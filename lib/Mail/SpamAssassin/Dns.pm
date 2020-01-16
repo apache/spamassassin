@@ -47,7 +47,7 @@ our $LAST_DNS_CHECK = 0;
 our @EXISTING_DOMAINS = qw{
   akamai.com
   bing.com
-  cloudflare.net
+  cloudflare.com
   digitalpoint.com
   facebook.com
   google.com
