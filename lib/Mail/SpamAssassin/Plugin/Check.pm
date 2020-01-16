@@ -879,6 +879,9 @@ sub do_body_tests {
         '.$self->ran_rule_plugin_code($rulename, "body").'
       }
     ');
+
+    return if ($opts{doing_user_rules} &&
+            !$self->is_user_rule_sub($rulename.'_body_test'));
   }
   );
 }
