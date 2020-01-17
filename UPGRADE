@@ -2,6 +2,8 @@
 Note for Users Upgrading to SpamAssassin 4.0.0
 ----------------------------------------------
 
+- FromNameSpoof: fns_extrachars parameter default value has been increased to 50
+
 - All log output (stderr, file, syslog) is now escaped properly,
   \r \n \t \\, and control chars, DEL, UTF-8 sequences as \x{XX}.
   Whitespace is not normalized anymore like in versions <4.0.
