@@ -262,7 +262,9 @@ sub check_fromname_spoof
   my ($self, $pms, $check_lvl) = @_;
   $self->_check_fromnamespoof($pms);
 
-  $check_lvl //= $pms->{conf}->{fns_check};
+  if ( not defined $check_lvl ) {
+    $check_lvl = $pms->{conf}->{fns_check};
+  }
 
   my @array = (
     ($pms->{fromname_address_different}) ,
@@ -348,7 +350,7 @@ sub _check_fromnamespoof
 
   $fnd{'addr'} = $pms->get("From:name");
 
-  if ($fnd{'addr'} =~ /\b([\w\.\!\#\$\%\&\'\*\+\/\=\?\^\_\`\{\|\}\~\-]+@[\w\-\.]+\.[\w\-\.]++)\b/i) {
+  if ($fnd{'addr'} =~ /\b((?>[\w\.\!\#\$\%\&\'\*\+\/\=\?\^\_\`\{\|\}\~\-]+@[\w\-\.]+\.[\w\-\.]+))\b/i) {
     my $nochar = ($fnd{'addr'} =~ y/A-Za-z0-9//c);
     $nochar -= ($1 =~ y/A-Za-z0-9//c);
 
