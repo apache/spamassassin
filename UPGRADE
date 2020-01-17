@@ -103,6 +103,10 @@ Note for Users Upgrading to SpamAssassin 4.0.0
   No actions are required. If re-learning some old messages, they might
   be learned twice. Old IDs should expire automatically.
 
+- report_charset defaults now to UTF-8
+
+- Meta rules inherit net tflag from it's dependencies (Bug 7735)
+
 Note for Users Upgrading to SpamAssassin 3.4.4
 ----------------------------------------------
 
