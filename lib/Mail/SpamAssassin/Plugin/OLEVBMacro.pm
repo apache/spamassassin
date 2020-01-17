@@ -95,6 +95,8 @@ my $marker2 = "\x00\x41\x74\x74\x72\x69\x62\x75\x74\x00";
 my $marker3 = "\x5c\x6f\x62\x6a\x65\x6d\x62";
 my $marker4 = "\x5c\x6f\x62\x6a\x64\x61\x74";
 my $marker5 = "\x5c\x20\x6f\x62\x6a\x64\x61\x74";
+# Excel .xlsx encrypted package, thanks to Dan Bagwell for the sample
+my $encrypted_marker = "\x45\x00\x6e\x00\x63\x00\x72\x00\x79\x00\x70\x00\x74\x00\x65\x00\x64\x00\x50\x00\x61\x00\x63\x00\x6b\x00\x61\x00\x67\x00\x65";
 
 # this code burps an ugly message if it fails, but that's redirected elsewhere
 # AZ_OK is a constant exported by Archive::Zip
@@ -836,6 +838,9 @@ sub _is_encrypted_doc {
     my $tdata = substr $data, 2000;
     $tdata =~ s/\\0/ /g;
     if (index($tdata, "E n c r y p t e d P a c k a g e") > -1) {
+      return 1;
+    }
+    if (index($tdata, $encrypted_marker) > -1) {
       return 1;
     }
   }
