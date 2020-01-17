@@ -55,7 +55,7 @@ The plugin allows you to skip emails that have been DKIM signed by specific send
 FromNameSpoof allows for a configurable closeness when matching the From:addr and From:name,
 the closeness can be adjusted with:
 
- fns_extrachars 5
+ fns_extrachars 50
 
 B<Note> that FromNameSpoof detects the "owner" of a domain by the following search:
 
@@ -193,7 +193,7 @@ sub set_config {
 
   push(@cmds, {
     setting => 'fns_extrachars',
-    default => 5,
+    default => 50,
     type => $Mail::SpamAssassin::Conf::CONF_TYPE_NUMERIC,
   });
 
