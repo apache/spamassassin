@@ -2586,7 +2586,7 @@ tflags     USB_DRIVES                 publish
 #header     __SUBJ_YOUR_LOGO           Subject =~ /\b(?:with|having) your logos?\b/i
 #header     __SUBJ_CUSTOM_WITH_LOGO    Subject =~ /^(?=.*\bcustom\b).*(?:printed |with )+(?:your )?logos?\b/i
 
-full       __FROM_NAME_IN_MSG         /^From:\s+([^<]\S+\s\S+)\s(?=.{1,2048}^\1$)/sm
+full       __FROM_NAME_IN_MSG         /^From:\s+([^<]\S+\s\S+)\s(?=.{1,2048}^\1\r?$)/sm
 meta       FRNAME_IN_MSG_XPRIO_NO_SUB (__FROM_NAME_IN_MSG && __XPRIO && (__SUBJECT_EMPTY || __SUBJ_SHORT)) && !__DKIM_EXISTS  && !__SUBJ_NOT_SHORT && !ALL_TRUSTED
 describe   FRNAME_IN_MSG_XPRIO_NO_SUB From name in message + X-Priority + short or no subject
 score      FRNAME_IN_MSG_XPRIO_NO_SUB 2.500	# limit
