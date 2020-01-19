@@ -420,21 +420,21 @@ sub parse {
       {
         $parse_error = "config: SpamAssassin failed to parse line, ".
                         "\"$value\" is not valid for \"$key\", ".
-                        "skipping: $line";
+                        "skipping: \"$line\" in $self->{currentfile}";
         goto failed_line;
       }
       elsif ($ret eq $Mail::SpamAssassin::Conf::INVALID_HEADER_FIELD_NAME)
       {
         $parse_error = "config: SpamAssassin failed to parse line, ".
                        "it does not specify a valid header field name, ".
-                       "skipping: $line";
+                       "skipping: \"$line\" in $self->{currentfile}";
         goto failed_line;
       }
       elsif ($ret eq $Mail::SpamAssassin::Conf::MISSING_REQUIRED_VALUE)
       {
         $parse_error = "config: SpamAssassin failed to parse line, ".
                         "no value provided for \"$key\", ".
-                        "skipping: $line";
+                        "skipping: \"$line\" in $self->{currentfile}";
         goto failed_line;
       }
       else {
