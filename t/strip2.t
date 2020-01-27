@@ -4,7 +4,7 @@ use lib '.'; use lib 't';
 use SATest; sa_t_init("strip2");
 
 use Test::More;
-plan skip_all => 'Long running tests disabled' if conf_bool('run_long_tests');
+plan skip_all => 'Long running tests disabled' unless conf_bool('run_long_tests');
 plan tests => 98;
 
 # ---------------------------------------------------------------------------
@@ -48,7 +48,7 @@ foreach $input (@files) {
 		$test_number = test_number();
     my $d_output = "log/d.$testname/$test_number";
     unlink $d_output;
-    ok sarun ("-d < $d_input");
+    ok sarun ("-L -d < $d_input");
     ok (-f $d_output);
     ok(!compare_text($input,$d_output))
         or diffwarn( $input, $d_output );
@@ -72,7 +72,7 @@ foreach $input (@files) {
 		$test_number = test_number();
     my $d_output = "log/d.$testname/$test_number";
     unlink $d_output;
-    ok sarun ("-d < $d_input");
+    ok sarun ("-L -d < $d_input");
     ok (-f $d_output);
     ok(!compare_text($input,$d_output))
         or diffwarn( $input, $d_output );
@@ -101,7 +101,7 @@ ok (-f $d_input);
   $test_number = test_number();
   my $d_output = "log/d.$testname/$test_number";
   unlink $d_output;
-  ok sarun ("-d < $d_input");
+  ok sarun ("-L -d < $d_input");
   ok (-f $d_output);
   ok(!compare_text($input,$d_output))
         or diffwarn( $input, $d_output );
@@ -111,7 +111,7 @@ ok (-f $d_input);
 $test_number = test_number();
 my $d_output = "log/d.$testname/$test_number";
 unlink $d_output;
-ok sarun ("-d < $input");
+ok sarun ("-L -d < $input");
 ok (-f $d_output);
 ok(!compare_text($input,$d_output))
         or diffwarn( $input, $d_output );
@@ -119,8 +119,8 @@ ok(!compare_text($input,$d_output))
 
 sub diffwarn {
   my ($f1, $f2) = @_;
-  print "# Diff is as follows:\n";
-  untaint_system "diff -u $f1 $f2";
+  print STDERR "# Diff is as follows:\n";
+  untaint_system "diff -u $f1 $f2 | cat -v >&2";
   print "\n\n";
 }
 
