@@ -251,7 +251,7 @@ sub new {
   # bug 4363
   # Check to see if we should do CRLF instead of just LF
   # For now, just check the first and last line and do whatever it does
-  if (@message && (index($message[0], "\015\012") != -1 || index($message[-1], "\015\012") != -1)) {
+  if (index($message[0], "\015\012") != -1 || index($message[-1], "\015\012") != -1) {
     $self->{line_ending} = "\015\012";
     dbg("message: line ending changed to CRLF");
   }
@@ -265,7 +265,12 @@ sub new {
   for (;;) {
     # make sure not to lose the last header field when there is no body
     my $eof = !@message;
-    my $current = $eof ? "\n" : shift @message;
+    my $current = $eof ? $self->{line_ending} : shift @message;
+
+    # Bug 7785: spamass-milter breaks wrapped headers, add any missing \r
+    if ($squash_crlf) {
+      $current =~ s/(?<!\015)\012/\015\012/gs;
+    }
 
     if ( $current =~ /^[ \t]/ ) {
       # This wasn't useful in terms of a rule, but we may want to treat it
@@ -301,7 +306,7 @@ sub new {
         }
       }
 
-      if ($current eq "\012" || $current eq "\015\012") {  # a regular end of a header section
+      if ($current eq $self->{line_ending}) {  # a regular end of a header section
 	if ($eof) {
 	  $self->{'missing_head_body_separator'} = 1;
 	} else {

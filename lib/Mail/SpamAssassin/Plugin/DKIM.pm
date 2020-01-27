@@ -835,10 +835,9 @@ sub _check_dkim_signature {
         $verifier->PRINT($str);
       } else {
         # feeding large chunk to Mail::DKIM is _much_ faster than line-by-line
-        my $str2 = $str; # make a copy, sigh
-        $str2 =~ s/\012/\015\012/gs; # LF -> CRLF
-        $verifier->PRINT($str2);
-        undef $str2;
+        $str =~ s/\012/\015\012/gs; # LF -> CRLF
+        $verifier->PRINT($str);
+        undef $str;
       }
       1;
     } or do {  # intercept die() exceptions and render safe

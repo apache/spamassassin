@@ -3280,6 +3280,10 @@ The full message is the pristine message headers plus the pristine message
 body, including all MIME data such as images, other attachments, MIME
 boundaries, etc.
 
+Note that CRLF/LF line endings are matched as the original message has them.
+For any full rules that match newlines, it's recommended to use \r?$ instead
+of plain $, so it works on all systems.
+
 =item full SYMBOLIC_TEST_NAME eval:name_of_eval_method([args])
 
 Define a full message eval test.  See above.

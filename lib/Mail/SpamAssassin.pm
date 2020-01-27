@@ -1157,13 +1157,12 @@ sub remove_spamassassin_markup {
   my $hdrs = $mail_obj->get_pristine_header();
   my $body = $mail_obj->get_pristine_body();
 
-  # remove DOS line endings
-  $hdrs =~ s/\r//gs;
+  # force \n for line-ending processing temporarily
+  $hdrs =~ s/\015?\012/\n/gs;
+  $body =~ s/\015?\012/\n/gs;
 
   # unfold SA added headers, but not X-Spam-Prev headers ...
-  $hdrs = "\n".$hdrs;   # simplifies regexp below
-  1 while $hdrs =~ s/(\nX-Spam-(?!Prev).+?)\n[ \t]+(\S.*\n)/$1 $2/g;
-  $hdrs =~ s/^\n//;
+  1 while $hdrs =~ s/((?:^|\n)X-Spam-(?!Prev).+?)\n[ \t]+(\S.*\n)/$1 $2/g;
 
 ###########################################################################
   # Backward Compatibility, pre 3.0.x.
@@ -1214,14 +1213,11 @@ sub remove_spamassassin_markup {
   }
 
   # remove any other X-Spam headers we added, will be unfolded
-  $hdrs = "\n".$hdrs;   # simplifies regexp below
-  1 while $hdrs =~ s/\nX-Spam-.*\n/\n/g;
-  $hdrs =~ s/^\n//;
+  1 while $hdrs =~ s/(^|\n)X-Spam-.*\n/$1/g;
 
-  # re-add DOS line endings
-  if ($mail_obj->{line_ending} ne "\n") {
-    $hdrs =~ s/\r?\n/$mail_obj->{line_ending}/gs;
-  }
+  # force original message line endings
+  $hdrs =~ s/\n/$mail_obj->{line_ending}/gs;
+  $body =~ s/\n/$mail_obj->{line_ending}/gs;
 
   # Put the whole thing back together ...
   return join ('', $mbox, $hdrs, $body);

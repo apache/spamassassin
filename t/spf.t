@@ -11,7 +11,7 @@ plan skip_all => "Net tests disabled" unless conf_bool('run_net_tests');
 plan skip_all => "Need Mail::SPF" unless HAS_MAILSPF;
 plan skip_all => "Can't use Net::DNS Safely" unless can_use_net_dns_safely();
 
-plan tests => 64;
+plan tests => 68;
 
 # ---------------------------------------------------------------------------
 
@@ -379,6 +379,12 @@ sarun ("-t < data/nice/spf3-received-spf", \&patterns_run_cb);
 ok_all_patterns();
 # Test same with nonfolded headers
 sarun ("-t < data/nice/spf4-received-spf-nofold", \&patterns_run_cb);
+ok_all_patterns();
+# Test same with crlf line endings
+sarun ("-t < data/nice/spf5-received-spf-crlf", \&patterns_run_cb);
+ok_all_patterns();
+# Test same with crlf line endings (bug 7785)
+sarun ("-t < data/nice/spf6-received-spf-crlf2", \&patterns_run_cb);
 ok_all_patterns();
 
 
