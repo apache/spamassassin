@@ -1144,5 +1144,6 @@ sub got_dnsbl_hit {
 sub has_tflags_domains_only { 1 }
 sub has_subtest_for_ranges { 1 }
 sub has_uridnsbl_for_a { 1 }  # uridnsbl rules recognize tflags 'a' and 'ns'
+sub has_uridnsbl_a_ns { 1 }  # has an actually working 'a' flag, unlike above :-(
 
 1;
