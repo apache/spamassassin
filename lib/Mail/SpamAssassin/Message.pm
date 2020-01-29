@@ -1065,7 +1065,7 @@ sub _parse_multipart {
 	}
       }
 
-      # Maximum parts to process
+      # Maximum parts to process, simply skip the rest of the parts
       if (++$partcnt == 1000) {
         dbg("message: mimepart limit exceeded, stopping parsing");
         $self->{'mimepart_limit_exceeded'} = 1;
