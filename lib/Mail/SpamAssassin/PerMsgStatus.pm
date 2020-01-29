@@ -136,10 +136,28 @@ BEGIN {
       $pms->{tag_data}->{'REMOTEHOSTADDR'} || "127.0.0.1";
     },
 
+    FIRSTTRUSTEDIP => sub {
+      my $pms = shift;
+      my $lasthop = $pms->{msg}->{metadata}->{relays_trusted}->[-1];
+      $lasthop ? $lasthop->{ip} : '';
+    },
+
+    FIRSTTRUSTEDREVIP => sub {
+      my $pms = shift;
+      my $lasthop = $pms->{msg}->{metadata}->{relays_trusted}->[-1];
+      $lasthop ? reverse_ip_address($lasthop->{ip}) : '';
+    },
+
     LASTEXTERNALIP => sub {
       my $pms = shift;
       my $lasthop = $pms->{msg}->{metadata}->{relays_external}->[0];
       $lasthop ? $lasthop->{ip} : '';
+    },
+
+    LASTEXTERNALREVIP => sub {
+      my $pms = shift;
+      my $lasthop = $pms->{msg}->{metadata}->{relays_external}->[0];
+      $lasthop ? reverse_ip_address($lasthop->{ip}) : '';
     },
 
     LASTEXTERNALRDNS => sub {

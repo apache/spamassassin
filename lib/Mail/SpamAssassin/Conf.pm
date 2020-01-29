@@ -4572,8 +4572,14 @@ optional, and the default is shown below.
                    'X-Spam-Relays-Internal' pseudo-header)
  _RELAYSEXTERNAL_  relays used and deemed to be external (see the 
                    'X-Spam-Relays-External' pseudo-header)
+ _FIRSTTRUSTEDIP_  IP address of first trusted client (see RELAYSTRUSTED)
+ _FIRSTTRUSTEDREVIP_  IP address of first trusted client (in reversed
+                   format suitable for RBL queries)
  _LASTEXTERNALIP_  IP address of client in the external-to-internal
                    SMTP handover
+ _LASTEXTERNALREVIP_  IP address of client in the external-to-internal
+                   SMTP handover (in reversed format suitable for RBL
+                   queries)
  _LASTEXTERNALRDNS_ reverse-DNS of client in the external-to-internal
                    SMTP handover
  _LASTEXTERNALHELO_ HELO string used by client in the external-to-internal
