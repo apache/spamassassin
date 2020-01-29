@@ -1,4 +1,7 @@
-To: users@spamassassin.apache.org, dev@spamassassin.apache.org, announce@apache.org
+From: <your@apache.org address here>
+To: <your@apache.org address here>
+Bcc: users@spamassassin.apache.org, dev@spamassassin.apache.org, announce@spamassassin.apache.org, announce@apache.org
+Reply-to: dev@spamassassin.apache.org
 Subject: ANNOUNCE: Apache SpamAssassin 3.4.3 available
 
 Release Notes -- Apache SpamAssassin -- Version 3.4.3
@@ -133,6 +136,7 @@ Optimizations
 
 None noted.
 
+
 Downloading and availability
 ----------------------------
 
@@ -142,17 +146,17 @@ https://spamassassin.apache.org/downloads.cgi
 
 sha256sum of archive files:
 
-  586a45d89e446f5c86ae48417e483b83057771ec463b7e941a45ae6e090f0b42  Mail-SpamAssassin-3.4.3.tar.bz2
-  a4f139aeb13f95c2dab10a11a8390e6a9c7abffc3597816b1129b64d921f4cae  Mail-SpamAssassin-3.4.3.tar.gz
-  c158a5cbe582b6d8e9b5cb4aff817da461909409445ea253f33716f9753bb4c4  Mail-SpamAssassin-3.4.3.zip
-  4e4e8943f065f198b99312da06e62899451c87a115284c6e734601d21f1c568e  Mail-SpamAssassin-rules-3.4.3.r1870871.tgz
+  a5b8fde50e468be8b36b90f5c39b19dfea947d6184a06cbf6dd16bf97265008d  Mail-SpamAssassin-3.4.3.tar.bz2
+  bb3adac71b2a5b69d584ee9843460f61c62da0bb7441c4007cc741b404ad27b8  Mail-SpamAssassin-3.4.3.tar.gz
+  3f4e55e8b4f2420c6d0b30850acd6cfb8808c7e559e0a9168b93950ca5289e86  Mail-SpamAssassin-3.4.3.zip
+  d4804c19c5ee2065443fa09e3940462daa48481dfa9d4a1d95e2683d75c7c7d9  Mail-SpamAssassin-rules-3.4.3.r1871124.tgz
 
 sha512sum of archive files:
 
-  bdbe9a32f87b3d68d7889db61d806cec7caa41ba199df84329343703ed171f8ed9166fc184fb094a7c0e56a7bab8b920995dd82ea3f192cdd08b0c2d66056993  Mail-SpamAssassin-3.4.3.tar.bz2
-  d0e105d76e09dfb359638fe2ee1ecc551948c0d150411afe2e9f040098494878188f798f7c559bbf23a3854a5e8fc50d8a046251730f5ec7fba5073ce2a4aa6d  Mail-SpamAssassin-3.4.3.tar.gz
-  1d2e1426aa34c055d72ea9e1bbeeaf4056f2f9706846d2e4e6a40c4ad724f2f9b87af907567e74803e09b84297a4edba2d3f5a47ae747cc9cb271e75d59b94d7  Mail-SpamAssassin-3.4.3.zip
-  d48e44a9ce52dae5de094967f9893988b2e160f5db18fe37cfb85987be027c1cb659f5ba075798fe33044d1671c17391275b745118a1613c937ed0c322a66327  Mail-SpamAssassin-rules-3.4.3.r1870871.tgz
+  4d50b30a42d318c3a4c868b4940d1f56c329cc501270df12e1a369dd7de670c30f328a5fbc37dbd3b0d06538b9500085e920939c62de80ad6d8740bc47162cb0  Mail-SpamAssassin-3.4.3.tar.bz2
+  d2fd657d3c20273b0c06cb1da083d757d3f2a7f60c7ed6e6ad8f98e6df33c9c5f3824f0531abf5dbc32b0dde22979d7d671231fa2ef0d8b073ea6804c5de0c3a  Mail-SpamAssassin-3.4.3.tar.gz
+  608d8db07e08475e8eba42584fbff95210539e34fdfdc62cc8112d8aa42e88a7537be5bc1c624d5dd9aadce717c459407e64f1b56592ac743051d2c31e817d14  Mail-SpamAssassin-3.4.3.zip
+  2089bd97798c64fec8dea127cc12fbd9d9647bfe42c056a7674c7e9f85bb9e29ad73f741317ec74824016192736d57f16f70ff9bfd1eac0a8de747e417e3175f  Mail-SpamAssassin-rules-3.4.3.r1871124.tgz
 
 Note that the *-rules-*.tgz files are only necessary if you cannot,
 or do not wish to, run "sa-update" after install to download the latest

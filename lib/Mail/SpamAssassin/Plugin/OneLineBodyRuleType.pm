@@ -89,29 +89,39 @@ sub do_one_line_body_tests {
     loop_body => sub
   {
     my ($self, $pms, $conf, $rulename, $pat, %opts) = @_;
-    $pat = untaint_var($pat);
-    my $sub;
+    my $sub = '
+      my ($self, $line) = @_;
+      my $qrptr = $self->{main}->{conf}->{test_qrs};
+    ';
 
     if (($conf->{tflags}->{$rulename}||'') =~ /\bmultiple\b/)
     {
+      # support multiple matches
+      my ($max) = $conf->{tflags}->{$rulename} =~ /\bmaxhits=(\d+)\b/;
+      $max = untaint_var($max);
+      if ($max) {
+        $sub .= '
+          if (exists $self->{tests_already_hit}->{q{'.$rulename.'}}) {
+            return 0 if $self->{tests_already_hit}->{q{'.$rulename.'}} >= '.$max.';
+          }
+        ';
+      }
       # avoid [perl #86784] bug (fixed in 5.13.x), access the arg through ref
-      $sub = '
-      my $lref = \$_[1];
+      $sub .= '
+      my $lref = \$line;
       pos $$lref = 0;
       '.$self->hash_line_for_rule($pms, $rulename).'
-      while ($$lref =~ '.$pat.'g) {
-        my $self = $_[0];
+      while ($$lref =~ /$qrptr->{q{'.$rulename.'}}/go) {
         $self->got_hit(q{'.$rulename.'}, "BODY: ", ruletype => "one_line_body");
-        '. $self->hit_rule_plugin_code($pms, $rulename, "one_line_body",
-                                      "return 1") . '
+        '. $self->hit_rule_plugin_code($pms, $rulename, "one_line_body", "") . '
+        '. ($max? 'last if $self->{tests_already_hit}->{q{'.$rulename.'}} >= '.$max.';' : '') . '
       }
       ';
 
     } else {
-      $sub = '
+      $sub .= '
       '.$self->hash_line_for_rule($pms, $rulename).'
-      if ($_[1] =~ '.$pat.') {
-        my $self = $_[0];
+      if ($line =~ /$qrptr->{q{'.$rulename.'}}/o) {
         $self->got_hit(q{'.$rulename.'}, "BODY: ", ruletype => "one_line_body");
         '. $self->hit_rule_plugin_code($pms, $rulename, "one_line_body", "return 1") . '
       }
@@ -122,7 +132,7 @@ sub do_one_line_body_tests {
     return if ($opts{doing_user_rules} &&
                   !$self->is_user_rule_sub($rulename.'_one_line_body_test'));
 
-    $self->add_temporary_method ($rulename.'_one_line_body_test', '{'.$sub.'}');
+    $self->add_temporary_method ($rulename.'_one_line_body_test', $sub);
   },
     pre_loop_body => sub
   {

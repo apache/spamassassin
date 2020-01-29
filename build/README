@@ -1,7 +1,8 @@
 APACHE SPAMASSASSIN RELEASE PROCEDURE
 =====================================
 
-- First off, checkout the branch or trunk you wish to build.
+- First off, checkout the branch or trunk you wish to build.  I usually do
+  this as a privileged user in a build.tmp directory.
 
 - As the release gets close, consider switching to R-T-C development
   mode: https://wiki.apache.org/spamassassin/DevelopmentMode
@@ -246,7 +247,7 @@ APACHE SPAMASSASSIN RELEASE PROCEDURE
 
   - For a maintenance release (x.y.1, x.y.2):
 
-    vers=3_4_2
+    vers=3_4_3
 
     Then run:
 
@@ -257,7 +258,7 @@ APACHE SPAMASSASSIN RELEASE PROCEDURE
 
   - For a maintenance release candidate(x.y.1-rc1), pre-release (x.y.1-preZ) or alpha (x.y.1-alphaZ):
 
-    vers=3_4_2_rc_1
+    vers=3_4_3_rc_1
 
     #Then run:
 
@@ -297,10 +298,9 @@ APACHE SPAMASSASSIN RELEASE PROCEDURE
 
 - Check out the code from the tag you just made:
 
-    #These should be set from the previous command unless you are on a
-    #  different server
-    #vers=3_4_1
-    #repo=https://svn.apache.org/repos/asf/spamassassin
+    #Switch to a non-privileged user
+    vers=3_4_3
+    repo=https://svn.apache.org/repos/asf/spamassassin
     rm -rf ~/relbuild
     svn co $repo/tags/spamassassin_release_$vers ~/relbuild
     cd ~/relbuild
@@ -544,33 +544,34 @@ APACHE SPAMASSASSIN RELEASE PROCEDURE
 
   WARNING: edit 'build/update_website_docs' beforehand and set the "PERL"
   "WEBDIR" and "vers" lines.  On my build system, the website checkout is
-  in ~/asf/spamassassin/site and perl is in the path so nothing special is
+  in ~/asf/Mail-SpamAssassin/site and perl is in the path so nothing special is
   needed.
 
-        #If needed, remove the old docs
-        cd ~/asf/spamassassin/site
+        #If needed, remove the old docs - This will be different for v4.0
+        cd ~/asf/Mail-SpamAssassin/site
         svn up
         svn delete --force full/3.4.x
         svn commit -m "removing old doc tree from website" 
 
         #Checkout the current release
         cd /tmp
-        svn checkout https://svn.apache.org/repos/asf/spamassassin/tags/spamassassin_release_3_4_2/ release
+        svn checkout https://svn.apache.org/repos/asf/spamassassin/tags/spamassassin_release_3_4_3/ release
         cd /tmp/release
         #link your rules and rulesrc
         ln -s ~/usr/src/Mail-SpamAssassin/trunk/rules
         ln -s ~/usr/src/Mail-SpamAssassin/trunk/rulesrc 
         build/update_website_docs
 
-        cd ~/asf/spamassassin/site
+        cd ~/asf/Mail-SpamAssassin/site
         svn add full/3.4.x
         svn commit -m "updating new doc tree on website" full
 
 - update the tag used to point to "current release":
 
     repo=https://svn.apache.org/repos/asf/spamassassin
+    vers=3_4_3
     svn delete -m "updating for new release"  $repo/tags/spamassassin_current_release_3.4.x
-    svn copy -m "updating for new release" $repo/tags/spamassassin_release_3_4_2 $repo/tags/spamassassin_current_release_3.4.x
+    svn copy -m "updating for new release" $repo/tags/spamassassin_release_$vers $repo/tags/spamassassin_current_release_3.4.x
 
 - upload release .tar.gz (not .bz2) tarball to CPAN at http://pause.cpan.org/:
 

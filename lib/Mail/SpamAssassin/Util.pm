@@ -1327,6 +1327,10 @@ sub uri_list_canonicalize {
     # CRs just confuse things down below, so trash them now
     $uri =~ s/\r//g;
 
+    # Skip some common non-http stuff like #abcdef, ?foobar,
+    # /image.gif (but not //foo.com which actually does http)
+    next if length($uri) <= 1 || $uri =~ m{^(?:[#?&]|/(?!/))};
+
     # Make a copy so we don't trash the original in the array
     my $nuri = $uri;
 

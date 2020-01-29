@@ -1254,6 +1254,7 @@ skip them completely. Disabled with 0.
 
   push (@cmds, {
     setting => 'body_part_scan_size',
+    is_admin => 1,
     default => 50000,
     type => $CONF_TYPE_NUMERIC,
   });
@@ -1267,6 +1268,7 @@ Like body_part_scan_size, for "rawbody" type rules.
 
   push (@cmds, {
     setting => 'rawbody_part_scan_size',
+    is_admin => 1,
     default => 500000,
     type => $CONF_TYPE_NUMERIC,
   });
@@ -3496,6 +3498,20 @@ internally, and should not be used.
     setting => 'priority',
     is_priv => 1,
     type => $CONF_TYPE_HASH_KEY_VALUE,
+    code => sub {
+      my ($self, $key, $value, $line) = @_;
+      my ($rulename, $priority) = split(/\s+/, $value, 2);
+      unless (defined $priority) {
+        return $MISSING_REQUIRED_VALUE;
+      }
+      unless ($rulename =~ IS_RULENAME) {
+        return $INVALID_VALUE;
+      }
+      unless ($priority =~ /^-?\d+$/) {
+        return $INVALID_VALUE;
+      }
+      $self->{priority}->{$rulename} = $priority;
+    }
   });
 
 =back
