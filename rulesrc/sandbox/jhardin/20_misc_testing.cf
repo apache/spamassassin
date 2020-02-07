@@ -2808,7 +2808,7 @@ score      FREEM_DATA_ENTRY            2.500	# limit
 
 
 
-header     __HDR_RCVD_EBAY             X-Spam-Relays-External =~ /rdns=\S+\.ebay\.com\s/
+header     __HDR_RCVD_EBAY             X-Spam-Relays-External =~ /\srdns=\S+\.ebay\.com\s/
 uri        __URI_IMG_EBAY              m,://[^/?]+\.ebayimg\.com/,i
 
 meta       __EBAY_IMG_NOT_RCVD_EBAY    __URI_IMG_EBAY && !__HDR_RCVD_EBAY
@@ -2817,16 +2817,19 @@ score      EBAY_IMG_NOT_RCVD_EBAY      3.000	# limit
 describe   EBAY_IMG_NOT_RCVD_EBAY      E-bay hosted image but message not from E-bay
 tflags     EBAY_IMG_NOT_RCVD_EBAY      publish
 
-header     __HDR_RCVD_AMAZON           X-Spam-Relays-External =~ /rdns=\S+\.amazon(?:ses)?\.com\s/
+header     __HDR_RCVD_AMAZON           X-Spam-Relays-External =~ /\srdns=\S+\.amazon(?:ses)?\.com\s/
 uri        __URI_IMG_AMAZON            m,://[^/?]+\.(?:ssl-)?images-amazon\.com/,i
 
+# price alert site that leverages Amazon, avoid FPs
+header     __HDR_RCVD_KEEPA            X-Spam-Relays-External =~ /\srdns=\S+\.keepa\.com\s/
+
 meta       __AMAZON_IMG_NOT_RCVD_AMZN  __URI_IMG_AMAZON && !__HDR_RCVD_AMAZON
-meta       AMAZON_IMG_NOT_RCVD_AMZN    __AMAZON_IMG_NOT_RCVD_AMZN && !__URI_DBL_DOM && !__RCD_RDNS_SMTP && !__RCD_RDNS_MTA && !__DATE_LOWER && !__MSGID_LIST 
+meta       AMAZON_IMG_NOT_RCVD_AMZN    __AMAZON_IMG_NOT_RCVD_AMZN && !__HDR_RCVD_KEEPA && !__URI_DBL_DOM && !__RCD_RDNS_SMTP && !__RCD_RDNS_MTA && !__DATE_LOWER && !__MSGID_LIST
 score      AMAZON_IMG_NOT_RCVD_AMZN    2.500	# limit
 describe   AMAZON_IMG_NOT_RCVD_AMZN    Amazon hosted image but message not from Amazon
 tflags     AMAZON_IMG_NOT_RCVD_AMZN    publish
 
-header     __HDR_RCVD_ALIBABA          X-Spam-Relays-External =~ /rdns=\S+\.alibaba\.com\s/
+header     __HDR_RCVD_ALIBABA          X-Spam-Relays-External =~ /\srdns=\S+\.alibaba\.com\s/
 uri        __URI_IMG_ALICDN            m,//(?:[^/.]+\.)*alicdn\.com/.+\.(?:jpe?g|gif|png),i
 
 meta       __ALIBABA_IMG_NOT_RCVD_ALI  __URI_IMG_ALICDN && !__HDR_RCVD_ALIBABA
@@ -2835,7 +2838,7 @@ score      ALIBABA_IMG_NOT_RCVD_ALI    2.500	# limit
 describe   ALIBABA_IMG_NOT_RCVD_ALI    Alibaba hosted image but message not from Alibaba
 tflags     ALIBABA_IMG_NOT_RCVD_ALI    publish
 
-header     __HDR_RCVD_WALMART          X-Spam-Relays-External =~ /rdns=\S+\.walmart\.com\s/
+header     __HDR_RCVD_WALMART          X-Spam-Relays-External =~ /\srdns=\S+\.walmart\.com\s/
 uri        __URI_IMG_WALMART           m,://[^/?]+\.walmartimages\.com/,i
 
 meta       __WALMART_IMG_NOT_RCVD_WAL  __URI_IMG_WALMART && !__HDR_RCVD_WALMART
@@ -2844,7 +2847,7 @@ score      WALMART_IMG_NOT_RCVD_WAL    2.500	# limit
 describe   WALMART_IMG_NOT_RCVD_WAL    Walmart hosted image but message not from Walmart
 tflags     WALMART_IMG_NOT_RCVD_WAL    publish
 
-header     __HDR_RCVD_NEWEGG           X-Spam-Relays-External =~ /rdns=\S+\.newegg\.com\s/
+header     __HDR_RCVD_NEWEGG           X-Spam-Relays-External =~ /\srdns=\S+\.newegg\.com\s/
 uri        __URI_IMG_NEWEGG            m,://[^/?]+\.neweggimages\.com/,i
 
 meta       __NEWEGG_IMG_NOT_RCVD_NEGG  __URI_IMG_NEWEGG && !__HDR_RCVD_NEWEGG
@@ -2853,7 +2856,7 @@ score      NEWEGG_IMG_NOT_RCVD_NEGG    2.500	# limit
 describe   NEWEGG_IMG_NOT_RCVD_NEGG    Newegg hosted image but message not from Newegg
 tflags     NEWEGG_IMG_NOT_RCVD_NEGG    publish
 
-header     __HDR_RCVD_SHOPIFY          X-Spam-Relays-External =~ /rdns=\S+\.shopify\.com\s/
+header     __HDR_RCVD_SHOPIFY          X-Spam-Relays-External =~ /\srdns=\S+\.shopify\.com\s/
 uri        __URI_IMG_SHOPIFY           m,://cdn\.shopify\.com/.+\.(?:jpe?g|gif|png),i
 
 meta       __SHOPIFY_IMG_NOT_RCVD_SFY  __URI_IMG_SHOPIFY && !__HDR_RCVD_SHOPIFY
