@@ -750,12 +750,13 @@ sub _check_macrotype_doc {
   my $zip = _open_zip_handle($data);
   return 0 unless $zip;
 
-  #https://www.decalage.info/vba_tools
+  # https://www.decalage.info/vba_tools
+  # Consider macrofiles as lowercase, they are checked later with a case-insensitive method
   my %macrofiles = (
     'word/vbaproject.bin' => 'word2k7',
     'macros/vba/_vba_project' => 'word97',
     'xl/vbaproject.bin' => 'xl2k7',
-    'xl/embeddings/oleObject1.bin' => 'xl2k13',
+    'xl/embeddings/oleobject1.bin' => 'xl2k13',
     '_vba_project_cur/vba/_vba_project' => 'xl97',
     'ppt/vbaproject.bin' => 'ppt2k7',
   );
@@ -763,7 +764,7 @@ sub _check_macrotype_doc {
   my @members = $zip->members();
   foreach my $member (@members){
     my $mname = lc $member->fileName();
-    if (exists($macrofiles{$mname})) {
+    if (exists($macrofiles{lc($mname)})) {
       dbg("Found $macrofiles{$mname} vba file");
       $pms->{olemacro_exists} = 1;
       last;
