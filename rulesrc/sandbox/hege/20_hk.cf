@@ -202,7 +202,8 @@ mimeheader	__HK_SPAMMY_CDFN	Content-Disposition =~ /name=.*?(?:lot(?:eri[ej]|t(?
 meta		HK_SPAMMY_FILENAME	__HK_SPAMMY_CTFN || __HK_SPAMMY_CDFN
 
 mimeheader	HK_CTE_RAW		Content-Transfer-Encoding =~ /^raw$/
-score		HK_CTE_RAW		1
+score		HK_CTE_RAW		2
+tflags		HK_CTE_RAW		publish
 
 mimeheader	__CT_UTF7		Content-Type =~ /\bcharset=.?utf-7\b/i
 
