@@ -167,7 +167,7 @@ sub dnsbl_hit {
     } elsif ($question->string =~ /^(\d+)\.(\d+)\.(\d+)\.(\d+)\.(\S+\w)/) {
       $log = "$4.$3.$2.$1 listed in " . lc($5);
     } elsif ($question->string =~ /^(\S+)(?<!\.)/) {
-      $log = "listed in $1";
+      $log = "listed in ".lc($1);
     }
   }
 
