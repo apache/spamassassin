@@ -91,6 +91,8 @@ our $VERSION = '0.52';
 # http://blog.rootshell.be/2015/01/08/searching-for-microsoft-office-files-containing-macro/
 my $marker1 = "\xd0\xcf\x11\xe0";
 my $marker2 = "\x00\x41\x74\x74\x72\x69\x62\x75\x74\x00";
+# Office 2003 embedded ole
+my $marker2a = "\x01\x00\x4f\x00\x6c\x00\x65\x00\x31\x00\x30\x00\x4e\x00\x61\x00";
 # embedded object in rtf files (https://www.biblioscape.com/rtf15_spec.htm)
 my $marker3 = "\x5c\x6f\x62\x6a\x65\x6d\x62";
 my $marker4 = "\x5c\x6f\x62\x6a\x64\x61\x74";
@@ -868,6 +870,11 @@ sub _check_markers {
 
   if (index($data, $marker1) == 0 && index($data, $marker2) > -1) {
     dbg('Marker 1 & 2 found');
+    return 1;
+  }
+
+  if (index($data, $marker1) == 0 && index($data, $marker2a) > -1) {
+    dbg('Marker 1 & 2a found');
     return 1;
   }
 
