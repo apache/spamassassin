@@ -54,3 +54,8 @@ meta       __UNICR_IMG_NOT_RCVD_LINK     __URI_IMG_UNICREDIT && !__HDR_RCVD_UNIC
 meta       GB_UNICR_IMG_NOT_RCVD_LINK    __UNICR_IMG_NOT_RCVD_LINK && !__HAS_ERRORS_TO && !__MSGID_LIST && !__MSGID_GUID && !__RCD_RDNS_SMTP
 describe   GB_UNICR_IMG_NOT_RCVD_LINK    Unicredit Bank hosted image but message not from Unicredit
 # score      GB_UNICR_IMG_NOT_RCVD_LINK    2.500    # limit
+
+header     __FROM_NAME_WETRANSFER        From:name =~ /WeTransfer/i
+meta       GB_WETRANSFER_HTM             ( HTML_ATTACH && __FROM_NAME_WETRANSFER )
+describe   GB_WETRANSFER_HTM             WeTransfer html attachment
+score      GB_WETRANSFER_HTM             2.0 # limit
