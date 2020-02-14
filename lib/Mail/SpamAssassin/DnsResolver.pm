@@ -869,9 +869,9 @@ sub poll_responses {
             my @matches =
               grep(m{^\Q$dnsid\E/}, keys %{$self->{id_to_callback}});
             if (!@matches) {
-              info("dns: no likely matching queries for id %s", $dnsid);
+              dbg("dns: no likely matching queries for id %s", $dnsid);
             } else {
-              info("dns: a likely matching query: %s", join(', ', @matches));
+              dbg("dns: a likely matching query: %s", join(', ', @matches));
             }
           }
         }
