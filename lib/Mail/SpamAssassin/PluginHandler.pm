@@ -81,6 +81,12 @@ sub load_plugin {
   }
   $package = Mail::SpamAssassin::Util::untaint_var($package);
 
+  # Bug 7728
+  if ($package eq 'Mail::SpamAssassin::Plugin::HashCash') {
+    warn "plugin: $package is deprecated, remove loadplugin clause from your configuration\n";
+    return;
+  }
+
   # Don't load the same plugin twice!
   # Do this *before* calling ->new(), otherwise eval rules will be
   # registered on a nonexistent object
