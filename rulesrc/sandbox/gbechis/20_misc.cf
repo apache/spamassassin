@@ -19,6 +19,8 @@ describe    GB_COPY_OF_SHORT   Url shortnener spam
 ifplugin Mail::SpamAssassin::Plugin::FromNameSpoof
   meta      GB_FROMNAME_SPOOFED_EMAIL_IP  ( FROMNAME_SPOOFED_EMAIL && !__NOT_SPOOFED )
   describe  GB_FROMNAME_SPOOFED_EMAIL_IP  From:name looks like a spoofed email from a spoofed ip
+  score     GB_FROMNAME_SPOOFED_EMAIL_IP  0.50 # limit
+  tflags    GB_FROMNAME_SPOOFED_EMAIL_IP  publish
 endif
 
 header     __HDR_RCVD_GOOGLE           X-Spam-Relays-External =~ /rdns=mail-\S+\.google\.com\s/
