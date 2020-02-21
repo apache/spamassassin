@@ -1236,38 +1236,6 @@ it will be used if it is available.
     }
   });
 
-
-=item body_part_scan_size               (default: 50000)
-
-Per mime-part scan size limit in bytes for "body" type rules.
-The decoded/stripped mime-part is truncated approx to this size.
-Helps scanning large messages safely, so it's not necessary to
-skip them completely. Disabled with 0.
-
-=cut
-
-  push (@cmds, {
-    setting => 'body_part_scan_size',
-    is_admin => 1,
-    default => 50000,
-    type => $CONF_TYPE_NUMERIC,
-  });
-
-
-=item rawbody_part_scan_size               (default: 500000)
-
-Like body_part_scan_size, for "rawbody" type rules.
-
-=cut
-
-  push (@cmds, {
-    setting => 'rawbody_part_scan_size',
-    is_admin => 1,
-    default => 500000,
-    type => $CONF_TYPE_NUMERIC,
-  });
-
-
 =back
 
 =head2 NETWORK TEST OPTIONS
@@ -3634,6 +3602,36 @@ general running of SpamAssassin.
     }
   });
 
+=item body_part_scan_size               (default: 50000)
+
+Per mime-part scan size limit in bytes for "body" type rules.
+The decoded/stripped mime-part is truncated approx to this size.
+Helps scanning large messages safely, so it's not necessary to
+skip them completely. Disabled with 0.
+
+=cut
+
+  push (@cmds, {
+    setting => 'body_part_scan_size',
+    is_admin => 1,
+    default => 50000,
+    type => $CONF_TYPE_NUMERIC,
+  });
+
+
+=item rawbody_part_scan_size               (default: 500000)
+
+Like body_part_scan_size, for "rawbody" type rules.
+
+=cut
+
+  push (@cmds, {
+    setting => 'rawbody_part_scan_size',
+    is_admin => 1,
+    default => 500000,
+    type => $CONF_TYPE_NUMERIC,
+  });
+  
 =item rbl_timeout t [t_min] [zone]		(default: 15 3)
 
 All DNS queries are made at the beginning of a check and we try to read
