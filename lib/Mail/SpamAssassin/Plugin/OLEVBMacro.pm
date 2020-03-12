@@ -42,6 +42,8 @@ Mail::SpamAssassin::Plugin::OLEVBMacro - search attached documents for evidence 
     body     OLEMACRO_CSV eval:check_olemacro_csv()
     describe OLEMACRO_CSV Malicious csv file that tries to exec cmd.exe detected
 
+    body     OLEMACRO_DOWNLOAD_EXE eval:check_olemacro_download_exe()
+    describe OLEMACRO_DOWNLOAD_EXE Malicious code inside the Office doc that tries to download a .exe file detected
   endif
 
 =head1 DESCRIPTION
@@ -100,6 +102,9 @@ my $marker4 = "\x5c\x6f\x62\x6a\x64\x61\x74";
 my $marker5 = "\x5c\x20\x6f\x62\x6a\x64\x61\x74";
 # Excel .xlsx encrypted package, thanks to Dan Bagwell for the sample
 my $encrypted_marker = "\x45\x00\x6e\x00\x63\x00\x72\x00\x79\x00\x70\x00\x74\x00\x65\x00\x64\x00\x50\x00\x61\x00\x63\x00\x6b\x00\x61\x00\x67\x00\x65";
+# .exe file downloaded from external website
+my $exe_marker1 = "\x00((https?)://)[-A-Za-z0-9+&@#/%?=~_|!:,.;]{5,1000}[-A-Za-z0-9+&@#/%=~_|]{5,1000}(\.exe|\.cmd|\.bat)([\x06|\x00])";
+my $exe_marker2 = "URLDownloadToFileA";
 
 # this code burps an ugly message if it fails, but that's redirected elsewhere
 # AZ_OK is a constant exported by Archive::Zip
@@ -124,6 +129,7 @@ sub new {
   $self->register_eval_rule("check_olemacro_renamed");
   $self->register_eval_rule("check_olemacro_encrypted");
   $self->register_eval_rule("check_olemacro_zip_password");
+  $self->register_eval_rule("check_olemacro_download_exe");
 
   return $self;
 }
@@ -464,6 +470,14 @@ sub check_olemacro_zip_password {
   return $pms->{olemacro_zip_password};
 }
 
+sub check_olemacro_download_exe {
+  my ($self,$pms,$body,$name) = @_;
+
+  _check_attachments(@_) unless exists $pms->{olemacro_download_exe};
+
+  return $pms->{olemacro_download_exe};
+}
+
 sub _check_attachments {
 
   my ($self,$pms,$body,$name) = @_;
@@ -532,6 +546,11 @@ sub _check_attachments {
       }
 
       return 1 if $pms->{olemacro_exists} == 1;
+    }
+
+    if ((defined $data) and ($data =~ /$exe_marker1/) and (index($data, $exe_marker2))) {
+      dbg('Url that triggers a download to an .exe file found in Office file');
+      $pms->{olemacro_download_exe} = 1;
     }
 
     if ($pms->{conf}->{olemacro_extended_scan} == 1) {
