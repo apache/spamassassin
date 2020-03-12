@@ -41,6 +41,7 @@ Mail::SpamAssassin::Plugin::OLEVBMacro - search attached documents for evidence 
 
     body     OLEMACRO_CSV eval:check_olemacro_csv()
     describe OLEMACRO_CSV Malicious csv file that tries to exec cmd.exe detected
+
   endif
 
 =head1 DESCRIPTION
@@ -497,8 +498,10 @@ sub _check_attachments {
 
       $data = $part->decode($chunk_size) unless defined $data;
 
-      _check_encrypted_doc($pms, $name, $data);
-      _check_macrotype_doc($pms, $name, $data);
+      if (defined $data) {
+        _check_encrypted_doc($pms, $name, $data);
+        _check_macrotype_doc($pms, $name, $data);
+      }
 
       return 1 if $pms->{olemacro_exists} == 1;
     }
@@ -508,11 +511,13 @@ sub _check_attachments {
       dbg("Found attachment with name $name");
       $data = $part->decode($chunk_size) unless defined $data;
 
-      _check_encrypted_doc($pms, $name, $data);
-      _check_oldtype_doc($pms, $name, $data);
-      # zipped doc that matches olemacro_exts - strange
-      if (_check_macrotype_doc($pms, $name, $data)) {
-        $pms->{olemacro_renamed} = $pms->{olemacro_office_xml};
+      if (defined $data) {
+        _check_encrypted_doc($pms, $name, $data);
+        _check_oldtype_doc($pms, $name, $data);
+        # zipped doc that matches olemacro_exts - strange
+        if (_check_macrotype_doc($pms, $name, $data)) {
+          $pms->{olemacro_renamed} = $pms->{olemacro_office_xml};
+        }
       }
 
       return 1 if $pms->{olemacro_exists} == 1;
@@ -522,7 +527,9 @@ sub _check_attachments {
       dbg("Found zip attachment with name $name");
       $data = $part->decode($chunk_size) unless defined $data;
 
-      _check_zip($pms, $name, $data);
+      if (defined $data) {
+        _check_zip($pms, $name, $data);
+      }
 
       return 1 if $pms->{olemacro_exists} == 1;
     }
@@ -531,18 +538,20 @@ sub _check_attachments {
       dbg("Extended scan attachment with name $name");
       $data = $part->decode($chunk_size) unless defined $data;
 
-      if (_is_office_doc($data)) {
-        $pms->{olemacro_renamed} = 1;
-        dbg("Found $name to be an Office Doc!");
-        _check_encrypted_doc($pms, $name, $data);
-        _check_oldtype_doc($pms, $name, $data);
-      }
+      if (defined $data) {
+        if (_is_office_doc($data)) {
+          $pms->{olemacro_renamed} = 1;
+          dbg("Found $name to be an Office Doc!");
+          _check_encrypted_doc($pms, $name, $data);
+          _check_oldtype_doc($pms, $name, $data);
+        }
 
-      if (_check_macrotype_doc($pms, $name, $data)) {
-        $pms->{olemacro_renamed} = $pms->{olemacro_office_xml};
-      }
+        if (_check_macrotype_doc($pms, $name, $data)) {
+          $pms->{olemacro_renamed} = $pms->{olemacro_office_xml};
+        }
 
-      _check_zip($pms, $name, $data);
+        _check_zip($pms, $name, $data);
+      }
 
       return 1 if $pms->{olemacro_exists} == 1;
     }
@@ -902,6 +911,7 @@ sub _check_markers {
     dbg('XML macros marker found');
     return 1;
   }
+
 }
 
 sub _find_malice_bins {
