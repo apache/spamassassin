@@ -1879,8 +1879,8 @@ else
   meta          __FUZZY_MONERO      0
 endif
 
-uri            __URL_BTC_ID     m;[/.][13][a-km-zA-HJ-NP-Z1-9]{25,34}(?:/|$);
-body           __BITCOIN_ID     /\b(?<!=)[13][a-km-zA-HJ-NP-Z1-9]{25,34}\b/
+uri            __URL_BTC_ID     m;[/.](?:[13][a-km-zA-HJ-NP-Z1-9]{25,34}|bc1[acdefghjklmnpqrstucwxyz234567890]{30,90})(?:/|$);
+body           __BITCOIN_ID     /\b(?<!=)(?:[13][a-km-zA-HJ-NP-Z1-9]{25,34}|bc1[acdefghjklmnpqrstucwxyz234567890]{30,90})\b/
 
 meta          FUZZY_MONERO        __FUZZY_MONERO
 describe      FUZZY_MONERO        Obfuscated "Monero"
@@ -2001,7 +2001,7 @@ ifplugin Mail::SpamAssassin::Plugin::ReplaceTags
   replace_rules  __YOUR_WEBCAM
   body           __YOUR_ONAN            /(?:^|\s)(?:<Y><O><U><R>?|<I><H><R><E><R>)\s(?:<M><A><S><T>(?:<U>|<R>){2}<B><A><T><I>(?:<O><N>|<N><G>)(?:<S><V><I><D><E><O>)?|<O><N><A><N><I><S><M>|<S><O><L><I><T><A><R><Y>\s<S><E><X>|<H><A><N><D>\s<F><U><C><K><I><N><G>|<S><E><L><B><S><T><B><E><F><R><I><E><D><I><G><U><N><G>)/i
   replace_rules  __YOUR_ONAN
-  body           __YOUR_PERSONAL        /(?:^|\s)(?:<Y><O><U><R>\s(?:<P><E><R><S><O><N><A><L>|<P><R><I><V><A><T><E>|<S><O><C><I><A><L>\s<C><O><N><T><A><C><T>|<A><D><D><R><E><S><S>|<F><R><I><E><N><D><S>)\s(?:<I><N><F><O>(?:<R><M><A><T><I><O><N>)?|<D><A><T><A>|<D><E><T><A><I><L><S>|<B><O><O><K>|<S><E><C><R><E><T><S>)|<A><L><L>\s<Y><O><U><R>\s<F><I><L><E><S>)[\s\.]/i
+  body           __YOUR_PERSONAL        /(?:^|\s)(?:<Y><O><U><R>\s(?:<P><E><R><S><O><N><A><L>|<P><R><I><V><A><T><E>|<S><O><C><I><A><L>\s<C><O><N><T><A><C><T>|<A><D><D><R><E><S><S>|<F><R><I><E><N><D><S>)\s(?:<I><N><F><O>(?:<R><M><A><T><I><O><N>)?|<D><A><T><A>|<D><E><T><A><I><L><S>|<B><O><O><K>|<S><E><C><R><E><T><S>)|<A><L><L>\s<Y><O><U><R>\s(?:<F><I><L><E><S>|<C><O><N><T><A><C><T><S>))[\s\.]/i
   replace_rules  __YOUR_PERSONAL
   body           __HOURS_DEADLINE       /(?:^|\s)(?:(?:<G><I><V><E>\s<Y><O><U>|<G><E><B><E>\s<I><H><N><E><N>(?:\s<N><U><R>)?|<Y><O><U>\s(?:<W><I><L><L>\s)?<H><A><V><E>(?:\s<O><N><L><Y>|\s<J><U><S><T>)?|<W><I><T><H><I><N>)(?:(\s<T><H><E>)?\s(?:<L><A><S><T>|<N><E><X><T>))?\s(?:\d+|<O><N><E>|<T><W><O>|<T><H><R><E><E>)\s?(?:<H><O><U><R><S>?|<H><R>\s?<S>?|<D><A><Y><S>?|<S><T><U><N><D><E><N>)|(?:<B><Y>|<T><O>|<U><N><T><I><L>|<B><E><F><O><R><E>)\s<T><H><E>\s<E><N><D>\s<O><F>\s<T><H><E>\s(?:<W><O><R><K>(?:<I><N><G>)?\s)?<D><A><Y>|Ich\sgebe\sIhnen\s\d+\sStunden|\d+\s<H><O><U><R><S>?\s<B><E><F><O><R><E>\s(?:<S><E><N><D><I><N><G>|<R><E><L><E><A><S><I><N><G>|<E><X><P><O><S><I><N><G>|<P><U><B><L><I><S><H><I><N><G>)|(?:<T><H><E>|<Y><O><U><R>)\s<D><E><A><D><L><I><N><E>\s(?:<I><S>|<W><I><L><L>\s<B><E>))/i
   replace_rules  __HOURS_DEADLINE
@@ -2014,7 +2014,7 @@ else
   body           __YOUR_PASSWORD        /\b(?:your|(?:change|modify|update|reset|alter|fix)\sthe)\s(?:pass[-\s_]word|pswd)\b/i
   body           __YOUR_WEBCAM          /\b(?:from|your|with)\s(?:(?:screen|desktop)\sand\s|own\s)?(?:web[-\s]?|front[-\s]?|network\s)cam\b/i
   body           __YOUR_ONAN            /\b(?:your?|ihrer)\s(?:mast[ur]{2}bati(?:on|ng)(?:svideo)?|onanism|solitary\ssex|hand\sfucking|Selbstbefriedigung)\b/i
-  body           __YOUR_PERSONAL        /\b(?:your\s(?:personal|private|social\scontact|address|friends)\s(?:info(?:rmation)?|data|details|book|secrets)|all\syour\sfiles)\b/i
+  body           __YOUR_PERSONAL        /\b(?:your\s(?:personal|private|social\scontact|address|friends)\s(?:info(?:rmation)?|data|details|book|secrets)|all\syour\s(?:files|contacts))\b/i
   body           __HOURS_DEADLINE       /\b(?:(?:give\syou|gebe\sihnen(?:\snur)?|you\s(?:will\s)?have(?:\sonly|\sjust)?|within)(?:(\sthe)?\s(?:last|next))?\s(?:\d+|one|two|three)\s?(?:hours?|hr(?:\s?s)?|days?|stunden)|(?:by|to|until|before)\sthe\send\sof\sthe\s(?:work(?:ing)?\s)?day|Ich\sgebe\sIhnen\s\d+\sStunden|\d+\shours?\sbefore\s(?:sending|releasing|exposing|publishing)|(?:the|your)\sdeadline\s(?:is|will\sbe))\b/i
   body           __EXPLOSIVE_DEVICE     /\b(?:explosive\sdevice|bomb)\b/i
 endif
