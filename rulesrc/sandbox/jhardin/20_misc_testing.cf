@@ -1995,13 +1995,13 @@ ifplugin Mail::SpamAssassin::Plugin::ReplaceTags
   replace_rules  __MY_MALWARE
   body           __PAY_ME               /(?:^|\s)(?:<P><A><Y>\s<M><E>|(?:(?:<S><E><N><D>|<T><R><A><N><S><M><I><T>|<G><I><V><E>)\s<M><E>|(?:<S><E><N><D>(?:<E><N>\s<S><I><E>)?|<T><R><A><N><S><F><E><R>)\s(?:<T><H><E>\s<A><M><O><U><N><T>\s<O><F>|<E><X><A><C><T><L><Y>|<G><E><N><A><U>)|<I>\s<W><A><N><T>|<D><E><N>\s<B><E><T><R><A><G>\s<V><O><N>|<P><A><Y><M><E><N><T>\s<O><F>)\s(?:[\d,'.\$£]+\s?(?:<U><S><D>?|<E><U><R>?(?:<O><S>)?|<G><B><P>|<B><T><C>)?|<B><I><T><C><O><I><N>|<B><T><C>)|(?:<M><A><K><E>|<P><E><R><F><O><R><M>|<S><E><N><D>|<T><R><A><N><S><M><I><T>)\s<T><H><E>\s<P><A><Y><M><E><N><T>|<A><M><O><U><N><T>\s<F><O><R>\s<M><Y>\s<S><I><L><E><N><C><E>|(?:<P><A><Y>|<F><U><N><D>)\s<T><H><I><S>\s(?:<B><I><T><C><O><I><N>|<M><O><N><E><R><O>)[-\s](?:<A><D><D><R><E><S><S>|<W><A><L><L><E><T>|<B><R><I><E><F><T><A><S><C><H><E>))[\s\.,]/i
   replace_rules  __PAY_ME
-  body           __YOUR_PASSWORD        /(?:^|\s)(?:<Y><O><U><R>|(?:<C><H><A><N><G><E>|<M><O><D><I><F><Y>|<U><P><D><A><T><E>|<R><E><S><E><T>|<A><L><T><E><R>|<F><I><X>)\s<T><H><E>)\s(?:<P><A><S><S>[-\s_]<W><O><R><D>|<P><S><W><D>\s)/i
+  body           __YOUR_PASSWORD        /(?:^|\s)(?:<Y><O><U><R>|(?:<C><H><A><N><G><E>|<M><O><D><I><F><Y>|<U><P><D><A><T><E>|<R><E><S><E><T>|<A><L><T><E><R>|<F><I><X>)\s<T><H><E>)\s(?:<P><A><S><S>[-\s_]?<W><O><R><D>|<P><S><W><D>\s)/i
   replace_rules  __YOUR_PASSWORD
   body           __YOUR_WEBCAM          /(?:^|\s)(?:<F><R><O><M>|<Y><O><U><R>|<W><I><T><H>)\s(?:(?:<S><C><R><E><E><N>|<D><E><S><K><T><O><P>)\s<A><N><D>\s|<O><W><N>\s)?(?:<W><E><B>[-\s]?|<F><R><O><N><T>[-\s]?|<N><E><T><W><O><R><K>\s)<C><A><M>/i
   replace_rules  __YOUR_WEBCAM
   body           __YOUR_ONAN            /(?:^|\s)(?:<Y><O><U><R>?|<I><H><R><E><R>)\s(?:<M><A><S><T>(?:<U>|<R>){2}<B><A><T><I>(?:<O><N>|<N><G>)(?:<S><V><I><D><E><O>)?|<O><N><A><N><I><S><M>|<S><O><L><I><T><A><R><Y>\s<S><E><X>|<H><A><N><D>\s<F><U><C><K><I><N><G>|<S><E><L><B><S><T><B><E><F><R><I><E><D><I><G><U><N><G>)/i
   replace_rules  __YOUR_ONAN
-  body           __YOUR_PERSONAL        /(?:^|\s)(?:<Y><O><U><R>\s(?:<P><E><R><S><O><N><A><L>|<P><R><I><V><A><T><E>|<S><O><C><I><A><L>\s<C><O><N><T><A><C><T>|<A><D><D><R><E><S><S>|<F><R><I><E><N><D><S>)\s(?:<I><N><F><O>(?:<R><M><A><T><I><O><N>)?|<D><A><T><A>|<D><E><T><A><I><L><S>|<B><O><O><K>|<S><E><C><R><E><T><S>)|<A><L><L>\s<Y><O><U><R>\s(?:<F><I><L><E><S>|<C><O><N><T><A><C><T><S>))[\s\.]/i
+  body           __YOUR_PERSONAL        /(?:^|\s)(?:<Y><O><U><R>\s(?:<P><E><R><S><O><N><A><L>|<P><R><I><V><A><T><E>|<S><O><C><I><A><L>\s<C><O><N><T><A><C><T>|<A><D><D><R><E><S><S>|<F><R><I><E><N><D><S>)\s(?:<I><N><F><O>(?:<R><M><A><T><I><O><N>)?|<D><A><T><A>|<D><E><T><A><I><L><S>|<B><O><O><K>|<S><E><C><R><E><T><S>)|<A><L><L>\s(?:<O><F>\s)?<Y><O><U><R>\s(?:<F><I><L><E><S>|<C><O><N><T><A><C><T><S>|<S><E><C><R><E><T><S>))[\s\.]/i
   replace_rules  __YOUR_PERSONAL
   body           __HOURS_DEADLINE       /(?:^|\s)(?:(?:<G><I><V><E>\s<Y><O><U>|<G><E><B><E>\s<I><H><N><E><N>(?:\s<N><U><R>)?|<Y><O><U>\s(?:<W><I><L><L>\s)?<H><A><V><E>(?:\s<O><N><L><Y>|\s<J><U><S><T>)?|<W><I><T><H><I><N>)(?:(\s<T><H><E>)?\s(?:<L><A><S><T>|<N><E><X><T>))?\s(?:\d+|<O><N><E>|<T><W><O>|<T><H><R><E><E>)\s?(?:<H><O><U><R><S>?|<H><R>\s?<S>?|<D><A><Y><S>?|<S><T><U><N><D><E><N>)|(?:<B><Y>|<T><O>|<U><N><T><I><L>|<B><E><F><O><R><E>)\s<T><H><E>\s<E><N><D>\s<O><F>\s<T><H><E>\s(?:<W><O><R><K>(?:<I><N><G>)?\s)?<D><A><Y>|Ich\sgebe\sIhnen\s\d+\sStunden|\d+\s<H><O><U><R><S>?\s<B><E><F><O><R><E>\s(?:<S><E><N><D><I><N><G>|<R><E><L><E><A><S><I><N><G>|<E><X><P><O><S><I><N><G>|<P><U><B><L><I><S><H><I><N><G>)|(?:<T><H><E>|<Y><O><U><R>)\s<D><E><A><D><L><I><N><E>\s(?:<I><S>|<W><I><L><L>\s<B><E>))/i
   replace_rules  __HOURS_DEADLINE
@@ -2011,10 +2011,10 @@ else
   body           __MY_VICTIM            /\b(?:hi|hello),?(?:\smy)?\s(?:victim|prey)\b/i
   body           __MY_MALWARE           /\b(?:(?:I(?:'ve|\shave)?\s(?:put|set\s?up|installed|buil[td]\sin|placed)\s(?:a\s)?|my\s(?:personal\s)?)(?:malware|virus|spy\s?ware|trojan|program\srecorded|expl[o0]it)|application[^\.]{1,30}(?:enable[sd]|allows)\sme\sto\s(?:access|control)|I\s(?:contaminated|infected|hacked|toxified|poisoned)\s(?:your|this)\s(?:machine|computer|gadget|(?:smart\s?)?phone|device|email)|Anwendung\s[^\.]{1,50}\sich\sauf\salle\sIhre\sdarauf\sgespeicherten\sDateien\szugreifen\skann|mein\shinterhältiges\sProgramm|I\s?am\s?a\s?hacker|(?:(?:trojan|virus|spyware|malware)\s)+giv(?:es|ing)\sme)\b/i
   body           __PAY_ME               /\b(?:pay\sme|(?:(?:send|transmit|give)\sme|(?:send(?:en\ssie)?|transfer)\s(?:the\samount\sof|exactly|genau)|I\swant|den\sbetrag\svon|payment\sof)\s(?:[\d,'.\$£]+\s?(?:usd?|eur?(?:os)?|gbp|BTC)?|bitcoin|BTC)|(?:make|perform|send|transmit)\sthe\spayment|amount\sfor\smy\ssilence|(?:pay|fund)\sthis\s(?:bitcoin|monero)[-\s](?:address|wallet|brieftasche))\b/i
-  body           __YOUR_PASSWORD        /\b(?:your|(?:change|modify|update|reset|alter|fix)\sthe)\s(?:pass[-\s_]word|pswd)\b/i
+  body           __YOUR_PASSWORD        /\b(?:your|(?:change|modify|update|reset|alter|fix)\sthe)\s(?:pass[-\s_]?word|pswd)\b/i
   body           __YOUR_WEBCAM          /\b(?:from|your|with)\s(?:(?:screen|desktop)\sand\s|own\s)?(?:web[-\s]?|front[-\s]?|network\s)cam\b/i
   body           __YOUR_ONAN            /\b(?:your?|ihrer)\s(?:mast[ur]{2}bati(?:on|ng)(?:svideo)?|onanism|solitary\ssex|hand\sfucking|Selbstbefriedigung)\b/i
-  body           __YOUR_PERSONAL        /\b(?:your\s(?:personal|private|social\scontact|address|friends)\s(?:info(?:rmation)?|data|details|book|secrets)|all\syour\s(?:files|contacts))\b/i
+  body           __YOUR_PERSONAL        /\b(?:your\s(?:personal|private|social\scontact|address|friends)\s(?:info(?:rmation)?|data|details|book|secrets)|all\s(?:of\s)?your\s(?:files|contacts|secrets))\b/i
   body           __HOURS_DEADLINE       /\b(?:(?:give\syou|gebe\sihnen(?:\snur)?|you\s(?:will\s)?have(?:\sonly|\sjust)?|within)(?:(\sthe)?\s(?:last|next))?\s(?:\d+|one|two|three)\s?(?:hours?|hr(?:\s?s)?|days?|stunden)|(?:by|to|until|before)\sthe\send\sof\sthe\s(?:work(?:ing)?\s)?day|Ich\sgebe\sIhnen\s\d+\sStunden|\d+\shours?\sbefore\s(?:sending|releasing|exposing|publishing)|(?:the|your)\sdeadline\s(?:is|will\sbe))\b/i
   body           __EXPLOSIVE_DEVICE     /\b(?:explosive\sdevice|bomb)\b/i
 endif
@@ -2039,6 +2039,11 @@ meta           BITCOIN_DEADLINE       __BITCOIN_ID && __HOURS_DEADLINE && !BITCO
 describe       BITCOIN_DEADLINE       BitCoin with a deadline
 score          BITCOIN_DEADLINE       3.000	# limit
 tflags         BITCOIN_DEADLINE       publish
+
+meta           BITCOIN_YOUR_INFO      __BITCOIN_ID && __YOUR_PERSONAL && !BITCOIN_EXTORT_01
+describe       BITCOIN_YOUR_INFO      BitCoin with your personal info
+score          BITCOIN_YOUR_INFO      3.000	# limit
+tflags         BITCOIN_YOUR_INFO      publish
 
 meta           BITCOIN_MALWARE        __BITCOIN_ID && __MY_MALWARE && !BITCOIN_EXTORT_01 && !__NOT_SPOOFED
 describe       BITCOIN_MALWARE        BitCoin + malware bragging
