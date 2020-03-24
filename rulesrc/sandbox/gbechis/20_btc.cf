@@ -41,7 +41,7 @@ score    GB_BITCOIN_NH        3.0 # limit
 
 if (version >= 3.004003)
   ifplugin Mail::SpamAssassin::Plugin::HashBL
-    body          GB_HASHBL_BTC eval:check_hashbl_bodyre('bl.btcblack.it', 'raw/max=10/shuffle', '\b(?<!=)(?:[13][a-km-zA-HJ-NP-Z1-9]{25,34})|(bc1[acdefghjklmnpqrstuvwxyz234567890]{30,90})\b')
+    body          GB_HASHBL_BTC eval:check_hashbl_bodyre('bl.btcblack.it', 'raw/max=10/shuffle', '\b(?<!=)([13][a-km-zA-HJ-NP-Z1-9]{25,34}|bc1[acdefghjklmnpqrstuvwxyz234567890]{30,90})\b')
     priority      GB_HASHBL_BTC -100
     tflags        GB_HASHBL_BTC net
     reuse         GB_HASHBL_BTC
