@@ -449,6 +449,10 @@ sub assemble_regexps {
           $pat =~ s/\Q\[\\t\]\E/\\t/gs;
         }
 
+        if ($opt{ruletype} eq 'body') {
+          $pat =~ s/^\s/\\s/;
+        }
+
         if ($opt{ruletype} eq 'header') {
           print "$opt{ruletype} $opt{ruleprefix}${name}  ALL =~ /$pat/\n";
         } else {
