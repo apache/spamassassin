@@ -1240,6 +1240,12 @@ sub parse_received_line {
     # from zimbramail.artsit.org.uk (unverified) by MAILSWEEP.birminghamartsit.org.uk (Clearswift SMTPRS 5.1.7) with ESMTP id <T78926b35f2c0a80003da8@MAILSWEEP.birminghamartsit.org.uk> for <discuss@lists.surbl.org>; Tue, 30 May 2006 15:56:15 +0100
     if (/^\S+ (?:(?:with|via|for) \S+|\(unverified\)) by\b/) { return 0; }
 
+    # from MjA3NDc4Mg (unknown) by ismtpd0001p1lon1.sendgrid.net (SG) with HTTP id aqHKNX2kSp-HiqspAa-uvw for <email@e.example.com>; Thu, 02 Apr 2020 07:53:55.516 +0000 (UTC)
+    if (/^\S+ \(unknown\) by \S+ \(SG\) with \b/) { return 0; }
+
+    # from localhost (example.com [local]) by example.com (OpenSMTPD) with ESMTPA id 5db34e0d for <email@example.com>; Tue, 7 Apr 2020 01:38:29 -0600 (MDT)
+    if (/^\S+ \(\S+ \[local\]\) by \S+ \(OpenSMTPD\) with \b/) { return 0; }
+
     # from DL1GSPMX02 (dl1gspmx02.gamestop.com) by email.ebgames.com (LSMTP for Windows NT v1.1b) with SMTP id <21.000575A0@email.ebgames.com>; Tue, 12 Sep 2006 21:06:43 -0500
     if (/\(LSMTP for/) { return 0; }
 
