@@ -1567,7 +1567,6 @@ sub http_get_lwp {
 
 # Do a GET request via HTTP for a given URL using an external program,
 # or fall back to LWP if no external downloading program is available.
-# Use the optional time_t value to do an IMS GET
 sub http_get {
   my($url, $dir, $suggested_out_fname, $force_reload) = @_;
   my $content;
