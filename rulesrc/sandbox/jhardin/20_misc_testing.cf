@@ -1858,7 +1858,7 @@ ifplugin Mail::SpamAssassin::Plugin::ReplaceTags
   describe      FUZZY_CLICK_HERE    Obfuscated "click here"
   tflags        FUZZY_CLICK_HERE    publish
 
-  body          FUZZY_BITCOIN       /<B>(?!itcoin)<I><T><C><O><I><N>/i
+  body          FUZZY_BITCOIN       /<B>(?!itcoin)<I><T>-?<C><O><I><N>/i
   replace_rules FUZZY_BITCOIN   
   describe      FUZZY_BITCOIN       Obfuscated "Bitcoin"
   tflags        FUZZY_BITCOIN       publish
