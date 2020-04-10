@@ -24,7 +24,8 @@ q{ This must be the very last line}, 'lastline',
 
 );
 
-ok (sdrun ("-L --ssl --server-key data/etc/testhost.key --server-cert data/etc/testhost.cert",
-           "--ssl < data/spam/001",
+my $port = probably_unused_spamd_port();
+ok (sdrun ("-L --ssl --port $port --server-key data/etc/testhost.key --server-cert data/etc/testhost.cert",
+           "--ssl --port $port < data/spam/001",
            \&patterns_run_cb));
 ok_all_patterns();
