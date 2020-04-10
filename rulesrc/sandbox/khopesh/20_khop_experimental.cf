@@ -120,7 +120,7 @@ tflags	 __BOTNET_NOTRUST	nopublish # confirm license with author first
 
 
 # Note: unfair regarding RFC 2821, see http://en.wikipedia.org/wiki/FCrDNS#Uses
-header __HELO_NOT_RDNS	X-Spam-Relays-External =~ /^[^\]]+ rdns=(\S+) helo=(?!\1)\S/
+header __HELO_NOT_RDNS	X-Spam-Relays-External =~ /^[^\]]+ rdns=(\S+) helo=(?!(?i)\1)\S/
 meta	 KHOP_HELO_FCRDNS	__HELO_NOT_RDNS && !(__VIA_ML || __freemail_safe || __RCVD_IN_DNSWL || __NOT_SPOOFED || __RDNS_SHORT)
 describe KHOP_HELO_FCRDNS	Relay HELO differs from its IP's reverse DNS
 score	 KHOP_HELO_FCRDNS	0.4 # 20090603
