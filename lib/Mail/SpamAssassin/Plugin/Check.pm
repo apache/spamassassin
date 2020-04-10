@@ -716,7 +716,7 @@ sub do_head_tests {
     }
 
     my $def = $conf->{test_opt_unset}->{$rulename};
-    push(@{ $ordered{$hdrname . (!defined $def ? '' : "\t".$def)} },
+    push(@{ $ordered{$hdrname . (!defined $def ? '' : "\t$rulename")} },
          $rulename);
 
     return if ($opts{doing_user_rules} &&
@@ -740,7 +740,8 @@ sub do_head_tests {
       my($hdrname, $def) = split(/\t/, $k, 2);
       $self->push_evalstr_prefix($pms, '
         $hval = $self->get(q{'.$hdrname.'}, ' .
-                           (!defined($def) ? 'undef' : 'q{'.$def.'}') . ');
+                           (!defined($def) ? 'undef' :
+                              '$self->{conf}->{test_opt_unset}->{q{'.$def.'}}') . ');
       ');
       foreach my $rulename (@{$v}) {
           my $tc_ref = $testcode{$rulename};
