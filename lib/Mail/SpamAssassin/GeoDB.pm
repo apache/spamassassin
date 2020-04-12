@@ -498,10 +498,7 @@ sub load_geoip {
     if ($_[1] =~ IS_IPV4_ADDRESS) {
       $city = $_[0]->{db}->{city}->record_by_addr($_[1]);
     } elsif ($_[0]->{db}->{city_v6}) {
-      $city = $_[0]->{db}->{city_v6}->country_code_by_addr_v6($_[1]);
-      return $res if !defined $city;
-      $res->{country} = $city;
-      return $res;
+      $city = $_[0]->{db}->{city_v6}->record_by_addr_v6($_[1]);
     }
     if (!defined $city) {
       dbg("geodb: GeoIP city query failed for $_[1]");
