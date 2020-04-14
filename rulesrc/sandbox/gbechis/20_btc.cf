@@ -13,7 +13,12 @@ body     __COPY_PASTE_FR      /le copier (et le|\+) coller/i
 meta     __GB_BITCOIN_CP_FR   ( __BITCOIN_ID && !__URL_BTC_ID && __COPY_PASTE_FR )
 describe __GB_BITCOIN_CP_FR   French Bitcoin scam
 
-body     __COPY_PASTE_EN      /Copy (and|\+|\&) paste/i
+ifplugin Mail::SpamAssassin::Plugin::ReplaceTags
+  body     __COPY_PASTE_EN    /<C><O><P><Y> (?:<A><N><D>|\+|\&) <P><A><S><T><E>/i
+  replace_rules __COPY_PASTE_EN
+else
+  body     __COPY_PASTE_EN    /Copy (and|\+|\&) paste/i
+endif
 meta     __GB_BITCOIN_CP_EN   ( __BITCOIN_ID && !__URL_BTC_ID && __COPY_PASTE_EN )
 describe __GB_BITCOIN_CP_EN   English Bitcoin scam
 
