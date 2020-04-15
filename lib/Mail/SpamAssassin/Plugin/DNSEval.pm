@@ -45,7 +45,7 @@ package Mail::SpamAssassin::Plugin::DNSEval;
 use Mail::SpamAssassin::Plugin;
 use Mail::SpamAssassin::Logger;
 use Mail::SpamAssassin::Constants qw(:ip);
-use Mail::SpamAssassin::Util qw(reverse_ip_address idn_to_ascii compile_regexp);
+use Mail::SpamAssassin::Util qw(reverse_ip_address idn_to_ascii compile_regexp is_fqdn_valid);
 
 use strict;
 use warnings;
@@ -439,7 +439,7 @@ sub check_rbl_from_host {
   return 0 if !$pms->is_dns_available();
 
   $self->_check_rbl_addresses($pms, $rule, $set, $rbl_server,
-    $subtest, $_[1]->all_from_addrs());
+    $subtest, $pms->all_from_addrs());
 }
 
 sub check_rbl_headers {
@@ -458,7 +458,7 @@ sub check_rbl_headers {
   }
 
   foreach my $rbl_headers (@env_hdr) {
-    my $addr = $_[1]->get($rbl_headers.':addr', undef);
+    my $addr = $pms->get($rbl_headers.':addr', undef);
     if ( defined $addr && $addr =~ /\@([^\@\s]+)/ ) {
       $self->_check_rbl_addresses($pms, $rule, $set, $rbl_server,
         $subtest, $addr);
@@ -467,13 +467,14 @@ sub check_rbl_headers {
       chomp($unsplitted_host);
       foreach my $host (split(/\n/, $unsplitted_host)) {
         if ($host =~ IS_IP_ADDRESS) {
-          return if ($conf->{tflags}->{$rule}||'') =~ /\bdomains_only\b/;
+          next if ($conf->{tflags}->{$rule}||'') =~ /\bdomains_only\b/;
           $host = reverse_ip_address($host);
         } else {
-          return if ($conf->{tflags}->{$rule}||'') =~ /\bips_only\b/;
+          next if ($conf->{tflags}->{$rule}||'') =~ /\bips_only\b/;
+          next unless is_fqdn_valid($host);
+          next unless $pms->{main}->{registryboundaries}->is_domain_valid($host);
         }
-        $pms->do_rbl_lookup($rule, $set, 'A',
-          "$host.$rbl_server", $subtest) if ( defined $host and $host ne "");
+        $pms->do_rbl_lookup($rule, $set, 'A', "$host.$rbl_server", $subtest);
       }
     }
   }
@@ -498,7 +499,7 @@ sub check_rbl_from_domain {
   return 0 if !$pms->is_dns_available();
 
   $self->_check_rbl_addresses($pms, $rule, $set, $rbl_server,
-    $subtest, $_[1]->all_from_addrs_domains());
+    $subtest, $pms->all_from_addrs_domains());
 }
 =over 4
 
@@ -564,15 +565,16 @@ sub complete_ns_lookup {
 
   foreach my $rr (@ns) {
     my $nshost = $rr->mname;
-    if(defined($nshost)) {
-      chomp($nshost);
+    next unless defined $nshost;
+    chomp($nshost);
+    if (is_fqdn_valid($nshost)) {
       if ( defined $subtest ) {
         dbg("dnseval: checking [$nshost] / $rule / $set / $rbl_server / $subtest");
       } else {
         dbg("dnseval: checking [$nshost] / $rule / $set / $rbl_server");
       }
       $pms->do_rbl_lookup($rule, $set, 'A',
-        "$nshost.$rbl_server", $subtest) if ( defined $nshost and $nshost ne "");
+        "$nshost.$rbl_server", $subtest);
     }
   }
 }
@@ -614,14 +616,15 @@ sub check_rbl_rcvd {
       } else {
         next if ($pms->{conf}->{tflags}->{$rule}||'') =~ /\bips_only\b/;
         $host =~ s/\.$//;
+        next unless is_fqdn_valid($host);
+        next unless $pms->{main}->{registryboundaries}->is_domain_valid($host);
       }
       if ( defined $subtest ) {
         dbg("dnseval: checking [$host] / $rule / $set / $rbl_server / $subtest");
       } else {
         dbg("dnseval: checking [$host] / $rule / $set / $rbl_server");
       }
-      $pms->do_rbl_lookup($rule, $set, 'A',
-        "$host.$rbl_server", $subtest) if ( defined $host and $host ne "");
+      $pms->do_rbl_lookup($rule, $set, 'A', "$host.$rbl_server", $subtest);
     }
   }
   return 0;
@@ -636,7 +639,7 @@ sub check_rbl_envfrom {
   return 0 if !$pms->is_dns_available();
 
   $self->_check_rbl_addresses($pms, $rule, $set, $rbl_server,
-    $subtest, $_[1]->get('EnvelopeFrom:addr',undef));
+    $subtest, $pms->get('EnvelopeFrom:addr',undef));
 }
 
 sub _check_rbl_addresses {
@@ -665,6 +668,8 @@ sub _check_rbl_addresses {
       $host = reverse_ip_address($host);
     } else {
       next if ($pms->{conf}->{tflags}->{$rule}||'') =~ /\bips_only\b/;
+      next unless is_fqdn_valid($host);
+      next unless $pms->{main}->{registryboundaries}->is_domain_valid($host);
     }
     dbg("dnseval: checking [$host] / $rule / $set / $rbl_server");
     $pms->do_rbl_lookup($rule, $set, 'A', "$host.$rbl_server", $subtest);
