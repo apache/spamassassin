@@ -463,16 +463,18 @@ sub check_rbl_headers {
       $self->_check_rbl_addresses($pms, $rule, $set, $rbl_server,
         $subtest, $addr);
     } else {
-      my $host = $pms->get($rbl_headers);
-      chomp($host);
-      if ($host =~ IS_IP_ADDRESS) {
-        return if ($conf->{tflags}->{$rule}||'') =~ /\bdomains_only\b/;
-        $host = reverse_ip_address($host);
-      } else {
-        return if ($conf->{tflags}->{$rule}||'') =~ /\bips_only\b/;
+      my $unsplitted_host = $pms->get($rbl_headers);
+      chomp($unsplitted_host);
+      foreach my $host (split(/\n/, $unsplitted_host)) {
+        if ($host =~ IS_IP_ADDRESS) {
+          return if ($conf->{tflags}->{$rule}||'') =~ /\bdomains_only\b/;
+          $host = reverse_ip_address($host);
+        } else {
+          return if ($conf->{tflags}->{$rule}||'') =~ /\bips_only\b/;
+        }
+        $pms->do_rbl_lookup($rule, $set, 'A',
+          "$host.$rbl_server", $subtest) if ( defined $host and $host ne "");
       }
-      $pms->do_rbl_lookup($rule, $set, 'A',
-        "$host.$rbl_server", $subtest) if ( defined $host and $host ne "");
     }
   }
 }
