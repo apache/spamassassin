@@ -1,4 +1,12 @@
 
+Note for Users Upgrading to SpamAssassin 3.4.5
+----------------------------------------------
+
+- unwhitelist_auth now also removes def_whitelist_auth entries
+
+- SPF: add unwhitelist_from_spf to remove both whitelist_from_spf and
+  def_whitelist_from_spf entries
+
 Note for Users Upgrading to SpamAssassin 3.4.4
 ----------------------------------------------
 

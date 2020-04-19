@@ -113,6 +113,14 @@ Same as C<whitelist_from_spf>, but used for the default whitelist entries
 in the SpamAssassin distribution.  The whitelist score is lower, because
 these are often targets for spammer spoofing.
 
+=item unwhitelist_from_spf user@example.com
+
+Used to remove a C<whitelist_from_spf> or C<def_whitelist_from_spf> entry. 
+The specified email address has to match exactly the address previously used.
+
+Useful for removing undesired default entries from a distributed configuration
+by a local or site-specific configuration or by C<user_prefs>.
+
 =cut
 
   push (@cmds, {
@@ -123,6 +131,24 @@ these are often targets for spammer spoofing.
   push (@cmds, {
     setting => 'def_whitelist_from_spf',
     type => $Mail::SpamAssassin::Conf::CONF_TYPE_ADDRLIST
+  });
+
+  push (@cmds, {
+    setting => 'unwhitelist_from_spf',
+    type => $Mail::SpamAssassin::Conf::CONF_TYPE_ADDRLIST,
+    code => sub {
+      my ($self, $key, $value, $line) = @_;
+      unless (defined $value && $value !~ /^$/) {
+        return $Mail::SpamAssassin::Conf::MISSING_REQUIRED_VALUE;
+      }
+      unless ($value =~ /^(?:\S+(?:\s+\S+)*)$/) {
+        return $Mail::SpamAssassin::Conf::INVALID_VALUE;
+      }
+      $self->{parser}->remove_from_addrlist('whitelist_from_spf',
+                                        split (/\s+/, $value));
+      $self->{parser}->remove_from_addrlist('def_whitelist_from_spf',
+                                        split (/\s+/, $value));
+    }
   });
 
 =back
