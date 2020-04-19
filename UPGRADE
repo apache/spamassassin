@@ -7,6 +7,9 @@ Note for Users Upgrading to SpamAssassin 3.4.5
 - SPF: add unwhitelist_from_spf to remove both whitelist_from_spf and
   def_whitelist_from_spf entries
 
+- Default SQL schema for userpref.value changed from varchar(100) to
+  varchar(255), no need to modify unless you hit the limit. (Bug 7803)
+
 Note for Users Upgrading to SpamAssassin 3.4.4
 ----------------------------------------------
 
