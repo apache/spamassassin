@@ -11,7 +11,7 @@ plan skip_all => "Net tests disabled" unless conf_bool('run_net_tests');
 plan skip_all => "Need Mail::SPF" unless HAS_MAILSPF;
 plan skip_all => "Can't use Net::DNS Safely" unless can_use_net_dns_safely();
 
-plan tests => 68;
+plan tests => 72;
 
 # ---------------------------------------------------------------------------
 
@@ -459,5 +459,31 @@ sarun ("-t < data/nice/spf3-received-spf", \&patterns_run_cb);
 ok_all_patterns();
 # Test same with nonfolded headers
 sarun ("-t < data/nice/spf4-received-spf-nofold", \&patterns_run_cb);
+ok_all_patterns();
+
+
+# test unwhitelist_auth and unwhitelist_from_spf
+
+tstprefs("
+  whitelist_auth newsalerts-noreply\@dnsbltest.spamassassin.org
+  def_whitelist_auth newsalerts-noreply\@dnsbltest.spamassassin.org
+  unwhitelist_auth newsalerts-noreply\@dnsbltest.spamassassin.org
+
+  whitelist_from_spf *\@dnsbltest.spamassassin.org
+  def_whitelist_from_spf *\@dnsbltest.spamassassin.org
+  unwhitelist_from_spf *\@dnsbltest.spamassassin.org
+");
+
+%patterns = (
+  q{ SPF_HELO_PASS }, 'helo_pass',
+  q{ SPF_PASS }, 'pass',
+);
+
+%anti_patterns = (
+  q{ USER_IN_SPF_WHITELIST }, 'spf_whitelist',
+  q{ USER_IN_DEF_SPF_WL }, 'default_spf_whitelist',
+);
+
+sarun ("-t < data/nice/spf1", \&patterns_run_cb);
 ok_all_patterns();
 

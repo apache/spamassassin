@@ -316,7 +316,7 @@ e.g.
 
 =item unwhitelist_from user@example.com
 
-Used to override a default whitelist_from entry, so for example a distribution
+Used to remove a default whitelist_from entry, so for example a distribution
 whitelist_from can be overridden in a local.cf file, or an individual user can
 override a whitelist_from entry in their own C<user_prefs> file.
 The specified email address has to match exactly (although case-insensitively)
@@ -457,10 +457,10 @@ e.g.
 
 =item unwhitelist_from_rcvd user@example.com
 
-Used to override a default whitelist_from_rcvd entry, so for example a
-distribution whitelist_from_rcvd can be overridden in a local.cf file,
-or an individual user can override a whitelist_from_rcvd entry in
-their own C<user_prefs> file.
+Used to remove a default whitelist_from_rcvd or def_whitelist_from_rcvd
+entry, so for example a distribution whitelist_from_rcvd can be overridden
+in a local.cf file, or an individual user can override a whitelist_from_rcvd
+entry in their own C<user_prefs> file.
 
 The specified email address has to match exactly the address previously
 used in a whitelist_from_rcvd line.
@@ -504,7 +504,7 @@ non-spam, but which the user doesn't want.  Same format as C<whitelist_from>.
 
 =item unblacklist_from user@example.com
 
-Used to override a default blacklist_from entry, so for example a
+Used to remove a default blacklist_from entry, so for example a
 distribution blacklist_from can be overridden in a local.cf file, or
 an individual user can override a blacklist_from entry in their own
 C<user_prefs> file. The specified email address has to match exactly
@@ -633,8 +633,8 @@ these are often targets for spammer spoofing.
 
 =item unwhitelist_auth user@example.com
 
-Used to override a C<whitelist_auth> entry. The specified email address has to
-match exactly the address previously used in a C<whitelist_auth> line.
+Used to remove a C<whitelist_auth> or C<def_whitelist_auth> entry. The
+specified email address has to match exactly the address previously used.
 
 e.g.
 
@@ -644,10 +644,21 @@ e.g.
 =cut
 
   push (@cmds, {
-    command => 'unwhitelist_auth',
-    setting => 'whitelist_auth',
+    setting => 'unwhitelist_auth',
     type => $CONF_TYPE_ADDRLIST,
-    code => \&Mail::SpamAssassin::Conf::Parser::remove_addrlist_value
+    code => sub {
+      my ($self, $key, $value, $line) = @_;
+      unless (defined $value && $value !~ /^$/) {
+        return $MISSING_REQUIRED_VALUE;
+      }
+      unless ($value =~ /^(?:\S+(?:\s+\S+)*)$/) {
+        return $INVALID_VALUE;
+      }
+      $self->{parser}->remove_from_addrlist('whitelist_auth',
+                                        split (/\s+/, $value));
+      $self->{parser}->remove_from_addrlist('def_whitelist_auth',
+                                        split (/\s+/, $value));
+    }
   });
 
 
