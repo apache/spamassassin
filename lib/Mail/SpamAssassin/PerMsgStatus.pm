@@ -1102,13 +1102,13 @@ sub rewrite_report_safe {
 
   if (defined $self->{conf}->{rewrite_header}->{Subject}) {
     # Add a prefix to the subject if needed
+    $subject = "\n" if !defined $subject;
     if((defined $self->{subjprefix}) and ($self->{subjprefix} ne "")) {
       $tag = $self->_replace_tags($self->{subjprefix});
       $tag =~ s/\n/ /gs;
       $subject = $tag . $subject;
     }
     # Add a **SPAM** prefix
-    $subject = "\n" if !defined $subject;
     $tag = $self->_replace_tags($self->{conf}->{rewrite_header}->{Subject});
     $tag =~ s/\n/ /gs; # strip tag's newlines
     $subject =~ s/^(?:\Q${tag}\E )?/${tag} /g; # For some reason the tag may already be there!?
