@@ -55,13 +55,14 @@ use Mail::SpamAssassin::Constants qw(:ip);
 sub parse_received_headers {
   my ($self, $permsgstatus, $msg) = @_;
 
-  my $suppl_attrib = $msg->{suppl_attrib};  # out-of-band info from a caller
-
   # a caller may assert that a message is coming from inside or from an
   # authenticated roaming users; this info may not be available in mail
   # header section, e.g. in case of nonstandard authentication mechanisms
   my $originating;  # boolean
-  $originating = $suppl_attrib->{originating}  if ref $suppl_attrib;
+  if (defined $msg->{suppl_attrib}->{originating}) {
+    $originating = $msg->{suppl_attrib}->{originating};
+    dbg("metadata: set originating from suppl_attrib: %s", $originating);
+  }
 
   $self->{relays_trusted} = [ ];
   $self->{num_relays_trusted} = 0;
