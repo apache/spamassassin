@@ -59,8 +59,8 @@ sub parse_received_headers {
   # authenticated roaming users; this info may not be available in mail
   # header section, e.g. in case of nonstandard authentication mechanisms
   my $originating;  # boolean
-  if (defined $msg->{suppl_attrib}->{originating}) {
-    $originating = $msg->{suppl_attrib}->{originating};
+  if (exists $msg->{suppl_attrib}->{originating}) {
+    $originating = $msg->{suppl_attrib}->{originating} || 0;
     dbg("metadata: set originating from suppl_attrib: %s", $originating);
   }
 
