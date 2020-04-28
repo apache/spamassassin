@@ -4623,6 +4623,7 @@ optional, and the default is shown below.
 If a tag reference uses the name of a tag which is not in this list or defined
 by a loaded plugin, the reference will be left intact and not replaced by any
 value.
+All template tag names should be restricted to the character set [A-Za-z0-9(,)].
 
 Additional, plugin specific, template tags can be found in the documentation for
 the following plugins:

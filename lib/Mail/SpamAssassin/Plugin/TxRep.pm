@@ -184,16 +184,16 @@ This plugin module adds the following C<tags> that can be used as
 placeholders in certain options.  See L<Mail::SpamAssassin::Conf>
 for more information on TEMPLATE TAGS.
 
- _TXREP_XXX_Y_          TXREP modifier
- _TXREP_XXX_Y_MEAN_     Mean score on which TXREP modification is based
- _TXREP_XXX_Y_COUNT_    Number of messages on which TXREP modification is based
- _TXREP_XXX_Y_PRESCORE_ Score before TXREP
- _TXREP_XXX_Y_UNKNOW_   New sender (not found in the TXREP list)
+ _TXREPXXXY_         TXREP modifier
+ _TXREPXXXYMEAN_     Mean score on which TXREP modification is based
+ _TXREPXXXYCOUNT_    Number of messages on which TXREP modification is based
+ _TXREPXXXYPRESCORE_ Score before TXREP
+ _TXREPXXXYUNKNOWN_  New sender (not found in the TXREP list)
 
 The XXX part of the tag takes the form of one of the following IDs, depending
-on the reputation checked: EMAIL, EMAIL_IP, IP, DOMAIN, or HELO. The _Y appendix
-ID is used only in the case of dual storage, and takes the form of either _U (for
-user storage reputations), or _G (for global storage reputations).
+on the reputation checked: EMAIL, EMAILIP, IP, DOMAIN, or HELO. The Y appendix
+ID is used only in the case of dual storage, and takes the form of either U (for
+user storage reputations), or G (for global storage reputations).
 
 =cut
 
@@ -1247,7 +1247,7 @@ sub check_senders_reputation {
   my $date     = $pms->{msg}->receive_date() || $pms->{date_header_time};
   my $msg_id   = $self->{msgid} || $pms->{msg}->generate_msgid();
 
-  my $from   = lc $pms->get('From:addr') || $pms->get('EnvelopeFrom:addr');;
+  my $from   = lc $pms->get('From:addr') || $pms->get('EnvelopeFrom:addr');
   return 0 unless $from =~ /\S/;
   my $domain = $from;
   $domain =~ s/^.+@//;
@@ -1444,6 +1444,9 @@ sub check_reputation {
     }
     my $found  = $self->get_sender($id, $ip, $signedby);
     my $tag_id = (defined $storage)? uc($key.'_'.substr($storage,0,1)) : uc($key);
+    # TEMPLATE TAGS should match [A-Z] in their name
+    # and "_" must be avoided
+    $tag_id =~ s/_//g;
     if (defined $found && $self->count()) {
         $meanrep = $self->total() / $self->count();
     }
@@ -1471,14 +1474,14 @@ sub check_reputation {
               $delta = ($self->total()) / (1 + $self->count());
             }
 
-            $pms->set_tag('TXREP_'.$tag_id,             sprintf("%2.1f", $delta));
+            $pms->set_tag('TXREP'.$tag_id,             sprintf("%2.1f", $delta));
             if (defined $meanrep) {
-                $pms->set_tag('TXREP_'.$tag_id.'_MEAN', sprintf("%2.1f", $meanrep));
+                $pms->set_tag('TXREP'.$tag_id.'MEAN', sprintf("%2.1f", $meanrep));
             }
-            $pms->set_tag('TXREP_'.$tag_id.'_COUNT',    sprintf("%2.1f", $self->count()));
-            $pms->set_tag('TXREP_'.$tag_id.'_PRESCORE', sprintf("%2.1f", $pms->{score}));
+            $pms->set_tag('TXREP'.$tag_id.'COUNT',    sprintf("%2.1f", $self->count()));
+            $pms->set_tag('TXREP'.$tag_id.'PRESCORE', sprintf("%2.1f", $pms->{score}));
         } else {
-            $pms->set_tag('TXREP_'.$tag_id.'_UNKNOWN', 1);
+            $pms->set_tag('TXREP'.$tag_id.'UNKNOWN', 1);
         }
         dbg("TxRep: reputation: %s, count: %d, weight: %.1f, delta: %.3f, $tag_id: %s",
             defined $meanrep? sprintf("%.3f",$meanrep) : 'none',
