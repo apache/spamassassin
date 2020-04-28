@@ -2971,4 +2971,9 @@ meta       __DOTGOV_IMAGE              __URI_DOTGOV && __REMOTE_IMAGE
 meta       __DOTGOV_NXDKIM             __URI_DOTGOV && DKIM_ADSP_NXDOMAIN 
 tflags     __DOTGOV_NXDKIM             net
 
+# bitcoin work-at-home spams 04/2020
+body       PERFECT_BINARY              /\bperfect binary option\b/i
+body       WE_PAID                     /\bwe have (?:already )?(?:paid|sent|remitted|issued) \$?\d+ (?:thousand )?(?:dollars )?to our (?:users|subscribers|members|clients|affiliates|partners)\b/i
+body       MAKE_XTRA_DOLLAR            /\bmake an extra dollar\b/i
+body       BONUS_LAST_DAY              /\b(?:last|final) day of the (?:\$\d+ |\d+ dollars? )?bonus offer(?:ing)?\b/i
 
