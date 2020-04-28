@@ -416,6 +416,7 @@ sub check_hashbl_emails {
   my %seen;
   foreach my $email (@$emails) {
     next if exists $seen{$email};
+    next if $email !~ /.*\@.*/;
     if (($email =~ $self->{email_whitelist}) or defined ($pms->{hashbl_whitelist}{$email})) {
       dbg("Address whitelisted: $email");
       next;
