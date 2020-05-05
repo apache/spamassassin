@@ -528,7 +528,7 @@ sub load_geoip {
       dbg("geodb: GeoIP country query failed for $_[1]");
       return $res;
     };
-    $res->{country} = $country;
+    $res->{country} = $country || 'XX';
     $res->{continent} = $country_to_continent{$country} || 'XX';
     return $res;
   };
@@ -623,7 +623,7 @@ sub load_dbfile {
       dbg("geodb: IP::Country::DB_File country query failed for $_[1]");
       return $res;
     };
-    $res->{country} = $country;
+    $res->{country} = $country | 'XX';
     $res->{continent} = $country_to_continent{$country} || 'XX';
     return $res;
   };
@@ -660,7 +660,7 @@ sub load_fast {
     } else {
       return $res
     }
-    $res->{country} = $country;
+    $res->{country} = $country || 'XX';
     $res->{continent} = $country_to_continent{$country} || 'XX';
     return $res;
   };
