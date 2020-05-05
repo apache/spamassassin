@@ -623,7 +623,7 @@ sub load_dbfile {
       dbg("geodb: IP::Country::DB_File country query failed for $_[1]");
       return $res;
     };
-    $res->{country} = $country | 'XX';
+    $res->{country} = $country || 'XX';
     $res->{continent} = $country_to_continent{$country} || 'XX';
     return $res;
   };
