@@ -487,7 +487,7 @@ sub check_rbl_ns_from {
   my $key = "NS:" . $domain;
   my $obj = { dom => $domain, rule => $rule, set => $set, rbl_server => $rbl_server, subtest => $subtest };
   my $ent = {
-    key => $key, zone => $domain, obj => $obj, type => "URI-NS",
+    rulename => $rule, key => $key, zone => $domain, obj => $obj, type => "URI-NS",
   };
   # dig $dom ns
   $ent = $pms->{async}->bgsend_and_start_lookup(
