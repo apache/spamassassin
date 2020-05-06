@@ -660,6 +660,10 @@ sub load_fast {
     } else {
       return $res
     }
+    if (!defined $country) {
+      dbg("geodb: IP::Country::Fast country query failed for $_[1]");
+      return $res;
+    };
     $res->{country} = $country || 'XX';
     $res->{continent} = $country_to_continent{$country} || 'XX';
     return $res;
