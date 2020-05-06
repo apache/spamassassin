@@ -658,7 +658,7 @@ sub load_fast {
     if ($_[1] =~ IS_IPV4_ADDRESS) {
       $country = $_[0]->{db}->{country}->inet_atocc($_[1]);
     } else {
-      return $res
+      return $res;
     }
     if (!defined $country) {
       dbg("geodb: IP::Country::Fast country query failed for $_[1]");
