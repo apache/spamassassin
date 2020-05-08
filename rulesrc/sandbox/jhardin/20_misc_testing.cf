@@ -2977,3 +2977,11 @@ body       WE_PAID                     /\bwe have (?:already )?(?:paid|sent|remi
 body       MAKE_XTRA_DOLLAR            /\bmake an extra dollar\b/i
 body       BONUS_LAST_DAY              /\b(?:last|final) day of the (?:\$\d+ |\d+ dollars? )?bonus offer(?:ing)?\b/i
 
+body       __4BYTE_UTF8_WORD           /(?:\xf0\x9d[\x90-\x9f][\x80-\xbf]){3,10}/
+tflags     __4BYTE_UTF8_WORD           multiple, maxhits=10
+meta       SUSP_UTF8_WORD_MANY         __4BYTE_UTF8_WORD > 9
+describe   SUSP_UTF8_WORD_MANY         Many words using only suspicious UTF-8 characters
+score      SUSP_UTF8_WORD_MANY         3.000	# limit
+
+
+
