@@ -2154,7 +2154,7 @@ tflags      RCVD_DBL_DQ                publish
 
 # reported on users list 09/2014 George Johnson <georgejohnson@talaya.net>
 header    __RAND_HEADER                ALL =~ /^(?!Accept-Language|Authentication-Results|Content-|DomainKey-Signature|DKIM-|List-|MIME-|Received-SPF|Return-Path|Thread-|User-Agent)(?:[a-z]{4,}-[a-z]{3,}|[a-z]{3,}-[a-z]{4,}):\s+\d(?=\S{6,}\s*$)[\da-f]*(?:[-.]\w+)*\s*$/ism
-tflags    __RAND_HEADER                multiple, maxhits=4
+tflags    __RAND_HEADER                multiple maxhits=4
 meta      RAND_HEADER_MANY             __RAND_HEADER > 3
 describe  RAND_HEADER_MANY             Many random gibberish message headers
 score     RAND_HEADER_MANY             3.000   # limit
@@ -2199,7 +2199,7 @@ body      __NUM_SPCD_LTRS               /\d{4}\s(?:[a-z]\s){5}/i
 
 
 header    __SUBJ_UNNEEDED_HTML          Subject =~ /%[0-9a-f][0-9a-f]/i
-tflags    __SUBJ_UNNEEDED_HTML          multiple, maxhits=3
+tflags    __SUBJ_UNNEEDED_HTML          multiple maxhits=3
 meta      __SUBJ_UNNEEDED_HTML_MANY     __SUBJ_UNNEEDED_HTML > 1
 meta      SUBJ_UNNEEDED_HTML            __SUBJ_UNNEEDED_HTML && !__NOT_SPOOFED && !__RP_MATCHES_RCVD && !__VIA_ML 
 describe  SUBJ_UNNEEDED_HTML            Unneeded HTML formatting in Subject:
@@ -2255,7 +2255,7 @@ score     GOOG_REDIR_HTML_ONLY          2.000	# limit
 # low S/O, apparently lots of invisible ham...
 if can(Mail::SpamAssassin::Conf::feature_bug6558_free)
   rawbody   __STY_INVIS                   /\bstyle\s*=\s*"[^">]{0,80}(?:visibility\s*:\s*hidden\s*;|display\s*:\s*none\s*;)/i
-  tflags    __STY_INVIS                   multiple, maxhits=6
+  tflags    __STY_INVIS                   multiple maxhits=6
   meta      __STY_INVIS_2                 __STY_INVIS > 1
   meta      __STY_INVIS_3                 __STY_INVIS > 2
   meta      __STY_INVIS_MANY              __STY_INVIS > 5
@@ -2269,7 +2269,7 @@ endif
 
 if can(Mail::SpamAssassin::Conf::feature_bug6558_free)
   rawbody   __FONT_INVIS                  /<font\s[^>]{1,80}(?:font-size\s*:\s*[01]px\s*;|color\s*:\s*transparent\s*;)[^>]{1,80}>\w/i
-  tflags    __FONT_INVIS                  multiple, maxhits=6
+  tflags    __FONT_INVIS                  multiple maxhits=6
   meta      __FONT_INVIS_MANY             __FONT_INVIS > 5
   meta      HTML_TEXT_INVISIBLE_FONT      __FONT_INVIS_MANY
   describe  HTML_TEXT_INVISIBLE_FONT      HTML hidden text
@@ -2279,7 +2279,7 @@ endif
 
 # Adapted from SARE rules __SARE_HTML_SINGLET*
 rawbody   __HTML_SINGLET                />\s*(?:[a-z"]|&\#(?:\d+|x[0-9a-f]+);)\s*</i
-tflags    __HTML_SINGLET                multiple, maxhits=21
+tflags    __HTML_SINGLET                multiple maxhits=21
 meta      __HTML_SINGLET_MANY           __HTML_SINGLET > 20
 meta      HTML_SINGLET_MANY             __HTML_SINGLET_MANY && !__STY_INVIS_MANY && !__RCD_RDNS_MTA_MESSY && !__NOT_SPOOFED && !__FEES && !ALL_TRUSTED
 describe  HTML_SINGLET_MANY             Many single-letter HTML format blocks
@@ -2301,7 +2301,7 @@ score     HACKED_PHP_URI                2.000     # limit
 
 # very poor S/O - this appears a lot more in ham than in spam??
 #body      __PUNCT_ODD_SPACING           /[a-z]{3}\s+[.,][a-z]{3}/
-#tflags    __PUNCT_ODD_SPACING           multiple, maxhits=3
+#tflags    __PUNCT_ODD_SPACING           multiple maxhits=3
 #meta      __PUNCT_ODD_SPACING_MANY      __PUNCT_ODD_SPACING > 2
 
 # poor S/O - how is this in ham?
@@ -2404,7 +2404,7 @@ header     __CT_ENCRYPTED              Content-Type =~ /^multipart\/(?:x-)?(?:pg
 meta       ENCRYPTED_MESSAGE           __CT_ENCRYPTED
 describe   ENCRYPTED_MESSAGE           Message is encrypted, not likely to be spam
 score      ENCRYPTED_MESSAGE           -1.000
-tflags     ENCRYPTED_MESSAGE           nice,publish
+tflags     ENCRYPTED_MESSAGE           nice publish
 
 
 #body       __PHONE_GIBBERISH_01        /(?:\b\d\d\d-\d\d\d-\d\d\d\d\s+[a-z][^\d\s:.]+\s+){15}/
@@ -2978,7 +2978,7 @@ body       MAKE_XTRA_DOLLAR            /\bmake an extra dollar\b/i
 body       BONUS_LAST_DAY              /\b(?:last|final) day of the (?:\$\d+ |\d+ dollars? )?bonus offer(?:ing)?\b/i
 
 body       __4BYTE_UTF8_WORD           /(?:\xf0\x9d[\x90-\x9f][\x80-\xbf]){3,10}/
-tflags     __4BYTE_UTF8_WORD           multiple, maxhits=10
+tflags     __4BYTE_UTF8_WORD           multiple maxhits=10
 meta       SUSP_UTF8_WORD_MANY         __4BYTE_UTF8_WORD > 9
 describe   SUSP_UTF8_WORD_MANY         Many words using only suspicious UTF-8 characters
 score      SUSP_UTF8_WORD_MANY         3.000	# limit

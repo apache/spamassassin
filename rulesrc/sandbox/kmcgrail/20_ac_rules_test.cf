@@ -112,12 +112,12 @@ tflags 		AC_SPAMMY_URI_PATTERNS12 publish
 # and $samedir/50_scores.cf
 #ifplugin Mail::SpamAssassin::Plugin::Bayes
 #  body     AC_BAYES_99      eval:check_bayes('0.99', '0.999')
-#  tflags   AC_BAYES_99      learn,publish
+#  tflags   AC_BAYES_99      learn publish
 #  describe AC_BAYES_99      Bayes spam probability is 99 to 99.9%
 #  score    AC_BAYES_99      0  0  4.3    4.0
 #
 #  body     AC_BAYES_999     eval:check_bayes('0.999', '1.00')
-#  tflags   AC_BAYES_999	    learn,publish
+#  tflags   AC_BAYES_999	    learn publish
 #  describe AC_BAYES_999     Bayes spam probability is 99.9 to 100%
 #  score    AC_BAYES_999     0  0  4.8    4.5
 #endif
