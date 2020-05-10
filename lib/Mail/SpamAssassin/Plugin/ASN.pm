@@ -50,13 +50,28 @@ Autonomous System Number (ASN) of the connecting IP address.
 
  loadplugin Mail::SpamAssassin::Plugin::ASN
 
- asn_lookup asn.routeviews.org _ASN_ _ASNCIDR_
- 
- asn_lookup_ipv6 origin6.asn.cymru.com _ASN_ _ASNCIDR_
+ # Default / recommended settings
+ asn_use_geodb 1
+ asn_use_dns 1
+ asn_prefer_geodb 1
 
+ # Do lookups and add tags / X-Spam-ASN header
+ asn_lookup asn.routeviews.org _ASN_ _ASNCIDR_
+ asn_lookup_ipv6 origin6.asn.cymru.com _ASN_ _ASNCIDR_
  add_header all ASN _ASN_ _ASNCIDR_
 
- header TEST_AS1234 X-ASN =~ /^1234$/
+ # Rules to test ASN or Organization
+ # NOTE: Do not use rules that check metadata X-ASN header,
+ # only check_asn() eval function works correctly.
+ # Rule argument is full regexp to match.
+
+ # ASN Number: GeoIP ASN or DNS
+ # Matched string includes asn_prefix if defined, and normally
+ # looks like "AS1234" (DNS) or "AS1234 Google LLC" (GeoIP)
+ header AS_1234 eval:check_asn('/^AS1234\b/')
+
+ # ASN Organisation: GeoIP ASN has, DNS lists might not have
+ header AS_GOOGLE eval:check_asn('/\bGoogle\b/i')
 
 =head1 DESCRIPTION
 
@@ -67,6 +82,9 @@ this generally means that B<you should not use this plugin in a
 high-volume environment> or that you should use a local mirror of the
 zone (see C<ftp://ftp.routeviews.org/dnszones/>).  Other similar zones
 may also be used.
+
+GeoDB (GeoIP ASN) database lookups are supported since SpamAssassin 4.0 and
+it's recommended to use them instead of DNS queries.
 
 =head1 TEMPLATE TAGS
 
@@ -120,7 +138,7 @@ use re 'taint';
 
 use Mail::SpamAssassin::Plugin;
 use Mail::SpamAssassin::Logger;
-use Mail::SpamAssassin::Util qw(reverse_ip_address);
+use Mail::SpamAssassin::Util qw(reverse_ip_address compile_regexp);
 use Mail::SpamAssassin::Dns;
 use Mail::SpamAssassin::Constants qw(:ip);
 
@@ -133,6 +151,8 @@ sub new {
   $class = ref($class) || $class;
   my $self = $class->SUPER::new($mailsa);
   bless ($self, $class);
+
+  $self->register_eval_rule("check_asn");
 
   $self->set_config($mailsa->{conf});
 
@@ -352,6 +372,9 @@ sub parsed_metadata {
     }
   }
 
+  # Initialize status
+  $pms->{asn_results} = ();
+
   # get IP address of last external relay to lookup
   my $relay = $pms->{relays_external}->[0];
   if (!defined $relay) {
@@ -368,12 +391,18 @@ sub parsed_metadata {
   my $asn_found;
   if ($has_geodb) {
     my $asn = $geodb->get_asn($ip);
+    my $org = $geodb->get_asn_org($ip);
     if (!defined $asn) {
       dbg("asn: GeoDB ASN lookup failed");
     } else {
       $asn_found = 1;
       dbg("asn: GeoDB found ASN $asn");
-      $pms->set_tag('ASN', $conf->{asn_prefix}.$asn);
+      # Prevent double prefix
+      my $asn_tag =
+        length($conf->{asn_prefix}) && index($asn, $conf->{asn_prefix}) != 0 ?
+          $conf->{asn_prefix}.$asn : $asn;
+      $asn_tag .= ' '.$org if defined $org && length($org);
+      $pms->set_tag('ASN', $asn_tag);
       # For Bayes
       $pms->{msg}->put_metadata('X-ASN', $asn);
     }
@@ -551,8 +580,46 @@ sub process_dns_result {
   }
 }
 
+sub check_asn {
+  my ($self, $pms, $re) = @_;
+
+  my $rulename = $pms->get_current_eval_rule_name();
+
+  if (!defined $re) {
+    warn "asn: rule $rulename eval argument missing\n";
+    return 0;
+  }
+
+  my ($rec, $err) = compile_regexp($re, 2);
+  if (!$rec) {
+    warn "asn: invalid regexp for $rulename '$re': $err\n";
+    return 0;
+  }
+
+  $pms->action_depends_on_tags('ASN',
+    sub { my($pms,@args) = @_;
+      $self->_check_asn($pms, $rulename, $rec);
+    }
+  );
+
+  return 0;
+}
+
+sub _check_asn {
+  my ($self, $pms, $rulename, $rec) = @_;
+
+  my $asn = $pms->get_tag('ASN');
+  return if !defined $asn;
+
+  if ($asn =~ $rec) {
+    $pms->test_log("ASN: $asn");
+    $pms->got_hit($rulename, "");
+  }
+}
+
 # Version features
 sub has_asn_lookup_ipv6 { 1 }
 sub has_asn_geodb { 1 }
+sub has_check_asn { 1 }
 
 1;

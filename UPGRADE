@@ -90,7 +90,15 @@ Note for Users Upgrading to SpamAssassin 4.0.0
 
 - New AuthRes module to process Authentication-Results headers (unfinished)
 
-- Support GeoDB for ASN lookups (asn_use_geodb, asn_prefer_geodb, asn_use_dns).
+- ASN: Support GeoDB for ASN lookups (asn_use_geodb, asn_prefer_geodb,
+  asn_use_dns).
+
+- ASN: Default sa-update ruleset doesn't make ASN lookups or header adds
+  anymore.  Configure desired methods (asn_use_geodb / asn_use_dns) and
+  add_header clauses manually, as described in plugin documentation.  Usage
+  of asn_use_geodb without DNS is recommended, unless ASNCIDR is needed.  Do
+  not use rules that check metadata X-ASN header! Only the new eval function
+  described in plugin manual works reliably: check_asn().
 
 - sa-update: New --score-multiplier, --score-limit options
 

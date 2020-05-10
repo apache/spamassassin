@@ -29,7 +29,11 @@
 # header containing the data returned so that it can be used by the bayes
 # tokenizer.  See the plugin's POD docs for more info.
 
+# Apply default ASN rules for pre-4.0 clients only.
+# Usage changed in 4.0: there is also direct GeoDB/GeoIP support,
+# users should configure manually as described in plugin documentation.
 ifplugin Mail::SpamAssassin::Plugin::ASN
+if can(Mail::SpamAssassin::Plugin::ASN::has_check_asn)
  asn_lookup asn.routeviews.org _ASN_ _ASNCIDR_
  add_header all ASN _ASN_ _ASNCIDR_
 
@@ -37,4 +41,5 @@ ifplugin Mail::SpamAssassin::Plugin::ASN
  #if can(Mail::SpamAssassin::Plugin::ASN::has_asn_lookup_ipv6)
  #  asn_lookup_ipv6 origin6.asn.cymru.com _ASN_ _ASNCIDR_
  #endif
+endif	# has_check_asn
 endif	# Mail::SpamAssassin::Plugin::ASN
