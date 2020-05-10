@@ -741,6 +741,18 @@ sub get_isp {
   }
 }
 
+sub get_isp_org {
+  my ($self, $ip) = @_;
+
+  return undef if !defined $ip || $ip !~ /\S/; ## no critic (ProhibitExplicitReturnUndef)
+
+  if ($self->{dbapi}->{isp}) {
+    return $self->_get('isp',$ip)->{organization};
+  } else {
+    return undef; ## no critic (ProhibitExplicitReturnUndef)
+  }
+}
+
 sub get_asn {
   my ($self, $ip) = @_;
 
@@ -750,6 +762,20 @@ sub get_asn {
     return $self->_get('asn',$ip)->{asn};
   } elsif ($self->{dbapi}->{isp}) {
     return $self->_get('isp',$ip)->{asn};
+  } else {
+    return undef; ## no critic (ProhibitExplicitReturnUndef)
+  }
+}
+
+sub get_asn_org {
+  my ($self, $ip) = @_;
+
+  return undef if !defined $ip || $ip !~ /\S/; ## no critic (ProhibitExplicitReturnUndef)
+
+  if ($self->{dbapi}->{asn}) {
+    return $self->_get('asn',$ip)->{asn_organization};
+  } elsif ($self->{dbapi}->{isp}) {
+    return $self->_get('isp',$ip)->{asn_organization};
   } else {
     return undef; ## no critic (ProhibitExplicitReturnUndef)
   }
