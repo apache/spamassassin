@@ -568,11 +568,12 @@ sub load_geoip {
       }
       1;
     };
-    if (!defined $asn || $asn !~ /^AS(\d+)/) {
+    if (!defined $asn || $asn !~ /^((?:AS)?\d+)(?:\s+(.+))?/) {
       dbg("geodb: GeoIP asn query failed for $_[1]");
       return $res;
     };
     $res->{asn} = $1;
+    $res->{asn_organization} = $2 if defined $2;
     return $res;
   };
 
