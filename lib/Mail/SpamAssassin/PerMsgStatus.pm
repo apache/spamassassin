@@ -2560,6 +2560,10 @@ sub _process_text_uri_list {
         elsif ($uri =~ /^www\d{0,2}\./i) {
           $uri = "http://$uri";
         }
+        elsif ($uri =~ /\/.+\@/) {
+          # if a "/" is found before @ it cannot be a valid email address
+          $uri = "http://$uri";
+        }
         elsif (index($uri, '@') != -1) {
           # This is not linkified by MUAs: foo@bar%2Ecom
           # This IS linkified: foo@bar%2Ebar.com
