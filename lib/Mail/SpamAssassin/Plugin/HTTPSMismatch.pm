@@ -73,7 +73,8 @@ sub check_https_http_mismatch {
         # want to compare whole hostnames instead of domains?
         # comment this next section to the blank line.
         $uri = $self->{main}->{registryboundaries}->trim_domain($uri);
-        undef $uri unless ($self->{main}->{registryboundaries}->is_domain_valid($uri));
+        my $domain = $self->{main}->{registryboundaries}->uri_to_domain($uri);
+        undef $uri unless ($self->{main}->{registryboundaries}->is_domain_valid($domain));
       }
 
       next unless $uri;
