@@ -342,7 +342,7 @@ sub _parse_emails {
         }
       }
     }
-    my $body = join('', $pms->get_decoded_stripped_body_text_array());
+    my $body = join('', @{$pms->get_decoded_stripped_body_text_array()});
     if ($opts =~ /\bnouri\b/) {
       # strip urls with possible emails inside
       $body =~ s#<?https?://\S{0,255}(?:\@|%40)\S{0,255}# #gi;
