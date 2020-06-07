@@ -23,20 +23,29 @@ HashBL - query hashed (and unhashed) DNS blocklists
 
   loadplugin Mail::SpamAssassin::Plugin::HashBL
 
-  header   HASHBL_EMAIL eval:check_hashbl_emails('ebl.msbl.org')
+  # NON-WORKING usage examples below, replace xxx.example.invalid with real list
+  # See documentation below for detailed usage
+
+  header   HASHBL_EMAIL eval:check_hashbl_emails('ebl.example.invalid')
   describe HASHBL_EMAIL Message contains email address found on EBL
+  priority HASHBL_EMAIL -100 # required priority to launch async lookups early
+  tflags   HASHBL_EMAIL net
 
   hashbl_acl_freemail gmail.com
-  header  HASHBL_OSENDR  eval:check_hashbl_emails('rbl.example.com/A', 'md5/max=10/shuffle', 'X-Original-Sender', '^127\.', 'freemail')
+  header   HASHBL_OSENDR eval:check_hashbl_emails('rbl.example.invalid/A', 'md5/max=10/shuffle', 'X-Original-Sender', '^127\.', 'freemail')
   describe HASHBL_OSENDR Message contains email address found on HASHBL
-  tflags  HASHBL_OSENDR  net
+  priority HASHBL_OSENDR -100 # required priority to launch async lookups early
+  tflags   HASHBL_OSENDR net
 
-  body     HASHBL_BTC eval:check_hashbl_bodyre('btcbl.foo.bar', 'sha1/max=10/shuffle', '\b([13][a-km-zA-HJ-NP-Z1-9]{25,34})\b')
+  body     HASHBL_BTC eval:check_hashbl_bodyre('btcbl.example.invalid', 'sha1/max=10/shuffle', '\b([13][a-km-zA-HJ-NP-Z1-9]{25,34})\b')
   describe HASHBL_BTC Message contains BTC address found on BTCBL
-  priority HASHBL_BTC -100 # required priority to launch async lookups
+  priority HASHBL_BTC -100 # required priority to launch async lookups early
+  tflags   HASHBL_BTC net
 
-  header   HASHBL_URI eval:check_hashbl_uris('rbl.foo.bar', 'sha1', '127.0.0.32')
+  header   HASHBL_URI eval:check_hashbl_uris('rbl.example.invalid', 'sha1', '127.0.0.32')
   describe HASHBL_URI Message contains uri found on rbl
+  priority HASHBL_URI -100 # required priority to launch async lookups early
+  tflags   HASHBL_URI net
 
 =head1 DESCRIPTION
 
@@ -65,7 +74,7 @@ if HEADERS is empty ('') or missing, default is used.
 
 =over 4
 
-=item header RULE check_hashbl_emails('bl.example.com/A', 'OPTS', 'HEADERS/body', '^127\.')
+=item header RULE check_hashbl_emails('bl.example.invalid/A', 'OPTS', 'HEADERS/body', '^127\.')
 
 Check email addresses from DNS list, "body" can be specified along with
 headers to search body for emails.  Optional subtest regexp to match DNS
@@ -86,12 +95,15 @@ Default HEADERS: ALLFROM/Reply-To/body
 
 For existing public email blacklist, see: http://msbl.org/ebl.html
 
-  header HASHBL_EBL check_hashbl_emails('ebl.msbl.org')
-  priority HASHBL_EBL -100 # required for async query
+  # Working example, see http://msbl.org/ebl.html before usage
+  header   HASHBL_EMAIL eval:check_hashbl_emails('ebl.msbl.org')
+  describe HASHBL_EMAIL Message contains email address found on EBL
+  priority HASHBL_EMAIL -100 # required priority to launch async lookups early
+  tflags   HASHBL_EMAIL net
 
 =over 4
 
-=item header RULE check_hashbl_uris('bl.example.com/A', 'OPTS', '^127\.')
+=item header RULE check_hashbl_uris('bl.example.invalid/A', 'OPTS', '^127\.')
 
 Check uris from DNS list, optional subtest regexp to match DNS
 answer.
@@ -102,7 +114,7 @@ Default OPTS: sha1/max=10/shuffle
 
 =back
 
-=item body RULE check_hashbl_bodyre('bl.example.com/A', 'OPTS', '\b(match)\b', '^127\.')
+=item body RULE check_hashbl_bodyre('bl.example.invalid/A', 'OPTS', '\b(match)\b', '^127\.')
 
 Search body for matching regexp and query the string captured.  Regexp must
 have a single capture ( ) for the string ($1).  Optional subtest regexp to
