@@ -202,6 +202,9 @@ sub check_main {
     $pms->{resolver}->finish_socket() if $pms->{resolver};
   }
 
+  # last chance to handle left callbacks, make rule hits etc
+  $self->{main}->call_plugins ("check_cleanup", { permsgstatus => $pms });
+
   if ($pms->{deadline_exceeded}) {
     $pms->got_hit('TIME_LIMIT_EXCEEDED', '', defscore => 0.001,
                   description => 'Exceeded time limit / deadline');
