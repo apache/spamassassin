@@ -1124,17 +1124,24 @@ sub got_dnsbl_hit {
   $str =~ s/\s+/  /gs;	# long whitespace => short
   dbg("uridnsbl: domain \"$ent->{domain}\" listed ($rulename): $str");
 
-  $pms->{uridnsbl_hits}->{$rulename}->{$ent->{domain}} = 1;
-
-  # TODO: this needs to handle multiple domain hits per rule
-  $pms->clear_test_state();
-  #my $uris = join(' ', keys %{$pms->{uridnsbl_hits}->{$rulename}});
+  # Hits are saved and called in check_cleanup
   if (defined $ent->{orig_domain}) {
-    $pms->test_log("URIs: $ent->{orig_domain}/$ent->{domain}");
+    $pms->{uridnsbl_hits}->{$rulename}->{"$ent->{orig_domain}/$ent->{domain}"} = 1;
   } else {
-    $pms->test_log("URIs: $ent->{domain}");
+    $pms->{uridnsbl_hits}->{$rulename}->{"$ent->{domain}"} = 1;
   }
-  $pms->got_hit($rulename, '', ruletype => 'eval');
+}
+
+sub check_cleanup {
+  my ($self, $opts) = @_;
+
+  my $pms = $opts->{permsgstatus};
+
+  # Call any remaining hits
+  foreach my $rulename (keys %{$pms->{uridnsbl_hits}}) {
+    $pms->test_log("URIs: ".join(', ', sort keys %{$pms->{uridnsbl_hits}->{$rulename}}));
+    $pms->got_hit($rulename, '', ruletype => 'eval');
+  }
 }
 
 # ---------------------------------------------------------------------------
