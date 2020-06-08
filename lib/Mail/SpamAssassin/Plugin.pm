@@ -1042,17 +1042,27 @@ to receive specific events, or control the callback chain behaviour.
 
 =over 4
 
-=item $plugin->register_eval_rule ($nameofevalsub)
+=item $plugin->register_eval_rule ($nameofevalsub, $ruletype)
 
 Plugins that implement an eval test will need to call this, so that
 SpamAssassin calls into the object when that eval test is encountered.
 See the B<REGISTERING EVAL RULES> section for full details.
 
+Since 4.0, optional $ruletype can be specified to enforce that eval function
+cannot be called with wrong ruletype from configuration, for example user
+using "header FOO eval:foobar()" instead of "body FOO eval:foobar()". 
+Mismatch will result in lint failure. $ruletype can be one of:
+
+  $Mail::SpamAssassin::Conf::TYPE_HEAD_EVALS
+  $Mail::SpamAssassin::Conf::TYPE_BODY_EVALS
+  $Mail::SpamAssassin::Conf::TYPE_RAWBODY_EVALS
+  $Mail::SpamAssassin::Conf::TYPE_FULL_EVALS
+
 =cut
 
 sub register_eval_rule {
-  my ($self, $nameofsub) = @_;
-  $self->{main}->{conf}->register_eval_rule ($self, $nameofsub);
+  my ($self, $nameofsub, $ruletype) = @_;
+  $self->{main}->{conf}->register_eval_rule ($self, $nameofsub, $ruletype);
 }
 
 =item $plugin->register_generated_rule_method ($nameofsub)
@@ -1161,7 +1171,7 @@ called from rules in the configuration files, in the plugin class' constructor.
 
 For example,
 
-  $plugin->register_eval_rule ('check_for_foo')
+  $plugin->register_eval_rule ('check_for_foo', $Mail::SpamAssassin::Conf::TYPE_HEAD_EVALS)
 
 will cause C<$plugin-E<gt>check_for_foo()> to be called for this
 SpamAssassin rule:

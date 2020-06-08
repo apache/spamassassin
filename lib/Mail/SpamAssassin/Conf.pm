@@ -117,6 +117,23 @@ my @rule_types = ("body_tests", "uri_tests", "uri_evals",
                   "full_evals", "rawbody_tests", "rawbody_evals",
 		  "rbl_evals", "meta_tests");
 
+# Map internal ruletype to descriptive ruletype string
+our %TYPE_AS_STRING = (
+  $TYPE_HEAD_TESTS => 'header',
+  $TYPE_HEAD_EVALS => 'header',
+  $TYPE_BODY_TESTS => 'body',
+  $TYPE_BODY_EVALS => 'body',
+  $TYPE_FULL_TESTS => 'full',
+  $TYPE_FULL_EVALS => 'full',
+  $TYPE_RAWBODY_TESTS => 'rawbody',
+  $TYPE_RAWBODY_EVALS => 'rawbody',
+  $TYPE_URI_TESTS => 'uri',
+  $TYPE_URI_EVALS => 'uri',
+  $TYPE_META_TESTS => 'meta',
+  $TYPE_RBL_EVALS => 'header',
+  $TYPE_EMPTY_TESTS => 'empty',
+);
+
 #Removed $VERSION per BUG 6422
 #$VERSION = 'bogus';     # avoid CPAN.pm picking up version strings later
 
@@ -4766,6 +4783,7 @@ sub new {
   $self->{rawbody_evals} = { };
   $self->{meta_tests} = { };
   $self->{eval_plugins} = { };
+  $self->{eval_plugins_types} = { };
   $self->{duplicate_rules} = { };
 
   # map eval function names to rulenames
@@ -5171,8 +5189,15 @@ sub load_plugin_succeeded {
 }
 
 sub register_eval_rule {
-  my ($self, $pluginobj, $nameofsub) = @_;
+  my ($self, $pluginobj, $nameofsub, $ruletype) = @_;
   $self->{eval_plugins}->{$nameofsub} = $pluginobj;
+  if (defined $ruletype) {
+    if (defined $TYPE_AS_STRING{$ruletype}) {
+      $self->{eval_plugins_types}->{$nameofsub} = $ruletype;
+    } else {
+      $self->{parser}->lint_warn("register_eval_rule: invalid ruletype for $nameofsub");
+    }
+  }
 }
 
 ###########################################################################
@@ -5194,8 +5219,8 @@ sub clone {
   # is defined, its method will be recompiled for future scans in
   # order to *remove* the generated method calls
   my @NON_COPIED_KEYS = qw(
-    main eval_plugins plugins_loaded registered_commands sed_path_cache parser
-    scoreset scores want_rebuild_for_type
+    main eval_plugins eval_plugins_types plugins_loaded registered_commands
+    sed_path_cache parser scoreset scores want_rebuild_for_type
   );
 
   # special cases.  first, skip anything that cannot be changed

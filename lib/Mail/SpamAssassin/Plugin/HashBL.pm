@@ -159,9 +159,9 @@ sub new {
     $self->{hashbl_available} = 1;
   }
 
-  $self->register_eval_rule("check_hashbl_emails");
-  $self->register_eval_rule("check_hashbl_uris");
-  $self->register_eval_rule("check_hashbl_bodyre");
+  $self->register_eval_rule("check_hashbl_emails", $Mail::SpamAssassin::Conf::TYPE_HEAD_EVALS);
+  $self->register_eval_rule("check_hashbl_uris", $Mail::SpamAssassin::Conf::TYPE_HEAD_EVALS);
+  $self->register_eval_rule("check_hashbl_bodyre", $Mail::SpamAssassin::Conf::TYPE_BODY_EVALS);
   $self->set_config($mailsa->{conf});
 
   return $self;

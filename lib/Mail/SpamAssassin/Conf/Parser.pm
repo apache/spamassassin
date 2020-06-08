@@ -887,7 +887,14 @@ sub finish_parsing {
           $self->lint_warn("syntax error for eval function $name: $text");
           next;
         }
-        elsif ($type == $Mail::SpamAssassin::Conf::TYPE_BODY_EVALS) {
+        my $expected_type = $conf->{eval_plugins_types}->{$function};
+        if (defined $expected_type && $type != $expected_type) {
+          my $estr = $Mail::SpamAssassin::Conf::TYPE_AS_STRING{$expected_type};
+          $self->lint_warn("wrong rule type defined for $name, expected '$estr'");
+          next;
+        }
+
+        if ($type == $Mail::SpamAssassin::Conf::TYPE_BODY_EVALS) {
           $conf->{body_evals}->{$priority}->{$name} = [ $function, [@$argsref] ];
         }
         elsif ($type == $Mail::SpamAssassin::Conf::TYPE_HEAD_EVALS) {
