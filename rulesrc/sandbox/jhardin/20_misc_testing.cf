@@ -2983,5 +2983,13 @@ meta       SUSP_UTF8_WORD_MANY         __4BYTE_UTF8_WORD > 9
 describe   SUSP_UTF8_WORD_MANY         Many words using only suspicious UTF-8 characters
 score      SUSP_UTF8_WORD_MANY         3.000	# limit
 
+# observed by AC
+rawbody    __HTML_EMPTY_CELLS          /<td>(?:<\/td><td>){5,}/i
+tflags     __HTML_EMPTY_CELLS          multiple maxhits=3
+meta       __HTML_EMPTY_CELLS_MANY     __HTML_EMPTY_CELLS > 2
+meta       HTML_EMPTY_CELLS_MANY       __HTML_EMPTY_CELLS_MANY
+describe   HTML_EMPTY_CELLS_MANY       HTML table with lots of empty cells
+score      HTML_EMPTY_CELLS_MANY       1.500	# limit
+
 
 
