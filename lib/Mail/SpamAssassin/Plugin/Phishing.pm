@@ -103,7 +103,6 @@ sub _read_configfile {
   my ($self) = @_;
   my $conf = $self->{main}->{registryboundaries}->{conf};
   my @phtank_ln;
-  my $stripped_cluri;
 
   local *F;
   if ( defined($conf->{phishing_openphish_feed}) && ( -f $conf->{phishing_openphish_feed} ) ) {
@@ -112,12 +111,10 @@ sub _read_configfile {
         chomp;
         #lines that start with pound are comments
         next if(/^\s*\#/);
-        $stripped_cluri = $_;
-        $stripped_cluri =~ s/\?.*//;
         my $phishdomain = $self->{main}->{registryboundaries}->uri_to_domain($_);
         if ( defined $phishdomain ) {
-          push @{$self->{PHISHING}->{$stripped_cluri}->{phishdomain}}, $phishdomain;
-          push @{$self->{PHISHING}->{$stripped_cluri}->{phishinfo}->{$phishdomain}}, "OpenPhish";
+          push @{$self->{PHISHING}->{$_}->{phishdomain}}, $phishdomain;
+          push @{$self->{PHISHING}->{$_}->{phishinfo}->{$phishdomain}}, "OpenPhish";
         }
     }
 
@@ -138,13 +135,11 @@ sub _read_configfile {
 
         @phtank_ln = split(/,/, $_);
         $phtank_ln[1] =~ s/\"//g;
-        $stripped_cluri = $phtank_ln[1];
-        $stripped_cluri =~ s/\?.*//;
-        
+
         my $phishdomain = $self->{main}->{registryboundaries}->uri_to_domain($phtank_ln[1]);
         if ( defined $phishdomain ) {
-          push @{$self->{PHISHING}->{$stripped_cluri}->{phishdomain}}, $phishdomain;
-          push @{$self->{PHISHING}->{$stripped_cluri}->{phishinfo}->{$phishdomain}}, "PhishTank";
+          push @{$self->{PHISHING}->{$phtank_ln[1]}->{phishdomain}}, $phishdomain;
+          push @{$self->{PHISHING}->{$phtank_ln[1]}->{phishinfo}->{$phishdomain}}, "PhishTank";
         }
     }
 
@@ -161,7 +156,6 @@ sub check_phishing {
   my $feedname;
   my $domain;
   my $uris = $pms->get_uri_detail_list();
-  my $stripped_cluri;
 
   my $rulename = $pms->get_current_eval_rule_name();
 
@@ -174,12 +168,10 @@ sub check_phishing {
     if (($info->{types}->{a}) || ($info->{types}->{parsed})) {
       # check url
       foreach my $cluri (@{$info->{cleaned}}) {
-        $stripped_cluri = $cluri;
-        $stripped_cluri =~ s/\?.*//;
-        if ( exists $self->{PHISHING}->{$stripped_cluri} ) {
+        if ( exists $self->{PHISHING}->{$cluri} ) {
           $domain = $self->{main}->{registryboundaries}->uri_to_domain($cluri);
-          $feedname = $self->{PHISHING}->{$stripped_cluri}->{phishinfo}->{$domain}[0];
-          dbg("HIT! $domain [$stripped_cluri] found in $feedname feed");
+          $feedname = $self->{PHISHING}->{$cluri}->{phishinfo}->{$domain}[0];
+          dbg("HIT! $domain [$cluri] found in $feedname feed");
           $pms->test_log("$feedname ($domain)");
           $pms->got_hit($rulename, "", ruletype => 'eval');
           return 1;
