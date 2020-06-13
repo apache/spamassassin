@@ -83,14 +83,62 @@ sub set_config {
     my @cmds;
     push(@cmds, {
         setting => 'phishing_openphish_feed',
+        is_admin => 1,
         type => $Mail::SpamAssassin::Conf::CONF_TYPE_STRING,
         }
     );
+
+=head1 ADMIN PREFERENCES
+
+The following options can be used in site-wide (C<local.cf>)
+configuration files to customize how the module handles phishing uris
+
+=cut
+
+=over 4
+
+=item phishing_openphish_feed
+
+Absolute path of the downloaded OpenPhish datafeed.
+
+=back
+
+=cut
     push(@cmds, {
         setting => 'phishing_phishtank_feed',
+        is_admin => 1,
         type => $Mail::SpamAssassin::Conf::CONF_TYPE_STRING,
         }
     );
+=over 4
+
+=item phishing_phishtank_feed
+
+Absolute path of the downloaded PhishTank datafeed.
+
+=back
+
+=cut
+    push(@cmds, {
+        setting => 'phishing_uri_noparam',
+        is_admin => 1,
+        default => 0,
+        type => $Mail::SpamAssassin::Conf::CONF_TYPE_BOOL,
+        }
+    );
+=over 4
+
+=item phishing_uri_noparam ( 0 | 1 ) (default: 0)
+
+If this option is set uri parameters will not be take into consideration
+when parsing the phishing uris datafeed.
+If this option is enabled and the url without parameters is "generic"
+(like https://www.kisa.link/url_redirector.php?url=...) the url will be
+skipped.
+
+=back
+
+=cut
     $conf->{parser}->register_commands(\@cmds);
 }
 
@@ -103,6 +151,7 @@ sub _read_configfile {
   my ($self) = @_;
   my $conf = $self->{main}->{registryboundaries}->{conf};
   my @phtank_ln;
+  my $stripped_cluri;
 
   local *F;
   if ( defined($conf->{phishing_openphish_feed}) && ( -f $conf->{phishing_openphish_feed} ) ) {
@@ -111,10 +160,14 @@ sub _read_configfile {
         chomp;
         #lines that start with pound are comments
         next if(/^\s*\#/);
+        $stripped_cluri = $_;
+	if ( $conf->{phishing_uri_noparam} eq 1 ) {
+          $stripped_cluri =~ s/\?.*//;
+	}
         my $phishdomain = $self->{main}->{registryboundaries}->uri_to_domain($_);
         if ( defined $phishdomain ) {
-          push @{$self->{PHISHING}->{$_}->{phishdomain}}, $phishdomain;
-          push @{$self->{PHISHING}->{$_}->{phishinfo}->{$phishdomain}}, "OpenPhish";
+          push @{$self->{PHISHING}->{$stripped_cluri}->{phishdomain}}, $phishdomain;
+          push @{$self->{PHISHING}->{$stripped_cluri}->{phishinfo}->{$phishdomain}}, "OpenPhish";
         }
     }
 
@@ -135,11 +188,14 @@ sub _read_configfile {
 
         @phtank_ln = split(/,/, $_);
         $phtank_ln[1] =~ s/\"//g;
-
+        $stripped_cluri = $phtank_ln[1];
+	if ( $conf->{phishing_uri_noparam} eq 1 ) {
+          $stripped_cluri =~ s/\?.*//;
+	}
         my $phishdomain = $self->{main}->{registryboundaries}->uri_to_domain($phtank_ln[1]);
         if ( defined $phishdomain ) {
-          push @{$self->{PHISHING}->{$phtank_ln[1]}->{phishdomain}}, $phishdomain;
-          push @{$self->{PHISHING}->{$phtank_ln[1]}->{phishinfo}->{$phishdomain}}, "PhishTank";
+          push @{$self->{PHISHING}->{$stripped_cluri}->{phishdomain}}, $phishdomain;
+          push @{$self->{PHISHING}->{$stripped_cluri}->{phishinfo}->{$phishdomain}}, "PhishTank";
         }
     }
 
@@ -155,10 +211,11 @@ sub check_phishing {
 
   my $feedname;
   my $domain;
+  my $stripped_cluri;
+  my $dcnt;
+
   my $uris = $pms->get_uri_detail_list();
-
   my $rulename = $pms->get_current_eval_rule_name();
-
   while (my($uri, $info) = each %{$uris}) {
     # we want to skip mailto: uris
     next if ($uri =~ /^mailto:/i);
@@ -168,10 +225,20 @@ sub check_phishing {
     if (($info->{types}->{a}) || ($info->{types}->{parsed})) {
       # check url
       foreach my $cluri (@{$info->{cleaned}}) {
-        if ( exists $self->{PHISHING}->{$cluri} ) {
+        $stripped_cluri = $cluri;
+	if( $self->{main}->{conf}->{phishing_uri_noparam} eq 1 ) {
+          $stripped_cluri =~ s/\?.*//;
+          $dcnt = $stripped_cluri =~ tr/\///;
+	}
+	# If uri without parameters are considered, skip too short uris
+	# like https://www.google.com/url?sa=t&url=http://badsite.com
+        if( ($self->{main}->{conf}->{phishing_uri_noparam} eq 1) && ($dcnt <= 3) ) {
+          next;
+        }
+        if ( exists $self->{PHISHING}->{$stripped_cluri} ) {
           $domain = $self->{main}->{registryboundaries}->uri_to_domain($cluri);
-          $feedname = $self->{PHISHING}->{$cluri}->{phishinfo}->{$domain}[0];
-          dbg("HIT! $domain [$cluri] found in $feedname feed");
+          $feedname = $self->{PHISHING}->{$stripped_cluri}->{phishinfo}->{$domain}[0];
+          dbg("HIT! $domain [$stripped_cluri] found in $feedname feed");
           $pms->test_log("$feedname ($domain)");
           $pms->got_hit($rulename, "", ruletype => 'eval');
           return 1;
