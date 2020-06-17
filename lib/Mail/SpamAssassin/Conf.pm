@@ -5376,6 +5376,7 @@ sub feature_dns_block_rule { 1 } # supports 'dns_block_rule' config option
 sub feature_compile_regexp { 1 } # Util::compile_regexp
 sub feature_meta_rules_matching { 1 } # meta rules_matching() expression
 sub feature_subjprefix { 1 } # add subject prefixes rule option
+sub feature_bayes_stopwords { 1 } # multi language stopwords in Bayes
 sub feature_get_host { 1 } # $pms->get() :host :domain :ip :revip # was implemented together with AskDNS::has_tag_header # Bug 7734
 sub has_tflags_nosubject { 1 } # tflags nosubject
 sub perl_min_version_5010000 { return $] >= 5.010000 }  # perl version check ("perl_version" not neatly backwards-compatible)

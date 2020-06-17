@@ -37,7 +37,32 @@ And the chi-square probability combiner as described here:
 
 The results are incorporated into SpamAssassin as the BAYES_* rules.
 
-=head1 METHODS
+=head1 ADMINISTRATOR SETTINGS
+
+=over 4
+
+=item bayes_stopword_languages lang             (default: en)
+
+Languages enabled in bayes stopwords processing, every language have a default stopwords regexp,
+tokens matching this regular expressions will not be considered in bayes processing.
+
+Custom regular expressions for additional languages can be defined in C<local.cf>.
+
+Custom regular expressions can be specified by using the C<bayes_stopword_lang> keyword like in
+the following example:
+
+ bayes_stopword_languages en
+ bayes_stopword_en (?:you|me)
+
+=back
+
+=over 4
+
+=item bayes_max_token_length (default: 15)
+
+Configure the maximum number of character a token could contain
+
+=back
 
 =cut
 
@@ -53,7 +78,7 @@ use Digest::SHA qw(sha1 sha1_hex);
 use Mail::SpamAssassin::Plugin;
 use Mail::SpamAssassin::PerMsgStatus;
 use Mail::SpamAssassin::Logger;
-use Mail::SpamAssassin::Util qw(untaint_var);
+use Mail::SpamAssassin::Util qw(compile_regexp untaint_var);
 
 # pick ONLY ONE of these combining implementations.
 use Mail::SpamAssassin::Bayes::CombineChi;
@@ -216,6 +241,8 @@ use constant REQUIRE_SIGNIFICANT_TOKENS_TO_SCORE => -1;
 
 # How long a token should we hold onto?  (note: German speakers typically
 # will require a longer token than English ones.)
+# This is just a default value, option can be changed using
+# bayes_max_token_length option
 use constant MAX_TOKEN_LENGTH => 15;
 
 ###########################################################################
@@ -232,8 +259,66 @@ sub new {
   $self->{conf} = $main->{conf};
   $self->{use_ignores} = 1;
 
+  $self->set_config($self->{conf});
   $self->register_eval_rule("check_bayes");
   $self;
+}
+
+sub set_config {
+    my ($self, $conf) = @_;
+    my @cmds;
+    my $invalid_lang = 0;
+    my ($re, $def_lang);
+
+    push(@cmds, {
+      setting => 'bayes_max_token_length',
+      default => MAX_TOKEN_LENGTH,
+      type => $Mail::SpamAssassin::Conf::CONF_TYPE_NUMERIC,
+    });
+
+    push(@cmds, {
+        setting => 'bayes_stopword_languages',
+        type => $Mail::SpamAssassin::Conf::CONF_TYPE_STRING,
+        is_admin => 1,
+        default => 'en',
+        code => sub {
+          my ($self, $key, $value, $line) = @_;
+          my @lng = split(/,/, $value);
+          foreach my $lang ( @lng ) {
+            dbg("bayes: stopwords for language $lang enabled");
+            if ($lang !~ /^([a-z]{2})$/) {
+              $invalid_lang = 1;
+            }
+          }
+          return $Mail::SpamAssassin::Conf::INVALID_VALUE unless $invalid_lang eq 0;
+          $self->{bayes_stopword_languages} = $value;
+        }
+    });
+    $conf->{parser}->register_commands(\@cmds);
+}
+
+sub parse_config {
+    my ($self, $opt) = @_;
+    my $languages = $self->{conf}->{bayes_stopword_languages};
+
+    if ($opt->{key} =~ /^bayes_stopword_([a-z]{2})$/i) {
+        $self->inhibit_further_callbacks();
+
+        my $lang = lc($1);
+        my @opts = split(/\s+/, $opt->{value});
+        foreach my $re (@opts)
+        {
+          my ($rec, $err) = compile_regexp($re, 0);
+          if (!$rec) {
+            warn "bayes: invalid regex for language $lang: $@\n";
+            return 0;
+          }
+          # dbg("bayes: setting regexp for language $lang");
+          $self->{conf}->{bayes_stopword}{$lang} = $rec
+        }
+        return 1;
+    }
+    return 0;
 }
 
 sub finish {
@@ -1080,6 +1165,7 @@ sub tokenize {
     # dbg("bayes: token: %s", $token);
     $tokens{substr(sha1($token), -5)} = $token  if $token ne '';
   }
+  undef $self->{tokens};
 
   # return the keys == tokens ...
   return \%tokens;
@@ -1146,8 +1232,24 @@ sub _tokenize_line {
     # area, and it just slows us down to record them.
     # See http://wiki.apache.org/spamassassin/BayesStopList for more info.
     #
-    next if $len < 3 ||
-	($token =~ /^(?:a(?:ble|l(?:ready|l)|n[dy]|re)|b(?:ecause|oth)|c(?:an|ome)|e(?:ach|mail|ven)|f(?:ew|irst|or|rom)|give|h(?:a(?:ve|s)|ttp)|i(?:n(?:formation|to)|t\'s)|just|know|l(?:ike|o(?:ng|ok))|m(?:a(?:de|il(?:(?:ing|to))?|ke|ny)|o(?:re|st)|uch)|n(?:eed|o[tw]|umber)|o(?:ff|n(?:ly|e)|ut|wn)|p(?:eople|lace)|right|s(?:ame|ee|uch)|t(?:h(?:at|is|rough|e)|ime)|using|w(?:eb|h(?:ere|y)|ith(?:out)?|or(?:ld|k))|y(?:ears?|ou(?:(?:\'re|r))?))$/i);
+    next if $len < 3;
+    foreach my $lang ( split /,/, $self->{conf}->{bayes_stopword_languages} ) {
+      if ( not defined $self->{conf}->{bayes_stopword}{$lang} ) {
+        dbg("Missing stopwords regexp for language $lang");
+        next;
+      }
+      # check regexp only once
+      next if(exists $self->{tokens}{$lang}{$token});
+      $self->{tokens}{$lang}{$token} = 1;
+      # dbg("bayes: using stopwords for language $lang");
+      if ($token =~ /^$self->{conf}->{bayes_stopword}{$lang}$/i) {
+        dbg("bayes: skipped token \"$token\" because it's in stopword list for language \"$lang\"");
+        next;
+      } else {
+        # XXX for debugging purposes
+        # dbg("bayes: using token \"$token\" not matching regexp \"$self->{conf}->{bayes_stopword}{$lang}\" for language \"$lang\"");
+      }
+    }
 
     # are we in the body?  If so, apply some body-specific breakouts
     if ($region == 1 || $region == 2) {
@@ -1166,7 +1268,7 @@ sub _tokenize_line {
     # used as part of split tokens such as "HTo:D*net" indicating that 
     # the domain ".net" appeared in the To header.
     #
-    if ($len > MAX_TOKEN_LENGTH && $token !~ /\*/) {
+    if ($len > $self->{main}->{conf}->{bayes_max_token_length} && $token !~ /\*/) {
 
       if (TOKENIZE_LONG_8BIT_SEQS_AS_UTF8_CHARS && $token =~ /[\x80-\xBF]{2}/) {
 	# Bug 7135

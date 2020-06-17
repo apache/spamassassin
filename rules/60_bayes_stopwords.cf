@@ -1,0 +1,31 @@
+# <@LICENSE>
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.
+# The ASF licenses this file to you under the Apache License, Version 2.0
+# (the "License"); you may not use this file except in compliance with
+# the License.  You may obtain a copy of the License at:
+# 
+#     http://www.apache.org/licenses/LICENSE-2.0
+# 
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# </@LICENSE>
+
+if (version >= 4.000000)
+ if can(Mail::SpamAssassin::Conf::feature_bayes_stopwords)
+  bayes_stopword_en (?:a(?:ble|l(?:ready|l)|n[dy]|re)|b(?:ecause|oth)|c(?:an|ome)|e(?:ach|mail|ven)|f(?:ew|irst|or|rom)|give|h(?:a(?:ve|s)|ttp)|i(?:n(?:formation|to)|t\'s)|just|know|l(?:ike|o(?:ng|ok))|m(?:a(?:de|il(?:(?:ing|to))?|ke|ny)|o(?:re|st)|uch)|n(?:eed|o[tw]|umber)|o(?:ff|n(?:ly|e)|ut|wn)|p(?:eople|lace)|right|s(?:ame|ee|uch)|t(?:h(?:at|is|rough|e)|ime)|using|w(?:eb|h(?:ere|y)|ith(?:out)?|or(?:ld|k))|y(?:ears?|ou(?:(?:\'re|r))?))$
+  # bayes_stopword_en (?:a(?:bo(?:ut|ve)|fter|gain(?:st)?|ren(?:\'t)?)|b(?:e(?:cause|en|fore|ing|low|tween)|oth)|couldn(?:\'t)?|d(?:idn(?:\'t)?|o(?:es(?:n(?:\'t)?)?|ing|n\'t|wn)|uring)|each|f(?:rom|urther)|h(?:a(?:dn(?:\'t)?|sn(?:\'t)?|v(?:e(?:n(?:\'t)?)?|ing))|er(?:s(?:elf)?|e)|imself)|i(?:nto|sn\'t|t(?:\'s|self))|just|m(?:ightn(?:\'t)?|o(?:re|st)|ustn(?:\'t)?|yself)|needn(?:\'t)?|o(?:n(?:ce|ly)|ther|urs(?:elves)?|ver)|s(?:ame|h(?:an(?:\'t)?|e\'s|ould(?:(?:\'ve|n(?:\'t)?))?)|ome|uch)|th(?:a(?:t(?:\'ll)?|n)|e(?:irs?|m(?:selves)?|re|se|[ny])|is|ose|rough)|un(?:der|til)|very|w(?:asn(?:\'t)?|ere(?:n(?:\'t)?)?|h(?:at|e(?:re|n)|i(?:ch|le)|om)|i(?:ll|th)|o(?:n\'t|uldn(?:\'t)?))|you(?:\'(?:ll|re|ve|d)|r(?:s(?:el(?:ves|f))?)?))
+
+  bayes_stopword_es (?:a(?:lg(?:un(?:as|os)|o)|ntes?)|c(?:o(?:mo|ntra)|ua(?:ndo|l))|d(?:esde|onde|urante)|e(?:ll(?:as?|os)|ntre|r(?:a(?:is|[ns])|es)|s(?:as|os|t(?:a(?:(?:ba(?:(?:is|[ns]))?|d(?:(?:as?|os?))?|mos|ndo|r(?:(?:emos|\xc3(?:\xa1[ns]?|\xa9(?:is)?|\xada(?:(?:is|mos|[ns]))?)))?|s))?|e(?:mos)?|o[sy]?|uv(?:i(?:e(?:r(?:a(?:(?:is|[ns]))?|on)|se(?:(?:is|[ns]))?)|mos|ste(?:is)?|\xc3\xa9(?:ramos|semos))|[eo])|\xc3(?:\xa1(?:(?:bamos|is|[ns]))?|\xa9(?:(?:is|[ns]))?))))|fu(?:e(?:r(?:a(?:(?:is|[ns]))?|on)|se(?:(?:is|[ns]))?)|i(?:mos|ste(?:is)?)|\xc3\xa9(?:ramos|semos))|h(?:a(?:b(?:i(?:d(?:as?|os?)|endo)|r(?:emos|\xc3(?:\xa1[ns]?|\xa9(?:is)?|\xada(?:(?:is|mos|[ns]))?))|\xc3(?:\xa9is|\xada(?:(?:is|mos|[ns]))?))|sta|y(?:a(?:(?:mos|[ns]))?|\xc3\xa1is))|emos|ub(?:i(?:e(?:r(?:a(?:(?:is|[ns]))?|on)|se(?:(?:is|[ns]))?)|mos|ste(?:is)?|\xc3\xa9(?:ramos|semos))|[eo]))|m(?:uchos?|\xc3\xad(?:as|os))|n(?:ada|osotr(?:as|os)|uestr(?:as?|os?))|otr(?:as?|os?)|p(?:ara|ero|o(?:co|rque))|quien(?:es)?|s(?:e(?:a(?:mos|[ns])|ntid(?:(?:as?|os?))?|r(?:emos|\xc3(?:\xa1[ns]?|\xa9(?:is)?|\xada(?:(?:is|mos|[ns]))?))|\xc3\xa1is)|i(?:ente|ntiendo)|o(?:bre|is|mos)|uy(?:as?|os?))|t(?:a(?:mbi\xc3\xa9n|nto)|en(?:dr(?:emos|\xc3(?:\xa1[ns]?|\xa9(?:is)?|\xada(?:(?:is|mos|[ns]))?))|e(?:mos|d)|g(?:a(?:(?:mos|[ns]))?|\xc3\xa1is|o)|i(?:d(?:as?|os?)|endo)|\xc3(?:\xa9is|\xada(?:(?:is|mos|[ns]))?))|iene[ns]?|odos?|u(?:v(?:i(?:e(?:r(?:a(?:(?:is|[ns]))?|on)|se(?:(?:is|[ns]))?)|mos|ste(?:is)?|\xc3\xa9(?:ramos|semos))|[eo])|y(?:as?|os?)))|unos|v(?:osotr(?:as|os)|uestr(?:as?|os?))|\xc3\xa9ramos)
+
+  bayes_stopword_fr (?:a(?:ie(?:nt|s)|ur(?:a(?:(?:i(?:(?:ent|[st]))?|s))?|ez|i(?:ez|ons)|on[st])|v(?:ai(?:ent|[st])|e[cz]|i(?:ez|ons)|ons)|y(?:ant(?:(?:es?|s))?|ez|ons))|dans|e(?:lle|u(?:es|rent|ss(?:e(?:(?:nt|s))?|i(?:ez|ons)))|\xc3\xbb(?:mes|tes))|f(?:u(?:rent|ss(?:e(?:(?:nt|s))?|i(?:ez|ons)))|\xc3\xbb(?:mes|tes))|leur|m(?:ais|\xc3\xaame)|no(?:tre|us)|pour|s(?:er(?:a(?:(?:i(?:(?:ent|[st]))?|s))?|ez|i(?:ez|ons)|on[st])|o(?:i(?:ent|[st])|mmes|nt|y(?:ez|ons))|uis)|vo(?:tre|us)|\xc3(?:\xa9t(?:a(?:i(?:ent|[st])|nt(?:(?:es?|s))?)|i(?:ez|ons)|\xc3\xa9(?:es?|s))|\xaates))
+
+  bayes_stopword_de (?:a(?:ber|l(?:le[mnrs]?|so)|nder(?:(?:e[mnrs]?|[mnrs]))?|uch)|bist|d(?:a(?:mit|nn|ss(?:elbe)?|zu)|e(?:in(?:e[mnrs]?)?|mselben|n(?:selben|n)|r(?:er|selben?)|sse(?:lben|n))|i(?:ch|es(?:e(?:(?:lben?|[mnrs]))?)?)|o(?:ch|rt)|urch)|e(?:in(?:e[mnrs]?|ig(?:e[mnrs]?)?|mal)|twas|u(?:ch|er|re[mnrs]?))|ge(?:gen|wesen)|h(?:a(?:ben?|tten?)|i(?:er|nter))|i(?:h(?:nen|re[mnrs]?)|ndem)|je(?:de[mnrs]?|ne[mnrs]?|tzt)|k(?:ann|ein(?:e[mnrs]?)?|\xc3\xb6nn(?:en|te))|m(?:a(?:chen|nche[mnrs]?)|ein(?:e[mnrs]?)?|ich|uss(?:te)?)|n(?:ach|ichts?|och)|o(?:der|hne)|s(?:e(?:hr|in(?:e[mnrs]?)?|lbst)|i(?:ch|nd)|o(?:l(?:che[mnrs]?|l(?:te)?)|n(?:dern|st)))|un(?:ser(?:e[mns]?)?|ter)|viel|w(?:ar(?:en|st)|e(?:i(?:ter|l)|lche[mnrs]?|nn|rden?)|i(?:eder|ll|r(?:st|d))|oll(?:en|te)|\xc3(?:\xa4hrend|\xbcrden?))|zw(?:ar|ischen)|\xc3\xbcber)
+
+  bayes_stopword_it (?:a(?:bbia(?:(?:mo|no|te))?|gli|ll[aeo]|nche|v(?:e(?:mmo|ndo|s(?:s(?:e(?:ro)?|i(?:mo)?)|t[ei])|te|v(?:a(?:(?:mo|no|te))?|[io]))|r(?:a(?:nno|i)|e(?:bbe(?:ro)?|m(?:mo|o)|st[ei]|te|i)|\xc3[\xa0\xb2])|ut[aeio]))|co(?:me|ntro)|d(?:a(?:gli?|ll[aeo]?)|e(?:gli?|ll[aeo]?)|ove)|e(?:bb(?:e(?:ro)?|i)|ra(?:no|va(?:mo|te))|ssendo)|f(?:a(?:c(?:ci(?:a(?:(?:mo|no|te))?|o)|e(?:mmo|ndo|s(?:s(?:e(?:ro)?|i(?:mo)?)|t[ei])|v(?:a(?:(?:mo|no|te))?|[io])))|nno|r(?:a(?:nno|i)|e(?:bbe(?:ro)?|m(?:mo|o)|st[ei]|te|i)|\xc3[\xa0\xb2]))|ec(?:e(?:ro)?|i)|os(?:s(?:e(?:ro)?|i(?:mo)?)|t[ei])|u(?:mmo|rono))|hanno|loro|miei|n(?:e(?:gli?|ll[aeo]?)|ostr[aeio])|perch\xc3\xa9|qu(?:a(?:le|nt[aeio])|e(?:ll[aeio]|st[aeio]))|s(?:ar(?:a(?:nno|i)|e(?:bbe(?:ro)?|m(?:mo|o)|st[ei]|te|i)|\xc3[\xa0\xb2])|i(?:a(?:mo|no|te)|ete)|ono|t(?:a(?:n(?:do|no)|r(?:a(?:nno|i)|e(?:bbe(?:ro)?|m(?:mo|o)|st[ei]|te|i)|\xc3[\xa0\xb2])|v(?:a(?:(?:mo|no|te))?|[io])|i)|e(?:mmo|s(?:s(?:e(?:ro)?|i(?:mo)?)|t[ei])|tt(?:e(?:ro)?|i))|ia(?:(?:mo|no|te))?)|u(?:gli?|ll[aeo]?|oi))|tu(?:oi|tt[io])|vostr[aeio])
+ endif
+endif
