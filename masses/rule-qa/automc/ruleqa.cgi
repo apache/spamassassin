@@ -1657,6 +1657,7 @@ sub get_params_except {
   my @str = ();
   foreach my $p (@{$self->{cgi_param_order}}) {
     foreach my $skip (@excepts) {
+      next unless defined $skip;
       goto nextnext if
             ($skip eq $p || $self->{cgi_params}{$p} =~ /^\Q$skip\E=/);
     }
