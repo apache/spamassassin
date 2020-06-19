@@ -529,9 +529,12 @@ sub show_default_view {
     my $src = eval { $md->{rulemds}->{$self->{rule}}->{src} } || '(not found)';
     my $srchref = "https://svn.apache.org/viewvc/spamassassin/trunk/$src?revision=$rev\&view=markup";
 
-    my $lastmod = eval {
-          POSIX::strftime "%Y-%m-%d %H:%M:%S UTC", gmtime $md->{rulemds}->{$self->{rule}}->{srcmtime}
-        } || '(unknown)';
+    my $lastmod = '(unknown)';
+    if (defined $md->{rulemds}->{$self->{rule}}->{srcmtime}) {
+      $lastmod = eval {
+        POSIX::strftime "%Y-%m-%d %H:%M:%S UTC", gmtime $md->{rulemds}->{$self->{rule}}->{srcmtime}
+      } || '(unknown)';
+    }
 
     my $tflags = eval {
           $md->{rulemds}->{$self->{rule}}->{tf}
@@ -834,6 +837,8 @@ sub show_mclog {
 ###########################################################################
 
 sub read_corpus_file {
+  return ''; # THERE IS NO CORPUS.all FILE GENERATED ATM
+
   $self->{datadir} = $self->get_datadir_for_daterev($self->{daterev});
   $self->{datadir} =~ /([-\.\,_0-9a-zA-Z\/]+)/; my $safedatadir = $1;
 
