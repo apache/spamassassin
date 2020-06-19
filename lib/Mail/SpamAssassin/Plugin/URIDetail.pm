@@ -50,7 +50,10 @@ https://spamassassin.apache.org/).
 C<text> is the anchor text(s) (text between <a> and </a>) that
 linked to the raw URI.
 
-C<domain> is the domain(s) found in the cleaned URIs.
+C<domain> is the domain(s) found in the cleaned URIs, as trimmed to
+registrar boundary by Mail::SpamAssassin::Util::RegistrarBoundaries(3).
+
+C<host> is the full host(s) in the cleaned URIs. (Supported since SA 3.4.5)
 
 Example rule for matching a URI where the raw URI matches "%2Ebar",
 the domain "bar.com" is found, and the type is "a" (an anchor tag).
@@ -119,7 +122,7 @@ sub set_config {
 	my $op = $2;
 	my $pattern = $3;
 
-	if ($target !~ /^(?:raw|type|cleaned|text|domain)$/) {
+	if ($target !~ /^(?:raw|type|cleaned|text|domain|host)$/) {
 	    return $Mail::SpamAssassin::Conf::INVALID_VALUE;
 	}
 
@@ -220,6 +223,18 @@ sub check_uri_detail {
       dbg("uri: domain matched: '%s' %s /%s/", $match,$op,$patt);
     }
 
+    if (exists $rule->{host}) {
+      next unless $info->{hosts};
+      my($op,$patt) = @{$rule->{host}};
+      my $match;
+      for my $text (keys %{ $info->{hosts} }) {
+        if ( ($op eq '=~' && $text =~ $patt) ||
+             ($op eq '!~' && $text !~ $patt) ) { $match = $text; last }
+      }
+      next unless defined $match;
+      dbg("uri: host matched: '%s' %s /%s/", $match,$op,$patt);
+    }
+
     if (would_log('dbg', 'rules') > 1) {
       dbg("uri: criteria for $test met");
     }
@@ -236,5 +251,7 @@ sub check_uri_detail {
 }
 
 # ---------------------------------------------------------------------------
+
+sub has_host_key { 1 } # can match with "host" key
 
 1;
