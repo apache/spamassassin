@@ -680,7 +680,7 @@ sub date_in_direction {
 
   my $cur;
   for my $i (0 .. scalar(@{$self->{daterevs}})) {
-    if ($self->{daterevs}->[$i] eq $orig) {
+    if (defined $self->{daterevs}->[$i] && $self->{daterevs}->[$i] eq $orig) {
       $cur = $i; last;
     }
   }
