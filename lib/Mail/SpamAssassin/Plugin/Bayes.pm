@@ -260,7 +260,7 @@ sub new {
   $self->{use_ignores} = 1;
 
   $self->set_config($self->{conf});
-  $self->register_eval_rule("check_bayes");
+  $self->register_eval_rule("check_bayes", $Mail::SpamAssassin::Conf::TYPE_BODY_EVALS);
   $self;
 }
 

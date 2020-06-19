@@ -39,12 +39,12 @@ sub new {
   bless ($self, $class);
 
   # the important bit!
-  $self->register_eval_rule("multipart_alternative_difference");
-  $self->register_eval_rule("multipart_alternative_difference_count");
-  $self->register_eval_rule("check_blank_line_ratio");
-  $self->register_eval_rule("tvd_vertical_words");
-  $self->register_eval_rule("check_stock_info");
-  $self->register_eval_rule("check_body_length");
+  $self->register_eval_rule("multipart_alternative_difference", $Mail::SpamAssassin::Conf::TYPE_BODY_EVALS);
+  $self->register_eval_rule("multipart_alternative_difference_count", $Mail::SpamAssassin::Conf::TYPE_BODY_EVALS);
+  $self->register_eval_rule("check_blank_line_ratio", $Mail::SpamAssassin::Conf::TYPE_BODY_EVALS);
+  $self->register_eval_rule("tvd_vertical_words", $Mail::SpamAssassin::Conf::TYPE_BODY_EVALS);
+  $self->register_eval_rule("check_stock_info", $Mail::SpamAssassin::Conf::TYPE_BODY_EVALS);
+  $self->register_eval_rule("check_body_length", $Mail::SpamAssassin::Conf::TYPE_BODY_EVALS);
 
   return $self;
 }

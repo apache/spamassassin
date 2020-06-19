@@ -123,13 +123,13 @@ sub new {
 
   $self->set_config($mailsaobject->{conf});
 
-  $self->register_eval_rule("check_olemacro");
-  $self->register_eval_rule("check_olemacro_csv");
-  $self->register_eval_rule("check_olemacro_malice");
-  $self->register_eval_rule("check_olemacro_renamed");
-  $self->register_eval_rule("check_olemacro_encrypted");
-  $self->register_eval_rule("check_olemacro_zip_password");
-  $self->register_eval_rule("check_olemacro_download_exe");
+  $self->register_eval_rule("check_olemacro", $Mail::SpamAssassin::Conf::TYPE_BODY_EVALS);
+  $self->register_eval_rule("check_olemacro_csv", $Mail::SpamAssassin::Conf::TYPE_BODY_EVALS);
+  $self->register_eval_rule("check_olemacro_malice", $Mail::SpamAssassin::Conf::TYPE_BODY_EVALS);
+  $self->register_eval_rule("check_olemacro_renamed", $Mail::SpamAssassin::Conf::TYPE_BODY_EVALS);
+  $self->register_eval_rule("check_olemacro_encrypted", $Mail::SpamAssassin::Conf::TYPE_BODY_EVALS);
+  $self->register_eval_rule("check_olemacro_zip_password", $Mail::SpamAssassin::Conf::TYPE_BODY_EVALS);
+  $self->register_eval_rule("check_olemacro_download_exe", $Mail::SpamAssassin::Conf::TYPE_BODY_EVALS);
 
   return $self;
 }

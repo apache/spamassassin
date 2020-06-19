@@ -77,8 +77,8 @@ sub new {
     }
   }
 
-  $self->register_eval_rule("check_razor2");
-  $self->register_eval_rule("check_razor2_range");
+  $self->register_eval_rule("check_razor2", $Mail::SpamAssassin::Conf::TYPE_FULL_EVALS);
+  $self->register_eval_rule("check_razor2_range", $Mail::SpamAssassin::Conf::TYPE_FULL_EVALS);
 
   $self->set_config($mailsaobject->{conf});
 

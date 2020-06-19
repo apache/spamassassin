@@ -58,7 +58,7 @@ sub new {
   my $self = $class->SUPER::new($mailsaobject);
   bless ($self, $class);
 
-  $self->register_eval_rule("check_shortcircuit");
+  $self->register_eval_rule("check_shortcircuit"); # type does not matter
   $self->set_config($mailsaobject->{conf});
 
   return $self;

@@ -80,7 +80,7 @@ sub new {
   bless ($self, $class);
 
   # the important bit!
-  $self->register_eval_rule("check_from_in_auto_whitelist");
+  $self->register_eval_rule("check_from_in_auto_whitelist", $Mail::SpamAssassin::Conf::TYPE_HEAD_EVALS);
 
   $self->set_config($mailsaobject->{conf});
 

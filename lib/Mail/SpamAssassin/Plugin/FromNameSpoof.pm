@@ -147,13 +147,13 @@ sub new
   $self->set_config($mailsaobject->{conf});
 
   # the important bit!
-  $self->register_eval_rule("check_fromname_spoof");
-  $self->register_eval_rule("check_fromname_different");
-  $self->register_eval_rule("check_fromname_domain_differ");
-  $self->register_eval_rule("check_fromname_contains_email");
-  $self->register_eval_rule("check_fromname_equals_to");
-  $self->register_eval_rule("check_fromname_owners_differ");
-  $self->register_eval_rule("check_fromname_equals_replyto");
+  $self->register_eval_rule("check_fromname_spoof", $Mail::SpamAssassin::Conf::TYPE_HEAD_EVALS);
+  $self->register_eval_rule("check_fromname_different", $Mail::SpamAssassin::Conf::TYPE_HEAD_EVALS);
+  $self->register_eval_rule("check_fromname_domain_differ", $Mail::SpamAssassin::Conf::TYPE_HEAD_EVALS);
+  $self->register_eval_rule("check_fromname_contains_email", $Mail::SpamAssassin::Conf::TYPE_HEAD_EVALS);
+  $self->register_eval_rule("check_fromname_equals_to", $Mail::SpamAssassin::Conf::TYPE_HEAD_EVALS);
+  $self->register_eval_rule("check_fromname_owners_differ", $Mail::SpamAssassin::Conf::TYPE_HEAD_EVALS);
+  $self->register_eval_rule("check_fromname_equals_replyto", $Mail::SpamAssassin::Conf::TYPE_HEAD_EVALS);
   return $self;
 }
 

@@ -39,18 +39,18 @@ sub new {
   bless ($self, $class);
 
   # the important bit!
-  $self->register_eval_rule("html_tag_balance");
-  $self->register_eval_rule("html_image_only");
-  $self->register_eval_rule("html_image_ratio");
-  $self->register_eval_rule("html_charset_faraway");
-  $self->register_eval_rule("html_tag_exists");
-  $self->register_eval_rule("html_test");
-  $self->register_eval_rule("html_eval");
-  $self->register_eval_rule("html_text_match");
-  $self->register_eval_rule("html_title_subject_ratio");
-  $self->register_eval_rule("html_text_not_match");
-  $self->register_eval_rule("html_range");
-  $self->register_eval_rule("check_iframe_src");
+  $self->register_eval_rule("html_tag_balance", $Mail::SpamAssassin::Conf::TYPE_BODY_EVALS);
+  $self->register_eval_rule("html_image_only", $Mail::SpamAssassin::Conf::TYPE_BODY_EVALS);
+  $self->register_eval_rule("html_image_ratio", $Mail::SpamAssassin::Conf::TYPE_BODY_EVALS);
+  $self->register_eval_rule("html_charset_faraway", $Mail::SpamAssassin::Conf::TYPE_BODY_EVALS);
+  $self->register_eval_rule("html_tag_exists", $Mail::SpamAssassin::Conf::TYPE_BODY_EVALS);
+  $self->register_eval_rule("html_test", $Mail::SpamAssassin::Conf::TYPE_BODY_EVALS);
+  $self->register_eval_rule("html_eval", $Mail::SpamAssassin::Conf::TYPE_BODY_EVALS);
+  $self->register_eval_rule("html_text_match", $Mail::SpamAssassin::Conf::TYPE_BODY_EVALS);
+  $self->register_eval_rule("html_title_subject_ratio", $Mail::SpamAssassin::Conf::TYPE_BODY_EVALS);
+  $self->register_eval_rule("html_text_not_match", $Mail::SpamAssassin::Conf::TYPE_BODY_EVALS);
+  $self->register_eval_rule("html_range", $Mail::SpamAssassin::Conf::TYPE_BODY_EVALS);
+  $self->register_eval_rule("check_iframe_src", $Mail::SpamAssassin::Conf::TYPE_BODY_EVALS);
 
   return $self;
 }

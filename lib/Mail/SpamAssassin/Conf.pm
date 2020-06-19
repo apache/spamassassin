@@ -5190,12 +5190,15 @@ sub load_plugin_succeeded {
 
 sub register_eval_rule {
   my ($self, $pluginobj, $nameofsub, $ruletype) = @_;
+  if (exists $self->{eval_plugins}->{$nameofsub}) {
+    warn("config: eval function '$nameofsub' already exists, overwriting\n");
+  }
   $self->{eval_plugins}->{$nameofsub} = $pluginobj;
   if (defined $ruletype) {
     if (defined $TYPE_AS_STRING{$ruletype}) {
       $self->{eval_plugins_types}->{$nameofsub} = $ruletype;
     } else {
-      $self->{parser}->lint_warn("register_eval_rule: invalid ruletype for $nameofsub");
+      $self->{parser}->lint_warn("config: invalid ruletype for eval $nameofsub");
     }
   }
 }

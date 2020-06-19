@@ -58,22 +58,22 @@ sub new {
   my $self = $class->SUPER::new($mailsaobject);
   bless ($self, $class);
 
-  $self->register_eval_rule ("check_for_spf_pass");
-  $self->register_eval_rule ("check_for_spf_neutral");
-  $self->register_eval_rule ("check_for_spf_none");
-  $self->register_eval_rule ("check_for_spf_fail");
-  $self->register_eval_rule ("check_for_spf_softfail");
-  $self->register_eval_rule ("check_for_spf_permerror");
-  $self->register_eval_rule ("check_for_spf_temperror");
-  $self->register_eval_rule ("check_for_spf_helo_pass");
-  $self->register_eval_rule ("check_for_spf_helo_neutral");
-  $self->register_eval_rule ("check_for_spf_helo_none");
-  $self->register_eval_rule ("check_for_spf_helo_fail");
-  $self->register_eval_rule ("check_for_spf_helo_softfail");
-  $self->register_eval_rule ("check_for_spf_helo_permerror");
-  $self->register_eval_rule ("check_for_spf_helo_temperror");
-  $self->register_eval_rule ("check_for_spf_whitelist_from");
-  $self->register_eval_rule ("check_for_def_spf_whitelist_from");
+  $self->register_eval_rule ("check_for_spf_pass", $Mail::SpamAssassin::Conf::TYPE_HEAD_EVALS);
+  $self->register_eval_rule ("check_for_spf_neutral", $Mail::SpamAssassin::Conf::TYPE_HEAD_EVALS);
+  $self->register_eval_rule ("check_for_spf_none", $Mail::SpamAssassin::Conf::TYPE_HEAD_EVALS);
+  $self->register_eval_rule ("check_for_spf_fail", $Mail::SpamAssassin::Conf::TYPE_HEAD_EVALS);
+  $self->register_eval_rule ("check_for_spf_softfail", $Mail::SpamAssassin::Conf::TYPE_HEAD_EVALS);
+  $self->register_eval_rule ("check_for_spf_permerror", $Mail::SpamAssassin::Conf::TYPE_HEAD_EVALS);
+  $self->register_eval_rule ("check_for_spf_temperror", $Mail::SpamAssassin::Conf::TYPE_HEAD_EVALS);
+  $self->register_eval_rule ("check_for_spf_helo_pass", $Mail::SpamAssassin::Conf::TYPE_HEAD_EVALS);
+  $self->register_eval_rule ("check_for_spf_helo_neutral", $Mail::SpamAssassin::Conf::TYPE_HEAD_EVALS);
+  $self->register_eval_rule ("check_for_spf_helo_none", $Mail::SpamAssassin::Conf::TYPE_HEAD_EVALS);
+  $self->register_eval_rule ("check_for_spf_helo_fail", $Mail::SpamAssassin::Conf::TYPE_HEAD_EVALS);
+  $self->register_eval_rule ("check_for_spf_helo_softfail", $Mail::SpamAssassin::Conf::TYPE_HEAD_EVALS);
+  $self->register_eval_rule ("check_for_spf_helo_permerror", $Mail::SpamAssassin::Conf::TYPE_HEAD_EVALS);
+  $self->register_eval_rule ("check_for_spf_helo_temperror", $Mail::SpamAssassin::Conf::TYPE_HEAD_EVALS);
+  $self->register_eval_rule ("check_for_spf_whitelist_from", $Mail::SpamAssassin::Conf::TYPE_HEAD_EVALS);
+  $self->register_eval_rule ("check_for_def_spf_whitelist_from", $Mail::SpamAssassin::Conf::TYPE_HEAD_EVALS);
 
   $self->set_config($mailsaobject->{conf});
 

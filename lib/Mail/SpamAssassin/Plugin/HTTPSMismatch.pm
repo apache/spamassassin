@@ -38,7 +38,7 @@ sub new {
   bless ($self, $class);
 
   # the important bit!
-  $self->register_eval_rule ("check_https_http_mismatch");
+  $self->register_eval_rule ("check_https_http_mismatch", $Mail::SpamAssassin::Conf::TYPE_BODY_EVALS);
 
   return $self;
 }

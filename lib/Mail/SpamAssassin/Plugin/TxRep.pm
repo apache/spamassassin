@@ -225,7 +225,7 @@ sub new {                       # constructor: register the eval rule
   $self->{main}          = $main;
   $self->{conf}          = $main->{conf};
   $self->{factor}        = $main->{conf}->{txrep_factor};
-  $self->register_eval_rule("check_senders_reputation");
+  $self->register_eval_rule("check_senders_reputation", $Mail::SpamAssassin::Conf::TYPE_HEAD_EVALS);
   $self->set_config($main->{conf});
 
   # only the default conf loaded here, do nothing here requiring

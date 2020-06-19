@@ -99,13 +99,13 @@ sub new {
   my $self = $class->SUPER::new($mailsaobject);
   bless ($self, $class);
 
-  $self->register_eval_rule ("image_count");
-  $self->register_eval_rule ("pixel_coverage");
-  $self->register_eval_rule ("image_size_exact");
-  $self->register_eval_rule ("image_size_range");
-  $self->register_eval_rule ("image_named");
-  $self->register_eval_rule ("image_name_regex");
-  $self->register_eval_rule ("image_to_text_ratio");
+  $self->register_eval_rule ("image_count", $Mail::SpamAssassin::Conf::TYPE_BODY_EVALS);
+  $self->register_eval_rule ("pixel_coverage", $Mail::SpamAssassin::Conf::TYPE_BODY_EVALS);
+  $self->register_eval_rule ("image_size_exact", $Mail::SpamAssassin::Conf::TYPE_BODY_EVALS);
+  $self->register_eval_rule ("image_size_range", $Mail::SpamAssassin::Conf::TYPE_BODY_EVALS);
+  $self->register_eval_rule ("image_named", $Mail::SpamAssassin::Conf::TYPE_BODY_EVALS);
+  $self->register_eval_rule ("image_name_regex", $Mail::SpamAssassin::Conf::TYPE_BODY_EVALS);
+  $self->register_eval_rule ("image_to_text_ratio", $Mail::SpamAssassin::Conf::TYPE_BODY_EVALS);
 
   return $self;
 }

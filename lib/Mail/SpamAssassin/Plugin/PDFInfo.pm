@@ -162,19 +162,19 @@ sub new {
   my $self = $class->SUPER::new($mailsaobject);
   bless ($self, $class);
 
-  $self->register_eval_rule ("pdf_count");
-  $self->register_eval_rule ("pdf_image_count");
-  $self->register_eval_rule ("pdf_pixel_coverage");
-  $self->register_eval_rule ("pdf_image_size_exact");
-  $self->register_eval_rule ("pdf_image_size_range");
-  $self->register_eval_rule ("pdf_named");
-  $self->register_eval_rule ("pdf_name_regex");
-  $self->register_eval_rule ("pdf_image_to_text_ratio");
-  $self->register_eval_rule ("pdf_match_md5");
-  $self->register_eval_rule ("pdf_match_fuzzy_md5");
-  $self->register_eval_rule ("pdf_match_details");
-  $self->register_eval_rule ("pdf_is_encrypted");
-  $self->register_eval_rule ("pdf_is_empty_body");
+  $self->register_eval_rule ("pdf_count", $Mail::SpamAssassin::Conf::TYPE_BODY_EVALS);
+  $self->register_eval_rule ("pdf_image_count", $Mail::SpamAssassin::Conf::TYPE_BODY_EVALS);
+  $self->register_eval_rule ("pdf_pixel_coverage", $Mail::SpamAssassin::Conf::TYPE_BODY_EVALS);
+  $self->register_eval_rule ("pdf_image_size_exact", $Mail::SpamAssassin::Conf::TYPE_BODY_EVALS);
+  $self->register_eval_rule ("pdf_image_size_range", $Mail::SpamAssassin::Conf::TYPE_BODY_EVALS);
+  $self->register_eval_rule ("pdf_named", $Mail::SpamAssassin::Conf::TYPE_BODY_EVALS);
+  $self->register_eval_rule ("pdf_name_regex", $Mail::SpamAssassin::Conf::TYPE_BODY_EVALS);
+  $self->register_eval_rule ("pdf_image_to_text_ratio", $Mail::SpamAssassin::Conf::TYPE_BODY_EVALS);
+  $self->register_eval_rule ("pdf_match_md5", $Mail::SpamAssassin::Conf::TYPE_BODY_EVALS);
+  $self->register_eval_rule ("pdf_match_fuzzy_md5", $Mail::SpamAssassin::Conf::TYPE_BODY_EVALS);
+  $self->register_eval_rule ("pdf_match_details", $Mail::SpamAssassin::Conf::TYPE_BODY_EVALS);
+  $self->register_eval_rule ("pdf_is_encrypted", $Mail::SpamAssassin::Conf::TYPE_BODY_EVALS);
+  $self->register_eval_rule ("pdf_is_empty_body", $Mail::SpamAssassin::Conf::TYPE_BODY_EVALS);
 
   return $self;
 }

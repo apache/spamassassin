@@ -40,24 +40,24 @@ sub new {
   bless ($self, $class);
 
   # the important bit!
-  $self->register_eval_rule("check_from_in_blacklist");
-  $self->register_eval_rule("check_to_in_blacklist");
-  $self->register_eval_rule("check_to_in_whitelist");
-  $self->register_eval_rule("check_to_in_more_spam");
-  $self->register_eval_rule("check_to_in_all_spam");
-  $self->register_eval_rule("check_from_in_list");
-  $self->register_eval_rule("check_replyto_in_list");
-  $self->register_eval_rule("check_to_in_list");
-  $self->register_eval_rule("check_from_in_whitelist");
-  $self->register_eval_rule("check_forged_in_whitelist");
-  $self->register_eval_rule("check_from_in_default_whitelist");
-  $self->register_eval_rule("check_forged_in_default_whitelist");
-  $self->register_eval_rule("check_mailfrom_matches_rcvd");
-  $self->register_eval_rule("check_uri_host_listed");
+  $self->register_eval_rule("check_from_in_blacklist", $Mail::SpamAssassin::Conf::TYPE_HEAD_EVALS);
+  $self->register_eval_rule("check_to_in_blacklist", $Mail::SpamAssassin::Conf::TYPE_HEAD_EVALS);
+  $self->register_eval_rule("check_to_in_whitelist", $Mail::SpamAssassin::Conf::TYPE_HEAD_EVALS);
+  $self->register_eval_rule("check_to_in_more_spam", $Mail::SpamAssassin::Conf::TYPE_HEAD_EVALS);
+  $self->register_eval_rule("check_to_in_all_spam", $Mail::SpamAssassin::Conf::TYPE_HEAD_EVALS);
+  $self->register_eval_rule("check_from_in_list", $Mail::SpamAssassin::Conf::TYPE_HEAD_EVALS);
+  $self->register_eval_rule("check_replyto_in_list", $Mail::SpamAssassin::Conf::TYPE_HEAD_EVALS);
+  $self->register_eval_rule("check_to_in_list", $Mail::SpamAssassin::Conf::TYPE_HEAD_EVALS);
+  $self->register_eval_rule("check_from_in_whitelist", $Mail::SpamAssassin::Conf::TYPE_HEAD_EVALS);
+  $self->register_eval_rule("check_forged_in_whitelist", $Mail::SpamAssassin::Conf::TYPE_HEAD_EVALS);
+  $self->register_eval_rule("check_from_in_default_whitelist", $Mail::SpamAssassin::Conf::TYPE_HEAD_EVALS);
+  $self->register_eval_rule("check_forged_in_default_whitelist", $Mail::SpamAssassin::Conf::TYPE_HEAD_EVALS);
+  $self->register_eval_rule("check_mailfrom_matches_rcvd", $Mail::SpamAssassin::Conf::TYPE_HEAD_EVALS);
+  $self->register_eval_rule("check_uri_host_listed", $Mail::SpamAssassin::Conf::TYPE_HEAD_EVALS);
   # same as: eval:check_uri_host_listed('BLACK') :
-  $self->register_eval_rule("check_uri_host_in_blacklist");
+  $self->register_eval_rule("check_uri_host_in_blacklist"); # type does not matter
   # same as: eval:check_uri_host_listed('WHITE') :
-  $self->register_eval_rule("check_uri_host_in_whitelist");
+  $self->register_eval_rule("check_uri_host_in_whitelist"); # type does not matter
 
   return $self;
 }

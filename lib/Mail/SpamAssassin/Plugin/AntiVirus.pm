@@ -64,8 +64,8 @@ sub new {
   my $self = $class->SUPER::new($mailsaobject);
   bless ($self, $class);
 
-  $self->register_eval_rule("check_microsoft_executable");
-  $self->register_eval_rule("check_suspect_name");
+  $self->register_eval_rule("check_microsoft_executable", $Mail::SpamAssassin::Conf::TYPE_BODY_EVALS);
+  $self->register_eval_rule("check_suspect_name", $Mail::SpamAssassin::Conf::TYPE_BODY_EVALS);
 
   return $self;
 }

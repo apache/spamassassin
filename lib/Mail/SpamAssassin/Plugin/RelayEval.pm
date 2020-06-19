@@ -41,17 +41,17 @@ sub new {
   bless ($self, $class);
 
   # the important bit!
-  $self->register_eval_rule("check_for_numeric_helo");
-  $self->register_eval_rule("check_for_illegal_ip");
-  $self->register_eval_rule("check_all_trusted");
-  $self->register_eval_rule("check_no_relays");
-  $self->register_eval_rule("check_relays_unparseable");
-  $self->register_eval_rule("check_for_sender_no_reverse");
-  $self->register_eval_rule("check_for_from_domain_in_received_headers");
-  $self->register_eval_rule("check_for_forged_received_trail");
-  $self->register_eval_rule("check_for_forged_received_ip_helo");
-  $self->register_eval_rule("helo_ip_mismatch");
-  $self->register_eval_rule("check_for_no_rdns_dotcom_helo");
+  $self->register_eval_rule("check_for_numeric_helo"); # type does not matter
+  $self->register_eval_rule("check_for_illegal_ip"); # type does not matter
+  $self->register_eval_rule("check_all_trusted"); # type does not matter
+  $self->register_eval_rule("check_no_relays"); # type does not matter
+  $self->register_eval_rule("check_relays_unparseable"); # type does not matter
+  $self->register_eval_rule("check_for_sender_no_reverse"); # type does not matter
+  $self->register_eval_rule("check_for_from_domain_in_received_headers", $Mail::SpamAssassin::Conf::TYPE_HEAD_EVALS);
+  $self->register_eval_rule("check_for_forged_received_trail"); # type does not matter
+  $self->register_eval_rule("check_for_forged_received_ip_helo"); # type does not matter
+  $self->register_eval_rule("helo_ip_mismatch"); # type does not matter
+  $self->register_eval_rule("check_for_no_rdns_dotcom_helo"); # type does not matter
 
   return $self;
 }

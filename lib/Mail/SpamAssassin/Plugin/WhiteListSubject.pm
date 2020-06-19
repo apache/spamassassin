@@ -63,8 +63,8 @@ sub new {
   my $self = $class->SUPER::new($mailsaobject);
   bless ($self, $class);
 
-  $self->register_eval_rule ("check_subject_in_whitelist");
-  $self->register_eval_rule ("check_subject_in_blacklist");
+  $self->register_eval_rule ("check_subject_in_whitelist", $Mail::SpamAssassin::Conf::TYPE_HEAD_EVALS);
+  $self->register_eval_rule ("check_subject_in_blacklist", $Mail::SpamAssassin::Conf::TYPE_HEAD_EVALS);
 
   $self->set_config($mailsaobject->{conf});
 

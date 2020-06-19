@@ -323,7 +323,7 @@ sub new {
 
   $self->{finished} = { };
 
-  $self->register_eval_rule ("check_uridnsbl");
+  $self->register_eval_rule ("check_uridnsbl"); # type does not matter
   $self->set_config($samain->{conf});
 
   return $self;

@@ -87,8 +87,8 @@ sub new {
     }
   }
 
-  $self->register_eval_rule("check_language");
-  $self->register_eval_rule("check_body_8bits");
+  $self->register_eval_rule("check_language"); # type does not matter
+  $self->register_eval_rule("check_body_8bits", $Mail::SpamAssassin::Conf::TYPE_BODY_EVALS);
 
   $self->set_config($mailsaobject->{conf});
 

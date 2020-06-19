@@ -152,7 +152,7 @@ sub new {
   my $self = $class->SUPER::new($mailsa);
   bless ($self, $class);
 
-  $self->register_eval_rule("check_asn");
+  $self->register_eval_rule("check_asn", $Mail::SpamAssassin::Conf::TYPE_HEAD_EVALS);
 
   $self->set_config($mailsa->{conf});
 

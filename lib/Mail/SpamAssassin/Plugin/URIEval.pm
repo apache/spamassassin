@@ -38,9 +38,9 @@ sub new {
   bless ($self, $class);
 
   # the important bit!
-  $self->register_eval_rule("check_for_http_redirector");
-  $self->register_eval_rule("check_https_ip_mismatch");
-  $self->register_eval_rule("check_uri_truncated");
+  $self->register_eval_rule("check_for_http_redirector"); # type does not matter
+  $self->register_eval_rule("check_https_ip_mismatch"); # type does not matter
+  $self->register_eval_rule("check_uri_truncated"); # type does not matter
 
   return $self;
 }

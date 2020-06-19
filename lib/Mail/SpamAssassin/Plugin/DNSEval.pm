@@ -85,7 +85,7 @@ sub new {
 
   $self->set_config($mailsaobject->{conf});
   foreach(@{$self->{'evalrules'}}) {
-    $self->register_eval_rule($_);
+    $self->register_eval_rule($_, $Mail::SpamAssassin::Conf::TYPE_RBL_EVALS);
   }
 
   return $self;

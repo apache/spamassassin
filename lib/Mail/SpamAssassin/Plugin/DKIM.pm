@@ -146,19 +146,19 @@ sub new {
   bless ($self, $class);
 
   # signatures
-  $self->register_eval_rule("check_dkim_signed");
-  $self->register_eval_rule("check_dkim_valid");
-  $self->register_eval_rule("check_dkim_valid_author_sig");
-  $self->register_eval_rule("check_dkim_testing");
-  $self->register_eval_rule("check_dkim_valid_envelopefrom");
+  $self->register_eval_rule("check_dkim_signed", $Mail::SpamAssassin::Conf::TYPE_FULL_EVALS);
+  $self->register_eval_rule("check_dkim_valid", $Mail::SpamAssassin::Conf::TYPE_FULL_EVALS);
+  $self->register_eval_rule("check_dkim_valid_author_sig", $Mail::SpamAssassin::Conf::TYPE_FULL_EVALS);
+  $self->register_eval_rule("check_dkim_testing", $Mail::SpamAssassin::Conf::TYPE_HEAD_EVALS);
+  $self->register_eval_rule("check_dkim_valid_envelopefrom", $Mail::SpamAssassin::Conf::TYPE_FULL_EVALS);
 
   # author domain signing practices
-  $self->register_eval_rule("check_dkim_adsp");
-  $self->register_eval_rule("check_dkim_dependable");
+  $self->register_eval_rule("check_dkim_adsp", $Mail::SpamAssassin::Conf::TYPE_HEAD_EVALS);
+  $self->register_eval_rule("check_dkim_dependable", $Mail::SpamAssassin::Conf::TYPE_FULL_EVALS);
 
   # whitelisting
-  $self->register_eval_rule("check_for_dkim_whitelist_from");
-  $self->register_eval_rule("check_for_def_dkim_whitelist_from");
+  $self->register_eval_rule("check_for_dkim_whitelist_from", $Mail::SpamAssassin::Conf::TYPE_HEAD_EVALS);
+  $self->register_eval_rule("check_for_def_dkim_whitelist_from", $Mail::SpamAssassin::Conf::TYPE_HEAD_EVALS);
 
   # old names (aliases) for compatibility
   $self->register_eval_rule("check_dkim_verified");  # = check_dkim_valid

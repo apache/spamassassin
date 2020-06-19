@@ -67,7 +67,7 @@ sub new {
     dbg("pyzor: network tests on, attempting Pyzor");
   }
 
-  $self->register_eval_rule("check_pyzor");
+  $self->register_eval_rule("check_pyzor", $Mail::SpamAssassin::Conf::TYPE_FULL_EVALS);
 
   $self->set_config($mailsaobject->{conf});
 

@@ -68,18 +68,18 @@ sub new {
   bless ($self, $class);
 
   # the important bit!
-  $self->register_eval_rule("check_for_mime");
-  $self->register_eval_rule("check_for_mime_html");
-  $self->register_eval_rule("check_for_mime_html_only");
-  $self->register_eval_rule("check_mime_multipart_ratio");
-  $self->register_eval_rule("check_msg_parse_flags");
-  $self->register_eval_rule("check_for_ascii_text_illegal");
-  $self->register_eval_rule("check_abundant_unicode_ratio");
-  $self->register_eval_rule("check_for_faraway_charset");
-  $self->register_eval_rule("check_for_uppercase");
-  $self->register_eval_rule("check_ma_non_text");
-  $self->register_eval_rule("check_base64_length");
-  $self->register_eval_rule("check_qp_ratio");
+  $self->register_eval_rule("check_for_mime", $Mail::SpamAssassin::Conf::TYPE_BODY_EVALS);
+  $self->register_eval_rule("check_for_mime_html", $Mail::SpamAssassin::Conf::TYPE_BODY_EVALS);
+  $self->register_eval_rule("check_for_mime_html_only", $Mail::SpamAssassin::Conf::TYPE_BODY_EVALS);
+  $self->register_eval_rule("check_mime_multipart_ratio", $Mail::SpamAssassin::Conf::TYPE_BODY_EVALS);
+  $self->register_eval_rule("check_msg_parse_flags", $Mail::SpamAssassin::Conf::TYPE_HEADER_EVALS);
+  $self->register_eval_rule("check_for_ascii_text_illegal", $Mail::SpamAssassin::Conf::TYPE_BODY_EVALS);
+  $self->register_eval_rule("check_abundant_unicode_ratio", $Mail::SpamAssassin::Conf::TYPE_BODY_EVALS);
+  $self->register_eval_rule("check_for_faraway_charset", $Mail::SpamAssassin::Conf::TYPE_BODY_EVALS);
+  $self->register_eval_rule("check_for_uppercase", $Mail::SpamAssassin::Conf::TYPE_BODY_EVALS);
+  $self->register_eval_rule("check_ma_non_text", $Mail::SpamAssassin::Conf::TYPE_BODY_EVALS);
+  $self->register_eval_rule("check_base64_length", $Mail::SpamAssassin::Conf::TYPE_BODY_EVALS);
+  $self->register_eval_rule("check_qp_ratio", $Mail::SpamAssassin::Conf::TYPE_BODY_EVALS);
 
   return $self;
 }

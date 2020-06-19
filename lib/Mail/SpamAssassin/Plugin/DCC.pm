@@ -116,8 +116,8 @@ sub new {
     dbg("dcc: local tests only, disabling DCC");
   }
 
-  $self->register_eval_rule("check_dcc");
-  $self->register_eval_rule("check_dcc_reputation_range");
+  $self->register_eval_rule("check_dcc", $Mail::SpamAssassin::Conf::TYPE_FULL_EVALS);
+  $self->register_eval_rule("check_dcc_reputation_range", $Mail::SpamAssassin::Conf::TYPE_FULL_EVALS);
 
   $self->set_config($mailsaobject->{conf});
 

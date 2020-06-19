@@ -1054,7 +1054,7 @@ using "header FOO eval:foobar()" instead of "body FOO eval:foobar()".
 Mismatch will result in lint failure. $ruletype can be one of:
 
   $Mail::SpamAssassin::Conf::TYPE_HEAD_EVALS
-  $Mail::SpamAssassin::Conf::TYPE_BODY_EVALS
+  $Mail::SpamAssassin::Conf::TYPE_BODY_EVALS  (allows both body and rawbody)
   $Mail::SpamAssassin::Conf::TYPE_RAWBODY_EVALS
   $Mail::SpamAssassin::Conf::TYPE_FULL_EVALS
 

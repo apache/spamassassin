@@ -43,8 +43,8 @@ sub new {
   my $self = $class->SUPER::new($mailsaobject);
   bless ($self, $class);
 
-  $self->register_eval_rule("have_any_bounce_relays");
-  $self->register_eval_rule("check_whitelist_bounce_relays");
+  $self->register_eval_rule("have_any_bounce_relays"); # type does not matter
+  $self->register_eval_rule("check_whitelist_bounce_relays"); # type does not matter
 
   $self->set_config($mailsaobject->{conf});
 

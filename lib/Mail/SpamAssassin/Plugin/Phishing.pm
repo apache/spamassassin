@@ -73,7 +73,7 @@ sub new {
     bless ($self, $class);
 
     $self->set_config($mailsa->{conf});
-    $self->register_eval_rule("check_phishing");
+    $self->register_eval_rule("check_phishing", $Mail::SpamAssassin::Conf::TYPE_BODY_EVALS);
 
     return $self;
 }

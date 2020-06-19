@@ -153,10 +153,10 @@ sub new {
 
     $self->{freemail_available} = 1;
     $self->set_config($mailsa->{conf});
-    $self->register_eval_rule("check_freemail_replyto");
-    $self->register_eval_rule("check_freemail_from");
-    $self->register_eval_rule("check_freemail_header");
-    $self->register_eval_rule("check_freemail_body");
+    $self->register_eval_rule("check_freemail_replyto", $Mail::SpamAssassin::Conf::TYPE_HEAD_EVALS);
+    $self->register_eval_rule("check_freemail_from", $Mail::SpamAssassin::Conf::TYPE_HEAD_EVALS);
+    $self->register_eval_rule("check_freemail_header", $Mail::SpamAssassin::Conf::TYPE_HEAD_EVALS);
+    $self->register_eval_rule("check_freemail_body", $Mail::SpamAssassin::Conf::TYPE_HEAD_EVALS);
 
     return $self;
 }

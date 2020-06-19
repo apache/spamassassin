@@ -72,7 +72,7 @@ sub new {
   my $self = $class->SUPER::new($mailsaobject);
   bless ($self, $class);
 
-  $self->register_eval_rule("check_access_database");
+  $self->register_eval_rule("check_access_database", $Mail::SpamAssassin::Conf::TYPE_HEAD_EVALS);
 
   return $self;
 }
