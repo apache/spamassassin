@@ -1,3 +1,9 @@
+header   __PDS_RDNS_MTA X-Spam-Relays-External =~ /^[^\]]+ rdns=\S*(mta|mail|mx|smtp)\b\S* /i
+
+meta     PDS_RDNS_DYNAMIC_FP RDNS_DYNAMIC && !__PDS_RDNS_MTA
+score    PDS_RDNS_DYNAMIC_FP 0.01
+describe PDS_RDNS_DYNAMIC_FP RDNS_DYNAMIC with FP steps
+
 header   __PDS_FROM_NAME_TO_DOMAIN  ALL =~ /From: ["']?([a-z0-9\.-]+\.[0-9a-z\.-]+)["']? [^\n]+\nTo:[^\n]+\@\1/ism
 
 meta     PDS_SHORT_BOGUS_MSM_HDRS __PDS_HTML_LENGTH_1024 && __BOGUS_MSM_HDRS
