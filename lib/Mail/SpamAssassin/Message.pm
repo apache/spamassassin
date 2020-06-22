@@ -583,7 +583,7 @@ sub get_msgid {
   if (defined $msgid && $msgid =~ /^\s*<(.+)>\s*$/s) {
     return $1;
   } else {
-    return undef;
+    return;
   }
 }
 
