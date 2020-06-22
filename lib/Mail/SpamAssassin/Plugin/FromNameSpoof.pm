@@ -107,7 +107,6 @@ score    FROMNAME_SPOOF_EQUALS_TO 1.2
 =cut
 
 package Mail::SpamAssassin::Plugin::FromNameSpoof;
-my $VERSION = 0.9;
 
 use strict;
 use warnings;
@@ -118,6 +117,8 @@ use Mail::SpamAssassin::Util;
 
 use vars qw(@ISA);
 @ISA = qw(Mail::SpamAssassin::Plugin);
+
+my $VERSION = 0.9;
 
 sub dbg { Mail::SpamAssassin::Plugin::dbg ("FromNameSpoof: @_"); }
 
