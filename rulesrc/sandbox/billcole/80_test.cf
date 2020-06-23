@@ -46,7 +46,4 @@ rawbody   T_SCC_SPECIAL_GUID	/^([[:xdigit:]]{8})-([[:xdigit:]]{4})-([[:xdigit:]]
 tflags    T_SCC_SPECIAL_GUID	multiple maxhits=15
 #score     T_SCC_SPECIAL_GUID	0.3
 
-# CGP MAPI module fingerprint, to protect from MISSING_MIMEOLE
-describe __HAS_CGP_MAPI_IN_MAILER
-header   __HAS_CGP_MAPI_IN_MAILER X-Mailer =~ 'CommuniGate Pro MAPI'
-tflags   __HAS_CGP_MAPI_IN_MAILER publish
+

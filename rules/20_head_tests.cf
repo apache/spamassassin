@@ -311,9 +311,7 @@ header   __HAS_MSMAIL_PRI       exists:X-MSMail-Priority
 header   __HAS_SQUIRRELMAIL_IN_MAILER	X-Mailer =~ /SquirrelMail\b/
 # Ever growing Office version list without X-MimeOLE, bug 6346, 7122, 7463.
 header   __HAS_OFFICE1214_IN_MAILER	X-Mailer =~ /^Microsoft (?:Office )?Outlook 1[2456]\.0/
-# CGP MAPI module fingerprint, to protect from MISSING_MIMEOLE
-header   __HAS_CGP_MAPI_IN_MAILER X-Mailer =~ /CommuniGate Pro MAPI/
-meta     MISSING_MIMEOLE	(__HAS_MSMAIL_PRI && !__HAS_MIMEOLE && !__HAS_SQUIRRELMAIL_IN_MAILER && !__HAS_OFFICE1214_IN_MAILER && !__HAS_CGP_MAPI_IN_MAILER)
+meta     MISSING_MIMEOLE	(__HAS_MSMAIL_PRI && !__HAS_MIMEOLE && !__HAS_SQUIRRELMAIL_IN_MAILER && !__HAS_OFFICE1214_IN_MAILER)
 describe MISSING_MIMEOLE	Message has X-MSMail-Priority, but no X-MimeOLE
 
 header __HAS_X_MAILER		exists:X-Mailer
