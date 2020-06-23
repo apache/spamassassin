@@ -682,8 +682,9 @@ sub _dkim_load_modules {
       dbg("dkim: cannot load Mail::DKIM module, DKIM checks disabled: %s",
           $eval_stat);
     } else {
+      use version 0.77;
       my $version = Mail::DKIM::Verifier->VERSION;
-      if ($version >= 0.31) {
+      if (version->parse($version) >= version->parse(0.31)) {
         dbg("dkim: using Mail::DKIM version $version");
       } else {
         info("dkim: Mail::DKIM $version is older than the required ".
@@ -806,7 +807,8 @@ sub _check_dkim_signature {
     # signature objects not provided by the caller, must verify for ourselves
     my $timemethod = $self->{main}->UNIVERSAL::can("time_method") &&
                      $self->{main}->time_method("check_dkim_signature");
-    if (Mail::DKIM::Verifier->VERSION >= 0.40) {
+    use version 0.77;
+    if (version->parse(Mail::DKIM::Verifier->VERSION) >= version->parse(0.40)) {
       my $edns = $conf->{dns_options}->{edns};
       if ($edns && $edns >= 1024) {
         # Let Mail::DKIM use our interface to Net::DNS::Resolver.
