@@ -67,7 +67,7 @@ echo "[ rsyncing logs ]"
 # if running on sa-vm1.apache.org rsync locally, otherwise rsync remotely
 if [[ -e "$CORPUS_SRC_DIR" ]]; then
   echo "[ rsyncing logs locally ]"
-  rsync -artv --delete --exclude="*am-rescore-*" $CORPUS_SRC_DIR/*.log corpus/. || exit $?
+  rsync -artv --delete --exclude="*am-rescore-*" $CORPUS_SRC_DIR/*.r*.log corpus/. || exit $?
 else
   echo "[ rsyncing logs remotely ]"
   # load rsync credentials from RSYNC-CREDS file
@@ -75,7 +75,7 @@ else
   # RSYNC_PASSWORD="password"
   . $PROGDIR/RSYNC-CREDS
   export RSYNC_PASSWORD
-  rsync -artvz --delete --exclude="*am-rescore-*" $RSYNC_USERNAME@rsync.spamassassin.org::corpus/*.log corpus/. || exit $?
+  rsync -artvz --delete --exclude="*am-rescore-*" $RSYNC_USERNAME@rsync.spamassassin.org::corpus/*.r*.log corpus/. || exit $?
 fi
 
 
