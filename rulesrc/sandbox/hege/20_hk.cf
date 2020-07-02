@@ -134,7 +134,7 @@ body		__HK_SCAM_N8		/\byour compensation\b/i
 body		__HK_SCAM_N15		/\b(?:account (?:overseas?|offshore)|(?:overseas?|offshore) account)\b/i
 body		__HK_SCAM_N16		/\b(?:arrangement secret|secret arrangement)\b/i
 body		__HK_SCAM_S1		/pay you the sum of/i
-body		__HK_SCAM_S7		/(?:(?:investment|proposed|lucrative) (?:business|venture)|(?:business|venture) (?:enterprise|propos(?:al|ition)))/i
+#body		__HK_SCAM_S7		/(?:(?:investment|proposed|lucrative) (?:business|venture)|(?:business|venture) (?:enterprise|propos(?:al|ition)))/i
 #body		__HK_SCAM_S12		/fidelity investments international/i
 body		__HK_SCAM_S15		/(?:discovered a dormant account|can you be my partner)/i
 body		__HK_SCAM_S25		/\bbank (?:in|of) ghana/i
@@ -142,7 +142,7 @@ body		__HK_SCAM_S25		/\bbank (?:in|of) ghana/i
 #body		__HK_SCAM_S4		/transfer (?:this|my|of )?funds?/i
 #body		__HK_SCAM_S22		/\bmining companies/i
 #body		__HK_SCAM_S23		/(?:\b(?:urgent alert|start trade|get it at monday)\b|\b(?:5-|five )day price:)/i
-meta		HK_SCAM			__HK_SCAM_N2 || __HK_SCAM_N3 || __HK_SCAM_N8 || __HK_SCAM_N15 || __HK_SCAM_N16 || __HK_SCAM_S1 || __HK_SCAM_S7 || __HK_SCAM_S15 || __HK_SCAM_S25
+meta		HK_SCAM			__HK_SCAM_N2 || __HK_SCAM_N3 || __HK_SCAM_N8 || __HK_SCAM_N15 || __HK_SCAM_N16 || __HK_SCAM_S1 || __HK_SCAM_S15 || __HK_SCAM_S25
 score		HK_SCAM			2
 tflags		HK_SCAM			publish
 
