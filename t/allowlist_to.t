@@ -1,7 +1,9 @@
 #!/usr/bin/perl -T
 
-use lib '.'; use lib 't';
-use SATest; sa_t_init("whitelist_to");
+use lib '.'; 
+use lib 't';
+use SATest; 
+sa_t_init("allowlist_to");
 use Test::More tests => 1;
 
 # ---------------------------------------------------------------------------
@@ -14,7 +16,7 @@ use Test::More tests => 1;
 
 tstprefs ("
         $default_cf_lines
-        whitelist_to announce*
+        allowlist_to announce*
 	");
 
 sarun ("-L -t -D < data/nice/016", \&patterns_run_cb);
