@@ -544,21 +544,19 @@ e.g.
   });
 
 
-=item allowlist_to user@example.com
-
-Previously whitelist_to which will work interchangeably until 4.1.
+=item whitelist_to user@example.com
 
 If the given address appears as a recipient in the message headers
 (Resent-To, To, Cc, obvious envelope recipient, etc.) the mail will
-be listed as allowed.  Useful if you're deploying SpamAssassin system-wide,
+be whitelisted.  Useful if you're deploying SpamAssassin system-wide,
 and don't want some users to have their mail filtered.  Same format
 as C<whitelist_from>.
 
-There are three levels of To-allowlisting, C<allowlist_to>, C<more_spam_to>
+There are three levels of To-whitelisting, C<whitelist_to>, C<more_spam_to>
 and C<all_spam_to>.  Users in the first level may still get some spammish
 mails blocked, but users in C<all_spam_to> should never get mail blocked.
 
-The headers checked for allowlist addresses are as follows: if C<Resent-To> or
+The headers checked for whitelist addresses are as follows: if C<Resent-To> or
 C<Resent-Cc> are set, use those; otherwise check all addresses taken from the
 following set of headers:
 
@@ -586,9 +584,8 @@ See above.
 =cut
 
   push (@cmds, {
-    setting => 'allowlist_to',
+    setting => 'whitelist_to',
     type => $CONF_TYPE_ADDRLIST,
-    aliases => ['whitelist_to'],       # backward compatible - to be removed for 4.1
   });
   push (@cmds, {
     setting => 'more_spam_to',
@@ -797,8 +794,8 @@ directive blacklist_to
 Enlisting an address to the list named blacklist_from is synonymous to using the
 directive blacklist_from
 
-Enlisting an address to the list named allowlist_to is synonymous to using the
-directive allowlist_to 
+Enlisting an address to the list named whitelist_to is synonymous to using the
+directive whitelist_to 
 
 Enlisting an address to the list named whitelist_from is synonymous to using the
 directive whitelist_from
@@ -4814,7 +4811,7 @@ sub new {
   $self->{def_whitelist_from_rcvd} = { };
 
   $self->{blacklist_to} = { };
-  $self->{allowlist_to} = { };
+  $self->{whitelist_to} = { };
   $self->{more_spam_to} = { };
   $self->{all_spam_to} = { };
 

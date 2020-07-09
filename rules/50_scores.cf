@@ -711,12 +711,7 @@ score HEADER_HOST_IN_BLACKLIST	100.0
 score HEADER_HOST_IN_WHITELIST -100.0
 
 # not really false positives but the user wants spam!
-if (version >= 4.000000)
-  #Version 4.0.0 renames whitelist to allowlist
-  score USER_IN_ALLOWLIST_TO -6.000
-else
-  score USER_IN_WHITELIST_TO -6.000
-endif
+score USER_IN_WHITELIST_TO -6.000
 score USER_IN_MORE_SPAM_TO -20.000
 score USER_IN_ALL_SPAM_TO -100.000
 endif

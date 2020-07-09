@@ -42,7 +42,7 @@ sub new {
   # the important bit!
   $self->register_eval_rule("check_from_in_blacklist", $Mail::SpamAssassin::Conf::TYPE_HEAD_EVALS);
   $self->register_eval_rule("check_to_in_blacklist", $Mail::SpamAssassin::Conf::TYPE_HEAD_EVALS);
-  $self->register_eval_rule("check_to_in_allowlist", $Mail::SpamAssassin::Conf::TYPE_HEAD_EVALS);
+  $self->register_eval_rule("check_to_in_whitelist", $Mail::SpamAssassin::Conf::TYPE_HEAD_EVALS);
   $self->register_eval_rule("check_to_in_more_spam", $Mail::SpamAssassin::Conf::TYPE_HEAD_EVALS);
   $self->register_eval_rule("check_to_in_all_spam", $Mail::SpamAssassin::Conf::TYPE_HEAD_EVALS);
   $self->register_eval_rule("check_from_in_list", $Mail::SpamAssassin::Conf::TYPE_HEAD_EVALS);
@@ -80,10 +80,10 @@ sub check_to_in_blacklist {
   }
 }
 
-sub check_to_in_allowlist {
+sub check_to_in_whitelist {
   my ($self, $pms) = @_;
   foreach ($pms->all_to_addrs()) {
-    if ($self->_check_allowlist ($self->{main}->{conf}->{allowlist_to}, $_)) {
+    if ($self->_check_whitelist ($self->{main}->{conf}->{whitelist_to}, $_)) {
       return 1;
     }
   }
@@ -403,13 +403,13 @@ sub _check_whitelist_rcvd {
 
 ###########################################################################
 
-sub _check_allowlist {
+sub _check_whitelist {
   my ($self, $list, $addr) = @_;
   $addr = lc $addr;
   if (defined ($list->{$addr})) { return 1; }
   foreach my $regexp (values %{$list}) {
     if ($addr =~ $regexp) {
-      dbg("rules: address $addr matches allowlist or blocklist regexp: $regexp");
+      dbg("rules: address $addr matches whitelist or blacklist regexp: $regexp");
       return 1;
     }
   }
