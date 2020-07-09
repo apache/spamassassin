@@ -561,9 +561,10 @@ sub check_dkim_valid_author_sig {
 sub check_dkim_valid_envelopefrom {
   my ($self, $pms, $full_ref) = @_;
   my $result = 0;
-  my $envfrom=$self->{'main'}->{'registryboundaries'}->uri_to_domain($pms->get("EnvelopeFrom"));
+  my ($envfrom) = ($pms->get('EnvelopeFrom:addr')||'') =~ /\@(\S+)/;
   # if no envelopeFrom, it cannot be valid
-  return $result if !$envfrom;
+  return $result if !defined $envfrom;
+  $envfrom = lc $envfrom;
   $self->_check_dkim_signature($pms)  if !$pms->{dkim_checked_signature};
   if (!$pms->{dkim_valid}) {
     # don't bother
@@ -720,8 +721,8 @@ sub _check_dkim_signed_by {
       next if $minimum_key_bits && $sig->{_spamassassin_key_size} &&
               $sig->{_spamassassin_key_size} < $minimum_key_bits;
     }
-    my $sdid = $sig->domain;
-    next if !defined $sdid;  # a signature with a missing required tag 'd' ?
+    my ($sdid) = $sig->identity =~ /\@(\S+)/;
+    next if !defined $sdid;  # a signature with a missing required tag 'd' or 'i' ?
     $sdid = lc $sdid;
     if ($must_be_author_domain_signature) {
       next if !$pms->{dkim_author_domains}->{$sdid};
@@ -909,7 +910,7 @@ sub _check_dkim_signature {
       push(@valid_signatures, $signature)  if $valid && !$expired;
 
       # check if we have a potential Author Domain Signature, valid or not
-      my $d = $signature->domain;
+      my ($d) = $signature->identity =~ /\@(\S+)/;
       if (!defined $d) {
         # can be undefined on a broken signature with missing required tags
       } else {
@@ -1261,7 +1262,7 @@ sub _wlcheck_list {
       }
     }
 
-    my $sdid = $signature->domain;
+    my ($sdid) = $signature->identity =~ /\@(\S+)/;
     $sdid = lc $sdid  if defined $sdid;
 
     my %tried_authors;
@@ -1279,7 +1280,7 @@ sub _wlcheck_list {
 
       my $matches = 0;
       if (!defined $sdid) {
-        # don't bother, invalid signature with a missing 'd' tag
+        # don't bother, invalid signature with a missing 'd' or 'i' tag
 
       } elsif (!defined $acceptable_sdid || $acceptable_sdid eq '') {
         # An "Author Domain Signature" (sometimes called a first-party
