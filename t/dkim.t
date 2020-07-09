@@ -4,6 +4,7 @@ use strict;
 use warnings;
 use re 'taint';
 use lib '.'; use lib 't';
+use version 0.77;
 
 use SATest; sa_t_init("dkim");
 
@@ -11,7 +12,7 @@ use vars qw(%patterns %anti_patterns);
 
 use constant HAS_DKIM_VERIFIER => eval {
   require Mail::DKIM::Verifier;
-  Mail::DKIM::Verifier->VERSION >= 0.31;
+  version->parse(Mail::DKIM::Verifier->VERSION) >= version->parse->(0.31);
 };
 
 use Test::More;
