@@ -53,7 +53,7 @@ use Mail::SpamAssassin::Constants qw(:ip);
 # ---------------------------------------------------------------------------
 
 sub parse_received_headers {
-  my ($self, $permsgstatus, $msg) = @_;
+  my ($self, $pms, $msg) = @_;
 
   # a caller may assert that a message is coming from inside or from an
   # authenticated roaming users; this info may not be available in mail
@@ -88,11 +88,11 @@ sub parse_received_headers {
   $self->{allow_mailfetch_markers} = 1;         # This needs to be set for the
                                                 # first Received: header
   # now figure out what relays are trusted...
-  my $trusted = $permsgstatus->{main}->{conf}->{trusted_networks};
-  my $internal = $permsgstatus->{main}->{conf}->{internal_networks};
-  my $msa = $permsgstatus->{main}->{conf}->{msa_networks};
-  my $did_user_specify_trust = $permsgstatus->{main}->{conf}->{trusted_networks_configured};
-  my $did_user_specify_internal = $permsgstatus->{main}->{conf}->{internal_networks_configured};
+  my $trusted = $pms->{main}->{conf}->{trusted_networks};
+  my $internal = $pms->{main}->{conf}->{internal_networks};
+  my $msa = $pms->{main}->{conf}->{msa_networks};
+  my $did_user_specify_trust = $pms->{main}->{conf}->{trusted_networks_configured};
+  my $did_user_specify_internal = $pms->{main}->{conf}->{internal_networks_configured};
   my $in_trusted = 1;
   my $in_internal = 1;
   my $found_msa = 0;
@@ -126,8 +126,7 @@ sub parse_received_headers {
   # Now add the single line headers like X-Originating-IP. (bug 5680)
   # we convert them into synthetic "Received" headers so we can share
   # code below.
-  for my $header (@{$permsgstatus->{main}->{conf}->{originating_ip_headers}})
-  {
+  foreach my $header (@{$pms->{main}->{conf}->{originating_ip_headers}}) {
     my $str = $msg->get_header($header);
     next unless ($str && $str =~ m/($IP_ADDRESS)/);
     push @hdrs, "from X-Originating-IP: $1\n";
@@ -335,7 +334,7 @@ sub parse_received_line {
   my $by = '';
   my $id = '';
   my $ident = '';
-  my $envfrom = '';
+  my $envfrom = undef;
   my $mta_looked_up_dns = 0;
   my $IP_ADDRESS = IP_ADDRESS;
   my $IP_PRIVATE = IP_PRIVATE;
@@ -1211,8 +1210,11 @@ sub parse_received_line {
     # details of the handover described here, it's just qmail-scanner
     # logging a little more.
     if (/^\S+ by \S+ \(.{0,100}\) with qmail-scanner/) {
-      $envfrom =~ s/^\s*<*//gs; $envfrom =~ s/>*\s*$//gs;
-      $envfrom =~ s/[\s\000\#\[\]\(\)\<\>\|]/!/gs;
+      if (defined $envfrom) {
+        $envfrom =~ s/^\s*<*//gs;
+        $envfrom =~ s/>*\s*$//gs;
+        $envfrom =~ s/[\s\000\#\[\]\(\)\<\>\|]/!/gs;
+      }
       $self->{qmail_scanner_env_from} = $envfrom; # hack!
       return 0;
     }
@@ -1367,19 +1369,23 @@ enough:
   # (only handles 'alternative form', not 'preferred form' - to be improved)
   $ip =~ s/^0*:0*:(?:0*:)*ffff:(\d+\.\d+\.\d+\.\d+)$/$1/i;
 
-  $envfrom =~ s/^\s*<*//gs; $envfrom =~ s/>*\s*$//gs;
   $by =~ s/\;$//;
 
   # ensure invalid chars are stripped.  Replace with '!' to flag their
   # presence, though.  NOTE: this means "[1.2.3.4]" IP addr HELO
   # strings, which are legit by RFC-2821, look like "!1.2.3.4!".
   # still useful though.
-  $ip =~ s/[\s\000\#\[\]\(\)\<\>\|]/!/gs;
-  $rdns =~ s/[\s\000\#\[\]\(\)\<\>\|]/!/gs;
-  $helo =~ s/[\s\000\#\[\]\(\)\<\>\|]/!/gs;
-  $by =~ s/[\s\000\#\[\]\(\)\<\>\|]/!/gs;
-  $ident =~ s/[\s\000\#\[\]\(\)\<\>\|]/!/gs;
-  $envfrom =~ s/[\s\000\#\[\]\(\)\<\>\|]/!/gs;
+  my $strip_chars = qr/[\s\000\#\[\]\(\)\<\>\|]/;
+  $ip =~ s/$strip_chars/!/gs;
+  $rdns =~ s/$strip_chars/!/gs;
+  $helo =~ s/$strip_chars/!/gs;
+  $by =~ s/$strip_chars/!/gs;
+  $ident =~ s/$strip_chars/!/gs;
+  if (defined $envfrom) {
+    $envfrom =~ s/^\s*<*//gs;
+    $envfrom =~ s/>*\s*$//gs;
+    $envfrom =~ s/$strip_chars/!/gs;
+  }
 
   my $relay = {
     ip => $ip,
@@ -1426,7 +1432,10 @@ sub make_relay_as_string {
   # of entries must be preserved, so that regexps that assume that
   # e.g. "ip" comes before "helo" will still work.
   #
-  my $asstr = "[ ip=$relay->{ip} rdns=$relay->{rdns} helo=$relay->{helo} by=$relay->{by} ident=$relay->{ident} envfrom=$relay->{envfrom} intl=0 id=$relay->{id} auth=$relay->{auth} msa=0 ]";
+
+  # we could mark envfrom as "undef" if missing? dunno if needed?
+  my $envfrom = $relay->{envfrom} || '';
+  my $asstr = "[ ip=$relay->{ip} rdns=$relay->{rdns} helo=$relay->{helo} by=$relay->{by} ident=$relay->{ident} envfrom=$envfrom intl=0 id=$relay->{id} auth=$relay->{auth} msa=0 ]";
   dbg("received-header: parsed as $asstr");
   $relay->{as_string} = $asstr;
 }
