@@ -31,8 +31,8 @@ package Mail::SpamAssassin::Util::DependencyInfo;
 
 use strict;
 use warnings;
-# use bytes;
 use re 'taint';
+use version 0.77;
 
 our ( $EXIT_STATUS, $WARNINGS );
 
@@ -665,7 +665,7 @@ sub try_module {
   if ($installed) {
     eval { $module_version = $moddef->{module}->VERSION };  # wrap just in case
     if (!$recommended_version ||
-        ($module_version && $module_version >= $recommended_version)) {
+        ($module_version && version->parse($module_version) >= version->parse($recommended_version))) {
       $version_meets_recommended = 1;
     }
     $module_version = '' if !defined $module_version;
