@@ -544,19 +544,21 @@ e.g.
   });
 
 
-=item whitelist_to user@example.com
+=item welcomelist_to user@example.com
+
+Previously whitelist_to which will work interchangeably until 4.1.
 
 If the given address appears as a recipient in the message headers
 (Resent-To, To, Cc, obvious envelope recipient, etc.) the mail will
-be whitelisted.  Useful if you're deploying SpamAssassin system-wide,
+be listed as allowed.  Useful if you're deploying SpamAssassin system-wide,
 and don't want some users to have their mail filtered.  Same format
 as C<whitelist_from>.
 
-There are three levels of To-whitelisting, C<whitelist_to>, C<more_spam_to>
+There are three levels of To-welcomelisting, C<welcomelist_to>, C<more_spam_to>
 and C<all_spam_to>.  Users in the first level may still get some spammish
 mails blocked, but users in C<all_spam_to> should never get mail blocked.
 
-The headers checked for whitelist addresses are as follows: if C<Resent-To> or
+The headers checked for welcomelist addresses are as follows: if C<Resent-To> or
 C<Resent-Cc> are set, use those; otherwise check all addresses taken from the
 following set of headers:
 
@@ -584,8 +586,9 @@ See above.
 =cut
 
   push (@cmds, {
-    setting => 'whitelist_to',
+    setting => 'welcomelist_to',
     type => $CONF_TYPE_ADDRLIST,
+    aliases => ['whitelist_to'],       # backward compatible - to be removed for 4.1
   });
   push (@cmds, {
     setting => 'more_spam_to',
@@ -794,8 +797,8 @@ directive blacklist_to
 Enlisting an address to the list named blacklist_from is synonymous to using the
 directive blacklist_from
 
-Enlisting an address to the list named whitelist_to is synonymous to using the
-directive whitelist_to 
+Enlisting an address to the list named welcomelist_to is synonymous to using the
+directive welcomelist_to 
 
 Enlisting an address to the list named whitelist_from is synonymous to using the
 directive whitelist_from
@@ -4811,7 +4814,7 @@ sub new {
   $self->{def_whitelist_from_rcvd} = { };
 
   $self->{blacklist_to} = { };
-  $self->{whitelist_to} = { };
+  $self->{welcomelist_to} = { };
   $self->{more_spam_to} = { };
   $self->{all_spam_to} = { };
 
@@ -5381,6 +5384,7 @@ sub feature_meta_rules_matching { 1 } # meta rules_matching() expression
 sub feature_subjprefix { 1 } # add subject prefixes rule option
 sub feature_bayes_stopwords { 1 } # multi language stopwords in Bayes
 sub feature_get_host { 1 } # $pms->get() :host :domain :ip :revip # was implemented together with AskDNS::has_tag_header # Bug 7734
+sub feature_blocklist_welcomelist { 1 } # bz 7826
 sub has_tflags_nosubject { 1 } # tflags nosubject
 sub perl_min_version_5010000 { return $] >= 5.010000 }  # perl version check ("perl_version" not neatly backwards-compatible)
 

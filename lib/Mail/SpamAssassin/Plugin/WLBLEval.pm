@@ -42,7 +42,8 @@ sub new {
   # the important bit!
   $self->register_eval_rule("check_from_in_blacklist", $Mail::SpamAssassin::Conf::TYPE_HEAD_EVALS);
   $self->register_eval_rule("check_to_in_blacklist", $Mail::SpamAssassin::Conf::TYPE_HEAD_EVALS);
-  $self->register_eval_rule("check_to_in_whitelist", $Mail::SpamAssassin::Conf::TYPE_HEAD_EVALS);
+  $self->register_eval_rule("check_to_in_welcomelist", $Mail::SpamAssassin::Conf::TYPE_HEAD_EVALS);
+  $self->register_eval_rule("check_to_in_whitelist", $Mail::SpamAssassin::Conf::TYPE_HEAD_EVALS); #Stub - Remove in SA 4.1
   $self->register_eval_rule("check_to_in_more_spam", $Mail::SpamAssassin::Conf::TYPE_HEAD_EVALS);
   $self->register_eval_rule("check_to_in_all_spam", $Mail::SpamAssassin::Conf::TYPE_HEAD_EVALS);
   $self->register_eval_rule("check_from_in_list", $Mail::SpamAssassin::Conf::TYPE_HEAD_EVALS);
@@ -65,7 +66,7 @@ sub new {
 sub check_from_in_blacklist {
   my ($self, $pms) = @_;
   foreach ($pms->all_from_addrs()) {
-    if ($self->_check_whitelist ($self->{main}->{conf}->{blacklist_from}, $_)) {
+    if ($self->_check_welcomelist ($self->{main}->{conf}->{blacklist_from}, $_)) {
       return 1;
     }
   }
@@ -74,16 +75,21 @@ sub check_from_in_blacklist {
 sub check_to_in_blacklist {
   my ($self, $pms) = @_;
   foreach ($pms->all_to_addrs()) {
-    if ($self->_check_whitelist ($self->{main}->{conf}->{blacklist_to}, $_)) {
+    if ($self->_check_welcomelist ($self->{main}->{conf}->{blacklist_to}, $_)) {
       return 1;
     }
   }
 }
 
+#Stub for backwards compatibility - Remove in SA 4.1
 sub check_to_in_whitelist {
+  return check_to_in_welcomelist(@_);
+}
+
+sub check_to_in_welcomelist {
   my ($self, $pms) = @_;
   foreach ($pms->all_to_addrs()) {
-    if ($self->_check_whitelist ($self->{main}->{conf}->{whitelist_to}, $_)) {
+    if ($self->_check_welcomelist ($self->{main}->{conf}->{welcomelist_to}, $_)) {
       return 1;
     }
   }
@@ -92,7 +98,7 @@ sub check_to_in_whitelist {
 sub check_to_in_more_spam {
   my ($self, $pms) = @_;
   foreach ($pms->all_to_addrs()) {
-    if ($self->_check_whitelist ($self->{main}->{conf}->{more_spam_to}, $_)) {
+    if ($self->_check_welcomelist ($self->{main}->{conf}->{more_spam_to}, $_)) {
       return 1;
     }
   }
@@ -101,7 +107,7 @@ sub check_to_in_more_spam {
 sub check_to_in_all_spam {
   my ($self, $pms) = @_;
   foreach ($pms->all_to_addrs()) {
-    if ($self->_check_whitelist ($self->{main}->{conf}->{all_spam_to}, $_)) {
+    if ($self->_check_welcomelist ($self->{main}->{conf}->{all_spam_to}, $_)) {
       return 1;
     }
   }
@@ -116,7 +122,7 @@ sub check_from_in_list {
   }
 
   foreach my $addr ($pms->all_from_addrs()) {
-    if ($self->_check_whitelist ($list_ref, $addr)) {
+    if ($self->_check_welcomelist ($list_ref, $addr)) {
       return 1;
     }
   }
@@ -135,7 +141,7 @@ sub check_replyto_in_list {
   my $replyto = $pms->get("Reply-To:addr");
   return 0  if $replyto eq '';
 
-  if ($self->_check_whitelist ($list_ref, $replyto)) {
+  if ($self->_check_welcomelist ($list_ref, $replyto)) {
     return 1;
   }
 
@@ -170,7 +176,7 @@ sub check_to_in_list {
   }
 
   foreach my $addr ($pms->all_to_addrs()) {
-    if ($self->_check_whitelist ($list_ref, $addr)) {
+    if ($self->_check_welcomelist ($list_ref, $addr)) {
       return 1;
     }
   }
@@ -212,7 +218,7 @@ sub _check_from_in_whitelist {
   my ($self, $pms) = @_;
   my $found_match = 0;
   foreach ($pms->all_from_addrs()) {
-    if ($self->_check_whitelist ($self->{main}->{conf}->{whitelist_from}, $_)) {
+    if ($self->_check_welcomelist ($self->{main}->{conf}->{whitelist_from}, $_)) {
       $pms->{from_in_whitelist} = 1;
       return;
     }
@@ -403,13 +409,13 @@ sub _check_whitelist_rcvd {
 
 ###########################################################################
 
-sub _check_whitelist {
+sub _check_welcomelist {
   my ($self, $list, $addr) = @_;
   $addr = lc $addr;
   if (defined ($list->{$addr})) { return 1; }
   foreach my $regexp (values %{$list}) {
     if ($addr =~ $regexp) {
-      dbg("rules: address $addr matches whitelist or blacklist regexp: $regexp");
+      dbg("rules: address $addr matches welcomelist or blocklist regexp: $regexp");
       return 1;
     }
   }
