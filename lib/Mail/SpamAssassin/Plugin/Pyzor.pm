@@ -532,11 +532,11 @@ sub _check_result {
   my $count_wl = 0;
   foreach my $res (@$results) {
     chomp($res);
-    dbg("pyzor: got response: $res");
     if ($res =~ /^Traceback/) {
-      info("pyzor: internal error, python traceback seen in response");
+      info("pyzor: internal error, python traceback seen in response: $res");
       return 0;
     }
+    dbg("pyzor: got response: $res");
     # this regexp is intended to be a little bit forgiving
     if ($res =~ /^\S+\t.*?\t(\d+)\t(\d+)\s*$/) {
       # until pyzor servers can sync their DBs,
