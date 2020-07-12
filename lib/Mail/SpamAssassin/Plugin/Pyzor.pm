@@ -303,10 +303,12 @@ sub pyzor_lookup {
       return;
     }
     chomp for @response;
-    dbg("pyzor: got response: " . join("\\n", @response));
 
     if ($response[0] =~ /^Traceback/) {
-      warn("internal error, python traceback seen in response\n");
+      warn("internal error, python traceback seen in response: ".
+        join("\\n", @response));
+    } else {
+      dbg("pyzor: got response: ".join("\\n", @response));
     }
 
   });
