@@ -53,9 +53,9 @@ if can(Mail::SpamAssassin::Conf::feature_blocklist_welcomelist)
   describe USER_IN_WELCOMELIST_TO   User is listed in 'welcomelist_to'
   tflags USER_IN_WELCOMELIST_TO     userconf nice noautolearn
 else
-  header USER_IN_WHITELIST_TO     eval:check_to_in_whitelist()
-  describe USER_IN_WHITELIST_TO   User is listed in 'whitelist_to'
-  tflags USER_IN_WHITELIST_TO     userconf nice noautolearn
+  header USER_IN_WELCOMELIST_TO     eval:check_to_in_whitelist()
+  describe USER_IN_WELCOMELIST_TO   User is listed in 'whitelist_to'
+  tflags USER_IN_WELCOMELIST_TO     userconf nice noautolearn
 endif
 
 header USER_IN_MORE_SPAM_TO     eval:check_to_in_more_spam()
