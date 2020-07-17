@@ -1354,6 +1354,9 @@ enough:
     }
   }
 
+  # Strip ending dot, Bug 7810
+  $rdns =~ s/\.+\z//;
+
   if ($rdns =~ /^unknown$/i || $rdns =~ /^\[/) {
     $rdns = '';		# some MTAs seem to do this
   }
