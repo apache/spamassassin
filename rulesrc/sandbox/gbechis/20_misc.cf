@@ -23,7 +23,7 @@ ifplugin Mail::SpamAssassin::Plugin::FromNameSpoof
   tflags    GB_FROMNAME_SPOOFED_EMAIL_IP  publish
 endif
 
-header     __HDR_RCVD_GOOGLE           X-Spam-Relays-External =~ /rdns=mail-\S+\.google\.com\s/
+header     __HDR_RCVD_GOOGLE           X-Spam-Relays-External =~ / rdns=mail-\S+\.google\.com\.?\s/
 uri        __URI_IMG_GDRIVE            /^https:\/\/www\.google\.com\/drive\/static\/images\/drive\/logo-drive\.png/
 uri        __URI_IMG_GPHOTO            /^https:\/\/www\.google\.com\/photos\/about\/static\/images\/logo_photos_64dp\.svg/
 

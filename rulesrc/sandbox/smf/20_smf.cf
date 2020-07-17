@@ -1,5 +1,5 @@
 #testrules
-header   __FSL_RELAY_GOOGLE	X-Spam-Relays-External =~ /^[^\]]+ rdns=[^ ]+\.google\.com /i
+header   __FSL_RELAY_GOOGLE	X-Spam-Relays-External =~ /^[^\]]+ rdns=[^ ]+\.google\.com\.? /i
 header   __FSL_ENVFROM_GOOGLE	X-Spam-Relays-External =~ /^[^\]]+ envfrom=[^\@ ]+\@g(?:mail|oogle)\.com /i
 meta     FSL_NOT_FROM_GOOGLE	__FSL_ENVFROM_GOOGLE && !__FSL_RELAY_GOOGLE
 score    FSL_NOT_FROM_GOOGLE	2.0
