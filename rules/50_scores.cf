@@ -712,7 +712,7 @@ score HEADER_HOST_IN_WHITELIST -100.0
 
 # not really false positives but the user wants spam!
 #bz7826 renames whitelist to welcomelist
-score USER_IN_WELCOMELIST_TO -6.000
+#score USER_IN_WELCOMELIST_TO -6.000 - Moved to 60_whitelist.cf
 score USER_IN_MORE_SPAM_TO -20.000
 score USER_IN_ALL_SPAM_TO -100.000
 endif
