@@ -1974,7 +1974,7 @@ sub trap_sigalrm_fully {
     $SIG{ALRM} = $handler;
   } else {
     # may be using "safe" signals with %SIG; use POSIX to avoid it
-    POSIX::sigaction POSIX::SIGALRM(), new POSIX::SigAction $handler;
+    POSIX::sigaction POSIX::SIGALRM(), POSIX::SigAction->new($handler);
   }
 }
 

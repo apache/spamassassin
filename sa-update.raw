@@ -96,7 +96,7 @@ our ($have_lwp, $io_socket_module_name, $have_inet4, $use_inet4, $have_inet6, $u
 BEGIN {
   # Deal with optional modules
 
-  eval { require Digest::SHA; import Digest::SHA qw(sha256_hex sha512_hex); 1 } and do { $have_sha256=1; $have_sha512=1 }
+  eval { require Digest::SHA; Digest::SHA->import(qw(sha256_hex sha512_hex)); 1 } and do { $have_sha256=1; $have_sha512=1 }
   or die "Unable to verify file hashes! You must install a modern version of Digest::SHA.";
   
     $have_lwp = eval {
@@ -1953,7 +1953,7 @@ sub lint_check_dir {
   # due to the Logger module's globalness (all M::SA objects share the same
   # Logger setup), we can't change the debug level here to only include
   # "config" or otherwise be more terse. :(
-  my $spamtest = new Mail::SpamAssassin( {
+  my $spamtest = Mail::SpamAssassin->new( {
     rules_filename       => $dir,
     site_rules_filename  => $LOCAL_RULES_DIR,
     ignore_site_cf_files => 1,

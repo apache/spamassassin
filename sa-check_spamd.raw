@@ -213,10 +213,10 @@ foreach my $optkey (keys %opt) {
 # only uses the first line of output.
 my $client;
 if (defined $opt{'port'}) {
- $client = new Mail::SpamAssassin::Client({port => $opt{'port'},
-					   host => $opt{'hostname'}});
+ $client = Mail::SpamAssassin::Client->new({port => $opt{'port'},
+					    host => $opt{'hostname'}});
 } else {
- $client = new Mail::SpamAssassin::Client({socketpath => $opt{'socketpath'}});
+ $client = Mail::SpamAssassin::Client->new({socketpath => $opt{'socketpath'}});
 }
 
 # this'd be weird, but totally dependent on the client

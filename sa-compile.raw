@@ -149,7 +149,7 @@ my $post_config = q(
 
 ).join("\n", @{$opt{'cf'}})."\n";
 
-my $spamtest = new Mail::SpamAssassin(
+my $spamtest = Mail::SpamAssassin->new(
   {
     rules_filename      => $opt{'configpath'},
     site_rules_filename => $opt{'siteconfigpath'},

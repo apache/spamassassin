@@ -76,7 +76,7 @@ sub safe_lock {
       die "locker: safe_lock: cannot create tmp lockfile $lock_tmp for $lock_file: $!\n";
   }
   umask $umask;
-  autoflush LTMP 1;
+  LTMP->autoflush(1);
   dbg("locker: safe_lock: created $lock_tmp");
 
   for (my $retries = 0; $retries < $max_retries; $retries++) {
@@ -150,7 +150,7 @@ sub safe_unlock {
     warn "locker: safe_unlock: failed to create lock tmpfile $lock_tmp: $!";
     return;
   } else {
-    autoflush LTMP 1;
+    LTMP->autoflush(1);
     print LTMP "\n"  or warn "Error writing to $lock_tmp: $!";
 
     if (!(@stat_ourtmp = stat(LTMP)) || (scalar(@stat_ourtmp) < 11)) {

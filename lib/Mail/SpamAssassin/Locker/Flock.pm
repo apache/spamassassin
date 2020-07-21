@@ -55,7 +55,7 @@ sub safe_lock {
 
   my $lock_file = "$path.mutex";
   my $umask = umask(~$mode);
-  my $fh = new IO::File();
+  my $fh = IO::File->new;
 
   if (!$fh->open ($lock_file, O_RDWR|O_CREAT)) {
       umask $umask; # just in case

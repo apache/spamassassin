@@ -252,7 +252,7 @@ if (Mail::SpamAssassin::Util::am_running_on_windows()) {
 if ($opt{'lint'}) { $opt{'local'} = 1; }
 
 # create the tester factory
-my $spamtest = new Mail::SpamAssassin(
+my $spamtest = Mail::SpamAssassin->new(
   {
     rules_filename      => $opt{'configpath'},
     site_rules_filename => $opt{'siteconfigpath'},
@@ -378,7 +378,7 @@ for(my $elem = 0; $elem <= $#targets; $elem++) {
 setup_sig_handlers();
 
 # Everything below here needs ArchiveIterator ...
-my $iter = new Mail::SpamAssassin::ArchiveIterator(
+my $iter = Mail::SpamAssassin::ArchiveIterator->new(
   {
     'opt_max_size' => 0,  # no limit
     'opt_want_date' => 0

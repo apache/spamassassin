@@ -76,10 +76,10 @@ use constant HAS_IO_STRING => eval { require IO::String; };
 BEGIN
 {
     eval{
-      import Archive::Zip qw( :ERROR_CODES :CONSTANTS )
+      Archive::Zip->import(qw( :ERROR_CODES :CONSTANTS ))
     };
     eval{
-      import  IO::String
+      IO::String->import
     };
 }
 

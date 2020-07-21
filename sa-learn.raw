@@ -217,7 +217,7 @@ if (defined $opt{'dump'} || defined $opt{'import'} || defined $opt{'clear'} ||
 $post_config .= join("\n", @{$opt{'cf'}})."\n";
 
 # create the tester factory
-$spamtest = new Mail::SpamAssassin(
+$spamtest = Mail::SpamAssassin->new(
   {
     rules_filename      => $opt{'configpath'},
     site_rules_filename => $opt{'siteconfigpath'},
@@ -459,7 +459,7 @@ eval {
 
   ###########################################################################
 
-  my $iter = new Mail::SpamAssassin::ArchiveIterator(
+  my $iter = Mail::SpamAssassin::ArchiveIterator->new(
     {
         # skip messages larger than max-size bytes,
         # 0 for no limit, undef defaults to 256 KB

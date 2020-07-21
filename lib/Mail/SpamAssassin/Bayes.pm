@@ -111,7 +111,7 @@ sub learn {
   {
     # DMK, koppel@ece.lsu.edu:  Hoping that the ultimate fix to bug 2263 will
     # make it unnecessary to construct a PerMsgStatus here.
-    my $PMS = new Mail::SpamAssassin::PerMsgStatus $self->{main}, $msg;
+    my $PMS = Mail::SpamAssassin::PerMsgStatus->new($self->{main}, $msg);
     my $ignore = $self->ignore_message($PMS);
     $PMS->finish();
     return 0 if $ignore;

@@ -427,8 +427,8 @@ sub new {
     $self->timer_enable();
   }
 
-  $self->{conf} ||= new Mail::SpamAssassin::Conf ($self);
-  $self->{plugins} = Mail::SpamAssassin::PluginHandler->new ($self);
+  $self->{conf} ||= Mail::SpamAssassin::Conf->new($self);
+  $self->{plugins} = Mail::SpamAssassin::PluginHandler->new($self);
 
   $self->{save_pattern_hits} ||= 0;
 
@@ -468,7 +468,7 @@ sub create_locker {
   # for slow but safe, by keeping in quotes
   eval '
     use Mail::SpamAssassin::Locker::'.$class.';
-    $self->{locker} = new Mail::SpamAssassin::Locker::'.$class.' ($self);
+    $self->{locker} = Mail::SpamAssassin::Locker::'.$class.'->new($self);
     1;
   ' or do {
     my $eval_stat = $@ ne '' ? $@ : "errno=$!";  chomp $eval_stat;
@@ -831,7 +831,7 @@ sub signal_user_changed {
   $self->{bayes_scanner}->finish() if $self->{bayes_scanner};
   if ($self->{conf}->{use_bayes}) {
       require Mail::SpamAssassin::Bayes;
-      $self->{bayes_scanner} = new Mail::SpamAssassin::Bayes ($self);
+      $self->{bayes_scanner} = Mail::SpamAssassin::Bayes->new($self);
   } else {
       delete $self->{bayes_scanner} if $self->{bayes_scanner};
   }
@@ -1771,7 +1771,7 @@ sub init {
   # Initialize the Bayes subsystem
   if ($self->{conf}->{use_bayes}) {
       require Mail::SpamAssassin::Bayes;
-      $self->{bayes_scanner} = new Mail::SpamAssassin::Bayes ($self);
+      $self->{bayes_scanner} = Mail::SpamAssassin::Bayes->new($self);
   }
   $self->{'learn_to_journal'} = $self->{conf}->{bayes_learn_to_journal};
 

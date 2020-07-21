@@ -79,7 +79,7 @@ use warnings;
 use re 'taint';
 
 # Do this silliness to stop RPM from finding DBI as required
-BEGIN { require DBI;  import DBI; }
+BEGIN { require DBI;  DBI->import; }
 
 use Mail::SpamAssassin::PersistentAddrList;
 use Mail::SpamAssassin::Logger;

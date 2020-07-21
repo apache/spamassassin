@@ -53,7 +53,7 @@ BEGIN {
   # Socket->VERSION(1.95);  # provides AI_ADDRCONFIG
     Socket->VERSION(1.96);  # provides NIx_NOSERV, and Exporter tag :addrinfo
   # Socket->VERSION(1.97);  # IO::Socket::IP depends on Socket 1.97
-    import Socket qw(/^(?:AI|NI|NIx|EAI)_/);
+    Socket->import(qw(/^(?:AI|NI|NIx|EAI)_/));
 
     # AUTOLOADing 'constants' here enables inlining - see Exporter man page
     &AI_ADDRCONFIG; &AI_PASSIVE;
@@ -64,13 +64,13 @@ BEGIN {
     require Socket6;
   # Socket6->VERSION(0.13);  # provides NI_NAMEREQD
     Socket6->VERSION(0.18);  # provides AI_NUMERICSERV
-    import Socket6 qw(/^(?:AI|NI|NIx|EAI)_/);
+    Socket6->import(qw(/^(?:AI|NI|NIx|EAI)_/));
     &AI_ADDRCONFIG; &AI_PASSIVE;  # enable inlining
     &NI_NUMERICHOST; &NI_NUMERICSERV; &NI_NAMEREQD; 1;
   };
 
   require Socket;
-  import Socket qw(:DEFAULT IPPROTO_TCP);
+  Socket->import(qw(:DEFAULT IPPROTO_TCP));
 
   &SOCK_STREAM; &IPPROTO_TCP; &SOMAXCONN; # enable inlining
 
@@ -315,7 +315,7 @@ sub print_usage_and_exit {
   }
 
   require Pod::Usage;
-  import Pod::Usage;
+  Pod::Usage->import;
   pod2usage(
     -verbose => 0,
     -message => $message,
@@ -509,7 +509,7 @@ if ( $opt{'auth-ident'} ) {
          "but Net::Ident is unavailable: $@\n";
 
   $opt{'ident-timeout'} = undef if $opt{'ident-timeout'} <= 0.0;
-  import Net::Ident qw(ident_lookup);
+  Net::Ident->import(qw(ident_lookup));
 }
 
 ### Begin initialization of logging ########################
