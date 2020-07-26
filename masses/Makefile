@@ -23,6 +23,7 @@ perceptron.o: tmp/rules_${SCORESET}.pl tmp/tests.h tmp/scores.h
 	$(CC) $(CFLAGS) -c -o perceptron.o perceptron.c
 
 garescorer: tmp/rules_${SCORESET}.pl tmp/tests.h tmp/scores.h garescorer.c
+	(cd ../build/pga/source; make)
 	$(CC) $(CFLAGS) -DWL=2 -DOPTIMIZE -L $(PGAPACKLIBDIR) \
           -I $(PGAPACK)/include garescorer.c -o garescorer -lpgaO $(LDFLAGS)
 
@@ -50,5 +51,6 @@ tmp/.created:
 
 clean:
 	rm -rf *.o perceptron tmp freqs badrules \
-          perceptron.scores garescorer garescorer.scores
+          perceptron.scores garescorer garescorer.scores \
+          ../build/pga/lib/linux/*
 
