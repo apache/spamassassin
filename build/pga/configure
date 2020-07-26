@@ -222,7 +222,7 @@ PARALLEL=0                      # parallel libray, or use stub routines?
 OPTIMIZE=1                      # optimized?
 CPPFLAGS=""                     # flags to send to the C preprocessor
 LDFLAGS=""                      # link flags
-CFLAGS=""                       # flags to send to the C compiler
+CFLAGS="-fPIC"                       # flags to send to the C compiler
 FFLAGS=""                       # flags to send to the FORTRAN compiler
 PGA_DIR="`pwd`"                 # the root of the pgapack tree
 PGA_DIR=`echo $PGA_DIR | sed "s=tmp_mnt/=="`    # get rid of 'tmp_mnt/'
