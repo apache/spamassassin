@@ -40,8 +40,8 @@ while (<>) {
     $in_mut_sect = 0;
   }
 
-  if ($in_mut_sect && /^\s*score\s+(.+?)$/) {
-    my @vals = split(' ', $1);
+  if ($in_mut_sect && /^\s*score\s+([^#]+?)(#.*)?$/) {
+    my @vals = split(/\s+/, $1);
     my $new = '';
     foreach my $score (@vals) {
       if ($score =~ /^[\-\+]*\d/ && $score+0 == 0) {
@@ -50,6 +50,7 @@ while (<>) {
         $new .= "$score ";
       }
     }
+    $new .= $2 if defined $2;
     $new =~ s/ +$//;
     print "score $new\n";
   }
