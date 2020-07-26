@@ -169,13 +169,28 @@ make_rule_update_from_trunk() {
   tar -ztvf $TMPDIR/${REVISION}.tar.gz
 }
 
+copy_update_paranoid() {
+  SRC=$1
+  DST=$2
+
+  set +e
+  cp $SRC $DST
+  diff -u $SRC $DST
+  if [ $? -ne 0 ]; then
+    set -e
+    return 1
+  fi
+  set -e
+  return 0
+}
+
 copy_existing_update_for_reversion_testing() {
   EXIT=0
   (
     copy_update_paranoid "$UPDATEDIR/$REVERT_REVISION.tar.gz"      "$TMPDIR/$REVISION.tar.gz" &&
     copy_update_paranoid "$UPDATEDIR/$REVERT_REVISION.tar.gz.asc"  "$TMPDIR/$REVISION.tar.gz.asc" &&
     copy_update_paranoid "$UPDATEDIR/$REVERT_REVISION.tar.gz.sha1" "$TMPDIR/$REVISION.tar.gz.sha1" &&
-    copy_update_paranoid "$UPDATEDIR/$REVERT_REVISION.tar.gz.sha256" "$TMPDIR/$REVISION.tar.gz.sha256"
+    copy_update_paranoid "$UPDATEDIR/$REVERT_REVISION.tar.gz.sha256" "$TMPDIR/$REVISION.tar.gz.sha256" &&
     copy_update_paranoid "$UPDATEDIR/$REVERT_REVISION.tar.gz.sha512" "$TMPDIR/$REVISION.tar.gz.sha512"
   ) || EXIT=6
 
