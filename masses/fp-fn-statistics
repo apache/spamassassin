@@ -188,11 +188,11 @@ sub readlogs {
 
 sub readscores {
   print "Reading scores from \"$opt_cffile\"...\n";
-  my $cmd = "../build/parse-rules-for-masses -o tmp/rules_$$.pl -d \"$opt_cffile\" -s $opt_scoreset";
+  my $cmd = "../build/parse-rules-for-masses -o ./tmp/rules_$$.pl -d \"$opt_cffile\" -s $opt_scoreset";
   warn "[$cmd]\n";
   system ($cmd) and die;
-  require "tmp/rules_$$.pl";
-  unlink "tmp/rules_$$.pl";
+  require "./tmp/rules_$$.pl";
+  unlink "./tmp/rules_$$.pl";
   %allrules = %rules;           # ensure it stays global
 }
 

@@ -35,7 +35,7 @@ my %is_nice = ();
 
 if (!defined $argcffile) { $argcffile = "../rules"; }
 
-my $tmpf = "tmp/rules$$.pl";
+my $tmpf = "./tmp/rules$$.pl";
 system "../build/parse-rules-for-masses ".
       "-d \"$argcffile\" -s $scoreset -o $tmpf" and die;
 require $tmpf;

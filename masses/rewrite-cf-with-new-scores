@@ -188,7 +188,7 @@ exit;
 
 
 sub read_rules {
-  my $tmpf = "tmp/rules$$.pl";
+  my $tmpf = "./tmp/rules$$.pl";
   system "../build/parse-rules-for-masses ".
         "-d \"$opt_cffile\" -s $opt_scoreset -o $tmpf" and die;
   require $tmpf;

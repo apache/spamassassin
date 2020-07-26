@@ -174,7 +174,7 @@ sub readlogs {
 
 sub readscores {
   print "Reading scores from \"$opt_cffile\"...\n";
-  my $tmpf = "tmp/rules$$.pl";
+  my $tmpf = "./tmp/rules$$.pl";
   system "../build/parse-rules-for-masses ".
         "-d \"$opt_cffile\" -s $opt_scoreset -o $tmpf" and die;
   require $tmpf;
