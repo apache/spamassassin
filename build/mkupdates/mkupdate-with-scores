@@ -90,9 +90,11 @@ test_version() {
 
   cd release_$SA_VERSION
 
-  # fix for newer perl: Unescaped left brace in regex is illegal here in regex;
+  # fix for newer perl and <3.4.2: Unescaped left brace in regex is illegal here in regex;
   #   marked by <-- HERE in m/^(.{ <-- HERE ,200}).*$/ at lib/Mail/SpamAssassin/PerMsgStatus.pm line 921
   perl -p -i -e 's/\.\{,200/.{200/g' lib/Mail/SpamAssassin/PerMsgStatus.pm
+  # also do requires ./
+  perl -p -i -e 's%= "version\.h\.pl"%= "./version.h.pl"%g' spamc/configure.pl
 
   # need rules directory or build won't work
   if [ ! -e rules ]; then cp -a ../trunk/rules .; fi
