@@ -805,52 +805,48 @@ sub compute_overlaps_for_rule {
   my %overlaps_ham1r = ();
   my %overlaps_spam1r = ();
 
-  foreach my $r2 (keys %hmap_spam) {
-    next if $r1 eq $r2;
+  if ($freq_spam{$r1}) {
+    foreach my $r2 (keys %hmap_spam) {
+      next if $r1 eq $r2;
 
-    # require that both rules have at least 1 hit
-    next unless ($freq_spam{$r1} && $freq_spam{$r2});
+      my ($a1ina2, $a2ina1) = _hmap_to_overlap_ratio ($r2, $r1,
+                                      $hmap_spam{$r2}, $hmap_spam{$r1});
 
-    my ($a1ina2, $a2ina1) = _hmap_to_overlap_ratio ($r2, $r1,
-                                    $hmap_spam{$r2}, $hmap_spam{$r1});
+      if ($a1ina2 > 0)
+      {
+        $overlaps_spam1r{$r2} = $a1ina2;
 
-    if ($a1ina2 > 0)
-    {
-      $overlaps_spam1r{$r2} = $a1ina2;
+        if (exists $overlaps_spam1{$a1ina2})
+        { $overlaps_spam1{$a1ina2} .= " ".$r2."[$a2ina1]"; }
+        else { $overlaps_spam1{$a1ina2} = $r2."[$a2ina1]"; }
 
-      if (exists $overlaps_spam1{$a1ina2})
-      { $overlaps_spam1{$a1ina2} .= " ".$r2."[$a2ina1]"; }
-      else { $overlaps_spam1{$a1ina2} = $r2."[$a2ina1]"; }
-
-      if (exists $overlaps_spam2{$a2ina1})
-      { $overlaps_spam2{$a2ina1} .= " ".$r2."[$a2ina1]"; }
-      else { $overlaps_spam2{$a2ina1} = $r2."[$a2ina1]"; }
+        if (exists $overlaps_spam2{$a2ina1})
+        { $overlaps_spam2{$a2ina1} .= " ".$r2."[$a2ina1]"; }
+        else { $overlaps_spam2{$a2ina1} = $r2."[$a2ina1]"; }
+      }
     }
-
   }
 
-  foreach my $r2 (keys %hmap_ham) {
-    next if $r1 eq $r2;
+  if ($freq_ham{$r1}) {
+    foreach my $r2 (keys %hmap_ham) {
+      next if $r1 eq $r2;
 
-    # require that both rules have at least 1 hit
-    next unless ($freq_ham{$r1} && $freq_ham{$r2});
+      my ($a1ina2, $a2ina1) = _hmap_to_overlap_ratio ($r1, $r2,
+                                      $hmap_ham{$r2}, $hmap_ham{$r1});
 
-    my ($a1ina2, $a2ina1) = _hmap_to_overlap_ratio ($r1, $r2,
-                                    $hmap_ham{$r2}, $hmap_ham{$r1});
+      if ($a1ina2 > 0)
+      {
+        $overlaps_ham1r{$r2} = $a1ina2;
 
-    if ($a1ina2 > 0)
-    {
-      $overlaps_ham1r{$r2} = $a1ina2;
+        if (exists $overlaps_ham1{$a1ina2})
+        { $overlaps_ham1{$a1ina2} .= " ".$r2."[$a2ina1]"; }
+        else { $overlaps_ham1{$a1ina2} = $r2."[$a2ina1]"; }
 
-      if (exists $overlaps_ham1{$a1ina2})
-      { $overlaps_ham1{$a1ina2} .= " ".$r2."[$a2ina1]"; }
-      else { $overlaps_ham1{$a1ina2} = $r2."[$a2ina1]"; }
-
-      if (exists $overlaps_ham2{$a2ina1})
-      { $overlaps_ham2{$a2ina1} .= " ".$r2."[$a1ina2]"; }
-      else { $overlaps_ham2{$a2ina1} = $r2."[$a1ina2]"; }
+        if (exists $overlaps_ham2{$a2ina1})
+        { $overlaps_ham2{$a2ina1} .= " ".$r2."[$a1ina2]"; }
+        else { $overlaps_ham2{$a2ina1} = $r2."[$a1ina2]"; }
+      }
     }
-
   }
 
   _print_overlap_ratios($r1, \%overlaps_spam1, \%overlaps_spam2, "spam", \%overlaps_ham1r, "ham");
@@ -934,25 +930,23 @@ sub _prettify_overlap_rules {
 sub _hmap_to_overlap_ratio {
   my ($r1, $r2, $hmap1, $hmap2) = @_;
 
-  $hmap1 ||= '';
-  $hmap2 ||= '';
-  if ($hmap1 !~ /[^\000]/ || $hmap2 !~ /[^\000]/) {
-    # no hits on either! this would normally give a 100% hitrate match,
-    # but that's misleading -- so hide it by giving it a 0% overlap.
-    #
-    # also, ignore cases where there are no hits on *one* of the rules,
-    # while there are hits on the other -- after all, if one rule doesn't
-    # have a single hit, it cannot overlap.
-    #
-    return (0,0);
-  }
-
   # my $i; for ($i = 0; $i < length($hmap1)*8; $i++) { print vec($hmap1,$i,1); } print "\n"; for ($i = 0; $i < length($hmap2)*8; $i++) { print vec($hmap2,$i,1); } print "\n";
 
   # count bits in each, so we can show when one is fully subsumed by another
   # with perl's support for bitstring ops, we get C speed here, nice!
+
+  # no hits on either? this would normally give a 100% hitrate match,
+  # but that's misleading -- so hide it by giving it a 0% overlap.
+  #
+  # also, ignore cases where there are no hits on *one* of the rules,
+  # while there are hits on the other -- after all, if one rule doesn't
+  # have a single hit, it cannot overlap.
+
   my $a1 = unpack("%32b*", $hmap1);
+  return (0,0) unless $a1;
   my $a2 = unpack("%32b*", $hmap2);
+  return (0,0) unless $a2;
+
   my $a1_and_a2 = unpack("%32b*", ($hmap1 & $hmap2));
 
   # round rather than truncate
