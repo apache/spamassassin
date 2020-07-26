@@ -1,8 +1,8 @@
 # Generated automatically from Makefile.in by configure.
 CC          = cc
-PRECFLAGS   = -O 
-CPPFLAGS    = -I/usr/local/pga/include -Dlinux -DWL=32 -DFORTRANUNDERSCORE -DOPTIMIZE -DFAKE_MPI 
-HEADERS     = /usr/local/pga/include/pgapack.h
+PRECFLAGS   = -O -fPIC
+CPPFLAGS    = -I../include -Dlinux -DWL=32 -DFORTRANUNDERSCORE -DOPTIMIZE -DFAKE_MPI 
+HEADERS     = ../include/pgapack.h
 PGA_LIB_DIR = ../lib/linux
 PGA_LIB     = pgaO
 RM          = /bin/rm -f
