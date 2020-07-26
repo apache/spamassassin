@@ -90,6 +90,10 @@ test_version() {
 
   cd release_$SA_VERSION
 
+  # fix for newer perl: Unescaped left brace in regex is illegal here in regex;
+  #   marked by <-- HERE in m/^(.{ <-- HERE ,200}).*$/ at lib/Mail/SpamAssassin/PerMsgStatus.pm line 921
+  perl -p -i -e 's/\.\{,200/.{200/g' lib/Mail/SpamAssassin/PerMsgStatus.pm
+
   perl Makefile.PL PREFIX=$TMPDIR/release_$SA_VERSION < /dev/null
   make
   make install
