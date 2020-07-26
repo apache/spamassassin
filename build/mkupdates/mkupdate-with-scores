@@ -94,6 +94,9 @@ test_version() {
   #   marked by <-- HERE in m/^(.{ <-- HERE ,200}).*$/ at lib/Mail/SpamAssassin/PerMsgStatus.pm line 921
   perl -p -i -e 's/\.\{,200/.{200/g' lib/Mail/SpamAssassin/PerMsgStatus.pm
 
+  # need rules directory or build won't work
+  if [ ! -e rules ]; then cp -a ../trunk/rules .; fi
+
   perl Makefile.PL PREFIX=$TMPDIR/release_$SA_VERSION < /dev/null
   make
   make install
