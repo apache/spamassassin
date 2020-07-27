@@ -113,7 +113,6 @@ use warnings;
 use re 'taint';
 
 use Mail::SpamAssassin::Plugin;
-use Mail::SpamAssassin::Util;
 
 use vars qw(@ISA);
 @ISA = qw(Mail::SpamAssassin::Plugin);
@@ -121,18 +120,6 @@ use vars qw(@ISA);
 my $VERSION = 0.9;
 
 sub dbg { Mail::SpamAssassin::Plugin::dbg ("FromNameSpoof: @_"); }
-
-sub uri_to_domain {
-  my ($self, $domain) = @_;
-
-  return unless defined $domain;
-
-  if ($Mail::SpamAssassin::VERSION <= 3.004000) {
-    Mail::SpamAssassin::Util::uri_to_domain($domain);
-  } else {
-    $self->{main}->{registryboundaries}->uri_to_domain($domain);
-  }
-}
 
 # constructor: register the eval rule
 sub new
@@ -369,9 +356,9 @@ sub _check_fromnamespoof
 
   $tod{'addr'} = lc $toaddrs[0];
 
-  $fnd{'domain'} = $self->uri_to_domain($fnd{'addr'});
-  $fad{'domain'} = $self->uri_to_domain($fad{'addr'});
-  $tod{'domain'} = $self->uri_to_domain($tod{'addr'});
+  $fnd{'domain'} = $self->{main}->{registryboundaries}->uri_to_domain($fnd{'addr'});
+  $fad{'domain'} = $self->{main}->{registryboundaries}->uri_to_domain($fad{'addr'});
+  $tod{'domain'} = $self->{main}->{registryboundaries}->uri_to_domain($tod{'addr'});
 
   return 0 unless (defined $fnd{'domain'} && defined $fad{'domain'});
 
@@ -421,7 +408,7 @@ sub _find_address_owner
     }
   }
 
-  my $owner = $self->uri_to_domain($check);
+  my $owner = $self->{main}->{registryboundaries}->uri_to_domain($check);
 
   $check =~ /^([^\@]+)\@(.*)$/;
 
