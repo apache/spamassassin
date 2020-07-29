@@ -344,10 +344,13 @@ sub untaint_var {
           ${$arg}{untaint_var($k)} = untaint_var($v);
         }
       } else {
-        # hash keys are never tainted,
-        # although old version of perl had some quirks there
-        while (my($k, $v) = each %{$arg}) {
-          ${$arg}{untaint_var($k)} = untaint_var($v);
+        if($] < 5.020) {
+          # hash keys are never tainted,
+          # although old version of perl had some quirks there
+          # skip the check only for Perl > 5.020 to be on the safe side
+          while (my($k, $v) = each %{$arg}) {
+            ${$arg}{untaint_var($k)} = untaint_var($v);
+          }
         }
       }
       return %{$arg} if wantarray;
