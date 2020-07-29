@@ -2108,11 +2108,8 @@ sub is_always_matching_regexp {
   elsif ($re =~ /(?<!\\)\|\|/) {
     return "contains '||'";
   }
-  elsif ($re =~ /^\|/) {
-    return "starts with '|'";
-  }
-  elsif ($re =~ /\|(?<!\\\|)$/) {
-    return "ends with '|'";
+  elsif ($re =~ /^\||\|(?<!\\\|)$/) {
+    return "starts or ends with '|'";
   }
 
   return "";
