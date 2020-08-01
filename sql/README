@@ -6,13 +6,13 @@ SpamAssassin can now load users' score files from an SQL database.  The concept
 here is to have a web application (PHP/perl/ASP/etc.) that will allow users to
 be able to update their local preferences on how SpamAssassin will filter their
 e-mail.  The most common use for a system like this would be for users to be
-able to update the white list of addresses (whitelist_from) without the need
+able to update the white list of addresses (welcomelist_from, previously whitelist_from) without the need
 for them to update their $HOME/.spamassassin/user_prefs file.  It is also quite
 common for users listed in /etc/passwd to not have a home directory, therefore,
 the only way to have their own local settings would be through an RDBMS system.
 
 Note that this will NOT look for test rules, only local scores,
-whitelist_from(s), and required_score.
+welcomelist_from(s) (previously whitelist_from), and required_score.
 
 In addition, any config options marked as Admin Only will NOT be parsed from
 SQL preferences.
@@ -101,7 +101,7 @@ The database must contain a table, default name "userpref", with at
 least three fields:
 
   username varchar(100)	  # this is the username whose e-mail is being filtered
-  preference varchar(50)  # the preference (whitelist_from, required_score, etc.)
+  preference varchar(50)  # the preference (welcomelist_from (previously whitelist_from), required_score, etc.)
   value varchar(100)	  # the value of the named preference
 
 You can add as many other fields you wish as long as the above three fields are

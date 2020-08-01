@@ -17,5 +17,5 @@ tstprefs ("
         whitelist_to announce*
 	");
 
-sarun ("-L -t -D < data/nice/016", \&patterns_run_cb);
+sarun ("-L -t < data/nice/016", \&patterns_run_cb);
 ok_all_patterns();

@@ -1,4 +1,4 @@
-# SpamAssassin rules file: default whitelists
+# SpamAssassin rules file: default welcomelists
 #
 # Please don't modify this file as your changes will be overwritten with
 # the next update. Use @@LOCAL_RULES_DIR@@/local.cf instead.
@@ -22,7 +22,7 @@
 # </@LICENSE>
 
 ###########################################################################
-# Whitelist rules
+# Welcomelist rules
 #
 # Note that most of these get 'noautolearn'.  They should not be
 # considered when deciding whether to auto-learn a message, as a
@@ -35,9 +35,32 @@ header USER_IN_BLACKLIST	eval:check_from_in_blacklist()
 describe USER_IN_BLACKLIST	From: address is in the user's black-list
 tflags USER_IN_BLACKLIST	userconf noautolearn
 
-header USER_IN_WHITELIST	eval:check_from_in_whitelist()
-describe USER_IN_WHITELIST	From: address is in the user's white-list
-tflags USER_IN_WHITELIST	userconf nice noautolearn
+
+if can(Mail::SpamAssassin::Conf::feature_blocklist_welcomelist)
+  #bz7826 renames whitelist to welcomelist
+  header USER_IN_WELCOMELIST		eval:check_from_in_welcomelist()
+  describe USER_IN_WELCOMELIST	 	user is listed in 'welcomelist_from'
+  tflags USER_IN_WELCOMELIST		userconf nice noautolearn
+  score USER_IN_WELCOMELIST             -100.0
+  
+  ifplugin Mail::SpamAssassin::Plugin::RaciallyCharged
+    meta USER_IN_WHITELIST                (USER_IN_WELCOMELIST)
+    describe USER_IN_WHITELIST            DEPRECATED: See USER_IN_WELCOMELIST
+    tflags USER_IN_WHITELIST              userconf nice noautolearn
+    score USER_IN_WELCOMELIST             -0.01
+    score USER_IN_WHITELIST               -100.0
+  endif
+else
+  header USER_IN_WELCOMELIST	 	eval:check_from_in_whitelist()
+  describe USER_IN_WELCOMELIST	 	user is listed in 'welcomelist_from'
+  tflags USER_IN_WELCOMELIST	 	userconf nice noautolearn
+  score USER_IN_WELCOMELIST	 	-0.01
+
+  meta USER_IN_WHITELIST        	(USER_IN_WELCOMELIST)
+  describe USER_IN_WHITELIST     	DEPRECATED: See USER_IN_WELCOMELIST 
+  tflags USER_IN_WHITELIST       	userconf nice noautolearn
+  score USER_IN_WHITELIST		-100.0
+endif
 
 header USER_IN_DEF_WHITELIST	eval:check_from_in_default_whitelist()
 describe USER_IN_DEF_WHITELIST	From: address is in the default white-list
@@ -52,7 +75,15 @@ if can(Mail::SpamAssassin::Conf::feature_blocklist_welcomelist)
   header USER_IN_WELCOMELIST_TO		eval:check_to_in_welcomelist()
   describe USER_IN_WELCOMELIST_TO	User is listed in 'welcomelist_to'
   tflags USER_IN_WELCOMELIST_TO		userconf nice noautolearn
-  score USER_IN_WELCOMELIST_TO		-6.0
+  score USER_IN_WELCOMELIST_TO          -6.0
+
+  ifplugin Mail::SpamAssassin::Plugin::RaciallyCharged
+    meta USER_IN_WHITELIST_TO             (USER_IN_WELCOMELIST_TO)
+    describe USER_IN_WHITELIST_TO         DEPRECATED: See USER_IN_WELCOMELIST_TO
+    tflags USER_IN_WHITELIST_TO           userconf nice noautolearn
+    score USER_IN_WELCOMELIST_TO	  -0.01
+    score USER_IN_WHITELIST_TO            -6.0
+  endif
 else
   header USER_IN_WELCOMELIST_TO		eval:check_to_in_whitelist()
   describe USER_IN_WELCOMELIST_TO	User is listed in 'welcomelist_to'
@@ -95,12 +126,12 @@ if (version >= 3.004000)
 endif
 
 ###########################################################################
-# Default whitelists.  These should be addresses which send mail that is often
+# Default welcomelists.  These should be addresses which send mail that is often
 # tagged (incorrectly) as spam; it also helps that they be addresses of big
 # companies with lots of lawyers, so if spammers impersonate them, they'll get
 # into big trouble, so it doesn't provide a shortcut around SpamAssassin.
 #
-# Whitelist and blacklist addresses are now file-glob-style patterns, so
+# Welcomelist and blocklist addresses are now file-glob-style patterns, so
 # "friend@somewhere.com", "*@isp.com", or "*.domain.net" will all work.
 #
 # Please do not add unmoderated public mailing lists here.  They are

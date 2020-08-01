@@ -288,7 +288,9 @@ it from running.
 
 =over 4
 
-=item whitelist_from user@example.com
+=item welcomelist_from user@example.com
+
+Previously whitelist_from which will work interchangeably until 4.1.
 
 Used to whitelist sender addresses which send mail that is often tagged
 (incorrectly) as spam.
@@ -305,7 +307,7 @@ are not. Regular expressions are not used for security reasons.
 Matching is case-insensitive.
 
 Multiple addresses per line, separated by spaces, is OK.  Multiple
-C<whitelist_from> lines are also OK.
+C<welcomelist_from> lines are also OK.
 
 The headers checked for whitelist addresses are as follows: if C<Resent-From>
 is set, use that; otherwise check all addresses taken from the following
@@ -321,23 +323,24 @@ where this is available, is looked up.  See C<envelope_sender_header>.
 
 e.g.
 
-  whitelist_from joe@example.com fred@example.com
-  whitelist_from *@example.com
+  welcomelist_from joe@example.com fred@example.com
+  welcomelist_from *@example.com
 
 =cut
 
   push (@cmds, {
-    setting => 'whitelist_from',
+    setting => 'welcomelist_from',
     type => $CONF_TYPE_ADDRLIST,
+    aliases => ['whitelist_from'],     # backward compatible - to be removed for 4.1
   });
 
 =item unwhitelist_from user@example.com
 
-Used to remove a default whitelist_from entry, so for example a distribution
-whitelist_from can be overridden in a local.cf file, or an individual user can
-override a whitelist_from entry in their own C<user_prefs> file.
+Used to remove a default welcomelist_from (previously whitelist_from) entry, so for example a distribution
+welcomelist_from can be overridden in a local.cf file, or an individual user can
+override a welcomelist_from entry in their own C<user_prefs> file.
 The specified email address has to match exactly (although case-insensitively)
-the address previously used in a whitelist_from line, which implies that a
+the address previously used in a welcomelist_from line, which implies that a
 wildcard only matches literally the same wildcard (not 'any' address).
 
 e.g.
@@ -349,14 +352,14 @@ e.g.
 
   push (@cmds, {
     command => 'unwhitelist_from',
-    setting => 'whitelist_from',
+    setting => 'welcomelist_from',
     type => $CONF_TYPE_ADDRLIST,
     code => \&Mail::SpamAssassin::Conf::Parser::remove_addrlist_value
   });
 
 =item whitelist_from_rcvd addr@lists.sourceforge.net sourceforge.net
 
-Works similarly to whitelist_from, except that in addition to matching
+Works similarly to welcomelist_from (previously whitelist_from), except that in addition to matching
 a sender address, a relay's rDNS name or its IP address must match too
 for the whitelisting rule to fire. The first parameter is a sender's e-mail
 address to whitelist, and the second is a string to match the relay's rDNS,
@@ -510,7 +513,7 @@ e.g.
 =item blacklist_from user@example.com
 
 Used to specify addresses which send mail that is often tagged (incorrectly) as
-non-spam, but which the user doesn't want.  Same format as C<whitelist_from>.
+non-spam, but which the user doesn't want.  Same format as C<welcomelist_from>.
 
 =cut
 
@@ -552,7 +555,7 @@ If the given address appears as a recipient in the message headers
 (Resent-To, To, Cc, obvious envelope recipient, etc.) the mail will
 be listed as allowed.  Useful if you're deploying SpamAssassin system-wide,
 and don't want some users to have their mail filtered.  Same format
-as C<whitelist_from>.
+as C<welcomelist_from>.
 
 There are three levels of To-welcomelisting, C<welcomelist_to>, C<more_spam_to>
 and C<all_spam_to>.  Users in the first level may still get some spammish
@@ -615,7 +618,7 @@ be blacklisted.  Same format as C<blacklist_from>.
 =item whitelist_auth user@example.com
 
 Used to specify addresses which send mail that is often tagged (incorrectly) as
-spam.  This is different from C<whitelist_from> and C<whitelist_from_rcvd> in
+spam.  This is different from C<welcomelist_from> and C<whitelist_from_rcvd> in
 that it first verifies that the message was sent by an authorized sender for
 the address, before whitelisting.
 
@@ -800,8 +803,8 @@ directive blacklist_from
 Enlisting an address to the list named welcomelist_to is synonymous to using the
 directive welcomelist_to 
 
-Enlisting an address to the list named whitelist_from is synonymous to using the
-directive whitelist_from
+Enlisting an address to the list named welcomelist_from (previously whitelist_from) is synonymous to using the
+directive welcomelist_from
 
 e.g.
 
@@ -2213,7 +2216,7 @@ setting.  Example:
 Bayesian classification and autolearning will not be performed on mail
 from the listed addresses.  Program C<sa-learn> will also ignore the
 listed addresses if it is invoked using the C<--use-ignores> option.
-One or more addresses can be listed, see C<whitelist_from>.
+One or more addresses can be listed, see C<welcomelist_from>.
 
 Spam messages from certain senders may contain many words that
 frequently occur in ham.  For example, one might read messages from a
@@ -4807,7 +4810,7 @@ sub new {
 
   $self->{whitelist_auth} = { };
   $self->{def_whitelist_auth} = { };
-  $self->{whitelist_from} = { };
+  $self->{welcomelist_from} = { };
   $self->{whitelist_allows_relays} = { };
   $self->{blacklist_from} = { };
   $self->{whitelist_from_rcvd} = { };

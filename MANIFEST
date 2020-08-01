@@ -99,6 +99,7 @@ lib/Mail/SpamAssassin/Plugin/Phishing.pm
 lib/Mail/SpamAssassin/Plugin/PhishTag.pm
 lib/Mail/SpamAssassin/Plugin/PDFInfo.pm
 lib/Mail/SpamAssassin/Plugin/Pyzor.pm
+lib/Mail/SpamAssassin/Plugin/RaciallyCharged.pm
 lib/Mail/SpamAssassin/Plugin/Razor2.pm
 lib/Mail/SpamAssassin/Plugin/RelayCountry.pm
 lib/Mail/SpamAssassin/Plugin/RelayEval.pm
@@ -453,6 +454,7 @@ t/data/phishing/phishtank-feed.csv
 t/data/spam/phishing_openphish.eml
 t/data/spam/phishing_phishtank.eml
 t/welcomelist_to.t
+t/welcomelist_from.t
 t/phishing.t
 t/date.t
 t/db_awl_path.t
@@ -577,6 +579,7 @@ t/spamd_unix_and_tcp.t
 t/spamd_user_rules_leak.t
 t/spamd_utf8.t
 t/spamd_whitelist_leak.t
+t/spamd_welcomelist_leak.t
 t/spf.t
 t/sql_based_whitelist.t
 t/stop_always_matching_regexps.t

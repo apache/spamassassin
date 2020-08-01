@@ -32,7 +32,7 @@ my %facility = map( ($_, 1),
       ident ignore info ldap learn locker log logger markup HashBL
       message metadata mimeheader netset plugin prefork progress pyzor razor2
       received-header replacetags reporter rules rules-all spamd spf textcat
-      timing TxRep uri uridnsbl util pdfinfo asn geodb ));
+      timing TxRep uri uridnsbl util pdfinfo asn geodb RaciallyCharged));
 
 my $fh = IO::File->new_tmpfile();
 open(STDERR, ">&=".fileno($fh)) || die "Cannot reopen STDERR";

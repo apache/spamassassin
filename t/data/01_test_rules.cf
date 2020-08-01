@@ -124,15 +124,15 @@ describe BAYES_99     Bayes spam probability is 99 to 100%
 score BAYES_99 0 0 3.5 3.5
 
 ifplugin Mail::SpamAssassin::Plugin::WLBLEval
-header USER_IN_WHITELIST	eval:check_from_in_whitelist()
-tflags USER_IN_WHITELIST	userconf nice noautolearn
-score  USER_IN_WHITELIST -100.000
+#header USER_IN_WHITELIST	eval:check_from_in_whitelist()
+#tflags USER_IN_WHITELIST	userconf nice noautolearn
+#score  USER_IN_WHITELIST -100.000
 header USER_IN_DEF_WHITELIST	eval:check_from_in_default_whitelist()
 tflags USER_IN_DEF_WHITELIST	userconf nice noautolearn
 score  USER_IN_DEF_WHITELIST -15.000
-header USER_IN_WHITELIST_TO     eval:check_to_in_whitelist()
-tflags USER_IN_WHITELIST_TO     userconf nice noautolearn
-score  USER_IN_WHITELIST_TO -6.000
+#header USER_IN_WHITELIST_TO     eval:check_to_in_whitelist()
+#tflags USER_IN_WHITELIST_TO     userconf nice noautolearn
+#score  USER_IN_WHITELIST_TO -6.000
 header USER_IN_BLACKLIST	eval:check_from_in_blacklist()
 tflags USER_IN_BLACKLIST	userconf noautolearn
 score  USER_IN_BLACKLIST 100.000

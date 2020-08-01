@@ -92,12 +92,12 @@ sub set_config {
 
 =item whitelist_from_spf user@example.com
 
-Works similarly to whitelist_from, except that in addition to matching
-a sender address, a check against the domain's SPF record must pass.
-The first parameter is an address to whitelist, and the second is a string
+Works similarly to welcomelist_from (previously whitelist_from), except that 
+in addition to matching a sender address, a check against the domain's SPF record 
+must pass. The first parameter is an address to whitelist, and the second is a string
 to match the relay's rDNS.
 
-Just like whitelist_from, multiple addresses per line, separated by spaces,
+Just like welcomelist_from (previously whitelist_from), multiple addresses per line, separated by spaces,
 are OK. Multiple C<whitelist_from_spf> lines are also OK.
 
 The headers checked for whitelist_from_spf addresses are the same headers

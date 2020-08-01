@@ -49,7 +49,8 @@ sub new {
   $self->register_eval_rule("check_from_in_list", $Mail::SpamAssassin::Conf::TYPE_HEAD_EVALS);
   $self->register_eval_rule("check_replyto_in_list", $Mail::SpamAssassin::Conf::TYPE_HEAD_EVALS);
   $self->register_eval_rule("check_to_in_list", $Mail::SpamAssassin::Conf::TYPE_HEAD_EVALS);
-  $self->register_eval_rule("check_from_in_whitelist", $Mail::SpamAssassin::Conf::TYPE_HEAD_EVALS);
+  $self->register_eval_rule("check_from_in_welcomelist", $Mail::SpamAssassin::Conf::TYPE_HEAD_EVALS);
+  $self->register_eval_rule("check_from_in_whitelist", $Mail::SpamAssassin::Conf::TYPE_HEAD_EVALS); #Stub - Remove in SA 4.1
   $self->register_eval_rule("check_forged_in_whitelist", $Mail::SpamAssassin::Conf::TYPE_HEAD_EVALS);
   $self->register_eval_rule("check_from_in_default_whitelist", $Mail::SpamAssassin::Conf::TYPE_HEAD_EVALS);
   $self->register_eval_rule("check_forged_in_default_whitelist", $Mail::SpamAssassin::Conf::TYPE_HEAD_EVALS);
@@ -186,17 +187,22 @@ sub check_to_in_list {
 
 ###########################################################################
 
-sub check_from_in_whitelist {
+sub check_from_in_welcomelist {
   my ($self, $pms) = @_;
-  $self->_check_from_in_whitelist($pms) unless exists $pms->{from_in_whitelist};
-  return ($pms->{from_in_whitelist} > 0);
+  $self->_check_from_in_welcomelist($pms) unless exists $pms->{from_in_welcomelist};
+  return ($pms->{from_in_welcomelist} > 0);
 }
+
+#Stub for backwards compatibility - Remove in SA 4.1
+sub check_from_in_whitelist {
+  return check_from_in_welcomelist(@_);
+} 
 
 sub check_forged_in_whitelist {
   my ($self, $pms) = @_;
-  $self->_check_from_in_whitelist($pms) unless exists $pms->{from_in_whitelist};
+  $self->_check_from_in_welcomelist($pms) unless exists $pms->{from_in_welcomelist};
   $self->_check_from_in_default_whitelist($pms) unless exists $pms->{from_in_default_whitelist};
-  return ($pms->{from_in_whitelist} < 0) && ($pms->{from_in_default_whitelist} == 0);
+  return ($pms->{from_in_welcomelist} < 0) && ($pms->{from_in_default_whitelist} == 0);
 }
 
 sub check_from_in_default_whitelist {
@@ -208,23 +214,23 @@ sub check_from_in_default_whitelist {
 sub check_forged_in_default_whitelist {
   my ($self, $pms) = @_;
   $self->_check_from_in_default_whitelist($pms) unless exists $pms->{from_in_default_whitelist};
-  $self->_check_from_in_whitelist($pms) unless exists $pms->{from_in_whitelist};
-  return ($pms->{from_in_default_whitelist} < 0) && ($pms->{from_in_whitelist} == 0);
+  $self->_check_from_in_welcomelist($pms) unless exists $pms->{from_in_welcomelist};
+  return ($pms->{from_in_default_whitelist} < 0) && ($pms->{from_in_welcomelist} == 0);
 }
 
 ###########################################################################
 
-sub _check_from_in_whitelist {
+sub _check_from_in_welcomelist {
   my ($self, $pms) = @_;
   my $found_match = 0;
   foreach ($pms->all_from_addrs()) {
-    if ($self->_check_welcomelist ($self->{main}->{conf}->{whitelist_from}, $_)) {
-      $pms->{from_in_whitelist} = 1;
+    if ($self->_check_welcomelist ($self->{main}->{conf}->{welcomelist_from}, $_)) {
+      $pms->{from_in_welcomelist} = 1;
       return;
     }
     my $wh = $self->_check_whitelist_rcvd ($pms, $self->{main}->{conf}->{whitelist_from_rcvd}, $_);
     if ($wh == 1) {
-      $pms->{from_in_whitelist} = 1;
+      $pms->{from_in_welcomelist} = 1;
       return;
     }
     elsif ($wh == -1) {
@@ -232,7 +238,7 @@ sub _check_from_in_whitelist {
     }
   }
 
-  $pms->{from_in_whitelist} = $found_match;
+  $pms->{from_in_welcomelist} = $found_match;
   return;
 }
 

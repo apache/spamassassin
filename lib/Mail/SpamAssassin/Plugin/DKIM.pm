@@ -182,7 +182,7 @@ sub set_config {
 
 =item whitelist_from_dkim author@example.com [signing-domain]
 
-Works similarly to whitelist_from, except that in addition to matching
+Works similarly to welcomelist_from (previously whitelist_from), except that in addition to matching
 an author address (From) to the pattern in the first parameter, the message
 must also carry a valid Domain Keys Identified Mail (DKIM) signature made by
 a signing domain (SDID, i.e. the d= tag) that is acceptable to us.
@@ -1214,7 +1214,7 @@ sub _wlcheck_acceptable_signature {
   }
 }
 
-# use a traditional whitelist_from -style addrlist, the only acceptable DKIM
+# use a traditional welcomelist_from -style (previously whitelist_from) addrlist, the only acceptable DKIM
 # signature is an Author Domain Signature.  Note: don't pre-parse and store
 # domains; that's inefficient memory-wise and only saves one m//
 #

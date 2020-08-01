@@ -61,7 +61,7 @@ The type of this setting:
  - $CONF_TYPE_NUMERIC: numeric value (float or int)
  - $CONF_TYPE_BOOL: boolean (0/no or 1/yes)
  - $CONF_TYPE_TEMPLATE: template, like "report"
- - $CONF_TYPE_ADDRLIST: list of mail addresses, like "whitelist_from"
+ - $CONF_TYPE_ADDRLIST: list of mail addresses, like "welcomelist_from" (previously whitelist_from)
  - $CONF_TYPE_HASH_KEY_VALUE: hash key/value pair, like "describe" or tflags
  - $CONF_TYPE_STRINGLIST list of strings, stored as an array
  - $CONF_TYPE_IPADDRLIST list of IP addresses, stored as an array of SA::NetSet
