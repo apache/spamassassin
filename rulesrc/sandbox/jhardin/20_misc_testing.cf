@@ -2983,6 +2983,20 @@ meta       SUSP_UTF8_WORD_MANY         __4BYTE_UTF8_WORD > 9
 describe   SUSP_UTF8_WORD_MANY         Many words using only suspicious UTF-8 characters
 score      SUSP_UTF8_WORD_MANY         3.000	# limit
 
+meta       SUSP_UTF8_WORD_COMBO        __4BYTE_UTF8_WORD && ( __JM_REACTOR_DATE || __LIST_PARTIAL || __RDNS_NONE || __CLICK_HERE || __PHPMAILER_MUA || __STY_INVIS_2 ||  __TO___LOWER || __MSGID_OK_DIGITS )
+describe   SUSP_UTF8_WORD_COMBO        Words using only suspicious UTF-8 characters + other signs
+score      SUSP_UTF8_WORD_COMBO        3.000	# limit
+
+header     __4BYTE_UTF8_WORD_SUBJ      Subject =~ /(?:\xf0\x9d[\x90-\x9f][\x80-\xbf]){3,10}/
+meta       SUSP_UTF8_WORD_SUBJ         __4BYTE_UTF8_WORD_SUBJ
+describe   SUSP_UTF8_WORD_SUBJ         Word in Subject using only suspicious UTF-8 characters
+score      SUSP_UTF8_WORD_SUBJ         2.000	# limit
+
+header     __4BYTE_UTF8_WORD_FROM      From:name =~ /(?:\xf0\x9d[\x90-\x9f][\x80-\xbf]){3,10}/
+meta       SUSP_UTF8_WORD_FROM         __4BYTE_UTF8_WORD_FROM
+describe   SUSP_UTF8_WORD_FROM         Word in From name using only suspicious UTF-8 characters
+score      SUSP_UTF8_WORD_FROM         2.000	# limit
+
 # observed by AC
 rawbody    __HTML_EMPTY_CELLS          /<td>(?:<\/td><td>){5,}/i
 tflags     __HTML_EMPTY_CELLS          multiple maxhits=3
