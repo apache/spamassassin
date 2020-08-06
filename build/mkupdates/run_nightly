@@ -38,7 +38,7 @@ promote_active_rules() {
   #On Wednesday's, we send out a bad sandbox rules report to the list
   if [[ `date +%w` = 3 ]] ; then
     (
-      echo "From: noreply@sa-vm1.apache.org (Rules Report Cron)"
+      echo "From: automc@sa-vm.apache.org (Rules Report Cron)"
       echo "Subject: [auto] bad sandbox rules report"
       echo
       cat $REPDIR/badrules.txt

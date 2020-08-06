@@ -151,7 +151,7 @@ sub email_beforenine {
   my $size = keys %before_nine;
   return unless $size;
 
-  my $from = 'automc@sa-vm1.apache.org';
+  my $from = 'automc@sa-vm.apache.org';
   my $subject = '[corpus-cleanup] Early runners';
   my $message = "The following files were submitted by early runners:\n\n";
   foreach my $revision (keys %before_nine) {
