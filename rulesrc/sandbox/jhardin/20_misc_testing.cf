@@ -1837,7 +1837,7 @@ ifplugin Mail::SpamAssassin::Plugin::ReplaceTags
   describe      FUZZY_SAVINGS       Obfuscated "savings"
   tflags        FUZZY_SAVINGS       publish
 
-  body          FUZZY_IMPORTANT     /<I>(?!mportant)<M><P><O><R><T><A><N><T>/i
+  body          FUZZY_IMPORTANT     /<I>(?!mportant)(?:<M>|<N>)<P><O><R><T><A><N><T>/i
   replace_rules FUZZY_IMPORTANT
   describe      FUZZY_IMPORTANT     Obfuscated "important"
   tflags        FUZZY_IMPORTANT     publish
