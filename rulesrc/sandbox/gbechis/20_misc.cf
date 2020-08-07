@@ -12,6 +12,11 @@ describe    GB_GOOGLE_OBFUS	Obfuscate url through Google search
 score       GB_GOOGLE_OBFUS     0.75 # limit
 #tflags      GB_GOOGLE_OBFUS     publish
 
+uri         GB_GOOGLE_OBFUU	/^https:\/\/www\.google\.([a-z]{2,3})\/url\?q=.{1,50}/
+describe    GB_GOOGLE_OBFUU	Obfuscate url through Google redirect
+score       GB_GOOGLE_OBFUU     0.75 # limit
+#tflags      GB_GOOGLE_OBFUU     publish
+
 header      __COPY_OF       Subject =~ /Copy of:|offers for you/
 meta        GB_COPY_OF_SHORT   ( __URL_SHORTENER && __COPY_OF && __KAM_BODY_LENGTH_LT_1024 )
 describe    GB_COPY_OF_SHORT   Url shortnener spam
@@ -42,22 +47,3 @@ meta       GB_LINKED_IMG_NOT_RCVD_LINK   __LINKED_IMG_NOT_RCVD_LINK && !__HAS_ER
 describe   GB_LINKED_IMG_NOT_RCVD_LINK   Linkedin hosted image but message not from Linkedin
 score      GB_LINKED_IMG_NOT_RCVD_LINK   2.500    # limit
 tflags     GB_LINKED_IMG_NOT_RCVD_LINK   publish
-
-# header     __HDR_RCVD_PAYPAL		 X-Spam-Relays-External =~ /rdns=mx\S+\.slc\.paypal\.com\s/
-# uri        __URI_IMG_PAYPAL		 /^https:\/\/www\.paypalobjects\.com\/en_US\/i\/logo\/logo_emailheader_113wx46h\.gif/
-# meta       __PAYPAL_IMG_NOT_RCVD_LINK    __URI_IMG_PAYPAL && !__HDR_RCVD_PAYPAL
-# meta       GB_PAYPAL_IMG_NOT_RCVD_LINK   __PAYPAL_IMG_NOT_RCVD_LINK && !__HAS_ERRORS_TO && !__MSGID_LIST && !__MSGID_GUID && !__RCD_RDNS_SMTP
-# describe   GB_PAYPAL_IMG_NOT_RCVD_LINK   Paypal hosted image but message not from Paypal
-# score      GB_PAYPAL_IMG_NOT_RCVD_LINK   2.500    # limit
-
-header     __HDR_RCVD_UNICREDIT		 X-Spam-Relays-External =~ /rdns=mx\d+\.unicredit\.eu\s/
-uri        __URI_IMG_UNICREDIT		 /^https:\/\/www\.unicreditgroup\.eu\/etc\/designs\/unicreditgroupn\/img\/static\/logoHiRes\.png/
-meta       __UNICR_IMG_NOT_RCVD_LINK     __URI_IMG_UNICREDIT && !__HDR_RCVD_UNICREDIT
-meta       GB_UNICR_IMG_NOT_RCVD_LINK    __UNICR_IMG_NOT_RCVD_LINK && !__HAS_ERRORS_TO && !__MSGID_LIST && !__MSGID_GUID && !__RCD_RDNS_SMTP
-describe   GB_UNICR_IMG_NOT_RCVD_LINK    Unicredit Bank hosted image but message not from Unicredit
-# score      GB_UNICR_IMG_NOT_RCVD_LINK    2.500    # limit
-
-header     __FROM_NAME_WETRANSFER        From:name =~ /WeTransfer/i
-meta       GB_WETRANSFER_HTM             ( HTML_ATTACH && __FROM_NAME_WETRANSFER )
-describe   GB_WETRANSFER_HTM             WeTransfer html attachment
-score      GB_WETRANSFER_HTM             2.0 # limit
