@@ -679,7 +679,7 @@ sub _finish_query {
       dbg("$rulename: $ent->{zone} hit '$ent->{value}'");
       $ent->{value} =~ s/\@/[at]/g;
       # Hit now if only one query exists, otherwise call hits at scan end
-      if ($pms->{hashbl_emails_count}{$rulename} == 1) {
+      if ((defined $pms->{hashbl_emails_count}{$rulename}) and ($pms->{hashbl_emails_count}{$rulename} == 1)) {
         $pms->test_log($ent->{value});
         $pms->got_hit($rulename, '', ruletype => 'eval');
       } else {
