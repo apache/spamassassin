@@ -43,7 +43,7 @@ Mail::SpamAssassin::ArchiveIterator - find and process messages one at a time
 
 =head1 SYNOPSIS
 
-  my $iter = new Mail::SpamAssassin::ArchiveIterator(
+  my $iter = Mail::SpamAssassin::ArchiveIterator->new(
     { 
       'opt_max_size' => 256 * 1024,  # 0 implies no limit
       'opt_cache' => 1,
@@ -77,7 +77,7 @@ and C<result_sub> functions appropriately per message.
 
 ###########################################################################
 
-=item $item = new Mail::SpamAssassin::ArchiveIterator( [ { opt => val, ... } ] )
+=item $item = Mail::SpamAssassin::ArchiveIterator->new( [ { opt => val, ... } ] )
 
 Constructs a new C<Mail::SpamAssassin::ArchiveIterator> object.  You may
 pass the following attribute-value pairs to the constructor.  The pairs are

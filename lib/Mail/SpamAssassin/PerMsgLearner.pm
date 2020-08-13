@@ -21,7 +21,7 @@ Mail::SpamAssassin::PerMsgLearner - per-message status (spam or not-spam)
 
 =head1 SYNOPSIS
 
-  my $spamtest = new Mail::SpamAssassin ({
+  my $spamtest = Mail::SpamAssassin->new({
     'rules_filename'      => '/etc/spamassassin.rules',
     'userprefs_filename'  => $ENV{HOME}.'/.spamassassin/user_prefs'
   });

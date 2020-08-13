@@ -147,7 +147,7 @@ sub mypass {
 
 sub create_spamtest {
   $spamtest->finish() if $spamtest;
-  $spamtest = new Mail::SpamAssassin(
+  $spamtest = Mail::SpamAssassin->new(
     {
       rules_filename      => 'rules',
       site_rules_filename => 'rules/local.cf',

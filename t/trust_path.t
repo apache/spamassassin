@@ -15,7 +15,7 @@ our $have_patricia = 0;
 eval {
   require Net::Patricia;
   Net::Patricia->VERSION(1.16);  # need AF_INET6 support
-  import Net::Patricia;
+  Net::Patricia->import;
   $have_patricia = 1;
 };
 

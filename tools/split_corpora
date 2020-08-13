@@ -43,7 +43,7 @@ foreach (@IN_FILES) {
 
 my @bucket_fhs = ();
 foreach my $bucket (1 .. $num_buckets) {
-  my $bucket_fh = new FileHandle();
+  my $bucket_fh = FileHandle->new();
 
   if (!$bucket_fh->open(">$prefix.$bucket")) {
     die "Could not open '$prefix.$bucket' for writing: $!\n";
@@ -54,7 +54,7 @@ foreach my $bucket (1 .. $num_buckets) {
 
 my $current_bucket = 0;
 
-my $iter = new Mail::SpamAssassin::ArchiveIterator({
+my $iter = Mail::SpamAssassin::ArchiveIterator->new({
         'opt_all' => 1,
   });
 

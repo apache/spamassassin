@@ -255,7 +255,7 @@ sub _validate {
     if (exists $self->{'ident-timeout'} && $self->{'ident-timeout'} <= 0) {
       die "ERROR: --ident-timeout must be > 0\n";
     }
-    ##import Net::Ident qw(ident_lookup);
+    ##Net::Ident->import(qw(ident_lookup));
   }
 
   # let's not modify %ENV here...

@@ -51,7 +51,7 @@ use constant HAS_DBI => eval { require DBI; };
 
 # We need this so we can import the pg_types, since this is a DBD::Pg specific module it should be ok
 # YUCK! This little require/import trick is required for the rpm stuff
-BEGIN { require DBD::Pg; import DBD::Pg qw(:pg_types); }
+BEGIN { require DBD::Pg; DBD::Pg->import(qw(:pg_types)); }
 
 =head1 METHODS
 

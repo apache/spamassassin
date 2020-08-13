@@ -315,7 +315,7 @@ if ($opt_reuse) {
 my $user_prefs = "$opt_p/user_prefs";
 
 sub create_spamtest {
-  return new Mail::SpamAssassin ({
+  return Mail::SpamAssassin->new({
     'debug'              		=> $opt_debug,
     'rules_filename'     		=> $opt_c,
     'site_rules_filename'		=> "$opt_p/local.cf",
@@ -407,7 +407,7 @@ else {
 ###########################################################################
 ## SCAN MODE
 
-my $iter = new Mail::SpamAssassin::ArchiveIterator($AIopts);
+my $iter = Mail::SpamAssassin::ArchiveIterator->new($AIopts);
 
 # setup the AI functions
 if ($opt_client) {

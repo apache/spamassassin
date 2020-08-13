@@ -1,8 +1,8 @@
 #!/usr/bin/perl
 
 BEGIN {
-  eval { require Digest::SHA; import Digest::SHA qw(sha1_hex); 1 }
-  or do { require Digest::SHA1; import Digest::SHA1 qw(sha1_hex) }
+  eval { require Digest::SHA; Digest::SHA->import(qw(sha1_hex)); 1 }
+  or do { require Digest::SHA1; Digest::SHA1->import(qw(sha1_hex)) }
 }
 
 $/=undef;

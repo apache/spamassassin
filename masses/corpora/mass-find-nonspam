@@ -113,7 +113,7 @@ our $opt_single;
 use Getopt::Long;
 GetOptions("single");
 
-my $iter = new Mail::SpamAssassin::ArchiveIterator ({
+my $iter = Mail::SpamAssassin::ArchiveIterator->new({
         'opt_j' => 1,
         'opt_n' => 1,
         'opt_all' => 1,
