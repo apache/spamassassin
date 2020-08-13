@@ -678,6 +678,7 @@ sub _check_zip {
       ( $data, $status ) = $member->contents() unless defined $data;
       next unless $status == $az_ok;
 
+      next if not defined $data;
       if (_is_office_doc($data)) {
         dbg("Found $name to be an Office Doc!");
         _check_encrypted_doc($pms, $name, $data);
