@@ -265,7 +265,7 @@ sub is_leaf {
 
 =item raw()
 
-Return a reference to the the raw array.  Treat this as READ ONLY.
+Return a reference to the raw array.  Treat this as READ ONLY.
 
 =cut
 

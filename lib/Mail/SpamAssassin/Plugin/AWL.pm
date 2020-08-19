@@ -108,7 +108,7 @@ for messages, depending on the long-term behavior of the particular
 correspondent.
 
 For more information about the auto-whitelist system, please look
-at the the C<Automatic Whitelist System> section of the README file.
+at the C<Automatic Whitelist System> section of the README file.
 The auto-whitelist is not intended as a general-purpose replacement
 for static whitelist entries added to your config files.
 
