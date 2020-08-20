@@ -2268,11 +2268,11 @@ endif
 # rawbody   __SPAN_INVIS                  /<span\s[^>]{0,200}style\s*=\s*"[^">]{0,80}(?:visibility\s*:\s*hidden\s*;|display\s*:\s*none\s*;)[^>]{1,200}>\w/i
 
 if can(Mail::SpamAssassin::Conf::feature_bug6558_free)
-  rawbody   __FONT_INVIS                  /<font\s[^>]{1,80}(?:font-size\s*:\s*[01]px\s*;|color\s*:\s*transparent\s*;)[^>]{1,80}>\w/i
+  rawbody   __FONT_INVIS                  /<font\s[^>]{1,80}(?:font-size\s*:\s*(?:[01](?:px|pt|Q|vw|vh|vmin)|0(?:cm|mm|in|pc|em|ex|ch|rem|lh|vmax))\s*[;']|color\s*:\s*transparent\s*[;'])[^>]{0,80}>/i
   tflags    __FONT_INVIS                  multiple maxhits=6
   meta      __FONT_INVIS_MANY             __FONT_INVIS > 5
   meta      HTML_TEXT_INVISIBLE_FONT      __FONT_INVIS_MANY
-  describe  HTML_TEXT_INVISIBLE_FONT      HTML hidden text
+  describe  HTML_TEXT_INVISIBLE_FONT      HTML hidden text, typically for word obfuscation
   score     HTML_TEXT_INVISIBLE_FONT      3.000   # limit
   tflags    HTML_TEXT_INVISIBLE_FONT      publish
 endif
