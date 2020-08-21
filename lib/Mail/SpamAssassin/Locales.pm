@@ -18,6 +18,7 @@
 package Mail::SpamAssassin::Locales;
 
 use strict;
+use Mail::SpamAssassin::Logger;
 use warnings;
 # use bytes;
 use re 'taint';
@@ -75,9 +76,11 @@ sub is_charset_ok_for_locales {
   $cs = uc $cs; $cs =~ s/[^A-Z0-9]//g;
   $cs =~ s/^3D//gs;		# broken by quoted-printable
   $cs =~ s/:.*$//gs;            # trim off multiple charsets, just use 1st
+  dbg ("locales: is $cs ok for @locales?");
 
   # always OK (the net speaks mostly roman charsets)
   return 1 if ($cs eq 'USASCII');
+  return 1 if ($cs eq 'ASCII');
   return 1 if ($cs =~ /^ISO8859/);
   return 1 if ($cs =~ /^ISO10646/);
   return 1 if ($cs =~ /^UTF/);
