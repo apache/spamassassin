@@ -2268,7 +2268,7 @@ endif
 # rawbody   __SPAN_INVIS                  /<span\s[^>]{0,200}style\s*=\s*"[^">]{0,80}(?:visibility\s*:\s*hidden\s*;|display\s*:\s*none\s*;)[^>]{1,200}>\w/i
 
 if can(Mail::SpamAssassin::Conf::feature_bug6558_free)
-  rawbody   __FONT_INVIS                  /<(?!style)[a-z]+\s[^>]{1,80}(?:font(?:-size)?\s*:\s*(?:0*[01](?:\.\d+)?(?:px|pt|Q|vw|vh|vmin)|0+(?:\.\d+)?(?:cm|mm|in|pc|em|ex|ch|rem|lh|vmax))\s*[;'a-z]|color\s*:\s*transparent\s*[;'])[^>]{0,80}>/i
+  rawbody   __FONT_INVIS                  /<(?!style)[a-z]+\s[^>]{1,80}(?:font(?:-size)?\s*:\s*(?:0*[01](?:\.\d+)?(?:px|pt|Q|vw|vh|vmin)|0+(?:\.\d+)?(?:cm|mm|in|pc|em|ex|ch|rem|lh|vmax))\s*[;'a-z]|color\s*:\s*transparent\s*[;'])[^>]{0,80}>\w/i
   tflags    __FONT_INVIS                  multiple maxhits=6
   meta      __FONT_INVIS_MANY             __FONT_INVIS > 5
   meta      HTML_TEXT_INVISIBLE_FONT      __FONT_INVIS_MANY && !__HAS_ERRORS_TO && !__URI_DOTGOV && !__L_CTE_7BIT 
