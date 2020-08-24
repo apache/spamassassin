@@ -2269,9 +2269,12 @@ endif
 
 if can(Mail::SpamAssassin::Conf::feature_bug6558_free)
   # Lots of ham uses invisible fonts - WHY?
-  rawbody   __FONT_INVIS                  /<(?!style)[a-z]+\s[^>]{1,80}(?:font(?:-size)?\s*:\s*(?:0*[01](?:\.\d+)?(?:px|pt|Q|vw|vh|vmin)|0+(?:\.\d+)?(?:cm|mm|in|pc|em|ex|ch|rem|lh|vmax))\s*[;'a-z]|color\s*:\s*transparent\s*[;'])[^>]{0,80}>\w/i
-  tflags    __FONT_INVIS                  multiple maxhits=6
-  meta      __FONT_INVIS_MANY             __FONT_INVIS > 5
+  rawbody   __FONT_INVIS                  /<(?!style)[a-z]+\s[^>]{1,80}(?:font(?:-size)?\s*:\s*(?:0*[01](?:\.\d+)?(?:px|pt|Q|vw|vh|vmin)|0+(?:\.\d+)?(?:cm|mm|in|pc|em|ex|ch|rem|lh|vmax|%))(?:\s[a-z]|\s*[;'])|color\s*:\s*transparent\s*[;'])[^>]{0,80}>\w/i
+  tflags    __FONT_INVIS                  multiple maxhits=11
+  meta      __FONT_INVIS_2                __FONT_INVIS > 2
+  meta      __FONT_INVIS_5                __FONT_INVIS > 5
+  meta      __FONT_INVIS_10               __FONT_INVIS > 10
+  meta      __FONT_INVIS_MANY             __FONT_INVIS_5
   meta      HTML_TEXT_INVISIBLE_FONT      __FONT_INVIS_MANY && !__HAS_ERRORS_TO && !__URI_DOTGOV && !__L_CTE_7BIT && !__LYRIS_EZLM_REMAILER 
   describe  HTML_TEXT_INVISIBLE_FONT      HTML hidden text - word obfuscation?
   score     HTML_TEXT_INVISIBLE_FONT      3.000   # limit
@@ -2280,10 +2283,23 @@ if can(Mail::SpamAssassin::Conf::feature_bug6558_free)
   # Does this hit less ham while still hitting spam?
   rawbody   __WORD_INVIS                  /<(?!style)[a-z]+\s[^>]{1,80}(?:font(?:-size)?\s*:\s*(?:0*[01](?:\.\d+)?(?:px|pt|Q|vw|vh|vmin)|0+(?:\.\d+)?(?:cm|mm|in|pc|em|ex|ch|rem|lh|vmax))\s*[;'a-z]|color\s*:\s*transparent\s*[;'])[^>]{0,80}>\w{1,20}</i
   tflags    __WORD_INVIS                  multiple maxhits=6
-  meta      __WORD_INVIS_MANY             __WORD_INVIS > 5
+  meta      __WORD_INVIS_5                __WORD_INVIS > 5
 
-  meta      __FONT_INVIS_LONG_LINE        __FONT_INVIS && __LONGLINE 
-  meta      __FONT_INVIS_NORDNS           __FONT_INVIS && __RDNS_NONE 
+  meta      FONT_INVIS_LONG_LINE          __FONT_INVIS && __LONGLINE 
+  describe  FONT_INVIS_LONG_LINE          Invisible text + long lines
+  score     FONT_INVIS_LONG_LINE          3.000	# limit
+
+  meta      FONT_INVIS_NORDNS             __FONT_INVIS && __RDNS_NONE 
+  describe  FONT_INVIS_NORDNS             Invisible text + no rDNS
+  score     FONT_INVIS_NORDNS             2.500	# limit
+
+  meta      __FONT_INVIS_POSTEXTRAS       __FONT_INVIS && __AC_POST_EXTRAS
+  meta      __FONT_INVIS_MSGID            __FONT_INVIS && __MSGID_OK_HOST 
+  meta      __FONT_INVIS_NAKED_TO         __FONT_INVIS && __NAKED_TO 
+  meta      __FONT_INVIS_DIRECT           __FONT_INVIS && __DOS_DIRECT_TO_MX_UNTRUSTED 
+  meta      __FONT_INVIS_CENTER           __FONT_INVIS && __TAG_EXISTS_CENTER 
+  meta      __FONT_INVIS_SINGLET          __FONT_INVIS && __HTML_SINGLET 
+  meta      __FONT_INVIS_DOTGOV           __FONT_INVIS && __URI_DOTGOV 
 
 endif
 
@@ -2809,6 +2825,11 @@ rawbody    __AC_LARGE_INDENT           /text-indent\s*:\s*[-]?[0-9]{3,}(?:em|p[t
 uri        __AC_POSTHTMLEXTRAS         /(?:main[0-9]?|mian|start(?:page)?|info(?:page|source|center)?|(?:one|view)?(?:site|source)(?:view|[0-9])?|(?:hub|file)one|index(?:[0-9]|page)?|mediafile|userlink|faction1)[.,]html?\/\w{2,}\b/i
 
 uri        __AC_POSTIMGEXTRAS          /(?:(?:main|external|hosted|new|file)?(?:im(?:g|age)?|user|one)s?-?(?:view(?:er)?|file|map|finder|portal|hub|online)?s?|library|media(?:source|-?files?)?|main|png|view|begin|file|port|space|webpics|host)(?:[-]?(?:[0-9]|one|two|three|four|five|six|seven|eight|nine))?[.,](?:jpe?g|png|gif)\/\w{2,}\b/i
+
+meta       __AC_POST_EXTRAS            (__AC_POSTHTMLEXTRAS || __AC_POSTIMGEXTRAS)
+meta       AC_POST_EXTRAS              __AC_POST_EXTRAS
+describe   AC_POST_EXTRAS              Suspicious URL
+score      AC_POST_EXTRAS              2.500	# limit
 
 rawbody    __AC_TINY_FONT              /(?:font-size)\s*:\s*[1-3]\s*(?:em|p[tx]|%)?(?:\s*!important)?\s*[";]/i
 
