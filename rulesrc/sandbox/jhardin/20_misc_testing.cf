@@ -1863,6 +1863,10 @@ ifplugin Mail::SpamAssassin::Plugin::ReplaceTags
   describe      FUZZY_BITCOIN       Obfuscated "Bitcoin"
   tflags        FUZZY_BITCOIN       publish
 
+
+  body          __BITCOIN           /<B><I><T>-?<C><O><I><N>/i
+  replace_rules __BITCOIN   
+
   body          FUZZY_WALLET        /<W>(?!allet)<A><L><L><E><T>/i
   replace_rules FUZZY_WALLET    
   describe      FUZZY_WALLET        Obfuscated "Wallet"
@@ -1877,6 +1881,7 @@ ifplugin Mail::SpamAssassin::Plugin::ReplaceTags
 
 else
   meta          __FUZZY_MONERO      0
+  body          __BITCOIN           /\bBit-?coin\b/i
 endif
 
 uri            __URL_BTC_ID     m;[/.](?:[13][a-km-zA-HJ-NP-Z1-9]{25,34}|bc1[acdefghjklmnpqrstuvwxyz234567890]{30,90})(?:/|$);
@@ -1898,6 +1903,10 @@ else
 endif
 describe       BTC_ORG          Bitcoin wallet ID + unusual header
 score          BTC_ORG          2.500	# limit
+
+meta           BITCOIN_PDF      __BITCOIN && __PDF_ATTACH
+describe       BITCOIN_PDF      "Bitcoin" + PDF attachment
+score          BITCOIN_PDF      2.500	# limit
 
 # bitcoin obfuscation - tip o' the hat to Steve Zinski on the users list, with a little cleanup
 body           __BTC_OBFU_2     /\b\W{0,10}b(?!itcoin)\W{0,10}i\W{0,10}t\W{0,10}c\W{0,10}o\W{0,10}i\W{0,10}n\W{0,10}\b/i
