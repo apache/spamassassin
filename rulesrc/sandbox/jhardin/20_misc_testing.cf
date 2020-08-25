@@ -2285,7 +2285,8 @@ if can(Mail::SpamAssassin::Conf::feature_bug6558_free)
   tflags    __WORD_INVIS                  multiple maxhits=6
   meta      __WORD_INVIS_5                __WORD_INVIS > 5
 
-  meta      FONT_INVIS_LONG_LINE          __FONT_INVIS && __LONGLINE 
+  meta      __FONT_INVIS_LONG_LINE        __FONT_INVIS && __LONGLINE 
+  meta      FONT_INVIS_LONG_LINE          __FONT_INVIS_LONG_LINE && !__RDNS_LONG 
   describe  FONT_INVIS_LONG_LINE          Invisible text + long lines
   score     FONT_INVIS_LONG_LINE          3.000	# limit
 
@@ -2293,21 +2294,38 @@ if can(Mail::SpamAssassin::Conf::feature_bug6558_free)
   describe  FONT_INVIS_NORDNS             Invisible text + no rDNS
   score     FONT_INVIS_NORDNS             2.500	# limit
 
-  meta      __FONT_INVIS_POSTEXTRAS       __FONT_INVIS && __AC_POST_EXTRAS
+  meta      FONT_INVIS_POSTEXTRAS         __FONT_INVIS && __AC_POST_EXTRAS
+  describe  FONT_INVIS_POSTEXTRAS         Invisible text + suspicious URI
+  score     FONT_INVIS_POSTEXTRAS         3.500	# limit
+
   meta      __FONT_INVIS_MSGID            __FONT_INVIS && __MSGID_OK_HOST 
+  meta      FONT_INVIS_MSGID              __FONT_INVIS_MSGID && !__RCD_RDNS_MX_MESSY && !__RCD_RDNS_MX && !__HAS_ERRORS_TO 
+  describe  FONT_INVIS_MSGID              Invisible text + suspicious message ID
+  score     FONT_INVIS_MSGID              2.500	# limit
+
+
   meta      __FONT_INVIS_NAKED_TO         __FONT_INVIS && __NAKED_TO 
-  meta      __FONT_INVIS_DIRECT           __FONT_INVIS && __DOS_DIRECT_TO_MX_UNTRUSTED 
   meta      __FONT_INVIS_CENTER           __FONT_INVIS && __TAG_EXISTS_CENTER 
   meta      __FONT_INVIS_SINGLET          __FONT_INVIS && __HTML_SINGLET 
+
+  meta      __FONT_INVIS_DIRECT           __FONT_INVIS && __DOS_DIRECT_TO_MX_UNTRUSTED 
+  meta      FONT_INVIS_DIRECT             __FONT_INVIS_DIRECT && !__UNSUB_LINK && !__HAS_ERRORS_TO && !__MOZILLA_MSGID && !__RCD_RDNS_MAIL_MESSY 
+  describe  FONT_INVIS_DIRECT             Invisible text + direct-to-MX
+  score     FONT_INVIS_DIRECT             3.500	# limit
+
   meta      __FONT_INVIS_DOTGOV           __FONT_INVIS && __URI_DOTGOV 
+  meta      FONT_INVIS_DOTGOV             __FONT_INVIS_DOTGOV && !__MOZILLA_MSGID && !__RCD_RDNS_MAIL_MESSY && !__HAS_ERRORS_TO 
+  describe  FONT_INVIS_DOTGOV             Invisible text + .gov URI
+  score     FONT_INVIS_DOTGOV             3.500	# limit
 
 endif
 
-# Adapted from SARE rules __SARE_HTML_SINGLET*
+# Adapted from SARE rules __SARE_HTML_SINGLET
 rawbody   __HTML_SINGLET                />\s*(?:[a-z"]|&\#(?:\d+|x[0-9a-f]+);)\s*</i
 tflags    __HTML_SINGLET                multiple maxhits=21
+meta      __HTML_SINGLET_10             __HTML_SINGLET > 10
 meta      __HTML_SINGLET_MANY           __HTML_SINGLET > 20
-meta      HTML_SINGLET_MANY             __HTML_SINGLET_MANY && !__STY_INVIS_MANY && !__RCD_RDNS_MTA_MESSY && !__NOT_SPOOFED && !__FEES && !ALL_TRUSTED
+meta      HTML_SINGLET_MANY             __HTML_SINGLET_MANY && !__RCD_RDNS_MTA_MESSY && !__NOT_SPOOFED && !ALL_TRUSTED && !__USING_VERP1 && !__MIME_QP 
 describe  HTML_SINGLET_MANY             Many single-letter HTML format blocks
 score     HTML_SINGLET_MANY             2.500   # limit
 tflags    HTML_SINGLET_MANY             publish
@@ -2827,7 +2845,7 @@ uri        __AC_POSTHTMLEXTRAS         /(?:main[0-9]?|mian|start(?:page)?|info(?
 uri        __AC_POSTIMGEXTRAS          /(?:(?:main|external|hosted|new|file)?(?:im(?:g|age)?|user|one)s?-?(?:view(?:er)?|file|map|finder|portal|hub|online)?s?|library|media(?:source|-?files?)?|main|png|view|begin|file|port|space|webpics|host)(?:[-]?(?:[0-9]|one|two|three|four|five|six|seven|eight|nine))?[.,](?:jpe?g|png|gif)\/\w{2,}\b/i
 
 meta       __AC_POST_EXTRAS            (__AC_POSTHTMLEXTRAS || __AC_POSTIMGEXTRAS)
-meta       AC_POST_EXTRAS              __AC_POST_EXTRAS
+meta       AC_POST_EXTRAS              __AC_POST_EXTRAS && !__URI_MAILTO && !__HAS_LIST_ID 
 describe   AC_POST_EXTRAS              Suspicious URL
 score      AC_POST_EXTRAS              2.500	# limit
 
