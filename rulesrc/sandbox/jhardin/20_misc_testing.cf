@@ -3064,4 +3064,7 @@ describe   HTML_EMPTY_CELLS_MANY       HTML table with lots of empty cells
 score      HTML_EMPTY_CELLS_MANY       1.500	# limit
 
 
+uri        __SENDGRID_REDIR            m,://u\d+\.ct\.sendgrid\.net/ls/click\?upn=,
+meta       __SENDGRID_REDIR_PHISH      __SENDGRID_REDIR && PDS_FROM_NAME_TO_DOMAIN
+
 
