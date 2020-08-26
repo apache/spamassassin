@@ -2298,6 +2298,7 @@ if can(Mail::SpamAssassin::Conf::feature_bug6558_free)
   meta      FONT_INVIS_LONG_LINE          __FONT_INVIS_LONG_LINE && !__RDNS_LONG 
   describe  FONT_INVIS_LONG_LINE          Invisible text + long lines
   score     FONT_INVIS_LONG_LINE          3.000	# limit
+  tflags    FONT_INVIS_LONG_LINE          publish
 
   meta      FONT_INVIS_NORDNS             __FONT_INVIS && __RDNS_NONE 
   describe  FONT_INVIS_NORDNS             Invisible text + no rDNS
@@ -2306,12 +2307,12 @@ if can(Mail::SpamAssassin::Conf::feature_bug6558_free)
   meta      FONT_INVIS_POSTEXTRAS         __FONT_INVIS && __AC_POST_EXTRAS
   describe  FONT_INVIS_POSTEXTRAS         Invisible text + suspicious URI
   score     FONT_INVIS_POSTEXTRAS         3.500	# limit
+  tflags    FONT_INVIS_POSTEXTRAS         publish
 
   meta      __FONT_INVIS_MSGID            __FONT_INVIS && __MSGID_OK_HOST 
-  meta      FONT_INVIS_MSGID              __FONT_INVIS_MSGID && !__RCD_RDNS_MX_MESSY && !__RCD_RDNS_MX && !__HAS_ERRORS_TO 
+  meta      FONT_INVIS_MSGID              __FONT_INVIS_MSGID && !__RCD_RDNS_MX_MESSY && !__RCD_RDNS_MX && !__HAS_ERRORS_TO && !__RCD_RDNS_MAIL 
   describe  FONT_INVIS_MSGID              Invisible text + suspicious message ID
   score     FONT_INVIS_MSGID              2.500	# limit
-
 
   meta      __FONT_INVIS_NAKED_TO         __FONT_INVIS && __NAKED_TO 
   meta      __FONT_INVIS_CENTER           __FONT_INVIS && __TAG_EXISTS_CENTER 
@@ -2321,11 +2322,13 @@ if can(Mail::SpamAssassin::Conf::feature_bug6558_free)
   meta      FONT_INVIS_DIRECT             __FONT_INVIS_DIRECT && !__UNSUB_LINK && !__HAS_ERRORS_TO && !__MOZILLA_MSGID && !__RCD_RDNS_MAIL_MESSY 
   describe  FONT_INVIS_DIRECT             Invisible text + direct-to-MX
   score     FONT_INVIS_DIRECT             3.500	# limit
+  tflags    FONT_INVIS_DIRECT             publish
 
   meta      __FONT_INVIS_DOTGOV           __FONT_INVIS && __URI_DOTGOV 
   meta      FONT_INVIS_DOTGOV             __FONT_INVIS_DOTGOV && !__MOZILLA_MSGID && !__RCD_RDNS_MAIL_MESSY && !__HAS_ERRORS_TO 
   describe  FONT_INVIS_DOTGOV             Invisible text + .gov URI
   score     FONT_INVIS_DOTGOV             3.500	# limit
+  tflags    FONT_INVIS_DOTGOV             publish
 
 endif
 
