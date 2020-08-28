@@ -5,19 +5,21 @@
 #
 
 ifplugin Mail::SpamAssassin::Plugin::ReplaceTags
-  replace_tag  CURRENCY   [\(\[]?(?:\bU[Ss][D\$]{0,2}|\$(?:US)?|usd|CAD|GBP|=[Aa][34]|\xa3|&\#16[34];|(?i:pounds\ssterling)|\xa4|EUR(?:OS)?|(?:d')?[Ee]uro?s?|(?i:eur)\sde|CHF|FCFA|d[\xf3]lares\sde\slos\sE+\.\s?U+\.)[\]\)]?
+  replace_tag  CURRENCY   (?:[\(\[]?(?:\bU[Ss][D\$]{0,2}|\$(?:US)?|usd|USD|CAD|GBP|=[Aa][34]|\xa3|&\#16[34];|(?i:pounds\ssterling)|\xa4|EUR(?:OS)?|(?:d')?[Ee]uro?s?|(?i:eur)\sde|CHF|FCFA|d[\xf3]lares\sde\slos\sE+\.\s?U+\.)[\]\)]?)
   replace_tag  GB_UK      \b(?:U\.?K\.?|(?:Great\s)?Brit(?:ain|ish)|G\.?B\.?)\b
-  replace_tag  NUM_NOT_DATE    [1-9](?!\d\d\d\.\d\d\.\d\d\s)(?!\d?\.\d\d?\.\d\d\d\d\s)
+  # not date format or IP addr format
+  replace_tag  NUM_NOT_DATE       [1-9](?!\d\d\d\.\d\d\.\d\d\s)(?!\d?\.\d\d?\.\d\d\d\d\s)
+  replace_tag  NUM_NOT_DATE_IP    <NUM_NOT_DATE>(?!\d{0,2}(?:\.0|\.[1-2]\d{0,2}){3}(?:\D|$))
 
   body     __LOTSA_MONEY_00   /<CURRENCY>[\s\.]?<NUM_NOT_DATE>[\dOo][,\.][\dOo]{3}(?:(?!\d)|\b)/
-  body     __LOTSA_MONEY_01   /(?:(?i:sum\sof\s)[\(\[]?|<CURRENCY>\s?)[\s\.]?<NUM_NOT_DATE>[\d.,\sOo]{5,20}[\dOo](?<!\.00)\b/
-  body     __LOTSA_MONEY_02   /(?<!\d)<NUM_NOT_DATE>[\d.,\sOo]{5,20}[\dOo][\)\]\(]?\s?(?:<CURRENCY>|Pounds|(?i:dollars?|bucks))\b/
+  body     __LOTSA_MONEY_01   /(?:(?i:sum\sof\s)[\(\[]?|<CURRENCY>\s?)[\s\.]?<NUM_NOT_DATE_IP>[\d.,\sOo]{5,20}[\dOo](?<!\.00)\b/
+  body     __LOTSA_MONEY_02   /(?<!\d)<NUM_NOT_DATE_IP>[\d.,\sOo]{5,20}[\dOo][\)\]\(]?\s?(?:<CURRENCY>|Pounds|(?i:dollars?|bucks))\b/
   body     __LOTSA_MONEY_03   /(?:(?i:sum\sof\s)[\(\[]?|<CURRENCY>\s?)<NUM_NOT_DATE>[\d.,\sOo]{0,5}[\)\]]?\s?(?i:M(?i:il+)?\b|mil+(?i:io|<O>)n|hund?[re]+a?[dt]|thousand|tausend|milh[\xf5]es)/
   body     __LOTSA_MONEY_04   /(?:(?<!\d)<NUM_NOT_DATE>[\d\.,]{0,4}(?:M|\smilli?one?s|\s?mln)|million(?!s)|mill<O>n|hund?rea?d(?!s)[^\.]{1,25}thousand(?!s)|cents?[^\.]{1,25}mille|hundert[^\.]{1,30}tausend|ientos?[^\.]{1,20}mil|cent[a-z\s]{1,20}mil\s[a-z]{1,20}centos)[^\.\$]{0,50}?(?:(?:U\.?\s?S\.?\s?(?:A\.?\s?)?|united\s?states\s|E\.\s?U\.\s|canad(?:ian|a)\s|(?:ia\s)?de\s)?d(?:[o\xf3]|[\xc3][\xb3])l+are?s?|\bbucks|USD|GBP|<GB_UK>\spounds?|(?:<GB_UK>\s)?pounds?\ssterling|pounds(?!\sof)|(?:d'\s?)?euros?|francs?)\b/i
-  body     __LOTSA_MONEY_05   /(?:(?:sum|value|amount)\sof\s)<NUM_NOT_DATE>[\d.,\sO]{7,20}[\dO\.][\)\]\(\s]{0,3}(?:pounds?|dollars?|euros?|bucks)\b/i
+  body     __LOTSA_MONEY_05   /(?:(?:sum|value|amount)\sof\s)<NUM_NOT_DATE_IP>[\d.,\sO]{7,20}[\dO\.][\)\]\(\s]{0,3}(?:pounds?|dollars?|euros?|bucks)\b/i
   replace_rules   __LOTSA_MONEY_00 __LOTSA_MONEY_01 __LOTSA_MONEY_02 __LOTSA_MONEY_03 __LOTSA_MONEY_04
 
-  # not a meta so it will show up in the report
+  # not a subrule so it will show up in the report
   meta     LOTS_OF_MONEY    (__LOTSA_MONEY_00 || __LOTSA_MONEY_01 || __LOTSA_MONEY_02 || __LOTSA_MONEY_03 || __LOTSA_MONEY_04 || __LOTSA_MONEY_05) && !__TRAVEL_ITINERARY
   describe LOTS_OF_MONEY    Huge... sums of money
   score    LOTS_OF_MONEY    0.01
@@ -29,6 +31,7 @@ else
   meta     __LOTSA_MONEY_03   0
   meta     __LOTSA_MONEY_04   0
   meta     __LOTSA_MONEY_05   0
+  meta     LOTS_OF_MONEY      0
 endif
 
 # now combine with other stuff in metas to weed out FPs
