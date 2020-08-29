@@ -2268,7 +2268,7 @@ if can(Mail::SpamAssassin::Conf::feature_bug6558_free)
   meta      __STY_INVIS_2                 __STY_INVIS > 1
   meta      __STY_INVIS_3                 __STY_INVIS > 2
   meta      __STY_INVIS_MANY              __STY_INVIS > 5
-  meta      HTML_TEXT_INVISIBLE_STYLE     __STY_INVIS_MANY && (__RDNS_NONE || __HDRS_LCASE || __UNSUB_EMAIL ||  __ADMITS_SPAM || __FROM_DOM_INFO || __HTML_TAG_BALANCE_CENTER || __MSGID_RANDY ) && !__RDNS_LONG && !__RCD_RDNS_MTA 
+  meta      HTML_TEXT_INVISIBLE_STYLE     __STY_INVIS_MANY && (__RDNS_NONE || __HDRS_LCASE || __UNSUB_EMAIL ||  __ADMITS_SPAM || __FROM_DOM_INFO || __HTML_TAG_BALANCE_CENTER || __MSGID_RANDY ) && !__RDNS_LONG && !__FROM_ENCODED_QP 
   describe  HTML_TEXT_INVISIBLE_STYLE     HTML hidden text + other spam signs
   score     HTML_TEXT_INVISIBLE_STYLE     3.500   # limit
   tflags    HTML_TEXT_INVISIBLE_STYLE     publish
@@ -2284,7 +2284,7 @@ if can(Mail::SpamAssassin::Conf::feature_bug6558_free)
   meta      __FONT_INVIS_5                __FONT_INVIS > 5
   meta      __FONT_INVIS_10               __FONT_INVIS > 10
   meta      __FONT_INVIS_MANY             __FONT_INVIS_5
-  meta      HTML_TEXT_INVISIBLE_FONT      __FONT_INVIS_MANY && !__HAS_ERRORS_TO && !__URI_DOTGOV && !__L_CTE_7BIT && !__LYRIS_EZLM_REMAILER 
+  meta      HTML_TEXT_INVISIBLE_FONT      __FONT_INVIS_MANY && !__HAS_ERRORS_TO && !__URI_DOTGOV && !__L_CTE_7BIT && !__LYRIS_EZLM_REMAILER && !__ML3 && !__THREADED 
   describe  HTML_TEXT_INVISIBLE_FONT      HTML hidden text - word obfuscation?
   score     HTML_TEXT_INVISIBLE_FONT      3.000   # limit
   tflags    HTML_TEXT_INVISIBLE_FONT      publish
@@ -2310,11 +2310,15 @@ if can(Mail::SpamAssassin::Conf::feature_bug6558_free)
   tflags    FONT_INVIS_POSTEXTRAS         publish
 
   meta      __FONT_INVIS_MSGID            __FONT_INVIS && __MSGID_OK_HOST 
-  meta      FONT_INVIS_MSGID              __FONT_INVIS_MSGID && !__RCD_RDNS_MX_MESSY && !__RCD_RDNS_MX && !__HAS_ERRORS_TO && !__RCD_RDNS_MAIL 
+  meta      FONT_INVIS_MSGID              __FONT_INVIS_MSGID && !__RCD_RDNS_MX_MESSY && !__RCD_RDNS_MX && !__HAS_ERRORS_TO && !__RCD_RDNS_MAIL && !__MAIL_LINK && !__HDR_RCVD_AMAZON 
   describe  FONT_INVIS_MSGID              Invisible text + suspicious message ID
   score     FONT_INVIS_MSGID              2.500	# limit
 
-  meta      __FONT_INVIS_NAKED_TO         __FONT_INVIS && __NAKED_TO 
+  meta      __FONT_INVIS_NAKED_TO         __FONT_INVIS && __NAKED_TO
+  meta      FONT_INVIS_NAKED_TO           __FONT_INVIS_NAKED_TO && !__ML3 && !__HAS_ERRORS_TO
+  describe  FONT_INVIS_NAKED_TO           Invisible text + suspicious To
+  score     FONT_INVIS_NAKED_TO           2.500	# limit
+
   meta      __FONT_INVIS_CENTER           __FONT_INVIS && __TAG_EXISTS_CENTER 
   meta      __FONT_INVIS_SINGLET          __FONT_INVIS && __HTML_SINGLET 
 
@@ -2873,6 +2877,7 @@ score      URI_BUFFLY                  2.000	# limit
 meta       SHORTENER_SHORT_IMG         __URL_SHORTENER && HTML_SHORT_LINK_IMG_1
 describe   SHORTENER_SHORT_IMG         Short HTML + image + URL shortener
 score      SHORTENER_SHORT_IMG         2.500	# limit
+tflags     SHORTENER_SHORT_IMG         publish
 
 header     __DATA_ENTRY_SERVICE        Subject =~ /\bdata entry services?\b/i
 meta       FREEM_DATA_ENTRY            __DATA_ENTRY_SERVICE && __freemail_hdr_replyto
@@ -3032,6 +3037,11 @@ meta       __DOTGOV_IMAGE              __URI_DOTGOV && __REMOTE_IMAGE
 meta       __DOTGOV_NXDKIM             __URI_DOTGOV && DKIM_ADSP_NXDOMAIN 
 tflags     __DOTGOV_NXDKIM             net
 
+meta       URI_DOTEDU                  __URI_DOTEDU && !__DOS_HAS_LIST_UNSUB && !__VIA_ML && !__HAS_X_MAILER && !TRUSTED
+describe   URI_DOTEDU                  Has .edu URI
+score      URI_DOTEDU                  2.000	# limit
+
+
 # bitcoin work-at-home spams 04/2020
 body       PERFECT_BINARY              /\bperfect binary option\b/i
 body       WE_PAID                     /\bwe have (?:already )?(?:paid|sent|remitted|issued) \$?\d+ (?:thousand )?(?:dollars )?to our (?:users|subscribers|members|clients|affiliates|partners)\b/i
@@ -3068,6 +3078,15 @@ score      HTML_EMPTY_CELLS_MANY       1.500	# limit
 
 
 uri        __SENDGRID_REDIR            m,://u\d+\.ct\.sendgrid\.net/ls/click\?upn=,
+meta       SENDGRID_REDIR              __SENDGRID_REDIR
+describe   SENDGRID_REDIR              Redirect URI via Sendgrid
+score      SENDGRID_REDIR              3.500	# limit
+
 meta       __SENDGRID_REDIR_PHISH      __SENDGRID_REDIR && PDS_FROM_NAME_TO_DOMAIN
+meta       SENDGRID_REDIR_PHISH        __SENDGRID_REDIR_PHISH
+describe   SENDGRID_REDIR_PHISH        Redirect URI via Sendgrid + phishing signs
+score      SENDGRID_REDIR_PHISH        3.500	# limit
+
+
 
 
