@@ -2313,6 +2313,7 @@ if can(Mail::SpamAssassin::Conf::feature_bug6558_free)
   meta      FONT_INVIS_MSGID              __FONT_INVIS_MSGID && !__RCD_RDNS_MX_MESSY && !__RCD_RDNS_MX && !__HAS_ERRORS_TO && !__RCD_RDNS_MAIL && !__MAIL_LINK && !__HDR_RCVD_AMAZON && !__MIME_QP 
   describe  FONT_INVIS_MSGID              Invisible text + suspicious message ID
   score     FONT_INVIS_MSGID              2.500	# limit
+  tflags    FONT_INVIS_MSGID              publish
 
   meta      __FONT_INVIS_NAKED_TO         __FONT_INVIS && __NAKED_TO
   meta      FONT_INVIS_NAKED_TO           __FONT_INVIS_NAKED_TO && !__ML3 && !__HAS_ERRORS_TO
@@ -3028,18 +3029,26 @@ meta       __UNAME_PASSWD_PDF          ( __PASSWORD || __YOUR_PASSWORD ) && LOCA
 # .gov and .edu URIs appearing in spams, attempts to leverage whitelisting?
 uri        __URI_DOTGOV                m;^https?://(?:[^./]+\.)+gov/;i
 uri        __URI_DOTEDU                m;^https?://(?:[^./]+\.)+edu/;i
+header     __RCVD_DOTGOV_EXT           X-Spam-Relays-External =~ /\.gov\s/i
+header     __RCVD_DOTEDU_EXT           X-Spam-Relays-External =~ /\.edu\s/i
 
 meta       __DOTGOV_FREEMAIL           __URI_DOTGOV && __freemail_hdr_replyto
 #meta       __DOTGOV_MONEY              __URI_DOTGOV && ( __XFER_MONEY || __MONEY_FRAUD || __YOUR_FUND || __BENEFICIARY || __COMPENSATION || __LOTSA_MONEY_01 || __LOTSA_MONEY_04 )
 meta       __DOTGOV_MONEY              __URI_DOTGOV && ( __YOUR_FUND )
+
 meta       __DOTGOV_IMAGE              __URI_DOTGOV && __REMOTE_IMAGE 
+meta       DOTGOV_IMAGE                __DOTGOV_IMAGE && !__HAVE_BOUNCE_RELAYS 
+describe   DOTGOV_IMAGE                .gov URI + hosted image
+score      DOTGOV_IMAGE                3.000	# limit
+tflags     DOTGOV_IMAGE                publish
 
 meta       __DOTGOV_NXDKIM             __URI_DOTGOV && DKIM_ADSP_NXDOMAIN 
 tflags     __DOTGOV_NXDKIM             net
 
-meta       URI_DOTEDU                  __URI_DOTEDU && !__DOS_HAS_LIST_UNSUB && !__VIA_ML && !__HAS_X_MAILER && !TRUSTED && !__UNSUB_LINK && !__RDNS_SHORT 
+meta       URI_DOTEDU                  __URI_DOTEDU && !__RCVD_DOTEDU_EXT && !__DOS_HAS_LIST_UNSUB && !__VIA_ML && !__HAS_X_MAILER && !TRUSTED && !__UNSUB_LINK && !__RDNS_SHORT 
 describe   URI_DOTEDU                  Has .edu URI
 score      URI_DOTEDU                  2.000	# limit
+tflags     URI_DOTEDU                  publish
 
 
 # bitcoin work-at-home spams 04/2020
