@@ -3045,7 +3045,7 @@ tflags     DOTGOV_IMAGE                publish
 meta       __DOTGOV_NXDKIM             __URI_DOTGOV && DKIM_ADSP_NXDOMAIN 
 tflags     __DOTGOV_NXDKIM             net
 
-meta       URI_DOTEDU                  __URI_DOTEDU && !__RCVD_DOTEDU_EXT && !__DOS_HAS_LIST_UNSUB && !__VIA_ML && !__HAS_X_MAILER && !TRUSTED && !__UNSUB_LINK && !__RDNS_SHORT 
+meta       URI_DOTEDU                  __URI_DOTEDU && !__RCVD_DOTEDU_EXT && !__DOS_HAS_LIST_UNSUB && !__VIA_ML && !__HAS_X_MAILER && !ALL_TRUSTED && !__UNSUB_LINK && !__RDNS_SHORT 
 describe   URI_DOTEDU                  Has .edu URI
 score      URI_DOTEDU                  2.000	# limit
 tflags     URI_DOTEDU                  publish
