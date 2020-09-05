@@ -1908,6 +1908,10 @@ meta           BITCOIN_PDF      __BITCOIN && __PDF_ATTACH
 describe       BITCOIN_PDF      "Bitcoin" + PDF attachment
 score          BITCOIN_PDF      2.500	# limit
 
+meta           BITCOIN_MALF_HTML    HTML_EXTRA_CLOSE && (__BITCOIN || __BITCOIN_ID)
+describe       BITCOIN_PDF          Bitcoin + malformed HTML
+score          BITCOIN_PDF          3.500	# limit
+
 # bitcoin obfuscation - tip o' the hat to Steve Zinski on the users list, with a little cleanup
 body           __BTC_OBFU_2     /\b\W{0,10}b(?!itcoin)\W{0,10}i\W{0,10}t\W{0,10}c\W{0,10}o\W{0,10}i\W{0,10}n\W{0,10}\b/i
 body           __BTC_OBFU_3     /\b\W{0,10}b(?!tc\b)\W{0,10}t\W{0,10}c\W{0,10}\b/i
