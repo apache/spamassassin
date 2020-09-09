@@ -3055,10 +3055,28 @@ score      URI_DOTEDU                  2.000	# limit
 tflags     URI_DOTEDU                  publish
 
 meta       __URI_DOTEDU_ENTITY         __URI_DOTEDU && __AC_HTML_ENTITY_BONANZA_SHRT_RAW 
+meta       URI_DOTEDU_ENTITY           __URI_DOTEDU_ENTITY && !__SUBSCRIPTION_INFO 
+describe   URI_DOTEDU_ENTITY           Via .edu MTA + suspicious HTML content
+score      URI_DOTEDU_ENTITY           3.000	# limit
+tflags     URI_DOTEDU_ENTITY           publish
+
+meta       __RCVD_DOTEDU_SUSP_URI      __RCVD_DOTEDU_EXT && ( __45_ALNUM_URI || __45_ALNUM_URI_O || __64_ANY_URI )
+meta       RCVD_DOTEDU_SUSP_URI        __RCVD_DOTEDU_SUSP_URI
+describe   RCVD_DOTEDU_SUSP_URI        Via .edu MTA + suspicious URI
+score      RCVD_DOTEDU_SUSP_URI        3.000	# limit
+tflags     RCVD_DOTEDU_SUSP_URI        publish
 
 meta       __RCVD_DOTEDU_SHORT         __RCVD_DOTEDU_EXT && ( __HTML_IMG_ONLY || __BODY_URI_ONLY || __HTML_LENGTH_1024_1536 )
-meta       __RCVD_DOTEDU_SUSP_URI      __RCVD_DOTEDU_EXT && ( __45_ALNUM_URI || __45_ALNUM_URI_O || __64_ANY_URI )
+meta       RCVD_DOTEDU_SHORT           __RCVD_DOTEDU_SHORT && !__FS_SUBJ_RE && !__HAS_LIST_ID 
+describe   RCVD_DOTEDU_SHORT           Via .edu MTA + short message
+score      RCVD_DOTEDU_SHORT           2.500	# limit
+tflags     RCVD_DOTEDU_SHORT           publish
+
 meta       __RCVD_DOTEDU_SUSP          __RCVD_DOTEDU_EXT && ( MIME_QP_LONG_LINE || __TVD_SPACE_RATIO || __FROM_RUNON || __USING_VERP1 )
+meta       RCVD_DOTEDU_SUSP            __RCVD_DOTEDU_SUSP && !__HAS_X_LOOP && !__HAS_X_REF 
+describe   RCVD_DOTEDU_SUSP            Via .edu MTA + suspicious content
+score      RCVD_DOTEDU_SUSP            2.000	# limit
+
 
 # bitcoin work-at-home spams 04/2020
 body       PERFECT_BINARY              /\bperfect binary option\b/i
