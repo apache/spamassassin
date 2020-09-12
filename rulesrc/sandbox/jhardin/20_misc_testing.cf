@@ -2265,7 +2265,7 @@ meta      GOOG_REDIR_HTML_ONLY          (__GOOG_REDIR && MIME_HTML_ONLY) && !RDN
 describe  GOOG_REDIR_HTML_ONLY          Google redirect to obscure spamvertised website + HTML only
 score     GOOG_REDIR_HTML_ONLY          2.000	# limit
 
-
+rawbody   __LONG_INVIS_DIV              /<div\s+style\s*=\s*"(?:visibility\s*:\s*hidden|display\s*:\s*none)\s*">[^<\s]{1400}/i
 
 # low S/O, apparently lots of invisible ham...
 if can(Mail::SpamAssassin::Conf::feature_bug6558_free)
@@ -2278,9 +2278,18 @@ if can(Mail::SpamAssassin::Conf::feature_bug6558_free)
   describe  HTML_TEXT_INVISIBLE_STYLE     HTML hidden text + other spam signs
   score     HTML_TEXT_INVISIBLE_STYLE     3.500   # limit
   tflags    HTML_TEXT_INVISIBLE_STYLE     publish
+
+  meta      __LONG_STY_INVIS              __STY_INVIS && __LONGLINE
+  meta      LONG_INVISIBLE_TEXT           __LONG_INVIS_DIV || __LONG_STY_INVIS
+else
+  meta      LONG_INVISIBLE_TEXT           __LONG_INVIS_DIV
 endif
 # try it on span tags only...
 # rawbody   __SPAN_INVIS                  /<span\s[^>]{0,200}style\s*=\s*"[^">]{0,80}(?:visibility\s*:\s*hidden\s*;|display\s*:\s*none\s*;)[^>]{1,200}>\w/i
+
+describe  LONG_INVISIBLE_TEXT           Long block of hidden text - spam scan evasion?
+score     LONG_INVISIBLE_TEXT           3.000	# limit
+
 
 if can(Mail::SpamAssassin::Conf::feature_bug6558_free)
   # Lots of ham uses invisible fonts - WHY?
@@ -3083,18 +3092,41 @@ score      RCVD_DOTEDU_SUSP            2.000	# limit
 
 
 # bitcoin work-at-home spams 04/2020
-body       PERFECT_BINARY              /\bperfect binary option\b/i
-body       WE_PAID                     /\bwe have (?:already )?(?:paid|sent|remitted|issued) \$?\d+ (?:thousand )?(?:dollars )?to our (?:users|subscribers|members|clients|affiliates|partners)\b/i
-body       MAKE_XTRA_DOLLAR            /\bmake an extra dollar\b/i
-body       BONUS_LAST_DAY              /\b(?:last|final) day of the (?:\$\d+ |\d+ dollars? )?bonus offer(?:ing)?\b/i
+body       __PERFECT_BINARY            /\bperfect binary option\b/i
+body       __WE_PAID                   /\bwe have (?:already )?(?:paid|sent|remitted|issued) \$?\d+(?:,\d+)* (?:thousand )?(?:dollars )?to our (?:users|subscribers|members|clients|affiliates|partners)\b/i
+body       __MAKE_XTRA_DOLLAR          /\bmake an extra dollar\b/i
+body       __BONUS_LAST_DAY            /\b(?:last|final) day of the (?:\$\d+ |\d+ dollars? )?bonus offer(?:ing)?\b/i
+body       __PASSIVE_INCOME            /\bpassive income\b/i
+body       __WITHOUT_EFFORT            /\bwith(?:out(?: a(?:ny)?| the)?| no)(?: great)? effort\b/i
+body       __TRANSFORM_LIFE            /\b(transform|radically change) your (?:daily )?life\b/i
+body       __STAY_HOME                 /\b(?:going out of|leaving) your (?:home|house|residence)\b/i
+body       __RECEIVE_BONUS             /\byou(?:'ll )?(?:also |will )*(?:rec[ei]*ve|get|earn|be awarded) a (?:gift|bonus): \$[\d,]+/i
+
+meta       __WFH_01                    ( __PERFECT_BINARY + __WE_PAID + __MAKE_XTRA_DOLLAR + __BONUS_LAST_DAY + __PASSIVE_INCOME + __WITHOUT_EFFORT + __TRANSFORM_LIFE + __STAY_HOME + __RECEIVE_BONUS ) > 2
+
+meta       __BITCOIN_WFH_01            __BITCOIN && __WFH_01
+meta       BITCOIN_WFH_01              __BITCOIN_WFH_01
+describe   BITCOIN_WFH_01              Work-from-Home + bitcoin
+
+meta       __TO_TOO_MANY_WFH_01        __TO_WAY_TOO_MANY && __WFH_01
+meta       TO_TOO_MANY_WFH_01          __TO_TOO_MANY_WFH_01
+describe   TO_TOO_MANY_WFH_01          Work-from-Home + many recipients
+
+meta       __FREEMAIL_WFH_01           (FREEMAIL_FROM || FREEMAIL_REPLYTO) && __WFH_01
+meta       FREEMAIL_WFH_01             __FREEMAIL_WFH_01
+describe   FREEMAIL_WFH_01             Work-from-Home + freemail
+
 
 body       __4BYTE_UTF8_WORD           /(?:\xf0\x9d[\x90-\x9f][\x80-\xbf]){3,10}/
 tflags     __4BYTE_UTF8_WORD           multiple maxhits=10
-meta       SUSP_UTF8_WORD_MANY         __4BYTE_UTF8_WORD > 9
+meta       __4BYTE_UTF8_WORD_3         __4BYTE_UTF8_WORD > 3
+meta       __4BYTE_UTF8_WORD_5         __4BYTE_UTF8_WORD > 5
+meta       __4BYTE_UTF8_WORD_9         __4BYTE_UTF8_WORD > 9
+meta       SUSP_UTF8_WORD_MANY         __4BYTE_UTF8_WORD_9
 describe   SUSP_UTF8_WORD_MANY         Many words using only suspicious UTF-8 characters
 score      SUSP_UTF8_WORD_MANY         3.000	# limit
 
-meta       SUSP_UTF8_WORD_COMBO        __4BYTE_UTF8_WORD && ( __JM_REACTOR_DATE || __LIST_PARTIAL || __RDNS_NONE || __CLICK_HERE || __PHPMAILER_MUA || __STY_INVIS_2 ||  __TO___LOWER || __MSGID_OK_DIGITS )
+meta       SUSP_UTF8_WORD_COMBO        __4BYTE_UTF8_WORD && ( __LIST_PARTIAL || __RDNS_NONE || __CLICK_HERE || __PHPMAILER_MUA || __STY_INVIS_3 ||  __TO___LOWER || __MSGID_OK_DIGITS || __HTML_IMG_ONLY )
 describe   SUSP_UTF8_WORD_COMBO        Words using only suspicious UTF-8 characters + other signs
 score      SUSP_UTF8_WORD_COMBO        3.000	# limit
 
