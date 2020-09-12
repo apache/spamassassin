@@ -659,10 +659,16 @@ sub do_meta_tests {
           ');
         }
 
+        # conditionally include the dbg in the eval str
+        my $dbgstr = '';
+        if (would_log('dbg')) {
+          $dbgstr = 'dbg("rules: ran meta rule '.$metas[$i].' ======> got hit");';
+        }
+
         # Add this meta rule to the eval line
         $self->add_evalstr($pms, '
           $r = '.$meta{$metas[$i]}.';
-          if ($r) { $self->got_hit(q#'.$metas[$i].'#, "", ruletype => "meta", value => $r); }
+          if ($r) { $self->got_hit(q#'.$metas[$i].'#, "", ruletype => "meta", value => $r); '.$dbgstr.' }
         ');
 
         splice @metas, $i--, 1;    # remove this rule from our list
