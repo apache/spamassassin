@@ -3097,10 +3097,10 @@ body       __WE_PAID                   /\bwe have (?:already )?(?:paid|sent|remi
 body       __MAKE_XTRA_DOLLAR          /\bmake an extra dollar\b/i
 body       __BONUS_LAST_DAY            /\b(?:last|final) day of the (?:\$\d+ |\d+ dollars? )?bonus offer(?:ing)?\b/i
 body       __PASSIVE_INCOME            /\bpassive income\b/i
-body       __WITHOUT_EFFORT            /\bwith(?:out(?: a(?:ny)?| the)?| no)(?: great)? effort\b/i
+body       __WITHOUT_EFFORT            /\bwith(?:out(?: a(?:ny)?| the)?| no)(?: great| special| extra)? effort\b/i
 body       __TRANSFORM_LIFE            /\b(transform|change) your (?:daily )?life(?:style)?\b/i
 body       __STAY_HOME                 /\b(?:going out of|leaving)(?: your)? (?:home|house|residence)\b/i
-body       __RECEIVE_BONUS             /\byou(?:'ll)?(?: also| will)* (?:rec[ei]*ve|get|earn|collect|be (?:awarded|handed|remitted|given|paid)) a (?:gift|bonus)(?: of|:) \$[\d,]+/i
+body       __RECEIVE_BONUS             /\byou(?:'ll)?(?: also| will)* (?:rec[ei]*ve|get|earn|collect|be (?:awarded|handed|remitted|given|paid|(?:greeted|welcomed|started) with)) (?:an? )?(?:gift|bonus|extra)(?: of|:)? \$[\d,]+/i
 
 meta       __WFH_01                    ( __PERFECT_BINARY + __WE_PAID + __MAKE_XTRA_DOLLAR + __BONUS_LAST_DAY + __PASSIVE_INCOME + __WITHOUT_EFFORT + __TRANSFORM_LIFE + __STAY_HOME + __RECEIVE_BONUS ) > 2
 
