@@ -1913,6 +1913,9 @@ describe       BITCOIN_MALF_HTML    Bitcoin + malformed HTML
 score          BITCOIN_MALF_HTML    3.500	# limit
 
 meta           __BITCOIN_XPRIO      __XPRIO && (__BITCOIN || __BITCOIN_ID)
+meta           BITCOIN_XPRIO        __BITCOIN_XPRIO && !__ML1 && !__HAS_SENDER && !__DKIM_EXISTS && !__RCD_RDNS_MAIL_MESSY 
+describe       BITCOIN_XPRIO        Bitcoin + priority
+score          BITCOIN_XPRIO        2.500	# limit
 
 # bitcoin obfuscation - tip o' the hat to Steve Zinski on the users list, with a little cleanup
 body           __BTC_OBFU_2     /\b\W{0,10}b(?!itcoin)\W{0,10}i\W{0,10}t\W{0,10}c\W{0,10}o\W{0,10}i\W{0,10}n\W{0,10}\b/i
@@ -2280,7 +2283,9 @@ if can(Mail::SpamAssassin::Conf::feature_bug6558_free)
   tflags    HTML_TEXT_INVISIBLE_STYLE     publish
 
   meta      __LONG_STY_INVIS              __STY_INVIS && __LONGLINE
-  meta      LONG_INVISIBLE_TEXT           __LONG_INVIS_DIV || __LONG_STY_INVIS
+  meta      LONG_INVISIBLE_TEXT           __LONG_INVIS_DIV || (__LONG_STY_INVIS && !__UNSUB_LINK && !__RCD_RDNS_MTA_MESSY && !__USING_VERP1 && !__RCD_RDNS_MTA )
+
+  meta      __STY_INVIS_DIRECT            __STY_INVIS && __DOS_DIRECT_TO_MX_UNTRUSTED 
 else
   meta      LONG_INVISIBLE_TEXT           __LONG_INVIS_DIV
 endif
@@ -3066,6 +3071,9 @@ score      URI_DOTEDU                  2.000	# limit
 tflags     URI_DOTEDU                  publish
 
 meta       __URI_DOTEDU_LONG           __URI_DOTEDU && __LONGLINE 
+meta       URI_DOTEDU_LONG             __URI_DOTEDU_LONG && !ALL_TRUSTED && !__RDNS_LONG && !__DOS_RELAYED_EXT && !__URI_MAILTO && !__CTE 
+describe   URI_DOTEDU_LONG             Has .edu URI + excessively long line
+score      URI_DOTEDU_LONG             3.000	# limit
 
 meta       __URI_DOTEDU_ENTITY         __URI_DOTEDU && __AC_HTML_ENTITY_BONANZA_SHRT_RAW 
 meta       URI_DOTEDU_ENTITY           __URI_DOTEDU_ENTITY && !__SUBSCRIPTION_INFO 
@@ -3107,14 +3115,17 @@ meta       __WFH_01                    ( __PERFECT_BINARY + __WE_PAID + __MAKE_X
 meta       __BITCOIN_WFH_01            __BITCOIN && __WFH_01
 meta       BITCOIN_WFH_01              __BITCOIN_WFH_01
 describe   BITCOIN_WFH_01              Work-from-Home + bitcoin
+tflags     BITCOIN_WFH_01              publish
 
 meta       __TO_TOO_MANY_WFH_01        __TO_WAY_TOO_MANY && __WFH_01
 meta       TO_TOO_MANY_WFH_01          __TO_TOO_MANY_WFH_01
 describe   TO_TOO_MANY_WFH_01          Work-from-Home + many recipients
+tflags     TO_TOO_MANY_WFH_01          publish
 
 meta       __FREEMAIL_WFH_01           (FREEMAIL_FROM || FREEMAIL_REPLYTO) && __WFH_01
 meta       FREEMAIL_WFH_01             __FREEMAIL_WFH_01
 describe   FREEMAIL_WFH_01             Work-from-Home + freemail
+tflags     FREEMAIL_WFH_01             publish
 
 
 body       __4BYTE_UTF8_WORD           /(?:\xf0\x9d[\x90-\x9f][\x80-\xbf]){3,10}/
