@@ -3161,12 +3161,12 @@ score      HTML_EMPTY_CELLS_MANY       1.500	# limit
 
 
 uri        __SENDGRID_REDIR            m,://u\d+\.ct\.sendgrid\.net/ls/click\?upn=,
-meta       SENDGRID_REDIR              __SENDGRID_REDIR && !MIME_HTML_MOSTLY
+meta       SENDGRID_REDIR              __SENDGRID_REDIR && !MIME_HTML_MOSTLY && !__HAS_ERRORS_TO && !__HAS_X_BEEN_THERE && !__HAS_X_MAILMAN_VERSION 
 describe   SENDGRID_REDIR              Redirect URI via Sendgrid
-score      SENDGRID_REDIR              3.500	# limit
+score      SENDGRID_REDIR              3.000	# limit
 tflags     SENDGRID_REDIR              publish
 
-meta       __SENDGRID_REDIR_PHISH      __SENDGRID_REDIR && PDS_FROM_NAME_TO_DOMAIN
+meta       __SENDGRID_REDIR_PHISH      __SENDGRID_REDIR && ( PDS_FROM_NAME_TO_DOMAIN || FORGED_RELAY_MUA_TO_MX )
 meta       SENDGRID_REDIR_PHISH        __SENDGRID_REDIR_PHISH
 describe   SENDGRID_REDIR_PHISH        Redirect URI via Sendgrid + phishing signs
 score      SENDGRID_REDIR_PHISH        3.500	# limit
