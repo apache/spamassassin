@@ -298,7 +298,7 @@ Used to whitelist sender addresses which send mail that is often tagged
 Use of this setting is not recommended, since it blindly trusts the message,
 which is routinely and easily forged by spammers and phish senders. The
 recommended solution is to instead use C<whitelist_auth> or other authenticated
-whitelisting methods, or C<whitelist_from_rcvd>.
+whitelisting methods, or C<welcomelist_from_rcvd>.
 
 Whitelist and blacklist addresses are now file-glob-style patterns, so
 C<friend@somewhere.com>, C<*@isp.com>, or C<*.domain.net> will all work.
@@ -357,7 +357,9 @@ e.g.
     code => \&Mail::SpamAssassin::Conf::Parser::remove_addrlist_value
   });
 
-=item whitelist_from_rcvd addr@lists.sourceforge.net sourceforge.net
+=item welcomelist_from_rcvd addr@lists.sourceforge.net sourceforge.net
+
+Previously whitelist_from_rcvd which will work interchangeably until 4.1.
 
 Works similarly to welcomelist_from (previously whitelist_from), except that in addition to matching
 a sender address, a relay's rDNS name or its IP address must match too
@@ -394,24 +396,27 @@ result in the generated Received header field according to RFC 5321.
 
 e.g.
 
-  whitelist_from_rcvd joe@example.com  example.com
-  whitelist_from_rcvd *@*              mail.example.org
-  whitelist_from_rcvd *@axkit.org      [192.0.2.123]
-  whitelist_from_rcvd *@axkit.org      [192.0.2.0/24]
-  whitelist_from_rcvd *@axkit.org      [192.0.2.0]/24
-  whitelist_from_rcvd *@axkit.org      [2001:db8:1234::/48]
-  whitelist_from_rcvd *@axkit.org      [2001:db8:1234::]/48
+  welcomelist_from_rcvd joe@example.com  example.com
+  welcomelist_from_rcvd *@*              mail.example.org
+  welcomelist_from_rcvd *@axkit.org      [192.0.2.123]
+  welcomelist_from_rcvd *@axkit.org      [192.0.2.0/24]
+  welcomelist_from_rcvd *@axkit.org      [192.0.2.0]/24
+  welcomelist_from_rcvd *@axkit.org      [2001:db8:1234::/48]
+  welcomelist_from_rcvd *@axkit.org      [2001:db8:1234::]/48
 
-=item def_whitelist_from_rcvd addr@lists.sourceforge.net sourceforge.net
+=item def_welcomelist_from_rcvd addr@lists.sourceforge.net sourceforge.net
 
-Same as C<whitelist_from_rcvd>, but used for the default whitelist entries
-in the SpamAssassin distribution.  The whitelist score is lower, because
+Previously def_whitelist_from_rcvd which will work interchangeably until 4.1.
+
+Same as C<welcomelist_from_rcvd>, but used for the default welcomelist entries
+in the SpamAssassin distribution.  The welcomelist score is lower, because
 these are often targets for spammer spoofing.
 
 =cut
 
   push (@cmds, {
-    setting => 'whitelist_from_rcvd',
+    setting => 'welcomelist_from_rcvd',
+    aliases => ['whitelist_from_rcvd'], # backward compatible - to be removed for 4.1
     type => $CONF_TYPE_ADDRLIST,
     code => sub {
       my ($self, $key, $value, $line) = @_;
@@ -421,13 +426,14 @@ these are often targets for spammer spoofing.
       unless ($value =~ /^\S+\s+\S+$/) {
 	return $INVALID_VALUE;
       }
-      $self->{parser}->add_to_addrlist_rcvd ('whitelist_from_rcvd',
+      $self->{parser}->add_to_addrlist_rcvd ('welcomelist_from_rcvd',
                                         split(/\s+/, $value));
     }
   });
 
   push (@cmds, {
-    setting => 'def_whitelist_from_rcvd',
+    setting => 'def_welcomelist_from_rcvd',
+    aliases => ['def_whitelist_from_rcvd'],
     type => $CONF_TYPE_ADDRLIST,
     code => sub {
       my ($self, $key, $value, $line) = @_;
@@ -437,16 +443,16 @@ these are often targets for spammer spoofing.
       unless ($value =~ /^\S+\s+\S+$/) {
 	return $INVALID_VALUE;
       }
-      $self->{parser}->add_to_addrlist_rcvd ('def_whitelist_from_rcvd',
+      $self->{parser}->add_to_addrlist_rcvd ('def_welcomelist_from_rcvd',
                                         split(/\s+/, $value));
     }
   });
 
 =item whitelist_allows_relays user@example.com
 
-Specify addresses which are in C<whitelist_from_rcvd> that sometimes
+Specify addresses which are in C<welcomelist_from_rcvd> that sometimes
 send through a mail relay other than the listed ones. By default mail
-with a From address that is in C<whitelist_from_rcvd> that does not match
+with a From address that is in C<welcomelist_from_rcvd> that does not match
 the relay will trigger a forgery rule. Including the address in
 C<whitelist_allows_relay> prevents that.
 
@@ -460,7 +466,7 @@ Multiple addresses per line, separated by spaces, is OK.  Multiple
 C<whitelist_allows_relays> lines are also OK.
 
 The specified email address does not have to match exactly the address
-previously used in a whitelist_from_rcvd line as it is compared to the
+previously used in a welcomelist_from_rcvd line as it is compared to the
 address in the header.
 
 e.g.
@@ -475,25 +481,28 @@ e.g.
     type => $CONF_TYPE_ADDRLIST,
   });
 
-=item unwhitelist_from_rcvd user@example.com
+=item unwelcomelist_from_rcvd user@example.com
 
-Used to remove a default whitelist_from_rcvd or def_whitelist_from_rcvd
-entry, so for example a distribution whitelist_from_rcvd can be overridden
-in a local.cf file, or an individual user can override a whitelist_from_rcvd
+Previously unwhitelist_from_rcvd which will work interchangeably until 4.1.
+
+Used to remove a default welcomelist_from_rcvd (previously whitelist_from_rcvd) or def_welcomelist_from_rcvd (previously def_whitelist_from_rcvd)
+entry, so for example a distribution welcomelist_from_rcvd can be overridden
+in a local.cf file, or an individual user can override a welcomelist_from_rcvd
 entry in their own C<user_prefs> file.
 
 The specified email address has to match exactly the address previously
-used in a whitelist_from_rcvd line.
+used in a welcomelist_from_rcvd line.
 
 e.g.
 
-  unwhitelist_from_rcvd joe@example.com fred@example.com
-  unwhitelist_from_rcvd *@axkit.org
+  unwelcomelist_from_rcvd joe@example.com fred@example.com
+  unwelcomelist_from_rcvd *@axkit.org
 
 =cut
 
   push (@cmds, {
-    setting => 'unwhitelist_from_rcvd',
+    setting => 'unwelcomelist_from_rcvd',
+    aliases => ['unwhitelist_from_rcvd'],
     type => $CONF_TYPE_ADDRLIST,
     code => sub {
       my ($self, $key, $value, $line) = @_;
@@ -503,9 +512,9 @@ e.g.
       unless ($value =~ /^(?:\S+(?:\s+\S+)*)$/) {
 	return $INVALID_VALUE;
       }
-      $self->{parser}->remove_from_addrlist_rcvd('whitelist_from_rcvd',
+      $self->{parser}->remove_from_addrlist_rcvd('welcomelist_from_rcvd',
                                         split (/\s+/, $value));
-      $self->{parser}->remove_from_addrlist_rcvd('def_whitelist_from_rcvd',
+      $self->{parser}->remove_from_addrlist_rcvd('def_welcomelist_from_rcvd',
                                         split (/\s+/, $value));
     }
   });
@@ -618,7 +627,7 @@ be blacklisted.  Same format as C<blacklist_from>.
 =item whitelist_auth user@example.com
 
 Used to specify addresses which send mail that is often tagged (incorrectly) as
-spam.  This is different from C<welcomelist_from> and C<whitelist_from_rcvd> in
+spam.  This is different from C<welcomelist_from> and C<welcomelist_from_rcvd> in
 that it first verifies that the message was sent by an authorized sender for
 the address, before whitelisting.
 
@@ -4813,8 +4822,8 @@ sub new {
   $self->{welcomelist_from} = { };
   $self->{whitelist_allows_relays} = { };
   $self->{blacklist_from} = { };
-  $self->{whitelist_from_rcvd} = { };
-  $self->{def_whitelist_from_rcvd} = { };
+  $self->{welcomelist_from_rcvd} = { };
+  $self->{def_welcomelist_from_rcvd} = { };
 
   $self->{blacklist_to} = { };
   $self->{welcomelist_to} = { };

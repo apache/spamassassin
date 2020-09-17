@@ -10,17 +10,17 @@ plan tests => 32;
 # ---------------------------------------------------------------------------
 
 tstprefs ("
-        def_whitelist_from_rcvd *\@paypal.com paypal.com
-        def_whitelist_from_rcvd *\@paypal.com ebay.com
-        def_whitelist_from_rcvd mumble\@example.com example.com
-        whitelist_from_rcvd foo\@example.com spamassassin.org
-        whitelist_from_rcvd foo\@example.com example.com
-        whitelist_from_rcvd bar\@example.com example.com
+        def_welcomelist_from_rcvd *\@paypal.com paypal.com
+        def_welcomelist_from_rcvd *\@paypal.com ebay.com
+        def_welcomelist_from_rcvd mumble\@example.com example.com
+        welcomelist_from_rcvd foo\@example.com spamassassin.org
+        welcomelist_from_rcvd foo\@example.com example.com
+        welcomelist_from_rcvd bar\@example.com example.com
         whitelist_allows_relays bar\@example.com
         welcomelist_from baz\@example.com
         welcomelist_from bam\@example.com
         unwhitelist_from bam\@example.com
-        unwhitelist_from_rcvd mumble\@example.com
+        unwelcomelist_from_rcvd mumble\@example.com
 	");
 
 # tests 1 - 4 does welcomelist_from (previously whitelist_from) work?
@@ -36,11 +36,11 @@ tstprefs ("
 sarun ("-L -t < data/nice/008", \&patterns_run_cb);
 ok_all_patterns();
 
-# tests 5 - 8 does whitelist_from_rcvd work?
+# tests 5 - 8 does welcomelist_from_rcvd work?
 sarun ("-L -t < data/nice/009", \&patterns_run_cb);
 ok_all_patterns();
 
-# tests 9 - 12 second relay specified for same addr in whitelist_from_rcvd
+# tests 9 - 12 second relay specified for same addr in welcomelist_from_rcvd
 sarun ("-L -t < data/nice/010", \&patterns_run_cb);
 ok_all_patterns();
 
@@ -54,11 +54,11 @@ ok_all_patterns();
              q{ FORGED_IN_DEF_WHITELIST }, 'a8'
              );
 
-# tests 13 - 16 does def_whitelist_from_rcvd work?
+# tests 13 - 16 does def_welcomelist_from_rcvd work?
 sarun ("-L -t < data/nice/011", \&patterns_run_cb);
 ok_all_patterns();
 
-# tests 17 - 20 second relay specified for same addr in def_whitelist_from_rcvd
+# tests 17 - 20 second relay specified for same addr in def_welcomelist_from_rcvd
 sarun ("-L -t < data/nice/012", \&patterns_run_cb);
 ok_all_patterns();
 
@@ -79,7 +79,7 @@ ok_all_patterns();
 sarun ("-L -t < data/nice/014", \&patterns_run_cb);
 ok_all_patterns();
 
-# tests 29 - 32 does unwhitelist_from_rcvd work?
+# tests 29 - 32 does unwelcomelist_from_rcvd work?
 sarun ("-L -t < data/nice/015", \&patterns_run_cb);
 ok_all_patterns();
 

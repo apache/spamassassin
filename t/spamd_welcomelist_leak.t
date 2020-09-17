@@ -26,8 +26,8 @@ open (OUT, ">log/virtualconfig/testuser1/user_prefs");
 print OUT q{
 
         welcomelist_from    sb55sb123456789@yahoo.com
-        whitelist_from_rcvd sb55sb123456789@yahoo.com  cgocable.ca
-        whitelist_from_rcvd sb55sb123456789@yahoo.com  webnote.net
+        welcomelist_from_rcvd sb55sb123456789@yahoo.com  cgocable.ca
+        welcomelist_from_rcvd sb55sb123456789@yahoo.com  webnote.net
 
 };
 close OUT;

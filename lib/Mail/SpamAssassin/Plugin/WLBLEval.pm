@@ -228,7 +228,7 @@ sub _check_from_in_welcomelist {
       $pms->{from_in_welcomelist} = 1;
       return;
     }
-    my $wh = $self->_check_whitelist_rcvd ($pms, $self->{main}->{conf}->{whitelist_from_rcvd}, $_);
+    my $wh = $self->_check_whitelist_rcvd ($pms, $self->{main}->{conf}->{welcomelist_from_rcvd}, $_);
     if ($wh == 1) {
       $pms->{from_in_welcomelist} = 1;
       return;
@@ -248,7 +248,7 @@ sub _check_from_in_default_whitelist {
   my ($self, $pms) = @_;
   my $found_match = 0;
   foreach ($pms->all_from_addrs()) {
-    my $wh = $self->_check_whitelist_rcvd ($pms, $self->{main}->{conf}->{def_whitelist_from_rcvd}, $_);
+    my $wh = $self->_check_whitelist_rcvd ($pms, $self->{main}->{conf}->{def_welcomelist_from_rcvd}, $_);
     if ($wh == 1) {
       $pms->{from_in_default_whitelist} = 1;
       return;
@@ -342,10 +342,10 @@ sub _check_whitelist_rcvd {
   foreach my $white_addr (keys %{$list}) {
     my $regexp = $list->{$white_addr}{re};
     foreach my $domain (@{$list->{$white_addr}{domain}}) {
-      # $domain is a second param in whitelist_from_rcvd: a domain name or an IP address
+      # $domain is a second param in welcomelist_from_rcvd: a domain name or an IP address
       
       if ($addr =~ $regexp) {
-        # From or sender address matching the first param in whitelist_from_rcvd
+        # From or sender address matching the first param in welcomelist_from_rcvd
         my $match;
         foreach my $lastunt (@relays) {
           local($1,$2);

@@ -187,10 +187,10 @@ an author address (From) to the pattern in the first parameter, the message
 must also carry a valid Domain Keys Identified Mail (DKIM) signature made by
 a signing domain (SDID, i.e. the d= tag) that is acceptable to us.
 
-Only one whitelist entry is allowed per line, as in C<whitelist_from_rcvd>.
+Only one whitelist entry is allowed per line, as in C<welcomelist_from_rcvd>.
 Multiple C<whitelist_from_dkim> lines are allowed. File-glob style characters
 are allowed for the From address (the first parameter), just like with
-C<whitelist_from_rcvd>.
+C<welcomelist_from_rcvd>.
 
 The second parameter (the signing-domain) does not accept full file-glob style
 wildcards, although a simple '*.' (or just a '.') prefix to a domain name
