@@ -2283,9 +2283,13 @@ if can(Mail::SpamAssassin::Conf::feature_bug6558_free)
   tflags    HTML_TEXT_INVISIBLE_STYLE     publish
 
   meta      __LONG_STY_INVIS              __STY_INVIS && __LONGLINE
-  meta      LONG_INVISIBLE_TEXT           __LONG_INVIS_DIV || (__LONG_STY_INVIS && !__UNSUB_LINK && !__RCD_RDNS_MTA_MESSY && !__USING_VERP1 && !__RCD_RDNS_MTA )
+  meta      LONG_INVISIBLE_TEXT           __LONG_INVIS_DIV || (__LONG_STY_INVIS && !__UNSUB_LINK && !__RCD_RDNS_MTA_MESSY && !__USING_VERP1 && !__RCD_RDNS_MTA && !__RCD_RDNS_MTA_MESSY && !__USING_VERP1 )
 
   meta      __STY_INVIS_DIRECT            __STY_INVIS && __DOS_DIRECT_TO_MX_UNTRUSTED 
+  meta      STY_INVIS_DIRECT              __STY_INVIS_DIRECT && !__L_BODY_8BITS && !__UNSUB_LINK && !__HDR_RCVD_AMAZON && !__TO___LOWER && !__PDS_DOUBLE_URL
+  describe  STY_INVIS_DIRECT              HTML hidden text + direct-to-MX
+  score     STY_INVIS_DIRECT              2.500	# limit
+
 else
   meta      LONG_INVISIBLE_TEXT           __LONG_INVIS_DIV
 endif
@@ -2294,6 +2298,7 @@ endif
 
 describe  LONG_INVISIBLE_TEXT           Long block of hidden text - spam scan evasion?
 score     LONG_INVISIBLE_TEXT           3.000	# limit
+tflags    LONG_INVISIBLE_TEXT           publish
 
 
 if can(Mail::SpamAssassin::Conf::feature_bug6558_free)
@@ -2885,6 +2890,7 @@ meta       __AC_POST_EXTRAS            (__AC_POSTHTMLEXTRAS || __AC_POSTIMGEXTRA
 meta       AC_POST_EXTRAS              __AC_POST_EXTRAS && !__URI_MAILTO && !__HAS_LIST_ID 
 describe   AC_POST_EXTRAS              Suspicious URL
 score      AC_POST_EXTRAS              2.500	# limit
+tflags     AC_POST_EXTRAS              publish
 
 rawbody    __AC_TINY_FONT              /(?:font-size)\s*:\s*[1-3]\s*(?:em|p[tx]|%)?(?:\s*!important)?\s*[";]/i
 
@@ -3163,7 +3169,7 @@ score      HTML_EMPTY_CELLS_MANY       1.500	# limit
 uri        __SENDGRID_REDIR            m,://u\d+\.ct\.sendgrid\.net/ls/click\?upn=,
 meta       SENDGRID_REDIR              __SENDGRID_REDIR && !MIME_HTML_MOSTLY && !__HAS_ERRORS_TO && !__HAS_X_BEEN_THERE && !__HAS_X_MAILMAN_VERSION 
 describe   SENDGRID_REDIR              Redirect URI via Sendgrid
-score      SENDGRID_REDIR              2.000	# limit
+score      SENDGRID_REDIR              1.500	# limit
 tflags     SENDGRID_REDIR              publish
 
 meta       __SENDGRID_REDIR_PHISH      __SENDGRID_REDIR && ( __PDS_FROM_NAME_TO_DOMAIN || FORGED_RELAY_MUA_TO_MX || __TO_IN_SUBJ )
