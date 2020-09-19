@@ -2283,10 +2283,10 @@ if can(Mail::SpamAssassin::Conf::feature_bug6558_free)
   tflags    HTML_TEXT_INVISIBLE_STYLE     publish
 
   meta      __LONG_STY_INVIS              __STY_INVIS && __LONGLINE
-  meta      LONG_INVISIBLE_TEXT           __LONG_INVIS_DIV || (__LONG_STY_INVIS && !__UNSUB_LINK && !__RCD_RDNS_MTA_MESSY && !__USING_VERP1 && !__RCD_RDNS_MTA && !__RCD_RDNS_MTA_MESSY && !__USING_VERP1 )
+  meta      LONG_INVISIBLE_TEXT           __LONG_INVIS_DIV || (__LONG_STY_INVIS && !__UNSUB_LINK && !__RCD_RDNS_MTA_MESSY && !__USING_VERP1 && !__RCD_RDNS_MTA && !__RCD_RDNS_MTA_MESSY && !__MIME_QP && !__HAS_X_MAILER && !__REPTO_QUOTE && !__USING_VERP1 )
 
   meta      __STY_INVIS_DIRECT            __STY_INVIS && __DOS_DIRECT_TO_MX_UNTRUSTED 
-  meta      STY_INVIS_DIRECT              __STY_INVIS_DIRECT && !__L_BODY_8BITS && !__UNSUB_LINK && !__HDR_RCVD_AMAZON && !__TO___LOWER && !__PDS_DOUBLE_URL
+  meta      STY_INVIS_DIRECT              __STY_INVIS_DIRECT && !__L_BODY_8BITS && !__UNSUB_LINK && !__HDR_RCVD_AMAZON && !__TO___LOWER && !__PDS_DOUBLE_URL && !__MAIL_LINK 
   describe  STY_INVIS_DIRECT              HTML hidden text + direct-to-MX
   score     STY_INVIS_DIRECT              2.500	# limit
 
@@ -2320,7 +2320,7 @@ if can(Mail::SpamAssassin::Conf::feature_bug6558_free)
   meta      __WORD_INVIS_5                __WORD_INVIS > 5
 
   meta      __FONT_INVIS_LONG_LINE        __FONT_INVIS && __LONGLINE 
-  meta      FONT_INVIS_LONG_LINE          __FONT_INVIS_LONG_LINE && !__RDNS_LONG 
+  meta      FONT_INVIS_LONG_LINE          __FONT_INVIS_LONG_LINE && !__RDNS_LONG && !__DOS_HAS_LIST_UNSUB 
   describe  FONT_INVIS_LONG_LINE          Invisible text + long lines
   score     FONT_INVIS_LONG_LINE          3.000	# limit
   tflags    FONT_INVIS_LONG_LINE          publish
@@ -2329,7 +2329,7 @@ if can(Mail::SpamAssassin::Conf::feature_bug6558_free)
   describe  FONT_INVIS_NORDNS             Invisible text + no rDNS
   score     FONT_INVIS_NORDNS             2.500	# limit
 
-  meta      FONT_INVIS_POSTEXTRAS         __FONT_INVIS && __AC_POST_EXTRAS
+  meta      FONT_INVIS_POSTEXTRAS         (__FONT_INVIS || __STY_INVIS) && __AC_POST_EXTRAS
   describe  FONT_INVIS_POSTEXTRAS         Invisible text + suspicious URI
   score     FONT_INVIS_POSTEXTRAS         3.500	# limit
   tflags    FONT_INVIS_POSTEXTRAS         publish
