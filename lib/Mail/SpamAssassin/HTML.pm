@@ -377,6 +377,9 @@ sub html_uri {
     if (defined $attr->{href}) {
       $self->push_uri($tag, $attr->{href});
     }
+    if (defined $attr->{'data-saferedirecturl'}) {
+      $self->push_uri($tag, $attr->{'data-saferedirecturl'});
+    }
   }
   elsif ($tag =~ /^(?:img|frame|iframe|embed|script|bgsound)$/) {
     if (defined $attr->{src}) {
