@@ -28,6 +28,7 @@ enlist_addrlist (SUSP_NTLD) *@*.fit
 enlist_addrlist (SUSP_NTLD) *@*.ooo
 enlist_addrlist (SUSP_NTLD) *@*.faith
 enlist_addrlist (SUSP_NTLD) *@*.buzz
+enlist_addrlist (SUSP_NTLD) *@*.trade
 
 enlist_uri_host (SUSP_URI_NTLD) icu
 enlist_uri_host (SUSP_URI_NTLD) online
@@ -50,7 +51,7 @@ enlist_uri_host (SUSP_URI_NTLD) fit
 enlist_uri_host (SUSP_URI_NTLD) ooo
 enlist_uri_host (SUSP_URI_NTLD) faith
 enlist_uri_host (SUSP_URI_NTLD) buzz
-
+enlist_uri_host (SUSP_URI_NTLD) trade
 
 header   __FROM_ADDRLIST_SUSPNTLD eval:check_from_in_list('SUSP_NTLD')
 reuse    __FROM_ADDRLIST_SUSPNTLD
