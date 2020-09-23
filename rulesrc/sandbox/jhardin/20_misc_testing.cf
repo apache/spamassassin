@@ -3182,8 +3182,14 @@ meta       __MSGID_DOLLARS_URI_IMG     __MSGID_DOLLARS_MAYBE && __HAS_ANY_URI &&
 meta       MSGID_DOLLARS_URI_IMG       __MSGID_DOLLARS_URI_IMG && !__THREADED && !__HS_SUBJ_RE_FW 
 describe   MSGID_DOLLARS_URI_IMG       Suspicious Message-ID and image
 score      MSGID_DOLLARS_URI_IMG       3.000	# limit
+tflags     MSGID_DOLLARS_URI_IMG       publish
 
 uri        __URI_DASHGOVEDU            m,://[^/]*-(?:gov|edu)\.com/,i
+meta       URI_DASHGOVEDU              __URI_DASHGOVEDU
+describe   URI_DASHGOVEDU              Suspicious domain name
+score      URI_DASHGOVEDU              3.500	# limit
+tflags     URI_DASHGOVEDU              publish
+
 
 
 
