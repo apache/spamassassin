@@ -42,3 +42,9 @@ meta       GB_LINKED_IMG_NOT_RCVD_LINK   __LINKED_IMG_NOT_RCVD_LINK && !__HAS_ER
 describe   GB_LINKED_IMG_NOT_RCVD_LINK   Linkedin hosted image but message not from Linkedin
 score      GB_LINKED_IMG_NOT_RCVD_LINK   2.500    # limit
 tflags     GB_LINKED_IMG_NOT_RCVD_LINK   publish
+
+uri        __SENDINBLUE_REDIR            m,://\d+zll\.r\.ag\.d\.sendibm3\.com/mk/cl/f/,
+meta       SENDINBLUE_REDIR              __SENDINBLUE_REDIR && !MIME_HTML_MOSTLY && !__HAS_ERRORS_TO && !__HAS_X_BEEN_THERE && !__HAS_X_MAILMAN_VERSION
+describe   SENDINBLUE_REDIR              Redirect URI via Sendinblue
+# score      SENDINBLUE_REDIR            2.000    # limit
+# tflags     SENDINBLUE_REDIR            publish
