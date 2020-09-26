@@ -48,3 +48,9 @@ meta       SENDINBLUE_REDIR              __SENDINBLUE_REDIR && !MIME_HTML_MOSTLY
 describe   SENDINBLUE_REDIR              Redirect URI via Sendinblue
 # score      SENDINBLUE_REDIR            2.000    # limit
 # tflags     SENDINBLUE_REDIR            publish
+
+meta       __SENDINBLUE_REDIR_PHISH      __SENDINBLUE_REDIR && ( __PDS_FROM_NAME_TO_DOMAIN || FORGED_RELAY_MUA_TO_MX || __TO_IN_SUBJ )
+meta       SENDINBLUE_REDIR_PHISH        __SENDINBLUE_REDIR_PHISH
+describe   SENDINBLUE_REDIR_PHISH        Redirect URI via Sendinblue + phishing signs
+# score      SENDINBLUE_REDIR_PHISH        3.500    # limit
+# tflags     SENDINBLUE_REDIR_PHISH        publish
