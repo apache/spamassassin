@@ -3116,6 +3116,11 @@ body       __TRANSFORM_LIFE            /\b(transform|change) your (?:daily )?lif
 body       __STAY_HOME                 /\b(?:going out of|leaving)(?: your)? (?:home|house|residence)\b/i
 body       __RECEIVE_BONUS             /\byou(?:'ll)?(?: also| will)* (?:rec[ei]*ve|get|earn|collect|be (?:awarded|handed|remitted|given|paid|(?:greeted|welcomed|started) with)) (?:an? )?(?:gift|bonus|extra)(?: of|:)? \$[\d,]+/i
 
+meta       TRANSFORM_LIFE              __TRANSFORM_LIFE && !__SUBSCRIPTION_INFO && !__RP_MATCHES_RCVD && !__RCD_RDNS_MAIL_MESSY && !__VIA_ML 
+describe   TRANSFORM_LIFE              Transform your life!
+score      TRANSFORM_LIFE              2.500	# limit
+
+
 meta       __WFH_01                    ( __PERFECT_BINARY + __WE_PAID + __MAKE_XTRA_DOLLAR + __BONUS_LAST_DAY + __PASSIVE_INCOME + __WITHOUT_EFFORT + __TRANSFORM_LIFE + __STAY_HOME + __RECEIVE_BONUS ) > 2
 
 meta       __BITCOIN_WFH_01            __BITCOIN && __WFH_01
@@ -3190,6 +3195,8 @@ describe   URI_DASHGOVEDU              Suspicious domain name
 score      URI_DASHGOVEDU              3.500	# limit
 tflags     URI_DASHGOVEDU              publish
 
-
+meta       __NOINR_MSOE_FORG           __NO_INR_YES_REF && __MSOE_MID_WRONG_CASE 
+meta       __NOINR_MONEY               __NO_INR_YES_REF && __LOTSA_MONEY_01 
+meta       __NOINR_FRAUD               __NO_INR_YES_REF && (__AFRICAN_STATE || __BENEFICIARY || __COMPENSATION || __FILL_THIS_FORM_PARTIAL || __LOTTO_DEPT || __WIRE_XFR || __TRANSFORM_LIFE )
 
 
