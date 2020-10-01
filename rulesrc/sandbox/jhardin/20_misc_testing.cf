@@ -3195,8 +3195,9 @@ describe   URI_DASHGOVEDU              Suspicious domain name
 score      URI_DASHGOVEDU              3.500	# limit
 tflags     URI_DASHGOVEDU              publish
 
-meta       __NOINR_MSOE_FORG           __NO_INR_YES_REF && __MSOE_MID_WRONG_CASE 
-meta       __NOINR_MONEY               __NO_INR_YES_REF && __LOTSA_MONEY_01 
-meta       __NOINR_FRAUD               __NO_INR_YES_REF && (__AFRICAN_STATE || __BENEFICIARY || __COMPENSATION || __FILL_THIS_FORM_PARTIAL || __LOTTO_DEPT || __WIRE_XFR || __TRANSFORM_LIFE )
+# all have good S/O but are already scored very highly
+#meta       __NOINR_MSOE_FORG           __NO_INR_YES_REF && __MSOE_MID_WRONG_CASE 
+#meta       __NOINR_MONEY               __NO_INR_YES_REF && __LOTSA_MONEY_01 
+#meta       __NOINR_FRAUD               __NO_INR_YES_REF && (__AFRICAN_STATE || __BENEFICIARY || __COMPENSATION || __FILL_THIS_FORM_PARTIAL || __LOTTO_DEPT || __WIRE_XFR || __TRANSFORM_LIFE )
 
 
