@@ -5,7 +5,7 @@
 #
 
 ifplugin Mail::SpamAssassin::Plugin::ReplaceTags
-  replace_tag  CURRENCY   (?:[\(\[]?(?:\bU[Ss][D\$]{0,2}|\$(?:US)?|usd|USD|CAD|GBP|=[Aa][34]|\xa3|&\#16[34];|(?i:pounds\ssterling)|\xa4|EUR(?:OS)?|(?:d')?[Ee]uro?s?|(?i:eur)\sde|CHF|FCFA|d[\xf3]lares\sde\slos\sE+\.\s?U+\.)[\]\)]?)
+  replace_tag  CURRENCY   (?:[\(\[]?(?:\bU[Ss][D\$]{0,2}|\$(?:US)?|usd|USD|CAD|GBP|=[Aa][34]|\xa3|&\#16[34];|(?i:pounds\ssterling)|\xa4|EUR(?:OS?)?|(?:d')?[Ee]uro?s?|(?i:eur)\sde|CHF|FCFA|d[\xf3]lares\sde\slos\sE+\.\s?U+\.)[\]\)]?)
   replace_tag  GB_UK      \b(?:U\.?K\.?|(?:Great\s)?Brit(?:ain|ish)|G\.?B\.?)\b
   # not date format or IP addr format
   replace_tag  NUM_NOT_DATE       [1-9](?!\d\d\d\.\d\d\.\d\d\s)(?!\d?\.\d\d?\.\d\d\d\d\s)
