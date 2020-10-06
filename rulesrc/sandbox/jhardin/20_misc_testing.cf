@@ -2311,7 +2311,7 @@ if can(Mail::SpamAssassin::Conf::feature_bug6558_free)
   meta      __FONT_INVIS_MANY             __FONT_INVIS_2
   meta      HTML_TEXT_INVISIBLE_FONT      __FONT_INVIS_MANY && !__HAS_ERRORS_TO && !__URI_DOTGOV && !__LYRIS_EZLM_REMAILER && !__ML3 && !__THREADED && !__DKIMWL_WL_HI && !USER_IN_DEF_DKIM_WL && !__MOZILLA_MSGID 
   describe  HTML_TEXT_INVISIBLE_FONT      HTML hidden text - word obfuscation?
-  score     HTML_TEXT_INVISIBLE_FONT      3.000   # limit
+  score     HTML_TEXT_INVISIBLE_FONT      2.000   # limit
   tflags    HTML_TEXT_INVISIBLE_FONT      publish
 
   # Does this hit less ham while still hitting spam?
