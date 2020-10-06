@@ -2303,7 +2303,7 @@ tflags    LONG_INVISIBLE_TEXT           publish
 
 if can(Mail::SpamAssassin::Conf::feature_bug6558_free)
   # Lots of ham uses invisible fonts - WHY?
-  rawbody   __FONT_INVIS                  /<(?!style)[a-z]+\s[^>]{1,80}(?:font(?:-size)?\s*:\s*(?:0*[01](?:\.\d+)?(?:px|pt|Q|vw|vh|vmin)|0+(?:\.\d+)?(?:cm|mm|in|pc|em|ex|ch|rem|lh|vmax|%))(?:\s[a-z]|\s*[;'])|color\s*:\s*transparent\s*[;'])[^>]{0,80}>\w/i
+  rawbody   __FONT_INVIS                  /<(?!style)[a-z]+\s[^>]{1,80}(?:font(?:-size)?\s*:\s*(?:0*[01](?:\.\d+)?(?:px|pt|Q|vw|vh|vmin)|0+(?:\.\d+)?(?:cm|mm|pc|ch|rem|lh|vmax|%)|0+(?:\.0\d*)(?:em|ex|in))(?:\s[a-z]|\s*[;'])|color\s*:\s*transparent\s*[;'])[^>]{0,80}>\w/i
   tflags    __FONT_INVIS                  multiple maxhits=11
   meta      __FONT_INVIS_2                __FONT_INVIS > 2
   meta      __FONT_INVIS_5                __FONT_INVIS > 5
