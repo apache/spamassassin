@@ -103,13 +103,20 @@ sub sa_t_init {
   $scr = $ENV{'SPAMASSASSIN_SCRIPT'};
   $scr ||= "$perl_cmd ../spamassassin.raw";
 
-  $spamd = "$perl_cmd ../spamd/spamd.raw";
+  $spamd = $ENV{'SPAMD_SCRIPT'};
+  $spamd ||= "$perl_cmd ../spamd/spamd.raw";
 
   $spamc = $ENV{'SPAMC_SCRIPT'};
   $spamc ||= "../spamc/spamc";
 
   $salearn = $ENV{'SALEARN_SCRIPT'};
   $salearn ||= "$perl_cmd ../sa-learn.raw";
+
+  $saawl = $ENV{'SAAWL_SCRIPT'};
+  $saawl ||= "../sa-awl";
+
+  $sacheckspamd = $ENV{'SACHECKSPAMD_SCRIPT'};
+  $sacheckspamd ||= "../sa-check_spamd";
 
   $spamdlocalhost = $ENV{'SPAMD_LOCALHOST'};
   if (!$spamdlocalhost) {
@@ -394,6 +401,18 @@ sub salearnrun {
   if ($salearn_exitcode != 0) { return undef; }
   &checkfile ("d.$testname/$test_number", $read_sub) if (defined $read_sub);
   1;
+}
+
+sub saawlrun {
+  my $args = shift;
+
+  untaint_system("$saawl $args");
+}
+
+sub sacheckspamdrun {
+  my $args = shift;
+
+  untaint_system("$sacheckspamd $args");
 }
 
 sub scrun {
