@@ -284,7 +284,7 @@ body     __BENEFICIARY    /\bb(?:e|=E9|[\xe9]|[\xc3][\xa9])n(?:e|=E9|[\xe9]|[\xc
 body     __DIPLOMATIC     /\bdiplomatic\b/i
 body     __FEES           /\b(?:security|safe\w*|courier|registration|pay|paid|up-?front|processing|delivery|transfer|keeping)[\s\w]{0,15}\s(?:fee|charge)s?\b/i 
 body     __LUCKY_WINNER   /\b(?:lucky|gl.cklich(?:en)?|afortunados)\s(?:(?:ge)?win+ers?|ganador(?:es)?|individuals?)\b/i
-body     __YOUR_FUND      /\b(?:your|ihr)\s(?:unpaid\s|win+ing\s|ap+roved\s|foreign\s|overdue\s|outstanding\s|contract\s|inheritance\s|nicht\sausbezahlten\s){0,3}(?:fund|payment|geld)\b/i
+body     __YOUR_FUND      /\b(?:your|ihr)\s(?:unpaid\s|win+ing\s|ap+roved\s|foreign\s|overdue\s|outstanding\s|contract\s|inheritance\s|nicht\sausbezahlten\s){0,3}(?:fund|f\su\sn\sd|payment|geld)\b/i
 body     __NIGERIA        /\bnigeria\b/i
 body     __IVORY_COAST    /\b(?:Cote\s?D.Ivoire|Ivory\s?Coast|Costa\sde\sMarfil)\b/i
 body     __BURKINA_FASO   /\bburkina\s?faso\b/i
