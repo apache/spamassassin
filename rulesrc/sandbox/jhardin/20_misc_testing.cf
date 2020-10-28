@@ -3201,3 +3201,12 @@ tflags     URI_DASHGOVEDU              publish
 #meta       __NOINR_FRAUD               __NO_INR_YES_REF && (__AFRICAN_STATE || __BENEFICIARY || __COMPENSATION || __FILL_THIS_FORM_PARTIAL || __LOTTO_DEPT || __WIRE_XFR || __TRANSFORM_LIFE )
 
 
+uri        __URI_GOOG_STO_IMG         m,^https?://storage\.googleapis\.com/.*\.(?:png|jpe?g)$,i
+tflags     __URI_GOOG_STO_IMG         multiple maxhits=5
+
+uri        __URI_GOOG_STO_HTML        m,^https?://storage\.googleapis\.com/.*\.html?$,i
+tflags     __URI_GOOG_STO_HTML        multiple maxhits=5
+
+meta       __GOOG_STO_IMG_HTML        __URI_GOOG_STO_IMG && (__URI_GOOG_STO_HTML > 1)
+
+
