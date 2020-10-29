@@ -111,7 +111,7 @@ body FUZZY_CPILL	/(?!ciali[sz])<C><I><A><L><I><S>/i
 describe FUZZY_CPILL	Attempt to obfuscate words in spam
 replace_rules FUZZY_CPILL
 
-body FUZZY_CREDIT	/<inter W1>(?![ck]r[e\xe9]dit)<C><R><E><D><I><T>/i
+body FUZZY_CREDIT	/<inter W1>(?![ck]r(?:[e\xe9]|\xc3\xa9)dit)<C><R><E><D><I><T>/i
 describe FUZZY_CREDIT	Attempt to obfuscate words in spam
 replace_rules FUZZY_CREDIT
 
