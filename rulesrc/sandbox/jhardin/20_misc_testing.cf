@@ -1237,6 +1237,9 @@ uri         __URI_YOUSENDIT      m,^https?://www\.yousendit\.com/directdownload,
 uri         __URI_GOOGLE_DOC     m,^https?://docs\.google\.com/(?:[^/]+/)*(?:view(?:form)?\?(?:id|formkey)=|document/),i
 uri         __URI_GOOGLE_DRV     m,^https?://(?:drive\.google|googledrive)\.com/,i
 
+meta        __GOOGLE_DOC_SUSP    __URI_GOOGLE_DOC && (__HAS_DOMAINKEY_SIG || __RDNS_NONE || __SYSADMIN) && !ALL_TRUSTED
+
+
 body        __WEBMAIL_ACCT       /\byour web ?mail account/i
 body        __MAILBOX_FULL       /\b(?:you(?:r (?:mail\s?box|(?:e-?|web ?)mail))? (?:is (?:almost )?full|(?:quota )?ha(?:s|ve) (?:reached|exceeded|passed) (?:the|your|it'?s?) (?:university )?(?:size|storage|set|(?:e-?|web ?)mail|quota|folder|mail ?box)[\/\s](?:limit |quota |account )+)|over your mail\s?box (?:size )?(?:limit|quota)|maximum mail\s?box (?:size )?(?:limit|quota) exceeded|sua (?:conta|caixa) de (?:(?:e-?|web ?)mail|correio) (?:excedeu (?:sua|o) limite|est(?:=E1|[\xe1]|[\xc3][\xa1]) quase cheio))\b/i
 body        __CLEAN_MAILBOX      /\b(?:(?:e-?mail|mail\s?box|violation:|(?-i:CLICK)) (?:quota size|clean(?:-?up))|clean ?up click ?here)\b/i
@@ -3200,13 +3203,24 @@ tflags     URI_DASHGOVEDU              publish
 #meta       __NOINR_MONEY               __NO_INR_YES_REF && __LOTSA_MONEY_01 
 #meta       __NOINR_FRAUD               __NO_INR_YES_REF && (__AFRICAN_STATE || __BENEFICIARY || __COMPENSATION || __FILL_THIS_FORM_PARTIAL || __LOTTO_DEPT || __WIRE_XFR || __TRANSFORM_LIFE )
 
-
+# Apparent use of content hosted at storage.googleapis.com
+# (mapped images and HTML landing pages for the imagemap URIs)
+# to avoid URIBL hits
 uri        __URI_GOOG_STO_IMG         m,^https?://storage\.googleapis\.com/.*\.(?:png|jpe?g)$,i
 tflags     __URI_GOOG_STO_IMG         multiple maxhits=5
 
 uri        __URI_GOOG_STO_HTML        m,^https?://storage\.googleapis\.com/.*\.html?$,i
 tflags     __URI_GOOG_STO_HTML        multiple maxhits=5
 
-meta       __GOOG_STO_IMG_HTML        __URI_GOOG_STO_IMG && (__URI_GOOG_STO_HTML > 1)
+meta       __GOOG_STO_IMG_NOHTML      __URI_GOOG_STO_IMG && !__URI_GOOG_STO_HTML
+meta       __GOOG_STO_NOIMG_HTML      !__URI_GOOG_STO_IMG && __URI_GOOG_STO_HTML
+
+meta       __GOOG_STO_IMG_HTML_2      __URI_GOOG_STO_IMG && (__URI_GOOG_STO_HTML > 1)
+meta       __GOOG_STO_IMG_HTML_1      __URI_GOOG_STO_IMG && __URI_GOOG_STO_HTML
+
+meta       GOOG_STO_IMG_HTML          __GOOG_STO_IMG_HTML_2
+describe   GOOG_STO_IMG_HTML          Apparently using google content hosting to avoid URIBL
+score      GOOG_STO_IMG_HTML          3.000	# limit
+tflags     GOOG_STO_IMG_HTML          publish
 
 
