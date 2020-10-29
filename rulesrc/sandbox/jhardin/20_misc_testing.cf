@@ -3206,7 +3206,7 @@ tflags     URI_DASHGOVEDU              publish
 # Apparent use of content hosted at storage.googleapis.com
 # (mapped images and HTML landing pages for the imagemap URIs)
 # to avoid URIBL hits
-uri        __URI_GOOG_STO_IMG         m,^https?://storage\.googleapis\.com/.*\.(?:png|jpe?g)$,i
+uri        __URI_GOOG_STO_IMG         m,^https?://storage\.googleapis\.com/.*\.(?:png|jpe?g|gif)$,i
 tflags     __URI_GOOG_STO_IMG         multiple maxhits=5
 
 uri        __URI_GOOG_STO_HTML        m,^https?://storage\.googleapis\.com/.*\.html?$,i
