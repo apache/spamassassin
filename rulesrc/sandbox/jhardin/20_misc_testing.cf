@@ -3232,7 +3232,7 @@ score      GOOG_STO_NOIMG_HTML        3.000	# limit
 tflags     GOOG_STO_NOIMG_HTML        publish
 
 # S/O not great, try salvage what's possible
-meta       GOOG_STO_IMG_NOHTML        __GOOG_STO_IMG_NOHTML && (__RDNS_NONE || HTML_TEXT_INVISIBLE_STYLE || THIS_AD || __SUBJECT_ENCODED_B64 || __LOTTO_ADMITS)
+meta       GOOG_STO_IMG_NOHTML        __GOOG_STO_IMG_NOHTML && (__RDNS_NONE || HTML_TEXT_INVISIBLE_STYLE || THIS_AD || __SUBJECT_ENCODED_B64 || __LOTTO_ADMITS) && !__USING_VERP1 && !__HAS_ERRORS_TO && !__RCD_RDNS_MTA 
 describe   GOOG_STO_IMG_NOHTML        Apparently using google content hosting to avoid URIBL
 score      GOOG_STO_IMG_NOHTML        2.500	# limit
 tflags     GOOG_STO_IMG_NOHTML        publish
