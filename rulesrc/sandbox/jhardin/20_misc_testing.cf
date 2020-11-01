@@ -1234,7 +1234,7 @@ score       FROM_MISSP_PHISH     3.500	# limit
 uri         __URI_YOUSENDIT      m,^https?://www\.yousendit\.com/directdownload,i
 
 # see also DOS_GOOGLE_DOCS
-uri         __URI_GOOGLE_DOC     m,^https?://docs\.google\.com/(?:[^/]+/)*(?:view(?:form)?\?(?:id|formkey)=|document/),i
+uri         __URI_GOOGLE_DOC     m,^https?://docs\.google\.com/(?:[^/]+/)*(?:view(?:form)?\?(?:id|formkey|usp)=|document/),i
 uri         __URI_GOOGLE_DRV     m,^https?://(?:drive\.google|googledrive)\.com/,i
 
 meta        __GOOGLE_DOC_SUSP    __URI_GOOGLE_DOC && (__HAS_DOMAINKEY_SIG || __RDNS_NONE || __SYSADMIN) && !ALL_TRUSTED
