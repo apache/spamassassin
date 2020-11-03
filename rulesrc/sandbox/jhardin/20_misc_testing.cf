@@ -518,7 +518,7 @@ if can(Mail::SpamAssassin::Conf::perl_min_version_5010000)
   header     __PDS_TO_EQ_FROM_NAME_1  ALL =~ /\nTo:\s+(?:[^\n<]{0,80}<)?([^\n\s>]+)>?\n(?:[^\n]{1,100}\n)*From:\W+(\1)([^\n\w<]++<)?((?!\1)[^\n">]++)>?\n/ism
   header     __PDS_TO_EQ_FROM_NAME_2  ALL =~ /\nFrom:\W+"([\w+.-]+\@[\w.-]+\.\w\w+)(?:[^\n\w<]{0,80}<)?((?!\1)[^\n">]++)>?\n(?:[^\n]{1,100}\n)*To:\s+(?:[^\n<]{0,80}<)?(\1)>?/ism
 
-  meta       PDS_TO_EQ_FROM_NAME      (__PDS_TO_EQ_FROM_NAME_1 || __PDS_TO_EQ_FROM_NAME_2)
+  meta       PDS_TO_EQ_FROM_NAME      (__PDS_TO_EQ_FROM_NAME_1 || __PDS_TO_EQ_FROM_NAME_2) && !__HAS_SENDER 
   describe   PDS_TO_EQ_FROM_NAME      From: name same as To: address
 
   header     __PDS_FROM_2_EMAILS      From =~ /^\W+([\w+.-]+\@[\w.-]+\.\w\w++)(?:[^\n\w<]{0,80})?<(?!\1)[^\n\s]*\@/i
@@ -1032,7 +1032,7 @@ meta        GAPPY_HTML             __GAPPY_HTML && !__UNSUB_LINK && !__RP_MATCHE
 describe    GAPPY_HTML             HTML body with much useless whitespace
 
 # Try to improve S/O per bug 6119
-meta        TVD_SPACE_RATIO_MINFP  __TVD_SPACE_RATIO && !__CT_ENCRYPTED && !__SUBSCRIPTION_INFO && !__RCD_RDNS_MAIL && !__SUBJECT_ENCODED_QP && !__THREADED && !__BOTH_INR_AND_REF && !__X_CRON_ENV && !__HAS_THREAD_INDEX && !__HDRS_LCASE_KNOWN && !__ISO_2022_JP_DELIM && !__DOS_HAS_LIST_UNSUB && !__RP_MATCHES_RCVD && !__NOT_SPOOFED && !ALL_TRUSTED && !__RCD_RDNS_SMTP 
+meta        TVD_SPACE_RATIO_MINFP  __TVD_SPACE_RATIO && !__CT_ENCRYPTED && !__X_CRON_ENV && !__ISO_2022_JP_DELIM && !__NOT_SPOOFED && !ALL_TRUSTED && !__MIME_NO_TEXT 
 #tflags      TVD_SPACE_RATIO_MINFP  nopublish
 score       TVD_SPACE_RATIO_MINFP  2.500   # limit
 describe    TVD_SPACE_RATIO_MINFP  Space ratio
@@ -1237,11 +1237,6 @@ uri         __URI_YOUSENDIT      m,^https?://www\.yousendit\.com/directdownload,
 uri         __URI_GOOGLE_DOC     m,^https?://docs\.google\.com/(?:[^/]+/)*(?:view(?:form)?\?(?:id|formkey|usp)=|document/),i
 uri         __URI_GOOGLE_DRV     m,^https?://(?:drive\.google|googledrive)\.com/,i
 
-meta        __GOOGLE_DOC_SUSP    __URI_GOOGLE_DOC && (__HAS_DOMAINKEY_SIG || __RDNS_NONE || __SYSADMIN) && !ALL_TRUSTED
-meta        GOOGLE_DOC_SUSP      __GOOGLE_DOC_SUSP && !__RCD_RDNS_MTA_MESSY && __RCD_RDNS_MTA && !__LYRIS_EZLM_REMAILER && !__USING_VERP1 
-describe    GOOGLE_DOC_SUSP      Suspicious use of Google Docs
-score       GOOGLE_DOC_SUSP      2.500	# limit
-
 
 body        __WEBMAIL_ACCT       /\byour web ?mail account/i
 body        __MAILBOX_FULL       /\b(?:you(?:r (?:mail\s?box|(?:e-?|web ?)mail))? (?:is (?:almost )?full|(?:quota )?ha(?:s|ve) (?:reached|exceeded|passed) (?:the|your|it'?s?) (?:university )?(?:size|storage|set|(?:e-?|web ?)mail|quota|folder|mail ?box)[\/\s](?:limit |quota |account )+)|over your mail\s?box (?:size )?(?:limit|quota)|maximum mail\s?box (?:size )?(?:limit|quota) exceeded|sua (?:conta|caixa) de (?:(?:e-?|web ?)mail|correio) (?:excedeu (?:sua|o) limite|est(?:=E1|[\xe1]|[\xc3][\xa1]) quase cheio))\b/i
@@ -1300,9 +1295,15 @@ describe    GOOGLE_DOCS_PHISH_MANY  Phishing via a Google Docs form
 score       GOOGLE_DOCS_PHISH_MANY  4.00	# limit
 tflags      GOOGLE_DOCS_PHISH_MANY  publish
 
-meta        URI_GOOGLE_DOCS      __URI_GOOGLE_DOC && !__DKIM_EXISTS && !__TO_EQ_FROM_DOM && !__DOS_REF_TODAY && !__DOS_BODY_FRI && !__DOS_BODY_WED && !__freemail_safe_fwd && !__TO_EQ_FROM_DOM && !__HAS_ERRORS_TO
-describe    URI_GOOGLE_DOCS      URI for Google Docs, common in phishing
-score       URI_GOOGLE_DOCS      1.00	# limit
+meta        __GOOGLE_DOC_SUSP    __URI_GOOGLE_DOC && (__HAS_DOMAINKEY_SIG || __RDNS_NONE || __SYSADMIN || __STY_INVIS) && !ALL_TRUSTED
+meta        GOOGLE_DOC_SUSP      __GOOGLE_DOC_SUSP && !__HAS_SENDER && !__RCD_RDNS_MTA_MESSY && __RCD_RDNS_MTA && !__LYRIS_EZLM_REMAILER && !__USING_VERP1 
+describe    GOOGLE_DOC_SUSP      Suspicious use of Google Docs
+score       GOOGLE_DOC_SUSP      2.500	# limit
+tflags      GOOGLE_DOC_SUSP      publish
+
+#meta        URI_GOOGLE_DOCS      __URI_GOOGLE_DOC && !__DKIM_EXISTS && !__TO_EQ_FROM_DOM && !__DOS_REF_TODAY && !__DOS_BODY_FRI && !__DOS_BODY_WED && !__freemail_safe_fwd && !__TO_EQ_FROM_DOM && !__HAS_ERRORS_TO
+#describe    URI_GOOGLE_DOCS      URI for Google Docs, common in phishing
+#score       URI_GOOGLE_DOCS      1.00	# limit
 
 meta        __URI_PHISH    __HAS_ANY_URI && !__URI_GOOGLE_DOC && (__EMAIL_PHISH || __ACCT_PHISH)
 ifplugin Mail::SpamAssassin::Plugin::MIMEHeader
@@ -1354,7 +1355,8 @@ meta        BODY_SINGLE_WORD    __BODY_SINGLE_WORD && !ALL_TRUSTED && !__HDRS_LC
 describe    BODY_SINGLE_WORD    Message body is only one word (no spaces)
 score       BODY_SINGLE_WORD    2.500	# limit
 
-meta        BODY_SINGLE_URI     (__BODY_SINGLE_WORD && __HAS_ANY_URI) && !ALL_TRUSTED && !__HDRS_LCASE_KNOWN && !__FROM_ALL_NUMS && !__RCD_RDNS_SMTP
+meta        __BODY_SINGLE_URI     (__BODY_SINGLE_WORD && __HAS_ANY_URI)
+meta        BODY_SINGLE_URI     __BODY_SINGLE_URI && !ALL_TRUSTED && !__HDRS_LCASE_KNOWN && !__FROM_ALL_NUMS && !__RCD_RDNS_SMTP && !__VIA_ML 
 describe    BODY_SINGLE_URI     Message body is only a URI
 score       BODY_SINGLE_URI     2.500	# limit
 
@@ -1522,7 +1524,7 @@ header      __DATE_LOWER       ALL =~ /date:\s\S{5}/
 
 # duplicates __XPRIO
 #header      __FH_HAS_XPRIORITY exists:X-Priority
-meta        __XPRIO_MINFP      __XPRIO && !__CT_ENCRYPTED && !ALL_TRUSTED && !__HAS_ERRORS_TO && !__THREADED && !__LONGLINE && !__MAIL_LINK && !__RCD_RDNS_SMTP && !__USING_VERP1 && !__RCD_RDNS_MX_MESSY && !__XM_VBULLETIN && !__HAS_HREF && !__HAS_IMG_SRC && !__RCD_RDNS_MAIL_MESSY && !__HAS_SENDER && !__THREAD_INDEX_GOOD && !__VIA_ML && !__PHPMAILER_MUA && !__FROM_WEB_DAEMON 
+meta        __XPRIO_MINFP      __XPRIO && !__CT_ENCRYPTED && !ALL_TRUSTED && !__HAS_ERRORS_TO && !__HAS_IMG_SRC && !__RCD_RDNS_MAIL_MESSY && !__VIA_ML && !__PHPMAILER_MUA && !__AC_TINY_FONT && !__HAS_PHP_SCRIPT && !__DOS_HAS_LIST_UNSUB && !__HAS_IMG_SRC_ONECASE && !__NAKED_TO 
 
 ifplugin Mail::SpamAssassin::Plugin::DKIM
   ifplugin Mail::SpamAssassin::Plugin::SPF
@@ -2326,14 +2328,16 @@ if can(Mail::SpamAssassin::Conf::feature_bug6558_free)
   meta      __WORD_INVIS_5                __WORD_INVIS > 5
 
   meta      __FONT_INVIS_LONG_LINE        __FONT_INVIS && __LONGLINE 
-  meta      FONT_INVIS_LONG_LINE          __FONT_INVIS_LONG_LINE && !__RDNS_LONG && !__DOS_HAS_LIST_UNSUB 
+  meta      FONT_INVIS_LONG_LINE          __FONT_INVIS_LONG_LINE && !__HTML_SINGLET 
   describe  FONT_INVIS_LONG_LINE          Invisible text + long lines
   score     FONT_INVIS_LONG_LINE          3.000	# limit
   tflags    FONT_INVIS_LONG_LINE          publish
 
-  meta      FONT_INVIS_NORDNS             __FONT_INVIS && __RDNS_NONE 
+  meta      __FONT_INVIS_NORDNS           __FONT_INVIS && __RDNS_NONE 
+  meta      FONT_INVIS_NORDNS             __FONT_INVIS_NORDNS && !__HTML_SINGLET 
   describe  FONT_INVIS_NORDNS             Invisible text + no rDNS
   score     FONT_INVIS_NORDNS             2.500	# limit
+  tflags    FONT_INVIS_NORDNS             publish
 
   meta      FONT_INVIS_POSTEXTRAS         (__FONT_INVIS || __STY_INVIS) && __AC_POST_EXTRAS
   describe  FONT_INVIS_POSTEXTRAS         Invisible text + suspicious URI
@@ -2346,16 +2350,16 @@ if can(Mail::SpamAssassin::Conf::feature_bug6558_free)
   score     FONT_INVIS_MSGID              2.500	# limit
   tflags    FONT_INVIS_MSGID              publish
 
-  meta      __FONT_INVIS_NAKED_TO         __FONT_INVIS && __NAKED_TO
-  meta      FONT_INVIS_NAKED_TO           __FONT_INVIS_NAKED_TO && !__ML3 && !__HAS_ERRORS_TO
-  describe  FONT_INVIS_NAKED_TO           Invisible text + suspicious To
-  score     FONT_INVIS_NAKED_TO           2.500	# limit
+#  meta      __FONT_INVIS_NAKED_TO         __FONT_INVIS && __NAKED_TO
+#  meta      FONT_INVIS_NAKED_TO           __FONT_INVIS_NAKED_TO && !__ML3 && !__HAS_ERRORS_TO
+#  describe  FONT_INVIS_NAKED_TO           Invisible text + suspicious To
+#  score     FONT_INVIS_NAKED_TO           2.500	# limit
 
   meta      __FONT_INVIS_CENTER           __FONT_INVIS && __TAG_EXISTS_CENTER 
   meta      __FONT_INVIS_SINGLET          __FONT_INVIS && __HTML_SINGLET 
 
   meta      __FONT_INVIS_DIRECT           __FONT_INVIS && __DOS_DIRECT_TO_MX_UNTRUSTED 
-  meta      FONT_INVIS_DIRECT             __FONT_INVIS_DIRECT && !__UNSUB_LINK && !__HAS_ERRORS_TO && !__MOZILLA_MSGID && !__RCD_RDNS_MAIL_MESSY 
+  meta      FONT_INVIS_DIRECT             __FONT_INVIS_DIRECT && !__UNSUB_LINK && !__HAS_ERRORS_TO && !__MOZILLA_MSGID && !__RCD_RDNS_MAIL_MESSY && !__URI_DOTGOV && !__NAKED_TO && !__MSGID_OK_HEX 
   describe  FONT_INVIS_DIRECT             Invisible text + direct-to-MX
   score     FONT_INVIS_DIRECT             3.500	# limit
   tflags    FONT_INVIS_DIRECT             publish
@@ -3178,7 +3182,8 @@ score      HTML_EMPTY_CELLS_MANY       1.500	# limit
 
 
 uri        __SENDGRID_REDIR            m,://u\d+\.ct\.sendgrid\.net/ls/click\?upn=,
-meta       SENDGRID_REDIR              __SENDGRID_REDIR && !MIME_HTML_MOSTLY && !__HAS_ERRORS_TO && !__HAS_X_BEEN_THERE && !__HAS_X_MAILMAN_VERSION 
+meta       __SENDGRID_REDIR_NOPHISH    __SENDGRID_REDIR && !__SENDGRID_REDIR_PHISH
+meta       SENDGRID_REDIR              __SENDGRID_REDIR_NOPHISH && !ALL_TRUSTED && !__HAS_ERRORS_TO && !__HAS_X_BEEN_THERE && !__HAS_X_MAILMAN_VERSION && !__STY_INVIS_MANY && !__HTML_SINGLET_10 && !__HAVE_BOUNCE_RELAYS 
 describe   SENDGRID_REDIR              Redirect URI via Sendgrid
 score      SENDGRID_REDIR              1.500	# limit
 tflags     SENDGRID_REDIR              publish
@@ -3226,13 +3231,13 @@ describe   GOOG_STO_IMG_HTML          Apparently using google content hosting to
 score      GOOG_STO_IMG_HTML          3.000	# limit
 tflags     GOOG_STO_IMG_HTML          publish
 
-meta       GOOG_STO_NOIMG_HTML        __GOOG_STO_NOIMG_HTML
+meta       GOOG_STO_NOIMG_HTML        __GOOG_STO_NOIMG_HTML && !__HAS_LIST_ID 
 describe   GOOG_STO_NOIMG_HTML        Apparently using google content hosting to avoid URIBL
 score      GOOG_STO_NOIMG_HTML        3.000	# limit
 tflags     GOOG_STO_NOIMG_HTML        publish
 
 # S/O not great, try salvage what's possible
-meta       GOOG_STO_IMG_NOHTML        __GOOG_STO_IMG_NOHTML && (__RDNS_NONE || HTML_TEXT_INVISIBLE_STYLE || THIS_AD || __SUBJECT_ENCODED_B64 || __LOTTO_ADMITS) && !__USING_VERP1 && !__HAS_ERRORS_TO && !__RCD_RDNS_MTA 
+meta       GOOG_STO_IMG_NOHTML        __GOOG_STO_IMG_NOHTML && (__RDNS_NONE || HTML_TEXT_INVISIBLE_STYLE || THIS_AD || __SUBJECT_ENCODED_B64 || __LOTTO_ADMITS || __REPTO_QUOTE) && !__USING_VERP1 && !__HAS_ERRORS_TO && !__RCD_RDNS_MTA_MESSY && !__LYRIS_EZLM_REMAILER && !__HAS_CID 
 describe   GOOG_STO_IMG_NOHTML        Apparently using google content hosting to avoid URIBL
 score      GOOG_STO_IMG_NOHTML        2.500	# limit
 tflags     GOOG_STO_IMG_NOHTML        publish

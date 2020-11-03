@@ -241,9 +241,10 @@ body     __PAY_YOU        /\bpay\syou\b/
 body     __GIVE_MONEY     /\b(?:(?:give\syou\s(?:this\s)?(?:money|fund|inheritance))|(?:donated?\s(?:\w\+\s){0,3}(?:the\ssum\sof|(?:(?:the|this|some)\s(?:money|funds?|inheritance)|to\s)(?:you|(?:(?:the|a)\s)?church|charit(?:y|ies)|humanit\w+|needy|poor|orphan(?:age)?s?|philanthropists\?)))|de vous donner cet argent|faire don de la somme|voudrais en faire don|tego funduszu do dom(?:=F3|[\xf3])w (?:dziecka|wdowy))\b/i
 meta     __XFER_MONEY     (__WIRE_XFR || __TRUSTED_CHECK || __BANK_DRAFT || __MOVE_MONEY || __TO_YOUR_ACCT || __PAY_YOU || __GIVE_MONEY)
 
-meta     XFER_LOTSA_MONEY __XFER_MONEY && LOTS_OF_MONEY
-describe XFER_LOTSA_MONEY Transfer a lot of money
-score    XFER_LOTSA_MONEY 1.000   # limit
+meta     __XFER_LOTSA_MONEY      __XFER_MONEY && LOTS_OF_MONEY
+meta     XFER_LOTSA_MONEY        __XFER_LOTSA_MONEY && !__VIA_ML && !__HAS_SENDER && !__SUBSCRIPTION_INFO 
+describe XFER_LOTSA_MONEY        Transfer a lot of money
+score    XFER_LOTSA_MONEY        1.000   # limit
 
 body     __INTL_BANK      /\b(?:international\s(?:\w+\s)?bank|banque\sinternationale)\b/i
 body     __YOUR_BANK      /\byour?\s(?:full\s)?bank(?:ing)?\sinformations?\b/i
