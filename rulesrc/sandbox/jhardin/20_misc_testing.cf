@@ -1032,7 +1032,7 @@ meta        GAPPY_HTML             __GAPPY_HTML && !__UNSUB_LINK && !__RP_MATCHE
 describe    GAPPY_HTML             HTML body with much useless whitespace
 
 # Try to improve S/O per bug 6119
-meta        TVD_SPACE_RATIO_MINFP  __TVD_SPACE_RATIO && !__CT_ENCRYPTED && !__X_CRON_ENV && !__ISO_2022_JP_DELIM && !__NOT_SPOOFED && !ALL_TRUSTED && !__MIME_NO_TEXT 
+meta        TVD_SPACE_RATIO_MINFP  __TVD_SPACE_RATIO && !__CT_ENCRYPTED && !__X_CRON_ENV && !__ISO_2022_JP_DELIM && !__NOT_SPOOFED && !ALL_TRUSTED && !__MIME_NO_TEXT && !__LONGLINE && !__THREADED && !__SUBSCRIPTION_INFO && !__VIA_ML
 #tflags      TVD_SPACE_RATIO_MINFP  nopublish
 score       TVD_SPACE_RATIO_MINFP  2.500   # limit
 describe    TVD_SPACE_RATIO_MINFP  Space ratio
