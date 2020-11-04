@@ -1543,7 +1543,7 @@ tflags      XPRIO              publish
 # some no-ham combinations
 
 meta        __XPRIO_SHORT_SUBJ __XPRIO && __SUBJ_SHORT 
-meta        XPRIO_SHORT_SUBJ   __XPRIO_SHORT_SUBJ && !__UNPARSEABLE_RELAY_COUNT && !__DKIM_EXISTS && !__RP_MATCHES_RCVD && !__SUBSCRIPTION_INFO && !__FROM_ENCODED_QP && !ALL_TRUSTED && !__NAKED_TO
+meta        XPRIO_SHORT_SUBJ   __XPRIO_SHORT_SUBJ && !__MSM_PRIO_REPTO && !__UNPARSEABLE_RELAY_COUNT && !__RP_MATCHES_RCVD && !__SUBSCRIPTION_INFO && !__FROM_ENCODED_QP && !ALL_TRUSTED && !__NAKED_TO && !__RELAY_THRU_WWW && !__HAS_THREAD_INDEX && !__CTYPE_HAS_BOUNDARY 
 describe    XPRIO_SHORT_SUBJ   Has X-Priority header + short subject
 score       XPRIO_SHORT_SUBJ   2.500	# limit
 tflags      XPRIO_SHORT_SUBJ   publish
