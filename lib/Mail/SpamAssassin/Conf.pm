@@ -3535,6 +3535,10 @@ it is documented there.
 This flag is specific to rules invoking an URIDNSBL plugin,
 it is documented there.
 
+=item nolog
+
+This flag will hide (sensitive) rule informations from reports
+
 =back
 
 =cut
@@ -5398,6 +5402,7 @@ sub feature_bayes_stopwords { 1 } # multi language stopwords in Bayes
 sub feature_get_host { 1 } # $pms->get() :host :domain :ip :revip # was implemented together with AskDNS::has_tag_header # Bug 7734
 sub feature_blocklist_welcomelist { 1 } # bz 7826
 sub has_tflags_nosubject { 1 } # tflags nosubject
+sub has_tflags_nolog { 1 } # tflags nolog
 sub perl_min_version_5010000 { return $] >= 5.010000 }  # perl version check ("perl_version" not neatly backwards-compatible)
 
 ###########################################################################

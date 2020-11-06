@@ -2882,6 +2882,11 @@ sub _handle_hit {
 
     # save both summaries
     # TODO: this is slower than necessary, if we only need one
+    my $tflags = $self->{conf}->{tflags};
+    if (exists $tflags->{$rule} and $tflags->{$rule} =~ /\bnolog\b/) {
+      $self->{test_log_msgs}->{TERSE} = sprintf ("[%s]\n", "*REDACTED*");
+      $self->{test_log_msgs}->{LONG} =  sprintf ("%27s [%s]\n", "", "*REDACTED*");
+    }
     $self->{tag_data}->{REPORT} .= sprintf ("* %s %s %s%s\n%s",
               $score, $rule, $area,
               $self->_wrap_desc($desc,
