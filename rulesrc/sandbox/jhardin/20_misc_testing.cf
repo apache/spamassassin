@@ -1296,7 +1296,7 @@ score       GOOGLE_DOCS_PHISH_MANY  4.00	# limit
 tflags      GOOGLE_DOCS_PHISH_MANY  publish
 
 meta        __GOOGLE_DOC_SUSP    __URI_GOOGLE_DOC && (__HAS_DOMAINKEY_SIG || __RDNS_NONE || __SYSADMIN || __STY_INVIS) && !ALL_TRUSTED
-meta        GOOGLE_DOC_SUSP      __GOOGLE_DOC_SUSP && !__HAS_SENDER && !__RCD_RDNS_MTA_MESSY && !__LYRIS_EZLM_REMAILER && !__USING_VERP1 && !__RCD_RDNS_SMTP 
+meta        GOOGLE_DOC_SUSP      __GOOGLE_DOC_SUSP && !__HAS_SENDER && !__RCD_RDNS_MTA_MESSY && !__LYRIS_EZLM_REMAILER && !__USING_VERP1 && !__RCD_RDNS_SMTP && !__HAS_THREAD_INDEX 
 describe    GOOGLE_DOC_SUSP      Suspicious use of Google Docs
 score       GOOGLE_DOC_SUSP      2.500	# limit
 tflags      GOOGLE_DOC_SUSP      publish
@@ -1524,7 +1524,7 @@ header      __DATE_LOWER       ALL =~ /date:\s\S{5}/
 
 # duplicates __XPRIO
 #header      __FH_HAS_XPRIORITY exists:X-Priority
-meta        __XPRIO_MINFP      __XPRIO && !__CT_ENCRYPTED && !ALL_TRUSTED && !__HAS_ERRORS_TO && !__HAS_IMG_SRC && !__RCD_RDNS_MAIL_MESSY && !__VIA_ML && !__PHPMAILER_MUA && !__AC_TINY_FONT && !__HAS_PHP_SCRIPT && !__DOS_HAS_LIST_UNSUB && !__HAS_IMG_SRC_ONECASE && !__NAKED_TO && !__HAS_THREAD_INDEX && !__HAS_TNEF && !__HAS_SENDER && !__UNPARSEABLE_RELAY_COUNT && !__RCD_RDNS_SMTP_MESSY 
+meta        __XPRIO_MINFP      __XPRIO && !__CT_ENCRYPTED && !ALL_TRUSTED && !__HAS_ERRORS_TO && !__HAS_IMG_SRC && !__RCD_RDNS_MAIL_MESSY && !__VIA_ML && !__PHPMAILER_MUA && !__AC_TINY_FONT && !__HAS_PHP_SCRIPT && !__DOS_HAS_LIST_UNSUB && !__HAS_IMG_SRC_ONECASE && !__NAKED_TO && !__HAS_THREAD_INDEX && !__HAS_TNEF && !__HAS_SENDER && !__UNPARSEABLE_RELAY_COUNT && !__RCD_RDNS_SMTP_MESSY && !__RCD_RDNS_MX_MESSY && !__TO___LOWER 
 
 ifplugin Mail::SpamAssassin::Plugin::DKIM
   ifplugin Mail::SpamAssassin::Plugin::SPF
@@ -1540,10 +1540,10 @@ describe    XPRIO              Has X-Priority header
 score       XPRIO              2.250	# limit
 tflags      XPRIO              publish
 
-# some no-ham combinations
+# some high-S/O combinations
 
-meta        __XPRIO_SHORT_SUBJ __XPRIO && __SUBJ_SHORT 
-meta        XPRIO_SHORT_SUBJ   __XPRIO_SHORT_SUBJ && !__MSM_PRIO_REPTO && !__UNPARSEABLE_RELAY_COUNT && !__RP_MATCHES_RCVD && !__SUBSCRIPTION_INFO && !__FROM_ENCODED_QP && !ALL_TRUSTED && !__NAKED_TO && !__RELAY_THRU_WWW && !__HAS_THREAD_INDEX && !__CTYPE_HAS_BOUNDARY 
+meta        __XPRIO_SHORT_SUBJ __XPRIO_MINFP && __SUBJ_SHORT 
+meta        XPRIO_SHORT_SUBJ   __XPRIO_SHORT_SUBJ && !__MSM_PRIO_REPTO && !ALL_TRUSTED && !__DKIM_EXISTS && !__RELAY_THRU_WWW && !__CTYPE_HAS_BOUNDARY && !__PDS_RDNS_MTA 
 describe    XPRIO_SHORT_SUBJ   Has X-Priority header + short subject
 score       XPRIO_SHORT_SUBJ   2.500	# limit
 tflags      XPRIO_SHORT_SUBJ   publish
