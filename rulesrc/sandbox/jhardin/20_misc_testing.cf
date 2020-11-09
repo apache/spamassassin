@@ -1887,6 +1887,13 @@ ifplugin Mail::SpamAssassin::Plugin::ReplaceTags
   body          __FUZZY_MONERO      /<M>(?!onero)<O><N><E><R><O>/i
   replace_rules __FUZZY_MONERO
 
+  body          __FUZZY_WELLSFARGO_BODY  /<W>(?!ells[-\s]?Fargo)<E><L><L><S>[-\s]?<F><A><R><G><O>/i
+  replace_rules __FUZZY_WELLSFARGO_BODY
+  header        __FUZZY_WELLSFARGO_FROM  From:name =~ /<W>(?!ells[-\s]?Fargo)<E><L><L><S>[-\s]?<F><A><R><G><O>/i
+  replace_rules __FUZZY_WELLSFARGO_FROM
+  meta          FUZZY_WELLSFARGO         __FUZZY_WELLSFARGO_BODY || __FUZZY_WELLSFARGO_FROM
+  describe      FUZZY_WELLSFARGO         Obfuscated "Wells Fargo"
+
 else
   meta          __FUZZY_MONERO      0
   body          __BITCOIN           /\bBit-?coin\b/i
