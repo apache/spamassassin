@@ -3250,3 +3250,12 @@ score      GOOG_STO_IMG_NOHTML        2.500	# limit
 tflags     GOOG_STO_IMG_NOHTML        publish
 
 
+# download-a-file pitch, malware? 11/2020
+header     CRAIGSLIST_DATING          Subject =~ /Sexy \w+ From Craigs?list/i
+describe   CRAIGSLIST_DATING          Possible malware
+score      CRAIGSLIST_DATING          4.000	# limit
+
+uri        __URI_PVT_SHAREPOINT       m,^https?://(?!www\.)(?:[^/.]+\.)+sharepoint\.com/,i
+
+
+
