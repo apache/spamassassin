@@ -1524,7 +1524,7 @@ header      __DATE_LOWER       ALL =~ /date:\s\S{5}/
 
 # duplicates __XPRIO
 #header      __FH_HAS_XPRIORITY exists:X-Priority
-meta        __XPRIO_MINFP      __XPRIO && !__CT_ENCRYPTED && !ALL_TRUSTED && !__HAS_ERRORS_TO && !__HAS_IMG_SRC && !__RCD_RDNS_MAIL_MESSY && !__VIA_ML && !__PHPMAILER_MUA && !__AC_TINY_FONT && !__HAS_PHP_SCRIPT && !__DOS_HAS_LIST_UNSUB && !__HAS_IMG_SRC_ONECASE && !__NAKED_TO && !__HAS_THREAD_INDEX && !__HAS_TNEF && !__HAS_SENDER && !__UNPARSEABLE_RELAY_COUNT && !__RCD_RDNS_SMTP_MESSY && !__RCD_RDNS_MX_MESSY && !__TO___LOWER 
+meta        __XPRIO_MINFP      __XPRIO && !__CT_ENCRYPTED && !ALL_TRUSTED && !__HAS_ERRORS_TO && !__HAS_IMG_SRC && !__RCD_RDNS_MAIL_MESSY && !__VIA_ML && !__PHPMAILER_MUA && !__AC_TINY_FONT && !__HAS_PHP_SCRIPT && !__DOS_HAS_LIST_UNSUB && !__HAS_IMG_SRC_ONECASE && !__NAKED_TO && !__HAS_THREAD_INDEX && !__HAS_TNEF && !__HAS_SENDER && !__UNPARSEABLE_RELAY_COUNT && !__PDS_RDNS_MTA && !__RCD_RDNS_SMTP_MESSY && !__RCD_RDNS_MX_MESSY && !__TO___LOWER && !__FROM_WORDY 
 
 ifplugin Mail::SpamAssassin::Plugin::DKIM
   ifplugin Mail::SpamAssassin::Plugin::SPF
@@ -1543,8 +1543,8 @@ tflags      XPRIO              publish
 # some high-S/O combinations
 
 meta        __XPRIO_SHORT_SUBJ __XPRIO_MINFP && __SUBJ_SHORT 
-meta        XPRIO_SHORT_SUBJ   __XPRIO_SHORT_SUBJ && !__MSM_PRIO_REPTO && !ALL_TRUSTED && !__DKIM_EXISTS && !__RELAY_THRU_WWW && !__CTYPE_HAS_BOUNDARY && !__PDS_RDNS_MTA 
-describe    XPRIO_SHORT_SUBJ   Has X-Priority header + short subject
+meta        XPRIO_SHORT_SUBJ   __XPRIO_SHORT_SUBJ && !__MSM_PRIO_REPTO && !ALL_TRUSTED && !__DKIM_EXISTS && !__RELAY_THRU_WWW && !__CTYPE_HAS_BOUNDARY && !__RCD_RDNS_MTA && !__HAS_HREF 
+describe    XPRIO_SHORT_SUBJ   Has X Priority header + short subject
 score       XPRIO_SHORT_SUBJ   2.500	# limit
 tflags      XPRIO_SHORT_SUBJ   publish
 
