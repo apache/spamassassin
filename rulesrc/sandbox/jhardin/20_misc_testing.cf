@@ -3257,5 +3257,9 @@ score      CRAIGSLIST_DATING          4.000	# limit
 
 uri        __URI_PVT_SHAREPOINT       m,^https?://(?!www\.)(?:[^/.]+\.)+sharepoint\.com/,i
 
+# suspicious HTML observed in the wild
+rawbody    __QUOTQUOTQUOT             /(?:&quot;){5,}/
+tflags     __QUOTQUOTQUOT             multiple maxhits=16
+meta       __QUOTQUOTQUOT_MANY        __QUOTQUOTQUOT > 15
 
 
