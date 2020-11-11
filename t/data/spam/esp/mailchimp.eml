@@ -1,0 +1,27 @@
+Return-Path: <bounce-mc.us2_146119310.3574838-3df1488522@mail163.atl81.rsgsv.net>
+Received: from mail163.atl81.rsgsv.net (mail163.atl81.rsgsv.net [198.2.129.163])
+        by mx.example.com (envelope-sender <bounce-mc.us2_146119310.3574838-3df1488522@mail163.atl81.rsgsv.net>) (MIMEDefang) with ESMTP id C55071FC16
+        for <test@example.com>; Sat, 07 Nov 2020 07:31:51 +0100
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=mailchimpapp.net;
+        s=k2; t=1604730703; i=test=3Dgmail.com@mailchimpapp.net;
+        bh=7euznLCbpftOChJlT7G0qKSSJv1BQwOL+ovwc4A0Cjo=;
+        h=Subject:From:Reply-To:To:Date:Message-ID:List-ID:List-Unsubscribe:
+         Content-Type:MIME-Version;
+        b=JosC3FJiSrChTQ4ratnhLJIOfPT1cwFAB2U2HHeIoKQJggJ7c1r+9ecgxO0MvszG3
+         JO2LlkROKqTuCNgPWYAfXa2IcOaYzXMNiYq5PG/jJMEPSczmWBCgCICU47UdEbrArl
+         fWCWxs/zdCUEX8QFyWaoPKigxu1LE5YOScEvvEldd9oa9zqp5PVL+w0BtR7x+gNPXP
+         ayV4XvFhboWGVdDyz9YntsfrDG9sz1TVOJgHYm9B+pCP/UGxKRUMyT1LBho+drTk+x
+         882QUWzY6YQIoT1F50cTJpN2LqpdnZCcu8L+9TzCvHDQAV7JcKn8RhuVN5K7eXnqvp
+         6vsa6szjSZc8g==
+From: <test@gmail.com>
+To: test@example.com
+Subject: Sendgrid Test
+Date: Wed, 19 Aug 2020 22:00:36 +0000 (UTC)
+X-Mailer: MailChimp Mailer - **CIDf3f69a76883df1488522**
+X-Campaign: mailchimp82ba5f25cf3d9826cda415d7c.f3f69a7688
+X-campaignid: mailchimp82ba5f25cf3d9826cda415d7c.f3f69a7688
+X-MC-User: 1234
+MIME-Version: 1.0
+Message-Id: <20011206235802.4FD6F1143D6@gmail.com>
+
+Test message

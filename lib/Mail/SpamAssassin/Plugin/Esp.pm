@@ -61,6 +61,8 @@ sub new {
   $self->register_eval_rule('esp_sendgrid_check',  $Mail::SpamAssassin::Conf::TYPE_HEAD_EVALS);
   $self->register_eval_rule('esp_sendinblue_check',  $Mail::SpamAssassin::Conf::TYPE_HEAD_EVALS);
   $self->register_eval_rule('esp_mailup_check',  $Mail::SpamAssassin::Conf::TYPE_HEAD_EVALS);
+  $self->register_eval_rule('esp_maildome_check',  $Mail::SpamAssassin::Conf::TYPE_HEAD_EVALS);
+  $self->register_eval_rule('esp_mailchimp_check',  $Mail::SpamAssassin::Conf::TYPE_HEAD_EVALS);
 
   return $self;
 }
@@ -80,6 +82,12 @@ ifplugin Mail::SpamAssassin::Plugin::Esp
 endif
 
 Usage:
+
+  esp_mailchimp_check()
+    Checks for Mailchimp abused accounts
+
+  esp_maildome_check()
+    Checks for Maildome abused accounts
 
   esp_mailup_check()
     Checks for Mailup abused accounts
@@ -120,6 +128,14 @@ A file with abused Sendinblue accounts.
 
 A file with abused Mailup accounts.
 
+=item maildome_feed [...]
+
+A file with abused Maildome accounts.
+
+=item mailchimp_feed [...]
+
+A file with abused Mailchimp accounts.
+
 =back
 
 =head1 TEMPLATE TAGS
@@ -154,6 +170,12 @@ SENDINBLUEID
 =item *
 MAILUPID
 
+=item *
+MAILDOMEID
+
+=item *
+MAILCHIMPID
+
 =back
 
 =cut
@@ -186,32 +208,47 @@ sub set_config {
     type => $Mail::SpamAssassin::Conf::CONF_TYPE_STRING,
     }
   );
+  push(@cmds, {
+    setting => 'maildome_feed',
+    is_admin => 1,
+    type => $Mail::SpamAssassin::Conf::CONF_TYPE_STRING,
+    }
+  );
+  push(@cmds, {
+    setting => 'mailchimp_feed',
+    is_admin => 1,
+    type => $Mail::SpamAssassin::Conf::CONF_TYPE_STRING,
+    }
+  );
   $conf->{parser}->register_commands(\@cmds);
 }
 
 sub finish_parsing_end {
   my ($self, $opts) = @_;
-  $self->_read_configfile($self);
+  $self->_read_configfile('sendgrid_feed', 'SENDGRID');
+  $self->_read_configfile('sendgrid_domains_feed', 'SENDGRID_DOMAINS');
+  $self->_read_configfile('sendinblue_feed', 'SENDINBLUE');
+  $self->_read_configfile('mailup_feed', 'MAILUP');
+  $self->_read_configfile('maildome_feed', 'MAILDOME');
+  $self->_read_configfile('mailchimp_feed', 'MAILCHIMP');
 }
 
 sub _read_configfile {
-  my ($self) = @_;
+  my ($self, $feed, $esp) = @_;
   my $conf = $self->{main}->{registryboundaries}->{conf};
-  my $sendgrid_id;
-  my $sendgrid_domain;
-  my $sendinblue_id;
-  my $mailup_id;
+  my $id;
 
   local *F;
-  if ( defined($conf->{sendgrid_feed}) && ( -f $conf->{sendgrid_feed} ) ) {
-    open(F, '<', $conf->{sendgrid_feed});
+
+  if ( defined($conf->{$feed}) && ( -f $conf->{$feed} ) ) {
+    open(F, '<', $conf->{$feed});
     for ($!=0; <F>; $!=0) {
       chomp;
       #lines that start with pound are comments
       next if(/^\s*\#/);
-      $sendgrid_id = $_;
-      if ( defined $sendgrid_id ) {
-        push @{$self->{ESP}->{SENDGRID}->{$sendgrid_id}}, $sendgrid_id;
+      $id = $_;
+      if ( defined $id ) {
+        push @{$self->{ESP}->{$esp}->{$id}}, $id;
       }
     }
 
@@ -220,61 +257,6 @@ sub _read_configfile {
                 : die "error reading config file: $!";
     close(F) or die "error closing config file: $!";
   }
-
-  if ( defined($conf->{sendgrid_domains_feed}) && ( -f $conf->{sendgrid_domains_feed} ) ) {
-    open(F, '<', $conf->{sendgrid_domains_feed});
-    for ($!=0; <F>; $!=0) {
-      chomp;
-      #lines that start with pound are comments
-      next if(/^\s*\#/);
-      $sendgrid_domain = $_;
-      if ( defined $sendgrid_domain ) {
-        push @{$self->{ESP}->{SENDGRID_DOMAIN}->{$sendgrid_domain}}, $sendgrid_domain;
-      }
-    }
-
-    defined $_ || $!==0  or
-      $!==EBADF ? dbg("ESP: error reading config file: $!")
-                : die "error reading config file: $!";
-    close(F) or die "error closing config file: $!";
-  }
-
-  if ( defined($conf->{sendinblue_feed}) && ( -f $conf->{sendinblue_feed} ) ) {
-    open(F, '<', $conf->{sendinblue_feed});
-    for ($!=0; <F>; $!=0) {
-      chomp;
-      #lines that start with pound are comments
-      next if(/^\s*\#/);
-      $sendinblue_id = $_;
-      if ( ( defined $sendinblue_id ) and ($sendinblue_id =~ /[0-9]+/) ) {
-        push @{$self->{ESP}->{SENDINBLUE}->{$sendinblue_id}}, $sendinblue_id;
-      }
-    }
-
-    defined $_ || $!==0  or
-      $!==EBADF ? dbg("ESP: error reading config file: $!")
-                : die "error reading config file: $!";
-    close(F) or die "error closing config file: $!";
-  }
-
-  if ( defined($conf->{mailup_feed}) && ( -f $conf->{mailup_feed} ) ) {
-    open(F, '<', $conf->{mailup_feed});
-    for ($!=0; <F>; $!=0) {
-      chomp;
-      #lines that start with pound are comments
-      next if(/^\s*\#/);
-      $mailup_id = $_;
-      if ( defined $mailup_id ) {
-        push @{$self->{ESP}->{MAILUP}->{$mailup_id}}, $mailup_id;
-      }
-    }
-
-    defined $_ || $!==0  or
-      $!==EBADF ? dbg("ESP: error reading config file: $!")
-                : die "error reading config file: $!";
-    close(F) or die "error closing config file: $!";
-  }
-
 }
 
 sub esp_sendgrid_check_domain {
@@ -398,6 +380,68 @@ sub esp_mailup_check {
       $pms->set_tag('MAILUPID', $mailup_id);
       dbg("HIT! $mailup_id customer found in Mailup feed");
       $pms->test_log("Mailup id: $mailup_id");
+      $pms->got_hit($rulename, "", ruletype => 'eval');
+      return 1;
+    }
+  }
+
+}
+
+sub esp_maildome_check {
+  my ($self, $pms) = @_;
+  my $maildome_id;
+
+  my $rulename = $pms->get_current_eval_rule_name();
+
+  # return if X-Mailer is not what we want
+  my $xmailer = $pms->get("X-Mailer", undef);
+
+  if((not defined $xmailer) or ($xmailer !~ /MaildomeMTA/)) {
+    return;
+  }
+
+  $maildome_id = $pms->get("List-Unsubscribe", undef);
+  return if not defined $maildome_id;
+  $maildome_id =~ /subject=https:\/\/.*\/unsubscribe\/([0-9]+)\/([0-9]+)\/.*\/([0-9])\/([0-9]+)\>/;
+  $maildome_id = $2;
+
+  # if regexp doesn't match it's not Maildome
+  return if not defined $maildome_id;
+  chomp($maildome_id);
+  if(defined $maildome_id) {
+    if ( exists $self->{ESP}->{MAILDOME}->{$maildome_id} ) {
+      $pms->set_tag('MAILDOMEID', $maildome_id);
+      dbg("HIT! $maildome_id customer found in Maildome feed");
+      $pms->test_log("Maildome id: $maildome_id");
+      $pms->got_hit($rulename, "", ruletype => 'eval');
+      return 1;
+    }
+  }
+
+}
+
+sub esp_mailchimp_check {
+  my ($self, $pms) = @_;
+  my $mailchimp_id;
+
+  my $rulename = $pms->get_current_eval_rule_name();
+
+  # return if X-Mailer is not what we want
+  my $xmailer = $pms->get("X-Mailer", undef);
+
+  if((not defined $xmailer) or ($xmailer !~ /MailChimp Mailer/)) {
+    return;
+  }
+
+  $mailchimp_id = $pms->get("X-MC-User", undef);
+  return if not defined $mailchimp_id;
+
+  chomp($mailchimp_id);
+  if(defined $mailchimp_id) {
+    if ( exists $self->{ESP}->{MAILCHIMP}->{$mailchimp_id} ) {
+      $pms->set_tag('MAILCHIMPID', $mailchimp_id);
+      dbg("HIT! $mailchimp_id customer found in Mailchimp feed");
+      $pms->test_log("Mailchimp id: $mailchimp_id");
       $pms->got_hit($rulename, "", ruletype => 'eval');
       return 1;
     }
