@@ -3224,7 +3224,7 @@ tflags     URI_DASHGOVEDU              publish
 uri        __URI_GOOG_STO_IMG         m,^https?://storage\.googleapis\.com/.*\.(?:png|jpe?g|gif)$,i
 tflags     __URI_GOOG_STO_IMG         multiple maxhits=5
 
-uri        __URI_GOOG_STO_HTML        m,^https?://storage\.googleapis\.com/.*\.html?$,i
+uri        __URI_GOOG_STO_HTML        m,^https?://(?:firebase)?storage\.googleapis\.com/.*\.html?(?:$|\?),i
 tflags     __URI_GOOG_STO_HTML        multiple maxhits=5
 
 meta       __GOOG_STO_IMG_NOHTML      __URI_GOOG_STO_IMG && !__URI_GOOG_STO_HTML
