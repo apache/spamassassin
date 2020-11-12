@@ -43,7 +43,17 @@ ifplugin Mail::SpamAssassin::Plugin::FreeMail
   describe MONEY_FREEMAIL   Lots of money from someone using free email?
   #score    MONEY_FREEMAIL   0.5
   tflags   MONEY_FREEMAIL   nopublish
+
+  meta     MONEY_FREEMAIL_REPTO   LOTS_OF_MONEY && (__freemail_hdr_replyto)
+  describe MONEY_FREEMAIL_REPTO   Lots of money from someone using free email?
+  score    MONEY_FREEMAIL_REPTO   3.000	# limit
+  tflags   MONEY_FREEMAIL_REPTO   publish
 endif
+
+meta      MONEY_NOHTML        LOTS_OF_MONEY && __CT_TEXT_PLAIN 
+describe  MONEY_NOHTML        Lots of money in plain text
+score     MONEY_NOHTML        2.500	# limit
+
 
 #meta     MONEY_FROM_RUNON   LOTS_OF_MONEY && __FROM_RUNON	# almost same spam hit rate, poorer S/O
 meta     MONEY_FROM_MISSP   LOTS_OF_MONEY && __FROM_MISSPACED && !__MIME_QP
