@@ -3133,7 +3133,7 @@ body       __TRANSFORM_LIFE            /\b(transform|change) your (?:daily )?lif
 body       __STAY_HOME                 /\b(?:going out of|leaving)(?: your)? (?:home|house|residence)\b/i
 body       __RECEIVE_BONUS             /\byou(?:'ll)?(?: also| will)* (?:rec[ei]*ve|get|earn|collect|be (?:awarded|handed|remitted|given|paid|(?:greeted|welcomed|started) with)) (?:an? )?(?:gift|bonus|extra)(?: of|:)? \$[\d,]+/i
 
-meta       TRANSFORM_LIFE              __TRANSFORM_LIFE && !__SUBSCRIPTION_INFO && !__RP_MATCHES_RCVD && !__RCD_RDNS_MAIL_MESSY && !__VIA_ML 
+meta       TRANSFORM_LIFE              __TRANSFORM_LIFE && !__HAS_CAMPAIGNID && !__HAS_SENDER && !__HAS_X_MAILER && !__VIA_ML 
 describe   TRANSFORM_LIFE              Transform your life!
 score      TRANSFORM_LIFE              2.500	# limit
 
@@ -3251,15 +3251,15 @@ tflags     GOOG_STO_IMG_NOHTML        publish
 
 
 # download-a-file pitch, malware? 11/2020
-header     CRAIGSLIST_DATING          Subject =~ /Sexy \w+ From Craigs?list/i
-describe   CRAIGSLIST_DATING          Possible malware
-score      CRAIGSLIST_DATING          4.000	# limit
+#header     CRAIGSLIST_DATING          Subject =~ /Sexy \w+ From Craigs?list/i
+#describe   CRAIGSLIST_DATING          Possible malware
+#score      CRAIGSLIST_DATING          4.000	# limit
 
 uri        __URI_PVT_SHAREPOINT       m,^https?://(?!www\.)(?:[^/.]+\.)+sharepoint\.com/,i
 
 # suspicious HTML observed in the wild
-rawbody    __QUOTQUOTQUOT             /(?:&quot;){5,}/
-tflags     __QUOTQUOTQUOT             multiple maxhits=16
-meta       __QUOTQUOTQUOT_MANY        __QUOTQUOTQUOT > 15
+#rawbody    __QUOTQUOTQUOT             /(?:&quot;){5,}/
+#tflags     __QUOTQUOTQUOT             multiple maxhits=16
+#meta       __QUOTQUOTQUOT_MANY        __QUOTQUOTQUOT > 15
 
 
