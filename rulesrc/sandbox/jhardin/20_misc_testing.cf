@@ -1295,8 +1295,8 @@ describe    GOOGLE_DOCS_PHISH_MANY  Phishing via a Google Docs form
 score       GOOGLE_DOCS_PHISH_MANY  4.00	# limit
 tflags      GOOGLE_DOCS_PHISH_MANY  publish
 
-meta        __GOOGLE_DOC_SUSP    __URI_GOOGLE_DOC && (__HAS_DOMAINKEY_SIG || __RDNS_NONE || __SYSADMIN || __STY_INVIS) && !ALL_TRUSTED
-meta        GOOGLE_DOC_SUSP      __GOOGLE_DOC_SUSP && !__HAS_SENDER && !__RCD_RDNS_MTA_MESSY && !__LYRIS_EZLM_REMAILER && !__USING_VERP1 && !__RCD_RDNS_SMTP && !__HAS_THREAD_INDEX 
+meta        __GOOGLE_DOC_SUSP    __URI_GOOGLE_DOC && (__HAS_DOMAINKEY_SIG || __RDNS_NONE || __SYSADMIN || __STY_INVIS || LOTS_OF_MONEY || __XFER_MONEY) && !ALL_TRUSTED
+meta        GOOGLE_DOC_SUSP      __GOOGLE_DOC_SUSP && !__HAS_SENDER && !__RCD_RDNS_MTA_MESSY && !__LYRIS_EZLM_REMAILER && !__USING_VERP1 && !__RCD_RDNS_SMTP && !__HAS_THREAD_INDEX && !__RCD_RDNS_SMTP 
 describe    GOOGLE_DOC_SUSP      Suspicious use of Google Docs
 score       GOOGLE_DOC_SUSP      2.500	# limit
 tflags      GOOGLE_DOC_SUSP      publish
