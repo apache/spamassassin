@@ -402,7 +402,7 @@ sub esp_maildome_check {
 
   $maildome_id = $pms->get("List-Unsubscribe", undef);
   return if not defined $maildome_id;
-  $maildome_id =~ /subject=https:\/\/.*\/unsubscribe\/([0-9]+)\/([0-9]+)\/.*\/([0-9])\/([0-9]+)\>/;
+  $maildome_id =~ /subject=https:\/\/.*\/unsubscribe\/([0-9]+)\/([0-9]+)\/.*\/([0-9]+)\/([0-9]+)\>/;
   $maildome_id = $2;
 
   # if regexp doesn't match it's not Maildome
