@@ -3287,3 +3287,9 @@ uri        __URI_PVT_SHAREPOINT       m,^https?://(?!www\.)(?:[^/.]+\.)+sharepoi
 #meta       __QUOTQUOTQUOT_MANY        __QUOTQUOTQUOT > 15
 
 
+body        __OBFU_SHY                 /\b(?:[a-z]{1,3}[\xc2][\xad][a-z]{1,2}|\w+(?:[\xc2][\xad]\w+){2,6})\b(?![\xc2])/i
+tflags      __OBFU_SHY                 multiple maxhits=11
+meta        __OBFU_SHY_MANY            __OBFU_SHY > 10
+
+
+
