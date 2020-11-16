@@ -1226,7 +1226,7 @@ header      __FROM_WELLSFARGO    From:addr =~ /wellsfargo\.com$/i
 header      __FROM_WESTERNUNION  From:addr =~ /westernunion\.com$/i
 
 meta        __FROM_MISSP_PHISH   __FROM_MISSPACED && (__FROM_ASB_BANK || __FROM_AMEX || __FROM_BANK_LOOSE || __FROM_CHASE || __FROM_CMNWLTH_BANK || __FROM_EBAY_LOOSE || __FROM_HSBC || __FROM_LLOYDSTSB || __FROM_PAYPAL_LOOSE || __FROM_WELLSFARGO || __FROM_WESTERNUNION)
-meta        FROM_MISSP_PHISH     __FROM_MISSP_PHISH
+meta        FROM_MISSP_PHISH     __FROM_MISSP_PHISH && !__DOS_HAS_LIST_UNSUB 
 describe    FROM_MISSP_PHISH     Malformed, claims to be from financial organization - possible phish
 score       FROM_MISSP_PHISH     3.500	# limit
 
@@ -1239,42 +1239,55 @@ uri         __URI_GOOGLE_DRV     m,^https?://(?:drive\.google|googledrive)\.com/
 
 
 body        __WEBMAIL_ACCT       /\byour web ?mail account/i
-body        __MAILBOX_FULL       /\b(?:you(?:r (?:mail\s?box|(?:e-?|web ?)mail))? (?:is (?:almost )?full|(?:quota )?ha(?:s|ve) (?:reached|exceeded|passed) (?:the|your|it'?s?) (?:university )?(?:size|storage|set|(?:e-?|web ?)mail|quota|folder|mail ?box)[\/\s](?:limit |quota |account )+)|over your mail\s?box (?:size )?(?:limit|quota)|maximum mail\s?box (?:size )?(?:limit|quota) exceeded|sua (?:conta|caixa) de (?:(?:e-?|web ?)mail|correio) (?:excedeu (?:sua|o) limite|est(?:=E1|[\xe1]|[\xc3][\xa1]) quase cheio))\b/i
-body        __CLEAN_MAILBOX      /\b(?:(?:e-?mail|mail\s?box|violation:|(?-i:CLICK)) (?:quota size|clean(?:-?up))|clean ?up click ?here)\b/i
-body        __VALIDATE_MAILBOX   /\b(?:(?:re-?)?(?:valida(?:te|r)|confirm|set)(?:\S?(?:increase|raise))? (?:your|(?:a )?sua) (?:mail\s?box|(?:e-?)?mail quota|caixa)|confirmar (?:que )?a sua conta (?:de e-?mail|ainda est(?:=E1|[\xe1]|[\xc3][\xa1]) ativa)|wprowadz dane konta ponizej|utrzymania aktywnego konta e-?mail|weryfikacji konta)\b/i
-body        __UPGR_MAILBOX       /\b(?:up(?:g[ra]+d(?:e|ing)|date) (?:[hw]as\s(?:[a-z]+\s){1,5})?(?:o[nf] )?(?:your )?(?:mail\s?box|(?:web ?|e-?)mail)|(?:web ?|e-?)mail Upgrade cuenta|atualiz(?:e|ar) (?:a|sua) caixa de correio|click\S{0,10} (?:here(?:[:\.\s]{0,5}\S{0,10}http\S{10,80})?|below)(?: link)? to (?:(?:complete|finish|increase) )?(?:(?:the|this|your)\s)?(?:up(?:date|grade)|(?:web ?|e-?)?mail(?:\s?box)? (?:size|quota|limit))|utrzymania aktywnego konta|request (?:for )additional storage)\b/i
-body        __LOCK_MAILBOX       /\b(?:(?:deactivate|lock|lose ac+ess to|los[se] (?:of )?(?:important )?(?:information|mail|messages) in) (?:your )?(?:mail\s?box|(?:web ?|e-?)mail)|your (?:mail\s?box|(?:(?:web ?|e-?)mail)(?: account)?) (?:(?:will|may) be(?:come)? )?(?:in-?a(?:ctive|cess[ia]ble)|locked|disabled|deleted|removed)\b|ditt konto vara "?deaktiverad"?|begr(?:=E4|\xe4|[\xc3][\xa4])nsad tillg(?:=E5|[\xe5]|[\xc3][\xa5])ng till din brevl(?:=E5|[\xe5]|[\xc3][\xa5])da|contas? de (?:web ?|e-?)mail (?:ser(?:=E1|[\xe1]|[\xc3][\xa1]) (?:desativado|exclu(?:=ED|[\xed]|[\xc3][\xad])do)|(?:=E9|[\xe9]|[\xc3][\xa9]) exclu(?:=ED|[\xed]|[\xc3][\xad])do)|destruir a sua caixa de (?:correio|entrada)|tw(?:=F3|[\xf3])j konto zostalo ograniczone|straci swoje e-?mail na sta[\xc5][\x82]e|konto zostanie automatycznie wy[\xc5][\x82][\xc4][\x85]czona|e-?mail account[^.]{0,30}deactivated (?:in|from) our (?:database|system|server))/i
-body        __SYSADMIN           /\b(?:help?[- ]?desk|(?:(?:web ?)?mail ?|sys(?:tem )?)admin(?:istrator)|local[- ]host|(?:support|upgrade|management) (?:team|center)|message from administrator|university mail server copyright|suporte t(?:=E9|[\xe9]|[\xc3][\xa9])cnico|administrador do sistema)\b/i
+body        __MAILBOX_FULL       /\b(?:you(?:r (?:mail\s?box|(?:e-?|web ?)mail))? (?:is (?:almost )?full|quota is running low|(?:quota )?ha(?:s|ve) (?:reached|exceeded|passed) (?:the|your|it'?s?) (?:university )?(?:size|storage|set|(?:e-?|web ?)mail|quota|folder|mail ?box)[\/\s](?:limit |quota |account )+)|over your mail\s?box (?:size )?(?:limit|quota)|maximum mail\s?box (?:size )?(?:limit|quota) exceeded|sua (?:conta|caixa) de (?:(?:e-?|web ?)mail|correio) (?:excedeu (?:sua|o) limite|est(?:=E1|[\xe1]|[\xc3][\xa1]) quase cheio))\b/i
+body        __CLEAN_MAILBOX      /\b(?:(?:e-?mail|mail\s?box|violation:|(?-i:CLICK)) (?:quota size|clean(?:-?up))|clean ?up click ?here|(?:please|automatically) reduce (?:your|the) e?-?mail ?box size|reduce (?:your |the )?(?:e?-?mail(?: ?box)? )?size automatically)\b/i
+tflags      __CLEAN_MAILBOX      multiple maxhits=2
+body        __VALIDATE_MAILBOX   /\b(?:(?:re-?)?(?:valida(?:te|r)|confirm|set)(?:\S?(?:increase|raise))? (?:your|(?:a )?sua) (?:mail\s?box|(?:e-?)?mail quota|caixa)|confirmar (?:que )?a sua conta (?:de e-?mail|ainda est(?:=E1|[\xe1]|[\xc3][\xa1]) ativa)|wprowadz dane konta ponizej|utrzymania aktywnego konta e-?mail|weryfikacji konta|you (?:have )?(?:failed|refused) to (?:verify|validate)|(?:e-?mail|confirm) verification|verify k?now)\b/i
+tflags      __VALIDATE_MAILBOX   multiple maxhits=2
+body        __UPGR_MAILBOX       /\b(?:up(?:g[ra]+d(?:e|ing)|date) (?:(?:[hw]as|and)\s(?:[a-z]+\s){1,5})?(?:o[nf] )?(?:your )?(?:mail\s?box|(?:web ?|e-?)mail)|(?:web ?|e-?)mail Upgrade cuenta|atualiz(?:e|ar) (?:a|sua) caixa de correio|click\S{0,10} (?:here(?:[:\.\s]{0,5}\S{0,10}http\S{10,80})?|below)(?: link)? to (?:(?:complete|finish|increase) )?(?:(?:the|this|your)\s)?(?:up(?:date|grade)|(?:web ?|e-?)?mail(?:\s?box)? (?:size|quota|limit))|utrzymania aktywnego konta|request (?:for )additional storage|you (?:have )?(?:failed|refused) to up(?:date|grade))\b/i
+body        __LOCK_MAILBOX       /\b(?:(?:deactivate|lock(?: up)?|lose ac+ess to|los[se] (?:of )?(?:important )?(?:information|mail|messages) in) (?:your )?(?:mail\s?box|(?:web ?|e-?)mail)|your (?:mail\s?box|(?:(?:web ?|e-?)mail)(?: account)?) (?:(?:will|may) be(?:come)? )?(?:in-?a(?:ctive|cess[ia]ble)|locked|disabled|deleted|removed)\b|ditt konto vara "?deaktiverad"?|begr(?:=E4|\xe4|[\xc3][\xa4])nsad tillg(?:=E5|[\xe5]|[\xc3][\xa5])ng till din brevl(?:=E5|[\xe5]|[\xc3][\xa5])da|contas? de (?:web ?|e-?)mail (?:ser(?:=E1|[\xe1]|[\xc3][\xa1]) (?:desativado|exclu(?:=ED|[\xed]|[\xc3][\xad])do)|(?:=E9|[\xe9]|[\xc3][\xa9]) exclu(?:=ED|[\xed]|[\xc3][\xad])do)|destruir a sua caixa de (?:correio|entrada)|tw(?:=F3|[\xf3])j konto zostalo ograniczone|straci swoje e-?mail na sta[\xc5][\x82]e|konto zostanie automatycznie wy[\xc5][\x82][\xc4][\x85]czona|e-?mail account[^.]{0,30}deactivated (?:in|from) our (?:database|system|server)|you will be deactivated|(?:account|e?-?mail(?: ?box)?) (?:will (?:be )?)?(?:shut ?down|expire|deactivate)|we have (?:stopped|suspended) (?:processing|accepting) (?:any )?(?:incoming|new|fresh) email)/i
+tflags      __LOCK_MAILBOX       multiple maxhits=2
+body        __SYSADMIN           /\b(?:help?[- ]?desk|(?:(?:web ?)?mail ?|sys(?:tem )?)admin(?:istrator)|local[- ]host|(?:support|upgrade|management|security|admin(?:istrat(?:or|ion))?) (?:team|center)|message from administrator|university mail server copyright|suporte t(?:=E9|[\xe9]|[\xc3][\xa9])cnico|administrador do sistema)\b/i
+header      __SUBJ_ADMIN         Subject =~ /\b(?:sysadmin|admin|server|service|support)\b/i
+meta        __SUBJ_DOM_ADMIN     __SUBJ_ADMIN && __PDS_FROM_NAME_TO_DOMAIN
 body        __ATTN_MAIL_USER     /\b(?:att(?:entio)?n|dear|caro) (?:web ?(?:mail)?\s\S\s)?(?:web ?|e-?)?mail (?:user|DO USU(?:=E1|[\xe1]|[\xc3][\xa1])RIO)[:;,]/i
 body        __MAIL_ACCT_ACCESS1  /\b(?:your (?:web ?|e-?)?mail (?:account|log-?in) (?:has )?been accessed|r(?:=F3|[\xf3])zne komputery zalogowaniu sie)\b/i
-body        __MAIL_ACCT_ACCESS2  /\blo+se ac+es+ to your (?:web|e-?)?mail (?:account|log-?in|box|address)\b/i
+body        __MAIL_ACCT_ACCESS2  /\blo+se ac+es+ to your (?:web|e-?)?mail ?(?:account|log-?in|box|address)\b/i
 
 body        __MAILBOX_FULL_SE    /(?:\b=F6|[\xf6]|[\xc3][\xb6])verskridit gr(?:=E4|[\xe4]|[\xc3][\xa4])nsen f(?:=F6|[\xf6]|[\xc3][\xb6])r din postl(?:=E5|[\xe5]|[\xc3][\xa5])da\b/i
 body        __VALIDATE_MBOX_SE   /(?:\b=E5|[\xe5]|[\xc3][\xa5])terst(?:=E4|\xe4|[\xc3][\xa4])lla ditt konto\b/i
+body        __PASSWORD_UPGRADE   /\bpassword upgrade\b/i
+body        __PENDING_MESSAGES   /\b(?:messages? pending|pending messages?)\b/i
+body        __RELEASE_MESSAGES   /\brelease messages?\b/i
+body        __PASSWORD_EXP_CLUMSY  /\bpassword is due for expiration yesterday\b/i
 
-meta        __EMAIL_PHISH        (__WEBMAIL_ACCT + __MAILBOX_FULL + __MAILBOX_FULL_SE + __CLEAN_MAILBOX + __VALIDATE_MAILBOX + __VALIDATE_MBOX_SE + __UPGR_MAILBOX + __LOCK_MAILBOX + __SYSADMIN + __ATTN_MAIL_USER + __MAIL_ACCT_ACCESS1 + __MAIL_ACCT_ACCESS2 + __ACCESS_REVOKE + (__TVD_PH_SUBJ_META || __TVD_PH_BODY_META || __TVD_PH_BODY_ACCOUNTS_PRE || __TVD_PH_BODY_ACCOUNTS_POST) > 1)
-meta        __EMAIL_PHISH_MANY   (__WEBMAIL_ACCT + __MAILBOX_FULL + __MAILBOX_FULL_SE + __CLEAN_MAILBOX + __VALIDATE_MAILBOX + __VALIDATE_MBOX_SE + __UPGR_MAILBOX + __LOCK_MAILBOX + __SYSADMIN + __ATTN_MAIL_USER + __MAIL_ACCT_ACCESS1 + __MAIL_ACCT_ACCESS2 + __ACCESS_REVOKE + (__TVD_PH_SUBJ_META || __TVD_PH_BODY_META || __TVD_PH_BODY_ACCOUNTS_PRE || __TVD_PH_BODY_ACCOUNTS_POST) > 3)
+meta        __EMAIL_PHISH        (__WEBMAIL_ACCT + __MAILBOX_FULL + __MAILBOX_FULL_SE + __CLEAN_MAILBOX + __VALIDATE_MAILBOX + __VALIDATE_MBOX_SE + __UPGR_MAILBOX + __LOCK_MAILBOX + __SYSADMIN + __ATTN_MAIL_USER + __MAIL_ACCT_ACCESS1 + __MAIL_ACCT_ACCESS2 + __ACCESS_REVOKE + __PASSWORD_UPGRADE + __PASSWORD_EXP_CLUMSY + (__TVD_PH_SUBJ_META || __TVD_PH_BODY_META || __TVD_PH_BODY_ACCOUNTS_PRE || __TVD_PH_BODY_ACCOUNTS_POST) > 1) && !__EMAIL_PHISH_MANY
+meta        __EMAIL_PHISH_MANY   (__WEBMAIL_ACCT + __MAILBOX_FULL + __MAILBOX_FULL_SE + __CLEAN_MAILBOX + __VALIDATE_MAILBOX + __VALIDATE_MBOX_SE + __UPGR_MAILBOX + __LOCK_MAILBOX + __SYSADMIN + __ATTN_MAIL_USER + __MAIL_ACCT_ACCESS1 + __MAIL_ACCT_ACCESS2 + __ACCESS_REVOKE + __PASSWORD_UPGRADE + __PENDING_MESSAGES + __RELEASE_MESSAGES + __PASSWORD_EXP_CLUMSY + __TO_IN_SUBJ + __SUBJ_DOM_ADMIN + (__TVD_PH_SUBJ_META || __TVD_PH_BODY_META || __TVD_PH_BODY_ACCOUNTS_PRE || __TVD_PH_BODY_ACCOUNTS_POST) > 3)
 
 meta        UPGRADE_MAILBOX      __UPGR_MAILBOX && __HTML_FONT_LOW_CONTRAST_MINFP 
 describe    UPGRADE_MAILBOX      Upgrade your mailbox! (phishing?)
 
-body        __ACCESS_SUSPENDED   /\b?(:(?:access|account) has been (?:temporar(?:il)?y )(?:suspended|blocked|locked)|suspend (?:you from|your) access(?:ing)?)\b/i
-body        __ACCESS_RESTORE     /\bto (?:(?:restore|regain) access|(?:remove|uplift) (?:the|this) suspens|continue using your (?:account|online))/i
+body        __ACCESS_SUSPENDED   /\b(?:(?:access|account) (?:suspension|has been (?:temporar(?:il)?y )(?:suspended|blocked|locked))|suspend (?:you from|your) access(?:ing)?|suspen(?:sion|se|ded) notice)\b/i
+tflags      __ACCESS_SUSPENDED   multiple maxhits=2
+body        __ACCESS_RESTORE     /\bto (?:(?:restore|regain) access|(?:remove|uplift) (?:the|this) suspens|continue using your (?:account|online|mailbox))/i
 body        __ACCESS_REVOKE      /(?:temporary|permanent) (?:de-?activation|removal) of your (?:\w{1,30} )?(?:access|account)/i
-body        __VERIFY_ACCOUNT     /(?:confirm|updated?|verify) (?:your|the) (?:account|current|billing|personal|online)? ?(?:records?|information|account|identity|access|data|login)/i
+body        __VERIFY_ACCOUNT     /(?:confirm|updated?|verify) (?:your|the) (?:(?:account|current|billing|personal|online)? ?(?:records?|information|account|identity|access|data|login)|"?[^\@\s]+\@\S+"? (?:account|mail ?box)|confirm verification|verify k?now)/i
 body        __FAILED_LOGINS      /unsuc+es+ful log-?[io]n at+empts/i
 body        __ACCOUNT_REACTIV    /(?:(?:account|access) (?:has been )?(?:successfully )?(?:reviewed and )?re-?(?:activat(?:ion|ed)|new(?:al|ed))|(?:unlock|re-?activate|restore|recover) (?:your|the|this) (?:account|access))/i
 body        __SECURITY_DEPT      /\bsecurity dep(?:artmen)?t\b/i
 body        __ACCOUNT_ERROR      /your account (?:is|appears to be) (?:incorrect|missing|in error|invalid)/i
-body        __ACCOUNT_DISRUPT    /ensure (?:that )?your (?:account|access) is not (?:disrupted|suspended|interrupted)/i
+body        __ACCOUNT_DISRUPT    /\b(?:ensure (?:that )?your (?:account|access) is not (?:disrupted|suspended|interrupted)|(?:avoid|incoming) (?:[a-z]+ ){0,5}e?-?mails? (?:from )?being rejected|avoid (?:account|e?-?mail(?: ?box)?) (?:shut ?down|suspension|locking|termination|expiration))\b/i
+tflags      __ACCOUNT_DISRUPT    multiple maxhits=2
 body        __ACCOUNT_UPGRADE    /(?:upgrade (?:of )your (?:account|access)|your (?:access|account) is[\w\s]{0,40}being upgraded)/i
+body        __ACCOUNT_SECURE     /\bmake your (?:"?[^\@\s]+\@\S+"? |e-?mail )?account more secure\b/i
+body        __SUSPICION_LOGIN    /\bsuspicion login\b/i
 
-meta        __ACCT_PHISH         (__ACCESS_SUSPENDED + __ACCESS_RESTORE + __ACCESS_REVOKE + __VERIFY_ACCOUNT + __FAILED_LOGINS + __ACCOUNT_REACTIV + __SECURITY_DEPT + __ACCOUNT_ERROR + __ACCOUNT_DISRUPT + __ACCOUNT_UPGRADE) > 1 && !__ACCT_PHISH_MANY
-meta        __ACCT_PHISH_MANY    (__ACCESS_SUSPENDED + __ACCESS_RESTORE + __ACCESS_REVOKE + __VERIFY_ACCOUNT + __FAILED_LOGINS + __ACCOUNT_REACTIV + __SECURITY_DEPT + __ACCOUNT_ERROR + __ACCOUNT_DISRUPT + __ACCOUNT_UPGRADE) > 3
-meta        ACCT_PHISHING        __ACCT_PHISH
+meta        __ACCT_PHISH         (__ACCESS_SUSPENDED + __ACCESS_RESTORE + __ACCESS_REVOKE + __VERIFY_ACCOUNT + __FAILED_LOGINS + __ACCOUNT_REACTIV + __SECURITY_DEPT + __ACCOUNT_ERROR + __ACCOUNT_DISRUPT + __ACCOUNT_UPGRADE + __ACCOUNT_SECURE + __SUSPICION_LOGIN) > 1 && !__ACCT_PHISH_MANY
+meta        __ACCT_PHISH_MANY    (__ACCESS_SUSPENDED + __ACCESS_RESTORE + __ACCESS_REVOKE + __VERIFY_ACCOUNT + __FAILED_LOGINS + __ACCOUNT_REACTIV + __SECURITY_DEPT + __ACCOUNT_ERROR + __ACCOUNT_DISRUPT + __ACCOUNT_UPGRADE + __ACCOUNT_SECURE + __SUSPICION_LOGIN + __TO_IN_SUBJ + __SUBJ_DOM_ADMIN) > 3
+meta        ACCT_PHISHING        (__ACCT_PHISH || __EMAIL_PHISH) && !__RCD_RDNS_SMTP_MESSY 
 describe    ACCT_PHISHING        Possible phishing for account information
 score       ACCT_PHISHING        1.500  # limit
-meta        ACCT_PHISHING_MANY   __ACCT_PHISH_MANY
+meta        ACCT_PHISHING_MANY   (__ACCT_PHISH_MANY || __EMAIL_PHISH_MANY) && !GOOGLE_DOCS_PHISH_MANY && !GOOG_STO_HTML_PHISH_MANY
 describe    ACCT_PHISHING_MANY   Phishing for account information
 score       ACCT_PHISHING_MANY   3.000  # limit
 
@@ -1284,7 +1297,7 @@ describe    PHISHING_FREEMAIL    Send your login credentials to some random free
 
 # Google Docs observed on LOTS of phishes 2012
 meta        __GOOGLE_DOCS_PHISH_1  __URI_GOOGLE_DOC && (__TVD_PH_SUBJ_META || __TVD_PH_BODY_META || __TVD_PH_BODY_ACCOUNTS_PRE || __TVD_PH_BODY_ACCOUNTS_POST)
-meta        __GOOGLE_DOCS_PHISH_2  __URI_GOOGLE_DOC && (__EMAIL_PHISH || __ACCT_PHISH)
+meta        __GOOGLE_DOCS_PHISH_2  __URI_GOOGLE_DOC && (__EMAIL_PHISH || __ACCT_PHISH) && !__EMAIL_PHISH_MANY && !__ACCT_PHISH_MANY
 meta        GOOGLE_DOCS_PHISH    (__GOOGLE_DOCS_PHISH_1 || __GOOGLE_DOCS_PHISH_2)
 describe    GOOGLE_DOCS_PHISH    Possible phishing via a Google Docs form
 score       GOOGLE_DOCS_PHISH    3.00	# limit
@@ -1296,7 +1309,7 @@ score       GOOGLE_DOCS_PHISH_MANY  4.00	# limit
 tflags      GOOGLE_DOCS_PHISH_MANY  publish
 
 meta        __GOOGLE_DOC_SUSP    __URI_GOOGLE_DOC && (__HAS_DOMAINKEY_SIG || __RDNS_NONE || __SYSADMIN || __STY_INVIS || LOTS_OF_MONEY || __XFER_MONEY) && !ALL_TRUSTED
-meta        GOOGLE_DOC_SUSP      __GOOGLE_DOC_SUSP && !__HAS_SENDER && !__RCD_RDNS_MTA_MESSY && !__LYRIS_EZLM_REMAILER && !__USING_VERP1 && !__RCD_RDNS_SMTP && !__HAS_THREAD_INDEX && !__RCD_RDNS_SMTP && ! __HAS_LIST_ID 
+meta        GOOGLE_DOC_SUSP      __GOOGLE_DOC_SUSP && !GOOGLE_DOCS_PHISH_MANY && !__HAS_SENDER && !__RCD_RDNS_MTA_MESSY && !__LYRIS_EZLM_REMAILER && !__USING_VERP1 && !__RCD_RDNS_SMTP && !__HAS_THREAD_INDEX && !__RCD_RDNS_SMTP && ! __HAS_LIST_ID 
 describe    GOOGLE_DOC_SUSP      Suspicious use of Google Docs
 score       GOOGLE_DOC_SUSP      2.500	# limit
 tflags      GOOGLE_DOC_SUSP      publish
@@ -1305,11 +1318,11 @@ tflags      GOOGLE_DOC_SUSP      publish
 #describe    URI_GOOGLE_DOCS      URI for Google Docs, common in phishing
 #score       URI_GOOGLE_DOCS      1.00	# limit
 
-meta        __URI_PHISH    __HAS_ANY_URI && !__URI_GOOGLE_DOC && (__EMAIL_PHISH || __ACCT_PHISH)
+meta        __URI_PHISH    __HAS_ANY_URI && !__URI_GOOGLE_DOC && !__URI_GOOG_STO_HTML && (__EMAIL_PHISH || __ACCT_PHISH)
 ifplugin Mail::SpamAssassin::Plugin::MIMEHeader
-  meta      URI_PHISH      __URI_PHISH && !ALL_TRUSTED && !__UNSUB_LINK && !__TAG_EXISTS_CENTER && !__HAS_SENDER && !__CAN_HELP && !__VIA_ML && !__UPPERCASE_URI && !__HAS_CC && !__NUMBERS_IN_SUBJ && !__PCT_FOR_YOU && !__MOZILLA_MSGID && !__FB_COST && !__hk_bigmoney && !__REMOTE_IMAGE
+  meta      URI_PHISH      __URI_PHISH && !ALL_TRUSTED && !__UNSUB_LINK && !__TAG_EXISTS_CENTER && !__HAS_SENDER && !__CAN_HELP && !__VIA_ML && !__UPPERCASE_URI && !__HAS_CC && !__NUMBERS_IN_SUBJ && !__PCT_FOR_YOU && !__MOZILLA_MSGID && !__FB_COST && !__hk_bigmoney && !__REMOTE_IMAGE && !__HELO_HIGHPROFILE && !__RCD_RDNS_SMTP_MESSY 
 else
-  meta      URI_PHISH      __URI_PHISH && !ALL_TRUSTED && !__UNSUB_LINK && !__TAG_EXISTS_CENTER && !__HAS_SENDER && !__CAN_HELP && !__VIA_ML && !__UPPERCASE_URI && !__HAS_CC && !__NUMBERS_IN_SUBJ && !__PCT_FOR_YOU && !__MOZILLA_MSGID && !__FB_COST && !__hk_bigmoney
+  meta      URI_PHISH      __URI_PHISH && !ALL_TRUSTED && !__UNSUB_LINK && !__TAG_EXISTS_CENTER && !__HAS_SENDER && !__CAN_HELP && !__VIA_ML && !__UPPERCASE_URI && !__HAS_CC && !__NUMBERS_IN_SUBJ && !__PCT_FOR_YOU && !__MOZILLA_MSGID && !__FB_COST && !__hk_bigmoney && !__HELO_HIGHPROFILE && !__RCD_RDNS_SMTP_MESSY 
 endif
 describe    URI_PHISH            Phishing using web form
 score       URI_PHISH            4.00   # limit
@@ -2028,7 +2041,7 @@ ifplugin Mail::SpamAssassin::Plugin::ReplaceTags
   replace_rules  __MY_MALWARE
   body           __PAY_ME               /(?:^|\s)(?:<P><A><Y>\s<M><E>|(?:(?:<S><E><N><D>|<T><R><A><N><S><M><I><T>|<G><I><V><E>)\s<M><E>|(?:<S><E><N><D>(?:<E><N>\s<S><I><E>)?|<T><R><A><N><S><F><E><R>)\s(?:<T><H><E>\s<A><M><O><U><N><T>\s<O><F>|<E><X><A><C><T><L><Y>|<G><E><N><A><U>)|<I>\s<W><A><N><T>|<D><E><N>\s<B><E><T><R><A><G>\s<V><O><N>|<P><A><Y><M><E><N><T>\s<O><F>)\s(?:[\d,'.\$£]+\s?(?:<U><S><D>?|<E><U><R>?(?:<O><S>)?|<G><B><P>|<B><T><C>)?|<B><I><T><C><O><I><N>|<B><T><C>)|(?:<M><A><K><E>|<P><E><R><F><O><R><M>|<S><E><N><D>|<T><R><A><N><S><M><I><T>)\s<T><H><E>\s<P><A><Y><M><E><N><T>|<A><M><O><U><N><T>\s<F><O><R>\s<M><Y>\s<S><I><L><E><N><C><E>|(?:<P><A><Y>|<F><U><N><D>)\s<T><H><I><S>\s(?:<B><I><T><C><O><I><N>|<M><O><N><E><R><O>)[-\s](?:<A><D><D><R><E><S><S>|<W><A><L><L><E><T>|<B><R><I><E><F><T><A><S><C><H><E>))[\s\.,]/i
   replace_rules  __PAY_ME
-  body           __YOUR_PASSWORD        /(?:^|\s)(?:<Y><O><U><R>|(?:<C><H><A><N><G><E>|<M><O><D><I><F><Y>|<U><P><D><A><T><E>|<R><E><S><E><T>|<A><L><T><E><R>|<F><I><X>)\s<T><H><E>)\s(?:<P><A><S><S>[-\s_]?<W><O><R><D>|<P><S><W><D>\s)/i
+  body           __YOUR_PASSWORD        /(?:^|\s)(?:<Y><O><U><R>|(?:<C><H><A><N><G><E>|<M><O><D><I><F><Y>|<U><P><D><A><T><E>|<R><E><S><E><T>|<A><L><T><E><R>|<F><I><X>)\s<T><H><E>)\s(?:<A><C><C><O><U><N><T>\s|<E>-?<M><A><I><L>\s)?(?:<P><A><S><S>[-\s_]?<W><O><R><D>|<P><S><W><D>\s)/i
   replace_rules  __YOUR_PASSWORD
   body           __YOUR_WEBCAM          /(?:^|\s)(?:<F><R><O><M>|<Y><O><U><R>|<W><I><T><H>)\s(?:(?:<S><C><R><E><E><N>|<D><E><S><K><T><O><P>)\s<A><N><D>\s|<O><W><N>\s)?(?:<W><E><B>[-\s]?|<F><R><O><N><T>[-\s]?|<N><E><T><W><O><R><K>\s)<C><A><M>/i
   replace_rules  __YOUR_WEBCAM
@@ -2044,7 +2057,7 @@ else
   body           __MY_VICTIM            /\b(?:hi|hello),?(?:\smy)?\s(?:victim|prey)\b/i
   body           __MY_MALWARE           /\b(?:(?:I(?:'ve|\shave)?\s(?:put|set\s?up|installed|buil[td]\sin|placed)\s(?:a\s)?|my\s(?:personal\s)?)(?:malware|virus|spy\s?ware|trojan|program\srecorded|expl[o0]it)|application[^\.]{1,30}(?:enable[sd]|allows)\sme\sto\s(?:access|control)|I\s(?:contaminated|infected|hacked|toxified|poisoned)\s(?:your|this)\s(?:machine|computer|gadget|(?:smart\s?)?phone|device|email)|Anwendung\s[^\.]{1,50}\sich\sauf\salle\sIhre\sdarauf\sgespeicherten\sDateien\szugreifen\skann|mein\shinterhältiges\sProgramm|I\s?am\s?a\s?hacker|(?:(?:trojan|virus|spyware|malware)\s)+giv(?:es|ing)\sme)\b/i
   body           __PAY_ME               /\b(?:pay\sme|(?:(?:send|transmit|give)\sme|(?:send(?:en\ssie)?|transfer)\s(?:the\samount\sof|exactly|genau)|I\swant|den\sbetrag\svon|payment\sof)\s(?:[\d,'.\$£]+\s?(?:usd?|eur?(?:os)?|gbp|BTC)?|bitcoin|BTC)|(?:make|perform|send|transmit)\sthe\spayment|amount\sfor\smy\ssilence|(?:pay|fund)\sthis\s(?:bitcoin|monero)[-\s](?:address|wallet|brieftasche))\b/i
-  body           __YOUR_PASSWORD        /\b(?:your|(?:change|modify|update|reset|alter|fix)\sthe)\s(?:pass[-\s_]?word|pswd)\b/i
+  body           __YOUR_PASSWORD        /\b(?:your|(?:change|modify|update|reset|alter|fix)\sthe)\s(?:account\s|e-?mail\s)?(?:pass[-\s_]?word|pswd)\b/i
   body           __YOUR_WEBCAM          /\b(?:from|your|with)\s(?:(?:screen|desktop)\sand\s|own\s)?(?:web[-\s]?|front[-\s]?|network\s)cam\b/i
   body           __YOUR_ONAN            /\b(?:your?|ihrer)\s(?:mast[ur]{2}bati(?:on|ng)(?:svideo)?|onanism|solitary\ssex|hand\sfucking|Selbstbefriedigung|(?:pleasur(?:e|ing)|satisfy(?:ing)?)\syourself)\b/i
   body           __YOUR_PERSONAL        /\b(?:your\s(?:personal|private|social\scontact|address|friends)\s(?:info(?:rmation)?|data|details|book|secrets)|all\s(?:of\s)?your\s(?:files|contacts|secrets|correspondence))\b/i
@@ -3248,6 +3261,17 @@ meta       GOOG_STO_IMG_NOHTML        __GOOG_STO_IMG_NOHTML && (__RDNS_NONE || H
 describe   GOOG_STO_IMG_NOHTML        Apparently using google content hosting to avoid URIBL
 score      GOOG_STO_IMG_NOHTML        2.500	# limit
 tflags     GOOG_STO_IMG_NOHTML        publish
+
+meta        __GOOG_STO_HTML_PHISH     __URI_GOOG_STO_HTML && (__EMAIL_PHISH || __ACCT_PHISH) && !__EMAIL_PHISH_MANY && !__ACCT_PHISH_MANY
+meta        GOOG_STO_HTML_PHISH       __GOOG_STO_HTML_PHISH
+describe    GOOG_STO_HTML_PHISH       Possible phishing with google content hosting to avoid URIBL
+score       GOOG_STO_HTML_PHISH       3.00	# limit
+tflags      GOOG_STO_HTML_PHISH       publish
+
+meta        GOOG_STO_HTML_PHISH_MANY  __URI_GOOG_STO_HTML && (__EMAIL_PHISH_MANY || __ACCT_PHISH_MANY)
+describe    GOOG_STO_HTML_PHISH_MANY  Phishing with google content hosting to avoid URIBL
+score       GOOG_STO_HTML_PHISH_MANY  4.00	# limit
+tflags      GOOG_STO_HTML_PHISH_MANY  publish
 
 
 # download-a-file pitch, malware? 11/2020

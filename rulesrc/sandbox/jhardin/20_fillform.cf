@@ -98,8 +98,8 @@ ifplugin Mail::SpamAssassin::Plugin::ReplaceTags
   # Add to score if fraud/phishing question is present
   body     __FILL_THIS_FORM_FRAUD_PHISH1   /<FF_YOUR>(?:<FF_F1>|<FF_F2>|<FF_F3>|<FF_F4>|<FF_F5>)<FF_SUFFIX>(?:<FF_BLANK1>|<FF_BLANK2>$)/i
   replace_rules   __FILL_THIS_FORM_FRAUD_PHISH1
-  meta     __FILL_THIS_FORM_FRAUD_PHISH   (__FILL_THIS_FORM || __FILL_THIS_FORM_SHORT) && (__FILL_THIS_FORM_FRAUD_PHISH1 || __EMAIL_PHISH)
-  meta     FILL_THIS_FORM_FRAUD_PHISH     __FILL_THIS_FORM_FRAUD_PHISH && !__UNSUB_LINK && !__SPOOFED_URL && !__DOS_LINK && !__CAN_HELP && !__VIA_ML && !__COMMENT_EXISTS && !__HAS_IN_REPLY_TO && !__THREADED 
+  meta     __FILL_THIS_FORM_FRAUD_PHISH   (__FILL_THIS_FORM || __FILL_THIS_FORM_SHORT) && (__FILL_THIS_FORM_FRAUD_PHISH1 || __EMAIL_PHISH || __ACCT_PHISH)
+  meta     FILL_THIS_FORM_FRAUD_PHISH     __FILL_THIS_FORM_FRAUD_PHISH && !__UNSUB_LINK && !__SPOOFED_URL && !__DOS_LINK && !__CAN_HELP && !__VIA_ML && !__COMMENT_EXISTS && !__HAS_IN_REPLY_TO && !__THREADED && !__HDR_RCVD_SHOPIFY 
   describe FILL_THIS_FORM_FRAUD_PHISH     Answer suspicious question(s)
   #score    FILL_THIS_FORM_FRAUD_PHISH     1.50
 
