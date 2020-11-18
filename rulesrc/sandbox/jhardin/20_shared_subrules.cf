@@ -8,10 +8,11 @@ rawbody  __BUGGED_IMG	m{<img\b[^>]{0,100}\ssrc=.?https?://[^>]{6,80}(?:\?[^>]{8}
 
 # originally from khopesh/20_s25r.cf
 # Sanity check:  how much freemail lacks spf or dkim?
+# Explicitly exclude freemail providers that do not implement either SPF or DKIM - !__NOT_SPOOFED is not reliable for that
 # JHardin: convert to subrule and scored meta
 meta     __SPOOFED_FREEMAIL     !__NOT_SPOOFED && FREEMAIL_FROM
 tflags   __SPOOFED_FREEMAIL     net
-meta     SPOOFED_FREEMAIL       __SPOOFED_FREEMAIL && !__FS_SUBJ_RE && !__freemail_safe && !__DOS_HAS_LIST_ID && !__HAS_X_MAILING_LIST && !__HAS_X_REF && !__HAS_THREAD_INDEX && !__HDRS_LCASE_KNOWN && !__FSL_RELAY_GOOGLE 
+meta     SPOOFED_FREEMAIL       __SPOOFED_FREEMAIL && !__HAS_IN_REPLY_TO && !__FS_SUBJ_RE && !__MSGID_GUID && !__freemail_safe && !__THREADED && !__HDRS_LCASE_KNOWN && !__HDR_RCVD_GOOGLE && !__HDR_RCVD_TONLINEDE
 score    SPOOFED_FREEMAIL       2.000	# limit
 tflags   SPOOFED_FREEMAIL       net
 

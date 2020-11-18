@@ -2568,16 +2568,22 @@ header     __FROM_WORDY                From:addr =~ /^(?:(?:[A-Z][A-Za-z]+|or|&)
 #header     __FROM_WORDY                From:addr =~ /^(?:(?:[A-Z][A-Za-z]+|or|&)\.)+[A-Z][A-Za-z]+(?<!Customer\.S(?:ervice|upport))\@/
 header     __FROM_WORDY_3              From:addr =~ /(?:(?:[A-Z][A-Za-z]+|or|&)\.){2,}[A-Z][A-Za-z]+\@/
 
-meta       __FROM_WORDY_SONLY          __FROM_WORDY && (__XPRIO_MINFP || __TO_NO_BRKTS_MSFT || __FILL_THIS_FORM_SHORT || __HAS_MSMAIL_PRI || DEAR_FRIEND ||  __TO_NO_BRKTS_FROM_MSSP || FREEMAIL_REPLYTO )
-meta       FROM_WORDY                  ((__FROM_WORDY_SONLY && !__DKIM_EXISTS) || __FROM_WORDY_3) && !__HAS_TNEF && !__USING_VERP1 && !__HAS_THREAD_INDEX && !__HAS_LIST_ID && !__RCD_RDNS_MTA  && !__RCD_RDNS_MX 
-describe   FROM_WORDY                  From address looks like a sentence
-score      FROM_WORDY                  2.500	# limit
-tflags     FROM_WORDY                  publish
+# __FROM_WORDY S/O now very poor (ham sign? :) ), don't score even with FP avoidance
+#meta       __FROM_WORDY_SONLY          __FROM_WORDY && (__XPRIO_MINFP || __TO_NO_BRKTS_MSFT || __FILL_THIS_FORM_SHORT || __HAS_MSMAIL_PRI || DEAR_FRIEND ||  __TO_NO_BRKTS_FROM_MSSP || FREEMAIL_REPLYTO )
+#meta       FROM_WORDY                  ((__FROM_WORDY_SONLY && !__DKIM_EXISTS) || __FROM_WORDY_3) && !__HAS_TNEF && !__USING_VERP1 && !__HAS_THREAD_INDEX && !__HAS_LIST_ID && !__RCD_RDNS_MTA  && !__RCD_RDNS_MX 
+#describe   FROM_WORDY                  From address looks like a sentence
+#score      FROM_WORDY                  2.500	# limit
+#tflags     FROM_WORDY                  publish
+#
+#meta       FROM_WORDY_SHORT            ((__FROM_WORDY_SONLY || __FROM_WORDY_3) && __HTML_LENGTH_0000_1024) && !__HAS_TNEF && !__USING_VERP1 
+#describe   FROM_WORDY_SHORT            From address looks like a sentence + short message
+#score      FROM_WORDY_SHORT            2.500	# limit
+#tflags     FROM_WORDY_SHORT            publish
 
-meta       FROM_WORDY_SHORT            ((__FROM_WORDY_SONLY || __FROM_WORDY_3) && __HTML_LENGTH_0000_1024) && !__HAS_TNEF && !__USING_VERP1 
-describe   FROM_WORDY_SHORT            From address looks like a sentence + short message
-score      FROM_WORDY_SHORT            2.500	# limit
-tflags     FROM_WORDY_SHORT            publish
+meta       PHP_SCRIPT                  __HAS_PHP_SCRIPT && !ALL_TRUSTED && !__PHP_NOVER_MUA && !__TO___LOWER && !__MIME_BASE64 
+describe   PHP_SCRIPT                  Sent by PHP script
+score      PHP_SCRIPT                  2.500	# limit
+tflags     PHP_SCRIPT                  publish
 
 meta       PHP_SCRIPT_MUA              __HAS_PHP_SCRIPT && __PHP_NOVER_MUA 
 describe   PHP_SCRIPT_MUA              Sent by PHP script, no version number
@@ -2594,9 +2600,12 @@ tflags     PHP_ORIG_SCRIPT             publish
 
 # noted 5/26/2016 on list by RW
 header     __PHP_ORIG_SCRIPT_EVAL      X-PHP-Originating-Script =~ /\beval\b.*\bcode\b/i
+meta       PHP_ORIG_SCRIPT_EVAL        __PHP_ORIG_SCRIPT_EVAL
+describe   PHP_ORIG_SCRIPT_EVAL        From suspicious PHP source
+score      PHP_ORIG_SCRIPT_EVAL        3.000	# limit
 
 
-#header     __FROM_AUTHORITY_COMPANY    From:name =~ /\b(?:court|fed-?ex|dhl|e-?zpass|invoice)\b/
+#header     __FROM_AUTHORITY_COMPANY    From:name =~ /\b(?:court|fed-?ex|dhl|e-?zpass|invoice)\b/i
 #meta       __PHP_MALWARE_ATTACH        __HAS_PHP_SCRIPT && __FROM_AUTHORITY_COMPANY && __ZIP_ATTACH_MT
 
 meta       __XMSID                     __HAS_XM_SID && !__CTYPE_MULTIPART_MIXED 
@@ -3297,4 +3306,9 @@ header      __LW_TEST_02               From:addr =~ /^newsletters\@hohiko\.co\.u
 header      __LW_TEST_03               From:addr =~ /\@hohiko\.co\.uk$/
 
 header      __HDR_RCVD_TONLINEDE       X-Spam-Relays-External =~ /\srdns=\S+\.t-online\.de\s/
+
+header      __MSMAIL_PRI_NORMAL        X-MSMail-Priority =~ /^normal$/i
+meta        __MSMAIL_PRI_ABNORMAL      __HAS_MSMAIL_PRI && !__MSMAIL_PRI_NORMAL
+header      __MSMAIL_PRI_HIGH          X-MSMail-Priority =~ /^(?:high|urgent)$/i
+
 
