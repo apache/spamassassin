@@ -3291,5 +3291,9 @@ body        __OBFU_SHY                 /\b(?:[a-z]{1,3}[\xc2][\xad][a-z]{1,2}|\w
 tflags      __OBFU_SHY                 multiple maxhits=11
 meta        __OBFU_SHY_MANY            __OBFU_SHY > 10
 
+# For masscheck eval, by request
+header      __LW_TEST_01               From:addr =~ /^store-news\@amazon\.com$/
+header      __LW_TEST_02               From:addr =~ /^newsletters\@hohiko\.co\.uk$/
+header      __LW_TEST_03               From:addr =~ /\@hohiko\.co\.uk$/
 
 
