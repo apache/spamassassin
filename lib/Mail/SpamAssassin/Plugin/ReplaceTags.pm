@@ -24,7 +24,7 @@ regular expression rules.  The tags make it much easier to maintain
 complicated rules.
 
 Warning: This plugin relies on data structures specific to this version of
-SpamAssasin; it is not guaranteed to work with other versions of SpamAssassin.
+SpamAssassin; it is not guaranteed to work with other versions of SpamAssassin.
 
 =head1 SYNOPSIS
 
