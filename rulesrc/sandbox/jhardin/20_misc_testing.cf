@@ -3311,4 +3311,6 @@ header      __MSMAIL_PRI_NORMAL        X-MSMail-Priority =~ /^normal$/i
 meta        __MSMAIL_PRI_ABNORMAL      __HAS_MSMAIL_PRI && !__MSMAIL_PRI_NORMAL
 header      __MSMAIL_PRI_HIGH          X-MSMail-Priority =~ /^(?:high|urgent)$/i
 
+# Phishing? 11/2020
+full        __TO_ADDR_BODY_DOC         /^To:\s+(?:"[^"\n]{0,80}"\s*)?<?([^@\s]{1,40})@([^\s>]{1,40})>?\s(?=.{1,2048}\b\1(?:@\2)?\s+(?:sharepoint|document))/ism
 
