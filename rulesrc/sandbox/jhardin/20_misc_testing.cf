@@ -1350,13 +1350,13 @@ body        __BODY_TEXT_LINE     /^\s*\S/
 tflags      __BODY_TEXT_LINE     multiple maxhits=3
 meta        __EMPTY_BODY         __BODY_TEXT_LINE < 2 && !__SMIME_MESSAGE
 # this hits 13% of masscheck corpus spam, 50% of that only scores 2 points
-meta        BODY_EMPTY           __EMPTY_BODY && !ALL_TRUSTED && !__MIME_ATTACHMENT && !__HAS_THREAD_INDEX && !__TO_EQ_FROM_DOM && !NO_RELAYS && !__PDF_ATTACH && !__HDR_RCVD_GOOGLE 
+meta        BODY_EMPTY           __EMPTY_BODY && !ALL_TRUSTED && !__MIME_ATTACHMENT && !__HAS_THREAD_INDEX && !__TO_EQ_FROM_DOM && !NO_RELAYS && !__PDF_ATTACH && !__HDR_RCVD_GOOGLE && !__MSGID_APPLEMAIL && !__XM_IPHONEMAIL 
 describe    BODY_EMPTY           No body text in message
 score       BODY_EMPTY           2.00	# limit
 
 
 meta        __BODY_URI_ONLY      __BODY_TEXT_LINE < 3 && __HAS_ANY_URI && !__SMIME_MESSAGE
-meta        BODY_URI_ONLY        __BODY_URI_ONLY && !__NOT_SPOOFED && !__LCL__ENV_AND_HDR_FROM_MATCH && !__TO_EQ_FROM_DOM && !__X_CRON_ENV && !__DKIM_EXISTS && !__VIA_ML && !__HAS_X_REF 
+meta        BODY_URI_ONLY        __BODY_URI_ONLY && !__NOT_SPOOFED && !__LCL__ENV_AND_HDR_FROM_MATCH && !__TO_EQ_FROM_DOM && !__X_CRON_ENV && !__DKIM_EXISTS && !__VIA_ML && !__HAS_X_REF && !__RCD_RDNS_MX_MESSY && !__RCD_RDNS_MAIL_MESSY 
 describe    BODY_URI_ONLY        Message body is only a URI in one line of text or for an image
 score       BODY_URI_ONLY        1.500   # limit
 tflags      BODY_URI_ONLY        publish
@@ -1539,7 +1539,7 @@ header      __DATE_LOWER       ALL =~ /date:\s\S{5}/
 
 # duplicates __XPRIO
 #header      __FH_HAS_XPRIORITY exists:X-Priority
-meta        __XPRIO_MINFP      __XPRIO && !__CT_ENCRYPTED && !ALL_TRUSTED && !__HAS_ERRORS_TO && !__HAS_IMG_SRC && !__RCD_RDNS_MAIL_MESSY && !__VIA_ML && !__PHPMAILER_MUA && !__AC_TINY_FONT && !__HAS_PHP_SCRIPT && !__DOS_HAS_LIST_UNSUB && !__HAS_IMG_SRC_ONECASE && !__NAKED_TO && !__HAS_THREAD_INDEX && !__HAS_TNEF && !__HAS_SENDER && !__UNPARSEABLE_RELAY_COUNT && !__PDS_RDNS_MTA && !__RCD_RDNS_SMTP_MESSY && !__RCD_RDNS_MX_MESSY && !__TO___LOWER && !__FROM_WORDY && !__RP_MATCHES_RCVD && !__DKIM_EXISTS && !__FROM_WEB_DAEMON 
+meta        __XPRIO_MINFP      __XPRIO && !__CT_ENCRYPTED && !ALL_TRUSTED && !__HAS_ERRORS_TO && !__HAS_IMG_SRC && !__RCD_RDNS_MAIL_MESSY && !__VIA_ML && !__PHPMAILER_MUA && !__AC_TINY_FONT && !__HAS_PHP_SCRIPT && !__DOS_HAS_LIST_UNSUB && !__HAS_IMG_SRC_ONECASE && !__NAKED_TO && !__HAS_THREAD_INDEX && !__HAS_TNEF && !__HAS_SENDER && !__UNPARSEABLE_RELAY_COUNT && !__PDS_RDNS_MTA && !__RCD_RDNS_SMTP_MESSY && !__RCD_RDNS_MX_MESSY && !__TO___LOWER && !__FROM_WORDY && !__RP_MATCHES_RCVD && !__DKIM_EXISTS && !__FROM_WEB_DAEMON && !__RDNS_SHORT 
 
 ifplugin Mail::SpamAssassin::Plugin::DKIM
   ifplugin Mail::SpamAssassin::Plugin::SPF
@@ -2582,7 +2582,7 @@ header     __FROM_WORDY_3              From:addr =~ /(?:(?:[A-Z][A-Za-z]+|or|&)\
 #score      FROM_WORDY_SHORT            2.500	# limit
 #tflags     FROM_WORDY_SHORT            publish
 
-meta       PHP_SCRIPT                  __HAS_PHP_SCRIPT && !ALL_TRUSTED && !__PHP_NOVER_MUA && !__TO___LOWER && !__MIME_BASE64 
+meta       PHP_SCRIPT                  __HAS_PHP_SCRIPT && !ALL_TRUSTED && !__PHP_NOVER_MUA && !__TO___LOWER && !__MIME_BASE64 && !__HAS_ANY_EMAIL 
 describe   PHP_SCRIPT                  Sent by PHP script
 score      PHP_SCRIPT                  2.500	# limit
 tflags     PHP_SCRIPT                  publish
@@ -3309,9 +3309,19 @@ header      __LW_TEST_03               From:addr =~ /\@hohiko\.co\.uk$/
 
 header      __HDR_RCVD_TONLINEDE       X-Spam-Relays-External =~ /\srdns=\S+\.t-online\.de\s/
 
+meta        TONLINE_FAKE_DKIM          __HDR_RCVD_TONLINEDE && __DKIM_EXISTS 
+describe    TONLINE_FAKE_DKIM          t-online.de doesn't do DKIM
+score       TONLINE_FAKE_DKIM          2.500	# limit
+
+
 header      __MSMAIL_PRI_NORMAL        X-MSMail-Priority =~ /^normal$/i
-meta        __MSMAIL_PRI_ABNORMAL      __HAS_MSMAIL_PRI && !__MSMAIL_PRI_NORMAL
 header      __MSMAIL_PRI_HIGH          X-MSMail-Priority =~ /^(?:high|urgent)$/i
+meta        __MSMAIL_PRI_ABNORMAL      __HAS_MSMAIL_PRI && !__MSMAIL_PRI_NORMAL
+
+meta        MSMAIL_PRI_ABNORMAL        __MSMAIL_PRI_ABNORMAL && !ALL_TRUSTED && !__ANY_OUTLOOK_MUA && !__THREAD_INDEX_GOOD && !__DKIM_EXISTS 
+describe    MSMAIL_PRI_ABNORMAL        Email priority often abused
+score       MSMAIL_PRI_ABNORMAL        1.500	# limit
+
 
 # Phishing? 11/2020
 full        __TO_ADDR_BODY_DOC         /^To:\s+(?:"[^"\n]{0,80}"\s*)?<?([^@\s]{1,40})@([^\s>]{1,40})>?\s(?=.{1,2048}\b\1(?:@\2)?\s+(?:sharepoint|document))/ism
