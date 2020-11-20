@@ -313,7 +313,7 @@ header   __HAS_SQUIRRELMAIL_IN_MAILER	X-Mailer =~ /SquirrelMail\b/
 header   __HAS_OFFICE1214_IN_MAILER	X-Mailer =~ /^Microsoft (?:Office )?Outlook 1[2456]\.0/
 # CGP MAPI module fingerprint, to protect from MISSING_MIMEOLE
 header   __HAS_CGP_MAPI_IN_MAILER X-Mailer =~ /CommuniGate Pro MAPI/
-meta     MISSING_MIMEOLE	(__HAS_MSMAIL_PRI && !__HAS_MIMEOLE && !__HAS_SQUIRRELMAIL_IN_MAILER && !__HAS_OFFICE1214_IN_MAILER && !__HAS_CGP_MAPI_IN_MAILER)
+meta     MISSING_MIMEOLE	(__HAS_MSMAIL_PRI && !__HAS_MIMEOLE && !__HAS_SQUIRRELMAIL_IN_MAILER && !__HAS_OFFICE1214_IN_MAILER && !__HAS_CGP_MAPI_IN_MAILER && !__HDR_RCVD_TONLINEDE) 
 describe MISSING_MIMEOLE	Message has X-MSMail-Priority, but no X-MimeOLE
 
 header __HAS_X_MAILER		exists:X-Mailer
