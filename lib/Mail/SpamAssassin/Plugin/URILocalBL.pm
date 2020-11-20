@@ -480,14 +480,14 @@ sub check_uri_local_bl {
     my $flags = 0;
     my $flag_isp = 0;
     my $flag_silent = 0;
-    eval '$flags = GEOIP_MEMORY_CACHE | GEOIP_CHECK_CACHE' if ($gip_wanted >= $gip_have);
-    eval '$flag_silent = Geo::IP::GEOIP_SILENCE' if ($gip_wanted >= $gip_have);
-    eval '$flag_isp = GEOIP_ISP_EDITION' if ($gip_wanted >= $gip_have);
+    eval '$flags = GEOIP_MEMORY_CACHE | GEOIP_CHECK_CACHE' if ($gip_have >= $gip_wanted);
+    eval '$flag_silent = GEOIP_SILENCE' if ($gip_have >= $gip_wanted);
+    eval '$flag_isp = GEOIP_ISP_EDITION' if ($gip_have >= $gip_wanted);
 
    eval {
-    if ($flag_silent && $gic_wanted >= $gic_have) {
+    if ($flag_silent && $gic_have >= $gic_wanted) {
       $self->{geoip} = Geo::IP->new($flags | $flag_silent);
-      $self->{geoisp} = Geo::IP->open_type($flag_isp | $flag_silent | $flags);
+      $self->{geoisp} = Geo::IP->open_type($flag_isp, $flag_silent | $flags);
     } else {
       open(OLDERR, ">&STDERR");
       open(STDERR, ">", "/dev/null");
