@@ -3329,4 +3329,6 @@ full        __TO_ADDR_BODY_DOC         /^To:\s+(?:"[^"\n]{0,80}"\s*)?<?([^@\s]{1
 
 body        __BODY_HAS_ISBN            /(?:^|[^-\d])97[89]-\d(?:(?!--)[-\d]){10,14}(?:$|[^-\d])/
 
+header      __REPLYTO_NOREPLY          Reply-To =~ /\bno-?reply@/i
+
 
