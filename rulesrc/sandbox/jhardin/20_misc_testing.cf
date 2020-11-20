@@ -2582,7 +2582,7 @@ header     __FROM_WORDY_3              From:addr =~ /(?:(?:[A-Z][A-Za-z]+|or|&)\
 #score      FROM_WORDY_SHORT            2.500	# limit
 #tflags     FROM_WORDY_SHORT            publish
 
-meta       PHP_SCRIPT                  __HAS_PHP_SCRIPT && !ALL_TRUSTED && !__PHP_NOVER_MUA && !__TO___LOWER && !__MIME_BASE64 && !__HAS_ANY_EMAIL 
+meta       PHP_SCRIPT                  __HAS_PHP_SCRIPT && !ALL_TRUSTED && !__PHP_NOVER_MUA && !__TO___LOWER && !__MIME_BASE64 && !__HAS_ANY_EMAIL && !__L_CTE_7BIT 
 describe   PHP_SCRIPT                  Sent by PHP script
 score      PHP_SCRIPT                  2.500	# limit
 tflags     PHP_SCRIPT                  publish
@@ -3318,11 +3318,15 @@ header      __MSMAIL_PRI_NORMAL        X-MSMail-Priority =~ /^normal$/i
 header      __MSMAIL_PRI_HIGH          X-MSMail-Priority =~ /^(?:high|urgent)$/i
 meta        __MSMAIL_PRI_ABNORMAL      __HAS_MSMAIL_PRI && !__MSMAIL_PRI_NORMAL
 
-meta        MSMAIL_PRI_ABNORMAL        __MSMAIL_PRI_ABNORMAL && !ALL_TRUSTED && !__ANY_OUTLOOK_MUA && !__THREAD_INDEX_GOOD && !__DKIM_EXISTS 
+meta        MSMAIL_PRI_ABNORMAL        __MSMAIL_PRI_ABNORMAL && !ALL_TRUSTED && !__ANY_OUTLOOK_MUA && !__HAS_THREAD_INDEX  && !__DKIM_EXISTS && !__MSOE_MID_WRONG_CASE 
 describe    MSMAIL_PRI_ABNORMAL        Email priority often abused
 score       MSMAIL_PRI_ABNORMAL        1.500	# limit
 
 
 # Phishing? 11/2020
 full        __TO_ADDR_BODY_DOC         /^To:\s+(?:"[^"\n]{0,80}"\s*)?<?([^@\s]{1,40})@([^\s>]{1,40})>?\s(?=.{1,2048}\b\1(?:@\2)?\s+(?:sharepoint|document))/ism
+
+
+body        __BODY_HAS_ISBN            /(?:^|[^-\d])97[89]-\d(?:(?!--)[-\d]){10,14}(?:$|[^-\d])/
+
 
