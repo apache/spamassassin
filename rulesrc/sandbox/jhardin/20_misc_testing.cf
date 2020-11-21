@@ -1458,8 +1458,8 @@ tflags      FOUND_YOU          publish
 #meta        ADMITS_CANSPAM    __ADMITS_CANSPAM && !__VIA_ML
 #describe    ADMITS_CANSPAM    Admits to being spam
 
-body        __ADMITS_SPAM     /\bth(?:e[- ]+above|is)(?:\?+s|[- ]+is)[- ]+(?:intended[- ]+as[- ]+)?an?[- ]+(?:email[- ]+)?[a@]dvert[i1l]sement\b/i
-meta        ADMITS_SPAM       __ADMITS_SPAM && !__TO___LOWER && !__MSOE_MID_WRONG_CASE && !__RP_MATCHES_RCVD 
+body        __ADMITS_SPAM     /\bth(?:e[- ]+above|is)(?:\?+s|[- ]+is)[- ]+(?:intended[- ]+as[- ]+)?an?[- ]+(?:e-?mail[- ]+)?[a@]dvert[i1l]sement\b/i
+meta        ADMITS_SPAM       __ADMITS_SPAM && !__FROM_LOWER && !__MSGID_JAVAMAIL && !__HAS_CAMPAIGNID 
 describe    ADMITS_SPAM       Admits this is an ad
 
 #body        __OBFU_ADVERT     /\badvert[1l]sement\b/i
