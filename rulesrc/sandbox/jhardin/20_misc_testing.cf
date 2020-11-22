@@ -3316,9 +3316,10 @@ score       TONLINE_FAKE_DKIM          2.500	# limit
 
 header      __MSMAIL_PRI_NORMAL        X-MSMail-Priority =~ /^normal$/i
 header      __MSMAIL_PRI_HIGH          X-MSMail-Priority =~ /^(?:high|urgent)$/i
+header      __MSMAIL_PRI_LOW           X-MSMail-Priority =~ /^(?:low|non-urgent)$/i
 meta        __MSMAIL_PRI_ABNORMAL      __HAS_MSMAIL_PRI && !__MSMAIL_PRI_NORMAL
 
-meta        MSMAIL_PRI_ABNORMAL        __MSMAIL_PRI_ABNORMAL && !ALL_TRUSTED && !__ANY_OUTLOOK_MUA && !__HAS_THREAD_INDEX  && !__DKIM_EXISTS && !__MSOE_MID_WRONG_CASE 
+meta        MSMAIL_PRI_ABNORMAL        __MSMAIL_PRI_ABNORMAL && !ALL_TRUSTED && !__ANY_OUTLOOK_MUA && !__HAS_THREAD_INDEX  && !__DKIM_EXISTS && !__MSOE_MID_WRONG_CASE && !__HAS_X_MAILER 
 describe    MSMAIL_PRI_ABNORMAL        Email priority often abused
 score       MSMAIL_PRI_ABNORMAL        1.500	# limit
 
