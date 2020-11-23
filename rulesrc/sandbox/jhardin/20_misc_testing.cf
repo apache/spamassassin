@@ -3319,9 +3319,17 @@ header      __MSMAIL_PRI_HIGH          X-MSMail-Priority =~ /^(?:high|urgent)$/i
 header      __MSMAIL_PRI_LOW           X-MSMail-Priority =~ /^(?:low|non-urgent)$/i
 meta        __MSMAIL_PRI_ABNORMAL      __HAS_MSMAIL_PRI && !__MSMAIL_PRI_NORMAL
 
-meta        MSMAIL_PRI_ABNORMAL        __MSMAIL_PRI_ABNORMAL && !ALL_TRUSTED && !__ANY_OUTLOOK_MUA && !__HAS_THREAD_INDEX  && !__DKIM_EXISTS && !__MSOE_MID_WRONG_CASE && !__HAS_X_MAILER 
+# This is counterintuitive - exclude __MSMAIL_PRI_HIGH ?
+# It seems that 99% of the spam using X-MSMail-Priority other than "normal" is using *invalid values*
+# score "high" separately if justified
+meta        MSMAIL_PRI_ABNORMAL        __MSMAIL_PRI_ABNORMAL && !ALL_TRUSTED && !__ANY_OUTLOOK_MUA && !__HAS_THREAD_INDEX  && !__DKIM_EXISTS && !__MSOE_MID_WRONG_CASE && !__HAS_X_MAILER && !__HAS_UA && !__MSMAIL_PRI_HIGH 
 describe    MSMAIL_PRI_ABNORMAL        Email priority often abused
 score       MSMAIL_PRI_ABNORMAL        1.500	# limit
+
+meta        MSMAIL_PRI_HIGH            __MSMAIL_PRI_HIGH && !ALL_TRUSTED && !__FROM_LOWER && !__RDNS_SHORT 
+describe    MSMAIL_PRI_HIGH            Email priority often abused
+score       MSMAIL_PRI_HIGH            1.500	# limit
+
 
 
 # Phishing? 11/2020
@@ -3331,5 +3339,11 @@ full        __TO_ADDR_BODY_DOC         /^To:\s+(?:"[^"\n]{0,80}"\s*)?<?([^@\s]{1
 body        __BODY_HAS_ISBN            /(?:^|[^-\d])97[89]-\d(?:(?!--)[-\d]){10,14}(?:$|[^-\d])/
 
 header      __REPLYTO_NOREPLY          Reply-To =~ /\bno-?reply@/i
+
+body        __ORDER_TODAY              /\border (?:it|one|yours) (?:today|now)\b/i
+tflags      __ORDER_TODAY              multiple maxhits=4
+
+
+
 
 
