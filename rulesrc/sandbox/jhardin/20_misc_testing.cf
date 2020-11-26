@@ -1297,6 +1297,9 @@ score       ACCT_PHISHING_MANY   3.000  # limit
 meta        PHISHING_FREEMAIL    (__EMAIL_PHISH || __EMAIL_PHISH_MANY || __ACCT_PHISH || __ACCT_PHISH_MANY) && FREEMAIL_FORGED_REPLYTO
 describe    PHISHING_FREEMAIL    Send your login credentials to some random freemail account
 
+meta        __VFY_ACCT_FRAUD     __VERIFY_ACCOUNT && __ADVANCE_FEE_2_NEW 
+meta        __VFY_ACCT_NORDNS    __VERIFY_ACCOUNT && __RDNS_NONE 
+meta        __VFY_ACCT_FREEM     __VERIFY_ACCOUNT && __freemail_hdr_replyto 
 
 # Google Docs observed on LOTS of phishes 2012
 meta        __GOOGLE_DOCS_PHISH_1  __URI_GOOGLE_DOC && (__TVD_PH_SUBJ_META || __TVD_PH_BODY_META || __TVD_PH_BODY_ACCOUNTS_PRE || __TVD_PH_BODY_ACCOUNTS_POST)
@@ -1359,7 +1362,7 @@ score       BODY_EMPTY           2.00	# limit
 meta        __BODY_URI_ONLY      __BODY_TEXT_LINE < 3 && __HAS_ANY_URI && !__SMIME_MESSAGE
 meta        BODY_URI_ONLY        __BODY_URI_ONLY && !__NOT_SPOOFED && !__LCL__ENV_AND_HDR_FROM_MATCH && !__TO_EQ_FROM_DOM && !__X_CRON_ENV && !__DKIM_EXISTS && !__VIA_ML && !__HAS_X_REF && !__RCD_RDNS_MX_MESSY && !__RCD_RDNS_MAIL_MESSY 
 describe    BODY_URI_ONLY        Message body is only a URI in one line of text or for an image
-score       BODY_URI_ONLY        1.500   # limit
+score       BODY_URI_ONLY        2.000   # limit
 tflags      BODY_URI_ONLY        publish
 
 
@@ -3342,7 +3345,7 @@ header      __REPLYTO_NOREPLY          Reply-To =~ /\bno-?reply@/i
 
 body        __ORDER_TODAY              /\border (?:it|one|yours) (?:today|now)\b/i
 tflags      __ORDER_TODAY              multiple maxhits=4
-meta        __ORDER_TODAY_MANY         __ORDER_TODAY > 3
+meta        __ORDER_TODAY_MANY         __ORDER_TODAY > 2
 
 
 
