@@ -3297,14 +3297,16 @@ tflags      GOOG_STO_HTML_PHISH_MANY  publish
 uri        __URI_PVT_SHAREPOINT       m,^https?://(?!www\.)(?:[^/.]+\.)+sharepoint\.com/,i
 
 # suspicious HTML observed in the wild
+# Rotten S/O. Why do this in ham?
 #rawbody    __QUOTQUOTQUOT             /(?:&quot;){5,}/
 #tflags     __QUOTQUOTQUOT             multiple maxhits=16
 #meta       __QUOTQUOTQUOT_MANY        __QUOTQUOTQUOT > 15
 
 
-body        __OBFU_SHY                 /\b(?:[a-z]{1,3}[\xc2][\xad][a-z]{1,2}|\w+(?:[\xc2][\xad]\w+){2,6})\b(?![\xc2])/i
-tflags      __OBFU_SHY                 multiple maxhits=11
-meta        __OBFU_SHY_MANY            __OBFU_SHY > 10
+# Abysmal S/O. Why do this in ham?
+#body        __OBFU_SHY                 /\b(?:[a-z]{1,3}[\xc2][\xad][a-z]{1,2}|\w+(?:[\xc2][\xad]\w+){2,6})\b(?![\xc2])/i
+#tflags      __OBFU_SHY                 multiple maxhits=11
+#meta        __OBFU_SHY_MANY            __OBFU_SHY > 10
 
 # For masscheck eval, by request
 header      __LW_TEST_01               From:addr =~ /^store-news\@amazon\.com$/
@@ -3315,7 +3317,8 @@ header      __HDR_RCVD_TONLINEDE       X-Spam-Relays-External =~ /\srdns=\S+\.t-
 
 meta        TONLINE_FAKE_DKIM          __HDR_RCVD_TONLINEDE && __DKIM_EXISTS 
 describe    TONLINE_FAKE_DKIM          t-online.de doesn't do DKIM
-score       TONLINE_FAKE_DKIM          2.500	# limit
+score       TONLINE_FAKE_DKIM          3.000	# limit
+tflags      TONLINE_FAKE_DKIM          publish
 
 
 header      __MSMAIL_PRI_NORMAL        X-MSMail-Priority =~ /^normal$/i
@@ -3342,11 +3345,16 @@ full        __TO_ADDR_BODY_DOC         /^To:\s+(?:"[^"\n]{0,80}"\s*)?<?([^@\s]{1
 body        __BODY_HAS_ISBN            /(?:^|[^-\d])97[89]-\d(?:(?!--)[-\d]){10,14}(?:$|[^-\d])/
 
 header      __REPLYTO_NOREPLY          Reply-To =~ /\bno-?reply@/i
+meta        __REPLYTO_NOREPLY_SUSP     __REPLYTO_NOREPLY && (__HAS_DOMAINKEY_SIG || FORGED_RELAY_MUA_TO_MX || __MSGID_NOFQDN2 || __URI_DBL_SUBDOM)
 
+# S/O good but bulk already scoring >6 points
 body        __ORDER_TODAY              /\border (?:it|one|yours) (?:today|now)\b/i
-tflags      __ORDER_TODAY              multiple maxhits=4
-meta        __ORDER_TODAY_MANY         __ORDER_TODAY > 2
+#tflags      __ORDER_TODAY              multiple maxhits=4
+#meta        __ORDER_TODAY_2            __ORDER_TODAY > 1
+#meta        __ORDER_TODAY_3            __ORDER_TODAY > 2
+#meta        __ORDER_TODAY_4            __ORDER_TODAY > 3
 
 
-
+meta        __SHORTENER_SHORT_SUBJ     __URL_SHORTENER && __SUBJ_SHORT 
+meta        __URL_SHORTENER_MINFP      __URL_SHORTENER && !__URI_DOTGOV && __HAS_ERRORS_TO && !__URI_DBL_DOM 
 
