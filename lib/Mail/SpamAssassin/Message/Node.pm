@@ -682,7 +682,7 @@ sub _normalize {
 
 =item rendered()
 
-render_text() takes the given text/* type MIME part, and attempts to
+rendered() takes the given text/* type MIME part, and attempts to
 render it into a text scalar.  It will always render text/html, and will
 use a heuristic to determine if other text/* parts should be considered
 text/html.  Two scalars are returned: the rendered type (either text/html
