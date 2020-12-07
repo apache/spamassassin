@@ -1269,7 +1269,7 @@ meta        __EMAIL_PHISH_MANY   (__WEBMAIL_ACCT + __MAILBOX_FULL + __MAILBOX_FU
 meta        UPGRADE_MAILBOX      __UPGR_MAILBOX && __HTML_FONT_LOW_CONTRAST_MINFP 
 describe    UPGRADE_MAILBOX      Upgrade your mailbox! (phishing?)
 
-body        __ACCESS_SUSPENDED   /\b(?:(?:access|account|e?-?mails) (?:suspension|(?:has|have) (?:been )?(?:temporar(?:il)?y (?:been )?)?(?:suspended|blocked|locked))|suspend (?:you from|your) access(?:ing)?|suspen(?:sion|se|ded) notice)\b/i
+body        __ACCESS_SUSPENDED   /\b(?:(?:access|account|e?-?mails) (?:suspension|(?:has|have) (?:been )?(?:temporar(?:il)?y (?:been )?)?(?:suspended|blocked|locked|blacklisted))|suspend (?:you from|your) access(?:ing)?|suspen(?:sion|se|ded) noti(?:ce|fication))\b/i
 tflags      __ACCESS_SUSPENDED   multiple maxhits=2
 body        __ACCESS_RESTORE     /\bto (?:(?:restore|regain) access|(?:remove|uplift) (?:the|this) suspens|continue using your (?:account|online|mailbox)|zugreifen wiederhergestellt)/i
 body        __ACCESS_REVOKE      /(?:(?:temporary|permanent) (?:de-?activation|removal) of your (?:\w{1,30} )?(?:access|account)|Ihre Kreditkarte wird gesperrt)/i
@@ -1279,7 +1279,7 @@ body        __FAILED_LOGINS      /unsuc+es+ful log-?[io]n at+empts/i
 body        __ACCOUNT_REACTIV    /(?:(?:account|access) (?:has been )?(?:successfully )?(?:reviewed and )?re-?(?:activat(?:ion|ed)|new(?:al|ed))|(?:unlock|re-?activate|restore|recover) (?:your|the|this) (?:account|access))/i
 body        __SECURITY_DEPT      /\bsecurity dep(?:artmen)?t\b/i
 body        __ACCOUNT_ERROR      /\b(?:your account (?:is|appears to be) (?:incorrect|missing|in error|invalid))\b/i
-body        __ACCOUNT_DISRUPT    /\b(?:ensure (?:that )?your (?:account|access) is not (?:disrupted|suspended|interrupted)|(?:avoid|incoming) (?:[a-z]+ ){0,5}e?-?mails? (?:from )?being rejected|avoid (?:account|e?-?mail(?: ?box)? )?(?:shut ?down|suspension|locking|termination|expiration))\b/i
+body        __ACCOUNT_DISRUPT    /\b(?:ensure (?:that )?your (?:account|access) is not (?:disrupted|suspended|interrupted)|(?:avoid|incoming) (?:[a-z]+ ){0,5}e?-?mails? (?:from )?being rejected|avoid (?:account|e?-?mail(?: ?box)? )?(?:shut ?down|suspension|locking|termination|expiration)|will terminate (?:your|its) service)\b/i
 tflags      __ACCOUNT_DISRUPT    multiple maxhits=2
 body        __ACCOUNT_UPGRADE    /\b(?:upgrade (?:of )your (?:account|access)|your (?:access|account) is[\w\s]{0,40}being upgraded|Weiter zur Aktualisierung)\b/i
 body        __ACCOUNT_SECURE     /\b(?:make your (?:"?[^\@\s]+\@\S+"? |e-?mail )?account more secure|Ihre Kreditkarte weist einige Sicherheitsprobleme)\b/i
@@ -3356,5 +3356,9 @@ body        __ORDER_TODAY              /\border (?:it|one|yours) (?:today|now)\b
 
 
 meta        __SHORTENER_SHORT_SUBJ     __URL_SHORTENER && __SUBJ_SHORT 
-meta        __URL_SHORTENER_MINFP      __URL_SHORTENER && !__URI_DOTGOV && __HAS_ERRORS_TO && !__URI_DBL_DOM 
+meta        SHORTENER_SHORT_SUBJ       __SHORTENER_SHORT_SUBJ && !__DOS_HAS_LIST_UNSUB && !__HAS_LIST_ID && !__HDR_RCVD_GOOGLE && !__XPRIO 
+describe    SHORTENER_SHORT_SUBJ       URL shortener (avoiding URIBL?) + short subject
+score       SHORTENER_SHORT_SUBJ       3.000	# limit
+
+#meta        __URL_SHORTENER_MINFP      __URL_SHORTENER && !__URI_DOTGOV && __HAS_ERRORS_TO && !__URI_DBL_DOM 
 
