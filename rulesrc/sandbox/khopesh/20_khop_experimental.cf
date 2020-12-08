@@ -7,8 +7,9 @@ describe MALFORMED_FREEMAIL	Bad headers on message from free email service
 header	 FROM_WEBSITE	From:raw =~ m'\b(?:f|ht)tps?://[^\s"</\@]{3,60}\.\w\w'i
 describe FROM_WEBSITE	Sender name appears to be a link
 
-header	 FROM_2_EMAILS	From =~ /([^\@]{2,}\@[^\@]{2,60}\.\w\w).*(?!\1)[^\@]{2,}\@[^\@]/
-describe FROM_2_EMAILS	Sender claims to have a different email
+# replaced by jhardin sandbox __PDS_FROM_2_EMAILS for maintenance
+#header	 FROM_2_EMAILS	From =~ /([^\@]{2,}\@[^\@]{2,60}\.\w\w).*(?!\1)[^\@]{2,}\@[^\@]/
+#describe FROM_2_EMAILS	Sender claims to have a different email
 
 # Fix for __FROM_ALL_NUMS, which has a y2k bug in it.  Now it's a y2.1k bug.
 header __FROM_ALL_NUMS_FIX  From:addr =~ /^(?!(?:19|20)\d\d[01]\d[0-3]\d)\d+\@/
