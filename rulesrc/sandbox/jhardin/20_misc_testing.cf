@@ -525,6 +525,11 @@ if can(Mail::SpamAssassin::Conf::perl_min_version_5010000)
   meta       PDS_FROM_2_EMAILS        __PDS_FROM_2_EMAILS && !__VIA_ML && !__VIA_RESIGNER && !__MSGID_JAVAMAIL && !__RCD_RDNS_MAIL_MESSY 
   describe   PDS_FROM_2_EMAILS        From header has multiple different addresses
   score      PDS_FROM_2_EMAILS        3.500	# limit
+
+  meta       __FROM_MULTI_NORDNS      __PDS_FROM_2_EMAILS && __RDNS_NONE 
+
+  meta       __FROM_MULTI_SHORT_IMG   __PDS_FROM_2_EMAILS && (HTML_IMAGE_ONLY_16 || HTML_SHORT_LINK_IMG_2 || __HTML_IMG_ONLY)
+
 endif
 
 uri     __PDS_LOC_WP_POMO       m;/wp-includes/pomo/(?!(?:entry|po|mo|streams|translations)\.php).*;i
@@ -3363,4 +3368,8 @@ describe    SHORTENER_SHORT_SUBJ       URL shortener (avoiding URIBL?) + short s
 score       SHORTENER_SHORT_SUBJ       3.000	# limit
 
 #meta        __URL_SHORTENER_MINFP      __URL_SHORTENER && !__URI_DOTGOV && __HAS_ERRORS_TO && !__URI_DBL_DOM 
+
+uri         __URI_DOTTY_HEX            /(?:\.[0-9a-f]{2}){30}/
+
+
 
