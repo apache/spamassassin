@@ -521,7 +521,7 @@ if can(Mail::SpamAssassin::Conf::perl_min_version_5010000)
   meta       PDS_TO_EQ_FROM_NAME      (__PDS_TO_EQ_FROM_NAME_1 || __PDS_TO_EQ_FROM_NAME_2) && !__HAS_SENDER 
   describe   PDS_TO_EQ_FROM_NAME      From: name same as To: address
 
-  header     __PDS_FROM_2_EMAILS      From =~ /(?:\W|^)([\w+.-]+\@[\w.-]+\.\w\w++)(?:[^\n\w<]{0,80})?<(?!\1)[^\n\s]*\@/i
+  header     __PDS_FROM_2_EMAILS      From =~ /(?:^|<|"| )([\w+.-]+\@[\w.-]+\.\w\w++)(?:[^\n\w<]{0,80})?<(?!\1)[^\n\s]*\@/i
   meta       PDS_FROM_2_EMAILS        __PDS_FROM_2_EMAILS && !__VIA_ML && !__VIA_RESIGNER && !__MSGID_JAVAMAIL && !__RCD_RDNS_MAIL_MESSY 
   describe   PDS_FROM_2_EMAILS        From header has multiple different addresses
   score      PDS_FROM_2_EMAILS        3.500	# limit
