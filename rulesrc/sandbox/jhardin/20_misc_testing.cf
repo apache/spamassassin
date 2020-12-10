@@ -1167,7 +1167,7 @@ describe    SUBJ_ODD_CASE      Oddly mixed-case Subject: header
 # Somebody's resurrecting the dead 07/1012
 body        BILL_1618          /\bUnder Bills?.1618(?: Title III)? passed by the 105th U\.S\. Congress\b/i
 describe    BILL_1618          Mentions proposed US law supposedly permitting spamming
-body        NOT_SPAM           /\b(?:this mail cannot be considered Spam|ESTE CORREO NO PUEDE SER CONSIDERADO (?:INTRUSIVO|spam)|Diese Nachricht ist KEIN SPAM)\b/i
+body        NOT_SPAM           /\b(?:(?:this (?:e?-?mail|message)|we) (?:is not|are not|cannot be considered) Spam|ESTE CORREO NO PUEDE SER CONSIDERADO (?:INTRUSIVO|spam)|Diese Nachricht ist KEIN SPAM)/i
 describe    NOT_SPAM           I'm not spam! Really! I'm not, I'm not, I'm not!
 
 
