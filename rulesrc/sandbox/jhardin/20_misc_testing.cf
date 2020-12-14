@@ -1327,9 +1327,9 @@ score       GOOGLE_DOCS_PHISH_MANY  4.00	# limit
 tflags      GOOGLE_DOCS_PHISH_MANY  publish
 
 meta        __GOOGLE_DOC_SUSP    __URI_GOOGLE_DOC && (__HAS_DOMAINKEY_SIG || __RDNS_NONE || __SYSADMIN || __STY_INVIS || LOTS_OF_MONEY || __XFER_MONEY || __ADVANCE_FEE_2_NEW) && !ALL_TRUSTED
-meta        GOOGLE_DOC_SUSP      __GOOGLE_DOC_SUSP && !GOOGLE_DOCS_PHISH_MANY && !__HAS_SENDER && !__RCD_RDNS_MTA_MESSY && !__LYRIS_EZLM_REMAILER && !__USING_VERP1 && !__RCD_RDNS_SMTP && !__HAS_THREAD_INDEX && !__RCD_RDNS_SMTP && ! __HAS_LIST_ID 
+meta        GOOGLE_DOC_SUSP      __GOOGLE_DOC_SUSP && !GOOGLE_DOCS_PHISH_MANY && !__HAS_SENDER && !__RCD_RDNS_MTA_MESSY && !__LYRIS_EZLM_REMAILER && !__USING_VERP1 && !__RCD_RDNS_SMTP && !__HAS_THREAD_INDEX && !__RCD_RDNS_SMTP && ! __HAS_LIST_ID && !__SURVEY && !__BUGGED_IMG 
 describe    GOOGLE_DOC_SUSP      Suspicious use of Google Docs
-score       GOOGLE_DOC_SUSP      2.500	# limit
+score       GOOGLE_DOC_SUSP      3.000	# limit
 tflags      GOOGLE_DOC_SUSP      publish
 
 #meta        URI_GOOGLE_DOCS      __URI_GOOGLE_DOC && !__DKIM_EXISTS && !__TO_EQ_FROM_DOM && !__DOS_REF_TODAY && !__DOS_BODY_FRI && !__DOS_BODY_WED && !__freemail_safe_fwd && !__TO_EQ_FROM_DOM && !__HAS_ERRORS_TO
