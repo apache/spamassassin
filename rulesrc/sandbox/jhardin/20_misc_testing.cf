@@ -3381,11 +3381,15 @@ meta        URI_DOTTY_HEX              __URI_DOTTY_HEX
 describe    URI_DOTTY_HEX              Suspicious URI format
 
 
-# reported activity
 uri         __URI_MYSP_AC              m;://mysp\.ac/;i
+meta        URI_MYSP_AC                __URI_MYSP_AC
+describe    URI_MYSP_AC                Uses unusual redirector to avoid URIBL
 
 
 header     __ENVFROM_GOOG_TRIX         X-Spam-Relays-External =~ /\senvfrom=[^@\s]+\@trix\.bounces\.google\.com\s/
+meta       ENVFROM_GOOG_TRIX           __ENVFROM_GOOG_TRIX
+describe   ENVFROM_GOOG_TRIX           From suspicious Google subdomain
+score      ENVFROM_GOOG_TRIX           3.000	# limit
 
 
 
