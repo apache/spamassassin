@@ -219,7 +219,7 @@ meta     YOU_INHERIT      __YOU_INHERIT
 describe YOU_INHERIT      Discussing your inheritance
 body     __I_INHERIT      /\b(?:I|eu)\s[a-z\s]{0,30}(?:inherited|herdei)\b/i
 body     __THEY_INHERIT   /\b(?:inherit\sth(?:e|is)\smoney|herede\sest[ea]\sdinero)\b/i
-body     __NOT_DEAD_YET   /\b(?:will\sinherit|que\sherede)\b/i
+body     __NOT_DEAD_YET   /\b(?:will\sinherit|que\sherede|your\sdeath|your?\sbeing\sdead)\b/i
 body     __AM_DYING       /\b(?:am\s(?:\S+\s)?dying|terminally\sill|cancer|en\sphase\sterminale|(?:become|is|devenu|maladie)\sincurable|que\sje\smeurs)\b/i
 body     __I_WILL_YOU     /\bwill(?:ed)?\s(?:[a-z\s]{0,20}(?:fortune|money|\$[\d,]+[a-z]{0,9})\s)?to\syou\b/i
 body     __NEXT_OF_KIN    /\bnext[-\s]of[-\s]kin\b/i
@@ -284,6 +284,7 @@ score    COMPENSATION     1.50	# limit
  
 body     __TRUNK_BOX      /\b(?:(?:trunk|metallic|proof|security|consignment)\sbox(?:es)?|sealed\ssafe|une mallette m(?:e|=E9|[\xe9]|[\xc3][\xa9])tallique)\b/i
 body     __COURIER        /\bcourier\s(?:company|service)\b/i
+body     __YOUR_CONSIGNMENT     /\b(?:received?|pa(?:y|id)|sen[dt]|h[oe]ld|delay(?:ed)?|impound(?:ed)?|released?|ship(?:ped)?)\syour(?:\s\w+)?\sconsignment\b/i
 #meta     MONEY_FRAUD_BOX  LOTS_OF_MONEY && __TRUNK_BOX && __COURIER
 #describe MONEY_FRAUD_BOX  Lots of money in a box, lots of money from a fox
 #score    MONEY_FRAUD_BOX  1.0

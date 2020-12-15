@@ -94,7 +94,8 @@ describe IMPOTENCE              Impotence cure
 
 
 
-body URG_BIZ			/urgent.{0,16}(?:assistance|business|buy|confidential|notice|proposal|reply|request|response)/i
+body     __URG_BIZ		/urgent.{0,16}(?:assistance|business|buy|confidential|notice|proposal|reply|request|response)/i
+meta     URG_BIZ		__URG_BIZ
 describe URG_BIZ		Contains urgent matter
 
 
