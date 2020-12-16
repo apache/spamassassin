@@ -1372,9 +1372,9 @@ score       BODY_EMPTY           2.00	# limit
 
 
 meta        __BODY_URI_ONLY      __BODY_TEXT_LINE < 3 && __HAS_ANY_URI && !__SMIME_MESSAGE
-meta        BODY_URI_ONLY        __BODY_URI_ONLY && !__NOT_SPOOFED && !__LCL__ENV_AND_HDR_FROM_MATCH && !__TO_EQ_FROM_DOM && !__X_CRON_ENV && !__DKIM_EXISTS && !__VIA_ML && !__HAS_X_REF && !__RCD_RDNS_MX_MESSY && !__RCD_RDNS_MAIL_MESSY 
+meta        BODY_URI_ONLY        __BODY_URI_ONLY && !__NOT_SPOOFED && !__TO_EQ_FROM_DOM && !__X_CRON_ENV && !__DKIM_EXISTS && !__VIA_ML && !__HAS_X_REF && !__RCD_RDNS_MX_MESSY && !__RCD_RDNS_MAIL_MESSY && !__RCD_RDNS_SMTP_MESSY && !__MSGID_JAVAMAIL && !__RP_MATCHES_RCVD 
 describe    BODY_URI_ONLY        Message body is only a URI in one line of text or for an image
-score       BODY_URI_ONLY        2.000   # limit
+score       BODY_URI_ONLY        3.000   # limit
 tflags      BODY_URI_ONLY        publish
 
 
@@ -1555,7 +1555,7 @@ header      __DATE_LOWER       ALL =~ /date:\s\S{5}/
 
 # duplicates __XPRIO
 #header      __FH_HAS_XPRIORITY exists:X-Priority
-meta        __XPRIO_MINFP      __XPRIO && !__CT_ENCRYPTED && !ALL_TRUSTED && !__HAS_ERRORS_TO && !__HAS_IMG_SRC && !__RCD_RDNS_MAIL_MESSY && !__VIA_ML && !__PHPMAILER_MUA && !__AC_TINY_FONT && !__HAS_PHP_SCRIPT && !__DOS_HAS_LIST_UNSUB && !__HAS_IMG_SRC_ONECASE && !__NAKED_TO && !__HAS_THREAD_INDEX && !__HAS_TNEF && !__HAS_SENDER && !__UNPARSEABLE_RELAY_COUNT && !__PDS_RDNS_MTA && !__RCD_RDNS_SMTP_MESSY && !__RCD_RDNS_MX_MESSY && !__TO___LOWER && !__FROM_WORDY && !__RP_MATCHES_RCVD && !__DKIM_EXISTS && !__FROM_WEB_DAEMON && !__RDNS_SHORT 
+meta        __XPRIO_MINFP      __XPRIO && !__CT_ENCRYPTED && !ALL_TRUSTED && !__HAS_ERRORS_TO && !__HAS_IMG_SRC && !__RCD_RDNS_MAIL_MESSY && !__VIA_ML && !__PHPMAILER_MUA && !__AC_TINY_FONT && !__HAS_PHP_SCRIPT && !__DOS_HAS_LIST_UNSUB && !__HAS_IMG_SRC_ONECASE && !__NAKED_TO && !__HAS_THREAD_INDEX && !__HAS_TNEF && !__HAS_SENDER && !__UNPARSEABLE_RELAY_COUNT && !__PDS_RDNS_MTA && !__RCD_RDNS_SMTP_MESSY && !__RCD_RDNS_MX_MESSY && !__TO___LOWER && !__FROM_WORDY && !__RP_MATCHES_RCVD && !__DKIM_EXISTS && !__FROM_WEB_DAEMON && !__RDNS_SHORT && !__L_BODY_8BITS 
 
 ifplugin Mail::SpamAssassin::Plugin::DKIM
   ifplugin Mail::SpamAssassin::Plugin::SPF
@@ -3022,7 +3022,7 @@ header     __HDR_RCVD_SHOPIFY          X-Spam-Relays-External =~ /\srdns=\S+\.sh
 uri        __URI_IMG_SHOPIFY           m,://cdn\.shopify\.com/.+\.(?:jpe?g|gif|png),i
 
 meta       __SHOPIFY_IMG_NOT_RCVD_SFY  __URI_IMG_SHOPIFY && !__HDR_RCVD_SHOPIFY
-meta       SHOPIFY_IMG_NOT_RCVD_SFY    __SHOPIFY_IMG_NOT_RCVD_SFY && !MIME_QP_LONG_LINE && !__RCD_RDNS_MTA_MESSY && !__AC_UNSUB_URI && !__HAS_CAMPAIGNID && !__HAS_SENDER && !__HAS_ORGANIZATION && !__RCD_RDNS_OB 
+meta       SHOPIFY_IMG_NOT_RCVD_SFY    __SHOPIFY_IMG_NOT_RCVD_SFY && !MIME_QP_LONG_LINE && !__RCD_RDNS_MTA_MESSY && !__AC_UNSUB_URI && !__HAS_CAMPAIGNID && !__HAS_SENDER && !__HAS_ORGANIZATION && !__RCD_RDNS_OB && !__DOS_LINK 
 score      SHOPIFY_IMG_NOT_RCVD_SFY    2.500	# limit
 describe   SHOPIFY_IMG_NOT_RCVD_SFY    Shopify hosted image but message not from Shopify
 tflags     SHOPIFY_IMG_NOT_RCVD_SFY    publish
@@ -3360,13 +3360,16 @@ header      __REPLYTO_NOREPLY          Reply-To =~ /\bno-?reply@/i
 meta        __REPLYTO_NOREPLY_SUSP     __REPLYTO_NOREPLY && (__HAS_DOMAINKEY_SIG || FORGED_RELAY_MUA_TO_MX || __MSGID_NOFQDN2 || __URI_DBL_SUBDOM)
 
 # S/O good but bulk already scoring >6 points
-body        __ORDER_TODAY              /\border (?:it|one|yours) (?:today|now)\b/i
+body        __ORDER_TODAY              /\border (?:it|one|yours|this) (?:today|now|right\saway)\b/i
 #tflags      __ORDER_TODAY              multiple maxhits=4
 #meta        __ORDER_TODAY_2            __ORDER_TODAY > 1
 #meta        __ORDER_TODAY_3            __ORDER_TODAY > 2
 #meta        __ORDER_TODAY_4            __ORDER_TODAY > 3
-meta        __ORDER_TODAY_IMG          __ORDER_TODAY && __HTML_IMG_ONLY 
-meta        __ORDER_TODAY_ALI          __ORDER_TODAY && __ALIBABA_IMG_NOT_RCVD_ALI 
+#meta        __ORDER_TODAY_IMG          __ORDER_TODAY && __HTML_IMG_ONLY 
+#meta        __ORDER_TODAY_ALI          __ORDER_TODAY && __ALIBABA_IMG_NOT_RCVD_ALI 
+meta        ORDER_TODAY                __ORDER_TODAY && (__HTML_IMG_ONLY || __ALIBABA_IMG_NOT_RCVD_ALI || __TO_NO_BRKTS_NORDNS_HTML)
+describe    ORDER_TODAY                Get your order in now!
+score       ORDER_TODAY                2.500	# limit
 
 
 meta        __SHORTENER_SHORT_SUBJ     __URL_SHORTENER && __SUBJ_SHORT 
