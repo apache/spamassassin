@@ -2318,7 +2318,7 @@ rawbody   __LONG_INVIS_DIV              /<div\s+style\s*=\s*"(?:visibility\s*:\s
 
 # low S/O, apparently lots of invisible ham...
 if can(Mail::SpamAssassin::Conf::feature_bug6558_free)
-  rawbody   __STY_INVIS                   /\bstyle\s*=\s*"[^">]{0,80}(?:visibility\s*:\s*hidden\s*;|display\s*:\s*none\s*;)/i
+  rawbody   __STY_INVIS                   /\bstyle\s*=\s*"[^">]{0,80}(?:visibility\s*:\s*hidden\s*|display\s*:\s*none\s*)[;"]/i
   tflags    __STY_INVIS                   multiple maxhits=6
   meta      __STY_INVIS_2                 __STY_INVIS > 1
   meta      __STY_INVIS_3                 __STY_INVIS > 2
