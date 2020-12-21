@@ -1309,8 +1309,12 @@ score       ACCT_PHISHING_MANY   3.000  # limit
 meta        PHISHING_FREEMAIL    (__EMAIL_PHISH || __EMAIL_PHISH_MANY || __ACCT_PHISH || __ACCT_PHISH_MANY) && FREEMAIL_FORGED_REPLYTO
 describe    PHISHING_FREEMAIL    Send your login credentials to some random freemail account
 
-meta        __VFY_ACCT_FRAUD     __VERIFY_ACCOUNT && __ADVANCE_FEE_2_NEW 
 meta        __VFY_ACCT_NORDNS    __VERIFY_ACCOUNT && __RDNS_NONE 
+meta        VFY_ACCT_NORDNS      __VFY_ACCT_NORDNS && !__STY_INVIS_MANY 
+describe    VFY_ACCT_NORDNS      Verify your account to a poorly-configured MTA - probable phishing
+score       VFY_ACCT_NORDNS      3.000	# limit
+
+meta        __VFY_ACCT_FRAUD     __VERIFY_ACCOUNT && __ADVANCE_FEE_2_NEW 
 meta        __VFY_ACCT_FREEM     __VERIFY_ACCOUNT && __freemail_hdr_replyto 
 
 # Google Docs observed on LOTS of phishes 2012
@@ -1372,7 +1376,7 @@ score       BODY_EMPTY           2.00	# limit
 
 
 meta        __BODY_URI_ONLY      __BODY_TEXT_LINE < 3 && __HAS_ANY_URI && !__SMIME_MESSAGE
-meta        BODY_URI_ONLY        __BODY_URI_ONLY && !__NOT_SPOOFED && !__TO_EQ_FROM_DOM && !__X_CRON_ENV && !__DKIM_EXISTS && !__VIA_ML && !__HAS_X_REF && !__RCD_RDNS_MX_MESSY && !__RCD_RDNS_MAIL_MESSY && !__RCD_RDNS_SMTP_MESSY && !__MSGID_JAVAMAIL && !__RP_MATCHES_RCVD 
+meta        BODY_URI_ONLY        __BODY_URI_ONLY && !__NOT_SPOOFED && !__TO_EQ_FROM_DOM && !__X_CRON_ENV && !__DKIM_EXISTS && !__VIA_ML && !__HAS_X_REF && !__RCD_RDNS_MX_MESSY && !__RCD_RDNS_MAIL_MESSY && !__RCD_RDNS_SMTP_MESSY && !__MSGID_JAVAMAIL && !__RP_MATCHES_RCVD && !__URI_GOOGLE_DRV 
 describe    BODY_URI_ONLY        Message body is only a URI in one line of text or for an image
 score       BODY_URI_ONLY        3.000   # limit
 tflags      BODY_URI_ONLY        publish
@@ -3382,6 +3386,7 @@ score       SHORTENER_SHORT_SUBJ       3.000	# limit
 uri         __URI_DOTTY_HEX            /(?:\.[0-9a-f]{2}){30}/
 meta        URI_DOTTY_HEX              __URI_DOTTY_HEX
 describe    URI_DOTTY_HEX              Suspicious URI format
+tflags      URI_DOTTY_HEX              publish
 
 
 uri         __URI_MYSP_AC              m;://mysp\.ac/;i
@@ -3393,6 +3398,7 @@ header     __ENVFROM_GOOG_TRIX         X-Spam-Relays-External =~ /\senvfrom=[^@\
 meta       ENVFROM_GOOG_TRIX           __ENVFROM_GOOG_TRIX
 describe   ENVFROM_GOOG_TRIX           From suspicious Google subdomain
 score      ENVFROM_GOOG_TRIX           3.000	# limit
+tflags     ENVFROM_GOOG_TRIX           publish
 
 
 # observed in Netflix phish 12/2020
