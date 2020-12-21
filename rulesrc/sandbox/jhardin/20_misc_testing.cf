@@ -3306,7 +3306,7 @@ tflags      GOOG_STO_HTML_PHISH_MANY  publish
 #describe   CRAIGSLIST_DATING          Possible malware
 #score      CRAIGSLIST_DATING          4.000	# limit
 
-uri        __URI_PVT_SHAREPOINT       m,^https?://(?!www\.)(?:[^/.]+\.)+sharepoint\.com/,i
+uri        __URI_PVT_SHAREPOINT       m,^https?://(?!www\.)(?!static\d+\.)(?:[^/.]+\.)+sharepoint\.com/,i
 
 # suspicious HTML observed in the wild
 # Rotten S/O. Why do this in ham?
