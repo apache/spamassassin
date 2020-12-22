@@ -2322,11 +2322,15 @@ rawbody   __LONG_INVIS_DIV              /<div\s+style\s*=\s*"(?:visibility\s*:\s
 
 # low S/O, apparently lots of invisible ham...
 if can(Mail::SpamAssassin::Conf::feature_bug6558_free)
-  rawbody   __STY_INVIS                   /\bstyle\s*=\s*"[^">]{0,80}(?:visibility\s*:\s*hidden\s*|display\s*:\s*none\s*)[;"]/i
+  rawbody   __STY_INVIS                   /\bstyle\s*=\s*"[^">]{0,80}(?:visibility\s*:\s*hidden\s*|display\s*:\s*none\s*)[;"!]/i
   tflags    __STY_INVIS                   multiple maxhits=6
   meta      __STY_INVIS_2                 __STY_INVIS > 1
   meta      __STY_INVIS_3                 __STY_INVIS > 2
   meta      __STY_INVIS_MANY              __STY_INVIS > 5
+
+  # Widely used in ham for hiding tracking images? See how it performs on non-IMG tags...
+  rawbody   __STY_INVIS                   /<(?!img\s)[a-z]+\s[^>]{0,200}\bstyle\s*=\s*"[^">]{0,80}(?:visibility\s*:\s*hidden\s*|display\s*:\s*none\s*)[;"!]/i
+
   meta      HTML_TEXT_INVISIBLE_STYLE     __STY_INVIS_MANY && (__RDNS_NONE || __HDRS_LCASE || __UNSUB_EMAIL ||  __ADMITS_SPAM || __FROM_DOM_INFO || __HTML_TAG_BALANCE_CENTER || __MSGID_RANDY ) && !__RDNS_LONG && !__FROM_ENCODED_QP && !__HAS_THREAD_INDEX 
   describe  HTML_TEXT_INVISIBLE_STYLE     HTML hidden text + other spam signs
   score     HTML_TEXT_INVISIBLE_STYLE     3.500   # limit
