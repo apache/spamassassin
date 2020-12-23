@@ -693,11 +693,21 @@ tflags         COMMENT_GIBBERISH        publish
 #body           LOTSA_EMAILS               /\b(?:thousand|million)\se-?mail(?:\saddresse)?s?\b/i
 #tflags         LOTSA_EMAILS               nopublish
 
-body           __BIGNUM_EMAILS            /\b(?:thousand|million|\d[,\d]{4,})\s(?:(?!and|or|your|place|baby)\w+\s)?(?:e-?mail\saddresses|leads|names)\b/i
-meta           BIGNUM_EMAILS              __BIGNUM_EMAILS && !__SPOOFED_URL && !__BUGGED_IMG
+body           __BIGNUM_EMAILS            /\b(?:thousand|million|\d[,\d]{4,})\s(?:(?!and|or|your|place|baby)\w+\s)?(?:e-?mail(?:\saddresses|s?)|leads|names)\b/i
+tflags         __BIGNUM_EMAILS            multiple maxhits=5
+meta           BIGNUM_EMAILS              __BIGNUM_EMAILS && !BIGNUM_EMAILS_MANY && !__STY_INVIS 
 describe       BIGNUM_EMAILS              Lots of email addresses/leads
 score          BIGNUM_EMAILS              3.00		# limit
-#tflags         BIGNUM_EMAILS              nopublish
+tflags         BIGNUM_EMAILS              publish
+
+meta           __BIGNUM_EMAILS_2          __BIGNUM_EMAILS > 1
+meta           __BIGNUM_EMAILS_3          __BIGNUM_EMAILS > 2
+meta           __BIGNUM_EMAILS_4          __BIGNUM_EMAILS > 3
+meta           __BIGNUM_EMAILS_5          __BIGNUM_EMAILS > 4
+meta           BIGNUM_EMAILS_MANY         __BIGNUM_EMAILS_5 && !__STY_INVIS 
+describe       BIGNUM_EMAILS_MANY         Lots of email addresses/leads, over and over
+score          BIGNUM_EMAILS_MANY         3.00		# limit
+tflags         BIGNUM_EMAILS_MANY         publish
 
 #rawbody        __HTML_ELEM_OBFU           /[a-z\s]&\#[91]\d\d?[a-z]/
 #tflags         __HTML_ELEM_OBFU           multiple nopublish
