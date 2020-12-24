@@ -695,7 +695,7 @@ tflags         COMMENT_GIBBERISH        publish
 
 body           __BIGNUM_EMAILS            /\b(?:thousand|million|\d[,\d]{4,})\s(?:(?!and|or|your|place|baby)\w+\s)?(?:e-?mail(?:\saddresses|s?)|leads|names)\b/i
 tflags         __BIGNUM_EMAILS            multiple maxhits=5
-meta           BIGNUM_EMAILS              __BIGNUM_EMAILS && !BIGNUM_EMAILS_MANY && !__STY_INVIS && !__HDRS_LCASE_KNOWN && !__TAG_EXISTS_CENTER
+meta           BIGNUM_EMAILS              __BIGNUM_EMAILS && !BIGNUM_EMAILS_MANY && !__STY_INVIS && !__HDRS_LCASE_KNOWN && !__TAG_EXISTS_CENTER && !__HAS_TNEF 
 describe       BIGNUM_EMAILS              Lots of email addresses/leads
 score          BIGNUM_EMAILS              3.00		# limit
 tflags         BIGNUM_EMAILS              publish
@@ -2335,12 +2335,14 @@ rawbody   __LONG_INVIS_DIV              /<div\s+style\s*=\s*"(?:visibility\s*:\s
 if can(Mail::SpamAssassin::Conf::feature_bug6558_free)
   rawbody   __STY_INVIS                   /\bstyle\s*=\s*"[^">]{0,80}(?:visibility\s*:\s*hidden\s*|display\s*:\s*none\s*)[;"!]/i
   tflags    __STY_INVIS                   multiple maxhits=6
+  meta      __STY_INVIS_1                 __STY_INVIS == 1
   meta      __STY_INVIS_2                 __STY_INVIS > 1
   meta      __STY_INVIS_3                 __STY_INVIS > 2
   meta      __STY_INVIS_MANY              __STY_INVIS > 5
 
   # Widely used in ham for hiding tracking images? See how it performs on non-IMG tags...
-  rawbody   __STY_INVIS_NONIMG            /<(?!img\s)[a-z]+\s[^>]{0,200}\bstyle\s*=\s*"[^">]{0,80}(?:visibility\s*:\s*hidden\s*|display\s*:\s*none\s*)[;"!]/i
+  # S/O the same. :(
+  #rawbody   __STY_INVIS_NONIMG            /<(?!img\s)[a-z]+\s[^>]{0,200}\bstyle\s*=\s*"[^">]{0,80}(?:visibility\s*:\s*hidden\s*|display\s*:\s*none\s*)[;"!]/i
 
   meta      HTML_TEXT_INVISIBLE_STYLE     __STY_INVIS_MANY && (__RDNS_NONE || __HDRS_LCASE || __UNSUB_EMAIL ||  __ADMITS_SPAM || __FROM_DOM_INFO || __HTML_TAG_BALANCE_CENTER || __MSGID_RANDY ) && !__RDNS_LONG && !__FROM_ENCODED_QP && !__HAS_THREAD_INDEX 
   describe  HTML_TEXT_INVISIBLE_STYLE     HTML hidden text + other spam signs
@@ -2358,10 +2360,11 @@ if can(Mail::SpamAssassin::Conf::feature_bug6558_free)
 else
   meta      LONG_INVISIBLE_TEXT           __LONG_INVIS_DIV
 endif
-# try it on span tags only...
-# rawbody   __SPAN_INVIS                  /<span\s[^>]{0,200}style\s*=\s*"[^">]{0,80}(?:visibility\s*:\s*hidden\s*;|display\s*:\s*none\s*;)[^>]{1,200}>\w/i
 
-describe  LONG_INVISIBLE_TEXT           Long block of hidden text - spam scan evasion?
+# try it on span tags only...
+rawbody   __SPAN_INVIS                  /<span\s[^>]{0,200}style\s*=\s*"[^">]{0,80}(?:visibility\s*:\s*hidden\s*|display\s*:\s*none\s*)[;"!][^>]{1,200}>/i
+
+describe  LONG_INVISIBLE_TEXT           Long block of hidden text - bayes poison?
 score     LONG_INVISIBLE_TEXT           3.000	# limit
 tflags    LONG_INVISIBLE_TEXT           publish
 
