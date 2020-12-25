@@ -1490,8 +1490,9 @@ tflags      FOUND_YOU          publish
 #describe    ADMITS_CANSPAM    Admits to being spam
 
 body        __ADMITS_SPAM     /\bth(?:e[- ]+above|is)(?:\?+s|[- ]+is)[- ]+(?:intended[- ]+as[- ]+)?an?[- ]+(?:e-?mail[- ]+)?[a@]dvert[i1l]sement\b/i
-meta        ADMITS_SPAM       __ADMITS_SPAM && !__FROM_LOWER && !__MSGID_JAVAMAIL && !__HAS_CAMPAIGNID 
+meta        ADMITS_SPAM       __ADMITS_SPAM && !__FROM_LOWER && !__MSGID_JAVAMAIL && !__HAS_CAMPAIGNID && !__STY_INVIS_2 
 describe    ADMITS_SPAM       Admits this is an ad
+tflags      ADMITS_SPAM       publish
 
 #body        __OBFU_ADVERT     /\badvert[1l]sement\b/i
 #meta        OBFU_ADVERT       __OBFU_ADVERT
@@ -2344,6 +2345,9 @@ if can(Mail::SpamAssassin::Conf::feature_bug6558_free)
   # S/O the same. :(
   #rawbody   __STY_INVIS_NONIMG            /<(?!img\s)[a-z]+\s[^>]{0,200}\bstyle\s*=\s*"[^">]{0,80}(?:visibility\s*:\s*hidden\s*|display\s*:\s*none\s*)[;"!]/i
 
+  # *one* invisible style has better S/O than multiple...
+  meta      __STY_INVIS_1_MINFP           __STY_INVIS_1 && !__HAS_CAMPAIGNID 
+
   meta      HTML_TEXT_INVISIBLE_STYLE     __STY_INVIS_MANY && (__RDNS_NONE || __HDRS_LCASE || __UNSUB_EMAIL ||  __ADMITS_SPAM || __FROM_DOM_INFO || __HTML_TAG_BALANCE_CENTER || __MSGID_RANDY ) && !__RDNS_LONG && !__FROM_ENCODED_QP && !__HAS_THREAD_INDEX 
   describe  HTML_TEXT_INVISIBLE_STYLE     HTML hidden text + other spam signs
   score     HTML_TEXT_INVISIBLE_STYLE     3.500   # limit
@@ -2385,7 +2389,14 @@ if can(Mail::SpamAssassin::Conf::feature_bug6558_free)
   # Does this hit less ham while still hitting spam?
   rawbody   __WORD_INVIS                  /<(?!style)[a-z]+\s[^>]{1,80}(?:font(?:-size)?\s*:\s*(?:0*[01](?:\.\d+)?(?:px|pt|Q|vw|vh|vmin)|0+(?:\.\d+)?(?:cm|mm|in|pc|em|ex|ch|rem|lh|vmax))\s*[;'a-z]|color\s*:\s*transparent\s*[;'])[^>]{0,80}>\w{1,20}</i
   tflags    __WORD_INVIS                  multiple maxhits=6
+  meta      __WORD_INVIS_2                __WORD_INVIS > 1
   meta      __WORD_INVIS_5                __WORD_INVIS > 5
+
+  meta      WORD_INVIS_MANY               __WORD_INVIS_5
+  describe  WORD_INVIS_MANY               Many individual hidden words
+  score     WORD_INVIS_MANY               3.000	# limit
+  tflags    WORD_INVIS_MANY               publish
+
 
   meta      __FONT_INVIS_LONG_LINE        __FONT_INVIS && __LONGLINE 
   meta      FONT_INVIS_LONG_LINE          __FONT_INVIS_LONG_LINE && !__HTML_SINGLET 
