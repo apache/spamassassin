@@ -29,6 +29,7 @@ enlist_addrlist (SUSP_NTLD) *@*.ooo
 enlist_addrlist (SUSP_NTLD) *@*.faith
 enlist_addrlist (SUSP_NTLD) *@*.buzz
 enlist_addrlist (SUSP_NTLD) *@*.trade
+enlist_addrlist (SUSP_NTLD) *@*.cyou
 
 enlist_uri_host (SUSP_URI_NTLD) icu
 enlist_uri_host (SUSP_URI_NTLD) online
@@ -52,6 +53,7 @@ enlist_uri_host (SUSP_URI_NTLD) ooo
 enlist_uri_host (SUSP_URI_NTLD) faith
 enlist_uri_host (SUSP_URI_NTLD) buzz
 enlist_uri_host (SUSP_URI_NTLD) trade
+enlist_uri_host (SUSP_URI_NTLD) cyou
 
 header   __FROM_ADDRLIST_SUSPNTLD eval:check_from_in_list('SUSP_NTLD')
 reuse    __FROM_ADDRLIST_SUSPNTLD
@@ -123,7 +125,7 @@ describe VPS_NO_NTLD vps[0-9] domain at a suspiscious TLD
 score    VPS_NO_NTLD 1.0 # limit
 reuse    VPS_NO_NTLD
 
-body     __PDS_OFFER_ONLY_AMERICA /This offer (is )?(only )?for (United States|USA)/i
+body     __PDS_OFFER_ONLY_AMERICA /This offer (?:is )?(?:only )?for (United States|USA)/i
 
 meta     OFFER_ONLY_AMERICA __FROM_ADDRLIST_SUSPNTLD && __PDS_OFFER_ONLY_AMERICA
 describe OFFER_ONLY_AMERICA Offer only available to US
