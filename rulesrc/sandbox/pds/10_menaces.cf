@@ -11,7 +11,7 @@ score    PDS_SHORT_BOGUS_MSM_HDRS 2.0
 describe PDS_SHORT_BOGUS_MSM_HDRS Short HTML email with bogus MSM headers
 
 meta     PDS_FROM_NAME_TO_DOMAIN __PDS_FROM_NAME_TO_DOMAIN
-score    PDS_FROM_NAME_TO_DOMAIN 1.0
+score    PDS_FROM_NAME_TO_DOMAIN 2.0
 describe PDS_FROM_NAME_TO_DOMAIN From:name looks like To:domain
 
 meta     PDS_FRNOM_TODOM_NAKED_TO __NAKED_TO && PDS_FROM_NAME_TO_DOMAIN
@@ -26,6 +26,14 @@ score    PDS_HIDDEN_UK_BUSINESSLOAN 2.0 # limit
 reuse    PDS_HIDDEN_UK_BUSINESSLOAN
 
 uri  __PDS_DOUBLE_URL m;https?://[\S]+(?:\?|=)https?://[\S]+[\w]+$;
+
+meta     PDS_FRNOM_TODOM_DBL_URL PDS_FROM_NAME_TO_DOMAIN && __PDS_DOUBLE_URL
+describe PDS_FRNOM_TODOM_DBL_URL From Name to domain, double URL
+score    PDS_FRNOM_TODOM_DBL_URL 1.5
+
+meta     PDS_DBL_URL_HELO_NODOM __PDS_DOUBLE_URL && (__HELO_NO_DOMAIN && !HELO_LOCALHOST)
+describe PDS_DBL_URL_HELO_NODOM URL that ends with a URL, HELO not a domain
+score    PDS_DBL_URL_HELO_NODOM 1.0
 
 meta     PDS_DOUBLE_URL __PDS_DOUBLE_URL
 describe PDS_DOUBLE_URL URL that ends with a URL
