@@ -1,3 +1,5 @@
+header  __PDS_TO_BRAND_SUBJECT ALL =~ /To:\s+<?[^\n]+\@([^\.]+)\.(?:[^\n]+\n)*Subject: \"?\1\b/ism
+
 header   __PDS_RDNS_MTA X-Spam-Relays-External =~ /^[^\]]+ rdns=\S*(mta|mail|mx|smtp)\b\S* /i
 
 meta     PDS_RDNS_DYNAMIC_FP RDNS_DYNAMIC && !__PDS_RDNS_MTA
