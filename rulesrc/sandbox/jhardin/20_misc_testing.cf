@@ -2392,8 +2392,8 @@ if can(Mail::SpamAssassin::Conf::feature_bug6558_free)
   meta      __WORD_INVIS_2                __WORD_INVIS > 1
   meta      __WORD_INVIS_5                __WORD_INVIS > 5
 
-  meta      WORD_INVIS_MANY               __WORD_INVIS_5
-  describe  WORD_INVIS_MANY               Many individual hidden words
+  meta      WORD_INVIS_MANY               __WORD_INVIS_2
+  describe  WORD_INVIS_MANY               Multiple individual hidden words
   score     WORD_INVIS_MANY               3.000	# limit
   tflags    WORD_INVIS_MANY               publish
 
