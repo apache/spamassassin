@@ -1,6 +1,9 @@
 Note for Users Upgrading to SpamAssassin 3.4.5
 ----------------------------------------------
 
+- Spamassassin test suite can now run against the installed
+  SpamAssassin files (rather than those in the source directory)
+
 - unwhitelist_auth now also removes def_whitelist_auth entries
 
 - SPF: add unwhitelist_from_spf to remove both whitelist_from_spf and
