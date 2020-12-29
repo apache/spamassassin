@@ -763,7 +763,7 @@ sub _check_spf_whitelist {
 
   $scanner->{spf_whitelist_from} =
     $self->_wlcheck($scanner, 'whitelist_from_spf') ||
-    $self->_wlcheck($scanner, 'whitelist_auth');
+    $self->_wlcheck($scanner, 'welcomelist_auth');
 
   # if the message doesn't pass SPF validation, it can't pass an SPF whitelist
   if ($scanner->{spf_whitelist_from}) {
@@ -798,7 +798,7 @@ sub _check_def_spf_whitelist {
 
   $scanner->{def_spf_whitelist_from} =
     $self->_wlcheck($scanner, 'def_whitelist_from_spf') ||
-    $self->_wlcheck($scanner, 'def_whitelist_auth');
+    $self->_wlcheck($scanner, 'def_welcomelist_auth');
 
   # if the message doesn't pass SPF validation, it can't pass an SPF whitelist
   if ($scanner->{def_spf_whitelist_from}) {

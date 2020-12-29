@@ -40,8 +40,10 @@ sub new {
   bless ($self, $class);
 
   # the important bit!
-  $self->register_eval_rule("check_from_in_blacklist", $Mail::SpamAssassin::Conf::TYPE_HEAD_EVALS);
-  $self->register_eval_rule("check_to_in_blacklist", $Mail::SpamAssassin::Conf::TYPE_HEAD_EVALS);
+  $self->register_eval_rule("check_from_in_blocklist", $Mail::SpamAssassin::Conf::TYPE_HEAD_EVALS);
+  $self->register_eval_rule("check_from_in_blacklist", $Mail::SpamAssassin::Conf::TYPE_HEAD_EVALS); #Stub - Remove in SA 4.1
+  $self->register_eval_rule("check_to_in_blocklist", $Mail::SpamAssassin::Conf::TYPE_HEAD_EVALS);
+  $self->register_eval_rule("check_to_in_blacklist", $Mail::SpamAssassin::Conf::TYPE_HEAD_EVALS); #Stub - Remove in SA 4.1
   $self->register_eval_rule("check_to_in_welcomelist", $Mail::SpamAssassin::Conf::TYPE_HEAD_EVALS);
   $self->register_eval_rule("check_to_in_whitelist", $Mail::SpamAssassin::Conf::TYPE_HEAD_EVALS); #Stub - Remove in SA 4.1
   $self->register_eval_rule("check_to_in_more_spam", $Mail::SpamAssassin::Conf::TYPE_HEAD_EVALS);
@@ -51,20 +53,30 @@ sub new {
   $self->register_eval_rule("check_to_in_list", $Mail::SpamAssassin::Conf::TYPE_HEAD_EVALS);
   $self->register_eval_rule("check_from_in_welcomelist", $Mail::SpamAssassin::Conf::TYPE_HEAD_EVALS);
   $self->register_eval_rule("check_from_in_whitelist", $Mail::SpamAssassin::Conf::TYPE_HEAD_EVALS); #Stub - Remove in SA 4.1
-  $self->register_eval_rule("check_forged_in_whitelist", $Mail::SpamAssassin::Conf::TYPE_HEAD_EVALS);
-  $self->register_eval_rule("check_from_in_default_whitelist", $Mail::SpamAssassin::Conf::TYPE_HEAD_EVALS);
-  $self->register_eval_rule("check_forged_in_default_whitelist", $Mail::SpamAssassin::Conf::TYPE_HEAD_EVALS);
+  $self->register_eval_rule("check_forged_in_welcomelist", $Mail::SpamAssassin::Conf::TYPE_HEAD_EVALS);
+  $self->register_eval_rule("check_forged_in_whitelist", $Mail::SpamAssassin::Conf::TYPE_HEAD_EVALS); #Stub - Remove in SA 4.1
+  $self->register_eval_rule("check_from_in_default_welcomelist", $Mail::SpamAssassin::Conf::TYPE_HEAD_EVALS);
+  $self->register_eval_rule("check_from_in_default_whitelist", $Mail::SpamAssassin::Conf::TYPE_HEAD_EVALS); #Stub - Remove in SA 4.1
+  $self->register_eval_rule("check_forged_in_default_welcomelist", $Mail::SpamAssassin::Conf::TYPE_HEAD_EVALS);
+  $self->register_eval_rule("check_forged_in_default_whitelist", $Mail::SpamAssassin::Conf::TYPE_HEAD_EVALS); #Stub - Remove in SA 4.1
   $self->register_eval_rule("check_mailfrom_matches_rcvd", $Mail::SpamAssassin::Conf::TYPE_HEAD_EVALS);
   $self->register_eval_rule("check_uri_host_listed", $Mail::SpamAssassin::Conf::TYPE_HEAD_EVALS);
   # same as: eval:check_uri_host_listed('BLACK') :
-  $self->register_eval_rule("check_uri_host_in_blacklist"); # type does not matter
+  $self->register_eval_rule("check_uri_host_in_blocklist"); # type does not matter
+  $self->register_eval_rule("check_uri_host_in_blacklist"); # type does not matter #Stub - Remove in SA 4.1
   # same as: eval:check_uri_host_listed('WHITE') :
-  $self->register_eval_rule("check_uri_host_in_whitelist"); # type does not matter
+  $self->register_eval_rule("check_uri_host_in_welcomelist"); # type does not matter
+  $self->register_eval_rule("check_uri_host_in_whitelist"); # type does not matter #Stub - Remove in SA 4.1
 
   return $self;
 }
 
+#Stub for backwards compatibility - Remove in SA 4.1
 sub check_from_in_blacklist {
+  return check_from_in_blocklist(@_);
+}
+
+sub check_from_in_blocklist {
   my ($self, $pms) = @_;
   foreach ($pms->all_from_addrs()) {
     if ($self->_check_welcomelist ($self->{main}->{conf}->{blacklist_from}, $_)) {
@@ -73,7 +85,12 @@ sub check_from_in_blacklist {
   }
 }
 
+#Stub for backwards compatibility - Remove in SA 4.1
 sub check_to_in_blacklist {
+  return check_to_in_blocklist(@_);
+}
+
+sub check_to_in_blocklist {
   my ($self, $pms) = @_;
   foreach ($pms->all_to_addrs()) {
     if ($self->_check_welcomelist ($self->{main}->{conf}->{blacklist_to}, $_)) {
@@ -186,6 +203,11 @@ sub check_to_in_list {
 }
 
 ###########################################################################
+#
+#Stub for backwards compatibility - Remove in SA 4.1
+sub check_from_in_whitelist {
+  return check_from_in_welcomelist(@_);
+} 
 
 sub check_from_in_welcomelist {
   my ($self, $pms) = @_;
@@ -194,28 +216,38 @@ sub check_from_in_welcomelist {
 }
 
 #Stub for backwards compatibility - Remove in SA 4.1
-sub check_from_in_whitelist {
-  return check_from_in_welcomelist(@_);
-} 
-
 sub check_forged_in_whitelist {
-  my ($self, $pms) = @_;
-  $self->_check_from_in_welcomelist($pms) unless exists $pms->{from_in_welcomelist};
-  $self->_check_from_in_default_whitelist($pms) unless exists $pms->{from_in_default_whitelist};
-  return ($pms->{from_in_welcomelist} < 0) && ($pms->{from_in_default_whitelist} == 0);
+  return check_forged_in_welcomelist(@_);
 }
 
+sub check_forged_in_welcomelist {
+  my ($self, $pms) = @_;
+  $self->_check_from_in_welcomelist($pms) unless exists $pms->{from_in_welcomelist};
+  $self->_check_from_in_default_welcomelist($pms) unless exists $pms->{from_in_default_welcomelist};
+  return ($pms->{from_in_welcomelist} < 0) && ($pms->{from_in_default_welcomelist} == 0);
+}
+
+#Stub for backwards compatibility - Remove in SA 4.1
 sub check_from_in_default_whitelist {
-  my ($self, $pms) = @_;
-  $self->_check_from_in_default_whitelist($pms) unless exists $pms->{from_in_default_whitelist};
-  return ($pms->{from_in_default_whitelist} > 0);
+  return check_from_in_default_welcomelist(@_);
 }
 
-sub check_forged_in_default_whitelist {
+sub check_from_in_default_welcomelist {
   my ($self, $pms) = @_;
-  $self->_check_from_in_default_whitelist($pms) unless exists $pms->{from_in_default_whitelist};
+  $self->_check_from_in_default_welcomelist($pms) unless exists $pms->{from_in_default_welcomelist};
+  return ($pms->{from_in_default_welcomelist} > 0);
+}
+
+#Stub for backwards compatibility - Remove in SA 4.1
+sub check_forged_in_default_whitelist {
+  return check_forged_in_default_welcomelist(@_);
+}
+
+sub check_forged_in_default_welcomelist {
+  my ($self, $pms) = @_;
+  $self->_check_from_in_default_welcomelist($pms) unless exists $pms->{from_in_default_welcomelist};
   $self->_check_from_in_welcomelist($pms) unless exists $pms->{from_in_welcomelist};
-  return ($pms->{from_in_default_whitelist} < 0) && ($pms->{from_in_welcomelist} == 0);
+  return ($pms->{from_in_default_welcomelist} < 0) && ($pms->{from_in_welcomelist} == 0);
 }
 
 ###########################################################################
@@ -228,7 +260,7 @@ sub _check_from_in_welcomelist {
       $pms->{from_in_welcomelist} = 1;
       return;
     }
-    my $wh = $self->_check_whitelist_rcvd ($pms, $self->{main}->{conf}->{welcomelist_from_rcvd}, $_);
+    my $wh = $self->_check_welcomelist_rcvd ($pms, $self->{main}->{conf}->{welcomelist_from_rcvd}, $_);
     if ($wh == 1) {
       $pms->{from_in_welcomelist} = 1;
       return;
@@ -244,13 +276,13 @@ sub _check_from_in_welcomelist {
 
 ###########################################################################
 
-sub _check_from_in_default_whitelist {
+sub _check_from_in_default_welcomelist {
   my ($self, $pms) = @_;
   my $found_match = 0;
   foreach ($pms->all_from_addrs()) {
-    my $wh = $self->_check_whitelist_rcvd ($pms, $self->{main}->{conf}->{def_welcomelist_from_rcvd}, $_);
+    my $wh = $self->_check_welcomelist_rcvd ($pms, $self->{main}->{conf}->{def_welcomelist_from_rcvd}, $_);
     if ($wh == 1) {
-      $pms->{from_in_default_whitelist} = 1;
+      $pms->{from_in_default_welcomelist} = 1;
       return;
     }
     elsif ($wh == -1) {
@@ -258,7 +290,7 @@ sub _check_from_in_default_whitelist {
     }
   }
 
-  $pms->{from_in_default_whitelist} = $found_match;
+  $pms->{from_in_default_welcomelist} = $found_match;
   return;
 }
 
@@ -319,7 +351,8 @@ sub _check_addr_matches_rcvd {
 
 # look up $addr and trusted relays in a whitelist with rcvd
 # note if it appears to be a forgery and $addr is not in any-relay list
-sub _check_whitelist_rcvd {
+# changed from _check_whitelist_rcvd to _check_welcomelist_rcvd
+sub _check_welcomelist_rcvd {
   my ($self, $pms, $list, $addr) = @_;
 
   # we can only match this if we have at least 1 trusted or untrusted header
@@ -430,13 +463,20 @@ sub _check_welcomelist {
 }
 
 ###########################################################################
-
+#Stub for backwards compatibility - Remove in SA 4.1
 sub check_uri_host_in_blacklist {
+  return check_uri_host_in_blocklist(@_);
+}
+
+sub check_uri_host_in_blocklist {
   my ($self, $pms) = @_;
   $self->check_uri_host_listed($pms, 'BLACK');
 }
 
 sub check_uri_host_in_whitelist {
+  return check_uri_host_in_welcomelist(@_);
+}
+sub check_uri_host_in_welcomelist {
   my ($self, $pms) = @_;
   $self->check_uri_host_listed($pms, 'WHITE');
 }

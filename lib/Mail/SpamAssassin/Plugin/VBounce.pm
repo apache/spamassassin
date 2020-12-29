@@ -44,7 +44,7 @@ sub new {
   bless ($self, $class);
 
   $self->register_eval_rule("have_any_bounce_relays"); # type does not matter
-  $self->register_eval_rule("check_whitelist_bounce_relays"); # type does not matter
+  $self->register_eval_rule("check_welcomelist_bounce_relays"); # type does not matter
 
   $self->set_config($mailsaobject->{conf});
 
@@ -63,7 +63,8 @@ SpamAssassin handles incoming email messages.
 
 =over 4
 
-=item whitelist_bounce_relays hostname [hostname2 ...]
+=item welcomelist_bounce_relays hostname [hostname2 ...]
+Previously whitelist_bounce_relays which will work interchangeably until 4.1.
 
 This is used to 'rescue' legitimate bounce messages that were generated in
 response to mail you really *did* send. List the MTA relay hostnames that
@@ -76,14 +77,15 @@ Specifically, C<*> and C<?> are allowed, but all other metacharacters are not.
 Regular expressions are not used for security reasons.
 
 Multiple addresses per line, separated by spaces, is OK.  Multiple
-C<whitelist_bounce_relays> lines are also OK.
+C<welcomelist_bounce_relays> lines are also OK.
 
 =back
 
 =cut
 
   push (@cmds, {
-      setting => 'whitelist_bounce_relays',
+      setting => 'welcomelist_bounce_relays',
+      aliases => ['whitelist_bounce_relays'], # backward compatible - to be removed for 4.1
       type => $Mail::SpamAssassin::Conf::CONF_TYPE_ADDRLIST
     });
 
@@ -92,11 +94,16 @@ C<whitelist_bounce_relays> lines are also OK.
 
 sub have_any_bounce_relays {
   my ($self, $pms) = @_;
-  return $pms->{conf}->{whitelist_bounce_relays} &&
-         %{$pms->{conf}->{whitelist_bounce_relays}} ? 1 : 0;
+  return $pms->{conf}->{welcomelist_bounce_relays} &&
+         %{$pms->{conf}->{welcomelist_bounce_relays}} ? 1 : 0;
 }
 
+#Stub for backwards compatibility - Remove in SA 4.1
 sub check_whitelist_bounce_relays {
+  return check_welcomelist_bounce_relays(@_);
+}
+
+sub check_welcomelist_bounce_relays {
   my ($self, $pms) = @_;
 
   return 0  if !$self->have_any_bounce_relays($pms);
@@ -111,7 +118,7 @@ sub check_whitelist_bounce_relays {
   foreach my $line (@{$body}) {
     next unless ($line =~ /^[> ]*Received:/i);
     while ($line =~ / (\S+\.\S+) /g) {
-      return 1 if $self->_relay_is_in_whitelist_bounce_relays($pms, $1);
+      return 1 if $self->_relay_is_in_welcomelist_bounce_relays($pms, $1);
     }
   }
 
@@ -143,17 +150,17 @@ sub check_whitelist_bounce_relays {
 
     next unless ($fullhdr =~ /^[> ]*Received:/i);
     while ($fullhdr =~ /\s(\S+\.\S+)\s/gs) {
-      return 1 if $self->_relay_is_in_whitelist_bounce_relays($pms, $1);
+      return 1 if $self->_relay_is_in_welcomelist_bounce_relays($pms, $1);
     }
   }
 
   return 0;
 }
 
-sub _relay_is_in_whitelist_bounce_relays {
+sub _relay_is_in_welcomelist_bounce_relays {
   my ($self, $pms, $relay) = @_;
   return 1 if $self->_relay_is_in_list(
-        $pms->{conf}->{whitelist_bounce_relays}, $pms, $relay);
+        $pms->{conf}->{welcomelist_bounce_relays}, $pms, $relay);
   dbg("rules: relay $relay doesn't match any whitelist");
 
   return 0;

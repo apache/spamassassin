@@ -659,7 +659,7 @@ sub check_for_def_dkim_whitelist_from {
   my ($self, $pms) = @_;
   $self->_check_dkim_whitelist($pms)  if !$pms->{whitelist_checked};
   return $pms->{dkim_match_in_def_whitelist_from_dkim} || 
-         $pms->{dkim_match_in_def_whitelist_auth};
+         $pms->{dkim_match_in_def_welcomelist_auth};
 }
 
 # ---------------------------------------------------------------------------
@@ -1152,11 +1152,11 @@ sub _check_dkim_whitelist {
   $self->_wlcheck_acceptable_signature($pms, \@acceptable_sdid_tuples,
                                        'def_whitelist_from_dkim');
   $self->_wlcheck_author_signature($pms, \@acceptable_sdid_tuples,
-                                       'def_whitelist_auth');
+                                       'def_welcomelist_auth');
   $self->_wlcheck_acceptable_signature($pms, \@acceptable_sdid_tuples,
                                        'whitelist_from_dkim');
   $self->_wlcheck_author_signature($pms, \@acceptable_sdid_tuples,
-                                       'whitelist_auth');
+                                       'welcomelist_auth');
   if (!@acceptable_sdid_tuples) {
     dbg("dkim: no wl entries match author %s, no need to verify sigs",
         $authors_str);

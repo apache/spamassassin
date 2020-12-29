@@ -297,7 +297,7 @@ Used to whitelist sender addresses which send mail that is often tagged
 
 Use of this setting is not recommended, since it blindly trusts the message,
 which is routinely and easily forged by spammers and phish senders. The
-recommended solution is to instead use C<whitelist_auth> or other authenticated
+recommended solution is to instead use C<welcomelist_auth> or other authenticated
 whitelisting methods, or C<welcomelist_from_rcvd>.
 
 Whitelist and blacklist addresses are now file-glob-style patterns, so
@@ -624,7 +624,9 @@ be blacklisted.  Same format as C<blacklist_from>.
     type => $CONF_TYPE_ADDRLIST,
   });
 
-=item whitelist_auth user@example.com
+=item welcomelist_auth user@example.com
+
+Previously whitelist_auth which will work interchangeably until 4.1.
 
 Used to specify addresses which send mail that is often tagged (incorrectly) as
 spam.  This is different from C<welcomelist_from> and C<welcomelist_from_rcvd> in
@@ -636,47 +638,54 @@ schemes: SPF (using C<Mail::SpamAssassin::Plugin::SPF>), or DKIM (using
 C<Mail::SpamAssassin::Plugin::DKIM>).  Note that those plugins must be active,
 and working, for this to operate.
 
-Using C<whitelist_auth> is roughly equivalent to specifying duplicate
+Using C<welcomelist_auth> is roughly equivalent to specifying duplicate
 C<whitelist_from_spf>, C<whitelist_from_dk>, and C<whitelist_from_dkim> lines
 for each of the addresses specified.
 
 e.g.
 
-  whitelist_auth joe@example.com fred@example.com
-  whitelist_auth *@example.com
+  welcomelist_auth joe@example.com fred@example.com
+  welcomelist_auth *@example.com
 
-=item def_whitelist_auth user@example.com
+=item def_welcomelist_auth user@example.com
 
-Same as C<whitelist_auth>, but used for the default whitelist entries
-in the SpamAssassin distribution.  The whitelist score is lower, because
+Previously def_whitelist_auth which will work interchangeably until 4.1.
+
+Same as C<welcomelist_auth>, but used for the default welcomelist entries
+in the SpamAssassin distribution.  The welcomelist score is lower, because
 these are often targets for spammer spoofing.
 
 =cut
 
   push (@cmds, {
-    setting => 'whitelist_auth',
+    setting => 'welcomelist_auth',
+    aliases => ['whitelist_auth'], # backward compatible - to be removed for 4.1
     type => $CONF_TYPE_ADDRLIST,
   });
 
   push (@cmds, {
-    setting => 'def_whitelist_auth',
+    setting => 'def_welcomelist_auth',
+    aliases => ['def_whitelist_auth'], # backward compatible - to be removed for 4.1
     type => $CONF_TYPE_ADDRLIST,
   });
 
 =item unwhitelist_auth user@example.com
 
-Used to remove a C<whitelist_auth> or C<def_whitelist_auth> entry. The
+Previously unwhitelist_auth which will work interchangeably until 4.1.
+
+Used to remove a C<welcomelist_auth> or C<def_welcomelist_auth> entry. The
 specified email address has to match exactly the address previously used.
 
 e.g.
 
-  unwhitelist_auth joe@example.com fred@example.com
-  unwhitelist_auth *@example.com
+  unwelcomelist_auth joe@example.com fred@example.com
+  unwelcomelist_auth *@example.com
 
 =cut
 
   push (@cmds, {
-    setting => 'unwhitelist_auth',
+    setting => 'unwelcomelist_auth',
+    aliases => ['unwhitelist_auth'],
     type => $CONF_TYPE_ADDRLIST,
     code => sub {
       my ($self, $key, $value, $line) = @_;
@@ -686,9 +695,9 @@ e.g.
       unless ($value =~ /^(?:\S+(?:\s+\S+)*)$/) {
         return $INVALID_VALUE;
       }
-      $self->{parser}->remove_from_addrlist('whitelist_auth',
+      $self->{parser}->remove_from_addrlist('welcomelist_auth',
                                         split (/\s+/, $value));
-      $self->{parser}->remove_from_addrlist('def_whitelist_auth',
+      $self->{parser}->remove_from_addrlist('def_welcomelist_auth',
                                         split (/\s+/, $value));
     }
   });
@@ -4821,8 +4830,8 @@ sub new {
   $self->{bayes_ignore_from} = { };
   $self->{bayes_ignore_to} = { };
 
-  $self->{whitelist_auth} = { };
-  $self->{def_whitelist_auth} = { };
+  $self->{welcomelist_auth} = { };
+  $self->{def_welcomelist_auth} = { };
   $self->{welcomelist_from} = { };
   $self->{whitelist_allows_relays} = { };
   $self->{blacklist_from} = { };

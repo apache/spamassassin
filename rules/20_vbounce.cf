@@ -28,10 +28,10 @@
 # "ANY_BOUNCE_MESSAGE" rule hits in the X-Spam-Status line, and move
 # messages that match that to a 'vbounce' folder.
 #
-# You should also add 'whitelist_bounce_relays' lines, describing the names of
+# You should also add 'welcomelist_bounce_relays' lines, describing the names of
 # your own outgoing mail relays, like so:
 #
-#   whitelist_bounce_relays       dogma.boxhost.net
+#   welcomelist_bounce_relays       dogma.boxhost.net
 #
 # This is used to 'rescue' legitimate bounce messages that were generated in
 # response to mail you really *did* send.  If you don't do this, the
@@ -50,7 +50,7 @@
 
 ifplugin Mail::SpamAssassin::Plugin::VBounce
 
-body __MY_SERVERS_FOUND       eval:check_whitelist_bounce_relays()
+body __MY_SERVERS_FOUND       eval:check_welcomelist_bounce_relays()
 body __HAVE_BOUNCE_RELAYS     eval:have_any_bounce_relays()
 
 endif

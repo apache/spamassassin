@@ -53,14 +53,14 @@ freemail_whitelist email/domain ...
    Emails or domains listed here are ignored (pretend they aren't
    freemail). No wildcards!
 
-freemail_import_whitelist_auth 1/0
+freemail_import_welcomelist_auth 1/0
 
-   Entries in whitelist_auth will also be used to whitelist emails
+   Entries in welcomelist_auth will also be used to welcomelist emails
    or domains from being freemail.  Default is 0.
 
-freemail_import_def_whitelist_auth 1/0
+freemail_import_def_welcomelist_auth 1/0
 
-   Entries in def_whitelist_auth will also be used to whitelist emails
+   Entries in def_welcomelist_auth will also be used to whitelist emails
    or domains from being freemail.  Default is 0.
 
 header FREEMAIL_REPLYTO eval:check_freemail_replyto(['option'])
@@ -215,15 +215,17 @@ sub set_config {
         }
     );
     push(@cmds, {
-        setting => 'freemail_import_whitelist_auth',
+        setting => 'freemail_import_welcomelist_auth',
         default => 0,
         type => $Mail::SpamAssassin::Conf::CONF_TYPE_NUMERIC,
+	aliases => ['freemail_import_whitelist_auth'],
         }
     );
     push(@cmds, {
-        setting => 'freemail_import_def_whitelist_auth',
+        setting => 'freemail_import_def_welcomelist_auth',
         default => 0,
         type => $Mail::SpamAssassin::Conf::CONF_TYPE_NUMERIC,
+	alias => ['freemail_import_def_welcomelist_auth']
         }
     );
     $conf->{parser}->register_commands(\@cmds);
@@ -333,7 +335,7 @@ sub _is_freemail {
         return 0;
     }
 
-    foreach my $list ('whitelist_auth','def_whitelist_auth') {
+    foreach my $list ('welcomelist_auth','def_welcomelist_auth') {
         if ($pms->{conf}->{"freemail_import_$list"}) {
             foreach my $regexp (values %{$pms->{conf}->{$list}}) {
                 if ($email =~ /$regexp/o) {
