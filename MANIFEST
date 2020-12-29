@@ -232,6 +232,8 @@ sql/txrep_mysql.sql
 sql/txrep_pg.sql
 sql/txrep_sqlite.sql
 t/README
+t/esp.t
+t/uri_saferedirect.t
 t/SATest.pl
 t/SATest.pm
 t/all_modules.t
@@ -309,6 +311,10 @@ t/data/dkim/test-pass-20.msg
 t/data/dkim/test-pass-21.msg
 t/data/dkim/test-pass-22.msg
 t/data/dkim/test-pass-23.msg
+t/data/spam/esp/mailchimp.eml
+t/data/spam/esp/mailchimp.txt
+t/data/spam/esp/sendgrid_id.eml
+t/data/spam/esp/sendgrid_id.txt
 t/data/etc/hello.txt
 t/data/etc/testhost.cert
 t/data/etc/testhost.key
