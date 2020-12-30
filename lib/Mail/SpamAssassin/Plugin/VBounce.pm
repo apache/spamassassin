@@ -45,6 +45,7 @@ sub new {
 
   $self->register_eval_rule("have_any_bounce_relays"); # type does not matter
   $self->register_eval_rule("check_welcomelist_bounce_relays"); # type does not matter
+  $self->register_eval_rule("check_whitelist_bounce_relays"); # type does not matter - #Stub - Remove in SA 4.1
 
   $self->set_config($mailsaobject->{conf});
 

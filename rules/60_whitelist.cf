@@ -29,165 +29,188 @@
 # user slip-up could result in scribbling side-effects in the bayes
 # db as a result -- which is hard to remedy.
 
+if can(Mail::SpamAssassin::Conf::feature_blocklist_welcomelist)
+  ifplugin Mail::SpamAssassin::Plugin::WLBLEval
+
+    #bz7826 renames blacklist to blocklist
+    header USER_IN_BLOCKLIST		eval:check_from_in_blocklist()
+    describe USER_IN_BLOCKLIST	 	From: address is in the user's block-list
+    tflags USER_IN_BLOCKLIST		userconf nice noautolearn
+    score USER_IN_BLOCKLIST             100.0
+  
+    ifplugin Mail::SpamAssassin::Plugin::RaciallyCharged
+      meta USER_IN_BLACKLIST            (USER_IN_BLOCKLIST)
+      describe USER_IN_BLACKLIST        DEPRECATED: See USER_IN_BLOCKLIST
+      tflags USER_IN_BLACKLIST          userconf nice noautolearn
+      score USER_IN_BLOCKLIST           0.01
+      score USER_IN_BLACKLIST           100.0
+    endif
+  endif
+else
+  ifplugin Mail::SpamAssassin::Plugin::WLBLEval
+    header USER_IN_BLOCKLIST	 	eval:check_from_in_blacklist()
+    describe USER_IN_BLOCKLIST	 	From: address is in the user's block-list
+    tflags USER_IN_BLOCKLIST	 	userconf nice noautolearn
+    score USER_IN_BLOCKLIST	 	0.01
+  
+    meta USER_IN_BLACKLIST        	(USER_IN_BLACKLIST)
+    describe USER_IN_BLACKLIST     	DEPRECATED: See USER_IN_BLOCKLIST 
+    tflags USER_IN_BLACKLIST       	userconf nice noautolearn
+    score USER_IN_BLACKLIST		100.0
+  endif
+endif
+
+if can(Mail::SpamAssassin::Conf::feature_blocklist_welcomelist)
+  ifplugin Mail::SpamAssassin::Plugin::WLBLEval
+    #bz7826 renames whitelist to welcomelist
+    header USER_IN_WELCOMELIST		eval:check_from_in_welcomelist()
+    describe USER_IN_WELCOMELIST	user is listed in 'welcomelist_from'
+    tflags USER_IN_WELCOMELIST		userconf nice noautolearn
+    score USER_IN_WELCOMELIST           -100.0
+    
+    ifplugin Mail::SpamAssassin::Plugin::RaciallyCharged
+      meta USER_IN_WHITELIST            (USER_IN_WELCOMELIST)
+      describe USER_IN_WHITELIST        DEPRECATED: See USER_IN_WELCOMELIST
+      tflags USER_IN_WHITELIST          userconf nice noautolearn
+      score USER_IN_WELCOMELIST         -0.01
+      score USER_IN_WHITELIST           -100.0
+    endif
+  endif 
+else
+  ifplugin Mail::SpamAssassin::Plugin::WLBLEval
+    header USER_IN_WELCOMELIST	 	eval:check_from_in_whitelist()
+    describe USER_IN_WELCOMELIST	user is listed in 'welcomelist_from'
+    tflags USER_IN_WELCOMELIST	 	userconf nice noautolearn
+    score USER_IN_WELCOMELIST	 	-0.01
+  
+    meta USER_IN_WHITELIST        	(USER_IN_WELCOMELIST)
+    describe USER_IN_WHITELIST     	DEPRECATED: See USER_IN_WELCOMELIST 
+    tflags USER_IN_WHITELIST       	userconf nice noautolearn
+    score USER_IN_WHITELIST		-100.0
+  endif
+endif
+
+if can(Mail::SpamAssassin::Conf::feature_blocklist_welcomelist)
+  ifplugin Mail::SpamAssassin::Plugin::WLBLEval
+    #bz7826 renames whitelist to welcomelist
+    header USER_IN_DEF_WELCOMELIST	eval:check_from_in_default_welcomelist()
+    describe USER_IN_DEF_WELCOMELIST	From: address is in the default welcome-list
+    tflags USER_IN_DEF_WELCOMELIST	userconf nice noautolearn
+    score USER_IN_DEF_WELCOMELIST         -15.0
+  
+    ifplugin Mail::SpamAssassin::Plugin::RaciallyCharged
+      meta USER_IN_DEF_WHITELIST		(USER_IN_DEF_WELCOMELIST)
+      describe USER_IN_DEF_WHITELIST	DEPRECATED: See USER_IN_WELCOMELIST 
+      tflags USER_IN_DEF_WHITELIST	userconf nice noautolearn
+      score USER_IN_DEF_WELCOMELIST       -0.01
+      score USER_IN_DEF_WHITELIST         -15.0
+    endif
+  endif
+else
+  ifplugin Mail::SpamAssassin::Plugin::WLBLEval
+    header USER_IN_DEF_WELCOMELIST	eval:check_from_in_default_whitelist()
+    describe USER_IN_DEF_WELCOMELIST	From: address is in the default welcome-list
+    tflags USER_IN_DEF_WELCOMELIST	userconf nice noautolearn
+    score USER_IN_DEF_WELCOMELIST         -0.01
+  
+    meta USER_IN_DEF_WHITELIST        	(USER_IN_DEF_WELCOMELIST)
+    describe USER_IN_DEF_WHITELIST     	DEPRECATED: See USER_IN_DEF_WELCOMELIST 
+    tflags USER_IN_DEF_WHITELIST       	userconf nice noautolearn
+    score USER_IN_DEF_WHITELIST		-15.0
+  endif
+endif
+  
+if can(Mail::SpamAssassin::Conf::feature_blocklist_welcomelist)
+  ifplugin Mail::SpamAssassin::Plugin::WLBLEval
+    #bz7826 renames blacklist to blocklist
+    header USER_IN_BLOCKLIST_TO		eval:check_to_in_blocklist()
+    describe USER_IN_BLOCKLIST_TO         User is listed in 'blocklist_to'
+    tflags USER_IN_BLOCKLIST_TO		userconf nice noautolearn
+    score USER_IN_BLOCKLIST               10.0
+    
+    ifplugin Mail::SpamAssassin::Plugin::RaciallyCharged
+      meta USER_IN_BLACKLIST_TO		(USER_IN_BLOCKLIST_TO)
+      describe USER_IN_BLACKLIST_TO	DEPRECATED: See USER_IN_BLOCKLIST_TO
+      tflags USER_IN_BLACKLIST_TO	userconf nice noautolearn
+      score USER_IN_BLOCKLIST_TO	        0.01
+      score USER_IN_BLACKLIST_TO	        10.0
+    endif
+  endif
+else
+  ifplugin Mail::SpamAssassin::Plugin::WLBLEval
+    header USER_IN_BLOCKLIST_TO	 	eval:check_from_in_blacklist_to()
+    describe USER_IN_BLOCKLIST_TO	User is listed in 'blocklist_to'
+    tflags USER_IN_BLOCKLIST_TO	 	userconf nice noautolearn
+    score USER_IN_BLOCKLIST_TO	 	0.01
+  
+    meta USER_IN_BLACKLIST_TO        	(USER_IN_BLACKLIST_TO)
+    describe USER_IN_BLACKLIST_TO     	DEPRECATED: See USER_IN_BLOCKLIST_TO
+    tflags USER_IN_BLACKLIST_TO       	userconf nice noautolearn
+    score USER_IN_BLACKLIST_TO		10.0
+  endif
+endif
+
+if can(Mail::SpamAssassin::Conf::feature_blocklist_welcomelist)
+  ifplugin Mail::SpamAssassin::Plugin::WLBLEval
+    #bz7826 renames whitelist to welcomelist
+    header USER_IN_WELCOMELIST_TO		eval:check_to_in_welcomelist()
+    describe USER_IN_WELCOMELIST_TO	User is listed in 'welcomelist_to'
+    tflags USER_IN_WELCOMELIST_TO		userconf nice noautolearn
+    score USER_IN_WELCOMELIST_TO          -6.0
+  
+    ifplugin Mail::SpamAssassin::Plugin::RaciallyCharged
+      meta USER_IN_WHITELIST_TO             (USER_IN_WELCOMELIST_TO)
+      describe USER_IN_WHITELIST_TO         DEPRECATED: See USER_IN_WELCOMELIST_TO
+      tflags USER_IN_WHITELIST_TO           userconf nice noautolearn
+      score USER_IN_WELCOMELIST_TO	  -0.01
+      score USER_IN_WHITELIST_TO            -6.0
+    endif
+  endif
+else
+  ifplugin Mail::SpamAssassin::Plugin::WLBLEval
+    header USER_IN_WELCOMELIST_TO		eval:check_to_in_whitelist()
+    describe USER_IN_WELCOMELIST_TO	User is listed in 'welcomelist_to'
+    tflags USER_IN_WELCOMELIST_TO		userconf nice noautolearn
+    score USER_IN_WELCOMELIST_TO		-0.01
+  
+    meta USER_IN_WHITELIST_TO		(USER_IN_WELCOMELIST_TO)
+    describe USER_IN_WHITELIST_TO		DEPRECATED: See USER_IN_WELCOMELIST_TO
+    tflags USER_IN_WHITELIST_TO		userconf nice noautolearn
+    score USER_IN_WHITELIST_TO		-6.0
+  endif
+endif
+
 ifplugin Mail::SpamAssassin::Plugin::WLBLEval
+  header USER_IN_MORE_SPAM_TO     eval:check_to_in_more_spam()
+  describe USER_IN_MORE_SPAM_TO   User is listed in 'more_spam_to'
+  tflags USER_IN_MORE_SPAM_TO     userconf nice noautolearn
 
-if can(Mail::SpamAssassin::Conf::feature_blocklist_welcomelist)
-  #bz7826 renames blacklist to blocklist
-  header USER_IN_BLOCKLIST		eval:check_from_in_blocklist()
-  describe USER_IN_BLOCKLIST	 	From: address is in the user's block-list
-  tflags USER_IN_BLOCKLIST		userconf nice noautolearn
-  score USER_IN_BLOCKLIST               100.0
-  
-  ifplugin Mail::SpamAssassin::Plugin::RaciallyCharged
-    meta USER_IN_BLACKLIST                (USER_IN_BLOCKLIST)
-    describe USER_IN_BLACKLIST            DEPRECATED: See USER_IN_BLOCKLIST
-    tflags USER_IN_BLACKLIST              userconf nice noautolearn
-    score USER_IN_BLOCKLIST               0.01
-    score USER_IN_BLACKLIST               100.0
-  endif
-else
-  header USER_IN_BLOCKLIST	 	eval:check_from_in_blacklist()
-  describe USER_IN_BLOCKLIST	 	From: address is in the user's block-list
-  tflags USER_IN_BLOCKLIST	 	userconf nice noautolearn
-  score USER_IN_BLOCKLIST	 	0.01
-
-  meta USER_IN_BLACKLIST        	(USER_IN_BLACKLIST)
-  describe USER_IN_BLACKLIST     	DEPRECATED: See USER_IN_BLOCKLIST 
-  tflags USER_IN_BLACKLIST       	userconf nice noautolearn
-  score USER_IN_BLACKLIST		100.0
+  header USER_IN_ALL_SPAM_TO      eval:check_to_in_all_spam()
+  describe USER_IN_ALL_SPAM_TO    User is listed in 'all_spam_to'
+  tflags USER_IN_ALL_SPAM_TO      userconf nice noautolearn
 endif
-
-if can(Mail::SpamAssassin::Conf::feature_blocklist_welcomelist)
-  #bz7826 renames whitelist to welcomelist
-  header USER_IN_WELCOMELIST		eval:check_from_in_welcomelist()
-  describe USER_IN_WELCOMELIST	 	user is listed in 'welcomelist_from'
-  tflags USER_IN_WELCOMELIST		userconf nice noautolearn
-  score USER_IN_WELCOMELIST             -100.0
-  
-  ifplugin Mail::SpamAssassin::Plugin::RaciallyCharged
-    meta USER_IN_WHITELIST                (USER_IN_WELCOMELIST)
-    describe USER_IN_WHITELIST            DEPRECATED: See USER_IN_WELCOMELIST
-    tflags USER_IN_WHITELIST              userconf nice noautolearn
-    score USER_IN_WELCOMELIST             -0.01
-    score USER_IN_WHITELIST               -100.0
-  endif
-else
-  header USER_IN_WELCOMELIST	 	eval:check_from_in_whitelist()
-  describe USER_IN_WELCOMELIST	 	user is listed in 'welcomelist_from'
-  tflags USER_IN_WELCOMELIST	 	userconf nice noautolearn
-  score USER_IN_WELCOMELIST	 	-0.01
-
-  meta USER_IN_WHITELIST        	(USER_IN_WELCOMELIST)
-  describe USER_IN_WHITELIST     	DEPRECATED: See USER_IN_WELCOMELIST 
-  tflags USER_IN_WHITELIST       	userconf nice noautolearn
-  score USER_IN_WHITELIST		-100.0
-endif
-
-if can(Mail::SpamAssassin::Conf::feature_blocklist_welcomelist)
-  #bz7826 renames whitelist to welcomelist
-  header USER_IN_DEF_WELCOMELIST	eval:check_from_in_default_welcomelist()
-  describe USER_IN_DEF_WELCOMELIST	From: address is in the default welcome-list
-  tflags USER_IN_DEF_WELCOMELIST	userconf nice noautolearn
-  score USER_IN_DEF_WELCOMELIST         -15.0
-
-  ifplugin Mail::SpamAssassin::Plugin::RaciallyCharged
-    meta USER_IN_DEF_WHITELIST		(USER_IN_DEF_WELCOMELIST)
-    describe USER_IN_DEF_WHITELIST	DEPRECATED: See USER_IN_WELCOMELIST 
-    tflags USER_IN_DEF_WHITELIST	userconf nice noautolearn
-    score USER_IN_DEF_WELCOMELIST       -0.01
-    score USER_IN_DEF_WHITELIST         -15.0
-  endif
-else
-  header USER_IN_DEF_WELCOMELIST	eval:check_from_in_default_whitelist()
-  describe USER_IN_DEF_WELCOMELIST	From: address is in the default welcome-list
-  tflags USER_IN_DEF_WELCOMELIST	userconf nice noautolearn
-  score USER_IN_DEF_WELCOMELIST         -0.01
-
-  meta USER_IN_DEF_WHITELIST        	(USER_IN_DEF_WELCOMELIST)
-  describe USER_IN_DEF_WHITELIST     	DEPRECATED: See USER_IN_DEF_WELCOMELIST 
-  tflags USER_IN_DEF_WHITELIST       	userconf nice noautolearn
-  score USER_IN_DEF_WHITELIST		-15.0
-endif
-  
-if can(Mail::SpamAssassin::Conf::feature_blocklist_welcomelist)
-  #bz7826 renames blacklist to blocklist
-  header USER_IN_BLOCKLIST_TO		eval:check_to_in_blocklist()
-  describe USER_IN_BLOCKLIST_TO         User is listed in 'blocklist_to'
-  tflags USER_IN_BLOCKLIST_TO		userconf nice noautolearn
-  score USER_IN_BLOCKLIST               10.0
-  
-  ifplugin Mail::SpamAssassin::Plugin::RaciallyCharged
-    meta USER_IN_BLACKLIST_TO		(USER_IN_BLOCKLIST_TO)
-    describe USER_IN_BLACKLIST_TO	DEPRECATED: See USER_IN_BLOCKLIST_TO
-    tflags USER_IN_BLACKLIST_TO	userconf nice noautolearn
-    score USER_IN_BLOCKLIST_TO	        0.01
-    score USER_IN_BLACKLIST_TO	        10.0
-  endif
-else
-  header USER_IN_BLOCKLIST_TO	 	eval:check_from_in_blacklist_to()
-  describe USER_IN_BLOCKLIST_TO	User is listed in 'blocklist_to'
-  tflags USER_IN_BLOCKLIST_TO	 	userconf nice noautolearn
-  score USER_IN_BLOCKLIST_TO	 	0.01
-
-  meta USER_IN_BLACKLIST_TO        	(USER_IN_BLACKLIST_TO)
-  describe USER_IN_BLACKLIST_TO     	DEPRECATED: See USER_IN_BLOCKLIST_TO
-  tflags USER_IN_BLACKLIST_TO       	userconf nice noautolearn
-  score USER_IN_BLACKLIST_TO		10.0
-endif
-
-if can(Mail::SpamAssassin::Conf::feature_blocklist_welcomelist)
-  #bz7826 renames whitelist to welcomelist
-  header USER_IN_WELCOMELIST_TO		eval:check_to_in_welcomelist()
-  describe USER_IN_WELCOMELIST_TO	User is listed in 'welcomelist_to'
-  tflags USER_IN_WELCOMELIST_TO		userconf nice noautolearn
-  score USER_IN_WELCOMELIST_TO          -6.0
-
-  ifplugin Mail::SpamAssassin::Plugin::RaciallyCharged
-    meta USER_IN_WHITELIST_TO             (USER_IN_WELCOMELIST_TO)
-    describe USER_IN_WHITELIST_TO         DEPRECATED: See USER_IN_WELCOMELIST_TO
-    tflags USER_IN_WHITELIST_TO           userconf nice noautolearn
-    score USER_IN_WELCOMELIST_TO	  -0.01
-    score USER_IN_WHITELIST_TO            -6.0
-  endif
-else
-  header USER_IN_WELCOMELIST_TO		eval:check_to_in_whitelist()
-  describe USER_IN_WELCOMELIST_TO	User is listed in 'welcomelist_to'
-  tflags USER_IN_WELCOMELIST_TO		userconf nice noautolearn
-  score USER_IN_WELCOMELIST_TO		-0.01
-
-  meta USER_IN_WHITELIST_TO		(USER_IN_WELCOMELIST_TO)
-  describe USER_IN_WHITELIST_TO		DEPRECATED: See USER_IN_WELCOMELIST_TO
-  tflags USER_IN_WHITELIST_TO		userconf nice noautolearn
-  score USER_IN_WHITELIST_TO		-6.0
-endif
-
-header USER_IN_MORE_SPAM_TO     eval:check_to_in_more_spam()
-describe USER_IN_MORE_SPAM_TO   User is listed in 'more_spam_to'
-tflags USER_IN_MORE_SPAM_TO     userconf nice noautolearn
-
-header USER_IN_ALL_SPAM_TO      eval:check_to_in_all_spam()
-describe USER_IN_ALL_SPAM_TO    User is listed in 'all_spam_to'
-tflags USER_IN_ALL_SPAM_TO      userconf nice noautolearn
 
 if (version >= 3.004000)
-  body      URI_HOST_IN_BLACKLIST eval:check_uri_host_in_blacklist()
-  describe  URI_HOST_IN_BLACKLIST Host or Domain is listed in the user's URI black-list
-  tflags    URI_HOST_IN_BLACKLIST userconf noautolearn
-  
-  body      URI_HOST_IN_WHITELIST eval:check_uri_host_in_whitelist()
-  describe  URI_HOST_IN_WHITELIST Host or Domain is listed in the user's URI white-list
-  tflags    URI_HOST_IN_WHITELIST userconf nice noautolearn
-  
-  # Bug 7256, using a header rule with an eval() function does not work the way
-  # this was intended.
-  
-  # header    HEADER_HOST_IN_BLACKLIST eval:check_uri_host_listed('BLACK')
-  # describe  HEADER_HOST_IN_BLACKLIST Host or Domain in header is listed in the user's URI black-list
-  # tflags    HEADER_HOST_IN_BLACKLIST userconf noautolearn
-  
-  # header    HEADER_HOST_IN_WHITELIST eval:check_uri_host_listed('WHITE')
-  # describe  HEADER_HOST_IN_WHITELIST Host or Domain in header is listed in the user's URI white-list
-  # tflags    HEADER_HOST_IN_WHITELIST userconf nice noautolearn
+  ifplugin Mail::SpamAssassin::Plugin::WLBLEval
+    body      URI_HOST_IN_BLACKLIST eval:check_uri_host_in_blacklist()
+    describe  URI_HOST_IN_BLACKLIST Host or Domain is listed in the user's URI black-list
+    tflags    URI_HOST_IN_BLACKLIST userconf noautolearn
+    
+    body      URI_HOST_IN_WHITELIST eval:check_uri_host_in_whitelist()
+    describe  URI_HOST_IN_WHITELIST Host or Domain is listed in the user's URI white-list
+    tflags    URI_HOST_IN_WHITELIST userconf nice noautolearn
+    
+    # Bug 7256, using a header rule with an eval() function does not work the way
+    # this was intended.
+    
+    # header    HEADER_HOST_IN_BLACKLIST eval:check_uri_host_listed('BLACK')
+    # describe  HEADER_HOST_IN_BLACKLIST Host or Domain in header is listed in the user's URI black-list
+    # tflags    HEADER_HOST_IN_BLACKLIST userconf noautolearn
+    
+    # header    HEADER_HOST_IN_WHITELIST eval:check_uri_host_listed('WHITE')
+    # describe  HEADER_HOST_IN_WHITELIST Host or Domain in header is listed in the user's URI white-list
+    # tflags    HEADER_HOST_IN_WHITELIST userconf nice noautolearn
+  endif
 endif
 
 ###########################################################################
@@ -204,6 +227,8 @@ endif
 
 # Should really not be used these days, use def_welcomelist_auth if possible.
 
-# def_welcomelist_from_rcvd  *@foo.com  foo.com
+ifplugin Mail::SpamAssassin::Plugin::WLBLEval
+
+  # def_welcomelist_from_rcvd  *@foo.com  foo.com
 
 endif
