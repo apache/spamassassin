@@ -50,7 +50,12 @@
 
 ifplugin Mail::SpamAssassin::Plugin::VBounce
 
-body __MY_SERVERS_FOUND       eval:check_welcomelist_bounce_relays()
+if can(Mail::SpamAssassin::Conf::feature_blocklist_welcomelist)
+  body __MY_SERVERS_FOUND       eval:check_welcomelist_bounce_relays()
+else
+  body __MY_SERVERS_FOUND       eval:check_whitelist_bounce_relays()
+endif
+
 body __HAVE_BOUNCE_RELAYS     eval:have_any_bounce_relays()
 
 endif
