@@ -7,7 +7,7 @@ use Test::More;
 use constant HAS_MAILSPF => eval { require Mail::SPF; };
 
 plan skip_all => "Long running tests disabled" unless conf_bool('run_long_tests');
-#plan skip_all => "Net tests disabled" unless conf_bool('run_net_tests');
+plan skip_all => "Net tests disabled" unless conf_bool('run_net_tests');
 plan skip_all => "Need Mail::SPF" unless HAS_MAILSPF;
 plan skip_all => "Can't use Net::DNS Safely" unless can_use_net_dns_safely();
 
