@@ -3434,4 +3434,9 @@ tflags     ENVFROM_GOOG_TRIX           publish
 uri        URI_FREELOGO                m;::/www\.freepnglogos\.com/uploads;i
 describe   URI_FREELOGO                Free logo image, possible phishing
 
+# observed in tons of spam 12/2020
+rawbody    __MIXEDCASE_FONT            /<(?!FONT|font)[Ff][Oo][Nn][Tt]\s/
+rawbody    __TWO_IMAGE_PATTERN         m;<img src="(https?://[^"]{1,80}/)C([^/.]{1,30}\.jpg)">.{0,200}<img src="\1U\2";ism
+
+
 
