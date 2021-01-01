@@ -1259,6 +1259,9 @@ uri         __URI_YOUSENDIT      m,^https?://www\.yousendit\.com/directdownload,
 uri         __URI_GOOGLE_DOC     m,^https?://docs\.google\.com/(?:[^/]+/)*(?:view(?:form)?\?(?:[^&]+&)*(?:id|formkey|usp)=|document/),i
 uri         __URI_GOOGLE_DRV     m,^https?://(?:drive\.google|googledrive)\.com/,i
 
+# another fill-a-form service
+uri         __FORMS_GLE          m;^https?://forms\.gle/[0-9a-z]{15,}$;i
+
 
 body        __WEBMAIL_ACCT       /\byour web ?mail account/i
 body        __MAILBOX_FULL       /\b(?:you(?:r (?:mail\s?box|(?:e-?|web ?)mail))? (?:is (?:almost )?full|quota is running low|(?:quota )?ha(?:s|ve) (?:reached|exceeded|passed) (?:the|your|it'?s?) (?:university )?(?:size|storage|set|(?:e-?|web ?)mail|quota|folder|mail ?box)[\/\s](?:limit |quota |account )+)|over your mail\s?box (?:size )?(?:limit|quota)|maximum mail\s?box (?:size )?(?:limit|quota) exceeded|sua (?:conta|caixa) de (?:(?:e-?|web ?)mail|correio) (?:excedeu (?:sua|o) limite|est(?:=E1|[\xe1]|[\xc3][\xa1]) quase cheio))\b/i
