@@ -58,4 +58,5 @@ score      SENDINBLUE_REDIR_PHISH        3.500    # limit
 header     __GB_FAKE_RF                  Subject =~ /(Fw|Re)\:[a-z]/i
 meta       GB_FAKE_RF_SHORT              ( ! __THREADED && __GB_FAKE_RF && __PDS_URISHORTENER )
 describe   GB_FAKE_RF_SHORT              Fake reply or forward with url shortener
-score      GB_FAKE_RF_SHORT              1.500 # limit
+score      GB_FAKE_RF_SHORT              2.000 # limit
+tflags     GB_FAKE_RF_SHORT              publish

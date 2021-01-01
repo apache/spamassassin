@@ -18,7 +18,7 @@ ifplugin Mail::SpamAssassin::Plugin::FreeMail
     header   __FROM_EQ_REPLY            eval:check_fromname_equals_replyto()
     meta     GB_FREEM_FROM_NOT_REPLY    ( !__FROM_EQ_REPLY && FREEMAIL_FROM && FREEMAIL_REPLYTO )
     describe GB_FREEM_FROM_NOT_REPLY    From: and Reply-To: have different freemail domains
-    score    GB_FREEM_FROM_NOT_REPLY    0.50 # limit
+    score    GB_FREEM_FROM_NOT_REPLY    1.500 # limit
     tflags   GB_FREEM_FROM_NOT_REPLY    publish
   endif
 endif
