@@ -20,7 +20,9 @@ promote_active_rules() {
  
   # Make sure we have the source, since listpromotable assumes we do. 
   # Also, make_tarball_for_version removes rulesrc
-  svn co https://svn.apache.org/repos/asf/spamassassin/trunk/rulesrc
+  # Get rules ("static" published rules) as well as rulesrc (dev sandboxes) 
+  # as both are subject to modification at any time
+  svn co https://svn.apache.org/repos/asf/spamassassin/trunk/rules https://svn.apache.org/repos/asf/spamassassin/trunk/rulesrc
 
   $PERL build/mkupdates/listpromotable > rules/active.list.new || exit $?
   mv rules/active.list.new rules/active.list
