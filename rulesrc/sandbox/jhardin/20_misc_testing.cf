@@ -1261,6 +1261,7 @@ uri         __URI_GOOGLE_DRV     m,^https?://(?:drive\.google|googledrive)\.com/
 
 # another fill-a-form service
 uri         __FORMS_GLE          m;^https?://forms\.gle/[0-9a-z]{15,}$;i
+meta        __FORMS_GLE_SUSP     __FORMS_GLE && __LIST_PARTIAL 
 
 
 body        __WEBMAIL_ACCT       /\byour web ?mail account/i
@@ -2408,7 +2409,7 @@ if can(Mail::SpamAssassin::Conf::feature_bug6558_free)
   tflags    FONT_INVIS_LONG_LINE          publish
 
   meta      __FONT_INVIS_NORDNS           __FONT_INVIS && __RDNS_NONE 
-  meta      FONT_INVIS_NORDNS             __FONT_INVIS_NORDNS && !__HTML_SINGLET 
+  meta      FONT_INVIS_NORDNS             __FONT_INVIS_NORDNS && !__HTML_SINGLET && !__LYRIS_EZLM_REMAILER 
   describe  FONT_INVIS_NORDNS             Invisible text + no rDNS
   score     FONT_INVIS_NORDNS             2.500	# limit
   tflags    FONT_INVIS_NORDNS             publish
@@ -2419,7 +2420,7 @@ if can(Mail::SpamAssassin::Conf::feature_bug6558_free)
   tflags    FONT_INVIS_POSTEXTRAS         publish
 
   meta      __FONT_INVIS_MSGID            __FONT_INVIS && __MSGID_OK_HOST 
-  meta      FONT_INVIS_MSGID              __FONT_INVIS_MSGID && !__RCD_RDNS_MX_MESSY && !__RCD_RDNS_MX && !__HAS_ERRORS_TO && !__RCD_RDNS_MAIL && !__MAIL_LINK && !__HDR_RCVD_AMAZON && !__MIME_QP 
+  meta      FONT_INVIS_MSGID              __FONT_INVIS_MSGID && !__RCD_RDNS_MX_MESSY && !__RCD_RDNS_MX && !__HAS_ERRORS_TO && !__RCD_RDNS_MAIL && !__MAIL_LINK && !__HDR_RCVD_AMAZON && !__MIME_QP && !__HAS_CAMPAIGNID 
   describe  FONT_INVIS_MSGID              Invisible text + suspicious message ID
   score     FONT_INVIS_MSGID              2.500	# limit
   tflags    FONT_INVIS_MSGID              publish
@@ -3450,9 +3451,14 @@ describe   MIXED_FONT_CASE             Has font tag with mixed case
 score      MIXED_FONT_CASE             2.500	 # limit
 tflags     MIXED_FONT_CASE             publish
 
-# crosscheck BC's similar rules that use more-indirect logic
+# BC's similar rules use more-indirect logic and have a poorer S/O
 rawbody    __MIXED_IMG_CASE_JH         /<(?!IMG|img)[Ii][Mm][Gg]\s/
-rawbody    __MIXED_HREF_CASE_JH        /<(?!HREF|href)[Hh][Rr][Ee][Ff]\s/
+meta       MIXED_IMG_CASE              __MIXED_IMG_CASE_JH && !__MSGID_JAVAMAIL 
+describe   MIXED_IMG_CASE              Has img tag with mixed case
+score      MIXED_IMG_CASE              3.000	 # limit
+tflags     MIXED_IMG_CASE              publish
+
+rawbody    __MIXED_HREF_CASE_JH        /<[Aa]\s(?!HREF|href)[Hh][Rr][Ee][Ff]=/
 
 
 
