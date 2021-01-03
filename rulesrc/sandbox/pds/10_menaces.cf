@@ -4,7 +4,7 @@ meta     PDS_BRAND_SUBJ_NAKED_TO __NAKED_TO && __PDS_TO_BRAND_SUBJECT
 describe PDS_BRAND_SUBJ_NAKED_TO Subject starts with To: brand and naked To:
 score    PDS_BRAND_SUBJ_NAKED_TO 1.0
 
-header   __PDS_FROM_GMAIL X-Envelope-From:addr =~ /\@g(?:oogle)?mail\.com$/i
+header   __PDS_FROM_GMAIL From:addr =~ /\@g(?:oogle)?mail\.com$/i
 header   __PDS_GMAIL_MID Message-Id =~ /\@mail.gmail.com>$/
 
 meta     SPOOF_GMAIL_MID SPOOFED_FREEMAIL && __PDS_FROM_GMAIL && !__PDS_GMAIL_MID
