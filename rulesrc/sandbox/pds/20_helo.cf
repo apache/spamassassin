@@ -8,3 +8,9 @@ tflags   PDS_HELO_SPF_FAIL net
 meta     PDS_HP_HELO_NORDNS RDNS_NONE && __HELO_HIGHPROFILE
 describe PDS_HP_HELO_NORDNS High profile HELO with no sender rDNS
 score    PDS_HP_HELO_NORDNS 1.0
+
+ifplugin Mail::SpamAssassin::Plugin::AskDNS
+askdns   __HELO_DNS _LASTEXTERNALHELO_ A /./
+
+meta     __PDS_HP_HELO_NODNS (__HELO_HIGHPROFILE && !__HELO_DNS)
+endif
