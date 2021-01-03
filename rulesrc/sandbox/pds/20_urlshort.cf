@@ -800,10 +800,15 @@ meta     XPRIO_URL_SHORTNER __XPRIO_MINFP && __PDS_URISHORTENER
 describe XPRIO_URL_SHORTNER X-Priority header and short URL
 score    XPRIO_URL_SHORTNER 1.0 # limit
 
-rawbody __MIME_QPC           eval:check_for_mime('mime_quoted-printable_count')
+ifplugin Mail::SpamAssassin::Plugin::MIMEEval
+  rawbody __MIME_QPC           eval:check_for_mime('mime_quoted-printable_count')
 
-meta    __PDS_QP_512       (__MIME_QPC < 512)
-meta    __PDS_QP_1024      (__MIME_QPC < 1024)
+  meta    __PDS_QP_512       (__MIME_QPC < 512)
+  meta    __PDS_QP_1024      (__MIME_QPC < 1024)
+else
+  meta    __PDS_QP_512 0
+  meta    __PDS_QP_1024 0
+endif
 
 meta     __PDS_MSG_512 (__KAM_BODY_LENGTH_LT_512 || __HTML_LENGTH_512 || __PDS_QP_512)
 meta     __PDS_MSG_1024 (__KAM_BODY_LENGTH_LT_1024 || __PDS_HTML_LENGTH_1024 || __PDS_QP_1024)
