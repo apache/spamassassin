@@ -1,10 +1,12 @@
 ifplugin Mail::SpamAssassin::Plugin::MIMEEval
   rawbody __MIME_QPC           eval:check_for_mime('mime_quoted-printable_count')
 
+  meta    __PDS_QP_64       (__MIME_QPC < 64)
   meta    __PDS_QP_128       (__MIME_QPC < 128)
   meta    __PDS_QP_512       (__MIME_QPC < 512)
   meta    __PDS_QP_1024      (__MIME_QPC < 1024)
 else
+  meta    __PDS_QP_64 0
   meta    __PDS_QP_128 0
   meta    __PDS_QP_512 0
   meta    __PDS_QP_1024 0
@@ -831,6 +833,14 @@ meta     PDS_SHORTFWD_URISHRT (__PDS_URISHORTENER || __URL_SHORTENER) && (__THRE
 describe PDS_SHORTFWD_URISHRT Threaded email with URI shortener
 score    PDS_SHORTFWD_URISHRT 1.5 # limit
 reuse    PDS_SHORTFWD_URISHRT
+
+header   __PDS_SUBJ_FWD1 Subject =~ /^\s*(fwd|re)\b/i
+
+meta     __PDS_SUBJ_FWD __PDS_SUBJ_FWD1
+
+meta     PDS_SHORTFWD_URISHRT_FP (__PDS_URISHORTENER || __URL_SHORTENER) && __PDS_SUBJ_FWD && __PDS_QP_64
+describe PDS_SHORTFWD_URISHRT_FP Apparently a short fwd/re with URI shortener
+score    PDS_SHORTFWD_URISHRT_FP 1.5 # limit
 
 meta     PDS_FREEMAIL_REPLYTO_URISHRT (__PDS_URISHORTENER || __URL_SHORTENER) && __freemail_hdr_replyto && __SUBJ_SHORT && __PDS_HTML_LENGTH_2048
 describe PDS_FREEMAIL_REPLYTO_URISHRT Freemail replyto with URI shortener
