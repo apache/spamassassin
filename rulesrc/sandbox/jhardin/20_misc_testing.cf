@@ -3444,21 +3444,26 @@ describe   JH_SPAMMY_PATTERN01         Unusual pattern seen in spam campaign
 score      JH_SPAMMY_PATTERN01         3.000	# limit
 tflags     JH_SPAMMY_PATTERN01         publish
 
-# observed in tons of spam 12/2020
+# observed in tons of spam 12/2020 - already scores high without this
 rawbody    __MIXED_FONT_CASE           /<(?!FONT|font)[Ff][Oo][Nn][Tt]\s/
 meta       MIXED_FONT_CASE             __MIXED_FONT_CASE
-describe   MIXED_FONT_CASE             Has font tag with mixed case
+describe   MIXED_FONT_CASE             Has font tag in mixed case
 score      MIXED_FONT_CASE             2.500	 # limit
 tflags     MIXED_FONT_CASE             publish
 
-# BC's similar rules use more-indirect logic and have a poorer S/O
+
+# BC's similar mixed-case rules use more-indirect logic and have a poorer S/O
 rawbody    __MIXED_IMG_CASE_JH         /<(?!IMG|img)[Ii][Mm][Gg]\s/
 meta       MIXED_IMG_CASE              __MIXED_IMG_CASE_JH && !__MSGID_JAVAMAIL 
-describe   MIXED_IMG_CASE              Has img tag with mixed case
+describe   MIXED_IMG_CASE              Has img tag in mixed case
 score      MIXED_IMG_CASE              3.000	 # limit
 tflags     MIXED_IMG_CASE              publish
 
 rawbody    __MIXED_HREF_CASE_JH        /<[Aa]\s(?!HREF|href)[Hh][Rr][Ee][Ff]=/
+meta       MIXED_HREF_CASE             __MIXED_HREF_CASE_JH
+describe   MIXED_HREF_CASE             Has href in mixed case
+score      MIXED_HREF_CASE             2.000	 # limit
+tflags     MIXED_HREF_CASE             publish
 
 
 
