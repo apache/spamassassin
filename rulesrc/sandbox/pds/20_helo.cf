@@ -11,6 +11,8 @@ score    PDS_HP_HELO_NORDNS 1.0
 
 ifplugin Mail::SpamAssassin::Plugin::AskDNS
 askdns   __HELO_DNS _LASTEXTERNALHELO_ A /./
+tflags   __HELO_DNS net
 
 meta     __PDS_HP_HELO_NODNS (__HELO_HIGHPROFILE && !__HELO_DNS)
+tflags   __PDS_HP_HELO_NODNS net
 endif
