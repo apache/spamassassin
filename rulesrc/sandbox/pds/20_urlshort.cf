@@ -833,7 +833,7 @@ header   __PDS_SUBJ_FWD1 Subject =~ /^\s*(fwd|re)\b/i
 
 meta     __PDS_SUBJ_FWD __PDS_SUBJ_FWD1
 
-meta     PDS_SHORTFWD_URISHRT_FP (__PDS_URISHORTENER || __URL_SHORTENER) && __PDS_SUBJ_FWD && __PDS_QP_64
+meta     PDS_SHORTFWD_URISHRT_FP (__PDS_URISHORTENER || __URL_SHORTENER) && __PDS_SUBJ_FWD && __PDS_MSG_512
 describe PDS_SHORTFWD_URISHRT_FP Apparently a short fwd/re with URI shortener
 score    PDS_SHORTFWD_URISHRT_FP 1.5 # limit
 
