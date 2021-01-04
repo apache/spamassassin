@@ -1,23 +1,18 @@
 header   __NUMBERONLY_TLD From:addr =~ /\@[0-9]{4,}(\.[a-z]{2,4})?\.[a-z]+$/i
-reuse    __NUMBERONLY_TLD
 
 header   __NUMBEREND_TLD From:addr =~ /\@[a-z]{2,}[0-9]{4,}(\.[a-z]{2,4})?\.[a-z]+$/i
-reuse    __NUMBEREND_TLD
 
 meta     NUMBEREND_LINKBAIT __NUMBEREND_TLD && __LCL__KAM_BODY_LENGTH_LT_1024 && __BODY_URI_ONLY
 describe NUMBEREND_LINKBAIT Domain ends in a large number and very short body with link
 score    NUMBEREND_LINKBAIT 1.0 # limit
-reuse    NUMBEREND_LINKBAIT
 
 meta     NUMBERONLY_BITCOIN_EXP __NUMBERONLY_TLD && __BITCOIN_ID && __NAKED_TO
 describe NUMBERONLY_BITCOIN_EXP Domain ends in a large number and very short body with link
 score    NUMBERONLY_BITCOIN_EXP 2.0 # limit
-reuse    NUMBERONLY_BITCOIN_EXP
 
 meta     PDS_NAKED_TO_NUMERO __NAKED_TO && __NUMBERONLY_TLD
 describe PDS_NAKED_TO_NUMERO Naked-to, numberonly domain
 score    PDS_NAKED_TO_NUMERO 2.0
-reuse    PDS_NAKED_TO_NUMERO
 
 # _AUTHORDOMAIN_ implemented only from 3.4.1
 if (version >= 3.004001)
