@@ -2334,11 +2334,11 @@ meta      GOOG_REDIR_HTML_ONLY          (__GOOG_REDIR && MIME_HTML_ONLY) && !RDN
 describe  GOOG_REDIR_HTML_ONLY          Google redirect to obscure spamvertised website + HTML only
 score     GOOG_REDIR_HTML_ONLY          2.000	# limit
 
-rawbody   __LONG_INVIS_DIV              /<div\s+style\s*=\s*"(?:visibility\s*:\s*hidden|display\s*:\s*none)\s*">[^<\s]{1400}/i
+rawbody   __LONG_INVIS_DIV              /<div\s+style\s*=\s*"(?:(?<!-)visibility\s*:\s*hidden|display\s*:\s*none)\s*">[^<\s]{1400}/i
 
 # low S/O, apparently lots of invisible ham...
 if can(Mail::SpamAssassin::Conf::feature_bug6558_free)
-  rawbody   __STY_INVIS                   /\bstyle\s*=\s*"[^">]{0,80}(?:visibility\s*:\s*hidden\s*|display\s*:\s*none\s*)[;"!]/i
+  rawbody   __STY_INVIS                   /\bstyle\s*=\s*"[^">]{0,80}(?:(?<!-)visibility\s*:\s*hidden\s*|display\s*:\s*none\s*)[;"!]/i
   tflags    __STY_INVIS                   multiple maxhits=6
   meta      __STY_INVIS_1                 __STY_INVIS == 1
   meta      __STY_INVIS_2                 __STY_INVIS > 1
@@ -2347,7 +2347,7 @@ if can(Mail::SpamAssassin::Conf::feature_bug6558_free)
 
   # Widely used in ham for hiding tracking images? See how it performs on non-IMG tags...
   # S/O the same. :(
-  #rawbody   __STY_INVIS_NONIMG            /<(?!img\s)[a-z]+\s[^>]{0,200}\bstyle\s*=\s*"[^">]{0,80}(?:visibility\s*:\s*hidden\s*|display\s*:\s*none\s*)[;"!]/i
+  #rawbody   __STY_INVIS_NONIMG            /<(?!img\s)[a-z]+\s[^>]{0,200}\bstyle\s*=\s*"[^">]{0,80}(?:(?<!-)visibility\s*:\s*hidden\s*|display\s*:\s*none\s*)[;"!]/i
 
   # *one* invisible style has better S/O than multiple...
   meta      __STY_INVIS_1_MINFP           __STY_INVIS_1 && !__HAS_CAMPAIGNID 
@@ -2370,7 +2370,7 @@ else
 endif
 
 # try it on span tags only...
-rawbody   __SPAN_INVIS                  /<span\s[^>]{0,200}style\s*=\s*"[^">]{0,80}(?:visibility\s*:\s*hidden\s*|display\s*:\s*none\s*)[;"!][^>]{1,200}>/i
+rawbody   __SPAN_INVIS                  /<span\s[^>]{0,200}style\s*=\s*"[^">]{0,80}(?:(?<!-)visibility\s*:\s*hidden\s*|display\s*:\s*none\s*)[;"!][^>]{1,200}>/i
 
 describe  LONG_INVISIBLE_TEXT           Long block of hidden text - bayes poison?
 score     LONG_INVISIBLE_TEXT           3.000	# limit
@@ -2379,7 +2379,7 @@ tflags    LONG_INVISIBLE_TEXT           publish
 
 if can(Mail::SpamAssassin::Conf::feature_bug6558_free)
   # Lots of ham uses invisible fonts - WHY?
-  rawbody   __FONT_INVIS                  /<(?!style)[a-z]+\s[^>]{1,80}(?:font(?:-size)?\s*:\s*(?:0*[01](?:\.\d+)?(?:px|pt|Q|vw|vh|vmin)|0+(?:\.\d+)?(?:cm|mm|pc|ch|rem|lh|vmax|%)|0+(?:\.0\d*)(?:em|ex|in))(?:\s[a-z]|\s*[;'])|color\s*:\s*transparent\s*[;'])[^>]{0,80}>\w/i
+  rawbody   __FONT_INVIS                  /<(?!style)[a-z]+\s[^>]{1,80}(?:font(?:-size)?\s*:\s*(?:0*[01](?:\.\d+)?(?:px|pt|Q|vw|vh|vmin)|0+(?:\.\d+)?(?:cm|mm|pc|ch|rem|lh|vmax|%)|0+(?:\.0\d*)(?:em|ex|in))(?:\s[a-z]|\s*[;'])|['"\s;]color\s*:\s*transparent\s*[;'])[^>]{0,80}>\w/i
   tflags    __FONT_INVIS                  multiple maxhits=11
   meta      __FONT_INVIS_2                __FONT_INVIS > 2
   meta      __FONT_INVIS_5                __FONT_INVIS > 5
@@ -2391,7 +2391,7 @@ if can(Mail::SpamAssassin::Conf::feature_bug6558_free)
   tflags    HTML_TEXT_INVISIBLE_FONT      publish
 
   # Does this hit less ham while still hitting spam?
-  rawbody   __WORD_INVIS                  /<(?!style)[a-z]+\s[^>]{1,80}(?:font(?:-size)?\s*:\s*(?:0*[01](?:\.\d+)?(?:px|pt|Q|vw|vh|vmin)|0+(?:\.\d+)?(?:cm|mm|in|pc|em|ex|ch|rem|lh|vmax))\s*[;'a-z]|color\s*:\s*transparent\s*[;'])[^>]{0,80}>\w{1,20}</i
+  rawbody   __WORD_INVIS                  /<(?!style)[a-z]+\s[^>]{1,80}(?:font(?:-size)?\s*:\s*(?:0*[01](?:\.\d+)?(?:px|pt|Q|vw|vh|vmin)|0+(?:\.\d+)?(?:cm|mm|in|pc|em|ex|ch|rem|lh|vmax))\s*[;'a-z]|['"\s;]color\s*:\s*transparent\s*[;'])[^>]{0,80}>\w{1,20}</i
   tflags    __WORD_INVIS                  multiple maxhits=6
   meta      __WORD_INVIS_2                __WORD_INVIS > 1
   meta      __WORD_INVIS_5                __WORD_INVIS > 5
