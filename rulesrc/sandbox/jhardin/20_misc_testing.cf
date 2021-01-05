@@ -1917,7 +1917,7 @@ ifplugin Mail::SpamAssassin::Plugin::ReplaceTags
   describe      FUZZY_CLICK_HERE    Obfuscated "click here"
   tflags        FUZZY_CLICK_HERE    publish
 
-  body          FUZZY_BITCOIN       /<B>(?!itcoin)<I><T>[-\s]?<C><O><I><N>/i
+  body          FUZZY_BITCOIN       /<B>(?!it[-\s]?coin)<I><T>[-\s]?<C><O><I><N>/i
   replace_rules FUZZY_BITCOIN   
   describe      FUZZY_BITCOIN       Obfuscated "Bitcoin"
   tflags        FUZZY_BITCOIN       publish
@@ -1984,7 +1984,7 @@ describe       BITCOIN_XPRIO        Bitcoin + priority
 score          BITCOIN_XPRIO        2.500	# limit
 
 # bitcoin obfuscation - tip o' the hat to Steve Zinski on the users list, with a little cleanup
-body           __BTC_OBFU_2     /\b\W{0,10}b(?!itcoin)\W{0,10}i\W{0,10}t\W{0,10}c\W{0,10}o\W{0,10}i\W{0,10}n\W{0,10}\b/i
+body           __BTC_OBFU_2     /\b\W{0,10}b(?!it[-\s]?coin)\W{0,10}i\W{0,10}t\W{0,10}c\W{0,10}o\W{0,10}i\W{0,10}n\W{0,10}\b/i
 body           __BTC_OBFU_3     /\b\W{0,10}b(?!tc\b)\W{0,10}t\W{0,10}c\W{0,10}\b/i
 
 # seen in sloppy spam
