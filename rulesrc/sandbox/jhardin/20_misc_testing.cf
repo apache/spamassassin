@@ -2350,7 +2350,7 @@ if can(Mail::SpamAssassin::Conf::feature_bug6558_free)
   #rawbody   __STY_INVIS_NONIMG            /<(?!img\s)[a-z]+\s[^>]{0,200}\bstyle\s*=\s*"[^">]{0,80}(?:(?<!-)visibility\s*:\s*hidden\s*|display\s*:\s*none\s*)[;"!]/i
 
   # *one* invisible style has better S/O than multiple...
-  meta      __STY_INVIS_1_MINFP           __STY_INVIS_1 && !__HAS_CAMPAIGNID 
+  meta      __STY_INVIS_1_MINFP           __STY_INVIS_1 && !MIME_QP_LONG_LINE 
 
   meta      HTML_TEXT_INVISIBLE_STYLE     __STY_INVIS_MANY && (__RDNS_NONE || __HDRS_LCASE || __UNSUB_EMAIL ||  __ADMITS_SPAM || __FROM_DOM_INFO || __HTML_TAG_BALANCE_CENTER || __MSGID_RANDY ) && !__RDNS_LONG && !__FROM_ENCODED_QP && !__HAS_THREAD_INDEX 
   describe  HTML_TEXT_INVISIBLE_STYLE     HTML hidden text + other spam signs
@@ -2396,6 +2396,8 @@ if can(Mail::SpamAssassin::Conf::feature_bug6558_free)
   meta      __WORD_INVIS_2                __WORD_INVIS > 1
   meta      __WORD_INVIS_5                __WORD_INVIS > 5
 
+  meta      __WORD_INVIS_MINFP            __WORD_INVIS && !__SURVEY && !MIME_QP_LONG_LINE && !__FB_TOUR && !__MSGID_GUID 
+
   meta      WORD_INVIS_MANY               __WORD_INVIS_2
   describe  WORD_INVIS_MANY               Multiple individual hidden words
   score     WORD_INVIS_MANY               3.000	# limit
@@ -2409,7 +2411,7 @@ if can(Mail::SpamAssassin::Conf::feature_bug6558_free)
   tflags    FONT_INVIS_LONG_LINE          publish
 
   meta      __FONT_INVIS_NORDNS           __FONT_INVIS && __RDNS_NONE 
-  meta      FONT_INVIS_NORDNS             __FONT_INVIS_NORDNS && !__HTML_SINGLET && !__LYRIS_EZLM_REMAILER 
+  meta      FONT_INVIS_NORDNS             __FONT_INVIS_NORDNS && !__HTML_SINGLET && !__LYRIS_EZLM_REMAILER && !__YOUR_PERSONAL && !__HAS_X_MAILER 
   describe  FONT_INVIS_NORDNS             Invisible text + no rDNS
   score     FONT_INVIS_NORDNS             2.500	# limit
   tflags    FONT_INVIS_NORDNS             publish
@@ -2420,10 +2422,13 @@ if can(Mail::SpamAssassin::Conf::feature_bug6558_free)
   tflags    FONT_INVIS_POSTEXTRAS         publish
 
   meta      __FONT_INVIS_MSGID            __FONT_INVIS && __MSGID_OK_HOST 
-  meta      FONT_INVIS_MSGID              __FONT_INVIS_MSGID && !__RCD_RDNS_MX_MESSY && !__RCD_RDNS_MX && !__HAS_ERRORS_TO && !__RCD_RDNS_MAIL && !__MAIL_LINK && !__HDR_RCVD_AMAZON && !__MIME_QP && !__HAS_CAMPAIGNID 
+  meta      FONT_INVIS_MSGID              __FONT_INVIS_MSGID && !__RCD_RDNS_MX_MESSY && !__RCD_RDNS_MX && !__HAS_ERRORS_TO && !__RCD_RDNS_MAIL && !__MAIL_LINK && !__HDR_RCVD_AMAZON && !__MIME_QP && !__HAS_CAMPAIGNID && !__HAS_THREAD_INDEX 
   describe  FONT_INVIS_MSGID              Invisible text + suspicious message ID
   score     FONT_INVIS_MSGID              2.500	# limit
   tflags    FONT_INVIS_MSGID              publish
+
+  meta      __FONT_INVIS_HTML_NOHTML      __FONT_INVIS && HTML_MIME_NO_HTML_TAG 
+
 
 #  meta      __FONT_INVIS_NAKED_TO         __FONT_INVIS && __NAKED_TO
 #  meta      FONT_INVIS_NAKED_TO           __FONT_INVIS_NAKED_TO && !__ML3 && !__HAS_ERRORS_TO
