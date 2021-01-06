@@ -829,7 +829,7 @@ describe PDS_SHORTFWD_URISHRT Threaded email with URI shortener
 score    PDS_SHORTFWD_URISHRT 1.5 # limit
 reuse    PDS_SHORTFWD_URISHRT
 
-header   __PDS_SUBJ_FWD1 Subject =~ /^\s*(fwd|re)\b/i
+header   __PDS_SUBJ_FWD1 Subject =~ /^\s*(fwd?|re)\b/i
 
 meta     __PDS_SUBJ_FWD __PDS_SUBJ_FWD1
 
