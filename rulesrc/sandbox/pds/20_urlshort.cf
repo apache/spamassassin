@@ -1,10 +1,10 @@
 ifplugin Mail::SpamAssassin::Plugin::MIMEEval
-  rawbody __MIME_QPC           eval:check_for_mime('mime_quoted-printable_count')
+  rawbody __MIME_QPC           eval:check_for_mime('mime_qp_count')
 
-#  meta    __PDS_QP_64       (__MIME_QPC < 64)
-#  meta    __PDS_QP_128       (__MIME_QPC < 128)
-#  meta    __PDS_QP_512       (__MIME_QPC < 512)
-#  meta    __PDS_QP_1024      (__MIME_QPC < 1024)
+  meta    __PDS_QP_64        (__MIME_QPC > 0) && (__MIME_QPC < 64)
+  meta    __PDS_QP_128       (__MIME_QPC > 0) && (__MIME_QPC < 128)
+  meta    __PDS_QP_512       (__MIME_QPC > 0) && (__MIME_QPC < 512)
+  meta    __PDS_QP_1024      (__MIME_QPC > 0) && (__MIME_QPC < 1024)
 endif
 
 meta     __PDS_MSG_512 (__KAM_BODY_LENGTH_LT_512 || __HTML_LENGTH_512)

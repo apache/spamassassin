@@ -30,6 +30,7 @@ enlist_addrlist (SUSP_NTLD) *@*.faith
 enlist_addrlist (SUSP_NTLD) *@*.buzz
 enlist_addrlist (SUSP_NTLD) *@*.trade
 enlist_addrlist (SUSP_NTLD) *@*.cyou
+enlist_addrlist (SUSP_NTLD) *@*.vip
 
 enlist_uri_host (SUSP_URI_NTLD) icu
 enlist_uri_host (SUSP_URI_NTLD) online
@@ -54,6 +55,7 @@ enlist_uri_host (SUSP_URI_NTLD) faith
 enlist_uri_host (SUSP_URI_NTLD) buzz
 enlist_uri_host (SUSP_URI_NTLD) trade
 enlist_uri_host (SUSP_URI_NTLD) cyou
+enlist_uri_host (SUSP_URI_NTLD) vip
 
 header   __FROM_ADDRLIST_SUSPNTLD eval:check_from_in_list('SUSP_NTLD')
 reuse    __FROM_ADDRLIST_SUSPNTLD

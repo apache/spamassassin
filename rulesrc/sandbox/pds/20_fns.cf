@@ -14,12 +14,10 @@ meta     FROMNAME_SPOOFED_EMAIL  (__PLUGIN_FROMNAME_SPOOF && !__VIA_ML && !__VIA
 describe FROMNAME_SPOOFED_EMAIL From:name looks like a spoofed email
 score    FROMNAME_SPOOFED_EMAIL 0.3
 tflags   FROMNAME_SPOOFED_EMAIL publish
-reuse    FROMNAME_SPOOFED_EMAIL
 
 meta     FROMNAME_EQUALS_TO __PLUGIN_FROMNAME_EQUALS_TO
 describe FROMNAME_EQUALS_TO From:name matches To:
 score    FROMNAME_EQUALS_TO 1.0
 tflags   FROMNAME_EQUALS_TO publish
-reuse    FROMNAME_EQUALS_TO
 
 endif
