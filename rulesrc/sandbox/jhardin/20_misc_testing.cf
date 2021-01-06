@@ -2350,7 +2350,7 @@ if can(Mail::SpamAssassin::Conf::feature_bug6558_free)
   #rawbody   __STY_INVIS_NONIMG            /<(?!img\s)[a-z]+\s[^>]{0,200}\bstyle\s*=\s*"[^">]{0,80}(?:(?<!-)visibility\s*:\s*hidden\s*|display\s*:\s*none\s*)[;"!]/i
 
   # *one* invisible style has better S/O than multiple...
-  meta      __STY_INVIS_1_MINFP           __STY_INVIS_1 && !MIME_QP_LONG_LINE 
+  meta      __STY_INVIS_1_MINFP           __STY_INVIS_1 && !MIME_QP_LONG_LINE && !__MOZILLA_MSGID 
 
   meta      HTML_TEXT_INVISIBLE_STYLE     __STY_INVIS_MANY && (__RDNS_NONE || __HDRS_LCASE || __UNSUB_EMAIL ||  __ADMITS_SPAM || __FROM_DOM_INFO || __HTML_TAG_BALANCE_CENTER || __MSGID_RANDY ) && !__RDNS_LONG && !__FROM_ENCODED_QP && !__HAS_THREAD_INDEX 
   describe  HTML_TEXT_INVISIBLE_STYLE     HTML hidden text + other spam signs
@@ -2397,6 +2397,10 @@ if can(Mail::SpamAssassin::Conf::feature_bug6558_free)
   meta      __WORD_INVIS_5                __WORD_INVIS > 5
 
   meta      __WORD_INVIS_MINFP            __WORD_INVIS && !__SURVEY && !MIME_QP_LONG_LINE && !__FB_TOUR && !__MSGID_GUID 
+  meta      WORD_INVIS                    __WORD_INVIS_MINFP && !WORD_INVIS_MANY
+  describe  WORD_INVIS                    A hidden word
+  score     WORD_INVIS                    3.000	# limit
+  tflags    WORD_INVIS                    publish
 
   meta      WORD_INVIS_MANY               __WORD_INVIS_2
   describe  WORD_INVIS_MANY               Multiple individual hidden words
@@ -2428,6 +2432,10 @@ if can(Mail::SpamAssassin::Conf::feature_bug6558_free)
   tflags    FONT_INVIS_MSGID              publish
 
   meta      __FONT_INVIS_HTML_NOHTML      __FONT_INVIS && HTML_MIME_NO_HTML_TAG 
+  meta      FONT_INVIS_HTML_NOHTML        __FONT_INVIS_HTML_NOHTML && !__RDNS_LONG 
+  describe  FONT_INVIS_HTML_NOHTML        Invisible text + malformed HTML
+  score     FONT_INVIS_HTML_NOHTML        3.000	# limit
+  tflags    FONT_INVIS_HTML_NOHTML        publish
 
 
 #  meta      __FONT_INVIS_NAKED_TO         __FONT_INVIS && __NAKED_TO
@@ -3470,5 +3478,7 @@ describe   MIXED_HREF_CASE             Has href in mixed case
 score      MIXED_HREF_CASE             2.000	 # limit
 tflags     MIXED_HREF_CASE             publish
 
+# noticed in a couple of 419 spams
+header     __REPTO_ADDR_MALF_ENC       Reply-To:addr =~ /^=\?[^?]+\?.\?[^?]+\?=$/
 
 
