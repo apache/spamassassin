@@ -2840,11 +2840,11 @@ in all of the following cases:
 
 =item display: example@foo (Foo Blah), example@bar ;
 
-=item Foo Blah <example@foo>
+=item Foo Blah E<lt>example@fooE<gt>
 
-=item "Foo Blah" <example@foo>
+=item "Foo Blah" E<lt>example@fooE<gt>
 
-=item "'Foo Blah'" <example@foo>
+=item "'Foo Blah'" E<lt>example@fooE<gt>
 
 =back
 
@@ -2859,11 +2859,11 @@ For example, appending C<:name> to a header name will result in "Foo Blah"
 
 =item display: example@foo (Foo Blah), example@bar ;
 
-=item Foo Blah <example@foo>
+=item Foo Blah E<lt>example@fooE<gt>
 
-=item "Foo Blah" <example@foo>
+=item "Foo Blah" E<lt>example@fooE<gt>
 
-=item "'Foo Blah'" <example@foo>
+=item "'Foo Blah'" E<lt>example@fooE<gt>
 
 =back
 
@@ -2955,10 +2955,10 @@ zone.  There's a few things to note:
 
 Duplicated IPs are only queried once and reserved IPs are not queried.
 Private IPs are those listed in
-<https://www.iana.org/assignments/ipv4-address-space>,
-<http://duxcw.com/faq/network/privip.htm>,
-<http://duxcw.com/faq/network/autoip.htm>, or
-<https://tools.ietf.org/html/rfc5735> as private.
+C<https://www.iana.org/assignments/ipv4-address-space>,
+C<http://duxcw.com/faq/network/privip.htm>,
+C<http://duxcw.com/faq/network/autoip.htm>, or
+C<https://tools.ietf.org/html/rfc5735> as private.
 
 =item the 'set' argument
 
@@ -3274,7 +3274,7 @@ The value of any other type of hit test is "1".
 
 For example:
 
-meta META2        (3 * TEST1 - 2 * TEST2) > 0
+meta META2        (3 * TEST1 - 2 * TEST2) E<gt> 0
 
 Note that Perl builtins and functions, like C<abs()>, B<can't> be
 used, and will be treated as rule names.
@@ -3419,7 +3419,7 @@ Only affects header, body, rawbody, uri, and full tests.
 =item  maxhits=N
 
 If B<multiple> is specified, limit the number of hits found to N.
-If the rule is used in a meta that counts the hits (e.g. __RULENAME > 5),
+If the rule is used in a meta that counts the hits (e.g. __RULENAME E<gt> 5),
 this is a way to avoid wasted extra work (use "tflags multiple maxhits=6").
 
 For example:
@@ -3480,7 +3480,7 @@ tests, are run in increasing priority value order (negative priority values
 are run before positive priority values). The default test priority is 0
 (zero).
 
-The values <-99999999999999> and <-99999999999998> have a special meaning
+The values C<-99999999999999> and C<-99999999999998> have a special meaning
 internally, and should not be used.
 
 =cut
