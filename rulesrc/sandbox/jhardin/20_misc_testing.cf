@@ -3450,6 +3450,16 @@ describe   ENVFROM_GOOG_TRIX           From suspicious Google subdomain
 score      ENVFROM_GOOG_TRIX           3.000	# limit
 tflags     ENVFROM_GOOG_TRIX           publish
 
+# evaluate before altering __FSL_ENVFROM_*
+header   __JH_ENVFROM_GOOGLE   EnvelopeFrom =~ /\@g(?:mail|oogle)\.com$/i
+header   __JH_ENVFROM_YAHOO    EnvelopeFrom =~ /\@yahoo(?:groups)?\./i
+header   __JH_ENVFROM_YMAIL    EnvelopeFrom =~ /\@ymail\.com$/i
+header   __JH_ENVFROM_ROCKET   EnvelopeFrom =~ /\@rocketmail\.com$/i
+header   __JH_ENVFROM_HOTMAIL  EnvelopeFrom =~ /\@hotmail\./i
+header   __JH_ENVFROM_LIVE     EnvelopeFrom =~ /\@live\./i
+header   __JH_ENVFROM_AOL      EnvelopeFrom =~ /\@aol\./i
+
+
 
 # observed in Netflix phish 12/2020
 uri        URI_FREELOGO                m;::/www\.freepnglogos\.com/uploads;i
