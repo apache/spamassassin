@@ -3440,9 +3440,12 @@ meta        URI_MYSP_AC                __URI_MYSP_AC
 describe    URI_MYSP_AC                Uses unusual redirector to avoid URIBL
 
 
+# evaluate different options before finalizing
 header     __ENVFROM_GOOG_TRIX_01      X-Spam-Relays-External =~ /\senvfrom=[^@\s]+\@trix\.bounces\.google\.com\s/
 header     __ENVFROM_GOOG_TRIX_02      Return-Path =~ /\@trix\.bounces\.google\.com/
-meta       ENVFROM_GOOG_TRIX           __ENVFROM_GOOG_TRIX_01 || __ENVFROM_GOOG_TRIX_02
+header     __ENVFROM_GOOG_TRIX_03      EnvelopeFrom =~ /\@trix\.bounces\.google\.com$/
+header     __ENVFROM_GOOG_TRIX_04      EnvelopeFrom =~ /=trix\.bounces\.google\.com=/
+meta       ENVFROM_GOOG_TRIX           (__ENVFROM_GOOG_TRIX_01 || __ENVFROM_GOOG_TRIX_02 || __ENVFROM_GOOG_TRIX_03 || __ENVFROM_GOOG_TRIX_04) && !__FROM_FULL_NAME 
 describe   ENVFROM_GOOG_TRIX           From suspicious Google subdomain
 score      ENVFROM_GOOG_TRIX           3.000	# limit
 tflags     ENVFROM_GOOG_TRIX           publish
