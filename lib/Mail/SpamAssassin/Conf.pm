@@ -962,7 +962,19 @@ should be used to silence warnings in previous
 SpamAssassin versions.
 
 To be able to use this feature a C<add_header all Subjprefix _SUBJPREFIX_>
-configuration line could be needed on some setups.
+configuration line could be needed when the glue between the MTA and SpamAssassin
+rewrites the email content.
+
+Here is an example on how to use this feature:
+
+	rewrite_header Subject *****SPAM*****
+	add_header all Subjprefix _SUBJPREFIX_
+	body     OLEMACRO_MALICE eval:check_olemacro_malice()
+	describe OLEMACRO_MALICE Dangerous Office Macro
+	score    OLEMACRO_MALICE 5.0
+	if can(Mail::SpamAssassin::Conf::feature_subjprefix)
+	  subjprefix OLEMACRO_MALICE [VIRUS]
+	endif
 
 =cut
 
