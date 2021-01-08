@@ -190,6 +190,7 @@ GetOptions(
   'allowplugins'                        => \$opt{'allowplugins'},
   'reallyallowplugins'                  => \$opt{'reallyallowplugins'},
   'refreshmirrors'                      => \$opt{'refreshmirrors'},
+  'forcemirror=s'                       => \$opt{'forcemirror'},
   'httputil=s'                          => \$opt{'httputil'},
   'score-multiplier=s'                  => \$opt{'score-multiplier'},
   'score-limit=s'                       => \$opt{'score-limit'},
@@ -729,6 +730,12 @@ foreach my $channel (@channels) {
     my @mirrors = split(/^/, $mirby);
     while(my $mirror = shift @mirrors) {
       chomp $mirror;
+      if ( defined $opt{'forcemirror'} ) {
+        $mirror = $opt{'forcemirror'};
+        $mirrors{$mirror}->{"weight"} = 1;
+        dbg("channel: found mirror $mirror (forced)");
+	last;
+      }
 
       $mirror =~ s/#.*$//;   # remove comments
       $mirror =~ s/^\s+//;   # remove leading whitespace
@@ -2012,6 +2019,8 @@ Options:
                           SpamAssassin site rules directory
                           (default: @@LOCAL_STATE_DIR@@/@@VERSION@@)
   --refreshmirrors        Force the MIRRORED.BY file to be updated
+  --forcemirror           Use a specific mirror instead of downloading from
+                          official mirrors
   --httputil util         Force used download tool. By default first found
                           from these is used: curl, wget, fetch, lwp
   --score-multiplier x.x  Adjust all scores from update channel, multiply
@@ -2176,6 +2185,11 @@ Note: use of this option automatically enables GPG verification.
 Force the list of sa-update mirrors for each channel, stored in the MIRRORED.BY
 file, to be updated.  By default, the MIRRORED.BY file will be cached for up to
 7 days after each time it is downloaded.
+
+=item B<--forcemirror>
+
+Force the download from a specific host instead of relying on mirrors listed
+in MIRRORED.BY.
 
 =item B<--updatedir>
 
