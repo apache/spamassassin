@@ -3494,5 +3494,10 @@ header     __REPTO_ADDR_MALF_ENC       Reply-To:addr =~ /^=\?[^?]+\?.\?[^?]+\?=$
 
 # phishing content
 uri        __URI_FIREBASEAPP           m,://[^.]+\.firebaseapp\.com/,
+meta       URI_FIREBASEAPP             __URI_FIREBASEAPP
+describe   URI_FIREBASEAPP             Link to firebase hosted application, possible phishing
+score      URI_FIREBASEAPP             3.000	# limit
+tflags     URI_FIREBASEAPP             publish
+
 
 
