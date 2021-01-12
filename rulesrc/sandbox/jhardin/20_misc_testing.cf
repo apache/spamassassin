@@ -1945,7 +1945,8 @@ ifplugin Mail::SpamAssassin::Plugin::ReplaceTags
   meta          FUZZY_WELLSFARGO         __FUZZY_WELLSFARGO_BODY || __FUZZY_WELLSFARGO_FROM
   describe      FUZZY_WELLSFARGO         Obfuscated "Wells Fargo"
 
-  body          FUZZY_PORN          /<P>(?!ornograph)<O><R><N><O><G><R><A><P><H>/i
+  body          __FUZZY_PORN        /<P>(?!ornograph)<O><R><N><O><G><R><A><P><H>/i
+  meta          FUZZY_PORN          __FUZZY_PORN && !( __ENV_AND_HDR_FROM_MATCH && __SENDER_BOT )
   replace_rules FUZZY_PORN      
   describe      FUZZY_PORN          Obfuscated "Pornography" or "Pornographic"
   #tflags        FUZZY_PORN          publish
@@ -2109,7 +2110,7 @@ else
 endif
 meta           __EXTORT_MANY          (__MY_MALWARE + __PAY_ME + __MY_VICTIM + __YOUR_WEBCAM + __YOUR_ONAN + __YOUR_PERSONAL + __HOURS_DEADLINE + __YOUR_PASSWORD + LOCALPART_IN_SUBJECT + __DESTROY_ME + __DESTROY_YOU + __EXPLOSIVE_DEVICE) > 2
 
-meta           BITCOIN_EXTORT_01      __BITCOIN_ID && __EXTORT_MANY
+meta           BITCOIN_EXTORT_01      (__BITCOIN_ID && __EXTORT_MANY) && !( __FROM_FULL_NAME && __SENDER_BOT && __SINGLE_WORD_LINE && __MIME_HTML && __PHPMAILER_MUA )
 describe       BITCOIN_EXTORT_01      Extortion spam, pay via BitCoin
 score          BITCOIN_EXTORT_01      5.000	# limit
 tflags         BITCOIN_EXTORT_01      publish
@@ -3493,9 +3494,6 @@ meta       MIXED_HREF_CASE             __MIXED_HREF_CASE_JH
 describe   MIXED_HREF_CASE             Has href in mixed case
 score      MIXED_HREF_CASE             2.000	 # limit
 tflags     MIXED_HREF_CASE             publish
-
-# noticed in a couple of 419 spams
-header     __REPTO_ADDR_MALF_ENC       Reply-To:addr =~ /^=\?[^?]+\?.\?[^?]+\?=$/
 
 # phishing content
 uri        __URI_FIREBASEAPP           m,://[^.]+\.firebaseapp\.com/,
