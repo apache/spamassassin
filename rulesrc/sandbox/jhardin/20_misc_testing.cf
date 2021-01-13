@@ -485,6 +485,11 @@ describe       TO_IN_SUBJ           To address is in Subject
 tflags         TO_IN_SUBJ           publish
 score          TO_IN_SUBJ           0.1
 
+header         __SUBJ_HAS_TOUSR_1   ALL =~ /\nTo:\s+(?:[^\n<]{0,80}<)?([^@\n\s>,]+)@[^\n\s>;]+>?\n(?:[^\n]{1,200}\n)*Subject:\s+[^\n]{0,100}\1[^a-z0-9]/ism
+header         __SUBJ_HAS_TOUSR_2   ALL =~ /\nReceived:[^\n]{0,200} for <?([^@\n\s>;]+)@[^\n\s>;]+>?;(?:[^\n]+\n)*Subject:\s+[^\n]{0,100}\1[^a-z0-9]/ism
+meta           __TOUSR_IN_SUBJ      (__SUBJ_HAS_TOUSR_1 || __SUBJ_HAS_TOUSR_2)
+
+
 meta           __TO_EQ_FM_HTML_ONLY __TO_EQ_FROM && MIME_HTML_ONLY
 meta           TO_EQ_FM_HTML_ONLY   __TO_EQ_FM_HTML_ONLY && !ALL_TRUSTED && !__RCD_RDNS_MAIL_MESSY && !__RCD_RDNS_SMTP_MESSY && !__NOT_SPOOFED && !__DKIM_EXISTS && !__ANY_IMAGE_ATTACH && !__FROM_LOWER && !__TAG_EXISTS_CENTER
 describe       TO_EQ_FM_HTML_ONLY   To == From and HTML only
