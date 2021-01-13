@@ -471,7 +471,7 @@ describe       __TO_EQ_FROM         To: same as From:
 #tflags         __TO_EQ_FROM         publish
 
 # Suggested by Hans-Werner Friedemann on users list 09/30/2010
-header         __SUBJ_HAS_FROM_1    ALL =~ /\nFrom:\s+(?:[^\n<]{0,80}<)?([^\n\s>]+)>?\n(?:[^\n]{1,100}\n)*Subject:\s+[^\n]{0,100}\1[>,\s\n]/ism
+header         __SUBJ_HAS_FROM_1    ALL =~ /\nFrom:\s+(?:[^\n<]{0,80}<)?([^\n\s>]+)>?\n(?:[^\n]{1,100}\n)*Subject:\s+[^\n]{0,100}\1[>,:\s\n]/ism
 meta           FROM_IN_TO_AND_SUBJ  (__TO_EQ_FROM && __SUBJ_HAS_FROM_1) && !__HAS_LIST_ID 
 describe       FROM_IN_TO_AND_SUBJ  From address is in To and Subject
 tflags         FROM_IN_TO_AND_SUBJ  publish
@@ -1104,14 +1104,14 @@ header      __XM_EC_MESSENGER      X-Mailer =~ /\beC-Messenger\b/
 #meta        XM_EC_MESSENGER        __XM_EC_MESSENGER
 #describe    XM_EC_MESSENGER        eC-Messenger bulk mail service
 
-header      __SUBJ_OBFU_PUNCT      Subject =~ /(?:(?!<[a-z][a-z])[-~`"!@\#$%^&*()_+={}|\\\/?<>,.:;][a-z][-~`"!@\#$%^&*()_+={}|\\\/?<>,.:;\s]|[a-z][~`"!@\#$%^&*()_+={}|\\?<>,.:;][a-z])/i
+header      __SUBJ_OBFU_PUNCT      Subject =~ /(?:[-~`"!@\#$%^&*()_+={}|\\\/?<>,.:;][a-z][-~`"!@\#$%^&*()_+={}|\\\/?<>,.:;\s]|[a-z][~`"!@\#$%^&*()_+={}|\\?<>,.:;][a-z])/i
 tflags      __SUBJ_OBFU_PUNCT      multiple maxhits=4
-meta        SUBJ_OBFU_PUNCT_FEW    __SUBJ_OBFU_PUNCT > 1 && !__THREADED && !__RP_MATCHES_RCVD && !__NOT_SPOOFED && !__LCL__ENV_AND_HDR_FROM_MATCH 
-describe    SUBJ_OBFU_PUNCT_FEW    Possible punctuation-obfuscated Subject: header
-score       SUBJ_OBFU_PUNCT_FEW    0.750
-meta        SUBJ_OBFU_PUNCT_MANY   __SUBJ_OBFU_PUNCT > 2 && !__THREADED && !__RP_MATCHES_RCVD && !__NOT_SPOOFED && !__LCL__ENV_AND_HDR_FROM_MATCH 
-describe    SUBJ_OBFU_PUNCT_MANY   Punctuation-obfuscated Subject: header
-score       SUBJ_OBFU_PUNCT_MANY   1.750
+meta        SUBJ_OBFU_PUNCT_FEW    __SUBJ_OBFU_PUNCT > 1 && !SUBJ_OBFU_PUNCT_MANY && !__TO_IN_SUBJ && !__SUBJ_HAS_FROM_1 && !__THREADED && !__HAS_X_MAILING_LIST && !__TVD_MIME_ATT 
+describe    SUBJ_OBFU_PUNCT_FEW    Possible punctuation-obfuscated message subject
+score       SUBJ_OBFU_PUNCT_FEW    0.500	# limit
+meta        SUBJ_OBFU_PUNCT_MANY   __SUBJ_OBFU_PUNCT > 2 && !__TO_IN_SUBJ && !__SUBJ_HAS_FROM_1 && !__THREADED && !__HAS_X_MAILING_LIST && !__TVD_MIME_ATT 
+describe    SUBJ_OBFU_PUNCT_MANY   Punctuation-obfuscated message subject
+score       SUBJ_OBFU_PUNCT_MANY   2.000	# limit
 
 #meta        SUBJ_MANGLED           __SUBJ_OBFU_PUNCT && __GAPPY_SUBJECT && !__RP_MATCHES_RCVD && !__HAS_X_MAILER && !__DOS_HAS_LIST_UNSUB 
 #score       SUBJ_MANGLED           2.000    # limit
@@ -1988,6 +1988,12 @@ meta           __BITCOIN_XPRIO      __XPRIO && (__BITCOIN || __BITCOIN_ID)
 meta           BITCOIN_XPRIO        __BITCOIN_XPRIO && !__ML1 && !__HAS_SENDER && !__DKIM_EXISTS && !__RCD_RDNS_MAIL_MESSY 
 describe       BITCOIN_XPRIO        Bitcoin + priority
 score          BITCOIN_XPRIO        2.500	# limit
+
+meta           __BITCOIN_OBFU_SUBJ  __BITCOIN && __SUBJ_OBFU_PUNCT 
+meta           BITCOIN_OBFU_SUBJ    __BITCOIN_OBFU_SUBJ
+describe       BITCOIN_OBFU_SUBJ    Bitcoin + obfuscated subject
+score          BITCOIN_OBFU_SUBJ    3.500	# limit
+
 
 # bitcoin obfuscation - tip o' the hat to Steve Zinski on the users list, with a little cleanup
 body           __BTC_OBFU_2     /\b\W{0,10}b(?!it[-\s]?coin)\W{0,10}i\W{0,10}t\W{0,10}c\W{0,10}o\W{0,10}i\W{0,10}n\W{0,10}\b/i
