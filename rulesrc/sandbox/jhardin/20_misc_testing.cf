@@ -1946,8 +1946,8 @@ ifplugin Mail::SpamAssassin::Plugin::ReplaceTags
   describe      FUZZY_WELLSFARGO         Obfuscated "Wells Fargo"
 
   body          __FUZZY_PORN        /<P>(?!ornograph)<O><R><N><O><G><R><A><P><H>/i
+  replace_rules __FUZZY_PORN      
   meta          FUZZY_PORN          __FUZZY_PORN && !( __ENV_AND_HDR_FROM_MATCH && __SENDER_BOT )
-  replace_rules FUZZY_PORN      
   describe      FUZZY_PORN          Obfuscated "Pornography" or "Pornographic"
   #tflags        FUZZY_PORN          publish
 
