@@ -487,7 +487,9 @@ score          TO_IN_SUBJ           0.1
 
 header         __SUBJ_HAS_TOUSR_1   ALL =~ /\nTo:\s+(?:[^\n<]{0,80}<)?([^@\n\s>,]+)@[^\n\s>;]+>?\n(?:[^\n]{1,200}\n)*Subject:\s+[^\n]{0,100}\1[^a-z0-9]/ism
 header         __SUBJ_HAS_TOUSR_2   ALL =~ /\nReceived:[^\n]{0,200} for <?([^@\n\s>;]+)@[^\n\s>;]+>?;(?:[^\n]+\n)*Subject:\s+[^\n]{0,100}\1[^a-z0-9]/ism
-meta           __TOUSR_IN_SUBJ      (__SUBJ_HAS_TOUSR_1 || __SUBJ_HAS_TOUSR_2)
+meta           __TOUSR_IN_SUBJ      (__SUBJ_HAS_TOUSR_1 || __SUBJ_HAS_TOUSR_2) && !__TO_IN_SUBJ
+
+header         __SUBJ_HAS_ANY_EMAIL Subject =~ /\b[a-z][a-z0-9_.+]+@(?:[a-z][-a-z0-9]+\.)+[a-z]{2,8}\b/i
 
 
 meta           __TO_EQ_FM_HTML_ONLY __TO_EQ_FROM && MIME_HTML_ONLY
@@ -1111,10 +1113,11 @@ header      __XM_EC_MESSENGER      X-Mailer =~ /\beC-Messenger\b/
 
 header      __SUBJ_OBFU_PUNCT      Subject =~ /(?:[-~`"!@\#$%^&*()_+={}|\\\/?<>,.:;][a-z][-~`"!@\#$%^&*()_+={}|\\\/?<>,.:;\s]|[a-z][~`"!@\#$%^&*()_+={}|\\?<>,.:;][a-z])/i
 tflags      __SUBJ_OBFU_PUNCT      multiple maxhits=4
-meta        SUBJ_OBFU_PUNCT_FEW    __SUBJ_OBFU_PUNCT > 1 && !SUBJ_OBFU_PUNCT_MANY && !__TO_IN_SUBJ && !__SUBJ_HAS_FROM_1 && !__THREADED && !__HAS_X_MAILING_LIST && !__TVD_MIME_ATT 
+meta        __SUBJ_OBFU_PUNCT_NOEM __SUBJ_OBFU_PUNCT && !__SUBJ_HAS_ANY_EMAIL
+meta        SUBJ_OBFU_PUNCT_FEW    __SUBJ_OBFU_PUNCT > 1 && !SUBJ_OBFU_PUNCT_MANY && !__SUBJ_HAS_ANY_EMAIL && !__THREADED && !__HAS_X_MAILING_LIST && !__TVD_MIME_ATT 
 describe    SUBJ_OBFU_PUNCT_FEW    Possible punctuation-obfuscated message subject
 score       SUBJ_OBFU_PUNCT_FEW    0.500	# limit
-meta        SUBJ_OBFU_PUNCT_MANY   __SUBJ_OBFU_PUNCT > 2 && !__TO_IN_SUBJ && !__SUBJ_HAS_FROM_1 && !__THREADED && !__HAS_X_MAILING_LIST && !__TVD_MIME_ATT 
+meta        SUBJ_OBFU_PUNCT_MANY   __SUBJ_OBFU_PUNCT > 2 && !__SUBJ_HAS_ANY_EMAIL && !__THREADED && !__HAS_X_MAILING_LIST && !__TVD_MIME_ATT 
 describe    SUBJ_OBFU_PUNCT_MANY   Punctuation-obfuscated message subject
 score       SUBJ_OBFU_PUNCT_MANY   2.000	# limit
 
@@ -1995,9 +1998,10 @@ describe       BITCOIN_XPRIO        Bitcoin + priority
 score          BITCOIN_XPRIO        2.500	# limit
 
 meta           __BITCOIN_OBFU_SUBJ  __BITCOIN && __SUBJ_OBFU_PUNCT 
-meta           BITCOIN_OBFU_SUBJ    __BITCOIN_OBFU_SUBJ
+meta           BITCOIN_OBFU_SUBJ    __BITCOIN_OBFU_SUBJ && !__128_ALNUM_URI 
 describe       BITCOIN_OBFU_SUBJ    Bitcoin + obfuscated subject
 score          BITCOIN_OBFU_SUBJ    3.500	# limit
+tflags         BITCOIN_OBFU_SUBJ    publish
 
 
 # bitcoin obfuscation - tip o' the hat to Steve Zinski on the users list, with a little cleanup
