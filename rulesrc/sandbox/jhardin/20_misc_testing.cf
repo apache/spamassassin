@@ -1111,13 +1111,13 @@ header      __XM_EC_MESSENGER      X-Mailer =~ /\beC-Messenger\b/
 #meta        XM_EC_MESSENGER        __XM_EC_MESSENGER
 #describe    XM_EC_MESSENGER        eC-Messenger bulk mail service
 
-header      __SUBJ_OBFU_PUNCT      Subject =~ /(?:[-~`"!@\#$%^&*()_+={}|\\\/?<>,.:;][a-z][-~`"!@\#$%^&*()_+={}|\\\/?<>,.:;\s]|[a-z][~`"!@\#$%^&*()_+={}|\\?<>,.:;][a-z])/i
+header      __SUBJ_OBFU_PUNCT      Subject =~ /(?:[-~`"!@\#$%^&*()_+={}|\\\/?<>,.:;][a-z][-~`"!@\#$%^&*()_+={}|\\\/?<>,.:;\s]|(?:[a-z][~`"!@\#$%^&*()_+={}|\\?<>,.:;][a-z](?![a-z])))/i
 tflags      __SUBJ_OBFU_PUNCT      multiple maxhits=4
 meta        __SUBJ_OBFU_PUNCT_NOEM __SUBJ_OBFU_PUNCT && !__SUBJ_HAS_ANY_EMAIL
-meta        SUBJ_OBFU_PUNCT_FEW    __SUBJ_OBFU_PUNCT > 1 && !SUBJ_OBFU_PUNCT_MANY && !__SUBJ_HAS_ANY_EMAIL && !__THREADED && !__HAS_X_MAILING_LIST && !__TVD_MIME_ATT 
+meta        SUBJ_OBFU_PUNCT_FEW    __SUBJ_OBFU_PUNCT > 1 && !SUBJ_OBFU_PUNCT_MANY && !__SUBJ_HAS_ANY_EMAIL && !__TOUSR_IN_SUBJ && !__THREADED && !__HAS_X_MAILING_LIST && !__TVD_MIME_ATT 
 describe    SUBJ_OBFU_PUNCT_FEW    Possible punctuation-obfuscated message subject
 score       SUBJ_OBFU_PUNCT_FEW    0.500	# limit
-meta        SUBJ_OBFU_PUNCT_MANY   __SUBJ_OBFU_PUNCT > 2 && !__SUBJ_HAS_ANY_EMAIL && !__THREADED && !__HAS_X_MAILING_LIST && !__TVD_MIME_ATT 
+meta        SUBJ_OBFU_PUNCT_MANY   __SUBJ_OBFU_PUNCT > 2 && !__SUBJ_HAS_ANY_EMAIL && !__TOUSR_IN_SUBJ && !__THREADED && !__HAS_X_MAILING_LIST && !__TVD_MIME_ATT 
 describe    SUBJ_OBFU_PUNCT_MANY   Punctuation-obfuscated message subject
 score       SUBJ_OBFU_PUNCT_MANY   2.000	# limit
 
@@ -3518,4 +3518,6 @@ score      URI_FIREBASEAPP             3.000	# limit
 tflags     URI_FIREBASEAPP             publish
 
 
+# seen in a few spams
+body       __BTC_MLM                   /Block[-\s]?chain network marketing/i
 
