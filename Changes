@@ -1,104 +1,159 @@
 ------------------------------------------------------------------------
-r1884872 | kmcgrail | 2020-12-28 14:56:49 +0100 (Mon, 28 Dec 2020) | 1 line
-
-More MANIFEST cleanup
+r1885345 | kb | 2021-01-11 02:51:19 +0000 (Mon, 11 Jan 2021) | 1 line
+ 
+ BodyEval: plaintext_body_sig_ratio eval rules, bug 7879
 ------------------------------------------------------------------------
-r1884871 | kmcgrail | 2020-12-28 14:51:17 +0100 (Mon, 28 Dec 2020) | 1 line
-
-MANIFEST clean-up
+r1885234 | gbechis | 2021-01-07 07:47:53 +0000 (Thu, 07 Jan 2021) | 2 
+lines
+ 
+ pod fixes
+ 
 ------------------------------------------------------------------------
-r1884870 | kmcgrail | 2020-12-28 14:48:59 +0100 (Mon, 28 Dec 2020) | 1 line
-
-Fixing Copyright on CREDITS file
+r1885233 | gbechis | 2021-01-07 07:31:13 +0000 (Thu, 07 Jan 2021) | 2 
+lines
+ 
+ clarify man page
+ 
 ------------------------------------------------------------------------
-r1883660 | gbechis | 2020-11-20 08:33:00 +0100 (Fri, 20 Nov 2020) | 2 lines
-
-fix GeoIP open_type call, bz #7871
-
+r1885214 | kb | 2021-01-06 21:08:43 +0000 (Wed, 06 Jan 2021) | 1 line
+ 
+ plaintext_body_sig_ratio: eval() rules for the (first text/plain MIME 
+part's) body and signature lengths and ratio
 ------------------------------------------------------------------------
-r1883643 | gbechis | 2020-11-19 16:37:20 +0100 (Thu, 19 Nov 2020) | 2 lines
-
-typo
-
+r1884879 | gbechis | 2020-12-28 15:00:10 +0000 (Mon, 28 Dec 2020) | 2 
+lines
+ 
+ update [meta]cpan url
+ 
 ------------------------------------------------------------------------
-r1883642 | gbechis | 2020-11-19 16:35:33 +0100 (Thu, 19 Nov 2020) | 2 lines
-
-specify in debug message that not all rule types are compatible
-
+r1884876 | gbechis | 2020-12-28 14:38:35 +0000 (Mon, 28 Dec 2020) | 2 
+lines
+ 
+ Mention some changes in 3.4.5
+ 
 ------------------------------------------------------------------------
-r1883069 | gbechis | 2020-11-02 19:14:47 +0100 (Mon, 02 Nov 2020) | 3 lines
-
-backport TextCat improvements from trunk
-fix bz #7866
-
+r1884872 | kmcgrail | 2020-12-28 13:56:49 +0000 (Mon, 28 Dec 2020) | 1 
+line
+ 
+ More MANIFEST cleanup
 ------------------------------------------------------------------------
-r1882297 | gbechis | 2020-10-07 10:28:05 +0200 (Wed, 07 Oct 2020) | 2 lines
-
-Missing files from previous commit, bz #7860
-
+r1884871 | kmcgrail | 2020-12-28 13:51:17 +0000 (Mon, 28 Dec 2020) | 1 
+line
+ 
+ MANIFEST clean-up
 ------------------------------------------------------------------------
-r1882269 | gbechis | 2020-10-06 12:20:40 +0200 (Tue, 06 Oct 2020) | 4 lines
-
-Make it possible to run the Spamassassin test suite against the installed
-SpamAssassin files (rather than those in the source directory)
-bz #7860
-
+r1884870 | kmcgrail | 2020-12-28 13:48:59 +0000 (Mon, 28 Dec 2020) | 1 
+line
+ 
+ Fixing Copyright on CREDITS file
 ------------------------------------------------------------------------
-r1881912 | jhardin | 2020-09-21 20:43:37 +0200 (Mon, 21 Sep 2020) | 1 line
-
-Bug 7857: merge Revision 1881911 from trunk
+r1883660 | gbechis | 2020-11-20 07:33:00 +0000 (Fri, 20 Nov 2020) | 2 
+lines
+ 
+ fix GeoIP open_type call, bz #7871
+ 
 ------------------------------------------------------------------------
-r1881784 | gbechis | 2020-09-17 09:17:40 +0200 (Thu, 17 Sep 2020) | 2 lines
-
-exit if reallyallowplugin option is not specified
-
+r1883643 | gbechis | 2020-11-19 15:37:20 +0000 (Thu, 19 Nov 2020) | 2 
+lines
+ 
+ typo
+ 
 ------------------------------------------------------------------------
-r1881066 | billcole | 2020-08-21 21:29:57 +0200 (Fri, 21 Aug 2020) | 1 line
-
-Understand deprecated charset=ascii correctly. BZ#7851
+r1883642 | gbechis | 2020-11-19 15:35:33 +0000 (Thu, 19 Nov 2020) | 2 
+lines
+ 
+ specify in debug message that not all rule types are compatible
+ 
 ------------------------------------------------------------------------
-r1880999 | billcole | 2020-08-19 19:31:48 +0200 (Wed, 19 Aug 2020) | 1 line
-
-Fix duplicated-word typos in documentation BZ#7850
+r1883069 | gbechis | 2020-11-02 18:14:47 +0000 (Mon, 02 Nov 2020) | 3 
+lines
+ 
+ backport TextCat improvements from trunk
+ fix bz #7866
+ 
 ------------------------------------------------------------------------
-r1880998 | billcole | 2020-08-19 19:26:15 +0200 (Wed, 19 Aug 2020) | 1 line
-
-Add man page generation for sa-check_spamd BZ#7849
+r1882297 | gbechis | 2020-10-07 08:28:05 +0000 (Wed, 07 Oct 2020) | 2 
+lines
+ 
+ Missing files from previous commit, bz #7860
+ 
 ------------------------------------------------------------------------
-r1879979 | hege | 2020-07-17 07:03:52 +0200 (Fri, 17 Jul 2020) | 2 lines
-
-Bug 7810 - gmail has an extra dot in rDNS
-
+r1882269 | gbechis | 2020-10-06 10:20:40 +0000 (Tue, 06 Oct 2020) | 4 
+lines
+ 
+ Make it possible to run the Spamassassin test suite against the installed
+ SpamAssassin files (rather than those in the source directory)
+ bz #7860
+ 
 ------------------------------------------------------------------------
-r1879806 | hege | 2020-07-12 12:18:32 +0200 (Sun, 12 Jul 2020) | 2 lines
-
-Bug 7817 - Pyzor.pm - Show traceback in log
-
+r1881912 | jhardin | 2020-09-21 18:43:37 +0000 (Mon, 21 Sep 2020) | 1 line
+ 
+ Bug 7857: merge Revision 1881911 from trunk
 ------------------------------------------------------------------------
-r1879731 | kmcgrail | 2020-07-10 06:18:33 +0200 (Fri, 10 Jul 2020) | 1 line
-
-Fixing powered by Apache SpamAssassin logo to the correct version 2.0
+r1881784 | gbechis | 2020-09-17 07:17:40 +0000 (Thu, 17 Sep 2020) | 2 
+lines
+ 
+ exit if reallyallowplugin option is not specified
+ 
 ------------------------------------------------------------------------
-r1879727 | billcole | 2020-07-09 23:59:24 +0200 (Thu, 09 Jul 2020) | 1 line
-
-Don't assume versions are simple numbers
+r1881066 | billcole | 2020-08-21 19:29:57 +0000 (Fri, 21 Aug 2020) | 1 
+line
+ 
+ Understand deprecated charset=ascii correctly. BZ#7851
 ------------------------------------------------------------------------
-r1879726 | billcole | 2020-07-09 22:42:56 +0200 (Thu, 09 Jul 2020) | 1 line
-
-Don't treat versions like simple numbers
+r1880999 | billcole | 2020-08-19 17:31:48 +0000 (Wed, 19 Aug 2020) | 1 
+line
+ 
+ Fix duplicated-word typos in documentation BZ#7850
 ------------------------------------------------------------------------
-r1879700 | hege | 2020-07-09 12:47:48 +0200 (Thu, 09 Jul 2020) | 2 lines
-
-Backport EnvelopeFrom fixes from trunk (Revision 1844628,1864383) (Bug 7834)
-
+r1880998 | billcole | 2020-08-19 17:26:15 +0000 (Wed, 19 Aug 2020) | 1 
+line
+ 
+ Add man page generation for sa-check_spamd BZ#7849
 ------------------------------------------------------------------------
-r1879123 | billcole | 2020-06-23 20:20:55 +0200 (Tue, 23 Jun 2020) | 4 lines
-
-
-Fix Bug #7830: non-numeric version comparison. 
-
-
+r1879979 | hege | 2020-07-17 05:03:52 +0000 (Fri, 17 Jul 2020) | 2 lines
+ 
+ Bug 7810 - gmail has an extra dot in rDNS
+ 
 ------------------------------------------------------------------------
+r1879806 | hege | 2020-07-12 10:18:32 +0000 (Sun, 12 Jul 2020) | 2 lines
+ 
+ Bug 7817 - Pyzor.pm - Show traceback in log
+ 
+------------------------------------------------------------------------
+r1879731 | kmcgrail | 2020-07-10 04:18:33 +0000 (Fri, 10 Jul 2020) | 1 
+line
+ 
+ Fixing powered by Apache SpamAssassin logo to the correct version 2.0
+------------------------------------------------------------------------
+r1879727 | billcole | 2020-07-09 21:59:24 +0000 (Thu, 09 Jul 2020) | 1 
+line
+ 
+ Don't assume versions are simple numbers
+------------------------------------------------------------------------
+r1879726 | billcole | 2020-07-09 20:42:56 +0000 (Thu, 09 Jul 2020) | 1 
+line
+ 
+ Don't treat versions like simple numbers
+------------------------------------------------------------------------
+r1879700 | hege | 2020-07-09 10:47:48 +0000 (Thu, 09 Jul 2020) | 2 lines
+ 
+ Backport EnvelopeFrom fixes from trunk (Revision 1844628,1864383) (Bug 
+7834)
+ 
+------------------------------------------------------------------------
+r1879123 | billcole | 2020-06-23 18:20:55 +0000 (Tue, 23 Jun 2020) | 4 
+lines
+ 
+ 
+ Fix Bug #7830: non-numeric version comparison. 
+ 
+ 
+------------------------------------------------------------------------
+r1879052 | kmcgrail | 2020-06-21 02:48:32 +0000 (Sun, 21 Jun 2020) | 1 
+line
+ 
+ preparing to release 3.4.5-pre1
 ------------------------------------------------------------------------
 r1878990 | hege | 2020-06-19 14:11:26 +0000 (Fri, 19 Jun 2020) | 2 lines
  
