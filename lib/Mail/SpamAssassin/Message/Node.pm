@@ -388,6 +388,12 @@ sub detect_utf16 {
 	my $sum_l_o = 0;
 	my $decoder = undef;
 
+	# avoid scan if BOM present
+	if( $data =~ /^(?:\xff\xfe|\xfe\xff)/ ) {
+		dbg( "message: detect_utf16: found BOM" );
+		return undef;	# let perl figure it out from the BOM
+	}
+	
 	my @msg_h = unpack 'H' x length( $data ), $data;
 	my @msg_l = unpack 'h' x length( $data ), $data;
 
@@ -518,20 +524,22 @@ sub _normalize {
     # https://bz.apache.org/SpamAssassin/show_bug.cgi?id=7252
 
     my $decoder = detect_utf16( $_[0] );
-    if (eval { $rv = $decoder->decode($_[0], 1|8); defined $rv }) {
-      dbg("message: decoded as charset %s, declared %s",
-        $decoder->name, $charset_declared);
-      return $_[0]  if !$return_decoded;
-      $rv .= $data_taint;  # carry taintedness over, avoid Encode bug
-      return $rv;  # decoded
-    } else {
-      my $err = '';
-      if ($@) {
-        $err = $@; $err =~ s/\s+/ /gs; $err =~ s/(.*) at .*/$1/;
-        $err = " ($err)";
+    if (defined $decoder) {
+      if (eval { $rv = $decoder->decode($_[0], 1|8); defined $rv }) {
+        dbg("message: decoded as charset %s, declared %s",
+          $decoder->name, $charset_declared);
+        return $_[0]  if !$return_decoded;
+        $rv .= $data_taint;  # carry taintedness over, avoid Encode bug
+        return $rv;  # decoded
+      } else {
+        my $err = '';
+        if ($@) {
+          $err = $@; $err =~ s/\s+/ /gs; $err =~ s/(.*) at .*/$1/;
+          $err = " ($err)";
+        }
+        dbg("message: failed decoding as charset %s, declared %s%s",
+          $decoder->name, $charset_declared, $err);
       }
-      dbg("message: failed decoding as charset %s, declared %s%s",
-        $decoder->name, $charset_declared, $err);
     };
   } else {
     # try decoding as a declared character set
