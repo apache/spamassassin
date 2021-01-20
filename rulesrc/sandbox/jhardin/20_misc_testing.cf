@@ -120,6 +120,9 @@ ifplugin Mail::SpamAssassin::Plugin::MIMEHeader
   # see https://posts.specterops.io/the-tale-of-settingcontent-ms-files-f1ea253e4d39?gi=7ec45f2481ce
   mimeheader   __MALW_ATTACH_01_01 Content-Disposition =~ /\bfilename="?[^"]+\.SettingContent-ms\b/i
   mimeheader   __MALW_ATTACH_01_02 Content-Type =~ /\bname="?[^"]+\.SettingContent-ms\b/i
+  # others
+  mimeheader   __MALW_ATTACH_02_01 Content-Disposition =~ /\bfilename="?[^"]+pdf\.(?:ace|zip|7z|rar)[";$]/i
+  mimeheader   __MALW_ATTACH_02_02 Content-Type =~ /\bname="?[^"]+pdf\.(?:ace|zip|7z|rar)[";$]/i
   meta         MALW_ATTACH         __MALW_ATTACH_01_01 || __MALW_ATTACH_01_02
   describe     MALW_ATTACH         Attachment filename suspicious, probable malware exploit
 
@@ -128,6 +131,7 @@ ifplugin Mail::SpamAssassin::Plugin::MIMEHeader
   meta         ISO_ATTACH          __ISO_ATTACH || __ISO_ATTACH_MT
   describe     ISO_ATTACH          ISO attachment - possible malware delivery
   score        ISO_ATTACH          3.000	# limit
+
 else
   meta         __HTML_ATTACH_01    0
   meta         __HTML_ATTACH_02    0
@@ -137,6 +141,8 @@ else
   meta         __ZIP_ATTACH_MT     0
   meta         __MALW_ATTACH_01_01 0
   meta         __MALW_ATTACH_01_02 0
+  meta         __MALW_ATTACH_02_01 0
+  meta         __MALW_ATTACH_02_02 0
   meta         __ISO_ATTACH        0
   meta         __ISO_ATTACH_MT     0
 endif
@@ -1293,12 +1299,12 @@ body        __MAIL_ACCT_ACCESS2  /\blo+se ac+es+ to your (?:web|e-?)?mail ?(?:ac
 body        __MAILBOX_FULL_SE    /(?:\b=F6|[\xf6]|[\xc3][\xb6])verskridit gr(?:=E4|[\xe4]|[\xc3][\xa4])nsen f(?:=F6|[\xf6]|[\xc3][\xb6])r din postl(?:=E5|[\xe5]|[\xc3][\xa5])da\b/i
 body        __VALIDATE_MBOX_SE   /(?:\b=E5|[\xe5]|[\xc3][\xa5])terst(?:=E4|\xe4|[\xc3][\xa4])lla ditt konto\b/i
 body        __PASSWORD_UPGRADE   /\bpassword upgrade\b/i
-body        __PENDING_MESSAGES   /\b(?:messages pending|pending messages|undelivered (?:messages|e?-?mails)|(?:your|\d+) undelivered e?-?mails)\b/i
-body        __RELEASE_MESSAGES   /\b(?:release messages|(?:retrieve|release|download) your(?: undelivered|held|pending)? e?-?mails|(?:e?-?mails|messages).{1,20}download them now)\b/i
+body        __PENDING_MESSAGES   /\b(?:messages pending|(?:your|\d+[\])}]?) (?:pending|un(?:delivered|received)) (?:messages|e?-?mails))\b/i
+body        __RELEASE_MESSAGES   /\b(?:release messages|(?:retrieve|release|download) your(?: undelivered|unreceived|held|pending)? e?-?mails|(?:e?-?mails|messages).{1,20}download them now)\b/i
 body        __PASSWORD_EXP_CLUMSY  /\bpassword is due for expiration yesterday\b/i
 
-meta        __EMAIL_PHISH        (__WEBMAIL_ACCT + __MAILBOX_FULL + __MAILBOX_FULL_SE + __CLEAN_MAILBOX + __VALIDATE_MAILBOX + __VALIDATE_MBOX_SE + __UPGR_MAILBOX + __LOCK_MAILBOX + __SYSADMIN + __ATTN_MAIL_USER + __MAIL_ACCT_ACCESS1 + __MAIL_ACCT_ACCESS2 + __ACCESS_REVOKE + __PASSWORD_UPGRADE + __PASSWORD_EXP_CLUMSY + (__TVD_PH_SUBJ_META || __TVD_PH_BODY_META || __TVD_PH_BODY_ACCOUNTS_PRE || __TVD_PH_BODY_ACCOUNTS_POST) > 1) && !__EMAIL_PHISH_MANY
-meta        __EMAIL_PHISH_MANY   (__WEBMAIL_ACCT + __MAILBOX_FULL + __MAILBOX_FULL_SE + __CLEAN_MAILBOX + __VALIDATE_MAILBOX + __VALIDATE_MBOX_SE + __UPGR_MAILBOX + __LOCK_MAILBOX + __SYSADMIN + __ATTN_MAIL_USER + __MAIL_ACCT_ACCESS1 + __MAIL_ACCT_ACCESS2 + __ACCESS_REVOKE + __PASSWORD_UPGRADE + __PENDING_MESSAGES + __RELEASE_MESSAGES + __PASSWORD_EXP_CLUMSY + __TO_IN_SUBJ + __SUBJ_DOM_ADMIN + __FROM_DOM_ADMIN + (__TVD_PH_SUBJ_META || __TVD_PH_BODY_META || __TVD_PH_BODY_ACCOUNTS_PRE || __TVD_PH_BODY_ACCOUNTS_POST) > 3)
+meta        __EMAIL_PHISH        (__WEBMAIL_ACCT + __MAILBOX_FULL + __MAILBOX_FULL_SE + __CLEAN_MAILBOX + __VALIDATE_MAILBOX + __VALIDATE_MBOX_SE + __UPGR_MAILBOX + __LOCK_MAILBOX + __SYSADMIN + __ATTN_MAIL_USER + __MAIL_ACCT_ACCESS1 + __MAIL_ACCT_ACCESS2 + __ACCESS_REVOKE + __PASSWORD_UPGRADE + __PENDING_MESSAGES + __RELEASE_MESSAGES + __PASSWORD_EXP_CLUMSY + (__TVD_PH_SUBJ_META || __TVD_PH_BODY_META || __TVD_PH_BODY_ACCOUNTS_PRE || __TVD_PH_BODY_ACCOUNTS_POST || __PDS_FROM_NAME_TO_DOMAIN) > 1) && !__EMAIL_PHISH_MANY
+meta        __EMAIL_PHISH_MANY   (__WEBMAIL_ACCT + __MAILBOX_FULL + __MAILBOX_FULL_SE + __CLEAN_MAILBOX + __VALIDATE_MAILBOX + __VALIDATE_MBOX_SE + __UPGR_MAILBOX + __LOCK_MAILBOX + __SYSADMIN + __ATTN_MAIL_USER + __MAIL_ACCT_ACCESS1 + __MAIL_ACCT_ACCESS2 + __ACCESS_REVOKE + __PASSWORD_UPGRADE + __PENDING_MESSAGES + __RELEASE_MESSAGES + __PASSWORD_EXP_CLUMSY + __TO_IN_SUBJ + __SUBJ_DOM_ADMIN + __FROM_DOM_ADMIN + (__TVD_PH_SUBJ_META || __TVD_PH_BODY_META || __TVD_PH_BODY_ACCOUNTS_PRE || __TVD_PH_BODY_ACCOUNTS_POST || __PDS_FROM_NAME_TO_DOMAIN) > 3)
 
 meta        UPGRADE_MAILBOX      __UPGR_MAILBOX && __HTML_FONT_LOW_CONTRAST_MINFP 
 describe    UPGRADE_MAILBOX      Upgrade your mailbox! (phishing?)
@@ -1319,9 +1325,9 @@ body        __ACCOUNT_UPGRADE    /\b(?:upgrade (?:of )your (?:account|access)|yo
 body        __ACCOUNT_SECURE     /\b(?:make your (?:"?[^\@\s]+\@\S+"? |e-?mail )?account more secure|Ihre Kreditkarte weist einige Sicherheitsprobleme)\b/i
 body        __SUSPICION_LOGIN    /\bsuspicion login\b/i
 
-meta        __ACCT_PHISH         (__ACCESS_SUSPENDED + __ACCESS_RESTORE + __ACCESS_REVOKE + __VERIFY_ACCOUNT + __FAILED_LOGINS + __ACCOUNT_REACTIV + __SECURITY_DEPT + __ACCOUNT_ERROR + __ACCOUNT_DISRUPT + __ACCOUNT_UPGRADE + __ACCOUNT_SECURE + __SUSPICION_LOGIN) > 1 && !__ACCT_PHISH_MANY
-meta        __ACCT_PHISH_MANY    (__ACCESS_SUSPENDED + __ACCESS_RESTORE + __ACCESS_REVOKE + __VERIFY_ACCOUNT + __FAILED_LOGINS + __ACCOUNT_REACTIV + __SECURITY_DEPT + __ACCOUNT_ERROR + __ACCOUNT_DISRUPT + __ACCOUNT_UPGRADE + __ACCOUNT_SECURE + __SUSPICION_LOGIN + __TO_IN_SUBJ + __SUBJ_DOM_ADMIN + __FROM_DOM_ADMIN) > 3
-meta        ACCT_PHISHING        (__ACCT_PHISH || __EMAIL_PHISH) && !__RCD_RDNS_SMTP_MESSY 
+meta        __ACCT_PHISH         (__ACCESS_SUSPENDED + __ACCESS_RESTORE + __ACCESS_REVOKE + __VERIFY_ACCOUNT + __FAILED_LOGINS + __ACCOUNT_REACTIV + __SECURITY_DEPT + __ACCOUNT_ERROR + __ACCOUNT_DISRUPT + __ACCOUNT_UPGRADE + __ACCOUNT_SECURE + __SUSPICION_LOGIN + __PDS_FROM_NAME_TO_DOMAIN) > 1 && !__ACCT_PHISH_MANY
+meta        __ACCT_PHISH_MANY    (__ACCESS_SUSPENDED + __ACCESS_RESTORE + __ACCESS_REVOKE + __VERIFY_ACCOUNT + __FAILED_LOGINS + __ACCOUNT_REACTIV + __SECURITY_DEPT + __ACCOUNT_ERROR + __ACCOUNT_DISRUPT + __ACCOUNT_UPGRADE + __ACCOUNT_SECURE + __SUSPICION_LOGIN + __TO_IN_SUBJ + __SUBJ_DOM_ADMIN + __FROM_DOM_ADMIN + __PDS_FROM_NAME_TO_DOMAIN) > 3
+meta        ACCT_PHISHING        (__ACCT_PHISH || __EMAIL_PHISH) && !__RCD_RDNS_SMTP_MESSY && !ACCT_PHISHING_MANY
 describe    ACCT_PHISHING        Possible phishing for account information
 score       ACCT_PHISHING        1.500  # limit
 meta        ACCT_PHISHING_MANY   (__ACCT_PHISH_MANY || __EMAIL_PHISH_MANY) && !GOOGLE_DOCS_PHISH_MANY && !GOOG_STO_HTML_PHISH_MANY
@@ -3510,14 +3516,20 @@ describe   MIXED_HREF_CASE             Has href in mixed case
 score      MIXED_HREF_CASE             2.000	 # limit
 tflags     MIXED_HREF_CASE             publish
 
-# phishing content
-uri        __URI_FIREBASEAPP           m,://[^.]+\.firebaseapp\.com/,
-meta       URI_FIREBASEAPP             __URI_FIREBASEAPP
-describe   URI_FIREBASEAPP             Link to firebase hosted application, possible phishing
+# phishing content for now, may go primarly legit at some point
+uri        __URI_FIREBASEAPP           m,://[^./]+\.firebaseapp\.com/,
+uri        __URI_WEBAPP                m,://[^./]+\.web\.app/,
+meta       URI_FIREBASEAPP             __URI_FIREBASEAPP || __URI_WEBAPP
+describe   URI_FIREBASEAPP             Link to hosted firebase web application, possible phishing
 score      URI_FIREBASEAPP             3.000	# limit
 tflags     URI_FIREBASEAPP             publish
 
 
 # seen in a few spams
 body       __BTC_MLM                   /Block[-\s]?chain network marketing/i
+
+# phishing
+meta       __PHISH_FBASE_01            (__URI_FIREBASEAPP || __URI_WEBAPP) && __PDS_FROM_NAME_TO_DOMAIN && __MAIL_LINK
+
+
 
