@@ -3524,7 +3524,7 @@ describe   URI_FIREBASEAPP             Link to hosted firebase web application, 
 score      URI_FIREBASEAPP             3.000	# limit
 tflags     URI_FIREBASEAPP             publish
 
-uri        __URI_AZURE_CLOUDAPP        m,://[^./]+\.cloudapp\.azure\.com/,
+uri        __URI_AZURE_CLOUDAPP        m,://(?:[^./]+\.)+cloudapp\.azure\.com/,
 
 
 # seen in a few spams
