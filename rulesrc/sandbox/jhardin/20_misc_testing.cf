@@ -132,6 +132,11 @@ ifplugin Mail::SpamAssassin::Plugin::MIMEHeader
   describe     ISO_ATTACH          ISO attachment - possible malware delivery
   score        ISO_ATTACH          3.000	# limit
 
+  mimeheader   __PHISH_ATTACH_01_01  Content-Disposition =~ /\bfilename="?[^"]*(?:\.pdf)\.(?:html)[";$]/i
+  mimeheader   __PHISH_ATTACH_01_02  Content-Type =~ /\bname="?[^"]*(?:\.pdf)\.(?:html)[";$]/i
+  meta         PHISH_ATTACH          __PHISH_ATTACH_01_01 || __PHISH_ATTACH_01_02
+  describe     PHISH_ATTACH          Attachment filename suspicious, probable phishing
+
 else
   meta         __HTML_ATTACH_01    0
   meta         __HTML_ATTACH_02    0
@@ -3544,5 +3549,5 @@ meta       __UNDISC_FREEM              __TO_UNDISCLOSED && __freemail_replyto
 meta       UNDISC_FREEM                __UNDISC_FREEM
 describe   UNDISC_FREEM                Undisclosed recipients + freemail reply-to
 
-
+header     __REPTO_LONG                Reply-To:addr =~ /[^@]{20,}@/
 
