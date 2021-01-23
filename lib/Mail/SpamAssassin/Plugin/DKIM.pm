@@ -721,7 +721,10 @@ sub _check_dkim_signed_by {
       next if $minimum_key_bits && $sig->{_spamassassin_key_size} &&
               $sig->{_spamassassin_key_size} < $minimum_key_bits;
     }
-    my ($sdid) = $sig->identity =~ /\@(\S+)/;
+    my $sdid = $sig->domain;
+    if (defined $sig->identity) {
+      ($sdid) = $sig->identity =~ /\@(\S+)/;
+    }
     next if !defined $sdid;  # a signature with a missing required tag 'd' or 'i' ?
     $sdid = lc $sdid;
     if ($must_be_author_domain_signature) {
@@ -864,6 +867,16 @@ sub _check_dkim_signature {
       # signature, newer versions allow access to all signatures of a message
       @signatures = $verifier->UNIVERSAL::can("signatures") ?
                                  $verifier->signatures : $verifier->signature;
+
+      if (would_log("dbg","dkim")) {
+        foreach my $signature (@signatures) {
+          dbg("dkim: signature i=%s d=%s",
+            map(!defined $_ ? '(undef)' : $_,
+              $signature->identity, $signature->domain
+            )
+          );
+        }
+      }
     });
     if ($timer->timed_out()) {
       dbg("dkim: public key lookup or verification timed out after %s s",
@@ -910,7 +923,10 @@ sub _check_dkim_signature {
       push(@valid_signatures, $signature)  if $valid && !$expired;
 
       # check if we have a potential Author Domain Signature, valid or not
-      my ($d) = $signature->identity =~ /\@(\S+)/;
+      my $d = $signature->domain;
+      if (defined $signature->identity) {
+        ($d) = $signature->identity =~ /\@(\S+)/;
+      }
       if (!defined $d) {
         # can be undefined on a broken signature with missing required tags
       } else {
@@ -1262,7 +1278,10 @@ sub _wlcheck_list {
       }
     }
 
-    my ($sdid) = $signature->identity =~ /\@(\S+)/;
+    my $sdid = $signature->domain;
+    if (defined $signature->identity) {
+      ($sdid) = $signature->identity =~ /\@(\S+)/;
+    }
     $sdid = lc $sdid  if defined $sdid;
 
     my %tried_authors;
