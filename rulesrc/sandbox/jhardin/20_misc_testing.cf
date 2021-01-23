@@ -3537,9 +3537,12 @@ describe   PHISH_FBASEAPP              Probable phishing via hosted web app
 score      PHISH_FBASEAPP              3.000	# limit
 
 meta       __UNDISC_MONEY              __TO_UNDISCLOSED && (__ADVANCE_FEE_2_NEW || LOTS_OF_MONEY)
+meta       UNDISC_MONEY                __UNDISC_MONEY && !__VIA_ML
+describe   UNDISC_MONEY                Undisclosed recipients + money/fraud signs
 
 meta       __UNDISC_FREEM              __TO_UNDISCLOSED && __freemail_replyto 
-
+meta       UNDISC_FREEM                __UNDISC_FREEM
+describe   UNDISC_FREEM                Undisclosed recipients + freemail reply-to
 
 
 
