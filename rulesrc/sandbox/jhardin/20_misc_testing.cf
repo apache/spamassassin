@@ -125,6 +125,7 @@ ifplugin Mail::SpamAssassin::Plugin::MIMEHeader
   mimeheader   __MALW_ATTACH_02_02 Content-Type =~ /\bname="?[^"]*(?:invoice|pdf)\.(?:ace|zip|7z|rar)[";$]/i
   meta         MALW_ATTACH         __MALW_ATTACH_01_01 || __MALW_ATTACH_01_02 || __MALW_ATTACH_02_01 || __MALW_ATTACH_02_02
   describe     MALW_ATTACH         Attachment filename suspicious, probable malware exploit
+  tflags       MALW_ATTACH         publish
 
   mimeheader   __ISO_ATTACH        Content-Disposition =~ m,\bfilename="?[^"]+\.iso[";$],i
   mimeheader   __ISO_ATTACH_MT     Content-Type =~ m,\bapplication/x-iso9660-image\b,i
@@ -136,6 +137,7 @@ ifplugin Mail::SpamAssassin::Plugin::MIMEHeader
   mimeheader   __PHISH_ATTACH_01_02  Content-Type =~ /\bname="?[^"]*(?:\.pdf)\.(?:html)[";$]/i
   meta         PHISH_ATTACH          __PHISH_ATTACH_01_01 || __PHISH_ATTACH_01_02
   describe     PHISH_ATTACH          Attachment filename suspicious, probable phishing
+  tflags       PHISH_ATTACH          publish
 
 else
   meta         __HTML_ATTACH_01    0
@@ -1376,9 +1378,9 @@ tflags      GOOGLE_DOC_SUSP      publish
 
 meta        __URI_PHISH    __HAS_ANY_URI && !__URI_GOOGLE_DOC && !__URI_GOOG_STO_HTML && (__EMAIL_PHISH || __ACCT_PHISH)
 ifplugin Mail::SpamAssassin::Plugin::MIMEHeader
-  meta      URI_PHISH      __URI_PHISH && !ALL_TRUSTED && !__UNSUB_LINK && !__TAG_EXISTS_CENTER && !__HAS_SENDER && !__CAN_HELP && !__VIA_ML && !__UPPERCASE_URI && !__HAS_CC && !__NUMBERS_IN_SUBJ && !__PCT_FOR_YOU && !__MOZILLA_MSGID && !__FB_COST && !__hk_bigmoney && !__REMOTE_IMAGE && !__HELO_HIGHPROFILE && !__RCD_RDNS_SMTP_MESSY && !__BUGGED_IMG && !__FB_TOUR 
+  meta      URI_PHISH      __URI_PHISH && !ALL_TRUSTED && !__UNSUB_LINK && !__TAG_EXISTS_CENTER && !__HAS_SENDER && !__CAN_HELP && !__VIA_ML && !__UPPERCASE_URI && !__HAS_CC && !__NUMBERS_IN_SUBJ && !__PCT_FOR_YOU && !__MOZILLA_MSGID && !__FB_COST && !__hk_bigmoney && !__REMOTE_IMAGE && !__HELO_HIGHPROFILE && !__RCD_RDNS_SMTP_MESSY && !__BUGGED_IMG && !__FB_TOUR && !__RCVD_DOTGOV_EXT 
 else
-  meta      URI_PHISH      __URI_PHISH && !ALL_TRUSTED && !__UNSUB_LINK && !__TAG_EXISTS_CENTER && !__HAS_SENDER && !__CAN_HELP && !__VIA_ML && !__UPPERCASE_URI && !__HAS_CC && !__NUMBERS_IN_SUBJ && !__PCT_FOR_YOU && !__MOZILLA_MSGID && !__FB_COST && !__hk_bigmoney && !__HELO_HIGHPROFILE && !__RCD_RDNS_SMTP_MESSY && !__BUGGED_IMG && !__FB_TOUR 
+  meta      URI_PHISH      __URI_PHISH && !ALL_TRUSTED && !__UNSUB_LINK && !__TAG_EXISTS_CENTER && !__HAS_SENDER && !__CAN_HELP && !__VIA_ML && !__UPPERCASE_URI && !__HAS_CC && !__NUMBERS_IN_SUBJ && !__PCT_FOR_YOU && !__MOZILLA_MSGID && !__FB_COST && !__hk_bigmoney && !__HELO_HIGHPROFILE && !__RCD_RDNS_SMTP_MESSY && !__BUGGED_IMG && !__FB_TOUR && !__RCVD_DOTGOV_EXT 
 endif
 describe    URI_PHISH            Phishing using web form
 score       URI_PHISH            4.00   # limit
@@ -3530,6 +3532,10 @@ score      URI_FIREBASEAPP             3.000	# limit
 tflags     URI_FIREBASEAPP             publish
 
 uri        __URI_AZURE_CLOUDAPP        m,://(?:[^./]+\.)+cloudapp\.azure\.com/,
+meta       URI_AZURE_CLOUDAPP          __URI_AZURE_CLOUDAPP && !__HDR_RCVD_GOOGLE && !__CTYPE_CHARSET_QUOTED 
+describe   URI_AZURE_CLOUDAPP          Link to hosted azure web application, possible phishing
+score      URI_AZURE_CLOUDAPP          3.000	# limit
+tflags     URI_AZURE_CLOUDAPP          publish
 
 
 # seen in a few spams
@@ -3540,14 +3546,17 @@ meta       __PHISH_FBASE_01            (__URI_FIREBASEAPP || __URI_WEBAPP) && __
 meta       PHISH_FBASEAPP              __PHISH_FBASE_01
 describe   PHISH_FBASEAPP              Probable phishing via hosted web app
 score      PHISH_FBASEAPP              3.000	# limit
+tflags     PHISH_FBASEAPP              publish
 
 meta       __UNDISC_MONEY              __TO_UNDISCLOSED && (__ADVANCE_FEE_2_NEW || LOTS_OF_MONEY)
-meta       UNDISC_MONEY                __UNDISC_MONEY && !__VIA_ML
+meta       UNDISC_MONEY                __UNDISC_MONEY && !__VIA_ML && !__MSGID_HEXISH
 describe   UNDISC_MONEY                Undisclosed recipients + money/fraud signs
+tflags     UNDISC_MONEY                publish
 
 meta       __UNDISC_FREEM              __TO_UNDISCLOSED && __freemail_replyto 
 meta       UNDISC_FREEM                __UNDISC_FREEM
 describe   UNDISC_FREEM                Undisclosed recipients + freemail reply-to
+tflags     UNDISC_FREEM                publish
 
-header     __REPTO_LONG                Reply-To:addr =~ /[^@]{20,}@/
+header     __REPTO_LONG                Reply-To:addr =~ /[a-z]{20,}\d*@/
 
