@@ -3532,7 +3532,7 @@ score      URI_FIREBASEAPP             3.000	# limit
 tflags     URI_FIREBASEAPP             publish
 
 uri        __URI_AZURE_CLOUDAPP        m,://(?:[^./]+\.)+cloudapp\.azure\.com/,
-meta       URI_AZURE_CLOUDAPP          __URI_AZURE_CLOUDAPP && !__HDR_RCVD_GOOGLE && !__CTYPE_CHARSET_QUOTED 
+meta       URI_AZURE_CLOUDAPP          __URI_AZURE_CLOUDAPP && __NAKED_TO && !__HDR_RCVD_GOOGLE
 describe   URI_AZURE_CLOUDAPP          Link to hosted azure web application, possible phishing
 score      URI_AZURE_CLOUDAPP          3.000	# limit
 tflags     URI_AZURE_CLOUDAPP          publish
@@ -3558,5 +3558,5 @@ meta       UNDISC_FREEM                __UNDISC_FREEM
 describe   UNDISC_FREEM                Undisclosed recipients + freemail reply-to
 tflags     UNDISC_FREEM                publish
 
-header     __REPTO_LONG                Reply-To:addr =~ /[a-z]{20,}\d*@/
+header     __REPTO_LONG                Reply-To:addr =~ /[a-z]{25,}\d*@/i
 
