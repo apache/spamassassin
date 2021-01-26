@@ -3560,14 +3560,21 @@ tflags     UNDISC_FREEM                publish
 
 header     __REPTO_LONG                Reply-To:addr =~ /[a-z]{25,}\d*@/i
 
-# new spam pattern, is this enough to detect?
-uri        __IMGUR_IMG                 m,^https?://i\.imgur\.com/[a-z0-9]{7}\.(?:png|jpe?g)$,i
+# content+respond+unsub texts as free hosted images
+uri        __IMGUR_IMG                 m,^https?://i\.imgur\.com/[a-z0-9]{7}\.(?:png|gif|jpe?g)$,i
 tflags     __IMGUR_IMG                 multiple maxhits=5
 meta       __IMGUR_IMG_3               __IMGUR_IMG == 3
+meta       HOSTED_IMG_MULTI_PUB_01     __IMGUR_IMG_3 && !__DATE_LOWER 
+describe   HOSTED_IMG_MULTI_PUB_01     Multiple hosted images at public site
+score      HOSTED_IMG_MULTI_PUB_01     3.000	# limit
+tflags     HOSTED_IMG_MULTI_PUB_01     publish
 
-body       __OBFU_UNSUB_UL             /(?:click_here|remove_your|our_emails|this_list)/
+body       __OBFU_UNSUB_UL             /(?:click_here|remove_your|our_emails|this_list|to_unsubscribe)/
+
+# observed in some phish/419 spams
+header     __HAS_MAIL_REPLY_TO         exists:Mail-Reply-To
 
 ifplugin Mail::SpamAssassin::Plugin::FreeMail
-  header     __freemail_mailreplyto      eval:check_freemail_replyto('Mail-Reply-To')
+  header     __freemail_mailreplyto      eval:check_freemail_header('Mail-Reply-To')
 endif
 
