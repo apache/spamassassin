@@ -3578,3 +3578,6 @@ ifplugin Mail::SpamAssassin::Plugin::FreeMail
   header     __freemail_mailreplyto      eval:check_freemail_header('Mail-Reply-To')
 endif
 
+rawbody    __CONTENT_AFTER_HTML        /<\/html>\s*\S/is
+
+
