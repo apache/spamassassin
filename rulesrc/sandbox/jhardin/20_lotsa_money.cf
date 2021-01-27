@@ -44,10 +44,11 @@ ifplugin Mail::SpamAssassin::Plugin::FreeMail
   #score    MONEY_FREEMAIL   0.5
   tflags   MONEY_FREEMAIL   nopublish
 
-  meta     MONEY_FREEMAIL_REPTO   LOTS_OF_MONEY && (__freemail_hdr_replyto)
-  describe MONEY_FREEMAIL_REPTO   Lots of money from someone using free email?
-  score    MONEY_FREEMAIL_REPTO   3.000	# limit
-  tflags   MONEY_FREEMAIL_REPTO   publish
+  meta     __MONEY_FREEMAIL_REPTO   LOTS_OF_MONEY && __freemail_hdr_replyto
+  meta     MONEY_FREEMAIL_REPTO     __MONEY_FREEMAIL_REPTO && !__HAS_CAMPAIGNID 
+  describe MONEY_FREEMAIL_REPTO     Lots of money from someone using free email?
+  score    MONEY_FREEMAIL_REPTO     3.000	# limit
+  tflags   MONEY_FREEMAIL_REPTO     publish
 endif
 
 meta      MONEY_NOHTML        LOTS_OF_MONEY && __CT_TEXT_PLAIN 

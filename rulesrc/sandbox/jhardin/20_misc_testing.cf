@@ -1281,8 +1281,14 @@ uri         __URI_GOOGLE_DOC     m,^https?://docs\.google\.com/(?:[^/]+/)*(?:vie
 uri         __URI_GOOGLE_DRV     m,^https?://(?:drive\.google|googledrive)\.com/,i
 
 # another fill-a-form service
-uri         __FORMS_GLE          m;^https?://forms\.gle/[0-9a-z]{15,}$;i
-meta        __FORMS_GLE_SUSP     __FORMS_GLE && __LIST_PARTIAL 
+uri         __FORMS_GLE              m;^https?://forms\.gle/[0-9a-z]{15,}$;i
+
+meta        FORMS_GLE                __FORMS_GLE && !__HAS_X_BEEN_THERE && !__URI_DOTEDU 
+describe    FORMS_GLE                Hosted fill-in-this-form
+
+meta        __FORMS_GLE_SUSP         __FORMS_GLE && ( __REPLYTO_NOREPLY || __MSOE_MID_WRONG_CASE )
+
+meta        __SHORTENED_URL_FORM     __FORMS_GLE && __URL_SHORTENER
 
 
 body        __WEBMAIL_ACCT       /\byour web ?mail account/i
@@ -3569,15 +3575,27 @@ describe   HOSTED_IMG_MULTI_PUB_01     Multiple hosted images at public site
 score      HOSTED_IMG_MULTI_PUB_01     3.000	# limit
 tflags     HOSTED_IMG_MULTI_PUB_01     publish
 
-body       __OBFU_UNSUB_UL             /(?:click_here|remove_your|our_emails|this_list|to_unsubscribe)/
+meta       __BITCOIN_IMGUR             __IMGUR_IMG && __BITCOIN 
+
+meta       __DYNAMIC_IMGUR             __IMGUR_IMG && __RDNS_DYNAMIC_IPADDR 
+
+body       __OBFU_UNSUB_UL             /(?:click_here|remove_your|our_emails|this_list|to_unsubscribe|future_emails)/
+meta       OBFU_UNSUB_UL               __OBFU_UNSUB_UL && !__USING_VERP1 
+describe   OBFU_UNSUB_UL               Obfuscated unsubscribe text
+tflags     OBFU_UNSUB_UL               publish
 
 # observed in some phish/419 spams
 header     __HAS_MAIL_REPLY_TO         exists:Mail-Reply-To
 
 ifplugin Mail::SpamAssassin::Plugin::FreeMail
   header     __freemail_mailreplyto      eval:check_freemail_header('Mail-Reply-To')
+
+  meta       ODD_FREEM_REPTO             __freemail_mailreplyto
+  describe   ODD_FREEM_REPTO             Has unusual reply-to header
+  score      ODD_FREEM_REPTO             3.000	# limit
+  tflags     ODD_FREEM_REPTO             publish
 endif
 
-rawbody    __CONTENT_AFTER_HTML        /<\/html>\s*\S/is
+rawbody    __CONTENT_AFTER_HTML        /<\/html>\s*\S/i
 
 
