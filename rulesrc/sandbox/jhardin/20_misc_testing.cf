@@ -1283,7 +1283,7 @@ uri         __URI_GOOGLE_DRV     m,^https?://(?:drive\.google|googledrive)\.com/
 # another fill-a-form service
 uri         __FORMS_GLE              m;^https?://forms\.gle/[0-9a-z]{15,}$;i
 
-meta        FORMS_GLE                __FORMS_GLE && !__HAS_X_BEEN_THERE && !__URI_DOTEDU 
+meta        FORMS_GLE                __FORMS_GLE && !__HAS_X_BEEN_THERE && !__URI_DOTEDU && !__HAS_CAMPAIGN 
 describe    FORMS_GLE                Hosted fill-in-this-form
 
 meta        __FORMS_GLE_SUSP         __FORMS_GLE && ( __REPLYTO_NOREPLY || __MSOE_MID_WRONG_CASE )
@@ -3576,8 +3576,14 @@ score      HOSTED_IMG_MULTI_PUB_01     3.000	# limit
 tflags     HOSTED_IMG_MULTI_PUB_01     publish
 
 meta       __BITCOIN_IMGUR             __IMGUR_IMG && __BITCOIN 
+meta       BITCOIN_IMGUR               __BITCOIN_IMGUR
+describe   BITCOIN_IMGUR               Bitcoin + hosted image
+score      BITCOIN_IMGUR               3.500	# limit
 
 meta       __DYNAMIC_IMGUR             __IMGUR_IMG && __RDNS_DYNAMIC_IPADDR 
+meta       DYNAMIC_IMGUR               __DYNAMIC_IMGUR
+describe   DYNAMIC_IMGUR               dynamic IP + hosted image
+score      DYNAMIC_IMGUR               4.000	# limit
 
 body       __OBFU_UNSUB_UL             /(?:click_here|remove_your|our_emails|this_list|to_unsubscribe|future_emails)/
 meta       OBFU_UNSUB_UL               __OBFU_UNSUB_UL && !__USING_VERP1 
@@ -3597,6 +3603,9 @@ ifplugin Mail::SpamAssassin::Plugin::FreeMail
 endif
 
 rawbody    __CONTENT_AFTER_HTML        /<\/html>\s*\S/i
+meta       CONTENT_AFTER_HTML          __CONTENT_AFTER_HTML && !MIME_QP_LONG_LINE 
+describe   CONTENT_AFTER_HTML          More content after HTML close tag
+score      CONTENT_AFTER_HTML          2.500	# limit
 
 uri        __GOOG_REDIR_DOCUSIGN       m;://www\.google\.com/url\?.*q=https?://www\.docusign\.com/;i
 uri        __URI_ADOBESPARK            m;https?://branchlink\.adobespark\.com/;i
