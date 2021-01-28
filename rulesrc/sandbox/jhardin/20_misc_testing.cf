@@ -121,8 +121,8 @@ ifplugin Mail::SpamAssassin::Plugin::MIMEHeader
   mimeheader   __MALW_ATTACH_01_01 Content-Disposition =~ /\bfilename="?[^"]+\.SettingContent-ms\b/i
   mimeheader   __MALW_ATTACH_01_02 Content-Type =~ /\bname="?[^"]+\.SettingContent-ms\b/i
   # others
-  mimeheader   __MALW_ATTACH_02_01 Content-Disposition =~ /\bfilename="?[^"]*(?:invoice|pdf)\.(?:ace|zip|7z|rar)[";$]/i
-  mimeheader   __MALW_ATTACH_02_02 Content-Type =~ /\bname="?[^"]*(?:invoice|pdf)\.(?:ace|zip|7z|rar)[";$]/i
+  mimeheader   __MALW_ATTACH_02_01 Content-Disposition =~ /\bfilename="?[^"]*(?:invoice|pdf|\.img)\.(?:ace|zip|7z|rar)[";$]/i
+  mimeheader   __MALW_ATTACH_02_02 Content-Type =~ /\bname="?[^"]*(?:invoice|pdf|\.img)\.(?:ace|zip|7z|rar)[";$]/i
   meta         MALW_ATTACH         __MALW_ATTACH_01_01 || __MALW_ATTACH_01_02 || __MALW_ATTACH_02_01 || __MALW_ATTACH_02_02
   describe     MALW_ATTACH         Attachment filename suspicious, probable malware exploit
   tflags       MALW_ATTACH         publish
@@ -133,8 +133,8 @@ ifplugin Mail::SpamAssassin::Plugin::MIMEHeader
   describe     ISO_ATTACH          ISO attachment - possible malware delivery
   score        ISO_ATTACH          3.000	# limit
 
-  mimeheader   __PHISH_ATTACH_01_01  Content-Disposition =~ /\bfilename="?[^"]*(?:\.pdf)\.(?:html?)[";$]/i
-  mimeheader   __PHISH_ATTACH_01_02  Content-Type =~ /\bname="?[^"]*(?:\.pdf)\.(?:html?)[";$]/i
+  mimeheader   __PHISH_ATTACH_01_01  Content-Disposition =~ /\bfilename="?[^"]*(?:\.pdf)\.html?[";$]/i
+  mimeheader   __PHISH_ATTACH_01_02  Content-Type =~ /\bname="?[^"]*(?:\.pdf)\.html?[";$]/i
   meta         PHISH_ATTACH          __PHISH_ATTACH_01_01 || __PHISH_ATTACH_01_02
   describe     PHISH_ATTACH          Attachment filename suspicious, probable phishing
   tflags       PHISH_ATTACH          publish
@@ -3598,4 +3598,6 @@ endif
 
 rawbody    __CONTENT_AFTER_HTML        /<\/html>\s*\S/i
 
+uri        __GOOG_REDIR_DOCUSIGN       m;://www\.google\.com/url\?.*q=https?://www\.docusign\.com/;i
+uri        __URI_ADOBESPARK            m;https?://branchlink\.adobespark\.com/;i
 
