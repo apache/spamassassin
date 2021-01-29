@@ -2277,12 +2277,25 @@ describe    RCVD_DBL_DQ                Malformatted message header
 tflags      RCVD_DBL_DQ                publish
 
 # reported on users list 09/2014 George Johnson <georgejohnson@talaya.net>
-header    __RAND_HEADER                ALL =~ /^(?!Accept-Language|Authentication-Results|Content-|DomainKey-Signature|DKIM-|List-|MIME-|Received-SPF|Return-Path|Thread-|User-Agent)(?:[a-z]{4,}-[a-z]{3,}|[a-z]{3,}-[a-z]{4,}):\s+\d(?=\S{6,}\s*$)[\da-f]*(?:[-.]\w+)*\s*$/ism
+header    __RAND_HEADER                ALL =~ /^(?!Accept-Language|Authentication-Results|Content-|DomainKey-Signature|DKIM-|List-|MIME-|Received-SPF|Return-Path|Thread-|User-Agent|Tracking-Code)(?:[a-z]{4,}-[a-z]{3,}|[a-z]{3,}-[a-z]{4,}):\s+\d(?=\S{6,}\s*$)[\da-f]*(?:[-.]\w+)*\s*$/ism
 tflags    __RAND_HEADER                multiple maxhits=4
-meta      RAND_HEADER_MANY             __RAND_HEADER > 3
+meta      __RAND_HEADER_2              __RAND_HEADER > 1
+meta      __RAND_HEADER_3              __RAND_HEADER > 2
+meta      __RAND_HEADER_4              __RAND_HEADER > 3
+
+#meta      RAND_HEADER                  __RAND_HEADER && !RAND_HEADER_MANY && !__HAS_THREAD_INDEX && !__HAS_LIST_ID && !__HAS_TNEF && !__HAS_IN_REPLY_TO 
+#describe  RAND_HEADER                  Random gibberish message header(s)
+#score     RAND_HEADER                  3.000   # limit
+#tflags    RAND_HEADER                  publish
+
+meta      RAND_HEADER_MANY             __RAND_HEADER_4
 describe  RAND_HEADER_MANY             Many random gibberish message headers
 score     RAND_HEADER_MANY             3.000   # limit
 tflags    RAND_HEADER_MANY             publish
+
+header    __RAND_MKTG_HEADER           ALL =~ /^X-(?:[a-z]{2}){1,2}-(?:(?:Tracking|Subscriber|Delivery|EBS|Customer|Campaign)-[DSU]?id):/ism
+
+header    __HEADER_START_NUM           ALL =~ /^\d[-a-z0-9]*:/ism
 
 
 #body      FR_SPAM_LAW                  /article 34 de la loi 78-17\b/i
@@ -3543,6 +3556,11 @@ describe   URI_AZURE_CLOUDAPP          Link to hosted azure web application, pos
 score      URI_AZURE_CLOUDAPP          3.000	# limit
 tflags     URI_AZURE_CLOUDAPP          publish
 
+uri        __URI_ADOBESPARK            m,https?://branchlink\.adobespark\.com/,i
+meta       URI_ADOBESPARK              __URI_ADOBESPARK
+score      URI_ADOBESPARK              3.500	# limit
+tflags     URI_ADOBESPARK              publish
+
 
 # seen in a few spams
 body       __BTC_MLM                   /Block[-\s]?chain network marketing/i
@@ -3590,9 +3608,17 @@ meta       OBFU_UNSUB_UL               __OBFU_UNSUB_UL && !__USING_VERP1
 describe   OBFU_UNSUB_UL               Obfuscated unsubscribe text
 tflags     OBFU_UNSUB_UL               publish
 
+header     __HAS_GOOGLE_DKIM_SIG       exists:X-Google-DKIM-Signature
+header     __HAS_X_SENDER              exists:X-Sender
+header     __HAS_XM_SENT_BY            exists:X-Mailer-Sent-By
+
 header     __HAS_COMPLAINT_TO          exists:Complaint-To
-header     __HAS_TRACKING_CODE         exists:tracking-code
+header     __HAS_TRACKING_CODE         exists:Tracking-Code
 header     __HAS_LOGID                 exists:logid
+
+meta       JH_SPAMMY_HEADERS           __HAS_COMPLAINT_TO || __HAS_TRACKING_CODE || __HAS_LOGID
+describe   JH_SPAMMY_HEADERS           Has unusual message header(s) seen primarily in spam
+score      JH_SPAMMY_HEADERS           3.500	# limit
 
 # observed in some phish/419 spams
 header     __HAS_MAIL_REPLY_TO         exists:Mail-Reply-To
@@ -3606,11 +3632,13 @@ ifplugin Mail::SpamAssassin::Plugin::FreeMail
   tflags     ODD_FREEM_REPTO             publish
 endif
 
-rawbody    __CONTENT_AFTER_HTML        /<\/html>\s*\S/i
-meta       CONTENT_AFTER_HTML          __CONTENT_AFTER_HTML && !MIME_QP_LONG_LINE 
-describe   CONTENT_AFTER_HTML          More content after HTML close tag
-score      CONTENT_AFTER_HTML          2.500	# limit
+rawbody    __CONTENT_AFTER_HTML        /<\/html>\s*[a-z0-9]/i
+#meta       CONTENT_AFTER_HTML          __CONTENT_AFTER_HTML
+#describe   CONTENT_AFTER_HTML          More content after HTML close tag
+#score      CONTENT_AFTER_HTML          2.500	# limit
 
-uri        __GOOG_REDIR_DOCUSIGN       m;://www\.google\.com/url\?.*q=https?://www\.docusign\.com/;i
-uri        __URI_ADOBESPARK            m;https?://branchlink\.adobespark\.com/;i
+# High S/O but rare - ahead of the curve?
+uri        GOOG_REDIR_DOCUSIGN         m;://www\.google\.com/url\?.*q=https?://www\.docusign\.com/;i
+describe   GOOG_REDIR_DOCUSIGN         Indirect docusign link, probable phishing
+tflags     GOOG_REDIR_DOCUSIGN         publish
 
