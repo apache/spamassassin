@@ -42,9 +42,10 @@ describe FSL_BOTSPAM_1   Two-line spam with URI pointing to .ru domain
 # score    FSL_BOTSPAM_1   2.0
 
 # Mainsleaze
-body     FSL_THIS_IS_ADV  /This is an advertisement\./
-describe FSL_THIS_IS_ADV  This is an advertisement
-# score    FSL_THIS_IS_ADV  3.0
+# overlaps ADMITS_SPAM
+#body     FSL_THIS_IS_ADV  /This is an advertisement\./
+#describe FSL_THIS_IS_ADV  This is an advertisement
+## score    FSL_THIS_IS_ADV  3.0
 
 # Bot spew
 #rawbody  FSL_BOTSPAM_2   /alt="Click here to show image"/
