@@ -1521,7 +1521,7 @@ tflags      FOUND_YOU          publish
 #describe    ADMITS_CANSPAM    Admits to being spam
 
 body        __ADMITS_SPAM     /\bth(?:e[- ]+above|is)(?:\?+s|[- ]+is)[- ]+(?:intended[- ]+as[- ]+)?an?[- ]+(?:e-?mail[- ]+)?[a@]dvert[i1l]sement\b/i
-meta        ADMITS_SPAM       __ADMITS_SPAM && !__FROM_LOWER && !__MSGID_JAVAMAIL && !__HAS_CAMPAIGNID && !__STY_INVIS_2 
+meta        ADMITS_SPAM       __ADMITS_SPAM && !__FROM_LOWER && !__MSGID_JAVAMAIL && !__HAS_CAMPAIGNID && !__STY_INVIS_2 && !__LYRIS_EZLM_REMAILER 
 describe    ADMITS_SPAM       Admits this is an ad
 tflags      ADMITS_SPAM       publish
 
@@ -3589,6 +3589,10 @@ body       __OBFU_UNSUB_UL             /(?:click_here|remove_your|our_emails|thi
 meta       OBFU_UNSUB_UL               __OBFU_UNSUB_UL && !__USING_VERP1 
 describe   OBFU_UNSUB_UL               Obfuscated unsubscribe text
 tflags     OBFU_UNSUB_UL               publish
+
+header     __HAS_COMPLAINT_TO          exists:Complaint-To
+header     __HAS_TRACKING_CODE         exists:tracking-code
+header     __HAS_LOGID                 exists:logid
 
 # observed in some phish/419 spams
 header     __HAS_MAIL_REPLY_TO         exists:Mail-Reply-To
