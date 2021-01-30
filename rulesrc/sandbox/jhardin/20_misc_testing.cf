@@ -121,9 +121,10 @@ ifplugin Mail::SpamAssassin::Plugin::MIMEHeader
   mimeheader   __MALW_ATTACH_01_01 Content-Disposition =~ /\bfilename="?[^"]+\.SettingContent-ms\b/i
   mimeheader   __MALW_ATTACH_01_02 Content-Type =~ /\bname="?[^"]+\.SettingContent-ms\b/i
   # others
-  mimeheader   __MALW_ATTACH_02_01 Content-Disposition =~ /\bfilename="?[^"]*(?:invoice|pdf|\.img)\.(?:ace|zip|7z|rar)[";$]/i
-  mimeheader   __MALW_ATTACH_02_02 Content-Type =~ /\bname="?[^"]*(?:invoice|pdf|\.img)\.(?:ace|zip|7z|rar)[";$]/i
-  meta         MALW_ATTACH         __MALW_ATTACH_01_01 || __MALW_ATTACH_01_02 || __MALW_ATTACH_02_01 || __MALW_ATTACH_02_02
+  mimeheader   __MALW_ATTACH_02_01 Content-Disposition =~ /\bfilename="?[^"]*(?:invoice|\.pdf|\.img)\.(?:ace|zip|7z|rar)[";$]/i
+  mimeheader   __MALW_ATTACH_02_02 Content-Type =~ /\bname="?[^"]*(?:invoice|\.pdf|\.img)\.(?:ace|zip|7z|rar)[";$]/i
+  meta         __MALW_ATTACH       __MALW_ATTACH_01_01 || __MALW_ATTACH_01_02 || __MALW_ATTACH_02_01 || __MALW_ATTACH_02_02
+  meta         MALW_ATTACH         __MALW_ATTACH && !__HAS_THREAD_INDEX 
   describe     MALW_ATTACH         Attachment filename suspicious, probable malware exploit
   tflags       MALW_ATTACH         publish
 
@@ -1283,12 +1284,13 @@ uri         __URI_GOOGLE_DRV     m,^https?://(?:drive\.google|googledrive)\.com/
 # another fill-a-form service
 uri         __FORMS_GLE              m;^https?://forms\.gle/[0-9a-z]{15,}$;i
 
-meta        FORMS_GLE                __FORMS_GLE && !__HAS_X_BEEN_THERE && !__URI_DOTEDU && !__HAS_CAMPAIGN 
-describe    FORMS_GLE                Hosted fill-in-this-form
+# rotten S/O
+#meta        FORMS_GLE                __FORMS_GLE && !__HAS_X_BEEN_THERE && !__URI_DOTEDU && !__HAS_CAMPAIGN 
+#describe    FORMS_GLE                Hosted fill-in-this-form
 
-meta        __FORMS_GLE_SUSP         __FORMS_GLE && ( __REPLYTO_NOREPLY || __MSOE_MID_WRONG_CASE )
+#meta        __FORMS_GLE_SUSP         __FORMS_GLE && ( __REPLYTO_NOREPLY || __MSOE_MID_WRONG_CASE )
 
-meta        __SHORTENED_URL_FORM     __FORMS_GLE && __URL_SHORTENER
+#meta        __SHORTENED_URL_FORM     __FORMS_GLE && __URL_SHORTENER
 
 
 body        __WEBMAIL_ACCT       /\byour web ?mail account/i
@@ -1521,7 +1523,7 @@ tflags      FOUND_YOU          publish
 #describe    ADMITS_CANSPAM    Admits to being spam
 
 body        __ADMITS_SPAM     /\bth(?:e[- ]+above|is)(?:\?+s|[- ]+is)[- ]+(?:intended[- ]+as[- ]+)?an?[- ]+(?:e-?mail[- ]+)?[a@]dvert[i1l]sement\b/i
-meta        ADMITS_SPAM       __ADMITS_SPAM && !__FROM_LOWER && !__MSGID_JAVAMAIL && !__HAS_CAMPAIGNID && !__STY_INVIS_2 && !__LYRIS_EZLM_REMAILER 
+meta        ADMITS_SPAM       __ADMITS_SPAM && !__FROM_LOWER && !__MSGID_JAVAMAIL && !__HAS_CAMPAIGNID && !__STY_INVIS_2 && !__LYRIS_EZLM_REMAILER && !__RCD_RDNS_OB 
 describe    ADMITS_SPAM       Admits this is an ad
 tflags      ADMITS_SPAM       publish
 
@@ -2283,19 +2285,25 @@ meta      __RAND_HEADER_2              __RAND_HEADER > 1
 meta      __RAND_HEADER_3              __RAND_HEADER > 2
 meta      __RAND_HEADER_4              __RAND_HEADER > 3
 
-#meta      RAND_HEADER                  __RAND_HEADER && !RAND_HEADER_MANY && !__HAS_THREAD_INDEX && !__HAS_LIST_ID && !__HAS_TNEF && !__HAS_IN_REPLY_TO 
+#meta      RAND_HEADER                  __RAND_HEADER && !RAND_HEADER_MANY && !__MIME_BASE64 
 #describe  RAND_HEADER                  Random gibberish message header(s)
 #score     RAND_HEADER                  3.000   # limit
 #tflags    RAND_HEADER                  publish
 
-meta      RAND_HEADER_MANY             __RAND_HEADER_4
-describe  RAND_HEADER_MANY             Many random gibberish message headers
+meta      RAND_HEADER_LIST_SPOOF       __RAND_HEADER && __LIST_PARTIAL 
+describe  RAND_HEADER_LIST_SPOOF       Random gibberish message header(s), pretending to be a mailing list
+score     RAND_HEADER_LIST_SPOOF       3.000   # limit
+#tflags    RAND_HEADER                  publish
+
+meta      RAND_HEADER_MANY             __RAND_HEADER_2
+describe  RAND_HEADER_MANY             Multiple random gibberish message headers
 score     RAND_HEADER_MANY             3.000   # limit
 tflags    RAND_HEADER_MANY             publish
 
 header    __RAND_MKTG_HEADER           ALL =~ /^X-(?:[a-z]{2}){1,2}-(?:(?:Tracking|Subscriber|Delivery|EBS|Customer|Campaign)-[DSU]?id):/ism
-
-header    __HEADER_START_NUM           ALL =~ /^\d[-a-z0-9]*:/ism
+meta      RAND_MKTG_HEADER             __RAND_MKTG_HEADER && !__HAVE_BOUNCE_RELAYS 
+describe  RAND_MKTG_HEADER             Has partially-randomized marketing/tracking header(s)
+score     RAND_MKTG_HEADER             3.000	# limit
 
 
 #body      FR_SPAM_LAW                  /article 34 de la loi 78-17\b/i
@@ -3603,14 +3611,14 @@ meta       DYNAMIC_IMGUR               __DYNAMIC_IMGUR
 describe   DYNAMIC_IMGUR               dynamic IP + hosted image
 score      DYNAMIC_IMGUR               4.000	# limit
 
-body       __OBFU_UNSUB_UL             /(?:click_here|remove_your|our_emails|this_list|to_unsubscribe|future_emails)/
+body       __OBFU_UNSUB_UL             /(?:click_here|remove_your|our_e?mail|this_list|to_unsubscribe|future_e?mail|our_list)/
 meta       OBFU_UNSUB_UL               __OBFU_UNSUB_UL && !__USING_VERP1 
 describe   OBFU_UNSUB_UL               Obfuscated unsubscribe text
 tflags     OBFU_UNSUB_UL               publish
 
 header     __HAS_GOOGLE_DKIM_SIG       exists:X-Google-DKIM-Signature
 header     __HAS_X_SENDER              exists:X-Sender
-header     __HAS_XM_SENT_BY            exists:X-Mailer-Sent-By
+header     __HAS_HEADER_STARTS_NUM     ALL =~ /^\d[-a-z0-9]*:/ism
 
 header     __HAS_COMPLAINT_TO          exists:Complaint-To
 header     __HAS_TRACKING_CODE         exists:Tracking-Code
@@ -3633,9 +3641,9 @@ ifplugin Mail::SpamAssassin::Plugin::FreeMail
 endif
 
 rawbody    __CONTENT_AFTER_HTML        /<\/html>\s*[a-z0-9]/i
-#meta       CONTENT_AFTER_HTML          __CONTENT_AFTER_HTML
-#describe   CONTENT_AFTER_HTML          More content after HTML close tag
-#score      CONTENT_AFTER_HTML          2.500	# limit
+meta       CONTENT_AFTER_HTML          __CONTENT_AFTER_HTML && !__HAS_SENDER 
+describe   CONTENT_AFTER_HTML          More content after HTML close tag
+score      CONTENT_AFTER_HTML          2.500	# limit
 
 # High S/O but rare - ahead of the curve?
 uri        GOOG_REDIR_DOCUSIGN         m;://www\.google\.com/url\?.*q=https?://www\.docusign\.com/;i
