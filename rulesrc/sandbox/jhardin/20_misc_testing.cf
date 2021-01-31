@@ -2300,7 +2300,7 @@ describe  RAND_HEADER_MANY             Multiple random gibberish message headers
 score     RAND_HEADER_MANY             3.000   # limit
 tflags    RAND_HEADER_MANY             publish
 
-header    __RAND_MKTG_HEADER           ALL =~ /^X-(?:[a-z]{2}){1,2}-(?:(?:Tracking|Subscriber|Delivery|EBS|Customer|Campaign)-[DSU]?id):/ism
+header    __RAND_MKTG_HEADER           ALL =~ /^X-(?:[a-z]{2}){1,2}-(?:EBS|(?:Tracking|Subscriber|Delivery|Customer|Campaign)-[DSU]?id):/ism
 meta      RAND_MKTG_HEADER             __RAND_MKTG_HEADER && !__HAVE_BOUNCE_RELAYS 
 describe  RAND_MKTG_HEADER             Has partially-randomized marketing/tracking header(s)
 score     RAND_MKTG_HEADER             3.000	# limit
@@ -3183,6 +3183,11 @@ score      BOGUS_MIME_VERSION          3.500	# limit
 describe   BOGUS_MIME_VERSION          Mime version header is bogus
 tflags     BOGUS_MIME_VERSION          publish
 
+header     __MALF_MIME_VER             MIME-Version =~ /^1\.0\S/
+
+header     __VERBOSE_MIME_VER          MIME-Version =~ /^1\.0\s+\(\S[^)]*\)/
+
+
 # also hits NORMAL_HTTP_TO_IP but should be punished harder
 uri        __URI_HEX_IP                m;://0x[0-9A-F]{8,}[:/];i
 meta       URI_HEX_IP                  __URI_HEX_IP
@@ -3591,6 +3596,7 @@ describe   UNDISC_FREEM                Undisclosed recipients + freemail reply-t
 tflags     UNDISC_FREEM                publish
 
 header     __REPTO_LONG                Reply-To:addr =~ /[a-z]{25,}\d*@/i
+header     __REPTO_MISSPACED           ALL =~ /^Reply-To:\S/ism
 
 # content+respond+unsub texts as free hosted images
 uri        __IMGUR_IMG                 m,^https?://i\.imgur\.com/[a-z0-9]{7}\.(?:png|gif|jpe?g)$,i
@@ -3616,10 +3622,24 @@ meta       OBFU_UNSUB_UL               __OBFU_UNSUB_UL && !__USING_VERP1
 describe   OBFU_UNSUB_UL               Obfuscated unsubscribe text
 tflags     OBFU_UNSUB_UL               publish
 
-header     __HAS_GOOGLE_DKIM_SIG       exists:X-Google-DKIM-Signature
+header     __HAS_X_GOOGLE_DKIM_SIG     exists:X-Google-DKIM-Signature
 header     __HAS_X_SENDER              exists:X-Sender
+header     __HAS_X_CONTACTID           exists:X-ContactID
+header     __HAS_X_LETTER              exists:X-Letter
+header     __HAS_X_PROCINFO            exists:X-ProcInfo
+header     __HAS_X_MAILGUN_SID         exists:X-Mailgun-Sid
+header     __HAS_X_MAILGUN_TRACK_OPN   exists:X-Mailgun-Track-Opens
+header     __HAS_X_EBSERVER            exists:X-EBSERVER
+header     __HAS_X_SOURCE_DIR          exists:X-Source-Dir
+header     __HAS_X_OUTGOING_SPAM_STAT  exists:X-OutGoing-Spam-Status
 header     __HAS_HEADER_STARTS_NUM     ALL =~ /^\d[-a-z0-9]*:/ism
 
+# note: *NOT* "Message-ID" !
+header     __HAS_MESSAGEID             exists:MessageID
+meta       __MSGID_HNAME_MALF          __HAS_MESSAGEID && !__HAS_MESSAGE_ID
+
+header     __HAS_LIST_OPEN             exists:List-Open
+header     __HAS_LIST_POST             exists:List-Post
 header     __HAS_COMPLAINT_TO          exists:Complaint-To
 header     __HAS_TRACKING_CODE         exists:Tracking-Code
 header     __HAS_LOGID                 exists:logid
