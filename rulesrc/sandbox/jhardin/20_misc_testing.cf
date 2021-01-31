@@ -2291,9 +2291,9 @@ meta      __RAND_HEADER_4              __RAND_HEADER > 3
 #tflags    RAND_HEADER                  publish
 
 meta      RAND_HEADER_LIST_SPOOF       __RAND_HEADER && __LIST_PARTIAL 
-describe  RAND_HEADER_LIST_SPOOF       Random gibberish message header(s), pretending to be a mailing list
+describe  RAND_HEADER_LIST_SPOOF       Random gibberish message header(s) + pretending to be a mailing list
 score     RAND_HEADER_LIST_SPOOF       3.000   # limit
-#tflags    RAND_HEADER                  publish
+tflags    RAND_HEADER_LIST_SPOOF       publish
 
 meta      RAND_HEADER_MANY             __RAND_HEADER_2
 describe  RAND_HEADER_MANY             Multiple random gibberish message headers
@@ -2304,6 +2304,7 @@ header    __RAND_MKTG_HEADER           ALL =~ /^X-(?:[a-z]{2}){1,2}-(?:EBS|(?:Tr
 meta      RAND_MKTG_HEADER             __RAND_MKTG_HEADER && !__HAVE_BOUNCE_RELAYS 
 describe  RAND_MKTG_HEADER             Has partially-randomized marketing/tracking header(s)
 score     RAND_MKTG_HEADER             3.000	# limit
+tflags    RAND_MKTG_HEADER             publish
 
 
 #body      FR_SPAM_LAW                  /article 34 de la loi 78-17\b/i
@@ -3618,7 +3619,7 @@ describe   DYNAMIC_IMGUR               dynamic IP + hosted image
 score      DYNAMIC_IMGUR               4.000	# limit
 
 body       __OBFU_UNSUB_UL             /(?:click_here|remove_your|our_e?mail|this_list|to_unsubscribe|future_e?mail|our_list)/
-meta       OBFU_UNSUB_UL               __OBFU_UNSUB_UL && !__USING_VERP1 
+meta       OBFU_UNSUB_UL               __OBFU_UNSUB_UL && !__USING_VERP1 && !__STY_INVIS 
 describe   OBFU_UNSUB_UL               Obfuscated unsubscribe text
 tflags     OBFU_UNSUB_UL               publish
 
@@ -3647,6 +3648,7 @@ header     __HAS_LOGID                 exists:logid
 meta       JH_SPAMMY_HEADERS           __HAS_COMPLAINT_TO || __HAS_TRACKING_CODE || __HAS_LOGID
 describe   JH_SPAMMY_HEADERS           Has unusual message header(s) seen primarily in spam
 score      JH_SPAMMY_HEADERS           3.500	# limit
+tflags     JH_SPAMMY_HEADERS           publish
 
 # observed in some phish/419 spams
 header     __HAS_MAIL_REPLY_TO         exists:Mail-Reply-To
@@ -3661,9 +3663,10 @@ ifplugin Mail::SpamAssassin::Plugin::FreeMail
 endif
 
 rawbody    __CONTENT_AFTER_HTML        /<\/html>\s*[a-z0-9]/i
-meta       CONTENT_AFTER_HTML          __CONTENT_AFTER_HTML && !__HAS_SENDER 
+meta       CONTENT_AFTER_HTML          __CONTENT_AFTER_HTML && !__HAS_SENDER && !__LYRIS_EZLM_REMAILER 
 describe   CONTENT_AFTER_HTML          More content after HTML close tag
 score      CONTENT_AFTER_HTML          2.500	# limit
+tflags     CONTENT_AFTER_HTML          publish
 
 # High S/O but rare - ahead of the curve?
 uri        GOOG_REDIR_DOCUSIGN         m;://www\.google\.com/url\?.*q=https?://www\.docusign\.com/;i
