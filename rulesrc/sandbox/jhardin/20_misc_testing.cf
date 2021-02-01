@@ -3542,6 +3542,17 @@ describe   MIXED_FONT_CASE             Has font tag in mixed case
 score      MIXED_FONT_CASE             2.500	 # limit
 tflags     MIXED_FONT_CASE             publish
 
+rawbody    __MIXED_CENTER_CASE         /<(?!CENTER|center)[Cc][Ee][Nn][Tt][Ee][Rr]>/
+meta       MIXED_CENTER_CASE           __MIXED_CENTER_CASE
+describe   MIXED_CENTER_CASE           Has center tag in mixed case
+score      MIXED_CENTER_CASE           2.500	 # limit
+tflags     MIXED_CENTER_CASE           publish
+
+rawbody    __MIXED_AREA_CASE           /<(?!AREA|area)[Aa][Rr][Ee][Aa]\s/
+meta       MIXED_AREA_CASE             __MIXED_AREA_CASE
+describe   MIXED_AREA_CASE             Has area tag in mixed case
+score      MIXED_AREA_CASE             2.500	 # limit
+tflags     MIXED_AREA_CASE             publish
 
 # BC's similar mixed-case rules use more-indirect logic and have a poorer S/O
 rawbody    __MIXED_IMG_CASE_JH         /<(?!IMG|img)[Ii][Mm][Gg]\s/
@@ -3550,11 +3561,13 @@ describe   MIXED_IMG_CASE              Has img tag in mixed case
 score      MIXED_IMG_CASE              3.000	 # limit
 tflags     MIXED_IMG_CASE              publish
 
-rawbody    __MIXED_HREF_CASE_JH        /<[Aa]\s(?!HREF|href)[Hh][Rr][Ee][Ff]=/
+rawbody    __MIXED_HREF_CASE_JH        /<[Aa](?i:rea)?\s(?!HREF|href)[Hh][Rr][Ee][Ff]=/
 meta       MIXED_HREF_CASE             __MIXED_HREF_CASE_JH
 describe   MIXED_HREF_CASE             Has href in mixed case
 score      MIXED_HREF_CASE             2.000	 # limit
 tflags     MIXED_HREF_CASE             publish
+
+meta       __LOTSA_MIXED_CASE_TAGS     (__MIXED_FONT_CASE + __MIXED_CENTER_CASE + __MIXED_AREA_CASE + __MIXED_IMG_CASE_JH + __MIXED_HREF_CASE_JH) > 2
 
 # phishing content for now, may go primarly legit at some point
 uri        __URI_FIREBASEAPP           m,://[^./]+\.firebaseapp\.com/,
