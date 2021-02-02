@@ -2331,6 +2331,15 @@ score     GOOG_MALWARE_DNLD             5.000   # limit
 tflags    GOOG_MALWARE_DNLD             publish
 
 uri       __GOOG_REDIR                  m;^https?://[^/]*\.google\.com/url\?;i
+uri       __GOOG_REDIR_IMG              m;^https?://www\.google\.com/url\?.*q=https?://.*\.(?:png|gif|jpe?g)$;i
+uri       __GOOG_REDIR_HTML             m;^https?://www\.google\.com/url\?.*q=https?://.*\.html?$;i
+uri       __GOOG_REDIR_ARCHV            m;^https?://www\.google\.com/url\?.*q=https?://.*\.(?:ace|zip|7z|rar)$;i
+
+uri       __DDG_REDIR                   m;^https?://proxy\.duckduckgo\.com/iu/\?.*u=https?://;i
+uri       __DDG_REDIR_IMG               m;^https?://proxy\.duckduckgo\.com/iu/\?.*u=https?://.*\.(?:png|gif|jpe?g)$;i
+uri       __DDG_REDIR_HTML              m;^https?://proxy\.duckduckgo\.com/iu/\?.*u=https?://.*\.html?$;i
+uri       __DDG_REDIR_ARCHV             m;^https?://proxy\.duckduckgo\.com/iu/\?.*u=https?://.*\.(?:ace|zip|7z|rar)$;i
+
 
 body      ONLINE_MKTG_CNSLT             /\bonline marketing consultant\b/i
 
@@ -3651,13 +3660,13 @@ header     __HAS_X_MAILGUN_TRACK_OPN   exists:X-Mailgun-Track-Opens
 header     __HAS_X_EBSERVER            exists:X-EBSERVER
 header     __HAS_X_SOURCE_DIR          exists:X-Source-Dir
 header     __HAS_X_OUTGOING_SPAM_STAT  exists:X-OutGoing-Spam-Status
+header     __HAS_X_ENTITY_ID           exists:X-Entity-ID
 header     __HAS_HEADER_STARTS_NUM     ALL =~ /^\d[-a-z0-9]*:/ism
 
 meta       HAS_X_OUTGOING_SPAM_STAT    __HAS_X_OUTGOING_SPAM_STAT && !MAILING_LIST_MULTI && !__HAS_X_MAILMAN_VERSION 
-describe   HAS_X_OUTGOING_SPAM_STAT    Has header claiming outbound spam scan - why trust the claim?
+describe   HAS_X_OUTGOING_SPAM_STAT    Has header claiming outbound spam scan - why trust the results?
 score      HAS_X_OUTGOING_SPAM_STAT    3.000	# limit
 tflags     HAS_X_OUTGOING_SPAM_STAT    publish
-
 
 # note: *NOT* "Message-ID" !
 header     __HAS_MESSAGEID             exists:MessageID
