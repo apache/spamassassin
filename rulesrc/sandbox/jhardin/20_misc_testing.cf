@@ -245,7 +245,7 @@ describe       FROM_MISSP_TO_UNDISC  From misspaced, To undisclosed
 #endif
 
 meta           __FROM_MISSP_REPLYTO  __FROM_RUNON && __HAS_REPLY_TO
-meta           FROM_MISSP_REPLYTO    __FROM_MISSP_REPLYTO && !__NOT_SPOOFED && !__RCD_RDNS_MTA_MESSY && !__TO___LOWER && !__COMMENT_EXISTS && !__UNSUB_LINK && !__MIME_QP && !__CTYPE_MULTIPART_ALT && !__JM_REACTOR_DATE && !__PLING_QUERY
+meta           FROM_MISSP_REPLYTO    __FROM_MISSP_REPLYTO && !__NOT_SPOOFED && !__RCD_RDNS_MTA_MESSY && !__TO___LOWER && !__COMMENT_EXISTS && !__UNSUB_LINK && !__MIME_QP && !__CTYPE_MULTIPART_ALT && !__JM_REACTOR_DATE && !__PLING_QUERY && !__DOS_HAS_LIST_UNSUB 
 describe       FROM_MISSP_REPLYTO    From misspaced, has Reply-To
 score          FROM_MISSP_REPLYTO    2.500	# limit
 
@@ -339,9 +339,9 @@ describe       MDN_BOTCHED           Malformed return receipt header
 
 # observed in spam 9/2009
 header         __HDRS_MISSP          ALL:raw =~ /^(?:Subject|From|To|Reply-To):\S/ism
-#meta           HDRS_MISSP            __HDRS_MISSP && !__TAG_EXISTS_HEAD && !__DKIM_EXISTS && !__RP_MATCHES_RCVD && !__NOT_SPOOFED && !__LCL__ENV_AND_HDR_FROM_MATCH 
-#describe       HDRS_MISSP            Misspaced headers
-#score          HDRS_MISSP            2.000	# limit
+meta           HDRS_MISSP            __HDRS_MISSP && !(__FROM_ALL_HEX && __SUBJECT_PRESENT_EMPTY)
+describe       HDRS_MISSP            Misspaced headers
+score          HDRS_MISSP            2.500	# limit
 
 header         SPAMMY_MIME_BDRY_01  Content-Type =~ /boundary="\@\@BOUNDARY"/
 describe       SPAMMY_MIME_BDRY_01  Spammy MIME boundary string
@@ -2232,7 +2232,7 @@ tflags         MALWARE_PASSWORD       publish
 #describe      NUM_FREE         Number + free
 
 # seen in spam (malware?) 07/2014
-header         __DATE_SPACEY    ALL:raw =~ /\nDate:\s{8}/ism
+#header         __DATE_SPACEY    ALL:raw =~ /\nDate:\s{8}/ism
 
 #uri           __FSL_LINK_AWS_S3_WEB_LOOSE       m,^https?://(?:[^./]+\.)*s3[^./]+\.amazonaws\.com,i
 
@@ -2316,6 +2316,10 @@ header    __FM_EDGER_HOOVER             From =~ /\bedger hoover\b/i
 body      __MYSTERY_SHOPPER             /\bmystery shoppers?\b/i
 
 header    __HAS_X_NO_RELAY              exists:X-No-Relay
+meta      HAS_X_NO_RELAY                __HAS_X_NO_RELAY && !__TO_EQ_FROM_1 
+describe  HAS_X_NO_RELAY                Has spammy header
+score     HAS_X_NO_RELAY                2.500	# limit
+
 
 header    __DUP_SUSP_HDR                ALL =~ /\n(X-No-Relay)\s*:[ 	][^\n]{1,100}\n\1\s*:[ 	]/ism
 meta      DUP_SUSP_HDR                  __DUP_SUSP_HDR
@@ -3581,13 +3585,13 @@ describe   MIXED_IMG_CASE              Has img tag in mixed case
 score      MIXED_IMG_CASE              3.000	 # limit
 tflags     MIXED_IMG_CASE              publish
 
-rawbody    __MIXED_HREF_CASE_JH        /<[Aa](?i:rea)?\s(?!HREF|href)[Hh][Rr][Ee][Ff]=/
+rawbody    __MIXED_HREF_CASE_JH        /<[Aa](?i:rea)?\s+(?!HREF|href)[Hh][Rr][Ee][Ff]=/
 meta       MIXED_HREF_CASE             __MIXED_HREF_CASE_JH
 describe   MIXED_HREF_CASE             Has href in mixed case
 score      MIXED_HREF_CASE             2.000	 # limit
 tflags     MIXED_HREF_CASE             publish
 
-meta       __LOTSA_MIXED_CASE_TAGS     (__MIXED_FONT_CASE + __MIXED_CENTER_CASE + __MIXED_AREA_CASE + __MIXED_IMG_CASE_JH + __MIXED_HREF_CASE_JH) > 2
+meta       __LOTSA_MIXED_CASE_TAGS     (__MIXED_FONT_CASE + __MIXED_CENTER_CASE + __MIXED_AREA_CASE + __MIXED_IMG_CASE_JH + __MIXED_HREF_CASE_JH) > 1
 
 # phishing content for now, may go primarly legit at some point
 uri        __URI_FIREBASEAPP           m,://[^./]+\.firebaseapp\.com/,
@@ -3669,7 +3673,7 @@ header     __HAS_X_OUTGOING_SPAM_STAT  exists:X-OutGoing-Spam-Status
 header     __HAS_X_ENTITY_ID           exists:X-Entity-ID
 header     __HAS_HEADER_STARTS_NUM     ALL =~ /^\d[-a-z0-9]*:/ism
 
-meta       HAS_X_OUTGOING_SPAM_STAT    __HAS_X_OUTGOING_SPAM_STAT && !MAILING_LIST_MULTI && !__HAS_X_MAILMAN_VERSION 
+meta       HAS_X_OUTGOING_SPAM_STAT    __HAS_X_OUTGOING_SPAM_STAT && !MAILING_LIST_MULTI && !__HAS_X_MAILMAN_VERSION && !__AUTOREPLY_ASU 
 describe   HAS_X_OUTGOING_SPAM_STAT    Has header claiming outbound spam scan - why trust the results?
 score      HAS_X_OUTGOING_SPAM_STAT    3.000	# limit
 tflags     HAS_X_OUTGOING_SPAM_STAT    publish
