@@ -1,7 +1,7 @@
 
-# Azure-hosted web applications referred to in phishing spams, generated at Sat Jan 30 15:12:15 2021
+# Azure-hosted web applications referred to in phishing spams, generated at Mon Feb  1 22:29:26 2021
 
-uri PHISH_AZURE_CLOUDAPP m;^https?://(?=[^/]+\.cloudapp\.azure\.com)(?:(?:billetedecalle\.northeurope|comprobante(?:digital\.southcentralus|fiscale\.eastus)|multa(?:detrafico\.eastus|prev\.eastus|s\.(?:eastus|southcentralus))|notificadosburofax\.eastus|penadetransitomulta\.eastus))\.cloudapp\.azure\.com/;i
+uri PHISH_AZURE_CLOUDAPP m;^https?://(?=[^/]+\.cloudapp\.azure\.com)(?:(?:b(?:illetedecalle\.northeurope|urofaxnotificado\.eastus)|comprobante(?:digital\.southcentralus|fiscale\.eastus)|multa(?:detrafico\.eastus|prev\.eastus|s\.(?:eastus|southcentralus))|notificadosburofax\.eastus|penadetransitomulta\.eastus))\.cloudapp\.azure\.com/;i
 
 describe PHISH_AZURE_CLOUDAPP Link to known phishing web application
 score PHISH_AZURE_CLOUDAPP 3.000
