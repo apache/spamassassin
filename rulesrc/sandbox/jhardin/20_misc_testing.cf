@@ -3530,10 +3530,15 @@ uri        URI_FREELOGO                m;::/www\.freepnglogos\.com/uploads;i
 describe   URI_FREELOGO                Free logo image, possible phishing
 
 # observed in tons of spam 12/2020
-rawbody    JH_SPAMMY_PATTERN01         m;<img src="(https?://[^"]{1,80}/)C([^/.]{1,30}\.jpg)">.{0,200}<img src="\1U\2";ism
+rawbody    JH_SPAMMY_PATTERN01         m;<img src=['"](https?://[^'"]{1,80}/)C([^/.]{1,30}\.jpg)['"]>.{0,200}<img src="\1U\2";ism
 describe   JH_SPAMMY_PATTERN01         Unusual pattern seen in spam campaign
 score      JH_SPAMMY_PATTERN01         3.000	# limit
 tflags     JH_SPAMMY_PATTERN01         publish
+
+rawbody    JH_SPAMMY_PATTERN02         m;<img [^>]{0,50}src=['"](https?://[^"'\s]{1,80}\.php\?)t=o(\&[^"'\s]{1,50})["'][>\s].{0,200}<a href="\1t=c\2".{0,200}<a href="\1t=u\2";ism
+describe   JH_SPAMMY_PATTERN02         Unusual pattern seen in spam campaign
+score      JH_SPAMMY_PATTERN02         3.000	# limit
+tflags     JH_SPAMMY_PATTERN02         publish
 
 # observed in tons of spam 12/2020 - already scores high without this
 rawbody    __MIXED_FONT_CASE           /<(?!FONT|font)[Ff][Oo][Nn][Tt]\s/
