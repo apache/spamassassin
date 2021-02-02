@@ -2247,7 +2247,6 @@ meta           URI_GOOGLE_PROXY       __URI_GOOGLE_PROXY && !__LONGLINE && !__ML
 describe       URI_GOOGLE_PROXY       Accessing a blacklisted URI or obscuring source of phish via Google proxy?
 tflags         URI_GOOGLE_PROXY       publish
 
-
 # Apparent good performance is an artifact of certain corpora's collection mechanism
 #meta           RPATH_NULL_CTCQ        __BOUNCE_RPATH_NULL && __CTYPE_CHARSET_QUOTED && !__VIA_ML && !__SUBJECT_ENCODED_QP && !ANY_BOUNCE_MESSAGE && !__DOS_HAS_LIST_UNSUB && !__TAG_EXISTS_STYLE && !__TAG_EXISTS_STYLE && !__HAS_THREAD_INDEX 
 #score          RPATH_NULL_CTCQ        2.000   # limit
@@ -2335,6 +2334,11 @@ uri       __GOOG_REDIR_IMG              m;^https?://[^/]*\.google\.com/url\?(?:[
 tflags    __GOOG_REDIR_IMG              multiple
 uri       __GOOG_REDIR_HTML             m;^https?://[^/]*\.google\.com/url\?(?:[^&]+\&)*q=https?://.*\.html?(?=$|\?|\&);i
 uri       __GOOG_REDIR_ARCHV            m;^https?://[^/]*\.google\.com/url\?(?:[^&]+\&)*q=https?://.*\.(?:ace|zip|7z|rar)(?=$|\?|\&);i
+
+uri       __GOOG_PROXY_IMG              m;^https?://[^.]+\.googleusercontent\.com/proxy/.*\.(?:png|gif|jpe?g)(?=$|\?|\&);i
+tflags    __GOOG_PROXY_IMG              multiple
+uri       __GOOG_PROXY_HTML             m;^https?://[^.]+\.googleusercontent\.com/proxy/.*\.html?(?=$|\?|\&);i
+uri       __GOOG_PROXY_ARCHV            m;^https?://[^.]+\.googleusercontent\.com/proxy/.*\.(?:ace|zip|7z|rar)(?=$|\?|\&);i
 
 uri       __DDG_REDIR                   m;^https?://(?:proxy|external-content)\.duckduckgo\.com/iu/\?(?:[^&]+\&)*u=https?://;i
 uri       __DDG_REDIR_IMG               m;^https?://(?:proxy|external-content)\.duckduckgo\.com/iu/\?(?:[^&]+\&)*u=https?://.*\.(?:png|gif|jpe?g)(?=$|\?|\&);i
