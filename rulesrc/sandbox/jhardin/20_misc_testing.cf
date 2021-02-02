@@ -2331,14 +2331,16 @@ score     GOOG_MALWARE_DNLD             5.000   # limit
 tflags    GOOG_MALWARE_DNLD             publish
 
 uri       __GOOG_REDIR                  m;^https?://[^/]*\.google\.com/url\?;i
-uri       __GOOG_REDIR_IMG              m;^https?://www\.google\.com/url\?.*q=https?://.*\.(?:png|gif|jpe?g)$;i
-uri       __GOOG_REDIR_HTML             m;^https?://www\.google\.com/url\?.*q=https?://.*\.html?$;i
-uri       __GOOG_REDIR_ARCHV            m;^https?://www\.google\.com/url\?.*q=https?://.*\.(?:ace|zip|7z|rar)$;i
+uri       __GOOG_REDIR_IMG              m;^https?://[^/]*\.google\.com/url\?(?:[^&]+\&)*q=https?://.*\.(?:png|gif|jpe?g)(?=$|\?|\&);i
+tflags    __GOOG_REDIR_IMG              multiple
+uri       __GOOG_REDIR_HTML             m;^https?://[^/]*\.google\.com/url\?(?:[^&]+\&)*q=https?://.*\.html?(?=$|\?|\&);i
+uri       __GOOG_REDIR_ARCHV            m;^https?://[^/]*\.google\.com/url\?(?:[^&]+\&)*q=https?://.*\.(?:ace|zip|7z|rar)(?=$|\?|\&);i
 
-uri       __DDG_REDIR                   m;^https?://proxy\.duckduckgo\.com/iu/\?.*u=https?://;i
-uri       __DDG_REDIR_IMG               m;^https?://proxy\.duckduckgo\.com/iu/\?.*u=https?://.*\.(?:png|gif|jpe?g)$;i
-uri       __DDG_REDIR_HTML              m;^https?://proxy\.duckduckgo\.com/iu/\?.*u=https?://.*\.html?$;i
-uri       __DDG_REDIR_ARCHV             m;^https?://proxy\.duckduckgo\.com/iu/\?.*u=https?://.*\.(?:ace|zip|7z|rar)$;i
+uri       __DDG_REDIR                   m;^https?://(?:proxy|external-content)\.duckduckgo\.com/iu/\?(?:[^&]+\&)*u=https?://;i
+uri       __DDG_REDIR_IMG               m;^https?://(?:proxy|external-content)\.duckduckgo\.com/iu/\?(?:[^&]+\&)*u=https?://.*\.(?:png|gif|jpe?g)(?=$|\?|\&);i
+tflags    __DDG_REDIR_IMG               multiple
+uri       __DDG_REDIR_HTML              m;^https?://(?:proxy|external-content)\.duckduckgo\.com/iu/\?(?:[^&]+\&)*u=https?://.*\.html?(?=$|\?|\&);i
+uri       __DDG_REDIR_ARCHV             m;^https?://(?:proxy|external-content)\.duckduckgo\.com/iu/\?(?:[^&]+\&)*u=https?://.*\.(?:ace|zip|7z|rar)(?=$|\?|\&);i
 
 
 body      ONLINE_MKTG_CNSLT             /\bonline marketing consultant\b/i
