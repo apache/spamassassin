@@ -339,9 +339,10 @@ describe       MDN_BOTCHED           Malformed return receipt header
 
 # observed in spam 9/2009
 header         __HDRS_MISSP          ALL:raw =~ /^(?:Subject|From|To|Reply-To):\S/ism
-meta           HDRS_MISSP            __HDRS_MISSP && !(__FROM_ALL_HEX && __SUBJECT_PRESENT_EMPTY)
+meta           HDRS_MISSP            __HDRS_MISSP && !ALL_TRUSTED && !(__FROM_ALL_HEX && __SUBJECT_PRESENT_EMPTY)
 describe       HDRS_MISSP            Misspaced headers
 score          HDRS_MISSP            2.500	# limit
+tflags         HDRS_MISSP            publish
 
 header         SPAMMY_MIME_BDRY_01  Content-Type =~ /boundary="\@\@BOUNDARY"/
 describe       SPAMMY_MIME_BDRY_01  Spammy MIME boundary string
@@ -2243,7 +2244,7 @@ describe       URI_DQ_UNSUB     IP-address unsubscribe URI
 tflags         URI_DQ_UNSUB     publish
 
 uri            __URI_GOOGLE_PROXY     m;^https?://[^.]+\.googleusercontent\.com/proxy/;i
-meta           URI_GOOGLE_PROXY       __URI_GOOGLE_PROXY && !__LONGLINE && !__ML1 && !__FSL_RELAY_GOOGLE && !__FROM_LOWER && !__RCD_RDNS_MAIL 
+meta           URI_GOOGLE_PROXY       __URI_GOOGLE_PROXY && !__FSL_RELAY_GOOGLE && !__TO___LOWER && !__MSGID_OK_HEX && !__HAS_CAMPAIGNID 
 describe       URI_GOOGLE_PROXY       Accessing a blacklisted URI or obscuring source of phish via Google proxy?
 tflags         URI_GOOGLE_PROXY       publish
 
@@ -2319,6 +2320,7 @@ header    __HAS_X_NO_RELAY              exists:X-No-Relay
 meta      HAS_X_NO_RELAY                __HAS_X_NO_RELAY && !__TO_EQ_FROM_1 
 describe  HAS_X_NO_RELAY                Has spammy header
 score     HAS_X_NO_RELAY                2.500	# limit
+tflags    HAS_X_NO_RELAY                publish
 
 
 header    __DUP_SUSP_HDR                ALL =~ /\n(X-No-Relay)\s*:[ 	][^\n]{1,100}\n\1\s*:[ 	]/ism
@@ -3673,7 +3675,7 @@ header     __HAS_X_OUTGOING_SPAM_STAT  exists:X-OutGoing-Spam-Status
 header     __HAS_X_ENTITY_ID           exists:X-Entity-ID
 header     __HAS_HEADER_STARTS_NUM     ALL =~ /^\d[-a-z0-9]*:/ism
 
-meta       HAS_X_OUTGOING_SPAM_STAT    __HAS_X_OUTGOING_SPAM_STAT && !MAILING_LIST_MULTI && !__HAS_X_MAILMAN_VERSION && !__AUTOREPLY_ASU 
+meta       HAS_X_OUTGOING_SPAM_STAT    __HAS_X_OUTGOING_SPAM_STAT && !MAILING_LIST_MULTI && !__HAS_X_MAILMAN_VERSION && !__AUTOREPLY_ASU && !__THREAD_INDEX_GOOD 
 describe   HAS_X_OUTGOING_SPAM_STAT    Has header claiming outbound spam scan - why trust the results?
 score      HAS_X_OUTGOING_SPAM_STAT    3.000	# limit
 tflags     HAS_X_OUTGOING_SPAM_STAT    publish
@@ -3726,4 +3728,8 @@ tflags     GOOG_REDIR_DOCUSIGN         publish
 
 header     __LUNSUB_BEFORE_SUBJDT      ALL =~ /^List-unsubscribe: (?:[^\n]+\n){1,40}^(?:Subject|Date): /ism
 header     __LUNSUB_BRKT_MALF          List-Unsubscribe =~ /<[^>]*$/
+
+header     __REPTO_SPOTTY              Reply-To:addr =~ /^(?:[a-z]{1,3}\.){4,}[a-z]+\d+\@/i
+
+header     __MIXED_CTYPE_CASE          Content-Type =~ m;^(?i:text/)(?!html|HTML)[Hh][Tt][Mm][Ll];
 
