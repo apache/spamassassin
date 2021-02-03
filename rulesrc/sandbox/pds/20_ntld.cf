@@ -102,9 +102,7 @@ tflags   SEO_SUSP_NTLD publish
 describe SEO_SUSP_NTLD SEO offer from suspicious TLD
 score    SEO_SUSP_NTLD 1.2 # limit
 
-body     __PDS_THIS_IS_ADV  /This is an advert(?:isement)?/i
-
-meta     THIS_IS_ADV_SUSP_NTLD __FROM_ADDRLIST_SUSPNTLD && __PDS_THIS_IS_ADV
+meta     THIS_IS_ADV_SUSP_NTLD __FROM_ADDRLIST_SUSPNTLD && __ADMITS_SPAM
 tflags   THIS_IS_ADV_SUSP_NTLD publish
 describe THIS_IS_ADV_SUSP_NTLD This is an advertisement from a suspicious TLD
 score    THIS_IS_ADV_SUSP_NTLD 1.5 # limit
