@@ -27,6 +27,9 @@ Mail::SpamAssassin::Plugin::OLEVBMacro - search attached documents for evidence 
     body     OLEMACRO eval:check_olemacro()
     describe OLEMACRO Attachment has an Office Macro
 
+    body     OLEOBJ eval:check_oleobject()
+    describe OLEOBJ Attachment has an Ole Object
+
     body     OLEMACRO_MALICE eval:check_olemacro_malice()
     describe OLEMACRO_MALICE Potentially malicious Office Macro
 
@@ -124,6 +127,7 @@ sub new {
   $self->set_config($mailsaobject->{conf});
 
   $self->register_eval_rule("check_olemacro", $Mail::SpamAssassin::Conf::TYPE_BODY_EVALS);
+  $self->register_eval_rule("check_oleobject", $Mail::SpamAssassin::Conf::TYPE_BODY_EVALS);
   $self->register_eval_rule("check_olemacro_csv", $Mail::SpamAssassin::Conf::TYPE_BODY_EVALS);
   $self->register_eval_rule("check_olemacro_malice", $Mail::SpamAssassin::Conf::TYPE_BODY_EVALS);
   $self->register_eval_rule("check_olemacro_renamed", $Mail::SpamAssassin::Conf::TYPE_BODY_EVALS);
@@ -403,6 +407,14 @@ sub check_olemacro {
   _check_attachments(@_) unless exists $pms->{olemacro_exists};
 
   return $pms->{olemacro_exists};
+}
+
+sub check_oleobject {
+  my ($self,$pms,$body,$name) = @_;
+
+  _check_attachments(@_) unless exists $pms->{oleobject_exists};
+
+  return $pms->{oleobject_exists};
 }
 
 sub check_olemacro_csv {
@@ -787,9 +799,12 @@ sub _check_macrotype_doc {
     'word/vbaproject.bin' => 'word2k7',
     'macros/vba/_vba_project' => 'word97',
     'xl/vbaproject.bin' => 'xl2k7',
-    'xl/embeddings/oleobject1.bin' => 'xl2k13',
     '_vba_project_cur/vba/_vba_project' => 'xl97',
     'ppt/vbaproject.bin' => 'ppt2k7',
+  );
+
+  my %olefiles = (
+    'xl/embeddings/oleobject1.bin' => 'xl2k13',
   );
 
   my @members = $zip->members();
@@ -799,6 +814,11 @@ sub _check_macrotype_doc {
       dbg("Found $macrofiles{$mname} vba file");
       $pms->{olemacro_exists} = 1;
       last;
+    }
+    if (exists($olefiles{lc($mname)})) {
+        dbg("Found $olefiles{$mname} ole file");
+        $pms->{oleobject_exists} = 1;
+        last;
     }
   }
 
