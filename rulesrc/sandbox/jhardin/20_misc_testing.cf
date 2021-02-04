@@ -470,8 +470,8 @@ tflags         MANY_SPAN_IN_TEXT   publish
 #uri            __FEEDPROXY_URI     m;http://feedproxy\.google\.com/;i
 #rawbody        __FEEDPROXY         m;http://feedproxy\.google\.com/;i
 #tflags         __FEEDPROXY         multiple maxhits=5
-#meta           MANY_GOOG_PROXY     __FEEDPROXY > 4
-#describe       MANY_GOOG_PROXY     Many Google feedproxy URIs
+#meta           MANY_GOOG_FDPROXY   __FEEDPROXY > 4
+#describe       MANY_GOOG_FDPROXY   Many Google feedproxy URIs
 
 rawbody        TINY_FLOAT         /\bstyle\s*=\s*"[^"]{0,40}?(?:(?:FONT-SIZE\s*:\s+\dpx|FLOAT\s*:\s+(?:right|left))(?:;\s+)?(?:(?!(?:FONT-SIZE|FLOAT))\w+:\s+\w+;?\s*)*){2}/i
 describe       TINY_FLOAT         Has small-font floating HTML - text obfuscation?
@@ -717,7 +717,7 @@ tflags         COMMENT_GIBBERISH        publish
 
 body           __BIGNUM_EMAILS            /\b(?:thousand|million|\d[,1-9]{0,6}(?:[,0]+k?|k))\s(?:(?!and|or|your|place|baby)\w+\s)?(?:e-?mail(?:\saddresses|s?)|fax numbers|leads|names)\b/i
 tflags         __BIGNUM_EMAILS            multiple maxhits=5
-meta           BIGNUM_EMAILS              __BIGNUM_EMAILS && !BIGNUM_EMAILS_MANY && !__STY_INVIS && !__HDRS_LCASE_KNOWN && !__TAG_EXISTS_CENTER && !__HAS_TNEF 
+meta           BIGNUM_EMAILS              __BIGNUM_EMAILS && !BIGNUM_EMAILS_MANY && !__RDNS_HEX 
 describe       BIGNUM_EMAILS              Lots of email addresses/leads
 score          BIGNUM_EMAILS              3.00		# limit
 tflags         BIGNUM_EMAILS              publish
@@ -726,7 +726,7 @@ meta           __BIGNUM_EMAILS_2          __BIGNUM_EMAILS > 1
 meta           __BIGNUM_EMAILS_3          __BIGNUM_EMAILS > 2
 meta           __BIGNUM_EMAILS_4          __BIGNUM_EMAILS > 3
 meta           __BIGNUM_EMAILS_5          __BIGNUM_EMAILS > 4
-meta           BIGNUM_EMAILS_MANY         __BIGNUM_EMAILS_5 && !__STY_INVIS && !__HDRS_LCASE_KNOWN && !__TAG_EXISTS_CENTER
+meta           BIGNUM_EMAILS_MANY         __BIGNUM_EMAILS_3 && !__HAS_ERRORS_TO 
 describe       BIGNUM_EMAILS_MANY         Lots of email addresses/leads, over and over
 score          BIGNUM_EMAILS_MANY         3.00		# limit
 tflags         BIGNUM_EMAILS_MANY         publish
@@ -3639,11 +3639,12 @@ header     __REPTO_LONG                Reply-To:addr =~ /[a-z]{25,}\d*@/i
 header     __REPTO_MISSPACED           ALL:raw =~ /^Reply-To:\S/ism
 
 # content+respond+unsub texts as free hosted images
+# spammer response: now only two hosted images
 uri        __IMGUR_IMG                 m,^https?://i\.imgur\.com/[a-z0-9]{7}\.(?:png|gif|jpe?g)$,i
 tflags     __IMGUR_IMG                 multiple maxhits=4
 meta       __IMGUR_IMG_2               __IMGUR_IMG == 2
 meta       __IMGUR_IMG_3               __IMGUR_IMG == 3
-meta       HOSTED_IMG_MULTI_PUB_01     __IMGUR_IMG_3 && !__DATE_LOWER 
+meta       HOSTED_IMG_MULTI_PUB_01     (__IMGUR_IMG_2 || __IMGUR_IMG_3) && !__DATE_LOWER 
 describe   HOSTED_IMG_MULTI_PUB_01     Multiple hosted images at public site
 score      HOSTED_IMG_MULTI_PUB_01     3.000	# limit
 tflags     HOSTED_IMG_MULTI_PUB_01     publish
@@ -3730,14 +3731,24 @@ tflags     GOOG_REDIR_DOCUSIGN         publish
 header     __LUNSUB_BEFORE_SUBJDT      ALL =~ /^List-unsubscribe: (?:[^\n]+\n){1,40}^(?:Subject|Date): /ism
 header     __LUNSUB_BRKT_MALF          List-Unsubscribe =~ /<[^>]*$/
 
-header     __REPTO_SPOTTY              Reply-To:addr =~ /^(?:[a-z]{1,3}\.){4,}[a-z]+\d+\@/i
+header     REPTO_SPOTTY                Reply-To:addr =~ /^(?:[a-z]{1,3}\.){4,}[a-z]+\d+\@/i
 
-header     __MIXED_CTYPE_CASE          Content-Type =~ m;^(?i:text/)(?!html|HTML)[Hh][Tt][Mm][Ll];
+header     MIXED_CTYPE_CASE            Content-Type =~ m;^(?i:text/)(?!html|HTML)[Hh][Tt][Mm][Ll];
 
-header     __XM_ONE_WORD               X-Mailer =~ /^\s*\w+\s*$/
+header     __XM_ONE_WORD               X-Mailer =~ /^\s*(?!php)\w+\s*$/
 header     __XM_DIGITS_ONLY            X-Mailer =~ /^\s*\d+\s*$/
-header     __XM_ONE_CASE               X-Mailer =~ /^(?:[^a-z]+|[^A-Z]+)$/
-header     __XM_RANDOM                 X-Mailer =~ /q(!qmail)[^u\d]/i
+header     __XM_UC_ONLY                X-Mailer =~ /^[^a-z]+$/
+header     __XM_LC_ONLY                X-Mailer =~ /^[^A-Z]+$/
+header     __XM_RANDOM                 X-Mailer =~ /q(?!qmail)[^u\d]/i
 header     __XM_LIGHT_HEAVY            X-Mailer =~ /\b(?:light|(?<!::)lite|standard|business|pro(?:fessional)?|educational|personal)\b/i
+
+meta       XM_DIGITS_ONLY              __XM_DIGITS_ONLY
+describe   XM_DIGITS_ONLY              X-Mailer malformed
+score      XM_DIGITS_ONLY              3.000	# limit
+
+meta       XM_SPAMMY                   (__XM_LIGHT_HEAVY && !__MSGID_OK_HEX && !__HAS_X_BEEN_THERE) || (__XM_ONE_WORD && !__XM_DIGITS_ONLY && !__HAS_PHP_ORIG_SCRIPT && !__REPTO_QUOTE)
+describe   XM_SPAMMY                   X-Mailer random or otherwise spammy-looking
+score      XM_SPAMMY                   3.000	# limit
+
 
 
