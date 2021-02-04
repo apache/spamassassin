@@ -3640,7 +3640,8 @@ header     __REPTO_MISSPACED           ALL:raw =~ /^Reply-To:\S/ism
 
 # content+respond+unsub texts as free hosted images
 uri        __IMGUR_IMG                 m,^https?://i\.imgur\.com/[a-z0-9]{7}\.(?:png|gif|jpe?g)$,i
-tflags     __IMGUR_IMG                 multiple maxhits=5
+tflags     __IMGUR_IMG                 multiple maxhits=4
+meta       __IMGUR_IMG_2               __IMGUR_IMG == 2
 meta       __IMGUR_IMG_3               __IMGUR_IMG == 3
 meta       HOSTED_IMG_MULTI_PUB_01     __IMGUR_IMG_3 && !__DATE_LOWER 
 describe   HOSTED_IMG_MULTI_PUB_01     Multiple hosted images at public site
@@ -3732,4 +3733,11 @@ header     __LUNSUB_BRKT_MALF          List-Unsubscribe =~ /<[^>]*$/
 header     __REPTO_SPOTTY              Reply-To:addr =~ /^(?:[a-z]{1,3}\.){4,}[a-z]+\d+\@/i
 
 header     __MIXED_CTYPE_CASE          Content-Type =~ m;^(?i:text/)(?!html|HTML)[Hh][Tt][Mm][Ll];
+
+header     __XM_ONE_WORD               X-Mailer =~ /^\s*\w+\s*$/
+header     __XM_DIGITS_ONLY            X-Mailer =~ /^\s*\d+\s*$/
+header     __XM_ONE_CASE               X-Mailer =~ /^(?:[^a-z]+|[^A-Z]+)$/
+header     __XM_RANDOM                 X-Mailer =~ /q(!qmail)[^u\d]/i
+header     __XM_LIGHT_HEAVY            X-Mailer =~ /\b(?:light|(?<!::)lite|standard|business|pro(?:fessional)?|educational|personal)\b/i
+
 
