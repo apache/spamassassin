@@ -715,7 +715,7 @@ tflags         COMMENT_GIBBERISH        publish
 #body           LOTSA_EMAILS               /\b(?:thousand|million)\se-?mail(?:\saddresse)?s?\b/i
 #tflags         LOTSA_EMAILS               nopublish
 
-body           __BIGNUM_EMAILS            /\b(?:thousand|million|\d[,\d]{4,})\s(?:(?!and|or|your|place|baby)\w+\s)?(?:e-?mail(?:\saddresses|s?)|leads|names)\b/i
+body           __BIGNUM_EMAILS            /\b(?:thousand|million|\d[,1-9]{0,6}(?:[,0]+k?|k))\s(?:(?!and|or|your|place|baby)\w+\s)?(?:e-?mail(?:\saddresses|s?)|fax numbers|leads|names)\b/i
 tflags         __BIGNUM_EMAILS            multiple maxhits=5
 meta           BIGNUM_EMAILS              __BIGNUM_EMAILS && !BIGNUM_EMAILS_MANY && !__STY_INVIS && !__HDRS_LCASE_KNOWN && !__TAG_EXISTS_CENTER && !__HAS_TNEF 
 describe       BIGNUM_EMAILS              Lots of email addresses/leads
