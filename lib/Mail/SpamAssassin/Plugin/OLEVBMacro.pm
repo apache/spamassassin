@@ -786,7 +786,6 @@ sub _check_macrotype_doc {
     'word/vbaproject.bin' => 'word2k7',
     'macros/vba/_vba_project' => 'word97',
     'xl/vbaproject.bin' => 'xl2k7',
-    'xl/embeddings/oleobject1.bin' => 'xl2k13',
     '_vba_project_cur/vba/_vba_project' => 'xl97',
     'ppt/vbaproject.bin' => 'ppt2k7',
   );
