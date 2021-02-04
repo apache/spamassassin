@@ -72,6 +72,8 @@ score FILL_THIS_FORM_LONG      2.00
 # similar: .990 S/O, hits primarily spam <= 5 points
 # 01/07/13 GA likes it now
 #score EMAIL_URI_PHISH 	        2.50
+# Reliable but not widespread (low corpus count, ahead of the curve?), boost the score
+score PHISH_AZURE_CLOUDAPP     3.50
 
 # hege
 # FPs reported [bug 6417], GA assigning 3+ points
@@ -84,7 +86,8 @@ score FILL_THIS_FORM_LONG      2.00
 score RP_MATCHES_RCVD           -0.001
 
 # until rule or rescoring issues sorted, hits 20%+ ham
-score STYLE_GIBBERISH 0.1
+# too problematic, disabled entirely
+#score STYLE_GIBBERISH 0.1
 
 # jhardin
 # Limit some network scores until rule changes can be evaluated by weekly net masscheck
