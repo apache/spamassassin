@@ -866,7 +866,8 @@ sub _print_overlap_ratios {
 
   foreach my $ratio (sort { $b <=> $a } keys %$hash1) {
     $ratio ||= 0;
-    last if ($ratio < 20);     # 20% cutoff
+    last if ($ratio < 20 && $type eq 'spam');	# 20% cutoff for spam
+    #last if ($ratio < 1 && $type eq 'ham');	# follow ham all the way to zero for tuning analysis unless this is uncommented and set
     my $rules = _prettify_overlap_rules($r1, $hash1->{$ratio});
     next if ($rules eq '');
 
@@ -874,6 +875,9 @@ sub _print_overlap_ratios {
       $r2 =~ s/\[(.*?)\]$//;
       my $reverse_ratio = $1 || 0;
       next unless defined $r2;
+
+      ## If the ham hits are negligible, and there are spam hits, then it's not useful for tuning - skip
+      #next if ($ratio < 2 && $type eq 'ham' && exists $other_type_rules{$r2} );
 
       my $is_subrule = ($meta_subrule_pairs{"$r1.$r2"}
                       || $meta_subrule_pairs{"$r2.$r1"});
@@ -949,9 +953,9 @@ sub _hmap_to_overlap_ratio {
 
   my $a1_and_a2 = unpack("%32b*", ($hmap1 & $hmap2));
 
-  # round rather than truncate
-  my $a1_in_a2 = int ((($a1_and_a2 / ($a2 || 0.0001))*100) + 0.50);
-  my $a2_in_a1 = int ((($a1_and_a2 / ($a1 || 0.0001))*100) + 0.50);
+  # ceiling rather than truncate, so that small overlaps are not lost
+  my $a1_in_a2 = int ((($a1_and_a2 / ($a2 || 0.0001))*100) + 0.99);
+  my $a2_in_a1 = int ((($a1_and_a2 / ($a1 || 0.0001))*100) + 0.99);
 
   return ($a1_in_a2, $a2_in_a1);
 }
