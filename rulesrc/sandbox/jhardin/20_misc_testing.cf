@@ -717,10 +717,16 @@ tflags         COMMENT_GIBBERISH        publish
 
 body           __BIGNUM_EMAILS            /\b(?:thousand|million|\d[,1-9]{0,6}(?:[,0]+k?|k))\s(?:(?!and|or|your|place|baby)\w+\s)?(?:e-?mail(?:\saddresses|s?)|fax numbers|leads|names)\b/i
 tflags         __BIGNUM_EMAILS            multiple maxhits=5
-meta           BIGNUM_EMAILS              __BIGNUM_EMAILS && !BIGNUM_EMAILS_MANY && !__RDNS_HEX 
+meta           BIGNUM_EMAILS              __BIGNUM_EMAILS && !BIGNUM_EMAILS_MANY && !__BIGNUM_EMAILS_FREEM && !__RDNS_HEX && !MIME_QP_LONG_LINE 
 describe       BIGNUM_EMAILS              Lots of email addresses/leads
-score          BIGNUM_EMAILS              3.00		# limit
+score          BIGNUM_EMAILS              2.50		# limit
 tflags         BIGNUM_EMAILS              publish
+
+meta           __BIGNUM_EMAILS_FREEM      __BIGNUM_EMAILS && __freemail_hdr_replyto
+meta           BIGNUM_EMAILS_FREEM        __BIGNUM_EMAILS_FREEM
+describe       BIGNUM_EMAILS_FREEM        Lots of email addresses/leads, free email account
+score          BIGNUM_EMAILS_FREEM        3.00		# limit
+tflags         BIGNUM_EMAILS_FREEM        publish
 
 meta           __BIGNUM_EMAILS_2          __BIGNUM_EMAILS > 1
 meta           __BIGNUM_EMAILS_3          __BIGNUM_EMAILS > 2
@@ -3745,8 +3751,9 @@ header     __XM_LIGHT_HEAVY            X-Mailer =~ /\b(?:light|(?<!::)lite|stand
 meta       XM_DIGITS_ONLY              __XM_DIGITS_ONLY
 describe   XM_DIGITS_ONLY              X-Mailer malformed
 score      XM_DIGITS_ONLY              3.000	# limit
+tflags     XM_DIGITS_ONLY              publish
 
-meta       XM_SPAMMY                   (__XM_LIGHT_HEAVY && !__MSGID_OK_HEX && !__HAS_X_BEEN_THERE) || (__XM_ONE_WORD && !__XM_DIGITS_ONLY && !__HAS_PHP_ORIG_SCRIPT && !__REPTO_QUOTE)
+meta       XM_SPAMMY                   ((__XM_LIGHT_HEAVY && !__MSGID_OK_HEX && !__HAS_X_BEEN_THERE && !__SPAN_INVIS) || (__XM_ONE_WORD && !__XM_DIGITS_ONLY && !__HAS_PHP_ORIG_SCRIPT && !__REPTO_QUOTE && !__L_CTE_7BIT)) && !__HAS_ERRORS_TO && !__HAS_CAMPAIGNID 
 describe   XM_SPAMMY                   X-Mailer random or otherwise spammy-looking
 score      XM_SPAMMY                   3.000	# limit
 
