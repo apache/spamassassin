@@ -732,7 +732,7 @@ meta           __BIGNUM_EMAILS_2          __BIGNUM_EMAILS > 1
 meta           __BIGNUM_EMAILS_3          __BIGNUM_EMAILS > 2
 meta           __BIGNUM_EMAILS_4          __BIGNUM_EMAILS > 3
 meta           __BIGNUM_EMAILS_5          __BIGNUM_EMAILS > 4
-meta           BIGNUM_EMAILS_MANY         __BIGNUM_EMAILS_3 && !__HAS_ERRORS_TO && !__HAS_CAMPAIGNID 
+meta           BIGNUM_EMAILS_MANY         __BIGNUM_EMAILS_3 && !__HAS_ERRORS_TO && !__HAS_CAMPAIGNID && !__DATE_LOWER 
 describe       BIGNUM_EMAILS_MANY         Lots of email addresses/leads, over and over
 score          BIGNUM_EMAILS_MANY         3.00		# limit
 tflags         BIGNUM_EMAILS_MANY         publish
@@ -3741,11 +3741,13 @@ header     REPTO_SPOTTY                Reply-To:addr =~ /^(?:[a-z]{1,3}\.){4,}[a
 
 header     MIXED_CTYPE_CASE            Content-Type =~ m;^(?i:text/)(?!html|HTML)[Hh][Tt][Mm][Ll];
 
-header     __XM_ONE_WORD               X-Mailer =~ /^\s*(?!php)\w+\s*$/
+header     __XM_ONE_WORD               X-Mailer =~ /^\s*\w+\s*$/
+header     __XM_ONE_WORD_UNKNOWN       X-Mailer =~ /^\s*(?!php|msgsend|sendhtml|liveagent|(?:cheetah|xyz|swift)mailer)\w+\s*$/
+header     __XM_STARTS_DIGITS          X-Mailer =~ /^\s*\d+/
 header     __XM_DIGITS_ONLY            X-Mailer =~ /^\s*\d+\s*$/
 header     __XM_UC_ONLY                X-Mailer =~ /^[^a-z]+$/
 header     __XM_LC_ONLY                X-Mailer =~ /^[^A-Z]+$/
-header     __XM_RANDOM                 X-Mailer =~ /q(?!qmail)[^u\d]/i
+header     __XM_RANDOM                 X-Mailer =~ /q(?!qmail|\d|[-\w]*=+;)[^u]/i
 header     __XM_LIGHT_HEAVY            X-Mailer =~ /\b(?:light|(?<!::)lite|standard|business|pro(?:fessional)?|educational|personal)\b/i
 
 meta       XM_DIGITS_ONLY              __XM_DIGITS_ONLY
@@ -3753,7 +3755,12 @@ describe   XM_DIGITS_ONLY              X-Mailer malformed
 score      XM_DIGITS_ONLY              3.000	# limit
 tflags     XM_DIGITS_ONLY              publish
 
-meta       XM_SPAMMY                   ((__XM_LIGHT_HEAVY && !__MSGID_OK_HEX && !__HAS_X_BEEN_THERE && !__SPAN_INVIS) || (__XM_ONE_WORD && !__XM_DIGITS_ONLY && !__HAS_PHP_ORIG_SCRIPT && !__REPTO_QUOTE && !__L_CTE_7BIT)) && !__HAS_ERRORS_TO && !__HAS_CAMPAIGNID && !__TVD_PH_BODY_ACCOUNTS_POST && !__HAS_X_BEEN_THERE
+meta       XM_RANDOM                   __XM_RANDOM
+describe   XM_RANDOM                   X-Mailer apparently random
+score      XM_RANDOM                   3.000	# limit
+tflags     XM_RANDOM                   publish
+
+meta       XM_SPAMMY                   ((__XM_LIGHT_HEAVY && !__MSGID_OK_HEX && !__HAS_X_BEEN_THERE && !__SPAN_INVIS) || (__XM_ONE_WORD_UNKNOWN && !__XM_DIGITS_ONLY && !__HAS_PHP_ORIG_SCRIPT && !__REPTO_QUOTE && !__L_CTE_7BIT)) && !__HAS_ERRORS_TO && !__HAS_CAMPAIGNID && !__TVD_PH_BODY_ACCOUNTS_POST && !__HAS_X_BEEN_THERE && !__HAS_THREAD_INDEX && !__HAS_TNEF && !__HDR_RCVD_ALIBABA
 describe   XM_SPAMMY                   X-Mailer random or otherwise spammy-looking
 score      XM_SPAMMY                   3.000	# limit
 
