@@ -12,8 +12,8 @@ else
   meta    __PDS_QP_1024 0
 endif
 
-meta     __PDS_MSG_512 (__KAM_BODY_LENGTH_LT_512 || __HTML_LENGTH_512 || __PDS_QP_512)
-meta     __PDS_MSG_1024 (__KAM_BODY_LENGTH_LT_1024 || __PDS_HTML_LENGTH_1024 || __PDS_QP_1024)
+meta     __PDS_MSG_512 (__KAM_BODY_LENGTH_LT_512 || __HTML_LENGTH_512)
+meta     __PDS_MSG_1024 (__KAM_BODY_LENGTH_LT_1024 || __PDS_HTML_LENGTH_1024)
 
 ifplugin Mail::SpamAssassin::Plugin::WLBLEval
 if (version >= 3.004000)
@@ -843,7 +843,7 @@ meta     PDS_SHORTFWD_URISHRT_FP (__PDS_URISHORTENER || __URL_SHORTENER) && __HS
 describe PDS_SHORTFWD_URISHRT_FP Apparently a short fwd/re with URI shortener
 score    PDS_SHORTFWD_URISHRT_FP 1.5 # limit
 
-meta     PDS_SHORTFWD_URISHRT_QP (__PDS_URISHORTENER || __URL_SHORTENER) && __HS_SUBJ_RE_FW && __T_PDS_MSG_512 && !PDS_SHORTFWD_URISHRT_FP
+meta     PDS_SHORTFWD_URISHRT_QP (__PDS_URISHORTENER || __URL_SHORTENER) && __HS_SUBJ_RE_FW && __PDS_MSG_512 && !PDS_SHORTFWD_URISHRT_FP
 describe PDS_SHORTFWD_URISHRT_QP Apparently a short fwd/re with URI shortener
 score    PDS_SHORTFWD_URISHRT_QP 1.5 # limit
 
