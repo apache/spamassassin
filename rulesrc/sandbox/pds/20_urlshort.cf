@@ -5,13 +5,15 @@ ifplugin Mail::SpamAssassin::Plugin::MIMEEval
   meta    __PDS_QP_128       (__MIME_QPC > 0) && (__MIME_QPC < 128)
   meta    __PDS_QP_512       (__MIME_QPC > 0) && (__MIME_QPC < 512)
   meta    __PDS_QP_1024      (__MIME_QPC > 0) && (__MIME_QPC < 1024)
+else
+  meta    __PDS_QP_64 0
+  meta    __PDS_QP_128 0
+  meta    __PDS_QP_512 0
+  meta    __PDS_QP_1024 0
 endif
 
-meta     __PDS_MSG_512 (__KAM_BODY_LENGTH_LT_512 || __HTML_LENGTH_512)
-meta     __PDS_MSG_1024 (__KAM_BODY_LENGTH_LT_1024 || __PDS_HTML_LENGTH_1024)
-
-meta     __T_PDS_MSG_512 (__KAM_BODY_LENGTH_LT_512 || __HTML_LENGTH_512 || __PDS_QP_512)
-meta     __T_PDS_MSG_1024 (__KAM_BODY_LENGTH_LT_1024 || __PDS_HTML_LENGTH_1024 || __PDS_QP_1024)
+meta     __PDS_MSG_512 (__KAM_BODY_LENGTH_LT_512 || __HTML_LENGTH_512 || __PDS_QP_512)
+meta     __PDS_MSG_1024 (__KAM_BODY_LENGTH_LT_1024 || __PDS_HTML_LENGTH_1024 || __PDS_QP_1024)
 
 ifplugin Mail::SpamAssassin::Plugin::WLBLEval
 if (version >= 3.004000)
@@ -833,7 +835,13 @@ reuse    PDS_SHORTFWD_URISHRT
 
 header   __PDS_SUBJ_FWD1 Subject =~ /^\s*(fwd?|re)\b/i
 
-meta     __PDS_SUBJ_FWD __PDS_SUBJ_FWD1
+meta     __PDS_SUBJ_FWD (__PDS_SUBJ_FWD1 || __HS_SUBJ_RE_FW)
+
+meta     PDS_URISHRT_LOCALPART_SUBJ LOCALPART_IN_SUBJECT && (__PDS_URISHORTENER || __URL_SHORTENER) && __PDS_MSG_1024
+describe PDS_URISHRT_LOCALPART_SUBJ Localpart of To in subject
+score    PDS_URISHRT_LOCALPART_SUBJ 1.0
+
+meta     __PDS_TO_SUBJ_URISHRT __TO_IN_SUBJ && (__PDS_URISHORTENER || __URL_SHORTENER) && __PDS_MSG_1024
 
 meta     PDS_SHORTFWD_URISHRT_FP (__PDS_URISHORTENER || __URL_SHORTENER) && __PDS_SUBJ_FWD && __PDS_MSG_512
 describe PDS_SHORTFWD_URISHRT_FP Apparently a short fwd/re with URI shortener
