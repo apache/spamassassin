@@ -3742,7 +3742,7 @@ header     REPTO_SPOTTY                Reply-To:addr =~ /^(?:[a-z]{1,3}\.){4,}[a
 header     MIXED_CTYPE_CASE            Content-Type =~ m;^(?i:text/)(?!html|HTML)[Hh][Tt][Mm][Ll];
 
 header     __XM_ONE_WORD               X-Mailer =~ /^\s*\w+\s*$/
-header     __XM_ONE_WORD_UNKNOWN       X-Mailer =~ /^\s*(?!php|msgsend|sendhtml|liveagent|(?:cheetah|xyz|swift)mailer)\w+\s*$/
+header     __XM_ONE_WORD_UNKNOWN       X-Mailer =~ /^\s*(?!php|msgsend|sendhtml|liveagent|(?:cheetah|xyz|swift)mailer|dmdroid|codeigniter|sendinblue|host(?:odo|edsimply))\w+\s*$/
 header     __XM_STARTS_DIGITS          X-Mailer =~ /^\s*\d+/
 header     __XM_DIGITS_ONLY            X-Mailer =~ /^\s*\d+\s*$/
 header     __XM_UC_ONLY                X-Mailer =~ /^[^a-z]+$/
