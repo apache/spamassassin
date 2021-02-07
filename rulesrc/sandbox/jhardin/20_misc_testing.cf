@@ -732,7 +732,7 @@ meta           __BIGNUM_EMAILS_2          __BIGNUM_EMAILS > 1
 meta           __BIGNUM_EMAILS_3          __BIGNUM_EMAILS > 2
 meta           __BIGNUM_EMAILS_4          __BIGNUM_EMAILS > 3
 meta           __BIGNUM_EMAILS_5          __BIGNUM_EMAILS > 4
-meta           BIGNUM_EMAILS_MANY         __BIGNUM_EMAILS_3 && !__HAS_ERRORS_TO 
+meta           BIGNUM_EMAILS_MANY         __BIGNUM_EMAILS_3 && !__HAS_ERRORS_TO && !__HAS_CAMPAIGNID 
 describe       BIGNUM_EMAILS_MANY         Lots of email addresses/leads, over and over
 score          BIGNUM_EMAILS_MANY         3.00		# limit
 tflags         BIGNUM_EMAILS_MANY         publish
@@ -2439,7 +2439,7 @@ if can(Mail::SpamAssassin::Conf::feature_bug6558_free)
   #rawbody   __STY_INVIS_NONIMG            /<(?!img\s)[a-z]+\s[^>]{0,200}\bstyle\s*=\s*"[^">]{0,80}(?:(?<!-)visibility\s*:\s*hidden\s*|display\s*:\s*none\s*)[;"!]/i
 
   # *one* invisible style has better S/O than multiple...
-  meta      __STY_INVIS_1_MINFP           __STY_INVIS_1 && !MIME_QP_LONG_LINE && !__MOZILLA_MSGID 
+  meta      __STY_INVIS_1_MINFP           __STY_INVIS_1 && !MIME_QP_LONG_LINE && !__MOZILLA_MSGID && !__FROM_ADDRLIST_PAYPAL 
 
   meta      HTML_TEXT_INVISIBLE_STYLE     __STY_INVIS_MANY && (__RDNS_NONE || __HDRS_LCASE || __UNSUB_EMAIL ||  __ADMITS_SPAM || __FROM_DOM_INFO || __HTML_TAG_BALANCE_CENTER || __MSGID_RANDY ) && !__RDNS_LONG && !__FROM_ENCODED_QP && !__HAS_THREAD_INDEX 
   describe  HTML_TEXT_INVISIBLE_STYLE     HTML hidden text + other spam signs
@@ -3753,7 +3753,7 @@ describe   XM_DIGITS_ONLY              X-Mailer malformed
 score      XM_DIGITS_ONLY              3.000	# limit
 tflags     XM_DIGITS_ONLY              publish
 
-meta       XM_SPAMMY                   ((__XM_LIGHT_HEAVY && !__MSGID_OK_HEX && !__HAS_X_BEEN_THERE && !__SPAN_INVIS) || (__XM_ONE_WORD && !__XM_DIGITS_ONLY && !__HAS_PHP_ORIG_SCRIPT && !__REPTO_QUOTE && !__L_CTE_7BIT)) && !__HAS_ERRORS_TO && !__HAS_CAMPAIGNID 
+meta       XM_SPAMMY                   ((__XM_LIGHT_HEAVY && !__MSGID_OK_HEX && !__HAS_X_BEEN_THERE && !__SPAN_INVIS) || (__XM_ONE_WORD && !__XM_DIGITS_ONLY && !__HAS_PHP_ORIG_SCRIPT && !__REPTO_QUOTE && !__L_CTE_7BIT)) && !__HAS_ERRORS_TO && !__HAS_CAMPAIGNID && !__TVD_PH_BODY_ACCOUNTS_POST && !__HAS_X_BEEN_THERE
 describe   XM_SPAMMY                   X-Mailer random or otherwise spammy-looking
 score      XM_SPAMMY                   3.000	# limit
 
