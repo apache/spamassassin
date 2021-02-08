@@ -3742,13 +3742,20 @@ header     REPTO_SPOTTY                Reply-To:addr =~ /^(?:[a-z]{1,3}\.){4,}[a
 header     MIXED_CTYPE_CASE            Content-Type =~ m;^(?i:text/)(?!html|HTML)[Hh][Tt][Mm][Ll];
 
 header     __XM_ONE_WORD               X-Mailer =~ /^\s*\w+\s*$/
-header     __XM_ONE_WORD_UNKNOWN       X-Mailer =~ /^\s*(?!php|msgsend|sendhtml|liveagent|(?:cheetah|xyz|swift|power)mailer|dmdroid|codeigniter|sendinblue|host(?:odo|edsimply)|smart_send_\d|postfix|contactlab|communigator|magnews|(?:as2|manta|be)mail|edelivery|sellware)\w+\s*$/i
+header     __XM_ONE_WORD_UNKNOWN       X-Mailer =~ /^\s*(?!php|msgsend|send(?:html|inblue)|liveagent|(?:cheetah|xyz|swift|power)mailer|dmdroid|codeigniter|host(?:odo|edsimply)|smart_send_\d|postfix|contactlab|communigator|magnews|(?:as2|manta|be|mikatiminge)mail|edelivery|sellware|WHMCS$|CR$|EMS$|SME$|ACEM$|oempro\d|typo\d|drupal|mail(?:eon|ingwork|er)|onlineoffice|oscommerce|redmine|m1mailmessage_v\d)\w+\s*$/i
 header     __XM_STARTS_DIGITS          X-Mailer =~ /^\s*\d+/
 header     __XM_DIGITS_ONLY            X-Mailer =~ /^\s*\d+\s*$/
 header     __XM_UC_ONLY                X-Mailer =~ /^[^a-z]+$/
+header     __XM_UC_ONLY_UNKNOWN        X-Mailer =~ /^(?!SME$|ACEM$|CR$|PHP$|EMS$|TYPO\d$|WHMCS$)[^a-z]+$/
 header     __XM_LC_ONLY                X-Mailer =~ /^[^A-Z]+$/
-header     __XM_RANDOM                 X-Mailer =~ /q(?!qmail|\d|[-\w]*=+;)[^u]/i
+header     __XM_LC_ONLY_UNKNOWN        X-Mailer =~ /^(?!php$|mailer$|sendhtml$)[^A-Z]+$/
+header     __XM_RANDOM                 X-Mailer =~ /q(?!q?mail|\d|[-\w]*=+;)[^u]/i
 header     __XM_LIGHT_HEAVY            X-Mailer =~ /\b(?:light|(?<!::)lite|standard|business|pro(?:fessional)?|educational|personal)\b/i
+
+header     __XM_SMART_SEND             X-Mailer =~ /^Smart_Send(?:_\d+)+$/
+header     __XM_CHEETAHMAILER          X-Mailer =~ /^CheetahMailer$/
+header     __XM_XYZMAILER              X-Mailer =~ /^XyzMailer$/
+header     __XM_DMDROID                X-Mailer =~ /^dmDroid$/
 
 meta       XM_DIGITS_ONLY              __XM_DIGITS_ONLY
 describe   XM_DIGITS_ONLY              X-Mailer malformed
