@@ -29,10 +29,10 @@ sarun ("-L -t < data/spam/esp/sendgrid_id.eml", \&patterns_run_cb);
 ok_all_patterns();
 clear_pattern_counters();
 
-%patterns_sendgrid_id = (
+%patterns_mailchimp_id = (
         q{ MAILCHIMP_ID } => 'Mailchimp',
             );
 
-%patterns = %patterns_sendgrid_id;
+%patterns = %patterns_mailchimp_id;
 sarun ("-L -t < data/spam/esp/mailchimp.eml", \&patterns_run_cb);
 ok_all_patterns();
