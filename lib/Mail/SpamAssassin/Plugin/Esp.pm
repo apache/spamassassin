@@ -43,7 +43,7 @@ use Mail::SpamAssassin::PerMsgStatus;
 use vars qw(@ISA);
 our @ISA = qw(Mail::SpamAssassin::Plugin);
 
-my $VERSION = 1.2;
+my $VERSION = 1.2.1;
 
 sub dbg { Mail::SpamAssassin::Plugin::dbg ("Esp: @_"); }
 
@@ -245,6 +245,8 @@ sub _read_configfile {
   my $id;
 
   local *F;
+
+  return if not defined $conf->{$feed};
 
   my @feed_files = split(/,/, $conf->{$feed});
   foreach my $feed_file ( @feed_files ) {
