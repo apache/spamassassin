@@ -121,8 +121,8 @@ ifplugin Mail::SpamAssassin::Plugin::MIMEHeader
   mimeheader   __MALW_ATTACH_01_01 Content-Disposition =~ /\bfilename="?[^"]+\.SettingContent-ms\b/i
   mimeheader   __MALW_ATTACH_01_02 Content-Type =~ /\bname="?[^"]+\.SettingContent-ms\b/i
   # others
-  mimeheader   __MALW_ATTACH_02_01 Content-Disposition =~ /\bfilename="?[^"]*(?:invoice|\.pdf|\.img)\.(?:ace|zip|7z|rar)[";$]/i
-  mimeheader   __MALW_ATTACH_02_02 Content-Type =~ /\bname="?[^"]*(?:invoice|\.pdf|\.img)\.(?:ace|zip|7z|rar)[";$]/i
+  mimeheader   __MALW_ATTACH_02_01 Content-Disposition =~ /\bfilename="?[^"]*(?:invoice|statement|(?:\.|[\xc2][\xb7])pdf|(?:\.|[\xc2][\xb7])img)\.(?:ace|zip|7z|rar|gz)[";$]/i
+  mimeheader   __MALW_ATTACH_02_02 Content-Type =~ /\bname="?[^"]*(?:invoice|statement|(?:\.|[\xc2][\xb7])pdf|(?:\.|[\xc2][\xb7])img)\.(?:ace|zip|7z|rar|gz)[";$]/i
   meta         __MALW_ATTACH       __MALW_ATTACH_01_01 || __MALW_ATTACH_01_02 || __MALW_ATTACH_02_01 || __MALW_ATTACH_02_02
   meta         MALW_ATTACH         __MALW_ATTACH && !__HAS_THREAD_INDEX 
   describe     MALW_ATTACH         Attachment filename suspicious, probable malware exploit
