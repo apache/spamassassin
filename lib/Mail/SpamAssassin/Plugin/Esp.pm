@@ -43,7 +43,7 @@ use Mail::SpamAssassin::PerMsgStatus;
 use vars qw(@ISA);
 our @ISA = qw(Mail::SpamAssassin::Plugin);
 
-my $VERSION = 1.0;
+my $VERSION = 1.2;
 
 sub dbg { Mail::SpamAssassin::Plugin::dbg ("Esp: @_"); }
 
@@ -73,7 +73,7 @@ loadplugin Mail::SpamAssassin::Plugin::Esp Esp.pm
 
 ifplugin Mail::SpamAssassin::Plugin::Esp
 
-  sendgrid_feed /etc/mail/spamassassin/sendgrid-id-dnsbl.txt
+  sendgrid_feed /etc/mail/spamassassin/sendgrid-id-dnsbl.txt,/etc/mail/spamassassin/sendgrid-id-local.txt
   sendgrid_domains_feed /etc/mail/spamassassin/sendgrid-envelopefromdomain-dnsbl.txt
 
   header          SPBL_SENDGRID           eval:esp_sendgrid_check()
@@ -96,7 +96,7 @@ Usage:
     Checks for Sendinblue abused accounts
 
   esp_sendgrid_check()
-    Checks for Sendgrid abused accounts
+    Checks for Sendgrid abused accounts (both id and domains)
 
   esp_sendgrid_check_id()
     Checks for Sendgrid id abused accounts
@@ -110,31 +110,37 @@ Usage:
 
 =item sendgrid_feed [...]
 
-A file with all abused Sendgrid accounts.
+A list of files with all abused Sendgrid accounts.
+Files can be separated by a comma.
 More info at https://www.invaluement.com/serviceproviderdnsbl/.
 Data file can be downloaded from https://www.invaluement.com/spdata/sendgrid-id-dnsbl.txt.
 
 =item sendgrid_domains_feed [...]
 
-A file with abused domains managed by Sendgrid.
+A list of files with abused domains managed by Sendgrid.
+Files can be separated by a comma.
 More info at https://www.invaluement.com/serviceproviderdnsbl/.
 Data file can be downloaded from https://www.invaluement.com/spdata/sendgrid-envelopefromdomain-dnsbl.txt.
 
 =item sendinblue_feed [...]
 
-A file with abused Sendinblue accounts.
+A list of files with abused Sendinblue accounts.
+Files can be separated by a comma.
 
 =item mailup_feed [...]
 
-A file with abused Mailup accounts.
+A list of files with abused Mailup accounts.
+Files can be separated by a comma.
 
 =item maildome_feed [...]
 
-A file with abused Maildome accounts.
+A list of files with abused Maildome accounts.
+Files can be separated by a comma.
 
 =item mailchimp_feed [...]
 
-A file with abused Mailchimp accounts.
+A list of files with abused Mailchimp accounts.
+Files can be separated by a comma.
 
 =back
 
@@ -240,22 +246,25 @@ sub _read_configfile {
 
   local *F;
 
-  if ( defined($conf->{$feed}) && ( -f $conf->{$feed} ) ) {
-    open(F, '<', $conf->{$feed});
-    for ($!=0; <F>; $!=0) {
-      chomp;
-      #lines that start with pound are comments
-      next if(/^\s*\#/);
-      $id = $_;
-      if ( defined $id ) {
-        push @{$self->{ESP}->{$esp}->{$id}}, $id;
+  my @feed_files = split(/,/, $conf->{$feed});
+  foreach my $feed_file ( @feed_files ) {
+    if ( defined($feed_file) && ( -f $feed_file ) ) {
+      open(F, '<', $feed_file);
+      for ($!=0; <F>; $!=0) {
+        chomp;
+        #lines that start with pound are comments
+        next if(/^\s*\#/);
+        $id = $_;
+        if ( defined $id ) {
+          push @{$self->{ESP}->{$esp}->{$id}}, $id;
+        }
       }
-    }
 
-    defined $_ || $!==0  or
-      $!==EBADF ? dbg("ESP: error reading config file: $!")
-                : die "error reading config file: $!";
-    close(F) or die "error closing config file: $!";
+      defined $_ || $!==0  or
+        $!==EBADF ? dbg("ESP: error reading config file: $!")
+                  : die "error reading config file: $!";
+      close(F) or die "error closing config file: $!";
+    }
   }
 }
 
