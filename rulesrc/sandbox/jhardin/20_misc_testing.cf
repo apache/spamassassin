@@ -3745,10 +3745,11 @@ header     __XM_ONE_WORD               X-Mailer =~ /^\s*\w+\s*$/
 header     __XM_ONE_WORD_UNKNOWN       X-Mailer =~ /^\s*(?!php|msgsend|send(?:html|inblue|mail)|liveagent|(?:cheetah|xyz|swift|power)mailer|dmdroid|codeigniter|host(?:odo|edsimply)|smart_send_\d|postfix|contactlab|communigator|magnews|(?:as2|manta|be|mikatiminge|web)mail|edelivery|sellware|WHMCS$|CR$|EMS$|SM[EF]$|ACEM$|RMM\d?|EOW\d|FM$|ZIMACS$|oempro\d|typo\d|drupal|mail(?:eon|ingwork|er|spring)|onlineoffice|oscommerce|redmine|m1mailmessage_v\d)\w+\s*$/i
 header     __XM_STARTS_DIGITS          X-Mailer =~ /^\s*\d+/
 header     __XM_DIGITS_ONLY            X-Mailer =~ /^\s*\d+\s*$/
+meta       __XM_STARTS_DIGITS_ALNUM    __XM_STARTS_DIGITS && !__XM_DIGITS_ONLY
 header     __XM_UC_ONLY                X-Mailer =~ /^[^a-z]+$/
 header     __XM_UC_ONLY_UNKNOWN        X-Mailer =~ /^(?!SM[EF]$|ACEM$|CR$|PHP(?:BB)?\d?$|EMS$|TYPO\d$|WHMCS$|RMM\d?$|GURU$|SMTP$|ZIMACS$|EOW\d|FM$)[^a-z]+$/
 header     __XM_LC_ONLY                X-Mailer =~ /^[^A-Z]+$/
-header     __XM_LC_ONLY_UNKNOWN        X-Mailer =~ /^(?!php$|mailer$|sendhtml$)[^A-Z]+$/
+header     __XM_LC_ONLY_UNKNOWN        X-Mailer =~ /^(?!php|mailer$|sendhtml$)[^A-Z]+$/
 header     __XM_RANDOM                 X-Mailer =~ /q(?!q?mail|\d|[-\w]*=+;)[^u]/i
 header     __XM_LIGHT_HEAVY            X-Mailer =~ /\b(?:light|(?<!::)lite|standard|business|pro(?:fessional)?|educational|personal)\b/i
 
@@ -3766,6 +3767,14 @@ meta       XM_RANDOM                   __XM_RANDOM
 describe   XM_RANDOM                   X-Mailer apparently random
 score      XM_RANDOM                   3.000	# limit
 tflags     XM_RANDOM                   publish
+
+meta       XM_UC_ONLY                  __XM_UC_ONLY_UNKNOWN
+describe   XM_UC_ONLY                  X-Mailer all uppercase
+score      XM_UC_ONLY                  2.500	# limit
+
+meta       XM_ONE_WORD                 __XM_ONE_WORD_UNKNOWN
+describe   XM_ONE_WORD                 X-Mailer only one word
+score      XM_ONE_WORD                 2.000	# limit
 
 meta       XM_SPAMMY                   ((__XM_LIGHT_HEAVY && !__MSGID_OK_HEX && !__HAS_X_BEEN_THERE && !__SPAN_INVIS) || (__XM_ONE_WORD_UNKNOWN && !__XM_DIGITS_ONLY && !__HAS_PHP_ORIG_SCRIPT && !__REPTO_QUOTE && !__L_CTE_7BIT)) && !__HAS_ERRORS_TO && !__HAS_CAMPAIGNID && !__TVD_PH_BODY_ACCOUNTS_POST && !__HAS_X_BEEN_THERE && !__HAS_THREAD_INDEX && !__HAS_TNEF && !__HDR_RCVD_ALIBABA
 describe   XM_SPAMMY                   X-Mailer random or otherwise spammy-looking
