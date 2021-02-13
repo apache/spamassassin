@@ -2721,6 +2721,10 @@ header     __HAS_DOMAINKEY_SIG         exists:DomainKey-Signature
 header     __HAS_PHP_SCRIPT            exists:X-PHP-Script
 header     __HAS_PHP_ORIG_SCRIPT       exists:X-PHP-Originating-Script
 
+meta       XM_RECPTID                  __HAS_XM_RECPTID && !__TAG_EXISTS_SCRIPT 
+describe   XM_RECPTID                  Has spammy message header
+score      XM_RECPTID                  3.000	# limit
+
 header     __FROM_WORDY                From:addr =~ /^(?:(?:[A-Z][A-Za-z]+|or|&)\.)+[A-Z][A-Za-z]+\@/
 #header     __FROM_WORDY                From:addr =~ /^(?:(?:[A-Z][A-Za-z]+|or|&)\.)+[A-Z][A-Za-z]+(?<!Customer\.S(?:ervice|upport))\@/
 header     __FROM_WORDY_3              From:addr =~ /(?:(?:[A-Z][A-Za-z]+|or|&)\.){2,}[A-Z][A-Za-z]+\@/
@@ -3743,9 +3747,8 @@ header     MIXED_CTYPE_CASE            Content-Type =~ m;^(?i:text/)(?!html|HTML
 
 header     __XM_ONE_WORD               X-Mailer =~ /^\s*\w+\s*$/
 header     __XM_ONE_WORD_UNKNOWN       X-Mailer =~ /^\s*(?!php|msgsend|send(?:html|inblue|mail)|liveagent|(?:cheetah|xyz|swift|power)mailer|dmdroid|codeigniter|host(?:odo|edsimply)|smart_send_\d|postfix|contactlab|communigator|magnews|(?:as2|manta|be|mikatiminge|web)mail|edelivery|sellware|WHMCS$|CR$|EMS$|SM[EF]$|ACEM$|RMM\d?|EOW\d|FM$|ZIMACS$|oempro\d|typo\d|drupal|mail(?:eon|ingwork|er|spring)|onlineoffice|oscommerce|redmine|m1mailmessage_v\d)\w+\s*$/i
-header     __XM_STARTS_DIGITS          X-Mailer =~ /^\s*\d+/
+header     __XM_ALNUM_STARTS_DIGIT     X-Mailer =~ /^\s*\d+[\s\d]*\D/
 header     __XM_DIGITS_ONLY            X-Mailer =~ /^\s*\d+\s*$/
-meta       __XM_STARTS_DIGITS_ALNUM    __XM_STARTS_DIGITS && !__XM_DIGITS_ONLY
 header     __XM_UC_ONLY                X-Mailer =~ /^[^a-z]+$/
 header     __XM_UC_ONLY_UNKNOWN        X-Mailer =~ /^(?!SM[EF]$|ACEM$|CR$|PHP(?:BB)?\d?$|EMS$|TYPO\d$|WHMCS$|RMM\d?$|GURU$|SMTP$|ZIMACS$|EOW\d|FM$)[^a-z]+$/
 header     __XM_LC_ONLY                X-Mailer =~ /^[^A-Z]+$/
@@ -3768,11 +3771,11 @@ describe   XM_RANDOM                   X-Mailer apparently random
 score      XM_RANDOM                   3.000	# limit
 tflags     XM_RANDOM                   publish
 
-meta       XM_UC_ONLY                  __XM_UC_ONLY_UNKNOWN
+meta       XM_UC_ONLY                  __XM_UC_ONLY_UNKNOWN && !__STY_INVIS_MANY 
 describe   XM_UC_ONLY                  X-Mailer all uppercase
 score      XM_UC_ONLY                  2.500	# limit
 
-meta       XM_ONE_WORD                 __XM_ONE_WORD_UNKNOWN
+meta       XM_ONE_WORD                 __XM_ONE_WORD_UNKNOWN && !__L_CTE_7BIT 
 describe   XM_ONE_WORD                 X-Mailer only one word
 score      XM_ONE_WORD                 2.000	# limit
 
