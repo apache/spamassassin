@@ -854,6 +854,10 @@ meta     PDS_FREEMAIL_REPLYTO_URISHRT (__PDS_URISHORTENER || __URL_SHORTENER) &&
 describe PDS_FREEMAIL_REPLYTO_URISHRT Freemail replyto with URI shortener
 score    PDS_FREEMAIL_REPLYTO_URISHRT 1.5 # limit
 
+meta     PDS_FROM_2_EMAILS_SHRTNER (__PDS_URISHORTENER || __URL_SHORTENER) && (__PDS_FROM_2_EMAILS || __NAME_EMAIL_DIFF) && __PDS_MSG_512
+describe PDS_FROM_2_EMAILS_SHRTNER From 2 emails short email with little more than a URI shortener
+score    PDS_FROM_2_EMAILS_SHRTNER 1.5 # limit
+
 meta     TONOM_EQ_TOLOC_SHRT_SHRTNER __PDS_URISHORTENER && __PDS_TONAME_EQ_TOLOCAL && __PDS_MSG_1024
 describe TONOM_EQ_TOLOC_SHRT_SHRTNER Short email with shortener and To:name eq To:local
 score    TONOM_EQ_TOLOC_SHRT_SHRTNER 1.5 # limit
