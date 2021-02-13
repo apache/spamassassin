@@ -217,6 +217,7 @@ enlist_uri_host (PDS_URISHORTENER) go2.me
 enlist_uri_host (PDS_URISHORTENER) gog.li
 enlist_uri_host (PDS_URISHORTENER) golmao.com
 enlist_uri_host (PDS_URISHORTENER) goo.gl
+enlist_uri_host (PDS_URISHORTENER) goo.io
 enlist_uri_host (PDS_URISHORTENER) good.ly
 enlist_uri_host (PDS_URISHORTENER) goshrink.com
 enlist_uri_host (PDS_URISHORTENER) gplus.to
@@ -228,6 +229,7 @@ enlist_uri_host (PDS_URISHORTENER) hex.io
 enlist_uri_host (PDS_URISHORTENER) hiderefer.com
 enlist_uri_host (PDS_URISHORTENER) hmm.ph
 enlist_uri_host (PDS_URISHORTENER) hop.im
+enlist_uri_host (PDS_URISHORTENER) hop.kz
 enlist_uri_host (PDS_URISHORTENER) hopclicks.com
 enlist_uri_host (PDS_URISHORTENER) hotredirect.com
 enlist_uri_host (PDS_URISHORTENER) hotshorturl.com
@@ -854,7 +856,7 @@ meta     PDS_FREEMAIL_REPLYTO_URISHRT (__PDS_URISHORTENER || __URL_SHORTENER) &&
 describe PDS_FREEMAIL_REPLYTO_URISHRT Freemail replyto with URI shortener
 score    PDS_FREEMAIL_REPLYTO_URISHRT 1.5 # limit
 
-meta     PDS_FROM_2_EMAILS_SHRTNER (__PDS_URISHORTENER || __URL_SHORTENER) && (__PDS_FROM_2_EMAILS || __NAME_EMAIL_DIFF) && __PDS_MSG_512
+meta     PDS_FROM_2_EMAILS_SHRTNER (__PDS_URISHORTENER || __URL_SHORTENER) && (__PDS_FROM_2_EMAILS || __NAME_EMAIL_DIFF) && __BODY_URI_ONLY
 describe PDS_FROM_2_EMAILS_SHRTNER From 2 emails short email with little more than a URI shortener
 score    PDS_FROM_2_EMAILS_SHRTNER 1.5 # limit
 
