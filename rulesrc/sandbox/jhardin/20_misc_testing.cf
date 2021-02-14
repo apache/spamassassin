@@ -637,7 +637,7 @@ tflags         MANY_APPARENTLY_TO         nopublish
 
 # obfuscation of "opt out"
 ifplugin Mail::SpamAssassin::Plugin::ReplaceTags
-  body           FUZZY_OPTOUT             /\s(?!opt.?out)<O><P><T>.?<O><U><T>/i
+  body           FUZZY_OPTOUT             /(?=<O>)(?!opt.?out)<O><P><T>.?<O><U><T>/i
   replace_rules  FUZZY_OPTOUT
   describe       FUZZY_OPTOUT             Obfuscated opt-out text
 endif
@@ -1902,42 +1902,42 @@ tflags      URI_TRY_3LD       publish
 
 
 ifplugin Mail::SpamAssassin::Plugin::ReplaceTags
-  body          FUZZY_UNSUBSCRIBE   /<U>(?!nsubscribe)<N><S><U><B><S><C><R><I><B><E>/i
+  body          FUZZY_UNSUBSCRIBE   /(?=<U>)(?!unsubscribe)<U><N><S><U><B><S><C><R><I><B><E>/i
   replace_rules FUZZY_UNSUBSCRIBE
   describe      FUZZY_UNSUBSCRIBE   Obfuscated "unsubscribe"
   tflags        FUZZY_UNSUBSCRIBE   publish
 
-  body          FUZZY_ANDROID       /<A>(?!ndroid)<N><D><R><O><I><D>/i
+  body          FUZZY_ANDROID       /(?=<A>)(?!android)<A><N><D><R><O><I><D>/i
   replace_rules FUZZY_ANDROID
   describe      FUZZY_ANDROID       Obfuscated "android"
   tflags        FUZZY_ANDROID       publish
 
-  body          FUZZY_PROMOTION     /<P>(?!romotion)<R><O><M><O><T><I><O><N>/i
+  body          FUZZY_PROMOTION     /(?=<P>)(?!promotion)<P><R><O><M><O><T><I><O><N>/i
   replace_rules FUZZY_PROMOTION
   describe      FUZZY_PROMOTION     Obfuscated "promotion"
   tflags        FUZZY_PROMOTION     publish
 
-  body          FUZZY_PRIVACY       /<P>(?!rivacy)<R><I><V><A><C><Y>/i
+  body          FUZZY_PRIVACY       /(?=<P>)(?!privacy)<P><R><I><V><A><C><Y>/i
   replace_rules FUZZY_PRIVACY
   describe      FUZZY_PRIVACY       Obfuscated "privacy"
   tflags        FUZZY_PRIVACY       publish
 
-  body          FUZZY_BROWSER       /<B>(?!rowser)<R><O><W><S><E><R>/i
+  body          FUZZY_BROWSER       /(?=<B>)(?!browser)<B><R><O><W><S><E><R>/i
   replace_rules FUZZY_BROWSER
   describe      FUZZY_BROWSER       Obfuscated "browser"
   tflags        FUZZY_BROWSER       publish
 
-  body          FUZZY_SAVINGS       /<S>(?!avings)<A><V><I><N><G><S>/i
+  body          FUZZY_SAVINGS       /(?=<S>)(?!savings)<S><A><V><I><N><G><S>/i
   replace_rules FUZZY_SAVINGS
   describe      FUZZY_SAVINGS       Obfuscated "savings"
   tflags        FUZZY_SAVINGS       publish
 
-  body          FUZZY_IMPORTANT     /<I>(?!mportant)(?:<M>|<N>)<P><O><R><T><A><N><T>/i
+  body          FUZZY_IMPORTANT     /(?=<I>)(?!important)<I>(?:<M>|<N>)<P><O><R><T><A><N><T>/i
   replace_rules FUZZY_IMPORTANT
   describe      FUZZY_IMPORTANT     Obfuscated "important"
   tflags        FUZZY_IMPORTANT     publish
 
-  body          FUZZY_SECURITY      /<S>(?!ecurity)(?!eguridad)(?!\xc3\xa9curit\xc3\xa9)<E>(?:<C>|<G>)<U><R><I>(?:<T><Y>|<D><A><D>)/i
+  body          FUZZY_SECURITY      /(?=<S>)(?!security)(?!seguridad)(?!s\xc3\xa9curit\xc3\xa9)<S><E>(?:<C>|<G>)<U><R><I>(?:<T><Y>|<D><A><D>)/i
   replace_rules FUZZY_SECURITY
   describe      FUZZY_SECURITY      Obfuscated "security"
   tflags        FUZZY_SECURITY      publish
@@ -1948,12 +1948,12 @@ ifplugin Mail::SpamAssassin::Plugin::ReplaceTags
   describe      FUZZY_DR_OZ         Obfuscated Doctor Oz
   tflags        FUZZY_DR_OZ         publish
 
-  body          FUZZY_CLICK_HERE    /<C>(?!lick(?:\s|&nbsp;)here)<WS>*<L><WS>*<I><WS>*<C><WS>*<K><WS>+<H><WS>*<E><WS>*<R><WS>*<E>/i
+  body          FUZZY_CLICK_HERE    /(?=<C>)(?!click(?:\s|&nbsp;)here)<C><WS>*<L><WS>*<I><WS>*<C><WS>*<K><WS>+<H><WS>*<E><WS>*<R><WS>*<E>/i
   replace_rules FUZZY_CLICK_HERE
   describe      FUZZY_CLICK_HERE    Obfuscated "click here"
   tflags        FUZZY_CLICK_HERE    publish
 
-  body          FUZZY_BITCOIN       /<B>(?!it[-\s]?coin)<I><T>[-\s]?<C><O><I><N>/i
+  body          FUZZY_BITCOIN       /(?=<B>)(?!bit[-\s]?coin)<B><I><T>[-\s]?<C><O><I><N>/i
   replace_rules FUZZY_BITCOIN   
   describe      FUZZY_BITCOIN       Obfuscated "Bitcoin"
   tflags        FUZZY_BITCOIN       publish
@@ -1962,7 +1962,7 @@ ifplugin Mail::SpamAssassin::Plugin::ReplaceTags
   body          __BITCOIN           /<B><I><T>[-\s]?<C><O><I><N>/i
   replace_rules __BITCOIN   
 
-  body          FUZZY_WALLET        /<W>(?!allet)<A><L><L><E><T>/i
+  body          FUZZY_WALLET        /(?=<W>)(?!wallet)<W><A><L><L><E><T>/i
   replace_rules FUZZY_WALLET    
   describe      FUZZY_WALLET        Obfuscated "Wallet"
   tflags        FUZZY_WALLET        publish
@@ -1971,21 +1971,51 @@ ifplugin Mail::SpamAssassin::Plugin::ReplaceTags
   describe      FUZZY_BTC_WALLET    Heavily obfuscated "bitcoin wallet"
   tflags        FUZZY_BTC_WALLET    publish
 
-  body          __FUZZY_MONERO      /<M>(?!onero)<O><N><E><R><O>/i
+  body          __FUZZY_MONERO      /(?=<M>)(?!monero)<M><O><N><E><R><O>/i
   replace_rules __FUZZY_MONERO
 
-  body          __FUZZY_WELLSFARGO_BODY  /<W>(?!ells[-\s]?Fargo)<E><L><L><S>[-\s]?<F><A><R><G><O>/i
+  body          __FUZZY_WELLSFARGO_BODY  /(?=<W>)(?!Wells[-\s]?Fargo)<W><E><L><L><S>[-\s]?<F><A><R><G><O>/i
   replace_rules __FUZZY_WELLSFARGO_BODY
-  header        __FUZZY_WELLSFARGO_FROM  From:name =~ /<W>(?!ells[-\s]?Fargo)<E><L><L><S>[-\s]?<F><A><R><G><O>/i
+  header        __FUZZY_WELLSFARGO_FROM  From:name =~ /(?=<W>)(?!Wells[-\s]?Fargo)<W><E><L><L><S>[-\s]?<F><A><R><G><O>/i
   replace_rules __FUZZY_WELLSFARGO_FROM
   meta          FUZZY_WELLSFARGO         __FUZZY_WELLSFARGO_BODY || __FUZZY_WELLSFARGO_FROM
   describe      FUZZY_WELLSFARGO         Obfuscated "Wells Fargo"
 
-  body          __FUZZY_PORN        /<P>(?!ornograph)<O><R><N><O><G><R><A><P><H>/i
+  body          __FUZZY_PORN        /(?=<P>)(?!pornograph)<P><O><R><N><O><G><R><A><P><H>/i
   replace_rules __FUZZY_PORN      
   meta          FUZZY_PORN          __FUZZY_PORN && !( __ENV_AND_HDR_FROM_MATCH && __SENDER_BOT )
   describe      FUZZY_PORN          Obfuscated "Pornography" or "Pornographic"
   #tflags        FUZZY_PORN          publish
+
+  body          FUZZY_AMAZON        /(?=<A>)(?!amazon)<A><M><A><Z><O><N>/i
+  replace_rules FUZZY_AMAZON   
+  describe      FUZZY_AMAZON        Obfuscated "amazon"
+  tflags        FUZZY_AMAZON        publish
+
+  body          FUZZY_APPLE         /(?=<A>)(?!apple)<A><P><P><L><E>/i
+  replace_rules FUZZY_APPLE    
+  describe      FUZZY_APPLE         Obfuscated "apple"
+  tflags        FUZZY_APPLE         publish
+
+  body          FUZZY_MICROSOFT     /(?=<M>)(?!microsoft)<M><I><C><R><O><S><O><F><T>/i
+  replace_rules FUZZY_MICROSOFT
+  describe      FUZZY_MICROSOFT     Obfuscated "microsoft"
+  tflags        FUZZY_MICROSOFT     publish
+
+  body          FUZZY_FACEBOOK      /(?=<F>)(?!facebook)<F><A><C><E><B><O><O><K>/i
+  replace_rules FUZZY_FACEBOOK  
+  describe      FUZZY_FACEBOOK      Obfuscated "facebook"
+  tflags        FUZZY_FACEBOOK      publish
+
+  body          FUZZY_PAYPAL        /(?=<P>)(?!pay[-\s]?pal)<P><A><Y>[-\s]?<P><A><L>/i
+  replace_rules FUZZY_PAYPAL   
+  describe      FUZZY_PAYPAL        Obfuscated "paypal"
+  tflags        FUZZY_PAYPAL        publish
+
+  body          FUZZY_NORTON        /(?=<N>)(?!norton)<N><O><R><T><O><N>/i
+  replace_rules FUZZY_NORTON   
+  describe      FUZZY_NORTON        Obfuscated "norton"
+  tflags        FUZZY_NORTON        publish
 
 else
   meta          __FUZZY_MONERO      0
