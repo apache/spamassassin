@@ -75,6 +75,11 @@ score FILL_THIS_FORM_LONG      2.00
 # Reliable but not widespread (low corpus count, ahead of the curve?), boost the score
 score PHISH_AZURE_CLOUDAPP     3.50
 
+# jhardin
+# double-extension file attachments, low corpus count
+score PHISH_ATTACH             3.50
+score MALW_ATTACH              3.50
+
 # hege
 # FPs reported [bug 6417], GA assigning 3+ points
 # reduce score until that's resolved
