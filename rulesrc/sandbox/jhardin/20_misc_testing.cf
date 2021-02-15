@@ -2017,6 +2017,11 @@ ifplugin Mail::SpamAssassin::Plugin::ReplaceTags
   describe      FUZZY_NORTON        Obfuscated "norton"
   tflags        FUZZY_NORTON        publish
 
+  body          FUZZY_OVERSTOCK     /(?=<O>)(?!over[-\s]?stock)<O><V><E><R>[-\s]?<S><T><O><C><K>/i
+  replace_rules FUZZY_OVERSTOCK
+  describe      FUZZY_OVERSTOCK     Obfuscated "overstock"
+  tflags        FUZZY_OVERSTOCK     publish
+
 else
   meta          __FUZZY_MONERO      0
   body          __BITCOIN           /\bBit[-\s]?coin\b/i
