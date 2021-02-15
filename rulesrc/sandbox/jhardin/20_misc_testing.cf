@@ -3451,18 +3451,18 @@ meta       __GOOG_STO_NOIMG_HTML      !__URI_GOOG_STO_IMG && __URI_GOOG_STO_HTML
 meta       __GOOG_STO_IMG_HTML_2      __URI_GOOG_STO_IMG && (__URI_GOOG_STO_HTML > 1)
 meta       __GOOG_STO_IMG_HTML_1      __URI_GOOG_STO_IMG && __URI_GOOG_STO_HTML
 
-meta       GOOG_STO_IMG_HTML          __GOOG_STO_IMG_HTML_1
+meta       GOOG_STO_IMG_HTML          __GOOG_STO_IMG_HTML_1 && !URI_GOOG_STO_SPAMMY
 describe   GOOG_STO_IMG_HTML          Apparently using google content hosting to avoid URIBL
 score      GOOG_STO_IMG_HTML          3.000	# limit
 tflags     GOOG_STO_IMG_HTML          publish
 
-meta       GOOG_STO_NOIMG_HTML        __GOOG_STO_NOIMG_HTML
+meta       GOOG_STO_NOIMG_HTML        __GOOG_STO_NOIMG_HTML && !URI_GOOG_STO_SPAMMY
 describe   GOOG_STO_NOIMG_HTML        Apparently using google content hosting to avoid URIBL
 score      GOOG_STO_NOIMG_HTML        3.000	# limit
 tflags     GOOG_STO_NOIMG_HTML        publish
 
 # S/O not great, try salvage what's possible
-meta       GOOG_STO_IMG_NOHTML        __GOOG_STO_IMG_NOHTML && (__RDNS_NONE || HTML_TEXT_INVISIBLE_STYLE || THIS_AD || __SUBJECT_ENCODED_B64 || __LOTTO_ADMITS || __REPTO_QUOTE) && !__USING_VERP1 && !__HAS_ERRORS_TO && !__RCD_RDNS_MTA_MESSY && !__LYRIS_EZLM_REMAILER && !__HAS_CID 
+meta       GOOG_STO_IMG_NOHTML        __GOOG_STO_IMG_NOHTML && (__RDNS_NONE || HTML_TEXT_INVISIBLE_STYLE || THIS_AD || __SUBJECT_ENCODED_B64 || __LOTTO_ADMITS || __REPTO_QUOTE) && !__USING_VERP1 && !__HAS_ERRORS_TO && !__RCD_RDNS_MTA_MESSY && !__LYRIS_EZLM_REMAILER && !__HAS_CID && !URI_GOOG_STO_SPAMMY
 describe   GOOG_STO_IMG_NOHTML        Apparently using google content hosting to avoid URIBL
 score      GOOG_STO_IMG_NOHTML        2.500	# limit
 tflags     GOOG_STO_IMG_NOHTML        publish
