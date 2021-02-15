@@ -63,7 +63,7 @@ describe TVD_FUZZY_SYMBOL  Obfuscation of the word "symbol"
 # other one is still here if we want to get S/O of 1.0.
 # 1.740   2.1249   0.0000    1.000   0.89    1.00  TVD_FUZZY_SECURITIES2
 # 1.912   2.3312   0.0135    0.994   0.88    1.00  TVD_FUZZY_SECURITIES
-body TVD_FUZZY_SECURITIES       /<inter W2><post P2>(?!securities)(?!security es)<S><E><C><U><R><I><T><I><E><S>/i
+body TVD_FUZZY_SECURITIES       /<inter W2><post P2>(?!securities)(?!security,? es)<S><E><C><U><R><I><T><I><E><S>/i
 replace_rules TVD_FUZZY_SECURITIES
 #body TVD_FUZZY_SECURITIES2     /(?!securities)<S><E><C><U><R><I><T><I><E><S>/i
 #replace_rules TVD_FUZZY_SECURITIES2
