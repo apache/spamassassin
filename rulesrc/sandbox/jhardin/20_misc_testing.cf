@@ -637,7 +637,7 @@ tflags         MANY_APPARENTLY_TO         nopublish
 
 # obfuscation of "opt out"
 ifplugin Mail::SpamAssassin::Plugin::ReplaceTags
-  body           FUZZY_OPTOUT             /(?=<O>)(?!opt.?out)<O><P><T>.?<O><U><T>/i
+  body           FUZZY_OPTOUT             /(?:$|\W)(?=<O>)(?!opt[-\s]?out)<O><P><T>[-\s]?<O><U><T>(?:$|\W)/i
   replace_rules  FUZZY_OPTOUT
   describe       FUZZY_OPTOUT             Obfuscated opt-out text
 endif
@@ -1942,9 +1942,9 @@ ifplugin Mail::SpamAssassin::Plugin::ReplaceTags
   describe      FUZZY_SECURITY      Obfuscated "security"
   tflags        FUZZY_SECURITY      publish
 
-  body          __FUZZY_DR_OZ       /\bD(?!(?-i:(?:r.|octor)(?:\s|&nbsp;)Oz))(?:<R>|<O><C>(?:<T><O><R>)?)\.?<WS>*<O><Z>(?:$|\W)/i
+  body          __FUZZY_DR_OZ       /(?=<D>)(?!(?-i:D(?:r.|octor)(?:\s|&nbsp;)Oz))(?:<R>|<O><C>(?:<T><O><R>)?)\.?<WS>*<O><Z>(?:$|\W)/i
   replace_rules __FUZZY_DR_OZ
-  meta          FUZZY_DR_OZ         __FUZZY_DR_OZ && !__VIA_ML && !__DKIM_EXISTS && !__RP_MATCHES_RCVD 
+  meta          FUZZY_DR_OZ         __FUZZY_DR_OZ && !__VIA_ML
   describe      FUZZY_DR_OZ         Obfuscated Doctor Oz
   tflags        FUZZY_DR_OZ         publish
 
@@ -1987,12 +1987,12 @@ ifplugin Mail::SpamAssassin::Plugin::ReplaceTags
   describe      FUZZY_PORN          Obfuscated "Pornography" or "Pornographic"
   #tflags        FUZZY_PORN          publish
 
-  body          FUZZY_AMAZON        /(?=<A>)(?!amazon)<A><M><A><Z><O><N>/i
+  body          FUZZY_AMAZON        /(?:^|\W)(?=<A>)(?!amazon)<A><M><A><Z><O><N>(?:$|\W)/i
   replace_rules FUZZY_AMAZON   
   describe      FUZZY_AMAZON        Obfuscated "amazon"
   tflags        FUZZY_AMAZON        publish
 
-  body          FUZZY_APPLE         /(?=<A>)(?!apple)<A><P><P><L><E>/i
+  body          FUZZY_APPLE         /(?:^|\W)(?=<A>)(?!apple)<A><P><P><L><E>(?:$|\W)/i
   replace_rules FUZZY_APPLE    
   describe      FUZZY_APPLE         Obfuscated "apple"
   tflags        FUZZY_APPLE         publish
@@ -2002,7 +2002,7 @@ ifplugin Mail::SpamAssassin::Plugin::ReplaceTags
   describe      FUZZY_MICROSOFT     Obfuscated "microsoft"
   tflags        FUZZY_MICROSOFT     publish
 
-  body          FUZZY_FACEBOOK      /(?=<F>)(?!facebook)<F><A><C><E><B><O><O><K>/i
+  body          FUZZY_FACEBOOK      /(?=<F>)(?!fa[ck]ebook)<F><A><C><E><B><O><O><K>/i
   replace_rules FUZZY_FACEBOOK  
   describe      FUZZY_FACEBOOK      Obfuscated "facebook"
   tflags        FUZZY_FACEBOOK      publish
@@ -2012,12 +2012,12 @@ ifplugin Mail::SpamAssassin::Plugin::ReplaceTags
   describe      FUZZY_PAYPAL        Obfuscated "paypal"
   tflags        FUZZY_PAYPAL        publish
 
-  body          FUZZY_NORTON        /(?=<N>)(?!norton)<N><O><R><T><O><N>/i
+  body          FUZZY_NORTON        /(?:^|\W)(?=<N>)(?!norton)<N><O><R><T><O><N>(?:$|\W)/i
   replace_rules FUZZY_NORTON   
   describe      FUZZY_NORTON        Obfuscated "norton"
   tflags        FUZZY_NORTON        publish
 
-  body          FUZZY_OVERSTOCK     /(?=<O>)(?!over[-\s]?stock)<O><V><E><R>[-\s]?<S><T><O><C><K>/i
+  body          FUZZY_OVERSTOCK     /(?:^|\W)(?=<O>)(?!over[-\s]?stock)<O><V><E><R>[-\s]?<S><T><O><C><K>(?:$|\W)/i
   replace_rules FUZZY_OVERSTOCK
   describe      FUZZY_OVERSTOCK     Obfuscated "overstock"
   tflags        FUZZY_OVERSTOCK     publish
@@ -3781,8 +3781,8 @@ header     REPTO_SPOTTY                Reply-To:addr =~ /^(?:[a-z]{1,3}\.){4,}[a
 header     MIXED_CTYPE_CASE            Content-Type =~ m;^(?i:text/)(?!html|HTML)[Hh][Tt][Mm][Ll];
 
 header     __XM_ONE_WORD               X-Mailer =~ /^\s*\w+\s*$/
-header     __XM_ONE_WORD_UNKNOWN       X-Mailer =~ /^\s*(?!php|msgsend|send(?:html|inblue|mail)|liveagent|(?:cheetah|xyz|swift|power)mailer|dmdroid|codeigniter|host(?:odo|edsimply)|smart_send_\d|postfix|contactlab|communigator|magnews|(?:as2|manta|be|mikatiminge|web)mail|edelivery|sellware|WHMCS$|CR$|EMS$|SM[EF]$|ACEM$|RMM\d?|EOW\d|FM$|ZIMACS$|oempro\d|typo\d|drupal|mail(?:eon|ingwork|er|spring)|onlineoffice|oscommerce|redmine|m1mailmessage_v\d)\w+\s*$/i
-header     __XM_ALNUM_STARTS_DIGIT     X-Mailer =~ /^\s*\d+[\s\d]*\D/
+header     __XM_ONE_WORD_UNKNOWN       X-Mailer =~ /^\s*(?!php|msgsend|send(?:html|inblue|mail)|liveagent|(?:cheetah|xyz|swift|power)mailer|dmdroid|codeigniter|peppered|host(?:odo|edsimply)|smart_send_\d|postfix|contactlab|communigator|magnews|(?:as2|manta|be|mikatiminge|web)mail|edelivery|sellware|WHMCS$|CR$|EMS$|SM[EF]$|ACEM$|RMM\d?|EOW\d|FM$|ZIMACS$|oempro\d|typo\d|drupal|mail(?:eon|ingwork|er|spring|force)|onlineoffice|oscommerce|redmine|m1mailmessage_v\d)\w+\s*$/i
+header     __XM_ALNUM_STARTS_DIGIT     X-Mailer =~ /^\s*\d+[\s\d]*[^\s\d]/
 header     __XM_DIGITS_ONLY            X-Mailer =~ /^\s*\d+\s*$/
 header     __XM_UC_ONLY                X-Mailer =~ /^[^a-z]+$/
 header     __XM_UC_ONLY_UNKNOWN        X-Mailer =~ /^(?!SM[EF]$|ACEM$|CR$|PHP(?:BB)?\d?$|EMS$|TYPO\d$|WHMCS$|RMM\d?$|GURU$|SMTP$|ZIMACS$|EOW\d|FM$)[^a-z]+$/
@@ -3795,28 +3795,28 @@ header     __XM_SMART_SEND             X-Mailer =~ /^Smart_Send(?:_\d+)+$/
 header     __XM_CHEETAHMAILER          X-Mailer =~ /^CheetahMailer$/
 header     __XM_XYZMAILER              X-Mailer =~ /^XyzMailer$/
 header     __XM_DMDROID                X-Mailer =~ /^dmDroid$/
+header     __XM_DRUPAL                 X-Mailer =~ /^Drupal$/
 
 meta       XM_DIGITS_ONLY              __XM_DIGITS_ONLY
 describe   XM_DIGITS_ONLY              X-Mailer malformed
 score      XM_DIGITS_ONLY              3.000	# limit
 tflags     XM_DIGITS_ONLY              publish
 
-meta       XM_RANDOM                   __XM_RANDOM
+meta       XM_RANDOM                   __XM_RANDOM && !__STY_INVIS_3 && !__HAS_IN_REPLY_TO 
 describe   XM_RANDOM                   X-Mailer apparently random
 score      XM_RANDOM                   3.000	# limit
 tflags     XM_RANDOM                   publish
 
-meta       XM_UC_ONLY                  __XM_UC_ONLY_UNKNOWN && !__STY_INVIS_MANY 
+meta       XM_UC_ONLY                  __XM_UC_ONLY_UNKNOWN && !__STY_INVIS_MANY && !__HAS_X_REF && !__RCVD_DOTGOV_EXT 
 describe   XM_UC_ONLY                  X-Mailer all uppercase
 score      XM_UC_ONLY                  2.500	# limit
 
-meta       XM_ONE_WORD                 __XM_ONE_WORD_UNKNOWN && !__L_CTE_7BIT 
+meta       XM_ONE_WORD                 __XM_ONE_WORD_UNKNOWN && !__L_CTE_7BIT && !__HAS_X_MAILING_LIST 
 describe   XM_ONE_WORD                 X-Mailer only one word
 score      XM_ONE_WORD                 2.000	# limit
 
-meta       XM_SPAMMY                   ((__XM_LIGHT_HEAVY && !__MSGID_OK_HEX && !__HAS_X_BEEN_THERE && !__SPAN_INVIS) || (__XM_ONE_WORD_UNKNOWN && !__XM_DIGITS_ONLY && !__HAS_PHP_ORIG_SCRIPT && !__REPTO_QUOTE && !__L_CTE_7BIT)) && !__HAS_ERRORS_TO && !__HAS_CAMPAIGNID && !__TVD_PH_BODY_ACCOUNTS_POST && !__HAS_X_BEEN_THERE && !__HAS_THREAD_INDEX && !__HAS_TNEF && !__HDR_RCVD_ALIBABA
-describe   XM_SPAMMY                   X-Mailer random or otherwise spammy-looking
-score      XM_SPAMMY                   3.000	# limit
-
+meta       XM_LIGHT_HEAVY              __XM_LIGHT_HEAVY && !__HAS_X_BEEN_THERE 
+describe   XM_LIGHT_HEAVY              Special edition of a MUA
+score      XM_LIGHT_HEAVY              2.500	# limit
 
 
