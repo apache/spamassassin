@@ -2,7 +2,7 @@
 # meta        GB_MALWARE_DROPBOX_JAR_URI	( __MALWARE_DROPBOX_JAR_URI && (HTML_SHORT_LINK_IMG_1 || HTML_SHORT_LINK_IMG_2 || HTML_SHORT_LINK_IMG_3) )
 # describe    GB_MALWARE_DROPBOX_JAR_URI Dropbox that forces user to download jar file
 
-uri         GB_GOOGLE_OBFUR	/^https:\/\/www\.google\.([a-z]{2,3})\/url\?sa=t\&rct=j\&q=\&esrc=s\&source=web\&cd=([0-9])*\&cad=rja\&uact=([0-9]+)\&ved=.{1,50}\&url=https?:\/\/.{1,50}&usg=.{1,50}/
+uri         GB_GOOGLE_OBFUR	/^https:\/\/www\.google\.([a-z]{2,3})\/url\?sa=t\&rct=j\&q=\&esrc=s\&source=web\&cd=([0-9])*\&(cad=rja\&uact=([0-9]+)\&ved=.{1,50}\&)?url=https?:\/\/.{1,50}(&usg=.{1,50})?/
 describe    GB_GOOGLE_OBFUR	Obfuscate url through Google redirect
 score       GB_GOOGLE_OBFUR     0.75 # limit
 tflags      GB_GOOGLE_OBFUR     publish
