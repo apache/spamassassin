@@ -178,6 +178,7 @@ describe SHARE_50_50     Share the money 50/50
 
 body     EMRCP            /\bExcess (?:Maximum )?Return Capital (?:Profits?|Funds?)\b/i
 describe EMRCP            "Excess Maximum Return Capital Profit" scam
+tflags   EMRCP            publish
 
 meta     LUCRATIVE        ( __LUCRATIVE && __HELO_NO_DOMAIN ) && !ALL_TRUSTED
 describe LUCRATIVE        Make lots of money!

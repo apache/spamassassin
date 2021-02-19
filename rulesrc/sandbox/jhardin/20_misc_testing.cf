@@ -3581,6 +3581,8 @@ describe   ENVFROM_GOOG_TRIX           From suspicious Google subdomain
 score      ENVFROM_GOOG_TRIX           3.000	# limit
 tflags     ENVFROM_GOOG_TRIX           publish
 
+header     __ENVFROM_AMAZONSES         EnvelopeFrom =~ /\@amazonses\.com$/
+
 # evaluate before altering __FSL_ENVFROM_*
 header   __JH_ENVFROM_GOOGLE   EnvelopeFrom =~ /\@g(?:mail|oogle)\.com$/i
 header   __JH_ENVFROM_YAHOO    EnvelopeFrom =~ /\@yahoo(?:groups)?\./i
@@ -3589,6 +3591,7 @@ header   __JH_ENVFROM_ROCKET   EnvelopeFrom =~ /\@rocketmail\.com$/i
 header   __JH_ENVFROM_HOTMAIL  EnvelopeFrom =~ /\@hotmail\./i
 header   __JH_ENVFROM_LIVE     EnvelopeFrom =~ /\@live\./i
 header   __JH_ENVFROM_AOL      EnvelopeFrom =~ /\@aol\./i
+
 
 
 
@@ -3686,7 +3689,7 @@ header     __REPTO_MISSPACED           ALL:raw =~ /^Reply-To:\S/ism
 
 # content+respond+unsub texts as free hosted images
 # spammer response: now only two hosted images
-uri        __IMGUR_IMG                 m,^https?://i\.imgur\.com/[a-z0-9]{7}\.(?:png|gif|jpe?g)$,i
+uri        __IMGUR_IMG                 m,^https?://(?:[^.]+\.)?imgur\.com/[a-z0-9]{7}\.(?:png|gif|jpe?g)$,i
 tflags     __IMGUR_IMG                 multiple maxhits=4
 meta       __IMGUR_IMG_2               __IMGUR_IMG == 2
 meta       __IMGUR_IMG_3               __IMGUR_IMG == 3
