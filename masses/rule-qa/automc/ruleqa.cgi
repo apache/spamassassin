@@ -1958,6 +1958,10 @@ sub get_rule_metadata {
   }
 
   # if that failed, just return empty
+  if (1) {
+    print "<!-- WARN: Failed to read rule metadata file: $fname -->\n";
+  }
+
   $meta->{rulemds} = {};
   return $meta;
 }
