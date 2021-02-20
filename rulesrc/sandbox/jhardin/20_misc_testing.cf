@@ -136,7 +136,7 @@ ifplugin Mail::SpamAssassin::Plugin::MIMEHeader
 
   mimeheader   __PHISH_ATTACH_01_01  Content-Disposition =~ /\bfilename(?:="?[^"]*|\*(?:\d+\*)?=(?:UTF-8'')?\S*)(?:\.|%C2%B7|[\xc2][\xb7]|_)(?:pdf|docx?)\.html?[";$]/i
   mimeheader   __PHISH_ATTACH_01_02  Content-Type =~ /\bname="?[^"]*(?:\.|[\xc2][\xb7]|_)(?:pdf|docx?)\.html?[";$]/i
-  meta         PHISH_ATTACH          __PHISH_ATTACH_01_01 || __PHISH_ATTACH_01_02
+  meta         PHISH_ATTACH          (__PHISH_ATTACH_01_01 || __PHISH_ATTACH_01_02) && !__HAS_SENDER 
   describe     PHISH_ATTACH          Attachment filename suspicious, probable phishing
   tflags       PHISH_ATTACH          publish
 
@@ -2757,7 +2757,7 @@ header     __HAS_DOMAINKEY_SIG         exists:DomainKey-Signature
 header     __HAS_PHP_SCRIPT            exists:X-PHP-Script
 header     __HAS_PHP_ORIG_SCRIPT       exists:X-PHP-Originating-Script
 
-meta       XM_RECPTID                  __HAS_XM_RECPTID && !__TAG_EXISTS_SCRIPT 
+meta       XM_RECPTID                  __HAS_XM_RECPTID && !__TAG_EXISTS_SCRIPT && !__REPLYTO_NOREPLY && !__ENVFROM_AMAZONSES 
 describe   XM_RECPTID                  Has spammy message header
 score      XM_RECPTID                  3.000	# limit
 
@@ -3693,7 +3693,7 @@ uri        __IMGUR_IMG                 m,^https?://(?:[^.]+\.)?imgur\.com/[a-z0-
 tflags     __IMGUR_IMG                 multiple maxhits=4
 meta       __IMGUR_IMG_2               __IMGUR_IMG == 2
 meta       __IMGUR_IMG_3               __IMGUR_IMG == 3
-meta       HOSTED_IMG_MULTI_PUB_01     (__IMGUR_IMG_2 || __IMGUR_IMG_3) && !__DATE_LOWER 
+meta       HOSTED_IMG_MULTI_PUB_01     (__IMGUR_IMG_2 || __IMGUR_IMG_3) && !__DATE_LOWER && !__BOTH_INR_AND_REF 
 describe   HOSTED_IMG_MULTI_PUB_01     Multiple hosted images at public site
 score      HOSTED_IMG_MULTI_PUB_01     3.000	# limit
 tflags     HOSTED_IMG_MULTI_PUB_01     publish
