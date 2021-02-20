@@ -2156,7 +2156,7 @@ sub parse_infoxml {
   my $file = shift;
   my $xmlstr = readfile($file);
   my $opt = {};
-  if ($xmlstr =~ m!<opt (.*?)/>!s) {
+  if ($xmlstr =~ m!<opt ([^>]*?)>!s) {
     my $optstr = $1;
     my %attrs;
     while ($optstr =~ m!\b([A-Za-z0-9_]{1,50})="([^"]*)"!gs) {
