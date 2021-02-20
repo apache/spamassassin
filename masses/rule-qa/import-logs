@@ -87,14 +87,19 @@ sub locate_and_link {
   my @files = sort readdir(CORPUS);
   closedir(CORPUS);
 
+  warn "found ", $#files + 1, " files in $opt_dir";
+
   @files = grep {
-    /^(?:spam|ham)-(?:net-)?[-\w]+\.log$/ && -f "$opt_dir/$_" && -M _ < 30 
+    /^(?:spam|ham)-(?:net-)?[-\w.]+\.log$/ && -f "$opt_dir/$_" && -M _ < 30 
   } @files;
+
+  warn "kept ", $#files + 1, " files";
 
   foreach my $file (@files) {
     my $ftime;
     my $frevision;
 
+    warn "Processing $opt_dir/$file\n";
     open(FILE, "$opt_dir/$file") or warn "cannot read $opt_dir/$file";
     while (my $line = <FILE>) {
       last if $line !~ /^#/;
@@ -145,6 +150,8 @@ sub link_file {
 
   print "ln $f $t\n";
   (-f $t) and unlink $t;
-  link $f, $t or die "cannot ln";       # preserves modtimes
+  # cannot hardlink unless we have ownership or RW perms on the file
+  symlink $f, $t or die "cannot ln";
+  system "/usr/bin/touch -h -r '$f' '$t'";       # preserve modtimes
 }
 
