@@ -2,11 +2,18 @@
 # 
 # symlinked from 
 # lrwxrwxrwx   1 root     root          60 Dec  2 10:03 /etc/init.d/freqsd -> /export/home/svn-trunk/automc/etc-init.d-freqsd*
+#
+# new paths as of 2020:
+#     ~automc = /usr/local/spamassassin/automc
+#     /usr/local/spamassassin/automc/svn/trunk/build/automc/freqsd
+#     /usr/local/spamassassin/automc/svn/trunk/build/automc/etc-init.d-freqsd
+#
+
 
 . /etc/profile
 prog=freqsd
 
-HOME=/export/home/automc
+HOME=/usr/local/spamassassin/automc
 export HOME
 
 LC_CTYPE=C
@@ -15,7 +22,7 @@ export LC_CTYPE
 start() {
     echo "Starting $prog: " 
 
-    cd $HOME/svn/spamassassin
+    cd $HOME/svn/trunk
     rm $HOME/freqsd/log.1
     mv $HOME/freqsd/log $HOME/freqsd/log.1
 
@@ -28,7 +35,7 @@ start() {
 }
 
 stop() {
-    cd $HOME/svn/spamassassin
+    cd $HOME/svn/trunk
     su automc -c "./build/automc/freqsd -pidfile $HOME/freqsd/pid -kill"
 
     sleep 1

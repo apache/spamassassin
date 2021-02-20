@@ -1,7 +1,14 @@
-#!/local/perl586/bin/perl
+#!/usr/bin/perl
 #
 # freqsd - perform "background" operations required by the automc
 # infrastructure, such as building indices and "hit-frequencies" reports
+#
+# new paths as of 2020:
+#     ~automc = /usr/local/spamassassin/automc
+#     /usr/local/spamassassin/automc/svn/trunk/build/automc/freqsd
+#     /usr/local/spamassassin/automc/svn/trunk/build/automc/etc-init.d-freqsd
+#
+
 
 use strict;
 use warnings;
@@ -16,10 +23,10 @@ GetOptions(
     "kill" => \$opt_kill,
 );
 
-my $INHIBIT_SLOW_REPORTS_FLAG_FILE = "/export/home/automc/freqsd/flag.inhibit_slow_reports";
-my $dq_fast = IPC::DirQueue->new({ dir => "/export/home/automc/freqsd/dq_fast" });
-my $dq_slow = IPC::DirQueue->new({ dir => "/export/home/automc/freqsd/dq_slow" });
-$pidfile ||= "/export/home/automc/freqsd/pid";
+my $INHIBIT_SLOW_REPORTS_FLAG_FILE = "/usr/local/spamassassin/automc/freqsd/flag.inhibit_slow_reports";
+my $dq_fast = IPC::DirQueue->new({ dir => "/usr/local/spamassassin/automc/freqsd/dq_fast" });
+my $dq_slow = IPC::DirQueue->new({ dir => "/usr/local/spamassassin/automc/freqsd/dq_slow" });
+$pidfile ||= "/usr/local/spamassassin/automc/freqsd/pid";
 
 umask(002);
 
