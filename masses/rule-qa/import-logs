@@ -87,19 +87,19 @@ sub locate_and_link {
   my @files = sort readdir(CORPUS);
   closedir(CORPUS);
 
-  warn "found ", $#files + 1, " files in $opt_dir";
+  print "Found ", $#files + 1, " files in $opt_dir\n";
 
   @files = grep {
     /^(?:spam|ham)-(?:net-)?[-\w.]+\.log$/ && -f "$opt_dir/$_" && -M _ < 30 
   } @files;
 
-  warn "kept ", $#files + 1, " files";
+  print "Kept ", $#files + 1, " files\n";
 
   foreach my $file (@files) {
     my $ftime;
     my $frevision;
 
-    warn "Processing $opt_dir/$file\n";
+    print "Processing $opt_dir/$file\n";
     open(FILE, "$opt_dir/$file") or warn "cannot read $opt_dir/$file";
     while (my $line = <FILE>) {
       last if $line !~ /^#/;
