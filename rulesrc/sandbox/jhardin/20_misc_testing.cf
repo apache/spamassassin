@@ -3576,7 +3576,8 @@ describe    URI_MYSP_AC                Uses unusual redirector to avoid URIBL
 
 # evaluate different options before finalizing
 header     __ENVFROM_GOOG_TRIX         EnvelopeFrom =~ /(?:@|=)trix\.bounces\.google\.com(?:$|=)/
-meta       ENVFROM_GOOG_TRIX           __ENVFROM_GOOG_TRIX && !__FROM_FULL_NAME && !__SURVEY 
+meta       __ENVFROM_GOOG_TRIX_SPAMMY  __ENVFROM_GOOG_TRIX && (__GOOGLE_DOC_SUSP || FREEMAIL_REPLYTO_END_DIGIT || __ADVANCE_FEE_2_NEW || FORGED_GMAIL_RCVD)
+meta       ENVFROM_GOOG_TRIX           __ENVFROM_GOOG_TRIX_SPAMMY
 describe   ENVFROM_GOOG_TRIX           From suspicious Google subdomain
 score      ENVFROM_GOOG_TRIX           3.000	# limit
 tflags     ENVFROM_GOOG_TRIX           publish
@@ -3702,14 +3703,16 @@ meta       __BITCOIN_IMGUR             __IMGUR_IMG && __BITCOIN
 meta       BITCOIN_IMGUR               __BITCOIN_IMGUR
 describe   BITCOIN_IMGUR               Bitcoin + hosted image
 score      BITCOIN_IMGUR               3.500	# limit
+tflags     BITCOIN_IMGUR               publish
 
 meta       __DYNAMIC_IMGUR             __IMGUR_IMG && __RDNS_DYNAMIC_IPADDR 
 meta       DYNAMIC_IMGUR               __DYNAMIC_IMGUR
 describe   DYNAMIC_IMGUR               dynamic IP + hosted image
 score      DYNAMIC_IMGUR               4.000	# limit
+tflags     DYNAMIC_IMGUR               publish
 
 body       __OBFU_UNSUB_UL             /(?:click_here|remove_your|our_e?mail|this_list|to_unsubscribe|future_e?mail|our_list)/
-meta       OBFU_UNSUB_UL               __OBFU_UNSUB_UL && !__USING_VERP1 && !__STY_INVIS 
+meta       OBFU_UNSUB_UL               __OBFU_UNSUB_UL && !MAILING_LIST_MULTI 
 describe   OBFU_UNSUB_UL               Obfuscated unsubscribe text
 tflags     OBFU_UNSUB_UL               publish
 
