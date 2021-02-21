@@ -86,11 +86,12 @@ uri HTTP_77			/http:\/\/.{0,2}\%77/
 describe HTTP_77		Contains an URL-encoded hostname (HTTP77)
 
 # a.com.b.c
-uri SPOOF_COM2OTH	m{^https?://(?:\w+\.)+?com\.(?!(?:[a-z]{2}\.)?s3\.amazonaws\.com)(?:\w+\.){2}}i
+uri SPOOF_COM2OTH	m{^https?://(?:\w+\.)+?com\.(?!(?:[a-z]{2}\.)?s3\.amazonaws\.com|\w+\.psmtp\.com)(?:\w+\.){2}}i
 describe SPOOF_COM2OTH	URI contains ".com" in middle
 
 # a.com.b.com
-uri SPOOF_COM2COM	m{^https?://(?:\w+\.)+?com\.(?!(?:[a-z]{2}\.)?s3\.amazonaws\.com)(?:\w+\.)+?com\b}i
+uri __SPOOF_COM2COM	m{^https?://(?:\w+\.)+?com\.(?!(?:[a-z]{2}\.)?s3\.amazonaws\.com|\w+\.psmtp\.com)(?:\w+\.)+?com\b}i
+meta SPOOF_COM2COM	__SPOOF_COM2COM && !SPOOF_COM2OTH
 describe SPOOF_COM2COM 	URI contains ".com" in middle and end
 
 # a.net.b.com
