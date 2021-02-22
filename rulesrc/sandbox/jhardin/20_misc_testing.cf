@@ -3576,7 +3576,7 @@ describe    URI_MYSP_AC                Uses unusual redirector to avoid URIBL
 
 # evaluate different options before finalizing
 header     __ENVFROM_GOOG_TRIX         EnvelopeFrom =~ /(?:@|=)trix\.bounces\.google\.com(?:$|=)/
-meta       __ENVFROM_GOOG_TRIX_SPAMMY  __ENVFROM_GOOG_TRIX && (__GOOGLE_DOC_SUSP || FREEMAIL_REPLYTO_END_DIGIT || __ADVANCE_FEE_2_NEW || FORGED_GMAIL_RCVD)
+meta       __ENVFROM_GOOG_TRIX_SPAMMY  __ENVFROM_GOOG_TRIX && (__GOOGLE_DOC_SUSP || FREEMAIL_REPLYTO_END_DIGIT || __ADVANCE_FEE_2_NEW || FORGED_GMAIL_RCVD || LOTS_OF_MONEY || __HAS_X_SOURCE_DIR )
 meta       ENVFROM_GOOG_TRIX           __ENVFROM_GOOG_TRIX_SPAMMY
 describe   ENVFROM_GOOG_TRIX           From suspicious Google subdomain
 score      ENVFROM_GOOG_TRIX           3.000	# limit
