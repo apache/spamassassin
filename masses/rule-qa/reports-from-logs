@@ -111,13 +111,19 @@ sub locate_input {
   my @files = sort readdir(CORPUS);
   closedir(CORPUS);
 
+  warn "found ", $#files + 1, " files in $logsdir";
+
   @files = grep {
     /^(?:spam|ham)-(?:net-)?\S+\.log$/ && -f "$logsdir/$_" && -M _ < 10 
   } @files;
 
+  warn "kept ", $#files + 1, " files";
+
   foreach my $file (@files) {
     my $tag = 0;
     my $headers = '';
+
+    warn "processing $logsdir/$file";
 
     open(FILE, "$logsdir/$file") or warn "cannot read $logsdir/$file";
     while (my $line = <FILE>) {
