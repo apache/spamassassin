@@ -3795,7 +3795,7 @@ header     __XM_UC_ONLY                X-Mailer =~ /^[^a-z]+$/
 header     __XM_UC_ONLY_UNKNOWN        X-Mailer =~ /^(?!SM[EF]$|ACEM$|CR$|PHP(?:BB)?\d?$|EMS$|TYPO\d$|WHMCS$|RMM\d?$|GURU$|SMTP$|ZIMACS$|EOW\d|FM$)[^a-z]+$/
 header     __XM_LC_ONLY                X-Mailer =~ /^[^A-Z]+$/
 header     __XM_LC_ONLY_UNKNOWN        X-Mailer =~ /^(?!php|mailer$|sendhtml$)[^A-Z]+$/
-header     __XM_RANDOM                 X-Mailer =~ /q(?!q?mail|\d|[-\w]*=+;)[^u]/i
+header     __XM_RANDOM                 X-Mailer =~ /q(?!q?mail|boxmail|\d|[-\w]*=+;)[^u]/i
 header     __XM_LIGHT_HEAVY            X-Mailer =~ /\b(?:light|(?<!::)lite|standard|business|pro(?:fessional)?|educational|personal)\b/i
 
 header     __XM_SMART_SEND             X-Mailer =~ /^Smart_Send(?:_\d+)+$/
@@ -3808,6 +3808,10 @@ meta       XM_DIGITS_ONLY              __XM_DIGITS_ONLY
 describe   XM_DIGITS_ONLY              X-Mailer malformed
 score      XM_DIGITS_ONLY              3.000	# limit
 tflags     XM_DIGITS_ONLY              publish
+
+# just a check
+header     __XM_QBOXMAIL               X-Mailer =~ /qboxmail/i
+
 
 meta       XM_RANDOM                   __XM_RANDOM && !__STY_INVIS_3 && !__HAS_IN_REPLY_TO 
 describe   XM_RANDOM                   X-Mailer apparently random
