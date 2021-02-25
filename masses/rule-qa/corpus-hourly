@@ -446,8 +446,6 @@ sub gen_class {
       }
       close(IN);
       for (sort sort_all @output) { print OUT; }
-      unlink "$opt{tmp}/ham.log.$$";
-      unlink "$opt{tmp}/spam.log.$$";
     }
     elsif ($age eq "age") {
       my @output;
@@ -478,8 +476,6 @@ sub gen_class {
         close(IN);
       }
       for (sort sort_all @output) { print OUT; }
-      unlink "$opt{tmp}/ham.log.$$";
-      unlink "$opt{tmp}/spam.log.$$";
     }
     elsif (@ham && @spam) {
       # get logs
@@ -490,8 +486,6 @@ sub gen_class {
       open(IN, "./hit-frequencies -TxpaP $flags $opt{tmp}/spam.log.$$ $opt{tmp}/ham.log.$$ |");
       while(<IN>) { print(OUT); }
       close(IN);
-      unlink "$opt{tmp}/ham.log.$$";
-      unlink "$opt{tmp}/spam.log.$$";
     }
 
     $bytes = (-s OUT);
