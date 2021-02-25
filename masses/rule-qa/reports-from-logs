@@ -374,6 +374,8 @@ sub gen_class {
     $bytes = (-s OUT);
     close(OUT);
 
+    unlink $tmp_h, $tmp_s;
+
     if ($no_messages_in_freqs) {
       warn "ERROR: no data in freqs!  aborting, leaving tmp file as $tmpfname";
       return;
@@ -631,6 +633,7 @@ sub gen_report_freqs_all {
 
   if (-z $tmp_h_all && -z $tmp_s_all) {
     warn "time_filter_fileset() returned empty logs. not creating freqs!";
+    unlink $tmp_h_all, $tmp_s_all;
     return;     # we'll try again later
   }
 
@@ -641,6 +644,8 @@ sub gen_report_freqs_all {
   }
   close(FREQS);
   for (sort sort_all @output) { print OUT; }
+
+  unlink $tmp_h_all, $tmp_s_all;
 }
 
 # ---------------------------------------------------------------------------
