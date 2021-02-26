@@ -2007,7 +2007,7 @@ ifplugin Mail::SpamAssassin::Plugin::ReplaceTags
   describe      FUZZY_FACEBOOK      Obfuscated "facebook"
   tflags        FUZZY_FACEBOOK      publish
 
-  body          FUZZY_PAYPAL        /(?=<P>)(?!pay[-\s]?pal)<P><A><Y>[-\s]?<P><A><L>/i
+  body          FUZZY_PAYPAL        /(?:^|\W)(?=<P>)(?!pay[-\s]?pal)<P><A><Y>[-\s]?<P><A><L>(?:$|\W)/i
   replace_rules FUZZY_PAYPAL   
   describe      FUZZY_PAYPAL        Obfuscated "paypal"
   tflags        FUZZY_PAYPAL        publish
@@ -2028,7 +2028,7 @@ else
 endif
 
 uri            __URL_BTC_ID     m;[/.](?:[13][a-km-zA-HJ-NP-Z1-9]{25,34}|bc1[acdefghjklmnpqrstuvwxyz234567890]{30,90})(?:/|$);
-body           __BITCOIN_ID     /\b(?<!=)(?:[13](?:(?:[-_=\s][a-km-zA-HJ-NP-Z1-9]){25,34}|[a-km-zA-HJ-NP-Z1-9]{25,34})|bc1[acdefghjklmnpqrstuvwxyz234567890]{30,90}|b[-_=\s]c[-_=\s]1(?:[-_=\s][acdefghjklmnpqrstuvwxyz234567890]){30,90})\b/
+body           __BITCOIN_ID     /\b(?<!=)(?:[13](?:(?:[-_=\s][a-km-zA-HJ-NP-Z1-9]){29,34}|[a-km-zA-HJ-NP-Z1-9]{29,34})|bc1[acdefghjklmnpqrstuvwxyz234567890]{30,90}|b[-_=\s]c[-_=\s]1(?:[-_=\s][acdefghjklmnpqrstuvwxyz234567890]){30,90})\b/
 
 meta          FUZZY_MONERO        __FUZZY_MONERO
 describe      FUZZY_MONERO        Obfuscated "Monero"
