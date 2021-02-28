@@ -715,6 +715,10 @@ tflags         COMMENT_GIBBERISH        publish
 #body           LOTSA_EMAILS               /\b(?:thousand|million)\se-?mail(?:\saddresse)?s?\b/i
 #tflags         LOTSA_EMAILS               nopublish
 
+body           __BIGNUM_EMAIL_TST1        /\b(?:thousand|million|\d[,1-9]{0,6}(?:[,0]+k?|k))\s(?:(?!and|or|your|place|baby)\w+\s)?(?:e-?mail)\b/i
+body           __BIGNUM_EMAIL_TST2        /\b(?:thousand|million|\d[,1-9]{0,6}(?:[,0]+k?|k))\s(?:(?!and|or|your|place|baby)\w+\s)?(?:e-?mails)\b/i
+body           __BIGNUM_EMAIL_TST3        /\b(?:thousand|million|\d[,1-9]{0,6}(?:[,0]+k?|k))\s(?:(?!and|or|your|place|baby)\w+\s)?(?:e-?mail:)/i
+body           __BIGNUM_EMAIL_TST4        /\b(?:thousand|million|\d[,1-9]{0,6}(?:[,0]+k?|k))\s(?:(?!and|or|your|place|baby)\w+\s)?(?:e-?mail(?!:)s?)\b/i
 body           __BIGNUM_EMAILS            /\b(?:thousand|million|\d[,1-9]{0,6}(?:[,0]+k?|k))\s(?:(?!and|or|your|place|baby)\w+\s)?(?:e-?mail(?:s|\saddresses)|fax numbers|leads|names)\b/i
 tflags         __BIGNUM_EMAILS            multiple maxhits=5
 meta           BIGNUM_EMAILS              __BIGNUM_EMAILS && !BIGNUM_EMAILS_MANY && !__BIGNUM_EMAILS_FREEM && !__RDNS_HEX && !MIME_QP_LONG_LINE 
@@ -2757,7 +2761,7 @@ header     __HAS_DOMAINKEY_SIG         exists:DomainKey-Signature
 header     __HAS_PHP_SCRIPT            exists:X-PHP-Script
 header     __HAS_PHP_ORIG_SCRIPT       exists:X-PHP-Originating-Script
 
-meta       XM_RECPTID                  __HAS_XM_RECPTID && !__TAG_EXISTS_SCRIPT && !__REPLYTO_NOREPLY && !__ENVFROM_AMAZONSES 
+meta       XM_RECPTID                  __HAS_XM_RECPTID && !__TAG_EXISTS_SCRIPT && !__REPLYTO_NOREPLY && !__ENVFROM_AMAZONSES && !__DOS_DIRECT_TO_MX && !__FRAUD_PTX 
 describe   XM_RECPTID                  Has spammy message header
 score      XM_RECPTID                  3.000	# limit
 
