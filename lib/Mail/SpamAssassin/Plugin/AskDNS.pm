@@ -544,14 +544,9 @@ sub process_response_packet {
       # dbg("askdns: received rr type %s, data: %s", $rr_type, $rr_rdatastr);
     }
 
-    my $query_type = $arule->{q_type};
-    return if !defined $qtype || $query_type ne $qtype;
-
-    my $answer_types_ref = $arule->{a_types};
-    $answer_types_ref = [$query_type]  if !@$answer_types_ref;
+    next if !defined $qtype;
 
     my $subtest = $arule->{subtest};
-
     my $match;
     local($1,$2,$3);
     if (ref $subtest eq 'HASH') {  # a list of DNS rcodes (as hash keys)
@@ -559,7 +554,7 @@ sub process_response_packet {
     } elsif ($rcode != 0) {
       # skip remaining tests on DNS error
     } elsif (!defined($rr_type) ||
-             !grep($_ eq 'ANY' || $_ eq $rr_type, @$answer_types_ref) ) {
+             !grep($_ eq 'ANY' || $_ eq $rr_type, @{$arule->{a_types}}) ) {
       # skip remaining tests on wrong RR type
     } elsif (!defined $subtest) {
       $match = 1;  # any valid response of the requested RR type matches
