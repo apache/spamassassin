@@ -715,23 +715,23 @@ tflags         COMMENT_GIBBERISH        publish
 #body           LOTSA_EMAILS               /\b(?:thousand|million)\se-?mail(?:\saddresse)?s?\b/i
 #tflags         LOTSA_EMAILS               nopublish
 
-body           __BIGNUM_EMAIL_TST1        /\b(?:thousand|million|\d[,1-9]{0,6}(?:[,0]+k?|k))\s(?:(?!and|or|your|place|baby)\w+\s)?(?:e-?mail)\b/i
-body           __BIGNUM_EMAIL_TST2        /\b(?:thousand|million|\d[,1-9]{0,6}(?:[,0]+k?|k))\s(?:(?!and|or|your|place|baby)\w+\s)?(?:e-?mails)\b/i
-body           __BIGNUM_EMAIL_TST3        /\b(?:thousand|million|\d[,1-9]{0,6}(?:[,0]+k?|k))\s(?:(?!and|or|your|place|baby)\w+\s)?(?:e-?mail:)/i
-body           __BIGNUM_EMAIL_TST4        /\b(?:thousand|million|\d[,1-9]{0,6}(?:[,0]+k?|k))\s(?:(?!and|or|your|place|baby)\w+\s)?(?:e-?mail(?!:)s?)\b/i
-body           __BIGNUM_EMAIL_TST5        /\b(?:thousand|million|\d[,1-9]{0,6}(?:[,0]+k?|k))\s(?:(?!and|or|your|place|baby)\w+\s)?(?:e-?mail(?![-:.\)\>\]])s?)\b/i
+#body           __BIGNUM_EMAIL_TST1        /\b(?:thousand|million|\d[,1-9]{0,6}(?:[,0]+k?|k))\s(?:(?!and|or|your|place|baby)\w+\s)?(?:e-?mail)\b/i
+#body           __BIGNUM_EMAIL_TST2        /\b(?:thousand|million|\d[,1-9]{0,6}(?:[,0]+k?|k))\s(?:(?!and|or|your|place|baby)\w+\s)?(?:e-?mails)\b/i
+#body           __BIGNUM_EMAIL_TST3        /\b(?:thousand|million|\d[,1-9]{0,6}(?:[,0]+k?|k))\s(?:(?!and|or|your|place|baby)\w+\s)?(?:e-?mail:)/i
+#body           __BIGNUM_EMAIL_TST4        /\b(?:thousand|million|\d[,1-9]{0,6}(?:[,0]+k?|k))\s(?:(?!and|or|your|place|baby)\w+\s)?(?:e-?mail(?!:)s?)\b/i
+#body           __BIGNUM_EMAIL_TST5        /\b(?:thousand|million|\d[,1-9]{0,6}(?:[,0]+k?|k))\s(?:(?!and|or|your|place|baby)\w+\s)?(?:e-?mail(?![-:.\)\>\]])s?)\b/i
 
-body           __BIGNUM_EMAILS            /\b(?:thousand|million|\d[,1-9]{0,6}(?:[,0]+k?|k))\s(?:(?!and|or|your|place|baby)\w+\s)?(?:e-?mail(?!:)(?:s?|\saddresses)|fax numbers|leads|names)\b/i
+body           __BIGNUM_EMAILS            /\b(?:thousand|million|\d[,1-9]{0,6}(?:[,0]{2,}k?|k))\s(?:(?!and|or|your|place|baby|suspicious|supportive|subpoenaed)\w+\s)?(?:e-?mail(?:(?![-:.\)\>\]])s?|\saddresses)|fax numbers|leads|names)\b/i
 tflags         __BIGNUM_EMAILS            multiple maxhits=5
 meta           __BIGNUM_EMAILS_2          __BIGNUM_EMAILS > 1
 meta           __BIGNUM_EMAILS_3          __BIGNUM_EMAILS > 2
 meta           __BIGNUM_EMAILS_4          __BIGNUM_EMAILS > 3
 meta           __BIGNUM_EMAILS_5          __BIGNUM_EMAILS > 4
 
-meta           BIGNUM_EMAILS              __BIGNUM_EMAILS_2 && !BIGNUM_EMAILS_MANY && !__BIGNUM_EMAILS_FREEM && !__RDNS_HEX && !MIME_QP_LONG_LINE 
-describe       BIGNUM_EMAILS              Lots of email addresses/leads
-score          BIGNUM_EMAILS              2.50		# limit
-tflags         BIGNUM_EMAILS              publish
+#meta           BIGNUM_EMAILS              __BIGNUM_EMAILS_2 && !BIGNUM_EMAILS_MANY && !__BIGNUM_EMAILS_FREEM && !__RDNS_HEX && !MIME_QP_LONG_LINE 
+#describe       BIGNUM_EMAILS              Lots of email addresses/leads
+#score          BIGNUM_EMAILS              2.50		# limit
+#tflags         BIGNUM_EMAILS              publish
 
 meta           __BIGNUM_EMAILS_FREEM      __BIGNUM_EMAILS && __freemail_hdr_replyto
 meta           BIGNUM_EMAILS_FREEM        __BIGNUM_EMAILS_FREEM
@@ -3830,7 +3830,7 @@ describe   XM_RANDOM                   X-Mailer apparently random
 score      XM_RANDOM                   3.000	# limit
 tflags     XM_RANDOM                   publish
 
-meta       XM_UC_ONLY                  __XM_UC_ONLY_UNKNOWN && !__STY_INVIS_MANY && !__HAS_X_REF && !__RCVD_DOTGOV_EXT && !__XM_RANDOM 
+meta       XM_UC_ONLY                  __XM_UC_ONLY_UNKNOWN && !__STY_INVIS_MANY && !__HAS_X_REF && !__RCVD_DOTGOV_EXT && !__XM_RANDOM && !__HDRS_LCASE_KNOWN && !__HAS_THREAD_INDEX && !__HAS_X_LOOP 
 describe   XM_UC_ONLY                  X-Mailer all uppercase
 score      XM_UC_ONLY                  2.500	# limit
 
