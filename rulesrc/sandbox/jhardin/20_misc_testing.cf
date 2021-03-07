@@ -719,9 +719,16 @@ body           __BIGNUM_EMAIL_TST1        /\b(?:thousand|million|\d[,1-9]{0,6}(?
 body           __BIGNUM_EMAIL_TST2        /\b(?:thousand|million|\d[,1-9]{0,6}(?:[,0]+k?|k))\s(?:(?!and|or|your|place|baby)\w+\s)?(?:e-?mails)\b/i
 body           __BIGNUM_EMAIL_TST3        /\b(?:thousand|million|\d[,1-9]{0,6}(?:[,0]+k?|k))\s(?:(?!and|or|your|place|baby)\w+\s)?(?:e-?mail:)/i
 body           __BIGNUM_EMAIL_TST4        /\b(?:thousand|million|\d[,1-9]{0,6}(?:[,0]+k?|k))\s(?:(?!and|or|your|place|baby)\w+\s)?(?:e-?mail(?!:)s?)\b/i
-body           __BIGNUM_EMAILS            /\b(?:thousand|million|\d[,1-9]{0,6}(?:[,0]+k?|k))\s(?:(?!and|or|your|place|baby)\w+\s)?(?:e-?mail(?:s|\saddresses)|fax numbers|leads|names)\b/i
+body           __BIGNUM_EMAIL_TST5        /\b(?:thousand|million|\d[,1-9]{0,6}(?:[,0]+k?|k))\s(?:(?!and|or|your|place|baby)\w+\s)?(?:e-?mail(?![-:.\)\>\]])s?)\b/i
+
+body           __BIGNUM_EMAILS            /\b(?:thousand|million|\d[,1-9]{0,6}(?:[,0]+k?|k))\s(?:(?!and|or|your|place|baby)\w+\s)?(?:e-?mail(?!:)(?:s?|\saddresses)|fax numbers|leads|names)\b/i
 tflags         __BIGNUM_EMAILS            multiple maxhits=5
-meta           BIGNUM_EMAILS              __BIGNUM_EMAILS && !BIGNUM_EMAILS_MANY && !__BIGNUM_EMAILS_FREEM && !__RDNS_HEX && !MIME_QP_LONG_LINE 
+meta           __BIGNUM_EMAILS_2          __BIGNUM_EMAILS > 1
+meta           __BIGNUM_EMAILS_3          __BIGNUM_EMAILS > 2
+meta           __BIGNUM_EMAILS_4          __BIGNUM_EMAILS > 3
+meta           __BIGNUM_EMAILS_5          __BIGNUM_EMAILS > 4
+
+meta           BIGNUM_EMAILS              __BIGNUM_EMAILS_2 && !BIGNUM_EMAILS_MANY && !__BIGNUM_EMAILS_FREEM && !__RDNS_HEX && !MIME_QP_LONG_LINE 
 describe       BIGNUM_EMAILS              Lots of email addresses/leads
 score          BIGNUM_EMAILS              2.50		# limit
 tflags         BIGNUM_EMAILS              publish
@@ -732,10 +739,6 @@ describe       BIGNUM_EMAILS_FREEM        Lots of email addresses/leads, free em
 score          BIGNUM_EMAILS_FREEM        3.00		# limit
 tflags         BIGNUM_EMAILS_FREEM        publish
 
-meta           __BIGNUM_EMAILS_2          __BIGNUM_EMAILS > 1
-meta           __BIGNUM_EMAILS_3          __BIGNUM_EMAILS > 2
-meta           __BIGNUM_EMAILS_4          __BIGNUM_EMAILS > 3
-meta           __BIGNUM_EMAILS_5          __BIGNUM_EMAILS > 4
 meta           BIGNUM_EMAILS_MANY         __BIGNUM_EMAILS_3 && !__HAS_ERRORS_TO && !__HAS_CAMPAIGNID && !__DATE_LOWER 
 describe       BIGNUM_EMAILS_MANY         Lots of email addresses/leads, over and over
 score          BIGNUM_EMAILS_MANY         3.00		# limit
@@ -1985,7 +1988,7 @@ ifplugin Mail::SpamAssassin::Plugin::ReplaceTags
   meta          FUZZY_WELLSFARGO         __FUZZY_WELLSFARGO_BODY || __FUZZY_WELLSFARGO_FROM
   describe      FUZZY_WELLSFARGO         Obfuscated "Wells Fargo"
 
-  body          __FUZZY_PORN        /(?=<P>)(?!pornograph?(?:y|ic|er))<P><O><R><N><O><G><R><A><P><H>?(?:<Y>|<I><C>|<E><R>)/i
+  body          __FUZZY_PORN        /(?=<P>)(?!pornograph?(?:y|i[ca]|er))<P><O><R><N><O><G><R><A><P><H>?(?:<Y>|<I><C>|<E><R>)/i
   replace_rules __FUZZY_PORN      
   meta          FUZZY_PORN          __FUZZY_PORN && !( __ENV_AND_HDR_FROM_MATCH && __SENDER_BOT )
   describe      FUZZY_PORN          Obfuscated "Pornography" or "Pornographic"
@@ -1996,7 +1999,7 @@ ifplugin Mail::SpamAssassin::Plugin::ReplaceTags
   describe      FUZZY_AMAZON        Obfuscated "amazon"
   tflags        FUZZY_AMAZON        publish
 
-  body          FUZZY_APPLE         /(?:^|\W)(?=<A>)(?!apple)<A><P><P><L><E>(?:$|\W)/i
+  body          FUZZY_APPLE         /(?:^|\W)(?=<A>)(?!appl[ey])<A><P><P><L><E>(?:$|\W)/i
   replace_rules FUZZY_APPLE    
   describe      FUZZY_APPLE         Obfuscated "apple"
   tflags        FUZZY_APPLE         publish
@@ -2227,6 +2230,11 @@ meta           BITCOIN_BOMB           __BITCOIN_ID && __EXPLOSIVE_DEVICE && !BIT
 describe       BITCOIN_BOMB           BitCoin + bomb
 score          BITCOIN_BOMB           3.000	# limit
 tflags         BITCOIN_BOMB           publish
+
+meta           BITCOIN_ONAN           __BITCOIN_ID && __YOUR_ONAN && __KHOP_NO_FULL_NAME && !BITCOIN_EXTORT_01
+describe       BITCOIN_ONAN           BitCoin + [censored]
+score          BITCOIN_ONAN           3.000	# limit
+tflags         BITCOIN_ONAN           publish
 
 meta           MONERO_EXTORT_01       __MONERO && __EXTORT_MANY
 describe       MONERO_EXTORT_01       Extortion spam, pay via Monero cryptocurrency
@@ -3774,7 +3782,7 @@ ifplugin Mail::SpamAssassin::Plugin::FreeMail
 endif
 
 rawbody    __CONTENT_AFTER_HTML        /<\/html>\s*[a-z0-9]/i
-meta       CONTENT_AFTER_HTML          __CONTENT_AFTER_HTML && !__HAS_SENDER && !__LYRIS_EZLM_REMAILER 
+meta       CONTENT_AFTER_HTML          __CONTENT_AFTER_HTML && !__HAS_SENDER && !__LYRIS_EZLM_REMAILER && !__HAS_CID && !__RCD_RDNS_MTA_MESSY && !__URI_DOTGOV 
 describe   CONTENT_AFTER_HTML          More content after HTML close tag
 score      CONTENT_AFTER_HTML          2.500	# limit
 tflags     CONTENT_AFTER_HTML          publish
@@ -3796,7 +3804,7 @@ header     __XM_ONE_WORD_UNKNOWN       X-Mailer =~ /^\s*(?!php|msgsend|send(?:ht
 header     __XM_ALNUM_STARTS_DIGIT     X-Mailer =~ /^\s*\d+[\s\d]*[^\s\d]/
 header     __XM_DIGITS_ONLY            X-Mailer =~ /^\s*\d+\s*$/
 header     __XM_UC_ONLY                X-Mailer =~ /^[^a-z]+$/
-header     __XM_UC_ONLY_UNKNOWN        X-Mailer =~ /^(?!SM[EF]$|ACEM$|CR$|PHP(?:BB)?\d?$|EMS$|TYPO\d$|WHMCS$|RMM\d?$|GURU$|SMTP$|ZIMACS$|EOW\d|FM$)[^a-z]+$/
+header     __XM_UC_ONLY_UNKNOWN        X-Mailer =~ /^(?!SM[EF]$|ACEM$|CR$|PHP(?:BB)?[\/\d.]*$|EMS$|TYPO\d$|WHMCS$|RMM\d?$|GURU$|SMTP(?:\sCLIENT)?$|ZIMACS$|EOW\d|FM$|EDMAIL\sR[\d.]+$|HPPWS)[^a-z]+$/
 header     __XM_LC_ONLY                X-Mailer =~ /^[^A-Z]+$/
 header     __XM_LC_ONLY_UNKNOWN        X-Mailer =~ /^(?!php|mailer$|sendhtml$)[^A-Z]+$/
 header     __XM_RANDOM                 X-Mailer =~ /q(?!q?mail|boxmail|\d|[-\w]*=+;)[^u]/i
@@ -3817,12 +3825,12 @@ tflags     XM_DIGITS_ONLY              publish
 header     __XM_QBOXMAIL               X-Mailer =~ /qboxmail/i
 
 
-meta       XM_RANDOM                   __XM_RANDOM && !__STY_INVIS_3 && !__HAS_IN_REPLY_TO 
+meta       XM_RANDOM                   __XM_RANDOM && !__STY_INVIS_3 && !__HAS_IN_REPLY_TO && !__XM_UC_ONLY 
 describe   XM_RANDOM                   X-Mailer apparently random
 score      XM_RANDOM                   3.000	# limit
 tflags     XM_RANDOM                   publish
 
-meta       XM_UC_ONLY                  __XM_UC_ONLY_UNKNOWN && !__STY_INVIS_MANY && !__HAS_X_REF && !__RCVD_DOTGOV_EXT 
+meta       XM_UC_ONLY                  __XM_UC_ONLY_UNKNOWN && !__STY_INVIS_MANY && !__HAS_X_REF && !__RCVD_DOTGOV_EXT && !__XM_RANDOM 
 describe   XM_UC_ONLY                  X-Mailer all uppercase
 score      XM_UC_ONLY                  2.500	# limit
 
