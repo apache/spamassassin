@@ -627,7 +627,7 @@ sub process_response_packet {
           : $delim eq '/' ? ($rdatanum & $n2) == (int($n1) & $n2) # value/mask
           : 0; # notice int($n1) to fix perl ~5.14 taint bug (Bug 7725)
         }
-        if ($match && !defined $rulenames_hit{$rulename}) {
+        if ($match) {
           $self->askdns_hit($pms, $ent->{query_domain}, $qtype,
                             $rr_rdatastr, $rulename);
           $rulenames_hit{$rulename} = 1;
