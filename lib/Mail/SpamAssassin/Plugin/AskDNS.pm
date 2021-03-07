@@ -594,16 +594,12 @@ sub process_response_packet {
     # dbg("askdns: received rr type %s, data: %s", $rr_type, $rr_rdatastr);
     }
 
-    my $j = 0;
     for my $q_tuple (!ref $queries_ref ? () : @$queries_ref) {
       next  if !$q_tuple;
       my($query_type, $answer_types_ref, $rules) = @$q_tuple;
 
-      next  if !defined $qtype || $query_type ne $qtype;
+      next  if !defined $qtype;
       $answer_types_ref = [$query_type]  if !defined $answer_types_ref;
-
-      # mark rule as done
-      $pms->{askdns_map_dnskey_to_rules}{$dnskey}[$j++] = undef;
 
       while (my($rulename,$subtest) = each %$rules) {
         my $match;
@@ -631,7 +627,7 @@ sub process_response_packet {
           : $delim eq '/' ? ($rdatanum & $n2) == (int($n1) & $n2) # value/mask
           : 0; # notice int($n1) to fix perl ~5.14 taint bug (Bug 7725)
         }
-        if ($match) {
+        if ($match && !defined $rulenames_hit{$rulename}) {
           $self->askdns_hit($pms, $ent->{query_domain}, $qtype,
                             $rr_rdatastr, $rulename);
           $rulenames_hit{$rulename} = 1;
