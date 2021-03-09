@@ -2357,7 +2357,7 @@ tflags    RAND_HEADER_MANY             publish
 header    __RAND_MKTG_HEADER           ALL =~ /^X-(?:[a-z]{2}){1,2}-(?:EBS|(?:Tracking|Subscriber|Delivery|Customer|Campaign)-[DSU]?id):/ism
 meta      RAND_MKTG_HEADER             __RAND_MKTG_HEADER && !__HAVE_BOUNCE_RELAYS 
 describe  RAND_MKTG_HEADER             Has partially-randomized marketing/tracking header(s)
-score     RAND_MKTG_HEADER             3.000	# limit
+score     RAND_MKTG_HEADER             2.000	# limit
 tflags    RAND_MKTG_HEADER             publish
 
 
