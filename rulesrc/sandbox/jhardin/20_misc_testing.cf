@@ -2355,7 +2355,7 @@ score     RAND_HEADER_MANY             3.000   # limit
 tflags    RAND_HEADER_MANY             publish
 
 header    __RAND_MKTG_HEADER           ALL =~ /^X-(?:[a-z]{2}){1,2}-(?:EBS|(?:Tracking|Subscriber|Delivery|Customer|Campaign)-[DSU]?id):/ism
-meta      RAND_MKTG_HEADER             __RAND_MKTG_HEADER && !__HAVE_BOUNCE_RELAYS 
+meta      RAND_MKTG_HEADER             __RAND_MKTG_HEADER && !__HAVE_BOUNCE_RELAYS && !__HAS_THREAD_INDEX && !__HAS_X_MAILING_LIST 
 describe  RAND_MKTG_HEADER             Has partially-randomized marketing/tracking header(s)
 score     RAND_MKTG_HEADER             2.000	# limit
 tflags    RAND_MKTG_HEADER             publish
@@ -3730,6 +3730,7 @@ tflags     OBFU_UNSUB_UL               publish
 
 header     __HAS_X_GOOGLE_DKIM_SIG     exists:X-Google-DKIM-Signature
 header     __HAS_X_SENDER              exists:X-Sender
+header     __HAS_X_RECEIVER            exists:X-Receiver
 header     __HAS_X_CONTACTID           exists:X-ContactID
 header     __HAS_X_LETTER              exists:X-Letter
 header     __HAS_X_PROCINFO            exists:X-ProcInfo
