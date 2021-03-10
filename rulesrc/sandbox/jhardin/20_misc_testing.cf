@@ -3846,5 +3846,8 @@ score      XM_LIGHT_HEAVY              2.500	# limit
 # public PDF hosting abused for phishing redirects
 uri        __OPENTEXT_PDF              m;://core.opentext.com/pdfjs/web/viewer.html?shortLink=;i
 
+uri        __URI_LONG_REPEAT           m;://\w+\.(\w{10,}\.)\1\w+/;i
+
+
 
 
