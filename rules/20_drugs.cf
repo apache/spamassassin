@@ -111,7 +111,7 @@ describe VIA_GAP_GRA            Attempts to disguise the word 'viagra'
 # l - [l!|1]
 #plain Viagra and Cialis (used in obfu detection)
 body __DRUGS_ERECTILE_V	/\bViagra\b/i
-body __DRUGS_ERECTILE_C	/\bCialis\b/i
+body __DRUGS_ERECTILE_C	/\bCialis(?!\xc3\xa9)\b/i
 body __DRUGS_ERECTILE_L	/\bLevitra\b/i
 #  obfu/plain and mis-spelled Viagra variants
 body __DRUGS_ERECTILE1	/(?:\b|\s)[_\W]{0,3}(?:\\\/|V)[_\W]{0,3}[ij1!|l\xEC\xED\xEE\xEF][_\W]{0,3}[a40\xE0-\xE6@][_\W]{0,3}[xyz]?[gj][_\W]{0,3}r[_\W]{0,3}[a40\xE0-\xE6@][_\W]{0,3}x?[_\W]{0,3}(?:\b|\s)/i
@@ -119,8 +119,8 @@ body __DRUGS_ERECTILE2	/\bV(?:agira|igara|iaggra|iaegra)\b/i
 #  cialis variants (spelling correct now)
 # note: the rather strange pre-amble is to avoid FPs on french words containing high-ascii chars surrounding
 # "cialis".
-# try to avoid FPs on "specialist"
-body __DRUGS_ERECTILE3 /(?:\A|[\s\x00-\x2f\x3a-\x40\x5b-\x60\x7b-\x7f])[_\W]{0,3}(?!cialist|c i a l i s t)C[_\W]{0,3}[ij1!|l\xEC\xED\xEE\xEF][_\W]{0,3}[a4\xE0-\xE6@][_\W]{0,3}l?[l!|1][_\W]{0,3}[i1!|l\xEC-\xEF][_\W]{0,3}s[_\W]{0,3}(?:\b|\s)/i
+# try to avoid FPs on "specialist" and FR "spécialisé"
+body __DRUGS_ERECTILE3 /(?:\A|[\s\x00-\x2f\x3a-\x40\x5b-\x60\x7b-\x7f])[_\W]{0,3}(?!cialis(?:t|\xc3\xa9)|c i a l i s (?:t|\xc3\xa9))C[_\W]{0,3}[ij1!|l\xEC\xED\xEE\xEF][_\W]{0,3}[a4\xE0-\xE6@][_\W]{0,3}l?[l!|1][_\W]{0,3}[i1!|l\xEC-\xEF][_\W]{0,3}s[_\W]{0,3}(?:\b|\s)/i
 body __DRUGS_ERECTILE4	/\bC(?:alis|ilias|ilais)\b/i
 # generic names
 #sildenafil citrate
