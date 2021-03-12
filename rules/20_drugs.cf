@@ -37,7 +37,7 @@ require_version @@VERSION@@
 # header rules
 # (only use sufficiently long drug name to make name unique)
 
-header SUBJECT_DRUG_GAP_C	Subject =~ /\bc[\sc]{0,2}i[\si]{0,2}a[\sa]{0,2}l[\sl]{0,2}i[\si]{0,2}s{1,3}\b/i
+header SUBJECT_DRUG_GAP_C	Subject =~ /\bc(?!ialis(?:t|\xc3\xa9|\xe9))[\sc]{0,2}i[\si]{0,2}a[\sa]{0,2}l[\sl]{0,2}i[\si]{0,2}s{1,3}\b/i
 describe SUBJECT_DRUG_GAP_C	Subject contains a gappy version of 'cialis'
 
 header SUBJECT_DRUG_GAP_L	Subject =~ /l.{0,2}e.{0,2}v.{0,2}i.{0,2}t.{0,2}r.{0,2}a/i
@@ -111,7 +111,7 @@ describe VIA_GAP_GRA            Attempts to disguise the word 'viagra'
 # l - [l!|1]
 #plain Viagra and Cialis (used in obfu detection)
 body __DRUGS_ERECTILE_V	/\bViagra\b/i
-body __DRUGS_ERECTILE_C	/\bCialis(?!\xc3\xa9)\b/i
+body __DRUGS_ERECTILE_C	/\bCialis(?!\xc3\xa9|\xe9)\b/i
 body __DRUGS_ERECTILE_L	/\bLevitra\b/i
 #  obfu/plain and mis-spelled Viagra variants
 body __DRUGS_ERECTILE1	/(?:\b|\s)[_\W]{0,3}(?:\\\/|V)[_\W]{0,3}[ij1!|l\xEC\xED\xEE\xEF][_\W]{0,3}[a40\xE0-\xE6@][_\W]{0,3}[xyz]?[gj][_\W]{0,3}r[_\W]{0,3}[a40\xE0-\xE6@][_\W]{0,3}x?[_\W]{0,3}(?:\b|\s)/i
@@ -120,7 +120,7 @@ body __DRUGS_ERECTILE2	/\bV(?:agira|igara|iaggra|iaegra)\b/i
 # note: the rather strange pre-amble is to avoid FPs on french words containing high-ascii chars surrounding
 # "cialis".
 # try to avoid FPs on "specialist" and FR "spécialisé"
-body __DRUGS_ERECTILE3 /(?:\A|[\s\x00-\x2f\x3a-\x40\x5b-\x60\x7b-\x7f])[_\W]{0,3}(?!cialis(?:t|\xc3\xa9)|c i a l i s (?:t|\xc3\xa9))C[_\W]{0,3}[ij1!|l\xEC\xED\xEE\xEF][_\W]{0,3}[a4\xE0-\xE6@][_\W]{0,3}l?[l!|1][_\W]{0,3}[i1!|l\xEC-\xEF][_\W]{0,3}s[_\W]{0,3}(?:\b|\s)/i
+body __DRUGS_ERECTILE3 /(?:\A|[\s\x00-\x2f\x3a-\x40\x5b-\x60\x7b-\x7f])[_\W]{0,3}(?!cialis(?:t|\xc3\xa9|\xe9)|c i a l i s (?:t|\xc3\xa9|\xe9))C[_\W]{0,3}[ij1!|l\xEC\xED\xEE\xEF][_\W]{0,3}[a4\xE0-\xE6@][_\W]{0,3}l?[l!|1][_\W]{0,3}[i1!|l\xEC-\xEF][_\W]{0,3}s[_\W]{0,3}(?:\b|\s)/i
 body __DRUGS_ERECTILE4	/\bC(?:alis|ilias|ilais)\b/i
 # generic names
 #sildenafil citrate
