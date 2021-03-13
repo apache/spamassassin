@@ -4,7 +4,7 @@ score    PDS_BAD_THREAD_QP_64 1.0
 
 header  __PDS_TO_BRAND_SUBJECT ALL =~ /^To:\s+<?[^\@]+\@([^\.]+)\.(?:[^\n]+\n)*^Subject: \"?\1\b/ism
 
-meta     PDS_BRAND_SUBJ_NAKED_TO __NAKED_TO && __PDS_TO_BRAND_SUBJECT
+meta     PDS_BRAND_SUBJ_NAKED_TO __NAKED_TO && __PDS_TO_BRAND_SUBJECT && !MAILING_LIST_MULTI
 describe PDS_BRAND_SUBJ_NAKED_TO Subject starts with To: brand and naked To:
 score    PDS_BRAND_SUBJ_NAKED_TO 1.0
 
