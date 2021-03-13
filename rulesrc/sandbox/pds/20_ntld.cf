@@ -22,7 +22,6 @@ enlist_addrlist (SUSP_NTLD) *@*.site
 enlist_addrlist (SUSP_NTLD) *@*.space
 enlist_addrlist (SUSP_NTLD) *@*.gdn
 enlist_addrlist (SUSP_NTLD) *@*.click
-enlist_addrlist (SUSP_NTLD) *@*.pro
 enlist_addrlist (SUSP_NTLD) *@*.world
 enlist_addrlist (SUSP_NTLD) *@*.fit
 enlist_addrlist (SUSP_NTLD) *@*.ooo
@@ -47,7 +46,6 @@ enlist_uri_host (SUSP_URI_NTLD) site
 enlist_uri_host (SUSP_URI_NTLD) space
 enlist_uri_host (SUSP_URI_NTLD) gdn
 enlist_uri_host (SUSP_URI_NTLD) click
-enlist_uri_host (SUSP_URI_NTLD) pro
 enlist_uri_host (SUSP_URI_NTLD) world
 enlist_uri_host (SUSP_URI_NTLD) fit
 enlist_uri_host (SUSP_URI_NTLD) ooo
@@ -56,6 +54,11 @@ enlist_uri_host (SUSP_URI_NTLD) buzz
 enlist_uri_host (SUSP_URI_NTLD) trade
 enlist_uri_host (SUSP_URI_NTLD) cyou
 enlist_uri_host (SUSP_URI_NTLD) vip
+
+enlist_uri_host (SUSP_URI_NTLD_PRO) pro
+header   PDS_PRO_TLD eval:check_uri_host_listed('SUSP_URI_NTLD_PRO')
+score    PDS_PRO_TLD 1.0
+describe PDS_PRO_TLD .pro TLD
 
 header   __FROM_ADDRLIST_SUSPNTLD eval:check_from_in_list('SUSP_NTLD')
 reuse    __FROM_ADDRLIST_SUSPNTLD
