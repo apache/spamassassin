@@ -4,6 +4,9 @@ APACHE SPAMASSASSIN RELEASE PROCEDURE
 - First off, checkout the branch or trunk you wish to build.  I usually do
   this as a privileged user in a build.tmp directory.
 
+- When working with a branch, checkout both the branch and trunk, then create
+  the symlinks mentioned below in the section on svn status
+  
 - As the release gets close, consider switching to R-T-C development
   mode: https://wiki.apache.org/spamassassin/DevelopmentMode
 
@@ -13,15 +16,23 @@ APACHE SPAMASSASSIN RELEASE PROCEDURE
 - To build a release you need gpg, a few perl modules, re2c
   and the signing key for the project. For CentOS 7.5, the following worked:
 
+  - yum install gpg
+  - yum install zip
   - yum install perl* 
-  - yum remover perl-homedir
+  - yum remove perl-homedir
+  - yum install epel-release
+  - yum update
+  - yum install perl-BerkeleyDB
 
-  - using source and CPAN as root
-    - compiled razor-agents
-    - cpan install Net::Patricia
-    - cpan install Geo::IP
-    - cpan install Devel::SawAmpersand
-    - custom compiled re2c with  ./configure --prefix=/usr/local
+  - using source and CPAN as root (cpanm -S)
+    - cpanm -S Razor2::Client::Agent
+    - cpanm -S Net::Patricia
+    - cpanm -S Geo::IP
+    - cpanm -S Devel::SawAmpersand
+    - custom compiled re2c
+      - obtained latest release tarball from github as linked from https://re2c.org as epel rpm is very old
+      - yum install gcc-c++
+      - build with  ./configure --prefix=/usr/local && make && sudo make install
 
   - when you run perl Makefile.PL, you want full dependencies such as this
     snippet:
@@ -36,9 +47,10 @@ APACHE SPAMASSASSIN RELEASE PROCEDURE
   - NOTE: Missing Fetch is ok if we have wget or curl.  You just need 1 of
     the 3.
 
-  - You need ~/sabuildtools/bin with a symlink to gpg
+  - You need ~/sabuildtools/bin directory with a symlink to gpg
 
-  - You need ~/sabuildtools/sasigningkey with chmod 700 
+  - You need ~/sabuildtools/sasigningkey as a gpg home directory with chmod 700,
+    e.g., a symlink to ~/.gnupg if the signing key were in your gpg keyring
 
   - You need the passphrase to the sasigning key
 
@@ -133,6 +145,12 @@ APACHE SPAMASSASSIN RELEASE PROCEDURE
   you also did development on the same checkout.  Use a fresh checkout
   when making your builds to avoid this issue.
 
+  NOTE: The very old version of SVN that is included with CentOS 7
+  produces a different format of log than current versions of SVN.
+  There is no reason to create the Changes file on a CentOS 7 machine
+  rather than do the following steps with a newer version of SVN and
+  commit the Changes file, then check it out on the build machine.
+
   MAKE CERTAIN THIS IS RUN IN THE ROOT OF YOUR CHECKOUT!
 
   There are two options here:
@@ -183,7 +201,7 @@ APACHE SPAMASSASSIN RELEASE PROCEDURE
 
   With the rules in trunk symlinked, you can expect MANIFEST warnings when
   running things such as make distclean such as:
-
+make 
     No such file: rules/20_aux_tlds.cf
     No such file: rules/active.list
     No such file: rules/init.pre
@@ -322,6 +340,8 @@ APACHE SPAMASSASSIN RELEASE PROCEDURE
 
   NOTE: running gpg-agent with the proper homedir is needed for
   non-privileged users.
+
+  The above places files in ~/public_html/devel/
 
 # This step is part of the step above already
 #
