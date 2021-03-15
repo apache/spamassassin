@@ -34,6 +34,30 @@ APACHE SPAMASSASSIN RELEASE PROCEDURE
       - yum install gcc-c++
       - build with  ./configure --prefix=/usr/local && make && sudo make install
 
+  For Ubuntu 20.04 minimal install, installing the following packages worked, although the
+   optional Devel::SawAmpersand appears not to be available on that platform
+   
+      build-essentials
+      pyzor
+      razor
+      subversion
+      libberkeleydb-perl
+      libbsd-resource-perl
+      libdbi-perl
+      libencode-detect-perl
+      libgeo-ip-pe
+      libgeoip2-perl
+      libio-socket-inet6-perl
+      libmail-dkim-perl
+      libmail-spf-perl
+      libnet-patricia-perl
+      libnet-dns-perl
+      libnetaddr-ip-perl
+      libsocket6-perl
+      libsys-hostname-long-perl
+      libtest-pod-coverage-perl
+      libtest-pod-perl
+
   - when you run perl Makefile.PL, you want full dependencies such as this
     snippet:
 
