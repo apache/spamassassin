@@ -1480,7 +1480,23 @@ sub secure_tmpdir {
 
 *uri_list_canonify = \&uri_list_canonicalize;  # compatibility alias
 sub uri_list_canonicalize {
-  my($redirector_patterns, @uris) = @_;
+  my $redirector_patterns = shift;
+
+  my @uris;
+  my $rb;
+  if (ref($_[0]) eq 'ARRAY') {
+    # New call style:
+    # - reference to array of redirector_patterns
+    # - reference to array of URIs
+    # - reference to $self->{main}->{registryboundaries}
+    @uris = @{$_[0]};
+    $rb = $_[1];
+  } else {
+    # Old call style:
+    # - reference to array of redirector_patterns
+    # - rest of the arguments is list of uris
+    @uris = @_;
+  }
 
   # make sure we catch bad encoding tricks
   my @nuris;
@@ -1692,7 +1708,10 @@ sub uri_list_canonicalize {
       elsif ($proto eq 'http://' && $auth eq '' &&
              $nhost ne 'localhost' && $port eq '80' &&
              $nhost =~ /^(?:www\.)?([^.]+)$/) {
-        push(@nuris, join('', $proto, 'www.', $1, '.com', $rest));
+        # Do not add .com to already valid schemelessly parsed domains (Bug 7891)
+        unless (defined $rb && $rb->is_domain_valid($nhost)) {
+          push(@nuris, join('', $proto, 'www.', $1, '.com', $rest));
+        }
       }
     }
   }

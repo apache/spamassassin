@@ -2691,7 +2691,7 @@ sub add_uri_detail_list {
   if ($types->{nocanon}) {
     push @uris, $uri;
   } else {
-    @uris = uri_list_canonicalize($self->{conf}->{redirector_patterns}, $uri);
+    @uris = uri_list_canonicalize($self->{conf}->{redirector_patterns}, [$uri], $self->{main}->{registryboundaries});
   }
   foreach my $cleanuri (@uris) {
     # Make sure all the URIs are nice and short

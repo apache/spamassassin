@@ -25,7 +25,7 @@ use Test::More;
 use lib '.'; use lib 't';
 use SATest; sa_t_init("uri");
 
-my $tests = 102;
+my $tests = 103;
 $tests += 5 if $have_libidn;
 
 plan tests => $tests;
@@ -148,7 +148,7 @@ sub array_cmp {
 sub try_canon {
   my($input, $expect) = @_;
   my $redirs = $sa->{conf}->{redirector_patterns};
-  my @input = sort { $a cmp $b } Mail::SpamAssassin::Util::uri_list_canonify($redirs, @{$input});
+  my @input = sort { $a cmp $b } Mail::SpamAssassin::Util::uri_list_canonicalize($redirs, $input, $sa->{registryboundaries});
   my @expect = sort { $a cmp $b } @{$expect};
 
   # output what we want/get for debugging
@@ -301,6 +301,12 @@ ok (try_canon([
    ], [
    'http://foo/',
    'http://www.foo.com/',
+       ]));
+# Bug 7891
+ok (try_canon([
+   'http://www.ch/',
+   ], [
+   'http://www.ch/'
        ]));
 
 ##############################################
