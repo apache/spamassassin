@@ -86,8 +86,8 @@ GPG Verification Procedure
 --------------------------
 The release files also have a .asc accompanying them.  The file serves
 as an external GPG signature for the given release file.  The signing
-key is available via the wwwkeys.pgp.net key server, as well as
-https://www.apache.org/dist/spamassassin/KEYS
+key is available via the keys.gnupg.net or keys.openpgp.org key servers,
+as well as https://www.apache.org/dist/spamassassin/KEYS
 
 
 
@@ -109,9 +109,9 @@ sub   4096R/24F434CE 2005-12-20
 To verify a release file, download the file with the accompanying .asc
 file and run the following commands:
 
-  gpg --verbose --keyserver wwwkeys.pgp.net --recv-key F7D39814
-  gpg --verify Mail-SpamAssassin-3.4.4.tar.bz2.asc
-  gpg --fingerprint F7D39814
+  gpg --verbose --keyserver keys.gnupg.net --recv-key FDE52F40F7D39814
+  gpg --verify Mail-SpamAssassin-3.4.5.tar.bz2.asc
+  gpg --fingerprint FDE52F40F7D39814
 
 Then verify that the key matches the signature.
 
