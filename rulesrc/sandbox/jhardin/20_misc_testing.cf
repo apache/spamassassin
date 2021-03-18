@@ -1585,9 +1585,9 @@ describe    URI_WPADMIN        WordPress login/admin URI, possible phishing
 tflags      URI_WPADMIN        publish
 
 uri         __URI_WPCONTENT    m,/wp-content/.*\.(?:php|html?)\b,i
-uri         __URI_WPCONTENT_L  m,/wp-content/.*\.(?:(?!gif|jpg|png|bmp|ico|eot|pdf)[a-z]{3}|(?!jpeg)[a-z]{4})\b,i
+uri         __URI_WPCONTENT_L  m,/wp-content/.*\.(?:(?!gif|jpg|png|bmp|ico|eot|pdf|svg)[a-z]{3}|(?!jpeg)[a-z]{4})\b,i
 uri         __URI_WPINCLUDES   m,/wp-includes/.*\.(?:php|html?)\b,i
-uri         __URI_WPINCLUDES_L m,/wp-includes/.*\.(?:(?!gif|jpg|png|bmp|ico|eot|pdf)[a-z]{3}|(?!jpeg)[a-z]{4})\b,i
+uri         __URI_WPINCLUDES_L m,/wp-includes/.*\.(?:(?!gif|jpg|png|bmp|ico|eot|pdf|svg)[a-z]{3}|(?!jpeg)[a-z]{4})\b,i
 #uri         __URI_WP_WHITELIST m,/wp-content/plugins/civicrm/,i
 meta        URI_WP_HACKED      (__URI_WPCONTENT || __URI_WPINCLUDES) && !__VIA_ML && !__HAS_ERRORS_TO && !__RCD_RDNS_SMTP && !__THREADED && !ALL_TRUSTED && !__NOT_SPOOFED 
 describe    URI_WP_HACKED      URI for compromised WordPress site, possible malware
@@ -1601,7 +1601,7 @@ score       URI_WP_DIRINDEX    3.500   # limit
 tflags      URI_WP_DIRINDEX    publish
 
 # this has some overlap with URI_WP_HACKED
-uri         __PS_TEST_LOC_WP   m;/(?:wp-content/plugins|wp-content/themes|wp-includes|modules/mod_wdbanners|includes/|google_recommends|mt-static|data/module)/.{1,128}(?!\.gif|\.jpg|\.png|\.bmp|\.ico|\.pdf)[^?]{4}(?:\?[^?]{1,5})?$;i
+uri         __PS_TEST_LOC_WP   m;/(?:wp-content/plugins|wp-content/themes|wp-includes|modules/mod_wdbanners|includes/|google_recommends|mt-static|data/module)/.{1,128}(?!\.gif|\.jpg|\.png|\.bmp|\.ico|\.pdf|\.svg)[^?]{4}(?:\?[^?]{1,5})?$;i
 meta        URI_WP_HACKED_2    (__PS_TEST_LOC_WP && !URI_WP_HACKED) && !__HAS_LIST_ID && !__THREADED && !__USING_VERP1 
 describe    URI_WP_HACKED_2    URI for compromised WordPress site, possible malware
 score       URI_WP_HACKED_2    2.500   # limit
