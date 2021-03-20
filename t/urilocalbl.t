@@ -22,6 +22,7 @@ eval { require IP::Country::Fast;     $tests += 8; $has{FAST}    = 1 };
 
 use Test::More;
 
+plan skip_all => "Net tests disabled" unless conf_bool('run_net_tests');
 plan skip_all => "No supported GeoDB module installed" unless $tests;
 
 $net = conf_bool('run_net_tests');
