@@ -43,7 +43,7 @@ use Mail::SpamAssassin::PerMsgStatus;
 use vars qw(@ISA);
 our @ISA = qw(Mail::SpamAssassin::Plugin);
 
-my $VERSION = 1.2.1;
+my $VERSION = 1.3.0;
 
 sub dbg { Mail::SpamAssassin::Plugin::dbg ("Esp: @_"); }
 
@@ -63,6 +63,7 @@ sub new {
   $self->register_eval_rule('esp_mailup_check',  $Mail::SpamAssassin::Conf::TYPE_HEAD_EVALS);
   $self->register_eval_rule('esp_maildome_check',  $Mail::SpamAssassin::Conf::TYPE_HEAD_EVALS);
   $self->register_eval_rule('esp_mailchimp_check',  $Mail::SpamAssassin::Conf::TYPE_HEAD_EVALS);
+  $self->register_eval_rule('esp_constantcontact_check',  $Mail::SpamAssassin::Conf::TYPE_HEAD_EVALS);
 
   return $self;
 }
@@ -104,6 +105,9 @@ Usage:
   esp_sendgrid_check_domain()
     Checks for Sendgrid domains abused accounts
 
+  esp_constantcontact_check()
+    Checks for Constant Contact id abused accounts
+
 =head1 ADMINISTRATOR SETTINGS
 
 =over 4
@@ -140,6 +144,11 @@ Files can be separated by a comma.
 =item mailchimp_feed [...]
 
 A list of files with abused Mailchimp accounts.
+Files can be separated by a comma.
+
+=item constantcontact_feed [...]
+
+A list of files with abused Constant Contact accounts.
 Files can be separated by a comma.
 
 =back
@@ -181,6 +190,9 @@ MAILDOMEID
 
 =item *
 MAILCHIMPID
+
+=item *
+CONSTANTCONTACTID
 
 =back
 
@@ -226,6 +238,12 @@ sub set_config {
     type => $Mail::SpamAssassin::Conf::CONF_TYPE_STRING,
     }
   );
+  push(@cmds, {
+    setting => 'constantcontact_feed',
+    is_admin => 1,
+    type => $Mail::SpamAssassin::Conf::CONF_TYPE_STRING,
+    }
+  );
   $conf->{parser}->register_commands(\@cmds);
 }
 
@@ -237,6 +255,7 @@ sub finish_parsing_end {
   $self->_read_configfile('mailup_feed', 'MAILUP');
   $self->_read_configfile('maildome_feed', 'MAILDOME');
   $self->_read_configfile('mailchimp_feed', 'MAILCHIMP');
+  $self->_read_configfile('constantcontact_feed', 'CONSTANTCONTACT');
 }
 
 sub _read_configfile {
@@ -453,6 +472,39 @@ sub esp_mailchimp_check {
       $pms->set_tag('MAILCHIMPID', $mailchimp_id);
       dbg("HIT! $mailchimp_id customer found in Mailchimp feed");
       $pms->test_log("Mailchimp id: $mailchimp_id");
+      $pms->got_hit($rulename, "", ruletype => 'eval');
+      return 1;
+    }
+  }
+
+}
+
+sub esp_constantcontact_check {
+  my ($self, $pms) = @_;
+  my $contact_id;
+
+  my $rulename = $pms->get_current_eval_rule_name();
+
+  # return if X-Mailer is not what we want
+  my $xmailer = $pms->get("X-Mailer", undef);
+
+  if((not defined $xmailer) or ($xmailer !~ /Roving\sConstant\sContact/)) {
+    return;
+  }
+
+  my $envfrom = $pms->get("EnvelopeFrom:addr", undef);
+  return if not defined $envfrom;
+  return if $envfrom !~ /\@in\.constantcontact\.com/;
+
+  $contact_id = $pms->get("X-Roving-Id", undef);
+  return if not defined $contact_id;
+
+  chomp($contact_id);
+  if(defined $contact_id) {
+    if ( exists $self->{ESP}->{CONSTANTCONTACT}->{$contact_id} ) {
+      $pms->set_tag('CONSTANTCONTACTID', $contact_id);
+      dbg("HIT! $contact_id customer found in Constant Contact feed");
+      $pms->test_log("Constant Contact id: $contact_id");
       $pms->got_hit($rulename, "", ruletype => 'eval');
       return 1;
     }
