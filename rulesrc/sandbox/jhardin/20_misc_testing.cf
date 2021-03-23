@@ -3854,13 +3854,13 @@ describe   URI_LONG_REPEAT             Very long identical host+domain
 score      URI_LONG_REPEAT             2.500	# limit
 tflags     URI_LONG_REPEAT             publish
 
-body       READY_TO_SHIP               /in our (?:stock|warehouse)(?: today)?[.,] Ready (?:to (?:be )?|for )+ship/i
+body       READY_TO_SHIP               /(?:in our (?:stock|warehouse)(?: today)?[.,] Ready (?:to (?:be )?|for )+ship|ready for shipping (?:in|from) our warehouse)/i
 score      READY_TO_SHIP               1.500	# limit
 
 body       WANT_TO_ORDER               /you (?:(?:would )?like|want)( to)? order (?:this|it|now|today)\b/i
 score      WANT_TO_ORDER               1.500	# limit
 
-body       YOUR_DELIVERY_ADDRESS       /email with your (?:(?:delivery|shipping) address|address of shipping)/i
+body       YOUR_DELIVERY_ADDRESS       /(?:respond|reply) (to )?(?:our|this) email (?:with|and send) your (?:(?:delivery |shipping )?address|address (?:for|of) shipping)/i
 score      YOUR_DELIVERY_ADDRESS       1.500	# limit
 
 
