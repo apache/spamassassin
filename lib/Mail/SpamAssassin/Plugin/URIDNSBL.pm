@@ -1159,11 +1159,6 @@ sub got_dnsbl_hit {
   $str =~ s/\s+/  /gs;	# long whitespace => short
   dbg("uridnsbl: domain \"$dom\" listed ($rulename): $str");
 
-  if (!defined $pms->{uridnsbl_hits}->{$rulename}) {
-    $pms->{uridnsbl_hits}->{$rulename} = { };
-  };
-  $pms->{uridnsbl_hits}->{$rulename}->{$dom} = 1;
-
   if ( $pms->{uridnsbl_active_rules_nsrevipbl}->{$rulename}
     || $pms->{uridnsbl_active_rules_arevipbl}->{$rulename}
     || $pms->{uridnsbl_active_rules_nsrhsbl}->{$rulename}
@@ -1172,14 +1167,20 @@ sub got_dnsbl_hit {
     || $pms->{uridnsbl_active_rules_rhsbl_ipsonly}->{$rulename}
     || $pms->{uridnsbl_active_rules_rhsbl_domsonly}->{$rulename})
   {
-    # TODO: this needs to handle multiple domain hits per rule
-    $pms->clear_test_state();
-    my $uris = join (' ', keys %{$pms->{uridnsbl_hits}->{$rulename}});
-    $pms->test_log ("URIs: $uris");
-    $pms->got_hit ($rulename, "");
+    # Hits are saved and called in check_cleanup
+    $pms->{uridnsbl_hits}->{$rulename}->{$dom} = 1;
+  }
+}
 
-    # note that this rule has completed (since it got at least 1 hit)
-    $pms->register_async_rule_finish($rulename);
+sub check_cleanup {
+  my ($self, $opts) = @_;
+
+  my $pms = $opts->{permsgstatus};
+
+  # Call any remaining hits
+  foreach my $rulename (keys %{$pms->{uridnsbl_hits}}) {
+    $pms->test_log("URIs: ".join(', ', sort keys %{$pms->{uridnsbl_hits}->{$rulename}}));
+    $pms->got_hit($rulename, '');
   }
 }
 

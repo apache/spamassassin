@@ -46,6 +46,10 @@ sub new {
   $self->register_eval_rule("check_stock_info");
   $self->register_eval_rule("check_body_length");
 
+  $self->register_eval_rule("plaintext_body_length");
+  $self->register_eval_rule("plaintext_sig_length");
+  $self->register_eval_rule("plaintext_body_sig_ratio");
+
   return $self;
 }
 
@@ -292,10 +296,92 @@ sub check_body_length {
   return (defined $body_length && $body_length <= $min) ? 1 : 0;
 }
 
+
+# For plain text parts with a signature delimiter, evaluate the ratio and
+# lengths (in bytes) of the body and signature parts.
+# 
+# Arguments: min and (optional) max value
+# 
+#   body  __SIG_RATIO_EXCESSIVE  eval:plaintext_body_sig_ratio('0','0.5')
+
+sub plaintext_body_length {
+  my ($self, $pms, undef, $min, $max) = @_;
+
+  $self->_plaintext_body_sig_ratio($pms);
+
+  my $len = $pms->{plaintext_body_sig_ratio}->{body_length};
+
+  return (    defined $len
+	   && $len >= $min
+	   && (defined $max ? $len <= $max : 1) ) ? 1 : 0;
+}
+
+sub plaintext_sig_length {
+  my ($self, $pms, undef, $min, $max) = @_;
+
+  $self->_plaintext_body_sig_ratio($pms);
+
+  my $len = $pms->{plaintext_body_sig_ratio}->{sig_length};
+
+  return (    defined $len
+	   && $len >= $min
+	   && (defined $max ? $len <= $max : 1) ) ? 1 : 0;
+}
+
+sub plaintext_body_sig_ratio {
+  my ($self, $pms, undef, $min, $max) = @_;
+
+  $self->_plaintext_body_sig_ratio($pms);
+
+  my $len = $pms->{plaintext_body_sig_ratio}->{ratio};
+
+  return (    defined $len
+	   && $len >= $min
+	   && (defined $max ? $len <= $max : 10**6) ) ? 1 : 0;
+}
+
+sub _plaintext_body_sig_ratio {
+  my ($self, $pms) = @_;
+
+  return if exists $pms->{plaintext_body_sig_ratio};
+
+  $pms->{plaintext_body_sig_ratio} = {};
+
+  # Find the first text/plain MIME part.
+
+  # Naive approach.  This should commonly match the text/plain part we want,
+  # but could be enhanced to better cope with complex MIME structures.
+  my $part = ($pms->{msg}->find_parts(qr/^text\/plain/))[0];
+
+  return unless defined $part;
+
+  # Decode if necessary, do not render or alter whitespace.
+  my $text = $part->decode();
+
+  # Find the last occurence of a signature delimiter and get the body and
+  # signature lengths.
+  my ($len_b, $len_s) = map { length } $text =~ /(^|.*\n)-- \n(.*?)$/s;
+
+  if (! defined $len_b) {     # no sig marker, all body
+      $len_b = length $text;
+      $len_s = 0;
+  }
+
+  $pms->{plaintext_body_sig_ratio}->{body_length} = $len_b;
+  $pms->{plaintext_body_sig_ratio}->{sig_length}  = $len_s;
+
+  $pms->{plaintext_body_sig_ratio}->{ratio} = $len_s ? $len_b/$len_s : 10**6;
+
+  return 1;
+}
+
+
 # ---------------------------------------------------------------------------
 
 # capability checks for "if can()":
 #
 sub has_check_body_length { 1 }
+
+sub has_plaintext_body_sig_ratio { 1 }
 
 1;

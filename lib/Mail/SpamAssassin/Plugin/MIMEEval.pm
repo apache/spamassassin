@@ -291,6 +291,7 @@ sub _check_mime_header {
       if (!(grep { $_ eq "all" } @l) &&
 	  !Mail::SpamAssassin::Locales::is_charset_ok_for_locales($charset, @l))
       {
+	dbg ("mimeeval: $charset is not ok for @l");
 	$pms->{mime_faraway_charset} = 1;
       }
     }

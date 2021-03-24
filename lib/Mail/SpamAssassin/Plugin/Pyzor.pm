@@ -149,7 +149,7 @@ removing one of them.
 =item pyzor_options options
 
 Specify additional options to the pyzor(1) command. Please note that only
-characters in the range [0-9A-Za-z ,._/-] are allowed for security reasons.
+characters in the range [0-9A-Za-z =,._/-] are allowed for security reasons.
 
 =cut
 
@@ -160,7 +160,7 @@ characters in the range [0-9A-Za-z ,._/-] are allowed for security reasons.
     type => $Mail::SpamAssassin::Conf::CONF_TYPE_STRING,
     code => sub {
       my ($self, $key, $value, $line) = @_;
-      if ($value !~ m{^([0-9A-Za-z ,._/-]+)$}) {
+      if ($value !~ m{^([0-9A-Za-z =,._/-]+)$}) {
 	return $Mail::SpamAssassin::Conf::INVALID_VALUE;
       }
       $self->{pyzor_options} = $1;
@@ -303,10 +303,12 @@ sub pyzor_lookup {
       return;
     }
     chomp for @response;
-    dbg("pyzor: got response: " . join("\\n", @response));
 
     if ($response[0] =~ /^Traceback/) {
-      warn("internal error, python traceback seen in response\n");
+      warn("internal error, python traceback seen in response: ".
+        join("\\n", @response));
+    } else {
+      dbg("pyzor: got response: ".join("\\n", @response));
     }
 
   });

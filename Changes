@@ -1,4 +1,373 @@
 ------------------------------------------------------------------------
+r1887306 | hege | 2021-03-07 21:56:45 +0000 (Sun, 07 Mar 2021) | 2 lines
+ 
+ Fix previous commit, need to allow multiple AskDNS hits
+ 
+------------------------------------------------------------------------
+r1887305 | hege | 2021-03-07 21:51:31 +0000 (Sun, 07 Mar 2021) | 2 lines
+ 
+ AskDNS cleanups and fixes for Bug 7777 & Bug 7875 (Multiple DNS 
+responses)
+ 
+------------------------------------------------------------------------
+r1886188 | gbechis | 2021-02-04 08:02:07 +0000 (Thu, 04 Feb 2021) | 3 
+lines
+ 
+ do not consider oleobject1.bin files as bad,
+ they could also be images
+ 
+------------------------------------------------------------------------
+r1885637 | kmcgrail | 2021-01-18 05:37:09 +0000 (Mon, 18 Jan 2021) | 1 
+line
+ 
+ preparing to release 3.4.5-rc1
+------------------------------------------------------------------------
+r1885636 | kmcgrail | 2021-01-18 05:36:12 +0000 (Mon, 18 Jan 2021) | 1 
+line
+ 
+ adding spam that hits razor for testing
+------------------------------------------------------------------------
+r1885345 | kb | 2021-01-11 02:51:19 +0000 (Mon, 11 Jan 2021) | 1 line
+ 
+ BodyEval: plaintext_body_sig_ratio eval rules, bug 7879
+------------------------------------------------------------------------
+r1885234 | gbechis | 2021-01-07 07:47:53 +0000 (Thu, 07 Jan 2021) | 2 
+lines
+ 
+ pod fixes
+ 
+------------------------------------------------------------------------
+r1885233 | gbechis | 2021-01-07 07:31:13 +0000 (Thu, 07 Jan 2021) | 2 
+lines
+ 
+ clarify man page
+ 
+------------------------------------------------------------------------
+r1885214 | kb | 2021-01-06 21:08:43 +0000 (Wed, 06 Jan 2021) | 1 line
+ 
+ plaintext_body_sig_ratio: eval() rules for the (first text/plain MIME 
+part's) body and signature lengths and ratio
+------------------------------------------------------------------------
+r1884879 | gbechis | 2020-12-28 15:00:10 +0000 (Mon, 28 Dec 2020) | 2 
+lines
+ 
+ update [meta]cpan url
+ 
+------------------------------------------------------------------------
+r1884876 | gbechis | 2020-12-28 14:38:35 +0000 (Mon, 28 Dec 2020) | 2 
+lines
+ 
+ Mention some changes in 3.4.5
+ 
+------------------------------------------------------------------------
+r1884872 | kmcgrail | 2020-12-28 13:56:49 +0000 (Mon, 28 Dec 2020) | 1 
+line
+ 
+ More MANIFEST cleanup
+------------------------------------------------------------------------
+r1884871 | kmcgrail | 2020-12-28 13:51:17 +0000 (Mon, 28 Dec 2020) | 1 
+line
+ 
+ MANIFEST clean-up
+------------------------------------------------------------------------
+r1884870 | kmcgrail | 2020-12-28 13:48:59 +0000 (Mon, 28 Dec 2020) | 1 
+line
+ 
+ Fixing Copyright on CREDITS file
+------------------------------------------------------------------------
+r1883660 | gbechis | 2020-11-20 07:33:00 +0000 (Fri, 20 Nov 2020) | 2 
+lines
+ 
+ fix GeoIP open_type call, bz #7871
+ 
+------------------------------------------------------------------------
+r1883643 | gbechis | 2020-11-19 15:37:20 +0000 (Thu, 19 Nov 2020) | 2 
+lines
+ 
+ typo
+ 
+------------------------------------------------------------------------
+r1883642 | gbechis | 2020-11-19 15:35:33 +0000 (Thu, 19 Nov 2020) | 2 
+lines
+ 
+ specify in debug message that not all rule types are compatible
+ 
+------------------------------------------------------------------------
+r1883069 | gbechis | 2020-11-02 18:14:47 +0000 (Mon, 02 Nov 2020) | 3 
+lines
+ 
+ backport TextCat improvements from trunk
+ fix bz #7866
+ 
+------------------------------------------------------------------------
+r1882297 | gbechis | 2020-10-07 08:28:05 +0000 (Wed, 07 Oct 2020) | 2 
+lines
+ 
+ Missing files from previous commit, bz #7860
+ 
+------------------------------------------------------------------------
+r1882269 | gbechis | 2020-10-06 10:20:40 +0000 (Tue, 06 Oct 2020) | 4 
+lines
+ 
+ Make it possible to run the Spamassassin test suite against the installed
+ SpamAssassin files (rather than those in the source directory)
+ bz #7860
+ 
+------------------------------------------------------------------------
+r1881912 | jhardin | 2020-09-21 18:43:37 +0000 (Mon, 21 Sep 2020) | 1 line
+ 
+ Bug 7857: merge Revision 1881911 from trunk
+------------------------------------------------------------------------
+r1881784 | gbechis | 2020-09-17 07:17:40 +0000 (Thu, 17 Sep 2020) | 2 
+lines
+ 
+ exit if reallyallowplugin option is not specified
+ 
+------------------------------------------------------------------------
+r1881066 | billcole | 2020-08-21 19:29:57 +0000 (Fri, 21 Aug 2020) | 1 
+line
+ 
+ Understand deprecated charset=ascii correctly. BZ#7851
+------------------------------------------------------------------------
+r1880999 | billcole | 2020-08-19 17:31:48 +0000 (Wed, 19 Aug 2020) | 1 
+line
+ 
+ Fix duplicated-word typos in documentation BZ#7850
+------------------------------------------------------------------------
+r1880998 | billcole | 2020-08-19 17:26:15 +0000 (Wed, 19 Aug 2020) | 1 
+line
+ 
+ Add man page generation for sa-check_spamd BZ#7849
+------------------------------------------------------------------------
+r1879979 | hege | 2020-07-17 05:03:52 +0000 (Fri, 17 Jul 2020) | 2 lines
+ 
+ Bug 7810 - gmail has an extra dot in rDNS
+ 
+------------------------------------------------------------------------
+r1879806 | hege | 2020-07-12 10:18:32 +0000 (Sun, 12 Jul 2020) | 2 lines
+ 
+ Bug 7817 - Pyzor.pm - Show traceback in log
+ 
+------------------------------------------------------------------------
+r1879731 | kmcgrail | 2020-07-10 04:18:33 +0000 (Fri, 10 Jul 2020) | 1 
+line
+ 
+ Fixing powered by Apache SpamAssassin logo to the correct version 2.0
+------------------------------------------------------------------------
+r1879727 | billcole | 2020-07-09 21:59:24 +0000 (Thu, 09 Jul 2020) | 1 
+line
+ 
+ Don't assume versions are simple numbers
+------------------------------------------------------------------------
+r1879726 | billcole | 2020-07-09 20:42:56 +0000 (Thu, 09 Jul 2020) | 1 
+line
+ 
+ Don't treat versions like simple numbers
+------------------------------------------------------------------------
+r1879700 | hege | 2020-07-09 10:47:48 +0000 (Thu, 09 Jul 2020) | 2 lines
+ 
+ Backport EnvelopeFrom fixes from trunk (Revision 1844628,1864383) (Bug 
+7834)
+ 
+------------------------------------------------------------------------
+r1879123 | billcole | 2020-06-23 18:20:55 +0000 (Tue, 23 Jun 2020) | 4 
+lines
+ 
+ 
+ Fix Bug #7830: non-numeric version comparison. 
+ 
+ 
+------------------------------------------------------------------------
+r1879052 | kmcgrail | 2020-06-21 02:48:32 +0000 (Sun, 21 Jun 2020) | 1 
+line
+ 
+ preparing to release 3.4.5-pre1
+------------------------------------------------------------------------
+r1878990 | hege | 2020-06-19 14:11:26 +0000 (Fri, 19 Jun 2020) | 2 lines
+ 
+ Bug 7828 - uri_detail lacks support for key type "host"
+ 
+------------------------------------------------------------------------
+r1878575 | hege | 2020-06-08 05:18:37 +0000 (Mon, 08 Jun 2020) | 2 lines
+ 
+ Log all URIBL hit domains in report
+ 
+------------------------------------------------------------------------
+r1878574 | hege | 2020-06-08 04:44:27 +0000 (Mon, 08 Jun 2020) | 2 lines
+ 
+ Bug 7822: HashBL not examining all addresses in a message
+ 
+------------------------------------------------------------------------
+r1878572 | hege | 2020-06-08 04:18:44 +0000 (Mon, 08 Jun 2020) | 2 lines
+ 
+ Backport check_cleanup callback from trunk for internal use, not 
+documenting since it will only be in 3.4.5
+ 
+------------------------------------------------------------------------
+r1878568 | hege | 2020-06-07 16:34:50 +0000 (Sun, 07 Jun 2020) | 2 lines
+ 
+ Clarify some HashBL docs
+ 
+------------------------------------------------------------------------
+r1878559 | hege | 2020-06-07 10:41:22 +0000 (Sun, 07 Jun 2020) | 2 lines
+ 
+ Bug 7822: HashBL not examining all addresses in a message
+ 
+------------------------------------------------------------------------
+r1877459 | gbechis | 2020-05-06 22:36:46 +0000 (Wed, 06 May 2020) | 2 
+lines
+ 
+ always pass the rulename to bgsend_and_start_lookup
+ 
+------------------------------------------------------------------------
+r1877139 | gbechis | 2020-04-28 19:21:04 +0000 (Tue, 28 Apr 2020) | 3 
+lines
+ 
+ fix warnings that happens when From: is not a proper email address
+ bz 7811
+ 
+------------------------------------------------------------------------
+r1877124 | gbechis | 2020-04-28 09:50:37 +0000 (Tue, 28 Apr 2020) | 3 
+lines
+ 
+ fix txrep tags, "_" is not an allowed char in tag names
+ fixes bz 7749
+ 
+------------------------------------------------------------------------
+r1876821 | hege | 2020-04-22 10:00:36 +0000 (Wed, 22 Apr 2020) | 2 lines
+ 
+ Allow undefined suppl_attrib just in case
+ 
+------------------------------------------------------------------------
+r1876795 | hege | 2020-04-21 12:28:07 +0000 (Tue, 21 Apr 2020) | 2 lines
+ 
+ Add some suppl_attrib debugging
+ 
+------------------------------------------------------------------------
+r1876780 | gbechis | 2020-04-21 09:20:23 +0000 (Tue, 21 Apr 2020) | 2 
+lines
+ 
+ silence a possible warning
+ 
+------------------------------------------------------------------------
+r1876711 | hege | 2020-04-19 06:25:48 +0000 (Sun, 19 Apr 2020) | 2 lines
+ 
+ Mention Bug 7803
+ 
+------------------------------------------------------------------------
+r1876710 | hege | 2020-04-19 06:18:25 +0000 (Sun, 19 Apr 2020) | 2 lines
+ 
+ Bug 7809 - unwhitelist broken
+ 
+------------------------------------------------------------------------
+r1876561 | hege | 2020-04-15 15:03:58 +0000 (Wed, 15 Apr 2020) | 2 lines
+ 
+ DNSEval cleanups, validate hostnames
+ 
+------------------------------------------------------------------------
+r1876556 | hege | 2020-04-15 13:59:34 +0000 (Wed, 15 Apr 2020) | 2 lines
+ 
+ Bug 7808 - Fix check_rbl_headers with multiple same headers
+ 
+------------------------------------------------------------------------
+r1876381 | hege | 2020-04-10 20:38:45 +0000 (Fri, 10 Apr 2020) | 2 lines
+ 
+ Fix header rule parsing
+ 
+------------------------------------------------------------------------
+r1876367 | hege | 2020-04-10 14:49:20 +0000 (Fri, 10 Apr 2020) | 2 lines
+ 
+ Bug 7750 - _DKIMSELECTOR_ template tag is not substituted, when mail is 
+not DKIM signed
+ 
+------------------------------------------------------------------------
+r1876350 | hege | 2020-04-10 08:22:55 +0000 (Fri, 10 Apr 2020) | 2 lines
+ 
+ Bug 7790 - Allow = character in pyzor_options
+ 
+------------------------------------------------------------------------
+r1876348 | hege | 2020-04-10 07:51:51 +0000 (Fri, 10 Apr 2020) | 2 lines
+ 
+ Bug 7803 - SQL schema of userpref table, value too short
+ 
+------------------------------------------------------------------------
+r1876347 | hege | 2020-04-10 07:47:37 +0000 (Fri, 10 Apr 2020) | 2 lines
+ 
+ Bug 7807 - t/spamd_ssl.t fails due to small key size
+ 
+------------------------------------------------------------------------
+r1876346 | hege | 2020-04-10 07:44:37 +0000 (Fri, 10 Apr 2020) | 2 lines
+ 
+ Bug 7763 - ssl tests must be run as root
+ 
+------------------------------------------------------------------------
+r1876320 | hege | 2020-04-09 12:40:52 +0000 (Thu, 09 Apr 2020) | 2 lines
+ 
+ Bug 7806 - Tainting through concatenation with $^X does not taint
+ 
+------------------------------------------------------------------------
+r1876218 | gbechis | 2020-04-07 08:20:15 +0000 (Tue, 07 Apr 2020) | 2 
+lines
+ 
+ match few more received lines
+ 
+------------------------------------------------------------------------
+r1875134 | gbechis | 2020-03-12 18:32:40 +0000 (Thu, 12 Mar 2020) | 5 
+lines
+ 
+ sync OLEVBMacro plugin with trunk
+ - check for undef before reading mime part
+ - add a new rule to check if on the doc file there is an url that 
+ triggers a download to an external malicious file
+ 
+------------------------------------------------------------------------
+r1874343 | gbechis | 2020-02-21 23:04:46 +0000 (Fri, 21 Feb 2020) | 4 
+lines
+ 
+ put [raw]body_part_scan_size documentation in the right
+ section of man page
+ fix bz 7796
+ 
+------------------------------------------------------------------------
+r1874012 | gbechis | 2020-02-14 10:57:25 +0000 (Fri, 14 Feb 2020) | 2 
+lines
+ 
+ another couple of too chatty info messages converted to dbg
+ 
+------------------------------------------------------------------------
+r1874010 | gbechis | 2020-02-14 10:35:39 +0000 (Fri, 14 Feb 2020) | 2 
+lines
+ 
+ switch a too chatty info into a dbg statement
+ 
+------------------------------------------------------------------------
+r1873859 | gbechis | 2020-02-10 14:33:45 +0000 (Mon, 10 Feb 2020) | 2 
+lines
+ 
+ one more OLEMacro marker
+ 
+------------------------------------------------------------------------
+r1873752 | gbechis | 2020-02-07 18:37:10 +0000 (Fri, 07 Feb 2020) | 2 
+lines
+ 
+ sync OLEVBMacro plugin with trunk
+ 
+------------------------------------------------------------------------
+r1873340 | hege | 2020-01-29 21:38:08 +0000 (Wed, 29 Jan 2020) | 2 lines
+ 
+ Clarify mimepart limit
+ 
+------------------------------------------------------------------------
+r1873200 | hege | 2020-01-27 09:43:17 +0000 (Mon, 27 Jan 2020) | 2 lines
+ 
+ More DKIM test files for different CRLF/LF cases
+ 
+------------------------------------------------------------------------
+r1873123 | kmcgrail | 2020-01-25 02:49:19 +0000 (Sat, 25 Jan 2020) | 1 
+line
+ 
+ preparing to release 3.4.4 (post rc-1)
+------------------------------------------------------------------------
 r1873122 | kmcgrail | 2020-01-25 02:04:07 +0000 (Sat, 25 Jan 2020) | 1 
 line
  

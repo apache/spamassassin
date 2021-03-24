@@ -337,7 +337,10 @@ sub taint_var {
 
   # $^X is apparently "always tainted".
   # Concatenating an empty tainted string taints the result.
-  return $v . substr($^X, 0, 0);
+  # Bug 7806: use $fh trick to enforce for older Perl
+  my $t = eval { local $/; open my $fh, '<', \""; <$fh>; };
+  $t = '' unless defined $t;
+  return $v . $t . substr($^X, 0, 0);
 }
 
 ###########################################################################

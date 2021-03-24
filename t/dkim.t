@@ -4,6 +4,7 @@ use strict;
 use warnings;
 use re 'taint';
 use lib '.'; use lib 't';
+use version 0.77;
 
 use SATest; sa_t_init("dkim");
 
@@ -11,13 +12,13 @@ use vars qw(%patterns %anti_patterns);
 
 use constant HAS_DKIM_VERIFIER => eval {
   require Mail::DKIM::Verifier;
-  Mail::DKIM::Verifier->VERSION >= 0.31;
+  version->parse(Mail::DKIM::Verifier->VERSION) >= version->parse->(0.31);
 };
 
 use Test::More;
 plan skip_all => "Net tests disabled" unless conf_bool('run_net_tests');
 plan skip_all => "Needs Mail::DKIM::Verifier >= 0.31" unless HAS_DKIM_VERIFIER ;
-plan tests => 226;
+plan tests => 258;
 
 BEGIN {
   if (-e 't/test_dir') {

@@ -24,7 +24,7 @@ regular expression rules.  The tags make it much easier to maintain
 complicated rules.
 
 Warning: This plugin relies on data structures specific to this version of
-SpamAssasin; it is not guaranteed to work with other versions of SpamAssassin.
+SpamAssassin; it is not guaranteed to work with other versions of SpamAssassin.
 
 =head1 SYNOPSIS
 
@@ -100,7 +100,7 @@ sub finish_parsing_end {
     $self->{replace_rules_done}->{$rule} = 1;
 
     if (!exists $conf->{test_qrs}->{$rule}) {
-      dbg("replacetags: replace requested for non-existing rule: $rule\n");
+      dbg("replacetags: replace requested for non-existing or incompatible rule: $rule\n");
       next;
     }
 

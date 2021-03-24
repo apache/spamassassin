@@ -132,6 +132,7 @@ sub new {
       # $self->{pristine_body} size, e.g. when the caller passed a truncated
       # message to SpamAssassin, or when counting line-endings differently.
       $self->{pristine_body_length} = $self->{suppl_attrib}{body_size};
+      dbg("message: set pristine_body_length from suppl_attrib: %s", $self->{pristine_body_length});
     }
     if (ref $self->{suppl_attrib}{mimepart_digests}) {
       # Optional info provided by a caller: an array of digest codes (e.g. SHA1)
@@ -139,6 +140,7 @@ sub new {
       # As such it may differ from digests calculated by get_mimepart_digests(),
       # e.g. when the caller passed a truncated message to SpamAssassin.
       $self->{mimepart_digests} = $self->{suppl_attrib}{mimepart_digests};
+      dbg("message: set mimepart_digests from suppl_attrib");
     }
   }
 
@@ -978,7 +980,7 @@ sub _parse_multipart {
 	}
       }
 
-      # Maximum parts to process
+      # Maximum parts to process, simply skip the rest of the parts
       if (++$partcnt == 1000) {
         dbg("message: mimepart limit exceeded, stopping parsing");
         $self->{'mimepart_limit_exceeded'} = 1;

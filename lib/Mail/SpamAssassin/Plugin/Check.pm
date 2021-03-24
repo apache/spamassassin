@@ -202,6 +202,9 @@ sub check_main {
     $pms->{resolver}->finish_socket() if $pms->{resolver};
   }
 
+  # last chance to handle left callbacks, make rule hits etc
+  $self->{main}->call_plugins ("check_cleanup", { permsgstatus => $pms });
+
   if ($pms->{deadline_exceeded}) {
     $pms->got_hit('TIME_LIMIT_EXCEEDED', '', defscore => 0.001,
                   description => 'Exceeded time limit / deadline');
@@ -716,7 +719,7 @@ sub do_head_tests {
     }
 
     my $def = $conf->{test_opt_unset}->{$rulename};
-    push(@{ $ordered{$hdrname . (!defined $def ? '' : "\t".$def)} },
+    push(@{ $ordered{$hdrname . (!defined $def ? '' : "\t$rulename")} },
          $rulename);
 
     return if ($opts{doing_user_rules} &&
@@ -740,7 +743,8 @@ sub do_head_tests {
       my($hdrname, $def) = split(/\t/, $k, 2);
       $self->push_evalstr_prefix($pms, '
         $hval = $self->get(q{'.$hdrname.'}, ' .
-                           (!defined($def) ? 'undef' : 'q{'.$def.'}') . ');
+                           (!defined($def) ? 'undef' :
+                              '$self->{conf}->{test_opt_unset}->{q{'.$def.'}}') . ');
       ');
       foreach my $rulename (@{$v}) {
           my $tc_ref = $testcode{$rulename};

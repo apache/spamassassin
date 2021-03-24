@@ -224,6 +224,7 @@ if ( $opt{'allowplugins'} && !$opt{'reallyallowplugins'} ) {
   warn "Security warning: dangerous option --allowplugins used:\n".
        "- there should never be need to use this option, see man sa-update(1)\n".
        "- specify --reallyallowplugins to allow activating plugins\n";
+  exit 2;
 }
 
 $use_inet4 = $have_inet4 && ( !$opt{'force_pf'} || $opt{'force_pf'} eq 'inet' );

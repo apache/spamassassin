@@ -21,7 +21,7 @@ sarun("--add-addr-to-whitelist whitelist_test\@whitelist.spamassassin.taint.org"
       \&patterns_run_cb);
 
 untaint_system("pwd");
-untaint_system("../sa-awl --clean --min 9999 ./log/awltest");
+saawlrun("--clean --min 9999 ./log/awltest");
 
 sarun ("-L -t < data/spam/004", \&patterns_run_cb);
 ok_all_patterns();

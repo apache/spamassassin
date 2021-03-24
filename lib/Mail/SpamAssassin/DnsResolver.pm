@@ -858,7 +858,7 @@ sub poll_responses {
           if ($rcode eq 'REFUSED' || $id =~ m{^\d+/NO_QUESTION_IN_PACKET\z}) {
             # the failure was already reported above
           } else {
-            info("dns: no callback for id $id, ignored, packet on next debug line");
+            dbg("dns: no callback for id $id, ignored, packet on next debug line");
             # prevent filling normal logs with huge packet dumps
             dbg("dns: %s", $packet ? $packet->string : "undef");
           }
@@ -869,9 +869,9 @@ sub poll_responses {
             my @matches =
               grep(m{^\Q$dnsid\E/}, keys %{$self->{id_to_callback}});
             if (!@matches) {
-              info("dns: no likely matching queries for id %s", $dnsid);
+              dbg("dns: no likely matching queries for id %s", $dnsid);
             } else {
-              info("dns: a likely matching query: %s", join(', ', @matches));
+              dbg("dns: a likely matching query: %s", join(', ', @matches));
             }
           }
         }

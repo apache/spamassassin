@@ -22,15 +22,14 @@ use constant HAS_UNSAFE_HOSTNAME =>  # Bug 3806 - module exists and is old
 plan skip_all => "Long running tests disabled" unless conf_bool('run_long_tests');
 plan skip_all => "Net tests disabled" unless conf_bool('run_net_tests');
 plan skip_all => "Need Mail::SPF or Mail::SPF::Query" unless (HAS_SPFQUERY || HAS_MAILSPF);
-plan skip_all => "root required" unless AM_ROOT;
 plan skip_all => "Sys::Hostname::Long > 1.4 required." if HAS_UNSAFE_HOSTNAME;
 plan skip_all => "Test only designed for Windows, Linux or OpenBSD" unless (IS_LINUX || IS_OPENBSD || IS_WINDOWS);
 
 if(HAS_SPFQUERY && HAS_MAILSPF) {
-  plan tests => 106;
+  plan tests => 110;
 }
 else {
-  plan tests => 58; # TODO: These should be skips down in the code, not changing the test count.
+  plan tests => 62; # TODO: These should be skips down in the code, not changing the test count.
 }
 
 # ---------------------------------------------------------------------------
@@ -502,5 +501,31 @@ tstprefs("
 
 sarun ("-t < data/nice/spf3-received-spf", \&patterns_run_cb);
 
+ok_all_patterns();
+
+
+# test unwhitelist_auth and unwhitelist_from_spf
+
+tstprefs("
+  whitelist_auth newsalerts-noreply\@dnsbltest.spamassassin.org
+  def_whitelist_auth newsalerts-noreply\@dnsbltest.spamassassin.org
+  unwhitelist_auth newsalerts-noreply\@dnsbltest.spamassassin.org
+
+  whitelist_from_spf *\@dnsbltest.spamassassin.org
+  def_whitelist_from_spf *\@dnsbltest.spamassassin.org
+  unwhitelist_from_spf *\@dnsbltest.spamassassin.org
+");
+
+%patterns = (
+  q{ SPF_HELO_PASS }, 'helo_pass',
+  q{ SPF_PASS }, 'pass',
+);
+
+%anti_patterns = (
+  q{ USER_IN_SPF_WHITELIST }, 'spf_whitelist',
+  q{ USER_IN_DEF_SPF_WL }, 'default_spf_whitelist',
+);
+
+sarun ("-t < data/nice/spf1", \&patterns_run_cb);
 ok_all_patterns();
 

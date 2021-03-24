@@ -41,6 +41,9 @@ Mail::SpamAssassin::Plugin::OLEVBMacro - search attached documents for evidence 
 
     body     OLEMACRO_CSV eval:check_olemacro_csv()
     describe OLEMACRO_CSV Malicious csv file that tries to exec cmd.exe detected
+
+    body     OLEMACRO_DOWNLOAD_EXE eval:check_olemacro_download_exe()
+    describe OLEMACRO_DOWNLOAD_EXE Malicious code inside the Office doc that tries to download a .exe file detected
   endif
 
 =head1 DESCRIPTION
@@ -91,12 +94,17 @@ our $VERSION = '0.52';
 # http://blog.rootshell.be/2015/01/08/searching-for-microsoft-office-files-containing-macro/
 my $marker1 = "\xd0\xcf\x11\xe0";
 my $marker2 = "\x00\x41\x74\x74\x72\x69\x62\x75\x74\x00";
+# Office 2003 embedded ole
+my $marker2a = "\x01\x00\x4f\x00\x6c\x00\x65\x00\x31\x00\x30\x00\x4e\x00\x61\x00";
 # embedded object in rtf files (https://www.biblioscape.com/rtf15_spec.htm)
 my $marker3 = "\x5c\x6f\x62\x6a\x65\x6d\x62";
 my $marker4 = "\x5c\x6f\x62\x6a\x64\x61\x74";
 my $marker5 = "\x5c\x20\x6f\x62\x6a\x64\x61\x74";
 # Excel .xlsx encrypted package, thanks to Dan Bagwell for the sample
 my $encrypted_marker = "\x45\x00\x6e\x00\x63\x00\x72\x00\x79\x00\x70\x00\x74\x00\x65\x00\x64\x00\x50\x00\x61\x00\x63\x00\x6b\x00\x61\x00\x67\x00\x65";
+# .exe file downloaded from external website
+my $exe_marker1 = "\x00((https?)://)[-A-Za-z0-9+&@#/%?=~_|!:,.;]{5,1000}[-A-Za-z0-9+&@#/%=~_|]{5,1000}(\.exe|\.cmd|\.bat)([\x06|\x00])";
+my $exe_marker2 = "URLDownloadToFileA";
 
 # this code burps an ugly message if it fails, but that's redirected elsewhere
 # AZ_OK is a constant exported by Archive::Zip
@@ -121,6 +129,7 @@ sub new {
   $self->register_eval_rule("check_olemacro_renamed");
   $self->register_eval_rule("check_olemacro_encrypted");
   $self->register_eval_rule("check_olemacro_zip_password");
+  $self->register_eval_rule("check_olemacro_download_exe");
 
   return $self;
 }
@@ -461,6 +470,14 @@ sub check_olemacro_zip_password {
   return $pms->{olemacro_zip_password};
 }
 
+sub check_olemacro_download_exe {
+  my ($self,$pms,$body,$name) = @_;
+
+  _check_attachments(@_) unless exists $pms->{olemacro_download_exe};
+
+  return $pms->{olemacro_download_exe};
+}
+
 sub _check_attachments {
 
   my ($self,$pms,$body,$name) = @_;
@@ -495,8 +512,10 @@ sub _check_attachments {
 
       $data = $part->decode($chunk_size) unless defined $data;
 
-      _check_encrypted_doc($pms, $name, $data);
-      _check_macrotype_doc($pms, $name, $data);
+      if (defined $data) {
+        _check_encrypted_doc($pms, $name, $data);
+        _check_macrotype_doc($pms, $name, $data);
+      }
 
       return 1 if $pms->{olemacro_exists} == 1;
     }
@@ -506,11 +525,13 @@ sub _check_attachments {
       dbg("Found attachment with name $name");
       $data = $part->decode($chunk_size) unless defined $data;
 
-      _check_encrypted_doc($pms, $name, $data);
-      _check_oldtype_doc($pms, $name, $data);
-      # zipped doc that matches olemacro_exts - strange
-      if (_check_macrotype_doc($pms, $name, $data)) {
-        $pms->{olemacro_renamed} = $pms->{olemacro_office_xml};
+      if (defined $data) {
+        _check_encrypted_doc($pms, $name, $data);
+        _check_oldtype_doc($pms, $name, $data);
+        # zipped doc that matches olemacro_exts - strange
+        if (_check_macrotype_doc($pms, $name, $data)) {
+          $pms->{olemacro_renamed} = $pms->{olemacro_office_xml};
+        }
       }
 
       return 1 if $pms->{olemacro_exists} == 1;
@@ -520,27 +541,36 @@ sub _check_attachments {
       dbg("Found zip attachment with name $name");
       $data = $part->decode($chunk_size) unless defined $data;
 
-      _check_zip($pms, $name, $data);
+      if (defined $data) {
+        _check_zip($pms, $name, $data);
+      }
 
       return 1 if $pms->{olemacro_exists} == 1;
+    }
+
+    if ((defined $data) and ($data =~ /$exe_marker1/) and (index($data, $exe_marker2))) {
+      dbg('Url that triggers a download to an .exe file found in Office file');
+      $pms->{olemacro_download_exe} = 1;
     }
 
     if ($pms->{conf}->{olemacro_extended_scan} == 1) {
       dbg("Extended scan attachment with name $name");
       $data = $part->decode($chunk_size) unless defined $data;
 
-      if (_is_office_doc($data)) {
-        $pms->{olemacro_renamed} = 1;
-        dbg("Found $name to be an Office Doc!");
-        _check_encrypted_doc($pms, $name, $data);
-        _check_oldtype_doc($pms, $name, $data);
-      }
+      if (defined $data) {
+        if (_is_office_doc($data)) {
+          $pms->{olemacro_renamed} = 1;
+          dbg("Found $name to be an Office Doc!");
+          _check_encrypted_doc($pms, $name, $data);
+          _check_oldtype_doc($pms, $name, $data);
+        }
 
-      if (_check_macrotype_doc($pms, $name, $data)) {
-        $pms->{olemacro_renamed} = $pms->{olemacro_office_xml};
-      }
+        if (_check_macrotype_doc($pms, $name, $data)) {
+          $pms->{olemacro_renamed} = $pms->{olemacro_office_xml};
+        }
 
-      _check_zip($pms, $name, $data);
+        _check_zip($pms, $name, $data);
+      }
 
       return 1 if $pms->{olemacro_exists} == 1;
     }
@@ -750,12 +780,12 @@ sub _check_macrotype_doc {
   my $zip = _open_zip_handle($data);
   return 0 unless $zip;
 
-  #https://www.decalage.info/vba_tools
+  # https://www.decalage.info/vba_tools
+  # Consider macrofiles as lowercase, they are checked later with a case-insensitive method
   my %macrofiles = (
     'word/vbaproject.bin' => 'word2k7',
     'macros/vba/_vba_project' => 'word97',
     'xl/vbaproject.bin' => 'xl2k7',
-    'xl/embeddings/oleObject1.bin' => 'xl2k13',
     '_vba_project_cur/vba/_vba_project' => 'xl97',
     'ppt/vbaproject.bin' => 'ppt2k7',
   );
@@ -763,7 +793,7 @@ sub _check_macrotype_doc {
   my @members = $zip->members();
   foreach my $member (@members){
     my $mname = lc $member->fileName();
-    if (exists($macrofiles{$mname})) {
+    if (exists($macrofiles{lc($mname)})) {
       dbg("Found $macrofiles{$mname} vba file");
       $pms->{olemacro_exists} = 1;
       last;
@@ -870,6 +900,11 @@ sub _check_markers {
     return 1;
   }
 
+  if (index($data, $marker1) == 0 && index($data, $marker2a) > -1) {
+    dbg('Marker 1 & 2a found');
+    return 1;
+  }
+
   if (index($data, $marker3) > -1) {
     dbg('Marker 3 found');
     return 1;
@@ -894,6 +929,7 @@ sub _check_markers {
     dbg('XML macros marker found');
     return 1;
   }
+
 }
 
 sub _find_malice_bins {

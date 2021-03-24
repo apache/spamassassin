@@ -594,16 +594,12 @@ sub process_response_packet {
     # dbg("askdns: received rr type %s, data: %s", $rr_type, $rr_rdatastr);
     }
 
-    my $j = 0;
     for my $q_tuple (!ref $queries_ref ? () : @$queries_ref) {
       next  if !$q_tuple;
       my($query_type, $answer_types_ref, $rules) = @$q_tuple;
 
-      next  if !defined $qtype || $query_type ne $qtype;
+      next  if !defined $qtype;
       $answer_types_ref = [$query_type]  if !defined $answer_types_ref;
-
-      # mark rule as done
-      $pms->{askdns_map_dnskey_to_rules}{$dnskey}[$j++] = undef;
 
       while (my($rulename,$subtest) = each %$rules) {
         my $match;

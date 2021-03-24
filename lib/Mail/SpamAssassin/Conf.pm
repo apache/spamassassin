@@ -317,7 +317,7 @@ e.g.
 
 =item unwhitelist_from user@example.com
 
-Used to override a default whitelist_from entry, so for example a distribution
+Used to remove a default whitelist_from entry, so for example a distribution
 whitelist_from can be overridden in a local.cf file, or an individual user can
 override a whitelist_from entry in their own C<user_prefs> file.
 The specified email address has to match exactly (although case-insensitively)
@@ -458,10 +458,10 @@ e.g.
 
 =item unwhitelist_from_rcvd user@example.com
 
-Used to override a default whitelist_from_rcvd entry, so for example a
-distribution whitelist_from_rcvd can be overridden in a local.cf file,
-or an individual user can override a whitelist_from_rcvd entry in
-their own C<user_prefs> file.
+Used to remove a default whitelist_from_rcvd or def_whitelist_from_rcvd
+entry, so for example a distribution whitelist_from_rcvd can be overridden
+in a local.cf file, or an individual user can override a whitelist_from_rcvd
+entry in their own C<user_prefs> file.
 
 The specified email address has to match exactly the address previously
 used in a whitelist_from_rcvd line.
@@ -505,7 +505,7 @@ non-spam, but which the user doesn't want.  Same format as C<whitelist_from>.
 
 =item unblacklist_from user@example.com
 
-Used to override a default blacklist_from entry, so for example a
+Used to remove a default blacklist_from entry, so for example a
 distribution blacklist_from can be overridden in a local.cf file, or
 an individual user can override a blacklist_from entry in their own
 C<user_prefs> file. The specified email address has to match exactly
@@ -634,8 +634,8 @@ these are often targets for spammer spoofing.
 
 =item unwhitelist_auth user@example.com
 
-Used to override a C<whitelist_auth> entry. The specified email address has to
-match exactly the address previously used in a C<whitelist_auth> line.
+Used to remove a C<whitelist_auth> or C<def_whitelist_auth> entry. The
+specified email address has to match exactly the address previously used.
 
 e.g.
 
@@ -645,10 +645,21 @@ e.g.
 =cut
 
   push (@cmds, {
-    command => 'unwhitelist_auth',
-    setting => 'whitelist_auth',
+    setting => 'unwhitelist_auth',
     type => $CONF_TYPE_ADDRLIST,
-    code => \&Mail::SpamAssassin::Conf::Parser::remove_addrlist_value
+    code => sub {
+      my ($self, $key, $value, $line) = @_;
+      unless (defined $value && $value !~ /^$/) {
+        return $MISSING_REQUIRED_VALUE;
+      }
+      unless ($value =~ /^(?:\S+(?:\s+\S+)*)$/) {
+        return $INVALID_VALUE;
+      }
+      $self->{parser}->remove_from_addrlist('whitelist_auth',
+                                        split (/\s+/, $value));
+      $self->{parser}->remove_from_addrlist('def_whitelist_auth',
+                                        split (/\s+/, $value));
+    }
   });
 
 
@@ -911,7 +922,19 @@ should be used to silence warnings in previous
 SpamAssassin versions.
 
 To be able to use this feature a C<add_header all Subjprefix _SUBJPREFIX_>
-configuration line could be needed on some setups.
+configuration line could be needed when the glue between the MTA and SpamAssassin
+rewrites the email content.
+
+Here is an example on how to use this feature:
+
+        rewrite_header Subject *****SPAM*****
+        add_header all Subjprefix _SUBJPREFIX_
+        body     OLEMACRO_MALICE eval:check_olemacro_malice()
+        describe OLEMACRO_MALICE Dangerous Office Macro
+        score    OLEMACRO_MALICE 5.0
+        if can(Mail::SpamAssassin::Conf::feature_subjprefix)
+          subjprefix OLEMACRO_MALICE [VIRUS]
+        endif
 
 =cut
 
@@ -1241,38 +1264,6 @@ it will be used if it is available.
 	}
     }
   });
-
-
-=item body_part_scan_size               (default: 50000)
-
-Per mime-part scan size limit in bytes for "body" type rules.
-The decoded/stripped mime-part is truncated approx to this size.
-Helps scanning large messages safely, so it's not necessary to
-skip them completely. Disabled with 0.
-
-=cut
-
-  push (@cmds, {
-    setting => 'body_part_scan_size',
-    is_admin => 1,
-    default => 50000,
-    type => $CONF_TYPE_NUMERIC,
-  });
-
-
-=item rawbody_part_scan_size               (default: 500000)
-
-Like body_part_scan_size, for "rawbody" type rules.
-
-=cut
-
-  push (@cmds, {
-    setting => 'rawbody_part_scan_size',
-    is_admin => 1,
-    default => 500000,
-    type => $CONF_TYPE_NUMERIC,
-  });
-
 
 =back
 
@@ -2849,11 +2840,11 @@ in all of the following cases:
 
 =item display: example@foo (Foo Blah), example@bar ;
 
-=item Foo Blah <example@foo>
+=item Foo Blah E<lt>example@fooE<gt>
 
-=item "Foo Blah" <example@foo>
+=item "Foo Blah" E<lt>example@fooE<gt>
 
-=item "'Foo Blah'" <example@foo>
+=item "'Foo Blah'" E<lt>example@fooE<gt>
 
 =back
 
@@ -2868,11 +2859,11 @@ For example, appending C<:name> to a header name will result in "Foo Blah"
 
 =item display: example@foo (Foo Blah), example@bar ;
 
-=item Foo Blah <example@foo>
+=item Foo Blah E<lt>example@fooE<gt>
 
-=item "Foo Blah" <example@foo>
+=item "Foo Blah" E<lt>example@fooE<gt>
 
-=item "'Foo Blah'" <example@foo>
+=item "'Foo Blah'" E<lt>example@fooE<gt>
 
 =back
 
@@ -2964,10 +2955,10 @@ zone.  There's a few things to note:
 
 Duplicated IPs are only queried once and reserved IPs are not queried.
 Private IPs are those listed in
-<https://www.iana.org/assignments/ipv4-address-space>,
-<http://duxcw.com/faq/network/privip.htm>,
-<http://duxcw.com/faq/network/autoip.htm>, or
-<https://tools.ietf.org/html/rfc5735> as private.
+C<https://www.iana.org/assignments/ipv4-address-space>,
+C<http://duxcw.com/faq/network/privip.htm>,
+C<http://duxcw.com/faq/network/autoip.htm>, or
+C<https://tools.ietf.org/html/rfc5735> as private.
 
 =item the 'set' argument
 
@@ -3283,7 +3274,7 @@ The value of any other type of hit test is "1".
 
 For example:
 
-meta META2        (3 * TEST1 - 2 * TEST2) > 0
+meta META2        (3 * TEST1 - 2 * TEST2) E<gt> 0
 
 Note that Perl builtins and functions, like C<abs()>, B<can't> be
 used, and will be treated as rule names.
@@ -3428,7 +3419,7 @@ Only affects header, body, rawbody, uri, and full tests.
 =item  maxhits=N
 
 If B<multiple> is specified, limit the number of hits found to N.
-If the rule is used in a meta that counts the hits (e.g. __RULENAME > 5),
+If the rule is used in a meta that counts the hits (e.g. __RULENAME E<gt> 5),
 this is a way to avoid wasted extra work (use "tflags multiple maxhits=6").
 
 For example:
@@ -3489,7 +3480,7 @@ tests, are run in increasing priority value order (negative priority values
 are run before positive priority values). The default test priority is 0
 (zero).
 
-The values <-99999999999999> and <-99999999999998> have a special meaning
+The values C<-99999999999999> and C<-99999999999998> have a special meaning
 internally, and should not be used.
 
 =cut
@@ -3582,6 +3573,36 @@ general running of SpamAssassin.
     }
   });
 
+=item body_part_scan_size               (default: 50000)
+
+Per mime-part scan size limit in bytes for "body" type rules.
+The decoded/stripped mime-part is truncated approx to this size.
+Helps scanning large messages safely, so it's not necessary to
+skip them completely. Disabled with 0.
+
+=cut
+
+  push (@cmds, {
+    setting => 'body_part_scan_size',
+    is_admin => 1,
+    default => 50000,
+    type => $CONF_TYPE_NUMERIC,
+  });
+
+
+=item rawbody_part_scan_size               (default: 500000)
+
+Like body_part_scan_size, for "rawbody" type rules.
+
+=cut
+
+  push (@cmds, {
+    setting => 'rawbody_part_scan_size',
+    is_admin => 1,
+    default => 500000,
+    type => $CONF_TYPE_NUMERIC,
+  });
+  
 =item rbl_timeout t [t_min] [zone]		(default: 15 3)
 
 All DNS queries are made at the beginning of a check and we try to read
@@ -4357,6 +4378,7 @@ optional, and the default is shown below.
 If a tag reference uses the name of a tag which is not in this list or defined
 by a loaded plugin, the reference will be left intact and not replaced by any
 value.
+All template tag names should be restricted to the character set [A-Za-z0-9(,)].
 
 Additional, plugin specific, template tags can be found in the documentation for
 the following plugins:
