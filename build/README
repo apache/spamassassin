@@ -40,6 +40,7 @@ APACHE SPAMASSASSIN RELEASE PROCEDURE
       pyzor
       razor
       subversion
+      libarchive-zip-perl
       libberkeleydb-perl
       libbsd-resource-perl
       libdbi-perl
@@ -47,6 +48,7 @@ APACHE SPAMASSASSIN RELEASE PROCEDURE
       libgeo-ip-perl
       libgeoip2-perl
       libio-socket-inet6-perl
+      libio-string-perl
       libmail-dkim-perl
       libmail-spf-perl
       libnet-patricia-perl
@@ -546,6 +548,12 @@ make
   files to https://dist.apache.org/repos/dist/release/spamassassin/ once a
   release vote passes. 
 
+  NOTE - Since it takes up to 24 hours for all the mirrors of dist.apache.org
+  to receive changes, for a full release upload the files immediately
+  when the 72 hour period for a successful PMC vote has completed, then
+  you can start preparing the various news and announcements that you can't
+  commit or send until 24 hours after the upload.
+  
   [note: Symlinks may not work on all mirrors even though there may be 
   documentation to the contrary.]
 
@@ -568,15 +576,29 @@ make
   run, so the old downloads page will stick around for a while before it's
   safe to do so.)
 
-- (for full release builds) update the main website "downloads.html" and
-  all the links to downloads.cgi on all the pages in svn:
+- (for full release builds) Update the files in build/announcements/$vers.txt
+  to insert the correct checksums for the files that were uploaded. This directory
+  is not part of the release tarball, so committing it does not change the hashes.
+  
+- (for full release builds) update the main website "downloads.html" to link to
+  the new version of download files. This will involve changing the version number
+  in the download links for the install files, their detached GPG signature and hashes,
+  and the link to the announcement text.
 
     https://svn.apache.org/repos/asf/spamassassin/site
 
-  When changing the timestamp in the downloads.cgi link URL, ensure you
-  use a time 2 hours from now.  The ASF websites are synced internally to
-  the public HTTP servers on a bi-hourly basis, so it may take up to this
-  long for a file-download link to become valid and not a 404.
+  Previous versions of this README talked about using a timestamp in the
+  downloads.cgi links. However the instructions in
+  https://infra.apache.org/release-download-pages.html#less-than-24hr
+  say not to do that as a main website link. There is no need for a timestamp
+  once the mirrors have all updated. Also, if the old version that is obsoleted
+  by the new release is deleted as we are instructed to do, then not having
+  updated the website download pages will result in 404 links for all the
+  mirror sites that have already syncronized. It is probably fine to just wait
+  a few hours for a number of sites to sync, and then just accept the possibility
+  that there may be some people who try to download the new release and get a 404
+  then try the backup mirror site which will probably be the main one which
+  will work.
 
 - Update the "news.html" and the announcement on the home page.
 
