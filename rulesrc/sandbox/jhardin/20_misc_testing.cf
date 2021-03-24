@@ -121,8 +121,8 @@ ifplugin Mail::SpamAssassin::Plugin::MIMEHeader
   mimeheader   __MALW_ATTACH_01_01 Content-Disposition =~ /\bfilename(?:="?[^"]+|\*(?:\d+\*)?=(?:UTF-8'')?\S+)\.SettingContent-ms\b/i
   mimeheader   __MALW_ATTACH_01_02 Content-Type =~ /\bname="?[^"]+\.SettingContent-ms\b/i
   # others
-  mimeheader   __MALW_ATTACH_02_01 Content-Disposition =~ /\bfilename(?:="?[^"]*|\*(?:\d+\*)?=(?:UTF-8'')?\S*)(?:invoice|statement|(?:\.|%C2%B7|[\xc2][\xb7]|_)(?:pdf|img|png|gif|jpe?g))\.(?:ace|zip|7z|rar|r17|gz)[";$]/i
-  mimeheader   __MALW_ATTACH_02_02 Content-Type =~ /\bname="?[^"]*(?:invoice|statement|(?:\.|[\xc2][\xb7]|_)(?:pdf|img|png|gif|jpe?g))\.(?:ace|zip|7z|rar|r17|gz)[";$]/i
+  mimeheader   __MALW_ATTACH_02_01 Content-Disposition =~ /\bfilename(?:="?[^"]*|\*(?:\d+\*)?=(?:UTF-8'')?\S*)(?:invoice|statement|payment|(?:\.|%C2%B7|[\xc2][\xb7]|_)(?:pdf|img|png|gif|jpe?g))\.(?:ace|zip|rar|r17|[7g]?z)[";$]/i
+  mimeheader   __MALW_ATTACH_02_02 Content-Type =~ /\bname="?[^"]*(?:invoice|statement|payment|(?:\.|[\xc2][\xb7]|_)(?:pdf|img|png|gif|jpe?g))\.(?:ace|zip|rar|r17|[7g]?z)[";$]/i
   meta         __MALW_ATTACH       __MALW_ATTACH_01_01 || __MALW_ATTACH_01_02 || __MALW_ATTACH_02_01 || __MALW_ATTACH_02_02
   meta         MALW_ATTACH         __MALW_ATTACH && !__HAS_THREAD_INDEX 
   describe     MALW_ATTACH         Attachment filename suspicious, probable malware exploit
@@ -3854,13 +3854,13 @@ describe   URI_LONG_REPEAT             Very long identical host+domain
 score      URI_LONG_REPEAT             2.500	# limit
 tflags     URI_LONG_REPEAT             publish
 
-body       READY_TO_SHIP               /(?:in our (?:stock|warehouse|store)(?: today)?[.,] Ready (?:to (?:be )?|for )+ship|ready for shipping (?:(?:in|from) our (?:warehouse|stock)|to(?: worldwide| customers){2})|(?:our|this|a|great|fine|wonderful|cool|popular) new product in (?:our )?(?:warehouse|stock|store))/i
+body       READY_TO_SHIP               /(?:in our (?:stock|warehouse|store)(?: today)?[.,:] Ready (?:to (?:be )?|for )+ship|ready for shipping (?:(?:in|from) our (?:warehouse|stock)|to(?: worldwide| customers){2})|(?:our|this|a|great|fine|wonderful|cool|popular) new product in (?:our )?(?:warehouse|stock|store))/i
 score      READY_TO_SHIP               1.500	# limit
 
-body       WANT_TO_ORDER               /you (?:(?:would )?like|want)(?: to)? order (?:this|it|now|today)\b/i
+body       WANT_TO_ORDER               /you (?:(?:would )?like|want)(?: to)? (?:place an order|order (?:this|it|now|today))\b/i
 score      WANT_TO_ORDER               1.500	# limit
 
-body       YOUR_DELIVERY_ADDRESS       /(?:respond|reply) (?:to )?(?:our|this) ?email (?:with|and send(?: us)?) your (?:(?:delivery |shipping )?address|address (?:for|of) (?:shipping|delivery))/i
+body       YOUR_DELIVERY_ADDRESS       /(?:(?:respond|reply) (?:to )?(?:our|this) ?email (?:with|and send(?: us)?)|we need to know|let us know) your (?:(?:delivery |shipping )?address|address (?:for|of) (?:shipping|delivery))/i
 score      YOUR_DELIVERY_ADDRESS       1.500	# limit
 
 
