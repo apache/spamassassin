@@ -203,28 +203,30 @@ tflags RCVD_IN_IADB_VOUCHED     net nice
 reuse RCVD_IN_IADB_VOUCHED
 
 # ---------------------------------------------------------------------------
-# Return Path Certified:
-# https://www.returnpath.net/internetserviceprovider/certification/
+# Validity (née Return Path, SenderScore) reputation DNSBLs
+# https://issues.apache.org/SpamAssassin/show_bug.cgi?id=6247
+# Certified:
+# https://www.validity.com/resource-center/fact-sheet-certification/
 # (replaces RCVD_IN_BSP_TRUSTED, RCVD_IN_BSP_OTHER, RCVD_IN_SSC_TRUSTED_COI)
-header RCVD_IN_RP_CERTIFIED     eval:check_rbl_txt('ssc-firsttrusted', 'sa-trusted.bondedsender.org.')
-describe RCVD_IN_RP_CERTIFIED   Sender in ReturnPath Certified - Contact cert-sa@returnpath.net
-tflags RCVD_IN_RP_CERTIFIED     net nice
-reuse RCVD_IN_RP_CERTIFIED
+header RCVD_IN_VALIDITY_CERTIFIED     eval:check_rbl_txt('ssc-firsttrusted', 'sa-trusted.bondedsender.org.')
+describe RCVD_IN_VALIDITY_CERTIFIED   Sender in Validity Certification - Contact certification@validity.com
+tflags RCVD_IN_VALIDITY_CERTIFIED     net nice
+reuse RCVD_IN_VALIDITY_CERTIFIED
 
-# Return Path Safe:
-# https://www.returnpath.net/internetserviceprovider/certification/
+# Safe:
+# https://www.validity.com/resource-center/fact-sheet-certification/
 # (replaces HABEAS_ACCREDITED_COI, HABEAS_ACCREDITED_SOI, HABEAS_CHECKED)
-header RCVD_IN_RP_SAFE     eval:check_rbl_txt('ssc-firsttrusted','sa-accredit.habeas.com.')
-describe RCVD_IN_RP_SAFE   Sender in ReturnPath Safe - Contact safe-sa@returnpath.net
-tflags RCVD_IN_RP_SAFE     net nice
-reuse RCVD_IN_RP_SAFE
+header RCVD_IN_VALIDITY_SAFE     eval:check_rbl_txt('ssc-firsttrusted','sa-accredit.habeas.com.')
+describe RCVD_IN_VALIDITY_SAFE   Sender in Validity Safe - Contact certification@validity.com
+tflags RCVD_IN_VALIDITY_SAFE     net nice
+reuse RCVD_IN_VALIDITY_SAFE
 
-# Return Path Reputation Network Blacklist (RNBL):
-# https://senderscore.org/blacklistlookup/
-header RCVD_IN_RP_RNBL         eval:check_rbl('rnbl-lastexternal','bl.score.senderscore.com.')
-describe RCVD_IN_RP_RNBL       Relay in RNBL, https://senderscore.org/blacklistlookup/
-tflags RCVD_IN_RP_RNBL         net
-reuse RCVD_IN_RP_RNBL
+# Validity RPBL (née Return Path Reputation Network Blacklist - RNBL):
+# https://www.senderscore.org/blocklistlookup/
+header RCVD_IN_VALIDITY_RPBL     eval:check_rbl('rnbl-lastexternal','bl.score.senderscore.com.')
+describe RCVD_IN_VALIDITY_RPBL   Relay in Validity RPBL, https://senderscore.org/blocklistlookup/
+tflags RCVD_IN_VALIDITY_RPBL     net
+reuse RCVD_IN_VALIDITY_RPBL
 
 endif
 

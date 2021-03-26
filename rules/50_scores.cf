@@ -281,7 +281,7 @@ score RCVD_FORGED_WROTE 0 # n=0 n=1 n=2 n=3
 score RCVD_FORGED_WROTE2 0 # n=0 n=1 n=2 n=3
 #score RCVD_IN_BRBL_LASTEXT 0 1.644 0 1.449 # n=0 n=2
 score RCVD_IN_PSBL 0 2.700 0 2.700 # n=0 n=2
-score RCVD_IN_RP_RNBL 0 1.284 0 1.310 # n=0 n=2
+score RCVD_IN_VALIDITY_RPBL 0 1.284 0 1.310 # n=0 n=2
 score RCVD_MAIL_COM 0 # n=0 n=1 n=2 n=3
 score RDNS_DYNAMIC 2.639 0.363 1.663 0.982
 score RDNS_LOCALHOST 3.700 0.969 2.345 0.001
@@ -520,12 +520,12 @@ score NO_DNS_FOR_FROM 0 0.379 0 0.001 # n=0 n=2
 score RCVD_IN_ZEN_BLOCKED_OPENDNS 0 0.001 0 0.001
 score RCVD_IN_ZEN_BLOCKED 0 0.001 0 0.001
 
-# ReturnPath Certified
-# https://www.returnpath.net/internetserviceprovider/certification/
+# Validity (née ReturnPath) Certified
+# https://www.validity.com/resource-center/fact-sheet-certification/
 # CERTIFIED is a subset of SAFE, thus the score is cumulative.
 # -2 + -3 = -5 points for CERTIFIED
-score RCVD_IN_RP_CERTIFIED 0.0 -3.0 0.0 -3.0
-score RCVD_IN_RP_SAFE 0.0 -2.0 0.0 -2.0
+score RCVD_IN_VALIDITY_CERTIFIED 0.0 -3.0 0.0 -3.0
+score RCVD_IN_VALIDITY_SAFE 0.0 -2.0 0.0 -2.0
 
 # DNSWL is a commercial service that requires payment for servers over 100K queries daily.
 # Unfortunately, they will return true answers for DNS servers they consider abusive so
