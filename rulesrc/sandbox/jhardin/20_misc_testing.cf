@@ -3854,13 +3854,13 @@ describe   URI_LONG_REPEAT             Very long identical host+domain
 score      URI_LONG_REPEAT             2.500	# limit
 tflags     URI_LONG_REPEAT             publish
 
-body       READY_TO_SHIP               /(?:(?:in our (?:stock|warehouse|store)(?: today)?[.,:] |our (?:\w+ ){2,8}(?:is |now )+)Ready (?:to (?:be )?|for )+ship|ready for shipping (?:(?:in|from) our (?:warehouse|stock)|to(?: worldwide| customers){2})|(?:our|this|a|great|fine|wonderful|cool|popular) new product in (?:our )?(?:warehouse|stock|store))/i
+body       READY_TO_SHIP               /(?:(?:in our (?:stock|warehouse|store)(?: today)?[.,:] |our (?:\w+ ){2,8}(?:is |now )+)Ready (?:to (?:be )?|for )+ship|ready (?:for shipping|to (?:ship|send)) (?:(?:in|from|by) our (?:warehouse|stock)|to(?: global(?:ly)?| worldwide| customers){2})|(?:our|this|a|great|fine|wonderful|cool|popular) new product in (?:our )?(?:warehouse|stock|store))/i
 score      READY_TO_SHIP               1.500	# limit
 
-body       WANT_TO_ORDER               /you (?:(?:would )?like|want)(?: to)? (?:place an order|order (?:this|it|now|today))\b/i
+body       WANT_TO_ORDER               /you (?:(?:would )?like|want)(?: to)? (?:place an order|order (?:this|it|now|today|our \w+))\b/i
 score      WANT_TO_ORDER               1.500	# limit
 
-body       YOUR_DELIVERY_ADDRESS       /(?:(?:respond|reply) (?:to )?(?:our|this) ?email (?:with|and send(?: us)?)|we need to know|let us know) your (?:(?:delivery |shipping )address|address (?:for|of) (?:shipping|delivery))/i
+body       YOUR_DELIVERY_ADDRESS       /(?:(?:respond|reply) (?:to )?(?:our|this) ?email (?:with|and send(?: us)?)|we need to know|let us know|please send us) your (?:(?:delivery |shipping )address|address (?:for|of) (?:shipping|delivery))/i
 score      YOUR_DELIVERY_ADDRESS       1.500	# limit
 
 
