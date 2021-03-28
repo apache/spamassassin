@@ -231,13 +231,21 @@ reuse RCVD_IN_VALIDITY_RPBL
 # temporary
 meta RCVD_IN_RP_CERTIFIED RCVD_IN_VALIDITY_CERTIFIED
 describe RCVD_IN_RP_CERTIFIED RCVD_IN_RP_CERTIFIED renamed to RCVD_IN_VALIDITY_CERTIFIED, please update local rules
-score RCVD_IN_RP_CERTIFIED 0.001
+score RCVD_IN_RP_CERTIFIED -0.001
+tflags RCVD_IN_RP_CERTIFIED net nice publish
+reuse RCVD_IN_RP_CERTIFIED
+
 meta RCVD_IN_RP_SAFE RCVD_IN_VALIDITY_SAFE
 describe RCVD_IN_RP_SAFE RCVD_IN_RP_SAFE renamed to RCVD_IN_VALIDITY_SAFE, please update local rules
-score RCVD_IN_RP_SAFE 0.001
+score RCVD_IN_RP_SAFE -0.001
+tflags RCVD_IN_RP_SAFE net nice publish
+reuse RCVD_IN_RP_SAFE
+
 meta RCVD_IN_RP_RNBL RCVD_IN_VALIDITY_RPBL
 describe RCVD_IN_RP_RNBL RCVD_IN_RP_RNBL renamed to RCVD_IN_VALIDITY_RPBL, please update local rules
 score RCVD_IN_RP_RNBL 0.001
+tflags RCVD_IN_RP_RNBL net publish
+reuse RCVD_IN_RP_RNBL
 
 endif
 
