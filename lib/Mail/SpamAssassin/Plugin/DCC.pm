@@ -645,6 +645,16 @@ sub check_tick {
   my ($self, $opts) = @_;
 
   $self->_check_async($opts, 0);
+
+  my $pms = $opts->{permsgstatus};
+
+  # Finish callbacks
+  if ($pms->{dcc_range_callbacks}) {
+    while (@{$pms->{dcc_range_callbacks}}) {
+      my $cb_args = shift @{$pms->{dcc_range_callbacks}};
+      $self->check_dcc_reputation_range($pms, @$cb_args);
+    }
+  }
 }
 
 sub check_cleanup {
@@ -656,8 +666,9 @@ sub check_cleanup {
 
   # Finish callbacks
   if ($pms->{dcc_range_callbacks}) {
-    foreach (@{$pms->{dcc_range_callbacks}}) {
-      $self->check_dcc_reputation_range($pms, @$_);
+    while (@{$pms->{dcc_range_callbacks}}) {
+      my $cb_args = shift @{$pms->{dcc_range_callbacks}};
+      $self->check_dcc_reputation_range($pms, @$cb_args);
     }
   }
 }
