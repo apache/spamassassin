@@ -452,7 +452,6 @@ sub check_hashbl_emails {
   my $max = $opts =~ /\bmax=(\d+)\b/ ? $1 : 10;
   $#filtered_emails = $max-1 if scalar @filtered_emails > $max;
 
-  $pms->{hashbl_emails_count}{$rulename} = scalar @filtered_emails;
   foreach my $email (@filtered_emails) {
     $self->_submit_query($pms, $rulename, $email, $list, $opts, $subtest);
   }
@@ -667,11 +666,9 @@ sub _submit_query {
 sub _finish_query {
   my ($self, $pms, $ent, $pkt) = @_;
 
-  my $rulename = $ent->{rulename};
-
   if (!$pkt) {
     # $pkt will be undef if the DNS query was aborted (e.g. timed out)
-    dbg("lookup was aborted: $rulename $ent->{key}");
+    dbg("lookup was aborted: $ent->{rulename} $ent->{key}");
     return;
   }
 
@@ -679,31 +676,12 @@ sub _finish_query {
   my @answer = $pkt->answer;
   foreach my $rr (@answer) {
     if ($rr->address =~ $dnsmatch) {
-      dbg("$rulename: $ent->{zone} hit '$ent->{value}'");
+      dbg("$ent->{rulename}: $ent->{zone} hit '$ent->{value}'");
       $ent->{value} =~ s/\@/[at]/g;
-      # Hit now if only one query exists, otherwise call hits at scan end
-      if ($pms->{hashbl_emails_count}{$rulename} == 1) {
-        $pms->test_log($ent->{value});
-        $pms->got_hit($rulename, '', ruletype => 'eval');
-        $pms->register_async_rule_finish($rulename);
-      } else {
-        push @{$pms->{hashbl_emails_hits}{$rulename}}, $ent->{value};
-      }
+      $pms->test_log($ent->{value});
+      $pms->got_hit($ent->{rulename}, '', ruletype => 'eval');
+      $pms->register_async_rule_finish($ent->{rulename});
       return;
-    }
-  }
-}
-
-sub check_cleanup {
-  my ($self, $opts) = @_;
-
-  my $pms = $opts->{permsgstatus};
-
-  # Call any remaining hits
-  if (exists $pms->{hashbl_emails_hits}) {
-    foreach my $rulename (keys %{$pms->{hashbl_emails_hits}}) {
-      $pms->test_log(join(', ', sort @{$pms->{hashbl_emails_hits}{$rulename}}));
-      $pms->got_hit($rulename, '', ruletype => 'eval');
     }
   }
 }
