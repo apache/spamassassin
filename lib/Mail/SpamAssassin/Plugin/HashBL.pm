@@ -453,7 +453,6 @@ sub check_hashbl_emails {
   my $max = $opts =~ /\bmax=(\d+)\b/ ? $1 : 10;
   $#filtered_emails = $max-1 if scalar @filtered_emails > $max;
 
-  $pms->{hashbl_emails_count}{$rulename} = scalar @filtered_emails;
   foreach my $email (@filtered_emails) {
     $self->_submit_query($pms, $rulename, $email, $list, $opts, $subtest);
   }
@@ -678,28 +677,9 @@ sub _finish_query {
     if ($rr->address =~ $dnsmatch) {
       dbg("$rulename: $ent->{zone} hit '$ent->{value}'");
       $ent->{value} =~ s/\@/[at]/g;
-      # Hit now if only one query exists, otherwise call hits at scan end
-      if ((defined $pms->{hashbl_emails_count}{$rulename}) and ($pms->{hashbl_emails_count}{$rulename} == 1)) {
-        $pms->test_log($ent->{value});
-        $pms->got_hit($rulename, '', ruletype => 'eval');
-      } else {
-        push @{$pms->{hashbl_emails_hits}{$rulename}}, $ent->{value};
-      }
-      return;
-    }
-  }
-}
-
-sub check_cleanup {
-  my ($self, $opts) = @_;
-
-  my $pms = $opts->{permsgstatus};
-
-  # Call any remaining hits
-  if (exists $pms->{hashbl_emails_hits}) {
-    foreach my $rulename (keys %{$pms->{hashbl_emails_hits}}) {
-      $pms->test_log(join(', ', sort @{$pms->{hashbl_emails_hits}{$rulename}}));
+      $pms->test_log($ent->{value});
       $pms->got_hit($rulename, '', ruletype => 'eval');
+      return;
     }
   }
 }
