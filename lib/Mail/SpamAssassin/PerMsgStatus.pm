@@ -288,7 +288,8 @@ sub new {
     'main'              => $main,
     'msg'               => $msg,
     'score'             => 0,
-    'test_log_msgs'     => { },
+    'test_log_msgs'     => { }, # deprecated since 4.0, renamed to test_logs to prevent conflicts
+    'test_logs'         => { },
     'test_names_hit'    => [ ],
     'subtest_names_hit' => [ ],
     'spamd_result_log_items' => [ ],
@@ -452,6 +453,75 @@ sub check_timed {
   $self->{main}->call_plugins ("check_end", { permsgstatus => $self });
 
   1;
+}
+
+# Called from Check.pm after Plugins check_cleanup calls
+# Cleanup and finish things before learning/rewrites etc
+# TODO: document?
+sub check_cleanup {
+  my ($self) = shift;
+
+  # Create subjprefix
+  if (defined $self->{subjprefix}) {
+    $self->{tag_data}->{SUBJPREFIX} = $self->{subjprefix};
+  }
+
+  # Create reports
+  $self->{tag_data}->{REPORT} = '';
+  $self->{tag_data}->{SUMMARY} = '';
+  my $test_logs = $self->{test_logs};
+  my $scores = $self->{conf}->{scores};
+  foreach my $rule (@{$self->{test_names_hit}}) {
+    my $score = $scores->{$rule};
+    my $area = $test_logs->{$rule}->{area} || '';
+    my $desc = $test_logs->{$rule}->{desc} || '';
+
+    if ($score >= 10 || $score <= -10) {
+      $score = sprintf("%4.0f", $score);
+    } else {
+      $score = sprintf("%4.1f", $score);
+    }
+
+    my $terse = '';
+    my $long = '';
+    if (defined $test_logs->{$rule}->{msg}) {
+      my @msgs;
+      if (($self->{conf}->{tflags}->{$rule}||'') =~ /\bnolog\b/) {
+        @msgs = ['*REDACTED*'];
+      } else {
+        @msgs = @{$test_logs->{$rule}->{msg}};
+      }
+      local $1;
+      foreach my $msg (@msgs) {
+        while ($msg =~ s/^(.{30,48})\s//) {
+          $terse .= sprintf ("[%s]\n", $1);
+          if (length($1) > 47) {
+            $long .= sprintf ("%78s\n", "[$1]");
+          } else {
+            $long .= sprintf ("%27s [%s]\n", "", $1);
+          }
+        }
+        $terse .= sprintf ("[%s]\n", $msg);
+        if (length($msg) > 47) {
+          $long .= sprintf ("%78s\n", "[$msg]");
+        } else {
+          $long .= sprintf ("%27s [%s]\n", "", $msg);
+        }
+      }
+    }
+
+    $self->{tag_data}->{REPORT} .= sprintf ("* %s %s %s%s\n%s",
+        $score, $rule, $area,
+        $self->_wrap_desc($desc,
+            4+length($rule)+length($score)+length($area), "*      "),
+        ($terse ? "*      " . $terse : ''));
+
+    $self->{tag_data}->{SUMMARY} .= sprintf ("%s %-22s %s%s\n%s",
+        $score, $rule, $area,
+        $self->_wrap_desc($desc,
+            3+length($rule)+length($score)+length($area), " " x 28),
+        $long);
+  }
 }
 
 ###########################################################################
@@ -2809,25 +2879,15 @@ ENDOFEVAL
 
 ###########################################################################
 
-# note: only eval tests should store state in $self->{test_log_msgs};
-# pattern tests do not.
-#
-# the clearing of the test state is now inlined as:
-#
-# %{$self->{test_log_msgs}} = ();        # clear test state
-#
-# except for this public API for plugin use:
-
 =item $status->clear_test_state()
 
-Clear test state, including test log messages from C<$status-E<gt>test_log()>.
+DEPRECATED, UNNEEDED SINCE 4.0
 
 =cut
 
-sub clear_test_state {
-    my ($self) = @_;
-    %{$self->{test_log_msgs}} = ();
-}
+sub clear_test_state {}
+
+###########################################################################
 
 # internal API, called only by got_hit()
 # TODO: refactor and merge this into that function
@@ -2860,36 +2920,10 @@ sub _handle_hit {
     $self->{score} += $score;
 
     push(@{$self->{test_names_hit}}, $rule);
-    $area ||= '';
 
-    if ($score >= 10 || $score <= -10) {
-      $score = sprintf("%4.0f", $score);
-    }
-    else {
-      $score = sprintf("%4.1f", $score);
-    }
-
-    # save both summaries
-    # TODO: this is slower than necessary, if we only need one
-    if (($self->{conf}->{tflags}->{$rule}||'') =~ /\bnolog\b/) {
-      $self->{test_log_msgs}->{TERSE} = sprintf ("[%s]\n", "*REDACTED*");
-      $self->{test_log_msgs}->{LONG} =  sprintf ("%27s [%s]\n", "", "*REDACTED*");
-    }
-    $self->{tag_data}->{REPORT} .= sprintf ("* %s %s %s%s\n%s",
-              $score, $rule, $area,
-              $self->_wrap_desc($desc,
-                  4+length($rule)+length($score)+length($area), "*      "),
-              ($self->{test_log_msgs}->{TERSE} ?
-              "*      " . $self->{test_log_msgs}->{TERSE} : ''));
-
-    $self->{tag_data}->{SUMMARY} .= sprintf ("%s %-22s %s%s\n%s",
-              $score, $rule, $area,
-              $self->_wrap_desc($desc,
-                  3+length($rule)+length($score)+length($area), " " x 28),
-              ($self->{test_log_msgs}->{LONG} || ''));
-    if (defined $self->{subjprefix}) {
-      $self->{tag_data}->{SUBJPREFIX} = $self->{subjprefix};
-    }
+    # Save for report processing
+    $self->{test_logs}->{$rule}->{area} = $area;
+    $self->{test_logs}->{$rule}->{desc} = $desc;
 }
 
 sub _wrap_desc {
@@ -2977,7 +3011,6 @@ sub got_hit {
   # adding a hit does nothing if we don't have a score -- we probably
   # shouldn't have run it in the first place
   if (!$score) {
-    %{$self->{test_log_msgs}} = ();
     return;
   }
 
@@ -2996,7 +3029,6 @@ sub got_hit {
   my $already_hit = $self->{tests_already_hit}->{$rule} || 0;
   # don't count hits multiple times, unless 'tflags multiple' is on
   if ($already_hit && ($tflags_ref->{$rule}||'') !~ /\bmultiple\b/) {
-    %{$self->{test_log_msgs}} = ();
     return;
   }
 
@@ -3045,31 +3077,29 @@ sub got_hit {
     }
   }
 
-  %{$self->{test_log_msgs}} = ();  # clear test logs
   return 1;
 }
 
 ###########################################################################
 
-# TODO: this needs API doc
+=item $status->test_log ($text [, $rulename])
+
+Add $text log entry for a hit rule in final message REPORT/SUMMARY.
+
+Usually called just before got_hit(), to describe for example what URI the
+rule matched on.  Optional <$rulename> argument is recommended to make sure
+log is written to correct rule.  If rulename is not provided,
+get_current_eval_rule_name() is used as fallback.
+
+Can be called multiple times per rule for additional entries.
+
+=cut
+
 sub test_log {
-  my ($self, $msg) = @_;
-  local $1;
-  while ($msg =~ s/^(.{30,48})\s//) {
-    $self->_test_log_line ($1);
-  }
-  $self->_test_log_line ($msg);
-}
-
-sub _test_log_line {
-  my ($self, $msg) = @_;
-
-  $self->{test_log_msgs}->{TERSE} .= sprintf ("[%s]\n", $msg);
-  if (length($msg) > 47) {
-    $self->{test_log_msgs}->{LONG} .= sprintf ("%78s\n", "[$msg]");
-  } else {
-    $self->{test_log_msgs}->{LONG} .= sprintf ("%27s [%s]\n", "", $msg);
-  }
+  my ($self, $msg, $rulename) = @_;
+  $rulename ||= $self->get_current_eval_rule_name();
+  return if !defined $rulename;
+  push @{$self->{test_logs}->{$rulename}->{msg}}, $msg;
 }
 
 ###########################################################################

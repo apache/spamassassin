@@ -224,6 +224,7 @@ sub check_main {
 
   # last chance to handle left callbacks, make rule hits etc
   $self->{main}->call_plugins ("check_cleanup", { permsgstatus => $pms });
+  $pms->check_cleanup();
 
   if ($pms->{deadline_exceeded}) {
   # dbg("check: exceeded time limit, skipping auto-learning");
@@ -269,8 +270,6 @@ sub run_rbl_eval_tests {
     my $score = $pms->{conf}->{scores}->{$rulename};
     next unless $score;
 
-    %{$pms->{test_log_msgs}} = ();        # clear test state
-
     my $function = $test->[0];
     if (!exists $pms->{conf}->{eval_plugins}->{$function}) {
       warn("rules: unknown eval '$function' for $rulename, ignoring RBL eval\n");
@@ -311,7 +310,6 @@ sub run_generic_tests {
 
   my $ruletype = $opts{type};
   dbg("rules: running $ruletype tests; score so far=".$pms->{score});
-  %{$pms->{test_log_msgs}} = ();        # clear test state
 
   my $conf = $pms->{conf};
   my $doing_user_rules = $conf->{want_rebuild_for_type}->{$opts{consttype}};
@@ -1196,7 +1194,6 @@ sub run_eval_tests {
     $evalstr .= '
     if ($scoresptr->{q{'.$rulename.'}}) {
       $rulename = q#'.$rulename.'#;
-      %{$self->{test_log_msgs}} = ();
 ';
  
     # only need to set current_rule_name for plugin evals

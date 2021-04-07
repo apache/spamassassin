@@ -129,6 +129,12 @@ Note for Users Upgrading to SpamAssassin 4.0.0
 - BodyEval: plaintext_body_sig_ratio: eval rules for the (first text/plain
   MIME part's) body and signature lengths and ratio
 
+- API: Now supports multiple calls of $pms->test_log() for rules.  Add
+  $pms->check_cleanup() to finalize tags/reports etc.  Deprecate internal
+  $pms->{test_log_msgs}, rename to $pms->{test_logs}.  Deprecate
+  $pms->clear_test_state(), not needed anymore.  $pms->test_log() accepts
+  $rulename as second argument.
+
 Note for Users Upgrading to SpamAssassin 3.4.4
 ----------------------------------------------
 

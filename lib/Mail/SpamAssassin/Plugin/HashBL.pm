@@ -677,7 +677,7 @@ sub _finish_query {
     if ($rr->address =~ $dnsmatch) {
       dbg("$rulename: $ent->{zone} hit '$ent->{value}'");
       $ent->{value} =~ s/\@/[at]/g;
-      $pms->test_log($ent->{value});
+      $pms->test_log($ent->{value}, $rulename);
       $pms->got_hit($rulename, '', ruletype => 'eval');
       return;
     }

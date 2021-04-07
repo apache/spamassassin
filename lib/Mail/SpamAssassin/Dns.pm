@@ -171,17 +171,8 @@ sub dnsbl_hit {
     }
   }
 
-  # TODO: this may result in some log messages appearing under the
-  # wrong rules, since we could see this sequence: { test one hits,
-  # test one's message is logged, test two hits, test one fires again
-  # on another IP, test one's message is logged for that other IP --
-  # but under test two's heading }.   Right now though it's better
-  # than just not logging at all.
-
-  $self->{already_logged} ||= { };
-  if ($log && !$self->{already_logged}->{$log}) {
-    $self->test_log($log);
-    $self->{already_logged}->{$log} = 1;
+  if ($log) {
+    $self->test_log($log, $rule);
   }
 
   if (!$self->{tests_already_hit}->{$rule}) {

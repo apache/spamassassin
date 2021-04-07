@@ -612,7 +612,7 @@ sub _check_asn {
   return if !defined $asn;
 
   if ($asn =~ $rec) {
-    $pms->test_log("ASN: $asn");
+    $pms->test_log("ASN: $asn", $rulename);
     $pms->got_hit($rulename, "");
   }
 }

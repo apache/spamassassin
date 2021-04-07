@@ -435,7 +435,7 @@ sub _got_hit {
 
     if ($pms->{main}->{conf}->{freemail_add_describe_email}) {
         $email =~ s/\@/[at]/g;
-        $pms->test_log($email);
+        $pms->test_log($email, $rulename);
     }
 
     $pms->got_hit($rulename, "", description => $desc, ruletype => 'eval');

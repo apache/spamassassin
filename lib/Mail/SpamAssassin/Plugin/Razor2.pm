@@ -675,7 +675,7 @@ sub check_razor2_range {
 
   if ($cf >= $min && $cf <= $max) {
     my $cf_str = sprintf("cf: %3d", $cf);
-    $pms->test_log($cf_str);
+    $pms->test_log($cf_str, $rulename);
     if ($self->{main}->{conf}->{razor_fork}) {
       $pms->got_hit($rulename, "", ruletype => 'eval');
     }

@@ -588,8 +588,7 @@ sub askdns_hit {
 
   # only the first hit will show in the test log report, even if
   # an answer section matches more than once - got_hit() handles this
-  $pms->clear_test_state();
-  $pms->test_log(sprintf("%s %s:%s", $query_domain,$qtype,$rr_rdatastr));
+  $pms->test_log(sprintf("%s %s:%s", $query_domain,$qtype,$rr_rdatastr), $rulename);
   $pms->got_hit($rulename, 'ASKDNS: ', ruletype => 'askdns');  # score=>$score
 }
 

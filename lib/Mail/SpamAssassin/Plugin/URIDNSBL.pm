@@ -1126,13 +1126,10 @@ sub got_dnsbl_hit {
 
   $pms->{uridnsbl_hits}->{$rulename}->{$ent->{domain}} = 1;
 
-  # TODO: this needs to handle multiple domain hits per rule
-  $pms->clear_test_state();
-  #my $uris = join(' ', keys %{$pms->{uridnsbl_hits}->{$rulename}});
   if (defined $ent->{orig_domain}) {
-    $pms->test_log("URIs: $ent->{orig_domain}/$ent->{domain}");
+    $pms->test_log("URI: $ent->{orig_domain}/$ent->{domain}", $rulename);
   } else {
-    $pms->test_log("URIs: $ent->{domain}");
+    $pms->test_log("URI: $ent->{domain}", $rulename);
   }
   $pms->got_hit($rulename, '', ruletype => 'eval');
 }

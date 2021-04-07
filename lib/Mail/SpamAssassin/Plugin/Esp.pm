@@ -310,7 +310,7 @@ sub esp_sendgrid_check_domain {
       $pms->set_tag('SENDGRIDDOM', $sendgrid_domain);
       if ( exists $self->{ESP}->{SENDGRID_DOMAIN}->{$sendgrid_domain} ) {
         dbg("HIT! $sendgrid_domain domain found in Sendgrid Invaluement feed");
-        $pms->test_log("Sendgrid domain: $sendgrid_domain");
+        $pms->test_log("Sendgrid domain: $sendgrid_domain", $rulename);
         $pms->got_hit($rulename, "", ruletype => 'eval');
         return 1;
       }
@@ -339,7 +339,7 @@ sub esp_sendgrid_check_id {
       $pms->set_tag('SENDGRIDID', $sendgrid_id);
       if ( exists $self->{ESP}->{SENDGRID}->{$sendgrid_id} ) {
         dbg("HIT! $sendgrid_id customer id found in Sendgrid Invaluement feed");
-        $pms->test_log("Sendgrid id: $sendgrid_id");
+        $pms->test_log("Sendgrid id: $sendgrid_id", $rulename);
         $pms->got_hit($rulename, "", ruletype => 'eval');
         return 1;
       }
@@ -378,7 +378,7 @@ sub esp_sendinblue_check {
     if ( exists $self->{ESP}->{SENDINBLUE}->{$sendinblue_id} ) {
       $pms->set_tag('SENDINBLUEID', $sendinblue_id);
       dbg("HIT! $sendinblue_id ID found in Sendinblue feed");
-      $pms->test_log("Sendinblue id: $sendinblue_id");
+      $pms->test_log("Sendinblue id: $sendinblue_id", $rulename);
       $pms->got_hit($rulename, "", ruletype => 'eval');
       return 1;
     }
@@ -409,7 +409,7 @@ sub esp_mailup_check {
     if ( exists $self->{ESP}->{MAILUP}->{$mailup_id} ) {
       $pms->set_tag('MAILUPID', $mailup_id);
       dbg("HIT! $mailup_id customer found in Mailup feed");
-      $pms->test_log("Mailup id: $mailup_id");
+      $pms->test_log("Mailup id: $mailup_id", $rulename);
       $pms->got_hit($rulename, "", ruletype => 'eval');
       return 1;
     }
@@ -442,7 +442,7 @@ sub esp_maildome_check {
     if ( exists $self->{ESP}->{MAILDOME}->{$maildome_id} ) {
       $pms->set_tag('MAILDOMEID', $maildome_id);
       dbg("HIT! $maildome_id customer found in Maildome feed");
-      $pms->test_log("Maildome id: $maildome_id");
+      $pms->test_log("Maildome id: $maildome_id", $rulename);
       $pms->got_hit($rulename, "", ruletype => 'eval');
       return 1;
     }
@@ -471,7 +471,7 @@ sub esp_mailchimp_check {
     if ( exists $self->{ESP}->{MAILCHIMP}->{$mailchimp_id} ) {
       $pms->set_tag('MAILCHIMPID', $mailchimp_id);
       dbg("HIT! $mailchimp_id customer found in Mailchimp feed");
-      $pms->test_log("Mailchimp id: $mailchimp_id");
+      $pms->test_log("Mailchimp id: $mailchimp_id", $rulename);
       $pms->got_hit($rulename, "", ruletype => 'eval');
       return 1;
     }
@@ -504,7 +504,7 @@ sub esp_constantcontact_check {
     if ( exists $self->{ESP}->{CONSTANTCONTACT}->{$contact_id} ) {
       $pms->set_tag('CONSTANTCONTACTID', $contact_id);
       dbg("HIT! $contact_id customer found in Constant Contact feed");
-      $pms->test_log("Constant Contact id: $contact_id");
+      $pms->test_log("Constant Contact id: $contact_id", $rulename);
       $pms->got_hit($rulename, "", ruletype => 'eval');
       return 1;
     }

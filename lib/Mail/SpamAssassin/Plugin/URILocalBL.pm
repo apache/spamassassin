@@ -474,7 +474,7 @@ sub _check_host {
       if ( (!$neg && defined $ruleconf->{countries}{$cc}) ||
            ($neg && !defined $ruleconf->{countries}{$cc}) ) {
         dbg("$host ($ip) country $cc - HIT");
-        $pms->test_log("Host: $host in country $cc");
+        $pms->test_log("Host: $host in country $cc", $rulename);
         $pms->got_hit($rulename, "");
         return 1;
       } else {
@@ -496,7 +496,7 @@ sub _check_host {
       if ( (!$neg && defined $ruleconf->{continents}{$cc}) ||
            ($neg && !defined $ruleconf->{continents}{$cc}) ) {
         dbg("$host ($ip) continent $cc - HIT");
-        $pms->test_log("Host: $host in continent $cc");
+        $pms->test_log("Host: $host in continent $cc", $rulename);
         $pms->got_hit($rulename, "");
         return 1;
       } else {
@@ -516,7 +516,7 @@ sub _check_host {
         my $ispkey = uc($isp); $ispkey =~ s/\s+//gs;
         if (defined $ruleconf->{isps}{$ispkey}) {
           dbg("$host ($ip) isp \"$isp\" - HIT");
-          $pms->test_log("Host: $host in isp $isp");
+          $pms->test_log("Host: $host in isp $isp", $rulename);
           $pms->got_hit($rulename, "");
           return 1;
         } else {
@@ -532,7 +532,7 @@ sub _check_host {
     foreach my $ip (@$addrs) {
       if ($ruleconf->{netset}->contains_ip($ip)) {
         dbg("$host ($ip) matches cidr - HIT");
-        $pms->test_log("Host: $host in cidr");
+        $pms->test_log("Host: $host in cidr", $rulename);
         $pms->got_hit($rulename, "");
         return 1;
       } else {

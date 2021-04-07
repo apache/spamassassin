@@ -312,7 +312,7 @@ sub check_phishing {
           $domain = $self->{main}->{registryboundaries}->uri_to_domain($cluri);
           $feedname = $self->{PHISHING}->{$stripped_cluri}->{phishinfo}->{$domain}[0];
           dbg("HIT! $domain [$stripped_cluri] found in $feedname feed");
-          $pms->test_log("$feedname ($domain)");
+          $pms->test_log("$feedname ($domain)", $rulename);
           $pms->got_hit($rulename, "", ruletype => 'eval');
           return 1;
         }
