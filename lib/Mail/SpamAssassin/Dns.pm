@@ -731,6 +731,7 @@ sub is_rule_complete {
 
   return 1 if !exists $self->{async}->{pending_rules}{$rule};
   return 1 if !%{$self->{async}->{pending_rules}{$rule}};
+  return 1 if $self->{tests_already_hit}->{$rule};
 
   dbg("dns: $rule is not complete yet");
   return 0;
