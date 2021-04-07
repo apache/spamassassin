@@ -3864,7 +3864,7 @@ score      READY_TO_SHIP               1.250	# limit
 body       WANT_TO_ORDER               /you (?:(?:would )?like|want|are interested)(?: to| in)? (?:plac(?:e|ing) an order|order(?:ing)? (?:for )?(?:this|it|now|today|our \w+))\b/i
 score      WANT_TO_ORDER               2.500	# limit
 
-body       YOUR_DELIVERY_ADDRESS       /(?:(?:respond|reply) (?:to )?(?:our|this) ?e?mail (?:[\w,]+\s){0,10}(?:with|and send(?: us)?)|we need to know|let us know|send(?: us)?) your (?:(?:delivery |shipping |mailing |shipment )?address(?:[,.;]|(?: and| so)? we| if you)|address (?:for|of) (?:shipping|delivery|shipment))/i
+body       YOUR_DELIVERY_ADDRESS       /(?:(?:respond|reply|answer) (?:to )?(?:our|this) ?e?mail (?:[\w,]+\s){0,10}(?:with|and send(?: us)?)|we need to know|let us know|send(?: us)?) your (?:(?:delivery |shipping |mailing |shipment )?address(?:\s?[,.;]|(?: and| so)? we| if you)|address (?:for|of) (?:shipping|delivery|shipment))/i
 score      YOUR_DELIVERY_ADDRESS       1.250	# limit
 
 
