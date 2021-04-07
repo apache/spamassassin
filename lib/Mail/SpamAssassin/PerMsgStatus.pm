@@ -305,7 +305,7 @@ sub new {
     'deadline_exceeded' => 0,  # time limit exceeded, skipping further tests
     'tmpfiles'          => { },
     'uri_detail_list'   => { },
-    'subjprefix'        => "",
+    'subjprefix'        => undef,
   };
 
   dbg("check: pms new, time limit in %.3f s",
@@ -1138,7 +1138,7 @@ sub rewrite_report_safe {
   if (defined $self->{conf}->{rewrite_header}->{Subject}) {
     # Add a prefix to the subject if needed
     $subject = "\n" if !defined $subject;
-    if((defined $self->{subjprefix}) and ($self->{subjprefix} ne "")) {
+    if (defined $self->{subjprefix}) {
       $tag = $self->_replace_tags($self->{subjprefix});
       $tag =~ s/\n/ /gs;
       $subject = $tag . $subject;
@@ -1326,19 +1326,14 @@ sub rewrite_no_report_safe {
 	# The tag should be a comment for this header ...
 	$tag = "($tag)" if ($hdr =~ /^(?:From|To)$/);
 
-        if((defined $self->{subjprefix}) and (defined $self->{conf}->{rewrite_header}->{Subject})) {
-	  if($self->{subjprefix} ne "") {
-            $ntag = $self->_replace_tags($self->{subjprefix});
-            $ntag =~ s/\n/ /gs;
-	    $ntag =~ s/\s+$//;
-
-            local $1;
-	    if(defined $ntag) {
-              s/^([^:]+:)[ \t]*(?:\Q${ntag}\E )?/$1 ${ntag} /i;
-	    }
-	  }
-        }
-        s/^([^:]+:)[ \t]*(?:\Q${tag}\E )?/$1 ${tag} /i;
+	if (defined $self->{subjprefix}) {
+	  $ntag = $self->_replace_tags($self->{subjprefix});
+	  $ntag =~ s/\n/ /gs;
+	  $ntag =~ s/\s+$//;
+	  local $1;
+	  s/^([^:]+:)[ \t]*(?:\Q${ntag}\E )?/$1 ${ntag} /i;
+	}
+	s/^([^:]+:)[ \t]*(?:\Q${tag}\E )?/$1 ${tag} /i;
       }
 
       $addition = 'headers_spam';
@@ -1361,20 +1356,14 @@ sub rewrite_no_report_safe {
 	my $hdr = ucfirst(lc($1));
 	next if (!defined $self->{conf}->{rewrite_header}->{$hdr});
 
-        if((defined $self->{subjprefix}) and (defined $self->{conf}->{rewrite_header}->{Subject})) {
-	  if($self->{subjprefix} ne "") {
-            $ntag = $self->_replace_tags($self->{subjprefix});
-            $ntag =~ s/\n/ /gs;
-	    $ntag =~ s/\s+$//;
-
-            local $1;
-	    if(defined $ntag) {
-              s/^([^:]+:)[ \t]*(?:\Q${ntag}\E )?/$1 ${ntag} /i;
-	    }
-	  }
+        if (defined $self->{subjprefix}) {
+          $ntag = $self->_replace_tags($self->{subjprefix});
+          $ntag =~ s/\n/ /gs;
+          $ntag =~ s/\s+$//;
+          local $1;
+          s/^([^:]+:)[ \t]*(?:\Q${ntag}\E )?/$1 ${ntag} /i;
         }
       }
-
   }
 
   # Break the pristine header set into two blocks; $new_hdrs_pre is the stuff
@@ -2898,7 +2887,7 @@ sub _handle_hit {
               $self->_wrap_desc($desc,
                   3+length($rule)+length($score)+length($area), " " x 28),
               ($self->{test_log_msgs}->{LONG} || ''));
-    if((defined $self->{subjprefix}) and ($self->{subjprefix} ne "")) {
+    if (defined $self->{subjprefix}) {
       $self->{tag_data}->{SUBJPREFIX} = $self->{subjprefix};
     }
 }
@@ -3031,11 +3020,12 @@ sub got_hit {
   #$rule_descr = $rule  if !defined $rule_descr || $rule_descr eq '';
   $rule_descr = "No description available." if !defined $rule_descr || $rule_descr eq '';
 
-  if(defined $self->{conf}->{rewrite_header}->{Subject}) {
+  if (defined $self->{conf}->{rewrite_header}->{Subject}) {
     my $rule_subjprefix = $conf_ref->{subjprefix}->{$rule};
     if (defined $rule_subjprefix) {
       dbg("subjprefix: setting Subject prefix to $rule_subjprefix");
-      if($self->{subjprefix} !~ /\Q$rule_subjprefix\E/) {
+      $self->{subjprefix} ||= '';
+      if (index($self->{subjprefix}, $rule_subjprefix) == -1) {
         $self->{subjprefix} .= $rule_subjprefix . " ";  # save dynamic subject prefix.
       }
     }
