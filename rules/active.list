@@ -272,9 +272,6 @@ CHARSET_FARAWAY
 # tflags userconf
 CHARSET_FARAWAY_HEADER
 
-# good enough
-CK_HELO_GENERIC
-
 # tflags publish
 CN_B2B_SPAMMER
 
@@ -740,9 +737,6 @@ HELO_LH_HOME
 # good enough
 HELO_LOCALHOST
 
-# good enough
-HELO_MISC_IP
-
 # tflags publish
 HELO_NO_DOMAIN
 
@@ -1084,6 +1078,9 @@ PDS_FROM_NAME_TO_DOMAIN
 
 # tflags net
 PDS_HELO_SPF_FAIL
+
+# good enough
+PDS_NAKED_TO_NUMERO
 
 # good enough
 PDS_NO_FULL_NAME_SPOOFED_URL
@@ -1547,14 +1544,14 @@ STOCK_LOW_CONTRAST
 # tflags publish
 STOCK_TIP
 
-# good enough
-STOX_BOUND_090909_B
-
 # tflags userconf
 SUBJECT_IN_BLACKLIST
 
 # tflags userconf
 SUBJECT_IN_WHITELIST
+
+# good enough
+SUBJ_ATTENTION
 
 # tflags net
 SUBJ_BRKN_WORDNUMS
@@ -1582,6 +1579,9 @@ THIS_AD
 
 # tflags publish
 THIS_IS_ADV_SUSP_NTLD
+
+# good enough
+THREAD_INDEX_HEX
 
 # tflags publish
 TONLINE_FAKE_DKIM
