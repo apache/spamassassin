@@ -153,10 +153,11 @@ define a body-eval rule calling C<check_uridnsbl()> to use this.
 
 An RHSBL zone is one where the domain name is looked up, as a string; e.g. a
 URI using the domain C<foo.com> will cause a lookup of
-C<foo.com.uriblzone.net>.  Note that hostnames are stripped from the domain
-used in the URIBL lookup, so the domain C<foo.bar.com> will look up
+C<foo.com.uriblzone.net>.  Note that hostnames are trimmed to the domain
+portion in the URIBL lookup, so the domain C<foo.bar.com> will look up
 C<bar.com.uriblzone.net>, and C<foo.bar.co.uk> will look up
-C<bar.co.uk.uriblzone.net>.
+C<bar.co.uk.uriblzone.net>.  Using tflag C<notrim> will force full hostname
+lookup, but the specific uribl must support this method.
 
 If an URI consists of an IP address instead of a hostname, the IP address is
 looked up (using the standard reversed quads method) in each C<rhsbl_zone>.
@@ -186,8 +187,9 @@ for a single decimal or hex form the following must be true:
 Some typical examples of a sub-test are: 127.0.1.2, 127.0.1.20-127.0.1.39,
 127.2.3.0/255.255.255.0, 0.0.0.16/0.0.0.16, 0x10/0x10, 16, 0x10 .
 
-Note that, as with C<urirhsbl>, you must also define a body-eval rule calling
-C<check_uridnsbl()> to use this.
+Note that, as with C<urirhsbl>, you must also define a body-eval rule
+calling C<check_uridnsbl()> to use this.  Hostname to domain trimming is
+also done similarly.
 
 Example:
 
@@ -269,6 +271,12 @@ The 'a' flag may be applied to rules corresponding to uridnsbl and uridnssub
 directives. Host names from URLs will be mapped to their IP addresses, which
 will be sent to blocklists. When both 'ns' and 'a' flags are specified,
 both queries will be performed.
+
+=item tflags NAME_OF_RULE notrim
+
+The full hostname component will be matched against the named
+"urirhsbl"/"urirhssub" rule, instead of using the trimmed domain.
+This works better, but the specific uribl must support this method.
 
 =back
 
@@ -864,7 +872,9 @@ sub query_hosts_or_domains {
     # Launch RHSBL checks
     foreach my $rulename (@rhsblrules) {
       my $rulecf = $conf->{uridnsbls}->{$rulename};
-      $self->lookup_single_dnsbl($pms, $domain, $rulename,
+      # Check notrim tflag to query full hostname (Bug 7835)
+      my $query = ($conf->{tflags}->{$rulename}||'') =~ /\bnotrim\b/ ? $host : $domain;
+      $self->lookup_single_dnsbl($pms, $query, $rulename,
         $rulecf->{zone}, $rulecf->{type});
     }
   }
@@ -1142,5 +1152,6 @@ sub has_tflags_domains_only { 1 }
 sub has_subtest_for_ranges { 1 }
 sub has_uridnsbl_for_a { 1 }  # uridnsbl rules recognize tflags 'a' and 'ns'
 sub has_uridnsbl_a_ns { 1 }  # has an actually working 'a' flag, unlike above :-(
+sub has_tflags_notrim { 1 }
 
 1;

@@ -135,6 +135,10 @@ Note for Users Upgrading to SpamAssassin 4.0.0
   $pms->clear_test_state(), not needed anymore.  $pms->test_log() accepts
   $rulename as second argument.
 
+- URIDNSBL: urirhsbl/urirhssub rules support "notrim" tflag, which
+  forces querying the full hostname, instead of trimmed domain.  This works
+  better if the specific uribl supports this mode. (Bug 7835)
+
 Note for Users Upgrading to SpamAssassin 3.4.4
 ----------------------------------------------
 

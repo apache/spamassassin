@@ -7,7 +7,7 @@ use Test::More;
 plan skip_all => "Long running tests disabled" unless conf_bool('run_long_tests');
 plan skip_all => "Net tests disabled"          unless conf_bool('run_net_tests');
 plan skip_all => "Can't use Net::DNS Safely"   unless can_use_net_dns_safely();
-plan tests => 7;
+plan tests => 8;
 
 # ---------------------------------------------------------------------------
 
@@ -17,6 +17,7 @@ plan tests => 7;
  q{ X_URIBL_NS } => 'NS',
  q{ X_URIBL_DOMSONLY } => 'X_URIBL_DOMSONLY',
  q{ META_URIBL_A } => 'META_URIBL_A',
+ q{ X_URIBL_NOTRIM } => 'X_URIBL_NOTRIM',
 );
 
 %anti_patterns = (
@@ -51,6 +52,11 @@ tstlocalrules(q{
 
   # Bug 7897 - test that meta rules depending on net rules hit
   meta META_URIBL_A X_URIBL_A
+
+  # Bug 7835 - tflags notrim
+  urirhssub  X_URIBL_NOTRIM  dnsbltest.spamassassin.org.    A 16
+  body       X_URIBL_NOTRIM  eval:check_uridnsbl('X_URIBL_NOTRIM')
+  tflags     X_URIBL_NOTRIM  net domains_only notrim
 
 });
 
