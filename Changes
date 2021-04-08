@@ -1,4 +1,38 @@
 ------------------------------------------------------------------------
+r1888435 | hege | 2021-04-06 13:08:42 +0000 (Tue, 06 Apr 2021) | 2 lines
+ 
+ Revert Revision 1878575,1878574,1878572 (Bugs 7822, 7822), remove any 
+traces of undocumented check_cleanup from 3.4, metas do not work 
+correctly with it. URIDNSBL/HashBL revert to logging only first hit, any 
+improvements will be in 4.0 only.
+ 
+------------------------------------------------------------------------
+r1888433 | hege | 2021-04-06 13:06:49 +0000 (Tue, 06 Apr 2021) | 2 lines
+ 
+ Bug 7897 - add test case for meta net-rules
+ 
+------------------------------------------------------------------------
+r1888042 | sidney | 2021-03-24 23:49:14 +0000 (Wed, 24 Mar 2021) | 1 line
+ 
+ post-release of 3.4.5 ready new development version 3.4.6 in case there 
+is any more development required in this branch
+------------------------------------------------------------------------
+r1888010 | sidney | 2021-03-24 14:27:23 +0000 (Wed, 24 Mar 2021) | 1 line
+ 
+ update 3.4.5 announcement file with actual checksums
+------------------------------------------------------------------------
+r1887843 | sidney | 2021-03-20 09:14:03 +0000 (Sat, 20 Mar 2021) | 1 line
+ 
+ preparing to release 3.4.5 (supersedes r1887620)
+------------------------------------------------------------------------
+r1887653 | sidney | 2021-03-14 21:37:10 +0000 (Sun, 14 Mar 2021) | 1 line
+ 
+ preparing to release 3.4.5-rc2
+------------------------------------------------------------------------
+r1887620 | sidney | 2021-03-14 08:16:27 +0000 (Sun, 14 Mar 2021) | 1 line
+ 
+ preparing to release 3.4.5
+------------------------------------------------------------------------
 r1887306 | hege | 2021-03-07 21:56:45 +0000 (Sun, 07 Mar 2021) | 2 lines
  
  Fix previous commit, need to allow multiple AskDNS hits
