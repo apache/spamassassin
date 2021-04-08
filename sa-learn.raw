@@ -873,9 +873,6 @@ Do not perform any network accesses while learning details about the mail
 messages.  This will speed up the learning process, but may result in a
 slightly lower accuracy.
 
-Note that this is currently ignored, as current versions of SpamAssassin will
-not perform network access while learning; but future versions may.
-
 =item B<--import>
 
 If you previously used SpamAssassin's Bayesian learner without the C<DB_File>
