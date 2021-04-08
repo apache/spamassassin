@@ -1277,7 +1277,6 @@ sub add_test {
     # no re "strict";  # since perl 5.21.8: Ranges of ASCII printables...
     if ($text =~ /^exists:(.*)/) {
       my $hdr = $1;
-      # check :addr etc header options
       # $hdr used in eval text, validate carefully
       if ($hdr !~ /^[\w.-]+:?$/) {
         $self->lint_warn("config: invalid head test $name header: $hdr");
@@ -1288,12 +1287,17 @@ sub add_test {
       $conf->{test_opt_exists}->{$name} = 1;
     } else {
       # $hdr used in eval text, validate carefully
+      # check :addr etc header options
       if ($text !~ /^([\w.-]+(?:\:|(?:\:[a-z]+){1,2})?)\s*([=!]~)\s*(.+)$/) {
         $self->lint_warn("config: invalid head test $name: $text");
         return;
       }
       my ($hdr, $op, $pat) = ($1, $2, $3);
       $hdr =~ s/:$//;
+      if ($hdr =~ /:(?!(?:raw|addr|name|host|domain|ip|revip)\b)/i) {
+        $self->lint_warn("config: invalid header modifier for $name: $hdr", $name);
+        return;
+      }
       if ($pat =~ s/\s+\[if-unset:\s+(.+)\]$//) {
         $conf->{test_opt_unset}->{$name} = $1;
       }
