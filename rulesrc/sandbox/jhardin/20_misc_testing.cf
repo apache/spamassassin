@@ -3858,7 +3858,7 @@ describe   URI_LONG_REPEAT             Very long identical host+domain
 score      URI_LONG_REPEAT             2.500	# limit
 tflags     URI_LONG_REPEAT             publish
 
-body       READY_TO_SHIP               /(?:(?:in our (?:stock|warehouse|store)(?: today)?[.,:] |our (?:\w+ ){2,8}(?:is |now )+)Ready (?:to (?:be )?|for )+ship|ready (?:for shipping|to (?:ship|send)) (?:(?:in|from|by) our (?:warehouse|stock)|(?:to|for)(?: global(?:ly)?| worldwide| customers){2})|(?:our|this|a|great|fine|wonderful|cool|popular) new product in (?:our )?(?:warehouse|stock|store)|just arrived in our warehouse)/i
+body       READY_TO_SHIP               /(?:(?:in our (?:stock|warehouse|store)(?: today)?[.,:] |our (?:\w+,? ){2,8}(?:is |now )+)Ready (?:to (?:be )?|for )+ship|ready (?:for shipping|to (?:ship|send)) (?:(?:in|from|by) our (?:warehouse|stock)|(?:to|for)(?: global(?:ly)?| worldwide| customers){2})|(?:our|this|a|great|fine|wonderful|cool|popular) new product in (?:our )?(?:warehouse|stock|store)|just arrived in our warehouse)/i
 score      READY_TO_SHIP               1.250	# limit
 
 body       WANT_TO_ORDER               /you (?:(?:would )?like|want|are interested)(?: to| in)? (?:plac(?:e|ing) an order|order(?:ing)? (?:for )?(?:this|it|now|today|our \w+))\b/i
