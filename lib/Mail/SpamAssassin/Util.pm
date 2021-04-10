@@ -1860,7 +1860,15 @@ sub helper_app_pipe_open_windows {
   # use a traditional open(FOO, "cmd |")
   my $cmd = join(' ', @cmdline);
   if ($stdinfile) { $cmd .= qq/ < "$stdinfile"/; }
-  if ($duperr2out) { $cmd .= " 2>&1"; }
+  if ($duperr2out) {
+    # Support custom file target for STDERR, if ">file" specified
+    # Caller must make sure the destination is safe and untainted
+    if ($duperr2out =~ /^>/) {
+      $cmd .= " 2$duperr2out";
+    } else {
+      $cmd .= " 2>&1";
+    }
+  }
   return open ($fh, $cmd.'|');
 }
 
@@ -1956,7 +1964,15 @@ sub helper_app_pipe_open_unix {
         POSIX::close(2);
       }
 
-      open (STDERR, ">&STDOUT") or die "dup STDOUT failed: $!";
+      # Support custom file target for STDERR, if ">file" specified
+      # Caller must make sure the destination is safe and untainted
+      my $errout;
+      if ($duperr2out =~ /^>/) {
+        $errout = $duperr2out;
+      } else {
+        $errout = ">&STDOUT";
+      }
+      open (STDERR, $errout) or die "dup $errout failed: $!";
       STDERR->autoflush(1);  # make sure not to lose diagnostics if exec fails
 
       # STDERR must be fd 2 to be useful to subprocesses! (bug 3649)
