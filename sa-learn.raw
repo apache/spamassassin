@@ -462,7 +462,7 @@ eval {
   my $iter = Mail::SpamAssassin::ArchiveIterator->new(
     {
         # skip messages larger than max-size bytes,
-        # 0 for no limit, undef defaults to 256 KB
+        # 0 for no limit, undef defaults to 500 KB
       'opt_max_size' => $opt{'max-size'},
       'opt_want_date' => 0,
       'opt_from_regex' => $spamtest->{conf}->{mbox_format_from_regex},
@@ -636,7 +636,7 @@ Options:
  --mbox                Input sources are in mbox format
  --mbx                 Input sources are in mbx format
  --max-size <b>        Skip messages larger than b bytes;
-                       defaults to 256 KB, 0 implies no limit
+                       defaults to 500 KB, 0 implies no limit
  --showdots            Show progress using dots
  --progress            Show progress using progress bar
  --no-sync             Skip synchronizing the database and journal

@@ -72,7 +72,7 @@ INTERNAL_NETWORKS=""
 #   Current ruleqa settings: ham 6 years, spam 2 months
 #   Anything older than that will be ignored by ruleqa regardless.
 # Note the --all option which scans all messages regardless of size.
-#   Without --all, default is to skip messages over 256 KB.
+#   Without --all, default is to skip messages over 500 KB.
 run_all_masschecks() {
   ### sample: single corpus ###
   run_masscheck single-corpus --all \

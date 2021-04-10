@@ -30,8 +30,8 @@ use Mail::SpamAssassin::Constants qw(:sa);
 use Mail::SpamAssassin::Logger;
 use Mail::SpamAssassin::AICache;
 
-# 256 KiB is a big email, unless stated otherwise
-use constant BIG_BYTES => 256*1024;
+# 500 KiB is a big email, unless stated otherwise
+use constant BIG_BYTES => 500*1024;
 
 our ( $MESSAGES, $AICache, %class_opts );
 
@@ -45,7 +45,7 @@ Mail::SpamAssassin::ArchiveIterator - find and process messages one at a time
 
   my $iter = Mail::SpamAssassin::ArchiveIterator->new(
     { 
-      'opt_max_size' => 256 * 1024,  # 0 implies no limit
+      'opt_max_size' => 500 * 1024,  # 0 implies no limit
       'opt_cache' => 1,
     }
   );
@@ -91,7 +91,7 @@ A value of option I<opt_max_size> determines a limit (number of bytes)
 beyond which a message is considered large and is skipped by ArchiveIterator.
 
 A value 0 implies no size limit, all messages are examined. An undefined
-value implies a default limit of 256 KiB.
+value implies a default limit of 500 KiB.
 
 =item opt_all
 
