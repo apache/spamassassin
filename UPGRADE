@@ -139,6 +139,25 @@ Note for Users Upgrading to SpamAssassin 4.0.0
   forces querying the full hostname, instead of trimmed domain.  This works
   better if the specific uribl supports this mode. (Bug 7835)
 
+Note for Users Upgrading to SpamAssassin 3.4.5
+----------------------------------------------
+
+- Spamassassin test suite can now run against the installed
+  SpamAssassin files (rather than those in the source directory)
+
+- unwhitelist_auth now also removes def_whitelist_auth entries
+
+- SPF: add unwhitelist_from_spf to remove both whitelist_from_spf and
+  def_whitelist_from_spf entries
+
+- Default SQL schema for userpref.value changed from varchar(100) to
+  varchar(255), no need to modify unless you hit the limit. (Bug 7803)
+
+- URIDetail can now match full hostname with "host" key
+
+- BodyEval: plaintext_body_sig_ratio: eval rules for the (first text/plain
+  MIME part's) body and signature lengths and ratio
+
 Note for Users Upgrading to SpamAssassin 3.4.4
 ----------------------------------------------
 
