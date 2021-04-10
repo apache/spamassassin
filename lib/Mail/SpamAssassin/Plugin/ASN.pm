@@ -84,14 +84,16 @@ zone (see C<ftp://ftp.routeviews.org/dnszones/>).  Other similar zones
 may also be used.
 
 GeoDB (GeoIP ASN) database lookups are supported since SpamAssassin 4.0 and
-it's recommended to use them instead of DNS queries.
+it's recommended to use them instead of DNS queries, unless C<_ASNCIDR_>
+is needed.
 
 =head1 TEMPLATE TAGS
 
 This plugin allows you to create template tags containing the connecting
 IP's AS number and route info for that AS number.
 
-The default config will add a header field that looks like this:
+If you use add_header as documented in the example before, a header field is
+added that looks like this:
 
  X-Spam-ASN: AS24940 213.239.192.0/18
 
@@ -105,28 +107,18 @@ all be added to the C<_ASNCIDR_> tag, separated by spaces, eg:
 Note that the literal "AS" before the ASN in the _ASN_ tag is configurable
 through the I<asn_prefix> directive and may be set to an empty string.
 
-=head1 CONFIGURATION
+C<_ASNCIDR_> is not available with local GeoDB ASN lookups.
 
-The standard ruleset contains a configuration that will add a header field
-containing ASN data to scanned messages.  The bayes tokenizer will use the
-added header field for bayes calculations, and thus affect which BAYES_* rule
-will trigger for a particular message.
+=head1 BAYES
 
-B<Note> that in most cases you should not score on the ASN data directly.
-Bayes learning will probably trigger on the _ASNCIDR_ tag, but probably not
-very well on the _ASN_ tag alone.
+The bayes tokenizer will use ASN data for bayes calculations, and thus
+affect which BAYES_* rule will trigger for a particular message.  No
+in-depth analysis of the usefulness of bayes tokenization of ASN data has
+been performed.
 
 =head1 SEE ALSO
 
 http://www.routeviews.org/ - all data regarding routing, ASNs, etc....
-
-http://issues.apache.org/SpamAssassin/show_bug.cgi?id=4770 -
-SpamAssassin Issue #4770 concerning this plugin
-
-=head1 STATUS
-
-No in-depth analysis of the usefulness of bayes tokenization of ASN data has
-been performed.
 
 =cut
 
@@ -338,7 +330,7 @@ Set to 0 to never allow DNS queries.
 
 # ---------------------------------------------------------------------------
 
-sub parsed_metadata {
+sub extract_metadata {
   my ($self, $opts) = @_;
 
   my $pms = $opts->{permsgstatus};
@@ -352,6 +344,10 @@ sub parsed_metadata {
     dbg("asn: GeoDB ASN not available");
     if (!$conf->{asn_use_dns} || !$pms->is_dns_available()) {
       dbg("asn: DNS is not available, skipping ASN check");
+      return;
+    }
+    if ($self->{main}->{learning}) {
+      dbg("asn: learning message, skipping DNS-based ASN check");
       return;
     }
   }
@@ -376,7 +372,7 @@ sub parsed_metadata {
   $pms->{asn_results} = ();
 
   # get IP address of last external relay to lookup
-  my $relay = $pms->{relays_external}->[0];
+  my $relay = $opts->{msg}->{metadata}->{relays_external}->[0];
   if (!defined $relay) {
     dbg("asn: no first external relay IP available, skipping ASN check");
     return;
