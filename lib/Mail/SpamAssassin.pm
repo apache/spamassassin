@@ -1986,8 +1986,16 @@ it exists, or undef if it doesn't exist.
 sub find_rule_support_file {
   my ($self, $filename) = @_;
 
+  my @paths;
+  # search custom directories first
+  push @paths, $self->{site_rules_filename}  if $self->{site_rules_filename};
+  push @paths, $self->{rules_filename}  if $self->{rules_filename};
+  # updates sub-directory missing from @default_rules_path
+  push @paths, '__local_state_dir__/__version__/updates_spamassassin_org';
+  push @paths, @default_rules_path;
+
   return $self->first_existing_path(
-    map { my $p = $_; $p =~ s{$}{/$filename}; $p } @default_rules_path );
+    map { my $p = $_; $p =~ s{$}{/$filename}; $p } @paths );
 }
 
 =item $f->create_default_prefs ($filename, $username [ , $userdir ] )

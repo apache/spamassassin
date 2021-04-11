@@ -197,7 +197,7 @@ sub sa_t_init {
   rmtree ("log/test_rules_copy");
   mkdir ("log/test_rules_copy", 0755);
 
-  for $tainted (<../rules/*.cf>, <../rules/*.pm>, <../rules/*.pre>) {
+  for $tainted (<../rules/*.cf>, <../rules/*.pm>, <../rules/*.pre>, <../rules/languages>) {
     $tainted =~ /(.*)/;
     my $file = $1;
     $base = basename $file;
@@ -213,7 +213,7 @@ sub sa_t_init {
   rmtree ("log/localrules.tmp");
   mkdir ("log/localrules.tmp", 0755);
 
-  for $tainted (<../rules/*.pm>, <../rules/*.pre>) {
+  for $tainted (<../rules/*.pm>, <../rules/*.pre>, <../rules/languages>) {
     $tainted =~ /(.*)/;
     my $file = $1;
     $base = basename $file;
