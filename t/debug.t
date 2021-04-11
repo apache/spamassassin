@@ -22,7 +22,6 @@ use SATest; sa_t_init("debug");
 use Mail::SpamAssassin;
 
 use Test::More;
-plan skip_all => "Long running tests disabled" unless conf_bool('run_long_tests');
 plan tests => 3;
 
 # list of known debug facilities

@@ -4,7 +4,6 @@ use lib '.'; use lib 't';
 use SATest; sa_t_init("strip_no_subject");
 
 use Test::More;
-plan skip_all => "Long running tests disabled" unless conf_bool('run_long_tests');
 plan tests => 4;
 
 # ---------------------------------------------------------------------------
