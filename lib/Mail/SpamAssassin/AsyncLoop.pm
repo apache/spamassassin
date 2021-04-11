@@ -321,12 +321,12 @@ sub bgsend_and_start_lookup {
     my $dns_block_domains = $self->{main}->{conf}->{dns_block_rule_domains};
     if ($dns_query_blockages || $dns_block_domains) {
       my $search_list = domain_to_search_list($domain);
-      foreach my $parent_domain (@$search_list) {
+      foreach my $parent_domain ((@$search_list, '*')) {
         if ($dns_query_blockages) {
           $blocked = $dns_query_blockages->{$parent_domain};
           last if defined $blocked; # stop at first defined, can be true or false
         }
-        if (exists $dns_block_domains->{$parent_domain}) {
+        if ($parent_domain ne '*' && exists $dns_block_domains->{$parent_domain}) {
           # save for later check.. ps. untainted already
           $check_dbrdom = $dns_block_domains->{$parent_domain};
         }

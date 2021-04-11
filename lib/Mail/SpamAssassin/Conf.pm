@@ -1983,6 +1983,9 @@ a score of corresponding DNSBL and URIBL rules to zero, and can be a handy
 alternative to hunting for such rules when a site policy does not allow
 certain DNS block lists to be queried.
 
+Special wildcard "dns_query_restriction deny *" is supported to block all
+queries except allowed ones.
+
 Example:
   dns_query_restriction deny  dnswl.org surbl.org
   dns_query_restriction allow zen.spamhaus.org
