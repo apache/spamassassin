@@ -141,6 +141,7 @@ Whether to use DCC, if it is available.
   push(@cmds, {
     setting => 'use_dcc',
     default => 1,
+    is_admin => 1,
     type => $Mail::SpamAssassin::Conf::CONF_TYPE_BOOL,
   });
 
@@ -155,6 +156,7 @@ where it's automatically used.
   push(@cmds, {
     setting => 'use_dcc_rep',
     default => 1,
+    is_admin => 1,
     type => $Mail::SpamAssassin::Conf::CONF_TYPE_BOOL,
   });
 
@@ -187,21 +189,25 @@ default is C<90>.
 
   push (@cmds, {
     setting => 'dcc_body_max',
+    is_admin => 1,
     default => 999999,
     type => $Mail::SpamAssassin::Conf::CONF_TYPE_NUMERIC
   },
   {
     setting => 'dcc_fuz1_max',
+    is_admin => 1,
     default => 999999,
     type => $Mail::SpamAssassin::Conf::CONF_TYPE_NUMERIC
   },
   {
     setting => 'dcc_fuz2_max',
+    is_admin => 1,
     default => 999999,
     type => $Mail::SpamAssassin::Conf::CONF_TYPE_NUMERIC
   },
   {
     setting => 'dcc_rep_percent',
+    is_admin => 1,
     default => 90,
     type => $Mail::SpamAssassin::Conf::CONF_TYPE_NUMERIC
   });

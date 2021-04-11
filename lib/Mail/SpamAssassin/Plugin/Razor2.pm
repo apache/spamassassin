@@ -97,6 +97,7 @@ Whether to use Razor2, if it is available.
 
   push(@cmds, {
     setting => 'use_razor2',
+    is_admin => 1,
     default => 1,
     type => $Mail::SpamAssassin::Conf::CONF_TYPE_NUMERIC,
   });
@@ -111,6 +112,7 @@ throughput.  Experimental.
 
   push(@cmds, {
     setting => 'razor_fork',
+    is_admin => 1,
     default => 0,
     type => $Mail::SpamAssassin::Conf::CONF_TYPE_NUMERIC,
   });

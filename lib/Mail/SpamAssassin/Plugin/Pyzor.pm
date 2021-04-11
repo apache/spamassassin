@@ -90,6 +90,7 @@ Whether to use Pyzor, if it is available.
 
   push (@cmds, {
     setting => 'use_pyzor',
+    is_admin => 1,
     default => 1,
     type => $Mail::SpamAssassin::Conf::CONF_TYPE_BOOL
   });
@@ -104,6 +105,7 @@ throughput.  Experimental.
 
   push(@cmds, {
     setting => 'pyzor_fork',
+    is_admin => 1,
     default => 0,
     type => $Mail::SpamAssassin::Conf::CONF_TYPE_NUMERIC,
   });
@@ -121,6 +123,7 @@ set this to a relatively low value, e.g. C<5>.
 
   push (@cmds, {
     setting => 'pyzor_count_min',
+    is_admin => 1,
     default => 5,
     type => $Mail::SpamAssassin::Conf::CONF_TYPE_NUMERIC
   });
@@ -128,6 +131,7 @@ set this to a relatively low value, e.g. C<5>.
   # Deprecated setting, the name makes no sense!
   push (@cmds, {
     setting => 'pyzor_max',
+    is_admin => 1,
     type => $Mail::SpamAssassin::Conf::CONF_TYPE_NUMERIC,
     code => sub {
       my ($self, $key, $value, $line) = @_;
@@ -149,6 +153,7 @@ result.  Final decision is made by pyzor_whitelist_factor.
 
   push (@cmds, {
     setting => 'pyzor_whitelist_min',
+    is_admin => 1,
     default => 10,
     type => $Mail::SpamAssassin::Conf::CONF_TYPE_NUMERIC
   });
@@ -162,6 +167,7 @@ For default setting this means: 50 reports requires 10 whitelistings.
 
   push (@cmds, {
     setting => 'pyzor_whitelist_factor',
+    is_admin => 1,
     default => 0.2,
     type => $Mail::SpamAssassin::Conf::CONF_TYPE_NUMERIC
   });
