@@ -12,10 +12,8 @@ plan tests => 5;
 # ---------------------------------------------------------------------------
 
 %patterns = (
-
-q{ X-Spam-Flag: YES}, 'flag',
-q{ TEST_ENDSNUMS}, 'endsinnums',
-
+  q{ X-Spam-Flag: YES}, 'flag',
+  q{ TEST_ENDSNUMS}, 'endsinnums',
 );
 
 ok(start_spamd("-L"));
@@ -25,3 +23,4 @@ ok(spamcrun("--connect-retries=100 -H < data/spam/001",
             \&patterns_run_cb));
 ok_all_patterns();
 ok(stop_spamd());
+

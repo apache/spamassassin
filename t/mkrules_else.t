@@ -10,8 +10,8 @@ use File::Path;
 # ---------------------------------------------------------------------------
 print "\n rule with 'else'\n\n";
 
-my $tdir = "log/mkrules_else_t";
-rmtree([ $tdir ]);
+my $tdir = "$workdir/mkrules_else_t";
+mkdir($tdir);
 
 %patterns = (
   # ensure these have the appropriate conditional attached
@@ -163,8 +163,8 @@ sub mkrun {
   my $post_redir = '';
   $args =~ s/ 2\>\&1$// and $post_redir = ' 2>&1';
 
-  rmtree ("log/outputdir.tmp"); # some tests use this
-  mkdir ("log/outputdir.tmp", 0755);
+  rmtree ("$workdir/outputdir.tmp"); # some tests use this
+  mkdir ("$workdir/outputdir.tmp", 0755);
 
   clear_pattern_counters();
 
@@ -172,7 +172,7 @@ sub mkrun {
   print ("\t$scrargs\n");
 
   my $test_number = test_number();
-  untaint_system ("$scrargs > log/$testname.$test_number $post_redir");
+  untaint_system ("$scrargs > $workdir/$testname.$test_number $post_redir");
   $mk_exitcode = ($?>>8);
   if ($mk_exitcode != 0) { return undef; }
   &checkfile ("$testname.$test_number", $read_sub) if (defined $read_sub);

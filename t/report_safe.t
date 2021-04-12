@@ -9,7 +9,7 @@ use Test::More tests => 8;
 
 # Use a slightly modified gtube ...
 my $origtest = 'data/spam/gtube.eml';
-my $test = 'log/report_safe.eml';
+my $test = "$workdir/report_safe.eml";
 my $original = '';
 if (open(OTEST, $origtest) && open(TEST, ">$test")) {
   local $/=undef;
@@ -61,3 +61,4 @@ $message = safe($boundary, '', 'text/plain', $description, 'inline');
 tstprefs ("report_safe 2\n");
 sarun ("-L < $test", \&patterns_run_cb);
 ok_all_patterns();
+

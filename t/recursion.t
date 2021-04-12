@@ -81,7 +81,7 @@ sub create_test_message {
     $text = $newmsg;
   }
 
-  open (OUT, ">log/recurse.eml") or die;
+  open (OUT, ">$workdir/recurse.eml") or die;
   print OUT $text;
   close OUT or die;
 }
@@ -103,7 +103,7 @@ Subject: testing recursion 3
     $boundstr++;
   }
 
-  open (OUT, ">log/recurse.eml") or die;
+  open (OUT, ">$workdir/recurse.eml") or die;
   print OUT $text;
   close OUT or die;
 }
@@ -112,7 +112,7 @@ sub try_scan {
   my $fh = IO::File->new_tmpfile();
   ok($fh);
   open(STDERR, ">&=".fileno($fh)) || die "Cannot reopen STDERR";
-  sarun("-D -L -t < log/recurse.eml",
+  sarun("-D -L -t < $workdir/recurse.eml",
         \&patterns_run_cb);
   seek($fh, 0, 0);
   my $error = do {
@@ -134,4 +134,4 @@ try_scan();
 create_test_message_3();
 try_scan();
 
-ok(unlink 'log/recurse.eml');
+ok(unlink "$workdir/recurse.eml");

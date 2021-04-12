@@ -26,18 +26,11 @@ BEGIN {
 
 $ENV{'LANG'} = $testlocale;
 
-# ---------------------------------------------------------------------------
-
 %patterns = (
-
-q{ X-Spam-Status: Yes, score=}, 'status',
-q{ X-Spam-Flag: YES}, 'flag',
-
-
+  q{ X-Spam-Status: Yes, score=}, 'status',
+  q{ X-Spam-Flag: YES}, 'flag',
 );
 
 ok (sdrun ("-L", "< data/spam/008", \&patterns_run_cb));
 ok_all_patterns();
-exit;
 
-# ---------------------------------------------------------------------------

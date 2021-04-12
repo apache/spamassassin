@@ -1,20 +1,9 @@
 #!/usr/bin/perl -T
 
-BEGIN {
-  if (-e 't/test_dir') { # if we are running "t/rule_tests.t", kluge around ...
-    chdir 't';
-  }
-
-  if (-e 'test_dir') {            # running from test directory, not ..
-    unshift(@INC, '../blib/lib');
-    unshift(@INC, '../lib');
-  }
-}
-
-my $prefix = '.';
-if (-e 'test_dir') {            # running from test directory, not ..
-  $prefix = '..';
-}
+use lib '.';
+use lib 't';
+use SATest;
+sa_t_init("mimeparse");
 
 use strict;
 
@@ -23,69 +12,69 @@ use Mail::SpamAssassin;
 use Digest::SHA qw(sha1_hex);
 
 my %files = (
-	"$prefix/t/data/nice/mime1" => [
+	"data/nice/mime1" => [
 	  join("\n", 'multipart/alternative','text/plain',
 	             'multipart/mixed,text/plain','application/andrew-inset'),
 	],
 
-	"$prefix/t/data/nice/mime2" => [
+	"data/nice/mime2" => [
 	  join("\n",'audio/basic'),
 	],
 
-	"$prefix/t/data/nice/mime3" => [
+	"data/nice/mime3" => [
 	  join("\n", 'multipart/mixed','multipart/mixed,text/plain,audio/x-sun',
 	             'multipart/mixed,image/gif,image/gif,application/x-be2,application/atomicmail',
 		     'audio/x-sun'),
 	],
 
-	"$prefix/t/data/nice/mime4" => [
+	"data/nice/mime4" => [
 	  join("\n", 'multipart/mixed','text/plain','image/pgm'),
 	],
 
-	"$prefix/t/data/nice/mime5" => [
+	"data/nice/mime5" => [
 	  join("\n", 'multipart/mixed','text/plain','image/pbm'),
 	  'cfbc6b4dbe0d6fe764dd0e0f10023afb0eb0faa9',
 	  '6c41ae723b78e63e3763473cd737b84fae366f80'
 	],
 
-	"$prefix/t/data/nice/mime6" => [
+	"data/nice/mime6" => [
 	  join("\n",'application/postscript'),
 	],
 
-	"$prefix/t/data/nice/mime7" => [
+	"data/nice/mime7" => [
 	  join("\n",'multipart/mixed','audio/basic','audio/basic'),
 	],
 
-	"$prefix/t/data/nice/mime8" => [
+	"data/nice/mime8" => [
 	  join("\n",'multipart/mixed','application/postscript','binary','message/rfc822,multipart/mixed,text/plain,multipart/parallel,image/gif,audio/basic,application/atomicmail,message/rfc822,audio/x-sun'),
 	  '07fdde1c24f216b05813f6a1ae0c7c1c0f84c42b',
 	  '03e5acb518e8aca0b3a7b18f2d94b5efe73495b2'
 	],
 
-	"$prefix/t/data/nice/base64.txt" => [
+	"data/nice/base64.txt" => [
 	  join("\n",'multipart/mixed','text/plain','text/plain'),
 	  '0147e619903eb01721d04c4f05ab9c9d497be193',
 	  'a0f062b1992b25de8607df1b829d29ede5687126'
 	],
 
-	"$prefix/t/data/spam/badmime.txt" => [
+	"data/spam/badmime.txt" => [
 	  join("\n",'multipart/alternative','text/plain','text/html'),
 	  'fe56ab5c4b0199cd2811871adc89cf2a9a3d9748',
 	  '2e7fea381fe9f0b34f947ddb7a38b81ece68605d'
 	],
 
-	"$prefix/t/data/spam/badmime2.txt" => [
+	"data/spam/badmime2.txt" => [
 	  join("\n",'multipart/alternative','text/plain','text/html'),
 	  '05c9e1f1f3638a5191542b0c278debe38ac98a83',
 	  'e6e71e824aec0e204367bfdc9a9e227039f42815'
 	],
 
-	"$prefix/t/data/spam/badmime3.txt" => [
+	"data/spam/badmime3.txt" => [
 	  join("\n",'multipart/alternative','text/plain'),
 	  '1c9972d2708b27f4da2e2ef87dd64d53bd11d086'
 	],
 
-	"$prefix/t/data/nice/mime9" => [
+	"data/nice/mime9" => [
 	  join("\n",'multipart/mixed','text/plain','message/rfc822,message/rfc822,multipart/mixed,multipart/alternative,text/plain,text/html,image/jpeg'),
 	  '5cdcabdb89c5fbb3a5e0c0473599668927045d9c',
 	  'f80584aff917e03d54663422918b58e4689cf993',
@@ -96,9 +85,9 @@ my %files = (
 
 # initialize SpamAssassin
 my $sa = Mail::SpamAssassin->new({
-    rules_filename => "$prefix/t/log/test_rules_copy",
-    site_rules_filename => "$prefix/t/log/test_default.cf",
-    userprefs_filename  => "$prefix/masses/spamassassin/user_prefs",
+    rules_filename => $localrules,
+    site_rules_filename => $siterules,
+    userprefs_filename  => $userrules,
     local_tests_only    => 1,
     debug             => 0,
     dont_copy_prefs   => 1,

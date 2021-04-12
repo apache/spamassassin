@@ -9,26 +9,16 @@ $ENV{'LANGUAGE'} = $ENV{'LC_ALL'} = 'C';             # a cheat, but we need the 
 # ---------------------------------------------------------------------------
 
 %patterns = (
-
   q{ MIMEHEADER_TEST1 }, q{ test1 },
   q{ MIMEHEADER_TEST2 }, q{ test2 },
   q{ MATCH_NL_NONRAW }, q{ match_nl_nonraw },
   q{ MATCH_NL_RAW }, q{ match_nl_raw },
   q{ MIMEHEADER_FOUND }, q{ unset_found },
-
 );
 
 %anti_patterns = (
-
   q{ MIMEHEADER_NOTFOUND }, q{ unset_notfound },
-
 );
-
-tstpre(q{
-
-  loadplugin Mail::SpamAssassin::Plugin::MIMEHeader
-
-});
 
 tstprefs (q{
 
@@ -41,7 +31,8 @@ tstprefs (q{
   mimeheader MIMEHEADER_NOTFOUND xyzzy =~ /foobar/
   mimeheader MIMEHEADER_FOUND xyzzy =~ /foobar/ [if-unset: xyzfoobarxyz]
 
-	});
+});
 
 sarun ("-L -t < data/nice/004", \&patterns_run_cb);
 ok_all_patterns();
+

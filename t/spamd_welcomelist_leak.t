@@ -2,7 +2,7 @@
 # bug 4179
 
 use lib '.'; use lib 't';
-use SATest; sa_t_init("spamd_whitelist_leak");
+use SATest; sa_t_init("spamd_welcomelist_leak");
 
 use Test::More;
 plan skip_all => 'Spamd tests disabled.' if $SKIP_SPAMD_TESTS;
@@ -12,26 +12,22 @@ plan tests => 8;
 # bug 6003
 
 tstlocalrules (q{
+  body MYBODY /LOSE WEIGHT/
+  score MYBODY 99
+});
 
-        body MYBODY /LOSE WEIGHT/
-        score MYBODY 99
-
-  });
-
-rmtree ("log/virtualconfig/testuser1", 0, 1);
-mkpath ("log/virtualconfig/testuser1", 0, 0755);
-rmtree ("log/virtualconfig/testuser2", 0, 1);
-mkpath ("log/virtualconfig/testuser2", 0, 0755);
-open (OUT, ">log/virtualconfig/testuser1/user_prefs");
+rmtree ("$workdir/virtualconfig/testuser1", 0, 1);
+mkpath ("$workdir/virtualconfig/testuser1", 0, 0755);
+rmtree ("$workdir/virtualconfig/testuser2", 0, 1);
+mkpath ("$workdir/virtualconfig/testuser2", 0, 0755);
+open (OUT, ">$workdir/virtualconfig/testuser1/user_prefs");
 print OUT q{
-
-        welcomelist_from    sb55sb123456789@yahoo.com
-        welcomelist_from_rcvd sb55sb123456789@yahoo.com  cgocable.ca
-        welcomelist_from_rcvd sb55sb123456789@yahoo.com  webnote.net
-
+  welcomelist_from    sb55sb123456789@yahoo.com
+  welcomelist_from_rcvd sb55sb123456789@yahoo.com  cgocable.ca
+  welcomelist_from_rcvd sb55sb123456789@yahoo.com  webnote.net
 };
 close OUT;
-open (OUT, ">log/virtualconfig/testuser2/user_prefs");
+open (OUT, ">$workdir/virtualconfig/testuser2/user_prefs");
 print OUT '';
 close OUT;
 
@@ -43,7 +39,7 @@ close OUT;
 );
 
 # use -m1 so all scans use the same child
-ok (start_spamd ("--virtual-config-dir=log/virtualconfig/%u -L -u $spamd_run_as_user -m1"));
+ok (start_spamd ("--virtual-config-dir=$workdir/virtualconfig/%u -L -u $spamd_run_as_user -m1"));
 ok (spamcrun ("-u testuser1 < data/spam/001", \&patterns_run_cb));
 ok_all_patterns();
 clear_pattern_counters();
@@ -58,3 +54,4 @@ ok (spamcrun ("-u testuser2 < data/spam/001", \&patterns_run_cb));
 checkfile ($spamd_stderr, \&patterns_run_cb);
 ok_all_patterns();
 ok stop_spamd();
+

@@ -16,13 +16,9 @@ q{ 1.0 THIS_IS_A_VERY_LONG_RULE_NAME_WHICH_NEEDS_WRAP A very very long },
 );
 
 tstprefs ("
-        $default_cf_lines
-
-        report_safe 1
-        header THIS_IS_A_VERY_LONG_RULE_NAME_WHICH_NEEDS_WRAP Subject =~ /FREE/
-
-        describe THIS_IS_A_VERY_LONG_RULE_NAME_WHICH_NEEDS_WRAP A very very long rule name and this is a very very long description lorem ipsum etc. blah blah blah blah This mailing is done by an independent marketing co. We apologize if this message has reached you in error. Save the Planet, Save the Trees! Advertise via E mail. No wasted paper! Delete with one simple keystroke!
-
+  report_safe 1
+  header THIS_IS_A_VERY_LONG_RULE_NAME_WHICH_NEEDS_WRAP Subject =~ /FREE/
+  describe THIS_IS_A_VERY_LONG_RULE_NAME_WHICH_NEEDS_WRAP A very very long rule name and this is a very very long description lorem ipsum etc. blah blah blah blah This mailing is done by an independent marketing co. We apologize if this message has reached you in error. Save the Planet, Save the Trees! Advertise via E mail. No wasted paper! Delete with one simple keystroke!
 ");
 
 ok (sarun ("-L -t < data/spam/001", \&patterns_run_cb));
@@ -39,13 +35,9 @@ ok ($matched_output =~ /^                            .{0,60}very very/m);
 ok ($matched_output =~ /^                            .{0,60}keystroke!/m);
 
 tstprefs ("
-        $default_cf_lines
-
-        report_safe 0
-        header THIS_IS_A_VERY_LONG_RULE_NAME_WHICH_NEEDS_WRAP Subject =~ /FREE/
-
-        describe THIS_IS_A_VERY_LONG_RULE_NAME_WHICH_NEEDS_WRAP A very very long rule name and this is a very very long description lorem ipsum etc. blah blah blah blah This mailing is done by an independent marketing co. We apologize if this message has reached you in error. Save the Planet, Save the Trees! Advertise via E mail. No wasted paper! Delete with one simple keystroke!
-
+  report_safe 0
+  header THIS_IS_A_VERY_LONG_RULE_NAME_WHICH_NEEDS_WRAP Subject =~ /FREE/
+  describe THIS_IS_A_VERY_LONG_RULE_NAME_WHICH_NEEDS_WRAP A very very long rule name and this is a very very long description lorem ipsum etc. blah blah blah blah This mailing is done by an independent marketing co. We apologize if this message has reached you in error. Save the Planet, Save the Trees! Advertise via E mail. No wasted paper! Delete with one simple keystroke!
 ");
 
 ok (sarun ("-L -t < data/spam/001", \&patterns_run_cb));
@@ -55,5 +47,4 @@ $matched_output =~ s/\t/        /gs; # expand tabs
 
 ok ($matched_output =~ /^\s+\*      .{0,60}very very/m);
 ok ($matched_output =~ /^\s+\*      .{0,60}keystroke!/m);
-
 

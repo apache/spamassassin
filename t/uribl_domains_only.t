@@ -11,7 +11,9 @@ plan tests => 4;
 
 # ---------------------------------------------------------------------------
 
-%anti_patterns = ( q{ X_URIBL_DOMSONLY } => 'A' );
+%anti_patterns = (
+  q{ X_URIBL_DOMSONLY } => 'A'
+);
 
 tstlocalrules(q{
 

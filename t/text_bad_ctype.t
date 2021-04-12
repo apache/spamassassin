@@ -19,3 +19,4 @@ ok_all_patterns();
 %anti_patterns = ( q{ NATURAL } => 'NATURAL',);
 sarun ("-L -t < data/spam/badctype2", \&patterns_run_cb);
 ok_all_patterns();
+

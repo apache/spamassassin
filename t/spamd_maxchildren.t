@@ -10,14 +10,11 @@ plan tests => 22;
 # ---------------------------------------------------------------------------
 
 %patterns = (
-
-q{ X-Spam-Status: Yes, score=}, 'status',
-q{ X-Spam-Flag: YES}, 'flag',
-q{ X-Spam-Level: **********}, 'stars',
-q{ TEST_ENDSNUMS}, 'endsinnums',
-q{ TEST_NOREALNAME}, 'noreal',
-
-
+  q{ X-Spam-Status: Yes, score=}, 'status',
+  q{ X-Spam-Flag: YES}, 'flag',
+  q{ X-Spam-Level: **********}, 'stars',
+  q{ TEST_ENDSNUMS}, 'endsinnums',
+  q{ TEST_NOREALNAME}, 'noreal',
 );
 
 start_spamd("-L -m1");
@@ -36,5 +33,4 @@ clear_pattern_counters();
 ok (spamcrun ("< data/spam/001", \&patterns_run_cb));
 ok_all_patterns();
 ok (stop_spamd());
-
 

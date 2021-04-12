@@ -125,7 +125,7 @@ $ENV{LANGUAGE} = $ENV{LANG} = 'fr_CH.UTF-8';
 
 #--- normalize_charset 1
 
-tstlocalrules ($myrules . '
+tstprefs ($myrules . '
   report_safe 0
   normalize_charset 1
 ');
@@ -134,7 +134,7 @@ tstlocalrules ($myrules . '
 sarun ("-L < data/nice/unicode1", \&patterns_run_cb);
 ok_all_patterns();
 
-tstlocalrules ($myrules . '
+tstprefs ($myrules . '
   report_safe 1
   normalize_charset 1
 ');
@@ -142,7 +142,7 @@ tstlocalrules ($myrules . '
 sarun ("-L < data/nice/unicode1", \&patterns_run_cb);
 ok_all_patterns();
 
-tstlocalrules ($myrules . '
+tstprefs ($myrules . '
   report_safe 2
   normalize_charset 1
 ');
@@ -152,7 +152,7 @@ ok_all_patterns();
 
 #--- normalize_charset 0
 
-tstlocalrules ($myrules . '
+tstprefs ($myrules . '
   report_safe 0
   normalize_charset 0
 ');
@@ -160,7 +160,7 @@ tstlocalrules ($myrules . '
 sarun ("-L < data/nice/unicode1", \&patterns_run_cb);
 ok_all_patterns();
 
-tstlocalrules ($myrules . '
+tstprefs ($myrules . '
   report_safe 1
   normalize_charset 0
 ');
@@ -168,7 +168,7 @@ tstlocalrules ($myrules . '
 sarun ("-L < data/nice/unicode1", \&patterns_run_cb);
 ok_all_patterns();
 
-tstlocalrules ($myrules . '
+tstprefs ($myrules . '
   report_safe 2
   normalize_charset 0
 ');
@@ -182,7 +182,7 @@ $ENV{PERL_BADLANG} = 0;  # suppresses Perl warning about failed locale setting
 # see Mail::SpamAssassin::Conf::Parser::parse(), also Bug 6992
 $ENV{LANGUAGE} = $ENV{LANG} = 'zh_CN.UTF-8';
 
-tstlocalrules ($myrules . '
+tstprefs ($myrules . '
   report_safe 0
   normalize_charset 1
 ');
@@ -194,7 +194,7 @@ ok_all_patterns();
 
 $ENV{LANGUAGE} = $ENV{LANG} = 'en_US.UTF-8';
 
-tstlocalrules ($myrules . '
+tstprefs ($myrules . '
   report_safe 0
   normalize_charset 1
 ');
@@ -202,3 +202,4 @@ tstlocalrules ($myrules . '
 %anti_patterns = ();
 sarun ("-L < data/nice/unicode2", \&patterns_run_cb);
 ok_all_patterns();
+

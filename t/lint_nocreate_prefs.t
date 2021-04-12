@@ -11,8 +11,8 @@ use Test::More tests => 2;
 # override locale for this test!
 $ENV{'LANGUAGE'} = $ENV{'LC_ALL'} = 'C';
 
-sarun ("-L --lint --prefspath=log/prefs", \&patterns_run_cb);
+sarun ("-L --lint --prefspath=$workdir/prefs", \&patterns_run_cb);
 ok_all_patterns();
 
-ok (!-f "log/prefs");
+ok (!-f "$workdir/prefs");
 

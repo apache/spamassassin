@@ -7,24 +7,15 @@ use SATest; sa_t_init("bayesdbm_flock");
 use constant HAS_DB_FILE => eval { require DB_File };
 
 use Test::More;
-BEGIN { 
-  if (-e 't/test_dir') {
-    chdir 't';
-  }
-
-  if (-e 'test_dir') {
-    unshift(@INC, '../blib/lib');
-  }
-}
 
 plan skip_all => "Long running tests disabled" unless conf_bool('run_long_tests');
 plan skip_all => "Tests don't work on windows" if $RUNNING_ON_WINDOWS;
 plan skip_all => "DB_File is unavailable" unless HAS_DB_FILE;
 plan tests => 48;
 
-tstlocalrules ("
-        bayes_learn_to_journal 0
-        lock_method flock
+tstprefs ("
+  bayes_learn_to_journal 0
+  lock_method flock
 ");
 
 use Mail::SpamAssassin;
@@ -152,42 +143,42 @@ alarm(0);
 
 undef $sa;
 
-sa_t_init('bayes'); # this wipes out what is there and begins anew
+sa_t_init('bayesdbm_flock'); # this wipes out what is there and begins anew
 
 # make sure we learn to a journal
-tstlocalrules ("
-        bayes_learn_to_journal 1
+tstprefs ("
+  bayes_learn_to_journal 1
 ");
 
 $sa = create_saobj();
 
 $sa->init();
 
-ok(!-e 'log/user_state/bayes_journal');
+ok(!-e "$userstate/bayes_journal");
 
 ok($sa->{bayes_scanner}->learn(1, $mail));
 
-ok(-e 'log/user_state/bayes_journal');
+ok(-e "$userstate/bayes_journal");
 
 $sa->{bayes_scanner}->sync(1); # always returns 0, so no need to check return
 
-ok(!-e 'log/user_state/bayes_journal');
+ok(!-e "$userstate/bayes_journal");
 
-ok(-e 'log/user_state/bayes_seen');
+ok(-e "$userstate/bayes_seen");
 
-ok(-e 'log/user_state/bayes_toks');
+ok(-e "$userstate/bayes_toks");
 
 undef $sa;
 
-sa_t_init('bayes'); # this wipes out what is there and begins anew
+sa_t_init('bayesdbm_flock'); # this wipes out what is there and begins anew
 
 alarm(0);  # cancel timer - make sure that alarm is off
 
 # make sure we learn to a journal
-tstlocalrules ("
-bayes_learn_to_journal 0
-bayes_min_spam_num 10
-bayes_min_ham_num 10
+tstprefs ("
+  bayes_learn_to_journal 0
+  bayes_min_spam_num 10
+  bayes_min_ham_num 10
 ");
 
 # we get to bastardize the existing pattern matching code here.  It lets us provide
@@ -268,9 +259,9 @@ ok($score =~ /\d/ && $score <= 1.0 && $score != .5);
 
 ok(getimpl->{store}->clear_database());
 
-ok(!-e 'log/user_state/bayes_journal');
-ok(!-e 'log/user_state/bayes_seen');
-ok(!-e 'log/user_state/bayes_toks');
+ok(!-e "$userstate/bayes_journal");
+ok(!-e "$userstate/bayes_seen");
+ok(!-e "$userstate/bayes_toks");
 
 sub check_examined {
   local ($_);

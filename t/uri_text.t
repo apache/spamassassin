@@ -2,21 +2,6 @@
 
 # test URIs as grabbed from text/plain messages
 
-BEGIN {
-  if (-e 't/test_dir') { # if we are running "t/rule_names.t", kluge around ...
-    chdir 't';
-  }
-
-  if (-e 'test_dir') {            # running from test directory, not ..
-    unshift(@INC, '../blib/lib');
-  }
-}
-
-my $prefix = '.';
-if (-e 'test_dir') {            # running from test directory, not ..
-  $prefix = '..';
-}
-
 use strict;
 use lib '.'; use lib 't';
 use SATest; sa_t_init("uri_text");
@@ -27,8 +12,8 @@ use vars qw(%patterns %anti_patterns);
 # initialize SpamAssassin
 my $sa = create_saobj({
     require_rules => 0,
-    site_rules_filename => "$prefix/t/log/localrules.tmp",
-    rules_filename => "$prefix/rules",
+    site_rules_filename => $siterules,
+    rules_filename => $localrules,
     local_tests_only => 1,
     dont_copy_prefs => 1,
 });

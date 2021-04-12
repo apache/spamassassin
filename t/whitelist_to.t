@@ -7,15 +7,13 @@ use Test::More tests => 1;
 # ---------------------------------------------------------------------------
 
 %patterns = (
-
   q{ USER_IN_WELCOMELIST_TO }, 'hit-wl',
-
 );
 
 tstprefs ("
-        $default_cf_lines
-        whitelist_to announce*
-	");
+  whitelist_to announce*
+");
 
 sarun ("-L -t < data/nice/016", \&patterns_run_cb);
 ok_all_patterns();
+

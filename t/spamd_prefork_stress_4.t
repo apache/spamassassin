@@ -4,7 +4,7 @@ use lib '.'; use lib 't';
 use SATest; sa_t_init("spamd_prefork_stress_4");
 
 use Test::More;
-diag("NOTE: this test requires both 'run_spamd_prefork_stress_test' and 'run_long_tests' set to 'y'.");
+
 plan skip_all => "Spamd tests disabled" if $SKIP_SPAMD_TESTS;
 plan skip_all => "Long running tests disabled" unless conf_bool('run_long_tests');
 plan skip_all => "Spamd prefork stress tests disabled" unless conf_bool('run_spamd_prefork_stress_test');
@@ -12,20 +12,18 @@ plan tests => 43;
 
 # ---------------------------------------------------------------------------
 
-# tstlocalrules ('
-        # loadplugin myTestPlugin ../../data/testplugin.pm
+# tstprefs ('
+        # loadplugin myTestPlugin ../../../data/testplugin.pm
         # header PLUGIN_SLEEP eval:sleep_based_on_header()
 # ');
 
 
 %patterns = (
-
-q{ X-Spam-Status: Yes, score=}, 'status',
-q{ X-Spam-Flag: YES}, 'flag',
-q{ X-Spam-Level: **********}, 'stars',
-q{ TEST_ENDSNUMS}, 'endsinnums',
-q{ TEST_NOREALNAME}, 'noreal',
-
+  q{ X-Spam-Status: Yes, score=}, 'status',
+  q{ X-Spam-Flag: YES}, 'flag',
+  q{ X-Spam-Level: **********}, 'stars',
+  q{ TEST_ENDSNUMS}, 'endsinnums',
+  q{ TEST_NOREALNAME}, 'noreal',
 );
 
 my $tmpnum = 0;
@@ -112,6 +110,4 @@ sub test_spamc {
   clear_pattern_counters();
   ok (spamcrun ("<data/spam/001", \&patterns_run_cb));
 }
-
-
 

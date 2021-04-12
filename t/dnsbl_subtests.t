@@ -12,21 +12,6 @@ use SATest; sa_t_init("dnsbl_subtests");
 use vars qw(%patterns %anti_patterns);
 use Test::More tests => 46;
 
-BEGIN {
-  if (-e 't/test_dir') { # if we are running "t/rule_tests.t", kluge around ...
-    chdir 't';
-  }
-
-  if (-e 'test_dir') {            # running from test directory, not ..
-    unshift(@INC, '../blib/lib');
-  }
-}
-
-my $prefix = '.';
-if (-e 'test_dir') {            # running from test directory, not ..
-  $prefix = '..';
-}
-
 use Errno qw(EADDRINUSE EACCES);
 use Net::DNS::Nameserver;
 use Mail::SpamAssassin;
@@ -332,10 +317,10 @@ if (!$pid) {  # child
 sleep 1;
 
 $spamassassin_obj = Mail::SpamAssassin->new({
-  rules_filename      => "$prefix/t/log/test_rules_copy",
+  rules_filename      => $localrules,
   require_rules       => 1,
-  site_rules_filename => "$prefix/t/log/localrules.tmp",
-  userprefs_filename  => "$prefix/masses/spamassassin/user_prefs",
+  site_rules_filename => $siterules,
+  userprefs_filename  => $userrules,
   post_config_text    => $local_conf,
   dont_copy_prefs     => 1,
 # debug               => 'dns,async,uridnsbl',

@@ -6,16 +6,6 @@ use IO::File;
 
 use constant HAS_DB_FILE => eval { require DB_File };
 
-BEGIN {
-  if (-e 't/test_dir') {
-    chdir 't';
-  }
-
-  if (-e 'test_dir') {
-    unshift(@INC, '../blib/lib');
-  }
-}
-
 use Test::More;
 plan skip_all => 'Long running tests disabled' unless conf_bool('run_long_tests');
 plan skip_all => 'Need DB_File for this test'  unless HAS_DB_FILE;
@@ -24,19 +14,19 @@ plan tests => 35;
 # ---------------------------------------------------------------------------
 
 %added_address_whitelist_patterns = (
-q{SpamAssassin auto-whitelist: adding address to whitelist:}, 'added address to whitelist',
+  q{SpamAssassin auto-whitelist: adding address to whitelist:}, 'added address to whitelist',
 );
 %added_address_blacklist_patterns = (
-q{SpamAssassin auto-whitelist: adding address to blacklist:}, 'added address to blacklist',
+  q{SpamAssassin auto-whitelist: adding address to blacklist:}, 'added address to blacklist',
 );
 %removed_address_patterns = (
-q{SpamAssassin auto-whitelist: removing address:}, 'removed address',
+  q{SpamAssassin auto-whitelist: removing address:}, 'removed address',
 );
 %is_nonspam_patterns = (
-q{X-Spam-Status: No}, 'spamno',
+  q{X-Spam-Status: No}, 'spamno',
 );
 %is_spam_patterns = (
-q{X-Spam-Status: Yes}, 'spamyes',
+  q{X-Spam-Status: Yes}, 'spamyes',
 );
 
 
@@ -245,3 +235,4 @@ sarun ("-L < data/nice/002", \&patterns_run_cb);
 ok_all_patterns();
 
 $sa->remove_all_addresses_from_whitelist($mail);
+

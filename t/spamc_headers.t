@@ -10,16 +10,13 @@ plan tests => 5;
 # ---------------------------------------------------------------------------
 
 %patterns = (
-
   q{ Message-Id: <78w08.t365th3y6x7h@yahoo.com> } => 'msgid',
   q{ X-Spam-Status: Yes, } => 'xss',
   q{ TEST_NOREALNAME}, 'noreal',
   q{ subscription cancelable at anytime } => 'body',
-
 );
 
 %anti_patterns = (
-
 );
 
 start_spamd("-L --cf='report_safe 0'");

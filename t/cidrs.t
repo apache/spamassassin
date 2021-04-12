@@ -1,19 +1,7 @@
 #!/usr/bin/perl -T
 
-BEGIN {
-  if (-e 't/test_dir') { # if we are running "t/rule_tests.t", kluge around ...
-    chdir 't';
-  }
-
-  if (-e 'test_dir') {            # running from test directory, not ..
-    unshift(@INC, '../blib/lib');
-  }
-}
-
-my $prefix = '.';
-if (-e 'test_dir') {            # running from test directory, not ..
-  $prefix = '..';
-}
+use lib '.'; use lib 't';
+use SATest; sa_t_init("cidrs");
 
 use strict;
 
@@ -23,7 +11,7 @@ use Mail::SpamAssassin;
 use Mail::SpamAssassin::NetSet;
 
 my $sa = Mail::SpamAssassin->new({
-    rules_filename => "$prefix/rules",
+    rules_filename => $localrules,
 });
 
 sub tryone ($@) {

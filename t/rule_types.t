@@ -25,17 +25,22 @@ q{ RELAYS }, 'RELAYS',
 # for the commandline scanner).   Try to exercise some of the
 # different rule types we support, header-name macros etc. (TODO: all ;)
 #
-tstprefs ('
+tstlocalrules ('
+  header LAST_RCVD_LINE  Received =~ /www.fasttrec.com/
 
-header LAST_RCVD_LINE	Received =~ /www.fasttrec.com/
-header MESSAGEID_MATCH	MESSAGEID =~ /fasttrec.com/
-header ENV_FROM		EnvelopeFrom =~ /jm.netnoteinc.com/
-body SUBJ_IN_BODY	/YOUR BRAND NEW HOUSE/
-uri URI_RULE		/WWW.SUPERSITESCENTRAL.COM/i
-body BODY_LINE_WRAP	/making obscene amounts of money from the/
-header RELAYS		X-Spam-Relays-Untrusted =~ / helo=www.fasttrec.com /
+  header MESSAGEID_MATCH  MESSAGEID =~ /fasttrec.com/
 
-    ');
+  header ENV_FROM  EnvelopeFrom =~ /jm.netnoteinc.com/
+
+  body SUBJ_IN_BODY  /YOUR BRAND NEW HOUSE/
+
+  uri URI_RULE  /WWW.SUPERSITESCENTRAL.COM/i
+
+  body BODY_LINE_WRAP  /making obscene amounts of money from the/
+
+  header RELAYS  X-Spam-Relays-Untrusted =~ / helo=www.fasttrec.com /
+');
 
 sarun ("-L -t < data/spam/002", \&patterns_run_cb);
 ok_all_patterns();
+

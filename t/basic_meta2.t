@@ -2,8 +2,7 @@
 
 use lib '.'; 
 use lib 't';
-use SATest; 
-sa_t_init("meta2");
+use SATest; sa_t_init("basic_meta2");
 
 use Test::More;
 plan tests => 5;
@@ -25,7 +24,7 @@ plan tests => 5;
 
 );
 
-tstprefs (qq{
+tstlocalrules (qq{
 
    body __FOO_1 /a/
    body __FOO_2 /b/

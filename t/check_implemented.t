@@ -1,24 +1,5 @@
 #!/usr/bin/perl -T
 
-# detect use of dollar-ampersand somewhere in the perl interpreter;
-# once it is used once, it slows down every regexp match thereafter.
-
-BEGIN {
-  if (-e 't/test_dir') { # if we are running "t/rule_tests.t", kluge around ...
-    chdir 't';
-  }
-
-  if (-e 'test_dir') {            # running from test directory, not ..
-    unshift(@INC, '../blib/lib');
-    unshift(@INC, '../lib');
-  }
-}
-
-my $prefix = '.';
-if (-e 'test_dir') {            # running from test directory, not ..
-  $prefix = '..';
-}
-
 use lib '.'; use lib 't';
 use SATest; sa_t_init("check_implemented");
 
@@ -33,14 +14,14 @@ require Mail::SpamAssassin;
 
 # kill all 'loadplugin' lines
 foreach my $file 
-        (<log/localrules.tmp/*.pre>, <log/test_rules_copy/*.pre>) #*/
+        (<$localrules/*.pre>, <$siterules/*.pre>) #*/
 {
   $file = main::untaint_var($file);
   rename $file, "$file.bak" or die "rename $file failed";
   open IN, "<$file.bak" or die "cannot read $file.bak";
   open OUT, ">$file" or die "cannot write $file";
   while (<IN>) {
-    s/^loadplugin/###loadplugin/g;
+    s/^\s*loadplugin/###loadplugin/g;
     print OUT;
   }
   close IN;

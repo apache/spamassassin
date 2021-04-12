@@ -10,15 +10,12 @@ plan tests => 7;
 # ---------------------------------------------------------------------------
 
 %patterns = (
-
-q{ Subject: There yours for FREE!}, 'subj',
-q{ X-Spam-Status: Yes, score=}, 'status',
-q{ X-Spam-Flag: YES}, 'flag',
-q{ X-Spam-Level: **********}, 'stars',
-q{ TEST_ENDSNUMS}, 'endsinnums',
-q{ TEST_NOREALNAME}, 'noreal',
-
-
+  q{ Subject: There yours for FREE!}, 'subj',
+  q{ X-Spam-Status: Yes, score=}, 'status',
+  q{ X-Spam-Flag: YES}, 'flag',
+  q{ X-Spam-Level: **********}, 'stars',
+  q{ TEST_ENDSNUMS}, 'endsinnums',
+  q{ TEST_NOREALNAME}, 'noreal',
 );
 
 $spamd_inhibit_log_to_err = 1;

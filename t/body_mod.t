@@ -1,20 +1,5 @@
 #!/usr/bin/perl -w -T
 
-BEGIN {
-  if (-e 't/test_dir') { # if we are running "t/body_mod.t", kluge around ...
-    chdir 't';
-  }
-
-  if (-e 'test_dir') {            # running from test directory, not ..
-    unshift(@INC, '../blib/lib');
-  }
-}
-
-my $prefix = '.';
-if (-e 'test_dir') {            # running from test directory, not ..
-  $prefix = '..';
-}
-
 use strict;
 use lib '.'; use lib 't';
 use SATest; sa_t_init("body_mod");

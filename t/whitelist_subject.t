@@ -7,24 +7,20 @@ use Test::More tests => 4;
 # ---------------------------------------------------------------------------
 
 %is_whitelist_patterns = (
-q{ SUBJECT_IN_WHITELIST }, 'whitelist-subject'
+  q{ SUBJECT_IN_WHITELIST }, 'whitelist-subject'
 );
 
 %is_blacklist_patterns = (
-q{ SUBJECT_IN_BLACKLIST }, 'blacklist-subject'
+  q{ SUBJECT_IN_BLACKLIST }, 'blacklist-subject'
 );
 
-tstpre("
-loadplugin Mail::SpamAssassin::Plugin::WhiteListSubject
-");
-
 tstprefs ("
-use_bayes 0
-use_auto_whitelist 0
-$default_cf_lines
-whitelist_subject [HC Anno*]
-blacklist_subject whitelist test
-	");
+  loadplugin Mail::SpamAssassin::Plugin::WhiteListSubject
+  use_bayes 0
+  use_auto_whitelist 0
+  whitelist_subject [HC Anno*]
+  blacklist_subject whitelist test
+");
 
 %patterns = %is_whitelist_patterns;
 
@@ -36,3 +32,4 @@ ok_all_patterns();
 # force us to blacklist a nice msg
 ok(sarun ("-L -t < data/nice/015", \&patterns_run_cb));
 ok_all_patterns();
+

@@ -1,20 +1,5 @@
 #!/usr/bin/perl -w -T
 
-BEGIN {
-  if (-e 't/test_dir') { # if we are running "t/rule_names.t", kluge around ...
-    chdir 't';
-  }
-
-  if (-e 'test_dir') {            # running from test directory, not ..
-    unshift(@INC, '../blib/lib');
-  }
-}
-
-my $prefix = '.';
-if (-e 'test_dir') {            # running from test directory, not ..
-  $prefix = '..';
-}
-
 use lib '.'; use lib 't';
 use SATest; sa_t_init("rule_names");
 
@@ -49,7 +34,7 @@ while (my ($test, $type) = each %{ $sa->{conf}->{test_types} }) {
 }
 
 # run tests
-my $mail = 'log/rule_names.eml';
+my $mail = "$workdir/rule_names.eml";
 write_mail();
 %patterns = ();
 my $i = 1;
@@ -77,12 +62,12 @@ for my $test (@tests) {
 
 
 tstprefs ("
-	# set super low threshold, so always marked as spam
-	required_score -10000.0
-	# add two fake lexically high tests so every other hit will always be
-	# followed by a comma in the X-Spam-Status header
-	body ZZZZZZZZ /./
-	body zzzzzzzz /./
+  # set super low threshold, so always marked as spam
+  required_score -10000.0
+  # add two fake lexically high tests so every other hit will always be
+  # followed by a comma in the X-Spam-Status header
+  body ZZZZZZZZ /./
+  body zzzzzzzz /./
 ");
 sarun ("-L < $mail", \&patterns_run_cb);
 ok_all_patterns();
@@ -141,3 +126,4 @@ sub sha1_shuffle {
          map { [$_, sha1($_ . $i)] }
          @_;
 }
+

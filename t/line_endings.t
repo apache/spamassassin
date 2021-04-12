@@ -11,8 +11,8 @@ plan tests => 26;
 
 # Use a slightly modified gtube ...
 my $origtest = 'data/spam/gtube.eml';
-my $test = 'log/report_safe.eml';
-my $test2 = 'log/report_safe2.eml';
+my $test = "$workdir/report_safe.eml";
+my $test2 = "$workdir/report_safe2.eml";
 my $original = '';
 if (open(OTEST, $origtest) && open(TEST, ">$test") && open(TEST2, ">$test2")) {
   binmode OTEST;

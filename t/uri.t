@@ -1,20 +1,5 @@
 #!/usr/bin/perl -w -T
 
-BEGIN {
-  if (-e 't/test_dir') { # if we are running "t/rule_tests.t", kluge around ...
-    chdir 't';
-  }
-
-  if (-e 'test_dir') {            # running from test directory, not ..
-    unshift(@INC, '../blib/lib');
-  }
-}
-
-my $prefix = '.';
-if (-e 'test_dir') {            # running from test directory, not ..
-  $prefix = '..';
-}
-
 my $have_libidn;
 BEGIN {
   eval { require Net::LibIDN } and do { $have_libidn = 1 };
@@ -36,13 +21,10 @@ use Mail::SpamAssassin::Util;
 
 ##############################################
 
-
-tstlocalrules ('
-
+tstlocalrules ("
   util_rb_2tld live.com
   util_rb_3tld three.3ldlive.com
-
-');
+");
 
 # initialize SpamAssassin
 my $sa = create_saobj({'dont_copy_prefs' => 1,

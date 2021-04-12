@@ -1,7 +1,7 @@
 #!/usr/bin/perl -T
 
 use lib '.'; use lib 't';
-use SATest; sa_t_init("spf");
+use SATest; sa_t_init("spf_welcome_block");
 use Test::More;
 
 use constant HAS_MAILSPF => eval { require Mail::SPF; };

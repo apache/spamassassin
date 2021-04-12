@@ -4,7 +4,6 @@ use lib '.'; use lib 't';
 use SATest; sa_t_init("spamd_prefork_stress_3");
 
 use Test::More;
-diag("NOTE: this test requires both 'run_spamd_prefork_stress_test' and 'run_long_tests' set to 'y'.");
 
 plan skip_all => "Spamd tests disabled" if $SKIP_SPAMD_TESTS;
 plan skip_all => "Long running tests disabled" unless conf_bool('run_long_tests');
@@ -13,20 +12,17 @@ plan tests => 291;
 
 # ---------------------------------------------------------------------------
 
-tstlocalrules ('
-        loadplugin myTestPlugin ../../data/testplugin.pm
-        header PLUGIN_SLEEP eval:sleep_based_on_header()
+tstprefs ('
+  loadplugin myTestPlugin ../../../data/testplugin.pm
+  header PLUGIN_SLEEP eval:sleep_based_on_header()
 ');
 
-
 %patterns = (
-
-q{ X-Spam-Status: Yes, score=}, 'status',
-q{ X-Spam-Flag: YES}, 'flag',
-q{ X-Spam-Level: **********}, 'stars',
-q{ TEST_ENDSNUMS}, 'endsinnums',
-q{ TEST_NOREALNAME}, 'noreal',
-
+  q{ X-Spam-Status: Yes, score=}, 'status',
+  q{ X-Spam-Flag: YES}, 'flag',
+  q{ X-Spam-Level: **********}, 'stars',
+  q{ TEST_ENDSNUMS}, 'endsinnums',
+  q{ TEST_NOREALNAME}, 'noreal',
 );
 
 my $tmpnum = 0;
@@ -74,7 +70,7 @@ sub test_bg {
 sub mk_mail {
   my $secs = shift;
 
-  my $tmpf = "log/tmp.$testname.$tmpnum"; $tmpnum++;
+  my $tmpf = "$workdir/tmp.$testname.$tmpnum"; $tmpnum++;
 
   open (IN, "<data/spam/001");
   open (OUT, ">$tmpf") or die "cannot write $tmpf";
@@ -91,5 +87,4 @@ sub clean_pending_unlinks {
   unlink @pending_unlinks;
   @pending_unlinks = ();
 }
-
 

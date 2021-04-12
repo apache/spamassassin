@@ -18,14 +18,12 @@ plan tests => 23;
 # ---------------------------------------------------------------------------
 
 %patterns = (
-        q{ spam reported to DCC }, 'dcc report',
-            );
+  q{ spam reported to DCC }, 'dcc report',
+);
 
-tstpre ("
-
+tstprefs ("
   loadplugin Mail::SpamAssassin::Plugin::DCC
   dcc_timeout 30
-
 ");
 
 ok sarun ("-t -D info -r < data/spam/gtubedcc.eml 2>&1", \&patterns_run_cb);

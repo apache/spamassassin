@@ -9,16 +9,14 @@ use Test::More tests => 3;
 # ---------------------------------------------------------------------------
 
 %patterns = (
-
-q{  }, 'anything',
-
+  q{  }, 'anything',
 );
 
 # override locale for this test!
 $ENV{'LANGUAGE'} = $ENV{'LC_ALL'} = 'C';
 
-my $scoresfile  = "log/test_rules_copy/50_scores.cf";
-my $sandboxfile = "log/test_rules_copy/70_sandbox.cf";
+my $scoresfile  = "$localrules/50_scores.cf";
+my $sandboxfile = "$localrules/70_sandbox.cf";
 
 # when running from the built tarball or make disttest, we will not have a full
 # rules dir -- therefore no 70_sandbox.cf.  We will also have no 50_scores.cf,
@@ -32,3 +30,4 @@ SKIP: {
 
 sarun ("-L --lint", \&patterns_run_cb);
 ok_all_patterns();
+

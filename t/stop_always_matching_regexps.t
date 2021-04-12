@@ -1,16 +1,5 @@
 #!/usr/bin/perl -T
 
-BEGIN {
-  if (-e 't/test_dir') { # if we are running "t/rule_tests.t", kluge around ...
-    chdir 't';
-  }
-
-  if (-e 'test_dir') {            # running from test directory, not ..
-    unshift(@INC, '../blib/lib');
-    unshift(@INC, '../lib');
-  }
-}
-
 use lib '.'; use lib 't';
 use SATest; sa_t_init("stop_always_matching_regexps");
 use Test::More tests => 12;

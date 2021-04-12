@@ -117,3 +117,4 @@ ok ok_all_patterns();
 clear_pattern_counters();
 ok(scrunwantfail("--connect-retries 1 -x -E < data/spam/001", \&patterns_run_cb));
 ok ok_all_patterns();
+

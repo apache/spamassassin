@@ -6,7 +6,7 @@ use SATest; sa_t_init("spamc_x_e");
 use Test::More;
 plan skip_all => "Spamd tests disabled" if $SKIP_SPAMD_TESTS;
 plan tests => 7;
-diag "Failure may indicate some other process running on port 8.  Test assumes nothing is listening on port 8.";
+
 # ---------------------------------------------------------------------------
 # test case for bug 5478: spamc -x -e
 

@@ -10,23 +10,21 @@ plan tests => 5;
 # ---------------------------------------------------------------------------
 
 %patterns = (
-
-q{ 1.0 MYFOO }, 'myfoo',
-
+  q{ 1.0 MYFOO }, 'myfoo',
 );
 
 %anti_patterns = (
-q{  redefined at }, 'redefined_errors_in_spamd_log',
+  q{  redefined at }, 'redefined_errors_in_spamd_log',
 );
 
-tstlocalrules ("
-	allow_user_rules 1
-        loadplugin myTestPlugin ../../data/testplugin.pm
+tstprefs ("
+  allow_user_rules 1
+  loadplugin myTestPlugin ../../../data/testplugin.pm
 ");
 
-rmtree ("log/virtualconfig/testuser", 0, 1);
-mkpath ("log/virtualconfig/testuser", 0, 0755);
-open (OUT, ">log/virtualconfig/testuser/user_prefs");
+rmtree ("$workdir/virtualconfig/testuser", 0, 1);
+mkpath ("$workdir/virtualconfig/testuser", 0, 0755);
+open (OUT, ">$workdir/virtualconfig/testuser/user_prefs");
 print OUT q{
 
 	header MYFOO Content-Transfer-Encoding =~ /quoted-printable/
@@ -53,7 +51,7 @@ print OUT q{
 };
 close OUT;
 
-ok (start_spamd ("--virtual-config-dir=log/virtualconfig/%u -L -u $spamd_run_as_user"));
+ok (start_spamd ("--virtual-config-dir=$workdir/virtualconfig/%u -L -u $spamd_run_as_user"));
 ok (spamcrun ("-u testuser < data/spam/009", \&patterns_run_cb));
 ok (stop_spamd ());
 

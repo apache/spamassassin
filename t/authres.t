@@ -1,9 +1,7 @@
 #!/usr/bin/perl -T
 
-use lib '.'; 
-use lib 't';
-use SATest; 
-sa_t_init("authres");
+use lib '.'; use lib 't';
+use SATest; sa_t_init("authres");
 
 use Test::More;
 plan tests => 44;
@@ -17,11 +15,11 @@ loadplugin Mail::SpamAssassin::Plugin::AuthRes
 ## with internal networks
 
 tstprefs("
-clear_internal_networks
-clear_trusted_networks
-internal_networks 212.17.35.15
-trusted_networks 212.17.35.15
-trusted_networks 141.154.95.22
+  clear_internal_networks
+  clear_trusted_networks
+  internal_networks 212.17.35.15
+  trusted_networks 212.17.35.15
+  trusted_networks 141.154.95.22
 ");
 
 %patterns = (
@@ -48,13 +46,13 @@ ok_all_patterns();
 ## with trusted networks included
 
 tstprefs("
-clear_internal_networks
-clear_trusted_networks
-internal_networks 212.17.35.15
-trusted_networks 212.17.35.15
-trusted_networks 141.154.95.22
+  clear_internal_networks
+  clear_trusted_networks
+  internal_networks 212.17.35.15
+  trusted_networks 212.17.35.15
+  trusted_networks 141.154.95.22
 
-authres_networks trusted
+  authres_networks trusted
 ");
 
 %patterns = (
@@ -81,14 +79,14 @@ ok_all_patterns();
 ## with all networks (test ignore also)
 
 tstprefs("
-clear_internal_networks
-clear_trusted_networks
-internal_networks 212.17.35.15
-trusted_networks 212.17.35.15
-trusted_networks 141.154.95.22
+  clear_internal_networks
+  clear_trusted_networks
+  internal_networks 212.17.35.15
+  trusted_networks 212.17.35.15
+  trusted_networks 141.154.95.22
 
-authres_networks all
-authres_ignored_authserv authrestest3int authrestest4int
+  authres_networks all
+  authres_ignored_authserv authrestest3int authrestest4int
 ");
 
 %patterns = (
@@ -115,14 +113,14 @@ ok_all_patterns();
 ## with all networks (test trusted also)
 
 tstprefs("
-clear_internal_networks
-clear_trusted_networks
-internal_networks 212.17.35.15
-trusted_networks 212.17.35.15
-trusted_networks 141.154.95.22
+  clear_internal_networks
+  clear_trusted_networks
+  internal_networks 212.17.35.15
+  trusted_networks 212.17.35.15
+  trusted_networks 141.154.95.22
 
-authres_networks all
-authres_trusted_authserv authrestest6int
+  authres_networks all
+  authres_trusted_authserv authrestest6int
 ");
 
 %patterns = (

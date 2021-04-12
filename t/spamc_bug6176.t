@@ -12,9 +12,7 @@ plan tests => 2;
 # ---------------------------------------------------------------------------
 
 %patterns = (
-
-q{ TO GET THE EVOLUTION PREVIEW RELEASE }, 'evolution',
-
+  q{ TO GET THE EVOLUTION PREVIEW RELEASE }, 'evolution',
 );
 
 # connect on port 9 (discard): should always fail.

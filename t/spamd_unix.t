@@ -11,17 +11,14 @@ plan tests => 4;
 # ---------------------------------------------------------------------------
 
 %patterns = (
-
-q{ Subject: There yours for FREE!}, 'subj',
-q{ X-Spam-Status: Yes, score=}, 'status',
-q{ X-Spam-Flag: YES}, 'flag',
-
-
+  q{ Subject: There yours for FREE!}, 'subj',
+  q{ X-Spam-Status: Yes, score=}, 'status',
+  q{ X-Spam-Flag: YES}, 'flag',
 );
 
-tstlocalrules("
-      use_auto_whitelist 0
-    ");
+tstprefs("
+  use_auto_whitelist 0
+");
 
 my $sockpath = mk_safe_tmpdir()."/spamd.sock";
 start_spamd("-D -L --socketpath=$sockpath");

@@ -7,12 +7,11 @@ use Test::More tests => 4;
 # ---------------------------------------------------------------------------
 
 %patterns = (
-
-q{ X-Spam-Status: Yes, score=}, 'status',
-q{ X-Spam-Flag: YES}, 'flag',
-q{ X-Spam-Level: ****}, 'stars',
-
+  q{ X-Spam-Status: Yes, score=}, 'status',
+  q{ X-Spam-Flag: YES}, 'flag',
+  q{ X-Spam-Level: ****}, 'stars',
 );
 
 ok (sarun ("-L -t < data/spam/009", \&patterns_run_cb));
 ok_all_patterns();
+

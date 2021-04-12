@@ -1,12 +1,8 @@
 #!/usr/bin/perl -T
 
-use lib '.'; 
-use lib 't';
-
+use lib '.'; use lib 't';
 $ENV{'TEST_PERL_TAINT'} = 'no';     # inhibit for this test
-use SATest; 
-
-sa_t_init("sa_compile");
+use SATest; sa_t_init("sa_compile");
 
 use Config;
 use File::Basename;
@@ -21,21 +17,12 @@ plan skip_all => "Tests don't work on windows" if $RUNNING_ON_WINDOWS;
 plan skip_all => "RE2C isn't new enough" unless re2c_version_new_enough();
 plan tests => 5;
 
-BEGIN {
-  if (-e 't/test_dir') {
-    chdir 't';
-  }
-  if (-e 'test_dir') {
-    unshift(@INC, '../blib/lib');
-  }
-}
-
 # -------------------------------------------------------------------
 
 use Cwd;
 my $cwd = getcwd;
-my $builddir = "$cwd/log/d.$testname/build";
-my $instbase = "$cwd/log/d.$testname/inst";
+my $builddir = "$cwd/$workdir/d.$testname/build";
+my $instbase = "$cwd/$workdir/d.$testname/inst";
 untaint_system("rm -rf $instbase $builddir");
 untaint_system("mkdir -p $instbase $builddir");
 
@@ -181,3 +168,4 @@ sub set_rules {
   };
   close RULES or die;
 }
+

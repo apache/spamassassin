@@ -11,10 +11,10 @@ plan tests => 8;
 # ---------------------------------------------------------------------------
 
 %is_nonspam_patterns = (
-q{ Subject: Re: [SAtalk] auto-whitelisting}, 'subj',
+  q{ Subject: Re: [SAtalk] auto-whitelisting}, 'subj',
 );
 %is_spam_patterns = (
-q{ X-Spam-Status: Yes}, 'status',
+  q{ X-Spam-Status: Yes}, 'status',
 );
 
 %patterns = %is_nonspam_patterns;

@@ -5,24 +5,8 @@
 delete @ENV{'PATH', 'IFS', 'CDPATH', 'ENV', 'BASH_ENV'};
 $ENV{PATH}='/bin:/usr/bin:/usr/local/bin';
 
-BEGIN {
-  if (-e 't/test_dir') { # if we are running "t/rule_tests.t", kluge around ...
-    chdir 't';
-  }
-
-  if (-e 'test_dir') {            # running from test directory, not ..
-    unshift(@INC, '../blib/lib');
-    unshift(@INC, '../lib');
-  }
-}
-
-my $prefix = '.';
-if (-e 'test_dir') {            # running from test directory, not ..
-  $prefix = '..';
-}
-
 use lib '.'; use lib 't';
-use SATest; sa_t_init("basic_obj_api");
+use SATest; sa_t_init("config_tree_recurse.t");
 use Test::More tests => 4;
 
 # ---------------------------------------------------------------------------

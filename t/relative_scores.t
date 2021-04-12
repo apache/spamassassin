@@ -1,16 +1,5 @@
 #!/usr/bin/perl -T
 
-# Leave this part, or else it'll use the live modules which is BAD!
-BEGIN {
-  if (-e 't/test_dir') { # if we are running "t/rule_names.t", kluge around ...
-    chdir 't';
-  }
-
-  if (-e 'test_dir') {            # running from test directory, not ..
-    unshift(@INC, '../blib/lib', '.');
-  }
-}
-
 use lib '.'; use lib 't';
 use SATest; sa_t_init("relative_scores");
 
@@ -18,21 +7,21 @@ use strict;
 use vars qw/ $error /;
 
 tstlocalrules ("
-	# test that a single relative score applies to all scoresets
-	body FOO /foo/
-	score FOO 1 2 3 4
-	score FOO (1)
+  # test that a single relative score applies to all scoresets
+  body FOO /foo/
+  score FOO 1 2 3 4
+  score FOO (1)
 
-	# test that multiple relative scores apply to the scoresets
-	# appropriately, also that # and #.0 are equal
-	body BAR /bar/
-	score BAR 1
-	score BAR (1.0) (2) (3) (4.0)
+  # test that multiple relative scores apply to the scoresets
+  # appropriately, also that # and #.0 are equal
+  body BAR /bar/
+  score BAR 1
+  score BAR (1.0) (2) (3) (4.0)
 
-	# verify that negative decimal versions work
-	body BAZ /bar/
-	score BAZ 1
-	score BAZ (-1.0) (-2.1) (-3.2) (-4.3)
+  # verify that negative decimal versions work
+  body BAZ /bar/
+  score BAZ 1
+  score BAZ (-1.0) (-2.1) (-3.2) (-4.3)
 ");
 
 my $sa = create_saobj();
@@ -78,3 +67,4 @@ foreach my $index (0..3) {
   }
 }
 ok($error);
+

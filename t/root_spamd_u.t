@@ -16,16 +16,14 @@ plan tests => 11;
 # ---------------------------------------------------------------------------
 
 %patterns = (
-
-q{ Return-Path: sb55sb55@yahoo.com}, 'firstline',
-q{ Subject: There yours for FREE!}, 'subj',
-q{ X-Spam-Status: Yes, score=}, 'status',
-q{ X-Spam-Flag: YES}, 'flag',
-q{ X-Spam-Level: **********}, 'stars',
-q{ TEST_ENDSNUMS}, 'endsinnums',
-q{ TEST_NOREALNAME}, 'noreal',
-q{ This must be the very last line}, 'lastline',
-
+  q{ Return-Path: sb55sb55@yahoo.com}, 'firstline',
+  q{ Subject: There yours for FREE!}, 'subj',
+  q{ X-Spam-Status: Yes, score=}, 'status',
+  q{ X-Spam-Flag: YES}, 'flag',
+  q{ X-Spam-Level: **********}, 'stars',
+  q{ TEST_ENDSNUMS}, 'endsinnums',
+  q{ TEST_NOREALNAME}, 'noreal',
+  q{ This must be the very last line}, 'lastline',
 );
 
 # run spamc as unpriv uid
@@ -40,3 +38,4 @@ alarm 0;
 ok_all_patterns();
 
 ok(stop_spamd());
+

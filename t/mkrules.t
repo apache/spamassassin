@@ -9,10 +9,9 @@ use File::Path;
 # ---------------------------------------------------------------------------
 print " script runs, even with nothing to do\n\n";
 
-my $tdir = "log/mkrules_t";
-rmtree([ $tdir ]);
+my $tdir = "$workdir/mkrules_t";
 
-mkpath (["$tdir/rulesrc", "$tdir/rules"]);
+mkpath ([$tdir, "$tdir/rulesrc", "$tdir/rules"]);
 
 write_file("$tdir/MANIFEST", [ ]);
 write_file("$tdir/MANIFEST.SKIP", [ "foo2\n" ]);
@@ -296,7 +295,7 @@ print " active plugin, but the .pm file is AWOL\n\n";
   "describe GOOD desc_found"  => rule_line_2,
   "ifplugin Good" => if1,
   "endif" => endif_found,
-  "rulesrc/sandbox/foo/20_foo.cf: WARNING: plugin code file 'log/mkrules_t/rulesrc/sandbox/foo/plugin.pm' not found, line ignored: loadplugin Good plugin.pm" => plugin_not_found,
+  "rulesrc/sandbox/foo/20_foo.cf: WARNING: plugin code file '$workdir/mkrules_t/rulesrc/sandbox/foo/plugin.pm' not found, line ignored: loadplugin Good plugin.pm" => plugin_not_found,
 );
 %anti_patterns = (
   "describe T_GOOD desc_found"  => rule_line_2,
@@ -331,7 +330,7 @@ print " active plugin, but the .pm file is not in MANIFEST\n\n";
   "ifplugin Good" => if1,
   "endif" => endif_found,
   "tryplugin Good plugin.pm" => 'tryplugin',
-  "log/mkrules_t/rulesrc/sandbox/foo/20_foo.cf: WARNING: 'log/mkrules_t/rules/plugin.pm' not listed in manifest file, making 'tryplugin': loadplugin Good plugin.pm" => not_found_in_manifest_warning
+  "$workdir/mkrules_t/rulesrc/sandbox/foo/20_foo.cf: WARNING: '$workdir/mkrules_t/rules/plugin.pm' not listed in manifest file, making 'tryplugin': loadplugin Good plugin.pm" => not_found_in_manifest_warning
 );
 %anti_patterns = (
 );
@@ -448,19 +447,18 @@ sub mkrun {
   my $post_redir = '';
   $args =~ s/ 2\>\&1$// and $post_redir = ' 2>&1';
 
-  rmtree ("log/outputdir.tmp"); # some tests use this
-  mkdir ("log/outputdir.tmp", 0755);
+  rmtree ("$workdir/outputdir.tmp"); # some tests use this
+  mkdir ("$workdir/outputdir.tmp", 0755);
 
   clear_pattern_counters();
 
   my $scrargs = "$perl_path -I../lib ../build/mkrules $args";
   print ("\t$scrargs\n");
-
   my $test_number = test_number();
-  untaint_system ("$scrargs > log/$testname.$test_number $post_redir");
+  untaint_system ("$scrargs > $workdir/$testname.$test_number $post_redir");
   $mk_exitcode = ($?>>8);
   if ($mk_exitcode != 0) { return undef; }
-  &checkfile ("$testname.$test_number", $read_sub) if (defined $read_sub);
+  &checkfile ("$workdir/$testname.$test_number", $read_sub) if (defined $read_sub);
   1;
 }
 

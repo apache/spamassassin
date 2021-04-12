@@ -39,8 +39,6 @@ $ENV{'LANGUAGE'} = $ENV{'LC_ALL'} = 'C';             # a cheat, but we need the 
 
 tstprefs (qq{
 
-   $default_cf_lines
-
    loadplugin Mail::SpamAssassin::Plugin::Test
 
    body FOO1 /click here and e= nter your/i
@@ -79,3 +77,4 @@ tstprefs (qq{
 
 sarun ("-L -t -D < data/spam/006 2>&1", \&patterns_run_cb);
 ok ok_all_patterns();
+

@@ -10,11 +10,9 @@ plan tests => 10;
 # ---------------------------------------------------------------------------
 
 %is_spam_patterns = (
-
-q{ TEST_INVALID_DATE}, 'date',
-q{ TEST_ENDSNUMS}, 'endsinnums',
-q{ TEST_NOREALNAME}, 'noreal',
-
+  q{ TEST_INVALID_DATE}, 'date',
+  q{ TEST_ENDSNUMS}, 'endsinnums',
+  q{ TEST_NOREALNAME}, 'noreal',
 );
 
 %patterns = %is_spam_patterns;

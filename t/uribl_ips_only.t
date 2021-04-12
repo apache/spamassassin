@@ -12,7 +12,7 @@ plan tests => 4;
 # ---------------------------------------------------------------------------
 
 %anti_patterns = (
- q{ X_URIBL_IPSONLY } => 'A',
+  q{ X_URIBL_IPSONLY } => 'A',
 );
 
 tstlocalrules(q{

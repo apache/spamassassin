@@ -10,29 +10,29 @@ plan tests => 32;
 # ---------------------------------------------------------------------------
 
 tstprefs ("
-        def_welcomelist_from_rcvd *\@paypal.com paypal.com
-        def_welcomelist_from_rcvd *\@paypal.com ebay.com
-        def_welcomelist_from_rcvd mumble\@example.com example.com
-        welcomelist_from_rcvd foo\@example.com spamassassin.org
-        welcomelist_from_rcvd foo\@example.com example.com
-        welcomelist_from_rcvd bar\@example.com example.com
-        whitelist_allows_relays bar\@example.com
-        welcomelist_from baz\@example.com
-        welcomelist_from bam\@example.com
-        unwhitelist_from bam\@example.com
-        unwelcomelist_from_rcvd mumble\@example.com
-	");
+  def_welcomelist_from_rcvd *\@paypal.com paypal.com
+  def_welcomelist_from_rcvd *\@paypal.com ebay.com
+  def_welcomelist_from_rcvd mumble\@example.com example.com
+  welcomelist_from_rcvd foo\@example.com spamassassin.org
+  welcomelist_from_rcvd foo\@example.com example.com
+  welcomelist_from_rcvd bar\@example.com example.com
+  whitelist_allows_relays bar\@example.com
+  welcomelist_from baz\@example.com
+  welcomelist_from bam\@example.com
+  unwhitelist_from bam\@example.com
+  unwelcomelist_from_rcvd mumble\@example.com
+");
 
 # tests 1 - 4 does welcomelist_from (previously whitelist_from) work?
 %patterns = (
-             q{ USER_IN_WELCOMELIST }, 'w1'
-             );
+  q{ USER_IN_WELCOMELIST }, 'w1'
+);
 
 %anti_patterns = (
-             q{ FORGED_IN_WHITELIST }, 'a2',
-             q{ USER_IN_DEF_WHITELIST }, 'a3',
-             q{ FORGED_IN_DEF_WHITELIST }, 'a4'
-             );
+  q{ FORGED_IN_WHITELIST }, 'a2',
+  q{ USER_IN_DEF_WHITELIST }, 'a3',
+  q{ FORGED_IN_DEF_WHITELIST }, 'a4'
+);
 sarun ("-L -t < data/nice/008", \&patterns_run_cb);
 ok_all_patterns();
 
@@ -45,14 +45,14 @@ sarun ("-L -t < data/nice/010", \&patterns_run_cb);
 ok_all_patterns();
 
 %patterns = (
-             q{ USER_IN_DEF_WHITELIST }, 'w5'
-             );
+  q{ USER_IN_DEF_WHITELIST }, 'w5'
+);
 
 %anti_patterns = (
-             q{ USER_IN_WHITELIST }, 'a6',
-             q{ FORGED_IN_WHITELIST }, 'a7',
-             q{ FORGED_IN_DEF_WHITELIST }, 'a8'
-             );
+  q{ USER_IN_WHITELIST }, 'a6',
+  q{ FORGED_IN_WHITELIST }, 'a7',
+  q{ FORGED_IN_DEF_WHITELIST }, 'a8'
+);
 
 # tests 13 - 16 does def_welcomelist_from_rcvd work?
 sarun ("-L -t < data/nice/011", \&patterns_run_cb);
@@ -65,11 +65,11 @@ ok_all_patterns();
 %patterns = ();
 
 %anti_patterns = (
-             q{ USER_IN_WHITELIST }, 'a9',
-             q{ FORGED_IN_WHITELIST }, 'a10',
-             q{ USER_IN_DEF_WHITELIST }, 'a11',
-             q{ FORGED_IN_DEF_WHITELIST }, 'a12'
-             );
+  q{ USER_IN_WHITELIST }, 'a9',
+  q{ FORGED_IN_WHITELIST }, 'a10',
+  q{ USER_IN_DEF_WHITELIST }, 'a11',
+  q{ FORGED_IN_DEF_WHITELIST }, 'a12'
+);
 # tests 21 - 24 does whitelist_allows_relays suppress the forged rule without
 #  putting the address on the whitelist?
 sarun ("-L -t < data/nice/013", \&patterns_run_cb);

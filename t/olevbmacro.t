@@ -11,11 +11,9 @@ plan skip_all => 'Need Archive::Zip for this test' unless HAS_ARCHIVE_ZIP;
 plan skip_all => 'Need IO::String for this test' unless HAS_IO_STRING;
 plan tests => 7;
 
-tstpre ("
-loadplugin Mail::SpamAssassin::Plugin::OLEVBMacro
-");
-
 tstlocalrules (q{
+  loadplugin Mail::SpamAssassin::Plugin::OLEVBMacro
+
   olemacro_extended_scan 1
 
   body     OLEMACRO eval:check_olemacro()
@@ -34,40 +32,40 @@ tstlocalrules (q{
 
 
 %patterns = (
-        q{ OLEMACRO }, 'OLEMACRO',
-            );
+  q{ OLEMACRO }, 'OLEMACRO',
+);
 
 sarun ("-L -t < data/spam/olevbmacro/macro.eml", \&patterns_run_cb);
 ok_all_patterns();
 clear_pattern_counters();
 
 %patterns = (
-        q{ OLEMACRO_MALICE }, 'OLEMACRO_MALICE',
-            );
+  q{ OLEMACRO_MALICE }, 'OLEMACRO_MALICE',
+);
 
 sarun ("-L -t < data/spam/olevbmacro/malicemacro.eml", \&patterns_run_cb);
 ok_all_patterns();
 clear_pattern_counters();
 
 %patterns = (
-        q{ OLEMACRO_RENAME }, 'OLEMACRO_RENAME',
-            );
+  q{ OLEMACRO_RENAME }, 'OLEMACRO_RENAME',
+);
 
 sarun ("-L -t < data/spam/olevbmacro/renamedmacro.eml", \&patterns_run_cb);
 ok_all_patterns();
 clear_pattern_counters();
 
 %patterns = (
-        q{ OLEMACRO_ENCRYPTED }, 'OLEMACRO_ENCRYPTED',
-            );
+  q{ OLEMACRO_ENCRYPTED }, 'OLEMACRO_ENCRYPTED',
+);
 
 sarun ("-L -t < data/spam/olevbmacro/encrypted.eml", \&patterns_run_cb);
 ok_all_patterns();
 clear_pattern_counters();
 
 %patterns = (
-        q{ OLEMACRO_ZIP_PW }, 'OLEMACRO_ZIP_PW',
-            );
+  q{ OLEMACRO_ZIP_PW }, 'OLEMACRO_ZIP_PW',
+);
 
 sarun ("-L -t < data/spam/olevbmacro/zippwmacro.eml", \&patterns_run_cb);
 ok_all_patterns();
@@ -75,16 +73,17 @@ clear_pattern_counters();
 
 %patterns = ();
 %anti_patterns = (
-        q{ OLEMACRO }, 'OLEMACRO',
-            );
+  q{ OLEMACRO }, 'OLEMACRO',
+);
 
 sarun ("-L -t < data/spam/olevbmacro/nomacro.eml", \&patterns_run_cb);
 ok_all_patterns();
 
 %patterns = ();
 %anti_patterns = (
-        q{ OLEMACRO_CSV }, 'OLEMACRO_CSV',
-            );
+  q{ OLEMACRO_CSV }, 'OLEMACRO_CSV',
+);
 
 sarun ("-L -t < data/spam/olevbmacro/goodcsv.eml", \&patterns_run_cb);
 ok_all_patterns();
+

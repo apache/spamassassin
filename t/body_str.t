@@ -2,21 +2,6 @@
 
 # test URIs with UTF8 IDNA-equivalent dots between domains instead of ordinary '.'
 
-BEGIN {
-  if (-e 't/test_dir') { # if we are running "t/rule_names.t", kluge around ...
-    chdir 't';
-  }
-
-  if (-e 'test_dir') {            # running from test directory, not ..
-    unshift(@INC, '../blib/lib');
-  }
-}
-
-my $prefix = '.';
-if (-e 'test_dir') {            # running from test directory, not ..
-  $prefix = '..';
-}
-
 use strict;
 use lib '.'; use lib 't';
 use SATest; sa_t_init("body_str.t");

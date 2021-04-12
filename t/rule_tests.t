@@ -1,23 +1,7 @@
 #!/usr/bin/perl -T
 
-BEGIN {
-  if (-e 't/test_dir') { # if we are running "t/rule_tests.t", kluge around ...
-    chdir 't';
-  }
-
-  if (-e 'test_dir') {            # running from test directory, not ..
-    unshift(@INC, '../blib/lib');
-  }
-}
-
-my $prefix = '.';
-if (-e 'test_dir') {            # running from test directory, not ..
-  $prefix = '..';
-}
-
-use lib '.';
-use SATest;
-sa_t_init("rule_tests");
+use lib '.'; use lib 't';
+use SATest; sa_t_init("rule_tests");
 
 use strict;
 use Test::More;

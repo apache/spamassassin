@@ -22,20 +22,14 @@ plan skip_all => "no needed binaries found" unless $tests;
 plan tests => $tests;
 
 %patterns_gtube = (
-   q{ BODY: Generic Test for Unsolicited Bulk Email }, 'gtube',
-            );
-
-tstpre ("
-loadplugin Mail::SpamAssassin::Plugin::ExtractText
-");
-
+  q{ BODY: Generic Test for Unsolicited Bulk Email }, 'gtube',
+);
 
 if (-x "/usr/bin/pdftohtml") {
    tstprefs("
-   $default_cf_lines
-   extracttext_external    pdftohtml       /usr/bin/pdftohtml -i -stdout -noframes {} -
-   extracttext_use         pdftohtml       .pdf application/pdf
-   extracttext_timeout 5
+     extracttext_external  pdftohtml  /usr/bin/pdftohtml -i -stdout -noframes {} -
+     extracttext_use       pdftohtml  .pdf application/pdf
+     extracttext_timeout 30
    ");
    %patterns = %patterns_gtube;
    sarun ("-L -t < data/spam/extracttext/gtube_pdf.eml", \&patterns_run_cb);
@@ -45,10 +39,9 @@ if (-x "/usr/bin/pdftohtml") {
 
 if (-x "/usr/bin/pdftotext") {
    tstprefs("
-   $default_cf_lines
-   extracttext_external    pdftotext       /usr/bin/pdftotext -q -nopgbrk -enc UTF-8 {} -
-   extracttext_use         pdftotext       .pdf application/pdf
-   extracttext_timeout 5 10
+     extracttext_external  pdftotext  /usr/bin/pdftotext -q -nopgbrk -enc UTF-8 {} -
+     extracttext_use       pdftotext  .pdf application/pdf
+     extracttext_timeout 30 40
    ");
    %patterns = %patterns_gtube;
    sarun ("-L -t < data/spam/extracttext/gtube_pdf.eml", \&patterns_run_cb);
@@ -58,9 +51,9 @@ if (-x "/usr/bin/pdftotext") {
 
 if (-x "/usr/bin/tesseract") {
    tstprefs("
-   extracttext_external    tesseract       /usr/bin/tesseract -c page_separator= {} -
-   extracttext_use         tesseract       .bmp .jpg .png .tif
-   extracttext_timeout 20
+     extracttext_external  tesseract  /usr/bin/tesseract -c page_separator= {} -
+     extracttext_use       tesseract  .bmp .jpg .png .tif
+     extracttext_timeout 30 1
    ");
    %patterns = %patterns_gtube;
    sarun ("-L -t < data/spam/extracttext/gtube_jpg.eml", \&patterns_run_cb);

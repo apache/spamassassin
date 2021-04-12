@@ -2,28 +2,19 @@
 
 use Data::Dumper;
 use lib '.'; use lib 't';
-use SATest; sa_t_init("bayes");
+use SATest; sa_t_init("bayessdbm");
 
 use constant HAS_SDBM_FILE => eval { require SDBM_File };
 
 use Test::More;
-BEGIN {
-  if (-e 't/test_dir') {
-    chdir 't';
-  }
-
-  if (-e 'test_dir') {
-    unshift(@INC, '../blib/lib');
-  }
-}
 
 plan skip_all => "Long running tests disabled" unless conf_bool('run_long_tests');
 plan skip_all => "No SDBM_File" unless HAS_SDBM_FILE;
 plan tests => 52;
 
-tstlocalrules ("
-        bayes_store_module Mail::SpamAssassin::BayesStore::SDBM
-        bayes_learn_to_journal 0
+tstprefs ("
+  bayes_store_module Mail::SpamAssassin::BayesStore::SDBM
+  bayes_learn_to_journal 0
 ");
 
 use Mail::SpamAssassin;
@@ -145,44 +136,44 @@ getimpl->{store}->untie_db();
 
 undef $sa;
 
-sa_t_init('bayes'); # this wipes out what is there and begins anew
+sa_t_init('bayessdbm'); # this wipes out what is there and begins anew
 
 # make sure we learn to a journal
-tstlocalrules ("
-        bayes_store_module Mail::SpamAssassin::BayesStore::SDBM
-        bayes_learn_to_journal 1
+tstprefs ("
+  bayes_store_module Mail::SpamAssassin::BayesStore::SDBM
+  bayes_learn_to_journal 1
 ");
 
 $sa = create_saobj();
 
 $sa->init();
 
-ok(!-e 'log/user_state/bayes_journal');
+ok(!-e "$userstate/bayes_journal");
 
 ok($sa->{bayes_scanner}->learn(1, $mail));
 
-ok(-e 'log/user_state/bayes_journal');
+ok(-e "$userstate/bayes_journal");
 
 $sa->{bayes_scanner}->sync(1); # always returns 0, so no need to check return
 
-ok(!-e 'log/user_state/bayes_journal');
+ok(!-e "$userstate/bayes_journal");
 
-ok(-e 'log/user_state/bayes_seen.pag');
-ok(-e 'log/user_state/bayes_seen.dir');
+ok(-e "$userstate/bayes_seen.pag");
+ok(-e "$userstate/bayes_seen.dir");
 
-ok(-e 'log/user_state/bayes_toks.pag');
-ok(-e 'log/user_state/bayes_toks.dir');
+ok(-e "$userstate/bayes_toks.pag");
+ok(-e "$userstate/bayes_toks.dir");
 
 undef $sa;
 
-sa_t_init('bayes'); # this wipes out what is there and begins anew
+sa_t_init('bayessdbm'); # this wipes out what is there and begins anew
 
 # make sure we learn to a journal
-tstlocalrules ("
-        bayes_store_module Mail::SpamAssassin::BayesStore::SDBM
-bayes_learn_to_journal 0
-bayes_min_spam_num 10
-bayes_min_ham_num 10
+tstprefs ("
+  bayes_store_module Mail::SpamAssassin::BayesStore::SDBM
+  bayes_learn_to_journal 0
+  bayes_min_spam_num 10
+  bayes_min_ham_num 10
 ");
 
 # we get to bastardize the existing pattern matching code here.  It lets us provide
@@ -263,11 +254,11 @@ ok($score =~ /\d/ && $score <= 1.0 && $score != .5);
 
 ok(getimpl->{store}->clear_database());
 
-ok(!-e 'log/user_state/bayes_journal');
-ok(!-e 'log/user_state/bayes_seen.pag');
-ok(!-e 'log/user_state/bayes_seen.dir');
-ok(!-e 'log/user_state/bayes_toks.pag');
-ok(!-e 'log/user_state/bayes_toks.dir');
+ok(!-e "$userstate/bayes_journal");
+ok(!-e "$userstate/bayes_seen.pag");
+ok(!-e "$userstate/bayes_seen.dir");
+ok(!-e "$userstate/bayes_toks.pag");
+ok(!-e "$userstate/bayes_toks.dir");
 
 sub check_examined {
   local ($_);

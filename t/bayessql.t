@@ -1,7 +1,7 @@
 #!/usr/bin/perl -T
 
 use lib '.'; use lib 't';
-use SATest;
+use SATest; sa_t_init("bayessql");
 
 use constant HAS_DBI => eval { require DBI; }; # for our cleanup stuff
 
@@ -9,16 +9,6 @@ use Test::More;
 plan skip_all => "Bayes SQL tests are disabled" unless conf_bool('run_bayes_sql_tests');
 plan skip_all => "DBI is unavailable on this system" unless HAS_DBI;
 plan tests => 53;
-
-BEGIN {
-  if (-e 't/test_dir') {
-    chdir 't';
-  }
-
-  if (-e 'test_dir') {
-    unshift(@INC, '../blib/lib');
-  }
-}
 
 diag "Note: Failure may be due to an incorrect config.";
 
@@ -40,13 +30,11 @@ foreach my $setting (qw(
 
 my $testuser = 'tstusr.'.$$.'.'.time();
 
-sa_t_init("bayes");
-
-tstlocalrules ("
-$dbconfig
-bayes_sql_override_username $testuser
-loadplugin validuserplugin ../../data/validuserplugin.pm
-bayes_sql_username_authorized 1
+tstprefs ("
+  $dbconfig
+  bayes_sql_override_username $testuser
+  loadplugin validuserplugin ../../../data/validuserplugin.pm
+  bayes_sql_username_authorized 1
 ");
 
 use Mail::SpamAssassin;
@@ -79,13 +67,13 @@ $sa->finish_learner();
 
 undef $sa;
 
-sa_t_init("bayes");
+sa_t_init("bayessql");
 
-tstlocalrules ("
-$dbconfig
-bayes_sql_override_username iwillfail
-loadplugin validuserplugin ../../data/validuserplugin.pm
-bayes_sql_username_authorized 1
+tstprefs ("
+  $dbconfig
+  bayes_sql_override_username iwillfail
+  loadplugin validuserplugin ../../data/validuserplugin.pm
+  bayes_sql_username_authorized 1
 ");
 
 $sa = create_saobj();
@@ -102,11 +90,11 @@ $sa->finish_learner();
 
 undef $sa;
 
-sa_t_init("bayes");
+sa_t_init("bayessql");
 
-tstlocalrules ("
-$dbconfig
-bayes_sql_override_username $testuser
+tstprefs ("
+  $dbconfig
+  bayes_sql_override_username $testuser
 ");
 
 $sa = create_saobj();
@@ -241,14 +229,14 @@ $sa->finish_learner();
 
 undef $sa;
 
-sa_t_init('bayes'); # this wipes out what is there and begins anew
+sa_t_init("bayessql"); # this wipes out what is there and begins anew
 
 # make sure we learn to a journal
-tstlocalrules ("
-$dbconfig
-bayes_min_spam_num 10
-bayes_min_ham_num 10
-bayes_sql_override_username $testuser
+tstprefs ("
+  $dbconfig
+  bayes_min_spam_num 10
+  bayes_min_ham_num 10
+  bayes_sql_override_username $testuser
 ");
 
 # we get to bastardize the existing pattern matching code here.  It lets us provide

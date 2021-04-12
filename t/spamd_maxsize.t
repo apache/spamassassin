@@ -13,9 +13,7 @@ plan tests => 1;
 # test for size limit issues like in Bug 5412
 
 %patterns = (
-
-q{ Subject: There yours for FREE! }, 'subj',
-
+  q{ Subject: There yours for FREE! }, 'subj',
 );
 
 sdrun ("-L", "-s 512 < data/spam/001", \&patterns_run_cb);

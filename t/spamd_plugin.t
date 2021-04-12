@@ -11,18 +11,18 @@ plan tests => 6;
 
 # ---------------------------------------------------------------------------
 
-tstlocalrules ('
-        loadplugin myTestPlugin ../../data/testplugin.pm
-        header MY_TEST_PLUGIN eval:check_test_plugin()
+tstprefs ('
+  loadplugin myTestPlugin ../../../data/testplugin.pm
+  header MY_TEST_PLUGIN eval:check_test_plugin()
 ');
 
 # create a shared counter file for this test
 use Cwd;
-$ENV{'SPAMD_PLUGIN_COUNTER_FILE'} = getcwd."/log/spamd_plugin.tmp";
-open(COUNTER,">log/spamd_plugin.tmp");
+$ENV{'SPAMD_PLUGIN_COUNTER_FILE'} = getcwd."/$workdir/spamd_plugin.tmp";
+open(COUNTER,">$workdir/spamd_plugin.tmp");
 print COUNTER "0";
 close COUNTER;
-chmod (0666, "log/spamd_plugin.tmp");
+chmod (0666, "$workdir/spamd_plugin.tmp");
 
 my $sockpath = mk_safe_tmpdir()."/spamd.sock";
 start_spamd("-D -L --socketpath=$sockpath");

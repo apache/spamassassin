@@ -1,7 +1,7 @@
 #!/usr/bin/perl -T
 
 use lib '.'; use lib 't';
-use SATest; sa_t_init("sa-check_spamd");
+use SATest; sa_t_init("sa_check_spamd");
 
 use Test::More;
 plan skip_all => "Spamd tests disabled" if $SKIP_SPAMD_TESTS;
@@ -10,10 +10,8 @@ plan tests => 7;
 # ---------------------------------------------------------------------------
 
 %patterns = (
-
-q{ X-Spam-Status: Yes, score=}, 'status',
-q{ X-Spam-Flag: YES}, 'flag',
-
+  q{ X-Spam-Status: Yes, score=}, 'status',
+  q{ X-Spam-Flag: YES}, 'flag',
 );
 
 ok(start_spamd("-L"));
@@ -29,3 +27,4 @@ ok(stop_spamd());
 
 sacheckspamdrun("--hostname $spamdhost --port $p --verbose");
 ok (($? >> 8) != 0);
+

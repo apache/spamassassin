@@ -13,14 +13,14 @@ plan tests => 3;
 # ---------------------------------------------------------------------------
 
 %patterns = (
-q{ autolearn=no } => 'autolearn no',
+  q{ autolearn=no } => 'autolearn no',
 );
 
 %anti_patterns = (
-q{ autolearn=spam } => 'autolearned as spam',
+  q{ autolearn=spam } => 'autolearned as spam',
 );
 
-tstprefs ('
+tstprefs ("
 
 header	 AUTOLEARNTEST_FROM_HEADER	From =~ /@/
 score	 AUTOLEARNTEST_FROM_HEADER	13.0
@@ -30,7 +30,7 @@ use_bayes 1
 bayes_auto_learn 1
 bayes_auto_learn_threshold_spam 12.0
 
-');
+");
 
 ok (sarun ("-L -t < data/nice/001", \&patterns_run_cb));
 ok_all_patterns();

@@ -12,16 +12,7 @@ use warnings;
 my $debug = 0;
 my $running_perl56 = ($] < 5.007);
 
-# perl 5.6.1 on Solaris fails all tests here if PERL_DL_NONLAZY=1
-# but works fine if it is =0.  ho hum
-$ENV{'PERL_DL_NONLAZY'} = 0;
-
 close STDIN;    # inhibits noise from sa-compile
-
-BEGIN { 
-  if (-e 't/test_dir') { chdir 't'; } 
-  if (-e 'test_dir') { unshift(@INC, '../blib/lib'); }
-}
 
 use Test::More tests => 128;
 use lib '../lib';
@@ -445,9 +436,9 @@ sub try_extraction {
   my ($rules, $params, $output, $notoutput) = @_;
 
   my $sa = Mail::SpamAssassin->new({
-    rules_filename => "log/test_rules_copy",
-    site_rules_filename => "log/test_default.cf",
-    userprefs_filename  => "log/userprefs.cf",
+    rules_filename => $localrules,
+    site_rules_filename => $siterules,
+    userprefs_filename  => $userrules,
     local_tests_only    => 1,
     debug               => $debug,
     dont_copy_prefs     => 1,
@@ -456,18 +447,18 @@ sub try_extraction {
   ok($sa);
 
   # remove all rules and plugins; we want just our stuff
-  untaint_system("rm -f log/test_rules_copy/*.pre");
-  untaint_system("rm -f log/test_rules_copy/*.pm");
+  untaint_system("rm -f $siterules/*.pre");
+  untaint_system("rm -f $siterules/*.pm");
   # keep 20_aux_tlds.cf to suppress RB warnings
-  rename("log/test_rules_copy/20_aux_tlds.cf", "log/test_rules_copy/20_aux_tlds.cf.tmp");
-  untaint_system("rm -f log/test_rules_copy/*.cf");
-  rename("log/test_rules_copy/20_aux_tlds.cf.tmp", "log/test_rules_copy/20_aux_tlds.cf");
+  rename("$localrules/20_aux_tlds.cf", "$localrules/20_aux_tlds.cf.tmp");
+  untaint_system("rm -f $localrules/*.cf");
+  rename("$localrules/20_aux_tlds.cf.tmp", "$localrules/20_aux_tlds.cf");
 
   { # suppress unnecessary warning:
     #   "Filehandle STDIN reopened as STDOUT only for output"
     # See https://rt.perl.org/rt3/Public/Bug/Display.html?id=23838
     no warnings 'io';
-    open (OUT, ">log/test_rules_copy/00_test.cf")
+    open (OUT, ">$localrules/99_test.cf")
       or die "failed to write rule";
   }
   print OUT "

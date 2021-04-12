@@ -12,7 +12,7 @@ plan tests => 110;
 
 # ---------------------------------------------------------------------------
 
-my $pid_file = "log/spamd.pid";
+my $pid_file = "$workdir/spamd.pid";
 my($pid1, $pid2);
 
 dbgprint "Starting spamd...\n";

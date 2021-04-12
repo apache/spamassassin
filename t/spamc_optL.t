@@ -2,6 +2,7 @@
 
 use lib '.'; use lib 't';
 use SATest; sa_t_init("spamc_optL");
+
 use constant HAS_SDBM_FILE => eval { require SDBM_File; };
 
 use Test::More;
@@ -11,8 +12,8 @@ plan tests => 18;
 
 # ---------------------------------------------------------------------------
 
-tstlocalrules ("
-        bayes_store_module Mail::SpamAssassin::BayesStore::SDBM
+tstprefs ("
+  bayes_store_module Mail::SpamAssassin::BayesStore::SDBM
 ");
 
 start_spamd("-L --allow-tell");
@@ -55,3 +56,4 @@ ok (spamcrun ("-L forget < data/nice/001", \&patterns_run_cb));
 ok_all_patterns();
 
 stop_spamd();
+

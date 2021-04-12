@@ -1,16 +1,5 @@
 #!/usr/bin/perl -T
 
-BEGIN {
-  if (-e 't/test_dir') { # if we are running "t/rule_tests.t", kluge around ...
-    chdir 't';
-  }
-
-  if (-e 'test_dir') {            # running from test directory, not ..
-    unshift(@INC, '../blib/lib');
-    unshift(@INC, '../lib');
-  }
-}
-
 use lib '.'; use lib 't';
 use SATest; sa_t_init("urilocalbl");
 
@@ -55,6 +44,8 @@ loadplugin Mail::SpamAssassin::Plugin::URILocalBL
 );
 
 my $rules = "
+
+  dns_query_restriction allow google.com
 
   uri_block_cc X_URIBL_USA us
   describe X_URIBL_USA uri located in USA

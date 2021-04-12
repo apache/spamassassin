@@ -1,31 +1,18 @@
 #!/usr/bin/perl
 
-use lib '.'; 
-use lib 't';
+use lib '.'; use lib 't';
 $ENV{'TEST_PERL_TAINT'} = 'no';     # inhibit for this test
-use SATest; 
-sa_t_init("make_install");
+use SATest; sa_t_init("make_install");
 
 use Config;
 use Test::More tests => 25;
-
-BEGIN { 
-  if (-e 't/test_dir') {
-    chdir 't';
-  }
-
-  if (-e 'test_dir') {
-    unshift(@INC, '../blib/lib');
-  }
-
-};
 
 # -------------------------------------------------------------------
 
 use Cwd;
 my $cwd = getcwd;
-my $builddir = "$cwd/log/d.$testname/build";
-my $instbase = "$cwd/log/d.$testname/inst";
+my $builddir = "$cwd/$workdir/d.$testname/build";
+my $instbase = "$cwd/$workdir/d.$testname/inst";
 untaint_system("rm -rf $instbase $builddir");
 untaint_system("mkdir -p $instbase $builddir");
 

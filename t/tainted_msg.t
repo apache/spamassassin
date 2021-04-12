@@ -1,16 +1,5 @@
 #!/usr/bin/perl -T
 
-BEGIN {
-  if (-e 't/test_dir') { # if we are running "t/rule_tests.t", kluge around ...
-    chdir 't';
-  }
-
-  if (-e 'test_dir') {            # running from test directory, not ..
-    unshift(@INC, '../blib/lib');
-    unshift(@INC, '../lib');
-  }
-}
-
 $NO_SPAMD_REQUIRED=1;
 use lib '.'; use lib 't';
 use SATest; sa_t_init("tainted_msg");
@@ -24,7 +13,6 @@ plan tests => 9;
 # ---------------------------------------------------------------------------
 
 %patterns = (
-
   q{ tainted get_header found } => '',
   q{ tainted get_pristine found } => '',
   q{ tainted get_pristine_body found } => '',
@@ -33,12 +21,11 @@ plan tests => 9;
   q{ tainted get_visible_rendered_body_text_array found } => '',
   q{ tainted get_decoded_body_text_array found } => '',
   q{ tainted get_rendered_body_text_array found } => '',
-
 );
 %anti_patterns = ();
 
-tstlocalrules ("
-    loadplugin myTestPlugin ../../data/taintcheckplugin.pm
+tstprefs ("
+  loadplugin myTestPlugin ../../../data/taintcheckplugin.pm
 ");
 
 use Mail::SpamAssassin::Util;

@@ -1,7 +1,7 @@
 #!/usr/bin/perl -T
 
 use lib '.'; use lib 't';
-use SATest; sa_t_init("dns");
+use SATest; sa_t_init("dnsbl");
 
 use Test::More;
 plan skip_all => "Net tests disabled" unless conf_bool('run_net_tests');
@@ -141,3 +141,4 @@ tflags DNSBL_RHS	net
 # The -D clobbers test performance but some patterns & antipatterns depend on debug output
 sarun ("-D -t < data/spam/dnsbl.eml 2>&1", \&patterns_run_cb);
 ok_all_patterns();
+

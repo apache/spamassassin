@@ -12,6 +12,7 @@ use File::Basename;
 use File::Copy;
 use File::Path;
 use File::Spec;
+use File::Temp qw(tempdir);
 
 use Test::Builder ();
 use Test::More    ();
@@ -21,7 +22,9 @@ use POSIX qw(WIFEXITED WIFSIGNALED WIFSTOPPED WEXITSTATUS WTERMSIG WSTOPSIG);
 use vars qw($RUNNING_ON_WINDOWS $SSL_AVAILABLE
             $SKIP_SPAMD_TESTS $SKIP_SPAMC_TESTS $NO_SPAMC_EXE
             $SKIP_SETUID_NOBODY_TESTS $SKIP_DNSBL_TESTS
-            $have_inet4 $have_inet6 $spamdhost $spamdport);
+            $have_inet4 $have_inet6 $spamdhost $spamdport
+            $workdir $siterules $localrules $userrules $userstate
+            $keep_workdir $mainpid);
 
 BEGIN {
   require Exporter;
@@ -72,6 +75,7 @@ BEGIN {
 #
 sub sa_t_init {
   my $tname = shift;
+  $mainpid = $$;
 
   if ($config{PERL_PATH}) {
     $perl_path = $config{PERL_PATH};
@@ -124,8 +128,6 @@ sub sa_t_init {
   }
   $spamdhost = $ENV{'SPAMD_HOST'};
   $spamdhost ||= $spamdlocalhost;
-  $spamdport = $ENV{'SPAMD_PORT'};
-  $spamdport ||= probably_unused_spamd_port();
 
   # optimisation -- don't setup spamd test parameters unless we're
   # not skipping all spamd tests and this particular test is called
@@ -133,26 +135,65 @@ sub sa_t_init {
   # We still run spamc tests when there is an external SPAMD_HOST, but don't have to set up the spamd parameters for it
   if ($SKIP_SPAMD_TESTS or ($tname !~ /spam[cd]/)) {
     $NO_SPAMD_REQUIRED = 1;
+  } else {
+    $spamdport = $ENV{'SPAMD_PORT'};
+    $spamdport ||= probably_unused_spamd_port();
   }
 
-  $spamd_cf_args = "-C log/test_rules_copy";
-  $spamd_localrules_args = " --siteconfigpath log/localrules.tmp";
-  $scr_localrules_args =   " --siteconfigpath log/localrules.tmp";
-  $salearn_localrules_args =   " --siteconfigpath log/localrules.tmp";
+  (-f "t/test_dir") && chdir("t");        # run from ..
+  -f "test_dir"  or die "FATAL: not in test directory?\n";
 
-  $scr_cf_args = "-C log/test_rules_copy";
-  $scr_pref_args = "-p log/test_default.cf";
-  $salearn_cf_args = "-C log/test_rules_copy";
-  $salearn_pref_args = "-p log/test_default.cf";
+  unless (-d "log") {
+    mkdir ("log", 0755) or die ("Error creating log dir: $!");
+  }
+  chmod (0755, "log"); # set in case log already exists with wrong permissions
+
+  if (!$RUNNING_ON_WINDOWS) {
+    untaint_system("chacl -B log 2>/dev/null || setfacl -b log 2>/dev/null"); # remove acls that confuse test
+  }
+
+  # clean old workdir if sa_t_init called multiple times
+  if (defined $workdir) {
+    if (!$keep_workdir) {
+      rmtree($workdir);
+    }
+  }
+
+  # individual work directory to make parallel tests possible
+  $workdir = tempdir("$tname.XXXXXX", DIR => "log");
+  die "FATAL: failed to create workdir: $!" unless -d $workdir;
+  $keep_workdir = 0;
+  # $siterules contains all stock *.pre files
+  $siterules = "$workdir/siterules";
+  # $localrules contains all stock *.cf files
+  $localrules = "$workdir/localrules";
+  # $userrules contains user rules
+  $userrules = "$workdir/user.cf";
+  # user_state directory
+  $userstate = "$workdir/user_state";
+
+  mkdir($siterules) or die "FATAL: failed to create $siterules\n";
+  mkdir($localrules) or die "FATAL: failed to create $localrules\n";
+  open(OUT, ">$userrules") or die "FATAL: failed to create $userrules\n";
+  close(OUT);
+  mkdir($userstate) or die "FATAL: failed to create $userstate\n";
+
+  $spamd_cf_args = "-C $localrules";
+  $spamd_localrules_args = " --siteconfigpath $siterules";
+  $scr_localrules_args =   " --siteconfigpath $siterules";
+  $salearn_localrules_args =   " --siteconfigpath $siterules";
+
+  $scr_cf_args = "-C $localrules";
+  $scr_pref_args = "-p $userrules";
+  $salearn_cf_args = "-C $localrules";
+  $salearn_pref_args = "-p $userrules";
   $scr_test_args = "";
   $salearn_test_args = "";
-  $set_test_prefs = 0;
+  $set_user_prefs = 0;
   $default_cf_lines = "
-    bayes_path ./log/user_state/bayes
-    auto_whitelist_path ./log/user_state/auto-whitelist
+    bayes_path ./$userstate/bayes
+    auto_whitelist_path ./$userstate/auto-whitelist
   ";
-
-  (-f "t/test_dir") && chdir("t");        # run from ..
 
   read_config();
 
@@ -179,66 +220,34 @@ sub sa_t_init {
                     (untaint_cmd("$spamc -V") =~ /with SSL support/) &&
                     (untaint_cmd("$spamd --version") =~ /with SSL support/));
   }
-  # do not remove prior test results!
-  # rmtree ("log");
-
-  unless (-d "log") {
-    mkdir ("log", 0755) or die ("Error creating log dir: $!");
-  }
-  chmod (0755, "log"); # set in case log already exists with wrong permissions
-
-  if (!$RUNNING_ON_WINDOWS) {
-    untaint_system("chacl -B log 2>/dev/null || setfacl -b log 2>/dev/null"); # remove acls that confuse test
-  }
-
-  rmtree ("log/user_state");
-  rmtree ("log/outputdir.tmp");
-
-  rmtree ("log/test_rules_copy");
-  mkdir ("log/test_rules_copy", 0755);
-
-  for $tainted (<../rules/*.cf>, <../rules/*.pm>, <../rules/*.pre>, <../rules/languages>) {
-    $tainted =~ /(.*)/;
-    my $file = $1;
-    $base = basename $file;
-    copy ($file, "log/test_rules_copy/$base")
-      or warn "cannot copy $file to log/test_rules_copy/$base: $!";
-  }
-
-  copy ("data/01_test_rules.pre", "log/test_rules_copy/01_test_rules.pre")
-    or warn "cannot copy data/01_test_rules.cf to log/test_rules_copy/01_test_rules.pre: $!";
-  copy ("data/01_test_rules.cf", "log/test_rules_copy/01_test_rules.cf")
-    or warn "cannot copy data/01_test_rules.cf to log/test_rules_copy/01_test_rules.cf: $!";
-
-  rmtree ("log/localrules.tmp");
-  mkdir ("log/localrules.tmp", 0755);
 
   for $tainted (<../rules/*.pm>, <../rules/*.pre>, <../rules/languages>) {
     $tainted =~ /(.*)/;
     my $file = $1;
     $base = basename $file;
-    copy ($file, "log/localrules.tmp/$base")
-      or warn "cannot copy $file to log/localrules.tmp/$base: $!";
+    copy ($file, "$siterules/$base")
+      or warn "cannot copy $file to $siterules/$base: $!";
   }
 
-  copy ("../rules/user_prefs.template", "log/test_rules_copy/99_test_default.cf")
-    or die "user prefs copy failed: $!";
+  for $tainted (<../rules/*.cf>) {
+    $tainted =~ /(.*)/;
+    my $file = $1;
+    $base = basename $file;
+    copy ($file, "$localrules/$base")
+      or warn "cannot copy $file to $localrules/$base: $!";
+  }
 
-  open (PREFS, ">>log/test_rules_copy/99_test_default.cf")
-    or die "cannot append to log/test_rules_copy/99_test_default.cf: $!";
+  copy ("data/01_test_rules.pre", "$localrules/01_test_rules.pre")
+    or warn "cannot copy data/01_test_rules.cf to $localrules/01_test_rules.pre: $!";
+  copy ("data/01_test_rules.cf", "$localrules/01_test_rules.cf")
+    or warn "cannot copy data/01_test_rules.cf to $localrules/01_test_rules.cf: $!";
+
+  open (PREFS, ">>$localrules/99_test_default.cf")
+    or die "cannot append to $localrules/99_test_default.cf: $!";
   print PREFS $default_cf_lines
-    or die "error writing to log/test_rules_copy/99_test_default.cf: $!";
+    or die "error writing to $localrules/99_test_default.cf: $!";
   close PREFS
-    or die "error closing log/test_rules_copy/99_test_default.cf: $!";
-
-  # create an empty .prefs file
-  open (PREFS, ">>log/test_default.cf")
-    or die "cannot append to log/test_default.cf: $!";
-  close PREFS
-    or die "error closing log/test_default.cf: $!";
-
-  mkdir("log/user_state",$tmp_dir_mode);
-  chmod ($tmp_dir_mode, "log/user_state");  # unaffected by umask
+    or die "error closing $localrules/99_test_default.cf: $!";
 
   $home = $ENV{'HOME'};
   $home ||= $ENV{'WINDIR'} if (defined $ENV{'WINDIR'});
@@ -250,7 +259,7 @@ sub sa_t_init {
   $spamd_run_as_user = ($RUNNING_ON_WINDOWS || ($> == 0)) ? "nobody" : (getpwuid($>))[0] ;
 }
 
-# a port number between 32768 and 65535; used to allow multiple test
+# a port number between 40000 and 65520; used to allow multiple test
 # suite runs on the same machine simultaneously
 sub probably_unused_spamd_port {
   return 0 if $NO_SPAMD_REQUIRED;
@@ -263,11 +272,9 @@ sub probably_unused_spamd_port {
     @nstat = grep(/^\s*tcp/i, <NSTAT>);
     close(NSTAT);
   }
-  my $delta = ($$ % 32768) || int(rand(32768));
-  for (1..10) {
-    $port = 32768 + $delta;
+  for (1..20) {
+    $port = 40000 + int(rand(65500-40000));
     last unless (getservbyport($port, "tcp") || grep(/[:.]$port\s/, @nstat));
-    $delta = int(rand(32768));
   }
   return $port;
 }
@@ -291,31 +298,35 @@ sub sa_t_finish {
 
 sub tstfile {
   my $file = shift;
-  open (OUT, ">log/mail.txt") or die;
+  open (OUT, ">$workdir/mail.txt") or die;
   print OUT $file; close OUT;
-}
-
-sub tstlocalrules {
-  my $lines = shift;
-
-  $set_local_rules = 1;
-
-  open (OUT, ">log/localrules.tmp/00test.cf") or die;
-  print OUT $lines; close OUT;
 }
 
 sub tstprefs {
   my $lines = shift;
 
-  $set_test_prefs = 1;
+  open (OUT, ">$localrules/99_test_prefs.cf") or die;
+  print OUT $lines; close OUT;
+}
+
+sub tstlocalrules {
+  my $lines = shift;
+
+  open (OUT, ">$localrules/99_test_rules.cf") or die;
+  print OUT $lines; close OUT;
+}
+
+sub tstuserprefs {
+  my $lines = shift;
+
+  $set_user_prefs = 1;
 
   # TODO: should we use -p, or modify the test_rules_copy/99_test_default.cf?
   # for now, I'm taking the -p route, since we have to be able to test
   # the operation of user-prefs in general, itself.
 
-  open (OUT, ">log/tst.cf") or die;
+  open (OUT, ">$userrules") or die;
   print OUT $lines; close OUT;
-  $scr_pref_args = "-p log/tst.cf";
 }
 
 # creates a .pre file in the localrules dir to be parsed alongside init.pre
@@ -324,7 +335,7 @@ sub tstprefs {
 sub tstpre {
   my $lines = shift;
 
-  open (OUT, ">log/localrules.tmp/zz_tst.pre") or die;
+  open (OUT, ">$siterules/zz_test.pre") or die;
   print OUT $lines; close OUT;
 }
 
@@ -355,14 +366,14 @@ sub sarun {
   my $scrargs = "$scr $args";
   $scrargs =~ s!/!\\!g if ($^O =~ /^MS(DOS|Win)/i);
   print ("\t$scrargs\n");
-  (-d "log/d.$testname") or mkdir ("log/d.$testname", 0755);
+  (-d "$workdir/d.$testname") or mkdir ("$workdir/d.$testname", 0755);
   
   my $test_number = test_number();
-
-  untaint_system("$scrargs > log/d.$testname/$test_number $post_redir");
+#print STDERR "RUN: $scrargs\n";
+  untaint_system("$scrargs > $workdir/d.$testname/$test_number $post_redir");
   $sa_exitcode = ($?>>8);
   if ($sa_exitcode != 0) { return undef; }
-  &checkfile ("d.$testname/$test_number", $read_sub) if (defined $read_sub);
+  &checkfile ("$workdir/d.$testname/$test_number", $read_sub) if (defined $read_sub);
   1;
 }
 
@@ -392,14 +403,14 @@ sub salearnrun {
   my $salearnargs = "$salearn $args";
   $salearnargs =~ s!/!\\!g if ($^O =~ /^MS(DOS|Win)/i);
   print ("\t$salearnargs\n");
-  (-d "log/d.$testname") or mkdir ("log/d.$testname", 0755);
+  (-d "$workdir/d.$testname") or mkdir ("$workdir/d.$testname", 0755);
 
   my $test_number = test_number();
 
-  untaint_system("$salearnargs > log/d.$testname/$test_number");
+  untaint_system("$salearnargs > $workdir/d.$testname/$test_number");
   $salearn_exitcode = ($?>>8);
   if ($salearn_exitcode != 0) { return undef; }
-  &checkfile ("d.$testname/$test_number", $read_sub) if (defined $read_sub);
+  &checkfile ("$workdir/d.$testname/$test_number", $read_sub) if (defined $read_sub);
   1;
 }
 
@@ -451,14 +462,14 @@ sub spamcrun {
   $spamcargs =~ s!/!\\!g if ($^O =~ /^MS(DOS|Win)/i);
 
   print ("\t$spamcargs\n");
-  (-d "log/d.$testname") or mkdir ("log/d.$testname", 0755);
+  (-d "$workdir/d.$testname") or mkdir ("$workdir/d.$testname", 0755);
 
   my $test_number = test_number();
 
   if ($capture_stderr) {
-    untaint_system ("$spamcargs > log/d.$testname/out.$test_number 2>&1");
+    untaint_system ("$spamcargs > $workdir/d.$testname/out.$test_number 2>&1");
   } else {
-    untaint_system ("$spamcargs > log/d.$testname/out.$test_number");
+    untaint_system ("$spamcargs > $workdir/d.$testname/out.$test_number");
   }
 
   $sa_exitcode = ($?>>8);
@@ -468,7 +479,7 @@ sub spamcrun {
 
   %found = ();
   %found_anti = ();
-  &checkfile ("d.$testname/out.$test_number", $read_sub) if (defined $read_sub);
+  &checkfile ("$workdir/d.$testname/out.$test_number", $read_sub) if (defined $read_sub);
 
   if ($expect_failure) {
     ($sa_exitcode != 0);
@@ -497,10 +508,10 @@ sub spamcrun_background {
   $spamcargs =~ s!/!\\!g if ($^O =~ /^MS(DOS|Win)/i);
 
   print ("\t$spamcargs &\n");
-  (-d "log/d.$testname") or mkdir ("log/d.$testname", 0755);
+  (-d "$workdir/d.$testname") or mkdir ("$workdir/d.$testname", 0755);
   
   my $test_number = test_number();
-  untaint_system ("$spamcargs > log/d.$testname/bg.$test_number &") and return 0;
+  untaint_system ("$spamcargs > $workdir/d.$testname/bg.$test_number &") and return 0;
 
   1;
 }
@@ -518,9 +529,9 @@ sub sdrun {
 }
 
 sub recreate_outputdir_tmp {
-  rmtree ("log/outputdir.tmp"); # some tests use this
-  mkdir ("log/outputdir.tmp", $tmp_dir_mode);
-  chmod ($tmp_dir_mode, "log/outputdir.tmp");  # unaffected by umask
+  rmtree ("$workdir/outputdir.tmp"); # some tests use this
+  mkdir ("$workdir/outputdir.tmp", $tmp_dir_mode);
+  chmod ($tmp_dir_mode, "$workdir/outputdir.tmp");  # unaffected by umask
 }
 
 # out: $spamd_stderr
@@ -571,13 +582,13 @@ sub start_spamd {
     warn "oops! SATest.pm: a test prefs file was created, but spamd isn't reading it\n";
   }
 
-  (-d "log/d.$testname") or mkdir ("log/d.$testname", 0755);
+  (-d "$workdir/d.$testname") or mkdir ("$workdir/d.$testname", 0755);
   
   my $test_number = test_number();
-  my $spamd_stdout = "log/d.$testname/spamd.out.$test_number";
-     $spamd_stderr = "log/d.$testname/spamd.err.$test_number";    #  global
-  my $spamd_stdlog = "log/d.$testname/spamd.log.$test_number";
-  my $spamd_pidfile = "log/spamd.pid";
+  my $spamd_stdout = "$workdir/d.$testname/spamd.out.$test_number";
+     $spamd_stderr = "$workdir/d.$testname/spamd.err.$test_number";    #  global
+  my $spamd_stdlog = "$workdir/d.$testname/spamd.log.$test_number";
+  my $spamd_pidfile = "$workdir/spamd.pid";
   my $spamd_forker = $ENV{'SPAMD_FORKER'}   ?
                        $ENV{'SPAMD_FORKER'} :
                      $RUNNING_ON_WINDOWS    ?
@@ -599,7 +610,7 @@ sub start_spamd {
 
   # DEBUG instrumentation to trace spamd processes. See bug 5731 for history
   # if (-f "/home/jm/capture_spamd_straces") {
-  # $spamd_cmd = "strace -ttt -fo log/d.$testname/spamd.strace.$test_number $spamd_cmd";
+  # $spamd_cmd = "strace -ttt -fo $workdir/d.$testname/spamd.strace.$test_number $spamd_cmd";
   # }
 
   unlink ($spamd_stdout, $spamd_stderr, $spamd_stdlog, $spamd_pidfile);
@@ -688,10 +699,10 @@ sub create_saobj {
 
   # YUCK, these file/dir names should be some sort of variable, at
   # least we keep their definition in the same file for the moment.
-  my %setup_args = ( rules_filename => 'log/test_rules_copy',
-		     site_rules_filename => 'log/localrules.tmp',
-		     userprefs_filename => 'log/test_default.cf',
-		     userstate_dir => 'log/user_state',
+  my %setup_args = ( rules_filename => $localrules,
+		     site_rules_filename => $siterules,
+		     userprefs_filename => $userrules,
+		     userstate_dir => $userstate,
 		     local_tests_only => 1,
                      # debug => 'all',
 		   );
@@ -727,15 +738,11 @@ sub checkfile {
   my $read_sub = shift;
 
   # print "Checking $filename\n";
-  if (!open (IN, "< log/$filename")) {
-    # could be it already contains the "log/" prefix?
-    if (!open (IN, "< $filename")) {
-      warn "cannot open log/$filename or $filename"; return undef;
-    } else {
-      push @files_checked, "$filename";
-    }
+  if (!open (IN, "< $filename")) {
+    warn "cannot open $filename";
+    return undef;
   } else {
-    push @files_checked, "log/$filename";
+    push @files_checked, "$filename";
   }
   &$read_sub();
   close IN;
@@ -808,6 +815,7 @@ sub ok_all_patterns {
     } else {
       warn "\tNot found: $type = $pat at $file line $line.\n";
       if (!$dont_ok) {
+        $keep_workdir = 1;
         ok (0);                     # keep the right # of tests
       }
       $wasfailure++;
@@ -830,6 +838,7 @@ sub ok_all_patterns {
   if ($wasfailure) {
     warn "Output can be examined in: ".
          join(' ', @files_checked)."\n"  if @files_checked;
+    $keep_workdir = 1;
     return 0;
   } else {
     return 1;
@@ -940,7 +949,7 @@ sub conf_bool {
 sub mk_safe_tmpdir {
   return $safe_tmpdir if defined($safe_tmpdir);
 
-  my $dir = File::Spec->tmpdir() || 'log';
+  my $dir = $workdir || File::Spec->tmpdir();
 
   # be a little paranoid, since we're using a public tmp dir and
   # are exposed to race conditions
@@ -1155,6 +1164,13 @@ sub untaint_cmd {
     } else {
       return "";
     }
+}
+
+END {
+  # Cleanup workdir (but not if inside forked process)
+  if (defined $workdir && !$keep_workdir && $$ == $mainpid) {
+    rmtree($workdir);
+  }
 }
 
 1;

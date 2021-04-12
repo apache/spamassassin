@@ -13,17 +13,17 @@ plan tests => 28;
 # user B if they also set a score for that same rule name or create a user rule
 # with the same name.
 
-tstlocalrules ("
-	allow_user_rules 1
+tstprefs ("
+  allow_user_rules 1
 ");
 
-rmtree ("log/virtualconfig/testuser1", 0, 1);
-mkpath ("log/virtualconfig/testuser1", 0, 0755);
-rmtree ("log/virtualconfig/testuser2", 0, 1);
-mkpath ("log/virtualconfig/testuser2", 0, 0755);
-rmtree ("log/virtualconfig/testuser3", 0, 1);
-mkpath ("log/virtualconfig/testuser3", 0, 0755);
-open (OUT, ">log/virtualconfig/testuser1/user_prefs");
+rmtree ("$workdir/virtualconfig/testuser1", 0, 1);
+mkpath ("$workdir/virtualconfig/testuser1", 0, 0755);
+rmtree ("$workdir/virtualconfig/testuser2", 0, 1);
+mkpath ("$workdir/virtualconfig/testuser2", 0, 0755);
+rmtree ("$workdir/virtualconfig/testuser3", 0, 1);
+mkpath ("$workdir/virtualconfig/testuser3", 0, 0755);
+open (OUT, ">$workdir/virtualconfig/testuser1/user_prefs");
 print OUT q{
 
 	header MYFOO Content-Transfer-Encoding =~ /quoted-printable/
@@ -37,7 +37,7 @@ print OUT q{
 
 };
 close OUT;
-open (OUT, ">log/virtualconfig/testuser2/user_prefs");
+open (OUT, ">$workdir/virtualconfig/testuser2/user_prefs");
 print OUT q{
 
         # create a new user rule with same name
@@ -50,7 +50,7 @@ print OUT q{
 
 };
 close OUT;
-open (OUT, ">log/virtualconfig/testuser3/user_prefs");
+open (OUT, ">$workdir/virtualconfig/testuser3/user_prefs");
 print OUT q{
 
         # no user rules here
@@ -69,7 +69,7 @@ close OUT;
 );
 
 # use -m1 so all scans use the same child
-ok (start_spamd ("--virtual-config-dir=log/virtualconfig/%u -L -u $spamd_run_as_user -m1"));
+ok (start_spamd ("--virtual-config-dir=$workdir/virtualconfig/%u -L -u $spamd_run_as_user -m1"));
 ok (spamcrun ("-u testuser1 < data/spam/009", \&patterns_run_cb));
 ok_all_patterns();
 clear_pattern_counters();

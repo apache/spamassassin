@@ -7,32 +7,27 @@ use Test::More tests => 9;
 # ---------------------------------------------------------------------------
 
 %patterns = (
-
-q{ GTUBE }, 'gtube',
-q{ MY_TEST_PLUGIN }, 'plugin_called',
-q{ registered myTestPlugin }, 'registered',
-q{ myTestPlugin eval test called }, 'test_called',
-q{ myTestPlugin finishing }, 'plugin_finished',
-
-q{ test: plugins loaded: Mail::SpamAssassin::Plugin::ASN=HASH }, 'plugins_loaded',
-q{ myTestPlugin=HASH }, 'plugins_loaded2',
-
+  q{ GTUBE }, 'gtube',
+  q{ MY_TEST_PLUGIN }, 'plugin_called',
+  q{ registered myTestPlugin }, 'registered',
+  q{ myTestPlugin eval test called }, 'test_called',
+  q{ myTestPlugin finishing }, 'plugin_finished',
+  q{ test: plugins loaded: Mail::SpamAssassin::Plugin::ASN=HASH }, 'plugins_loaded',
+  q{ myTestPlugin=HASH }, 'plugins_loaded2',
 );
 
 %anti_patterns = (
-
-q{ SHOULD_NOT_BE_CALLED }, 'should_not_be_called'
-
+  q{ SHOULD_NOT_BE_CALLED }, 'should_not_be_called'
 );
 
 tstlocalrules ("
-	loadplugin myTestPlugin ../../data/testplugin.pm
-	ifplugin FooPlugin
-	  header SHOULD_NOT_BE_CALLED	eval:doesnt_exist()
-	endif
-	if plugin(myTestPlugin)
-	  header MY_TEST_PLUGIN		eval:check_test_plugin()
-	endif
+  loadplugin myTestPlugin ../../../data/testplugin.pm
+  ifplugin FooPlugin
+    header SHOULD_NOT_BE_CALLED eval:doesnt_exist()
+  endif
+  if plugin(myTestPlugin)
+    header MY_TEST_PLUGIN  eval:check_test_plugin()
+  endif
 ");
 
 ok (sarun ("-L -t < data/spam/gtube.eml", \&patterns_run_cb));

@@ -1,20 +1,5 @@
 #!/usr/bin/perl -w -T
 
-BEGIN {
-  if (-e 't/test_dir') { # if we are running "t/rule_names.t", kluge around ...
-    chdir 't';
-  }
-
-  if (-e 'test_dir') {            # running from test directory, not ..
-    unshift(@INC, '../blib/lib');
-  }
-}
-
-my $prefix = '.';
-if (-e 'test_dir') {            # running from test directory, not ..
-  $prefix = '..';
-}
-
 use strict;
 use lib '.'; use lib 't';
 use SATest; sa_t_init("debug");
@@ -31,9 +16,11 @@ my %facility = map( ($_, 1),
       ident ignore info ldap learn locker log logger markup HashBL
       message metadata mimeheader netset plugin prefork progress pyzor razor2
       received-header replacetags reporter rules rules-all spamd spf textcat
-      timing TxRep uri uridnsbl util pdfinfo asn geodb RaciallyCharged));
+      timing TxRep uri uridnsbl util pdfinfo asn geodb RaciallyCharged
+      PHISHTAG));
 
 my $fh = IO::File->new_tmpfile();
+open(OLDERR, ">&STDERR");
 open(STDERR, ">&=".fileno($fh)) || die "Cannot reopen STDERR";
 
 ok(sarun("-t -D < data/spam/dnsbl.eml"));
@@ -55,7 +42,7 @@ for (split(/^/m, $error)) {
     if (/^(?: \[ \d+ \] \s+)? (dbg|info): \s* ([^:\s]+) : \s* (.*)/x) {
 	if (!exists $facility{$2}) {
 	    $unlisted++;
-	    print "unlisted debug facility: $2\n";
+	    print OLDERR "unlisted debug facility: $2\n";
 	}
     }
     elsif (/^(?: \[ \d+ \] \s+)? (warn|error):/x) {

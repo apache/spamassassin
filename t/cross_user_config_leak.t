@@ -1,21 +1,5 @@
 #!/usr/bin/perl -T
 
-BEGIN {
-  if (-e 't/test_dir') { # if we are running "t/rule_tests.t", kluge around ...
-    chdir 't';
-  }
-
-  if (-e 'test_dir') {            # running from test directory, not ..
-    unshift(@INC, '../blib/lib');
-    unshift(@INC, '../lib');
-  }
-}
-
-my $prefix = '.';
-if (-e 'test_dir') {            # running from test directory, not ..
-  $prefix = '..';
-}
-
 use lib '.'; use lib 't';
 use SATest; sa_t_init("cross_user_config_leak");
 use Test::More tests => 6;
@@ -43,6 +27,9 @@ use warnings;
 require Mail::SpamAssassin;
 
 my $sa = create_saobj({
+    rules_filename => $localrules,
+    site_rules_filename => $siterules,
+    userprefs_filename  => $userrules,
     require_rules        => 1,
     local_tests_only     => 1,
     dont_copy_prefs      => 1,
@@ -77,11 +64,11 @@ my %expected_val;
 my %ignored_command;
 foreach my $k (@ignored_commands) { $ignored_command{$k}++; }
 
-print "Reading log/user_prefs1\n";
-$sa->read_scoreonly_config("log/user_prefs1");
+print "Reading $workdir/user_prefs1\n";
+$sa->read_scoreonly_config("$workdir/user_prefs1");
 set_all_confs($sa->{conf});
 
-$sa->signal_user_changed( { username => "user1", user_dir => "log/user1" });
+$sa->signal_user_changed( { username => "user1", user_dir => "$workdir/user1" });
 ok validate_all_confs($sa->{conf}, 1, 'after first user config read');
 
 print "Restoring config from backup\n";
@@ -89,9 +76,9 @@ $sa->copy_config(\%conf_backup, undef) or die "copy_config failed";
 ok validate_all_confs($sa->{conf}, 0, 'after restoring from backup');
 
 
-print "Reading log/user_prefs2\n";
-$sa->read_scoreonly_config("log/user_prefs2");
-$sa->signal_user_changed( { username => "user2", user_dir => "log/user2" });
+print "Reading $workdir/user_prefs2\n";
+$sa->read_scoreonly_config("$workdir/user_prefs2");
+$sa->signal_user_changed( { username => "user2", user_dir => "$workdir/user2" });
 ok validate_all_confs($sa->{conf}, 0, 'after second user config read');
 
 print "Restoring config from backup, second time\n";
@@ -205,6 +192,9 @@ sub validate_all_confs {
     # if the default value is undef, it's a permitted value, obvs
     next if ($settings_should_exist && !defined $cmd->{default});
 
+    # ignore use_dcc etc changed default from data/01_test_rules.cf
+    next if $k =~ /^use_(?:dcc|razor2|pyzor)$/;
+
     $setting_details = "key='$k' when=$stage";
     if (!defined $cmd->{type}) {
       # warn "undef config type for $k";                # already done this
@@ -261,10 +251,12 @@ sub assert_validation {
         " wanted=".(defined $expected_val ? "'$expected_val'" : "(none)").
         " $setting_details";
     $validation_passed = 0;
+    $keep_workdir = 1;
   }
   if (!$settings_should_exist && defined($val) && "".$val eq "".$expected_val) {
     warn "found=".(defined $val ? "'$val'" : "(none)")." wanted=(none)".
         " $setting_details";
     $validation_passed = 0;
+    $keep_workdir = 1;
   }
 }

@@ -20,21 +20,6 @@ plan skip_all => "Net tests disabled" unless conf_bool('run_net_tests');
 plan skip_all => "Needs Mail::DKIM::Verifier >= 0.31" unless HAS_DKIM_VERIFIER ;
 plan tests => 258;
 
-BEGIN {
-  if (-e 't/test_dir') {
-    chdir 't';
-  }
-
-  if (-e 'test_dir') {
-    unshift(@INC, '../blib/lib');
-  }
-}
-
-my $prefix = '.';
-if (-e 'test_dir') {            # running from test directory, not ..
-  $prefix = '..';
-}
-
 use IO::File;
 use Mail::SpamAssassin;
 
@@ -99,18 +84,14 @@ tstlocalrules("
   header DKIM_ADSP_SEL_TEST   eval:check_dkim_adsp('*', .spamassassin.org)
   priority DKIM_ADSP_SEL_TEST -100
   score  DKIM_ADSP_SEL_TEST   0.1
-  score RAZOR2_CHECK 0
-  score RAZOR2_CF_RANGE_51_100 0
-  score RAZOR2_CF_RANGE_E4_51_100 0
-  score RAZOR2_CF_RANGE_E8_51_100 0
 ");
 
 my $dirname = "data/dkim";
 
 $spamassassin_obj = Mail::SpamAssassin->new({
-  rules_filename      => "$prefix/t/log/test_rules_copy",
-  site_rules_filename => "$prefix/t/log/localrules.tmp",
-  userprefs_filename  => "$prefix/masses/spamassassin/user_prefs",
+  rules_filename      => $localrules,
+  site_rules_filename => $siterules,
+  userprefs_filename  => $userrules,
   dont_copy_prefs     => 1,
   require_rules       => 1,
 # debug               => 'dkim',

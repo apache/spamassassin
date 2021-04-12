@@ -8,14 +8,13 @@ use Test::More tests => 18;
 # ---------------------------------------------------------------------------
 
 %anti_patterns = (
-q{ autolearn=ham } => 'autolearned as ham'
+  q{ autolearn=ham } => 'autolearned as ham'
 );
 
 tstpre ('
-
   loadplugin Mail::SpamAssassin::Plugin::Shortcircuit
-
 ');
+
 tstlocalrules ('
 
   add_header all Status "_YESNO_, score=_SCORE_ required=_REQD_ tests=_TESTS_ shortcircuit=_SCTYPE_ autolearn=_AUTOLEARN_ version=_VERSION_"
@@ -45,7 +44,6 @@ tstlocalrules ('
   q{ shortcircuit=spam }, 'sc',
   q{ X-Spam-Status: Yes, score=103.0 required=5.0 }, 'shortcircuit_spam_score',
   q{ 100 SHORTCIRCUIT Not all rules were run }, 'shortcircuit rule desc',
-
 );
 ok (sarun ("-L -t < data/spam/001", \&patterns_run_cb));
 ok_all_patterns();
@@ -67,3 +65,4 @@ ok_all_patterns();
 );
 ok (sarun ("-L -t < data/nice/001", \&patterns_run_cb));
 ok_all_patterns();
+

@@ -2,20 +2,11 @@
 
 use Data::Dumper;
 use lib '.'; use lib 't';
-use SATest; sa_t_init("bayes");
+use SATest; sa_t_init("bayesbdb");
 
 use constant HAS_BDB => eval { require BerkeleyDB };
 
 use Test::More;
-BEGIN { 
-  if (-e 't/test_dir') {
-    chdir 't';
-  }
-
-  if (-e 'test_dir') {
-    unshift(@INC, '../blib/lib');
-  }
-}
 
 plan skip_all => "Long running tests disabled" unless conf_bool('run_long_tests');
 plan skip_all => "BerkeleyDB is unavailable" unless HAS_BDB;
@@ -28,8 +19,8 @@ plan skip_all => "BerkeleyDB is unavailable" unless HAS_BDB;
 plan tests => 42;
 
 
-tstlocalrules ("
-        bayes_store_module Mail::SpamAssassin::BayesStore::BDB
+tstprefs ("
+  bayes_store_module Mail::SpamAssassin::BayesStore::BDB
 ");
 
 use Mail::SpamAssassin;
@@ -151,13 +142,13 @@ getimpl->{store}->untie_db();
 
 undef $sa;
 
-sa_t_init('bayes'); # this wipes out what is there and begins anew
+sa_t_init('bayesbdb'); # this wipes out what is there and begins anew
 
 # make sure we learn to a journal
-tstlocalrules ("
-bayes_store_module Mail::SpamAssassin::BayesStore::BDB
-bayes_min_spam_num 10
-bayes_min_ham_num 10
+tstprefs ("
+  bayes_store_module Mail::SpamAssassin::BayesStore::BDB
+  bayes_min_spam_num 10
+  bayes_min_ham_num 10
 ");
 
 # we get to bastardize the existing pattern matching code here.  It lets us provide
@@ -238,9 +229,9 @@ ok($score =~ /\d/ && $score <= 1.0 && $score != .5);
 
 ok(getimpl->{store}->clear_database());
 
-ok(!-e 'log/user_state/bayes/vars.db');
-ok(!-e 'log/user_state/bayes/seen.db');
-ok(!-e 'log/user_state/bayes/toks.db');
+ok(!-e "$userstate/bayes/vars.db");
+ok(!-e "$userstate/bayes/seen.db");
+ok(!-e "$userstate/bayes/toks.db");
 
 sub check_examined {
   local ($_);

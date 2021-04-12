@@ -9,9 +9,11 @@ plan tests => 9;
 
 # ---------------------------------------------------------------------------
 
-tstlocalrules ("
-	loadplugin reporterplugin ../../data/reporterplugin.pm
+tstprefs ("
+  loadplugin reporterplugin ../../../data/reporterplugin.pm
 ");
+
+unlink "log/rptfail";
 
 start_spamd("-L --allow-tell");
 
@@ -41,4 +43,5 @@ ok_all_patterns();
 
 stop_spamd();
 
-ok(unlink 'log/rptfail'); # need a little cleanup
+ok(unlink "log/rptfail"); # need a little cleanup
+

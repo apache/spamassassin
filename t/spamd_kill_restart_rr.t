@@ -13,12 +13,12 @@ use File::Spec;
 
 # ---------------------------------------------------------------------------
 
-my $pid_file = "log/spamd.pid";
+my $pid_file = "$workdir/spamd.pid";
 my($pid1, $pid2);
 
-tstlocalrules("
-      use_auto_whitelist 0
-  ");
+tstprefs("
+  use_auto_whitelist 0
+");
 
 dbgprint "Starting spamd...\n";
 start_spamd("-L --round-robin -r ${pid_file}");
@@ -78,5 +78,4 @@ for $retry (0 .. 9) {
 
 dbgprint "Stopping spamd...\n";
 stop_spamd;
-
 

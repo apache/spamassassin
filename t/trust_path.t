@@ -1,16 +1,5 @@
 #!/usr/bin/perl -T
 
-BEGIN {
-  if (-e 't/test_dir') { # if we are running "t/rule_tests.t", kluge around ...
-    chdir 't';
-  }
-
-  if (-e 'test_dir') {            # running from test directory, not ..
-    unshift(@INC, '../blib/lib');
-    unshift(@INC, '../lib');
-  }
-}
-
 our $have_patricia = 0;
 eval {
   require Net::Patricia;
@@ -18,11 +7,6 @@ eval {
   Net::Patricia->import;
   $have_patricia = 1;
 };
-
-my $prefix = '.';
-if (-e 'test_dir') {            # running from test directory, not ..
-  $prefix = '..';
-}
 
 use lib '.'; use lib 't';
 use SATest; sa_t_init("trust_path");
@@ -672,7 +656,7 @@ while (1) {
   }
 
   my $sa = create_saobj({
-              userprefs_filename => "log/tst.cf",
+              userprefs_filename => $userrules,
               # debug => 1
             });
 

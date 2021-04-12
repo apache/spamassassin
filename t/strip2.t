@@ -28,7 +28,6 @@ my $input;
 # Make sure all the files can do "report_safe 0" and "report_safe 1"
 foreach $input (@files) {
   tstprefs ("
-        $default_cf_lines
         report_safe 0
         body TEST_ALWAYS /./
         score TEST_ALWAYS 100
@@ -36,7 +35,7 @@ foreach $input (@files) {
 
   # create report_safe 0 output
   my $test_number = test_number();
-  my $d_input = "log/d.$testname/$test_number";
+  my $d_input = "$workdir/d.$testname/$test_number";
   unlink $d_input;
   ok sarun ("-L < $input");
 
@@ -46,7 +45,7 @@ foreach $input (@files) {
   {
     print "output: $d_input\n";
 		$test_number = test_number();
-    my $d_output = "log/d.$testname/$test_number";
+    my $d_output = "$workdir/d.$testname/$test_number";
     unlink $d_output;
     ok sarun ("-L -d < $d_input");
     ok (-f $d_output);
@@ -55,7 +54,6 @@ foreach $input (@files) {
   }
 
   tstprefs ("
-        $default_cf_lines
         report_safe 1
         body TEST_ALWAYS /./
         score TEST_ALWAYS 100
@@ -63,14 +61,14 @@ foreach $input (@files) {
 
   # create report_safe 1 and -t output
 	$test_number = test_number();
-  $d_input = "log/d.$testname/$test_number";
+  $d_input = "$workdir/d.$testname/$test_number";
   unlink $d_input;
   ok sarun ("-L -t < $input");
   ok (-f $d_input);
   {
     print "output: $d_input\n";
 		$test_number = test_number();
-    my $d_output = "log/d.$testname/$test_number";
+    my $d_output = "$workdir/d.$testname/$test_number";
     unlink $d_output;
     ok sarun ("-L -d < $d_input");
     ok (-f $d_output);
@@ -84,7 +82,6 @@ foreach $input (@files) {
 $input = $files[0];
 
 tstprefs ("
-        $default_cf_lines
         report_safe 2
         body TEST_ALWAYS /./
         score TEST_ALWAYS 100
@@ -92,14 +89,14 @@ tstprefs ("
 
 # create report_safe 2 output
 my $test_number = test_number();
-$d_input = "log/d.$testname/$test_number";
+$d_input = "$workdir/d.$testname/$test_number";
 unlink $d_input;
 ok sarun ("-L < $input");
 ok (-f $d_input);
 {
   print "output: $d_input\n";
   $test_number = test_number();
-  my $d_output = "log/d.$testname/$test_number";
+  my $d_output = "$workdir/d.$testname/$test_number";
   unlink $d_output;
   ok sarun ("-L -d < $d_input");
   ok (-f $d_output);
@@ -109,7 +106,7 @@ ok (-f $d_input);
 
 # Work directly on regular message, as though it was not spam
 $test_number = test_number();
-my $d_output = "log/d.$testname/$test_number";
+my $d_output = "$workdir/d.$testname/$test_number";
 unlink $d_output;
 ok sarun ("-L -d < $input");
 ok (-f $d_output);

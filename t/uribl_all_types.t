@@ -13,12 +13,9 @@ plan tests => 3;
 # ---------------------------------------------------------------------------
 
 %patterns = (
-
-   q{ X_URIBL_IPSONLY [URI: 144.137.3.98] } => 'X_URIBL_IPSONLY',
-
-   # can be either uribl-example-b.com or uribl-example-c.com
-   q{ X_URIBL_DOMSONLY [URI: uribl-example} => 'X_URIBL_DOMSONLY',
-
+ q{ X_URIBL_IPSONLY [URI: 144.137.3.98] } => 'X_URIBL_IPSONLY',
+ # can be either uribl-example-b.com or uribl-example-c.com
+ q{ X_URIBL_DOMSONLY [URI: uribl-example} => 'X_URIBL_DOMSONLY',
 );
 
 tstlocalrules(q{

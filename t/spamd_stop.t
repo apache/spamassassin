@@ -10,9 +10,7 @@ plan tests => 2;
 # ---------------------------------------------------------------------------
 
 %patterns = (
-
-q{ X-Spam-Status: Yes,}, 'status',
-
+  q{ X-Spam-Status: Yes,}, 'status',
 );
 
 ok (sdrun ("-L", "< data/spam/001", \&patterns_run_cb));

@@ -2,21 +2,6 @@
 
 use constant HAVE_DEVEL_CYCLE => eval { require Devel::Cycle; };
 
-BEGIN {
-  if (-e 't/test_dir') { # if we are running "t/rule_tests.t", kluge around ...
-    chdir 't';
-  }
-
-  if (-e 'test_dir') {            # running from test directory, not ..
-    unshift(@INC, '../blib/lib');
-  }
-}
-
-my $prefix = '.';
-if (-e 'test_dir') {            # running from test directory, not ..
-  $prefix = '..';
-}
-
 use lib '.'; use lib 't';
 use SATest; sa_t_init("memory_cycles");
 
@@ -30,9 +15,9 @@ use Mail::SpamAssassin;
 # ---------------------------------------------------------------------------
 
 my $spamtest = Mail::SpamAssassin->new({
-    rules_filename => "$prefix/t/log/test_rules_copy",
-    site_rules_filename => "$prefix/t/log/test_default.cf",
-    userprefs_filename  => "$prefix/masses/spamassassin/user_prefs",
+    rules_filename => $localrules,
+    site_rules_filename => $siterules,
+    userprefs_filename  => $userrules,
     local_tests_only    => 1,
     debug             => 0,
     dont_copy_prefs   => 1,

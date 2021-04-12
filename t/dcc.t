@@ -22,11 +22,9 @@ diag('Note: Failure may not be an SpamAssassin bug, as DCC tests can fail due to
 
 );
 
-tstpre ("
-
-  loadplugin Mail::SpamAssassin::Plugin::DCC
-  dcc_timeout 30
-
+tstprefs ("
+  dns_available no
+  use_dcc 1
 ");
 
 ok sarun ("-t -D info -r < data/spam/gtubedcc.eml 2>&1", \&patterns_run_cb);
@@ -40,7 +38,7 @@ ok_all_patterns();
 
 );
 
-ok sarun ("-t < data/spam/gtubedcc.eml", \&patterns_run_cb);
+ok sarun ("-t < data/spam/gtubedcc.eml 2>&1", \&patterns_run_cb);
 ok_all_patterns();
-ok sarun ("-t < data/spam/gtubedcc_crlf.eml", \&patterns_run_cb);
+ok sarun ("-t < data/spam/gtubedcc_crlf.eml 2>&1", \&patterns_run_cb);
 ok_all_patterns();

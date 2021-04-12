@@ -3,21 +3,6 @@
 # Tests for Bug #7591, which is actually a bug seen in the EL7 build of Perl.
 # The real root cause is obscure, so we test for the bug not the Perl version.
  
-BEGIN {
-  if (-e 't/test_dir') { # if we are running "t/rule_names.t", kluge around ...
-    chdir 't';
-  }
-
-  if (-e 'test_dir') {            # running from test directory, not ..
-    unshift(@INC, '../blib/lib');
-  }
-}
-
-my $prefix = '.';
-if (-e 'test_dir') {            # running from test directory, not ..
-  $prefix = '..';
-}
-
 use lib '.'; use lib 't';
 use strict;
 use Test::More tests=> 12;
@@ -127,7 +112,6 @@ http://host6.example.com
 
 EOT
 my $tmpdir = mk_safe_tmpdir();
-warn "temp dir is $tmpdir\n";
 
 for my $mail  ($twoplus, $threeurls, $threeplus, $foururls, $fiveurls, $sixurls) {
   my @urls = grep(/\bhttp:/m,$mail);

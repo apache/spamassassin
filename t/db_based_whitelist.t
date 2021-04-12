@@ -11,10 +11,10 @@ plan tests => 8;
 # ---------------------------------------------------------------------------
 
 %is_nonspam_patterns = (
-q{ Subject: Re: [SAtalk] auto-whitelisting}, 'subj',
+  q{ Subject: Re: [SAtalk] auto-whitelisting}, 'subj',
 );
 %is_spam_patterns = (
-q{Subject: 4000           Your Vacation Winning !}, 'subj',
+  q{Subject: 4000           Your Vacation Winning !}, 'subj',
 );
 
 %patterns = %is_nonspam_patterns;
@@ -33,3 +33,4 @@ ok_all_patterns();
 %patterns = %is_spam_patterns;
 ok (sarun ("-L -t < data/spam/004", \&patterns_run_cb));
 ok_all_patterns();
+

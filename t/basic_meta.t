@@ -1,23 +1,8 @@
 #!/usr/bin/perl -w -T
 
-BEGIN {
-  if (-e 't/test_dir') { # if we are running "t/rule_names.t", kluge around ...
-    chdir 't';
-  }
-
-  if (-e 'test_dir') {            # running from test directory, not ..
-    unshift(@INC, '../blib/lib');
-  }
-}
-
-my $prefix = '.';
-if (-e 'test_dir') {            # running from test directory, not ..
-  $prefix = '..';
-}
-
 use strict;
 use lib '.'; use lib 't';
-use SATest; sa_t_init("meta");
+use SATest; sa_t_init("basic_meta");
 
 use Mail::SpamAssassin;
 
@@ -37,18 +22,18 @@ my $meta_dependency_disabled = 0;
 my $meta_dependency_nonexistent = 0;
 
 for (my $scoreset = 0; $scoreset < 4; $scoreset++) {
-  my $output = "log/rules-$scoreset.pl";
+  my $output = "$workdir/rules-$scoreset.pl";
   unlink $output || die;
   %rules = ();
   %scores = ();
-  if (untaint_system("$perl_path $prefix/build/parse-rules-for-masses -o $output -d \"$prefix/rules\" -s $scoreset -x")) {
+  if (untaint_system("$perl_path ../build/parse-rules-for-masses -o $output -d \"../rules\" -s $scoreset -x")) {
     warn "parse-rules-for-masses failed!";
   }
   eval {
-    require "log/rules-$scoreset.pl";
+    require "$workdir/rules-$scoreset.pl";
   };
   if ($@) {
-    warn "log/rules-$scoreset.pl is unparseable: $@";
+    warn "$workdir/rules-$scoreset.pl is unparseable: $@";
     warn "giving up on test.";
     ok(1);
     ok(1);
