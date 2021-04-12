@@ -88,55 +88,55 @@ if can(Mail::SpamAssassin::Plugin::URIDNSBL::has_tflags_domains_only)
 urirhssub       URIBL_DBL_SPAM   	dbl.spamhaus.org.       A   127.0.1.2
 body            URIBL_DBL_SPAM   	eval:check_uridnsbl('URIBL_DBL_SPAM')
 describe        URIBL_DBL_SPAM   	Contains a spam URL listed in the Spamhaus DBL blocklist
-tflags          URIBL_DBL_SPAM   	net domains_only
+tflags          URIBL_DBL_SPAM   	net domains_only notrim
 reuse           URIBL_DBL_SPAM
 
 urirhssub       URIBL_DBL_PHISH  	dbl.spamhaus.org.       A   127.0.1.4
 body            URIBL_DBL_PHISH	 	eval:check_uridnsbl('URIBL_DBL_PHISH')
 describe        URIBL_DBL_PHISH	 	Contains a Phishing URL listed in the Spamhaus DBL blocklist
-tflags          URIBL_DBL_PHISH  	net domains_only
+tflags          URIBL_DBL_PHISH  	net domains_only notrim
 reuse           URIBL_DBL_PHISH
 
 urirhssub       URIBL_DBL_MALWARE  	dbl.spamhaus.org.       A   127.0.1.5
 body            URIBL_DBL_MALWARE  	eval:check_uridnsbl('URIBL_DBL_MALWARE')
 describe        URIBL_DBL_MALWARE  	Contains a malware URL listed in the Spamhaus DBL blocklist
-tflags          URIBL_DBL_MALWARE  	net domains_only
+tflags          URIBL_DBL_MALWARE  	net domains_only notrim
 reuse           URIBL_DBL_MALWARE
 
 urirhssub       URIBL_DBL_BOTNETCC  	dbl.spamhaus.org.       A   127.0.1.6
 body            URIBL_DBL_BOTNETCC	eval:check_uridnsbl('URIBL_DBL_BOTNETCC')
 describe        URIBL_DBL_BOTNETCC	Contains a botned C&C URL listed in the Spamhaus DBL blocklist
-tflags          URIBL_DBL_BOTNETCC	net domains_only
+tflags          URIBL_DBL_BOTNETCC	net domains_only notrim
 reuse           URIBL_DBL_BOTNETCC
 
 urirhssub       URIBL_DBL_ABUSE_SPAM  	dbl.spamhaus.org.       A   127.0.1.102
 body            URIBL_DBL_ABUSE_SPAM	eval:check_uridnsbl('URIBL_DBL_ABUSE_SPAM')
 describe        URIBL_DBL_ABUSE_SPAM	Contains an abused spamvertized URL listed in the Spamhaus DBL blocklist
-tflags          URIBL_DBL_ABUSE_SPAM	net domains_only
+tflags          URIBL_DBL_ABUSE_SPAM	net domains_only notrim
 reuse           URIBL_DBL_ABUSE_SPAM
 
 urirhssub       URIBL_DBL_ABUSE_REDIR  	dbl.spamhaus.org.       A   127.0.1.103
 body            URIBL_DBL_ABUSE_REDIR  	eval:check_uridnsbl('URIBL_DBL_ABUSE_REDIR')
 describe        URIBL_DBL_ABUSE_REDIR  	Contains an abused redirector URL listed in the Spamhaus DBL blocklist
-tflags          URIBL_DBL_ABUSE_REDIR  	net domains_only
+tflags          URIBL_DBL_ABUSE_REDIR  	net domains_only notrim
 reuse           URIBL_DBL_ABUSE_REDIR
 
 urirhssub       URIBL_DBL_ABUSE_PHISH  	dbl.spamhaus.org.       A   127.0.1.104
 body            URIBL_DBL_ABUSE_PHISH	eval:check_uridnsbl('URIBL_DBL_ABUSE_PHISH')
 describe        URIBL_DBL_ABUSE_PHISH	Contains an abused phishing URL listed in the Spamhaus DBL blocklist
-tflags          URIBL_DBL_ABUSE_PHISH	net domains_only
+tflags          URIBL_DBL_ABUSE_PHISH	net domains_only notrim
 reuse           URIBL_DBL_ABUSE_PHISH
 
 urirhssub       URIBL_DBL_ABUSE_MALW  	dbl.spamhaus.org.       A   127.0.1.105
 body            URIBL_DBL_ABUSE_MALW	eval:check_uridnsbl('URIBL_DBL_ABUSE_MALW')
 describe        URIBL_DBL_ABUSE_MALW	Contains an abused malware URL listed in the Spamhaus DBL blocklist
-tflags          URIBL_DBL_ABUSE_MALW	net domains_only
+tflags          URIBL_DBL_ABUSE_MALW	net domains_only notrim
 reuse           URIBL_DBL_ABUSE_MALW
 
 urirhssub       URIBL_DBL_ABUSE_BOTCC  	dbl.spamhaus.org.       A   127.0.1.106
 body            URIBL_DBL_ABUSE_BOTCC  	eval:check_uridnsbl('URIBL_DBL_ABUSE_BOTCC')
 describe        URIBL_DBL_ABUSE_BOTCC  	Contains an abused botnet C&C URL listed in the Spamhaus DBL blocklist
-tflags          URIBL_DBL_ABUSE_BOTCC  	net domains_only
+tflags          URIBL_DBL_ABUSE_BOTCC  	net domains_only notrim
 reuse           URIBL_DBL_ABUSE_BOTCC
 
 
@@ -145,21 +145,21 @@ reuse           URIBL_DBL_ABUSE_BOTCC
 urirhssub       URIBL_DBL_ERROR  dbl.spamhaus.org.       A   127.0.1.255
 body            URIBL_DBL_ERROR  eval:check_uridnsbl('URIBL_DBL_ERROR')
 describe        URIBL_DBL_ERROR  Error: queried the Spamhaus DBL blocklist for an IP
-tflags          URIBL_DBL_ERROR  net domains_only
+tflags          URIBL_DBL_ERROR  net domains_only notrim
 reuse           URIBL_DBL_ERROR
 
 # New blocked checks 10/2019
 urirhssub       URIBL_DBL_BLOCKED_OPENDNS  dbl.spamhaus.org.       A   127.255.255.254
 body            URIBL_DBL_BLOCKED_OPENDNS  eval:check_uridnsbl('URIBL_DBL_BLOCKED_OPENDNS')
 describe        URIBL_DBL_BLOCKED_OPENDNS  ADMINISTRATOR NOTICE: The query to dbl.spamhaus.org was blocked due to usage of an open resolver. See https://www.spamhaus.org/returnc/pub/
-tflags          URIBL_DBL_BLOCKED_OPENDNS  net domains_only
+tflags          URIBL_DBL_BLOCKED_OPENDNS  net domains_only notrim
 reuse           URIBL_DBL_BLOCKED_OPENDNS
 
 # New blocked checks 10/2019
 urirhssub       URIBL_DBL_BLOCKED  dbl.spamhaus.org.       A   127.255.255.255
 body            URIBL_DBL_BLOCKED  eval:check_uridnsbl('URIBL_DBL_BLOCKED')
 describe        URIBL_DBL_BLOCKED  ADMINISTRATOR NOTICE: The query to dbl.spamhaus.org was blocked. See https://www.spamhaus.org/returnc/vol/
-tflags          URIBL_DBL_BLOCKED  net domains_only
+tflags          URIBL_DBL_BLOCKED  net domains_only notrim
 reuse           URIBL_DBL_BLOCKED
 
 endif
@@ -171,52 +171,52 @@ endif
 #urirhssub       URIBL_SC_SURBL  multi.surbl.org.        A   2
 #body            URIBL_SC_SURBL  eval:check_uridnsbl('URIBL_SC_SURBL')
 #describe        URIBL_SC_SURBL  Contains an URL listed in the SC SURBL blocklist
-#tflags          URIBL_SC_SURBL  net
+#tflags          URIBL_SC_SURBL  net notrim
 #reuse           URIBL_SC_SURBL
 
 urirhssub       URIBL_WS_SURBL  multi.surbl.org.        A   4
 body            URIBL_WS_SURBL  eval:check_uridnsbl('URIBL_WS_SURBL')
 describe        URIBL_WS_SURBL  Contains an URL listed in the WS SURBL blocklist
-tflags          URIBL_WS_SURBL  net
+tflags          URIBL_WS_SURBL  net notrim
 reuse           URIBL_WS_SURBL
 
 urirhssub       URIBL_PH_SURBL  multi.surbl.org.        A   8
 body            URIBL_PH_SURBL  eval:check_uridnsbl('URIBL_PH_SURBL')
 describe        URIBL_PH_SURBL  Contains an URL listed in the PH SURBL blocklist
-tflags          URIBL_PH_SURBL  net
+tflags          URIBL_PH_SURBL  net notrim
 reuse           URIBL_PH_SURBL
 
 urirhssub       URIBL_MW_SURBL  multi.surbl.org.        A   16
 body            URIBL_MW_SURBL  eval:check_uridnsbl('URIBL_MW_SURBL')
 describe        URIBL_MW_SURBL  Contains a URL listed in the MW SURBL blocklist
-tflags          URIBL_MW_SURBL  net
+tflags          URIBL_MW_SURBL  net notrim
 reuse           URIBL_MW_SURBL
 
 urirhssub       URIBL_CR_SURBL  multi.surbl.org.        A   128
 body            URIBL_CR_SURBL  eval:check_uridnsbl('URIBL_CR_SURBL')
 describe        URIBL_CR_SURBL  Contains an URL listed in the CR SURBL blocklist
-tflags          URIBL_CR_SURBL  net
+tflags          URIBL_CR_SURBL  net notrim
 reuse           URIBL_CR_SURBL
 
 #MERGED INTO BIT 64 per bug 7279
 #urirhssub       URIBL_AB_SURBL  multi.surbl.org.        A   32
 #body            URIBL_AB_SURBL  eval:check_uridnsbl('URIBL_AB_SURBL')
 #describe        URIBL_AB_SURBL  Contains an URL listed in the AB SURBL blocklist
-#tflags          URIBL_AB_SURBL  net
+#tflags          URIBL_AB_SURBL  net notrim
 #reuse           URIBL_AB_SURBL
 
 #JP MOVED INTO ABUSE AS WELL AND BIT REUSED  per bug 7279
 urirhssub       URIBL_ABUSE_SURBL  multi.surbl.org.        A   64
 body            URIBL_ABUSE_SURBL  eval:check_uridnsbl('URIBL_ABUSE_SURBL')
 describe        URIBL_ABUSE_SURBL  Contains an URL listed in the ABUSE SURBL blocklist
-tflags          URIBL_ABUSE_SURBL  net
+tflags          URIBL_ABUSE_SURBL  net notrim
 reuse           URIBL_ABUSE_SURBL
 
 #SURBL BLOCK RULES - Bit 1 means your DNS has been blocked and this rule should be triggered to notify you.
 urirhssub       SURBL_BLOCKED   multi.surbl.org.        A   1
 body            SURBL_BLOCKED   eval:check_uridnsbl('SURBL_BLOCKED')
 describe        SURBL_BLOCKED   ADMINISTRATOR NOTICE: The query to SURBL was blocked.  See http://wiki.apache.org/spamassassin/DnsBlocklists\#dnsbl-block for more information.
-tflags          SURBL_BLOCKED   net noautolearn
+tflags          SURBL_BLOCKED   net noautolearn notrim
 reuse           SURBL_BLOCKED
 
 if can(Mail::SpamAssassin::Conf::feature_dns_block_rule)
