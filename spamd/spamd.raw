@@ -1392,10 +1392,10 @@ sub spawn {
       dbg("spamd: uid assignment ERRNO is $!\n");
       dbg("spamd: real user is $< \neff user is $> \nreal groups are $( \neff groups are $) \n");
 
-
       # keep the sanity check to catch problems like bug 3900 just in case
       if ( $> != $uuid and $> != ( $uuid - 2**32 ) ) {
-        die "spamd: setuid to uid $uuid failed (> = $>, < = $<)\n";
+        sleep(1); # prevent spamd fork flooding
+        die "spamd: setuid to uid $uuid failed (> = $>, < = $<), not started as root?\n";
       }
     }
 
