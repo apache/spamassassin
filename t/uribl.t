@@ -7,7 +7,7 @@ use Test::More;
 plan skip_all => "Long running tests disabled" unless conf_bool('run_long_tests');
 plan skip_all => "Net tests disabled"          unless conf_bool('run_net_tests');
 plan skip_all => "Can't use Net::DNS Safely"   unless can_use_net_dns_safely();
-plan tests => 6;
+plan tests => 7;
 
 # ---------------------------------------------------------------------------
 
@@ -16,6 +16,7 @@ plan tests => 6;
  q{ X_URIBL_B } => 'B',
  q{ X_URIBL_NS } => 'NS',
  q{ X_URIBL_DOMSONLY } => 'X_URIBL_DOMSONLY',
+ q{ META_URIBL_A } => 'META_URIBL_A',
 );
 
 %anti_patterns = (
@@ -47,6 +48,9 @@ tstlocalrules(q{
   tflags     X_URIBL_DOMSONLY  net domains_only
 
   add_header all RBL _RBL_
+
+  # Bug 7897 - test that meta rules depending on net rules hit
+  meta META_URIBL_A X_URIBL_A
 
 });
 
