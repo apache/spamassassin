@@ -207,45 +207,27 @@ reuse RCVD_IN_IADB_VOUCHED
 # https://issues.apache.org/SpamAssassin/show_bug.cgi?id=6247
 # Certified:
 # https://www.validity.com/resource-center/fact-sheet-certification/
-# (replaces RCVD_IN_BSP_TRUSTED, RCVD_IN_BSP_OTHER, RCVD_IN_SSC_TRUSTED_COI)
+# (replaces RCVD_IN_BSP_TRUSTED, RCVD_IN_BSP_OTHER, RCVD_IN_SSC_TRUSTED_COI, RCVD_IN_RP_CERTIFIED)
 header RCVD_IN_VALIDITY_CERTIFIED     eval:check_rbl_txt('ssc-firsttrusted', 'sa-trusted.bondedsender.org.')
 describe RCVD_IN_VALIDITY_CERTIFIED   Sender in Validity Certification - Contact certification@validity.com
 tflags RCVD_IN_VALIDITY_CERTIFIED     net nice publish
-reuse RCVD_IN_VALIDITY_CERTIFIED
+reuse RCVD_IN_VALIDITY_CERTIFIED      RCVD_IN_RP_CERTIFIED
 
 # Safe:
 # https://www.validity.com/resource-center/fact-sheet-certification/
-# (replaces HABEAS_ACCREDITED_COI, HABEAS_ACCREDITED_SOI, HABEAS_CHECKED)
+# (replaces HABEAS_ACCREDITED_COI, HABEAS_ACCREDITED_SOI, HABEAS_CHECKED, RCVD_IN_RP_SAFE)
 header RCVD_IN_VALIDITY_SAFE     eval:check_rbl_txt('ssc-firsttrusted','sa-accredit.habeas.com.')
 describe RCVD_IN_VALIDITY_SAFE   Sender in Validity Safe - Contact certification@validity.com
 tflags RCVD_IN_VALIDITY_SAFE     net nice publish
-reuse RCVD_IN_VALIDITY_SAFE
+reuse RCVD_IN_VALIDITY_SAFE      RCVD_IN_RP_SAFE
 
 # Validity RPBL (née Return Path Reputation Network Blacklist - RNBL):
 # https://www.senderscore.org/blocklistlookup/
+# (replaces RCVD_IN_RP_RNBL)
 header RCVD_IN_VALIDITY_RPBL     eval:check_rbl('rnbl-lastexternal','bl.score.senderscore.com.')
 describe RCVD_IN_VALIDITY_RPBL   Relay in Validity RPBL, https://senderscore.org/blocklistlookup/
 tflags RCVD_IN_VALIDITY_RPBL     net publish
-reuse RCVD_IN_VALIDITY_RPBL
-
-# temporary
-meta RCVD_IN_RP_CERTIFIED RCVD_IN_VALIDITY_CERTIFIED
-describe RCVD_IN_RP_CERTIFIED RCVD_IN_RP_CERTIFIED renamed to RCVD_IN_VALIDITY_CERTIFIED, please update local rules
-score RCVD_IN_RP_CERTIFIED -0.001
-tflags RCVD_IN_RP_CERTIFIED net nice publish
-reuse RCVD_IN_RP_CERTIFIED
-
-meta RCVD_IN_RP_SAFE RCVD_IN_VALIDITY_SAFE
-describe RCVD_IN_RP_SAFE RCVD_IN_RP_SAFE renamed to RCVD_IN_VALIDITY_SAFE, please update local rules
-score RCVD_IN_RP_SAFE -0.001
-tflags RCVD_IN_RP_SAFE net nice publish
-reuse RCVD_IN_RP_SAFE
-
-meta RCVD_IN_RP_RNBL RCVD_IN_VALIDITY_RPBL
-describe RCVD_IN_RP_RNBL RCVD_IN_RP_RNBL renamed to RCVD_IN_VALIDITY_RPBL, please update local rules
-score RCVD_IN_RP_RNBL 0.001
-tflags RCVD_IN_RP_RNBL net publish
-reuse RCVD_IN_RP_RNBL
+reuse RCVD_IN_VALIDITY_RPBL      RCVD_IN_RP_RNBL
 
 endif
 
