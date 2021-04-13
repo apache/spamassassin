@@ -1253,7 +1253,7 @@ sub _tokenize_line {
   # cleared, even if the source string has perl characters semantics !!!
   # Is this really still desirable?
 
-  foreach my $token (split) {
+TOKEN: foreach my $token (split) {
     $token =~ s/^[-'"\.,]+//;        # trim non-alphanum chars at start or end
     $token =~ s/[-'"\.,]+$//;        # so we don't get loads of '"foo' tokens
 
@@ -1279,7 +1279,7 @@ sub _tokenize_line {
         if ($token =~ /^$self->{bayes_stopword}{$lang}$/i) {
           dbg("bayes: skipped token '$token' because it's in stopword list for language '$lang'");
           $self->{stopword_cache}{$token} = 1;
-          next;
+          next TOKEN;
         }
       }
       $self->{stopword_cache}{$token} = 0;
