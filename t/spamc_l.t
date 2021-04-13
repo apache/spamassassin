@@ -7,8 +7,6 @@ use Test::More;
 plan skip_all => "No SPAMC exe" if $NO_SPAMC_EXE;
 plan tests => 4;
 
-diag("NOTE: Failure might be because some other process is running on port 8.  Test assumes nothing is listening on port 8.");
-
 # ---------------------------------------------------------------------------
 
 my $errmsg = ($RUNNING_ON_WINDOWS?"10061":"Connection refused");
