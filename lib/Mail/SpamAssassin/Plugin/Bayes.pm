@@ -43,16 +43,24 @@ The results are incorporated into SpamAssassin as the BAYES_* rules.
 
 =item bayes_stopword_languages lang             (default: en)
 
-Languages enabled in bayes stopwords processing, every language have a default stopwords regexp,
-tokens matching this regular expressions will not be considered in bayes processing.
+Languages enabled in bayes stopwords processing, every language have a
+default stopwords regexp, tokens matching this regular expression will not
+be considered in bayes processing.
 
 Custom regular expressions for additional languages can be defined in C<local.cf>.
 
-Custom regular expressions can be specified by using the C<bayes_stopword_lang> keyword like in
-the following example:
+Custom regular expressions can be specified by using the C<bayes_stopword_lang>
+keyword like in the following example:
 
- bayes_stopword_languages en
+ bayes_stopword_languages en se
  bayes_stopword_en (?:you|me)
+ bayes_stopword_se (?:du|mig)
+
+Regexps will be anchored automatically at beginning and end.
+
+Only one bayes_stopword_languages or bayes_stopword_xx configuration line
+can be used.  New configuration line will override the old one, for example
+the ones from SpamAssassin default ruleset (60_bayes_stopwords.cf).
 
 =back
 
@@ -259,66 +267,93 @@ sub new {
   $self->{conf} = $main->{conf};
   $self->{use_ignores} = 1;
 
+  # Old default stopword list, need to have hardcoded one incase sa-update is not available
+  $self->{bayes_stopword}{en} = qr/(?:a(?:ble|l(?:ready|l)|n[dy]|re)|b(?:ecause|oth)|c(?:an|ome)|e(?:ach|mail|ven)|f(?:ew|irst|or|rom)|give|h(?:a(?:ve|s)|ttp)|i(?:n(?:formation|to)|t\'s)|just|know|l(?:ike|o(?:ng|ok))|m(?:a(?:de|il(?:(?:ing|to))?|ke|ny)|o(?:re|st)|uch)|n(?:eed|o[tw]|umber)|o(?:ff|n(?:ly|e)|ut|wn)|p(?:eople|lace)|right|s(?:ame|ee|uch)|t(?:h(?:at|is|rough|e)|ime)|using|w(?:eb|h(?:ere|y)|ith(?:out)?|or(?:ld|k))|y(?:ears?|ou(?:(?:\'re|r))?))/;
+
   $self->set_config($self->{conf});
   $self->register_eval_rule("check_bayes", $Mail::SpamAssassin::Conf::TYPE_BODY_EVALS);
   $self;
 }
 
 sub set_config {
-    my ($self, $conf) = @_;
-    my @cmds;
-    my $invalid_lang = 0;
-    my ($re, $def_lang);
+  my ($self, $conf) = @_;
+  my @cmds;
 
-    push(@cmds, {
-      setting => 'bayes_max_token_length',
-      default => MAX_TOKEN_LENGTH,
-      type => $Mail::SpamAssassin::Conf::CONF_TYPE_NUMERIC,
-    });
+  push(@cmds, {
+    setting => 'bayes_max_token_length',
+    default => MAX_TOKEN_LENGTH,
+    is_admin => 1,
+    type => $Mail::SpamAssassin::Conf::CONF_TYPE_NUMERIC,
+  });
 
-    push(@cmds, {
-        setting => 'bayes_stopword_languages',
-        type => $Mail::SpamAssassin::Conf::CONF_TYPE_STRING,
-        is_admin => 1,
-        default => 'en',
-        code => sub {
-          my ($self, $key, $value, $line) = @_;
-          my @lng = split(/,/, $value);
-          foreach my $lang ( @lng ) {
-            dbg("bayes: stopwords for language $lang enabled");
-            if ($lang !~ /^([a-z]{2})$/) {
-              $invalid_lang = 1;
-            }
-          }
-          return $Mail::SpamAssassin::Conf::INVALID_VALUE unless $invalid_lang eq 0;
-          $self->{bayes_stopword_languages} = $value;
+  push(@cmds, {
+    setting => 'bayes_stopword_languages',
+    default => ['en'],
+    is_admin => 1,
+    type => $Mail::SpamAssassin::Conf::CONF_TYPE_STRINGLIST,
+    code => sub {
+      my ($self, $key, $value, $line) = @_;
+      my @langs;
+      foreach my $lang (split(/(?:\s*,\s*|\s+)/, lc($value))) {
+        if ($lang !~ /^([a-z]{2})$/) {
+          return $Mail::SpamAssassin::Conf::INVALID_VALUE;
         }
-    });
-    $conf->{parser}->register_commands(\@cmds);
+        push @langs, $lang;
+      }
+      if (!@langs) {
+        return $Mail::SpamAssassin::Conf::MISSING_REQUIRED_VALUE;
+      }
+      @{$self->{bayes_stopword_languages}} = @langs;
+    }
+  });
+
+  $conf->{parser}->register_commands(\@cmds);
 }
 
 sub parse_config {
-    my ($self, $opt) = @_;
-    my $languages = $self->{conf}->{bayes_stopword_languages};
+  my ($self, $opts) = @_;
 
-    if ($opt->{key} =~ /^bayes_stopword_([a-z]{2})$/i) {
-        $self->inhibit_further_callbacks();
+  # Ignore users's configuration lines
+  return 0 if $opts->{user_config};
 
-        my $lang = lc($1);
-        my @opts = split(/\s+/, $opt->{value});
-        foreach my $re (@opts)
-        {
-          my ($rec, $err) = compile_regexp($re, 0);
-          if (!$rec) {
-            warn "bayes: invalid regex for language $lang: $@\n";
-            return 0;
-          }
-          # dbg("bayes: setting regexp for language $lang");
-          $self->{conf}->{bayes_stopword}{$lang} = $rec
+  if ($opts->{key} =~ /^bayes_stopword_([a-z]{2})$/i) {
+      $self->inhibit_further_callbacks();
+      my $lang = lc($1);
+      foreach my $re (split(/\s+/, $opts->{value})) {
+        my ($rec, $err) = compile_regexp($re, 0);
+        if (!$rec) {
+          warn "bayes: invalid regexp for $opts->{key}: $err\n";
+          return 0;
         }
-        return 1;
+        $self->{bayes_stopword}{$lang} = $rec;
+      }
+      return 1;
+  }
+
+  return 0;
+}
+
+sub finish_parsing_end {
+  my ($self, $opts) = @_;
+  my $conf = $opts->{conf};
+
+  my @langs;
+  foreach my $lang (@{$conf->{bayes_stopword_languages}}) {
+    if (defined $self->{bayes_stopword}{$lang}) {
+      push @langs, $lang;
+    } else {
+      warn "bayes: missing stopwords regexp for language '$lang'\n";
     }
-    return 0;
+  }
+  if (@langs) {
+    dbg("bayes: stopwords for languages enabled: ".join(' ', @langs));
+    @{$conf->{bayes_stopword_languages}} = @langs;
+  } else {
+    dbg("bayes: no stopword languages enabled");
+    $conf->{bayes_stopword_languages} = [];
+  }
+
+  return 0;
 }
 
 sub finish {
@@ -753,7 +788,6 @@ sub learner_is_scan_available {
 
 sub scan {
   my ($self, $permsgstatus, $msg) = @_;
-  my $score;
 
   return unless $self->{conf}->{use_learner};
 
@@ -838,6 +872,7 @@ sub scan {
   if (@pw_keys > N_SIGNIFICANT_TOKENS) { $#pw_keys = N_SIGNIFICANT_TOKENS - 1 }
 
   my @sorted;
+  my $score;
   foreach my $tok (@pw_keys) {
     next if $tok_strength{$tok} <
                 $Mail::SpamAssassin::Bayes::Combine::MIN_PROB_STRENGTH;
@@ -1091,8 +1126,10 @@ sub _get_msgdata_from_permsgstatus {
 # The calling functions expect a uniq'ed array of tokens ...
 sub tokenize {
   my ($self, $msg, $msgdata) = @_;
+  my $conf = $self->{conf};
+  my $t_src = $conf->{bayes_token_sources};
 
-  my $t_src = $self->{conf}->{bayes_token_sources};
+  $self->{stopword_cache} = ();
 
   # visible tokens from the body
   my @tokens_body;
@@ -1156,6 +1193,8 @@ sub tokenize {
     dbg("bayes: tokenized header: %d tokens", scalar @tokens_header);
   }
 
+  delete $self->{stopword_cache};
+
   # Go ahead and uniq the array, skip null tokens (can happen sometimes)
   # generate an SHA1 hash and take the lower 40 bits as our token
   my %tokens;
@@ -1165,7 +1204,6 @@ sub tokenize {
     # dbg("bayes: token: %s", $token);
     $tokens{substr(sha1($token), -5)} = $token  if $token ne '';
   }
-  undef $self->{tokens};
 
   # return the keys == tokens ...
   return \%tokens;
@@ -1177,6 +1215,7 @@ sub _tokenize_line {
   my $region = $_[3];
   local ($_) = $_[1];
 
+  my $conf = $self->{conf};
   my @rettokens;
 
   # include quotes, .'s and -'s for URIs, and [$,]'s for Nigerian-scam strings,
@@ -1233,22 +1272,20 @@ sub _tokenize_line {
     # See http://wiki.apache.org/spamassassin/BayesStopList for more info.
     #
     next if $len < 3;
-    foreach my $lang ( split /,/, $self->{conf}->{bayes_stopword_languages} ) {
-      if ( not defined $self->{conf}->{bayes_stopword}{$lang} ) {
-        dbg("Missing stopwords regexp for language $lang");
-        next;
+
+    # check stopwords regexp if not cached
+    if (!exists $self->{stopword_cache}{$token}) {
+      foreach my $lang (@{$conf->{bayes_stopword_languages}}) {
+        if ($token =~ /^$self->{bayes_stopword}{$lang}$/i) {
+          dbg("bayes: skipped token '$token' because it's in stopword list for language '$lang'");
+          $self->{stopword_cache}{$token} = 1;
+          next;
+        }
       }
-      # check regexp only once
-      next if(exists $self->{tokens}{$lang}{$token});
-      $self->{tokens}{$lang}{$token} = 1;
-      # dbg("bayes: using stopwords for language $lang");
-      if ($token =~ /^$self->{conf}->{bayes_stopword}{$lang}$/i) {
-        dbg("bayes: skipped token \"$token\" because it's in stopword list for language \"$lang\"");
-        next;
-      } else {
-        # XXX for debugging purposes
-        # dbg("bayes: using token \"$token\" not matching regexp \"$self->{conf}->{bayes_stopword}{$lang}\" for language \"$lang\"");
-      }
+      $self->{stopword_cache}{$token} = 0;
+    } else {
+      # bail out if cached known
+      next if $self->{stopword_cache}{$token};
     }
 
     # are we in the body?  If so, apply some body-specific breakouts
@@ -1268,7 +1305,7 @@ sub _tokenize_line {
     # used as part of split tokens such as "HTo:D*net" indicating that 
     # the domain ".net" appeared in the To header.
     #
-    if ($len > $self->{main}->{conf}->{bayes_max_token_length} && $token !~ /\*/) {
+    if ($len > $conf->{bayes_max_token_length} && index($token, '*') == -1) {
 
       if (TOKENIZE_LONG_8BIT_SEQS_AS_UTF8_CHARS && $token =~ /[\x80-\xBF]{2}/) {
 	# Bug 7135
