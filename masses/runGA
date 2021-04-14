@@ -65,7 +65,7 @@ echo "[Doing a scoreset $SCORESET score-generation run]"
 # Clean out old runs
 echo "[Cleaning up]"
 rm -rf spam-test.log ham-test.log spam.log ham.log \
-	NSBASE SPBASE tmp make.output freqs perceptron.scores \
+	NSBASE SPBASE tmp freqs perceptron.scores \
 	garescorer.scores
 make clean
 
@@ -74,14 +74,14 @@ make clean
 echo "[Generating 90/10 split ham]"
 perl tenpass/split-log-into-buckets-cached \
     9:gen-cache/ham-split9.log 1:gen-cache/ham-split1.log ORIG/ham-$NAME.log
-ln gen-cache/ham-split9.log $LOGDIR/NSBASE/ham.log
-ln gen-cache/ham-split1.log $LOGDIR/NSBASE/ham-test.log
+ln -f gen-cache/ham-split9.log $LOGDIR/NSBASE/ham.log
+ln -f gen-cache/ham-split1.log $LOGDIR/NSBASE/ham-test.log
 
 echo "[Generating 90/10 split spam]"
 perl tenpass/split-log-into-buckets-cached \
     9:gen-cache/spam-split9.log 1:gen-cache/spam-split1.log ORIG/spam-$NAME.log
-ln gen-cache/spam-split9.log $LOGDIR/SPBASE/spam.log
-ln gen-cache/spam-split1.log $LOGDIR/SPBASE/spam-test.log
+ln -f gen-cache/spam-split9.log $LOGDIR/SPBASE/spam.log
+ln -f gen-cache/spam-split1.log $LOGDIR/SPBASE/spam-test.log
 
 echo "[Setting up for gen run]"
 # Ok, setup for a run

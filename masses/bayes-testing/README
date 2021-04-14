@@ -58,10 +58,9 @@ folds as "cor/ham/bucket{1,2,3,4,5,6,7,8,9,10}".
 
 I then created a set of items I wanted to test:
 
-  mkdir testdir
-  mkdir testdir/{base,bug3118} [...etc.]
-  cp ~/ftp/spamassassin/lib/Mail/SpamAssassin/Bayes.pm testdir/base/Bayes.pm
-  cp ~/ftp/spamassassin/lib/Mail/SpamAssassin/Bayes.pm testdir/bug3118/Bayes.pm
+  mkdir -p testdir/{base,bug3118} [...etc.]
+  cp $SADIR/lib/Mail/SpamAssassin/Plugin/Bayes.pm testdir/base/Bayes.pm
+  cp $SADIR/lib/Mail/SpamAssassin/Plugin/Bayes.pm testdir/bug3118/Bayes.pm
 
 In other words, created a directory for each test and copied Bayes.pm into
 each one.

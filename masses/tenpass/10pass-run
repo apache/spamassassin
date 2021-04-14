@@ -30,7 +30,7 @@ for id in $passes ; do
   done
   echo "for training)"
 
-  rm ham.log spam.log
+  rm -f ham.log spam.log
   ln ORIG/ham-set$SCORESET.log ham.log
   ln ORIG/spam-set$SCORESET.log spam.log
 
@@ -38,19 +38,14 @@ for id in $passes ; do
   make >> make.output 2>&1
   bash -x ./runGA 2>&1 | tee make.output
 
-  rm ham.log spam.log
+  rm -f ham.log spam.log
   date
 
   echo "Saving test data for corpus $id..."
   cp make.output tenpass_results/make.output.$id
 
   cp $NSBASE/split-$id.log tenpass_results/ham-test.log.$id
-  rm tenpass_results/ham-test.log.$id.gz
-  gzip tenpass_results/ham-test.log.$id
-
   cp $SPBASE/split-$id.log tenpass_results/spam-test.log.$id
-  rm tenpass_results/spam-test.log.$id.gz
-  gzip tenpass_results/spam-test.log.$id
 
   cp gen-set$SCORESET-*/scores tenpass_results/scores.$id
   cp gen-set$SCORESET-*/test tenpass_results/test.$id

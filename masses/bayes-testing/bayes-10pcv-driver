@@ -31,6 +31,7 @@
 ###########################################################################
 
 testdir=`pwd`
+numcpus=`cpucount 2>/dev/null || egrep -c '^processor\b' /proc/cpuinfo 2>/dev/null || echo 1`
 
 learnargs=
 if [ "$#" -gt 0 ] ; then
@@ -38,7 +39,6 @@ if [ "$#" -gt 0 ] ; then
 fi
 
 cd $SADIR/masses
-PATH=$SADIR:$SADIR/masses:$PATH
 
 results=$testdir/results
 tmpdir=$results/config
@@ -47,9 +47,11 @@ rm -rf $results $tmpdir
 
 # now, just copy in the Bayes ruleset
 mkdir -p $results $tmpdir/rules
-cp ../rules/23_*.cf $tmpdir/rules
-cp ../rules/50*.cf $tmpdir/rules
+cp ../rules/20_aux_tlds.cf $tmpdir/rules
+cp ../rules/23_bayes.cf $tmpdir/rules
+cp ../rules/50_scores.cf $tmpdir/rules
 cp ../rules/*.pre $tmpdir/rules         # ensure we have plugins
+cp $testdir/*.cf $tmpdir/rules 2>/dev/null
 
 # tell SpamAssassin to use this path for DBs
 # TODO: for tests of these settings, read from a test-specific file
@@ -60,6 +62,7 @@ bayes_auto_learn          0
 bayes_min_ham_num         10
 bayes_min_spam_num        10
 bayes_store_module Mail::SpamAssassin::BayesStore::SDBM
+lock_method flock
 
 " > $tmpdir/rules/30bayes_path.cf
 mkdir $tmpdir/dbs
@@ -91,21 +94,20 @@ if [ $LEARN_ALL_THEN_FORGET_TEST_SET = 1 ] ; then
 
   (
   echo -n "Learning from all ham buckets..." ; date
-  runcmd sa-learn --ham --randseed=1 --no-sync $learnargs \
-	  --showdots --mbox --config-file=$tmpdir/rules $testdir/cor/ham/*
+  runcmd ../sa-learn --ham --randseed=1 --no-sync $learnargs \
+	  --showdots --mbox --siteconfigpath=$tmpdir/rules --config-file=$tmpdir/rules $testdir/cor/ham/*
 
   echo -n "Learning from all spam buckets..." ; date
-  runcmd sa-learn --spam --randseed=1 --no-sync $learnargs \
-	  --showdots --mbox --config-file=$tmpdir/rules $testdir/cor/spam/*
+  runcmd ../sa-learn --spam --randseed=1 --no-sync $learnargs \
+	  --showdots --mbox --siteconfigpath=$tmpdir/rules --config-file=$tmpdir/rules $testdir/cor/spam/*
 
-  runcmd sa-learn --sync $learnargs --config-file=$tmpdir/rules
+  runcmd ../sa-learn --sync $learnargs --siteconfigpath=$tmpdir/rules --config-file=$tmpdir/rules
 
   echo -n "Done learning. " ; date
   ) 2>&1 | tee $results/learn.log
 
   echo "Dumping bayes DB..."
-  ( cd .. ; tools/check_bayes_db --dbpath=$tmpdir/dbs/bayes ) \
-	> $results/bayes_db.dump
+  ../sa-learn --dump --dbpath=$tmpdir/dbs/bayes > $results/bayes_db.dump
 
 fi
 
@@ -144,33 +146,32 @@ for bucket in 1 2 3 4 5 6 7 8 9 10 ; do
 
   if [ $LEARN_ALL_THEN_FORGET_TEST_SET = 1 ] ; then
     echo "Forgetting contents of test ham bucket..."
-    runcmd sa-learn --forget --config-file=$tmpdir/rules --showdots \
+    runcmd ../sa-learn --forget --siteconfigpath=$tmpdir/rules --config-file=$tmpdir/rules --showdots \
 			  --mbox $rdir/hbuckettest
 
     echo "Forgetting contents of test spam bucket..."
-    runcmd sa-learn --forget --config-file=$tmpdir/rules --showdots \
+    runcmd ../sa-learn --forget --siteconfigpath=$tmpdir/rules --config-file=$tmpdir/rules --showdots \
 			  --mbox $rdir/sbuckettest
 
   else
     echo "Learning contents of learn ham bucket..."
-    runcmd sa-learn --ham --randseed=1 --no-sync $learnargs \
-	    --showdots --mbox --config-file=$tmpdir/rules $rdir/hbucketlearn
+    runcmd ../sa-learn --ham --randseed=1 --no-sync $learnargs \
+	    --showdots --mbox --siteconfigpath=$tmpdir/rules --config-file=$tmpdir/rules $rdir/hbucketlearn
 
     echo "Learning contents of learn spam bucket..."
-    runcmd sa-learn --spam --randseed=1 --no-sync $learnargs \
-	    --showdots --mbox --config-file=$tmpdir/rules $rdir/sbucketlearn
+    runcmd ../sa-learn --spam --randseed=1 --no-sync $learnargs \
+	    --showdots --mbox --siteconfigpath=$tmpdir/rules --config-file=$tmpdir/rules $rdir/sbucketlearn
 
-    runcmd sa-learn --sync $learnargs --config-file=$tmpdir/rules
+    runcmd ../sa-learn --sync $learnargs --siteconfigpath=$tmpdir/rules --config-file=$tmpdir/rules
 
     echo "Dumping bayes DB..."
-    ( cd .. ; sa-learn --dump --dbpath=$tmpdir/dbs/bayes ) \
-	  > $rdir/bayes_db.dump
+    ../sa-learn --dump --dbpath=$tmpdir/dbs/bayes > $rdir/bayes_db.dump
   fi
 
-  runcmd sa-learn --sync --config-file=$tmpdir/rules
+  runcmd ../sa-learn --sync --siteconfigpath=$tmpdir/rules --config-file=$tmpdir/rules
 
-  # take a copy of the trained Bayes DBs, gzipped
-  ( cd $tmpdir ; tar cf - dbs | gzip -c > $rdir/dbs.tgz )
+  # take a copy of the trained Bayes DBs
+  ( cd $tmpdir ; tar cf dbs.tar dbs )
 
   if [ $INTERLEAVE_TESTS = 1 ] ; then
     # now split the ham and spam test bucket into 10 sub-buckets,
@@ -180,34 +181,31 @@ for bucket in 1 2 3 4 5 6 7 8 9 10 ; do
     : > $rdir/spam.log
     
     mkdir $rdir/testbuckets
-    (
-      cd ..
-      tools/split_corpora -n 10 -p $rdir/testbuckets/ham \
+    ../tools/split_corpora -n 10 -p $rdir/testbuckets/ham \
 			$rdir/hbuckettest
-      tools/split_corpora -n 10 -p $rdir/testbuckets/spam \
+    ../tools/split_corpora -n 10 -p $rdir/testbuckets/spam \
 			$rdir/sbuckettest
-    )
 
     for subbucket in 1 2 3 4 5 6 7 8 9 10 ; do
       echo "Running mass-check on ham test-bucket $subbucket..."
-      time ./mass-check -c=$tmpdir/rules -p=$tmpdir/rules --showdots \
+      time ./mass-check -j=$numcpus -c=$tmpdir/rules -p=$tmpdir/rules --showdots \
 	    --bayes --mbox $rdir/testbuckets/ham.$subbucket \
 	    >> $rdir/nonspam.log
 
       echo "Running mass-check on spam test-bucket $subbucket..."
-      time ./mass-check -c=$tmpdir/rules -p=$tmpdir/rules --showdots \
+      time ./mass-check -j=$numcpus -c=$tmpdir/rules -p=$tmpdir/rules --showdots \
 	    --bayes --mbox $rdir/testbuckets/spam.$subbucket \
 	    >> $rdir/spam.log
     done
 
   else
     echo "Running mass-check on ham bucket..."
-    runcmd ./mass-check -c=$tmpdir/rules -p=$tmpdir/rules --showdots \
+    runcmd ./mass-check -j=$numcpus -c=$tmpdir/rules -p=$tmpdir/rules --showdots \
 	  --bayes --mbox $rdir/hbuckettest \
 	  > $rdir/nonspam.log
 
     echo "Running mass-check on spam bucket..."
-    runcmd ./mass-check -c=$tmpdir/rules -p=$tmpdir/rules --showdots \
+    runcmd ./mass-check -j=$numcpus -c=$tmpdir/rules -p=$tmpdir/rules --showdots \
 	  --bayes --mbox $rdir/sbuckettest \
 	  > $rdir/spam.log
   fi
@@ -229,6 +227,7 @@ for bucket in 1 2 3 4 5 6 7 8 9 10 ; do
   rm -f $rdir/hbucketlearn $rdir/sbucketlearn
 
   # but keep these to find FPs/FNs later
+  lz4 --rm -m $rdir/hbuckettest $rdir/sbuckettest || \
   gzip $rdir/hbuckettest $rdir/sbuckettest
 
 done
