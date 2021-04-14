@@ -1845,10 +1845,10 @@ sub _read_cf_pre {
       dbg("config: file or directory $path not accessible: $!");
     } elsif (-d _) {
       foreach my $file ($self->$filelistmethod($path)) {
-        $txt .= read_cf_file($file);
+        $txt .= $self->read_cf_file($file);
       }
     } elsif (-f _ && -s _ && -r _) {
-      $txt .= read_cf_file($path);
+      $txt .= $self->read_cf_file($path);
     }
   }
 
@@ -1857,8 +1857,13 @@ sub _read_cf_pre {
 
 
 sub read_cf_file {
-  my($path) = @_;
+  my($self, $path) = @_;
   my $txt = '';
+
+  if ($self->{cf_files_read}->{$path}++) {
+    dbg("config: skipping already read file: $path");
+    return $txt;
+  }
 
   local *IN;
   if (open (IN, "<".$path)) {
