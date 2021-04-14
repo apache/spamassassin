@@ -27,7 +27,7 @@ loadplugin Mail::SpamAssassin::Plugin::ExtractText
 
 ifplugin Mail::SpamAssassin::Plugin::ExtractText
 
-  extracttext_external    pdftohtml       /usr/bin/pdftohtml -i -stdout -noframes {}
+  extracttext_external    pdftohtml       /usr/bin/pdftohtml -i -stdout -noframes -nodrm {}
   extracttext_external    pdftotext       /usr/bin/pdftotext -q -nopgbrk -enc UTF-8 {} -
   extracttext_use         pdftotext       .pdf application/pdf
 
@@ -45,7 +45,7 @@ ifplugin Mail::SpamAssassin::Plugin::ExtractText
   extracttext_use           odt2txt      .odt .ott application/.*?opendocument.*text
   extracttext_use           odt2txt      .sdw .stw application/(?:x-)?soffice application/(?:x-)?starwriter
 
-  extracttext_external      tesseract    /usr/bin/tesseract -c page_separator= {} -
+  extracttext_external      tesseract    {OMP_THREAD_LIMIT=1} /usr/bin/tesseract -c page_separator= {} -
   extracttext_use           tesseract    .bmp .jpg .png image/jpeg
 
   add_header                all          ExtractText-Flags _EXTRACTTEXTFLAGS_
@@ -128,12 +128,17 @@ types. The regular expressions are anchored to beginning and end.
 
 =item extracttext_external
 
-Defines an external tool. The tool must read a document on standard input or
-from a file and write text to standard output.
-The special keyword "{}" will be substituted at runtime with the temporary filename
-to be scanned by the external tool.
-If the tool doesn't write to stdout you can force it by appending a "-"
-at the end of the configuration line.
+Defines an external tool.  The tool must read a document on standard input
+or from a file and write text to standard output.
+
+The special keyword "{}" will be substituted at runtime with the temporary
+filename to be scanned by the external tool.
+
+Environment variables can be defined with "{KEY=VALUE}", these strings will
+be removed from commandline.
+
+If the tool doesn't write to stdout you can force it by appending a "-" at
+the end of the configuration line.
 
 The general syntax is
 
@@ -336,7 +341,7 @@ sub parse_config {
       }
       my ($rec, $err) = compile_regexp('^(?i)'.$what.'$', 0);
       if (!$rec) {
-        warn("invalid regexp '$what': $err");
+        warn("invalid regexp '$what': $err\n");
         return 0;
       }
       push @{$self->{match}}, {where=>$where, what=>$rec, tool=>$tool};
@@ -347,21 +352,27 @@ sub parse_config {
   
   if ($opts->{key} eq 'extracttext_external') {
     $self->inhibit_further_callbacks();
+    my %env;
+    while ($opts->{value} =~ s/\{(.+?)\}/ /g) {
+      my ($k,$v) = split(/=/, $1, 2);
+      $env{$k} = defined $v ? $v : '';
+    }
     my @vals = split(/\s+/, $opts->{value});
     my $name = lc(shift @vals);
     return 0 unless @vals > 1;
     if ($self->{tools}->{$name}) {
-      warn "Duplicate tool defined: $name";
+      warn "extracttext: duplicate tool defined: $name\n";
       return 0;
     }
-    unless (-x $vals[0]) {
-      warn "Missing tool: $name ($vals[0])";
-      return 0;
-    }
+    #unless (-x $vals[0]) {
+    #  warn "extracttext: missing tool: $name ($vals[0])\n";
+    #  return 0;
+    #}
     $self->{tools}->{$name} = {
       'name' => $name,
       'type' => 'external',
-      'spec' => \@vals,
+      'env' => \%env,
+      'cmd' => \@vals,
     };
     dbg('extracttext: external: %s "%s"', $name, join('","', @vals));
     return 1;
@@ -376,9 +387,14 @@ sub _extract_external {
 
   my ($errno, $pipe_errno, $tmp_file, $err_file, $pid);
   my $resp = '';
-  my @cmd = @{$tool->{spec}};
+  my @cmd = @{$tool->{cmd}};
 
   Mail::SpamAssassin::PerMsgStatus::enter_helper_run_mode($self);
+
+  # Set environment variables
+  foreach (keys %{$tool->{env}}) {
+    $ENV{$_} = $tool->{env}{$_};
+  }
 
   my $timer = Mail::SpamAssassin::Timeout->new(
     { secs => $self->{main}->{conf}->{extracttext_timeout},
@@ -455,22 +471,26 @@ sub _extract_external {
   Mail::SpamAssassin::PerMsgStatus::leave_helper_run_mode($self);
   unlink($tmp_file);
   my $err_resp = -s $err_file ?
-    do { local $/; open(ERRF, $err_file); <ERRF>; } : '';
+    do { open(ERRF, $err_file); <ERRF>; } : '';
   unlink($err_file);
 
   if ($err_resp ne '' && would_log('dbg','extracttext') > 1) {
-    dbg("extracttext: [$pid] ($cmd[0]) stderr output:\n$err_resp");
+    dbg("extracttext: [$pid] ($cmd[0]) stderr output: $err_resp");
   }
 
   # If the output starts with the command that has been run it's
   # probably an error message
   my $basecmd = basename($cmd[0]);
-  if ($pipe_errno && $err_resp =~ /Usage:\s+$basecmd\s+|No such file or directory/) {
-    warn "wrong reply from $cmd[0], please verify command parameters (a '-' could be missing as last parameter).";
-    return (0, $resp);
-  }
-  if ($pipe_errno && !$resp) {
-    warn "Error $pipe_errno without a proper response from $cmd[0]";
+  if ($pipe_errno) {
+    if ($err_resp =~ /Usage:\s+$basecmd\s+|No such file or directory/) {
+      warn "extracttext: wrong reply from $cmd[0], please verify command parameters (a '-' could be missing as last parameter).\n";
+    }
+    elsif ($err_resp =~ /^Syntax Warning: May not be a PDF file/) {
+      # Ignore pdftohtml
+    }
+    elsif (!$resp) {
+      warn "extracttext: error ".($pipe_errno/256)." without a proper response from $cmd[0]: $err_resp\n";
+    }
     return (0, $resp);
   }
   return (1, $resp);
@@ -483,7 +503,7 @@ sub _extract_object {
   if ($tool->{type} eq 'external') {
     ($ok, $text) = $self->_extract_external($object, $tool);
   } else {
-    warn "Bad tool type: $tool->{type}";
+    warn "extracttext: bad tool type: $tool->{type}\n";
     return 0;
   }
 
