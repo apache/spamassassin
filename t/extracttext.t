@@ -27,7 +27,7 @@ plan tests => $tests;
 
 if (-x "/usr/bin/pdftohtml") {
    tstprefs("
-     extracttext_external  pdftohtml  /usr/bin/pdftohtml -i -stdout -noframes {} -
+     extracttext_external  pdftohtml  /usr/bin/pdftohtml -i -stdout -noframes -nodrm {} -
      extracttext_use       pdftohtml  .pdf application/pdf
      extracttext_timeout 30
    ");
@@ -51,7 +51,7 @@ if (-x "/usr/bin/pdftotext") {
 
 if (-x "/usr/bin/tesseract") {
    tstprefs("
-     extracttext_external  tesseract  /usr/bin/tesseract -c page_separator= {} -
+     extracttext_external  tesseract  {OMP_THREAD_LIMIT=1} /usr/bin/tesseract -c page_separator= {} -
      extracttext_use       tesseract  .bmp .jpg .png .tif
      extracttext_timeout 30 1
    ");
