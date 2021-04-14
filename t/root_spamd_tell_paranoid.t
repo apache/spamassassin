@@ -25,6 +25,7 @@ unlink("$userstate/bayes_seen.dir");
 unlink("$userstate/bayes_toks.dir");
 
 # ensure it is writable by all
+chmod 01755, $workdir;
 chmod 01777, $userstate;
 
 # use SDBM so we do not need DB_File
