@@ -1365,7 +1365,15 @@ sub taint_safe_archive_extract {
         # also, if --allowplugins is not specified, comment out
         # all loadplugin or tryplugin lines (and others that can load code)
         if ( !$opt{'allowplugins'} ) {
-          $content =~ s{^\s*((?:load|try)plugin|\S+_modules?|\S+_factory)\s}
+          $content =~ s{^\s*(
+              loadplugin |
+              tryplugin |
+              \S+_modules? |
+              \S+_factory |
+              dcc_(?:path|options) |
+              pyzor_(?:path|options) |
+              extracttext_external
+            )\s}
             {#(commented by sa-update, no --allowplugins switch specified)# $1}gmx;
         }
 
