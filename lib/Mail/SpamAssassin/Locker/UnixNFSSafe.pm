@@ -29,6 +29,7 @@ use Mail::SpamAssassin::Logger;
 use File::Spec;
 use Time::Local;
 use Fcntl qw(:DEFAULT :flock);
+use Errno qw(EEXIST);
 
 our @ISA = qw(Mail::SpamAssassin::Locker);
 
@@ -79,8 +80,8 @@ sub safe_lock {
   LTMP->autoflush(1);
   dbg("locker: safe_lock: created $lock_tmp");
 
-  for (my $retries = 0; $retries < $max_retries; $retries++) {
-    if ($retries > 0) { $self->jittery_one_second_sleep(); }
+  for (my $retries = 0; $retries < $max_retries * 2; $retries++) {
+    if ($retries > 0) { $self->jittery_half_second_sleep(); }
     print LTMP "$hname.$$\n"  or warn "Error writing to $lock_tmp: $!";
     dbg("locker: safe_lock: trying to get lock on $path with $retries retries");
     if (link($lock_tmp, $lock_file)) {
@@ -88,7 +89,10 @@ sub safe_lock {
       $is_locked = 1;
       last;
     }
-    warn "locker: creating link $lock_file to $lock_tmp failed: $!";
+    # if lock exists, it's already likely locked, no point complaining here
+    unless ($!{EEXIST}) {
+      warn "locker: creating link $lock_file to $lock_tmp failed: '$!'";
+    }
     # link _may_ return false even if the link _is_ created
     @stat = lstat($lock_tmp);
     @stat  or warn "locker: error accessing $lock_tmp: $!";

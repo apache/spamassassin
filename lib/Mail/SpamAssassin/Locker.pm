@@ -69,6 +69,11 @@ sub jittery_one_second_sleep {
   Time::HiRes::sleep(rand(1.0) + 0.5);
 }
 
+sub jittery_half_second_sleep {
+  my ($self) = @_;
+  Time::HiRes::sleep(rand(0.5) + 0.25);
+}
+
 ###########################################################################
 
 1;
