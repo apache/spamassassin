@@ -27,37 +27,41 @@ loadplugin Mail::SpamAssassin::Plugin::ExtractText
 
 ifplugin Mail::SpamAssassin::Plugin::ExtractText
 
-  extracttext_external    pdftohtml       /usr/bin/pdftohtml -i -stdout -noframes -nodrm {}
-  extracttext_external    pdftotext       /usr/bin/pdftotext -q -nopgbrk -enc UTF-8 {} -
-  extracttext_use         pdftotext       .pdf application/pdf
+  extracttext_external  pdftohtml  /usr/bin/pdftohtml -i -stdout -noframes -nodrm {}
+  extracttext_use       pdftohtml  .pdf application/pdf
+
+  extracttext_external  pdftotext  /usr/bin/pdftotext -q -nopgbrk -enc UTF-8 {} -
+  extracttext_use       pdftotext  .pdf application/pdf
 
   # http://docx2txt.sourceforge.net
-  extracttext_external    docx2txt        /usr/bin/docx2txt {} -
-  extracttext_use         docx2txt        .docx application/docx
+  extracttext_external  docx2txt   /usr/bin/docx2txt {} -
+  extracttext_use       docx2txt   .docx application/docx
 
-  extracttext_external      antiword     /usr/bin/antiword -t -w 0 -m UTF-8.txt {} -
-  extracttext_use           antiword     .doc application/(?:vnd\\.?)?ms-?word.*
+  extracttext_external  antiword   /usr/bin/antiword -t -w 0 -m UTF-8.txt {}
+  extracttext_use       antiword   .doc application/(?:vnd\.?)?ms-?word.*
 
-  extracttext_external      unrtf        /usr/bin/unrtf --nopict {} -
-  extracttext_use           unrtf        .doc .rtf application/rtf text/rtf
+  extracttext_external  unrtf      /usr/bin/unrtf --nopict {}
+  extracttext_use       unrtf      .doc .rtf application/rtf text/rtf
 
-  extracttext_external      odt2txt      /usr/bin/odt2txt --encoding=UTF-8 {}
-  extracttext_use           odt2txt      .odt .ott application/.*?opendocument.*text
-  extracttext_use           odt2txt      .sdw .stw application/(?:x-)?soffice application/(?:x-)?starwriter
+  extracttext_external  odt2txt    /usr/bin/odt2txt --encoding=UTF-8 {}
+  extracttext_use       odt2txt    .odt .ott application/.*?opendocument.*text
+  extracttext_use       odt2txt    .sdw .stw application/(?:x-)?soffice application/(?:x-)?starwriter
 
-  extracttext_external      tesseract    {OMP_THREAD_LIMIT=1} /usr/bin/tesseract -c page_separator= {} -
-  extracttext_use           tesseract    .bmp .jpg .png image/jpeg
+  extracttext_external  tesseract  {OMP_THREAD_LIMIT=1} /usr/bin/tesseract -c page_separator= {} -
+  extracttext_use       tesseract  .jpg .png .bmp .tif .tiff image/(?:jpeg|png|x-ms-bmp|tiff)
 
-  add_header                all          ExtractText-Flags _EXTRACTTEXTFLAGS_
-  header                    PDF_NO_TEXT  X-ExtractText-Flags =~ /\bpdftohtml_NoText\b/
-  describe                  PDF_NO_TEXT  PDF without text
+  add_header   all          ExtractText-Flags _EXTRACTTEXTFLAGS_
+  header       PDF_NO_TEXT  X-ExtractText-Flags =~ /\b1pdfto(?:html|txt)_NoText\b/
+  describe     PDF_NO_TEXT  PDF without text
+  score        PDF_NO_TEXT  0.001
 
-  header                    DOC_NO_TEXT  X-ExtractText-Flags =~ /\b(?:antiword|openxml|unrtf|odt2txt)_NoText\b/
-  describe                  DOC_NO_TEXT  Document without text
+  header       DOC_NO_TEXT  X-ExtractText-Flags =~ /\b(?:antiword|openxml|unrtf|odt2txt)_NoText\b/
+  describe     DOC_NO_TEXT  Document without text
+  score        DOC_NO_TEXT  0.001
 
-  header                    EXTRACTTEXT  exists:X-ExtractText-Flags
-  describe                  EXTRACTTEXT  Email processed by extracttext plugin
-  score                     EXTRACTTEXT  0.001
+  header       EXTRACTTEXT  exists:X-ExtractText-Flags
+  describe     EXTRACTTEXT  Email processed by extracttext plugin
+  score        EXTRACTTEXT  0.001
 
 endif
 
@@ -71,8 +75,6 @@ MIME part type and file name.
 
 =head1 CONFIGURATION
 
-In the configuration options, \ is used as an escape character. To include an
-actual \ (in regexes for example), use \\.
 All configuration lines in user_prefs files will be ignored.
 
 =over 4
@@ -119,9 +121,9 @@ types. The regular expressions are anchored to beginning and end.
 
 =head3 Examples
 
-	extracttext_use  antiword  .doc application/(?:vnd\\.?)?ms-?word.*
-	extracttext_use  openxml   .docx .dotx .dotm application/(?:vnd\\.?)openxml.*?word.*
-	extracttext_use  openxml   .doc .dot application/(?:vnd\\.?)?ms-?word.*
+	extracttext_use  antiword  .doc application/(?:vnd\.?)?ms-?word.*
+	extracttext_use  openxml   .docx .dotx .dotm application/(?:vnd\.?)openxml.*?word.*
+	extracttext_use  openxml   .doc .dot application/(?:vnd\.?)?ms-?word.*
 	extracttext_use  unrtf     .doc .rtf application/rtf text/rtf
 
 =over
@@ -137,8 +139,7 @@ filename to be scanned by the external tool.
 Environment variables can be defined with "{KEY=VALUE}", these strings will
 be removed from commandline.
 
-If the tool doesn't write to stdout you can force it by appending a "-" at
-the end of the configuration line.
+It is required that commandline used outputs result directly to STDOUT.
 
 The general syntax is
 
@@ -326,6 +327,10 @@ sub parse_config {
 
   if ($opts->{key} eq 'extracttext_use') {
     $self->inhibit_further_callbacks();
+    # Temporary kludge to notify users. Double backslashes have zero benefit for this plugin config.
+    if ($opts->{value} =~ s/\\\\/\\/g) {
+      warn "extracttext: DOUBLE BACKSLASHES DEPRECATED, change config to single backslashes, autoconverted for backward compatibility: $opts->{key} $opts->{value}\n";
+    }
     my @vals = split(/\s+/, $opts->{value});
     my $tool = lc(shift @vals);
     return 0 unless @vals;
@@ -352,6 +357,10 @@ sub parse_config {
   
   if ($opts->{key} eq 'extracttext_external') {
     $self->inhibit_further_callbacks();
+    # Temporary kludge to notify users. Double backslashes have zero benefit for this plugin config.
+    if ($opts->{value} =~ s/\\\\/\\/g) {
+      warn "extracttext: DOUBLE BACKSLASHES DEPRECATED, change config to single backslashes, autoconverted for backward compatibility: $opts->{key} $opts->{value}\n";
+    }
     my %env;
     while ($opts->{value} =~ s/\{(.+?)\}/ /g) {
       my ($k,$v) = split(/=/, $1, 2);
@@ -413,21 +422,9 @@ sub _extract_external {
     close($err_fh);
     $err_file = untaint_file_path($err_file);
 
-    # if last parameter	is "-" push it to the end to write to stdout
-    my $stdout = 0;
-    if ($cmd[-1] eq "-") {
-      pop @cmd;
-      $stdout = 1;
-    }
     foreach (@cmd) {
       # substitute "{}" with the temporary file name to pass to the external software
       s/\{\}/$tmp_file/;
-    }
-    if ($stdout == 1) {
-      push(@cmd, "-");
-    }
-
-    foreach (@cmd) {
       $_ = untaint_var($_);
     }
 
@@ -470,26 +467,38 @@ sub _extract_external {
 
   Mail::SpamAssassin::PerMsgStatus::leave_helper_run_mode($self);
   unlink($tmp_file);
+  # Read first line from STDERR
   my $err_resp = -s $err_file ?
-    do { open(ERRF, $err_file); <ERRF>; } : '';
+    do { open(ERRF, $err_file); $_ = <ERRF>; close(ERRF); chomp; $_; } : '';
   unlink($err_file);
 
-  if ($err_resp ne '' && would_log('dbg','extracttext') > 1) {
+  if ($err_resp ne '') {
     dbg("extracttext: [$pid] ($cmd[0]) stderr output: $err_resp");
   }
 
   # If the output starts with the command that has been run it's
   # probably an error message
-  my $basecmd = basename($cmd[0]);
   if ($pipe_errno) {
-    if ($err_resp =~ /Usage:\s+$basecmd\s+|No such file or directory/) {
-      warn "extracttext: wrong reply from $cmd[0], please verify command parameters (a '-' could be missing as last parameter).\n";
+    if ($err_resp =~ /\b(?:Usage:|No such file or directory)/) {
+      warn "extracttext: error from $cmd[0], please verify configuration: $err_resp\n";
     }
-    elsif ($err_resp =~ /^Syntax Warning: May not be a PDF file/) {
+    elsif ($err_resp =~ /^Syntax (?:Warning|Error): (?:May not be a PDF file|Couldn't find trailer dictionary)/) {
       # Ignore pdftohtml
     }
+    elsif ($err_resp =~ /^Error in (?:findFileFormatStream|fopenReadStream): (?:truncated file|file not found)/) {
+      # Ignore tesseract
+    }
+    elsif ($err_resp =~ /^libpng error:/) {
+      # Ignore tesseract
+    }
+    elsif ($err_resp =~ /^Corrupt JPEG data:/) {
+      # Ignore tesseract
+    }
+    elsif ($err_resp =~ /^\S+ is not a Word Document/) {
+      # Ignore antiword
+    }
     elsif (!$resp) {
-      warn "extracttext: error ".($pipe_errno/256)." without a proper response from $cmd[0]: $err_resp\n";
+      warn "extracttext: error (".($pipe_errno/256).") from $cmd[0]: $err_resp\n";
     }
     return (0, $resp);
   }
