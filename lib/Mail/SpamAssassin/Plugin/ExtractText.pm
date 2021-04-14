@@ -30,7 +30,7 @@ ifplugin Mail::SpamAssassin::Plugin::ExtractText
   extracttext_external  pdftohtml  /usr/bin/pdftohtml -i -stdout -noframes -nodrm {}
   extracttext_use       pdftohtml  .pdf application/pdf
 
-  extracttext_external  pdftotext  /usr/bin/pdftotext -q -nopgbrk -enc UTF-8 {} -
+  extracttext_external  pdftotext  /usr/bin/pdftotext -nopgbrk -layout -enc UTF-8 {} -
   extracttext_use       pdftotext  .pdf application/pdf
 
   # http://docx2txt.sourceforge.net

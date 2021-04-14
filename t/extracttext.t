@@ -49,7 +49,7 @@ if (HAS_PDFTOHTML) {
 
 if (HAS_PDFTOTEXT) {
    tstprefs("
-     extracttext_external  pdftotext  /usr/bin/pdftotext -q -nopgbrk -enc UTF-8 {} -
+     extracttext_external  pdftotext  /usr/bin/pdftotext -nopgbrk -layout -enc UTF-8 {} -
      extracttext_use       pdftotext  .pdf
      extracttext_timeout 30 40
    ");
@@ -61,7 +61,7 @@ if (HAS_PDFTOTEXT) {
 
    # Should fail
    tstprefs("
-     extracttext_external  pdftotext  /usr/bin/pdftotext -q -nopgbrk -enc UTF-8 {} -
+     extracttext_external  pdftotext  /usr/bin/pdftotext -nopgbrk -layout -enc UTF-8 {} -
      extracttext_use       pdftotext  .FOO
      extracttext_timeout 30 40
    ");
