@@ -366,7 +366,13 @@ sub parse {
         goto failed_line;
       }
 
-      $skip_parsing = !$skip_parsing;
+      # Check if we are blocked anywhere in previous if-stack (Bug 7848)
+      if (grep { $_->{skip_parsing} == 1 } @if_stack) {
+        $skip_parsing = 1;
+      } else {
+        $skip_parsing = !$skip_parsing;
+      }
+
       next;
     }
 
