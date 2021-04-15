@@ -1250,7 +1250,7 @@ Select the locales to allow from the list below:
     type => $CONF_TYPE_STRING,
   });
 
-=item normalize_charset ( 0 | 1)        (default: 0)
+=item normalize_charset ( 0 | 1 )        (default: 1)
 
 Whether to decode non- UTF-8 and non-ASCII textual parts and recode them
 to UTF-8 before the text is given over to rules processing. The character
@@ -3555,6 +3555,11 @@ This flag is specific to rules invoking an URIDNSBL plugin,
 it is documented there.
 
 =item  a
+
+This flag is specific to rules invoking an URIDNSBL plugin,
+it is documented there.
+
+=item  notrim
 
 This flag is specific to rules invoking an URIDNSBL plugin,
 it is documented there.
