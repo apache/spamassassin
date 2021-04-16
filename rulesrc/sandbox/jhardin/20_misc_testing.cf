@@ -3175,6 +3175,7 @@ tflags     EBAY_IMG_NOT_RCVD_EBAY      publish
 
 header     __HDR_RCVD_AMAZON           X-Spam-Relays-External =~ /\srdns=\S+\.amazon(?:ses)?\.com\s/
 uri        __URI_IMG_AMAZON            m,://[^/?]+\.(?:ssl-)?images-amazon\.com/,i
+header     __FROM_NAME_AMAZONCOM       From:name =~ /\bamazon\.com\b/i
 
 # price alert site that leverages Amazon, avoid FPs
 header     __HDR_RCVD_KEEPA            X-Spam-Relays-External =~ /\srdns=\S+\.keepa\.com\s/
@@ -3879,6 +3880,8 @@ tflags     ADULT_DATING_COMPANY        publish
 body       CHINA_MANUFACTURER          /\bWe are China located manufacture/i
 score      CHINA_MANUFACTURER          2.500	# limit
 
+meta       POSSIBLE_AMAZON_PHISH_01    (__FROM_NAME_AMAZONCOM && NAME_EMAIL_DIFF)
+meta       POSSIBLE_AMAZON_PHISH_02    (__FROM_NAME_AMAZONCOM && !__HDR_RCVD_AMAZON)
 
 
 
