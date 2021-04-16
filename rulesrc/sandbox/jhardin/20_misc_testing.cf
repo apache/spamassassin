@@ -3858,7 +3858,7 @@ describe   URI_LONG_REPEAT             Very long identical host+domain
 score      URI_LONG_REPEAT             2.500	# limit
 tflags     URI_LONG_REPEAT             publish
 
-body       READY_TO_SHIP               /(?:(?:in our (?:stock|warehouse|store)(?: today)?[.,:] |our (?:\w+,? ){2,8}(?:is |now )+)Ready (?:to (?:be )?|for )+ship|ready (?:for shipping|to (?:ship|send)) (?:(?:in|from|by) our (?:warehouse|stock)|(?:to|for)(?: global(?:ly)?| worldwide| customers){2})|(?:(?:our|this|a|great|fine|wonderful|cool|popular) new product|we have(?: \w+){1,6} available) in (?:our )?(?:warehouse|stock|store)|just arrived in our warehouse)/i
+body       READY_TO_SHIP               /(?:(?:in our (?:stock|warehouse|store)(?: today| now| right away)?[.,:] |our (?:\w+,? ){2,8}(?:is |now )+)Ready (?:to (?:be )?|for )+(?:ship|send|deliver)|ready (?:for shipping|to (?:ship|send)) (?:(?:in|from|by) our (?:warehouse|stock)|(?:to|for)(?: global(?:ly)?| worldwide| customers){2})|(?:(?:our|this|a|great|fine|wonderful|cool|popular) new product|we have(?: \w+){1,6} available) in (?:our )?(?:warehouse|stock|store)|just arrived in our warehouse)/i
 score      READY_TO_SHIP               1.250	# limit
 
 body       WANT_TO_ORDER               /you (?:(?:would )?like|want|are interested)(?: to| in)? (?:plac(?:e|ing) an order|order(?:ing)? (?:for )?(?:this|it|now|today|our \w+))\b/i
@@ -3866,6 +3866,19 @@ score      WANT_TO_ORDER               2.500	# limit
 
 body       YOUR_DELIVERY_ADDRESS       /(?:(?:respond|reply|answer) (?:to )?(?:our|this) ?e?mail (?:[\w,]+\s){0,10}(?:with|and send(?: us)?)|we need to know|let us know|(?:send|provide)(?: us)?|confirm) (?:your|the) (?:(?:delivery |shipping |mailing |shipment )?address(?:\s?[,.;]|(?: and| so)? we| if you)|address (?:for|of) (?:shipping|delivery|shipment))/i
 score      YOUR_DELIVERY_ADDRESS       1.250	# limit
+
+# Don't joe-job a SA dev's wife
+body       __ADULTDATINGCOMPANY_BODY   /\bAdultDatingCompany\b/i
+header     __ADULTDATINGCOMPANY_FROM   From:name =~ /\bAdultDatingCompany\b/i
+header     __ADULTDATINGCOMPANY_REPTO  Reply-To:name =~ /\bAdultDatingCompany\b/i
+meta       ADULT_DATING_COMPANY        __ADULTDATINGCOMPANY_BODY || __ADULTDATINGCOMPANY_FROM || __ADULTDATINGCOMPANY_REPTO
+score      ADULT_DATING_COMPANY        10.000	# limit
+tflags     ADULT_DATING_COMPANY        publish
+
+
+body       CHINA_MANUFACTURER          /\bWe are China located manufacture/i
+score      CHINA_MANUFACTURER          2.500	# limit
+
 
 
 
