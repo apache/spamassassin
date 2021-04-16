@@ -234,6 +234,7 @@ sub parse {
             @Mail::SpamAssassin::Conf::MIGRATED_SETTINGS;
 
   $self->{currentfile} = '(no file)';
+  $self->{linenum} = ();
   my $skip_parsing = 0;
   my @curfile_stack;
   my @if_stack;
@@ -247,6 +248,10 @@ sub parse {
 
   while (defined ($line = shift @conf_lines)) {
     local ($1);         # bug 3838: prevent random taint flagging of $1
+    my $parse_error;    # undef by default, may be overridden
+
+    # don't count internal file start/end lines
+    $self->{linenum}{$self->{currentfile}}++ unless $line =~ /^file\s/;
 
     if (index($line,'#') > -1) {
       # bug 5545: used to support testing rules in the ruleqa system
@@ -279,29 +284,34 @@ sub parse {
     $key =~ tr/-/_/;
     $value = '' unless defined($value);
 
-#   # Do a better job untainting this info ...
-#   # $value = untaint_var($value);
-#   Do NOT blindly untaint now, do it carefully later when semantics is known!
-
-    my $parse_error;       # undef by default, may be overridden
-
     # $key if/elsif blocks sorted by most commonly used
     if ($key eq 'endif') {
-      my $lastcond = pop @if_stack;
-      if (!defined $lastcond) {
-        $parse_error = "config: found endif without matching conditional";
+      if ($value ne '') {
+        $parse_error = "config: '$key' must be standalone";
         goto failed_line;
       }
-
+      my $lastcond = pop @if_stack;
+      if (!defined $lastcond) {
+        $parse_error = "config: missing starting 'if' for '$key'";
+        goto failed_line;
+      }
       $skip_parsing = $lastcond->{skip_parsing};
       next;
     }
     elsif ($key eq 'ifplugin') {
+      if ($value eq '') {
+        $parse_error = "config: missing '$key' condition";
+        goto failed_line;
+      }
       $self->handle_conditional ($key, "plugin ($value)",
                         \@if_stack, \$skip_parsing);
       next;
     }
     elsif ($key eq 'if') {
+      if ($value eq '') {
+        $parse_error = "config: missing '$key' condition";
+        goto failed_line;
+      }
       $self->handle_conditional ($key, $value,
                         \@if_stack, \$skip_parsing);
       next;
@@ -312,53 +322,50 @@ sub parse {
         $self->{currentfile} = $1;
         next;
       }
-
-      if ($value =~ /^end\s/) {
+      elsif ($value =~ /^end\s/) {
+        foreach (@if_stack) {
+          my $msg = "config: unclosed '$_->{type}' found ".
+                    "in $self->{currentfile} (line $_->{linenum})";
+          $self->lint_warn($msg, undef);
+        }
         $self->{file_scoped_attrs} = { };
-
-        if (scalar @if_stack > 0) {
-          my $cond = pop @if_stack;
-
-          if ($cond->{type} eq 'if') {
-            my $msg = "config: unclosed 'if' in ".
-                  $self->{currentfile}.": if ".$cond->{conditional}."\n";
-            warn $msg;
-            $self->lint_warn($msg, undef);
-          }
-          else {
-            # die seems a bit excessive here, but this shouldn't be possible
-            # so I suppose it's okay.
-            die "config: unknown 'if' type: ".$cond->{type}."\n";
-          }
-
-          @if_stack = ();
-        }
+        @if_stack = ();
         $skip_parsing = 0;
-
-        my $curfile = pop @curfile_stack;
-        if (defined $curfile) {
-          $self->{currentfile} = $curfile;
-        } else {
-          $self->{currentfile} = '(no file)';
-        }
+        $self->{currentfile} = pop @curfile_stack;
         next;
+      }
+      else {
+        $parse_error = "config: missing '$key' value";
+        goto failed_line;
       }
     }
     elsif ($key eq 'include') {
+      if ($value eq '') {
+        $parse_error = "config: missing '$key' value";
+        goto failed_line;
+      }
       $value = $self->fix_path_relative_to_current_file($value);
       my $text = $conf->{main}->read_cf($value, 'included file');
-      unshift (@conf_lines, split (/\n/, $text));
+      unshift (@conf_lines,
+          "file end $self->{currentfile}",
+          split (/\n/, $text),
+          "file start $self->{currentfile}");
       next;
     }
     elsif ($key eq 'else') {
+      if ($value ne '') {
+        $parse_error = "config: '$key' must be standalone";
+        goto failed_line;
+      }
+
       # TODO: if/else/else won't get flagged here :(
       if (!@if_stack) {
-        $parse_error = "config: found else without matching conditional";
+        $parse_error = "config: '$key' missing starting if";
         goto failed_line;
       }
 
       # Check if we are blocked anywhere in previous if-stack (Bug 7848)
-      if (grep { $_->{skip_parsing} == 1 } @if_stack) {
+      if (grep { $_->{skip_parsing} } @if_stack) {
         $skip_parsing = 1;
       } else {
         $skip_parsing = !$skip_parsing;
@@ -371,6 +378,11 @@ sub parse {
     next if $skip_parsing;
 
     if ($key eq 'require_version') {
+      if ($value eq '') {
+        $parse_error = "config: missing '$key' value";
+        goto failed_line;
+      }
+
       # if it wasn't replaced during install, assume current version ...
       next if ($value eq "\@\@VERSION\@\@");
 
@@ -385,11 +397,11 @@ sub parse {
       #$value =~ s/^(\d+)\.(\d{1,3}).*$/sprintf "%d.%d", $1, $2/e;
 
       if ($ver ne $value) {
-        my $msg = "config: configuration file \"$self->{currentfile}\" requires ".
+        my $msg = "config: configuration file '$self->{currentfile}' requires ".
                 "version $value of SpamAssassin, but this is code version ".
                 "$ver. Maybe you need to use ".
                 "the -C switch, or remove the old config files? ".
-                "Skipping this file";
+                "Skipping this file.";
         warn $msg;
         $self->lint_warn($msg, undef);
         $skip_parsing = 1;
@@ -422,25 +434,16 @@ sub parse {
       my $ret = &{$cmd->{code}} ($conf, $cmd->{setting}, $value, $line);
       next if !$ret;
 
-      if ($ret eq $Mail::SpamAssassin::Conf::INVALID_VALUE)
-      {
-        $parse_error = "config: SpamAssassin failed to parse line, ".
-                        "\"$value\" is not valid for \"$key\", ".
-                        "skipping: \"$line\" in $self->{currentfile}";
+      if ($ret eq $Mail::SpamAssassin::Conf::INVALID_VALUE) {
+        $parse_error = "config: invalid '$key' value";
         goto failed_line;
       }
-      elsif ($ret eq $Mail::SpamAssassin::Conf::INVALID_HEADER_FIELD_NAME)
-      {
-        $parse_error = "config: SpamAssassin failed to parse line, ".
-                       "it does not specify a valid header field name, ".
-                       "skipping: \"$line\" in $self->{currentfile}";
+      elsif ($ret eq $Mail::SpamAssassin::Conf::INVALID_HEADER_FIELD_NAME) {
+        $parse_error = "config: invalid header field name";
         goto failed_line;
       }
-      elsif ($ret eq $Mail::SpamAssassin::Conf::MISSING_REQUIRED_VALUE)
-      {
-        $parse_error = "config: SpamAssassin failed to parse line, ".
-                        "no value provided for \"$key\", ".
-                        "skipping: \"$line\" in $self->{currentfile}";
+      elsif ($ret eq $Mail::SpamAssassin::Conf::MISSING_REQUIRED_VALUE) {
+        $parse_error = "config: missing '$key' value";
         goto failed_line;
       }
       else {
@@ -469,18 +472,25 @@ failed_line:
       if ($migrated_keys{$key}) {
         # this key was moved into a plugin; non-fatal for lint
         $is_error = 0;
-        $msg = "config: failed to parse, now a plugin, skipping, in \"$self->{currentfile}\": $line";
+        $msg = "config: failed to parse line, now a plugin";
       } else {
         # a real syntax error; this is fatal for --lint
-        $msg = "config: failed to parse line, skipping, in \"$self->{currentfile}\": $line";
+        $msg = "config: failed to parse line";
       }
     }
 
+    if ($self->{currentfile} eq '(no file)') {
+      $msg .= " in $self->{currentfile}: $line"; 
+    } else {
+      $msg .= " in $self->{currentfile} ".
+              "(line $self->{linenum}{$self->{currentfile}}): $line"; 
+    }
     $self->lint_warn($msg, undef, $is_error);
   }
 
   delete $self->{if_stack};
   delete $self->{cond_cache};
+  delete $self->{linenum};
 
   $self->lint_check();
   $self->fix_tests();
@@ -496,9 +506,10 @@ sub handle_conditional {
   # just do what we would do then
   if (exists $self->{cond_cache}{"$key $value"}) {
     push (@{$if_stack_ref}, {
-        type => 'if',
-        conditional => $value,
-        skip_parsing => $$skip_parsing_ref
+        'type' => $key,
+        'conditional' => $value,
+        'skip_parsing' => $$skip_parsing_ref,
+        'linenum' => $self->{linenum}{$self->{currentfile}}
       });
     if ($self->{cond_cache}{"$key $value"} == 0) {
       $$skip_parsing_ref = 1;
@@ -507,9 +518,8 @@ sub handle_conditional {
   }
 
   my @tokens = ($value =~ /($ARITH_EXPRESSION_LEXER)/og);
-
   my $eval = '';
-  my $bad = 0;
+
   foreach my $token (@tokens) {
     if ($token eq '(' || $token eq ')' || $token eq '!') {
       # using tainted subr. argument may taint the whole expression, avoid
@@ -527,7 +537,7 @@ sub handle_conditional {
     elsif ($token eq 'has') {
       # replace with a method call
       $eval .= '$self->cond_clause_has';
-    }
+    }	
     elsif ($token eq 'version') {
       $eval .= $Mail::SpamAssassin::VERSION." ";
     }
@@ -545,27 +555,25 @@ sub handle_conditional {
         my $u = untaint_var($token);
         $eval .= "'$u'";
       } else {
-        warn "config: illegal name '$token' in 'if $value'\n";
-        $bad++;
-        last;
+        my $msg = "config: not allowed value '$token' ".
+            "in $self->{currentfile} (line $self->{linenum}{$self->{currentfile}})";
+        $self->lint_warn($msg, undef);
+        return;
       }
     }
     else {
-      $bad++;
-      warn "config: unparseable chars in 'if $value': '$token'\n";
-      last;
+      my $msg = "config: unparseable value '$token' ".
+          "in $self->{currentfile} (line $self->{linenum}{$self->{currentfile}})";
+      $self->lint_warn($msg, undef);
+      return;
     }
   }
 
-  if ($bad) {
-    $self->lint_warn("config: bad 'if' line, in \"$self->{currentfile}\"", undef);
-    return -1;
-  }
-
   push (@{$if_stack_ref}, {
-      type => 'if',
-      conditional => $value,
-      skip_parsing => $$skip_parsing_ref
+      'type' => $key,
+      'conditional' => $value,
+      'skip_parsing' => $$skip_parsing_ref,
+      'linenum' => $self->{linenum}{$self->{currentfile}}
     });
 
   if (eval $eval) {
@@ -573,7 +581,12 @@ sub handle_conditional {
     # leave $skip_parsing as-is; we may not be parsing anyway in this block.
     # in other words, support nested 'if's and 'require_version's
   } else {
-    warn "config: error in $key - $eval: $@" if $@ ne '';
+    if ($@) {
+      my $msg = "config: error parsing conditional ".
+          "in $self->{currentfile} (line $self->{linenum}{$self->{currentfile}}): $eval ($@)";
+      warn $msg;
+      $self->lint_warn($msg, undef, 0); # not fatal?
+    }
     $self->{cond_cache}{"$key $value"} = 0;
     $$skip_parsing_ref = 1;
   }
@@ -603,16 +616,18 @@ sub cond_clause_can_or_has {
 
   local($1,$2);
   if (!defined $method) {
-    $self->lint_warn("config: bad 'if' line, no argument to $fn_name(), ".
-                     "in \"$self->{currentfile}\"", undef);
+    my $msg = "config: bad 'if' line, no argument to $fn_name() ".
+              "in $self->{currentfile} (line $self->{linenum}{$self->{currentfile}})";
+    $self->lint_warn($msg, undef);
   } elsif ($method =~ /^(.*)::([^:]+)$/) {
     no strict "refs";
     my($module, $meth) = ($1, $2);
     return 1  if $module->can($meth) &&
                  ( $fn_name eq 'has' || &{$method}() );
   } else {
-    $self->lint_warn("config: bad 'if' line, cannot find '::' in $fn_name($method), ".
-                     "in \"$self->{currentfile}\"", undef);
+    my $msg = "config: bad 'if' line, cannot find '::' in $fn_name($method) ".
+              "in $self->{currentfile} (line $self->{linenum}{$self->{currentfile}})";
+    $self->lint_warn($msg, undef);
   }
   return;
 }

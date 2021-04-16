@@ -1260,7 +1260,8 @@ sub read_scoreonly_config {
 
   $text = "file start $filename\n" . $text;
   # add an extra \n in case file did not end in one.
-  $text .= "\nfile end $filename\n";
+  $text .= "\n" unless $text =~ /\n\z/;
+  $text .= "file end $filename\n";
 
   $self->{conf}->{main} = $self;
   $self->{conf}->parse_scores_only ($text);
@@ -1741,10 +1742,18 @@ sub init {
   }
 
   if ($self->{pre_config_text}) {
-    $self->{config_text} = $self->{pre_config_text} . $self->{config_text};
+    $self->{pre_config_text} .= "\n" unless $self->{pre_config_text} =~ /\n\z/;
+    $self->{config_text} = "file start (pre_config_text)\n".
+                           $self->{pre_config_text}.
+                           "file end (pre_config_text)\n".
+                           $self->{config_text};
   }
   if ($self->{post_config_text}) {
-    $self->{config_text} .= $self->{post_config_text};
+    $self->{post_config_text} .= "\n" unless $self->{post_config_text} =~ /\n\z/;
+    $self->{config_text} .= "\n" unless $self->{config_text} =~ /\n\z/;
+    $self->{config_text} .= "file start (post_config_text)\n".
+                            $self->{post_config_text}.
+                            "file end (post_config_text)\n";
   }
 
   if ($self->{config_text} !~ /\S/) {
@@ -1876,7 +1885,8 @@ sub read_cf_file {
 
     $txt = "file start $path\n" . $txt;
     # add an extra \n in case file did not end in one.
-    $txt .= "\nfile end $path\n";
+    $txt .= "\n" unless $txt =~ /\n\z/;
+    $txt .= "file end $path\n";
 
     dbg("config: read file $path");
   }

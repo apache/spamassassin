@@ -166,6 +166,9 @@ sub load_with_dbi {
 	 }
 	 if ($config_text ne '') {
 	   $conf->{main} = $main;
+	   $config_text = "file start (sql config)\n".
+	                  $config_text.
+	                  "file end (sql config)\n";
 	   $conf->parse_scores_only($config_text);
 	   delete $conf->{main};
 	 }

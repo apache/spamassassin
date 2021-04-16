@@ -191,6 +191,9 @@ sub load_with_ldap {
   }
   if ($config_text ne '') {
     $conf->{main} = $main;
+    $config_text = "file start (ldap config)\n".
+                   $config_text.
+                   "file end (ldap config)\n";
     $conf->parse_scores_only($config_text);
     delete $conf->{main};
   }
