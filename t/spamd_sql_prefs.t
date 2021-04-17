@@ -35,7 +35,7 @@ ok(start_spamd("-L --sql-config -u $spamd_run_as_user"));
 %patterns = (
   q{ X-Spam-tTEST1: FOO1 }, 'Added Header tTEST1',
   q{ X-Spam-Flag: YES}, 'Spam Flag',
-  q{ BODY: Generic Test for Unsolicited Bulk Email }, 'GTUBE Test',
+  q{ 1000 GTUBE }, 'GTUBE Test',
   q{ XJS*C4JDBQADN1.NSBN3*2IDNEN*GTUBE-STANDARD-ANTI-UBE-TEST-EMAIL*C.34X }, 'GTUBE String',
 );
 %anti_patterns = (
@@ -51,7 +51,7 @@ clear_pattern_counters();
   q{ XJS*C4JDBQADN1.NSBN3*2IDNEN*GTUBE-STANDARD-ANTI-UBE-TEST-EMAIL*C.34X }, 'GTUBE String',
 );
 %anti_patterns = (
-  q{ BODY: Generic Test for Unsolicited Bulk Email }, 'GTUBE Test',
+  q{ 1000 GTUBE }, 'GTUBE Test',
   q{ X-Spam-Flag: YES}, 'Spam Flag',
 );
 ok (spamcrun("-u testuser < data/spam/018", \&patterns_run_cb));
@@ -68,7 +68,7 @@ ok($dbh->do("INSERT INTO userpref VALUES('testuser', 'required_score', '1000')")
 );
 %anti_patterns = (
   q{ X-Spam-Flag: YES}, 'Spam Flag YES',
-  q{ BODY: Generic Test for Unsolicited Bulk Email }, 'GTUBE Test',
+  q{ 1000 GTUBE }, 'GTUBE Test',
 );
 ok (spamcrun("-u testuser < data/spam/018", \&patterns_run_cb));
 ok_all_patterns();

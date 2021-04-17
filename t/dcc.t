@@ -25,6 +25,7 @@ diag('Note: Failure may not be an SpamAssassin bug, as DCC tests can fail due to
 tstprefs ("
   dns_available no
   use_dcc 1
+  score DCC_CHECK 3.3
 ");
 
 ok sarun ("-t -D info -r < data/spam/gtubedcc.eml 2>&1", \&patterns_run_cb);
@@ -34,7 +35,7 @@ ok_all_patterns();
 
 %patterns = (
 
-  q{ Detected as bulk mail by DCC }, 'dcc',
+  q{ 3.3 DCC_CHECK }, 'dcc',
 
 );
 

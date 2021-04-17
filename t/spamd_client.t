@@ -32,7 +32,7 @@ ok($testmsg);
 
 %patterns = (
   q{ X-Spam-Flag: YES}, 'flag',
-  q{ BODY: Generic Test for Unsolicited Bulk Email }, 'gtube',
+  q{ 1000 GTUBE }, 'gtube',
   q{ XJS*C4JDBQADN1.NSBN3*2IDNEN*GTUBE-STANDARD-ANTI-UBE-TEST-EMAIL*C.34X }, 'gtube string',
 );
 
@@ -91,7 +91,7 @@ if (!$RUNNING_ON_WINDOWS) {
 
   %patterns = (
     q{ X-Spam-Flag: YES}, 'flag',
-    q{ BODY: Generic Test for Unsolicited Bulk Email }, 'gtube',
+    q{ 1000 GTUBE }, 'gtube',
     q{ XJS*C4JDBQADN1.NSBN3*2IDNEN*GTUBE-STANDARD-ANTI-UBE-TEST-EMAIL*C.34X }, 'gtube string',
       );
 

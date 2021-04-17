@@ -17,13 +17,14 @@ diag('Note: Failures may not be an SpamAssassin bug, as Pyzor tests can fail due
 tstprefs ("
   dns_available no
   use_pyzor 1
+  score PYZOR_CHECK 3.3
 ");
 
 #PYZOR file was from real-world spam in October 2018
 
 #TESTING FOR SPAM
 %patterns = (
-  q{ Listed in Pyzor }, 'spam',
+  q{ 3.3 PYZOR_CHECK }, 'spam',
 );
 
 sarun ("-t < data/spam/pyzor", \&patterns_run_cb);
@@ -38,7 +39,7 @@ ok_all_patterns();
   'pyzor: result: COUNT=0' => 'zerocount',
 );
 %anti_patterns = (
-  q{ Listed in Pyzor }, 'nonspam',
+  q{ 3.3 PYZOR_CHECK }, 'nonspam',
 );
 
 sarun ("-D pyzor -t < data/nice/001 2>&1", \&patterns_run_cb);

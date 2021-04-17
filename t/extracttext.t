@@ -19,7 +19,7 @@ plan skip_all => "no needed binaries found" unless $tests;
 plan tests => $tests;
 
 %patterns_gtube = (
-  q{ BODY: Generic Test for Unsolicited Bulk Email }, 'gtube',
+  q{ 1000 GTUBE }, 'gtube',
 );
 
 if (HAS_PDFTOHTML) {
