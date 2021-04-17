@@ -590,10 +590,10 @@ endif
 
 
 # Evaluate Validity (née ReturnPath) and blacklist collisions
-meta           __VALIDITY_SAFE_BRBL             RCVD_IN_VALIDITY_SAFE && RCVD_IN_BRBL_LASTEXT
-meta           __VALIDITY_CERTIFIED_BRBL        RCVD_IN_VALIDITY_CERTIFIED && RCVD_IN_BRBL_LASTEXT
-tflags         __VALIDITY_SAFE_BRBL             net nopublish
-tflags         __VALIDITY_CERTIFIED_BRBL        net nopublish
+#meta           __VALIDITY_SAFE_BRBL             RCVD_IN_VALIDITY_SAFE && RCVD_IN_BRBL_LASTEXT
+#meta           __VALIDITY_CERTIFIED_BRBL        RCVD_IN_VALIDITY_CERTIFIED && RCVD_IN_BRBL_LASTEXT
+#tflags         __VALIDITY_SAFE_BRBL             net nopublish
+#tflags         __VALIDITY_CERTIFIED_BRBL        net nopublish
 meta           __VALIDITY_SAFE_ZEN              RCVD_IN_VALIDITY_SAFE && __RCVD_IN_ZEN
 meta           __VALIDITY_CERTIFIED_ZEN         RCVD_IN_VALIDITY_CERTIFIED && __RCVD_IN_ZEN
 tflags         __VALIDITY_SAFE_ZEN              net nopublish
@@ -2490,7 +2490,7 @@ if can(Mail::SpamAssassin::Conf::feature_bug6558_free)
   #rawbody   __STY_INVIS_NONIMG            /<(?!img\s)[a-z]+\s[^>]{0,200}\bstyle\s*=\s*"[^">]{0,80}(?:(?<!-)visibility\s*:\s*hidden\s*|display\s*:\s*none\s*)[;"!]/i
 
   # *one* invisible style has better S/O than multiple...
-  meta      __STY_INVIS_1_MINFP           __STY_INVIS_1 && !MIME_QP_LONG_LINE && !__MOZILLA_MSGID && !__FROM_ADDRLIST_PAYPAL 
+  meta      __STY_INVIS_1_MINFP           __STY_INVIS_1 && !MIME_QP_LONG_LINE && !__MOZILLA_MSGID
 
   meta      HTML_TEXT_INVISIBLE_STYLE     __STY_INVIS_MANY && (__RDNS_NONE || __HDRS_LCASE || __UNSUB_EMAIL ||  __ADMITS_SPAM || __FROM_DOM_INFO || __HTML_TAG_BALANCE_CENTER || __MSGID_RANDY ) && !__RDNS_LONG && !__FROM_ENCODED_QP && !__HAS_THREAD_INDEX 
   describe  HTML_TEXT_INVISIBLE_STYLE     HTML hidden text + other spam signs
@@ -3180,13 +3180,14 @@ describe   EBAY_IMG_NOT_RCVD_EBAY      E-bay hosted image but message not from E
 tflags     EBAY_IMG_NOT_RCVD_EBAY      publish
 
 header     __HDR_RCVD_AMAZON           X-Spam-Relays-External =~ /\srdns=\S+\.amazon(?:ses)?\.com\s/
+header     __HDR_RCVD_AMAZON_HELO      X-Spam-Relays-External =~ /\srdns=\shelo=[^.]+\.smtp-out\.amazonses\.com\s/
 uri        __URI_IMG_AMAZON            m,://[^/?]+\.(?:ssl-)?images-amazon\.com/,i
 header     __FROM_NAME_AMAZONCOM       From:name =~ /\bamazon\.com\b/i
 
 # price alert site that leverages Amazon, avoid FPs
 header     __HDR_RCVD_KEEPA            X-Spam-Relays-External =~ /\srdns=\S+\.keepa\.com\s/
 
-meta       __AMAZON_IMG_NOT_RCVD_AMZN  __URI_IMG_AMAZON && !__HDR_RCVD_AMAZON
+meta       __AMAZON_IMG_NOT_RCVD_AMZN  __URI_IMG_AMAZON && !__HDR_RCVD_AMAZON && !__HDR_RCVD_AMAZON_HELO
 meta       AMAZON_IMG_NOT_RCVD_AMZN    __AMAZON_IMG_NOT_RCVD_AMZN && !__HDR_RCVD_KEEPA && !__URI_DBL_DOM && !__RCD_RDNS_SMTP && !__RCD_RDNS_MTA && !__DATE_LOWER && !__MSGID_LIST
 score      AMAZON_IMG_NOT_RCVD_AMZN    2.500	# limit
 describe   AMAZON_IMG_NOT_RCVD_AMZN    Amazon hosted image but message not from Amazon
@@ -3886,19 +3887,19 @@ tflags     ADULT_DATING_COMPANY        publish
 body       CHINA_MANUFACTURER          /\bWe are China located manufacture/i
 score      CHINA_MANUFACTURER          2.500	# limit
 
-meta       POSSIBLE_AMAZON_PHISH_01    (__FROM_NAME_AMAZONCOM && NAME_EMAIL_DIFF)
-meta       POSSIBLE_AMAZON_PHISH_02    (__FROM_NAME_AMAZONCOM && !__HDR_RCVD_AMAZON)
+meta       POSSIBLE_AMAZON_PHISH_01    (__FROM_NAME_AMAZONCOM && __NAME_EMAIL_DIFF)
+meta       POSSIBLE_AMAZON_PHISH_02    (__FROM_NAME_AMAZONCOM && !__HDR_RCVD_AMAZON && !__HDR_RCVD_AMAZON_HELO)
 
-meta       POSSIBLE_EBAY_PHISH_01      (__FROM_NAME_EBAYCOM && NAME_EMAIL_DIFF)
+meta       POSSIBLE_EBAY_PHISH_01      (__FROM_NAME_EBAYCOM && __NAME_EMAIL_DIFF)
 meta       POSSIBLE_EBAY_PHISH_02      (__FROM_NAME_EBAYCOM && !__HDR_RCVD_EBAY)
 
-meta       POSSIBLE_APPLE_PHISH_01     (__FROM_NAME_APPLECOM && NAME_EMAIL_DIFF)
+meta       POSSIBLE_APPLE_PHISH_01     (__FROM_NAME_APPLECOM && __NAME_EMAIL_DIFF)
 meta       POSSIBLE_APPLE_PHISH_02     (__FROM_NAME_APPLECOM && !__HDR_RCVD_APPLE)
 
-meta       POSSIBLE_PAYPAL_PHISH_01    (__FROM_NAME_PAYPALCOM && NAME_EMAIL_DIFF)
+meta       POSSIBLE_PAYPAL_PHISH_01    (__FROM_NAME_PAYPALCOM && __NAME_EMAIL_DIFF)
 meta       POSSIBLE_PAYPAL_PHISH_02    (__FROM_NAME_PAYPALCOM && !__HDR_RCVD_PAYPAL)
 
 header     __FROM_ADDR_GMAIL           From:addr =~ /\@gmail\.com>?$/i
-meta       __POSSIBLE_GMAIL_PHISHER    (__FROM_ADDR_GMAIL && NAME_EMAIL_DIFF)
+meta       __POSSIBLE_GMAIL_PHISHER    (__FROM_ADDR_GMAIL && __NAME_EMAIL_DIFF)
 
 
