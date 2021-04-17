@@ -3900,6 +3900,7 @@ meta       POSSIBLE_PAYPAL_PHISH_01    (__FROM_NAME_PAYPALCOM && __NAME_EMAIL_DI
 meta       POSSIBLE_PAYPAL_PHISH_02    (__FROM_NAME_PAYPALCOM && !__HDR_RCVD_PAYPAL)
 
 header     __FROM_ADDR_GMAIL           From:addr =~ /\@gmail\.com>?$/i
-meta       __POSSIBLE_GMAIL_PHISHER    (__FROM_ADDR_GMAIL && __NAME_EMAIL_DIFF)
+meta       POSSIBLE_GMAIL_PHISHER      (__FROM_ADDR_GMAIL && __NAME_EMAIL_DIFF)
+describe   POSSIBLE_GMAIL_PHISHER      Apparent phishing email sent from a gmail account
 
 
