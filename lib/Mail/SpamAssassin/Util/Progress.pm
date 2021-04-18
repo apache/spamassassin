@@ -184,7 +184,7 @@ sub init_bar {
 
   my @chars = (' ') x $self->{bar_size};
 
-  print $fh sprintf("\r%3d%% [%s] %6.2f %s/sec %sm%ss LEFT",
+  print $fh sprintf("\r%3d%% [%s] %6.2f %s/sec %s-%s- LEFT",
 		    0, join('', @chars), 0, $self->{itemtype}, '--', '--');
 
   return;
@@ -235,14 +235,12 @@ sub update {
       
       # using the overall_rate here seems to provide much smoother eta numbers
       my $eta = ($self->{total} - $num_done)/$overall_rate;
-      
-      # we make the assumption that we will never run > 1 hour, maybe this is bad
-      my $min = int($eta/60) % 60;
-      my $sec = int($eta % 60);
-      
-      print $fh sprintf("\r%3d%% [%s] %6.2f %s/sec %02dm%02ds LEFT",
-			$percentage, join('', @chars), $self->{avg_msgs_per_sec},
-                        $self->{itemtype}, $min, $sec);
+
+      my($t1, $v1, $t2, $v2) = seconds_to_values($eta);
+
+      print $fh sprintf("\r%3d%% [%s] %6.2f %s/sec %2d${t1}%2d${t2} LEFT",
+                      $percentage, join('', @chars), $self->{avg_msgs_per_sec},
+                      $self->{itemtype}, $v1, $v2);
     }
     else { # we have no term, so fake it
       print $fh '.' x $msgs_since;
@@ -287,8 +285,7 @@ sub final {
 
   my $msgs_per_sec = $num_done / $time_taken;
 
-  my $min = int($time_taken/60) % 60;
-  my $sec = $time_taken % 60;
+  my($t1, $v1, $t2, $v2) = seconds_to_values($time_taken);
 
   if ($self->{term}) {
     my @chars = (' ') x $self->{bar_size};
@@ -297,17 +294,36 @@ sub final {
       $chars[$_] = '=';
     }
 
-    print $fh sprintf("\r%3d%% [%s] %6.2f %s/sec %02dm%02ds DONE\n",
+    print $fh sprintf("\r%3d%% [%s] %6.2f %s/sec %2d${t1}%2d${t2} DONE\n",
 		      $percentage, join('', @chars), $msgs_per_sec,
-                      $self->{itemtype}, $min, $sec);
+                      $self->{itemtype}, $v1, $v2);
   }
   else {
-    print $fh sprintf("\n%3d%% Completed %6.2f %s/sec in %02dm%02ds\n",
+    print $fh sprintf("\n%3d%% Completed %6.2f %s/sec in %2d${t1}%2d${t2}\n",
 		      $percentage, $msgs_per_sec,
-                      $self->{itemtype}, $min, $sec);
+                      $self->{itemtype}, $v1, $v2);
   }
 
   return;
+}
+
+sub seconds_to_values {
+  my $isec = shift;
+
+  my $day = int($isec/86400); $isec -= $day*86400;
+  my $hour = int($isec/3600); $isec -= $hour*3600;
+  my $min = int($isec/60); $isec -= $min*60;
+  my $sec = int($isec);
+
+  if ($day > 0) {
+    return ('d', $day, 'h', $hour);
+  }
+  elsif ($hour > 0) {
+    return ('h', $hour, 'm', $min);
+  }
+  else {
+    return ('m', $min, 's', $sec);
+  }
 }
 
 1;
