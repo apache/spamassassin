@@ -641,7 +641,8 @@ Options:
  --progress            Show progress using progress bar
  --no-sync             Skip synchronizing the database and journal
                        after learning
- -L, --local           Operate locally, no network accesses
+ -L, --local           Operate locally, no network accesses. Use
+                       of this is recommended, see documentation.
  --import              Migrate data from older version/non DB_File
                        based databases
  --clear               Wipe out existing database
@@ -870,8 +871,10 @@ ignored since there is no learn operation.
 =item B<-L>, B<--local>
 
 Do not perform any network accesses while learning details about the mail
-messages.  This will speed up the learning process, but may result in a
-slightly lower accuracy.
+messages.  This should be normally used, as there really isn't anything
+Bayes can learn from network lookup results.  Official SpamAssassin plugins
+do not currently do any network lookups when learning, but it's possible
+that third party ones might.
 
 =item B<--import>
 
