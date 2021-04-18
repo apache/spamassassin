@@ -346,6 +346,7 @@ sub parsed_metadata {
 
   return 0  if $conf->{skip_uribl_checks};
   return 0  if !$pms->is_dns_available();
+  return 0  if $self->{main}->{learning};
 
   $pms->{'uridnsbl_activerules'} = { };
   $pms->{'uridnsbl_hits'} = { };

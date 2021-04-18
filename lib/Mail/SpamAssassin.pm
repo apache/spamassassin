@@ -728,6 +728,9 @@ sub init_learner {
     if (exists $opts->{$k}) { $self->{$v} = $opts->{$k}; }
   }
 
+  # Set flag which can be checked from plugins etc
+  $self->{learning} = 1;
+
   return \%ret;
 }
 
@@ -757,6 +760,7 @@ Finish learning.
 sub finish_learner {
   my $self = shift;
   $self->{bayes_scanner}->force_close(1) if $self->{bayes_scanner};
+  delete $self->{learning};
   1;
 }
 

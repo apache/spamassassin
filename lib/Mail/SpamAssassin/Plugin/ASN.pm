@@ -293,6 +293,11 @@ sub parsed_metadata {
     return;
   }
 
+  if ($self->{main}->{learning}) {
+    dbg("asn: learning message, skipping DNS-based ASN check");
+    return;
+  }
+
   # initialize the tag data so that if no result is returned from the DNS
   # query we won't end up with a missing tag.  Don't use $pms->set_tag()
   # here to avoid triggering any tag-dependent action unnecessarily
