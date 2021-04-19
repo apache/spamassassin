@@ -46,6 +46,9 @@ rawbody   T_SCC_SPECIAL_GUID	/^([[:xdigit:]]{8})-([[:xdigit:]]{4})-([[:xdigit:]]
 tflags    T_SCC_SPECIAL_GUID	publish multiple maxhits=15
 #score     T_SCC_SPECIAL_GUID	0.3
 
-describe ALL_INTERNAL	No external relays
-header   ALL_INTERNAL	X-Spam-Relays-External =~ /^$/
+describe __NO_EXTERNALS	No external relays
+header   __NO_EXTERNALS	X-Spam-Relays-External =~ /^$/
+
+describe ALL_INTERNAL	Has only internal relays
+meta     ALL_INTERNAL	__NO_EXTERNALS && !NO_RELAYS
 tflags   ALL_INTERNAL	nice
