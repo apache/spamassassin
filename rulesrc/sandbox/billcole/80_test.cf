@@ -43,7 +43,9 @@ header    T_SCC_ODD_MUA  X-Mailer =~ /^X-Mailer: Microsoft Outlook 14.0$/
 
 describe  T_SCC_SPECIAL_GUID      Unique in a similar way
 rawbody   T_SCC_SPECIAL_GUID	/^([[:xdigit:]]{8})-([[:xdigit:]]{4})-([[:xdigit:]]{3})-\3-([[:xdigit:]]{12})$/m
-tflags    T_SCC_SPECIAL_GUID	multiple maxhits=15
+tflags    T_SCC_SPECIAL_GUID	publish multiple maxhits=15
 #score     T_SCC_SPECIAL_GUID	0.3
 
-
+describe ALL_INTERNAL	No external relays
+header   ALL_INTERNAL	X-Spam-Relays-External /^$/
+tflags   ALL_INTERNAL	nice
