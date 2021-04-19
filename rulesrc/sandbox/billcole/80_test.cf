@@ -47,5 +47,5 @@ tflags    T_SCC_SPECIAL_GUID	publish multiple maxhits=15
 #score     T_SCC_SPECIAL_GUID	0.3
 
 describe ALL_INTERNAL	No external relays
-header   ALL_INTERNAL	X-Spam-Relays-External /^$/
+header   ALL_INTERNAL	X-Spam-Relays-External =~ /^$/
 tflags   ALL_INTERNAL	nice
