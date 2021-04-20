@@ -820,7 +820,8 @@ sub show_mclog {
     die "cannot open $gzfile";
   }
 
-  open (GZ, "pigz -cd < $gzfile |") or die "cannot gunzip '$gzfile'";
+  my $lines = 0;
+  open (GZ, "pigz -cd < $gzfile | grep -F '$saferule' |") or die "cannot gunzip '$gzfile'";
   while (<GZ>) {
     /^[\.Y]\s+\S+\s+\S+\s+(?:\S*,|)\Q$saferule\E[, ]/ or next;
 
@@ -828,6 +829,7 @@ sub show_mclog {
     s/,mid=<.*>,/,mid=<REMOVED_BY_RULEQA>,/gs;
 
     print;
+    last if ++$lines >= 100;
   }
 
   close GZ;
