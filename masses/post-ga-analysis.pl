@@ -26,7 +26,16 @@ while(<SPAM>)
 {
     next if /^#/;
     /.\s+[-0-9]*\s+[^\s]+\s+([^\s]*)(\s+?:(?:bayes|time)=\S+)\s*?$/;
-    my @rules=split /,/,$1;
+    my $test_str = $1;
+    my @rules;
+    foreach my $r (split(/,/, $test_str)) {
+      my $hits = 1;
+      # Support compacted RULE(hitcount) format
+      if ($r =~ s/\((\d+)\)$//) {
+        $hits = $1;
+      }
+      push @rules, $r for (1 .. $hits);
+    }
     my $score = 0.0;
     foreach $rule (@rules)
     {
@@ -53,8 +62,17 @@ while(<NONSPAM>)
     next if /^#/;
     /.\s+[-0-9]*\s+[^\s]+\s+([^\s]*)\s*$/;
     next unless defined($1);
+    my $test_str = $1;
+    my @rules;
+    foreach my $r (split(/,/, $test_str)) {
+      my $hits = 1;
+      # Support compacted RULE(hitcount) format
+      if ($r =~ s/\((\d+)\)$//) {
+        $hits = $1;
+      }
+      push @rules, $r for (1 .. $hits);
+    }
 
-    my @rules=split /,/,$1;
     my $score = 0.0;
     foreach $rule (@rules)
     {

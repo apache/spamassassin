@@ -173,8 +173,16 @@ sub readlogs {
       next unless ($caught eq 'Y' || $caught eq '.') && $rules;
 
       # get tests, but ignore unknown tests and subrules
-      my @tests = grep { defined $scores{$_} && !$allrules{$_}->{issubrule} }
-	split(/,/, $rules);
+      my @tests;
+      foreach my $r (split(/,/, $rules)) {
+        my $hits = 1;
+        # Support compacted RULE(hitcount) format
+        if ($r =~ s/\((\d+)\)$//) {
+          $hits = $1;
+        }
+        next unless (defined $scores{$r} && !$allrules{$r}->{issubrule});
+        push @tests, $r for (1 .. $hits);
+      }
 
       # run handler
       log_line_count($isspam, $count, \@tests, $msgline);

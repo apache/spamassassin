@@ -24,7 +24,16 @@ while(<SPAM>)
     next if /^\#/;
     /.\s+[-0-9]*\s+[^\s]+\s+([^\s]*)\s*$/;
     my $testshit = $1; $testshit ||= '';
-    my @rules=split /,/,$testshit;
+
+    my @rules;
+    foreach my $r (split(/,/, $testshit)) {
+      my $hits = 1;
+      # Support compacted RULE(hitcount) format
+      if ($r =~ s/\((\d+)\)$//) {
+        $hits = $1;
+      }
+      push @rules, $r for (1 .. $hits);
+    }
 
     my $score = 0.0;
     foreach $rule (@rules) {
@@ -46,7 +55,16 @@ while(<HAM>)
     next if /^\#/;
     /.\s+[-0-9]*\s+[^\s]+\s+([^\s]*)\s*$/;
     my $testshit = $1; $testshit ||= '';
-    my @rules=split /,/,$testshit;
+
+    my @rules;
+    foreach my $r (split(/,/, $testshit)) {
+      my $hits = 1;
+      # Support compacted RULE(hitcount) format
+      if ($r =~ s/\((\d+)\)$//) {
+        $hits = $1;
+      }
+      push @rules, $r for (1 .. $hits);
+    }
 
     my $score = 0.0;
     foreach $rule (@rules) {

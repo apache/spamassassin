@@ -67,7 +67,17 @@ while (<HAM>) {
 	my (undef,undef,undef, $test_str, undef) = split /\s/;
 
 	# Extract the relevant rule hits and sort them by column number.
-	my @hits = sort map { $rules{$_} } grep { exists $rules{$_} } split /,/, $test_str;
+	my @tests;
+	foreach my $r (split(/,/, $test_str)) {
+          my $hits = 1;
+          # Support compacted RULE(hitcount) format
+          if ($r =~ s/\((\d+)\)$//) {
+            $hits = $1;
+          }
+          next unless exists $rules{$r};
+          push @tests, $r for (1 .. $hits);
+        }
+	my @hits = sort map { $rules{$_} } @tests;
 
 	# Count the number of occurrences and size of this pattern.
 	$ham_patterns{join (' ', @hits)}++;
@@ -95,7 +105,17 @@ while (<SPAM>) {
 	my (undef,undef,undef, $test_str, undef) = split /\s/;
 
 	# Extract the relevant rule hits and sort them by column number.
-	my @hits = sort map { $rules{$_} } grep { exists $rules{$_} } split /,/, $test_str;
+	my @tests;
+	foreach my $r (split(/,/, $test_str)) {
+          my $hits = 1;
+          # Support compacted RULE(hitcount) format
+          if ($r =~ s/\((\d+)\)$//) {
+            $hits = $1;
+          }
+          next unless exists $rules{$r};
+          push @tests, $r for (1 .. $hits);
+        }
+	my @hits = sort map { $rules{$_} } @tests;
 
 	# Count the number of occurrences and size of this pattern.
 	$spam_patterns{join (' ', @hits)}++;

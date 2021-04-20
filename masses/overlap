@@ -105,8 +105,17 @@ sub read_file {
     while(<FILE>) {
 	next if /^#/;
 	if (/^[Y.]\s+-?\d+\s+\S+\s+(\S+)/) {
-	    my @tests = split(/,/, $1);
-	    @tests = grep { !/^T_/ } @tests if $opt_t;
+	    my $test_str = $1;
+	    my @tests;
+	    foreach my $r (split(/,/, $test_str)) {
+              next if ($opt_t && $r =~ /^T_/); # skip test rules
+              my $hits = 1;
+              # Support compacted RULE(hitcount) format
+              if ($r =~ s/\((\d+)\)$//) {
+                $hits = $1;
+              }
+              push @tests, $r for (1 .. $hits);
+            }
 	    my $i = 0;
 	    for my $a (@tests) {
 		$solo{$a}++;

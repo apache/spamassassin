@@ -730,6 +730,18 @@ sub readlogs {
       ';
     }
 
+    $evalstr .= '
+      my @rules;
+      foreach my $r (split(/,/, $rules)) {
+        my $hits = 1;
+        # Support compacted RULE(hitcount) format
+        if ($r =~ s/\((\d+)\)$//) {
+          $hits = $1;
+        }
+        push @rules, $r for (1 .. $hits);
+      }
+    ';
+
     my $hmapstr = '';
     my $smapstr = '';
     if ($isspam) {
@@ -747,7 +759,7 @@ sub readlogs {
       }
 
       $evalstr .= '
-        foreach my $r (split(/,/, $rules)) {
+        foreach my $r (@rules) {
           $freq_spam{$r}++ unless $freq_mesg{$r}++;
           '.$hmapstr.$smapstr.'
         }
@@ -768,7 +780,7 @@ sub readlogs {
       }
 
       $evalstr .= '
-        foreach my $r (split(/,/, $rules)) {
+        foreach my $r (@rules) {
           $freq_ham{$r}++ unless $freq_mesg{$r}++;
           '.$hmapstr.$smapstr.'
         }

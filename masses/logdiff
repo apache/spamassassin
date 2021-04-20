@@ -36,7 +36,15 @@ sub fixfile {
     }
 
     my ($scorepath, $rules, $meta) = ($1,$2,$3);
-    my @rules = split(/,/, $rules);
+    my @rules;
+    foreach my $r (split(/,/, $rules)) {
+      my $hits = 1;
+      # Support compacted RULE(hitcount) format
+      if ($r =~ s/\((\d+)\)$//) {
+        $hits = $1;
+      }
+      push @rules, $r for (1 .. $hits);
+    }
     @rules = sort grep {
         $_ !~ /^AWL$/
     } @rules;

@@ -698,7 +698,8 @@ sub wanted {
       # Amavis X-Spam-Status rules include score and are enclosed in []
       # Amavis: [RULENAME=0.01,RULENAME_2=0.01]
       # Spamassassin: RULENAME,RULENAME_2
-      s/[\[\]]//, s/=.*// foreach (@previous);
+      # .. also support compact RULE(hits), no need to count hits here
+      s/[\[\]]//, s/=.*//, s/\(\d+\)$// foreach (@previous);
       $ma->{metadata}->{reuse_tests_hit} = { map {$_ => 1} @previous };
       $reusing = 1;
     }
@@ -826,11 +827,19 @@ sub wanted {
     # don't bother adjusting scores for reuse
     $score = $status->get_score();
     # list of tests hit
+    my %tests;
+    foreach ((
+      split(/,/, $status->get_names_of_tests_hit()),
+      split(/,/, $status->get_names_of_subtests_hit())
+    )) {
+      $tests{$_}++;
+    }
     my @tests;
-    push @tests, split(/,/, $status->get_names_of_tests_hit());
-    push @tests, split(/,/, $status->get_names_of_subtests_hit());
-
-    $tests = join(",", sort(@tests));
+    foreach (sort keys %tests) {
+      # Use compact RULE(hitcount) format
+      push @tests, $tests{$_} > 1 ? "$_($tests{$_})" : $_;
+    }
+    $tests = join(",", @tests);
     $extra = join(",", @extra);
   }
 

@@ -157,9 +157,15 @@ sub read_argv {
 	}
 	# "mass-check" format
 	elsif (/^[Y.]\s+-?\d+\s+\S+\s+(\S+)/) {
+	    my $test_str = $1;
 	    $type = 2;
-	    foreach (split(/,/, $1)) {
-		$freq{$_}++;
+	    foreach my $r (split(/,/, $test_str)) {
+	        my $hits = 1;
+	        # Support compacted RULE(hitcount) format
+	        if ($r =~ s/\((\d+)\)$//) {
+	          $hits = $1;
+	        }
+		$freq{$r} += $hits;
 	    }
 	}
 	# "scores" format
