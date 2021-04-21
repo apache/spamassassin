@@ -87,10 +87,12 @@ if (!scalar keys %{$netlist}) {
 
 my $url;        # tracks the last day used
 my $dayoffset = 0;
-foreach my $day (@DAYS_REQUIRED) {
-  if (!$FROM_CACHE || !-f $cache.$day || (-M $cache.$day) > 0.5) {
+my $with_new_offset = 0;
 
-with_new_offset:
+foreach my $day (@DAYS_REQUIRED) {
+  if (!$FROM_CACHE || !-f $cache.$day || (-M $cache.$day) > 0.5 || $with_new_offset) {
+
+    $with_new_offset = 0;
     $url = $cgi_url.($day+$dayoffset)."-days-ago?xml=1";
     warn "HTTP get: $url\n";
 
@@ -134,7 +136,8 @@ with_new_offset:
     # so the results are untrustworthy.
     if ($daysubs =~ /(?:^|\s)net-/) {
       warn "day $day contains a --net mass-check! offsetting by an extra day\n";
-      $dayoffset++; goto with_new_offset;
+      $dayoffset++;
+      $with_new_offset = 1; redo;
     }
 
     ($submitters ne '') and $submitters .= "; ";
