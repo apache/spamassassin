@@ -57,6 +57,9 @@ Specify a domain, or a number of domains, which should be skipped for the
 URIBL checks.  This is very useful to specify very common domains which are
 not going to be listed in URIBLs.
 
+In addition to trimmed domain, the full hostname is also checked from the
+list.
+
 =back
 
 =over 4
@@ -448,7 +451,11 @@ sub check_dnsbl {
     while (my($host,$domain) = each( %{$info->{hosts}} )) {
       if ($skip_domains->{$domain}) {
         dbg("uridnsbl: domain $domain in skip list, host $host");
-      } else {
+      }
+      elsif ($skip_domains->{$host}) {
+        dbg("uridnsbl: host $host in skip list, domain $domain");
+      }
+      else {
         # use hostname as a key, and drag along the stripped domain name part
         $uri_ordered[$entry]->{$host} = $domain;
       }
@@ -1152,6 +1159,6 @@ sub has_tflags_domains_only { 1 }
 sub has_subtest_for_ranges { 1 }
 sub has_uridnsbl_for_a { 1 }  # uridnsbl rules recognize tflags 'a' and 'ns'
 sub has_uridnsbl_a_ns { 1 }  # has an actually working 'a' flag, unlike above :-(
-sub has_tflags_notrim { 1 }
+sub has_tflags_notrim { 1 }  # Bug 7835
 
 1;
