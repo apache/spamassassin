@@ -2268,6 +2268,8 @@ sub find_all_addrs_in_mail {
 sub find_all_addrs_in_line {
   my ($self, $line) = @_;
 
+  return () unless defined $line;
+
   # a more permissive pattern based on "dot-atom" as per RFC2822
   my $ID_PATTERN   = qr/[-a-zA-Z0-9_\+\:\=\!\#\$\%\&\*\^\?\{\}\|\~\/\.]+/;
   my $HOST_PATTERN = qr/[-a-zA-Z0-9_\+\:\/]+/;
@@ -2276,9 +2278,12 @@ sub find_all_addrs_in_line {
   my %seen;
   while ($line =~ s/(?:mailto:)?\s*
 	      ($ID_PATTERN \@
-	      $HOST_PATTERN(?:\.$HOST_PATTERN)+)//oix) 
+	      ($HOST_PATTERN(?:\.$HOST_PATTERN)+))//oix) 
   {
     my $addr = $1;
+    my $host = $2;
+    next unless Mail::SpamAssassin::Util::is_fqdn_valid($host);
+    next unless $self->{registryboundaries}->is_domain_valid($host);
     $addr =~ s/^mailto://;
     next if (defined ($seen{$addr})); $seen{$addr} = 1;
     push (@addrs, $addr);
