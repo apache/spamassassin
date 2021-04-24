@@ -3892,12 +3892,20 @@ meta       POSSIBLE_AMAZON_PHISH_02    (__FROM_NAME_AMAZONCOM && !__HDR_RCVD_AMA
 
 meta       POSSIBLE_EBAY_PHISH_01      (__FROM_NAME_EBAYCOM && __NAME_EMAIL_DIFF)
 meta       POSSIBLE_EBAY_PHISH_02      (__FROM_NAME_EBAYCOM && !__HDR_RCVD_EBAY)
+describe   POSSIBLE_EBAY_PHISH_02      Claims to be from ebay but not processed by any ebay MTA
+tflags     POSSIBLE_EBAY_PHISH_02      publish
 
 meta       POSSIBLE_APPLE_PHISH_01     (__FROM_NAME_APPLECOM && __NAME_EMAIL_DIFF)
 meta       POSSIBLE_APPLE_PHISH_02     (__FROM_NAME_APPLECOM && !__HDR_RCVD_APPLE)
+describe   POSSIBLE_APPLE_PHISH_02     Claims to be from apple but not processed by any apple MTA
+tflags     POSSIBLE_APPLE_PHISH_02     publish
 
 meta       POSSIBLE_PAYPAL_PHISH_01    (__FROM_NAME_PAYPALCOM && __NAME_EMAIL_DIFF)
+describe   POSSIBLE_PAYPAL_PHISH_01    Claims to be from paypal but has non-paypal from email address
+tflags     POSSIBLE_PAYPAL_PHISH_01    publish
 meta       POSSIBLE_PAYPAL_PHISH_02    (__FROM_NAME_PAYPALCOM && !__HDR_RCVD_PAYPAL)
+describe   POSSIBLE_PAYPAL_PHISH_02    Claims to be from paypal but not processed by any paypal MTA
+tflags     POSSIBLE_PAYPAL_PHISH_02    publish
 
 header     __FROM_ADDR_GMAIL           From:addr =~ /\@gmail\.com>?$/i
 meta       POSSIBLE_GMAIL_PHISHER      (__FROM_ADDR_GMAIL && __NAME_EMAIL_DIFF)
