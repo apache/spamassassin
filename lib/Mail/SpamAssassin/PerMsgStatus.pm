@@ -2347,7 +2347,7 @@ sub _get {
         }
       }
       if ($host && $getdomain) {
-        $host = $self->{main}->{registryboundaries}->trim_domain($1, 1);
+        $host = $self->{main}->{registryboundaries}->trim_domain($host, 1);
       }
     } else {
       my $ipRE = qr/(?<!\.)\b(${IP_ADDRESS})\b(?!\.)/;
