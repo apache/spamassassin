@@ -64,6 +64,10 @@ BEGIN {
   $ENV{'PATH'} = '/bin:/usr/bin:/usr/local/bin';
   # Remove tainted envs, at least ENV used in FreeBSD
   delete @ENV{qw(IFS CDPATH ENV BASH_ENV)};
+
+  # Fix INC to point to built SA
+  if (-e 't/test_dir') { unshift(@INC, 'blib/lib'); }
+  elsif (-e 'test_dir') { unshift(@INC, '../blib/lib'); }
 }
 
 # Set up for testing. Exports (as global vars):
@@ -786,17 +790,37 @@ sub patterns_run_cb {
   }
 
   foreach my $pat (sort keys %patterns) {
-    my $safe = pattern_to_re ($pat);
-    # print "JMD $patterns{$pat}\n";
-    if ($_ =~ /${safe}/s) {
-      $found{$patterns{$pat}}++;
+    # '' for exact match
+    local $1;
+    if ($pat =~ /^'(.*)'$/s) {
+      if (index($_, $1) != -1) {
+        $found{$patterns{$pat}}++;
+      }
+    }
+    # nothing or // for re
+    else {
+      my $safe = pattern_to_re ($pat);
+      # print "JMD $patterns{$pat}\n";
+      if ($_ =~ /${safe}/s) {
+        $found{$patterns{$pat}}++;
+      }
     }
   }
   foreach my $pat (sort keys %anti_patterns) {
-    my $safe = pattern_to_re ($pat);
-    # print "JMD $patterns{$pat}\n";
-    if ($_ =~ /${safe}/s) {
-      $found_anti{$anti_patterns{$pat}}++;
+    # '' for exact match
+    local $1;
+    if ($pat =~ /^'(.*)'$/s) {
+      if (index($_, $1) != -1) {
+        $found_anti{$anti_patterns{$pat}}++;
+      }
+    }
+    # nothing or // for re
+    else {
+      my $safe = pattern_to_re ($pat);
+      # print "JMD $patterns{$pat}\n";
+      if ($_ =~ /${safe}/s) {
+        $found_anti{$anti_patterns{$pat}}++;
+      }
     }
   }
 }
