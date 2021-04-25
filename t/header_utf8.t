@@ -8,6 +8,10 @@ BEGIN {
   eval { require Net::LibIDN } and do { $have_libidn = 1 };
 }
 
+if (!$have_libidn) {
+  warn "Net::LibIDN is not installed, tests will be lacking\n";
+}
+
 use Test::More;
 plan skip_all => "Test requires Perl 5.8" unless $] > 5.008; # TODO: SA already doesn't support anything below 5.8.1
 plan tests => 156;
