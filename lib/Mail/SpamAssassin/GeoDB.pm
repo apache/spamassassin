@@ -40,6 +40,7 @@ use warnings;
 use re 'taint';
 
 use Socket;
+use version 0.77;
 
 our @ISA = qw();
 

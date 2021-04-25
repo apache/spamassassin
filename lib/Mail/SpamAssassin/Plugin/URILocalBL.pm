@@ -116,7 +116,6 @@ use strict;
 use warnings;
 # use bytes;
 use re 'taint';
-use version;
 
 our @ISA = qw(Mail::SpamAssassin::Plugin);
 

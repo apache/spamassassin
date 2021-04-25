@@ -133,6 +133,7 @@ use Mail::SpamAssassin::Logger;
 use Mail::SpamAssassin::Util qw(reverse_ip_address compile_regexp);
 use Mail::SpamAssassin::Dns;
 use Mail::SpamAssassin::Constants qw(:ip);
+use version 0.77;
 
 our @ISA = qw(Mail::SpamAssassin::Plugin);
 
