@@ -487,7 +487,7 @@ sub check_cleanup {
     if (defined $test_logs->{$rule}->{msg}) {
       my @msgs;
       if (($self->{conf}->{tflags}->{$rule}||'') =~ /\bnolog\b/) {
-        @msgs = ['*REDACTED*'];
+        push(@msgs, '*REDACTED*');
       } else {
         @msgs = @{$test_logs->{$rule}->{msg}};
       }
