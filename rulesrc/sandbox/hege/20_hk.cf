@@ -1,6 +1,23 @@
 
 rawbody __HTML_UTF7 /<meta [^>]{0,200}\bcharset=.?utf-7\b/i
 
+header __NESTED_COMMENT_FROM From:raw =~ /\([^)]*\(/
+header __NESTED_COMMENT_TO To:raw =~ /\([^)]*\(/
+header __NESTED_COMMENT_CC Cc:raw =~ /\([^)]*\(/
+header __NESTED_COMMENT_REPLYTO Reply-To:raw =~ /\([^)]*\(/
+header __COMMENT_IN_FROM_ADDR From:raw =~ /<[^>]*\(/
+header __COMMENT_IN_TO_ADDR To:raw =~ /<[^>]*\(/
+header __COMMENT_IN_CC_ADDR Cc:raw =~ /<[^>]*\(/
+header __COMMENT_IN_REPLYTO_ADDR Reply-To:raw =~ /<[^>]*\(/
+header __DOUBLE_ESCAPE_FROM From:raw =~ /\\\\/
+header __DOUBLE_ESCAPE_TO To:raw =~ /\\\\/
+header __DOUBLE_ESCAPE_CC Cc:raw =~ /\\\\/
+header __DOUBLE_ESCAPE_REPLYTO Reply-To:raw =~ /\\\\/
+header __DUPLICATE_HEADER_FROM ALL:raw =~ /\nFrom:.*?\nFrom:/is
+header __DUPLICATE_HEADER_TO ALL:raw =~ /\nTo:.*?\nTo:/is
+header __DUPLICATE_HEADER_CC ALL:raw =~ /\nCc:.*?\nCc:/is
+header __DUPLICATE_HEADER_REPLYTO ALL:raw =~ /\nReply-To:.*?\nReply-To:/is
+
 ####
 #### Basic stuff
 ####
