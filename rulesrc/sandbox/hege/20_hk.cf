@@ -1,6 +1,10 @@
 
 rawbody __HTML_UTF7 /<meta [^>]{0,200}\bcharset=.?utf-7\b/i
 
+header __NESTED_ANGLE_FROM From:raw =~ /<[^>]*</
+header __NESTED_ANGLE_TO To:raw =~ /<[^>]*</
+header __NESTED_ANGLE_CC Cc:raw =~ /<[^>]*</
+header __NESTED_ANGLE_REPLYTO Reply-To:raw =~ /<[^>]*</
 header __NESTED_COMMENT_FROM From:raw =~ /\([^)]*\(/
 header __NESTED_COMMENT_TO To:raw =~ /\([^)]*\(/
 header __NESTED_COMMENT_CC Cc:raw =~ /\([^)]*\(/
@@ -21,6 +25,8 @@ header __DUPLICATE_HEADER_REPLYTO ALL:raw =~ /\nReply-To:.*?\nReply-To:/is
 ####
 #### Basic stuff
 ####
+
+header		HK_NAME_ANGLES_FWD	From:name =~ />>/
 
 uri		URI_IN_URI_5		/(?::\/\/.*?){5}/
 describe	URI_IN_URI_5		Multiple URIs inside URI
