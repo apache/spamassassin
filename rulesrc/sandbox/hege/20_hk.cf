@@ -64,9 +64,9 @@ header		HK_RCVD_IP_MULTICAST	X-Spam-Relays-External =~ / ip=(?:22[4-9]|23[0-9])\
 score		HK_RCVD_IP_MULTICAST	2
 tflags		HK_RCVD_IP_MULTICAST	publish
 
-header		HK_RANDOM_ENVFROM	 EnvelopeFrom =~ /^(?!(?:mail|bounce)[_.-]|[^@]*(?:[+=^~\#-]|mcgr|kpmg|nlpbr|ndqv|lcgc|cplpr)|[^@]{26}|.*?@.{0,20}\b(?:cmp-info|cmpgnr|cnn|tori|jysk|amadeus)\.[a-z]{2,3}$)[^@]*(?:[bcdfgjklmnpqrtvwxz]{5}|[aeiouy]{5}|([a-z]{1,2})(?:\1){3})/mi
-header		HK_RANDOM_FROM	 	    From:addr =~ /^(?!(?:mail|bounce)[_.-]|[^@]*(?:[+=^~\#-]|mcgr|kpmg|nlpbr|ndqv|lcgc|cplpr)|[^@]{26}|.*?@.{0,20}\b(?:cmp-info|cmpgnr|cnn|tori|jysk|amadeus)\.[a-z]{2,3}$)[^@]*(?:[bcdfgjklmnpqrtvwxz]{5}|[aeiouy]{5}|([a-z]{1,2})(?:\1){3})/mi
-header		HK_RANDOM_REPLYTO	Reply-To:addr =~ /^(?!(?:mail|bounce)[_.-]|[^@]*(?:[+=^~\#-]|mcgr|kpmg|nlpbr|ndqv|lcgc|cplpr)|[^@]{26}|.*?@.{0,20}\b(?:cmp-info|cmpgnr|cnn|tori|jysk|amadeus)\.[a-z]{2,3}$)[^@]*(?:[bcdfgjklmnpqrtvwxz]{5}|[aeiouy]{5}|([a-z]{1,2})(?:\1){3})/mi
+header		HK_RANDOM_ENVFROM	 EnvelopeFrom =~ /^(?!(?:mail|bounce)[_.-]|[^@]*(?:[+=^~\#-]|mcgr|kpmg|nlpbr|ndqv|lcgc|cplpr)|[^@]{26}|.*?\@.{0,20}\b(?:cmp-info|cmpgnr|cnn|tori|jysk|amadeus|amazon)\.[a-z]{2,3}$)[^@]*(?:[bcdfgjklmnpqrtvwxz]{5}|[aeiouy]{5}|([a-z]{1,2})(?:\1){3})/mi
+header		HK_RANDOM_FROM	 	    From:addr =~ /^(?!(?:mail|bounce)[_.-]|[^@]*(?:[+=^~\#-]|mcgr|kpmg|nlpbr|ndqv|lcgc|cplpr)|[^@]{26}|.*?\@.{0,20}\b(?:cmp-info|cmpgnr|cnn|tori|jysk|amadeus|amazon)\.[a-z]{2,3}$)[^@]*(?:[bcdfgjklmnpqrtvwxz]{5}|[aeiouy]{5}|([a-z]{1,2})(?:\1){3})/mi
+header		HK_RANDOM_REPLYTO	Reply-To:addr =~ /^(?!(?:mail|bounce)[_.-]|[^@]*(?:[+=^~\#-]|mcgr|kpmg|nlpbr|ndqv|lcgc|cplpr)|[^@]{26}|.*?\@.{0,20}\b(?:cmp-info|cmpgnr|cnn|tori|jysk|amadeus|amazon)\.[a-z]{2,3}$)[^@]*(?:[bcdfgjklmnpqrtvwxz]{5}|[aeiouy]{5}|([a-z]{1,2})(?:\1){3})/mi
 describe	HK_RANDOM_ENVFROM	Envelope sender username looks random
 score		HK_RANDOM_ENVFROM	1
 tflags		HK_RANDOM_ENVFROM	publish
