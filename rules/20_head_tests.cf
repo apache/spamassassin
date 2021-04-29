@@ -461,7 +461,8 @@ if (version >= 4.000000)
   header FROM_ILLEGAL_CHARS	eval:check_illegal_chars('From','0.20','2')
   header __HEAD_ILLEGAL_CHARS	eval:check_illegal_chars('ALL','0.010','2')
   meta HEAD_ILLEGAL_CHARS	__HEAD_ILLEGAL_CHARS && !__SUBJ_ILLEGAL_CHARS && !FROM_ILLEGAL_CHARS
-else
+endif
+if (version < 4.000000)
   meta __SUBJ_ILLEGAL_CHARS 0
   meta SUBJ_ILLEGAL_CHARS 0
   meta FROM_ILLEGAL_CHARS 0
