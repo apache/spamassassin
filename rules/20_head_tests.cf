@@ -454,15 +454,23 @@ tflags CHARSET_FARAWAY_HEADER	userconf
 # might want to exempt users using languages that don't use Latin
 # alphabets, but do it in the eval
 
-header __SUBJ_ILLEGAL_CHARS	eval:check_illegal_chars('Subject','0.00','2')
-meta SUBJ_ILLEGAL_CHARS         (__SUBJ_ILLEGAL_CHARS && !__FROM_YAHOO_COM)
+# Will FP without 4.0 and UTF-8 support
+if (version >= 4.000000)
+  header __SUBJ_ILLEGAL_CHARS	eval:check_illegal_chars('Subject','0.00','2')
+  meta SUBJ_ILLEGAL_CHARS         (__SUBJ_ILLEGAL_CHARS && !__FROM_YAHOO_COM)
+  header FROM_ILLEGAL_CHARS	eval:check_illegal_chars('From','0.20','2')
+  header __HEAD_ILLEGAL_CHARS	eval:check_illegal_chars('ALL','0.010','2')
+  meta HEAD_ILLEGAL_CHARS	__HEAD_ILLEGAL_CHARS && !__SUBJ_ILLEGAL_CHARS && !FROM_ILLEGAL_CHARS
+else
+  meta __SUBJ_ILLEGAL_CHARS 0
+  meta SUBJ_ILLEGAL_CHARS 0
+  meta FROM_ILLEGAL_CHARS 0
+  meta __HEAD_ILLEGAL_CHARS 0
+  meta HEAD_ILLEGAL_CHARS 0
+endif
+
 describe SUBJ_ILLEGAL_CHARS	Subject: has too many raw illegal characters
-
-header FROM_ILLEGAL_CHARS	eval:check_illegal_chars('From','0.20','2')
 describe FROM_ILLEGAL_CHARS	From: has too many raw illegal characters
-
-header __HEAD_ILLEGAL_CHARS	eval:check_illegal_chars('ALL','0.010','2')
-meta HEAD_ILLEGAL_CHARS		__HEAD_ILLEGAL_CHARS && !__SUBJ_ILLEGAL_CHARS && !FROM_ILLEGAL_CHARS
 describe HEAD_ILLEGAL_CHARS	Headers have too many raw illegal characters
 
     ###################################################################
