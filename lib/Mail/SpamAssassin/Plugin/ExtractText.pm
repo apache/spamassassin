@@ -27,9 +27,6 @@ loadplugin Mail::SpamAssassin::Plugin::ExtractText
 
 ifplugin Mail::SpamAssassin::Plugin::ExtractText
 
-  extracttext_external  pdftohtml  /usr/bin/pdftohtml -i -stdout -noframes -nodrm {}
-  extracttext_use       pdftohtml  .pdf application/pdf
-
   extracttext_external  pdftotext  /usr/bin/pdftotext -nopgbrk -layout -enc UTF-8 {} -
   extracttext_use       pdftotext  .pdf application/pdf
 
@@ -51,7 +48,7 @@ ifplugin Mail::SpamAssassin::Plugin::ExtractText
   extracttext_use       tesseract  .jpg .png .bmp .tif .tiff image/(?:jpeg|png|x-ms-bmp|tiff)
 
   add_header   all          ExtractText-Flags _EXTRACTTEXTFLAGS_
-  header       PDF_NO_TEXT  X-ExtractText-Flags =~ /\b1pdfto(?:html|txt)_NoText\b/
+  header       PDF_NO_TEXT  X-ExtractText-Flags =~ /\bpdftotext_NoText\b/
   describe     PDF_NO_TEXT  PDF without text
   score        PDF_NO_TEXT  0.001
 
@@ -68,7 +65,8 @@ endif
 =head1 DESCRIPTION
 
 This module uses external tools to extract text from message parts,
-and then sets the text as the rendered part.
+and then sets the text as the rendered part. External tool must output
+plain text, not HTML or other non-textual result.
 
 How to extract text is completely configurable, and based on
 MIME part type and file name.
@@ -218,7 +216,7 @@ Tag: _EXTRACTTEXTTOOLS_
 
 Contains chains of tools used for extraction.
 
-X-ExtractText-Tools: pdftohtml openxml_antiword
+X-ExtractText-Tools: pdftotext openxml_antiword
 
 =item X-ExtractText-Types
 
@@ -251,7 +249,7 @@ X-ExtractText-Flags: openxml_NoText
 
 Example:
 
-	header    PDF_NO_TEXT  X-ExtractText-Flags =~ /pdftohtml_Notext/
+	header    PDF_NO_TEXT  X-ExtractText-Flags =~ /\bpdftotext_Notext\b/
 	describe  PDF_NO_TEXT  PDF without text
 
 =cut
@@ -331,6 +329,10 @@ sub parse_config {
     if ($opts->{value} =~ s/\\\\/\\/g) {
       warn "extracttext: DOUBLE BACKSLASHES DEPRECATED, change config to single backslashes, autoconverted for backward compatibility: $opts->{key} $opts->{value}\n";
     }
+    if ($opts->{value} =~ /(?:to|2)html\b/) {
+      warn "extracttext: HTML tools are not supported, plain text output is required. Please remove: $opts->{key} $opts->{value}\n";
+      return 1;
+    }
     my @vals = split(/\s+/, $opts->{value});
     my $tool = lc(shift @vals);
     return 0 unless @vals;
@@ -360,6 +362,10 @@ sub parse_config {
     # Temporary kludge to notify users. Double backslashes have zero benefit for this plugin config.
     if ($opts->{value} =~ s/\\\\/\\/g) {
       warn "extracttext: DOUBLE BACKSLASHES DEPRECATED, change config to single backslashes, autoconverted for backward compatibility: $opts->{key} $opts->{value}\n";
+    }
+    if ($opts->{value} =~ /(?:to|2)html\b/) {
+      warn "extracttext: HTML tools are not supported, plain text output is required. Please remove: $opts->{key} $opts->{value}\n";
+      return 1;
     }
     my %env;
     while ($opts->{value} =~ s/\{(.+?)\}/ /g) {
@@ -483,7 +489,7 @@ sub _extract_external {
       warn "extracttext: error from $cmd[0], please verify configuration: $err_resp\n";
     }
     elsif ($err_resp =~ /^Syntax (?:Warning|Error): (?:May not be a PDF file|Couldn't find trailer dictionary)/) {
-      # Ignore pdftohtml
+      # Ignore pdftotext
     }
     elsif ($err_resp =~ /^Error in (?:findFileFormatStream|fopenReadStream): (?:truncated file|file not found)/) {
       # Ignore tesseract
@@ -587,12 +593,8 @@ sub _extract {
     }
     $coll->{chars} += length($text);
     $coll->{words} += scalar @{[split(/\W+/s,$text)]} - 1;
-    # minimal heuristic to find out if output will be text/plain or text/html
-    if (index($tool->{name}, 'html') >= 0) {
-      $type = "text/html";
-    }
     dbg("extracttext: rendering text for type $type with $tool->{name}");
-    $part->set_rendered($text, $type);
+    $part->set_rendered($text);
   }
 
   if (@types) {

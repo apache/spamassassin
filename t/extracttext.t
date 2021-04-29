@@ -5,12 +5,10 @@ use SATest; sa_t_init("extracttext");
 
 use Test::More;
 
-use constant HAS_PDFTOHTML => eval { $_ = untaint_cmd("which pdftohtml"); chomp; -x };
 use constant HAS_PDFTOTEXT => eval { $_ = untaint_cmd("which pdftotext"); chomp; -x };
 use constant HAS_TESSERACT => eval { $_ = untaint_cmd("which tesseract"); chomp; -x };
 
 my $tests = 0;
-$tests += 2 if (HAS_PDFTOHTML);
 $tests += 2 if (HAS_PDFTOTEXT);
 $tests += 1 if (HAS_TESSERACT);
 if ($tests && $tests < 5) { diag("some binaries missing, not running all tests\n"); }
@@ -21,31 +19,6 @@ plan tests => $tests;
 %patterns_gtube = (
   q{ 1000 GTUBE }, 'gtube',
 );
-
-if (HAS_PDFTOHTML) {
-   tstprefs("
-     extracttext_external  pdftohtml  /usr/bin/pdftohtml -i -stdout -noframes -nodrm {} -
-     extracttext_use       pdftohtml  .pdf application/pdf
-     extracttext_timeout 30
-   ");
-   %anti_patterns = ();
-   %patterns = %patterns_gtube;
-   sarun ("-L -t < data/spam/extracttext/gtube_pdf.eml", \&patterns_run_cb);
-   ok_all_patterns();
-   clear_pattern_counters();
-
-   # Mime regex test (includes redundant single backslash for test)
-   tstprefs("
-     extracttext_external  pdftohtml  /usr/bin/pdftohtml -i -stdout -noframes -nodrm {} -
-     extracttext_use       pdftohtml  application\\/(?:pdf)
-     extracttext_timeout 30
-   ");
-   %anti_patterns = ();
-   %patterns = %patterns_gtube;
-   sarun ("-L -t < data/spam/extracttext/gtube_pdf.eml", \&patterns_run_cb);
-   ok_all_patterns();
-   clear_pattern_counters();
-}
 
 if (HAS_PDFTOTEXT) {
    tstprefs("
