@@ -62,7 +62,7 @@ use Mail::SpamAssassin::AsyncLoop;
 use Mail::SpamAssassin::Conf;
 use Mail::SpamAssassin::Util qw(untaint_var base64_encode idn_to_ascii
                                 uri_list_canonicalize reverse_ip_address
-                                is_fqdn_valid);
+                                is_fqdn_valid parse_header_addresses);
 use Mail::SpamAssassin::Timeout;
 use Mail::SpamAssassin::Logger;
 
@@ -1953,21 +1953,24 @@ sub extract_message_metadata {
   # tags (explicitly required for DMARC, RFC 7489)
   #
   { local $1;
-    my $addr = $self->get('EnvelopeFrom:addr', undef);
+    my $host = ($self->get('EnvelopeFrom:first:addr:host'))[0];
     # collect a FQDN, ignoring potential trailing WSP
-    if (defined $addr && $addr =~ /\@([^@. \t]+\.[^@ \t]+?)[ \t]*\z/s) {
-      my $d = idn_to_ascii($1);
+    if (defined $host) {
+      my $d = idn_to_ascii($host);
       $self->set_tag('SENDERDOMAIN', $d);
       $self->{msg}->put_metadata("X-SenderDomain", $d);
       dbg("metadata: X-SenderDomain: %s", $d);
     }
-    # TODO: the get ':addr' only returns the first address; this should be
-    # augmented to be able to return all addresses in a header field, multiple
-    # addresses in a From header field are allowed according to RFC 5322
-    $addr = $self->get('From:addr', undef);
-    if (defined $addr && $addr =~ /\@([^@. \t]+\.[^@ \t]+?)[ \t]*\z/s) {
-      my $d = idn_to_ascii($1);
-      $self->set_tag('AUTHORDOMAIN', $d);
+    my @from_doms;
+    my %seen;
+    foreach ($self->get('From:addr:host')) {
+      next if $seen{$_}++;
+      my $d = idn_to_ascii($_);
+      push @from_doms, $d;
+    }
+    if (@from_doms) {
+      $self->set_tag('AUTHORDOMAIN', @from_doms > 1 ? \@from_doms : $from_doms[0]);
+      my $d = join(" ", @from_doms);
       $self->{msg}->put_metadata("X-AuthorDomain", $d);
       dbg("metadata: X-AuthorDomain: %s", $d);
     }
@@ -2031,25 +2034,32 @@ sub get_decoded_stripped_body_text_array {
 
 =item $status->get (header_name [, default_value])
 
-Returns a message header, pseudo-header, real name or address.
-C<header_name> is the name of a mail header, such as 'Subject', 'To',
-etc.  If C<default_value> is given, it will be used if the requested
-C<header_name> does not exist.
+Returns a message header, pseudo-header or a real name, email-address or
+some other parsed value set by modifiers.  C<header_name> is the name of a
+mail header, such as 'Subject', 'To', etc.
 
-Appending C<:raw> to the header name will inhibit decoding of quoted-printable
-or base-64 encoded strings.
+Should be called in list context since 4.0.  Will return list of headers
+content, or other values when modifiers used.
 
-Appending a modifier C<:addr> to a header field name will cause everything
-except the first email address to be removed from the header field.  It is
-mainly applicable to header fields 'From', 'Sender', 'To', 'Cc' along with
-their 'Resent-*' counterparts, and the 'Return-Path'. For example, all of
-the following will result in "example@foo":
+If C<default_value> is given, it will be used if the requested
+C<header_name> does not exist.  This is mainly useful when called in scalar
+context to set 'undef' instead of legacy '' return value when header does
+not exist.
+
+Appending C<:raw> modifier to the header name will inhibit decoding of
+quoted-printable or base-64 encoded strings.
+
+Appending C<:addr> modifier to the header name will return all
+email-addresses found in the header.  It is mainly applicable to header
+fields 'From', 'Sender', 'To', 'Cc' along with their 'Resent-*'
+counterparts, and the 'Return-Path'.  For example, all of the following will
+result in "example@foo" (and "example@bar"):
 
 =over 4
 
 =item example@foo
 
-=item example@foo (Foo Blah)
+=item example@foo (Foo Blah), <example@bar>
 
 =item example@foo, example@bar
 
@@ -2063,18 +2073,18 @@ the following will result in "example@foo":
 
 =back
 
-Appending a modifier C<:name> to a header field name will cause everything
-except the first display name to be removed from the header field. It is
-mainly applicable to header fields containing a single mail address: 'From',
-'Sender', along with their 'Resent-From' and 'Resent-Sender' counterparts.
-For example, all of the following will result in "Foo Blah". One level of
-single quotes is stripped too, as it is often seen.
+Appending C<:name> modifier to the header name will return all "display
+names" from the header field.  As with C<:addr>, it is mainly applicable to
+header fields 'From', 'Sender', 'To', 'Cc' along with their 'Resent-*'
+counterparts, and the 'Return-Path'.  For example, all of the following will
+result in "Foo Blah" (and "Bar Baz").  One level of single quotes is
+stripped too, as it is often seen.
 
 =over 4
 
 =item example@foo (Foo Blah)
 
-=item example@foo (Foo Blah), example@bar
+=item example@foo (Foo Blah), "Bar Baz" <example@bar>
 
 =item display: example@foo (Foo Blah), example@bar ;
 
@@ -2086,22 +2096,27 @@ single quotes is stripped too, as it is often seen.
 
 =back
 
-Appending a modifier C<:host> to a header field name will return the first
-hostname-looking string that ends with a valid TLD. First it tries to find a
-match after @ character (possible email), then from any part of the header.
-Normal use of this would be for example 'From:addr:host' to return the
-hostname portion of a From-address.
+Appending C<:host> to the header name will return the first hostname-looking
+string that ends with a valid TLD.  First it tries to find a match after @
+character (possible email), then from any part of the header.  Normal use of
+this would be for example 'From:addr:host' to return the hostname portion of
+a From-address.
 
-Appending a modifier C<:domain> to a header field name implies C<:host>,
-but will return only domain part of the hostname, as returned by
-RegistryBoundaries::trim_domain.
+Appending C<:domain> to the header name implies C<:host>, but will return
+only domain part of the hostname, as returned by
+RegistryBoundaries::trim_domain().
 
-Appending a modifier C<:ip> to a header field name, will return the first
-IPv4 or IPv6 address string found. Could be used for example as
-'X-Originating-IP:ip'.
+Appending C<:ip> to the header name, will return the first IPv4 or IPv6
+address string found.  Could be used for example as 'X-Originating-IP:ip'.
 
-Appending a modifier C<:revip> to a header field name implies C<:ip>,
-but will return the found IP in reverse (usually for DNSBL usage).
+Appending C<:revip> to the header name implies C<:ip>, but will return the
+found IP in reverse (usually for DNSBL usage).
+
+Appending C<:first> modifier to the header name will return only the first
+(topmost) header, in case there are multiple ones.  Similarly C<:last> will
+select the last one.  These affect only the physical header line selection. 
+If selected header is parsed further with C<:addr> or similar, it may return
+multiple results, if the selected header contains multiple addresses.
 
 There are several special pseudo-headers that can be specified:
 
@@ -2143,6 +2158,12 @@ the message has passed through
 =item C<X-Spam-Relays-Trusted> is the generated metadata of trusted relays
 the message has passed through
 
+=item C<X-Spam-Relays-External> is the generated metadata of external relays
+the message has passed through
+
+=item C<X-Spam-Relays-Internal> is the generated metadata of internal relays
+the message has passed through
+
 =back
 
 =cut
@@ -2151,98 +2172,106 @@ the message has passed through
 sub _get {
   my ($self, $request) = @_;
 
-  my $result;
+  my @results;
   my $getaddr = 0;
   my $getname = 0;
   my $getraw = 0;
+  my $needraw = 0;
   my $gethost = 0;
   my $getdomain = 0;
   my $getip = 0;
   my $getrevip = 0;
+  my $getfirst = 0;
+  my $getlast = 0;
 
   # special queries - process and strip modifiers
   if (index($request,':') >= 0) {  # triage
     local $1;
     while ($request =~ s/:([^:]*)//) {
       if    ($1 eq 'raw')    { $getraw  = 1 }
-      elsif ($1 eq 'addr')   { $getaddr = $getraw = 1 }
-      elsif ($1 eq 'name')   { $getname = 1 }
+      elsif ($1 eq 'addr')   { $getaddr = $needraw = 1 }
+      elsif ($1 eq 'name')   { $getname = $needraw = 1 }
       elsif ($1 eq 'host')   { $gethost = 1 }
       elsif ($1 eq 'domain') { $gethost = $getdomain = 1 }
       elsif ($1 eq 'ip')     { $getip = 1 }
       elsif ($1 eq 'revip')  { $getip = $getrevip = 1 }
+      elsif ($1 eq 'first')  { $getfirst = 1 }
+      elsif ($1 eq 'last')   { $getlast = 1 }
     }
   }
   my $request_lc = lc $request;
 
   # ALL: entire pristine or semi-raw headers
   if ($request eq 'ALL') {
-    return ($getraw ? $self->{msg}->get_pristine_header()
-                    : $self->{msg}->get_all_headers(0));
+    if ($getraw) {
+      @results = $self->{msg}->get_pristine_header() =~ /^([^ \t].*?\n)(?![ \t])/smgi;
+    } else {
+      @results = $self->{msg}->get_all_headers(0);
+    }
+    return \@results;
   }
   # ALL-TRUSTED: entire trusted raw headers
   elsif ($request eq 'ALL-TRUSTED') {
     # '+1' since we added the received header even though it's not considered
     # trusted, so we know that those headers can be trusted too
-    return $self->get_all_hdrs_in_rcvd_index_range(
+    @results = $self->get_all_hdrs_in_rcvd_index_range(
 			undef, $self->{last_trusted_relay_index}+1,
 			undef, undef, $getraw);
+    return \@results;
   }
   # ALL-INTERNAL: entire internal raw headers
   elsif ($request eq 'ALL-INTERNAL') {
     # '+1' for the same reason as in ALL-TRUSTED above
-    return $self->get_all_hdrs_in_rcvd_index_range(
+    @results = $self->get_all_hdrs_in_rcvd_index_range(
 			undef, $self->{last_internal_relay_index}+1,
 			undef, undef, $getraw);
+    return \@results;
   }
   # ALL-UNTRUSTED: entire untrusted raw headers
   elsif ($request eq 'ALL-UNTRUSTED') {
     # '+1' for the same reason as in ALL-TRUSTED above
-    return $self->get_all_hdrs_in_rcvd_index_range(
+    @results = $self->get_all_hdrs_in_rcvd_index_range(
 			$self->{last_trusted_relay_index}+1, undef,
 			undef, undef, $getraw);
+    return \@results;
   }
   # ALL-EXTERNAL: entire external raw headers
   elsif ($request eq 'ALL-EXTERNAL') {
     # '+1' for the same reason as in ALL-TRUSTED above
-    return $self->get_all_hdrs_in_rcvd_index_range(
+    @results = $self->get_all_hdrs_in_rcvd_index_range(
 			$self->{last_internal_relay_index}+1, undef,
 			undef, undef, $getraw);
+    return \@results;
   }
   # EnvelopeFrom: the SMTP MAIL FROM: address
   elsif ($request_lc eq "\LEnvelopeFrom") {
-    $result = $self->get_envelope_from();
+    push @results, $self->get_envelope_from();
   }
   # untrusted relays list, as string
   elsif ($request_lc eq "\LX-Spam-Relays-Untrusted") {
-    $result = $self->{relays_untrusted_str};
+    push @results, $self->{relays_untrusted_str};
   }
   # trusted relays list, as string
   elsif ($request_lc eq "\LX-Spam-Relays-Trusted") {
-    $result = $self->{relays_trusted_str};
+    push @results, $self->{relays_trusted_str};
   }
   # external relays list, as string
   elsif ($request_lc eq "\LX-Spam-Relays-External") {
-    $result = $self->{relays_external_str};
+    push @results, $self->{relays_external_str};
   }
   # internal relays list, as string
   elsif ($request_lc eq "\LX-Spam-Relays-Internal") {
-    $result = $self->{relays_internal_str};
+    push @results, $self->{relays_internal_str};
   }
   # ToCc: the combined recipients list
   elsif ($request_lc eq "\LToCc") {
-    $result = join("\n", $self->{msg}->get_header('To', $getraw));
-    if ($result ne '') {
-      chomp $result;
-      $result .= ", " if $result =~ /\S/;
-    }
-    $result .= join("\n", $self->{msg}->get_header('Cc', $getraw));
-    $result = undef if $result eq '';
+    push @results, $self->{msg}->get_header('To', $getraw);
+    push @results, $self->{msg}->get_header('Cc', $getraw);
   }
   # MESSAGEID: handle lists which move the real message-id to another
   # header for resending.
   elsif ($request eq 'MESSAGEID') {
-    $result = join("\n", grep { defined($_) && $_ ne '' }
+    push @results, grep { defined($_) && $_ ne '' } (
 		   $self->{msg}->get_header('X-Message-Id', $getraw),
 		   $self->{msg}->get_header('Resent-Message-Id', $getraw),
 		   $self->{msg}->get_header('X-Original-Message-ID', $getraw),
@@ -2250,115 +2279,126 @@ sub _get {
   }
   # a conventional header
   else {
-    my @results = $getraw ? $self->{msg}->raw_header($request)
-                          : $self->{msg}->get_header($request);
-  # dbg("message: get(%s)%s = %s",
-  #     $request, $getraw?'raw':'', join(", ",@results));
-    if (@results) {
-      $result = join('', @results);
-    } else {  # metadata
-      $result = $self->{msg}->get_metadata($request);
+    my @res = $getraw||$needraw ? $self->{msg}->raw_header($request)
+                                : $self->{msg}->get_header($request);
+    if (!@res) {
+      if (defined(my $m = $self->{msg}->get_metadata($request))) {
+        push @res, $m;
+      }
     }
+    push @results, @res if @res;
   }
 
-  # special queries
-  if (defined $result && ($getaddr || $getname)) {
-    local $1;
-    $result =~ s/^[^:]+:(.*);\s*$/$1/gs;	# 'undisclosed-recipients: ;'
-    $result =~ s/\s+/ /g;			# reduce whitespace
-    $result =~ s/^\s+//;			# leading whitespace
-    $result =~ s/\s+$//;			# trailing whitespace
-
-    if ($getaddr) {
-      # Get the email address out of the header
-      # All of these should result in "jm@foo":
-      # jm@foo
-      # jm@foo (Foo Blah)
-      # jm@foo, jm@bar
-      # display: jm@foo (Foo Blah), jm@bar ;
-      # Foo Blah <jm@foo>
-      # "Foo Blah" <jm@foo>
-      # "'Foo Blah'" <jm@foo>
-      #
-      # strip out the (comments)
-      $result =~ s/\s*\(.*?\)//g;
-      # strip out the "quoted text", unless it's the only thing in the string
-      if ($result !~ /^".*"$/) {
-        $result =~ s/(?<!<)"[^"]*"(?!\@)//g;   #" emacs
-      }
-      # Foo Blah <jm@xxx> or <jm@xxx>
-      local $1;
-      $result =~ s/^[^"<]*?<(.*?)>.*$/$1/;
-      # multiple addresses on one line? remove all but first
-      $result =~ s/,.*$//;
-    }
-    elsif ($getname) {
-      # Get the display name out of the header
-      # All of these should result in "Foo Blah":
-      #
-      # jm@foo (Foo Blah)
-      # (Foo Blah) jm@foo
-      # jm@foo (Foo Blah), jm@bar
-      # display: jm@foo (Foo Blah), jm@bar ;
-      # Foo Blah <jm@foo>
-      # "Foo Blah" <jm@foo>
-      # "'Foo Blah'" <jm@foo>
-      #
-      local $1;
-      # does not handle mailbox-list or address-list or quotes well, to be improved
-      if ($result =~ /^ \s* " (.*?) (?<!\\)" \s* < [^<>]* >/sx ||
-          $result =~ /^ \s* (.*?) \s* < [^<>]* >/sx) {
-        $result = $1;  # display-name, RFC 5322
-        # name-addr    = [display-name] angle-addr
-        # display-name = phrase
-        # phrase       = 1*word / obs-phrase
-        # word         = atom / quoted-string
-        # obs-phrase   = word *(word / "." / CFWS)
-        $result =~ s{ " ( (?: [^"\\] | \\. )* ) " }
-                { my $s=$1; $s=~s{\\(.)}{$1}gs; $s }gsxe;
-        $result =~ s/\\"/"/gs;
-      } elsif ($result =~ /^ [^(,]*? \( (.*?) \) /sx) {  # legacy form
-        # nested comments are not handled, to be improved
-        $result = $1;
-      } else {  # no display name
-        $result = '';
-      }
-      $result =~ s/^ \s* ' \s* (.*?) \s* ' \s* \z/$1/sx;
-    }
+  # Nothing found to process further, bail out quick
+  if (!@results) {
+    return \@results;
   }
 
-  # special host/domain
-  if (defined $result && ($gethost || $getdomain || $getip)) {
-    my $host;
-    if ($gethost) {
-      my $tldsRE = $self->{main}->{registryboundaries}->{valid_tlds_re};
-      my $hostRE = qr/(?<![._-])\b([a-z\d][a-z\d._-]{0,251}\.${tldsRE})\b(?![._-])/i;
-      # try grabbing email/msgid domain first, because user part might look like
-      # a valid host..
-      if ($result =~ /.*\@${hostRE}/i && is_fqdn_valid($1)) {
-        $host = $1;
-      } else {
-        # otherwise try hard to find a valid host
-        while ($result =~ /${hostRE}/ig) {
-          if (is_fqdn_valid($1)) {
-            $host = $1;
-            last;
+  # Continue processing only first (topmost) or last header
+  if ($getfirst) {
+    @results = ($results[0]);
+  } elsif ($getlast) {
+    @results = ($results[-1]);
+  }
+
+  # special addr/name
+  if ($getaddr || $getname) {
+    my @res;
+    foreach my $line (@results) {
+      next unless defined $line;
+      # Note: parse_header_addresses always called with raw undecoded value
+      # Skip invalid addresses here
+      my @addrs = parse_header_addresses($line);
+      if (@addrs) {
+        if ($getaddr) {
+          foreach my $addr (@addrs) {
+            push @res, $addr->{address} if defined $addr->{address};
+          }
+        }
+        elsif ($getname) {
+          foreach my $addr (@addrs) {
+            next unless defined $addr->{phrase};
+            if ($getraw) {
+              # phrase=name, could also be username or comment unless name found
+              push @res, $addr->{phrase};
+            } else {
+              # If :raw was not specifically asked, decode mimewords
+              # TODO: silly call to Node module, should probably be in Util
+              my $decoded = Mail::SpamAssassin::Message::Node::_decode_header(
+                              $addr->{phrase}, "PMS:get:$request");
+              # Normalize whitespace, unless it's all white-space
+              if ($decoded =~ /\S/) {
+                $decoded =~ s/\s+/ /gs;
+                $decoded =~ s/^\s+//;
+                $decoded =~ s/\s+$//;
+                $decoded =~ s/^'(.*?)'$/$1/; # remove single quotes
+              }
+              push @res, $decoded if defined $decoded;
+            }
           }
         }
       }
-      if ($host && $getdomain) {
-        $host = $self->{main}->{registryboundaries}->trim_domain($host, 1);
+    }
+    @results = @res;
+  }
+
+  # special host/domain
+  if (@results && ($gethost || $getdomain || $getip)) {
+    my @res;
+    if ($gethost) {
+      # TODO: IDN matching needs honing
+      my $tldsRE = $self->{main}->{registryboundaries}->{valid_tlds_re};
+      #my $hostRE = qr/(?<![._-])\b([a-z\d][a-z\d._-]{0,251}\.${tldsRE})\b(?![._-])/i;
+      my $hostRE = qr/(?<![._-])(\S{1,251}\.${tldsRE})(?![._-])/i;
+      foreach my $line (@results) {
+        next unless defined $line;
+        my $host;
+        if ($getaddr) {
+          # If :addr already preparsed the line, just grab domain liberally
+          if ($line =~ /.*\@(\S+)/) {
+            $host = $1;
+          }
+        }
+        else {
+          # try grabbing email/msgid domain first, because user part might look like
+          # a valid host..
+          if ($line =~ /.*\@${hostRE}/i) {
+            if (is_fqdn_valid(idn_to_ascii($1), 1)) {
+              $host = $1;
+            }
+          }
+          # otherwise try hard to find a valid host
+          if (!$host) {
+            while ($line =~ /${hostRE}/ig) {
+              if (is_fqdn_valid(idn_to_ascii($1), 1)) {
+                $host = $1;
+                last;
+              }
+            }
+          }
+        }
+        if ($host) {
+          if ($getdomain) {
+            $host = $self->{main}->{registryboundaries}->trim_domain($host, 1);
+          }
+          push @res, $host;
+        }
       }
     } else {
       my $ipRE = qr/(?<!\.)\b(${IP_ADDRESS})\b(?!\.)/;
-      if ($result =~ $ipRE) {
-        $host = $getrevip ? reverse_ip_address($1) : $1;
+      foreach my $line (@results) {
+        next unless defined $line;
+        my $host;
+        if ($line =~ $ipRE) {
+          $host = $getrevip ? reverse_ip_address($1) : $1;
+        }
+        push @res, $host  if defined $host;
       }
     }
-    $result = $host;
+    @results = @res;
   }
 
-  return $result;
+  return \@results;
 }
 
 # optimized for speed
@@ -2367,7 +2407,7 @@ sub _get {
 # $_[2] is defval
 sub get {
   my $cache = $_[0]->{get_cache};
-  my $found;
+  my $found = [];
   if (exists $cache->{$_[1]}) {
     # return cache entry if it is known
     # (measured hit/attempts rate on a production mailer is about 47%)
@@ -2375,13 +2415,34 @@ sub get {
   } else {
     # fill in a cache entry
     $found = _get(@_);
+    # filter out undefined
+    @$found = grep { defined } @$found;
     $cache->{$_[1]} = $found;
   }
   # if the requested header wasn't found, we should return a default value
   # as specified by the caller: if defval argument is present it represents
   # a default value even if undef; if defval argument is absent a default
   # value is an empty string for upwards compatibility
-  return (defined $found ? $found : @_ > 2 ? $_[2] : '');
+  if (@$found) {
+    # new list context usage in 4.0, return all values always
+    if (wantarray) {
+      return @$found;
+    }
+    # legacy scalar context expected only single return value for some
+    # queries, without a newline
+    if ($_[1] =~ /:(?:addr|name|host|domain|ip|revip)\b/ ||
+        $_[1] eq 'EnvelopeFrom') {
+      my $res = $found->[0];
+      $res =~ s/\n\z$//;
+      return $res;
+    } else {
+      return join('', @$found);
+    }
+  } elsif (@_ > 2) {
+    return wantarray ? ($_[2]) : $_[2];
+  } else {
+    return wantarray ? () : '';
+  }
 }
 
 ###########################################################################
@@ -2698,15 +2759,16 @@ sub _process_dkim_uri_list {
 
   # Look for the domain in DK/DKIM headers
   if ($self->{conf}->{parse_dkim_uris}) {
-    my $dk = join(" ", grep {defined} ( $self->get('DomainKey-Signature',undef ),
-                                        $self->get('DKIM-Signature',undef) ));
-    while ($dk =~ /\bd\s*=\s*([^;]+)/g) {
-      my $d = $1;
-      $d =~ s/\s+//g;
-      # prefix with domainkeys: so it doesn't merge with identical keys
-      $self->add_uri_detail_list("domainkeys:$d",
-        {'domainkeys'=>1, 'nocanon'=>1, 'noclean'=>1},
-        'domainkeys', 1);
+    foreach my $dk ( $self->get('DomainKey-Signature'),
+                     $self->get('DKIM-Signature') ) {
+      while ($dk =~ /\bd\s*=\s*([^;]+)/g) {
+        my $d = $1;
+        $d =~ s/\s+//g;
+        # prefix with domainkeys: so it doesn't merge with identical keys
+        $self->add_uri_detail_list("domainkeys:$d",
+          {'domainkeys'=>1, 'nocanon'=>1, 'noclean'=>1},
+          'domainkeys', 1);
+      }
     }
   }
 }
@@ -3123,8 +3185,8 @@ sub get_envelope_from {
   # Assume that because they have configured it, their MTA will always add it.
   # This will prevent us falling through and picking up inappropriate headers.
   if (defined $self->{conf}->{envelope_sender_header}) {
-    # make sure we get the most recent copy - there can be only one EnvelopeSender.
-    $envf = $self->get($self->{conf}->{envelope_sender_header}.":addr",undef);
+    # get the most recent (topmost) copy - there can be only one EnvelopeSender.
+    $envf = ($self->get($self->{conf}->{envelope_sender_header}.":first:addr"))[0];
     # ok if it contains an "@" sign, or is "" (ie. "<>" without the < and >)
     if (defined $envf && (index($envf, '@') > 0 || $envf eq '')) {
       dbg("message: using envelope_sender_header '%s' as EnvelopeFrom: '%s'",
@@ -3177,17 +3239,19 @@ sub get_envelope_from {
   # lines, we cannot trust any Envelope-From headers, since they're likely to
   # be incorrect fetchmail guesses.
 
-  if (index($self->get("X-Sender"), '@') != -1) {
-    my $rcvd = join(' ', $self->get("Received"));
-    if (index($rcvd, '(fetchmail') != -1) {
-      dbg("message: X-Sender and fetchmail signatures found, cannot trust envelope-from");
-      $self->{envelopefrom} = undef;
-      return;
+  my $x_sender = ($self->get("X-Sender:first:addr"))[0];
+  if (defined $x_sender && index($x_sender, '@') != -1) {
+    foreach ($self->get("Received")) {
+      if (index($_, '(fetchmail') != -1) {
+        dbg("message: X-Sender and fetchmail signatures found, cannot trust envelope-from");
+        $self->{envelopefrom} = undef;
+        return;
+      }
     }
   }
 
   # procmailrc notes this (we now recommend adding it to Received instead)
-  if (defined($envf = $self->get("X-Envelope-From:addr",undef))) {
+  if (defined($envf = ($self->get("X-Envelope-From:first:addr"))[0])) {
     # heuristic: this could have been relayed via a list which then used
     # a *new* Envelope-from.  check
     if ($self->get("ALL") =~ /^Received:.*?^X-Envelope-From:/smi) {
@@ -3202,7 +3266,7 @@ sub get_envelope_from {
   }
 
   # qmail, new-inject(1)
-  if (defined($envf = $self->get("Envelope-Sender:addr",undef))) {
+  if (defined($envf = ($self->get("Envelope-Sender:first:addr"))[0])) {
     # heuristic: this could have been relayed via a list which then used
     # a *new* Envelope-from.  check
     if ($self->get("ALL") =~ /^Received:.*?^Envelope-Sender:/smi) {
@@ -3221,7 +3285,7 @@ sub get_envelope_from {
   #   data.  This use of return-path is required; mail systems MUST support
   #   it.  The return-path line preserves the information in the <reverse-
   #   path> from the MAIL command.
-  if (defined($envf = $self->get("Return-Path:addr",undef))) {
+  if (defined($envf = ($self->get("Return-Path:first:addr"))[0])) {
     # heuristic: this could have been relayed via a list which then used
     # a *new* Envelope-from.  check
     if ($self->get("ALL") =~ /^Received:.*?^Return-Path:/smi) {
@@ -3261,7 +3325,7 @@ sub get_all_hdrs_in_rcvd_index_range {
   $include_end_rcvd = 1 unless defined $include_end_rcvd;
 
   my $cur_rcvd_index = -1;  # none found yet
-  my $result = '';
+  my @results;
 
   my @hdrs;
   if ($getraw) {
@@ -3280,14 +3344,20 @@ sub get_all_hdrs_in_rcvd_index_range {
     }
     if ((!defined $start_rcvd || $start_rcvd <= $cur_rcvd_index) &&
 	(!defined $end_rcvd || $cur_rcvd_index < $end_rcvd)) {
-      $result .= $hdr;
+      push @results, $hdr;
     }
     elsif (defined $end_rcvd && $cur_rcvd_index == $end_rcvd) {
-      $result .= $hdr;
+      push @results, $hdr;
       last;
     }
   }
-  return ($result eq '' ? undef : $result);
+
+  if (wantarray) {
+    return @results;
+  } else {
+    my $result = join('', @results);
+    return ($result eq '' ? undef : $result);
+  }
 }
 
 ###########################################################################
@@ -3377,9 +3447,9 @@ sub all_from_addrs {
   my @addrs;
 
   # Resent- headers take priority, if present. see bug 672
-  my $resent = $self->get('Resent-From',undef);
-  if (defined $resent && $resent =~ /\S/) {
-    @addrs = $self->{main}->find_all_addrs_in_line ($resent);
+  my @resent = $self->get('Resent-From:first:addr');
+  if (@resent) {
+    @addrs = @resent;
   }
   else {
     # bug 2292: Used to use find_all_addrs_in_line() with the same
@@ -3387,17 +3457,18 @@ sub all_from_addrs {
     # FNs for things like welcomelist_from (previously whitelist_from).  
     # Since all of these are From
     # headers, there should only be 1 address in each anyway (not exactly
-    # true, RFC 2822 allows multiple addresses in a From header field),
-    # so use the :addr code...
+    # true, RFC 2822 allows multiple addresses in a From header field)
+    # *** since 4.0 all addresses are returned from Header correctly ***
     # bug 3366: some addresses come in as 'foo@bar...', which is invalid.
     # so deal with the multiple periods.
+    # TODO: 4.0 need :first:addr here ? Why check so many headers ?
     ## no critic
     @addrs = map { tr/././s; $_ } grep { $_ ne '' }
-        ($self->get('From:addr'),		# std
-         $self->get('Envelope-Sender:addr'),	# qmail: new-inject(1)
-         $self->get('Resent-Sender:addr'),	# procmailrc manpage
-         $self->get('X-Envelope-From:addr'),	# procmailrc manpage
-         $self->get('EnvelopeFrom:addr'));	# SMTP envelope
+      ($self->get('From:addr'),            # std
+       $self->get('Envelope-Sender:addr'), # qmail: new-inject(1)
+       $self->get('Resent-Sender:addr'),   # procmailrc manpage
+       $self->get('X-Envelope-From:addr'), # procmailrc manpage
+       $self->get('EnvelopeFrom:addr'));   # SMTP envelope
     # http://www.cs.tut.fi/~jkorpela/headers.html is useful here
   }
 
@@ -3455,47 +3526,52 @@ sub all_to_addrs {
   my @addrs;
 
   # Resent- headers take priority, if present. see bug 672
-  my $resent = join('', $self->get('Resent-To'), $self->get('Resent-Cc'));
-  if ($resent =~ /\S/) {
-    @addrs = $self->{main}->find_all_addrs_in_line($resent);
+  my @resent = ( $self->get('Resent-To:first:addr'),
+                 $self->get('Resent-Cc:first:addr') );
+  if (@resent) {
+    @addrs = @resent;
   } else {
     # OK, a fetchmail trick: try to find the recipient address from
     # the most recent 3 Received lines.  This is required for sendmail,
     # since it does not add a helpful header like exim, qmail
     # or Postfix do.
     #
-    my $rcvd = $self->get('Received');
-    $rcvd =~ s/\n[ \t]+/ /gs;
-    $rcvd =~ s/\n+/\n/gs;
-
-    my @rcvdlines = split(/\n/, $rcvd, 4); pop @rcvdlines; # forget last one
+    my @rcvd = ($self->get('Received'))[0 .. 2];
     my @rcvdaddrs;
-    foreach my $line (@rcvdlines) {
-      if ($line =~ / for (\S+\@\S+);/) { push (@rcvdaddrs, $1); }
+    foreach my $line (@rcvd) {
+      next unless defined $line;
+      if ($line =~ / for <?(\S+\@(\S+?))>?;/) {
+        if (is_fqdn_valid(idn_to_ascii($2), 1)) {
+          push @rcvdaddrs, $1;
+        }
+      }
     }
 
-    @addrs = $self->{main}->find_all_addrs_in_line (
-       join('',
-	 join(" ", @rcvdaddrs)."\n",
-         $self->get('To'),			# std
-  	 $self->get('Apparently-To'),		# sendmail, from envelope
-  	 $self->get('Delivered-To'),		# Postfix, poss qmail
-  	 $self->get('Envelope-Recipients'),	# qmail: new-inject(1)
-  	 $self->get('Apparently-Resent-To'),	# procmailrc manpage
-  	 $self->get('X-Envelope-To'),		# procmailrc manpage
-  	 $self->get('Envelope-To'),		# exim
-	 $self->get('X-Delivered-To'),		# procmail quick start
-	 $self->get('X-Original-To'),		# procmail quick start
-	 $self->get('X-Rcpt-To'),		# procmail quick start
-	 $self->get('X-Real-To'),		# procmail quick start
-	 $self->get('Cc')));			# std
+    # TODO: 4.0 use :first:addr ? Why so many headers ?
+    @addrs = (
+      @rcvdaddrs,
+      $self->get('To:addr'),                   # std
+      $self->get('Apparently-To:addr'),        # sendmail, from envelope
+      $self->get('Delivered-To:addr'),         # Postfix, poss qmail
+      $self->get('Envelope-Recipients:addr'),  # qmail: new-inject(1)
+      $self->get('Apparently-Resent-To:addr'), # procmailrc manpage
+      $self->get('X-Envelope-To:addr'),        # procmailrc manpage
+      $self->get('Envelope-To:addr'),          # exim
+      $self->get('X-Delivered-To:addr'),       # procmail quick start
+      $self->get('X-Original-To:addr'),        # procmail quick start
+      $self->get('X-Rcpt-To:addr'),            # procmail quick start
+      $self->get('X-Real-To:addr'),            # procmail quick start
+      $self->get('Cc:addr'));                  # std
     # those are taken from various sources; thanks to Nancy McGough, who
     # noted some in <http://www.ii.com/internet/robots/procmail/qs/#envelope>
   }
 
-  dbg("eval: all '*To' addrs: " . join(" ", @addrs));
-  $self->{all_to_addrs} = \@addrs;
-  return @addrs;
+  my %seen;
+  my @result = grep { !$seen{$_}++ } @addrs;
+
+  dbg("eval: all '*To' addrs: " . join(" ", @result));
+  $self->{all_to_addrs} = \@result;
+  return @result;
 
 # http://www.cs.tut.fi/~jkorpela/headers.html is useful here, also
 # http://www.exim.org/pipermail/exim-users/Week-of-Mon-20001009/021672.html

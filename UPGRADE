@@ -2,6 +2,19 @@
 Note for Users Upgrading to SpamAssassin 4.0.0
 ----------------------------------------------
 
+- Improved internal header address (From/To/Cc) parser, now also handles
+  multiple addresses.  Optional support for external Email::Address::XS
+  parser, which can handle nested comments and other oddities.
+
+- Header :addr :name modifiers now returns all addresses.  :first :last
+  select only first (topmost) or last header to process, when there are
+  multiple headers with the same name (:addr and :name may still return
+  multiple values from a single header).
+
+- API: $pms->get() can and should now be called in list context.  Scalar
+  context continues to return multiple values newline separated, but this
+  should be considered deprecated.
+
 - New ExtractText plugin that extracts text from documents or images and feed it
   into SpamAssassin
 

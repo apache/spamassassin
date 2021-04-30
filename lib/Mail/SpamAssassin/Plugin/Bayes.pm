@@ -1561,10 +1561,12 @@ sub _pre_chew_addr_header {
   my ($self, $val) = @_;
   local ($_);
 
-  my @addrs = $self->{main}->find_all_addrs_in_line ($val);
+  my @addrs = Mail::SpamAssassin::Util::parse_header_addresses($val);
   my @toks;
-  foreach (@addrs) {
-    push (@toks, $self->_tokenize_mail_addrs ($_));
+  foreach my $addr (@addrs) {
+    if (defined $addr->{address}) {
+      push @toks, $self->_tokenize_mail_addrs($addr->{address});
+    }
   }
   return join (' ', @toks);
 }

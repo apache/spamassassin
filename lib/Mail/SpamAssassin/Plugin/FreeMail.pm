@@ -464,13 +464,13 @@ sub check_freemail_header {
         $re = $rec;
     }
 
-    my @emails = map (lc, $pms->{main}->find_all_addrs_in_line ($pms->get($header)));
+    my @emails = map (lc, $pms->get("$header:addr"));
 
     if (!scalar (@emails)) {
          dbg("header $header not found from mail");
          return 0;
     }
-    dbg("addresses from header $header: ".join(';',@emails));
+    dbg("addresses from header $header: ".join(', ', @emails));
 
     foreach my $email (@emails) {    
         if ($self->_is_freemail($email, $pms)) {
@@ -592,24 +592,33 @@ sub check_freemail_replyto {
 
     # Skip mailing-list etc looking requests, mostly FPs from them
     if ($pms->{main}->{conf}->{freemail_skip_bulk_envfrom}) {
-        my $envfrom = lc($pms->get("EnvelopeFrom"));
-        if ($envfrom =~ $skip_replyto_envfrom) {
+        my $envfrom = ($pms->get("EnvelopeFrom"))[0];
+        if (defined $envfrom && $envfrom =~ $skip_replyto_envfrom) {
             dbg("envelope sender looks bulk, skipping check: $envfrom");
             return 0;
         }
     }
 
-    my $from = lc($pms->get("From:addr"));
-    my $replyto = lc($pms->get("Reply-To:addr"));
-    my $from_is_fm = $self->_is_freemail($from, $pms);
-    my $replyto_is_fm = $self->_is_freemail($replyto, $pms);
+    my @from_addrs = map (lc, $pms->get("From:addr"));
+    dbg("From address: ".join(", ", @from_addrs)) if @from_addrs;
 
-    dbg("From address: $from") if $from ne '';
-    dbg("Reply-To address: $replyto") if $replyto ne '';
+    my @replyto_addrs = map (lc, $pms->get("Reply-To:addr"));
+    dbg("Reply-To address: ".join(", ", @replyto_addrs)) if @replyto_addrs;
 
-    if ($from_is_fm and $replyto_is_fm and ($from ne $replyto)) {
+    my $from_is_fm = grep { $self->_is_freemail($_, $pms) } @from_addrs;
+    my $replyto_is_fm = grep { $self->_is_freemail($_, $pms) } @replyto_addrs;
+
+    my $from_not_in_replyto = 1;
+    foreach my $from (@from_addrs) {
+        next unless grep { $_ eq $from } @replyto_addrs;
+        $from_not_in_replyto = 0;
+    }
+
+    if ($from_is_fm and $replyto_is_fm and $from_not_in_replyto) {
         dbg("HIT! From and Reply-To are different freemails");
-        $self->_got_hit($pms, "$from, $replyto", "From and Reply-To are different freemails");
+        my $from = join(",", @from_addrs);
+        my $replyto = join(",", @replyto_addrs);
+        $self->_got_hit($pms, "$from -> $replyto", "From and Reply-To are different freemails");
         return 0;
     }
 
@@ -620,7 +629,7 @@ sub check_freemail_replyto {
         }
     }
     elsif ($what eq 'reply') {
-        if ($replyto ne '' and !$replyto_is_fm) {
+        if (@replyto_addrs and !$replyto_is_fm) {
             dbg("Reply-To defined and is not freemail, skipping check");
             return 0;
         }
@@ -629,19 +638,21 @@ sub check_freemail_replyto {
             return 0;
         }
     }
-    my $reply = $replyto_is_fm ? $replyto : $from;
 
     return 0 unless $self->_parse_body($pms);
-    
+
     # Compare body to headers
     if (scalar keys %{$pms->{freemail_cache}{body}}) {
-        my $check = $what eq 'replyto' ? $replyto : $reply;
-        dbg("comparing $check to body freemails");
-        foreach my $email (keys %{$pms->{freemail_cache}{body}}) {
-            if ($email ne $check) {
-                dbg("HIT! $check and $email are different freemails");
-                $self->_got_hit($pms, "$check, $email", "Different freemails in reply header and body");
-                return 0;
+        my $reply_addrs = $what eq 'replyto' ? \@replyto_addrs :
+                              $replyto_is_fm ? \@replyto_addrs : \@from_addrs;
+        dbg("comparing to body freemails: ".join(", ", @$reply_addrs));
+        foreach my $body_email (keys %{$pms->{freemail_cache}{body}}) {
+            foreach my $reply_email (@$reply_addrs) {
+                if ($body_email ne $reply_email) {
+                    dbg("HIT! $reply_email (Reply) and $body_email (Body) are different freemails");
+                    $self->_got_hit($pms, "$reply_email, $body_email", "Different freemails in reply header and body");
+                    return 0;
+                }
             }
         }
     }

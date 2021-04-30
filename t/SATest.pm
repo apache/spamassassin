@@ -68,6 +68,7 @@ BEGIN {
   # Fix INC to point to built SA
   if (-e 't/test_dir') { unshift(@INC, 'blib/lib'); }
   elsif (-e 'test_dir') { unshift(@INC, '../blib/lib'); }
+  else { die "FATAL: not in or below test directory?\n"; }
 }
 
 # Set up for testing. Exports (as global vars):

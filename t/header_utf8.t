@@ -1,7 +1,13 @@
 #!/usr/bin/perl -T
 
+###
+### UTF-8 CONTENT, edit with UTF-8 locale/editor
+###
+
 use lib '.'; use lib 't';
 use SATest; sa_t_init("header_utf8.t");
+
+use constant HAS_EMAIL_ADDRESS_XS => eval { require Email::Address::XS; };
 
 my $have_libidn;
 BEGIN {
@@ -14,7 +20,10 @@ if (!$have_libidn) {
 
 use Test::More;
 plan skip_all => "Test requires Perl 5.8" unless $] > 5.008; # TODO: SA already doesn't support anything below 5.8.1
-plan tests => 156;
+
+my $tests = 156;
+$tests = 305 if (HAS_EMAIL_ADDRESS_XS);
+plan tests => $tests;
 
 # ---------------------------------------------------------------------------
 
@@ -123,6 +132,21 @@ if (!$have_libidn) {
                {$1 /esempio-università\.it/}m
 }
 
+
+
+###
+### Test internal and Email::Address::XS parsers
+###
+
+for (1 .. 2) { ## parser loop
+
+if ($_ == 2 && !HAS_EMAIL_ADDRESS_XS) {
+  warn "Not running Email::Address::XS tests, module missing\n";
+  next;
+}
+$ENV{'SA_HEADER_ADDRESS_PARSER'} = $_;
+
+
 $ENV{PERL_BADLANG} = 0;  # suppresses Perl warning about failed locale setting
 # see Mail::SpamAssassin::Conf::Parser::parse(), also Bug 6992
 $ENV{LANGUAGE} = $ENV{LANG} = 'fr_CH.UTF-8';
@@ -206,4 +230,7 @@ tstprefs ($myrules . '
 %anti_patterns = ();
 sarun ("-L < data/nice/unicode2", \&patterns_run_cb);
 ok_all_patterns();
+
+
+} ## end parser loop
 

@@ -1064,8 +1064,11 @@ sub add_all_addresses_to_blacklist {
 
   my @addrlist;
   my @hdrs = $mail_obj->get_header('From');
-  if ($#hdrs >= 0) {
-    push (@addrlist, $self->find_all_addrs_in_line (join (" ", @hdrs)));
+  foreach my $hdr (@hdrs) {
+    my @addrs = Mail::SpamAssassin::Util::parse_header_addresses($hdr);
+    foreach my $addr (@addrs) {
+      push @addrlist, $addr->{address} if defined $addr->{address};
+    }
   }
 
   foreach my $addr (@addrlist) {
@@ -2244,8 +2247,12 @@ sub find_all_addrs_in_mail {
   				Errors-To Mail-Followup-To))
   {
     my @hdrs = $mail_obj->get_header($header);
-    if ($#hdrs < 0) { next; }
-    push (@addrlist, $self->find_all_addrs_in_line(join (" ", @hdrs)));
+    foreach my $hdr (@hdrs) {
+      my @addrs = Mail::SpamAssassin::Util::parse_header_addresses($hdr);
+      foreach my $addr (@addrs) {
+        push @addrlist, $addr->{address} if defined $addr->{address};
+      }
+    }
   }
 
   # find addrs in body, too

@@ -5430,6 +5430,7 @@ sub feature_subjprefix { 1 } # add subject prefixes rule option
 sub feature_bayes_stopwords { 1 } # multi language stopwords in Bayes
 sub feature_get_host { 1 } # $pms->get() :host :domain :ip :revip # was implemented together with AskDNS::has_tag_header # Bug 7734
 sub feature_blocklist_welcomelist { 1 } # bz 7826
+sub feature_header_address_parser { 1 } # improved header address parsing using Email::Address::XS, $pms->get() list context
 sub has_tflags_nosubject { 1 } # tflags nosubject
 sub has_tflags_nolog { 1 } # tflags nolog
 sub perl_min_version_5010000 { return $] >= 5.010000 }  # perl version check ("perl_version" not neatly backwards-compatible)

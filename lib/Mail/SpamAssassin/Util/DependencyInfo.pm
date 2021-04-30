@@ -302,6 +302,13 @@ our @OPTIONAL_MODULES = (
   desc => 'IO::String emulates file interface for in-core strings.
   It is used by the optional OLEVBMacro Plugin.',
 },
+{
+  module => 'Email::Address::XS',
+  version => 0,
+  desc => 'Email::Address::XS is used to parse email addresses from header
+  fields like To/From/cc, per RFC 5322. If installed, it may additionally
+  be used by internal parser to process complex lists.',
+},
 );
 
 our @BINARIES = ();

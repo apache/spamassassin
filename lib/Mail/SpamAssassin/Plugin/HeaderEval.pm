@@ -89,7 +89,7 @@ sub check_for_fake_aol_relay_in_rcvd {
   local ($_);
 
   $_ = $pms->get('Received');
-  s/\s/ /gs;
+  s/\s+/ /gs;
 
   # this is the hostname format used by AOL for their relays. Spammers love 
   # forging it.  Don't make it more specific to match aol.com only, though --
@@ -125,16 +125,13 @@ sub check_for_faraway_charset_in_headers {
   return 0 if grep { $_ eq "all" } @locales;
 
   for my $h (qw(From Subject)) {
-    my @hdrs = $pms->get("$h:raw");  # ??? get() returns a scalar ???
-    if ($#hdrs >= 0) {
-      $hdr = join(" ", @hdrs);
-    } else {
-      $hdr = '';
-    }
-    while ($hdr =~ /=\?(.+?)\?.\?.*?\?=/g) {
-      Mail::SpamAssassin::Locales::is_charset_ok_for_locales($1, @locales)
-	  or return 1;
-    }
+    my @hdrs = $pms->get("$h:raw");
+    foreach my $hdr (@hdrs) {
+      while ($hdr =~ /=\?(.+?)\?.\?.*?\?=/g) {
+        Mail::SpamAssassin::Locales::is_charset_ok_for_locales($1, @locales)
+          or return 1;
+      }
+    }     
   }
   0;
 }
@@ -145,35 +142,35 @@ sub check_for_unique_subject_id {
   $_ = lc $pms->get('Subject');
 
   my $id = 0;
-  if (/[-_\.\s]{7,}([-a-z0-9]{4,})$/
-	|| /\s{10,}(?:\S\s)?(\S+)$/
-	|| /\s{3,}[-:\#\(\[]+([-a-z0-9]{4,})[\]\)]+$/
-	|| /\s{3,}[:\#\(\[]*([a-f0-9]{4,})[\]\)]*$/
-	|| /\s{3,}[-:\#]([a-z0-9]{5,})$/
-	|| /[\s._]{3,}([^0\s._]\d{3,})$/
-	|| /[\s._]{3,}\[(\S+)\]$/
+  if (/[-_\.\s]{7,}([-a-z0-9]{4,})$/m
+	|| /\s{10,}(?:\S\s)?(\S+)$/m
+	|| /\s{3,}[-:\#\(\[]+([-a-z0-9]{4,})[\]\)]+$/m
+	|| /\s{3,}[:\#\(\[]*([a-f0-9]{4,})[\]\)]*$/m
+	|| /\s{3,}[-:\#]([a-z0-9]{5,})$/m
+	|| /[\s._]{3,}([^0\s._]\d{3,})$/m
+	|| /[\s._]{3,}\[(\S+)\]$/m
 
         # (7217vPhZ0-478TLdy5829qicU9-0@26) and similar
-        || /\(([-\w]{7,}\@\d+)\)$/
+        || /\(([-\w]{7,}\@\d+)\)$/m
 
         # Seven or more digits at the end of a subject is almost certainly a id
-        || /\b(\d{7,})\s*$/
+        || /\b(\d{7,})\s*$/m
 
         # stuff at end of line after "!" or "?" is usually an id
-        || /[!\?]\s*(\d{4,}|\w+(-\w+)+)\s*$/
+        || /[!\?]\s*(\d{4,}|\w+(-\w+)+)\s*$/m
 
         # 9095IPZK7-095wsvp8715rJgY8-286-28 and similar
 	# excluding 'Re:', etc and the first word
-        || /(?:\w{2,3}:\s)?\w+\s+(\w{7,}-\w{7,}(-\w+)*)\s*$/
+        || /(?:\w{2,3}:\s)?\w+\s+(\w{7,}-\w{7,}(-\w+)*)\s*$/m
 
         # #30D7 and similar
-        || /\s#\s*([a-f0-9]{4,})\s*$/
+        || /\s#\s*([a-f0-9]{4,})\s*$/m
      )
   {
     $id = $1;
     # exempt online purchases
     if ($id =~ /\d{5,}/
-	&& /(?:item|invoice|order|number|confirmation).{1,6}\Q$id\E\s*$/)
+	&& /(?:item|invoice|order|number|confirmation).{1,6}\Q$id\E\s*$/m)
     {
       $id = 0;
     }
@@ -270,7 +267,7 @@ sub check_illegal_chars {
 
   $header .= ":raw" unless $header =~ /:raw$/;
   my $str = $pms->get($header);
-  return 0 if !defined $str || $str eq '';
+  return 0 if !defined $str || $str !~ /\S/;
 
   if ($str =~ tr/\x00-\x7F//c && is_valid_utf_8($str)) {
     # is non-ASCII and is valid UTF-8
@@ -304,12 +301,12 @@ sub gated_through_received_hdr_remover {
   my ($self, $pms) = @_;
 
   my $txt = $pms->get("Mailing-List",undef);
-  if (defined $txt && $txt =~ /^contact \S+\@\S+\; run by ezmlm$/) {
+  if (defined $txt && $txt =~ /^contact \S+\@\S+\; run by ezmlm$/m) {
     my $dlto = $pms->get("Delivered-To");
     my $rcvd = $pms->get("Received");
 
     # ensure we have other indicative headers too
-    if ($dlto =~ /^mailing list \S+\@\S+/ &&
+    if ($dlto =~ /^mailing list \S+\@\S+/m &&
         $rcvd =~ /qmail \d+ invoked (?:from network|by .{3,20})\); \d+ ... \d+/)
     {
       return 1;
@@ -647,10 +644,9 @@ sub _check_recipients {
   my @inputs;
 
   # ToCc: pseudo-header works best, but sometimes Bcc: is better
-  for ('ToCc', 'Bcc') {
-    my $to = $pms->get($_);	# get recipients
-    $to =~ s/\(.*?\)//g;	# strip out the (comments)
-    push(@inputs, ($to =~ m/([\w.=-]+\@\w+(?:[\w.-]+\.)+\w+)/g));
+  for ('ToCc:addr', 'Bcc:addr') {
+    my @to = $pms->get($_);	# get recipients
+    push @inputs, @to;
     last if scalar(@inputs) >= TOCC_SIMILAR_COUNT;
   }
 

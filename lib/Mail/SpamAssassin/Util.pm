@@ -49,6 +49,7 @@ require 5.008001;  # needs utf8::is_utf8()
 
 use Mail::SpamAssassin::Logger;
 
+use version 0.77;
 use Exporter ();
 
 our @ISA = qw(Exporter);
@@ -60,7 +61,7 @@ our @EXPORT_OK = qw(&local_tz &base64_decode &base64_encode
                   &secure_tmpdir &uri_list_canonicalize &get_my_locales
                   &parse_rfc822_date &idn_to_ascii &is_valid_utf_8
                   &get_user_groups &compile_regexp &qr_to_string
-                  &is_fqdn_valid);
+                  &is_fqdn_valid &parse_header_addresses);
 
 our $AM_TAINTED;
 
@@ -2334,6 +2335,330 @@ sub get_tag_value_for_score {
 
 ###########################################################################
 
+# RFC 5322 (+IDN?) parsing of addresses and names from To/From/Cc.. headers
+#
+# Return array of hashes, containing at minimum name,address,user,host
+#
+# Override parser with SA_HEADER_ADDRESS_PARSER environment variable
+
+our $header_address_parser;
+our $email_address_xs;
+our $email_address_xs_fix_address;
+BEGIN {
+  # SA_HEADER_ADDRESS_PARSER=1 only use internal parser
+  # SA_HEADER_ADDRESS_PARSER=2 only use Email::Address::XS
+  # By default internal is preferred, will defer for some cases
+  $header_address_parser = untaint_var($ENV{'SA_HEADER_ADDRESS_PARSER'});
+  if ((!defined $header_address_parser || $header_address_parser eq '2') &&
+       eval 'use Email::Address::XS; 1;') {
+    $email_address_xs = 1;
+    if (version->parse(Email::Address::XS->VERSION) < version->parse(1.02)) {
+      $email_address_xs_fix_address = 1;
+    }
+  }
+}
+
+# Helper for internal parser
+our $header_address_mailre = qr/
+  # user
+  (?:
+    # quoted localpart
+    " (?:|(?:[^"\\]++|\\.)*+) " |
+    # or un-quoted localpart
+    [^\@\s\<\>\(\)\[\]\,\:\;]+
+  )
+  # domain
+  \@ (?: [^\"\s\<\>\(\)\[\]\,\:\;]+ | \[ [\d:.]+ \] )
+/ix;
+
+# Very relaxed internal parser
+# Only handles non-nested comments in some places
+our $header_address_re = qr/^
+  \s*
+  (?:
+    # optional phrase, quoted or non-quoted
+    (?:
+      ( (?: " (?:|(?:[^"\\]++|\\.)*+) " | [^",;<]++ )+ )
+      \s*
+    )?
+    # and enclosed email (or empty)
+    # ... allow whitespace in localpart
+    < \s* ( [^>\@]* \S+ | \s* ) \s* >
+    # some output duplicate enclosures..
+    (?: \s* < \s* (?: (?: " (?:|(?:[^"\\]++|\\.)*+) " )? \S+ | \s* ) \s* > )*
+  |
+    # or standalone email or phrase
+    (?:
+      ( $header_address_mailre ) |
+      ( (?: " (?:|(?:[^"\\]++|\\.)*+) " | [^",;<]++ )+ )
+    )
+  )
+  # possible comment after (no nested support here)
+  (?: \s* \( ( (?:|(?:[^()\\]++|\\.)*+) ) \) )?
+  # Followed by comma (semi-colon sometimes) or finish
+  \s* (?: [,;] | \z )
+/ix;
+
+#
+# Main public function
+# expected input is header contents without Header: itself
+#
+sub parse_header_addresses {
+  my ($str) = @_;
+
+  return if !defined $str || $str !~ /\S/;
+
+  my @results;
+
+  # Internal parser
+  if (!$header_address_parser || $header_address_parser eq '1') {
+    @results = _parse_header_addresses($str);
+  }
+
+  # Email::Address::XS
+  if ($email_address_xs) {
+    if (!$header_address_parser || $header_address_parser eq '2') {
+      # Only consulted if no internal results, or there doesn't
+      # seem to have enough results, or possible nested comments ( (
+      my $maybe_nested = scalar($str =~ /\(/) >= 2;
+      if (!@results || $maybe_nested || @results < scalar($str =~ tr/,//)+1) {
+        my @results_xs = _parse_header_addresses_xs($str);
+        # If we have more results than internal, use it, or nested
+        if (@results_xs > @results || $maybe_nested) {
+          return @results_xs;
+        }
+      }
+    }
+  }
+
+  return @results;
+}
+
+# Check some basic parsing mistakes
+sub _valid_parsed_address {
+  return 0 if !defined $_[0];
+  return 0 if index($_[0], '""@') == 0;
+  return 0 if scalar($_[0] =~ tr/"//) == 1;
+  return 1;
+}
+
+#
+# v0.1, improved internal parser, no support for comments in strange
+# places or nested comments, but handled a large corpus atleast 99% the
+# same as Email::Address::XS and in some cases even better (retains some
+# more name/addr info, even when not fully valid).
+#
+sub _parse_header_addresses {
+  local $_ = shift;
+  local ($1, $2, $3, $4, $5);
+
+  # Clear trailing whitespace
+  s/\s+\z//s;
+
+  # Strip away all escaped blackslashes, simplifies processing a lot
+  s/\\\\//g;
+
+  # Reduce group address
+  s/^[^"()<>]+:\s*(.*?)\s*(?:;.*)?/$1/gs;
+
+  # Skip empty
+  return unless /\S/;
+
+  my @results;
+  while (s/$header_address_re//igs) {
+    my $phrase = defined $1 ? $1 :
+                 defined $4 ? $4 : undef;
+    my $address = defined $2 ? $2 :
+                defined $3 ? $3 : undef;
+    my $comment = defined $5 ? $5 : undef;
+
+    my ($user, $host, $invalid);
+
+    # Check relaxed <> capture
+    if (defined $2) {
+      # Remove comments (no nested support here)
+      $address =~ s/\((?:|(?:[^()\\]++|\\.)*+)\)//gs;
+      # Validate as somewhat email looking
+      if ($address !~ /^$header_address_mailre$/) {
+        $address = undef;
+      }
+    }
+
+    # Validate some other address oddities
+    if (!_valid_parsed_address($address)) {
+      $address = undef;
+    }
+
+    if (defined $phrase) {
+      my $newphrase;
+      # Parse phrase as quoted and unquoted parts
+      while ($phrase =~ /(?:"(|(?:[^"\\]++|\\.)*+)"|([^"]++))/igs) {
+        my $qs = $1;
+        my $nqs = $2;
+        if (defined $qs) {
+          # Unescape things inside quoted string
+          $qs =~ s/\\(?!\\)//g;
+          $qs =~ s/\\\\/\\/g;
+          #$qs =~ s/\\//g;
+          $newphrase .= $qs;
+        } else {
+          # Remove comments (no nested support here)
+          $nqs =~ s/\((?:|(?:[^()\\]++|\\.)*+)\)//gs;
+          $newphrase .= $nqs;
+        }
+      }
+      $phrase = $newphrase;
+
+      # If we only have phrase which looks email, swap when valid
+      # Check all in one if, either swap or don't
+      if (!defined $address &&
+          $phrase =~ /^$header_address_mailre$/i &&
+          _valid_parsed_address($phrase) &&
+          $phrase =~ /^[^\@]*\@([^\@]*)/ &&
+          is_fqdn_valid(idn_to_ascii($1), 1)) {
+        $address = $phrase;
+        $phrase = undef;
+      } else {
+        # Remove redundant phrase==email?
+        if (defined $address && $phrase eq $address) {
+          $phrase = undef;
+        } elsif ($phrase eq '') {
+          $phrase = undef;
+        }
+      }
+    }
+
+    # Copy comment to phrase if not defined
+    if (!defined $phrase && defined $comment) {
+      $phrase = $comment;
+    }
+
+    if (defined $address) {
+      # Unescape quoted localpart
+      #if ($address =~ /^"(.*?)"\@(.*)/) {
+      #  $user = $1;
+      #  $host = $2;
+      #  $user =~ s/\\//g;
+      #  $user =~ s/\s+//gs;
+      #  $address = "$user\@$host";
+      #}
+      # Strip sometimes seen quotes
+      #$address =~ s/^'(.*?)'$/$1/;
+      $address =~ s/^(([^\@]*)\@([^\@]*)).*/$1/;
+      ($user, $host) = ($2, $3);
+    }
+
+    $invalid = !defined $host || !is_fqdn_valid(idn_to_ascii($host), 1);
+    push @results, {
+      'phrase' => $phrase,
+      'user' => $user,
+      'host' => $host,
+      'address' => $address,
+      'comment' => $comment,
+      'invalid' => $invalid
+    };
+  }
+
+  # Was something left unparsed?
+  if (index($_, '@') != -1) {
+    # Last ditch effort, examples:
+    # =?UTF-8?Q?"Foobar"_<noreply@foobar.com>?=
+    # =?utf-8?Q?"Foobar"?=<info=foobar.com@mlsend.com>
+    while (/<($header_address_mailre)>/igs) {
+      my $address = $1;
+      next if !_valid_parsed_address($address);
+      $address =~ s/^(([^\@]*)\@([^\@]*)).*/$1/;
+      my ($user, $host) = ($2, $3);
+      my $invalid = !is_fqdn_valid(idn_to_ascii($host), 1);
+      push @results, {
+        'phrase' => undef,
+        'user' => $user,
+        'host' => $host,
+        'address' => $address,
+        'comment' => undef,
+        'invalid' => $invalid
+      };
+    }
+  }
+
+  return if !@results;
+  return @results;
+}
+
+sub _parse_header_addresses_xs {
+  my ($str) = @_;
+
+  # Strip away all escaped blackslashes, simplifies processing a lot
+  $str =~ s/\\\\//g;
+
+  my @results;
+  my @addrs = Email::Address::XS->parse($str);
+
+  local ($1, $2);
+  foreach my $addr (@addrs) {
+    my $name = $addr->name;
+    my $address = $addr->address;
+    my $user = $addr->user;
+    my $host = $addr->host;
+    my $phrase = $addr->phrase;
+    my $comment = $addr->comment;
+    my $invalid;
+
+    # Workaround Bug 5201 for Email::Address::XS
+    # From: "joe+foobar@example.com"
+    # If everything else is missing but phrase looks like
+    # an email, let's assume it is (hostname verifies)
+    if (!defined $address && !defined $user &&
+        !defined $comment && defined $phrase &&
+        _valid_parsed_address($phrase) &&
+        $phrase =~ /^([^\s\@]+)\@([^\s\@]+)$/ &&
+        is_fqdn_valid(idn_to_ascii($2), 1))
+    {
+      $user = $1;
+      $host = $2;
+      $address = $phrase;
+      $name = $user;
+      $invalid = 0;
+      $phrase = undef;
+    }
+    else {
+      $invalid = !$addr->is_valid;
+    }
+
+    # Version <1.02 borks address if both user+host are UTF-8
+    if ($email_address_xs_fix_address) {
+      if (defined $user && defined $host) {
+        # <"Another User"@foo> loses quotes in user, add back
+        if (index($user, ' ') != -1 &&
+            index($user, '"') == -1) {
+          $user = '"'.$user.'"';
+        }
+        $address = $user.'@'.$host;
+      }
+    }
+
+    # Copy comment to phrase if not defined
+    if (!defined $phrase && defined $comment) {
+      $phrase = $comment;
+    }
+
+    # Use input as name if nothing found
+    if (!defined $phrase && !defined $address) {
+      $phrase = $str;
+    }
+
+    push @results, {
+      'phrase' => $phrase,
+      'user' => $user,
+      'host' => $host,
+      'address' => $address,
+      'comment' => $comment,
+      'invalid' => $invalid
+    };
+  }
+
+  return @results;
+}
 
 1;
 
