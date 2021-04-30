@@ -22,8 +22,8 @@ meta		__MIXED_IMG_CASE	__HAS_IMG_SRC - __HAS_IMG_SRC_ONECASE > 0
 describe	__MIXED_HREF_CASE	Has anchor tags with mixed-up cases in non-quoted lines
 meta		__MIXED_HREF_CASE	__HAS_HREF - __HAS_HREF_ONECASE > 0
 
-describe	T_MIXED_TAG_CASE	Has multiple mixed-case tags in non-quoted lines.
-meta		T_MIXED_TAG_CASE	__MIXED_IMG_CASE && __MIXED_HREF_CASE
+describe	__MIXED_TAG_CASE	Has multiple mixed-case tags in non-quoted lines.
+meta		__MIXED_TAG_CASE	__MIXED_IMG_CASE && __MIXED_HREF_CASE
 
 describe	T_SCC_THREE_WORD_MONTY	Are you POTUS or a mass murderer? 
 header		T_SCC_THREE_WORD_MONTY	From =~ /(\w{2,}) (\w{2,}) (\w{2,}) <\1.\2.\3/
@@ -37,8 +37,8 @@ describe SCC_MAJORDOMO Multiple indications of the majordomo list manager
 meta SCC_MAJORDOMO __SCC_MD_UNSUB + __SCC_MD_SUB + __SCC_MD_SENDER + __SCC_MD_RCVD_OUT > 1
 tflags SCC_MAJORDOMO nice
 
-describe  T_SCC_ODD_MUA  Unlikely MUA for a modern human
-header    T_SCC_ODD_MUA  X-Mailer =~ /^X-Mailer: Microsoft Outlook 14.0$/
+describe  SCC_ODD_MUA  Unlikely MUA for a modern human
+header    SCC_ODD_MUA  X-Mailer =~ /^X-Mailer: Microsoft Outlook 14.0$/
 
 
 describe  T_SCC_SPECIAL_GUID      Unique in a similar way
@@ -52,3 +52,6 @@ header   __NO_EXTERNALS	X-Spam-Relays-External =~ /^$/
 describe ALL_INTERNAL	Has only internal relays
 meta     ALL_INTERNAL	__NO_EXTERNALS && !NO_RELAYS
 tflags   ALL_INTERNAL	nice
+
+describe SCC_NEWBIE_HASBEENS	Abused gTLDs seen in spam from Google Apps.  
+header   SCC_NEWBIE_HASBEENS	X-Beenthere =~ /\.(today|online|monster)

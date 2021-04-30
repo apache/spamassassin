@@ -114,8 +114,7 @@ header __HAS_X_LOOP		exists:X-Loop
 header __HAS_X_MAILING_LIST	exists:X-Mailing-List
 header __HAS_X_MAILMAN_VERSION	exists:X-Mailman-Version
 describe MAILING_LIST_MULTI	Multiple indicators imply a widely-seen list manager
-# __ML2 and __HAS_LIST_ID are exactly equivalent, don't double-count
-meta   MAILING_LIST_MULTI	__HAS_X_LOOP + __HAS_X_MAILING_LIST + __HAS_X_MAILMAN_VERSION + __HAS_LIST_ID + __HAS_X_BEEN_THERE +__DOS_HAS_LIST_UNSUB + __ML1 + __ML3 + __ML4 + __ML5 > 2
+meta   MAILING_LIST_MULTI	__HAS_X_LOOP + __HAS_X_MAILING_LIST + __HAS_X_MAILMAN_VERSION + __HAS_X_BEEN_THERE +__DOS_HAS_LIST_UNSUB + __ML1 + __ML2 + __ML3 + __ML4 + __ML5 > 2
 tflags MAILING_LIST_MULTI	nice
 
 # QUALCOMM Eudora
