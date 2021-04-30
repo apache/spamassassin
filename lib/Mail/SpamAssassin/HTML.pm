@@ -248,6 +248,18 @@ sub parse {
   # the HTML::Parser API won't do it for us
   $text =~ s/<(\w+)\s*\/>/<$1>/gi;
 
+  # Normalize unicode quotes, messes up attributes parsing
+  # U+201C e2 80 9c LEFT DOUBLE QUOTATION MARK
+  # U+201D e2 80 9d RIGHT DOUBLE QUOTATION MARK
+  # Examples of input:
+  # <a href=\x{E2}\x{80}\x{9D}https://foobar.com\x{E2}\x{80}\x{9D}>
+  # .. results in uri "\x{E2}\x{80}\x{9D}https://foobar.com\x{E2}\x{80}\x{9D}"
+  if (utf8::is_utf8($text)) {
+    $text =~ s/(?:\x{201C}|\x{201D})/"/g;
+  } else {
+    $text =~ s/\x{E2}\x{80}(?:\x{9C}|\x{9D})/"/g;
+  }
+
   if (!$self->UNIVERSAL::can('utf8_mode')) {
     # utf8_mode is cleared by default, only warn if it would need to be set
     warn "message: cannot set utf8_mode, module HTML::Parser is too old\n"
