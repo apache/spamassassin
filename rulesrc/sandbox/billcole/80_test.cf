@@ -54,4 +54,5 @@ meta     ALL_INTERNAL	__NO_EXTERNALS && !NO_RELAYS
 tflags   ALL_INTERNAL	nice
 
 describe SCC_NEWBIE_HASBEENS	Abused gTLDs seen in spam from Google Apps.  
-header   SCC_NEWBIE_HASBEENS	X-Beenthere =~ /\.(today|online|monster)
+header   SCC_NEWBIE_HASBEENS	X-Beenthere =~ /\.(today|online|monster)/
+
