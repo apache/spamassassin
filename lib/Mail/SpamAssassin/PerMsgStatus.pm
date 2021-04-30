@@ -2653,6 +2653,9 @@ sub _process_text_uri_list {
       next if exists $seen{$rawuri};
       $seen{$rawuri} = 1;
 
+      # Ignore bogus mail captures (@ might have been trimmed from the end above..)
+      next if $rawtype eq 'mail' && index($rawuri, '@') == -1;
+
       dbg("uri: found rawuri from text ($rawtype): $rawuri") if $would_log_uri_all;
 
       # Quick ignore if schemeless host not valid
