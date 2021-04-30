@@ -2,6 +2,7 @@
 
 use lib '.'; use lib 't';
 use SATest; sa_t_init("askdns");
+use version 0.77;
 
 use constant HAS_DKIM_VERIFIER => eval {
   require Mail::DKIM::Verifier;
