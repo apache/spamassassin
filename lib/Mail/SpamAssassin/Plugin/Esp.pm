@@ -392,9 +392,9 @@ sub esp_mailup_check {
 
   my $rulename = $pms->get_current_eval_rule_name();
 
-  # All Mailup emails have the X-CSA-Complaints header set to whitelist-complaints@eco.de
+  # All Mailup emails have the X-CSA-Complaints header set to *-complaints@eco.de
   my $xcsa = $pms->get("X-CSA-Complaints", undef);
-  if((not defined $xcsa) or ($xcsa !~ /complaints\@eco\.de/)) {
+  if((not defined $xcsa) or ($xcsa !~ /\-complaints\@eco\.de/)) {
     return;
   }
   # All Mailup emails have the X-Abuse header that must match
