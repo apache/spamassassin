@@ -418,7 +418,7 @@ describe BAD_ENC_HEADER		Message has bad MIME encoding in the header
 
 
 header __ML1  Precedence =~ m{\b(list|bulk)\b}i
-header __ML2  exists:List-Id
+meta   __ML2  __HAS_LIST_ID
 header __ML3  exists:List-Post
 header __ML4  exists:Mailing-List
 header __ML5  Return-Path:addr =~ m{^([^\@]+-(request|bounces|admin|owner)|owner-[^\@]+)(\@|\z)}i
