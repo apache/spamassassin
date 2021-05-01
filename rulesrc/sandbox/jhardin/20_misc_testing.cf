@@ -1311,7 +1311,7 @@ body        __WEBMAIL_ACCT       /\byour web ?mail account/i
 body        __MAILBOX_FULL       /\b(?:you(?:r (?:mail\s?box|(?:e-?|web ?)mail))? (?:is (?:almost )?full|quota is running low|(?:quota )?ha(?:s|ve) (?:reached|exceeded|passed) (?:the|your|it'?s?) (?:university )?(?:size|storage|set|(?:e-?|web ?)mail|quota|folder|mail ?box)[\/\s](?:limit |quota |account )+)|over your mail\s?box (?:size )?(?:limit|quota)|maximum mail\s?box (?:size )?(?:limit|quota) exceeded|sua (?:conta|caixa) de (?:(?:e-?|web ?)mail|correio) (?:excedeu (?:sua|o) limite|est(?:=E1|[\xe1]|[\xc3][\xa1]) quase cheio))\b/i
 body        __CLEAN_MAILBOX      /\b(?:(?:e-?mail|mail\s?box|violation:|(?-i:CLICK)) (?:quota size|clean(?:-?up))|clean ?up click ?here|(?:please|automatically) reduce (?:your|the) e?-?mail ?box size|reduce (?:your |the )?(?:e?-?mail(?: ?box)? )?size automatically)\b/i
 tflags      __CLEAN_MAILBOX      multiple maxhits=2
-body        __VALIDATE_MAILBOX   /\b(?:(?:re-?)?(?:valida(?:te|r)|confirm|set)(?:\S?(?:increase|raise))? (?:your|(?:a )?sua) (?:mail\s?box|(?:e-?)?mail quota|caixa)|confirmar (?:que )?a sua conta (?:de e-?mail|ainda est(?:=E1|[\xe1]|[\xc3][\xa1]) ativa)|wprowadz dane konta ponizej|utrzymania aktywnego konta e-?mail|weryfikacji konta|you (?:have )?(?:failed|refused) to (?:verify|validate)|(?:e-?mail|confirm) verification|verify k?now|logs?in below to (\S+\s){0,10}(?:download|release|retrieve) your (?:messages|e?-?mails))\b/i
+body        __VALIDATE_MAILBOX   /\b(?:(?:re-?)?(?:valida(?:te|r)|confirm|set)(?:\S?(?:increase|raise))? (?:your|(?:a )?sua) (?:mail\s?box|(?:e-?)?mail quota|caixa)|confirmar (?:que )?a sua conta (?:de e-?mail|ainda est(?:=E1|[\xe1]|[\xc3][\xa1]) ativa)|wprowadz dane konta ponizej|utrzymania aktywnego konta e-?mail|weryfikacji konta|you (?:have )?(?:failed|refused) to (?:verify|validate)|(?:e-?mail|confirm) verification|verify k?now|logs?in below to (\S+\s){0,10}(?:download|release|retrieve) your (?:messages|e?-?mails)|verify [a-z][a-z0-9_]{3,40}@[a-z][a-z0-9]{2,30}\.[a-z]{2,6}|your mailbox [^@\s]{3,30}@\S{3,30} (?:(?:needs to|must) be verified|(?:needs|requires) verification))\b/i
 tflags      __VALIDATE_MAILBOX   multiple maxhits=2
 body        __UPGR_MAILBOX       /\b(?:up(?:g[ra]+d(?:e|ing)|date) (?:(?:[hw]as|and)\s(?:[a-z]+\s){1,5})?(?:o[nf] )?(?:your )?(?:mail\s?box|(?:web ?|e-?)mail)|(?:web ?|e-?)mail Upgrade cuenta|atualiz(?:e|ar) (?:a|sua) caixa de correio|click\S{0,10} (?:here(?:[:\.\s]{0,5}\S{0,10}http\S{10,80})?|below)(?: link)? to (?:(?:complete|finish|increase) )?(?:(?:the|this|your)\s)?(?:up(?:date|grade)|(?:web ?|e-?)?mail(?:\s?box)? (?:size|quota|limit))|utrzymania aktywnego konta|request (?:for )additional storage|you (?:have )?(?:failed|refused) to up(?:date|grade))\b/i
 body        __LOCK_MAILBOX       /\b(?:(?:deactivate|lock(?: up)?|lose ac+ess to|los[se] (?:of )?(?:important )?(?:information|mail|messages) in) (?:your )?(?:mail\s?box|(?:web ?|e-?)mail)|your (?:mail\s?box|(?:(?:web ?|e-?)mail)(?: account)?) (?:(?:will|may) be(?:come)? )?(?:in-?a(?:ctive|cess[ia]ble)|locked|disabled|deleted|removed)\b|ditt konto vara "?deaktiverad"?|begr(?:=E4|\xe4|[\xc3][\xa4])nsad tillg(?:=E5|[\xe5]|[\xc3][\xa5])ng till din brevl(?:=E5|[\xe5]|[\xc3][\xa5])da|contas? de (?:web ?|e-?)mail (?:ser(?:=E1|[\xe1]|[\xc3][\xa1]) (?:desativado|exclu(?:=ED|[\xed]|[\xc3][\xad])do)|(?:=E9|[\xe9]|[\xc3][\xa9]) exclu(?:=ED|[\xed]|[\xc3][\xad])do)|destruir a sua caixa de (?:correio|entrada)|tw(?:=F3|[\xf3])j konto zostalo ograniczone|straci swoje e-?mail na sta[\xc5][\x82]e|konto zostanie automatycznie wy[\xc5][\x82][\xc4][\x85]czona|e-?mail account[^.]{0,30}deactivated (?:in|from) our (?:database|system|server)|you will be deactivated|(?:account|e?-?mail(?: ?box)?) (?:will (?:be )?)?(?:shut ?down|expire|deactivate)|we have (?:stopped|suspended) (?:processing|accepting) (?:any )?(?:incoming|new|fresh) email)/i
@@ -1333,7 +1333,7 @@ body        __RELEASE_MESSAGES   /\b(?:release messages|(?:retrieve|release|down
 body        __PASSWORD_EXP_CLUMSY  /\bpassword is due for expiration yesterday\b/i
 
 meta        __EMAIL_PHISH        (__WEBMAIL_ACCT + __MAILBOX_FULL + __MAILBOX_FULL_SE + __CLEAN_MAILBOX + __VALIDATE_MAILBOX + __VALIDATE_MBOX_SE + __UPGR_MAILBOX + __LOCK_MAILBOX + __SYSADMIN + __ATTN_MAIL_USER + __MAIL_ACCT_ACCESS1 + __MAIL_ACCT_ACCESS2 + __ACCESS_REVOKE + __PASSWORD_UPGRADE + __PENDING_MESSAGES + __RELEASE_MESSAGES + __PASSWORD_EXP_CLUMSY + (__TVD_PH_SUBJ_META || __TVD_PH_BODY_META || __TVD_PH_BODY_ACCOUNTS_PRE || __TVD_PH_BODY_ACCOUNTS_POST || __PDS_FROM_NAME_TO_DOMAIN) > 1) && !__EMAIL_PHISH_MANY
-meta        __EMAIL_PHISH_MANY   (__WEBMAIL_ACCT + __MAILBOX_FULL + __MAILBOX_FULL_SE + __CLEAN_MAILBOX + __VALIDATE_MAILBOX + __VALIDATE_MBOX_SE + __UPGR_MAILBOX + __LOCK_MAILBOX + __SYSADMIN + __ATTN_MAIL_USER + __MAIL_ACCT_ACCESS1 + __MAIL_ACCT_ACCESS2 + __ACCESS_REVOKE + __PASSWORD_UPGRADE + __PENDING_MESSAGES + __RELEASE_MESSAGES + __PASSWORD_EXP_CLUMSY + __TO_IN_SUBJ + __SUBJ_DOM_ADMIN + __FROM_DOM_ADMIN + (__TVD_PH_SUBJ_META || __TVD_PH_BODY_META || __TVD_PH_BODY_ACCOUNTS_PRE || __TVD_PH_BODY_ACCOUNTS_POST || __PDS_FROM_NAME_TO_DOMAIN) > 3)
+meta        __EMAIL_PHISH_MANY   (__WEBMAIL_ACCT + __MAILBOX_FULL + __MAILBOX_FULL_SE + __CLEAN_MAILBOX + __VALIDATE_MAILBOX + __VALIDATE_MBOX_SE + __UPGR_MAILBOX + __LOCK_MAILBOX + __SYSADMIN + __ATTN_MAIL_USER + __MAIL_ACCT_ACCESS1 + __MAIL_ACCT_ACCESS2 + __ACCESS_REVOKE + __PASSWORD_UPGRADE + __PENDING_MESSAGES + __RELEASE_MESSAGES + __PASSWORD_EXP_CLUMSY + __TO_IN_SUBJ + __SUBJ_DOM_ADMIN + __FROM_DOM_ADMIN + (__TVD_PH_SUBJ_META || __TVD_PH_BODY_META || __TVD_PH_BODY_ACCOUNTS_PRE || __TVD_PH_BODY_ACCOUNTS_POST || __PDS_FROM_NAME_TO_DOMAIN || __TO_IN_SUBJ) > 3)
 
 meta        UPGRADE_MAILBOX      __UPGR_MAILBOX && __HTML_FONT_LOW_CONTRAST_MINFP 
 describe    UPGRADE_MAILBOX      Upgrade your mailbox! (phishing?)
@@ -3471,7 +3471,7 @@ tflags     URI_DASHGOVEDU              publish
 # Apparent use of content hosted at storage.googleapis.com
 # (mapped images and HTML landing pages for the imagemap URIs)
 # to avoid URIBL hits
-uri        __URI_GOOG_STO_IMG         m,^https?://storage\.googleapis\.com/.*\.(?:png|jpe?g|gif)$,i
+uri        __URI_GOOG_STO_IMG         m,^https?://(?:firebase)?storage\.googleapis\.com/.*\.(?:png|jpe?g|gif)$,i
 tflags     __URI_GOOG_STO_IMG         multiple maxhits=5
 
 uri        __URI_GOOG_STO_HTML        m,^https?://(?:firebase)?storage\.googleapis\.com/.*\.html?(?:$|\?),i
@@ -3510,8 +3510,8 @@ describe    GOOG_STO_HTML_PHISH_MANY  Phishing with google content hosting to av
 score       GOOG_STO_HTML_PHISH_MANY  4.00	# limit
 tflags      GOOG_STO_HTML_PHISH_MANY  publish
 
-uri         __URI_GOOG_STO_EMAIL       m;^https?://storage\.googleapis\.com/.*[a-z0-9]@(?:[a-z0-9]{2,20}\.){1,3}[a-z]{2,3};i
-meta        GOOG_STO_EMAIL_PHISH       __URI_GOOG_STO_EMAIL && (__PDS_FROM_NAME_TO_DOMAIN || __SUBJ_HAS_TO_1)
+uri         __URI_GOOG_STO_EMAIL       m;^https?://(?:firebase)?storage\.googleapis\.com/.*[a-z0-9]@(?:[a-z0-9]{2,20}\.){1,3}[a-z]{2,3}$;i
+meta        GOOG_STO_EMAIL_PHISH       __URI_GOOG_STO_EMAIL && (__PDS_FROM_NAME_TO_DOMAIN || __TO_IN_SUBJ)
 describe    GOOG_STO_EMAIL_PHISH       Possible phishing with google hosted content URI having email address
 score       GOOG_STO_EMAIL_PHISH       3.00	# limit
 tflags      GOOG_STO_EMAIL_PHISH       publish
@@ -3764,7 +3764,7 @@ header     __HAS_X_ANTIABUSE           exists:X-AntiAbuse
 header     __HAS_X_AUTHED_SENDER       exists:X-Authenticated-Sender
 header     __HAS_HEADER_STARTS_NUM     ALL =~ /^\d[-a-z0-9]*:/ism
 
-meta       HAS_X_OUTGOING_SPAM_STAT    __HAS_X_OUTGOING_SPAM_STAT && !MAILING_LIST_MULTI && !__HAS_X_MAILMAN_VERSION && !__AUTOREPLY_ASU && !__THREAD_INDEX_GOOD && !__HAS_X_LOOP && !__DOC_ATTACH && !__PDF_ATTACH 
+meta       HAS_X_OUTGOING_SPAM_STAT    __HAS_X_OUTGOING_SPAM_STAT && !MAILING_LIST_MULTI && !__HAS_X_MAILMAN_VERSION && !__AUTOREPLY_ASU && !__THREAD_INDEX_GOOD && !__HAS_X_LOOP && !__DOC_ATTACH && !__PDF_ATTACH && !__FROM_EQ_ORG_1 && !__HAS_IN_REPLY_TO 
 describe   HAS_X_OUTGOING_SPAM_STAT    Has header claiming outbound spam scan - why trust the results?
 score      HAS_X_OUTGOING_SPAM_STAT    2.000	# limit
 tflags     HAS_X_OUTGOING_SPAM_STAT    publish
