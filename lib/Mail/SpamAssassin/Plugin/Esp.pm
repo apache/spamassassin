@@ -388,20 +388,27 @@ sub esp_sendinblue_check {
 
 sub esp_mailup_check {
   my ($self, $pms) = @_;
-  my $mailup_id;
+  my ($mailup_id, $xabuse, $listid);
 
   my $rulename = $pms->get_current_eval_rule_name();
 
   # All Mailup emails have the X-CSA-Complaints header set to whitelist-complaints@eco.de
   my $xcsa = $pms->get("X-CSA-Complaints", undef);
-  if((not defined $xcsa) or ($xcsa !~ /whitelist-complaints\@eco\.de/)) {
+  if((not defined $xcsa) or ($xcsa !~ /complaints\@eco\.de/)) {
     return;
   }
   # All Mailup emails have the X-Abuse header that must match
-  $mailup_id = $pms->get("X-Abuse", undef);
-  return if not defined $mailup_id;
-  $mailup_id =~ /Please report abuse here: http\:\/\/.*\.musvc([0-9]+)\.net\/p\?c=([0-9]+)/;
-  $mailup_id = $2;
+  $xabuse = $pms->get("X-Abuse", undef);
+  return if not defined $xabuse;
+  if($xabuse =~ /Please report abuse here: http\:\/\/.*\.musvc([0-9]+)\.net\/p\?c=([0-9]+)/) {
+    $mailup_id = $2;
+  }
+  if(not defined $mailup_id) {
+    $listid = $pms->get("list-id", undef);
+    if($listid =~ /\<(\d+)\.\d+\>/) {
+      $mailup_id = $1;
+    }
+  }
   # if regexp doesn't match it's not Mailup
   return if not defined $mailup_id;
   chomp($mailup_id);
