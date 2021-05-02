@@ -6,7 +6,7 @@ use Test::More;
 
 plan skip_all => "Net tests disabled" unless conf_bool('run_net_tests');
 
-plan tests => 1;
+plan tests => 2;
 
 # ---------------------------------------------------------------------------
 
