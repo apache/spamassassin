@@ -8,13 +8,8 @@ plan tests => 6;
 
 # ---------------------------------------------------------------------------
 
-my $plugins = '';
-
-if (eval { require BSD::Resource; }) {
-    $plugins .= "loadplugin Mail::SpamAssassin::Plugin::ResourceLimits\n"
-}
-
 tstpre ("
+  loadplugin Mail::SpamAssassin::Plugin::ResourceLimits
   loadplugin Mail::SpamAssassin::Plugin::RelayCountry
   loadplugin Mail::SpamAssassin::Plugin::URIDNSBL
   loadplugin Mail::SpamAssassin::Plugin::SPF
@@ -60,7 +55,6 @@ tstpre ("
   loadplugin Mail::SpamAssassin::Plugin::AuthRes
   loadplugin Mail::SpamAssassin::Plugin::Esp
   loadplugin Mail::SpamAssassin::Plugin::ExtractText
-  $plugins
 ");
 
 tstprefs("
@@ -90,7 +84,8 @@ tstprefs("
 
 if (conf_bool('run_net_tests')) {
     # sometimes trips on URIBL_BLOCKED, ignore..
-    sarun ("-D -t < data/nice/001 2>&1 | grep -v dns_block_rule", \&patterns_run_cb);
+    # also ignore BSD::Resource not installed
+    sarun ("-D -t < data/nice/001 2>&1 | grep -vE '(dns_block_rule|ResourceLimits not used)'", \&patterns_run_cb);
     ok_all_patterns();
 } else {
     sarun ("-D -L -t < data/nice/001 2>&1", \&patterns_run_cb);

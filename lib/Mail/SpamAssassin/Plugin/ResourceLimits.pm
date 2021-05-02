@@ -42,11 +42,11 @@ NOTE: Because this plugin uses BSD::Resource, it will not function on Windows.
 
 =over 4
 
-=item resource_limit_cpu 120	(default: 0 or no limit)
+=item resource_limit_cpu 120    (default: 0 or no limit)
 
 How many cpu cycles are allowed on this process before it dies.
 
-=item resource_limit_mem 536870912	(default: 0 or no limit)
+=item resource_limit_mem 536870912    (default: 0 or no limit)
 
 The maximum number of bytes of memory allowed both for:
 
@@ -68,77 +68,80 @@ resident set size
 
 package Mail::SpamAssassin::Plugin::ResourceLimits;
 
-use Mail::SpamAssassin::Plugin ();
-use Mail::SpamAssassin::Logger ();
-use Mail::SpamAssassin::Util   ();
-use Mail::SpamAssassin::Constants qw(:sa);
+use Mail::SpamAssassin::Plugin;
+use Mail::SpamAssassin::Logger;
 
 use strict;
 use warnings;
 use re 'taint';
 
-use BSD::Resource qw(RLIMIT_RSS RLIMIT_AS RLIMIT_CPU);
+use constant HAS_BSD_RESOURCE =>
+  eval 'use BSD::Resource qw(RLIMIT_CPU RLIMIT_RSS RLIMIT_AS); 1;';
 
 our @ISA = qw(Mail::SpamAssassin::Plugin);
 
 sub new {
-    my $class        = shift;
-    my $mailsaobject = shift;
+  my $class    = shift;
+  my $mailsaobject = shift;
 
-    $class = ref($class) || $class;
-    my $self = $class->SUPER::new($mailsaobject);
-    bless( $self, $class );
+  $class = ref($class) || $class;
+  my $self = $class->SUPER::new($mailsaobject);
+  bless ($self, $class);
 
-    $self->set_config( $mailsaobject->{conf} );
-    return $self;
+  if (!HAS_BSD_RESOURCE) {
+    warn "ResourceLimits not used, required module BSD::Resource missing\n";
+  }
+
+  $self->set_config($mailsaobject->{conf});
+  return $self;
 }
 
 sub set_config {
-    my ( $self, $conf ) = @_;
-    my @cmds = ();
+  my ($self, $conf) = @_;
+  my @cmds;
 
-    push(
-        @cmds,
-        {
-            setting  => 'resource_limit_mem',
-            is_admin => 1,
-            default  => '0',
-            type     => $Mail::SpamAssassin::Conf::CONF_TYPE_NUMERIC
-        }
-    );
+  push(@cmds, {
+    setting  => 'resource_limit_mem',
+    is_admin => 1,
+    default  => 0,
+    type     => $Mail::SpamAssassin::Conf::CONF_TYPE_NUMERIC
+  });
 
-    push(
-        @cmds,
-        {
-            setting  => 'resource_limit_cpu',
-            is_admin => 1,
-            default  => '0',
-            type     => $Mail::SpamAssassin::Conf::CONF_TYPE_NUMERIC
-        }
-    );
+  push(@cmds, {
+    setting  => 'resource_limit_cpu',
+    is_admin => 1,
+    default  => 0,
+    type     => $Mail::SpamAssassin::Conf::CONF_TYPE_NUMERIC
+  });
 
-    $conf->{parser}->register_commands( \@cmds );
+  $conf->{parser}->register_commands(\@cmds);
 }
 
+if (HAS_BSD_RESOURCE) { eval '
 sub spamd_child_init {
-    my ($self) = @_;
+  my ($self) = @_;
 
-    # Set CPU Resource limits if they were specified.
-    Mail::SpamAssassin::Util::dbg("resourcelimitplugin: In spamd_child_init");
-    Mail::SpamAssassin::Util::dbg( "resourcelimitplugin: cpu limit: " . $self->{main}->{conf}->{resource_limit_cpu} );
-    if ( $self->{main}->{conf}->{resource_limit_cpu} ) {
-        BSD::Resource::setrlimit( RLIMIT_CPU, $self->{main}->{conf}->{resource_limit_cpu}, $self->{main}->{conf}->{resource_limit_cpu} )
-          || info("resourcelimitplugin: Unable to set RLIMIT_CPU");
-    }
+  my $conf = $self->{main}->{conf};
 
-    # Set  Resource limits if they were specified.
-    Mail::SpamAssassin::Util::dbg( "resourcelimitplugin: mem limit: " . $self->{main}->{conf}->{resource_limit_mem} );
-    if ( $self->{main}->{conf}->{resource_limit_mem} ) {
-        BSD::Resource::setrlimit( RLIMIT_RSS, $self->{main}->{conf}->{resource_limit_mem}, $self->{main}->{conf}->{resource_limit_mem} )
-          || info("resourcelimitplugin: Unable to set RLIMIT_RSS");
-        BSD::Resource::setrlimit( RLIMIT_AS, $self->{main}->{conf}->{resource_limit_mem}, $self->{main}->{conf}->{resource_limit_mem} )
-          || info("resourcelimitplugin: Unable to set RLIMIT_AS");
-    }
+  # Set CPU Resource limits if they were specified.
+  dbg("resourcelimits: cpu limit: " . $conf->{resource_limit_cpu});
+  if ($conf->{resource_limit_cpu}) {
+    BSD::Resource::setrlimit( RLIMIT_CPU,
+        $conf->{resource_limit_cpu}, $conf->{resource_limit_cpu} )
+      or info("resourcelimits: Unable to set RLIMIT_CPU");
+  }
+
+  # Set Resource limits if they were specified.
+  dbg("resourcelimits: mem limit: " . $conf->{resource_limit_mem});
+  if ($conf->{resource_limit_mem}) {
+    BSD::Resource::setrlimit( RLIMIT_RSS,
+        $conf->{resource_limit_mem}, $conf->{resource_limit_mem} )
+      or info("resourcelimits: Unable to set RLIMIT_RSS");
+    BSD::Resource::setrlimit( RLIMIT_AS,
+        $conf->{resource_limit_mem}, $conf->{resource_limit_mem} )
+      or info("resourcelimits: Unable to set RLIMIT_AS");
+  }
 }
+'; }
 
 1;
