@@ -51,15 +51,10 @@ our @MODULES = (
 },
 {
   module => 'Net::DNS',
-  version => ($^O =~ /^(mswin|dos|os2)/oi ? '0.46' : '0.34'),
+  version => '0.69',
   desc => 'Used for all DNS-based tests (SBL, XBL, SpamCop, DSBL, etc.),
   perform MX checks, and is also used when manually reporting spam to
-  SpamCop.
-
-  You need to make sure the Net::DNS version is sufficiently up-to-date:
-
-  - version 0.34 or higher on Unix systems
-  - version 0.46 or higher on Windows systems',
+  SpamCop.',
 },
 {
   'module' => 'NetAddr::IP',
