@@ -210,8 +210,6 @@ our %rcode_value = (  # https://www.iana.org/assignments/dns-parameters, RFC 619
   BADMODE => 19, BADNAME => 20, BADALG => 21, BADTRUNC => 22,
 );
 
-our $txtdata_can_provide_a_list;
-
 sub new {
   my($class,$sa_main) = @_;
 
@@ -220,10 +218,6 @@ sub new {
   bless($self, $class);
 
   $self->set_config($sa_main->{conf});
-
-  #$txtdata_can_provide_a_list = Net::DNS->VERSION >= 0.69;
-  #more robust version check from Damyan Ivanov - Bug 7095
-  $txtdata_can_provide_a_list = version->parse(Net::DNS->VERSION) >= version->parse('0.69');
 
   return $self;
 }
@@ -510,20 +504,14 @@ sub process_response_packet {
     } else {
       $rr_type = uc $rr->type;
       if ($rr_type eq 'A') {
-        # Net::DNS::RR::A::address() is available since Net::DNS 0.69
-        $rr_rdatastr = $rr->UNIVERSAL::can('address') ? $rr->address
-                                                      : $rr->rdatastr;
+        $rr_rdatastr = $rr->address;
         if ($rr_rdatastr =~ m/^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\z/) {
           $rdatanum = Mail::SpamAssassin::Util::my_inet_aton($rr_rdatastr);
         }
 
       } elsif ($rr->UNIVERSAL::can('txtdata')) {
         # TXT, SPF: join with no intervening spaces, as per RFC 5518
-        if ($txtdata_can_provide_a_list || $rr_type ne 'TXT') {
-          $rr_rdatastr = join('', $rr->txtdata);  # txtdata() in list context!
-        } else {  # char_str_list() is only available for TXT records
-          $rr_rdatastr = join('', $rr->char_str_list);  # historical
-        }
+        $rr_rdatastr = join('', $rr->txtdata);  # txtdata() in list context!
         # Net::DNS attempts to decode text strings in a TXT record as UTF-8,
         # which is undesired: octets failing the UTF-8 decoding are converted
         # to a Unicode "replacement character" U+FFFD (encoded as octets
@@ -536,9 +524,7 @@ sub process_response_packet {
         utf8::encode($rr_rdatastr)  if utf8::is_utf8($rr_rdatastr);
 
       } else {
-        # rdatastr() is historical, use rdstring() since Net::DNS 0.69
-        $rr_rdatastr = $rr->UNIVERSAL::can('rdstring') ? $rr->rdstring
-                                                       : $rr->rdatastr;
+        $rr_rdatastr = $rr->rdstring;
         utf8::encode($rr_rdatastr)  if utf8::is_utf8($rr_rdatastr);
       }
       # dbg("askdns: received rr type %s, data: %s", $rr_type, $rr_rdatastr);

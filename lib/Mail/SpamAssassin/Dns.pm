@@ -79,10 +79,6 @@ BEGIN {
 
   no warnings;
   eval {
-    require Net::DNS;
-    require Net::DNS::Resolver;
-  };
-  eval {
     require MIME::Base64;
   };
   eval {
@@ -152,7 +148,7 @@ sub dnsbl_hit {
     # txtdata returns a non- zone-file-format encoded result, unlike rdstring;
     # avoid space-separated RDATA <character-string> fields if possible,
     # txtdata provides a list of strings in a list context since Net::DNS 0.69
-    $log = join('',$answer->txtdata);
+    $log = join('', $answer->txtdata);
     utf8::encode($log)  if utf8::is_utf8($log);
     local $1;
     $log =~ s{ (?<! [<(\[] ) (https? : // \S+)}{<$1>}xgi;
@@ -189,15 +185,14 @@ sub dnsbl_uri {
     # txtdata returns a non- zone-file-format encoded result, unlike rdstring;
     # avoid space-separated RDATA <character-string> fields if possible,
     # txtdata provides a list of strings in a list context since Net::DNS 0.69
-    $rdatastr = join('',$answer->txtdata);
+    $rdatastr = join('', $answer->txtdata);
   } else {
-    # rdatastr() is historical/undocumented, use rdstring() since Net::DNS 0.69
-    $rdatastr = $answer->UNIVERSAL::can('rdstring') ? $answer->rdstring
-                                                    : $answer->rdatastr;
+    $rdatastr = $answer->rdstring;
     # encoded in a RFC 1035 zone file format (escaped), decode it
     $rdatastr =~ s{ \\ ( [0-9]{3} | (?![0-9]{3}) . ) }
                   { length($1)==3 && $1 <= 255 ? chr($1) : $1 }xgse;
   }
+
   # Bug 7236: Net::DNS attempts to decode text strings in a TXT record as
   # UTF-8 since version 0.69, which is undesired: octets failing the UTF-8
   # decoding are converted to a Unicode "replacement character" U+FFFD, and
@@ -241,11 +236,9 @@ sub process_dnsbl_result {
       # txtdata returns a non- zone-file-format encoded result, unlike rdstring;
       # avoid space-separated RDATA <character-string> fields if possible,
       # txtdata provides a list of strings in a list context since Net::DNS 0.69
-      $rdatastr = join('',$answer->txtdata);
+      $rdatastr = join('', $answer->txtdata);
     } else {
-      # rdatastr() is historical/undocumented, use rdstring() since Net::DNS 0.69
-      $rdatastr = $answer->UNIVERSAL::can('rdstring') ? $answer->rdstring
-                                                    : $answer->rdatastr;
+      $rdatastr = $answer->rdstring;
       # encoded in a RFC 1035 zone file format (escaped), decode it
       $rdatastr =~ s{ \\ ( [0-9]{3} | (?![0-9]{3}) . ) }
                     { length($1)==3 && $1 <= 255 ? chr($1) : $1 }xgse;
@@ -536,22 +529,6 @@ sub is_dns_available {
   if ($self->{main}->{local_tests_only}) {
     dbg("dns: using local tests only, DNS not available");
     return $IS_DNS_AVAILABLE;
-  }
-
-  # Check version numbers - runtime check only
-  if (defined $Net::DNS::VERSION) {
-    if (am_running_on_windows()) {
-      if ($Net::DNS::VERSION < 0.46) {
-	warn("dns: Net::DNS version is $Net::DNS::VERSION, but need 0.46 for Win32\n");
-	return $IS_DNS_AVAILABLE;
-      }
-    }
-    else {
-      if ($Net::DNS::VERSION < 0.34) {
-	warn("dns: Net::DNS version is $Net::DNS::VERSION, but need 0.34\n");
-	return $IS_DNS_AVAILABLE;
-      }
-    }
   }
 
   #$self->clear_resolver();

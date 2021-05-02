@@ -131,13 +131,10 @@ use re 'taint';
 use Mail::SpamAssassin::Plugin;
 use Mail::SpamAssassin::Logger;
 use Mail::SpamAssassin::Util qw(reverse_ip_address compile_regexp);
-use Mail::SpamAssassin::Dns;
 use Mail::SpamAssassin::Constants qw(:ip);
 use version 0.77;
 
 our @ISA = qw(Mail::SpamAssassin::Plugin);
-
-our $txtdata_can_provide_a_list;
 
 sub new {
   my ($class, $mailsa) = @_;
@@ -148,10 +145,6 @@ sub new {
   $self->register_eval_rule("check_asn", $Mail::SpamAssassin::Conf::TYPE_HEAD_EVALS);
 
   $self->set_config($mailsa->{conf});
-
-  #$txtdata_can_provide_a_list = Net::DNS->VERSION >= 0.69;
-  #more robust version check from Damyan Ivanov - Bug 7095
-  $txtdata_can_provide_a_list = version->parse(Net::DNS->VERSION) >= version->parse('0.69');
 
   # we need GeoDB ASN
   $self->{main}->{geodb_wanted}->{asn} = 1;
@@ -501,8 +494,7 @@ sub process_dns_result {
   foreach my $rr (@answer) {
     #dbg("asn: %s: lookup result packet: %s", $zone, $rr->string);
     next if $rr->type ne 'TXT';
-    my @strings = $txtdata_can_provide_a_list ? $rr->txtdata :
-      $rr->char_str_list; # historical
+    my @strings = $rr->txtdata;
     next if !@strings;
     for (@strings) { utf8::encode($_) if utf8::is_utf8($_) }
 

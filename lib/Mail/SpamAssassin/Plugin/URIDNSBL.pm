@@ -1007,9 +1007,7 @@ sub complete_a_lookup {
   foreach my $rr (@answer) {
     $j++;
     next if $rr->type ne 'A';
-    # Net::DNS::RR::A::address() is available since Net::DNS 0.69
-    my $ip_address = $rr->UNIVERSAL::can('address') ? $rr->address
-                                                    : $rr->rdatastr;
+    my $ip_address = $rr->address;
     dbg("uridnsbl: complete_a_lookup got(%d) A for %s: %s",
         $j, $ent->{lookup}, $ip_address);
     $self->lookup_dnsbl_for_ip($pms, $ip_address, $ent);
@@ -1081,9 +1079,7 @@ sub complete_dnsbl_lookup {
     my $rr_type = $rr->type;
 
     if ($rr_type eq 'A') {
-      # Net::DNS::RR::A::address() is available since Net::DNS 0.69
-      $rdatastr = $rr->UNIVERSAL::can('address') ? $rr->address
-                                                 : $rr->rdatastr;
+      $rdatastr = $rr->address;
       if ($rdatastr =~ IS_IPV4_ADDRESS) {
         $rdatanum = Mail::SpamAssassin::Util::my_inet_aton($rdatastr);
       }
@@ -1091,7 +1087,7 @@ sub complete_dnsbl_lookup {
       # txtdata returns a non- zone-file-format encoded result, unlike rdstring;
       # avoid space-separated RDATA <character-string> fields if possible;
       # txtdata provides a list of strings in list context since Net::DNS 0.69
-      $rdatastr = join('',$rr->txtdata);
+      $rdatastr = join('', $rr->txtdata);
       utf8::encode($rdatastr)  if utf8::is_utf8($rdatastr);
     } else {
       next;

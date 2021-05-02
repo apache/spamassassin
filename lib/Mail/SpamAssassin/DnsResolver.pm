@@ -51,11 +51,14 @@ use Mail::SpamAssassin::Util qw(untaint_var decode_dns_question_entry
 use Socket;
 use Errno qw(EADDRINUSE EACCES);
 use Time::HiRes qw(time);
+use version 0.77;
 
 our @ISA = qw();
 
+our $have_net_dns;
 our $io_socket_module_name;
 BEGIN {
+  $have_net_dns = eval { require Net::DNS; };
   if (eval { require IO::Socket::IP }) {
     $io_socket_module_name = 'IO::Socket::IP';
   } elsif (eval { require IO::Socket::INET6 }) {
@@ -79,7 +82,6 @@ sub new {
   };
   bless ($self, $class);
 
-  $self->load_resolver();
   $self;
 }
 
@@ -124,7 +126,9 @@ sub load_resolver {
   }
   
   eval {
-    require Net::DNS;
+    die "Net::DNS required\n" if !$have_net_dns;
+    die "Net::DNS 0.69 required\n"
+      if (version->parse(Net::DNS->VERSION) < version->parse(0.69));
     # force_v4 is set in new() to avoid error in older versions of Net::DNS
     # that don't have it; other options are set by function calls so a typo
     # or API change will cause an error here
@@ -164,7 +168,7 @@ sub load_resolver {
     1;
   } or do {
     my $eval_stat = $@ ne '' ? $@ : "errno=$!";  chomp $eval_stat;
-    dbg("dns: eval failed: $eval_stat");
+    warn("dns: resolver create failed: $eval_stat\n");
   };
 
   dbg("dns: using socket module: %s version %s%s",
@@ -592,17 +596,11 @@ sub new_dns_packet {
     # RD flag needs to be set explicitly since Net::DNS 1.01, Bug 7223	
     $packet->header->rd(1);
 
-  # my $udp_payload_size = $self->{res}->udppacketsize;
+    # my $udp_payload_size = $self->{res}->udppacketsize;
     my $udp_payload_size = $self->{conf}->{dns_options}->{edns};
     if ($udp_payload_size && $udp_payload_size > 512) {
-    # dbg("dns: adding EDNS ext, UDP payload size %d", $udp_payload_size);
-      if ($packet->UNIVERSAL::can('edns')) {  # available since Net::DNS 0.69
-        $packet->edns->size($udp_payload_size);
-      } else {  # legacy mechanism
-        my $optrr = Net::DNS::RR->new(Type => 'OPT', Name => '', TTL => 0,
-                                      Class => $udp_payload_size);
-        $packet->push('additional', $optrr);
-      }
+      # dbg("dns: adding EDNS ext, UDP payload size %d", $udp_payload_size);
+      $packet->edns->size($udp_payload_size);
     }
   }
 
