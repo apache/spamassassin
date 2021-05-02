@@ -344,14 +344,6 @@ our @OPTIONAL_BINARIES = (
   version_check_regex => 'curl ([\d\.]*)',
   desc => $lwp_note,
 },
-#Fetch is a FreeBSD Product. We do not believe it has any way to check the version from
-#the command line.  It has been tested with FreeBSD version 8 through 9.1.
-{
-  binary => 'fetch',
-  version => '0',
-  
-  desc => $lwp_note,
-},
 {
   binary => 're2c',
   version => '0',
@@ -360,6 +352,16 @@ our @OPTIONAL_BINARIES = (
   for regular expressions to speed up scanning.',
 }
 );
+
+#Fetch is a FreeBSD Product. We do not believe it has any way to check the version from
+#the command line.  It has been tested with FreeBSD version 8 through 9.1.
+if ($^O eq 'freebsd') {
+  push @OPTIONAL_BINARIES, {
+    binary => 'fetch',
+    version => '0',
+    desc => $lwp_note,
+  };
+}
 
 ###########################################################################
 
