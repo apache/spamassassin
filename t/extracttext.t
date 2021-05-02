@@ -11,7 +11,7 @@ use constant HAS_TESSERACT => eval { $_ = untaint_cmd("which tesseract"); chomp;
 my $tests = 0;
 $tests += 2 if (HAS_PDFTOTEXT);
 $tests += 1 if (HAS_TESSERACT);
-if ($tests && $tests < 5) { diag("some binaries missing, not running all tests\n"); }
+if ($tests && $tests < 3) { diag("some binaries missing, not running all tests\n"); }
 
 plan skip_all => "no needed binaries found" unless $tests;
 plan tests => $tests;
