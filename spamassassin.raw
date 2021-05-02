@@ -190,6 +190,7 @@ GetOptions(
   '6'                                       => sub { $opt{'force_ipv6'} = 1;
                                                      $opt{'force_ipv4'} = 0; },
   'lint'                                    => \$opt{'lint'},
+  'net'                                     => \$opt{'net'},
   'local-only|local|L'                      => \$opt{'local'},
   'mbox'                                    => sub { $opt{'format'} = 'mbox'; },
   'mbx'                                     => sub { $opt{'format'} = 'mbx'; },
@@ -249,7 +250,8 @@ if (Mail::SpamAssassin::Util::am_running_on_windows()) {
 }
 
 # bug 5048: --lint should not cause network accesses
-if ($opt{'lint'}) { $opt{'local'} = 1; }
+# allow --net to override for testing
+if ($opt{'lint'} && !$opt{'net'}) { $opt{'local'} = 1; }
 
 # create the tester factory
 my $spamtest = Mail::SpamAssassin->new(

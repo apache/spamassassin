@@ -13,10 +13,13 @@ plan tests => 1;
 %patterns = (
   q{  }, 'anything',
 );
+%anti_patterns = (
+  q{ warn: }, 'warning',
+);
 
 # override locale for this test!
 $ENV{'LANGUAGE'} = $ENV{'LC_ALL'} = 'C';
 
-sarun ("--lint", \&patterns_run_cb);
+sarun ("--lint --net", \&patterns_run_cb);
 ok_all_patterns();
 
