@@ -2006,10 +2006,14 @@ sub find_rule_support_file {
 
   my @paths;
   # search custom directories first
-  push @paths, $self->{site_rules_filename}
-    if $self->{site_rules_filename} && -d $self->{site_rules_filename};
-  push @paths, $self->{rules_filename}
-    if $self->{rules_filename} && -d $self->{rules_filename};
+  if ($self->{site_rules_filename}) {
+    foreach my $path (split("\000", $self->{site_rules_filename})) {
+      push @paths, $path  if -d $path;
+    }
+  }
+  if ($self->{rules_filename} && -d $self->{rules_filename}) {
+    push @paths, $self->{rules_filename}
+  }
   # updates sub-directory missing from @default_rules_path
   push @paths, '__local_state_dir__/__version__/updates_spamassassin_org';
   push @paths, @default_rules_path;
