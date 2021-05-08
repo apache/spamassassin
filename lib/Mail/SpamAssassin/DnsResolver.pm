@@ -46,7 +46,8 @@ use Mail::SpamAssassin;
 use Mail::SpamAssassin::Logger;
 use Mail::SpamAssassin::Constants qw(:ip);
 use Mail::SpamAssassin::Util qw(untaint_var decode_dns_question_entry
-                                idn_to_ascii reverse_ip_address);
+                                idn_to_ascii reverse_ip_address
+                                domain_to_search_list);
 
 use Socket;
 use Errno qw(EADDRINUSE EACCES);
@@ -682,6 +683,19 @@ port if the reply id does not match the return value from bgsend.
 sub bgsend {
   my ($self, $domain, $type, $class, $cb) = @_;
   return if $self->{no_resolver};
+
+  my $dns_query_blockages = $self->{main}->{conf}->{dns_query_blocked};
+  if ($dns_query_blockages) {
+    my $search_list = domain_to_search_list($domain);
+    foreach my $parent_domain ((@$search_list, '*')) {
+      my $blocked = $dns_query_blockages->{$parent_domain};
+      next if !defined $blocked; # not listed
+      last if !$blocked; # allowed
+      # blocked
+      dbg("dns: bgsend, query $type/$domain blocked by dns_query_restriction: $parent_domain");
+      return;
+    }
+  }
 
   $self->{send_timed_out} = 0;
 
