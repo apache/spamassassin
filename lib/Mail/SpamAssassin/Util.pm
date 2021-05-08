@@ -61,7 +61,8 @@ our @EXPORT_OK = qw(&local_tz &base64_decode &base64_encode
                   &secure_tmpdir &uri_list_canonicalize &get_my_locales
                   &parse_rfc822_date &idn_to_ascii &is_valid_utf_8
                   &get_user_groups &compile_regexp &qr_to_string
-                  &is_fqdn_valid &parse_header_addresses);
+                  &is_fqdn_valid &parse_header_addresses
+                  &domain_to_search_list);
 
 our $AM_TAINTED;
 
@@ -2302,6 +2303,31 @@ sub fisher_yates_shuffle {
 
 ###########################################################################
 
+# Given a domain name, produces a listref of successively stripped down
+# parent domains, e.g. a domain '2.10.Example.COM' would produce a list:
+# '2.10.example.com', '10.example.com', 'example.com', 'com', ''
+#
+sub domain_to_search_list {
+  my ($domain) = @_;
+  $domain =~ s/^\.+//; $domain =~ s/\.+\z//;  # strip leading and trailing dots
+  my @search_keys;
+  if ($domain =~ /\[/) {  # don't split address literals
+    @search_keys = ( $domain, '' );  # presumably an address literal
+  } else {
+    local $1;
+    $domain = lc $domain;
+    for (;;) {
+      push(@search_keys, $domain);
+      last  if $domain eq '';
+      # strip one level
+      $domain = ($domain =~ /^ (?: [^.]* ) \. (.*) \z/xs) ? $1 : '';
+    }
+    if (@search_keys > 20) {  # enforce some sanity limit
+      @search_keys = @search_keys[$#search_keys-19 .. $#search_keys];
+    }
+  }
+  return \@search_keys;
+}
 
 ###########################################################################
 
