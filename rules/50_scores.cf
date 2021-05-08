@@ -265,9 +265,13 @@ score RATWARE_EGROUPS 1.898 1.258 1.406 1.621
 score RATWARE_HASH_DASH 0 # n=0 n=1 n=2 n=3
 score RATWARE_MOZ_MALFORMED 0 # n=0 n=1 n=2 n=3
 score RATWARE_MPOP_WEBMAIL 1.153 1.338 1.229 1.999 # n=0
-score RATWARE_MS_HASH 2.036 3.692 0.454 2.148
+# jhardin 05/2021
+# masscheck corpora thin or nonexistent, real world FPs reported - exposing to ruleqa for eval
+#score RATWARE_MS_HASH 2.036 3.692 0.454 2.148
 score RATWARE_OE_MALFORMED 0 # n=0 n=1 n=2 n=3
-score RATWARE_OUTLOOK_NONAME 2.964 0.033 2.685 2.950
+# jhardin 05/2021
+# masscheck corpora thin or nonexistent, real world FPs reported - exposing to ruleqa for eval
+#score RATWARE_OUTLOOK_NONAME 2.964 0.033 2.685 2.950
 score RATWARE_RCVD_AT 0 # n=0 n=1 n=2 n=3
 score RATWARE_RCVD_PF 0 # n=0 n=1 n=2 n=3
 score RATWARE_ZERO_TZ 2.392 2.535 0.265 1.781 # n=0
