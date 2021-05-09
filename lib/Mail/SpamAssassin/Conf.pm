@@ -5177,7 +5177,7 @@ sub maybe_header_only {
   my($self,$rulename) = @_;
   my $type = $self->{test_types}->{$rulename};
 
-  if ($rulename =~ /^AUTOLEARNTEST/) {
+  if (index($rulename, 'AUTOLEARNTEST') == 0) {
     dbg("config: auto-learn: $rulename - Test type is $self->{test_types}->{$rulename}.");
   }
  
@@ -5201,7 +5201,7 @@ sub maybe_body_only {
   my($self,$rulename) = @_;
   my $type = $self->{test_types}->{$rulename};
 
-  if ($rulename =~ /^AUTOLEARNTEST/) {
+  if (index($rulename, 'AUTOLEARNTEST') == 0) {
     dbg("config: auto-learn: $rulename - Test type is $self->{test_types}->{$rulename}.");
   }
 

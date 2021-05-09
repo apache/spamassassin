@@ -261,7 +261,7 @@ sub parse {
       }
 
       # bug 6800: let X-Spam-Checker-Version also show what sa-update we are at
-      if ($line =~ /^\# UPDATE version (\d+)$/) {
+      if (index($line, '# UPD') == 0 && $line =~ /^\# UPDATE version (\d+)$/) {
         for ($self->{currentfile}) {  # just aliasing, not a loop
           $conf->{update_version}{$_} = $1  if defined $_ && $_ ne '(no file)';
         }
@@ -276,7 +276,9 @@ sub parse {
     next unless($line); # skip empty lines
 
     # handle i18n
-    if ($line =~ s/^lang\s+(\S+)\s+//) { next if ($lang !~ /^$1/i); }
+    if (index($line, 'lang') == 0 && $line =~ s/^lang\s+(\S+)\s+//) {
+      next if $lang !~ /^$1/i;
+    }
 
     my($key, $value) = split(/\s+/, $line, 2);
     $key = lc $key;
