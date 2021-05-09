@@ -406,7 +406,7 @@ sub load_models {
   # create language ngram maps once
   for (@lm) {
     # look for end delimiter
-    if (/^0 (.+)/) {
+    if (index($_, '0 ') == 0 && /^0 (.+)/) {
       $ngram->{"language"} = $1;
       push(@nm, $ngram);
       # reset for next language
