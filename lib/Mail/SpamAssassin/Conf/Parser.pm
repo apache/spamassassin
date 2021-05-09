@@ -251,7 +251,7 @@ sub parse {
     my $parse_error;    # undef by default, may be overridden
 
     # don't count internal file start/end lines
-    $self->{linenum}{$self->{currentfile}}++ unless $line =~ /^file\s/;
+    $self->{linenum}{$self->{currentfile}}++ if index($line, 'file ') != 0;
 
     if (index($line,'#') > -1) {
       # bug 5545: used to support testing rules in the ruleqa system
