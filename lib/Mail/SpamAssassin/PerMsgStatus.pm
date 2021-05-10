@@ -3135,12 +3135,13 @@ sub got_hit {
             $rule_descr);
 
   # take care of duplicate rules, too (bug 5206)
-  my $dups = $conf_ref->{duplicate_rules}->{$rule};
-  if ($dups && @{$dups}) {
-    foreach my $dup (@{$dups}) {
-      $self->got_hit($dup, $area, %params);
-    }
-  }
+  # ... removed as it's buggy
+  #my $dups = $conf_ref->{duplicate_rules}->{$rule};
+  #if ($dups && @{$dups}) {
+  #  foreach my $dup (@{$dups}) {
+  #    $self->got_hit($dup, $area, %params);
+  #  }
+  #}
 
   return 1;
 }
