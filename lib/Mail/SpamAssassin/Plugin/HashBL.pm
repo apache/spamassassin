@@ -620,8 +620,10 @@ sub _hash {
 
   my $hashtype = $opts =~ /\b(raw|sha1|md5)\b/i ? lc($1) : 'sha1';
   if ($hashtype eq 'sha1') {
+    utf8::encode($value) if utf8::is_utf8($value); # sha1_hex expects bytes
     return sha1_hex($value);
   } elsif ($hashtype eq 'md5') {
+    utf8::encode($value) if utf8::is_utf8($value); # md5_hex expects bytes
     return md5_hex($value);
   } else {
     return $value;
