@@ -880,7 +880,8 @@ sub finish_parsing {
   # don't do this if allow_user_rules is active, since it deletes entries
   # from {tests}
   if (!$conf->{allow_user_rules}) {
-    $self->find_dup_rules();          # must be after fix_priorities()
+    # Duplicate merging is buggy, disabled, code to be removed
+    #$self->find_dup_rules();          # must be after fix_priorities()
   }
 
   dbg("config: finish parsing");
