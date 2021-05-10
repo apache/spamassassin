@@ -773,15 +773,12 @@ sub pattern_to_re {
 # ---------------------------------------------------------------------------
 
 sub patterns_run_cb {
-  local ($_);
   my $string = shift;
 
-  if (defined $string) {
-    $_ = $string;
-  } else {
-    $_ = join ('', <IN>);
+  if (!defined $string) {
+    $string = join ('', <IN>);
   }
-  $matched_output = $_;
+  $matched_output = $string;
 
   # create default names == the pattern itself, if not specified
   foreach my $pat (keys %patterns) {
@@ -789,12 +786,17 @@ sub patterns_run_cb {
       $patterns{$pat} = $pat;
     }
   }
+  foreach my $pat (keys %anti_patterns) {
+    if ($anti_patterns{$pat} eq '') {
+      $anti_patterns{$pat} = $pat;
+    }
+  }
 
   foreach my $pat (sort keys %patterns) {
     # '' for exact match
     local $1;
     if ($pat =~ /^'(.*)'$/s) {
-      if (index($_, $1) != -1) {
+      if (index($string, $1) != -1) {
         $found{$patterns{$pat}}++;
       }
     }
@@ -802,7 +804,7 @@ sub patterns_run_cb {
     else {
       my $safe = pattern_to_re ($pat);
       # print "JMD $patterns{$pat}\n";
-      if ($_ =~ /${safe}/s) {
+      if ($string =~ /${safe}/s) {
         $found{$patterns{$pat}}++;
       }
     }
@@ -811,7 +813,7 @@ sub patterns_run_cb {
     # '' for exact match
     local $1;
     if ($pat =~ /^'(.*)'$/s) {
-      if (index($_, $1) != -1) {
+      if (index($string, $1) != -1) {
         $found_anti{$anti_patterns{$pat}}++;
       }
     }
@@ -819,7 +821,7 @@ sub patterns_run_cb {
     else {
       my $safe = pattern_to_re ($pat);
       # print "JMD $patterns{$pat}\n";
-      if ($_ =~ /${safe}/s) {
+      if ($string =~ /${safe}/s) {
         $found_anti{$anti_patterns{$pat}}++;
       }
     }
