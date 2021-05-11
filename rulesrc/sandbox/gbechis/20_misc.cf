@@ -12,6 +12,11 @@ describe    GB_GOOGLE_OBFUS	Obfuscate url through Google search
 score       GB_GOOGLE_OBFUS     0.75 # limit
 #tflags      GB_GOOGLE_OBFUS     publish
 
+uri         GB_GOOGLE_OBFUQ	/^https:\/\/www\.google\.([a-z]{2,3})\/url\?q=.{1,50}\&sa=D&Xh=Gd&usg=/
+describe    GB_GOOGLE_OBFUQ	Obfuscate url through Google search
+score       GB_GOOGLE_OBFUQ     0.75 # limit
+#tflags      GB_GOOGLE_OBFUQ     publish
+
 header      __COPY_OF       Subject =~ /Copy of:|offers for you/
 meta        GB_COPY_OF_SHORT   ( __URL_SHORTENER && __COPY_OF && __KAM_BODY_LENGTH_LT_1024 )
 describe    GB_COPY_OF_SHORT   Url shortnener spam
