@@ -1801,7 +1801,7 @@ sub get_user_groups {
   my ( $user, undef, undef, $gid, undef ) = getpwuid($suid);
   my $rgids="$gid ";
   while ( my($name,undef,$gid,$members) = getgrent() ) {
-    if ( $members =~ m/(?:^| )\Q$user\E(?: |$)/ ) {
+    if ( grep { $_ eq $user } split(/ /, $members) ) {
       $rgids .= "$gid ";
       dbg("util: get_user_groups: added $gid ($name) to group list which is now: $rgids\n");
     }
