@@ -1380,22 +1380,31 @@ sub spawn {
       # bug 3900: assignments to $> and $< problems with BSD perl bug
       # use the POSIX functions to hide the platform specific workarounds 
       dbg("spamd: Privilege de-escalation from user $< and groups $(\n");
-      $! = 0;
-      POSIX::setgid($ugid);  # set effective and real gid
-      dbg("spamd: setgid ERRNO is $!\n");
-      $( = $ugid;
-      $) = "$ugid ".(get_user_groups($uuid));  # set effective and real gid/grouplist another way because we lack initgroups in Perl
-      dbg("spamd: group assignment ERRNO is $!\n");
-      POSIX::setuid($uuid);  # set effective and real UID
-      dbg("spamd: setuid ERRNO is $!\n");
-      $< = $uuid; $> = $uuid;   # bug 5574
-      dbg("spamd: uid assignment ERRNO is $!\n");
-      dbg("spamd: real user is $< \neff user is $> \nreal groups are $( \neff groups are $) \n");
+      $! = 0; POSIX::setgid($ugid);  # set effective and real gid
+      if ($!) { warn("spamd: POSIX::setgid $ugid failed: $!\n"); }
+      $! = 0; $( = $ugid;
+      if ($!) { warn("spamd: failed to set gid $ugid: $!\n"); }
+      # set effective and real gid/grouplist another way because we lack initgroups in Perl
+      my $togids = "$ugid ".get_user_groups($uuid);
+      $! = 0; $) = $togids;
+      if ($!) {
+        # could be perl 5.30 bug #134169, let's be safe
+        if (grep { $_ eq '0' } split(/ /, ${)})) {
+          die("spamd: failed to set effective gid $togids: $!\n");
+        } else {
+          warn("spamd: failed to set effective gid $togids: $!\n");
+        }
+      }
+      $! = 0; POSIX::setuid($uuid);  # set effective and real UID
+      if ($!) { warn("spamd: POSIX::setuid $uuid failed: $!\n"); }
+      $! = 0; $< = $uuid; $> = $uuid;   # bug 5574
+      if ($!) { warn("spamd: setuid $uuid failed: $!\n"); }
+      dbg("spamd: now running as: ruid=$< euid=$> rgid=$( egid=$)");
 
       # keep the sanity check to catch problems like bug 3900 just in case
       if ( $> != $uuid and $> != ( $uuid - 2**32 ) ) {
         sleep(1); # prevent spamd fork flooding
-        die "spamd: setuid to uid $uuid failed (> = $>, < = $<), not started as root?\n";
+        die "spamd: setuid to uid $uuid failed (ruid=$<, euid=$>), not started as root?\n";
       }
     }
 
