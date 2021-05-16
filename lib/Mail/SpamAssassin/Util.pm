@@ -1641,10 +1641,10 @@ sub receive_date {
 sub get_user_groups {
   my $suid = shift;
   dbg("util: get_user_groups: uid is $suid\n");
-  my ( $user, $passwd, $uid, $gid, $quota, $comment, $gcos, $dir, $shell, $expire ) = getpwuid($suid);
+  my ( $user, undef, undef, $gid, undef ) = getpwuid($suid);
   my $rgids="$gid ";
-  while ( my($name,$pw,$gid,$members) = getgrent() ) {
-    if ( $members =~ m/\b$user\b/ ) {
+  while ( my($name,undef,$gid,$members) = getgrent() ) {
+    if ( grep { $_ eq $user } split(/ /, $members) ) {
       $rgids .= "$gid ";
       dbg("util: get_user_groups: added $gid ($name) to group list which is now: $rgids\n");
     }
