@@ -2967,7 +2967,7 @@ sub _handle_hit {
       });
 
     # ignore meta-match sub-rules.
-    if ($rule =~ /^__/) { push(@{$self->{subtest_names_hit}}, $rule); return; }
+    if (index($rule, '__') == 0) { push(@{$self->{subtest_names_hit}}, $rule); return; }
 
     # this should not happen; warn about it
     if (!defined $score) {

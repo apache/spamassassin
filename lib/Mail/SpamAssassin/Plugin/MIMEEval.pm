@@ -390,7 +390,7 @@ sub _check_attachments {
 	$part_bytes[$part] += length;
       }
 
-      if ($where != 1 && $cte eq "quoted-printable" && ! /^SPAM: /) {
+      if ($where != 1 && $cte eq "quoted-printable" && index($_, 'SPAM: ') != 0) {
         # RFC 5322: Each line SHOULD be no more than 78 characters,
         #           excluding the CRLF.
         # RFC 2045: The Quoted-Printable encoding REQUIRES that
