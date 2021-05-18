@@ -674,7 +674,7 @@ sub fix_tests {
     # 
     if ( ! exists $conf->{scores}->{$k} ) {
       # T_ rules (in a testing probationary period) get low, low scores
-      my $set_score = ($k =~/^T_/) ? 0.01 : 1.0;
+      my $set_score = index($k, 'T_') == 0 ? 0.01 : 1.0;
 
       $set_score = -$set_score if ( ($conf->{tflags}->{$k}||'') =~ /\bnice\b/ );
       for my $index (0..3) {
