@@ -2094,7 +2094,7 @@ sub compile_regexp {
 
   # paranoid check for eval exec (?{foo}), in case someone
   # actually put "use re 'eval'" somewhere..
-  if ($re =~ /\(\?\??\{/) {
+  if (index($re, '?{') >= 0 && $re =~ /\(\?\??\{/) {
     return (undef, 'eval (?{}) found');
   }
 
@@ -2104,7 +2104,7 @@ sub compile_regexp {
   if ($delim_end && $delim_end !~ tr/\}\)\]//) {
     # first we remove all escaped backslashes "\\"
     my $dbs_stripped = $re;
-    $dbs_stripped =~ s/\\\\//g;
+    $dbs_stripped =~ s/\\\\//g if index($dbs_stripped, '\\\\') >= 0;
     # now we can properly check if something is unescaped
     if ($dbs_stripped =~ /(?<!\\)\Q${delim_end}\E/) {
       return (undef, "unquoted delimiter '$delim_end' found");
