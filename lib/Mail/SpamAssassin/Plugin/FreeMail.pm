@@ -236,9 +236,9 @@ sub parse_config {
 
     if ($opts->{key} eq "freemail_domains") {
         foreach my $temp (split(/\s+/, $opts->{value})) {
-            if ($temp =~ /^[a-z0-9.*?-]+$/i) {
+            if ($temp !~ tr/a-zA-Z0-9.*?-//c) {
                 my $value = lc($temp);
-                if ($value =~ /[*?]/) { # separate wildcard list
+                if ($value =~ tr/*?//) { # separate wildcard list
                     $self->{freemail_temp_wc}{$value} = 1;
                 }
                 else {
@@ -246,7 +246,7 @@ sub parse_config {
                 }
             }
             else {
-                warn("invalid freemail_domains: $temp");
+                warn("freemail: invalid freemail_domains: $temp\n");
             }
         }
         $self->inhibit_further_callbacks();
@@ -260,7 +260,7 @@ sub parse_config {
                 $self->{freemail_whitelist}{$value} = 1;
             }
             else {
-                warn("invalid freemail_whitelist: $temp");
+                warn("freemail: invalid freemail_whitelist: $temp\n");
             }
         }
         $self->inhibit_further_callbacks();
@@ -298,7 +298,7 @@ sub finish_parsing_end {
             dbg("no freemail_domains entries defined, disabling plugin");
         }
         else {
-            warn("no freemail_domains entries defined, disabling plugin");
+            warn("freemail: no freemail_domains entries defined, disabling plugin\n");
         }
         $self->{freemail_available} = 0;
     }
@@ -450,7 +450,7 @@ sub check_freemail_header {
     dbg("RULE ($rulename) check_freemail_header".(defined $regex ? " regex:$regex" : ""));
 
     unless (defined $header) {
-        warn("check_freemail_header needs argument");
+        warn("freemail: check_freemail_header needs argument\n");
         return 0;
     }
 
@@ -582,7 +582,7 @@ sub check_freemail_replyto {
 
     if (defined $what) {
         if ($what ne 'replyto' and $what ne 'reply') {
-            warn("invalid check_freemail_replyto option: $what");
+            warn("freemail: invalid check_freemail_replyto option: $what\n");
             return 0;
         }
     }
