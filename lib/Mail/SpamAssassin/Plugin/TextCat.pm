@@ -459,7 +459,11 @@ sub classify {
   my @results_tag;
   foreach (@results[0..19]) {
     last unless defined $_;
-    push @results_tag, sprintf "%s:%s(%.02f)", $_, $results{$_}, $results{$_} / $best;
+    if($best != 0) {
+      push @results_tag, sprintf "%s:%s(%.02f)", $_, $results{$_}, $results{$_} / $best;
+    } else {
+      push @results_tag, sprintf "%s:%s(unknown)", $_, $results{$_};
+    }
   }
   $opts->{permsgstatus}->set_tag('TEXTCATRESULTS', join(' ', @results_tag));
 
