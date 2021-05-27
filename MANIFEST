@@ -82,6 +82,7 @@ lib/Mail/SpamAssassin/Plugin/BodyEval.pm
 lib/Mail/SpamAssassin/Plugin/BodyRuleBaseExtractor.pm
 lib/Mail/SpamAssassin/Plugin/Check.pm
 lib/Mail/SpamAssassin/Plugin/DCC.pm
+lib/Mail/SpamAssassin/Plugin/DecodeShortURLs.pm
 lib/Mail/SpamAssassin/Plugin/DKIM.pm
 lib/Mail/SpamAssassin/Plugin/DNSEval.pm
 lib/Mail/SpamAssassin/Plugin/Esp.pm
@@ -227,6 +228,8 @@ sql/awl_mysql.sql
 sql/awl_pg.sql
 sql/bayes_mysql.sql
 sql/bayes_pg.sql
+sql/decodeshorturl_mysql.sql
+sql/decodeshorturl_sqlite.sql
 sql/userpref_mysql.sql
 sql/userpref_pg.sql
 sql/txrep_mysql.sql
@@ -405,6 +408,8 @@ t/data/spam/badmime3.txt
 t/data/spam/base64.txt
 t/data/spam/bsmtp
 t/data/spam/bsmtpnull
+t/data/spam/decodeshorturl/base.eml
+t/data/spam/decodeshorturl/chain.eml
 t/data/spam/dnsbl.eml
 t/data/spam/dnsbl_domsonly.eml
 t/data/spam/dnsbl_ipsonly.eml
@@ -473,6 +478,7 @@ t/db_based_whitelist.t
 t/db_based_whitelist_ips.t
 t/dcc.t
 t/debug.t
+t/decodeshorturl.t
 t/desc_wrap.t
 t/dkim.t
 t/dnsbl.t
