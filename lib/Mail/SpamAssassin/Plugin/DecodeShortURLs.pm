@@ -384,7 +384,7 @@ sub recursive_lookup {
   my $location;
   if ($self->{caching} && ($location = $self->cache_get($short_url))) {
     dbg("Found cached $short_url => $location");
-    if($self->{url_shortner_loginfo}) {
+    if($self->{url_shortener_loginfo}) {
       info("Found cached $short_url => $location");
     } else {
       dbg("Found cached $short_url => $location");
