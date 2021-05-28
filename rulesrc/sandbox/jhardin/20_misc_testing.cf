@@ -3361,9 +3361,9 @@ score      RCVD_DOTEDU_SUSP_URI        3.000	# limit
 tflags     RCVD_DOTEDU_SUSP_URI        publish
 
 meta       __RCVD_DOTEDU_SHORT         __RCVD_DOTEDU_EXT && ( __HTML_IMG_ONLY || __BODY_URI_ONLY || __HTML_LENGTH_1024_1536 )
-meta       RCVD_DOTEDU_SHORT           __RCVD_DOTEDU_SHORT && !__FS_SUBJ_RE && !__HAS_LIST_ID 
+meta       RCVD_DOTEDU_SHORT           __RCVD_DOTEDU_SHORT && !ALL_TRUSTED && !__FS_SUBJ_RE && !__HAS_LIST_ID
 describe   RCVD_DOTEDU_SHORT           Via .edu MTA + short message
-score      RCVD_DOTEDU_SHORT           2.500	# limit
+score      RCVD_DOTEDU_SHORT           1.500	# limit
 tflags     RCVD_DOTEDU_SHORT           publish
 
 meta       __RCVD_DOTEDU_SUSP          __RCVD_DOTEDU_EXT && ( MIME_QP_LONG_LINE || __TVD_SPACE_RATIO || __FROM_RUNON || __USING_VERP1 )
