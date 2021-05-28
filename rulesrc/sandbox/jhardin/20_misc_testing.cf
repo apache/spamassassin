@@ -3322,8 +3322,8 @@ meta       __UNAME_PASSWD_PDF          ( __PASSWORD || __YOUR_PASSWORD ) && LOCA
 # .gov and .edu URIs appearing in spams, attempts to leverage whitelisting?
 uri        __URI_DOTGOV                m;^https?://(?:[^./]+\.)+gov/;i
 uri        __URI_DOTEDU                m;^https?://(?:[^./]+\.)+edu/;i
-header     __RCVD_DOTGOV_EXT           X-Spam-Relays-External =~ /\.gov\s/i
-header     __RCVD_DOTEDU_EXT           X-Spam-Relays-External =~ /\.edu\s/i
+header     __RCVD_DOTGOV_EXT           X-Spam-Relays-External =~ /\srdns=\S+\.gov\s/i
+header     __RCVD_DOTEDU_EXT           X-Spam-Relays-External =~ /\srdns=\S+\.edu\s/i
 
 meta       __DOTGOV_FREEMAIL           __URI_DOTGOV && __freemail_hdr_replyto
 #meta       __DOTGOV_MONEY              __URI_DOTGOV && ( __XFER_MONEY || __MONEY_FRAUD || __YOUR_FUND || __BENEFICIARY || __COMPENSATION || __LOTSA_MONEY_01 || __LOTSA_MONEY_04 )
