@@ -28,6 +28,11 @@ DecodeShortURLs - Expand shortened URLs
   url_shortener bit.ly
   url_shortener go.to
   ...
+  body HAS_SHORT_URL          eval:short_url()
+  describe HAS_SHORT_URL      Message contains one or more shortened URLs
+
+  body SHORT_URL_CHAINED      eval:short_url_chained()
+  describe SHORT_URL_CHAINED  Message has shortened URL chained to other shorteners
 
 =head1 DESCRIPTION
 
@@ -39,12 +44,6 @@ SpamAssassin which can then be accessed by other plug-ins, such as URIDNSBL.
 
 This plugin also sets the rule HAS_SHORT_URL if any matching short URLs are
 found.
-
-Regular 'uri' rules can be used to detect and score links disabled by the
-shortening service for abuse and URL_BITLY_BLOCKED is supplied as an example.
-It should be safe to score this rule highly on a match as experience shows
-that bit.ly only blocks access to a URL if it has seen consistent abuse and
-problem reports.
 
 This plug-in will follow 'chained' shorteners e.g.
 from short URL to short URL to short URL and finally to the real URL
@@ -58,12 +57,10 @@ which point it will fire the rule 'SHORT_URL_MAXCHAIN' and go no further.
 If a shortener returns a '404 Not Found' result for the short URL then the
 rule 'SHORT_URL_404' will be fired.
 
-If a shortener does not return an HTTP redirect, then a dynamic rule will
-be fired: 'SHORT_C<SHORTENER>_C<CODE>' where C<SHORTENER> is the uppercase
-name of the shortener with dots converted to underscores.  e.g.:
-'SHORT_T_CO_200' This is to handle the case of t.co which now returns an
-HTTP 200 and an abuse page instead of redirecting to an abuse page like
-every other shortener does...
+If a shortener returns a '200 OK' result for the short URL then the
+rule 'SHORT_URL_200' will be fired.
+
+This can cover the case when an abuse page is displayed.
 
 =head1 NOTES
 
@@ -85,7 +82,7 @@ could not have been developed without his code.
 
 package Mail::SpamAssassin::Plugin::DecodeShortURLs;
 
-my $VERSION = 0.11;
+my $VERSION = 0.12;
 
 use Mail::SpamAssassin::Plugin;
 use strict;
@@ -124,7 +121,12 @@ sub new {
 
   $self->set_config($mailsaobject->{conf});
   $self->register_method_priority ('check_dnsbl', -10);
-  $self->register_eval_rule('short_url_tests');
+  $self->register_eval_rule('short_url');
+  $self->register_eval_rule('short_url_200');
+  $self->register_eval_rule('short_url_404');
+  $self->register_eval_rule('short_url_chained');
+  $self->register_eval_rule('short_url_maxchain');
+  $self->register_eval_rule('short_url_loop');
 
   return $self;
 }
@@ -313,6 +315,42 @@ sub _connect_dbi_cache {
   }
 }
 
+sub short_url {
+  my ($self, $opts) = @_;
+
+  return $self->{short_url};
+}
+
+sub short_url_200 {
+  my ($self, $opts) = @_;
+
+  return $self->{short_url_200};
+}
+
+sub short_url_404 {
+  my ($self, $opts) = @_;
+
+  return $self->{short_url_404};
+}
+
+sub short_url_chained {
+  my ($self, $opts) = @_;
+
+  return $self->{short_url_chained};
+}
+
+sub short_url_maxchain {
+  my ($self, $opts) = @_;
+
+  return $self->{short_url_maxchain};
+}
+
+sub short_url_loop {
+  my ($self, $opts) = @_;
+
+  return $self->{short_url_loop};
+}
+
 sub check_dnsbl {
   my ($self, $opts) = @_;
   my $pms = $opts->{permsgstatus};
@@ -377,7 +415,7 @@ sub recursive_lookup {
   if ($count >= 10) {
     dbg("Error: more than 10 shortener redirections");
     # Fire test
-    $pms->got_hit('SHORT_URL_MAXCHAIN');
+    $self->{short_url_maxchain} = 1;
     return undef;
   }
 
@@ -393,16 +431,8 @@ sub recursive_lookup {
     my $response = $self->{ua}->head($short_url);
     if (!$response->is_redirect) {
       dbg("URL is not redirect: $short_url = ".$response->status_line);
-      if ((my ($domain) = ($short_url =~ /^https?:\/\/(\S+)\//))) {
-          if (exists $self->{url_shorteners}->{$domain}) {
-              $domain =~ s/\./_/g;
-              $domain = uc($domain);
-              my $h = 'SHORT_' . $domain . '_' . $response->code;
-              dbg("hit rule: $h");
-              $pms->got_hit($h);
-          }
-      }
-      $pms->got_hit('SHORT_URL_404') if($response->code == '404');
+      $self->{short_url_200} = 1 if($response->code == '200');
+      $self->{short_url_404} = 1 if($response->code == '404');
       return undef;
     }
     $location = $response->headers->{location};
@@ -418,12 +448,12 @@ sub recursive_lookup {
   }
 
   # At this point we have a new URL in $response
-  $pms->got_hit('HAS_SHORT_URL');
+  $self->{short_url} = 1;
   $pms->add_uri_detail_list($location);
 
   # Set chained here otherwise we might mark a disabled page or
   # redirect back to the same host as chaining incorrectly.
-  $pms->got_hit('SHORT_URL_CHAINED') if $count > 0;
+  $self->{short_url_chained} = 1 if $count > 0;
 
   # Check if we are being redirected to a local page
   # Don't recurse in this case...
@@ -440,7 +470,7 @@ sub recursive_lookup {
     if (exists $been_here{$location}) {
       # Loop detected
       dbg("Error: loop detected");
-      $pms->got_hit('SHORT_URL_LOOP');
+      $self->{short_url_loop} = 1;
       return $location;
     } else {
       if (exists $self->{url_shorteners}->{$domain}) {
@@ -453,11 +483,6 @@ sub recursive_lookup {
 
   # No recursion; just return the final location...
   return $location;
-}
-
-sub short_url_tests {
-  # Set by parsed_metadata
-  return 0;
 }
 
 sub cache_add {

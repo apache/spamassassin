@@ -17,10 +17,10 @@ url_shortener bit.ly
 url_shortener tinyurl.com
 
 ifplugin Mail::SpamAssassin::Plugin::DecodeShortURLs
-  body HAS_SHORT_URL              eval:short_url_tests()
+  body HAS_SHORT_URL              eval:short_url()
   describe HAS_SHORT_URL          Message contains one or more shortened URLs
 
-  body SHORT_URL_CHAINED          eval:short_url_tests()
+  body SHORT_URL_CHAINED          eval:short_url_chained()
   describe SHORT_URL_CHAINED      Message has shortened URL chained to other shorteners
 endif
 ");
