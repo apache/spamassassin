@@ -67,7 +67,7 @@ every other shortener does...
 
 =head1 NOTES
 
-This plugin runs the parsed_metadata hook with a priority of -1 so that
+This plugin runs the check_dnsbl hook with a priority of -10 so that
 it may modify the parsed URI list prior to the URIDNSBL plugin which
 runs as priority 0.
 
@@ -94,13 +94,11 @@ use warnings;
 use vars qw(@ISA);
 @ISA = qw(Mail::SpamAssassin::Plugin);
 
-use constant HAS_LWP_USERAGENT => eval { local $SIG{'__DIE__'}; require LWP::UserAgent; };
-use constant HAS_DBI => eval { local $SIG{'__DIE__'}; require DBI; };
+use constant HAS_LWP_USERAGENT => eval { require LWP::UserAgent; };
+use constant HAS_DBI => eval { require DBI; };
 
-sub dbg {
-  my $msg = shift;
-  return Mail::SpamAssassin::Logger::dbg("DecodeShortURLs: $msg");
-}
+sub dbg { return Mail::SpamAssassin::Logger::dbg("DecodeShortURLs: @_"); }
+sub info { return Mail::SpamAssassin::Logger::info("DecodeShortURLs: @_"); }
 
 sub new {
   my $class = shift;
@@ -125,7 +123,7 @@ sub new {
   }
 
   $self->set_config($mailsaobject->{conf});
-  $self->register_method_priority ('parsed_metadata', -1);
+  $self->register_method_priority ('check_dnsbl', -10);
   $self->register_eval_rule('short_url_tests');
 
   return $self;
@@ -300,7 +298,12 @@ sub _connect_dbi_cache {
   if ($self->{url_shortener_dbi_cache} && HAS_DBI) {
     eval {
       local $SIG{'__DIE__'};
-      $self->{dbh} = DBI->connect_cached($self->{url_shortener_cache_dsn},$self->{url_shortener_cache_username},$self->{url_shortener_cache_password}, {RaiseError => 1, PrintError => 0, InactiveDestroy => 1}) or die $!;
+      $self->{dbh} = DBI->connect_cached(
+        $self->{url_shortener_cache_dsn},
+        $self->{url_shortener_cache_username},
+        $self->{url_shortener_cache_password},
+        {RaiseError => 1, PrintError => 0, InactiveDestroy => 1}
+      ) or die $!;
     };
     if ($@) {
       dbg("warn: $@");
@@ -310,15 +313,12 @@ sub _connect_dbi_cache {
   }
 }
 
-sub parsed_metadata {
+sub check_dnsbl {
   my ($self, $opts) = @_;
   my $pms = $opts->{permsgstatus};
   my $msg = $opts->{msg};
 
   return if $self->{disabled};
-
-  dbg ('warn: get_uri_detail_list() has been called already')
-    if exists $pms->{uri_detail_list};
 
   # don't keep dereferencing these
   $self->{url_shorteners} = $pms->{main}->{conf}->{url_shorteners};
@@ -359,11 +359,11 @@ sub parsed_metadata {
   my $count = scalar keys %short_urls;
   return undef unless $count gt 0;
 
-  initialise_url_shortener_cache($self, $opts) if defined $self->{url_shortener_cache_type};
+  $self->initialise_url_shortener_cache($opts) if defined $self->{url_shortener_cache_type};
 
   my $max_short_urls = $pms->{main}->{conf}->{max_short_urls};
   foreach my $short_url (keys %short_urls) {
-    next if ($max_short_urls le 0);
+    next if $max_short_urls <= 0;
     my $location = $self->recursive_lookup($short_url, $pms);
     $max_short_urls--;
   }
@@ -383,8 +383,7 @@ sub recursive_lookup {
 
   my $location;
   if ($self->{caching} && ($location = $self->cache_get($short_url))) {
-    dbg("Found cached $short_url => $location");
-    if($self->{url_shortener_loginfo}) {
+    if ($self->{url_shortener_loginfo}) {
       info("Found cached $short_url => $location");
     } else {
       dbg("Found cached $short_url => $location");
@@ -424,7 +423,7 @@ sub recursive_lookup {
 
   # Set chained here otherwise we might mark a disabled page or
   # redirect back to the same host as chaining incorrectly.
-  $pms->got_hit('SHORT_URL_CHAINED') if ($count gt 0);
+  $pms->got_hit('SHORT_URL_CHAINED') if $count > 0;
 
   # Check if we are being redirected to a local page
   # Don't recurse in this case...

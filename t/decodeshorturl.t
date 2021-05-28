@@ -13,8 +13,6 @@ loadplugin Mail::SpamAssassin::Plugin::DecodeShortURLs
 ");
 
 tstprefs("
-$default_cf_lines
-
 url_shortener bit.ly
 url_shortener tinyurl.com
 
