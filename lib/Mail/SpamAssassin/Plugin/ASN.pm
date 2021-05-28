@@ -573,6 +573,7 @@ sub check_asn {
   my ($self, $pms, $re) = @_;
 
   my $rulename = $pms->get_current_eval_rule_name();
+  $pms->rule_pending($rulename); # mark async
 
   if (!defined $re) {
     warn "asn: rule $rulename eval argument missing\n";
@@ -596,6 +597,8 @@ sub check_asn {
 
 sub _check_asn {
   my ($self, $pms, $rulename, $rec) = @_;
+
+  $pms->rule_ready($rulename); # mark rule ready for metas
 
   my $asn = $pms->get_tag('ASN');
   return if !defined $asn;

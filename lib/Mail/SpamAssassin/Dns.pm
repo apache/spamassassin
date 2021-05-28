@@ -311,27 +311,8 @@ sub check_subtest {
   return 0;
 }
 
-sub harvest_until_rule_completes {
-  my ($self, $rule) = @_;
-
-  dbg("dns: harvest_until_rule_completes");
-  my $result = 0;
-
-  for (my $first=1;  ; $first=0) {
-    # complete_lookups() may call completed_callback(), which may
-    # call start_lookup() again (like in Plugin::URIDNSBL)
-    my ($alldone,$anydone) =
-      $self->{async}->complete_lookups($first ? 0 : 1.0,  1);
-
-    $result = 1  if $self->is_rule_complete($rule);
-    last  if $result || $alldone;
-
-    dbg("dns: harvest_until_rule_completes - check_tick");
-    $self->{main}->call_plugins ("check_tick", { permsgstatus => $self });
-  }
-
-  return $result;
-}
+# Deprecated since 4.0, meta rules do not depend on priorities anymore
+sub harvest_until_rule_completes {}
 
 sub harvest_dnsbl_queries {
   my ($self) = @_;
@@ -702,16 +683,19 @@ sub cleanup_kids {
 sub register_async_rule_start {}
 sub register_async_rule_finish {}
 sub mark_all_async_rules_complete {}
+sub is_rule_complete {}
 
-sub is_rule_complete {
+# Return number of pending lookups for a rule,
+# or list all of rules still pending
+sub get_pending_lookups {
   my ($self, $rule) = @_;
-
-  return 1 if !exists $self->{async}->{pending_rules}{$rule};
-  return 1 if !%{$self->{async}->{pending_rules}{$rule}};
-  return 1 if $self->{tests_already_hit}->{$rule};
-
-  dbg("dns: $rule is not complete yet");
-  return 0;
+  if (defined $rule) {
+    return 0 if !exists $self->{async}->{pending_rules}{$rule};
+    return scalar keys %{$self->{async}->{pending_rules}{$rule}};
+  } else {
+    return grep { %{$self->{async}->{pending_rules}{$_}} }
+             keys %{$self->{async}->{pending_rules}};
+  }
 }
 
 ###########################################################################

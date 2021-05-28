@@ -324,6 +324,7 @@ sub check_pyzor {
   ## forking method
 
   $pms->{pyzor_rulename} = $pms->get_current_eval_rule_name();
+  $pms->rule_pending($pms->{pyzor_rulename}); # mark async
 
   # create socketpair for communication
   $pms->{pyzor_backchannel} = Mail::SpamAssassin::SubProcBackChannel->new();
@@ -501,6 +502,8 @@ sub _check_forked_result {
     delete $pms->{pyzor_backchannel};
     return 0;
   }
+
+  $pms->rule_ready($pms->{pyzor_rulename}); # mark rule ready for metas
 
   dbg("pyzor: child process $kid_pid finished, reading results");
 

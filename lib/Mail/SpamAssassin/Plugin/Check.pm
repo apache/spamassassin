@@ -28,9 +28,6 @@ use Mail::SpamAssassin::Constants qw(:sa);
 
 our @ISA = qw(Mail::SpamAssassin::Plugin);
 
-my $ARITH_EXPRESSION_LEXER = ARITH_EXPRESSION_LEXER;
-my $META_RULES_MATCHING_RE = META_RULES_MATCHING_RE;
-
 # methods defined by the compiled ruleset; deleted in finish_tests()
 our @TEMPORARY_METHODS;
 
@@ -97,6 +94,10 @@ sub check_main {
       $master_deadline - time)  if $master_deadline;
 
   my @uris = $pms->get_uri_list();
+
+  # initialize meta stuff
+  $pms->{meta_pending} = {};
+  $pms->{meta_pending}->{$_} = 1 foreach (keys %{$pms->{conf}->{meta_tests}});
 
   # Make sure priority -100 exists for launching DNS
   $pms->{conf}->{priorities}->{-100} ||= 1 if $do_dns;
@@ -176,14 +177,13 @@ sub check_main {
     $pms->harvest_completed_queries() if $rbls_running;
     last if $pms->{deadline_exceeded} || $pms->{shortcircuited};
 
-    $self->do_meta_tests($pms, $priority);
-    $pms->harvest_completed_queries() if $rbls_running;
-    last if $pms->{deadline_exceeded} || $pms->{shortcircuited};
-
     # we may need to call this more often than once through the loop, but
     # it needs to be done at least once, either at the beginning or the end.
     $self->{main}->call_plugins ("check_tick", { permsgstatus => $pms });
     $pms->harvest_completed_queries() if $rbls_running;
+
+    # check for ready metas
+    $self->do_meta_tests($pms, $priority);
   }
 
   # Finish DNS results
@@ -205,6 +205,12 @@ sub check_main {
   undef $bodytext;
   undef $fulltext;
 
+  # last chance to handle left callbacks, make rule hits etc
+  $self->{main}->call_plugins ("check_cleanup", { permsgstatus => $pms });
+
+  # final check for ready metas
+  $self->finish_meta_tests($pms);
+
   # check dns_block_rule (bug 6728)
   # TODO No idea yet what would be the most logical place to do all these..
   if ($pms->{conf}->{dns_block_rule}) {
@@ -222,8 +228,7 @@ sub check_main {
     }
   }
 
-  # last chance to handle left callbacks, make rule hits etc
-  $self->{main}->call_plugins ("check_cleanup", { permsgstatus => $pms });
+  # PMS cleanup will write reports etc, all rule hits must be registered by now
   $pms->check_cleanup();
 
   if ($pms->{deadline_exceeded}) {
@@ -259,6 +264,113 @@ sub finish_tests {
     undef &{$method};
   }
   @TEMPORARY_METHODS = ();      # clear for next time
+}
+
+###########################################################################
+
+sub do_meta_tests {
+  my ($self, $pms, $priority) = @_;
+
+  # Needed for Reuse to work, otherwise we don't care about priorities
+  if ($self->{main}->have_plugin('start_rules')) {
+    $self->{main}->call_plugins('start_rules', {
+      permsgstatus => $pms,
+      ruletype => 'meta',
+      priority => $priority
+    });
+  }
+
+  return if $self->{am_compiling}; # nothing to compile here
+
+  my $mp = $pms->{meta_pending};
+  my $tp = $pms->{tests_pending};
+  my $md = $pms->{conf}->{meta_dependencies};
+  my $mt = $pms->{conf}->{meta_tests};
+  my $h = $pms->{tests_already_hit};
+  my $retry;
+
+  # Get pending async rule list
+  my %pl = map { $_ => 1 } $pms->get_pending_lookups();
+
+RULE:
+  foreach my $rulename (keys %$mp) {
+    # Meta is not ready if some dependency has not run yet
+    foreach my $deprule (@{$md->{$rulename}||[]}) {
+      if (!exists $h->{$deprule} || $tp->{$deprule} || $pl{$deprule}) {
+        next RULE;
+      }
+    }
+    # Metasubs look like ($_[0]->{$rulename}||($_[1]->{$rulename}?1:0)) ...
+    my $result = $mt->{$rulename}->($pms, $h, {});
+    if ($result) {
+      dbg("rules: ran meta rule $rulename ======> got hit ($result)");
+      $pms->got_hit($rulename, '', ruletype => 'meta', value => $result);
+    } else {
+      dbg("rules-all: ran meta rule $rulename, no hit") if $would_log_rules_all;
+      $h->{$rulename} = 0; # mark meta done
+    }
+    delete $mp->{$rulename};
+    # Reiterate all metas again, in case some meta depended on us
+    $retry = 1;
+  }
+
+  goto RULE if $retry--;
+}
+
+sub finish_meta_tests {
+  my ($self, $pms) = @_;
+
+  return if $self->{am_compiling}; # nothing to compile here
+
+  my $mp = $pms->{meta_pending};
+  my $md = $pms->{conf}->{meta_dependencies};
+  my $mt = $pms->{conf}->{meta_tests};
+  my $h = $pms->{tests_already_hit};
+  my $retry;
+  my %unrun_metas;
+
+RULE:
+  foreach my $rulename (keys %$mp) {
+    my %unrun;
+    # Meta is not ready if some dependency has not run yet
+    foreach my $deprule (@{$md->{$rulename}||[]}) {
+      if (!exists $h->{$deprule}) {
+        # Record all unrun deps for second meta evaluation
+        $unrun{$deprule} = 1;
+      }
+    }
+    # Metasubs look like ($_[0]->{$rulename}||($_[1]->{$rulename}?1:0)) ...
+    my $result = $mt->{$rulename}->($pms, $h, {});
+    my $result2 = $result;
+    if (%unrun) {
+      # Evaluate all unrun rules as true using %unrun list
+      $result2 = $mt->{$rulename}->($pms, $h, \%unrun);
+    }
+    # Evaluated second time with all unrun rules as true.  If result is not
+    # the same, we can't safely finish the meta. (Bug 7735)
+    if ($result != $result2) {
+      $unrun_metas{$rulename} = \%unrun  if $would_log_rules_all;
+      next RULE;
+    } elsif ($result) {
+      dbg("rules: ran meta rule $rulename ======> got hit ($result)");
+      $pms->got_hit($rulename, '', ruletype => 'meta', value => $result);
+    } else {
+      dbg("rules-all: ran meta rule $rulename, no hit") if $would_log_rules_all;
+      $h->{$rulename} = 0; # mark meta done
+    }
+    delete $mp->{$rulename};
+    # Reiterate all metas again, in case some meta depended on us
+    $retry = 1;
+  }
+
+  goto RULE if $retry--;
+
+  if ($would_log_rules_all && %unrun_metas) {
+    foreach (sort keys %unrun_metas) {
+      dbg("rules-all: unrun dependencies prevented meta $_ from running: ".
+          join(', ', sort keys %{$unrun_metas{$_}}));
+    }
+  }
 }
 
 ###########################################################################
@@ -346,6 +458,7 @@ sub run_generic_tests {
         # start_rules_plugin_code '.$ruletype.' '.$priority.'
         my $scoresptr = $self->{conf}->{scores};
         my $qrptr = $self->{conf}->{test_qrs};
+        my $hitsptr = $self->{tests_already_hit};
     ');
     if (defined $opts{pre_loop_body}) {
       $opts{pre_loop_body}->($self, $pms, $conf, %nopts);
@@ -529,170 +642,6 @@ sub add_temporary_method {
 
 ###########################################################################
 
-# Returns all rulenames matching glob (FOO_*)
-sub expand_ruleglob {
-  my ($self, $ruleglob, $pms, $conf, $rulename) = @_;
-  my $expanded;
-  if (exists $pms->{ruleglob_cache}{$ruleglob}) {
-    $expanded = $pms->{ruleglob_cache}{$ruleglob};
-  } else {
-    my $reglob = $ruleglob;
-    $reglob =~ s/\?/./g;
-    $reglob =~ s/\*/.*?/g;
-    # Glob rules, but do not match ourselves..
-    my @rules = grep {/^${reglob}$/ && $_ ne $rulename} keys %{$conf->{scores}};
-    if (@rules) {
-      $expanded = join('+', sort @rules);
-    } else {
-      $expanded = '0';
-    }
-  }
-  my $logstr = $expanded eq '0' ? 'no matches' : $expanded;
-  dbg("rules: meta $rulename rules_matching($ruleglob) expanded: $logstr");
-  $pms->{ruleglob_cache}{$ruleglob} = $expanded;
-  return " ($expanded) ";
-};
-
-sub do_meta_tests {
-  my ($self, $pms, $priority) = @_;
-  my (%rule_deps, %meta, $rulename);
-
-  $self->run_generic_tests ($pms, $priority,
-    consttype => $Mail::SpamAssassin::Conf::TYPE_META_TESTS,
-    type => 'meta',
-    testhash => $pms->{conf}->{meta_tests},
-    args => [ ],
-    loop_body => sub
-  {
-    my ($self, $pms, $conf, $rulename, $rule, %opts) = @_;
-
-    # Expand meta rules_matching() before lexing
-    $rule =~ s/${META_RULES_MATCHING_RE}/$self->expand_ruleglob($1,$pms,$conf,$rulename)/ge;
-
-    # Lex the rule into tokens using a rather simple RE method ...
-    my @tokens = ($rule =~ /$ARITH_EXPRESSION_LEXER/og);
-
-    # Set the rule blank to start
-    $meta{$rulename} = "";
-
-    # List dependencies that are meta tests in the same priority band
-    $rule_deps{$rulename} = [ ];
-
-    # Go through each token in the meta rule
-    foreach my $token (@tokens) {
-
-      # ... rulename?
-      if ($token =~ IS_RULENAME) {
-        # the " || 0" formulation is to avoid "use of uninitialized value"
-        # warnings; this is better than adding a 0 to a hash for every
-        # rule referred to in a meta...
-        $meta{$rulename} .= "(\$h->{'$token'}||0) ";
-      
-        if (!exists $conf->{scores}->{$token}) {
-          dbg("rules: meta test $rulename has undefined dependency '$token'");
-        }
-        elsif ($conf->{scores}->{$token} == 0) {
-          # bug 5040: net rules in a non-net scoreset
-          # there are some cases where this is expected; don't warn
-          # in those cases.
-          unless ((($conf->get_score_set()) & 1) == 0 &&
-              ($conf->{tflags}->{$token}||'') =~ /\bnet\b/)
-          {
-            info("rules: meta test $rulename has dependency '$token' with a zero score");
-          }
-        }
-
-        # If the token is another meta rule, add it as a dependency
-        push (@{ $rule_deps{$rulename} }, $token)
-          if (exists $conf->{meta_tests}->{$opts{priority}}->{$token});
-      } else {
-        # ... number or operator
-        $meta{$rulename} .= "$token ";
-      }
-    }
-  },
-    pre_loop_body => sub
-  {
-    my ($self, $pms, $conf, %opts) = @_;
-    $self->push_evalstr_prefix($pms, '
-      my $r;
-      my $h = $self->{tests_already_hit};
-    ');
-  },
-    post_loop_body => sub
-  {
-    my ($self, $pms, $conf, %opts) = @_;
-
-    # Sort by length of dependencies list.  It's more likely we'll get
-    # the dependencies worked out this way.
-    my @metas = sort { @{ $rule_deps{$a} } <=> @{ $rule_deps{$b} } }
-                keys %{$conf->{meta_tests}->{$opts{priority}}};
-
-    my $count;
-    my $tflags = $conf->{tflags};
-
-    # Now go ahead and setup the eval string
-    do {
-      $count = $#metas;
-      my %metas = map { $_ => 1 } @metas; # keep a small cache for fast lookups
-
-      # Go through each meta rule we haven't done yet
-      for (my $i = 0 ; $i <= $#metas ; $i++) {
-
-        # If we depend on meta rules that haven't run yet, skip it
-        next if (grep( $metas{$_}, @{ $rule_deps{ $metas[$i] } }));
-
-        # If we depend on network tests, call ensure_rules_are_complete()
-        # to block until they are
-        if (!defined $conf->{meta_dependencies}->{ $metas[$i] }) {
-          warn "no meta_dependencies defined for $metas[$i]";
-        }
-        my $alldeps = join ' ', grep {
-                ($tflags->{$_}||'') =~ /\bnet\b/
-              } split (' ', $conf->{meta_dependencies}->{ $metas[$i] } );
-
-        if ($alldeps ne '') {
-          $self->add_evalstr($pms, '
-            $self->ensure_rules_are_complete(q{'.$metas[$i].'}, qw{'.$alldeps.'});
-          ');
-        }
-
-        # conditionally include the dbg in the eval str
-        my $dbgstr = '';
-        if (would_log('dbg')) {
-          $dbgstr = 'dbg("rules: ran meta rule '.$metas[$i].' ======> got hit");';
-        }
-
-        # Add this meta rule to the eval line
-        $self->add_evalstr($pms, '
-          $r = '.$meta{$metas[$i]}.';
-          if ($r) { $self->got_hit(q#'.$metas[$i].'#, "", ruletype => "meta", value => $r); '.$dbgstr.' }
-        ');
-
-        splice @metas, $i--, 1;    # remove this rule from our list
-      }
-    } while ($#metas != $count && $#metas > -1); # run until we can't go anymore
-
-    # If there are any rules left, we can't solve the dependencies so complain
-    my %metas = map { $_ => 1 } @metas; # keep a small cache for fast lookups
-    foreach my $rulename_t (@metas) {
-      $pms->{rule_errors}++; # flag to --lint that there was an error ...
-      my $msg =
-          "rules: excluding meta test $rulename_t, unsolved meta dependencies: " .
-              join(", ", grep($metas{$_}, @{ $rule_deps{$rulename_t} }));
-      if ($self->{main}->{lint_rules}) {
-        warn $msg."\n";
-      }
-      else {
-        info($msg);
-      }
-    }
-  }
-  );
-}
-
-###########################################################################
-
 sub do_head_tests {
   my ($self, $pms, $priority) = @_;
   # hash to hold the rules, "header\tdefault value" => rulename
@@ -787,6 +736,7 @@ sub do_head_tests {
 
           $self->add_evalstr($pms, '
           if ($scoresptr->{q{'.$rulename.'}}) {
+            $hitsptr->{q{'.$rulename.'}} ||= 0;
             '.$posline.'
             '.$self->hash_line_for_rule($pms, $rulename).'
             '.$ifwhile.' ('.$expr.') {
@@ -880,6 +830,7 @@ sub do_body_tests {
 
     $self->add_evalstr($pms, '
       if ($scoresptr->{q{'.$rulename.'}}) {
+        $hitsptr->{q{'.$rulename.'}} ||= 0;
         '.$sub.'
         '.$self->ran_rule_plugin_code($rulename, "body").'
       }
@@ -941,6 +892,7 @@ sub do_uri_tests {
 
     $self->add_evalstr($pms, '
       if ($scoresptr->{q{'.$rulename.'}}) {
+        $hitsptr->{q{'.$rulename.'}} ||= 0;
         '.$sub.'
         '.$self->ran_rule_plugin_code($rulename, "uri").'
       }
@@ -1001,6 +953,7 @@ sub do_rawbody_tests {
 
     $self->add_evalstr($pms, '
       if ($scoresptr->{q{'.$rulename.'}}) {
+        $hitsptr->{q{'.$rulename.'}} ||= 0;
         '.$sub.'
         '.$self->ran_rule_plugin_code($rulename, "rawbody").'
       }
@@ -1037,6 +990,7 @@ sub do_full_tests {
     $max ||= 0;
     $self->add_evalstr($pms, '
       if ($scoresptr->{q{'.$rulename.'}}) {
+        $hitsptr->{q{'.$rulename.'}} ||= 0;
         pos $$fullmsgref = 0;
         '.$self->hash_line_for_rule($pms, $rulename).'
         dbg("rules-all: running full rule %s", q{'.$rulename.'});
@@ -1193,6 +1147,7 @@ sub run_eval_tests {
 
     $evalstr .= '
     if ($scoresptr->{q{'.$rulename.'}}) {
+      $hitsptr->{q{'.$rulename.'}} ||= 0;
       $rulename = q#'.$rulename.'#;
 ';
  
@@ -1254,6 +1209,7 @@ sub run_eval_tests {
 
     my \$testptr = \$self->{conf}->{$evalname}->{$priority};
     my \$scoresptr = \$self->{conf}->{scores};
+    my \$hitsptr = \$self->{tests_already_hit};
     my \$prepend2desc = q#$prepend2desc#;
     my \$rulename;
     my \$result;
@@ -1400,6 +1356,18 @@ sub free_ruleset_source {
   if (exists $pms->{conf}->{$type.'_tests'}->{$pri}) {
     delete $pms->{conf}->{$type.'_tests'}->{$pri};
   }
+}
+
+###########################################################################
+
+sub compile_now_start {
+  my ($self, $params) = @_;
+  $self->{am_compiling} = 1;
+}
+
+sub compile_now_finish {
+  my ($self, $params) = @_;
+  delete $self->{am_compiling};
 }
 
 ###########################################################################

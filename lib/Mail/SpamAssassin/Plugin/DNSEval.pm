@@ -394,6 +394,8 @@ sub check_rbl_backend {
     return 0;
   }
 
+  $pms->rule_pending($rule); # mark async
+
   dbg("dnseval: only inspecting the following IPs: ".join(", ", @ips));
 
   foreach my $ip (@ips) {
@@ -426,7 +428,9 @@ sub check_rbl_txt {
 }
 
 sub check_rbl_sub {
+  my ($self, $pms, $rule, $set, $subtest) = @_;
   # just a dummy, check_start / init_rbl_subs handles the subs
+  $pms->rule_pending($rule); # mark async
   return 0;
 }
 
@@ -437,6 +441,8 @@ sub check_rbl_from_host {
 
   return 0 if $self->{main}->{conf}->{skip_rbl_checks};
   return 0 if !$pms->is_dns_available();
+
+  $pms->rule_pending($rule); # mark async
 
   $self->_check_rbl_addresses($pms, $rule, $set, $rbl_server,
     $subtest, $pms->all_from_addrs());
@@ -701,6 +707,8 @@ sub check_dns_sender {
   $host = idn_to_ascii($host);
   dbg("dnseval: checking A and MX for host $host");
 
+  $pms->rule_pending($rule); # mark async
+
   $self->do_sender_lookup($pms, $rule, 'A', $host);
   $self->do_sender_lookup($pms, $rule, 'MX', $host);
 
@@ -717,7 +725,8 @@ sub do_sender_lookup {
   $pms->{async}->bgsend_and_start_lookup(
     $host, $type, undef, $ent, sub {
       my ($ent, $pkt) = @_;
-      return if !$pkt;
+      return if !$pkt; # aborted / timed out
+      $pms->rule_ready($ent->{rulename}); # mark as run, could still hit
       foreach my $answer ($pkt->answer) {
         next if !$answer;
         next if $answer->type ne 'A' && $answer->type ne 'MX';

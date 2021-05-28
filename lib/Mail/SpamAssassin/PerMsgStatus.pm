@@ -294,6 +294,7 @@ sub new {
     'subtest_names_hit' => [ ],
     'spamd_result_log_items' => [ ],
     'tests_already_hit' => { },
+    'tests_pending'     => { },
     'get_cache'         => { },
     'tag_data'          => { },
     'rule_errors'       => 0,
@@ -2862,32 +2863,8 @@ sub add_uri_detail_list {
 
 ###########################################################################
 
-sub ensure_rules_are_complete {
-  my $self = shift;
-  my $metarule = shift;
-  # @_ is now the list of rules
-
-  foreach my $r (@_) {
-    # dbg("rules: meta rule depends on net rule $r");
-    next if ($self->is_rule_complete($r));
-
-    dbg("rules: meta rule $metarule depends on pending rule $r, blocking");
-    my $timer = $self->{main}->time_method("wait_for_pending_rules");
-
-    my $start = time;
-    $self->harvest_until_rule_completes($r);
-    my $elapsed = sprintf "%.2f", time - $start;
-
-    if (!$self->is_rule_complete($r)) {
-      dbg("rules: rule $r is still not complete; exited early?");
-    }
-    elsif ($elapsed > 0) {
-      my $txt = "rules: $r took $elapsed seconds to complete, for $metarule";
-      # Info only if something took over 1 sec to wait, prevent log flood
-      if ($elapsed >= 1) { info($txt); } else { dbg($txt); }
-    }
-  }
-}
+# Deprecated since 4.0, meta rules do not depend on priorities anymore
+sub ensure_rules_are_complete {}
 
 ###########################################################################
 
@@ -3134,16 +3111,52 @@ sub got_hit {
             $params{ruletype},
             $rule_descr);
 
-  # take care of duplicate rules, too (bug 5206)
-  # ... removed as it's buggy
-  #my $dups = $conf_ref->{duplicate_rules}->{$rule};
-  #if ($dups && @{$dups}) {
-  #  foreach my $dup (@{$dups}) {
-  #    $self->got_hit($dup, $area, %params);
-  #  }
-  #}
-
   return 1;
+}
+
+=item $status->rule_pending ($rulename)
+
+Register a pending rule.  Must be called from rules eval-function, if the
+result can arrive later than when exiting the function (async lookups).
+
+$status->rule_done($rulename) or $status->got_hit(...) must be called when
+the result has arrived.  If these are not used, it can break depending meta
+rule evaluation.
+
+=cut
+
+sub rule_pending {
+  my ($self, $rule) = @_;
+
+  $self->{tests_pending}->{$rule} = 1;
+
+  if (exists $self->{tests_already_hit}->{$rule}) {
+    # Only clear result if not hit
+    if ($self->{tests_already_hit}->{$rule} == 0) {
+      delete $self->{tests_already_hit}->{$rule};
+    }
+  }
+}
+
+=item $status->rule_ready ($rulename)
+
+Mark a previously marked $status->rule_pending() rule ready.  Alternatively
+$status->got_hit() will also mark rule ready.  If these are not used, it can
+break depending meta rule evaluation.
+
+=cut
+
+sub rule_ready {
+  my ($self, $rule) = @_;
+
+  if ($self->get_pending_lookups($rule)) {
+    # Can't be ready if there are pending lookups, ignore for now.
+    # Final do_meta_tests() in Check.pm will allow pending anyway.
+    return;
+  }
+
+  delete $self->{tests_pending}->{$rule};
+  $self->{tests_already_hit}->{$rule} ||= 0;
 }
 
 ###########################################################################

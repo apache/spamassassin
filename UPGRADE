@@ -2,6 +2,16 @@
 Note for Users Upgrading to SpamAssassin 4.0.0
 ----------------------------------------------
 
+- Meta rules no longer use priority values, they are evaluated dynamically
+  when the rules they depend on are finished.  (Bug 7735)
+
+- API: New $pms->rule_pending() and $pms->rule_ready() functions. 
+  $pms->rule_pending($rulename) must be called from rules eval-function, if
+  the result can arrive later than when exiting the function (async
+  lookups).  $pms->rule_ready($rulename) or $pms->got_hit(...) must be
+  called when the result has arrived.  If these are not used, it can break
+  depending meta rule evaluation.
+
 - Improved internal header address (From/To/Cc) parser, now also handles
   multiple addresses.  Optional support for external Email::Address::XS
   parser, which can handle nested comments and other oddities.
@@ -92,12 +102,14 @@ Note for Users Upgrading to SpamAssassin 4.0.0
   pyzor_max setting to pyzor_count_min.  Added pyzor_whitelist_min and
   pyzor_whitelist_factor setting.  Also try to ignore "empty body" FPs.
 
-- API: deprecated register_async_rule_start/finish calls (they can be left
-  in code for backwards compatibility).  Plugins should only use
-  bgsend_and_start_lookup which handles required things automatically
-  (direct calls to bgsend or start_lookup should not be used),
-  bgsend_and_start_lookup should always contain $ent->{rulename} for correct
-  meta dependency handling. Deprecated also start_lookup, get_lookup, lookup_ns.
+- API: deprecated $pms->register_async_rule_start() and
+  $pms->register_async_rule_finish() calls (they can be left in code for
+  backwards compatibility).  Plugins should only use
+  $pms->bgsend_and_start_lookup() which handles required things
+  automatically (direct calls to bgsend or start_lookup should not be used). 
+  $pms->bgsend_and_start_lookup() should always contain $ent->{rulename} for
+  correct meta dependency handling.  Deprecated also start_lookup,
+  get_lookup, lookup_ns, harvest_until_rule_completes, is_rule_complete.
 
 - SPF: Mail::SPF is now only supported.  Mail::SPF::Query use is deprecated,
   along with settings do_not_use_mail_spf, do_not_use_mail_spf_query.  SPF

@@ -444,6 +444,8 @@ sub check_hashbl_emails {
     $seen{$email} = 1;
   }
 
+  return 0 unless @filtered_emails;
+
   # Randomize order
   if ($opts =~ /\bshuffle\b/) {
     Mail::SpamAssassin::Util::fisher_yates_shuffle(\@filtered_emails);
@@ -452,6 +454,8 @@ sub check_hashbl_emails {
   # Truncate list
   my $max = $opts =~ /\bmax=(\d+)\b/ ? $1 : 10;
   $#filtered_emails = $max-1 if scalar @filtered_emails > $max;
+
+  $pms->rule_pending($rulename); # mark async
 
   foreach my $email (@filtered_emails) {
     $self->_submit_query($pms, $rulename, $email, $list, $opts, $subtest);
@@ -513,6 +517,8 @@ sub check_hashbl_uris {
     $seen{$uri} = 1;
   }
 
+  return 0 unless @filtered_uris;
+
   # Randomize order
   if ($opts =~ /\bshuffle\b/) {
     Mail::SpamAssassin::Util::fisher_yates_shuffle(\@filtered_uris);
@@ -521,6 +527,8 @@ sub check_hashbl_uris {
   # Truncate list
   my $max = $opts =~ /\bmax=(\d+)\b/ ? $1 : 10;
   $#filtered_uris = $max-1 if scalar @filtered_uris > $max;
+
+  $pms->rule_pending($rulename); # mark async
 
   foreach my $furi (@filtered_uris) {
     $self->_submit_query($pms, $rulename, $furi, $list, $opts, $subtest);
@@ -608,6 +616,8 @@ sub check_hashbl_bodyre {
   my $max = $opts =~ /\bmax=(\d+)\b/ ? $1 : 10;
   $#matches = $max-1 if scalar @matches > $max;
 
+  $pms->rule_pending($rulename); # mark async
+
   foreach my $match (@matches) {
     $self->_submit_query($pms, $rulename, $match, $list, $opts, $subtest);
   }
@@ -672,6 +682,8 @@ sub _finish_query {
     dbg("lookup was aborted: $rulename $ent->{key}");
     return;
   }
+
+  $pms->rule_ready($rulename); # mark rule ready for metas
 
   my $dnsmatch = $ent->{subtest} ? $ent->{subtest} : qr/^127\./;
   my @answer = $pkt->answer;

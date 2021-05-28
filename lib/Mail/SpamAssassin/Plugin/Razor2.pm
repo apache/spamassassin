@@ -443,6 +443,7 @@ sub check_razor2 {
   ## forking method
 
   $pms->{razor2_rulename} = $pms->get_current_eval_rule_name();
+  $pms->rule_pending($pms->{razor2_rulename}); # mark async
 
   # create socketpair for communication
   $pms->{razor2_backchannel} = Mail::SpamAssassin::SubProcBackChannel->new();
@@ -549,6 +550,8 @@ sub _check_forked_result {
     return 0;
   }
 
+  $pms->rule_ready($pms->{razor2_rulename}); # mark rule ready for metas
+
   dbg("razor2: child process $kid_pid finished, reading results");
 
   my $backmsg;
@@ -635,16 +638,21 @@ sub check_razor2_range {
   # continue.
   return unless $self->{razor2_available};
   return unless $self->{main}->{conf}->{use_razor2};
-  return if $pms->{razor2_abort};
 
   # Check if callback overriding rulename
   if (!defined $rulename) {
     $rulename = $pms->get_current_eval_rule_name();
   }
 
+  if ($pms->{razor2_abort}) {
+    $pms->rule_ready($rulename); # mark rule ready for metas
+    return;
+  }
+
   # If forked, call back later unless results are in
   if ($self->{main}->{conf}->{razor_fork}) {
     if (!defined $pms->{razor2_result}) {
+      $pms->rule_pending($rulename); # mark async
       dbg("razor2: delaying check_razor2_range call for $rulename");
       # array matches check_razor2_range() argument order
       push @{$pms->{razor2_range_callbacks}},
@@ -659,6 +667,8 @@ sub check_razor2_range {
       $self->check_razor2($pms, $body);
     }
   }
+
+  $pms->rule_ready($rulename); # mark rule ready for metas
 
   my $cf = 0;
   if ($engine) {

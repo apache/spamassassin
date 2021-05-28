@@ -2,7 +2,7 @@
 
 use lib '.'; use lib 't';
 use SATest; sa_t_init("if_can");
-use Test::More tests => 17;
+use Test::More tests => 19;
 
 # ---------------------------------------------------------------------------
 
@@ -20,6 +20,7 @@ use Test::More tests => 17;
   q{ SHOULD_BE_CALLED09 }, 'should_be_called09',
   q{ SHOULD_BE_CALLED10 }, 'should_be_called10',
   q{ SHOULD_BE_CALLED11 }, 'should_be_called11',
+  q{ SHOULD_BE_CALLED12 }, 'should_be_called12',
 
 );
 %anti_patterns = (
@@ -28,6 +29,7 @@ use Test::More tests => 17;
   q{ SHOULD_NOT_BE_CALLED02 }, 'should_not_be_called02',
   q{ SHOULD_NOT_BE_CALLED03 }, 'should_not_be_called03',
   q{ SHOULD_NOT_BE_CALLED04 }, 'should_not_be_called04',
+  q{ SHOULD_NOT_BE_CALLED05 }, 'should_not_be_called05',
 
 );
 tstlocalrules (q{
@@ -80,6 +82,13 @@ tstlocalrules (q{
   else
     body SHOULD_BE_CALLED11 /./
   endif
+  endif
+
+  if can(Mail::SpamAssassin::Conf::feature_local_tests_only) && local_tests_only
+    body SHOULD_BE_CALLED12 /./
+  endif
+  if can(Mail::SpamAssassin::Conf::feature_local_tests_only) && !local_tests_only
+    body SHOULD_NOT_BE_CALLED05 /./
   endif
 
 });

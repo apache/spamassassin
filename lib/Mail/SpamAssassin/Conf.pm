@@ -4832,7 +4832,9 @@ sub new {
   $self->{meta_tests} = { };
   $self->{eval_plugins} = { };
   $self->{eval_plugins_types} = { };
-  $self->{duplicate_rules} = { };
+
+  # meta dependencies
+  $self->{meta_dependencies} = {};
 
   # map eval function names to rulenames
   $self->{eval_to_rule} = {};
@@ -5382,7 +5384,6 @@ sub free_uncompiled_rule_source {
   {
     #delete $self->{if_stack}; # it's Parser not Conf?
     #delete $self->{source_file};
-    #delete $self->{meta_dependencies};
   }
 }
 
@@ -5431,6 +5432,7 @@ sub feature_bayes_stopwords { 1 } # multi language stopwords in Bayes
 sub feature_get_host { 1 } # $pms->get() :host :domain :ip :revip # was implemented together with AskDNS::has_tag_header # Bug 7734
 sub feature_blocklist_welcomelist { 1 } # bz 7826
 sub feature_header_address_parser { 1 } # improved header address parsing using Email::Address::XS, $pms->get() list context
+sub feature_local_tests_only { 1 } # Config parser supports "if (local_tests_only)"
 sub has_tflags_nosubject { 1 } # tflags nosubject
 sub has_tflags_nolog { 1 } # tflags nolog
 sub perl_min_version_5010000 { return $] >= 5.010000 }  # perl version check ("perl_version" not neatly backwards-compatible)

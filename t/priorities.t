@@ -83,8 +83,8 @@ ok assert_rule_pri 'FOO1', -28;
 sub assert_rule_pri {
   my ($r, $pri) = @_;
 
-  if (defined $conf->{rbl_evals}->{$r}) {
-    # ignore rbl_evals; they do not use the priority system at all
+  if (defined $conf->{rbl_evals}->{$r} || defined $conf->{meta_tests}->{$r}) {
+    # ignore rbl_evals and metas; they do not use the priority system at all
     return 1;
   }
 

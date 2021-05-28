@@ -469,6 +469,8 @@ sub process_response_packet {
       # and returns a number for the rest; we deal with numbers from here on
       $rcode = $rcode_value{$rcode}  if exists $rcode_value{$rcode};
     }
+
+    $pms->rule_ready($rulename); # mark rule ready for metas
   }
   if (!@answer) {
     # a trick to make the following loop run at least once, so that we can

@@ -730,6 +730,10 @@ sub _check_async {
             foreach (@{$pms->{conf}->{eval_to_rule}->{check_dcc}}) {
               $pms->got_hit($_, "", ruletype => 'eval');
             }
+          } else {
+            foreach (@{$pms->{conf}->{eval_to_rule}->{check_dcc}}) {
+              $pms->rule_ready($_);
+            }
           }
         }
       } else {
@@ -819,7 +823,13 @@ sub check_dcc {
   return 0 if $self->{dcc_disabled};
   return 0 if !$pms->{conf}->{use_dcc};
   return 0 if $pms->{dcc_abort};
-  return 0 if $pms->{dcc_async_start}; # async already handling?
+
+  # async already handling?
+  if ($pms->{dcc_async_start}) {
+    my $rulename = $pms->get_current_eval_rule_name();
+    $pms->rule_pending($rulename); # mark async
+    return 0;
+  }
 
   return $pms->{dcc_result} if defined $pms->{dcc_result};
 
@@ -866,6 +876,8 @@ sub check_dcc_reputation_range {
       # If callback, use got_hit()
       if ($result) {
         $pms->got_hit($cb_rulename, "", ruletype => 'eval');
+      } else {
+        $pms->rule_ready($cb_rulename);
       }
       return 0;
     } else {
@@ -875,6 +887,7 @@ sub check_dcc_reputation_range {
     # Install callback if waiting for async result
     if (!defined $cb_rulename) {
       my $rulename = $pms->get_current_eval_rule_name();
+      $pms->rule_pending($rulename); # mark async
       # array matches check_dcc_reputation_range() argument order
       push @{$pms->{dcc_range_callbacks}}, [undef, $min, $max, $rulename];
     }

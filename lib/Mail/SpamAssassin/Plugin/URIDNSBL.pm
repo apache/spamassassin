@@ -342,6 +342,9 @@ sub new {
 
 # this is just a placeholder; in fact the results are dealt with later	 
 sub check_uridnsbl {
+  my ($self, $pms) = @_;
+  my $rulename = $pms->get_current_eval_rule_name();
+  $pms->rule_pending($rulename); # mark async
   return 0;
 }
 
@@ -1058,19 +1061,19 @@ sub lookup_single_dnsbl {
 sub complete_dnsbl_lookup {
   my ($self, $pms, $ent, $pkt) = @_;
 
+  my $rulename = $ent->{rulename};
+
   if (!$pkt) {
     # $pkt will be undef if the DNS query was aborted (e.g. timed out)
     dbg("uridnsbl: complete_dnsbl_lookup aborted %s %s",
-        $ent->{rulename}, $ent->{key});
+        $rulename, $ent->{key});
     return;
   }
 
-  dbg("uridnsbl: complete_dnsbl_lookup $ent->{key} $ent->{rulename}");
-  my $conf = $pms->{conf};
+  $pms->rule_ready($rulename); # mark rule ready for metas
+  dbg("uridnsbl: complete_dnsbl_lookup $ent->{key} $rulename");
 
-  my $rulename = $ent->{rulename};
-  my $rulecf = $conf->{uridnsbls}->{$rulename};
-
+  my $rulecf = $pms->{conf}->{uridnsbls}->{$rulename};
   my @subtests;
   my @answer = $pkt->answer;
   foreach my $rr (@answer)
@@ -1127,7 +1130,9 @@ sub complete_dnsbl_lookup {
           :              sprintf('%08x%s%08x', $n1,$delim,$n2),
           $match ? 'match' : 'no');
     }
-    $self->got_dnsbl_hit($pms, $ent, $rdatastr, $rulename) if $match;
+    if ($match) {
+      $self->got_dnsbl_hit($pms, $ent, $rdatastr, $rulename);
+    }
   }
 }
 

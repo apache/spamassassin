@@ -92,6 +92,7 @@ sub do_one_line_body_tests {
     my $sub = '
       my ($self, $line) = @_;
       my $qrptr = $self->{main}->{conf}->{test_qrs};
+      my $hitsptr = $self->{tests_already_hit};
     ';
 
     if (($conf->{tflags}->{$rulename}||'') =~ /\bmultiple\b/)
@@ -101,8 +102,8 @@ sub do_one_line_body_tests {
       $max = untaint_var($max);
       if ($max) {
         $sub .= '
-          if (exists $self->{tests_already_hit}->{q{'.$rulename.'}}) {
-            return 0 if $self->{tests_already_hit}->{q{'.$rulename.'}} >= '.$max.';
+          if ($hitsptr->{q{'.$rulename.'}}) {
+            return 0 if $hitsptr->{q{'.$rulename.'}} >= '.$max.';
           }
         ';
       }
@@ -128,6 +129,10 @@ sub do_one_line_body_tests {
       ';
 
     }
+
+    $sub .= '
+      $self->rule_ready(q{'.$rulename.'});
+    ';
 
     return if ($opts{doing_user_rules} &&
                   !$self->is_user_rule_sub($rulename.'_one_line_body_test'));

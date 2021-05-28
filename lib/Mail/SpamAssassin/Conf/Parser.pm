@@ -546,6 +546,9 @@ sub handle_conditional {
     elsif ($token eq 'perl_version') {
       $eval .= $]." ";
     }
+    elsif ($token eq 'local_tests_only') {
+      $eval .= '($self->{conf}->{main}->{local_tests_only}?1:0) '
+    }
     elsif ($token =~ /^(?:\W{1,5}|[+-]?\d+(?:\.\d+)?)$/) {
       # using tainted subr. argument may taint the whole expression, avoid
       my $u = untaint_var($token);
@@ -885,16 +888,10 @@ sub finish_parsing {
     $conf->{main}->call_plugins("user_conf_parsing_start", { conf => $conf });
   }
 
-  $self->trace_meta_dependencies();
+  # compile meta rules
+  $self->compile_meta_rules();
   $self->fix_priorities();
   $self->fix_tflags();
-
-  # don't do this if allow_user_rules is active, since it deletes entries
-  # from {tests}
-  if (!$conf->{allow_user_rules}) {
-    # Duplicate merging is buggy, disabled, code to be removed
-    #$self->find_dup_rules();          # must be after fix_priorities()
-  }
 
   dbg("config: finish parsing");
 
@@ -969,7 +966,7 @@ sub finish_parsing {
         $conf->{head_tests}->{$priority}->{$name} = $text;
       }
       elsif ($type == $Mail::SpamAssassin::Conf::TYPE_META_TESTS) {
-        $conf->{meta_tests}->{$priority}->{$name} = $text;
+        # Handled by compile_meta_rules()
       }
       elsif ($type == $Mail::SpamAssassin::Conf::TYPE_URI_TESTS) {
         $conf->{uri_tests}->{$priority}->{$name} = $text;
@@ -1008,82 +1005,161 @@ sub finish_parsing {
   }
 }
 
-sub trace_meta_dependencies {
-  my ($self) = @_;
-  my $conf = $self->{conf};
-  $conf->{meta_dependencies} = { };
-
-  foreach my $name (keys %{$conf->{tests}}) {
-    next unless ($conf->{test_types}->{$name}
-                    == $Mail::SpamAssassin::Conf::TYPE_META_TESTS);
-    my $alreadydone = {};
-    $self->_meta_deps_recurse($conf, $name, $name, $alreadydone);
+# Returns all rulenames matching glob (FOO_*)
+sub expand_ruleglob {
+  my ($self, $ruleglob, $rulename) = @_;
+  my $expanded;
+  if (exists $self->{ruleglob_cache}{$ruleglob}) {
+    $expanded = $self->{ruleglob_cache}{$ruleglob};
+  } else {
+    my $reglob = $ruleglob;
+    $reglob =~ s/\?/./g;
+    $reglob =~ s/\*/.*?/g;
+    # Glob rules, but do not match ourselves..
+    my @rules = grep {/^${reglob}$/ && $_ ne $rulename} keys %{$self->{conf}->{scores}};
+    if (@rules) {
+      $expanded = join('+', sort @rules);
+    } else {
+      $expanded = '0';
+    }
   }
+  my $logstr = $expanded eq '0' ? 'no matches' : $expanded;
+  dbg("rules: meta $rulename rules_matching($ruleglob) expanded: $logstr");
+  $self->{ruleglob_cache}{$ruleglob} = $expanded;
+  return " ($expanded) ";
 }
 
-sub _meta_deps_recurse {
-  my ($self, $conf, $toprule, $name, $alreadydone) = @_;
+sub compile_meta_rules {
+  my ($self) = @_;
+  my (%meta, %meta_deps, %rule_deps);
+  my $conf = $self->{conf};
 
-  # Avoid recomputing the dependencies of a rule
-  return split(' ', $conf->{meta_dependencies}->{$name}) if defined $conf->{meta_dependencies}->{$name};
+  foreach my $name (keys %{$conf->{tests}}) {
+    next unless $conf->{test_types}->{$name} == $Mail::SpamAssassin::Conf::TYPE_META_TESTS;
+    my $rule = $conf->{tests}->{$name};
 
-  # Obviously, don't trace empty or nonexistent rules
-  my $rule = $conf->{tests}->{$name};
-  unless ($rule) {
-      $conf->{meta_dependencies}->{$name} = '';
-      return ( );
+    # Expand meta rules_matching() before lexing
+    $rule =~ s/${META_RULES_MATCHING_RE}/$self->expand_ruleglob($1,$name)/ge;
+
+    # Lex the rule into tokens using a rather simple RE method ...
+    my @tokens = ($rule =~ /$ARITH_EXPRESSION_LEXER/og);
+
+    # Set the rule blank to start
+    $meta{$name} = '';
+
+    # List dependencies that are meta tests in the same priority band
+    $meta_deps{$name} = [ ];
+
+    # List all rule dependencies
+    $rule_deps{$name} = [ ];
+
+    # Go through each token in the meta rule
+    foreach my $token (@tokens) {
+      # operator (triage, already validated by is_meta_valid)
+      if ($token !~ tr/+&|()!<>=//c) {
+        $meta{$name} .= "$token ";
+      }
+      # rule-like check for local_tests_only
+      elsif ($token eq 'local_tests_only') {
+        $meta{$name} .= '($_[0]->{main}->{local_tests_only}||0) ';
+      }
+      # ... rulename?
+      elsif ($token =~ IS_RULENAME) {
+        # Will end up later in a compiled sub called from do_meta_tests:
+        #  $_[0] = $pms
+        #  $_[1] = $h ($pms->{tests_already_hit}),
+        #  $_[2] = hashref list of unrun rules
+        $meta{$name} .= "(\$_[1]->{'$token'}||(\$_[2]->{'$token'}?1:0)) ";
+
+        if (!exists $conf->{test_types}->{$token}) {
+          dbg("rules: meta test $name has undefined dependency '$token'");
+          push @{$rule_deps{$name}}, $token;
+          next;
+        }
+
+        if ($conf->{scores}->{$token} == 0) {
+          # bug 5040: net rules in a non-net scoreset
+          # there are some cases where this is expected; don't warn
+          # in those cases.
+          unless ((($conf->get_score_set()) & 1) == 0 &&
+              ($conf->{tflags}->{$token}||'') =~ /\bnet\b/)
+          {
+            dbg("rules: meta test $name has dependency '$token' with a zero score");
+          }
+        }
+
+        # If the token is another meta rule, add it as a dependency
+        if ($conf->{test_types}->{$token} == $Mail::SpamAssassin::Conf::TYPE_META_TESTS) {
+          push @{$meta_deps{$name}}, $token;
+        }
+
+        # Record all dependencies
+        push @{$rule_deps{$name}}, $token;
+      }
+      # ... number or operator (already validated by is_meta_valid)
+      else {
+        $meta{$name} .= "$token ";
+      }
+    }
   }
 
-  # Avoid infinite recursion
-  return ( ) if exists $alreadydone->{$name};
-  $alreadydone->{$name} = ( );
+  # Sort by length of dependencies list.  It's more likely we'll get
+  # the dependencies worked out this way.
+  my @metas = sort { @{$meta_deps{$a}} <=> @{$meta_deps{$b}} } keys %meta;
+  my $count;
+  do {
+    $count = $#metas;
+    my %metas = map { $_ => 1 } @metas; # keep a small cache for fast lookups
+    # Go through each meta rule we haven't done yet
+    for (my $i = 0 ; $i <= $#metas ; $i++) {
+      next if (grep( $metas{$_}, @{ $meta_deps{ $metas[$i] } }));
+      splice @metas, $i--, 1;    # remove this rule from our list
+    }
+  } while ($#metas != $count && $#metas > -1); # run until we can't go anymore
 
-  my %deps;
-
-  # Lex the rule into tokens using a rather simple RE method ...
-  my @tokens = ($rule =~ /($ARITH_EXPRESSION_LEXER)/og);
-
-  # Go through each token in the meta rule
-  my $conf_tests = $conf->{tests};
-  foreach my $token (@tokens) {
-    # has to be an alpha+numeric token
-    next if $token =~ tr{A-Za-z0-9_}{}c || substr($token,0,1) =~ tr{A-Za-z_}{}c; # even faster
-
-    # and has to be a rule name
-    next unless exists $conf_tests->{$token};
-
-    # add and recurse
-    $deps{untaint_var($token)} = ( );
-    my @subdeps = $self->_meta_deps_recurse($conf, $toprule, $token, $alreadydone);
-    @deps{@subdeps} = ( );
+  # If there are any rules left, we can't solve the dependencies so complain
+  my %unsolved_metas = map { $_ => 1 } @metas; # keep a small cache for fast lookups
+  foreach my $rulename_t (@metas) {
+    my $msg = "rules: excluding meta test $rulename_t, unsolved meta dependencies: ".
+              join(", ", grep($unsolved_metas{$_}, @{ $meta_deps{$rulename_t} }));
+    $self->lint_warn($msg);
   }
-  $conf->{meta_dependencies}->{$name} = join (' ', keys %deps);
-  return keys %deps;
+
+  foreach my $name (keys %meta) {
+    if (@{$rule_deps{$name}}) {
+      $conf->{meta_dependencies}->{$name} = $rule_deps{$name};
+    }
+    if ($unsolved_metas{$name}) {
+      $conf->{meta_tests}->{$name} = sub { 0 };
+    } else {
+      # Compile meta sub
+      eval '$conf->{meta_tests}->{$name} = sub { '.$meta{$name}.'};';
+      # Paranoid check
+      die "rules: meta compilation failed for $name: '$meta{$name}': $@" if ($@);
+    }
+  }
 }
 
 sub fix_priorities {
   my ($self) = @_;
   my $conf = $self->{conf};
 
-  die unless $conf->{meta_dependencies};    # order requirement
+  return unless $conf->{meta_dependencies};    # order requirement
   my $pri = $conf->{priority};
 
   # sort into priority order, lowest first -- this way we ensure that if we
   # rearrange the pri of a rule early on, we cannot accidentally increase its
   # priority later.
-  foreach my $rule (sort {
-            $pri->{$a} <=> $pri->{$b}
-          } keys %{$pri})
-  {
+  foreach my $rule (sort { $pri->{$a} <=> $pri->{$b} } keys %{$pri}) {
     # we only need to worry about meta rules -- they are the
     # only type of rules which depend on other rules
     my $deps = $conf->{meta_dependencies}->{$rule};
     next unless (defined $deps);
 
     my $basepri = $pri->{$rule};
-    foreach my $dep (split ' ', $deps) {
+    foreach my $dep (@$deps) {
       my $deppri = $pri->{$dep};
-      if ($deppri > $basepri) {
+      if (defined $deppri && $deppri > $basepri) {
         dbg("rules: $rule (pri $basepri) requires $dep (pri $deppri): fixed");
         $pri->{$dep} = $basepri;
       }
@@ -1100,65 +1176,13 @@ sub fix_tflags {
   while (my($rulename,$deps) = each %{$conf->{meta_dependencies}}) {
     my $tfl = $tflags->{$rulename}||'';
     next if $tfl =~ /\bnet\b/;
-    foreach my $deprule (split(' ', $deps)) {
+    foreach my $deprule (@$deps) {
       if (($tflags->{$deprule}||'') =~ /\bnet\b/) {
         dbg("rules: meta $rulename inherits tflag net, depends on $deprule");
         $tflags->{$rulename} = $tfl eq '' ? 'net' : "$tfl net";
         last;
       }
     }
-  }
-}
-
-sub find_dup_rules {
-  my ($self) = @_;
-  my $conf = $self->{conf};
-
-  my %names_for_text;
-  my %dups;
-  while (my ($name, $text) = each %{$conf->{tests}}) {
-    my $type = $conf->{test_types}->{$name};
-
-    # skip eval and empty tests
-    next if ($type & 1) ||
-      ($type eq $Mail::SpamAssassin::Conf::TYPE_EMPTY_TESTS);
-
-    my $tf = ($conf->{tflags}->{$name}||''); $tf =~ s/\s+/ /gs;
-    # ensure similar, but differently-typed, rules are not marked as dups;
-    # take tflags into account too due to "tflags multiple"
-    $text = "$type\t$text\t$tf";
-
-    if (defined $names_for_text{$text}) {
-      $names_for_text{$text} .= " ".$name;
-      $dups{$text} = undef;     # found (at least) one
-    } else {
-      $names_for_text{$text} = $name;
-    }
-  }
-
-  foreach my $text (keys %dups) {
-    my $first;
-    my $first_pri;
-    my @names = sort {$a cmp $b} split(' ', $names_for_text{$text});
-    foreach my $name (@names) {
-      my $priority = $conf->{priority}->{$name} || 0;
-
-      if (!defined $first || $priority < $first_pri) {
-        $first_pri = $priority;
-        $first = $name;
-      }
-    }
-    # $first is now the earliest-occurring rule. mark others as dups
-
-    my @dups;
-    foreach my $name (@names) {
-      next if $name eq $first;
-      push @dups, $name;
-      delete $conf->{tests}->{$name};
-    }
-
-    dbg("rules: $first merged duplicates: ".join(' ', @dups));
-    $conf->{duplicate_rules}->{$first} = \@dups;
   }
 }
 
@@ -1358,12 +1382,6 @@ sub add_test {
      dbg("config: auto-learn: $name has type $type = $conf->{test_types}->{$name} during add_test\n");
   }
 
-  if ($type == $Mail::SpamAssassin::Conf::TYPE_META_TESTS) {
-    $conf->{priority}->{$name} ||= 500;
-  }
-  else {
-    $conf->{priority}->{$name} ||= 0;
-  }
   $conf->{priority}->{$name} ||= 0;
 
   if ($conf->{main}->{keep_config_parsing_metadata}) {
@@ -1417,8 +1435,8 @@ sub is_meta_valid {
   my $meta = '';
 
   # Paranoid check (Bug #7557)
-  if ($rule =~ /(?:\:\:|->)/)  {
-    warn("config: invalid meta $name rule: $rule") ;
+  if ($rule =~ /(?:\:\:|->|[\$\@\%\;\{\}])/) {
+    warn("config: invalid meta $name rule: $rule\n");
     return 0;
   }
 

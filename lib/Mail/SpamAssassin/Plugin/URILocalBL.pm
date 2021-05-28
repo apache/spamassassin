@@ -390,8 +390,12 @@ sub check_uri_local_bl {
     }
   }
 
+  return 0 unless %found_hosts;
+
   # bail out now if dns not available
   return 0 if !$pms->is_dns_available();
+
+  $pms->rule_pending($rulename); # mark async
 
   foreach my $host (keys %found_hosts) {
     $host = idn_to_ascii($host);
@@ -427,6 +431,8 @@ sub _finish_lookup {
       dbg("host lookup failed: $rulename $host");
       return;
   }
+
+  $pms->rule_ready($rulename); # mark rule ready for metas
 
   my @answer = $pkt->answer;
   my @addrs;

@@ -197,6 +197,8 @@ sub check_start {
         dbg("reuse: rule $rule hit, will add at priority $priority, stage " .
            "$stage");
         last;
+      } else {
+        $pms->rule_ready($rule);
       }
     }
   }
