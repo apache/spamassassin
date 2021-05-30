@@ -211,10 +211,16 @@ sub load_geoip2 {
   my ($self, $geodb_opts) = @_;
   my ($db, $dbapi, $ok);
 
+  # Warn about fatal errors if this module was specifically requested
+  my $errwarn = ($geodb_opts->{module}||'') eq 'geoip2';
+
   eval {
     require MaxMind::DB::Reader;
   } or do {
-    dbg("geodb: MaxMind::DB::Reader (GeoIP2) module load failed");
+    my $err = $@;
+    $err =~ s/ at .*//s;
+    $err = "geodb: MaxMind::DB::Reader (GeoIP2) module load failed: $err";
+    $errwarn ? warn("$err\n") : dbg($err);
     return (undef, undef);
   };
 
@@ -256,8 +262,10 @@ sub load_geoip2 {
         1;
       };
       if ($@ || !$db->{$dbtype}) {
-        $@ =~ s/\s+Trace begun.*//s;
-        dbg("geodb: GeoIP2: $dbtype load failed");
+        my $err = $@;
+        $err =~ s/\s+Trace begun.*//s;
+        $err =~ s/ at .*//s;
+        dbg("geodb: GeoIP2: $dbtype load failed: $err");
       } else {
         dbg("geodb: GeoIP2: loaded $dbtype from $path{$dbtype}");
         $ok = 1;
@@ -269,7 +277,10 @@ sub load_geoip2 {
     } 
   }
 
-  return (undef, undef) if !$ok;
+  if (!$ok) {
+    warn("geodb: GeoIP2 requested, but no databases could be loaded\n") if $errwarn;
+    return (undef, undef)
+  }
 
   # dbinfo_DBTYPE()
   $db->{city} and $dbapi->{dbinfo_city} = sub {
@@ -385,6 +396,9 @@ sub load_geoip {
   my ($gic_wanted, $gic_have, $gip_wanted, $gip_have);
   my ($flags, $fix_stderr, $can_ipv6);
 
+  # Warn about fatal errors if this module was specifically requested
+  my $errwarn = ($geodb_opts->{module}||'') eq 'geoip';
+
   eval {
     require Geo::IP;
     # need GeoIP C library 1.6.3 and GeoIP perl API 1.4.4 or later to avoid messages leaking - Bug 7153
@@ -404,7 +418,10 @@ sub load_geoip {
     $can_ipv6 = Geo::IP->VERSION >= 1.39 && Geo::IP->api eq 'CAPI';
     1;
   } or do {
-    dbg("geodb: Geo::IP module load failed");
+    my $err = $@;
+    $err =~ s/ at .*//s;
+    $err = "geodb: Geo::IP module load failed: $err";
+    $errwarn ? warn("$err\n") : dbg($err);
     return (undef, undef);
   };
 
@@ -461,7 +478,9 @@ sub load_geoip {
       }
     };
     if ($@ || !$db->{$dbtype}) {
-      dbg("geodb: GeoIP: database $path{$dbtype} load failed: $@");
+      my $err = $@;
+      $err =~ s/ at .*//s;
+      dbg("geodb: GeoIP: database $path{$dbtype} load failed: $err");
     } else {
       dbg("geodb: GeoIP: loaded $dbtype from $path{$dbtype}");
       $ok = 1;
@@ -472,7 +491,10 @@ sub load_geoip {
     close(OLDERR);
   }
 
-  return (undef, undef) if !$ok;
+  if (!$ok) {
+    warn("geodb: GeoIP requested, but no databases could be loaded\n") if $errwarn;
+    return (undef, undef)
+  }
 
   # dbinfo_DBTYPE()
   $db->{city} and $dbapi->{dbinfo_city} = sub {
@@ -585,13 +607,18 @@ sub load_dbfile {
   my ($self, $geodb_opts) = @_;
   my ($db, $dbapi);
 
+  # Warn about fatal errors if this module was specifically requested
+  my $errwarn = ($geodb_opts->{module}||'') eq 'dbfile';
+
   if (!defined $geodb_opts->{dbs}->{country}) {
-    dbg("geodb: IP::Country::DB_File requires geodb_options country:/path/to/ipcc.db");
+    my $err = "geodb: IP::Country::DB_File requires geodb_options country:/path/to/ipcc.db";
+    $errwarn ? warn("$err\n") : dbg($err);
     return (undef, undef);
   }
 
   if (!-f $geodb_opts->{dbs}->{country}) {
-    dbg("geodb: IP::Country::DB_File database not found: ".$geodb_opts->{dbs}->{country});
+    my $err = "geodb: IP::Country::DB_File database not found: ".$geodb_opts->{dbs}->{country};
+    $errwarn ? warn("$err\n") : dbg($err);
     return (undef, undef);
   }
 
@@ -601,7 +628,10 @@ sub load_dbfile {
     1;
   };
   if ($@ || !$db->{country}) {
-    dbg("geodb: IP::Country::DB_File country load failed: $@");
+    my $err = $@;
+    $err =~ s/ at .*//s;
+    $err = "geodb: IP::Country::DB_File country load failed: $err";
+    $errwarn ? warn("$err\n") : dbg($err);
     return (undef, undef);
   } else {
     dbg("geodb: IP::Country::DB_File loaded country from ".$geodb_opts->{dbs}->{country});
@@ -637,14 +667,19 @@ sub load_fast {
   my ($self, $geodb_opts) = @_;
   my ($db, $dbapi);
 
+  # Warn about fatal errors if this module was specifically requested
+  my $errwarn = ($geodb_opts->{module}||'') eq 'fast';
+
   eval {
     require IP::Country::Fast;
     $db->{country} = IP::Country::Fast->new();
     1;
   };
   if ($@ || !$db->{country}) {
-    my $eval_stat = $@ ne '' ? $@ : "errno=$!";  chomp $eval_stat;
-    dbg("geodb: IP::Country::Fast load failed: $eval_stat");
+    my $err = $@;
+    $err =~ s/ at .*//s;
+    $err = "geodb: IP::Country::Fast load failed: $err";
+    $errwarn ? warn("$err\n") : dbg($err);
     return (undef, undef);
   }
 
