@@ -6,5 +6,5 @@ CREATE TABLE `short_url_cache`
   `modified` INT(11) NOT NULL ,
   PRIMARY KEY (`short_url`)
 ) ENGINE = InnoDB;
-ALTER TABLE `spam_bayes`.`short_url_cache` ADD INDEX `short_url_by_modified` (`short_url`, `modified`);
-ALTER TABLE `spam_bayes`.`short_url_cache` ADD INDEX `short_url_modified` (`modified`);
+ALTER TABLE `short_url_cache` ADD INDEX `short_url_by_modified` (`short_url`, `modified`);
+ALTER TABLE `short_url_cache` ADD INDEX `short_url_modified` (`modified`);
