@@ -316,39 +316,39 @@ sub _connect_dbi_cache {
 }
 
 sub short_url {
-  my ($self, $opts) = @_;
+  my ($self, $pms) = @_;
 
-  return $self->{short_url};
+  return $pms->{short_url};
 }
 
 sub short_url_200 {
-  my ($self, $opts) = @_;
+  my ($self, $pms) = @_;
 
-  return $self->{short_url_200};
+  return $pms->{short_url_200};
 }
 
 sub short_url_404 {
-  my ($self, $opts) = @_;
+  my ($self, $pms) = @_;
 
-  return $self->{short_url_404};
+  return $pms->{short_url_404};
 }
 
 sub short_url_chained {
-  my ($self, $opts) = @_;
+  my ($self, $pms) = @_;
 
-  return $self->{short_url_chained};
+  return $pms->{short_url_chained};
 }
 
 sub short_url_maxchain {
-  my ($self, $opts) = @_;
+  my ($self, $pms) = @_;
 
-  return $self->{short_url_maxchain};
+  return $pms->{short_url_maxchain};
 }
 
 sub short_url_loop {
-  my ($self, $opts) = @_;
+  my ($self, $pms) = @_;
 
-  return $self->{short_url_loop};
+  return $pms->{short_url_loop};
 }
 
 sub check_dnsbl {
@@ -428,11 +428,16 @@ sub recursive_lookup {
     }
   } else {
     # Not cached; do lookup
+    if($count eq 0) {
+      undef $pms->{short_url_200};
+      undef $pms->{short_url_404};
+      undef $pms->{short_url_chained};
+    }
     my $response = $self->{ua}->head($short_url);
     if (!$response->is_redirect) {
       dbg("URL is not redirect: $short_url = ".$response->status_line);
-      $self->{short_url_200} = 1 if($response->code == '200');
-      $self->{short_url_404} = 1 if($response->code == '404');
+      $pms->{short_url_200} = 1 if($response->code == '200');
+      $pms->{short_url_404} = 1 if($response->code == '404');
       return undef;
     }
     $location = $response->headers->{location};
@@ -448,12 +453,13 @@ sub recursive_lookup {
   }
 
   # At this point we have a new URL in $response
-  $self->{short_url} = 1;
-  $pms->add_uri_detail_list($location);
+  $pms->{short_url} = 1;
 
   # Set chained here otherwise we might mark a disabled page or
   # redirect back to the same host as chaining incorrectly.
-  $self->{short_url_chained} = 1 if $count > 0;
+  $pms->{short_url_chained} = 1 if $count > 0;
+
+  $pms->add_uri_detail_list($location);
 
   # Check if we are being redirected to a local page
   # Don't recurse in this case...
