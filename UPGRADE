@@ -2,6 +2,12 @@
 Note for Users Upgrading to SpamAssassin 4.0.0
 ----------------------------------------------
 
+- Setting normalize_charset is now enabled by default.  Note that rules
+  should not expect specific non-UTF8 or UTF8 encoding in body.  Matching is
+  done against raw bytes, which may very depending on normalize_charset
+  setting and whether decoding to UTF8 was successful.
+  See: http://wiki.apache.org/spamassassin/WritingRulesAdvanced
+
 - Meta rules no longer use priority values, they are evaluated dynamically
   when the rules they depend on are finished.  (Bug 7735)
 

@@ -252,11 +252,10 @@ our @OPTIONAL_MODULES = (
 {
   module => 'Encode::Detect::Detector',
   version => 0,
-  desc => 'If you plan to use the normalize_charset config setting to
-  decode message parts from their declared character set into Unicode, and
-  such decoding fails, the Encode::Detect::Detector module (when available)
-  may be consulted to provide an alternative guess on a character set of a
-  problematic message part.',
+  desc => 'If normalize_charset decoding of message parts from their
+  declared character set into Unicode fails, the Encode::Detect::Detector
+  module (when available) may be consulted to provide an alternative guess
+  on a character set of a problematic message part.',
 },
 {
   module => 'Net::Patricia',

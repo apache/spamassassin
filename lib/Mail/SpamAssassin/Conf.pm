@@ -1250,7 +1250,7 @@ Select the locales to allow from the list below:
     type => $CONF_TYPE_STRING,
   });
 
-=item normalize_charset ( 0 | 1 )        (default: 0)
+=item normalize_charset ( 0 | 1 )        (default: 1)
 
 Whether to decode non- UTF-8 and non-ASCII textual parts and recode them
 to UTF-8 before the text is given over to rules processing. The character
@@ -1272,7 +1272,7 @@ it will be used if it is available.
 
   push (@cmds, {
     setting => 'normalize_charset',
-    default => 0,
+    default => 1,
     type => $CONF_TYPE_BOOL,
     code => sub {
 	my ($self, $key, $value, $line) = @_;
@@ -3181,6 +3181,12 @@ The 'body' in this case is the textual parts of the message body; any
 non-text MIME parts are stripped, and the message decoded from
 Quoted-Printable or Base-64-encoded format if necessary.  Parts declared as
 text/html will be rendered from HTML to text.
+
+Body is processed as a raw byte string, which means Unicode-specific regex
+features like \p{} can NOT be used for matching.  The normalize_charset
+setting will also affect how raw bytes are presented.  Rules in .cf files
+should be written portably - to match "a with umlaut" character, look for
+both LATIN1 and UTF8 raw byte variants: /(?:\xE4|\xC3\xA4)/
 
 All body paragraphs (double-newline-separated blocks text) are turned into a
 line breaks removed, whitespace normalized single line.  Any lines longer
