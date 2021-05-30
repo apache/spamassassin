@@ -4,7 +4,7 @@ use lib '.'; use lib 't';
 use SATest; sa_t_init("all_modules");
 
 use Test::More;
-plan tests => 6;
+plan tests => 7;
 
 # ---------------------------------------------------------------------------
 
@@ -81,6 +81,7 @@ tstprefs("
         q{ Use of uninitialized }, 'uninitialized',
         q{ warn: }, 'warn',
         q{ SpamAssassin failed to parse line }, 'parse',
+        '/ at .* line \d+/', 'warn',
             );
 
 if (conf_bool('run_net_tests')) {

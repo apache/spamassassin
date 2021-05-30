@@ -214,7 +214,7 @@ sub load_geoip2 {
   eval {
     require MaxMind::DB::Reader;
   } or do {
-    dbg("geodb: MaxMind::DB::Reader (GeoIP2) module load failed: $@");
+    dbg("geodb: MaxMind::DB::Reader (GeoIP2) module load failed");
     return (undef, undef);
   };
 
@@ -257,7 +257,7 @@ sub load_geoip2 {
       };
       if ($@ || !$db->{$dbtype}) {
         $@ =~ s/\s+Trace begun.*//s;
-        dbg("geodb: GeoIP2: $dbtype load failed: $@");
+        dbg("geodb: GeoIP2: $dbtype load failed");
       } else {
         dbg("geodb: GeoIP2: loaded $dbtype from $path{$dbtype}");
         $ok = 1;
@@ -404,7 +404,7 @@ sub load_geoip {
     $can_ipv6 = Geo::IP->VERSION >= 1.39 && Geo::IP->api eq 'CAPI';
     1;
   } or do {
-    dbg("geodb: Geo::IP module load failed: $@");
+    dbg("geodb: Geo::IP module load failed");
     return (undef, undef);
   };
 
