@@ -3181,7 +3181,7 @@ tflags     EBAY_IMG_NOT_RCVD_EBAY      publish
 
 header     __HDR_RCVD_AMAZON           X-Spam-Relays-External =~ /\srdns=\S+\.amazon(?:ses)?\.com\s/
 header     __HDR_RCVD_AMAZON_HELO      X-Spam-Relays-External =~ /\srdns=\shelo=[^.]+\.smtp-out\.amazonses\.com\s/
-uri        __URI_IMG_AMAZON            m,://[^/?]+\.(?:ssl-)?images-amazon\.com/,i
+uri        __URI_IMG_AMAZON            m,://[^/?]+\.(?:ssl-)?(?:images|media)-amazon\.com/.*\.(?:png|gif|jpe?g)$,i
 header     __FROM_NAME_AMAZONCOM       From:name =~ /\bamazon\.com\b/i
 
 # price alert site that leverages Amazon, avoid FPs
