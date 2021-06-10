@@ -90,6 +90,6 @@ if (conf_bool('run_net_tests')) {
     sarun ("-D -t < data/nice/001 2>&1 | grep -vE '(dns_block_rule|ResourceLimits not used)'", \&patterns_run_cb);
     ok_all_patterns();
 } else {
-    sarun ("-D -L -t < data/nice/001 2>&1", \&patterns_run_cb);
+    sarun ("-D -L -t < data/nice/001 2>&1 | grep -vE '(ResourceLimits not used)'", \&patterns_run_cb);
     ok_all_patterns();
 }
