@@ -13,6 +13,9 @@ loadplugin Mail::SpamAssassin::Plugin::DecodeShortURLs
 ");
 
 tstprefs("
+dns_query_restriction allow bit.ly
+dns_query_restriction allow tinyurl.com
+
 url_shortener bit.ly
 url_shortener tinyurl.com
 
