@@ -303,6 +303,12 @@ our @OPTIONAL_MODULES = (
   fields like To/From/cc, per RFC 5322. If installed, it may additionally
   be used by internal parser to process complex lists.',
 },
+{
+  module => 'Mail::Dmarc',
+  version => 0,
+  desc => 'Mail::Dmarc is a Perl implementation of DMARC protocol.
+  It is used by the optional Dmarc Plugin.',
+},
 );
 
 our @BINARIES = ();

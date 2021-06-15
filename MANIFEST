@@ -84,6 +84,7 @@ lib/Mail/SpamAssassin/Plugin/Check.pm
 lib/Mail/SpamAssassin/Plugin/DCC.pm
 lib/Mail/SpamAssassin/Plugin/DecodeShortURLs.pm
 lib/Mail/SpamAssassin/Plugin/DKIM.pm
+lib/Mail/SpamAssassin/Plugin/Dmarc.pm
 lib/Mail/SpamAssassin/Plugin/DNSEval.pm
 lib/Mail/SpamAssassin/Plugin/Esp.pm
 lib/Mail/SpamAssassin/Plugin/ExtractText.pm
@@ -358,6 +359,10 @@ t/data/nice/dkim/MultipleSig_06
 t/data/nice/dkim/NonExistingHeader_09
 t/data/nice/dkim/Nowsp_03
 t/data/nice/dkim/Simple_02
+t/data/nice/dmarc/noneok.eml
+t/data/nice/dmarc/quarok.eml
+t/data/nice/dmarc/rejectok.eml
+t/data/nice/dmarc/strictrejectok.eml
 t/data/nice/mailman_message.txt
 t/data/nice/mime1
 t/data/nice/mime2
@@ -411,6 +416,11 @@ t/data/spam/bsmtp
 t/data/spam/bsmtpnull
 t/data/spam/decodeshorturl/base.eml
 t/data/spam/decodeshorturl/chain.eml
+t/data/spam/dmarc/nodmarc.eml
+t/data/spam/dmarc/noneko.eml
+t/data/spam/dmarc/quarko.eml
+t/data/spam/dmarc/rejectko.eml
+t/data/spam/dmarc/strictrejectko.eml
 t/data/spam/dnsbl.eml
 t/data/spam/dnsbl_domsonly.eml
 t/data/spam/dnsbl_ipsonly.eml

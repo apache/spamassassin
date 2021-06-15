@@ -1,0 +1,23 @@
+Return-Path: <test@dmarc2.spamassassin.org>
+Received: from dmarc2.spamassassin.org (dmarc2.spamassassin.org [64.142.3.173])
+	by dmarc2.spamassassin.org (8.14.9/8.14.9) with ESMTP id 13DFe22R006047
+	(version=TLSv1/SSLv3 cipher=AES256-GCM-SHA384 bits=256 verify=NO);
+	Tue, 13 Apr 2021 11:40:02 -0400
+DKIM-Signature: v=1; a=rsa-sha1; c=relaxed/simple; d=
+        dmarc2.spamassassin.org; h=from:to:subject:message-id:date
+        :mime-version:content-type; s=selector1; bh=AaYQYg3XpWgPk5P7okfW
+        fbeh0V4=; b=2T58S24T2pMH5xPY2FB3YYH9qvdyXg6KZUIhNnj0bHFkmLbZWsYN
+        lMdfQojRifSwD28tN8tljiKE9tdwNJeWj8sy6hGzvw5ksGjvAHjb46ZifWi9oD+7
+        2ddAvVgKSV/wtVhg5dZCimNdDq3irKOQ881mPHuzdcXxEsNxYJUMR/989HTvdYLA
+        eJAcT00hum1LdL+wdxZiG/JyC0G5mThARi/b3KdC7MV8DukO3pSRJjWsIgnEJNna
+        +F7YCCJbp6Rm32HyUayYbov3ZMZ6MFzN9sYUkej/gUTl8LMacW3ibCcleeVD4oKN
+        ksOe+bE0CAevco5lyqSEjSAXigBAGoV2ow==
+From: SpamAssassin Test <test@dmarc2.spamassassin.org>
+To: undisclosed-recipients:;
+Subject: test message 1
+Message-ID: <4A294538.10002@dmarc2.spamassassin.org>
+Date: Sun, 11 Apr 2021 02:00:04 +0000
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+
+test message

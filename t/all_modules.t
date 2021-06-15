@@ -56,6 +56,7 @@ tstpre ("
   loadplugin Mail::SpamAssassin::Plugin::Esp
   loadplugin Mail::SpamAssassin::Plugin::ExtractText
   loadplugin Mail::SpamAssassin::Plugin::DecodeShortURLs
+  loadplugin Mail::SpamAssassin::Plugin::Dmarc
 ");
 
 tstprefs("
