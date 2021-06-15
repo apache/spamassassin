@@ -73,6 +73,8 @@ a maximum timeout of 5 seconds per lookup.
 
 =head1 ACKNOWLEDGEMENTS
 
+=encoding utf8
+
 A lot of this plugin has been hacked together by using other plugins as
 examples.  The author would particularly like to tip his hat to Karsten
 Bräckelmann for his work on GUDO.pm, the original version of this plugin
@@ -149,8 +151,6 @@ sub set_config {
     }
   });
 
-=cut
-
 =head1 PRIVILEGED SETTINGS
 
 =over 4
@@ -163,6 +163,8 @@ is configured however plans to support redis cache is planned.
 Example:
 url_shortener_cache_type sqlite
 
+=back
+
 =cut
 
   push (@cmds, {
@@ -172,7 +174,7 @@ url_shortener_cache_type sqlite
     type => $Mail::SpamAssassin::Conf::CONF_TYPE_STRING
   });
 
-=cut
+=over 4
 
 =item url_shortener_cache_dsn		(default: none)
 
@@ -186,6 +188,8 @@ Example:
 
 url_shortener_cache_dsn dbi:SQLite:dbname=/tmp/DecodeShortURLs.sq3
 
+=back
+
 =cut
 
   push (@cmds, {
@@ -195,11 +199,13 @@ url_shortener_cache_dsn dbi:SQLite:dbname=/tmp/DecodeShortURLs.sq3
     type => $Mail::SpamAssassin::Conf::CONF_TYPE_STRING
   });
 
-=cut
+=over 4
 
 =item url_shortener_cache_username  (default: none)
 
 The username that should be used to connect to the database.
+
+=back
 
 =cut
 
@@ -210,11 +216,13 @@ The username that should be used to connect to the database.
     type => $Mail::SpamAssassin::Conf::CONF_TYPE_STRING
   });
 
-=cut
+=over 4
 
 =item url_shortener_cache_password  (default: none)
 
 The password that should be used to connect to the database.
+
+=back
 
 =cut
 
@@ -225,7 +233,7 @@ The password that should be used to connect to the database.
     type => $Mail::SpamAssassin::Conf::CONF_TYPE_STRING
   });
 
-=cut
+=over 4
 
 =item url_shortener_cache_ttl		(default: 86400)
 
@@ -239,6 +247,8 @@ echo "DELETE FROM short_url_cache WHERE modified < NOW() - C<ttl>; | sqlite3 /pa
 
 NOTE: replace C<ttl> above with the same value you use for this option
 
+=back
+
 =cut
 
   push (@cmds, {
@@ -248,11 +258,13 @@ NOTE: replace C<ttl> above with the same value you use for this option
     type => $Mail::SpamAssassin::Conf::CONF_TYPE_NUMERIC
   });
 
-=cut
+=over 4
 
 =item url_shortener_loginfo           (default: 0 (off))
 
 If this option is enabled (set to 1), then short URLs and the decoded URLs will be logged with info priority.
+
+=back
 
 =cut
 
@@ -263,11 +275,13 @@ If this option is enabled (set to 1), then short URLs and the decoded URLs will 
     type => $Mail::SpamAssassin::Conf::CONF_TYPE_BOOL
   });
 
-=cut
+=over 4
 
 =item max_short_urls                 (default: 10)
 
 The max depth of short urls that will be chained until it stops looking further.
+
+=back
 
 =cut
 
