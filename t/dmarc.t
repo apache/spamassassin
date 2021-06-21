@@ -12,9 +12,11 @@ use constant HAS_DKIM_VERIFIER => eval {
   require Mail::DKIM::Verifier;
   version->parse(Mail::DKIM::Verifier->VERSION) >= version->parse(0.31);
 };
+use constant HAS_MAILDMARC => eval { require Mail::DMARC::PurePerl; };
 
 plan skip_all => "Net tests disabled" unless conf_bool('run_net_tests');
-plan skip_all => "Need Mail::SPF" unless HAS_MAILSPF;
+plan skip_all => "Needs Mail::SPF" unless HAS_MAILSPF;
+plan skip_all => "Needs Mail::DMARC::PurePerl" unless HAS_MAILDMARC;
 plan skip_all => "Needs Mail::DKIM::Verifier >= 0.31" unless HAS_DKIM_VERIFIER ;
 plan tests => 9;
 
