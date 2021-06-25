@@ -11,7 +11,9 @@ score    PDS_BRAND_SUBJ_NAKED_TO 1.0
 header   __PDS_FROM_GMAIL From:addr =~ /\@g(?:oogle)?mail\.com$/i
 header   __PDS_GMAIL_MID Message-Id =~ /\@mail.gmail.com>$/
 
-meta     SPOOF_GMAIL_MID SPOOFED_FREEMAIL && __PDS_FROM_GMAIL && !__PDS_GMAIL_MID
+meta     __PDS_SPOOF_GMAIL_MID __PDS_FROM_GMAIL && !__PDS_GMAIL_MID
+
+meta     SPOOF_GMAIL_MID SPOOFED_FREEMAIL && __PDS_SPOOF_GMAIL_MID
 score    SPOOF_GMAIL_MID 1.5
 describe SPOOF_GMAIL_MID From Gmail but it doesn't seem to be...
 
