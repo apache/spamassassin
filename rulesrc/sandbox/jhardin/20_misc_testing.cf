@@ -3189,7 +3189,7 @@ header     __FROM_NAME_AMAZONCOM       From:name =~ /\bamazon\.com\b/i
 header     __HDR_RCVD_KEEPA            X-Spam-Relays-External =~ /\srdns=\S+\.keepa\.com\s/
 
 meta       __AMAZON_IMG_NOT_RCVD_AMZN  __URI_IMG_AMAZON && !__HDR_RCVD_AMAZON && !__HDR_RCVD_AMAZON_HELO
-meta       AMAZON_IMG_NOT_RCVD_AMZN    __AMAZON_IMG_NOT_RCVD_AMZN && !__HDR_RCVD_KEEPA && !__URI_DBL_DOM && !__RCD_RDNS_SMTP && !__RCD_RDNS_MTA && !__DATE_LOWER && !__MSGID_LIST
+meta       AMAZON_IMG_NOT_RCVD_AMZN    __AMAZON_IMG_NOT_RCVD_AMZN && !__HDR_RCVD_KEEPA && !__URI_DBL_DOM && !__RCD_RDNS_SMTP && !__RCD_RDNS_MTA && !__DATE_LOWER && !__MSGID_LIST && !__URI_PRODUCT_AMAZON && !__HAS_ERRORS_TO 
 score      AMAZON_IMG_NOT_RCVD_AMZN    2.500	# limit
 describe   AMAZON_IMG_NOT_RCVD_AMZN    Amazon hosted image but message not from Amazon
 tflags     AMAZON_IMG_NOT_RCVD_AMZN    publish
