@@ -3234,7 +3234,7 @@ header     __HDR_RCVD_LINKEDIN         X-Spam-Relays-External =~ /\srdns=\S+\.li
 uri        __URI_IMG_LINKEDIN          m;://media-exp\d\.licdn\.com/dms/image/;i
 
 meta       __LINKED_IMG_NOT_RCVD_LINK  __URI_IMG_LINKEDIN && !__HDR_RCVD_LINKEDIN
-meta       LINKEDIN_IMG_NOT_RCVD_LNKN  __LINKED_IMG_NOT_RCVD_LINK
+meta       LINKEDIN_IMG_NOT_RCVD_LNKN  __LINKED_IMG_NOT_RCVD_LINK && !__LUNSUB_BEFORE_SUBJDT 
 score      LINKEDIN_IMG_NOT_RCVD_LNKN  2.500  # limit
 describe   LINKEDIN_IMG_NOT_RCVD_LNKN  Linkedin hosted image but message not from Linkedin
 
