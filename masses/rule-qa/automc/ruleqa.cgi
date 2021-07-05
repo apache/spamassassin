@@ -239,6 +239,7 @@ sub ui_get_rules {
 
   # which rules?
   $self->{rule} = $self->{q}->param('rule') || '';
+  $self->{rule} =~ s/[^_0-9a-zA-Z\/]//gs; # Sanitize
   $self->{rules_all} = 0;
   $self->{rules_grep} = 0;
   $self->{nicerule} = $self->{rule};
@@ -250,7 +251,9 @@ sub ui_get_rules {
   }
 
   $self->{srcpath} = $self->{q}->param('srcpath') || '';
+  $self->{srcpath} =~ s/[^.,_0-9a-zA-Z\/-]//gs; # Sanitize
   $self->{mtime} = $self->{q}->param('mtime') || '';
+  $self->{mtime} =~ s/[^0-9]//gs; # Sanitize
 
   $self->{freqs}{head} = { };
   $self->{freqs}{data} = { };
