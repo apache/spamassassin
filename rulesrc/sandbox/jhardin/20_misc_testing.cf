@@ -3906,19 +3906,19 @@ describe   URI_LONG_REPEAT             Very long identical host+domain
 score      URI_LONG_REPEAT             2.500	# limit
 tflags     URI_LONG_REPEAT             publish
 
-body       READY_TO_SHIP               /(?:(?:in our (?:stock|warehouse|store)(?: today| now| right away)?[.,:] |our (?:\w+,? ){2,8}(?:is |now )+)Ready (?:to (?:be )?|for )+(?:ship|send|deliver)|ready (?:for shipping|to (?:ship|send)) (?:(?:in|from|by) our (?:warehouse|stock)|(?:to|for)(?: global(?:ly)?| worldwide| customers){2})|(?:(?:our|this|a|great|fine|wonderful|cool|popular) new product|we have(?: \w+){1,6} available|ready) in (?:our )?(?:warehouse|stock|store)|just arrived in our warehouse|we will (?:contact the (?:warehouse|logistics) to )?arrange (?:the )?(?:shipment|delivery))/i
+body       READY_TO_SHIP               /(?:(?:in our (?:stock|warehouse|store)(?: today| now| right away)?[.,:]\s|our (?:\w+,? ){2,8}(?:is |now )+)Ready (?:to (?:be )?|for )+(?:ship|send|deliver)|ready (?:for shipping|to (?:ship|send)) (?:(?:in|from|by) our (?:warehouse|stock)|(?:to|for)(?: global(?:ly)?| worldwide| customers){2})|(?:(?:our|this|a|great|fine|wonderful|cool|popular) new product|we have(?: \w+){1,6} available|ready) in (?:our )?(?:warehouse|stock|store)|just arrived in our warehouse|we will (?:contact the (?:warehouse|logistics) to )?arrange (?:the )?(?:shipment|delivery)|a new (?:\w+ ){1,3}in our warehouse)/i
 score      READY_TO_SHIP               1.250	# limit
 
 body       WANT_TO_ORDER               /you (?:(?:would )?like|want|are interested|need|wish)(?: to| in)? (?:plac(?:e|ing) an order|order(?:ing)? (?:for )?(?:this|it|now|today|our \w+)|take one (?:or two )?(?:today|now))\b/i
 score      WANT_TO_ORDER               2.750	# limit
 
-body       YOUR_DELIVERY_ADDRESS       /(?:(?:respond|reply|answer) (?:to )?(?:our|this) ?e?mail (?:[\w,]+\s){0,10}(?:with|and send(?: us)?)|we need to know|let us know|(?:send|provide|tell|inform)(?: us)?(?: of)?|confirm|indicate)(?: the (?:order )?quantity and)? (?:your |the )?(?:detailed |specific )?(?:(?:delivery |shipping |mailing |shipment )?address(?:\s?[,.;]|(?: and| so)? we| if you)|address (?:for|of) (?:shipping|delivery|shipment))/i
+body       YOUR_DELIVERY_ADDRESS       /(?:(?:respond|reply|answer) (?:to )?(?:our|this) ?e?mail (?:[\w,]+\s){0,10}(?:with|and send(?: us)?)|we need to know|let us know|(?:send|provide|tell|inform)(?: us)?(?: of)?|confirm|indicate)(?: t?he (?:order )?quantity and)? (?:your |the )?(?:detailed |specific )?(?:(?:delivery |shipping |mailing |shipment |receiving )?address(?:\s?[,.;]|(?: and| so)? we| if you)|address (?:for|of) (?:shipping|delivery|shipment))/i
 score      YOUR_DELIVERY_ADDRESS       1.250	# limit
 
-body       NEW_PRODUCTS                /\bhere are new products|(?:Our company|we) (?:has |have )?(?:(?:recently|just|newly) (?:introduce|release|launche)[ds](?: a) new|a new (?:\w+\s){1,5} here)|recently,? our company launched/i
+body       NEW_PRODUCTS                /\bhere are new products|\b(?:Our company|we) (?:has |have )?(?:(?:recently|just|newly) (?:introduce|release|launche)[ds](?: a) new|a new (?:\w+\s){1,5} here)|recently,? our company launched|\bI want to recommend a new (?:\w+ )+(?:we|our)\b/i
 score      NEW_PRODUCTS                1.250	# limit
 
-body       DETAILS_OF_PRODUCT          /(?:Please|kindly) (?:see|refer to|check(?: out)?) the (?:details of the product|(?:detailed |complete )?product (?:details|information)) (below|following|that follow)|the following (?:(?:is the )?(?:detailed )?product information|is a brief introduction to (?:\w+\s){0,5}this product)|\bhere (is|are) some basic information about this|you can (?:\w+ )?understand our product/i
+body       DETAILS_OF_PRODUCT          /(?:Please|kindly) (?:see|refer to|check(?: out)?) the (?:details of the product|(?:detailed |complete |specific )?product (?:details|information)) (below|following|that follow|in detail)|the following (?:(?:is the )?(?:detailed )?product information|is a brief introduction to (?:\w+\s){0,5}this product)|\bhere (is|are) some basic information about this|you can (?:\w+ )?understand our product/i
 score      DETAILS_OF_PRODUCT          1.250	# limit
 
 # Don't joe-job a SA dev's wife
