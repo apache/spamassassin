@@ -140,6 +140,13 @@ ifplugin Mail::SpamAssassin::Plugin::MIMEHeader
   describe     PHISH_ATTACH          Attachment filename suspicious, probable phishing
   tflags       PHISH_ATTACH          publish
 
+  mimeheader   __TEXT_XML_MT       Content-Type =~ m,\btext/xml\b,i
+
+  mimeheader   __MSO_THEME_MT      Content-Type =~ m,\bapplication/vnd.ms-officetheme\b,i
+  mimeheader   __X_MSO_MT          Content-Type =~ m,\bapplication/x-mso\b,i
+  meta         __ATTACH_MSO_MHTML  __TEXT_XML_MT && __MSO_THEME_MT && __X_MSO_MT
+
+
 else
   meta         __HTML_ATTACH_01    0
   meta         __HTML_ATTACH_02    0
