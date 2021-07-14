@@ -12,7 +12,7 @@ use vars qw(%patterns %anti_patterns);
 
 use constant HAS_DKIM_VERIFIER => eval {
   require Mail::DKIM::Verifier;
-  version->parse(Mail::DKIM::Verifier->VERSION) >= version->parse->(0.31);
+  version->parse(Mail::DKIM::Verifier->VERSION) >= version->parse(0.31);
 };
 
 use Test::More;
