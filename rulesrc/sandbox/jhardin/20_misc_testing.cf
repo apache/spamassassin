@@ -3922,10 +3922,12 @@ score      WANT_TO_ORDER               2.750	# limit
 body       YOUR_DELIVERY_ADDRESS       /(?:(?:respond|reply|answer) (?:to )?(?:our|this) ?e?mail (?:[\w,]+\s){0,10}(?:with|and send(?: us)?)|we need to know|let us know|(?:send|provide|tell|inform)(?: us)?(?: of)?|confirm|indicate)(?: t?he (?:order )?quantity and)? (?:your |the )?(?:detailed |specific )?(?:(?:delivery |shipping |mailing |shipment |receiving )?address(?:\s?[,.;]|(?: and| so)? we| if you)|address (?:for|of) (?:shipping|delivery|shipment))/i
 score      YOUR_DELIVERY_ADDRESS       1.250	# limit
 
-body       NEW_PRODUCTS                /\bhere are new products|\b(?:Our company|we) (?:has |have )?(?:(?:recently|just|newly) (?:introduce|release|launche)[ds](?: a) new|a new (?:\w+\s){1,5} here)|recently,? our company launched|\bI want to recommend a new (?:\w+ )+(?:we|our)\b/i
+body       __NEW_PRODUCTS              /\bhere are new products|\b(?:Our company|we) (?:has |have )?(?:(?:recently|just|newly) (?:introduce|release|launche)[ds](?: a) new|a new (?!cat\s|kitten\s|dog\s|puppy\s|pet\s|baby\s|child\s|boy\s|girl\s)(?:\w+\s){1,5} here)|recently,? our company launched|\bI want to recommend a new (?:\w+ )+(?:we|our)\b|latest version of our (?:stock|product)/i
+meta       NEW_PRODUCTS                __NEW_PRODUCTS && !__STY_INVIS_MANY 
 score      NEW_PRODUCTS                1.250	# limit
+tflags     NEW_PRODUCTS                publish
 
-body       DETAILS_OF_PRODUCT          /(?:Please|kindly) (?:see|refer to|check(?: out)?) the (?:details of the product|(?:detailed |complete |specific )?product (?:details|information)) (below|following|that follow|in detail)|the following (?:(?:is the )?(?:detailed )?product information|is a brief introduction to (?:\w+\s){0,5}this product)|\bhere (is|are) some basic information about this|you can (?:\w+ )?understand our product/i
+body       DETAILS_OF_PRODUCT          /(?:Please|kindly) (?:see|refer to|check(?: out)?) the (?:details of the product|(?:detailed |complete |specific )?product (?:details|information)) (below|following|that follow|in detail)|the following (?:(?:is the )?(?:detailed )?product information|is a brief introduction to (?:\w+\s){0,5}this product)|\bhere (is|are) some basic information about this|you can (?:\w+ )?understand our product|take a look at this product|interested in learning about (?:this|our product)|grasp our (?:product|goods)|details can be checked below/i
 score      DETAILS_OF_PRODUCT          1.250	# limit
 
 # Don't joe-job a SA dev's wife
