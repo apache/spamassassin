@@ -179,7 +179,7 @@ BITCOIN_IMGUR
 # good enough
 BITCOIN_MALF_HTML
 
-# tflags net
+# tflags publish
 BITCOIN_MALWARE
 
 # tflags publish
@@ -239,9 +239,6 @@ BITCOIN_XPRIO
 # tflags publish
 BITCOIN_YOUR_INFO
 
-# good enough
-BODY_SINGLE_URI
-
 # tflags publish
 BODY_URI_ONLY
 
@@ -280,9 +277,6 @@ CN_B2B_SPAMMER
 
 # tflags publish
 COMMENT_GIBBERISH
-
-# tflags net
-COMPENSATION
 
 # tflags publish
 CONTENT_AFTER_HTML
@@ -449,13 +443,13 @@ FORGED_SPF_HELO
 # tflags net
 FORM_FRAUD
 
-# tflags net
+# tflags publish
 FORM_FRAUD_3
 
 # tflags publish
 FORM_FRAUD_5
 
-# tflags net
+# tflags publish
 FORM_LOW_CONTRAST
 
 # tflags publish
@@ -535,9 +529,6 @@ FROM_MISSP_MSFT
 
 # good enough
 FROM_MISSP_PHISH
-
-# tflags net
-FROM_MISSP_REPLYTO
 
 # tflags net
 FROM_MISSP_SPF_FAIL
@@ -849,9 +840,6 @@ JH_SPAMMY_PATTERN01
 JH_SPAMMY_PATTERN02
 
 # tflags net
-KHOP_FAKE_EBAY
-
-# tflags net
 KHOP_HELO_FCRDNS
 
 # tflags publish
@@ -1007,6 +995,9 @@ NA_DOLLARS
 # tflags publish
 NEWEGG_IMG_NOT_RCVD_NEGG
 
+# tflags publish
+NEW_PRODUCTS
+
 # good enough
 NICE_REPLY_A
 
@@ -1018,9 +1009,6 @@ NML_ADSP_CUSTOM_LOW
 
 # tflags net
 NML_ADSP_CUSTOM_MED
-
-# tflags net
-NORDNS_LOW_CONTRAST
 
 # tflags publish
 NOT_SPAM
@@ -1520,7 +1508,7 @@ SHORT_IMG_SUSP_NTLD
 # good enough
 SHORT_SHORTNER
 
-# tflags net
+# tflags publish
 SINGLETS_LOW_CONTRAST
 
 # tflags net
@@ -1574,7 +1562,7 @@ SPOOF_GMAIL_MID
 # tflags publish
 STATIC_XPRIO_OLE
 
-# tflags net
+# tflags publish
 STOCK_LOW_CONTRAST
 
 # tflags publish
@@ -1601,7 +1589,7 @@ SYSADMIN
 # tflags publish
 TAGSTAT_IMG_NOT_RCVD_TGST
 
-# tflags net
+# tflags publish
 TEQF_USR_IMAGE
 
 # tflags net
@@ -1624,9 +1612,6 @@ TO_EQ_FM_DIRECT_MX
 
 # tflags net
 TO_EQ_FM_DOM_HTML_IMG
-
-# tflags net
-TO_EQ_FM_DOM_HTML_ONLY
 
 # tflags net
 TO_EQ_FM_DOM_SPF_FAIL
@@ -1677,7 +1662,10 @@ TVD_QUAL_MEDS
 TVD_RCVD_SPACE_BRACKET
 
 # tflags net
-TVD_SPACE_ENCODED
+TVD_SPACE_RATIO_MINFP
+
+# tflags net
+TVD_SUBJ_NUM_OBFU_MINFP
 
 # good enough
 TVD_VISIT_PHARMA
@@ -1877,7 +1865,7 @@ URI_WP_DIRINDEX
 # tflags net
 URI_WP_HACKED
 
-# tflags publish
+# tflags net
 URI_WP_HACKED_2
 
 # tflags publish
