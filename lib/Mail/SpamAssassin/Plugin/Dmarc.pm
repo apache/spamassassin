@@ -254,7 +254,11 @@ sub _check_dmarc {
     $result = $dmarc->validate();
   };
   if ($@) {
-    dbg("Dmarc error while evaluating domain $domain: $@");
+    if(defined $domain) {
+      dbg("Dmarc error while evaluating domain $domain: $@");
+    } else {
+      dbg("Dmarc error: $@");
+    }
     return;
   }
 
