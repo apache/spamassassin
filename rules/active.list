@@ -179,7 +179,7 @@ BITCOIN_IMGUR
 # good enough
 BITCOIN_MALF_HTML
 
-# tflags publish
+# tflags net
 BITCOIN_MALWARE
 
 # tflags publish
@@ -449,7 +449,7 @@ FORM_FRAUD_3
 # tflags publish
 FORM_FRAUD_5
 
-# tflags publish
+# tflags net
 FORM_LOW_CONTRAST
 
 # tflags publish
@@ -722,9 +722,6 @@ HAS_X_NO_RELAY
 # tflags publish
 HAS_X_OUTGOING_SPAM_STAT
 
-# tflags net
-HDRS_LCASE
-
 # good enough
 HDRS_LCASE_IMGONLY
 
@@ -840,6 +837,9 @@ JH_SPAMMY_PATTERN01
 JH_SPAMMY_PATTERN02
 
 # tflags net
+KHOP_FAKE_EBAY
+
+# tflags net
 KHOP_HELO_FCRDNS
 
 # tflags publish
@@ -886,9 +886,6 @@ MANY_HDRS_LCASE
 
 # tflags publish
 MANY_SPAN_IN_TEXT
-
-# tflags net
-MAY_BE_FORGED
 
 # tflags publish
 MILLION_HUNDRED
@@ -1010,6 +1007,9 @@ NML_ADSP_CUSTOM_LOW
 # tflags net
 NML_ADSP_CUSTOM_MED
 
+# tflags net
+NORDNS_LOW_CONTRAST
+
 # tflags publish
 NOT_SPAM
 
@@ -1075,6 +1075,9 @@ PDS_FRNOM_TODOM_DBL_URL
 
 # good enough
 PDS_FRNOM_TODOM_NAKED_TO
+
+# tflags net
+PDS_FROM_2_EMAILS
 
 # good enough
 PDS_FROM_2_EMAILS_SHRTNER
@@ -1419,9 +1422,6 @@ RDNS_NUM_TLD_XM
 READY_TO_SHIP
 
 # good enough
-REPLYTO_EMPTY
-
-# good enough
 REPLYTO_WITHOUT_TO_CC
 
 # tflags publish
@@ -1472,9 +1472,6 @@ RISK_FREE
 # good enough
 SCC_NEWBIE_HASBEENS
 
-# good enough
-SCRIPT_GIBBERISH
-
 # tflags publish
 SENDGRID_REDIR
 
@@ -1508,7 +1505,7 @@ SHORT_IMG_SUSP_NTLD
 # good enough
 SHORT_SHORTNER
 
-# tflags publish
+# tflags net
 SINGLETS_LOW_CONTRAST
 
 # tflags net
@@ -1562,7 +1559,7 @@ SPOOF_GMAIL_MID
 # tflags publish
 STATIC_XPRIO_OLE
 
-# tflags publish
+# tflags net
 STOCK_LOW_CONTRAST
 
 # tflags publish
@@ -1578,9 +1575,6 @@ SUBJECT_IN_WHITELIST
 SUBJ_BRKN_WORDNUMS
 
 # tflags net
-SUBJ_UNNEEDED_HTML
-
-# tflags net
 SURBL_BLOCKED
 
 # tflags publish
@@ -1592,7 +1586,7 @@ TAGSTAT_IMG_NOT_RCVD_TGST
 # tflags publish
 TEQF_USR_IMAGE
 
-# tflags net
+# tflags publish
 TEQF_USR_MSGID_HEX
 
 # tflags publish
@@ -1611,13 +1605,7 @@ TONLINE_FAKE_DKIM
 TO_EQ_FM_DIRECT_MX
 
 # tflags net
-TO_EQ_FM_DOM_HTML_IMG
-
-# tflags net
 TO_EQ_FM_DOM_SPF_FAIL
-
-# tflags net
-TO_EQ_FM_HTML_ONLY
 
 # tflags net
 TO_EQ_FM_SPF_FAIL
@@ -1660,9 +1648,6 @@ TVD_QUAL_MEDS
 
 # good enough
 TVD_RCVD_SPACE_BRACKET
-
-# tflags net
-TVD_SPACE_RATIO_MINFP
 
 # tflags net
 TVD_SUBJ_NUM_OBFU_MINFP
@@ -1835,7 +1820,7 @@ URI_MALWARE_SCMS
 # tflags userconf
 URI_NOVOWEL
 
-# tflags net
+# tflags publish
 URI_ONLY_MSGID_MALF
 
 # tflags publish
@@ -1865,7 +1850,7 @@ URI_WP_DIRINDEX
 # tflags net
 URI_WP_HACKED
 
-# tflags net
+# tflags publish
 URI_WP_HACKED_2
 
 # tflags publish
