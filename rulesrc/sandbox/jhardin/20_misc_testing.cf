@@ -3267,10 +3267,10 @@ header     __HDR_RCVD_FACEBOOK         X-Spam-Relays-External =~ /\srdns=\S+\.fa
 uri        __URI_IMG_FACEBOOK          m;://([^/.]+\.)+fbcdn\.net/v/.+\.(?:jpe?g|gif|png);i
 
 meta       __FACEBOOK_IMG_NOT_RCVD_FB  __URI_IMG_FACEBOOK && !__HDR_RCVD_FACEBOOK
-#meta       FACEBOOK_IMG_NOT_RCVD_FB    __FACEBOOK_IMG_NOT_RCVD_FB
-#score      FACEBOOK_IMG_NOT_RCVD_FB    1.500  # limit
-#describe   FACEBOOK_IMG_NOT_RCVD_FB    Facebook hosted image but message not from Facebook
-#tflags     FACEBOOK_IMG_NOT_RCVD_FB    publish
+meta       FACEBOOK_IMG_NOT_RCVD_FB    __FACEBOOK_IMG_NOT_RCVD_FB && !__VIA_ML && !__ONE_IMG && !__RCD_RDNS_SMTP 
+score      FACEBOOK_IMG_NOT_RCVD_FB    2.000  # limit
+describe   FACEBOOK_IMG_NOT_RCVD_FB    Facebook hosted image but message not from Facebook
+tflags     FACEBOOK_IMG_NOT_RCVD_FB    publish
 
 
 uri        __URI_IMG_YTIMG             m,://[^/?]+\.ytimg\.com/,i
