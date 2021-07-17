@@ -443,13 +443,13 @@ FORGED_SPF_HELO
 # tflags net
 FORM_FRAUD
 
-# tflags publish
+# tflags net
 FORM_FRAUD_3
 
 # tflags publish
 FORM_FRAUD_5
 
-# tflags net
+# tflags publish
 FORM_LOW_CONTRAST
 
 # tflags publish
@@ -529,6 +529,9 @@ FROM_MISSP_MSFT
 
 # good enough
 FROM_MISSP_PHISH
+
+# tflags net
+FROM_MISSP_REPLYTO
 
 # tflags net
 FROM_MISSP_SPF_FAIL
@@ -722,6 +725,9 @@ HAS_X_NO_RELAY
 # tflags publish
 HAS_X_OUTGOING_SPAM_STAT
 
+# tflags net
+HDRS_LCASE
+
 # good enough
 HDRS_LCASE_IMGONLY
 
@@ -812,7 +818,7 @@ HTML_OFF_PAGE
 # tflags publish
 HTML_SHRT_CMNT_OBFU_MANY
 
-# tflags publish
+# tflags net
 HTML_SINGLET_MANY
 
 # good enough
@@ -835,9 +841,6 @@ JH_SPAMMY_PATTERN01
 
 # tflags publish
 JH_SPAMMY_PATTERN02
-
-# tflags net
-KHOP_FAKE_EBAY
 
 # tflags net
 KHOP_HELO_FCRDNS
@@ -881,11 +884,11 @@ MALWARE_PASSWORD
 # tflags publish
 MALW_ATTACH
 
-# tflags net
-MANY_HDRS_LCASE
-
 # tflags publish
 MANY_SPAN_IN_TEXT
+
+# tflags net
+MAY_BE_FORGED
 
 # tflags publish
 MILLION_HUNDRED
@@ -1075,9 +1078,6 @@ PDS_FRNOM_TODOM_DBL_URL
 
 # good enough
 PDS_FRNOM_TODOM_NAKED_TO
-
-# tflags net
-PDS_FROM_2_EMAILS
 
 # good enough
 PDS_FROM_2_EMAILS_SHRTNER
@@ -1487,9 +1487,6 @@ SERGIO_SUBJECT_VIAGRA01
 # tflags publish
 SHOPIFY_IMG_NOT_RCVD_SFY
 
-# good enough
-SHORTENED_URL_SRC
-
 # tflags publish
 SHORTENER_SHORT_IMG
 
@@ -1559,7 +1556,7 @@ SPOOF_GMAIL_MID
 # tflags publish
 STATIC_XPRIO_OLE
 
-# tflags net
+# tflags publish
 STOCK_LOW_CONTRAST
 
 # tflags publish
@@ -1573,6 +1570,9 @@ SUBJECT_IN_WHITELIST
 
 # tflags net
 SUBJ_BRKN_WORDNUMS
+
+# tflags net
+SUBJ_UNNEEDED_HTML
 
 # tflags net
 SURBL_BLOCKED
@@ -1603,6 +1603,12 @@ TONLINE_FAKE_DKIM
 
 # tflags publish
 TO_EQ_FM_DIRECT_MX
+
+# tflags net
+TO_EQ_FM_DOM_HTML_IMG
+
+# tflags net
+TO_EQ_FM_DOM_HTML_ONLY
 
 # tflags net
 TO_EQ_FM_DOM_SPF_FAIL
@@ -1847,7 +1853,7 @@ URI_WPADMIN
 # tflags publish
 URI_WP_DIRINDEX
 
-# tflags net
+# tflags publish
 URI_WP_HACKED
 
 # tflags publish
