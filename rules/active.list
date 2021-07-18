@@ -179,7 +179,7 @@ BITCOIN_IMGUR
 # good enough
 BITCOIN_MALF_HTML
 
-# tflags net
+# tflags publish
 BITCOIN_MALWARE
 
 # tflags publish
@@ -239,7 +239,7 @@ BITCOIN_XPRIO
 # tflags publish
 BITCOIN_YOUR_INFO
 
-# tflags publish
+# tflags net
 BODY_URI_ONLY
 
 # tflags publish
@@ -277,6 +277,9 @@ CN_B2B_SPAMMER
 
 # tflags publish
 COMMENT_GIBBERISH
+
+# tflags net
+COMPENSATION
 
 # tflags publish
 CONTENT_AFTER_HTML
@@ -443,7 +446,7 @@ FORGED_SPF_HELO
 # tflags net
 FORM_FRAUD
 
-# tflags net
+# tflags publish
 FORM_FRAUD_3
 
 # tflags publish
@@ -818,7 +821,7 @@ HTML_OFF_PAGE
 # tflags publish
 HTML_SHRT_CMNT_OBFU_MANY
 
-# tflags net
+# tflags publish
 HTML_SINGLET_MANY
 
 # good enough
@@ -1010,9 +1013,6 @@ NML_ADSP_CUSTOM_LOW
 # tflags net
 NML_ADSP_CUSTOM_MED
 
-# tflags net
-NORDNS_LOW_CONTRAST
-
 # tflags publish
 NOT_SPAM
 
@@ -1078,6 +1078,9 @@ PDS_FRNOM_TODOM_DBL_URL
 
 # good enough
 PDS_FRNOM_TODOM_NAKED_TO
+
+# tflags net
+PDS_FROM_2_EMAILS
 
 # good enough
 PDS_FROM_2_EMAILS_SHRTNER
@@ -1502,7 +1505,7 @@ SHORT_IMG_SUSP_NTLD
 # good enough
 SHORT_SHORTNER
 
-# tflags net
+# tflags publish
 SINGLETS_LOW_CONTRAST
 
 # tflags net
@@ -1556,7 +1559,7 @@ SPOOF_GMAIL_MID
 # tflags publish
 STATIC_XPRIO_OLE
 
-# tflags publish
+# tflags net
 STOCK_LOW_CONTRAST
 
 # tflags publish
@@ -1614,6 +1617,9 @@ TO_EQ_FM_DOM_HTML_ONLY
 TO_EQ_FM_DOM_SPF_FAIL
 
 # tflags net
+TO_EQ_FM_HTML_ONLY
+
+# tflags net
 TO_EQ_FM_SPF_FAIL
 
 # tflags publish
@@ -1630,9 +1636,6 @@ TO_NO_BRKTS_HTML_IMG
 
 # tflags publish
 TO_NO_BRKTS_HTML_ONLY
-
-# tflags net
-TO_NO_BRKTS_MSFT
 
 # tflags publish
 TO_NO_BRKTS_NORDNS_HTML
@@ -1654,6 +1657,9 @@ TVD_QUAL_MEDS
 
 # good enough
 TVD_RCVD_SPACE_BRACKET
+
+# tflags net
+TVD_SPACE_ENCODED
 
 # tflags net
 TVD_SUBJ_NUM_OBFU_MINFP
@@ -1681,9 +1687,6 @@ UNICODE_OBFU_ZW
 
 # tflags userconf
 UNPARSEABLE_RELAY
-
-# tflags net
-UPGRADE_MAILBOX
 
 # tflags net
 URIBL_ABUSE_SURBL
@@ -1826,7 +1829,7 @@ URI_MALWARE_SCMS
 # tflags userconf
 URI_NOVOWEL
 
-# tflags publish
+# tflags net
 URI_ONLY_MSGID_MALF
 
 # tflags publish
