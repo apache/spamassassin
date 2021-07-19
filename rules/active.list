@@ -179,7 +179,7 @@ BITCOIN_IMGUR
 # good enough
 BITCOIN_MALF_HTML
 
-# tflags publish
+# tflags net
 BITCOIN_MALWARE
 
 # tflags publish
@@ -398,6 +398,9 @@ ENVFROM_GOOG_TRIX
 # tflags net
 ENV_AND_HDR_SPF_MATCH
 
+# tflags publish
+FACEBOOK_IMG_NOT_RCVD_FB
+
 # good enough
 FAKE_REPLY_A1
 
@@ -446,7 +449,7 @@ FORGED_SPF_HELO
 # tflags net
 FORM_FRAUD
 
-# tflags publish
+# tflags net
 FORM_FRAUD_3
 
 # tflags publish
@@ -821,7 +824,7 @@ HTML_OFF_PAGE
 # tflags publish
 HTML_SHRT_CMNT_OBFU_MANY
 
-# tflags publish
+# tflags net
 HTML_SINGLET_MANY
 
 # good enough
@@ -844,6 +847,9 @@ JH_SPAMMY_PATTERN01
 
 # tflags publish
 JH_SPAMMY_PATTERN02
+
+# tflags net
+KHOP_FAKE_EBAY
 
 # tflags net
 KHOP_HELO_FCRDNS
@@ -886,6 +892,9 @@ MALWARE_PASSWORD
 
 # tflags publish
 MALW_ATTACH
+
+# tflags net
+MANY_HDRS_LCASE
 
 # tflags publish
 MANY_SPAN_IN_TEXT
@@ -1494,9 +1503,6 @@ SHOPIFY_IMG_NOT_RCVD_SFY
 SHORTENER_SHORT_IMG
 
 # good enough
-SHORTENER_SHORT_SUBJ
-
-# good enough
 SHORT_BODY_G_DRIVE_DYN
 
 # tflags publish
@@ -1559,7 +1565,7 @@ SPOOF_GMAIL_MID
 # tflags publish
 STATIC_XPRIO_OLE
 
-# tflags net
+# tflags publish
 STOCK_LOW_CONTRAST
 
 # tflags publish
@@ -1586,7 +1592,7 @@ SYSADMIN
 # tflags publish
 TAGSTAT_IMG_NOT_RCVD_TGST
 
-# tflags publish
+# tflags net
 TEQF_USR_IMAGE
 
 # tflags publish
@@ -1609,9 +1615,6 @@ TO_EQ_FM_DIRECT_MX
 
 # tflags net
 TO_EQ_FM_DOM_HTML_IMG
-
-# tflags net
-TO_EQ_FM_DOM_HTML_ONLY
 
 # tflags net
 TO_EQ_FM_DOM_SPF_FAIL
@@ -1637,6 +1640,9 @@ TO_NO_BRKTS_HTML_IMG
 # tflags publish
 TO_NO_BRKTS_HTML_ONLY
 
+# tflags net
+TO_NO_BRKTS_MSFT
+
 # tflags publish
 TO_NO_BRKTS_NORDNS_HTML
 
@@ -1660,6 +1666,9 @@ TVD_RCVD_SPACE_BRACKET
 
 # tflags net
 TVD_SPACE_ENCODED
+
+# tflags net
+TVD_SPACE_RATIO_MINFP
 
 # tflags net
 TVD_SUBJ_NUM_OBFU_MINFP
@@ -1856,7 +1865,7 @@ URI_WPADMIN
 # tflags publish
 URI_WP_DIRINDEX
 
-# tflags publish
+# tflags net
 URI_WP_HACKED
 
 # tflags publish
