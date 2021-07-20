@@ -278,9 +278,6 @@ CN_B2B_SPAMMER
 # tflags publish
 COMMENT_GIBBERISH
 
-# tflags net
-COMPENSATION
-
 # tflags publish
 CONTENT_AFTER_HTML
 
@@ -824,11 +821,8 @@ HTML_OFF_PAGE
 # tflags publish
 HTML_SHRT_CMNT_OBFU_MANY
 
-# tflags net
+# tflags publish
 HTML_SINGLET_MANY
-
-# good enough
-HTML_TAG_BALANCE_CENTER
 
 # tflags net
 HTML_TEXT_INVISIBLE_FONT
@@ -1087,9 +1081,6 @@ PDS_FRNOM_TODOM_DBL_URL
 
 # good enough
 PDS_FRNOM_TODOM_NAKED_TO
-
-# tflags net
-PDS_FROM_2_EMAILS
 
 # good enough
 PDS_FROM_2_EMAILS_SHRTNER
@@ -1592,7 +1583,7 @@ SYSADMIN
 # tflags publish
 TAGSTAT_IMG_NOT_RCVD_TGST
 
-# tflags net
+# tflags publish
 TEQF_USR_IMAGE
 
 # tflags publish
@@ -1614,7 +1605,7 @@ TONLINE_FAKE_DKIM
 TO_EQ_FM_DIRECT_MX
 
 # tflags net
-TO_EQ_FM_DOM_HTML_IMG
+TO_EQ_FM_DOM_HTML_ONLY
 
 # tflags net
 TO_EQ_FM_DOM_SPF_FAIL
@@ -1667,12 +1658,6 @@ TVD_RCVD_SPACE_BRACKET
 # tflags net
 TVD_SPACE_ENCODED
 
-# tflags net
-TVD_SPACE_RATIO_MINFP
-
-# tflags net
-TVD_SUBJ_NUM_OBFU_MINFP
-
 # good enough
 TVD_VISIT_PHARMA
 
@@ -1696,6 +1681,9 @@ UNICODE_OBFU_ZW
 
 # tflags userconf
 UNPARSEABLE_RELAY
+
+# tflags net
+UPGRADE_MAILBOX
 
 # tflags net
 URIBL_ABUSE_SURBL
@@ -1865,7 +1853,7 @@ URI_WPADMIN
 # tflags publish
 URI_WP_DIRINDEX
 
-# tflags net
+# tflags publish
 URI_WP_HACKED
 
 # tflags publish
