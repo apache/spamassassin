@@ -10,7 +10,8 @@ meta   KB_RATWARE_MSGID        (__KB_MSGID_OUTLOOK_888 && __ANY_OUTLOOK_MUA)
 
 # bug 5817 -- Forged Relay, direct MUA to MX
 
-header FORGED_RELAY_MUA_TO_MX         X-Spam-Relays-External =~ /^\[ ip=(?!127)([\d.]+) [^\[]*\[ ip=\1 [^\[]+ helo=(!(?!(?:10|127|169\.254|172\.(?:1[6-9]|2[0-9]|3[01])|192\.168)\.)| )[^\[]+$/
+header __FORGED_RELAY_MUA_TO_MX       X-Spam-Relays-External =~ /^\[ ip=(?!127)([\d.]+) [^\[]*\[ ip=\1 [^\[]+ helo=(!(?!(?:10|127|169\.254|172\.(?:1[6-9]|2[0-9]|3[01])|192\.168)\.)| )[^\[]+$/
+meta   FORGED_RELAY_MUA_TO_MX         __FORGED_RELAY_MUA_TO_MX
 
 # Plus quite a few devel variants and accompanying tests.  This mess needs
 # cleaning up, probably after re-investigation.  See dos/70_bugs.cf for history.
