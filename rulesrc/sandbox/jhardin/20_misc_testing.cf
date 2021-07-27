@@ -1628,13 +1628,13 @@ header      __DATE_LOWER       ALL =~ /date:\s\S{5}/
 
 # duplicates __XPRIO
 #header      __FH_HAS_XPRIORITY exists:X-Priority
-meta        __XPRIO_MINFP      __XPRIO && !__CT_ENCRYPTED && !ALL_TRUSTED && !__HAS_ERRORS_TO && !__HAS_IMG_SRC && !__RCD_RDNS_MAIL_MESSY && !__VIA_ML && !__PHPMAILER_MUA && !__AC_TINY_FONT && !__HAS_PHP_SCRIPT && !__DOS_HAS_LIST_UNSUB && !__HAS_IMG_SRC_ONECASE && !__NAKED_TO && !__HAS_THREAD_INDEX && !__HAS_TNEF && !__HAS_SENDER && !__UNPARSEABLE_RELAY_COUNT && !__PDS_RDNS_MTA && !__RCD_RDNS_SMTP_MESSY && !__RCD_RDNS_MX_MESSY && !__TO___LOWER && !__FROM_WORDY && !__RP_MATCHES_RCVD && !__DKIM_EXISTS && !__FROM_WEB_DAEMON && !__RDNS_SHORT && !__L_BODY_8BITS 
+meta        __XPRIO_MINFP      __XPRIO && !__CT_ENCRYPTED && !ALL_TRUSTED && !__HAS_ERRORS_TO && !__HAS_IMG_SRC && !__RCD_RDNS_MAIL_MESSY && !__VIA_ML && !__PHPMAILER_MUA && !__AC_TINY_FONT && !__HAS_PHP_SCRIPT && !__DOS_HAS_LIST_UNSUB && !__HAS_IMG_SRC_ONECASE && !__NAKED_TO && !__HAS_THREAD_INDEX && !__HAS_TNEF && !__HAS_SENDER && !__UNPARSEABLE_RELAY_COUNT && !__PDS_RDNS_MTA && !__RCD_RDNS_SMTP_MESSY && !__RCD_RDNS_MX_MESSY && !__TO___LOWER && !__FROM_WORDY && !__RP_MATCHES_RCVD && !__DKIM_EXISTS && !__FROM_WEB_DAEMON && !__RDNS_SHORT && !__L_BODY_8BITS && !__HAS_X_SENDER 
 
 ifplugin Mail::SpamAssassin::Plugin::DKIM
   ifplugin Mail::SpamAssassin::Plugin::SPF
-    meta    XPRIO              __XPRIO_MINFP && !DKIM_SIGNED && !__DKIM_DEPENDABLE && !DKIM_VALID && !DKIM_VALID_AU && !RCVD_IN_DNSWL_NONE && !SPF_PASS 
+    meta    XPRIO              __XPRIO_MINFP && !DKIM_SIGNED && !DKIM_VALID && !DKIM_VALID_AU && !RCVD_IN_DNSWL_NONE && !SPF_PASS 
   else
-    meta    XPRIO              __XPRIO_MINFP && !DKIM_SIGNED && !__DKIM_DEPENDABLE && !DKIM_VALID && !DKIM_VALID_AU && !RCVD_IN_DNSWL_NONE 
+    meta    XPRIO              __XPRIO_MINFP && !DKIM_SIGNED && !DKIM_VALID && !DKIM_VALID_AU && !RCVD_IN_DNSWL_NONE 
   endif
   tflags    XPRIO              net
 else
