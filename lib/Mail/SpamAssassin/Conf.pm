@@ -639,7 +639,7 @@ C<Mail::SpamAssassin::Plugin::DKIM>).  Note that those plugins must be active,
 and working, for this to operate.
 
 Using C<welcomelist_auth> is roughly equivalent to specifying duplicate
-C<whitelist_from_spf>, C<whitelist_from_dk>, and C<whitelist_from_dkim> lines
+C<whitelist_from_spf>, C<whitelist_from_dk>, and C<welcomelist_from_dkim> lines
 for each of the addresses specified.
 
 e.g.
@@ -731,7 +731,7 @@ Use the delist_uri_host directive to neutralize previous enlist_uri_host
 settings.
 
 Enlisting to lists named 'BLACK' and 'WHITE' have their shorthand directives
-blacklist_uri_host and whitelist_uri_host and corresponding default rules,
+blocklist_uri_host and welcomelist_uri_host and corresponding default rules,
 but the names 'BLACK' and 'WHITE' are otherwise not special or reserved.
 
 =cut
@@ -847,7 +847,9 @@ e.g.
     }
   });
 
-=item blacklist_uri_host host-or-domain ...
+=item blocklist_uri_host host-or-domain ...
+
+Previously blacklist_uri_host which will work interchangeably until 4.1.
 
 Is a shorthand for a directive:  enlist_uri_host (BLACK) host ...
 
@@ -856,7 +858,8 @@ Please see directives enlist_uri_host and delist_uri_host for details.
 =cut
 
   push (@cmds, {
-    command => 'blacklist_uri_host',
+    command => 'blocklist_uri_host',
+    aliases => ['blacklist_uri_host'],
     setting => 'uri_host_lists',
     type => $CONF_TYPE_HASH_KEY_VALUE,
     code => sub {
@@ -868,7 +871,9 @@ Please see directives enlist_uri_host and delist_uri_host for details.
     }
   });
 
-=item whitelist_uri_host host-or-domain ...
+=item welcomelist_uri_host host-or-domain ...
+
+Previously whitelist_uri_host which will work interchangeably until 4.1.
 
 Is a shorthand for a directive:  enlist_uri_host (BLACK) host ...
 
@@ -877,7 +882,8 @@ Please see directives enlist_uri_host and delist_uri_host for details.
 =cut
 
   push (@cmds, {
-    command => 'whitelist_uri_host',
+    command => 'welcomelist_uri_host',
+    aliases => ['whitelist_uri_host'],
     setting => 'uri_host_lists',
     type => $CONF_TYPE_HASH_KEY_VALUE,
     code => sub {
