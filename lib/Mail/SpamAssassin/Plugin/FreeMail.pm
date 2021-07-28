@@ -218,14 +218,14 @@ sub set_config {
         setting => 'freemail_import_welcomelist_auth',
         default => 0,
         type => $Mail::SpamAssassin::Conf::CONF_TYPE_NUMERIC,
-	aliases => ['freemail_import_whitelist_auth'],
+        aliases => ['freemail_import_whitelist_auth'],
         }
     );
     push(@cmds, {
         setting => 'freemail_import_def_welcomelist_auth',
         default => 0,
         type => $Mail::SpamAssassin::Conf::CONF_TYPE_NUMERIC,
-	alias => ['freemail_import_def_welcomelist_auth']
+        aliases => ['freemail_import_def_welcomelist_auth']
         }
     );
     $conf->{parser}->register_commands(\@cmds);

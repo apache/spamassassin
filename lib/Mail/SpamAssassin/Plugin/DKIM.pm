@@ -403,7 +403,7 @@ is only informational.
 
   push (@cmds, {
     setting => 'welcomelist_from_dkim',
-    alias => ['whitelist_from_dkim'],
+    aliases => ['whitelist_from_dkim'],
     type => $Mail::SpamAssassin::Conf::CONF_TYPE_ADDRLIST,
     code => sub {
       my ($self, $key, $value, $line) = @_;
@@ -425,7 +425,7 @@ is only informational.
 
   push (@cmds, {
     setting => 'def_welcomelist_from_dkim',
-    alias => ['def_whitelist_from_dkim'],
+    aliases => ['def_whitelist_from_dkim'],
     type => $Mail::SpamAssassin::Conf::CONF_TYPE_ADDRLIST,
     code => sub {
       my ($self, $key, $value, $line) = @_;
@@ -446,7 +446,7 @@ is only informational.
 
   push (@cmds, {
     setting => 'unwelcomelist_from_dkim',
-    alias => ['unwhitelist_from_dkim'],
+    aliases => ['unwhitelist_from_dkim'],
     type => $Mail::SpamAssassin::Conf::CONF_TYPE_ADDRLIST,
     code => sub {
       my ($self, $key, $value, $line) = @_;
