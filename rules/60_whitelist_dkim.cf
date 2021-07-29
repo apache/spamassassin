@@ -68,9 +68,9 @@ endif
 # The order here may or may not be correct and should be checked
 if (version >= 3.003000)
 
-ifplugin Mail::SpamAssassin::Plugin::DKIM
-
 if can(Mail::SpamAssassin::Conf::feature_blocklist_welcomelist)
+
+ifplugin Mail::SpamAssassin::Plugin::DKIM
 
 # The backwards compatibility for this rule will be after the else statement below
 header USER_IN_DEF_DKIM_WL	eval:check_for_def_dkim_welcomelist_from()
@@ -198,7 +198,11 @@ def_welcomelist_from_dkim *@fisglobal.com
 def_welcomelist_from_dkim *@*.msgfocus.com
 def_welcomelist_from_dkim *@boredpanda.com mailersend.com
 
+endif # Mail::SpamAssassin::Plugin::DKIM
+
 else
+
+ifplugin Mail::SpamAssassin::Plugin::DKIM
 
 header USER_IN_DEF_DKIM_WL	eval:check_for_def_dkim_whitelist_from()
 describe USER_IN_DEF_DKIM_WL	From: address is in the default DKIM welcome-list
@@ -315,8 +319,8 @@ def_whitelist_from_dkim *@fisglobal.com
 def_whitelist_from_dkim *@*.msgfocus.com
 def_whitelist_from_dkim *@boredpanda.com mailersend.com
 
-endif # if can(Mail::SpamAssassin::Conf::feature_blocklist_welcomelist)
-
 endif # Mail::SpamAssassin::Plugin::DKIM
+
+endif # if can(Mail::SpamAssassin::Conf::feature_blocklist_welcomelist)
 
 endif # version >= 3.3.0
