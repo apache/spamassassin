@@ -3938,9 +3938,9 @@ meta       XM_LONG_DUP_TO              __XM_VERY_LONG && __DUPLICATE_HEADER_TO
 # public PDF hosting abused for phishing redirects
 uri        __OPENTEXT_PDF              m;://core.opentext.com/pdfjs/web/viewer.html?shortLink=;i
 
-uri        __URI_LONG_REPEAT           m;(?:://|@)(?:\w+\.)*(\w{10,}\.)\1;i
+uri        __URI_LONG_REPEAT           m;(?:://|@)(?:\w+\.)*(\w{7,}\.)\1;i
 meta       URI_LONG_REPEAT             __URI_LONG_REPEAT
-describe   URI_LONG_REPEAT             Very long identical host+domain
+describe   URI_LONG_REPEAT             Long identical host+domain
 score      URI_LONG_REPEAT             2.500	# limit
 tflags     URI_LONG_REPEAT             publish
 
