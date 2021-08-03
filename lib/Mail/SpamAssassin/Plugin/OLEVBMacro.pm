@@ -1051,4 +1051,7 @@ sub _decode_part_header {
   return $header_field_body;
 }
 
+# Version features
+sub has_olemacro_redirect_uri { 1 }
+
 1;
