@@ -47,6 +47,9 @@ Mail::SpamAssassin::Plugin::OLEVBMacro - search attached documents for evidence 
 
     body     OLEMACRO_DOWNLOAD_EXE eval:check_olemacro_download_exe()
     describe OLEMACRO_DOWNLOAD_EXE Malicious code inside the Office doc that tries to download a .exe file detected
+
+    body     OLEMACRO_URI_TARGET eval:check_olemacro_redirect_uri()
+    describe OLEMACRO_URI_TARGET Malicious code inside the Office doc that tries to redirect to an uri
   endif
 
 =head1 DESCRIPTION
@@ -134,6 +137,7 @@ sub new {
   $self->register_eval_rule("check_olemacro_encrypted", $Mail::SpamAssassin::Conf::TYPE_BODY_EVALS);
   $self->register_eval_rule("check_olemacro_zip_password", $Mail::SpamAssassin::Conf::TYPE_BODY_EVALS);
   $self->register_eval_rule("check_olemacro_download_exe", $Mail::SpamAssassin::Conf::TYPE_BODY_EVALS);
+  $self->register_eval_rule("check_olemacro_redirect_uri", $Mail::SpamAssassin::Conf::TYPE_BODY_EVALS);
 
   return $self;
 }
@@ -490,6 +494,14 @@ sub check_olemacro_download_exe {
   return $pms->{olemacro_download_exe};
 }
 
+sub check_olemacro_redirect_uri {
+  my ($self,$pms,$body,$name) = @_;
+
+  _check_attachments(@_) unless exists $pms->{olemacro_redirect_uri};
+
+  return $pms->{olemacro_redirect_uri};
+}
+
 sub _check_attachments {
 
   my ($self,$pms,$body,$name) = @_;
@@ -832,6 +844,16 @@ sub _check_macrotype_doc {
       if (($status == $az_ok) && (_check_ctype_xml($data))) {
         $pms->{olemacro_exists} = 1;
       }
+    }
+  }
+
+  my @rels = $zip->membersMatching('.*\.rels');
+  foreach my $rel ( @rels ) {
+    dbg("Found " . $rel->fileName . " configuration file");
+    my ( $data, $status ) = $rel->contents();
+    if (($status == $az_ok) && ($data =~ /Target=\"http.*TargetMode=\"External\"/is)) {
+      $pms->{olemacro_redirect_uri} = 1;
+      last;
     }
   }
 
