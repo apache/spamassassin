@@ -62,6 +62,7 @@ make_tarball_for_version() {
   # to what's installed
   # TODO: this *would* be performed in a checkout of the desired
   # version's branch.  right now we're only using 1 version though
+  # ... we are using TRUNK for this currently
   make clean
   $PERL Makefile.PL PREFIX=$tmpdir < /dev/null || exit $?
   make                                     || exit $?
@@ -74,6 +75,7 @@ make_tarball_for_version() {
   # ensure the basic lint/rule-sanity test suite passes for this ruleset
   # before we build an update from it.  useful particularly to catch
   # "tflags nopublish" leakage (bug 6297)
+  # ... tested with TRUNK version currently
   make test \
     TEST_FILES="t/basic_lint.t t/basic_lint_without_sandbox.t t/basic_meta.t" \
     || exit $?
@@ -88,6 +90,7 @@ make_tarball_for_version() {
   #rm -rf rulesrc
 
   # double check we still lint without those 2 files
+  # ... still using TRUNK version
   ./spamassassin --lint                   || exit $?
 
   rulesdir=`pwd`/rules
@@ -113,7 +116,7 @@ make_tarball_for_version() {
     cd $linttmp
     # check validity of tarball; also extract
     gunzip -cd < $tmpdir/update.tgz | tar xf - || exit $?
-  )
+  ) || exit $?
 
   sitetmp=$tmpdir/sitetmp
   rm -rf $sitetmp
@@ -122,9 +125,25 @@ make_tarball_for_version() {
 
   # now, ensure the ruleset (entirely as distributed) lints, also.
   # use "-p /dev/null" so any user_prefs data is ignored.
+  # ... still using TRUNK version
   ./spamassassin -x --configpath=$linttmp --siteconfigpath=$sitetmp \
                -p /dev/null --lint \
                 || exit $?
+
+  # additionally build the actual $version and lint with it too
+  (
+    testtag=spamassassin_release_${version//./_}
+    cd $tmpdir || exit $?
+    svn co https://svn.apache.org/repos/asf/spamassassin/tags/$testtag/ || exit $?
+    cd $testtag || exit $?
+    rm -f rules; ln -s $rulesdir rules
+    make clean 2>/dev/null || true
+    perl Makefile.PL </dev/null || exit $?
+    make || exit $?
+    ./spamassassin -x --configpath=$linttmp --siteconfigpath=$sitetmp \
+               -p /dev/null --lint \
+                || exit $?
+  ) || exit $?
 
   # sign and get sums
   gpg --batch --homedir $HOME/key \
