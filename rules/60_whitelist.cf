@@ -190,78 +190,80 @@ ifplugin Mail::SpamAssassin::Plugin::WLBLEval
   tflags USER_IN_ALL_SPAM_TO      userconf nice noautolearn
 endif
 
-if (version >= 3.004000)
-  if can(Mail::SpamAssassin::Conf::feature_blocklist_welcomelist)
-    ifplugin Mail::SpamAssassin::Plugin::WLBLEval
-      #bz7826 renames whitelist to welcomelist and blacklist to blocklist
-      body URI_HOST_IN_BLOCKLIST      eval:check_uri_host_in_blocklist()
-      describe URI_HOST_IN_BLOCKLIST    Host or Domain is listed in the user's URI block-list
-      tflags URI_HOST_IN_BLOCKLIST      userconf noautolearn
-      score URI_HOST_IN_BLOCKLIST	100.0
+if can(Mail::SpamAssassin::Conf::feature_blocklist_welcomelist)
+  ifplugin Mail::SpamAssassin::Plugin::WLBLEval
+    #bz7826 renames whitelist to welcomelist and blacklist to blocklist
+    body URI_HOST_IN_BLOCKLIST      eval:check_uri_host_in_blocklist()
+    describe URI_HOST_IN_BLOCKLIST    Host or Domain is listed in the user's URI block-list
+    tflags URI_HOST_IN_BLOCKLIST      userconf noautolearn
+    score URI_HOST_IN_BLOCKLIST	100.0
   
-      ifplugin Mail::SpamAssassin::Plugin::RaciallyCharged
-        meta URI_HOST_IN_BLACKLIST      (URI_HOST_IN_BLOCKLIST)
-        describe URI_HOST_IN_BLACKLIST  DEPRECATED: See URI_HOST_IN_BLOCKLIST
-        tflags URI_HOST_IN_BLACKLIST    userconf noautolearn
-        score URI_HOST_IN_BLOCKLIST     -0.01
-        score URI_HOST_IN_BLACKLIST     100.0
-      endif
-    endif
-  else
-    ifplugin Mail::SpamAssassin::Plugin::WLBLEval
-      body URI_HOST_IN_BLOCKLIST      eval:check_uri_host_in_blacklist()
-      describe URI_HOST_IN_BLOCKLIST    Host or Domain is listed in the user's URI block-list
-      tflags URI_HOST_IN_BLOCKLIST      userconf noautolearn
-      score URI_HOST_IN_BLOCKLIST 	-0.01
-  
-      meta URI_HOST_IN_BLACKLIST  (URI_HOST_IN_BLOCKLIST)
-      describe URI_HOST_IN_BLACKLIST    DEPRECATED: See URI_HOST_IN_BLOCKLIST
-      tflags URI_HOST_IN_BLACKLIST      userconf noautolearn
-      score URI_HOST_IN_BLACKLIST 	100.0
+    ifplugin Mail::SpamAssassin::Plugin::RaciallyCharged
+      meta URI_HOST_IN_BLACKLIST      (URI_HOST_IN_BLOCKLIST)
+      describe URI_HOST_IN_BLACKLIST  DEPRECATED: See URI_HOST_IN_BLOCKLIST
+      tflags URI_HOST_IN_BLACKLIST    userconf noautolearn
+      score URI_HOST_IN_BLOCKLIST     -0.01
+      score URI_HOST_IN_BLACKLIST     100.0
     endif
   endif
+else
+  if (version >= 3.004000)
+  ifplugin Mail::SpamAssassin::Plugin::WLBLEval
+    body URI_HOST_IN_BLOCKLIST      eval:check_uri_host_in_blacklist()
+    describe URI_HOST_IN_BLOCKLIST    Host or Domain is listed in the user's URI block-list
+    tflags URI_HOST_IN_BLOCKLIST      userconf noautolearn
+    score URI_HOST_IN_BLOCKLIST 	-0.01
+  
+    meta URI_HOST_IN_BLACKLIST  (URI_HOST_IN_BLOCKLIST)
+    describe URI_HOST_IN_BLACKLIST    DEPRECATED: See URI_HOST_IN_BLOCKLIST
+    tflags URI_HOST_IN_BLACKLIST      userconf noautolearn
+    score URI_HOST_IN_BLACKLIST 	100.0
+  endif
+  endif
+endif
 
-  if can(Mail::SpamAssassin::Conf::feature_blocklist_welcomelist)
-    ifplugin Mail::SpamAssassin::Plugin::WLBLEval
-      #bz7826 renames whitelist to welcomelist and blacklist to blocklist
-      body URI_HOST_IN_WELCOMELIST      eval:check_uri_host_in_welcomelist()
-      describe URI_HOST_IN_WELCOMELIST    Host or Domain is listed in the user's URI welcome-list
-      tflags URI_HOST_IN_WELCOMELIST      userconf nice noautolearn
-      score URI_HOST_IN_WELCOMELIST       -100.0
-  
-      ifplugin Mail::SpamAssassin::Plugin::RaciallyCharged
-        meta URI_HOST_IN_WHITELIST        (URI_HOST_IN_WELCOMELIST)
-        describe URI_HOST_IN_WHITELIST    DEPRECATED: See URI_HOST_IN_WELCOMELIST
-        tflags URI_HOST_IN_WHITELIST      userconf nice noautolearn
-        score URI_HOST_IN_WELCOMELIST     -0.01
-        score URI_HOST_IN_WHITELIST       -100.0
-      endif
-    endif
-  else
-    ifplugin Mail::SpamAssassin::Plugin::WLBLEval
-      body URI_HOST_IN_WELCOMELIST      eval:check_uri_host_in_whitelist()
-      describe URI_HOST_IN_WELCOMELIST    Host or Domain is listed in the user's URI welcome-list
-      tflags URI_HOST_IN_WELCOMELIST      userconf nice noautolearn
-      score URI_HOST_IN_WELCOMELIST       -0.01
-  
-      meta URI_HOST_IN_WHITELIST  (URI_HOST_IN_WELCOMELIST)
-      describe URI_HOST_IN_WHITELIST      DEPRECATED: See URI_HOST_IN_WELCOMELIST
-      tflags URI_HOST_IN_WHITELIST        userconf nice noautolearn
-      score URI_HOST_IN_WHITELIST -100.0
+if can(Mail::SpamAssassin::Conf::feature_blocklist_welcomelist)
+  ifplugin Mail::SpamAssassin::Plugin::WLBLEval
+    #bz7826 renames whitelist to welcomelist and blacklist to blocklist
+    body URI_HOST_IN_WELCOMELIST      eval:check_uri_host_in_welcomelist()
+    describe URI_HOST_IN_WELCOMELIST    Host or Domain is listed in the user's URI welcome-list
+    tflags URI_HOST_IN_WELCOMELIST      userconf nice noautolearn
+    score URI_HOST_IN_WELCOMELIST       -100.0
+
+    ifplugin Mail::SpamAssassin::Plugin::RaciallyCharged
+      meta URI_HOST_IN_WHITELIST        (URI_HOST_IN_WELCOMELIST)
+      describe URI_HOST_IN_WHITELIST    DEPRECATED: See URI_HOST_IN_WELCOMELIST
+      tflags URI_HOST_IN_WHITELIST      userconf nice noautolearn
+      score URI_HOST_IN_WELCOMELIST     -0.01
+      score URI_HOST_IN_WHITELIST       -100.0
     endif
   endif
-      
+else
+  if (version >= 3.004000)
+  ifplugin Mail::SpamAssassin::Plugin::WLBLEval
+    body URI_HOST_IN_WELCOMELIST      eval:check_uri_host_in_whitelist()
+    describe URI_HOST_IN_WELCOMELIST    Host or Domain is listed in the user's URI welcome-list
+    tflags URI_HOST_IN_WELCOMELIST      userconf nice noautolearn
+    score URI_HOST_IN_WELCOMELIST       -0.01
+
+    meta URI_HOST_IN_WHITELIST  (URI_HOST_IN_WELCOMELIST)
+    describe URI_HOST_IN_WHITELIST      DEPRECATED: See URI_HOST_IN_WELCOMELIST
+    tflags URI_HOST_IN_WHITELIST        userconf nice noautolearn
+    score URI_HOST_IN_WHITELIST -100.0
+  endif
+  endif
+endif
+
       # Bug 7256, using a header rule with an eval() function does not work the way
       # this was intended.
-      
-      # header	  HEADER_HOST_IN_BLACKLIST eval:check_uri_host_listed('BLACK')
+
+      # header    HEADER_HOST_IN_BLACKLIST eval:check_uri_host_listed('BLACK')
       # describe  HEADER_HOST_IN_BLACKLIST Host or Domain in header is listed in the user's URI black-list
-      # tflags	  HEADER_HOST_IN_BLACKLIST userconf noautolearn
-      
-      # header	  HEADER_HOST_IN_WHITELIST eval:check_uri_host_listed('WHITE')
+      # tflags    HEADER_HOST_IN_BLACKLIST userconf noautolearn
+
+      # header    HEADER_HOST_IN_WHITELIST eval:check_uri_host_listed('WHITE')
       # describe  HEADER_HOST_IN_WHITELIST Host or Domain in header is listed in the user's URI white-list
-      # tflags	  HEADER_HOST_IN_WHITELIST userconf nice noautolearn
-endif
+      # tflags    HEADER_HOST_IN_WHITELIST userconf nice noautolearn
 
 ###########################################################################
 # Default welcomelists.  These should be addresses which send mail that is often
