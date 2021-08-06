@@ -3191,7 +3191,7 @@ tflags     EBAY_IMG_NOT_RCVD_EBAY      publish
 
 header     __HDR_RCVD_AMAZON           X-Spam-Relays-External =~ /\srdns=\S+\.amazon(?:ses)?\.com\s/
 header     __HDR_RCVD_AMAZON_HELO      X-Spam-Relays-External =~ /\srdns=\shelo=[^.]+\.smtp-out\.amazonses\.com\s/
-uri        __URI_IMG_AMAZON            m,://[^/?]+\.(?:ssl-)?(?:images|media)-amazon\.com/.*\.(?:png|gif|jpe?g)$,i
+uri        __URI_IMG_AMAZON            m,://[^/?]+\.(?:ssl-)?(?:images|media)-amazon\.com/.*\.(?:png|gif|jpe?g|webp)$,i
 uri        __URI_PRODUCT_AMAZON        m,://www\.amazon\.(?:com|co\.uk|[a-z][a-z])/dp/[a-z0-9]{10}/,i
 header     __FROM_NAME_AMAZONCOM       From:name =~ /\bamazon\.com\b/i
 
@@ -3205,7 +3205,7 @@ describe   AMAZON_IMG_NOT_RCVD_AMZN    Amazon hosted image but message not from 
 tflags     AMAZON_IMG_NOT_RCVD_AMZN    publish
 
 header     __HDR_RCVD_ALIBABA          X-Spam-Relays-External =~ /\srdns=\S+\.alibaba\.com\s/
-uri        __URI_IMG_ALICDN            m,//(?:[^/.]+\.)*alicdn\.com/.+\.(?:jpe?g|gif|png),i
+uri        __URI_IMG_ALICDN            m,//(?:[^/.]+\.)*alicdn\.com/.+\.(?:jpe?g|gif|png|webp),i
 
 meta       __ALIBABA_IMG_NOT_RCVD_ALI  __URI_IMG_ALICDN && !__HDR_RCVD_ALIBABA
 meta       ALIBABA_IMG_NOT_RCVD_ALI    __ALIBABA_IMG_NOT_RCVD_ALI && !__YOUR_PASSWORD && !__UNSUB_LINK && !__MSGID_BEFORE_RECEIVED && !__HAS_HREF_ONECASE 
@@ -3232,7 +3232,7 @@ describe   NEWEGG_IMG_NOT_RCVD_NEGG    Newegg hosted image but message not from 
 tflags     NEWEGG_IMG_NOT_RCVD_NEGG    publish
 
 header     __HDR_RCVD_SHOPIFY          X-Spam-Relays-External =~ /\srdns=\S+\.shopify\.com\s/
-uri        __URI_IMG_SHOPIFY           m,://cdn\.shopify\.com/.+\.(?:jpe?g|gif|png),i
+uri        __URI_IMG_SHOPIFY           m,://cdn\.shopify\.com/.+\.(?:jpe?g|gif|png|webp),i
 
 meta       __SHOPIFY_IMG_NOT_RCVD_SFY  __URI_IMG_SHOPIFY && !__HDR_RCVD_SHOPIFY
 meta       SHOPIFY_IMG_NOT_RCVD_SFY    __SHOPIFY_IMG_NOT_RCVD_SFY && !MIME_QP_LONG_LINE && !__RCD_RDNS_MTA_MESSY && !__AC_UNSUB_URI && !__HAS_CAMPAIGNID && !__HAS_SENDER && !__HAS_ORGANIZATION && !__RCD_RDNS_OB && !__DOS_LINK 
@@ -3250,7 +3250,7 @@ describe   LINKEDIN_IMG_NOT_RCVD_LNKN  Linkedin hosted image but message not fro
 tflags     LINKEDIN_IMG_NOT_RCVD_LNKN  publish
 
 header     __HDR_RCVD_TUMBLR           X-Spam-Relays-External =~ /\srdns=\S+\.tumblr\.com\s/
-uri        __URI_IMG_TUMBLR            m;://\d+\.media\.tumblr\.com/.+\.(?:jpe?g|gif|png);i
+uri        __URI_IMG_TUMBLR            m;://\d+\.media\.tumblr\.com/.+\.(?:jpe?g|gif|png|webp);i
 
 meta       __TUMBLR_IMG_NOT_RCVD_TUMB  __URI_IMG_TUMBLR && !__HDR_RCVD_TUMBLR
 meta       TUMBLR_IMG_NOT_RCVD_TUMB    __TUMBLR_IMG_NOT_RCVD_TUMB
@@ -3258,7 +3258,7 @@ score      TUMBLR_IMG_NOT_RCVD_TUMB    2.000  # limit
 describe   TUMBLR_IMG_NOT_RCVD_TUMB    Tumblr hosted image but message not from Tumblr
 
 header     __HDR_RCVD_TAGSTAT          X-Spam-Relays-External =~ /\srdns=\S+\.tagstat\.com\s/
-uri        __URI_IMG_TAGSTAT           m;://i\d+\.tagstat\.com/.+\.(?:jpe?g|gif|png);i
+uri        __URI_IMG_TAGSTAT           m;://i\d+\.tagstat\.com/.+\.(?:jpe?g|gif|png|webp);i
 
 meta       __TAGSTAT_IMG_NOT_RCVD_TGST __URI_IMG_TAGSTAT && !__HDR_RCVD_TAGSTAT
 meta       TAGSTAT_IMG_NOT_RCVD_TGST   __TAGSTAT_IMG_NOT_RCVD_TGST
@@ -3267,7 +3267,7 @@ describe   TAGSTAT_IMG_NOT_RCVD_TGST   Tagstat hosted image but message not from
 tflags     TAGSTAT_IMG_NOT_RCVD_TGST   publish
 
 header     __HDR_RCVD_FACEBOOK         X-Spam-Relays-External =~ /\srdns=\S+\.facebook\.com\s/
-uri        __URI_IMG_FACEBOOK          m;://([^/.]+\.)+fbcdn\.net/v/.+\.(?:jpe?g|gif|png);i
+uri        __URI_IMG_FACEBOOK          m;://([^/.]+\.)+fbcdn\.net/v/.+\.(?:jpe?g|gif|png|webp);i
 
 meta       __FACEBOOK_IMG_NOT_RCVD_FB  __URI_IMG_FACEBOOK && !__HDR_RCVD_FACEBOOK
 meta       FACEBOOK_IMG_NOT_RCVD_FB    __FACEBOOK_IMG_NOT_RCVD_FB && !__VIA_ML && !__ONE_IMG && !__RCD_RDNS_SMTP 
@@ -3285,7 +3285,7 @@ describe   TARINGANET_IMG_NOT_RCVD_TN    media.taringa.net hosted image but mess
 tflags     TARINGANET_IMG_NOT_RCVD_TN    publish
 
 header     __HDR_RCVD_BEBEE            X-Spam-Relays-External =~ /\srdns=\S+\.bebee\.com\s/
-uri        __URI_IMG_BEBEE             m;://contents\.bebee\.com/users/.+\.(?:jpe?g|gif|png);i
+uri        __URI_IMG_BEBEE             m;://contents\.bebee\.com/users/.+\.(?:jpe?g|gif|png|webp);i
 
 meta       __BEBEE_IMG_NOT_RCVD_BB     __URI_IMG_BEBEE && !__HDR_RCVD_BEBEE
 meta       BEBEE_IMG_NOT_RCVD_BB       __BEBEE_IMG_NOT_RCVD_BB
@@ -3300,32 +3300,34 @@ uri        __URI_IMG_WISH              m,://contestimg\.wish\.com/,i
 uri        __URI_IMG_STATICBG          m,://imgaz\.staticbg\.com/images/,i
 uri        __URI_IMG_CHANNYPIC         m,://www\.channypicture\.com/pic/,i
 uri        __URI_IMG_TOPHATTER         m;://images\.tophatter\.com/[0-9a-f]{30,}/;i
-uri        __URI_IMG_GBTCDN            m;://des\.gbtcdn\.com/storage/store/[0-9a-f/]{30,}\.(?:png|gif|jpe?g)$;i
-uri        __URI_IMG_EFUSERASSETS      m;://\d+\.efuserassets\.com/\d+/.+\.(?:jpe?g|gif|png);i
-uri        __URI_IMG_IMGBOX_THUMB      m;://thumbs\d*\.imgbox\.com/.+\.(?:jpe?g|gif|png);i
+uri        __URI_IMG_GBTCDN            m;://des\.gbtcdn\.com/storage/store/[0-9a-f/]{30,}\.(?:png|gif|jpe?g|webp)$;i
+uri        __URI_IMG_EFUSERASSETS      m;://\d+\.efuserassets\.com/\d+/.+\.(?:jpe?g|gif|png|webp);i
+uri        __URI_IMG_IMGBOX_THUMB      m;://thumbs\d*\.imgbox\.com/.+\.(?:jpe?g|gif|png|webp);i
 uri        __URI_IMG_500PXORG          m;://drscdn\.500px\.org/photo/;i
 uri        __URI_IMG_WIXMP             m;://images-wixmp-[0-9a-f]{20,}\.wixmp\.com/;i
+uri        __URI_IMG_POSTIMGCC         m;://i\.postimg\.cc/.+\.(?:jpe?g|gif|png|webp);i
+uri        __URI_IMG_FOTERCOM          m;://foter\.com/photos/.+\.(?:jpe?g|gif|png|webp);i
 
 
-meta       __HOSTED_IMG_DQ_UNSUB       __URI_DQ_UNSUB && ( __URI_IMG_EBAY || __URI_IMG_AMAZON || __URI_IMG_ALICDN || __URI_IMG_WALMART || __URI_IMG_NEWEGG || __URI_IMG_SHOPIFY || __URI_IMG_YTIMG || __URI_IMG_JOOMCDN || __URI_IMG_WISH || __URI_IMG_STATICBG || __URI_IMG_CHANNYPIC || __URI_IMG_TOPHATTER || __URI_IMG_GBTCDN || __URI_IMG_LINKEDIN || __URI_IMG_TUMBLR || __URI_IMG_TAGSTAT || __URI_IMG_FACEBOOK || __URI_IMG_TARINGANET || __URI_IMG_BEBEE || __URI_IMG_EFUSERASSETS || __URI_IMG_IMGBOX_THUMB || __URI_IMG_500PXORG || __URI_IMG_WIXMP)
+meta       __HOSTED_IMG_DQ_UNSUB       __URI_DQ_UNSUB && ( __URI_IMG_EBAY || __URI_IMG_AMAZON || __URI_IMG_ALICDN || __URI_IMG_WALMART || __URI_IMG_NEWEGG || __URI_IMG_SHOPIFY || __URI_IMG_YTIMG || __URI_IMG_JOOMCDN || __URI_IMG_WISH || __URI_IMG_STATICBG || __URI_IMG_CHANNYPIC || __URI_IMG_TOPHATTER || __URI_IMG_GBTCDN || __URI_IMG_LINKEDIN || __URI_IMG_TUMBLR || __URI_IMG_TAGSTAT || __URI_IMG_FACEBOOK || __URI_IMG_TARINGANET || __URI_IMG_BEBEE || __URI_IMG_EFUSERASSETS || __URI_IMG_IMGBOX_THUMB || __URI_IMG_500PXORG || __URI_IMG_WIXMP || __URI_IMG_POSTIMGCC)
 meta       HOSTED_IMG_DQ_UNSUB         __HOSTED_IMG_DQ_UNSUB
 score      HOSTED_IMG_DQ_UNSUB         3.500	# limit
 describe   HOSTED_IMG_DQ_UNSUB         Image hosted at large ecomm site, IP addr unsub link
 tflags     HOSTED_IMG_DQ_UNSUB         publish
 
-meta       __HOSTED_IMG_DIRECT_MX      __DOS_DIRECT_TO_MX && ( __URI_IMG_EBAY || __URI_IMG_AMAZON || __URI_IMG_ALICDN  || __URI_IMG_WALMART || __URI_IMG_NEWEGG || __URI_IMG_SHOPIFY || __URI_IMG_YTIMG || __URI_IMG_JOOMCDN || __URI_IMG_WISH || __URI_IMG_STATICBG || __URI_IMG_CHANNYPIC || __URI_IMG_TOPHATTER || __URI_IMG_GBTCDN || __URI_IMG_LINKEDIN || __URI_IMG_TUMBLR || __URI_IMG_TAGSTAT || __URI_IMG_FACEBOOK || __URI_IMG_TARINGANET || __URI_IMG_BEBEE || __URI_IMG_EFUSERASSETS || __URI_IMG_IMGBOX_THUMB || __URI_IMG_500PXORG || __URI_IMG_WIXMP)
+meta       __HOSTED_IMG_DIRECT_MX      __DOS_DIRECT_TO_MX && ( __URI_IMG_EBAY || __URI_IMG_AMAZON || __URI_IMG_ALICDN  || __URI_IMG_WALMART || __URI_IMG_NEWEGG || __URI_IMG_SHOPIFY || __URI_IMG_YTIMG || __URI_IMG_JOOMCDN || __URI_IMG_WISH || __URI_IMG_STATICBG || __URI_IMG_CHANNYPIC || __URI_IMG_TOPHATTER || __URI_IMG_GBTCDN || __URI_IMG_LINKEDIN || __URI_IMG_TUMBLR || __URI_IMG_TAGSTAT || __URI_IMG_FACEBOOK || __URI_IMG_TARINGANET || __URI_IMG_BEBEE || __URI_IMG_EFUSERASSETS || __URI_IMG_IMGBOX_THUMB || __URI_IMG_500PXORG || __URI_IMG_WIXMP || __URI_IMG_POSTIMGCC)
 meta       HOSTED_IMG_DIRECT_MX        __HOSTED_IMG_DIRECT_MX && !__DKIM_EXISTS 
 score      HOSTED_IMG_DIRECT_MX        3.500	# limit
 describe   HOSTED_IMG_DIRECT_MX        Image hosted at large ecomm, CDN or hosting site, message direct-to-mx
 tflags     HOSTED_IMG_DIRECT_MX        publish
 
-meta       __HOSTED_IMG_FREEM          ( FREEMAIL_REPLYTO || FREEMAIL_FROM ) && ( __URI_IMG_EBAY || __URI_IMG_AMAZON || __URI_IMG_ALICDN || __URI_IMG_WALMART || __URI_IMG_NEWEGG || __URI_IMG_SHOPIFY || __URI_IMG_YTIMG || __URI_IMG_JOOMCDN || __URI_IMG_WISH || __URI_IMG_WP_REDIR || __URI_IMG_STATICBG || __URI_IMG_CHANNYPIC || __URI_IMG_TOPHATTER || __URI_IMG_GBTCDN || __URI_IMG_LINKEDIN || __URI_IMG_TUMBLR || __URI_IMG_TAGSTAT || __URI_IMG_FACEBOOK || __URI_IMG_TARINGANET || __URI_IMG_BEBEE || __URI_IMG_EFUSERASSETS || __URI_IMG_IMGBOX_THUMB || __URI_IMG_500PXORG || __URI_IMG_WIXMP)
+meta       __HOSTED_IMG_FREEM          ( FREEMAIL_REPLYTO || FREEMAIL_FROM ) && ( __URI_IMG_EBAY || __URI_IMG_AMAZON || __URI_IMG_ALICDN || __URI_IMG_WALMART || __URI_IMG_NEWEGG || __URI_IMG_SHOPIFY || __URI_IMG_YTIMG || __URI_IMG_JOOMCDN || __URI_IMG_WISH || __URI_IMG_WP_REDIR || __URI_IMG_STATICBG || __URI_IMG_CHANNYPIC || __URI_IMG_TOPHATTER || __URI_IMG_GBTCDN || __URI_IMG_LINKEDIN || __URI_IMG_TUMBLR || __URI_IMG_TAGSTAT || __URI_IMG_FACEBOOK || __URI_IMG_TARINGANET || __URI_IMG_BEBEE || __URI_IMG_EFUSERASSETS || __URI_IMG_IMGBOX_THUMB || __URI_IMG_500PXORG || __URI_IMG_WIXMP || __URI_IMG_POSTIMGCC)
 meta       HOSTED_IMG_FREEM            __HOSTED_IMG_FREEM && !__THREADED 
 score      HOSTED_IMG_FREEM            3.500	# limit
 describe   HOSTED_IMG_FREEM            Image hosted at large ecomm, CDN or hosting site or redirected, freemail from or reply-to
 tflags     HOSTED_IMG_FREEM            publish
 
-meta       __HOSTED_IMG_MULTI          ( __URI_IMG_EBAY + __URI_IMG_AMAZON + __URI_IMG_ALICDN + __URI_IMG_WALMART + __URI_IMG_NEWEGG + __URI_IMG_SHOPIFY + __URI_IMG_YTIMG + __URI_IMG_JOOMCDN + __URI_IMG_WISH + __URI_IMG_WP_REDIR + __URI_IMG_STATICBG + __URI_IMG_CHANNYPIC + __URI_IMG_TOPHATTER + __URI_IMG_GBTCDN + __URI_IMG_LINKEDIN + __URI_IMG_TUMBLR + __URI_IMG_TAGSTAT + __URI_IMG_FACEBOOK + __URI_IMG_TARINGANET + __URI_IMG_BEBEE + __URI_IMG_EFUSERASSETS + __URI_IMG_IMGBOX_THUMB + __URI_IMG_500PXORG + __URI_IMG_WIXMP) > 1
+meta       __HOSTED_IMG_MULTI          ( __URI_IMG_EBAY + __URI_IMG_AMAZON + __URI_IMG_ALICDN + __URI_IMG_WALMART + __URI_IMG_NEWEGG + __URI_IMG_SHOPIFY + __URI_IMG_YTIMG + __URI_IMG_JOOMCDN + __URI_IMG_WISH + __URI_IMG_WP_REDIR + __URI_IMG_STATICBG + __URI_IMG_CHANNYPIC + __URI_IMG_TOPHATTER + __URI_IMG_GBTCDN + __URI_IMG_LINKEDIN + __URI_IMG_TUMBLR + __URI_IMG_TAGSTAT + __URI_IMG_FACEBOOK + __URI_IMG_TARINGANET + __URI_IMG_BEBEE + __URI_IMG_EFUSERASSETS + __URI_IMG_IMGBOX_THUMB + __URI_IMG_500PXORG + __URI_IMG_WIXMP + __URI_IMG_POSTIMGCC) > 1
 meta       HOSTED_IMG_MULTI            __HOSTED_IMG_MULTI && !__DKIM_EXISTS 
 score      HOSTED_IMG_MULTI            3.000	# limit
 describe   HOSTED_IMG_MULTI            Multiple images hosted at different large ecomm, CDN or hosting sites, free image sites, or redirected
@@ -3947,21 +3949,21 @@ describe   URI_LONG_REPEAT             Long identical host+domain
 score      URI_LONG_REPEAT             2.500	# limit
 tflags     URI_LONG_REPEAT             publish
 
-body       READY_TO_SHIP               /(?:(?:in our (?:stock|warehouse|store|storage facility)(?: today| now| right away)?[.,:]\s|our (?:\w+,? ){2,8}(?:is |now )+)Ready (?:to (?:be )?|for )+(?:ship|send|deliver)|ready (?:for shipping|to (?:ship|send)) (?:(?:in|from|by) our (?:warehouse|stock|stor(?:e|age))|(?:to|for)(?: global(?:ly)?| worldwide| customers){2})|(?:(?:our|this|a|great|fine|wonderful|cool|popular) new product|we have(?: \w+){1,6} available|ready) in (?:our )?(?:warehouse|stock|stor(?:e|age))|just arrived in our (?:warehouse|stor(?:e|age))|we will (?:contact the (?:warehouse|logistics|store|storage(?: facility)) to )?arrange (?:the )?(?:shipment|delivery)|a new (?:\w+ ){1,3}in our (?:warehouse|storage)|this (?:new )?(?:merchandise|product|item) is (?:now )?ready (?:to ship )?(?:at|in|from) our (?:warehouse|stock|stor(?:e|age)))/i
+body       READY_TO_SHIP               /(?:(?:in our (?:stock|warehouse|store|storage facility)(?: today| now| right away)?[.,:]\s|our (?:\w+,? ){2,8}(?:is |now )+)Ready (?:to (?:be )?|for )+(?:ship|send|deliver)|ready (?:for shipping|to (?:ship|send)) (?:(?:in|from|by) our (?:warehouse|stock|stor(?:e|age))|(?:to|for)(?: global(?:ly)?| worldwide| customers){2})|(?:(?:our|this|a|great|fine|wonderful|cool|popular) new product|we have(?: \w+){1,6} available|ready) in (?:our )?(?:warehouse|stock|stor(?:e|age))|just arrived in our (?:warehouse|stor(?:e|age))|we will (?:contact the (?:warehouse|logistics|store|storage(?: facility)) to )?arrange (?:the )?(?:shipment|delivery)|a new (?:\w+ ){1,3}in our (?:warehouse|storage)|this (?:new )?(?:merchandise|product|item) is (?:now )?(?:ready (?:to ship )?|available )(?:at|in|from) our (?:warehouse|stock|stor(?:e|age)))/i
 score      READY_TO_SHIP               1.250	# limit
 
-body       WANT_TO_ORDER               /you (?:(?:would )?like|want|(?:are )?interested|need|wish)(?: to| in)? (?:plac(?:e|ing) an order|order(?:ing)? (?:for )?(?:this|it|now|today|our \w+)|tak(e|ing) (?:one (?:o[rt] two )?(?:\w+ ){0,2}|this (?:item|product) |some )(?:today|now|of our))\b/i
+body       WANT_TO_ORDER               /you(?:'d)? (?:(?:would )?like|want|(?:are |(?:would )?be )?interested|need|wish)(?: to| in)? (?:plac(?:e|ing) an order|order(?:ing)? (?:for )?(?:this|it|now|today|our \w+)|(?:(?:tak|receiv)(e|ing)|pick up) (?:one (?:o[rt] two )?(?:\w+ ){0,2}|this (?:item|product) |some )(?:today|now|of our))\b/i
 score      WANT_TO_ORDER               2.750	# limit
 
-body       YOUR_DELIVERY_ADDRESS       /(?:(?:respond|reply|answer) (?:to )?(?:our|this) ?e?mail (?:[\w,]+\s){0,10}(?:with|and send(?: us)?)|we need to know|let us know|(?:send|provide|tell|inform)(?: us)?(?: of)?|confirm|indicate)(?: t?he (?:order )?quantity and)? (?:your |the )?(?:detailed |specific )?(?:(?:delivery |shipping |mailing |shipment |receiving )?address(?:\s?[,.;]|(?: and| so)? we| if you)|address (?:for|of) (?:shipping|delivery|shipment))|(?:provide|give) us (?:with |details of )(?:the |your )?address,? (?:and )?we will contact (?:the )?(?:warehouse|logistics|storage(?: facility))/i
+body       YOUR_DELIVERY_ADDRESS       /(?:(?:respond|reply|answer) (?:to )?(?:our|this) ?e?mail (?:[\w,]+\s){0,10}(?:with|and send(?: us)?)|we need to know|let us know|(?:send|provide|tell|inform)(?: us)?(?: of)?|confirm|indicate)(?: t?he (?:order )?quantity and)? (?:your |the )?(?:detailed |specific |exact )?(?:(?:delivery |shipping |mailing |shipment |receiving )?(?:address|location)(?:\s?[,.;]|(?: and| so)? we| if you)|address (?:for|of) (?:shipping|delivery|shipment))|(?:provide|give) us (?:with |details of )(?:the |your )?address,? (?:and )?we will contact (?:the )?(?:warehouse|logistics|storage(?: facility))|your (?:mailing|shipping) address to (?:arrange|set ?up) (?:shipment|delivery) (?:(?:for|to) you|of th)/i
 score      YOUR_DELIVERY_ADDRESS       1.250	# limit
 
-body       __NEW_PRODUCTS              /\bhere are new products|\b(?:Our company|we) (?:has |have )?(?:(?:recently|just|newly) (?:introduce|release|launche)[ds](?: a| our)? new|a new (?!cat\s|kitten\s|dog\s|puppy\s|pet\s|baby\s|child\s|boy\s|girl\s)(?:\w+\s){1,5} here)|recently,? our company (?:launch|releas)ed|\bI want to recommend a new (?:\w+ ){1,5}(?:we|our)\b|latest version of our (?:stock|product)|\b(?:our|a) new (?:\w+ ){1,3}has (?:recently|just) been released/i
+body       __NEW_PRODUCTS              /\bhere are new products|\b(?:Our company|we) (?:has |have )?(?:(?:recently|just|newly) (?:introduce|release|launche)[ds](?: a| our| the)? (?:new|(?:\w+\s){1,5}below)|a new (?!cat\s|kitten\s|dog\s|puppy\s|pet\s|baby\s|child\s|boy\s|girl\s)(?:\w+\s){1,5} here)|recently,? our company (?:launch|releas)ed|\bI want to recommend a new (?:\w+ ){1,5}(?:we|our)\b|latest version of our (?:stock|product)|\b(?:our|a) new (?:\w+ ){1,3}has (?:recently|just) been released/i
 meta       NEW_PRODUCTS                __NEW_PRODUCTS && !__STY_INVIS_MANY 
 score      NEW_PRODUCTS                1.250	# limit
 tflags     NEW_PRODUCTS                publish
 
-body       DETAILS_OF_PRODUCT          /(?:Please|kindly) (?:see|refer to|check(?: out)?) the (?:details of the product|(?:detailed |complete |specific )?product (?:details|information)) (below|following|that follow|in detail)|the following (?:(?:is the )?(?:detailed )?product information|is a brief introduction to (?:\w+\s){0,5}this product)|\bhere (is|are) some basic information about this|you can (?:\w+ )?understand our product|take a look at this product|interested in learning about (?:this|our product)|grasp our (?:product|goods)|details can be checked below|provide you \w+ the product[-\s]specific (?:details|information)/i
+body       DETAILS_OF_PRODUCT          /(?:Please|kindly) (?:see|refer to|check(?: out)?) the (?:details of the product|(?:detailed |complete |specific )?product (?:details|information)) (below|following|that follow|in detail)|the following (?:(?:is the )?(?:detailed )?product information|is a brief introduction to (?:\w+\s){0,5}this product)|\bhere (is|are) some basic information about this|you can (?:\w+ )?understand our product|take a look at this product|interested in learning about (?:this|our product)|grasp our (?:product|goods)|details can be checked below|(?:provide|present) you \w+ the product(?:[-\s]specific)? (?:details|information)/i
 score      DETAILS_OF_PRODUCT          1.250	# limit
 
 # Don't joe-job a SA dev's wife
