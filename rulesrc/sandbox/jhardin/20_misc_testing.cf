@@ -3307,27 +3307,32 @@ uri        __URI_IMG_500PXORG          m;://drscdn\.500px\.org/photo/;i
 uri        __URI_IMG_WIXMP             m;://images-wixmp-[0-9a-f]{20,}\.wixmp\.com/;i
 uri        __URI_IMG_POSTIMGCC         m;://i\.postimg\.cc/.+\.(?:jpe?g|gif|png|webp);i
 uri        __URI_IMG_FOTERCOM          m;://foter\.com/photos/.+\.(?:jpe?g|gif|png|webp);i
+uri        __URI_IMG_GTRACING          m;://shopify\.gtracing\.com/img/.+\.(?:jpe?g|gif|png|webp);i
+uri        __URI_IMG_JOOMCDN           m;://img\.joomcdn\.net/.+\.(?:jpe?g|gif|png|webp);i
+uri        __URI_IMG_DHRESOURCE        m;://www\.dhresource\.com/.+\.(?:jpe?g|gif|png|webp);i
 
 
-meta       __HOSTED_IMG_DQ_UNSUB       __URI_DQ_UNSUB && ( __URI_IMG_EBAY || __URI_IMG_AMAZON || __URI_IMG_ALICDN || __URI_IMG_WALMART || __URI_IMG_NEWEGG || __URI_IMG_SHOPIFY || __URI_IMG_YTIMG || __URI_IMG_JOOMCDN || __URI_IMG_WISH || __URI_IMG_STATICBG || __URI_IMG_CHANNYPIC || __URI_IMG_TOPHATTER || __URI_IMG_GBTCDN || __URI_IMG_LINKEDIN || __URI_IMG_TUMBLR || __URI_IMG_TAGSTAT || __URI_IMG_FACEBOOK || __URI_IMG_TARINGANET || __URI_IMG_BEBEE || __URI_IMG_EFUSERASSETS || __URI_IMG_IMGBOX_THUMB || __URI_IMG_500PXORG || __URI_IMG_WIXMP || __URI_IMG_POSTIMGCC)
+meta       __URI_HOSTED_IMG            ( __URI_IMG_EBAY || __URI_IMG_AMAZON || __URI_IMG_ALICDN || __URI_IMG_WALMART || __URI_IMG_NEWEGG || __URI_IMG_SHOPIFY || __URI_IMG_YTIMG || __URI_IMG_JOOMCDN || __URI_IMG_WISH || __URI_IMG_STATICBG || __URI_IMG_CHANNYPIC || __URI_IMG_TOPHATTER || __URI_IMG_GBTCDN || __URI_IMG_LINKEDIN || __URI_IMG_TUMBLR || __URI_IMG_TAGSTAT || __URI_IMG_FACEBOOK || __URI_IMG_TARINGANET || __URI_IMG_BEBEE || __URI_IMG_EFUSERASSETS || __URI_IMG_IMGBOX_THUMB || __URI_IMG_500PXORG || __URI_IMG_WIXMP || __URI_IMG_POSTIMGCC || __URI_IMG_GTRACING || __URI_IMG_JOOMCDN || __URI_IMG_DHRESOURCE )
+
+meta       __HOSTED_IMG_DQ_UNSUB       __URI_DQ_UNSUB && __URI_HOSTED_IMG
 meta       HOSTED_IMG_DQ_UNSUB         __HOSTED_IMG_DQ_UNSUB
 score      HOSTED_IMG_DQ_UNSUB         3.500	# limit
 describe   HOSTED_IMG_DQ_UNSUB         Image hosted at large ecomm site, IP addr unsub link
 tflags     HOSTED_IMG_DQ_UNSUB         publish
 
-meta       __HOSTED_IMG_DIRECT_MX      __DOS_DIRECT_TO_MX && ( __URI_IMG_EBAY || __URI_IMG_AMAZON || __URI_IMG_ALICDN  || __URI_IMG_WALMART || __URI_IMG_NEWEGG || __URI_IMG_SHOPIFY || __URI_IMG_YTIMG || __URI_IMG_JOOMCDN || __URI_IMG_WISH || __URI_IMG_STATICBG || __URI_IMG_CHANNYPIC || __URI_IMG_TOPHATTER || __URI_IMG_GBTCDN || __URI_IMG_LINKEDIN || __URI_IMG_TUMBLR || __URI_IMG_TAGSTAT || __URI_IMG_FACEBOOK || __URI_IMG_TARINGANET || __URI_IMG_BEBEE || __URI_IMG_EFUSERASSETS || __URI_IMG_IMGBOX_THUMB || __URI_IMG_500PXORG || __URI_IMG_WIXMP || __URI_IMG_POSTIMGCC)
+meta       __HOSTED_IMG_DIRECT_MX      __DOS_DIRECT_TO_MX && __URI_HOSTED_IMG
 meta       HOSTED_IMG_DIRECT_MX        __HOSTED_IMG_DIRECT_MX && !__DKIM_EXISTS 
 score      HOSTED_IMG_DIRECT_MX        3.500	# limit
 describe   HOSTED_IMG_DIRECT_MX        Image hosted at large ecomm, CDN or hosting site, message direct-to-mx
 tflags     HOSTED_IMG_DIRECT_MX        publish
 
-meta       __HOSTED_IMG_FREEM          ( FREEMAIL_REPLYTO || FREEMAIL_FROM ) && ( __URI_IMG_EBAY || __URI_IMG_AMAZON || __URI_IMG_ALICDN || __URI_IMG_WALMART || __URI_IMG_NEWEGG || __URI_IMG_SHOPIFY || __URI_IMG_YTIMG || __URI_IMG_JOOMCDN || __URI_IMG_WISH || __URI_IMG_WP_REDIR || __URI_IMG_STATICBG || __URI_IMG_CHANNYPIC || __URI_IMG_TOPHATTER || __URI_IMG_GBTCDN || __URI_IMG_LINKEDIN || __URI_IMG_TUMBLR || __URI_IMG_TAGSTAT || __URI_IMG_FACEBOOK || __URI_IMG_TARINGANET || __URI_IMG_BEBEE || __URI_IMG_EFUSERASSETS || __URI_IMG_IMGBOX_THUMB || __URI_IMG_500PXORG || __URI_IMG_WIXMP || __URI_IMG_POSTIMGCC)
+meta       __HOSTED_IMG_FREEM          ( FREEMAIL_REPLYTO || FREEMAIL_FROM ) && __URI_HOSTED_IMG
 meta       HOSTED_IMG_FREEM            __HOSTED_IMG_FREEM && !__THREADED 
 score      HOSTED_IMG_FREEM            3.500	# limit
 describe   HOSTED_IMG_FREEM            Image hosted at large ecomm, CDN or hosting site or redirected, freemail from or reply-to
 tflags     HOSTED_IMG_FREEM            publish
 
-meta       __HOSTED_IMG_MULTI          ( __URI_IMG_EBAY + __URI_IMG_AMAZON + __URI_IMG_ALICDN + __URI_IMG_WALMART + __URI_IMG_NEWEGG + __URI_IMG_SHOPIFY + __URI_IMG_YTIMG + __URI_IMG_JOOMCDN + __URI_IMG_WISH + __URI_IMG_WP_REDIR + __URI_IMG_STATICBG + __URI_IMG_CHANNYPIC + __URI_IMG_TOPHATTER + __URI_IMG_GBTCDN + __URI_IMG_LINKEDIN + __URI_IMG_TUMBLR + __URI_IMG_TAGSTAT + __URI_IMG_FACEBOOK + __URI_IMG_TARINGANET + __URI_IMG_BEBEE + __URI_IMG_EFUSERASSETS + __URI_IMG_IMGBOX_THUMB + __URI_IMG_500PXORG + __URI_IMG_WIXMP + __URI_IMG_POSTIMGCC) > 1
+meta       __HOSTED_IMG_MULTI          ( __URI_IMG_EBAY + __URI_IMG_AMAZON + __URI_IMG_ALICDN + __URI_IMG_WALMART + __URI_IMG_NEWEGG + __URI_IMG_SHOPIFY + __URI_IMG_YTIMG + __URI_IMG_JOOMCDN + __URI_IMG_WISH + __URI_IMG_WP_REDIR + __URI_IMG_STATICBG + __URI_IMG_CHANNYPIC + __URI_IMG_TOPHATTER + __URI_IMG_GBTCDN + __URI_IMG_LINKEDIN + __URI_IMG_TUMBLR + __URI_IMG_TAGSTAT + __URI_IMG_FACEBOOK + __URI_IMG_TARINGANET + __URI_IMG_BEBEE + __URI_IMG_EFUSERASSETS + __URI_IMG_IMGBOX_THUMB + __URI_IMG_500PXORG + __URI_IMG_WIXMP + __URI_IMG_POSTIMGCC + __URI_IMG_GTRACING + __URI_IMG_JOOMCDN + __URI_IMG_DHRESOURCE) > 1
 meta       HOSTED_IMG_MULTI            __HOSTED_IMG_MULTI && !__DKIM_EXISTS 
 score      HOSTED_IMG_MULTI            3.000	# limit
 describe   HOSTED_IMG_MULTI            Multiple images hosted at different large ecomm, CDN or hosting sites, free image sites, or redirected
