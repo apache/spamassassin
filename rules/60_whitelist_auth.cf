@@ -24,10 +24,6 @@
 ###########################################################################
 # SPF and DKIM whitelist rules
 
-if (version >= 3.003000)
-
-ifplugin Mail::SpamAssassin::Plugin::SPF
-
 if can(Mail::SpamAssassin::Conf::feature_blocklist_welcomelist)
 
 ###########################################################################
@@ -1998,6 +1994,3 @@ def_whitelist_auth *@*.verintefm.com
 
 endif # if can(Mail::SpamAssassin::Conf::feature_blocklist_welcomelist)
 
-endif # Mail::SpamAssassin::Plugin::SPF
-
-endif # version >= 3.3.0
