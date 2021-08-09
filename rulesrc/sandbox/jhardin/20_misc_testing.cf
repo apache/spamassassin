@@ -3802,7 +3802,7 @@ uri        __IMGUR_IMG                 m,^https?://(?:[^.]+\.)?imgur\.com/[a-z0-
 tflags     __IMGUR_IMG                 multiple maxhits=4
 meta       __IMGUR_IMG_2               __IMGUR_IMG == 2
 meta       __IMGUR_IMG_3               __IMGUR_IMG == 3
-meta       HOSTED_IMG_MULTI_PUB_01     (__IMGUR_IMG_2 || __IMGUR_IMG_3) && !__DATE_LOWER && !__BOTH_INR_AND_REF 
+meta       HOSTED_IMG_MULTI_PUB_01     (__IMGUR_IMG_2 || __IMGUR_IMG_3) && !__DATE_LOWER && !__BOTH_INR_AND_REF && !__HAS_IN_REPLY_TO 
 describe   HOSTED_IMG_MULTI_PUB_01     Multiple hosted images at public site
 score      HOSTED_IMG_MULTI_PUB_01     3.000	# limit
 tflags     HOSTED_IMG_MULTI_PUB_01     publish
