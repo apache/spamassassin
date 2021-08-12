@@ -99,7 +99,7 @@ sub set_config {
 
 =item dmarc_save_reports ( 0 | 1 ) (default: 0)
 
-Store DMARC reports using Mail::Dmarc::Store, mail-dmarc.ini must be configured to save and send DMARC reports.
+Store DMARC reports using Mail::DMARC::Store, mail-dmarc.ini must be configured to save and send DMARC reports.
 
 =back
 
@@ -217,7 +217,6 @@ sub _check_dmarc {
   $dmarc = Mail::DMARC::PurePerl->new();
   $lasthop = $pms->{relays_external}->[0];
 
-  return if ( not ref($pms->{dkim_verifier}));
   return if ( $pms->get('From:addr') !~ /\@/ );
 
   $spf_status = 'pass' if ((defined $pms->{spf_pass}) and ($pms->{spf_pass} eq 1));
@@ -237,7 +236,7 @@ sub _check_dmarc {
   return if not defined $mfrom_domain;
   $dmarc->source_ip($lasthop->{ip});
   $dmarc->header_from_raw($pms->get('From:addr'));
-  $dmarc->dkim($pms->{dkim_verifier});
+  $dmarc->dkim($pms->{dkim_verifier}) if (ref($pms->{dkim_verifier}));
   eval {
     $dmarc->spf([
       {
