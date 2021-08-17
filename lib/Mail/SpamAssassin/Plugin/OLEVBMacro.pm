@@ -49,7 +49,7 @@ Mail::SpamAssassin::Plugin::OLEVBMacro - search attached documents for evidence 
     describe OLEMACRO_DOWNLOAD_EXE Malicious code inside the Office doc that tries to download a .exe file detected
 
     body     OLEMACRO_URI_TARGET eval:check_olemacro_redirect_uri()
-    describe OLEMACRO_URI_TARGET Malicious code inside the Office doc that tries to redirect to an uri
+    describe OLEMACRO_URI_TARGET Uri inside an Office doc
   endif
 
 =head1 DESCRIPTION
@@ -848,12 +848,18 @@ sub _check_macrotype_doc {
   }
 
   my @rels = $zip->membersMatching('.*\.rels');
-  foreach my $rel ( @rels ) {
-    dbg("Found " . $rel->fileName . " configuration file");
-    my ( $data, $status ) = $rel->contents();
-    if (($status == $az_ok) && ($data =~ /Target=\"http.*TargetMode=\"External\"/is)) {
-      $pms->{olemacro_redirect_uri} = 1;
-      last;
+  my @relations;
+  if(not defined $pms->{olemacro_redirect_uri}) {
+    foreach my $rel ( @rels ) {
+      dbg("Found " . $rel->fileName . " configuration file");
+      my ( $data, $status ) = $rel->contents();
+      @relations = split(/Relationship\s/, $data);
+      foreach my $rls ( @relations ) {
+        if (($status == $az_ok) && ($rls =~ /Target=\"(https?\:\/\/[^"']*)\".*TargetMode=\"External\"/is)) {
+          $pms->{olemacro_redirect_uri} = 1;
+          $pms->add_uri_detail_list($1) if defined $1;
+        }
+      }
     }
   }
 
