@@ -1432,7 +1432,8 @@ uri         __URI_GOOG_MC        /(?!(?-i:[Gg]oogle))google/i
 rawbody     __HTML_FONT_TINY_01      /font-size:\s{0,5}[0-4]px;/i
 rawbody     __HTML_FONT_TINY_02      /<font\s[^>]{0,80}size\s*=\s*["']?-(?:[2-9]|[1-9]\d+)["']?[^>]{0,80}>/i
 rawbody     __AC_TINY_FONT           /(?:font-size)\s*:\s*[1-3]\s*(?:em|p[tx]|%)?(?:\s*!important)?\s*[";]/i
-meta        HTML_FONT_TINY_NORDNS    (__HTML_FONT_TINY_01 || __HTML_FONT_TINY_02 || __AC_TINY_FONT) && __RDNS_NONE 
+meta        __HTML_FONT_TINY_NORDNS  (__HTML_FONT_TINY_01 || __HTML_FONT_TINY_02 || __AC_TINY_FONT) && __RDNS_NONE 
+meta        HTML_FONT_TINY_NORDNS    __HTML_FONT_TINY_NORDNS && !__HAS_CID 
 describe    HTML_FONT_TINY_NORDNS    Font too small to read, no rDNS
 score       HTML_FONT_TINY_NORDNS    2.000	# limit
 
@@ -1496,14 +1497,16 @@ uri         __URI_DOS_FILE     /^[A-Z]:\\/i
 
 
 # try to FP-reduce HTML_FONT_LOW_CONTRAST
-ifplugin Mail::SpamAssassin::Plugin::DKIM
-  meta        __HTML_FONT_LOW_CONTRAST_MINFP	HTML_FONT_LOW_CONTRAST && !__HAS_SENDER && !__THREADED && !__HAS_THREAD_INDEX && !ALL_TRUSTED && !__NOT_SPOOFED && !__HDRS_LCASE_KNOWN && !DKIM_VALID
-else
-  meta        __HTML_FONT_LOW_CONTRAST_MINFP	HTML_FONT_LOW_CONTRAST && !__HAS_SENDER && !__THREADED && !__HAS_THREAD_INDEX && !ALL_TRUSTED && !__NOT_SPOOFED && !__HDRS_LCASE_KNOWN
-endif
+#ifplugin Mail::SpamAssassin::Plugin::DKIM
+# DKIM no longer useful for FP-avoidance
+#  meta        __HTML_FONT_LOW_CONTRAST_MINFP	HTML_FONT_LOW_CONTRAST && !__THREADED && !ALL_TRUSTED && !__HAS_X_LOOP && !__HDRS_LCASE_KNOWN && !__LYRIS_EZLM_REMAILER && !__HDR_RCVD_ALIBABA && !__HDR_RCVD_APPLE && !__HDR_RCVD_LINKEDIN && !__HDR_RCVD_PAYPAL && !__HDR_RCVD_SHOPIFY && !__HDR_RCVD_FACEBOOK && !__HDR_RCVD_EBAY && !__HDR_RCVD_AMAZON && !__RCVD_DOTGOV_EXT && !__HAS_ERRORS_TO && !__TRAVEL_ITINERARY && !DKIM_VALID
+#else
+  meta        __HTML_FONT_LOW_CONTRAST_MINFP	HTML_FONT_LOW_CONTRAST && !__THREADED && !ALL_TRUSTED && !__HAS_X_LOOP && !__HDRS_LCASE_KNOWN && !__LYRIS_EZLM_REMAILER && !__HDR_RCVD_ALIBABA && !__HDR_RCVD_APPLE && !__HDR_RCVD_LINKEDIN && !__HDR_RCVD_PAYPAL && !__HDR_RCVD_SHOPIFY && !__HDR_RCVD_FACEBOOK && !__HDR_RCVD_EBAY && !__HDR_RCVD_AMAZON && !__RCVD_DOTGOV_EXT && !__HAS_ERRORS_TO && !__TRAVEL_ITINERARY 
+#endif
 
 # some no-ham (at the time) combinations
-meta        GAPPY_LOW_CONTRAST    HTML_FONT_LOW_CONTRAST && __GAPPY_SUBJECT 
+meta        __GAPPY_LOW_CONTRAST  HTML_FONT_LOW_CONTRAST && __GAPPY_SUBJECT 
+meta        GAPPY_LOW_CONTRAST    __GAPPY_LOW_CONTRAST && !__HAS_LIST_ID 
 describe    GAPPY_LOW_CONTRAST    Gappy subject + hidden text
 score       GAPPY_LOW_CONTRAST    2.500   # limit
 
@@ -1524,7 +1527,7 @@ score       URI_DOTDOT_LOW_CNTRST 2.500   # limit
 #tflags      STOCK_LOW_CONTRAST    publish
 
 meta        __NORDNS_LOW_CONTRAST HTML_FONT_LOW_CONTRAST && __RDNS_NONE
-meta        NORDNS_LOW_CONTRAST   __NORDNS_LOW_CONTRAST && !ALL_TRUSTED && !__HAS_CID 
+meta        NORDNS_LOW_CONTRAST   __NORDNS_LOW_CONTRAST && !ALL_TRUSTED && !__HAS_CID && !__THREADED 
 describe    NORDNS_LOW_CONTRAST   No rDNS + hidden text
 score       NORDNS_LOW_CONTRAST   2.500   # limit
 
@@ -1534,7 +1537,7 @@ describe    DIRECT_LOW_CONTRAST   Direct-to-MX + hidden text
 score       DIRECT_LOW_CONTRAST   2.500   # limit
 
 meta        __LONGLN_LOW_CONTRAST HTML_FONT_LOW_CONTRAST && __LONGLINE
-meta        LONGLN_LOW_CONTRAST   __LONGLN_LOW_CONTRAST && !ALL_TRUSTED
+meta        LONGLN_LOW_CONTRAST   __LONGLN_LOW_CONTRAST && !ALL_TRUSTED && !__HAS_ERRORS_TO && !__TRAVEL_ITINERARY 
 describe    LONGLN_LOW_CONTRAST   Excessively long line + hidden text
 score       LONGLN_LOW_CONTRAST   2.500   # limit
 
@@ -3134,7 +3137,8 @@ describe   HTML_ENTITY_ASCII           Obfuscated ASCII
 score      HTML_ENTITY_ASCII           3.000	# limit
 tflags     HTML_ENTITY_ASCII           publish
 
-meta       HTML_ENTITY_ASCII_TINY      __HTML_ENTITY_ASCII && (__HTML_FONT_TINY_01 || __HTML_FONT_TINY_02 || __AC_TINY_FONT)
+meta       __HTML_ENTITY_ASCII_TINY    __HTML_ENTITY_ASCII && (__HTML_FONT_TINY_01 || __HTML_FONT_TINY_02 || __AC_TINY_FONT)
+meta       HTML_ENTITY_ASCII_TINY      __HTML_ENTITY_ASCII_TINY && !__HAS_IN_REPLY_TO 
 describe   HTML_ENTITY_ASCII_TINY      Obfuscated ASCII + tiny fonts
 score      HTML_ENTITY_ASCII_TINY      3.000	# limit
 tflags     HTML_ENTITY_ASCII_TINY      publish
