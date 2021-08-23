@@ -1638,17 +1638,21 @@ sub precache_params {
     next if ($k eq 'q');        # a shortcut, ignore for future refs
     my $v = $self->{q}->param($k);
     if (!defined $v) { $v = ''; }
-    $self->{cgi_params}{$k} = "$k=".uri_escape($v);
+    $k =~ s/[<>]//gs;
+    $v =~ s/[<>]//gs;
+    $self->{cgi_params}{$k} = uri_escape($k)."=".uri_escape($v);
   }
 }
 
 sub add_cgi_path_param {        # assumes already escaped unless $not_escaped
   my ($self, $k, $v, $not_escaped) = @_;
+  $k =~ s/[<>]//gs;
+  $v =~ s/[<>]//gs;
   if (!defined $self->{cgi_params}{$k}) {
     push (@{$self->{cgi_param_order}}, $k);
   }
   if ($not_escaped) {
-    $self->{cgi_params}{$k} = $k."=".uri_escape($v);
+    $self->{cgi_params}{$k} = uri_escape($k)."=".uri_escape($v);
     $self->{q}->param(-name=>$k, -value=>$v);
   } else {
     $self->{cgi_params}{$k} = $k."=".$v;
