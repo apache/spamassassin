@@ -526,6 +526,7 @@ sub check_rbl_ns_from {
   return 0 if $self->{main}->{conf}->{skip_rbl_checks};
   return 0 unless $pms->is_dns_available();
 
+  dbg("dnseval: EnvelopeFrom header not found") unless defined (($pms->get("EnvelopeFrom:addr"))[0]);
   for my $from ($pms->get('EnvelopeFrom:addr')) {
     next unless defined $from;
     $from =~ tr/././s;          # bug 3366
