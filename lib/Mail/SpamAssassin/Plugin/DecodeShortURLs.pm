@@ -567,4 +567,7 @@ sub cache_get {
   return undef;
 }
 
+# Version features
+sub has_short_url { 1 }
+
 1;
