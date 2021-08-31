@@ -176,6 +176,8 @@ sub new {
   $self->register_eval_rule ("pdf_is_encrypted", $Mail::SpamAssassin::Conf::TYPE_BODY_EVALS);
   $self->register_eval_rule ("pdf_is_empty_body", $Mail::SpamAssassin::Conf::TYPE_BODY_EVALS);
 
+  $self->register_method_priority ("parsed_metadata", -1);
+
   return $self;
 }
 
@@ -213,6 +215,7 @@ my %get_details = (
     my $no_more_fuzzy = 0;
     my $got_image = 0;
     my $encrypted = 0;
+    my $location;
 
     while($data =~ /([^\n]+)/g) {
       # dbg("pdfinfo: line=$1");
@@ -239,6 +242,14 @@ my %get_details = (
 
       # once we hit the first stream, we stop collecting data for fuzzy md5
       $no_more_fuzzy = 1 if (index($line, 'stream') >= 0);
+
+      # XXX some pdf have uris but are stored inside binary data
+      if ($line =~ /\/S\s?\/URI\s?\/URI\s?\(([^\)\\]+)\)\s?/) {
+         $location = $1;
+         dbg("pdfinfo: found URI $location in pdf " . ($name ? $name : ''));
+         $pms->add_uri_detail_list($location);
+         undef $location;
+      }
 
       # From a v1.3 pdf
       # [12234] dbg: pdfinfo: line=630 0 0 149 0 0 cm
@@ -386,6 +397,21 @@ sub _set_tag {
   }
   else {
     $pms->{tag_data}->{$tag} = $value;
+  }
+}
+
+# ----------------------------------------
+
+sub parsed_metadata {
+  my ($self, $opts) = @_;
+  my $pms = $opts->{permsgstatus};
+
+  dbg ('warn: get_uri_detail_list() has been called already')
+    if exists $pms->{uri_detail_list};
+
+  # make sure we have image data read in.
+  if (!exists $pms->{'pdfinfo'}) {
+    $self->_find_pdf_mime_parts($pms);
   }
 }
 
