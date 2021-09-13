@@ -248,6 +248,9 @@ BITCOIN_YOUR_INFO
 # good enough
 BODY_SINGLE_URI
 
+# good enough
+BODY_SINGLE_WORD
+
 # tflags publish
 BODY_URI_ONLY
 
@@ -830,7 +833,7 @@ HTML_OFF_PAGE
 # tflags publish
 HTML_SHRT_CMNT_OBFU_MANY
 
-# tflags net
+# tflags publish
 HTML_SINGLET_MANY
 
 # good enough
@@ -853,9 +856,6 @@ JH_SPAMMY_PATTERN01
 
 # tflags publish
 JH_SPAMMY_PATTERN02
-
-# tflags net
-KHOP_FAKE_EBAY
 
 # tflags net
 KHOP_HELO_FCRDNS
@@ -910,6 +910,9 @@ MALW_ATTACH
 
 # tflags publish
 MANY_SPAN_IN_TEXT
+
+# tflags net
+MAY_BE_FORGED
 
 # tflags publish
 MILLION_HUNDRED
@@ -1577,6 +1580,9 @@ SUBJECT_IN_BLACKLIST
 # tflags userconf
 SUBJECT_IN_WHITELIST
 
+# good enough
+SUBJ_ATTENTION
+
 # tflags net
 SUBJ_BRKN_WORDNUMS
 
@@ -1646,9 +1652,6 @@ TO_NO_BRKTS_HTML_IMG
 # tflags publish
 TO_NO_BRKTS_HTML_ONLY
 
-# tflags net
-TO_NO_BRKTS_MSFT
-
 # tflags publish
 TO_NO_BRKTS_NORDNS_HTML
 
@@ -1672,6 +1675,9 @@ TVD_RCVD_IP4
 
 # good enough
 TVD_RCVD_SPACE_BRACKET
+
+# tflags net
+TVD_SPACE_ENCODED
 
 # good enough
 TVD_VISIT_PHARMA
@@ -1838,7 +1844,7 @@ URI_MALWARE_SCMS
 # tflags userconf
 URI_NOVOWEL
 
-# tflags publish
+# tflags net
 URI_ONLY_MSGID_MALF
 
 # tflags publish
