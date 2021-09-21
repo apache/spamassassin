@@ -875,7 +875,7 @@ Please see directives enlist_uri_host and delist_uri_host for details.
 
 Previously whitelist_uri_host which will work interchangeably until 4.1.
 
-Is a shorthand for a directive:  enlist_uri_host (BLACK) host ...
+Is a shorthand for a directive:  enlist_uri_host (WHITE) host ...
 
 Please see directives enlist_uri_host and delist_uri_host for details.
 
