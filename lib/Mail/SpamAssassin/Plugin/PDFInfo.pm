@@ -143,7 +143,7 @@ package Mail::SpamAssassin::Plugin::PDFInfo;
 use Mail::SpamAssassin::Plugin;
 use Mail::SpamAssassin::Logger;
 use Mail::SpamAssassin::Util qw(compile_regexp);
-use strict;
+use strict; use feature qw(refaliasing state evalbytes say fc current_sub); no feature qw(indirect);
 use warnings;
 use re 'taint';
 # use bytes;
@@ -406,7 +406,7 @@ sub parsed_metadata {
   my ($self, $opts) = @_;
   my $pms = $opts->{permsgstatus};
 
-  dbg ('warn: get_uri_detail_list() has been called already')
+  dbg ('pdfinfo: get_uri_detail_list() has been called already')
     if exists $pms->{uri_detail_list};
 
   # make sure we have image data read in.
