@@ -98,7 +98,7 @@ describe DEAR_WINNER   Spam with generic salutation of "dear winner"
 
 # 18.685  24.1565   0.0671    0.997   0.87    0.01  T_SUBJECT_NEEDS_ENCODING
 meta SUBJECT_NEEDS_ENCODING    (!__SUBJECT_ENCODED_B64 && !__SUBJECT_ENCODED_QP) && __SUBJECT_NEEDS_MIME
-describe SUBJECT_NEEDS_ENCODING  Subject is encoded but does not specify the encoding
+describe SUBJECT_NEEDS_ENCODING  Subject includes non-encoded illegal characters
 
 # 0.310   0.4008   0.0000    1.000   0.74    0.01  T_DRUGS_HDIA
 header DRUGS_HDIA       Subject =~ /\bhoodia\b/i
