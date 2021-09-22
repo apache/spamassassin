@@ -95,7 +95,7 @@ describe HELO_DYNAMIC_IPADDR Relay HELO'd using suspicious hostname (IP addr 1)
 # node-c-8b22.a2000.nl
 # cm89.omega139.maxonline.com.sg
 # cm114.gamma208.maxonline.com.sg
-header __HELO_DYNAMIC_DHCP X-Spam-Relays-External =~ /^[^\]]+ helo=\S*(?:(?<!a)cm|catv|docsis|cable|dsl|dhcp|cpe|node)\S*\d+[^\d\s]+\d+[^\]]+ auth= /i
+header __HELO_DYNAMIC_DHCP X-Spam-Relays-External =~ /^[^\]]+ helo=\S*(?:(?<!smtp)(?<!a)cm|catv|docsis|cable|dsl|dhcp|cpe|node)\S*\d+[^\d\s]+\d+[^\]]+ auth= /i
 meta HELO_DYNAMIC_DHCP (__HELO_DYNAMIC_DHCP && !HELO_STATIC_HOST)
 describe HELO_DYNAMIC_DHCP Relay HELO'd using suspicious hostname (DHCP)
 

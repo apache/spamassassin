@@ -193,7 +193,7 @@ header __RDNS_DYNAMIC_ASAHI   X-Spam-Relays-External =~ /^[^\]]+ rdns=[a-z][0-9]
 # exceptions (bug 5397):
 # exceptions: 66-220-155-151.mail-mail.facebook.com
 # exceptions: o167-89-97-77.outbound-mail.sendgrid.net (bug 7592)
-header  __RDNS_STATIC         X-Spam-Relays-External =~ /^[^\]]+ rdns=\S*(?:fix|static|fixip|dedicated|mail\-mail|outbound-mail)/i
+header  __RDNS_STATIC         X-Spam-Relays-External =~ /^[^\]]+ rdns=\S*(?:fix|static|fixip|dedicated|mail\-mail|outbound-mail|smtp)/i
 
 # bug 5586:
 header __CGATE_RCVD       Received =~ /by \S+ \(CommuniGate Pro/
