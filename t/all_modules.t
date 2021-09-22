@@ -82,7 +82,7 @@ tstprefs("
         q{ Use of uninitialized }, 'uninitialized',
         q{ warn: }, 'warn',
         q{ SpamAssassin failed to parse line }, 'parse',
-        '/ at .* line \d+/', 'warn',
+        '/ at .* line \d+/', 'at_line',
             );
 
 if (conf_bool('run_net_tests')) {

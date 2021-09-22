@@ -820,7 +820,7 @@ sub patterns_run_cb {
     # nothing or // for re
     else {
       my $safe = pattern_to_re ($pat);
-      # print "JMD $patterns{$pat}\n";
+      # print "JMD $anti_patterns{$pat}\n";
       if ($string =~ /${safe}/s) {
         $found_anti{$anti_patterns{$pat}}++;
       }
