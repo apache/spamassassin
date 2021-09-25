@@ -7,10 +7,11 @@
 
 # Performing well in masschecks 10/2018, lots of hits on low-scoring spam
 # do some FP avoidance to improve it
+# exclude very short messages, checksum may be bogus (e.g. on just "Sent from my Apple iPhone" in an attachments-only message)
 header   __FSL_HAS_LIST_UNSUB  exists:List-Unsubscribe
-meta     FSL_BULK_SIG          (DCC_CHECK || RAZOR2_CHECK || PYZOR_CHECK) && !__FSL_HAS_LIST_UNSUB && !__UNSUB_LINK && !__RCVD_IN_DNSWL && !__JM_REACTOR_DATE && !__RCD_RDNS_SMTP_MESSY
+meta     FSL_BULK_SIG          (DCC_CHECK || RAZOR2_CHECK || PYZOR_CHECK) && !__FSL_HAS_LIST_UNSUB && !__UNSUB_LINK && !__DOS_HAS_LIST_UNSUB && !__RCVD_IN_DNSWL && !__JM_REACTOR_DATE && !__RCD_RDNS_SMTP && !__RCD_RDNS_SMTP_MESSY && !__USING_VERP1 && !__KAM_BODY_LENGTH_LT_128 
 describe FSL_BULK_SIG          Bulk signature with no Unsubscribe
-score    FSL_BULK_SIG          3.000	# limit
+score    FSL_BULK_SIG          2.500	# limit
 tflags   FSL_BULK_SIG          net publish
 
 uri      FSL_LINK_AWS_S3_WEB    /http:\/\/[^. ]+\.s3-website-[^. ]+\.amazonaws\.com/i
