@@ -20,7 +20,7 @@ tstprefs ("
   score PYZOR_CHECK 3.3
 ");
 
-#PYZOR file was from real-world spam in October 2018
+#PYZOR file was from real-world spam in October 2021
 
 #TESTING FOR SPAM
 %patterns = (
