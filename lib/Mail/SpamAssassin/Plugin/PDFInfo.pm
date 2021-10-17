@@ -143,7 +143,7 @@ package Mail::SpamAssassin::Plugin::PDFInfo;
 use Mail::SpamAssassin::Plugin;
 use Mail::SpamAssassin::Logger;
 use Mail::SpamAssassin::Util qw(compile_regexp);
-use strict; use feature qw(refaliasing state evalbytes say fc current_sub); no feature qw(indirect);
+use strict;
 use warnings;
 use re 'taint';
 # use bytes;
