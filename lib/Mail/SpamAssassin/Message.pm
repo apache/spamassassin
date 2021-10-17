@@ -51,6 +51,8 @@ BEGIN {
   or do { require Digest::SHA1; import Digest::SHA1 qw(sha1 sha1_hex) }
 }
 
+use Scalar::Util qw(tainted);
+
 use Mail::SpamAssassin;
 use Mail::SpamAssassin::Message::Node;
 use Mail::SpamAssassin::Message::Metadata;
@@ -207,14 +209,14 @@ sub new {
   # messages? Tainting the message is important because it prevents certain
   # exploits later.
   if (Mail::SpamAssassin::Util::am_running_in_taint_mode() &&
-        grep { !Scalar::Util::tainted($_) } @message) {
+        grep { !tainted($_) } @message) {
     local($_);
     # To preserve newlines, no joining and splitting here, process each line
     # directly as is.
     foreach (@message) {
       $_ = Mail::SpamAssassin::Util::taint_var($_);
     }
-    if (grep { !Scalar::Util::tainted($_) } @message) {
+    if (grep { !tainted($_) } @message) {
       die "Mail::SpamAssassin::Message failed to enforce message taintness";
     }
   }
