@@ -188,7 +188,7 @@ BITCOIN_IMGUR
 # good enough
 BITCOIN_MALF_HTML
 
-# tflags net
+# tflags publish
 BITCOIN_MALWARE
 
 # tflags publish
@@ -292,9 +292,6 @@ CN_B2B_SPAMMER
 
 # tflags publish
 COMMENT_GIBBERISH
-
-# tflags net
-COMPENSATION
 
 # tflags publish
 CONTENT_AFTER_HTML
@@ -458,10 +455,10 @@ FONT_INVIS_POSTEXTRAS
 # tflags net
 FORGED_SPF_HELO
 
-# tflags publish
+# tflags net
 FORM_FRAUD
 
-# tflags net
+# tflags publish
 FORM_FRAUD_3
 
 # tflags publish
@@ -549,9 +546,6 @@ FROM_MISSP_MSFT
 FROM_MISSP_PHISH
 
 # tflags net
-FROM_MISSP_REPLYTO
-
-# tflags net
 FROM_MISSP_SPF_FAIL
 
 # good enough
@@ -601,6 +595,9 @@ FSL_CTYPE_WIN1251
 
 # good enough
 FSL_HELO_BARE_IP_1
+
+# good enough
+FSL_HELO_FAKE
 
 # good enough
 FSL_HELO_NON_FQDN_1
@@ -749,6 +746,9 @@ HAS_X_NO_RELAY
 # tflags publish
 HAS_X_OUTGOING_SPAM_STAT
 
+# tflags net
+HDRS_LCASE
+
 # good enough
 HDRS_LCASE_IMGONLY
 
@@ -842,7 +842,7 @@ HTML_OFF_PAGE
 # tflags publish
 HTML_SHRT_CMNT_OBFU_MANY
 
-# tflags publish
+# tflags net
 HTML_SINGLET_MANY
 
 # good enough
@@ -914,14 +914,8 @@ MALWARE_PASSWORD
 # tflags publish
 MALW_ATTACH
 
-# tflags net
-MANY_HDRS_LCASE
-
 # tflags publish
 MANY_SPAN_IN_TEXT
-
-# tflags net
-MAY_BE_FORGED
 
 # tflags publish
 MILLION_HUNDRED
@@ -1057,6 +1051,9 @@ NSL_RCVD_HELO_USER
 
 # tflags publish
 OBFU_BITCOIN
+
+# good enough
+OBFU_HTML_ATTACH
 
 # tflags publish
 OBFU_JVSCR_ESC
@@ -1493,6 +1490,9 @@ SENDGRID_REDIR_PHISH
 # tflags publish
 SEO_SUSP_NTLD
 
+# good enough
+SERGIO_SUBJECT_VIAGRA01
+
 # tflags publish
 SHOPIFY_IMG_NOT_RCVD_SFY
 
@@ -1578,6 +1578,9 @@ SUBJECT_IN_WHITELIST
 SUBJ_BRKN_WORDNUMS
 
 # tflags net
+SUBJ_UNNEEDED_HTML
+
+# tflags net
 SURBL_BLOCKED
 
 # good enough
@@ -1629,6 +1632,9 @@ TO_EQ_FM_DIRECT_MX
 TO_EQ_FM_DOM_SPF_FAIL
 
 # tflags net
+TO_EQ_FM_HTML_ONLY
+
+# tflags net
 TO_EQ_FM_SPF_FAIL
 
 # tflags publish
@@ -1648,9 +1654,6 @@ TO_NO_BRKTS_HTML_IMG
 
 # tflags publish
 TO_NO_BRKTS_HTML_ONLY
-
-# tflags net
-TO_NO_BRKTS_MSFT
 
 # tflags publish
 TO_NO_BRKTS_NORDNS_HTML
@@ -1676,14 +1679,14 @@ TVD_RCVD_IP4
 # good enough
 TVD_RCVD_SPACE_BRACKET
 
-# tflags net
-TVD_SPACE_ENCODED
-
 # good enough
 TVD_SPACE_ENC_FM_MIME
 
 # tflags net
 TVD_SPACE_RATIO_MINFP
+
+# tflags net
+TVD_SUBJ_NUM_OBFU_MINFP
 
 # tflags publish
 TW_GIBBERISH_MANY
@@ -1847,7 +1850,7 @@ URI_MALWARE_SCMS
 # tflags userconf
 URI_NOVOWEL
 
-# tflags publish
+# tflags net
 URI_ONLY_MSGID_MALF
 
 # tflags publish
