@@ -254,7 +254,7 @@ BODY_SINGLE_URI
 # good enough
 BODY_SINGLE_WORD
 
-# tflags publish
+# tflags net
 BODY_URI_ONLY
 
 # tflags publish
@@ -293,9 +293,6 @@ CN_B2B_SPAMMER
 # tflags publish
 COMMENT_GIBBERISH
 
-# tflags net
-COMPENSATION
-
 # tflags publish
 CONTENT_AFTER_HTML
 
@@ -307,6 +304,9 @@ CTE_8BIT_MISMATCH
 
 # good enough
 CTYPE_NULL
+
+# good enough
+DATE_IN_FUTURE_96_Q
 
 # tflags publish
 DAY_I_EARNED
@@ -458,10 +458,10 @@ FONT_INVIS_POSTEXTRAS
 # tflags net
 FORGED_SPF_HELO
 
-# tflags publish
+# tflags net
 FORM_FRAUD
 
-# tflags publish
+# tflags net
 FORM_FRAUD_3
 
 # tflags publish
@@ -848,7 +848,7 @@ HTML_OFF_PAGE
 # tflags publish
 HTML_SHRT_CMNT_OBFU_MANY
 
-# tflags publish
+# tflags net
 HTML_SINGLET_MANY
 
 # good enough
@@ -871,9 +871,6 @@ JH_SPAMMY_PATTERN01
 
 # tflags publish
 JH_SPAMMY_PATTERN02
-
-# tflags net
-KHOP_FAKE_EBAY
 
 # tflags net
 KHOP_HELO_FCRDNS
@@ -1066,9 +1063,6 @@ NSL_RCVD_HELO_USER
 
 # tflags publish
 OBFU_BITCOIN
-
-# good enough
-OBFU_HTML_ATTACH
 
 # tflags publish
 OBFU_JVSCR_ESC
@@ -1616,10 +1610,10 @@ TARINGANET_IMG_NOT_RCVD_TN
 # tflags publish
 TEQF_USR_IMAGE
 
-# tflags publish
+# tflags net
 TEQF_USR_MSGID_HEX
 
-# tflags publish
+# tflags net
 TEQF_USR_MSGID_MALF
 
 # good enough
@@ -1641,13 +1635,13 @@ TONOM_EQ_TOLOC_SHRT_SHRTNER
 TO_EQ_FM_DIRECT_MX
 
 # tflags net
+TO_EQ_FM_DOM_HTML_IMG
+
+# tflags net
 TO_EQ_FM_DOM_HTML_ONLY
 
 # tflags net
 TO_EQ_FM_DOM_SPF_FAIL
-
-# tflags net
-TO_EQ_FM_HTML_ONLY
 
 # tflags net
 TO_EQ_FM_SPF_FAIL
@@ -1669,6 +1663,9 @@ TO_NO_BRKTS_HTML_IMG
 
 # tflags publish
 TO_NO_BRKTS_HTML_ONLY
+
+# tflags net
+TO_NO_BRKTS_MSFT
 
 # tflags publish
 TO_NO_BRKTS_NORDNS_HTML
@@ -1699,6 +1696,12 @@ TVD_SPACE_ENCODED
 
 # good enough
 TVD_SPACE_ENC_FM_MIME
+
+# tflags net
+TVD_SPACE_RATIO_MINFP
+
+# tflags net
+TVD_SUBJ_NUM_OBFU_MINFP
 
 # tflags publish
 TW_GIBBERISH_MANY
@@ -1862,7 +1865,7 @@ URI_MALWARE_SCMS
 # tflags userconf
 URI_NOVOWEL
 
-# tflags net
+# tflags publish
 URI_ONLY_MSGID_MALF
 
 # tflags publish
