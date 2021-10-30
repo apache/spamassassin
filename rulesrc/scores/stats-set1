@@ -1,23 +1,23 @@
 ##### WITH NEW RULES AND SCORES #####
 
 # SUMMARY for threshold 5.0:
-# Correctly non-spam: 165336  71.056%  (99.612% of non-spam corpus)
-# Correctly spam:      50588  21.741%  (75.840% of spam corpus)
-# False positives:       644  0.277%  (0.388% of nonspam,  22924 weighted)
-# False negatives:     16116  6.926%  (24.160% of spam,  37726 weighted)
+# Correctly non-spam: 165335  71.057%  (99.611% of non-spam corpus)
+# Correctly spam:      50584  21.740%  (75.840% of spam corpus)
+# False positives:       645  0.277%  (0.389% of nonspam,  22929 weighted)
+# False negatives:     16114  6.925%  (24.160% of spam,  37803 weighted)
 # Average score for spam:  9.9    nonspam: -0.6
-# Average for false-pos:   8.9  false-neg: 2.3
-# TOTAL:              232684  100.00%
+# Average for false-pos:   8.8  false-neg: 2.3
+# TOTAL:              232678  100.00%
 
 Reading scores from "tmprules"...
 Reading per-message hit stat logs and scores...
 
 # SUMMARY for threshold 5.0:
-# Correctly non-spam:  20828  99.67%
-# Correctly spam:       6385  75.89%
-# False positives:        70  0.33%
-# False negatives:      2029  24.11%
-# TCR(l=50): 1.521794  SpamRecall: 75.885%  SpamPrec: 98.916%
+# Correctly non-spam:  20827  99.66%
+# Correctly spam:       6337  75.31%
+# False positives:        71  0.34%
+# False negatives:      2077  24.69%
+# TCR(l=50): 1.495291  SpamRecall: 75.315%  SpamPrec: 98.892%
 
 ##### WITHOUT NEW RULES AND SCORES #####
 Reading scores from "../rules-base"...
@@ -25,10 +25,10 @@ Reading per-message hit stat logs and scores...
 
 # SUMMARY for threshold 5.0:
 # Correctly non-spam: 165631  99.79%
-# Correctly spam:      23629  35.42%
+# Correctly spam:      23683  35.51%
 # False positives:       349  0.21%
-# False negatives:     43075  64.58%
-# TCR(l=50): 1.102090  SpamRecall: 35.424%  SpamPrec: 98.544%
+# False negatives:     43015  64.49%
+# TCR(l=50): 1.103084  SpamRecall: 35.508%  SpamPrec: 98.548%
 Reading scores from "../rules-base"...
 Reading per-message hit stat logs and scores...
 
