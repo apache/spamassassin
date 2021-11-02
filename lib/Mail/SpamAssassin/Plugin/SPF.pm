@@ -453,7 +453,7 @@ sub _check_spf {
 	  dbg("spf: could not parse result from existing Received-SPF header");
 	}
 
-      } elsif ($hdr =~ /^Authentication-Results:.*;\s*SPF\s*=\s*([^;]*)/i) {
+      } elsif ($hdr =~ /^(?:Arc\-)?Authentication-Results:.*;\s*SPF\s*=\s*([^;]*)/i) {
         dbg("spf: found an Authentication-Results header added by an internal host: $hdr");
 
         # RFC 5451 header parser - added by D. Stussy 2010-09-09:

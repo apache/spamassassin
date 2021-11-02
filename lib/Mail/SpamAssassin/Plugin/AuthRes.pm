@@ -319,7 +319,7 @@ sub parsed_metadata {
   }
 
   foreach my $hdr (split(/^/m, $pms->get($nethdr))) {
-    if ($hdr =~ /^Authentication-Results:\s*(.+)/i) {
+    if ($hdr =~ /^(?:Arc\-)?Authentication-Results:\s*(.+)/i) {
       push @authres, $1;
     }
   }
