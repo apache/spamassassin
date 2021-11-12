@@ -534,9 +534,6 @@ FROM_MISSP_MSFT
 FROM_MISSP_PHISH
 
 # tflags net
-FROM_MISSP_REPLYTO
-
-# tflags net
 FROM_MISSP_SPF_FAIL
 
 # good enough
@@ -700,6 +697,9 @@ GOOG_REDIR_DOCUSIGN
 
 # good enough
 GOOG_REDIR_HTML_ONLY
+
+# good enough
+GOOG_REDIR_NORDNS
 
 # tflags publish
 GOOG_REDIR_SHORT
@@ -898,6 +898,9 @@ MALW_ATTACH
 
 # tflags publish
 MANY_SPAN_IN_TEXT
+
+# tflags net
+MAY_BE_FORGED
 
 # tflags publish
 MILLION_HUNDRED
@@ -1535,6 +1538,9 @@ SUBJECT_IN_WHITELIST
 # tflags net
 SUBJ_BRKN_WORDNUMS
 
+# good enough
+SUBJ_OBFU_LOW_CNTRST
+
 # tflags net
 SURBL_BLOCKED
 
@@ -1578,9 +1584,6 @@ TO_EQ_FM_DIRECT_MX
 TO_EQ_FM_DOM_SPF_FAIL
 
 # tflags net
-TO_EQ_FM_HTML_ONLY
-
-# tflags net
 TO_EQ_FM_SPF_FAIL
 
 # tflags publish
@@ -1600,6 +1603,9 @@ TO_NO_BRKTS_HTML_IMG
 
 # tflags publish
 TO_NO_BRKTS_HTML_ONLY
+
+# tflags net
+TO_NO_BRKTS_MSFT
 
 # tflags publish
 TO_NO_BRKTS_NORDNS_HTML
@@ -1624,9 +1630,6 @@ TVD_RCVD_SPACE_BRACKET
 
 # good enough
 TVD_SPACE_ENC_FM_MIME
-
-# tflags net
-TVD_SUBJ_NUM_OBFU_MINFP
 
 # tflags publish
 TW_GIBBERISH_MANY
