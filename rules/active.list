@@ -116,9 +116,6 @@ AMAZON_IMG_NOT_RCVD_AMZN
 # good enough
 ANY_PILL_PRICE
 
-# good enough
-APOSTROPHE_TOCC
-
 # tflags publish
 APP_DEVELOPMENT_FREEM
 
@@ -191,7 +188,7 @@ BITCOIN_IMGUR
 # good enough
 BITCOIN_MALF_HTML
 
-# tflags publish
+# tflags net
 BITCOIN_MALWARE
 
 # tflags publish
@@ -257,7 +254,7 @@ BODY_SINGLE_URI
 # good enough
 BODY_SINGLE_WORD
 
-# tflags publish
+# tflags net
 BODY_URI_ONLY
 
 # tflags publish
@@ -295,6 +292,9 @@ CN_B2B_SPAMMER
 
 # tflags publish
 COMMENT_GIBBERISH
+
+# tflags net
+COMPENSATION
 
 # tflags publish
 CONTENT_AFTER_HTML
@@ -455,7 +455,7 @@ FORGED_SPF_HELO
 # tflags publish
 FORM_FRAUD
 
-# tflags publish
+# tflags net
 FORM_FRAUD_3
 
 # tflags publish
@@ -478,6 +478,9 @@ FREEM_FRNUM_UNICD_EMPTY
 
 # tflags publish
 FRNAME_IN_MSG_XPRIO_NO_SUB
+
+# good enough
+FROM_2_EMAILS_SHORT
 
 # tflags publish
 FROM_ADDR_WS
@@ -534,6 +537,9 @@ FROM_MISSP_MSFT
 FROM_MISSP_PHISH
 
 # tflags net
+FROM_MISSP_REPLYTO
+
+# tflags net
 FROM_MISSP_SPF_FAIL
 
 # good enough
@@ -580,6 +586,9 @@ FSL_CTYPE_WIN1251
 
 # good enough
 FSL_HELO_BARE_IP_1
+
+# good enough
+FSL_HELO_FAKE
 
 # good enough
 FSL_HELO_NON_FQDN_1
@@ -731,6 +740,9 @@ HAS_X_NO_RELAY
 # tflags publish
 HAS_X_OUTGOING_SPAM_STAT
 
+# tflags net
+HDRS_LCASE
+
 # good enough
 HDRS_LCASE_IMGONLY
 
@@ -849,6 +861,9 @@ JH_SPAMMY_PATTERN01
 JH_SPAMMY_PATTERN02
 
 # tflags net
+KHOP_FAKE_EBAY
+
+# tflags net
 KHOP_HELO_FCRDNS
 
 # tflags publish
@@ -895,6 +910,9 @@ MALWARE_PASSWORD
 
 # tflags publish
 MALW_ATTACH
+
+# tflags net
+MANY_HDRS_LCASE
 
 # tflags publish
 MANY_SPAN_IN_TEXT
@@ -1093,6 +1111,9 @@ PDS_TONAME_EQ_TOLOCAL_FREEM_FORGE
 
 # good enough
 PDS_TONAME_EQ_TOLOCAL_HDRS_LCASE
+
+# good enough
+PDS_TO_EQ_FROM_NAME
 
 # tflags publish
 PHISH_ATTACH
@@ -1562,10 +1583,10 @@ TARINGANET_IMG_NOT_RCVD_TN
 # tflags publish
 TEQF_USR_IMAGE
 
-# tflags publish
+# tflags net
 TEQF_USR_MSGID_HEX
 
-# tflags publish
+# tflags net
 TEQF_USR_MSGID_MALF
 
 # tflags publish
@@ -1581,7 +1602,13 @@ TONLINE_FAKE_DKIM
 TO_EQ_FM_DIRECT_MX
 
 # tflags net
+TO_EQ_FM_DOM_HTML_ONLY
+
+# tflags net
 TO_EQ_FM_DOM_SPF_FAIL
+
+# tflags net
+TO_EQ_FM_HTML_ONLY
 
 # tflags net
 TO_EQ_FM_SPF_FAIL
@@ -1628,8 +1655,17 @@ TVD_RCVD_IP4
 # good enough
 TVD_RCVD_SPACE_BRACKET
 
+# tflags net
+TVD_SPACE_ENCODED
+
 # good enough
 TVD_SPACE_ENC_FM_MIME
+
+# tflags net
+TVD_SPACE_RATIO_MINFP
+
+# tflags net
+TVD_SUBJ_NUM_OBFU_MINFP
 
 # tflags publish
 TW_GIBBERISH_MANY
@@ -1820,7 +1856,7 @@ URI_WPADMIN
 # tflags publish
 URI_WP_DIRINDEX
 
-# tflags publish
+# tflags net
 URI_WP_HACKED
 
 # tflags publish
