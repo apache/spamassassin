@@ -2593,7 +2593,7 @@ if can(Mail::SpamAssassin::Conf::feature_bug6558_free)
   tflags    FONT_INVIS_POSTEXTRAS         publish
 
   meta      __FONT_INVIS_MSGID            __FONT_INVIS && __MSGID_OK_HOST 
-  meta      FONT_INVIS_MSGID              __FONT_INVIS_MSGID && !__RCD_RDNS_MX_MESSY && !__RCD_RDNS_MX && !__HAS_ERRORS_TO && !__RCD_RDNS_MAIL && !__MAIL_LINK && !__HDR_RCVD_AMAZON && !__MIME_QP && !__HAS_CAMPAIGNID && !__HAS_THREAD_INDEX 
+  meta      FONT_INVIS_MSGID              __FONT_INVIS_MSGID && !__RCD_RDNS_MX_MESSY && !__RCD_RDNS_MX && !__HAS_ERRORS_TO && !__RCD_RDNS_MAIL && !__MAIL_LINK && !__HDR_RCVD_AMAZON && !__MIME_QP && !__HAS_CAMPAIGNID && !__HAS_THREAD_INDEX && !__RCD_RDNS_MTA 
   describe  FONT_INVIS_MSGID              Invisible text + suspicious message ID
   score     FONT_INVIS_MSGID              2.500	# limit
   tflags    FONT_INVIS_MSGID              publish
