@@ -3249,9 +3249,10 @@ describe   NEWEGG_IMG_NOT_RCVD_NEGG    Newegg hosted image but message not from 
 tflags     NEWEGG_IMG_NOT_RCVD_NEGG    publish
 
 header     __HDR_RCVD_SHOPIFY          X-Spam-Relays-External =~ /\srdns=\S+\.shopify\.com\s/
+header     __HDR_ENVFROM_SHOPIFY       X-Spam-Relays-External =~ /\shelo=\S+\.mailer\.shopify\.com\s(?:[^\]\s]+\s)*envfrom=\S+\.shopifyemail\.com\s/
 uri        __URI_IMG_SHOPIFY           m,://cdn\.shopify\.com/.+\.(?:jpe?g|gif|png|webp),i
 
-meta       __SHOPIFY_IMG_NOT_RCVD_SFY  __URI_IMG_SHOPIFY && !__HDR_RCVD_SHOPIFY
+meta       __SHOPIFY_IMG_NOT_RCVD_SFY  __URI_IMG_SHOPIFY && !__HDR_RCVD_SHOPIFY && !__HDR_ENVFROM_SHOPIFY
 meta       SHOPIFY_IMG_NOT_RCVD_SFY    __SHOPIFY_IMG_NOT_RCVD_SFY && !MIME_QP_LONG_LINE && !__RCD_RDNS_MTA_MESSY && !__AC_UNSUB_URI && !__HAS_CAMPAIGNID && !__HAS_SENDER && !__HAS_ORGANIZATION && !__RCD_RDNS_OB && !__DOS_LINK 
 score      SHOPIFY_IMG_NOT_RCVD_SFY    2.500	# limit
 describe   SHOPIFY_IMG_NOT_RCVD_SFY    Shopify hosted image but message not from Shopify
