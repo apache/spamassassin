@@ -9,7 +9,7 @@ use constant HAS_IO_STRING => eval { require IO::String; };
 use Test::More;
 plan skip_all => 'Need Archive::Zip for this test' unless HAS_ARCHIVE_ZIP;
 plan skip_all => 'Need IO::String for this test' unless HAS_IO_STRING;
-plan tests => 7;
+plan tests => 8;
 
 tstlocalrules (q{
   loadplugin Mail::SpamAssassin::Plugin::OLEVBMacro
@@ -28,6 +28,8 @@ tstlocalrules (q{
   score    OLEMACRO_ZIP_PW 0.1
   body     OLEMACRO_CSV eval:check_olemacro_csv()
   score    OLEMACRO_CSV 0.1
+  body     OLEMACRO_TURI eval:check_olemacro_redirect_uri()
+  score    OLEMACRO_TURI 0.1
 });
 
 
@@ -87,3 +89,10 @@ ok_all_patterns();
 sarun ("-L -t < data/spam/olevbmacro/goodcsv.eml", \&patterns_run_cb);
 ok_all_patterns();
 
+%patterns = (
+  q{ OLEMACRO_TURI }, 'OLEMACRO_TURI',
+);
+%anti_patterns = ();
+
+sarun ("-L -t < data/spam/olevbmacro/target_uri.eml", \&patterns_run_cb);
+ok_all_patterns();

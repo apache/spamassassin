@@ -499,7 +499,13 @@ sub check_olemacro_redirect_uri {
 
   _check_attachments(@_) unless exists $pms->{olemacro_redirect_uri};
 
-  return $pms->{olemacro_redirect_uri};
+  my $rulename = $pms->get_current_eval_rule_name();
+  if(defined $pms->{olemacro_redirect_uri}) {
+    $pms->test_log("$pms->{olemacro_redirect_uri}", $rulename);
+    $pms->got_hit($rulename, "", ruletype => 'eval');
+    return 1;
+  }
+  return 0;
 }
 
 sub _check_attachments {
@@ -849,6 +855,7 @@ sub _check_macrotype_doc {
 
   my @rels = $zip->membersMatching('.*\.rels');
   my @relations;
+  my $target_uri;
   if(not defined $pms->{olemacro_redirect_uri}) {
     foreach my $rel ( @rels ) {
       dbg("Found " . $rel->fileName . " configuration file");
@@ -856,8 +863,10 @@ sub _check_macrotype_doc {
       @relations = split(/Relationship\s/, $data);
       foreach my $rls ( @relations ) {
         if (($status == $az_ok) && ($rls =~ /Target=\"(https?\:\/\/[^"']*)\".*TargetMode=\"External\"/is)) {
-          $pms->{olemacro_redirect_uri} = 1;
-          $pms->add_uri_detail_list($1) if defined $1;
+          $target_uri = $1;
+          dbg("Found target uri $target_uri");
+          $pms->add_uri_detail_list($target_uri) if defined $target_uri;
+          $pms->{olemacro_redirect_uri} = $target_uri;
         }
       }
     }
