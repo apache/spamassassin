@@ -821,9 +821,7 @@ sub _check_macrotype_doc {
     'ppt/vbaproject.bin' => 'ppt2k7',
   );
 
-  my %olefiles = (
-    'xl/embeddings/oleobject1.bin' => 'xl2k13',
-  );
+  my $oledir = 'xl/embeddings/';
 
   my @members = $zip->members();
   foreach my $member (@members){
@@ -833,8 +831,8 @@ sub _check_macrotype_doc {
       $pms->{olemacro_exists} = 1;
       last;
     }
-    if (exists($olefiles{lc($mname)})) {
-        dbg("Found $olefiles{$mname} ole file");
+    if ($mname =~ /^$oledir/) {
+        dbg("Found $mname ole file");
         $pms->{oleobject_exists} = 1;
         last;
     }
