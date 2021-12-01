@@ -44,7 +44,7 @@ if can(Mail::SpamAssassin::Conf::feature_blocklist_welcomelist)
   endif
 
   #might be a way to only have one instance of the below block, unsure if it's even necessary
-  reuse USER_IN_DKIM_WHITELSIT
+  reuse USER_IN_DKIM_WHITELIST
   reuse USER_IN_DKIM_WELCOMELIST
 
 else
