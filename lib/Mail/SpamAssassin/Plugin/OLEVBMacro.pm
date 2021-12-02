@@ -30,6 +30,9 @@ Mail::SpamAssassin::Plugin::OLEVBMacro - search attached documents for evidence 
     body     OLEOBJ eval:check_oleobject()
     describe OLEOBJ Attachment has an Ole Object
 
+    body     OLERTF eval:check_olertfobject()
+    describe OLERTF Attachment has an Ole Rtf Object
+
     body     OLEMACRO_MALICE eval:check_olemacro_malice()
     describe OLEMACRO_MALICE Potentially malicious Office Macro
 
@@ -131,6 +134,7 @@ sub new {
 
   $self->register_eval_rule("check_olemacro", $Mail::SpamAssassin::Conf::TYPE_BODY_EVALS);
   $self->register_eval_rule("check_oleobject", $Mail::SpamAssassin::Conf::TYPE_BODY_EVALS);
+  $self->register_eval_rule("check_olertfobject", $Mail::SpamAssassin::Conf::TYPE_BODY_EVALS);
   $self->register_eval_rule("check_olemacro_csv", $Mail::SpamAssassin::Conf::TYPE_BODY_EVALS);
   $self->register_eval_rule("check_olemacro_malice", $Mail::SpamAssassin::Conf::TYPE_BODY_EVALS);
   $self->register_eval_rule("check_olemacro_renamed", $Mail::SpamAssassin::Conf::TYPE_BODY_EVALS);
@@ -419,6 +423,14 @@ sub check_oleobject {
   _check_attachments(@_) unless exists $pms->{oleobject_exists};
 
   return $pms->{oleobject_exists};
+}
+
+sub check_olertfobject {
+  my ($self,$pms,$body,$name) = @_;
+
+  _check_attachments(@_) unless exists $pms->{olertfobject_exists};
+
+  return $pms->{olertfobject_exists};
 }
 
 sub check_olemacro_csv {
@@ -822,6 +834,7 @@ sub _check_macrotype_doc {
   );
 
   my $oledir = 'xl/embeddings/';
+  my $olertfdir = 'word/';
 
   my @members = $zip->members();
   foreach my $member (@members){
@@ -834,6 +847,11 @@ sub _check_macrotype_doc {
     if ($mname =~ /^$oledir/) {
         dbg("Found $mname ole file");
         $pms->{oleobject_exists} = 1;
+        last;
+    }
+    if ($mname =~ /^$olertfdir.{1,50}\.rtf/) {
+        dbg("Found $mname ole rtf file");
+        $pms->{olertfobject_exists} = 1;
         last;
     }
   }
@@ -1066,5 +1084,6 @@ sub _decode_part_header {
 
 # Version features
 sub has_olemacro_redirect_uri { 1 }
+sub has_olertfobject { 1 }
 
 1;
