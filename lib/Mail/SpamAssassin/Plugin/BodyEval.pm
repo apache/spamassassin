@@ -360,7 +360,7 @@ sub _plaintext_body_sig_ratio {
 
   # Find the last occurence of a signature delimiter and get the body and
   # signature lengths.
-  my ($len_b, $len_s) = map { length } $text =~ /(^|.*\n)-- \n(.*?)$/s;
+  my ($len_b, $len_s) = map { length } $text =~ /(^|.*\n)-- \r?\n(.*?)$/s;
 
   if (! defined $len_b) {     # no sig marker, all body
       $len_b = length $text;
