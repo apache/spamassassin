@@ -232,7 +232,7 @@ sub _check_dmarc {
   $spf_helo_status = 'neutral' if ((defined $pms->{spf_helo_neutral}) and ($pms->{spf_helo_neutral} eq 1));
   $spf_helo_status = 'softfail' if ((defined $pms->{spf_helo_softfail}) and ($pms->{spf_helo_softfail} eq 1));
 
-  $mfrom_domain = $pms->get('EnvelopeFrom:host');
+  $mfrom_domain = $pms->get('EnvelopeFrom:host', undef);
   return if not defined $mfrom_domain;
   $dmarc->source_ip($lasthop->{ip});
   $dmarc->header_from_raw($pms->get('From:addr'));
