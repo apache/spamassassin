@@ -11,7 +11,7 @@ header   __PDS_CPANEL_FROM_ADDR_FAKE From:addr =~ /^cPanelon/
 header   __PDS_CPANEL_CT Content-Type =~ /Cpanel::Email::Object/
 header   __PDS_CPANEL_XICONTACT exists:X-iContact_locale
 
-meta     __PDS_CPANEL_SPOOF_PHP (__PDS_CPANEL_FROM_NAME || __PDS_FROM_CPANEL_ADDR_FAKE) && (__PHP_MUA || __HAS_PHP_SCRIPT)
+meta     __PDS_CPANEL_SPOOF_PHP (__PDS_CPANEL_FROM_NAME || __PDS_CPANEL_FROM_ADDR_FAKE) && (__PHP_MUA || __HAS_PHP_SCRIPT)
 
 meta     __PDS_CPANEL_MISSING_HEADERS __PDS_CPANEL_FROM_NAME && !(__PDS_CPANEL_CT || __PDS_CPANEL_XICONTACT)
 
