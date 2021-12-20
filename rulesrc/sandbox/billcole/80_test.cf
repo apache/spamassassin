@@ -56,3 +56,6 @@ tflags   ALL_INTERNAL	nice
 describe SCC_NEWBIE_HASBEENS	Abused gTLDs seen in spam from Google Apps.  
 header   SCC_NEWBIE_HASBEENS	X-Beenthere =~ /\.(today|online|monster)/
 
+describe  T_SCC_HTML_OBJOBJ	Contains an object
+rawbody   T_SCC_HTML_OBJOBJ	/< *object +\w{65,80} *>/
+
