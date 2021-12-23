@@ -679,7 +679,7 @@ the same authorized identity, and will not associate any IP address with it.
 (The same happens with valid DKIM signatures. No option available for DKIM).
 
 Note: at domains that define the useless SPF +all (pass all), no IP would be
-ever associated with the email address, and all addresses (incl. the froged
+ever associated with the email address, and all addresses (incl. the forged
 ones) would be treated as coming from the authorized source. However, such
 domains are hopefully rare, and ask for this kind of treatment anyway.
 
