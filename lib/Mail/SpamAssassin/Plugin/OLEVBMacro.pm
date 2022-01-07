@@ -53,6 +53,9 @@ Mail::SpamAssassin::Plugin::OLEVBMacro - search attached documents for evidence 
 
     body     OLEMACRO_URI_TARGET eval:check_olemacro_redirect_uri()
     describe OLEMACRO_URI_TARGET Uri inside an Office doc
+
+    body     OLEMACRO_MHTML_TARGET eval:check_olemacro_mhtml_uri()
+    describe OLEMACRO_MHTML_TARGET exploitable mhtml uri inside an Office doc
   endif
 
 =head1 DESCRIPTION
@@ -115,6 +118,10 @@ my $encrypted_marker = "\x45\x00\x6e\x00\x63\x00\x72\x00\x79\x00\x70\x00\x74\x00
 my $exe_marker1 = "\x00((https?)://)[-A-Za-z0-9+&@#/%?=~_|!:,.;]{5,1000}[-A-Za-z0-9+&@#/%=~_|]{5,1000}(\.exe|\.cmd|\.bat)([\x06|\x00])";
 my $exe_marker2 = "URLDownloadToFileA";
 
+# CVE-2021-40444 marker
+my $mhtml_marker1 = "^MHTML:&#x48;&#x54;&#x50;&#x3a;&#x5c;&#x5c;&#x31;&";
+my $mhtml_marker2 = "^mhtml:(https?)://";
+
 # this code burps an ugly message if it fails, but that's redirected elsewhere
 # AZ_OK is a constant exported by Archive::Zip
 my $az_ok;
@@ -142,6 +149,7 @@ sub new {
   $self->register_eval_rule("check_olemacro_zip_password", $Mail::SpamAssassin::Conf::TYPE_BODY_EVALS);
   $self->register_eval_rule("check_olemacro_download_exe", $Mail::SpamAssassin::Conf::TYPE_BODY_EVALS);
   $self->register_eval_rule("check_olemacro_redirect_uri", $Mail::SpamAssassin::Conf::TYPE_BODY_EVALS);
+  $self->register_eval_rule("check_olemacro_mhtml_uri", $Mail::SpamAssassin::Conf::TYPE_BODY_EVALS);
 
   return $self;
 }
@@ -520,6 +528,24 @@ sub check_olemacro_redirect_uri {
   return 0;
 }
 
+sub check_olemacro_mhtml_uri {
+  my ($self,$pms,$body,$name) = @_;
+  my $mhtml;
+
+  _check_attachments(@_) unless exists $pms->{olemacro_redirect_uri};
+
+  my $rulename = $pms->get_current_eval_rule_name();
+  if(defined $pms->{olemacro_mhtml_uri}) {
+    $mhtml = $pms->{olemacro_mhtml_uri};
+    if(($mhtml =~ /$mhtml_marker1/i) or ($mhtml =~ /$mhtml_marker2/i)) {
+      $pms->got_hit($rulename, "", ruletype => 'eval');
+      return 1;
+    }
+    return 0;
+  }
+  return 0;
+}
+
 sub _check_attachments {
 
   my ($self,$pms,$body,$name) = @_;
@@ -872,17 +898,20 @@ sub _check_macrotype_doc {
   my @rels = $zip->membersMatching('.*\.rels');
   my @relations;
   my $target_uri;
+  my $mhtml;
   if(not defined $pms->{olemacro_redirect_uri}) {
     foreach my $rel ( @rels ) {
       dbg("Found " . $rel->fileName . " configuration file");
       my ( $data, $status ) = $rel->contents();
       @relations = split(/Relationship\s/, $data);
       foreach my $rls ( @relations ) {
-        if (($status == $az_ok) && ($rls =~ /Target=\"(https?\:\/\/[^"']*)\".*TargetMode=\"External\"/is)) {
-          $target_uri = $1;
+        if (($status == $az_ok) && ($rls =~ /Target=\"(mhtml:)?(https?\:\/\/[^"']*)\".*TargetMode=\"External\"/is)) {
+          $mhtml = $1;
+          $target_uri = $2;
           dbg("Found target uri $target_uri");
           $pms->add_uri_detail_list($target_uri) if defined $target_uri;
           $pms->{olemacro_redirect_uri} = $target_uri;
+          $pms->{olemacro_mhtml_uri} = $mhtml . $target_uri if defined $mhtml;
         }
       }
     }
@@ -1084,6 +1113,7 @@ sub _decode_part_header {
 
 # Version features
 sub has_olemacro_redirect_uri { 1 }
+sub has_olemacro_mhtml_uri { 1 }
 sub has_olertfobject { 1 }
 
 1;
