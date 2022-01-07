@@ -457,8 +457,14 @@ sub recursive_lookup {
     $location = $response->headers->{location};
     # Bail out if $short_url redirects to itself
     return undef if ($short_url eq $location);
-    $self->cache_add($short_url, $location) if $self->{caching};
     dbg("Found $short_url => $location");
+    if ($self->{caching}) {
+      if ($self->cache_add($short_url, $location)) {
+        dbg("Added $short_url to cache");
+      } else {
+        dbg("Cannot add $short_url to cache");
+      }
+    }
     if($self->{url_shortener_loginfo}) {
       info("Found $short_url => $location");
     } else {
@@ -507,7 +513,9 @@ sub recursive_lookup {
 
 sub cache_add {
   my ($self, $short_url, $decoded_url) = @_;
-  return undef if not $self->{caching};
+  return 0 if not $self->{caching};
+
+  return 0 if((length($short_url) > 256) or (length($decoded_url) > 512));
 
   eval {
     $self->{sth_insert} = $self->{dbh}->prepare_cached("
@@ -517,11 +525,11 @@ sub cache_add {
   };
   if ($@) {
     dbg("warn: $@");
-    return undef;
+    return 0;
   };
 
   $self->{sth_insert}->execute($short_url, $decoded_url, time(), time());
-  return undef;
+  return 1;
 }
 
 sub cache_get {
