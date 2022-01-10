@@ -233,6 +233,10 @@ sub _check_dmarc {
   $spf_helo_status = 'softfail' if ((defined $pms->{spf_helo_softfail}) and ($pms->{spf_helo_softfail} eq 1));
 
   $mfrom_domain = $pms->get('EnvelopeFrom:host', undef);
+  if(not defined $mfrom_domain) {
+    $mfrom_domain = $pms->get('From:domain', undef);
+    dbg("cannot find EnvelopeFrom domain, using From:domain $mfrom_domain");
+  }
   return if not defined $mfrom_domain;
   $dmarc->source_ip($lasthop->{ip});
   $dmarc->header_from_raw($pms->get('From:addr'));
