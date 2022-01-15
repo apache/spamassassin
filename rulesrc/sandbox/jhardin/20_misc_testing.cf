@@ -68,12 +68,12 @@ describe       RDNS_LOCALHOST  Sender's public rDNS is "localhost"
 #describe       EU_SPAM_LAW     Quoting "European Parliament" spam law
 
 ifplugin Mail::SpamAssassin::Plugin::MIMEHeader
-  mimeheader   __HTML_ATTACH_01    Content-Type =~ m,\btext/html\b.+\.html?\b,i
-  mimeheader   __HTML_ATTACH_02    Content-Disposition =~ m,\bfilename="?[^"]+\.html?\b,i
+  mimeheader   __HTML_ATTACH_01    Content-Type =~ m,\btext/html\b.+\.s?html?\b,i
+  mimeheader   __HTML_ATTACH_02    Content-Disposition =~ m,\bfilename="?[^"]+\.s?html?\b,i
   meta         HTML_ATTACH         __HTML_ATTACH_01 || __HTML_ATTACH_02
   describe     HTML_ATTACH         HTML attachment to bypass scanning?
 
-  mimeheader   OBFU_HTML_ATTACH    Content-Type =~ m,\bapplication/octet-stream\b.+\.html?\b,i
+  mimeheader   OBFU_HTML_ATTACH    Content-Type =~ m,\bapplication/octet-stream\b.+\.s?html?\b,i
   describe     OBFU_HTML_ATTACH    HTML attachment with non-text MIME type
 
   mimeheader   OBFU_TEXT_ATTACH    Content-Type =~ m,\bapplication/octet-stream\b.+\.txt\b,i
