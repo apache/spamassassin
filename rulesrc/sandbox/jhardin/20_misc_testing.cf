@@ -1307,6 +1307,11 @@ uri         __URI_GOOGLE_DOC_FRM m,^https?://docs\.google\.com/forms/,i
 uri         __URI_GOOGLE_DRV     m,^https?://(?:drive\.google|googledrive)\.com/,i
 
 body        __UNSUB_GOOG_FORM    m,Unsubscribe\s<?https?://docs\.google\.com/forms/,i
+meta        UNSUB_GOOG_FORM      __UNSUB_GOOG_FORM
+describe    UNSUB_GOOG_FORM      Unsubscribe via Google Docs form
+score       UNSUB_GOOG_FORM      2.500	# limit
+tflags      UNSUB_GOOG_FORM      publish
+
 
 # another fill-a-form service
 uri         __FORMS_GLE              m;^https?://forms\.gle/[0-9a-z]{15,}$;i
