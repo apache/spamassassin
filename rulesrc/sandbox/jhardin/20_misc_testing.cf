@@ -3932,7 +3932,7 @@ header     __XM_UC_ONLY                X-Mailer =~ /^[^a-z]+$/
 header     __XM_UC_ONLY_UNKNOWN        X-Mailer =~ /^(?!SM[EF]$|ACEM$|CR$|PHP(?:BB)?[\/\d.]*$|EMS$|TYPO\d$|WHMCS$|RMM\d?$|GURU$|SMTP(?:\sCLIENT)?$|ZIMACS$|EOW\d|FM$|EDMAIL\sR[\d.]+$|HPPWS)[^a-z]+$/
 header     __XM_LC_ONLY                X-Mailer =~ /^[^A-Z]+$/
 header     __XM_LC_ONLY_UNKNOWN        X-Mailer =~ /^(?!php|mailer$|sendhtml$)[^A-Z]+$/
-header     __XM_RANDOM                 X-Mailer =~ /q(?!q?mail|boxmail|\d|[-\w]*=+;)[^u]/i
+header     __XM_RANDOM                 X-Mailer =~ /q(?!(?:q|box|i\s)?mail|\d|[-\w]*=+;)[^u]/i
 header     __XM_LIGHT_HEAVY            X-Mailer =~ /\b(?:light|(?<!::)lite|standard|business|pro(?:fessional)?|educational|personal)\b/i
 header     __XM_VERY_LONG              X-Mailer =~ /.{50}/
 
