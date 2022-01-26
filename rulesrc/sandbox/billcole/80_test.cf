@@ -59,3 +59,8 @@ header   SCC_NEWBIE_HASBEENS	X-Beenthere =~ /\.(today|online|monster)/
 describe  T_SCC_HTML_OBJOBJ	Contains an object
 rawbody   T_SCC_HTML_OBJOBJ	/< *object +\w{65,80} *>/
 
+describe SCC_ISEMM_LID_1	Fingerprint of a particular spammer using an old spamware
+header SCC_ISEMM_LID_1		X-Mailer-LID =~ /54,55,56,58,53/
+score  SCC_ISEMM_LID_1		2.0 #limit
+tflags SCC_ISEMM_LID_1		publish
+
