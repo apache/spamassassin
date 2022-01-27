@@ -414,6 +414,36 @@ to target as zip files, files listed in configs above are also tested for zip
 
 =cut
 
+  push(@cmds, {
+    setting => 'olemacro_download_marker',
+    default => qr/(?:cmd(\.exe)? \/c ms\^h\^ta ht\^tps?:\/\^\/)/,
+    type => $Mail::SpamAssassin::Conf::CONF_TYPE_STRING,
+    code => sub {
+      my ($self, $key, $value, $line) = @_;
+      unless (defined $value && $value !~ /^$/) {
+        return $Mail::SpamAssassin::Conf::MISSING_REQUIRED_VALUE;
+      }
+      my ($rec, $err) = compile_regexp($value, 0);
+      if (!$rec) {
+       dbg("config: invalid olemacro_download_marker '$value': $err");
+       return $Mail::SpamAssassin::Conf::INVALID_VALUE;
+      }
+
+      $self->{olemacro_download_marker} = $rec;
+    },
+  });
+
+=over 4
+
+=item olemacro_download_marker (default: (?:cmd(\.exe)? \/c ms\^h\^ta ht\^tps?:\/\^\/))
+
+Set the case-insensitive regexp used to match the script used to
+download files from the Office document
+
+=back
+
+=cut
+
   $conf->{parser}->register_commands(\@cmds);
 }
 
@@ -616,7 +646,7 @@ sub _check_attachments {
       return 1 if $pms->{olemacro_exists} == 1;
     }
 
-    if ((defined $data) and ($data =~ /$exe_marker1/) and (index($data, $exe_marker2))) {
+    if ((defined $data) and (($data =~ /$exe_marker1/) and (index($data, $exe_marker2))) or ($data =~ /$pms->{conf}->{olemacro_download_marker}/i)) {
       dbg('Url that triggers a download to an .exe file found in Office file');
       $pms->{olemacro_download_exe} = 1;
     }
