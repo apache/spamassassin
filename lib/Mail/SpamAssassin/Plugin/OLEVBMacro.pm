@@ -646,7 +646,7 @@ sub _check_attachments {
       return 1 if $pms->{olemacro_exists} == 1;
     }
 
-    if ((defined $data) and (($data =~ /$exe_marker1/) and (index($data, $exe_marker2))) or ($data =~ /$pms->{conf}->{olemacro_download_marker}/i)) {
+    if ((defined $data) and (($data =~ /$exe_marker1/) and (index($data, $exe_marker2)) or ($data =~ /$pms->{conf}->{olemacro_download_marker}/i))) {
       dbg('Url that triggers a download to an .exe file found in Office file');
       $pms->{olemacro_download_exe} = 1;
     }
