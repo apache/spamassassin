@@ -30,9 +30,13 @@ header		T_SCC_THREE_WORD_MONTY	From =~ /(\w{2,}) (\w{2,}) (\w{2,}) <\1.\2.\3/
 
 # Fingerprint Majordomo lists
 header __SCC_MD_UNSUB List-Unsubscribe =~ /: <mailto:majordomo\@/
+tflags __SCC_MD_UNSUB nice
 header __SCC_MD_SUB List-Subscribe =~ /: <mailto:majordomo\@/
+tflags __SCC_MD_SUB nice
 header __SCC_MD_SENDER Sender =~ /\bowner-/
+tflags __SCC_MD_SENDER nice
 header __SCC_MD_RCVD_OUT Received =~ /-outgoing@/
+tflags __SCC_MD_RCVD_OUT nice
 describe SCC_MAJORDOMO Multiple indications of the majordomo list manager
 meta SCC_MAJORDOMO __SCC_MD_UNSUB + __SCC_MD_SUB + __SCC_MD_SENDER + __SCC_MD_RCVD_OUT > 1
 tflags SCC_MAJORDOMO nice
