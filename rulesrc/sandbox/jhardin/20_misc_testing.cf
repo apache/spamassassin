@@ -3907,10 +3907,16 @@ ifplugin Mail::SpamAssassin::Plugin::FreeMail
 endif
 
 rawbody    __CONTENT_AFTER_HTML        /<\/html>\s*[a-z0-9]/i
-meta       CONTENT_AFTER_HTML          __CONTENT_AFTER_HTML && !__HAS_SENDER && !__LYRIS_EZLM_REMAILER && !__HAS_CID && !__RCD_RDNS_MTA_MESSY && !__URI_DOTGOV 
-describe   CONTENT_AFTER_HTML          More content after HTML close tag
+
+meta       CONTENT_AFTER_HTML          __CONTENT_AFTER_HTML && (__L_CTE_8BIT || __RDNS_NUMERIC_TLD || __HTML_TAG_BALANCE_CENTER || __STY_INVIS_MANY || __TO_EQ_FROM_USR || __TO_EQ_FROM_USR_2 || __KAM_HTML_FONT_INVALID || __SUBJECT_ENCODED_B64 )
+describe   CONTENT_AFTER_HTML          More content after HTML close tag + other spam signs
 score      CONTENT_AFTER_HTML          2.500	# limit
 tflags     CONTENT_AFTER_HTML          publish
+
+meta       CONTENT_AFTER_HTML_WEAK     __CONTENT_AFTER_HTML && !CONTENT_AFTER_HTML && !__CT_TEXT_PLAIN && !__BOUNCE_FROM_DAEMON && !__MSGID_OK_HEX && !__HAS_SENDER && !__LYRIS_EZLM_REMAILER && !MAILING_LIST_MULTI && !__HAS_CID && !__URI_DOTGOV 
+describe   CONTENT_AFTER_HTML_WEAK     More content after HTML close tag
+score      CONTENT_AFTER_HTML_WEAK     1.500	# limit
+tflags     CONTENT_AFTER_HTML_WEAK     publish
 
 # High S/O but rare - ahead of the curve?
 uri        GOOG_REDIR_DOCUSIGN         m;://www\.google\.com/url\?.*q=https?://www\.docusign\.com/;i
