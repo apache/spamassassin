@@ -68,3 +68,17 @@ header SCC_ISEMM_LID_1		X-Mailer-LID =~ /54,55,56,58,53/
 score  SCC_ISEMM_LID_1		2.0 #limit
 tflags SCC_ISEMM_LID_1		publish
 
+# TESTING a few domains that are in our "suspicious" list but are known to have some good senders
+describe T_SCC_TLD_SPACE From domain in *.space 
+header   T_SCC_TLD_SPACE From =~ /<[^ @]+@[^ @>]+\.space>/
+
+describe T_SCC_TLD_ONLINE From domain in *.online 
+header   T_SCC_TLD_ONLINE From =~ /<[^ @]+@[^ @>]+\.online>/
+
+describe T_SCC_TLD_XYZ From domain in *.xyz
+header   T_SCC_TLD_XYZ From =~ /<[^ @]+@[^ @>]+\.xyz>/
+
+describe	T_SCC_URL_NOTIONSITE  has a notion.site URL
+uri		T_SCC_URL_NOTIONSITE  /https?:\/\/[^ ]*\.notion.site/
+tflags		T_SCC_URL_NOTIONSITE  multiple maxhits=5
+
