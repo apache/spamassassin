@@ -82,3 +82,7 @@ describe	T_SCC_URL_NOTIONSITE  has a notion.site URL
 uri		T_SCC_URL_NOTIONSITE  /https?:\/\/[^ ]*\.notion.site/
 tflags		T_SCC_URL_NOTIONSITE  multiple maxhits=5
 
+
+describe	T_SCC_URL_CLOUDINARY  Has Cloudinary backend(?) URL
+uri		T_SCC_URL_CLOUDINARY  /https?:\/\/res.cloudinary.com/
+tflags		T_SCC_URL_CLOUDINARY  multiple maxhits=5
