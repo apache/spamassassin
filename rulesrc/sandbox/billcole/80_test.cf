@@ -65,7 +65,6 @@ rawbody   T_SCC_HTML_OBJOBJ	/< *object +\w{65,80} *>/
 
 describe SCC_ISEMM_LID_1	Fingerprint of a particular spammer using an old spamware
 header SCC_ISEMM_LID_1		X-Mailer-LID =~ /54,55,56,58,53/
-score  SCC_ISEMM_LID_1		2.0 #limit
 tflags SCC_ISEMM_LID_1		publish
 
 # TESTING a few domains that are in our "suspicious" list but are known to have some good senders
