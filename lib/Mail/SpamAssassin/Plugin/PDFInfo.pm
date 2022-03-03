@@ -215,7 +215,6 @@ my %get_details = (
     my $no_more_fuzzy = 0;
     my $got_image = 0;
     my $encrypted = 0;
-    my $location;
 
     while($data =~ /([^\n]+)/g) {
       # dbg("pdfinfo: line=$1");
@@ -228,25 +227,11 @@ my %get_details = (
           $line =~ s/\s+$//;  # strip off whitespace at end.
           $fuzzy_data .= $line;
 	}
+	# once we hit the first stream, we stop collecting data for fuzzy md5
+	$no_more_fuzzy = 1  if index($line, 'stream') >= 0;
       }
 
-      if ($line =~ m/^\/([A-Za-z]+)/) {
-         $pdf_tags .= $1;
-      }
-
-      $got_image=1 if ($line =~ m/\/Image/);
-      $encrypted=1 if ($line =~ m/^\/Encrypt/);
-
-      # once we hit the first stream, we stop collecting data for fuzzy md5
-      $no_more_fuzzy = 1 if (index($line, 'stream') >= 0);
-
-      # XXX some pdf have uris but are stored inside binary data
-      if ($line =~ /\/S\s?\/URI\s?\/URI\s?\(([^\)\\]+)\)\s?/) {
-         $location = $1;
-         dbg("pdfinfo: found URI $location in pdf " . ($name ? $name : ''));
-         $pms->add_uri_detail_list($location);
-         undef $location;
-      }
+      $got_image = 1  if index($line, '/Image') >= 0;
 
       # From a v1.3 pdf
       # [12234] dbg: pdfinfo: line=630 0 0 149 0 0 cm
@@ -267,21 +252,37 @@ my %get_details = (
           $width = $1;
           $height = $2;
         }
+        if ($width && $height) {
+          $no_more_fuzzy = 1;
+          my $area = $width * $height;
+          $total_height += $height;
+          $total_width += $width;
+          $total_area += $area;
+          $pms->{pdfinfo}->{dems_pdf}->{"${height}x${width}"} = 1;
+          $pms->{'pdfinfo'}->{"count_pdf_images"} ++;
+          dbg("pdfinfo: Found image in PDF ".($name ? $name : '')." - $height x $width pixels ($area pixels sq.)");
+          $self->_set_tag($pms, 'PDFIMGDIM', "${height}x${width}");
+          $height=0; $width=0;  # reset and check for next image
+          $got_image = 0;
+        }
       }
 
-      # did pdf contain image data?
-      if ($got_image && $width && $height) {
-        $no_more_fuzzy = 1;
-        my $area = $width * $height;
-        $total_height += $height;
-        $total_width += $width;
-        $total_area += $area;
-        $pms->{pdfinfo}->{dems_pdf}->{"${height}x${width}"} = 1;
-        $pms->{'pdfinfo'}->{"count_pdf_images"} ++;
-        dbg("pdfinfo: Found image in PDF ".($name ? $name : '')." - $height x $width pixels ($area pixels sq.)");
-        $self->_set_tag($pms, 'PDFIMGDIM', "${height}x${width}");
-        $height=0; $width=0;  # reset and check for next image
-        $got_image = 0;
+      #
+      # Triage - expecting / to be found for rest of the checks
+      #
+      next unless index($line, '/') >= 0;
+
+      $encrypted = 1  if index($line, '/Encrypt') == 0;
+
+      if ($line =~ m/^\/([A-Za-z]+)/) {
+         $pdf_tags .= $1;
+      }
+
+      # XXX some pdf have uris but are stored inside binary data
+      if ($line =~ /\/S\s?\/URI\s?\/URI\s?\(([^\)\\]+)\)\s?/) {
+         my $location = $1;
+         dbg("pdfinfo: found URI $location in pdf " . ($name ? $name : ''));
+         $pms->add_uri_detail_list($location);
       }
 
       # [5310] dbg: pdfinfo: line=<</Producer(GPL Ghostscript 8.15)
@@ -292,30 +293,23 @@ my %get_details = (
       # [5310] dbg: pdfinfo: line=/Author(colet)>>endobj
       # or all on same line inside xml - v1.6+
       # <</CreationDate(D:20070226165054-06'00')/Creator( Adobe Photoshop CS2 Windows)/Producer(Adobe Photoshop for Windows -- Image Conversion Plug-in)/ModDate(D:20070226165100-06'00')>>
-
-      if ($line =~ /\/Producer\s?\(([^\)\\]+)/) {
-        $producer = $1;
+      if ($line =~ /\/Producer\s{0,2}\((.*?(?<!\\))\)/) {
+        $producer = clean_property($1);
       }
-      if ($line =~ /\/CreationDate\s?\(D\:(\d+)/) {
-        $created = $1;
+      if ($line =~ /\/CreationDate\s{0,2}\(D\:(\d+)/) {
+        $created = clean_property($1);
       }
-      if ($line =~ /\/ModDate\s?\(D\:(\d+)/) {
-        $modified = $1;
+      if ($line =~ /\/ModDate\s{0,2}\(D\:(\d+)/) {
+        $modified = clean_property($1);
       }
-      if ($line =~ /\/Title\s?\(([^\)\\]+)/) {
-        $title = $1;
-        # Title=\376\377\000w\000w\000n\000g
-        # Title=wwng
-        $title =~ s/\\\d{3}//g;
+      if ($line =~ /\/Title\s{0,2}\((.*?(?<!\\))\)/) {
+        $title = clean_property($1);
       }
-      if ($line =~ /\/Creator\s?\(([^\)\\]+)/) {
-        $creator = $1;
+      if ($line =~ /\/Creator\s{0,2}\((.*?(?<!\\))\)/) {
+        $creator = clean_property($1);
       }
-      if ($line =~ /\/Author\s?\(([^\)]+)/) {
-        $author = $1;
-        # Author=\376\377\000H\000P\000_\000A\000d\000m\000i\000n\000i\000s\000t\000r\000a\000t\000o\000r
-        # Author=HP_Administrator
-        $author =~ s/\\\d{3}//g;
+      if ($line =~ /\/Author\s{0,2}\((.*?(?<!\\))\)/) {
+        $author = clean_property($1);
       }
     }
 
@@ -379,6 +373,21 @@ my %get_details = (
   },
 
 );
+
+sub clean_property {
+  local $_ = shift;
+  # Author=\376\377\000H\000P\000_\000A\000d\000m\000i\000n\000i\000s\000t\000r\000a\000t\000o\000r
+  # Handle UTF-16 (in ultra-naive way for now)
+  if (s/^\xfe\xff//) {
+    s/\x00//g;
+  } elsif (s/^\\376\\377//) {
+    s/\\00?0?//g;
+  }
+  # Fix quoted parenthesis:
+  # Title(Foo \(bar\))
+  s/\\([()])/$1/g;
+  return $_;
+}
 
 # ----------------------------------------
 
