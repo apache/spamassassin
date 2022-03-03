@@ -223,9 +223,6 @@ my %get_details = (
 
       $line_count++;
 
-      # lines containing high bytes will have no data we need, so save some cycles
-      next if ($line =~ /[\x80-\xff]/);
-
       if (!$no_more_fuzzy && $line_count < 70) {
         if ($line !~ m/^\%/ && $line !~ m/^\/(?:Height|Width|(?:(?:Media|Crop)Box))/ && $line !~ m/^\d+\s+\d+\s+\d+\s+\d+\s+\d+\s+\d+\s+cm$/) {
           $line =~ s/\s+$//;  # strip off whitespace at end.
