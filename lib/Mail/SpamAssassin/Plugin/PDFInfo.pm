@@ -130,6 +130,27 @@ This plugin helps detected spam using attached PDF files
      body RULENAME eval:pdf_is_empty_body(<bytes>)
         bytes: maximum byte count to allow and still consider it empty
 
+  pdf_image_to_text_ratio()
+
+     body RULENAME eval:pdf_image_to_text_ratio(<min>,<max>)
+        Ratio calculated as body_length / total_image_area
+        min: minimum ratio
+        max: maximum ratio
+
+  pdf_image_size_exact()
+
+     body RULENAME eval:pdf_image_size_exact(<h>,<w>)
+        h: image height is exactly h
+        w: image width is exactly w
+
+  pdf_image_size_range()
+
+     body RULENAME eval:pdf_image_size_range(<minh>,<minw>,[<maxh>],[<maxw>])
+        minh: image height is atleast minh
+        minw: image width is atleast minw
+        maxh: (optional) image height is no more than maxh
+        maxw: (optional) image width is no more than maxw
+
   NOTE: See the ruleset for more examples that are not documented here.
 
 =back
@@ -146,9 +167,7 @@ use Mail::SpamAssassin::Util qw(compile_regexp);
 use strict;
 use warnings;
 use re 'taint';
-# use bytes;
 use Digest::MD5 qw(md5_hex);
-#use MIME::QuotedPrint; # use Util::qp_decode instead
 
 our @ISA = qw(Mail::SpamAssassin::Plugin);
 
@@ -176,520 +195,373 @@ sub new {
   $self->register_eval_rule ("pdf_is_encrypted", $Mail::SpamAssassin::Conf::TYPE_BODY_EVALS);
   $self->register_eval_rule ("pdf_is_empty_body", $Mail::SpamAssassin::Conf::TYPE_BODY_EVALS);
 
+  # lower priority for add_uri_detail_list to work
   $self->register_method_priority ("parsed_metadata", -1);
 
   return $self;
 }
 
-# -----------------------------------------
-
-my %get_details = (
-  'pdf' => sub {
-    my ($self, $pms, $part) = @_;
-
-    my $type = $part->{'type'} || 'base64';
-    my $data = '';
-
-    if ($type eq 'quoted-printable') {
-      $data = Mail::SpamAssassin::Util::qp_decode($data);
-    }
-    else {
-      $data = $part->decode();  # just use built in base64 decoder
-    }
-
-    my $index = substr($data, 0, 8);
-
-    return unless ($index =~ /.PDF\-(\d\.\d)/);
-    my $version = $1;
-    $self->_set_tag($pms, 'PDFVERSION', $version);
-    # dbg("pdfinfo: pdf version = $version");
-
-    my ($height, $width, $fuzzy_data, $pdf_tags);
-    my ($producer, $created, $modified, $title, $creator, $author) = ('unknown','0','0','untitled','unknown','unknown');
-    my ($md5, $fuzzy_md5) = ('', '');
-    my ($total_height, $total_width, $total_area, $line_count) = (0,0,0,0);
-
-    my $name = $part->{'name'} || '';
-    $self->_set_tag($pms, 'PDFNAME', $name);
-
-    my $no_more_fuzzy = 0;
-    my $got_image = 0;
-    my $encrypted = 0;
-
-    while($data =~ /([^\n]+)/g) {
-      # dbg("pdfinfo: line=$1");
-      my $line = $1;
-
-      $line_count++;
-
-      if (!$no_more_fuzzy && $line_count < 70) {
-        if ($line !~ m/^\%/ && $line !~ m/^\/(?:Height|Width|(?:(?:Media|Crop)Box))/ && $line !~ m/^\d+\s+\d+\s+\d+\s+\d+\s+\d+\s+\d+\s+cm$/) {
-          $line =~ s/\s+$//;  # strip off whitespace at end.
-          $fuzzy_data .= $line;
-	}
-	# once we hit the first stream, we stop collecting data for fuzzy md5
-	$no_more_fuzzy = 1  if index($line, 'stream') >= 0;
-      }
-
-      $got_image = 1  if index($line, '/Image') >= 0;
-
-      # From a v1.3 pdf
-      # [12234] dbg: pdfinfo: line=630 0 0 149 0 0 cm
-      # [12234] dbg: pdfinfo: line=/Width 630
-      # [12234] dbg: pdfinfo: line=/Height 149
-      if ($got_image) {
-        if ($line =~ /^(\d+)\s+\d+\s+\d+\s+(\d+)\s+\d+\s+\d+\s+cm$/) {
-          $width = $1;
-          $height = $2;
-        }
-        elsif ($line =~ /^\/Width\s(\d+)/) {
-          $width = $1;
-        }
-        elsif ($line =~ /^\/Height\s(\d+)/) {
-          $height = $1;
-        }
-        elsif ($line =~ m/\/Width\s(\d+)\/Height\s(\d+)/) {
-          $width = $1;
-          $height = $2;
-        }
-        if ($width && $height) {
-          $no_more_fuzzy = 1;
-          my $area = $width * $height;
-          $total_height += $height;
-          $total_width += $width;
-          $total_area += $area;
-          $pms->{pdfinfo}->{dems_pdf}->{"${height}x${width}"} = 1;
-          $pms->{'pdfinfo'}->{"count_pdf_images"} ++;
-          dbg("pdfinfo: Found image in PDF ".($name ? $name : '')." - $height x $width pixels ($area pixels sq.)");
-          $self->_set_tag($pms, 'PDFIMGDIM', "${height}x${width}");
-          $height=0; $width=0;  # reset and check for next image
-          $got_image = 0;
-        }
-      }
-
-      #
-      # Triage - expecting / to be found for rest of the checks
-      #
-      next unless index($line, '/') >= 0;
-
-      $encrypted = 1  if index($line, '/Encrypt') == 0;
-
-      if ($line =~ m/^\/([A-Za-z]+)/) {
-         $pdf_tags .= $1;
-      }
-
-      # XXX some pdf have uris but are stored inside binary data
-      if ($line =~ /\/S\s?\/URI\s?\/URI\s?\(([^\)\\]+)\)\s?/) {
-         my $location = $1;
-         dbg("pdfinfo: found URI $location in pdf " . ($name ? $name : ''));
-         $pms->add_uri_detail_list($location);
-      }
-
-      # [5310] dbg: pdfinfo: line=<</Producer(GPL Ghostscript 8.15)
-      # [5310] dbg: pdfinfo: line=/CreationDate(D:20070703144220)
-      # [5310] dbg: pdfinfo: line=/ModDate(D:20070703144220)
-      # [5310] dbg: pdfinfo: line=/Title(Microsoft Word - Document1)
-      # [5310] dbg: pdfinfo: line=/Creator(PScript5.dll Version 5.2)
-      # [5310] dbg: pdfinfo: line=/Author(colet)>>endobj
-      # or all on same line inside xml - v1.6+
-      # <</CreationDate(D:20070226165054-06'00')/Creator( Adobe Photoshop CS2 Windows)/Producer(Adobe Photoshop for Windows -- Image Conversion Plug-in)/ModDate(D:20070226165100-06'00')>>
-      if ($line =~ /\/Producer\s{0,2}\((.*?(?<!\\))\)/) {
-        $producer = clean_property($1);
-      }
-      if ($line =~ /\/CreationDate\s{0,2}\(D\:(\d+)/) {
-        $created = clean_property($1);
-      }
-      if ($line =~ /\/ModDate\s{0,2}\(D\:(\d+)/) {
-        $modified = clean_property($1);
-      }
-      if ($line =~ /\/Title\s{0,2}\((.*?(?<!\\))\)/) {
-        $title = clean_property($1);
-      }
-      if ($line =~ /\/Creator\s{0,2}\((.*?(?<!\\))\)/) {
-        $creator = clean_property($1);
-      }
-      if ($line =~ /\/Author\s{0,2}\((.*?(?<!\\))\)/) {
-        $author = clean_property($1);
-      }
-    }
-
-    # store the file name so we can check pdf_named() or pdf_name_match() later.
-    $pms->{pdfinfo}->{names_pdf}->{$name} = 1 if $name;
-
-    # store encrypted flag.
-    $pms->{pdfinfo}->{encrypted} = $encrypted;
-
-    # if we had multiple images in the pdf, we need to store the total HxW as well.
-    # If it was a single Image PDF, then this value will already be in the hash.
-    $pms->{pdfinfo}->{dems_pdf}->{"${total_height}x${total_width}"} = 1 if ($total_height && $total_width);;
-
-    if ($total_area) {
-      $pms->{pdfinfo}->{pc_pdf} = $total_area;
-      $self->_set_tag($pms, 'PDFIMGAREA', $total_area);
-      dbg("pdfinfo: Filename=$name Total HxW: $total_height x $total_width ($total_area area)") if ($total_area);
-    }
-
-    dbg("pdfinfo: Filename=$name Title=$title Author=$author Producer=$producer Created=$created Modified=$modified");
-
-    $md5 = uc(md5_hex($data)) if $data;
-    $fuzzy_md5 = uc(md5_hex($fuzzy_data)) if $fuzzy_data;
-    my $tags_md5;
-    $tags_md5 = uc(md5_hex($pdf_tags)) if $pdf_tags;
-
-    dbg("pdfinfo: MD5 results for ".($name ? $name : '')." - md5=".($md5 ? $md5 : '')." fuzzy1=".($fuzzy_md5 ? $fuzzy_md5 : '')." fuzzy2=".($tags_md5 ? $tags_md5 : ''));
-
-    # we dont need tags for these.
-    $pms->{pdfinfo}->{details}->{created} = $created if $created;
-    $pms->{pdfinfo}->{details}->{modified} = $modified if $modified;
-
-    if ($producer) {
-      $pms->{pdfinfo}->{details}->{producer} = $producer if $producer;
-      $self->_set_tag($pms, 'PDFPRODUCER', $producer);
-    }
-    if ($title) {
-      $pms->{pdfinfo}->{details}->{title} = $title;
-      $self->_set_tag($pms, 'PDFTITLE', $title);
-    }
-    if ($creator) {
-      $pms->{pdfinfo}->{details}->{creator} = $creator;
-      $self->_set_tag($pms, 'PDFCREATOR', $creator);
-    }
-    if ($author) {
-      $pms->{pdfinfo}->{details}->{author} = $author;
-      $self->_set_tag($pms, 'PDFAUTHOR', $author);
-    }
-    if ($md5) {
-      $pms->{pdfinfo}->{md5}->{$md5} = 1;
-      $self->_set_tag($pms, 'PDFMD5', $fuzzy_md5);
-    }
-    if ($fuzzy_md5) {
-      $pms->{pdfinfo}->{fuzzy_md5}->{$fuzzy_md5} = 1;
-      $self->_set_tag($pms, 'PDFMD5FUZZY1', $fuzzy_md5);
-    }
-    if ($tags_md5) {
-      $pms->{pdfinfo}->{fuzzy_md5}->{$tags_md5} = 1;
-      $self->_set_tag($pms, 'PDFMD5FUZZY2', $tags_md5);
-    }
-  },
-
-);
-
-sub clean_property {
-  local $_ = shift;
-  # Author=\376\377\000H\000P\000_\000A\000d\000m\000i\000n\000i\000s\000t\000r\000a\000t\000o\000r
-  # Handle UTF-16 (in ultra-naive way for now)
-  if (s/^\xfe\xff//) {
-    s/\x00//g;
-  } elsif (s/^\\376\\377//) {
-    s/\\00?0?//g;
-  }
-  # Fix quoted parenthesis:
-  # Title(Foo \(bar\))
-  s/\\([()])/$1/g;
-  return $_;
-}
-
-# ----------------------------------------
-
-sub _set_tag {
-
-  my ($self, $pms, $tag, $value) = @_;
-
-  dbg("pdfinfo: set_tag called for $tag $value");
-  return unless ($tag && $value);
-
-  if (exists $pms->{tag_data}->{$tag}) {
-    $pms->{tag_data}->{$tag} .= " $value";  # append value
-  }
-  else {
-    $pms->{tag_data}->{$tag} = $value;
-  }
-}
-
-# ----------------------------------------
-
 sub parsed_metadata {
   my ($self, $opts) = @_;
+
   my $pms = $opts->{permsgstatus};
 
-  dbg ('pdfinfo: get_uri_detail_list() has been called already')
-    if exists $pms->{uri_detail_list};
-
-  # make sure we have image data read in.
-  if (!exists $pms->{'pdfinfo'}) {
-    $self->_find_pdf_mime_parts($pms);
-  }
-}
-
-# ----------------------------------------
-
-sub _find_pdf_mime_parts {
-  my ($self,$pms) = @_;
-
-  # bail early if message does not have pdf parts
-  return 0 if (exists $pms->{'pdfinfo'}->{'no_parts'});
-
   # initialize
-  $pms->{'pdfinfo'}->{"pc_pdf"} = 0;
-  $pms->{'pdfinfo'}->{"count_pdf"} = 0;
-  $pms->{'pdfinfo'}->{"count_pdf_images"} = 0;
+  $pms->{pdfinfo}->{count_pdf} = 0;
+  $pms->{pdfinfo}->{count_pdf_images} = 0;
 
   my @parts = $pms->{msg}->find_parts(qr@^(image|application)/(pdf|octet\-stream)$@, 1);
   my $part_count = scalar @parts;
 
   dbg("pdfinfo: Identified $part_count possible mime parts that need checked for PDF content");
 
-  # cache this so we can easily bail
-  $pms->{'pdfinfo'}->{'no_parts'} = 1 unless $part_count;
-
   foreach my $p (@parts) {
-    my $type = $p->{'type'} =~ m@/([\w\-]+)$@;
-    my $name = $p->{'name'} || '';
+    my $type = $p->{type} || '';
+    my $name = $p->{name} || '';
 
-    my $cte = lc( $p->get_header('content-transfer-encoding') || '' );
-
-    dbg("pdfinfo: found part, type=".($type ? $type : '')." file=".($name ? $name : '')." cte=".($cte ? $cte : '')."");
-
-    # make sure its a cte we support
-    next unless ($cte =~ /^(?:base64|quoted\-printable)$/);
+    dbg("pdfinfo: found part, type=$type file=$name");
 
     # filename must end with .pdf, or application type can be pdf
     # sometimes windows muas will wrap a pdf up inside a .dat file
     # v0.8 - Added .fdf phoney PDF detection
-    next unless ($name =~ /\.[fp]df$/ || $type eq 'pdf');
+    next unless ($name =~ /\.[fp]df$/i || $type =~ m@/pdf$@);
 
-    # if we get this far, make sure type is pdf for sure (not octet-stream or anything else)
-    $type='pdf';
+    _get_pdf_details($pms, $p);
+    $pms->{pdfinfo}->{count_pdf}++;
+  }
 
-    if ($type && exists $get_details{$type}) {
-       $get_details{$type}->($self, $pms, $p);
-       $pms->{'pdfinfo'}->{"count_$type"} ++;
+  _set_tag($pms, 'PDFCOUNT',  $pms->{pdfinfo}->{count_pdf});
+  _set_tag($pms, 'PDFIMGCOUNT', $pms->{pdfinfo}->{count_pdf_images});
+}
+
+sub _get_pdf_details {
+  my ($pms, $part) = @_;
+
+  my $data = $part->decode();
+
+  # Remove UTF-8 BOM
+  $data =~ s/^\xef\xbb\xbf//;
+
+  # Search magic in first 1024 bytes
+  if ($data !~ /^.{0,1024}\%PDF\-(\d\.\d)/s) {
+    dbg("pdfinfo: PDF magic header not found, invalid file?");
+    return;
+  }
+  my $version = $1;
+  _set_tag($pms, 'PDFVERSION', $version);
+  # dbg("pdfinfo: pdf version = $version");
+
+  my ($fuzzy_data, $pdf_tags);
+  my ($md5, $fuzzy_md5) = ('','');
+  my ($total_height, $total_width, $total_area, $line_count) = (0,0,0,0);
+
+  my $name = $part->{name} || '';
+  _set_tag($pms, 'PDFNAME', $name);
+  # store the file name so we can check pdf_named() or pdf_name_match() later.
+  $pms->{pdfinfo}->{names_pdf}->{$name} = 1 if $name;
+
+  my $no_more_fuzzy = 0;
+  my $got_image = 0;
+  my $encrypted = 0;
+
+  while ($data =~ /([^\n]+)/g) {
+    # dbg("pdfinfo: line=$1");
+    my $line = $1;
+
+    if (!$no_more_fuzzy && ++$line_count < 70) {
+      if ($line !~ m/^\%/ && $line !~ m/^\/(?:Height|Width|(?:(?:Media|Crop)Box))/ && $line !~ m/^\d+\s+\d+\s+\d+\s+\d+\s+\d+\s+\d+\s+cm$/) {
+        $line =~ s/\s+$//;  # strip off whitespace at end.
+        $fuzzy_data .= $line;
+      }
+      # once we hit the first stream, we stop collecting data for fuzzy md5
+      $no_more_fuzzy = 1  if index($line, 'stream') >= 0;
+    }
+
+    $got_image = 1  if index($line, '/Image') >= 0;
+    if (!$encrypted && index($line, '/Encrypt') == 0) {
+      # store encrypted flag.
+      $encrypted = $pms->{pdfinfo}->{encrypted} = 1;
+    }
+
+    # From a v1.3 pdf
+    # [12234] dbg: pdfinfo: line=630 0 0 149 0 0 cm
+    # [12234] dbg: pdfinfo: line=/Width 630
+    # [12234] dbg: pdfinfo: line=/Height 149
+    if ($got_image) {
+      my ($width, $height);
+      if ($line =~ /^(\d+)\s+\d+\s+\d+\s+(\d+)\s+\d+\s+\d+\s+cm$/) {
+        $width = $1;
+        $height = $2;
+      }
+      elsif ($line =~ /^\/Width\s(\d+)/) {
+        $width = $1;
+      }
+      elsif ($line =~ /^\/Height\s(\d+)/) {
+        $height = $1;
+      }
+      elsif ($line =~ m/\/Width\s(\d+)\/Height\s(\d+)/) {
+        $width = $1;
+        $height = $2;
+      }
+      if ($width && $height) {
+        $no_more_fuzzy = 1;
+        my $area = $width * $height;
+        $total_height += $height;
+        $total_width += $width;
+        $total_area += $area;
+        $pms->{pdfinfo}->{dems_pdf}->{"${height}x${width}"} = 1;
+        $pms->{pdfinfo}->{count_pdf_images}++;
+        dbg("pdfinfo: Found image in PDF $name: $height x $width pixels ($area pixels sq.)");
+        _set_tag($pms, 'PDFIMGDIM', "${height}x${width}");
+        $got_image = $height = $width = 0;  # reset and check for next image
+      }
+    }
+
+    #
+    # Triage - expecting / to be found for rest of the checks
+    #
+    next unless index($line, '/') >= 0;
+
+    if ($line =~ m/^\/([A-Za-z]+)/) {
+      $pdf_tags .= $1;
+    }
+
+    # XXX some pdf have uris but are stored inside binary data
+    if ($line =~ /\/S\s?\/URI\s?\/URI\s?\(([^\)\\]+)\)\s?/) {
+      my $location = $1;
+      dbg("pdfinfo: found URI: $location");
+      $pms->add_uri_detail_list($location);
+    }
+
+    # [5310] dbg: pdfinfo: line=<</Producer(GPL Ghostscript 8.15)
+    # [5310] dbg: pdfinfo: line=/CreationDate(D:20070703144220)
+    # [5310] dbg: pdfinfo: line=/ModDate(D:20070703144220)
+    # [5310] dbg: pdfinfo: line=/Title(Microsoft Word - Document1)
+    # [5310] dbg: pdfinfo: line=/Creator(PScript5.dll Version 5.2)
+    # [5310] dbg: pdfinfo: line=/Author(colet)>>endobj
+    # or all on same line inside xml - v1.6+
+    # <</CreationDate(D:20070226165054-06'00')/Creator( Adobe Photoshop CS2 Windows)/Producer(Adobe Photoshop for Windows -- Image Conversion Plug-in)/ModDate(D:20070226165100-06'00')>>
+    # Or hex values
+    # /Creator<FEFF005700720069007400650072>
+    if ($line =~ /\/Author\s{0,2}( \( .*? (?<!\\) \) | < [^>]* > )/x) {
+      my $author = _clean_property($1);
+      dbg("pdfinfo: found property Author=$author");
+      $pms->{pdfinfo}->{details}->{author}->{$author} = 1;
+      _set_tag($pms, 'PDFAUTHOR', $author);
+    }
+    if ($line =~ /\/Creator\s{0,2}( \( .*? (?<!\\) \) | < [^>]* > )/x) {
+      my $creator = _clean_property($1);
+      dbg("pdfinfo: found property Creator=$creator");
+      $pms->{pdfinfo}->{details}->{creator}->{$creator} = 1;
+      _set_tag($pms, 'PDFCREATOR', $creator);
+    }
+    if ($line =~ /\/CreationDate\s{0,2}\(D\:(\d+)/) {
+      my $created = _clean_property($1);
+      dbg("pdfinfo: found property Created=$created");
+      $pms->{pdfinfo}->{details}->{created}->{$created} = 1;
+    }
+    if ($line =~ /\/ModDate\s{0,2}\(D\:(\d+)/) {
+      my $modified = _clean_property($1);
+      dbg("pdfinfo: found property Modified=$modified");
+      $pms->{pdfinfo}->{details}->{modified}->{$modified} = 1;
+    }
+    if ($line =~ /\/Producer\s{0,2}( \( .*? (?<!\\) \) | < [^>]* > )/x) {
+      my $producer = _clean_property($1);
+      dbg("pdfinfo: found property Producer=$producer");
+      $pms->{pdfinfo}->{details}->{producer}->{$producer} = 1;
+      _set_tag($pms, 'PDFPRODUCER', $producer);
+    }
+    if ($line =~ /\/Title\s{0,2}( \( .*? (?<!\\) \) | < [^>]* > )/x) {
+      my $title = _clean_property($1);
+      dbg("pdfinfo: found property Title=$title");
+      $pms->{pdfinfo}->{details}->{title}->{$title} = 1;
+      _set_tag($pms, 'PDFTITLE', $title);
     }
   }
 
-  $self->_set_tag($pms, 'PDFCOUNT',  $pms->{'pdfinfo'}->{"count_pdf"});
-  $self->_set_tag($pms, 'PDFIMGCOUNT', $pms->{'pdfinfo'}->{"count_pdf_images"});
+  # if we had multiple images in the pdf, we need to store the total HxW as well.
+  # If it was a single Image PDF, then this value will already be in the hash.
+  $pms->{pdfinfo}->{dems_pdf}->{"${total_height}x${total_width}"} = 1 if ($total_height && $total_width);
 
-}
-
-# ----------------------------------------
-
-sub pdf_named {
-  my ($self,$pms,$body,$name) = @_;
-  return unless (defined $name);
-
-  # make sure we have image data read in.
-  if (!exists $pms->{'pdfinfo'}) {
-    $self->_find_pdf_mime_parts($pms);
+  if ($total_area) {
+    $pms->{pdfinfo}->{pc_pdf} = $total_area;
+    _set_tag($pms, 'PDFIMGAREA', $total_area);
+    dbg("pdfinfo: Total HxW: $total_height x $total_width ($total_area area)");
   }
 
-  return 0 if (exists $pms->{'pdfinfo'}->{'no_parts'});
+  $md5 = uc(md5_hex($data)) if $data;
+  $fuzzy_md5 = uc(md5_hex($fuzzy_data)) if $fuzzy_data;
+  my $tags_md5 = '';
+  $tags_md5 = uc(md5_hex($pdf_tags)) if $pdf_tags;
 
-  return 0 unless (exists $pms->{'pdfinfo'}->{"names_pdf"});
-  return 1 if (exists $pms->{'pdfinfo'}->{"names_pdf"}->{$name});
+  dbg("pdfinfo: MD5 results for $name: md5=$md5 fuzzy1=$fuzzy_md5 fuzzy2=$tags_md5");
+
+  if ($md5) {
+    $pms->{pdfinfo}->{md5}->{$md5} = 1;
+    _set_tag($pms, 'PDFMD5', $fuzzy_md5);
+  }
+  if ($fuzzy_md5) {
+    $pms->{pdfinfo}->{fuzzy_md5}->{$fuzzy_md5} = 1;
+    _set_tag($pms, 'PDFMD5FUZZY1', $fuzzy_md5);
+  }
+  if ($tags_md5) {
+    $pms->{pdfinfo}->{fuzzy_md5}->{$tags_md5} = 1;
+    _set_tag($pms, 'PDFMD5FUZZY2', $tags_md5);
+  }
+}
+
+sub _clean_property {
+  local $_ = shift;
+  # Anything inside < > is hex encoded
+  if (/^</) {
+    # Might contain whitespace so search all hex values
+    my $str = '';
+    $str .= pack("H*", $1) while (/([0-9A-Fa-f]{2})/g);
+    $_ = $str;
+    # Handle/strip UTF-16 (in ultra-naive way for now)
+    s/\x00//g if (s/^(?:\xfe\xff|\xff\xfe)//);
+  } else {
+    s/^\(//; s/\)$//;
+    # Decode octals
+    # Author=\376\377\000H\000P\000_\000A\000d\000m\000i\000n\000i\000s\000t\000r\000a\000t\000o\000r
+    s/(?<!\\)\\([0-3][0-7][0-7])/pack("C",oct($1))/ge;
+    # Handle/strip UTF-16 (in ultra-naive way for now)
+    s/\x00//g if (s/^(?:\xfe\xff|\xff\xfe)//);
+    # Unescape some stuff like \\ \( \)
+    # Title(Foo \(bar\))
+    s/\\([()\\])/$1/g;
+  }
+  return $_;
+}
+
+sub _set_tag {
+  my ($pms, $tag, $value) = @_;
+
+  return unless defined $value && $value ne '';
+  dbg("pdfinfo: set_tag called for $tag $value");
+
+  if (exists $pms->{tag_data}->{$tag}) {
+    $pms->{tag_data}->{$tag} .= ' '.$value;  # append value
+  }
+  else {
+    $pms->{tag_data}->{$tag} = $value;
+  }
+}
+
+sub pdf_named {
+  my ($self, $pms, $body, $name) = @_;
+
+  return unless defined $name;
+
+  return 1 if exists $pms->{pdfinfo}->{names_pdf}->{$name};
   return 0;
 }
 
-# -----------------------------------------
-
 sub pdf_name_regex {
-  my ($self,$pms,$body,$re) = @_;
-  return unless (defined $re);
+  my ($self, $pms, $body, $regex) = @_;
 
-  # make sure we have image data read in.
-  if (!exists $pms->{'pdfinfo'}) {
-    $self->_find_pdf_mime_parts($pms);
-  }
+  return unless defined $regex;
+  return 0 unless exists $pms->{pdfinfo}->{names_pdf};
 
-  return 0 if (exists $pms->{'pdfinfo'}->{'no_parts'});
-  return 0 unless (exists $pms->{'pdfinfo'}->{"names_pdf"});
-
-  my ($rec, $err) = compile_regexp($re, 2);
+  my ($rec, $err) = compile_regexp($regex, 2);
   if (!$rec) {
-    info("pdfinfo: invalid regexp '$re': $err");
+    my $rulename = $pms->get_current_eval_rule_name();
+    warn "pdfinfo: invalid regexp for $rulename '$regex': $err";
     return 0;
   }
 
-  my $hit = 0;
-  foreach my $name (keys %{$pms->{'pdfinfo'}->{"names_pdf"}}) {
+  foreach my $name (keys %{$pms->{pdfinfo}->{names_pdf}}) {
     if ($name =~ $rec) {
       dbg("pdfinfo: pdf_name_regex hit on $name");
       return 1;
     }
   }
+
   return 0;
-
 }
-
-# -----------------------------------------
 
 sub pdf_is_encrypted {
-  my ($self,$pms,$body) = @_;
+  my ($self, $pms, $body) = @_;
 
-  # make sure we have image data read in.
-  if (!exists $pms->{'pdfinfo'}) {
-    $self->_find_pdf_mime_parts($pms);
-  }
-
-  return 0 if (exists $pms->{'pdfinfo'}->{'no_parts'});
-  return $pms->{'pdfinfo'}->{'encrypted'};
+  return $pms->{pdfinfo}->{encrypted};
 }
-
-# -----------------------------------------
 
 sub pdf_count {
-  my ($self,$pms,$body,$min,$max) = @_;
-  return unless defined $min;
+  my ($self, $pms, $body, $min, $max) = @_;
 
-  # make sure we have image data read in.
-  if (!exists $pms->{'pdfinfo'}) {
-    $self->_find_pdf_mime_parts($pms);
-  }
-
-  return 0 if (exists $pms->{'pdfinfo'}->{'no_parts'});
-  return 0 unless (exists $pms->{'pdfinfo'}->{"count_pdf"});
-  return result_check($min, $max, $pms->{'pdfinfo'}->{"count_pdf"});
-
+  return _result_check($min, $max, $pms->{pdfinfo}->{count_pdf});
 }
-
-# -----------------------------------------
 
 sub pdf_image_count {
-  my ($self,$pms,$body,$min,$max) = @_;
-  return unless defined $min;
+  my ($self, $pms, $body, $min, $max) = @_;
 
-  # make sure we have image data read in.
-  if (!exists $pms->{'pdfinfo'}) {
-    $self->_find_pdf_mime_parts($pms);
-  }
-
-  return 0 if (exists $pms->{'pdfinfo'}->{'no_parts'});
-  return 0 unless (exists $pms->{'pdfinfo'}->{"count_pdf_images"});
-  return result_check($min, $max, $pms->{'pdfinfo'}->{"count_pdf_images"});
-
+  return _result_check($min, $max, $pms->{pdfinfo}->{count_pdf_images});
 }
-
-# -----------------------------------------
 
 sub pdf_pixel_coverage {
   my ($self,$pms,$body,$min,$max) = @_;
-  return unless (defined $min);
 
-  # make sure we have image data read in.
-  if (!exists $pms->{'pdfinfo'}) {
-    $self->_find_pdf_mime_parts($pms);
-  }
-
-  return 0 if (exists $pms->{'pdfinfo'}->{'no_parts'});
-  return 0 unless (exists $pms->{'pdfinfo'}->{"pc_pdf"});
-
-  # dbg("pdfinfo: pc_$type: $min, ".($max ? $max:'').", $type, ".$pms->{'pdfinfo'}->{"pc_pdf"});
-  return result_check($min, $max, $pms->{'pdfinfo'}->{"pc_pdf"});
+  return _result_check($min, $max, $pms->{pdfinfo}->{pc_pdf});
 }
 
-# -----------------------------------------
-
 sub pdf_image_to_text_ratio {
-  my ($self,$pms,$body,$min,$max) = @_;
-  return unless (defined $min && defined $max);
+  my ($self, $pms, $body, $min, $max) = @_;
 
-  # make sure we have image data read in.
-  if (!exists $pms->{'pdfinfo'}) {
-    $self->_find_pdf_mime_parts($pms);
-  }
-
-  return 0 if (exists $pms->{'pdfinfo'}->{'no_parts'});
-  return 0 unless (exists $pms->{'pdfinfo'}->{"pc_pdf"});
+  return unless defined $max;
+  return 0 unless $pms->{pdfinfo}->{pc_pdf};
 
   # depending on how you call this eval (body vs rawbody),
   # the $textlen will differ.
-  my $textlen = length(join('',@$body));
+  my $textlen = length(join('', @$body));
+  return 0 unless $textlen;
 
-  return 0 unless ( $textlen > 0 && exists $pms->{'pdfinfo'}->{"pc_pdf"} && $pms->{'pdfinfo'}->{"pc_pdf"} > 0);
-
-  my $ratio = $textlen / $pms->{'pdfinfo'}->{"pc_pdf"};
+  my $ratio = $textlen / $pms->{pdfinfo}->{pc_pdf};
   dbg("pdfinfo: image ratio=$ratio, min=$min max=$max");
-  return result_check($min, $max, $ratio, 1);
-}
 
-# -----------------------------------------
+  return _result_check($min, $max, $ratio, 1);
+}
 
 sub pdf_is_empty_body {
-  my ($self,$pms,$body,$min) = @_;
+  my ($self, $pms, $body, $min) = @_;
 
+  return 0 unless $pms->{pdfinfo}->{count_pdf};
   $min ||= 0;  # default to 0 bytes
 
-  # make sure we have image data read in.
-  if (!exists $pms->{'pdfinfo'}) {
-    $self->_find_pdf_mime_parts($pms);
-  }
-
-  return 0 if (exists $pms->{'pdfinfo'}->{'no_parts'});
-  return 0 unless $pms->{'pdfinfo'}->{"count_pdf"};
-
-  # check for cached result
-  return 1 if $pms->{'pdfinfo'}->{"no_body_text"};
-
   shift @$body;  # shift body array removes line #1 -> subject line.
-
   my $bytes = 0;
-  my $textlen = length(join('',@$body));
   foreach my $line (@$body) {
-    next unless ($line =~ m/\S/);
-    next if ($line =~ m/^Subject/);
+    next unless $line =~ /\S/;
+    next if $line =~ /^Subject/;
     $bytes += length($line);
+    # no hit if minimum already exceeded
+    return 0 if $bytes > $min;
   }
 
-  dbg("pdfinfo: is_empty_body = $bytes bytes");
-
-  if ($bytes == 0 || ($bytes <= $min)) {
-    $pms->{'pdfinfo'}->{"no_body_text"} = 1;
-    return 1;
-  }
-
-  # cache it and return 0
-  $pms->{'pdfinfo'}->{"no_body_text"} = 0;
-  return 0;
+  dbg("pdfinfo: pdf_is_empty_body matched ($bytes <= $min)");
+  return 1;
 }
-
-# -----------------------------------------
 
 sub pdf_image_size_exact {
-  my ($self,$pms,$body,$height,$width) = @_;
-  return unless (defined $height && defined $width);
+  my ($self, $pms, $body, $height, $width) = @_;
 
-  # make sure we have image data read in.
-  if (!exists $pms->{'pdfinfo'}) {
-    $self->_find_pdf_mime_parts($pms);
-  }
+  return unless defined $width;
 
-  return 0 if (exists $pms->{'pdfinfo'}->{'no_parts'});
-  return 0 unless (exists $pms->{'pdfinfo'}->{"dems_pdf"});
-  return 1 if (exists $pms->{'pdfinfo'}->{"dems_pdf"}->{"${height}x${width}"});
+  return 1 if exists $pms->{pdfinfo}->{dems_pdf}->{"${height}x${width}"};
   return 0;
 }
 
-# -----------------------------------------
-
 sub pdf_image_size_range {
-  my ($self,$pms,$body,$minh,$minw,$maxh,$maxw) = @_;
-  return unless (defined $minh && defined $minw);
+  my ($self, $pms, $body, $minh, $minw, $maxh, $maxw) = @_;
 
-  # make sure we have image data read in.
-  if (!exists $pms->{'pdfinfo'}) {
-    $self->_find_pdf_mime_parts($pms);
-  }
+  return unless defined $minw;
+  return 0 unless exists $pms->{pdfinfo}->{dems_pdf};
 
-  return 0 if (exists $pms->{'pdfinfo'}->{'no_parts'});
-  return 0 unless (exists $pms->{'pdfinfo'}->{"dems_pdf"});
-
-  foreach my $dem ( keys %{$pms->{'pdfinfo'}->{"dems_pdf"}}) {
-    my ($h,$w) = split(/x/,$dem);
+  foreach my $dem (keys %{$pms->{pdfinfo}->{dems_pdf}}) {
+    my ($h, $w) = split(/x/, $dem);
     next if ($h < $minh);  # height less than min height
     next if ($w < $minw);  # width less than min width
     next if (defined $maxh && $h > $maxh);  # height more than max height
     next if (defined $maxw && $w > $maxw);  # width more than max width
-
     # if we make it here, we have a match
     return 1;
   }
@@ -697,88 +569,54 @@ sub pdf_image_size_range {
   return 0;
 }
 
-# -----------------------------------------
-
 sub pdf_match_md5 {
+  my ($self, $pms, $body, $md5) = @_;
 
-  my ($self,$pms,$body,$md5) = @_;
   return unless defined $md5;
 
-  my $uc_md5 = uc($md5);  # uppercase matches only
-
-  # make sure we have pdf data read in.
-  if (!exists $pms->{'pdfinfo'}) {
-    $self->_find_pdf_mime_parts($pms);
-  }
-
-  return 0 if (exists $pms->{'pdfinfo'}->{'no_parts'});
-  return 0 unless (exists $pms->{'pdfinfo'}->{"md5"});
-  return 1 if (exists $pms->{'pdfinfo'}->{"md5"}->{$uc_md5});
+  return 1 if exists $pms->{pdfinfo}->{md5}->{uc $md5};
   return 0;
 }
-
-# -----------------------------------------
 
 sub pdf_match_fuzzy_md5 {
+  my ($self, $pms, $body, $md5) = @_;
 
-  my ($self,$pms,$body,$md5) = @_;
   return unless defined $md5;
 
-  my $uc_md5 = uc($md5);  # uppercase matches only
-
-  # make sure we have pdf data read in.
-  if (!exists $pms->{'pdfinfo'}) {
-    $self->_find_pdf_mime_parts($pms);
-  }
-
-  return 0 if (exists $pms->{'pdfinfo'}->{'no_parts'});
-  return 0 unless (exists $pms->{'pdfinfo'}->{"fuzzy_md5"});
-  return 1 if (exists $pms->{'pdfinfo'}->{"fuzzy_md5"}->{$uc_md5});
+  return 1 if exists $pms->{pdfinfo}->{fuzzy_md5}->{uc $md5};
   return 0;
 }
-
-# -----------------------------------------
 
 sub pdf_match_details {
   my ($self, $pms, $body, $detail, $regex) = @_;
-  return unless ($detail && $regex);
 
-  # make sure we have pdf data read in.
-  if (!exists $pms->{'pdfinfo'}) {
-    $self->_find_pdf_mime_parts($pms);
-  }
-
-  return 0 if (exists $pms->{'pdfinfo'}->{'no_parts'});
-  return 0 unless (exists $pms->{'pdfinfo'}->{'details'});
-
-  my $check_value = $pms->{pdfinfo}->{details}->{$detail};
-  return unless $check_value;
+  return unless defined $regex;
+  return unless exists $pms->{pdfinfo}->{details}->{$detail};
 
   my ($rec, $err) = compile_regexp($regex, 2);
   if (!$rec) {
-    info("pdfinfo: invalid regexp '$regex': $err");
+    my $rulename = $pms->get_current_eval_rule_name();
+    warn "pdfinfo: invalid regexp for $rulename '$regex': $err";
     return 0;
   }
 
-  if ($check_value =~ $rec) {
-    dbg("pdfinfo: pdf_match_details $detail $regex matches $check_value");
-    return 1;
+  foreach (keys %{$pms->{pdfinfo}->{details}->{$detail}}) {
+    if ($_ =~ $rec) {
+      dbg("pdfinfo: pdf_match_details $detail ($regex) match: $_");
+      return 1;
+    }
   }
+
   return 0;
 }
 
-# -----------------------------------------
-
-sub result_check {
+sub _result_check {
   my ($min, $max, $value, $nomaxequal) = @_;
-  return 0 unless defined $value;
-  return 0 if ($value < $min);
-  return 0 if (defined $max && $value > $max);
-  return 0 if (defined $nomaxequal && $nomaxequal && $value == $max);
+  return 0 unless defined $min && defined $value;
+  return 0 if $value < $min;
+  return 0 if defined $max && $value > $max;
+  return 0 if defined $nomaxequal && $nomaxequal && $value == $max;
   return 1;
 }
 
-# -----------------------------------------
-
 1;
-
