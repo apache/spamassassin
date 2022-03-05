@@ -263,6 +263,7 @@ sub _get_pdf_details {
   my $no_more_fuzzy = 0;
   my $got_image = 0;
   my $encrypted = 0;
+  my %uris;
 
   while ($data =~ /([^\n]+)/g) {
     # dbg("pdfinfo: line=$1");
@@ -327,10 +328,14 @@ sub _get_pdf_details {
     }
 
     # XXX some pdf have uris but are stored inside binary data
-    if ($line =~ /\/S\s?\/URI\s?\/URI\s?\(([^\)\\]+)\)\s?/) {
-      my $location = $1;
-      dbg("pdfinfo: found URI: $location");
-      $pms->add_uri_detail_list($location);
+    if (keys %uris < 20 && $line =~ /(?:\/S\s{0,2}\/URI\s{0,2}|^\s*)\/URI\s{0,2}( \( .*? (?<!\\) \) | < [^>]* > )/x) {
+      my $location = _parse_string($1);
+      next unless index($location, '.') > 0; # ignore some binary mess
+      if (!exists $uris{$location}) {
+        $uris{$location} = 1;
+        dbg("pdfinfo: found URI: $location");
+        $pms->add_uri_detail_list($location);
+      }
     }
 
     # [5310] dbg: pdfinfo: line=<</Producer(GPL Ghostscript 8.15)
@@ -344,35 +349,35 @@ sub _get_pdf_details {
     # Or hex values
     # /Creator<FEFF005700720069007400650072>
     if ($line =~ /\/Author\s{0,2}( \( .*? (?<!\\) \) | < [^>]* > )/x) {
-      my $author = _clean_property($1);
+      my $author = _parse_string($1);
       dbg("pdfinfo: found property Author=$author");
       $pms->{pdfinfo}->{details}->{author}->{$author} = 1;
       _set_tag($pms, 'PDFAUTHOR', $author);
     }
     if ($line =~ /\/Creator\s{0,2}( \( .*? (?<!\\) \) | < [^>]* > )/x) {
-      my $creator = _clean_property($1);
+      my $creator = _parse_string($1);
       dbg("pdfinfo: found property Creator=$creator");
       $pms->{pdfinfo}->{details}->{creator}->{$creator} = 1;
       _set_tag($pms, 'PDFCREATOR', $creator);
     }
     if ($line =~ /\/CreationDate\s{0,2}\(D\:(\d+)/) {
-      my $created = _clean_property($1);
+      my $created = _parse_string($1);
       dbg("pdfinfo: found property Created=$created");
       $pms->{pdfinfo}->{details}->{created}->{$created} = 1;
     }
     if ($line =~ /\/ModDate\s{0,2}\(D\:(\d+)/) {
-      my $modified = _clean_property($1);
+      my $modified = _parse_string($1);
       dbg("pdfinfo: found property Modified=$modified");
       $pms->{pdfinfo}->{details}->{modified}->{$modified} = 1;
     }
     if ($line =~ /\/Producer\s{0,2}( \( .*? (?<!\\) \) | < [^>]* > )/x) {
-      my $producer = _clean_property($1);
+      my $producer = _parse_string($1);
       dbg("pdfinfo: found property Producer=$producer");
       $pms->{pdfinfo}->{details}->{producer}->{$producer} = 1;
       _set_tag($pms, 'PDFPRODUCER', $producer);
     }
     if ($line =~ /\/Title\s{0,2}( \( .*? (?<!\\) \) | < [^>]* > )/x) {
-      my $title = _clean_property($1);
+      my $title = _parse_string($1);
       dbg("pdfinfo: found property Title=$title");
       $pms->{pdfinfo}->{details}->{title}->{$title} = 1;
       _set_tag($pms, 'PDFTITLE', $title);
@@ -410,7 +415,7 @@ sub _get_pdf_details {
   }
 }
 
-sub _clean_property {
+sub _parse_string {
   local $_ = shift;
   # Anything inside < > is hex encoded
   if (/^</) {
@@ -431,17 +436,21 @@ sub _clean_property {
     # Title(Foo \(bar\))
     s/\\([()\\])/$1/g;
   }
-  return $_;
+  # Limit to some sane length
+  return substr($_, 0, 256);
 }
 
 sub _set_tag {
   my ($pms, $tag, $value) = @_;
 
   return unless defined $value && $value ne '';
-  dbg("pdfinfo: set_tag called for $tag $value");
+  dbg("pdfinfo: set_tag called for $tag: $value");
 
   if (exists $pms->{tag_data}->{$tag}) {
-    $pms->{tag_data}->{$tag} .= ' '.$value;  # append value
+    # Limit to some sane length
+    if (length($pms->{tag_data}->{$tag}) < 2048) {
+      $pms->{tag_data}->{$tag} .= ' '.$value;  # append value
+    }
   }
   else {
     $pms->{tag_data}->{$tag} = $value;
