@@ -452,10 +452,10 @@ FONT_INVIS_POSTEXTRAS
 # tflags net
 FORGED_SPF_HELO
 
-# tflags publish
+# tflags net
 FORM_FRAUD
 
-# tflags publish
+# tflags net
 FORM_FRAUD_3
 
 # tflags publish
@@ -731,9 +731,6 @@ HAS_X_NO_RELAY
 # tflags publish
 HAS_X_OUTGOING_SPAM_STAT
 
-# tflags net
-HDRS_LCASE
-
 # good enough
 HDRS_LCASE_IMGONLY
 
@@ -827,7 +824,7 @@ HTML_OFF_PAGE
 # tflags publish
 HTML_SHRT_CMNT_OBFU_MANY
 
-# tflags publish
+# tflags net
 HTML_SINGLET_MANY
 
 # good enough
@@ -899,14 +896,8 @@ MALWARE_PASSWORD
 # tflags publish
 MALW_ATTACH
 
-# tflags net
-MANY_HDRS_LCASE
-
 # tflags publish
 MANY_SPAN_IN_TEXT
-
-# tflags net
-MAY_BE_FORGED
 
 # tflags publish
 MILLION_HUNDRED
@@ -1078,6 +1069,9 @@ PDS_FRNOM_TODOM_DBL_URL
 
 # good enough
 PDS_FRNOM_TODOM_NAKED_TO
+
+# tflags net
+PDS_FROM_2_EMAILS
 
 # good enough
 PDS_FROM_2_EMAILS_SHRTNER
@@ -1572,9 +1566,6 @@ SUBJ_ATTENTION
 SUBJ_BRKN_WORDNUMS
 
 # tflags net
-SUBJ_UNNEEDED_HTML
-
-# tflags net
 SURBL_BLOCKED
 
 # good enough
@@ -1626,6 +1617,9 @@ TO_EQ_FM_DOM_HTML_ONLY
 TO_EQ_FM_DOM_SPF_FAIL
 
 # tflags net
+TO_EQ_FM_HTML_ONLY
+
+# tflags net
 TO_EQ_FM_SPF_FAIL
 
 # tflags publish
@@ -1659,16 +1653,13 @@ TO_TOO_MANY_WFH_01
 TUMBLR_IMG_NOT_RCVD_TUMB
 
 # good enough
+TVD_PH_BODY_META
+
+# good enough
 TVD_QUAL_MEDS
 
 # good enough
 TVD_RCVD_SPACE_BRACKET
-
-# tflags net
-TVD_SPACE_ENCODED
-
-# tflags net
-TVD_SPACE_RATIO_MINFP
 
 # good enough
 TVD_VISIT_PHARMA
