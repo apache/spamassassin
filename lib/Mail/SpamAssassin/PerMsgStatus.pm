@@ -1691,7 +1691,8 @@ sub report_unsatisfied_actions {
 
 Set a template tag, as used in C<add_header>, report templates, etc.
 This API is intended for use by plugins.  Tag names will be converted
-to an all-uppercase representation internally.
+to an all-uppercase representation internally.  Tag names must consist
+of ONLY alphanumeric characters.
 
 C<$value> can be a simple scalar (string or number), or a reference to an
 array, in which case the public method get_tag will join array elements
