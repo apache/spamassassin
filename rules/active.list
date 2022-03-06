@@ -452,10 +452,10 @@ FONT_INVIS_POSTEXTRAS
 # tflags net
 FORGED_SPF_HELO
 
-# tflags net
+# tflags publish
 FORM_FRAUD
 
-# tflags net
+# tflags publish
 FORM_FRAUD_3
 
 # tflags publish
@@ -824,7 +824,7 @@ HTML_OFF_PAGE
 # tflags publish
 HTML_SHRT_CMNT_OBFU_MANY
 
-# tflags net
+# tflags publish
 HTML_SINGLET_MANY
 
 # good enough
@@ -1608,16 +1608,7 @@ TONLINE_FAKE_DKIM
 TO_EQ_FM_DIRECT_MX
 
 # tflags net
-TO_EQ_FM_DOM_HTML_IMG
-
-# tflags net
-TO_EQ_FM_DOM_HTML_ONLY
-
-# tflags net
 TO_EQ_FM_DOM_SPF_FAIL
-
-# tflags net
-TO_EQ_FM_HTML_ONLY
 
 # tflags net
 TO_EQ_FM_SPF_FAIL
@@ -1636,9 +1627,6 @@ TO_NO_BRKTS_HTML_IMG
 
 # tflags publish
 TO_NO_BRKTS_HTML_ONLY
-
-# tflags net
-TO_NO_BRKTS_MSFT
 
 # tflags publish
 TO_NO_BRKTS_NORDNS_HTML
@@ -1856,7 +1844,7 @@ URI_WPADMIN
 # tflags publish
 URI_WP_DIRINDEX
 
-# tflags net
+# tflags publish
 URI_WP_HACKED
 
 # tflags publish
