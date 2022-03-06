@@ -326,7 +326,6 @@ sub print_usage_and_exit {
 # defaults
 my %opt = (
   'user-config'   => 1,
-  'ident-timeout' => 5.0,
   # scaling settings; some of these aren't actually settable via cmdline
   'server-scale-period' => 2,   # how often to scale the # of kids, secs
   'min-children'  => 1,         # min kids to have running
@@ -367,7 +366,6 @@ Getopt::Long::Configure("bundling");
 GetOptions(
   'allow-tell'               => \$opt{'tell'},
   'allowed-ips|A=s'          => \@{ $opt{'allowed-ip'} },
-  'auth-ident'               => \$opt{'auth-ident'},
   'configpath|C=s'           => \$opt{'configpath'},
   'c'                        => \$opt{'create-prefs'},
   'create-prefs!'            => \$opt{'create-prefs'},
@@ -377,7 +375,6 @@ GetOptions(
   'groupname|g=s'            => \$opt{'groupname'},
   'helper-home-dir|H:s'      => \$opt{'home_dir_for_helpers'},
   'help|h'                   => \$opt{'help'},
-  'ident-timeout=f'          => \$opt{'ident-timeout'},
   '4|ipv4only|ipv4-only|ipv4'=> sub { $opt{'force_ipv4'} = 1;
                                       $opt{'force_ipv6'} = 0; },
   '6'                        => sub { $opt{'force_ipv6'} = 1;
@@ -500,16 +497,6 @@ if ( @{ $opt{'allowed-ip'} } ) {
   set_allowed_ip( grep length, map { split /,/ } @{ $opt{'allowed-ip'} } );
 } else {
   set_allowed_ip('127.0.0.1', '::1');
-}
-
-# ident-based spamc user authentication
-if ( $opt{'auth-ident'} ) {
-  eval { require Net::Ident }
-  or die "spamd: ident-based authentication requested, ".
-         "but Net::Ident is unavailable: $@\n";
-
-  $opt{'ident-timeout'} = undef if $opt{'ident-timeout'} <= 0.0;
-  Net::Ident->import(qw(ident_lookup));
 }
 
 ### Begin initialization of logging ########################
@@ -2291,10 +2278,6 @@ sub parse_headers {
     $line =~ s/\r\n$//;
 
     if (!length $line) {    # end of headers
-      if (!$got_user_header && $opt{'auth-ident'}) {
-        service_unavailable_error('User header required');
-        return 0;
-      }
       return 1;
     }
 
@@ -2349,10 +2332,6 @@ sub got_user_header {
       return 0;
     }
     $current_user = $1;
-  }
-
-  if ($opt{'auth-ident'} && !auth_ident($current_user)) {
-    return 0;
   }
 
   if ( !$opt{'user-config'} ) {
@@ -2494,19 +2473,6 @@ sub service_timeout {
 }
 
 ###########################################################################
-
-sub auth_ident {
-  my $username = shift;
-  my $ident_username = ident_lookup( $client, $opt{'ident-timeout'} );
-  my $dn = $ident_username || 'NONE';    # display name
-  dbg("ident: ident_username = $dn, spamc_username = $username\n");
-  if ( !defined($ident_username) || $username ne $ident_username ) {
-    info("spamd: ident username ($dn) does not match "
-	 . "spamc username ($username)" );
-    return 0;
-  }
-  return 1;
-}
 
 sub handle_user_setuid_basic {
   my $username = shift;
@@ -3284,8 +3250,6 @@ Options:
  -g groupname, --groupname=groupname  Run as groupname
  -v, --vpopmail                    Enable vpopmail config
  -x, --nouser-config               Disable user config files
- --auth-ident                      Use ident to identify spamc user (deprecated)
- --ident-timeout=timeout           Timeout for ident connections
  -D, --debug[=areas]               Print debugging messages (for areas)
  -L, --local                       Use local tests only (no DNS)
  -P, --paranoid                    Die upon user errors
@@ -3351,12 +3315,11 @@ command to tell what type of message is being processed and whether
 local (learn/forget) or remote (report/revoke) databases should be
 updated.
 
-Note that spamd always trusts the username passed in (unless
-B<--auth-ident> is used) so clients could maliciously learn messages
-for other users. (This is not usually a concern with an SQL Bayes
-store as users will typically have read-write access directly to the
-database, and can also use C<sa-learn> with the B<-u> option to
-achieve the same result.)
+Note that spamd always trusts the username passed in so clients could
+maliciously learn messages for other users.  (This is not usually a concern
+with an SQL Bayes store as users will typically have read-write access
+directly to the database, and can also use C<sa-learn> with the B<-u> option
+to achieve the same result.)
 
 =item B<-c>, B<--create-prefs>
 
@@ -3614,24 +3577,6 @@ configuration from the user's home directory (B<--user-config>).
 
 This option does not disable or otherwise influence the SQL, LDAP or
 Virtual Config Dir settings.
-
-=item B<--auth-ident>
-
-Verify the username provided by spamc using ident.  This is only
-useful if connections are only allowed from trusted hosts (because an
-identd that lies is trivial to create) and if spamc REALLY SHOULD be
-running as the user it represents.  Connections are terminated
-immediately if authentication fails.  In this case, spamc will pass
-the mail through unchecked.  Failure to connect to an ident server,
-and response timeouts are considered authentication failures.  This
-requires that Net::Ident be installed. Deprecated.
-
-=item B<--ident-timeout>=I<timeout>
-
-Wait at most I<timeout> seconds for a response to ident queries.
-Ident query that takes longer that I<timeout> seconds will fail, and
-mail will not be processed.  Setting this to 0.0 or less results in no
-timeout, which is STRONGLY discouraged.  The default is 5 seconds.
 
 =item B<-A> I<host,...>, B<--allowed-ips>=I<host,...>
 

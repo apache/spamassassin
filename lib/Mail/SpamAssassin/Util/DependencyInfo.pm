@@ -170,12 +170,6 @@ our @OPTIONAL_MODULES = (
   More info on installing and using Razor can be found
   at http://wiki.apache.org/spamassassin/InstallingRazor .',
 },
-#{
-# module => 'Net::Ident',
-# version => 0,
-# desc => 'If you plan to use the --auth-ident option to spamd, you will need
-# to install this module.',
-#},
 {
   module => 'IO::Socket::IP',
   version => 0.09,
