@@ -101,6 +101,11 @@ For existing public email blacklist, see: http://msbl.org/ebl.html
   priority HASHBL_EMAIL -100 # required priority to launch async lookups early
   tflags   HASHBL_EMAIL net
 
+Default regex for matching and capturing emails can be overridden with
+C<hashbl_email_regex>.  Likewise, the default whitelist can be changed with
+C<hashbl_email_whitelist>.  Only change if you know what you are doing, see
+module source for the defaults.  Example: hashbl_email_regex \S+@\S+.com
+
 =over 4
 
 =item header RULE check_hashbl_uris('bl.example.invalid/A', 'OPTS', '^127\.')
@@ -187,27 +192,66 @@ sub set_config {
     }
   });
 
+  push (@cmds, {
+    setting => 'hashbl_email_regex',
+    is_admin => 1,
+    type => $Mail::SpamAssassin::Conf::CONF_TYPE_STRING,
+    # Some regexp tips courtesy of http://www.regular-expressions.info/email.html
+    # full email regex v0.02
+    default => qr/(?i)
+      (?=.{0,64}\@)				# limit userpart to 64 chars (and speed up searching?)
+      (?<![a-z0-9!#\$%&'*+\/=?^_`{|}~-])	# start boundary
+      (						# capture email
+      [a-z0-9!#\$%&'*+\/=?^_`{|}~-]+		# no dot in beginning
+      (?:\.[a-z0-9!#\$%&'*+\/=?^_`{|}~-]+)*	# no consecutive dots, no ending dot
+      \@
+      (?:[a-z0-9](?:[a-z0-9-]{0,59}[a-z0-9])?\.){1,4} # max 4x61 char parts (should be enough?)
+      _TLDS_ # ends with valid tld, _TLDS_ is template which will be replaced in finish_parsing_end()
+      )
+    /x,
+    code => sub {
+      my ($self, $key, $value, $line) = @_;
+      if (!defined $value || $value eq '') {
+        return $Mail::SpamAssassin::Conf::MISSING_REQUIRED_VALUE;
+      }
+      my ($rec, $err) = compile_regexp($value, 0);
+      if (!$rec) {
+        dbg("config: invalid hashbl_email_regex '$value': $err");
+        return $Mail::SpamAssassin::Conf::INVALID_VALUE;
+      }
+      $self->{hashbl_email_regex} = $rec;
+    }
+  });
+
+  push (@cmds, {
+    setting => 'hashbl_email_whitelist',
+    is_admin => 1,
+    type => $Mail::SpamAssassin::Conf::CONF_TYPE_STRING,
+    default => qr/(?i)
+      ^(?:
+          abuse|support|sales|info|helpdesk|contact|kontakt
+        | (?:post|host|domain)master
+        | undisclosed.*                     # yahoo.com etc(?)
+        | request-[a-f0-9]{16}              # live.com
+        | bounced?-                         # yahoo.com etc
+        | [a-f0-9]{8}(?:\.[a-f0-9]{8}|-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}) # gmail msgids?
+        | .+=.+=.+                          # gmail forward
+      )\@
+    /x,
+    code => sub {
+      my ($self, $key, $value, $line) = @_;
+      if (!defined $value || $value eq '') {
+      }
+      my ($rec, $err) = compile_regexp($value, 0);
+      if (!$rec) {
+        dbg("config: invalid hashbl_email_whitelist '$value': $err");
+        return $Mail::SpamAssassin::Conf::INVALID_VALUE;
+      }
+      $self->{hashbl_email_whitelist} = $rec;
+    }
+  });
+
   $conf->{parser}->register_commands(\@cmds);
-}
-
-sub _parse_args {
-    my ($self, $acl) = @_;
-
-    if (not defined $acl) {
-      return ();
-    }
-    $acl =~ s/\s+//g;
-    if ($acl !~ /^[a-z0-9]{1,32}$/) {
-        warn("invalid acl name: $acl");
-        return ();
-    }
-    if ($acl eq 'all') {
-        return ();
-    }
-    if (defined $self->{hashbl_acl}{$acl}) {
-        warn("no such acl defined: $acl");
-        return ();
-    }
 }
 
 sub parse_config {
@@ -240,6 +284,7 @@ sub parse_config {
         }
         return 1;
     }
+
     return 0;
 }
 
@@ -250,42 +295,13 @@ sub finish_parsing_end {
 
   # valid_tlds_re will be available at finish_parsing_end, compile it now,
   # we only need to do it once and before possible forking
-  if (!exists $self->{email_re}) {
-    $self->_init_email_re();
-  }
+  # replace _TLDS_ with valid list of TLDs
+  $opts->{conf}->{hashbl_email_regex} =~ s/_TLDS_/$self->{main}->{registryboundaries}->{valid_tlds_re}/g;
+  #dbg("hashbl_email_regex: $opts->{conf}->{hashbl_email_regex}");
+  $opts->{conf}->{hashbl_email_whitelist} =~ s/_TLDS_/$self->{main}->{registryboundaries}->{valid_tlds_re}/g;
+  #dbg("hashbl_email_whitelist: $opts->{conf}->{hashbl_email_regex}");
 
   return 0;
-}
-
-sub _init_email_re {
-  my ($self) = @_;
-
-  # Some regexp tips courtesy of http://www.regular-expressions.info/email.html
-  # full email regex v0.02
-  $self->{email_re} = qr/
-    (?=.{0,64}\@)			# limit userpart to 64 chars (and speed up searching?)
-    (?<![a-z0-9!#\$%&'*+\/=?^_`{|}~-])	# start boundary
-    (					# capture email
-    [a-z0-9!#\$%&'*+\/=?^_`{|}~-]+	# no dot in beginning
-    (?:\.[a-z0-9!#\$%&'*+\/=?^_`{|}~-]+)* # no consecutive dots, no ending dot
-    \@
-    (?:[a-z0-9](?:[a-z0-9-]{0,59}[a-z0-9])?\.){1,4} # max 4x61 char parts (should be enough?)
-    $self->{main}->{registryboundaries}->{valid_tlds_re} # ends with valid tld
-    )
-  /xi;
-
-  # default email whitelist
-  $self->{email_whitelist} = qr/
-    ^(?:
-        abuse|support|sales|info|helpdesk|contact|kontakt
-      | (?:post|host|domain)master
-      | undisclosed.*                     # yahoo.com etc(?)
-      | request-[a-f0-9]{16}              # live.com
-      | bounced?-                         # yahoo.com etc
-      | [a-f0-9]{8}(?:\.[a-f0-9]{8}|-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}) # gmail msgids?
-      | .+=.+=.+                          # gmail forward
-    )\@
-  /xi;
 }
 
 sub _get_emails {
@@ -362,7 +378,7 @@ sub _parse_emails {
     if ($opts =~ /\bnoquote\b/) {
       # strip emails contained in <>, not mailto:
       # also strip ones followed by quote-like "wrote:" (but not fax: and tel: etc)
-      $body =~ s#<?(?<!mailto:)$self->{email_re}(?:>|\s{1,10}(?!(?:fa(?:x|csi)|tel|phone|e?-?mail))[a-z]{2,11}:)# #gi;
+      $body =~ s#<?(?<!mailto:)$pms->{conf}->{hashbl_email_regex}(?:>|\s{1,10}(?!(?:fa(?:x|csi)|tel|phone|e?-?mail))[a-z]{2,11}:)# #gi;
     }
     $str .= $body;
   } else {
@@ -372,7 +388,7 @@ sub _parse_emails {
   my @emails; # keep find order
   my %seen;
 
-  while ($str =~ /($self->{email_re})/g) {
+  while ($str =~ /($pms->{conf}->{hashbl_email_regex})/g) {
     next if exists $seen{$1};
     push @emails, $1;
   }
@@ -385,7 +401,6 @@ sub check_hashbl_emails {
 
   return 0 if !$self->{hashbl_available};
   return 0 if !$pms->is_dns_available();
-  return 0 if !$self->{email_re};
 
   my $rulename = $pms->get_current_eval_rule_name();
 
@@ -430,7 +445,8 @@ sub check_hashbl_emails {
   foreach my $email (@$emails) {
     next if exists $seen{$email};
     next if $email !~ /.*\@.*/;
-    if (($email =~ $self->{email_whitelist}) or defined ($pms->{hashbl_whitelist}{$email})) {
+    if ($email =~ $pms->{conf}->{hashbl_email_whitelist}
+        || defined $pms->{hashbl_whitelist}{$email}) {
       dbg("Address whitelisted: $email");
       next;
     }
@@ -703,5 +719,7 @@ sub has_hashbl_bodyre { 1 }
 sub has_hashbl_emails { 1 }
 sub has_hashbl_uris { 1 }
 sub has_hashbl_ignore { 1 }
+sub has_hashbl_email_regex { 1 }
+sub has_hashbl_email_whitelist { 1 }
 
 1;
