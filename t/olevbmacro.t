@@ -9,15 +9,15 @@ use constant HAS_IO_STRING => eval { require IO::String; };
 use Test::More;
 plan skip_all => 'Need Archive::Zip for this test' unless HAS_ARCHIVE_ZIP;
 plan skip_all => 'Need IO::String for this test' unless HAS_IO_STRING;
-plan tests => 8;
+plan tests => 12;
 
 tstlocalrules (q{
   loadplugin Mail::SpamAssassin::Plugin::OLEVBMacro
 
   olemacro_extended_scan 1
 
-  body     OLEMACRO eval:check_olemacro()
-  score    OLEMACRO 0.1
+  body     OLEMACRO_FOUND eval:check_olemacro()
+  score    OLEMACRO_FOUND 0.1
   body     OLEMACRO_MALICE eval:check_olemacro_malice()
   score    OLEMACRO_MALICE 0.1
   body     OLEMACRO_RENAME eval:check_olemacro_renamed()
@@ -34,7 +34,7 @@ tstlocalrules (q{
 
 
 %patterns = (
-  q{ OLEMACRO }, 'OLEMACRO',
+  q{ 0.1 OLEMACRO_FOUND }, 'OLEMACRO_FOUND',
 );
 
 sarun ("-L -t < data/spam/olevbmacro/macro.eml", \&patterns_run_cb);
@@ -42,7 +42,8 @@ ok_all_patterns();
 clear_pattern_counters();
 
 %patterns = (
-  q{ OLEMACRO_MALICE }, 'OLEMACRO_MALICE',
+  q{ 0.1 OLEMACRO_FOUND }, 'OLEMACRO_FOUND',
+  q{ 0.1 OLEMACRO_MALICE }, 'OLEMACRO_MALICE',
 );
 
 sarun ("-L -t < data/spam/olevbmacro/malicemacro.eml", \&patterns_run_cb);
@@ -50,7 +51,8 @@ ok_all_patterns();
 clear_pattern_counters();
 
 %patterns = (
-  q{ OLEMACRO_RENAME }, 'OLEMACRO_RENAME',
+  q{ 0.1 OLEMACRO_FOUND }, 'OLEMACRO_FOUND',
+  q{ 0.1 OLEMACRO_RENAME }, 'OLEMACRO_RENAME',
 );
 
 sarun ("-L -t < data/spam/olevbmacro/renamedmacro.eml", \&patterns_run_cb);
@@ -58,7 +60,7 @@ ok_all_patterns();
 clear_pattern_counters();
 
 %patterns = (
-  q{ OLEMACRO_ENCRYPTED }, 'OLEMACRO_ENCRYPTED',
+  q{ 0.1 OLEMACRO_ENCRYPTED }, 'OLEMACRO_ENCRYPTED',
 );
 
 sarun ("-L -t < data/spam/olevbmacro/encrypted.eml", \&patterns_run_cb);
@@ -66,7 +68,8 @@ ok_all_patterns();
 clear_pattern_counters();
 
 %patterns = (
-  q{ OLEMACRO_ZIP_PW }, 'OLEMACRO_ZIP_PW',
+  q{ 0.1 OLEMACRO_FOUND }, 'OLEMACRO_FOUND',
+  q{ 0.1 OLEMACRO_ZIP_PW }, 'OLEMACRO_ZIP_PW',
 );
 
 sarun ("-L -t < data/spam/olevbmacro/zippwmacro.eml", \&patterns_run_cb);
@@ -75,7 +78,7 @@ clear_pattern_counters();
 
 %patterns = ();
 %anti_patterns = (
-  q{ OLEMACRO }, 'OLEMACRO',
+  q{ 0.1 OLEMACRO_FOUND }, 'OLEMACRO_FOUND',
 );
 
 sarun ("-L -t < data/spam/olevbmacro/nomacro.eml", \&patterns_run_cb);
@@ -83,14 +86,15 @@ ok_all_patterns();
 
 %patterns = ();
 %anti_patterns = (
-  q{ OLEMACRO_CSV }, 'OLEMACRO_CSV',
+  q{ 0.1 OLEMACRO_FOUND }, 'OLEMACRO_FOUND',
+  q{ 0.1 OLEMACRO_CSV }, 'OLEMACRO_CSV',
 );
 
 sarun ("-L -t < data/spam/olevbmacro/goodcsv.eml", \&patterns_run_cb);
 ok_all_patterns();
 
 %patterns = (
-  q{ OLEMACRO_TURI }, 'OLEMACRO_TURI',
+  q{ 0.1 OLEMACRO_TURI }, 'OLEMACRO_TURI',
 );
 %anti_patterns = ();
 
