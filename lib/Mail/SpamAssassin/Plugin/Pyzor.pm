@@ -95,18 +95,18 @@ Whether to use Pyzor, if it is available.
     type => $Mail::SpamAssassin::Conf::CONF_TYPE_BOOL
   });
 
-=item pyzor_fork (0|1)		(default: 0)
+=item pyzor_fork (0|1)		(default: 1)
 
 Instead of running Pyzor synchronously, fork separate process for it and
 read the results in later (similar to async DNS lookups).  Increases
-throughput.  Experimental.
+throughput.
 
 =cut
 
   push(@cmds, {
     setting => 'pyzor_fork',
     is_admin => 1,
-    default => 0,
+    default => 1,
     type => $Mail::SpamAssassin::Conf::CONF_TYPE_NUMERIC,
   });
 
