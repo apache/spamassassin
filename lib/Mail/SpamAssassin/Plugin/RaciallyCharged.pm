@@ -23,7 +23,7 @@ use Mail::SpamAssassin::Plugin;
 use vars qw(@ISA);
 @ISA = qw(Mail::SpamAssassin::Plugin);
 
-sub dbg { Mail::SpamAssassin::Plugin::dbg ("RaciallyCharged: @_"); }
+sub dbg { my $msg = shift; Mail::SpamAssassin::Plugin::dbg("RaciallyCharged: $msg", @_); }
 
 sub new {
   my ($class, $mailsa) = @_;

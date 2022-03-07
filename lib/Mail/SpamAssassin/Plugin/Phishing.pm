@@ -66,7 +66,7 @@ use Mail::SpamAssassin::PerMsgStatus;
 
 our @ISA = qw(Mail::SpamAssassin::Plugin);
 
-sub dbg { Mail::SpamAssassin::Plugin::dbg ("Phishing: @_"); }
+sub dbg { my $msg = shift; Mail::SpamAssassin::Plugin::dbg("Phishing: $msg", @_); }
 
 sub new {
     my ($class, $mailsa) = @_;

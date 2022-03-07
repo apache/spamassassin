@@ -72,7 +72,7 @@ BEGIN
     };
 }
 
-sub dbg { Mail::SpamAssassin::Plugin::dbg ("Dmarc: @_"); }
+sub dbg { my $msg = shift; Mail::SpamAssassin::Plugin::dbg("Dmarc: $msg", @_); }
 
 sub new {
     my ($class, $mailsa) = @_;

@@ -45,7 +45,7 @@ our @ISA = qw(Mail::SpamAssassin::Plugin);
 
 my $VERSION = 1.5.0;
 
-sub dbg { Mail::SpamAssassin::Plugin::dbg ("Esp: @_"); }
+sub dbg { my $msg = shift; Mail::SpamAssassin::Plugin::dbg("Esp: $msg", @_); }
 
 sub new {
   my $class = shift;

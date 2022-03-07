@@ -96,8 +96,8 @@ use vars qw(@ISA);
 use constant HAS_LWP_USERAGENT => eval { require LWP::UserAgent; };
 use constant HAS_DBI => eval { require DBI; };
 
-sub dbg { return Mail::SpamAssassin::Logger::dbg("DecodeShortURLs: @_"); }
-sub info { return Mail::SpamAssassin::Logger::info("DecodeShortURLs: @_"); }
+sub dbg { my $msg = shift; return Mail::SpamAssassin::Logger::dbg("DecodeShortURLs: $msg", @_); }
+sub info { my $msg = shift; return Mail::SpamAssassin::Logger::info("DecodeShortURLs: $msg", @_); }
 
 sub new {
   my $class = shift;

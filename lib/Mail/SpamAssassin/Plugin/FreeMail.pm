@@ -142,7 +142,7 @@ our $skip_replyto_envfrom = qr/
   )\@
 /xi;
 
-sub dbg { Mail::SpamAssassin::Plugin::dbg ("FreeMail: @_"); }
+sub dbg { my $msg = shift; Mail::SpamAssassin::Plugin::dbg("FreeMail: $msg", @_); }
 
 sub new {
     my ($class, $mailsa) = @_;

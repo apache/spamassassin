@@ -119,7 +119,7 @@ use vars qw(@ISA);
 
 my $VERSION = 0.9;
 
-sub dbg { Mail::SpamAssassin::Plugin::dbg ("FromNameSpoof: @_"); }
+sub dbg { my $msg = shift; Mail::SpamAssassin::Plugin::dbg("FromNameSpoof: $msg", @_); }
 
 # constructor: register the eval rule
 sub new

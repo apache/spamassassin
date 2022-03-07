@@ -144,10 +144,7 @@ use Mail::SpamAssassin::Util qw(compile_regexp);
 
 our @ISA = qw(Mail::SpamAssassin::Plugin);
 
-sub dbg {
-  my $msg = shift;
-  Mail::SpamAssassin::Plugin::dbg("HashBL: $msg", @_);
-}
+sub dbg { my $msg = shift; Mail::SpamAssassin::Plugin::dbg("HashBL: $msg", @_); }
 
 sub new {
   my ($class, $mailsa) = @_;

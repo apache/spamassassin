@@ -119,10 +119,7 @@ use re 'taint';
 
 our @ISA = qw(Mail::SpamAssassin::Plugin);
 
-sub dbg {
-  my $str = shift;
-  Mail::SpamAssassin::Plugin::dbg ("URILocalBL: $str", @_);
-}
+sub dbg { my $msg = shift; Mail::SpamAssassin::Plugin::dbg ("URILocalBL: $msg", @_); }
 
 my $IP_ADDRESS = IP_ADDRESS;
 
