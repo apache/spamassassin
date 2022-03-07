@@ -81,7 +81,7 @@ sub check_https_http_mismatch {
       $permsgstatus->{chhm_anchors}++ if exists $v->{anchor_text};
 
       foreach (@{$v->{anchor_text}}) {
-        if (m@https://([^/:?#]+)@i) {
+        if (m@https://([^\s/:?#]+)@i) {
           my $https = $1;
 
 	  # want to compare whole hostnames instead of domains?
