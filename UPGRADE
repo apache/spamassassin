@@ -34,13 +34,12 @@ Note for Users Upgrading to SpamAssassin 4.0.0
 - New ExtractText plugin that extracts text from documents or images and feed it
   into SpamAssassin
 
-- New option added to sa-update to force rules download from a specific mirror
+- New --forcemirror option added to sa-update to force rules download from a
+  specific mirror
 
 - New Esp plugin that checks spam coming from some Esp providers
 
 - New nolog tflag added to hide info coming from rules in SpamAssassin reports
-
-- FromNameSpoof: fns_extrachars parameter default value has been increased to 50
 
 - All log output (stderr, file, syslog) is now escaped properly,
   \r \n \t \\, and control chars, DEL, UTF-8 sequences as \x{XX}.
@@ -52,7 +51,8 @@ Note for Users Upgrading to SpamAssassin 4.0.0
 - API: New $pms->add_uri_detail_list() function.  Also new uri_detail_list
   types: unlinked, schemeless
 
-- IDN support, new Util::idn_to_ascii() function (Bug 7215)
+- IDN (Internationalized domain name) support, new Util::idn_to_ascii()
+  function (Bug 7215)
 
 - Util::split_domain, trim_domain, is_domain_valid functions have new
   optional argument ($is_ascii)
@@ -73,16 +73,17 @@ Note for Users Upgrading to SpamAssassin 4.0.0
 
 - URILocalBL: IPv6 lookups for hosts, if supported by used database
 
-- DNS lookups are launched when priority -100 reached. This allows
-  shortcircuiting at lower priority without sending unneeded DNS queries.
-  NOTE: Don't use shortcircuiting for meta rules with priority <-100,
-  that refer to check_rbl* or other network rules. They will never hit.
-  (Bug 5930)
+- DNS (or other async) lookups are now only launched when priority -100 is
+  reached. This allows shortcircuiting at lower priority without sending
+  unneeded DNS queries. (Bug 5930)
 
-- new plugin callback method check_dnsbl (to launch lookups at priority -100),
-  check_post_dnsbl (to harvest own network lookups)
+- API: New plugin callback method check_dnsbl (to launch network lookups at
+  priority -100), check_post_dnsbl (to harvest own network lookups)
 
-- freemail_import_whitelist_auth, freemail_import_def_whitelist_auth added (Bug 6451)
+- API: New plugin callback method check_cleanup (for cleaning up things..)
+
+- FreeMail: new options freemail_import_whitelist_auth,
+  freemail_import_def_whitelist_auth added (Bug 6451)
 
 - New internal Mail::SpamAssassin::GeoDB module that provides unified interface to
   modules MaxMind::DB::Reader (GeoIP2), Geo::IP, IP::Country::DB_File, IP::Country::Fast.
@@ -90,8 +91,6 @@ Note for Users Upgrading to SpamAssassin 4.0.0
   geodb_search_path. Deprecated settings country_db_type, country_db_path,
   uri_country_db_path, uri_country_db_isp_path still work but print a warning to
   migrate to geodb_module/options.
-
-- new plugin callback method check_cleanup
 
 - Razor2 razor_fork option added.  It will fork separate Razor2 process and
   read in the results later asynchronously, increasing throughput.  When
@@ -126,9 +125,10 @@ Note for Users Upgrading to SpamAssassin 4.0.0
 - "ALL" pseudo-header now returns decoded headers, so it's usage is consistent
   with single header matching (:raw returns undecoded and folded like before).
 
-- New dns_block_rule option handles blocked DNSBLs
+- New dns_block_rule option handles blocked DNSBLs (Bug 6728)
 
-- New AuthRes module to process Authentication-Results headers (unfinished)
+- New AuthRes module to process Authentication-Results headers (unfinished,
+  Bug 6918)
 
 - ASN: Support GeoDB for ASN lookups (asn_use_geodb, asn_prefer_geodb,
   asn_use_dns).
@@ -193,6 +193,8 @@ Note for Users Upgrading to SpamAssassin 3.4.5
 
 Note for Users Upgrading to SpamAssassin 3.4.4
 ----------------------------------------------
+
+- FromNameSpoof: fns_extrachars parameter default value has been increased to 50
 
 - nosubject and maxhits tflags now work correctly with sa-compile
 
