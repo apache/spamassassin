@@ -364,8 +364,8 @@ sub canon_uri {
   my ($self, $uri) = @_;
 
   # URIs don't have leading/trailing whitespace ...
-  $uri =~ s/^\s+//;
-  $uri =~ s/\s+$//;
+  $uri =~ s/^[\s\xA0]+//;
+  $uri =~ s/[\s\xA0]+$//;
 
   # Make sure all the URIs are nice and short
   if (length $uri > MAX_URI_LENGTH) {
