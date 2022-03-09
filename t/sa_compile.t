@@ -1,5 +1,9 @@
 #!/usr/bin/perl -T
 
+###
+### UTF-8 CONTENT, edit with UTF-8 locale/editor
+###
+
 use lib '.'; use lib 't';
 $ENV{'TEST_PERL_TAINT'} = 'no';     # inhibit for this test
 use SATest; sa_t_init("sa_compile");
@@ -15,7 +19,7 @@ use Test::More;
 plan skip_all => "Long running tests disabled" unless conf_bool('run_long_tests');
 plan skip_all => "Tests don't work on windows" if $RUNNING_ON_WINDOWS;
 plan skip_all => "RE2C isn't new enough" unless re2c_version_new_enough();
-plan tests => 5;
+plan tests => 24;
 
 # -------------------------------------------------------------------
 
@@ -41,39 +45,74 @@ system_or_die "cd $builddir && mv Mail-SpamAssassin-* x";
 $scr = "$instdir/$temp_binpath/spamassassin";
 $scr_localrules_args = $scr_cf_args = "";      # use the default rules dir, from our "install"
 
-&set_rules("body FOO /You have been selected to receive/");
+&set_rules('
+body FOO1 /You have been selected to receive/
+body FOO2 /You have bee[n] selected to receive/
+body FOO3 /You have bee(?:xyz|\x6e) selected to receive/
+body FOO4 /./
+body FOO5 /金融機/
+body FOO6 /金融(?:xyz|機)/
+body FOO7 /\xe9\x87\x91\xe8\x9e\x8d\xe6\xa9\x9f/
+body FOO8 /.\x87(?:\x91|\x00)[\xe8\x00]\x9e\x8d\xe6\xa9\x9f/
+');
 
 # ensure we don't use compiled rules
 untaint_system("rm -rf $instdir/var/spamassassin/compiled");
 
 %patterns = (
-
-  q{ check: tests=FOO }, 'FOO'
-
+  '/ check: tests=FOO1,FOO2,FOO3,FOO4\n/', 'FOO',
 );
-
-print "\nRunning spam checks uncompiled\n";
-ok sarun ("-D -Lt < $cwd/data/spam/001 2>&1", \&patterns_run_cb);
+%anti_patterns = (
+  '/ zoom: able to use /', '',
+);
+ok sarun ("-D all,rules-all -L -t --cf 'normalize_charset 1' < $cwd/data/spam/001 2>&1", \&patterns_run_cb);
 ok_all_patterns();
-
+clear_pattern_counters();
+ok sarun ("-D all,rules-all -L -t --cf 'normalize_charset 0' < $cwd/data/spam/001 2>&1", \&patterns_run_cb);
+ok_all_patterns();
+clear_pattern_counters();
+%patterns = (
+  '/ check: tests=FOO4,FOO5,FOO6,FOO7,FOO8\n/', 'FOO',
+);
+%anti_patterns = (
+  '/ zoom: able to use /', '',
+);
+ok sarun ("-D all,rules-all -L -t --cf 'normalize_charset 1' < $cwd/data/spam/unicode1 2>&1", \&patterns_run_cb);
+ok_all_patterns();
+clear_pattern_counters();
+ok sarun ("-D all,rules-all -L -t --cf 'normalize_charset 0' < $cwd/data/spam/unicode1 2>&1", \&patterns_run_cb);
+ok_all_patterns();
 clear_pattern_counters();
 
 # -------------------------------------------------------------------
 
-print "\nRunning spam checks compiled\n";
 untaint_system "rm -rf \$HOME/.spamassassin/sa-compile.cache"; # reset test
-system_or_die "$instdir/$temp_binpath/sa-compile --keep-tmps 2>&1";  # --debug
-%patterns = (
-
-  q{ able to use 1/1 'body_0' compiled rules }, 'able-to-use',
-  q{ check: tests=FOO }, 'FOO'
-
-);
+system_or_die "TMP=$instdir TMPDIR=$instdir $instdir/$temp_binpath/sa-compile --quiet -p $cwd/$workdir/user.cf --keep-tmps -D 2>$instdir/sa-compile.debug";  # --debug
 $scr = "$instdir/$temp_binpath/spamassassin";
 $scr_localrules_args = $scr_cf_args = "";      # use the default rules dir, from our "install"
 
-ok sarun ("-D -Lt < $cwd/data/spam/001 2>&1", \&patterns_run_cb);
+%patterns = (
+  q{ zoom: able to use 5/5 'body_0' compiled rules }, 'able-to-use',
+  '/ check: tests=FOO1,FOO2,FOO3,FOO4\n/', 'FOO',
+);
+%anti_patterns = ();
+ok sarun ("-D all,rules-all -L -t --cf 'normalize_charset 1' < $cwd/data/spam/001 2>&1", \&patterns_run_cb);
 ok_all_patterns();
+clear_pattern_counters();
+ok sarun ("-D all,rules-all -L -t --cf 'normalize_charset 0' < $cwd/data/spam/001 2>&1", \&patterns_run_cb);
+ok_all_patterns();
+clear_pattern_counters();
+%patterns = (
+  q{ zoom: able to use 5/5 'body_0' compiled rules }, 'able-to-use',
+  '/ check: tests=FOO4,FOO5,FOO6,FOO7,FOO8\n/', 'FOO',
+);
+%anti_patterns = ();
+ok sarun ("-D all,rules-all -L -t --cf 'normalize_charset 1' < $cwd/data/spam/unicode1 2>&1", \&patterns_run_cb);
+ok_all_patterns();
+clear_pattern_counters();
+ok sarun ("-D all,rules-all -L -t --cf 'normalize_charset 0' < $cwd/data/spam/unicode1 2>&1", \&patterns_run_cb);
+ok_all_patterns();
+clear_pattern_counters();
 
 # -------------------------------------------------------------------
 
@@ -130,13 +169,8 @@ sub set_rules {
 
   open RULES, ">$file"
           or die "cannot write $file - $!";
-  print RULES qq{
-
-    use_bayes 0
-
-    $rules
-
-  };
+  print RULES "use_bayes 0";
+  print RULES $rules;
   close RULES or die;
 
   #Create the dir for the pre file
