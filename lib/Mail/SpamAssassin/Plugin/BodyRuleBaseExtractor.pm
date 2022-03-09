@@ -1110,7 +1110,7 @@ sub fixup_re {
         $output .= "\"$esc\"";
       }
     }
-    else {
+    elsif ($fixup_re_test) {
       print "PRE: $pre\nTOK: $tok\n"  or die "error writing: $!";
     }
   }
