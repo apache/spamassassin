@@ -1982,7 +1982,7 @@ sub test_global_state_dir {
     # Purge stale test files
     if (opendir(WT_DIR, $dir)) {
       foreach (grep {/^\.sawritetest/ && -M "$dir/$_" > 0.0001} readdir(WT_DIR)) {
-        unlink(Mail::SpamAssassin::Util::untaint_file_path("$dir/$_"));
+        unlink(Mail::SpamAssassin::Util::untaint_file_path(File::Spec->catdir($dir, $_)));
       }
       closedir WT_DIR;
     }
