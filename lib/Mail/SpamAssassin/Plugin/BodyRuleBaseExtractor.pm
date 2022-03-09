@@ -1132,6 +1132,8 @@ sub fixup_re {
   $output =~ s/\*\*BACKSLASH\*\*/\\\\/gs;
 
   if ($fixup_re_test) { print "OUTPUT: $output\n"  or die "error writing: $!" }
+
+  utf8::encode($output)  if utf8::is_utf8($output); # force octets
   return $output;
 }
 

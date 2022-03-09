@@ -560,7 +560,7 @@ scan(psv)
 	AV *results;
 
   CODE:
-	pstart = (unsigned char *) SvPVutf8(psv, plen);
+	pstart = (unsigned char *) SvPV(psv, plen);
 	pend = pstart + plen;
 	results = (AV *) sv_2mortal((SV *) newAV());
 
