@@ -1342,7 +1342,7 @@ sub add_test {
       }
       my ($hdr, $op, $pat) = ($1, $2, $3);
       $hdr =~ s/:$//;
-      if ($hdr =~ /:(?!(?:raw|addr|name|host|domain|ip|revip)\b)/i) {
+      if ($hdr =~ /:(?!(?:raw|addr|name|host|domain|ip|revip|first|last)\b)/i) {
         $self->lint_warn("config: invalid header modifier for $name: $hdr", $name);
         return;
       }

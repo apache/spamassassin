@@ -688,7 +688,7 @@ sub do_head_tests {
     my ($self, $pms, $conf, %opts) = @_;
     $self->push_evalstr_prefix($pms, '
       no warnings q(uninitialized);
-      my $hval;
+      my $hval; my @harr;
     ');
   },
     post_loop_body => sub
@@ -698,9 +698,10 @@ sub do_head_tests {
     while(my($k,$v) = each %ordered) {
       my($hdrname, $def) = split(/\t/, $k, 2);
       $self->push_evalstr_prefix($pms, '
-        $hval = $self->get(q{'.$hdrname.'}, ' .
+        @harr = $self->get(q{'.$hdrname.'});
+        $hval = scalar(@harr) ? join("\n", @harr) : ' .
                            (!defined($def) ? 'undef' :
-                              '$self->{conf}->{test_opt_unset}->{q{'.$def.'}}') . ');
+                              '$self->{conf}->{test_opt_unset}->{q{'.$def.'}}') . ';
       ');
       foreach my $rulename (@{$v}) {
           my $tc_ref = $testcode{$rulename};
