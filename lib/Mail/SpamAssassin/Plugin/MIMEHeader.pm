@@ -51,6 +51,23 @@ around the newline character in "folded" headers will be replaced with a single
 space.  Append C<:raw> to the header name to retrieve the raw, undecoded value,
 including pristine whitespace, instead.
 
+=item tflags NAME_OF_RULE range=x-y
+
+Match only from specific MIME parts, indexed in the order they are parsed.
+Part 1 = main message headers. Part 2 = next part etc.
+
+ range=1    (match only main headers, not any subparts)
+ range=2-   (match any subparts, but not the main headers)
+ range=-3   (match only first three parts, including main headers)
+ range=2-3  (match only first two subparts)
+
+=items tflags NAME_OF_RULE concat
+
+Concat all headers from all mime parts (possible range applied) into a
+single string for matching.  This allows matching headers across multiple
+parts with single regex.  Normally pattern is tested individually for
+different mime parts.
+
 =back
 
 =cut
@@ -194,21 +211,72 @@ sub eval_hook_called {
     $getraw = 0;
   }
 
+  my $range_min = 0;
+  my $range_max = 1000;
+  if (($scanner->{conf}->{tflags}->{$rulename}||'') =~ /(?:^|\s)range=(\d+)?(-)?(\d+)?(?:\s|$)/) {
+    if (defined $1 && defined $2 && defined $3) {
+      $range_min = $1;
+      $range_max = $3;
+    }
+    elsif (defined $1 && defined $2) {
+      $range_min = $1;
+    }
+    elsif (defined $2 && defined $3) {
+      $range_max = $3;
+    }
+    elsif (defined $1) {
+      $range_min = $range_max = $1;
+    }
+  }
+
+  my $concat = ($scanner->{conf}->{tflags}->{$rulename}||'') =~ /\bconcat\b/;
+  my $cval = '';
+
+  my $idx = 0;
   foreach my $p ($scanner->{msg}->find_parts(qr/./)) {
+    $idx++;
+    last if $idx > $range_max;
+    next if $idx < $range_min;
+
     my $val;
-    if ($getraw) {
+    if ($hdr eq 'ALL') {
+      $val = $p->get_all_headers($getraw, 0);
+    }
+    elsif ($getraw) {
       $val = $p->raw_header($hdr);
     } else {
       $val = $p->get_header($hdr);
     }
     $val = $if_unset if !defined $val;
 
-    if ($val =~ $pattern) {
-      return ($negated ? 0 : 1);
+    if ($concat) {
+      $val .= "\n" unless $val =~ /\n$/;
+      $cval .= $val;
+      next;
+    }
+
+    if ($val =~ /$pattern/p) {
+      next if $negated;
+      my $match = defined ${^MATCH} ? ${^MATCH} : "<negative match>";
+      dbg("mimeheader: ran rule $rulename ======> got hit: \"$match\" (part $idx)");
+      return 1;
     }
   }
 
-  return ($negated ? 1 : 0);
+  if ($concat) {
+    if (!$negated && $cval =~ /$pattern/p) {
+      my $match = defined ${^MATCH} ? ${^MATCH} : "<negative match>";
+      dbg("mimeheader: ran rule $rulename ======> got hit: \"$match\" (concat)");
+      return 1;
+    }
+  }
+
+  if ($negated) {
+    dbg("mimeheader: ran rule $rulename ======> got hit: \"<negative match>\"");
+    return 1;
+  }
+
+  return 0;
 }
 
 # ---------------------------------------------------------------------------
@@ -223,5 +291,9 @@ sub finish_tests {
 }
 
 # ---------------------------------------------------------------------------
+
+sub has_all_header { 1 } # Supports ALL header query (Bug 5582)
+sub has_tflags_range { 1 } # Supports tflags range=x-y
+sub has_tflags_concat { 1 } # Support tflags concat
 
 1;
