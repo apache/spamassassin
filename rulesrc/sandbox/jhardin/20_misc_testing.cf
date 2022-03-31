@@ -1306,7 +1306,7 @@ uri         __URI_GOOGLE_DOC     m,^https?://docs\.google\.com/(?:[^/]+/)*(?:vie
 uri         __URI_GOOGLE_DOC_FRM m,^https?://docs\.google\.com/forms/,i
 uri         __URI_GOOGLE_DRV     m,^https?://(?:drive\.google|googledrive)\.com/,i
 
-body        __UNSUB_GOOG_FORM    m,Unsubscribe\s<?https?://docs\.google\.com/forms/,i
+body        __UNSUB_GOOG_FORM    m,Unsub?sc?ribe\s<?https?://docs\.google\.com/forms/,i
 meta        UNSUB_GOOG_FORM      __UNSUB_GOOG_FORM
 describe    UNSUB_GOOG_FORM      Unsubscribe via Google Docs form
 score       UNSUB_GOOG_FORM      2.500	# limit
