@@ -70,8 +70,10 @@ describe   GB_FAKE_RF_SHORT              Fake reply or forward with url shortene
 score      GB_FAKE_RF_SHORT              2.000 # limit
 tflags     GB_FAKE_RF_SHORT              publish
 
-rawbody    __GB_REGEX_BR                 /{\:REGEX\:\((<br>){1,3}\|(<br>){1,3}/
-meta       GB_REGEX_BR_SPOOF             ( __GB_REGEX_BR && PDS_FROMNAME_SPOOFED_EMAIL && __ANY_TEXT_ATTACH_DOC )
-describe   GB_REGEX_BR_SPOOF             Office document from spoofed email
-score      GB_REGEX_BR_SPOOF             2.000 # limit
-# tflags     GB_REGEX_BR_SPOOF             publish
+ifplugin Mail::SpamAssassin::Plugin::FromNameSpoof
+  rawbody    __GB_REGEX_BR                 /{\:REGEX\:\((<br>){1,3}\|(<br>){1,3}/
+  meta       GB_REGEX_BR_SPOOF             ( __GB_REGEX_BR && PDS_FROMNAME_SPOOFED_EMAIL && __ANY_TEXT_ATTACH_DOC )
+  describe   GB_REGEX_BR_SPOOF             Office document from spoofed email
+  score      GB_REGEX_BR_SPOOF             2.000 # limit
+  # tflags     GB_REGEX_BR_SPOOF             publish
+endif
