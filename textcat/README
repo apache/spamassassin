@@ -1,0 +1,8 @@
+
+Sources to create rules/languages file.
+
+Most latin1 based languages have utf8 alternatives named xx.utf8.  Only name
+file xx.utf8 if it has xx also.  Native UTF-8 languages should be named
+xx.utf-8.  TextCat will convert xx.utf8 name into xx, as results will depend
+on normalize_charset and mail encoding.
+

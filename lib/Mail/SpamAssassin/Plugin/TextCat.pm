@@ -449,7 +449,14 @@ sub classify {
       $p += exists($ngram->{$_}) ? abs($ngram->{$_} - $i) : $maxp;
       $i++;
     }
-    $results{$language} = $p;
+    # Most latin1 languages have xx and xx.utf8 alternatives (those which
+    # don't have should be named xx.utf-8).  Always strip .utf8 from name,
+    # it will not be accurate as matching will depend on normalize_charset
+    # and mail encoding.  Keep track of the best score for alternatives.
+    $language = $short  if index($language, '.utf8') > 0;
+    if (!exists $results{$language} || $results{$language} > $p) {
+      $results{$language} = $p
+    }
   }
   my @results = sort { $results{$a} <=> $results{$b} } keys %results;
 
@@ -543,11 +550,14 @@ sub extract_metadata {
 
   my $body = $msg->get_rendered_body_text_array();
   $body = join("\n", @{$body});
-  $body =~ s/^Subject://i;
+
+  # Strip subject prefixes, enhances results
+  $body =~ s/^(?:[a-z]{2,12}:\s*){1,10}//i;
 
   # Strip anything that looks like url or email, enhances results
-  $body =~ s{https?://\S+}{ }gs;
-  $body =~ s{\S+?\@[a-zA-Z]\S+}{ }gs;
+  $body =~ s/https?(?:\:\/\/|:&#x2F;&#x2F;|%3A%2F%2F)\S{1,1024}/ /gs;
+  $body =~ s/\S{1,64}?\@[a-zA-Z]\S{1,128}/ /gs;
+  $body =~ s/\bwww\.\S{1,128}/ /gs;
 
   my $len = length($body);
   # truncate after 10k; that should be plenty to classify it
