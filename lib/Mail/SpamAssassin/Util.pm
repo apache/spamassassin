@@ -2319,16 +2319,14 @@ sub domain_to_search_list {
   my ($domain) = @_;
   $domain =~ s/^\.+//; $domain =~ s/\.+\z//;  # strip leading and trailing dots
   my @search_keys;
-  if ($domain =~ /\[/) {  # don't split address literals
+  if (index($domain, '[') == 0) {  # don't split address literals
     @search_keys = ( $domain );  # presumably an address literal
-  } else {
-    local $1;
+  } elsif ($domain ne '') {
     $domain = lc $domain;
-    for (;;) {
-      last  if $domain eq '';
-      push(@search_keys, $domain);
-      # strip one level
-      $domain = ($domain =~ /^ (?: [^.]* ) \. (.*) \z/xs) ? $1 : '';
+    push @search_keys, $domain;
+    my $pos = 0;
+    while (($pos = index($domain, '.', $pos+1)) != -1) {
+      push @search_keys, substr($domain, $pos+1);
     }
     if (@search_keys > 20) {  # enforce some sanity limit
       @search_keys = @search_keys[$#search_keys-19 .. $#search_keys];
