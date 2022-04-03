@@ -49,9 +49,6 @@ Note that you can upgrade SpamAssassin using these instructions, as long
 as you take care to read the caveats in the file UPGRADE.   Upgrading
 will not delete your learnt Bayes data or local rule modifications.
 
-If you're using SunOS 4.1.x, see
-http://wiki.spamassassin.org/w/BuildingOnSunOS4 for build tips.
-
 
 Installing SpamAssassin for Personal Use (Not System-Wide)
 ----------------------------------------------------------
@@ -62,7 +59,7 @@ These steps assume the following, so substitute as necessary:
   - The location of the procmail executable is /usr/bin/procmail
 
 Many more details of this process are at
-http://wiki.apache.org/spamassassin/SingleUserUnixInstall
+https://wiki.apache.org/spamassassin/SingleUserUnixInstall
 
 1. Uncompress and extract the SpamAssassin archive, using "unzip" or
    "tar xvfz", in a temporary directory.
@@ -119,7 +116,7 @@ http://wiki.apache.org/spamassassin/SingleUserUnixInstall
 caughtspam
 
 Also, see the file procmailrc.example and
-http://wiki.apache.org/spamassassin/UsedViaProcmail
+https://wiki.apache.org/spamassassin/UsedViaProcmail
 
 8. Now, you should be ready to send some test emails and ensure everything
    works as expected.  First, send yourself a test email that doesn't
@@ -136,7 +133,7 @@ http://wiki.apache.org/spamassassin/UsedViaProcmail
    don't lose incoming email.
 
    Note: one possible cause for this is the use of smrsh on the MTA system;
-   see http://wiki.spamassassin.org/w/ProcmailVsSmrsh for details.
+   see https://wiki.apache.org/spamassassin/ProcmailVsSmrsh for details.
 
 9. You can now customize SpamAssassin.  See README for more information.
 
@@ -197,7 +194,7 @@ CPAN
 ----
 
 Most of the modules listed below are available via the Comprehensive Perl
-Archive Network (CPAN, see http://www.cpan.org/ for more information).
+Archive Network (CPAN, see https://www.cpan.org/ for more information).
 While each module is different, most can be installed via a few simple
 commands such as:
 
@@ -320,7 +317,7 @@ version is too low for them to be used.
 
     There seems to be a bug in libdb 4.1.25, which is
     distributed by default on some versions of Linux.  See
-    http://wiki.apache.org/spamassassin/DbFileSleepBug for details.
+    https://wiki.apache.org/spamassassin/DbFileSleepBug for details.
 
 
   - Net::SMTP (from CPAN)
@@ -438,7 +435,7 @@ What Next?
 Take a look at the USAGE document for more information on how to use
 SpamAssassin.
 
-The SpamAssassin Wiki <http://wiki.spamassassin.org/> contains
+The SpamAssassin Wiki <https://wiki.apache.org/spamassassin/> contains
 information on custom plugins, extensions, and other optional modules
 included with SpamAssassin.
 

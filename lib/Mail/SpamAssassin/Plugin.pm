@@ -911,7 +911,7 @@ only spamd calls this API.
 =item result
 
 The C<'result: ...'> line for this scan.  Format is as described
-at B<http://wiki.apache.org/spamassassin/SpamdSyslogFormat>.
+at B<https://wiki.apache.org/spamassassin/SpamdSyslogFormat>.
 
 =back
 
@@ -1255,8 +1255,8 @@ Mail::SpamAssassin(3)
 
 Mail::SpamAssassin::PerMsgStatus(3)
 
-http://wiki.apache.org/spamassassin/PluginWritingTips
+https://wiki.apache.org/spamassassin/PluginWritingTips
 
-http://issues.apache.org/SpamAssassin/show_bug.cgi?id=2163
+https://issues.apache.org/SpamAssassin/show_bug.cgi?id=2163
 
 =cut

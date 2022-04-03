@@ -68,7 +68,7 @@ our inetOrgPerson subclass.
 Here's an example for openldap's /etc/openldap/schema/inetorgperson.schema :
 
   # SpamAssassin
-  # see http://SpamAssassin.org/ .
+  # see https://SpamAssassin.org/ .
   attributetype ( 2.16.840.1.113730.3.1.217
           NAME 'spamassassin'
           DESC 'SpamAssassin user preferences settings'
@@ -97,9 +97,6 @@ If you do not see the above text, then the LDAP query was not successful, and
 you should see any error messages reported. <username> should be the user
 that was passed to spamd and is usually the user executing spamc.
 
-If you need to set up LDAP, a good guide is here:
-http://yolinux.com/TUTORIALS/LinuxTutorialLDAP.html
-
 To test LDAP support using the SpamAssassin test suite, you need to
 perform a little bit of manual configuration first.  See the file
 "ldap/README.testing" for details.
@@ -111,6 +108,6 @@ operation of LDAP support may change at any time with future releases of SA.
 ******
 
 Please send any comments to <kris at koehntopp.de> and file bugs via
-<http://issues.apache.org/SpamAssassin/>.
+<https://issues.apache.org/SpamAssassin/>.
 
 Kristian Köhntopp

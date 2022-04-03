@@ -399,7 +399,7 @@ make
 
 - Check the README file for any items to change.
 
-- Review the CREDITS to update Committers - http://whimsy.apache.org/
+- Review the CREDITS to update Committers - https://whimsy.apache.org/
   can help with this.
 
 - Review the CREDITS to update Copyright
@@ -413,7 +413,7 @@ make
   development mailing list to make the release.  Post the URL,
   SHA sums, and proposed release announcement mail to the dev list.  
 
-    http://people.apache.org/~kmcgrail/devel/ qualifies as "discreet".
+    https://people.apache.org/~kmcgrail/devel/ qualifies as "discreet".
 
   Pre-releases and RCs require just lazy consensus -- ie. no objections.
 
@@ -423,14 +423,14 @@ make
     https://dist.apache.org/repos/dist/dev/SpamAssassin
 
 - (for a pre or rc release), - upload .tar.gz (not .bz2) tarball to CPAN
-  at http://pause.cpan.org/:
+  at https://pause.cpan.org/:
 
         https://pause.perl.org/pause/authenquery?ACTION=add_uri
 
   See notes below for issues on indexing but the tar should be named in a 
   manner that CPAN will process it as a Developer Release per
 
-  http://www.cpan.org/modules/04pause.html#developerreleases
+  https://www.cpan.org/modules/04pause.html#developerreleases
 
   As of 2014-02-05, adding -TRIAL to the filename should work. For example:
 
@@ -532,7 +532,7 @@ make
   make it clear that this is an unofficial "test build" by placing it
   in your public_html dir:
 
-        http://people.apache.org/~kmcgrail/devel/ for example
+        https://people.apache.org/~kmcgrail/devel/ for example
 
   NOTE: It's also feasible that you could publish via SVNPubSub as noted 
   below but using the SVN repository at:
@@ -557,7 +557,7 @@ make
   [note: Symlinks may not work on all mirrors even though there may be 
   documentation to the contrary.]
 
-  As documented at http://www.apache.org/dev/release.html, SpamAssassin
+  As documented at https://www.apache.org/dev/release.html, SpamAssassin
   as of 2014-02-26 publishes tarballs by manipulating the repo on svn.
 
   svn co https://dist.apache.org/repos/dist/release/spamassassin/ release
@@ -567,7 +567,7 @@ make
 
     Only the most recent version of each supported release line should be
     stored.  The archives will auto update.  
-    See http://www.apache.org/dev/release#archived.
+    See https://www.apache.org/dev/release#archived.
   - Commit 
   - Wait 24 hours before you announce to allow mirrors to update
 
@@ -638,7 +638,7 @@ make
     svn delete -m "updating for new release"  $repo/tags/spamassassin_current_release_3.4.x
     svn copy -m "updating for new release" $repo/tags/spamassassin_release_$vers $repo/tags/spamassassin_current_release_3.4.x
 
-- upload release .tar.gz (not .bz2) tarball to CPAN at http://pause.cpan.org/:
+- upload release .tar.gz (not .bz2) tarball to CPAN at https://pause.cpan.org/:
 
         https://pause.perl.org/pause/authenquery?ACTION=add_uri
 
@@ -672,7 +672,7 @@ make
 
 - Add the new version to the Bugzilla versions list:
 
-        http://issues.apache.org/SpamAssassin/editversions.cgi?product=Spamassassin&action=add
+        https://issues.apache.org/SpamAssassin/editversions.cgi?product=Spamassassin&action=add
 
 - Add a milestone for the next version to the Bugzilla milestones list:
 
@@ -697,7 +697,7 @@ make
 
         https://issues.apache.org/SpamAssassin/editmilestones.cgi?product=Spamassassin
 
-- Update http://en.wikipedia.org/wiki/SpamAssassin
+- Update https://en.wikipedia.org/wiki/SpamAssassin
 
 
 

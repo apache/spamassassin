@@ -308,6 +308,6 @@ sub compile_now_finish {
 
 =head1 SEE ALSO
 
-C<http://issues.apache.org/SpamAssassin/show_bug.cgi?id=3109>
+C<https://issues.apache.org/SpamAssassin/show_bug.cgi?id=3109>
 
 =cut
