@@ -5187,56 +5187,9 @@ sub get_description_for_rule {
 
 ###########################################################################
 
-sub maybe_header_only {
-  my($self,$rulename) = @_;
-  my $type = $self->{test_types}->{$rulename};
-
-  if (index($rulename, 'AUTOLEARNTEST') == 0) {
-    dbg("config: auto-learn: $rulename - Test type is $self->{test_types}->{$rulename}.");
-  }
- 
-  return 0 if (!defined ($type));
-
-  if (($type == $TYPE_HEAD_TESTS) || ($type == $TYPE_HEAD_EVALS)) {
-    return 1;
-
-  } elsif ($type == $TYPE_META_TESTS) {
-    if (($self->{tflags}->{$rulename}||'') =~ /\bnet\b/) {
-      return 0;
-    } else {
-      return 1;
-    }
-  }
-
-  return 0;
-}
-
-sub maybe_body_only {
-  my($self,$rulename) = @_;
-  my $type = $self->{test_types}->{$rulename};
-
-  if (index($rulename, 'AUTOLEARNTEST') == 0) {
-    dbg("config: auto-learn: $rulename - Test type is $self->{test_types}->{$rulename}.");
-  }
-
-  return 0 if (!defined ($type));
-
-  if (($type == $TYPE_BODY_TESTS) || ($type == $TYPE_BODY_EVALS)
-        || ($type == $TYPE_URI_TESTS) || ($type == $TYPE_URI_EVALS))
-  {
-    # some rawbody go off of headers...
-    return 1;
-
-  } elsif ($type == $TYPE_META_TESTS) {
-    if (($self->{tflags}->{$rulename}||'') =~ /\bnet\b/) {
-      return 0;
-    } else {
-      return 1;
-    }
-  }
-
-  return 0;
-}
+# Deprecated since Bug 7905/7906
+sub maybe_header_only { warn "Deprecated Conf::maybe_header_only() called"; }
+sub maybe_body_only { warn "Deprecated Conf::maybe_body_only() called"; }
 
 ###########################################################################
 

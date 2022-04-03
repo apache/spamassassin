@@ -724,6 +724,21 @@ sub get_autolearn_force_names {
   return $names;
 }
 
+sub _get_autolearn_testtype {
+  my ($self, $test) = @_;
+  return '' unless defined $test;
+  return 'head' if $test == $Mail::SpamAssassin::Conf::TYPE_HEAD_TESTS
+                || $test == $Mail::SpamAssassin::Conf::TYPE_HEAD_EVALS;
+  return 'body' if $test == $Mail::SpamAssassin::Conf::TYPE_BODY_TESTS
+                || $test == $Mail::SpamAssassin::Conf::TYPE_BODY_EVALS
+                || $test == $Mail::SpamAssassin::Conf::TYPE_RAWBODY_TESTS
+                || $test == $Mail::SpamAssassin::Conf::TYPE_RAWBODY_EVALS
+                || $test == $Mail::SpamAssassin::Conf::TYPE_URI_TESTS
+                || $test == $Mail::SpamAssassin::Conf::TYPE_URI_EVALS;
+  return 'meta' if $test == $Mail::SpamAssassin::Conf::TYPE_META_TESTS;
+  return '';
+}
+
 sub _get_autolearn_points {
   my ($self) = @_;
 
@@ -731,11 +746,13 @@ sub _get_autolearn_points {
   # ensure it only gets computed once, even if we return early
   $self->{autolearn_points} = 0;
 
+  my $conf = $self->{conf};
+
   # This function needs to use use sum($score[scoreset % 2]) not just {score}.
   # otherwise we shift what we autolearn on and it gets really weird.  - tvd
-  my $orig_scoreset = $self->{conf}->get_score_set();
+  my $orig_scoreset = $conf->get_score_set();
   my $new_scoreset = $orig_scoreset;
-  my $scores = $self->{conf}->{scores};
+  my $scores = $conf->{scores};
 
   if (($orig_scoreset & 2) == 0) { # we don't need to recompute
     dbg("learn: auto-learn: currently using scoreset $orig_scoreset");
@@ -743,10 +760,10 @@ sub _get_autolearn_points {
   else {
     $new_scoreset = $orig_scoreset & ~2;
     dbg("learn: auto-learn: currently using scoreset $orig_scoreset, recomputing score based on scoreset $new_scoreset");
-    $scores = $self->{conf}->{scoreset}->[$new_scoreset];
+    $scores = $conf->{scoreset}->[$new_scoreset];
   }
 
-  my $tflags = $self->{conf}->{tflags};
+  my $tflags = $conf->{tflags};
   my $points = 0;
 
   # Just in case this function is called multiple times, clear out the
@@ -767,7 +784,7 @@ sub _get_autolearn_points {
       # Use the original scoreset since it'll be 0 in sets 0 and 1.
       if ($tflags->{$test} =~ /\blearn\b/) {
 	# we're guaranteed that the score will be defined
-        $self->{learned_points} += $self->{conf}->{scoreset}->[$orig_scoreset]->{$test};
+        $self->{learned_points} += $conf->{scoreset}->[$orig_scoreset]->{$test};
 	next;
       }
 
@@ -784,14 +801,41 @@ sub _get_autolearn_points {
 
     # Go ahead and add points to the proper locations
     # Changed logic because in testing, I was getting both head and body. Bug 5503
-    if ($self->{conf}->maybe_header_only ($test)) {
+    # Cleanup logic, Bug 7905/7906
+    my $type = $self->_get_autolearn_testtype($conf->{test_types}->{$test});
+    if ($type eq 'head') {
       $self->{head_only_points} += $scores->{$test};
-      dbg("learn: auto-learn: adding head_only points $scores->{$test}");
-    } elsif ($self->{conf}->maybe_body_only ($test)) {
+      dbg("learn: auto-learn: adding header points $scores->{$test} ($test)");
+    }
+    elsif ($type eq 'body') {
       $self->{body_only_points} += $scores->{$test};
-      dbg("learn: auto-learn: adding body_only points $scores->{$test}");
-    } else {
-      dbg("learn: auto-learn: not considered head or body scores: $scores->{$test}");
+      dbg("learn: auto-learn: adding body points $scores->{$test} ($test)");
+    }
+    elsif ($type eq 'meta') {
+      if ($conf->{meta_dependencies}->{$test}) {
+        my $dep_head = 0;
+        my $dep_body = 0;
+        foreach my $deptest (@{$conf->{meta_dependencies}->{$test}}) {
+          my $deptype = $self->_get_autolearn_testtype($conf->{test_types}->{$deptest});
+          if ($deptype eq 'head') { $dep_head++; }
+          elsif ($deptype eq 'body') { $dep_body++; }
+        }
+        if ($dep_head || $dep_body) {
+          my $dep_total = $dep_head + $dep_body;
+          my $p_head = sprintf "%0.3f", $scores->{$test} * ($dep_head / $dep_total);
+          my $p_body = sprintf "%0.3f", $scores->{$test} * ($dep_body / $dep_total);
+          $self->{head_only_points} += $p_head;
+          $self->{body_only_points} += $p_body;
+          dbg("learn: auto-learn: adding $p_head header and $p_body body points, $dep_head/$dep_body ratio ($test)");
+        } else {
+          dbg("learn: auto-learn: not considered as header or body points, no header/body deps ($test)");
+        }
+      } else {
+          dbg("learn: auto-learn: not considered as header or body points, no meta deps ($test)");
+      }
+    }
+    else {
+      dbg("learn: auto-learn: not considered as header or body points, ignored ruletype ($test)");
     }
 
     $points += $scores->{$test};
