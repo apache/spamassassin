@@ -33,7 +33,7 @@ ifplugin Mail::SpamAssassin::Plugin::DCC
 
 full     DCC_CHECK	eval:check_dcc()
 describe DCC_CHECK	Detected as bulk mail by DCC (dcc-servers.net)
-tflags   DCC_CHECK	net
+tflags   DCC_CHECK	net autolearn_body
 priority DCC_CHECK	10
 reuse    DCC_CHECK
 

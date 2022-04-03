@@ -33,7 +33,7 @@ ifplugin Mail::SpamAssassin::Plugin::Pyzor
 
 full PYZOR_CHECK	eval:check_pyzor()
 describe PYZOR_CHECK	Listed in Pyzor (https://pyzor.readthedocs.io/en/latest/)
-tflags PYZOR_CHECK	net
+tflags PYZOR_CHECK	net autolearn_body
 priority PYZOR_CHECK	30
 reuse  PYZOR_CHECK
 

@@ -33,7 +33,7 @@ ifplugin Mail::SpamAssassin::Plugin::Razor2
 
 full RAZOR2_CHECK	eval:check_razor2()
 describe RAZOR2_CHECK	Listed in Razor2 (http://razor.sf.net/)
-tflags RAZOR2_CHECK	net
+tflags RAZOR2_CHECK	net autolearn_body
 priority RAZOR2_CHECK	20
 reuse  RAZOR2_CHECK
 
