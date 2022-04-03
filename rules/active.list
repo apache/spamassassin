@@ -194,7 +194,7 @@ BITCOIN_IMGUR
 # good enough
 BITCOIN_MALF_HTML
 
-# tflags net
+# tflags publish
 BITCOIN_MALWARE
 
 # tflags publish
@@ -476,7 +476,7 @@ FONT_INVIS_POSTEXTRAS
 # tflags net
 FORGED_SPF_HELO
 
-# tflags net
+# tflags publish
 FORM_FRAUD
 
 # tflags publish
@@ -767,6 +767,9 @@ HAS_X_NO_RELAY
 # tflags publish
 HAS_X_OUTGOING_SPAM_STAT
 
+# tflags net
+HDRS_LCASE
+
 # good enough
 HDRS_LCASE_IMGONLY
 
@@ -928,9 +931,6 @@ MALWARE_PASSWORD
 
 # tflags publish
 MALW_ATTACH
-
-# tflags net
-MANY_HDRS_LCASE
 
 # tflags publish
 MANY_SPAN_IN_TEXT
@@ -1102,9 +1102,6 @@ PDS_BTC_NTLD
 
 # good enough
 PDS_DBL_URL_TNB_RUNON
-
-# tflags net
-PDS_FROM_2_EMAILS
 
 # tflags net
 PDS_HELO_SPF_FAIL
@@ -1641,10 +1638,10 @@ TONLINE_FAKE_DKIM
 TO_EQ_FM_DIRECT_MX
 
 # tflags net
-TO_EQ_FM_DOM_SPF_FAIL
+TO_EQ_FM_DOM_HTML_ONLY
 
 # tflags net
-TO_EQ_FM_HTML_ONLY
+TO_EQ_FM_DOM_SPF_FAIL
 
 # tflags net
 TO_EQ_FM_SPF_FAIL
@@ -1663,9 +1660,6 @@ TO_NO_BRKTS_HTML_IMG
 
 # tflags publish
 TO_NO_BRKTS_HTML_ONLY
-
-# tflags net
-TO_NO_BRKTS_MSFT
 
 # tflags publish
 TO_NO_BRKTS_NORDNS_HTML
