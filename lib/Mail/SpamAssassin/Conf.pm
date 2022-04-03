@@ -3195,7 +3195,7 @@ should be written portably - to match "a with umlaut" character, look for
 both LATIN1 and UTF8 raw byte variants: /(?:\xE4|\xC3\xA4)/
 
 All body paragraphs (double-newline-separated blocks text) are turned into a
-line breaks removed, whitespace normalized single line.  Any lines longer
+linebreaks-removed, whitespace-normalized, single line.  Any lines longer
 than 2kB are split into shorter separate lines (from a boundary when
 possible), this may unexpectedly prevent pattern from matching.  Patterns
 are matched independently against each of these lines.
@@ -3203,6 +3203,9 @@ are matched independently against each of these lines.
 Note that by default the message Subject header is considered part of the
 body and becomes the first line when running the rules. If you don't want
 to match Subject along with body text, use "tflags RULENAME nosubject".
+
+See C<https://wiki.apache.org/SpamAssassin/WritingRules> for more
+information.
 
 =item body SYMBOLIC_TEST_NAME eval:name_of_eval_method([args])
 
