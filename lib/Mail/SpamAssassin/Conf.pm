@@ -46,7 +46,7 @@ directories.
 The following web page lists the most important configuration settings
 used to configure SpamAssassin; novices are encouraged to read it first:
 
-  http://wiki.apache.org/spamassassin/ImportantInitialConfigItems
+  https://wiki.apache.org/spamassassin/ImportantInitialConfigItems
 
 =head1 FILE FORMAT
 
@@ -1279,7 +1279,7 @@ operated by spammers, open relays, or open proxies.  A trusted host could
 conceivably relay spam, but will not originate it, and will not forge header
 data. DNS blacklist checks will never query for hosts on these networks. 
 
-See C<http://wiki.apache.org/spamassassin/TrustPath> for more information.
+See C<https://wiki.apache.org/spamassassin/TrustPath> for more information.
 
 MXes for your domain(s) and internal relays should B<also> be specified using
 the C<internal_networks> setting. When there are 'trusted' hosts that
@@ -2539,7 +2539,7 @@ default heuristics.
 
 (Note for MTA developers: we would prefer if the use of a single header be
 avoided in future, since that precludes 'downstream' spam scanning.
-C<http://wiki.apache.org/spamassassin/EnvelopeSenderInReceived> details a
+C<https://wiki.apache.org/spamassassin/EnvelopeSenderInReceived> details a
 better proposal, storing the envelope sender at each hop in the C<Received>
 header.)
 
@@ -2896,7 +2896,7 @@ by newlines.
 C<X-Spam-Relays-Internal> and C<X-Spam-Relays-External> represent a portable,
 pre-parsed representation of the message's network path, as recorded in the
 Received headers, divided into 'trusted' vs 'untrusted' and 'internal' vs
-'external' sets.  See C<http://wiki.apache.org/spamassassin/TrustedRelays> for
+'external' sets.  See C<https://wiki.apache.org/spamassassin/TrustedRelays> for
 more details.
 
 =back
@@ -2955,9 +2955,7 @@ zone.  There's a few things to note:
 
 Duplicated IPs are only queried once and reserved IPs are not queried.
 Private IPs are those listed in
-C<https://www.iana.org/assignments/ipv4-address-space>,
-C<http://duxcw.com/faq/network/privip.htm>,
-C<http://duxcw.com/faq/network/autoip.htm>, or
+C<https://www.iana.org/assignments/ipv4-address-space>, or
 C<https://tools.ietf.org/html/rfc5735> as private.
 
 =item the 'set' argument
@@ -3010,7 +3008,7 @@ IP address from the most recent 'untrusted line', as used in '-firsttrusted'
 above.  That's because we're talking about the trustworthiness of the
 IP address data, not the source header line, here; and in the case of 
 the most recent header (the 'firsttrusted'), that data can be trusted.
-See the Wiki page at C<http://wiki.apache.org/spamassassin/TrustedRelays>
+See the Wiki page at C<https://wiki.apache.org/spamassassin/TrustedRelays>
 for more information on this.
 
 =item Selecting just the last external IP

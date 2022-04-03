@@ -700,7 +700,7 @@ C<re2c> can match strings much faster than perl code, by constructing a DFA to
 match many simple strings in parallel, and compiling that to native object
 code.  Not all SpamAssassin rules are amenable to this conversion, however.
 
-This requires C<re2c> (see C<http://re2c.org/>), and the C
+This requires C<re2c> (see C<https://re2c.org/>), and the C
 compiler used to build Perl XS modules, be installed.
 
 Note that running this, and creating a compiled ruleset, will have no
@@ -777,7 +777,7 @@ I<area> is the area of the code to instrument.
 
 For more information about which areas (also known as channels) are
 available, please see the documentation at
-L<http://wiki.apache.org/spamassassin/DebugChannels>.
+L<https://wiki.apache.org/spamassassin/DebugChannels>.
 
 =item B<-h>, B<--help>
 
@@ -803,7 +803,7 @@ C<Mail::SpamAssassin::Plugin::Rule2XSBody>
 
 =head1 BUGS
 
-See <http://issues.apache.org/SpamAssassin/>
+See <https://issues.apache.org/SpamAssassin/>
 
 =head1 AUTHORS
 

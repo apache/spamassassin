@@ -35,7 +35,7 @@ SpamAssassin as a DNSBL.
 Note that spam reports sent by this plugin to SpamCop each include the
 entire spam message.
 
-See http://www.spamcop.net/ for more information about SpamCop.
+See https://www.spamcop.net/ for more information about SpamCop.
 
 =cut
 
@@ -114,7 +114,7 @@ guess will be used as the From: address in SpamCop reports.
 =item spamcop_to_address user@example.com   (default: generic reporting address)
 
 Your customized SpamCop report submission address.  You need to obtain
-this address by registering at C<http://www.spamcop.net/>.  If this is
+this address by registering at C<https://www.spamcop.net/>.  If this is
 not set, SpamCop reports will go to a generic reporting address for
 SpamAssassin users and your reports will probably have less weight in
 the SpamCop system.
