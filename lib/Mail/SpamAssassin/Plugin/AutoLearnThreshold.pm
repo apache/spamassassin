@@ -105,7 +105,11 @@ Note: SpamAssassin requires at least 3 points from the header, and 3
 points from the body to auto-learn as spam.  Therefore, the minimum
 working value for this option is 6.
 
-If the test option autolearn_force is set, the minimum value will 
+If test option C<autolearn_header> or C<autolearn_body> is set, points from
+that rule are forced to count as coming from header or body accordingly. 
+This can be useful for adjusting some meta rules.
+
+If the test option C<autolearn_force> is set, the minimum value will 
 remain at 6 points but there is no requirement that the points come
 from body and header rules.  This option is useful for autolearning
 with rules that are considered to be extremely safe indicators of 

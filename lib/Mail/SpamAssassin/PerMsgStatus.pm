@@ -774,6 +774,7 @@ sub _get_autolearn_points {
   $self->{autolearn_force} = 0;
 
   foreach my $test (@{$self->{test_names_hit}}) {
+    my $force_type = '';
     # According to the documentation, noautolearn, userconf, and learn
     # rules are ignored for autolearning.
     if (exists $tflags->{$test}) {
@@ -794,6 +795,12 @@ sub _get_autolearn_points {
         #ADD RULE NAME TO LIST
         $self->{autolearn_force_names}.="$test,";
       }
+
+      # Bug 7907
+      local $1;
+      if ($tflags->{$test} =~ /\bautolearn_(body|header)\b/) {
+        $force_type = $1;
+      }
     }
 
     # ignore tests with 0 score (or undefined) in this scoreset
@@ -803,11 +810,11 @@ sub _get_autolearn_points {
     # Changed logic because in testing, I was getting both head and body. Bug 5503
     # Cleanup logic, Bug 7905/7906
     my $type = $self->_get_autolearn_testtype($conf->{test_types}->{$test});
-    if ($type eq 'head') {
+    if ($force_type eq 'header' || ($force_type eq '' && $type eq 'head')) {
       $self->{head_only_points} += $scores->{$test};
       dbg("learn: auto-learn: adding header points $scores->{$test} ($test)");
     }
-    elsif ($type eq 'body') {
+    elsif ($force_type eq 'body' || ($force_type eq '' && $type eq 'body')) {
       $self->{body_only_points} += $scores->{$test};
       dbg("learn: auto-learn: adding body points $scores->{$test} ($test)");
     }
