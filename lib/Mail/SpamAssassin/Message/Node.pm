@@ -422,7 +422,7 @@ sub detect_utf16 {
 	if( $utf16le_clues > $utf16be_clues ) {
 		dbg( "message: detect_utf16: UTF-16LE" );
 		$decoder = Encode::find_encoding("UTF-16LE");
-	} elsif( $utf16le_clues > $utf16be_clues ) {
+	} elsif( $utf16be_clues > $utf16le_clues ) {
 		dbg( "message: detect_utf16: UTF-16BE" );
 		$decoder = Encode::find_encoding("UTF-16BE");
 	} else {
