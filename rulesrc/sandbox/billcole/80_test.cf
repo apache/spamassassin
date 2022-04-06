@@ -48,7 +48,6 @@ header    SCC_ODD_MUA  X-Mailer =~ /^X-Mailer: Microsoft Outlook 14.0$/
 describe  SCC_SPECIAL_GUID      Unique in a similar way
 rawbody   SCC_SPECIAL_GUID	/^([[:xdigit:]]{8})-([[:xdigit:]]{4})-([[:xdigit:]]{3})-\3-([[:xdigit:]]{12})$/m
 tflags    SCC_SPECIAL_GUID	publish multiple maxhits=15
-#score    SCC_SPECIAL_GUID	0.3
 
 describe __NO_EXTERNALS	No external relays
 header   __NO_EXTERNALS	X-Spam-Relays-External =~ /^$/
@@ -66,6 +65,7 @@ rawbody   T_SCC_HTML_OBJOBJ	/< *object +\w{65,80} *>/
 describe SCC_ISEMM_LID_1	Fingerprint of a particular spammer using an old spamware
 header SCC_ISEMM_LID_1		X-Mailer-LID =~ /54,55,56,58,53/
 tflags SCC_ISEMM_LID_1		publish
+score SCC_ISEMM_LID_1		3.5
 
 # TESTING a few domains that are in our "suspicious" list but are known to have some good senders
 describe T_SCC_TLD_SPACE From domain in *.space 
