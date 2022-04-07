@@ -911,16 +911,11 @@ sub finish_parsing {
 
         # Validate type
         my $expected_type = $conf->{eval_plugins_types}->{$function};
-        if (defined $expected_type) {
+        if (defined $expected_type && $expected_type != $type) {
           # Allow both body and rawbody if expecting body
-          if ($expected_type == $Mail::SpamAssassin::Conf::TYPE_BODY_EVALS) {
-            if ($type != $expected_type && $type != $Mail::SpamAssassin::Conf::TYPE_RAWBODY_EVALS) {
-              my $estr = $Mail::SpamAssassin::Conf::TYPE_AS_STRING{$expected_type};
-              $self->lint_warn("wrong rule type defined for $name, expected '$estr'");
-              next;
-            }
-          }
-          elsif ($type != $expected_type) {
+          if (!($expected_type == $Mail::SpamAssassin::Conf::TYPE_BODY_EVALS &&
+              $type == $Mail::SpamAssassin::Conf::TYPE_RAWBODY_EVALS))
+          {
             my $estr = $Mail::SpamAssassin::Conf::TYPE_AS_STRING{$expected_type};
             $self->lint_warn("wrong rule type defined for $name, expected '$estr'");
             next;
