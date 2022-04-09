@@ -1,23 +1,23 @@
 ##### WITH NEW RULES AND SCORES #####
 
 # SUMMARY for threshold 5.0:
-# Correctly non-spam: 188807  55.026%  (99.704% of non-spam corpus)
-# Correctly spam:     135962  39.625%  (88.425% of spam corpus)
-# False positives:       560  0.163%  (0.296% of nonspam,  28000 weighted)
-# False negatives:     17797  5.187%  (11.575% of spam,  46261 weighted)
+# Correctly non-spam: 188792  55.022%  (99.696% of non-spam corpus)
+# Correctly spam:     135971  39.628%  (88.434% of spam corpus)
+# False positives:       575  0.168%  (0.304% of nonspam,  28643 weighted)
+# False negatives:     17783  5.183%  (11.566% of spam,  46258 weighted)
 # Average score for spam:  14.5    nonspam: -0.9
-# Average for false-pos:   6.2  false-neg: 2.6
-# TOTAL:              343126  100.00%
+# Average for false-pos:   6.1  false-neg: 2.6
+# TOTAL:              343121  100.00%
 
 Reading scores from "tmprules"...
 Reading per-message hit stat logs and scores...
 
 # SUMMARY for threshold 5.0:
-# Correctly non-spam:  23705  99.75%
-# Correctly spam:      17001  87.90%
-# False positives:        59  0.25%
-# False negatives:      2341  12.10%
-# TCR(l=50): 3.655642  SpamRecall: 87.897%  SpamPrec: 99.654%
+# Correctly non-spam:  23704  99.75%
+# Correctly spam:      17041  88.10%
+# False positives:        60  0.25%
+# False negatives:      2301  11.90%
+# TCR(l=50): 3.648746  SpamRecall: 88.104%  SpamPrec: 99.649%
 
 ##### WITHOUT NEW RULES AND SCORES #####
 Reading scores from "../rules-base"...
@@ -25,10 +25,10 @@ Reading per-message hit stat logs and scores...
 
 # SUMMARY for threshold 5.0:
 # Correctly non-spam: 188859  99.73%
-# Correctly spam:      94880  61.71%
+# Correctly spam:      94854  61.69%
 # False positives:       508  0.27%
-# False negatives:     58879  38.29%
-# TCR(l=50): 1.824405  SpamRecall: 61.707%  SpamPrec: 99.467%
+# False negatives:     58900  38.31%
+# TCR(l=50): 1.823891  SpamRecall: 61.692%  SpamPrec: 99.467%
 Reading scores from "../rules-base"...
 Reading per-message hit stat logs and scores...
 
