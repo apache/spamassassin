@@ -67,6 +67,18 @@ header SCC_ISEMM_LID_1		X-Mailer-LID =~ /54,55,56,58,53/
 tflags SCC_ISEMM_LID_1		publish
 score SCC_ISEMM_LID_1		3.5
 
+describe SCC_SPAMMER_ADDR_1	Fingerprint of a particular spammer
+body     SCC_SPAMMER_ADDR_1	/34 N Franklin/
+
+describe SCC_SPAMMER_ADDR_2	Fingerprint of a particular spammer
+body     SCC_SPAMMER_ADDR_2	/6130 W Flamingo Rd/
+
+describe SCC_CANSPAM_1		Interesting compliance language
+body	 SCC_CANSPAM_1		/The advertiser does not manage your subscription/
+
+describe SCC_CANSPAM_2		Interesting compliance language
+body	 SCC_CANSPAM_2		/you may unsubscribe by clicking here or by writing to/
+
 # TESTING a few domains that are in our "suspicious" list but are known to have some good senders
 describe T_SCC_TLD_SPACE From domain in *.space 
 header   T_SCC_TLD_SPACE From =~ /<[^ @]+@[^ @>]+\.space>/
