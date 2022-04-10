@@ -4,7 +4,7 @@ use lib '.'; use lib 't';
 use SATest;
 
 use Test::More;
-plan skip_all => 'AWL SQL Tests not enabled.' if conf_bool('run_awl_sql_tests');
+plan skip_all => 'AWL SQL Tests not enabled.' unless conf_bool('run_awl_sql_tests');
 plan tests => 11;
 diag "Note: Failure may be due to an incorrect config";
 
