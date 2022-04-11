@@ -106,6 +106,10 @@ sub new {
     $self->{username} = $args->{username};
   }
 
+  if ($args->{max_size}) {
+    $self->{max_size} = $args->{max_size};
+  }
+
   if ($args->{timeout}) {
     $self->{timeout} = $args->{timeout} || 30;
   }
@@ -579,6 +583,7 @@ sub _filter {
   my ($self, $msg, $command) = @_;
 
   my %data;
+  my $msgsize;
 
   $self->_clear_errors();
 
@@ -586,7 +591,10 @@ sub _filter {
 
   return 0 unless ($remote);
 
-  my $msgsize = length($msg.$EOL);
+  if(defined $self->{max_size}) {
+    $msg = substr($msg,0,$self->{max_size});
+  }
+  $msgsize = length($msg.$EOL);
 
   print $remote "$command $PROTOVERSION$EOL";
   print $remote "Content-length: $msgsize$EOL";
