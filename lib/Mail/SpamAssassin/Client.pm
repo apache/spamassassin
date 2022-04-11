@@ -135,6 +135,8 @@ threshold
 
 message
 
+report
+
 =cut
 
 sub process {
@@ -148,6 +150,41 @@ sub process {
   }
 
   return $self->_filter($msg, $command);
+}
+
+=head2 spam_report
+
+public instance (\%) spam_report (String $msg)
+
+Description:
+The method implements the report call.
+
+See the process method for the return value.
+
+=cut
+
+sub spam_report {
+  my ($self, $msg) = @_;
+
+  return $self->_filter($msg, 'REPORT');
+}
+
+=head2 spam_report_ifspam
+
+public instance (\%) spam_report_ifspam (String $msg)
+
+Description:
+The method implements the report_ifspam call.
+A report will be returned only if the message is spam.
+
+See the process method for the return value.
+
+=cut
+
+sub spam_report_ifspam {
+  my ($self, $msg) = @_;
+
+  return $self->_filter($msg, 'REPORT_IFSPAM');
 }
 
 =head2 check
@@ -534,6 +571,8 @@ threshold
 
 message (if available)
 
+report (if available)
+
 =cut
 
 sub _filter {
@@ -595,7 +634,11 @@ sub _filter {
     $!==EBADF ? dbg("error reading from spamd (10): $!")
               : die "error reading from spamd (10): $!";
 
-  $data{message} = $return_msg if ($return_msg);
+  if($command =~ /^REPORT/) {
+    $data{report} = $return_msg if ($return_msg);
+  } else {
+    $data{message} = $return_msg if ($return_msg);
+  }
 
   close $remote  or die "error closing socket: $!";
 
