@@ -48,6 +48,7 @@ CREATE TABLE awl (
   msgcount int(11) NOT NULL default '0',
   totscore float NOT NULL default '0',
   signedby varchar(255) NOT NULL default '',
+  last_hit timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (username,email,signedby,ip)
 ) TYPE=MyISAM;
 
