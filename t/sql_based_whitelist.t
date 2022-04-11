@@ -5,7 +5,7 @@ use SATest;
 
 use Test::More;
 plan skip_all => 'AWL SQL Tests not enabled.' unless conf_bool('run_awl_sql_tests');
-plan tests => 20;
+plan tests => 23;
 diag "Note: Failure may be due to an incorrect config";
 
 sa_t_init("sql_based_whitelist");
@@ -62,6 +62,11 @@ ok(sarun ("-L -t -D auto-whitelist < data/nice/002 2>&1", \&patterns_run_cb));
 ok_all_patterns();
 
 %patterns = (%is_spam_patterns, (q{'144.137 scores -8, msgcount 4'} => 'scores'));;
+ok(sarun ("-L -t -D auto-whitelist < data/spam/004 2>&1", \&patterns_run_cb));
+ok_all_patterns();
+
+# Should be raised after last spam
+%patterns = (%is_spam_patterns, (q{'144.137 scores 9.837, msgcount 5'} => 'scores'));;
 ok(sarun ("-L -t -D auto-whitelist < data/spam/004 2>&1", \&patterns_run_cb));
 ok_all_patterns();
 
