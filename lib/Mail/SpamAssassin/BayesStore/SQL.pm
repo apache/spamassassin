@@ -2344,12 +2344,10 @@ Description:
 This method returns the string to be used in SELECT statements to represent
 the token column.
 
-The default is to use the RPAD function to pad the token out to 5 characters.
-
 =cut
 
 sub _token_select_string {
-  return "RPAD(token, 5, ' ')";
+  return "token";
 }
 
 sub sa_die { Mail::SpamAssassin::sa_die(@_); }
