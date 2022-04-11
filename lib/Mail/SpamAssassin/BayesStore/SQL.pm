@@ -2344,10 +2344,13 @@ Description:
 This method returns the string to be used in SELECT statements to represent
 the token column.
 
+The default is to use the SUBSTR function to pad the token out to 5 characters.
+
 =cut
 
 sub _token_select_string {
-  return "token";
+  # Use SQLite compatible RPAD alternative
+  return "SUBSTR(token || '     ', 1, 5)";
 }
 
 sub sa_die { Mail::SpamAssassin::sa_die(@_); }

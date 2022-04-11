@@ -1073,6 +1073,20 @@ sub _put_tokens {
   return 1;
 }
 
+=head2 _token_select_string
+
+private instance (String) _token_select_string
+
+Description:
+This method returns the string to be used in SELECT statements to represent
+the token column.
+
+=cut
+
+sub _token_select_string {
+  return "token";
+}
+
 sub _quote_bytea {
   my ($str) = @_;
   my $buf = "";
