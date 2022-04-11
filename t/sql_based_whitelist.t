@@ -2,35 +2,75 @@
 
 use lib '.'; use lib 't';
 use SATest;
-
 use Test::More;
-plan skip_all => 'AWL SQL Tests not enabled.' unless conf_bool('run_awl_sql_tests');
-plan tests => 23;
+
+use constant HAS_DBI => eval { require DBI; };
+use constant HAS_DBD_SQLITE => eval { require DBD::SQLite; };
+
+use constant SQLITE => (HAS_DBI && HAS_DBD_SQLITE);
+use constant SQL => conf_bool('run_awl_sql_tests');
+
+plan skip_all => "run_awl_sql_tests not enabled or DBI/SQLite not found" unless (SQLITE || SQL);
+
+my $tests = 0;
+$tests += 23 if (SQLITE);
+$tests += 23 if (SQL);
+plan tests => $tests;
+
 diag "Note: Failure may be due to an incorrect config";
 
 sa_t_init("sql_based_whitelist");
 
-my $dbconfig = '';
-foreach my $setting (qw(
-  user_awl_dsn
-  user_awl_sql_username
-  user_awl_sql_password
-  user_awl_sql_table
-)) {
-  my $val = conf($setting);
-  $dbconfig .= "$setting $val\n" if $val;
+if (SQLITE) {
+  my $dbh = DBI->connect("dbi:SQLite:dbname=$workdir/awl.db","","");
+  $dbh->do("
+  CREATE TABLE awl (
+    username varchar(100) NOT NULL default '',
+    email varchar(255) NOT NULL default '',
+    ip varchar(40) NOT NULL default '',
+    msgcount bigint NOT NULL default '0',
+    totscore float NOT NULL default '0',
+    signedby varchar(255) NOT NULL default '',
+    last_hit timestamp NOT NULL default CURRENT_TIMESTAMP,
+    PRIMARY KEY (username,email,signedby,ip)
+  );
+  ") or die "Failed to create $workdir/awl.db";
+
+  tstprefs ("
+    use_auto_whitelist 1
+    auto_whitelist_factory Mail::SpamAssassin::SQLBasedAddrList
+    user_awl_dsn dbi:SQLite:dbname=$workdir/awl.db
+  ");
+
+  run_awl();
 }
 
-my $testuser = 'tstusr.'.$$.'.'.time();
+if (SQL) {
+  my $dbconfig = '';
+  foreach my $setting (qw(
+      user_awl_dsn
+      user_awl_sql_username
+      user_awl_sql_password
+      user_awl_sql_table
+      )) {
+    my $val = conf($setting);
+    $dbconfig .= "$setting $val\n" if $val;
+  }
 
-tstprefs ("
-  use_auto_whitelist 1
-  auto_whitelist_factory Mail::SpamAssassin::SQLBasedAddrList
-  $dbconfig
-  user_awl_sql_override_username $testuser
-");
+  my $testuser = 'tstusr.'.$$.'.'.time();
+
+  tstprefs ("
+    use_auto_whitelist 1
+    auto_whitelist_factory Mail::SpamAssassin::SQLBasedAddrList
+    $dbconfig
+    user_awl_sql_override_username $testuser
+  ");
+
+  run_awl();
+}
 
 # ---------------------------------------------------------------------------
+sub run_awl {
 
 %is_nonspam_patterns = (
   q{ Subject: Re: [SAtalk] auto-whitelisting}, 'subj',
@@ -76,3 +116,5 @@ ok_all_patterns();
 
 ok(sarun ("--remove-addr-from-whitelist whitelist_test\@whitelist.spamassassin.taint.org", \&patterns_run_cb));
 
+}
+# ---------------------------------------------------------------------------
