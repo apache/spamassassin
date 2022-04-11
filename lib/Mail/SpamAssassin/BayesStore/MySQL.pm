@@ -30,6 +30,9 @@ In addition, this module will support rollback on error, if you are
 using the InnoDB database table type in MySQL.  For more information
 please review the instructions in sql/README.bayes.
 
+This module is also compatible with MariaDB and DBD::MariaDB can be used
+instead of DBD::mysql driver.
+
 =cut
 
 package Mail::SpamAssassin::BayesStore::MySQL;

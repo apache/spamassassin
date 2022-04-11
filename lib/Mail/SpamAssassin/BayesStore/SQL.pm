@@ -21,7 +21,11 @@ Mail::SpamAssassin::BayesStore::SQL - SQL Bayesian Storage Module Implementation
 
 =head1 DESCRIPTION
 
-This module implements a SQL based bayesian storage module.
+This module implements a SQL based bayesian storage module.  It's compatible
+with SQLite and possibly other standard SQL servers.
+
+Do not use this for MySQL/MariaDB or PgSQL, they have their own specific
+modules.
 
 =cut
 

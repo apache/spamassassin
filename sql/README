@@ -75,23 +75,16 @@ If you have a table layout that differs from the default, please
 review the documentation for user_scores_sql_custom_query for
 information on how deal with a custom layout.
 
+
 Requirements
 ------------
 
-In order for SpamAssassin to work with your SQL database, you must have
-the perl DBI module installed, AS WELL AS the DBD driver/module for your
-specific database.  For example, if using MySQL as your RDBMS, you must have
-the Msql-Mysql module installed.  Check CPAN for the latest versions of DBI 
-and your database driver/module. 
-
-We are currently using:
-
-  DBI-1.20
-  Msql-Mysql-modules-1.2219
-  perl v5.6.1
-
-But older and newer versions should work fine as the SQL code in SpamAssassin
-is as simple as could be.
+In order for SpamAssassin to work with your SQL database, you must have the
+perl DBI module installed, AS WELL AS the DBD driver/module for your
+specific database.  For example, if using MySQL/MariaDB as your RDBMS, you
+must have the DBD::mysql or DBD::MariaDB module installed.  For PostgreSQL
+use the DBD::Pg module.  Check CPAN for the latest versions of DBI and your
+database driver/module.
 
 
 Database Schema
