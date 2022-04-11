@@ -15,7 +15,7 @@ CREATE TRIGGER [UpdateLastHit]
     AFTER UPDATE
     ON txrep
     FOR EACH ROW
-    WHEN NEW.last_hot < OLD.last_hit
+    WHEN NEW.last_hit < OLD.last_hit
 BEGIN
     UPDATE txrep SET last_hit=CURRENT_TIMESTAMP 
     WHERE (username=OLD.username AND email=OLD.email AND signedby=OLD.signedby AND ip=OLD.ip);

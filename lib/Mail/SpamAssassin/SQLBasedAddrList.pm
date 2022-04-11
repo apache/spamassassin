@@ -220,7 +220,15 @@ sub get_addr_entry {
     push(@args, @signedby);
   }
   $sql .= " ORDER BY last_hit";
+
   my $sth = $self->{dbh}->prepare($sql);
+
+  unless (defined($sth)) {
+    info("auto-whitelist: sql-based get_addr_entry %s: SQL prepare error: %s",
+         join('|',@args), $self->{dbh}->errstr);
+    return $entry;
+  }
+
   my $rc = $sth->execute($self->{_username}, @args);
 
   if (!$rc) { # there was an error, but try to go on
@@ -302,7 +310,14 @@ sub add_score {
     } elsif ($self->{dsn} =~ /^DBI:(?:mysql|MariaDB)/i) {
        $sql .= " ON DUPLICATE KEY UPDATE msgcount = ?, totscore = totscore + ?";
     }
+
     my $sth = $self->{dbh}->prepare($sql);
+
+    unless (defined($sth)) {
+      info("auto-whitelist: sql-based add_score/insert %s: SQL prepare error: %s",
+           join('|',@args), $self->{dbh}->errstr);
+      return $entry;
+    }
 
     if (!$self->{_with_awl_signer}) {
       my $rc;
@@ -361,6 +376,13 @@ sub add_score {
     push(@args, $ip);
 
     my $sth = $self->{dbh}->prepare($sql);
+
+    unless (defined($sth)) {
+      info("auto-whitelist: sql-based add_score/update %s: SQL prepare error: %s",
+           join('|',@args), $self->{dbh}->errstr);
+      return $entry;
+    }
+
     my $rc = $sth->execute(@args);
 
     if (!$rc) {
@@ -421,6 +443,13 @@ sub remove_entry {
   }
 
   my $sth = $self->{dbh}->prepare($sql);
+
+  unless (defined($sth)) {
+    info("auto-whitelist: sql-based remove_entry %s: SQL prepare error: %s",
+         join('|',@args), $self->{dbh}->errstr);
+    return;
+  }
+
   my $rc = $sth->execute(@args);
 
   if (!$rc) {
