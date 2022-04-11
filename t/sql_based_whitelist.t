@@ -5,7 +5,7 @@ use SATest;
 
 use Test::More;
 plan skip_all => 'AWL SQL Tests not enabled.' unless conf_bool('run_awl_sql_tests');
-plan tests => 11;
+plan tests => 20;
 diag "Note: Failure may be due to an incorrect config";
 
 sa_t_init("sql_based_whitelist");
@@ -43,24 +43,30 @@ tstprefs ("
 );
 
 %patterns = %is_nonspam_patterns;
-
 ok(sarun ("--remove-addr-from-whitelist whitelist_test\@whitelist.spamassassin.taint.org", \&patterns_run_cb));
 
 # 3 times, to get into the whitelist:
-ok(sarun ("-L -t < data/nice/002", \&patterns_run_cb));
-ok(sarun ("-L -t < data/nice/002", \&patterns_run_cb));
-ok(sarun ("-L -t < data/nice/002", \&patterns_run_cb));
+%patterns = (%is_nonspam_patterns, (q{'144.137 scores 0, msgcount 0'} => 'scores'));
+ok(sarun ("-L -t -D auto-whitelist < data/nice/002 2>&1", \&patterns_run_cb));
+ok_all_patterns();
+%patterns = (%is_nonspam_patterns, (q{'144.137 scores -2, msgcount 1'} => 'scores'));
+ok(sarun ("-L -t -D auto-whitelist < data/nice/002 2>&1", \&patterns_run_cb));
+ok_all_patterns();
+%patterns = (%is_nonspam_patterns, (q{'144.137 scores -4, msgcount 2'} => 'scores'));
+ok(sarun ("-L -t -D auto-whitelist < data/nice/002 2>&1", \&patterns_run_cb));
+ok_all_patterns();
 
 # Now check
-ok(sarun ("-L -t < data/nice/002", \&patterns_run_cb));
+%patterns = (%is_nonspam_patterns, (q{'144.137 scores -6, msgcount 3'} => 'scores'));
+ok(sarun ("-L -t -D auto-whitelist < data/nice/002 2>&1", \&patterns_run_cb));
 ok_all_patterns();
 
-%patterns = %is_spam_patterns;
-ok(sarun ("-L -t < data/spam/004", \&patterns_run_cb));
+%patterns = (%is_spam_patterns, (q{'144.137 scores -8, msgcount 4'} => 'scores'));;
+ok(sarun ("-L -t -D auto-whitelist < data/spam/004 2>&1", \&patterns_run_cb));
 ok_all_patterns();
 
-%patterns = %is_spam_patterns2;
-ok(sarun ("-L -t < data/spam/007", \&patterns_run_cb));
+%patterns = (%is_spam_patterns2, (q{'210.73 scores 0, msgcount 0'} => 'scores'));;
+ok(sarun ("-L -t -D auto-whitelist < data/spam/007 2>&1", \&patterns_run_cb));
 ok_all_patterns();
 
 ok(sarun ("--remove-addr-from-whitelist whitelist_test\@whitelist.spamassassin.taint.org", \&patterns_run_cb));
