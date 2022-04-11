@@ -297,16 +297,16 @@ sub add_score {
     my $sql = sprintf("INSERT INTO %s (%s) VALUES (%s)", $self->{tablename},
                       join(',', @fields),  join(',', ('?') x @fields));
     if ($self->{dsn} =~ /^DBI:pg/i) {
-       $sql .= " ON CONFLICT (username, email, signedby, ip) DO UPDATE set msgcount = ?, totscore = totscore + ?";
+       $sql .= " ON CONFLICT (username, email, signedby, ip) DO UPDATE set msgcount = msgcount + 1, totscore = totscore + ?";
     } elsif ($self->{dsn} =~ /^DBI:(?:mysql|MariaDB)/i) {
-       $sql .= " ON DUPLICATE KEY UPDATE msgcount = ?, totscore = totscore + ?";
+       $sql .= " ON DUPLICATE KEY UPDATE msgcount = msgcount + 1, totscore = totscore + ?";
     }
     my $sth = $self->{dbh}->prepare($sql);
 
     if (!$self->{_with_awl_signer}) {
       my $rc;
       if ($self->{dsn} =~ /^DBI:(?:pg|mysql|MariaDB)/i) {
-          $rc = $sth->execute(@args, $entry->{msgcount}, $score);
+          $rc = $sth->execute(@args, $score);
       } else {
           $rc = $sth->execute(@args);
       }
@@ -322,7 +322,7 @@ sub add_score {
       for my $s (@signedby) {
         my $rc;
 	if ($self->{dsn} =~ /^DBI:(?:pg|mysql|MariaDB)/i) {
-          $rc = $sth->execute(@args, $s, $entry->{msgcount}, $score);
+          $rc = $sth->execute(@args, $s, $score);
 	} else {
 	  $rc = $sth->execute(@args, $s);
 	}
@@ -342,9 +342,9 @@ sub add_score {
     # insert failed, assume primary key constraint, so try the update
 
     my $sql = "UPDATE $self->{tablename} ".
-              "SET msgcount = ?, totscore = totscore + ? ".
+              "SET msgcount = msgcount + 1, totscore = totscore + ? ".
               "WHERE username = ? AND email = ?";
-    my(@args) = ($entry->{msgcount}, $score, $self->{_username}, $email);
+    my(@args) = ($score, $self->{_username}, $email);
     if ($self->{_with_awl_signer}) {
       my @signedby = !defined $signedby ? () : split(' ', lc $signedby);
       if (!@signedby) {
