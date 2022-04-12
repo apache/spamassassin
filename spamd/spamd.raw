@@ -1626,9 +1626,27 @@ sub accept_a_conn {
       peer_info_from_socket($client);
     $remote_hostaddr or die 'failed to obtain port and ip from socket';
 
-    my $msg = sprintf("connection from %s [%s]:%s to port %d, fd %d",
+    my $ssl_info = '';
+    if ($client->isa('IO::Socket::SSL')) {
+      $ssl_info = ', ';
+      my $ssl_version = $client->get_sslversion();
+      if (defined $ssl_version) {
+        $ssl_info .= $ssl_version.'/';
+      } else {
+        $ssl_version = $client->get_sslversion_int();
+        if    ($ssl_version == 0x0304) { $ssl_info .= 'TLSv1.3/'; }
+        elsif ($ssl_version == 0x0303) { $ssl_info .= 'TLSv1.2/'; }
+        elsif ($ssl_version == 0x0302) { $ssl_info .= 'TLSv1.1/'; }
+        elsif ($ssl_version == 0x0301) { $ssl_info .= 'TLSv1.0/'; }
+        elsif ($ssl_version == 0x0300) { $ssl_info .= 'SSLv3/'; }
+        elsif ($ssl_version == 0x0002) { $ssl_info .= 'SSLv2/'; }
+      }
+      $ssl_info .= $client->get_cipher();
+    }
+
+    my $msg = sprintf("connection from %s [%s]:%s to port %d, fd %d%s",
                       $remote_hostname, $remote_hostaddr, $remote_port,
-                      $local_port, $socket_info->{fd});
+                      $local_port, $socket_info->{fd}, $ssl_info);
     if (ip_is_allowed($remote_hostaddr)) {
       info("spamd: $msg");
     }
