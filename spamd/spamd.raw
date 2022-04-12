@@ -1425,12 +1425,12 @@ sub spawn {
       my $evalret = eval { accept_a_conn($scaling ? 0.5 : undef); };
 
       if (!defined $evalret) {
-        warn("spamd: error: $@ $!, continuing");
+        warn("spamd: error: $@, continuing\n");
         if ($client) { $client->close(); }  # avoid fd leaks
       }
       elsif ($evalret == -1) {
         # serious error; used for accept() failure
-        die("spamd: respawning server");
+        die("spamd: respawning server\n");
       }
 
       $spamtest->call_plugins("spamd_child_post_connection_close");
@@ -1550,18 +1550,21 @@ sub accept_from_any_server_socket {
       $socket or die "no socket???, impossible";
       dbg("spamd: accept() on fd %d", $selected_socket_info->{fd});
       $client = $socket->accept;
+      if (!defined $client) {
+        if (defined $socket) {
+          die sprintf("%s accept failed: %s\n", ref $socket,
+                       $socket->isa('IO::Socket::SSL') ?
+                         $socket->errstr : $@);
+        } else {
+          die "accept failed: no socket available: $!\n";
+        }
+      }
     }
     1;  # end eval with success
 
   } or do {
     my $err = $@ ne '' ? $@ : "errno=$!";  chomp $err;
-    if ($locked) {
-      dbg("spamd: releasing a lock over select+accept");
-      flock($sockets_access_lock_fh, LOCK_UN)
-        or die "Can't release sockets-access lock: $!";
-      $locked = 0;
-    }
-    die "accept_a_conn: $err";
+    info("spamd: accept_a_conn: $err");
   };
 
   if ($locked) {
@@ -1569,16 +1572,7 @@ sub accept_from_any_server_socket {
     flock($sockets_access_lock_fh, LOCK_UN)
       or die "Can't release sockets-access lock: $!";
   }
-  if(!defined $client) {
-    if(defined($socket)) {
-      die sprintf("accept_a_conn: %s accept failed: %s",
-                         ref $socket,
-                         !$socket->isa('IO::Socket::SSL') ? $!
-                           : $socket->errstr.", $!");
-    } else {
-      die sprintf("accept_a_conn: no socket available");
-    }
-  }
+
   return ($client, $selected_socket_info);
 }
 
@@ -1601,8 +1595,11 @@ sub accept_a_conn {
     if ( $! == &Errno::EINTR ) {
       return 0;
     }
+    elsif ( $@ =~ /ssl3_get_record:wrong version number/ ) {
+      # Handshake error, not speaking SSL? No need to respawn
+      return 0;
+    }
     else {
-      warn("spamd: accept failed: $!");
       return -1;
     }
   }
