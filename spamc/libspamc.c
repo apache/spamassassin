@@ -1383,6 +1383,8 @@ int message_filter(struct transport *tp, const char *username,
 #ifdef SPAMC_SSL
             SSL_write(ssl, buf, len);
             SSL_write(ssl, towrite_buf, towrite_len);
+            SSL_shutdown(ssl);
+            shutdown(sock, SHUT_WR);
 #endif
         }
         else {
@@ -1731,6 +1733,8 @@ int message_tell(struct transport *tp, const char *username, int flags,
 #ifdef SPAMC_SSL
 	SSL_write(ssl, buf, len);
 	SSL_write(ssl, m->msg, m->msg_len);
+	SSL_shutdown(ssl);
+	shutdown(sock, SHUT_WR);
 #endif
     }
     else {

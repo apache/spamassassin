@@ -1837,7 +1837,7 @@ sub zlib_inflate_read {
 
     # TODO: inflate in smaller buffers instead of at EOF
     while (1) {
-      my $numbytes = $client->read($buf, (1024 * 64) + $red, $red);
+      my $numbytes = $client->read($buf, (1024 * 64), $red);
       if (!defined $numbytes) {
         die "read of zlib data failed: $!";
         return -1;
@@ -1847,13 +1847,13 @@ sub zlib_inflate_read {
     }
 
     if ($red > $expected_length) {
-      warn "hmm, zlib read $red > expected_length $expected_length";
+      warn "spamd: zlib read $red > expected_length $expected_length\n";
       substr ($buf, $expected_length) = '';
     }
 
     ($out, $status) = $zlib->inflate($buf);
     if ($status != Compress::Zlib::Z_STREAM_END()) {
-      die "failed to find end of zlib stream";
+      die "failed to find end of zlib stream\n";
     }
   };
 
@@ -2319,7 +2319,7 @@ sub parse_headers {
       return 0 unless got_remove_header($hdrs, $header, $value);
     }
     elsif ($header eq 'Compress') {
-      return 0 unless &got_compress_header($hdrs, $header, $value);
+      return 0 unless got_compress_header($hdrs, $header, $value);
     }
   }
 
@@ -2455,10 +2455,10 @@ sub got_compress_header {
       return 0;
     }
     $hdrs->{compress_zlib} = 1;
-    dbg("spamd: compress header received\n");
+    dbg("spamd: compress header received: $value");
   }
   else {
-    protocol_error("(compression type not supported)");
+    protocol_error("(compression type not supported: $value)");
     return 0;
   }
 
