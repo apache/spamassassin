@@ -139,6 +139,9 @@
  * */
 #define SPAMC_UNAVAIL_TEMPFAIL (1<<13)
 
+/* April 2022, add SSL client certificate support, bug 7267 */
+#define SPAMC_CLIENT_SSL_CERT (1<<12)
+
 #define SPAMC_MESSAGE_CLASS_SPAM 1
 #define SPAMC_MESSAGE_CLASS_HAM  2
 
@@ -249,6 +252,13 @@ struct transport
     /* Added for filterloop */
     int filter_retries;
     int filter_retry_sleep;
+
+#ifdef SPAMC_SSL
+    const char *ssl_cert_file;
+    const char *ssl_key_file;
+    const char *ssl_ca_file;
+    const char *ssl_ca_path;
+#endif
 };
 
 /* Initialise and setup transport-specific context for the connection

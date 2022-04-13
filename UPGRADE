@@ -177,6 +177,10 @@ Note for Users Upgrading to SpamAssassin 4.0.0
 - Autolearn: add new tflags autolearn_header/autolearn_body. These can
   force a rule to count as header or body points accordingly. (Bug 7907)
 
+- SSL client certificate support for spamc/spamd.  New spamc options
+  --ssl-cert, --ssl-key, --ssl-ca-file, --ssl-ca-path.  New spamd options
+  --ssl-verify, --ssl-ca-file, --ssl-ca-path (Bug 7267)
+
 Note for Users Upgrading to SpamAssassin 3.4.5
 ----------------------------------------------
 

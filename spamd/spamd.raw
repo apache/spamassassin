@@ -410,6 +410,9 @@ GetOptions(
   'socketpath=s'             => \$opt{'socketpath'},
   'sql-config!'              => \$opt{'sql-config'},
   'ssl'                      => \$opt{'ssl'},
+  'ssl-verify'               => \$opt{'ssl-verify'},
+  'ssl-ca-file=s'            => \$opt{'ssl-ca-file'},
+  'ssl-ca-path=s'            => \$opt{'ssl-ca-path'},
   'ssl-port=s'               => \$opt{'ssl-port'},
   'syslog-socket=s'          => \$opt{'syslog-socket'},
   'syslog|s=s'               => \$opt{'syslog'},
@@ -742,8 +745,19 @@ if ( defined $ENV{'HOME'} ) {
 
 # Do whitelist later in tmp dir. Side effect: this will be done as -u user.
 
+# Initialize SSL options
+
 $opt{'server-key'}  ||= "$LOCAL_RULES_DIR/certs/server-key.pem";
 $opt{'server-cert'} ||= "$LOCAL_RULES_DIR/certs/server-cert.pem";
+
+$opt{'ssl-verify'} = 1  if $opt{'ssl-ca-file'} || $opt{'ssl-ca-path'};
+$opt{'ssl'} ||= $opt{'ssl-verify'};
+if ($opt{'ssl-ca-file'} && !-e $opt{'ssl-ca-file'}) {
+  die "spamd: ssl-ca-file $opt{'ssl-ca-file'} does not exist\n";
+}
+if ($opt{'ssl-ca-path'} && !-e $opt{'ssl-ca-path'}) {
+  die "spamd: ssl-ca-path $opt{'ssl-ca-path'} does not exist\n";
+}
 
 # ---------------------------------------------------------------------------
 # Server (listening) socket setup for the various supported types
@@ -1063,21 +1077,41 @@ sub server_sock_setup_inet {
     );
     $sockopt{V6Only} = 1  if $io_socket_module_name eq 'IO::Socket::IP'
                              && IO::Socket::IP->VERSION >= 0.09;
-    %sockopt = (%sockopt, (
-      SSL_verify_mode => 0x00,
-      SSL_key_file    => $opt{'server-key'},
-      SSL_cert_file   => $opt{'server-cert'},
-    ))  if $ssl;
+    if ($ssl) {
+      if (!$have_ssl_module) {
+	eval { require IO::Socket::SSL; }
+	or die "spamd: SSL encryption requested, ".
+	    "but IO::Socket::SSL is unavailable ($@)\n";
+	$have_ssl_module = 1;
+      }
+      %sockopt = (%sockopt, (
+        SSL_server      => 1,
+        SSL_key_file    => $opt{'server-key'},
+        SSL_cert_file   => $opt{'server-cert'},
+      ));
+      my $ssl_mode;
+      if ($opt{'ssl-verify'}) {
+	$ssl_mode = Net::SSLeay::VERIFY_PEER()
+	    | Net::SSLeay::VERIFY_FAIL_IF_NO_PEER_CERT();
+	if ($opt{'ssl-ca-file'}) {
+	  $sockopt{SSL_ca_file} = $opt{'ssl-ca-file'};
+	}
+	if ($opt{'ssl-ca-path'}) {
+	  $sockopt{SSL_ca_path} = $opt{'ssl-ca-path'};
+	}
+	$sockopt{SSL_check_crl} = 0;
+	$sockopt{SSL_verifycn_scheme} = 'none';
+	$sockopt{SSL_verifycn_publicsuffix} = '';
+      } else {
+	$ssl_mode = Net::SSLeay::VERIFY_NONE()
+	    | Net::SSLeay::VERIFY_FAIL_IF_NO_PEER_CERT();
+      }
+      $sockopt{SSL_verify_mode} = $ssl_mode;
+    }
     dbg("spamd: creating %s socket: %s",
         $ssl ? 'IO::Socket::SSL' : $io_socket_module_name,
         join(', ', map("$_: ".(defined $sockopt{$_} ? $sockopt{$_} : "(undef)"),
                        sort keys %sockopt)));
-    if ($ssl && !$have_ssl_module) {
-      eval { require IO::Socket::SSL }
-        or die "spamd: SSL encryption requested, ".
-               "but IO::Socket::SSL is unavailable ($@)\n";
-      $have_ssl_module = 1;
-    }
     my $server_inet = $ssl ? IO::Socket::SSL->new(%sockopt)
                            : $io_socket_module_name->new(%sockopt);
     my $diag;
@@ -1595,7 +1629,8 @@ sub accept_a_conn {
     if ( $! == &Errno::EINTR ) {
       return 0;
     }
-    elsif ( $@ =~ /ssl3_get_record:wrong version number/ ) {
+    elsif ( $@ =~ /ssl3_get_record:wrong version number/ ||
+            $@ =~ /peer did not return a certificate/ ) {
       # Handshake error, not speaking SSL? No need to respawn
       return 0;
     }
@@ -3270,6 +3305,9 @@ Options:
  -P, --paranoid                    Die upon user errors
  -H [dir], --helper-home-dir[=dir] Specify a different HOME directory
  --ssl                             Enable SSL on TCP connections
+ --ssl-verify                      Request a client certificate and verify it
+ --ssl-ca-file cafile              Certificate Authority certificate file
+ --ssl-ca-path capath              Certificate Authority directory
  --ssl-port port                   Override --port setting for SSL connections
  --server-key keyfile              Specify an SSL keyfile
  --server-cert certfile            Specify an SSL certificate
@@ -3744,6 +3782,24 @@ B<--port> port will be used to accept SSL connections instead of unencrypted
 connections.  If the B<--ssl> switch is used, and B<--ssl-port> is set, then
 unencrypted connections will be accepted on the B<--port>, at the same time as
 encrypted connections are accepted at B<--ssl-port>.
+
+=item B<--ssl-verify>
+
+Implies B<--ssl>.  Request a client certificate and verify the certificate. 
+Requires B<--ssl-ca-file> or B<--ssl-ca-path>.
+
+=item B<--ssl-ca-file>=I<cafile>
+
+Implies B<--ssl-verify>.  Use the specified Certificate Authority
+certificate to verify the client certificate.  The client certificate must
+be signed by this certificate.
+
+=item B<--ssl-ca-path>=I<capath>
+
+Implies B<--ssl-verify>.  Use the Certificate Authority certificate files in
+the specified set of directories to verify the client certificate.  The
+client certificate must be signed by one of these Certificate Authorities. 
+See the man page for B<IO::Socket::SSL> for additional details.
 
 =item B<--ssl-port>=I<port>
 

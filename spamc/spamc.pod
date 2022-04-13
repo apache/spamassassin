@@ -189,10 +189,32 @@ The default is 1 time (ie. one attempt and no retries).
 Sleep for I<sleep> seconds between failed spamd filtering attempts.
 The default is 1 second.
 
-=item B<-S>, B<--ssl>, B<--ssl>
+=item B<-S>, B<--ssl>
 
 If spamc was built with support for SSL, encrypt data to and from the
 spamd process with SSL; spamd must support SSL as well.
+
+=item B<--ssl-cert>=I<certfile>
+
+Authenticate to spamd server with a SSL client certificate.  Specify the
+certificate file to use.
+
+=item B<--ssl-key>=I<keyfile>
+
+Authenticate to spamd server with a SSL client certificate.  Specify the
+certificate key file to use.
+
+=item B<--ssl-ca-file>=I<cafile>
+
+Use the specified Certificate Authority certificate to verify the server
+certificate.  The server certificate must be signed by this certificate.
+
+=item B<--ssl-ca-path>=I<capath>
+
+Use the Certificate Authority certificate files in the specified set of
+directories to verify the server certificate.  The server certificate must
+be signed by one of these Certificate Authorities.  See the man page for
+B<IO::Socket::SSL> for additional details.
 
 =item B<-t> I<timeout>, B<--timeout>=I<timeout>
 

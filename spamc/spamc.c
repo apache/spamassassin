@@ -90,7 +90,7 @@ char *__progname = "spamc";
 
 
 /* safe fallback defaults to on now - CRH */
-int flags = SPAMC_RAW_MODE | SPAMC_SAFE_FALLBACK;
+int flags = SPAMC_RAW_MODE | SPAMC_SAFE_FALLBACK | SPAMC_TLSV1;
 
 /* global to control whether we should exit(0)/exit(1) on ham/spam */
 int use_exit_code = 0;
@@ -146,6 +146,10 @@ print_usage(void)
         "                      [default: 783]\n");
 #ifdef SPAMC_SSL
     usg("  -S, --ssl           Use SSL to talk to spamd.\n");
+    usg("  --ssl-cert cert     Authenticate using SSL client certificate.\n");
+    usg("  --ssl-key key       Specify an SSL client key PEM file.\n");
+    usg("  --ssl-ca-file file  Specify the location of the CA PEM file.\n");
+    usg("  --ssl-ca-path path  Specify a directory containin CA files.\n");
 #endif
 #ifndef _WIN32
     usg("  -U, --socket path   Connect to spamd via UNIX domain sockets.\n");
@@ -248,6 +252,10 @@ read_args(int argc, char **argv,
        { "randomize", no_argument, 0, 'H' },
        { "port", required_argument, 0, 'p' },
        { "ssl", optional_argument, 0, 'S' },
+       { "ssl-cert", optional_argument, 0, 5 },
+       { "ssl-key", optional_argument, 0, 6 },
+       { "ssl-ca-file", optional_argument, 0, 7 },
+       { "ssl-ca-path", optional_argument, 0, 8 },
        { "socket", required_argument, 0, 'U' },
        { "config", required_argument, 0, 'F' },
        { "timeout", required_argument, 0, 't' },
@@ -277,6 +285,13 @@ read_args(int argc, char **argv,
        { 0, 0, 0, 0} /* last element _must_ be all zeroes */
     };
     
+#ifdef SPAMC_SSL
+    ptrn->ssl_cert_file = 0;
+    ptrn->ssl_key_file = 0;
+    ptrn->ssl_ca_file = 0;
+    ptrn->ssl_ca_path = 0;
+#endif
+
     while ((opt = spamc_getopt_long(argc, argv, opts, longoptions, 
                 &longind)) != -1)
     {
@@ -522,8 +537,41 @@ read_args(int argc, char **argv,
                 ptrn->filter_retry_sleep = atoi(spamc_optarg);
                 break;
             }
+#ifdef SPAMC_SSL
+            case 5:
+            {
+                flags |= SPAMC_CLIENT_SSL_CERT;
+                ptrn->ssl_cert_file = spamc_optarg;
+                break;
+            }
+            case 6:
+            {
+                flags |= SPAMC_CLIENT_SSL_CERT;
+                ptrn->ssl_key_file = spamc_optarg;
+                break;
+            }
+            case 7:
+            {
+                ptrn->ssl_ca_file = spamc_optarg;
+                break;
+            }
+            case 8:
+            {
+                ptrn->ssl_ca_path = spamc_optarg;
+                break;
+            }
+#endif
         }
     }
+
+#ifdef SPAMC_SSL
+    if ((flags & SPAMC_CLIENT_SSL_CERT)
+	&& !(ptrn->ssl_cert_file && ptrn->ssl_key_file)) {
+	libspamc_log(flags, LOG_ERR,
+		     "--ssl-cert and --ssl-key must be used together");
+	ret = EX_USAGE;
+    }
+#endif
 
     if (*max_size > SPAMC_MAX_MESSAGE_LEN) {
         libspamc_log(flags, LOG_ERR, "-s parameter is beyond max of %d",

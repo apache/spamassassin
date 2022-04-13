@@ -607,6 +607,120 @@ static int _try_to_connect_tcp(const struct transport *tp, int *sockptr)
     return _translate_connect_errno(origerr);
 }
 
+#ifdef SPAMC_SSL
+static char * _ssl_err_as_string (void) {
+    BIO *bio = BIO_new(BIO_s_mem());
+    ERR_print_errors(bio);
+    char *buf = NULL;
+    size_t len = BIO_get_mem_data(bio, &buf);
+    char *ret = (char *)calloc(1, 1 + len);
+    if (!ret) {
+        BIO_free(bio);
+        char *err = "(could not get SSL error)";
+        return err;
+    }
+    memcpy(ret, buf, len);
+    BIO_free(bio);
+    /* Only return up to first newline */
+    char *lf = strchr(ret, '\n');
+    if (lf)
+        *lf = '\0';
+    return ret;
+}
+
+static SSL_CTX * _try_ssl_ctx_init(int flags)
+{
+    const SSL_METHOD *meth;
+    SSL_CTX *ctx;
+
+    SSLeay_add_ssl_algorithms();
+    SSL_load_error_strings();
+    /* this method allows negotiation of version */
+    meth = SSLv23_client_method();
+    ctx = SSL_CTX_new(meth);
+    if (ctx == NULL) {
+        libspamc_log(flags, LOG_ERR, "cannot create SSL CTX context: %s",
+                     _ssl_err_as_string());
+        return NULL;
+    }
+    if (flags & SPAMC_TLSV1) {
+	/* allow TLSv1.0 or better */
+	SSL_CTX_set_options(ctx, SSL_OP_NO_SSLv2|SSL_OP_NO_SSLv3);
+    } else {
+	/* allow SSLv3 or better */
+	SSL_CTX_set_options(ctx, SSL_OP_NO_SSLv2);
+    }
+    SSL_CTX_set_mode(ctx, SSL_MODE_AUTO_RETRY);
+    return ctx;
+}
+
+static int _try_ssl_connect(SSL_CTX *ctx, struct transport *tp,
+			    SSL **pssl, int flags, int sock)
+{
+    SSL *ssl;
+    int ssl_rtn;
+    if (tp->ssl_ca_file || tp->ssl_ca_path) {
+	if (!SSL_CTX_load_verify_locations(ctx, tp->ssl_ca_file,
+					   tp->ssl_ca_path)) {
+	    libspamc_log(flags, LOG_ERR,
+			 "error loading CA file %s or path %s: %s",
+			 tp->ssl_ca_file ? tp->ssl_ca_file : "(void)",
+			 tp->ssl_ca_path ? tp->ssl_ca_path : "(void)",
+			 _ssl_err_as_string());
+	    return EX_OSERR;
+	}
+	SSL_CTX_set_verify(ctx, SSL_VERIFY_PEER, NULL);
+    } else {
+        SSL_CTX_set_verify(ctx, SSL_VERIFY_NONE, NULL);
+    }
+    if (flags & SPAMC_CLIENT_SSL_CERT) {
+	/* libspamc_log(flags, LOG_ERR, "loading client cert %s key %s",
+		     tp->ssl_cert_file, tp->ssl_key_file); */
+	if (!SSL_CTX_use_certificate_file(ctx, tp->ssl_cert_file,
+					  SSL_FILETYPE_PEM)) {
+	    libspamc_log(flags, LOG_ERR,
+			 "unable to load certificate file %s: %s",
+			 tp->ssl_cert_file, _ssl_err_as_string());
+	    return EX_OSERR;
+	}
+	if (!SSL_CTX_use_PrivateKey_file(ctx, tp->ssl_key_file,
+					 SSL_FILETYPE_PEM)) {
+	    libspamc_log(flags, LOG_ERR,
+			 "unable to load key file %s: %s",
+			 tp->ssl_key_file, _ssl_err_as_string());
+	    return EX_OSERR;
+	}
+	if (!SSL_CTX_check_private_key(ctx)) {
+	    libspamc_log(flags, LOG_ERR,
+			 "key file %s and cert file %s do not match: %s",
+			 tp->ssl_key_file, tp->ssl_cert_file,
+			 _ssl_err_as_string());
+	    return EX_OSERR;
+	}
+    }
+    ssl = SSL_new(ctx);
+    if (ssl == NULL) {
+        libspamc_log(flags, LOG_ERR,
+	             "SSL_new failed: %s", _ssl_err_as_string());
+        return EX_OSERR;
+    }
+    *pssl = ssl;
+    if (!SSL_set_fd(ssl, sock)) {
+	libspamc_log(flags, LOG_ERR,
+		     "SSL_set_fd failed: %s", _ssl_err_as_string());
+	return EX_OSERR;
+    }
+    ssl_rtn = SSL_connect(ssl);
+    if (ssl_rtn != 1) {
+	int ssl_err = SSL_get_error(ssl, ssl_rtn);
+	libspamc_log(flags, LOG_ERR,
+		     "SSL_connect error: %s", _ssl_err_as_string());
+	return EX_UNAVAILABLE;
+    }
+    return EX_OK;
+}
+#endif
+
 /* Aug 14, 2002 bj: Reworked things. Now we have message_read, message_write,
  * message_dump, lookup_host, message_filter, and message_process, and a bunch
  * of helper functions.
@@ -1213,13 +1327,13 @@ int message_filter(struct transport *tp, const char *username,
 
     if (flags & SPAMC_USE_SSL) {
 #ifdef SPAMC_SSL
-	SSLeay_add_ssl_algorithms();
-	meth = SSLv23_client_method();
-	SSL_load_error_strings();
-	ctx = SSL_CTX_new(meth);
+        ctx = _try_ssl_ctx_init(flags);
+        if (ctx == NULL) {
+	    failureval = EX_OSERR;
+	    goto failure;
+        }
 #else
 	UNUSED_VARIABLE(ssl);
-	UNUSED_VARIABLE(meth);
 	UNUSED_VARIABLE(ctx);
 	libspamc_log(flags, LOG_ERR, "spamc not built with SSL support");
 	return EX_SOFTWARE;
@@ -1372,17 +1486,31 @@ int message_filter(struct transport *tp, const char *username,
     
         if (flags & SPAMC_USE_SSL) {
 #ifdef SPAMC_SSL
-            ssl = SSL_new(ctx);
-            SSL_set_fd(ssl, sock);
-            SSL_connect(ssl);
+            rc = _try_ssl_connect(ctx, tp, &ssl, flags, sock);
+            if (rc != EX_OK) {
+                failureval = rc;
+                goto failure;
+            }
 #endif
         }
     
         /* Send to spamd */
         if (flags & SPAMC_USE_SSL) {
 #ifdef SPAMC_SSL
-            SSL_write(ssl, buf, len);
-            SSL_write(ssl, towrite_buf, towrite_len);
+            rc = SSL_write(ssl, buf, len);
+            if (rc <= 0) {
+                libspamc_log(flags, LOG_ERR, "SSL write failed (%d)",
+                             SSL_get_error(ssl, rc));
+                failureval = EX_IOERR;
+                goto failure;
+            }
+            rc = SSL_write(ssl, towrite_buf, towrite_len);
+            if (rc <= 0) {
+                libspamc_log(flags, LOG_ERR, "SSL write failed (%d)",
+                             SSL_get_error(ssl, rc));
+                failureval = EX_IOERR;
+                goto failure;
+            }
             SSL_shutdown(ssl);
             shutdown(sock, SHUT_WR);
 #endif
@@ -1595,20 +1723,19 @@ int message_tell(struct transport *tp, const char *username, int flags,
     int failureval;
     SSL_CTX *ctx = NULL;
     SSL *ssl = NULL;
-    const SSL_METHOD *meth;
 
     assert(tp != NULL);
     assert(m != NULL);
 
     if (flags & SPAMC_USE_SSL) {
 #ifdef SPAMC_SSL
-	SSLeay_add_ssl_algorithms();
-	meth = SSLv23_client_method();
-	SSL_load_error_strings();
-	ctx = SSL_CTX_new(meth);
+        ctx = _try_ssl_ctx_init(flags);
+        if (ctx == NULL) {
+            failureval = EX_OSERR;
+            goto failure;
+        }
 #else
 	UNUSED_VARIABLE(ssl);
-	UNUSED_VARIABLE(meth);
 	UNUSED_VARIABLE(ctx);
 	libspamc_log(flags, LOG_ERR, "spamc not built with SSL support");
 	return EX_SOFTWARE;
@@ -1722,17 +1849,31 @@ int message_tell(struct transport *tp, const char *username, int flags,
 
     if (flags & SPAMC_USE_SSL) {
 #ifdef SPAMC_SSL
-	ssl = SSL_new(ctx);
-	SSL_set_fd(ssl, sock);
-	SSL_connect(ssl);
+        rc = _try_ssl_connect(ctx, tp, &ssl, flags, sock);
+        if (rc != EX_OK) {
+            failureval = rc;
+            goto failure;
+        }
 #endif
     }
 
     /* Send to spamd */
     if (flags & SPAMC_USE_SSL) {
 #ifdef SPAMC_SSL
-	SSL_write(ssl, buf, len);
-	SSL_write(ssl, m->msg, m->msg_len);
+	rc = SSL_write(ssl, buf, len);
+        if (rc <= 0) {
+            libspamc_log(flags, LOG_ERR, "SSL write failed (%d)",
+                         SSL_get_error(ssl, rc));
+            failureval = EX_IOERR;
+            goto failure;
+        }
+	rc = SSL_write(ssl, m->msg, m->msg_len);
+        if (rc <= 0) {
+            libspamc_log(flags, LOG_ERR, "SSL write failed (%d)",
+                         SSL_get_error(ssl, rc));
+            failureval = EX_IOERR;
+            goto failure;
+        }
 	SSL_shutdown(ssl);
 	shutdown(sock, SHUT_WR);
 #endif
