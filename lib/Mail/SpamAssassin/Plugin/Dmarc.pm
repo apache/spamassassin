@@ -204,7 +204,7 @@ sub _check_dmarc {
   my ($self,$pms,$name) = @_;
   my $spf_status = 'none';
   my $spf_helo_status = 'none';
-  my ($dmarc, $lasthop, $result, $rua, $domain, $mfrom_domain);
+  my ($dmarc, $lasthop, $result, $rua, $mfrom_domain);
 
   if (!HAS_DMARC) {
     warn "check_dmarc not supported, required module Mail::DMARC::PurePerl missing\n";
@@ -257,8 +257,8 @@ sub _check_dmarc {
     $result = $dmarc->validate();
   };
   if ($@) {
-    if(defined $domain) {
-      dbg("Dmarc error while evaluating domain $domain: $@");
+    if(defined $mfrom_domain) {
+      dbg("Dmarc error while evaluating domain $mfrom_domain: $@");
     } else {
       dbg("Dmarc error: $@");
     }
