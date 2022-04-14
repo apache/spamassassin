@@ -181,10 +181,9 @@ Note for Users Upgrading to SpamAssassin 4.0.0
   --ssl-cert, --ssl-key, --ssl-ca-file, --ssl-ca-path.  New spamd options
   --ssl-verify, --ssl-ca-file, --ssl-ca-path (Bug 7267)
 
-- ArchiveIterator now uncompresses automatically all gzip-compressed files
-  even without .gz extension (usually some Maildir files, Bug 7598).  Added
-  .xz decompression support.  These apply to spamassassin and sa-learn
-  commands also.
+- ArchiveIterator now uncompresses automatically all gzip, bzip2, xz, lz4,
+  lzip and lzo-compressed files (Bug 7598).  These apply to spamassassin
+  and sa-learn commands also.
 
 Note for Users Upgrading to SpamAssassin 3.4.5
 ----------------------------------------------
