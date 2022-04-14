@@ -236,12 +236,11 @@ sub set_functions {
 Generates the list of messages to process, then runs each message through
 the configured wanted subroutine.
 
-Files which are detected as C<gzip> compressed (regardless of extension,
-works also on Maildir files) are uncompressed automatically via IO::Zlib. 
-Files with C<.bz2> extension are automatically uncompressed via call to
-C<bzip2 -dc> command.  Files with C<.xz> extension are automatically
-uncompressed via call to C<xz -dc> command.  Compressed mailbox/mbox files
-are not supported.
+Compressed files are detected and uncompressed automatically regardless of
+file extension.  Supported formats are C<gzip>, C<bzip2>, C<xz>, C<lz4>,
+C<lzip>, C<lzo>.  Gzip is uncompressed via IO::Zlib module, others use their
+specific command line tool (bzip2/xz/lz4/lzip/lzop).  Compressed
+mailbox/mbox files are not supported.
 
 The target_paths array is expected to be either one element per path in the
 following format: C<class:format:raw_location>, or a hash reference containing
@@ -295,8 +294,10 @@ sub run {
     return 0;
   }
 
-  $self->{bzip2_path} = Mail::SpamAssassin::Util::find_executable_in_env_path('bzip2');
-  $self->{xz_path} = Mail::SpamAssassin::Util::find_executable_in_env_path('xz');
+  # Find some uncompressors (gzip is handled with IO::Zlib)
+  foreach ('bzip2','xz','lz4','lzip','lzop') {
+    $self->{$_.'_path'} = Mail::SpamAssassin::Util::find_executable_in_env_path($_);
+  }
 
   # scan the targets and get the number and list of messages
   $self->_scan_targets(\@targets,
@@ -618,38 +619,14 @@ sub _mail_open {
   my ($self, $file, $ignore_missing) = @_;
   my $fh;
 
-  # Assume that the file by default is just a plain file
-  my @expr = ( $file );
-  my $mode = '<';
-
-  # Handle some compressed files
-  if ($file =~ /\.bz2$/i) {
-    if ($self->{bzip2_path}) {
-      $mode = '-|';
-      unshift @expr, $self->{bzip2_path}, '-cd';
-    } else {
-      warn "archive-iterator: bzip2 executable required for $file\n";
-      return;
-    }
-  }
-  elsif ($file =~ /\.xz$/i) {
-    if ($self->{xz_path}) {
-      $mode = '-|';
-      unshift @expr, $self->{xz_path}, '-cd';
-    } else {
-      warn "archive-iterator: xz executable required for $file\n";
-      return;
-    }
-  }
-
   # Go ahead and try to open the file
   # bug 5288: the "magic" version of open will strip leading and trailing
   # whitespace from the expression.  switch to the three-argument version
   # of open which does not strip whitespace.  see "perldoc -f open" and
   # "perldoc perlipc" for more information.
-  if (!open ($fh, $mode, @expr)) {
+  if (!open($fh, '<', $file)) {
     # Don't warn about disappeared files
-    if ($ignore_missing && $mode eq '<' && $! == ENOENT) {
+    if ($ignore_missing && $! == ENOENT) {
       dbg("archive-iterator: no access to $file: $!");
     } else {
       warn "archive-iterator: no access to $file: $!\n"
@@ -660,13 +637,14 @@ sub _mail_open {
   # bug 5249: mail could have 8-bit data, need this on some platforms
   binmode $fh  or die "cannot set input file to binmode: $!";
 
-  # Detect gzip compressed data (only from files)
-  if ($mode eq '<' && -f $file && read($fh, my $magic, 2)) {
-    if ($magic eq "\x1F\x8B") {
-      dbg("archive-iterator: detected gzipped file $file, reopening with IO::Zlib");
+  # Detect compressed data (only from files, can't reopen pipe)
+  if (-f $file && read($fh, my $magic, 6)) {
+    # GZIP
+    if ($magic =~ /^\x1F\x8B/) {
+      dbg("archive-iterator: detected gzip file $file, reopening with IO::Zlib");
       close $fh  or die "error closing input file: $!";
       eval { require IO::Zlib; };
-      if ($@) { warn "IO::Zlib required for $file: $@\n"; return; }
+      if ($@) { warn "archive-iterator: IO::Zlib required for $file: $@\n"; return; }
       $fh = IO::Zlib->new($file, "rb");
       if (!$fh) {
         if ($ignore_missing && $! == ENOENT) {
@@ -676,6 +654,76 @@ sub _mail_open {
         }
         return;
       }
+    }
+    # BZIP2
+    elsif ($magic =~ /^\x42\x5A(?:\x68|\x30)/) {
+      dbg("archive-iterator: detected bzip2 file $file, reopening with bzip2");
+      close $fh  or die "error closing input file: $!";
+      if (!$self->{bzip2_path}) {
+        warn "archive-iterator: bzip2 executable required for $file\n";
+        return;
+      }
+      if (!open($fh, '-|', $self->{bzip2_path}, '-cd', $file)) {
+        warn "archive-iterator: no access to $file: $!\n";
+        return;
+      }
+      binmode $fh  or die "cannot set input file to binmode: $!";
+    }
+    # XZ
+    elsif ($magic =~ /^\xFD\x37\x7A\x58\x5A\x00/) {
+      dbg("archive-iterator: detected xz file $file, reopening with xz");
+      close $fh  or die "error closing input file: $!";
+      if (!$self->{xz_path}) {
+        warn "archive-iterator: xz executable required for $file\n";
+        return;
+      }
+      if (!open($fh, '-|', $self->{xz_path}, '-cd', $file)) {
+        warn "archive-iterator: no access to $file: $!\n";
+        return;
+      }
+      binmode $fh  or die "cannot set input file to binmode: $!";
+    }
+    # LZ4
+    elsif ($magic =~ /^\x04\x22\x4D\x18/) {
+      dbg("archive-iterator: detected lz4 file $file, reopening with lz4");
+      close $fh  or die "error closing input file: $!";
+      if (!$self->{lz4_path}) {
+        warn "archive-iterator: lz4 executable required for $file\n";
+        return;
+      }
+      if (!open($fh, '-|', $self->{lz4_path}, '-cd', $file)) {
+        warn "archive-iterator: no access to $file: $!\n";
+        return;
+      }
+      binmode $fh  or die "cannot set input file to binmode: $!";
+    }
+    # LZIP
+    elsif ($magic =~ /^\x4C\x5A\x49\x50/) {
+      dbg("archive-iterator: detected lzip file $file, reopening with lzip");
+      close $fh  or die "error closing input file: $!";
+      if (!$self->{lzip_path}) {
+        warn "archive-iterator: lzip executable required for $file\n";
+        return;
+      }
+      if (!open($fh, '-|', $self->{lzip_path}, '-cd', $file)) {
+        warn "archive-iterator: no access to $file: $!\n";
+        return;
+      }
+      binmode $fh  or die "cannot set input file to binmode: $!";
+    }
+    # LZO
+    elsif ($magic =~ /^\x89\x4C\x5A\x4F\x00\x0D/) {
+      dbg("archive-iterator: detected lzo file $file, reopening with lzop");
+      close $fh  or die "error closing input file: $!";
+      if (!$self->{lzop_path}) {
+        warn "archive-iterator: lzop executable required for $file\n";
+        return;
+      }
+      if (!open($fh, '-|', $self->{lzop_path}, '-cd', $file)) {
+        warn "archive-iterator: no access to $file: $!\n";
+        return;
+      }
+      binmode $fh  or die "cannot set input file to binmode: $!";
     } else {
       # Reset position
       seek($fh,0,0);

@@ -679,8 +679,8 @@ that matches.  See C<Mail::SpamAssassin::ArchiveIterator> for more details.
 If you are using mail boxes in format other than maildir you should use
 the B<--mbox> or B<--mbx> parameters.
 
-Files compressed with gzip/bzip2/xz are uncompressed automatically.  See
-C<Mail::SpamAssassin::ArchiveIterator> for more details.
+Files compressed with gzip/bzip2/xz/lz4/lzip/lzo are uncompressed
+automatically.  See C<Mail::SpamAssassin::ArchiveIterator> for more details.
 
 SpamAssassin remembers which mail messages it has learnt already, and will not
 re-learn those messages again, unless you use the B<--forget> option. Messages
