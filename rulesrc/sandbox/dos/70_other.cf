@@ -247,6 +247,7 @@ describe DOS_RCVD_IP_TWICE_A	Received from the same IP twice in a row
 
 header DOS_RCVD_IP_TWICE_B	X-Spam-Relays-External =~ /^\s*\[ ip=(?!127)([\d.]+) [^\[]*\[ ip=\1 [^\]]*\]\s*$/
 describe DOS_RCVD_IP_TWICE_B	Received from the same IP twice in a row (only one external relay)
+score DOS_RCVD_IP_TWICE_B	2.0 #limit see bz#7971
 
 header DOS_RCVD_IP_TWICE_C	X-Spam-Relays-External =~ /^\s*\[ ip=(?!127)([\d.]+) [^\[]*\bhelo=(?:![\d.]{7,15}!)? [^\[]*\[ ip=\1 [^\]]*\]\s*$/
 describe DOS_RCVD_IP_TWICE_C	Received from the same IP twice in a row (only one external relay; empty or IP helo)
