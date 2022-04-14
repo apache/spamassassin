@@ -133,6 +133,24 @@ sub new {
   return $self;
 }
 
+=head1 PRIVILEGED SETTINGS
+
+=over 4
+
+=item url_shortener     (default: none)
+
+A domain that should be considered as an url shortener.
+If the domain begins with a '.', 3rd level tld of the main
+domain will be checked.
+
+Example:
+url_shortener bit.ly
+url_shortener .page.link
+
+=back
+
+=cut
+
 sub set_config {
   my($self, $conf) = @_;
   my @cmds = ();
@@ -150,8 +168,6 @@ sub set_config {
       }
     }
   });
-
-=head1 PRIVILEGED SETTINGS
 
 =over 4
 
@@ -386,6 +402,7 @@ sub check_dnsbl {
   # Sort short URLs into hash to de-dup them
   my %short_urls;
   my $uris = $pms->get_uri_detail_list();
+  my $tldsRE = $self->{main}->{registryboundaries}->{valid_tlds_re};
   while (my($uri, $info) = each %{$uris}) {
     next unless ($info->{domains});
     foreach ( keys %{ $info->{domains} } ) {
@@ -402,6 +419,18 @@ sub check_dnsbl {
         }
         $short_urls{$uri} = 1;
         next;
+      } elsif(/^(?!www)[a-z\d._-]{0,251}\.([a-z\d._-]{0,251}\.${tldsRE})/) {
+        # if domain is a 3rd level domain check if there is a url shortener
+        # on the 2nd level tld
+        my $dom = '.' . $1;
+        if (exists $self->{url_shorteners}->{$dom}) {
+          if ($uri !~ /^https?:\/\/(?:www\.)?$_\/.+$/i) {
+            dbg("Discarding URI: $uri");
+            next;
+          }
+          $short_urls{$uri} = 1;
+          next;
+        }
       }
     }
   }
@@ -457,7 +486,6 @@ sub recursive_lookup {
     $location = $response->headers->{location};
     # Bail out if $short_url redirects to itself
     return undef if ($short_url eq $location);
-    dbg("Found $short_url => $location");
     if ($self->{caching}) {
       if ($self->cache_add($short_url, $location)) {
         dbg("Added $short_url to cache");
@@ -499,10 +527,20 @@ sub recursive_lookup {
       $self->{short_url_loop} = 1;
       return $location;
     } else {
+      my $tldsRE = $self->{main}->{registryboundaries}->{valid_tlds_re};
       if (exists $self->{url_shorteners}->{$domain}) {
         $been_here{$location} = 1;
         # Recurse...
         return $self->recursive_lookup($location, $pms, %been_here);
+      } elsif($domain =~ /^(?!www)[a-z\d._-]{0,251}\.([a-z\d._-]{0,251}\.${tldsRE})/) {
+        # if domain is a 3rd level domain check if there is a url shortener
+        # on the 2nd level tld
+        my $dom = '.' . $1;
+        if (exists $self->{url_shorteners}->{$dom}) {
+          $been_here{$location} = 1;
+          # Recurse...
+          return $self->recursive_lookup($location, $pms, %been_here);
+        }
       }
     }
   }
