@@ -205,8 +205,6 @@ sub new {
   $self->{s} = [ ];		# spam, of course
   $self->{h} = [ ];		# ham, as if you couldn't guess
 
-  $self->{access_problem} = 0;
-
   if ($self->{opt_all}) {
     $self->{opt_max_size} = 0;
   } elsif (!defined $self->{opt_max_size}) {
@@ -316,11 +314,16 @@ sub run {
 sub _run {
   my ($self, $messages) = @_;
 
+  my $messages_run = 0;
   while (my $message = shift @{$messages}) {
     my($class, undef, $date, undef, $result) = $self->_run_message($message);
-    &{$self->{result_sub}}($class, $result, $date) if $result;
+    if ($result) {
+      $messages_run++;
+      &{$self->{result_sub}}($class, $result, $date);
+    }
   }
-  return ! $self->{access_problem};
+  # Return success if atleast some files were processed through
+  return $messages_run > 0;
 }
 
 ############################################################################
@@ -346,22 +349,22 @@ sub _run_message {
 sub _run_file {
   my ($self, $class, $format, $where, $date) = @_;
 
-  if (!_mail_open($where)) {
-    $self->{access_problem} = 1;
+  if (!_mail_open($where, 1)) {
     return;
   }
 
   my $stat_errn = stat(INPUT) ? 0 : 0+$!;
   if ($stat_errn == ENOENT) {
-    dbg("archive-iterator: no such input ($where)");
+    # no longer there?
+    dbg("archive-iterator: no access to $where: $!");
     return;
   }
   elsif ($stat_errn != 0) {
-    warn "archive-iterator: no access to input ($where): $!";
+    warn "archive-iterator: no access to $where: $!\n";
     return;
   }
   elsif (!-f _ && !-c _ && !-p _) {
-    warn "archive-iterator: not a plain file (or char.spec. or pipe) ($where)";
+    warn "archive-iterator: not a plain file (or char.spec. or pipe) ($where)\n";
     return;
   }
 
@@ -418,8 +421,7 @@ sub _run_mailbox {
   }
   my @msg;
   my $header;
-  if (!_mail_open($file)) {
-    $self->{access_problem} = 1;
+  if (!_mail_open($file, 1)) {
     return;
   }
 
@@ -468,8 +470,7 @@ sub _run_mbx {
   my @msg;
   my $header;
 
-  if (!_mail_open($file)) {
-    $self->{access_problem} = 1;
+  if (!_mail_open($file, 1)) {
     return;
   }
 
@@ -579,12 +580,9 @@ sub _scan_targets {
       if ($format eq 'detect') {
 	# detect the format
         my $stat_errn = stat($location) ? 0 : 0+$!;
-        if ($stat_errn == ENOENT) {
-          $thisformat = 'file';  # actually, no file - to be detected later
-        }
-        elsif ($stat_errn != 0) {
-          warn "archive-iterator: no access to $location: $!";
-          $thisformat = 'file';
+        if ($stat_errn != 0) {
+          warn "archive-iterator: no access to $location: $!\n";
+          next;
         }
         elsif (-d _) {
 	  # it's a directory
@@ -623,7 +621,7 @@ sub _scan_targets {
 }
 
 sub _mail_open {
-  my ($file) = @_;
+  my ($file, $ignore_missing) = @_;
 
   # bug 5288: the "magic" version of open will strip leading and trailing
   # whitespace from the expression.  switch to the three-argument version
@@ -646,7 +644,12 @@ sub _mail_open {
 
   # Go ahead and try to open the file
   if (!open (INPUT, $mode, @expr)) {
-    warn "archive-iterator: unable to open $file: $!\n";
+    # Don't warn about disappeared files
+    if ($ignore_missing && $mode eq '<' && $! == ENOENT) {
+      dbg("archive-iterator: no access to $file: $!");
+    } else {
+      warn "archive-iterator: no access to $file: $!\n"
+    }
     return 0;
   }
 
@@ -754,7 +757,7 @@ sub _scan_directory {
     # Maildir format: bug 3003
     for my $sub ("new", "cur") {
       opendir (DIR, "$folder/$sub")
-            or die "Can't open '$folder/$sub' dir: $!\n";
+            or die "archive-iterator: can't open '$folder/$sub' dir: $!\n";
       # Don't learn from messages marked as deleted
       # Or files starting with a leading dot
       push @files, map { "$sub/$_" } grep { !/^\.|:2,.*T/ } readdir(DIR);
@@ -794,9 +797,10 @@ sub _scan_directory {
     my $stat_errn = stat($file) ? 0 : 0+$!;
     if ($stat_errn == ENOENT) {
       # no longer there?
+      dbg("archive-iterator: no access to $file: $!");
     }
     elsif ($stat_errn != 0) {
-      warn "archive-iterator: no access to $file: $!";
+      warn "archive-iterator: no access to $file: $!\n";
     }
     elsif (-f _ || -c _ || -p _) {
       $self->_scan_file($class, $file, $bkfunc);
@@ -805,7 +809,7 @@ sub _scan_directory {
       push(@subdirs, $file);
     }
     else {
-      warn "archive-iterator: $file is not a plain file or directory: $!";
+      warn "archive-iterator: $file is not a plain file or directory\n";
     }
   }
   undef @files;  # release storage
@@ -849,7 +853,6 @@ sub _scan_file {
 
       my $header = '';
       if (!_mail_open($mail)) {
-        $self->{access_problem} = 1;
         return;
       }
       for ($!=0; <INPUT>; $!=0) {
@@ -900,7 +903,6 @@ sub _scan_mailbox {
     $folder =~ s/\/\s*$//; #Remove trailing slash, if there
     if (!opendir(DIR, $folder)) {
       warn "archive-iterator: can't open '$folder' dir: $!\n";
-      $self->{access_problem} = 1;
       return;
     }
     while ($_ = readdir(DIR)) {
@@ -927,7 +929,6 @@ sub _scan_mailbox {
     $self->_bump_scan_progress();
     if ($file =~ /\.(?:gz|bz2)$/) {
       warn "archive-iterator: compressed mbox folders are not supported at this time\n";
-      $self->{access_problem} = 1;
       next;
     }
 
@@ -948,7 +949,6 @@ sub _scan_mailbox {
 
     unless ($count) {
       if (!_mail_open($file)) {
-        $self->{access_problem} = 1;
 	next;
       }
 
@@ -1031,7 +1031,6 @@ sub _scan_mbx {
     $folder =~ s/\/\s*$//; # remove trailing slash, if there is one
     if (!opendir(DIR, $folder)) {
       warn "archive-iterator: can't open '$folder' dir: $!\n";
-      $self->{access_problem} = 1;
       return;
     }
     while ($_ = readdir(DIR)) {
@@ -1059,7 +1058,6 @@ sub _scan_mbx {
 
     if ($folder =~ /\.(?:gz|bz2)$/) {
       warn "archive-iterator: compressed mbx folders are not supported at this time\n";
-      $self->{access_problem} = 1;
       next;
     }
 
@@ -1080,7 +1078,6 @@ sub _scan_mbx {
 
     unless ($count) {
       if (!_mail_open($file)) {
-	$self->{access_problem} = 1;
         next;
       }
 
