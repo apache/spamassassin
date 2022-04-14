@@ -366,16 +366,6 @@ version is too low for them to be used.
     Fedora: yum install perl-IO-Socket-SSL
 
 
-  - Compress::Zlib (from CPAN)
-
-    If you wish to use the optional zlib compression for communication
-    between spamc and spamd (the -z option to spamc), useful for
-    long-distance use of spamc over the internet, you need to install
-    this module.
-
-    Fedora: yum install perl-Compress-Zlib
-
-
   - Mail::DKIM (from CPAN)
 
     If this module is installed, and you enable the DKIM plugin,
