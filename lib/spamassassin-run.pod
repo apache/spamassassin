@@ -90,9 +90,9 @@ see the appropriate OPTION information below.
 Files compressed with gzip/bzip2/xz/lz4/lzip/lzo are uncompressed
 automatically.  See C<Mail::SpamAssassin::ArchiveIterator> for more details.
 
-Please note that SpamAssassin is not designed to scan large
-messages. Don't feed messages larger than about 500 KB to
-SpamAssassin, as this will consume a huge amount of memory.
+Please note that SpamAssassin is not designed to scan huge messages. 
+Messages larger than ~10-20MB should not be fed to SpamAssassin, as memory
+consumption will increase rapidly.
 
 =head1 OPTIONS
 
