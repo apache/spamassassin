@@ -87,6 +87,9 @@ containing whitespace or beginning with "." or "," are skipped).
 The options I<--mbox> and I<--mbx> can override the assumed format,
 see the appropriate OPTION information below.
 
+Files compressed with gzip/bzip2/xz are uncompressed automatically.  See
+C<Mail::SpamAssassin::ArchiveIterator> for more details.
+
 Please note that SpamAssassin is not designed to scan large
 messages. Don't feed messages larger than about 500 KB to
 SpamAssassin, as this will consume a huge amount of memory.
