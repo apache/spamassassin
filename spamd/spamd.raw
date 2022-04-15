@@ -2213,18 +2213,23 @@ sub dotell {
   my @did_set;
   my @did_remove;
 
-  if ($hdrs->{set_local}) {
-    my $status = $spamtest->learn($mail, undef, ($hdrs->{message_class} eq 'spam' ? 1 : 0), 0);
+  # bug 5740 Don't bayes learn if global configs disabkle bayes,
+  #  also give user some control with userprefs bayes_learn_during_report option
 
-    push(@did_set, 'local') if ($status->did_learn());
-    $status->finish();
-  }
+  if (defined $spamtest->{bayes_scanner} && $spamtest->{conf}->{bayes_learn_during_report}) {
+    if ($hdrs->{set_local}) {
+      my $status = $spamtest->learn($mail, undef, ($hdrs->{message_class} eq 'spam' ? 1 : 0), 0);
 
-  if ($hdrs->{remove_local}) {
-    my $status = $spamtest->learn($mail, undef, undef, 1);
+      push(@did_set, 'local') if ($status->did_learn());
+      $status->finish();
+    }
 
-    push(@did_remove, 'local') if ($status->did_learn());
-    $status->finish();
+    if ($hdrs->{remove_local}) {
+      my $status = $spamtest->learn($mail, undef, undef, 1);
+
+      push(@did_remove, 'local') if ($status->did_learn());
+      $status->finish();
+    }
   }
 
   if ($hdrs->{set_remote}) {
