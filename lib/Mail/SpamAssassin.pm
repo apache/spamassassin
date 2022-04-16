@@ -1937,7 +1937,7 @@ sub get_and_create_userstate_dir {
     dbg("config: error accessing $fname: $!");
   } else {  # does not exist, create it
     eval {
-      mkpath($fname, 0, 0700);  1;
+      mkpath(Mail::SpamAssassin::Util::untaint_file_path($fname), 0, 0700);  1;
     } or do {
       my $eval_stat = $@ ne '' ? $@ : "errno=$!";  chomp $eval_stat;
       dbg("config: mkdir $fname failed: $eval_stat");
