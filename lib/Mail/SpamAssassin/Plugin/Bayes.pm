@@ -56,7 +56,10 @@ keyword like in the following example:
  bayes_stopword_en (?:you|me)
  bayes_stopword_se (?:du|mig)
 
-Regexps will be anchored automatically at beginning and end.
+Regexps are case-insensitive will be anchored automatically at beginning and
+end.
+
+To disable stopwords usage, specify C<bayes_stopword_languages disable>.
 
 Only one bayes_stopword_languages or bayes_stopword_xx configuration line
 can be used.  New configuration line will override the old one, for example
@@ -294,16 +297,21 @@ sub set_config {
     code => sub {
       my ($self, $key, $value, $line) = @_;
       my @langs;
-      foreach my $lang (split(/(?:\s*,\s*|\s+)/, lc($value))) {
-        if ($lang !~ /^([a-z]{2})$/) {
-          return $Mail::SpamAssassin::Conf::INVALID_VALUE;
+      if ($value eq 'disable') {
+        @{$self->{bayes_stopword_languages}} = ();
+      }
+      else {
+        foreach my $lang (split(/(?:\s*,\s*|\s+)/, lc($value))) {
+          if ($lang !~ /^([a-z]{2})$/) {
+            return $Mail::SpamAssassin::Conf::INVALID_VALUE;
+          }
+          push @langs, $lang;
         }
-        push @langs, $lang;
+        if (!@langs) {
+          return $Mail::SpamAssassin::Conf::MISSING_REQUIRED_VALUE;
+        }
+        @{$self->{bayes_stopword_languages}} = @langs;
       }
-      if (!@langs) {
-        return $Mail::SpamAssassin::Conf::MISSING_REQUIRED_VALUE;
-      }
-      @{$self->{bayes_stopword_languages}} = @langs;
     }
   });
 
@@ -320,7 +328,7 @@ sub parse_config {
       $self->inhibit_further_callbacks();
       my $lang = lc($1);
       foreach my $re (split(/\s+/, $opts->{value})) {
-        my ($rec, $err) = compile_regexp($re, 0);
+        my ($rec, $err) = compile_regexp('^(?i)'.$re.'$', 0);
         if (!$rec) {
           warn "bayes: invalid regexp for $opts->{key}: $err\n";
           return 0;
@@ -1274,18 +1282,20 @@ TOKEN: foreach my $token (split) {
     next if $len < 3;
 
     # check stopwords regexp if not cached
-    if (!exists $self->{stopword_cache}{$token}) {
-      foreach my $lang (@{$conf->{bayes_stopword_languages}}) {
-        if ($token =~ /^$self->{bayes_stopword}{$lang}$/i) {
-          dbg("bayes: skipped token '$token' because it's in stopword list for language '$lang'");
-          $self->{stopword_cache}{$token} = 1;
-          next TOKEN;
+    if (@{$conf->{bayes_stopword_languages}}) {
+      if (!exists $self->{stopword_cache}{$token}) {
+        foreach my $lang (@{$conf->{bayes_stopword_languages}}) {
+          if ($token =~ $self->{bayes_stopword}{$lang}) {
+            dbg("bayes: skipped token '$token' because it's in stopword list for language '$lang'");
+            $self->{stopword_cache}{$token} = 1;
+            next TOKEN;
+          }
         }
+        $self->{stopword_cache}{$token} = 0;
+      } else {
+        # bail out if cached known
+        next if $self->{stopword_cache}{$token};
       }
-      $self->{stopword_cache}{$token} = 0;
-    } else {
-      # bail out if cached known
-      next if $self->{stopword_cache}{$token};
     }
 
     # are we in the body?  If so, apply some body-specific breakouts
