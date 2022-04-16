@@ -3943,7 +3943,8 @@ string of octal digits, it is converted to a numeric value internally.
     type => $CONF_TYPE_NUMERIC,
     code => sub {
       my ($self, $key, $value, $line) = @_;
-      if ($value !~ /^0?[0-7]{3}$/) { return $INVALID_VALUE }
+      if ($value !~ /^0?[0-7]{3}$/) { return $INVALID_VALUE; }
+      $value = '0'.$value if length($value) == 3; # Bug 5771
       $self->{bayes_file_mode} = untaint_var($value);
     }
   });
