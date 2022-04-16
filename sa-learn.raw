@@ -517,6 +517,12 @@ sub killed {
 sub target {
   my ($target) = @_;
 
+  if (!defined $isspam)
+  {
+    usage( 0,
+  "Please select either --spam or --ham before the first target"
+    );
+  }
   my $class = ( $isspam ? "spam" : "ham" );
   my $format = ( defined( $opt{'format'} ) ? $opt{'format'} : "detect" );
 
@@ -618,8 +624,8 @@ B<sa-learn> [options] --dump [ all | data | magic ]
 
 Options:
 
- --ham                 Learn messages as ham (non-spam)
- --spam                Learn messages as spam
+ --ham                 Learn the following messages as ham (non-spam)
+ --spam                Learn the following messages as spam
  --forget              Forget a message
  --use-ignores         Use bayes_ignore_from and bayes_ignore_to
  --sync                Synchronize the database and the journal if needed
@@ -658,7 +664,7 @@ Options:
  --siteconfigpath=path Path for site configs
                        (default:  @@PREFIX@@/etc/mail/spamassassin)
  --cf='config line'    Additional line of configuration
- -D, --debug [area=n,...]  Print debugging messages
+ -D, --debug [area,...]  Print debugging messages
  -V, --version         Print version
  -h, --help            Print usage message
 
@@ -700,21 +706,21 @@ should investigate the C<spamc -L> switch.
 
 =item B<--ham>
 
-Learn the input message(s) as ham.   If you have previously learnt any of the
-messages as spam, SpamAssassin will forget them first, then re-learn them as
-ham.  Alternatively, if you have previously learnt them as ham, it'll skip them
-this time around.  If the messages have already been filtered through
-SpamAssassin, the learner will ignore any modifications SpamAssassin may have
-made.
+Learn the input message(s) in the files following the option as ham.
+If you have previously learnt any of the messages as spam, SpamAssassin will
+forget them first, then re-learn them as ham.  Alternatively, if you have
+previously learnt them as ham, it'll skip them this time around.
+If the messages have already been filtered through SpamAssassin, the learner
+will ignore any modifications SpamAssassin may have made.
 
 =item B<--spam>
 
-Learn the input message(s) as spam.   If you have previously learnt any of the
-messages as ham, SpamAssassin will forget them first, then re-learn them as
-spam.  Alternatively, if you have previously learnt them as spam, it'll skip
-them this time around.  If the messages have already been filtered through
-SpamAssassin, the learner will ignore any modifications SpamAssassin may have
-made.
+Learn the input message(s) in the files following the option as spam.
+If you have previously learnt any of the messages as ham, SpamAssassin will
+forget them first, then re-learn them as spam.  Alternatively, if you have
+previously learnt them as spam, it'll skip them this time around.
+If the messages have already been filtered through SpamAssassin, the learner
+will ignore any modifications SpamAssassin may havemmade.
 
 =item B<--folders>=I<filename>, B<-f> I<filename>
 
@@ -845,6 +851,9 @@ I<area> is the area of the code to instrument. For example, to produce
 diagnostic output on bayes, learn, and dns, use:
 
         spamassassin -D bayes,learn,dns
+
+Use an empty string (-D '') to indicate no areas when the next item on the
+command line is a path, to prevent the path from being parsed as an area.
 
 For more information about which areas (also known as channels) are available,
 please see the documentation at:
@@ -1018,6 +1027,7 @@ Otherwise, the results may be pretty skewed.
 
 	sa-learn --spam /path/to/spam/folder
 	sa-learn --ham /path/to/ham/folder
+	sa-learn --ham hampath1 hampath2 --spam spampath1 spampath2
 	...
 
 Let SpamAssassin proceed, learning stuff. When it finds ham and spam
