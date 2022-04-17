@@ -31,11 +31,13 @@ if can(Mail::SpamAssassin::Conf::feature_welcomelist_blocklist)
   header USER_IN_SPF_WELCOMELIST	eval:check_for_spf_welcomelist_from()
   describe USER_IN_SPF_WELCOMELIST	From: address is in the user's SPF welcomelist
   tflags USER_IN_SPF_WELCOMELIST	userconf nice noautolearn net
+  score USER_IN_SPF_WELCOMELIST		-0.01
   reuse USER_IN_SPF_WELCOMELIST
 
   meta USER_IN_SPF_WHITELIST		(USER_IN_SPF_WELCOMELIST)
   describe USER_IN_SPF_WHITELIST	DEPRECATED: See USER_IN_SPF_WELCOMELIST
   tflags USER_IN_SPF_WHITELIST		userconf nice noautolearn net
+  score USER_IN_SPF_WHITELIST		-100
   reuse USER_IN_SPF_WHITELIST
 
   header USER_IN_DEF_SPF_WL		eval:check_for_def_spf_welcomelist_from()
@@ -47,11 +49,13 @@ if !can(Mail::SpamAssassin::Conf::feature_welcomelist_blocklist)
   header USER_IN_SPF_WELCOMELIST	eval:check_for_spf_whitelist_from()
   describe USER_IN_SPF_WELCOMELIST	From: address is in the user's SPF welcomelist
   tflags USER_IN_SPF_WELCOMELIST	userconf nice noautolearn net
+  score USER_IN_SPF_WELCOMELIST		-0.01
   reuse USER_IN_SPF_WELCOMELIST
 
   meta USER_IN_SPF_WHITELIST		(USER_IN_SPF_WELCOMELIST)
   describe USER_IN_SPF_WHITELIST	DEPRECATED: See USER_IN_SPF_WELCOMELIST
   tflags USER_IN_SPF_WHITELIST		userconf nice noautolearn net
+  score USER_IN_SPF_WHITELIST		-100
   reuse USER_IN_SPF_WHITELIST
 
   header USER_IN_DEF_SPF_WL		eval:check_for_def_spf_whitelist_from()

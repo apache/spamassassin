@@ -721,8 +721,8 @@ score USER_IN_ALL_SPAM_TO -100.000
 endif
 
 ifplugin Mail::SpamAssassin::Plugin::SPF
-score USER_IN_SPF_WELCOMELIST -0.01
-score USER_IN_SPF_WHITELIST -100.000
+#score USER_IN_SPF_WELCOMELIST -0.01 - Moved to 60_welcomelist_spf.cf
+#score USER_IN_SPF_WHITELIST -100.000 - Moved to 60_welcomelist_spf.cf
 score USER_IN_DEF_SPF_WL -7.500
 score ENV_AND_HDR_SPF_MATCH -0.5
 endif # Mail::SpamAssassin::Plugin::SPF
