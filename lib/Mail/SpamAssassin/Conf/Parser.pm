@@ -599,6 +599,7 @@ sub handle_conditional {
 
 # functions supported in the "if" eval:
 sub cond_clause_plugin_loaded {
+  return 1 if $_[1] eq 'Mail::SpamAssassin::Plugin::RaciallyCharged'; # removed in 4.1
   return $_[0]->{conf}->{plugins_loaded}->{$_[1]};
 }
 
