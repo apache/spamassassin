@@ -40,7 +40,7 @@ Mail::SpamAssassin - Spam detector and markup engine
 =head1 DESCRIPTION
 
 Mail::SpamAssassin is a module to identify spam using several methods
-including text analysis, internet-based realtime blacklists, statistical
+including text analysis, internet-based realtime blocklists, statistical
 analysis, and internet-based hashing algorithms.
 
 Using its rule base, it uses a wide range of heuristic tests on mail
@@ -952,73 +952,84 @@ sub revoke_as_spam {
 
 ###########################################################################
 
-=item $f->add_address_to_whitelist ($addr, $cli_p)
+=item $f->add_address_to_welcomelist ($addr, $cli_p)
+
+Previously add_address_to_whitelist which will work interchangeably until 4.1.
 
 Given a string containing an email address, add it to the automatic
-whitelist database.
+welcomelist database.
 
 If $cli_p is set then underlying plugin may give visual feedback on additions/failures.
 
 =cut
 
-sub add_address_to_whitelist {
+sub add_address_to_welcomelist {
   my ($self, $addr, $cli_p) = @_;
 
-  $self->call_plugins("whitelist_address", { address => $addr,
+  $self->call_plugins("welcomelist_address", { address => $addr,
                                              cli_p => $cli_p });
 }
+*add_address_to_whitelist = \&add_address_to_welcomelist; # removed in 4.1
 
 ###########################################################################
 
-=item $f->add_all_addresses_to_whitelist ($mail, $cli_p)
+=item $f->add_all_addresses_to_welcomelist ($mail, $cli_p)
+
+Previously add_all_addresses_to_whitelist which will work interchangeably until 4.1.
 
 Given a mail message, find as many addresses in the usual headers (To, Cc, From
-etc.), and the message body, and add them to the automatic whitelist database.
+etc.), and the message body, and add them to the automatic welcomelist database.
 
 If $cli_p is set then underlying plugin may give visual feedback on additions/failures.
 
 =cut
 
-sub add_all_addresses_to_whitelist {
+sub add_all_addresses_to_welcomelist {
   my ($self, $mail_obj, $cli_p) = @_;
 
   foreach my $addr ($self->find_all_addrs_in_mail ($mail_obj)) {
-    $self->call_plugins("whitelist_address", { address => $addr,
+    $self->call_plugins("welcomelist_address", { address => $addr,
                                                cli_p => $cli_p });
   }
 }
+*add_all_addresses_to_whitelist = \&add_all_addresses_to_welcomelist; # removed in 4.1
 
 ###########################################################################
 
-=item $f->remove_address_from_whitelist ($addr, $cli_p)
+=item $f->remove_address_from_welcomelist ($addr, $cli_p)
+
+Previously remove_address_from_whitelist which will work interchangeably until 4.1.
 
 Given a string containing an email address, remove it from the automatic
-whitelist database.
+welcomelist database.
 
 If $cli_p is set then underlying plugin may give visual feedback on additions/failures.
 
 =cut
 
-sub remove_address_from_whitelist {
+sub remove_address_from_welcomelist {
   my ($self, $addr, $cli_p) = @_;
 
   $self->call_plugins("remove_address", { address => $addr,
                                           cli_p => $cli_p });
 }
+*remove_address_from_whitelist = \&remove_address_from_welcomelist; # removed in 4.1
 
 ###########################################################################
 
-=item $f->remove_all_addresses_from_whitelist ($mail, $cli_p)
+=item $f->remove_all_addresses_from_welcomelist ($mail, $cli_p)
+
+Previously remove_all_addresses_from_whitelist which will work interchangeably until 4.1.
 
 Given a mail message, find as many addresses in the usual headers (To, Cc, From
-etc.), and the message body, and remove them from the automatic whitelist
+etc.), and the message body, and remove them from the automatic welcomelist
 database.
 
 If $cli_p is set then underlying plugin may give visual feedback on additions/failures.
 
 =cut
 
-sub remove_all_addresses_from_whitelist {
+sub remove_all_addresses_from_welcomelist {
   my ($self, $mail_obj, $cli_p) = @_;
 
   foreach my $addr ($self->find_all_addrs_in_mail ($mail_obj)) {
@@ -1026,30 +1037,36 @@ sub remove_all_addresses_from_whitelist {
                                             cli_p => $cli_p });
   }
 }
+*remove_all_addresses_from_whitelist = \&remove_all_addresses_from_welcomelist; # removed in 4.1
 
 ###########################################################################
 
-=item $f->add_address_to_blacklist ($addr, $cli_p)
+=item $f->add_address_to_blocklist ($addr, $cli_p)
+
+Previously add_address_to_blacklist which will work interchangeably until 4.1.
 
 Given a string containing an email address, add it to the automatic
-whitelist database with a high score, effectively blacklisting them.
+welcomelist database with a high score, effectively blocklisting them.
 
 If $cli_p is set then underlying plugin may give visual feedback on additions/failures.
 
 =cut
 
-sub add_address_to_blacklist {
+sub add_address_to_blocklist {
   my ($self, $addr, $cli_p) = @_;
-  $self->call_plugins("blacklist_address", { address => $addr,
+  $self->call_plugins("blocklist_address", { address => $addr,
                                              cli_p => $cli_p });
 }
+*add_address_to_blacklist = \&add_address_to_blocklist; # removed in 4.1
 
 ###########################################################################
 
-=item $f->add_all_addresses_to_blacklist ($mail, $cli_p)
+=item $f->add_all_addresses_to_blocklist ($mail, $cli_p)
+
+Previously add_all_addresses_to_blacklist which will work interchangeably until 4.1.
 
 Given a mail message, find addresses in the From headers and add them to the
-automatic whitelist database with a high score, effectively blacklisting them.
+automatic welcomelist database with a high score, effectively blocklisting them.
 
 Note that To and Cc addresses are not used.
 
@@ -1057,7 +1074,7 @@ If $cli_p is set then underlying plugin may give visual feedback on additions/fa
 
 =cut
 
-sub add_all_addresses_to_blacklist {
+sub add_all_addresses_to_blocklist {
   my ($self, $mail_obj, $cli_p) = @_;
 
   $self->init(1);
@@ -1072,11 +1089,11 @@ sub add_all_addresses_to_blacklist {
   }
 
   foreach my $addr (@addrlist) {
-    $self->call_plugins("blacklist_address", { address => $addr,
+    $self->call_plugins("blocklist_address", { address => $addr,
                                                cli_p => $cli_p });
   }
-
 }
+*add_all_addresses_to_blacklist = \&add_all_addresses_to_blocklist; # removed in 4.1
 
 ###########################################################################
 
@@ -1237,8 +1254,8 @@ sub remove_spamassassin_markup {
 Read a configuration file and parse user preferences from it.
 
 User preferences are as defined in the C<Mail::SpamAssassin::Conf> manual page.
-In other words, they include scoring options, scores, whitelists and
-blacklists, and so on, but do not include rule definitions, privileged
+In other words, they include scoring options, scores, welcomelists and
+blocklists, and so on, but do not include rule definitions, privileged
 settings, etc. unless C<allow_user_rules> is enabled; and they never include
 the administrator settings.
 
@@ -1329,7 +1346,7 @@ sub load_scoreonly_ldap {
 =item $f->set_persistent_address_list_factory ($factoryobj)
 
 Set the persistent address list factory, used to create objects for the
-automatic whitelist algorithm's persistent-storage back-end.  See
+automatic welcomelist algorithm's persistent-storage back-end.  See
 C<Mail::SpamAssassin::PersistentAddrList> for the API these factory objects
 must implement, and the API the objects they produce must implement.
 
@@ -1502,7 +1519,7 @@ sub lint_rules {
   $self->{dont_copy_prefs} = $olddcp;       # revert back to previous
 
   # bug 5048: override settings to ensure a faster lint
-  $self->{'conf'}->{'use_auto_whitelist'} = 0;
+  $self->{'conf'}->{'use_auto_welcomelist'} = 0;
   $self->{'conf'}->{'bayes_auto_learn'} = 0;
 
   my $mail = $self->parse(\@testmsg, 1, { master_deadline => undef });
@@ -2130,6 +2147,9 @@ sub sed_path {
     return $self->{conf}->{sed_path_cache}->{$path};
   }
 
+  # <4.0 compatibility check, to be removed in 4.1
+  my $check_compat = $path eq '__userstate__/auto-welcomelist';
+
   my $orig_path = $path;
 
   $path =~ s/__local_rules_dir__/$self->{LOCAL_RULES_DIR} || ''/ges;
@@ -2141,6 +2161,16 @@ sub sed_path {
   $path =~ s{__perl_major_ver__}{$self->get_perl_major_version()}ges;
   $path =~ s/__version__/${VERSION}/gs;
   $path =~ s/^\~([^\/]*)/$self->expand_name($1)/es;
+
+  # <4.0 compatibility check, to be removed in 4.1
+  if ($check_compat) {
+    if ($path =~ m{^(.+)/(.+)$}) {
+      # Use auto-whitelist if found
+      if (!-e $path && -e "$1/auto-whitelist") {
+        $path = "$1/auto-whitelist";
+      }
+    }
+  }
 
   $path = Mail::SpamAssassin::Util::untaint_file_path ($path);
   $self->{conf}->{sed_path_cache}->{$orig_path} = $path;
@@ -2238,6 +2268,10 @@ sub call_plugins {
     # read.  Plugins can also now use {valid_tlds_re} to one time compile
     # regexes in finish_parsing_end.
     $self->{registryboundaries} = Mail::SpamAssassin::RegistryBoundaries->new ($self);
+  } elsif ($subname eq 'whitelist_address' || $subname eq 'blacklist_address') {
+    # Warn about backwards compatibility, removed in 4.1
+    # Third party usage should be rare event, so do not translate function names
+    warn "config: Deprecated $subname called from call_plugins, use welcomelist_address or blocklist_address\n";
   }
 
   # safety net in case some plugin changes global settings, Bug 6218

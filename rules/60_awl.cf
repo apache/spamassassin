@@ -1,4 +1,4 @@
-# SpamAssassin rules file: auto-whitelist
+# SpamAssassin rules file: auto-welcomelist
 #
 # Please don't modify this file as your changes will be overwritten with
 # the next update. Use @@LOCAL_RULES_DIR@@/local.cf instead.
@@ -23,7 +23,13 @@
 
 ifplugin Mail::SpamAssassin::Plugin::AWL
 
+if can(Mail::SpamAssassin::Conf::feature_welcomelist_blocklist)
+header AWL			eval:check_from_in_auto_welcomelist()
+endif
+if !can(Mail::SpamAssassin::Conf::feature_welcomelist_blocklist)
 header AWL			eval:check_from_in_auto_whitelist()
+endif
+
 describe AWL			Adjusted score from AWL reputation of From: address
 tflags AWL			userconf noautolearn
 priority AWL                    1000

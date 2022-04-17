@@ -143,7 +143,9 @@ set this to a relatively low value, e.g. C<5>.
     }
   });
 
-=item pyzor_whitelist_min NUMBER	(default: 10)
+=item pyzor_welcomelist_min NUMBER	(default: 10)
+
+Previously pyzor_whitelist_min which will work interchangeably until 4.1.
 
 This option sets how often a message's body checksum must have been
 whitelisted to the Pyzor server for SpamAssassin to consider ignoring the
@@ -152,13 +154,16 @@ result.  Final decision is made by pyzor_whitelist_factor.
 =cut
 
   push (@cmds, {
-    setting => 'pyzor_whitelist_min',
+    setting => 'pyzor_welcomelist_min',
+    aliases => ['pyzor_whitelist_min'], # removed in 4.1
     is_admin => 1,
     default => 10,
     type => $Mail::SpamAssassin::Conf::CONF_TYPE_NUMERIC
   });
 
-=item pyzor_whitelist_factor NUMBER	(default: 0.2)
+=item pyzor_welcomelist_factor NUMBER	(default: 0.2)
+
+Previously pyzor_whitelist_factor which will work interchangeably until 4.1.
 
 Ignore Pyzor result if REPORTCOUNT x NUMBER >= pyzor_whitelist_min.
 For default setting this means: 50 reports requires 10 whitelistings.
@@ -166,7 +171,8 @@ For default setting this means: 50 reports requires 10 whitelistings.
 =cut
 
   push (@cmds, {
-    setting => 'pyzor_whitelist_factor',
+    setting => 'pyzor_welcomelist_factor',
+    aliases => ['pyzor_whitelist_factor'], # removed in 4.1
     is_admin => 1,
     default => 0.2,
     type => $Mail::SpamAssassin::Conf::CONF_TYPE_NUMERIC
@@ -561,14 +567,14 @@ sub _check_result {
   my $conf = $self->{main}->{conf};
 
   my $count_min = $conf->{pyzor_count_min};
-  my $wl_min = $conf->{pyzor_whitelist_min};
+  my $wl_min = $conf->{pyzor_welcomelist_min};
 
   my $wl_limit = $count_wl >= $wl_min ?
-    $count * $conf->{pyzor_whitelist_factor} : 0;
+    $count * $conf->{pyzor_welcomelist_factor} : 0;
 
-  dbg("pyzor: result: COUNT=$count/$count_min WHITELIST=$count_wl/$wl_min/%.1f",
+  dbg("pyzor: result: COUNT=$count/$count_min WELCOMELIST=$count_wl/$wl_min/%.1f",
     $wl_limit);
-  $pms->set_tag('PYZOR', "Reported $count times, whitelisted $count_wl times.");
+  $pms->set_tag('PYZOR', "Reported $count times, welcomelisted $count_wl times.");
 
   # Empty body etc results in same hash, we should skip very large numbers..
   if ($count >= 1000000 || $count_wl >= 10000) {
@@ -576,9 +582,9 @@ sub _check_result {
     return 0;
   }
 
-  # Whitelisted?
+  # Welcomelisted?
   if ($wl_limit && $count_wl >= $wl_limit) {
-    dbg("pyzor: message whitelisted");
+    dbg("pyzor: message welcomelisted");
     return 0;
   }
 

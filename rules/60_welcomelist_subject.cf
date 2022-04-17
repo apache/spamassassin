@@ -29,6 +29,28 @@
 # user slip-up could result in scribbling side-effects in the bayes
 # db as a result -- which is hard to remedy.
 
+# 4.0 module rename, Bug 7826
+ifplugin Mail::SpamAssassin::Plugin::WelcomeListSubject
+
+header SUBJECT_IN_WELCOMELIST	eval:check_subject_in_welcomelist()
+describe SUBJECT_IN_WELCOMELIST	Subject: contains string in the user's welcome-list
+tflags SUBJECT_IN_WELCOMELIST	userconf nice noautolearn
+score SUBJECT_IN_WELCOMELIST	-100
+
+header SUBJECT_IN_BLOCKLIST	eval:check_subject_in_blocklist()
+describe SUBJECT_IN_BLOCKLIST	Subject: contains string in the user's block-list
+tflags SUBJECT_IN_BLOCKLIST	userconf noautolearn
+score SUBJECT_IN_BLOCKLIST	100
+
+meta SUBJECT_IN_WHITELIST	(SUBJECT_IN_WELCOMELIST)
+describe SUBJECT_IN_WHITELIST	DEPRECATED: See SUBJECT_IN_WELCOMELIST
+score SUBJECT_IN_WHITELIST	-0.01
+
+meta SUBJECT_IN_BLACKLIST	(SUBJECT_IN_BLOCKLIST)
+describe SUBJECT_IN_BLACKLIST	DEPRECATED: See SUBJECT_IN_BLOCKLIST
+score SUBJECT_IN_BLACKLIST	-0.01
+
+else
 ifplugin Mail::SpamAssassin::Plugin::WhiteListSubject
 
 header SUBJECT_IN_WHITELIST	eval:check_subject_in_whitelist()
@@ -40,3 +62,5 @@ describe SUBJECT_IN_BLACKLIST	Subject: contains string in the user's black-list
 tflags SUBJECT_IN_BLACKLIST	userconf noautolearn
 
 endif # Mail::SpamAssassin::Plugin::WhiteListSubject
+endif
+

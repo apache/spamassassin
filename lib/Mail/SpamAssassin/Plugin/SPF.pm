@@ -72,8 +72,10 @@ sub new {
   $self->register_eval_rule ("check_for_spf_helo_softfail", $Mail::SpamAssassin::Conf::TYPE_HEAD_EVALS);
   $self->register_eval_rule ("check_for_spf_helo_permerror", $Mail::SpamAssassin::Conf::TYPE_HEAD_EVALS);
   $self->register_eval_rule ("check_for_spf_helo_temperror", $Mail::SpamAssassin::Conf::TYPE_HEAD_EVALS);
-  $self->register_eval_rule ("check_for_spf_whitelist_from", $Mail::SpamAssassin::Conf::TYPE_HEAD_EVALS);
-  $self->register_eval_rule ("check_for_def_spf_whitelist_from", $Mail::SpamAssassin::Conf::TYPE_HEAD_EVALS);
+  $self->register_eval_rule ("check_for_spf_welcomelist_from", $Mail::SpamAssassin::Conf::TYPE_HEAD_EVALS);
+  $self->register_eval_rule ("check_for_spf_whitelist_from", $Mail::SpamAssassin::Conf::TYPE_HEAD_EVALS); # removed in 4.1
+  $self->register_eval_rule ("check_for_def_spf_welcomelist_from", $Mail::SpamAssassin::Conf::TYPE_HEAD_EVALS);
+  $self->register_eval_rule ("check_for_def_spf_whitelist_from", $Mail::SpamAssassin::Conf::TYPE_HEAD_EVALS); # removed in 4.1
 
   $self->set_config($mailsaobject->{conf});
 
@@ -90,37 +92,43 @@ sub set_config {
 
 =over 4
 
-=item whitelist_from_spf user@example.com
+=item welcomelist_from_spf user@example.com
 
-Works similarly to welcomelist_from (previously whitelist_from), except that 
-in addition to matching a sender address, a check against the domain's SPF record 
-must pass. The first parameter is an address to whitelist, and the second is a string
-to match the relay's rDNS.
+Previously whitelist_from_spf which will work interchangeably until 4.1.
 
-Just like welcomelist_from (previously whitelist_from), multiple addresses per line, separated by spaces,
-are OK. Multiple C<whitelist_from_spf> lines are also OK.
+Works similarly to welcomelist_from, except that in addition to matching a
+sender address, a check against the domain's SPF record must pass.  The
+first parameter is an address to welcomelist, and the second is a string to
+match the relay's rDNS.
 
-The headers checked for whitelist_from_spf addresses are the same headers
+Just like welcomelist_from, multiple addresses per line, separated by
+spaces, are OK.  Multiple C<welcomelist_from_spf> lines are also OK.
+
+The headers checked for welcomelist_from_spf addresses are the same headers
 used for SPF checks (Envelope-From, Return-Path, X-Envelope-From, etc).
 
-Since this whitelist requires an SPF check to be made, network tests must be
+Since this welcomelist requires an SPF check to be made, network tests must be
 enabled. It is also required that your trust path be correctly configured.
 See the section on C<trusted_networks> for more info on trust paths.
 
 e.g.
 
-  whitelist_from_spf joe@example.com fred@example.com
-  whitelist_from_spf *@example.com
+  welcomelist_from_spf joe@example.com fred@example.com
+  welcomelist_from_spf *@example.com
 
-=item def_whitelist_from_spf user@example.com
+=item def_welcomelist_from_spf user@example.com
 
-Same as C<whitelist_from_spf>, but used for the default whitelist entries
-in the SpamAssassin distribution.  The whitelist score is lower, because
+Previously def_whitelist_from_spf which will work interchangeably until 4.1.
+
+Same as C<welcomelist_from_spf>, but used for the default welcomelist entries
+in the SpamAssassin distribution.  The welcomelist score is lower, because
 these are often targets for spammer spoofing.
 
-=item unwhitelist_from_spf user@example.com
+=item unwelcomelist_from_spf user@example.com
 
-Used to remove a C<whitelist_from_spf> or C<def_whitelist_from_spf> entry. 
+Previously unwhitelist_from_spf which will work interchangeably until 4.1.
+
+Used to remove a C<welcomelist_from_spf> or C<def_welcomelist_from_spf> entry. 
 The specified email address has to match exactly the address previously used.
 
 Useful for removing undesired default entries from a distributed configuration
@@ -129,17 +137,20 @@ by a local or site-specific configuration or by C<user_prefs>.
 =cut
 
   push (@cmds, {
-    setting => 'whitelist_from_spf',
+    setting => 'welcomelist_from_spf',
+    aliases => ['whitelist_from_spf'], # removed in 4.1
     type => $Mail::SpamAssassin::Conf::CONF_TYPE_ADDRLIST
   });
 
   push (@cmds, {
-    setting => 'def_whitelist_from_spf',
+    setting => 'def_welcomelist_from_spf',
+    aliases => ['def_whitelist_from_spf'], # removed in 4.1
     type => $Mail::SpamAssassin::Conf::CONF_TYPE_ADDRLIST
   });
 
   push (@cmds, {
-    setting => 'unwhitelist_from_spf',
+    setting => 'unwelcomelist_from_spf',
+    aliases => ['unwhitelist_from_spf'], # removed in 4.1
     type => $Mail::SpamAssassin::Conf::CONF_TYPE_ADDRLIST,
     code => sub {
       my ($self, $key, $value, $line) = @_;
@@ -149,9 +160,9 @@ by a local or site-specific configuration or by C<user_prefs>.
       unless ($value =~ /^(?:\S+(?:\s+\S+)*)$/) {
         return $Mail::SpamAssassin::Conf::INVALID_VALUE;
       }
-      $self->{parser}->remove_from_addrlist('whitelist_from_spf',
+      $self->{parser}->remove_from_addrlist('welcomelist_from_spf',
                                         split (/\s+/, $value));
-      $self->{parser}->remove_from_addrlist('def_whitelist_from_spf',
+      $self->{parser}->remove_from_addrlist('def_welcomelist_from_spf',
                                         split (/\s+/, $value));
     }
   });
@@ -347,17 +358,19 @@ sub check_for_spf_helo_temperror {
   $scanner->{spf_helo_temperror};
 }
 
-sub check_for_spf_whitelist_from {
+sub check_for_spf_welcomelist_from {
   my ($self, $scanner) = @_;
-  $self->_check_spf_whitelist($scanner) unless $scanner->{spf_whitelist_from_checked};
-  $scanner->{spf_whitelist_from};
+  $self->_check_spf_welcomelist($scanner) unless $scanner->{spf_welcomelist_from_checked};
+  $scanner->{spf_welcomelist_from};
 }
+*check_for_spf_whitelist_from = \&check_for_spf_welcomelist_from; # removed in 4.1
 
-sub check_for_def_spf_whitelist_from {
+sub check_for_def_spf_welcomelist_from {
   my ($self, $scanner) = @_;
-  $self->_check_def_spf_whitelist($scanner) unless $scanner->{def_spf_whitelist_from_checked};
-  $scanner->{def_spf_whitelist_from};
+  $self->_check_def_spf_welcomelist($scanner) unless $scanner->{def_spf_welcomelist_from_checked};
+  $scanner->{def_spf_welcomelist_from};
 }
+*check_for_def_spf_whitelist_from = \&check_for_def_spf_welcomelist_from; # removed in 4.1
 
 sub _check_spf {
   my ($self, $scanner, $ishelo) = @_;
@@ -743,73 +756,73 @@ sub _get_sender {
   }
 }
 
-sub _check_spf_whitelist {
+sub _check_spf_welcomelist {
   my ($self, $scanner) = @_;
 
-  $scanner->{spf_whitelist_from_checked} = 1;
-  $scanner->{spf_whitelist_from} = 0;
+  $scanner->{spf_welcomelist_from_checked} = 1;
+  $scanner->{spf_welcomelist_from} = 0;
 
   # if we've already checked for an SPF PASS and didn't get it don't waste time
-  # checking to see if the sender address is in the spf whitelist
+  # checking to see if the sender address is in the spf welcomelist
   if ($scanner->{spf_checked} && !$scanner->{spf_pass}) {
-    dbg("spf: whitelist_from_spf: already checked spf and didn't get pass, skipping whitelist check");
+    dbg("spf: welcomelist_from_spf: already checked spf and didn't get pass, skipping welcomelist check");
     return;
   }
 
   if (!$scanner->{spf_sender}) {
-    dbg("spf: spf_whitelist_from: no EnvelopeFrom available for whitelist check");
+    dbg("spf: spf_welcomelist_from: no EnvelopeFrom available for welcomelist check");
     return;
   }
 
-  $scanner->{spf_whitelist_from} =
-    $self->_wlcheck($scanner, 'whitelist_from_spf') ||
+  $scanner->{spf_welcomelist_from} =
+    $self->_wlcheck($scanner, 'welcomelist_from_spf') ||
     $self->_wlcheck($scanner, 'welcomelist_auth');
 
-  # if the message doesn't pass SPF validation, it can't pass an SPF whitelist
-  if ($scanner->{spf_whitelist_from}) {
+  # if the message doesn't pass SPF validation, it can't pass an SPF welcomelist
+  if ($scanner->{spf_welcomelist_from}) {
     if ($self->check_for_spf_pass($scanner)) {
-      dbg("spf: whitelist_from_spf: $scanner->{spf_sender} is in user's WHITELIST_FROM_SPF and passed SPF check");
+      dbg("spf: welcomelist_from_spf: $scanner->{spf_sender} is in user's WELCOMELIST_FROM_SPF and passed SPF check");
     } else {
-      dbg("spf: whitelist_from_spf: $scanner->{spf_sender} is in user's WHITELIST_FROM_SPF but failed SPF check");
-      $scanner->{spf_whitelist_from} = 0;
+      dbg("spf: welcomelist_from_spf: $scanner->{spf_sender} is in user's WELCOMELIST_FROM_SPF but failed SPF check");
+      $scanner->{spf_welcomelist_from} = 0;
     }
   } else {
-    dbg("spf: whitelist_from_spf: $scanner->{spf_sender} is not in user's WHITELIST_FROM_SPF");
+    dbg("spf: welcomelist_from_spf: $scanner->{spf_sender} is not in user's WELCOMELIST_FROM_SPF");
   }
 }
 
-sub _check_def_spf_whitelist {
+sub _check_def_spf_welcomelist {
   my ($self, $scanner) = @_;
 
-  $scanner->{def_spf_whitelist_from_checked} = 1;
-  $scanner->{def_spf_whitelist_from} = 0;
+  $scanner->{def_spf_welcomelist_from_checked} = 1;
+  $scanner->{def_spf_welcomelist_from} = 0;
 
   # if we've already checked for an SPF PASS and didn't get it don't waste time
-  # checking to see if the sender address is in the spf whitelist
+  # checking to see if the sender address is in the spf welcomelist
   if ($scanner->{spf_checked} && !$scanner->{spf_pass}) {
-    dbg("spf: def_spf_whitelist_from: already checked spf and didn't get pass, skipping whitelist check");
+    dbg("spf: def_spf_welcomelist_from: already checked spf and didn't get pass, skipping welcomelist check");
     return;
   }
 
   if (!$scanner->{spf_sender}) {
-    dbg("spf: def_spf_whitelist_from: could not find usable envelope sender");
+    dbg("spf: def_spf_welcomelist_from: could not find usable envelope sender");
     return;
   }
 
-  $scanner->{def_spf_whitelist_from} =
-    $self->_wlcheck($scanner, 'def_whitelist_from_spf') ||
+  $scanner->{def_spf_welcomelist_from} =
+    $self->_wlcheck($scanner, 'def_welcomelist_from_spf') ||
     $self->_wlcheck($scanner, 'def_welcomelist_auth');
 
-  # if the message doesn't pass SPF validation, it can't pass an SPF whitelist
-  if ($scanner->{def_spf_whitelist_from}) {
+  # if the message doesn't pass SPF validation, it can't pass an SPF welcomelist
+  if ($scanner->{def_spf_welcomelist_from}) {
     if ($self->check_for_spf_pass($scanner)) {
-      dbg("spf: def_whitelist_from_spf: $scanner->{spf_sender} is in DEF_WHITELIST_FROM_SPF and passed SPF check");
+      dbg("spf: def_welcomelist_from_spf: $scanner->{spf_sender} is in DEF_WELCOMELIST_FROM_SPF and passed SPF check");
     } else {
-      dbg("spf: def_whitelist_from_spf: $scanner->{spf_sender} is in DEF_WHITELIST_FROM_SPF but failed SPF check");
-      $scanner->{def_spf_whitelist_from} = 0;
+      dbg("spf: def_welcomelist_from_spf: $scanner->{spf_sender} is in DEF_WELCOMELIST_FROM_SPF but failed SPF check");
+      $scanner->{def_spf_welcomelist_from} = 0;
     }
   } else {
-    dbg("spf: def_whitelist_from_spf: $scanner->{spf_sender} is not in DEF_WHITELIST_FROM_SPF");
+    dbg("spf: def_welcomelist_from_spf: $scanner->{spf_sender} is not in DEF_WELCOMELIST_FROM_SPF");
   }
 }
 

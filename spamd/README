@@ -83,9 +83,9 @@ use mysql or LDAP for per-user configuration there is no reason in the world
 to run as root, and this remains fully functional.
 
 If you do not need to let your users define their own rules, maintain
-their own whitelists, or have non-world-readable home and ~/.spamassassin
+their own welcomelists, or have non-world-readable home and ~/.spamassassin
 directories, then just set spamd up to run with the "-u username" option.
-Since spamd can use auto-whitelisting, which requires it maintain a
+Since spamd can use auto-welcomelisting, which requires it maintain a
 database of email addresses on-disk, you should use a non-"root" but
 non-"nobody" user: "mailnull" or "mail" are good choices, or even create a
 "spamd" user.
@@ -129,7 +129,7 @@ spamc, it is easily possible for malicious users invoking modified
 spamc clients to make spamd:
 
  (1.)  read (and hence determine) the contents of other users configurations
- (2.)  change the contents of other users configurations (whitelisting)
+ (2.)  change the contents of other users configurations (welcomelisting)
  (3.)  grab CPU time as that user -- this is an issue on ulimit'd systems
 
 If users do not have the opportunity to invoke spamc themselves, and

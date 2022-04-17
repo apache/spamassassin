@@ -1,7 +1,7 @@
 #!/usr/bin/perl -T
 
 use lib '.'; use lib 't';
-use SATest; sa_t_init("whitelist_addrs");
+use SATest; sa_t_init("welcomelist_addrs");
 use IO::File;
 
 use constant HAS_DB_FILE => eval { require DB_File };
@@ -13,10 +13,10 @@ plan tests => 35;
 
 # ---------------------------------------------------------------------------
 
-%added_address_whitelist_patterns = (
+%added_address_welcomelist_patterns = (
   q{SpamAssassin auto-welcomelist: adding address to welcomelist:}, 'added address to welcomelist',
 );
-%added_address_blacklist_patterns = (
+%added_address_blocklist_patterns = (
   q{SpamAssassin auto-welcomelist: adding address to blocklist:}, 'added address to blocklist',
 );
 %removed_address_patterns = (
@@ -30,8 +30,8 @@ plan tests => 35;
 );
 
 
-%patterns = %added_address_whitelist_patterns;
-ok(sarun ("--add-addr-to-whitelist whitelist_test\@whitelist.spamassassin.taint.org", \&patterns_run_cb));
+%patterns = %added_address_welcomelist_patterns;
+ok(sarun ("--add-addr-to-welcomelist whitelist_test\@whitelist.spamassassin.taint.org", \&patterns_run_cb));
 ok_all_patterns();
 %patterns = %is_nonspam_patterns;
 ok (sarun ("-L < data/nice/002", \&patterns_run_cb));
@@ -41,24 +41,24 @@ sarun ("-L < data/spam/004", \&patterns_run_cb);
 ok_all_patterns();
 
 %patterns = %removed_address_patterns;
-ok(sarun ("--remove-addr-from-whitelist whitelist_test\@whitelist.spamassassin.taint.org", \&patterns_run_cb));
+ok(sarun ("--remove-addr-from-welcomelist whitelist_test\@whitelist.spamassassin.taint.org", \&patterns_run_cb));
 ok_all_patterns();
 %patterns = %is_spam_patterns;
 sarun ("-L < data/spam/004", \&patterns_run_cb);
 ok_all_patterns();
 
-%patterns = %added_address_blacklist_patterns;
-ok(sarun ("--add-addr-to-blacklist whitelist_test\@whitelist.spamassassin.taint.org", \&patterns_run_cb));
+%patterns = %added_address_blocklist_patterns;
+ok(sarun ("--add-addr-to-blocklist whitelist_test\@whitelist.spamassassin.taint.org", \&patterns_run_cb));
 ok_all_patterns();
 %patterns = %is_spam_patterns;
 sarun ("-L < data/nice/002", \&patterns_run_cb);
 ok_all_patterns();
 
-ok(sarun ("--remove-addr-from-whitelist whitelist_test\@whitelist.spamassassin.taint.org", \&patterns_run_cb));
+ok(sarun ("--remove-addr-from-welcomelist whitelist_test\@whitelist.spamassassin.taint.org", \&patterns_run_cb));
 
 
-# The following section tests the object oriented interface to adding/removing whitelist
-# and blacklist entries.  Primarily this is testing basic functionality and that the
+# The following section tests the object oriented interface to adding/removing welcomelist
+# and blocklist entries.  Primarily this is testing basic functionality and that the
 # "print" commands that are present in the command line interface are not being printed
 # when you call the methods directly.  This is why we are manipulating STDOUT.
 
@@ -73,7 +73,7 @@ my $sa = create_saobj();
 
 $sa->init();
 
-$sa->add_address_to_whitelist("whitelist_test\@whitelist.spamassassin.taint.org");
+$sa->add_address_to_welcomelist("whitelist_test\@whitelist.spamassassin.taint.org");
 
 seek($fh, 0, 0);
 
@@ -100,7 +100,7 @@ ok($fh);
 open(STDOUT, ">&=".fileno($fh)) || die "Cannot reopen STDOUT";
 select STDOUT; $| = 1;
 
-$sa->remove_address_from_whitelist("whitelist_test\@whitelist.spamassassin.taint.org");
+$sa->remove_address_from_welcomelist("whitelist_test\@whitelist.spamassassin.taint.org");
 
 seek($fh, 0, 0);
 
@@ -124,7 +124,7 @@ ok($fh);
 open(STDOUT, ">&=".fileno($fh)) || die "Cannot reopen STDOUT";
 select STDOUT; $| = 1;
 
-$sa->add_address_to_blacklist("whitelist_test\@whitelist.spamassassin.taint.org");
+$sa->add_address_to_blocklist("whitelist_test\@whitelist.spamassassin.taint.org");
 
 seek($fh, 0, 0);
 
@@ -143,7 +143,7 @@ ok($error !~ /SpamAssassin auto-welcomelist: /);
 sarun ("-L < data/nice/002", \&patterns_run_cb);
 ok_all_patterns();
 
-$sa->remove_address_from_whitelist("whitelist_test\@whitelist.spamassassin.taint.org");
+$sa->remove_address_from_welcomelist("whitelist_test\@whitelist.spamassassin.taint.org");
 
 # Now we can test the "all" methods
 
@@ -164,7 +164,7 @@ ok($fh);
 open(STDOUT, ">&=".fileno($fh)) || die "Cannot reopen STDOUT";
 select STDOUT; $| = 1;
 
-$sa->add_all_addresses_to_whitelist($mail);
+$sa->add_all_addresses_to_welcomelist($mail);
 
 seek($fh, 0, 0);
 
@@ -191,7 +191,7 @@ ok($fh);
 open(STDOUT, ">&=".fileno($fh)) || die "Cannot reopen STDOUT";
 select STDOUT; $| = 1;
 
-$sa->remove_all_addresses_from_whitelist($mail);
+$sa->remove_all_addresses_from_welcomelist($mail);
 
 seek($fh, 0, 0);
 
@@ -215,7 +215,7 @@ ok($fh);
 open(STDOUT, ">&=".fileno($fh)) || die "Cannot reopen STDOUT";
 select STDOUT; $| = 1;
 
-$sa->add_all_addresses_to_blacklist($mail);
+$sa->add_all_addresses_to_blocklist($mail);
 
 seek($fh, 0, 0);
 
@@ -234,5 +234,5 @@ ok($error !~ /SpamAssassin auto-welcomelist: /);
 sarun ("-L < data/nice/002", \&patterns_run_cb);
 ok_all_patterns();
 
-$sa->remove_all_addresses_from_whitelist($mail);
+$sa->remove_all_addresses_from_welcomelist($mail);
 

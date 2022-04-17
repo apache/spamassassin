@@ -17,33 +17,33 @@
 
 =head1 NAME
 
-Mail::SpamAssassin::Plugin::WhiteListSubject - whitelist by Subject header
+Mail::SpamAssassin::Plugin::WelcomeListSubject - welcomelist by Subject header
 
 =head1 SYNOPSIS
 
- loadplugin Mail::SpamAssassin::Plugin::WhiteListSubject
+ loadplugin Mail::SpamAssassin::Plugin::WelcomeListSubject
 
- header SUBJECT_IN_WHITELIST eval:check_subject_in_whitelist()
- header SUBJECT_IN_BLACKLIST eval:check_subject_in_blacklist()
+ header SUBJECT_IN_WELCOMELIST eval:check_subject_in_welcomelist()
+ header SUBJECT_IN_BLOCKLIST eval:check_subject_in_blocklist()
 
- score SUBJECT_IN_WHITELIST -100
- score SUBJECT_IN_BLACKLIST 100
+ score SUBJECT_IN_WELCOMELIST -100
+ score SUBJECT_IN_BLOCKLIST 100
 
- whitelist_subject [Bug *]
- blacklist_subject Make Money Fast
+ welcomelist_subject [Bug *]
+ blocklist_subject Make Money Fast
 
 =head1 DESCRIPTION
 
-This SpamAssassin plugin module provides eval tests for whitelisting and
-blacklisting particular strings in the Subject header. String will match
-anywhere in the subject. The value for whitelist_subject or blacklist_subject
+This SpamAssassin plugin module provides eval tests for welcomelisting and
+blocklisting particular strings in the Subject header. String will match
+anywhere in the subject. The value for welcomelist_subject or blocklist_subject
 are strings which may contain file -glob -style patterns, similar to the
-other whitelist_* config options. Note that each subject/string must be a
+other welcomelist_* config options. Note that each subject/string must be a
 separate *_subject command, all whitespace is included in the string.
 
 =cut
 
-package Mail::SpamAssassin::Plugin::WhiteListSubject;
+package Mail::SpamAssassin::Plugin::WelcomeListSubject;
 
 use Mail::SpamAssassin::Plugin;
 use Mail::SpamAssassin::Util qw(compile_regexp);
@@ -63,8 +63,8 @@ sub new {
   my $self = $class->SUPER::new($mailsaobject);
   bless ($self, $class);
 
-  $self->register_eval_rule ("check_subject_in_whitelist", $Mail::SpamAssassin::Conf::TYPE_HEAD_EVALS);
-  $self->register_eval_rule ("check_subject_in_blacklist", $Mail::SpamAssassin::Conf::TYPE_HEAD_EVALS);
+  $self->register_eval_rule ("check_subject_in_welcomelist", $Mail::SpamAssassin::Conf::TYPE_HEAD_EVALS);
+  $self->register_eval_rule ("check_subject_in_blocklist", $Mail::SpamAssassin::Conf::TYPE_HEAD_EVALS);
 
   $self->set_config($mailsaobject->{conf});
 
@@ -77,7 +77,8 @@ sub set_config {
   my @cmds;
 
   push(@cmds, {
-	       setting => 'whitelist_subject',
+	       setting => 'welcomelist_subject',
+	       aliases => ['whitelist_subject'], # removed in 4.1
 	       default => {},
                type => $Mail::SpamAssassin::Conf::CONF_TYPE_ADDRLIST,
 	       code => sub {
@@ -97,7 +98,8 @@ sub set_config {
 	       }});
 
   push(@cmds, {
-	       setting => 'blacklist_subject',
+	       setting => 'blocklist_subject',
+	       aliases => ['blacklist_subject'], # removed in 4.1
 	       default => {},
                type => $Mail::SpamAssassin::Conf::CONF_TYPE_ADDRLIST,
 	       code => sub {
@@ -119,24 +121,24 @@ sub set_config {
   $conf->{parser}->register_commands(\@cmds);
 }
 
-sub check_subject_in_whitelist {
+sub check_subject_in_welcomelist {
   my ($self, $permsgstatus) = @_;
 
   my $subject = $permsgstatus->get('Subject');
 
   return 0 unless $subject ne '';
 
-  return $self->_check_subject($permsgstatus->{conf}->{whitelist_subject}, $subject);
+  return $self->_check_subject($permsgstatus->{conf}->{welcomelist_subject}, $subject);
 }
 
-sub check_subject_in_blacklist {
+sub check_subject_in_blocklist {
   my ($self, $permsgstatus) = @_;
 
   my $subject = $permsgstatus->get('Subject');
 
   return 0 unless $subject ne '';
 
-  return $self->_check_subject($permsgstatus->{conf}->{blacklist_subject}, $subject);
+  return $self->_check_subject($permsgstatus->{conf}->{blocklist_subject}, $subject);
 }
 
 sub _check_subject {

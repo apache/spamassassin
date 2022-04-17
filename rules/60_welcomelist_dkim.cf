@@ -26,21 +26,18 @@
 
 #For those wondering why there's not just an ifplugin in front of all of this, there's a big involving it
 #in nested if statements
-if can(Mail::SpamAssassin::Conf::feature_blocklist_welcomelist)
+if can(Mail::SpamAssassin::Conf::feature_welcomelist_blocklist)
   ifplugin Mail::SpamAssassin::Plugin::DKIM
     #bz7826 renames whitelist to welcomelist and blacklist to blocklist
     header USER_IN_DKIM_WELCOMELIST     eval:check_for_dkim_welcomelist_from()
     describe USER_IN_DKIM_WELCOMELIST   From: address is in the user's DKIM welcomelist
     tflags USER_IN_DKIM_WELCOMELIST     nice noautolearn net userconf
-    score USER_IN_DKIM_WELCOMELIST      -100.000
+    score USER_IN_DKIM_WELCOMELIST      -0.01
 
-    ifplugin Mail::SpamAssassin::Plugin::RaciallyCharged
-      meta USER_IN_DKIM_WHITELIST       (USER_IN_DKIM_WELCOMELIST)
-      describe USER_IN_DKIM_WHITELIST   DEPRECATED: See USER_IN_DKIM_WELCOMELIST
-      tflags USER_IN_DKIM_WHITELIST     nice noautolearn net userconf
-      score USER_IN_DKIM_WELCOMELIST    -0.01
-      score USER_IN_DKIM_WHITELIST      -100.000
-    endif
+    meta USER_IN_DKIM_WHITELIST       (USER_IN_DKIM_WELCOMELIST)
+    describe USER_IN_DKIM_WHITELIST   DEPRECATED: See USER_IN_DKIM_WELCOMELIST
+    tflags USER_IN_DKIM_WHITELIST     nice noautolearn net userconf
+    score USER_IN_DKIM_WHITELIST      -100.000
   endif
 
   #might be a way to only have one instance of the below block, unsure if it's even necessary
@@ -66,7 +63,7 @@ else
 endif
 
 
-if can(Mail::SpamAssassin::Conf::feature_blocklist_welcomelist)
+if can(Mail::SpamAssassin::Conf::feature_welcomelist_blocklist)
 ifplugin Mail::SpamAssassin::Plugin::DKIM
 
 # The backwards compatibility for this rule will be after the else statement below
@@ -321,5 +318,5 @@ def_whitelist_from_dkim *@*.msgfocus.com
 def_whitelist_from_dkim *@boredpanda.com mailersend.com
 
 endif # Mail::SpamAssassin::Plugin::DKIM
-endif # if can(Mail::SpamAssassin::Conf::feature_blocklist_welcomelist)
+endif # if can(Mail::SpamAssassin::Conf::feature_welcomelist_blocklist)
 

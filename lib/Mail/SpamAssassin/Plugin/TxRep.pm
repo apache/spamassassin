@@ -23,7 +23,7 @@ Mail::SpamAssassin::Plugin::TxRep - Normalize scores with sender reputation reco
 =head1 SYNOPSIS
 
 The TxRep (Reputation) plugin is designed as an improved replacement of the AWL
-(Auto-Whitelist) plugin. It adjusts the final message spam score by looking up 
+(Auto-Welcomelist) plugin. It adjusts the final message spam score by looking up 
 and taking in consideration the reputation of the sender.
 
 To try TxRep out, you B<have to> first disable the AWL plugin (if enabled), and
@@ -48,7 +48,7 @@ Use the supplied 60_txreputation.cf file or add these lines to a .cf file:
 
 =head1 DESCRIPTION
 
-This plugin is intended to replace the former AWL - AutoWhiteList. Although the
+This plugin is intended to replace the former AWL - AutoWelcomeList. Although the
 concept and the scope differ, the purpose remains the same - the normalizing of spam
 score results based on previous sender's history. The name was intentionally changed
 from "whitelist" to "reputation" to avoid any confusion, since the result score can
@@ -70,7 +70,7 @@ respective sender, when calculating the corrective score at a new message, it do
 not take it in count in any way. So for example a sender who previously sent a single
 ham message with the score of -5, and then sends a second one with the score of +10,
 AWL will issue a corrective score bringing the score towards the -5. With the default
-C<auto_whitelist_factor> of 0.5, the resulting score would be only 2.5. And it would be
+C<auto_welcomelist_factor> of 0.5, the resulting score would be only 2.5. And it would be
 exactly the same even if the sender previously sent 1,000 messages with the average of
 -5. TxRep tries to take the maximal advantage of the collected data, and adjusts the
 final score not only with the mean reputation score stored in the database, but also
@@ -105,23 +105,23 @@ of past messages, and low recent frequency. It also turns to be particularly
 counterproductive when the administrator detects new patterns in certain messages, and
 applies new rules to better tag such messages as spam or ham. AWL will practically
 eliminate the effect of the new rules, by adjusting the score back towards the (wrong)
-historical average. Only setting the C<auto_whitelist_factor> lower would help, but in
+historical average. Only setting the C<auto_welcomelist_factor> lower would help, but in
 the same time it would also reduce the overall impact of AWL, and put doubts on its
-purpose. TxRep, besides the L</C<txrep_factor>> (replacement of the C<auto_whitelist_factor>),
+purpose. TxRep, besides the L</C<txrep_factor>> (replacement of the C<auto_welcomelist_factor>),
 introduces also the L</C<txrep_dilution_factor>> to help coping with this issue by
 progressively reducing the impact of past records. More details can be found in the
 description of the factor below.
 
-6. B<Blacklisting and Whitelisting> - when a whitelisting or blacklisting was requested
+6. B<Blocklisting and Welcomelisting> - when a welcomelisting or blocklisting was requested
 through SpamAssassin's API, AWL adjusts the historical total score of the plain email
 address without IP (and deleted records bound to an IP), but since during the reception 
-new records with IP will be added, the blacklisted entry would cease acting during 
+new records with IP will be added, the blocklisted entry would cease acting during 
 scanning. TxRep always uses the record of the plain email address without IP together 
 with the one bound to an IP address, DKIM signature, or SPF pass (unless the weight 
 factor for the EMAIL reputation is set to zero). AWL uses the score of 100 (resp. -100) 
-for the blacklisting (resp. whitelisting) purposes. TxRep increases the value 
+for the blocklisting (resp. welcomelisting) purposes. TxRep increases the value 
 proportionally to the weight factor of the EMAIL reputation. It is explained in details 
-in the section L<BLACKLISTING / WHITELISTING>. TxRep can blacklist or whitelist also
+in the section L<BLOCKLISTING / WELCOMELISTING>. TxRep can blocklist or welcomelist also
 IP addresses, domain names, and dotless HELO names.
 
 7. B<Sender Identification> - AWL identifies a sender on the basis of the email address
@@ -157,24 +157,24 @@ use dual storages: the global common storage, where all email processed by SpamA
 is recorded, and a local storage separate for each user, with reputation data from his
 email only. See more details at the setting L</C<txrep_user2global_ratio>>.
 
-10. B<Outbound Whitelisting> - when a local user sends messages to an email address, we
+10. B<Outbound Welcomelisting> - when a local user sends messages to an email address, we
 assume that he needs to see the eventual answer too, hence the recipient's address should
-be whitelisted. When SpamAssassin is used for scanning outgoing email too, when local
+be welcomelisted. When SpamAssassin is used for scanning outgoing email too, when local
 users use the SMTP server where SA is installed, for sending email, and when internal
 networks are defined, TxREP will improve the reputation of all 'To:' and 'CC' addresses
 from messages originating in the internal networks. Details can be found at the setting
-L</C<txrep_whitelist_out>>.
+L</C<txrep_welcomelist_out>>.
 
 Both plugins (AWL and TxREP) cannot coexist. It is necessary to disable the AWL to allow
 TxRep running. TxRep reuses the database handling of the original AWL module, and some
 its parameters bound to the database handler modules. By default, TxRep creates its own
-database, but the original auto-whitelist can be reused as a starting point. The AWL
+database, but the original auto-welcomelist can be reused as a starting point. The AWL
 database can be renamed to the name defined in TxRep settings, and TxRep will start
-using it. The original auto-whitelist database has to be backed up, to allow switching
+using it. The original auto-welcomelist database has to be backed up, to allow switching
 back to the original state.
 
 The spamassassin/Plugin/TxRep.pm file replaces both spamassassin/Plugin/AWL.pm and
-spamassassin/AutoWhitelist.pm. Another two AWL files, spamassassin/DBBasedAddrList.pm
+spamassassin/AutoWelcomelist.pm. Another two AWL files, spamassassin/DBBasedAddrList.pm
 and spamassassin/SQLBasedAddrList.pm are still needed.
 
 
@@ -464,16 +464,18 @@ learned, or need to be relearned after modifying the learn penalty or bonus.
   });
 
 
-=item B<txrep_whitelist_out>
+=item B<txrep_welcomelist_out>
 
  range [0..200]         (default: 10)
 
+Previously txrep_whitelist_out which will work interchangeably until 4.1.
+
 When the value of this setting is greater than zero, recipients of messages sent from
-within the internal networks will be whitelisted through improving their total reputation
+within the internal networks will be welcomelisted through improving their total reputation
 score with the number of points defined by this setting. Since the IP address and other
 sender identificators are not known when sending the email, only the reputation of the
-standalone email is being whitelisted. The domain name is intentionally also left
-unaffected. The outbound whitelisting can only work when SpamAssassin is set up to scan
+standalone email is being welcomelisted. The domain name is intentionally also left
+unaffected. The outbound welcomelisting can only work when SpamAssassin is set up to scan
 also outgoing email, when local users use the SMTP server for sending email, and when
 C<internal_networks> are defined in SpamAssassin configuration. The improving of the
 reputation happens at every message sent from internal networks, so the more messages is
@@ -483,13 +485,14 @@ being sent to the recipient, the better reputation his email address will have.
 =cut
 
   push (@cmds, {
-    setting     => 'txrep_whitelist_out',
+    setting     => 'txrep_welcomelist_out',
+    aliases	=> ['txrep_whitelist_out'], # removed in 4.1
     default     => 10,
     type        => $Mail::SpamAssassin::Conf::CONF_TYPE_NUMERIC,
     code        => sub {
         my ($self, $key, $value, $line) = @_;
         if ($value < 0 || $value > 200) {return $Mail::SpamAssassin::Conf::INVALID_VALUE;}
-        $self->{txrep_whitelist_out} = $value;
+        $self->{txrep_welcomelist_out} = $value;
     }
   });
 
@@ -588,7 +591,7 @@ global (server-wide) storages.
 
 User storage keeps only senders who send messages to the respective recipient,
 and will reflect also the corrected/learned scores, when some messages are marked
-by the user as spam or ham, or when the sender is whitelisted or blacklisted
+by the user as spam or ham, or when the sender is welcomelisted or blocklisted
 through the API of SpamAssassin.
 
 Global storage keeps the reputation data of all messages processed by SpamAssassin
@@ -610,7 +613,7 @@ available, the global storage is used fully, without applying the ratio.
 When the ratio is set to zero, only the default storage will be used. And it
 then depends whether you use the global, or the local user storage by default,
 which in turn is controlled either by the parameter user_awl_sql_override_username
-(in case of SQL storage), or the C</auto_whitelist_path> parameter (in case of
+(in case of SQL storage), or the C</auto_welcomelist_path> parameter (in case of
 Berkeley database).
 
 When this dual storage is enabled, and no global storage is defined by the
@@ -620,7 +623,7 @@ Berkeley database it uses the path defined by '__local_state_dir__/tx-reputation
 which typically renders into /var/db/spamassassin/tx-reputation. When the default
 storages are not available, or are not writable, you would have to set the global
 storage with the help of the C<user_awl_sql_override_username> resp.
-C<auto_whitelist_path settings>.
+C<auto_welcomelist_path settings>.
 
 Please note that some SpamAssassin installations run always under the same user
 ID. In such case it is pointless enabling the dual storage, because it would
@@ -642,9 +645,9 @@ This feature is disabled by default.
   });
 
 
-=item B<auto_whitelist_distinguish_signed>
+=item B<auto_welcomelist_distinguish_signed>  (default: 1 - enabled)
 
- (default: 1 - enabled)
+Previously auto_welcomelist_distinguish_signed which will work interchangeably until 4.1.
 
 Used by the SQLBasedAddrList storage implementation.
 
@@ -664,7 +667,7 @@ that is not possible you must set this option to 0 to avoid SQL errors.
 =cut
 
   push (@cmds, {
-    setting     => 'auto_whitelist_distinguish_signed',
+    setting     => 'auto_welcomelist_distinguish_signed',
     default     => 1,
     type        => $Mail::SpamAssassin::Conf::CONF_TYPE_BOOL
   });
@@ -775,7 +778,7 @@ At a user sending from multiple locations, diverse mail servers, or from a dynam
 IP range out of the masked block, his email address will have a separate reputation
 value for each of the different (partial) IP addresses.
 
-When the option auto_whitelist_distinguish_signed is enabled, in contrary to
+When the option auto_welcomelist_distinguish_signed is enabled, in contrary to
 the original AWL module, TxRep does not record the IP address when DKIM
 signature is detected. The email address is then not bound to any IP address, but
 rather just to the DKIM signature, since it is considered that it authenticates
@@ -921,9 +924,11 @@ Select alternative database factory module for the TxRep database.
   });
 
 
-=item B<auto_whitelist_path /path/filename>
+=item B<auto_welcomelist_path /path/filename>
 
  (default: ~/.spamassassin/tx-reputation)
+
+Previously auto_whitelist_path which will work interchangeably until 4.1.
 
 This is the TxRep directory and filename.  By default, each user
 has their own reputation database in their C<~/.spamassassin> directory with
@@ -933,21 +938,24 @@ across all users.
 =cut
 
   push (@cmds, {
-    setting      => 'auto_whitelist_path',
+    setting      => 'auto_welcomelist_path',
+    setting      => ['auto_whitelist_path'], # removed in 4.1
     is_admin     => 1,
     default      => '__userstate__/tx-reputation',
     type         => $Mail::SpamAssassin::Conf::CONF_TYPE_STRING,
     code         => sub {
         my ($self, $key, $value, $line) = @_;
         unless (defined $value && $value !~ /^$/) {return $Mail::SpamAssassin::Conf::MISSING_REQUIRED_VALUE;}
-        $self->{auto_whitelist_path} = $value;
+        $self->{auto_welcomelist_path} = $value;
     }
   });
 
 
-=item B<auto_whitelist_db_modules Module ...>
+=item B<auto_welcomelist_db_modules Module ...>
 
  (default: see below)
+
+Previously auto_whitelist_db_modules which will work interchangeably until 4.1.
 
 What database modules should be used for the TxRep storage database
 file.   The first named module that can be loaded from the Perl include path
@@ -964,16 +972,19 @@ NDBM_File is not supported (see SpamAssassin bug 4353).
 =cut
 
   push (@cmds, {
-    setting      => 'auto_whitelist_db_modules',
+    setting      => 'auto_welcomelist_db_modules',
+    aliases      => ['auto_whitelist_db_modules'], # removed in 4.1
     is_admin     => 1,
     default      => 'DB_File GDBM_File SDBM_File',
     type         => $Mail::SpamAssassin::Conf::CONF_TYPE_STRING
   });
 
 
-=item B<auto_whitelist_file_mode>
+=item B<auto_welcomelist_file_mode>
 
  (default: 0700)
+
+Previously auto_whitelist_file_mode which will work interchangeably until 4.1.
 
 The file mode bits used for the TxRep directory or file.
 
@@ -984,7 +995,8 @@ not have any execute bits set (the umask is set to 0111).
 =cut
 
   push (@cmds, {
-    setting      => 'auto_whitelist_file_mode',
+    setting      => 'auto_welcomelist_file_mode',
+    aliases      => ['auto_whitelist_file_mode'], # removed in 4.1
     is_admin     => 1,
     default      => '0700',
     type         => $Mail::SpamAssassin::Conf::CONF_TYPE_NUMERIC,
@@ -993,7 +1005,8 @@ not have any execute bits set (the umask is set to 0111).
         if ($value !~ /^0?[0-7]{3}$/) {
             return $Mail::SpamAssassin::Conf::INVALID_VALUE;
         }
-        $self->{auto_whitelist_file_mode} = untaint_var($value);
+        $value = '0'.$value if length($value) == 3; # Bug 5771
+        $self->{auto_welcomelist_file_mode} = untaint_var($value);
     }
   });
 
@@ -1133,46 +1146,48 @@ sub _fn_envelope {
 }
 
 
-=head1 BLACKLISTING / WHITELISTING
+=head1 BLOCKLISTING / WELCOMELISTING
 
-When asked by SpamAssassin to blacklist or whitelist a user, the TxRep
-plugin adds a score of 100 (for blacklisting) or -100 (for whitelisting)
+When asked by SpamAssassin to blocklist or welcomelist a user, the TxRep
+plugin adds a score of 100 (for blocklisting) or -100 (for welcomelisting)
 to the given sender's email address. At a plain address without any IP
 address, the value is multiplied by the ratio of total reputation
 weight to the EMAIL reputation weight to account for the reduced impact
 of the standalone EMAIL reputation when calculating the overall reputation.
 
    total_weight = weight_email + weight_email_ip + weight_domain + weight_ip + weight_helo
-   blacklisted_reputation = 100 * total_weight / weight_email
+   blocklisted_reputation = 100 * total_weight / weight_email
 
-When a standalone email address is blacklisted/whitelisted, all records
+When a standalone email address is blocklisted/welcomelisted, all records
 of the email address bound to an IP address, DKIM signature, or a SPF pass
 will be removed from the database, and only the standalone record is kept.
 
-Besides blacklisting/whitelisting of standalone email addresses, the same
-method may be used also for blacklisting/whitelisting of IP addresses,
+Besides blocklisting/welcomelisting of standalone email addresses, the same
+method may be used also for blocklisting/welcomelisting of IP addresses,
 domain names, and HELO names (only dotless Netbios HELO names can be used).
 
-When whitelisting/blacklisting an email address or domain name, you can
+When welcomelisting/blocklisting an email address or domain name, you can
 bind them to a specified DKIM signature or SPF record by appending the 
 DKIM signing domain or the tag 'spf' after the ID in the following way:
 
- spamassassin --add-addr-to-blacklist=spamming.biz,spf
- spamassassin --add-addr-to-whitelist=friend@good.org,good.org
+ spamassassin --add-addr-to-blocklist=spamming.biz,spf
+ spamassassin --add-addr-to-welcomelist=friend@good.org,good.org
 
 When a message contains both a DKIM signature and an SPF pass, the DKIM
 signature takes the priority, so the record bound to the 'spf' tag won't 
 be checked. Only email addresses and domains can be bound to DKIM or SPF.
 Records of IP addresses and HELO names are always without DKIM/SPF.
 
-In case of dual storage, the black/whitelisting is performed only in the
+In case of dual storage, the block/welcomelisting is performed only in the
 default storage.
 
 =cut
 
 ######################################################## plugin hooks #####
-sub blacklist_address {my $self=shift; return $self->_fn_envelope(@_,  100, "blacklisting address");}
-sub whitelist_address {my $self=shift; return $self->_fn_envelope(@_, -100, "whitelisting address");}
+sub blocklist_address {my $self=shift; return $self->_fn_envelope(@_,  100, "blocklisting address");}
+*blacklist_address = \&blocklist_address; # removed in 4.1
+sub welcomelist_address {my $self=shift; return $self->_fn_envelope(@_, -100, "welcomelisting address");}
+*whitelist_address = \&welcomelist_address; # removed in 4.1
 sub remove_address    {my $self=shift; return $self->_fn_envelope(@_,undef, "removing address");}
 ###########################################################################
 
@@ -1227,8 +1242,8 @@ sub check_senders_reputation {
 
   # Cases where we would not be able to use TxRep
   return 0 unless ($self->{conf}->{use_txrep});
-  if ($self->{conf}->{use_auto_whitelist}) {
-    warn("TxRep: cannot run when Auto-Whitelist is enabled. Please disable it!\n");
+  if ($self->{conf}->{use_auto_welcomelist}) {
+    warn("TxRep: cannot run when Auto-Welcomelist is enabled. Please disable it!\n");
     return 0;
   }
   if ($autolearn && !$self->{conf}->{txrep_autolearn}) {
@@ -1302,21 +1317,21 @@ sub check_senders_reputation {
     } else {dbg("TxRep: no message-id available, parsing forced");}
   }             # else no message tracking, go ahead with normal rep scan
 
-  # whitelists recipients at senders from internal networks after checking MSG_ID only
-  if ( $self->{conf}->{txrep_whitelist_out} &&
+  # welcomelists recipients at senders from internal networks after checking MSG_ID only
+  if ( $self->{conf}->{txrep_welcomelist_out} &&
           defined $pms->{relays_internal} &&  @{$pms->{relays_internal}} &&
         (!defined $pms->{relays_external} || !@{$pms->{relays_external}})
      ) {
     foreach my $rcpt ($pms->all_to_addrs()) {
         if ($rcpt) {
-            dbg("TxRep: internal sender, whitelisting recipient: $rcpt");
-            $self->modify_reputation($rcpt, -1*$self->{conf}->{txrep_whitelist_out}, undef);
+            dbg("TxRep: internal sender, welcomelisting recipient: $rcpt");
+            $self->modify_reputation($rcpt, -1*$self->{conf}->{txrep_welcomelist_out}, undef);
         }
     }
   }
 
   # Get the signing domain
-  my $signedby = ($self->{conf}->{auto_whitelist_distinguish_signed})? $pms->get_tag('DKIMDOMAIN') : undef;
+  my $signedby = ($self->{conf}->{auto_welcomelist_distinguish_signed})? $pms->get_tag('DKIMDOMAIN') : undef;
 
   # Summary of all information we've gathered so far
   dbg("TxRep: active, %s pre-score: %s, autolearn score: %s, IP: %s, address: %s %s",
@@ -1668,25 +1683,25 @@ sub open_storages {
 		$self->{user_storage} = $self->{global_storage} = $self->{default_storage};
 	    }
 	} elsif (index(ref($factory), 'DBBasedAddrList') >= 0) {
-	    $is_global    = index($self->{conf}->{auto_whitelist_path}, '__userstate__') == -1;
+	    $is_global    = index($self->{conf}->{auto_welcomelist_path}, '__userstate__') == -1;
 	    $storage_type = 'DB';
 	}
 	if (!defined $self->{global_storage}) {
 	    my $sql_override_orig = $self->{conf}->{user_awl_sql_override_username};
-	    my $awl_path_orig     = $self->{conf}->{auto_whitelist_path};
+	    my $awl_path_orig     = $self->{conf}->{auto_welcomelist_path};
 	    if ($is_global) {
 		$self->{conf}->{user_awl_sql_override_username} = '';
-		$self->{conf}->{auto_whitelist_path}            = '__userstate__/tx-reputation';
+		$self->{conf}->{auto_welcomelist_path}            = '__userstate__/tx-reputation';
 		$self->{global_storage} = $self->{default_storage};
 		$self->{user_storage}   = $factory->new_checker($self->{main});
 	    } else {
 		$self->{conf}->{user_awl_sql_override_username} = 'GLOBAL';
-		$self->{conf}->{auto_whitelist_path}            = '__local_state_dir__/tx-reputation';
+		$self->{conf}->{auto_welcomelist_path}            = '__local_state_dir__/tx-reputation';
 		$self->{global_storage} = $factory->new_checker($self->{main});
 		$self->{user_storage}   = $self->{default_storage};
 	    }
 	    $self->{conf}->{user_awl_sql_override_username} = $sql_override_orig;
-	    $self->{conf}->{auto_whitelist_path}            = $awl_path_orig;
+	    $self->{conf}->{auto_welcomelist_path}            = $awl_path_orig;
 	
 	    # Another ugly hack to find out whether the user differs from
 	    # the global one. We need to add a method to the factory handlers
@@ -1927,10 +1942,10 @@ the processing time.
 4. Disabling the option L</C<txrep_autolearn>> will save the processing time
 at messages that trigger the auto-learning process.
 
-5. Disabling L</C<txrep_whitelist_out>> will reduce the processing time at
+5. Disabling L</C<txrep_welcomelist_out>> will reduce the processing time at
 outbound connections.
 
-6. Keeping the option L</C<auto_whitelist_distinguish_signed>> enabled may help
+6. Keeping the option L</C<auto_welcomelist_distinguish_signed>> enabled may help
 slightly reducing the size of the database, because at signed messages, the
 originating IP address is ignored, hence no additional database entries are
 needed for each separate IP address (resp. a masked block of IP addresses).

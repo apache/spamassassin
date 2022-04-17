@@ -29,7 +29,7 @@ SpamCop is a service for reporting spam.  SpamCop determines the origin
 of unwanted email and reports it to the relevant Internet service
 providers.  By reporting spam, you have a positive impact on the
 problem.  Reporting unsolicited email also helps feed spam filtering
-systems, including, but not limited to, the SpamCop blacklist used in
+systems, including, but not limited to, the SpamCop blocklist used in
 SpamAssassin as a DNSBL.
 
 Note that spam reports sent by this plugin to SpamCop each include the

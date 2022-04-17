@@ -404,7 +404,7 @@ sub check_timed {
   # this lets us see ludicrously spammish mails (score: 40) etc., which
   # we can then immediately submit to spamblocking services.
   #
-  # TODO: change this to do whitelist/blacklists first? probably a plan
+  # TODO: change this to do welcomelist/blocklists first? probably a plan
   # NOTE: definitely need AWL stuff last, for regression-to-mean of score
 
   # TVD: we may want to do more than just clearing out the headers, but ...
@@ -632,7 +632,7 @@ ignored:
 
   - rules with tflags set to 'learn' (the Bayesian rules)
 
-  - rules with tflags set to 'userconf' (user white/black-listing rules, etc)
+  - rules with tflags set to 'userconf' (user welcome/block-listing rules, etc)
 
   - rules with tflags set to 'noautolearn'
 

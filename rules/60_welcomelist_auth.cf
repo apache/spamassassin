@@ -24,7 +24,7 @@
 ###########################################################################
 # SPF and DKIM whitelist rules
 
-if can(Mail::SpamAssassin::Conf::feature_blocklist_welcomelist)
+if can(Mail::SpamAssassin::Conf::feature_welcomelist_blocklist)
 
 ###########################################################################
 # These should be primarily envelope-from addresses which send mail that is
@@ -1991,5 +1991,5 @@ def_whitelist_auth *@*.testingmom.com
 def_whitelist_auth *@*.ceramicartsnetwork.org
 def_whitelist_auth *@*.verintefm.com
 
-endif # if can(Mail::SpamAssassin::Conf::feature_blocklist_welcomelist)
+endif # if can(Mail::SpamAssassin::Conf::feature_welcomelist_blocklist)
 

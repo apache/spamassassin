@@ -19,7 +19,7 @@ plan tests => $tests;
 
 diag "Note: Failure may be due to an incorrect config";
 
-sa_t_init("sql_based_whitelist");
+sa_t_init("sql_based_welcomelist");
 
 if (SQLITE) {
   my $dbh = DBI->connect("dbi:SQLite:dbname=$workdir/awl.db","","");
@@ -37,8 +37,8 @@ if (SQLITE) {
   ") or die "Failed to create $workdir/awl.db";
 
   tstprefs ("
-    use_auto_whitelist 1
-    auto_whitelist_factory Mail::SpamAssassin::SQLBasedAddrList
+    use_auto_welcomelist 1
+    auto_welcomelist_factory Mail::SpamAssassin::SQLBasedAddrList
     user_awl_dsn dbi:SQLite:dbname=$workdir/awl.db
   ");
 
@@ -60,8 +60,8 @@ if (SQL) {
   my $testuser = 'tstusr.'.$$.'.'.time();
 
   tstprefs ("
-    use_auto_whitelist 1
-    auto_whitelist_factory Mail::SpamAssassin::SQLBasedAddrList
+    use_auto_welcomelist 1
+    auto_welcomelist_factory Mail::SpamAssassin::SQLBasedAddrList
     $dbconfig
     user_awl_sql_override_username $testuser
   ");
@@ -83,9 +83,9 @@ sub run_awl {
 );
 
 %patterns = %is_nonspam_patterns;
-ok(sarun ("--remove-addr-from-whitelist whitelist_test\@whitelist.spamassassin.taint.org", \&patterns_run_cb));
+ok(sarun ("--remove-addr-from-welcomelist whitelist_test\@whitelist.spamassassin.taint.org", \&patterns_run_cb));
 
-# 3 times, to get into the whitelist:
+# 3 times, to get into the welcomelist:
 %patterns = (%is_nonspam_patterns, (q{'144.137 scores 0, msgcount 0'} => 'scores'));
 ok(sarun ("-L -t -D auto-welcomelist < data/nice/002 2>&1", \&patterns_run_cb));
 ok_all_patterns();
@@ -114,7 +114,7 @@ ok_all_patterns();
 ok(sarun ("-L -t -D auto-welcomelist < data/spam/007 2>&1", \&patterns_run_cb));
 ok_all_patterns();
 
-ok(sarun ("--remove-addr-from-whitelist whitelist_test\@whitelist.spamassassin.taint.org", \&patterns_run_cb));
+ok(sarun ("--remove-addr-from-welcomelist whitelist_test\@whitelist.spamassassin.taint.org", \&patterns_run_cb));
 
 }
 # ---------------------------------------------------------------------------

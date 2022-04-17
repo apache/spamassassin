@@ -40,7 +40,7 @@ loadplugin Mail::SpamAssassin::Plugin::SpamCop
 #
 #loadplugin Mail::SpamAssassin::Plugin::AntiVirus
 
-# AWL - do auto-whitelist checks
+# AWL - do auto-welcomelist checks
 #
 #loadplugin Mail::SpamAssassin::Plugin::AWL
 
@@ -56,9 +56,9 @@ loadplugin Mail::SpamAssassin::Plugin::AutoLearnThreshold
 #
 #loadplugin Mail::SpamAssassin::Plugin::AccessDB
 
-# WhitelistSubject - Whitelist/Blacklist certain subject regular expressions
+# WelcomelistSubject - Welcomelist/Blocklist certain subject regular expressions
 #
-loadplugin Mail::SpamAssassin::Plugin::WhiteListSubject
+loadplugin Mail::SpamAssassin::Plugin::WelcomeListSubject
 
 ###########################################################################
 # experimental plugins

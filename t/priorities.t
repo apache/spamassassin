@@ -9,10 +9,10 @@ use Mail::SpamAssassin;
 
 tstlocalrules (q{
 
-  priority USER_IN_WHITELIST     -1000
-  priority USER_IN_DEF_WHITELIST -1000
+  priority USER_IN_WELCOMELIST     -1000
+  priority USER_IN_DEF_WELCOMELIST -1000
   priority USER_IN_ALL_SPAM_TO   -1000
-  priority SUBJECT_IN_WHITELIST  -1000
+  priority SUBJECT_IN_WELCOMELIST  -1000
 
   priority ALL_TRUSTED            -950
 
@@ -64,7 +64,7 @@ ok($sa);
 my $conf = $sa->{conf};
 sub assert_rule_pri;
 
-ok assert_rule_pri 'USER_IN_WHITELIST', -1000;
+ok assert_rule_pri 'USER_IN_WELCOMELIST', -1000;
 
 ok assert_rule_pri 'SC_URIBL_SURBL', -530;
 ok assert_rule_pri 'SC_URIBL_HASH', -510;

@@ -161,7 +161,7 @@ ok_all_patterns();
 ok(salearnrun("--ham data/nice", \&check_examined));
 ok_all_patterns();
 
-ok(salearnrun("--ham data/whitelists", \&check_examined));
+ok(salearnrun("--ham data/welcomelists", \&check_examined));
 ok_all_patterns();
 
 %patterns = ( 'non-token data: bayes db version' => 'db version' );

@@ -17,7 +17,7 @@
 
 =head1 NAME
 
-Mail::SpamAssassin::Plugin::AWL - Normalize scores via auto-whitelist
+Mail::SpamAssassin::Plugin::AWL - Normalize scores via auto-welcomelist
 
 =head1 SYNOPSIS
 
@@ -28,14 +28,14 @@ To try this out, add this or uncomment this line in init.pre:
 Use the supplied 60_awl.cf file (ie you don't have to do anything) or
 add these lines to a .cf file:
 
-  header AWL             eval:check_from_in_auto_whitelist()
-  describe AWL           From: address is in the auto white-list
+  header AWL             eval:check_from_in_auto_welcomelist()
+  describe AWL           From: address is in the auto welcome-list
   tflags AWL             userconf noautolearn
   priority AWL           1000
 
 =head1 DESCRIPTION
 
-This plugin module provides support for the auto-whitelist.  It keeps
+This plugin module provides support for the auto-welcomelist.  It keeps
 track of the average SpamAssassin score for senders.  Senders are
 tracked using a combination of their From: address and their IP address.
 It then uses that average score to reduce the variability in scoring
@@ -63,7 +63,7 @@ use warnings;
 # use bytes;
 use re 'taint';
 use Mail::SpamAssassin::Plugin;
-use Mail::SpamAssassin::AutoWhitelist;
+use Mail::SpamAssassin::AutoWelcomelist;
 use Mail::SpamAssassin::Util qw(untaint_var);
 use Mail::SpamAssassin::Logger;
 
@@ -80,7 +80,8 @@ sub new {
   bless ($self, $class);
 
   # the important bit!
-  $self->register_eval_rule("check_from_in_auto_whitelist", $Mail::SpamAssassin::Conf::TYPE_HEAD_EVALS);
+  $self->register_eval_rule("check_from_in_auto_welcomelist", $Mail::SpamAssassin::Conf::TYPE_HEAD_EVALS);
+  $self->register_eval_rule("check_from_in_auto_whitelist", $Mail::SpamAssassin::Conf::TYPE_HEAD_EVALS); # removed in 4.1
 
   $self->set_config($mailsaobject->{conf});
 
@@ -99,18 +100,20 @@ SpamAssassin handles incoming email messages.
 
 =over 4
 
-=item use_auto_whitelist ( 0 | 1 )		(default: 1)
+=item use_auto_welcomelist ( 0 | 1 )		(default: 1)
 
-Whether to use auto-whitelists.  Auto-whitelists track the long-term
+Previously use_auto_whitelist which will work interchangeably until 4.1.
+
+Whether to use auto-welcomelists.  Auto-welcomelists track the long-term
 average score for each sender and then shift the score of new messages
 toward that long-term average.  This can increase or decrease the score
 for messages, depending on the long-term behavior of the particular
 correspondent.
 
-For more information about the auto-whitelist system, please look
-at the C<Automatic Whitelist System> section of the README file.
-The auto-whitelist is not intended as a general-purpose replacement
-for static whitelist entries added to your config files.
+For more information about the auto-welcomelist system, please look
+at the C<Automatic Welcomelist System> section of the README file.
+The auto-welcomelist is not intended as a general-purpose replacement
+for static welcomelist entries added to your config files.
 
 Note that certain tests are ignored when determining the final
 message score:
@@ -120,12 +123,15 @@ message score:
 =cut
 
   push (@cmds, {
-		setting => 'use_auto_whitelist',
+		setting => 'use_auto_welcomelist',
+		aliases => ['use_auto_whitelist'], # backward compatible - to be removed for 4.1
 		default => 1,
 		type => $Mail::SpamAssassin::Conf::CONF_TYPE_BOOL
 	       });
 
-=item auto_whitelist_factor n	(default: 0.5, range [0..1])
+=item auto_welcomelist_factor n	(default: 0.5, range [0..1])
+
+Previously auto_whitelist_factor which will work interchangeably until 4.1.
 
 How much towards the long-term mean for the sender to regress a message.
 Basically, the algorithm is to track the long-term mean score of messages for
@@ -143,12 +149,15 @@ mean; C<factor> = 0 mean just use the calculated score.
 =cut
 
   push (@cmds, {
-		setting => 'auto_whitelist_factor',
+		setting => 'auto_welcomelist_factor',
+		aliases => ['auto_whitelist_factor'], # backward compatible - to be removed for 4.1
 		default => 0.5,
 		type => $Mail::SpamAssassin::Conf::CONF_TYPE_NUMERIC
 	       });
 
-=item auto_whitelist_ipv4_mask_len n	(default: 16, range [0..32])
+=item auto_welcomelist_ipv4_mask_len n	(default: 16, range [0..32])
+
+Previously auto_whitelist_ipv4_mask_len which will work interchangeably until 4.1.
 
 The AWL database keeps only the specified number of most-significant bits
 of an IPv4 address in its fields, so that different individual IP addresses
@@ -164,7 +173,8 @@ of 8, any split is allowed.
 =cut
 
   push (@cmds, {
-		setting => 'auto_whitelist_ipv4_mask_len',
+		setting => 'auto_welcomelist_ipv4_mask_len',
+		aliases => ['auto_whitelist_ipv4_mask_len'], # removed in 4.1
 		default => 16,
 		type => $Mail::SpamAssassin::Conf::CONF_TYPE_NUMERIC,
 		code => sub {
@@ -174,11 +184,13 @@ of 8, any split is allowed.
 		  } elsif ($value !~ /^\d+$/ || $value < 0 || $value > 32) {
 		    return $Mail::SpamAssassin::Conf::INVALID_VALUE;
 		  }
-		  $self->{auto_whitelist_ipv4_mask_len} = $value;
+		  $self->{auto_welcomelist_ipv4_mask_len} = $value;
 		}
 	       });
 
-=item auto_whitelist_ipv6_mask_len n	(default: 48, range [0..128])
+=item auto_welcomelist_ipv6_mask_len n	(default: 48, range [0..128])
+
+Previously auto_whitelist_ipv6_mask_len which will work interchangeably until 4.1.
 
 The AWL database keeps only the specified number of most-significant bits
 of an IPv6 address in its fields, so that different individual IP addresses
@@ -195,7 +207,8 @@ is allowed.
 =cut
 
   push (@cmds, {
-		setting => 'auto_whitelist_ipv6_mask_len',
+		setting => 'auto_welcomelist_ipv6_mask_len',
+		aliases => ['auto_whitelist_ipv6_mask_len'], # removed in 4.1
 		default => 48,
 		type => $Mail::SpamAssassin::Conf::CONF_TYPE_NUMERIC,
 		code => sub {
@@ -205,7 +218,7 @@ is allowed.
 		  } elsif ($value !~ /^\d+$/ || $value < 0 || $value > 128) {
 		    return $Mail::SpamAssassin::Conf::INVALID_VALUE;
 		  }
-		  $self->{auto_whitelist_ipv6_mask_len} = $value;
+		  $self->{auto_welcomelist_ipv6_mask_len} = $value;
 		}
 	       });
 
@@ -215,7 +228,7 @@ Used by the SQLBasedAddrList storage implementation.
 
 If this option is set the SQLBasedAddrList module will override the set
 username with the value given.  This can be useful for implementing global
-or group based auto-whitelist databases.
+or group based auto-welcomelist databases.
 
 =cut
 
@@ -225,7 +238,9 @@ or group based auto-whitelist databases.
 		type => $Mail::SpamAssassin::Conf::CONF_TYPE_STRING
 	       });
 
-=item auto_whitelist_distinguish_signed
+=item auto_welcomelist_distinguish_signed
+
+Previously auto_whitelist_distinguish_signed which will work interchangeably until 4.1.
 
 Used by the SQLBasedAddrList storage implementation.
 
@@ -240,7 +255,8 @@ turning on this option.
 =cut
 
   push (@cmds, {
-		setting => 'auto_whitelist_distinguish_signed',
+		setting => 'auto_welcomelist_distinguish_signed',
+		aliases => ['auto_whitelist_distinguish_signed'], # removed in 4.1
 		default => 0,
 		type => $Mail::SpamAssassin::Conf::CONF_TYPE_BOOL
 	       });
@@ -256,32 +272,38 @@ user's C<user_prefs> file.
 
 =over 4
 
-=item auto_whitelist_factory module (default: Mail::SpamAssassin::DBBasedAddrList)
+=item auto_welcomelist_factory module (default: Mail::SpamAssassin::DBBasedAddrList)
 
-Select alternative whitelist factory module.
+Previously auto_whitelist_factory which will work interchangeably until 4.1.
+
+Select alternative welcomelist factory module.
 
 =cut
 
   push (@cmds, {
-		setting => 'auto_whitelist_factory',
+		setting => 'auto_welcomelist_factory',
+		aliases => ['auto_whitelist_factory'], # removed in 4.1
 		is_admin => 1,
 		default => 'Mail::SpamAssassin::DBBasedAddrList',
 		type => $Mail::SpamAssassin::Conf::CONF_TYPE_STRING
 	       });
 
-=item auto_whitelist_path /path/filename (default: ~/.spamassassin/auto-whitelist)
+=item auto_welcomelist_path /path/filename (default: ~/.spamassassin/auto-welcomelist)
 
-This is the automatic-whitelist directory and filename.  By default, each user
-has their own whitelist database in their C<~/.spamassassin> directory with
+Previously auto_whitelist_path which will work interchangeably until 4.1.
+
+This is the automatic-welcomelist directory and filename.  By default, each user
+has their own welcomelist database in their C<~/.spamassassin> directory with
 mode 0700.  For system-wide SpamAssassin use, you may want to share this
 across all users, although that is not recommended.
 
 =cut
 
   push (@cmds, {
-		setting => 'auto_whitelist_path',
+		setting => 'auto_welcomelist_path',
+		aliases => ['auto_whitelist_path'], # removed in 4.1
 		is_admin => 1,
-		default => '__userstate__/auto-whitelist',
+		default => '__userstate__/auto-welcomelist',
 		type => $Mail::SpamAssassin::Conf::CONF_TYPE_STRING,
 		code => sub {
 		  my ($self, $key, $value, $line) = @_;
@@ -291,13 +313,15 @@ across all users, although that is not recommended.
 		  if (-d $value) {
 		    return $Mail::SpamAssassin::Conf::INVALID_VALUE;
 		  }
-		  $self->{auto_whitelist_path} = $value;
+		  $self->{auto_welcomelist_path} = $value;
 		}
 	       });
 
-=item auto_whitelist_db_modules Module ...	(default: see below)
+=item auto_welcomelist_db_modules Module ...	(default: see below)
 
-What database modules should be used for the auto-whitelist storage database
+Previously auto_whitelist_db_modules which will work interchangeably until 4.1.
+
+What database modules should be used for the auto-welcomelist storage database
 file.   The first named module that can be loaded from the perl include path
 will be used.  The format is:
 
@@ -313,15 +337,18 @@ preclude its use for the AWL (see SpamAssassin bug 4353).
 =cut
 
   push (@cmds, {
-		setting => 'auto_whitelist_db_modules',
+		setting => 'auto_welcomelist_db_modules',
+		aliases => ['auto_whitelist_db_modules'], # removed in 4.1
 		is_admin => 1,
 		default => 'DB_File GDBM_File SDBM_File',
 		type => $Mail::SpamAssassin::Conf::CONF_TYPE_STRING
 	       });
 
-=item auto_whitelist_file_mode		(default: 0700)
+=item auto_welcomelist_file_mode		(default: 0700)
 
-The file mode bits used for the automatic-whitelist directory or file.
+Previously auto_whitelist_file_mode which will work interchangeably until 4.1.
+
+The file mode bits used for the automatic-welcomelist directory or file.
 
 Make sure you specify this using the 'x' mode bits set, as it may also be used
 to create directories.  However, if a file is created, the resulting file will
@@ -330,7 +357,8 @@ not have any execute bits set (the umask is set to 0111).
 =cut
 
   push (@cmds, {
-		setting => 'auto_whitelist_file_mode',
+		setting => 'auto_welcomelist_file_mode',
+		aliases => ['auto_whitelist_file_mode'], # removed in 4.1
 		is_admin => 1,
 		default => '0700',
 		type => $Mail::SpamAssassin::Conf::CONF_TYPE_NUMERIC,
@@ -339,7 +367,7 @@ not have any execute bits set (the umask is set to 0111).
 		  if ($value !~ /^0?[0-7]{3}$/) {
                     return $Mail::SpamAssassin::Conf::INVALID_VALUE;
                   }
-		  $self->{auto_whitelist_file_mode} = untaint_var($value);
+		  $self->{auto_welcomelist_file_mode} = untaint_var($value);
 		}
 	       });
 
@@ -390,7 +418,7 @@ The password for the database username, for the above DSN.
 
 Used by the SQLBasedAddrList storage implementation.
 
-The table user auto-whitelists are stored in, for the above DSN.
+The table user auto-welcomelists are stored in, for the above DSN.
 
 =cut
 
@@ -404,15 +432,15 @@ The table user auto-whitelists are stored in, for the above DSN.
   $conf->{parser}->register_commands(\@cmds);
 }
 
-sub check_from_in_auto_whitelist {
+sub check_from_in_auto_welcomelist {
     my ($self, $pms) = @_;
 
-    return 0 unless ($pms->{conf}->{use_auto_whitelist});
+    return 0 unless ($pms->{conf}->{use_auto_welcomelist});
 
     my $timer = $self->{main}->time_method("total_awl");
 
     my $from = lc $pms->get('From:addr');
-  # dbg("auto-whitelist: From: $from");
+  # dbg("auto-welcomelist: From: $from");
     return 0 unless $from =~ /\S/;
 
     # find the earliest usable "originating IP".  ignore private nets
@@ -443,18 +471,18 @@ sub check_from_in_auto_whitelist {
     my $awlpoints = (sprintf "%0.3f", $points) + 0;
 
    # Create the AWL object
-    my $whitelist;
+    my $welcomelist;
     eval {
-      $whitelist = Mail::SpamAssassin::AutoWhitelist->new($pms->{main});
+      $welcomelist = Mail::SpamAssassin::AutoWelcomelist->new($pms->{main});
 
       my $meanscore;
       { # check
         my $timer = $self->{main}->time_method("check_awl");
-        $meanscore = $whitelist->check_address($from, $origip, $signedby);
+        $meanscore = $welcomelist->check_address($from, $origip, $signedby);
       }
       my $delta = 0;
 
-      dbg("auto-whitelist: AWL active, pre-score: %s, autolearn score: %s, ".
+      dbg("auto-welcomelist: AWL active, pre-score: %s, autolearn score: %s, ".
 	  "mean: %s, IP: %s, address: %s %s",
           $pms->{score}, $awlpoints,
           !defined $meanscore ? 'undef' : sprintf("%.3f",$meanscore),
@@ -463,13 +491,13 @@ sub check_from_in_auto_whitelist {
 
       if (defined $meanscore) {
 	$delta = $meanscore - $awlpoints;
-	$delta *= $pms->{main}->{conf}->{auto_whitelist_factor};
+	$delta *= $pms->{main}->{conf}->{auto_welcomelist_factor};
       
 	$pms->set_tag('AWL', sprintf("%2.1f",$delta));
         if (defined $meanscore) {
 	  $pms->set_tag('AWLMEAN', sprintf("%2.1f", $meanscore));
 	}
-	$pms->set_tag('AWLCOUNT', sprintf("%2.1f", $whitelist->count()));
+	$pms->set_tag('AWLCOUNT', sprintf("%2.1f", $welcomelist->count()));
 	$pms->set_tag('AWLPRESCORE', sprintf("%2.1f", $pms->{score}));
       }
 
@@ -478,7 +506,7 @@ sub check_from_in_auto_whitelist {
       # later ones.  http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=159704
       if (!$pms->{disable_auto_learning}) {
         my $timer = $self->{main}->time_method("update_awl");
-	$whitelist->add_score($awlpoints);
+	$welcomelist->add_score($awlpoints);
       }
 
       # now redundant, got_hit() takes care of it
@@ -491,135 +519,138 @@ sub check_from_in_auto_whitelist {
                       score => sprintf("%0.3f", $delta));
       }
 
-      $whitelist->finish();
+      $welcomelist->finish();
       1;
     } or do {
       my $eval_stat = $@ ne '' ? $@ : "errno=$!";  chomp $eval_stat;
-      warn("auto-whitelist: open of auto-whitelist file failed: $eval_stat\n");
+      warn("auto-welcomelist: open of auto-welcomelist file failed: $eval_stat\n");
       # try an unlock, in case we got that far
-      eval { $whitelist->finish(); } if $whitelist;
+      eval { $welcomelist->finish(); } if $welcomelist;
       return 0;
     };
 
-    dbg("auto-whitelist: post auto-whitelist score: %.3f", $pms->{score});
+    dbg("auto-welcomelist: post auto-welcomelist score: %.3f", $pms->{score});
 
     # test hit is above
     return 0;
 }
+*check_from_in_auto_whitelist = \&check_from_in_auto_welcomelist; # removed in 4.1
 
-sub blacklist_address {
+sub blocklist_address {
   my ($self, $args) = @_;
 
-  return 0 unless ($self->{main}->{conf}->{use_auto_whitelist});
+  return 0 unless ($self->{main}->{conf}->{use_auto_welcomelist});
 
   unless ($args->{address}) {
-    print "SpamAssassin auto-whitelist: failed to add address to blacklist\n" if ($args->{cli_p});
-    dbg("auto-whitelist: failed to add address to blacklist");
+    print "SpamAssassin auto-welcomelist: failed to add address to blocklist\n" if ($args->{cli_p});
+    dbg("auto-welcomelist: failed to add address to blocklist");
     return;
   }
   
-  my $whitelist;
+  my $welcomelist;
   my $status;
 
   eval {
-    $whitelist = Mail::SpamAssassin::AutoWhitelist->new($self->{main});
+    $welcomelist = Mail::SpamAssassin::AutoWelcomelist->new($self->{main});
 
-    if ($whitelist->add_known_bad_address($args->{address}, $args->{signedby})) {
-      print "SpamAssassin auto-whitelist: adding address to blacklist: " . $args->{address} . "\n" if ($args->{cli_p});
-      dbg("auto-whitelist: adding address to blacklist: " . $args->{address});
+    if ($welcomelist->add_known_bad_address($args->{address}, $args->{signedby})) {
+      print "SpamAssassin auto-welcomelist: adding address to blocklist: " . $args->{address} . "\n" if ($args->{cli_p});
+      dbg("auto-welcomelist: adding address to blocklist: " . $args->{address});
       $status = 0;
     }
     else {
-      print "SpamAssassin auto-whitelist: error adding address to blacklist\n" if ($args->{cli_p});
-      dbg("auto-whitelist: error adding address to blacklist");
+      print "SpamAssassin auto-welcomelist: error adding address to blocklist\n" if ($args->{cli_p});
+      dbg("auto-welcomelist: error adding address to blocklist");
       $status = 1;
     }
-    $whitelist->finish();
+    $welcomelist->finish();
     1;
   } or do {
     my $eval_stat = $@ ne '' ? $@ : "errno=$!";  chomp $eval_stat;
-    warn("auto-whitelist: open of auto-whitelist file failed: $eval_stat\n");
-    eval { $whitelist->finish(); };
+    warn("auto-welcomelist: open of auto-welcomelist file failed: $eval_stat\n");
+    eval { $welcomelist->finish(); };
     return 0;
   };
 
   return $status;
 }
+*blacklist_address = \&blocklist_address; # removed in 4.1
 
-sub whitelist_address {
+sub welcomelist_address {
   my ($self, $args) = @_;
 
-  return 0 unless ($self->{main}->{conf}->{use_auto_whitelist});
+  return 0 unless ($self->{main}->{conf}->{use_auto_welcomelist});
 
   unless ($args->{address}) {
-    print "SpamAssassin auto-whitelist: failed to add address to whitelist\n" if ($args->{cli_p});
-    dbg("auto-whitelist: failed to add address to whitelist");
+    print "SpamAssassin auto-welcomelist: failed to add address to welcomelist\n" if ($args->{cli_p});
+    dbg("auto-welcomelist: failed to add address to welcomelist");
     return 0;
   }
 
-  my $whitelist;
+  my $welcomelist;
   my $status;
 
   eval {
-    $whitelist = Mail::SpamAssassin::AutoWhitelist->new($self->{main});
+    $welcomelist = Mail::SpamAssassin::AutoWelcomelist->new($self->{main});
 
-    if ($whitelist->add_known_good_address($args->{address}, $args->{signedby})) {
-      print "SpamAssassin auto-whitelist: adding address to whitelist: " . $args->{address} . "\n" if ($args->{cli_p});
-      dbg("auto-whitelist: adding address to whitelist: " . $args->{address});
+    if ($welcomelist->add_known_good_address($args->{address}, $args->{signedby})) {
+      print "SpamAssassin auto-welcomelist: adding address to welcomelist: " . $args->{address} . "\n" if ($args->{cli_p});
+      dbg("auto-welcomelist: adding address to welcomelist: " . $args->{address});
       $status = 1;
     }
     else {
-      print "SpamAssassin auto-whitelist: error adding address to whitelist\n" if ($args->{cli_p});
-      dbg("auto-whitelist: error adding address to whitelist");
+      print "SpamAssassin auto-welcomelist: error adding address to welcomelist\n" if ($args->{cli_p});
+      dbg("auto-welcomelist: error adding address to welcomelist");
       $status = 0;
     }
 
-    $whitelist->finish();
+    $welcomelist->finish();
     1;
   } or do {
     my $eval_stat = $@ ne '' ? $@ : "errno=$!";  chomp $eval_stat;
-    warn("auto-whitelist: open of auto-whitelist file failed: $eval_stat\n");
-    eval { $whitelist->finish(); };
+    warn("auto-welcomelist: open of auto-welcomelist file failed: $eval_stat\n");
+    eval { $welcomelist->finish(); };
     return 0;
   };
 
   return $status;
 }
+*whitelist_address = \&welcomelist_address; # removed in 4.1
 
 sub remove_address {
   my ($self, $args) = @_;
 
-  return 0 unless ($self->{main}->{conf}->{use_auto_whitelist});
+  return 0 unless ($self->{main}->{conf}->{use_auto_welcomelist});
 
   unless ($args->{address}) {
-    print "SpamAssassin auto-whitelist: failed to remove address\n" if ($args->{cli_p});
-    dbg("auto-whitelist: failed to remove address");
+    print "SpamAssassin auto-welcomelist: failed to remove address\n" if ($args->{cli_p});
+    dbg("auto-welcomelist: failed to remove address");
     return 0;
   }
 
-  my $whitelist;
+  my $welcomelist;
   my $status;
 
   eval {
-    $whitelist = Mail::SpamAssassin::AutoWhitelist->new($self->{main});
+    $welcomelist = Mail::SpamAssassin::AutoWelcomelist->new($self->{main});
 
-    if ($whitelist->remove_address($args->{address}, $args->{signedby})) {
-      print "SpamAssassin auto-whitelist: removing address: " . $args->{address} . "\n" if ($args->{cli_p});
-      dbg("auto-whitelist: removing address: " . $args->{address});
+    if ($welcomelist->remove_address($args->{address}, $args->{signedby})) {
+      print "SpamAssassin auto-welcomelist: removing address: " . $args->{address} . "\n" if ($args->{cli_p});
+      dbg("auto-welcomelist: removing address: " . $args->{address});
       $status = 1;
     }
     else {
-      print "SpamAssassin auto-whitelist: error removing address\n" if ($args->{cli_p});
-      dbg("auto-whitelist: error removing address");
+      print "SpamAssassin auto-welcomelist: error removing address\n" if ($args->{cli_p});
+      dbg("auto-welcomelist: error removing address");
       $status = 0;
     }
   
-    $whitelist->finish();
+    $welcomelist->finish();
     1;
   } or do {
     my $eval_stat = $@ ne '' ? $@ : "errno=$!";  chomp $eval_stat;
-    warn("auto-whitelist: open of auto-whitelist file failed: $eval_stat\n");
-    eval { $whitelist->finish(); };
+    warn("auto-welcomelist: open of auto-welcomelist file failed: $eval_stat\n");
+    eval { $welcomelist->finish(); };
     return 0;
   };
 

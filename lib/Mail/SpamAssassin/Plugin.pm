@@ -846,7 +846,9 @@ Reference to the original message object.
 
 =back
 
-=item $plugin->whitelist_address( { options ... } )
+=item $plugin->welcomelist_address( { options ... } )
+
+Previously whitelist_address which will work interchangeably until 4.1.
 
 Called when a request is made to add an address to a
 persistent address list.
@@ -863,7 +865,9 @@ Indicate if the call is being made from a command line interface.
 
 =back
 
-=item $plugin->blacklist_address( { options ... } )
+=item $plugin->blocklist_address( { options ... } )
+
+Previously blacklist_address which will work interchangeably until 4.1.
 
 Called when a request is made to add an address to a
 persistent address list.

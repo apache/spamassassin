@@ -48,7 +48,7 @@
 #
 ###########################################################################
 
-if can(Mail::SpamAssassin::Conf::feature_blocklist_welcomelist)
+if can(Mail::SpamAssassin::Conf::feature_welcomelist_blocklist)
   ifplugin Mail::SpamAssassin::Plugin::VBounce
     body __MY_SERVERS_FOUND       eval:check_welcomelist_bounce_relays()
   endif

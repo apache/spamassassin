@@ -27,7 +27,7 @@ Mail::SpamAssassin::Conf::LDAP - load SpamAssassin scores from LDAP database
 =head1 DESCRIPTION
 
 Mail::SpamAssassin is a module to identify spam using text analysis and
-several internet-based realtime blacklists.
+several internet-based realtime blocklists.
 
 This class is used internally by SpamAssassin to load scores from an LDAP
 database.  Please refer to the C<Mail::SpamAssassin> documentation for public

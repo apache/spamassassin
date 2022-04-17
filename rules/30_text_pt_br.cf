@@ -50,16 +50,16 @@ lang pt_BR unsafe_report ou confirmar que seu endereço de email pode receber spa
 lang pt_BR unsafe_report Se quiser visualizar a mensagem, pode ser mais seguro salvá-la em um arquivo
 lang pt_BR unsafe_report e abrí-la com um editor.
 
-lang pt_BR describe USER_IN_BLACKLIST Endereço do From: está na blacklist do usuário
-lang pt_BR describe USER_IN_WHITELIST Endereço do From: está na whitelist do usuário
-lang pt_BR describe USER_IN_DEF_WHITELIST Endereço do From: está na whitelist padrão
-lang pt_BR describe USER_IN_BLACKLIST_TO Usuário está listado na 'blacklist_to'
-lang pt_BR describe USER_IN_WELCOMELIST_TO Usuário está listado na 'whitelist_to'
+lang pt_BR describe USER_IN_BLOCKLIST Endereço do From: está na blocklist do usuário
+lang pt_BR describe USER_IN_WELCOMELIST Endereço do From: está na welcomelist do usuário
+lang pt_BR describe USER_IN_DEF_WELCOMELIST Endereço do From: está na welcomelist padrão
+lang pt_BR describe USER_IN_BLOCKLIST_TO Usuário está listado na 'blocklist_to'
+lang pt_BR describe USER_IN_WELCOMELIST_TO Usuário está listado na 'welcomelist_to'
 lang pt_BR describe USER_IN_MORE_SPAM_TO Usuário está listado na 'more_spam_to'
 lang pt_BR describe USER_IN_ALL_SPAM_TO Usuário está listado na 'all_spam_to'
 
 ifplugin Mail::SpamAssassin::Plugin::AWL
-lang pt_BR describe AWL Endereço do From: está na auto whitelist
+lang pt_BR describe AWL Endereço do From: está na auto welcomelist
 endif
 
 # 20_advance_fee.cf - These are removed and will break lint
@@ -357,7 +357,7 @@ lang pt_BR describe EMPTY_MESSAGE Mensagem parece não conter texto no conteúdo e
 lang pt_BR describe NO_HEADERS_MESSAGE Mensagem parece não conter grande parte dos cabeçalhos RFC-822
 
 # 20_net_tests.cf
-lang pt_BR describe DIGEST_MULTIPLE Remetente está listado em mais de uma blacklist
+lang pt_BR describe DIGEST_MULTIPLE Remetente está listado em mais de uma blocklist
 lang pt_BR describe NO_DNS_FOR_FROM Remetente não possui registros MX ou A no DNS
 
 # 20_phrases.cf
@@ -579,17 +579,17 @@ lang pt_BR describe BODY_8BITS Body contém 8 caracteres de 8-bit consecutivos
 endif
 
 # 25_uribl.cf
-lang pt_BR describe URIBL_SBL Contém uma URL listada na blacklist SBL
-lang pt_BR describe URIBL_DBL_SPAM Contém uma URL listada na blacklist DBL blocklist
+lang pt_BR describe URIBL_SBL Contém uma URL listada na blocklist SBL
+lang pt_BR describe URIBL_DBL_SPAM Contém uma URL listada na blocklist DBL blocklist
 lang pt_BR describe URIBL_DBL_ERROR Erro: Consultou a DBL por um IP
-#lang pt_BR describe URIBL_SC_SURBL Contém uma URL listada na blacklist SC SURBL - removed bug 7279
-lang pt_BR describe URIBL_WS_SURBL Contém uma URL listada na blacklist WS SURBL
-lang pt_BR describe URIBL_PH_SURBL Contém uma URL listada na blacklist PH SURBL
-#lang pt_BR describe URIBL_OB_SURBL Contém uma URL listada na blacklist OB SURBL - REMOVED BUG 6853
-#lang pt_BR describe URIBL_AB_SURBL Contém uma URL listada na blacklist AB SURBL - removed bug 7279
+#lang pt_BR describe URIBL_SC_SURBL Contém uma URL listada na blocklist SC SURBL - removed bug 7279
+lang pt_BR describe URIBL_WS_SURBL Contém uma URL listada na blocklist WS SURBL
+lang pt_BR describe URIBL_PH_SURBL Contém uma URL listada na blocklist PH SURBL
+#lang pt_BR describe URIBL_OB_SURBL Contém uma URL listada na blocklist OB SURBL - REMOVED BUG 6853
+#lang pt_BR describe URIBL_AB_SURBL Contém uma URL listada na blocklist AB SURBL - removed bug 7279
 #Changed from JP to ABUSE per bug 7279
-lang pt_BR describe URIBL_ABUSE_SURBL Contém uma URL listada na blacklist ABUSE SURBL
-lang pt_BR describe URIBL_BLACK Contém uma URL listada na blacklist URIBL
+lang pt_BR describe URIBL_ABUSE_SURBL Contém uma URL listada na blocklist ABUSE SURBL
+lang pt_BR describe URIBL_BLACK Contém uma URL listada na blocklist URIBL
 lang pt_BR describe URIBL_GREY Contém uma URL listada na greylist URIBL
 lang pt_BR describe URIBL_RED Contém uma URL listada na redlist URIBL
 
@@ -598,16 +598,12 @@ ifplugin Mail::SpamAssassin::Plugin::Shortcircuit
 lang pt_BR describe SHORTCIRCUIT Nem todas as regras foram executadas por causa de um problema em uma delas
 endif
 
-# 60_whitelist_dkim.cf
-lang pt_BR describe USER_IN_DKIM_WHITELIST Endereço do From: está na whitelist de DKIM do usuário
-lang pt_BR describe USER_IN_DEF_DKIM_WL Endereço do From: está na whitelist de DKIM padrão
+# 60_welcomelist_dkim.cf
+lang pt_BR describe USER_IN_DKIM_WELCOMELIST Endereço do From: está na welcomelist de DKIM do usuário
+lang pt_BR describe USER_IN_DEF_DKIM_WL Endereço do From: está na welcomelist de DKIM padrão
 
-# 60_whitelist_spf.cf
-lang pt_BR describe USER_IN_SPF_WHITELIST Endereço do From: está na whitelist de SPF do usuário
-lang pt_BR describe USER_IN_DEF_SPF_WL Endereço do From: está na whitelist de SPF padrão
-lang pt_BR describe ENV_AND_HDR_SPF_MATCH Endereço do From: confere com Envelope From e está na whitelist de SPF
-
-# 60_whitelist_subject.cf
-lang pt_BR describe SUBJECT_IN_WHITELIST Assunto contém palavra que está na whitelist do usuário
-lang pt_BR describe SUBJECT_IN_BLACKLIST Assunto contém palavra que está na blacklist do usuário
+# 60_welcomelist_spf.cf
+lang pt_BR describe USER_IN_SPF_WELCOMELIST Endereço do From: está na welcomelist de SPF do usuário
+lang pt_BR describe USER_IN_DEF_SPF_WL Endereço do From: está na welcomelist de SPF padrão
+lang pt_BR describe ENV_AND_HDR_SPF_MATCH Endereço do From: confere com Envelope From e está na welcomelist de SPF
 

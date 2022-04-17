@@ -53,23 +53,23 @@ sub new_checker {
     'locked_file'	=> ''
   };
 
-  my @order = split(/\s+/, $main->{conf}->{auto_whitelist_db_modules});
+  my @order = split(/\s+/, $main->{conf}->{auto_welcomelist_db_modules});
   untaint_var(\@order);
   my $dbm_module = Mail::SpamAssassin::Util::first_available_module (@order);
   if (!$dbm_module) {
-    die "auto-whitelist: cannot find a usable DB package from auto_whitelist_db_modules: " .
-	$main->{conf}->{auto_whitelist_db_modules}."\n";
+    die "auto-welcomelist: cannot find a usable DB package from auto_welcomelist_db_modules: " .
+	$main->{conf}->{auto_welcomelist_db_modules}."\n";
   }
 
-  my $umask = umask ~ (oct($main->{conf}->{auto_whitelist_file_mode}));
+  my $umask = umask ~ (oct($main->{conf}->{auto_welcomelist_file_mode}));
 
   # if undef then don't worry -- empty hash!
-  if (defined($main->{conf}->{auto_whitelist_path})) {
-    my $path = $main->sed_path($main->{conf}->{auto_whitelist_path});
+  if (defined($main->{conf}->{auto_welcomelist_path})) {
+    my $path = $main->sed_path($main->{conf}->{auto_welcomelist_path});
     my ($mod1, $mod2);
 
     if ($main->{locker}->safe_lock
-            ($path, 30, $main->{conf}->{auto_whitelist_file_mode}))
+            ($path, 30, $main->{conf}->{auto_welcomelist_file_mode}))
     {
       $self->{locked_file} = $path;
       $self->{is_locked}   = 1;
@@ -80,20 +80,20 @@ sub new_checker {
       ($mod1, $mod2) = ('R/O', O_RDONLY);
     }
 
-    dbg("auto-whitelist: tie-ing to DB file of type $dbm_module $mod1 in $path");
+    dbg("auto-welcomelist: tie-ing to DB file of type $dbm_module $mod1 in $path");
 
     ($self->{is_locked} && $dbm_module eq 'DB_File') and
             Mail::SpamAssassin::Util::avoid_db_file_locking_bug($path);
 
     if (! tie %{ $self->{accum} }, $dbm_module, $path, $mod2,
-            oct($main->{conf}->{auto_whitelist_file_mode}) & 0666)
+            oct($main->{conf}->{auto_welcomelist_file_mode}) & 0666)
     {
       my $err = $!;   # might get overwritten later
       if ($self->{is_locked}) {
         $self->{main}->{locker}->safe_unlock($self->{locked_file});
         $self->{is_locked} = 0;
       }
-      die "auto-whitelist: cannot open auto_whitelist_path $path: $err\n";
+      die "auto-welcomelist: cannot open auto_welcomelist_path $path: $err\n";
     }
   }
   umask $umask;
@@ -106,10 +106,10 @@ sub new_checker {
 
 sub finish {
   my $self = shift;
-  dbg("auto-whitelist: DB addr list: untie-ing and unlocking");
+  dbg("auto-welcomelist: DB addr list: untie-ing and unlocking");
   untie %{$self->{accum}};
   if ($self->{is_locked}) {
-    dbg("auto-whitelist: DB addr list: file locked, breaking lock");
+    dbg("auto-welcomelist: DB addr list: file locked, breaking lock");
     $self->{main}->{locker}->safe_unlock ($self->{locked_file});
     $self->{is_locked} = 0;
   }
@@ -128,7 +128,7 @@ sub get_addr_entry {
   $entry->{msgcount} = $self->{accum}->{$addr} || 0;
   $entry->{totscore} = $self->{accum}->{$addr.'|totscore'} || 0;
 
-  dbg("auto-whitelist: db-based $addr scores ".$entry->{msgcount}.'/'.$entry->{totscore});
+  dbg("auto-welcomelist: db-based $addr scores ".$entry->{msgcount}.'/'.$entry->{totscore});
   return $entry;
 }
 
@@ -143,7 +143,7 @@ sub add_score {
     $entry->{msgcount}++;
     $entry->{totscore} += $score;
 
-    dbg("auto-whitelist: add_score: new count: ".$entry->{msgcount}.", new totscore: ".$entry->{totscore});
+    dbg("auto-welcomelist: add_score: new count: ".$entry->{msgcount}.", new totscore: ".$entry->{totscore});
 
     $self->{accum}->{$entry->{addr}} = $entry->{msgcount};
     $self->{accum}->{$entry->{addr}.'|totscore'} = $entry->{totscore};
