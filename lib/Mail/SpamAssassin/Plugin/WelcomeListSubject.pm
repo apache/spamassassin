@@ -64,7 +64,9 @@ sub new {
   bless ($self, $class);
 
   $self->register_eval_rule ("check_subject_in_welcomelist", $Mail::SpamAssassin::Conf::TYPE_HEAD_EVALS);
+  $self->register_eval_rule ("check_subject_in_whitelist", $Mail::SpamAssassin::Conf::TYPE_HEAD_EVALS); # removed in 4.1
   $self->register_eval_rule ("check_subject_in_blocklist", $Mail::SpamAssassin::Conf::TYPE_HEAD_EVALS);
+  $self->register_eval_rule ("check_subject_in_blacklist", $Mail::SpamAssassin::Conf::TYPE_HEAD_EVALS); # removed in 4.1
 
   $self->set_config($mailsaobject->{conf});
 
@@ -130,6 +132,7 @@ sub check_subject_in_welcomelist {
 
   return $self->_check_subject($permsgstatus->{conf}->{welcomelist_subject}, $subject);
 }
+*check_subject_in_whitelist = \&check_subject_in_welcomelist; # removed in 4.1
 
 sub check_subject_in_blocklist {
   my ($self, $permsgstatus) = @_;
@@ -140,6 +143,7 @@ sub check_subject_in_blocklist {
 
   return $self->_check_subject($permsgstatus->{conf}->{blocklist_subject}, $subject);
 }
+*check_subject_in_blacklist = \&check_subject_in_blocklist;
 
 sub _check_subject {
   my ($self, $list, $subject) = @_;
