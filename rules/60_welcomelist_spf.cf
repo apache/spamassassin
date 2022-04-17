@@ -1,4 +1,4 @@
-# SpamAssassin rules file: default SPF whitelists
+# SpamAssassin rules file: default SPF welcomelists
 #
 # Please don't modify this file as your changes will be overwritten with
 # the next update. Use @@LOCAL_RULES_DIR@@/local.cf instead.
@@ -21,27 +21,50 @@
 # limitations under the License.
 # </@LICENSE>
 
-###########################################################################
-# SPF whitelist rules
-
 ifplugin Mail::SpamAssassin::Plugin::SPF
 
-header USER_IN_SPF_WHITELIST	eval:check_for_spf_whitelist_from()
-describe USER_IN_SPF_WHITELIST	From: address is in the user's SPF whitelist
-tflags USER_IN_SPF_WHITELIST	userconf nice noautolearn net
-reuse USER_IN_SPF_WHITELIST
+###########################################################################
+# SPF welcomelist rules
 
-header USER_IN_DEF_SPF_WL	eval:check_for_def_spf_whitelist_from()
-describe USER_IN_DEF_SPF_WL	From: address is in the default SPF white-list
-tflags USER_IN_DEF_SPF_WL	userconf nice noautolearn net
-reuse USER_IN_DEF_SPF_WL
+if can(Mail::SpamAssassin::Conf::feature_welcomelist_blocklist)
+  header USER_IN_SPF_WELCOMELIST	eval:check_for_spf_welcomelist_from()
+  describe USER_IN_SPF_WELCOMELIST	From: address is in the user's SPF welcomelist
+  tflags USER_IN_SPF_WELCOMELIST	userconf nice noautolearn net
+  reuse USER_IN_SPF_WELCOMELIST
+
+  meta USER_IN_SPF_WHITELIST		(USER_IN_SPF_WELCOMELIST)
+  describe USER_IN_SPF_WHITELIST	DEPRECATED: See USER_IN_SPF_WELCOMELIST
+  tflags USER_IN_SPF_WHITELIST		userconf nice noautolearn net
+  reuse USER_IN_SPF_WHITELIST
+
+  header USER_IN_DEF_SPF_WL		eval:check_for_def_spf_welcomelist_from()
+  describe USER_IN_DEF_SPF_WL		From: address is in the default SPF welcome-list
+  tflags USER_IN_DEF_SPF_WL		userconf nice noautolearn net
+  reuse USER_IN_DEF_SPF_WL
+endif
+if !can(Mail::SpamAssassin::Conf::feature_welcomelist_blocklist)
+  header USER_IN_SPF_WELCOMELIST	eval:check_for_spf_whitelist_from()
+  describe USER_IN_SPF_WELCOMELIST	From: address is in the user's SPF welcomelist
+  tflags USER_IN_SPF_WELCOMELIST	userconf nice noautolearn net
+  reuse USER_IN_SPF_WELCOMELIST
+
+  meta USER_IN_SPF_WHITELIST		(USER_IN_SPF_WELCOMELIST)
+  describe USER_IN_SPF_WHITELIST	DEPRECATED: See USER_IN_SPF_WELCOMELIST
+  tflags USER_IN_SPF_WHITELIST		userconf nice noautolearn net
+  reuse USER_IN_SPF_WHITELIST
+
+  header USER_IN_DEF_SPF_WL		eval:check_for_def_spf_whitelist_from()
+  describe USER_IN_DEF_SPF_WL		From: address is in the default SPF welcome-list
+  tflags USER_IN_DEF_SPF_WL		userconf nice noautolearn net
+  reuse USER_IN_DEF_SPF_WL
+endif
 
 meta ENV_AND_HDR_SPF_MATCH	(USER_IN_DEF_SPF_WL && __ENV_AND_HDR_FROM_MATCH)
 describe ENV_AND_HDR_SPF_MATCH	Env and Hdr From used in default SPF WL Match
 tflags ENV_AND_HDR_SPF_MATCH	userconf nice noautolearn net
 
 ###########################################################################
-# Default whitelists.  These should be addresses which send mail that is often
+# Default welcomelists.  These should be addresses which send mail that is often
 # tagged (incorrectly) as spam; it also helps that they be addresses of big
 # companies with lots of lawyers, so if spammers impersonate them, they'll get
 # into big trouble, so it doesn't provide a shortcut around SpamAssassin.
@@ -51,6 +74,49 @@ tflags ENV_AND_HDR_SPF_MATCH	userconf nice noautolearn net
 #
 # Please do not add unmoderated public mailing lists here.  They are
 # too easily abused by spammers.
+
+if can(Mail::SpamAssassin::Conf::feature_welcomelist_blocklist)
+
+def_welcomelist_from_spf   *@nytimes.com
+def_welcomelist_from_spf   *@amazon.com
+def_welcomelist_from_spf   *@amazon.co.uk
+def_welcomelist_from_spf   *@*.amazon.co.uk
+def_welcomelist_from_spf   *@ora.com
+def_welcomelist_from_spf   *@*.ora.com
+def_welcomelist_from_spf   *@mypoints.com
+def_welcomelist_from_spf   *@*.mypoints.com
+def_welcomelist_from_spf   *@paypal.com
+def_welcomelist_from_spf   *@ebay.com
+def_welcomelist_from_spf   *@foolsubs.com
+def_welcomelist_from_spf   *@match.com
+
+# bugtraq: can contain malicious Javascript etc.
+def_welcomelist_from_spf   *@securityfocus.com
+
+def_welcomelist_from_spf   *@mediaunspun.imakenews.net
+
+# sender of Cringley newsletter
+def_welcomelist_from_spf   *@bdcimail.com
+
+# Silicon.com newslettters - we see thousands of these
+def_welcomelist_from_spf   *@silicon.com
+
+# C|Net news.com newsletters
+def_welcomelist_from_spf   *@newsletter.online.com
+
+# bug 1348
+def_welcomelist_from_spf   *@enews.buy.com
+def_welcomelist_from_spf   *@palm.m0.net
+def_welcomelist_from_spf   *@handspring.4at1.com
+
+endif
+
+
+###
+### For <4.0 compatibility
+###
+
+if !can(Mail::SpamAssassin::Conf::feature_welcomelist_blocklist)
 
 def_whitelist_from_spf   *@nytimes.com
 def_whitelist_from_spf   *@amazon.com
@@ -84,4 +150,11 @@ def_whitelist_from_spf   *@enews.buy.com
 def_whitelist_from_spf   *@palm.m0.net
 def_whitelist_from_spf   *@handspring.4at1.com
 
+endif
+
+###
+###
+###
+
 endif # Mail::SpamAssassin::Plugin::SPF
+
