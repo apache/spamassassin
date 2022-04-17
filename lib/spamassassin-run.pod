@@ -62,7 +62,7 @@ Options:
  -4 --ipv4only, --ipv4-only, --ipv4 Use IPv4, disable use of IPv6 for DNS etc.
  -6                                Use IPv6, disable use of IPv4 where possible
  --progress                        Print progress bar
- -D, --debug [area=n,...]          Print debugging messages
+ -D, --debug [area,...]            Print debugging messages
  -V, --version                     Print version
  -h, --help                        Print usage message
 
@@ -295,6 +295,9 @@ I<area> is the area of the code to instrument. For example, to produce
 diagnostic output on bayes, learn, and dns, use:
 
         spamassassin -D bayes,learn,dns
+
+Use an empty string (-D '') to indicate no areas when the next item on the
+command line is a path, to prevent the path from being parsed as an area.
 
 Higher priority informational messages that are suitable for logging in normal
 circumstances are available with an area of "info".
