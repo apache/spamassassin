@@ -320,6 +320,7 @@ sub parse {
     }
     elsif ($key eq 'file') {
       if ($value =~ /^start\s+(.+)$/) {
+        dbg("config: parsing file $1");
         push (@curfile_stack, $self->{currentfile});
         $self->{currentfile} = $1;
         next;
