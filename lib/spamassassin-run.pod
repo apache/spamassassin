@@ -167,6 +167,8 @@ are no errors, or greater than 0 if any errors are found.
 
 =item B<-W>, B<--add-to-welcomelist>
 
+Previously --add-to-whitelist which will work interchangeably until 4.1.
+
 Add all email addresses, in the headers and body of the mail message read
 from STDIN, to a persistent address welcomelist.  Note that you must be running
 C<spamassassin> or C<spamd> with a persistent address list plugin enabled for
@@ -174,12 +176,16 @@ this to work.
 
 =item B<--add-to-blocklist>
 
+Previously --add-to-blacklist which will work interchangeably until 4.1.
+
 Add all email addresses, in the headers and body of the mail message read
 from STDIN, to the persistent address blocklist.  Note that you must be
 running C<spamassassin> or C<spamd> with a persistent address list plugin
 enabled for this to work.
 
 =item B<-R>, B<--remove-from-welcomelist>
+
+Previously --remove-from-whitelist which will work interchangeably until 4.1.
 
 Remove all email addresses, in the headers and body of the mail message read
 from STDIN, from a persistent address list. STDIN must contain a full email
@@ -191,17 +197,23 @@ address list plugin enabled for this to work.
 
 =item B<--add-addr-to-welcomelist>
 
+Previously --add-addr-to-whitelist which will work interchangeably until 4.1.
+
 Add the named email address to a persistent address welcomelist.  Note that you
 must be running C<spamassassin> or C<spamd> with a persistent address list
 plugin enabled for this to work.
 
 =item B<--add-addr-to-blocklist>
 
+Previously --add-addr-to-blacklist which will work interchangeably until 4.1.
+
 Add the named email address to a persistent address blocklist.  Note that you
 must be running C<spamassassin> or C<spamd> with a persistent address list
 plugin enabled for this to work.
 
 =item B<--remove-addr-from-welcomelist>
+
+Previously --remove-addr-from-whitelist which will work interchangeably until 4.1.
 
 Remove the named email address from a persistent address welcomelist.  Note that
 you must be running C<spamassassin> or C<spamd> with a persistent address
