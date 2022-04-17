@@ -51,7 +51,7 @@ if !can(Mail::SpamAssassin::Conf::feature_welcomelist_blocklist)
   describe USER_IN_DKIM_WHITELIST	DEPRECATED: See USER_IN_DKIM_WELCOMELIST
   tflags USER_IN_DKIM_WHITELIST		nice noautolearn net userconf
   score USER_IN_DKIM_WHITELIST		-100.000
-  reuse USER_IN_DKIM_WHITELSIT
+  reuse USER_IN_DKIM_WHITELIST
 endif
 
 if can(Mail::SpamAssassin::Conf::feature_welcomelist_blocklist)
