@@ -143,7 +143,7 @@ sub check_subject_in_blocklist {
 
   return $self->_check_subject($permsgstatus->{conf}->{blocklist_subject}, $subject);
 }
-*check_subject_in_blacklist = \&check_subject_in_blocklist;
+*check_subject_in_blacklist = \&check_subject_in_blocklist; # removed in 4.1
 
 sub _check_subject {
   my ($self, $list, $subject) = @_;
