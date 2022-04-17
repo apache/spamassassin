@@ -5413,7 +5413,8 @@ sub feature_meta_rules_matching { 1 } # meta rules_matching() expression
 sub feature_subjprefix { 1 } # add subject prefixes rule option
 sub feature_bayes_stopwords { 1 } # multi language stopwords in Bayes
 sub feature_get_host { 1 } # $pms->get() :host :domain :ip :revip # was implemented together with AskDNS::has_tag_header # Bug 7734
-sub feature_welcomelist_blocklist { 1 } # bz 7826
+sub feature_blocklist_welcomelist { 1 } # bz 7826 - do not use, for backwards compatibility
+sub feature_welcomelist_blocklist { 1 } # bz 7826 - this is the actual feature_ to use, everything is renamed at this point
 sub feature_header_address_parser { 1 } # improved header address parsing using Email::Address::XS, $pms->get() list context
 sub feature_local_tests_only { 1 } # Config parser supports "if (local_tests_only)"
 sub feature_header_first_last { 1 } # Can actually use :first :last modifiers in rules
