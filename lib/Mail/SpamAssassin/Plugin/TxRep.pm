@@ -993,6 +993,7 @@ not have any execute bits set (the umask is set to 0111).
         if ($value !~ /^0?[0-7]{3}$/) {
             return $Mail::SpamAssassin::Conf::INVALID_VALUE;
         }
+        $value = '0'.$value if length($value) == 3; # Bug 5771
         $self->{auto_whitelist_file_mode} = untaint_var($value);
     }
   });
