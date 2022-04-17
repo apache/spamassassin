@@ -2,6 +2,11 @@
 Note for Users Upgrading to SpamAssassin 4.0.0
 ----------------------------------------------
 
+- All rules, functions, command line options and modules that contain
+  "whitelist" or "blacklist" have been renamed to contain more racially
+  neutral "welcomelist" and "blocklist" terms.  Old names will continue work
+  as backwards compatibility atleast until 4.1 release.  (Bug 7826)
+
 - Setting normalize_charset is now enabled by default.  Note that rules
   should not expect specific non-UTF8 or UTF8 encoding in body.  Matching is
   done against raw bytes, which may vary depending on normalize_charset
