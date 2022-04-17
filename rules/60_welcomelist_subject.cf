@@ -1,4 +1,4 @@
-# SpamAssassin rules file: default whitelist/blacklist subject
+# SpamAssassin rules file: default welcomelist/blocklist subject
 #
 # Please don't modify this file as your changes will be overwritten with
 # the next update. Use @@LOCAL_RULES_DIR@@/local.cf instead.
@@ -22,45 +22,58 @@
 # </@LICENSE>
 
 ###########################################################################
-# Whitelist/Blacklist rules
+# Welcomelist/Blocklist rules
 #
 # Note that most of these get 'noautolearn'.  They should not be
 # considered when deciding whether to auto-learn a message, as a
 # user slip-up could result in scribbling side-effects in the bayes
 # db as a result -- which is hard to remedy.
 
-# 4.0 module rename, Bug 7826
+# 4.0 / Bug 7826 renames whitelist to welcomelist and blacklist to blocklist
+# Module was renamed WhiteListSubject -> WelcomeListSubject
 ifplugin Mail::SpamAssassin::Plugin::WelcomeListSubject
+  header SUBJECT_IN_WELCOMELIST		eval:check_subject_in_welcomelist()
+  describe SUBJECT_IN_WELCOMELIST	Subject: contains string in the user's welcome-list
+  tflags SUBJECT_IN_WELCOMELIST		userconf nice noautolearn
+  score SUBJECT_IN_WELCOMELIST		-0.01
 
-header SUBJECT_IN_WELCOMELIST	eval:check_subject_in_welcomelist()
-describe SUBJECT_IN_WELCOMELIST	Subject: contains string in the user's welcome-list
-tflags SUBJECT_IN_WELCOMELIST	userconf nice noautolearn
-score SUBJECT_IN_WELCOMELIST	-100
+  meta SUBJECT_IN_WHITELIST		(SUBJECT_IN_WELCOMELIST)
+  describe SUBJECT_IN_WHITELIST		DEPRECATED: See SUBJECT_IN_WELCOMELIST
+  tflags SUBJECT_IN_WHITELIST		userconf nice noautolearn
+  score SUBJECT_IN_WHITELIST		-100
 
-header SUBJECT_IN_BLOCKLIST	eval:check_subject_in_blocklist()
-describe SUBJECT_IN_BLOCKLIST	Subject: contains string in the user's block-list
-tflags SUBJECT_IN_BLOCKLIST	userconf noautolearn
-score SUBJECT_IN_BLOCKLIST	100
+  header SUBJECT_IN_BLOCKLIST		eval:check_subject_in_blocklist()
+  describe SUBJECT_IN_BLOCKLIST		Subject: contains string in the user's block-list
+  tflags SUBJECT_IN_BLOCKLIST		userconf noautolearn
+  score SUBJECT_IN_BLOCKLIST		0.01
 
-meta SUBJECT_IN_WHITELIST	(SUBJECT_IN_WELCOMELIST)
-describe SUBJECT_IN_WHITELIST	DEPRECATED: See SUBJECT_IN_WELCOMELIST
-score SUBJECT_IN_WHITELIST	-0.01
+  meta SUBJECT_IN_BLACKLIST		(SUBJECT_IN_BLOCKLIST)
+  describe SUBJECT_IN_BLACKLIST		DEPRECATED: See SUBJECT_IN_BLOCKLIST
+  tflags SUBJECT_IN_BLACKLIST		userconf noautolearn
+  score SUBJECT_IN_BLACKLIST		100
+endif
 
-meta SUBJECT_IN_BLACKLIST	(SUBJECT_IN_BLOCKLIST)
-describe SUBJECT_IN_BLACKLIST	DEPRECATED: See SUBJECT_IN_BLOCKLIST
-score SUBJECT_IN_BLACKLIST	-0.01
-
-else
+if !plugin(Mail::SpamAssassin::Plugin::WelcomeListSubject)
 ifplugin Mail::SpamAssassin::Plugin::WhiteListSubject
+  header SUBJECT_IN_WELCOMELIST		eval:check_subject_in_whitelist()
+  describe SUBJECT_IN_WELCOMELIST	Subject: contains string in the user's welcome-list
+  tflags SUBJECT_IN_WELCOMELIST		userconf nice noautolearn
+  score SUBJECT_IN_WELCOMELIST		-0.01
 
-header SUBJECT_IN_WHITELIST	eval:check_subject_in_whitelist()
-describe SUBJECT_IN_WHITELIST	Subject: contains string in the user's white-list
-tflags SUBJECT_IN_WHITELIST	userconf nice noautolearn
+  meta SUBJECT_IN_WHITELIST		(SUBJECT_IN_WELCOMELIST)
+  describe SUBJECT_IN_WHITELIST		DEPRECATED: See SUBJECT_IN_WELCOMELIST
+  tflags SUBJECT_IN_WHITELIST		userconf nice noautolearn
+  score SUBJECT_IN_WHITELIST		-100
 
-header SUBJECT_IN_BLACKLIST	eval:check_subject_in_blacklist()
-describe SUBJECT_IN_BLACKLIST	Subject: contains string in the user's black-list
-tflags SUBJECT_IN_BLACKLIST	userconf noautolearn
+  header SUBJECT_IN_BLOCKLIST		eval:check_subject_in_blacklist()
+  describe SUBJECT_IN_BLOCKLIST		Subject: contains string in the user's block-list
+  tflags SUBJECT_IN_BLOCKLIST		userconf noautolearn
+  score SUBJECT_IN_BLOCKLIST		0.01
 
-endif # Mail::SpamAssassin::Plugin::WhiteListSubject
+  meta SUBJECT_IN_BLACKLIST		(SUBJECT_IN_BLOCKLIST)
+  describe SUBJECT_IN_BLACKLIST		DEPRECATED: See SUBJECT_IN_BLOCKLIST
+  tflags SUBJECT_IN_BLACKLIST		userconf noautolearn
+  score SUBJECT_IN_BLACKLIST		100
+endif
 endif
 

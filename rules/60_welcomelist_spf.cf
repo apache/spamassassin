@@ -26,6 +26,7 @@ ifplugin Mail::SpamAssassin::Plugin::SPF
 ###########################################################################
 # SPF welcomelist rules
 
+# 4.0 / Bug 7826 renames whitelist to welcomelist and blacklist to blocklist
 if can(Mail::SpamAssassin::Conf::feature_welcomelist_blocklist)
   header USER_IN_SPF_WELCOMELIST	eval:check_for_spf_welcomelist_from()
   describe USER_IN_SPF_WELCOMELIST	From: address is in the user's SPF welcomelist
