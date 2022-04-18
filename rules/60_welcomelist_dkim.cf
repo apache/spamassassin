@@ -31,27 +31,35 @@ if can(Mail::SpamAssassin::Conf::feature_welcomelist_blocklist)
   header USER_IN_DKIM_WELCOMELIST	eval:check_for_dkim_welcomelist_from()
   describe USER_IN_DKIM_WELCOMELIST	From: address is in the user's DKIM welcomelist
   tflags USER_IN_DKIM_WELCOMELIST	nice noautolearn net userconf
-  score USER_IN_DKIM_WELCOMELIST	-0.01
+  score USER_IN_DKIM_WELCOMELIST	-100
   reuse USER_IN_DKIM_WELCOMELIST
 
-  meta USER_IN_DKIM_WHITELIST		(USER_IN_DKIM_WELCOMELIST)
-  describe USER_IN_DKIM_WHITELIST	DEPRECATED: See USER_IN_DKIM_WELCOMELIST
-  tflags USER_IN_DKIM_WHITELIST		nice noautolearn net userconf
-  score USER_IN_DKIM_WHITELIST		-100.000
-  reuse USER_IN_DKIM_WHITELIST
+  # Backwards compatibility
+  # To disable set "enable_compat welcomelist_blocklist" in init.pre
+  if !has(Mail::SpamAssassin::Conf::compat_welcomelist_blocklist)
+    meta USER_IN_DKIM_WHITELIST		(USER_IN_DKIM_WELCOMELIST)
+    describe USER_IN_DKIM_WHITELIST	DEPRECATED: See USER_IN_DKIM_WELCOMELIST
+    tflags USER_IN_DKIM_WHITELIST	nice noautolearn net userconf
+    score USER_IN_DKIM_WHITELIST	-100
+    reuse USER_IN_DKIM_WHITELIST
+    score USER_IN_DKIM_WELCOMELIST	-0.01
+  endif
 endif
 if !can(Mail::SpamAssassin::Conf::feature_welcomelist_blocklist)
   header USER_IN_DKIM_WELCOMELIST	eval:check_for_dkim_whitelist_from()
   describe USER_IN_DKIM_WELCOMELIST	From: address is in the user's DKIM welcomelist
   tflags USER_IN_DKIM_WELCOMELIST	nice noautolearn net userconf
-  score USER_IN_DKIM_WELCOMELIST	-0.01
+  score USER_IN_DKIM_WELCOMELIST	-100
   reuse USER_IN_DKIM_WELCOMELIST
 
-  meta USER_IN_DKIM_WHITELIST		(USER_IN_DKIM_WELCOMELIST)
-  describe USER_IN_DKIM_WHITELIST	DEPRECATED: See USER_IN_DKIM_WELCOMELIST
-  tflags USER_IN_DKIM_WHITELIST		nice noautolearn net userconf
-  score USER_IN_DKIM_WHITELIST		-100.000
-  reuse USER_IN_DKIM_WHITELIST
+  if !has(Mail::SpamAssassin::Conf::compat_welcomelist_blocklist)
+    meta USER_IN_DKIM_WHITELIST		(USER_IN_DKIM_WELCOMELIST)
+    describe USER_IN_DKIM_WHITELIST	DEPRECATED: See USER_IN_DKIM_WELCOMELIST
+    tflags USER_IN_DKIM_WHITELIST	nice noautolearn net userconf
+    score USER_IN_DKIM_WHITELIST	-100
+    reuse USER_IN_DKIM_WHITELIST
+    score USER_IN_DKIM_WELCOMELIST	-0.01
+  endif
 endif
 
 if can(Mail::SpamAssassin::Conf::feature_welcomelist_blocklist)

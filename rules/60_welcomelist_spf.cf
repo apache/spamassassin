@@ -31,14 +31,19 @@ if can(Mail::SpamAssassin::Conf::feature_welcomelist_blocklist)
   header USER_IN_SPF_WELCOMELIST	eval:check_for_spf_welcomelist_from()
   describe USER_IN_SPF_WELCOMELIST	From: address is in the user's SPF welcomelist
   tflags USER_IN_SPF_WELCOMELIST	userconf nice noautolearn net
-  score USER_IN_SPF_WELCOMELIST		-0.01
+  score USER_IN_SPF_WELCOMELIST		-100
   reuse USER_IN_SPF_WELCOMELIST
 
-  meta USER_IN_SPF_WHITELIST		(USER_IN_SPF_WELCOMELIST)
-  describe USER_IN_SPF_WHITELIST	DEPRECATED: See USER_IN_SPF_WELCOMELIST
-  tflags USER_IN_SPF_WHITELIST		userconf nice noautolearn net
-  score USER_IN_SPF_WHITELIST		-100
-  reuse USER_IN_SPF_WHITELIST
+  # Backwards compatibility
+  # To disable set "enable_compat welcomelist_blocklist" in init.pre
+  if !has(Mail::SpamAssassin::Conf::compat_welcomelist_blocklist)
+    meta USER_IN_SPF_WHITELIST		(USER_IN_SPF_WELCOMELIST)
+    describe USER_IN_SPF_WHITELIST	DEPRECATED: See USER_IN_SPF_WELCOMELIST
+    tflags USER_IN_SPF_WHITELIST	userconf nice noautolearn net
+    score USER_IN_SPF_WHITELIST		-100
+    reuse USER_IN_SPF_WHITELIST
+    score USER_IN_SPF_WELCOMELIST	-0.01
+  endif
 
   header USER_IN_DEF_SPF_WL		eval:check_for_def_spf_welcomelist_from()
   describe USER_IN_DEF_SPF_WL		From: address is in the default SPF welcome-list

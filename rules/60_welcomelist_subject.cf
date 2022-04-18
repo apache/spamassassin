@@ -35,22 +35,30 @@ ifplugin Mail::SpamAssassin::Plugin::WelcomeListSubject
   header SUBJECT_IN_WELCOMELIST		eval:check_subject_in_welcomelist()
   describe SUBJECT_IN_WELCOMELIST	Subject: contains string in the user's welcome-list
   tflags SUBJECT_IN_WELCOMELIST		userconf nice noautolearn
-  score SUBJECT_IN_WELCOMELIST		-0.01
+  score SUBJECT_IN_WELCOMELIST		-100
 
-  meta SUBJECT_IN_WHITELIST		(SUBJECT_IN_WELCOMELIST)
-  describe SUBJECT_IN_WHITELIST		DEPRECATED: See SUBJECT_IN_WELCOMELIST
-  tflags SUBJECT_IN_WHITELIST		userconf nice noautolearn
-  score SUBJECT_IN_WHITELIST		-100
+  # Backwards compatibility
+  # To disable set "enable_compat welcomelist_blocklist" in init.pre
+  if !has(Mail::SpamAssassin::Conf::compat_welcomelist_blocklist)
+    meta SUBJECT_IN_WHITELIST		(SUBJECT_IN_WELCOMELIST)
+    describe SUBJECT_IN_WHITELIST	DEPRECATED: See SUBJECT_IN_WELCOMELIST
+    tflags SUBJECT_IN_WHITELIST		userconf nice noautolearn
+    score SUBJECT_IN_WHITELIST		-100
+    score SUBJECT_IN_WELCOMELIST	-0.01
+  endif
 
   header SUBJECT_IN_BLOCKLIST		eval:check_subject_in_blocklist()
   describe SUBJECT_IN_BLOCKLIST		Subject: contains string in the user's block-list
   tflags SUBJECT_IN_BLOCKLIST		userconf noautolearn
-  score SUBJECT_IN_BLOCKLIST		0.01
+  score SUBJECT_IN_BLOCKLIST		100
 
-  meta SUBJECT_IN_BLACKLIST		(SUBJECT_IN_BLOCKLIST)
-  describe SUBJECT_IN_BLACKLIST		DEPRECATED: See SUBJECT_IN_BLOCKLIST
-  tflags SUBJECT_IN_BLACKLIST		userconf noautolearn
-  score SUBJECT_IN_BLACKLIST		100
+  if !has(Mail::SpamAssassin::Conf::compat_welcomelist_blocklist)
+    meta SUBJECT_IN_BLACKLIST		(SUBJECT_IN_BLOCKLIST)
+    describe SUBJECT_IN_BLACKLIST	DEPRECATED: See SUBJECT_IN_BLOCKLIST
+    tflags SUBJECT_IN_BLACKLIST		userconf noautolearn
+    score SUBJECT_IN_BLACKLIST		100
+    score SUBJECT_IN_BLOCKLIST		0.01
+  endif
 endif
 
 if !plugin(Mail::SpamAssassin::Plugin::WelcomeListSubject)
