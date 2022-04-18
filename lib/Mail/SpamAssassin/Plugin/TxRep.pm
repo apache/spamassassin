@@ -939,7 +939,7 @@ across all users.
 
   push (@cmds, {
     setting      => 'auto_welcomelist_path',
-    setting      => ['auto_whitelist_path'], # removed in 4.1
+    aliases      => ['auto_whitelist_path'], # removed in 4.1
     is_admin     => 1,
     default      => '__userstate__/tx-reputation',
     type         => $Mail::SpamAssassin::Conf::CONF_TYPE_STRING,
