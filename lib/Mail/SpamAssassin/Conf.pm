@@ -4604,6 +4604,40 @@ version.  So 3.0.0 is C<3.000000>, and 3.4.80 is C<3.004080>.
     }
   });
 
+=item enable_compat xxxxxx
+
+Define a version compatibility flag.
+
+This creates a function named C<Mail::SpamAssassin::Conf::compat_xxxxxx>,
+which returns true.  It can be used for example in cf-files, similarly as existing
+C<feature_> checks:
+
+  if can(Mail::SpamAssassin::Conf::compat_xxxxxx)
+
+Name can only consist of [a-zA-Z0-9_] characters.
+
+Mainly used by SpamAssassin distribution to handle backwards compatibility
+issues.
+
+=cut
+
+  push (@cmds, {
+    setting => 'enable_compat',
+    is_admin => 1,
+    code => sub {
+      my ($self, $key, $value, $line) = @_;
+      if ($value eq '') {
+        return $MISSING_REQUIRED_VALUE;
+      } elsif ($value !~ /^[a-zA-Z0-9_]{1,128}$/) {
+        return $INVALID_VALUE;
+      }
+      # Inject compat method
+      { no strict 'refs';
+        *{"Mail::SpamAssassin::Conf::compat_$value"} = sub { 1 };
+      }
+    }
+  });
+
 =back
 
 =head1 TEMPLATE TAGS
