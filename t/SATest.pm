@@ -197,7 +197,7 @@ sub sa_t_init {
   $set_user_prefs = 0;
   $default_cf_lines = "
     bayes_path ./$userstate/bayes
-    auto_whitelist_path ./$userstate/auto-welcomelist
+    auto_welcomelist_path ./$userstate/auto-welcomelist
   ";
 
   read_config();
