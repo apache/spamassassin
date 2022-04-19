@@ -30,7 +30,7 @@ TMP="/usr/local/spamassassin/automc/tmp/generate-new-scores"
 
 rm -rf $TMP
 mkdir -p $TMP
-cd $TMP
+cd $TMP || exit 1
 
 set -e
 
@@ -54,8 +54,8 @@ echo "Finished generating new scores"
 pwd
 
 # 20101106 - temporarily s/0.000/0.001/g scores - bug 6510
-sed -i -e 's/0.000/0.001 # force non-zero/g' scores-set0
-sed -i -e 's/0.000/0.001 # force non-zero/g' scores-set1
+sed -i -e 's/\b0\.000/0.001 # force non-zero/g' scores-set0
+sed -i -e 's/\b0\.000/0.001 # force non-zero/g' scores-set1
 
 cp scores-set0 scores-set2
 cp scores-set1 scores-set3
