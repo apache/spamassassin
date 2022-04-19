@@ -6,7 +6,8 @@ LOGDIR="/var/www/automc.spamassassin.org/mkupdates"
 REPDIR="/var/www/ruleqa.spamassassin.org/reports"
 UPDDIR="/var/www/automc.spamassassin.org/updates"
 
-VERSIONS="3.4.4"
+# Tarball creation disabled, see comment near make_tarball_for_version call
+#VERSIONS="3.4.4"
 
 cd /usr/local/spamassassin/automc/svn/trunk
 
@@ -267,9 +268,13 @@ set -x
 
 promote_active_rules
 
-for VER in $VERSIONS; do
-  make_tarball_for_version $VER
-done
+### Disabled update.tar.gz creation in run_nightly, not sure what the purpose
+### was, as mkupdate-with-scores already creates much more thoroughly tested
+### tarball - if that failed, probably not a good idea to make one here
+###  19.4.2022 -hk
+#for VER in $VERSIONS; do
+#  make_tarball_for_version $VER
+#done
 
 set +x
 

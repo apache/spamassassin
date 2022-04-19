@@ -44,6 +44,7 @@ PROGDIR=`dirname $0`
 PROGNAME=`basename $0 .sh`
 HOST=`hostname -f`
 
+SVN_BASEURL="https://svn.apache.org/repos/asf/spamassassin"
 TMPDIR="/usr/local/spamassassin/automc/tmp/${PROGNAME}"
 UPDATEDIR="/var/www/automc.spamassassin.org/updates"
 KEYDIR="/usr/local/spamassassin/automc/key"
@@ -80,13 +81,13 @@ echo "REVERT_REVISION=$REVERT_REVISION"
 
 test_version() {
   SA_VERSION=$1
-  SA_SVN_TAG=$2
+  SA_SVN_PATH=$2
 
   # to heck with dealing with svn update failures
   rm -rf release_$SA_VERSION
 
   # test the release on the version(s) of spamassassin the update is meant for
-  svn co https://svn.apache.org/repos/asf/spamassassin/$SA_SVN_TAG release_$SA_VERSION
+  svn co $SVN_BASEURL/$SA_SVN_PATH release_$SA_VERSION
 
   cd release_$SA_VERSION
 
@@ -99,18 +100,19 @@ test_version() {
   # need rules directory or build won't work
   if [ ! -e rules ]; then cp -a ../trunk/rules .; fi
 
+  rm -rf $TMPDIR/release_$SA_VERSION
   perl Makefile.PL PREFIX=$TMPDIR/release_$SA_VERSION < /dev/null
   make
   make install
 
-  set +e
-  ./sa-update -D --install $TMPDIR/${REVISION}.tar.gz
-  STATUS=$?
-  set -e
+  ./sa-update -D --install $TMPDIR/${REVISION}.tar.gz || {
+    echo "FATAL: sa-update test failed for version $SA_VERSION (r$REVISION)" >&2
+    exit $?
+  }
 
   cd ..
   rm -rf release_$SA_VERSION $TMPDIR/release_$SA_VERSION
-  return $STATUS
+  return 0
 }
 
 make_rule_update_from_trunk() {
@@ -118,14 +120,14 @@ make_rule_update_from_trunk() {
   rm -rf trunk trunk-rulesrc-scores
 
   # get the latest scores for new rules
-  svn co https://svn.apache.org/repos/asf/spamassassin/trunk/rulesrc/scores trunk-rulesrc-scores
+  svn co $SVN_BASEURL/trunk/rulesrc/scores trunk-rulesrc-scores
 
   # get the revision number of the rules
   # TODO: have the script that make 72_scores.cf include a revision number
   #REVISION=`head -1 trunk-rulesrc-scores/72_scores.cf | cut -d" " -f6`
   REVISION=`head -1 trunk-rulesrc-scores/scores-set* | cut -d" " -f9 | sort -rn | head -1`
 
-  svn co --revision=$REVISION https://svn.apache.org/repos/asf/spamassassin/trunk trunk
+  svn co --revision=$REVISION $SVN_BASEURL/trunk trunk
 
   cd trunk
 
@@ -133,8 +135,10 @@ make_rule_update_from_trunk() {
     svn up build
   fi
 
+  rm -rf $TMPDIR/trunk
   perl Makefile.PL PREFIX=$TMPDIR/trunk < /dev/null
   make
+  make test TEST_FILES="t/basic_lint.t t/basic_lint_without_sandbox.t t/basic_meta.t"
 
   cd ..
 
@@ -153,9 +157,7 @@ make_rule_update_from_trunk() {
 
   # remove files we don't want to ship in updates
   # remember that 3KB == 1GB of traffic on the mirrors as of Jan 1, 2010
-  set +e
   rm -f 70_sandbox.cf 70_inactive.cf STATISTICS-set?.txt
-  set -e
 
   mkdir -p $TMPDIR/trunk/etc/mail/spamassassin
   #cp *.pre *.cf *.txt languages user_prefs.template $TMPDIR/trunk/etc/mail/spamassassin/.
@@ -174,42 +176,17 @@ make_rule_update_from_trunk() {
   tar -ztvf $TMPDIR/${REVISION}.tar.gz
 }
 
-copy_update_paranoid() {
-  SRC=$1
-  DST=$2
-
-  set +e
-  cp $SRC $DST
-  diff -u $SRC $DST
-  if [ $? -ne 0 ]; then
-    set -e
-    return 1
-  fi
-  set -e
-  return 0
-}
-
 copy_existing_update_for_reversion_testing() {
-  EXIT=0
-  (
-    copy_update_paranoid "$UPDATEDIR/$REVERT_REVISION.tar.gz"      "$TMPDIR/$REVISION.tar.gz" &&
-    copy_update_paranoid "$UPDATEDIR/$REVERT_REVISION.tar.gz.asc"  "$TMPDIR/$REVISION.tar.gz.asc" &&
-    copy_update_paranoid "$UPDATEDIR/$REVERT_REVISION.tar.gz.sha1" "$TMPDIR/$REVISION.tar.gz.sha1" &&
-    copy_update_paranoid "$UPDATEDIR/$REVERT_REVISION.tar.gz.sha256" "$TMPDIR/$REVISION.tar.gz.sha256" &&
-    copy_update_paranoid "$UPDATEDIR/$REVERT_REVISION.tar.gz.sha512" "$TMPDIR/$REVISION.tar.gz.sha512"
-  ) || EXIT=6
-
-  # copying the update files went wrong exit
-  if [ $EXIT -gt 0 ]; then
+  cp "$UPDATEDIR/$REVERT_REVISION.tar.gz"* "$TMPDIR/" || {
     echo "Could not copy existing revision $REVERT_REVISION, to temporary testing directory, aborting!"
     exit $EXIT
-  fi
+  }
 }
 
 check_for_disable-automatic-update_file_in_svn() {
   rm -rf $TMPDIR/svn-scores-latest
   # checkout the latest scores directory
-  svn co https://svn.apache.org/repos/asf/spamassassin/trunk/rulesrc/scores/ $TMPDIR/svn-scores-latest
+  svn co $SVN_BASEURL/trunk/rulesrc/scores/ $TMPDIR/svn-scores-latest
 
   AUTOUPDATESDISABLED=0
 
@@ -248,6 +225,18 @@ disable_auto_update_publishing_and_get_new_update_revision_number() {
   echo "New update version/revision will be $REVISION"
 }
 
+svn_path_exists() {
+  SVNINFO=`svn info $1 2>&1 || true`
+  # W170000 == non-existent revision
+  if [[ $SVNINFO =~ W170000: ]]; then return 1; fi
+  # Hardfail on any other error
+  if [[ ! $SVNINFO =~ Revision: ]]; then
+    echo "svn info failed: $SVNINFO" >&2
+    exit 1
+  fi
+  return 0
+}
+
 rm -rf $TMPDIR
 mkdir $TMPDIR
 cd $TMPDIR
@@ -279,19 +268,38 @@ fi
 # test to make sure it works with sa-update --install
 TESTED_VERSIONS=""
 
+# Iterate through all 3.4 versions (3.4.1 - 3.4.x, and the 3.4 HEAD)
 MAJOR_VERS=3
 for (( MINOR_VERS=4; 1; MINOR_VERS++ )); do
   for (( UPDATE_VERS=1; 1; UPDATE_VERS++ )); do
-    svn info https://svn.apache.org/repos/asf/spamassassin/tags/spamassassin_release_${MAJOR_VERS}_${MINOR_VERS}_${UPDATE_VERS} || break
-    test_version ${MAJOR_VERS}.${MINOR_VERS}.${UPDATE_VERS} tags/spamassassin_release_${MAJOR_VERS}_${MINOR_VERS}_${UPDATE_VERS} &&
-      TESTED_VERSIONS="$TESTED_VERSIONS ${MAJOR_VERS}.${MINOR_VERS}.${UPDATE_VERS}"
+    REL=${MAJOR_VERS}_${MINOR_VERS}_${UPDATE_VERS}
+    if svn_path_exists $SVN_BASEURL/tags/spamassassin_release_${REL}; then
+      test_version ${REL} tags/spamassassin_release_${REL} &&
+        TESTED_VERSIONS="$TESTED_VERSIONS ${REL}"
+    fi
   done
-  # we just assume that the next stable version is the branch's current version
-  set +e
-  svn info https://svn.apache.org/repos/asf/spamassassin/branches_${MAJOR_VERS}.${MINOR_VERS}.${UPDATE_VERS} || break 
-  test_version ${MAJOR_VERS}.${MINOR_VERS}.${UPDATE_VERS} branches/${MAJOR_VERS}.${MINOR_VERS}.${UPDATE_VERS} &&
-    TESTED_VERSIONS="$TESTED_VERSIONS ${MAJOR_VERS}.${MINOR_VERS}.${UPDATE_VERS}"
-  set -e
+  # we just assume that the next stable version is the branch's current version (HEAD)
+  if svn_path_exists $SVN_BASEURL/branches/${MAJOR_VERS}.${MINOR_VERS}; then
+    test_version ${MAJOR_VERS}_${MINOR_VERS}_HEAD branches/${MAJOR_VERS}.${MINOR_VERS} &&
+      TESTED_VERSIONS="$TESTED_VERSIONS ${MAJOR_VERS}_${MINOR_VERS}_HEAD"
+  fi
+done
+
+# Iterate through all 4.0 versions (4.0.0 - 4.0.x, and the 4.0 HEAD)
+MAJOR_VERS=4
+for (( MINOR_VERS=0; 1; MINOR_VERS++ )); do
+  for (( UPDATE_VERS=0; 1; UPDATE_VERS++ )); do
+    REL=${MAJOR_VERS}_${MINOR_VERS}_${UPDATE_VERS}
+    if svn_path_exists $SVN_BASEURL/tags/spamassassin_release_${REL}; then
+      test_version ${REL} tags/spamassassin_release_${REL} &&
+        TESTED_VERSIONS="$TESTED_VERSIONS ${REL}"
+    fi
+  done
+  # we just assume that the next stable version is the branch's current version (HEAD)
+  if svn_path_exists $SVN_BASEURL/branches/${MAJOR_VERS}.${MINOR_VERS}; then
+    test_version ${MAJOR_VERS}_${MINOR_VERS}_HEAD branches/${MAJOR_VERS}.${MINOR_VERS} &&
+      TESTED_VERSIONS="$TESTED_VERSIONS ${MAJOR_VERS}_${MINOR_VERS}_HEAD"
+  fi
 done
 
 echo "VERSIONS UPDATE PASSED ON: $TESTED_VERSIONS"
@@ -300,7 +308,8 @@ echo "VERSIONS UPDATE PASSED ON: $TESTED_VERSIONS"
 if [[ ! -z "$TESTED_VERSIONS" ]]; then
   (
     chmod 644 $TMPDIR/$REVISION.tar.gz* &&
-    cp -a $TMPDIR/$REVISION.tar.gz* $UPDATEDIR/
+    # Atomic copy
+    rsync -a $TMPDIR/$REVISION.tar.gz* $UPDATEDIR/
   ) || exit 5
 
   if [ $AUTOUPDATESDISABLED -eq 1 -a $REVERT_REVISION -eq 0 ]; then
