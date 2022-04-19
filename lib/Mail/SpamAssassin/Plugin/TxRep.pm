@@ -668,6 +668,7 @@ that is not possible you must set this option to 0 to avoid SQL errors.
 
   push (@cmds, {
     setting     => 'auto_welcomelist_distinguish_signed',
+    aliases     => ['auto_whitelist_distinguish_signed'], # removed in 4.1
     default     => 1,
     type        => $Mail::SpamAssassin::Conf::CONF_TYPE_BOOL
   });
