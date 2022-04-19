@@ -786,7 +786,9 @@ sub poll_responses {
 
   for (;;) {
     my ($nfound, $timeleft, $eval_stat);
-    eval {  # use eval to catch alarm signal
+    # if a restartable signal is caught, retry 3 times before aborting
+    my $eintrcount = 3;
+    eval {  # use eval to caught alarm signal
       my $timer;  # collects timestamp when variable goes out of scope
       if (!defined($timeout) || $timeout > 0)
         { $timer = $self->{main}->time_method("poll_dns_idle") }
@@ -802,6 +804,10 @@ sub poll_responses {
       warn "dns: select aborted: $eval_stat\n";
       last;
     } elsif (!defined $nfound || $nfound < 0) {
+      if ($!{EINTR} and $eintrcount > 0) {
+        $eintrcount--;
+        next;
+      }
       if ($!) { warn "dns: select failed: $!\n" }
       else    { info("dns: select interrupted") }  # shouldn't happen
       last;
