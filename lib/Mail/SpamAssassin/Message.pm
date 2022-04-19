@@ -933,6 +933,7 @@ sub _parse_multipart {
   my($self, $toparse) = @_;
 
   my ($msg, $boundary, $body, $subparse) = @{$toparse};
+  my $nested_boundary = 0;
 
   # we're not supposed to be a leaf, so prep ourselves
   $msg->{'body_parts'} = [];
@@ -983,6 +984,7 @@ sub _parse_multipart {
   my $header;
   my $part_array;
   my $found_end_boundary;
+  my $found_last_end_boundary;
   my $partcnt = 0;
 
   my $line_count = @{$body};
@@ -991,7 +993,12 @@ sub _parse_multipart {
     # deal with the mime part;
     # a triage before an unlikely-to-match regexp avoids a CPU hotspot
     $found_end_boundary = defined $boundary && substr($_,0,2) eq '--'
-                          && /^--\Q$boundary\E(?:--)?\s*$/;
+                          && /^--\Q$boundary\E(--)?\s*$/;
+    $found_last_end_boundary = $found_end_boundary && $1;
+    if ($found_end_boundary && $nested_boundary) {
+      $found_end_boundary = 0;
+      $nested_boundary = 0 if ($found_last_end_boundary); # bug 7358 - handle one level of non-unique boundary string
+    }
     if ( --$line_count == 0 || $found_end_boundary ) {
       my $line = $_; # remember the last line
 
@@ -1050,12 +1057,8 @@ sub _parse_multipart {
       push(@{$self->{'parse_queue'}}, [ $part_msg, $p_boundary, $part_array, $subparse ]);
       $msg->add_body_part($part_msg);
 
-      # rfc 1521 says /^--boundary--$/, some MUAs may just require /^--boundary--/
-      # but this causes problems with horizontal lines when the boundary is
-      # made up of dashes as well, etc.
       if (defined $boundary) {
-        # no re "strict";  # since perl 5.21.8: Ranges of ASCII printables...
-        if ($line =~ /^--\Q${boundary}\E--\s*$/) {
+        if ($found_last_end_boundary) {
 	  # Make a note that we've seen the end boundary
 	  $self->{mime_boundary_state}->{$boundary}--;
           last;
@@ -1104,6 +1107,12 @@ sub _parse_multipart {
         if ($header) {
           my ( $key, $value ) = split ( /:\s*/, $header, 2 );
           $part_msg->header( $key, $value );
+          if (defined $boundary && lc $key eq 'content-type') {
+	    my (undef, $nested_bound) = Mail::SpamAssassin::Util::parse_content_type($part_msg->header('content-type'));
+            if (defined $nested_bound && $nested_bound eq $boundary) {
+       	      $nested_boundary = 1;
+            }
+          }
         }
         $in_body = 1;
 
