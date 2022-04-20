@@ -2317,21 +2317,26 @@ sub fisher_yates_shuffle {
 #
 sub domain_to_search_list {
   my ($domain) = @_;
+
   $domain =~ s/^\.+//; $domain =~ s/\.+\z//;  # strip leading and trailing dots
-  my @search_keys;
-  if (index($domain, '[') == 0) {  # don't split address literals
-    @search_keys = ( $domain );  # presumably an address literal
-  } elsif ($domain ne '') {
-    $domain = lc $domain;
-    push @search_keys, $domain;
-    my $pos = 0;
-    while (($pos = index($domain, '.', $pos+1)) != -1) {
-      push @search_keys, substr($domain, $pos+1);
-    }
-    if (@search_keys > 20) {  # enforce some sanity limit
-      @search_keys = @search_keys[$#search_keys-19 .. $#search_keys];
-    }
+  return [] unless $domain;                   # no domain left
+  return [$domain] if index($domain, '[') == 0; # don't split address literals
+
+  # initialize
+  $domain = lc $domain;
+  my @search_keys = ($domain);
+  my $pos = 0;
+
+  # split domain into search keys
+  while (($pos = index($domain, '.', $pos+1)) != -1) {
+    push @search_keys, substr($domain, $pos+1);
   }
+
+  # enforce some sanity limit
+  if (@search_keys > 20) {
+    @search_keys = @search_keys[$#search_keys-19 .. $#search_keys];
+  }
+
   return \@search_keys;
 }
 

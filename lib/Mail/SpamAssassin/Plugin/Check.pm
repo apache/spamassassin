@@ -219,10 +219,10 @@ sub check_main {
       foreach my $domain (keys %{$pms->{conf}->{dns_block_rule}{$rule}}) {
         my $blockfile = $self->{main}->sed_path("__global_state_dir__/dnsblock_$domain");
         next if -f $blockfile; # no need to warn and create again..
-        warn("check: dns_block_rule $rule hit, creating $blockfile ".
-             "(This means dnsbl blocked you due to too many queries. ".
+        warn "check: dns_block_rule $rule hit, creating $blockfile ".
+             "(This means DNSBL blocked you due to too many queries. ".
              "Set all affected rules score to 0, or use ".
-             "\"dns_query_restriction deny $domain\" to disable queries)\n");
+             "\"dns_query_restriction deny $domain\" to disable queries)\n";
         Mail::SpamAssassin::Util::touch_file($blockfile, { create_exclusive => 1 });
       }
     }
@@ -384,8 +384,9 @@ sub run_rbl_eval_tests {
 
     my $function = $test->[0];
     if (!exists $pms->{conf}->{eval_plugins}->{$function}) {
-      warn("rules: unknown eval '$function' for $rulename, ignoring RBL eval\n");
-      return 0;
+      warn "rules: unknown eval '$function' for $rulename, ignoring RBL eval\n";
+      $pms->{rule_errors}++;
+      next;
     }
 
     my $result;
@@ -1137,12 +1138,14 @@ sub run_eval_tests {
 
     my $function = untaint_var($test->[0]); # was validated with \w+
     if (!$function) {
-      warn "rules: error: no eval function defined for $rulename";
+      warn "rules: no eval function defined for $rulename\n";
+      $pms->{rule_errors}++;
       next;
     }
  
     if (!exists $conf->{eval_plugins}->{$function}) {
-      warn("rules: error: unknown eval '$function' for $rulename\n");
+      warn "rules: unknown eval '$function' for $rulename\n";
+      $pms->{rule_errors}++;
       next;
     }
 
@@ -1233,7 +1236,7 @@ EOT
   if (!$eval_result) {
     my $eval_stat = $@ ne '' ? $@ : "errno=$!";  chomp $eval_stat;
     warn "rules: failed to compile eval tests, skipping some: $eval_stat\n";
-    $self->{rule_errors}++;
+    $pms->{rule_errors}++;
   }
   else {
     my $method = "${package_name}::${methodname}";

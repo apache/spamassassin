@@ -100,7 +100,6 @@ test_version() {
   # need rules directory or build won't work
   if [ ! -e rules ]; then cp -a ../trunk/rules .; fi
 
-  rm -rf $TMPDIR/release_$SA_VERSION
   perl Makefile.PL PREFIX=$TMPDIR/release_$SA_VERSION < /dev/null
   make
   make install
@@ -135,7 +134,6 @@ make_rule_update_from_trunk() {
     svn up build
   fi
 
-  rm -rf $TMPDIR/trunk
   perl Makefile.PL PREFIX=$TMPDIR/trunk < /dev/null
   make
   make test TEST_FILES="t/basic_lint.t t/basic_lint_without_sandbox.t t/basic_meta.t"
@@ -268,39 +266,35 @@ fi
 # test to make sure it works with sa-update --install
 TESTED_VERSIONS=""
 
-# Iterate through all 3.4 versions (3.4.1 - 3.4.x, and the 3.4 HEAD)
+# Iterate through all found 3.4 versions (3.4.1 - 3.4.x)
 MAJOR_VERS=3
-for (( MINOR_VERS=4; 1; MINOR_VERS++ )); do
-  for (( UPDATE_VERS=1; 1; UPDATE_VERS++ )); do
-    REL=${MAJOR_VERS}_${MINOR_VERS}_${UPDATE_VERS}
-    if svn_path_exists $SVN_BASEURL/tags/spamassassin_release_${REL}; then
-      test_version ${REL} tags/spamassassin_release_${REL} &&
-        TESTED_VERSIONS="$TESTED_VERSIONS ${REL}"
-    fi
-  done
-  # we just assume that the next stable version is the branch's current version (HEAD)
-  if svn_path_exists $SVN_BASEURL/branches/${MAJOR_VERS}.${MINOR_VERS}; then
-    test_version ${MAJOR_VERS}_${MINOR_VERS}_HEAD branches/${MAJOR_VERS}.${MINOR_VERS} &&
-      TESTED_VERSIONS="$TESTED_VERSIONS ${MAJOR_VERS}_${MINOR_VERS}_HEAD"
-  fi
+MINOR_VERS=4
+for (( UPDATE_VERS=1; 1; UPDATE_VERS++ )); do
+  REL=${MAJOR_VERS}_${MINOR_VERS}_${UPDATE_VERS}
+  if ! svn_path_exists $SVN_BASEURL/tags/spamassassin_release_${REL}; then break; fi
+  test_version ${REL} tags/spamassassin_release_${REL} &&
+    TESTED_VERSIONS="$TESTED_VERSIONS ${REL}"
 done
+# And lastly the HEAD
+if svn_path_exists $SVN_BASEURL/branches/${MAJOR_VERS}.${MINOR_VERS}; then
+  test_version ${MAJOR_VERS}_${MINOR_VERS}_HEAD branches/${MAJOR_VERS}.${MINOR_VERS} &&
+    TESTED_VERSIONS="$TESTED_VERSIONS ${MAJOR_VERS}_${MINOR_VERS}_HEAD"
+fi
 
-# Iterate through all 4.0 versions (4.0.0 - 4.0.x, and the 4.0 HEAD)
+# Iterate through all found 4.0 versions (4.0.0 - 4.0.x)
 MAJOR_VERS=4
+MINOR_VERS=0
 for (( MINOR_VERS=0; 1; MINOR_VERS++ )); do
-  for (( UPDATE_VERS=0; 1; UPDATE_VERS++ )); do
-    REL=${MAJOR_VERS}_${MINOR_VERS}_${UPDATE_VERS}
-    if svn_path_exists $SVN_BASEURL/tags/spamassassin_release_${REL}; then
-      test_version ${REL} tags/spamassassin_release_${REL} &&
-        TESTED_VERSIONS="$TESTED_VERSIONS ${REL}"
-    fi
-  done
-  # we just assume that the next stable version is the branch's current version (HEAD)
-  if svn_path_exists $SVN_BASEURL/branches/${MAJOR_VERS}.${MINOR_VERS}; then
-    test_version ${MAJOR_VERS}_${MINOR_VERS}_HEAD branches/${MAJOR_VERS}.${MINOR_VERS} &&
-      TESTED_VERSIONS="$TESTED_VERSIONS ${MAJOR_VERS}_${MINOR_VERS}_HEAD"
-  fi
+  REL=${MAJOR_VERS}_${MINOR_VERS}_${UPDATE_VERS}
+  if ! svn_path_exists $SVN_BASEURL/tags/spamassassin_release_${REL}; then break; fi
+  test_version ${REL} tags/spamassassin_release_${REL} &&
+    TESTED_VERSIONS="$TESTED_VERSIONS ${REL}"
 done
+# And lastly the HEAD
+if svn_path_exists $SVN_BASEURL/branches/${MAJOR_VERS}.${MINOR_VERS}; then
+  test_version ${MAJOR_VERS}_${MINOR_VERS}_HEAD branches/${MAJOR_VERS}.${MINOR_VERS} &&
+    TESTED_VERSIONS="$TESTED_VERSIONS ${MAJOR_VERS}_${MINOR_VERS}_HEAD"
+fi
 
 echo "VERSIONS UPDATE PASSED ON: $TESTED_VERSIONS"
 

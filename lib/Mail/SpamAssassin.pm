@@ -1551,7 +1551,6 @@ sub finish {
   $self->call_plugins("finish_tests", { conf => $self->{conf},
                                         main => $self });
 
-  $self->{conf}->finish(); delete $self->{conf};
   $self->{plugins}->finish(); delete $self->{plugins};
 
   if ($self->{bayes_scanner}) {
@@ -1560,6 +1559,8 @@ sub finish {
   }
 
   $self->{resolver}->finish()  if $self->{resolver};
+
+  $self->{conf}->finish(); delete $self->{conf};
 
   $self->timer_end("finish");
   %{$self} = ();
