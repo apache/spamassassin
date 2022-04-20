@@ -68,10 +68,10 @@ use Mail::SpamAssassin::Logger;
 
 our @ISA = qw();
 
-# methods defined by the compiled ruleset; deleted in finish_tests()
+# methods defined by the compiled ruleset; deleted in finish()
 our @TEMPORARY_METHODS;
 
-# methods defined by register_plugin_eval_glue(); deleted in finish_tests()
+# methods defined by register_plugin_eval_glue(); deleted in finish()
 our %TEMPORARY_EVAL_GLUE_METHODS;
 
 ###########################################################################
@@ -1947,16 +1947,9 @@ sub finish {
 	  permsgstatus => $self
 	});
 
-  $self->report_unsatisfied_actions;
+  $self->report_unsatisfied_actions();
 
-  # Delete out all of the members of $self.  This will remove any direct
-  # circular references and let the memory get reclaimed while also being more
-  # efficient than a foreach() loop over the keys.
-  %{$self} = ();
-}
-
-sub finish_tests {
-  my ($conf) = @_;
+  # Clean up temporary methods
   foreach my $method (@TEMPORARY_METHODS) {
     if (defined &{$method}) {
       undef &{$method};
@@ -1964,8 +1957,17 @@ sub finish_tests {
   }
   @TEMPORARY_METHODS = ();      # clear for next time
   %TEMPORARY_EVAL_GLUE_METHODS = ();
+
+  # Delete out all of the members of $self.  This will remove any direct
+  # circular references and let the memory get reclaimed while also being more
+  # efficient than a foreach() loop over the keys.
+  %{$self} = ();
 }
 
+# Deprecated for clarity, only Plugins have this function
+sub finish_tests {}
+
+###########################################################################
 
 =item $name = $status->get_current_eval_rule_name()
 
@@ -2963,11 +2965,11 @@ ENDOFEVAL
   eval $evalstr . '; 1'   ## no critic
   or do {
     my $eval_stat = $@ ne '' ? $@ : "errno=$!";  chomp $eval_stat;
-    warn "rules: failed to run header tests, skipping some: $eval_stat\n";
+    warn "rules: failed to compile method '$function': $eval_stat\n";
     $self->{rule_errors}++;
   };
 
-  # ensure this method is deleted if finish_tests() is called
+  # ensure this method is deleted if finish() is called
   push (@TEMPORARY_METHODS, $function);
 }
 
