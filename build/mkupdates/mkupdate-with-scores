@@ -100,7 +100,6 @@ test_version() {
   # need rules directory or build won't work
   if [ ! -e rules ]; then cp -a ../trunk/rules .; fi
 
-  rm -rf $TMPDIR/release_$SA_VERSION
   perl Makefile.PL PREFIX=$TMPDIR/release_$SA_VERSION < /dev/null
   make
   make install
