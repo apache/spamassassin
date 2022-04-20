@@ -135,7 +135,6 @@ make_rule_update_from_trunk() {
     svn up build
   fi
 
-  rm -rf $TMPDIR/trunk
   perl Makefile.PL PREFIX=$TMPDIR/trunk < /dev/null
   make
   make test TEST_FILES="t/basic_lint.t t/basic_lint_without_sandbox.t t/basic_meta.t"
