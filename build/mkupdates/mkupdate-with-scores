@@ -271,10 +271,9 @@ MAJOR_VERS=3
 for (( MINOR_VERS=4; 1; MINOR_VERS++ )); do
   for (( UPDATE_VERS=1; 1; UPDATE_VERS++ )); do
     REL=${MAJOR_VERS}_${MINOR_VERS}_${UPDATE_VERS}
-    if svn_path_exists $SVN_BASEURL/tags/spamassassin_release_${REL}; then
-      test_version ${REL} tags/spamassassin_release_${REL} &&
-        TESTED_VERSIONS="$TESTED_VERSIONS ${REL}"
-    fi
+    if ! svn_path_exists $SVN_BASEURL/tags/spamassassin_release_${REL}; then break; fi
+    test_version ${REL} tags/spamassassin_release_${REL} &&
+      TESTED_VERSIONS="$TESTED_VERSIONS ${REL}"
   done
   # we just assume that the next stable version is the branch's current version (HEAD)
   if svn_path_exists $SVN_BASEURL/branches/${MAJOR_VERS}.${MINOR_VERS}; then
@@ -288,10 +287,9 @@ MAJOR_VERS=4
 for (( MINOR_VERS=0; 1; MINOR_VERS++ )); do
   for (( UPDATE_VERS=0; 1; UPDATE_VERS++ )); do
     REL=${MAJOR_VERS}_${MINOR_VERS}_${UPDATE_VERS}
-    if svn_path_exists $SVN_BASEURL/tags/spamassassin_release_${REL}; then
-      test_version ${REL} tags/spamassassin_release_${REL} &&
-        TESTED_VERSIONS="$TESTED_VERSIONS ${REL}"
-    fi
+    if ! svn_path_exists $SVN_BASEURL/tags/spamassassin_release_${REL}; then; break; fi
+    test_version ${REL} tags/spamassassin_release_${REL} &&
+      TESTED_VERSIONS="$TESTED_VERSIONS ${REL}"
   done
   # we just assume that the next stable version is the branch's current version (HEAD)
   if svn_path_exists $SVN_BASEURL/branches/${MAJOR_VERS}.${MINOR_VERS}; then
