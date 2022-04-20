@@ -80,9 +80,6 @@ describe SCC_CANSPAM_2		Interesting compliance language
 body	 SCC_CANSPAM_2		/you may unsubscribe by clicking here or by writing to/
 
 # TESTING a few domains that are in our "suspicious" list but are known to have some good senders
-describe T_SCC_TLD_SPACE From domain in *.space 
-header   T_SCC_TLD_SPACE From =~ /<[^ @]+@[^ @>]+\.space>/
-
 describe T_SCC_TLD_ONLINE From domain in *.online 
 header   T_SCC_TLD_ONLINE From =~ /<[^ @]+@[^ @>]+\.online>/
 
