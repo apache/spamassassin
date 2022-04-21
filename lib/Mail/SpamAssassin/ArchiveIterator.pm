@@ -415,7 +415,7 @@ sub _run_mailbox {
   my @msg;
   my $header;
 
-  my $fh = $self->_mail_open($where, 1);
+  my $fh = $self->_mail_open($file, 1);
   return unless $fh;
 
   my $opt_max_size = $self->{opt_max_size};
@@ -466,7 +466,7 @@ sub _run_mbx {
   my @msg;
   my $header;
 
-  my $fh = $self->_mail_open($where, 1);
+  my $fh = $self->_mail_open($file, 1);
   return unless $fh;
 
   my $opt_max_size = $self->{opt_max_size};
@@ -1001,7 +1001,7 @@ sub _scan_mailbox {
 
   foreach my $file (@files) {
     $self->_bump_scan_progress();
-    if ($file =~ /\.(?:gz|bz2|xz)$/i) {
+    if ($file =~ /\.(?:gz|bz2|xz|lz[o4]?)$/i) {
       warn "archive-iterator: compressed mbox folders are not supported at this time\n";
       next;
     }
@@ -1129,7 +1129,7 @@ sub _scan_mbx {
   foreach my $file (@files) {
     $self->_bump_scan_progress();
 
-    if ($folder =~ /\.(?:gz|bz2|xz)$/i) {
+    if ($folder =~ /\.(?:gz|bz2|xz|lz[o4]?)$/i) {
       warn "archive-iterator: compressed mbx folders are not supported at this time\n";
       next;
     }

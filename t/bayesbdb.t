@@ -1,6 +1,6 @@
 #!/usr/bin/perl -T
 
-use Data::Dumper;
+use File::Find qw(find);
 use lib '.'; use lib 't';
 use SATest; sa_t_init("bayesbdb");
 
@@ -16,7 +16,7 @@ plan skip_all => "BerkeleyDB is unavailable" unless HAS_BDB;
   plan skip_all => "BerkeleyDB >= 4.6 is required" unless $BerkeleyDB::db_version >= 4.6;
 }
 
-plan tests => 42;
+plan tests => 46;
 
 
 tstprefs ("
@@ -155,13 +155,24 @@ tstprefs ("
 # our own checking callback and keep using the existing ok_all_patterns call
 %patterns = ( 1 => 'Acted on message' );
 
+$wanted_examined = count_files("data/spam");
 ok(salearnrun("--spam data/spam", \&check_examined));
 ok_all_patterns();
 
+$wanted_examined = count_files("data/nice");
 ok(salearnrun("--ham data/nice", \&check_examined));
 ok_all_patterns();
 
+$wanted_examined = count_files("data/welcomelists");
 ok(salearnrun("--ham data/welcomelists", \&check_examined));
+ok_all_patterns();
+
+$wanted_examined = 3;
+ok(salearnrun("--ham --mbox data/nice.mbox", \&check_examined));
+ok_all_patterns();
+
+$wanted_examined = 3;
+ok(salearnrun("--ham --mbox < data/nice.mbox", \&check_examined));
 ok_all_patterns();
 
 %patterns = ( 'non-token data: bayes db version' => 'db version' );
@@ -243,7 +254,17 @@ sub check_examined {
     $_ = join ('', <IN>);
   }
 
-  if ($_ =~ /(?:Forgot|Learned) tokens from \d+ message\(s\) \(\d+ message\(s\) examined\)/) {
-    $found{'Acted on message'}++;
+  if ($_ =~ /(?:Forgot|Learned) tokens from \d+ message\(s\) \((\d+) message\(s\) examined\)/) {
+    #print STDERR "examined $1 messages\n";
+    if (defined $wanted_examined && $wanted_examined == $1) {
+      $found{'Acted on message'}++;
+    }
   }
 }
+
+sub count_files {
+  my $cnt = 0;
+  find({wanted => sub { $cnt++ if -f $_; }, no_chdir => 1}, $_[0]);
+  return $cnt;
+}
+
