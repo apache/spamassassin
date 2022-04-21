@@ -4631,6 +4631,7 @@ issues.
       } elsif ($value !~ /^[a-zA-Z0-9_]{1,128}$/) {
         return $INVALID_VALUE;
       }
+      dbg("config: enabling compatibility flag $value");
       # Inject compat method
       { no strict 'refs';
         *{"Mail::SpamAssassin::Conf::compat_$value"} = sub { 1 };
