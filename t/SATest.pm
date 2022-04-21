@@ -647,7 +647,11 @@ sub start_spamd {
   sleep $wait ;
   while ($spamd_pid <= 0) {
     my $spamdlog = '';
-    my $pidstr = untaint_cmd("cat $spamd_pidfile 2>/dev/null");
+    my $pidstr;
+    if (open(PID, $spamd_pidfile)) {
+      $pidstr = <PID>;
+      close PID;
+    }
     if ($pidstr) {
        chomp $pidstr;
        $spamd_pid = $pidstr;
