@@ -1,5 +1,6 @@
 #!/usr/bin/perl -T
 
+use File::Find qw(find);
 use lib '.'; use lib 't';
 use SATest; sa_t_init("bayessql");
 
@@ -14,8 +15,8 @@ plan skip_all => "DBI is unavailable on this system" unless (HAS_DBI);
 plan skip_all => "Bayes SQL tests are disabled or DBD::SQLite not found" unless (SQLITE || SQL);
 
 my $tests = 0;
-$tests += 53 if (SQLITE);
-$tests += 53 if (SQL);
+$tests += 57 if (SQLITE);
+$tests += 57 if (SQL);
 plan tests => $tests;
 
 diag "Note: Failure may be due to an incorrect config.";
@@ -339,13 +340,24 @@ tstprefs ("
 # our own checking callback and keep using the existing ok_all_patterns call
 %patterns = ( 1 => 'Acted on message' );
 
+$wanted_examined = count_files("data/spam");
 ok(salearnrun("--spam data/spam", \&check_examined));
 ok_all_patterns();
 
+$wanted_examined = count_files("data/nice");
 ok(salearnrun("--ham data/nice", \&check_examined));
 ok_all_patterns();
 
+$wanted_examined = count_files("data/whitelists");
 ok(salearnrun("--ham data/whitelists", \&check_examined));
+ok_all_patterns();
+
+$wanted_examined = 3;
+ok(salearnrun("--ham --mbox data/nice.mbox", \&check_examined));
+ok_all_patterns();
+
+$wanted_examined = 3;
+ok(salearnrun("--ham --mbox < data/nice.mbox", \&check_examined));
 ok_all_patterns();
 
 %patterns = ( 'non-token data: bayes db version' => 'db version' );
@@ -450,9 +462,18 @@ sub check_examined {
     $_ = join ('', <IN>);
   }
 
-  if ($_ =~ /(?:Forgot|Learned) tokens from \d+ message\(s\) \(\d+ message\(s\) examined\)/) {
-    $found{'Acted on message'}++;
+  if ($_ =~ /(?:Forgot|Learned) tokens from \d+ message\(s\) \((\d+) message\(s\) examined\)/) {
+    #print STDERR "examined $1 messages\n";
+    if (defined $wanted_examined && $wanted_examined == $1) {
+      $found{'Acted on message'}++;
+    }
   }
+}
+
+sub count_files {
+  my $cnt = 0;
+  find({wanted => sub { $cnt++ if -f $_; }, no_chdir => 1}, $_[0]);
+  return $cnt;
 }
 
 # WARNING! Do not use this as an example, this breaks abstraction

@@ -415,7 +415,7 @@ sub _run_mailbox {
   my @msg;
   my $header;
 
-  my $fh = $self->_mail_open($where, 1);
+  my $fh = $self->_mail_open($file, 1);
   return unless $fh;
 
   my $opt_max_size = $self->{opt_max_size};
@@ -466,7 +466,7 @@ sub _run_mbx {
   my @msg;
   my $header;
 
-  my $fh = $self->_mail_open($where, 1);
+  my $fh = $self->_mail_open($file, 1);
   return unless $fh;
 
   my $opt_max_size = $self->{opt_max_size};
