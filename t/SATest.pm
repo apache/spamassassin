@@ -632,7 +632,7 @@ sub start_spamd {
   sleep $wait ;
   while ($spamd_pid <= 0) {
     my $spamdlog = '';
-    my $pidsr;
+    my $pidstr;
     if (open(PID, $spamd_pidfile)) {
       $pidstr = <PID>;
       close PID;
