@@ -6,6 +6,8 @@ use Test::More tests => 3;
 
 # ---------------------------------------------------------------------------
 
+disable_compat "welcomelist_blocklist";
+
 %patterns = (
   q{ USER_IN_BLACKLIST }, 'blacklisted',
 );

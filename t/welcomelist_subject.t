@@ -7,11 +7,11 @@ use Test::More tests => 4;
 # ---------------------------------------------------------------------------
 
 %is_welcomelist_patterns = (
-  q{ SUBJECT_IN_WHITELIST }, 'welcomelist-subject'
+  q{ SUBJECT_IN_WELCOMELIST }, 'welcomelist-subject'
 );
 
 %is_blocklist_patterns = (
-  q{ SUBJECT_IN_BLACKLIST }, 'blocklist-subject'
+  q{ SUBJECT_IN_BLOCKLIST }, 'blocklist-subject'
 );
 
 tstprefs ("

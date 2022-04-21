@@ -11,6 +11,8 @@ plan tests => 8;
 # ---------------------------------------------------------------------------
 # bug 6003
 
+disable_compat "welcomelist_blocklist";
+
 tstlocalrules (q{
   body MYBODY /LOSE WEIGHT/
   score MYBODY 99

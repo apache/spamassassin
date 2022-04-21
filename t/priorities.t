@@ -7,6 +7,8 @@ use Test::More tests => 10;
 
 use Mail::SpamAssassin;
 
+disable_compat "welcomelist_blocklist";
+
 tstlocalrules (q{
 
   priority USER_IN_WHITELIST     -1000

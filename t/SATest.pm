@@ -344,6 +344,21 @@ sub tstpre {
   print OUT $lines; close OUT;
 }
 
+# remove default compatibility option
+sub disable_compat {
+  my $compat = shift;
+  return unless defined $compat;
+  open (IN, "$siterules/init.pre") or die;
+  open (OUT, ">$siterules/init.pre.new") or die;
+  while (<IN>) {
+    next if $_ =~ /^\s*enable_compat\s+\Q$compat\E(?:\s|$)/i;
+    print OUT $_;
+  }
+  close OUT or die;
+  close IN or die;
+  rename("$siterules/init.pre.new", "$siterules/init.pre");
+}
+
 # Run spamassassin. Calls back with the output.
 # in $args: arguments to run with
 # in $read_sub: callback for the output (should read from <IN>).

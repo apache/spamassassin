@@ -47,7 +47,7 @@ plan tests => $tests;
   q{/ LT_NOTE /}      => 'LT_NOTE',
   q{/ LT_UTF8SMTP_ANY /}    => 'LT_UTF8SMTP_ANY',
   q{/ LT_SPLIT_UTF8_SUBJ /} => 'LT_SPLIT_UTF8_SUBJ',
-  q{/ USER_IN_BLACKLIST /}  => 'USER_IN_BLACKLIST',
+  q{/ USER_IN_BLOCKLIST /}  => 'USER_IN_BLOCKLIST',
 );
 
 %mypatterns_utf8 = (  # as it appears in a report body

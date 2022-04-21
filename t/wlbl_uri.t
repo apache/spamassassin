@@ -4,6 +4,8 @@ use lib '.'; use lib 't';
 use SATest; sa_t_init("wlbl_uri");
 use Test::More tests => 12;
 
+disable_compat "welcomelist_blocklist";
+
 %patterns = (
   q{ 0.0 URI_HOST_IN_BLOCKLIST }, 'hit-blo',
   q{ 100 URI_HOST_IN_BLACKLIST }, 'hit-bla',

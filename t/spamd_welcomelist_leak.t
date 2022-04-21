@@ -33,7 +33,7 @@ close OUT;
 
 %patterns = (
   q{ 99 MYBODY }, 'MYBODY',
-  q{-0.0 USER_IN_WELCOMELIST }, 'USER_IN_WELCOMELIST',
+  q{-100 USER_IN_WELCOMELIST }, 'USER_IN_WELCOMELIST',
 );
 %anti_patterns = (
 );
