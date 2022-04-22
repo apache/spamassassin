@@ -21,30 +21,30 @@ plan skip_all => "Needs Mail::DKIM::Verifier >= 0.31" unless HAS_DKIM_VERIFIER ;
 plan tests => 9;
 
 tstpre ("
-loadplugin Mail::SpamAssassin::Plugin::Dmarc
+loadplugin Mail::SpamAssassin::Plugin::DMARC
 ");
 
 tstprefs("
 header DMARC_NONE eval:check_dmarc_none()
 priority DMARC_NONE 500
-describe DMARC_NONE Dmarc none policy
+describe DMARC_NONE DMARC none policy
 
 header DMARC_QUAR eval:check_dmarc_quarantine()
 priority DMARC_QUAR 500
-describe DMARC_QUAR Dmarc quarantine policy
+describe DMARC_QUAR DMARC quarantine policy
 
 header DMARC_REJECT eval:check_dmarc_reject()
 priority DMARC_REJECT 500
-describe DMARC_REJECT Dmarc reject policy
+describe DMARC_REJECT DMARC reject policy
 
 header DMARC_MISSING eval:check_dmarc_missing()
 priority DMARC_MISSING 500
-describe DMARC_MISSING Missing Dmarc policy
+describe DMARC_MISSING Missing DMARC policy
 ");
 
 %patterns = ();
 %anti_patterns = (
-    q{ DMARC_NONE } => 'Dmarc none policy',
+    q{ DMARC_NONE } => 'DMARC none policy',
             );
 
 sarun ("-t < data/nice/dmarc/noneok.eml", \&patterns_run_cb);
@@ -53,7 +53,7 @@ clear_pattern_counters();
 
 %anti_patterns = ();
 %patterns = (
-    q{ DMARC_NONE } => 'Dmarc none policy',
+    q{ DMARC_NONE } => 'DMARC none policy',
             );
 
 sarun ("-t < data/spam/dmarc/noneko.eml", \&patterns_run_cb);
@@ -62,7 +62,7 @@ clear_pattern_counters();
 
 %patterns = ();
 %anti_patterns = (
-    q{ DMARC_QUAR } => 'Dmarc quarantine policy',
+    q{ DMARC_QUAR } => 'DMARC quarantine policy',
             );
 
 sarun ("-t < data/nice/dmarc/quarok.eml", \&patterns_run_cb);
@@ -71,7 +71,7 @@ clear_pattern_counters();
 
 %anti_patterns = ();
 %patterns = (
-    q{ DMARC_QUAR } => 'Dmarc quarantine policy',
+    q{ DMARC_QUAR } => 'DMARC quarantine policy',
             );
 
 sarun ("-t < data/spam/dmarc/quarko.eml", \&patterns_run_cb);
@@ -80,7 +80,7 @@ clear_pattern_counters();
 
 %patterns = ();
 %anti_patterns = (
-    q{ DMARC_REJECT } => 'Dmarc reject policy',
+    q{ DMARC_REJECT } => 'DMARC reject policy',
             );
 
 sarun ("-t < data/nice/dmarc/rejectok.eml", \&patterns_run_cb);
@@ -89,7 +89,7 @@ clear_pattern_counters();
 
 %anti_patterns = ();
 %patterns = (
-    q{ DMARC_REJECT } => 'Dmarc reject policy',
+    q{ DMARC_REJECT } => 'DMARC reject policy',
             );
 
 sarun ("-t < data/spam/dmarc/rejectko.eml", \&patterns_run_cb);
@@ -98,7 +98,7 @@ clear_pattern_counters();
 
 %patterns = ();
 %anti_patterns = (
-    q{ DMARC_REJECT } => 'Dmarc reject policy',
+    q{ DMARC_REJECT } => 'DMARC reject policy',
             );
 
 sarun ("-t < data/nice/dmarc/strictrejectok.eml", \&patterns_run_cb);
@@ -107,7 +107,7 @@ clear_pattern_counters();
 
 %anti_patterns = ();
 %patterns = (
-    q{ DMARC_REJECT } => 'Dmarc reject policy',
+    q{ DMARC_REJECT } => 'DMARC reject policy',
             );
 
 sarun ("-t < data/spam/dmarc/strictrejectko.eml", \&patterns_run_cb);
@@ -116,7 +116,7 @@ clear_pattern_counters();
 
 %anti_patterns = ();
 %patterns = (
-    q{ DMARC_MISSING } => 'Missing Dmarc policy',
+    q{ DMARC_MISSING } => 'Missing DMARC policy',
             );
 
 sarun ("-t < data/spam/dmarc/nodmarc.eml", \&patterns_run_cb);

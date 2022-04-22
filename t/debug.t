@@ -17,7 +17,7 @@ my %facility = map( ($_, 1),
       message metadata mimeheader netset plugin prefork progress pyzor razor2
       received-header replacetags reporter rules rules-all spamd spf textcat
       timing TxRep uri uridnsbl util pdfinfo asn geodb RaciallyCharged
-      PHISHTAG resourcelimits https_http_mismatch ));
+      PHISHTAG resourcelimits https_http_mismatch DMARC ));
 
 my $fh = IO::File->new_tmpfile();
 open(OLDERR, ">&STDERR");

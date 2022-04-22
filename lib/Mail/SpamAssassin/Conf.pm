@@ -4231,6 +4231,10 @@ See C<Mail::SpamAssassin::Plugin> for more details on writing plugins.
       } else {
 	return $INVALID_VALUE;
       }
+      # trunk Dmarc.pm was renamed to DMARC.pm
+      if ($package eq 'Mail::SpamAssassin::Plugin::Dmarc' && !defined $path) {
+        $package = 'Mail::SpamAssassin::Plugin::DMARC';
+      }
       $self->load_plugin ($package, $path);
     }
   });
