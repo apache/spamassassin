@@ -301,7 +301,7 @@ our @OPTIONAL_MODULES = (
   module => 'Mail::DMARC::PurePerl',
   version => 0,
   desc => 'Mail::DMARC::PurePerl is a Perl implementation of DMARC protocol.
-  It is used by the optional Dmarc Plugin.',
+  It is used by the optional DMARC Plugin.',
 },
 );
 
