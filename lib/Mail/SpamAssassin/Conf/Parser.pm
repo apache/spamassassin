@@ -650,14 +650,14 @@ sub lint_check {
     # Check for description and score issues in lint fashion
     while ( my $k = each %{$conf->{descriptions}} ) {
       if (!exists $conf->{tests}->{$k}) {
-        dbg("config: warning: description exists for non-existent rule $k");
+        dbg("config: description exists for non-existent rule $k");
       }
     }
 
     while ( my($sk) = each %{$conf->{scores}} ) {
       if (!exists $conf->{tests}->{$sk}) {
         # bug 5514: not a lint warning any more
-        dbg("config: warning: score set for non-existent rule $sk");
+        dbg("config: score set for non-existent rule $sk");
       }
     }
   }
@@ -687,10 +687,10 @@ sub fix_tests {
     }
 
     # loop through all the tests and if we are missing a description with debug
-    # set, throw a warning except for testing T_ or meta __ rules.
+    # set, throw a note except for testing T_ or meta __ rules.
     if ($would_log_dbg && $k !~ m/^(?:T_|__)/i) {
       if ( ! exists $conf->{descriptions}->{$k} ) {
-        dbg("config: warning: no description set for $k");
+        dbg("config: no description set for $k");
       }
     }
   }
