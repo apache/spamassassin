@@ -16,7 +16,7 @@ plan skip_all => "BerkeleyDB is unavailable" unless HAS_BDB;
   plan skip_all => "BerkeleyDB >= 4.6 is required" unless $BerkeleyDB::db_version >= 4.6;
 }
 
-plan tests => 46;
+plan tests => 48;
 
 
 tstprefs ("
@@ -173,6 +173,10 @@ ok_all_patterns();
 
 $wanted_examined = 3;
 ok(salearnrun("--ham --mbox < data/nice.mbox", \&check_examined));
+ok_all_patterns();
+
+$wanted_examined = 3;
+ok(salearnrun("--forget --mbox data/nice.mbox", \&check_examined));
 ok_all_patterns();
 
 %patterns = ( 'non-token data: bayes db version' => 'db version' );

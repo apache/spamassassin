@@ -173,15 +173,14 @@ if ( !defined $isspam
   && !defined $opt{'folders'} )
 {
   usage( 0,
-"Please select either --spam, --ham, --folders, --forget, --sync, --import,\n--dump, --clear, --backup or --restore"
+    "Please select either --spam, --ham, --folders, --forget, --sync, --import,\n--dump, --clear, --backup or --restore"
   );
 }
 
 # We need to make sure the journal syncs pre-forget...
 if ( defined $forget && $opt{'nosync'} ) {
   $opt{'nosync'} = 0;
-  warn
-"sa-learn warning: --forget requires read/write access to the database, and is incompatible with --no-sync\n";
+  warn "sa-learn warning: --forget requires read/write access to the database, and is incompatible with --no-sync\n";
 }
 
 if ( defined $opt{'old_format'} ) {
@@ -517,10 +516,10 @@ sub killed {
 sub target {
   my ($target) = @_;
 
-  if (!defined $isspam)
+  if (!defined $isspam && !$forget)
   {
     usage( 0,
-  "Please select either --spam or --ham before the first target"
+      "Please select either --spam or --ham or --forget before the first target"
     );
   }
   my $class = ( $isspam ? "spam" : "ham" );
@@ -626,7 +625,7 @@ Options:
 
  --ham                 Learn the following messages as ham (non-spam)
  --spam                Learn the following messages as spam
- --forget              Forget a message
+ --forget              Forget the following messages
  --use-ignores         Use bayes_ignore_from and bayes_ignore_to
  --sync                Synchronize the database and the journal if needed
  --force-expire        Force a database sync and expiry run
@@ -767,7 +766,8 @@ into the Bayes databases.
 
 =item B<--forget>
 
-Forget a given message previously learnt.
+Forget the input message(s) in the files following the option as previously
+learnt.
 
 =item B<--dbpath>
 

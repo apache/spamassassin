@@ -10,7 +10,7 @@ use Test::More;
 
 plan skip_all => "Long running tests disabled" unless conf_bool('run_long_tests');
 plan skip_all => "DB_File is unavailable" unless HAS_DB_FILE;
-plan tests => 52;
+plan tests => 54;
 
 tstprefs ("
   bayes_learn_to_journal 0
@@ -193,6 +193,10 @@ ok_all_patterns();
 
 $wanted_examined = 3;
 ok(salearnrun("--ham --mbox < data/nice.mbox", \&check_examined));
+ok_all_patterns();
+
+$wanted_examined = 3;
+ok(salearnrun("--forget --mbox data/nice.mbox", \&check_examined));
 ok_all_patterns();
 
 %patterns = ( 'non-token data: bayes db version' => 'db version' );

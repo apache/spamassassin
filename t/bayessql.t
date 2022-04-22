@@ -15,8 +15,8 @@ plan skip_all => "DBI is unavailable on this system" unless (HAS_DBI);
 plan skip_all => "Bayes SQL tests are disabled or DBD::SQLite not found" unless (SQLITE || SQL);
 
 my $tests = 0;
-$tests += 57 if (SQLITE);
-$tests += 57 if (SQL);
+$tests += 59 if (SQLITE);
+$tests += 59 if (SQL);
 plan tests => $tests;
 
 diag "Note: Failure may be due to an incorrect config.";
@@ -358,6 +358,10 @@ ok_all_patterns();
 
 $wanted_examined = 3;
 ok(salearnrun("--ham --mbox < data/nice.mbox", \&check_examined));
+ok_all_patterns();
+
+$wanted_examined = 3;
+ok(salearnrun("--forget --mbox data/nice.mbox", \&check_examined));
 ok_all_patterns();
 
 %patterns = ( 'non-token data: bayes db version' => 'db version' );

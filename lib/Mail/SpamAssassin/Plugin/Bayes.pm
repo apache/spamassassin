@@ -1450,17 +1450,29 @@ sub _tokenize_headers {
 
     if (MAP_HEADERS_MID) {
       if ($hdr =~ /^(?:In-Reply-To|References|Message-ID)$/i) {
-        $parsed{"*MI"} = $val;
+        if (exists $parsed{"*MI"}) {
+          $parsed{"*MI"} .= " ".$val;
+        } else {
+          $parsed{"*MI"} = $val;
+        }
       }
     }
     if (MAP_HEADERS_FROMTOCC) {
       if ($hdr =~ /^(?:From|To|Cc)$/i) {
-        $parsed{"*Ad"} = $val;
+        if (exists $parsed{"*Ad"}) {
+          $parsed{"*Ad"} .= " ".$val;
+        } else {
+          $parsed{"*Ad"} = $val;
+        }
       }
     }
     if (MAP_HEADERS_USERAGENT) {
       if ($hdr =~ /^(?:X-Mailer|User-Agent)$/i) {
-        $parsed{"*UA"} = $val;
+        if (exists $parsed{"*UA"}) {
+          $parsed{"*UA"} .= " ".$val;
+        } else {
+          $parsed{"*UA"} = $val;
+        }
       }
     }
 
@@ -1474,11 +1486,13 @@ sub _tokenize_headers {
     } else {
       $parsed{$hdr} = $val;
     }
-    if (would_log('dbg', 'bayes') > 1) {
+  }
+
+  if (would_log('dbg', 'bayes') > 1) {
+    foreach my $hdr (sort keys %parsed) {
       dbg("bayes: header tokens for $hdr = \"$parsed{$hdr}\"");
     }
   }
-
   return %parsed;
 }
 
@@ -1574,6 +1588,11 @@ sub _pre_chew_addr_header {
   my @addrs = Mail::SpamAssassin::Util::parse_header_addresses($val);
   my @toks;
   foreach my $addr (@addrs) {
+    if (defined $addr->{phrase}) {
+      foreach (split(/\s+/, $addr->{phrase})) {
+        push @toks, "N*".$_; # Bug 6319
+      }
+    }
     if (defined $addr->{address}) {
       push @toks, $self->_tokenize_mail_addrs($addr->{address});
     }
