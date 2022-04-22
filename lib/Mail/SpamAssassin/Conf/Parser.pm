@@ -690,7 +690,7 @@ sub fix_tests {
     # set, throw a note except for testing T_ or meta __ rules.
     if ($would_log_dbg && $k !~ m/^(?:T_|__)/i) {
       if ( ! exists $conf->{descriptions}->{$k} ) {
-        dbg("config: no description set for $k");
+        dbg("config: no description set for rule $k");
       }
     }
   }
