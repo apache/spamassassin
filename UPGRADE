@@ -8,6 +8,9 @@ Note for Users Upgrading to SpamAssassin 4.0.0
   setting and whether decoding to UTF8 was successful.
   See: https://wiki.apache.org/spamassassin/WritingRulesAdvanced
 
+- IDN (Internationalized domain name) support, requires Net::LibIDN2 or
+  Net::LibIDN module.  New Util::idn_to_ascii() function.  (Bug 7215)
+
 - Meta rules no longer use priority values, they are evaluated dynamically
   when the rules they depend on are finished.  (Bug 7735)
 
@@ -50,9 +53,6 @@ Note for Users Upgrading to SpamAssassin 4.0.0
 
 - API: New $pms->add_uri_detail_list() function.  Also new uri_detail_list
   types: unlinked, schemeless
-
-- IDN (Internationalized domain name) support, new Util::idn_to_ascii()
-  function (Bug 7215)
 
 - Util::split_domain, trim_domain, is_domain_valid functions have new
   optional argument ($is_ascii)

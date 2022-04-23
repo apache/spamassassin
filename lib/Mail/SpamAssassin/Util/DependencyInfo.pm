@@ -114,6 +114,15 @@ our @OPTIONAL_MODULES = (
   desc => 'Used when manually reporting spam to SpamCop with "spamassassin -r".',
 },
 {
+  module => 'Net::LibIDN2',
+  version => 0,
+  desc => "Newer version of the optional Net::LibIDN module.
+  Provides mapping between Internationalized Domain Names (IDN) in
+  Unicode and ASCII-compatible encoding (ACE) for use in DNS and comparisions.
+  The module is optional, but without it Unicode IDN names found in mail will
+  not be suitable for DNS queries and white/blacklisting.",
+},
+{
   module => 'Net::LibIDN',
   version => 0,
   desc => "Provides mapping between Internationalized Domain Names (IDN) in

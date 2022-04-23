@@ -293,12 +293,16 @@ is too low for them to be used.
     For proper detection of charsets and converting them into Unicode, you
     will need to install this module.
 
+  - Net::LibIDN2 (from CPAN)
   - Net::LibIDN (from CPAN)
 
     Provides mapping between Internationalized Domain Names (IDN) in Unicode
     and ASCII-compatible encoding (ACE) for use in DNS and comparisions. 
     The module is optional, but without it Unicode IDN names found in mail
     will not be suitable for DNS queries and white/blacklisting.
+
+    Either module should work fine, but newer Net::LibIDN2 might not be
+    available in all distributions.
 
   - Email::Address::XS
 

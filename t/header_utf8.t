@@ -8,21 +8,21 @@ use lib '.'; use lib 't';
 use SATest; sa_t_init("header_utf8.t");
 
 use constant HAS_EMAIL_ADDRESS_XS => eval { require Email::Address::XS; };
+use constant HAS_LIBIDN => eval { require Net::LibIDN; };
+use constant HAS_LIBIDN2 => eval { require Net::LibIDN2; };
 
-my $have_libidn;
-BEGIN {
-  eval { require Net::LibIDN } and do { $have_libidn = 1 };
+if (!HAS_EMAIL_ADDRESS_XS) {
+  warn "Email::Address::XS is not installed, tests will be lacking\n";
 }
-
-if (!$have_libidn) {
-  warn "Net::LibIDN is not installed, tests will be lacking\n";
+if (!HAS_LIBIDN && !HAS_LIBIDN2) {
+  warn "Net::LibIDN or Net::LibIDN2 is not installed, tests will be lacking\n";
 }
 
 use Test::More;
 plan skip_all => "Test requires Perl 5.8" unless $] > 5.008; # TODO: SA already doesn't support anything below 5.8.1
 
 my $tests = 156;
-$tests = 305 if (HAS_EMAIL_ADDRESS_XS);
+$tests = 305 if (HAS_EMAIL_ADDRESS_XS || (!HAS_EMAIL_ADDRESS_XS && HAS_LIBIDN && HAS_LIBIDN2));
 plan tests => $tests;
 
 # ---------------------------------------------------------------------------
@@ -125,7 +125,7 @@ my $myrules = <<'END';
   lang zh describe LT_ANY_CHARS  字符被包含在消息报头部分
 END
 
-if (!$have_libidn) {
+if (!HAS_LIBIDN && !HAS_LIBIDN2) {
   # temporary fudge to prevent a test failing
   # until the Net::LibIDN becomes a mandatory module
   $myrules =~ s{^(\s*header LT_AUTH_DOM\s+X-AuthorDomain =~)\s*(/.*/)$}
@@ -134,18 +134,34 @@ if (!$have_libidn) {
 
 
 
-###
-### Test internal and Email::Address::XS parsers
-###
-
-for (1 .. 2) { ## parser loop
-
-if ($_ == 2 && !HAS_EMAIL_ADDRESS_XS) {
-  warn "Not running Email::Address::XS tests, module missing\n";
-  next;
+## Test 1 with internal parser, any libidn
+$ENV{'SA_HEADER_ADDRESS_PARSER'} = 1;
+if (HAS_LIBIDN) {
+  $ENV{'SA_LIBIDN'} = 1;
+  $libidn_done++;
+} elsif (HAS_LIBIDN2) {
+  $ENV{'SA_LIBIDN'} = 2;
+  $libidn2_done++;
 }
-$ENV{'SA_HEADER_ADDRESS_PARSER'} = $_;
+run_tests();
+## Test 2 with Email::Address::XS
+if (HAS_EMAIL_ADDRESS_XS) {
+  $ENV{'SA_HEADER_ADDRESS_PARSER'} = 2;
+  if (HAS_LIBIDN2 && !defined $libidn2_done) {
+    $ENV{'SA_LIBIDN'} = 2;
+    $libidn2_done++;
+  }
+  run_tests();
+} else {
+  ## .. or Test 2 with internal parser, libidn2
+  if (HAS_LIBIDN2 && !defined $libidn2_done) {
+    $ENV{'SA_LIBIDN'} = 2;
+    run_tests();
+  }
+}
 
+
+sub run_tests {
 
 $ENV{PERL_BADLANG} = 0;  # suppresses Perl warning about failed locale setting
 # see Mail::SpamAssassin::Conf::Parser::parse(), also Bug 6992
@@ -232,5 +248,5 @@ sarun ("-L < data/nice/unicode2", \&patterns_run_cb);
 ok_all_patterns();
 
 
-} ## end parser loop
+} ## run_tests
 

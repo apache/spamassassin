@@ -65,6 +65,7 @@ our @EXPORT_OK = qw(&local_tz &base64_decode &base64_encode
 our $AM_TAINTED;
 
 use Config;
+use Encode;
 use IO::Handle;
 use File::Spec;
 use File::Basename;
@@ -120,13 +121,20 @@ BEGIN {
 
 ###########################################################################
 
-our $have_libidn;
+our ($have_libidn, $have_libidn2);
 BEGIN {
-  eval { require Net::LibIDN } and do { $have_libidn = 1 };
+  my $sa_libidn = ($ENV{'SA_LIBIDN'}||'') =~ /(\d+)/ ? $1 : 0;
+  if (!$sa_libidn || $sa_libidn eq '2') {
+    eval { require Net::LibIDN2; } and do { $have_libidn2 = 1; };
+  }
+  if (!$have_libidn2 && (!$sa_libidn || $sa_libidn eq '1')) {
+    eval { require Net::LibIDN; } and do { $have_libidn = 1; };
+  }
 }
 
-$have_libidn or info("util: module Net::LibIDN not available, ".
-  "internationalized domain names with U-labels will not be recognized!");
+$have_libidn||$have_libidn2
+  or info("util: module Net::LibIDN or Net::LibIDN2 not available, ".
+          "internationalized domain names with U-labels will not be recognized!");
 
 ###########################################################################
 
@@ -473,6 +481,7 @@ sub is_valid_utf_8 {
 # The result is always in octets (utf8 flag off) even if the argument was in
 # Unicode characters.
 #
+#my $idn_cache = {};
 sub idn_to_ascii {
   no bytes;  # make sure there is no 'use bytes' in effect
   return undef  if !defined $_[0]; ## no critic (ProhibitExplicitReturnUndef)
@@ -483,9 +492,16 @@ sub idn_to_ascii {
 
   # Rapid return for most common case, all-ASCII (including IP address literal),
   # no conversion needed. Also if we don't have LibIDN, nothing more we can do.
-  if ($s !~ tr/a-zA-Z0-9_.:[]-//c || !$have_libidn) {
+  if ($s !~ tr/a-zA-Z0-9_.:[]-//c || !($have_libidn||$have_libidn2)) {
     return lc $s; # retains taintedness
   }
+
+  #if (exists $idn_cache->{$s}) {
+  #  dbg("util: idn_to_ascii: converted to ACE: '$s' -> '$idn_cache->{$s}' (cached)");
+  #  return $idn_cache->{$s};
+  #}
+  #$idn_cache = {} if %$idn_cache > 1000;
+  #my $orig_s = $s; # save original for idn_cache
 
   # propagate taintedness of the argument
   my $t = tainted($s);
@@ -514,14 +530,34 @@ sub idn_to_ascii {
 
   if ($charset) {
     # to ASCII-compatible encoding (ACE), lowercased
-    my $sa = Net::LibIDN::idn_to_ascii($s, $charset);
-    if (!defined $sa) {
-      info("util: idn_to_ascii: conversion to ACE failed: '%s' (charset %s)",
-        $s, $charset);
-    } else {
-      dbg("util: idn_to_ascii: converted to ACE: '%s' -> '%s' (charset %s)",
-        $s, $sa, $charset);
-      $s = $sa;
+    if ($have_libidn) {
+      my $sa = Net::LibIDN::idn_to_ascii($s, $charset);
+      if (!defined $sa) {
+        info("util: idn_to_ascii: conversion to ACE failed: '%s' (charset %s)",
+          $s, $charset);
+      } else {
+        dbg("util: idn_to_ascii: converted to ACE: '%s' -> '%s' (charset %s)",
+          $s, $sa, $charset)  if $s ne $sa;
+        $s = $sa;
+      }
+    } elsif ($have_libidn2) {
+      my $si = $s;
+      if ($charset eq 'ISO-8859-1') {
+        Encode::from_to($si, 'ISO-8859-1', 'UTF-8');
+        utf8::decode($si) unless utf8::is_utf8($si);
+      }
+      my $rc = 0;
+      my $sa = Net::LibIDN2::idn2_to_ascii_8($si,
+                 &Net::LibIDN2::IDN2_NFC_INPUT + &Net::LibIDN2::IDN2_NONTRANSITIONAL,
+                 $rc);
+      if (!defined $sa) {
+        info("util: idn_to_ascii: conversion to ACE failed: '%s' (charset %s) (LibIDN2)",
+          Net::LibIDN2::idn2_strerror($rc), $charset);
+      } else {
+        dbg("util: idn_to_ascii: converted to ACE: '%s' -> '%s' (charset %s) (LibIDN2)",
+          $s, $sa, $charset)  if $s ne $sa;
+        $s = $sa;
+      }
     }
   } else {
     my($package, $filename, $line) = caller;
@@ -530,7 +566,8 @@ sub idn_to_ascii {
     $s = lc $s;  # garbage-in / garbage-out
   }
 
-  $t ? taint_var($s) : $s;  # propagate taintedness of the argument
+  return $t ? taint_var($s) : $s;  # propagate taintedness of the argument
+  #return $idn_cache->{$orig_s} = $t ? taint_var($s) : $s;  # propagate taintedness of the argument
 }
 
 ###########################################################################
