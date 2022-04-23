@@ -18,9 +18,9 @@ Using CPAN via CPAN.pm:
 
 Using Linux:
 
-	Debian: apt-get install spamassassin
+	Debian/Ubuntu: apt-get install spamassassin
 	Gentoo: emerge mail-filter/spamassassin
-	Fedora: yum install spamassassin
+	Fedora/CentOS/RedHat: yum install spamassassin
 
 Alternatively download the tarfile, zipfile, and/or build your own RPM
 from https://spamassassin.apache.org/.  Building from tar/zip file is
@@ -416,6 +416,21 @@ is too low for them to be used.
   - Net::SMTP (from CPAN)
 
     Used when manually reporting spam to SpamCop.
+
+Examples of installing most recommended modules on popular distributions:
+
+ Debian/Ubuntu:
+  apt-get install libencode-detect-perl libnet-libidn-perl \
+    libemail-address-xs-perl libmail-dkim-perl libmail-spf-perl \
+    libio-socket-ip-perl
+
+ Gentoo:
+  emerge dev-perl/Encode-Detect dev-perl/Net-LibIDN \
+    dev-perl/Email-Address-XS dev-perl/Mail-DKIM dev-perl/Mail-SPF
+
+ Fedora/CentOS/RedHat:
+  yum install perl-MIME-Base64 perl-Encode-Detect perl-Net-LibIDN \
+    perl-Email-Address-XS perl-Mail-DKIM perl-Mail-SPF perl-IO-Socket-IP
 
 
 What Next?
