@@ -702,38 +702,34 @@ score NO_HEADERS_MESSAGE 0.001
 score HTML_CHARSET_FARAWAY 0.500
 score MIME_CHARSET_FARAWAY 2.450
 
-# rescore never changes the whitelist/blacklist scores
+# rescore never changes the welcomelist/blocklist scores
 ifplugin Mail::SpamAssassin::Plugin::WLBLEval
-#score USER_IN_BLACKLIST 100.000 - Moved to 60_whitelist.cf
-#score USER_IN_WHITELIST -100.000 - Moved to 60_whitelist.cf
-#score USER_IN_DEF_WHITELIST -15.000 - Moved to 60_whitelist.cf
-#score USER_IN_BLACKLIST_TO   10.000 - Moved to 60_whitelist.cf
-#score URI_HOST_IN_BLACKLIST  100.0 - Moved to 60_whitelist.cf
-#score URI_HOST_IN_WHITELIST -100.0 - Moved to 60_whitelist.cf
+#score USER_IN_BLOCKLIST 100.000 - Moved to 60_welcomelist.cf
+#score USER_IN_WELCOMELIST -100.000 - Moved to 60_welcomelist.cf
+#score USER_IN_DEF_WELCOMELIST -15.000 - Moved to 60_welcomelist.cf
+#score USER_IN_BLOCKLIST_TO   10.000 - Moved to 60_welcomelist.cf
+#score URI_HOST_IN_BLOCKLIST  100.0 - Moved to 60_welcomelist.cf
+#score URI_HOST_IN_WELCOMELIST -100.0 - Moved to 60_welcomelist.cf
 #Removed in bug 7256
-#score HEADER_HOST_IN_BLACKLIST	100.0
-#score HEADER_HOST_IN_WHITELIST -100.0
+#score HEADER_HOST_IN_BLOCKLIST	100.0
+#score HEADER_HOST_IN_WELCOMELIST -100.0
 
 # not really false positives but the user wants spam!
-#score USER_IN_WHITELIST_TO -6.000 - Moved to 60_whitelist.cf
+#score USER_IN_WELCOMELIST_TO -6.000 - Moved to 60_welcomelist.cf
 score USER_IN_MORE_SPAM_TO -20.000
 score USER_IN_ALL_SPAM_TO -100.000
 endif
 
-ifplugin Mail::SpamAssassin::Plugin::WhiteListSubject
-score SUBJECT_IN_WHITELIST -100
-score SUBJECT_IN_BLACKLIST 100
-endif # Mail::SpamAssassin::Plugin::WhiteListSubject
-
 ifplugin Mail::SpamAssassin::Plugin::SPF
-score USER_IN_SPF_WHITELIST -100.000
+#score USER_IN_SPF_WELCOMELIST -0.01 - Moved to 60_welcomelist_spf.cf
+#score USER_IN_SPF_WHITELIST -100.000 - Moved to 60_welcomelist_spf.cf
 score USER_IN_DEF_SPF_WL -7.500
 score ENV_AND_HDR_SPF_MATCH -0.5
 endif # Mail::SpamAssassin::Plugin::SPF
 
 # DKIM
 ifplugin Mail::SpamAssassin::Plugin::DKIM
-#score USER_IN_DKIM_WHITELIST -100.000 - Moved to 60_whitelist_dkim.cf
+#score USER_IN_DKIM_WELCOMELIST -100.000 - Moved to 60_welcomelist_dkim.cf
 score USER_IN_DEF_DKIM_WL -7.500
 score DKIM_SIGNED 0.1
 score DKIM_VALID -0.1

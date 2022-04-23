@@ -65,6 +65,7 @@ SpamAssassin handles incoming email messages.
 =over 4
 
 =item welcomelist_bounce_relays hostname [hostname2 ...]
+
 Previously whitelist_bounce_relays which will work interchangeably until 4.1.
 
 This is used to 'rescue' legitimate bounce messages that were generated in
@@ -97,11 +98,6 @@ sub have_any_bounce_relays {
   my ($self, $pms) = @_;
   return $pms->{conf}->{welcomelist_bounce_relays} &&
          %{$pms->{conf}->{welcomelist_bounce_relays}} ? 1 : 0;
-}
-
-#Stub for backwards compatibility - Remove in SA 4.1
-sub check_whitelist_bounce_relays {
-  return check_welcomelist_bounce_relays(@_);
 }
 
 sub check_welcomelist_bounce_relays {
@@ -157,12 +153,13 @@ sub check_welcomelist_bounce_relays {
 
   return 0;
 }
+*check_whitelist_bounce_relays = \&check_welcomelist_bounce_relays; # removed in 4.1
 
 sub _relay_is_in_welcomelist_bounce_relays {
   my ($self, $pms, $relay) = @_;
   return 1 if $self->_relay_is_in_list(
         $pms->{conf}->{welcomelist_bounce_relays}, $pms, $relay);
-  dbg("rules: relay $relay doesn't match any whitelist");
+  dbg("rules: relay $relay doesn't match any welcomelist");
 
   return 0;
 }

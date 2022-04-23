@@ -15,6 +15,8 @@ plan tests => 72;
 
 # ---------------------------------------------------------------------------
 
+disable_compat "welcomelist_blocklist";
+
 # ensure all rules will fire
 tstlocalrules ("
   score SPF_FAIL 0.001

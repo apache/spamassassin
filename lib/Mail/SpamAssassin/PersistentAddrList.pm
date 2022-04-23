@@ -33,7 +33,7 @@ SpamAssassin will call:
 
 =head1 DESCRIPTION
 
-All persistent address list implementations, used by the auto-whitelist
+All persistent address list implementations, used by the auto-welcomelist
 code to track known-good email addresses, use this as a base class.
 
 See C<Mail::SpamAssassin::DBBasedAddrList> for an example.
@@ -81,7 +81,7 @@ SpamAssassin classes.
 
 sub new_checker {
   my ($factory, $main) = @_;
-  die "auto-whitelist: unimplemented base method";	# override this
+  die "auto-welcomelist: unimplemented base method";	# override this
 }
 
 ###########################################################################
@@ -109,7 +109,7 @@ a C<count> key and a C<totscore> key.
 sub get_addr_entry {
   my ($self, $addr, $signedby) = @_;
   my $entry = { };
-  die "auto-whitelist: unimplemented base method";	# override this
+  die "auto-welcomelist: unimplemented base method";	# override this
   return $entry;
 }
 
@@ -117,27 +117,27 @@ sub get_addr_entry {
 
 =item $entry = $addrlist->add_score($entry, $score);
 
-This method should add the given score to the whitelist database for the
+This method should add the given score to the welcomelist database for the
 given entry, and then return the new entry.
 
 =cut
 
 sub add_score {
     my ($self, $entry, $score) = @_;
-    die "auto-whitelist: unimplemented base method"; # override this
+    die "auto-welcomelist: unimplemented base method"; # override this
 }
 
 ###########################################################################
 
 =item $entry = $addrlist->remove_entry ($entry);
 
-This method should remove the given entry from the whitelist database.
+This method should remove the given entry from the welcomelist database.
 
 =cut
 
 sub remove_entry {
   my ($self, $entry) = @_;
-  die "auto-whitelist: unimplemented base method";	# override this
+  die "auto-welcomelist: unimplemented base method";	# override this
 }
 
 ###########################################################################
@@ -145,7 +145,7 @@ sub remove_entry {
 =item $entry = $addrlist->finish ();
 
 Clean up, if necessary.  Called by SpamAssassin when it has finished
-checking, or adding to, the auto-whitelist database.
+checking, or adding to, the auto-welcomelist database.
 
 =cut
 

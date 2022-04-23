@@ -67,7 +67,13 @@ use AnyDBM_File ;
 
 my $db;
 if ($#ARGV == -1) {
-  $db = $ENV{HOME}."/.spamassassin/auto-whitelist";
+  # Check for existing file from <4.0, compatibility to be removed in 4.1
+  if (!-e $ENV{HOME}."/.spamassassin/auto-welcomelist" &&
+       -e $ENV{HOME}."/.spamassassin/auto-whitelist") {
+    $db = $ENV{HOME}."/.spamassassin/auto-whitelist";
+  } else {
+    $db = $ENV{HOME}."/.spamassassin/auto-welcomelist";
+  }
 } else {
   $db = $ARGV[0];
 }
@@ -120,7 +126,7 @@ untie %h;
 
 =head1 NAME
 
-sa-awl - examine and manipulate SpamAssassin's auto-whitelist db
+sa-awl - examine and manipulate SpamAssassin's auto-welcomelist db
 
 =head1 SYNOPSIS
 
@@ -128,10 +134,10 @@ B<sa-awl> [--clean] [--min n] [dbfile]
 
 =head1 DESCRIPTION
 
-Check or clean a SpamAssassin auto-whitelist (AWL) database file.
+Check or clean a SpamAssassin auto-welcomelist (AWL) database file.
 
 The name of the file is specified after any options, as C<dbfile>.
-The default is C<$HOME/.spamassassin/auto-whitelist>.
+The default is C<$HOME/.spamassassin/auto-welcomelist>.
 
 =head1 OPTIONS
 

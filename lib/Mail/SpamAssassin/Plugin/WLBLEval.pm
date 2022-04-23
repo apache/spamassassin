@@ -61,48 +61,35 @@ sub new {
   $self->register_eval_rule("check_forged_in_default_whitelist", $Mail::SpamAssassin::Conf::TYPE_HEAD_EVALS); #Stub - Remove in SA 4.1
   $self->register_eval_rule("check_mailfrom_matches_rcvd", $Mail::SpamAssassin::Conf::TYPE_HEAD_EVALS);
   $self->register_eval_rule("check_uri_host_listed", $Mail::SpamAssassin::Conf::TYPE_HEAD_EVALS);
-  # same as: eval:check_uri_host_listed('BLACK') :
+  # same as: eval:check_uri_host_listed('BLOCK') :
   $self->register_eval_rule("check_uri_host_in_blocklist"); # type does not matter
   $self->register_eval_rule("check_uri_host_in_blacklist"); # type does not matter #Stub - Remove in SA 4.1
-  # same as: eval:check_uri_host_listed('WHITE') :
+  # same as: eval:check_uri_host_listed('WELCOME') :
   $self->register_eval_rule("check_uri_host_in_welcomelist"); # type does not matter
   $self->register_eval_rule("check_uri_host_in_whitelist"); # type does not matter #Stub - Remove in SA 4.1
 
   return $self;
 }
 
-#Stub for backwards compatibility - Remove in SA 4.1
-sub check_from_in_blacklist {
-  return check_from_in_blocklist(@_);
-}
-
 sub check_from_in_blocklist {
   my ($self, $pms) = @_;
   foreach ($pms->all_from_addrs()) {
-    if ($self->_check_welcomelist ($self->{main}->{conf}->{blacklist_from}, $_)) {
+    if ($self->_check_welcomelist ($self->{main}->{conf}->{blocklist_from}, $_)) {
       return 1;
     }
   }
 }
-
-#Stub for backwards compatibility - Remove in SA 4.1
-sub check_to_in_blacklist {
-  return check_to_in_blocklist(@_);
-}
+*check_from_in_blacklist = \&check_from_in_blocklist; # removed in 4.1
 
 sub check_to_in_blocklist {
   my ($self, $pms) = @_;
   foreach ($pms->all_to_addrs()) {
-    if ($self->_check_welcomelist ($self->{main}->{conf}->{blacklist_to}, $_)) {
+    if ($self->_check_welcomelist ($self->{main}->{conf}->{blocklist_to}, $_)) {
       return 1;
     }
   }
 }
-
-#Stub for backwards compatibility - Remove in SA 4.1
-sub check_to_in_whitelist {
-  return check_to_in_welcomelist(@_);
-}
+*check_to_in_blacklist = \&check_to_in_blocklist; # removed in 4.1
 
 sub check_to_in_welcomelist {
   my ($self, $pms) = @_;
@@ -112,6 +99,7 @@ sub check_to_in_welcomelist {
     }
   }
 }
+*check_to_in_whitelist = \&check_to_in_welcomelist; # removed in 4.1
 
 sub check_to_in_more_spam {
   my ($self, $pms) = @_;
@@ -204,21 +192,13 @@ sub check_to_in_list {
 
 ###########################################################################
 #
-#Stub for backwards compatibility - Remove in SA 4.1
-sub check_from_in_whitelist {
-  return check_from_in_welcomelist(@_);
-} 
 
 sub check_from_in_welcomelist {
   my ($self, $pms) = @_;
   $self->_check_from_in_welcomelist($pms) unless exists $pms->{from_in_welcomelist};
   return ($pms->{from_in_welcomelist} > 0);
 }
-
-#Stub for backwards compatibility - Remove in SA 4.1
-sub check_forged_in_whitelist {
-  return check_forged_in_welcomelist(@_);
-}
+*check_from_in_whitelist = \&check_from_in_welcomelist; # removed in 4.1
 
 sub check_forged_in_welcomelist {
   my ($self, $pms) = @_;
@@ -226,22 +206,14 @@ sub check_forged_in_welcomelist {
   $self->_check_from_in_default_welcomelist($pms) unless exists $pms->{from_in_default_welcomelist};
   return ($pms->{from_in_welcomelist} < 0) && ($pms->{from_in_default_welcomelist} == 0);
 }
-
-#Stub for backwards compatibility - Remove in SA 4.1
-sub check_from_in_default_whitelist {
-  return check_from_in_default_welcomelist(@_);
-}
+*check_forged_in_whitelist = \&check_forged_in_welcomelist; # removed in 4.1
 
 sub check_from_in_default_welcomelist {
   my ($self, $pms) = @_;
   $self->_check_from_in_default_welcomelist($pms) unless exists $pms->{from_in_default_welcomelist};
   return ($pms->{from_in_default_welcomelist} > 0);
 }
-
-#Stub for backwards compatibility - Remove in SA 4.1
-sub check_forged_in_default_whitelist {
-  return check_forged_in_default_welcomelist(@_);
-}
+*check_from_in_default_whitelist = \&check_from_in_default_welcomelist; # removed in 4.1
 
 sub check_forged_in_default_welcomelist {
   my ($self, $pms) = @_;
@@ -249,6 +221,7 @@ sub check_forged_in_default_welcomelist {
   $self->_check_from_in_welcomelist($pms) unless exists $pms->{from_in_welcomelist};
   return ($pms->{from_in_default_welcomelist} < 0) && ($pms->{from_in_welcomelist} == 0);
 }
+*check_forged_in_default_whitelist = \&check_forged_in_default_welcomelist; # removed in 4.1
 
 ###########################################################################
 
@@ -349,9 +322,8 @@ sub _check_addr_matches_rcvd {
 
 ###########################################################################
 
-# look up $addr and trusted relays in a whitelist with rcvd
+# look up $addr and trusted relays in a welcomelist with rcvd
 # note if it appears to be a forgery and $addr is not in any-relay list
-# changed from _check_whitelist_rcvd to _check_welcomelist_rcvd
 sub _check_welcomelist_rcvd {
   my ($self, $pms, $list, $addr) = @_;
 
@@ -363,7 +335,7 @@ sub _check_welcomelist_rcvd {
   if ($pms->{num_relays_untrusted} > 0) {
     @relays = $pms->{relays_untrusted}->[0];
   }
-  # then try the trusted ones; the user could have whitelisted a trusted
+  # then try the trusted ones; the user could have welcomelisted a trusted
   # relay, totally permitted
   # but do not do this if any untrusted relays, to avoid forgery -- bug 4425
   if ($pms->{num_relays_trusted} > 0 && !$pms->{num_relays_untrusted} ) {
@@ -372,9 +344,9 @@ sub _check_welcomelist_rcvd {
 
   $addr = lc $addr;
   my $found_forged = 0;
-  foreach my $white_addr (keys %{$list}) {
-    my $regexp = $list->{$white_addr}{re};
-    foreach my $domain (@{$list->{$white_addr}{domain}}) {
+  foreach my $welcome_addr (keys %{$list}) {
+    my $regexp = $list->{$welcome_addr}{re};
+    foreach my $domain (@{$list->{$welcome_addr}{domain}}) {
       # $domain is a second param in welcomelist_from_rcvd: a domain name or an IP address
       
       if ($addr =~ $regexp) {
@@ -391,7 +363,7 @@ sub _check_welcomelist_rcvd {
               # relay's IP address not provided or unparseable
 
             } elsif ($wl_ip  =~ /^\d+\.\d+\.\d+\.\d+\z/s) {
-              # an IPv4 whitelist entry can only be matched by an IPv4 relay
+              # an IPv4 welcomelist entry can only be matched by an IPv4 relay
               if ($wl_ip eq $rly_ip) { $match = 1; last }  # exact match
 
             } elsif ($wl_ip =~ /^[\d\.]+\z/s) {  # an IPv4 classful subnet?
@@ -404,12 +376,12 @@ sub _check_welcomelist_rcvd {
                 dbg("rules: bad IP address in relay: %s, sender: %s",
                     $rly_ip, $addr);
               } else {
-                my $wl_ip_obj = NetAddr::IP->new($wl_ip); # whitelist 2nd param
+                my $wl_ip_obj = NetAddr::IP->new($wl_ip); # welcomelist 2nd param
                 if (!defined $wl_ip_obj) {
-                  info("rules: bad IP address in whitelist: %s", $wl_ip);
+                  info("rules: bad IP address in welcomelist: %s", $wl_ip);
                 } elsif ($wl_ip_obj->contains($rly_ip_obj)) {
                   # note: an IPv4-compatible IPv6 address can match an IPv4 addr
-                  dbg("rules: relay addr %s matches whitelist %s, sender: %s",
+                  dbg("rules: relay addr %s matches welcomelist %s, sender: %s",
                       $rly_ip, $wl_ip_obj, $addr);
                   $match = 1; last;
                 } else {
@@ -425,8 +397,8 @@ sub _check_welcomelist_rcvd {
           }
         }
         if ($match) {
-          dbg("rules: address %s matches (def_)whitelist_from_rcvd %s %s",
-              $addr, $list->{$white_addr}{re}, $domain);
+          dbg("rules: address %s matches (def_)welcomelist_from_rcvd %s %s",
+              $addr, $list->{$welcome_addr}{re}, $domain);
           return 1;
         }
         # found address match but no relay match. note as possible forgery
@@ -435,7 +407,7 @@ sub _check_welcomelist_rcvd {
     }
   }
   if ($found_forged) { # might be forgery. check if in list of exempted
-    my $wlist = $pms->{conf}->{whitelist_allows_relays};
+    my $wlist = $pms->{conf}->{welcomelist_allows_relays};
     foreach my $regexp (values %{$wlist}) {
       if ($addr =~ $regexp) {
         $found_forged = 0;
@@ -463,23 +435,18 @@ sub _check_welcomelist {
 }
 
 ###########################################################################
-#Stub for backwards compatibility - Remove in SA 4.1
-sub check_uri_host_in_blacklist {
-  return check_uri_host_in_blocklist(@_);
-}
 
 sub check_uri_host_in_blocklist {
   my ($self, $pms) = @_;
-  $self->check_uri_host_listed($pms, 'BLACK');
+  $self->check_uri_host_listed($pms, 'BLOCK');
 }
+*check_uri_host_in_blacklist = \&check_uri_host_in_blocklist; # removed in 4.1
 
-sub check_uri_host_in_whitelist {
-  return check_uri_host_in_welcomelist(@_);
-}
 sub check_uri_host_in_welcomelist {
   my ($self, $pms) = @_;
-  $self->check_uri_host_listed($pms, 'WHITE');
+  $self->check_uri_host_listed($pms, 'WELCOME');
 }
+*check_uri_host_in_whitelist = \&check_uri_host_in_welcomelist; # removed in 4.1
 
 sub check_uri_host_listed {
   my ($self, $pms, $subname) = @_;

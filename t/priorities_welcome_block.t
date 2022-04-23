@@ -1,26 +1,24 @@
 #!/usr/bin/perl -T
 
 use lib '.'; use lib 't';
-use SATest; sa_t_init("priorities");
+use SATest; sa_t_init("priorities_welcome_block");
 use strict;
 use Test::More tests => 10;
 
 use Mail::SpamAssassin;
 
-disable_compat "welcomelist_blocklist";
-
 tstlocalrules (q{
 
-  priority USER_IN_WHITELIST     -1000
-  priority USER_IN_DEF_WHITELIST -1000
+  priority USER_IN_WELCOMELIST     -1000
+  priority USER_IN_DEF_WELCOMELIST -1000
   priority USER_IN_ALL_SPAM_TO   -1000
-  priority SUBJECT_IN_WHITELIST  -1000
+  priority SUBJECT_IN_WELCOMELIST  -1000
 
   priority ALL_TRUSTED            -950
 
-  priority SUBJECT_IN_BLACKLIST   -900
-  priority USER_IN_BLACKLIST_TO   -900
-  priority USER_IN_BLACKLIST      -900
+  priority SUBJECT_IN_BLOCKLIST   -900
+  priority USER_IN_BLOCKLIST_TO   -900
+  priority USER_IN_BLOCKLIST      -900
 
   priority BAYES_99               -400
 
@@ -66,7 +64,7 @@ ok($sa);
 my $conf = $sa->{conf};
 sub assert_rule_pri;
 
-ok assert_rule_pri 'USER_IN_WHITELIST', -1000;
+ok assert_rule_pri 'USER_IN_WELCOMELIST', -1000;
 
 ok assert_rule_pri 'SC_URIBL_SURBL', -530;
 ok assert_rule_pri 'SC_URIBL_HASH', -510;

@@ -186,7 +186,7 @@ sub set_config {
 
 Previously whitelist_from_dkim which will work interchangeably until 4.1.
 
-Works similarly to welcomelist_from (previously whitelist_from), except that in addition to matching
+Works similarly to welcomelist_from, except that in addition to matching
 an author address (From) to the pattern in the first parameter, the message
 must also carry a valid Domain Keys Identified Mail (DKIM) signature made by
 a signing domain (SDID, i.e. the d= tag) that is acceptable to us.
@@ -403,7 +403,7 @@ is only informational.
 
   push (@cmds, {
     setting => 'welcomelist_from_dkim',
-    aliases => ['whitelist_from_dkim'],
+    aliases => ['whitelist_from_dkim'], # removed in 4.1
     type => $Mail::SpamAssassin::Conf::CONF_TYPE_ADDRLIST,
     code => sub {
       my ($self, $key, $value, $line) = @_;
@@ -417,7 +417,6 @@ is only informational.
       my $address = $1;
       my $sdid = defined $2 ? $2 : '';  # empty implies author domain signature
       $address =~ s/(\@[^@]*)\z/lc($1)/e;  # lowercase the email address domain
-      #Previously the first parameter was whitelist_from_dkim
       $self->{parser}->add_to_addrlist_dkim('welcomelist_from_dkim',
                                             $address, lc $sdid);
     }
@@ -425,7 +424,7 @@ is only informational.
 
   push (@cmds, {
     setting => 'def_welcomelist_from_dkim',
-    aliases => ['def_whitelist_from_dkim'],
+    aliases => ['def_whitelist_from_dkim'], # removed in 4.1
     type => $Mail::SpamAssassin::Conf::CONF_TYPE_ADDRLIST,
     code => sub {
       my ($self, $key, $value, $line) = @_;
@@ -446,7 +445,7 @@ is only informational.
 
   push (@cmds, {
     setting => 'unwelcomelist_from_dkim',
-    aliases => ['unwhitelist_from_dkim'],
+    aliases => ['unwhitelist_from_dkim'], # removed in 4.1
     type => $Mail::SpamAssassin::Conf::CONF_TYPE_ADDRLIST,
     code => sub {
       my ($self, $key, $value, $line) = @_;
@@ -460,7 +459,6 @@ is only informational.
       my $address = $1;
       my $sdid = defined $2 ? $2 : '';  # empty implies author domain signature
       $address =~ s/(\@[^@]*)\z/lc($1)/e;  # lowercase the email address domain
-      #Previously the first parameter was whitelist_from_dkim
       $self->{parser}->remove_from_addrlist_dkim('welcomelist_from_dkim',
                                                  $address, lc $sdid);
       $self->{parser}->remove_from_addrlist_dkim('def_welcomelist_from_dkim',
@@ -664,17 +662,10 @@ sub check_dkim_testing {
 sub check_for_dkim_welcomelist_from {
   my ($self, $pms) = @_;
   $self->_check_dkim_welcomelist($pms)  if !$pms->{welcomelist_checked};
-  #Was originally dkim_match_in_whitelist_from_dkim and dkim_match_in_whitelist_auth respectively
   return $pms->{dkim_match_in_welcomelist_from_dkim} || 
          $pms->{dkim_match_in_welcomelist_auth};
 }
-
-#Stub for backwards compatibility - Remove in SA 4.1
-sub check_for_dkim_whitelist_from {
-
-  return check_for_dkim_welcomelist_from(@_);
-    
-}
+*check_for_dkim_whitelist_from = \&check_for_dkim_welcomelist_from; # removed in 4.1
 
 sub check_for_def_dkim_welcomelist_from {
   my ($self, $pms) = @_;
@@ -682,13 +673,7 @@ sub check_for_def_dkim_welcomelist_from {
   return $pms->{dkim_match_in_def_welcomelist_from_dkim} || 
          $pms->{dkim_match_in_def_welcomelist_auth};
 }
-
-#Stub for backwards compatibility - Remove in SA 4.1
-sub check_for_def_dkim_whitelist_from {
-
-  return check_for_def_dkim_welcomelist_from(@_);
-
-}
+*check_for_def_dkim_whitelist_from = \&check_for_def_dkim_welcomelist_from; # removed in 4.1
 
 # ---------------------------------------------------------------------------
 
@@ -1175,7 +1160,6 @@ sub _check_dkim_adsp {
 sub _check_dkim_welcomelist {
   my ($self, $pms) = @_;
 
-  #Was originally whitelist_checked, changed due to bz7826
   $pms->{welcomelist_checked} = 1;
 
   $self->_get_authors($pms)  if !$pms->{dkim_author_addresses};
@@ -1222,13 +1206,13 @@ sub _check_dkim_welcomelist {
     }
   }
   if (@valid) {
-    dbg("dkim: author %s, WHITELISTED by %s",
+    dbg("dkim: author %s, WELCOMELISTED by %s",
         $authors_str, join(", ",@valid));
   } elsif (@fail) {
     dbg("dkim: author %s, found in %s BUT IGNORED",
         $authors_str, join(", ",@fail));
   } else {
-    dbg("dkim: author %s, not in any dkim whitelist", $authors_str);
+    dbg("dkim: author %s, not in any dkim welcomelist", $authors_str);
   }
 }
 
@@ -1253,7 +1237,7 @@ sub _wlcheck_acceptable_signature {
   }
 }
 
-# use a traditional welcomelist_from -style (previously whitelist_from) addrlist, the only acceptable DKIM
+# use a traditional welcomelist_from -style addrlist, the only acceptable DKIM
 # signature is an Author Domain Signature.  Note: don't pre-parse and store
 # domains; that's inefficient memory-wise and only saves one m//
 #

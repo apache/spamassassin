@@ -776,7 +776,7 @@ get_output_fd(int *fd)
  * If the program's caller didn't identify the user to run as, use the
  * current user for this. Note that we're not talking about UNIX perm-
  * issions, but giving SpamAssassin a username so it can do per-user
- * configuration (whitelists & the like).
+ * configuration (welcomelists & the like).
  *
  * Allocates memory for the username, returns EX_OK if successful.
  */

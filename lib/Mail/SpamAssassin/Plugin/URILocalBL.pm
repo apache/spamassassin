@@ -17,7 +17,7 @@
 
 =head1 NAME
 
-URILocalBL - blacklist URIs using local information (ISP names, address lists, and country codes)
+URILocalBL - blocklist URIs using local information (ISP names, address lists, and country codes)
 
 =head1 SYNOPSIS
 
@@ -27,20 +27,20 @@ found in the HTML portion of a message, i.e. <a href=...> markup.
 
   loadplugin    Mail::SpamAssassin::Plugin::URILocalBL
 
-Why local blacklisting? There are a few excellent, effective, and
+Why local blocklisting? There are a few excellent, effective, and
 well-maintained DNSBL's out there. But they have several drawbacks:
 
 =over 2
 
-=item * blacklists can cover tens of thousands of entries, and you can't select which ones you use;
+=item * blocklists can cover tens of thousands of entries, and you can't select which ones you use;
 
 =item * verifying that it's correctly configured can be non-trivial;
 
-=item * new blacklisting entries may take a while to be detected and entered, so it's not instantaneous.
+=item * new blocklisting entries may take a while to be detected and entered, so it's not instantaneous.
 
 =back
 
-Sometimes all you want is a quick, easy, and very surgical blacklisting of
+Sometimes all you want is a quick, easy, and very surgical blocklisting of
 a particular site or a particular ISP. This plugin is defined for that
 exact usage case.
 
@@ -89,7 +89,7 @@ And to block all CIDR blocks registered to an ISP, one might use:
 Quote ISP names containing spaces.
 
 Lastly, if there's a country that you want to block but there's an explicit
-host you wish to exempt from that blacklist, you can use:
+host you wish to exempt from that blocklist, you can use:
 
   uri_block_exclude TEST1 www.baidu.com
 

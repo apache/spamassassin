@@ -9,6 +9,8 @@ plan tests => 32;
 
 # ---------------------------------------------------------------------------
 
+disable_compat "welcomelist_blocklist";
+
 tstprefs ("
   def_whitelist_from_rcvd *\@paypal.com paypal.com
   def_whitelist_from_rcvd *\@paypal.com ebay.com

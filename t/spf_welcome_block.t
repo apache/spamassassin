@@ -26,7 +26,7 @@ tstlocalrules ("
   score SPF_PASS -0.001
   score SPF_HELO_PASS -0.001
   score USER_IN_DEF_SPF_WL -0.001
-  score USER_IN_SPF_WHITELIST -0.001
+  score USER_IN_SPF_WELCOMELIST -0.001
 ");
 
 %patterns = (
@@ -307,7 +307,7 @@ tstprefs("
 %patterns = (
   q{ SPF_HELO_PASS }, 'helo_pass',
   q{ SPF_PASS }, 'pass',
-  q{ USER_IN_SPF_WHITELIST }, 'spf_whitelist',
+  q{ USER_IN_SPF_WELCOMELIST }, 'spf_whitelist',
   q{ USER_IN_DEF_SPF_WL }, 'default_spf_whitelist',
 );
 
@@ -328,7 +328,7 @@ tstprefs("
 );
 
 %anti_patterns = (
-  q{ USER_IN_SPF_WHITELIST }, 'spf_whitelist',
+  q{ USER_IN_SPF_WELCOMELIST }, 'spf_whitelist',
   q{ USER_IN_DEF_SPF_WL }, 'default_spf_whitelist',
 );
 
@@ -350,7 +350,7 @@ tstprefs("
 %patterns = (
   q{ SPF_HELO_PASS }, 'helo_pass',
   q{ SPF_PASS }, 'pass',
-  q{ USER_IN_SPF_WHITELIST }, 'spf_whitelist',
+  q{ USER_IN_SPF_WELCOMELIST }, 'spf_whitelist',
   q{ USER_IN_DEF_SPF_WL }, 'default_spf_whitelist',
 );
 
@@ -480,7 +480,7 @@ tstprefs("
 );
 
 %anti_patterns = (
-  q{ USER_IN_SPF_WHITELIST }, 'spf_whitelist',
+  q{ USER_IN_SPF_WELCOMELIST }, 'spf_whitelist',
   q{ USER_IN_DEF_SPF_WL }, 'default_spf_whitelist',
 );
 

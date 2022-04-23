@@ -33,7 +33,7 @@ close OUT;
 
 %patterns = (
   q{ 99 MYBODY }, 'MYBODY',
-  q{-0.0 USER_IN_WELCOMELIST }, 'USER_IN_WELCOMELIST',
+  q{-100 USER_IN_WELCOMELIST }, 'USER_IN_WELCOMELIST',
 );
 %anti_patterns = (
 );
@@ -48,7 +48,7 @@ clear_pattern_counters();
   q{ 99 MYBODY }, 'MYBODY',
 );
 %anti_patterns = (
-  q{-0.0 USER_IN_WELCOMELIST }, 'USER_IN_WELCOMELIST',
+  q{ 0 USER_IN_WELCOMELIST }, 'USER_IN_WELCOMELIST',
 );
 ok (spamcrun ("-u testuser2 < data/spam/001", \&patterns_run_cb));
 checkfile ($spamd_stderr, \&patterns_run_cb);

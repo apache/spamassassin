@@ -743,7 +743,7 @@ if ( defined $ENV{'HOME'} ) {
   delete $ENV{'HOME'};         # we do not want to use this when running spamd
 }
 
-# Do whitelist later in tmp dir. Side effect: this will be done as -u user.
+# Do welcomelist later in tmp dir. Side effect: this will be done as -u user.
 
 # Initialize SSL options
 

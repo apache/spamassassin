@@ -70,7 +70,7 @@ tflags RCVD_IN_MSPIKE_ZBI	net
 ## Meta rules for aggregating good and bad senders
 # Bad
 meta RCVD_IN_MSPIKE_BL		RCVD_IN_MSPIKE_L5 || RCVD_IN_MSPIKE_L4 || RCVD_IN_MSPIKE_L3 || __RCVD_IN_MSPIKE_Z
-describe RCVD_IN_MSPIKE_BL	Mailspike blacklisted
+describe RCVD_IN_MSPIKE_BL	Mailspike blocklisted
 tflags RCVD_IN_MSPIKE_BL	net
 
 # Good

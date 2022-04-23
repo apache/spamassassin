@@ -14,6 +14,15 @@
 # added to new files, named according to the release they're added in.
 ###########################################################################
 
+# Version compatibility - Welcomelist/Blocklist
+# In SpamAssassin 4.0, rules containing "whitelist" or "blacklist" have been
+# renamed to contain more racially neutral "welcomelist" and "blocklist"
+# terms.  When this compatibility flag is enabled, old rule names from stock
+# rules will not hit anymore alongside the new ones.  For more information,
+# see: https://wiki.apache.org/spamassassin/WelcomelistBlocklist
+#
+enable_compat welcomelist_blocklist
+
 # RelayCountry - add metadata for Bayes learning, marking the countries
 # a message was relayed through
 #

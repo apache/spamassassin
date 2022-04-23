@@ -284,7 +284,7 @@ it from running.
 
 =back
 
-=head2 WHITELIST AND BLACKLIST OPTIONS
+=head2 WELCOMELIST AND BLOCKLIST OPTIONS
 
 =over 4
 
@@ -292,15 +292,15 @@ it from running.
 
 Previously whitelist_from which will work interchangeably until 4.1.
 
-Used to whitelist sender addresses which send mail that is often tagged
+Used to welcomelist sender addresses which send mail that is often tagged
 (incorrectly) as spam.
 
 Use of this setting is not recommended, since it blindly trusts the message,
 which is routinely and easily forged by spammers and phish senders. The
 recommended solution is to instead use C<welcomelist_auth> or other authenticated
-whitelisting methods, or C<welcomelist_from_rcvd>.
+welcomelisting methods, or C<welcomelist_from_rcvd>.
 
-Whitelist and blacklist addresses are now file-glob-style patterns, so
+Welcomelist and blocklist addresses are now file-glob-style patterns, so
 C<friend@somewhere.com>, C<*@isp.com>, or C<*.domain.net> will all work.
 Specifically, C<*> and C<?> are allowed, but all other metacharacters
 are not. Regular expressions are not used for security reasons.
@@ -309,7 +309,7 @@ Matching is case-insensitive.
 Multiple addresses per line, separated by spaces, is OK.  Multiple
 C<welcomelist_from> lines are also OK.
 
-The headers checked for whitelist addresses are as follows: if C<Resent-From>
+The headers checked for welcomelist addresses are as follows: if C<Resent-From>
 is set, use that; otherwise check all addresses taken from the following
 set of headers:
 
@@ -330,13 +330,15 @@ e.g.
 
   push (@cmds, {
     setting => 'welcomelist_from',
+    aliases => ['whitelist_from'], # backward compatible - to be removed for 4.1
     type => $CONF_TYPE_ADDRLIST,
-    aliases => ['whitelist_from'],     # backward compatible - to be removed for 4.1
   });
 
-=item unwhitelist_from user@example.com
+=item unwelcomelist_from user@example.com
 
-Used to remove a default welcomelist_from (previously whitelist_from) entry, so for example a distribution
+Previously unwelcomelist_from which will work interchangeably until 4.1.
+
+Used to remove a default welcomelist_from entry, so for example a distribution
 welcomelist_from can be overridden in a local.cf file, or an individual user can
 override a welcomelist_from entry in their own C<user_prefs> file.
 The specified email address has to match exactly (although case-insensitively)
@@ -345,13 +347,14 @@ wildcard only matches literally the same wildcard (not 'any' address).
 
 e.g.
 
-  unwhitelist_from joe@example.com fred@example.com
-  unwhitelist_from *@example.com
+  unwelcomelist_from joe@example.com fred@example.com
+  unwelcomelist_from *@example.com
 
 =cut
 
   push (@cmds, {
-    command => 'unwhitelist_from',
+    command => 'unwelcomelist_from',
+    aliases => ['unwhitelist_from'], # backward compatible - to be removed for 4.1
     setting => 'welcomelist_from',
     type => $CONF_TYPE_ADDRLIST,
     code => \&Mail::SpamAssassin::Conf::Parser::remove_addrlist_value
@@ -361,10 +364,10 @@ e.g.
 
 Previously whitelist_from_rcvd which will work interchangeably until 4.1.
 
-Works similarly to welcomelist_from (previously whitelist_from), except that in addition to matching
+Works similarly to welcomelist_from, except that in addition to matching
 a sender address, a relay's rDNS name or its IP address must match too
-for the whitelisting rule to fire. The first parameter is a sender's e-mail
-address to whitelist, and the second is a string to match the relay's rDNS,
+for the welcomelisting rule to fire. The first parameter is a sender's e-mail
+address to welcomelist, and the second is a string to match the relay's rDNS,
 or its IP address. Matching is case-insensitive.
 
 This second parameter is matched against a TCP-info information field as
@@ -433,7 +436,7 @@ these are often targets for spammer spoofing.
 
   push (@cmds, {
     setting => 'def_welcomelist_from_rcvd',
-    aliases => ['def_whitelist_from_rcvd'],
+    aliases => ['def_whitelist_from_rcvd'], # backward compatible - to be removed for 4.1
     type => $CONF_TYPE_ADDRLIST,
     code => sub {
       my ($self, $key, $value, $line) = @_;
@@ -448,22 +451,24 @@ these are often targets for spammer spoofing.
     }
   });
 
-=item whitelist_allows_relays user@example.com
+=item welcomelist_allows_relays user@example.com
+
+Previously whitelist_allows_relays which will work interchangeably until 4.1.
 
 Specify addresses which are in C<welcomelist_from_rcvd> that sometimes
 send through a mail relay other than the listed ones. By default mail
 with a From address that is in C<welcomelist_from_rcvd> that does not match
 the relay will trigger a forgery rule. Including the address in
-C<whitelist_allows_relay> prevents that.
+C<welcomelist_allows_relay> prevents that.
 
-Whitelist and blacklist addresses are now file-glob-style patterns, so
+Welcomelist and blocklist addresses are now file-glob-style patterns, so
 C<friend@somewhere.com>, C<*@isp.com>, or C<*.domain.net> will all work.
 Specifically, C<*> and C<?> are allowed, but all other metacharacters
 are not. Regular expressions are not used for security reasons.
 Matching is case-insensitive.
 
 Multiple addresses per line, separated by spaces, is OK.  Multiple
-C<whitelist_allows_relays> lines are also OK.
+C<welcomelist_allows_relays> lines are also OK.
 
 The specified email address does not have to match exactly the address
 previously used in a welcomelist_from_rcvd line as it is compared to the
@@ -471,13 +476,14 @@ address in the header.
 
 e.g.
 
-  whitelist_allows_relays joe@example.com fred@example.com
-  whitelist_allows_relays *@example.com
+  welcomelist_allows_relays joe@example.com fred@example.com
+  welcomelist_allows_relays *@example.com
 
 =cut
 
   push (@cmds, {
-    setting => 'whitelist_allows_relays',
+    setting => 'welcomelist_allows_relays',
+    aliases => ['whitelist_allows_relays'], # backward compatible - to be removed for 4.1
     type => $CONF_TYPE_ADDRLIST,
   });
 
@@ -485,7 +491,7 @@ e.g.
 
 Previously unwhitelist_from_rcvd which will work interchangeably until 4.1.
 
-Used to remove a default welcomelist_from_rcvd (previously whitelist_from_rcvd) or def_welcomelist_from_rcvd (previously def_whitelist_from_rcvd)
+Used to remove a default welcomelist_from_rcvd or def_welcomelist_from_rcvd
 entry, so for example a distribution welcomelist_from_rcvd can be overridden
 in a local.cf file, or an individual user can override a welcomelist_from_rcvd
 entry in their own C<user_prefs> file.
@@ -502,7 +508,7 @@ e.g.
 
   push (@cmds, {
     setting => 'unwelcomelist_from_rcvd',
-    aliases => ['unwhitelist_from_rcvd'],
+    aliases => ['unwhitelist_from_rcvd'], # backward compatible - to be removed for 4.1
     type => $CONF_TYPE_ADDRLIST,
     code => sub {
       my ($self, $key, $value, $line) = @_;
@@ -519,7 +525,7 @@ e.g.
     }
   });
 
-=item blacklist_from user@example.com
+=item blocklist_from user@example.com
 
 Used to specify addresses which send mail that is often tagged (incorrectly) as
 non-spam, but which the user doesn't want.  Same format as C<welcomelist_from>.
@@ -527,30 +533,34 @@ non-spam, but which the user doesn't want.  Same format as C<welcomelist_from>.
 =cut
 
   push (@cmds, {
-    setting => 'blacklist_from',
+    setting => 'blocklist_from',
+    aliases => ['blacklist_from'], # backward compatible - to be removed for 4.1
     type => $CONF_TYPE_ADDRLIST,
   });
 
-=item unblacklist_from user@example.com
+=item unblocklist_from user@example.com
 
-Used to remove a default blacklist_from entry, so for example a
-distribution blacklist_from can be overridden in a local.cf file, or
-an individual user can override a blacklist_from entry in their own
+Previously unblacklist_from which will work interchangeably until 4.1.
+
+Used to remove a default blocklist_from entry, so for example a
+distribution blocklist_from can be overridden in a local.cf file, or
+an individual user can override a blocklist_from entry in their own
 C<user_prefs> file. The specified email address has to match exactly
-the address previously used in a blacklist_from line.
+the address previously used in a blocklist_from line.
 
 
 e.g.
 
-  unblacklist_from joe@example.com fred@example.com
-  unblacklist_from *@spammer.com
+  unblocklist_from joe@example.com fred@example.com
+  unblocklist_from *@spammer.com
 
 =cut
 
 
   push (@cmds, {
-    command => 'unblacklist_from',
-    setting => 'blacklist_from',
+    command => 'unblocklist_from',
+    aliases => ['unblacklist_from'], # backward compatible - to be removed for 4.1
+    setting => 'blocklist_from',
     type => $CONF_TYPE_ADDRLIST,
     code => \&Mail::SpamAssassin::Conf::Parser::remove_addrlist_value
   });
@@ -599,8 +609,8 @@ See above.
 
   push (@cmds, {
     setting => 'welcomelist_to',
+    aliases => ['whitelist_to'], # backward compatible - to be removed for 4.1
     type => $CONF_TYPE_ADDRLIST,
-    aliases => ['whitelist_to'],       # backward compatible - to be removed for 4.1
   });
   push (@cmds, {
     setting => 'more_spam_to',
@@ -611,16 +621,19 @@ See above.
     type => $CONF_TYPE_ADDRLIST,
   });
 
-=item blacklist_to user@example.com
+=item blocklist_to user@example.com
+
+Previously blacklist_auth which will work interchangeably until 4.1.
 
 If the given address appears as a recipient in the message headers
 (Resent-To, To, Cc, obvious envelope recipient, etc.) the mail will
-be blacklisted.  Same format as C<blacklist_from>.
+be blocklisted.  Same format as C<blocklist_from>.
 
 =cut
 
   push (@cmds, {
-    setting => 'blacklist_to',
+    setting => 'blocklist_to',
+    aliases => ['blacklist_to'], # backward compatible - to be removed for 4.1
     type => $CONF_TYPE_ADDRLIST,
   });
 
@@ -631,7 +644,7 @@ Previously whitelist_auth which will work interchangeably until 4.1.
 Used to specify addresses which send mail that is often tagged (incorrectly) as
 spam.  This is different from C<welcomelist_from> and C<welcomelist_from_rcvd> in
 that it first verifies that the message was sent by an authorized sender for
-the address, before whitelisting.
+the address, before welcomelisting.
 
 Authorization is performed using one of the installed sender-authorization
 schemes: SPF (using C<Mail::SpamAssassin::Plugin::SPF>), or DKIM (using
@@ -639,7 +652,7 @@ C<Mail::SpamAssassin::Plugin::DKIM>).  Note that those plugins must be active,
 and working, for this to operate.
 
 Using C<welcomelist_auth> is roughly equivalent to specifying duplicate
-C<whitelist_from_spf>, C<whitelist_from_dk>, and C<welcomelist_from_dkim> lines
+C<welcomelist_from_spf>, C<welcomelist_from_dk>, and C<welcomelist_from_dkim> lines
 for each of the addresses specified.
 
 e.g.
@@ -669,7 +682,7 @@ these are often targets for spammer spoofing.
     type => $CONF_TYPE_ADDRLIST,
   });
 
-=item unwhitelist_auth user@example.com
+=item unwelcomelist_auth user@example.com
 
 Previously unwhitelist_auth which will work interchangeably until 4.1.
 
@@ -685,7 +698,7 @@ e.g.
 
   push (@cmds, {
     setting => 'unwelcomelist_auth',
-    aliases => ['unwhitelist_auth'],
+    aliases => ['unwhitelist_auth'], # backward compatible - to be removed for 4.1
     type => $CONF_TYPE_ADDRLIST,
     code => sub {
       my ($self, $key, $value, $line) = @_;
@@ -730,9 +743,9 @@ in order to match.
 Use the delist_uri_host directive to neutralize previous enlist_uri_host
 settings.
 
-Enlisting to lists named 'BLACK' and 'WHITE' have their shorthand directives
+Enlisting to lists named 'BLOCK' and 'WELCOME' have their shorthand directives
 blocklist_uri_host and welcomelist_uri_host and corresponding default rules,
-but the names 'BLACK' and 'WHITE' are otherwise not special or reserved.
+but the names 'BLOCK' and 'WELCOME' are otherwise not special or reserved.
 
 =cut
 
@@ -812,17 +825,17 @@ Matching is case-insensitive.
 Multiple addresses per line, separated by spaces, is OK.  Multiple
 C<enlist_addrlist> lines are also OK.
 
-Enlisting an address to the list named blacklist_to is synonymous to using the
-directive blacklist_to 
+Enlisting an address to the list named blocklist_to is synonymous to using
+the directive blocklist_to.
 
-Enlisting an address to the list named blacklist_from is synonymous to using the
-directive blacklist_from
+Enlisting an address to the list named blocklist_from is synonymous to using
+the directive blocklist_from.
 
-Enlisting an address to the list named welcomelist_to is synonymous to using the
-directive welcomelist_to 
+Enlisting an address to the list named welcomelist_to is synonymous to using
+the directive welcomelist_to.
 
-Enlisting an address to the list named welcomelist_from (previously whitelist_from) is synonymous to using the
-directive welcomelist_from
+Enlisting an address to the list named welcomelist_from is synonymous to
+using the directive welcomelist_from.
 
 e.g.
 
@@ -851,7 +864,7 @@ e.g.
 
 Previously blacklist_uri_host which will work interchangeably until 4.1.
 
-Is a shorthand for a directive:  enlist_uri_host (BLACK) host ...
+Is a shorthand for a directive:  enlist_uri_host (BLOCK) host ...
 
 Please see directives enlist_uri_host and delist_uri_host for details.
 
@@ -859,14 +872,14 @@ Please see directives enlist_uri_host and delist_uri_host for details.
 
   push (@cmds, {
     command => 'blocklist_uri_host',
-    aliases => ['blacklist_uri_host'],
+    aliases => ['blacklist_uri_host'], # backward compatible - to be removed for 4.1
     setting => 'uri_host_lists',
     type => $CONF_TYPE_HASH_KEY_VALUE,
     code => sub {
       my($conf, $key, $value, $line) = @_;
       foreach my $host ( split(/\s+/, lc $value) ) {
         my $v = $host =~ s/^!// ? 0 : 1;
-        $conf->{uri_host_lists}{'BLACK'}{$host} = $v;
+        $conf->{uri_host_lists}{'BLOCK'}{$host} = $v;
       }
     }
   });
@@ -875,7 +888,7 @@ Please see directives enlist_uri_host and delist_uri_host for details.
 
 Previously whitelist_uri_host which will work interchangeably until 4.1.
 
-Is a shorthand for a directive:  enlist_uri_host (WHITE) host ...
+Is a shorthand for a directive:  enlist_uri_host (WELCOME) host ...
 
 Please see directives enlist_uri_host and delist_uri_host for details.
 
@@ -883,14 +896,14 @@ Please see directives enlist_uri_host and delist_uri_host for details.
 
   push (@cmds, {
     command => 'welcomelist_uri_host',
-    aliases => ['whitelist_uri_host'],
+    aliases => ['whitelist_uri_host'], # backward compatible - to be removed for 4.1
     setting => 'uri_host_lists',
     type => $CONF_TYPE_HASH_KEY_VALUE,
     code => sub {
       my($conf, $key, $value, $line) = @_;
       foreach my $host ( split(/\s+/, lc $value) ) {
         my $v = $host =~ s/^!// ? 0 : 1;
-        $conf->{uri_host_lists}{'WHITE'}{$host} = $v;
+        $conf->{uri_host_lists}{'WELCOME'}{$host} = $v;
       }
     }
   });
@@ -1318,7 +1331,7 @@ What networks or hosts are 'trusted' in your setup.  B<Trusted> in this case
 means that relay hosts on these networks are considered to not be potentially
 operated by spammers, open relays, or open proxies.  A trusted host could
 conceivably relay spam, but will not originate it, and will not forge header
-data. DNS blacklist checks will never query for hosts on these networks. 
+data. DNS blocklist checks will never query for hosts on these networks. 
 
 See C<https://wiki.apache.org/spamassassin/TrustPath> for more information.
 
@@ -1593,7 +1606,7 @@ more trusted relays.  See also C<envelope_sender_header>.
 =item skip_rbl_checks ( 0 | 1 )   (default: 0)
 
 Turning on the skip_rbl_checks setting will disable the DNSEval plugin,
-which implements Real-time Block List (or: Blackhole List) (RBL) lookups.
+which implements Real-time Block List (or: Blockhole List) (RBL) lookups.
 
 By default, SpamAssassin will run RBL checks. Individual blocklists may
 be disabled selectively by setting a score of a corresponding rule to 0.
@@ -2503,7 +2516,7 @@ as implemented by a Shortcircuit plugin. A synthetic hit on a rule named
 TIME_LIMIT_EXCEEDED with a near-zero default score is generated, so that
 the report will reflect the event. A score for TIME_LIMIT_EXCEEDED may
 be provided explicitly in a configuration file, for example to achieve
-whitelisting or blacklisting effect for messages with long processing times.
+welcomelisting or blocklisting effect for messages with long processing times.
 
 The C<time_limit> option is a useful protection against excessive processing
 time on certain degenerate or unusually long or complex mail messages, as well
@@ -3047,7 +3060,7 @@ C<arguments> are optional arguments to the function call.
 
 =item header SYMBOLIC_TEST_NAME eval:check_rbl('set', 'zone' [, 'sub-test'])
 
-Check a DNSBL (a DNS blacklist or whitelist).  This will retrieve Received:
+Check a DNSBL (a DNS blocklist or welcomelist).  This will retrieve Received:
 headers from the message, extract the IP addresses, select which ones are
 'untrusted' based on the C<trusted_networks> logic, and query that DNSBL
 zone.  There's a few things to note:
@@ -3095,7 +3108,7 @@ sending directly to your MX (mail exchange).
 
 =item selecting IPs by whether they are trusted
 
-When checking a 'nice' DNSBL (a DNS whitelist), you cannot trust the IP
+When checking a 'nice' DNSBL (a DNS welcomelist), you cannot trust the IP
 addresses in Received headers that were not added by trusted relays.  To
 test the first IP address that can be trusted, place '-firsttrusted' at the
 end of the set name.  That should test the IP address of the relay that
@@ -3515,7 +3528,7 @@ source of the points.
 
 This flag is specific when using AWL plugin.
 
-Normally, AWL plugin normalizes scores via auto-whitelist. In some scenarios
+Normally, AWL plugin normalizes scores via auto-welcomelist. In some scenarios
 it works against the system administrator when trying to add some rules to
 correct miss-classified email. When AWL plugin searches the email and finds 
 the noawl flag it will exit without normalizing the score nor storing the
@@ -4235,6 +4248,10 @@ See C<Mail::SpamAssassin::Plugin> for more details on writing plugins.
       if ($package eq 'Mail::SpamAssassin::Plugin::Dmarc' && !defined $path) {
         $package = 'Mail::SpamAssassin::Plugin::DMARC';
       }
+      # backwards compatible - removed in 4.1
+      elsif ($package eq 'Mail::SpamAssassin::Plugin::WhiteListSubject' && !defined $path) {
+        $package = 'Mail::SpamAssassin::Plugin::WelcomeListSubject';
+      }
       $self->load_plugin ($package, $path);
     }
   });
@@ -4908,12 +4925,11 @@ sub new {
   $self->{welcomelist_auth} = { };
   $self->{def_welcomelist_auth} = { };
   $self->{welcomelist_from} = { };
-  $self->{whitelist_allows_relays} = { };
-  $self->{blacklist_from} = { };
+  $self->{welcomelist_allows_relays} = { };
   $self->{welcomelist_from_rcvd} = { };
   $self->{def_welcomelist_from_rcvd} = { };
 
-  $self->{blacklist_to} = { };
+  $self->{blocklist_to} = { };
   $self->{welcomelist_to} = { };
   $self->{more_spam_to} = { };
   $self->{all_spam_to} = { };
@@ -5436,7 +5452,8 @@ sub feature_meta_rules_matching { 1 } # meta rules_matching() expression
 sub feature_subjprefix { 1 } # add subject prefixes rule option
 sub feature_bayes_stopwords { 1 } # multi language stopwords in Bayes
 sub feature_get_host { 1 } # $pms->get() :host :domain :ip :revip # was implemented together with AskDNS::has_tag_header # Bug 7734
-sub feature_blocklist_welcomelist { 1 } # bz 7826
+sub feature_blocklist_welcomelist { 1 } # bz 7826 - do not use, for backwards compatibility
+sub feature_welcomelist_blocklist { 1 } # bz 7826 - this is the actual feature_ to use, everything is renamed at this point
 sub feature_header_address_parser { 1 } # improved header address parsing using Email::Address::XS, $pms->get() list context
 sub feature_local_tests_only { 1 } # Config parser supports "if (local_tests_only)"
 sub feature_header_first_last { 1 } # Can actually use :first :last modifiers in rules

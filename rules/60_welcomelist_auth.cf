@@ -24,8 +24,6 @@
 ###########################################################################
 # SPF and DKIM whitelist rules
 
-if can(Mail::SpamAssassin::Conf::feature_blocklist_welcomelist)
-
 ###########################################################################
 # These should be primarily envelope-from addresses which send mail that is
 # often tagged (incorrectly) as spam or high-profile domains that are common
@@ -41,6 +39,9 @@ if can(Mail::SpamAssassin::Conf::feature_blocklist_welcomelist)
 # IMPORTANT: Changes are needed in two places to support older versions of 
 # SA.  Change the def_welcomelist_auth entry and search "older" and change 
 # the previous config entries in unison.
+
+# 4.0 / Bug 7826 renames whitelist to welcomelist and blacklist to blocklist
+if can(Mail::SpamAssassin::Conf::feature_welcomelist_blocklist)
 
 def_welcomelist_auth *@apache.org
 def_welcomelist_auth *@*.apache.org
@@ -1015,9 +1016,14 @@ def_welcomelist_auth *@*.testingmom.com
 def_welcomelist_auth *@*.ceramicartsnetwork.org
 def_welcomelist_auth *@*.verintefm.com
 
-else
+endif # if can(Mail::SpamAssassin::Conf::feature_welcomelist_blocklist)
 
-#For older versions of SA, these old entries remain for SA before version 4.0
+
+#
+# For older versions of SA, these old entries remain for SA before version 4.0
+#
+
+if !can(Mail::SpamAssassin::Conf::feature_welcomelist_blocklist)
 
 def_whitelist_auth *@apache.org
 def_whitelist_auth *@*.apache.org
@@ -1991,5 +1997,5 @@ def_whitelist_auth *@*.testingmom.com
 def_whitelist_auth *@*.ceramicartsnetwork.org
 def_whitelist_auth *@*.verintefm.com
 
-endif # if can(Mail::SpamAssassin::Conf::feature_blocklist_welcomelist)
+endif # if !can(Mail::SpamAssassin::Conf::feature_welcomelist_blocklist)
 

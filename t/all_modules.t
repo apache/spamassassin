@@ -22,7 +22,7 @@ tstpre ("
   loadplugin Mail::SpamAssassin::Plugin::AutoLearnThreshold
   loadplugin Mail::SpamAssassin::Plugin::TextCat
   loadplugin Mail::SpamAssassin::Plugin::AccessDB
-  loadplugin Mail::SpamAssassin::Plugin::WhiteListSubject
+  loadplugin Mail::SpamAssassin::Plugin::WelcomeListSubject
   loadplugin Mail::SpamAssassin::Plugin::MIMEHeader
   loadplugin Mail::SpamAssassin::Plugin::ReplaceTags
   loadplugin Mail::SpamAssassin::Plugin::DKIM

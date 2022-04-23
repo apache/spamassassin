@@ -93,7 +93,7 @@ Default OPTS: sha1/notag/noquote/max=10/shuffle
 
 Default HEADERS: ALLFROM/Reply-To/body
 
-For existing public email blacklist, see: http://msbl.org/ebl.html
+For existing public email blocklist, see: http://msbl.org/ebl.html
 
   # Working example, see http://msbl.org/ebl.html before usage
   header   HASHBL_EMAIL eval:check_hashbl_emails('ebl.msbl.org')
@@ -102,8 +102,8 @@ For existing public email blacklist, see: http://msbl.org/ebl.html
   tflags   HASHBL_EMAIL net
 
 Default regex for matching and capturing emails can be overridden with
-C<hashbl_email_regex>.  Likewise, the default whitelist can be changed with
-C<hashbl_email_whitelist>.  Only change if you know what you are doing, see
+C<hashbl_email_regex>.  Likewise, the default welcomelist can be changed with
+C<hashbl_email_welcomelist>.  Only change if you know what you are doing, see
 module source for the defaults.  Example: hashbl_email_regex \S+@\S+.com
 
 =over 4
@@ -221,7 +221,8 @@ sub set_config {
   });
 
   push (@cmds, {
-    setting => 'hashbl_email_whitelist',
+    setting => 'hashbl_email_welcomelist',
+    aliases => ['hashbl_email_whitelist'], # removed in 4.1
     is_admin => 1,
     type => $Mail::SpamAssassin::Conf::CONF_TYPE_STRING,
     default => qr/(?i)
@@ -241,10 +242,10 @@ sub set_config {
       }
       my ($rec, $err) = compile_regexp($value, 0);
       if (!$rec) {
-        dbg("config: invalid hashbl_email_whitelist '$value': $err");
+        dbg("config: invalid hashbl_email_welcomelist '$value': $err");
         return $Mail::SpamAssassin::Conf::INVALID_VALUE;
       }
-      $self->{hashbl_email_whitelist} = $rec;
+      $self->{hashbl_email_welcomelist} = $rec;
     }
   });
 
@@ -295,8 +296,8 @@ sub finish_parsing_end {
   # replace _TLDS_ with valid list of TLDs
   $opts->{conf}->{hashbl_email_regex} =~ s/_TLDS_/$self->{main}->{registryboundaries}->{valid_tlds_re}/g;
   #dbg("hashbl_email_regex: $opts->{conf}->{hashbl_email_regex}");
-  $opts->{conf}->{hashbl_email_whitelist} =~ s/_TLDS_/$self->{main}->{registryboundaries}->{valid_tlds_re}/g;
-  #dbg("hashbl_email_whitelist: $opts->{conf}->{hashbl_email_regex}");
+  $opts->{conf}->{hashbl_email_welcomelist} =~ s/_TLDS_/$self->{main}->{registryboundaries}->{valid_tlds_re}/g;
+  #dbg("hashbl_email_welcomelist: $opts->{conf}->{hashbl_email_regex}");
 
   return 0;
 }
@@ -342,15 +343,15 @@ sub _parse_emails {
     return $pms->{hashbl_email_cache}{$hdr} = \@emails;
   }
 
-  if (not defined $pms->{hashbl_whitelist}) {
-    %{$pms->{hashbl_whitelist}} = map { lc($_) => 1 }
+  if (not defined $pms->{hashbl_welcomelist}) {
+    %{$pms->{hashbl_welcomelist}} = map { lc($_) => 1 }
         ( $pms->get("X-Original-To:addr"),
           $pms->get("Apparently-To:addr"),
           $pms->get("Delivered-To:addr"),
           $pms->get("Envelope-To:addr"),
         );
-    if ( defined $pms->{hashbl_whitelist}{''} ) {
-      delete $pms->{hashbl_whitelist}{''};
+    if ( defined $pms->{hashbl_welcomelist}{''} ) {
+      delete $pms->{hashbl_welcomelist}{''};
     }
   }
 
@@ -442,9 +443,9 @@ sub check_hashbl_emails {
   foreach my $email (@$emails) {
     next if exists $seen{$email};
     next if $email !~ /.*\@.*/;
-    if ($email =~ $pms->{conf}->{hashbl_email_whitelist}
-        || defined $pms->{hashbl_whitelist}{$email}) {
-      dbg("Address whitelisted: $email");
+    if ($email =~ $pms->{conf}->{hashbl_email_welcomelist}
+        || defined $pms->{hashbl_welcomelist}{$email}) {
+      dbg("Address welcomelisted: $email");
       next;
     }
     if ($nodot || $notag) {
@@ -717,6 +718,7 @@ sub has_hashbl_emails { 1 }
 sub has_hashbl_uris { 1 }
 sub has_hashbl_ignore { 1 }
 sub has_hashbl_email_regex { 1 }
+sub has_hashbl_email_welcomelist { 1 }
 sub has_hashbl_email_whitelist { 1 }
 
 1;

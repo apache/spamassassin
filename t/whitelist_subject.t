@@ -6,6 +6,8 @@ use Test::More tests => 4;
 
 # ---------------------------------------------------------------------------
 
+disable_compat "welcomelist_blocklist";
+
 %is_whitelist_patterns = (
   q{ SUBJECT_IN_WHITELIST }, 'whitelist-subject'
 );

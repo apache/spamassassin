@@ -52,13 +52,13 @@ Options:
  -t, --test-mode                   Pipe message through and add extra
                                    report to the bottom
  --lint                            Lint the rule set: report syntax errors
- -W, --add-to-whitelist            Add addresses in mail to persistent address whitelist
- --add-to-blacklist                Add addresses in mail to persistent address blacklist
- -R, --remove-from-whitelist       Remove all addresses found in mail from
+ -W, --add-to-welcomelist          Add addresses in mail to persistent address welcomelist
+ --add-to-blocklist                Add addresses in mail to persistent address blocklist
+ -R, --remove-from-welcomelist     Remove all addresses found in mail from
                                    persistent address list
- --add-addr-to-whitelist=addr      Add addr to persistent address whitelist
- --add-addr-to-blacklist=addr      Add addr to persistent address blacklist
- --remove-addr-from-whitelist=addr Remove addr from persistent address list
+ --add-addr-to-welcomelist=addr    Add addr to persistent address welcomelist
+ --add-addr-to-blocklist=addr      Add addr to persistent address blocklist
+ --remove-addr-from-welcomelist=addr Remove addr from persistent address list
  -4 --ipv4only, --ipv4-only, --ipv4 Use IPv4, disable use of IPv6 for DNS etc.
  -6                                Use IPv6, disable use of IPv4 where possible
  --progress                        Print progress bar
@@ -165,45 +165,57 @@ Syntax check (lint) the rule set and configuration files, reporting
 typos and rules that do not compile correctly.  Exits with 0 if there
 are no errors, or greater than 0 if any errors are found.
 
-=item B<-W>, B<--add-to-whitelist>
+=item B<-W>, B<--add-to-welcomelist>
+
+Previously --add-to-whitelist which will work interchangeably until 4.1.
 
 Add all email addresses, in the headers and body of the mail message read
-from STDIN, to a persistent address whitelist.  Note that you must be running
+from STDIN, to a persistent address welcomelist.  Note that you must be running
 C<spamassassin> or C<spamd> with a persistent address list plugin enabled for
 this to work.
 
-=item B<--add-to-blacklist>
+=item B<--add-to-blocklist>
+
+Previously --add-to-blacklist which will work interchangeably until 4.1.
 
 Add all email addresses, in the headers and body of the mail message read
-from STDIN, to the persistent address blacklist.  Note that you must be
+from STDIN, to the persistent address blocklist.  Note that you must be
 running C<spamassassin> or C<spamd> with a persistent address list plugin
 enabled for this to work.
 
-=item B<-R>, B<--remove-from-whitelist>
+=item B<-R>, B<--remove-from-welcomelist>
+
+Previously --remove-from-whitelist which will work interchangeably until 4.1.
 
 Remove all email addresses, in the headers and body of the mail message read
 from STDIN, from a persistent address list. STDIN must contain a full email
 message, so to remove a single address you should use
-B<--remove-addr-from-whitelist> instead.
+B<--remove-addr-from-welcomelist> instead.
 
 Note that you must be running C<spamassassin> or C<spamd> with a persistent
 address list plugin enabled for this to work.
 
-=item B<--add-addr-to-whitelist>
+=item B<--add-addr-to-welcomelist>
 
-Add the named email address to a persistent address whitelist.  Note that you
+Previously --add-addr-to-whitelist which will work interchangeably until 4.1.
+
+Add the named email address to a persistent address welcomelist.  Note that you
 must be running C<spamassassin> or C<spamd> with a persistent address list
 plugin enabled for this to work.
 
-=item B<--add-addr-to-blacklist>
+=item B<--add-addr-to-blocklist>
 
-Add the named email address to a persistent address blacklist.  Note that you
+Previously --add-addr-to-blacklist which will work interchangeably until 4.1.
+
+Add the named email address to a persistent address blocklist.  Note that you
 must be running C<spamassassin> or C<spamd> with a persistent address list
 plugin enabled for this to work.
 
-=item B<--remove-addr-from-whitelist>
+=item B<--remove-addr-from-welcomelist>
 
-Remove the named email address from a persistent address whitelist.  Note that
+Previously --remove-addr-from-whitelist which will work interchangeably until 4.1.
+
+Remove the named email address from a persistent address welcomelist.  Note that
 you must be running C<spamassassin> or C<spamd> with a persistent address
 list plugin enabled for this to work.
 

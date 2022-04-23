@@ -27,16 +27,18 @@
 
 ###########################################################################
 
-priority USER_IN_WHITELIST     -1000
-priority USER_IN_DEF_WHITELIST -1000
-priority USER_IN_ALL_SPAM_TO   -1000
-priority SUBJECT_IN_WHITELIST  -1000
+priority USER_IN_WELCOMELIST     -1000
+priority USER_IN_WHITELIST       -1000
+priority USER_IN_DEF_WELCOMELIST -1000
+priority USER_IN_DEF_WHITELIST   -1000
+priority USER_IN_ALL_SPAM_TO     -1000
 
-priority ALL_TRUSTED            -950
+priority ALL_TRUSTED             -950
 
-priority SUBJECT_IN_BLACKLIST   -900
-priority USER_IN_BLACKLIST_TO   -900
-priority USER_IN_BLACKLIST      -900
+priority USER_IN_BLOCKLIST_TO    -900
+priority USER_IN_BLOCKLIST       -900
+priority USER_IN_BLACKLIST_TO    -900
+priority USER_IN_BLACKLIST       -900
 
 ###########################################################################
 

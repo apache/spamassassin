@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 
 # WARNING: This script is VERY rough and provided only as a template
-# for moving a DB based autowhitelist to a SQL based one.  You should
+# for moving a DB based autowelcomelist to a SQL based one.  You should
 # do backups and that sort of thing before attempting to use this
 # script.
 
@@ -17,7 +17,7 @@ my ( %h $k $v );
 
 sub usage {
   print "This program takes the following required arguments:\n";
-  print "--username <username> - This is who's whitelist you are loading.\n";
+  print "--username <username> - This is who's welcomelist you are loading.\n";
   print "                        It should match exactly what spassassin or\n";
   print "                        spamd will be using.\n";
   print "--dsn <dsn> - This is the database DSN.  It should be in the form:\n";
@@ -26,9 +26,9 @@ sub usage {
   print "--ok - Basically a sanity check that you understand how dangerous this script is.\n";
   print "\n";
   print "This program take the following optional arguments:\n";
-  print "--dbautowhitelist <path>  - path to the auto-whitelist you wish to\n";
+  print "--dbautowelcomelist <path>  - path to the auto-welcomelist you wish to\n";
   print "                            convert. Default is to use \n";
-  print "                            \$ENV{HOME}/.spamassassin/auto-whitelist\n";
+  print "                            \$ENV{HOME}/.spamassassin/auto-welcomelist\n";
   print "--sqlusername <username> - Needed if your DBI driver requires a username.\n";
   print "--sqlpassword <password> - Needed if your DBI driver requires a password.\n";
   print "\n\n";
@@ -45,7 +45,7 @@ my %opt;
 GetOptions('dsn=s' => \$opt{'dsn'},
            'sqlusername=s' => \$opt{'sqlusername'},
            'sqlpassword=s' => \$opt{'sqlpassword'},
-           'dbautowhitelist=s' => \$opt{'dbautowhitelist'},
+           'dbautowelcomelist=s' => \$opt{'dbautowelcomelist'},
            'username=s' => \$opt{'username'},
            'help' => \$opt{'help'},
            'ok' => \$opt{'ok'},
@@ -65,11 +65,11 @@ if (!$opt{'username'} || !$opt{'dsn'}) {
 }
 
 my $db;
-if ($opt{'dbautowhitelist'}) {
-  $db = $opt{'dbautowhitelist'};
+if ($opt{'dbautowelcomelist'}) {
+  $db = $opt{'dbautowelcomelist'};
 }
 else {
-  $db = $ENV{HOME}."/.spamassassin/auto-whitelist";
+  $db = $ENV{HOME}."/.spamassassin/auto-welcomelist";
 }
 
 tie %h, "DB_File",$db, O_RDONLY,0600

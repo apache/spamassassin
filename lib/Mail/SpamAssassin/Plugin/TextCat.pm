@@ -114,7 +114,7 @@ confidence. In that case, no action is taken.
 
 The rule C<UNWANTED_LANGUAGE_BODY> is triggered if none of the languages
 detected are in the "ok" list. Note that this is the only effect of the
-"ok" list. It does not act as a whitelist against any other form of spam
+"ok" list. It does not act as a welcomelist against any other form of spam
 scanning.
 
 In your configuration, you must use the two or three letter language

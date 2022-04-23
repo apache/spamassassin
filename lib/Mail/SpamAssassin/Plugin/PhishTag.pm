@@ -222,7 +222,7 @@ PhishTag - SpamAssassin plugin for redirecting links in incoming emails.
 =head1 DESCRIPTION
 
 PhishTag enables administrators to rewrite links in emails that trigger certain
-tests, preferably anti-phishing blacklist tests. The plugin will inhibit the
+tests, preferably anti-phishing blocklist tests. The plugin will inhibit the
 blocking of a portion of the emails that trigger the test by SpamAssassin, and
 let them pass to the users' inbox after the rewrite. It is useful in providing
 training to email users about company policies and general email usage.

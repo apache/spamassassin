@@ -104,7 +104,7 @@ our @OPTIONAL_MODULES = (
   module => 'DB_File',
   version => 0,
   desc => 'Used to store data on-disk, for the Bayes-style logic and
-  auto-whitelist.  *Much* more efficient than the other standard Perl
+  auto-welcomelist.  *Much* more efficient than the other standard Perl
   database packages.  Strongly recommended.',
 },
 {
@@ -120,7 +120,7 @@ our @OPTIONAL_MODULES = (
   Provides mapping between Internationalized Domain Names (IDN) in
   Unicode and ASCII-compatible encoding (ACE) for use in DNS and comparisions.
   The module is optional, but without it Unicode IDN names found in mail will
-  not be suitable for DNS queries and white/blacklisting.",
+  not be suitable for DNS queries and welcome/blocklisting.",
 },
 {
   module => 'Net::LibIDN',

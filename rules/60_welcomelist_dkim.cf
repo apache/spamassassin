@@ -21,60 +21,59 @@
 # limitations under the License.
 # </@LICENSE>
 
+ifplugin Mail::SpamAssassin::Plugin::DKIM
+
 ###########################################################################
 # DKIM whitelist rules
 
-#For those wondering why there's not just an ifplugin in front of all of this, there's a big involving it
-#in nested if statements
-if can(Mail::SpamAssassin::Conf::feature_blocklist_welcomelist)
-  ifplugin Mail::SpamAssassin::Plugin::DKIM
-    #bz7826 renames whitelist to welcomelist and blacklist to blocklist
-    header USER_IN_DKIM_WELCOMELIST     eval:check_for_dkim_welcomelist_from()
-    describe USER_IN_DKIM_WELCOMELIST   From: address is in the user's DKIM welcomelist
-    tflags USER_IN_DKIM_WELCOMELIST     nice noautolearn net userconf
-    score USER_IN_DKIM_WELCOMELIST      -100.000
-
-    ifplugin Mail::SpamAssassin::Plugin::RaciallyCharged
-      meta USER_IN_DKIM_WHITELIST       (USER_IN_DKIM_WELCOMELIST)
-      describe USER_IN_DKIM_WHITELIST   DEPRECATED: See USER_IN_DKIM_WELCOMELIST
-      tflags USER_IN_DKIM_WHITELIST     nice noautolearn net userconf
-      score USER_IN_DKIM_WELCOMELIST    -0.01
-      score USER_IN_DKIM_WHITELIST      -100.000
-    endif
-  endif
-
-  #might be a way to only have one instance of the below block, unsure if it's even necessary
-  reuse USER_IN_DKIM_WHITELIST
+# 4.0 / Bug 7826 renames whitelist to welcomelist and blacklist to blocklist
+if can(Mail::SpamAssassin::Conf::feature_welcomelist_blocklist)
+  header USER_IN_DKIM_WELCOMELIST	eval:check_for_dkim_welcomelist_from()
+  describe USER_IN_DKIM_WELCOMELIST	From: address is in the user's DKIM welcomelist
+  tflags USER_IN_DKIM_WELCOMELIST	nice noautolearn net userconf
+  score USER_IN_DKIM_WELCOMELIST	-100
   reuse USER_IN_DKIM_WELCOMELIST
 
-else
-  ifplugin Mail::SpamAssassin::Plugin::DKIM
-    header USER_IN_DKIM_WELCOMELIST     eval:check_for_dkim_whitelist_from()
-    describe USER_IN_DKIM_WELCOMELIST   From: address is in the user's DKIM welcomelist
-    tflags USER_IN_DKIM_WELCOMELIST     nice noautolearn net userconf
-    score USER_IN_DKIM_WELCOMELIST      -0.01
-
+  # Backwards compatibility
+  # To disable set "enable_compat welcomelist_blocklist" in init.pre
+  if !has(Mail::SpamAssassin::Conf::compat_welcomelist_blocklist)
     meta USER_IN_DKIM_WHITELIST		(USER_IN_DKIM_WELCOMELIST)
-    describe USER_IN_DKIM_WHITELIST     DEPRECATED: See USER_IN_DKIM_WELCOMELIST
-    tflags USER_IN_DKIM_WHITELIST       nice noautolearn net userconf
-    score USER_IN_DKIM_WHITELIST        -100.000
+    describe USER_IN_DKIM_WHITELIST	DEPRECATED: See USER_IN_DKIM_WELCOMELIST
+    tflags USER_IN_DKIM_WHITELIST	nice noautolearn net userconf
+    score USER_IN_DKIM_WHITELIST	-100
+    reuse USER_IN_DKIM_WHITELIST
+    score USER_IN_DKIM_WELCOMELIST	-0.01
   endif
-
-  reuse USER_IN_DKIM_WHITELSIT
+endif
+if !can(Mail::SpamAssassin::Conf::feature_welcomelist_blocklist)
+  header USER_IN_DKIM_WELCOMELIST	eval:check_for_dkim_whitelist_from()
+  describe USER_IN_DKIM_WELCOMELIST	From: address is in the user's DKIM welcomelist
+  tflags USER_IN_DKIM_WELCOMELIST	nice noautolearn net userconf
+  score USER_IN_DKIM_WELCOMELIST	-100
   reuse USER_IN_DKIM_WELCOMELIST
 
+  if !has(Mail::SpamAssassin::Conf::compat_welcomelist_blocklist)
+    meta USER_IN_DKIM_WHITELIST		(USER_IN_DKIM_WELCOMELIST)
+    describe USER_IN_DKIM_WHITELIST	DEPRECATED: See USER_IN_DKIM_WELCOMELIST
+    tflags USER_IN_DKIM_WHITELIST	nice noautolearn net userconf
+    score USER_IN_DKIM_WHITELIST	-100
+    reuse USER_IN_DKIM_WHITELIST
+    score USER_IN_DKIM_WELCOMELIST	-0.01
+  endif
 endif
 
-
-if can(Mail::SpamAssassin::Conf::feature_blocklist_welcomelist)
-ifplugin Mail::SpamAssassin::Plugin::DKIM
-
-# The backwards compatibility for this rule will be after the else statement below
-header USER_IN_DEF_DKIM_WL	eval:check_for_def_dkim_welcomelist_from()
-describe USER_IN_DEF_DKIM_WL	From: address is in the default DKIM welcome-list
-tflags USER_IN_DEF_DKIM_WL	nice noautolearn net
-reuse USER_IN_DEF_DKIM_WL
-
+if can(Mail::SpamAssassin::Conf::feature_welcomelist_blocklist)
+  header USER_IN_DEF_DKIM_WL	eval:check_for_def_dkim_welcomelist_from()
+  describe USER_IN_DEF_DKIM_WL	From: address is in the default DKIM welcome-list
+  tflags USER_IN_DEF_DKIM_WL	nice noautolearn net
+  reuse USER_IN_DEF_DKIM_WL
+endif
+if !can(Mail::SpamAssassin::Conf::feature_welcomelist_blocklist)
+  header USER_IN_DEF_DKIM_WL	eval:check_for_def_dkim_whitelist_from()
+  describe USER_IN_DEF_DKIM_WL	From: address is in the default DKIM welcome-list
+  tflags USER_IN_DEF_DKIM_WL	nice noautolearn net
+  reuse USER_IN_DEF_DKIM_WL
+endif
 
 ###########################################################################
 # Default welcomelists.  These should be e-mail addresses of authors (i.e.
@@ -86,6 +85,8 @@ reuse USER_IN_DEF_DKIM_WL
 #
 # Whitelist and blacklist addresses are file-glob-style patterns, so
 # "friend@somewhere.com", "*@isp.com", or "*.domain.net" will all work.
+
+if can(Mail::SpamAssassin::Conf::feature_welcomelist_blocklist)
 
 def_welcomelist_from_dkim  *@*.ebay.com		ebay.com
 def_welcomelist_from_dkim  *@ebay.com
@@ -195,22 +196,14 @@ def_welcomelist_from_dkim *@fisglobal.com
 def_welcomelist_from_dkim *@*.msgfocus.com
 def_welcomelist_from_dkim *@boredpanda.com mailersend.com
 
-endif # Mail::SpamAssassin::Plugin::DKIM
-
-
+endif # if can(Mail::SpamAssassin::Conf::feature_welcomelist_blocklist)
 
 
 #
 # For older versions of SA, these old entries remain for SA before version 4.0
 #
 
-else
-ifplugin Mail::SpamAssassin::Plugin::DKIM
-
-header USER_IN_DEF_DKIM_WL	eval:check_for_def_dkim_whitelist_from()
-describe USER_IN_DEF_DKIM_WL	From: address is in the default DKIM welcome-list
-tflags USER_IN_DEF_DKIM_WL	nice noautolearn net
-reuse USER_IN_DEF_DKIM_WL
+if !can(Mail::SpamAssassin::Conf::feature_welcomelist_blocklist)
 
 def_whitelist_from_dkim  *@*.ebay.com		ebay.com
 def_whitelist_from_dkim  *@ebay.com
@@ -320,6 +313,11 @@ def_whitelist_from_dkim *@fisglobal.com
 def_whitelist_from_dkim *@*.msgfocus.com
 def_whitelist_from_dkim *@boredpanda.com mailersend.com
 
+endif # if !can(Mail::SpamAssassin::Conf::feature_welcomelist_blocklist)
+
+#
+#
+#
+
 endif # Mail::SpamAssassin::Plugin::DKIM
-endif # if can(Mail::SpamAssassin::Conf::feature_blocklist_welcomelist)
 

@@ -11,6 +11,8 @@ plan tests => 8;
 # ---------------------------------------------------------------------------
 # bug 6003
 
+disable_compat "welcomelist_blocklist";
+
 tstlocalrules (q{
   body MYBODY /LOSE WEIGHT/
   score MYBODY 99
@@ -48,7 +50,7 @@ clear_pattern_counters();
   q{ 99 MYBODY }, 'MYBODY',
 );
 %anti_patterns = (
-  q{-100 USER_IN_WHITELIST }, 'USER_IN_WHITELIST',
+  q{ 0 USER_IN_WHITELIST }, 'USER_IN_WHITELIST',
 );
 ok (spamcrun ("-u testuser2 < data/spam/001", \&patterns_run_cb));
 checkfile ($spamd_stderr, \&patterns_run_cb);

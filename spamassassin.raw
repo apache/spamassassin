@@ -160,7 +160,7 @@ if ($Mail::SpamAssassin::VERSION ne '@@VERSION@@' && '@@VERSION@@' ne "\@\@VERSI
 #
 my %opt = ( 'create-prefs' => 1, 'format' => 'detect', pre => [], cf => [] );
 
-my $doing_whitelist_operation = 0;
+my $doing_welcomelist_operation = 0;
 my $count                     = 0;
 my @targets                   = ();
 my $exitvalue;
@@ -174,10 +174,14 @@ my $total_messages            = 0;
 Getopt::Long::Configure(
   qw(bundling no_getopt_compat no_auto_abbrev no_ignore_case));
 GetOptions(
-  'add-addr-to-blacklist=s'                 => \$opt{'add-addr-to-blacklist'},
-  'add-addr-to-whitelist=s'                 => \$opt{'add-addr-to-whitelist'},
-  'add-to-blacklist'                        => \$opt{'add-to-blacklist'},
-  'add-to-whitelist|W'                      => \$opt{'add-to-whitelist'},
+  'add-addr-to-blocklist=s'                 => \$opt{'add-addr-to-blocklist'},
+  'add-addr-to-welcomelist=s'               => \$opt{'add-addr-to-welcomelist'},
+  'add-addr-to-blacklist=s'                 => \$opt{'add-addr-to-blocklist'}, # removed in 4.1
+  'add-addr-to-whitelist=s'                 => \$opt{'add-addr-to-welcomelist'}, # removed in 4.1
+  'add-to-blocklist'                        => \$opt{'add-to-blocklist'},
+  'add-to-welcomelist|W'                    => \$opt{'add-to-welcomelist'},
+  'add-to-blacklist'                        => \$opt{'add-to-blocklist'}, # removed in 4.1
+  'add-to-whitelist'                        => \$opt{'add-to-welcomelist'}, # removed in 4.1
   'configpath|config-file|config-dir|c|C=s' => \$opt{'configpath'},
   'create-prefs!'                           => \$opt{'create-prefs'},
   'pre=s'                                   => \@{$opt{'pre'}},
@@ -195,8 +199,10 @@ GetOptions(
   'mbox'                                    => sub { $opt{'format'} = 'mbox'; },
   'mbx'                                     => sub { $opt{'format'} = 'mbx'; },
   'prefspath|prefs-file|p=s'                => \$opt{'prefspath'},
-  'remove-addr-from-whitelist=s'            => \$opt{'remove-addr-from-whitelist'},
-  'remove-from-whitelist|R'                 => \$opt{'remove-from-whitelist'},
+  'remove-addr-from-welcomelist=s'          => \$opt{'remove-addr-from-welcomelist'},
+  'remove-from-welcomelist|R'               => \$opt{'remove-from-welcomelist'},
+  'remove-addr-from-whitelist=s'            => \$opt{'remove-addr-from-welcomelist'}, # removed in 4.1
+  'remove-from-whitelist'                   => \$opt{'remove-from-welcomelist'}, # removed in 4.1
   'remove-markup|despamassassinify|d'       => \$opt{'remove-markup'},
   'report|r'                                => \$opt{'report'},
   'revoke|k'                                => \$opt{'revoke'},
@@ -285,23 +291,23 @@ if ($opt{'lint'}) {
   exit $res ? 1 : 0;
 }
 
-if ($opt{'remove-addr-from-whitelist'} ||
-    $opt{'add-addr-to-whitelist'} ||
-    $opt{'add-addr-to-blacklist'})
+if ($opt{'remove-addr-from-welcomelist'} ||
+    $opt{'add-addr-to-welcomelist'} ||
+    $opt{'add-addr-to-blocklist'})
 {
   $spamtest->init(1);
 
-  if ( $opt{'add-addr-to-whitelist'} ) {
-    $spamtest->add_address_to_whitelist($opt{'add-addr-to-whitelist'}, 1);
+  if ( $opt{'add-addr-to-welcomelist'} ) {
+    $spamtest->add_address_to_welcomelist($opt{'add-addr-to-welcomelist'}, 1);
   }
-  elsif ( $opt{'remove-addr-from-whitelist'} ) {
-    $spamtest->remove_address_from_whitelist($opt{'remove-addr-from-whitelist'}, 1);
+  elsif ( $opt{'remove-addr-from-welcomelist'} ) {
+    $spamtest->remove_address_from_welcomelist($opt{'remove-addr-from-welcomelist'}, 1);
   }
-  elsif ( $opt{'add-addr-to-blacklist'} ) {
-    $spamtest->add_address_to_blacklist($opt{'add-addr-to-blacklist'}, 1);
+  elsif ( $opt{'add-addr-to-blocklist'} ) {
+    $spamtest->add_address_to_blocklist($opt{'add-addr-to-blocklist'}, 1);
   }
   else {
-    die "spamassassin: oops! unhandled whitelist operation";
+    die "spamassassin: oops! unhandled welcomelist operation";
   }
 
   $spamtest->finish();
@@ -311,21 +317,21 @@ if ($opt{'remove-addr-from-whitelist'} ||
   exit(0);
 }
 
-# if we're going to do white/black-listing, let's prep now...
-if ( $opt{'remove-from-whitelist'}
-  or $opt{'add-to-whitelist'}
-  or $opt{'add-to-blacklist'} )
+# if we're going to do welcome/block-listing, let's prep now...
+if ( $opt{'remove-from-welcomelist'}
+  or $opt{'add-to-welcomelist'}
+  or $opt{'add-to-blocklist'} )
 {
-  $doing_whitelist_operation = 1;
+  $doing_welcomelist_operation = 1;
   $spamtest->init(1);
 }
 
 # if we're doing things in test mode, force disable long-term memory
-# functions like autowhitelist and bayes autolearn.
+# functions like autowelcomelist and bayes autolearn.
 # XXX - feels like we need a plugin hook here so plugins can be made
 # aware and take appropriate action.
 if ($opt{'test-mode'}) {
-  $spamtest->{'conf'}->{'use_auto_whitelist'} = 0;
+  $spamtest->{'conf'}->{'use_auto_welcomelist'} = 0;
   $spamtest->{'conf'}->{'bayes_auto_learn'} = 0;
 }
 
@@ -411,7 +417,7 @@ if (defined $tempfile) {
 
 # Let folks know how many messages were handled, as long as the handling
 # didn't produce output (ala: check, test, or remove_markup ...)
-if ( $opt{'report'} || $opt{'revoke'} || $doing_whitelist_operation ) {
+if ( $opt{'report'} || $opt{'revoke'} || $doing_welcomelist_operation ) {
   print "$count message(s) examined.\n"  or die "error writing: $!";
 }
 
@@ -460,19 +466,19 @@ sub wanted {
   $mail       = $spamtest->parse($dataref);
   $count++;
 
-  # This is a short cut -- doing white/black-list?  Do it and return quickly.
-  if ($doing_whitelist_operation) {
-    if ( $opt{'add-to-whitelist'} ) {
-      $spamtest->add_all_addresses_to_whitelist($mail, 1);
+  # This is a short cut -- doing welcome/block-list?  Do it and return quickly.
+  if ($doing_welcomelist_operation) {
+    if ( $opt{'add-to-welcomelist'} ) {
+      $spamtest->add_all_addresses_to_welcomelist($mail, 1);
     }
-    elsif ( $opt{'remove-from-whitelist'} ) {
-      $spamtest->remove_all_addresses_from_whitelist($mail, 1);
+    elsif ( $opt{'remove-from-welcomelist'} ) {
+      $spamtest->remove_all_addresses_from_welcomelist($mail, 1);
     }
-    elsif ( $opt{'add-to-blacklist'} ) {
-      $spamtest->add_all_addresses_to_blacklist($mail, 1);
+    elsif ( $opt{'add-to-blocklist'} ) {
+      $spamtest->add_all_addresses_to_blocklist($mail, 1);
     }
     else {
-      warn "spamassassin: oops! unhandled whitelist operation";
+      warn "spamassassin: oops! unhandled welcomelist operation";
     }
 
     $mail->finish();
@@ -832,8 +838,8 @@ from the SpamAssassin distribution.
     Mail::SpamAssassin::ArchiveIterator
 	find and process messages one at a time
 
-    Mail::SpamAssassin::AutoWhitelist
-	auto-whitelist handler for SpamAssassin
+    Mail::SpamAssassin::AutoWelcomelist
+	auto-welcomelist handler for SpamAssassin
 
     Mail::SpamAssassin::Bayes
 	determine spammishness using a Bayesian classifier
@@ -884,7 +890,7 @@ from the SpamAssassin distribution.
 	look up URLs against DNS blocklists
 
     Mail::SpamAssassin::SQLBasedAddrList
-	SpamAssassin SQL Based Auto Whitelist
+	SpamAssassin SQL Based Auto Welcomelist
 
 =head1 BUGS
 

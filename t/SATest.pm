@@ -197,7 +197,7 @@ sub sa_t_init {
   $set_user_prefs = 0;
   $default_cf_lines = "
     bayes_path ./$userstate/bayes
-    auto_whitelist_path ./$userstate/auto-whitelist
+    auto_welcomelist_path ./$userstate/auto-welcomelist
   ";
 
   read_config();
@@ -342,6 +342,21 @@ sub tstpre {
 
   open (OUT, ">$siterules/zz_test.pre") or die;
   print OUT $lines; close OUT;
+}
+
+# remove default compatibility option
+sub disable_compat {
+  my $compat = shift;
+  return unless defined $compat;
+  open (IN, "$siterules/init.pre") or die;
+  open (OUT, ">$siterules/init.pre.new") or die;
+  while (<IN>) {
+    next if $_ =~ /^\s*enable_compat\s+\Q$compat\E(?:\s|$)/i;
+    print OUT $_;
+  }
+  close OUT or die;
+  close IN or die;
+  rename("$siterules/init.pre.new", "$siterules/init.pre");
 }
 
 # Run spamassassin. Calls back with the output.

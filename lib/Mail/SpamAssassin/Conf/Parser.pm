@@ -26,7 +26,7 @@ Mail::SpamAssassin::Conf::Parser - parse SpamAssassin configuration
 =head1 DESCRIPTION
 
 Mail::SpamAssassin is a module to identify spam using text analysis and
-several internet-based realtime blacklists.
+several internet-based realtime blocklists.
 
 This class is used internally by SpamAssassin to parse its configuration files.
 Please refer to the C<Mail::SpamAssassin> documentation for public interfaces.
@@ -600,6 +600,7 @@ sub handle_conditional {
 
 # functions supported in the "if" eval:
 sub cond_clause_plugin_loaded {
+  return 1 if $_[1] eq 'Mail::SpamAssassin::Plugin::RaciallyCharged'; # removed in 4.1
   return $_[0]->{conf}->{plugins_loaded}->{$_[1]};
 }
 

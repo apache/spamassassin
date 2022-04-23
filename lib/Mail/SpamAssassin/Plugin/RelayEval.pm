@@ -74,7 +74,7 @@ sub hostname_to_domain {
   }
 }
 
-sub _helo_forgery_whitelisted {
+sub _helo_forgery_welcomelisted {
   my ($helo, $rdns) = @_;
   if ($helo eq 'msn.com' && $rdns eq 'hotmail.com') { return 1; }
   0;
@@ -355,7 +355,7 @@ sub _check_for_forged_received {
     my $prev = $from[$i-1];
     if (defined($prev) && $i > 0
 		&& $prev =~ /^\w+(?:[\w.-]+\.)+\w+$/
-		&& $by ne $prev && !_helo_forgery_whitelisted($by, $prev))
+		&& $by ne $prev && !_helo_forgery_welcomelisted($by, $prev))
     {
       dbg2("eval: forged-HELO: mismatch on from: '$prev' != '$by'");
       $pms->{mismatch_from}++;

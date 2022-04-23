@@ -48,7 +48,9 @@ freemail_domains domain ...
    For example:
    freemail_domains hotmail.com hotmail.co.?? yahoo.* yahoo.*.*
 
-freemail_whitelist email/domain ...
+freemail_welcomelist email/domain ...
+
+   Previously freemail_whitelist which will work interchangeably until 4.1.
 
    Emails or domains listed here are ignored (pretend they aren't
    freemail). No wildcards!
@@ -60,7 +62,7 @@ freemail_import_welcomelist_auth 1/0
 
 freemail_import_def_welcomelist_auth 1/0
 
-   Entries in def_welcomelist_auth will also be used to whitelist emails
+   Entries in def_welcomelist_auth will also be used to welcomelist emails
    or domains from being freemail.  Default is 0.
 
 header FREEMAIL_REPLYTO eval:check_freemail_replyto(['option'])
@@ -101,11 +103,11 @@ header FREEMAIL_BODY eval:check_freemail_body(['regex'])
  1.996 - fix freemail_skip_bulk_envfrom
  1.997 - set freemail_skip_when_over_max to 1 by default
  1.998 - don't warn about missing freemail_domains when linting
- 1.999 - default whitelist undisclosed-recipient@yahoo.com etc
+ 1.999 - default welcomelist undisclosed-recipient@yahoo.com etc
  2.000 - some cleaning up
- 2.001 - fix freemail_whitelist
+ 2.001 - fix freemail_welcomelist
  2.002 - _add_desc -> _got_hit, fix description email append bug
- 2.003 - freemail_import_(def_)whitelist_auth
+ 2.003 - freemail_import_(def_)welcomelist_auth
 
 =cut
 
@@ -115,8 +117,8 @@ use Mail::SpamAssassin::Util qw(compile_regexp);
 
 our @ISA = qw(Mail::SpamAssassin::Plugin);
 
-# default email whitelist
-our $email_whitelist = qr/
+# default email welcomelist
+our $email_welcomelist = qr/
   ^(?:
       abuse|support|sales|info|helpdesk|contact|kontakt
     | (?:post|host|domain)master
@@ -216,16 +218,16 @@ sub set_config {
     );
     push(@cmds, {
         setting => 'freemail_import_welcomelist_auth',
+        aliases => ['freemail_import_whitelist_auth'], # removed in 4.1
         default => 0,
         type => $Mail::SpamAssassin::Conf::CONF_TYPE_NUMERIC,
-        aliases => ['freemail_import_whitelist_auth'],
         }
     );
     push(@cmds, {
         setting => 'freemail_import_def_welcomelist_auth',
+        aliases => ['freemail_import_def_whitelist_auth'], # removed in 4.1
         default => 0,
         type => $Mail::SpamAssassin::Conf::CONF_TYPE_NUMERIC,
-        aliases => ['freemail_import_def_whitelist_auth']
         }
     );
     $conf->{parser}->register_commands(\@cmds);
@@ -253,14 +255,14 @@ sub parse_config {
         return 1;
     }
 
-    if ($opts->{key} eq "freemail_whitelist") {
+    if ($opts->{key} eq "freemail_welcomelist" || $opts->{key} eq "freemail_whitelist") {
         foreach my $temp (split(/\s+/, $opts->{value})) {
             my $value = lc($temp);
             if ($value =~ /\w[.@]\w/) {
-                $self->{freemail_whitelist}{$value} = 1;
+                $self->{freemail_welcomelist}{$value} = 1;
             }
             else {
-                warn("freemail: invalid freemail_whitelist: $temp\n");
+                warn("freemail: invalid freemail_welcomelist: $temp\n");
             }
         }
         $self->inhibit_further_callbacks();
@@ -317,21 +319,21 @@ sub _is_freemail {
 
     return 0 if $email eq '';
 
-    if (defined $self->{freemail_whitelist}{$email}) {
-        dbg("whitelisted email: $email");
+    if (defined $self->{freemail_welcomelist}{$email}) {
+        dbg("welcomelisted email: $email");
         return 0;
     }
 
     my $domain = $email;
     $domain =~ s/.*\@//;
 
-    if (defined $self->{freemail_whitelist}{$domain}) {
-        dbg("whitelisted domain: $domain");
+    if (defined $self->{freemail_welcomelist}{$domain}) {
+        dbg("welcomelisted domain: $domain");
         return 0;
     }
 
-    if ($email =~ $email_whitelist) {
-        dbg("whitelisted email, default: $email");
+    if ($email =~ $email_welcomelist) {
+        dbg("welcomelisted email, default: $email");
         return 0;
     }
 
@@ -339,7 +341,7 @@ sub _is_freemail {
         if ($pms->{conf}->{"freemail_import_$list"}) {
             foreach my $regexp (values %{$pms->{conf}->{$list}}) {
                 if ($email =~ /$regexp/o) {
-                    dbg("whitelisted email, $list: $email");
+                    dbg("welcomelisted email, $list: $email");
                     return 0;
                 }
             }

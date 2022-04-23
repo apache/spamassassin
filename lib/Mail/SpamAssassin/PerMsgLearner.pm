@@ -97,8 +97,8 @@ sub learn_spam {
   my ($self, $id) = @_;
 
   # bug 4096
-  # if ($self->{main}->{learn_with_whitelist}) {
-  # $self->{main}->add_all_addresses_to_blacklist ($self->{msg});
+  # if ($self->{main}->{learn_with_welcomelist}) {
+  # $self->{main}->add_all_addresses_to_blocklist ($self->{msg});
   # }
 
   # use the real message-id here instead of mass-check's idea of an "id",
@@ -124,8 +124,8 @@ sub learn_ham {
   my ($self, $id) = @_;
 
   # bug 4096
-  # if ($self->{main}->{learn_with_whitelist}) {
-  # $self->{main}->add_all_addresses_to_whitelist ($self->{msg});
+  # if ($self->{main}->{learn_with_welcomelist}) {
+  # $self->{main}->add_all_addresses_to_welcomelist ($self->{msg});
   # }
 
   $self->{learned} = $self->{bayes_scanner}->learn (0, $self->{msg}, $id);
@@ -148,8 +148,8 @@ sub forget {
   my ($self, $id) = @_;
 
   # bug 4096
-  # if ($self->{main}->{learn_with_whitelist}) {
-  # $self->{main}->remove_all_addresses_from_whitelist ($self->{msg});
+  # if ($self->{main}->{learn_with_welcomelist}) {
+  # $self->{main}->remove_all_addresses_from_welcomelist ($self->{msg});
   # }
 
   $self->{learned} = $self->{bayes_scanner}->forget ($self->{msg}, $id);

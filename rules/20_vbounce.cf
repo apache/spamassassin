@@ -48,17 +48,15 @@
 #
 ###########################################################################
 
-if can(Mail::SpamAssassin::Conf::feature_blocklist_welcomelist)
-  ifplugin Mail::SpamAssassin::Plugin::VBounce
-    body __MY_SERVERS_FOUND       eval:check_welcomelist_bounce_relays()
-  endif
-else
-  ifplugin Mail::SpamAssassin::Plugin::VBounce
-    body __MY_SERVERS_FOUND       eval:check_whitelist_bounce_relays()
-  endif
-endif
-
 ifplugin Mail::SpamAssassin::Plugin::VBounce
+
+
+if can(Mail::SpamAssassin::Conf::feature_welcomelist_blocklist)
+  body __MY_SERVERS_FOUND       eval:check_welcomelist_bounce_relays()
+endif
+if !can(Mail::SpamAssassin::Conf::feature_welcomelist_blocklist)
+  body __MY_SERVERS_FOUND       eval:check_whitelist_bounce_relays()
+endif
 
 body __HAVE_BOUNCE_RELAYS     eval:have_any_bounce_relays()
 
@@ -335,4 +333,6 @@ describe VBOUNCE_MESSAGE    Virus-scanner bounce message
 meta     ANY_BOUNCE_MESSAGE (CRBOUNCE_MESSAGE||BOUNCE_MESSAGE||VBOUNCE_MESSAGE||OOOBOUNCE_MESSAGE)
 describe ANY_BOUNCE_MESSAGE Message is some kind of bounce message
 
-endif
+
+endif # Mail::SpamAssassin::Plugin::VBounce
+
