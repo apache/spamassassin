@@ -86,7 +86,6 @@ BEGIN {                          # see comments in "spamassassin.raw" for doco
 
 # These are the non-standard required modules
 use Net::DNS;
-use HTTP::Date qw(time2str);
 use Archive::Tar 1.23;
 use IO::Zlib 1.04;
 use Mail::SpamAssassin::Logger qw(:DEFAULT info log_message);
@@ -1534,7 +1533,11 @@ sub http_get_lwp {
     $request->url($url);
 
     if (defined $ims) {
-      my $str = time2str($ims);
+      my ($sec,$min,$hour,$mday,$mon,$year,$wday,$yday) = gmtime($ims);
+      my $str = sprintf("%s, %02d %s %04d %02d:%02d:%02d GMT",
+          qw(Sun Mon Tue Wed Thu Fri Sat)[$wday], $mday,
+          qw(Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec)[$mon],
+          $year + 1900, $hour, $min, $sec);
       $request->header('If-Modified-Since', $str);
       dbg("http: IMS GET request, $url, $str");
     }

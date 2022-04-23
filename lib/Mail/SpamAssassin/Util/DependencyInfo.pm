@@ -235,13 +235,7 @@ our @OPTIONAL_MODULES = (
 {
   module => 'LWP::UserAgent',
   version => 0,
-  desc => 'The "sa-update" program requires this module to make HTTP requests.',
-},
-{
-  module => 'HTTP::Date',
-  version => 0,
-  desc => 'The "sa-update" program requires this module to make HTTP
-  If-Modified-Since GET requests.',
+  desc => 'The "sa-update" program can use this module to make HTTP requests.',
 },
 {
   module => 'Encode::Detect::Detector',

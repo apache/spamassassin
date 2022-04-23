@@ -380,7 +380,6 @@ $makefile{META_MERGE} = {
     'DBI' =>                       0,
     'Getopt::Long' =>              2.32,
     'LWP::UserAgent' =>            0,
-    'HTTP::Date' =>                0,
     'Archive::Tar' =>              1.23,
     'IO::Zlib' =>                  1.04,
     'Encode::Detect' =>            0
