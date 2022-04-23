@@ -64,7 +64,7 @@ use warnings;
 # use bytes;
 use re 'taint';
 
-require 5.006_001;
+require v5.14.0;
 
 use Mail::SpamAssassin::Logger;
 use Mail::SpamAssassin::Constants;

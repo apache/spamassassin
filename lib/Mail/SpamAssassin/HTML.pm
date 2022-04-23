@@ -24,9 +24,6 @@ use strict;
 use warnings;
 use re 'taint';
 
-require 5.008;     # need basic Unicode support for HTML::Parser::utf8_mode
-# require 5.008008;  # Bug 3787; [perl #37950]: Malformed UTF-8 character ...
-
 use HTML::Parser 3.43 ();
 use Mail::SpamAssassin::Logger;
 use Mail::SpamAssassin::Constants qw(:sa);

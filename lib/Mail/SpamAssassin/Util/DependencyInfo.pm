@@ -114,12 +114,21 @@ our @OPTIONAL_MODULES = (
   desc => 'Used when manually reporting spam to SpamCop with "spamassassin -r".',
 },
 {
-  'module' => 'Net::LibIDN',
-  'version' => 0,
-  'desc' => "Provides mapping between Internationalized Domain Names (IDN) in
+  module => 'Net::LibIDN2',
+  version => 0,
+  desc => "Newer version of the optional Net::LibIDN module.
+  Provides mapping between Internationalized Domain Names (IDN) in
   Unicode and ASCII-compatible encoding (ACE) for use in DNS and comparisions.
   The module is optional, but without it Unicode IDN names found in mail will
   not be suitable for DNS queries and welcome/blocklisting.",
+},
+{
+  module => 'Net::LibIDN',
+  version => 0,
+  desc => "Provides mapping between Internationalized Domain Names (IDN) in
+  Unicode and ASCII-compatible encoding (ACE) for use in DNS and comparisions.
+  The module is optional, but without it Unicode IDN names found in mail will
+  not be suitable for DNS queries and white/blacklisting.",
 },
 {
   module => 'Mail::SPF',
@@ -183,7 +192,7 @@ our @OPTIONAL_MODULES = (
 {
   module => 'IO::Socket::INET6',
   version => 0,
-  desc => 'This module is an older alternative to IO::Socket::IP.
+  desc => 'This module is a deprecated alternative to IO::Socket::IP.
   Spamd, as well some underlying modules, will fall back to using
   IO::Socket::INET6 if IO::Socket::IP is unavailable. One or the other
   module is required to support IPv6 (e.g. in spamd/spamc protocol,
@@ -226,22 +235,9 @@ our @OPTIONAL_MODULES = (
   your database.',
 },
 {
-  module => 'Getopt::Long',
-  version => '2.32',        # min version was included in 5.8.0, which works
-  desc => 'The "sa-stats.pl" program included in "tools", used to generate
-  summary reports from spamd\'s syslog messages, requires this version
-  of Getopt::Long or newer.',
-},
-{
   module => 'LWP::UserAgent',
   version => 0,
-  desc => 'The "sa-update" program requires this module to make HTTP requests.',
-},
-{
-  module => 'HTTP::Date',
-  version => 0,
-  desc => 'The "sa-update" program requires this module to make HTTP
-  If-Modified-Since GET requests.',
+  desc => 'The "sa-update" program can use this module to make HTTP requests.',
 },
 {
   module => 'Encode::Detect::Detector',

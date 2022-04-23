@@ -1,17 +1,16 @@
 #!/usr/bin/perl -w -T
 
-my $have_libidn;
-BEGIN {
-  eval { require Net::LibIDN } and do { $have_libidn = 1 };
-}
-
 use strict;
 use Test::More;
 use lib '.'; use lib 't';
 use SATest; sa_t_init("uri");
 
-my $tests = 103;
-$tests += 5 if $have_libidn;
+use constant HAS_LIBIDN => eval { require Net::LibIDN; };
+use constant HAS_LIBIDN2 => eval { require Net::LibIDN2; };
+
+my $tests = 104;
+$tests += 6 if (HAS_LIBIDN);
+$tests += 6 if (HAS_LIBIDN2);
 
 plan tests => $tests;
 
@@ -108,13 +107,31 @@ ok(try_domains('http://foo..bar@example.com', 'example.com'));
 ok(try_domains('bar..example.com', undef));
 ok(try_domains('http://example..com', undef));
 
-if ($have_libidn) {
-  ok(try_domains('Cinéma.ca', 'xn--cinma-dsa.ca'));
-  ok(try_domains('marcaespaña.es', 'xn--marcaespaa-19a.es'));
-  ok(try_domains('äkäslompolo.fi', 'xn--kslompolo-u2ab.fi'));
-  ok(try_domains('foo.xn--fiqs8s', 'foo.xn--fiqs8s'));
+sub try_libidn {
+  ok(try_domains("Cin\x{E9}ma.ca", 'xn--cinma-dsa.ca'));
+  ok(try_domains("marcaespa\x{F1}a.es", 'xn--marcaespaa-19a.es'));
+  ok(try_domains("\xe4k\xe4slompolo.fi", 'xn--kslompolo-u2ab.fi'));
+  ok(try_domains("\x{C3}\x{A4}k\x{C3}\x{A4}slompolo.fi", 'xn--kslompolo-u2ab.fi'));
+  ok(try_domains("foo.xn--fiqs8s", 'foo.xn--fiqs8s'));
   ok(try_domains("foo\x2e\xe9\xa6\x99\xe6\xb8\xaf", 'foo.xn--j6w193g'));
 }
+
+if (HAS_LIBIDN) {
+  $Mail::SpamAssassin::Util::have_libidn = 1;
+  $Mail::SpamAssassin::Util::have_libidn2 = 0;
+  try_libidn();
+}
+if (HAS_LIBIDN2) {
+  $Mail::SpamAssassin::Util::have_libidn = 0;
+  $Mail::SpamAssassin::Util::have_libidn2 = 1;
+  try_libidn();
+}
+
+# Without LibIDN, should not produce results,
+# as is_fqdn_valid() will fail
+$Mail::SpamAssassin::Util::have_libidn = 0;
+$Mail::SpamAssassin::Util::have_libidn2 = 0;
+ok(try_domains("Cin\x{E9}ma.ca", undef));
 
 ##############################################
 
