@@ -36,8 +36,6 @@ use strict;
 use warnings;
 use re 'taint';
 
-require 5.008001;  # needs utf8::is_utf8()
-
 use Mail::SpamAssassin;
 use Mail::SpamAssassin::Constants qw(:sa);
 use Mail::SpamAssassin::HTML;

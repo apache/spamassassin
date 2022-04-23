@@ -1,5 +1,5 @@
 #!/usr/bin/perl
-require 5.6.1;
+require v5.14.0;
 
 use strict;
 use warnings;
