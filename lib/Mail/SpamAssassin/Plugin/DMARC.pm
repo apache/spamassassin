@@ -82,7 +82,7 @@ sub new {
   $self->register_eval_rule("check_dmarc_missing");
 
   if (!HAS_DMARC) {
-    warn "DMARC not supported, required module Mail::DMARC::PurePerl missing\n";
+    warn "DMARC not supported, required module Mail::DMARC missing\n";
   }
 
   return $self;
