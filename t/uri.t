@@ -9,8 +9,8 @@ use constant HAS_LIBIDN => eval { require Net::LibIDN; };
 use constant HAS_LIBIDN2 => eval { require Net::LibIDN2; };
 
 my $tests = 104;
-$tests += 6 if (HAS_LIBIDN);
-$tests += 6 if (HAS_LIBIDN2);
+$tests += 7 if (HAS_LIBIDN);
+$tests += 7 if (HAS_LIBIDN2);
 
 plan tests => $tests;
 
@@ -110,7 +110,8 @@ ok(try_domains('http://example..com', undef));
 sub try_libidn {
   ok(try_domains("Cin\x{E9}ma.ca", 'xn--cinma-dsa.ca'));
   ok(try_domains("marcaespa\x{F1}a.es", 'xn--marcaespaa-19a.es'));
-  ok(try_domains("\xe4k\xe4slompolo.fi", 'xn--kslompolo-u2ab.fi'));
+  ok(try_domains("\x{E4}k\x{E4}slompolo.fi", 'xn--kslompolo-u2ab.fi'));
+  ok(try_domains("\N{U+00E4}k\N{U+00E4}slompolo.fi", 'xn--kslompolo-u2ab.fi'));
   ok(try_domains("\x{C3}\x{A4}k\x{C3}\x{A4}slompolo.fi", 'xn--kslompolo-u2ab.fi'));
   ok(try_domains("foo.xn--fiqs8s", 'foo.xn--fiqs8s'));
   ok(try_domains("foo\x2e\xe9\xa6\x99\xe6\xb8\xaf", 'foo.xn--j6w193g'));

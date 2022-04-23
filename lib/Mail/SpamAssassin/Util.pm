@@ -544,8 +544,8 @@ sub idn_to_ascii {
       my $si = $s;
       if ($charset eq 'ISO-8859-1') {
         Encode::from_to($si, 'ISO-8859-1', 'UTF-8');
-        utf8::decode($si) unless utf8::is_utf8($si);
       }
+      utf8::decode($si) unless utf8::is_utf8($si);
       my $rc = 0;
       my $sa = Net::LibIDN2::idn2_to_ascii_8($si,
                  &Net::LibIDN2::IDN2_NFC_INPUT + &Net::LibIDN2::IDN2_NONTRANSITIONAL,
