@@ -161,11 +161,11 @@ sub _check_dmarc {
       $eval_stat = $@ ne '' ? $@ : "errno=$!";  chomp $eval_stat;
     };
     if (!defined($eval_stat)) {
-      dbg("DMARC: using Mail::DMARC::PurePerl for SPF checks");
+      dbg("using Mail::DMARC::PurePerl for SPF checks");
       $self->{has_mail_dmarc} = 1;
     } else {
-      dbg("DMARC: cannot load Mail::DMARC::PurePerl: module: $eval_stat");
-      dbg("DMARC: Mail::DMARC::PurePerl is required for DMARC checks, DMARC checks disabled");
+      dbg("cannot load Mail::DMARC::PurePerl: module: $eval_stat");
+      dbg("Mail::DMARC::PurePerl is required for DMARC checks, DMARC checks disabled");
       $self->{has_mail_dmarc} = undef;
     }
   }
@@ -247,7 +247,7 @@ sub _check_dmarc {
 
     if (defined $result->reason->[0]{comment} &&
           $result->reason->[0]{comment} eq 'too many policies') {
-      dbg("result: no policy available");
+      dbg("result: no policy available (too many policies)");
       $pms->{dmarc_policy} = 'no policy available';
     } elsif ($result->result ne 'none') {
       dbg("result: $result->{result}, disposition: $result->{disposition}, dkim: $result->{dkim}, spf: $result->{spf} (spf: $spf_status, spf_helo: $spf_helo_status)");
