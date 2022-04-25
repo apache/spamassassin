@@ -26,21 +26,35 @@ Mail::SpamAssassin::Plugin::DMARC - check DMARC policy
   loadplugin Mail::SpamAssassin::Plugin::DMARC
 
   ifplugin Mail::SpamAssassin::Plugin::DMARC
-    header DMARC_NONE eval:check_dmarc_none()
-    priority DMARC_NONE 500
-    describe DMARC_NONE DMARC none policy
-
-    header DMARC_QUAR eval:check_dmarc_quarantine()
-    priority DMARC_QUAR 500
-    describe DMARC_QUAR DMARC quarantine policy
+    header DMARC_PASS eval:check_dmarc_pass()
+    describe DMARC_PASS DMARC pass policy
+    priority DMARC_PASS 500
+    tflags DMARC_PASS net nice
+    score DMARC_PASS -0.001
 
     header DMARC_REJECT eval:check_dmarc_reject()
-    priority DMARC_REJECT 500
     describe DMARC_REJECT DMARC reject policy
+    priority DMARC_REJECT 500
+    tflags DMARC_REJECT net
+    score DMARC_REJECT 0.001
+
+    header DMARC_QUAR eval:check_dmarc_quarantine()
+    describe DMARC_QUAR DMARC quarantine policy
+    priority DMARC_QUAR 500
+    tflags DMARC_QUAR net
+    score DMARC_QUAR 0.001
+
+    header DMARC_NONE eval:check_dmarc_none()
+    describe DMARC_NONE DMARC none policy
+    priority DMARC_NONE 500
+    tflags DMARC_NONE net
+    score DMARC_NONE 0.001
 
     header DMARC_MISSING eval:check_dmarc_missing()
-    priority DMARC_MISSING 500
     describe DMARC_MISSING Missing DMARC policy
+    priority DMARC_MISSING 500
+    tflags DMARC_MISSING net
+    score DMARC_MISSING 0.001
   endif
 
 =head1 DESCRIPTION
