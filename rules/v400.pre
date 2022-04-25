@@ -31,4 +31,7 @@
 
 # DMARC - Check DMARC compliance
 #
-# loadplugin Mail::SpamAssassin::Plugin::DMARC
+# Requires Mail::DMARC module and working SPF and DKIM Plugins.
+#
+loadplugin Mail::SpamAssassin::Plugin::DMARC
+

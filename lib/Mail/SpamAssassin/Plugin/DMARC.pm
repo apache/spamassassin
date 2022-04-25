@@ -63,8 +63,6 @@ use Mail::SpamAssassin::Plugin;
 
 our @ISA = qw(Mail::SpamAssassin::Plugin);
 
-use constant HAS_DMARC => eval { require Mail::DMARC::PurePerl; };
-
 sub dbg { my $msg = shift; Mail::SpamAssassin::Plugin::dbg("DMARC: $msg", @_); }
 
 sub new {
@@ -80,10 +78,6 @@ sub new {
   $self->register_eval_rule("check_dmarc_quarantine");
   $self->register_eval_rule("check_dmarc_none");
   $self->register_eval_rule("check_dmarc_missing");
-
-  if (!HAS_DMARC) {
-    warn "DMARC not supported, required module Mail::DMARC missing\n";
-  }
 
   return $self;
 }
@@ -158,7 +152,25 @@ sub check_dmarc_missing {
 sub _check_dmarc {
   my ($self, $pms, $name) = @_;
 
-  return if !HAS_DMARC;
+  # Load DMARC module
+  if (!exists $self->{has_mail_dmarc}) {
+    my $eval_stat;
+    eval {
+      require Mail::DMARC::PurePerl;
+    } or do {
+      $eval_stat = $@ ne '' ? $@ : "errno=$!";  chomp $eval_stat;
+    };
+    if (!defined($eval_stat)) {
+      dbg("DMARC: using Mail::DMARC::PurePerl for SPF checks");
+      $self->{has_mail_dmarc} = 1;
+    } else {
+      dbg("DMARC: cannot load Mail::DMARC::PurePerl: module: $eval_stat");
+      dbg("DMARC: Mail::DMARC::PurePerl is required for DMARC checks, DMARC checks disabled");
+      $self->{has_mail_dmarc} = undef;
+    }
+  }
+
+  return if !$self->{has_mail_dmarc};
   return if $pms->{dmarc_checked};
   $pms->{dmarc_checked} = 1;
 
