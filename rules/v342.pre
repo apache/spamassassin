@@ -17,17 +17,21 @@
 ###########################################################################
 
 # HashBL - Query hashed/unhashed strings, emails, uris etc from DNS lists
+#
 # loadplugin Mail::SpamAssassin::Plugin::HashBL
 
 # ResourceLimits - assure your spamd child processes
 # do not exceed specified CPU or memory limit
+#
 # loadplugin Mail::SpamAssassin::Plugin::ResourceLimits
 
 # FromNameSpoof - help stop spam that tries to spoof other domains using 
 # the from name
+#
 # loadplugin Mail::SpamAssassin::Plugin::FromNameSpoof
 
 # Phishing - finds uris used in phishing campaigns detected by
 # OpenPhish or PhishTank feeds.
+#
 # loadplugin Mail::SpamAssassin::Plugin::Phishing
 

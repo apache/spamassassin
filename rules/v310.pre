@@ -60,14 +60,6 @@ loadplugin Mail::SpamAssassin::Plugin::AutoLearnThreshold
 #
 loadplugin Mail::SpamAssassin::Plugin::WelcomeListSubject
 
-###########################################################################
-# experimental plugins
-
-# DomainKeys - perform DomainKeys verification
-#
-# This plugin has been removed as of v3.3.0.  Use the DKIM plugin instead,
-# which supports both Domain Keys and DKIM.
-
 # MIMEHeader - apply regexp rules against MIME headers in the message
 #
 loadplugin Mail::SpamAssassin::Plugin::MIMEHeader
