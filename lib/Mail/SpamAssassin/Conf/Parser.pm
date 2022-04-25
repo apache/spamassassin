@@ -558,6 +558,16 @@ sub handle_conditional {
     elsif ($token =~ /^\w[\w\:]+$/) { # class name
       # Strictly controlled form:
       if ($token =~ /^(?:\w+::){0,10}\w+$/) {
+        # trunk Dmarc.pm was renamed to DMARC.pm
+        # (same check also in Conf.pm loadplugin)
+        if ($token eq 'Mail::SpamAssassin::Plugin::Dmarc') {
+          $token = 'Mail::SpamAssassin::Plugin::DMARC';
+        }
+        # backwards compatible - removed in 4.1
+        # (same check also in Conf.pm loadplugin)
+        elsif ($token eq 'Mail::SpamAssassin::Plugin::WhiteListSubject') {
+          $token = 'Mail::SpamAssassin::Plugin::WelcomeListSubject';
+        }
         my $u = untaint_var($token);
         $eval .= "'$u'";
       } else {

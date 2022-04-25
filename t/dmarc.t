@@ -25,6 +25,11 @@ loadplugin Mail::SpamAssassin::Plugin::DMARC
 ");
 
 tstprefs("
+# Check that rename backwards compatibility works with if's
+ifplugin Mail::SpamAssassin::Plugin::Dmarc
+if plugin ( Mail::SpamAssassin::Plugin::Dmarc)
+ifplugin Mail::SpamAssassin::Plugin::DMARC
+
 header DMARC_NONE eval:check_dmarc_none()
 priority DMARC_NONE 500
 describe DMARC_NONE DMARC none policy
@@ -40,6 +45,10 @@ describe DMARC_REJECT DMARC reject policy
 header DMARC_MISSING eval:check_dmarc_missing()
 priority DMARC_MISSING 500
 describe DMARC_MISSING Missing DMARC policy
+
+endif
+endif
+endif
 ");
 
 %patterns = ();

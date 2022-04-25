@@ -4245,11 +4245,13 @@ See C<Mail::SpamAssassin::Plugin> for more details on writing plugins.
 	return $INVALID_VALUE;
       }
       # trunk Dmarc.pm was renamed to DMARC.pm
-      if ($package eq 'Mail::SpamAssassin::Plugin::Dmarc' && !defined $path) {
+      # (same check also in Conf/Parser.pm handle_conditional)
+      if ($package eq 'Mail::SpamAssassin::Plugin::Dmarc') {
         $package = 'Mail::SpamAssassin::Plugin::DMARC';
       }
       # backwards compatible - removed in 4.1
-      elsif ($package eq 'Mail::SpamAssassin::Plugin::WhiteListSubject' && !defined $path) {
+      # (same check also in Conf/Parser.pm handle_conditional)
+      elsif ($package eq 'Mail::SpamAssassin::Plugin::WhiteListSubject') {
         $package = 'Mail::SpamAssassin::Plugin::WelcomeListSubject';
       }
       $self->load_plugin ($package, $path);

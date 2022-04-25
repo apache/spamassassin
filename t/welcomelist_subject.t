@@ -15,11 +15,15 @@ use Test::More tests => 4;
 );
 
 tstprefs ("
-  loadplugin Mail::SpamAssassin::Plugin::WhiteListSubject
-  use_bayes 0
-  use_auto_welcomelist 0
+  loadplugin Mail::SpamAssassin::Plugin::WelcomeListSubject
+
+  # Check that rename backwards compatibility works with if's
+  ifplugin Mail::SpamAssassin::Plugin::WhiteListSubject
+  if plugin(Mail::SpamAssassin::Plugin::WelcomeListSubject)
   welcomelist_subject [HC Anno*]
   blocklist_subject whitelist test
+  endif
+  endif
 ");
 
 %patterns = %is_welcomelist_patterns;

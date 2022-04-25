@@ -18,10 +18,14 @@ disable_compat "welcomelist_blocklist";
 
 tstprefs ("
   loadplugin Mail::SpamAssassin::Plugin::WhiteListSubject
-  use_bayes 0
-  use_auto_whitelist 0
+
+  # Check that rename backwards compatibility works with if's
+  ifplugin Mail::SpamAssassin::Plugin::WhiteListSubject
+  if plugin(Mail::SpamAssassin::Plugin::WelcomeListSubject)
   whitelist_subject [HC Anno*]
   blacklist_subject whitelist test
+  endif
+  endif
 ");
 
 %patterns = %is_whitelist_patterns;
