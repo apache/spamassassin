@@ -161,7 +161,7 @@ sub _check_dmarc {
       $eval_stat = $@ ne '' ? $@ : "errno=$!";  chomp $eval_stat;
     };
     if (!defined($eval_stat)) {
-      dbg("using Mail::DMARC::PurePerl for SPF checks");
+      dbg("using Mail::DMARC::PurePerl for DMARC checks");
       $self->{has_mail_dmarc} = 1;
     } else {
       dbg("cannot load Mail::DMARC::PurePerl: module: $eval_stat");
