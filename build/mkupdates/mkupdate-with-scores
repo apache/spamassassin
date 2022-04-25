@@ -100,12 +100,18 @@ test_version() {
   # need rules directory or build won't work
   if [ ! -e rules ]; then cp -a ../trunk/rules .; fi
 
+  # Fix for <4.0 - enable_compat/WelcomeListSubject not yet supported
+  if [[ $SA_VERSION =~ ^3 ]]; then
+    perl -p -i -e 's/^\s*(enable_compat)/#$1/' rules/init.pre
+    perl -p -i -e 's/WelcomeListSubject/WhiteListSubject/g' rules/v310.pre
+  fi
+
   perl Makefile.PL PREFIX=$TMPDIR/release_$SA_VERSION < /dev/null
   make
   make install
 
-  ./sa-update -D --install $TMPDIR/${REVISION}.tar.gz || {
-    echo "FATAL: sa-update test failed for version $SA_VERSION (r$REVISION)" >&2
+  ./sa-update --install $TMPDIR/${REVISION}.tar.gz 2>&1 || {
+    echo "FATAL: sa-update test failed for version $SA_VERSION (r$REVISION)"
     exit $?
   }
 
@@ -229,7 +235,7 @@ svn_path_exists() {
   if [[ $SVNINFO =~ W170000: ]]; then return 1; fi
   # Hardfail on any other error
   if [[ ! $SVNINFO =~ Revision: ]]; then
-    echo "svn info failed: $SVNINFO" >&2
+    echo "FATAL: svn info failed: $SVNINFO"
     exit 1
   fi
   return 0

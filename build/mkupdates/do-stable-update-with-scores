@@ -17,7 +17,10 @@ if [ $RV -ne 0 ] ; then
     echo "From: noreply@spamassassin.apache.org (automc Cron)"
     echo "Subject: [auto] do-nightly-rescore-example return code $RV"
     echo ""
-    echo "Exit Status $RV is not zero for do-nightly-rescore-example."
+    echo "Exit Status $RV is not zero for do-nightly-rescore-example.sh"
+    echo ""
+    echo "=== tail of ~automc/tmp/do-stable-update-with-scores.log ==="
+    tail -20 /usr/local/spamassassin/automc/tmp/do-stable-update-with-scores.log
   ) | /usr/sbin/sendmail -oi ruleqa@spamassassin.apache.org
 else
   echo "Running mkupdate-with-scores..."
@@ -31,6 +34,9 @@ else
       echo "Subject: [auto] mkupdate-with-scores return code $RV"
       echo ""
       echo "Exit Status $RV is not zero for mkupdate-with-scores"
+      echo ""
+      echo "=== tail of ~automc/tmp/do-stable-update-with-scores.log ==="
+      tail -20 /usr/local/spamassassin/automc/tmp/do-stable-update-with-scores.log
     ) | /usr/sbin/sendmail -oi ruleqa@spamassassin.apache.org
   fi
 fi
