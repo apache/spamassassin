@@ -147,9 +147,14 @@ Installing rules from network is done with a single command:
         sa-update
 
 For security reasons, it should not be run as root, but as the user normally
-running SpamAssassin.  You need to change ownership of LOCAL_STATE_DIR to
-that user (usually: chown -R user:user /var/lib/spamassassin).  You can find
-out the default directory with sa-update --help (look for --updatedir).
+running SpamAssassin.  You can run the initial setup once as root, to create
+necessary directories etc.  Then you need to change ownership of
+LOCAL_STATE_DIR to that user (usually: chown -R user:user
+/var/lib/spamassassin), you can find out the default directory with
+sa-update --help (look for --updatedir).  Same needs to be done for
+LOCAL_RULES_DIR/sa-update-keys (usually: chown -R user:user
+/etc/mail/spamassassin/sa-update-keys), the directory can be found with
+spamassassin --help (look for --siteconfigpath).
 
 If you wish to install rules from downloaded files, rather than "live" from
 the latest online ruleset, here is how to do it.
