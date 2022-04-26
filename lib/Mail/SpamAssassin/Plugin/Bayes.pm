@@ -1448,6 +1448,10 @@ sub _tokenize_headers {
     elsif ($hdr =~ /^${MARK_PRESENCE_ONLY_HDRS}$/i) {
       $val = "1"; # just mark the presence, they create lots of hapaxen
     }
+    elsif ($hdr =~ /^x-spam-relays-(?:external|internal|trusted|untrusted)$/) {
+      # remove redundant rdns helo ident envfrom intl auth msa words
+      $val =~ s/ [a-z]+=/ /g;
+    }
 
     if (MAP_HEADERS_MID) {
       if ($hdr =~ /^(?:In-Reply-To|References|Message-ID)$/i) {
@@ -1511,7 +1515,7 @@ sub _pre_chew_content_type {
   }
 
   # stop-list words for Content-Type header: these wind up totally gray
-  $val =~ s/\b(?:text|charset)\b//;
+  $val =~ s/\b(?:text|charset)\b/ /g;
 
   $val;
 }
