@@ -626,10 +626,10 @@ foreach my $channel (@channels) {
   my $GPG;
 
   if ($instfile) {
-    dbg("channel: using --install files $instfile\{,.sha256,.sha512,.asc\}");
+    dbg("channel: using --install files $instfile\{,.asc,.sha512,.sha256\}");
     $content = read_install_file($instfile);
-    if ( -s "$instfile.sha512" ) { $SHA512 = read_install_file($instfile.".sha512"); }
-    if ( -s "$instfile.sha256" ) { $SHA256 = read_install_file($instfile.".sha256"); }
+    if ( -f "$instfile.sha512" ) { $SHA512 = read_install_file($instfile.".sha512"); }
+    if ( -f "$instfile.sha256" ) { $SHA256 = read_install_file($instfile.".sha256"); }
     $GPG = read_install_file($instfile.".asc") if $GPG_ENABLED;
 
   } else {  # not an install file, obtain fresh rules from network
@@ -863,7 +863,11 @@ foreach my $channel (@channels) {
   }
 
   unless ($content && (($GPG_ENABLED && $GPG) || (!$GPG_ENABLED && ($SHA512 || $SHA256)))) {
-    channel_failed("channel '$channel': could not find working mirror");
+    if ($instfile) {
+      channel_failed("channel '$channel': missing checksum files $instfile\{,.sha512,.sha256\}");
+    } else {
+      channel_failed("channel '$channel': could not find working mirror");
+    }
     next;
   }
 
@@ -1297,6 +1301,7 @@ sub read_install_file {
   my $all;
   { local $/ = undef; $all = <IN> }
   close IN or die "cannot close $file: $!";
+  defined $all && $all ne '' or die "empty file $file\n";
   return $all;
 }
 
@@ -2014,9 +2019,9 @@ Options:
                           Use multiple times for multiple channels
   --channelfile file      Retrieve updates from the channels in the file
   --checkonly             Check for update availability, do not install
-  --install filename      Install updates directly from this file. Signature
-                          verification will use "file.asc", "file.sha256",
-                          and "file.sha512".
+  --install file          Install updates directly from this file. Signature
+                          verification will use "file.asc", or "file.sha512"
+                          or "file.sha256".
   --allowplugins          Allow updates to load plugin code (DANGEROUS)
   --gpgkey key            Trust the key id to sign releases
                           Use multiple times for multiple keys
@@ -2055,8 +2060,9 @@ configuration, based on channels.  The default channel is
 I<updates.spamassassin.org>, which has updated rules since the previous
 release.
 
-Update archives are verified using SHA256 and SHA512 hashes and GPG signatures,
-by default.
+Update archives are verified using GPG signatures by default.  If GPG is
+disabled (not recommended), file integrity is checked with SHA512 or SHA256
+checksums.
 
 Note that C<sa-update> will not restart C<spamd> or otherwise cause
 a scanner to reload the now-updated ruleset automatically.  Instead,
@@ -2104,10 +2110,10 @@ The exit code will be C<0> or C<1> as described below.
 Install updates "offline", from the named tar.gz file, instead of performing
 DNS lookups and HTTP invocations.
 
-Files named B<file>.sha256, B<file>.sha512, and B<file>.asc will be used for
-the SHA256 and SHA512 hashes and the GPG signature, respectively.  The filename
-provided must contain a version number of at least 3 digits, which will be used
-as the channel's update version number.
+Files named B<file>.asc, B<file>.sha512, or B<file>.sha256 will be used for
+GPG signature, and the SHA256 and SHA512 checksums, respectively.  The
+filename provided must contain a version number of at least 3 digits, which
+will be used as the channel's update version number.
 
 Multiple B<--channel> switches cannot be used with B<--install>.  To install
 multiple channels from tarballs, run C<sa-update> multiple times with different
