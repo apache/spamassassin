@@ -121,6 +121,8 @@ test_version() {
 }
 
 make_rule_update_from_trunk() {
+  cd $TMPDIR
+
   # to heck with dealing with svn update failures
   rm -rf trunk trunk-rulesrc-scores
 
@@ -168,16 +170,17 @@ make_rule_update_from_trunk() {
 
   ../spamassassin --lint -D
 
-  tar cvf - *.cf *.txt languages user_prefs.template | gzip -9 > $TMPDIR/${REVISION}.tar.gz
+  tar -cvf $TMPDIR/${REVISION}.tar *.cf *.txt languages user_prefs.template
+  # 5% better compression than gzip
+  zopfli $TMPDIR/${REVISION}.tar
 
-  cd ../..
+  cd $TMPDIR
 
-  shasum  -a 1 $TMPDIR/${REVISION}.tar.gz > $TMPDIR/${REVISION}.tar.gz.sha1
-  shasum  -a 256 $TMPDIR/${REVISION}.tar.gz > $TMPDIR/${REVISION}.tar.gz.sha256
-  shasum  -a 512 $TMPDIR/${REVISION}.tar.gz > $TMPDIR/${REVISION}.tar.gz.sha512
-  gpg --batch --homedir $KEYDIR -bas $TMPDIR/${REVISION}.tar.gz || exit $?
-
-  tar -ztvf $TMPDIR/${REVISION}.tar.gz
+  tar -ztvf ${REVISION}.tar.gz
+  shasum  -a 1    ${REVISION}.tar.gz >${REVISION}.tar.gz.sha1
+  shasum  -a 256  ${REVISION}.tar.gz >${REVISION}.tar.gz.sha256
+  shasum  -a 512  ${REVISION}.tar.gz >${REVISION}.tar.gz.sha512
+  gpg --batch --homedir $KEYDIR -bas ${REVISION}.tar.gz || exit $?
 }
 
 copy_existing_update_for_reversion_testing() {
