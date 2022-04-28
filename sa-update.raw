@@ -813,19 +813,6 @@ foreach my $channel (@channels) {
         next;
       }
 
-      # SHA512 of the archive file
-      ($result_fname, $http_ok) = http_get("$mirror/$newV.tar.gz.sha512", $UPDDir);
-      if (!$http_ok || !-s $result_fname) {
-        # If not found, try SHA256 instead
-        ($result_fname, $http_ok) = http_get("$mirror/$newV.tar.gz.sha256", $UPDDir);
-        if (!$http_ok || !-s $result_fname) {
-          dbg("channel: No sha512 or sha256 file available from $mirror, %s",
-            %mirrors ? "sleeping $sleep_sec sec and trying next" : 'no mirrors left');
-          sleep($sleep_sec) if %mirrors;
-          next;
-        }
-      }
-
       # if GPG is enabled, the GPG detached signature of the archive file
       if ($GPG_ENABLED) {
         ($result_fname, $http_ok) = http_get("$mirror/$newV.tar.gz.asc", $UPDDir);
@@ -834,6 +821,20 @@ foreach my $channel (@channels) {
             %mirrors ? "sleeping $sleep_sec sec and trying next" : 'no mirrors left');
           sleep($sleep_sec) if %mirrors;
           next;
+        }
+      }
+      else {
+        # SHA512 of the archive file
+        ($result_fname, $http_ok) = http_get("$mirror/$newV.tar.gz.sha512", $UPDDir);
+        if (!$http_ok || !-s $result_fname) {
+          # If not found, try SHA256 instead
+          ($result_fname, $http_ok) = http_get("$mirror/$newV.tar.gz.sha256", $UPDDir);
+          if (!$http_ok || !-s $result_fname) {
+            dbg("channel: No sha512 or sha256 file available from $mirror, %s",
+              %mirrors ? "sleeping $sleep_sec sec and trying next" : 'no mirrors left');
+            sleep($sleep_sec) if %mirrors;
+            next;
+          }
         }
       }
 
@@ -861,7 +862,7 @@ foreach my $channel (@channels) {
     }
   }
 
-  unless ($content && ( $SHA512 || $SHA256 ) && (!$GPG_ENABLED || $GPG)) {
+  unless ($content && (($GPG_ENABLED && $GPG) || (!$GPG_ENABLED && ($SHA512 || $SHA256)))) {
     channel_failed("channel '$channel': could not find working mirror");
     next;
   }
@@ -2130,19 +2131,18 @@ Use --reallyallowplugins option to bypass warnings and make it work.
 
 =item B<--gpg>, B<--nogpg>
 
-sa-update by default will verify update archives by use of SHA256 and SHA512
-checksums and GPG signature.  SHA* hashes can verify whether or not the
-downloaded archive has been corrupted, but it does not offer any form of
-security regarding whether or not the downloaded archive is legitimate
-(aka: non-modifed by evildoers).  GPG verification of the archive is used to
-solve that problem.
+sa-update by default will verify update archives by use of GPG signature. 
 
-If you wish to skip GPG verification, you can use the B<--nogpg> option
-to disable its use.  Use of the following gpgkey-related options will
-override B<--nogpg> and keep GPG verification enabled.
+If you wish to skip GPG verification (very unsafe), you can use the
+B<--nogpg> option to disable its use.  Use of the following gpgkey-related
+options will override B<--nogpg> and keep GPG verification enabled.
 
-Note: Currently, only GPG itself is supported (ie: not PGP).  v1.2 has been
-tested, although later versions ought to work as well.
+If GPG is disabled, only SHA512 or SHA256 checksums are used to verify
+whether or not the downloaded archive has been corrupted, but it does not
+offer any form of security regarding whether or not the downloaded archive
+is legitimate (aka: non-modifed by evildoers).
+
+Note: Only GnuPG is supported (ie: not any other PGP software).
 
 =item B<--gpgkey>
 
