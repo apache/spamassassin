@@ -2000,13 +2000,13 @@ sub test_global_state_dir {
     # Purge stale test files (enough to do only some times randomly)
     if (rand() < 0.2 && opendir(WT_DIR, $dir)) {
       foreach (grep {index($_, '.sawritetest') == 0 &&
-                 (-M File::Spec->catdir($dir, $_)||0) > 0.0001} readdir(WT_DIR)) {
-        unlink(Mail::SpamAssassin::Util::untaint_file_path(File::Spec->catdir($dir, $_)));
+                 (-M File::Spec->catfile($dir, $_)||0) > 0.0001} readdir(WT_DIR)) {
+        unlink(Mail::SpamAssassin::Util::untaint_file_path(File::Spec->catfile($dir, $_)));
       }
       closedir WT_DIR;
     }
     my $n = ".sawritetest$$".Mail::SpamAssassin::Util::pseudo_random_string(6);
-    my $file = File::Spec->catdir($dir, $n);
+    my $file = File::Spec->catfile($dir, $n);
     if (Mail::SpamAssassin::Util::touch_file($file, { create_exclusive => 1 })) {
       dbg("config: global_state_dir set to $dir");
       $self->{global_state_dir} = $dir;
