@@ -1997,9 +1997,10 @@ sub set_global_state_dir {
 sub test_global_state_dir {
     my ($self, $dir) = @_;
     eval { mkpath($dir, 0, 0700); }; # just a single stat if exists already
-    # Purge stale test files
-    if (opendir(WT_DIR, $dir)) {
-      foreach (grep {/^\.sawritetest/ && (-M "$dir/$_"||0) > 0.0001} readdir(WT_DIR)) {
+    # Purge stale test files (enough to do only some times randomly)
+    if (rand() < 0.2 && opendir(WT_DIR, $dir)) {
+      foreach (grep {index($_, '.sawritetest') == 0 &&
+                 (-M File::Spec->catdir($dir, $_)||0) > 0.0001} readdir(WT_DIR)) {
         unlink(Mail::SpamAssassin::Util::untaint_file_path(File::Spec->catdir($dir, $_)));
       }
       closedir WT_DIR;
