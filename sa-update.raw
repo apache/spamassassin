@@ -676,6 +676,8 @@ foreach my $channel (@channels) {
         channel_failed("channel '$channel': MIRRORED.BY file URL was not in DNS");
         next;
       }
+      # make sure requests spread randomly
+      Mail::SpamAssassin::Util::fisher_yates_shuffle(\@mirrors);
       foreach my $mirror (@mirrors) {
         my ($result_fname, $http_ok) =
           http_get($mirror, $UPDDir, $mirby_path, $mirby_force_reload);
