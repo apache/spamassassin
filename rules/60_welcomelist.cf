@@ -40,7 +40,7 @@ if can(Mail::SpamAssassin::Conf::feature_welcomelist_blocklist)
 
   # Backwards compatibility
   # To disable set "enable_compat welcomelist_blocklist" in init.pre
-  if !has(Mail::SpamAssassin::Conf::compat_welcomelist_blocklist)
+  if !can(Mail::SpamAssassin::Conf::compat_welcomelist_blocklist)
     meta USER_IN_BLACKLIST		(USER_IN_BLOCKLIST)
     describe USER_IN_BLACKLIST		DEPRECATED: See USER_IN_BLOCKLIST
     tflags USER_IN_BLACKLIST		userconf nice noautolearn
@@ -66,7 +66,7 @@ if can(Mail::SpamAssassin::Conf::feature_welcomelist_blocklist)
   tflags USER_IN_WELCOMELIST		userconf nice noautolearn
   score USER_IN_WELCOMELIST		-100
     
-  if !has(Mail::SpamAssassin::Conf::compat_welcomelist_blocklist)
+  if !can(Mail::SpamAssassin::Conf::compat_welcomelist_blocklist)
     meta USER_IN_WHITELIST		(USER_IN_WELCOMELIST)
     describe USER_IN_WHITELIST		DEPRECATED: See USER_IN_WELCOMELIST
     tflags USER_IN_WHITELIST		userconf nice noautolearn
@@ -92,7 +92,7 @@ if can(Mail::SpamAssassin::Conf::feature_welcomelist_blocklist)
   tflags USER_IN_DEF_WELCOMELIST	userconf nice noautolearn
   score USER_IN_DEF_WELCOMELIST		-15
   
-  if !has(Mail::SpamAssassin::Conf::compat_welcomelist_blocklist)
+  if !can(Mail::SpamAssassin::Conf::compat_welcomelist_blocklist)
     meta USER_IN_DEF_WHITELIST		(USER_IN_DEF_WELCOMELIST)
     describe USER_IN_DEF_WHITELIST	DEPRECATED: See USER_IN_WELCOMELIST 
     tflags USER_IN_DEF_WHITELIST	userconf nice noautolearn
@@ -118,7 +118,7 @@ if can(Mail::SpamAssassin::Conf::feature_welcomelist_blocklist)
   tflags USER_IN_BLOCKLIST_TO		userconf nice noautolearn
   score USER_IN_BLOCKLIST_TO	     	10
 
-  if !has(Mail::SpamAssassin::Conf::compat_welcomelist_blocklist)
+  if !can(Mail::SpamAssassin::Conf::compat_welcomelist_blocklist)
     meta USER_IN_BLACKLIST_TO		(USER_IN_BLOCKLIST_TO)
     describe USER_IN_BLACKLIST_TO	DEPRECATED: See USER_IN_BLOCKLIST_TO
     tflags USER_IN_BLACKLIST_TO		userconf nice noautolearn
@@ -144,7 +144,7 @@ if can(Mail::SpamAssassin::Conf::feature_welcomelist_blocklist)
   tflags USER_IN_WELCOMELIST_TO		userconf nice noautolearn
   score USER_IN_WELCOMELIST_TO		-6
 
-  if !has(Mail::SpamAssassin::Conf::compat_welcomelist_blocklist)
+  if !can(Mail::SpamAssassin::Conf::compat_welcomelist_blocklist)
     meta USER_IN_WHITELIST_TO		(USER_IN_WELCOMELIST_TO)
     describe USER_IN_WHITELIST_TO	DEPRECATED: See USER_IN_WELCOMELIST_TO
     tflags USER_IN_WHITELIST_TO		userconf nice noautolearn
@@ -178,7 +178,7 @@ if can(Mail::SpamAssassin::Conf::feature_welcomelist_blocklist)
   tflags URI_HOST_IN_BLOCKLIST		userconf noautolearn
   score URI_HOST_IN_BLOCKLIST		100
 
-  if !has(Mail::SpamAssassin::Conf::compat_welcomelist_blocklist)
+  if !can(Mail::SpamAssassin::Conf::compat_welcomelist_blocklist)
     meta URI_HOST_IN_BLACKLIST		(URI_HOST_IN_BLOCKLIST)
     describe URI_HOST_IN_BLACKLIST	DEPRECATED: See URI_HOST_IN_BLOCKLIST
     tflags URI_HOST_IN_BLACKLIST	userconf noautolearn
@@ -206,7 +206,7 @@ if can(Mail::SpamAssassin::Conf::feature_welcomelist_blocklist)
   tflags URI_HOST_IN_WELCOMELIST	userconf nice noautolearn
   score URI_HOST_IN_WELCOMELIST		-100
 
-  if !has(Mail::SpamAssassin::Conf::compat_welcomelist_blocklist)
+  if !can(Mail::SpamAssassin::Conf::compat_welcomelist_blocklist)
     meta URI_HOST_IN_WHITELIST		(URI_HOST_IN_WELCOMELIST)
     describe URI_HOST_IN_WHITELIST	DEPRECATED: See URI_HOST_IN_WELCOMELIST
     tflags URI_HOST_IN_WHITELIST	userconf nice noautolearn

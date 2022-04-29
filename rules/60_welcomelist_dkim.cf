@@ -36,7 +36,7 @@ if can(Mail::SpamAssassin::Conf::feature_welcomelist_blocklist)
 
   # Backwards compatibility
   # To disable set "enable_compat welcomelist_blocklist" in init.pre
-  if !has(Mail::SpamAssassin::Conf::compat_welcomelist_blocklist)
+  if !can(Mail::SpamAssassin::Conf::compat_welcomelist_blocklist)
     meta USER_IN_DKIM_WHITELIST		(USER_IN_DKIM_WELCOMELIST)
     describe USER_IN_DKIM_WHITELIST	DEPRECATED: See USER_IN_DKIM_WELCOMELIST
     tflags USER_IN_DKIM_WHITELIST	nice noautolearn net userconf
@@ -52,7 +52,7 @@ if !can(Mail::SpamAssassin::Conf::feature_welcomelist_blocklist)
   score USER_IN_DKIM_WELCOMELIST	-100
   reuse USER_IN_DKIM_WELCOMELIST
 
-  if !has(Mail::SpamAssassin::Conf::compat_welcomelist_blocklist)
+  if !can(Mail::SpamAssassin::Conf::compat_welcomelist_blocklist)
     meta USER_IN_DKIM_WHITELIST		(USER_IN_DKIM_WELCOMELIST)
     describe USER_IN_DKIM_WHITELIST	DEPRECATED: See USER_IN_DKIM_WELCOMELIST
     tflags USER_IN_DKIM_WHITELIST	nice noautolearn net userconf

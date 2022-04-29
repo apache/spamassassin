@@ -39,7 +39,7 @@ ifplugin Mail::SpamAssassin::Plugin::WelcomeListSubject
 
   # Backwards compatibility
   # To disable set "enable_compat welcomelist_blocklist" in init.pre
-  if !has(Mail::SpamAssassin::Conf::compat_welcomelist_blocklist)
+  if !can(Mail::SpamAssassin::Conf::compat_welcomelist_blocklist)
     meta SUBJECT_IN_WHITELIST		(SUBJECT_IN_WELCOMELIST)
     describe SUBJECT_IN_WHITELIST	DEPRECATED: See SUBJECT_IN_WELCOMELIST
     tflags SUBJECT_IN_WHITELIST		userconf nice noautolearn
@@ -52,7 +52,7 @@ ifplugin Mail::SpamAssassin::Plugin::WelcomeListSubject
   tflags SUBJECT_IN_BLOCKLIST		userconf noautolearn
   score SUBJECT_IN_BLOCKLIST		100
 
-  if !has(Mail::SpamAssassin::Conf::compat_welcomelist_blocklist)
+  if !can(Mail::SpamAssassin::Conf::compat_welcomelist_blocklist)
     meta SUBJECT_IN_BLACKLIST		(SUBJECT_IN_BLOCKLIST)
     describe SUBJECT_IN_BLACKLIST	DEPRECATED: See SUBJECT_IN_BLOCKLIST
     tflags SUBJECT_IN_BLACKLIST		userconf noautolearn
