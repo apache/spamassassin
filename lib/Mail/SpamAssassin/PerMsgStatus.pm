@@ -3523,12 +3523,11 @@ sub all_from_addrs {
     @addrs = @resent;
   }
   else {
-    # bug 2292: Used to use find_all_addrs_in_line() with the same
-    # headers, but the would catch addresses in comments which caused
-    # FNs for things like welcomelist_from (previously whitelist_from).  
-    # Since all of these are From
-    # headers, there should only be 1 address in each anyway (not exactly
-    # true, RFC 2822 allows multiple addresses in a From header field)
+    # bug 2292: Used to use find_all_addrs_in_line() with the same headers,
+    # but the would catch addresses in comments which caused FNs for things
+    # like welcomelist_from.  Since all of these are From headers, there
+    # should only be 1 address in each anyway (not exactly true, RFC 2822
+    # allows multiple addresses in a From header field)
     # *** since 4.0 all addresses are returned from Header correctly ***
     # bug 3366: some addresses come in as 'foo@bar...', which is invalid.
     # so deal with the multiple periods.

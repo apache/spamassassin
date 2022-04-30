@@ -148,8 +148,8 @@ set this to a relatively low value, e.g. C<5>.
 Previously pyzor_whitelist_min which will work interchangeably until 4.1.
 
 This option sets how often a message's body checksum must have been
-whitelisted to the Pyzor server for SpamAssassin to consider ignoring the
-result.  Final decision is made by pyzor_whitelist_factor.
+welcomelisted to the Pyzor server for SpamAssassin to consider ignoring the
+result.  Final decision is made by pyzor_welcomelist_factor.
 
 =cut
 
@@ -165,8 +165,8 @@ result.  Final decision is made by pyzor_whitelist_factor.
 
 Previously pyzor_whitelist_factor which will work interchangeably until 4.1.
 
-Ignore Pyzor result if REPORTCOUNT x NUMBER >= pyzor_whitelist_min.
-For default setting this means: 50 reports requires 10 whitelistings.
+Ignore Pyzor result if REPORTCOUNT x NUMBER >= pyzor_welcomelist_min.
+For default setting this means: 50 reports requires 10 welcomelistings.
 
 =cut
 

@@ -91,8 +91,8 @@ Note for Users Upgrading to SpamAssassin 4.0.0
 
 - API: New plugin callback method check_cleanup (for cleaning up things..)
 
-- FreeMail: new options freemail_import_whitelist_auth,
-  freemail_import_def_whitelist_auth added (Bug 6451)
+- FreeMail: new options freemail_import_welcomelist_auth,
+  freemail_import_def_welcomelist_auth added (Bug 6451)
 
 - New internal Mail::SpamAssassin::GeoDB module that provides unified interface to
   modules MaxMind::DB::Reader (GeoIP2), Geo::IP, IP::Country::DB_File, IP::Country::Fast.
@@ -113,8 +113,8 @@ Note for Users Upgrading to SpamAssassin 4.0.0
 - Pyzor pyzor_fork option added. It will fork separate Pyzor process and
   read in the results later asynchronously, increasing throughput. When
   this is used, rule priorities are automatically adjusted to -100. Renamed
-  pyzor_max setting to pyzor_count_min.  Added pyzor_whitelist_min and
-  pyzor_whitelist_factor setting.  Also try to ignore "empty body" FPs.
+  pyzor_max setting to pyzor_count_min.  Added pyzor_welcomelist_min and
+  pyzor_welcomelist_factor setting.  Also try to ignore "empty body" FPs.
 
 - API: deprecated $pms->register_async_rule_start() and
   $pms->register_async_rule_finish() calls (they can be left in code for
@@ -202,10 +202,10 @@ Note for Users Upgrading to SpamAssassin 3.4.5
 - Spamassassin test suite can now run against the installed
   SpamAssassin files (rather than those in the source directory)
 
-- unwhitelist_auth now also removes def_whitelist_auth entries
+- unwelcomelist_auth now also removes def_welcomelist_auth entries
 
-- SPF: add unwhitelist_from_spf to remove both whitelist_from_spf and
-  def_whitelist_from_spf entries
+- SPF: add unwelcomelist_from_spf to remove both welcomelist_from_spf and
+  def_welcomelist_from_spf entries
 
 - Default SQL schema for userpref.value changed from varchar(100) to
   varchar(255), no need to modify unless you hit the limit. (Bug 7803)
@@ -536,7 +536,7 @@ Note for Users Upgrading to SpamAssassin 3.1.0
 -----------------------------------------------
 
 - A significant amount of core functionality has been moved into
-  plugins.  These include, AWL (auto-whitelist), DCC, Pyzor, Razor2,
+  plugins.  These include, AWL (auto-welcomelist), DCC, Pyzor, Razor2,
   SpamCop reporting and TextCat.  For information on configuring these
   plugins please refer to their individual documentation:
   perldoc Mail::SpamAssassin::Plugin::* (ie AWL, DCC, etc)
@@ -553,10 +553,10 @@ Note for Users Upgrading to SpamAssassin 3.1.0
   yourself and decide if you are able to re-enable the plugins for
   your site.
 
-- The use_auto_whitelist config option has been moved to a user config
-  option, this allows individual users to turn on or off whitelisting
+- The use_auto_welcomelist config option has been moved to a user config
+  option, this allows individual users to turn on or off welcomelisting
   regardless of what is set in the system config.  If you would like to
-  disable AWL (auto-whitelist) on a site-wide basis, then you can comment
+  disable AWL (auto-welcomelist) on a site-wide basis, then you can comment
   out the plugin in "v310.pre".
 
 - The bayes_auto_learn_threshold_* config options for bayes have moved
@@ -637,9 +637,9 @@ Note for Users Upgrading to SpamAssassin 3.0.x
   http://wiki.apache.org/spamassassin/UpgradeTo300 for information about
   third-party software.
 
-- The --auto-whitelist, --whitelist and -a options for "spamd" and
-  "spamassassin" to turn on the auto-whitelist have been removed and
-  replaced by the "use_auto_whitelist" configuration option which is
+- The --auto-welcomelist, --welcomelist and -a options for "spamd" and
+  "spamassassin" to turn on the auto-welcomelist have been removed and
+  replaced by the "use_auto_welcomelist" configuration option which is
   also now turned on by default.
 
 - The --virtual-config switch for spamd had to be dropped, due to licensing

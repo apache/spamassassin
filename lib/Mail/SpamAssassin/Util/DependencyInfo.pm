@@ -128,7 +128,7 @@ our @OPTIONAL_MODULES = (
   desc => "Provides mapping between Internationalized Domain Names (IDN) in
   Unicode and ASCII-compatible encoding (ACE) for use in DNS and comparisions.
   The module is optional, but without it Unicode IDN names found in mail will
-  not be suitable for DNS queries and white/blacklisting.",
+  not be suitable for DNS queries and welcome/blocklisting.",
 },
 {
   module => 'Mail::SPF',

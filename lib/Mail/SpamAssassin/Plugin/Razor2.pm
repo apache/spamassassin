@@ -215,7 +215,7 @@ sub razor2_access {
       my $sigs = $rc->compute_sigs($objects)
 	  or die "$debug: error in compute_sigs";
 
-      # if mail isn't whitelisted, check it out
+      # if mail isn't welcomelisted, check it out
       # see 'man razor-whitelist'
       if ($type ne 'check' || ! $rc->local_check($objects->[0])) {
 	# provide a better error message when servers are unavailable,

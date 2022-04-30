@@ -304,7 +304,7 @@ is too low for them to be used.
     Provides mapping between Internationalized Domain Names (IDN) in Unicode
     and ASCII-compatible encoding (ACE) for use in DNS and comparisions. 
     The module is optional, but without it Unicode IDN names found in mail
-    will not be suitable for DNS queries and white/blacklisting.
+    will not be suitable for DNS queries and welcome/blocklisting.
 
     Either module should work fine, but newer Net::LibIDN2 might not be
     available in all distributions.
@@ -353,7 +353,7 @@ is too low for them to be used.
   - DB_File (from CPAN)
 
     Used to store data on-disk, for the Bayes-style logic, TxRep, and
-    auto-whitelist.  *Much* more efficient than the other standard Perl
+    auto-welcomelist.  *Much* more efficient than the other standard Perl
     database packages.  Strongly recommended.
 
     There seems to be a bug in libdb 4.1.25, which is
