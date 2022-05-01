@@ -94,7 +94,6 @@ use vars qw(@ISA);
 my $VERSION = 0.12;
 
 use constant HAS_LWP_USERAGENT => eval { require LWP::UserAgent; };
-use constant HAS_DBI => eval { require DBI; };
 
 sub dbg { my $msg = shift; return Mail::SpamAssassin::Logger::dbg("DecodeShortURLs: $msg", @_); }
 sub info { my $msg = shift; return Mail::SpamAssassin::Logger::info("DecodeShortURLs: $msg", @_); }
@@ -108,17 +107,12 @@ sub new {
   bless ($self, $class);
 
   if ($mailsaobject->{local_tests_only} || !HAS_LWP_USERAGENT) {
+    dbg("local tests only, disabling checks");
     $self->{disabled} = 1;
-  } else {
-    $self->{disabled} = 0;
   }
-
-  unless ($self->{disabled}) {
-    $self->{ua} = new LWP::UserAgent;
-    $self->{ua}->{max_redirect} = 0;
-    $self->{ua}->{timeout} = 5;
-    $self->{ua}->env_proxy;
-    $self->{caching} = 0;
+  elsif (!HAS_LWP_USERAGENT) {
+    dbg("module LWP::UserAgent not installed, disabling checks");
+    $self->{disabled} = 1;
   }
 
   $self->set_config($mailsaobject->{conf});
@@ -160,7 +154,7 @@ sub set_config {
     default => {},
     code => sub {
       my ($self, $key, $value, $line) = @_;
-      if ($value =~ /^$/) {
+      if ($value eq '') {
         return $Mail::SpamAssassin::Conf::MISSING_REQUIRED_VALUE;
       }
       foreach my $domain (split(/\s+/, $value)) {
@@ -173,11 +167,12 @@ sub set_config {
 
 =item url_shortener_cache_type     (default: none)
 
-The specific type of cache type that is being utilized. Currently only sqlite
-is configured however plans to support redis cache is planned.
+The cache type that is being utilized.  Currently only supported value is
+C<dbi> that implies C<url_shortener_cache_dsn> is a DBI connect string.
+DBI module is required.
 
 Example:
-url_shortener_cache_type sqlite
+url_shortener_cache_type dbi
 
 =back
 
@@ -185,7 +180,7 @@ url_shortener_cache_type sqlite
 
   push (@cmds, {
     setting => 'url_shortener_cache_type',
-    default => undef,
+    default => '',
     is_priv => 1,
     type => $Mail::SpamAssassin::Conf::CONF_TYPE_STRING
   });
@@ -194,15 +189,22 @@ url_shortener_cache_type sqlite
 
 =item url_shortener_cache_dsn		(default: none)
 
-The dsn to a database file to write cache entries to.  The database will
-be created automatically if is does not already exist but the supplied path
-and file must be read/writable by the user running spamassassin or spamd.
+The DBI dsn of the database to use.
 
-Note: You will need to have the proper DBI version of the cache type installed.
+For SQLite, the database will be created automatically if it does not
+already exist, the supplied path and file must be read/writable by the
+user running spamassassin or spamd.
 
-Example:
+For MySQL/MariaDB or PostgreSQL, see sql-directory for database table
+creation clauses.
 
-url_shortener_cache_dsn dbi:SQLite:dbname=/tmp/DecodeShortURLs.sq3
+You will need to have the proper DBI module for your database.  For example
+DBD::SQLite, DBD::mysql, DBD::MariaDB or DBD::Pg.
+
+Minimum required SQLite version is 3.24.0 (available from DBD::SQLite 1.59).
+
+Examples:
+url_shortener_cache_dsn dbi:SQLite:dbname=/var/lib/spamassassin/DecodeShortURLs.db
 
 =back
 
@@ -219,7 +221,8 @@ url_shortener_cache_dsn dbi:SQLite:dbname=/tmp/DecodeShortURLs.sq3
 
 =item url_shortener_cache_username  (default: none)
 
-The username that should be used to connect to the database.
+The username that should be used to connect to the database.  Not used for
+SQLite.
 
 =back
 
@@ -236,7 +239,8 @@ The username that should be used to connect to the database.
 
 =item url_shortener_cache_password  (default: none)
 
-The password that should be used to connect to the database.
+The password that should be used to connect to the database.  Not used for
+SQLite.
 
 =back
 
@@ -256,12 +260,7 @@ The password that should be used to connect to the database.
 The length of time a cache entry will be valid for in seconds.
 Default is 86400 (1 day).
 
-NOTE: you will also need to run the following via cron to actually remove the
-records from the database:
-
-echo "DELETE FROM short_url_cache WHERE modified < NOW() - C<ttl>; | sqlite3 /path/to/database"
-
-NOTE: replace C<ttl> above with the same value you use for this option
+See C<url_shortener_cache_autoclean> for database cleaning.
 
 =back
 
@@ -271,6 +270,28 @@ NOTE: replace C<ttl> above with the same value you use for this option
     setting => 'url_shortener_cache_ttl',
     is_admin => 1,
     default => 86400,
+    type => $Mail::SpamAssassin::Conf::CONF_TYPE_NUMERIC
+  });
+
+=over 4
+
+=item url_shortener_cache_autoclean	(default: 1000)
+
+Automatically purge old entries from database.  Value describes a random run
+chance of 1/x.  The default value of 1000 means that cleaning is run
+approximately once for every 1000 messages processed.  Value of 1 would mean
+database is cleaned every time a message is processed.
+
+Set 0 to disable automatic cleaning and to do it manually.
+
+=back
+
+=cut
+
+  push (@cmds, {
+    setting => 'url_shortener_cache_autoclean',
+    is_admin => 1,
+    default => 1000,
     type => $Mail::SpamAssassin::Conf::CONF_TYPE_NUMERIC
   });
 
@@ -312,36 +333,155 @@ The max depth of short urls that will be chained until it stops looking further.
 }
 
 sub initialise_url_shortener_cache {
-  my($self, $opts) = @_;
+  my ($self, $conf) = @_;
 
-  if($self->{url_shortener_cache_type} eq "dbi" && defined $self->{url_shortener_cache_dsn} && HAS_DBI) {
-    $self->{url_shortener_dbi_cache} = $self->{url_shortener_cache_dsn};
-    return _connect_dbi_cache($self, $opts);
-  } else {
-    warn "Wrong cache type selected";
+  return if $self->{dbh};
+  return if !$conf->{url_shortener_cache_type};
+
+  if (!$conf->{url_shortener_cache_dsn}) {
+    warn "DecodeShortURLs: invalid cache configuration\n";
     return;
   }
-}
 
-sub _connect_dbi_cache {
-  my($self, $opts) = @_;
-
-  # Initialise cache if enabled
-  if ($self->{url_shortener_dbi_cache} && HAS_DBI) {
+  ##
+  ## SQLite
+  ## 
+  if ($conf->{url_shortener_cache_type} =~ /^(?:dbi|sqlite)$/i
+      && $conf->{url_shortener_cache_dsn} =~ /^dbi:SQLite/)
+  {
     eval {
       local $SIG{'__DIE__'};
+      require DBI;
+      require DBD::SQLite;
+      DBD::SQLite->VERSION(1.59_01); # Required for ON CONFLICT
       $self->{dbh} = DBI->connect_cached(
-        $self->{url_shortener_cache_dsn},
-        $self->{url_shortener_cache_username},
-        $self->{url_shortener_cache_password},
-        {RaiseError => 1, PrintError => 0, InactiveDestroy => 1}
-      ) or die $!;
+        $conf->{url_shortener_cache_dsn}, '', '',
+        {RaiseError => 1, PrintError => 0, InactiveDestroy => 1, AutoCommit => 1}
+      );
+      $self->{dbh}->do("
+        CREATE TABLE IF NOT EXISTS short_url_cache (
+          short_url   TEXT PRIMARY KEY NOT NULL,
+          decoded_url TEXT NOT NULL,
+          hits        INTEGER NOT NULL DEFAULT 1,
+          created     INTEGER NOT NULL DEFAULT (strftime('%s','now')),
+          modified    INTEGER NOT NULL DEFAULT (strftime('%s','now'))
+        )
+      ");
+      # Maintaining index for cleaning is likely more expensive than occasional full table scan
+      #$self->{dbh}->do("
+      #  CREATE INDEX IF NOT EXISTS short_url_modified
+      #    ON short_url_cache(modified)
+      #");
+      $self->{sth_insert} = $self->{dbh}->prepare("
+        INSERT INTO short_url_cache (short_url, decoded_url, modified)
+        VALUES (?,?,strftime('%s','now'))
+        ON CONFLICT(short_url) DO UPDATE
+          SET decoded_url = excluded.decoded_url,
+              modified = excluded.modified,
+              hits = hits + 1
+      ");
+      $self->{sth_select} = $self->{dbh}->prepare("
+        SELECT decoded_url FROM short_url_cache
+        WHERE short_url = ? AND modified >= strftime('%s','now') - $conf->{url_shortener_cache_ttl}
+      ");
+      $self->{sth_delete} = $self->{dbh}->prepare("
+        DELETE FROM short_url_cache
+        WHERE modified < strftime('%s','now') - $conf->{url_shortener_cache_ttl}
+      ");
     };
     if ($@) {
-      dbg("warn: $@");
-    } else {
-      $self->{caching} = 1;
+      warn "DecodeShortURLs: cache connect failed: $@\n";
+      undef $self->{dbh};
+      undef $self->{sth_insert};
+      undef $self->{sth_select};
+      undef $self->{sth_delete};
     }
+  }
+  ##
+  ## MySQL/MariaDB
+  ## 
+  elsif (lc $conf->{url_shortener_cache_type} eq 'dbi'
+      && $conf->{url_shortener_cache_dsn} =~ /^dbi:(?:mysql|MariaDB)/)
+  {
+    eval {
+      local $SIG{'__DIE__'};
+      require DBI;
+      $self->{dbh} = DBI->connect_cached(
+        $conf->{url_shortener_cache_dsn},
+        $conf->{url_shortener_cache_username},
+        $conf->{url_shortener_cache_password},
+        {RaiseError => 1, PrintError => 0, InactiveDestroy => 1, AutoCommit => 1}
+      );
+      $self->{sth_insert} = $self->{dbh}->prepare("
+        INSERT INTO short_url_cache (short_url, decoded_url, modified)
+        VALUES (?,?,NOW())
+        ON DUPLICATE KEY UPDATE
+          decoded_url = VALUES(decoded_url),
+          modified = VALUES(modified),
+          hits = hits + 1
+      ");
+      $self->{sth_select} = $self->{dbh}->prepare("
+        SELECT decoded_url FROM short_url_cache
+        WHERE short_url = ? AND modified >= DATE_SUB(NOW(), INTERVAL $conf->{url_shortener_cache_ttl} SECOND)
+      ");
+      $self->{sth_delete} = $self->{dbh}->prepare("
+        DELETE FROM short_url_cache
+        WHERE modified < DATE_SUB(NOW(), INTERVAL $conf->{url_shortener_cache_ttl} SECOND)
+      ");
+    };
+    if ($@) {
+      warn "DecodeShortURLs: cache connect failed: $@\n";
+      undef $self->{dbh};
+      undef $self->{sth_insert};
+      undef $self->{sth_select};
+      undef $self->{sth_delete};
+    }
+  }
+  ##
+  ## PostgreSQL
+  ## 
+  elsif (lc $conf->{url_shortener_cache_type} eq 'dbi'
+      && $conf->{url_shortener_cache_dsn} =~ /^dbi:Pg/)
+  {
+    eval {
+      local $SIG{'__DIE__'};
+      require DBI;
+      $self->{dbh} = DBI->connect_cached(
+        $conf->{url_shortener_cache_dsn},
+        $conf->{url_shortener_cache_username},
+        $conf->{url_shortener_cache_password},
+        {RaiseError => 1, PrintError => 0, InactiveDestroy => 1, AutoCommit => 1}
+      );
+      $self->{sth_insert} = $self->{dbh}->prepare("
+        INSERT INTO short_url_cache (short_url, decoded_url, modified)
+        VALUES (?,?,NOW())
+        ON CONFLICT (short_url) DO UPDATE SET
+          decoded_url = EXCLUDED.decoded_url,
+          modified = EXCLUDED.modified,
+          hits = short_url_cache.hits + 1
+      ");
+      $self->{sth_select} = $self->{dbh}->prepare("
+        SELECT decoded_url FROM short_url_cache
+        WHERE short_url = ? AND modified >= NOW() - INTERVAL '$conf->{url_shortener_cache_ttl} SECONDS'
+      ");
+      $self->{sth_delete} = $self->{dbh}->prepare("
+        DELETE FROM short_url_cache
+        WHERE modified < NOW() - INTERVAL '$conf->{url_shortener_cache_ttl} SECONDS'
+      ");
+    };
+    if ($@) {
+      warn "DecodeShortURLs: cache connect failed: $@\n";
+      undef $self->{dbh};
+      undef $self->{sth_insert};
+      undef $self->{sth_select};
+      undef $self->{sth_delete};
+    }
+  ##
+  ## ...
+  ##
+  } else {
+    warn "DecodeShortURLs: invalid cache configuration\n";
+    return;
   }
 }
 
@@ -381,123 +521,124 @@ sub short_url_loop {
   return $pms->{short_url_loop};
 }
 
+sub _check_shortener_uri {
+  my ($uri, $conf) = @_;
+
+  return 0 unless $uri =~ m{^
+    https?://		# Only http
+    (?:[^\@/?#]*\@)?	# Ignore user:pass@
+    ([^/?#:]+)		# (Capture hostname)
+    (?::\d+)?		# Possible port
+    .*?\w		# Some path wanted
+    }ix;
+  my $host = lc $1;
+  if (exists $conf->{url_shorteners}->{$host}) {
+    return 1;
+  }
+  # if domain is a 3rd level domain check if there is a url shortener
+  # on the 2nd level tld
+  elsif ($host =~ /^(?!www)[^.]+(\.[^.]+\.[^.]+)$/i &&
+           exists $conf->{url_shorteners}->{$1}) {
+    return 1;
+  }
+  return 0;
+}
+
 sub check_dnsbl {
   my ($self, $opts) = @_;
-  my $pms = $opts->{permsgstatus};
-  my $msg = $opts->{msg};
 
   return if $self->{disabled};
 
-  # don't keep dereferencing these
-  $self->{url_shorteners} = $pms->{main}->{conf}->{url_shorteners};
-  if(defined $pms->{main}->{conf}->{url_shortener_cache_type}) {
-    $self->{url_shortener_cache_type} = $pms->{main}->{conf}->{url_shortener_cache_type};
-    $self->{url_shortener_cache_dsn} = $pms->{main}->{conf}->{url_shortener_cache_dsn};
-    $self->{url_shortener_cache_username} = $pms->{main}->{conf}->{url_shortener_cache_username};
-    $self->{url_shortener_cache_password} = $pms->{main}->{conf}->{url_shortener_cache_password};
-    $self->{url_shortener_cache_ttl} = $pms->{main}->{conf}->{url_shortener_cache_ttl};
-  }
-  $self->{url_shortener_loginfo} = $pms->{main}->{conf}->{url_shortener_loginfo};
+  my $pms = $opts->{permsgstatus};
+  my $conf = $pms->{conf};
 
   # Sort short URLs into hash to de-dup them
   my %short_urls;
   my $uris = $pms->get_uri_detail_list();
-  my $tldsRE = $self->{main}->{registryboundaries}->{valid_tlds_re};
   while (my($uri, $info) = each %{$uris}) {
-    next unless ($info->{domains});
-    foreach ( keys %{ $info->{domains} } ) {
-      if (exists $self->{url_shorteners}->{lc $_}) {
-        # NOTE: $info->{domains} appears to contain all the domains parsed
-        # from the single input URI with no way to work out what the base
-        # domain is.  So to prevent someone from stuffing the URI with a
-        # shortener to force this plug-in to follow a link that *isn't* on
-        # the list of shorteners; we enforce that the shortener must be the
-        # base URI and that a path must be present.
-        if ($uri !~ /^https?:\/\/(?:www\.)?$_\/.+$/i) {
-          dbg("Discarding URI: $uri");
-          next;
-        }
-        $short_urls{$uri} = 1;
-        next;
-      } elsif(/^(?!www)[a-z\d._-]{0,251}\.([a-z\d._-]{0,251}\.${tldsRE})/) {
-        # if domain is a 3rd level domain check if there is a url shortener
-        # on the 2nd level tld
-        my $dom = '.' . $1;
-        if (exists $self->{url_shorteners}->{$dom}) {
-          if ($uri !~ /^https?:\/\/(?:www\.)?$_\/.+$/i) {
-            dbg("Discarding URI: $uri");
-            next;
-          }
-          $short_urls{$uri} = 1;
-          next;
-        }
-      }
+    next unless $info->{domains} && $info->{cleaned};
+    if (_check_shortener_uri($uri, $conf)) {
+      $short_urls{$uri} = 1;
     }
   }
 
   # Make sure we have some work to do
   # Before we open any log files etc.
-  my $count = scalar keys %short_urls;
-  return unless $count gt 0;
+  return unless %short_urls;
 
-  $self->initialise_url_shortener_cache($opts) if defined $self->{url_shortener_cache_type};
+  # Initialize cache
+  $self->initialise_url_shortener_cache($conf);
 
-  my $max_short_urls = $pms->{main}->{conf}->{max_short_urls};
+  # Initialize LWP
+  my $ua = LWP::UserAgent->new();
+  $ua->{max_redirect} = 0;
+  $ua->{timeout} = 5;
+  $ua->env_proxy;
+
+  # Launch HTTP queries
+  my $lookups = 0;
   foreach my $short_url (keys %short_urls) {
-    next if $max_short_urls <= 0;
-    my $location = $self->recursive_lookup($short_url, $pms);
-    $max_short_urls--;
+    $self->recursive_lookup($short_url, $pms, $ua);
+    last if ++$lookups >= $conf->{max_short_urls};
+  }
+
+  # Automatically purge old entries
+  if ($self->{dbh} && $conf->{url_shortener_cache_autoclean}
+      && rand() < 1/$conf->{url_shortener_cache_autoclean})
+  {
+    dbg("cleaning stale cache entries");
+    eval { $self->{sth_delete}->execute(); };
+    if ($@) { dbg("cache cleaning failed: $@"); }
   }
 }
 
 sub recursive_lookup {
-  my ($self, $short_url, $pms, %been_here) = @_;
+  my ($self, $short_url, $pms, $ua, %been_here) = @_;
+  my $conf = $pms->{conf};
 
   my $count = scalar keys %been_here;
-  dbg("Redirection count $count") if $count gt 0;
+  dbg("redirection count $count") if $count;
   if ($count >= 10) {
-    dbg("Error: more than 10 shortener redirections");
+    dbg("found more than 10 shortener redirections");
     # Fire test
-    $self->{short_url_maxchain} = 1;
+    $pms->{short_url_maxchain} = 1;
     return;
   }
 
   my $location;
-  if ($self->{caching} && ($location = $self->cache_get($short_url))) {
-    if ($self->{url_shortener_loginfo}) {
-      info("Found cached $short_url => $location");
+  if (defined($location = $self->cache_get($short_url))) {
+    if ($conf->{url_shortener_loginfo}) {
+      info("found cached $short_url => $location");
     } else {
-      dbg("Found cached $short_url => $location");
+      dbg("found cached $short_url => $location");
     }
   } else {
     # Not cached; do lookup
-    if($count eq 0) {
-      undef $pms->{short_url_200};
-      undef $pms->{short_url_404};
-      undef $pms->{short_url_chained};
-    }
-    my $response = $self->{ua}->head($short_url);
+    my $response = $ua->head($short_url);
     if (!$response->is_redirect) {
       dbg("URL is not redirect: $short_url = ".$response->status_line);
-      $pms->{short_url_200} = 1 if($response->code == '200');
-      $pms->{short_url_404} = 1 if($response->code == '404');
+      if ($response->code eq '200') {
+        $pms->{short_url_200} = 1;
+      } elsif ($response->code eq '404') {
+        $pms->{short_url_404} = 1;
+      }
       return;
     }
     $location = $response->headers->{location};
-    # Bail out if $short_url redirects to itself
-    return if ($short_url eq $location);
-    if ($self->{caching}) {
-      if ($self->cache_add($short_url, $location)) {
-        dbg("Added $short_url to cache");
-      } else {
-        dbg("Cannot add $short_url to cache");
-      }
-    }
-    if($self->{url_shortener_loginfo}) {
-      info("Found $short_url => $location");
+    if ($self->{url_shortener_loginfo}) {
+      info("found $short_url => $location");
     } else {
-      dbg("Found $short_url => $location");
+      dbg("found $short_url => $location");
     }
+  }
+
+  # Update cache
+  $self->cache_add($short_url, $location);
+
+  # Bail out if $short_url redirects to itself
+  if ($short_url eq $location) {
+    dbg("URL is redirect to itself");
+    return;
   }
 
   # At this point we have a new URL in $response
@@ -505,115 +646,76 @@ sub recursive_lookup {
 
   # Set chained here otherwise we might mark a disabled page or
   # redirect back to the same host as chaining incorrectly.
-  $pms->{short_url_chained} = 1 if $count > 0;
-
-  $pms->add_uri_detail_list($location);
+  $pms->{short_url_chained} = 1 if $count;
 
   # Check if we are being redirected to a local page
   # Don't recurse in this case...
-  if($location !~ /^https?:/) {
-    my($host) = ($short_url =~ /^(https?:\/\/\S+)\//);
-    $location = "$host/$location";
-    dbg("Looks like a local redirection: $short_url => $location");
-    $pms->add_uri_detail_list($location);
-    return $location;
+  if ($location !~ m{^[a-z]+://}i) {
+    my $orig_location = $location;
+    my $orig_short_url = $short_url;
+    # Strip to..
+    if (index($location, '/') == 0) {
+      $short_url =~ s{^([a-z]+://.*?)[/?#].*}{$1}; # ..absolute path
+    } else {
+      $short_url =~ s{^([a-z]+://.*)/}{$1}; # ..relative path
+    }
+    $location = "$short_url/$location";
+    dbg("looks like a local redirection: $orig_short_url => $location ($orig_location)");
+    $pms->add_uri_detail_list($location) if !$pms->{uri_detail_list}->{$location};
+    return;
   }
+
+  if (exists $been_here{$location}) {
+    # Loop detected
+    dbg("error: loop detected: $location");
+    $pms->{short_url_loop} = 1;
+    return;
+  }
+  $been_here{$location} = 1;
+  $pms->add_uri_detail_list($location) if !$pms->{uri_detail_list}->{$location};
 
   # Check for recursion
-  if ((my ($domain) = ($location =~ /^https?:\/\/(\S+)\//))) {
-    if (exists $been_here{$location}) {
-      # Loop detected
-      dbg("Error: loop detected");
-      $self->{short_url_loop} = 1;
-      return $location;
-    } else {
-      my $tldsRE = $self->{main}->{registryboundaries}->{valid_tlds_re};
-      if (exists $self->{url_shorteners}->{$domain}) {
-        $been_here{$location} = 1;
-        # Recurse...
-        return $self->recursive_lookup($location, $pms, %been_here);
-      } elsif($domain =~ /^(?!www)[a-z\d._-]{0,251}\.([a-z\d._-]{0,251}\.${tldsRE})/) {
-        # if domain is a 3rd level domain check if there is a url shortener
-        # on the 2nd level tld
-        my $dom = '.' . $1;
-        if (exists $self->{url_shorteners}->{$dom}) {
-          $been_here{$location} = 1;
-          # Recurse...
-          return $self->recursive_lookup($location, $pms, %been_here);
-        }
-      }
-    }
+  if (_check_shortener_uri($location, $conf)) {
+    # Recurse...
+    $self->recursive_lookup($location, $pms, $ua, %been_here);
   }
-
-  # No recursion; just return the final location...
-  return $location;
 }
 
 sub cache_add {
   my ($self, $short_url, $decoded_url) = @_;
-  return 0 if not $self->{caching};
 
-  return 0 if((length($short_url) > 256) or (length($decoded_url) > 512));
+  return if !$self->{dbh};
+  return if length($short_url) > 256 || length($decoded_url) > 512;
 
-  eval {
-    $self->{sth_insert} = $self->{dbh}->prepare_cached("
-      INSERT INTO short_url_cache (short_url, decoded_url, created, modified)
-      VALUES (?,?,?,?)
-    ");
-  };
+  eval { $self->{sth_insert}->execute($short_url, $decoded_url); };
   if ($@) {
-    dbg("warn: $@");
-    return 0;
-  };
+    dbg("could not add to cache: $@");
+  }
 
-  $self->{sth_insert}->execute($short_url, $decoded_url, time(), time());
-  return 1;
+  return;
 }
 
 sub cache_get {
   my ($self, $key) = @_;
-  return if not $self->{caching};
 
-  eval {
-    $self->{sth_select} = $self->{dbh}->prepare_cached("
-      SELECT decoded_url FROM short_url_cache
-      WHERE short_url = ? AND modified > ?
-    ");
-  };
+  return if !$self->{dbh};
+
+  eval { $self->{sth_select}->execute($key); };
   if ($@) {
-   dbg("warn: $@");
-   return;
+    dbg("cache get failed: $@");
+    return;
   }
 
-  eval {
-    $self->{sth_update} = $self->{dbh}->prepare_cached("
-      UPDATE short_url_cache
-      SET modified=?, hits=hits+1
-      WHERE short_url = ?
-    ");
-  };
-  if ($@) {
-   dbg("warn: $@");
-   return;
+  my @row = $self->{sth_select}->fetchrow_array();
+  if (@row) {
+    return $row[0];
   }
 
-  my $tcheck = time() - $self->{url_shortener_cache_ttl};
-  $self->{sth_select}->execute($key, $tcheck);
-  my $row = $self->{sth_select}->fetchrow_array();
-  if($row) {
-    # Found cache entry; touch it to prevent expiry
-    $self->{sth_update}->execute(time(),$key);
-    $self->{sth_select}->finish();
-    $self->{sth_update}->finish();
-    return $row;
-  }
-
-  $self->{sth_select}->finish();
-  $self->{sth_update}->finish();
   return;
 }
 
 # Version features
 sub has_short_url { 1 }
+sub has_autoclean { 1 }
 
 1;
