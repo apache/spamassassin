@@ -81,16 +81,16 @@ tstprefs("
         q{ Syntax error }, 'syntax',
         q{ Use of uninitialized }, 'uninitialized',
         q{ warn: }, 'warn',
-        q{ SpamAssassin failed to parse line }, 'parse',
+        q{ failed to parse }, 'parse',
         '/ at .* line \d+/', 'at_line',
             );
 
 if (conf_bool('run_net_tests')) {
     # sometimes trips on URIBL_BLOCKED, ignore..
-    # also ignore BSD::Resource, Mail::DMARC not installed
-    sarun ("-D -t < data/nice/001 2>&1 | grep -vE '(dns_block_rule|ResourceLimits not used)'", \&patterns_run_cb);
+    # also ignore ResourceLimits/OLEVBMacro missing required modules
+    sarun ("-D -t < data/nice/001 2>&1 | grep -vE '(dns_block_rule|ResourceLimits not used|OLEVBMacro:.*required module)'", \&patterns_run_cb);
     ok_all_patterns();
 } else {
-    sarun ("-D -L -t < data/nice/001 2>&1 | grep -vE '(ResourceLimits not used)'", \&patterns_run_cb);
+    sarun ("-D -L -t < data/nice/001 2>&1 | grep -vE '(ResourceLimits not used|OLEVBMacro:.*required module)'", \&patterns_run_cb);
     ok_all_patterns();
 }
