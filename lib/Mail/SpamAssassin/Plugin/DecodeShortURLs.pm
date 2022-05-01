@@ -27,12 +27,24 @@ DecodeShortURLs - Expand shortened URLs
 
   url_shortener bit.ly
   url_shortener go.to
-  ...
+
   body HAS_SHORT_URL          eval:short_url()
-  describe HAS_SHORT_URL      Message contains one or more shortened URLs
+  describe HAS_SHORT_URL      Message has one or more shortened URLs
 
   body SHORT_URL_CHAINED      eval:short_url_chained()
   describe SHORT_URL_CHAINED  Message has shortened URL chained to other shorteners
+
+  body SHORT_URL_MAXCHAIN     eval:short_url_maxchain()
+  describe SHORT_URL_MAXCHAIN Message has shortened URL that causes more than 10 redirections
+
+  body SHORT_URL_LOOP         eval:short_url_loop()
+  describe SHORT_URL_LOOP     Message has short URL that loops back to itself
+
+  body SHORT_URL_200          eval:short_url_200()
+  describe SHORT_URL_200      Message has shortened URL returning HTTP 200
+
+  body SHORT_URL_404          eval:short_url_404()
+  describe SHORT_URL_404      Message has shortened URL returning HTTP 404
 
 =head1 DESCRIPTION
 
@@ -45,31 +57,28 @@ SpamAssassin which can then be accessed by other plug-ins, such as URIDNSBL.
 This plugin also sets the rule HAS_SHORT_URL if any matching short URLs are
 found.
 
-This plug-in will follow 'chained' shorteners e.g.
-from short URL to short URL to short URL and finally to the real URL
-
+This plug-in will follow 'chained' shorteners e.g.  from short URL to short
+URL to short URL and finally to the real URL.
 
 If this form of chaining is found, then the rule 'SHORT_URL_CHAINED' will be
-fired.  If a loop is detected then 'SHORT_URL_LOOP' will be fired.
-This plug-in limits the number of chained shorteners to a maximim of 10 at
-which point it will fire the rule 'SHORT_URL_MAXCHAIN' and go no further.
+fired.  If a loop is detected then 'SHORT_URL_LOOP' will be fired.  This
+plug-in limits the number of chained shorteners to a maximum of 10 at which
+point it will fire the rule 'SHORT_URL_MAXCHAIN' and go no further.
 
 If a shortener returns a '404 Not Found' result for the short URL then the
 rule 'SHORT_URL_404' will be fired.
 
-If a shortener returns a '200 OK' result for the short URL then the
-rule 'SHORT_URL_200' will be fired.
-
-This can cover the case when an abuse page is displayed.
+If a shortener returns a '200 OK' result for the short URL then the rule
+'SHORT_URL_200' will be fired.  This can cover the case when an abuse page
+is displayed.
 
 =head1 NOTES
 
-This plugin runs the check_dnsbl hook with a priority of -10 so that
-it may modify the parsed URI list prior to the URIDNSBL plugin which
-runs as priority 0.
+This plugin runs at the check_dnsbl hook with a priority of -10 so that it
+may modify the parsed URI list prior to the URIDNSBL plugin.
 
-Currently the plugin queries a maximum of 10 distinct shortened URLs with
-a maximum timeout of 5 seconds per lookup.
+Currently the plugin queries a maximum of 10 distinct shortened URLs with a
+maximum timeout of 5 seconds per lookup.
 
 =head1 ACKNOWLEDGEMENTS
 
