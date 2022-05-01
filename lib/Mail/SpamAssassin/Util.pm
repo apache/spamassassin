@@ -1566,7 +1566,7 @@ sub uri_list_canonicalize {
         push @nuris, $1
       }
       # Address must be trimmed of %20
-      if ($nuri =~ tr/%20// &&
+      if (index($nuri, '%20') >= 0 &&
           $nuri =~ /^(?:mailto:)?(?:\%20)*([^\@]+\@[^?&%]+)/) {
         push @nuris, "mailto:$1";
       }
