@@ -48,6 +48,13 @@ score      GB_GOOG_IMG_NOT_RCVD_GOOG   2.500    # limit
 # score      GB_LINKED_IMG_NOT_RCVD_LINK   2.500    # limit
 # tflags     GB_LINKED_IMG_NOT_RCVD_LINK   publish
 
+# header     __HDR_RCVD_PAYPAL           X-Spam-Relays-External =~ /\srdns=\S+\.paypal\.com\s/
+uri        __URI_IMG_PAYPAL              /^https:\/\/www\.paypalobjects\.com\/(?:en_US|ui\-web)\//
+meta       __PAYPAL_IMG_NOT_RCVD_PAYP    __URI_IMG_PAYPAL && !__HDR_RCVD_PAYPAL
+meta       GB_PAYPAL_IMG_NOT_RCVD_PAYP   __PAYPAL_IMG_NOT_RCVD_PAYP && !__HAS_ERRORS_TO && !__MSGID_LIST && !__MSGID_GUID && !__RCD_RDNS_SMTP
+describe   GB_PAYPAL_IMG_NOT_RCVD_PAYP   Paypal hosted image but message not from Paypal
+score      GB_PAYPAL_IMG_NOT_RCVD_PAYP   2.500    # limit
+
 uri        __SENDINBLUE_REDIR            m~://.{4,5}\.r\.a[a-z]?\.d\.sendibm[0-9]\.com/mk/([a-z]){2}/~
 meta       SENDINBLUE_REDIR              __SENDINBLUE_REDIR && !MIME_HTML_MOSTLY && !__HAS_ERRORS_TO && !__HAS_X_BEEN_THERE && !__HAS_X_MAILMAN_VERSION
 describe   SENDINBLUE_REDIR              Redirect URI via Sendinblue
