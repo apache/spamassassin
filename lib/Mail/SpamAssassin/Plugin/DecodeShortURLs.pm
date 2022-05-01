@@ -84,14 +84,14 @@ could not have been developed without his code.
 
 package Mail::SpamAssassin::Plugin::DecodeShortURLs;
 
-my $VERSION = 0.12;
-
 use Mail::SpamAssassin::Plugin;
 use strict;
 use warnings;
 
 use vars qw(@ISA);
 @ISA = qw(Mail::SpamAssassin::Plugin);
+
+my $VERSION = 0.12;
 
 use constant HAS_LWP_USERAGENT => eval { require LWP::UserAgent; };
 use constant HAS_DBI => eval { require DBI; };
@@ -319,7 +319,7 @@ sub initialise_url_shortener_cache {
     return _connect_dbi_cache($self, $opts);
   } else {
     warn "Wrong cache type selected";
-    return undef;
+    return;
   }
 }
 
@@ -438,7 +438,7 @@ sub check_dnsbl {
   # Make sure we have some work to do
   # Before we open any log files etc.
   my $count = scalar keys %short_urls;
-  return undef unless $count gt 0;
+  return unless $count gt 0;
 
   $self->initialise_url_shortener_cache($opts) if defined $self->{url_shortener_cache_type};
 
@@ -459,7 +459,7 @@ sub recursive_lookup {
     dbg("Error: more than 10 shortener redirections");
     # Fire test
     $self->{short_url_maxchain} = 1;
-    return undef;
+    return;
   }
 
   my $location;
@@ -481,11 +481,11 @@ sub recursive_lookup {
       dbg("URL is not redirect: $short_url = ".$response->status_line);
       $pms->{short_url_200} = 1 if($response->code == '200');
       $pms->{short_url_404} = 1 if($response->code == '404');
-      return undef;
+      return;
     }
     $location = $response->headers->{location};
     # Bail out if $short_url redirects to itself
-    return undef if ($short_url eq $location);
+    return if ($short_url eq $location);
     if ($self->{caching}) {
       if ($self->cache_add($short_url, $location)) {
         dbg("Added $short_url to cache");
@@ -572,7 +572,7 @@ sub cache_add {
 
 sub cache_get {
   my ($self, $key) = @_;
-  return undef if not $self->{caching};
+  return if not $self->{caching};
 
   eval {
     $self->{sth_select} = $self->{dbh}->prepare_cached("
@@ -582,7 +582,7 @@ sub cache_get {
   };
   if ($@) {
    dbg("warn: $@");
-   return undef;
+   return;
   }
 
   eval {
@@ -594,7 +594,7 @@ sub cache_get {
   };
   if ($@) {
    dbg("warn: $@");
-   return undef;
+   return;
   }
 
   my $tcheck = time() - $self->{url_shortener_cache_ttl};
@@ -610,7 +610,7 @@ sub cache_get {
 
   $self->{sth_select}->finish();
   $self->{sth_update}->finish();
-  return undef;
+  return;
 }
 
 # Version features

@@ -819,7 +819,7 @@ sub _get_part_details {
 sub _open_zip_handle {
   my ($data) = @_;
 
-  return undef unless HAS_ARCHIVE_ZIP && HAS_IO_STRING;
+  return unless HAS_ARCHIVE_ZIP && HAS_IO_STRING;
 
   # open our archive from raw data
   my $SH = IO::String->new($data);
@@ -829,7 +829,7 @@ sub _open_zip_handle {
     dbg("cannot read zipfile");
     # as we cannot read it its not a zip (or too big/corrupted)
     # so skip processing.
-    return undef;
+    return;
   }
 
   return $zip;
