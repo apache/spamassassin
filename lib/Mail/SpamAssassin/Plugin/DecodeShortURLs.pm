@@ -391,20 +391,17 @@ sub initialise_url_shortener_cache {
       ");
       $self->{sth_select} = $self->{dbh}->prepare("
         SELECT decoded_url FROM short_url_cache
-        WHERE short_url = ? AND created >= strftime('%s','now') - $conf->{url_shortener_cache_ttl}
+        WHERE short_url = ?
       ");
       $self->{sth_delete} = $self->{dbh}->prepare("
+        DELETE FROM short_url_cache
+        WHERE short_url = ? AND created < strftime('%s','now') - $conf->{url_shortener_cache_ttl}
+      ");
+      $self->{sth_clean} = $self->{dbh}->prepare("
         DELETE FROM short_url_cache
         WHERE created < strftime('%s','now') - $conf->{url_shortener_cache_ttl}
       ");
     };
-    if ($@) {
-      warn "DecodeShortURLs: cache connect failed: $@\n";
-      undef $self->{dbh};
-      undef $self->{sth_insert};
-      undef $self->{sth_select};
-      undef $self->{sth_delete};
-    }
   }
   ##
   ## MySQL/MariaDB
@@ -431,20 +428,17 @@ sub initialise_url_shortener_cache {
       ");
       $self->{sth_select} = $self->{dbh}->prepare("
         SELECT decoded_url FROM short_url_cache
-        WHERE short_url = ? AND created >= UNIX_TIMESTAMP() - $conf->{url_shortener_cache_ttl}
+        WHERE short_url = ?
       ");
       $self->{sth_delete} = $self->{dbh}->prepare("
+        DELETE FROM short_url_cache
+        WHERE short_url = ? AND created < UNIX_TIMESTAMP() - $conf->{url_shortener_cache_ttl}
+      ");
+      $self->{sth_clean} = $self->{dbh}->prepare("
         DELETE FROM short_url_cache
         WHERE created < UNIX_TIMESTAMP() - $conf->{url_shortener_cache_ttl}
       ");
     };
-    if ($@) {
-      warn "DecodeShortURLs: cache connect failed: $@\n";
-      undef $self->{dbh};
-      undef $self->{sth_insert};
-      undef $self->{sth_select};
-      undef $self->{sth_delete};
-    }
   }
   ##
   ## PostgreSQL
@@ -471,26 +465,32 @@ sub initialise_url_shortener_cache {
       ");
       $self->{sth_select} = $self->{dbh}->prepare("
         SELECT decoded_url FROM short_url_cache
-        WHERE short_url = ? AND created >= CAST(EXTRACT(epoch FROM NOW()) AS INT) - $conf->{url_shortener_cache_ttl}
+        WHERE short_url = ?
       ");
       $self->{sth_delete} = $self->{dbh}->prepare("
+        DELETE FROM short_url_cache
+        WHERE short_url ? = AND created < CAST(EXTRACT(epoch FROM NOW()) AS INT) - $conf->{url_shortener_cache_ttl}
+      ");
+      $self->{sth_clean} = $self->{dbh}->prepare("
         DELETE FROM short_url_cache
         WHERE created < CAST(EXTRACT(epoch FROM NOW()) AS INT) - $conf->{url_shortener_cache_ttl}
       ");
     };
-    if ($@) {
-      warn "DecodeShortURLs: cache connect failed: $@\n";
-      undef $self->{dbh};
-      undef $self->{sth_insert};
-      undef $self->{sth_select};
-      undef $self->{sth_delete};
-    }
   ##
   ## ...
   ##
   } else {
     warn "DecodeShortURLs: invalid cache configuration\n";
     return;
+  }
+
+  if ($@ || !$self->{sth_clean}) {
+    warn "DecodeShortURLs: cache connect failed: $@\n";
+    undef $self->{dbh};
+    undef $self->{sth_insert};
+    undef $self->{sth_select};
+    undef $self->{sth_delete};
+    undef $self->{sth_clean};
   }
 }
 
@@ -596,7 +596,7 @@ sub check_dnsbl {
       && rand() < 1/$conf->{url_shortener_cache_autoclean})
   {
     dbg("cleaning stale cache entries");
-    eval { $self->{sth_delete}->execute(); };
+    eval { $self->{sth_clean}->execute(); };
     if ($@) { dbg("cache cleaning failed: $@"); }
   }
 }
@@ -696,6 +696,7 @@ sub cache_add {
   return if !$self->{dbh};
   return if length($short_url) > 256 || length($decoded_url) > 512;
 
+  # Upsert
   eval { $self->{sth_insert}->execute($short_url, $decoded_url); };
   if ($@) {
     dbg("could not add to cache: $@");
@@ -709,6 +710,16 @@ sub cache_get {
 
   return if !$self->{dbh};
 
+  # Make sure expired entries are gone.  Just a quick check for primary key,
+  # not that expensive.
+  eval { $self->{sth_delete}->execute($key); };
+  if ($@) {
+    dbg("cache delete failed: $@");
+    return;
+  }
+
+  # Now try to get it (don't bother parsing if something was deleted above,
+  # it would be rare event anyway)
   eval { $self->{sth_select}->execute($key); };
   if ($@) {
     dbg("cache get failed: $@");
