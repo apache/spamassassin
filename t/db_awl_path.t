@@ -20,7 +20,7 @@ print OUT "file created to block AWL from working; AWL expects a dir";
 close OUT;
 
 tstprefs ("
-  auto_whitelist_path ./$workdir/awl/shouldbeinaccessible
+  auto_whitelist_path ./$workdir/awl/this_lock_warning_is_ok
   auto_whitelist_file_mode 0755
 ");
 
