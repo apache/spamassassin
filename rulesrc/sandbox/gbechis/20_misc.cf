@@ -49,7 +49,7 @@ score      GB_GOOG_IMG_NOT_RCVD_GOOG   2.500    # limit
 # tflags     GB_LINKED_IMG_NOT_RCVD_LINK   publish
 
 # header     __HDR_RCVD_PAYPAL           X-Spam-Relays-External =~ /\srdns=\S+\.paypal\.com\s/
-uri        __URI_IMG_PAYPAL              /^https:\/\/www\.paypalobjects\.com\/(?:digitalassets|en_US|ui\-web)\//
+uri        __URI_IMG_PAYPAL              /^https:\/\/www\.paypalobjects\.com\/(?:digitalassets|en_US|ui\-web)\/.{1,64}\.(?:gif|jpg|png)/
 meta       __PAYPAL_IMG_NOT_RCVD_PAYP    __URI_IMG_PAYPAL && !__HDR_RCVD_PAYPAL
 meta       GB_PAYPAL_IMG_NOT_RCVD_PAYP   __PAYPAL_IMG_NOT_RCVD_PAYP && !__HAS_ERRORS_TO && !__MSGID_LIST && !__MSGID_GUID && !__RCD_RDNS_SMTP
 describe   GB_PAYPAL_IMG_NOT_RCVD_PAYP   Paypal hosted image but message not from Paypal
