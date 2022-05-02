@@ -372,8 +372,8 @@ sub initialise_url_shortener_cache {
           short_url   TEXT PRIMARY KEY NOT NULL,
           decoded_url TEXT NOT NULL,
           hits        INTEGER NOT NULL DEFAULT 1,
-          created     INTEGER NOT NULL DEFAULT (strftime('%s','now')),
-          modified    INTEGER NOT NULL DEFAULT (strftime('%s','now'))
+          created     INTEGER NOT NULL,
+          modified    INTEGER NOT NULL
         )
       ");
       # Maintaining index for cleaning is likely more expensive than occasional full table scan
@@ -382,8 +382,8 @@ sub initialise_url_shortener_cache {
       #    ON short_url_cache(modified)
       #");
       $self->{sth_insert} = $self->{dbh}->prepare("
-        INSERT INTO short_url_cache (short_url, decoded_url, modified)
-        VALUES (?,?,strftime('%s','now'))
+        INSERT INTO short_url_cache (short_url, decoded_url, created, modified)
+        VALUES (?,?,strftime('%s','now'),strftime('%s','now'))
         ON CONFLICT(short_url) DO UPDATE
           SET decoded_url = excluded.decoded_url,
               modified = excluded.modified,
@@ -422,8 +422,8 @@ sub initialise_url_shortener_cache {
         {RaiseError => 1, PrintError => 0, InactiveDestroy => 1, AutoCommit => 1}
       );
       $self->{sth_insert} = $self->{dbh}->prepare("
-        INSERT INTO short_url_cache (short_url, decoded_url, modified)
-        VALUES (?,?,NOW())
+        INSERT INTO short_url_cache (short_url, decoded_url, created, modified)
+        VALUES (?,?,UNIX_TIMESTAMP(),UNIX_TIMESTAMP())
         ON DUPLICATE KEY UPDATE
           decoded_url = VALUES(decoded_url),
           modified = VALUES(modified),
@@ -431,11 +431,11 @@ sub initialise_url_shortener_cache {
       ");
       $self->{sth_select} = $self->{dbh}->prepare("
         SELECT decoded_url FROM short_url_cache
-        WHERE short_url = ? AND modified >= DATE_SUB(NOW(), INTERVAL $conf->{url_shortener_cache_ttl} SECOND)
+        WHERE short_url = ? AND modified >= UNIX_TIMESTAMP() - $conf->{url_shortener_cache_ttl}
       ");
       $self->{sth_delete} = $self->{dbh}->prepare("
         DELETE FROM short_url_cache
-        WHERE modified < DATE_SUB(NOW(), INTERVAL $conf->{url_shortener_cache_ttl} SECOND)
+        WHERE modified < UNIX_TIMESTAMP() - $conf->{url_shortener_cache_ttl}
       ");
     };
     if ($@) {
@@ -462,8 +462,8 @@ sub initialise_url_shortener_cache {
         {RaiseError => 1, PrintError => 0, InactiveDestroy => 1, AutoCommit => 1}
       );
       $self->{sth_insert} = $self->{dbh}->prepare("
-        INSERT INTO short_url_cache (short_url, decoded_url, modified)
-        VALUES (?,?,NOW())
+        INSERT INTO short_url_cache (short_url, decoded_url, created, modified)
+        VALUES (?,?,CAST(EXTRACT(epoch FROM NOW()) AS INT),CAST(EXTRACT(epoch FROM NOW()) AS INT))
         ON CONFLICT (short_url) DO UPDATE SET
           decoded_url = EXCLUDED.decoded_url,
           modified = EXCLUDED.modified,
@@ -471,11 +471,11 @@ sub initialise_url_shortener_cache {
       ");
       $self->{sth_select} = $self->{dbh}->prepare("
         SELECT decoded_url FROM short_url_cache
-        WHERE short_url = ? AND modified >= NOW() - INTERVAL '$conf->{url_shortener_cache_ttl} SECONDS'
+        WHERE short_url = ? AND modified >= CAST(EXTRACT(epoch FROM NOW()) AS INT) - $conf->{url_shortener_cache_ttl}
       ");
       $self->{sth_delete} = $self->{dbh}->prepare("
         DELETE FROM short_url_cache
-        WHERE modified < NOW() - INTERVAL '$conf->{url_shortener_cache_ttl} SECONDS'
+        WHERE modified < CAST(EXTRACT(epoch FROM NOW()) AS INT) - $conf->{url_shortener_cache_ttl}
       ");
     };
     if ($@) {
