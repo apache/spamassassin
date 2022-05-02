@@ -379,7 +379,7 @@ sub initialise_url_shortener_cache {
       # Maintaining index for cleaning is likely more expensive than occasional full table scan
       #$self->{dbh}->do("
       #  CREATE INDEX IF NOT EXISTS short_url_modified
-      #    ON short_url_cache(modified)
+      #    ON short_url_cache(created)
       #");
       $self->{sth_insert} = $self->{dbh}->prepare("
         INSERT INTO short_url_cache (short_url, decoded_url, created, modified)
@@ -391,11 +391,11 @@ sub initialise_url_shortener_cache {
       ");
       $self->{sth_select} = $self->{dbh}->prepare("
         SELECT decoded_url FROM short_url_cache
-        WHERE short_url = ? AND modified >= strftime('%s','now') - $conf->{url_shortener_cache_ttl}
+        WHERE short_url = ? AND created >= strftime('%s','now') - $conf->{url_shortener_cache_ttl}
       ");
       $self->{sth_delete} = $self->{dbh}->prepare("
         DELETE FROM short_url_cache
-        WHERE modified < strftime('%s','now') - $conf->{url_shortener_cache_ttl}
+        WHERE created < strftime('%s','now') - $conf->{url_shortener_cache_ttl}
       ");
     };
     if ($@) {
@@ -431,11 +431,11 @@ sub initialise_url_shortener_cache {
       ");
       $self->{sth_select} = $self->{dbh}->prepare("
         SELECT decoded_url FROM short_url_cache
-        WHERE short_url = ? AND modified >= UNIX_TIMESTAMP() - $conf->{url_shortener_cache_ttl}
+        WHERE short_url = ? AND created >= UNIX_TIMESTAMP() - $conf->{url_shortener_cache_ttl}
       ");
       $self->{sth_delete} = $self->{dbh}->prepare("
         DELETE FROM short_url_cache
-        WHERE modified < UNIX_TIMESTAMP() - $conf->{url_shortener_cache_ttl}
+        WHERE created < UNIX_TIMESTAMP() - $conf->{url_shortener_cache_ttl}
       ");
     };
     if ($@) {
@@ -471,11 +471,11 @@ sub initialise_url_shortener_cache {
       ");
       $self->{sth_select} = $self->{dbh}->prepare("
         SELECT decoded_url FROM short_url_cache
-        WHERE short_url = ? AND modified >= CAST(EXTRACT(epoch FROM NOW()) AS INT) - $conf->{url_shortener_cache_ttl}
+        WHERE short_url = ? AND created >= CAST(EXTRACT(epoch FROM NOW()) AS INT) - $conf->{url_shortener_cache_ttl}
       ");
       $self->{sth_delete} = $self->{dbh}->prepare("
         DELETE FROM short_url_cache
-        WHERE modified < CAST(EXTRACT(epoch FROM NOW()) AS INT) - $conf->{url_shortener_cache_ttl}
+        WHERE created < CAST(EXTRACT(epoch FROM NOW()) AS INT) - $conf->{url_shortener_cache_ttl}
       ");
     };
     if ($@) {

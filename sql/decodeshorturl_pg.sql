@@ -7,4 +7,4 @@ CREATE TABLE short_url_cache (
   PRIMARY KEY (short_url)
 );
 -- Maintaining index for cleaning is likely more expensive than occasional full table scan
--- ALTER TABLE short_url_cache ADD INDEX short_url_modified (modified);
+-- ALTER TABLE short_url_cache ADD INDEX short_url_created (created);
