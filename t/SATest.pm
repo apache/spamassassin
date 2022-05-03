@@ -264,6 +264,19 @@ sub sa_t_init {
   $spamd_run_as_user = ($RUNNING_ON_WINDOWS || ($> == 0)) ? "nobody" : (getpwuid($>))[0] ;
 }
 
+# remove all rules - $localrules/*.cf
+# when you want to only use rules declared inside a specific *.t
+sub clear_localrules {
+  for $tainted (<$localrules/*.cf>) {
+    $tainted =~ /(.*)/;
+    my $file = $1;
+    # Keep some useful, should not contain any rules
+    next if $file =~ /10_default_prefs.cf$/;
+    next if $file =~ /20_aux_tlds.cf$/;
+    unlink $file;
+  }
+}
+
 # a port number between 40000 and 65520; used to allow multiple test
 # suite runs on the same machine simultaneously
 sub probably_unused_spamd_port {

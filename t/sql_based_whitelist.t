@@ -21,6 +21,20 @@ diag "Note: Failure may be due to an incorrect config";
 
 sa_t_init("sql_based_whitelist");
 
+# only use rules defined here in tstprefs()
+clear_localrules();
+
+my $rules = q(
+    # Needed for AWL to run
+    header AWL eval:check_from_in_auto_whitelist()
+    priority AWL 1000
+    # Fixed message scores to keep track of correct scoring
+    body NICE_002 /happy mailing list/
+    score NICE_002 -1.2
+    body SPAM_004_007 /MAKE MONEY FAST/
+    score SPAM_004_007 5.5
+);
+
 if (SQLITE) {
   my $dbh = DBI->connect("dbi:SQLite:dbname=$workdir/awl.db","","");
   $dbh->do("
@@ -40,6 +54,7 @@ if (SQLITE) {
     use_auto_whitelist 1
     auto_whitelist_factory Mail::SpamAssassin::SQLBasedAddrList
     user_awl_dsn dbi:SQLite:dbname=$workdir/awl.db
+    $rules
   ");
 
   run_awl();
@@ -64,6 +79,7 @@ if (SQL) {
     auto_whitelist_factory Mail::SpamAssassin::SQLBasedAddrList
     $dbconfig
     user_awl_sql_override_username $testuser
+    $rules
   ");
 
   run_awl();
@@ -85,32 +101,39 @@ sub run_awl {
 %patterns = %is_nonspam_patterns;
 ok(sarun ("--remove-addr-from-whitelist whitelist_test\@whitelist.spamassassin.taint.org", \&patterns_run_cb));
 
-# 3 times, to get into the whitelist:
-%patterns = (%is_nonspam_patterns, (q{'144.137 scores 0, msgcount 0'} => 'scores'));
+# 3 times, to get into the whitelist: # verify correct ip/score/msgcount from debug output
+%patterns = (%is_nonspam_patterns,
+  (q{'sql-based whitelist_test@whitelist.spamassassin.taint.org|144.137 scores 0, msgcount 0'} => 'scores'));
 ok(sarun ("-L -t -D auto-welcomelist < data/nice/002 2>&1", \&patterns_run_cb));
 ok_all_patterns();
-%patterns = (%is_nonspam_patterns, (q{'144.137 scores -2, msgcount 1'} => 'scores'));
+%patterns = (%is_nonspam_patterns,
+  (q{'sql-based whitelist_test@whitelist.spamassassin.taint.org|144.137 scores -1.2, msgcount 1'} => 'scores'));
 ok(sarun ("-L -t -D auto-welcomelist < data/nice/002 2>&1", \&patterns_run_cb));
 ok_all_patterns();
-%patterns = (%is_nonspam_patterns, (q{'144.137 scores -4, msgcount 2'} => 'scores'));
+%patterns = (%is_nonspam_patterns,
+  (q{'sql-based whitelist_test@whitelist.spamassassin.taint.org|144.137 scores -2.4, msgcount 2'} => 'scores'));
 ok(sarun ("-L -t -D auto-welcomelist < data/nice/002 2>&1", \&patterns_run_cb));
 ok_all_patterns();
 
 # Now check
-%patterns = (%is_nonspam_patterns, (q{'144.137 scores -6, msgcount 3'} => 'scores'));
+%patterns = (%is_nonspam_patterns,
+  (q{'sql-based whitelist_test@whitelist.spamassassin.taint.org|144.137 scores -3.6, msgcount 3'} => 'scores'));
 ok(sarun ("-L -t -D auto-welcomelist < data/nice/002 2>&1", \&patterns_run_cb));
 ok_all_patterns();
 
-%patterns = (%is_spam_patterns, (q{'144.137 scores -8, msgcount 4'} => 'scores'));;
+%patterns = (%is_spam_patterns,
+  (q{'sql-based whitelist_test@whitelist.spamassassin.taint.org|144.137 scores -4.8, msgcount 4'} => 'scores'));
 ok(sarun ("-L -t -D auto-welcomelist < data/spam/004 2>&1", \&patterns_run_cb));
 ok_all_patterns();
 
 # Should be raised after last spam
-%patterns = (%is_spam_patterns, (q{'144.137 scores 9.837, msgcount 5'} => 'scores'));;
+%patterns = (%is_spam_patterns,
+  (q{'sql-based whitelist_test@whitelist.spamassassin.taint.org|144.137 scores 0.7, msgcount 5'} => 'scores'));
 ok(sarun ("-L -t -D auto-welcomelist < data/spam/004 2>&1", \&patterns_run_cb));
 ok_all_patterns();
 
-%patterns = (%is_spam_patterns2, (q{'210.73 scores 0, msgcount 0'} => 'scores'));;
+%patterns = (%is_spam_patterns2,
+  (q{'sql-based whitelist_test@whitelist.spamassassin.taint.org|210.73 scores 0, msgcount 0'} => 'scores'));
 ok(sarun ("-L -t -D auto-welcomelist < data/spam/007 2>&1", \&patterns_run_cb));
 ok_all_patterns();
 
