@@ -12,7 +12,7 @@ use constant SQLITE => (HAS_DBI && HAS_DBD_SQLITE);
 
 plan skip_all => "Net tests disabled"                unless conf_bool('run_net_tests');
 my $tests = 3;
-$tests += 2 if (SQLITE);
+$tests += 4 if (SQLITE);
 plan tests => $tests;
 
 tstpre ("
@@ -83,4 +83,13 @@ clear_pattern_counters();
 my $dbh = DBI->connect("dbi:SQLite:dbname=$workdir/DecodeShortURLs.db","","");
 my @row = $dbh->selectrow_array("SELECT decoded_url FROM short_url_cache WHERE short_url = 'http://bit.ly/30yH6WK'");
 is($row[0], 'http://spamassassin.apache.org/');
+
+# Check another email to cleanup old entries from database
+sarun ("-t < data/spam/decodeshorturl/base2.eml", \&patterns_run_cb);
+ok_all_patterns();
+clear_pattern_counters();
+
+my $dbh = DBI->connect("dbi:SQLite:dbname=$workdir/DecodeShortURLs.db","","");
+my @row = $dbh->selectrow_array("SELECT decoded_url FROM short_url_cache WHERE short_url = 'http://bit.ly/30yH6WK'");
+isnt($row[0], 'https://spamassassin.apache.org/');
 }
