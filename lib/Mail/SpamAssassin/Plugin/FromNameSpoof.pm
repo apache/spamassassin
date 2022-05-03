@@ -390,9 +390,9 @@ sub _check_fromnamespoof
     $pms->set_tag("FNSFNAMEDOMAIN", $fnd{'domain'});
     $pms->set_tag("FNSFADDRDOMAIN", $fad{'domain'});
 
-    dbg("From name spoof: $fnd{addr} $fnd{domain} $fnd{owner}");
-    dbg("Actual From: $fad{addr} $fad{domain} $fad{owner}");
-    dbg("To Address: $tod{addr} $tod{domain} $tod{owner}");
+    dbg("From name spoof: $fnd{addr} $fnd{domain} $fnd{owner}") if defined $fnd{owner};
+    dbg("Actual From: $fad{addr} $fad{domain} $fad{owner}") if defined $fad{owner};
+    dbg("To Address: $tod{addr} $tod{domain} $tod{owner}") if defined $tod{owner};
   }
 }
 
@@ -409,6 +409,8 @@ sub _find_address_owner
   }
 
   my $owner = $self->{main}->{registryboundaries}->uri_to_domain($check);
+
+  return if not defined $owner;
 
   $check =~ /^([^\@]+)\@(.*)$/;
 
