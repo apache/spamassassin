@@ -287,7 +287,7 @@ See C<url_shortener_cache_autoclean> for database cleaning.
 
 =item url_shortener_cache_autoclean	(default: 1000)
 
-Automatically purge old unused entries from database.  Value describes a random run
+Automatically purge old entries from database.  Value describes a random run
 chance of 1/x.  The default value of 1000 means that cleaning is run
 approximately once for every 1000 messages processed.  Value of 1 would mean
 database is cleaned every time a message is processed.
@@ -396,11 +396,11 @@ sub initialise_url_shortener_cache {
       ");
       $self->{sth_delete} = $self->{dbh}->prepare("
         DELETE FROM short_url_cache
-        WHERE short_url = ? AND modified < strftime('%s','now') - $conf->{url_shortener_cache_ttl}
+        WHERE short_url = ? AND created < strftime('%s','now') - $conf->{url_shortener_cache_ttl}
       ");
       $self->{sth_clean} = $self->{dbh}->prepare("
         DELETE FROM short_url_cache
-        WHERE modified < strftime('%s','now') - $conf->{url_shortener_cache_ttl}
+        WHERE created < strftime('%s','now') - $conf->{url_shortener_cache_ttl}
       ");
     };
   }
@@ -433,11 +433,11 @@ sub initialise_url_shortener_cache {
       ");
       $self->{sth_delete} = $self->{dbh}->prepare("
         DELETE FROM short_url_cache
-        WHERE short_url = ? AND modified < UNIX_TIMESTAMP() - $conf->{url_shortener_cache_ttl}
+        WHERE short_url = ? AND created < UNIX_TIMESTAMP() - $conf->{url_shortener_cache_ttl}
       ");
       $self->{sth_clean} = $self->{dbh}->prepare("
         DELETE FROM short_url_cache
-        WHERE modified < UNIX_TIMESTAMP() - $conf->{url_shortener_cache_ttl}
+        WHERE created < UNIX_TIMESTAMP() - $conf->{url_shortener_cache_ttl}
       ");
     };
   }
@@ -470,11 +470,11 @@ sub initialise_url_shortener_cache {
       ");
       $self->{sth_delete} = $self->{dbh}->prepare("
         DELETE FROM short_url_cache
-        WHERE short_url ? = AND modified < CAST(EXTRACT(epoch FROM NOW()) AS INT) - $conf->{url_shortener_cache_ttl}
+        WHERE short_url ? = AND created < CAST(EXTRACT(epoch FROM NOW()) AS INT) - $conf->{url_shortener_cache_ttl}
       ");
       $self->{sth_clean} = $self->{dbh}->prepare("
         DELETE FROM short_url_cache
-        WHERE modified < CAST(EXTRACT(epoch FROM NOW()) AS INT) - $conf->{url_shortener_cache_ttl}
+        WHERE created < CAST(EXTRACT(epoch FROM NOW()) AS INT) - $conf->{url_shortener_cache_ttl}
       ");
     };
   ##
