@@ -126,12 +126,13 @@ sub new {
 
   $self->set_config($mailsaobject->{conf});
   $self->register_method_priority ('check_dnsbl', -10);
-  $self->register_eval_rule('short_url');
-  $self->register_eval_rule('short_url_200');
-  $self->register_eval_rule('short_url_404');
-  $self->register_eval_rule('short_url_chained');
-  $self->register_eval_rule('short_url_maxchain');
-  $self->register_eval_rule('short_url_loop');
+  $self->register_eval_rule('short_url', $Mail::SpamAssassin::Conf::TYPE_BODY_EVALS);
+  $self->register_eval_rule('short_url_200', $Mail::SpamAssassin::Conf::TYPE_BODY_EVALS);
+  $self->register_eval_rule('short_url_404', $Mail::SpamAssassin::Conf::TYPE_BODY_EVALS);
+  $self->register_eval_rule('short_url_code', $Mail::SpamAssassin::Conf::TYPE_BODY_EVALS);
+  $self->register_eval_rule('short_url_chained', $Mail::SpamAssassin::Conf::TYPE_BODY_EVALS);
+  $self->register_eval_rule('short_url_maxchain', $Mail::SpamAssassin::Conf::TYPE_BODY_EVALS);
+  $self->register_eval_rule('short_url_loop', $Mail::SpamAssassin::Conf::TYPE_BODY_EVALS);
 
   return $self;
 }
@@ -512,6 +513,13 @@ sub short_url_404 {
   return $pms->{short_url_404};
 }
 
+sub short_url_code {
+  my ($self, $pms, undef, $code) = @_;
+
+  return unless defined $code && $code =~ /^\d{3}$/;
+  return $pms->{"short_url_$code"};
+}
+
 sub short_url_chained {
   my ($self, $pms) = @_;
 
@@ -621,15 +629,23 @@ sub recursive_lookup {
     } else {
       dbg("found cached $short_url => $location");
     }
+    # Cached http code?
+    if ($location =~ /^\d{3}$/) {
+      $pms->{"short_url_$location"} = 1;
+      # Update cache
+      $self->cache_add($short_url, $location);
+      return;
+    }
   } else {
     # Not cached; do lookup
     my $response = $ua->head($short_url);
     if (!$response->is_redirect) {
       dbg("URL is not redirect: $short_url = ".$response->status_line);
-      if ($response->code eq '200') {
-        $pms->{short_url_200} = 1;
-      } elsif ($response->code eq '404') {
-        $pms->{short_url_404} = 1;
+      my $rcode = $response->code;
+      if ($rcode =~ /^\d{3}$/) {
+        $pms->{"short_url_$rcode"} = 1;
+        # Update cache
+        $self->cache_add($short_url, $rcode);
       }
       return;
     }
@@ -737,5 +753,6 @@ sub cache_get {
 # Version features
 sub has_short_url { 1 }
 sub has_autoclean { 1 }
+sub has_short_url_code { 1 }
 
 1;
