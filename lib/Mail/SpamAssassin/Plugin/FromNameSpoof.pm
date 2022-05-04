@@ -105,12 +105,11 @@ use in reports, header fields, other plugins, etc.:
 
 =head1 EXAMPLE 
 
-header  __PLUGIN_FROMNAME_SPOOF  eval:check_fromname_spoof()
-header  __PLUGIN_FROMNAME_EQUALS_TO  eval:check_fromname_equals_to()
-
-meta     FROMNAME_SPOOF_EQUALS_TO (__PLUGIN_FROMNAME_SPOOF && __PLUGIN_FROMNAME_EQUALS_TO)
-describe FROMNAME_SPOOF_EQUALS_TO From:name is spoof to look like To: address
-score    FROMNAME_SPOOF_EQUALS_TO 1.2
+  header  __PLUGIN_FROMNAME_SPOOF  eval:check_fromname_spoof()
+  header  __PLUGIN_FROMNAME_EQUALS_TO  eval:check_fromname_equals_to()
+  meta     FROMNAME_SPOOF_EQUALS_TO (__PLUGIN_FROMNAME_SPOOF && __PLUGIN_FROMNAME_EQUALS_TO)
+  describe FROMNAME_SPOOF_EQUALS_TO From:name is spoof to look like To: address
+  score    FROMNAME_SPOOF_EQUALS_TO 1.2
 
 =cut
 
