@@ -856,7 +856,7 @@ e.g.
       my $listname = $1;  # corresponds to arg in check_uri_host_in_wblist()
       # note: must not factor out dereferencing, as otherwise
       # subhashes would spring up in a copy and be lost
-      $conf->{parser}->add_to_addrlist ($listname, split(/\s+/, $value));
+      $conf->{parser}->add_to_addrlist ($listname, split(/\s+/, $2));
     }
   });
 
