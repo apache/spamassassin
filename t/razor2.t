@@ -16,21 +16,15 @@ diag('Note: Failures may not be an SpamAssassin bug, as Razor tests can fail due
 
 # ---------------------------------------------------------------------------
 
-#report the email as spam so it fails below.  This process is not likely to work and I can't find a test point for razor. KAM 2018-08-20
-#unless (HAS_RAZOR2 or HAS_RAZOR2_IDENT) {
-#  system ("razor-report < data/spam/001");
-#  if (($? >> 8) != 0) {
-#    warn "'razor-report < data/spam/001' failed. This may cause this test to fail.\n";
-#  }
-#}
-
 tstprefs ("
+  full RAZOR2_CHECK	eval:check_razor2()
+  tflags RAZOR2_CHECK	net autolearn_body
   dns_available no
   use_razor2 1
   score RAZOR2_CHECK 3.3
 ");
 
-#RAZOR2 file was from real-world spam in June 2019
+#RAZOR2 file contains a test string supplied by Razor tech support
 
 #TESTING FOR SPAM
 %patterns = (

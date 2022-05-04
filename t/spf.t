@@ -19,6 +19,28 @@ disable_compat "welcomelist_blocklist";
 
 # ensure all rules will fire
 tstlocalrules ("
+  header SPF_PASS		eval:check_for_spf_pass()
+  header SPF_NEUTRAL		eval:check_for_spf_neutral()
+  header SPF_FAIL		eval:check_for_spf_fail()
+  header SPF_SOFTFAIL		eval:check_for_spf_softfail()
+  header SPF_HELO_PASS		eval:check_for_spf_helo_pass()
+  header SPF_HELO_NEUTRAL	eval:check_for_spf_helo_neutral()
+  header SPF_HELO_FAIL		eval:check_for_spf_helo_fail()
+  header SPF_HELO_SOFTFAIL	eval:check_for_spf_helo_softfail()
+  tflags SPF_PASS		nice userconf net
+  tflags SPF_HELO_PASS		nice userconf net
+  tflags SPF_NEUTRAL		net
+  tflags SPF_FAIL	        net
+  tflags SPF_SOFTFAIL		net
+  tflags SPF_HELO_NEUTRAL       net
+  tflags SPF_HELO_FAIL		net
+  tflags SPF_HELO_SOFTFAIL	net
+  header USER_IN_SPF_WELCOMELIST eval:check_for_spf_welcomelist_from()
+  tflags USER_IN_SPF_WELCOMELIST userconf nice noautolearn net
+  header USER_IN_DEF_SPF_WL	eval:check_for_def_spf_welcomelist_from()
+  tflags USER_IN_DEF_SPF_WL	userconf nice noautolearn net
+  meta USER_IN_SPF_WHITELIST	(USER_IN_SPF_WELCOMELIST)
+  tflags USER_IN_SPF_WHITELIST	userconf nice noautolearn net
   score SPF_FAIL 0.001
   score SPF_HELO_FAIL 0.001
   score SPF_HELO_NEUTRAL 0.001
@@ -28,6 +50,7 @@ tstlocalrules ("
   score SPF_PASS -0.001
   score SPF_HELO_PASS -0.001
   score USER_IN_DEF_SPF_WL -0.001
+  score USER_IN_SPF_WELCOMELIST -0.001
   score USER_IN_SPF_WHITELIST -0.001
 ");
 

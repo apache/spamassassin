@@ -73,8 +73,11 @@ plan tests => $tests;
 );
 
 my $myrules = <<'END';
+  header USER_IN_BLOCKLIST  eval:check_from_in_blocklist()
+  tflags USER_IN_BLOCKLIST  userconf nice noautolearn
+  score USER_IN_BLOCKLIST   100
   add_header all  AuthorDomain _AUTHORDOMAIN_
-  blacklist_from  Marilù.Gioffré@esempio-università.it
+  blocklist_from  Marilù.Gioffré@esempio-università.it
   header LT_UTF8SMTP_ANY  Received =~ /\bwith\s*UTF8SMTPS?A?\b/mi
   score  LT_UTF8SMTP_ANY  -0.1
   header LT_RPATH   Return-Path:addr =~ /^Marilù\.Gioffré\@esempio-università\.it\z/

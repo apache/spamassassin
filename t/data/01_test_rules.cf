@@ -18,7 +18,19 @@
 # limitations under the License.
 # </@LICENSE>
 
-# Disable dcc/razor/pyzor by default
+# This file defines a subset of the default configuration and rules that tests can count on
+# If you need something else in a test, use tstpre, tstlocalrules, or tstprefs in the test
+# instead of adding it here, so tests can be more self-contained and maintainable.
+
+clear_report_template
+report _SUMMARY_
+
+clear_headers
+
+add_header spam Flag _YESNOCAPS_
+add_header all Level _STARS(*)_
+add_header all Status "_YESNO_, score=_SCORE_ required=_REQD_ tests=_TESTS_ autolearn=_AUTOLEARN_ version=_VERSION_"
+
 ifplugin Mail::SpamAssassin::Plugin::DCC
 use_dcc 0
 endif
@@ -100,12 +112,3 @@ redirector_pattern      /^http:\/\/redir\.internet\.com\/.+?\/.+?\/(.*)$/i
 redirector_pattern      /^http:\/\/(?:.*?\.)?adtech\.de\/.*(?:;|\|)link=(.*?)(?:;|$)/i
 redirector_pattern      m'^http.*?/redirect\.php\?.*(?<=[?&])goto=(.*?)(?:$|[&\#])'i
 redirector_pattern      m'^https?:/*(?:[^/]+\.)?emf\d\.com/r\.cfm.*?&r=(.*)'i
-
-ifplugin Mail::SpamAssassin::Plugin::DKIM
-adsp_override sa-test-nxd.spamassassin.org  nxdomain
-adsp_override sa-test-unk.spamassassin.org  unknown
-adsp_override sa-test-all.spamassassin.org  all
-adsp_override sa-test-dis.spamassassin.org  discardable
-adsp_override sa-test-di2.spamassassin.org
-endif
-

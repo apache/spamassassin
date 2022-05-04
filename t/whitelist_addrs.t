@@ -13,6 +13,12 @@ plan tests => 35;
 
 # ---------------------------------------------------------------------------
 
+tstprefs ("
+  header AWL        eval:check_from_in_auto_welcomelist()
+  tflags AWL        userconf noautolearn
+  priority AWL      1000
+");
+
 %added_address_whitelist_patterns = (
   q{SpamAssassin auto-welcomelist: adding address to welcomelist:}, 'added address to welcomelist',
 );

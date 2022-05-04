@@ -22,9 +22,11 @@ plan tests => 18;
 
 tstpre ("
 loadplugin Mail::SpamAssassin::Plugin::DMARC
+loadplugin Mail::SpamAssassin::Plugin::DKIM
 ");
 
 tstprefs("
+full   DKIM_SIGNED           eval:check_dkim_signed()
 # Check that rename backwards compatibility works with if's
 ifplugin Mail::SpamAssassin::Plugin::Dmarc
 if plugin ( Mail::SpamAssassin::Plugin::Dmarc)

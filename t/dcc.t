@@ -21,6 +21,9 @@ diag('Note: Failure may not be an SpamAssassin bug, as DCC tests can fail due to
 );
 
 tstprefs ("
+  full     DCC_CHECK  eval:check_dcc()
+  tflags   DCC_CHECK  net autolearn_body
+  priority DCC_CHECK  10
   dns_available no
   use_dcc 1
   meta X_META_POS DCC_CHECK

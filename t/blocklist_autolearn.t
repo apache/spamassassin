@@ -15,6 +15,9 @@ use Test::More tests => 3;
 );
 
 tstprefs ('
+  header USER_IN_BLOCKLIST		eval:check_from_in_blocklist()
+  tflags USER_IN_BLOCKLIST		userconf nice noautolearn
+  score USER_IN_BLOCKLIST		100
   blacklist_from *@ximian.com
 ');
 

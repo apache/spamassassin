@@ -15,8 +15,11 @@ diag('Note: Failures may not be an SpamAssassin bug, as Pyzor tests can fail due
 # ---------------------------------------------------------------------------
 
 tstprefs ("
+  full PYZOR_CHECK	eval:check_pyzor()
+  tflags PYZOR_CHECK	net autolearn_body
   dns_available no
   use_pyzor 1
+  pyzor_count_min 1
   score PYZOR_CHECK 3.3
 ");
 

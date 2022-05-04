@@ -25,6 +25,13 @@ open(OLDERR, ">&STDERR") || die "Cannot copy STDERR file handle";
 # quiet "used only once" warnings
 1 if *OLDERR;
 
+tstlocalrules ("
+  clear_originating_ip_headers
+  originating_ip_headers X-Yahoo-Post-IP X-Originating-IP X-Apparently-From
+  originating_ip_headers X-SenderIP X-AOL-IP
+  originating_ip_headers X-MS-Exchange-CrossTenant-OriginalAttributedTenantConnectingIp
+");
+
 my @data = (
 
 # ---------------------------------------------------------------------------

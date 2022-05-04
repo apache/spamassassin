@@ -25,6 +25,7 @@ sa_t_init("sql_based_welcomelist");
 clear_localrules();
 
 my $rules = q(
+    add_header all Status "_YESNO_, score=_SCORE_ required=_REQD_ tests=_TESTS_ autolearn=_AUTOLEARN_ version=_VERSION_"
     # Needed for AWL to run
     header AWL eval:check_from_in_auto_welcomelist()
     priority AWL 1000

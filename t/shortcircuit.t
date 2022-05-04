@@ -17,6 +17,9 @@ tstpre ('
 
 tstlocalrules ('
 
+  header SHORTCIRCUIT             eval:check_shortcircuit()
+  describe SHORTCIRCUIT           Not all rules were run, due to a shortcircuited rule
+  tflags SHORTCIRCUIT             userconf noautolearn
   add_header all Status "_YESNO_, score=_SCORE_ required=_REQD_ tests=_TESTS_ shortcircuit=_SCTYPE_ autolearn=_AUTOLEARN_ version=_VERSION_"
 
   # hits spam/001

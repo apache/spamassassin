@@ -12,6 +12,9 @@ plan tests => 8;
 # bug 6003
 
 tstlocalrules (q{
+  header USER_IN_WELCOMELIST		eval:check_from_in_welcomelist()
+  tflags USER_IN_WELCOMELIST		userconf nice noautolearn
+  score USER_IN_WELCOMELIST		-100
   body MYBODY /LOSE WEIGHT/
   score MYBODY 99
 });

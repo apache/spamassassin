@@ -70,6 +70,22 @@ sub test_samples($$) {
 
 # ensure rules will fire, and disable some expensive ones
 tstlocalrules("
+  full   DKIM_SIGNED           eval:check_dkim_signed()
+  full   DKIM_VALID            eval:check_dkim_valid()
+  full   DKIM_VALID_AU         eval:check_dkim_valid_author_sig()
+  meta   DKIM_INVALID          DKIM_SIGNED && !DKIM_VALID
+  header DKIM_ADSP_NXDOMAIN    eval:check_dkim_adsp('N')
+  header DKIM_ADSP_DISCARD     eval:check_dkim_adsp('D')
+  header DKIM_ADSP_ALL         eval:check_dkim_adsp('A')
+  header DKIM_ADSP_CUSTOM_LOW  eval:check_dkim_adsp('1')
+  header DKIM_ADSP_CUSTOM_MED  eval:check_dkim_adsp('2')
+  header DKIM_ADSP_CUSTOM_HIGH eval:check_dkim_adsp('3')
+  adsp_override sa-test-nxd.spamassassin.org  nxdomain
+  adsp_override sa-test-unk.spamassassin.org  unknown
+  adsp_override sa-test-all.spamassassin.org  all
+  adsp_override sa-test-dis.spamassassin.org  discardable
+  adsp_override sa-test-di2.spamassassin.org
+
   dkim_minimum_key_bits 512
   score DKIM_SIGNED          -0.1
   score DKIM_VALID           -0.1

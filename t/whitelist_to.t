@@ -11,6 +11,9 @@ use Test::More tests => 1;
 );
 
 tstprefs ("
+  header USER_IN_WELCOMELIST_TO		eval:check_to_in_welcomelist()
+  tflags USER_IN_WELCOMELIST_TO		userconf nice noautolearn
+  score USER_IN_WELCOMELIST_TO		-6
   whitelist_to announce*
 ");
 

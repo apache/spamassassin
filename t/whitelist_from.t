@@ -12,6 +12,18 @@ plan tests => 32;
 disable_compat "welcomelist_blocklist";
 
 tstprefs ("
+  header USER_IN_WELCOMELIST		eval:check_from_in_welcomelist()
+  tflags USER_IN_WELCOMELIST		userconf nice noautolearn
+  header USER_IN_DEF_WELCOMELIST	eval:check_from_in_default_welcomelist()
+  tflags USER_IN_DEF_WELCOMELIST	userconf nice noautolearn
+  meta USER_IN_WHITELIST		(USER_IN_WELCOMELIST)
+  tflags USER_IN_WHITELIST		userconf nice noautolearn
+  score USER_IN_WHITELIST		-100
+  score USER_IN_WELCOMELIST		-0.01
+  meta USER_IN_DEF_WHITELIST		(USER_IN_DEF_WELCOMELIST)
+  tflags USER_IN_DEF_WHITELIST	userconf nice noautolearn
+  score USER_IN_DEF_WHITELIST		-15
+  score USER_IN_DEF_WELCOMELIST	-0.01
   def_whitelist_from_rcvd *\@paypal.com paypal.com
   def_whitelist_from_rcvd *\@paypal.com ebay.com
   def_whitelist_from_rcvd mumble\@example.com example.com

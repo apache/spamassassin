@@ -14,6 +14,12 @@ plan tests => 8;
 disable_compat "welcomelist_blocklist";
 
 tstlocalrules (q{
+  header USER_IN_WELCOMELIST		eval:check_from_in_welcomelist()
+  tflags USER_IN_WELCOMELIST		userconf nice noautolearn
+  meta USER_IN_WHITELIST		(USER_IN_WELCOMELIST)
+  tflags USER_IN_WHITELIST		userconf nice noautolearn
+  score USER_IN_WHITELIST		-100
+  score USER_IN_WELCOMELIST		-0.01
   body MYBODY /LOSE WEIGHT/
   score MYBODY 99
 });

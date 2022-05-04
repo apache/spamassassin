@@ -10,6 +10,12 @@ plan tests => 32;
 # ---------------------------------------------------------------------------
 
 tstprefs ("
+  header USER_IN_WELCOMELIST		eval:check_from_in_welcomelist()
+  tflags USER_IN_WELCOMELIST		userconf nice noautolearn
+  score USER_IN_WELCOMELIST		-100
+  header USER_IN_DEF_WELCOMELIST	eval:check_from_in_default_welcomelist()
+  tflags USER_IN_DEF_WELCOMELIST	userconf nice noautolearn
+  score USER_IN_DEF_WELCOMELIST		-15
   def_welcomelist_from_rcvd *\@paypal.com paypal.com
   def_welcomelist_from_rcvd *\@paypal.com ebay.com
   def_welcomelist_from_rcvd mumble\@example.com example.com

@@ -16,6 +16,12 @@ use Test::More tests => 4;
 
 tstprefs ("
   loadplugin Mail::SpamAssassin::Plugin::WelcomeListSubject
+  header SUBJECT_IN_WELCOMELIST		eval:check_subject_in_welcomelist()
+  tflags SUBJECT_IN_WELCOMELIST		userconf nice noautolearn
+  score SUBJECT_IN_WELCOMELIST		-100
+  header SUBJECT_IN_BLOCKLIST		eval:check_subject_in_blocklist()
+  tflags SUBJECT_IN_BLOCKLIST		userconf noautolearn
+  score SUBJECT_IN_BLOCKLIST		100
 
   # Check that rename backwards compatibility works with if's
   ifplugin Mail::SpamAssassin::Plugin::WhiteListSubject
