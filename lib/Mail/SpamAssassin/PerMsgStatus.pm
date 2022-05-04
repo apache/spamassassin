@@ -3173,7 +3173,7 @@ sub got_hit {
 Register a pending rule.  Must be called from rules eval-function, if the
 result can arrive later than when exiting the function (async lookups).
 
-$status->rule_done($rulename) or $status->got_hit(...) must be called when
+$status->rule_ready($rulename) or $status->got_hit(...) must be called when
 the result has arrived.  If these are not used, it can break depending meta
 rule evaluation.
 
