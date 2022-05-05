@@ -14,7 +14,7 @@ plan tests => 32;
 
 # ---------------------------------------------------------------------------
 
-my $userprefdb = mk_safe_tmpdir()."/userpref.db";
+my $userprefdb = $workdir."/userpref.db";
 
 my $dbh = DBI->connect("dbi:SQLite:dbname=$userprefdb","","");
 ok($dbh);
@@ -84,8 +84,6 @@ checkfile ($spamd_stderr, \&patterns_run_cb);
 ok_all_patterns();
 
 ok(stop_spamd());
-
-cleanup_safe_tmpdir();
 
 ok($dbh->disconnect());
 

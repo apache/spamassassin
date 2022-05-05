@@ -111,7 +111,7 @@ http://host5.example.com
 http://host6.example.com
 
 EOT
-my $tmpdir = mk_safe_tmpdir();
+my $tmpdir = $workdir;
 
 for my $mail  ($twoplus, $threeurls, $threeplus, $foururls, $fiveurls, $sixurls) {
   my @urls = grep(/\bhttp:/m,$mail);
@@ -141,4 +141,3 @@ for my $mail  ($twoplus, $threeurls, $threeplus, $foururls, $fiveurls, $sixurls)
   }
 }
 
-cleanup_safe_tmpdir();

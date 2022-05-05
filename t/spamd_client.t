@@ -97,7 +97,7 @@ if (!$RUNNING_ON_WINDOWS) {
 
   %anti_patterns = ();
 
-  my $sockpath = mk_safe_tmpdir()."/spamd.sock";
+  my $sockpath = $workdir."/spamd.sock";
   ok(start_spamd("-L --socketpath=$sockpath"));
 
   $client = create_clientobj({
@@ -126,7 +126,6 @@ if (!$RUNNING_ON_WINDOWS) {
   ok_all_patterns();
 
   ok(stop_spamd());
-  cleanup_safe_tmpdir();
 }
 
 if (HAS_SDBM_FILE) {
