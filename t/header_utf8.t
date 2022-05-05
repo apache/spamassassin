@@ -141,7 +141,6 @@ if (!HAS_LIBIDN && !HAS_LIBIDN2) {
 $ENV{'SA_HEADER_ADDRESS_PARSER'} = 1;
 if (HAS_LIBIDN) {
   $ENV{'SA_LIBIDN'} = 1;
-  $libidn_done++;
 } elsif (HAS_LIBIDN2) {
   $ENV{'SA_LIBIDN'} = 2;
   $libidn2_done++;
