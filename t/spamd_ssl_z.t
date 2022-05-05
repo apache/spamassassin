@@ -3,6 +3,8 @@
 use lib '.'; use lib 't';
 use SATest; sa_t_init("spamd_ssl_z");
 
+use constant HAVE_ZLIB => eval { require Compress::Zlib; };
+
 untaint_system("$spamc -z < /dev/null");
 my $SPAMC_Z_AVAILABLE = ($? >> 8 == 0);
 
