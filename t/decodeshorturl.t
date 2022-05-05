@@ -92,8 +92,8 @@ is($row[0], 'http://spamassassin.apache.org/');
 sarun ("-t < data/spam/decodeshorturl/base2.eml", \&patterns_run_cb);
 ok_all_patterns();
 
-my $dbh = DBI->connect("dbi:SQLite:dbname=$workdir/DecodeShortURLs.db","","");
-my @row = $dbh->selectrow_array("SELECT decoded_url FROM short_url_cache WHERE short_url = 'http://bit.ly/30yH6WK'");
+$dbh = DBI->connect("dbi:SQLite:dbname=$workdir/DecodeShortURLs.db","","");
+@row = $dbh->selectrow_array("SELECT decoded_url FROM short_url_cache WHERE short_url = 'http://bit.ly/30yH6WK'");
 isnt($row[0], 'https://spamassassin.apache.org/');
 
 }
