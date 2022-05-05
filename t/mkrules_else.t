@@ -175,8 +175,7 @@ sub mkrun {
   untaint_system ("$scrargs > $workdir/$testname.$test_number $post_redir");
   $mk_exitcode = ($?>>8);
   if ($mk_exitcode != 0) { return undef; }
-  # apparently redundant check, complains cannot open mkrules_else.0
-  #&checkfile ("$testname.$test_number", $read_sub) if (defined $read_sub);
+  &checkfile ("$workdir/$testname.$test_number", $read_sub) if (defined $read_sub);
   1;
 }
 
