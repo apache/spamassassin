@@ -244,8 +244,12 @@ sub parsed_metadata {
     # Check that DKIM module is loaded
     if (exists $pms->{conf}->{dkim_timeout}) {
       if (!$self->{main}->{local_tests_only}) {
-        # Initialize async queue
+        # Initialize async queue, any eval calls will queue their checks
         $pms->{fromname_async_queue} = [];
+        # Process and finish queue as soon as DKIM is ready
+        $pms->action_depends_on_tags('DKIMDOMAIN', sub {
+          $self->_check_async_queue($pms);
+        });
       } else {
         dbg("local tests only, ignoring fns_ignore_dkim setting");
       }
@@ -357,11 +361,21 @@ sub check_fromname_equals_replyto {
 
 sub check_cleanup {
   my ($self, $opts) = @_;
-  my $pms = $opts->{permsgstatus};
 
-  if (exists $pms->{fromname_async_queue} && @{$pms->{fromname_async_queue}}) {
+  $self->_check_async_queue($opts->{permsgstatus});
+}
+
+# Shall only be called when DKIMDOMAIN is ready, or from check_cleanup() to
+# make sure _check_fromnamespoof is called if DKIMDOMAIN was never set
+sub _check_async_queue {
+  my ($self, $pms) = @_;
+
+  if (exists $pms->{fromname_async_queue}) {
     $self->_check_fromnamespoof($pms);
     $_->() foreach (@{$pms->{fromname_async_queue}});
+    # No more async queueing needed.  If any evals are called later, they
+    # will act on the results directly.
+    delete $pms->{fromname_async_queue};
   }
 }
 
