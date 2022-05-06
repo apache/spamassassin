@@ -241,18 +241,17 @@ sub parsed_metadata {
 
   # If fns_ignore_dkim used, force wait for DKIM results
   if (%{$pms->{conf}->{fns_ignore_dkim}}) {
-    # Check that DKIM module is loaded
-    if (exists $pms->{conf}->{dkim_timeout}) {
-      if (!$self->{main}->{local_tests_only}) {
-        # Initialize async queue, any eval calls will queue their checks
-        $pms->{fromname_async_queue} = [];
-        # Process and finish queue as soon as DKIM is ready
-        $pms->action_depends_on_tags('DKIMDOMAIN', sub {
-          $self->_check_async_queue($pms);
-        });
-      } else {
-        dbg("local tests only, ignoring fns_ignore_dkim setting");
-      }
+    if ($self->{main}->{local_tests_only}) {
+      dbg("local tests only, ignoring fns_ignore_dkim setting");
+    }
+    # Check that DKIM module is loaded (a bit kludgy check)
+    elsif (exists $pms->{conf}->{dkim_timeout}) {
+      # Initialize async queue, any eval calls will queue their checks
+      $pms->{fromname_async_queue} = [];
+      # Process and finish queue as soon as DKIM is ready
+      $pms->action_depends_on_tags('DKIMDOMAIN', sub {
+        $self->_check_async_queue($pms);
+      });
     } else {
       dbg("DKIM plugin not loaded, ignoring fns_ignore_dkim setting");
     }
