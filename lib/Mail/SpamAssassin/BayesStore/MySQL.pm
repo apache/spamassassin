@@ -295,7 +295,8 @@ sub set_running_expire_tok {
 
   return 0 unless (defined($self->{_dbh}));
 
-  my $sql = "INSERT INTO bayes_expire (id,runtime) VALUES (?,?)";
+  my $sql = "INSERT INTO bayes_expire (id,runtime) VALUES (?,?)
+             ON DUPLICATE KEY UPDATE runtime=VALUES(runtime)";
 
   my $time = time();
 
