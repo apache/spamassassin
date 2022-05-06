@@ -368,7 +368,7 @@ sub esp_mailchimp_check {
   # return if X-Mailer is not what we want
   my $xmailer = $pms->get("X-Mailer", undef);
 
-  if((not defined $xmailer) or ($xmailer !~ /MailChimp Mailer/)) {
+  if((not defined $xmailer) or ($xmailer !~ /MailChimp Mailer/i)) {
     return;
   }
 
