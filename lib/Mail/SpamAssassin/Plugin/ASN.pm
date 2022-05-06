@@ -573,8 +573,6 @@ sub check_asn {
   my ($self, $pms, $re) = @_;
 
   my $rulename = $pms->get_current_eval_rule_name();
-  $pms->rule_pending($rulename); # mark async
-
   if (!defined $re) {
     warn "asn: rule $rulename eval argument missing\n";
     return 0;
@@ -585,6 +583,8 @@ sub check_asn {
     warn "asn: invalid regexp for $rulename '$re': $err\n";
     return 0;
   }
+
+  $pms->rule_pending($rulename); # mark async
 
   $pms->action_depends_on_tags('ASN',
     sub { my($pms,@args) = @_;
