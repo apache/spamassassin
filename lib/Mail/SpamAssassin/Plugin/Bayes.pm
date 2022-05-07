@@ -174,6 +174,8 @@ our $IGNORED_HDRS = qr{(?: (?:X-)?Sender    # misc noise
 our $MARK_PRESENCE_ONLY_HDRS = qr{(?: X-Face
   |X-(?:Gnu-?PG|PGP|GPG)(?:-Key)?-Fingerprint
   |D(?:KIM|omainKey)-Signature
+  |X-Google-DKIM-Signature
+  |ARC-(?:Message-Signature|Seal)
   |Autocrypt
 )}ix;
 
