@@ -76,10 +76,6 @@ Note for Users Upgrading to SpamAssassin 4.0.0
 
 - URILocalBL: uri_block_cc/uri_block_cont support negation (Bug 7528)
 
-- URILocalBL: uri_block_cidr "10.1.1.0-10.1.1.225" range format not
-  supported anymore (Net::CIDR::Lite -> Mail::SpamAssassin::NetSet)
-  (maybe fixable in NetSet before 4.0.0 released)
-
 - URILocalBL: IPv6 lookups for hosts, if supported by used database
 
 - DNS (or other async) lookups are now only launched when priority -100 is
@@ -199,6 +195,10 @@ Note for Users Upgrading to SpamAssassin 4.0.0
 - New project maintained DecodeShortURLs plugin.  Note that it might not be
   directly compatible with rules from the old third party plugin.  See
   documentation for configuration and rule format.
+
+- Installing module Net::CIDR::Lite allows to use dash separated IP range
+  format (e.g. 192.168.1.1-192.168.255.255) for NetSet tables
+  (internal_networks, trusted_networks, msa_networks, uri_local_cidr).
 
 Note for Users Upgrading to SpamAssassin 3.4.5
 ----------------------------------------------

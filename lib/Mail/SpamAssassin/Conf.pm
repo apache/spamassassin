@@ -1353,6 +1353,9 @@ If masklen is not specified, and there is not trailing dot, then just a single
 IP address specified is used, as if the masklen were C</32> with an IPv4
 address, or C</128> in case of an IPv6 address.
 
+If module Net::CIDR::Lite is installed, it's also possible to use dash
+separated IP range format (e.g. 192.168.1.1-192.168.255.255).
+
 If a network or host address is prefaced by a C<!> the matching network or
 host will be excluded from the list even if a less specific (shorter netmask
 length) subnet is later specified in the list. This allows a subset of

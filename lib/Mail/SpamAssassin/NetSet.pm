@@ -77,7 +77,45 @@ sub add_cidr {
   my $numadded = 0;
   delete $self->{cache};  # invalidate cache (in case of late additions)
 
+  # Pre-parse x.x.x.x-x.x.x.x range notation into CIDR blocks
+  # requires Net::CIDR::Lite
+  my @nets2;
   foreach my $cidr_orig (@nets) {
+    next if index($cidr_orig, '-') == -1; # Triage
+    my $cidr = $cidr_orig;
+    my $exclude = ($cidr =~ s/^!\s*//) ? 1 : 0;
+    local($1);
+    $cidr =~ s/\b0+(\d+)/$1/; # Strip leading zeroes
+    eval { require Net::CIDR::Lite; }; # Only try to load now when it's necessary
+    if ($@) {
+      warn "netset: IP range notation '$cidr_orig' requires Net::CIDR::Lite module, ignoring\n";
+      $cidr_orig = undef;
+      next;
+    }
+    my $cidrs = Net::CIDR::Lite->new;
+    eval { $cidrs->add_range($cidr); };
+    if ($@) {
+      my $err = $@; $err =~ s/ at .*//s;
+      warn "netset: illegal IP range '$cidr_orig': $err\n";
+      $cidr_orig = undef;
+      next;
+    }
+    my @arr = $cidrs->list;
+    if (!@arr) {
+      my $err = $@; $err =~ s/ at .*//s;
+      warn "netset: failed to parse IP range '$cidr_orig': $err\n";
+      $cidr_orig = undef;
+      next;
+    }
+    # Save exclude flag
+    if ($exclude) { $_ = "!$_" foreach (@arr); }
+    # Rewrite this @nets value directly, add any rest to @nets2
+    $cidr_orig = shift @arr;
+    push @nets2, @arr  if @arr;
+  }
+
+  foreach my $cidr_orig (@nets, @nets2) {
+    next unless defined $cidr_orig;
     my $cidr = $cidr_orig;  # leave original unchanged, useful for logging
 
     # recognizes syntax:

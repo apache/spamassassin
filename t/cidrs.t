@@ -4,8 +4,13 @@ use lib '.'; use lib 't';
 use SATest; sa_t_init("cidrs");
 
 use strict;
+use Test::More;
 
-use Test::More tests => 51;
+use constant HAS_NET_CIDR => eval { require Net::CIDR::Lite; };
+
+my $tests = 53;
+$tests += 4 if (HAS_NET_CIDR);
+plan tests => $tests;
 
 use Mail::SpamAssassin;
 use Mail::SpamAssassin::NetSet;
@@ -108,3 +113,13 @@ ok trynet "DEAD:BEEF:0000:0102:0304:0506:0:0/96",
 ok !trynet "DEAD:BEEF:0000:0102:0304:0506:1:1/90",
           "DEAD:BEEF:0000:0102:0304:0506:0:0/96";
 
+# NetSet does not parse leading zeroes as octal number, it strips them
+ok tryone "010.010.10.10", "10.10.10.10";
+ok !tryone "8.8.10.10", "010.010.10.10";
+
+if (HAS_NET_CIDR) {
+  ok tryone "127.0.0.1", "127.0.0.0-127.0.0.255";
+  ok trynet "127.0.0.16/30", "127.0.0.0-127.0.000.255";
+  ok !tryone "127.0.0.1", "127.0.0.8-127.0.0.20";
+  ok tryone "010.50.60.1", "0.0.0.0-010.255.255.255";
+}

@@ -250,15 +250,22 @@ our @OPTIONAL_MODULES = (
 {
   module => 'Net::Patricia',
   version => 1.16,
-  desc => 'If this module is available, it will be used for IP address lookups
-  in tables internal_networks, trusted_networks, and msa_networks. Recommended
-  when a number of entries in these tables is large, i.e. in hundreds
-  or thousands. However, in case of overlapping (or conflicting) networks
-  in these tables, lookup results may differ as Net::Patricia finds a
-  tightest-matching entry, while a sequential NetAddr::IP search finds
-  a first-matching entry. So when overlapping network ranges are given,
-  specifying more specific subnets (longest netmask) first, followed by
-  wider subnets ensures predictable results.',
+  desc => 'If this module is available, it will be used for IP address
+  lookups in tables internal_networks, trusted_networks, msa_networks and
+  uri_local_cidr.  Recommended when a number of entries in these tables is
+  large, i.e.  in hundreds or thousands.  However, in case of overlapping
+  (or conflicting) networks in these tables, lookup results may differ as
+  Net::Patricia finds a tightest-matching entry, while a sequential
+  NetAddr::IP search finds a first-matching entry.  So when overlapping
+  network ranges are given, specifying more specific subnets (longest
+  netmask) first, followed by wider subnets ensures predictable results.',
+},
+{
+  module => 'Net::CIDR::Lite',
+  version => 0,
+  desc => 'If this module is available, then dash separated IP range format
+  "192.168.1.1-192.168.255.255" can be used for internal_networks,
+  trusted_networks, msa_networks and uri_local_cidr.';
 },
 {
   module => 'Net::DNS::Nameserver',
