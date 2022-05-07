@@ -8,7 +8,7 @@ use Test::More;
 
 use constant HAS_NET_CIDR => eval { require Net::CIDR::Lite; };
 
-my $tests = 62;
+my $tests = 72;
 $tests += 4 if (HAS_NET_CIDR);
 plan tests => $tests;
 
@@ -56,12 +56,26 @@ ok tryone "127.0.0.1", "127.0/16";
 ok tryone "127.0.0.1", "127.0.0/24";
 ok tryone "127.0.0.0", "127.0.0.0/24";
 ok tryone "127.0.0.255", "127.0.0.0/24";
-ok tryone "127.0.0.1", "127.0.0.1/32";
 
+ok !tryone "127.0.0.0", "127.0.0.1/32";
+ok tryone "127.0.0.1", "127.0.0.1/32";
+ok !tryone "127.0.0.2", "127.0.0.1/32";
+
+ok tryone "127.0.0.0", "127.0.0.0/31";
+ok tryone "127.0.0.1", "127.0.0.0/31";
+ok !tryone "127.0.0.2", "127.0.0.0/31";
+ok !tryone "127.0.0.3", "127.0.0.0/31";
+
+# This probably misbehaves because it's not an "even" CIDR
 ok tryone "127.0.0.0", "127.0.0.1/31"; # NetAddr::IP bug? Should NOT match?
 ok tryone "127.0.0.1", "127.0.0.1/31";
 ok !tryone "127.0.0.2", "127.0.0.1/31"; # NetAddr::IP bug? Should match?
 ok !tryone "127.0.0.3", "127.0.0.1/31";
+
+ok !tryone "127.0.0.1", "127.0.0.2/31";
+ok tryone "127.0.0.2", "127.0.0.2/31";
+ok tryone "127.0.0.3", "127.0.0.2/31";
+ok !tryone "127.0.0.4", "127.0.0.2/31";
 
 ok !tryone "127.0.0.15", "127.0.0.16/31";
 ok tryone "127.0.0.16", "127.0.0.16/31";
