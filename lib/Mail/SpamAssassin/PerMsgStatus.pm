@@ -3179,6 +3179,26 @@ rule evaluation.
 
 =cut
 
+# === Bug 7735 notes ===
+#
+# Rule readiness status for dynamic meta rules evaluation (Plugins / Check /
+# do_meta_tests) is always tracked by $pms->{tests_already_hit}->{$rule}. 
+# If it exists, then rule is considered run and ready.
+#
+# The public rule_pending() / rule_ready() function pair is meant to be used
+# for any async rules, and they additionally track rule status in
+# $pms->{tests_pending}->{$rule}, which do_meta_tests also checks.  So any
+# rule_pending() call must always be accompanied later by rule_ready() or
+# got_hit().
+#
+# Any rule regardless of what it is must always be marked ready via
+# $pms->{tests_already_hit} for meta evaluation to work, even if no
+# rule_pending() is called.  If rule has no async methods, it's possible to
+# use $pms->{tests_already_hit} directly for marking, as is done for example
+# by Check.pm for all basic body/header/etc rules (look for
+# $hitsptr->{q{'.$rulename.'}} ||= 0).  As such it's also always safe to
+# call rule_ready() without rule_pending().
+
 sub rule_pending {
   my ($self, $rule) = @_;
 

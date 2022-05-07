@@ -736,6 +736,7 @@ sub do_head_tests {
             }
           }
 
+          # Make sure rule is marked ready for meta rules using $hitsptr
           $self->add_evalstr($pms, '
           if ($scoresptr->{q{'.$rulename.'}}) {
             $hitsptr->{q{'.$rulename.'}} ||= 0;
@@ -830,6 +831,7 @@ sub do_body_tests {
       ';
     }
 
+    # Make sure rule is marked ready for meta rules using $hitsptr
     $self->add_evalstr($pms, '
       if ($scoresptr->{q{'.$rulename.'}}) {
         $hitsptr->{q{'.$rulename.'}} ||= 0;
@@ -892,6 +894,7 @@ sub do_uri_tests {
       ';
     }
 
+    # Make sure rule is marked ready for meta rules using $hitsptr
     $self->add_evalstr($pms, '
       if ($scoresptr->{q{'.$rulename.'}}) {
         $hitsptr->{q{'.$rulename.'}} ||= 0;
@@ -953,6 +956,7 @@ sub do_rawbody_tests {
       ';
     }
 
+    # Make sure rule is marked ready for meta rules using $hitsptr
     $self->add_evalstr($pms, '
       if ($scoresptr->{q{'.$rulename.'}}) {
         $hitsptr->{q{'.$rulename.'}} ||= 0;
@@ -990,6 +994,7 @@ sub do_full_tests {
     my ($max) = ($conf->{tflags}->{$rulename}||'') =~ /\bmaxhits=(\d+)\b/;
     $max = untaint_var($max);
     $max ||= 0;
+    # Make sure rule is marked ready for meta rules using $hitsptr
     $self->add_evalstr($pms, '
       if ($scoresptr->{q{'.$rulename.'}}) {
         $hitsptr->{q{'.$rulename.'}} ||= 0;
@@ -1149,6 +1154,7 @@ sub run_eval_tests {
       next;
     }
 
+    # Make sure rule is marked ready for meta rules using $hitsptr
     $evalstr .= '
     if ($scoresptr->{q{'.$rulename.'}}) {
       $hitsptr->{q{'.$rulename.'}} ||= 0;

@@ -130,8 +130,9 @@ sub do_one_line_body_tests {
 
     }
 
+    # Make sure rule is marked ready for meta rules using $hitsptr
     $sub .= '
-      $self->rule_ready(q{'.$rulename.'});
+      $hitsptr->{q{'.$rulename.'}} ||= 0;
     ';
 
     return if ($opts{doing_user_rules} &&
