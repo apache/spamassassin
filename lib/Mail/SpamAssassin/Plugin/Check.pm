@@ -300,7 +300,7 @@ RULE:
         next RULE;
       }
     }
-    # Metasubs look like ($_[0]->{$rulename}||($_[1]->{$rulename}?1:0)) ...
+    # Metasubs look like ($_[1]->{$rulename}||($_[2]->{$rulename}?1:0)) ...
     my $result = $mt->{$rulename}->($pms, $h, {});
     if ($result) {
       dbg("rules: ran meta rule $rulename ======> got hit ($result)");
@@ -339,7 +339,7 @@ RULE:
         $unrun{$deprule} = 1;
       }
     }
-    # Metasubs look like ($_[0]->{$rulename}||($_[1]->{$rulename}?1:0)) ...
+    # Metasubs look like ($_[1]->{$rulename}||($_[2]->{$rulename}?1:0)) ...
     my $result = $mt->{$rulename}->($pms, $h, {});
     my $result2 = $result;
     if (%unrun) {
