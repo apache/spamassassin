@@ -265,7 +265,7 @@ our @OPTIONAL_MODULES = (
   version => 0,
   desc => 'If this module is available, then dash separated IP range format
   "192.168.1.1-192.168.255.255" can be used for internal_networks,
-  trusted_networks, msa_networks and uri_local_cidr.';
+  trusted_networks, msa_networks and uri_local_cidr.',
 },
 {
   module => 'Net::DNS::Nameserver',
