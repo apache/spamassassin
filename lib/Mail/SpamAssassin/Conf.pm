@@ -2243,7 +2243,7 @@ a spam-filtering ISP or mailing list, and that service adds
 new headers (as most of them do), these headers may provide
 inappropriate cues to the Bayesian classifier, allowing it
 to take a "short cut". To avoid this, list the headers using this
-setting.  Example:
+setting. Header matching is case-insensitive.  Example:
 
         bayes_ignore_header X-Upstream-Spamfilter
         bayes_ignore_header X-Upstream-SomethingElse
@@ -2252,14 +2252,15 @@ setting.  Example:
 
   push (@cmds, {
     setting => 'bayes_ignore_header',
-    default => [],
-    type => $CONF_TYPE_STRINGLIST,
+    type => $CONF_TYPE_HASH_KEY_VALUE,
     code => sub {
       my ($self, $key, $value, $line) = @_;
       if ($value eq '') {
         return $MISSING_REQUIRED_VALUE;
       }
-      push (@{$self->{bayes_ignore_headers}}, split(/\s+/, $value));
+      foreach (split(/\s+/, $value)) {
+        $self->{bayes_ignore_header}->{lc $_} = 1;
+      }
     }
   });
 
@@ -4920,7 +4921,7 @@ sub new {
   $self->{headers_spam} = [ ];
   $self->{headers_ham} = [ ];
 
-  $self->{bayes_ignore_headers} = [ ];
+  $self->{bayes_ignore_header} = { };
   $self->{bayes_ignore_from} = { };
   $self->{bayes_ignore_to} = { };
 
