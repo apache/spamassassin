@@ -6,7 +6,7 @@ use SATest; sa_t_init("dnsbl");
 use Test::More;
 plan skip_all => "Net tests disabled" unless conf_bool('run_net_tests');
 plan skip_all => "Can't use Net::DNS Safely" unless can_use_net_dns_safely();
-plan tests => 18;
+plan tests => 21;
 
 # ---------------------------------------------------------------------------
 # bind configuration currently used to support this test
@@ -47,27 +47,30 @@ EOF
 # hits we expect and some hits we don't expect
 
 %patterns = (
- q{ <dns:98.3.137.144.dnsbltest.spamassassin.org> [127.0.0.2] } => 'P_1',
- q{ <dns:134.88.73.210.dnsbltest.spamassassin.org> [127.0.0.4] } => 'P_2',
- q{ <dns:18.13.119.61.dnsbltest.spamassassin.org> [127.0.0.12] } => 'P_3',
- q{ <dns:14.35.17.212.dnsbltest.spamassassin.org> [127.0.0.1] } => 'P_4',
- q{ <dns:226.149.120.193.dnsbltest.spamassassin.org> [127.0.0.1] } => 'P_5',
- q{ <dns:example.com.dnsbltest.spamassassin.org> [127.0.0.2] } => 'P_6',
- q{,DNSBL_TEST_TOP,} => 'P_8',
- q{,DNSBL_TEST_WHITELIST,} => 'P_9',
- q{,DNSBL_TEST_DYNAMIC,} => 'P_10',
- q{,DNSBL_TEST_SPAM,} => 'P_11',
- q{,DNSBL_TEST_RELAY,} => 'P_12',
- q{,DNSBL_TXT_TOP,} => 'P_13',
- q{,DNSBL_TXT_RE,} => 'P_14',
- q{,DNSBL_RHS,} => 'P_15',
+ q{'<dns:98.3.137.144.dnsbltest.spamassassin.org> [127.0.0.2]'} => '',
+ q{'<dns:134.88.73.210.dnsbltest.spamassassin.org> [127.0.0.4]'} => '',
+ q{'<dns:18.13.119.61.dnsbltest.spamassassin.org> [127.0.0.12]'} => '',
+ q{'<dns:14.35.17.212.dnsbltest.spamassassin.org> [127.0.0.1]'} => '',
+ q{'<dns:226.149.120.193.dnsbltest.spamassassin.org> [127.0.0.1]'} => '',
+ q{'<dns:example.com.dnsbltest.spamassassin.org> [127.0.0.2]'} => '',
+ q{'1.0 DNSBL_TEST_TOP'} => '',
+ q{'1.0 DNSBL_TEST_WHITELIST'} => '',
+ q{'1.0 DNSBL_TEST_DYNAMIC'} => '',
+ q{'1.0 DNSBL_TEST_SPAM'} => '',
+ q{'1.0 DNSBL_TEST_RELAY'} => '',
+ q{'1.0 DNSBL_TXT_TOP'} => '',
+ q{'1.0 DNSBL_TXT_RE'} => '',
+ q{'1.0 DNSBL_RHS'} => '',
+ q{'1.0 META_DNSBL_A'} => '',
+ q{'1.0 META_DNSBL_B'} => '',
+ q{'1.0 META_DNSBL_C'} => '',
 );
 
 %anti_patterns = (
- q{,DNSBL_TEST_MISS,} => 'P_19',
- q{,DNSBL_TXT_MISS,} => 'P_20',
- q{,DNSBL_TEST_WHITELIST_MISS,} => 'P_21',
- q{ launching DNS A query for 14.35.17.212.untrusted.dnsbltest.spamassassin.org. } => 'untrusted',
+ q{'1.0 DNSBL_TEST_MISS'} => '',
+ q{'1.0 DNSBL_TXT_MISS'} => '',
+ q{'1.0 DNSBL_TEST_WHITELIST_MISS'} => '',
+ q{'14.35.17.212.untrusted.dnsbltest.spamassassin.org'} => '',
 );
 
 tstprefs("
@@ -84,9 +87,6 @@ add_header all Untrusted _RELAYSUNTRUSTED_
 clear_trusted_networks
 trusted_networks 10.
 trusted_networks 150.51.53.1
-
-# make ,DNSBL, pattern matches work (never allow it first in the tests= list)
-meta AAA 1
 
 header DNSBL_TEST_TOP	eval:check_rbl('test', 'dnsbltest.spamassassin.org.')
 describe DNSBL_TEST_TOP	DNSBL A record match
@@ -136,9 +136,18 @@ header DNSBL_RHS	eval:check_rbl_from_host('r', 'dnsbltest.spamassassin.org.')
 describe DNSBL_RHS	DNSBL RHS match
 tflags DNSBL_RHS	net
 
+# Bug 7897 - test that meta rules depending on net rules hit
+meta META_DNSBL_A DNSBL_TEST_DYNAMIC
+# It also needs to hit even if priority is lower than dnsbl (-100)
+meta META_DNSBL_B DNSBL_TEST_SPAM
+priority META_DNSBL_B -500
+# Or super high
+meta META_DNSBL_C DNSBL_TEST_RELAY
+priority META_DNSBL_C 2000
+priority DNSBL_TEST_RELAY 2000
+
 ");
 
-# The -D clobbers test performance but some patterns & antipatterns depend on debug output
-sarun ("-D -t < data/spam/dnsbl.eml 2>&1", \&patterns_run_cb);
+sarun ("-t < data/spam/dnsbl.eml", \&patterns_run_cb);
 ok_all_patterns();
 
