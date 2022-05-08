@@ -1,7 +1,5 @@
 #!/usr/bin/perl -T
 
-# run with:   sudo prove -v t/root_spamd*
-
 use lib '.'; use lib 't';
 use SATest; sa_t_init("root_spamd_virtual");
 
