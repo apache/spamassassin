@@ -365,7 +365,7 @@ RULE:
 
   goto RULE if $retry--;
 
-  if ($would_log_rules_all && %unrun_metas) {
+  if (%unrun_metas) {
     foreach (sort keys %unrun_metas) {
       dbg("rules-all: unrun dependencies prevented meta $_ from running: ".
           join(', ', sort keys %{$unrun_metas{$_}}));
