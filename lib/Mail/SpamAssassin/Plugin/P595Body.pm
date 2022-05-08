@@ -20,6 +20,7 @@ use Mail::SpamAssassin::Plugin;
 use Mail::SpamAssassin::Logger;
 use Mail::SpamAssassin::Plugin::BodyRuleBaseExtractor;
 use Mail::SpamAssassin::Plugin::OneLineBodyRuleType;
+use Mail::SpamAssassin::Util qw(qr_to_string);
 
 use strict;
 use warnings;
@@ -151,6 +152,7 @@ sub run_body_fast_scan {
       my %alreadydone;
       foreach my $rulename (@caught) {
         {
+          next if not defined $rulename;
           # only try each rule once per line
           next if exists $alreadydone{$rulename};
           $alreadydone{$rulename} = undef;
