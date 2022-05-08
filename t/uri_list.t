@@ -2,12 +2,12 @@
 
 # Tests for Bug #7591, which is actually a bug seen in the EL7 build of Perl.
 # The real root cause is obscure, so we test for the bug not the Perl version.
- 
-use lib '.'; use lib 't';
+
 use strict;
+use lib '.'; use lib 't';
+use SATest; sa_t_init("uri_list");
 use Test::More tests=> 12;
 use Mail::SpamAssassin::Util;
-use SATest; sa_t_init("uri_list");
 use warnings;
 use Cwd;
 

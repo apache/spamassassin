@@ -2,6 +2,9 @@
 
 use strict;
 
+use lib '.'; use lib 't';
+use SATest; sa_t_init("date");
+
 use Mail::SpamAssassin;
 use Mail::SpamAssassin::Util;
 

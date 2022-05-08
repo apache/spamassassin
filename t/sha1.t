@@ -1,6 +1,8 @@
 #!/usr/bin/perl -w -T
 
 use strict;
+use lib '.'; use lib 't';
+use SATest; sa_t_init("sha1");
 
 use Mail::SpamAssassin;
 use Digest::SHA qw(sha1_hex);

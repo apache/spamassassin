@@ -1,26 +1,15 @@
 #!/usr/bin/perl
 
+use lib '.'; use lib 't';
+use SATest; sa_t_init('perlcritic');
+
 use strict;
 use warnings;
-use File::Spec;
 use Test::More;
 use English qw(-no_match_vars);
 
-BEGIN {
-  if (-d 'xt') { chdir 'xt'; }
-
-  if (-e 'test_dir') {            # running from test directory, not ..
-    unshift(@INC, '../blib/lib');
-    unshift(@INC, '../lib');
-  }
-}
-
-eval { require Test::Perl::Critic; };
-
-if ( $EVAL_ERROR ) {
-    my $msg = 'Test::Perl::Critic required to criticise code';
-    plan( skip_all => $msg );
-}
+plan skip_all => "This test requires Test::Perl::Critic" unless (eval { require Test::Perl::Critic; 1} );
+plan skip_all => "PerlCritic test cannot run in Taint mode" if (${^TAINT});
 
 open RC, ">../t/log/perlcritic.rc"  or die "cannot create t/log/perlcritic.rc";
 

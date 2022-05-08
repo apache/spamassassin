@@ -6,6 +6,7 @@ use Test::More tests => 4;
 use IO::File;
 
 # ---------------------------------------------------------------------------
+diag "Note: This test when successful displays lockfile warning messages";
 
 %is_spam_patterns = (
 q{ X-Spam-Status: Yes}, 'isspam',

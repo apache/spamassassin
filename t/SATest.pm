@@ -26,6 +26,7 @@ use vars qw($RUNNING_ON_WINDOWS $SSL_AVAILABLE
             $workdir $siterules $localrules $userrules $userstate
             $keep_workdir $mainpid);
 
+my $sa_code_dir;
 BEGIN {
   require Exporter;
   use vars qw(@ISA @EXPORT @EXPORT_OK);
@@ -65,11 +66,19 @@ BEGIN {
   # Remove tainted envs, at least ENV used in FreeBSD
   delete @ENV{qw(IFS CDPATH ENV BASH_ENV)};
 
-  # Fix INC to point to built SA
-  if (-e 't/test_dir') { unshift(@INC, 'blib/lib'); }
-  elsif (-e 'test_dir') { unshift(@INC, '../blib/lib'); }
+  # Fix INC to point to absolute path of built SA
+  if (-e 't/test_dir') { $sa_code_dir = 'blib/lib'; }
+  elsif (-e 'test_dir') { $sa_code_dir = '../blib/lib'; }
   else { die "FATAL: not in or below test directory?\n"; }
+  File::Spec->rel2abs($sa_code_dir) =~ /^(.*)\z/s;
+  $sa_code_dir = $1;
+  if (not -d $sa_code_dir) {
+    die "FATAL: not in expected directory relative to built code tree?\n";
+  }
 }
+
+# use is run at compile time, but after the variable has been computed in the BEGIN block
+use lib $sa_code_dir;
 
 # Set up for testing. Exports (as global vars):
 # out: $home: $HOME env variable
@@ -749,7 +758,6 @@ sub create_saobj {
     $setup_args{$arg} = $args->{$arg};
   }
 
-  # We'll assume that the test has setup INC correctly
   require Mail::SpamAssassin;
 
   my $sa = Mail::SpamAssassin->new(\%setup_args);
@@ -760,7 +768,6 @@ sub create_saobj {
 sub create_clientobj {
   my $args = shift;
 
-  # We'll assume that the test has setup INC correctly
   require Mail::SpamAssassin::Client;
 
   my $client = Mail::SpamAssassin::Client->new($args);
