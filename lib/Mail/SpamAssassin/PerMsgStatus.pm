@@ -3171,11 +3171,15 @@ sub got_hit {
 =item $status->rule_pending ($rulename)
 
 Register a pending rule.  Must be called from rules eval-function, if the
-result can arrive later than when exiting the function (async lookups).
+result can arrive later than when exiting the function (async lookups). 
+This is not required if eval uses $status->{async}->bgsend_and_start_lookup(),
+as it automatically registers a pending rule and also marks it ready when the
+result callback is run.
 
 $status->rule_ready($rulename) or $status->got_hit(...) must be called when
-the result has arrived.  If these are not used, it can break depending meta
-rule evaluation.
+the result has arrived.  If these are not used, it can break dynamic meta rule
+evaluation.  This does not apply when bgsend_and_start_lookup() was used, as
+mentioned above.
 
 =cut
 
@@ -3189,7 +3193,7 @@ rule evaluation.
 # for any async rules, and they additionally track rule status in
 # $pms->{tests_pending}->{$rule}, which do_meta_tests also checks.  So any
 # rule_pending() call must always be accompanied later by rule_ready() or
-# got_hit().
+# got_hit(). These are not required when bgsend_and_start_lookup() is used.
 #
 # Any rule regardless of what it is must always be marked ready via
 # $pms->{tests_already_hit} for meta evaluation to work, even if no
@@ -3216,7 +3220,7 @@ sub rule_pending {
 
 Mark a previously marked $status->rule_pending() rule ready.  Alternatively
 $status->got_hit() will also mark rule ready.  If these are not used, it can
-break depending meta rule evaluation.
+break dynamic meta rule evaluation.
 
 =cut
 
@@ -3225,7 +3229,6 @@ sub rule_ready {
 
   if ($self->get_pending_lookups($rule)) {
     # Can't be ready if there are pending lookups, ignore for now.
-    # Final do_meta_tests() in Check.pm will allow pending anyway.
     return;
   }
 
