@@ -115,7 +115,7 @@ sub do_one_line_body_tests {
       while ($$lref =~ /$qrptr->{q{'.$rulename.'}}/gop) {
         $self->got_hit(q{'.$rulename.'}, "BODY: ", ruletype => "one_line_body");
         '. $self->hit_rule_plugin_code($pms, $rulename, "one_line_body", "") . '
-        '. ($max? 'last if $self->{tests_already_hit}->{q{'.$rulename.'}} >= '.$max.';' : '') . '
+        '. ($max? 'last if $hitsptr->{q{'.$rulename.'}} >= '.$max.';' : '') . '
       }
       ';
 
