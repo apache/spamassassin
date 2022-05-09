@@ -74,7 +74,6 @@ sub new {
     'check_rbl_ns_from',
     'check_rbl_txt',
     'check_rbl_sub',
-    'check_rbl_results_for',
     'check_rbl_from_host',
     'check_rbl_from_domain',
     'check_rbl_envfrom',
