@@ -154,7 +154,7 @@ sub finish_parsing_start {
 
   # Adjust priority -100 to launch early
   # Find rulenames from eval_to_rule mappings
-  foreach my $evalfunc ('check_rbl','check_rbl_sub','check_rbl_txt') {
+  foreach my $evalfunc (@{$self->{'evalrules'}}) {
     foreach (@{$opts->{conf}->{eval_to_rule}->{$evalfunc}||[]}) {
       dbg("dnseval: adjusting rule $_ priority to -100");
       $opts->{conf}->{priority}->{$_} = -100;
