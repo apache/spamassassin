@@ -318,7 +318,7 @@ sub bgsend_and_start_lookup {
     if ($blocked) {
       dbg("async: blocked by %s: %s", $blocked_by, $dnskey);
     } else {
-      dbg("async: launching %s for %s", $dnskey, $key);
+      dbg("async: launching %s", $dnskey);
       $id = $self->{main}->{resolver}->bgsend($domain, $type, $class, sub {
           my($pkt, $pkt_id, $timestamp) = @_;
           # this callback sub is called from DnsResolver::poll_responses()
@@ -662,8 +662,10 @@ sub abort_remaining_lookups {
     foreach my $tuple (@{$dns_query_info->{applicants}}) {
       my($ent, $cb) = @$tuple;
       if ($cb) {
-        dbg("async: calling callback/abort on key %s%s", $dnskey,
-            !defined $ent->{rulename} ? '' : ", rule ".$ent->{rulename});
+        my @rulenames = grep { defined } (ref $ent->{rulename} ?
+                  @{$ent->{rulename}} : $ent->{rulename});
+        dbg("async: calling callback/abort on key %s, rules: %s", $dnskey,
+            join(", ", @rulenames));
         $cb_count++;
         eval {
           $cb->($ent, undef); 1;
