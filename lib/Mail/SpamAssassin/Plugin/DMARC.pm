@@ -77,7 +77,8 @@ use Mail::SpamAssassin::Plugin;
 
 our @ISA = qw(Mail::SpamAssassin::Plugin);
 
-sub dbg { my $msg = shift; Mail::SpamAssassin::Plugin::dbg("DMARC: $msg", @_); }
+sub dbg { my $msg = shift; Mail::SpamAssassin::Logger::dbg("DMARC: $msg", @_); }
+sub info { my $msg = shift; Mail::SpamAssassin::Logger::info("DMARC: $msg", @_); }
 
 sub new {
   my ($class, $mailsa) = @_;
