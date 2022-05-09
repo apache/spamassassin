@@ -149,6 +149,19 @@ sub set_config {
     $conf->{parser}->register_commands(\@cmds);
 }
 
+sub finish_parsing_start {
+  my ($self, $opts) = @_;
+
+  # Adjust priority -100 to launch early
+  # Find rulenames from eval_to_rule mappings
+  foreach my $evalfunc ('check_rbl','check_rbl_sub','check_rbl_txt') {
+    foreach (@{$opts->{conf}->{eval_to_rule}->{$evalfunc}||[]}) {
+      dbg("dnseval: adjusting rule $_ priority to -100");
+      $opts->{conf}->{priority}->{$_} = -100;
+    }
+  }
+}
+
 # this is necessary because PMS::run_rbl_eval_tests() calls these functions
 # directly as part of PMS
 sub check_start {
