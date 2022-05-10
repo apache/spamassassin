@@ -23,7 +23,7 @@ plan tests => 37;
 # - Rules defined only by "reuse" can have arbitrary scores and priorities set
 
 # Need all files under $localrules for mass-check
-foreach my $tainted (<$siterules/*.pre>) {
+foreach my $tainted (<$siterules/*.pre $siterules/languages>) {
   $tainted =~ /(.*)/;
   my $file = $1;
   copy ($file, "$localrules")
