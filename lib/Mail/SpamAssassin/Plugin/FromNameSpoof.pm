@@ -443,7 +443,7 @@ sub _check_fromnamespoof {
     foreach my $list (@lists) {
       $list_refs->{$list} = $conf->{$list};
     }
-    dbg("using addrlists for owner aliases: ".join(', ', map { s/^FNS_//r; $_ } @lists));
+    dbg("using addrlists for owner aliases: ".join(', ', map { s/^FNS_//r; } @lists));
   }
   my $fromname_owner = $self->_find_address_owner($fromname_addr, $fromname_domain, $list_refs);
   my $from_owner = $self->_find_address_owner($from_addr, $from_domain, $list_refs);
