@@ -879,7 +879,8 @@ sub ok_all_patterns {
         ok ($found{$type} == 1) or warn "Found more than once: $type at $file line $line.\n";
       }
     } else {
-      warn "\tNot found: $type = $pat at $file line $line.\n";
+      my $typestr = $type eq $pat ? "" : "$type = ";
+      warn "\tNot found: $typestr$pat at $file line $line.\n";
       if (!$dont_ok) {
         $keep_workdir = 1;
         ok (0);                     # keep the right # of tests
@@ -891,7 +892,8 @@ sub ok_all_patterns {
     my $type = $anti_patterns{$pat};
     print "\tChecking for anti-pattern $type at $file line $line.\n";
     if (defined $found_anti{$type}) {
-      warn "\tFound anti-pattern: $type = $pat at $file line $line.\n";
+      my $typestr = $type eq $pat ? "" : "$type = ";
+      warn "\tFound anti-pattern: $typestr$pat at $file line $line.\n";
       if (!$dont_ok) { ok (0); }
       $wasfailure++;
     }
@@ -924,7 +926,8 @@ sub skip_all_patterns {
       if ($skip) {
         warn "\tTest skipped: $skip at $file line $line.\n";
       } else {
-        warn "\tNot found: $type = $pat at $file line $line.\n";
+        my $typestr = $type eq $pat ? "" : "$type = ";
+        warn "\tNot found: $typestr$pat at $file line $line.\n";
       }
       skip ($skip, 0);                     # keep the right # of tests
     }
@@ -933,7 +936,8 @@ sub skip_all_patterns {
     my $type = $anti_patterns{$pat};
     print "\tChecking for anti-pattern $type\n";
     if (defined $found_anti{$type}) {
-      warn "\tFound anti-pattern: $type = $pat at $file line $line.\n";
+      my $typestr = $type eq $pat ? "" : "$type = ";
+      warn "\tFound anti-pattern: $typestr$pat at $file line $line.\n";
       skip ($skip, 0);
     }
     else
