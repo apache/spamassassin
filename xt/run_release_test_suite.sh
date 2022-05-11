@@ -47,4 +47,6 @@ overridevalues="1:1:1:1:1"
 # force -T on the tests, don't leave it up to the user
 prove -T $verbose "$@" t/*.t xt/20_saw_ampersand.t :: --override $overrideflags $overridevalues
 
-t.rules/run $verbose
+# t.rules/run script takes a --verbose option but it is too verbose when used with prove -v
+# If you need to see more output from a rule test use   t.rules/run --verbose --tests RULENAME 
+prove -T $verbose t.rules/run
