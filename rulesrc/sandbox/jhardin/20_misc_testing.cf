@@ -4039,4 +4039,11 @@ header     __FROM_ADDR_GMAIL           From:addr =~ /\@gmail\.com>?$/i
 meta       POSSIBLE_GMAIL_PHISHER      (__FROM_ADDR_GMAIL && __NAME_EMAIL_DIFF)
 describe   POSSIBLE_GMAIL_PHISHER      Apparent phishing email sent from a gmail account
 
+header     __REPTO_INFONUMSCOM         Reply-To:addr =~ /^info@\d{5,}\.com$/i
+meta       REPTO_INFONUMSCOM           __REPTO_INFONUMSCOM
+score      REPTO_INFONUMSCOM           3.000	# limit
+tflags     REPTO_INFONUMSCOM           publish
+
+
+
 
