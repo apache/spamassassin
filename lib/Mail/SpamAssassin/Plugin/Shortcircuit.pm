@@ -89,9 +89,12 @@ To override a test that uses shortcircuiting, you can set the classification
 type to C<off>.
 
 Note that DNS and other network lookups are launched when SA reaches
-priority -100.  If you want to shortcircuit scanning before the network
+priority -100.  If you want to shortcircuit scanning before any network
 queries are sent, you need to set lower than -100 priority to any such rule,
-like -200 in the examples below.
+like -200 as in the examples below.
+
+Shortcircuited test will be automatically set to priority -200, but only if
+the original priority is unchanged at default 0.
 
 =over 4
 
@@ -160,7 +163,8 @@ to:
 
         # set the defaults:
         $self->{shortcircuit}->{$rule} = $type;
-        $self->{priority}->{$rule} = -200;
+        # don't override existing priority unless it's default 0
+        $self->{priority}->{$rule} ||= -200;
 
         my $tf = $self->{tflags}->{$rule};
         $self->{tflags}->{$rule} = ($tf ? $tf." " : "") .
