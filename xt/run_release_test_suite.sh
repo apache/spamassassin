@@ -16,8 +16,8 @@
 
 if [ "$(id -u)" -eq 0 ]; then echo Do ont run this as root; exit 1; fi
 
-# One test doesn't work with taint mode, separate out a -T option if found
-# Also check for a verbose option and pass it to t.rules/run
+# Remove -T option from user, because this script always adds it
+# Check for a verbose option and pass it to t.rules/run
 for a; do
     shift
     case $a in
@@ -44,8 +44,7 @@ fi
 overrideflags="run_long_tests:run_net_tests:run_dcc_tests:run_sql_pref_tests:run_spamd_prefork_stress_test"
 overridevalues="1:1:1:1:1"
 
-# force -T on the tests that work with it, don't leave it up to the user
+# force -T on the tests, don't leave it up to the user
 prove -T $verbose "$@" t/*.t xt/20_saw_ampersand.t :: --override $overrideflags $overridevalues
-prove $verbose "$@" xt/60_perlcritic.t :: --override $overrideflags $overridevalues
 
 t.rules/run $verbose
