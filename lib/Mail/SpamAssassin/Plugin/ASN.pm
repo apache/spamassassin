@@ -71,7 +71,9 @@ Autonomous System Number (ASN) of the connecting IP address.
  header AS_1234 eval:check_asn('/^AS1234\b/')
 
  # ASN Organisation: GeoIP ASN has, DNS lists might not have
- header AS_GOOGLE eval:check_asn('/\bGoogle\b/i')
+ # Note the second parameter which checks MYASN tag (default is ASN)
+ asn_lookup myview.example.com _MYASN_ _MYASNCIDR_
+ header AS_GOOGLE eval:check_asn('/\bGoogle\b/i', 'MYASN')
 
 =head1 DESCRIPTION
 
@@ -132,7 +134,6 @@ use Mail::SpamAssassin::Plugin;
 use Mail::SpamAssassin::Logger;
 use Mail::SpamAssassin::Util qw(reverse_ip_address compile_regexp);
 use Mail::SpamAssassin::Constants qw(:ip);
-use version 0.77;
 
 our @ISA = qw(Mail::SpamAssassin::Plugin);
 
@@ -388,24 +389,25 @@ sub extract_metadata {
       $asn_found = 1;
       dbg("asn: GeoDB found ASN $asn");
       # Prevent double prefix
-      my $asn_tag =
+      my $asn_value =
         length($conf->{asn_prefix}) && index($asn, $conf->{asn_prefix}) != 0 ?
           $conf->{asn_prefix}.$asn : $asn;
-      $asn_tag .= ' '.$org if defined $org && length($org);
-      $pms->set_tag('ASN', $asn_tag);
+      $asn_value .= ' '.$org if defined $org && length($org);
+      $pms->set_tag('ASN', $asn_value);
       # For Bayes
       $pms->{msg}->put_metadata('X-ASN', $asn);
     }
   }
 
-  # No point continuing without DNS from now on
-  if (!$conf->{asn_use_dns} || !$pms->is_dns_available()) {
-    dbg("asn: skipping disabled DNS lookups");
-    return;
-  }
   # Skip DNS if GeoDB was successful and preferred
   if ($asn_found && $conf->{asn_prefer_geodb}) {
     dbg("asn: GeoDB lookup successful, skipping DNS lookups");
+    return;
+  }
+
+  # No point continuing without DNS from now on
+  if (!$conf->{asn_use_dns} || !$pms->is_dns_available()) {
+    dbg("asn: skipping disabled DNS lookups");
     return;
   }
 
@@ -570,7 +572,7 @@ sub process_dns_result {
 }
 
 sub check_asn {
-  my ($self, $pms, $re) = @_;
+  my ($self, $pms, $re, $asn_tag) = @_;
 
   my $rulename = $pms->get_current_eval_rule_name();
   if (!defined $re) {
@@ -586,9 +588,10 @@ sub check_asn {
 
   $pms->rule_pending($rulename); # mark async
 
-  $pms->action_depends_on_tags('ASN',
+  $asn_tag = 'ASN' unless defined $asn_tag;
+  $pms->action_depends_on_tags($asn_tag,
     sub { my($pms,@args) = @_;
-      $self->_check_asn($pms, $rulename, $rec);
+      $self->_check_asn($pms, $rulename, $rec, $asn_tag);
     }
   );
 
@@ -596,15 +599,15 @@ sub check_asn {
 }
 
 sub _check_asn {
-  my ($self, $pms, $rulename, $rec) = @_;
+  my ($self, $pms, $rulename, $rec, $asn_tag) = @_;
 
   $pms->rule_ready($rulename); # mark rule ready for metas
 
-  my $asn = $pms->get_tag('ASN');
+  my $asn = $pms->get_tag($asn_tag);
   return if !defined $asn;
 
   if ($asn =~ $rec) {
-    $pms->test_log("ASN: $asn", $rulename);
+    $pms->test_log("$asn_tag: $asn", $rulename);
     $pms->got_hit($rulename, "");
   }
 }
@@ -613,5 +616,6 @@ sub _check_asn {
 sub has_asn_lookup_ipv6 { 1 }
 sub has_asn_geodb { 1 }
 sub has_check_asn { 1 }
+sub has_check_asn_tag { 1 } # $asn_tag parameter for check_asn()
 
 1;
