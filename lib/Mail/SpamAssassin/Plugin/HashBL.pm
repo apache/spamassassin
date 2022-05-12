@@ -28,23 +28,19 @@ HashBL - query hashed (and unhashed) DNS blocklists
 
   header   HASHBL_EMAIL eval:check_hashbl_emails('ebl.example.invalid')
   describe HASHBL_EMAIL Message contains email address found on EBL
-  priority HASHBL_EMAIL -100 # required priority to launch async lookups early
   tflags   HASHBL_EMAIL net
 
   hashbl_acl_freemail gmail.com
   header   HASHBL_OSENDR eval:check_hashbl_emails('rbl.example.invalid/A', 'md5/max=10/shuffle', 'X-Original-Sender', '^127\.', 'freemail')
   describe HASHBL_OSENDR Message contains email address found on HASHBL
-  priority HASHBL_OSENDR -100 # required priority to launch async lookups early
   tflags   HASHBL_OSENDR net
 
   body     HASHBL_BTC eval:check_hashbl_bodyre('btcbl.example.invalid', 'sha1/max=10/shuffle', '\b([13][a-km-zA-HJ-NP-Z1-9]{25,34})\b')
   describe HASHBL_BTC Message contains BTC address found on BTCBL
-  priority HASHBL_BTC -100 # required priority to launch async lookups early
   tflags   HASHBL_BTC net
 
   header   HASHBL_URI eval:check_hashbl_uris('rbl.example.invalid', 'sha1', '127.0.0.32')
   describe HASHBL_URI Message contains uri found on rbl
-  priority HASHBL_URI -100 # required priority to launch async lookups early
   tflags   HASHBL_URI net
 
 =head1 DESCRIPTION
@@ -98,7 +94,6 @@ For existing public email blocklist, see: http://msbl.org/ebl.html
   # Working example, see http://msbl.org/ebl.html before usage
   header   HASHBL_EMAIL eval:check_hashbl_emails('ebl.msbl.org')
   describe HASHBL_EMAIL Message contains email address found on EBL
-  priority HASHBL_EMAIL -100 # required priority to launch async lookups early
   tflags   HASHBL_EMAIL net
 
 Default regex for matching and capturing emails can be overridden with
@@ -284,6 +279,20 @@ sub parse_config {
     }
 
     return 0;
+}
+
+sub finish_parsing_start {
+  my ($self, $opts) = @_;
+  my $conf = $opts->{conf};
+
+  # Adjust priority -100 to launch early
+  # Find rulenames from eval_to_rule mappings
+  foreach my $evalfunc ('check_hashbl_emails','check_hashbl_uris','check_hashbl_bodyre') {
+    foreach (@{$conf->{eval_to_rule}->{$evalfunc}||[]}) {
+      dbg("adjusting rule $_ priority to -100");
+      $conf->{priority}->{$_} = -100;
+    }
+  }
 }
 
 sub finish_parsing_end {
