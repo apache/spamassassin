@@ -1152,7 +1152,9 @@ sub fix_priorities {
   my $conf = $self->{conf};
 
   return unless $conf->{meta_dependencies};    # order requirement
+
   my $pri = $conf->{priority};
+  my $tflags = $conf->{tflags};
 
   # sort into priority order, lowest first -- this way we ensure that if we
   # rearrange the pri of a rule early on, we cannot accidentally increase its
@@ -1167,8 +1169,14 @@ sub fix_priorities {
     foreach my $dep (@$deps) {
       my $deppri = $pri->{$dep};
       if (defined $deppri && $deppri > $basepri) {
-        dbg("rules: $rule (pri $basepri) requires $dep (pri $deppri): fixed");
-        $pri->{$dep} = $basepri;
+        if ($basepri < -100 && ($tflags->{$dep}||'') =~ /\bnet\b/) {
+          dbg("rules: $rule (pri $basepri) requires $dep (pri $deppri): fixed to -100 (net rule)");
+          $pri->{$dep} = -100;
+          $conf->{priorities}->{-100}++;
+        } else {
+          dbg("rules: $rule (pri $basepri) requires $dep (pri $deppri): fixed");
+          $pri->{$dep} = $basepri;
+        }
       }
     }
   }
