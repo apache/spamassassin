@@ -783,6 +783,17 @@ score SPF_SOFTFAIL 0 0.972 0 0.665 # n=0 n=2
 # </gen:mutable>
 endif # Mail::SpamAssassin::Plugin::SPF
 
+# DMARC
+ifplugin Mail::SpamAssassin::Plugin::DMARC
+score DMARC_PASS -0.001
+# <gen:mutable>
+score DMARC_REJECT 0.001 1.797 0.001 1.797 # n=0 n=2
+score DMARC_QUAR 0.001 1.198 0.001 1.198 # n=0 n=2
+score DMARC_NONE 0.001 0.898 0.001 0.898 # n=0 n=2
+# </gen:mutable>
+score DMARC_MISSING 0.001
+endif # Mail::SpamAssassin::Plugin::DMARC
+
 # URIDNSBL
 ifplugin Mail::SpamAssassin::Plugin::URIDNSBL
 # <gen:mutable>
