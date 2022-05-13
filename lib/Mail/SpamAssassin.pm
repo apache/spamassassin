@@ -2212,6 +2212,18 @@ sub get_pre_files_in_dir {
   return $self->_get_cf_pre_files_in_dir($dir, 'pre');
 }
 
+sub _reorder_dir {
+  # Official ASF channel should be loaded first in
+  # order to be able to override scores by using custom channels
+  # bz 7991
+  if($a eq 'updates_spamassassin_org.cf') {
+    return -1;
+  } elsif ($b eq 'updates_spamassassin_org.cf') {
+    return 1;
+  }
+  return $a cmp $b;
+}
+
 sub _get_cf_pre_files_in_dir {
   my ($self, $dir, $type) = @_;
 
@@ -2230,7 +2242,7 @@ sub _get_cf_pre_files_in_dir {
       my $eval_stat = $@ ne '' ? $@ : "errno=$!";  chomp $eval_stat;
       die "_get_cf_pre_files_in_dir error: $eval_stat";
     };
-    @cfs = sort { $a cmp $b } @cfs;
+    @cfs = sort { _reorder_dir($a, $b) } @cfs;
     return @cfs;
   }
   else {
@@ -2239,7 +2251,7 @@ sub _get_cf_pre_files_in_dir {
                      /\.${type}$/i && -f "$dir/$_" } readdir(SA_CF_DIR);
     closedir SA_CF_DIR;
 
-    return map { "$dir/$_" } sort { $a cmp $b } @cfs;
+    return map { "$dir/$_" } sort { _reorder_dir($a, $b) } @cfs;
   }
 }
 
