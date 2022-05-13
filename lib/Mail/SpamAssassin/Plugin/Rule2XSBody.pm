@@ -197,6 +197,11 @@ sub check_rules_at_priority {
   $self->{one_line_body}->check_rules_at_priority($params);
 }
 
+sub check_cleanup {
+  my ($self, $params) = @_;
+  $self->{one_line_body}->check_cleanup($params);
+}
+
 ###########################################################################
 
 sub run_body_fast_scan {

@@ -66,6 +66,21 @@ sub check_start {
   }
 }
 
+sub check_cleanup {
+  my ($self, $params) = @_;
+  my $pms = $params->{permsgstatus};
+  my $hitsptr = $pms->{tests_already_hit};
+  my $scoresptr = $pms->{conf}->{scores};
+
+  # Force all body rules ready for meta rules.  Need to do it here in
+  # cleanup, because the body is scanned per line instead of per rule
+  if ($pms->{conf}->{skip_body_rules}) {
+    foreach (keys %{$pms->{conf}->{skip_body_rules}}) {
+      $hitsptr->{$_} ||= 0  if $scoresptr->{$_};
+    }
+  }
+}
+
 ###########################################################################
 
 1;

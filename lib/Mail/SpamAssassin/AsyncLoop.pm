@@ -73,7 +73,7 @@ sub new {
     queries_started     => 0,
     queries_completed   => 0,
     pending_lookups     => { },
-    pending_rules	=> { },
+    pending_rules	=> { },  # maintain pending rules list for meta evaluation
     rules_for_key	=> { },  # record all rules used by a key for logging
     timing_by_query     => { },
     all_lookups         => { },  # keyed by "rr_type/domain"
@@ -181,8 +181,17 @@ Hash of options. Only supported and required option is master_deadline:
 
 =cut
 
+sub start_queue {
+  my($self) = @_;
+
+  $self->{wait_queue} = 1;
+}
+
 sub launch_queue {
   my($self) = @_;
+
+  delete $self->{wait_queue};
+
   if ($self->{bgsend_queue}) {
     dbg("async: launching queued lookups");
     foreach (@{$self->{bgsend_queue}}) {
@@ -199,14 +208,17 @@ sub bgsend_and_start_lookup {
   return if $self->{main}->{resolver}->{no_resolver};
 
   # Waiting for priority -100 to launch?
-  if ($self->{wait_launch}) {
+  if ($self->{wait_queue}) {
     push @{$self->{bgsend_queue}}, [@_];
-    dbg("async: dns priority not reached, queueing lookup: $domain/$type");
+    dbg("async: DNS priority not reached, queueing lookup: $domain/$type");
     return $ent;
   }
 
-  if (!defined $ent->{rulename}) {
-    info("async: bgsend_and_start_lookup called without rulename: $domain/$type");
+  if (!defined $ent->{rulename} && !$self->{rulename_warned}++) {
+    my($package, $filename, $line) = caller;
+    warn "async: bgsend_and_start_lookup called without rulename, ".
+         "from $package ($filename) line $line. You are likely using ".
+         "a plugin that is not compatible with SpamAssasin 4.0.0.";
   }
 
   $domain =~ s/\.+\z//s;  # strip trailing dots, these sometimes still sneak in
@@ -316,9 +328,10 @@ sub bgsend_and_start_lookup {
       }
     }
     if ($blocked) {
-      dbg("async: blocked by %s: %s", $blocked_by, $dnskey);
+      dbg("async: blocked by %s: %s, rules: %s", $blocked_by, $dnskey,
+          join(", ", @rulenames));
     } else {
-      dbg("async: launching %s", $dnskey);
+      dbg("async: launching %s, rules: %s", $dnskey, join(", ", @rulenames));
       $id = $self->{main}->{resolver}->bgsend($domain, $type, $class, sub {
           my($pkt, $pkt_id, $timestamp) = @_;
           # this callback sub is called from DnsResolver::poll_responses()
@@ -376,9 +389,12 @@ DIRECT USE DEPRECATED since 4.0.0, please use bgsend_and_start_lookup.
 sub start_lookup {
   my $self = shift;
 
-  warn "async: deprecated start_lookup called, please use bgsend_and_start_lookup\n"
-    if !$self->{start_lookup_warned};
-  $self->{start_lookup_warned} = 1;
+  if (!$self->{start_lookup_warned}++) {
+    my($package, $filename, $line) = caller;
+    warn "async: deprecated start_lookup called, ".
+         "from $package ($filename) line $line. You are likely using ".
+         "a plugin that is not compatible with SpamAssasin 4.0.0.";
+  }
 
   return if $self->{main}->{resolver}->{no_resolver};
   $self->_start_lookup(@_);

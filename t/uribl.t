@@ -6,7 +6,10 @@ use SATest; sa_t_init("uribl");
 use Test::More;
 plan skip_all => "Net tests disabled"          unless conf_bool('run_net_tests');
 plan skip_all => "Can't use Net::DNS Safely"   unless can_use_net_dns_safely();
-plan tests => 10;
+
+# run many times to catch some random natured failures
+my $iterations = 5;
+plan tests => 10 * $iterations;
 
 # ---------------------------------------------------------------------------
 
@@ -68,6 +71,8 @@ tstlocalrules(q{
 
 });
 
-ok sarun ("-t < data/spam/dnsbl.eml", \&patterns_run_cb);
-ok_all_patterns();
+for (1 .. $iterations) {
+  ok sarun ("-t < data/spam/dnsbl.eml", \&patterns_run_cb);
+  ok_all_patterns();
+}
 

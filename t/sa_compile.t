@@ -54,35 +54,36 @@ body FOO5 /金融機/
 body FOO6 /金融(?:xyz|機)/
 body FOO7 /\xe9\x87\x91\xe8\x9e\x8d\xe6\xa9\x9f/
 body FOO8 /.\x87(?:\x91|\x00)[\xe8\x00]\x9e\x8d\xe6\xa9\x9f/
+# Test that meta rules work for sa-compiled body rules
+# (loosely related to Bug 7987)
+meta META1 FOO1 && FOO2 && FOO3 && FOO4
+meta META2 FOO5 && FOO6 && FOO7 && FOO8
 ');
 
 # ensure we don't use compiled rules
 untaint_system("rm -rf $instdir/var/spamassassin/compiled");
 
 %patterns = (
-  '/ check: tests=FOO1,FOO2,FOO3,FOO4\n/', 'FOO',
+  '/ check: tests=FOO1,FOO2,FOO3,FOO4,META1\n/', '',
 );
 %anti_patterns = (
   '/ zoom: able to use /', '',
 );
-ok sarun ("-D all,rules-all -L -t --cf 'normalize_charset 1' < $cwd/data/spam/001 2>&1", \&patterns_run_cb);
+ok sarun ("-D check,zoom -L -t --cf 'normalize_charset 1' < $cwd/data/spam/001 2>&1", \&patterns_run_cb);
 ok_all_patterns();
-clear_pattern_counters();
-ok sarun ("-D all,rules-all -L -t --cf 'normalize_charset 0' < $cwd/data/spam/001 2>&1", \&patterns_run_cb);
+ok sarun ("-D check,zoom -L -t --cf 'normalize_charset 0' < $cwd/data/spam/001 2>&1", \&patterns_run_cb);
 ok_all_patterns();
-clear_pattern_counters();
+
 %patterns = (
-  '/ check: tests=FOO4,FOO5,FOO6,FOO7,FOO8\n/', 'FOO',
+  '/ check: tests=FOO4,FOO5,FOO6,FOO7,FOO8,META2\n/', '',
 );
 %anti_patterns = (
   '/ zoom: able to use /', '',
 );
-ok sarun ("-D all,rules-all -L -t --cf 'normalize_charset 1' < $cwd/data/spam/unicode1 2>&1", \&patterns_run_cb);
+ok sarun ("-D check,zoom -L -t --cf 'normalize_charset 1' < $cwd/data/spam/unicode1 2>&1", \&patterns_run_cb);
 ok_all_patterns();
-clear_pattern_counters();
-ok sarun ("-D all,rules-all -L -t --cf 'normalize_charset 0' < $cwd/data/spam/unicode1 2>&1", \&patterns_run_cb);
+ok sarun ("-D check,zoom -L -t --cf 'normalize_charset 0' < $cwd/data/spam/unicode1 2>&1", \&patterns_run_cb);
 ok_all_patterns();
-clear_pattern_counters();
 
 # -------------------------------------------------------------------
 
@@ -92,27 +93,24 @@ $scr = "$instdir/$temp_binpath/spamassassin";
 $scr_localrules_args = $scr_cf_args = "";      # use the default rules dir, from our "install"
 
 %patterns = (
-  q{ zoom: able to use 5/5 'body_0' compiled rules }, 'able-to-use',
-  '/ check: tests=FOO1,FOO2,FOO3,FOO4\n/', 'FOO',
+  q{ zoom: able to use 5/5 'body_0' compiled rules }, '',
+  '/ check: tests=FOO1,FOO2,FOO3,FOO4,META1\n/', '',
 );
 %anti_patterns = ();
-ok sarun ("-D all,rules-all -L -t --cf 'normalize_charset 1' < $cwd/data/spam/001 2>&1", \&patterns_run_cb);
+ok sarun ("-D check,zoom -L -t --cf 'normalize_charset 1' < $cwd/data/spam/001 2>&1", \&patterns_run_cb);
 ok_all_patterns();
-clear_pattern_counters();
-ok sarun ("-D all,rules-all -L -t --cf 'normalize_charset 0' < $cwd/data/spam/001 2>&1", \&patterns_run_cb);
+ok sarun ("-D check,zoom -L -t --cf 'normalize_charset 0' < $cwd/data/spam/001 2>&1", \&patterns_run_cb);
 ok_all_patterns();
-clear_pattern_counters();
+
 %patterns = (
-  q{ zoom: able to use 5/5 'body_0' compiled rules }, 'able-to-use',
-  '/ check: tests=FOO4,FOO5,FOO6,FOO7,FOO8\n/', 'FOO',
+  q{ zoom: able to use 5/5 'body_0' compiled rules }, '',
+  '/ check: tests=FOO4,FOO5,FOO6,FOO7,FOO8,META2\n/', '',
 );
 %anti_patterns = ();
-ok sarun ("-D all,rules-all -L -t --cf 'normalize_charset 1' < $cwd/data/spam/unicode1 2>&1", \&patterns_run_cb);
+ok sarun ("-D check,zoom -L -t --cf 'normalize_charset 1' < $cwd/data/spam/unicode1 2>&1", \&patterns_run_cb);
 ok_all_patterns();
-clear_pattern_counters();
-ok sarun ("-D all,rules-all -L -t --cf 'normalize_charset 0' < $cwd/data/spam/unicode1 2>&1", \&patterns_run_cb);
+ok sarun ("-D check,zoom -L -t --cf 'normalize_charset 0' < $cwd/data/spam/unicode1 2>&1", \&patterns_run_cb);
 ok_all_patterns();
-clear_pattern_counters();
 
 # -------------------------------------------------------------------
 

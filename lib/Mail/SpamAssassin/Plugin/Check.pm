@@ -54,8 +54,8 @@ sub check_main {
   my $pms = $args->{permsgstatus};
   $would_log_rules_all = would_log('dbg', 'rules-all') == 2;
 
-  # Make AsyncLoop wait permission for launching queries
-  $pms->{async}->{wait_launch} = 1;
+  # Make AsyncLoop wait launch_queue() for launching queries
+  $pms->{async}->start_queue();
 
   my $suppl_attrib = $pms->{msg}->{suppl_attrib};
   if (ref $suppl_attrib && ref $suppl_attrib->{rule_hits}) {
@@ -129,7 +129,6 @@ sub check_main {
     # unneeded DNS queries.
     if ($do_dns && !$rbls_running && $priority >= -100) {
       $rbls_running = 1;
-      $pms->{async}->{wait_launch} = 0; # permission granted
       $pms->{async}->launch_queue(); # check if something was queued
       $self->run_rbl_eval_tests($pms);
       $self->{main}->call_plugins ("check_dnsbl", { permsgstatus => $pms });
@@ -289,8 +288,8 @@ sub do_meta_tests {
   my $h = $pms->{tests_already_hit};
   my $retry;
 
-  # Get pending async rule list
-  my %pl = map { $_ => 1 } $pms->get_pending_lookups();
+  # Get pending DNS async rule list
+  my %pl = map { $_ => 1 } $pms->get_async_pending_rules();
 
 RULE:
   foreach my $rulename (keys %$mp) {
@@ -323,6 +322,7 @@ sub finish_meta_tests {
   return if $self->{am_compiling}; # nothing to compile here
 
   my $mp = $pms->{meta_pending};
+  my $tp = $pms->{tests_pending};
   my $md = $pms->{conf}->{meta_dependencies};
   my $mt = $pms->{conf}->{meta_tests};
   my $h = $pms->{tests_already_hit};
@@ -334,7 +334,7 @@ RULE:
     my %unrun;
     # Meta is not ready if some dependency has not run yet
     foreach my $deprule (@{$md->{$rulename}||[]}) {
-      if (!exists $h->{$deprule}) {
+      if (!exists $h->{$deprule} || $tp->{$deprule}) {
         # Record all unrun deps for second meta evaluation
         $unrun{$deprule} = 1;
       }

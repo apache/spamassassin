@@ -433,13 +433,14 @@ sub launch_queries {
       next;
     }
     dbg("askdns: launching query ($rulename): $query");
-    $pms->{async}->bgsend_and_start_lookup(
+    my $ret = $pms->{async}->bgsend_and_start_lookup(
       $query, $arule->{q_type}, undef,
         { rulename => $rulename, type => 'AskDNS' },
         sub { my ($ent,$pkt) = @_;
               $self->process_response_packet($pms, $ent, $pkt, $rulename) },
         master_deadline => $pms->{master_deadline}
     );
+    $pms->rule_ready($rulename) if !$ret; # mark ready if nothing launched
   }
 }
 

@@ -378,6 +378,8 @@ sub check_dnsbl {
   foreach my $rulename (keys %{$conf->{uridnsbls}}) {
     next if !$conf->{scores}->{$rulename};
 
+    $pms->rule_pending($rulename); # mark async
+
     my $rulecf = $conf->{uridnsbls}->{$rulename};
     my %tfl = map { ($_,1) } split(/\s+/, $conf->{tflags}->{$rulename}||'');
 

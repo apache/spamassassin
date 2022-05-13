@@ -150,13 +150,14 @@ sub set_config {
 
 sub finish_parsing_start {
   my ($self, $opts) = @_;
+  my $conf = $opts->{conf};
 
   # Adjust priority -100 to launch early
   # Find rulenames from eval_to_rule mappings
   foreach my $evalfunc (@{$self->{'evalrules'}}) {
-    foreach (@{$opts->{conf}->{eval_to_rule}->{$evalfunc}||[]}) {
+    foreach (@{$conf->{eval_to_rule}->{$evalfunc}||[]}) {
       dbg("dnseval: adjusting rule $_ priority to -100");
-      $opts->{conf}->{priority}->{$_} = -100;
+      $conf->{priority}->{$_} = -100;
     }
   }
 }
@@ -165,34 +166,33 @@ sub finish_parsing_start {
 # directly as part of PMS
 sub check_start {
   my ($self, $opts) = @_;
+  my $pms = $opts->{permsgstatus};
 
   foreach(@{$self->{'evalrules'}}) {
-    $opts->{'permsgstatus'}->register_plugin_eval_glue($_);
+    $pms->register_plugin_eval_glue($_);
   }
 
   # Initialize check_rbl_sub tests
-  $self->init_rbl_subs($opts->{'permsgstatus'});
+  $self->_init_rbl_subs($pms);
 }
 
-sub init_rbl_subs {
+sub _init_rbl_subs {
   my ($self, $pms) = @_;
-
-  return if $pms->{rbl_subs};
+  my $conf = $pms->{conf};
 
   # Very hacky stuff and direct rbl_evals usage for now, TODO rewrite everything
-  foreach my $rule (@{$pms->{conf}->{eval_to_rule}->{check_rbl_sub}}) {
-    next if !exists $pms->{conf}->{rbl_evals}->{$rule};
-    next if !$pms->{conf}->{scores}->{$rule};
+  foreach my $rule (@{$conf->{eval_to_rule}->{check_rbl_sub}||[]}) {
+    next if !exists $conf->{rbl_evals}->{$rule};
+    next if !$conf->{scores}->{$rule};
     # rbl_evals is [$function,[@args]]
-    my $args = $pms->{conf}->{rbl_evals}->{$rule}->[1];
-    my $set = $args->[0];
-    my $subtest = $args->[1];
+    my $args = $conf->{rbl_evals}->{$rule}->[1];
+    my ($set, $subtest) = @$args;
     if (!defined $subtest) {
       warn("dnseval: missing subtest for rule $rule\n");
       next;
     }
     if ($subtest =~ /^sb:/) {
-      info("dnseval: ignored $rule, SenderBase rules are deprecated");
+      warn("dnseval: ignored $rule, SenderBase rules are deprecated\n");
       next;
     }
     # Compile as regex if not pure ip/bitmask (same check in process_dnsbl_result)
@@ -206,6 +206,7 @@ sub init_rbl_subs {
     }
     dbg("dnseval: initialize check_rbl_sub for rule $rule, set $set, subtest $subtest");
     push @{$pms->{rbl_subs}{$set}}, [$subtest, $rule];
+    $pms->rule_pending($rule); # mark async, rule_ready() done in Dns/process_dnsbl_result
   }
 }
 
@@ -283,7 +284,7 @@ sub check_rbl_accreditor {
     $self->message_accreditor_tag($pms);
   }
   if ($pms->{accreditor_tag}->{$accreditor}) {
-    $self->check_rbl_backend($pms, $rule, $set, $rbl_server, 'A', $subtest);
+    $self->_check_rbl_backend($pms, $rule, $set, $rbl_server, 'A', $subtest);
   }
   return 0;
 }
@@ -324,7 +325,7 @@ sub message_accreditor_tag {
   $pms->{accreditor_tag} = \%acctags;
 }
 
-sub check_rbl_backend {
+sub _check_rbl_backend {
   my ($self, $pms, $rule, $set, $rbl_server, $type, $subtest) = @_;
 
   return if !exists $pms->{dnseval_ips}; # no untrusted ips
@@ -406,14 +407,12 @@ sub check_rbl_backend {
     return 0;
   }
 
-  $pms->rule_pending($rule); # mark async
-
   dbg("dnseval: only inspecting the following IPs: ".join(", ", @ips));
 
   foreach my $ip (@ips) {
-    my $revip = reverse_ip_address($ip);
-    $pms->do_rbl_lookup($rule, $set, $type,
-      $revip.'.'.$rbl_server, $subtest) if defined $revip;
+    if (defined(my $revip = reverse_ip_address($ip))) {
+      $pms->do_rbl_lookup($rule, $set, $type, $revip.'.'.$rbl_server, $subtest)
+    }
   }
 
   # note that results are not handled here, hits are handled directly
@@ -427,7 +426,7 @@ sub check_rbl {
   return 0 if $self->{main}->{conf}->{skip_rbl_checks};
   return 0 if !$pms->is_dns_available();
 
-  $self->check_rbl_backend($pms, $rule, $set, $rbl_server, 'A', $subtest);
+  $self->_check_rbl_backend($pms, $rule, $set, $rbl_server, 'A', $subtest);
 }
 
 sub check_rbl_txt {
@@ -436,12 +435,12 @@ sub check_rbl_txt {
   return 0 if $self->{main}->{conf}->{skip_rbl_checks};
   return 0 if !$pms->is_dns_available();
 
-  $self->check_rbl_backend($pms, $rule, $set, $rbl_server, 'TXT', $subtest);
+  $self->_check_rbl_backend($pms, $rule, $set, $rbl_server, 'TXT', $subtest);
 }
 
 sub check_rbl_sub {
   my ($self, $pms, $rule, $set, $subtest) = @_;
-  # just a dummy, check_start / init_rbl_subs handles the subs
+  # just a dummy, _init_rbl_subs/do_rbl_lookup handles the subs
   $pms->rule_pending($rule); # mark async
   return 0;
 }
@@ -453,8 +452,6 @@ sub check_rbl_from_host {
 
   return 0 if $self->{main}->{conf}->{skip_rbl_checks};
   return 0 if !$pms->is_dns_available();
-
-  $pms->rule_pending($rule); # mark async
 
   $self->_check_rbl_addresses($pms, $rule, $set, $rbl_server,
     $subtest, $pms->all_from_addrs());
@@ -551,10 +548,11 @@ sub check_rbl_ns_from {
 
   dbg("dnseval: checking NS for host $domain");
 
-  my $key = "NS:" . $domain;
+  $pms->rule_pending($rule); # mark async
+
   my $obj = { dom => $domain, rule => $rule, set => $set, rbl_server => $rbl_server, subtest => $subtest };
   my $ent = {
-    rulename => $rule, key => $key, zone => $domain, obj => $obj, type => "URI-NS",
+    rulename => $rule, zone => $domain, obj => $obj, type => "URI-NS",
   };
   # dig $dom ns
   $ent = $pms->{async}->bgsend_and_start_lookup(
