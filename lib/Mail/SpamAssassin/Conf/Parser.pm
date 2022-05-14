@@ -1335,6 +1335,14 @@ sub add_test {
   }
   elsif ($type == $Mail::SpamAssassin::Conf::TYPE_HEAD_TESTS)
   {
+    # If redefining header test, clear out opt hashes so they don't leak to
+    # the new test.  There are separate hashes for options as it saves lots
+    # of memory (exists, neg, if-unset are rarely used).
+    if (exists $conf->{tests}->{$name}) {
+      delete $conf->{test_opt_exists}->{$name};
+      delete $conf->{test_opt_unset}->{$name};
+      delete $conf->{test_opt_neg}->{$name};
+    }
     local($1,$2,$3);
     # RFC 5322 section 3.6.8, ftext printable US-ASCII chars not including ":"
     # no re "strict";  # since perl 5.21.8: Ranges of ASCII printables...
