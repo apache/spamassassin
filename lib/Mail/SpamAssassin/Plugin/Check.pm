@@ -660,27 +660,24 @@ sub do_head_tests {
     loop_body => sub
   {
     my ($self, $pms, $conf, $rulename, $pat, %opts) = @_;
-    my ($op, $op_infix);
-    my $hdrname = $conf->{test_opt_header}->{$rulename};
-    if (exists $conf->{test_opt_exists}->{$rulename}) {
-      $op_infix = 0;
-      if (exists $conf->{test_opt_neg}->{$rulename}) {
-        $op = '!defined';
-      } else {
-        $op = 'defined';
-      }
-    }
-    else {
-      $op_infix = 1;
-      $op = $conf->{test_opt_neg}->{$rulename} ? '!~' : '=~';
-    }
 
-    my $def = $conf->{test_opt_unset}->{$rulename};
-    push(@{ $ordered{$hdrname . (!defined $def ? '' : "\t$rulename")} },
-         $rulename);
+    push @{$ordered{
+            $conf->{test_opt_header}->{$rulename} .
+            (!exists $conf->{test_opt_unset}->{$rulename} ? '' : "\t$rulename")
+         }}, $rulename;
 
     return if ($opts{doing_user_rules} &&
             !$self->is_user_rule_sub($rulename.'_head_test'));
+
+    my ($op, $op_infix);
+    if (exists $conf->{test_opt_exists}->{$rulename}) {
+      $op_infix = 0;
+      $op = exists $conf->{test_opt_neg}->{$rulename} ? '!defined' : 'defined';
+    }
+    else {
+      $op_infix = 1;
+      $op = exists $conf->{test_opt_neg}->{$rulename} ? '!~' : '=~';
+    }
 
     $testcode{$rulename} = [$op_infix, $op, $pat];
   },
@@ -729,11 +726,7 @@ sub do_head_tests {
                 $whlast = 'last if ++$hits >= '.untaint_var($1).';';
               }
             }
-            if ($matchg) {
-              $expr = '$hval '.$op.' /$qrptr->{q{'.$rulename.'}}/gop';
-            } else {
-              $expr = '$hval '.$op.' /$qrptr->{q{'.$rulename.'}}/op';
-            }
+            $expr = '$hval '.$op.' /$qrptr->{q{'.$rulename.'}}/'.$matchg.'op';
           }
 
           # Make sure rule is marked ready for meta rules using $hitsptr
