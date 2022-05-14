@@ -143,6 +143,11 @@ sub setup_test_set_pri {
       dbg "zoom: skipping rule $name, ReplaceTags";
       next;
     }
+    # ignore regex capture template rules
+    if ($conf->{capture_rules}->{$name}) {
+      dbg "zoom: skipping rule $name, capture template";
+      next;
+    }
 
     # we have the rule, and its regexp matches.  zero out the body
     # rule, so that the module can do the work instead

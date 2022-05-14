@@ -190,8 +190,9 @@ NEXT_RULE:
       next NEXT_RULE;
     }
 
-    # ignore ReplaceTags rules
-    my $is_a_replacetags_rule = $conf->{replace_rules}->{$name};
+    # ignore ReplaceTags rules, and regex capture template rules
+    my $is_a_replacetags_rule = $conf->{replace_rules}->{$name} ||
+                                $conf->{capture_rules}->{$name};
     my ($minlen, $lossy, @bases);
 
     if (!$is_a_replacetags_rule) {

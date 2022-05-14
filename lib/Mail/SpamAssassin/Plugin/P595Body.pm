@@ -73,6 +73,8 @@ sub setup_test_set_pri {
   while (my ($rule, $pat) = each %{$conf->{body_tests}->{$pri}}) {
     # ignore rules marked for ReplaceTags work!
     next if ($conf->{replace_rules}->{$rule});
+    # ignore regex capture template rules
+    next if ($conf->{capture_rules}->{$rule});
 
     #$pat = Mail::SpamAssassin::Util::regexp_remove_delimiters($pat);
     $pat = qr_to_string($conf->{test_qrs}->{$rule});

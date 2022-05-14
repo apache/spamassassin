@@ -4915,6 +4915,9 @@ sub new {
   # map eval function names to rulenames
   $self->{eval_to_rule} = {};
 
+  # regex capture template rules
+  $self->{capture_rules} = {};
+
   # testing stuff
   $self->{regression_tests} = { };
 
@@ -5464,6 +5467,7 @@ sub feature_header_address_parser { 1 } # improved header address parsing using 
 sub feature_local_tests_only { 1 } # Config parser supports "if (local_tests_only)"
 sub feature_header_first_last { 1 } # Can actually use :first :last modifiers in rules
 sub feature_header_match_many { 1 } # Can actually match all :addr :name etc results, before only first one was used
+sub feature_capture_rules { 1 } # Can capture and use strings with regex in body/rawbody/full/uri/header rules # Bug 7992
 sub has_tflags_nosubject { 1 } # tflags nosubject
 sub has_tflags_nolog { 1 } # tflags nolog
 sub perl_min_version_5010000 { return $] >= 5.010000 }  # perl version check ("perl_version" not neatly backwards-compatible)

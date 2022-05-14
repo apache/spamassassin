@@ -458,7 +458,7 @@ sub run_generic_tests {
     $self->push_evalstr_prefix($pms, '
         # start_rules_plugin_code '.$ruletype.' '.$priority.'
         my $scoresptr = $self->{conf}->{scores};
-        my $qrptr = $self->{conf}->{test_qrs};
+        my $qrptr = $self->{conf}->{test_qrs}; my $test_qr;
         my $hitsptr = $self->{tests_already_hit};
     ');
     if (defined $opts{pre_loop_body}) {
@@ -726,13 +726,15 @@ sub do_head_tests {
                 $whlast = 'last if ++$hits >= '.untaint_var($1).';';
               }
             }
-            $expr = '$hval '.$op.' /$qrptr->{q{'.$rulename.'}}/'.$matchg.'op';
+            $expr = '$hval '.$op.' /$test_qr/'.$matchg.'op';
           }
 
           # Make sure rule is marked ready for meta rules using $hitsptr
           $self->add_evalstr($pms, '
           if ($scoresptr->{q{'.$rulename.'}}) {
             $hitsptr->{q{'.$rulename.'}} ||= 0;
+            '.($op_infix ? '$test_qr = $qrptr->{q{'.$rulename.'}};' : '').'
+            '.$self->capture_rules_code($conf, $rulename).'
             '.$posline.'
             '.$self->hash_line_for_rule($pms, $rulename).'
             '.$ifwhile.' ('.$expr.') {
@@ -771,6 +773,7 @@ sub do_body_tests {
       dbg("rules-all: running body rule %s", q{'.$rulename.'});
       ';
     }
+    $sub .= $self->capture_rules_code($conf, $rulename);
     my $nosubject = ($conf->{tflags}->{$rulename}||'') =~ /\bnosubject\b/;
     if ($nosubject) {
       $sub .= '
@@ -795,7 +798,7 @@ sub do_body_tests {
       $sub .= '
         pos $l = 0;
         '.$self->hash_line_for_rule($pms, $rulename).'
-        while ($l =~ /$qrptr->{q{'.$rulename.'}}/gop) {
+        while ($l =~ /$test_qr/gop) {
           $self->got_hit(q{'.$rulename.'}, "BODY: ", ruletype => "body");
           '. $self->hit_rule_plugin_code($pms, $rulename, "body", "") . '
           '. ($max? 'last body_'.$loopid.' if ++$hits >= '.$max.';' : '') .'
@@ -816,7 +819,7 @@ sub do_body_tests {
       }
       $sub .= '
         '.$self->hash_line_for_rule($pms, $rulename).'
-        if ($l =~ /$qrptr->{q{'.$rulename.'}}/op) {
+        if ($l =~ /$test_qr/op) {
           $self->got_hit(q{'.$rulename.'}, "BODY: ", ruletype => "body");
           '. $self->hit_rule_plugin_code($pms, $rulename, "body", "last") .'
         }
@@ -828,6 +831,7 @@ sub do_body_tests {
     $self->add_evalstr($pms, '
       if ($scoresptr->{q{'.$rulename.'}}) {
         $hitsptr->{q{'.$rulename.'}} ||= 0;
+        $test_qr = $qrptr->{q{'.$rulename.'}};
         '.$sub.'
         '.$self->ran_rule_plugin_code($rulename, "body").'
       }
@@ -859,6 +863,7 @@ sub do_uri_tests {
       dbg("rules-all: running uri rule %s", q{'.$rulename.'});
       ';
     }
+    $sub .= $self->capture_rules_code($conf, $rulename);
     if (($conf->{tflags}->{$rulename}||'') =~ /\bmultiple\b/) {
       $loopid++;
       my ($max) = $conf->{tflags}->{$rulename} =~ /\bmaxhits=(\d+)\b/;
@@ -868,7 +873,7 @@ sub do_uri_tests {
       uri_'.$loopid.': foreach my $l (@_) {
         pos $l = 0;
         '.$self->hash_line_for_rule($pms, $rulename).'
-        while ($l =~ /$qrptr->{q{'.$rulename.'}}/gop) {
+        while ($l =~ /$test_qr/gop) {
            $self->got_hit(q{'.$rulename.'}, "URI: ", ruletype => "uri");
            '. $self->hit_rule_plugin_code($pms, $rulename, "uri", "") . '
            '. ($max? 'last uri_'.$loopid.' if ++$hits >= '.$max.';' : '') .'
@@ -879,7 +884,7 @@ sub do_uri_tests {
       $sub .= '
       foreach my $l (@_) {
         '.$self->hash_line_for_rule($pms, $rulename).'
-          if ($l =~ /$qrptr->{q{'.$rulename.'}}/op) {
+          if ($l =~ /$test_qr/op) {
            $self->got_hit(q{'.$rulename.'}, "URI: ", ruletype => "uri");
            '. $self->hit_rule_plugin_code($pms, $rulename, "uri", "last") .'
         }
@@ -891,6 +896,7 @@ sub do_uri_tests {
     $self->add_evalstr($pms, '
       if ($scoresptr->{q{'.$rulename.'}}) {
         $hitsptr->{q{'.$rulename.'}} ||= 0;
+        $test_qr = $qrptr->{q{'.$rulename.'}};
         '.$sub.'
         '.$self->ran_rule_plugin_code($rulename, "uri").'
       }
@@ -918,6 +924,7 @@ sub do_rawbody_tests {
       dbg("rules-all: running rawbody rule %s", q{'.$rulename.'});
       ';
     }
+    $sub .= $self->capture_rules_code($conf, $rulename);
     if (($conf->{tflags}->{$rulename}||'') =~ /\bmultiple\b/)
     {
       # support multiple matches
@@ -929,7 +936,7 @@ sub do_rawbody_tests {
       rawbody_'.$loopid.': foreach my $l (@_) {
         pos $l = 0;
         '.$self->hash_line_for_rule($pms, $rulename).'
-        while ($l =~ /$qrptr->{q{'.$rulename.'}}/gop) {
+        while ($l =~ /$test_qr/gop) {
            $self->got_hit(q{'.$rulename.'}, "RAW: ", ruletype => "rawbody");
            '. $self->hit_rule_plugin_code($pms, $rulename, "rawbody", "") . '
            '. ($max? 'last rawbody_'.$loopid.' if ++$hits >= '.$max.';' : '') .'
@@ -941,7 +948,7 @@ sub do_rawbody_tests {
       $sub .= '
       foreach my $l (@_) {
         '.$self->hash_line_for_rule($pms, $rulename).'
-        if ($l =~ /$qrptr->{q{'.$rulename.'}}/op) {
+        if ($l =~ /$test_qr/op) {
            $self->got_hit(q{'.$rulename.'}, "RAW: ", ruletype => "rawbody");
            '. $self->hit_rule_plugin_code($pms, $rulename, "rawbody", "last") . '
         }
@@ -953,6 +960,7 @@ sub do_rawbody_tests {
     $self->add_evalstr($pms, '
       if ($scoresptr->{q{'.$rulename.'}}) {
         $hitsptr->{q{'.$rulename.'}} ||= 0;
+        $test_qr = $qrptr->{q{'.$rulename.'}};
         '.$sub.'
         '.$self->ran_rule_plugin_code($rulename, "rawbody").'
       }
@@ -991,11 +999,13 @@ sub do_full_tests {
     $self->add_evalstr($pms, '
       if ($scoresptr->{q{'.$rulename.'}}) {
         $hitsptr->{q{'.$rulename.'}} ||= 0;
+        $test_qr = $qrptr->{q{'.$rulename.'}};
         pos $$fullmsgref = 0;
         '.$self->hash_line_for_rule($pms, $rulename).'
         dbg("rules-all: running full rule %s", q{'.$rulename.'});
+        '.$self->capture_rules_code($conf, $rulename).'
         $hits = 0;
-        while ($$fullmsgref =~ /$qrptr->{q{'.$rulename.'}}/gp) {
+        while ($$fullmsgref =~ /$test_qr/gp) {
           $self->got_hit(q{'.$rulename.'}, "FULL: ", ruletype => "full");
           '. $self->hit_rule_plugin_code($pms, $rulename, "full", "last") . '
           last if ++$hits >= '.$max.';
@@ -1326,6 +1336,18 @@ sub hit_rule_plugin_code {
     ';
   }
 
+  # Save named captures for regex template rules
+  my $capture_code = '';
+  if (%{$pms->{conf}->{capture_rules}}) {
+    $capture_code = '
+        foreach my $cname (keys %-) {
+          foreach my $cval (@{$-{$cname}}) {
+            $self->{capture_values}->{$cname}->{$cval} = 1;
+          }
+        }
+    ';
+  }
+
   # if we're not running "tflags multiple", break out of the matching
   # loop this way
   my $multiple_code = '';
@@ -1334,7 +1356,7 @@ sub hit_rule_plugin_code {
     $multiple_code = $loop_break_directive.';';
   }
 
-  return $debug_code.$save_hits_code.$multiple_code;
+  return $debug_code.$save_hits_code.$capture_code.$multiple_code;
 }
 
 sub ran_rule_plugin_code {
@@ -1347,6 +1369,32 @@ sub ran_rule_plugin_code {
   return '
     $self->{main}->call_plugins ("ran_rule", { permsgstatus => $self, rulename => \''.$rulename.'\', ruletype => \''.$ruletype.'\' });
   ';
+}
+
+sub capture_rules_code {
+  my ($self, $conf, $rulename) = @_;
+
+  return '' unless exists $conf->{capture_rules}->{$rulename};
+
+  my $code = '
+      foreach my $cname (keys %{$self->{conf}->{capture_rules}->{q{'.$rulename.'}}}) {
+        if (exists $self->{capture_values}->{$cname}) {
+          my $cval = "(?:".join("|", map { quotemeta($_) }
+                      keys %{$self->{capture_values}->{$cname}}).")";
+          $test_qr =~ s/"""${cname}"""/$cval/gs;
+  ';
+  if ($would_log_rules_all) {
+    $code .= '
+          dbg("rules-all: replaced regex capture template: %s, %s, %s",
+            q{'.$rulename.'}, $cname, $test_qr);
+    ';
+  }
+  $code .= '
+        }
+      }
+  ';
+
+  return $code;
 }
 
 sub free_ruleset_source {
