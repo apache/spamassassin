@@ -740,7 +740,7 @@ sub do_head_tests {
             '.$ifwhile.' ('.$expr.') {
               $self->got_hit(q{'.$rulename.'}, "", ruletype => "header");
               '.$self->hit_rule_plugin_code($pms, $rulename, "header", "",
-                                            $matching_string_unavailable).'
+                                $matching_string_unavailable, !$op_infix).'
               '.$whlast.'
             }
             '.$self->ran_rule_plugin_code($rulename, "header").'
@@ -1306,7 +1306,7 @@ sub start_rules_plugin_code {
 
 sub hit_rule_plugin_code {
   my ($self, $pms, $rulename, $ruletype, $loop_break_directive,
-      $matching_string_unavailable) = @_;
+      $matching_string_unavailable, $no_capture) = @_;
 
   # note: keep this in 'single quotes' to avoid the $ & performance hit,
   # unless specifically requested by the caller.   Also split the
@@ -1338,7 +1338,7 @@ sub hit_rule_plugin_code {
 
   # Save named captures for regex template rules
   my $capture_code = '';
-  if (%{$pms->{conf}->{capture_rules}}) {
+  if (!$no_capture && %{$pms->{conf}->{capture_rules}}) {
     $capture_code = '
         foreach my $cname (keys %-) {
           foreach my $cval (@{$-{$cname}}) {
