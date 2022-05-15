@@ -142,6 +142,20 @@ DNS query type can be appended to list with /A (default) or /TXT.
 
 Default OPTS: sha1/max=10/shuffle
 
+Additional supported OPTS:
+
+  ip        only query if value is valid IPv4/IPv6 address
+  ipv4      only query if value is valid IPv4 address
+  ipv6      only query if value is valid IPv6 address
+  revip     reverse IP before query
+  fqdn      only query if value is valid FQDN (is_fqdn_valid)
+  tld       only query if value has valid TLD (is_domain_valid)
+  trim      trim name from hostname to domain (trim_domain)
+
+If both ip/ipv4/ipv6 and fqdn/tld are enabled, only either of them is
+required to match.  Both fqdn and tld are needed for complete FQDN+TLD
+check.
+
 =back
 
 =cut
@@ -157,7 +171,8 @@ use Digest::MD5 qw(md5_hex);
 use Digest::SHA qw(sha1_hex);
 
 use Mail::SpamAssassin::Plugin;
-use Mail::SpamAssassin::Util qw(compile_regexp);
+use Mail::SpamAssassin::Constants qw(:ip);
+use Mail::SpamAssassin::Util qw(compile_regexp is_fqdn_valid reverse_ip_address);
 
 our @ISA = qw(Mail::SpamAssassin::Plugin);
 
@@ -276,37 +291,35 @@ sub set_config {
 }
 
 sub parse_config {
-    my ($self, $opt) = @_;
+  my ($self, $opt) = @_;
 
-    if ($opt->{key} =~ /^hashbl_acl_([a-z0-9]{1,32})$/i) {
-        $self->inhibit_further_callbacks();
-        return 1 unless $self->{hashbl_available};
+  if ($opt->{key} =~ /^hashbl_acl_([a-z0-9]{1,32})$/i) {
+    $self->inhibit_further_callbacks();
+    return 1 unless $self->{hashbl_available};
 
-        my $acl = lc($1);
-        my @opts = split(/\s+/, $opt->{value});
-        foreach my $tmp (@opts)
-        {
-            if ($tmp =~ /^(\!)?(\S+)$/i) {
-                my $neg = $1;
-                my $value = lc($2);
-
-                if (defined $neg) {
-                    $self->{hashbl_acl}{$acl}{$value} = 0;
-                } else {
-                    next if $acl eq 'all';
-                    # exclusions overrides
-                    if ( not defined $self->{hashbl_acl}{$acl}{$value} ) {
-                      $self->{hashbl_acl}{$acl}{$value} = 1
-                    }
-                }
-            } else {
-                warn("invalid acl: $tmp");
-            }
+    my $acl = lc($1);
+    my @opts = split(/\s+/, $opt->{value});
+    foreach my $tmp (@opts) {
+      if ($tmp =~ /^(\!)?(\S+)$/i) {
+        my $neg = $1;
+        my $value = lc($2);
+        if (defined $neg) {
+          $self->{hashbl_acl}{$acl}{$value} = 0;
+        } else {
+          next if $acl eq 'all';
+          # exclusions overrides
+          if (!defined $self->{hashbl_acl}{$acl}{$value}) {
+            $self->{hashbl_acl}{$acl}{$value} = 1
+          }
         }
-        return 1;
+      } else {
+        warn("invalid acl: $tmp");
+      }
     }
+    return 1;
+  }
 
-    return 0;
+  return 0;
 }
 
 sub finish_parsing_start {
@@ -339,28 +352,32 @@ sub finish_parsing_end {
   return 0;
 }
 
+sub _parse_opts {
+  my %opts;
+  foreach my $o (split(/\s*\/\s*/, lc $_[0])) {
+    my ($k, $v) = split(/=/, $o);
+    $opts{$k} = defined $v ? $v : 1;
+  }
+  return \%opts;
+}
+
 sub _get_emails {
   my ($self, $pms, $opts, $from, $acl) = @_;
 
   my @emails; # keep find order
   my %seen;
-  my @tmp_email;
-  my $domain;
 
-  foreach my $hdr (split(/\//, $from)) {
+  foreach my $hdr (split(/\s*\/\s*/, $from)) {
     my $parsed_emails = $self->_parse_emails($pms, $opts, $hdr);
     foreach (@$parsed_emails) {
-      next if exists $seen{$_};
-      my @tmp_email = split('@', $_);
-      my $domain = $tmp_email[1];
-      if (defined($acl) and ($acl ne "all") and defined($domain)) {
-        if (defined($self->{hashbl_acl}{$acl}{$domain}) and ($self->{hashbl_acl}{$acl}{$domain} eq 1)) {
+      next if $seen{$_}++;
+      my ($domain) = ($_ =~ /.*\@(.+)/);
+      if (defined $domain && defined $acl && $acl ne 'all') {
+        if ($self->{hashbl_acl}{$acl}{$domain}) {
           push @emails, $_;
-          $seen{$_} = 1;
         }
       } else {
         push @emails, $_;
-        $seen{$_} = 1;
       }
     }
   }
@@ -380,16 +397,14 @@ sub _parse_emails {
     return $pms->{hashbl_email_cache}{$hdr} = \@emails;
   }
 
-  if (not defined $pms->{hashbl_welcomelist}) {
+  if (!defined $pms->{hashbl_welcomelist}) {
     %{$pms->{hashbl_welcomelist}} = map { lc($_) => 1 }
         ( $pms->get("X-Original-To:addr"),
           $pms->get("Apparently-To:addr"),
           $pms->get("Delivered-To:addr"),
           $pms->get("Envelope-To:addr"),
         );
-    if ( defined $pms->{hashbl_welcomelist}{''} ) {
-      delete $pms->{hashbl_welcomelist}{''};
-    }
+    delete $pms->{hashbl_welcomelist}{''};
   }
 
   my $str = '';
@@ -406,11 +421,11 @@ sub _parse_emails {
       }
     }
     my $body = join('', @{$pms->get_decoded_stripped_body_text_array()});
-    if ($opts =~ /\bnouri\b/) {
+    if ($opts->{nouri}) {
       # strip urls with possible emails inside
       $body =~ s#<?https?://\S{0,255}(?:\@|%40)\S{0,255}# #gi;
     }
-    if ($opts =~ /\bnoquote\b/) {
+    if ($opts->{noquote}) {
       # strip emails contained in <>, not mailto:
       # also strip ones followed by quote-like "wrote:" (but not fax: and tel: etc)
       $body =~ s#<?(?<!mailto:)$pms->{conf}->{hashbl_email_regex}(?:>|\s{1,10}(?!(?:fa(?:x|csi)|tel|phone|e?-?mail))[a-z]{2,11}:)# #gi;
@@ -424,7 +439,7 @@ sub _parse_emails {
   my %seen;
 
   while ($str =~ /($pms->{conf}->{hashbl_email_regex})/g) {
-    next if exists $seen{$1};
+    next if $seen{$1}++;
     push @emails, $1;
   }
 
@@ -453,15 +468,14 @@ sub check_hashbl_emails {
     $subtest = $rec;
   }
 
-  # Defaults
-  $opts = 'sha1/notag/noquote/max=10/shuffle' if !$opts;
-
+  # Parse opts, defaults
+  $opts = _parse_opts($opts || 'sha1/notag/noquote/max=10/shuffle');
   $from = 'ALLFROM/Reply-To/body' if !$from;
 
   # Find all emails
   my $emails = $self->_get_emails($pms, $opts, $from, $acl);
   if (!@$emails) {
-    if(defined $acl) {
+    if (defined $acl) {
       dbg("$rulename: no emails found ($from) on acl $acl");
     } else {
       dbg("$rulename: no emails found ($from)");
@@ -472,38 +486,34 @@ sub check_hashbl_emails {
   }
 
   # Filter list
-  my $keep_case = $opts =~ /\bcase\b/i;
-  my $nodot = $opts =~ /\bnodot\b/i;
-  my $notag = $opts =~ /\bnotag\b/i;
   my @filtered_emails; # keep order
   my %seen;
   foreach my $email (@$emails) {
-    next if exists $seen{$email};
-    next if $email !~ /.*\@.*/;
+    next if $seen{$email}++;
+    next if index($email, '@') == -1;
     if ($email =~ $pms->{conf}->{hashbl_email_welcomelist}
         || defined $pms->{hashbl_welcomelist}{$email}) {
       dbg("Address welcomelisted: $email");
       next;
     }
-    if ($nodot || $notag) {
+    if ($opts->{nodot} || $opts->{notag}) {
       my ($username, $domain) = ($email =~ /(.*)(\@.*)/);
-      $username =~ tr/.//d if $nodot;
-      $username =~ s/\+.*// if $notag;
+      $username =~ tr/.//d if $opts->{nodot};
+      $username =~ s/\+.*// if $opts->{notag};
       $email = $username.$domain;
     }
-    push @filtered_emails, $keep_case ? $email : lc($email);
-    $seen{$email} = 1;
+    push @filtered_emails, $opts->{case} ? $email : lc($email);
   }
 
   return 0 unless @filtered_emails;
 
   # Randomize order
-  if ($opts =~ /\bshuffle\b/) {
+  if ($opts->{shuffle}) {
     Mail::SpamAssassin::Util::fisher_yates_shuffle(\@filtered_emails);
   }
 
   # Truncate list
-  my $max = $opts =~ /\bmax=(\d+)\b/ ? $1 : 10;
+  my $max = $opts->{max} || 10;
   $#filtered_emails = $max-1 if scalar @filtered_emails > $max;
 
   $pms->rule_pending($rulename); # mark async
@@ -537,13 +547,10 @@ sub check_hashbl_uris {
     $subtest = $rec;
   }
 
-  # Defaults
-  $opts = 'sha1/max=10/shuffle' if !$opts;
+  # Parse opts, defaults
+  $opts = _parse_opts($opts || 'sha1/max=10/shuffle');
 
-  # Filter list
-  my $keep_case = $opts =~ /\bcase\b/i;
-
-  if ($opts =~ /raw/) {
+  if ($opts->{raw}) {
     warn "HashBL: $rulename raw option invalid\n";
     return 0;
   }
@@ -555,7 +562,7 @@ sub check_hashbl_uris {
   while (my($uri, $info) = each %{$uris}) {
     # we want to skip mailto: uris
     next if ($uri =~ /^mailto:/i);
-    next if exists $seen{$uri};
+    next if $seen{$uri}++;
 
     # no hosts/domains were found via this uri, so skip
     next unless $info->{hosts};
@@ -563,20 +570,19 @@ sub check_hashbl_uris {
     next unless $info->{types}->{a} || $info->{types}->{parsed};
     foreach my $uri (@{$info->{cleaned}}) {
       # check url
-      push @filtered_uris, $keep_case ? $uri : lc($uri);
+      push @filtered_uris, $opts->{case} ? $uri : lc($uri);
     }
-    $seen{$uri} = 1;
   }
 
   return 0 unless @filtered_uris;
 
   # Randomize order
-  if ($opts =~ /\bshuffle\b/) {
+  if ($opts->{shuffle}) {
     Mail::SpamAssassin::Util::fisher_yates_shuffle(\@filtered_uris);
   }
 
   # Truncate list
-  my $max = $opts =~ /\bmax=(\d+)\b/ ? $1 : 10;
+  my $max = $opts->{max} || 10;
   $#filtered_uris = $max-1 if scalar @filtered_uris > $max;
 
   $pms->rule_pending($rulename); # mark async
@@ -621,22 +627,20 @@ sub check_hashbl_bodyre {
     $subtest = $rec;
   }
 
-  # Defaults
-  $opts = 'sha1/max=10/shuffle' if !$opts;
-
-  my $keep_case = $opts =~ /\bcase\b/i;
+  # Parse opts, defaults
+  $opts = _parse_opts($opts || 'sha1/max=10/shuffle');
 
   # Search body
   my @matches;
   my %seen;
+
   if (ref($bodyref) eq 'ARRAY') {
     # body, rawbody
-    foreach (@$bodyref) {
-      while ($_ =~ /$re/gs) {
+    foreach my $body (@$bodyref) {
+      while ($body =~ /$re/gs) {
         next if !defined $1;
-        my $match = $keep_case ? $1 : lc($1);
-        next if exists $seen{$match};
-        $seen{$match} = 1;
+        my $match = $opts->{case} ? $1 : lc($1);
+        next if $seen{$match}++;
         push @matches, $match;
       }
     }
@@ -644,9 +648,8 @@ sub check_hashbl_bodyre {
     # full
     while ($$bodyref =~ /$re/gs) {
       next if !defined $1;
-      my $match = $keep_case ? $1 : lc($1);
-      next if exists $seen{$match};
-      $seen{$match} = 1;
+      my $match = $opts->{case} ? $1 : lc($1);
+      next if $seen{$match}++;
       push @matches, $match;
     }
   }
@@ -659,12 +662,12 @@ sub check_hashbl_bodyre {
   }
 
   # Randomize order
-  if ($opts =~ /\bshuffle\b/) {
+  if ($opts->{shuffle}) {
     Mail::SpamAssassin::Util::fisher_yates_shuffle(\@matches);
   }
 
   # Truncate list
-  my $max = $opts =~ /\bmax=(\d+)\b/ ? $1 : 10;
+  my $max = $opts->{max} || 10;
   $#matches = $max-1 if scalar @matches > $max;
 
   $pms->rule_pending($rulename); # mark async
@@ -703,6 +706,10 @@ sub check_hashbl_tag {
     $subtest = $rec;
   }
 
+  # Parse opts, defaults
+  $opts = _parse_opts($opts || 'sha1/max=10/shuffle');
+  $opts->{fqdn} = $opts->{tld} = 1  if $opts->{trim};
+
   # Strip possible _ delimiters
   $tag =~ s/^_(.+)_$/$1/;
 
@@ -721,37 +728,69 @@ sub check_hashbl_tag {
 sub _check_hashbl_tag {
   my ($self, $pms, $list, $opts, $tag, $subtest, $rulename) = @_;
 
-  # Defaults
-  $opts = 'sha1/max=10/shuffle' if !$opts;
-
-  # Filter list
-  my $keep_case = $opts =~ /\bcase\b/i;
-
   # Get raw array of tag values, get_tag() returns joined string
   my $valref = $pms->get_tag_raw($tag);
+  my @vals = ref $valref ? @$valref : $valref;
 
-  # Filter empty
-  my @vals = grep { defined $_ && $_ ne '' }
-               (ref $valref ? @$valref : $valref);
+  # Lowercase
+  @vals = map { lc } @vals  if !$opts->{case};
+
+  # Options
+  foreach my $value (@vals) {
+    my $is_ip = $value =~ IS_IP_ADDRESS;
+    if ($opts->{ip}) {
+      if (!$is_ip) {
+        $value = undef;
+        next;
+      }
+    }
+    if ($opts->{ipv4}) {
+      if ($value =~ IS_IPV4_ADDRESS) {
+        $is_ip = 1;
+      } else {
+        $value = undef;
+        next;
+      }
+    }
+    if ($opts->{ipv6}) {
+      if (!$is_ip || $value =~ IS_IPV4_ADDRESS) {
+        $value = undef;
+        next;
+      }
+    }
+    if ($is_ip && $opts->{revip}) {
+      $value = reverse_ip_address($value);
+    }
+    if (!$is_ip) {
+      if ($opts->{fqdn} && !is_fqdn_valid($value)) {
+        $value = undef;
+        next;
+      }
+      if ($opts->{tld} && !$pms->{main}->{registryboundaries}->is_domain_valid($value)) {
+        $value = undef;
+        next;
+      }
+      if ($opts->{trim}) {
+        $value = $pms->{main}->{registryboundaries}->trim_domain($value);
+      }
+    }
+  }
+
+  # Unique (and remove empty)
+  @vals = do { my %seen; grep { defined $_ && !$seen{$_}++ } @vals; };
 
   if (!@vals) {
     $pms->rule_ready($rulename); # mark rule ready for metas
     return;
   }
 
-  # Lowercase
-  @vals = map { lc } @vals  if !$keep_case;
-
-  # Unique
-  @vals = do { my %seen; grep { !$seen{$_}++ } @vals; };
-
   # Randomize order
-  if ($opts =~ /\bshuffle\b/) {
+  if ($opts->{shuffle}) {
     Mail::SpamAssassin::Util::fisher_yates_shuffle(\@vals);
   }
 
   # Truncate list
-  my $max = $opts =~ /\bmax=(\d+)\b/ ? $1 : 10;
+  my $max = $opts->{max} || 10;
   $#vals = $max-1 if scalar @vals > $max;
 
   foreach my $value (@vals) {
@@ -764,11 +803,10 @@ sub _check_hashbl_tag {
 sub _hash {
   my ($self, $opts, $value) = @_;
 
-  my $hashtype = $opts =~ /\b(raw|sha1|md5)\b/i ? lc($1) : 'sha1';
-  if ($hashtype eq 'sha1') {
+  if ($opts->{sha1}) {
     utf8::encode($value) if utf8::is_utf8($value); # sha1_hex expects bytes
     return sha1_hex($value);
-  } elsif ($hashtype eq 'md5') {
+  } elsif ($opts->{md5}) {
     utf8::encode($value) if utf8::is_utf8($value); # md5_hex expects bytes
     return md5_hex($value);
   } else {
