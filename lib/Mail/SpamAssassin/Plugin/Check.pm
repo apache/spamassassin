@@ -1341,7 +1341,7 @@ sub hit_rule_plugin_code {
   if (!$no_capture) {
     $capture_code = '
         foreach my $cname (keys %-) {
-          my @cvals = @{$-{$cname}};
+          my @cvals = grep { $_ ne "" } @{$-{$cname}};
           foreach my $cval (@cvals) {
             $self->{capture_values}->{$cname}->{$cval} = 1;
           }
