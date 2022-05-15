@@ -1338,7 +1338,7 @@ sub hit_rule_plugin_code {
 
   # Save named captures for regex template rules
   my $capture_code = '';
-  if (!$no_capture && %{$pms->{conf}->{capture_rules}}) {
+  if (!$no_capture) {
     $capture_code = '
         foreach my $cname (keys %-) {
           my @cvals = @{$-{$cname}};
