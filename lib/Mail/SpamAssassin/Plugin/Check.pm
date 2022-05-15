@@ -1341,9 +1341,11 @@ sub hit_rule_plugin_code {
   if (!$no_capture && %{$pms->{conf}->{capture_rules}}) {
     $capture_code = '
         foreach my $cname (keys %-) {
-          foreach my $cval (@{$-{$cname}}) {
+          my @cvals = @{$-{$cname}};
+          foreach my $cval (@cvals) {
             $self->{capture_values}->{$cname}->{$cval} = 1;
           }
+          $self->set_tag($cname, @cvals == 1 ? $cvals[0] : \@cvals);
         }
     ';
   }
