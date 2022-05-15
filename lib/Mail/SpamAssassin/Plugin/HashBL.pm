@@ -43,6 +43,11 @@ HashBL - query hashed (and unhashed) DNS blocklists
   describe HASHBL_URI Message contains uri found on rbl
   tflags   HASHBL_URI net
 
+  # Capture tag using SA 4.0 regex named capture feature
+  header   __X_SOME_ID X-Some-ID =~ /^(?<XSOMEID>\d{10,20})$/
+  # Query the tag value as is from a DNSBL
+  header   HASHBL_TAG eval:check_hashbl_tag('idbl.example.invalid/A', 'raw', 'XSOMEID', '^127\.')
+
 =head1 DESCRIPTION
 
 This plugin support multiple types of hashed or unhashed DNS blocklists.
@@ -101,6 +106,8 @@ C<hashbl_email_regex>.  Likewise, the default welcomelist can be changed with
 C<hashbl_email_welcomelist>.  Only change if you know what you are doing, see
 module source for the defaults.  Example: hashbl_email_regex \S+@\S+.com
 
+=back
+
 =over 4
 
 =item header RULE check_hashbl_uris('bl.example.invalid/A', 'OPTS', '^127\.')
@@ -114,11 +121,26 @@ Default OPTS: sha1/max=10/shuffle
 
 =back
 
+=over 4
+
 =item body RULE check_hashbl_bodyre('bl.example.invalid/A', 'OPTS', '\b(match)\b', '^127\.')
 
 Search body for matching regexp and query the string captured.  Regexp must
 have a single capture ( ) for the string ($1).  Optional subtest regexp to
 match DNS answer.  Note that eval rule type must be "body" or "rawbody".
+
+=back
+
+=over 4
+
+=item header RULE check_hashbl_tag('bl.example.invalid/A', 'OPTS', 'TAGNAME', '^127\.')
+
+Lookup value of SpamAssassin tag _TAGNAME_ from DNS list, optional subtest
+regexp to match DNS answer.
+
+DNS query type can be appended to list with /A (default) or /TXT.
+
+Default OPTS: sha1/max=10/shuffle
 
 =back
 
@@ -156,9 +178,15 @@ sub new {
     $self->{hashbl_available} = 1;
   }
 
-  $self->register_eval_rule("check_hashbl_emails", $Mail::SpamAssassin::Conf::TYPE_HEAD_EVALS);
-  $self->register_eval_rule("check_hashbl_uris", $Mail::SpamAssassin::Conf::TYPE_HEAD_EVALS);
-  $self->register_eval_rule("check_hashbl_bodyre", $Mail::SpamAssassin::Conf::TYPE_BODY_EVALS);
+  $self->{evalfuncs} = {
+    'check_hashbl_emails' => $Mail::SpamAssassin::Conf::TYPE_HEAD_EVALS,
+    'check_hashbl_uris' => $Mail::SpamAssassin::Conf::TYPE_HEAD_EVALS,
+    'check_hashbl_bodyre' => $Mail::SpamAssassin::Conf::TYPE_BODY_EVALS,
+    'check_hashbl_tag' => $Mail::SpamAssassin::Conf::TYPE_HEAD_EVALS,
+  };
+  while (my ($func, $type) = each %{$self->{evalfuncs}}) {
+    $self->register_eval_rule($func, $type);
+  }
   $self->set_config($mailsa->{conf});
 
   return $self;
@@ -287,7 +315,7 @@ sub finish_parsing_start {
 
   # Adjust priority -100 to launch early
   # Find rulenames from eval_to_rule mappings
-  foreach my $evalfunc ('check_hashbl_emails','check_hashbl_uris','check_hashbl_bodyre') {
+  foreach my $evalfunc (%{$self->{evalfuncs}}) {
     foreach (@{$conf->{eval_to_rule}->{$evalfunc}||[]}) {
       dbg("adjusting rule $_ priority to -100");
       $conf->{priority}->{$_} = -100;
@@ -648,6 +676,91 @@ sub check_hashbl_bodyre {
   return 0;
 }
 
+sub check_hashbl_tag {
+  my ($self, $pms, $list, $opts, $tag, $subtest) = @_;
+
+  return 0 if !$self->{hashbl_available};
+  return 0 if !$pms->is_dns_available();
+
+  my $rulename = $pms->get_current_eval_rule_name();
+
+  if (!defined $list) {
+    warn "HashBL: $rulename blocklist argument missing\n";
+    return 0;
+  }
+
+  if (!defined $tag || $tag eq '') {
+    warn "HashBL: $rulename tag argument missing\n";
+    return 0;
+  }
+
+  if ($subtest) {
+    my ($rec, $err) = compile_regexp($subtest, 0);
+    if (!$rec) {
+      warn "HashBL: $rulename invalid subtest regex: $@\n";
+      return 0;
+    }
+    $subtest = $rec;
+  }
+
+  # Strip possible _ delimiters
+  $tag =~ s/^_(.+)_$/$1/;
+
+  # Force uppercase
+  $tag = uc($tag);
+
+  $pms->rule_pending($rulename); # mark async
+
+  $pms->action_depends_on_tags($tag, sub {
+    $self->_check_hashbl_tag($pms, $list, $opts, $tag, $subtest, $rulename);
+  });
+
+  return 0;
+}
+
+sub _check_hashbl_tag {
+  my ($self, $pms, $list, $opts, $tag, $subtest, $rulename) = @_;
+
+  # Defaults
+  $opts = 'sha1/max=10/shuffle' if !$opts;
+
+  # Filter list
+  my $keep_case = $opts =~ /\bcase\b/i;
+
+  # Get raw array of tag values, get_tag() returns joined string
+  my $valref = $pms->get_tag_raw($tag);
+
+  # Filter empty
+  my @vals = grep { defined $_ && $_ ne '' }
+               (ref $valref ? @$valref : $valref);
+
+  if (!@vals) {
+    $pms->rule_ready($rulename); # mark rule ready for metas
+    return;
+  }
+
+  # Lowercase
+  @vals = map { lc } @vals  if !$keep_case;
+
+  # Unique
+  @vals = do { my %seen; grep { !$seen{$_}++ } @vals; };
+
+  # Randomize order
+  if ($opts =~ /\bshuffle\b/) {
+    Mail::SpamAssassin::Util::fisher_yates_shuffle(\@vals);
+  }
+
+  # Truncate list
+  my $max = $opts =~ /\bmax=(\d+)\b/ ? $1 : 10;
+  $#vals = $max-1 if scalar @vals > $max;
+
+  foreach my $value (@vals) {
+    $self->_submit_query($pms, $rulename, $value, $list, $opts, $subtest);
+  }
+
+  return;
+}
+
 sub _hash {
   my ($self, $opts, $value) = @_;
 
@@ -729,5 +842,6 @@ sub has_hashbl_ignore { 1 }
 sub has_hashbl_email_regex { 1 }
 sub has_hashbl_email_welcomelist { 1 }
 sub has_hashbl_email_whitelist { 1 }
+sub has_hashbl_tag { 1 }
 
 1;
