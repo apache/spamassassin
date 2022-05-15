@@ -411,6 +411,7 @@ sub sarun {
   (-d "$workdir/d.$testname") or mkdir ("$workdir/d.$testname", 0755);
   
   my $test_number = test_number();
+  $current_checkfile = "$workdir/d.$testname/$test_number";
 #print STDERR "RUN: $scrargs\n";
   untaint_system("$scrargs > $workdir/d.$testname/$test_number $post_redir");
   $sa_exitcode = ($?>>8);
@@ -448,6 +449,7 @@ sub salearnrun {
   (-d "$workdir/d.$testname") or mkdir ("$workdir/d.$testname", 0755);
 
   my $test_number = test_number();
+  $current_checkfile = "$workdir/d.$testname/$test_number";
 
   untaint_system("$salearnargs > $workdir/d.$testname/$test_number");
   $salearn_exitcode = ($?>>8);
