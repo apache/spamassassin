@@ -270,12 +270,12 @@ sub _check_eval {
         $pms->rule_ready($rulename);
       }
     };
-    $pms->rule_pending($rulename); # mark async
-    return;
+    return; # return undef for async status
   }
 
   $self->_check_fromnamespoof($pms);
-  return $result->();
+  # make sure not to return undef, as this is not async anymore
+  return $result->() || 0;
 }
 
 sub check_fromname_spoof {

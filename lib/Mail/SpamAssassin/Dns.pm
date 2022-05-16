@@ -94,14 +94,14 @@ sub do_rbl_lookup {
   if (defined $subtest) {
     if ($subtest =~ /^sb:/) {
       info("dns: ignored $rule, SenderBase rules are deprecated");
-      return;
+      return 0;
     }
     # Compile as regex if not pure ip/bitmask (same check in process_dnsbl_result)
     if ($subtest !~ /^\d+(?:\.\d+\.\d+\.\d+)?$/) {
       my ($rec, $err) = compile_regexp($subtest, 0);
       if (!$rec) {
         warn("dns: invalid rule $rule subtest regexp '$subtest': $err\n");
-        return;
+        return 0;
       }
       $subtest = $rec;
     }
@@ -110,25 +110,24 @@ sub do_rbl_lookup {
   dbg("dns: launching rule %s, set %s, type %s, %s", $rule, $set, $type,
     defined $subtest ? "subtest $subtest" : 'no subtest');
 
-  $self->rule_pending($rule); # mark async
-
   my $ent = {
     rulename => $rule,
     type => "DNSBL",
     set => $set,
     subtest => $subtest,
   };
-  $self->{async}->bgsend_and_start_lookup($host, $type, undef, $ent,
+  my $ret = $self->{async}->bgsend_and_start_lookup($host, $type, undef, $ent,
     sub { my($ent, $pkt) = @_; $self->process_dnsbl_result($ent, $pkt) },
     master_deadline => $self->{master_deadline}
   );
+
+  return 0 if defined $ret; # no query started
+  return; # return undef for async status
 }
 
 # Deprecated, was only used from DNSEval.pm?
 sub do_dns_lookup {
   my ($self, $rule, $type, $host) = @_;
-
-  $self->rule_pending($rule); # mark async
 
   my $ent = {
     rulename => $rule,

@@ -294,7 +294,6 @@ sub new {
     'subtest_names_hit' => [ ],
     'spamd_result_log_items' => [ ],
     'tests_already_hit' => { },
-    'tests_pending'     => { },
     'get_cache'         => { },
     'tag_data'          => { },
     'rule_errors'       => 0,
@@ -3104,9 +3103,6 @@ sub got_hit {
     $score = $params{defscore}  if !defined $score;
   }
 
-  # Make sure rule is marked ready in tests_pending also
-  $self->{tests_pending}->{$rule} = 0;
-
   # adding a hit does nothing if we don't have a score -- we probably
   # shouldn't have run it in the first place
   if (!$score) {
@@ -3171,70 +3167,14 @@ sub got_hit {
   return 1;
 }
 
-=item $status->rule_pending ($rulename)
-
-Register a pending rule.  Must be called if the rules result is evaluated
-later than when exiting it's eval-function (e.g.  async lookups).  This is
-required for meta rules that depend on this rule to evaluate correctly.
-
-It is not strictly required when $status->{async}->bgsend_and_start_lookup()
-is used, as that automatically tracks pending DNS rules and also marks them
-ready when the result callback is run.  But when a plugin has dummy stub
-eval-function (examples: check_uridnsbl, check_rbl_sub), then using
-rule_pending() and rule_ready() is necessary.  Otherwise in some cases the
-eval-function could be run before any lookups are launched, and the rule
-would be marked ready too early.
-
-$status->rule_ready($rulename) or $status->got_hit($rulename, ...) must be
-called when the result has arrived.  If these are not used, then any meta
-rules depending on the rule might not evaluate at all.
-
-=cut
-
-# === Bug 7735 technical notes ===
-#
-# Rule readiness status for dynamic meta rules evaluation (Plugins / Check /
-# do_meta_tests) is always tracked by $pms->{tests_already_hit}->{$rule}. 
-# If it exists, then rule is considered run and ready.
-#
-# The public rule_pending() / rule_ready() function pair is meant to be used
-# for any async rules, and they additionally track rule status in
-# $pms->{tests_pending}->{$rule}, which do_meta_tests also checks.  Any
-# rule_pending() call _must_ be accompanied later by rule_ready() or
-# got_hit().  But as bgsend_and_start_lookup() automatically tracks rules
-# too, most of legacy plugins not using these should work correctly - only
-# in some corner cases where a dummy stub eval-function is called early by
-# accident (maybe due to adjusted rule priority) things might break.
-#
-# Any rule regardless of what it is must always be marked ready via
-# $pms->{tests_already_hit} for meta evaluation to work, even if no
-# rule_pending() is called.  If rule has no async methods, it's possible to
-# use $pms->{tests_already_hit} directly for marking, as is done for example
-# by Check.pm for all basic body/header/etc rules (look for
-# $hitsptr->{q{'.$rulename.'}} ||= 0).  As such it's also always safe to
-# call rule_ready() without rule_pending(), it achieves the same.
-
-sub rule_pending {
-  my ($self, $rule) = @_;
-
-  # Ignore if called after rule_pending(), rule_ready() or got_hit(), they
-  # are the only ones that make $self->{tests_pending}->{$rule} exist
-  return if exists $self->{tests_pending}->{$rule};
-
-  # It's possible that tests_already_hit == 0, if some stub eval call was
-  # run early.  It's ok to clear this and pretend it was never run.  We now
-  # rely exclusively on tests_pending and wait for rule_ready() or got_hit()
-  delete $self->{tests_already_hit}->{$rule} if !$self->{tests_already_hit}->{$rule};
-  $self->{tests_pending}->{$rule} = 1;
-}
-
 =item $status->rule_ready ($rulename)
 
-Mark a rule ready, so it can be considered for meta rule evaluation.  Any
-rule regardless of type must always be marked ready when it's finished,
-otherwise any meta rules that depend on it might not evaluate.  If
-$status->rule_pending() was called, then a $stats->rule_ready() call must be
-done, alternatively $status->got_hit() will also mark rule ready.
+Mark an asynchronous rule ready, so it can be considered for meta rule
+evaluation.  Asynchronous rule is a rule whose eval-function returns undef,
+marking that it's not ready yet, expecting results later. 
+$status->rule_ready() must be called later to mark it ready, alternatively
+$status->got_hit() also does this.  If neither is called, then any meta rule
+that depends on this rule might not evaluate.
 
 =cut
 
@@ -3244,11 +3184,9 @@ sub rule_ready {
   if ($self->get_async_pending_rules($rule)) {
     # Can't be ready if there are pending DNS lookups, ignore for now.
     # Make sure tests_pending exist, should not accept rule_pending() anymore
-    $self->{tests_pending}->{$rule} ||= 0;
     return;
   }
 
-  $self->{tests_pending}->{$rule} = 0;
   $self->{tests_already_hit}->{$rule} ||= 0;
 }
 

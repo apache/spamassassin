@@ -516,13 +516,14 @@ sub check_hashbl_emails {
   my $max = $opts->{max} || 10;
   $#filtered_emails = $max-1 if scalar @filtered_emails > $max;
 
-  $pms->rule_pending($rulename); # mark async
-
+  my $queries;
   foreach my $email (@filtered_emails) {
-    $self->_submit_query($pms, $rulename, $email, $list, $opts, $subtest);
+    my $ret = $self->_submit_query($pms, $rulename, $email, $list, $opts, $subtest);
+    $queries++ if defined $ret;
   }
 
-  return 0;
+  return 0 if !$queries; # no query started
+  return; # return undef for async status
 }
 
 sub check_hashbl_uris {
@@ -585,13 +586,14 @@ sub check_hashbl_uris {
   my $max = $opts->{max} || 10;
   $#filtered_uris = $max-1 if scalar @filtered_uris > $max;
 
-  $pms->rule_pending($rulename); # mark async
-
+  my $queries;
   foreach my $furi (@filtered_uris) {
-    $self->_submit_query($pms, $rulename, $furi, $list, $opts, $subtest);
+    my $ret = $self->_submit_query($pms, $rulename, $furi, $list, $opts, $subtest);
+    $queries++ if defined $ret;
   }
 
-  return 0;
+  return 0 if !$queries; # no query started
+  return; # return undef for async status
 }
 
 sub check_hashbl_bodyre {
@@ -670,13 +672,14 @@ sub check_hashbl_bodyre {
   my $max = $opts->{max} || 10;
   $#matches = $max-1 if scalar @matches > $max;
 
-  $pms->rule_pending($rulename); # mark async
-
+  my $queries;
   foreach my $match (@matches) {
-    $self->_submit_query($pms, $rulename, $match, $list, $opts, $subtest);
+    my $ret = $self->_submit_query($pms, $rulename, $match, $list, $opts, $subtest);
+    $queries++ if defined $ret;
   }
 
-  return 0;
+  return 0 if !$queries; # no query started
+  return; # return undef for async status
 }
 
 sub check_hashbl_tag {
@@ -716,13 +719,11 @@ sub check_hashbl_tag {
   # Force uppercase
   $tag = uc($tag);
 
-  $pms->rule_pending($rulename); # mark async
-
   $pms->action_depends_on_tags($tag, sub {
     $self->_check_hashbl_tag($pms, $list, $opts, $tag, $subtest, $rulename);
   });
 
-  return 0;
+  return; # return undef for async status
 }
 
 sub _check_hashbl_tag {
@@ -819,7 +820,7 @@ sub _submit_query {
 
   if (exists $pms->{conf}->{hashbl_ignore}->{lc $value}) {
     dbg("query skipped, ignored string: $value");
-    return 1;
+    return 0;
   }
 
   my $hash = $self->_hash($opts, $value);
@@ -827,7 +828,7 @@ sub _submit_query {
 
   if (exists $pms->{conf}->{hashbl_ignore}->{$hash}) {
     dbg("query skipped, ignored hash: $value");
-    return 1;
+    return 0;
   }
 
   my $type = $list =~ s,/(A|TXT)$,,i ? uc($1) : 'A';
@@ -840,7 +841,7 @@ sub _submit_query {
     value => $value,
     subtest => $subtest,
   };
-  $pms->{async}->bgsend_and_start_lookup($lookup, $type, undef, $ent,
+  return $pms->{async}->bgsend_and_start_lookup($lookup, $type, undef, $ent,
     sub { my ($ent, $pkt) = @_; $self->_finish_query($pms, $ent, $pkt); },
     master_deadline => $pms->{master_deadline}
   );

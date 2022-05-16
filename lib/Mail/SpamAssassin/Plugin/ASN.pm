@@ -586,8 +586,6 @@ sub check_asn {
     return 0;
   }
 
-  $pms->rule_pending($rulename); # mark async
-
   $asn_tag = 'ASN' unless defined $asn_tag;
   $pms->action_depends_on_tags($asn_tag,
     sub { my($pms,@args) = @_;
@@ -595,7 +593,7 @@ sub check_asn {
     }
   );
 
-  return 0;
+  return; # return undef for async status
 }
 
 sub _check_asn {

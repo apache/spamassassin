@@ -443,7 +443,6 @@ sub check_razor2 {
   ## forking method
 
   $pms->{razor2_rulename} = $pms->get_current_eval_rule_name();
-  $pms->rule_pending($pms->{razor2_rulename}); # mark async
 
   # create socketpair for communication
   $pms->{razor2_backchannel} = Mail::SpamAssassin::SubProcBackChannel->new();
@@ -500,7 +499,7 @@ sub check_razor2 {
     return 0;
   };
 
-  return 0;
+  return; # return undef for async status
 }
 
 sub check_tick {
@@ -652,12 +651,11 @@ sub check_razor2_range {
   # If forked, call back later unless results are in
   if ($self->{main}->{conf}->{razor_fork}) {
     if (!defined $pms->{razor2_result}) {
-      $pms->rule_pending($rulename); # mark async
       dbg("razor2: delaying check_razor2_range call for $rulename");
       # array matches check_razor2_range() argument order
       push @{$pms->{razor2_range_callbacks}},
         [$engine, $min, $max, $rulename];
-      return 0;
+      return; # return undef for async status
     }
   } else {
     # If Razor2 hasn't been checked yet, go ahead and run it.

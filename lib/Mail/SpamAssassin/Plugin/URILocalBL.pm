@@ -392,26 +392,30 @@ sub check_uri_local_bl {
   # bail out now if dns not available
   return 0 if !$pms->is_dns_available();
 
-  $pms->rule_pending($rulename); # mark async
-
+  my $queries;
   foreach my $host (keys %found_hosts) {
     $host = idn_to_ascii($host);
     dbg("launching A/AAAA lookup for $host");
     # launch dns
-    $pms->{async}->bgsend_and_start_lookup($host, 'A', undef,
+    my $ret = $pms->{async}->bgsend_and_start_lookup($host, 'A', undef,
       { rulename => $rulename, host => $host, type => 'URILocalBL' },
       sub { my($ent, $pkt) = @_; $self->_finish_lookup($pms, $ent, $pkt); },
       master_deadline => $pms->{master_deadline}
     );
+    $queries++ if defined $ret;
     # also IPv6 if database supports
     if ($self->{main}->{geodb}->can('country_v6')) {
-      $pms->{async}->bgsend_and_start_lookup($host, 'AAAA', undef,
+      $ret = $pms->{async}->bgsend_and_start_lookup($host, 'AAAA', undef,
         { rulename => $rulename, host => $host, type => 'URILocalBL' },
         sub { my($ent, $pkt) = @_; $self->_finish_lookup($pms, $ent, $pkt); },
         master_deadline => $pms->{master_deadline}
       );
+      $queries++ if defined $ret;
     }
   }
+
+  return 0 if !$queries; # no query started
+  return; # return undef for async status
 }
 
 sub _finish_lookup {

@@ -282,20 +282,16 @@ sub do_meta_tests {
   return if $self->{am_compiling}; # nothing to compile here
 
   my $mp = $pms->{meta_pending};
-  my $tp = $pms->{tests_pending};
   my $md = $pms->{conf}->{meta_dependencies};
   my $mt = $pms->{conf}->{meta_tests};
   my $h = $pms->{tests_already_hit};
   my $retry;
 
-  # Get pending DNS async rule list
-  my %pl = map { $_ => 1 } $pms->get_async_pending_rules();
-
 RULE:
   foreach my $rulename (keys %$mp) {
     # Meta is not ready if some dependency has not run yet
     foreach my $deprule (@{$md->{$rulename}||[]}) {
-      if (!exists $h->{$deprule} || $tp->{$deprule} || $pl{$deprule}) {
+      if (!exists $h->{$deprule}) {
         next RULE;
       }
     }
@@ -322,7 +318,6 @@ sub finish_meta_tests {
   return if $self->{am_compiling}; # nothing to compile here
 
   my $mp = $pms->{meta_pending};
-  my $tp = $pms->{tests_pending};
   my $md = $pms->{conf}->{meta_dependencies};
   my $mt = $pms->{conf}->{meta_tests};
   my $h = $pms->{tests_already_hit};
@@ -334,7 +329,7 @@ RULE:
     my %unrun;
     # Meta is not ready if some dependency has not run yet
     foreach my $deprule (@{$md->{$rulename}||[]}) {
-      if (!exists $h->{$deprule} || $tp->{$deprule}) {
+      if (!exists $h->{$deprule}) {
         # Record all unrun deps for second meta evaluation
         $unrun{$deprule} = 1;
       }
@@ -1157,10 +1152,8 @@ sub run_eval_tests {
       next;
     }
 
-    # Make sure rule is marked ready for meta rules using $hitsptr
     $evalstr .= '
     if ($scoresptr->{q{'.$rulename.'}}) {
-      $hitsptr->{q{'.$rulename.'}} ||= 0;
       $rulename = q#'.$rulename.'#;
 ';
  
@@ -1176,13 +1169,13 @@ sub run_eval_tests {
 
     if ($would_log_rules_all) {
       $evalstr .= '
-      dbg("rules-all: running eval rule %s (%s)", q{'.$rulename.'}, q{'.$function.'});
+      dbg("rules-all: running eval rule %s (%s)", $rulename, q{'.$function.'});
       ';
     }
 
     $evalstr .= '
       eval {
-        $result = $self->'.$function.'(@extraevalargs, @{$testptr->{q#'.$rulename.'#}->[1]}); 1;
+        $result = $self->'.$function.'(@extraevalargs, @{$testptr->{$rulename}->[1]}); 1;
       } or do {
         $result = 0;
         die "rules: $@\n"  if index($@, "__alarm__ignore__") >= 0;
@@ -1199,10 +1192,16 @@ sub run_eval_tests {
 ';
     }
 
+    # If eval returns undef, it means rule is running async and $hitsptr
+    # will be set later by rule_ready() or got_hit()
     $evalstr .= '
-      if ($result) {
-        $self->got_hit($rulename, $prepend2desc, ruletype => "eval", value => $result);
-        '.$dbgstr.'
+      if (defined $result) {
+        if ($result) {
+          $self->got_hit($rulename, $prepend2desc, ruletype => "eval", value => $result);
+          '.$dbgstr.'
+        } else {
+          $hitsptr->{$rulename} ||= 0;
+        }
       }
     }
 ';

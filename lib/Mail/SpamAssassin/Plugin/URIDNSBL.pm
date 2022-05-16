@@ -343,9 +343,7 @@ sub new {
 # this is just a placeholder; in fact the results are dealt with later	 
 sub check_uridnsbl {
   my ($self, $pms) = @_;
-  my $rulename = $pms->get_current_eval_rule_name();
-  $pms->rule_pending($rulename); # mark async
-  return 0;
+  return; # return undef for async status
 }
 
 # ---------------------------------------------------------------------------
@@ -377,8 +375,6 @@ sub check_dnsbl {
 
   foreach my $rulename (keys %{$conf->{uridnsbls}}) {
     next if !$conf->{scores}->{$rulename};
-
-    $pms->rule_pending($rulename); # mark async
 
     my $rulecf = $conf->{uridnsbls}->{$rulename};
     my %tfl = map { ($_,1) } split(/\s+/, $conf->{tflags}->{$rulename}||'');

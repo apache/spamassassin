@@ -330,7 +330,6 @@ sub check_pyzor {
   ## forking method
 
   $pms->{pyzor_rulename} = $pms->get_current_eval_rule_name();
-  $pms->rule_pending($pms->{pyzor_rulename}); # mark async
 
   # create socketpair for communication
   $pms->{pyzor_backchannel} = Mail::SpamAssassin::SubProcBackChannel->new();
@@ -386,7 +385,7 @@ sub check_pyzor {
     return 0;
   };
 
-  return 0;
+  return; # return undef for async status
 }
 
 sub pyzor_lookup {
