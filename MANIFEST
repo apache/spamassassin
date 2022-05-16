@@ -86,7 +86,6 @@ lib/Mail/SpamAssassin/Plugin/DecodeShortURLs.pm
 lib/Mail/SpamAssassin/Plugin/DKIM.pm
 lib/Mail/SpamAssassin/Plugin/DMARC.pm
 lib/Mail/SpamAssassin/Plugin/DNSEval.pm
-lib/Mail/SpamAssassin/Plugin/Esp.pm
 lib/Mail/SpamAssassin/Plugin/ExtractText.pm
 lib/Mail/SpamAssassin/Plugin/FreeMail.pm
 lib/Mail/SpamAssassin/Plugin/FromNameSpoof.pm
@@ -428,10 +427,6 @@ t/data/spam/dmarc/strictrejectko.eml
 t/data/spam/dnsbl.eml
 t/data/spam/dnsbl_domsonly.eml
 t/data/spam/dnsbl_ipsonly.eml
-t/data/spam/esp/mailchimp.eml
-t/data/spam/esp/mailchimp.txt
-t/data/spam/esp/sendgrid_id.eml
-t/data/spam/esp/sendgrid_id.txt
 t/data/spam/extracttext/gtube_jpg.eml
 t/data/spam/extracttext/gtube_pdf.eml
 t/data/spam/freemail1
@@ -508,7 +503,6 @@ t/dnsbl.t
 t/dnsbl_sc_meta.t
 t/dnsbl_subtests.t
 t/enable_compat.t
-t/esp.t
 t/extracttext.t
 t/freemail.t
 t/freemail_welcome_block.t
