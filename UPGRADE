@@ -279,7 +279,7 @@ Note for Users Upgrading to SpamAssassin 3.4.3
 - DNSEval: add check_rbl_ns_from to check against an rbl for dns servers
 
 - HashBL: Add check_hashbl_bodyre, check_hashbl_emails, check_hashbl_uris,
-  hashbl_ignore
+  check_hashbl_tag, hashbl_ignore. New sha256 option.
 
 - ASN: Support IPv6 with asn_lookup_ipv6 (Bug 7211)
 
