@@ -9,7 +9,7 @@ plan skip_all => "Can't use Net::DNS Safely"   unless can_use_net_dns_safely();
 
 # run many times to catch some random natured failures
 my $iterations = 5;
-plan tests => 10 * $iterations;
+plan tests => 11 * $iterations;
 
 # ---------------------------------------------------------------------------
 
@@ -23,7 +23,9 @@ plan tests => 10 * $iterations;
  q{ 1.0 META_HASHBL_BTC } => '',
  q{ 1.0 META_HASHBL_URI } => '',
 );
-%anti_patterns = ();
+%anti_patterns = (
+ q{ 1.0 X_HASHBL_SHA256 } => '',
+);
 
 # Check from debug output log that nothing else than these were queried
 @valid_queries = qw(
@@ -33,6 +35,7 @@ bc9f1b35acd338b92b0659cc2111e6b661a8b2bc.hashbltest1.spamassassin.org
 96b802967118135ef048c2bc860e7b0deb7d2333.hashbltest1.spamassassin.org
 170d83ef2dc9c2de0e65ce4461a3a375.hashbltest2.spamassassin.org
 cc205dd956d568ff8524d7fc42868500e4d7d162.hashbltest3.spamassassin.org
+jykf2a5v6asavfel3stymlmieh4e66jeroxuw52mc5xhdylnyb7a.hashbltest3.spamassassin.org
 6a42acf4133289d595e3875a9d677f810e80b7b4.hashbltest4.spamassassin.org
 5c6205960a65b1f9078f0e12dcac970aab0015eb.hashbltest4.spamassassin.org
 1234567890.hashbltest5.spamassassin.org
@@ -76,6 +79,10 @@ tstlocalrules(q{
 
   body     X_HASHBL_BTC eval:check_hashbl_bodyre('hashbltest3.spamassassin.org', 'sha1/max=10/shuffle', '\b([13][a-km-zA-HJ-NP-Z1-9]{25,34})\b')
   tflags   X_HASHBL_BTC net
+
+  # Not supposed to hit, @valid_queries just checks that sha256 is calculated correctly
+  body     X_HASHBL_SHA256 eval:check_hashbl_bodyre('hashbltest3.spamassassin.org', 'sha256/max=10/shuffle', '\b([13][a-km-zA-HJ-NP-Z1-9]{25,34})\b')
+  tflags   X_HASHBL_SHA256 net
 
   header   X_HASHBL_URI eval:check_hashbl_uris('hashbltest4.spamassassin.org', 'sha1', '127.0.0.2')
   tflags   X_HASHBL_URI net

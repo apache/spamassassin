@@ -57,6 +57,7 @@ OPTS refers to multiple generic options:
   raw      do not hash data, query as is
   md5      hash query with MD5
   sha1     hash query with SHA1
+  sha256   hash query with Base32 encoded SHA256
   case     keep case before hashing, default is to lowercase
   max=x	   maximum number of queries
   shuffle  if max exceeded, random shuffle queries before truncating to limit
@@ -168,11 +169,12 @@ use re 'taint';
 my $VERSION = 0.101;
 
 use Digest::MD5 qw(md5_hex);
-use Digest::SHA qw(sha1_hex);
+use Digest::SHA qw(sha1_hex sha256);
 
 use Mail::SpamAssassin::Plugin;
 use Mail::SpamAssassin::Constants qw(:ip);
-use Mail::SpamAssassin::Util qw(compile_regexp is_fqdn_valid reverse_ip_address);
+use Mail::SpamAssassin::Util qw(compile_regexp is_fqdn_valid reverse_ip_address
+                                base32_encode);
 
 our @ISA = qw(Mail::SpamAssassin::Plugin);
 
@@ -804,7 +806,10 @@ sub _check_hashbl_tag {
 sub _hash {
   my ($self, $opts, $value) = @_;
 
-  if ($opts->{sha1}) {
+  if ($opts->{sha256}) {
+    utf8::encode($value) if utf8::is_utf8($value); # sha256 expects bytes
+    return base32_encode(sha256($value));
+  } elsif ($opts->{sha1}) {
     utf8::encode($value) if utf8::is_utf8($value); # sha1_hex expects bytes
     return sha1_hex($value);
   } elsif ($opts->{md5}) {
