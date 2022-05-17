@@ -287,14 +287,11 @@ sub do_meta_tests {
   my $h = $pms->{tests_already_hit};
   my $retry;
 
-  # Get pending DNS async rule list
-  my %pl = map { $_ => 1 } $pms->get_async_pending_rules();
-
 RULE:
   foreach my $rulename (keys %$mp) {
     # Meta is not ready if some dependency has not run yet
     foreach my $deprule (@{$md->{$rulename}||[]}) {
-      if (!exists $h->{$deprule} || $pl{$deprule}) {
+      if (!exists $h->{$deprule}) {
         next RULE;
       }
     }
