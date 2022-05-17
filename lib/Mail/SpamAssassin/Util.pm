@@ -1011,6 +1011,7 @@ sub base32_encode {
   utf8::encode($str)  if utf8::is_utf8($str); # force octets
   my $bits = unpack("B*", $str)."0000";
   my $output;
+  local($1);
   $output .= $base32_bitchr{$1} while ($bits =~ /(.{5})/g);
   return $output;
 }
