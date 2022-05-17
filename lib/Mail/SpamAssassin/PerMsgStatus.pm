@@ -3183,7 +3183,6 @@ sub rule_ready {
 
   if ($self->get_async_pending_rules($rule)) {
     # Can't be ready if there are pending DNS lookups, ignore for now.
-    # Make sure tests_pending exist, should not accept rule_pending() anymore
     return;
   }
 
