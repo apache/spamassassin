@@ -887,5 +887,6 @@ sub has_hashbl_email_regex { 1 }
 sub has_hashbl_email_welcomelist { 1 }
 sub has_hashbl_email_whitelist { 1 }
 sub has_hashbl_tag { 1 }
+sub has_hashbl_sha256 { 1 }
 
 1;
