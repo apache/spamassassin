@@ -196,6 +196,7 @@ sub _check_dmarc {
   }
 
   my $from_addr = ($pms->get('From:first:addr'))[0];
+  return if not defined $from_addr;
   return if index($from_addr, '@') == -1;
 
   my $mfrom_domain = ($pms->get('EnvelopeFrom:first:addr:host'))[0];
