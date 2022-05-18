@@ -39,9 +39,13 @@ HashBL - query hashed (and unhashed) DNS blocklists
   describe HASHBL_BTC Message contains BTC address found on BTCBL
   tflags   HASHBL_BTC net
 
-  header   HASHBL_URI eval:check_hashbl_uris('rbl.example.invalid', 'sha1', '127.0.0.32')
+  header   HASHBL_URI eval:check_hashbl_uris('rbl.example.invalid', 'sha1', '^127\.0\.0\.32$')
   describe HASHBL_URI Message contains uri found on rbl
   tflags   HASHBL_URI net
+
+  body     HASHBL_ATTACHMENT eval:check_hashbl_attachments('attbl.example.invalid', 'sha256')
+  describe HASHBL_ATTACHMENT Message contains attachment found on attbl
+  tflags   HASHBL_ATTACHMENT net
 
   # Capture tag using SA 4.0 regex named capture feature
   header   __X_SOME_ID X-Some-ID =~ /^(?<XSOMEID>\d{10,20})$/
@@ -50,39 +54,39 @@ HashBL - query hashed (and unhashed) DNS blocklists
 
 =head1 DESCRIPTION
 
-This plugin support multiple types of hashed or unhashed DNS blocklists.
+This plugin supports multiple types of hashed or unhashed DNS blocklist queries.
 
-OPTS refers to multiple generic options:
+=over 4
 
-  raw      do not hash data, query as is
+=item Common OPTS that apply to all functions:
+
+  raw      no hashing, query as is (can break if value is not valid DNS label)
   md5      hash query with MD5
   sha1     hash query with SHA1
   sha256   hash query with Base32 encoded SHA256
   case     keep case before hashing, default is to lowercase
-  max=x	   maximum number of queries
+  max=x	   maximum number of queries (defaults to 10 if not specified)
   shuffle  if max exceeded, random shuffle queries before truncating to limit
 
-Multiple options can be separated with slash or other non-word character.
-If OPTS is empty ('') or missing, default is used.
+Multiple options can be separated with slash.
 
-HEADERS refers to slash separated list of Headers to process:
+When rule OPTS is empty ('') or missing, default is used as documented by
+each query type.  If any options are defined, then all needed options must
+be explicitly defined.
 
-  ALL           all headers
-  ALLFROM       all From headers as returned by $pms->all_from_addrs()
-  EnvelopeFrom  message envelope from (Return-Path etc)
-  HeaderName    any header as used with $pms->get()
-
-if HEADERS is empty ('') or missing, default is used.
+=back 
 
 =over 4
 
-=item header RULE check_hashbl_emails('bl.example.invalid/A', 'OPTS', 'HEADERS/body', '^127\.')
+=item header RULE check_hashbl_emails('bl.example.invalid/A', 'OPTS', 'HEADERS', '^127\.')
 
-Check email addresses from DNS list, "body" can be specified along with
-headers to search body for emails.  Optional subtest regexp to match DNS
-answer.  Note that eval rule type must always be "header".
+Check email addresses from DNS list.  Note that "body" can be specified
+along with headers to search message body for emails.  Rule type must always
+be "header".
 
-DNS query type can be appended to list with /A (default) or /TXT.
+Optional DNS query type can be appended to list with /A (default) or /TXT.
+
+Default OPTS: sha1/notag/noquote/max=10/shuffle
 
 Additional supported OPTS:
 
@@ -91,13 +95,23 @@ Additional supported OPTS:
   nouri    ignore emails inside uris
   noquote  ignore emails inside < > or possible quotings
 
-Default OPTS: sha1/notag/noquote/max=10/shuffle
-
 Default HEADERS: ALLFROM/Reply-To/body
+
+HEADERS refers to slash separated list of Headers to process:
+
+  ALL           all headers
+  ALLFROM       all From headers as returned by $pms->all_from_addrs()
+  EnvelopeFrom  message envelope from (Return-Path etc)
+  <HeaderName>  any header as used with header rules or $pms->get()
+  body          all emails found in message body
+
+If HEADERS is empty ('') or missing, default is used.
+
+Optional subtest regexp to match DNS answer (default: '^127\.').
 
 For existing public email blocklist, see: http://msbl.org/ebl.html
 
-  # Working example, see http://msbl.org/ebl.html before usage
+  # Working example, see https://msbl.org/ebl.html before usage
   header   HASHBL_EMAIL eval:check_hashbl_emails('ebl.msbl.org')
   describe HASHBL_EMAIL Message contains email address found on EBL
   tflags   HASHBL_EMAIL net
@@ -105,7 +119,7 @@ For existing public email blocklist, see: http://msbl.org/ebl.html
 Default regex for matching and capturing emails can be overridden with
 C<hashbl_email_regex>.  Likewise, the default welcomelist can be changed with
 C<hashbl_email_welcomelist>.  Only change if you know what you are doing, see
-module source for the defaults.  Example: hashbl_email_regex \S+@\S+.com
+plugin source code for the defaults.  Example: hashbl_email_regex \S+@\S+.com
 
 =back
 
@@ -113,22 +127,29 @@ module source for the defaults.  Example: hashbl_email_regex \S+@\S+.com
 
 =item header RULE check_hashbl_uris('bl.example.invalid/A', 'OPTS', '^127\.')
 
-Check uris from DNS list, optional subtest regexp to match DNS
-answer.
+Check all URIs parsed from message from DNS list.
 
-DNS query type can be appended to list with /A (default) or /TXT.
+Optional DNS query type can be appended to list with /A (default) or /TXT.
 
 Default OPTS: sha1/max=10/shuffle
+
+Optional subtest regexp to match DNS answer (default: '^127\.').
 
 =back
 
 =over 4
 
-=item body RULE check_hashbl_bodyre('bl.example.invalid/A', 'OPTS', '\b(match)\b', '^127\.')
+=item [raw]body RULE check_hashbl_bodyre('bl.example.invalid/A', 'OPTS', '\b(match)\b', '^127\.')
 
 Search body for matching regexp and query the string captured.  Regexp must
-have a single capture ( ) for the string ($1).  Optional subtest regexp to
-match DNS answer.  Note that eval rule type must be "body" or "rawbody".
+have a single capture ( ) for the string ($1).  Rule type must be "body" or
+"rawbody".
+
+Optional DNS query type can be appended to list with /A (default) or /TXT.
+
+Default OPTS: sha1/max=10/shuffle
+
+Optional subtest regexp to match DNS answer (default: '^127\.').
 
 =back
 
@@ -136,10 +157,9 @@ match DNS answer.  Note that eval rule type must be "body" or "rawbody".
 
 =item header RULE check_hashbl_tag('bl.example.invalid/A', 'OPTS', 'TAGNAME', '^127\.')
 
-Lookup value of SpamAssassin tag _TAGNAME_ from DNS list, optional subtest
-regexp to match DNS answer.
+Query value of SpamAssassin tag _TAGNAME_ from DNS list.
 
-DNS query type can be appended to list with /A (default) or /TXT.
+Optional DNS query type can be appended to list with /A (default) or /TXT.
 
 Default OPTS: sha1/max=10/shuffle
 
@@ -153,9 +173,46 @@ Additional supported OPTS:
   tld       only query if value has valid TLD (is_domain_valid)
   trim      trim name from hostname to domain (trim_domain)
 
-If both ip/ipv4/ipv6 and fqdn/tld are enabled, only either of them is
-required to match.  Both fqdn and tld are needed for complete FQDN+TLD
-check.
+  If both ip/ipv4/ipv6 and fqdn/tld are enabled, only either of them is
+  required to match.  Both fqdn and tld are needed for complete FQDN+TLD
+  check.
+
+Optional subtest regexp to match DNS answer (default: '^127\.').
+
+=back
+
+=over 4
+
+=item header RULE check_hashbl_attachments('bl.example.invalid/A', 'OPTS', '^127\.')
+
+Check all all message attachments (mimeparts) from DNS list.
+
+Optional DNS query type can be appended to list with /A (default) or /TXT.
+
+Default OPTS: sha1/max=10/shuffle
+
+Additional supported OPTS:
+
+  minsize=x  skip any parts smaller than x bytes
+  maxsize=x  skip any parts larger than x bytes
+
+Optional subtest regexp to match DNS answer (default: '^127\.').
+
+Specific attachment filenames can be skipped with C<hashbl_ignore>.  For
+example "hashbl_ignore safe.pdf".
+
+Specific mime types can be skipped with C<hashbl_ignore>.  For example
+"hashbl_ignore text/plain".
+
+=back
+
+=over 4
+
+=item hashbl_ignore value [value...]
+
+Skip any type of query, if either the hash or original value (email for
+example) matches.  Multiple values can be defined, separated by whitespace. 
+Matching is case-insensitive.
 
 =back
 
@@ -200,6 +257,7 @@ sub new {
     'check_hashbl_uris' => $Mail::SpamAssassin::Conf::TYPE_HEAD_EVALS,
     'check_hashbl_bodyre' => $Mail::SpamAssassin::Conf::TYPE_BODY_EVALS,
     'check_hashbl_tag' => $Mail::SpamAssassin::Conf::TYPE_HEAD_EVALS,
+    'check_hashbl_attachments' => $Mail::SpamAssassin::Conf::TYPE_BODY_EVALS,
   };
   while (my ($func, $type) = each %{$self->{evalfuncs}}) {
     $self->register_eval_rule($func, $type);
@@ -803,6 +861,87 @@ sub _check_hashbl_tag {
   return;
 }
 
+sub check_hashbl_attachments {
+  my ($self, $pms, undef, $list, $opts, $subtest) = @_;
+
+  return 0 if !$self->{hashbl_available};
+  return 0 if !$pms->is_dns_available();
+
+  my $rulename = $pms->get_current_eval_rule_name();
+
+  if (!defined $list) {
+    warn "HashBL: $rulename blocklist argument missing\n";
+    return 0;
+  }
+
+  if ($subtest) {
+    my ($rec, $err) = compile_regexp($subtest, 0);
+    if (!$rec) {
+      warn "HashBL: $rulename invalid subtest regex: $@\n";
+      return 0;
+    }
+    $subtest = $rec;
+  }
+
+  # Parse opts, defaults
+  $opts = _parse_opts($opts || 'sha1/max=10/shuffle');
+
+  if ($opts->{raw}) {
+    warn "HashBL: $rulename raw option invalid\n";
+    return 0;
+  }
+
+  my %seen;
+  my @hashes;
+  foreach my $part ($pms->{msg}->find_parts(qr/./, 1, 1)) {
+    my $body = $part->decode();
+    next if !defined $body || $body eq '';
+    my $type = lc $part->{'type'} || '';
+    my $name = $part->{'name'} || '';
+    my $len = length($body);
+    dbg("found attachment, type: $type, length: $len, name: $name");
+    if (exists $pms->{conf}->{hashbl_ignore}->{$type}) {
+      dbg("query skipped, ignored type: $type");
+      next;
+    }
+    if (exists $pms->{conf}->{hashbl_ignore}->{lc $name}) {
+      dbg("query skipped, ignored filename: $name");
+      next;
+    }
+    if ($opts->{minsize} && $len < $opts->{minsize}) {
+      dbg("query skipped, size smaller than $opts->{minsize}");
+      next;
+    }
+    if ($opts->{maxsize} && $len > $opts->{minsize}) {
+      dbg("query skipped, size larger than $opts->{maxsize}");
+      next;
+    }
+    my $hash = $self->_hash($opts, $body);
+    next if $seen{$hash}++;
+    push @hashes, $hash;
+  }
+
+  return 0 unless @hashes;
+
+  # Randomize order
+  if ($opts->{shuffle}) {
+    Mail::SpamAssassin::Util::fisher_yates_shuffle(\@hashes);
+  }
+
+  # Truncate list
+  my $max = $opts->{max} || 10;
+  $#hashes = $max-1 if scalar @hashes > $max;
+
+  my $queries;
+  foreach my $hash (@hashes) {
+    my $ret = $self->_submit_query($pms, $rulename, $hash, $list, $opts, $subtest, 1);
+    $queries++ if defined $ret;
+  }
+
+  return 0 if !$queries; # no query started
+  return; # return undef for async status
+}
+
 sub _hash {
   my ($self, $opts, $value) = @_;
 
@@ -821,20 +960,20 @@ sub _hash {
 }
 
 sub _submit_query {
-  my ($self, $pms, $rulename, $value, $list, $opts, $subtest) = @_;
+  my ($self, $pms, $rulename, $value, $list, $opts, $subtest, $already_hashed) = @_;
 
-  if (exists $pms->{conf}->{hashbl_ignore}->{lc $value}) {
+  if (!$already_hashed && exists $pms->{conf}->{hashbl_ignore}->{lc $value}) {
     dbg("query skipped, ignored string: $value");
     return 0;
   }
 
-  my $hash = $self->_hash($opts, $value);
-  dbg("querying $value ($hash) from $list");
-
-  if (exists $pms->{conf}->{hashbl_ignore}->{$hash}) {
+  my $hash = $already_hashed ? $value : $self->_hash($opts, $value);
+  if (exists $pms->{conf}->{hashbl_ignore}->{lc $hash}) {
     dbg("query skipped, ignored hash: $value");
     return 0;
   }
+
+  dbg("querying $value ($hash) from $list");
 
   my $type = $list =~ s,/(A|TXT)$,,i ? uc($1) : 'A';
   my $lookup = "$hash.$list";
@@ -888,5 +1027,6 @@ sub has_hashbl_email_welcomelist { 1 }
 sub has_hashbl_email_whitelist { 1 }
 sub has_hashbl_tag { 1 }
 sub has_hashbl_sha256 { 1 }
+sub has_hashbl_attachments { 1 }
 
 1;

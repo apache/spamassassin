@@ -204,6 +204,9 @@ Note for Users Upgrading to SpamAssassin 4.0.0
   format (e.g. 192.168.1.1-192.168.255.255) for NetSet tables
   (internal_networks, trusted_networks, msa_networks, uri_local_cidr).
 
+- HashBL: New functions check_hashbl_tag, check_hashbl_attachments.
+  New sha256 option.
+
 Note for Users Upgrading to SpamAssassin 3.4.5
 ----------------------------------------------
 
@@ -279,7 +282,7 @@ Note for Users Upgrading to SpamAssassin 3.4.3
 - DNSEval: add check_rbl_ns_from to check against an rbl for dns servers
 
 - HashBL: Add check_hashbl_bodyre, check_hashbl_emails, check_hashbl_uris,
-  check_hashbl_tag, hashbl_ignore. New sha256 option.
+  hashbl_ignore
 
 - ASN: Support IPv6 with asn_lookup_ipv6 (Bug 7211)
 

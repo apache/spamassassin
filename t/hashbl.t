@@ -39,6 +39,7 @@ jykf2a5v6asavfel3stymlmieh4e66jeroxuw52mc5xhdylnyb7a.hashbltest3.spamassassin.or
 6a42acf4133289d595e3875a9d677f810e80b7b4.hashbltest4.spamassassin.org
 5c6205960a65b1f9078f0e12dcac970aab0015eb.hashbltest4.spamassassin.org
 1234567890.hashbltest5.spamassassin.org
+w3hcrlct6yshq5vq6gjv2hf3pzk3jvsk6ilj5iaks4qwewudrr6q.hashbltest6.spamassassin.org
 );
 
 sub check_queries {
@@ -59,11 +60,11 @@ sub check_queries {
     }
   }
   close WL;
+  diag("Invalid query launched: $_") foreach (keys %invalid);
   unless (keys %found == @valid_queries) {
-    diag("Not all queries launched");
+    diag("Incorrect amount of queries launched");
     return 0;
   }
-  diag("Invalid query launched: $_") foreach (keys %invalid);
   return !%invalid;
 }
 
@@ -89,6 +90,12 @@ tstlocalrules(q{
 
   header   __X_SOME_ID X-Some-ID =~ /^(?<XSOMEID>\d{10,20})$/
   header   X_HASHBL_TAG eval:check_hashbl_tag('hashbltest5.spamassassin.org/A', 'raw', 'XSOMEID', '^127\.')
+
+  # Not supposed to hit, @valid_queries just checks that they are launched
+  hashbl_ignore text/plain
+  body     X_HASHBL_ATT eval:check_hashbl_attachments('hashbltest6.spamassassin.org/A', 'sha256')
+  describe X_HASHBL_ATT Message contains attachment found on attbl
+  tflags   X_HASHBL_ATT net
 
   # Bug 7897 - test that meta rules depending on net rules hit
   meta META_HASHBL_EMAIL X_HASHBL_EMAIL
