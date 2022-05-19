@@ -3121,7 +3121,8 @@ sub got_hit {
            for $tflags_ref->{$rule};
   };
 
-  my $already_hit = $self->{tests_already_hit}->{$rule} || 0;
+  $self->rule_ready($rule, 1); # mark ready for metas
+  my $already_hit = $self->{tests_already_hit}->{$rule};
   # don't count hits multiple times, unless 'tflags multiple' is on
   if ($already_hit && ($tflags_ref->{$rule}||'') !~ /\bmultiple\b/) {
     return;
@@ -3167,7 +3168,7 @@ sub got_hit {
   return 1;
 }
 
-=item $status->rule_ready ($rulename)
+=item $status->rule_ready ($rulename [, $no_async])
 
 Mark an asynchronous rule ready, so it can be considered for meta rule
 evaluation.  Asynchronous rule is a rule whose eval-function returns undef,
@@ -3176,16 +3177,25 @@ $status->rule_ready() must be called later to mark it ready, alternatively
 $status->got_hit() also does this.  If neither is called, then any meta rule
 that depends on this rule might not evaluate.
 
+Optional boolean $no_async skips checking if there are pending async DNS
+lookups for the rule.
+
 =cut
 
 sub rule_ready {
-  my ($self, $rule) = @_;
+  my ($self, $rule, $no_async) = @_;
 
-  if ($self->get_async_pending_rules($rule)) {
+  if (!$no_async && $self->get_async_pending_rules($rule)) {
     # Can't be ready if there are pending DNS lookups, ignore for now.
     return;
   }
 
+  # record rules that depend on this, so do_meta_tests will be run
+  foreach (keys %{$self->{conf}->{meta_deprules}->{$rule}}) {
+    $self->{meta_check_ready}->{$_} = 1;
+  }
+
+  # mark ready
   $self->{tests_already_hit}->{$rule} ||= 0;
 }
 

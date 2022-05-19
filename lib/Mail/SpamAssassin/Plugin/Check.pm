@@ -102,7 +102,8 @@ sub check_main {
   # Make sure priority -100 exists for launching DNS
   $pms->{conf}->{priorities}->{-100} ||= 1 if $do_dns;
 
-  foreach my $priority (sort { $a <=> $b } keys %{$pms->{conf}->{priorities}}) {
+  my @priorities = sort { $a <=> $b } keys %{$pms->{conf}->{priorities}};
+  foreach my $priority (@priorities) {
     # no need to run if there are no priorities at this level.  This can
     # happen in Conf.pm when we switch a rule from one priority to another
     next unless ($pms->{conf}->{priorities}->{$priority} > 0);
@@ -182,7 +183,8 @@ sub check_main {
     $pms->harvest_completed_queries() if $rbls_running;
 
     # check for ready metas
-    $self->do_meta_tests($pms, $priority);
+    # - if this is not last priority (finish_meta_tests will be run anyway)
+    $self->do_meta_tests($pms, $priority)  if $priority != $priorities[-1];
   }
 
   # Finish DNS results
@@ -280,7 +282,9 @@ sub do_meta_tests {
   }
 
   return if $self->{am_compiling}; # nothing to compile here
+  return if !$pms->{meta_check_ready}; # nothing to check
 
+  my $mr = $pms->{meta_check_ready};
   my $mp = $pms->{meta_pending};
   my $md = $pms->{conf}->{meta_dependencies};
   my $mt = $pms->{conf}->{meta_tests};
@@ -288,7 +292,7 @@ sub do_meta_tests {
   my $retry;
 
 RULE:
-  foreach my $rulename (keys %$mp) {
+  foreach my $rulename (keys %$mr) {
     # Meta is not ready if some dependency has not run yet
     foreach my $deprule (@{$md->{$rulename}||[]}) {
       if (!exists $h->{$deprule}) {
@@ -304,12 +308,15 @@ RULE:
       dbg("rules-all: ran meta rule $rulename, no hit") if $would_log_rules_all;
       $h->{$rulename} = 0; # mark meta done
     }
+    delete $mr->{$rulename};
     delete $mp->{$rulename};
     # Reiterate all metas again, in case some meta depended on us
     $retry = 1;
   }
 
   goto RULE if $retry--;
+
+  delete $pms->{meta_check_ready};
 }
 
 sub finish_meta_tests {
@@ -454,7 +461,6 @@ sub run_generic_tests {
         # start_rules_plugin_code '.$ruletype.' '.$priority.'
         my $scoresptr = $self->{conf}->{scores};
         my $qrptr = $self->{conf}->{test_qrs}; my $test_qr;
-        my $hitsptr = $self->{tests_already_hit};
     ');
     if (defined $opts{pre_loop_body}) {
       $opts{pre_loop_body}->($self, $pms, $conf, %nopts);
@@ -724,10 +730,10 @@ sub do_head_tests {
             $expr = '$hval '.$op.' /$test_qr/'.$matchg.'op';
           }
 
-          # Make sure rule is marked ready for meta rules using $hitsptr
+          # Make sure rule is marked ready for meta rules
           $self->add_evalstr($pms, '
           if ($scoresptr->{q{'.$rulename.'}}) {
-            $hitsptr->{q{'.$rulename.'}} ||= 0;
+            $self->rule_ready(q{'.$rulename.'}, 1);
             '.($op_infix ? '$test_qr = $qrptr->{q{'.$rulename.'}};' : '').'
             '.$self->capture_rules_code($conf, $rulename).'
             '.$posline.'
@@ -822,10 +828,10 @@ sub do_body_tests {
       ';
     }
 
-    # Make sure rule is marked ready for meta rules using $hitsptr
+    # Make sure rule is marked ready for meta rules
     $self->add_evalstr($pms, '
       if ($scoresptr->{q{'.$rulename.'}}) {
-        $hitsptr->{q{'.$rulename.'}} ||= 0;
+        $self->rule_ready(q{'.$rulename.'}, 1);
         $test_qr = $qrptr->{q{'.$rulename.'}};
         '.$sub.'
         '.$self->ran_rule_plugin_code($rulename, "body").'
@@ -887,10 +893,10 @@ sub do_uri_tests {
       ';
     }
 
-    # Make sure rule is marked ready for meta rules using $hitsptr
+    # Make sure rule is marked ready for meta rules
     $self->add_evalstr($pms, '
       if ($scoresptr->{q{'.$rulename.'}}) {
-        $hitsptr->{q{'.$rulename.'}} ||= 0;
+        $self->rule_ready(q{'.$rulename.'}, 1);
         $test_qr = $qrptr->{q{'.$rulename.'}};
         '.$sub.'
         '.$self->ran_rule_plugin_code($rulename, "uri").'
@@ -951,10 +957,10 @@ sub do_rawbody_tests {
       ';
     }
 
-    # Make sure rule is marked ready for meta rules using $hitsptr
+    # Make sure rule is marked ready for meta rules
     $self->add_evalstr($pms, '
       if ($scoresptr->{q{'.$rulename.'}}) {
-        $hitsptr->{q{'.$rulename.'}} ||= 0;
+        $self->rule_ready(q{'.$rulename.'}, 1);
         $test_qr = $qrptr->{q{'.$rulename.'}};
         '.$sub.'
         '.$self->ran_rule_plugin_code($rulename, "rawbody").'
@@ -990,10 +996,10 @@ sub do_full_tests {
     my ($max) = ($conf->{tflags}->{$rulename}||'') =~ /\bmaxhits=(\d+)\b/;
     $max = untaint_var($max);
     $max ||= 0;
-    # Make sure rule is marked ready for meta rules using $hitsptr
+    # Make sure rule is marked ready for meta rules
     $self->add_evalstr($pms, '
       if ($scoresptr->{q{'.$rulename.'}}) {
-        $hitsptr->{q{'.$rulename.'}} ||= 0;
+        $self->rule_ready(q{'.$rulename.'}, 1);
         $test_qr = $qrptr->{q{'.$rulename.'}};
         pos $$fullmsgref = 0;
         '.$self->hash_line_for_rule($pms, $rulename).'
@@ -1192,8 +1198,8 @@ sub run_eval_tests {
 ';
     }
 
-    # If eval returns undef, it means rule is running async and $hitsptr
-    # will be set later by rule_ready() or got_hit()
+    # If eval returns undef, it means rule is running async and
+    # will be marked ready later by rule_ready() or got_hit()
     $evalstr .= '
       if (defined $result) {
         if ($result) {
@@ -1221,7 +1227,6 @@ sub run_eval_tests {
 
     my \$testptr = \$self->{conf}->{$evalname}->{$priority};
     my \$scoresptr = \$self->{conf}->{scores};
-    my \$hitsptr = \$self->{tests_already_hit};
     my \$prepend2desc = q#$prepend2desc#;
     my \$rulename;
     my \$result;

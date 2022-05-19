@@ -4911,6 +4911,7 @@ sub new {
 
   # meta dependencies
   $self->{meta_dependencies} = {};
+  $self->{meta_deprules} = {};
 
   # map eval function names to rulenames
   $self->{eval_to_rule} = {};

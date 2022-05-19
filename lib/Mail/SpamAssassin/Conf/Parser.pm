@@ -1135,6 +1135,9 @@ sub compile_meta_rules {
   foreach my $name (keys %meta) {
     if (@{$rule_deps{$name}}) {
       $conf->{meta_dependencies}->{$name} = $rule_deps{$name};
+      foreach my $deprule (@{$rule_deps{$name}}) {
+        $conf->{meta_deprules}->{$deprule}->{$name} = 1;
+      }
     }
     if ($unsolved_metas{$name}) {
       $conf->{meta_tests}->{$name} = sub { 0 };
