@@ -90,6 +90,7 @@ tstlocalrules(q{
 
   header   __X_SOME_ID X-Some-ID =~ /^(?<XSOMEID>\d{10,20})$/
   header   X_HASHBL_TAG eval:check_hashbl_tag('hashbltest5.spamassassin.org/A', 'raw', 'XSOMEID', '^127\.')
+  tflags   X_HASHBL_TAG net
 
   # Not supposed to hit, @valid_queries just checks that they are launched
   hashbl_ignore text/plain
