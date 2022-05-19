@@ -382,20 +382,6 @@ sub parse_config {
   return 0;
 }
 
-sub finish_parsing_start {
-  my ($self, $opts) = @_;
-  my $conf = $opts->{conf};
-
-  # Adjust priority -100 to launch early
-  # Find rulenames from eval_to_rule mappings
-  foreach my $evalfunc (%{$self->{evalfuncs}}) {
-    foreach (@{$conf->{eval_to_rule}->{$evalfunc}||[]}) {
-      dbg("adjusting rule $_ priority to -100");
-      $conf->{priority}->{$_} = -100;
-    }
-  }
-}
-
 sub finish_parsing_end {
   my ($self, $opts) = @_;
 

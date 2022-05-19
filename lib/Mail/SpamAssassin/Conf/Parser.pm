@@ -909,7 +909,10 @@ sub finish_parsing {
 
   while (my ($name, $text) = each %{$conf->{tests}}) {
     my $type = $conf->{test_types}->{$name};
-    my $priority = $conf->{priority}->{$name} || 0;
+
+    # Adjust priority -100 for net rules instead of default 0
+    my $priority = $conf->{priority}->{$name} ? $conf->{priority}->{$name} :
+        ($conf->{tflags}->{$name}||'') =~ /\bnet\b/ ? -100 : 0;
     $conf->{priorities}->{$priority}++;
 
     # eval type handling
