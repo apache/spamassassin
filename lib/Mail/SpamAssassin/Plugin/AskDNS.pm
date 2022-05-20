@@ -447,37 +447,30 @@ sub launch_queries {
 sub process_response_packet {
   my($self, $pms, $ent, $pkt, $rulename) = @_;
 
-  my $conf = $pms->{conf};
-  my $arule = $conf->{askdns}{$rulename};
-
-  my($header, @question, @answer, $qtype, $rcode);
   # NOTE: $pkt will be undef if the DNS query was aborted (e.g. timed out)
-  if ($pkt) {
-    @answer = $pkt->answer;
-    $header = $pkt->header;
-    @question = $pkt->question;
-    $qtype = uc $question[0]->qtype  if @question;
-    $rcode = uc $header->rcode  if $header;  # 'NOERROR', 'NXDOMAIN', ...
+  return if !$pkt;
 
-    # NOTE: qname is encoded in RFC 1035 zone format, decode it
-    dbg("askdns: answer received (%s), rcode %s, query %s, answer has %d records",
-        $rulename, $rcode,
-        join(', ', map(join('/', decode_dns_question_entry($_)), @question)),
-        scalar @answer);
+  my @question = $pkt->question;
+  return if !@question;
 
-    if (defined $rcode && exists $rcode_value{$rcode}) {
-      # Net::DNS return a rcode name for codes it knows about,
-      # and returns a number for the rest; we deal with numbers from here on
-      $rcode = $rcode_value{$rcode}  if exists $rcode_value{$rcode};
-    }
+  $pms->rule_ready($rulename); # mark rule ready for metas
 
-    $pms->rule_ready($rulename); # mark rule ready for metas
-  }
-  if (!@answer) {
-    # a trick to make the following loop run at least once, so that we can
-    # evaluate also rules which only care for rcode status
-    @answer = ( undef );
-  }
+  my @answer = $pkt->answer;
+  my $rcode = uc $pkt->header->rcode;  # 'NOERROR', 'NXDOMAIN', ...
+
+  # NOTE: qname is encoded in RFC 1035 zone format, decode it
+  dbg("askdns: answer received (%s), rcode %s, query %s, answer has %d records",
+      $rulename, $rcode,
+      join(', ', map(join('/', decode_dns_question_entry($_)), @question)),
+      scalar @answer);
+
+  # Net::DNS return a rcode name for codes it knows about,
+  # and returns a number for the rest; we deal with numbers from here on
+  $rcode = $rcode_value{$rcode}  if exists $rcode_value{$rcode};
+
+  # a trick to make the following loop run at least once, so that we can
+  # evaluate also rules which only care for rcode status
+  @answer = (undef)  if !@answer;
 
   # NOTE:  $rr->rdstring returns the result encoded in a DNS zone file
   # format, i.e. enclosed in double quotes if a result contains whitespace
@@ -499,6 +492,9 @@ sub process_response_packet {
   # verification takes place.
   # The same goes for RFC 7208 (SPF), RFC 4871 (DKIM), RFC 5617 (ADSP),
   # draft-kucherawy-dmarc-base (DMARC), ...
+
+  my $arule = $pms->{conf}->{askdns}{$rulename};
+  my $subtest = $arule->{subtest};
 
   for my $rr (@answer) {
     my($rr_rdatastr, $rdatanum, $rr_type);
@@ -533,9 +529,6 @@ sub process_response_packet {
       # dbg("askdns: received rr type %s, data: %s", $rr_type, $rr_rdatastr);
     }
 
-    next if !defined $qtype;
-
-    my $subtest = $arule->{subtest};
     my $match;
     local($1,$2,$3);
     if (ref $subtest eq 'HASH') {  # a list of DNS rcodes (as hash keys)
@@ -562,7 +555,7 @@ sub process_response_packet {
         : 0; # notice int($n1) to fix perl ~5.14 taint bug (Bug 7725)
     }
     if ($match) {
-      $self->askdns_hit($pms, $ent->{query_domain}, $qtype,
+      $self->askdns_hit($pms, $ent->{query_domain}, $question[0]->qtype,
                         $rr_rdatastr, $rulename);
     }
   }

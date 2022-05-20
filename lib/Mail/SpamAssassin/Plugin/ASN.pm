@@ -463,6 +463,9 @@ sub extract_metadata {
 sub process_dns_result {
   my ($self, $pms, $pkt, $zone_index, $lookup_zone) = @_;
 
+  # NOTE: $pkt will be undef if the DNS query was aborted (e.g. timed out)
+  return if !$pkt;
+
   my $conf = $self->{main}->{conf};
 
   my $zone = $conf->{$lookup_zone}[$zone_index]->{zone};
@@ -490,10 +493,7 @@ sub process_dns_result {
     %route_tag_data_seen = map(($_,1), @route_tag_data);
   }
 
-  # NOTE: $pkt will be undef if the DNS query was aborted (e.g. timed out)
-  my @answer = !defined $pkt ? () : $pkt->answer;
-
-  foreach my $rr (@answer) {
+  foreach my $rr ($pkt->answer) {
     #dbg("asn: %s: lookup result packet: %s", $zone, $rr->string);
     next if $rr->type ne 'TXT';
     my @strings = $rr->txtdata;
