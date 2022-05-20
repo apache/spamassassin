@@ -733,6 +733,8 @@ sub do_head_tests {
           # Make sure rule is marked ready for meta rules
           $self->add_evalstr($pms, '
           if ($scoresptr->{q{'.$rulename.'}}) {
+            '.($would_log_rules_all ?
+              'dbg("rules-all: running header rule %s", q{'.$rulename.'});' : '').'
             $self->rule_ready(q{'.$rulename.'}, 1);
             '.($op_infix ? '$test_qr = $qrptr->{q{'.$rulename.'}};' : '').'
             '.$self->capture_rules_code($conf, $rulename).'
