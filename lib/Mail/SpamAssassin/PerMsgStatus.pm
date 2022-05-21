@@ -3635,6 +3635,19 @@ sub all_to_addrs {
 
 ###########################################################################
 
+# Save and tag regex named captures, $captures is ref to %- results
+sub set_captures {
+  my ($self, $captures) = @_;
+
+  foreach my $cname (keys %$captures) {
+    my @cvals = do { my %seen; grep { !$seen{$_}++ } @{$captures->{$cname}} };
+    $self->{capture_values}->{$cname} = \@cvals;
+    $self->set_tag($cname, @cvals == 1 ? $cvals[0] : \@cvals);
+  }
+}
+
+###########################################################################
+
 1;
 __END__
 

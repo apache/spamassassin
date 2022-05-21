@@ -1376,11 +1376,7 @@ sub ran_rule_plugin_code {
   # Set tags from captured values
   my $code = '
     if (%captures) {
-      foreach my $cname (keys %captures) {
-        my @cvals = do { my %seen; grep { !$seen{$_}++ } @{$captures{$cname}} };
-        $self->{capture_values}->{$cname} = \@cvals;
-        $self->set_tag($cname, @cvals == 1 ? $cvals[0] : \@cvals);
-      }
+      $self->set_captures(\%captures);
       %captures = ();
     }
   ';

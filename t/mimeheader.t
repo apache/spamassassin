@@ -2,26 +2,32 @@
 
 use lib '.'; use lib 't';
 use SATest; sa_t_init("mimeheader");
-use Test::More tests => 12;
+use Test::More tests => 18;
 
 # ---------------------------------------------------------------------------
 
 %patterns = (
-  q{ 1.0 MIMEHEADER_TEST1 }, q{ test1 },
-  q{ 1.0 MIMEHEADER_TEST2 }, q{ test2 },
-  q{ 1.0 MATCH_NL_NONRAW }, q{ match_nl_nonraw },
-  q{ 1.0 MATCH_NL_RAW }, q{ match_nl_raw },
-  q{ 1.0 MIMEHEADER_FOUND1 }, q{ unset_found },
-  q{ 1.0 MIMEHEADER_FOUND2 }, q{ negate_found },
-  q{ 1.0 MIMEHEADER_CONCAT1 }, q{ concat1_found },
-  q{ 1.0 MIMEHEADER_RANGE1 }, q{ range1_found },
-  q{ 1.0 MIMEHEADER_RANGE2 }, q{ range2_found },
-  q{ 1.0 MIMEHEADER_RANGE3 }, q{ range3_found },
-  q{ 1.0 MIMEHEADER_RANGE4 }, q{ range4_found },
+  q{ 1.0 MIMEHEADER_TEST1 }, '',
+  q{ 1.0 MIMEHEADER_TEST2 }, '',
+  q{ 1.0 MATCH_NL_NONRAW }, '',
+  q{ 1.0 MATCH_NL_RAW }, '',
+  q{ 1.0 MIMEHEADER_FOUND1 }, '',
+  q{ 1.0 MIMEHEADER_FOUND2 }, '',
+  q{ 1.0 MIMEHEADER_CONCAT1 }, '',
+  q{ 1.0 MIMEHEADER_RANGE1 }, '',
+  q{ 1.0 MIMEHEADER_RANGE2 }, '',
+  q{ 1.0 MIMEHEADER_RANGE3 }, '',
+  q{ 1.0 MIMEHEADER_RANGE4 }, '',
+  q{ 1.0 MIMEHEADER_MULTI1 }, '',
+  q{ 1.0 MIMEHEADER_MULTIMETA1 }, '',
+  q{ 1.0 MIMEHEADER_MULTI2 }, '',
+  q{ 1.0 MIMEHEADER_MULTIMETA2 }, '',
+  q{ 1.0 MIMEHEADER_CAPTURE1 }, '',
+  q{/tag MIMECAP1 is now ready, value: text/plain\n/}, '',
 );
 
 %anti_patterns = (
-  q{ MIMEHEADER_NOTFOUND }, q{ notfound },
+  q{ MIMEHEADER_NOTFOUND }, '',
 );
 
 tstprefs (q{
@@ -51,8 +57,19 @@ tstprefs (q{
   mimeheader MIMEHEADER_RANGE4 Content-Type =~ /Jurek/
   tflags MIMEHEADER_RANGE4 range=-10
 
+  # multiple
+  mimeheader MIMEHEADER_MULTI1 Content-Type =~ /-[82]/ # iso-8859-2, two matches
+  tflags MIMEHEADER_MULTI1 multiple
+  meta MIMEHEADER_MULTIMETA1 MIMEHEADER_MULTI1 == 2
+  mimeheader MIMEHEADER_MULTI2 ALL =~ /^X-/m # Count X- starting headers
+  tflags MIMEHEADER_MULTI2 multiple
+  meta MIMEHEADER_MULTIMETA2 MIMEHEADER_MULTI2 == 4
+
+  # named regex capture
+  mimeheader MIMEHEADER_CAPTURE1 Content-Type =~ /(?<MIMECAP1>text\/\w+)/
 });
 
-sarun ("-D mimeheader -L -t < data/nice/004 2>&1", \&patterns_run_cb);
+# Check debug needed for tag check
+sarun ("-D check -L -t < data/nice/004 2>&1", \&patterns_run_cb);
 ok_all_patterns();
 

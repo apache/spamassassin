@@ -1338,18 +1338,7 @@ sub add_test {
       return;
     }
     $conf->{test_qrs}->{$name} = $rec;
-    # Check for named regex capture templates
-    if (index($rec, '"""') >= 0) {
-      local($1);
-      while ($rec =~ /"""(\w+)"""/g) {
-        $conf->{capture_rules}->{$name}->{$1} = 1;
-      }
-    }
-    # Make rules with captures run before anything else
-    if ($rec =~ /\(\?[<']\w/) {
-      dbg("config: adjusting regex capture rule $name priority to -10000");
-      $conf->{priority}->{$name} = -10000;
-    }
+    $self->parse_captures($name, $rec);
   }
   elsif ($type == $Mail::SpamAssassin::Conf::TYPE_HEAD_TESTS)
   {
@@ -1398,17 +1387,7 @@ sub add_test {
       $conf->{test_qrs}->{$name} = $rec;
       $conf->{test_opt_header}->{$name} = $hdr;
       $conf->{test_opt_neg}->{$name} = 1 if $op eq '!~';
-      # Check for named regex capture templates
-      if (index($rec, '"""') >= 0) {
-        while ($rec =~ /"""(\w+)"""/g) {
-          $conf->{capture_rules}->{$name}->{$1} = 1;
-        }
-      }
-      # Make rules with captures run before anything else
-      if ($rec =~ /\(\?[<']\w/) {
-        dbg("config: adjusting regex capture rule $name priority to -10000");
-        $conf->{priority}->{$name} = -10000;
-      }
+      $self->parse_captures($name, $rec);
     }
   }
   elsif ($type == $Mail::SpamAssassin::Conf::TYPE_META_TESTS)
@@ -1531,6 +1510,23 @@ sub is_meta_valid {
   $err =~ s/Illegal division by zero/division by zero possible/i;
   $self->lint_warn("config: invalid expression for rule $name: \"$rule\": $err\n", $name);
   return 0;
+}
+
+sub parse_captures {
+  my ($self, $name, $re) = @_;
+
+  # Check for named regex capture templates
+  if (index($re, '"""') >= 0) {
+    local($1);
+    while ($re =~ /"""([A-Z][A-Z0-9_]*)"""/g) {
+      $self->{conf}->{capture_rules}->{$name}->{$1} = 1;
+    }
+  }
+  # Make rules with captures run before anything else
+  if ($re =~ /\(\?[<'][A-Z]/) {
+    dbg("config: adjusting regex capture rule $name priority to -10000");
+    $self->{conf}->{priority}->{$name} = -10000;
+  }
 }
 
 # Deprecated functions, leave just in case..
