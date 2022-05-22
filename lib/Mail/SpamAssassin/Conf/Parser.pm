@@ -1519,6 +1519,7 @@ sub parse_captures {
   if (index($re, '%{') >= 0) {
     local($1);
     while ($re =~ /(?<!\\)\%\{([A-Z][A-Z0-9]*(?:_[A-Z0-9]+)*(?:\([^\)\}]*\))?)\}/g) {
+      dbg("config: found named capture for rule $name: $1");
       $self->{conf}->{capture_template_rules}->{$name}->{$1} = 1;
     }
   }
