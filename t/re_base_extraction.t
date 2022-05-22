@@ -10,9 +10,6 @@ use strict;
 use warnings;
 
 my $debug = 0;
-my $running_perl56 = ($] < 5.007);
-
-close STDIN;    # inhibits noise from sa-compile
 
 use Test::More tests => 128;
 use lib '../lib';
@@ -190,11 +187,7 @@ use lib '../lib';
 # skip this one for perl 5.6.*; it does not truncate the long strings in the
 # same place as 5.8.* and 5.9.*, although they still work fine
 
-($running_perl56) and ok(1);
-($running_perl56) and ok(1);
-($running_perl56) and ok(1);
-($running_perl56) and ok(1);
-(!$running_perl56) and try_extraction ('
+try_extraction ('
 
   body VIRUS_WARNING345                /(This message contained attachments that have been blocked by Guinevere|This is an automatic message from the Guinevere Internet Antivirus Scanner)\./
   body VIRUS_WARNING345I                /(This message contained attachments that have been blocked by Guinevere|This is an automatic message from the Guinevere Internet Antivirus Scanner)\./i
@@ -215,11 +208,7 @@ use lib '../lib';
 
 # ---------------------------------------------------------------------------
 
-# also not suitable for perl 5.6.x
-($running_perl56) and ok(1);
-($running_perl56) and ok(1);
-($running_perl56) and ok(1);
-(!$running_perl56) and try_extraction ('
+try_extraction ('
 
   body FOO /foobar\x{e2}\x{82}\x{ac}baz/
 
