@@ -1400,7 +1400,7 @@ sub ran_rule_plugin_code {
 sub capture_rules_replace {
   my ($self, $conf, $rulename) = @_;
 
-  return '{' unless exists $conf->{capture_rules}->{$rulename};
+  return '{' unless exists $conf->{capture_template_rules}->{$rulename};
 
   # Replace all named capture templates in regex, format %{CAPTURE_NAME}
   # Note that backquotes must be double escaped in $test_qr
