@@ -119,6 +119,12 @@ sub extract_set {
     my $nicepri = $pri; $nicepri =~ s/-/neg/g;
     $self->extract_set_pri($conf, $test_set->{$pri}, $ruletype.'_'.$nicepri);
   }
+
+  # Clear extract_hints tmpfile
+  if ($self->{tmpf}) {
+    unlink $self->{tmpf};
+    delete $self->{tmpf};
+  }
 }
 
 ###########################################################################
@@ -191,11 +197,12 @@ NEXT_RULE:
     }
 
     # ignore ReplaceTags rules, and regex capture template rules
-    my $is_a_replacetags_rule = $conf->{replace_rules}->{$name} ||
-                                $conf->{capture_rules}->{$name};
+    my $is_a_replace_rule = $conf->{replace_rules}->{$name} ||
+                            $conf->{capture_rules}->{$name} ||
+                            $conf->{capture_template_rules}->{$name};
     my ($minlen, $lossy, @bases);
 
-    if (!$is_a_replacetags_rule) {
+    if (!$is_a_replace_rule) {
       eval {  # catch die()s
         my ($qr, $mods) = $self->simplify_and_qr_regexp($rule);
         ($lossy, @bases) = $self->extract_hints($rule, $qr, $mods);
@@ -203,6 +210,7 @@ NEXT_RULE:
         1;
       } or do {
         my $eval_stat = $@ ne '' ? $@ : "errno=$!";  chomp $eval_stat;
+        $eval_stat =~ s/ at .*//s;
         dbg("zoom: giving up on regexp: $eval_stat");
       };
 
@@ -221,9 +229,9 @@ NEXT_RULE:
       }
     }
 
-    if ($is_a_replacetags_rule || !$minlen || !@bases) {
+    if ($is_a_replace_rule || !$minlen || !@bases) {
       dbg("zoom: ignoring rule %s, %s", $name,
-          $is_a_replacetags_rule ? 'is a replace rule'
+          $is_a_replace_rule ? 'is a replace rule'
           : !@bases ? 'no bases' : 'no minlen');
       push @failed, { orig => $rule };
       $cached->{rule_bases}->{$cachekey} = { };
@@ -505,10 +513,7 @@ sub simplify_and_qr_regexp {
 }
 
 sub extract_hints {
-  my $self = shift;
-  my $rawrule = shift;
-  my $rule = shift;
-  my $mods = shift;
+  my ($self, $rawrule, $rule, $mods) = @_;
 
   my $main = $self->{main};
   my $orig = $rule;
@@ -535,24 +540,30 @@ sub extract_hints {
   # r? => (r|)
   $rule =~ s/(?<!\\)(\w)\?/\($1\|\)/gs;
 
-  my ($tmpf, $tmpfh) = Mail::SpamAssassin::Util::secure_tmpfile();
-  $tmpfh  or die "failed to create a temporary file";
-  untaint_var(\$tmpf);
+  # Create single tmpfile for extract_hints to use, instead of thousands
+  if (!$self->{tmpf}) {
+    ($self->{tmpf}, my $tmpfh) = Mail::SpamAssassin::Util::secure_tmpfile();
+    $tmpfh  or die "failed to create a temporary file";
+    close $tmpfh;
+    $self->{tmpf} = untaint_var($self->{tmpf});
+  }
 
+  open(my $tmpfh, '>'.$self->{tmpf})
+    or die "error opening $self->{tmpf}: $!";
+  binmode $tmpfh;
   print $tmpfh "use bytes; m{" . $rule . "}" . $mods
-    or die "error writing to $tmpf: $!";
-  close $tmpfh  or die "error closing $tmpf: $!";
+    or die "error writing to $self->{tmpf}: $!";
+  close $tmpfh  or die "error closing $self->{tmpf}: $!";
 
-  my $perl = $self->get_perl();
+  $self->{perl} = $self->get_perl()  if !exists $self->{perl};
   local *IN;
-  open (IN, "$perl -c -Mre=debug $tmpf 2>&1 |")
-    or die "cannot run $perl: ".exit_status_str($?,$!);
+  open (IN, "$self->{perl} -c -Mre=debug $self->{tmpf} 2>&1 |")
+    or die "cannot run $self->{perl}: ".exit_status_str($?,$!);
 
   my($inbuf,$nread,$fullstr); $fullstr = '';
   while ( $nread=read(IN,$inbuf,16384) ) { $fullstr .= $inbuf }
   defined $nread  or die "error reading from pipe: $!";
 
-  unlink $tmpf  or die "cannot unlink $tmpf: $!";
   close IN      or die "error closing pipe: $!";
   defined $fullstr  or warn "empty result from a pipe";
 

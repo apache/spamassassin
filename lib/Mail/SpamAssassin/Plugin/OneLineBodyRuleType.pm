@@ -106,12 +106,13 @@ sub do_one_line_body_tests {
     my $sub = '
       my ($self, $line) = @_;
       my $qrptr = $self->{main}->{conf}->{test_qrs};
-      my $hitsptr = $self->{tests_already_hit};
-      my %captures;
     ';
 
     if (($conf->{tflags}->{$rulename}||'') =~ /\bmultiple\b/)
     {
+      $sub .= '
+        my $hitsptr = $self->{tests_already_hit};
+      ';
       # support multiple matches
       my ($max) = $conf->{tflags}->{$rulename} =~ /\bmaxhits=(\d+)\b/;
       $max = untaint_var($max);
@@ -138,7 +139,6 @@ sub do_one_line_body_tests {
       $sub .= '
       '.$self->hash_line_for_rule($pms, $rulename).'
       if ($line =~ /$qrptr->{q{'.$rulename.'}}/op) {
-        '.$self->capture_plugin_code().'
         $self->got_hit(q{'.$rulename.'}, "BODY: ", ruletype => "one_line_body");
         '. $self->hit_rule_plugin_code($pms, $rulename, "one_line_body", "return 1") . '
       }
@@ -150,7 +150,6 @@ sub do_one_line_body_tests {
     $sub .= '
       $self->rule_ready(q{'.$rulename.'}, 1);
     ';
-    $sub .= $self->ran_rule_plugin_code($rulename, "one_line_body");
 
     return if ($opts{doing_user_rules} &&
                   !$self->is_user_rule_sub($rulename.'_one_line_body_test'));

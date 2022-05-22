@@ -460,7 +460,8 @@ sub run_generic_tests {
     $self->push_evalstr_prefix($pms, '
         # start_rules_plugin_code '.$ruletype.' '.$priority.'
         my $scoresptr = $self->{conf}->{scores};
-        my $qrptr = $self->{conf}->{test_qrs}; my $test_qr;
+        my $qrptr = $self->{conf}->{test_qrs};
+        my $test_qr;
     ');
     if (defined $opts{pre_loop_body}) {
       $opts{pre_loop_body}->($self, $pms, $conf, %nopts);
@@ -513,6 +514,7 @@ EOT
     dbg("rules: run_generic_tests - compiling eval code: %s, priority %s",
         $ruletype, $priority);
   # dbg("rules: eval code to compile: %s", $evalstr);
+
     my $eval_result;
     { my $timer = $self->{main}->time_method('compile_gen');
       $eval_result = eval($evalstr);
@@ -639,7 +641,7 @@ sub add_evalstr2 {
 
 sub add_temporary_method {
   my ($self, $methodname, $methodbody) = @_;
-  $self->add_evalstr2 (' sub '.$methodname.' { '.$methodbody.' } ');
+  $self->add_evalstr2(' sub '.$methodname.' { '.$methodbody.' } '."\n");
   push (@TEMPORARY_METHODS, $methodname);
 }
 
@@ -734,21 +736,22 @@ sub do_head_tests {
           # Make sure rule is marked ready for meta rules
           $self->add_evalstr($pms, '
           if ($scoresptr->{q{'.$rulename.'}}) {
-            '.($would_log_rules_all ?
-              'dbg("rules-all: running header rule %s", q{'.$rulename.'});' : '').'
-            $self->rule_ready(q{'.$rulename.'}, 1);
             '.($op_infix ? '$test_qr = $qrptr->{q{'.$rulename.'}};' : '').'
-            '.$self->capture_rules_replace($conf, $rulename).'
-            '.$posline.'
-            '.$self->hash_line_for_rule($pms, $rulename).'
-            '.$ifwhile.' ('.$expr.') {
-              '.($op_infix ? $self->capture_plugin_code() : '').'
-              $self->got_hit(q{'.$rulename.'}, "", ruletype => "header");
-              '.$self->hit_rule_plugin_code($pms, $rulename, "header", "",
-                                $matching_string_unavailable).'
-              '.$whlast.'
-            }
-            '.$self->ran_rule_plugin_code($rulename, "header").'
+            '.($op_infix ? $self->capture_rules_replace($conf, $rulename) : '').'
+              '.($would_log_rules_all ?
+                'dbg("rules-all: running header rule %s", q{'.$rulename.'});' : '').'
+              $self->rule_ready(q{'.$rulename.'}, 1);
+              '.$posline.'
+              '.$self->hash_line_for_rule($pms, $rulename).'
+              '.$ifwhile.' ('.$expr.') {
+                '.($op_infix ? $self->capture_plugin_code() : '').'
+                $self->got_hit(q{'.$rulename.'}, "", ruletype => "header");
+                '.$self->hit_rule_plugin_code($pms, $rulename, "header", "",
+                                  $matching_string_unavailable).'
+                '.$whlast.'
+              }
+              '.$self->ran_rule_plugin_code($rulename, "header").'
+            '.($op_infix ? "}\n" : '').'
           }
           ');
       }
@@ -778,7 +781,6 @@ sub do_body_tests {
       dbg("rules-all: running body rule %s", q{'.$rulename.'});
       ';
     }
-    $sub .= $self->capture_rules_replace($conf, $rulename);
     my $nosubject = ($conf->{tflags}->{$rulename}||'') =~ /\bnosubject\b/;
     if ($nosubject) {
       $sub .= '
@@ -837,10 +839,12 @@ sub do_body_tests {
     # Make sure rule is marked ready for meta rules
     $self->add_evalstr($pms, '
       if ($scoresptr->{q{'.$rulename.'}}) {
-        $self->rule_ready(q{'.$rulename.'}, 1);
         $test_qr = $qrptr->{q{'.$rulename.'}};
-        '.$sub.'
-        '.$self->ran_rule_plugin_code($rulename, "body").'
+        '.$self->capture_rules_replace($conf, $rulename).'
+          $self->rule_ready(q{'.$rulename.'}, 1);
+          '.$sub.'
+          '.$self->ran_rule_plugin_code($rulename, "body").'
+        }
       }
     ');
 
@@ -870,7 +874,6 @@ sub do_uri_tests {
       dbg("rules-all: running uri rule %s", q{'.$rulename.'});
       ';
     }
-    $sub .= $self->capture_rules_replace($conf, $rulename);
     if (($conf->{tflags}->{$rulename}||'') =~ /\bmultiple\b/) {
       $loopid++;
       my ($max) = $conf->{tflags}->{$rulename} =~ /\bmaxhits=(\d+)\b/;
@@ -904,10 +907,12 @@ sub do_uri_tests {
     # Make sure rule is marked ready for meta rules
     $self->add_evalstr($pms, '
       if ($scoresptr->{q{'.$rulename.'}}) {
-        $self->rule_ready(q{'.$rulename.'}, 1);
         $test_qr = $qrptr->{q{'.$rulename.'}};
-        '.$sub.'
-        '.$self->ran_rule_plugin_code($rulename, "uri").'
+        '.$self->capture_rules_replace($conf, $rulename).'
+          $self->rule_ready(q{'.$rulename.'}, 1);
+          '.$sub.'
+          '.$self->ran_rule_plugin_code($rulename, "uri").'
+        }
       }
     ');
   }
@@ -933,7 +938,6 @@ sub do_rawbody_tests {
       dbg("rules-all: running rawbody rule %s", q{'.$rulename.'});
       ';
     }
-    $sub .= $self->capture_rules_replace($conf, $rulename);
     if (($conf->{tflags}->{$rulename}||'') =~ /\bmultiple\b/)
     {
       # support multiple matches
@@ -970,10 +974,12 @@ sub do_rawbody_tests {
     # Make sure rule is marked ready for meta rules
     $self->add_evalstr($pms, '
       if ($scoresptr->{q{'.$rulename.'}}) {
-        $self->rule_ready(q{'.$rulename.'}, 1);
         $test_qr = $qrptr->{q{'.$rulename.'}};
-        '.$sub.'
-        '.$self->ran_rule_plugin_code($rulename, "rawbody").'
+        '.$self->capture_rules_replace($conf, $rulename).'
+          $self->rule_ready(q{'.$rulename.'}, 1);
+          '.$sub.'
+          '.$self->ran_rule_plugin_code($rulename, "rawbody").'
+        }
       }
     ');
 
@@ -1009,21 +1015,22 @@ sub do_full_tests {
     # Make sure rule is marked ready for meta rules
     $self->add_evalstr($pms, '
       if ($scoresptr->{q{'.$rulename.'}}) {
-        $self->rule_ready(q{'.$rulename.'}, 1);
         $test_qr = $qrptr->{q{'.$rulename.'}};
-        pos $$fullmsgref = 0;
-        '.$self->hash_line_for_rule($pms, $rulename).'
-        dbg("rules-all: running full rule %s", q{'.$rulename.'});
         '.$self->capture_rules_replace($conf, $rulename).'
-        $hits = 0;
-        while ($$fullmsgref =~ /$test_qr/gp) {
-          '.$self->capture_plugin_code().'
-          $self->got_hit(q{'.$rulename.'}, "FULL: ", ruletype => "full");
-          '. $self->hit_rule_plugin_code($pms, $rulename, "full", "last") . '
-          last if ++$hits >= '.$max.';
+          $self->rule_ready(q{'.$rulename.'}, 1);
+          pos $$fullmsgref = 0;
+          '.$self->hash_line_for_rule($pms, $rulename).'
+          dbg("rules-all: running full rule %s", q{'.$rulename.'});
+          $hits = 0;
+          while ($$fullmsgref =~ /$test_qr/gp) {
+            '.$self->capture_plugin_code().'
+            $self->got_hit(q{'.$rulename.'}, "FULL: ", ruletype => "full");
+            '. $self->hit_rule_plugin_code($pms, $rulename, "full", "last") . '
+            last if ++$hits >= '.$max.';
+          }
+          pos $$fullmsgref = 0;
+          '.$self->ran_rule_plugin_code($rulename, "full").'
         }
-        pos $$fullmsgref = 0;
-        '.$self->ran_rule_plugin_code($rulename, "full").'
       }
     ');
   }
@@ -1393,14 +1400,17 @@ sub ran_rule_plugin_code {
 sub capture_rules_replace {
   my ($self, $conf, $rulename) = @_;
 
-  return '' unless exists $conf->{capture_rules}->{$rulename};
+  return '{' unless exists $conf->{capture_rules}->{$rulename};
 
+  # Replace all named capture templates in regex, format %{CAPTURE_NAME}
+  # Note that backquotes must be double escaped in $test_qr
   my $code = '
-      foreach my $cname (keys %{$self->{conf}->{capture_rules}->{q{'.$rulename.'}}}) {
-        if (exists $self->{capture_values}->{$cname}) {
-          my $cval = "(?:".join("|", map { quotemeta($_) }
-                      @{$self->{capture_values}->{$cname}}).")";
-          $test_qr =~ s/"""${cname}"""/$cval/gs;
+      foreach my $cname (keys %{$self->{conf}->{capture_template_rules}->{q{'.$rulename.'}}}) {
+        my $valref = $self->get_tag_raw($cname);
+        my @vals = grep { defined $_ && $_ ne "" } (ref $valref ? @$valref : $valref);
+        if (@vals) {
+          my $cval = "(?:".join("|", map { quotemeta($_) } @vals).")";
+          $test_qr =~ s/(?<!\\\\)\\%\\{${cname}\\}/$cval/gs;
   ';
   if ($would_log_rules_all) {
     $code .= '
@@ -1409,8 +1419,20 @@ sub capture_rules_replace {
     ';
   }
   $code .= '
+        } else {
+  ';
+  if ($would_log_rules_all) {
+    $code .= '
+          dbg("rules-all: not running rule %s, dependent tag not defined: %s",
+            q{'.$rulename.'}, $cname);
+    ';
+  }
+  $code .= '
+          $test_qr = undef;
+          last;
         }
       }
+      if ($test_qr) {
   ';
 
   return $code;

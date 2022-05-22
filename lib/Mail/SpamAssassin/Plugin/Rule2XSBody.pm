@@ -143,9 +143,14 @@ sub setup_test_set_pri {
       dbg "zoom: skipping rule $name, ReplaceTags";
       next;
     }
-    # ignore regex capture template rules
+    # ignore regex capture rules
     if ($conf->{capture_rules}->{$name}) {
-      dbg "zoom: skipping rule $name, capture template";
+      dbg "zoom: skipping rule $name, regex capture";
+      next;
+    }
+    # ignore regex capture template rules
+    if ($conf->{capture_template_rules}->{$name}) {
+      dbg "zoom: skipping rule $name, regex capture template";
       next;
     }
 

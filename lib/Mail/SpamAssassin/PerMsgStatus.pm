@@ -249,8 +249,8 @@ BEGIN {
     HEADER => sub {
       my $pms = shift;
       my $hdr = shift;
-      return if !$hdr;
-      $pms->get($hdr,undef);
+      return '' if !$hdr;
+      $pms->get($hdr, '');
     },
 
     TIMING => sub {
@@ -1595,16 +1595,15 @@ sub _replace_tags {
 
   # default to leaving the original string in place, if we cannot find
   # a tag for it (bug 4793)
-  local($1,$2,$3);
-  $text =~ s{(_(\w+?)(?:\((.*?)\))?_)}{
-        my $full = $1;
-        my $tag = $2;
+  local($1);
+  $text =~ s{_([A-Z][A-Z0-9]*(?:_[A-Z0-9]+)*(?:\(.*?\))?)_}{
+        my $tag = $1;
         my $result;
         if ($tag =~ /^ADDEDHEADER(?:HAM|SPAM|)\z/) {
           # Bug 6278: break infinite recursion through _get_added_headers and
           # _get_tag on an attempt to use such tag in add_header template
         } else {
-          $result = $self->get_tag_raw($tag,$3);
+          $result = $self->get_tag_raw($tag);
           if (!ref $result) {
             utf8::encode($result) if utf8::is_utf8($result);
           } elsif (ref $result eq 'ARRAY') {
@@ -1613,7 +1612,7 @@ sub _replace_tags {
             $result = join(' ', @values);
           }
         }
-        defined $result ? $result : $full;
+        defined $result ? $result : "_${tag}_";
       }ge;
 
   return $text;
@@ -1739,10 +1738,12 @@ sub report_unsatisfied_actions {
 
 =item $status->set_tag($tagname, $value)
 
-Set a template tag, as used in C<add_header>, report templates, etc.
-This API is intended for use by plugins.  Tag names will be converted
-to an all-uppercase representation internally.  Tag names must consist
-of ONLY alphanumeric characters.
+Set a template tag, as used in C<add_header>, report templates, etc.  This
+API is intended for use by plugins.  Tag names will be converted to an
+all-uppercase representation internally.  Tag names must consist only of
+[A-Z0-9_] characters and must not contain consecutive underscores.  Also the
+name must not start or end in an underscore, as that is the template tagging
+format.
 
 C<$value> can be a simple scalar (string or number), or a reference to an
 array, in which case the public method get_tag will join array elements
@@ -1763,8 +1764,9 @@ caller's scope can be accessed inside this C<sub>. For example:
               return $text;
             });
 
-See C<Mail::SpamAssassin::Conf>'s C<TEMPLATE TAGS> section for more details
-on how template tags are used.
+See C<Mail::SpamAssassin::Conf>'s C<TEMPLATE TAGS> and C<CAPTURING TAGS
+USING REGEX NAMED CAPTURE GROUPS> sections for more details on how template
+tags are used.
 
 C<undef> will be returned if a tag by that name has not been defined.
 
@@ -1782,9 +1784,11 @@ sub set_tag {
 
 Get the current value of a template tag, as used in C<add_header>, report
 templates, etc. This API is intended for use by plugins.  Tag names will be
-converted to an all-uppercase representation internally.  See
-C<Mail::SpamAssassin::Conf>'s C<TEMPLATE TAGS> section for more details on
-tags.
+converted to an all-uppercase representation internally.
+
+See C<Mail::SpamAssassin::Conf>'s C<TEMPLATE TAGS> and C<CAPTURING TAGS
+USING REGEX NAMED CAPTURE GROUPS> sections for more details on how template
+tags are used.
 
 C<undef> will be returned if a tag by that name has not been defined.
 
@@ -1795,9 +1799,9 @@ sub get_tag {
 
   return if !defined $tag;
 
-  # handle atleast HEADER(arg)
+  # handle TAGNAME(args) format
   local($1);
-  if ($tag =~ s/\(([a-zA-Z0-9:-]+)\)$//) {
+  if ($tag =~ s/\((.*?)\)$//) {
     @args = ($1);
   }
   $tag = uc $tag;
@@ -1831,9 +1835,9 @@ sub get_tag_raw {
 
   return if !defined $tag;
 
-  # handle atleast HEADER(arg)
+  # handle TAGNAME(args) format
   local($1);
-  if ($tag =~ s/\(([a-zA-Z0-9:-]+)\)$//) {
+  if ($tag =~ s/\((.*?)\)$//) {
     @args = ($1);
   }
 
@@ -3640,8 +3644,8 @@ sub set_captures {
   my ($self, $captures) = @_;
 
   foreach my $cname (keys %$captures) {
+    next unless $cname =~ /^[A-Z][A-Z0-9]*(?:_[A-Z0-9]+)*$/; # safety check
     my @cvals = do { my %seen; grep { !$seen{$_}++ } @{$captures->{$cname}} };
-    $self->{capture_values}->{$cname} = \@cvals;
     $self->set_tag($cname, @cvals == 1 ? $cvals[0] : \@cvals);
   }
 }

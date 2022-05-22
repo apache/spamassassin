@@ -1516,16 +1516,17 @@ sub parse_captures {
   my ($self, $name, $re) = @_;
 
   # Check for named regex capture templates
-  if (index($re, '"""') >= 0) {
+  if (index($re, '%{') >= 0) {
     local($1);
-    while ($re =~ /"""([A-Z][A-Z0-9_]*)"""/g) {
-      $self->{conf}->{capture_rules}->{$name}->{$1} = 1;
+    while ($re =~ /(?<!\\)\%\{([A-Z][A-Z0-9]*(?:_[A-Z0-9]+)*(?:\([^\)\}]*\))?)\}/g) {
+      $self->{conf}->{capture_template_rules}->{$name}->{$1} = 1;
     }
   }
   # Make rules with captures run before anything else
-  if ($re =~ /\(\?[<'][A-Z]/) {
+  if ($re =~ /\(\?P?[<'][A-Z]/) {
     dbg("config: adjusting regex capture rule $name priority to -10000");
     $self->{conf}->{priority}->{$name} = -10000;
+    $self->{conf}->{capture_rules}->{$name} = 1;
   }
 }
 

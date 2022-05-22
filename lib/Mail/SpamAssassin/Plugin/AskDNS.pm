@@ -340,7 +340,7 @@ sub set_config {
 
         # collect tag names as used in each query template
         # also support common HEADER(arg) tag which does $pms->get(arg)
-        my @tags = $query_template =~ /_([A-Z][A-Z0-9]*|HEADER\([a-zA-Z0-9:-]+\))_/g;
+        my @tags = $query_template =~ /_([A-Z][A-Z0-9]*(?:_[A-Z0-9]+)*(?:\(.*?\))?)_/g;
         # save rule to tag dependencies
         $self->{askdns}{$rulename}{tags}{$_} = 1 foreach (@tags);
 
@@ -404,12 +404,19 @@ sub launch_queries {
       foreach my $tag (@$tags) {
         # cache tag values locally
         if (!exists $pms->{askdns_tag_cache}{$tag}) {
-          $pms->{askdns_tag_cache}{$tag} = $pms->get_tag($tag);
+          my $valref = $pms->get_tag_raw($tag);
+          my @vals = grep { defined $_ && $_ ne '' } (ref $valref ? @$valref : $valref);
+          # Paranoid check for undefined tag
+          if (!@vals) {
+            dbg("askdns: skipping rule $rulename, no value found for tag: $tag");
+            return;
+          }
+          $pms->{askdns_tag_cache}{$tag} = \@vals;
         }
         my %q_iter_new;
         foreach my $q (keys %q_iter) {
           # handle space separated multi-valued tags
-          foreach my $val (split(' ', $pms->{askdns_tag_cache}{$tag})) {
+          foreach my $val (@{$pms->{askdns_tag_cache}{$tag}}) {
             my $qtmp = $q;
             $qtmp =~ s/\Q_${tag}_\E/${val}/g;
             $q_iter_new{$qtmp} = 1;
