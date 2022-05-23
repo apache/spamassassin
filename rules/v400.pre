@@ -16,12 +16,16 @@
 # added to new files, named according to the release they're added in.
 ###########################################################################
 
-# ExtractText - Extract text from documents or images and feed it
-# into SpamAssassin
+# ExtractText - Extract text from documents or images for matching
+#
+# Requires manual configuration, see plugin documentation.
 #
 # loadplugin Mail::SpamAssassin::Plugin::ExtractText
 
-# DecodeShortUrl - Decode url from url shorteners
+# DecodeShortUrl - Check for shortened URLs
+#
+# Note that this plugin will send HTTP requests to different URL shortener
+# services.  Enabling caching is recommended, see plugin documentation.
 #
 # loadplugin Mail::SpamAssassin::Plugin::DecodeShortURLs
 
