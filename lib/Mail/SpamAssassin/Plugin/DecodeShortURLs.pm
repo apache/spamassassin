@@ -24,7 +24,6 @@ DecodeShortURLs - Check for shortened URLs
   loadplugin    Mail::SpamAssassin::Plugin::DecodeShortURLs
 
   url_shortener tinyurl.com
-  url_shortener go.to
   url_shortener_get bit.ly
 
   body HAS_SHORT_URL          eval:short_url()
@@ -44,6 +43,9 @@ DecodeShortURLs - Check for shortened URLs
 
   body SHORT_URL_404          eval:short_url_code('404') # Can check any non-redirect HTTP code
   describe SHORT_URL_404      Message has shortened URL returning HTTP 404
+
+  uri URI_TINYURL_BLOCKED      m,https://tinyurl\.com/app/nospam,
+  describe URI_TINYURL_BLOCKED Message contains a tinyurl that has been disabled due to abuse
 
   uri URI_BITLY_BLOCKED       m,^https://bitly\.com/a/blocked,
   describe URI_BITLY_BLOCKED  Message contains a bit.ly URL that has been disabled due to abuse
