@@ -339,6 +339,23 @@ The max depth of short urls that will be chained until it stops looking further.
     type => $Mail::SpamAssassin::Conf::CONF_TYPE_NUMERIC
   });
 
+=over 4
+
+=item url_shortener_user_agent       (default: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/101.0.4951.67 Safari/537.36)
+
+Set User-Agent header for HTTP queries.
+
+=back
+
+=cut
+
+  push (@cmds, {
+    setting => 'url_shortener_user_agent',
+    is_admin => 1,
+    default => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/101.0.4951.67 Safari/537.36',
+    type => $Mail::SpamAssassin::Conf::CONF_TYPE_STRING
+  });
+
   $conf->{parser}->register_commands(\@cmds);
 }
 
@@ -587,7 +604,7 @@ sub check_dnsbl {
   $self->initialise_url_shortener_cache($conf);
 
   # Initialize LWP
-  my $ua = LWP::UserAgent->new();
+  my $ua = LWP::UserAgent->new('agent' => $conf->{url_shortener_user_agent});
   $ua->{max_redirect} = 0;
   $ua->{timeout} = 5;
   $ua->env_proxy;
@@ -754,5 +771,6 @@ sub cache_get {
 sub has_short_url { 1 }
 sub has_autoclean { 1 }
 sub has_short_url_code { 1 }
+sub has_user_agent { 1 }
 
 1;
