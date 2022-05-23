@@ -11,7 +11,7 @@ use constant HAS_DBD_SQLITE => eval { require DBD::SQLite; DBD::SQLite->VERSION(
 use constant SQLITE => (HAS_DBI && HAS_DBD_SQLITE);
 
 plan skip_all => "Net tests disabled"                unless conf_bool('run_net_tests');
-my $tests = 4;
+my $tests = 5;
 $tests += 4 if (SQLITE);
 plan tests => $tests;
 
@@ -19,12 +19,13 @@ tstpre ("
 loadplugin Mail::SpamAssassin::Plugin::DecodeShortURLs
 ");
 
-tstprefs("
+tstprefs(q{
 dns_query_restriction allow bit.ly
 dns_query_restriction allow tinyurl.com
 
-url_shortener bit.ly
+clear_url_shortener
 url_shortener tinyurl.com
+url_shortener_get bit.ly
 
 body HAS_SHORT_URL              eval:short_url()
 describe HAS_SHORT_URL          Message contains one or more shortened URLs
@@ -35,24 +36,27 @@ describe SHORT_URL_CHAINED      Message has shortened URL chained to other short
 body SHORT_URL_404		eval:short_url_404()
 describe SHORT_URL_404		Short URL is invalid
 
-body SHORT_URL_C404		eval:short_url_code(404)
+body SHORT_URL_C404		eval:short_url_code('404')
 describe SHORT_URL_C404		Short URL is invalid
-");
+
+uri URI_BITLY_BLOCKED           m,^https://bitly\.com/a/blocked,
+});
 
 ###
 ### Basic functions, no caching
 ###
 
 %patterns = (
-   q{ 1.0 HAS_SHORT_URL } => 'Message contains one or more shortened URLs',
-   q{ 1.0 SHORT_URL_404 } => 'Short URL is invalid 404',
-   q{ 1.0 SHORT_URL_C404 } => 'Short URL is invalid C404',
+   q{ 1.0 HAS_SHORT_URL } => '',
+   q{ 1.0 SHORT_URL_404 } => '',
+   q{ 1.0 SHORT_URL_C404 } => '',
+   q{ 1.0 URI_BITLY_BLOCKED } => '',
 );
 sarun ("-t < data/spam/decodeshorturl/base.eml", \&patterns_run_cb);
 ok_all_patterns();
 
 %patterns = (
-   q{ 1.0 SHORT_URL_CHAINED } => 'Message has shortened URL chained to other shorteners',
+   q{ 1.0 SHORT_URL_CHAINED } => '',
 );
 sarun ("-t < data/spam/decodeshorturl/chain.eml", \&patterns_run_cb);
 ok_all_patterns();
@@ -79,7 +83,7 @@ describe HAS_SHORT_URL          Message contains one or more shortened URLs
 ");
 
 %patterns = (
-   q{ 1.0 HAS_SHORT_URL } => 'Message contains one or more shortened URLs',
+   q{ 1.0 HAS_SHORT_URL } => '',
 );
 sarun ("-t < data/spam/decodeshorturl/base.eml", \&patterns_run_cb);
 ok_all_patterns();

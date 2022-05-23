@@ -15,18 +15,17 @@
 # limitations under the License.
 # </@LICENSE>
 
-# Original code by Steve Freegard <steve.freegard@fsl.com>
-
 =head1 NAME
 
-DecodeShortURLs - Expand shortened URLs
+DecodeShortURLs - Check for shortened URLs
 
 =head1 SYNOPSIS
 
   loadplugin    Mail::SpamAssassin::Plugin::DecodeShortURLs
 
-  url_shortener bit.ly
+  url_shortener tinyurl.com
   url_shortener go.to
+  url_shortener_get bit.ly
 
   body HAS_SHORT_URL          eval:short_url()
   describe HAS_SHORT_URL      Message has one or more shortened URLs
@@ -35,59 +34,43 @@ DecodeShortURLs - Expand shortened URLs
   describe SHORT_URL_CHAINED  Message has shortened URL chained to other shorteners
 
   body SHORT_URL_MAXCHAIN     eval:short_url_maxchain()
-  describe SHORT_URL_MAXCHAIN Message has shortened URL that causes more than 10 redirections
+  describe SHORT_URL_MAXCHAIN Message has shortened URL that causes too many redirections
 
   body SHORT_URL_LOOP         eval:short_url_loop()
   describe SHORT_URL_LOOP     Message has short URL that loops back to itself
 
-  body SHORT_URL_200          eval:short_url_200()
+  body SHORT_URL_200          eval:short_url_code('200') # Can check any non-redirect HTTP code
   describe SHORT_URL_200      Message has shortened URL returning HTTP 200
 
-  body SHORT_URL_404          eval:short_url_404()
+  body SHORT_URL_404          eval:short_url_code('404') # Can check any non-redirect HTTP code
   describe SHORT_URL_404      Message has shortened URL returning HTTP 404
+
+  uri URI_BITLY_BLOCKED       m,^https://bitly\.com/a/blocked,
+  describe URI_BITLY_BLOCKED  Message contains a bit.ly URL that has been disabled due to abuse
 
 =head1 DESCRIPTION
 
-This plugin looks for URLs shortened by a list of URL shortening services and
-upon finding a matching URL will connect using to the shortening service and
-do an HTTP HEAD lookup and retrieve the location header which points to the
-actual shortened URL, it then adds this URL to the list of URIs extracted by
-SpamAssassin which can then be accessed by other plug-ins, such as URIDNSBL.
+This plugin looks for URLs shortened by a list of URL shortening services. 
+Upon finding a matching URL, plugin will send a HTTP request to the
+shortening service and retrieve the Location-header which points to the
+actual shortened URL.  It then adds this URL to the list of URIs extracted
+by SpamAssassin which can then be accessed by uri rules and plugins such as
+URIDNSBL.
 
-This plugin also sets the rule HAS_SHORT_URL if any matching short URLs are
-found.
+This plugin will follow chained redirections, where a short URL redirects to
+another short URL.  Redirection depth limit can be set with
+C<max_short_url_redirections>.
 
-This plug-in will follow 'chained' shorteners e.g.  from short URL to short
-URL to short URL and finally to the real URL.
+Maximum of C<max_short_urls> short URLs are checked in a message (10 by
+default).
 
-If this form of chaining is found, then the rule 'SHORT_URL_CHAINED' will be
-fired.  If a loop is detected then 'SHORT_URL_LOOP' will be fired.  This
-plug-in limits the number of chained shorteners to a maximum of 10 at which
-point it will fire the rule 'SHORT_URL_MAXCHAIN' and go no further.
-
-If a shortener returns a '404 Not Found' result for the short URL then the
-rule 'SHORT_URL_404' will be fired.
-
-If a shortener returns a '200 OK' result for the short URL then the rule
-'SHORT_URL_200' will be fired.  This can cover the case when an abuse page
-is displayed.
+All supported rule types for checking short URLs and redirection status are
+documented in L<SYNOPSIS> section.
 
 =head1 NOTES
 
-This plugin runs at the check_dnsbl hook with a priority of -10 so that it
-may modify the parsed URI list prior to the URIDNSBL plugin.
-
-Currently the plugin queries a maximum of 10 distinct shortened URLs with a
-maximum timeout of 5 seconds per lookup.
-
-=head1 ACKNOWLEDGEMENTS
-
-=encoding utf8
-
-A lot of this plugin has been hacked together by using other plugins as
-examples.  The author would particularly like to tip his hat to Karsten
-Bräckelmann for his work on GUDO.pm, the original version of this plugin
-could not have been developed without his code.
+This plugin runs at the check_dnsbl hook (priority -100) so that it may
+modify the parsed URI list prior to normal uri rules or the URIDNSBL plugin.
 
 =cut
 
@@ -100,7 +83,7 @@ use warnings;
 use vars qw(@ISA);
 @ISA = qw(Mail::SpamAssassin::Plugin);
 
-my $VERSION = 0.12;
+my $VERSION = 4.00;
 
 use constant HAS_LWP_USERAGENT => eval { require LWP::UserAgent; };
 
@@ -133,6 +116,7 @@ sub new {
   $self->register_eval_rule('short_url_chained', $Mail::SpamAssassin::Conf::TYPE_BODY_EVALS);
   $self->register_eval_rule('short_url_maxchain', $Mail::SpamAssassin::Conf::TYPE_BODY_EVALS);
   $self->register_eval_rule('short_url_loop', $Mail::SpamAssassin::Conf::TYPE_BODY_EVALS);
+  $self->register_eval_rule('short_url_tests'); # for legacy plugin compatibility warning
 
   return $self;
 }
@@ -141,15 +125,29 @@ sub new {
 
 =over 4
 
-=item url_shortener     (default: none)
+=item url_shortener  domain [domain...]     (default: none)
 
-A domain that should be considered as an url shortener.
-If the domain begins with a '.', 3rd level tld of the main
-domain will be checked.
+Domains that should be considered as an URL shortener.  If the domain begins
+with a '.', 3rd level tld of the main domain will be checked.
 
 Example:
-url_shortener bit.ly
-url_shortener .page.link
+
+ url_shortener tinyurl.com
+ url_shortener .page.link
+
+=back
+
+=over 4
+
+=item url_shortener_get  domain [domain...]     (default: none)
+
+Alias to C<url_shortener>.  HTTP request will be done with GET method,
+instead of default HEAD.  Required for some services like bit.ly to return
+blocked URL correctly.
+
+Example:
+
+ url_shortener_get bit.ly
 
 =back
 
@@ -162,13 +160,53 @@ sub set_config {
   push (@cmds, {
     setting => 'url_shortener',
     default => {},
+    type => $Mail::SpamAssassin::Conf::CONF_TYPE_HASH_KEY_VALUE,
     code => sub {
       my ($self, $key, $value, $line) = @_;
       if ($value eq '') {
         return $Mail::SpamAssassin::Conf::MISSING_REQUIRED_VALUE;
       }
       foreach my $domain (split(/\s+/, $value)) {
-        $self->{url_shorteners}->{lc $domain} = 1;
+        $self->{url_shortener}->{lc $domain} = 1; # 1 == head
+      }
+    }
+  });
+
+  push (@cmds, {
+    setting => 'url_shortener_get',
+    code => sub {
+      my ($self, $key, $value, $line) = @_;
+      if ($value eq '') {
+        return $Mail::SpamAssassin::Conf::MISSING_REQUIRED_VALUE;
+      }
+      foreach my $domain (split(/\s+/, $value)) {
+        $self->{url_shortener}->{lc $domain} = 2; # 2 == get
+      }
+    }
+  });
+
+=over 4
+
+=item clear_url_shortener  [domain] [domain...]
+
+Clear configured url_shortener and url_shortener_get domains, for example to
+override default settings from an update channel.  If domains are specified,
+then only those are removed from list.
+
+=back
+
+=cut
+
+  push (@cmds, {
+    setting => 'clear_url_shortener',
+    code => sub {
+      my ($self, $key, $value, $line) = @_;
+      if ($value eq '') {
+        $self->{url_shortener} = {};
+      } else {
+        foreach my $domain (split(/\s+/, $value)) {
+          delete $self->{url_shortener}->{lc $domain};
+        }
       }
     }
   });
@@ -214,7 +252,8 @@ DBD::SQLite, DBD::mysql, DBD::MariaDB or DBD::Pg.
 Minimum required SQLite version is 3.24.0 (available from DBD::SQLite 1.59).
 
 Examples:
-url_shortener_cache_dsn dbi:SQLite:dbname=/var/lib/spamassassin/DecodeShortURLs.db
+
+ url_shortener_cache_dsn dbi:SQLite:dbname=/var/lib/spamassassin/DecodeShortURLs.db
 
 =back
 
@@ -324,9 +363,27 @@ If this option is enabled (set to 1), then short URLs and the decoded URLs will 
 
 =over 4
 
+=item url_shortener_timeout     (default: 5)
+
+Maximum time a short URL HTTP request can take, in seconds.
+
+=back
+
+=cut
+
+  push (@cmds, {
+    setting => 'url_shortener_timeout',
+    is_admin => 1,
+    default => 5,
+    type => $Mail::SpamAssassin::Conf::CONF_TYPE_NUMERIC
+  });
+
+=over 4
+
 =item max_short_urls                 (default: 10)
 
-The max depth of short urls that will be chained until it stops looking further.
+Maximum amount of short URLs that will be looked up per message.  Chained
+redirections are not counted, only initial short URLs found.
 
 =back
 
@@ -341,9 +398,27 @@ The max depth of short urls that will be chained until it stops looking further.
 
 =over 4
 
+=item max_short_url_redirections     (default: 10)
+
+Maximum depth of chained redirections that a short URL can generate.
+
+=back
+
+=cut
+
+  push (@cmds, {
+    setting => 'max_short_url_redirections',
+    is_admin => 1,
+    default => 10,
+    type => $Mail::SpamAssassin::Conf::CONF_TYPE_NUMERIC
+  });
+
+=over 4
+
 =item url_shortener_user_agent       (default: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/101.0.4951.67 Safari/537.36)
 
-Set User-Agent header for HTTP queries.
+Set User-Agent header for HTTP requests.  Some services require it to look
+like a common browser.
 
 =back
 
@@ -357,6 +432,27 @@ Set User-Agent header for HTTP queries.
   });
 
   $conf->{parser}->register_commands(\@cmds);
+}
+
+=head1 ACKNOWLEDGEMENTS
+
+Original DecodeShortURLs plugin was developed by Steve Freegard.
+
+=cut
+
+sub short_url_tests {
+  # Legacy compatibility warning done in finish_parsing_start
+  return 0;
+}
+
+sub finish_parsing_start {
+  my ($self, $opts) = @_;
+
+  if ($opts->{conf}->{eval_to_rule}->{short_url_tests}) {
+    warn "DecodeShortURLs: Legacy configuration format detected. ".
+         "Eval function short_url_tests() is no longer supported, ".
+         "please see documentation for the new rule format.\n";
+  }
 }
 
 sub initialise_url_shortener_cache {
@@ -558,6 +654,7 @@ sub short_url_loop {
 sub _check_shortener_uri {
   my ($uri, $conf) = @_;
 
+  local($1);
   return 0 unless $uri =~ m{^
     https?://		# Only http
     (?:[^\@/?#]*\@)?	# Ignore user:pass@
@@ -566,16 +663,22 @@ sub _check_shortener_uri {
     .*?\w		# Some path wanted
     }ix;
   my $host = lc $1;
-  if (exists $conf->{url_shorteners}->{$host}) {
-    return 1;
+  if (exists $conf->{url_shortener}->{$host}) {
+    return {
+      'uri' => $uri,
+      'method' => $conf->{url_shortener}->{$host} == 1 ? 'head' : 'get',
+    };
   }
   # if domain is a 3rd level domain check if there is a url shortener
   # on the 2nd level tld
   elsif ($host =~ /^(?!www)[^.]+(\.[^.]+\.[^.]+)$/i &&
-           exists $conf->{url_shorteners}->{$1}) {
-    return 1;
+           exists $conf->{url_shortener}->{$1}) {
+    return {
+      'uri' => $uri,
+      'method' => $conf->{url_shortener}->{$1} == 1 ? 'head' : 'get',
+    };
   }
-  return 0;
+  return;
 }
 
 sub check_dnsbl {
@@ -591,8 +694,9 @@ sub check_dnsbl {
   my $uris = $pms->get_uri_detail_list();
   while (my($uri, $info) = each %{$uris}) {
     next unless $info->{domains} && $info->{cleaned};
-    if (_check_shortener_uri($uri, $conf)) {
-      $short_urls{$uri} = 1;
+    if (my $short_url_info = _check_shortener_uri($uri, $conf)) {
+      $short_urls{$uri} = $short_url_info;
+      last if scalar keys %short_urls >= $conf->{max_short_urls};
     }
   }
 
@@ -604,16 +708,16 @@ sub check_dnsbl {
   $self->initialise_url_shortener_cache($conf);
 
   # Initialize LWP
-  my $ua = LWP::UserAgent->new('agent' => $conf->{url_shortener_user_agent});
-  $ua->{max_redirect} = 0;
-  $ua->{timeout} = 5;
+  my $ua = LWP::UserAgent->new(
+    'agent' => $conf->{url_shortener_user_agent},
+    'max_redirect' => 0,
+    'timeout' => $conf->{url_shortener_timeout},
+  );
   $ua->env_proxy;
 
-  # Launch HTTP queries
-  my $lookups = 0;
-  foreach my $short_url (keys %short_urls) {
-    $self->recursive_lookup($short_url, $pms, $ua);
-    last if ++$lookups >= $conf->{max_short_urls};
+  # Launch HTTP requests
+  foreach my $uri (keys %short_urls) {
+    $self->recursive_lookup($short_urls{$uri}, $pms, $ua);
   }
 
   # Automatically purge old entries
@@ -627,18 +731,19 @@ sub check_dnsbl {
 }
 
 sub recursive_lookup {
-  my ($self, $short_url, $pms, $ua, %been_here) = @_;
+  my ($self, $short_url_info, $pms, $ua, %been_here) = @_;
   my $conf = $pms->{conf};
 
   my $count = scalar keys %been_here;
   dbg("redirection count $count") if $count;
-  if ($count >= 10) {
-    dbg("found more than 10 shortener redirections");
+  if ($count >= $conf->{max_short_url_redirections}) {
+    dbg("found more than $conf->{max_short_url_redirections} shortener redirections");
     # Fire test
     $pms->{short_url_maxchain} = 1;
     return;
   }
 
+  my $short_url = $short_url_info->{uri};
   my $location;
   if (defined($location = $self->cache_get($short_url))) {
     if ($conf->{url_shortener_loginfo}) {
@@ -655,7 +760,8 @@ sub recursive_lookup {
     }
   } else {
     # Not cached; do lookup
-    my $response = $ua->head($short_url);
+    my $method = $short_url_info->{method};
+    my $response = $ua->$method($short_url);
     if (!$response->is_redirect) {
       dbg("URL is not redirect: $short_url = ".$response->status_line);
       my $rcode = $response->code;
@@ -717,9 +823,9 @@ sub recursive_lookup {
   $pms->add_uri_detail_list($location) if !$pms->{uri_detail_list}->{$location};
 
   # Check for recursion
-  if (_check_shortener_uri($location, $conf)) {
+  if (my $short_url_info = _check_shortener_uri($location, $conf)) {
     # Recurse...
-    $self->recursive_lookup($location, $pms, $ua, %been_here);
+    $self->recursive_lookup($short_url_info, $pms, $ua, %been_here);
   }
 }
 
@@ -771,6 +877,10 @@ sub cache_get {
 sub has_short_url { 1 }
 sub has_autoclean { 1 }
 sub has_short_url_code { 1 }
-sub has_user_agent { 1 }
+sub has_user_agent { 1 } # url_shortener_user_agent
+sub has_get { 1 } # url_shortener_get
+sub has_clear { 1 } # clear_url_shortener
+sub has_timeout { 1 } # url_shortener_timeout
+sub has_max_redirections { 1 } # max_short_url_redirections
 
 1;
