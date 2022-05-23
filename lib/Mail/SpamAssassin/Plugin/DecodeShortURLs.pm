@@ -656,15 +656,19 @@ sub short_url_loop {
 sub _check_shortener_uri {
   my ($uri, $conf) = @_;
 
-  local($1);
+  local($1,$2);
   return 0 unless $uri =~ m{^
     https?://		# Only http
     (?:[^\@/?#]*\@)?	# Ignore user:pass@
     ([^/?#:]+)		# (Capture hostname)
     (?::\d+)?		# Possible port
-    .*?\w		# Some path wanted
+    (.*?\w)?		# Some path wanted
     }ix;
   my $host = lc $1;
+  my $has_path = defined $2;
+  my $levels = $host =~ tr/.//;
+  # No point looking at single level "xxx.yy" without a path
+  return if $levels == 1 && !$has_path;
   if (exists $conf->{url_shortener}->{$host}) {
     return {
       'uri' => $uri,
@@ -673,7 +677,7 @@ sub _check_shortener_uri {
   }
   # if domain is a 3rd level domain check if there is a url shortener
   # on the 2nd level tld
-  elsif ($host =~ /^(?!www)[^.]+(\.[^.]+\.[^.]+)$/i &&
+  elsif ($levels == 2 && $host =~ /^(?!www)[^.]+(\.[^.]+\.[^.]+)$/i &&
            exists $conf->{url_shortener}->{$1}) {
     return {
       'uri' => $uri,

@@ -11,7 +11,7 @@ use constant HAS_DBD_SQLITE => eval { require DBD::SQLite; DBD::SQLite->VERSION(
 use constant SQLITE => (HAS_DBI && HAS_DBD_SQLITE);
 
 plan skip_all => "Net tests disabled"                unless conf_bool('run_net_tests');
-my $tests = 5;
+my $tests = 6;
 $tests += 4 if (SQLITE);
 plan tests => $tests;
 
@@ -25,6 +25,7 @@ dns_query_restriction allow tinyurl.com
 
 clear_url_shortener
 url_shortener tinyurl.com
+url_shortener .page.link
 url_shortener_get bit.ly
 
 body HAS_SHORT_URL              eval:short_url()
@@ -40,6 +41,7 @@ body SHORT_URL_C404		eval:short_url_code('404')
 describe SHORT_URL_C404		Short URL is invalid
 
 uri URI_BITLY_BLOCKED           m,^https://bitly\.com/a/blocked,
+uri URI_PAGE_LINK		m,^http://activity\.wps\.com/,
 });
 
 ###
@@ -51,6 +53,7 @@ uri URI_BITLY_BLOCKED           m,^https://bitly\.com/a/blocked,
    q{ 1.0 SHORT_URL_404 } => '',
    q{ 1.0 SHORT_URL_C404 } => '',
    q{ 1.0 URI_BITLY_BLOCKED } => '',
+   q{ 1.0 URI_PAGE_LINK } => '',
 );
 sarun ("-t < data/spam/decodeshorturl/base.eml", \&patterns_run_cb);
 ok_all_patterns();
