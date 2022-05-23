@@ -237,7 +237,8 @@ our @OPTIONAL_MODULES = (
 {
   module => 'LWP::UserAgent',
   version => 0,
-  desc => 'The "sa-update" program can use this module to make HTTP requests.',
+  desc => 'The "sa-update" program can use this module to make HTTP requests.
+  Also used by DecodeShortURLs plugin.',
 },
 {
   module => 'Encode::Detect::Detector',
