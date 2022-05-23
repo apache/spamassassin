@@ -93,8 +93,6 @@ sub check_main {
   dbg("check: check_main, time limit in %.3f s",
       $master_deadline - time)  if $master_deadline;
 
-  my @uris = $pms->get_uri_list();
-
   # initialize meta stuff
   $pms->{meta_pending} = {};
   $pms->{meta_pending}->{$_} = 1 foreach (keys %{$pms->{conf}->{meta_tests}});
@@ -153,7 +151,7 @@ sub check_main {
     $pms->harvest_completed_queries() if $rbls_running;
     last if $pms->{deadline_exceeded} || $pms->{shortcircuited};
 
-    $self->do_uri_tests($pms, $priority, @uris);
+    $self->do_uri_tests($pms, $priority, $pms->get_uri_list());
     $pms->harvest_completed_queries() if $rbls_running;
     last if $pms->{deadline_exceeded} || $pms->{shortcircuited};
 
