@@ -28,31 +28,26 @@ Mail::SpamAssassin::Plugin::DMARC - check DMARC policy
   ifplugin Mail::SpamAssassin::Plugin::DMARC
     header DMARC_PASS eval:check_dmarc_pass()
     describe DMARC_PASS DMARC pass policy
-    priority DMARC_PASS 500
     tflags DMARC_PASS net nice
     score DMARC_PASS -0.001
 
     header DMARC_REJECT eval:check_dmarc_reject()
     describe DMARC_REJECT DMARC reject policy
-    priority DMARC_REJECT 500
     tflags DMARC_REJECT net
     score DMARC_REJECT 0.001
 
     header DMARC_QUAR eval:check_dmarc_quarantine()
     describe DMARC_QUAR DMARC quarantine policy
-    priority DMARC_QUAR 500
     tflags DMARC_QUAR net
     score DMARC_QUAR 0.001
 
     header DMARC_NONE eval:check_dmarc_none()
     describe DMARC_NONE DMARC none policy
-    priority DMARC_NONE 500
     tflags DMARC_NONE net
     score DMARC_NONE 0.001
 
     header DMARC_MISSING eval:check_dmarc_missing()
     describe DMARC_MISSING Missing DMARC policy
-    priority DMARC_MISSING 500
     tflags DMARC_MISSING net
     score DMARC_MISSING 0.001
   endif
@@ -88,11 +83,11 @@ sub new {
   bless ($self, $class);
 
   $self->set_config($mailsa->{conf});
-  $self->register_eval_rule("check_dmarc_pass");
-  $self->register_eval_rule("check_dmarc_reject");
-  $self->register_eval_rule("check_dmarc_quarantine");
-  $self->register_eval_rule("check_dmarc_none");
-  $self->register_eval_rule("check_dmarc_missing");
+  $self->register_eval_rule("check_dmarc_pass", $Mail::SpamAssassin::Conf::TYPE_HEAD_EVALS);
+  $self->register_eval_rule("check_dmarc_reject", $Mail::SpamAssassin::Conf::TYPE_HEAD_EVALS);
+  $self->register_eval_rule("check_dmarc_quarantine", $Mail::SpamAssassin::Conf::TYPE_HEAD_EVALS);
+  $self->register_eval_rule("check_dmarc_none", $Mail::SpamAssassin::Conf::TYPE_HEAD_EVALS);
+  $self->register_eval_rule("check_dmarc_missing", $Mail::SpamAssassin::Conf::TYPE_HEAD_EVALS);
 
   return $self;
 }
@@ -120,48 +115,119 @@ Store DMARC reports using Mail::DMARC::Store, mail-dmarc.ini must be configured 
   $conf->{parser}->register_commands(\@cmds);
 }
 
+sub parsed_metadata {
+  my ($self, $opts) = @_;
+  my $pms = $opts->{permsgstatus};
+
+  # Force waiting of SPF and DKIM results
+  $pms->{dmarc_async_queue} = [];
+}
+
+sub _check_eval {
+  my ($self, $pms, $result) = @_;
+
+  if (exists $pms->{dmarc_async_queue}) {
+    my $rulename = $pms->get_current_eval_rule_name();
+    push @{$pms->{dmarc_async_queue}}, sub {
+      if ($result->()) {
+        $pms->got_hit($rulename, '', ruletype => 'header');
+      } else {
+        $pms->rule_ready($rulename);
+      }
+    };
+    return; # return undef for async status
+  }
+
+  $self->_check_dmarc($pms);
+  # make sure not to return undef, as this is not async anymore
+  return $result->() || 0;
+}
+
 sub check_dmarc_pass {
   my ($self, $pms, $name) = @_;
 
-  $self->_check_dmarc($pms) unless $pms->{dmarc_checked};
-  return defined $pms->{dmarc_result} &&
-         $pms->{dmarc_result} eq 'pass' &&
-         $pms->{dmarc_policy} ne 'no policy available';
+  my $result = sub {
+    defined $pms->{dmarc_result} &&
+      $pms->{dmarc_result} eq 'pass' &&
+      $pms->{dmarc_policy} ne 'no policy available';
+  };
+
+  return $self->_check_eval($pms, $result);
 }
 
 sub check_dmarc_reject {
   my ($self, $pms, $name) = @_;
 
-  $self->_check_dmarc($pms) unless $pms->{dmarc_checked};
-  return defined $pms->{dmarc_result} &&
-         $pms->{dmarc_result} eq 'fail' &&
-         $pms->{dmarc_policy} eq 'reject';
+  my $result = sub {
+    defined $pms->{dmarc_result} &&
+      $pms->{dmarc_result} eq 'fail' &&
+      $pms->{dmarc_policy} eq 'reject';
+  };
+
+  return $self->_check_eval($pms, $result);
 }
 
 sub check_dmarc_quarantine {
   my ($self, $pms, $name) = @_;
 
-  $self->_check_dmarc($pms) unless $pms->{dmarc_checked};
-  return defined $pms->{dmarc_result} &&
-         $pms->{dmarc_result} eq 'fail' &&
-         $pms->{dmarc_policy} eq 'quarantine';
+  my $result = sub {
+    defined $pms->{dmarc_result} &&
+      $pms->{dmarc_result} eq 'fail' &&
+      $pms->{dmarc_policy} eq 'quarantine';
+  };
+
+  return $self->_check_eval($pms, $result);
 }
 
 sub check_dmarc_none {
   my ($self, $pms, $name) = @_;
 
-  $self->_check_dmarc($pms) unless $pms->{dmarc_checked};
-  return defined $pms->{dmarc_result} &&
-         $pms->{dmarc_result} eq 'fail' &&
-         $pms->{dmarc_policy} eq 'none';
+  my $result = sub {
+    return defined $pms->{dmarc_result} &&
+      $pms->{dmarc_result} eq 'fail' &&
+      $pms->{dmarc_policy} eq 'none';
+  };
+
+  return $self->_check_eval($pms, $result);
 }
 
 sub check_dmarc_missing {
   my ($self, $pms, $name) = @_;
 
-  $self->_check_dmarc($pms) unless $pms->{dmarc_checked};
-  return defined $pms->{dmarc_result} &&
-         $pms->{dmarc_policy} eq 'no policy available';
+  my $result = sub {
+    defined $pms->{dmarc_result} &&
+      $pms->{dmarc_policy} eq 'no policy available';
+  };
+
+  return $self->_check_eval($pms, $result);
+}
+
+sub check_tick {
+  my ($self, $opts) = @_;
+
+  $self->_check_async_queue($opts->{permsgstatus});
+}
+
+sub check_cleanup {
+  my ($self, $opts) = @_;
+
+  # Finish it whether SPF and DKIM is ready or not
+  $self->_check_async_queue($opts->{permsgstatus}, 1);
+}
+
+sub _check_async_queue {
+  my ($self, $pms, $finish) = @_;
+
+  return unless exists $pms->{dmarc_async_queue};
+
+  # Check if SPF or DKIM is ready
+  if ($finish || ($pms->{spf_checked} && $pms->{dkim_checked_signature})) {
+    $self->_check_dmarc($pms);
+    $_->() foreach (@{$pms->{dmarc_async_queue}});
+    # No more async queueing needed.  If any evals are called later, they
+    # will act on the results directly.
+    delete $pms->{dmarc_async_queue};
+  }
 }
 
 sub _check_dmarc {
@@ -276,3 +342,4 @@ sub _check_dmarc {
 }
 
 1;
+

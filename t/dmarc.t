@@ -20,37 +20,32 @@ plan skip_all => "Needs Mail::DMARC::PurePerl" unless HAS_MAILDMARC;
 plan skip_all => "Needs Mail::DKIM::Verifier >= 0.31" unless HAS_DKIM_VERIFIER ;
 plan tests => 18;
 
-tstpre ("
-loadplugin Mail::SpamAssassin::Plugin::DMARC
-loadplugin Mail::SpamAssassin::Plugin::DKIM
-");
-
 tstprefs("
-full   DKIM_SIGNED           eval:check_dkim_signed()
+
+header SPF_PASS     eval:check_for_spf_pass()
+tflags SPF_PASS     nice userconf net
+full   DKIM_SIGNED  eval:check_dkim_signed()
+tflags DKIM_SIGNED  net
+
 # Check that rename backwards compatibility works with if's
 ifplugin Mail::SpamAssassin::Plugin::Dmarc
 if plugin ( Mail::SpamAssassin::Plugin::Dmarc)
 ifplugin Mail::SpamAssassin::Plugin::DMARC
 
 header DMARC_PASS eval:check_dmarc_pass()
-priority DMARC_PASS 500
-describe DMARC_PASS DMARC pass policy
+tflags DMARC_PASS net
 
 header DMARC_NONE eval:check_dmarc_none()
-priority DMARC_NONE 500
-describe DMARC_NONE DMARC none policy
+tflags DMARC_NONE net
 
 header DMARC_QUAR eval:check_dmarc_quarantine()
-priority DMARC_QUAR 500
-describe DMARC_QUAR DMARC quarantine policy
+tflags DMARC_QUAR net
 
 header DMARC_REJECT eval:check_dmarc_reject()
-priority DMARC_REJECT 500
-describe DMARC_REJECT DMARC reject policy
+tflags DMARC_REJECT net
 
 header DMARC_MISSING eval:check_dmarc_missing()
-priority DMARC_MISSING 500
-describe DMARC_MISSING Missing DMARC policy
+tflags DMARC_MISSING net
 
 endif
 endif
