@@ -29,6 +29,9 @@ DecodeShortURLs - Check for shortened URLs
   body HAS_SHORT_URL          eval:short_url()
   describe HAS_SHORT_URL      Message has one or more shortened URLs
 
+  body SHORT_URL_REDIR        eval:short_url_redir()
+  describe SHORT_URL_REDIR    Message has shortened URL that resulted in a valid redirection
+
   body SHORT_URL_CHAINED      eval:short_url_chained()
   describe SHORT_URL_CHAINED  Message has shortened URL chained to other shorteners
 
@@ -100,18 +103,19 @@ sub new {
   my $self = $class->SUPER::new($mailsaobject);
   bless ($self, $class);
 
-  if ($mailsaobject->{local_tests_only} || !HAS_LWP_USERAGENT) {
-    dbg("local tests only, disabling checks");
-    $self->{disabled} = 1;
+  if ($mailsaobject->{local_tests_only}) {
+    dbg("local tests only, disabling HTTP requests");
+    $self->{net_disabled} = 1;
   }
   elsif (!HAS_LWP_USERAGENT) {
-    dbg("module LWP::UserAgent not installed, disabling checks");
-    $self->{disabled} = 1;
+    dbg("module LWP::UserAgent not installed, disabling HTTP requests");
+    $self->{net_disabled} = 1;
   }
 
   $self->set_config($mailsaobject->{conf});
   $self->register_method_priority ('check_dnsbl', -10);
   $self->register_eval_rule('short_url', $Mail::SpamAssassin::Conf::TYPE_BODY_EVALS);
+  $self->register_eval_rule('short_url_redir', $Mail::SpamAssassin::Conf::TYPE_BODY_EVALS);
   $self->register_eval_rule('short_url_200', $Mail::SpamAssassin::Conf::TYPE_BODY_EVALS);
   $self->register_eval_rule('short_url_404', $Mail::SpamAssassin::Conf::TYPE_BODY_EVALS);
   $self->register_eval_rule('short_url_code', $Mail::SpamAssassin::Conf::TYPE_BODY_EVALS);
@@ -613,7 +617,18 @@ sub initialise_url_shortener_cache {
 sub short_url {
   my ($self, $pms) = @_;
 
+  # Run checks if check_dnsbl didn't
+  if ($self->{net_disabled}) {
+    $self->_check_short($pms);
+  }
+
   return $pms->{short_url};
+}
+
+sub short_url_redir {
+  my ($self, $pms) = @_;
+
+  return $pms->{short_url_redir};
 }
 
 sub short_url_200 {
@@ -690,9 +705,13 @@ sub _check_shortener_uri {
 sub check_dnsbl {
   my ($self, $opts) = @_;
 
-  return if $self->{disabled};
+  $self->_check_short($opts->{permsgstatus});
+}
 
-  my $pms = $opts->{permsgstatus};
+sub _check_short {
+  my ($self, $pms) = @_;
+
+  return if $pms->{short_url_checked}++;
   my $conf = $pms->{conf};
 
   # Sort short URLs into hash to de-dup them
@@ -706,9 +725,14 @@ sub check_dnsbl {
     }
   }
 
-  # Make sure we have some work to do
-  # Before we open any log files etc.
+  # Bail out if no shortener was found
   return unless %short_urls;
+
+  # Mark that a URL shortener was found
+  $pms->{short_url} = 1;
+
+  # Bail out if network lookups not enabled
+  return if $self->{net_disabled};
 
   # Initialize cache
   $self->initialise_url_shortener_cache($conf);
@@ -795,8 +819,8 @@ sub recursive_lookup {
     return;
   }
 
-  # At this point we have a new URL in $response
-  $pms->{short_url} = 1;
+  # At this point we have a valid redirection and new URL in $response
+  $pms->{short_url_redir} = 1;
 
   # Set chained here otherwise we might mark a disabled page or
   # redirect back to the same host as chaining incorrectly.
@@ -888,5 +912,9 @@ sub has_get { 1 } # url_shortener_get
 sub has_clear { 1 } # clear_url_shortener
 sub has_timeout { 1 } # url_shortener_timeout
 sub has_max_redirections { 1 } # max_short_url_redirections
+# short_url() will always hit if matching url_shortener was found, even
+# without HTTP requests.  To check if a valid HTTP redirection response was
+# seen, use short_url_redir().
+sub has_short_url_redir { 1 }
 
 1;
