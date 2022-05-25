@@ -72,7 +72,7 @@ meta       GB_FAKE_RF                    ( ! __THREADED && ! MAILING_LIST_MULTI 
 describe   GB_FAKE_RF                    Fake reply
 score      GB_FAKE_RF                    1.000 # limit
 
-meta       GB_FAKE_RF_SHORT              ( ! __THREADED && __GB_FAKE_RF && __PDS_URISHORTENER )
+meta       GB_FAKE_RF_SHORT              ( ! __THREADED && __GB_FAKE_RF && __URL_SHORTENER )
 describe   GB_FAKE_RF_SHORT              Fake reply or forward with url shortener
 score      GB_FAKE_RF_SHORT              2.000 # limit
 tflags     GB_FAKE_RF_SHORT              publish

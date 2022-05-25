@@ -28,7 +28,7 @@ meta     PDS_PHPE_SHORT_URL __PDS_SHORT_URL && (__PDS_PHP_EVAL1 || __PDS_PHP_EVA
 describe PDS_PHPE_SHORT_URL Short URL that isn't a shortener and sent by PHP exploit
 score    PDS_PHPE_SHORT_URL 2.0 # limit
 
-meta     PDS_PHPE_URISHORTENER (__PDS_PHP_EVAL1 || __PDS_PHP_EVAL2) && (__URL_SHORTENER || __PDS_URISHORTENER)
+meta     PDS_PHPE_URISHORTENER (__PDS_PHP_EVAL1 || __PDS_PHP_EVAL2) && __URL_SHORTENER
 describe PDS_PHPE_URISHORTENER URI Shortener with PHP eval
 score    PDS_PHPE_URISHORTENER 2.0 # limit
 
