@@ -617,10 +617,8 @@ sub initialise_url_shortener_cache {
 sub short_url {
   my ($self, $pms) = @_;
 
-  # Run checks if check_dnsbl didn't
-  if ($self->{net_disabled}) {
-    $self->_check_short($pms);
-  }
+  # Make sure checks are run
+  $self->_check_short($pms);
 
   return $pms->{short_url};
 }
@@ -628,11 +626,17 @@ sub short_url {
 sub short_url_redir {
   my ($self, $pms) = @_;
 
+  # Make sure checks are run
+  $self->_check_short($pms);
+
   return $pms->{short_url_redir};
 }
 
 sub short_url_200 {
   my ($self, $pms) = @_;
+
+  # Make sure checks are run
+  $self->_check_short($pms);
 
   return $pms->{short_url_200};
 }
@@ -640,11 +644,17 @@ sub short_url_200 {
 sub short_url_404 {
   my ($self, $pms) = @_;
 
+  # Make sure checks are run
+  $self->_check_short($pms);
+
   return $pms->{short_url_404};
 }
 
 sub short_url_code {
   my ($self, $pms, undef, $code) = @_;
+
+  # Make sure checks are run
+  $self->_check_short($pms);
 
   return unless defined $code && $code =~ /^\d{3}$/;
   return $pms->{"short_url_$code"};
@@ -653,17 +663,26 @@ sub short_url_code {
 sub short_url_chained {
   my ($self, $pms) = @_;
 
+  # Make sure checks are run
+  $self->_check_short($pms);
+
   return $pms->{short_url_chained};
 }
 
 sub short_url_maxchain {
   my ($self, $pms) = @_;
 
+  # Make sure checks are run
+  $self->_check_short($pms);
+
   return $pms->{short_url_maxchain};
 }
 
 sub short_url_loop {
   my ($self, $pms) = @_;
+
+  # Make sure checks are run
+  $self->_check_short($pms);
 
   return $pms->{short_url_loop};
 }
