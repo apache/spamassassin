@@ -67,7 +67,8 @@ another short URL.  Redirection depth limit can be set with
 C<max_short_url_redirections>.
 
 Maximum of C<max_short_urls> short URLs are checked in a message (10 by
-default).
+default).  Setting it to 0 disables HTTP requests, allowing only short_url()
+test to work and report found shorteners.
 
 All supported rule types for checking short URLs and redirection status are
 documented in L<SYNOPSIS> section.
@@ -390,6 +391,9 @@ Maximum time a short URL HTTP request can take, in seconds.
 
 Maximum amount of short URLs that will be looked up per message.  Chained
 redirections are not counted, only initial short URLs found.
+
+Setting it to 0 disables HTTP requests, allowing only short_url() test to
+work and report any found shortener URLs.
 
 =back
 
@@ -750,8 +754,9 @@ sub _check_short {
   # Mark that a URL shortener was found
   $pms->{short_url} = 1;
 
-  # Bail out if network lookups not enabled
+  # Bail out if network lookups not enabled or max_short_urls 0
   return if $self->{net_disabled};
+  return if !$conf->{max_short_urls};
 
   # Initialize cache
   $self->initialise_url_shortener_cache($conf);
