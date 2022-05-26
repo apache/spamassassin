@@ -71,6 +71,9 @@ sub check_queries {
 tstlocalrules(q{
   rbl_timeout 30
 
+  clear_uridnsbl_skip_domain
+  uridnsbl_skip_domain trusted.com
+
   header   X_HASHBL_EMAIL eval:check_hashbl_emails('hashbltest1.spamassassin.org')
   tflags   X_HASHBL_EMAIL net
 

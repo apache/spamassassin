@@ -214,6 +214,9 @@ Skip any type of query, if either the hash or original value (email for
 example) matches.  Multiple values can be defined, separated by whitespace. 
 Matching is case-insensitive.
 
+Any host or its domain part matching uridnsbl_skip_domains is also ignored
+by default.
+
 =back
 
 =cut
@@ -409,22 +412,31 @@ sub _parse_opts {
 
 sub _get_emails {
   my ($self, $pms, $opts, $from, $acl) = @_;
+  my $conf = $pms->{conf};
 
   my @emails; # keep find order
   my %seen;
 
   foreach my $hdr (split(/\s*\/\s*/, $from)) {
     my $parsed_emails = $self->_parse_emails($pms, $opts, $hdr);
-    foreach (@$parsed_emails) {
-      next if $seen{$_}++;
-      my ($domain) = ($_ =~ /.*\@(.+)/);
-      if (defined $domain && defined $acl && $acl ne 'all') {
-        if ($self->{hashbl_acl}{$acl}{$domain}) {
-          push @emails, $_;
+    foreach my $email (@$parsed_emails) {
+      next if $seen{$email}++;
+      my ($domain) = ($email =~ /.*\@(.+)/);
+      next unless defined $domain;
+      next if defined $acl && $acl ne 'all' && !$self->{hashbl_acl}{$acl}{$domain};
+      # Don't check uridnsbl_skip_domains when explicit acl is used
+      if (!defined $acl) {
+        if (exists $conf->{uridnsbl_skip_domains}->{lc $domain}) {
+          dbg("query skipped, uridnsbl_skip_domains: $email");
+          next;
         }
-      } else {
-        push @emails, $_;
+        my $dom = $pms->{main}->{registryboundaries}->trim_domain($domain);
+        if (exists $conf->{uridnsbl_skip_domains}->{lc $dom}) {
+          dbg("query skipped, uridnsbl_skip_domains: $email");
+          next;
+        }
       }
+      push @emails, $email;
     }
   }
 
@@ -578,6 +590,7 @@ sub check_hashbl_uris {
   return 0 if !$self->{hashbl_available};
   return 0 if !$pms->is_dns_available();
 
+  my $conf = $pms->{conf};
   my $rulename = $pms->get_current_eval_rule_name();
 
   if (!defined $list) {
@@ -606,6 +619,7 @@ sub check_hashbl_uris {
   my %seen;
   my @filtered_uris;
 
+URI:
   while (my($uri, $info) = each %{$uris}) {
     # we want to skip mailto: uris
     next if ($uri =~ /^mailto:/i);
@@ -615,6 +629,14 @@ sub check_hashbl_uris {
     next unless $info->{hosts};
     next unless $info->{cleaned};
     next unless $info->{types}->{a} || $info->{types}->{parsed};
+    foreach my $host (keys %{$info->{hosts}}) {
+      if (exists $conf->{uridnsbl_skip_domains}->{$host} ||
+          exists $conf->{uridnsbl_skip_domains}->{$info->{hosts}->{$host}})
+      {
+        dbg("query skipped, uridnsbl_skip_domains: $uri");
+        next URI;
+      }
+    }
     foreach my $uri (@{$info->{cleaned}}) {
       # check url
       push @filtered_uris, $opts->{case} ? $uri : lc($uri);
@@ -774,6 +796,7 @@ sub check_hashbl_tag {
 
 sub _check_hashbl_tag {
   my ($self, $pms, $list, $opts, $tag, $subtest, $rulename) = @_;
+  my $conf = $pms->{conf};
 
   # Get raw array of tag values, get_tag() returns joined string
   my $valref = $pms->get_tag_raw($tag);
@@ -809,16 +832,28 @@ sub _check_hashbl_tag {
       $value = reverse_ip_address($value);
     }
     if (!$is_ip) {
-      if ($opts->{fqdn} && !is_fqdn_valid($value)) {
+      my $fqdn_valid = is_fqdn_valid($value);
+      if ($opts->{fqdn} && !$fqdn_valid) {
         $value = undef;
         next;
+      }
+      my $domain;
+      if ($fqdn_valid) {
+        $domain = $pms->{main}->{registryboundaries}->trim_domain($value);
+        if (exists $conf->{uridnsbl_skip_domains}->{lc $value} ||
+            exists $conf->{uridnsbl_skip_domains}->{lc $domain})
+        {
+          dbg("query skipped, uridnsbl_skip_domains: $value");
+          $value = undef;
+          next;
+        }
       }
       if ($opts->{tld} && !$pms->{main}->{registryboundaries}->is_domain_valid($value)) {
         $value = undef;
         next;
       }
-      if ($opts->{trim}) {
-        $value = $pms->{main}->{registryboundaries}->trim_domain($value);
+      if ($opts->{trim} && $domain) {
+        $value = $domain;
       }
     }
   }
@@ -947,14 +982,15 @@ sub _hash {
 
 sub _submit_query {
   my ($self, $pms, $rulename, $value, $list, $opts, $subtest, $already_hashed) = @_;
+  my $conf = $pms->{conf};
 
-  if (!$already_hashed && exists $pms->{conf}->{hashbl_ignore}->{lc $value}) {
+  if (!$already_hashed && exists $conf->{hashbl_ignore}->{lc $value}) {
     dbg("query skipped, ignored string: $value");
     return 0;
   }
 
   my $hash = $already_hashed ? $value : $self->_hash($opts, $value);
-  if (exists $pms->{conf}->{hashbl_ignore}->{lc $hash}) {
+  if (exists $conf->{hashbl_ignore}->{lc $hash}) {
     dbg("query skipped, ignored hash: $value");
     return 0;
   }
