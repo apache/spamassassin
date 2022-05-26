@@ -531,7 +531,7 @@ sub initialise_url_shortener_cache {
   ## MySQL/MariaDB
   ## 
   elsif (lc $conf->{url_shortener_cache_type} eq 'dbi'
-      && $conf->{url_shortener_cache_dsn} =~ /^dbi:(?:mysql|MariaDB)/)
+      && $conf->{url_shortener_cache_dsn} =~ /^dbi:(?:mysql|MariaDB)/i)
   {
     eval {
       local $SIG{'__DIE__'};
@@ -568,7 +568,7 @@ sub initialise_url_shortener_cache {
   ## PostgreSQL
   ## 
   elsif (lc $conf->{url_shortener_cache_type} eq 'dbi'
-      && $conf->{url_shortener_cache_dsn} =~ /^dbi:Pg/)
+      && $conf->{url_shortener_cache_dsn} =~ /^dbi:Pg/i)
   {
     eval {
       local $SIG{'__DIE__'};
