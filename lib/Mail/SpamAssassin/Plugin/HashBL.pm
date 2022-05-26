@@ -30,7 +30,7 @@ HashBL - query hashed (and unhashed) DNS blocklists
   describe HASHBL_EMAIL Message contains email address found on EBL
   tflags   HASHBL_EMAIL net
 
-  hashbl_acl_freemail gmail.com
+  hashbl_acl_freemail gmail.com # only query gmail.com addresses
   header   HASHBL_OSENDR eval:check_hashbl_emails('rbl.example.invalid/A', 'md5/max=10/shuffle', 'X-Original-Sender', '^127\.', 'freemail')
   describe HASHBL_OSENDR Message contains email address found on HASHBL
   tflags   HASHBL_OSENDR net
@@ -94,6 +94,9 @@ Additional supported OPTS:
   notag    strip username tags from email
   nouri    ignore emails inside uris
   noquote  ignore emails inside < > or possible quotings
+  user     query userpart of email only
+  host     query hostpart of email only
+  domain   query domain of email only (hostpart+trim_domain)
 
 Default HEADERS: ALLFROM/Reply-To/body
 
@@ -424,18 +427,6 @@ sub _get_emails {
       my ($domain) = ($email =~ /.*\@(.+)/);
       next unless defined $domain;
       next if defined $acl && $acl ne 'all' && !$self->{hashbl_acl}{$acl}{$domain};
-      # Don't check uridnsbl_skip_domains when explicit acl is used
-      if (!defined $acl) {
-        if (exists $conf->{uridnsbl_skip_domains}->{lc $domain}) {
-          dbg("query skipped, uridnsbl_skip_domains: $email");
-          next;
-        }
-        my $dom = $pms->{main}->{registryboundaries}->trim_domain($domain);
-        if (exists $conf->{uridnsbl_skip_domains}->{lc $dom}) {
-          dbg("query skipped, uridnsbl_skip_domains: $email");
-          next;
-        }
-      }
       push @emails, $email;
     }
   }
@@ -455,7 +446,7 @@ sub _parse_emails {
     return $pms->{hashbl_email_cache}{$hdr} = \@emails;
   }
 
-  if (!defined $pms->{hashbl_welcomelist}) {
+  if (!exists $pms->{hashbl_welcomelist}) {
     %{$pms->{hashbl_welcomelist}} = map { lc($_) => 1 }
         ( $pms->get("X-Original-To:addr"),
           $pms->get("Apparently-To:addr"),
@@ -510,6 +501,7 @@ sub check_hashbl_emails {
   return 0 if !$self->{hashbl_available};
   return 0 if !$pms->is_dns_available();
 
+  my $conf = $pms->{conf};
   my $rulename = $pms->get_current_eval_rule_name();
 
   if (!defined $list) {
@@ -548,22 +540,49 @@ sub check_hashbl_emails {
   my %seen;
   foreach my $email (@$emails) {
     next if $seen{$email}++;
-    next if index($email, '@') == -1;
-    if ($email =~ $pms->{conf}->{hashbl_email_welcomelist}
-        || defined $pms->{hashbl_welcomelist}{$email}) {
-      dbg("Address welcomelisted: $email");
+    if (exists $pms->{hashbl_welcomelist}{$email} ||
+        $email =~ $conf->{hashbl_email_welcomelist})
+    {
+      dbg("query skipped, address welcomelisted: $email");
       next;
     }
+    my ($username, $domain) = ($email =~ /(.*)\@(.*)/);
+    # Don't check uridnsbl_skip_domains when explicit acl is used
+    if (!defined $acl) {
+      if (exists $conf->{uridnsbl_skip_domains}->{lc $domain}) {
+        dbg("query skipped, uridnsbl_skip_domains: $email");
+        next;
+      }
+      my $dom = $pms->{main}->{registryboundaries}->trim_domain($domain);
+      if (exists $conf->{uridnsbl_skip_domains}->{lc $dom}) {
+        dbg("query skipped, uridnsbl_skip_domains: $email");
+        next;
+      }
+    }
     if ($opts->{nodot} || $opts->{notag}) {
-      my ($username, $domain) = ($email =~ /(.*)(\@.*)/);
       $username =~ tr/.//d if $opts->{nodot};
       $username =~ s/\+.*// if $opts->{notag};
-      $email = $username.$domain;
     }
-    push @filtered_emails, $opts->{case} ? $email : lc($email);
+    # Final query assembly
+    my $qmail;
+    if ($opts->{host} || $opts->{domain}) {
+      if ($opts->{domain}) {
+        $domain = $pms->{main}->{registryboundaries}->trim_domain($domain);
+      }
+      $qmail = $domain;
+    } elsif ($opts->{user}) {
+      $qmail = $username;
+    } else {
+      $qmail = $username.'@'.$domain;
+    }
+    $qmail = lc $qmail  if !$opts->{case};
+    push @filtered_emails, $qmail;
   }
 
   return 0 unless @filtered_emails;
+
+  # Unique
+  @filtered_emails = do { my %seen; grep { !$seen{$_}++ } @filtered_emails; };
 
   # Randomize order
   if ($opts->{shuffle}) {
@@ -644,6 +663,9 @@ URI:
   }
 
   return 0 unless @filtered_uris;
+
+  # Unique
+  @filtered_uris = do { my %seen; grep { !$seen{$_}++ } @filtered_uris; };
 
   # Randomize order
   if ($opts->{shuffle}) {
@@ -730,6 +752,9 @@ sub check_hashbl_bodyre {
   } else {
     dbg("$rulename: matches found: '".join("', '", @matches)."'");
   }
+
+  # Unique
+  @matches = do { my %seen; grep { !$seen{$_}++ } @matches; };
 
   # Randomize order
   if ($opts->{shuffle}) {
@@ -1050,5 +1075,6 @@ sub has_hashbl_email_whitelist { 1 }
 sub has_hashbl_tag { 1 }
 sub has_hashbl_sha256 { 1 }
 sub has_hashbl_attachments { 1 }
+sub has_hashbl_email_domain { 1 } # user/host/domain option for emails
 
 1;

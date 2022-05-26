@@ -33,6 +33,7 @@ cb565607a98fbdf1be52cdb86466ab34244bd6fc.hashbltest1.spamassassin.org
 bc9f1b35acd338b92b0659cc2111e6b661a8b2bc.hashbltest1.spamassassin.org
 62e12fbe4b32adc2e87147d74590372b461f35f6.hashbltest1.spamassassin.org
 96b802967118135ef048c2bc860e7b0deb7d2333.hashbltest1.spamassassin.org
+1675677ba3d539bdfb0ae8940bf7e6c836f3ad17.hashbltest1.spamassassin.org
 170d83ef2dc9c2de0e65ce4461a3a375.hashbltest2.spamassassin.org
 cc205dd956d568ff8524d7fc42868500e4d7d162.hashbltest3.spamassassin.org
 jykf2a5v6asavfel3stymlmieh4e66jeroxuw52mc5xhdylnyb7a.hashbltest3.spamassassin.org
@@ -40,6 +41,9 @@ jykf2a5v6asavfel3stymlmieh4e66jeroxuw52mc5xhdylnyb7a.hashbltest3.spamassassin.or
 5c6205960a65b1f9078f0e12dcac970aab0015eb.hashbltest4.spamassassin.org
 1234567890.hashbltest5.spamassassin.org
 w3hcrlct6yshq5vq6gjv2hf3pzk3jvsk6ilj5iaks4qwewudrr6q.hashbltest6.spamassassin.org
+userpart.hashbltest7.spamassassin.org
+host.domain.com.hashbltest7.spamassassin.org
+domain.com.hashbltest7.spamassassin.org
 );
 
 sub check_queries {
@@ -51,7 +55,8 @@ sub check_queries {
   }
   while (<WL>) {
     my $line = $_;
-    while ($line =~ /\b(\w+\.hashbltest\d\.spamassassin\.org)\b/g) {
+    print STDERR $line if $line =~ /warn:/;
+    while ($line =~ m,([^\s/]+\.hashbltest\d\.spamassassin\.org)\b,g) {
       my $query = $1;
       $found{$query}++;
       if (!grep { $query eq $_ } @valid_queries) {
@@ -100,6 +105,12 @@ tstlocalrules(q{
   body     X_HASHBL_ATT eval:check_hashbl_attachments('hashbltest6.spamassassin.org/A', 'sha256')
   describe X_HASHBL_ATT Message contains attachment found on attbl
   tflags   X_HASHBL_ATT net
+
+  # email user/host/domain
+  hashbl_acl_domacl host.domain.com
+  header __X_HASHBL_UHD1 eval:check_hashbl_emails('hashbltest7.spamassassin.org', 'raw/user', 'body', '^', 'domacl')
+  header __X_HASHBL_UHD2 eval:check_hashbl_emails('hashbltest7.spamassassin.org', 'raw/host', 'body', '^', 'domacl')
+  header __X_HASHBL_UHD3 eval:check_hashbl_emails('hashbltest7.spamassassin.org', 'raw/domain', 'body', '^', 'domacl')
 
   # Bug 7897 - test that meta rules depending on net rules hit
   meta META_HASHBL_EMAIL X_HASHBL_EMAIL
