@@ -98,7 +98,6 @@ $plugins .= q{
   loadplugin Mail::SpamAssassin::Plugin::BodyRuleBaseExtractor
   loadplugin Mail::SpamAssassin::Plugin::Check
   loadplugin Mail::SpamAssassin::Plugin::DecodeShortURLs
-  loadplugin Mail::SpamAssassin::Plugin::Esp
   loadplugin Mail::SpamAssassin::Plugin::ExtractText
   loadplugin Mail::SpamAssassin::Plugin::FreeMail
   loadplugin Mail::SpamAssassin::Plugin::FromNameSpoof
