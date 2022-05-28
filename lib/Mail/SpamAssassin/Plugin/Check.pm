@@ -1413,7 +1413,7 @@ sub capture_rules_replace {
         my @vals = grep { defined $_ && $_ ne "" } (ref $valref ? @$valref : $valref);
         if (@vals) {
           my $cval = "(?:".join("|", map { quotemeta($_) } @vals).")";
-          $test_qr =~ s/(?<!\\\\)\\%\\{\Q${cname}\E\\}/$cval/gs;
+          $test_qr =~ s/(?<!\\\\)\\%\\\\{\Q${cname}\E\\\\}/$cval/gs;
   ';
   if ($would_log_rules_all) {
     $code .= '

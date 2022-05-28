@@ -1332,13 +1332,13 @@ sub add_test {
       $type == $Mail::SpamAssassin::Conf::TYPE_RAWBODY_TESTS ||
       $type == $Mail::SpamAssassin::Conf::TYPE_FULL_TESTS)
   {
+    $self->parse_captures($name, \$text);
     my ($rec, $err) = compile_regexp($text, 1, $ignore_amre);
     if (!$rec) {
       $self->lint_warn("config: invalid regexp for $name '$text': $err", $name);
       return;
     }
     $conf->{test_qrs}->{$name} = $rec;
-    $self->parse_captures($name, $rec);
   }
   elsif ($type == $Mail::SpamAssassin::Conf::TYPE_HEAD_TESTS)
   {
@@ -1379,6 +1379,7 @@ sub add_test {
       if ($pat =~ s/\s+\[if-unset:\s+(.+)\]$//) {
         $conf->{test_opt_unset}->{$name} = $1;
       }
+      $self->parse_captures($name, \$pat);
       my ($rec, $err) = compile_regexp($pat, 1, $ignore_amre);
       if (!$rec) {
         $self->lint_warn("config: invalid regexp for $name '$pat': $err", $name);
@@ -1387,7 +1388,6 @@ sub add_test {
       $conf->{test_qrs}->{$name} = $rec;
       $conf->{test_opt_header}->{$name} = $hdr;
       $conf->{test_opt_neg}->{$name} = 1 if $op eq '!~';
-      $self->parse_captures($name, $rec);
     }
   }
   elsif ($type == $Mail::SpamAssassin::Conf::TYPE_META_TESTS)
@@ -1516,15 +1516,16 @@ sub parse_captures {
   my ($self, $name, $re) = @_;
 
   # Check for named regex capture templates
-  if (index($re, '%{') >= 0) {
+  if (index($$re, '%{') >= 0) {
     local($1);
-    while ($re =~ /(?<!\\)\%\{([A-Z][A-Z0-9]*(?:_[A-Z0-9]+)*(?:\([^\)\}]*\))?)\}/g) {
+    # Replace %{FOO} with %\{FOO\} so compile_regexp doesn't fail with unescaped left brace
+    while ($$re =~ s/(?<!\\)\%\{([A-Z][A-Z0-9]*(?:_[A-Z0-9]+)*(?:\([^\)\}]*\))?)\}/%\\{$1\\}/g) {
       dbg("config: found named capture for rule $name: $1");
       $self->{conf}->{capture_template_rules}->{$name}->{$1} = 1;
     }
   }
   # Make rules with captures run before anything else
-  if ($re =~ /\(\?P?[<'][A-Z]/) {
+  if ($$re =~ /\(\?P?[<'][A-Z]/) {
     dbg("config: adjusting regex capture rule $name priority to -10000");
     $self->{conf}->{priority}->{$name} = -10000;
     $self->{conf}->{capture_rules}->{$name} = 1;
