@@ -10,7 +10,7 @@ plan tests => 2;
 # ---------------------------------------------------------------------------
 
 %patterns = (
-  q{ hello world }, 'spamc', 
+  'hello world', 'spamc', 
 );
 
 # connect on port 9 (discard): should always fail

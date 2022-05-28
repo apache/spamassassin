@@ -16,7 +16,7 @@ plan tests => scalar(@test_locales);
 # ---------------------------------------------------------------------------
 
 %patterns = (
-  q{  }, 'anything',
+  qr/^/, 'anything',
 );
 
 foreach my $locale (@test_locales) {

@@ -23,11 +23,11 @@ use Test::More tests => 18;
   q{ 1.0 MIMEHEADER_MULTI2 }, '',
   q{ 1.0 MIMEHEADER_MULTIMETA2 }, '',
   q{ 1.0 MIMEHEADER_CAPTURE1 }, '',
-  q{/tag MIMECAP1 is now ready, value: text/plain\n/}, '',
+  qr/tag MIMECAP1 is now ready, value: text\/plain\n/, '',
 );
 
 %anti_patterns = (
-  q{ MIMEHEADER_NOTFOUND }, '',
+  'MIMEHEADER_NOTFOUND', '',
 );
 
 tstprefs (q{

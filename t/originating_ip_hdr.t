@@ -16,8 +16,8 @@ tstlocalrules (q{
   score  TEST_ORIG_IP_H2 0.1
 });
 
-%patterns      = ( q{ TEST_ORIG_IP_H1 }, 'test_orig_ip_h1' );
-%anti_patterns = ( q{ TEST_ORIG_IP_H2 }, 'test_orig_ip_h2' );
+%patterns      = ( q{ 0.1 TEST_ORIG_IP_H1 }, '' );
+%anti_patterns = ( q{ TEST_ORIG_IP_H2 }, '' );
 
 ok(sarun("-L -t < data/nice/orig_ip_hdr.eml", \&patterns_run_cb));
 ok_all_patterns();
@@ -35,8 +35,8 @@ tstlocalrules (q{
   score  TEST_ORIG_IP_H2 0.1
 });
 
-%patterns      = ( q{ TEST_ORIG_IP_H1 }, 'test_orig_ip_h1',
-                   q{ TEST_ORIG_IP_H2 }, 'test_orig_ip_h2' );
+%patterns      = ( q{ 0.1 TEST_ORIG_IP_H1 }, '',
+                   q{ TEST_ORIG_IP_H2 }, '' );
 %anti_patterns = ();
 
 ok(sarun("-L -t < data/nice/orig_ip_hdr.eml", \&patterns_run_cb));
@@ -53,8 +53,8 @@ tstlocalrules (q{
 });
 
 %patterns = ();
-%anti_patterns = ( q{ TEST_ORIG_IP_H1 }, 'test_orig_ip_h1',
-                   q{ TEST_ORIG_IP_H2 }, 'test_orig_ip_h2' );
+%anti_patterns = ( q{ 0.1 TEST_ORIG_IP_H1 }, '',
+                   q{ TEST_ORIG_IP_H2 }, '' );
 
 ok(sarun("-L -t < data/nice/orig_ip_hdr.eml", \&patterns_run_cb));
 ok_all_patterns();

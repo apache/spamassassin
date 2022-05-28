@@ -11,16 +11,12 @@ plan tests => 2;
 # ---------------------------------------------------------------------------
 
 %patterns = (
- q{ DNSBL_TEST_TOP } => 'DNSBL_TEST_TOP',
- q{ SC_DNSBL } => 'SC_DNSBL',
+ q{ 1.0 DNSBL_TEST_TOP } => 'DNSBL_TEST_TOP',
+ q{ 1.0 SC_DNSBL } => 'SC_DNSBL',
 );
 
 %anti_patterns = (
 );
-
-# What is this designed to test?  Was there some bug regarding
-# shortcircuiting and meta/dns rules?  Adjusted prio -700 to -100, since
-# that's when DNS lookups launch after Bug 5930
 
 tstprefs("
 
@@ -36,7 +32,7 @@ tstprefs("
   header DNSBL_TEST_TOP	eval:check_rbl('test', 'dnsbltest.spamassassin.org.')
   tflags DNSBL_TEST_TOP	net
   meta SC_DNSBL (DNSBL_TEST_TOP)
-  priority SC_DNSBL -100
+  priority SC_DNSBL -700
   shortcircuit SC_DNSBL on
 
 ");

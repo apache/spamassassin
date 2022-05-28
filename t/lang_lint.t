@@ -10,7 +10,7 @@ plan tests => 8;
 # ---------------------------------------------------------------------------
 
 my @locales = qw( de es fr it nl pl pl pt_BR );
-%patterns = ( q{  }, 'anything', );
+%patterns = ( qr/^/, 'anything', );
 
 for $locale (@locales) {
   $ENV{'LANGUAGE'} = $locale;

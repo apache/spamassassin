@@ -29,7 +29,7 @@ ok_all_patterns();
   q{ 1.0 ANY_RULE }, '',
 );
 %anti_patterns = (
-  q{ 1.0 COMPAT_RULE }, '',
+  q{ COMPAT_RULE }, '',
 );
 
 tstprefs("

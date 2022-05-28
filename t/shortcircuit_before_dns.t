@@ -15,8 +15,8 @@ plan tests => 5;
 );
 
 %anti_patterns = (
- q{ dns: bgsend } => '',
- q{ 1.0 DNSBL_TEST_TOP } => '',
+ q{ DNSBL_TEST_TOP } => '',
+ 'dns: bgsend' => '',
 );
 
 
@@ -46,7 +46,7 @@ my $conf = "
 tstprefs($conf);
 
 # we need -D output for patterns
-sarun ("-D dns -t < data/spam/dnsbl.eml 2>&1", \&patterns_run_cb);
+sarun ("-D dns,async -t < data/spam/dnsbl.eml 2>&1", \&patterns_run_cb);
 ok_all_patterns();
 clear_pattern_counters();
 
@@ -59,7 +59,7 @@ $conf =~ s/SC_TEST_NO_DNS -101/SC_TEST_NO_DNS -100/;
 
 %patterns = (
  q{ 1.0 SC_TEST_NO_DNS } => '',
- q{ dns: bgsend } => '',
+ 'dns: bgsend' => '',
 );
 %anti_patterns = ();
 

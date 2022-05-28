@@ -9,11 +9,11 @@ use Test::More tests => 3;
 disable_compat "welcomelist_blocklist";
 
 %patterns = (
-  q{ USER_IN_BLACKLIST }, 'blacklisted',
+  q{ 100 USER_IN_BLACKLIST }, 'blacklisted',
 );
 
 %anti_patterns = (
-  q{ autolearn=ham } => 'autolearned as ham'
+  'autolearn=ham' => 'autolearned as ham'
 );
 
 tstprefs ('

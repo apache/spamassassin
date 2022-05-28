@@ -2,6 +2,8 @@
 # imported into main for ease of use.
 package main;
 
+require v5.14.0;
+
 # use strict;
 # use warnings;
 # use re 'taint';
@@ -700,7 +702,7 @@ sub start_spamd {
     }
 
     my $sleep = (int($wait++ / 4) + 1);
-    warn "spam_pid not found: Sleeping $sleep - Retry # $retries\n";
+    warn "spam_pid not found: Sleeping $sleep - Retry # $retries\n" if $retries && $retries < 20;
 
     sleep $sleep if $retries > 0;
 
@@ -796,23 +798,6 @@ sub checkfile {
 
 # ---------------------------------------------------------------------------
 
-sub pattern_to_re {
-  my $pat = shift;
-
-  if ($pat =~ /^\/(.*)\/$/) {
-    return $1;
-  }
-
-  $pat = quotemeta($pat);
-
-  # make whitespace irrelevant; match any amount as long as the
-  # non-whitespace chars are OK.
-  $pat =~ s/\\\s/\\s\*/gs;
-  $pat;
-}
-
-# ---------------------------------------------------------------------------
-
 sub patterns_run_cb {
   my $string = shift;
 
@@ -822,47 +807,53 @@ sub patterns_run_cb {
   $matched_output = $string;
 
   # create default names == the pattern itself, if not specified
+  my %seen;
   foreach my $pat (keys %patterns) {
     if ($patterns{$pat} eq '') {
       $patterns{$pat} = $pat;
     }
+    if ($seen{$patterns{$pat}}++) {
+      die "ERROR: duplicate pattern name found: '$patterns{$pat}'\n";
+    }
   }
+  %seen = ();
   foreach my $pat (keys %anti_patterns) {
     if ($anti_patterns{$pat} eq '') {
       $anti_patterns{$pat} = $pat;
     }
+    if ($seen{$anti_patterns{$pat}}++) {
+      die "ERROR: duplicate anti_pattern name found: '$anti_patterns{$pat}'\n";
+    }
   }
 
   foreach my $pat (sort keys %patterns) {
-    # '' for exact match
-    local $1;
-    if ($pat =~ /^'(.*)'$/s) {
-      if (index($string, $1) != -1) {
+    if (index($pat, '(?^') == 0) { # Detect qr// regex, it's a string now
+      if ($string =~ $pat) {
         $found{$patterns{$pat}}++;
       }
-    }
-    # nothing or // for re
-    else {
-      my $safe = pattern_to_re ($pat);
-      # print "JMD $patterns{$pat}\n";
-      if ($string =~ /${safe}/s) {
+    } else {
+      my $re = $pat;
+      $re =~ s/([^A-Za-z_0-9\s])/\\$1/gs; # quotemeta
+      $re =~ s/\s+/\\s+/gs; # normalize whitespace
+      eval { $re = qr/$re/; 1; };
+      if ($@) { die "ERROR: failed to compile regex: '$re'\n"; }
+      if ($string =~ $re) {
         $found{$patterns{$pat}}++;
       }
     }
   }
   foreach my $pat (sort keys %anti_patterns) {
-    # '' for exact match
-    local $1;
-    if ($pat =~ /^'(.*)'$/s) {
-      if (index($string, $1) != -1) {
+    if (index($pat, '(?^') == 0) { # Detect qr// regex, it's a string now
+      if ($string =~ $pat) {
         $found_anti{$anti_patterns{$pat}}++;
       }
-    }
-    # nothing or // for re
-    else {
-      my $safe = pattern_to_re ($pat);
-      # print "JMD $anti_patterns{$pat}\n";
-      if ($string =~ /${safe}/s) {
+    } else {
+      my $re = $pat;
+      $re =~ s/([^A-Za-z_0-9\s])/\\$1/gs; # quotemeta
+      $re =~ s/\s+/\\s+/gs; # normalize whitespace
+      eval { $re = qr/$re/; 1; };
+      if ($@) { die "ERROR: failed to compile regex: '$re'\n"; }
+      if ($string =~ $re) {
         $found_anti{$anti_patterns{$pat}}++;
       }
     }

@@ -9,11 +9,11 @@ plan tests => 2;
 # ---------------------------------------------------------------------------
 
 %patterns = (
-  q{ QUOTE_YOUR } => 'QUOTE_YOUR',
+  q{ 1.0 QUOTE_YOUR } => '',
 );
 
 %anti_patterns = (
-  q{ OPPORTUNITY } => 'OPPORTUNITY',
+  q{ OPPORTUNITY } => '',
 );
 
 tstlocalrules ('

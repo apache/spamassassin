@@ -7,17 +7,17 @@ use Test::More tests => 9;
 # ---------------------------------------------------------------------------
 
 %patterns = (
-  q{ GTUBE }, 'gtube',
-  q{ MY_TEST_PLUGIN }, 'plugin_called',
-  q{ registered myTestPlugin }, 'registered',
-  q{ myTestPlugin eval test called }, 'test_called',
-  q{ myTestPlugin finishing }, 'plugin_finished',
-  q{ test: plugins loaded: Mail::SpamAssassin::Plugin::ASN=HASH }, 'plugins_loaded',
-  q{ myTestPlugin=HASH }, 'plugins_loaded2',
+  q{ 1000 GTUBE },		'gtube',
+  q{ 1.0 MY_TEST_PLUGIN },	'plugin_called',
+  'registered myTestPlugin',	'registered',
+  'myTestPlugin eval test called', 'test_called',
+  'myTestPlugin finishing',	'plugin_finished',
+  'test: plugins loaded: Mail::SpamAssassin::Plugin::ASN=HASH', 'plugins_loaded',
+  'myTestPlugin=HASH',		'plugins_loaded2',
 );
 
 %anti_patterns = (
-  q{ SHOULD_NOT_BE_CALLED }, 'should_not_be_called'
+  'SHOULD_NOT_BE_CALLED', 'should_not_be_called'
 );
 
 tstlocalrules ("

@@ -50,31 +50,31 @@ EOF
 # hits we expect and some hits we don't expect
 
 %patterns = (
- q{'<dns:98.3.137.144.dnsbltest.spamassassin.org> [127.0.0.2]'} => '',
- q{'<dns:134.88.73.210.dnsbltest.spamassassin.org> [127.0.0.4]'} => '',
- q{'<dns:18.13.119.61.dnsbltest.spamassassin.org> [127.0.0.12]'} => '',
- q{'<dns:14.35.17.212.dnsbltest.spamassassin.org> [127.0.0.1]'} => '',
- q{'<dns:226.149.120.193.dnsbltest.spamassassin.org> [127.0.0.1]'} => '',
- q{'<dns:example.com.dnsbltest.spamassassin.org> [127.0.0.2]'} => '',
- q{'1.0 DNSBL_TEST_TOP'} => '',
- q{'1.0 DNSBL_TEST_WHITELIST'} => '',
- q{'1.0 DNSBL_TEST_DYNAMIC'} => '',
- q{'1.0 DNSBL_TEST_SPAM'} => '',
- q{'1.0 DNSBL_TEST_RELAY'} => '',
- q{'1.0 DNSBL_TXT_TOP'} => '',
- q{'1.0 DNSBL_TXT_RE'} => '',
- q{'1.0 DNSBL_RHS'} => '',
- q{'1.0 META_DNSBL_A'} => '',
- q{'1.0 META_DNSBL_B'} => '',
- q{'1.0 META_DNSBL_C'} => '',
+ '<dns:98.3.137.144.dnsbltest.spamassassin.org> [127.0.0.2]'	=> '',
+ '<dns:134.88.73.210.dnsbltest.spamassassin.org> [127.0.0.4]'	=> '',
+ '<dns:18.13.119.61.dnsbltest.spamassassin.org> [127.0.0.12]'	=> '',
+ '<dns:14.35.17.212.dnsbltest.spamassassin.org> [127.0.0.1]'	=> '',
+ '<dns:226.149.120.193.dnsbltest.spamassassin.org> [127.0.0.1]' => '',
+ '<dns:example.com.dnsbltest.spamassassin.org> [127.0.0.2]'	=> '',
+ ' 1.0 DNSBL_TEST_TOP '		=> '',
+ ' -1.0 DNSBL_TEST_WHITELIST '	=> '',
+ ' 1.0 DNSBL_TEST_DYNAMIC '	=> '',
+ ' 1.0 DNSBL_TEST_SPAM '	=> '',
+ ' 1.0 DNSBL_TEST_RELAY '	=> '',
+ ' 1.0 DNSBL_TXT_TOP '		=> '',
+ ' 1.0 DNSBL_TXT_RE '		=> '',
+ ' 1.0 DNSBL_RHS '		=> '',
+ ' 1.0 META_DNSBL_A '		=> '',
+ ' 1.0 META_DNSBL_B '		=> '',
+ ' 1.0 META_DNSBL_C '		=> '',
 );
 
 %anti_patterns = (
- q{'1.0 DNSBL_TEST_MISS'} => '',
- q{'1.0 DNSBL_TXT_MISS'} => '',
- q{'1.0 DNSBL_TEST_WHITELIST_MISS'} => '',
- q{'14.35.17.212.untrusted.dnsbltest.spamassassin.org'} => '',
- q{/rules-all: unrun dependencies [^\n]+ (?:__|META_)?DNSBL_/} => '',
+ ' 1.0 DNSBL_TEST_MISS '		=> '',
+ ' 1.0 DNSBL_TXT_MISS '			=> '',
+ ' 1.0 DNSBL_TEST_WHITELIST_MISS '	=> '',
+ '14.35.17.212.untrusted.dnsbltest.spamassassin.org'		=> '',
+ qr/rules-all: unrun dependencies [^\n]+ (?:__|META_)?DNSBL_/	=> '',
 );
 
 tstprefs("

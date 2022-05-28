@@ -43,7 +43,7 @@ ok_all_patterns();
   q{ 3.3 X_META_POS }, 'pos',
 );
 %anti_patterns = (
-  q{ 3.3 X_META_NEG }, 'neg',
+  q{ X_META_NEG }, 'neg',
 );
 
 ok sarun ("-t < data/spam/gtubedcc.eml 2>&1", \&patterns_run_cb);
@@ -55,9 +55,9 @@ ok_all_patterns();
 %patterns = (
 );
 %anti_patterns = (
-  q{ 3.3 DCC_CHECK }, 'dcc',
-  q{ 3.3 X_META_POS }, 'pos',
-  q{ 3.3 X_META_NEG }, 'neg',
+  q{ DCC_CHECK }, 'dcc',
+  q{ X_META_POS }, 'pos',
+  q{ X_META_NEG }, 'neg',
 );
 ok sarun ("-t -L < data/spam/gtubedcc.eml 2>&1", \&patterns_run_cb);
 ok_all_patterns();

@@ -10,20 +10,20 @@ plan tests => 20;
 # ---------------------------------------------------------------------------
 
 %patterns = (
-  q{ TEST_FOO_1 }     => '',
-  q{ TEST_FOO_2 }     => '',
-  q{ TEST_FOO_3 }     => '',
-  q{ TEST_META_1 }    => '',
-  q{ TEST_META_3 }    => '',
-  q{ TEST_META_5 }    => '',
-  q{ TEST_META_7 }    => '',
-  q{ TEST_META_A }    => '',
-  q{ TEST_META_B }    => '',
-  q{ TEST_META_C }    => '',
-  q{ TEST_META_D }    => '',
-  q{ TEST_META_E }    => '',
-  q{ TEST_META_F }    => '',
-  q{ TEST_META_G }    => '',
+  q{ 1.0 TEST_FOO_1 }     => '',
+  q{ 1.0 TEST_FOO_2 }     => '',
+  q{ 1.0 TEST_FOO_3 }     => '',
+  q{ 1.0 TEST_META_1 }    => '',
+  q{ 1.0 TEST_META_3 }    => '',
+  q{ 1.0 TEST_META_5 }    => '',
+  q{ 1.0 TEST_META_7 }    => '',
+  q{ 1.0 TEST_META_A }    => '',
+  q{ 1.0 TEST_META_B }    => '',
+  q{ 1.0 TEST_META_C }    => '',
+  q{ 1.0 TEST_META_D }    => '',
+  q{ 1.0 TEST_META_E }    => '',
+  q{ 1.0 TEST_META_F }    => '',
+  q{ 1.0 TEST_META_G }    => '',
 );
 
 %anti_patterns = (

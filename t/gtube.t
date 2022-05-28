@@ -15,7 +15,7 @@ ok (sarun ("-L -t < data/spam/gtube.eml", \&patterns_run_cb));
 ok_all_patterns();
 
 %patterns = (
-  q{ X-Spam-Status: No }, 'not_marked_as_spam_from_awl_bonus',
+  qr/^X-Spam-Status: No/m, 'not_marked_as_spam_from_awl_bonus',
 );
 
 ok (sarun ("-L -t < data/nice/not_gtube.eml", \&patterns_run_cb));

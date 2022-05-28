@@ -39,13 +39,13 @@ tstprefs ("
 
 # tests 1 - 4 does whitelist_from work?
 %patterns = (
-  q{ USER_IN_WHITELIST }, 'w1'
+  q{ -100 USER_IN_WHITELIST }, '',
 );
 
 %anti_patterns = (
-  q{ FORGED_IN_WHITELIST }, 'a2',
-  q{ USER_IN_DEF_WHITELIST }, 'a3',
-  q{ FORGED_IN_DEF_WHITELIST }, 'a4'
+  q{ FORGED_IN_WHITELIST }, '',
+  q{ USER_IN_DEF_WHITELIST }, '',
+  q{ FORGED_IN_DEF_WHITELIST }, '',
 );
 sarun ("-L -t < data/nice/008", \&patterns_run_cb);
 ok_all_patterns();
@@ -59,13 +59,13 @@ sarun ("-L -t < data/nice/010", \&patterns_run_cb);
 ok_all_patterns();
 
 %patterns = (
-  q{ USER_IN_DEF_WHITELIST }, 'w5'
+  q{ -15 USER_IN_DEF_WHITELIST }, '',
 );
 
 %anti_patterns = (
-  q{ USER_IN_WHITELIST }, 'a6',
-  q{ FORGED_IN_WHITELIST }, 'a7',
-  q{ FORGED_IN_DEF_WHITELIST }, 'a8'
+  q{ USER_IN_WHITELIST }, '',
+  q{ FORGED_IN_WHITELIST }, '',
+  q{ FORGED_IN_DEF_WHITELIST }, '',
 );
 
 # tests 13 - 16 does def_whitelist_from_rcvd work?
@@ -79,10 +79,10 @@ ok_all_patterns();
 %patterns = ();
 
 %anti_patterns = (
-  q{ USER_IN_WHITELIST }, 'a9',
-  q{ FORGED_IN_WHITELIST }, 'a10',
-  q{ USER_IN_DEF_WHITELIST }, 'a11',
-  q{ FORGED_IN_DEF_WHITELIST }, 'a12'
+  q{ USER_IN_WHITELIST }, '',
+  q{ FORGED_IN_WHITELIST }, '',
+  q{ USER_IN_DEF_WHITELIST }, '',
+  q{ FORGED_IN_DEF_WHITELIST }, '',
 );
 # tests 21 - 24 does whitelist_allows_relays suppress the forged rule without
 #  putting the address on the whitelist?

@@ -14,7 +14,7 @@ plan tests => 5;
 );
 
 %anti_patterns = (
-  q{  redefined at }, 'redefined_errors_in_spamd_log',
+  'redefined at', 'redefined_errors_in_spamd_log',
 );
 
 tstprefs ("

@@ -17,11 +17,11 @@ plan tests => 12;
   q{ 1.0 TEST_CAPTURE_5 } => '',
   q{ 1.0 TEST_CAPTURE_6 } => '',
   q{ 1.0 TEST_CAPTURE_7 } => '',
-  q{/tag TESTCAP1 is now ready, value: Ximian\n/} => '',
-  q{/tag TESTCAP2 is now ready, value: Ximian\n/} => '',
-  q{/tag TESTCAP3 is now ready, value: gnome.org\n/} => '',
-  q{/tag TESTCAP4 is now ready, value: milkplus\n/} => '',
-  q{/tag TESTCAP5 is now ready, value: release\n/} => '',
+  qr/tag TESTCAP1 is now ready, value: Ximian\n/ => '',
+  qr/tag TESTCAP2 is now ready, value: Ximian\n/ => '',
+  qr/tag TESTCAP3 is now ready, value: gnome\.org\n/ => '',
+  qr/tag TESTCAP4 is now ready, value: milkplus\n/ => '',
+  qr/tag TESTCAP5 is now ready, value: release\n/ => '',
 );
 %anti_patterns = ();
 
@@ -39,6 +39,6 @@ tstlocalrules (q{
    body TEST_CAPTURE_7 m{www\.%{HEADER(From:addr:domain)}/}
 });
 
-sarun ("-D check -L -t < data/nice/001 2>&1", \&patterns_run_cb);
+sarun ("-D check,config -L -t < data/nice/001 2>&1", \&patterns_run_cb);
 ok_all_patterns();
 

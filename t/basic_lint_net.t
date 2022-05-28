@@ -11,7 +11,7 @@ plan tests => 2;
 # ---------------------------------------------------------------------------
 
 %patterns = (
-  q{  }, 'anything',
+  qr/^/, 'anything',
 );
 %anti_patterns = (
   q{ warn: }, 'warning',

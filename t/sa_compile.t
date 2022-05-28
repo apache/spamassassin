@@ -64,10 +64,10 @@ meta META2 FOO5 && FOO6 && FOO7 && FOO8
 untaint_system("rm -rf $instdir/var/spamassassin/compiled");
 
 %patterns = (
-  '/ check: tests=FOO1,FOO2,FOO3,FOO4,META1\n/', '',
+  qr/ check: tests=FOO1,FOO2,FOO3,FOO4,META1\n/, '',
 );
 %anti_patterns = (
-  '/ zoom: able to use /', '',
+  'zoom: able to use', '',
 );
 ok sarun ("-D check,zoom -L -t --cf 'normalize_charset 1' < $cwd/data/spam/001 2>&1", \&patterns_run_cb);
 ok_all_patterns();
@@ -75,10 +75,10 @@ ok sarun ("-D check,zoom -L -t --cf 'normalize_charset 0' < $cwd/data/spam/001 2
 ok_all_patterns();
 
 %patterns = (
-  '/ check: tests=FOO4,FOO5,FOO6,FOO7,FOO8,META2\n/', '',
+  qr/ check: tests=FOO4,FOO5,FOO6,FOO7,FOO8,META2\n/, '',
 );
 %anti_patterns = (
-  '/ zoom: able to use /', '',
+  'zoom: able to use', '',
 );
 ok sarun ("-D check,zoom -L -t --cf 'normalize_charset 1' < $cwd/data/spam/unicode1 2>&1", \&patterns_run_cb);
 ok_all_patterns();
@@ -93,8 +93,8 @@ $scr = "$instdir/$temp_binpath/spamassassin";
 $scr_localrules_args = $scr_cf_args = "";      # use the default rules dir, from our "install"
 
 %patterns = (
-  q{ zoom: able to use 5/5 'body_0' compiled rules }, '',
-  '/ check: tests=FOO1,FOO2,FOO3,FOO4,META1\n/', '',
+  ' zoom: able to use 5/5 \'body_0\' compiled rules ', '',
+  qr/ check: tests=FOO1,FOO2,FOO3,FOO4,META1\n/, '',
 );
 %anti_patterns = ();
 ok sarun ("-D check,zoom -L -t --cf 'normalize_charset 1' < $cwd/data/spam/001 2>&1", \&patterns_run_cb);
@@ -103,8 +103,8 @@ ok sarun ("-D check,zoom -L -t --cf 'normalize_charset 0' < $cwd/data/spam/001 2
 ok_all_patterns();
 
 %patterns = (
-  q{ zoom: able to use 5/5 'body_0' compiled rules }, '',
-  '/ check: tests=FOO4,FOO5,FOO6,FOO7,FOO8,META2\n/', '',
+  ' zoom: able to use 5/5 \'body_0\' compiled rules ', '',
+  qr/ check: tests=FOO4,FOO5,FOO6,FOO7,FOO8,META2\n/, '',
 );
 %anti_patterns = ();
 ok sarun ("-D check,zoom -L -t --cf 'normalize_charset 1' < $cwd/data/spam/unicode1 2>&1", \&patterns_run_cb);

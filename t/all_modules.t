@@ -76,12 +76,12 @@ tstprefs("
             );
 
 %anti_patterns = (
-        q{ Insecure dependency }, 'tainted',
-        q{ Syntax error }, 'syntax',
-        q{ Use of uninitialized }, 'uninitialized',
-        q{ warn: }, 'warn',
-        q{ failed to parse }, 'parse',
-        '/ at .* line \d+/', 'at_line',
+        ' warn: ', 'warn',
+        qr/Insecure dependency/i, 'tainted',
+        qr/Syntax error/i, 'syntax',
+        qr/Use of uninitialized/i, 'uninitialized',
+        qr/failed to parse/i, 'parse',
+        qr/ at .* line \d+/, 'at_line',
             );
 
 if (conf_bool('run_net_tests')) {

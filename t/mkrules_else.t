@@ -15,18 +15,13 @@ mkdir($tdir);
 
 %patterns = (
   # ensure these have the appropriate conditional attached
-  "/(?s)ifplugin Mail::SpamAssassin::Plugin::WhateverNonExistent".
-        "[^\\n]*\\n".
-        "die_with_a_syntax_error/" => die_with_a_syntax_error_found,
-
-  "/(?s)if !plugin\\(Mail::SpamAssassin::Plugin::WhateverNonExistent\\)".
-        "[^\\n]*\\n".
-        "body GOOD \\/foo\\//" => rule_GOOD,
+  qr/ifplugin Mail::SpamAssassin::Plugin::WhateverNonExistent[^\n]*\ndie_with_a_syntax_error/s => 'die_with_a_syntax_error_found',
+  qr/if !plugin\(Mail::SpamAssassin::Plugin::WhateverNonExistent\)[^\n]*\nbody GOOD \/foo\//s => 'rule_GOOD',
 
 );
 %anti_patterns = (
-  "ERROR"        => ERROR_in_stdout,
-  "WARNING"      => WARNING_in_stdout,
+  'ERROR'        => 'ERROR_in_stdout',
+  'WARNING'      => 'WARNING_in_stdout',
 );
 
 mkpath ([ "$tdir/rulesrc/sandbox/foo", "$tdir/rules" ]);
@@ -57,11 +52,9 @@ rmtree([ $tdir ]);
 %patterns = (
 );
 %anti_patterns = (
-  "/(?s)meta\\s+T_B1\\s+\\S+\\n".
-        "meta\\s+T_B1\\s+\\S+/" => two_metas_in_one_ifplugin_scope,
-
-  "ERROR"        => ERROR_in_stdout,
-  "WARNING"      => WARNING_in_stdout,
+  qr/meta\s+T_B1\s+\S+\nmeta\s+T_B1\s+\S+/s => 'two_metas_in_one_ifplugin_scope',
+  'ERROR'        => 'ERROR_in_stdout',
+  'WARNING'      => 'WARNING_in_stdout',
 );
 
 mkpath ([ "$tdir/rulesrc/sandbox/foo", "$tdir/rules" ]);
@@ -101,11 +94,9 @@ rmtree([ $tdir ]);
 %patterns = (
 );
 %anti_patterns = (
-  "/(?s)meta\\s+__B1\\s+\\S+\\n".
-        "meta\\s+__B1\\s+\\S+/" => two_metas_in_one_ifplugin_scope,
-
-  "ERROR"        => ERROR_in_stdout,
-  "WARNING"      => WARNING_in_stdout,
+  qr/meta\s+__B1\s+\S+\nmeta\s+__B1\s+\S+/s => 'two_metas_in_one_ifplugin_scope',
+  'ERROR'        => 'ERROR_in_stdout',
+  'WARNING'      => 'WARNING_in_stdout',
 );
 
 mkpath ([ "$tdir/rulesrc/sandbox/foo", "$tdir/rules" ]);
@@ -136,8 +127,8 @@ ok (mkrun ("--src $tdir/rulesrc --out $tdir/rules --manifest $tdir/MANIFEST --ma
 checkfile("$tdir/rules/70_sandbox.cf", \&patterns_run_cb);
 
 %patterns = (
-  "body T_A1" => T_A1_defined,
-  "meta __B1" => __B1_defined,
+  'body T_A1' => 'T_A1_defined',
+  'meta __B1' => '__B1_defined',
 );
 checkfile("$tdir/rules/72_active.cf", \&patterns_run_cb);
 ok ok_all_patterns();

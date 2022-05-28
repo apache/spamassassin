@@ -60,7 +60,7 @@ endif
     q{ DMARC_PASS } => '',
 );
 %anti_patterns = (
-    q{/DMARC_(?!PASS)/} => '',
+    qr/DMARC_(?!PASS)/ => '',
 );
 
 sarun ("-t < data/nice/dmarc/noneok.eml", \&patterns_run_cb);
@@ -83,7 +83,7 @@ ok_all_patterns();
     q{ DMARC_REJECT } => '',
 );
 %anti_patterns = (
-    q{/DMARC_(?!REJECT)/} => '',
+    qr/DMARC_(?!REJECT)/ => '',
 );
 
 sarun ("-t < data/spam/dmarc/rejectko.eml", \&patterns_run_cb);
@@ -100,7 +100,7 @@ ok_all_patterns();
     q{ DMARC_QUAR } => '',
 );
 %anti_patterns = (
-    q{/DMARC_(?!QUAR)/} => '',
+    qr/DMARC_(?!QUAR)/ => '',
 );
 
 sarun ("-t < data/spam/dmarc/quarko.eml", \&patterns_run_cb);
@@ -114,7 +114,7 @@ ok_all_patterns();
     q{ DMARC_NONE } => '',
 );
 %anti_patterns = (
-    q{/DMARC_(?!NONE)/} => '',
+    qr/DMARC_(?!NONE)/ => '',
 );
 
 sarun ("-t < data/spam/dmarc/noneko.eml", \&patterns_run_cb);
@@ -128,7 +128,7 @@ ok_all_patterns();
     q{ DMARC_MISSING } => '',
 );
 %anti_patterns = (
-    q{/DMARC_(?!MISSING)/} => '',
+    qr/DMARC_(?!MISSING)/ => '',
 );
 
 sarun ("-t < data/spam/dmarc/nodmarc.eml", \&patterns_run_cb);

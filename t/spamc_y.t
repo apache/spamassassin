@@ -14,7 +14,7 @@ plan tests => 2;
 
 %anti_patterns = (
   # the text should NOT be output, bug 4991
-  q{ hello world }, 'spamc_y',
+  'hello world', 'spamc_y',
 );
 
 # connect on port 8 (unassigned): should always fail

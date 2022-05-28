@@ -47,10 +47,10 @@ stop_spamd(); # just to be sure
 # max-size of 512 bytes; EX_TOOBIG, pass through message despite -x
 
 %patterns = (
-  q{ Subject: There yours for FREE!}, 'subj',
+  'Subject: There yours for FREE!', 'subj',
 );
 %anti_patterns = (
-  q{ X-Spam-Flag: }, 'flag',
+  'X-Spam-Flag:', 'flag',
 );
 
 # this should have exit code == 0, and pass through the full
@@ -66,11 +66,11 @@ ok(scrun("-s 512 -x -E < data/spam/001", \&patterns_run_cb));
 ok ok_all_patterns();
 
 %patterns = (
-  q{ 0/0 }, '0/0',
+  '0/0', '0/0',
 );
 %anti_patterns = (
-  q{ Subject: There yours for FREE!}, 'subj',
-  q{ X-Spam-Flag: }, 'flag',
+  'Subject: There yours for FREE!', 'subj',
+  'X-Spam-Flag:', 'flag',
 );
 
 # this should have exit code == 0, and emit "0/0"
@@ -94,8 +94,8 @@ ok(scrun("--connect-retries 1 -R < data/spam/001", \&patterns_run_cb));
 # we do not want to see the output with -x on error
 %patterns = ();
 %anti_patterns = (
-  q{ Subject: There yours for FREE!}, 'subj',
-  q{ X-Spam-Flag: YES}, 'flag',
+  'Subject: There yours for FREE!', 'subj',
+  'X-Spam-Flag: YES', 'flag',
 );
 
 # this should have exit code != 0

@@ -43,28 +43,28 @@ tstlocalrules ('
 ');
 
 %patterns = (
-  q{ SC_PRI_SPAM_001 }, 'hit',
-  q{ shortcircuit=spam }, 'sc',
-  q{ X-Spam-Status: Yes, score=103.0 required=5.0 }, 'shortcircuit_spam_score',
-  q{ 100 SHORTCIRCUIT Not all rules were run }, 'shortcircuit rule desc',
+  ' 1.0 SC_PRI_SPAM_001 ', 'hit',
+  'shortcircuit=spam', 'sc',
+  qr/X-Spam-Status: Yes, score=103.0 required=5.0 /m, 'shortcircuit_spam_score',
+  ' 100 SHORTCIRCUIT Not all rules were run', 'shortcircuit rule desc',
 );
 ok (sarun ("-L -t < data/spam/001", \&patterns_run_cb));
 ok_all_patterns();
 
 %patterns = (
-  q{ SC_002 }, 'hit',
-  q{ shortcircuit=spam }, 'sc',
-  q{ X-Spam-Status: Yes, score=50.0 required=5.0 }, 'SC_002 score',
-  q{ 0.0 SHORTCIRCUIT Not all rules were run }, 'shortcircuit rule desc',
+  ' 50 SC_002 ', 'hit',
+  'shortcircuit=spam', 'sc',
+  qr/^X-Spam-Status: Yes, score=50.0 required=5.0 /m, 'SC_002 score',
+  ' 0.0 SHORTCIRCUIT Not all rules were run', 'shortcircuit rule desc',
 );
 ok (sarun ("-L -t < data/spam/002", \&patterns_run_cb));
 ok_all_patterns();
 
 %patterns = (
-  q{ SC_HAM_001 }, 'SC_HAM_001',
-  q{ shortcircuit=ham }, 'sc_ham',
-  q{ X-Spam-Status: No, score=-101.0 required=5.0 }, 'SC_HAM_001 score',
-  q{ -100 SHORTCIRCUIT Not all rules were run }, 'shortcircuit rule desc',
+  ' -1.0 SC_HAM_001 ', 'SC_HAM_001',
+  'shortcircuit=ham', 'sc_ham',
+  qr/^X-Spam-Status: No, score=-101.0 required=5.0 /m, 'SC_HAM_001 score',
+  ' -100 SHORTCIRCUIT Not all rules were run', 'shortcircuit rule desc',
 );
 ok (sarun ("-L -t < data/nice/001", \&patterns_run_cb));
 ok_all_patterns();

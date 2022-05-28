@@ -46,12 +46,12 @@ tstprefs('
   q{ 1.0 TEST_META }, '',
 );
 %anti_patterns = (
-  q{ 1.0 TEST_EXISTS2 }, '',
-  q{ 1.0 TEST_UNSET1 }, '',
-  q{ 1.0 TEST_UNSET3 }, '',
-  q{ 1.0 TEST_LEAK1 }, '',
-  q{ 1.0 TEST_LEAK2 }, '',
-  q{ 1.0 TEST_LEAK3 }, '',
+  q{ TEST_EXISTS2 }, '',
+  q{ TEST_UNSET1 }, '',
+  q{ TEST_UNSET3 }, '',
+  q{ TEST_LEAK1 }, '',
+  q{ TEST_LEAK2 }, '',
+  q{ TEST_LEAK3 }, '',
 );
 
 ok (sarun ("-L -t < data/nice/001", \&patterns_run_cb));
@@ -87,9 +87,9 @@ tstprefs('
   q{ 1.0 TOCC2 }, '',
 );
 %anti_patterns = (
-  q{ 1.0 TONEG }, '',
-  q{ 1.0 CCNEG }, '',
-  q{ 1.0 TOCCNEG }, '',
+  q{ TONEG }, '',
+  q{ CCNEG }, '',
+  q{ TOCCNEG }, '',
 );
 
 ok (sarun ("-L -t < data/nice/006", \&patterns_run_cb));

@@ -59,10 +59,10 @@ END
 disable_compat "welcomelist_blocklist";
 
 %patterns = (
-  q{ 0.0 URI_HOST_IN_BLOCKLIST }, 'hit-blo',
-  q{ 100 URI_HOST_IN_BLACKLIST }, 'hit-bla',
-  q{ -0.0 URI_HOST_IN_WELCOMELIST }, 'hit-wel',
-  q{ -100 URI_HOST_IN_WHITELIST }, 'hit-whi',
+  q{ 0.0 URI_HOST_IN_BLOCKLIST }, '',
+  q{ 100 URI_HOST_IN_BLACKLIST }, '',
+  q{ -0.0 URI_HOST_IN_WELCOMELIST }, '',
+  q{ -100 URI_HOST_IN_WHITELIST }, '',
 );
 
 ###
@@ -88,12 +88,12 @@ ok_all_patterns();
 ###
 
 %patterns = (
-  q{ 100 URI_HOST_IN_BLOCKLIST }, 'hit-blo',
-  q{ -100 URI_HOST_IN_WELCOMELIST }, 'hit-wel',
+  q{ 100 URI_HOST_IN_BLOCKLIST }, '',
+  q{ -100 URI_HOST_IN_WELCOMELIST }, '',
 );
 %anti_patterns = (
-  q{ URI_HOST_IN_BLACKLIST }, 'hit-bla',
-  q{ URI_HOST_IN_WHITELIST }, 'hit-whi',
+  q{ URI_HOST_IN_BLACKLIST }, '',
+  q{ URI_HOST_IN_WHITELIST }, '',
 );
 
 tstpre("

@@ -7,11 +7,11 @@ use Test::More tests => 3;
 # ---------------------------------------------------------------------------
 
 %patterns = (
-  q{ USER_IN_BLOCKLIST }, 'blocklisted',
+  q{ 100 USER_IN_BLOCKLIST }, 'blocklisted',
 );
 
 %anti_patterns = (
-  q{ autolearn=ham } => 'autolearned as ham'
+  'autolearn=ham' => 'autolearned as ham'
 );
 
 tstprefs ('

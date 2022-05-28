@@ -25,7 +25,7 @@ plan tests => 10 * $iterations;
 );
 
 %anti_patterns = (
- q{ 1.0 X_URIBL_FULL_NS } => '',
+ q{ X_URIBL_FULL_NS } => '',
 );
 
 tstlocalrules(q{
