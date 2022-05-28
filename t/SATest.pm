@@ -284,6 +284,9 @@ sub clear_localrules {
     # Keep some useful, should not contain any rules
     next if $file =~ /10_default_prefs.cf$/;
     next if $file =~ /20_aux_tlds.cf$/;
+    # Keep our own tstprefs() or tstlocalrules()
+    next if $file =~ /99_test_prefs.cf$/;
+    next if $file =~ /99_test_rules.cf$/;
     unlink $file;
   }
 }
