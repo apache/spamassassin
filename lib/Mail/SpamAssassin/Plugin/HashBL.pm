@@ -559,10 +559,8 @@ sub check_hashbl_emails {
         next;
       }
     }
-    if ($opts->{nodot} || $opts->{notag}) {
-      $username =~ tr/.//d if $opts->{nodot};
-      $username =~ s/\+.*// if $opts->{notag};
-    }
+    $username =~ tr/.//d if $opts->{nodot};
+    $username =~ s/\+.*// if $opts->{notag};
     # Final query assembly
     my $qmail;
     if ($opts->{host} || $opts->{domain}) {
