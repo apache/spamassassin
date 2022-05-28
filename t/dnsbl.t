@@ -153,6 +153,7 @@ priority DNSBL_TEST_RELAY 2000
 ");
 
 for (1 .. $iterations) {
+  clear_localrules() if $_ == 3; # do some tests without any other rules to check meta bugs
   # rules-all debug needed for unrun check
   sarun ("-t -D rules-all < data/spam/dnsbl.eml 2>&1", \&patterns_run_cb);
   ok_all_patterns();

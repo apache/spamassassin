@@ -2,7 +2,7 @@
 
 use lib '.'; use lib 't';
 use SATest; sa_t_init("rule_multiple");
-use Test::More tests => 21;
+use Test::More tests => 42;
 
 # ---------------------------------------------------------------------------
 
@@ -114,6 +114,11 @@ tstlocalrules ('
   meta META_EVAL_RULE	EVAL_RULE > 1
 ');
 
+sarun ("-L -t < data/spam/002 2>&1", \&patterns_run_cb);
+ok_all_patterns();
+
+# do some tests without any other rules to check meta bugs
+clear_localrules();
 sarun ("-L -t < data/spam/002 2>&1", \&patterns_run_cb);
 ok_all_patterns();
 

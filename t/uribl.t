@@ -72,6 +72,7 @@ tstlocalrules(q{
 });
 
 for (1 .. $iterations) {
+  clear_localrules() if $_ == 3; # do some tests without any other rules to check meta bugs
   ok sarun ("-t < data/spam/dnsbl.eml", \&patterns_run_cb);
   ok_all_patterns();
 }

@@ -124,6 +124,7 @@ tstlocalrules(q{
 });
 
 for (1 .. $iterations) {
+  clear_localrules() if $_ == 3; # do some tests without any other rules to check meta bugs
   ok sarun ("-t -D async,dns,HashBL < data/spam/hashbl 2>&1", \&patterns_run_cb);
   ok(check_queries());
   ok_all_patterns();
