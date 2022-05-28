@@ -18,3 +18,22 @@ loadplugin Mail::SpamAssassin::Plugin::FromNameSpoof
 loadplugin Mail::SpamAssassin::Plugin::Phishing
 loadplugin Mail::SpamAssassin::Plugin::ExtractText
 
+clear_report_template
+report _SUMMARY_
+
+clear_headers
+
+add_header spam Flag _YESNOCAPS_
+add_header all Level _STARS(*)_
+add_header all Status "_YESNO_, score=_SCORE_ required=_REQD_ tests=_TESTS_ autolearn=_AUTOLEARN_ version=_VERSION_"
+
+ifplugin Mail::SpamAssassin::Plugin::DCC
+use_dcc 0
+endif
+ifplugin Mail::SpamAssassin::Plugin::Razor2
+use_razor2 0
+endif
+ifplugin Mail::SpamAssassin::Plugin::Pyzor
+use_pyzor 0
+endif
+
