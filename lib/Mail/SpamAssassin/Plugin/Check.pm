@@ -181,8 +181,7 @@ sub check_main {
     $pms->harvest_completed_queries() if $rbls_running;
 
     # check for ready metas
-    # - if this is not last priority (finish_meta_tests will be run anyway)
-    $self->do_meta_tests($pms, $priority)  if $priority != $priorities[-1];
+    $self->do_meta_tests($pms, $priority);
   }
 
   # Finish DNS results
