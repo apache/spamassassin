@@ -1007,9 +1007,14 @@ sub do_full_tests {
                 loop_body => sub
   {
     my ($self, $pms, $conf, $rulename, $pat, %opts) = @_;
-    my ($max) = ($conf->{tflags}->{$rulename}||'') =~ /\bmaxhits=(\d+)\b/;
-    $max = untaint_var($max);
-    $max ||= 0;
+    my $whlast = 'last;';
+    if (($conf->{tflags}->{$rulename}||'') =~ /\bmultiple\b/) {
+      if (($conf->{tflags}->{$rulename}||'') =~ /\bmaxhits=(\d+)\b/) {
+        $whlast = 'last if ++$hits >= '.untaint_var($1).';';
+      } else {
+        $whlast = '';
+      }
+    }
     # Make sure rule is marked ready for meta rules
     $self->add_evalstr($pms, '
       if ($scoresptr->{q{'.$rulename.'}}) {
@@ -1024,7 +1029,7 @@ sub do_full_tests {
             '.$self->capture_plugin_code().'
             $self->got_hit(q{'.$rulename.'}, "FULL: ", ruletype => "full");
             '. $self->hit_rule_plugin_code($pms, $rulename, "full", "last") . '
-            last if ++$hits >= '.$max.';
+            '.$whlast.'
           }
           pos $$fullmsgref = 0;
           '.$self->ran_rule_plugin_code($rulename, "full").'
