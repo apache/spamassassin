@@ -371,6 +371,7 @@ GetOptions(
   'create-prefs!'            => \$opt{'create-prefs'},
   'daemonize!'               => \$opt{'daemonize'},
   'debug|D:s'                => \$opt{'debug'},
+  'default-user|U=s'         => \$opt{'default-user'},
   'd'                        => \$opt{'daemonize'},
   'groupname|g=s'            => \$opt{'groupname'},
   'helper-home-dir|H:s'      => \$opt{'home_dir_for_helpers'},
@@ -452,6 +453,10 @@ if ($opt{'help'}) {
 if ($opt{'version'}) {
   print_version();
   exit($resphash{'EX_OK'});
+}
+
+if (!defined $opt{'default-user'}) {
+  $opt{'default-user'} = 'nobody';
 }
 
 my $log_timestamp_fmt = $opt{'log-timestamp-fmt'};
@@ -1810,15 +1815,15 @@ sub handle_setuid_to_user {
   }
   if (!am_running_on_windows()) {
     warn("spamd: still running as root: user not specified with -u, "
-         . "not found, or set to root, falling back to nobody\n");
+         . "not found, or set to root, falling back to $opt{'default-user'}\n");
 
     my ($name, $pwd, $uid, $gid, $quota, $comment, $gcos, $dir, $etc) =
-        getpwnam('nobody');
+        getpwnam($opt{'default-user'});
   
     $) = (get_user_groups($uid));       # eGID
     $> = $uid;                          # eUID
     if (!defined($uid) || ($> != $uid and $> != ($uid - 2**32))) {
-      die("spamd: setuid to nobody failed");
+      die("spamd: setuid to $opt{'default-user'} failed");
   }
 
   $spamtest->signal_user_changed(
@@ -3313,6 +3318,8 @@ Options:
  -g groupname, --groupname=groupname  Run as groupname
  -v, --vpopmail                    Enable vpopmail config
  -x, --nouser-config               Disable user config files
+ -U username, --default-user=username  Fall back to this username if spamc user
+                                   is not found (default: nobody)
  -D, --debug[=areas]               Print debugging messages (for areas)
  -L, --local                       Use local tests only (no DNS)
  -P, --paranoid                    Die upon user errors
@@ -3644,6 +3651,12 @@ configuration from the user's home directory (B<--user-config>).
 This option does not disable or otherwise influence the SQL, LDAP or
 Virtual Config Dir settings.
 
+=item B<-U> I<username>, B<--default-user>=I<username>
+
+Fall back to this username, if the username provided by spamc is not found.
+Default is I<nobody>, which might not exist or not have a usable home
+directory, use this setting to define a suitable user if needed.
+
 =item B<-A> I<host,...>, B<--allowed-ips>=I<host,...>
 
 Specify a comma-separated list of authorized hosts or networks which
@@ -3708,8 +3721,8 @@ network tests.  Works the same as the C<-L> flag to C<spamassassin(1)>.
 
 =item B<-P>, B<--paranoid>
 
-Die on user errors (for the user passed from spamc) instead of falling back to
-user I<nobody> and using the default configuration.
+Die on user errors (for the user passed from spamc) instead of falling back
+to user C<--default-user> and using the default configuration.
 
 =item B<-m> I<number> , B<--max-children>=I<number>
 
