@@ -52,6 +52,7 @@ sub check_main {
   my ($self, $args) = @_;
 
   my $pms = $args->{permsgstatus};
+  my $conf = $pms->{conf};
   $would_log_rules_all = would_log('dbg', 'rules-all') == 2;
 
   # Make AsyncLoop wait launch_queue() for launching queries
@@ -95,16 +96,18 @@ sub check_main {
 
   # initialize meta stuff
   $pms->{meta_pending} = {};
-  $pms->{meta_pending}->{$_} = 1 foreach (keys %{$pms->{conf}->{meta_tests}});
+  foreach my $rulename (keys %{$conf->{meta_tests}}) {
+    $pms->{meta_pending}->{$rulename} = 1  if $conf->{scores}->{$rulename};
+  }
 
   # Make sure priority -100 exists for launching DNS
-  $pms->{conf}->{priorities}->{-100} ||= 1 if $do_dns;
+  $conf->{priorities}->{-100} ||= 1 if $do_dns;
 
-  my @priorities = sort { $a <=> $b } keys %{$pms->{conf}->{priorities}};
+  my @priorities = sort { $a <=> $b } keys %{$conf->{priorities}};
   foreach my $priority (@priorities) {
     # no need to run if there are no priorities at this level.  This can
     # happen in Conf.pm when we switch a rule from one priority to another
-    next unless ($pms->{conf}->{priorities}->{$priority} > 0);
+    next unless ($conf->{priorities}->{$priority} > 0);
 
     if ($pms->{deadline_exceeded}) {
       last;
@@ -211,10 +214,10 @@ sub check_main {
 
   # check dns_block_rule (bug 6728)
   # TODO No idea yet what would be the most logical place to do all these..
-  if ($pms->{conf}->{dns_block_rule}) {
-    foreach my $rule (keys %{$pms->{conf}->{dns_block_rule}}) {
+  if ($conf->{dns_block_rule}) {
+    foreach my $rule (keys %{$conf->{dns_block_rule}}) {
       next if !$pms->{tests_already_hit}->{$rule}; # hit?
-      foreach my $domain (keys %{$pms->{conf}->{dns_block_rule}{$rule}}) {
+      foreach my $domain (keys %{$conf->{dns_block_rule}{$rule}}) {
         my $blockfile = $self->{main}->sed_path("__global_state_dir__/dnsblock_$domain");
         next if -f $blockfile; # no need to warn and create again..
         warn "check: dns_block_rule $rule hit, creating $blockfile ".
@@ -242,7 +245,7 @@ sub check_main {
 
   # track user_rules recompilations; each scanned message is 1 tick on this counter
   if ($self->{done_user_rules}) {
-    my $counters = $pms->{conf}->{want_rebuild_for_type};
+    my $counters = $conf->{want_rebuild_for_type};
     foreach my $type (keys %{$self->{done_user_rules}}) {
       if ($counters->{$type} > 0) {
         $counters->{$type}--;
@@ -326,11 +329,11 @@ sub finish_meta_tests {
   my $mt = $pms->{conf}->{meta_tests};
   my $h = $pms->{tests_already_hit};
   my $retry;
-  my %unrun_metas;
+  my %unrun;
 
 RULE:
   foreach my $rulename (keys %$mp) {
-    my %unrun;
+    %unrun = ();
     # Meta is not ready if some dependency has not run yet
     foreach my $deprule (@{$md->{$rulename}||[]}) {
       if (!exists $h->{$deprule}) {
@@ -348,7 +351,6 @@ RULE:
     # Evaluated second time with all unrun rules as true.  If result is not
     # the same, we can't safely finish the meta. (Bug 7735)
     if ($result != $result2) {
-      $unrun_metas{$rulename} = \%unrun  if $would_log_rules_all;
       next RULE;
     } elsif ($result) {
       dbg("rules: ran meta rule $rulename ======> got hit ($result)");
@@ -364,10 +366,17 @@ RULE:
 
   goto RULE if $retry--;
 
-  if (%unrun_metas) {
-    foreach (sort keys %unrun_metas) {
-      dbg("rules-all: unrun dependencies prevented meta $_ from running: ".
-          join(', ', sort keys %{$unrun_metas{$_}}));
+  if ($would_log_rules_all) {
+    foreach my $rulename (sort keys %{$pms->{conf}->{meta_tests}}) {
+      next if !$pms->{conf}->{scores}->{$rulename};
+      my %unrun;
+      foreach my $deprule (@{$md->{$rulename}||[]}) {
+        $unrun{$deprule} = 1  if !exists $h->{$deprule};
+      }
+      if (%unrun) {
+        dbg("rules-all: unrun dependencies prevented meta $rulename from running: ".
+          join(', ', sort keys %unrun));
+      }
     }
   }
 }
