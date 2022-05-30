@@ -464,55 +464,55 @@ sub parsed_metadata {
 sub check_olemacro {
   my ($self, $pms) = @_;
 
-  return $pms->{olemacro_exists};
+  return $pms->{olemacro_exists} ? 1 : 0;
 }
 
 sub check_oleobject {
   my ($self, $pms) = @_;
 
-  return $pms->{oleobject_exists};
+  return $pms->{oleobject_exists} ? 1 : 0;
 }
 
 sub check_olertfobject {
   my ($self, $pms) = @_;
 
-  return $pms->{olertfobject_exists};
+  return $pms->{olertfobject_exists} ? 1 : 0;
 }
 
 sub check_olemacro_csv {
   my ($self, $pms) = @_;
 
-  return $pms->{olemacro_csv};
+  return $pms->{olemacro_csv} ? 1 : 0;
 }
 
 sub check_olemacro_malice {
   my ($self, $pms) = @_;
 
-  return $pms->{olemacro_malice};
+  return $pms->{olemacro_malice} ? 1 : 0;
 }
 
 sub check_olemacro_renamed {
   my ($self, $pms) = @_;
 
-  return $pms->{olemacro_renamed};
+  return $pms->{olemacro_renamed} ? 1 : 0;
 }
 
 sub check_olemacro_encrypted {
   my ($self, $pms) = @_;
 
-  return $pms->{olemacro_encrypted};
+  return $pms->{olemacro_encrypted} ? 1 : 0;
 }
 
 sub check_olemacro_zip_password {
   my ($self, $pms) = @_;
 
-  return $pms->{olemacro_zip_password};
+  return $pms->{olemacro_zip_password} ? 1 : 0;
 }
 
 sub check_olemacro_download_exe {
   my ($self, $pms) = @_;
 
-  return $pms->{olemacro_download_exe};
+  return $pms->{olemacro_download_exe} ? 1 : 0;
 }
 
 sub check_olemacro_redirect_uri {

@@ -662,16 +662,16 @@ sub check_dkim_testing {
 sub check_for_dkim_welcomelist_from {
   my ($self, $pms) = @_;
   $self->_check_dkim_welcomelist($pms)  if !$pms->{welcomelist_checked};
-  return $pms->{dkim_match_in_welcomelist_from_dkim} || 
-         $pms->{dkim_match_in_welcomelist_auth};
+  return ($pms->{dkim_match_in_welcomelist_from_dkim} || 
+          $pms->{dkim_match_in_welcomelist_auth}) ? 1 : 0;
 }
 *check_for_dkim_whitelist_from = \&check_for_dkim_welcomelist_from; # removed in 4.1
 
 sub check_for_def_dkim_welcomelist_from {
   my ($self, $pms) = @_;
   $self->_check_dkim_welcomelist($pms)  if !$pms->{welcomelist_checked};
-  return $pms->{dkim_match_in_def_welcomelist_from_dkim} || 
-         $pms->{dkim_match_in_def_welcomelist_auth};
+  return ($pms->{dkim_match_in_def_welcomelist_from_dkim} || 
+         $pms->{dkim_match_in_def_welcomelist_auth}) ? 1 : 0;
 }
 *check_for_def_dkim_whitelist_from = \&check_for_def_dkim_welcomelist_from; # removed in 4.1
 

@@ -182,7 +182,7 @@ sub check_for_mime {
 
   $self->_check_attachments($pms) unless exists $pms->{mime_checked_attachments};
   return 0 unless exists $pms->{$test};
-  return $pms->{$test};
+  return $pms->{$test} ? 1 : 0;
 }
 
 # any text/html MIME part

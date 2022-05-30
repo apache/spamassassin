@@ -256,7 +256,7 @@ sub _get_images {
 
 sub image_named {
   my ($self,$pms,$body,$name) = @_;
-  return unless (defined $name);
+  return 0 unless (defined $name);
 
   # make sure we have image data read in.
   if (!exists $pms->{'imageinfo'}) {
@@ -272,7 +272,7 @@ sub image_named {
 
 sub image_name_regex {
   my ($self,$pms,$body,$re) = @_;
-  return unless (defined $re);
+  return 0 unless (defined $re);
 
   # make sure we have image data read in.
   if (!exists $pms->{'imageinfo'}) {
@@ -300,7 +300,7 @@ sub image_name_regex {
 sub image_count {
   my ($self,$pms,$body,$type,$min,$max) = @_;
 
-  return unless defined $min;
+  return 0 unless defined $min;
 
   # make sure we have image data read in.
   if (!exists $pms->{'imageinfo'}) {
@@ -316,7 +316,7 @@ sub image_count {
 sub pixel_coverage {
   my ($self,$pms,$body,$type,$min,$max) = @_;
 
-  return unless (defined $type && defined $min);
+  return 0 unless (defined $type && defined $min);
 
   # make sure we have image data read in.
   if (!exists $pms->{'imageinfo'}) {
@@ -331,7 +331,7 @@ sub pixel_coverage {
 
 sub image_to_text_ratio {
   my ($self,$pms,$body,$type,$min,$max) = @_;
-  return unless (defined $type && defined $min && defined $max);
+  return 0 unless (defined $type && defined $min && defined $max);
 
   # make sure we have image data read in.
   if (!exists $pms->{'imageinfo'}) {
@@ -353,7 +353,7 @@ sub image_to_text_ratio {
 
 sub image_size_exact {
   my ($self,$pms,$body,$type,$height,$width) = @_;
-  return unless (defined $type && defined $height && defined $width);
+  return 0 unless (defined $type && defined $height && defined $width);
 
   # make sure we have image data read in.
   if (!exists $pms->{'imageinfo'}) {
@@ -369,7 +369,7 @@ sub image_size_exact {
 
 sub image_size_range {
   my ($self,$pms,$body,$type,$minh,$minw,$maxh,$maxw) = @_;
-  return unless (defined $type && defined $minh && defined $minw);
+  return 0 unless (defined $type && defined $minh && defined $minw);
 
   # make sure we have image data read in.
   if (!exists $pms->{'imageinfo'}) {
@@ -377,7 +377,7 @@ sub image_size_range {
   }
 
   my $name = 'dems_'.$type;
-  return unless (exists $pms->{'imageinfo'}->{$name});
+  return 0 unless (exists $pms->{'imageinfo'}->{$name});
 
   foreach my $dem ( keys %{$pms->{'imageinfo'}->{"dems_$type"}}) {
     my ($h,$w) = split(/x/,$dem);

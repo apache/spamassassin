@@ -624,7 +624,7 @@ sub short_url {
   # Make sure checks are run
   $self->_check_short($pms);
 
-  return $pms->{short_url};
+  return $pms->{short_url} ? 1 : 0;
 }
 
 sub short_url_redir {
@@ -633,7 +633,7 @@ sub short_url_redir {
   # Make sure checks are run
   $self->_check_short($pms);
 
-  return $pms->{short_url_redir};
+  return $pms->{short_url_redir} ? 1 : 0;
 }
 
 sub short_url_200 {
@@ -642,7 +642,7 @@ sub short_url_200 {
   # Make sure checks are run
   $self->_check_short($pms);
 
-  return $pms->{short_url_200};
+  return $pms->{short_url_200} ? 1 : 0;
 }
 
 sub short_url_404 {
@@ -651,7 +651,7 @@ sub short_url_404 {
   # Make sure checks are run
   $self->_check_short($pms);
 
-  return $pms->{short_url_404};
+  return $pms->{short_url_404} ? 1 : 0;
 }
 
 sub short_url_code {
@@ -660,8 +660,8 @@ sub short_url_code {
   # Make sure checks are run
   $self->_check_short($pms);
 
-  return unless defined $code && $code =~ /^\d{3}$/;
-  return $pms->{"short_url_$code"};
+  return 0 unless defined $code && $code =~ /^\d{3}$/;
+  return $pms->{"short_url_$code"} ? 1 : 0;
 }
 
 sub short_url_chained {
@@ -670,7 +670,7 @@ sub short_url_chained {
   # Make sure checks are run
   $self->_check_short($pms);
 
-  return $pms->{short_url_chained};
+  return $pms->{short_url_chained} ? 1 : 0;
 }
 
 sub short_url_maxchain {
@@ -679,7 +679,7 @@ sub short_url_maxchain {
   # Make sure checks are run
   $self->_check_short($pms);
 
-  return $pms->{short_url_maxchain};
+  return $pms->{short_url_maxchain} ? 1 : 0;
 }
 
 sub short_url_loop {
@@ -688,7 +688,7 @@ sub short_url_loop {
   # Make sure checks are run
   $self->_check_short($pms);
 
-  return $pms->{short_url_loop};
+  return $pms->{short_url_loop} ? 1 : 0;
 }
 
 sub _check_shortener_uri {

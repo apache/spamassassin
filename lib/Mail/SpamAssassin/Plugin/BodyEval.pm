@@ -69,7 +69,7 @@ sub multipart_alternative_difference_count {
   my ($self, $pms, $fulltext, $ratio, $minhtml) = @_;
   $self->_multipart_alternative_difference($pms) unless (exists $pms->{madiff});
   return 0 unless $pms->{madiff_html} > $minhtml;
-  return(($pms->{madiff_text} / $pms->{madiff_html}) > $ratio);
+  return (($pms->{madiff_text} / $pms->{madiff_html}) > $ratio);
 }
 
 sub _multipart_alternative_difference {
@@ -222,7 +222,7 @@ sub tvd_vertical_words {
   }
 
   dbg("eval: tvd_vertical_words value: $pms->{tvd_vertical_words} / min: $min / max: $max - value must be >= min and < max");
-  return 1 if ($pms->{tvd_vertical_words} >= $min && $pms->{tvd_vertical_words} < $max);
+  return ($pms->{tvd_vertical_words} >= $min && $pms->{tvd_vertical_words} < $max);
 }
 
 sub check_stock_info {

@@ -143,7 +143,7 @@ sub check_no_relays {
 
 sub check_relays_unparseable {
   my ($self, $pms) = @_;
-  return $pms->{num_relays_unparseable};
+  return $pms->{num_relays_unparseable} ? 1 : 0;
 }
 
 # Check if the apparent sender (in the last received header) had
@@ -213,7 +213,7 @@ sub check_for_from_domain_in_received_headers {
 sub check_for_no_rdns_dotcom_helo {
   my ($self, $pms) = @_;
   if (!exists $pms->{no_rdns_dotcom_helo}) { $self->_check_received_helos($pms); }
-  return $pms->{no_rdns_dotcom_helo};
+  return $pms->{no_rdns_dotcom_helo} ? 1 : 0;
 }
 
 # Bug 1133

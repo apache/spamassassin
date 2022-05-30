@@ -635,8 +635,8 @@ sub check_razor2_range {
 
   # If Razor2 isn't available, or the general test is disabled, don't
   # continue.
-  return unless $self->{razor2_available};
-  return unless $self->{main}->{conf}->{use_razor2};
+  return 0 unless $self->{razor2_available};
+  return 0 unless $self->{main}->{conf}->{use_razor2};
 
   # Check if callback overriding rulename
   if (!defined $rulename) {
