@@ -1200,17 +1200,20 @@ In other words, the eval test method should look something like this:
 
   sub check_for_foo {
     my ($self, $permsgstatus, ...arguments...) = @_;
-    ...code returning 0 or 1
+    ...code returning 0 (miss), 1 (hit), or undef (async function)
   }
+
+The eval rule should return C<1> for a hit, or C<0> if the rule is not hit. 
+Special case of "return undef" must be used when result is not yet ready and
+it will be later declared with PerMsgStatus functions got_hit() or
+rule_ready() - see their documentation for more info.  Make sure not to
+return undef by mistake.
 
 Note that the headers can be accessed using the C<get()> method on the
 C<Mail::SpamAssassin::PerMsgStatus> object, and the body by
 C<get_decoded_stripped_body_text_array()> and other similar methods.
 Similarly, the C<Mail::SpamAssassin::Conf> object holding the current
 configuration may be accessed through C<$permsgstatus-E<gt>{main}-E<gt>{conf}>.
-
-The eval rule should return C<1> for a hit, or C<0> if the rule
-is not hit.
 
 State for a single message being scanned should be stored on the C<$permsgstatus>
 object, not on the C<$self> object, since C<$self> persists between scan
