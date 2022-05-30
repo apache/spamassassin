@@ -30,7 +30,10 @@ HashBL - query hashed (and unhashed) DNS blocklists
   describe HASHBL_EMAIL Message contains email address found on EBL
   tflags   HASHBL_EMAIL net
 
-  hashbl_acl_freemail gmail.com # only query gmail.com addresses
+  # rewrite googlemail.com -> gmail.com, applied before acl/welcomelist
+  hashbl_email_domain_alias gmail.com googlemail.com
+  # only query gmail.com addresses
+  hashbl_acl_freemail gmail.com
   header   HASHBL_OSENDR eval:check_hashbl_emails('rbl.example.invalid/A', 'md5/max=10/shuffle', 'X-Original-Sender', '^127\.', 'freemail')
   describe HASHBL_OSENDR Message contains email address found on HASHBL
   tflags   HASHBL_OSENDR net
@@ -294,6 +297,27 @@ sub set_config {
   });
 
   push (@cmds, {
+    setting => 'hashbl_email_domain_alias',
+    is_admin => 1,
+    type => $Mail::SpamAssassin::Conf::CONF_TYPE_HASH_KEY_VALUE,
+    default => {},
+    code => sub {
+      my ($self, $key, $value, $line) = @_;
+      if (!defined $value || $value eq '') {
+        return $Mail::SpamAssassin::Conf::MISSING_REQUIRED_VALUE;
+      }
+      my @vals = split(/\s+/, lc $value);
+      if (@vals < 2 || index($value, '@') >= 0) {
+        return $Mail::SpamAssassin::Conf::INVALID_VALUE;
+      }
+      my $domain = shift @vals;
+      foreach my $alias (@vals) {
+        $self->{hashbl_email_domain_alias}->{$alias} = $domain;
+      }
+    }
+  });
+
+  push (@cmds, {
     setting => 'hashbl_email_regex',
     is_admin => 1,
     type => $Mail::SpamAssassin::Conf::CONF_TYPE_STRING,
@@ -423,9 +447,13 @@ sub _get_emails {
   foreach my $hdr (split(/\s*\/\s*/, $from)) {
     my $parsed_emails = $self->_parse_emails($pms, $opts, $hdr);
     foreach my $email (@$parsed_emails) {
-      next if $seen{$email}++;
-      my ($domain) = ($email =~ /.*\@(.+)/);
+      my ($username, $domain) = ($email =~ /(.*)\@(.+)/);
       next unless defined $domain;
+      if (exists $conf->{hashbl_email_domain_alias}->{lc $domain}) {
+        $domain = $conf->{hashbl_email_domain_alias}->{lc $domain};
+        $email = $username.'@'.$domain;
+      }
+      next if $seen{$email}++;
       next if defined $acl && $acl ne 'all' && !$self->{hashbl_acl}{$acl}{$domain};
       push @emails, $email;
     }
@@ -506,6 +534,11 @@ sub check_hashbl_emails {
 
   if (!defined $list) {
     warn "HashBL: $rulename blocklist argument missing\n";
+    return 0;
+  }
+
+  if (defined $acl && $acl ne 'all' && !exists $self->{hashbl_acl}{$acl}) {
+    warn "HashBL: $rulename acl '$acl' not defined\n";
     return 0;
   }
 
@@ -991,7 +1024,7 @@ sub _hash {
 
   if ($opts->{sha256}) {
     utf8::encode($value) if utf8::is_utf8($value); # sha256 expects bytes
-    return base32_encode(sha256($value));
+    return lc base32_encode(sha256($value));
   } elsif ($opts->{sha1}) {
     utf8::encode($value) if utf8::is_utf8($value); # sha1_hex expects bytes
     return sha1_hex($value);
@@ -1074,5 +1107,6 @@ sub has_hashbl_tag { 1 }
 sub has_hashbl_sha256 { 1 }
 sub has_hashbl_attachments { 1 }
 sub has_hashbl_email_domain { 1 } # user/host/domain option for emails
+sub has_hashbl_email_domain_alias { 1 } # hashbl_email_domain_alias
 
 1;

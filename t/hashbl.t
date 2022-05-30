@@ -9,7 +9,7 @@ plan skip_all => "Can't use Net::DNS Safely"   unless can_use_net_dns_safely();
 
 # run many times to catch some random natured failures
 my $iterations = 5;
-plan tests => 11 * $iterations;
+plan tests => 12 * $iterations;
 
 # ---------------------------------------------------------------------------
 
@@ -25,6 +25,7 @@ plan tests => 11 * $iterations;
 );
 %anti_patterns = (
  q{ 1.0 X_HASHBL_SHA256 } => '',
+ q{ warn: } => '',
 );
 
 # Check from debug output log that nothing else than these were queried
@@ -34,6 +35,7 @@ bc9f1b35acd338b92b0659cc2111e6b661a8b2bc.hashbltest1.spamassassin.org
 62e12fbe4b32adc2e87147d74590372b461f35f6.hashbltest1.spamassassin.org
 96b802967118135ef048c2bc860e7b0deb7d2333.hashbltest1.spamassassin.org
 1675677ba3d539bdfb0ae8940bf7e6c836f3ad17.hashbltest1.spamassassin.org
+2ead26370ef9d238584aa3c86a02e254708370a0.hashbltest1.spamassassin.org
 170d83ef2dc9c2de0e65ce4461a3a375.hashbltest2.spamassassin.org
 cc205dd956d568ff8524d7fc42868500e4d7d162.hashbltest3.spamassassin.org
 jykf2a5v6asavfel3stymlmieh4e66jeroxuw52mc5xhdylnyb7a.hashbltest3.spamassassin.org
@@ -44,6 +46,7 @@ w3hcrlct6yshq5vq6gjv2hf3pzk3jvsk6ilj5iaks4qwewudrr6q.hashbltest6.spamassassin.or
 userpart.hashbltest7.spamassassin.org
 host.domain.com.hashbltest7.spamassassin.org
 domain.com.hashbltest7.spamassassin.org
+2qlyngefopecg66lt6pwfpegjaajbzasuxs5vzgii2vfbonj6rua.hashbltest8.spamassassin.org
 );
 
 sub check_queries {
@@ -58,16 +61,21 @@ sub check_queries {
     print STDERR $line if $line =~ /warn:/;
     while ($line =~ m,([^\s/]+\.hashbltest\d\.spamassassin\.org)\b,g) {
       my $query = $1;
-      $found{$query}++;
       if (!grep { $query eq $_ } @valid_queries) {
         $invalid{$query}++;
+      } else {
+        $found{$query}++;
       }
     }
   }
   close WL;
-  diag("Invalid query launched: $_") foreach (keys %invalid);
+  diag("Unwanted query launched: $_") foreach (keys %invalid);
   unless (keys %found == @valid_queries) {
-    diag("Incorrect amount of queries launched");
+    foreach (@valid_queries) {
+      if (!exists $found{$_}) {
+        diag("Query not launched: $_");
+      }
+    }
     return 0;
   }
   return !%invalid;
@@ -111,6 +119,11 @@ tstlocalrules(q{
   header __X_HASHBL_UHD1 eval:check_hashbl_emails('hashbltest7.spamassassin.org', 'raw/user', 'body', '^', 'domacl')
   header __X_HASHBL_UHD2 eval:check_hashbl_emails('hashbltest7.spamassassin.org', 'raw/host', 'body', '^', 'domacl')
   header __X_HASHBL_UHD3 eval:check_hashbl_emails('hashbltest7.spamassassin.org', 'raw/domain', 'body', '^', 'domacl')
+
+  hashbl_email_domain_alias domain.com aliasdomain.com
+  hashbl_acl_domaincom domain.com
+  header   X_HASHBL_ALIAS_NODOT eval:check_hashbl_emails('hashbltest8.spamassassin.org', 'sha256/nodot', 'body', '^127\.', 'domaincom')
+  tflags   X_HASHBL_ALIAS_NODOT net
 
   # Bug 7897 - test that meta rules depending on net rules hit
   meta META_HASHBL_EMAIL X_HASHBL_EMAIL
