@@ -231,12 +231,8 @@ my %makefile = (
 
         'rules/*.pm',
 
-        # don't remove these. they are built from 'rulesrc' in SVN, but
-        # in a distribution tarball, they're not
-        # 'rules/70_sandbox.cf',
-        # 'rules/72_active.cf',
-
-        # this file is no longer built, or used
+        'rules/70_sandbox.cf',
+        'rules/72_active.cf',
         'rules/70_inactive.cf',
 
       )
