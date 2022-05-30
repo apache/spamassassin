@@ -1,194 +1,780 @@
 ------------------------------------------------------------------------
-r1900556 | gbechis | 2022-05-04 17:09:39 +0000 (Wed, 04 May 2022) | 2 
+r1901421 | gbechis | 2022-05-30 16:15:13 +0000 (Mon, 30 May 2022) | 2 lines
+
+spam from freshdesk.com domain has been reported
+
+------------------------------------------------------------------------
+r1901419 | hege | 2022-05-30 14:12:23 +0000 (Mon, 30 May 2022) | 4 lines
+ 
+ - hashbl_email_domain_alias
+ - warn of undefined acl
+ - lc base32 for better cosmetics
+ 
+------------------------------------------------------------------------
+r1901416 | hege | 2022-05-30 12:49:39 +0000 (Mon, 30 May 2022) | 2 lines
+ 
+ Bug 6995 - specify user to fall back for spamd instead of nobody
+ 
+------------------------------------------------------------------------
+r1901405 | hege | 2022-05-30 09:21:09 +0000 (Mon, 30 May 2022) | 2 lines
+ 
+ Document "return undef" for eval-functions
+ 
+------------------------------------------------------------------------
+r1901403 | hege | 2022-05-30 08:57:52 +0000 (Mon, 30 May 2022) | 2 lines
+ 
+ Fix eval functions returning unintended "undef"
+ 
+------------------------------------------------------------------------
+r1901399 | sidney | 2022-05-30 07:42:02 +0000 (Mon, 30 May 2022) | 1 line
+ 
+ bug 7998 Add two files to make clean that were dropped from distribution 
+some time ago
+------------------------------------------------------------------------
+r1901397 | hege | 2022-05-30 05:58:31 +0000 (Mon, 30 May 2022) | 2 lines
+ 
+ Minor cleaning up, ignore disabled metas (score 0), make unrun meta 
+reporting foolproof
+ 
+------------------------------------------------------------------------
+r1901378 | sidney | 2022-05-29 04:53:44 +0000 (Sun, 29 May 2022) | 1 line
+ 
+ fix irrelevant spf warning in test case
+------------------------------------------------------------------------
+r1901375 | jhardin | 2022-05-28 21:33:30 +0000 (Sat, 28 May 2022) | 1 line
+ 
+ Update generated ruleset
+------------------------------------------------------------------------
+r1901358 | sidney | 2022-05-28 15:06:49 +0000 (Sat, 28 May 2022) | 1 line
+ 
+ bug 7997 move non-rule settings from 01_test_rules.cf to 
+01_test_rules.pre
+------------------------------------------------------------------------
+r1901350 | hege | 2022-05-28 11:45:22 +0000 (Sat, 28 May 2022) | 2 lines
+ 
+ Revert skipping last priority do_meta_tests, fixes some issues, but 
+metas still need a bit more tweaking
+ 
+------------------------------------------------------------------------
+r1901349 | hege | 2022-05-28 11:43:13 +0000 (Sat, 28 May 2022) | 2 lines
+ 
+ Make some tests run with and without extra rules to catch bugs
+ 
+------------------------------------------------------------------------
+r1901348 | hege | 2022-05-28 11:36:17 +0000 (Sat, 28 May 2022) | 2 lines
+ 
+ Don't clear any tstprefs() or tstlocalrules() settings with 
+clear_localrules()
+ 
+------------------------------------------------------------------------
+r1901347 | hege | 2022-05-28 11:00:42 +0000 (Sat, 28 May 2022) | 2 lines
+ 
+ Fix Unescaped left brace for %{FOO} templates (Bug 7992)
+ 
+------------------------------------------------------------------------
+r1901346 | hege | 2022-05-28 10:38:25 +0000 (Sat, 28 May 2022) | 16 lines
+ 
+ Test cleanups and fixes.
+ 
+ Note that %patterns has now two exact patterns styles:
+ 
+ - Literal strings match exactly the string.  Whitespace is no longer 
+ignored
+   (any leading and trailing whitelist must match), but consecutive
+   whitespace is normalized:
+ 
+   q{ FOO } => ''
+   ' FOO ' => ''
+ 
+ - Regular expressions, defined with standard qr// operator:
+ 
+   qr/ FOO / => ''
+ 
+ 
+------------------------------------------------------------------------
+r1901345 | hege | 2022-05-28 10:25:23 +0000 (Sat, 28 May 2022) | 2 lines
+ 
+ Remove redundant if
+ 
+------------------------------------------------------------------------
+r1901344 | hege | 2022-05-28 10:24:55 +0000 (Sat, 28 May 2022) | 2 lines
+ 
+ Fix tflags multiple handling for full rules
+ 
+------------------------------------------------------------------------
+r1901318 | sidney | 2022-05-27 09:59:23 +0000 (Fri, 27 May 2022) | 1 line
+ 
+ Bug 7989 Remove three more references in tests to deleted plugin Esp.pm
+------------------------------------------------------------------------
+r1901311 | hege | 2022-05-27 06:06:52 +0000 (Fri, 27 May 2022) | 2 lines
+ 
+ Enable HashBL plugin by default per devlist discussion
+ 
+------------------------------------------------------------------------
+r1901309 | jhardin | 2022-05-27 04:02:25 +0000 (Fri, 27 May 2022) | 1 line
+ 
+ Update generated ruleset
+------------------------------------------------------------------------
+r1901297 | gbechis | 2022-05-26 17:14:35 +0000 (Thu, 26 May 2022) | 2 
 lines
  
- basic FromNameSpoof tests
+ fix cache where CamelCase configuration options are used
  
 ------------------------------------------------------------------------
-r1900555 | gbechis | 2022-05-04 16:39:55 +0000 (Wed, 04 May 2022) | 2 
+r1901270 | hege | 2022-05-26 06:27:34 +0000 (Thu, 26 May 2022) | 2 lines
+ 
+ user/host/domain options for check_hashbl_emails() and some cleaning up
+ 
+------------------------------------------------------------------------
+r1901268 | hege | 2022-05-26 05:24:05 +0000 (Thu, 26 May 2022) | 2 lines
+ 
+ Use uridnsbl_skip_domains for HashBL lookups
+ 
+------------------------------------------------------------------------
+r1901255 | hege | 2022-05-25 19:25:54 +0000 (Wed, 25 May 2022) | 2 lines
+ 
+ Why is stuff like USER_IN_DKIM_WHITELIST in sandbox 10_force_active.cf? 
+Add WELCOME/BLOCK alternatives. Should clean all of non-sandbox rules 
+away if it's not necessary.
+ 
+------------------------------------------------------------------------
+r1901254 | hege | 2022-05-25 19:22:50 +0000 (Wed, 25 May 2022) | 2 lines
+ 
+ USER_IN_SPF_WELCOMELIST and USER_IN_DKIM_WELCOMELIST ended up in 
+72_scores.cf as 0.001? Try to fix?
+ 
+------------------------------------------------------------------------
+r1901249 | hege | 2022-05-25 15:48:43 +0000 (Wed, 25 May 2022) | 2 lines
+ 
+ Make DMARC rules async to properly wait for SPF and DKIM results
+ 
+------------------------------------------------------------------------
+r1901241 | hege | 2022-05-25 13:46:02 +0000 (Wed, 25 May 2022) | 4 lines
+ 
+ Unify __URL_SHORTENER usage:
+ - Replace sandbox __URL_SHORTENER with rules/25_url_shortener.cf
+ - Migrate __PDS_URISHORTENER list into __URL_SHORTENER
+ 
+------------------------------------------------------------------------
+r1901240 | hege | 2022-05-25 13:36:17 +0000 (Wed, 25 May 2022) | 2 lines
+ 
+ Allow "max_short_urls 0" to disable all HTTP requests, enabling usage of 
+short_url() as a list lookup only.
+ 
+------------------------------------------------------------------------
+r1901228 | hege | 2022-05-25 09:57:47 +0000 (Wed, 25 May 2022) | 2 lines
+ 
+ Make sure checks are done in case of strange rule priorities vs 
+check_dnsbl
+ 
+------------------------------------------------------------------------
+r1901227 | hege | 2022-05-25 09:46:02 +0000 (Wed, 25 May 2022) | 3 lines
+ 
+ - Add short_url_redir() function to check if a valid redirection was 
+found
+ - short_url() will result in hit as long as url_shortener matching URL 
+was found, no HTTP request required (fixes local tests only or missing 
+LWP module)
+ 
+------------------------------------------------------------------------
+r1901166 | hege | 2022-05-23 12:55:35 +0000 (Mon, 23 May 2022) | 2 lines
+ 
+ Optimize short url parsing
+ 
+------------------------------------------------------------------------
+r1901164 | hege | 2022-05-23 12:31:55 +0000 (Mon, 23 May 2022) | 2 lines
+ 
+ Improve documentation
+ 
+------------------------------------------------------------------------
+r1901157 | hege | 2022-05-23 09:20:21 +0000 (Mon, 23 May 2022) | 2 lines
+ 
+ Add current tinyurl block example. Remove deprecated go.to.
+ 
+------------------------------------------------------------------------
+r1901155 | hege | 2022-05-23 09:09:08 +0000 (Mon, 23 May 2022) | 8 lines
+ 
+ DecodeShortURLs:
+ - Add url_shortener_get (GET requests)
+ - Add clear_url_shortener
+ - Add url_shortener_timeout
+ - Add max_short_url_redirections
+ - Detect and warn about legacy short_url_tests() usage
+ - Improve docs and tests
+ 
+------------------------------------------------------------------------
+r1901154 | hege | 2022-05-23 08:32:12 +0000 (Mon, 23 May 2022) | 2 lines
+ 
+ Use $pms->get_uri_list() as do_uri_tests() argument, otherwise any 
+add_uri_detail_list additions are not available for uri rules.
+ 
+------------------------------------------------------------------------
+r1901152 | gbechis | 2022-05-23 08:15:56 +0000 (Mon, 23 May 2022) | 2 
 lines
  
- fix man page formatting
+ publish btc rbl
  
 ------------------------------------------------------------------------
-r1900553 | hege | 2022-05-04 13:43:43 +0000 (Wed, 04 May 2022) | 2 lines
+r1901136 | hege | 2022-05-23 04:41:50 +0000 (Mon, 23 May 2022) | 2 lines
  
- Document parallel testing, also as reminder for everyone..
- 
-------------------------------------------------------------------------
-r1900552 | hege | 2022-05-04 13:39:36 +0000 (Wed, 04 May 2022) | 2 lines
- 
- Add FromNameSpoof
+ Update docs
  
 ------------------------------------------------------------------------
-r1900549 | hege | 2022-05-04 12:51:24 +0000 (Wed, 04 May 2022) | 2 lines
+r1901135 | hege | 2022-05-23 04:38:50 +0000 (Mon, 23 May 2022) | 2 lines
  
- Clean up code, properly wait for DKIM results, improve docs
- 
-------------------------------------------------------------------------
-r1900547 | sidney | 2022-05-04 11:06:22 +0000 (Wed, 04 May 2022) | 1 line
- 
- bug 7982 fix tests failing when run from release tarball, removing 
-dependency on rules that are in trunk
-------------------------------------------------------------------------
-r1900546 | sidney | 2022-05-04 11:01:48 +0000 (Wed, 04 May 2022) | 1 line
- 
- Back to development version until we are ready to build the next 
-pre-release
-------------------------------------------------------------------------
-r1900541 | hege | 2022-05-04 06:56:15 +0000 (Wed, 04 May 2022) | 2 lines
- 
- Fix typo
+ Add url_shortener_user_agent (default Chrome) so request is not blocked 
+by some services
  
 ------------------------------------------------------------------------
-r1900538 | gbechis | 2022-05-04 06:43:17 +0000 (Wed, 04 May 2022) | 2 
+r1901118 | hege | 2022-05-22 09:21:31 +0000 (Sun, 22 May 2022) | 2 lines
+ 
+ Improve tests
+ 
+------------------------------------------------------------------------
+r1901117 | hege | 2022-05-22 09:21:22 +0000 (Sun, 22 May 2022) | 2 lines
+ 
+ Add some debug logging for named captures
+ 
+------------------------------------------------------------------------
+r1901116 | hege | 2022-05-22 09:20:58 +0000 (Sun, 22 May 2022) | 2 lines
+ 
+ Forgot to escape capture name in regex
+ 
+------------------------------------------------------------------------
+r1901115 | hege | 2022-05-22 09:13:08 +0000 (Sun, 22 May 2022) | 2 lines
+ 
+ Fix renamed hash check
+ 
+------------------------------------------------------------------------
+r1901114 | hege | 2022-05-22 08:44:07 +0000 (Sun, 22 May 2022) | 6 lines
+ 
+ Bug 7992 - Capturing and reusing strings for matching across rules
+ - Now uses %{TAGNAME} template format for regex matching
+ - If any regex rule depends on undefined tag, consider the rule unrun
+ - Allow tag names to contain underscores
+ - Add documentation
+ 
+------------------------------------------------------------------------
+r1901112 | hege | 2022-05-22 08:39:51 +0000 (Sun, 22 May 2022) | 2 lines
+ 
+ Clear out some ancient Perl 5.6 checks
+ 
+------------------------------------------------------------------------
+r1901096 | hege | 2022-05-21 08:51:57 +0000 (Sat, 21 May 2022) | 3 lines
+ 
+ - Named capture cleanups, add tests, new PMS/set_captures, 
+Parser/parse_captures functions (Bug 7992)
+ - MIMEHeader: support named regex captures, add tflags multiple support, 
+improve tests
+ 
+------------------------------------------------------------------------
+r1901093 | hege | 2022-05-21 06:21:56 +0000 (Sat, 21 May 2022) | 5 lines
+ 
+ Bug 7992 - Capturing and reusing strings for matching across rules
+ - Check %- right after regex matching, to prevent got_hit or anything 
+else potentially messing with it in the future
+ - Save all matches on tflags multiple rules
+ - Remove duplicate values from matches/tags
+ 
+------------------------------------------------------------------------
+r1901085 | gbechis | 2022-05-20 13:52:25 +0000 (Fri, 20 May 2022) | 3 
 lines
  
- Match html files stored on Fleek cloud
+ better limit on regexp, it cannot work with longer strings because of dns
+ labels limits.
  
 ------------------------------------------------------------------------
-r1900536 | hege | 2022-05-04 04:38:59 +0000 (Wed, 04 May 2022) | 2 lines
+r1901082 | hege | 2022-05-20 08:52:33 +0000 (Fri, 20 May 2022) | 2 lines
  
- Don't add listname itself to a list
- 
-------------------------------------------------------------------------
-r1900531 | hege | 2022-05-04 02:52:21 +0000 (Wed, 04 May 2022) | 2 lines
- 
- Add missing to MANIFEST
+ Bug 7994 - Plugin ASN.pm, AskDNS.pm: return early if $pkt is undefined
  
 ------------------------------------------------------------------------
-r1900515 | gbechis | 2022-05-03 15:02:40 +0000 (Tue, 03 May 2022) | 2 
+r1901080 | hege | 2022-05-20 07:59:04 +0000 (Fri, 20 May 2022) | 2 lines
+ 
+ Add missing header rule logging
+ 
+------------------------------------------------------------------------
+r1901068 | hege | 2022-05-19 15:48:50 +0000 (Thu, 19 May 2022) | 2 lines
+ 
+ Better validation for rulenames
+ 
+------------------------------------------------------------------------
+r1901067 | hege | 2022-05-19 15:43:41 +0000 (Thu, 19 May 2022) | 2 lines
+ 
+ Automatically adjust priority -100 for tflags net rules
+ 
+------------------------------------------------------------------------
+r1901063 | hege | 2022-05-19 13:23:35 +0000 (Thu, 19 May 2022) | 2 lines
+ 
+ Add tflags net
+ 
+------------------------------------------------------------------------
+r1901060 | hege | 2022-05-19 09:47:40 +0000 (Thu, 19 May 2022) | 5 lines
+ 
+ Some meta cleanups and optimizations (Bug 7987)
+ - Use rule_ready() everywhere instead of direct tests_already_hit modify
+ - Simple tracking of meta dependency hits, run do_meta_tests only when 
+needed
+ - Do not run do_meta_tests on last priority, as finish_meta_tests will 
+run anyway
+ 
+------------------------------------------------------------------------
+r1901048 | jhardin | 2022-05-19 00:59:11 +0000 (Thu, 19 May 2022) | 1 line
+ 
+ Update generated ruleset
+------------------------------------------------------------------------
+r1901042 | gbechis | 2022-05-18 17:59:54 +0000 (Wed, 18 May 2022) | 2 
 lines
  
- revert r1900506, not correct for general use
+ silence a warning
  
 ------------------------------------------------------------------------
-r1900514 | gbechis | 2022-05-03 14:56:35 +0000 (Tue, 03 May 2022) | 3 
+r1901033 | hege | 2022-05-18 12:40:40 +0000 (Wed, 18 May 2022) | 2 lines
+ 
+ HashBL: add check_hashbl_attachments. Improve documentation.
+ 
+------------------------------------------------------------------------
+r1900984 | hege | 2022-05-17 07:52:27 +0000 (Tue, 17 May 2022) | 2 lines
+ 
+ Revert get_async_pending_rules from do_meta_tests one more time. It's 
+really not needed, as rule_ready() in run_eval_tests is enough.
+ 
+------------------------------------------------------------------------
+r1900983 | hege | 2022-05-17 07:48:20 +0000 (Tue, 17 May 2022) | 2 lines
+ 
+ Remove outdated comment
+ 
+------------------------------------------------------------------------
+r1900981 | hege | 2022-05-17 06:03:11 +0000 (Tue, 17 May 2022) | 2 lines
+ 
+ Add HashBL things
+ 
+------------------------------------------------------------------------
+r1900980 | jhardin | 2022-05-17 06:01:30 +0000 (Tue, 17 May 2022) | 1 line
+ 
+ Update generated ruleset
+------------------------------------------------------------------------
+r1900979 | hege | 2022-05-17 05:58:09 +0000 (Tue, 17 May 2022) | 2 lines
+ 
+ Add local($1) just in case
+ 
+------------------------------------------------------------------------
+r1900978 | hege | 2022-05-17 05:48:11 +0000 (Tue, 17 May 2022) | 2 lines
+ 
+ Forgot has_hashbl_sha256
+ 
+------------------------------------------------------------------------
+r1900977 | hege | 2022-05-17 05:43:57 +0000 (Tue, 17 May 2022) | 2 lines
+ 
+ Add sha256 option to HashBL (Bug 7993)
+ 
+------------------------------------------------------------------------
+r1900976 | hege | 2022-05-17 05:40:33 +0000 (Tue, 17 May 2022) | 2 lines
+ 
+ Add very simple Util/base32_encode function for HashBL
+ 
+------------------------------------------------------------------------
+r1900974 | hege | 2022-05-17 04:02:38 +0000 (Tue, 17 May 2022) | 5 lines
+ 
+ Bug 7987 - DNSEval.pm,HashBL.pm,URILocalBL.pm: unnecessary use of 
+rule_pending and rule_ready
+ For backwards compatibility:
+ - Use rule_ready() in run_eval_tests to allow async even for "return 0"
+ - Bring back async pending check in do_meta_tests
+ 
+------------------------------------------------------------------------
+r1900961 | hege | 2022-05-16 15:51:19 +0000 (Mon, 16 May 2022) | 4 lines
+ 
+ Bug 7987 - DNSEval.pm,HashBL.pm,URILocalBL.pm: unnecessary use of 
+rule_pending and rule_ready
+ - Remove $pms->rule_pending(), $pms->{tests_pending} to make things much 
+simpler
+ - Async eval-functions must now "return undef"
+ 
+------------------------------------------------------------------------
+r1900942 | gbechis | 2022-05-16 07:46:47 +0000 (Mon, 16 May 2022) | 2 
 lines
  
- silence a warning if uri_to_domain fails.
- bz #7984
+ Remove Esp plugin
  
 ------------------------------------------------------------------------
-r1900513 | hege | 2022-05-03 14:40:18 +0000 (Tue, 03 May 2022) | 4 lines
+r1900933 | jhardin | 2022-05-16 02:04:34 +0000 (Mon, 16 May 2022) | 1 line
  
- - Add http code caching
- - Add short_url_code just in case, to check any non-redirect http code
- - Check register_eval_rule type
+ Update generated ruleset
+------------------------------------------------------------------------
+r1900932 | hege | 2022-05-15 17:42:47 +0000 (Sun, 15 May 2022) | 2 lines
+ 
+ Add missing t/data/spam/hashbl
  
 ------------------------------------------------------------------------
-r1900512 | hege | 2022-05-03 13:50:53 +0000 (Tue, 03 May 2022) | 3 lines
+r1900929 | hege | 2022-05-15 16:07:26 +0000 (Sun, 15 May 2022) | 4 lines
  
- - Add clear_localrules() test function to use only rules defined in *.t 
-/ tstprefs().
- - Convert sql_based_welcomelist.t to clear_localrules
+ - Add options to check_hashbl_tag, ip/ipv4/ipv6/revip/fqdn/tld/trim
+ - Cleanup HashBL code
+ - Add basic HashBL tests
  
 ------------------------------------------------------------------------
-r1900511 | sidney | 2022-05-03 13:48:24 +0000 (Tue, 03 May 2022) | 1 line
+r1900928 | hege | 2022-05-15 15:31:51 +0000 (Sun, 15 May 2022) | 2 lines
  
- Cosmetic fix that does not affect the test but I could not unsee it once 
-I noticed it
+ Add $current_checkfile variable to get current log output file
+ 
 ------------------------------------------------------------------------
-r1900508 | gbechis | 2022-05-03 12:41:02 +0000 (Tue, 03 May 2022) | 2 
+r1900927 | hege | 2022-05-15 13:29:53 +0000 (Sun, 15 May 2022) | 2 lines
+ 
+ Skip empty regex captures
+ 
+------------------------------------------------------------------------
+r1900917 | hege | 2022-05-15 09:05:12 +0000 (Sun, 15 May 2022) | 2 lines
+ 
+ Add check_hashbl_tag eval
+ 
+------------------------------------------------------------------------
+r1900911 | hege | 2022-05-15 05:31:19 +0000 (Sun, 15 May 2022) | 2 lines
+ 
+ Do not check if captured_rules exists, as all values are now potentially 
+used as tags
+ 
+------------------------------------------------------------------------
+r1900910 | hege | 2022-05-15 05:12:44 +0000 (Sun, 15 May 2022) | 3 lines
+ 
+ Bug 7992 - Capturing and reusing strings for matching across rules
+ - Set captured value(s) as a tag
+ 
+------------------------------------------------------------------------
+r1900880 | hege | 2022-05-14 12:38:56 +0000 (Sat, 14 May 2022) | 2 lines
+ 
+ No regex capture for header exists: test
+ 
+------------------------------------------------------------------------
+r1900879 | hege | 2022-05-14 12:18:41 +0000 (Sat, 14 May 2022) | 2 lines
+ 
+ Bug 7992 - Capturing and reusing strings for matching across rules
+ 
+------------------------------------------------------------------------
+r1900876 | gbechis | 2022-05-14 09:36:03 +0000 (Sat, 14 May 2022) | 2 
 lines
  
- missed in previous
+ fix Esp regression tests, X-MC-User is a 25 chars string
  
 ------------------------------------------------------------------------
-r1900507 | gbechis | 2022-05-03 12:39:54 +0000 (Tue, 03 May 2022) | 2 
+r1900873 | hege | 2022-05-14 06:58:57 +0000 (Sat, 14 May 2022) | 2 lines
+ 
+ Small code cleanup
+ 
+------------------------------------------------------------------------
+r1900871 | hege | 2022-05-14 06:30:45 +0000 (Sat, 14 May 2022) | 2 lines
+ 
+ Do not leak options when redefining a header test. Add some actual basic 
+header tests.
+ 
+------------------------------------------------------------------------
+r1900857 | gbechis | 2022-05-13 13:27:05 +0000 (Fri, 13 May 2022) | 4 
 lines
  
- test autocleanup
+ Official ASF channel should be loaded first in
+ order to be able to override scores by using custom channels
+ bz #7991
  
 ------------------------------------------------------------------------
-r1900506 | gbechis | 2022-05-03 12:39:04 +0000 (Tue, 03 May 2022) | 3 
+r1900849 | hege | 2022-05-13 06:06:33 +0000 (Fri, 13 May 2022) | 8 lines
+ 
+ - Bug 7987
+ - fix body rules considered unrun when using sa-compile
+ - fix check_rbl_sub rules considered unrun and other DNSEval cleanups
+ - improve rule_pending/rule_ready/got_hit() logic
+ - rename $pms->get_pending_lookups to get_async_pending_rules
+ - other minor async cleanups
+ - test and documentation improvements
+ 
+------------------------------------------------------------------------
+r1900844 | jhardin | 2022-05-13 02:38:44 +0000 (Fri, 13 May 2022) | 1 line
+ 
+ Update generated ruleset
+------------------------------------------------------------------------
+r1900839 | gbechis | 2022-05-12 14:25:12 +0000 (Thu, 12 May 2022) | 2 
 lines
  
- cleanup database by checking "modified" field so that frequently checked
- urls are always in hot cache
+ set DMARC_PASS and DMARC_MISSING rules as immutable
  
 ------------------------------------------------------------------------
-r1900494 | sidney | 2022-05-02 23:53:07 +0000 (Mon, 02 May 2022) | 1 line
+r1900834 | hege | 2022-05-12 11:34:54 +0000 (Thu, 12 May 2022) | 2 lines
  
- change a name used in test to make it clearer that a warning message is 
-expected and can be ignored
+ Limit fixing net rule priorities to -100
+ 
 ------------------------------------------------------------------------
-r1900485 | gbechis | 2022-05-02 16:12:44 +0000 (Mon, 02 May 2022) | 2 
+r1900832 | hege | 2022-05-12 09:39:34 +0000 (Thu, 12 May 2022) | 2 lines
+ 
+ Auto adjust priority to -100
+ 
+------------------------------------------------------------------------
+r1900829 | hege | 2022-05-12 09:29:35 +0000 (Thu, 12 May 2022) | 2 lines
+ 
+ Cleanup ASN, add support for tag name in check_asn()
+ 
+------------------------------------------------------------------------
+r1900819 | jhardin | 2022-05-12 02:39:44 +0000 (Thu, 12 May 2022) | 1 line
+ 
+ Update generated ruleset
+------------------------------------------------------------------------
+r1900813 | hege | 2022-05-11 15:24:34 +0000 (Wed, 11 May 2022) | 2 lines
+ 
+ Prettier failure pattern logging
+ 
+------------------------------------------------------------------------
+r1900812 | hege | 2022-05-11 15:12:25 +0000 (Wed, 11 May 2022) | 2 lines
+ 
+ Don't override existing priority unless it's default 0
+ 
+------------------------------------------------------------------------
+r1900811 | hege | 2022-05-11 14:59:25 +0000 (Wed, 11 May 2022) | 2 lines
+ 
+ Small Shortcircuit cleanup. Mention network lookups at -100 priority.
+ 
+------------------------------------------------------------------------
+r1900800 | jhardin | 2022-05-11 03:28:05 +0000 (Wed, 11 May 2022) | 1 line
+ 
+ Add rule for eval
+------------------------------------------------------------------------
+r1900798 | sidney | 2022-05-11 01:56:18 +0000 (Wed, 11 May 2022) | 1 line
+ 
+ use prove for the rule tests too for a better release tester experience
+------------------------------------------------------------------------
+r1900796 | sidney | 2022-05-11 00:28:26 +0000 (Wed, 11 May 2022) | 1 line
+ 
+ update script that runs release tests for change in the perlcritic test
+------------------------------------------------------------------------
+r1900794 | sidney | 2022-05-10 23:23:31 +0000 (Tue, 10 May 2022) | 1 line
+ 
+ move percritic test code from xt directory which is not in MANIFEST
+------------------------------------------------------------------------
+r1900793 | gbechis | 2022-05-10 23:11:43 +0000 (Tue, 10 May 2022) | 3 
 lines
  
- DecodeShortURLs cache test
+ refactor some code
+ improvements on Mailup and Sendinblue matches
  
 ------------------------------------------------------------------------
-r1900483 | hege | 2022-05-02 15:23:50 +0000 (Mon, 02 May 2022) | 2 lines
+r1900789 | hege | 2022-05-10 16:55:26 +0000 (Tue, 10 May 2022) | 2 lines
  
- Make TTL handling foolproof, do a cheap delete before select. Tidy 
-things up a bit.
- 
-------------------------------------------------------------------------
-r1900481 | hege | 2022-05-02 14:56:24 +0000 (Mon, 02 May 2022) | 2 lines
- 
- Fix logic: Compare TTL to created field, otherwise entry might not never 
-expire and update itself.
+ Add t/perlcritic.t in MANIFEST
  
 ------------------------------------------------------------------------
-r1900479 | hege | 2022-05-02 14:21:38 +0000 (Mon, 02 May 2022) | 2 lines
+r1900788 | hege | 2022-05-10 16:53:03 +0000 (Tue, 10 May 2022) | 2 lines
  
- Revert back to unix timestamps (int)
+ Add t/perlcritic.t per dev-list discussion
  
 ------------------------------------------------------------------------
-r1900477 | gbechis | 2022-05-02 12:56:54 +0000 (Mon, 02 May 2022) | 2 
+r1900771 | sidney | 2022-05-10 03:31:25 +0000 (Tue, 10 May 2022) | 1 line
+ 
+ corrected fix to  perlcritic error
+------------------------------------------------------------------------
+r1900770 | sidney | 2022-05-10 03:22:40 +0000 (Tue, 10 May 2022) | 1 line
+ 
+ make a map non-destructive fixes perlcritic error and makes it not 
+destroy the list
+------------------------------------------------------------------------
+r1900768 | sidney | 2022-05-10 02:19:01 +0000 (Tue, 10 May 2022) | 1 line
+ 
+ Updated build/release instructions - some content moved to wiki
+------------------------------------------------------------------------
+r1900764 | sidney | 2022-05-10 00:41:11 +0000 (Tue, 10 May 2022) | 1 line
+ 
+ Fix texcat languages filename not defined warning in t/reuse.t test
+------------------------------------------------------------------------
+r1900741 | hege | 2022-05-09 12:52:20 +0000 (Mon, 09 May 2022) | 2 lines
+ 
+ Remove non-existing check_rbl_results_for eval
+ 
+------------------------------------------------------------------------
+r1900740 | hege | 2022-05-09 12:51:18 +0000 (Mon, 09 May 2022) | 2 lines
+ 
+ Adjust priority of all eval rules..
+ 
+------------------------------------------------------------------------
+r1900738 | hege | 2022-05-09 11:46:21 +0000 (Mon, 09 May 2022) | 2 lines
+ 
+ Automatically adjust check_rbl* rules to -100 for early async launch
+ 
+------------------------------------------------------------------------
+r1900732 | gbechis | 2022-05-09 11:08:33 +0000 (Mon, 09 May 2022) | 2 
 lines
  
- more tweaks to Paypal rule
+ add "info" sub
  
 ------------------------------------------------------------------------
-r1900474 | gbechis | 2022-05-02 10:33:01 +0000 (Mon, 02 May 2022) | 2 
+r1900725 | hege | 2022-05-09 09:11:43 +0000 (Mon, 09 May 2022) | 2 lines
+ 
+ Improve logging
+ 
+------------------------------------------------------------------------
+r1900723 | hege | 2022-05-09 08:33:22 +0000 (Mon, 09 May 2022) | 2 lines
+ 
+ Use $hitsptr for consistency
+ 
+------------------------------------------------------------------------
+r1900719 | hege | 2022-05-09 05:27:43 +0000 (Mon, 09 May 2022) | 2 lines
+ 
+ Small code cleanup, improve logging. Ignore $ent->{key} as documented.
+ 
+------------------------------------------------------------------------
+r1900688 | hege | 2022-05-08 12:17:21 +0000 (Sun, 08 May 2022) | 2 lines
+ 
+ Improve tests
+ 
+------------------------------------------------------------------------
+r1900680 | hege | 2022-05-08 06:40:12 +0000 (Sun, 08 May 2022) | 2 lines
+ 
+ Improve rule_pending() documentation
+ 
+------------------------------------------------------------------------
+r1900678 | hege | 2022-05-08 06:04:55 +0000 (Sun, 08 May 2022) | 2 lines
+ 
+ Remove redundant $would_log_rules_all check
+ 
+------------------------------------------------------------------------
+r1900676 | sidney | 2022-05-08 05:40:03 +0000 (Sun, 08 May 2022) | 8 lines
+ 
+ bug 7988 Fixes and updates to regression tests
+ - All tests now use common initialization in SATest.pm
+ - Use absolute pathname in @INC to fix breakage caused by chdir
+ - Some wording changes in test warnings
+ - Revamp xt tests to use one shell script that calls t/*.t and another 3 
+test scripts
+ - Fix problems in saw-ampersand test and update for newer SpamAssassin 
+code
+ 
+ 
+------------------------------------------------------------------------
+r1900675 | hege | 2022-05-08 05:15:50 +0000 (Sun, 08 May 2022) | 2 lines
+ 
+ Remove outdated/superfluous suggestion to run prove command, all tests 
+should be run the way general documentation suggests. (Note: "prove -T" 
+should always be used, if used..)
+ 
+------------------------------------------------------------------------
+r1900674 | kmcgrail | 2022-05-08 04:23:09 +0000 (Sun, 08 May 2022) | 1 
+line
+ 
+ BZ 7981 working on release UPGRADE and Announcement files in Google Docs
+------------------------------------------------------------------------
+r1900670 | sidney | 2022-05-08 00:24:17 +0000 (Sun, 08 May 2022) | 1 line
+ 
+ Add missing declaration and fix an undefined var error uncovered in 
+testing that it revealed
+------------------------------------------------------------------------
+r1900667 | hege | 2022-05-07 20:34:59 +0000 (Sat, 07 May 2022) | 2 lines
+ 
+ Add a some more Bug 7735 comments/documentation
+ 
+------------------------------------------------------------------------
+r1900666 | hege | 2022-05-07 20:27:28 +0000 (Sat, 07 May 2022) | 2 lines
+ 
+ Fix SA breaking typo, sorry
+ 
+------------------------------------------------------------------------
+r1900664 | hege | 2022-05-07 19:03:30 +0000 (Sat, 07 May 2022) | 2 lines
+ 
+ Fix comment/documentation
+ 
+------------------------------------------------------------------------
+r1900658 | hege | 2022-05-07 14:41:14 +0000 (Sat, 07 May 2022) | 2 lines
+ 
+ Add few more tests
+ 
+------------------------------------------------------------------------
+r1900653 | hege | 2022-05-07 14:00:49 +0000 (Sat, 07 May 2022) | 2 lines
+ 
+ Add some more tests. Seems NetAddr::IP has some bug handling stuff like 
+127.0.0.1/31 (I don't think it should match 127.0.0.0).
+ 
+------------------------------------------------------------------------
+r1900651 | hege | 2022-05-07 13:16:03 +0000 (Sat, 07 May 2022) | 2 lines
+ 
+ Installing Net::CIDR::Lite allows to use dash separated IP range format 
+(e.g. 192.168.1.1-192.168.255.255) for NetSet tables (internal_networks, 
+trusted_networks, msa_networks, uri_local_cidr)
+ 
+------------------------------------------------------------------------
+r1900648 | hege | 2022-05-07 09:21:33 +0000 (Sat, 07 May 2022) | 2 lines
+ 
+ No point mapping bayes_ignore_header constantly from array to lc hash, 
+just make it lc hash from the start. Also make it more standards 
+conforming, no point having differently named hash from the command.
+ 
+------------------------------------------------------------------------
+r1900646 | hege | 2022-05-07 08:13:29 +0000 (Sat, 07 May 2022) | 2 lines
+ 
+ More DKIM-Signature like headers to "mark presence only"
+ 
+------------------------------------------------------------------------
+r1900642 | hege | 2022-05-07 06:01:02 +0000 (Sat, 07 May 2022) | 2 lines
+ 
+ Remove superfluous version check, it's not possible to be false
+ 
+------------------------------------------------------------------------
+r1900630 | hege | 2022-05-06 15:03:13 +0000 (Fri, 06 May 2022) | 2 lines
+ 
+ Use primary key for MySQL bayes_expire to make it potentially Galera 
+compatible
+ 
+------------------------------------------------------------------------
+r1900622 | gbechis | 2022-05-06 10:45:31 +0000 (Fri, 06 May 2022) | 2 
 lines
  
- another white tentacle
+ better match on X-Mailer
  
 ------------------------------------------------------------------------
-r1900468 | gbechis | 2022-05-01 22:31:52 +0000 (Sun, 01 May 2022) | 2 
-lines
+r1900614 | hege | 2022-05-06 05:53:16 +0000 (Fri, 06 May 2022) | 2 lines
  
- more Paypal images
- 
-------------------------------------------------------------------------
-r1900467 | gbechis | 2022-05-01 21:40:15 +0000 (Sun, 01 May 2022) | 2 
-lines
- 
- Check emails with Paypal hosted image but message not from Paypal
+ Make if logic a little more straightforward
  
 ------------------------------------------------------------------------
-r1900464 | hege | 2022-05-01 18:13:16 +0000 (Sun, 01 May 2022) | 2 lines
+r1900613 | hege | 2022-05-06 05:40:14 +0000 (Fri, 06 May 2022) | 2 lines
  
- Improve docs
- 
-------------------------------------------------------------------------
-r1900462 | hege | 2022-05-01 17:51:21 +0000 (Sun, 01 May 2022) | 2 lines
- 
- Clean up DecodeShortURLs code. Add MySQL/Postgres support.
+ Act as soon as DKIMDOMAIN is ready
  
 ------------------------------------------------------------------------
-r1900458 | hege | 2022-05-01 14:10:07 +0000 (Sun, 01 May 2022) | 2 lines
+r1900607 | hege | 2022-05-06 04:14:21 +0000 (Fri, 06 May 2022) | 2 lines
  
- Fix invalid tr//
- 
-------------------------------------------------------------------------
-r1900446 | hege | 2022-05-01 09:25:11 +0000 (Sun, 01 May 2022) | 2 lines
- 
- Fix perlcritic
+ Only mark rule_pending when needed
  
 ------------------------------------------------------------------------
-r1900443 | hege | 2022-05-01 09:08:00 +0000 (Sun, 01 May 2022) | 2 lines
+r1900605 | jhardin | 2022-05-06 03:34:53 +0000 (Fri, 06 May 2022) | 1 line
  
- run_long_tests is already enabled by default, remove unneeded duplicates 
-from xt/
+ Update generated ruleset
+------------------------------------------------------------------------
+r1900599 | hege | 2022-05-05 17:58:25 +0000 (Thu, 05 May 2022) | 2 lines
+ 
+ Ok fix properly. Apparently checkfile() is only for saving filenames 
+when error (Output can be examined in..). Fix the path.
  
 ------------------------------------------------------------------------
-r1900437 | hege | 2022-05-01 06:56:11 +0000 (Sun, 01 May 2022) | 2 lines
+r1900597 | hege | 2022-05-05 17:48:29 +0000 (Thu, 05 May 2022) | 2 lines
  
- Bug 7983 - t/all_modules.t (OLEVBMacro) fails without 
-Archive::Zip/IO::String
+ Fix spurious cannot open mkrules_else.0 warnings
  
+------------------------------------------------------------------------
+r1900596 | hege | 2022-05-05 17:39:36 +0000 (Thu, 05 May 2022) | 2 lines
+ 
+ Fix HAVE_ZLIB
+ 
+------------------------------------------------------------------------
+r1900595 | hege | 2022-05-05 17:31:13 +0000 (Thu, 05 May 2022) | 2 lines
+ 
+ Fix: "my" variable $dbh masks earlier declaration in same scope
+ 
+------------------------------------------------------------------------
+r1900594 | hege | 2022-05-05 17:31:00 +0000 (Thu, 05 May 2022) | 2 lines
+ 
+ Fix: Name "main::libidn_done" used only once: possible typo
+ 
+------------------------------------------------------------------------
+r1900586 | sidney | 2022-05-05 13:15:00 +0000 (Thu, 05 May 2022) | 1 line
+ 
+ bug 7986 Partial fix lets  tests run when directory path up to 80 long. 
+Use workdir, remove now obsolete mk_safe_tmpdir()
+------------------------------------------------------------------------
+r1900583 | sidney | 2022-05-05 12:16:01 +0000 (Thu, 05 May 2022) | 1 line
+ 
+ 4.0.0-pre1 released
 ------------------------------------------------------------------------
