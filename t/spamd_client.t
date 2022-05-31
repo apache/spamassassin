@@ -97,7 +97,7 @@ if (!$RUNNING_ON_WINDOWS) {
 
   %anti_patterns = ();
 
-  my $sockpath = $socketdir."/spamd.sock";
+  my $sockpath = mk_socket_tempdir()."/spamd.sock";
   ok(start_spamd("-L --socketpath=$sockpath"));
 
   $client = create_clientobj({

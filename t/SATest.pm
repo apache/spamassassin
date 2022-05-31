@@ -25,7 +25,7 @@ use vars qw($RUNNING_ON_WINDOWS $SSL_AVAILABLE
             $SKIP_SPAMD_TESTS $SKIP_SPAMC_TESTS $NO_SPAMC_EXE
             $SKIP_SETUID_NOBODY_TESTS $SKIP_DNSBL_TESTS
             $have_inet4 $have_inet6 $spamdhost $spamdport
-            $workdir $socketdir $siterules $localrules $userrules $userstate
+            $workdir $siterules $localrules $userrules $userstate
             $keep_workdir $mainpid);
 
 my $sa_code_dir;
@@ -174,16 +174,11 @@ sub sa_t_init {
       rmtree($workdir);
     }
   }
-  if (defined $socketdir) {
-    rmtree($socketdir);
-  }
 
   # individual work directory to make parallel tests possible
   $workdir = tempdir("$tname.XXXXXX", DIR => "log");
   die "FATAL: failed to create workdir: $!" unless -d $workdir;
   $keep_workdir = 0;
-  $socketdir = tempdir(CLEANUP => 1);
-  die "FATAL: failed to create workdir: $!" unless -d $workdir;
   # $siterules contains all stock *.pre files
   $siterules = "$workdir/siterules";
   # $localrules contains all stock *.cf files
@@ -1017,6 +1012,12 @@ sub conf_bool {
   return 0;                                 # n or 0
 }
 
+sub mk_socket_tempdir {
+  my $dir = tempdir(CLEANUP => 1);
+  die "FATAL: failed to create socket_tempdir: $!" unless -d $dir;
+  return $dir;
+}
+
 sub wait_for_file_to_change_or_disappear {
   my ($f, $timeout, $action) = @_;
 
@@ -1205,9 +1206,6 @@ END {
   # Cleanup workdir (but not if inside forked process)
   if (defined $workdir && !$keep_workdir && $$ == $mainpid) {
     rmtree($workdir);
-  }
-  if (defined $socketdir && $$ == $mainpid) {
-    rmtree($socketdir);
   }
 }
 

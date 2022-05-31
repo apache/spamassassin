@@ -10,7 +10,7 @@ plan tests => 10;
 
 # ---------------------------------------------------------------------------
 
-my $sockpath = $socketdir."/spamd.sock";
+my $sockpath = mk_socket_tempdir()."/spamd.sock";
 start_spamd("-D -L --socketpath=$sockpath --port $spamdport -A $spamdhost -i $spamdhost");
 %patterns = (
   q{ Subject: There yours for FREE!}, 'subj',

@@ -24,7 +24,7 @@ print COUNTER "0";
 close COUNTER;
 chmod (0666, "$workdir/spamd_plugin.tmp");
 
-my $sockpath = $socketdir."/spamd.sock";
+my $sockpath = mk_socket_tempdir()."/spamd.sock";
 start_spamd("-D -L --socketpath=$sockpath");
 
 %patterns = (

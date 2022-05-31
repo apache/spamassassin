@@ -20,7 +20,7 @@ tstprefs("
   use_auto_whitelist 0
 ");
 
-my $sockpath = $socketdir."/spamd.sock";
+my $sockpath = mk_socket_tempdir()."/spamd.sock";
 start_spamd("-D -L --socketpath=$sockpath");
 ok (spamcrun ("-U $sockpath < data/spam/001", \&patterns_run_cb));
 ok_all_patterns();
