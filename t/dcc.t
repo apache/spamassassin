@@ -6,6 +6,7 @@ use SATest; sa_t_init("dcc");
 use constant HAS_DCC => eval { $_ = untaint_cmd("which cdcc"); chomp; -x };
 
 use Test::More;
+plan skip_all => "Tests don't work on windows" if $RUNNING_ON_WINDOWS;
 plan skip_all => "Net tests disabled" unless conf_bool('run_net_tests');
 plan skip_all => "DCC tests disabled" unless conf_bool('run_dcc_tests');
 plan skip_all => "DCC executable not found in path" unless HAS_DCC;
