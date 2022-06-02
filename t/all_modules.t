@@ -76,7 +76,9 @@ tstprefs("
             );
 
 %anti_patterns = (
-        ' warn: ', 'warn',
+        # sometimes trips on URIBL_BLOCKED, ignore..
+        # also ignore ResourceLimits/OLEVBMacro missing required modules
+        qr/ warn: (?![^\n]*(?:dns_block_rule|ResourceLimits not used|OLEVBMacro:.*required module))/, 'warn',
         qr/Insecure dependency/i, 'tainted',
         qr/Syntax error/i, 'syntax',
         qr/Use of uninitialized/i, 'uninitialized',
@@ -85,11 +87,9 @@ tstprefs("
             );
 
 if (conf_bool('run_net_tests')) {
-    # sometimes trips on URIBL_BLOCKED, ignore..
-    # also ignore ResourceLimits/OLEVBMacro missing required modules
-    sarun ("-D -t < data/nice/001 2>&1 | grep -vE '(dns_block_rule|ResourceLimits not used|OLEVBMacro:.*required module)'", \&patterns_run_cb);
+    sarun ("-D -t < data/nice/001 2>&1", \&patterns_run_cb);
     ok_all_patterns();
 } else {
-    sarun ("-D -L -t < data/nice/001 2>&1 | grep -vE '(ResourceLimits not used|OLEVBMacro:.*required module)'", \&patterns_run_cb);
+    sarun ("-D -L -t < data/nice/001 2>&1", \&patterns_run_cb);
     ok_all_patterns();
 }
