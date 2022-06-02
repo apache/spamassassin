@@ -64,10 +64,25 @@ BEGIN {
   };
 
   # Clean PATH so taint doesn't complain
-  $ENV{'PATH'} = '/bin:/usr/bin:/usr/local/bin';
-  # Remove tainted envs, at least ENV used in FreeBSD
-  delete @ENV{qw(IFS CDPATH ENV BASH_ENV)};
-
+  if (!$RUNNING_ON_WINDOWS) {
+    $ENV{'PATH'} = '/bin:/usr/bin:/usr/local/bin';
+    # Remove tainted envs, at least ENV used in FreeBSD
+    delete @ENV{qw(IFS CDPATH ENV BASH_ENV)};
+  } else {
+    # Windows might need non-system directories in PATH to run a Perl installation
+    # The best we can do is clean out obviously bad stuff such as relative paths or \..\
+    my @pathdirs = split(';', $ENV{'PATH'});
+    $ENV{'PATH'} =
+      join(';', # filter for only dirs that are canonical absolute paths that exist
+	   map {
+		 my $pathdir = $_;
+		 File::Spec->canonpath(Cwd::realpath($pathdir)) =~ /^(.*)\z/s;
+		 my $abspathdir = $1; # untaint it
+		 ((lc $pathdir eq lc $abspathdir) and (-d $abspathdir))?($abspathdir):()
+		}
+		@pathdirs);
+  }
+  
   # Fix INC to point to absolute path of built SA
   if (-e 't/test_dir') { $sa_code_dir = 'blib/lib'; }
   elsif (-e 'test_dir') { $sa_code_dir = '../blib/lib'; }
