@@ -146,6 +146,11 @@ $have_libidn||$have_libidn2
   sub find_executable_in_env_path {
     my ($filename) = @_;
 
+    if (RUNNING_ON_WINDOWS) {
+      # Look for .exe on Windows
+      $filename .= '.exe' unless $filename =~ /\.exe$/i;
+    }
+
     clean_path_in_taint_mode();
     if ( !$displayed_path++ ) {
       dbg("util: current PATH is: ".join($Config{'path_sep'},File::Spec->path()));
