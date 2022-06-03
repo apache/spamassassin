@@ -20,7 +20,7 @@ use strict;
 use warnings;
 use re 'taint';
 
-my $VERSION = 2.003;
+my $VERSION = 4.000;
 
 =head1 NAME
 
@@ -97,17 +97,6 @@ header FREEMAIL_HDRX eval:check_freemail_header('header' [, 'regex'])
 header FREEMAIL_BODY eval:check_freemail_body(['regex'])
 
    Searches body for freemail address. With optional regex to match.
-
-=head1 CHANGELOG
-
- 1.996 - fix freemail_skip_bulk_envfrom
- 1.997 - set freemail_skip_when_over_max to 1 by default
- 1.998 - don't warn about missing freemail_domains when linting
- 1.999 - default welcomelist undisclosed-recipient@yahoo.com etc
- 2.000 - some cleaning up
- 2.001 - fix freemail_welcomelist
- 2.002 - _add_desc -> _got_hit, fix description email append bug
- 2.003 - freemail_import_(def_)welcomelist_auth
 
 =cut
 
@@ -296,12 +285,7 @@ sub finish_parsing_end {
         dbg("loaded freemail_domains entries: $count normal, $wcount wildcard");
     }
     else {
-        if ($self->{main}->{lint_rules} ||1) {
-            dbg("no freemail_domains entries defined, disabling plugin");
-        }
-        else {
-            warn("freemail: no freemail_domains entries defined, disabling plugin\n");
-        }
+        dbg("no freemail_domains entries defined, disabling plugin");
         $self->{freemail_available} = 0;
     }
 
@@ -426,21 +410,13 @@ sub _parse_body {
     return 1;
 }
 
-sub _got_hit {
-    my ($self, $pms, $email, $desc) = @_;
+sub _test_log {
+    my ($self, $pms, $email, $rulename) = @_;
 
-    my $rulename = $pms->get_current_eval_rule_name();
-
-    if (defined $pms->{conf}->{descriptions}->{$rulename}) {
-        $desc = $pms->{conf}->{descriptions}->{$rulename};
-    }
-
-    if ($pms->{main}->{conf}->{freemail_add_describe_email}) {
-        $email =~ s/\@/[at]/g;
+    if ($pms->{conf}->{freemail_add_describe_email}) {
+        $email =~ s/\@/(at)/g;
         $pms->test_log($email, $rulename);
     }
-
-    $pms->got_hit($rulename, "", description => $desc, ruletype => 'eval');
 }
 
 sub check_freemail_header {
@@ -483,7 +459,7 @@ sub check_freemail_header {
             else {
                 dbg("HIT! $email is freemail");
             }
-            $self->_got_hit($pms, $email, "Header $header is freemail");
+            $self->_test_log($pms, $email, $rulename);
             return 1;
          }
     }
@@ -515,16 +491,16 @@ sub check_freemail_body {
         foreach my $email (keys %{$pms->{freemail_cache}{body}}) {
             if ($email =~ /$re/o) {
                 dbg("HIT! email from body is freemail and matches regex: $email");
-                $self->_got_hit($pms, $email, "Email from body is freemail");
-                return 0;
+                $self->_test_log($pms, $email, $rulename);
+                return 1;
             }
         }
     }
     elsif (scalar keys %{$pms->{freemail_cache}{body}}) {
         my $emails = join(', ', keys %{$pms->{freemail_cache}{body}});
         dbg("HIT! body has freemails: $emails");
-        $self->_got_hit($pms, $emails, "Body contains freemails");
-        return 0;
+        $self->_test_log($pms, $emails, $rulename);
+        return 1;
     }
 
     return 0;
@@ -567,8 +543,8 @@ sub check_freemail_from {
         else {
             dbg("HIT! $email is freemail");
         }
-        $self->_got_hit($pms, $email, "Sender address is freemail");
-        return 0;
+        $self->_test_log($pms, $email, $rulename);
+        return 1;
     }
 
     return 0;
@@ -620,8 +596,8 @@ sub check_freemail_replyto {
         dbg("HIT! From and Reply-To are different freemails");
         my $from = join(",", @from_addrs);
         my $replyto = join(",", @replyto_addrs);
-        $self->_got_hit($pms, "$from -> $replyto", "From and Reply-To are different freemails");
-        return 0;
+        $self->_test_log($pms, "$from -> $replyto", $rulename);
+        return 1;
     }
 
     if ($what eq 'replyto') {
@@ -652,8 +628,8 @@ sub check_freemail_replyto {
             foreach my $reply_email (@$reply_addrs) {
                 if ($body_email ne $reply_email) {
                     dbg("HIT! $reply_email (Reply) and $body_email (Body) are different freemails");
-                    $self->_got_hit($pms, "$reply_email, $body_email", "Different freemails in reply header and body");
-                    return 0;
+                    $self->_test_log($pms, "$reply_email, $body_email", $rulename);
+                    return 1;
                 }
             }
         }
