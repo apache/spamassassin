@@ -756,7 +756,7 @@ sub do_sender_lookup {
             $pkt->header->rcode eq 'SERVFAIL')
         {
           if (++$pms->{sender_host_fail} == 2) {
-            $pms->got_hit($ent->{rulename}, "DNS: ", ruletype => "dns")
+            $pms->got_hit($ent->{rulename}, "DNS: ", ruletype => "dns");
           }
         }
       }
