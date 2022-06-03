@@ -239,12 +239,10 @@ sub check_uri_detail {
       dbg("uri: criteria for $test met");
     }
     
-    $permsg->got_hit($test);
-
     # reset hash
     keys %uri_detail;
 
-    return 0;
+    return 1;
   }
 
   return 0;

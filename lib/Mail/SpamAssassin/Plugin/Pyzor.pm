@@ -324,7 +324,8 @@ sub check_pyzor {
 
   if (!$self->{main}->{conf}->{pyzor_fork}) {
     my @results = $self->pyzor_lookup($pms);
-    return $self->_check_result($pms, \@results);
+    $self->_check_result($pms, \@results);
+    return 0; # _check_result calls got_hit()
   }
 
   ## forking method
