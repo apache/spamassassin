@@ -3125,13 +3125,13 @@ sub got_hit {
            for $tflags_ref->{$rule};
   };
 
-  $self->rule_ready($rule, 1); # mark ready for metas
-  my $already_hit = $self->{tests_already_hit}->{$rule};
+  my $already_hit = $self->{tests_already_hit}->{$rule} || 0;
   # don't count hits multiple times, unless 'tflags multiple' is on
   if ($already_hit && ($tflags_ref->{$rule}||'') !~ /\bmultiple\b/) {
     return;
   }
 
+  $self->rule_ready($rule, 1); # mark ready for metas
   $self->{tests_already_hit}->{$rule} = $already_hit + $value;
 
   # default ruletype, if not specified:
@@ -3188,6 +3188,9 @@ lookups for the rule.
 
 sub rule_ready {
   my ($self, $rule, $no_async) = @_;
+
+  # Ready already?
+  return if exists $self->{tests_already_hit}->{$rule};
 
   if (!$no_async && $self->get_async_pending_rules($rule)) {
     # Can't be ready if there are pending DNS lookups, ignore for now.
