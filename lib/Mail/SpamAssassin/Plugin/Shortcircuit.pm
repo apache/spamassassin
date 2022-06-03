@@ -234,7 +234,7 @@ sub hit_rule {
   my $rule = $params->{rulename};
 
   # don't s/c if we're linting
-  return if ($scan->{lint_rules});
+  return if ($self->{main}->{lint_rules});
 
   # don't s/c if we're in compile_now()
   return if ($self->{am_compiling});
