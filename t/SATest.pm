@@ -164,8 +164,8 @@ sub sa_t_init {
   # not skipping all spamd tests and this particular test is called
   # called "spamd_something" or "spamc_foo"
   # We still run spamc tests when there is an external SPAMD_HOST, but don't have to set up the spamd parameters for it
-  if ($SKIP_SPAMD_TESTS or ($tname !~ /spam[cd]/)) {
-    $NO_SPAMD_REQUIRED = 1;
+  if ($tname !~ /spam[cd]/) {
+    $TEST_DOES_NOT_RUN_SPAMC_OR_D = 1;
   } else {
     $spamdport = $ENV{'SPAMD_PORT'};
     $spamdport ||= probably_unused_spamd_port();
@@ -240,17 +240,17 @@ sub sa_t_init {
     $tmp_dir_mode = 0755;
   }
 
-  if (!$NO_SPAMD_REQUIRED) {
-    $NO_SPAMC_EXE = ($RUNNING_ON_WINDOWS &&
+  $NO_SPAMC_EXE = $TEST_DOES_NOT_RUN_SPAMC_OR_D ||
+                  ($RUNNING_ON_WINDOWS &&
                    !$ENV{'SPAMC_SCRIPT'} &&
                    !(-e "../spamc/spamc.exe"));
-    $SKIP_SPAMC_TESTS = ($NO_SPAMC_EXE ||
-                       ($RUNNING_ON_WINDOWS && !$ENV{'SPAMD_HOST'})); 
-    $SSL_AVAILABLE = ((!$SKIP_SPAMC_TESTS) &&  # no SSL test if no spamc
-                    (!$SKIP_SPAMD_TESTS) &&  # or if no local spamd
-                    (untaint_cmd("$spamc -V") =~ /with SSL support/) &&
-                    (untaint_cmd("$spamd --version") =~ /with SSL support/));
-  }
+  $SKIP_SPAMC_TESTS = ($NO_SPAMC_EXE ||
+                     ($RUNNING_ON_WINDOWS && !$ENV{'SPAMD_HOST'})); 
+  $SSL_AVAILABLE = (!$TEST_DOES_NOT_RUN_SPAMC_OR_D) &&
+                  (!$SKIP_SPAMC_TESTS) &&  # no SSL test if no spamc
+                  (!$SKIP_SPAMD_TESTS) &&  # or if no local spamd
+                  (untaint_cmd("$spamc -V") =~ /with SSL support/) &&
+                  (untaint_cmd("$spamd --version") =~ /with SSL support/);
 
   for $tainted (<../rules/*.pm>, <../rules/*.pre>, <../rules/languages>) {
     $tainted =~ /(.*)/;
@@ -309,7 +309,7 @@ sub clear_localrules {
 # a port number between 40000 and 65520; used to allow multiple test
 # suite runs on the same machine simultaneously
 sub probably_unused_spamd_port {
-  return 0 if $NO_SPAMD_REQUIRED;
+  return 0 if $SKIP_SPAMD_TESTS;
 
   my $port;
   my @nstat;
@@ -601,7 +601,7 @@ sub recreate_outputdir_tmp {
 # out: $spamd_stderr
 sub start_spamd {
   return if $SKIP_SPAMD_TESTS;
-  die "NO_SPAMD_REQUIRED in start_spamd! oops" if $NO_SPAMD_REQUIRED;
+  die "TEST_DOES_NOT_RUN_SPAMC_OR_D; in start_spamd! oops" if $TEST_DOES_NOT_RUN_SPAMC_OR_D;
 
   my $spamd_extra_args = shift;
 
@@ -737,7 +737,7 @@ sub start_spamd {
 
 sub stop_spamd {
   return 0 if ( defined($spamd_already_killed) || $SKIP_SPAMD_TESTS);
-  die "NO_SPAMD_REQUIRED in stop_spamd! oops" if $NO_SPAMD_REQUIRED;
+  die "TEST_DOES_NOT_RUN_SPAMC_OR_D; in stop_spamd! oops" if $TEST_DOES_NOT_RUN_SPAMC_OR_D;
 
   $spamd_pid ||= 0;
   $spamd_pid = untaint_var($spamd_pid);
