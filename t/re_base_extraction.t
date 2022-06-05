@@ -438,11 +438,13 @@ sub try_extraction {
   ok($sa);
 
   # remove all rules and plugins; we want just our stuff
-  rmtree("$siterules/*.pre", "$siterules/*.pm", { safe=> 1 });
+  foreach (<$siterules/*.pre>, <$siterules/*.pm>) {
+    unlink(untaint_var($_));
+  }
   # keep 20_aux_tlds.cf to suppress RB warnings
-  rename("$localrules/20_aux_tlds.cf", "$localrules/20_aux_tlds.cf.tmp");
-  rmtree("$localrules/*.cf", { safe=> 1 });
-  rename("$localrules/20_aux_tlds.cf.tmp", "$localrules/20_aux_tlds.cf");
+  foreach (<$localrules/*.cf>) {
+    unlink(untaint_var($_)) unless $_ =~ /20_aux_tlds.cf$/;
+  }
 
   { # suppress unnecessary warning:
     #   "Filehandle STDIN reopened as STDOUT only for output"
