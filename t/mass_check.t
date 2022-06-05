@@ -3,7 +3,9 @@
 use lib '.'; use lib 't';
 use SATest; sa_t_init("mass_check");
 
-use Test::More tests => 1;
+use Test::More;
+plan skip_all => "Bug 8003 - Investigate if can be made to work on windows" if $RUNNING_ON_WINDOWS;
+plan tests => 1;
 
 # ---------------------------------------------------------------------------
 

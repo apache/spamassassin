@@ -11,7 +11,9 @@ use warnings;
 
 my $debug = 0;
 
-use Test::More tests => 128;
+use Test::More;
+plan skip_all => "Bug 8003 - Investigate if can be made to work on windows" if $RUNNING_ON_WINDOWS;
+plan tests => 128;
 use lib '../lib';
 
 # ---------------------------------------------------------------------------
@@ -436,11 +438,10 @@ sub try_extraction {
   ok($sa);
 
   # remove all rules and plugins; we want just our stuff
-  untaint_system("rm -f $siterules/*.pre");
-  untaint_system("rm -f $siterules/*.pm");
+  rmtree("$siterules/*.pre", "$siterules/*.pm", { safe=> 1 });
   # keep 20_aux_tlds.cf to suppress RB warnings
   rename("$localrules/20_aux_tlds.cf", "$localrules/20_aux_tlds.cf.tmp");
-  untaint_system("rm -f $localrules/*.cf");
+  rmtree("$localrules/*.cf", { safe=> 1 });
   rename("$localrules/20_aux_tlds.cf.tmp", "$localrules/20_aux_tlds.cf");
 
   { # suppress unnecessary warning:

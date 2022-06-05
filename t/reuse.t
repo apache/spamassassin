@@ -10,6 +10,7 @@ use Mail::SpamAssassin;
 
 use Test::More;
 plan skip_all => "no mass check" unless (-e '../masses/mass-check');
+plan skip_all => "Bug 8003 - Investigate if can be made to work on windows" if $RUNNING_ON_WINDOWS;
 plan tests => 37;
 
 # Tests the following cases:

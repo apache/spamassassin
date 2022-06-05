@@ -8,6 +8,7 @@ use constant HAS_BDB => eval { require BerkeleyDB };
 
 use Test::More;
 
+plan skip_all => "Bug 8003 - Investigate if can be made to work on windows" if $RUNNING_ON_WINDOWS;
 plan skip_all => "Long running tests disabled" unless conf_bool('run_long_tests');
 plan skip_all => "BerkeleyDB is unavailable" unless HAS_BDB;
 

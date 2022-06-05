@@ -3,7 +3,9 @@
 
 use lib '.'; use lib 't';
 use SATest; sa_t_init("mkrules_else");
-use Test::More tests => 18;
+use Test::More;
+plan skip_all => "Bug 8003 - Investigate if can be made to work on windows" if $RUNNING_ON_WINDOWS;
+plan tests => 18;
 use File::Copy;
 use File::Path;
 
