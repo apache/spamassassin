@@ -183,7 +183,7 @@ sub check_dmarc_none {
   my ($self, $pms, $name) = @_;
 
   my $result = sub {
-    return defined $pms->{dmarc_result} &&
+    defined $pms->{dmarc_result} &&
       $pms->{dmarc_result} eq 'fail' &&
       $pms->{dmarc_policy} eq 'none';
   };
