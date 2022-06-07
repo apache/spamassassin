@@ -30,6 +30,11 @@ Taking into account signatures from any signing domains:
  full   DKIM_VALID_AU         eval:check_dkim_valid_author_sig()
  full   DKIM_VALID_EF         eval:check_dkim_valid_envelopefrom()
 
+Taking into account ARC signatures from any signing domains:
+
+ full   ARC_SIGNED           eval:check_arc_signed()
+ full   ARC_VALID            eval:check_arc_valid()
+
 Taking into account signatures from specified signing domains only:
 (quotes may be omitted on domain names consisting only of letters, digits,
 dots, and minus characters)
@@ -147,7 +152,9 @@ sub new {
 
   # signatures
   $self->register_eval_rule("check_dkim_signed", $Mail::SpamAssassin::Conf::TYPE_FULL_EVALS);
+  $self->register_eval_rule("check_arc_signed", $Mail::SpamAssassin::Conf::TYPE_FULL_EVALS);
   $self->register_eval_rule("check_dkim_valid", $Mail::SpamAssassin::Conf::TYPE_FULL_EVALS);
+  $self->register_eval_rule("check_arc_valid", $Mail::SpamAssassin::Conf::TYPE_FULL_EVALS);
   $self->register_eval_rule("check_dkim_valid_author_sig", $Mail::SpamAssassin::Conf::TYPE_FULL_EVALS);
   $self->register_eval_rule("check_dkim_testing", $Mail::SpamAssassin::Conf::TYPE_HEAD_EVALS);
   $self->register_eval_rule("check_dkim_valid_envelopefrom", $Mail::SpamAssassin::Conf::TYPE_FULL_EVALS);
@@ -398,6 +405,7 @@ prepend its own signature on a copy of some third party mail and re-send it,
 which makes it no more trustworthy than without such signature. This is also
 a reason for a rule DKIM_VALID to have a near-zero score, i.e. a rule hit
 is only informational.
+This option is evaluated on ARC signatures checks as well.
 
 =cut
 
@@ -542,6 +550,18 @@ sub check_dkim_signed {
   return $result;
 }
 
+sub check_arc_signed {
+  my ($self, $pms, $full_ref, @acceptable_domains) = @_;
+  $self->_check_dkim_signature($pms)  if !$pms->{arc_checked_signature};
+  my $result = 0;
+  if (!$pms->{arc_signed}) {
+    # don't bother
+  } elsif (!@acceptable_domains) {
+    $result = 1;  # no additional constraints, any signing domain will do
+  }
+  return $result;
+}
+
 sub check_dkim_valid {
   my ($self, $pms, $full_ref, @acceptable_domains) = @_;
   $self->_check_dkim_signature($pms)  if !$pms->{dkim_checked_signature};
@@ -553,6 +573,19 @@ sub check_dkim_valid {
                   # also any signing key size will do
   } else {
     $result = $self->_check_dkim_signed_by($pms,1,0,\@acceptable_domains);
+  }
+  return $result;
+}
+
+sub check_arc_valid {
+  my ($self, $pms, $full_ref, @acceptable_domains) = @_;
+  $self->_check_dkim_signature($pms)  if !$pms->{arc_checked_signature};
+  my $result = 0;
+  if (!$pms->{arc_valid}) {
+    # don't bother
+  } elsif (!@acceptable_domains) {
+    $result = 1;  # no additional constraints, any signing domain will do,
+                  # also any signing key size will do
   }
   return $result;
 }
@@ -700,6 +733,9 @@ sub _dkim_load_modules {
       my $version = Mail::DKIM::Verifier->VERSION;
       if (version->parse($version) >= version->parse(0.31)) {
         dbg("dkim: using Mail::DKIM version $version");
+      } elsif (version->parse($version) < version->parse(0.50)) {
+        dbg("dkim: Mail::DKIM $version is older than 0.50 ".
+             "ARC support will not be available, suggested upgrade to 0.50 or later!");
       } else {
         info("dkim: Mail::DKIM $version is older than the required ".
              "minimal version 0.31, suggested upgrade to 0.37 or later!");
@@ -712,6 +748,18 @@ sub _dkim_load_modules {
         eval { require Mail::DKIM::DkimPolicy }  # ignoring status
       }
     }
+    eval {
+      # Have to do this so that RPM doesn't find these as required perl modules.
+      { require Mail::DKIM::ARC::Verifier }
+      $self->{arc_available} = 1;
+    } or do {
+      $eval_stat = $@ ne '' ? $@ : "errno=$!";  chomp $eval_stat;
+      if (defined $eval_stat) {
+        dbg("dkim: cannot load Mail::DKIM::ARC module, DKIM::ARC checks disabled: %s",
+          $eval_stat);
+      }
+      $self->{arc_available} = 0;
+    };
   }
   return $self->{service_available};
 }
@@ -776,12 +824,13 @@ sub _get_authors {
 }
 
 sub _check_dkim_signature {
-  my ($self, $pms) = @_;
+  my ($self, $pms, $type) = @_;
 
   my $conf = $pms->{conf};
-  my($verifier, @signatures, @valid_signatures);
+  my($verifier, $arc_verifier, @signatures, @arc_signatures, @valid_signatures, @arc_valid_signatures);
 
   $pms->{dkim_checked_signature} = 1; # has this sub already been invoked?
+  $pms->{arc_checked_signature} = 1; # has this sub already been invoked?
   $pms->{dkim_signatures_ready} = 0;  # have we obtained & verified signatures?
   $pms->{dkim_signatures_dependable} = 0;
   # dkim_signatures_dependable =
@@ -790,15 +839,17 @@ sub _check_dkim_signature {
   #     (no signatures, or message was not truncated) )
   $pms->{dkim_signatures} = \@signatures;
   $pms->{dkim_valid_signatures} = \@valid_signatures;
+  $pms->{arc_signatures} = \@arc_signatures;
+  $pms->{arc_valid_signatures} = \@arc_valid_signatures;
   $pms->{dkim_signed} = 0;
+  $pms->{arc_signed} = 0;
   $pms->{dkim_valid} = 0;
+  $pms->{arc_valid} = 0;
   $pms->{dkim_key_testing} = 0;
   # the following hashes are keyed by a signing domain (SDID):
   $pms->{dkim_author_sig_tempfailed} = {}; # DNS timeout verifying author sign.
   $pms->{dkim_has_valid_author_sig} = {};  # a valid author domain signature
   $pms->{dkim_has_any_author_sig} = {};  # valid or invalid author domain sign.
-
-  $self->_get_authors($pms)  if !$pms->{dkim_author_addresses};
 
   my $suppl_attrib = $pms->{msg}->{suppl_attrib};
   if (defined $suppl_attrib && exists $suppl_attrib->{dkim_signatures}) {
@@ -833,81 +884,110 @@ sub _check_dkim_signature {
       }
     }
     $verifier = Mail::DKIM::Verifier->new;
-    if (!$verifier) {
+    _check_signature($self, $pms, $verifier, 'DKIM', \@signatures) if $self->{service_available};
+    $arc_verifier = Mail::DKIM::ARC::Verifier->new;
+    _check_signature($self, $pms, $arc_verifier, 'ARC', \@arc_signatures) if $self->{arc_available};
+  }
+}
+
+sub _check_signature {
+  my($self, $pms, $verifier, $type, $signatures) = @_;
+
+  my $sig_type = lc $type;
+  $self->_get_authors($pms)  if !$pms->{"${sig_type}_author_addresses"};
+
+  my(@valid_signatures);
+  my $conf = $pms->{conf};
+  if (!$verifier) {
+    if($type eq 'DKIM') {
       dbg("dkim: cannot create Mail::DKIM::Verifier object");
-      return;
+    } elsif($type eq 'ARC') {
+      dbg("dkim: cannot create Mail::DKIM::ARC::Verifier object");
     }
-    $pms->{dkim_verifier} = $verifier;
-    #
-    # feed content of a message into verifier, using \r\n endings,
-    # required by Mail::DKIM API (see bug 5300)
-    # note: bug 5179 comment 28: perl does silly things on non-Unix platforms
-    # unless we use \015\012 instead of \r\n
-    eval {
-      my $str = $pms->{msg}->get_pristine();
-      if ($pms->{msg}->{line_ending} eq "\015\012") {
-        # message already CRLF, just feed it
-        $verifier->PRINT($str);
-      } else {
-        # feeding large chunk to Mail::DKIM is _much_ faster than line-by-line
-        $str =~ s/\012/\015\012/gs; # LF -> CRLF
-        $verifier->PRINT($str);
-        undef $str;
+    return;
+  } else {
+    if($type eq 'DKIM') {
+      $pms->{dkim_verifier} = $verifier;
+    } elsif($type eq 'ARC') {
+      $pms->{arc_verifier} = $verifier;
+    }
+  }
+  # feed content of a message into verifier, using \r\n endings,
+  # required by Mail::DKIM API (see bug 5300)
+  # note: bug 5179 comment 28: perl does silly things on non-Unix platforms
+  # unless we use \015\012 instead of \r\n
+  eval {
+    my $str = $pms->{msg}->get_pristine();
+    if ($pms->{msg}->{line_ending} eq "\015\012") {
+      # message already CRLF, just feed it
+      $verifier->PRINT($str);
+    } else {
+      # feeding large chunk to Mail::DKIM is _much_ faster than line-by-line
+      $str =~ s/\012/\015\012/gs; # LF -> CRLF
+      $verifier->PRINT($str);
+      undef $str;
+    }
+    1;
+  } or do {  # intercept die() exceptions and render safe
+    my $eval_stat = $@ ne '' ? $@ : "errno=$!";  chomp $eval_stat;
+    dbg("dkim: verification failed, intercepted error: $eval_stat");
+    return 0;           # cannot verify message
+  };
+
+  my $timeout = $conf->{dkim_timeout};
+  my $timer = Mail::SpamAssassin::Timeout->new(
+                { secs => $timeout, deadline => $pms->{master_deadline} });
+
+  my $err = $timer->run_and_catch(sub {
+    dbg("dkim: performing public $type key lookup and signature verification");
+    $verifier->CLOSE();  # the action happens here
+
+    # currently SpamAssassin's parsing is better than Mail::Address parsing,
+    # don't bother fetching $verifier->message_originator->address
+    # to replace what we already have in $pms->{dkim_author_addresses}
+
+    # versions before 0.29 only provided a public interface to fetch one
+    # signature, newer versions allow access to all signatures of a message
+    @$signatures = $verifier->UNIVERSAL::can("signatures") ?
+                               $verifier->signatures : $verifier->signature;
+    if (would_log("dbg","dkim")) {
+      foreach my $signature (@$signatures) {
+        dbg("dkim: $type signature i=%s d=%s",
+          map(!defined $_ ? '(undef)' : $_,
+            $signature->identity, $signature->domain
+          )
+        );
       }
-      1;
-    } or do {  # intercept die() exceptions and render safe
-      my $eval_stat = $@ ne '' ? $@ : "errno=$!";  chomp $eval_stat;
-      dbg("dkim: verification failed, intercepted error: $eval_stat");
-      return 0;           # cannot verify message
-    };
-
-    my $timeout = $conf->{dkim_timeout};
-    my $timer = Mail::SpamAssassin::Timeout->new(
-                  { secs => $timeout, deadline => $pms->{master_deadline} });
-
-    my $err = $timer->run_and_catch(sub {
-      dbg("dkim: performing public key lookup and signature verification");
-      $verifier->CLOSE();  # the action happens here
-
-      # currently SpamAssassin's parsing is better than Mail::Address parsing,
-      # don't bother fetching $verifier->message_originator->address
-      # to replace what we already have in $pms->{dkim_author_addresses}
-
-      # versions before 0.29 only provided a public interface to fetch one
-      # signature, newer versions allow access to all signatures of a message
-      @signatures = $verifier->UNIVERSAL::can("signatures") ?
-                                 $verifier->signatures : $verifier->signature;
-
-      if (would_log("dbg","dkim")) {
-        foreach my $signature (@signatures) {
-          dbg("dkim: signature i=%s d=%s",
-            map(!defined $_ ? '(undef)' : $_,
-              $signature->identity, $signature->domain
-            )
-          );
-        }
-      }
-    });
-    if ($timer->timed_out()) {
-      dbg("dkim: public key lookup or verification timed out after %s s",
-          $timeout );
+    }
+  });
+  if ($timer->timed_out()) {
+    dbg("dkim: public key lookup or verification timed out after %s s",
+        $timeout );
 #***
-    # $pms->{dkim_author_sig_tempfailed}->{$_} = 1  for ...
+  # $pms->{dkim_author_sig_tempfailed}->{$_} = 1  for ...
 
-    } elsif ($err) {
-      chomp $err;
-      dbg("dkim: public key lookup or verification failed: $err");
-    }
+  } elsif ($err) {
+    chomp $err;
+    dbg("dkim: $type public key lookup or verification failed: $err");
+  }
+  if($type eq 'DKIM') {
     $pms->{dkim_signatures_ready} = 1;
-    if (!@signatures || !$pms->{tests_already_hit}->{'__TRUNCATED'}) {
+    if (!@$signatures || !$pms->{tests_already_hit}->{'__TRUNCATED'}) {
       $pms->{dkim_signatures_dependable} = 1;
+    }
+  } elsif($type eq 'ARC') {
+    $pms->{arc_signatures_ready} = 1;
+    if (!@$signatures || !$pms->{tests_already_hit}->{'__TRUNCATED'}) {
+      $pms->{arc_signatures_dependable} = 1;
     }
   }
 
-  if ($pms->{dkim_signatures_ready}) {
+  # DKIM signatures check
+  if ($pms->{"${sig_type}_signatures_ready"}) {
     my $sig_result_supported;
+    # dkim_minimum_key_bits is evaluated for ARC signatures as well
     my $minimum_key_bits = $conf->{dkim_minimum_key_bits};
-    foreach my $signature (@signatures) {
+    foreach my $signature (@$signatures) {
       # old versions of Mail::DKIM would give undef for an invalid signature
       next if !defined $signature;
       next if !$signature->selector; # empty selector
@@ -938,63 +1018,89 @@ sub _check_dkim_signature {
         # can be undefined on a broken signature with missing required tags
       } else {
         $d = lc $d;
-        if ($pms->{dkim_author_domains}->{$d}) {  # SDID matches author domain
-          $pms->{dkim_has_any_author_sig}->{$d} = 1;
+        if ($pms->{"${sig_type}_author_domains"}->{$d}) {  # SDID matches author domain
+          $pms->{"${sig_type}_has_any_author_sig"}->{$d} = 1;
           if ($valid && !$expired &&
               $key_size && $key_size >= $minimum_key_bits) {
-            $pms->{dkim_has_valid_author_sig}->{$d} = 1;
+            $pms->{"${sig_type}_has_valid_author_sig"}->{$d} = 1;
           } elsif ( ($sig_result_supported ? $signature
                                            : $verifier)->result_detail
                    =~ /\b(?:timed out|SERVFAIL)\b/i) {
-            $pms->{dkim_author_sig_tempfailed}->{$d} = 1;
+            $pms->{"${sig_type}_author_sig_tempfailed"}->{$d} = 1;
           }
         }
       }
-      if (would_log("dbg","dkim")) {
-        dbg("dkim: %s %s, i=%s, d=%s, s=%s, a=%s, c=%s, %s, %s, %s",
-          $info,
-          $signature->isa('Mail::DKIM::DkSignature') ? 'DK' : 'DKIM',
-          map(!defined $_ ? '(undef)' : $_,
-            $signature->identity, $d, $signature->selector,
-            $signature->algorithm, scalar($signature->canonicalization),
-            $key_size ? "key_bits=$key_size" : "unknown key size",
-            ($sig_result_supported ? $signature : $verifier)->result ),
-          defined $d && $pms->{dkim_author_domains}->{$d}
-            ? 'matches author domain'
-            : 'does not match author domain',
-        );
+      if($type eq 'DKIM') {
+        if (would_log("dbg","dkim")) {
+          dbg("dkim: %s %s, i=%s, d=%s, s=%s, a=%s, c=%s, %s, %s, %s",
+            $info,
+            $signature->isa('Mail::DKIM::DkSignature') ? 'DK' : 'DKIM',
+            map(!defined $_ ? '(undef)' : $_,
+              $signature->identity, $d, $signature->selector,
+              $signature->algorithm, scalar($signature->canonicalization),
+              $key_size ? "key_bits=$key_size" : "unknown key size",
+              ($sig_result_supported ? $signature : $verifier)->result ),
+            defined $d && $pms->{dkim_author_domains}->{$d}
+              ? 'matches author domain'
+              : 'does not match author domain',
+          );
+        }
+      } elsif($type eq 'ARC') {
+        if (would_log("dbg","dkim")) {
+          dbg("dkim: %s %s, i=%s, d=%s, s=%s, a=%s, c=%s, %s, %s, %s",
+            $info,
+            $type,
+            map(!defined $_ ? '(undef)' : $_,
+              $signature->identity, $d, $signature->selector,
+              $signature->algorithm, scalar($signature->canonicalization),
+              $key_size ? "key_bits=$key_size" : "unknown key size",
+              ($sig_result_supported ? $signature : $verifier)->result ),
+            defined $d && $pms->{arc_author_domains}->{$d}
+              ? 'matches author domain'
+              : 'does not match author domain',
+          );
+        }
       }
     }
     if (@valid_signatures) {
-      $pms->{dkim_signed} = 1;
-      $pms->{dkim_valid} = 1;
+      if($type eq 'DKIM') {
+        $pms->{dkim_signed} = 1;
+        $pms->{dkim_valid} = 1;
+
+        # supply values for both tags
+        my(%seen1, %seen2, %seen3, @identity_list, @domain_list, @selector_list);
+        @identity_list = grep(defined $_ && $_ ne '' && !$seen1{$_}++,
+                            map($_->identity, @valid_signatures));
+        @domain_list =   grep(defined $_ && $_ ne '' && !$seen2{$_}++,
+                            map($_->domain, @valid_signatures));
+        @selector_list = grep(defined $_ && $_ ne '' && !$seen3{$_}++,
+                            map($_->selector, @valid_signatures));
+        $pms->set_tag('DKIMIDENTITY',
+                    @identity_list == 1 ? $identity_list[0] : \@identity_list);
+        $pms->set_tag('DKIMDOMAIN',
+                    @domain_list == 1   ? $domain_list[0]   : \@domain_list);
+        $pms->set_tag('DKIMSELECTOR',
+                    @selector_list == 1   ? $selector_list[0]   : \@selector_list);
+      } elsif($type eq 'ARC') {
+        $pms->{arc_signed} = 1;
+        $pms->{arc_valid} = 1;
+      }
       # let the result stand out more clearly in the log, use uppercase
       my $sig = $valid_signatures[0];
       my $sig_res = ($sig_result_supported ? $sig : $verifier)->result_detail;
-      dbg("dkim: signature verification result: %s", uc($sig_res));
-
-      # supply values for both tags
-      my(%seen1, %seen2, %seen3, @identity_list, @domain_list, @selector_list);
-      @identity_list = grep(defined $_ && $_ ne '' && !$seen1{$_}++,
-                            map($_->identity, @valid_signatures));
-      @domain_list =   grep(defined $_ && $_ ne '' && !$seen2{$_}++,
-                            map($_->domain, @valid_signatures));
-      @selector_list = grep(defined $_ && $_ ne '' && !$seen3{$_}++,
-                            map($_->selector, @valid_signatures));
-      $pms->set_tag('DKIMIDENTITY',
-                    @identity_list == 1 ? $identity_list[0] : \@identity_list);
-      $pms->set_tag('DKIMDOMAIN',
-                    @domain_list == 1   ? $domain_list[0]   : \@domain_list);
-      $pms->set_tag('DKIMSELECTOR',
-                    @selector_list == 1   ? $selector_list[0]   : \@selector_list);
-    } elsif (@signatures) {
-      $pms->{dkim_signed} = 1;
-      my $sig = $signatures[0];
+      dbg("dkim: $type signature verification result: %s", uc($sig_res));
+    } elsif (@$signatures) {
+      if($type eq 'DKIM') {
+        $pms->{dkim_signed} = 1;
+      } elsif($type eq 'ARC') {
+        $pms->{arc_signed} = 1;
+      }
+      my $sig = @$signatures[0];
       my $sig_res =
         ($sig_result_supported && $sig ? $sig : $verifier)->result_detail;
-      dbg("dkim: signature verification result: %s", uc($sig_res));
+      dbg("dkim: $type signature verification result: %s", uc($sig_res));
     } else {
-      dbg("dkim: signature verification result: none");
+      dbg("dkim: $type signature verification result: none");
     }
   }
 }
@@ -1356,5 +1462,8 @@ sub _wlcheck_list {
   }
   return ($any_match_at_all, \%any_match_by_wl);
 }
+
+# Version features
+sub has_arc { 1 }
 
 1;
