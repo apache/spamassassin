@@ -3,7 +3,7 @@
 use lib '.'; use lib 't';
 use SATest; sa_t_init("dcc");
 
-use constant HAS_DCC => eval { $_ = untaint_cmd("which cdcc"); chomp; -x };
+use constant HAS_DCC => !$RUNNING_ON_WINDOWS && eval { $_ = untaint_cmd("which cdcc"); chomp; -x };
 
 use Test::More;
 plan skip_all => "Tests don't work on windows" if $RUNNING_ON_WINDOWS;
