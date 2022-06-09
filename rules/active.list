@@ -287,6 +287,9 @@ CN_B2B_SPAMMER
 # tflags publish
 COMMENT_GIBBERISH
 
+# tflags net
+COMPENSATION
+
 # tflags publish
 CONTENT_AFTER_HTML
 
@@ -740,6 +743,9 @@ HAS_X_NO_RELAY
 # tflags publish
 HAS_X_OUTGOING_SPAM_STAT
 
+# tflags net
+HDRS_LCASE
+
 # good enough
 HDRS_LCASE_IMGONLY
 
@@ -827,7 +833,7 @@ HTML_OFF_PAGE
 # tflags publish
 HTML_SHRT_CMNT_OBFU_MANY
 
-# tflags publish
+# tflags net
 HTML_SINGLET_MANY
 
 # good enough
@@ -886,6 +892,9 @@ LOTTO_DEPT
 
 # tflags publish
 LUCRATIVE
+
+# good enough
+MALFORMED_FREEMAIL
 
 # tflags publish
 MALF_HTML_B64
@@ -1545,6 +1554,9 @@ SUBJ_ATTENTION
 SUBJ_BRKN_WORDNUMS
 
 # tflags net
+SUBJ_UNNEEDED_HTML
+
+# tflags net
 SURBL_BLOCKED
 
 # tflags publish
@@ -1601,6 +1613,9 @@ TO_NO_BRKTS_HTML_IMG
 # tflags publish
 TO_NO_BRKTS_HTML_ONLY
 
+# tflags net
+TO_NO_BRKTS_MSFT
+
 # tflags publish
 TO_NO_BRKTS_NORDNS_HTML
 
@@ -1611,13 +1626,13 @@ TO_NO_BRKTS_PCNT
 TO_TOO_MANY_WFH_01
 
 # good enough
+TUMBLR_IMG_NOT_RCVD_TUMB
+
+# good enough
 TVD_LONG_WORD5
 
 # good enough
 TVD_RCVD_SPACE_BRACKET
-
-# tflags net
-TVD_SPACE_RATIO_MINFP
 
 # good enough
 TVD_VISIT_PHARMA
@@ -1790,7 +1805,7 @@ URI_NOVOWEL
 # good enough
 URI_OBFU_DOM
 
-# tflags publish
+# tflags net
 URI_ONLY_MSGID_MALF
 
 # tflags publish
