@@ -249,12 +249,12 @@ use Mail::SpamAssassin::SpamdForkScaling qw(:pfstates);
 use Mail::SpamAssassin::Logger qw(:DEFAULT log_message);
 use Mail::SpamAssassin::Util qw(untaint_var untaint_file_path secure_tmpdir
                                 exit_status_str am_running_on_windows
-                                get_user_groups);
+                                get_user_groups force_die);
 use Mail::SpamAssassin::Timeout;
 
 use Getopt::Long;
 use POSIX qw(:sys_wait_h);
-use POSIX qw(locale_h setsid sigprocmask _exit);
+use POSIX qw(locale_h setsid sigprocmask);
 use Errno;
 use Fcntl qw(:flock);
 
@@ -2144,7 +2144,7 @@ sub check {
   # ensure we didn't accidentally fork (bug 4370)
   if ($starting_self_pid != $$) {
     eval { warn("spamd: accidental fork: $$ != $starting_self_pid"); };
-    POSIX::_exit(1);        # avoid END and dtor processing
+    force_die(0);        # avoid END and dtor processing
   }
 
   return 1;

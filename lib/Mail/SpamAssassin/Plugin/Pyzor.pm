@@ -38,14 +38,14 @@ use Mail::SpamAssassin::Plugin;
 use Mail::SpamAssassin::Logger;
 use Mail::SpamAssassin::Timeout;
 use Mail::SpamAssassin::Util qw(untaint_var untaint_file_path
-                                proc_status_ok exit_status_str);
+                                proc_status_ok exit_status_str force_die);
 use strict;
 use warnings;
 # use bytes;
 use re 'taint';
 
 use Storable;
-use POSIX qw(PIPE_BUF WNOHANG _exit);
+use POSIX qw(PIPE_BUF WNOHANG);
 
 our @ISA = qw(Mail::SpamAssassin::Plugin);
 
@@ -356,8 +356,7 @@ sub check_pyzor {
     $SIG{PIPE} = 'IGNORE';
     $SIG{$_} = sub {
       eval { dbg("pyzor: child process $$ caught signal $_[0]"); };
-      _exit(6);  # avoid END and destructor processing
-      kill('KILL',$$);  # still kicking? die!
+      force_die(6);  # avoid END and destructor processing
       } foreach qw(INT HUP TERM TSTP QUIT USR1 USR2);
     dbg("pyzor: child process $$ forked");
     $pms->{pyzor_backchannel}->setup_backchannel_child_post_fork();
@@ -368,12 +367,12 @@ sub check_pyzor {
     };
     if ($@) {
       dbg("pyzor: child return value freeze failed: $@");
-      _exit(0); # avoid END and destructor processing
+      force_die(0); # avoid END and destructor processing
     }
     if (!syswrite($pms->{pyzor_backchannel}->{parent}, $backmsg)) {
       dbg("pyzor: child backchannel write failed: $!");
     }
-    _exit(0); # avoid END and destructor processing
+    force_die(0); # avoid END and destructor processing
   }
 
   $pms->{pyzor_pid} = $pid;

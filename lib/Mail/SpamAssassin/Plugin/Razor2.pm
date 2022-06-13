@@ -44,13 +44,14 @@ use Mail::SpamAssassin::Plugin;
 use Mail::SpamAssassin::Logger;
 use Mail::SpamAssassin::Timeout;
 use Mail::SpamAssassin::SubProcBackChannel;
+use Mail::SpamAssassin::Util qw(force_die);
 use strict;
 use warnings;
 # use bytes;
 use re 'taint';
 
 use Storable;
-use POSIX qw(PIPE_BUF WNOHANG _exit);
+use POSIX qw(PIPE_BUF WNOHANG);
 
 our @ISA = qw(Mail::SpamAssassin::Plugin);
 
@@ -468,8 +469,7 @@ sub check_razor2 {
     $SIG{PIPE} = 'IGNORE';
     $SIG{$_} = sub {
       eval { dbg("razor2: child process $$ caught signal $_[0]"); };
-      _exit(6);  # avoid END and destructor processing
-      kill('KILL',$$);  # still kicking? die!
+      force_die(6);  # avoid END and destructor processing
       } foreach qw(INT HUP TERM TSTP QUIT USR1 USR2);
     dbg("razor2: child process $$ forked");
     $pms->{razor2_backchannel}->setup_backchannel_child_post_fork();
@@ -481,12 +481,12 @@ sub check_razor2 {
     };
     if ($@) {
       dbg("razor2: child return value freeze failed: $@");
-      _exit(0); # avoid END and destructor processing
+      force_die(0); # avoid END and destructor processing
     }
     if (!syswrite($pms->{razor2_backchannel}->{parent}, $backmsg)) {
       dbg("razor2: child backchannel write failed: $!");
     }
-    _exit(0); # avoid END and destructor processing
+    force_die(0); # avoid END and destructor processing
   }
 
   $pms->{razor2_pid} = $pid;

@@ -59,7 +59,7 @@ our @EXPORT_OK = qw(&local_tz &base64_decode &base64_encode &base32_encode
                   &secure_tmpdir &uri_list_canonicalize &get_my_locales
                   &parse_rfc822_date &idn_to_ascii &is_valid_utf_8
                   &get_user_groups &compile_regexp &qr_to_string
-                  &is_fqdn_valid &parse_header_addresses
+                  &is_fqdn_valid &parse_header_addresses &force_die
                   &domain_to_search_list);
 
 our $AM_TAINTED;
@@ -1944,16 +1944,22 @@ sub helper_app_pipe_open_windows {
 }
 
 sub force_die {
-  my ($msg) = @_;
+  my ($statrc, $msg) = @_;
 
   # note use of eval { } scope in logging -- paranoia to ensure that a broken
   # $SIG{__WARN__} implementation will not interfere with the flow of control
   # here, where we *have* to die.
-  eval { warn $msg };  # hmm, STDERR may no longer be open
-  eval { dbg("util: force_die: $msg") };
+  if ($msg) {
+    eval { warn $msg };  # hmm, STDERR may no longer be open
+    eval { dbg("util: force_die: $msg") };
+  }
 
-  POSIX::_exit(6);  # avoid END and destructor processing 
-  kill('KILL',$$);  # still kicking? die! 
+  if (am_running_on_windows()) {
+    exit($statrc); # on Windows _exit would terminate parent too BUG 8007
+  } else {
+    POSIX::_exit($statrc);  # avoid END and destructor processing 
+    kill('KILL',$$) if ($statrc);  # somehow this breaks those places that are calling it to exit(0)
+  }
 }
 
 sub helper_app_pipe_open_unix {
@@ -2058,7 +2064,7 @@ sub helper_app_pipe_open_unix {
   my $eval_stat = $@ ne '' ? $@ : "errno=$!";  chomp $eval_stat;
 
   # bug 4370: we really have to exit here; break any eval traps
-  force_die(sprintf('util: failed to spawn a process "%s": %s',
+  force_die(6, sprintf('util: failed to spawn a process "%s": %s',
                     join(", ",@cmdline), $eval_stat));
   die;  # must be a die() otherwise -w will complain
 }
