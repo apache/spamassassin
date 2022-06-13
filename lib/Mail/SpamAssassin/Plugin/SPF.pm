@@ -30,9 +30,10 @@ records published by the domain owners in DNS to fight email address
 forgery and make it easier to identify spams.
 
 It's recommended to use MTA filter (pypolicyd-spf / spf-engine etc), so this
-plugin can reuse the Received-SPF header results as is.  Otherwise
-throughput could suffer, DNS lookups done by this plugin are not
+plugin can reuse the Received-SPF and/or Authentication-Results header results as is.
+Otherwise throughput could suffer, DNS lookups done by this plugin are not
 asynchronous.
+Those headers will also help when SpamAssassin is not able to correctly detect EnvelopeFrom.
 
 =cut
 
