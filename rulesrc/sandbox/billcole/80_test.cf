@@ -79,6 +79,11 @@ body	 SCC_CANSPAM_1		/The advertiser does not manage your subscription/
 describe SCC_CANSPAM_2		Interesting compliance language
 body	 SCC_CANSPAM_2		/you may unsubscribe by clicking here or by writing to/
 
+# 1-3 are antique and stale. This sha256@sha256.*.co pattern is fresh in 2022
+describe SCC_SPAMMERMID4        Distinctive Message-Id
+header   SCC_SPAMMERMID4        Message-ID =~ /<[-_a-zA-Z0-9.]{43}\.[-_a-zA-Z0-9.]{43}\@[-a-z0-9]{4,30}\.co>/
+score    SCC_SPAMMERMID4        1
+
 # TESTING a few domains that are in our "suspicious" list but are known to have some good senders
 describe T_SCC_TLD_ONLINE From domain in *.online 
 header   T_SCC_TLD_ONLINE From =~ /<[^ @]+@[^ @>]+\.online>/
