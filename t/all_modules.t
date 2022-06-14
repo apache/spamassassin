@@ -4,7 +4,7 @@ use lib '.'; use lib 't';
 use SATest; sa_t_init("all_modules");
 
 use Test::More;
-plan tests => 7;
+plan tests => 6;
 
 # ---------------------------------------------------------------------------
 
@@ -83,7 +83,6 @@ tstprefs("
         qr/Syntax error/i, 'syntax',
         qr/Use of uninitialized/i, 'uninitialized',
         qr/failed to parse/i, 'parse',
-        qr/ at .* line \d+/, 'at_line',
             );
 
 if (conf_bool('run_net_tests')) {
