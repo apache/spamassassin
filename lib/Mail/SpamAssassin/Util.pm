@@ -146,24 +146,32 @@ $have_libidn||$have_libidn2
   sub find_executable_in_env_path {
     my ($filename) = @_;
 
-    if (RUNNING_ON_WINDOWS) {
-      # Look for .exe on Windows
-      $filename .= '.exe' unless $filename =~ /\.exe$/i;
-    }
-
     clean_path_in_taint_mode();
     if ( !$displayed_path++ ) {
       dbg("util: current PATH is: ".join($Config{'path_sep'},File::Spec->path()));
     }
+
+    my @pathext = ('');
+    if (RUNNING_ON_WINDOWS) {
+      if ( $ENV{PATHEXT} ) {
+        push @pathext, split($Config{'path_sep'}, $ENV{PATHEXT});
+      } else {
+        push @pathext, qw{.exe .com .bat};
+      }
+    }
+
     foreach my $path (File::Spec->path()) {
-      my $fname = File::Spec->catfile ($path, $filename);
-      if ( -f $fname ) {
-        if (-x $fname) {
-          dbg("util: executable for $filename was found at $fname");
-          return $fname;
-        }
-        else {
-          dbg("util: $filename was found at $fname, but isn't executable");
+      my $base = File::Spec->catfile ($path, $filename);
+      for my $ext ( @pathext ) {
+        my $fname = $base.$ext;
+        if ( -f $fname ) {
+          if (-x $fname) {
+            dbg("util: executable for $filename was found at $fname");
+            return $fname;
+          }
+          else {
+            dbg("util: $filename was found at $fname, but isn't executable");
+          }
         }
       }
     }
@@ -185,11 +193,12 @@ $have_libidn||$have_libidn2
     dbg("util: taint mode: deleting unsafe environment variables, resetting PATH");
 
     if (RUNNING_ON_WINDOWS) {
-      dbg("util: running on Win32, skipping PATH cleaning");
-      return;
+      if ( $ENV{'PATHEXT'} ) { # clean and untaint
+        $ENV{'PATHEXT'} = join($Config{'path_sep'}, grep ($_, map( {$_ =~ m/^(\.[a-zA-Z]{1,10})$/; $1; } split($Config{'path_sep'}, $ENV{'PATHEXT'}))));
+      }
+    } else {
+      delete @ENV{qw(IFS CDPATH ENV BASH_ENV)};
     }
-
-    delete @ENV{qw(IFS CDPATH ENV BASH_ENV)};
 
     # Go through and clean the PATH out
     my @path;
@@ -215,8 +224,8 @@ $have_libidn||$have_libidn2
 	dbg("util: PATH included '$dir', which isn't a directory, dropping");
 	next;
       }
-      elsif (($stat[2]&2) != 0) {
-        # World-Writable directories are considered insecure.
+      elsif (!RUNNING_ON_WINDOWS && (($stat[2]&2) != 0)) {
+        # World-Writable directories are considered insecure, but unavoidable on Windows
         # We could be more paranoid and check all of the parent directories as well,
         # but it's good for now.
 	dbg("util: PATH included '$dir', which is world writable, dropping");
@@ -1929,6 +1938,7 @@ sub helper_app_pipe_open_windows {
   my ($fh, $stdinfile, $duperr2out, @cmdline) = @_;
 
   # use a traditional open(FOO, "cmd |")
+  $cmdline[0] = '"'.$cmdline[0].'"' if ($cmdline[0] !~ /^\".*\"$/);
   my $cmd = join(' ', @cmdline);
   if ($stdinfile) { $cmd .= qq/ < "$stdinfile"/; }
   if ($duperr2out) {

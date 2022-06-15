@@ -74,13 +74,14 @@ BEGIN {
     my @pathdirs = split(';', $ENV{'PATH'});
     $ENV{'PATH'} =
       join(';', # filter for only dirs that are canonical absolute paths that exist
-	   map {
-		 my $pathdir = $_;
-		 File::Spec->canonpath(Cwd::realpath($pathdir)) =~ /^(.*)\z/s;
-		 my $abspathdir = $1; # untaint it
-		 ((lc $pathdir eq lc $abspathdir) and (-d $abspathdir))?($abspathdir):()
-		}
-		@pathdirs);
+        map {
+          my $pathdir = $_;
+            $pathdir =~ s/\\*\z//;
+              File::Spec->canonpath(Cwd::realpath($pathdir)) =~ /^(.*)\z/s;
+              my $abspathdir = $1; # untaint it
+               ((lc $pathdir eq lc $abspathdir) and (-d $abspathdir))?($abspathdir):()
+              }
+          @pathdirs);
   }
   
   # Fix INC to point to absolute path of built SA
@@ -135,6 +136,9 @@ sub sa_t_init {
   $perl_cmd .= " -T" if !defined($ENV{'TEST_PERL_TAINT'}) or $ENV{'TEST_PERL_TAINT'} ne 'no';
   $perl_cmd .= " -w" if !defined($ENV{'TEST_PERL_WARN'})  or $ENV{'TEST_PERL_WARN'}  ne 'no';
 
+  # To work in Windows, the perl scripts have to be launched by $perl_cmd and
+  # the ones that are exe files have to be directly called in the command lines
+  
   $scr = $ENV{'SPAMASSASSIN_SCRIPT'};
   $scr ||= "$perl_cmd ../spamassassin.raw";
 
@@ -148,10 +152,10 @@ sub sa_t_init {
   $salearn ||= "$perl_cmd ../sa-learn.raw";
 
   $saawl = $ENV{'SAAWL_SCRIPT'};
-  $saawl ||= "../sa-awl";
+  $saawl ||= "$perl_cmd ../sa-awl";
 
   $sacheckspamd = $ENV{'SACHECKSPAMD_SCRIPT'};
-  $sacheckspamd ||= "../sa-check_spamd";
+  $sacheckspamd ||= "$perl_cmd ../sa-check_spamd";
 
   $spamdlocalhost = $ENV{'SPAMD_LOCALHOST'};
   if (!$spamdlocalhost) {
