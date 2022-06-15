@@ -2229,11 +2229,11 @@ sub _get_cf_pre_files_in_dir {
 
   if ($self->{config_tree_recurse}) {
     my @cfs;
-
     # use "eval" to avoid loading File::Find unless this is specified
     eval ' use File::Find qw();
       File::Find::find(
         { untaint => 1,
+          am_running_on_windows() ? (untaint_pattern => qr|^([-+@\w.:\\/]+)$|) : (),
           follow => 1,
           wanted =>
             sub { push(@cfs, $File::Find::name) if /\.\Q$type\E$/i && -f $_ }
