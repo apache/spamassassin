@@ -130,14 +130,18 @@ for my $mail  ($twoplus, $threeurls, $threeplus, $foururls, $fiveurls, $sixurls)
   # this is ugly, but it actually demos the bug. 
   open (my $mfh, ">", "$tmpdir/msg");
   print $mfh "$mail";
-  my $haverules = (  -f "../rules/25_uribl.cf" ) ;
-  my  $sarcnt = qx/..\/spamassassin -D all < $tmpdir\/msg 2>&1 |grep -c 'uridnsbl:.*skip'/;
+  my $haverules = (  -f "../rules/25_uribl.cf" );
+  use vars qw($sarcnt);
+  sarun("-D all < $tmpdir/msg 2>&1", \&sarcount);
   # test isn't very useful without this component, but this will at least skip the subtest when it can't be run
   SKIP: {
     skip  "No rules found!\n", 1 if (! $haverules ); 
     if (!ok ( $count == $sarcnt )) {
       warn "Simple grep for http:// found $count URLs, get_uri_list found $ulcnt URLs, spamassassin script found $sarcnt\n";
     }
+  }
+  sub sarcount {
+    $sarcnt = grep(/uridnsbl:.*skip/, <IN>);
   }
 }
 

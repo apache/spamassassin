@@ -2,13 +2,11 @@
 
 use lib '.'; use lib 't';
 use SATest; sa_t_init("extracttext");
-
+use Mail::SpamAssassin::Util;
 use Test::More;
 
-plan skip_all => "Tests don't work on windows" if $RUNNING_ON_WINDOWS;
-
-use constant PDFTOTEXT => eval { $_ = untaint_cmd("which pdftotext"); chomp; -x && $_ };
-use constant TESSERACT => eval { $_ = untaint_cmd("which tesseract"); chomp; -x && $_ };
+use constant PDFTOTEXT => Mail::SpamAssassin::Util::find_executable_in_env_path('pdftotext');
+use constant TESSERACT => Mail::SpamAssassin::Util::find_executable_in_env_path('tesseract');
 
 my $tests = 0;
 $tests += 2 if (PDFTOTEXT);

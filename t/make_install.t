@@ -5,16 +5,17 @@ $ENV{'TEST_PERL_TAINT'} = 'no';     # inhibit for this test
 use SATest; sa_t_init("make_install");
 
 use Config;
-use Test::More tests => 25;
-
+use Test::More;
+plan skip_all => "Tests don't work on windows" if $RUNNING_ON_WINDOWS;
+plan tests => 25;
 # -------------------------------------------------------------------
 
 use Cwd;
 my $cwd = getcwd;
 my $builddir = "$cwd/$workdir/d.$testname/build";
 my $instbase = "$cwd/$workdir/d.$testname/inst";
-untaint_system("rm -rf $instbase $builddir");
-untaint_system("mkdir -p $instbase $builddir");
+rmtree($instbase, $builddir, { safe => 1 });
+mkpath($instbase, $builddir, { error  => \my $err_list });
 
 untaint_system("cd .. && make tardist >/dev/null");
 $? == 0  or die "tardist failed: $?";
