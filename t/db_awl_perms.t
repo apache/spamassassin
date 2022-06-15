@@ -2,8 +2,10 @@
 
 use lib '.'; use lib 't';
 use SATest; sa_t_init("db_awl_perms");
-use Test::More tests => 5;
 use IO::File;
+use Test::More;
+plan skip_all => "Tests don't work on windows" if $RUNNING_ON_WINDOWS;
+plan tests => 5;
 
 # ---------------------------------------------------------------------------
 # bug 6173
@@ -21,7 +23,8 @@ umask 022;
 sarun("--add-addr-to-whitelist whitelist_test\@example.org",
       \&patterns_run_cb);
 
-untaint_system "ls -l $userstate";          # for the logs
+# in case this test is ever made to work on Windows
+untaint_system($RUNNING_ON_WINDOWS?("dir " . File::Spec->canonpath($userstate)):"ls -l $userstate");  # for the logs
 
 sub checkmode {
   my $fname = shift;
