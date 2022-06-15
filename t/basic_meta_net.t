@@ -66,8 +66,10 @@ my $common_rules = q{
 
 tstlocalrules (qq{
    # Force DNS queries to fail/timeout
+   # 192.0.0.192 is a reserved address that won't immediately fail as unreachable
+   # and isn't likely to be allocated by IANA for some incompatible purpose
    rbl_timeout 2 1
-   dns_server 240.0.0.240
+   dns_server 192.0.0.192
 
    $common_rules
 
@@ -76,7 +78,7 @@ tstlocalrules (qq{
    meta X_LOCAL_NEG local_tests_only
 });
 
-sarun ("-t < data/spam/dnsbl.eml", \&patterns_run_cb);
+sarun ("-D dns -t < data/spam/dnsbl.eml", \&patterns_run_cb);
 ok_all_patterns();
 
 #
