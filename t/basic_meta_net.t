@@ -78,7 +78,7 @@ tstlocalrules (qq{
    meta X_LOCAL_NEG local_tests_only
 });
 
-sarun ("-D dns -t < data/spam/dnsbl.eml", \&patterns_run_cb);
+sarun ("-t < data/spam/dnsbl.eml", \&patterns_run_cb);
 ok_all_patterns();
 
 #
