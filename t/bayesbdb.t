@@ -8,7 +8,6 @@ use constant HAS_BDB => eval { require BerkeleyDB };
 
 use Test::More;
 
-plan skip_all => "Bug 8003 - Investigate if can be made to work on windows" if $RUNNING_ON_WINDOWS;
 plan skip_all => "Long running tests disabled" unless conf_bool('run_long_tests');
 plan skip_all => "BerkeleyDB is unavailable" unless HAS_BDB;
 
@@ -140,6 +139,8 @@ ok(getimpl->{store}->tie_db_writable());
 ok(!getimpl->{store}->seen_get($msgid));
 
 getimpl->{store}->untie_db();
+
+getimpl->{store}->_close_db(); # on Windows the following sa_t_init can't delete the old files without this close
 
 undef $sa;
 
