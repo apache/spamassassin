@@ -1928,7 +1928,7 @@ score       URI_TRY_USME      2.000	# limit
 tflags      URI_TRY_USME      publish
 
 uri         __URI_TRY_3LD_NOMY     m,^https?://(?:try(?!r\.codeschool)|start|get(?!\.adobe)|save|check(?!out)|act|compare|join|learn(?!ing)|request|visit(?!or|\.vermont))[^.]*\.(?:(?!list-manage\.)[^/.]+\.)+(?:com|net)\b,i
-uri         __URI_TRY_3LD     m,^https?://(?:try(?!r\.codeschool)|start|get(?!\.adobe)|save|check(?!out)|act|compare|join|learn(?!ing)|request|visit(?!or|\.vermont)|my(?!sub|turbotax|news\.apple|a\.godaddy|account|support|build|blob)\w)[^.]*\.(?:(?!list-manage\.)[^/.]+\.)+(?:com|net)\b,i
+uri         __URI_TRY_3LD     m,^https?://(?:try(?!r\.codeschool)|start|get(?!\.adobe)|save|check(?!out)|act|compare|join|learn(?!ing)|request|visit(?!or|\.vermont)|my(?!sub|turbotax|news\.apple|a\.godaddy|account|support|build|blob|images?|photos?)\w)[^.]*\.(?:(?!list-manage\.)[^/.]+\.)+(?:com|net)\b,i
 meta        URI_TRY_3LD       __URI_TRY_3LD && !__HAS_ERRORS_TO && !__HDR_RCVD_ALIBABA && !__HDR_CASE_REVERSED && !__XM_EC_MESSENGER && !__CHARITY && !__URI_DOTEDU && !__HAS_X_REF && !__HDR_RCVD_APPLE 
 describe    URI_TRY_3LD       "Try it" URI, suspicious hostname
 score       URI_TRY_3LD       2.000   # limit
