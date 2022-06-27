@@ -824,7 +824,7 @@ sub _get_authors {
 }
 
 sub _check_dkim_signature {
-  my ($self, $pms, $type) = @_;
+  my ($self, $pms) = @_;
 
   my $conf = $pms->{conf};
   my($verifier, $arc_verifier, @signatures, @arc_signatures, @valid_signatures, @arc_valid_signatures);
@@ -858,12 +858,23 @@ sub _check_dkim_signature {
     @signatures = @$provided_signatures  if ref $provided_signatures;
     $pms->{dkim_signatures_ready} = 1;
     $pms->{dkim_signatures_dependable} = 1;
-    dbg("dkim: signatures provided by the caller, %d signatures",
+    dbg("dkim: DKIM signatures provided by the caller, %d signatures",
         scalar(@signatures));
   }
+  if (defined $suppl_attrib && exists $suppl_attrib->{arc_signatures}) {
+    # caller of SpamAssassin already supplied ARC signature objects
+    my $provided_arc_signatures = $suppl_attrib->{arc_signatures};
+    @arc_signatures = @$provided_arc_signatures  if ref $provided_arc_signatures;
+    $pms->{arc_signatures_ready} = 1;
+    $pms->{arc_signatures_dependable} = 1;
+    dbg("dkim: ARC signatures provided by the caller, %d signatures",
+        scalar(@arc_signatures));
+  }
 
-  if ($pms->{dkim_signatures_ready}) {
+  if ($pms->{dkim_signatures_ready} or $pms->{arc_signatures_ready}) {
     # signatures already available and verified
+    _check_valid_signature($self, $pms, $verifier, 'DKIM', \@signatures) if $self->{service_available};
+    _check_valid_signature($self, $pms, $arc_verifier, 'ARC', \@arc_signatures) if $self->{arc_available};
   } elsif (!$pms->is_dns_available()) {
     dbg("dkim: signature verification disabled, DNS resolving not available");
   } elsif (!$self->_dkim_load_modules()) {
@@ -883,9 +894,9 @@ sub _check_dkim_signature {
         Mail::DKIM::DNS::resolver($res);
       }
     }
-    $verifier = Mail::DKIM::Verifier->new;
+    $verifier = Mail::DKIM::Verifier->new if $self->{service_available};
     _check_signature($self, $pms, $verifier, 'DKIM', \@signatures) if $self->{service_available};
-    $arc_verifier = Mail::DKIM::ARC::Verifier->new;
+    $arc_verifier = Mail::DKIM::ARC::Verifier->new if $self->{arc_available};
     _check_signature($self, $pms, $arc_verifier, 'ARC', \@arc_signatures) if $self->{arc_available};
   }
 }
@@ -975,13 +986,24 @@ sub _check_signature {
     if (!@$signatures || !$pms->{tests_already_hit}->{'__TRUNCATED'}) {
       $pms->{dkim_signatures_dependable} = 1;
     }
+    _check_valid_signature($self, $pms, $verifier, 'DKIM', \@$signatures) if $self->{service_available};
   } elsif($type eq 'ARC') {
     $pms->{arc_signatures_ready} = 1;
     if (!@$signatures || !$pms->{tests_already_hit}->{'__TRUNCATED'}) {
       $pms->{arc_signatures_dependable} = 1;
     }
+    _check_valid_signature($self, $pms, $verifier, 'ARC', \@$signatures) if $self->{arc_available};
   }
+}
 
+sub _check_valid_signature {
+  my($self, $pms, $verifier, $type, $signatures) = @_;
+
+  my $sig_type = lc $type;
+  $self->_get_authors($pms)  if !$pms->{"${sig_type}_author_addresses"};
+
+  my(@valid_signatures);
+  my $conf = $pms->{conf};
   # DKIM signatures check
   if ($pms->{"${sig_type}_signatures_ready"}) {
     my $sig_result_supported;
