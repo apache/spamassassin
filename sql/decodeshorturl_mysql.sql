@@ -1,5 +1,5 @@
 CREATE TABLE `short_url_cache`
-( `short_url` VARCHAR(256) NOT NULL,
+( `short_url` VARCHAR(255) NOT NULL,
   `decoded_url` VARCHAR(512) NOT NULL,
   `hits` INT NOT NULL DEFAULT 1,
   `created` INT(11) NOT NULL,
