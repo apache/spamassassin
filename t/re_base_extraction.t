@@ -12,7 +12,6 @@ use warnings;
 my $debug = 0;
 
 use Test::More;
-plan skip_all => "Bug 8003 - Investigate if can be made to work on windows" if $RUNNING_ON_WINDOWS;
 plan tests => 128;
 use lib '../lib';
 
