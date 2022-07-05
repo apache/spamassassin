@@ -257,9 +257,17 @@ working downwards until results are successfully parsed.
 
 Adds capability check for "if can()" for check_for_spf_permerror, check_for_spf_temperror, check_for_spf_helo_permerror and check_for_spf_helo_permerror
 
-=cut 
+=cut
 
 sub has_check_for_spf_errors { 1 }
+
+=item has_check_spf_skipped_noenvfrom
+
+Adds capability check for "if can()" for check_spf_skipped_noenvfrom
+
+=cut
+
+sub has_check_spf_skipped_noenvfrom { 1 }
 
 sub parsed_metadata {
   my ($self, $opts) = @_;
