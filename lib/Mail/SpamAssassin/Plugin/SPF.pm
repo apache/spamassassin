@@ -77,6 +77,7 @@ sub new {
   $self->register_eval_rule ("check_for_spf_whitelist_from", $Mail::SpamAssassin::Conf::TYPE_HEAD_EVALS); # removed in 4.1
   $self->register_eval_rule ("check_for_def_spf_welcomelist_from", $Mail::SpamAssassin::Conf::TYPE_HEAD_EVALS);
   $self->register_eval_rule ("check_for_def_spf_whitelist_from", $Mail::SpamAssassin::Conf::TYPE_HEAD_EVALS); # removed in 4.1
+  $self->register_eval_rule ("check_spf_skipped_noenvfrom", $Mail::SpamAssassin::Conf::TYPE_HEAD_EVALS);
 
   $self->set_config($mailsaobject->{conf});
 
@@ -357,6 +358,26 @@ sub check_for_spf_helo_temperror {
   my ($self, $scanner) = @_;
   $self->_check_spf ($scanner, 1) unless $scanner->{spf_helo_checked};
   return $scanner->{spf_helo_temperror} ? 1 : 0;
+}
+
+=over 4
+
+=item check_spf_skipped_noenvfrom
+
+Checks if SPF checks have been skipped because EnvelopeFrom cannot be determined.
+
+=back
+
+=cut
+
+sub check_spf_skipped_noenvfrom {
+  my ($self, $scanner) = @_;
+  $self->_check_spf ($scanner, 0) unless $scanner->{spf_checked};
+  if (!exists $scanner->{spf_sender}) {
+    return 1;
+  } else {
+    return 0;
+  }
 }
 
 sub check_for_spf_welcomelist_from {
