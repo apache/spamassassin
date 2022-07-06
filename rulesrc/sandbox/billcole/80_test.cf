@@ -84,6 +84,10 @@ describe SCC_SPAMMERMID4        Distinctive Message-Id
 header   SCC_SPAMMERMID4        Message-ID =~ /<[-_a-zA-Z0-9.]{43}\.[-_a-zA-Z0-9.]{43}\@[-a-z0-9]{4,30}\.co>/
 score    SCC_SPAMMERMID4        1
 
+describe T_SCC_ESP_RESY		From "Resy" which is known to emit spam
+body	T_SCC_ESP_RESY		/This marketing message was sent to you by Resy/
+
+
 # TESTING a few domains that are in our "suspicious" list but are known to have some good senders
 describe T_SCC_TLD_ONLINE From domain in *.online 
 header   T_SCC_TLD_ONLINE From =~ /<[^ @]+@[^ @>]+\.online>/
