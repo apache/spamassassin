@@ -291,7 +291,17 @@ sub _check_dmarc {
   my $dmarc = Mail::DMARC::PurePerl->new();
   $dmarc->source_ip($lasthop->{ip});
   $dmarc->header_from_raw($from_addr);
-  $dmarc->dkim($pms->{dkim_verifier}) if (ref($pms->{dkim_verifier}));
+
+  my $suppl_attrib = $pms->{msg}->{suppl_attrib};
+  if (defined $suppl_attrib && exists $suppl_attrib->{dkim_signatures}) {
+    my $dkim_signatures = $suppl_attrib->{dkim_signatures};
+    foreach my $signature ( @$dkim_signatures ) {
+      $dmarc->dkim( domain => $signature->domain, result => $signature->result );
+      dbg("DKIM result for domain " . $signature->domain . ": " . $signature->result);
+    }
+  } else {
+    $dmarc->dkim($pms->{dkim_verifier}) if (ref($pms->{dkim_verifier}));
+  }
 
   my $result;
   eval {
