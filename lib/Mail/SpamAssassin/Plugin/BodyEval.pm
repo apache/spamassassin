@@ -360,17 +360,17 @@ sub _plaintext_body_sig_ratio {
 
   # Find the last occurence of a signature delimiter and get the body and
   # signature lengths.
-                                  # Bug 7980 - (^|.*\n) is super slow here
-  my ($len_b, $len_s) = map { length } $text =~ /(.*\n)-- ?\r?\n(.*?)$/s;
 
-  if (!defined $len_b) {
-      # No sig marker? Double check if whole body is signature
-      $len_b = 0;
-      ($len_s) = map { length } $text =~ /^-- ?\r?\n(.*?)$/s;
-      if (!defined $len_s) {     # no sig marker, all body
-          $len_b = length $text;
-          $len_s = 0;
-      }
+  my $len_b = length($text);
+  my $len_s = 0;
+
+  while ($text =~ /^-- ?\r?$/mg) {
+
+    # ignore decoy marker at the end
+    next if ( length($text) - $+[0] <= 4 );
+
+    $len_b = $-[0];
+    $len_s = length($text) - $+[0];
   }
 
   $pms->{plaintext_body_sig_ratio}->{body_length} = $len_b;
