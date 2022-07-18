@@ -17,6 +17,11 @@ describe    GB_GOOGLE_OBFUQ	Obfuscate url through Google search
 score       GB_GOOGLE_OBFUQ     0.75 # limit
 #tflags      GB_GOOGLE_OBFUQ     publish
 
+uri         GB_GOOGLE_TRANSL    /^https?:\/\/.{10,64}\-ipfs\-.{2,8}\-\-ipfs\-io\.translate\.goog\/\?_x_tr_hp=/
+describe    GB_GOOGLE_TRANSL    Obfuscate url through Google Translate
+score       GB_GOOGLE_TRANSL    0.75 # limit
+#tflags      GB_GOOGLE_TRANSL    publish
+
 header      __COPY_OF       Subject =~ /Copy of:|offers for you/
 meta        GB_COPY_OF_SHORT   ( __URL_SHORTENER && __COPY_OF && __KAM_BODY_LENGTH_LT_1024 )
 describe    GB_COPY_OF_SHORT   Url shortnener spam
