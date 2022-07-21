@@ -120,7 +120,8 @@ parameter will only act as a filter on a result.
 
 Currently recognized RR types in the rr_type parameter are: ANY, A, AAAA,
 MX, TXT, PTR, NAPTR, NS, SOA, CERT, CNAME, DNAME, DHCID, HINFO, MINFO,
-RP, HIP, IPSECKEY, KX, LOC, SRV, SSHFP, SPF.
+RP, HIP, IPSECKEY, KX, LOC, GPOS, SRV, OPENPGPKEY, SSHFP, SPF, TLSA, URI,
+CAA, CSYNC.
 
 https://www.iana.org/assignments/dns-parameters/dns-parameters.xml
 
