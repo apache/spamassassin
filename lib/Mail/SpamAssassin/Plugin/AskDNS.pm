@@ -388,7 +388,7 @@ sub check_dnsbl {
   }
 }
 
-# generate DNS queries - called for each rule when it's tag dependencies
+# generate DNS queries - called for each rule when its tag dependencies
 # are met
 #
 sub launch_queries {
