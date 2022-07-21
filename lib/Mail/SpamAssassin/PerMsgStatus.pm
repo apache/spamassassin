@@ -1753,7 +1753,7 @@ compatibility.
 C<$value> can also be a subroutine reference, which will be evaluated
 each time the template is expanded. The first argument passed by get_tag
 to a called subroutine will be a PerMsgStatus object (this module's object),
-followed by optional arguments provided a caller to get_tag.
+followed by optional arguments provided by a caller to get_tag.
 
 Note that perl supports closures, which means that variables set in the
 caller's scope can be accessed inside this C<sub>. For example:
@@ -1767,8 +1767,6 @@ caller's scope can be accessed inside this C<sub>. For example:
 See C<Mail::SpamAssassin::Conf>'s C<TEMPLATE TAGS> and C<CAPTURING TAGS
 USING REGEX NAMED CAPTURE GROUPS> sections for more details on how template
 tags are used.
-
-C<undef> will be returned if a tag by that name has not been defined.
 
 =cut
 
