@@ -1012,9 +1012,10 @@ sub _check_valid_signature {
     foreach my $signature (@$signatures) {
       # old versions of Mail::DKIM would give undef for an invalid signature
       next if !defined $signature;
-      next if !$signature->selector; # empty selector
+      $sig_result_supported = !! $signature->UNIVERSAL::can("result_detail");
+      # test for empty selector (must not treat a selector "0" as missing!)
+      next if !defined $signature->selector || $signature->selector eq "";
 
-      $sig_result_supported = $signature->UNIVERSAL::can("result_detail");
       my($info, $valid, $expired);
       $valid =
         ($sig_result_supported ? $signature : $verifier)->result eq 'pass';
@@ -1395,9 +1396,10 @@ sub _wlcheck_list {
   foreach my $signature (@{$pms->{dkim_signatures}}) {
     # old versions of Mail::DKIM would give undef for an invalid signature
     next if !defined $signature;
-    next if !$signature->selector; # empty selector
+    my $sig_result_supported = !! $signature->UNIVERSAL::can("result_detail");
+    # test for empty selector (must not treat a selector "0" as missing!)
+    next if !defined $signature->selector || $signature->selector eq "";
 
-    my $sig_result_supported = $signature->UNIVERSAL::can("result_detail");
     my($info, $valid, $expired, $key_size_weak);
     $valid =
       ($sig_result_supported ? $signature : $verifier)->result eq 'pass';
