@@ -30,10 +30,11 @@ Taking into account signatures from any signing domains:
  full   DKIM_VALID_AU         eval:check_dkim_valid_author_sig()
  full   DKIM_VALID_EF         eval:check_dkim_valid_envelopefrom()
 
-Taking into account ARC signatures from any signing domains:
+Taking into account ARC signatures (Authenticated Received Chain, RFC 8617)
+from any signing domains:
 
- full   ARC_SIGNED           eval:check_arc_signed()
- full   ARC_VALID            eval:check_arc_valid()
+ full   ARC_SIGNED            eval:check_arc_signed()
+ full   ARC_VALID             eval:check_arc_valid()
 
 Taking into account signatures from specified signing domains only:
 (quotes may be omitted on domain names consisting only of letters, digits,
@@ -830,7 +831,7 @@ sub _check_dkim_signature {
   my($verifier, $arc_verifier, @signatures, @arc_signatures, @valid_signatures, @arc_valid_signatures);
 
   $pms->{dkim_checked_signature} = 1; # has this sub already been invoked?
-  $pms->{arc_checked_signature} = 1; # has this sub already been invoked?
+  $pms->{arc_checked_signature} = 1;  # has this sub already been invoked?
   $pms->{dkim_signatures_ready} = 0;  # have we obtained & verified signatures?
   $pms->{dkim_signatures_dependable} = 0;
   # dkim_signatures_dependable =
@@ -889,6 +890,8 @@ sub _check_dkim_signature {
         # Only do so if EDNS0 provides a reasonably-sized UDP payload size,
         # as our interface does not provide a DNS fallback to TCP, unlike
         # the Net::DNS::Resolver::send which does provide it.
+        # See also Bug 7265 regarding a choice of a resolver.
+      # my $res = $self->{main}->{resolver}->get_resolver;
         my $res = $self->{main}->{resolver};
         dbg("dkim: providing our own resolver: %s", ref $res);
         Mail::DKIM::DNS::resolver($res);
@@ -910,16 +913,16 @@ sub _check_signature {
   my(@valid_signatures);
   my $conf = $pms->{conf};
   if (!$verifier) {
-    if($type eq 'DKIM') {
+    if ($type eq 'DKIM') {
       dbg("dkim: cannot create Mail::DKIM::Verifier object");
-    } elsif($type eq 'ARC') {
+    } elsif ($type eq 'ARC') {
       dbg("dkim: cannot create Mail::DKIM::ARC::Verifier object");
     }
     return;
   } else {
-    if($type eq 'DKIM') {
+    if ($type eq 'DKIM') {
       $pms->{dkim_verifier} = $verifier;
-    } elsif($type eq 'ARC') {
+    } elsif ($type eq 'ARC') {
       $pms->{arc_verifier} = $verifier;
     }
   }
@@ -981,13 +984,13 @@ sub _check_signature {
     chomp $err;
     dbg("dkim: $type public key lookup or verification failed: $err");
   }
-  if($type eq 'DKIM') {
+  if ($type eq 'DKIM') {
     $pms->{dkim_signatures_ready} = 1;
     if (!@$signatures || !$pms->{tests_already_hit}->{'__TRUNCATED'}) {
       $pms->{dkim_signatures_dependable} = 1;
     }
     _check_valid_signature($self, $pms, $verifier, 'DKIM', \@$signatures) if $self->{service_available};
-  } elsif($type eq 'ARC') {
+  } elsif ($type eq 'ARC') {
     $pms->{arc_signatures_ready} = 1;
     if (!@$signatures || !$pms->{tests_already_hit}->{'__TRUNCATED'}) {
       $pms->{arc_signatures_dependable} = 1;
@@ -1053,7 +1056,7 @@ sub _check_valid_signature {
           }
         }
       }
-      if($type eq 'DKIM') {
+      if ($type eq 'DKIM') {
         if (would_log("dbg","dkim")) {
           dbg("dkim: %s %s, i=%s, d=%s, s=%s, a=%s, c=%s, %s, %s, %s",
             $info,
@@ -1068,7 +1071,7 @@ sub _check_valid_signature {
               : 'does not match author domain',
           );
         }
-      } elsif($type eq 'ARC') {
+      } elsif ($type eq 'ARC') {
         if (would_log("dbg","dkim")) {
           dbg("dkim: %s %s, i=%s, d=%s, s=%s, a=%s, c=%s, %s, %s, %s",
             $info,
@@ -1085,8 +1088,9 @@ sub _check_valid_signature {
         }
       }
     }
+
     if (@valid_signatures) {
-      if($type eq 'DKIM') {
+      if ($type eq 'DKIM') {
         $pms->{dkim_signed} = 1;
         $pms->{dkim_valid} = 1;
 
@@ -1103,8 +1107,8 @@ sub _check_valid_signature {
         $pms->set_tag('DKIMDOMAIN',
                     @domain_list == 1   ? $domain_list[0]   : \@domain_list);
         $pms->set_tag('DKIMSELECTOR',
-                    @selector_list == 1   ? $selector_list[0]   : \@selector_list);
-      } elsif($type eq 'ARC') {
+                    @selector_list == 1 ? $selector_list[0] : \@selector_list);
+      } elsif ($type eq 'ARC') {
         $pms->{arc_signed} = 1;
         $pms->{arc_valid} = 1;
       }
@@ -1112,16 +1116,17 @@ sub _check_valid_signature {
       my $sig = $valid_signatures[0];
       my $sig_res = ($sig_result_supported ? $sig : $verifier)->result_detail;
       dbg("dkim: $type signature verification result: %s", uc($sig_res));
+
     } elsif (@$signatures) {
-      if($type eq 'DKIM') {
+      if ($type eq 'DKIM') {
         $pms->{dkim_signed} = 1;
-      } elsif($type eq 'ARC') {
+      } elsif ($type eq 'ARC') {
         $pms->{arc_signed} = 1;
       }
       my $sig = @$signatures[0];
-      my $sig_res =
-        ($sig_result_supported && $sig ? $sig : $verifier)->result_detail;
+      my $sig_res = ($sig_result_supported ? $sig : $verifier)->result_detail;
       dbg("dkim: $type signature verification result: %s", uc($sig_res));
+
     } else {
       dbg("dkim: $type signature verification result: none");
     }
