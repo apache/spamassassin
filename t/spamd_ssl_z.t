@@ -5,14 +5,15 @@ use SATest; sa_t_init("spamd_ssl_z");
 
 use constant HAVE_ZLIB => eval { require Compress::Zlib; };
 
-untaint_system("$spamc -z < /dev/null");
-my $SPAMC_Z_AVAILABLE = ($? >> 8 == 0);
-
 use Test::More;
 plan skip_all => "Spamd tests disabled" if $SKIP_SPAMD_TESTS;
 plan skip_all => "SSL is unavailble" unless $SSL_AVAILABLE;
 plan skip_all => "ZLIB REQUIRED" unless HAVE_ZLIB;
+
+untaint_system("$spamc -z < /dev/null");
+my $SPAMC_Z_AVAILABLE = ($? >> 8 == 0);
 plan skip_all => "SPAMC Z unavailable" unless $SPAMC_Z_AVAILABLE;
+
 plan tests => 9;
 
 # ---------------------------------------------------------------------------
