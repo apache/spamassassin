@@ -17,14 +17,14 @@ open RC, ">../t/log/perlcritic.rc"  or die "cannot create t/log/perlcritic.rc";
 print RC q{
 
   severity = 5
-  verbose = 10
+  verbose = 9
   exclude = ValuesAndExpressions::ProhibitLeadingZeros InputOutput::ProhibitBarewordFileHandles InputOutput::ProhibitTwoArgOpen BuiltinFunctions::ProhibitStringyEval InputOutput::ProhibitInteractiveTest Bangs::ProhibitBitwiseOperators Compatibility::ProhibitThreeArgumentOpen Lax::ProhibitStringyEval::ExceptForRequire Lax::ProhibitLeadingZeros::ExceptChmod ValuesAndExpressions::PreventSQLInjection ControlStructures::ProhibitReturnInDoBlock
 
   [TestingAndDebugging::ProhibitNoStrict]
   allow = refs
 
   [Perlsecret]
-  allow_secrets = Venus, Goatse, Baby Cart
+  allow_secrets = Venus, Baby Cart
 
 }  or die "cannot write t/log/perlcritic.rc";
 close RC  or die "cannot close t/log/perlcritic.rc";

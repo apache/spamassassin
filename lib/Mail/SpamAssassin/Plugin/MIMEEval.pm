@@ -89,8 +89,7 @@ sub new {
 sub are_more_high_bits_set {
   my ($self, $str) = @_;
 
-  # TODO: I suspect a tr// trick may be faster here
-  my $numhis = () = ($str =~ /[\200-\377]/g);
+  my $numhis = $str =~ tr/\x00-\x7F//c;  # number of non-ASCII chars
   my $numlos = length($str) - $numhis;
 
   ($numlos <= $numhis && $numhis > 3);
@@ -416,8 +415,10 @@ sub _check_attachments {
 
         # count excessive QP bytes
         if (index($_, '=') >= 0) {
+## no critic (Perlsecret)
 	  # whoever wrote this next line is an evil hacker -- jm
 	  my $qp = () = m/=(?:09|3[0-9ABCEF]|[2456][0-9A-F]|7[0-9A-E])/g;
+## use critic
 	  if ($qp) {
 	    $qp_count += $qp;
 	    # tabs and spaces at end of encoded line are okay.  Also, multiple
