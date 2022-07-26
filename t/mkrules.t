@@ -3,7 +3,6 @@
 use lib '.'; use lib 't';
 use SATest; sa_t_init("mkrules");
 use Test::More;
-plan skip_all => "Bug 8003 - Investigate if can be made to work on windows" if $RUNNING_ON_WINDOWS;
 plan tests => 97;
 use File::Copy;
 use File::Path;
@@ -11,6 +10,7 @@ use File::Path;
 # ---------------------------------------------------------------------------
 print " script runs, even with nothing to do\n\n";
 
+$workdir =~ s!\\!/!g if $RUNNING_ON_WINDOWS;
 my $tdir = "$workdir/mkrules_t";
 
 mkpath ([$tdir, "$tdir/rulesrc", "$tdir/rules"]);
