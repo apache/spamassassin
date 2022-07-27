@@ -14,7 +14,7 @@ plan tests => 6;
 # ---------------------------------------------------------------------------
 
 %patterns = (
-  q{ Message successfully } => 'learned',
+  q{Message successfully } => 'learned',
 );
 
 # run spamc as unpriv uid
