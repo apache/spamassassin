@@ -199,6 +199,12 @@ my %makefile = (
         'Errno'                => 0,
     },
 
+    # The modules that are not core that are used in default tests
+    'TEST_REQUIRES' => {
+        'Net::DNS::Nameserver' => 0,
+        'Text::Diff'           => 0,
+    },
+
     'dist' => {
         COMPRESS => 'gzip -9f',
         SUFFIX => 'gz',
