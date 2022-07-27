@@ -24,7 +24,7 @@ print RC q{
   allow = refs
 
   [Perlsecret]
-  allow_secrets = Venus, Baby Cart
+  allow_secrets = Venus
 
 }  or die "cannot write t/log/perlcritic.rc";
 close RC  or die "cannot close t/log/perlcritic.rc";
