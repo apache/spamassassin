@@ -115,6 +115,8 @@ my $marker4 = "\x5c\x6f\x62\x6a\x64\x61\x74";
 my $marker5 = "\x5c\x20\x6f\x62\x6a\x64\x61\x74";
 # Excel .xlsx encrypted package, thanks to Dan Bagwell for the sample
 my $encrypted_marker = "\x45\x00\x6e\x00\x63\x00\x72\x00\x79\x00\x70\x00\x74\x00\x65\x00\x64\x00\x50\x00\x61\x00\x63\x00\x6b\x00\x61\x00\x67\x00\x65";
+# Excel .xls marker present only on unencrypted files
+my $workbook_marker = "\x57\x00\x6f\x00\x72\x00\x6b\x00\x62\x00\x6f\x00\x6f\x00\x6b\x00";
 # .exe file downloaded from external website
 my $exe_marker1 = "\x00(https?://[-a-z0-9+&@#/%?=~_|!:,.;]{5,1000}[-a-z0-9+&@#/%=~_|]{5,1000}\.(?:exe|cmd|bat))[\x06|\x00]";
 my $exe_marker2 = "URLDownloadToFileA";
@@ -965,13 +967,14 @@ sub _is_encrypted_doc {
 
   #http://stackoverflow.com/questions/14347513/how-to-detect-if-a-word-document-is-password-protected-before-uploading-the-file/14347730#14347730
   return 1 if $data =~ /(?:<encryption xmlns)/i;
-  return 1 if substr($data, 520, 1) eq "\xfe";
-  return 1 if substr($data, 523, 1) eq "\x13";
-  return 1 if substr($data, 532, 1) eq "\x2f";
   my $tdata = substr($data, 0, 2000);
   return 1 if index($tdata, $encrypted_marker) > -1;
   $tdata =~ s/\\0/ /g;
   return 1 if index($tdata, "E n c r y p t e d P a c k a g e") > -1;
+  return 0 if index($tdata, $workbook_marker) > -1;
+  return 1 if substr($data, 0x208, 1) eq "\xfe";
+  return 1 if substr($data, 0x214, 1) eq "\x2f";
+  return 1 if substr($data, 0x20B, 1) eq "\x13";
 
   return 0;
 }
