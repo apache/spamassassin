@@ -202,7 +202,9 @@ my %makefile = (
     # The modules that are not core that are used in default tests
     'TEST_REQUIRES' => {
         'Net::DNS::Nameserver' => 0,
-        'Text::Diff'           => 0,
+        'Text::Diff' => 0,
+        'Perl::Critic::Policy::TestingAndDebugging::ProhibitNoStrict' => 0,
+        'Perl::Critic::Policy::Perlsecret' => 0,
     },
 
     'dist' => {

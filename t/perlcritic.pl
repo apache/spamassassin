@@ -18,7 +18,7 @@ print RC q{
 
   severity = 5
   verbose = 9
-  exclude = ValuesAndExpressions::ProhibitLeadingZeros InputOutput::ProhibitBarewordFileHandles InputOutput::ProhibitTwoArgOpen BuiltinFunctions::ProhibitStringyEval InputOutput::ProhibitInteractiveTest Bangs::ProhibitBitwiseOperators Compatibility::ProhibitThreeArgumentOpen Lax::ProhibitStringyEval::ExceptForRequire Lax::ProhibitLeadingZeros::ExceptChmod ValuesAndExpressions::PreventSQLInjection ControlStructures::ProhibitReturnInDoBlock
+  exclude = ValuesAndExpressions::ProhibitLeadingZeros InputOutput::ProhibitBarewordFileHandles InputOutput::ProhibitTwoArgOpen BuiltinFunctions::ProhibitStringyEval InputOutput::ProhibitInteractiveTest Bangs::ProhibitBitwiseOperators Compatibility::ProhibitThreeArgumentOpen Lax::ProhibitStringyEval::ExceptForRequire Lax::ProhibitLeadingZeros::ExceptChmod ValuesAndExpressions::PreventSQLInjection ControlStructures::ProhibitReturnInDoBlock ValuesAndExpressions::ProhibitAccessOfPrivateData
 
   [TestingAndDebugging::ProhibitNoStrict]
   allow = refs
