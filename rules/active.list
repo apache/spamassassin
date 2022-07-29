@@ -464,10 +464,10 @@ FONT_INVIS_POSTEXTRAS
 # tflags net
 FORGED_SPF_HELO
 
-# tflags net
+# tflags publish
 FORM_FRAUD
 
-# tflags net
+# tflags publish
 FORM_FRAUD_3
 
 # tflags publish
@@ -547,9 +547,6 @@ FROM_MISSP_FREEMAIL
 
 # good enough
 FROM_MISSP_MSFT
-
-# tflags net
-FROM_MISSP_REPLYTO
 
 # tflags net
 FROM_MISSP_SPF_FAIL
@@ -818,7 +815,7 @@ HTML_OFF_PAGE
 # tflags publish
 HTML_SHRT_CMNT_OBFU_MANY
 
-# tflags publish
+# tflags net
 HTML_SINGLET_MANY
 
 # good enough
@@ -841,9 +838,6 @@ JH_SPAMMY_PATTERN01
 
 # tflags publish
 JH_SPAMMY_PATTERN02
-
-# tflags net
-KHOP_FAKE_EBAY
 
 # tflags net
 KHOP_HELO_FCRDNS
@@ -892,9 +886,6 @@ MALWARE_PASSWORD
 
 # tflags publish
 MALW_ATTACH
-
-# tflags net
-MANY_HDRS_LCASE
 
 # tflags publish
 MANY_SPAN_IN_TEXT
@@ -1529,11 +1520,11 @@ SUBJECT_IN_BLOCKLIST
 # tflags userconf
 SUBJECT_IN_WELCOMELIST
 
-# tflags net
-SUBJ_BRKN_WORDNUMS
+# good enough
+SUBJECT_NEEDS_ENCODING
 
 # tflags net
-SUBJ_UNNEEDED_HTML
+SUBJ_BRKN_WORDNUMS
 
 # tflags net
 SURBL_BLOCKED
@@ -1603,15 +1594,6 @@ TO_TOO_MANY_WFH_01
 
 # good enough
 TVD_RCVD_SPACE_BRACKET
-
-# tflags net
-TVD_SPACE_ENCODED
-
-# tflags net
-TVD_SPACE_RATIO_MINFP
-
-# tflags net
-TVD_SUBJ_NUM_OBFU_MINFP
 
 # good enough
 TVD_VISIT_PHARMA
@@ -1781,7 +1763,7 @@ URI_MALWARE_SCMS
 # tflags userconf
 URI_NOVOWEL
 
-# tflags net
+# tflags publish
 URI_ONLY_MSGID_MALF
 
 # tflags publish
@@ -1808,10 +1790,10 @@ URI_WPADMIN
 # tflags publish
 URI_WP_DIRINDEX
 
-# tflags net
+# tflags publish
 URI_WP_HACKED
 
-# tflags net
+# tflags publish
 URI_WP_HACKED_2
 
 # tflags publish
