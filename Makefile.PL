@@ -7,16 +7,13 @@ use Config;
 
 use ExtUtils::MakeMaker;
 
-#Check the version of perl.  4.0 requires 5.14.0 or greater
-if ($] < 5.014000) {
-  die "Apache SpamAssassin requires at least Perl 5.14.0"; 
-}
+# raising the version of makemaker to 6.64 to use TEST_REQUIRES
+use constant MIN_MAKEMAKER_VERSION => 6.64;
+
 # avoid stupid 'Argument "6.30_01" isn't numeric in numeric ge (>=)' warnings;
 my $mm_version = eval $ExtUtils::MakeMaker::VERSION;
-
-# raising the version of makemaker to 6.46 per bug 6598 & 6131
-if ($mm_version < 6.46) {
-  die "Apache SpamAssassin Makefile.PL requires at least ExtUtils::MakeMaker v6.46";
+if ($mm_version < MIN_MAKEMAKER_VERSION) {
+  die "Apache SpamAssassin Makefile.PL requires at least ExtUtils::MakeMaker v" . MIN_MAKEMAKER_VERSION;
 }
 
 use constant RUNNING_ON_WINDOWS => ($^O =~ /^(mswin|dos|os2)/oi);
@@ -171,7 +168,7 @@ my %makefile = (
     'PMLIBDIRS' => [ 'lib' ],
 
     'PM_FILTER' => '$(PREPROCESS) -Mconditional -Mvars -DVERSION="$(VERSION)" \
-    	-DPREFIX="$(I_PREFIX)" \
+	-DPREFIX="$(I_PREFIX)" \
 	-DDEF_RULES_DIR="$(I_DATADIR)" \
 	-DLOCAL_RULES_DIR="$(I_CONFDIR)" \
 	-DLOCAL_STATE_DIR="$(I_LOCALSTATEDIR)"',
@@ -199,9 +196,28 @@ my %makefile = (
         'Errno'                => 0,
     },
 
+    # In case MIN_MAKEMAKER_VERSION is greater than the version bundled in the core of MIN_PERL_VERSION
+    # use this to ensure CPAN will automatically upgrade MakeMaker if needed
+    'CONFIGURE_REQUIRES' => {
+        'ExtUtils::MakeMaker' => MIN_MAKEMAKER_VERSION,
+    },
+
     # The modules that are not core that are used in default tests
     'TEST_REQUIRES' => {
+        'Archive::Zip' => 0,
+        'DBD::SQLite' => 0,
+        'Devel::Cycle' => 0,
+        'Email::Address::XS' => 0,
+        'Geo::IP' => 0,
+        'IO::String' => 0,
+        'IP::Country::DB_File' => 0,
+        'IP::Country::Fast' => 0,
+        'MaxMind::DB::Reader' => 0,
         'Net::DNS::Nameserver' => 0,
+        'Net::CIDR::Lite' => 0,
+        'Net::LibIDN' => 0,
+        'Net::LibIDN2' => 0,
+        'Net::Patricia' => 0,
         'Text::Diff' => 0,
         'Perl::Critic::Policy::TestingAndDebugging::ProhibitNoStrict' => 0,
         'Perl::Critic::Policy::Perlsecret' => 0,
@@ -253,6 +269,7 @@ my %makefile = (
     # We have only this Makefile.PL and this option keeps MakeMaker from
     # asking all questions twice after a 'make dist*'.
     'NORECURS' => 1,
+    'MIN_PERL_VERSION'=> 5.014000,
 );
 
 # rules/72_active.cf is built from "rulesrc", but *must* exist before
@@ -331,11 +348,13 @@ See that file if you wish to customize what tests are run, and how.
 
 # check optional module versions
 use lib 'lib';
-use Mail::SpamAssassin::Util::DependencyInfo;
-if (Mail::SpamAssassin::Util::DependencyInfo::long_diagnostics() != 0) {
-  # missing required module?  die!
-  # bug 5908: http://cpantest.grango.org/wiki/CPANAuthorNotes says
-  # we should exit with a status of 0, but without creating Makefile
+require Mail::SpamAssassin::Util::DependencyInfo;
+if (Mail::SpamAssassin::Util::DependencyInfo::long_diagnostics(1) != 0) {
+  # This prints a full report of missing required and optional modules and binaries
+  # but only exit 0 without creating Makefile if there are missing required binaries.
+  # See http://cpantest.grango.org/wiki/CPANAuthorNotes
+  # Continuing when there are missing required CPAN modules allows cpan to install them
+  # before it runs make on the Makefile
   exit 0;
 }
 

@@ -409,7 +409,10 @@ sub debug_diagnostics {
   return $out;
 }
 
+# When called from Makefile.PL use optional argument so it distinguishes between missing required modules
+# that CPAN will install before continuing, and missing required binaries that can't be fixed by CPAN install
 sub long_diagnostics {
+  my ($missing_modules_are_continuable) = @_;
   my $summary = "";
 
   print "checking module dependencies and their versions...\n";
@@ -421,6 +424,11 @@ sub long_diagnostics {
   }
   foreach my $moddef (@OPTIONAL_MODULES) {
     try_module(0, $moddef, \$summary);
+  }
+
+  if ($missing_modules_are_continuable) {
+    $WARNINGS += $EXIT_STATUS;
+    $EXIT_STATUS = 0;
   }
 
   print "checking binary dependencies and their versions...\n";
