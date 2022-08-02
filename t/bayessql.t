@@ -19,7 +19,7 @@ $tests += 59 if (SQLITE);
 $tests += 59 if (SQL);
 plan tests => $tests;
 
-diag "Note: If there is a failure it may be due to an incorrect SQL configuration.";
+diag "Note: If there is a failure it may be due to an incorrect SQL configuration." if (SQL);
 
 my ($dbconfig, $dbdsn, $dbusername, $dbpassword);
 

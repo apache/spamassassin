@@ -17,7 +17,7 @@ $tests += 23 if (SQLITE);
 $tests += 23 if (SQL);
 plan tests => $tests;
 
-diag "Note: If there is a failure it may be due to an incorrect SQL configuration.";
+diag "Note: If there is a failure it may be due to an incorrect SQL configuration." if (SQL);
 
 sa_t_init("sql_based_welcomelist");
 
