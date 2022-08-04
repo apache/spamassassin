@@ -75,12 +75,15 @@ BEGIN {
     $ENV{'PATH'} =
       join(';', # filter for only dirs that are canonical absolute paths that exist
         map {
-          my $pathdir = $_;
-            $pathdir =~ s/\\*\z//;
-              File::Spec->canonpath(Cwd::realpath($pathdir)) =~ /^(.*)\z/s;
-              my $abspathdir = $1; # untaint it
-               ((lc $pathdir eq lc $abspathdir) and (-d $abspathdir))?($abspathdir):()
+              my $pathdir = $_;
+              $pathdir =~ s/\\*\z//;
+              my $abspathdir = File::Spec->canonpath(Cwd::realpath($pathdir));
+              if (defined $abspathdir) {
+                $abspathdir  =~ /^(.*)\z/s;
+                $abspathdir = $1; # untaint it
               }
+              ((defined $abspathdir) and (lc $pathdir eq lc $abspathdir) and (-d $abspathdir))?($abspathdir):()
+            }
           @pathdirs);
   }
   
@@ -142,13 +145,16 @@ sub sa_t_init {
     my $inc_opts =
       join(' -I', # filter for only dirs that are canonical absolute paths that exist
         map {
-          my $pathdir = $_;
-            $pathdir =~ s/[\/\\]*\z//; # remove trailing directory separators
-            File::Spec->canonpath(Cwd::realpath($pathdir)) =~ /^(.*)\z/s;
-            my $abspathdir = $1; # untaint it
-             ((lc $pathdir eq lc $abspathdir) and (-d $abspathdir))?($abspathdir):()
+              my $pathdir = $_;
+              $pathdir =~ s/[\/\\]*\z//; # remove trailing directory separators
+              my $abspathdir = File::Spec->canonpath(Cwd::realpath($pathdir));
+              if (defined $abspathdir) {
+                 $abspathdir =~ /^(.*)\z/s;
+                 $abspathdir = $1; # untaint it
+              }
+              ((defined $abspathdir) and (lc $pathdir eq lc $abspathdir) and (-d $abspathdir))?($abspathdir):()
             }
-	   @pathdirs);
+           @pathdirs);
     $perl_cmd .= " -I$inc_opts" if ($inc_opts);
   }
   
