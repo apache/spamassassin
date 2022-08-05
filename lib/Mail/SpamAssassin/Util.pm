@@ -548,10 +548,10 @@ sub idn_to_ascii {
       my $sa = Net::LibIDN::idn_to_ascii($s, $charset);
       if (!defined $sa) {
         info("util: idn_to_ascii: conversion to ACE failed: '%s' (charset %s)",
-          $s, $charset);
+             $s, $charset);
       } else {
         dbg("util: idn_to_ascii: converted to ACE: '%s' -> '%s' (charset %s)",
-          $s, $sa, $charset)  if $s ne $sa;
+            $s, $sa, $charset)  if $s ne $sa;
         $s = $sa;
       }
     } elsif ($have_libidn2) {
@@ -565,11 +565,11 @@ sub idn_to_ascii {
                  &Net::LibIDN2::IDN2_NFC_INPUT + &Net::LibIDN2::IDN2_NONTRANSITIONAL,
                  $rc);
       if (!defined $sa) {
-        info("util: idn_to_ascii: conversion to ACE failed: '%s' (charset %s) (LibIDN2)",
-          Net::LibIDN2::idn2_strerror($rc), $charset);
+        info("util: idn_to_ascii: conversion to ACE failed, %s: '%s' (charset %s) (LibIDN2)",
+             Net::LibIDN2::idn2_strerror($rc), $s, $charset);
       } else {
         dbg("util: idn_to_ascii: converted to ACE: '%s' -> '%s' (charset %s) (LibIDN2)",
-          $s, $sa, $charset)  if $s ne $sa;
+            $s, $sa, $charset)  if $s ne $sa;
         $s = $sa;
       }
     }
