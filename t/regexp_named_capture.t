@@ -5,7 +5,7 @@ use lib 't';
 use SATest; sa_t_init("regexp_named_capture");
 
 use Test::More;
-plan tests => 12;
+plan tests => 13;
 
 # ---------------------------------------------------------------------------
 
@@ -23,7 +23,9 @@ plan tests => 12;
   qr/tag TESTCAP4 is now ready, value: milkplus\n/ => '',
   qr/tag TESTCAP5 is now ready, value: release\n/ => '',
 );
-%anti_patterns = ();
+%anti_patterns = (
+  q{ warn: },
+);
 
 tstlocalrules (q{
    body TEST_CAPTURE_1 /release of (?<TESTCAP1>\w+)/
