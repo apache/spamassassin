@@ -9,7 +9,7 @@ eval { require MaxMind::DB::Reader;   $tests += 2; $has{GEOIP2}  = 1 };
 eval { require Geo::IP;               $tests += 2; $has{GEOIP}   = 1 };
 eval { require IP::Country::Fast;     $tests += 2; $has{FAST}    = 1 };
 eval { require IP::Country::DB_File;
-       if ($DB_File::db_ver > 1 and $DB_FIle::db_version > 1) {
+       if ($DB_File::db_ver > 1 and $DB_File::db_version > 1) {
          $tests += 2;
          $has{DB_FILE} = 1;
        }
