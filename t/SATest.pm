@@ -139,24 +139,27 @@ sub sa_t_init {
   $perl_cmd .= " -T" if !defined($ENV{'TEST_PERL_TAINT'}) or $ENV{'TEST_PERL_TAINT'} ne 'no';
   $perl_cmd .= " -w" if !defined($ENV{'TEST_PERL_WARN'})  or $ENV{'TEST_PERL_WARN'}  ne 'no';
 
-  # Copy directories in PERL5LIB into -I options in perl_cmd because -T suppresses use of PERL5LIB
+  # Copy directories in PERL5LIB into -I options in perl_cmd because -T suppresses use of PERL5LIB in call to ./spamassassin
+  # If PERL5LIB is empty copy @INC instead because on some platforms like FreeBSD MakeMaker clears PER5LIB and sets @INC
+  # Filter out relative paths, and canonicalize so no symlinks or /../ will be left in untainted result as a nod to security
+  # Since this is only used to run tests, the security considerations are not as strict as with more general situations.
+  my @pathdirs = @INC;
   if ($ENV{'PERL5LIB'}) {
-    my @pathdirs = split($Config{path_sep}, $ENV{'PERL5LIB'});
-    my $inc_opts =
-      join(' -I', # filter for only dirs that are canonical absolute paths that exist
-        map {
-              my $pathdir = $_;
-              $pathdir =~ s/[\/\\]*\z//; # remove trailing directory separators
-              my $abspathdir = File::Spec->canonpath(Cwd::realpath($pathdir));
-              if (defined $abspathdir) {
-                 $abspathdir =~ /^(.*)\z/s;
-                 $abspathdir = $1; # untaint it
-              }
-              ((defined $abspathdir) and (lc $pathdir eq lc $abspathdir) and (-d $abspathdir))?($abspathdir):()
-            }
-           @pathdirs);
-    $perl_cmd .= " -I$inc_opts" if ($inc_opts);
+    @pathdirs = split($Config{path_sep}, $ENV{'PERL5LIB'});
   }
+  my $inc_opts =
+    join(' -I', # filter for only dirs that are absolute paths that exist, then canonicalize them
+      map {
+            my $pathdir = $_;
+            my $canonpathdir = File::Spec->canonpath(Cwd::realpath($pathdir)) if (File::Spec->file_name_is_absolute($pathdir));
+            if (defined $canonpathdir) {
+               $canonpathdir =~ /^(.*)\z/s;
+               $canonpathdir = $1; # untaint it
+            }
+            ((defined $canonpathdir) and (-d $canonpathdir))?($canonpathdir):()
+          }
+         @pathdirs);
+  $perl_cmd .= " -I$inc_opts" if ($inc_opts);
   
   # To work in Windows, the perl scripts have to be launched by $perl_cmd and
   # the ones that are exe files have to be directly called in the command lines
