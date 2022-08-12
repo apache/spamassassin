@@ -170,6 +170,14 @@ our @OPTIONAL_MODULES = (
   Country code based filtering.',
 },
 {
+  module => 'IP::Country::Fast',
+  version => 0,
+  desc => 'Used by the RelayCountry plugin (not enabled by default) to
+  determine the domain country codes of each relay in the path of an email. 
+  Also used by the URILocalBL plugin (not enabled by default) to provide
+  Country code based filtering.',
+},
+{
   module => 'Razor2::Client::Agent',
   alt_name => 'Razor2',
   version => '2.61',
@@ -235,6 +243,13 @@ our @OPTIONAL_MODULES = (
   user configuration data, Bayes storage, or other storage, you will need
   to have these installed; both the basic DBI module and the DBD driver for
   your database.',
+},
+{
+  module => 'DBD::SQLite',
+  version => 1.59,
+  desc => 'If you intend to use SpamAssassin with SQLite as the SQL database
+  backend for the DBI module, this is the DBD driver required. Version 1.59_01
+  or later is needed to provide SQLite 3.25.0 or later.',
 },
 {
   module => 'LWP::UserAgent',
@@ -384,14 +399,6 @@ problems.
 
 sub debug_diagnostics {
   my $out = "diag: perl platform: $] $^O\n";
-
-# # this avoids an unsightly warning due to a shortcoming of Net::Ident;
-# # "Net::Ident::_export_hooks() called too early to check prototype at
-# # /usr/share/perl5/Net/Ident.pm line 29."   It only needs to be
-# # called here.
-# eval '
-#   sub Net::Ident::_export_hooks;
-# ';
 
   my $prefix = '';
   foreach my $moddef (@MODULES, 'optional', @OPTIONAL_MODULES) {

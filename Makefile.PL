@@ -5,16 +5,10 @@ use strict;
 use warnings;
 use Config;
 
-use ExtUtils::MakeMaker;
+use ExtUtils::MakeMaker 6.64;
 
 # raising the version of makemaker to 6.64 to use TEST_REQUIRES
 use constant MIN_MAKEMAKER_VERSION => 6.64;
-
-# avoid stupid 'Argument "6.30_01" isn't numeric in numeric ge (>=)' warnings;
-my $mm_version = eval $ExtUtils::MakeMaker::VERSION;
-if ($mm_version < MIN_MAKEMAKER_VERSION) {
-  die "Apache SpamAssassin Makefile.PL requires at least ExtUtils::MakeMaker v" . MIN_MAKEMAKER_VERSION;
-}
 
 use constant RUNNING_ON_WINDOWS => ($^O =~ /^(mswin|dos|os2)/oi);
 use constant HAS_DBI => eval { require DBI; };
@@ -187,10 +181,9 @@ my %makefile = (
         'Archive::Tar'         => 1.23,          # for sa-update
         'IO::Zlib'             => 1.04,          # for sa-update
         'Mail::DKIM'           => 0.31,
-        'Net::DNS'             => (RUNNING_ON_WINDOWS ? 0.46 : 0.34), # bugs in older revs
+        'Net::DNS'             => 0.69,
         'NetAddr::IP'          => 4.010,
         'Sys::Hostname'        => 0,
-        'Test::More'           => 0,
         'Time::HiRes'          => 0,
         'Time::Local'          => 0,
         'Errno'                => 0,
@@ -198,26 +191,18 @@ my %makefile = (
 
     # In case MIN_MAKEMAKER_VERSION is greater than the version bundled in the core of MIN_PERL_VERSION
     # use this to ensure CPAN will automatically upgrade MakeMaker if needed
+    'BUILD_REQUIRES' => {
+        'ExtUtils::MakeMaker' => MIN_MAKEMAKER_VERSION,
+    },
+
     'CONFIGURE_REQUIRES' => {
         'ExtUtils::MakeMaker' => MIN_MAKEMAKER_VERSION,
     },
 
     # The modules that are not core that are used in default tests
     'TEST_REQUIRES' => {
-        'Archive::Zip' => 0,
-        'DBD::SQLite' => 0,
         'Devel::Cycle' => 0,
-        'Email::Address::XS' => 0,
-        'Geo::IP' => 0,
-        'IO::String' => 0,
-        'IP::Country::DB_File' => 0,
-        'IP::Country::Fast' => 0,
-        'MaxMind::DB::Reader' => 0,
-        'Net::DNS::Nameserver' => 0,
-        'Net::CIDR::Lite' => 0,
-        'Net::LibIDN' => 0,
-        'Net::LibIDN2' => 0,
-        'Net::Patricia' => 0,
+        'Test::More'   => 0,
         'Text::Diff' => 0,
         'Perl::Critic::Policy::TestingAndDebugging::ProhibitNoStrict' => 0,
         'Perl::Critic::Policy::Perlsecret' => 0,
@@ -225,7 +210,8 @@ my %makefile = (
 
     'dist' => {
         COMPRESS => 'gzip -9f',
-        SUFFIX => 'gz',
+        SUFFIX => '.gz',
+        TARFLAGS => 'cf',
         DIST_DEFAULT => 'tardist',
 
         CI => 'svn commit',
@@ -388,25 +374,41 @@ $makefile{META_MERGE} = {
     MailingList => 'http://wiki.apache.org/spamassassin/MailingLists',
   },
 
-  recommends => {
-    'MIME::Base64' =>              0,
-    'DB_File' =>                   0,
-    'Net::SMTP' =>                 0,
-    'Mail::SPF' =>                 0,
-    'Geo::IP' =>                   0,
-    'Razor2::Client::Agent' =>     2.61,
-    'Net::Ident' =>                0,
-    'IO::Socket::INET6' =>         0,
-    'IO::Socket::SSL' =>           1.76,
-    'Compress::Zlib' =>            0,
-    'Mail::DKIM' =>                0.37,
-    'DBI' =>                       0,
-    'Getopt::Long' =>              2.32,
-    'LWP::UserAgent' =>            0,
-    'Archive::Tar' =>              1.23,
-    'IO::Zlib' =>                  1.04,
-    'Encode::Detect' =>            0
-  }
+  prereqs => {
+    runtime => {
+      recommends => {
+        'MIME::Base64' =>              0,
+        'DB_File' =>                   0,
+        'Net::SMTP' =>                 0,
+        'Net::LibIDN2' =>              0,
+        'Net::LibIDN' =>               0,
+        'Mail::SPF' =>                 0,
+        'MaxMind::DB::Reader' =>       0,
+        'MaxMind::DB::Reader::XS' =>   0,
+        'Geo::IP' =>                   0,
+        'IP::Country::DB_File' =>      0,
+        'IP::Country::Fast' =>         0,
+        'Razor2::Client::Agent' =>     2.61,
+        'IO::Socket::IP' =>            0.09,
+        'IO::Socket::INET6' =>         0,
+        'IO::Socket::SSL' =>           1.76,
+        'Compress::Zlib' =>            0,
+        'Mail::DKIM' =>                0.37,
+        'DBI' =>                       0,
+        'DBD::SQLite' =>               1.59,
+        'LWP::UserAgent' =>            0,
+        'Encode::Detect::Detector' =>  0,
+        'Net::Patricia' =>             1.16,
+        'Net::CIDR::Lite' =>           0,
+        'Net::DNS::Nameserver' =>      0,
+        'BSD::Resource' =>             0,
+        'Archive::Zip' =>              0,
+        'IO::String' =>                0,
+        'Email::Address::XS' =>        0,
+        'Mail::DMARC' =>               0,
+      },
+    },
+  },
 };
 
 #######################################################################
@@ -415,7 +417,7 @@ $makefile{META_MERGE} = {
 $makefile{EXE_FILES} = [ values %{$makefile{EXE_FILES}} ];
 $makefile{AUTHOR} =~ s/(<.+) at (.+>)/$1\@$2/;
 WriteMakefile(%makefile);
-print "Makefile written by ExtUtils::MakeMaker $mm_version\n";
+print "Makefile written by ExtUtils::MakeMaker $ExtUtils::MakeMaker::VERSION\n";
 
 #######################################################################
 
