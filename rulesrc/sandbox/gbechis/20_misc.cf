@@ -86,3 +86,12 @@ uri        GB_URI_FLEEK_STO_HTM          m,^https?://storageapi\.fleek\.co/.*\.h
 describe   GB_URI_FLEEK_STO_HTM          Html file stored on Fleek cloud
 score      GB_URI_FLEEK_STO_HTM          1.000 # limit
 tflags     GB_URI_FLEEK_STO_HTM          multiple maxhits=5
+
+if (version >= 4.000000)
+if can(Mail::SpamAssassin::Conf::feature_capture_rules)
+  header        __GB_TO_ADDR            To:addr =~ /(?<GB_TO_ADDR>.*)/
+  uri           GB_STORAGE_GOOGLE_EMAIL m|^https?://storage\.cloud\.google\.com/.{4,128}\#%{GB_TO_ADDR}|i
+  describe      GB_STORAGE_GOOGLE_EMAIL Google storage cloud abuse
+  score         GB_STORAGE_GOOGLE_EMAIL 2.000 # limit
+endif
+endif
