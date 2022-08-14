@@ -53,7 +53,7 @@ if (TESSERACT) {
    ");
    %anti_patterns = ();
    %patterns = %patterns_gtube;
-   sarun ("-L -t < data/spam/extracttext/gtube_jpg.eml", \&patterns_run_cb);
+   sarun ("-L -t < data/spam/extracttext/gtube_png.eml", \&patterns_run_cb);
    ok_all_patterns();
    clear_pattern_counters();
 }
