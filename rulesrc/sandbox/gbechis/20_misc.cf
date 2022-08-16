@@ -93,5 +93,9 @@ if can(Mail::SpamAssassin::Conf::feature_capture_rules)
   uri           GB_STORAGE_GOOGLE_EMAIL m|^https?://storage\.cloud\.google\.com/.{4,128}\#%{GB_TO_ADDR}|i
   describe      GB_STORAGE_GOOGLE_EMAIL Google storage cloud abuse
   score         GB_STORAGE_GOOGLE_EMAIL 2.000 # limit
+
+  uri           GB_CUSTOM_HTM_URI       m|^https?://.{10,128}\.html?\#%{GB_TO_ADDR}|i
+  describe      GB_CUSTOM_HTM_URI       Custom html uri
+  score         GB_CUSTOM_HTM_URI       1.500 # limit
 endif
 endif
