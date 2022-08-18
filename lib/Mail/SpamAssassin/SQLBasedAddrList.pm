@@ -256,7 +256,8 @@ sub get_addr_entry {
   }
   $sth->finish();
 
-  dbg("auto-welcomelist: sql-based %s scores %s, msgcount %s",
+  # tests t/sql_based_w*.t look for this dbg line in this format
+  dbg("auto-welcomelist: sql-based %s scores %.1f, msgcount %s",
       join('|',@args), $entry->{totscore}, $entry->{msgcount});
 
   return $entry;

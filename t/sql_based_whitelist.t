@@ -104,7 +104,7 @@ ok(sarun ("--remove-addr-from-whitelist whitelist_test\@whitelist.spamassassin.t
 
 # 3 times, to get into the whitelist: # verify correct ip/score/msgcount from debug output
 %patterns = (%is_nonspam_patterns,
-  ('sql-based whitelist_test@whitelist.spamassassin.taint.org|144.137 scores 0, msgcount 0' => 'scores'));
+  ('sql-based whitelist_test@whitelist.spamassassin.taint.org|144.137 scores 0.0, msgcount 0' => 'scores'));
 ok(sarun ("-L -t -D auto-welcomelist < data/nice/002 2>&1", \&patterns_run_cb));
 ok_all_patterns();
 %patterns = (%is_nonspam_patterns,
@@ -134,7 +134,7 @@ ok(sarun ("-L -t -D auto-welcomelist < data/spam/004 2>&1", \&patterns_run_cb));
 ok_all_patterns();
 
 %patterns = (%is_spam_patterns2,
-  ('sql-based whitelist_test@whitelist.spamassassin.taint.org|210.73 scores 0, msgcount 0' => 'scores'));
+  ('sql-based whitelist_test@whitelist.spamassassin.taint.org|210.73 scores 0.0, msgcount 0' => 'scores'));
 ok(sarun ("-L -t -D auto-welcomelist < data/spam/007 2>&1", \&patterns_run_cb));
 ok_all_patterns();
 
