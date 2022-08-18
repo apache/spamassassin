@@ -5,7 +5,7 @@ use SATest;
 use Test::More;
 
 use constant HAS_DBI => eval { require DBI; };
-use constant HAS_DBD_SQLITE => eval { require DBD::SQLite; };
+use constant HAS_DBD_SQLITE => eval { require DBD::SQLite; DBD::SQLite->VERSION(1.59_01); };
 
 use constant SQLITE => (HAS_DBI && HAS_DBD_SQLITE);
 use constant SQL => conf_bool('run_awl_sql_tests');

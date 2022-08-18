@@ -256,7 +256,7 @@ creation clauses.
 You will need to have the proper DBI module for your database.  For example
 DBD::SQLite, DBD::mysql, DBD::MariaDB or DBD::Pg.
 
-Minimum required SQLite version is 3.24.0 (available from DBD::SQLite 1.59).
+Minimum required SQLite version is 3.24.0 (available from DBD::SQLite 1.59_01).
 
 Examples:
 

@@ -3,7 +3,7 @@
 use lib '.'; use lib 't';
 use SATest; sa_t_init("spamd_sql_prefs");
 use constant HAS_DBI => eval { require DBI; };
-use constant HAS_DBD_SQLITE => eval { require DBD::SQLite; };
+use constant HAS_DBD_SQLITE => eval { require DBD::SQLite; DBD::SQLite->VERSION(1.59_01); };
 
 use Test::More;
 plan skip_all => "Spamd tests disabled" if $SKIP_SPAMD_TESTS;
