@@ -26,7 +26,7 @@ use vars qw($RUNNING_ON_WINDOWS $SSL_AVAILABLE
             $SKIP_SETUID_NOBODY_TESTS $SKIP_DNSBL_TESTS
             $have_inet4 $have_inet6 $spamdhost $spamdport
             $workdir $siterules $localrules $userrules $userstate
-            $keep_workdir $mainpid);
+            $keep_workdir $mainpid $spamd_pidfile);
 
 my $sa_code_dir;
 BEGIN {
@@ -238,6 +238,7 @@ sub sa_t_init {
   close(OUT);
   mkdir($userstate) or die "FATAL: failed to create $userstate\n";
 
+  $spamd_pidfile = "$workdir/spamd.pid";
   $spamd_cf_args = "-C $localrules";
   $spamd_localrules_args = " --siteconfigpath $siterules";
   $scr_localrules_args =   " --siteconfigpath $siterules";
@@ -681,7 +682,6 @@ sub start_spamd {
   my $spamd_stdout = "$workdir/d.$testname/spamd.out.$test_number";
      $spamd_stderr = "$workdir/d.$testname/spamd.err.$test_number";    #  global
   my $spamd_stdlog = "$workdir/d.$testname/spamd.log.$test_number";
-  my $spamd_pidfile = "$workdir/spamd.pid";
   my $spamd_forker = $ENV{'SPAMD_FORKER'}   ?
                        $ENV{'SPAMD_FORKER'} :
                      $RUNNING_ON_WINDOWS    ?
