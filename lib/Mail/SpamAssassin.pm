@@ -2230,6 +2230,7 @@ sub _get_cf_pre_files_in_dir {
   if ($self->{config_tree_recurse}) {
     my @cfs;
     # copied from Mail::SpamAssassin::Util::untaint_file_path
+    # fix bugs 8010 and 8025 by using an untaint pattern that is better on Windows than File::Find's default
     my $chars = '-_A-Za-z0-9.#%=+,/:()\\@\\xA0-\\xFF\\\\';
     my $re = qr{^\s*([$chars][${chars}~ ]*)\z};
     # use "eval" to avoid loading File::Find unless this is specified
