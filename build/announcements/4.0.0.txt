@@ -1,39 +1,84 @@
-TEMPORARY NOTE: IN PREP FOR RELEASE, THIS IS MOVED TO
-https://docs.google.com/document/d/1BGFFfZlQxYe9-H9AyEY_MVski_VtAaTb-4BLA_exwYs/edit
-TO MAKE EDITING EASIER AND COLLABORATIVE
-
-THIS IS JUST A COPY OF 3.4.6 RIGHT NOW.
-
 From: <your@apache.org address here>
 To: <your@apache.org address here>
 Bcc: users@spamassassin.apache.org, dev@spamassassin.apache.org, announce@spamassassin.apache.org, announce@apache.org
 Reply-to: dev@spamassassin.apache.org
-Subject: ANNOUNCE: Apache SpamAssassin 3.4.6 available
+Subject: ANNOUNCE: Apache SpamAssassin 4.0.0 available
 
-Release Notes -- Apache SpamAssassin -- Version 3.4.6
+Release Notes -- Apache SpamAssassin -- Version 4.0.0
+
 
 Introduction
 ------------
 
-Apache SpamAssassin 3.4.6 fixes two small but potentially annoying bugs in 3.4.5
+Apache SpamAssassin 4.0.0 contains numerous tweaks and bug fixes over
+the past releases. In particular, it includes major changes that
+significantly improve the handling of text in international language.
+
+As with any major release, there are countless functional patches and
+improvements to upgrade to 4.0.0. Apache SpamAssassin 4.0.0 includes
+several years of fixes that significantly improve classification and
+performance. It has been thoroughly tested in production systems. We
+strongly recommend upgrading as soon as possible.
 
 
-*** On March 1, 2020, we stopped publishing rulesets with SHA-1 signatures.
-    If you do not update to 3.4.2 or later, you will be stuck at the last
-    ruleset with SHA-1 signatures. Such an upgrade should be to 3.4.6 to
-    obtain the contained security fixes ***
+Important Notes
+—--------------
 
-*** Ongoing development on the 3.4 branch has ceased. All future releases
-    and bug fixes will be on the 4.0 series, unless a new security issue
-    is found that necessitates a 3.4.7 release. ***
+*** On March 1, 2020, we stopped publishing rulesets with SHA-1
+  signatures. If you do not update to 3.4.2 or later, you will be stuck
+  at the last ruleset with SHA-1 signatures. Such an upgrade should be
+  to 3.4.6 to obtain the contained security fixes ***
 
-Many thanks to the committers, contributors, rule testers, mass checkers,
-and code testers who have made this release possible.
+*** Ongoing development on the 3.4 branch has ceased. All future
+  releases and bug fixes will be on the 4.0 series, unless a new
+  security issue is found that necessitates a 3.4.7 release. ***
+
+
+Thanks
+—-----
+
+Many thanks to the committers (see CREDITS file), contributors, rule
+testers, mass checkers, and code testers who have made this release
+possible. We would also like to thank cPanel for their continued support
+of new features.
 
 Notable features:
 =================
 
-None noted.
+
+New plugins
+-----------
+
+There are three new plugins added with this release:
+
+
+#1 Mail::SpamAssassin::Plugin::ExtractText
+
+This plugin uses external tools to extract text from message parts, and
+then sets the text as the rendered part. All SpamAssassin rules that
+apply to the rendered part will run on the extracted text as well.
+
+
+#2 Mail::SpamAssassin::Plugin::DMARC
+
+This plugin checks if emails match DMARC policy after parsing DKIM and
+SPF results.
+
+
+#3 Mail::SpamAssassin::Plugin::DecodeShortURLs
+
+This plugin looks for URLs shortened by a list of URL shortening
+services. Upon finding a matching URL, plugin will send a HTTP request
+to the shortening service and retrieve the Location-header which points
+to the actual shortened URL. It then adds this URL to the list of URIs
+extracted by SpamAssassin which can then be accessed by uri rules and
+plugins such as URIDNSBL.
+
+
+Removed plugin
+--------------
+
+HashCash module, formerly deprecated, has now been removed completely
 
 
 Notable changes
@@ -41,28 +86,133 @@ Notable changes
 
 This release includes fixes for the following:
 
-  - Fixed URIDNSBL not triggering meta rules
-  - Fix false positive in T_KAM_HTML_FONT_INVALID on CSS color !important
+  - Support for international text such as UTF-8 rules has been
+     completed and significantly improved to include native UTF-8
+     processing
+
+  - Bayes plugin has been improved to skip common words aka noise words
+     written in languages other than English
+
+  - OLEVBMacro plugin has been improved in order to detect more
+     Microsoft Office macros and dangerous content. It has also been
+     improved to extract URIs from Office documents for automatic
+     inclusion in rules such as RBL lookups.
+
+  - You can now use Captured Tags to use tags “captured” in one rule
+     inside other rules
+
+  - sa-update(1) tool has been improved with three new options:
+    #1 force-mirror: forces sa-update to use a specific mirror server,
+    #2 score-multiplier: adjust all scores from update channel by a
+      given multiplier to quickly level set scores to match your
+      preferred threshold
+    #3 score-limit adjusts all scores from update channel over a
+      specified limit to a new limit
+
+* SSL client certificate support has been improved and made easier to
+   implement with spamc/spamd
+
+* DKIM plugin can now detect ARC signatures
+
+* More work on improving the configuration and internal coding to use
+  more inclusive and less divisive language
+
+* spamc(1) speed has been improved when both SSL and compression are
+  used
+
+* The normalize_charset option is now enabled by default. NOTE: Rules
+  should not expect specific non-UTF-8 or UTF-8 encoding in the body.
+  Matching is done against the raw body, which may vary depending on
+  normalize_charset setting and whether UTF-8 decoding was successful.
+
+* Mail::SPF is now the only supported module used by the SPF plugin. 
+
+* Mail::SPF::Query use is deprecated, along with settings
+  do_not_use_mail_spf, do_not_use_mail_spf_query.
+
+ * SPF lookups are not done asynchronously and you may consider using an
+   SPF filter at the MTA level (pypolicyd-spf / spf-engine / etc) which
+   generates a Received-SPF header that can be parsed by SpamAssassin.
+
+ * The default sa-update ruleset doesn't make ASN lookups or header
+   additions anymore.  Configure desired methods (asn_use_geodb /
+   asn_use_dns) and add_header clauses manually, as described in
+   documentation for the Mail::SpamAssassin::Plugin::ASN.
+
 
 New configuration options
 -------------------------
 
-None noted.
+All rules, functions, command line options and modules that contain
+"whitelist" or "blacklist" have been renamed to "welcomelist" and
+"blocklist" terms
+
+Old options will continue to work for backwards compatibility until at
+least the Apache SpamAssassin version 4.1.0 release
+
+New tflag "nolog" added to hide info coming from rules in SpamAssassin
+reports
+
+New dns_options "nov4" and "nov6" added.
+IMPORTANT:; You must set nov6 if your DNS resolver is filtering
+IPv6 AAAA replies.
+
+Razor2 razor_fork option added. It will fork separate Razor2 process and
+read in the results later asynchronously, increasing throughput. When
+this is used, rule priorities are automatically adjusted to -100.
+
+Pyzor pyzor_fork option added. It will fork separate Pyzor process and
+read in the results later asynchronously, increasing throughput. When
+this is used, rule priorities are automatically adjusted to -100
+
+urirhsbl and urirhssub rules now support "notrim" tflag, which forces
+querying the full hostname, instead of trimmed domain
+
+report_charset now defaults to UTF-8 which may change the rendering of
+SpamAssassin reports
 
 Notable Internal changes
 ------------------------
 
-None noted.
+Meta rules no longer use priority values, they are evaluated dynamically
+when the rules they depend on are finished
+
+DNS and other asynchronous lookups like DCC or Razor2 plugins are now
+launched when priority -100 is reached. This allows short circuiting at
+lower priority without sending unneeded DNS queries
+
+New internal Mail::SpamAssassin::GeoDB module supporting RelayCountry
+and URILocalBL plugins provides a unified interface to Geographic IP
+modules. These include:
+    MaxMind::DB::Reader (GeoIP2)
+    Geo::IP
+    IP::Country::DB_File
+    IP::Country::Fast.
+
+Bayes and TxRep Message-ID tracking now uses a different hashing method
+
 
 Other updates
 -------------
 
 None noted.
 
+
 Optimizations
 -------------
 
-None noted.
+Apache SpamAssassin 4.0.0 represents years of work by the project with
+numerous improvements, new rule types, and internal native handling of
+messages in international languages. These three key optimizations will
+improve the efficiency of SpamAssassin:
+
+    DNS queries are now done asynchronously for overall speed
+    improvements
+
+    DCC checks can now use dccifd asynchronously for improved throughput
+
+    Pyzor and Razor fork use separate processes done asynchronously for
+    increased throughput
 
 
 Downloading and availability
@@ -72,26 +222,14 @@ Downloads are available from:
 
 https://spamassassin.apache.org/downloads.cgi
 
-sha256sum of archive files:
+[INSERT SHA256 and SHA512 HASHES OF FILES HERE AFTER RELEASE IS PREPARED]
 
-  bc4875f3e4bb5979f0c10283213a512c4c9646220ae0132a78c8e3af94789610  Mail-SpamAssassin-3.4.6.tar.bz2
-  500c7e2a7cdf3aa4dd822d97aaff2ab22235a60cf17a68ab817861d215a4e568  Mail-SpamAssassin-3.4.6.tar.gz
-  7eb88a4d2d90bc77fe6e22f31e45727392adf023fb5c3ecfef2cf66721c00399  Mail-SpamAssassin-3.4.6.zip
-  b1efcdc57e6b100735855e24ee8391b0857327d70e1e1d2c2757d5f66e8a1ce6  Mail-SpamAssassin-rules-3.4.6.r1888502.tgz
-
-sha512sum of archive files:
-
-  bb53ba928917b02071b2e6690a11240e1af503334f292c870a8c49c24b0a58b44c78f827e2f43e71a3ce920481fa0e1e62b78a39452658c57d18f4e11daeb593  Mail-SpamAssassin-3.4.6.tar.bz2
-  7910852f04463a7363a2fc3b70a35adadf5714552e57c5b8ca57beaa534ee18d9f06526cdbcf8bcd5781e5ca778f98d2f84ef2efd1872fa550cfe1689440364a  Mail-SpamAssassin-3.4.6.tar.gz
-  b58b2e5b1e2be9bb7ac323d6de390e47c9a2067fc2eeb568784b35558ec23c68c25cbd0cf157342da9266aa3a92df4ce6de14edea5e34926ce540b29a40626e3  Mail-SpamAssassin-3.4.6.zip
-  29167c2ab50de26954181ad53395d4270b8b15b7d3bb13d6c62aa2f13ed3bb7a54adcda944bbd4c8d0cf4fe918a2eb0f542ef420af2bd96a121cb3d9b55dd572  Mail-SpamAssassin-rules-3.4.6.r1888502.tgz
-
-Note that the *-rules-*.tgz files are only necessary if you cannot,
-or do not wish to, run "sa-update" after install to download the latest
-fresh rules.
+Note that the Rules files, aka *-rules-*.tgz, are only necessary if you
+cannot, or do not wish to, run "sa-update" after installation. Using
+sa-update will download the latest rules
 
 See the INSTALL and UPGRADE files in the distribution for important
-installation notes.
+installation notes
 
 
 GPG Verification Procedure
@@ -102,8 +240,7 @@ key is available via the keys.gnupg.net or keys.openpgp.org key servers,
 as well as https://www.apache.org/dist/spamassassin/KEYS
 
 
-
-The following key is used to sign releases after, and including SA 3.3.0:
+The following key is used to sign SA releases 3.3.0 and later:
 
 pub   4096R/F7D39814 2009-12-02
       Key fingerprint = D809 9BC7 9E17 D7E4 9BC2  1E31 FDE5 2F40 F7D3 9814
@@ -121,7 +258,7 @@ sub   4096R/24F434CE 2005-12-20
 To verify a release file, download the file with the accompanying .asc
 file and run the following commands:
 
-  gpg --verbose --keyserver keys.gnupg.net --recv-key FDE52F40F7D39814
+  gpg --verbose --keyserver keys.openpgp.org --recv-key FDE52F40F7D39814
   gpg --verify Mail-SpamAssassin-3.4.6.tar.bz2.asc
   gpg --fingerprint FDE52F40F7D39814
 
@@ -129,34 +266,35 @@ Then verify that the key matches the signature.
 
 Note that older versions of gnupg may not be able to complete the steps
 above. Specifically, GnuPG v1.0.6, 1.0.7 & 1.2.6 failed while v1.4.11
-worked flawlessly.
+worked flawlessly
 
 See https://www.apache.org/info/verification.html for more information
-on verifying Apache releases.
+on verifying Apache releases
 
 
 About Apache SpamAssassin
 -------------------------
 
 Apache SpamAssassin is a mature, widely-deployed open source project
-that serves as a mail filter to identify spam. SpamAssassin uses a
-variety of mechanisms including mail header and text analysis, Bayesian
-filtering, DNS blocklists, and collaborative filtering databases. In
-addition, Apache SpamAssassin has a modular architecture that allows
-other technologies to be quickly incorporated as an addition or as a
-replacement for existing methods.
+that provides filtering to classify email to block spam, malware, and
+phishes.
 
-Apache SpamAssassin typically runs on a server, classifies and labels
-spam before it reaches your mailbox, while allowing other components of
-a mail system to act on its results.
+Apache SpamAssassin uses a variety of mechanisms including mail header
+and text analysis, Bayesian filtering, DNS blocklists, collaborative
+filtering databases, and meta concepts to lower incorrect
+classification.
 
-Most of the Apache SpamAssassin is written in Perl, with heavily
-traversed code paths carefully optimized. Benefits are portability,
-robustness and facilitated maintenance. It can run on a wide variety of
-POSIX platforms.
+Apache SpamAssassin uses a highly modular architecture that allows other
+technologies to be quickly incorporated as plugins to easily add or
+replace existing methods.
 
-The server and the Perl library feels at home on Unix and Linux platforms
-and reportedly also works on MS Windows systems under ActivePerl.
+Apache SpamAssassin typically runs on a server using either command line
+utilities or an API to classify email so a mail system can use the
+results before the message reaches mailboxes.
+
+Most of the Apache SpamAssassin is written in Perl natively supporting
+Unix, Linux, and macOS platforms and Microsoft Windows using Strawberry
+Perl.
 
 For more information, visit https://spamassassin.apache.org/
 
