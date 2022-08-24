@@ -22,6 +22,20 @@ use strict;
 use warnings;
 use re 'taint';
 
+my @ORIG_INC_OPTS;
+BEGIN {
+  # bug 8030 - Save what is in @INC to capture any -I arguments passed in to use at SIGHUP restart
+  # This is done before any use lib statements add anything else to @INC
+  my %orig_inc;
+  for (my $i = $#INC; $i >=0; $i--) {
+    my $path = $INC[$i];
+    if (!$orig_inc{$path}) { # more stringent checking will done later after more modules are loaded
+       $orig_inc{$path} = 1;
+       unshift(@ORIG_INC_OPTS, $path);
+    }
+  }
+}
+
 my $PREFIX          = '@@PREFIX@@';             # substituted at 'make' time
 my $DEF_RULES_DIR   = '@@DEF_RULES_DIR@@';      # substituted at 'make' time
 my $LOCAL_RULES_DIR = '@@LOCAL_RULES_DIR@@';    # substituted at 'make' time
@@ -3226,15 +3240,12 @@ sub map_server_sockets {
 # is received
 my $perl_from_hashbang_line;
 sub prepare_for_sighup_restart {
-  # it'd be great if we could introspect the interpreter to figure this
-  # out, but bizarrely it seems unavailable.
-  if (open (IN, "<$ORIG_ARG0")) {
-    my $l = <IN>;
-    close IN;
-    if ($l && $l =~ /^#!\s*(\S+)\s*.*?$/) {
-      $perl_from_hashbang_line = $1;
-    }
-  }
+  @ORIG_INC_OPTS =
+    map {
+          my $path = untaint_var($_);
+          (File::Spec->file_name_is_absolute($path) and (-d $path))?("-I", $path):()
+        }
+        @ORIG_INC_OPTS;
 }
 
 sub do_sighup_restart {
@@ -3251,15 +3262,14 @@ sub do_sighup_restart {
 
   # ensure we re-run spamd using the right perl interpreter, and
   # with the right switches (taint mode and warnings) (bug 5255)
+  # Also need -I options (bug 8030) because there is no way
+  # to determine if everything in @INC came from this perl's defaults
   my $perl = untaint_var($^X);
-  my @execs = ( $perl, "-T", "-w", $ORIG_ARG0, @ORIG_ARGV );
+  my @execs = ( $perl, "-T", "-w", @ORIG_INC_OPTS, $ORIG_ARG0, @ORIG_ARGV );
 
-  if ($perl eq $perl_from_hashbang_line) {
-    # we're using the same perl as the script uses on the #! line;
-    # we can safely just exec the script
-    @execs = ( $ORIG_ARG0, @ORIG_ARGV );
-  }
-
+  # bug 8030 - removed code that in some cases just exec'd the script
+  # Can't ever exec the script in case the perl -I options are necessary
+  
   warn "spamd: restarting using '" . join (' ', @execs) . "'\n";
   exec @execs;
 
