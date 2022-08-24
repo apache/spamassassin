@@ -8,30 +8,30 @@ use Test::More tests => 21;
 
 %patterns = (
 
-  q{ GTUBE }, 'gtube',
-  q{ SHOULD_BE_CALLED01 }, 'should_be_called01',
-  q{ SHOULD_BE_CALLED02 }, 'should_be_called02',
-  q{ SHOULD_BE_CALLED03 }, 'should_be_called03',
-  q{ SHOULD_BE_CALLED04 }, 'should_be_called04',
-  q{ SHOULD_BE_CALLED05 }, 'should_be_called05',
-  q{ SHOULD_BE_CALLED06 }, 'should_be_called06',
-  q{ SHOULD_BE_CALLED07 }, 'should_be_called07',
+  q{ 1000 GTUBE }, '',
+  q{ 1.0 SHOULD_BE_CALLED01 }, '',
+  q{ 1.0 SHOULD_BE_CALLED02 }, '',
+  q{ 1.0 SHOULD_BE_CALLED03 }, '',
+  q{ 1.0 SHOULD_BE_CALLED04 }, '',
+  q{ 1.0 SHOULD_BE_CALLED05 }, '',
+  q{ 1.0 SHOULD_BE_CALLED06 }, '',
+  q{ 1.0 SHOULD_BE_CALLED07 }, '',
 
 );
 %anti_patterns = (
 
-  q{ SHOULD_NOT_BE_CALLED01 }, 'should_not_be_called01',
-  q{ SHOULD_NOT_BE_CALLED02 }, 'should_not_be_called02',
-  q{ SHOULD_NOT_BE_CALLED03 }, 'should_not_be_called03',
-  q{ SHOULD_NOT_BE_CALLED04 }, 'should_not_be_called04',
-  q{ SHOULD_NOT_BE_CALLED05 }, 'should_not_be_called05',
-  q{ SHOULD_NOT_BE_CALLED06 }, 'should_not_be_called06',
-  q{ SHOULD_NOT_BE_CALLED07 }, 'should_not_be_called07',
-  q{ SHOULD_NOT_BE_CALLED08 }, 'should_not_be_called08',
-  q{ SHOULD_NOT_BE_CALLED09 }, 'should_not_be_called09',
-  q{ SHOULD_NOT_BE_CALLED10 }, 'should_not_be_called10',
-  q{ SHOULD_NOT_BE_CALLED11 }, 'should_not_be_called11',
-  q{ SHOULD_NOT_BE_CALLED12 }, 'should_not_be_called12',
+  q{ SHOULD_NOT_BE_CALLED01 }, '',
+  q{ SHOULD_NOT_BE_CALLED02 }, '',
+  q{ SHOULD_NOT_BE_CALLED03 }, '',
+  q{ SHOULD_NOT_BE_CALLED04 }, '',
+  q{ SHOULD_NOT_BE_CALLED05 }, '',
+  q{ SHOULD_NOT_BE_CALLED06 }, '',
+  q{ SHOULD_NOT_BE_CALLED07 }, '',
+  q{ SHOULD_NOT_BE_CALLED08 }, '',
+  q{ SHOULD_NOT_BE_CALLED09 }, '',
+  q{ SHOULD_NOT_BE_CALLED10 }, '',
+  q{ SHOULD_NOT_BE_CALLED11 }, '',
+  q{ SHOULD_NOT_BE_CALLED12 }, '',
 
 );
 

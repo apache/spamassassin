@@ -88,6 +88,14 @@ that.
 To override a test that uses shortcircuiting, you can set the classification
 type to C<off>.
 
+Note that DNS and other network lookups are launched when SA reaches
+priority -100.  If you want to shortcircuit scanning before any network
+queries are sent, you need to set lower than -100 priority to any such rule,
+like -200 as in the examples below.
+
+Shortcircuited test will be automatically set to priority -200, but only if
+the original priority is unchanged at default 0.
+
 =over 4
 
 =item on
@@ -99,7 +107,7 @@ shortcircuited.  This would allow you, for example, to define a rule such as
   body TEST /test/
   describe TEST test rule that scores barely over spam threshold
   score TEST 5.5
-  priority TEST -100
+  priority TEST -200
   shortcircuit TEST on
 
 The result of a message hitting the above rule would be a final score of 5.5,
@@ -113,11 +121,11 @@ Disables shortcircuiting on said rule.
 
 Shortcircuit the rule using a set of defaults; override the default score of
 this rule with the score from C<shortcircuit_spam_score>, set the
-C<noautolearn> tflag, and set priority to C<-100>.  In other words,
+C<noautolearn> tflag, and set priority to C<-200>.  In other words,
 equivalent to:
 
   shortcircuit TEST on
-  priority TEST -100
+  priority TEST -200
   score TEST 100
   tflags TEST noautolearn
 
@@ -125,11 +133,11 @@ equivalent to:
 
 Shortcircuit the rule using a set of defaults; override the default score of
 this rule with the score from C<shortcircuit_ham_score>, set the C<noautolearn>
-and C<nice> tflags, and set priority to C<-100>.   In other words, equivalent
+and C<nice> tflags, and set priority to C<-200>.   In other words, equivalent
 to:
 
   shortcircuit TEST on
-  priority TEST -100
+  priority TEST -200
   score TEST -100
   tflags TEST noautolearn nice
 
@@ -141,23 +149,22 @@ to:
     setting => 'shortcircuit',
     code => sub {
       my ($self, $key, $value, $line) = @_;
-      my ($rule,$type);
       unless (defined $value && $value !~ /^$/) {
         return $Mail::SpamAssassin::Conf::MISSING_REQUIRED_VALUE;
       }
-      if ($value =~ /^(\S+)\s+(\S+)$/) {
-        $rule=$1;
-        $type=$2;
-      } else {
+      local($1,$2);
+      unless ($value =~ /^(\w+)\s+(\w+)$/) {
         return $Mail::SpamAssassin::Conf::INVALID_VALUE;
       }
+      my ($rule, $type) = ($1, $2);
 
-      if ($type =~ m/^(?:spam|ham)$/) {
+      if ($type eq "ham" || $type eq "spam") {
         dbg("shortcircuit: adding $rule using abbreviation $type");
 
         # set the defaults:
         $self->{shortcircuit}->{$rule} = $type;
-        $self->{priority}->{$rule} = -100;
+        # don't override existing priority unless it's default 0
+        $self->{priority}->{$rule} ||= -200;
 
         my $tf = $self->{tflags}->{$rule};
         $self->{tflags}->{$rule} = ($tf ? $tf." " : "") .
@@ -227,7 +234,7 @@ sub hit_rule {
   my $rule = $params->{rulename};
 
   # don't s/c if we're linting
-  return if ($scan->{lint_rules});
+  return if ($self->{main}->{lint_rules});
 
   # don't s/c if we're in compile_now()
   return if ($self->{am_compiling});

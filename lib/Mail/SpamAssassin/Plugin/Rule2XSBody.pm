@@ -143,6 +143,16 @@ sub setup_test_set_pri {
       dbg "zoom: skipping rule $name, ReplaceTags";
       next;
     }
+    # ignore regex capture rules
+    if ($conf->{capture_rules}->{$name}) {
+      dbg "zoom: skipping rule $name, regex capture";
+      next;
+    }
+    # ignore regex capture template rules
+    if ($conf->{capture_template_rules}->{$name}) {
+      dbg "zoom: skipping rule $name, regex capture template";
+      next;
+    }
 
     # we have the rule, and its regexp matches.  zero out the body
     # rule, so that the module can do the work instead
@@ -195,6 +205,11 @@ sub check_start {
 sub check_rules_at_priority {
   my ($self, $params) = @_;
   $self->{one_line_body}->check_rules_at_priority($params);
+}
+
+sub check_cleanup {
+  my ($self, $params) = @_;
+  $self->{one_line_body}->check_cleanup($params);
 }
 
 ###########################################################################

@@ -34,7 +34,7 @@ tstlocalrules (q{
 
 
 %patterns = (
-  q{ 0.1 OLEMACRO_FOUND }, 'OLEMACRO_FOUND',
+  q{ 0.1 OLEMACRO_FOUND }, '',
 );
 
 sarun ("-L -t < data/spam/olevbmacro/macro.eml", \&patterns_run_cb);
@@ -42,8 +42,8 @@ ok_all_patterns();
 clear_pattern_counters();
 
 %patterns = (
-  q{ 0.1 OLEMACRO_FOUND }, 'OLEMACRO_FOUND',
-  q{ 0.1 OLEMACRO_MALICE }, 'OLEMACRO_MALICE',
+  q{ 0.1 OLEMACRO_FOUND }, '',
+  q{ 0.1 OLEMACRO_MALICE }, '',
 );
 
 sarun ("-L -t < data/spam/olevbmacro/malicemacro.eml", \&patterns_run_cb);
@@ -51,8 +51,8 @@ ok_all_patterns();
 clear_pattern_counters();
 
 %patterns = (
-  q{ 0.1 OLEMACRO_FOUND }, 'OLEMACRO_FOUND',
-  q{ 0.1 OLEMACRO_RENAME }, 'OLEMACRO_RENAME',
+  q{ 0.1 OLEMACRO_FOUND }, '',
+  q{ 0.1 OLEMACRO_RENAME }, '',
 );
 
 sarun ("-L -t < data/spam/olevbmacro/renamedmacro.eml", \&patterns_run_cb);
@@ -60,7 +60,7 @@ ok_all_patterns();
 clear_pattern_counters();
 
 %patterns = (
-  q{ 0.1 OLEMACRO_ENCRYPTED }, 'OLEMACRO_ENCRYPTED',
+  q{ 0.1 OLEMACRO_ENCRYPTED }, '',
 );
 
 sarun ("-L -t < data/spam/olevbmacro/encrypted.eml", \&patterns_run_cb);
@@ -68,8 +68,8 @@ ok_all_patterns();
 clear_pattern_counters();
 
 %patterns = (
-  q{ 0.1 OLEMACRO_FOUND }, 'OLEMACRO_FOUND',
-  q{ 0.1 OLEMACRO_ZIP_PW }, 'OLEMACRO_ZIP_PW',
+  q{ 0.1 OLEMACRO_FOUND }, '',
+  q{ 0.1 OLEMACRO_ZIP_PW }, '',
 );
 
 sarun ("-L -t < data/spam/olevbmacro/zippwmacro.eml", \&patterns_run_cb);
@@ -78,7 +78,7 @@ clear_pattern_counters();
 
 %patterns = ();
 %anti_patterns = (
-  q{ 0.1 OLEMACRO_FOUND }, 'OLEMACRO_FOUND',
+  q{ 0.1 OLEMACRO_FOUND }, '',
 );
 
 sarun ("-L -t < data/spam/olevbmacro/nomacro.eml", \&patterns_run_cb);
@@ -86,15 +86,15 @@ ok_all_patterns();
 
 %patterns = ();
 %anti_patterns = (
-  q{ 0.1 OLEMACRO_FOUND }, 'OLEMACRO_FOUND',
-  q{ 0.1 OLEMACRO_CSV }, 'OLEMACRO_CSV',
+  q{ 0.1 OLEMACRO_FOUND }, '',
+  q{ 0.1 OLEMACRO_CSV }, '',
 );
 
 sarun ("-L -t < data/spam/olevbmacro/goodcsv.eml", \&patterns_run_cb);
 ok_all_patterns();
 
 %patterns = (
-  q{ 0.1 OLEMACRO_TURI }, 'OLEMACRO_TURI',
+  q{ 0.1 OLEMACRO_TURI }, '',
 );
 %anti_patterns = ();
 

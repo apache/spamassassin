@@ -12,6 +12,9 @@ plan tests => 8;
 # bug 6003
 
 tstlocalrules (q{
+  header USER_IN_WELCOMELIST		eval:check_from_in_welcomelist()
+  tflags USER_IN_WELCOMELIST		userconf nice noautolearn
+  score USER_IN_WELCOMELIST		-100
   body MYBODY /LOSE WEIGHT/
   score MYBODY 99
 });
@@ -32,8 +35,8 @@ print OUT '';
 close OUT;
 
 %patterns = (
-  q{ 99 MYBODY }, 'MYBODY',
-  q{-100 USER_IN_WELCOMELIST }, 'USER_IN_WELCOMELIST',
+  q{ 99 MYBODY }, '',
+  q{ -100 USER_IN_WELCOMELIST }, '',
 );
 %anti_patterns = (
 );
@@ -45,10 +48,10 @@ ok_all_patterns();
 clear_pattern_counters();
 
 %patterns = (
-  q{ 99 MYBODY }, 'MYBODY',
+  q{ 99 MYBODY }, '',
 );
 %anti_patterns = (
-  q{ 0 USER_IN_WELCOMELIST }, 'USER_IN_WELCOMELIST',
+  qr/\d USER_IN_WELCOMELIST /, '',
 );
 ok (spamcrun ("-u testuser2 < data/spam/001", \&patterns_run_cb));
 checkfile ($spamd_stderr, \&patterns_run_cb);

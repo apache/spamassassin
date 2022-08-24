@@ -1,6 +1,5 @@
 #!/usr/bin/perl -T
 
-$NO_SPAMD_REQUIRED=1;
 use lib '.'; use lib 't';
 use SATest; sa_t_init("tainted_msg");
 

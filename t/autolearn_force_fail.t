@@ -17,7 +17,7 @@ plan tests => 3;
 );
 
 %anti_patterns = (
-  q{ autolearn=spam } => 'autolearned as spam',
+  'autolearn=spam' => 'autolearned as spam',
 );
 
 tstprefs ("

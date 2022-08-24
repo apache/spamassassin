@@ -11,6 +11,7 @@ plan tests => 98;
 
 use File::Copy;
 use File::Compare qw(compare_text);
+use Text::Diff;
 
 my @files = qw(
 	data/nice/crlf-endings
@@ -113,11 +114,10 @@ ok (-f $d_output);
 ok(!compare_text($input,$d_output))
         or diffwarn( $input, $d_output );
 
-
 sub diffwarn {
   my ($f1, $f2) = @_;
   print STDERR "# Diff is as follows:\n";
-  untaint_system "diff -u $f1 $f2 | cat -v >&2";
+  diff ($f1, $f2, { STYLE => 'unified', OUTPUT => \*STDERR });
   print "\n\n";
 }
 

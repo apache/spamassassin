@@ -2,7 +2,7 @@
 CREATE TABLE bayes_expire (
   id int(11) NOT NULL default '0',
   runtime int(11) NOT NULL default '0',
-  KEY bayes_expire_idx1 (id)
+  PRIMARY KEY  (id)
 ) ENGINE=InnoDB;
 
 CREATE TABLE bayes_global_vars (

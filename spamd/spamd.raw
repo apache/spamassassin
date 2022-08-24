@@ -22,6 +22,20 @@ use strict;
 use warnings;
 use re 'taint';
 
+my @ORIG_INC_OPTS;
+BEGIN {
+  # bug 8030 - Save what is in @INC to capture any -I arguments passed in to use at SIGHUP restart
+  # This is done before any use lib statements add anything else to @INC
+  my %orig_inc;
+  for (my $i = $#INC; $i >=0; $i--) {
+    my $path = $INC[$i];
+    if (!$orig_inc{$path}) { # more stringent checking will done later after more modules are loaded
+       $orig_inc{$path} = 1;
+       unshift(@ORIG_INC_OPTS, $path);
+    }
+  }
+}
+
 my $PREFIX          = '@@PREFIX@@';             # substituted at 'make' time
 my $DEF_RULES_DIR   = '@@DEF_RULES_DIR@@';      # substituted at 'make' time
 my $LOCAL_RULES_DIR = '@@LOCAL_RULES_DIR@@';    # substituted at 'make' time
@@ -249,12 +263,12 @@ use Mail::SpamAssassin::SpamdForkScaling qw(:pfstates);
 use Mail::SpamAssassin::Logger qw(:DEFAULT log_message);
 use Mail::SpamAssassin::Util qw(untaint_var untaint_file_path secure_tmpdir
                                 exit_status_str am_running_on_windows
-                                get_user_groups);
+                                get_user_groups force_die);
 use Mail::SpamAssassin::Timeout;
 
 use Getopt::Long;
 use POSIX qw(:sys_wait_h);
-use POSIX qw(locale_h setsid sigprocmask _exit);
+use POSIX qw(locale_h setsid sigprocmask);
 use Errno;
 use Fcntl qw(:flock);
 
@@ -371,6 +385,7 @@ GetOptions(
   'create-prefs!'            => \$opt{'create-prefs'},
   'daemonize!'               => \$opt{'daemonize'},
   'debug|D:s'                => \$opt{'debug'},
+  'default-user|U=s'         => \$opt{'default-user'},
   'd'                        => \$opt{'daemonize'},
   'groupname|g=s'            => \$opt{'groupname'},
   'helper-home-dir|H:s'      => \$opt{'home_dir_for_helpers'},
@@ -452,6 +467,10 @@ if ($opt{'help'}) {
 if ($opt{'version'}) {
   print_version();
   exit($resphash{'EX_OK'});
+}
+
+if (!defined $opt{'default-user'}) {
+  $opt{'default-user'} = 'nobody';
 }
 
 my $log_timestamp_fmt = $opt{'log-timestamp-fmt'};
@@ -1810,15 +1829,15 @@ sub handle_setuid_to_user {
   }
   if (!am_running_on_windows()) {
     warn("spamd: still running as root: user not specified with -u, "
-         . "not found, or set to root, falling back to nobody\n");
+         . "not found, or set to root, falling back to $opt{'default-user'}\n");
 
     my ($name, $pwd, $uid, $gid, $quota, $comment, $gcos, $dir, $etc) =
-        getpwnam('nobody');
+        getpwnam($opt{'default-user'});
   
     $) = (get_user_groups($uid));       # eGID
     $> = $uid;                          # eUID
     if (!defined($uid) || ($> != $uid and $> != ($uid - 2**32))) {
-      die("spamd: setuid to nobody failed");
+      die("spamd: setuid to $opt{'default-user'} failed");
   }
 
   $spamtest->signal_user_changed(
@@ -2139,7 +2158,7 @@ sub check {
   # ensure we didn't accidentally fork (bug 4370)
   if ($starting_self_pid != $$) {
     eval { warn("spamd: accidental fork: $$ != $starting_self_pid"); };
-    POSIX::_exit(1);        # avoid END and dtor processing
+    force_die(0);        # avoid END and dtor processing
   }
 
   return 1;
@@ -3221,15 +3240,12 @@ sub map_server_sockets {
 # is received
 my $perl_from_hashbang_line;
 sub prepare_for_sighup_restart {
-  # it'd be great if we could introspect the interpreter to figure this
-  # out, but bizarrely it seems unavailable.
-  if (open (IN, "<$ORIG_ARG0")) {
-    my $l = <IN>;
-    close IN;
-    if ($l && $l =~ /^#!\s*(\S+)\s*.*?$/) {
-      $perl_from_hashbang_line = $1;
-    }
-  }
+  @ORIG_INC_OPTS =
+    map {
+          my $path = untaint_var($_);
+          (File::Spec->file_name_is_absolute($path) and (-d $path))?("-I", $path):()
+        }
+        @ORIG_INC_OPTS;
 }
 
 sub do_sighup_restart {
@@ -3246,15 +3262,14 @@ sub do_sighup_restart {
 
   # ensure we re-run spamd using the right perl interpreter, and
   # with the right switches (taint mode and warnings) (bug 5255)
+  # Also need -I options (bug 8030) because there is no way
+  # to determine if everything in @INC came from this perl's defaults
   my $perl = untaint_var($^X);
-  my @execs = ( $perl, "-T", "-w", $ORIG_ARG0, @ORIG_ARGV );
+  my @execs = ( $perl, "-T", "-w", @ORIG_INC_OPTS, $ORIG_ARG0, @ORIG_ARGV );
 
-  if ($perl eq $perl_from_hashbang_line) {
-    # we're using the same perl as the script uses on the #! line;
-    # we can safely just exec the script
-    @execs = ( $ORIG_ARG0, @ORIG_ARGV );
-  }
-
+  # bug 8030 - removed code that in some cases just exec'd the script
+  # Can't ever exec the script in case the perl -I options are necessary
+  
   warn "spamd: restarting using '" . join (' ', @execs) . "'\n";
   exec @execs;
 
@@ -3313,6 +3328,8 @@ Options:
  -g groupname, --groupname=groupname  Run as groupname
  -v, --vpopmail                    Enable vpopmail config
  -x, --nouser-config               Disable user config files
+ -U username, --default-user=username  Fall back to this username if spamc user
+                                   is not found (default: nobody)
  -D, --debug[=areas]               Print debugging messages (for areas)
  -L, --local                       Use local tests only (no DNS)
  -P, --paranoid                    Die upon user errors
@@ -3644,6 +3661,12 @@ configuration from the user's home directory (B<--user-config>).
 This option does not disable or otherwise influence the SQL, LDAP or
 Virtual Config Dir settings.
 
+=item B<-U> I<username>, B<--default-user>=I<username>
+
+Fall back to this username, if the username provided by spamc is not found.
+Default is I<nobody>, which might not exist or not have a usable home
+directory, use this setting to define a suitable user if needed.
+
 =item B<-A> I<host,...>, B<--allowed-ips>=I<host,...>
 
 Specify a comma-separated list of authorized hosts or networks which
@@ -3708,8 +3731,8 @@ network tests.  Works the same as the C<-L> flag to C<spamassassin(1)>.
 
 =item B<-P>, B<--paranoid>
 
-Die on user errors (for the user passed from spamc) instead of falling back to
-user I<nobody> and using the default configuration.
+Die on user errors (for the user passed from spamc) instead of falling back
+to user C<--default-user> and using the default configuration.
 
 =item B<-m> I<number> , B<--max-children>=I<number>
 

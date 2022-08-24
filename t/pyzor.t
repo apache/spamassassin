@@ -3,7 +3,8 @@
 use lib '.'; use lib 't';
 use SATest; sa_t_init("pyzor");
 
-use constant HAS_PYZOR => eval { $_ = untaint_cmd("which pyzor"); chomp; -x };
+use Mail::SpamAssassin::Util;
+use constant HAS_PYZOR =>  Mail::SpamAssassin::Util::find_executable_in_env_path('pyzor');
 
 use Test::More;
 plan skip_all => "Net tests disabled" unless conf_bool('run_net_tests');
@@ -15,8 +16,11 @@ diag('Note: Failures may not be an SpamAssassin bug, as Pyzor tests can fail due
 # ---------------------------------------------------------------------------
 
 tstprefs ("
+  full PYZOR_CHECK	eval:check_pyzor()
+  tflags PYZOR_CHECK	net autolearn_body
   dns_available no
   use_pyzor 1
+  pyzor_count_min 1
   score PYZOR_CHECK 3.3
 ");
 
@@ -27,10 +31,11 @@ tstprefs ("
   q{ 3.3 PYZOR_CHECK }, 'spam',
 );
 
-sarun ("-t < data/spam/pyzor", \&patterns_run_cb);
+# Windows cmd doesn't recognize ' character
+sarun ("--cf=\"pyzor_fork 0\" -t < data/spam/pyzor", \&patterns_run_cb);
 ok_all_patterns();
 # Same with fork
-sarun ("--cf='pyzor_fork 1' -t < data/spam/pyzor", \&patterns_run_cb);
+sarun ("--cf=\"pyzor_fork 1\" -t < data/spam/pyzor", \&patterns_run_cb);
 ok_all_patterns();
 
 #TESTING FOR HAM
@@ -42,9 +47,9 @@ ok_all_patterns();
   q{ 3.3 PYZOR_CHECK }, 'nonspam',
 );
 
-sarun ("-D pyzor -t < data/nice/001 2>&1", \&patterns_run_cb);
+sarun ("-D pyzor --cf=\"pyzor_fork 0\" -t < data/nice/001 2>&1", \&patterns_run_cb);
 ok_all_patterns();
 # same with fork
-sarun ("-D pyzor --cf='pyzor_fork 1' -t < data/nice/001 2>&1", \&patterns_run_cb);
+sarun ("-D pyzor --cf=\"pyzor_fork 1\" -t < data/nice/001 2>&1", \&patterns_run_cb);
 ok_all_patterns();
 

@@ -27,7 +27,7 @@ ifplugin Mail::SpamAssassin::Plugin::FreeMail
   #Web forms used to submit shortened urls
   header          __XMAIL_CODEIGN         X-Mailer =~ /CodeIgniter/
   header          __XMAIL_PHPMAIL         X-Mailer =~ /PHPMailer/
-  meta            GB_WEBFORM              ( ( __XMAIL_CODEIGN || __XMAIL_PHPMAIL ) && ( __PDS_URISHORTENER || __URL_SHORTENER ) && FREEMAIL_FROM )
+  meta            GB_WEBFORM              ( ( __XMAIL_CODEIGN || __XMAIL_PHPMAIL ) && __URL_SHORTENER && FREEMAIL_FROM )
   describe        GB_WEBFORM              Webform with url shortener
   score           GB_WEBFORM              1.500 # limit
 endif

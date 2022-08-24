@@ -20,6 +20,6 @@ tstprefs("
 ");
 
 # we need -D output for patterns
-sarun ("-D -L -t < data/spam/dnsbl.eml 2>&1", \&patterns_run_cb);
+sarun ("-D dns -L -t < data/spam/dnsbl.eml 2>&1", \&patterns_run_cb);
 ok_all_patterns();
 

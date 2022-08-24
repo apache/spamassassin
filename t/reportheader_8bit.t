@@ -10,9 +10,9 @@ $ENV{'LANGUAGE'} = $ENV{'LC_ALL'} = 'C';             # a cheat, but we need the 
 # ---------------------------------------------------------------------------
 
 %patterns = (
-  q{/(?m)^X-Spam-Report:\s*$/}, 'qp-encoded-hdr',
-  q{/(?m)^\t\*\s+[0-9.-]+ INVALID_DATE\s+Invalid Date: header =\?UTF-8\?B\?wq4gwq8gwrA=\?= foo$/}, 'qp-encoded-desc',
-  q{/(?m)^ [0-9.-]+ INVALID_DATE\s+Invalid Date: header ® ¯ ° foo$/}, 'report-desc',
+  qr/^X-Spam-Report:\s*$/m, 'qp-encoded-hdr',
+  qr/^\t\*\s+[0-9.-]+ INVALID_DATE\s+Invalid Date: header =\?UTF-8\?B\?wq4gwq8gwrA=\?= foo$/m, 'qp-encoded-desc',
+  qr/^ [0-9.-]+ INVALID_DATE\s+Invalid Date: header ® ¯ ° foo$/m, 'report-desc',
 );
 
 tstprefs ("

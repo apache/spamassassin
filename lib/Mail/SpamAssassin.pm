@@ -2212,16 +2212,32 @@ sub get_pre_files_in_dir {
   return $self->_get_cf_pre_files_in_dir($dir, 'pre');
 }
 
+sub _reorder_dir {
+  # Official ASF channel should be loaded first in
+  # order to be able to override scores by using custom channels
+  # bz 7991
+  if($a eq 'updates_spamassassin_org.cf') {
+    return -1;
+  } elsif ($b eq 'updates_spamassassin_org.cf') {
+    return 1;
+  }
+  return $a cmp $b;
+}
+
 sub _get_cf_pre_files_in_dir {
   my ($self, $dir, $type) = @_;
 
   if ($self->{config_tree_recurse}) {
     my @cfs;
-
+    # copied from Mail::SpamAssassin::Util::untaint_file_path
+    # fix bugs 8010 and 8025 by using an untaint pattern that is better on Windows than File::Find's default
+    my $chars = '-_A-Za-z0-9.#%=+,/:()\\@\\xA0-\\xFF\\\\';
+    my $re = qr{^\s*([$chars][${chars}~ ]*)\z};
     # use "eval" to avoid loading File::Find unless this is specified
     eval ' use File::Find qw();
       File::Find::find(
         { untaint => 1,
+          am_running_on_windows() ? (untaint_pattern => $re) : (),
           follow => 1,
           wanted =>
             sub { push(@cfs, $File::Find::name) if /\.\Q$type\E$/i && -f $_ }
@@ -2230,7 +2246,7 @@ sub _get_cf_pre_files_in_dir {
       my $eval_stat = $@ ne '' ? $@ : "errno=$!";  chomp $eval_stat;
       die "_get_cf_pre_files_in_dir error: $eval_stat";
     };
-    @cfs = sort { $a cmp $b } @cfs;
+    @cfs = sort { _reorder_dir($a, $b) } @cfs;
     return @cfs;
   }
   else {
@@ -2239,7 +2255,7 @@ sub _get_cf_pre_files_in_dir {
                      /\.${type}$/i && -f "$dir/$_" } readdir(SA_CF_DIR);
     closedir SA_CF_DIR;
 
-    return map { "$dir/$_" } sort { $a cmp $b } @cfs;
+    return map { "$dir/$_" } sort { _reorder_dir($a, $b) } @cfs;
   }
 }
 

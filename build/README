@@ -1,90 +1,58 @@
 APACHE SPAMASSASSIN RELEASE PROCEDURE
 =====================================
 
-- First off, checkout the branch or trunk you wish to build.  I usually do
-  this as a privileged user in a build.tmp directory.
+This document contains instructions for producing a release of SpamAssassin.
+It is intended to provide instructions and a checklist for the release manager.
+This document should also be useful to downstream packagers, although they would
+ignore all the details here that have to do with specifics of the Apache release process.
+The section on setting up a build and test environment might be useful to someone
+having dificulty installing SpamAssassin from source on their own machine.
 
-- When working with a branch, checkout both the branch and trunk, then create
-  the symlinks mentioned below in the section on svn status
-  
-- As the release gets close, consider switching to R-T-C development
-  mode: https://wiki.apache.org/spamassassin/DevelopmentMode
+Setting up a machine for building and testing:
 
-- Using DNS resolvers like 8.8.8.8 did NOT work.  It causes spurious
-  failures on things like dnsbl.t.  Use a real DNS server.
+The release build should not be done on a machine that is already used to run SpamAssassin.
+If SpamAssassin is installed system-wide, it has the potential of files from the existing
+installation being visible to and interfering with the build or test processes.
+Also some of the tests have the potential of interfering with running processes associated
+with the system-installed SpamAssassin.
 
-- To build a release you need gpg, a few perl modules, re2c
-  and the signing key for the project. For CentOS 7.5, the following worked:
+The safest course of action for an official release buld is to use a (virtual) machine
+made specifically for the purpose. Detailed instructions for installing a build environment
+can be found on the Apache SpamAssassin wiki at https://cwiki.apache.org/confluence/x/lRKhD
 
-  - yum install gpg
-  - yum install zip
-  - yum install perl* 
-  - yum remove perl-homedir
-  - yum install epel-release
-  - yum update
-  - yum install perl-BerkeleyDB
+Release manager code signing:
 
-  - using source and CPAN as root (cpanm -S)
-    - cpanm -S Razor2::Client::Agent
-    - cpanm -S Net::Patricia
-    - cpanm -S Geo::IP
-    - cpanm -S Devel::SawAmpersand
-    - custom compiled re2c
-      - obtained latest release tarball from github as linked from https://re2c.org as epel rpm is very old
-      - yum install gcc-c++
-      - build with  ./configure --prefix=/usr/local && make && sudo make install
+If you are producing a release package authorized by the Apache SpamAssassin PMC, you should
+have been given a copy of the project's signing keys and the password to use them.
+They are in the form of a tar file that you should unpack into a directory named ~/sabuildtools
+on the build machine. It contains a bin subdirectory that contains a symlink to /usr/bin/gpg
+which should be installed on the machine. The name ~/sabuildtools is hardcoded in the release
+packaging scripts, so be sure to place the files there. The packaging scripts will pronpt you
+for the password when it signs the final packages.
 
-  For Ubuntu 20.04 minimal install, installing the following packages worked
-   
-      build-essential
-      pyzor
-      razor
-      subversion
-      libarchive-zip-perl
-      libberkeleydb-perl
-      libbsd-resource-perl
-      libdbi-perl
-      libencode-detect-perl
-      libgeo-ip-perl
-      libgeoip2-perl
-      libio-socket-inet6-perl
-      libio-string-perl
-      libmail-dkim-perl
-      libmail-spf-perl
-      libnet-patricia-perl
-      libnet-dns-perl
-      libnetaddr-ip-perl
-      libsocket6-perl
-      libsys-hostname-long-perl
-      libtest-pod-coverage-perl
-      libtest-pod-perl
+The build process:
 
-  - when you run perl Makefile.PL, you want full dependencies such as this
-    snippet:
+To be certain of producing a clean build, begin by creating a new directory and cd to it.
 
-    checking module dependencies and their versions...
-    checking binary dependencies and their versions...
-    <snip>
-    dependency check complete...
+Checkout trunk from svn at first, even if you are going to build a branch. 
 
-    optional binary missing or nonfunctional: fetch
+If you are going to build a branch, checkout the branch. Then create the three symlinks to
+directories in trunk as exampled below.
 
-  - NOTE: Missing Fetch is ok if we have wget or curl.  You just need 1 of
-    the 3.
+  rm -rf ~/build.tmp
+  mkdir ~/build..tmp
+  cd ~/build.tmp
+  svn co https://svn.apache.org/repos/asf/spamassassin/trunk
+  ## the rest are only done if going to make a branch build instead of from trunk
+  mkdir branches
+  cd branches
+  svn co https://svn.apache.org/repos/asf/spamassassin/branches/3.4
+  cd 3.4
+  ln -s ../../trunk/rules
+  ln -s ../../trunk/rulesrc
+  ln -s ../../trunk/t.rules
 
-  - You need ~/sabuildtools/bin directory with a symlink to gpg
-
-  - You need ~/sabuildtools/sasigningkey as a gpg home directory with chmod 700,
-    e.g., a symlink to ~/.gnupg if the signing key were in your gpg keyring
-
-  - You need the passphrase to the sasigning key
-
-- Ensure ExtUtils::MakeMaker is version 6.46 or later, to create
-  a detailed-enough META.yml 
-
-    perl -MExtUtils::MakeMaker -e 'print $ExtUtils::MakeMaker::VERSION'
-
-- Run "svn status" to ensure you're building/releasing from a pristine
+Run "svn status" to ensure you're building/releasing from a pristine
   checkout:
 
     cd [checkedoutdir]
@@ -99,35 +67,20 @@ APACHE SPAMASSASSIN RELEASE PROCEDURE
   (ie., no "M" or "C" files; any files marked "M" have been locally
   modified, and should be "svn revert"ed before you continue.)
 
-- Rule Source is only in trunk.  If you are building a branch, checkout 
-  trunk as well and symlink it, i.e. rulesrc -> ../trunk/rulesrc/
-
-- t.rule Source is only in trunk.  If you are building a branch, checkout
-  trunk as well and symlink it, i.e. t.rules -> ../trunk/t.rules/
-
+- The directories rules, rulesrc, and t.rules are only in trunk because
+  rule development and publishing are only done from trunk.
+  The symlinks from a branch checkout allow for the build and test process
+  to work with the valid copy of rules that are in trunk. Those rules are
+  not included in the install package that is produced.
+  
 - Rules are ONLY published from trunk.  Rule development should use plugin
   and version conditions to make it so one ruleset works on all modern
-  versions of SA. If you are building a branch, checkout trunk as well and
-  symlink the rules from trunk, i.e. rules -> ../trunk/rules/
+  versions of SA.
 
   With the rules in trunk symlinked, you can expect MANIFEST warnings when
-  running things such as make distclean such as:
+  running things such as make distcheck such as:
 
-    No such file: rules/20_aux_tlds.cf
-    No such file: rules/active.list
-    No such file: rules/init.pre
-    No such file: rules/languages
-    No such file: rules/local.cf
-    No such file: rules/regression_tests.cf
-    No such file: rules/sa-update-pubkey.txt
-    No such file: rules/user_prefs.template
-    No such file: rules/v310.pre
-    No such file: rules/v312.pre
-    No such file: rules/v320.pre
-    No such file: rules/v330.pre
-    No such file: rules/v340.pre
-    No such file: rules/v341.pre
-    No such file: rules/v342.pre
+    No such file: rules/v400.pre
 
   NOTE: Don't remove the lines from the MANIFEST though!
 
@@ -149,9 +102,11 @@ APACHE SPAMASSASSIN RELEASE PROCEDURE
 
   Full releases: @EXTRA_VERSION is blank and IS_DEVEL_BUILD is 0.
 
-- Ensure the new version number takes hold:
+- Ensure that it builds and that the new version number takes hold:
 
-    make clean ; perl Makefile.PL < /dev/null ; make
+    make clean
+    perl Makefile.PL < /dev/null
+    make ENABLE_SSL=yes
     ./spamassassin -L -t < sample-nonspam.txt | grep X-Spam-
 
   Verify that the X-Spam-* headers use the correct version string,
@@ -201,11 +156,14 @@ APACHE SPAMASSASSIN RELEASE PROCEDURE
     3.4.0 release tag revision.  r1676613 is the 3.4.1 release tag
     revision.
 
-    To find the release tag revision, use the tags website, i.e.: 
+    To find the release tag revision, first get the tag name using the tags website, i.e.: 
       https://svn.apache.org/repos/asf/spamassassin/tags/
+    or on the command line
+      svn ls https://svn.apache.org/repos/asf/spamassassin/tags/ | grep release
 
-    NOTE: 3.4.1 is currently on trunk and will be branched to 3.4 because 
-    3.4 branch was not used.
+    then the command (using the actual release tag you want to look up)
+
+     svn log https://svn.apache.org/repos/asf/spamassassin/tags/spamassassin_release_3_4_6 -v --stop-on-copy
 
 - Exclude some automated changes from the logs:
 
@@ -226,57 +184,38 @@ APACHE SPAMASSASSIN RELEASE PROCEDURE
 
   With the rules in trunk symlinked, you can expect MANIFEST warnings when
   running things such as make distclean such as:
-make 
-    No such file: rules/20_aux_tlds.cf
-    No such file: rules/active.list
-    No such file: rules/init.pre
-    No such file: rules/languages
-    No such file: rules/local.cf
-    No such file: rules/regression_tests.cf
-    No such file: rules/sa-update-pubkey.txt
-    No such file: rules/user_prefs.template
-    No such file: rules/v310.pre
-    No such file: rules/v312.pre
-    No such file: rules/v320.pre
-    No such file: rules/v330.pre
-    No such file: rules/v340.pre
-    No such file: rules/v341.pre
-    No such file: rules/v342.pre
+
+    No such file: rules/v400.pre
 
   NOTE: Don't remove the lines from the MANIFEST though!
 
 - run "make disttest" to ensure all default tests pass once the
-  distribution is fully packaged.  (this takes ~12 1/2 minutes on my system
-  2018-09-01)
+  distribution is fully packaged.
 
     make disttest < /dev/null
 
-- run the release test suite, which forces all tests to run and also
-  applies an additional, more stringent set of tests.  This may require
-  "sudo" privileges on your test box, and unusual CPAN modules like
-  "Devel::SawAmpersand", so you might have to skip some of this or ignore
-  some spurious failures. For example, I don't have re2c or dcc installed
-  on my devel system so I fail xt/50_dcc & xt/50_sa_compile.
+    The point of disttest is that it creates a subdirectory with only the
+    files from MANIFEST, so it tests in the same environment as that of
+    an unpacked distribution tar, without the presence of rules files
+    that are not in MANIFEST. To get the same testing for the root tests
+    cd into the Mail-Spamassin* subdirectory that make disttest created and run
+      sudo make test TEST_FILES="t/spamd_root*"
+    You can similarly cd into that directory to re-run tests such as dcc.t
+    that can fail due to temporary problems accessing a remote server. 
 
+- Run the release test suite using the command
+   xt/run_release_test_suite.sh
+   
+  This runs all tests, not just the defaults set in t/config.dist and also
+  runs an additional, more stringent set of tests. There are some tests that
+  will still be skipped because they are not yet ready for regular use or are
+  deprecated for now. See the wiki page on setting up a release environment for
+  information on how to set up to run the sawampersand test.
 
-  Additionally, this will run tests such as the spamd prefork which will
-  kill all running spamd processes.  This release test suite is intended
-  for a development environment.
+- Run the tests that require sudo privileges. DO NOT run these on a machine that
+  runs a production copy of SpamAssassin.
 
-    NOTE: These likely must run as root. Some tests prompt for sudo.
-
-    make test TEST_FILES="xt/*.t"
-
-    FAILURE NOTES: 
-
-	  50_razor2.t - you need to register for razor
-          and the sample of a bad email may have fallen
-          out of their database.
-
-    A failure on the xt/ tests does not necessarily block a release.  
-    The xt tests are intended for people rolling an SA release or custom 
-    package.  Expect the DCC tests to fail if DCC is not installed, etc.
-
+    sudo make test TEST_FILES="t/root*.t"
 
 - Check in the updated Changes file, and SpamAssassin.pm.
 
@@ -357,7 +296,7 @@ make
     NOTE: link rules, t.rules and rulesrc to a trunk checkout if needed!
 
     killall gpg-agent
-    #THESE ARE NOT NEEDED FOR A TRUNK RELEASE
+    #THESE THREE ln LINES ARE NOT NEEDED FOR A TRUNK RELEASE
     ln -s ~/usr/src/Mail-SpamAssassin/trunk/rules
     ln -s ~/usr/src/Mail-SpamAssassin/trunk/rulesrc
     ln -s ~/usr/src/Mail-SpamAssassin/trunk/t.rules
@@ -367,18 +306,6 @@ make
   non-privileged users.
 
   The above places files in ~/public_html/devel/
-
-# This step is part of the step above already
-#
-#- run "./build/repackage_latest_update_rules" package a rule file for 
-#  people who can't run sa-update:
-#
-#    ./build/repackage_latest_update_rules
-#
-#  WARNING: this will use the most recently-created "sa-update" tarball for
-#  the rules tgz, so if changes have been committed to the "rules" dir in
-#  SVN since then, they will not be released!
-#
 
 - test the files!  redo until they work!! ;)
 

@@ -52,14 +52,14 @@ use Exporter ();
 
 our @ISA = qw(Exporter);
 our @EXPORT = ();
-our @EXPORT_OK = qw(&local_tz &base64_decode &base64_encode
+our @EXPORT_OK = qw(&local_tz &base64_decode &base64_encode &base32_encode
                   &untaint_var &untaint_file_path &exit_status_str
                   &proc_status_ok &am_running_on_windows &reverse_ip_address
                   &decode_dns_question_entry &touch_file &secure_tmpfile
                   &secure_tmpdir &uri_list_canonicalize &get_my_locales
                   &parse_rfc822_date &idn_to_ascii &is_valid_utf_8
                   &get_user_groups &compile_regexp &qr_to_string
-                  &is_fqdn_valid &parse_header_addresses
+                  &is_fqdn_valid &parse_header_addresses &force_die
                   &domain_to_search_list);
 
 our $AM_TAINTED;
@@ -70,7 +70,6 @@ use IO::Handle;
 use File::Spec;
 use File::Basename;
 use Time::Local;
-use NetAddr::IP 4.000;
 use Scalar::Util qw(tainted);
 use Fcntl;
 use Errno qw(ENOENT EACCES EEXIST);
@@ -79,6 +78,7 @@ use POSIX qw(:sys_wait_h WIFEXITED WIFSIGNALED WIFSTOPPED WEXITSTATUS
 
 ###########################################################################
 
+use constant HAS_NETADDR_IP => eval { require NetAddr::IP; };
 use constant HAS_MIME_BASE64 => eval { require MIME::Base64; };
 use constant RUNNING_ON_WINDOWS => ($^O =~ /^(?:mswin|dos|os2)/i);
 
@@ -150,15 +150,28 @@ $have_libidn||$have_libidn2
     if ( !$displayed_path++ ) {
       dbg("util: current PATH is: ".join($Config{'path_sep'},File::Spec->path()));
     }
+
+    my @pathext = ('');
+    if (RUNNING_ON_WINDOWS) {
+      if ( $ENV{PATHEXT} ) {
+        push @pathext, split($Config{'path_sep'}, $ENV{PATHEXT});
+      } else {
+        push @pathext, qw{.exe .com .bat};
+      }
+    }
+
     foreach my $path (File::Spec->path()) {
-      my $fname = File::Spec->catfile ($path, $filename);
-      if ( -f $fname ) {
-        if (-x $fname) {
-          dbg("util: executable for $filename was found at $fname");
-          return $fname;
-        }
-        else {
-          dbg("util: $filename was found at $fname, but isn't executable");
+      my $base = File::Spec->catfile ($path, $filename);
+      for my $ext ( @pathext ) {
+        my $fname = $base.$ext;
+        if ( -f $fname ) {
+          if (-x $fname) {
+            dbg("util: executable for $filename was found at $fname");
+            return $fname;
+          }
+          else {
+            dbg("util: $filename was found at $fname, but isn't executable");
+          }
         }
       }
     }
@@ -180,11 +193,12 @@ $have_libidn||$have_libidn2
     dbg("util: taint mode: deleting unsafe environment variables, resetting PATH");
 
     if (RUNNING_ON_WINDOWS) {
-      dbg("util: running on Win32, skipping PATH cleaning");
-      return;
+      if ( $ENV{'PATHEXT'} ) { # clean and untaint
+        $ENV{'PATHEXT'} = join($Config{'path_sep'}, grep ($_, map( {$_ =~ m/^(\.[a-zA-Z]{1,10})$/; $1; } split($Config{'path_sep'}, $ENV{'PATHEXT'}))));
+      }
+    } else {
+      delete @ENV{qw(IFS CDPATH ENV BASH_ENV)};
     }
-
-    delete @ENV{qw(IFS CDPATH ENV BASH_ENV)};
 
     # Go through and clean the PATH out
     my @path;
@@ -210,8 +224,8 @@ $have_libidn||$have_libidn2
 	dbg("util: PATH included '$dir', which isn't a directory, dropping");
 	next;
       }
-      elsif (($stat[2]&2) != 0) {
-        # World-Writable directories are considered insecure.
+      elsif (!RUNNING_ON_WINDOWS && (($stat[2]&2) != 0)) {
+        # World-Writable directories are considered insecure, but unavoidable on Windows
         # We could be more paranoid and check all of the parent directories as well,
         # but it's good for now.
 	dbg("util: PATH included '$dir', which is world writable, dropping");
@@ -534,10 +548,10 @@ sub idn_to_ascii {
       my $sa = Net::LibIDN::idn_to_ascii($s, $charset);
       if (!defined $sa) {
         info("util: idn_to_ascii: conversion to ACE failed: '%s' (charset %s)",
-          $s, $charset);
+             $s, $charset);
       } else {
         dbg("util: idn_to_ascii: converted to ACE: '%s' -> '%s' (charset %s)",
-          $s, $sa, $charset)  if $s ne $sa;
+            $s, $sa, $charset)  if $s ne $sa;
         $s = $sa;
       }
     } elsif ($have_libidn2) {
@@ -551,11 +565,11 @@ sub idn_to_ascii {
                  &Net::LibIDN2::IDN2_NFC_INPUT + &Net::LibIDN2::IDN2_NONTRANSITIONAL,
                  $rc);
       if (!defined $sa) {
-        info("util: idn_to_ascii: conversion to ACE failed: '%s' (charset %s) (LibIDN2)",
-          Net::LibIDN2::idn2_strerror($rc), $charset);
+        info("util: idn_to_ascii: conversion to ACE failed, %s: '%s' (charset %s) (LibIDN2)",
+             Net::LibIDN2::idn2_strerror($rc), $s, $charset);
       } else {
         dbg("util: idn_to_ascii: converted to ACE: '%s' -> '%s' (charset %s) (LibIDN2)",
-          $s, $sa, $charset)  if $s ne $sa;
+            $s, $sa, $charset)  if $s ne $sa;
         $s = $sa;
       }
     }
@@ -995,6 +1009,27 @@ sub base64_encode {
   return $_;
 }
 
+# Very basic Base32 encoder
+our %base32_bitchr = (
+  '00000'=>'A', '00001'=>'B', '00010'=>'C', '00011'=>'D', '00100'=>'E',
+  '00101'=>'F', '00110'=>'G', '00111'=>'H', '01000'=>'I', '01001'=>'J',
+  '01010'=>'K', '01011'=>'L', '01100'=>'M', '01101'=>'N', '01110'=>'O',
+  '01111'=>'P', '10000'=>'Q', '10001'=>'R', '10010'=>'S', '10011'=>'T',
+  '10100'=>'U', '10101'=>'V', '10110'=>'W', '10111'=>'X', '11000'=>'Y',
+  '11001'=>'Z', '11010'=>'2', '11011'=>'3', '11100'=>'4', '11101'=>'5',
+  '11110'=>'6', '11111'=>'7'
+);
+sub base32_encode {
+  my ($str) = @_;
+  return if !defined $str;
+  utf8::encode($str)  if utf8::is_utf8($str); # force octets
+  my $bits = unpack("B*", $str)."0000";
+  my $output;
+  local($1);
+  $output .= $base32_bitchr{$1} while ($bits =~ /(.{5})/g);
+  return $output;
+}
+
 ###########################################################################
 
 sub portable_getpwuid {
@@ -1147,8 +1182,8 @@ sub reverse_ip_address {
     $revip = "$4.$3.$2.$1";
   } elsif (index($ip, ':') == -1 || $ip !~ /^[0-9a-fA-F:.]{2,}\z/) {  # triage
     # obviously unrecognized syntax
-  } elsif (!NetAddr::IP->can('full6')) {  # since NetAddr::IP 4.010
-    info("util: version of NetAddr::IP is too old, IPv6 not supported");
+  } elsif (!HAS_NETADDR_IP || !NetAddr::IP->can('full6')) {  # since NetAddr::IP 4.010
+    info("util: sufficiently new NetAddr::IP not found, IPv6 not supported");
   } else {
     # looks like an IPv6 address, let NetAddr::IP check the details
     my $ip_obj = NetAddr::IP->new6($ip);
@@ -1566,7 +1601,7 @@ sub uri_list_canonicalize {
         push @nuris, $1
       }
       # Address must be trimmed of %20
-      if ($nuri =~ tr/%20// &&
+      if (index($nuri, '%20') >= 0 &&
           $nuri =~ /^(?:mailto:)?(?:\%20)*([^\@]+\@[^?&%]+)/) {
         push @nuris, "mailto:$1";
       }
@@ -1903,6 +1938,7 @@ sub helper_app_pipe_open_windows {
   my ($fh, $stdinfile, $duperr2out, @cmdline) = @_;
 
   # use a traditional open(FOO, "cmd |")
+  $cmdline[0] = '"'.$cmdline[0].'"' if ($cmdline[0] !~ /^\".*\"$/);
   my $cmd = join(' ', @cmdline);
   if ($stdinfile) { $cmd .= qq/ < "$stdinfile"/; }
   if ($duperr2out) {
@@ -1918,16 +1954,22 @@ sub helper_app_pipe_open_windows {
 }
 
 sub force_die {
-  my ($msg) = @_;
+  my ($statrc, $msg) = @_;
 
   # note use of eval { } scope in logging -- paranoia to ensure that a broken
   # $SIG{__WARN__} implementation will not interfere with the flow of control
   # here, where we *have* to die.
-  eval { warn $msg };  # hmm, STDERR may no longer be open
-  eval { dbg("util: force_die: $msg") };
+  if ($msg) {
+    eval { warn $msg };  # hmm, STDERR may no longer be open
+    eval { dbg("util: force_die: $msg") };
+  }
 
-  POSIX::_exit(6);  # avoid END and destructor processing 
-  kill('KILL',$$);  # still kicking? die! 
+  if (am_running_on_windows()) {
+    exit($statrc); # on Windows _exit would terminate parent too BUG 8007
+  } else {
+    POSIX::_exit($statrc);  # avoid END and destructor processing 
+    kill('KILL',$$) if ($statrc);  # somehow this breaks those places that are calling it to exit(0)
+  }
 }
 
 sub helper_app_pipe_open_unix {
@@ -2032,7 +2074,7 @@ sub helper_app_pipe_open_unix {
   my $eval_stat = $@ ne '' ? $@ : "errno=$!";  chomp $eval_stat;
 
   # bug 4370: we really have to exit here; break any eval traps
-  force_die(sprintf('util: failed to spawn a process "%s": %s',
+  force_die(6, sprintf('util: failed to spawn a process "%s": %s',
                     join(", ",@cmdline), $eval_stat));
   die;  # must be a die() otherwise -w will complain
 }

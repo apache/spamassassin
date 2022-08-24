@@ -119,7 +119,7 @@ sub html_tag_exists {
 
 sub html_test {
   my ($self, $pms, undef, $test) = @_;
-  return $pms->{html}{$test};
+  return $pms->{html}{$test} ? 1 : 0;
 }
 
 sub html_eval {

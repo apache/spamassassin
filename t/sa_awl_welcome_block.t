@@ -19,7 +19,7 @@ tstprefs ("
 sarun("--add-addr-to-welcomelist whitelist_test\@whitelist.spamassassin.taint.org",
       \&patterns_run_cb);
 
-untaint_system("pwd");
+print cwd() . "\n";
 saawlrun("--clean --min 9999 ./$userstate/awltest");
 
 sarun ("-L -t < data/spam/004", \&patterns_run_cb);

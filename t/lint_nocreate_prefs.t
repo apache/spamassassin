@@ -6,7 +6,7 @@ use Test::More tests => 2;
 
 # ---------------------------------------------------------------------------
 
-%patterns = ( q{  }, 'anything' );
+%patterns = ( qr/^/, 'anything' );
 
 # override locale for this test!
 $ENV{'LANGUAGE'} = $ENV{'LC_ALL'} = 'C';

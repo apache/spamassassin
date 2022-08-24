@@ -2,10 +2,12 @@
 
 use lib '.'; use lib 't';
 use SATest; sa_t_init("db_awl_path");
-use Test::More tests => 4;
+use Test::More;
+plan tests => 4;
 use IO::File;
 
 # ---------------------------------------------------------------------------
+diag "Note: This test when successful displays lockfile warning messages";
 
 %is_spam_patterns = (
 q{ X-Spam-Status: Yes}, 'isspam',
@@ -20,7 +22,7 @@ print OUT "file created to block AWL from working; AWL expects a dir";
 close OUT;
 
 tstprefs ("
-  auto_whitelist_path ./$workdir/awl/shouldbeinaccessible
+  auto_whitelist_path ./$workdir/awl/this_lock_warning_is_ok
   auto_whitelist_file_mode 0755
 ");
 

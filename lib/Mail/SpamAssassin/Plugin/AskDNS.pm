@@ -56,11 +56,17 @@ See the C<Mail::SpamAssassin::Conf> POD for details on C<rbl_timeout>.
 A query template is a string which will be expanded to produce a domain name
 to be used in a DNS query. The template may include SpamAssassin tag names,
 which will be replaced by their values to form a final query domain.
+
 The final query domain must adhere to rules governing DNS domains, i.e.
-must consist of fields each up to 63 characters long, delimited by dots.
-There may be a trailing dot at the end, but it is redundant / carries
-no semantics, because SpamAssassin uses a Net::DSN::Resolver::send method
-for querying DNS, which ignores any 'search' or 'domain' DNS resolver options.
+must consist of fields each up to 63 characters long, delimited by dots,
+not exceeding 255 characters. International domain names (in UTF-8) are
+allowed and will be encoded to ASCII-compatible encoding (ACE) according
+to IDN rules. Syntactically invalid resulting queries will be discarded
+by the DNS resolver code (with some info warnings).
+
+There may be a trailing dot at the end, but it is redundant / carries no
+semantics, because SpamAssassin uses a Net::DSN::Resolver::send method for
+querying DNS, which ignores any 'search' or 'domain' DNS resolver options.
 Domain names in DNS queries are case-insensitive.
 
 A tag name is a string of capital letters, preceded and followed by an
@@ -120,7 +126,8 @@ parameter will only act as a filter on a result.
 
 Currently recognized RR types in the rr_type parameter are: ANY, A, AAAA,
 MX, TXT, PTR, NAPTR, NS, SOA, CERT, CNAME, DNAME, DHCID, HINFO, MINFO,
-RP, HIP, IPSECKEY, KX, LOC, SRV, SSHFP, SPF.
+RP, HIP, IPSECKEY, KX, LOC, GPOS, SRV, OPENPGPKEY, SSHFP, SPF, TLSA, URI,
+CAA, CSYNC.
 
 https://www.iana.org/assignments/dns-parameters/dns-parameters.xml
 
@@ -340,7 +347,7 @@ sub set_config {
 
         # collect tag names as used in each query template
         # also support common HEADER(arg) tag which does $pms->get(arg)
-        my @tags = $query_template =~ /_([A-Z][A-Z0-9]*|HEADER\([a-zA-Z0-9:-]+\))_/g;
+        my @tags = $query_template =~ /_([A-Z][A-Z0-9]*(?:_[A-Z0-9]+)*(?:\(.*?\))?)_/g;
         # save rule to tag dependencies
         $self->{askdns}{$rulename}{tags}{$_} = 1 foreach (@tags);
 
@@ -387,7 +394,7 @@ sub check_dnsbl {
   }
 }
 
-# generate DNS queries - called for each rule when it's tag dependencies
+# generate DNS queries - called for each rule when its tag dependencies
 # are met
 #
 sub launch_queries {
@@ -404,12 +411,19 @@ sub launch_queries {
       foreach my $tag (@$tags) {
         # cache tag values locally
         if (!exists $pms->{askdns_tag_cache}{$tag}) {
-          $pms->{askdns_tag_cache}{$tag} = $pms->get_tag($tag);
+          my $valref = $pms->get_tag_raw($tag);
+          my @vals = grep { defined $_ && $_ ne '' } (ref $valref ? @$valref : $valref);
+          # Paranoid check for undefined tag
+          if (!@vals) {
+            dbg("askdns: skipping rule $rulename, no value found for tag: $tag");
+            return;
+          }
+          $pms->{askdns_tag_cache}{$tag} = \@vals;
         }
         my %q_iter_new;
         foreach my $q (keys %q_iter) {
           # handle space separated multi-valued tags
-          foreach my $val (split(' ', $pms->{askdns_tag_cache}{$tag})) {
+          foreach my $val (@{$pms->{askdns_tag_cache}{$tag}}) {
             my $qtmp = $q;
             $qtmp =~ s/\Q_${tag}_\E/${val}/g;
             $q_iter_new{$qtmp} = 1;
@@ -433,50 +447,44 @@ sub launch_queries {
       next;
     }
     dbg("askdns: launching query ($rulename): $query");
-    $pms->{async}->bgsend_and_start_lookup(
+    my $ret = $pms->{async}->bgsend_and_start_lookup(
       $query, $arule->{q_type}, undef,
         { rulename => $rulename, type => 'AskDNS' },
         sub { my ($ent,$pkt) = @_;
               $self->process_response_packet($pms, $ent, $pkt, $rulename) },
         master_deadline => $pms->{master_deadline}
     );
+    $pms->rule_ready($rulename) if !$ret; # mark ready if nothing launched
   }
 }
 
 sub process_response_packet {
   my($self, $pms, $ent, $pkt, $rulename) = @_;
 
-  my $conf = $pms->{conf};
-  my $arule = $conf->{askdns}{$rulename};
-
-  my($header, @question, @answer, $qtype, $rcode);
   # NOTE: $pkt will be undef if the DNS query was aborted (e.g. timed out)
-  if ($pkt) {
-    @answer = $pkt->answer;
-    $header = $pkt->header;
-    @question = $pkt->question;
-    $qtype = uc $question[0]->qtype  if @question;
-    $rcode = uc $header->rcode  if $header;  # 'NOERROR', 'NXDOMAIN', ...
+  return if !$pkt;
 
-    # NOTE: qname is encoded in RFC 1035 zone format, decode it
-    dbg("askdns: answer received (%s), rcode %s, query %s, answer has %d records",
-        $rulename, $rcode,
-        join(', ', map(join('/', decode_dns_question_entry($_)), @question)),
-        scalar @answer);
+  my @question = $pkt->question;
+  return if !@question;
 
-    if (defined $rcode && exists $rcode_value{$rcode}) {
-      # Net::DNS return a rcode name for codes it knows about,
-      # and returns a number for the rest; we deal with numbers from here on
-      $rcode = $rcode_value{$rcode}  if exists $rcode_value{$rcode};
-    }
+  $pms->rule_ready($rulename); # mark rule ready for metas
 
-    $pms->rule_ready($rulename); # mark rule ready for metas
-  }
-  if (!@answer) {
-    # a trick to make the following loop run at least once, so that we can
-    # evaluate also rules which only care for rcode status
-    @answer = ( undef );
-  }
+  my @answer = $pkt->answer;
+  my $rcode = uc $pkt->header->rcode;  # 'NOERROR', 'NXDOMAIN', ...
+
+  # NOTE: qname is encoded in RFC 1035 zone format, decode it
+  dbg("askdns: answer received (%s), rcode %s, query %s, answer has %d records",
+      $rulename, $rcode,
+      join(', ', map(join('/', decode_dns_question_entry($_)), @question)),
+      scalar @answer);
+
+  # Net::DNS return a rcode name for codes it knows about,
+  # and returns a number for the rest; we deal with numbers from here on
+  $rcode = $rcode_value{$rcode}  if exists $rcode_value{$rcode};
+
+  # a trick to make the following loop run at least once, so that we can
+  # evaluate also rules which only care for rcode status
+  @answer = (undef)  if !@answer;
 
   # NOTE:  $rr->rdstring returns the result encoded in a DNS zone file
   # format, i.e. enclosed in double quotes if a result contains whitespace
@@ -498,6 +506,9 @@ sub process_response_packet {
   # verification takes place.
   # The same goes for RFC 7208 (SPF), RFC 4871 (DKIM), RFC 5617 (ADSP),
   # draft-kucherawy-dmarc-base (DMARC), ...
+
+  my $arule = $pms->{conf}->{askdns}{$rulename};
+  my $subtest = $arule->{subtest};
 
   for my $rr (@answer) {
     my($rr_rdatastr, $rdatanum, $rr_type);
@@ -532,9 +543,6 @@ sub process_response_packet {
       # dbg("askdns: received rr type %s, data: %s", $rr_type, $rr_rdatastr);
     }
 
-    next if !defined $qtype;
-
-    my $subtest = $arule->{subtest};
     my $match;
     local($1,$2,$3);
     if (ref $subtest eq 'HASH') {  # a list of DNS rcodes (as hash keys)
@@ -561,7 +569,7 @@ sub process_response_packet {
         : 0; # notice int($n1) to fix perl ~5.14 taint bug (Bug 7725)
     }
     if ($match) {
-      $self->askdns_hit($pms, $ent->{query_domain}, $qtype,
+      $self->askdns_hit($pms, $ent->{query_domain}, $question[0]->qtype,
                         $rr_rdatastr, $rulename);
     }
   }

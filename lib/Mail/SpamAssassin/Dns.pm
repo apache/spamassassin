@@ -94,14 +94,14 @@ sub do_rbl_lookup {
   if (defined $subtest) {
     if ($subtest =~ /^sb:/) {
       info("dns: ignored $rule, SenderBase rules are deprecated");
-      return;
+      return 0;
     }
     # Compile as regex if not pure ip/bitmask (same check in process_dnsbl_result)
     if ($subtest !~ /^\d+(?:\.\d+\.\d+\.\d+)?$/) {
       my ($rec, $err) = compile_regexp($subtest, 0);
       if (!$rec) {
         warn("dns: invalid rule $rule subtest regexp '$subtest': $err\n");
-        return;
+        return 0;
       }
       $subtest = $rec;
     }
@@ -116,10 +116,13 @@ sub do_rbl_lookup {
     set => $set,
     subtest => $subtest,
   };
-  $self->{async}->bgsend_and_start_lookup($host, $type, undef, $ent,
+  my $ret = $self->{async}->bgsend_and_start_lookup($host, $type, undef, $ent,
     sub { my($ent, $pkt) = @_; $self->process_dnsbl_result($ent, $pkt) },
     master_deadline => $self->{master_deadline}
   );
+
+  return 0 if defined $ret; # no query started
+  return; # return undef for async status
 }
 
 # Deprecated, was only used from DNSEval.pm?
@@ -222,6 +225,20 @@ sub process_dnsbl_result {
   my $question = ($pkt->question)[0];
   return if !$question;
 
+  my $rulename = $ent->{rulename};
+
+  # Mark rule ready for meta rules, but only if this was the last lookup
+  # pending, rules can have many lookups launched for different IPs
+  if (!$self->get_async_pending_rules($rulename)) {
+    $self->rule_ready($rulename);
+    # Mark depending check_rbl_sub rules too
+    if (exists $self->{rbl_subs}{$ent->{set}}) {
+      foreach (@{$self->{rbl_subs}{$ent->{set}}}) {
+        $self->rule_ready($_->[1]);
+      }
+    }
+  }
+
   # DNSBL tests are here
   foreach my $answer ($pkt->answer) {
     next if !$answer;
@@ -256,17 +273,18 @@ sub process_dnsbl_result {
     # check_rbl tests
     if (defined $ent->{subtest}) {
       if ($self->check_subtest($rdatastr, $ent->{subtest})) {
-        $self->dnsbl_hit($ent->{rulename}, $question, $answer);
+        $self->dnsbl_hit($rulename, $question, $answer);
       }
     } else {
-      $self->dnsbl_hit($ent->{rulename}, $question, $answer);
+      $self->dnsbl_hit($rulename, $question, $answer);
     }
 
     # check_rbl_sub tests
-    if (defined $self->{rbl_subs}{$ent->{set}}) {
+    if (exists $self->{rbl_subs}{$ent->{set}}) {
       $self->process_dnsbl_set($ent->{set}, $question, $answer, $rdatastr);
     }
   }
+
   return 1;
 }
 
@@ -685,9 +703,9 @@ sub register_async_rule_finish {}
 sub mark_all_async_rules_complete {}
 sub is_rule_complete {}
 
-# Return number of pending lookups for a rule,
+# Return number of pending DNS lookups for a rule,
 # or list all of rules still pending
-sub get_pending_lookups {
+sub get_async_pending_rules {
   my ($self, $rule) = @_;
   if (defined $rule) {
     return 0 if !exists $self->{async}->{pending_rules}{$rule};

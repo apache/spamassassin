@@ -4,8 +4,13 @@ use lib '.'; use lib 't';
 use SATest; sa_t_init("cidrs");
 
 use strict;
+use Test::More;
 
-use Test::More tests => 51;
+use constant HAS_NET_CIDR => eval { require Net::CIDR::Lite; };
+
+my $tests = 72;
+$tests += 4 if (HAS_NET_CIDR);
+plan tests => $tests;
 
 use Mail::SpamAssassin;
 use Mail::SpamAssassin::NetSet;
@@ -49,8 +54,34 @@ ok tryone "127.0.0.254", "127.";
 ok tryone "127.0.0.1", "127/8";
 ok tryone "127.0.0.1", "127.0/16";
 ok tryone "127.0.0.1", "127.0.0/24";
+ok tryone "127.0.0.0", "127.0.0.0/24";
+ok tryone "127.0.0.255", "127.0.0.0/24";
+
+ok !tryone "127.0.0.0", "127.0.0.1/32";
 ok tryone "127.0.0.1", "127.0.0.1/32";
+ok !tryone "127.0.0.2", "127.0.0.1/32";
+
+ok tryone "127.0.0.0", "127.0.0.0/31";
+ok tryone "127.0.0.1", "127.0.0.0/31";
+ok !tryone "127.0.0.2", "127.0.0.0/31";
+ok !tryone "127.0.0.3", "127.0.0.0/31";
+
+# This probably misbehaves because it's not an "even" CIDR
+ok tryone "127.0.0.0", "127.0.0.1/31"; # NetAddr::IP bug? Should NOT match?
 ok tryone "127.0.0.1", "127.0.0.1/31";
+ok !tryone "127.0.0.2", "127.0.0.1/31"; # NetAddr::IP bug? Should match?
+ok !tryone "127.0.0.3", "127.0.0.1/31";
+
+ok !tryone "127.0.0.1", "127.0.0.2/31";
+ok tryone "127.0.0.2", "127.0.0.2/31";
+ok tryone "127.0.0.3", "127.0.0.2/31";
+ok !tryone "127.0.0.4", "127.0.0.2/31";
+
+ok !tryone "127.0.0.15", "127.0.0.16/31";
+ok tryone "127.0.0.16", "127.0.0.16/31";
+ok tryone "127.0.0.17", "127.0.0.16/31";
+ok !tryone "127.0.0.18", "127.0.0.16/31";
+
 ok tryone "127.0.0.1", "10.", "11.", "127.0.0.1";
 ok tryone "127.0.0.1", "127.0.";
 ok tryone "127.0.0.1", "127.0.0.";
@@ -108,3 +139,13 @@ ok trynet "DEAD:BEEF:0000:0102:0304:0506:0:0/96",
 ok !trynet "DEAD:BEEF:0000:0102:0304:0506:1:1/90",
           "DEAD:BEEF:0000:0102:0304:0506:0:0/96";
 
+# NetSet does not parse leading zeroes as octal number, it strips them
+ok tryone "010.010.10.10", "10.10.10.10";
+ok !tryone "8.8.10.10", "010.010.10.10";
+
+if (HAS_NET_CIDR) {
+  ok tryone "127.0.0.1", "127.0.0.0-127.0.0.255";
+  ok trynet "127.0.0.16/30", "127.0.0.0-127.0.000.255";
+  ok !tryone "127.0.0.1", "127.0.0.8-127.0.0.20";
+  ok tryone "010.50.60.1", "0.0.0.0-010.255.255.255";
+}

@@ -78,6 +78,7 @@ sub check_from_in_blocklist {
       return 1;
     }
   }
+  return 0;
 }
 *check_from_in_blacklist = \&check_from_in_blocklist; # removed in 4.1
 
@@ -88,6 +89,7 @@ sub check_to_in_blocklist {
       return 1;
     }
   }
+  return 0;
 }
 *check_to_in_blacklist = \&check_to_in_blocklist; # removed in 4.1
 
@@ -98,6 +100,7 @@ sub check_to_in_welcomelist {
       return 1;
     }
   }
+  return 0;
 }
 *check_to_in_whitelist = \&check_to_in_welcomelist; # removed in 4.1
 
@@ -108,6 +111,7 @@ sub check_to_in_more_spam {
       return 1;
     }
   }
+  return 0;
 }
 
 sub check_to_in_all_spam {
@@ -117,6 +121,7 @@ sub check_to_in_all_spam {
       return 1;
     }
   }
+  return 0;
 }
 
 sub check_from_in_list {
@@ -124,7 +129,7 @@ sub check_from_in_list {
   my $list_ref = $pms->{conf}->{$list};
   unless (defined $list_ref) {
     warn "eval: could not find list $list";
-    return;
+    return 0;
   }
 
   foreach my $addr ($pms->all_from_addrs()) {
@@ -141,7 +146,7 @@ sub check_replyto_in_list {
   my $list_ref = $pms->{conf}->{$list};
   unless (defined $list_ref) {
     warn "eval: could not find list $list";
-    return;
+    return 0;
   }
 
   my $replyto = $pms->get("Reply-To:addr");
@@ -178,7 +183,7 @@ sub check_to_in_list {
   my $list_ref = $pms->{conf}->{$list};
   unless (defined $list_ref) {
     warn "eval: could not find list $list";
-    return;
+    return 0;
   }
 
   foreach my $addr ($pms->all_to_addrs()) {

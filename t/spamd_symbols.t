@@ -10,8 +10,8 @@ plan tests => 3;
 # ---------------------------------------------------------------------------
 
 %patterns = (
-  q{ TEST_ENDSNUMS, }, 'endsinnums',
-  q{ TEST_NOREALNAME, }, 'noreal',
+  ',TEST_ENDSNUMS,', 'endsinnums',
+  ',TEST_NOREALNAME,', 'noreal',
 );
 
 ok (sdrun ("-L", "-y < data/spam/001", \&patterns_run_cb));

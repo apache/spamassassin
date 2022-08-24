@@ -6,21 +6,26 @@ use SATest; sa_t_init("uribl");
 use Test::More;
 plan skip_all => "Net tests disabled"          unless conf_bool('run_net_tests');
 plan skip_all => "Can't use Net::DNS Safely"   unless can_use_net_dns_safely();
-plan tests => 8;
+
+# run many times to catch some random natured failures
+my $iterations = 5;
+plan tests => 10 * $iterations;
 
 # ---------------------------------------------------------------------------
 
 %patterns = (
- q{ X_URIBL_A } => 'A',
- q{ X_URIBL_B } => 'B',
- q{ X_URIBL_NS } => 'NS',
- q{ X_URIBL_DOMSONLY } => 'X_URIBL_DOMSONLY',
- q{ META_URIBL_A } => 'META_URIBL_A',
- q{ X_URIBL_NOTRIM } => 'X_URIBL_NOTRIM',
+ q{ 1.0 X_URIBL_A } => '',
+ q{ 1.0 X_URIBL_B } => '',
+ q{ 1.0 X_URIBL_NS } => '',
+ q{ 1.0 X_URIBL_DOMSONLY } => '',
+ q{ 1.0 META_URIBL_A } => '',
+ q{ 1.0 META_URIBL_B } => '',
+ q{ 1.0 META_URIBL_NS } => '',
+ q{ 1.0 X_URIBL_NOTRIM } => '',
 );
 
 %anti_patterns = (
- q{ X_URIBL_FULL_NS } => 'FULL_NS',
+ q{ X_URIBL_FULL_NS } => '',
 );
 
 tstlocalrules(q{
@@ -51,6 +56,13 @@ tstlocalrules(q{
 
   # Bug 7897 - test that meta rules depending on net rules hit
   meta META_URIBL_A X_URIBL_A
+  # It also needs to hit even if priority is lower than dnsbl (-100)
+  meta META_URIBL_B X_URIBL_B
+  priority META_URIBL_B -500
+  # Or super high
+  meta META_URIBL_NS X_URIBL_NS
+  priority META_URIBL_NS 2000
+  priority X_URIBL_NS 2000
 
   # Bug 7835 - tflags notrim
   urirhssub  X_URIBL_NOTRIM  dnsbltest.spamassassin.org.    A 16
@@ -59,7 +71,9 @@ tstlocalrules(q{
 
 });
 
-# note: don't leave -D here, it causes spurious passes
-ok sarun ("-t < data/spam/dnsbl.eml 2>&1", \&patterns_run_cb);
-ok_all_patterns();
+for (1 .. $iterations) {
+  clear_localrules() if $_ == 3; # do some tests without any other rules to check meta bugs
+  ok sarun ("-t < data/spam/dnsbl.eml", \&patterns_run_cb);
+  ok_all_patterns();
+}
 

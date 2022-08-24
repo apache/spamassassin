@@ -66,6 +66,20 @@ sub check_start {
   }
 }
 
+sub check_cleanup {
+  my ($self, $params) = @_;
+  my $pms = $params->{permsgstatus};
+  my $scoresptr = $pms->{conf}->{scores};
+
+  # Force all body rules ready for meta rules.  Need to do it here in
+  # cleanup, because the body is scanned per line instead of per rule
+  if ($pms->{conf}->{skip_body_rules}) {
+    foreach (keys %{$pms->{conf}->{skip_body_rules}}) {
+      $pms->rule_ready($_, 1)  if $scoresptr->{$_};
+    }
+  }
+}
+
 ###########################################################################
 
 1;
@@ -92,11 +106,13 @@ sub do_one_line_body_tests {
     my $sub = '
       my ($self, $line) = @_;
       my $qrptr = $self->{main}->{conf}->{test_qrs};
-      my $hitsptr = $self->{tests_already_hit};
     ';
 
     if (($conf->{tflags}->{$rulename}||'') =~ /\bmultiple\b/)
     {
+      $sub .= '
+        my $hitsptr = $self->{tests_already_hit};
+      ';
       # support multiple matches
       my ($max) = $conf->{tflags}->{$rulename} =~ /\bmaxhits=(\d+)\b/;
       $max = untaint_var($max);
@@ -115,7 +131,7 @@ sub do_one_line_body_tests {
       while ($$lref =~ /$qrptr->{q{'.$rulename.'}}/gop) {
         $self->got_hit(q{'.$rulename.'}, "BODY: ", ruletype => "one_line_body");
         '. $self->hit_rule_plugin_code($pms, $rulename, "one_line_body", "") . '
-        '. ($max? 'last if $self->{tests_already_hit}->{q{'.$rulename.'}} >= '.$max.';' : '') . '
+        '. ($max? 'last if $hitsptr->{q{'.$rulename.'}} >= '.$max.';' : '') . '
       }
       ';
 
@@ -130,8 +146,9 @@ sub do_one_line_body_tests {
 
     }
 
+    # Make sure rule is marked ready for meta rules
     $sub .= '
-      $self->rule_ready(q{'.$rulename.'});
+      $self->rule_ready(q{'.$rulename.'}, 1);
     ';
 
     return if ($opts{doing_user_rules} &&

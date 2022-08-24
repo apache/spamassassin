@@ -3,23 +3,6 @@
 # detect use of dollar-ampersand somewhere in the perl interpreter;
 # once it is used once, it slows down every regexp match thereafter.
 
-BEGIN {
-  if (-d 'xt') { chdir 'xt'; }
-
-  if (-e 'test_dir') {            # running from test directory, not ..
-    unshift(@INC, '../blib/lib');
-    unshift(@INC, '../lib');
-  }
-}
-
-use lib '../t';
-use SATest; 
-sa_t_init("saw_ampersand");
-
-use Test;
-
-use Carp qw(croak);
-
 # Starting with perl 5.17.7, this entire test becomes irrelevant:
 # perldelta 5.17.7:
 #
@@ -30,34 +13,22 @@ use Carp qw(croak);
 #  down your program when used. Hence, the /p regular expression flag
 #  now does nothing.
 
-our $RUN_THIS_TEST;
+use lib '../t'; use lib 't';
+use SATest; 
+sa_t_init("saw_ampersand");
 
-BEGIN {
-  $RUN_THIS_TEST = 1;
-  if ($] >= 5.017007) {
-    $RUN_THIS_TEST = 0;
-  }
-  use constant HAS_DSA => eval 'use Devel::SawAmpersand; 1;';
-  plan tests => 0 if ! ( $RUN_THIS_TEST and HAS_DSA) ;
+use Test::More;
 
-  if (!$RUN_THIS_TEST) {
-    print "NOTE: This test is unnecessary as of perl 5.17.7.\n";
-    exit;
-  } 
-  if ( !HAS_DSA ) {
-    print "NOTE: This test requires Devel::SawAmpersand\n"; 
-    exit;
-  } 
-}
+plan skip_all => "This test is unnecessary as of perl 5.17.7" if ($] >= 5.017007);
+plan skip_all => "This test requires Devel::SawAmpersand" unless (eval { require Devel::SawAmpersand; 1} );
+plan tests => 41;
 
-
-plan tests => 37;
+use Carp qw(croak);
 
 # ---------------------------------------------------------------------------
 
 use strict;
 require Mail::SpamAssassin;
-use Devel::SawAmpersand;
 
 # it is important to order these from least-plugin-code-run to most.
 
@@ -66,10 +37,9 @@ tryone (1, "");
 
 print "\ntrying net with only local rule plugins\n";
 
-
 # kill all 'loadplugin' lines
 foreach my $file 
-        (<log/localrules.tmp/*.pre>, <log/test_rules_copy/*.pre>) #*/
+        (<$siterules/*.pre>, <$localrules/*.pre>) #*/
 {
   $file = untaint_var($file);
   rename $file, "$file.bak" or die "rename $file failed";
@@ -104,17 +74,48 @@ write_plugin_pre($plugins);
 tryone (0, "");
 
 print "\ntrying net with more local rule plugins\n";
-
 $plugins .= q{
   loadplugin Mail::SpamAssassin::Plugin::SpamCop
   loadplugin Mail::SpamAssassin::Plugin::AntiVirus
   loadplugin Mail::SpamAssassin::Plugin::TextCat
   loadplugin Mail::SpamAssassin::Plugin::AccessDB
-  loadplugin Mail::SpamAssassin::Plugin::WhiteListSubject
+  loadplugin Mail::SpamAssassin::Plugin::WelcomeListSubject
   loadplugin Mail::SpamAssassin::Plugin::MIMEHeader
   loadplugin Mail::SpamAssassin::Plugin::ReplaceTags
   loadplugin Mail::SpamAssassin::Plugin::Shortcircuit
   loadplugin Mail::SpamAssassin::Plugin::Rule2XSBody
+};
+write_plugin_pre($plugins);
+tryone (0, "");
+
+print "\ntrying net with even more local rule plugins\n";
+$plugins .= q{
+  loadplugin Mail::SpamAssassin::Plugin::ASN
+  loadplugin Mail::SpamAssassin::Plugin::AWL
+  loadplugin Mail::SpamAssassin::Plugin::AskDNS
+  loadplugin Mail::SpamAssassin::Plugin::AuthRes
+  loadplugin Mail::SpamAssassin::Plugin::AutoLearnThreshold
+  loadplugin Mail::SpamAssassin::Plugin::BodyRuleBaseExtractor
+  loadplugin Mail::SpamAssassin::Plugin::Check
+  loadplugin Mail::SpamAssassin::Plugin::DecodeShortURLs
+  loadplugin Mail::SpamAssassin::Plugin::ExtractText
+  loadplugin Mail::SpamAssassin::Plugin::FreeMail
+  loadplugin Mail::SpamAssassin::Plugin::FromNameSpoof
+  loadplugin Mail::SpamAssassin::Plugin::HashBL
+  loadplugin Mail::SpamAssassin::Plugin::ImageInfo
+  loadplugin Mail::SpamAssassin::Plugin::OLEVBMacro
+  loadplugin Mail::SpamAssassin::Plugin::OneLineBodyRuleType
+  loadplugin Mail::SpamAssassin::Plugin::P595Body
+  loadplugin Mail::SpamAssassin::Plugin::PhishTag
+  loadplugin Mail::SpamAssassin::Plugin::Phishing
+  loadplugin Mail::SpamAssassin::Plugin::RelayCountry
+  loadplugin Mail::SpamAssassin::Plugin::RelayEval
+  loadplugin Mail::SpamAssassin::Plugin::ResourceLimits
+  loadplugin Mail::SpamAssassin::Plugin::Reuse
+  loadplugin Mail::SpamAssassin::Plugin::SPF
+  loadplugin Mail::SpamAssassin::Plugin::Test
+  loadplugin Mail::SpamAssassin::Plugin::URIDNSBL
+  loadplugin Mail::SpamAssassin::Plugin::URILocalBL
 };
 write_plugin_pre($plugins);
 tryone (0, "");
@@ -168,7 +169,7 @@ print "\ntrying net with all default non-local rule plugins\n";
 
 # TODO: unportable
 untaint_system "perl -pi.bak -e 's/^###loadplugin/loadplugin/g' ".
-                " log/localrules.tmp/*.pre log/test_rules_copy/*.pre";
+                " $siterules/*.pre $localrules/*.pre";
 
 ($? >> 8 != 0) and die "perl failed";
 
@@ -181,12 +182,12 @@ exit;
 
 sub write_plugin_pre {
   my $cftext = shift;
-  open OUT, ">log/localrules.tmp/test.pre"
-    or die "cannot create log/localrules.tmp/test.pre: $!";
+  open OUT, ">$siterules/test.pre"
+    or die "cannot create $siterules/test.pre: $!";
   print OUT $cftext
-    or die "error writing to log/localrules.tmp/test.pre: $!";
+    or die "error writing to $siterules/test.pre: $!";
   close OUT
-    or die "cannot close log/localrules.tmp/test.pre: $!";
+    or die "cannot close $siterules/test.pre: $!";
 }
 
 sub tryone {

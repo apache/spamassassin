@@ -106,7 +106,7 @@ filtering might require a paid subscription database like GeoIPISP.
 
 package Mail::SpamAssassin::Plugin::URILocalBL;
 use Mail::SpamAssassin::Plugin;
-use Mail::SpamAssassin::Constants qw(:ip);
+use Mail::SpamAssassin::Constants qw(:ip :sa);
 use Mail::SpamAssassin::Util qw(untaint_var idn_to_ascii);
 use Mail::SpamAssassin::NetSet;
 
@@ -122,6 +122,7 @@ our @ISA = qw(Mail::SpamAssassin::Plugin);
 sub dbg { my $msg = shift; Mail::SpamAssassin::Plugin::dbg ("URILocalBL: $msg", @_); }
 
 my $IP_ADDRESS = IP_ADDRESS;
+my $RULENAME_RE = RULENAME_RE;
 
 # constructor
 sub new {
@@ -154,7 +155,7 @@ sub set_config {
     code => sub {
       my ($self, $key, $value, $line) = @_;
 
-      if ($value !~ /^(\S+)\s+(.+?)\s*$/) {
+      if ($value !~ /^(${RULENAME_RE})\s+(.+?)\s*$/) {
         return $Mail::SpamAssassin::Conf::INVALID_VALUE;
       }
       my $name = $1;
@@ -196,7 +197,7 @@ sub set_config {
     code => sub {
       my ($self, $key, $value, $line) = @_;
 
-      if ($value !~ /^(\S+)\s+(.+?)\s*$/) {
+      if ($value !~ /^(${RULENAME_RE})\s+(.+?)\s*$/) {
         return $Mail::SpamAssassin::Conf::INVALID_VALUE;
       }
       my $name = $1;
@@ -238,7 +239,7 @@ sub set_config {
     code => sub {
       my ($self, $key, $value, $line) = @_;
 
-      if ($value !~ /^(\S+)\s+(.+?)\s*$/) {
+      if ($value !~ /^(${RULENAME_RE})\s+(.+?)\s*$/) {
         return $Mail::SpamAssassin::Conf::INVALID_VALUE;
       }
       my $name = $1;
@@ -272,7 +273,7 @@ sub set_config {
     code => sub {
       my ($self, $key, $value, $line) = @_;
 
-      if ($value !~ /^(\S+)\s+(.+?)\s*$/) {
+      if ($value !~ /^(${RULENAME_RE})\s+(.+?)\s*$/) {
         return $Mail::SpamAssassin::Conf::INVALID_VALUE;
       }
       my $name = $1;
@@ -299,7 +300,7 @@ sub set_config {
     code => sub {
       my ($self, $key, $value, $line) = @_;
 
-      if ($value !~ /^(\S+)\s+(.+?)\s*$/) {
+      if ($value !~ /^(${RULENAME_RE})\s+(.+?)\s*$/) {
         return $Mail::SpamAssassin::Conf::INVALID_VALUE;
       }
       my $name = $1;
@@ -392,26 +393,30 @@ sub check_uri_local_bl {
   # bail out now if dns not available
   return 0 if !$pms->is_dns_available();
 
-  $pms->rule_pending($rulename); # mark async
-
+  my $queries;
   foreach my $host (keys %found_hosts) {
     $host = idn_to_ascii($host);
     dbg("launching A/AAAA lookup for $host");
     # launch dns
-    $pms->{async}->bgsend_and_start_lookup($host, 'A', undef,
+    my $ret = $pms->{async}->bgsend_and_start_lookup($host, 'A', undef,
       { rulename => $rulename, host => $host, type => 'URILocalBL' },
       sub { my($ent, $pkt) = @_; $self->_finish_lookup($pms, $ent, $pkt); },
       master_deadline => $pms->{master_deadline}
     );
+    $queries++ if defined $ret;
     # also IPv6 if database supports
     if ($self->{main}->{geodb}->can('country_v6')) {
-      $pms->{async}->bgsend_and_start_lookup($host, 'AAAA', undef,
+      $ret = $pms->{async}->bgsend_and_start_lookup($host, 'AAAA', undef,
         { rulename => $rulename, host => $host, type => 'URILocalBL' },
         sub { my($ent, $pkt) = @_; $self->_finish_lookup($pms, $ent, $pkt); },
         master_deadline => $pms->{master_deadline}
       );
+      $queries++ if defined $ret;
     }
   }
+
+  return 0 if !$queries; # no query started
+  return; # return undef for async status
 }
 
 sub _finish_lookup {

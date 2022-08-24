@@ -3,20 +3,24 @@
 use lib '.'; use lib 't';
 use SATest; sa_t_init("basic_lint");
 
+use Test::More;
+
 @test_locales = qw(C);
-# Test with few random additional locales if available
-my $locales = untaint_cmd("locale -a");
-while ($locales =~ /^((?:C|en_US|fr_FR|zh_CN)\.(?:utf|iso|gb).*)$/gmi) {
-  push @test_locales, $1;
+
+if (!$RUNNING_ON_WINDOWS) {
+  # Test with few random additional locales if available
+  my $locales = untaint_cmd("locale -a");
+  while ($locales =~ /^((?:C|en_US|fr_FR|zh_CN)\.(?:utf|iso|gb).*)$/gmi) {
+    push @test_locales, $1;
+  }
 }
 
-use Test::More;
 plan tests => scalar(@test_locales);
 
 # ---------------------------------------------------------------------------
 
 %patterns = (
-  q{  }, 'anything',
+  qr/^/, 'anything',
 );
 
 foreach my $locale (@test_locales) {

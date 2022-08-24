@@ -9,7 +9,7 @@ use Test::More tests => 3;
 # ---------------------------------------------------------------------------
 
 %patterns = (
-  q{  }, 'anything',
+  qr/^/, 'anything',
 );
 
 # override locale for this test!

@@ -2,7 +2,8 @@
 
 use lib '.'; use lib 't';
 use SATest; sa_t_init("db_awl_path_welcome_block");
-use Test::More tests => 4;
+use Test::More;
+plan tests => 4;
 use IO::File;
 
 # ---------------------------------------------------------------------------
@@ -20,7 +21,7 @@ print OUT "file created to block AWL from working; AWL expects a dir";
 close OUT;
 
 tstprefs ("
-  auto_welcomelist_path ./$workdir/awl/shouldbeinaccessible
+  auto_welcomelist_path ./$workdir/awl/this_lock_warning_is_ok
   auto_welcomelist_file_mode 0755
 ");
 

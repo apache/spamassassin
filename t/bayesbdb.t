@@ -140,6 +140,8 @@ ok(!getimpl->{store}->seen_get($msgid));
 
 getimpl->{store}->untie_db();
 
+getimpl->{store}->_close_db(); # on Windows the following sa_t_init can't delete the old files without this close
+
 undef $sa;
 
 sa_t_init('bayesbdb'); # this wipes out what is there and begins anew

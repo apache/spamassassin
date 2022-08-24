@@ -17,6 +17,11 @@ describe    GB_GOOGLE_OBFUQ	Obfuscate url through Google search
 score       GB_GOOGLE_OBFUQ     0.75 # limit
 #tflags      GB_GOOGLE_OBFUQ     publish
 
+uri         GB_GOOGLE_TRANSL    /^https?:\/\/.{10,64}\-ipfs\-.{2,8}\-\-ipfs\-io\.translate\.goog\/\?_x_tr_hp=/
+describe    GB_GOOGLE_TRANSL    Obfuscate url through Google Translate
+score       GB_GOOGLE_TRANSL    0.75 # limit
+#tflags      GB_GOOGLE_TRANSL    publish
+
 header      __COPY_OF       Subject =~ /Copy of:|offers for you/
 meta        GB_COPY_OF_SHORT   ( __URL_SHORTENER && __COPY_OF && __KAM_BODY_LENGTH_LT_1024 )
 describe    GB_COPY_OF_SHORT   Url shortnener spam
@@ -48,6 +53,13 @@ score      GB_GOOG_IMG_NOT_RCVD_GOOG   2.500    # limit
 # score      GB_LINKED_IMG_NOT_RCVD_LINK   2.500    # limit
 # tflags     GB_LINKED_IMG_NOT_RCVD_LINK   publish
 
+# header     __HDR_RCVD_PAYPAL           X-Spam-Relays-External =~ /\srdns=\S+\.paypal\.com\s/
+uri        __URI_IMG_PAYPAL              /^https:\/\/www\.paypalobjects\.com\/(?:digitalassets|en_US|ui\-web)\/.{1,64}\.(?:gif|jpg|png)/
+meta       __PAYPAL_IMG_NOT_RCVD_PAYP    __URI_IMG_PAYPAL && !__HDR_RCVD_PAYPAL
+meta       GB_PAYPAL_IMG_NOT_RCVD_PAYP   __PAYPAL_IMG_NOT_RCVD_PAYP && !__HAS_ERRORS_TO && !__MSGID_LIST && !__MSGID_GUID && !__RCD_RDNS_SMTP
+describe   GB_PAYPAL_IMG_NOT_RCVD_PAYP   Paypal hosted image but message not from Paypal
+score      GB_PAYPAL_IMG_NOT_RCVD_PAYP   2.500    # limit
+
 uri        __SENDINBLUE_REDIR            m~://.{4,5}\.r\.a[a-z]?\.d\.sendibm[0-9]\.com/mk/([a-z]){2}/~
 meta       SENDINBLUE_REDIR              __SENDINBLUE_REDIR && !MIME_HTML_MOSTLY && !__HAS_ERRORS_TO && !__HAS_X_BEEN_THERE && !__HAS_X_MAILMAN_VERSION
 describe   SENDINBLUE_REDIR              Redirect URI via Sendinblue
@@ -65,7 +77,29 @@ meta       GB_FAKE_RF                    ( ! __THREADED && ! MAILING_LIST_MULTI 
 describe   GB_FAKE_RF                    Fake reply
 score      GB_FAKE_RF                    1.000 # limit
 
-meta       GB_FAKE_RF_SHORT              ( ! __THREADED && __GB_FAKE_RF && __PDS_URISHORTENER )
+meta       GB_FAKE_RF_SHORT              ( ! __THREADED && __GB_FAKE_RF && __URL_SHORTENER )
 describe   GB_FAKE_RF_SHORT              Fake reply or forward with url shortener
 score      GB_FAKE_RF_SHORT              2.000 # limit
 tflags     GB_FAKE_RF_SHORT              publish
+
+uri        GB_URI_FLEEK_STO_HTM          m,^https?://storageapi\.fleek\.co/.*\.html?,i
+describe   GB_URI_FLEEK_STO_HTM          Html file stored on Fleek cloud
+score      GB_URI_FLEEK_STO_HTM          1.000 # limit
+tflags     GB_URI_FLEEK_STO_HTM          multiple maxhits=5
+
+if (version >= 4.000000)
+if can(Mail::SpamAssassin::Conf::feature_capture_rules)
+  header        __GB_TO_ADDR            To:addr =~ /(?<GB_TO_ADDR>.*)/
+  uri           GB_STORAGE_GOOGLE_EMAIL m|^https?://storage\.cloud\.google\.com/.{4,128}\#%{GB_TO_ADDR}|i
+  describe      GB_STORAGE_GOOGLE_EMAIL Google storage cloud abuse
+  score         GB_STORAGE_GOOGLE_EMAIL 2.000 # limit
+  tflags        GB_STORAGE_GOOGLE_EMAIL publish
+
+  uri           __GB_CUSTOM_HTM_URI0    m|^https?://.{10,128}\.html?\#%{GB_TO_ADDR}|i
+  uri           __GB_CUSTOM_HTM_URI1    m|^https?://.{10,64}\=https?://.{4,64}\#%{GB_TO_ADDR}|i
+  meta          GB_CUSTOM_HTM_URI       ( __GB_CUSTOM_HTM_URI0 || __GB_CUSTOM_HTM_URI1 )
+  describe      GB_CUSTOM_HTM_URI       Custom html uri
+  score         GB_CUSTOM_HTM_URI       1.500 # limit
+  tflags        GB_CUSTOM_HTM_URI       publish
+endif
+endif

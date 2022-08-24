@@ -1,20 +1,24 @@
 #!/usr/bin/perl
 
 use lib '.'; use lib 't';
-$ENV{'TEST_PERL_TAINT'} = 'no';     # inhibit for this test
+$ENV{'TEST_PERL_TAINT'} = 'no';  # so $perl_cmd doesn't have -T when used to call Makefile.PL 
 use SATest; sa_t_init("make_install");
 
 use Config;
-use Test::More tests => 25;
-
+use Test::More;
+plan skip_all => "Tests don't work on windows" if $RUNNING_ON_WINDOWS;
+plan tests => 25;
 # -------------------------------------------------------------------
 
 use Cwd;
 my $cwd = getcwd;
 my $builddir = "$cwd/$workdir/d.$testname/build";
 my $instbase = "$cwd/$workdir/d.$testname/inst";
-untaint_system("rm -rf $instbase $builddir");
-untaint_system("mkdir -p $instbase $builddir");
+$builddir = untaint_var($builddir);
+$instbase = untaint_var($instbase);
+rmtree($instbase, $builddir, { safe => 1 });
+mkdirp($instbase);
+mkdirp($builddir);
 
 untaint_system("cd .. && make tardist >/dev/null");
 $? == 0  or die "tardist failed: $?";
@@ -67,10 +71,20 @@ if ($x64_bit_lib_test) {
   print "\nDisabling checks for 64 bit lib directories.\n";
 }
 
+# bug 8019 - substitute for File::Path:mkpath that can work in -T mode
+sub mkdirp {
+  my $dir = shift;
+  return if (-d $dir);
+  mkdirp(dirname($dir));
+  mkdir $dir;
+}
+
 sub new_instdir {
   $instdir = $instbase.".".(shift);
+  $instdir = untaint_var($instdir);
   print "\nsetting new instdir: $instdir\n";
-  untaint_system("rm -rf $instdir; mkdir $instdir");
+  rmtree($instdir, { safe => 1 });
+  mkdirp($instdir);
 }
 
 sub run_makefile_pl {

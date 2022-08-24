@@ -109,6 +109,21 @@ describe NML_ADSP_CUSTOM_MED    ADSP custom_med hit, and not from a mailing list
 meta     NML_ADSP_CUSTOM_HIGH   DKIM_ADSP_CUSTOM_HIGH && !__VIA_ML && !__VIA_RESIGNER
 describe NML_ADSP_CUSTOM_HIGH   ADSP custom_high hit, and not from a mailing list
 
+if can(Mail::SpamAssassin::Plugin::DKIM::has_arc)
+  full     ARC_SIGNED		eval:check_arc_signed()
+  describe ARC_SIGNED		Message has a ARC signature
+  tflags   ARC_SIGNED		net
+  reuse    ARC_SIGNED
+
+  full     ARC_VALID		eval:check_arc_valid()
+  describe ARC_VALID		Message has a valid ARC signature
+  tflags   ARC_VALID		net
+  reuse    ARC_VALID
+
+  meta     ARC_INVALID		ARC_SIGNED && !ARC_VALID
+  describe ARC_INVALID		ARC signature exists, but is not valid
+endif
+
 #
 # old, declared for compatibility with pre-3.3, should have scores 0
 #

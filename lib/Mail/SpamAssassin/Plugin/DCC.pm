@@ -826,9 +826,7 @@ sub check_dcc {
 
   # async already handling?
   if ($pms->{dcc_async_start}) {
-    my $rulename = $pms->get_current_eval_rule_name();
-    $pms->rule_pending($rulename); # mark async
-    return 0;
+    return; # return undef for async status
   }
 
   return $pms->{dcc_result} if defined $pms->{dcc_result};
@@ -887,9 +885,9 @@ sub check_dcc_reputation_range {
     # Install callback if waiting for async result
     if (!defined $cb_rulename) {
       my $rulename = $pms->get_current_eval_rule_name();
-      $pms->rule_pending($rulename); # mark async
       # array matches check_dcc_reputation_range() argument order
       push @{$pms->{dcc_range_callbacks}}, [undef, $min, $max, $rulename];
+      return; # return undef for async status
     }
   }
 

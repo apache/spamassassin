@@ -592,7 +592,11 @@ sub _extract {
       push @{$coll->{text}}, $text;
     }
     $coll->{chars} += length($text);
-    $coll->{words} += scalar @{[split(/\W+/s,$text)]} - 1;
+
+    # the following is safe (regarding clobbering the @_) since perl v5.11.0
+    $coll->{words} += split(/\W+/s,$text) - 1;
+    # $coll->{words} += scalar @{[split(/\W+/s,$text)]} - 1;  # old perl hack
+
     dbg("extracttext: rendering text for type $type with $tool->{name}");
     $part->set_rendered($text);
   }

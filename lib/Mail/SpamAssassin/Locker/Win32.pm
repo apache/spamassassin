@@ -72,7 +72,7 @@ sub safe_lock {
       return 1;
     }
     my @stat = stat($lock_file);
-    @stat  or warn "locker: error accessing $lock_file: $!";
+    @stat  or dbg("locker: error accessing $lock_file: $!");
 
     # check age of lockfile ctime
     my $age = ($#stat < 11 ? undef : $stat[10]);

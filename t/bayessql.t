@@ -8,7 +8,7 @@ use Test::More;
 use Mail::SpamAssassin;
 
 use constant HAS_DBI => eval { require DBI; }; # for our cleanup stuff
-use constant SQLITE => eval { require DBD::SQLite; };
+use constant SQLITE => eval { require DBD::SQLite; DBD::SQLite->VERSION(1.59_01); };
 use constant SQL => conf_bool('run_bayes_sql_tests');
 
 plan skip_all => "DBI is unavailable on this system" unless (HAS_DBI);
@@ -19,7 +19,7 @@ $tests += 59 if (SQLITE);
 $tests += 59 if (SQL);
 plan tests => $tests;
 
-diag "Note: Failure may be due to an incorrect config.";
+diag "Note: If there is a failure it may be due to an incorrect SQL configuration." if (SQL);
 
 my ($dbconfig, $dbdsn, $dbusername, $dbpassword);
 

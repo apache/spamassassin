@@ -267,13 +267,7 @@ else {
 my $RevSAVersion = join(".", reverse split(/\./, $SAVersion));
 
 # set debug areas, if any specified (only useful for command-line tools)
-$SAVersion =~ /^(\d+\.\d+)/;
-if ($1+0 > 3.0) {
-  $opt{'debug'} ||= 'all' if (defined $opt{'debug'});
-}
-else {
-  $opt{'debug'} = defined $opt{'debug'};
-}
+$opt{'debug'} ||= 'all' if (defined $opt{'debug'});
 
 # Find the default site rule directory, also setup debugging and other M::SA bits
 my $SA = Mail::SpamAssassin->new({

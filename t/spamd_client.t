@@ -31,9 +31,9 @@ my $testmsg = getmessage("data/spam/gtube.eml");
 ok($testmsg);
 
 %patterns = (
-  q{ X-Spam-Flag: YES}, 'flag',
+  qr/^X-Spam-Flag: YES/m, 'flag',
   q{ 1000 GTUBE }, 'gtube',
-  q{ XJS*C4JDBQADN1.NSBN3*2IDNEN*GTUBE-STANDARD-ANTI-UBE-TEST-EMAIL*C.34X }, 'gtube string',
+  'XJS*C4JDBQADN1.NSBN3*2IDNEN*GTUBE-STANDARD-ANTI-UBE-TEST-EMAIL*C.34X', 'gtube string',
 );
 
 ok(start_spamd("-L"));
@@ -66,11 +66,11 @@ ok_all_patterns();
 
 clear_pattern_counters();
 %patterns = (
-q{ X-Spam-Flag: YES}, 'flag',
+qr/^X-Spam-Flag: YES/m, 'flag',
 );
 
 %anti_patterns = (
-q{ XJS*C4JDBQADN1.NSBN3*2IDNEN*GTUBE-STANDARD-ANTI-UBE-TEST-EMAIL*C.34X }, 'gtube string',
+  'XJS*C4JDBQADN1.NSBN3*2IDNEN*GTUBE-STANDARD-ANTI-UBE-TEST-EMAIL*C.34X', 'gtube string',
 );
 
 $result = $client->headers($testmsg);
@@ -90,14 +90,14 @@ if (!$RUNNING_ON_WINDOWS) {
   $spamd_already_killed = undef;
 
   %patterns = (
-    q{ X-Spam-Flag: YES}, 'flag',
+    qr/^X-Spam-Flag: YES/m, 'flag',
     q{ 1000 GTUBE }, 'gtube',
-    q{ XJS*C4JDBQADN1.NSBN3*2IDNEN*GTUBE-STANDARD-ANTI-UBE-TEST-EMAIL*C.34X }, 'gtube string',
+    'XJS*C4JDBQADN1.NSBN3*2IDNEN*GTUBE-STANDARD-ANTI-UBE-TEST-EMAIL*C.34X', 'gtube string',
       );
 
   %anti_patterns = ();
 
-  my $sockpath = mk_safe_tmpdir()."/spamd.sock";
+  my $sockpath = mk_socket_tempdir()."/spamd.sock";
   ok(start_spamd("-L --socketpath=$sockpath"));
 
   $client = create_clientobj({
@@ -126,7 +126,6 @@ if (!$RUNNING_ON_WINDOWS) {
   ok_all_patterns();
 
   ok(stop_spamd());
-  cleanup_safe_tmpdir();
 }
 
 if (HAS_SDBM_FILE) {

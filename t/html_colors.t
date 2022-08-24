@@ -1,6 +1,8 @@
 #!/usr/bin/perl -w -T
 
 use strict;
+use lib '.'; use lib 't';
+use SATest; sa_t_init("html_colors");
 use Test::More tests => 28;
 use Mail::SpamAssassin;
 use Mail::SpamAssassin::HTML;

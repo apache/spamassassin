@@ -15,7 +15,7 @@ plan tests => 4;
   q{ X-Spam-Flag: YES}, 'flag',
 );
 
-my $sockpath = mk_safe_tmpdir()."/spamd.sock";
+my $sockpath = mk_socket_tempdir()."/spamd.sock";
 start_spamd("-D -L --socketpath=$sockpath");
 
 open (OUT, ">$workdir/spamc_cf.cf");
@@ -25,5 +25,4 @@ close OUT;
 ok (spamcrun ("-F $workdir/spamc_cf.cf < data/spam/001", \&patterns_run_cb));
 ok_all_patterns();
 stop_spamd();
-cleanup_safe_tmpdir();
 

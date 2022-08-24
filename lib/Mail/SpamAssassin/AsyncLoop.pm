@@ -73,7 +73,8 @@ sub new {
     queries_started     => 0,
     queries_completed   => 0,
     pending_lookups     => { },
-    pending_rules	=> { },
+    pending_rules	=> { },  # maintain pending rules list for meta evaluation
+    rules_for_key	=> { },  # record all rules used by a key for logging
     timing_by_query     => { },
     all_lookups         => { },  # keyed by "rr_type/domain"
   };
@@ -180,8 +181,17 @@ Hash of options. Only supported and required option is master_deadline:
 
 =cut
 
+sub start_queue {
+  my($self) = @_;
+
+  $self->{wait_queue} = 1;
+}
+
 sub launch_queue {
   my($self) = @_;
+
+  delete $self->{wait_queue};
+
   if ($self->{bgsend_queue}) {
     dbg("async: launching queued lookups");
     foreach (@{$self->{bgsend_queue}}) {
@@ -198,14 +208,17 @@ sub bgsend_and_start_lookup {
   return if $self->{main}->{resolver}->{no_resolver};
 
   # Waiting for priority -100 to launch?
-  if ($self->{wait_launch}) {
+  if ($self->{wait_queue}) {
     push @{$self->{bgsend_queue}}, [@_];
-    dbg("async: dns priority not reached, queueing lookup: $domain/$type");
+    dbg("async: DNS priority not reached, queueing lookup: $domain/$type");
     return $ent;
   }
 
-  if (!defined $ent->{rulename}) {
-    info("async: bgsend_and_start_lookup called without rulename: $domain/$type");
+  if (!defined $ent->{rulename} && !$self->{rulename_warned}++) {
+    my($package, $filename, $line) = caller;
+    warn "async: bgsend_and_start_lookup called without rulename, ".
+         "from $package ($filename) line $line. You are likely using ".
+         "a plugin that is not compatible with SpamAssasin 4.0.0.";
   }
 
   $domain =~ s/\.+\z//s;  # strip trailing dots, these sometimes still sneak in
@@ -230,15 +243,17 @@ sub bgsend_and_start_lookup {
 
   $ent = {}  if !$ent;
   $ent->{id} = undef;
-  $ent->{key} = $dnskey  if !exists $ent->{key};
+  my $key = $ent->{key} = $dnskey;
   $ent->{query_type} = $type;
   $ent->{query_domain} = $domain;
   $ent->{type} = $type  if !exists $ent->{type};
   $ent->{zone} = $domain  if !exists $ent->{zone};
   $cb = $ent->{completed_callback}  if !$cb;  # compatibility with SA < 3.4
 
-  my $key = $ent->{key};
-  my $rulename = $ent->{rulename};
+  my @rulenames = grep { defined } (ref $ent->{rulename} ?
+                    @{$ent->{rulename}} : $ent->{rulename});
+
+  $self->{rules_for_key}->{$key}{$_} = 1 foreach (@rulenames);
 
   if ($dns_query_info) {  # DNS query already underway or completed
     my $id = $ent->{id} = $dns_query_info->{id};  # re-use existing query
@@ -251,27 +266,20 @@ sub bgsend_and_start_lookup {
     if (!$pkt) {  # DNS query underway, still waiting for results
       # just add our query to the existing one
       push(@{$dns_query_info->{applicants}}, [$ent,$cb]);
-      if (ref($rulename) eq 'ARRAY') {
-        $self->{pending_rules}->{$_}{$key} = 1 foreach (@$rulename);
-      } else {
-        $self->{pending_rules}->{$rulename}{$key} = 1 if $rulename;
-      }
-      dbg("async: query %s already underway, adding no.%d %s",
+      $self->{pending_rules}->{$_}{$key} = 1 foreach (@rulenames);
+      dbg("async: query %s already underway, adding no.%d, rules: %s",
           $id, scalar @{$dns_query_info->{applicants}},
-          $rulename || $key);
+          join(", ", @rulenames));
 
     } else {  # DNS query already completed, re-use results
       # answer already known, just do the callback and be done with it
-      if (ref($rulename) eq 'ARRAY') {
-        delete $self->{pending_rules}->{$_}{$key} foreach (@$rulename);
-      } else {
-        delete $self->{pending_rules}->{$rulename}{$key};
-      }
+      delete $self->{pending_rules}->{$_}{$key} foreach (@rulenames);
       if (!$cb) {
-        dbg("async: query %s already done, re-using for %s", $id, $key);
+        dbg("async: query %s already done, re-using for %s, rules: %s",
+            $id, $key, join(", ", @rulenames));
       } else {
-        dbg("async: query %s already done, re-using for %s, callback",
-            $id, $key);
+        dbg("async: query %s already done, re-using for %s, callback, rules: %s",
+            $id, $key, join(", ", @rulenames));
         eval {
           $cb->($ent, $pkt); 1;
         } or do {
@@ -320,9 +328,10 @@ sub bgsend_and_start_lookup {
       }
     }
     if ($blocked) {
-      dbg("async: blocked by %s: %s", $blocked_by, $dnskey);
+      dbg("async: blocked by %s: %s, rules: %s", $blocked_by, $dnskey,
+          join(", ", @rulenames));
     } else {
-      dbg("async: launching %s for %s", $dnskey, $key);
+      dbg("async: launching %s, rules: %s", $dnskey, join(", ", @rulenames));
       $id = $self->{main}->{resolver}->bgsend($domain, $type, $class, sub {
           my($pkt, $pkt_id, $timestamp) = @_;
           # this callback sub is called from DnsResolver::poll_responses()
@@ -336,19 +345,14 @@ sub bgsend_and_start_lookup {
           my $cb_count = 0;
           foreach my $tuple (@{$dns_query_info->{applicants}}) {
             my($appl_ent, $appl_cb) = @$tuple;
-            my $rulename = $appl_ent->{rulename};
-            if (ref($rulename) eq 'ARRAY') {
-              delete $self->{pending_rules}->{$_}{$appl_ent->{key}}
-                foreach (@$rulename);
-            } else {
-              delete $self->{pending_rules}->{$rulename}{$appl_ent->{key}}
-                if defined $rulename;
+            my @rulenames = grep { defined } (ref $appl_ent->{rulename} ?
+                      @{$appl_ent->{rulename}} : $appl_ent->{rulename});
+            foreach (@rulenames) {
+              delete $self->{pending_rules}->{$_}{$appl_ent->{key}};
             }
             if ($appl_cb) {
-              dbg("async: calling callback on key %s%s", $key,
-                  !defined $rulename ? ''
-                    : ", rules: ".(ref($rulename) eq 'ARRAY' ?
-                      join(', ', @$rulename) : $rulename));
+              dbg("async: calling callback on key %s, rules: %s",
+                  $key, join(", ", @rulenames));
               $cb_count++;
               eval {
                 $appl_cb->($appl_ent, $pkt); 1;
@@ -368,11 +372,7 @@ sub bgsend_and_start_lookup {
     return if !defined $id;
     $dns_query_info->{id} = $ent->{id} = $id;
     push(@{$dns_query_info->{applicants}}, [$ent,$cb]);
-    if (ref($rulename) eq 'ARRAY') {
-      $self->{pending_rules}->{$_}{$key} = 1 foreach (@$rulename);
-    } else {
-      $self->{pending_rules}->{$rulename}{$key} = 1 if $rulename;
-    }
+    $self->{pending_rules}->{$_}{$key} = 1 foreach (@rulenames);
     $self->_start_lookup($ent, $options{master_deadline});
   }
   return $ent;
@@ -389,9 +389,12 @@ DIRECT USE DEPRECATED since 4.0.0, please use bgsend_and_start_lookup.
 sub start_lookup {
   my $self = shift;
 
-  warn "async: deprecated start_lookup called, please use bgsend_and_start_lookup\n"
-    if !$self->{start_lookup_warned};
-  $self->{start_lookup_warned} = 1;
+  if (!$self->{start_lookup_warned}++) {
+    my($package, $filename, $line) = caller;
+    warn "async: deprecated start_lookup called, ".
+         "from $package ($filename) line $line. You are likely using ".
+         "a plugin that is not compatible with SpamAssasin 4.0.0.";
+  }
 
   return if $self->{main}->{resolver}->{no_resolver};
   $self->_start_lookup(@_);
@@ -456,15 +459,16 @@ sub _start_lookup {
   $ent->{timeout_initial} = $t_init;
   $ent->{timeout_min} = $t_end;
 
+  my @rulenames = grep { defined } (ref $ent->{rulename} ?
+                    @{$ent->{rulename}} : $ent->{rulename});
   $ent->{display_id} =  # identifies entry in debug logging and similar
-    join(", ", grep { defined }
-               map { ref $ent->{$_} ? @{$ent->{$_}} : $ent->{$_} }
-               qw(sets rules rulename type key) );
+    join(", ", grep { defined } map { $ent->{$_} } qw(type key));
 
   $self->{pending_lookups}->{$key} = $ent;
 
   $self->{queries_started}++;
-  dbg("async: starting: %s (timeout %.1fs, min %.1fs)%s",
+  dbg("async: starting: %s%s (timeout %.1fs, min %.1fs)%s",
+      @rulenames ? join(", ", @rulenames).", " : '',
       $ent->{display_id}, $ent->{timeout_initial}, $ent->{timeout_min},
       !$clipped_by_master_deadline ? '' : ', capped by time limit');
 
@@ -579,7 +583,9 @@ sub complete_lookups {
         $anydone = 1;
         $ent->{finish_time} = $now  if !defined $ent->{finish_time};
         my $elapsed = $ent->{finish_time} - $ent->{start_time};
-        dbg("async: completed in %.3f s: %s", $elapsed, $ent->{display_id});
+        my @rulenames = keys %{$self->{rules_for_key}->{$key}};
+        dbg("async: completed in %.3f s: %s, rules: %s",
+            $elapsed, $ent->{display_id}, join(", ", @rulenames));
         $self->{timing_by_query}->{". $key ($ent->{type})"} += $elapsed;
         $self->{queries_completed}++;
         delete $pending->{$key};
@@ -649,11 +655,13 @@ sub abort_remaining_lookups {
 
   while (my($key,$ent) = each %$pending) {
     my $dur = $now - $ent->{start_time};
-    my $msg = sprintf( "async: aborting after %.3f s, %s: %s", $dur,
+    my @rulenames = keys %{$self->{rules_for_key}->{$key}};
+    my $msg = sprintf( "async: aborting after %.3f s, %s: %s, rules: %s",
+        $dur,
         (defined $ent->{timeout_initial} &&
          $now > $ent->{start_time} + $ent->{timeout_initial}
            ? 'past original deadline' : 'deadline shrunk'),
-        $ent->{display_id} );
+        $ent->{display_id}, join(", ", @rulenames) );
     $dur > 1 ? info($msg) : dbg($msg);
     $foundcnt++;
     $self->{timing_by_query}->{"X $key"} = $dur;
@@ -670,8 +678,10 @@ sub abort_remaining_lookups {
     foreach my $tuple (@{$dns_query_info->{applicants}}) {
       my($ent, $cb) = @$tuple;
       if ($cb) {
-        dbg("async: calling callback/abort on key %s%s", $dnskey,
-            !defined $ent->{rulename} ? '' : ", rule ".$ent->{rulename});
+        my @rulenames = grep { defined } (ref $ent->{rulename} ?
+                  @{$ent->{rulename}} : $ent->{rulename});
+        dbg("async: calling callback/abort on key %s, rules: %s", $dnskey,
+            join(", ", @rulenames));
         $cb_count++;
         eval {
           $cb->($ent, undef); 1;

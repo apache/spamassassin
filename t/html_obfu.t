@@ -7,18 +7,18 @@ use Test::More tests => 9;
 # ---------------------------------------------------------------------------
 
 %patterns = (
-  q{ MILLION_EMAIL } => 'MILLION_EMAIL',
-  q{ GUARANTEE } => 'GUARANTEE',
-  q{ NATURAL } => 'NATURAL',
-  q{ OUR_AFFILIATE_PARTNERS } => 'OUR_AFFILIATE_PARTNERS',
-  q{ VIAGRA } => 'VIAGRA',
+  q{ 1.0 MILLION_EMAIL } => '',
+  q{ 1.0 GUARANTEE } => '',
+  q{ 1.0 NATURAL } => '',
+  q{ 1.0 OUR_AFFILIATE_PARTNERS } => '',
+  q{ 1.0 VIAGRA } => '',
 );
 
 %anti_patterns = (
-  q{ OPPORTUNITY } => 'OPPORTUNITY',
-  q{ BUG5749_P_H2 } => 'BUG5749_P_H2',
-  q{ BUG5749_H2_H3 } => 'BUG5749_H2_H3',
-  q{ BUG6168_EXAMPLE } => 'BUG6168_EXAMPLE',
+  q{ OPPORTUNITY } => '',
+  q{ BUG5749_P_H2 } => '',
+  q{ BUG5749_H2_H3 } => '',
+  q{ BUG6168_EXAMPLE } => '',
 );
 
 tstlocalrules ('

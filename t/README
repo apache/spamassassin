@@ -16,6 +16,11 @@ that includes the testing step would look like
 See the INSTALL file for details on the build and installation
 process.
 
+For faster testing with multiple CPUs, you can activate parallel processing
+with HARNESS_OPTIONS=j<x>.  For example, this would run 8 tests in parallel:
+
+ make test HARNESS_OPTIONS=j8
+
 Regression Test Options
 -----------------------
 

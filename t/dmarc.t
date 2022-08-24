@@ -20,35 +20,32 @@ plan skip_all => "Needs Mail::DMARC::PurePerl" unless HAS_MAILDMARC;
 plan skip_all => "Needs Mail::DKIM::Verifier >= 0.31" unless HAS_DKIM_VERIFIER ;
 plan tests => 18;
 
-tstpre ("
-loadplugin Mail::SpamAssassin::Plugin::DMARC
-");
-
 tstprefs("
+
+header SPF_PASS     eval:check_for_spf_pass()
+tflags SPF_PASS     nice userconf net
+full   DKIM_SIGNED  eval:check_dkim_signed()
+tflags DKIM_SIGNED  net
+
 # Check that rename backwards compatibility works with if's
 ifplugin Mail::SpamAssassin::Plugin::Dmarc
 if plugin ( Mail::SpamAssassin::Plugin::Dmarc)
 ifplugin Mail::SpamAssassin::Plugin::DMARC
 
 header DMARC_PASS eval:check_dmarc_pass()
-priority DMARC_PASS 500
-describe DMARC_PASS DMARC pass policy
+tflags DMARC_PASS net
 
 header DMARC_NONE eval:check_dmarc_none()
-priority DMARC_NONE 500
-describe DMARC_NONE DMARC none policy
+tflags DMARC_NONE net
 
 header DMARC_QUAR eval:check_dmarc_quarantine()
-priority DMARC_QUAR 500
-describe DMARC_QUAR DMARC quarantine policy
+tflags DMARC_QUAR net
 
 header DMARC_REJECT eval:check_dmarc_reject()
-priority DMARC_REJECT 500
-describe DMARC_REJECT DMARC reject policy
+tflags DMARC_REJECT net
 
 header DMARC_MISSING eval:check_dmarc_missing()
-priority DMARC_MISSING 500
-describe DMARC_MISSING Missing DMARC policy
+tflags DMARC_MISSING net
 
 endif
 endif
@@ -63,7 +60,7 @@ endif
     q{ DMARC_PASS } => '',
 );
 %anti_patterns = (
-    q{/DMARC_(?!PASS)/} => '',
+    qr/DMARC_(?!PASS)/ => '',
 );
 
 sarun ("-t < data/nice/dmarc/noneok.eml", \&patterns_run_cb);
@@ -86,7 +83,7 @@ ok_all_patterns();
     q{ DMARC_REJECT } => '',
 );
 %anti_patterns = (
-    q{/DMARC_(?!REJECT)/} => '',
+    qr/DMARC_(?!REJECT)/ => '',
 );
 
 sarun ("-t < data/spam/dmarc/rejectko.eml", \&patterns_run_cb);
@@ -103,7 +100,7 @@ ok_all_patterns();
     q{ DMARC_QUAR } => '',
 );
 %anti_patterns = (
-    q{/DMARC_(?!QUAR)/} => '',
+    qr/DMARC_(?!QUAR)/ => '',
 );
 
 sarun ("-t < data/spam/dmarc/quarko.eml", \&patterns_run_cb);
@@ -117,7 +114,7 @@ ok_all_patterns();
     q{ DMARC_NONE } => '',
 );
 %anti_patterns = (
-    q{/DMARC_(?!NONE)/} => '',
+    qr/DMARC_(?!NONE)/ => '',
 );
 
 sarun ("-t < data/spam/dmarc/noneko.eml", \&patterns_run_cb);
@@ -131,7 +128,7 @@ ok_all_patterns();
     q{ DMARC_MISSING } => '',
 );
 %anti_patterns = (
-    q{/DMARC_(?!MISSING)/} => '',
+    qr/DMARC_(?!MISSING)/ => '',
 );
 
 sarun ("-t < data/spam/dmarc/nodmarc.eml", \&patterns_run_cb);

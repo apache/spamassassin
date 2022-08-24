@@ -21,7 +21,7 @@ run_ipv6_dns_tests=n
 run_dcc_tests=n
 
 # ---------------------------------------------------------------------------
-# Run SQL-based user pref tests during 'make test' REQUIRES DBD::SQLite
+# Run SQL-based user pref tests during 'make test' REQUIRES DBD::SQLite 1.59_01 or later
 run_sql_pref_tests=n
 
 # ---------------------------------------------------------------------------
@@ -68,12 +68,6 @@ run_spamd_prefork_stress_test=n
 # rule_names.t fails continually due to changes in the rulesrc repository;
 # TODO: we need a better way to test this.
 run_rule_name_tests=n
-
-# ---------------------------------------------------------------------------
-
-# This test requires the Devel::SawAmpersand CPAN module, and may also fail
-# depending on changes in the third-party modules we import.
-run_saw_ampersand_test=n
 
 # ---------------------------------------------------------------------------
 

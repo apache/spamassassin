@@ -88,7 +88,7 @@ sub check_https_ip_mismatch {
 # is there a better way to do this?
 sub check_uri_truncated {
   my ($self, $pms) = @_;
-  return $pms->{'uri_truncated'};
+  return $pms->{'uri_truncated'} ? 1 : 0;
 }
 
 1;

@@ -20,6 +20,7 @@ use Mail::SpamAssassin::Plugin;
 use Mail::SpamAssassin::Logger;
 use Mail::SpamAssassin::Plugin::BodyRuleBaseExtractor;
 use Mail::SpamAssassin::Plugin::OneLineBodyRuleType;
+use Mail::SpamAssassin::Util qw(qr_to_string);
 
 use strict;
 use warnings;
@@ -72,6 +73,9 @@ sub setup_test_set_pri {
   while (my ($rule, $pat) = each %{$conf->{body_tests}->{$pri}}) {
     # ignore rules marked for ReplaceTags work!
     next if ($conf->{replace_rules}->{$rule});
+    # ignore regex capture template rules
+    next if ($conf->{capture_rules}->{$rule});
+    next if ($conf->{capture_template_rules}->{$rule});
 
     #$pat = Mail::SpamAssassin::Util::regexp_remove_delimiters($pat);
     $pat = qr_to_string($conf->{test_qrs}->{$rule});
@@ -116,6 +120,11 @@ sub check_rules_at_priority {
   $self->{one_line_body}->check_rules_at_priority($params);
 }
 
+sub check_cleanup {
+  my ($self, $params) = @_;
+  $self->{one_line_body}->check_cleanup($params);
+}
+
 ###########################################################################
 
 sub run_body_fast_scan {
@@ -151,6 +160,7 @@ sub run_body_fast_scan {
       my %alreadydone;
       foreach my $rulename (@caught) {
         {
+          next if not defined $rulename;
           # only try each rule once per line
           next if exists $alreadydone{$rulename};
           $alreadydone{$rulename} = undef;

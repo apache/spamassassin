@@ -10,7 +10,7 @@ plan tests => 10;
 
 # ---------------------------------------------------------------------------
 
-my $sockpath = mk_safe_tmpdir()."/spamd.sock";
+my $sockpath = mk_socket_tempdir()."/spamd.sock";
 start_spamd("-D -L --socketpath=$sockpath --port $spamdport -A $spamdhost -i $spamdhost");
 %patterns = (
   q{ Subject: There yours for FREE!}, 'subj',
@@ -42,5 +42,4 @@ ok (spamcrun ("< data/spam/gtube.eml", \&patterns_run_cb));
 ok_all_patterns();
 
 stop_spamd();
-cleanup_safe_tmpdir();
 

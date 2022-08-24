@@ -460,7 +460,7 @@ sub _set_tag {
 sub pdf_named {
   my ($self, $pms, $body, $name) = @_;
 
-  return unless defined $name;
+  return 0 unless defined $name;
 
   return 1 if exists $pms->{pdfinfo}->{names_pdf}->{$name};
   return 0;
@@ -469,7 +469,7 @@ sub pdf_named {
 sub pdf_name_regex {
   my ($self, $pms, $body, $regex) = @_;
 
-  return unless defined $regex;
+  return 0 unless defined $regex;
   return 0 unless exists $pms->{pdfinfo}->{names_pdf};
 
   my ($rec, $err) = compile_regexp($regex, 2);
@@ -492,7 +492,7 @@ sub pdf_name_regex {
 sub pdf_is_encrypted {
   my ($self, $pms, $body) = @_;
 
-  return $pms->{pdfinfo}->{encrypted};
+  return $pms->{pdfinfo}->{encrypted} ? 1 : 0;
 }
 
 sub pdf_count {
@@ -516,7 +516,7 @@ sub pdf_pixel_coverage {
 sub pdf_image_to_text_ratio {
   my ($self, $pms, $body, $min, $max) = @_;
 
-  return unless defined $max;
+  return 0 unless defined $max;
   return 0 unless $pms->{pdfinfo}->{pc_pdf};
 
   # depending on how you call this eval (body vs rawbody),
@@ -553,7 +553,7 @@ sub pdf_is_empty_body {
 sub pdf_image_size_exact {
   my ($self, $pms, $body, $height, $width) = @_;
 
-  return unless defined $width;
+  return 0 unless defined $width;
 
   return 1 if exists $pms->{pdfinfo}->{dems_pdf}->{"${height}x${width}"};
   return 0;
@@ -562,7 +562,7 @@ sub pdf_image_size_exact {
 sub pdf_image_size_range {
   my ($self, $pms, $body, $minh, $minw, $maxh, $maxw) = @_;
 
-  return unless defined $minw;
+  return 0 unless defined $minw;
   return 0 unless exists $pms->{pdfinfo}->{dems_pdf};
 
   foreach my $dem (keys %{$pms->{pdfinfo}->{dems_pdf}}) {
@@ -581,7 +581,7 @@ sub pdf_image_size_range {
 sub pdf_match_md5 {
   my ($self, $pms, $body, $md5) = @_;
 
-  return unless defined $md5;
+  return 0 unless defined $md5;
 
   return 1 if exists $pms->{pdfinfo}->{md5}->{uc $md5};
   return 0;
@@ -590,7 +590,7 @@ sub pdf_match_md5 {
 sub pdf_match_fuzzy_md5 {
   my ($self, $pms, $body, $md5) = @_;
 
-  return unless defined $md5;
+  return 0 unless defined $md5;
 
   return 1 if exists $pms->{pdfinfo}->{fuzzy_md5}->{uc $md5};
   return 0;
@@ -599,8 +599,8 @@ sub pdf_match_fuzzy_md5 {
 sub pdf_match_details {
   my ($self, $pms, $body, $detail, $regex) = @_;
 
-  return unless defined $regex;
-  return unless exists $pms->{pdfinfo}->{details}->{$detail};
+  return 0 unless defined $regex;
+  return 0 unless exists $pms->{pdfinfo}->{details}->{$detail};
 
   my ($rec, $err) = compile_regexp($regex, 2);
   if (!$rec) {

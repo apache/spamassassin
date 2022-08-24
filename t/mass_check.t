@@ -3,7 +3,9 @@
 use lib '.'; use lib 't';
 use SATest; sa_t_init("mass_check");
 
-use Test::More tests => 1;
+use Test::More;
+plan skip_all => "mass check script does not run on Windows" if $RUNNING_ON_WINDOWS;
+plan tests => 1;
 
 # ---------------------------------------------------------------------------
 

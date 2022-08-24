@@ -17,6 +17,28 @@ plan tests => 72;
 
 # ensure all rules will fire
 tstlocalrules ("
+  header SPF_PASS		eval:check_for_spf_pass()
+  header SPF_NEUTRAL		eval:check_for_spf_neutral()
+  header SPF_FAIL		eval:check_for_spf_fail()
+  header SPF_SOFTFAIL		eval:check_for_spf_softfail()
+  header SPF_HELO_PASS		eval:check_for_spf_helo_pass()
+  header SPF_HELO_NEUTRAL	eval:check_for_spf_helo_neutral()
+  header SPF_HELO_FAIL		eval:check_for_spf_helo_fail()
+  header SPF_HELO_SOFTFAIL	eval:check_for_spf_helo_softfail()
+  tflags SPF_PASS		nice userconf net
+  tflags SPF_HELO_PASS		nice userconf net
+  tflags SPF_NEUTRAL		net
+  tflags SPF_FAIL	        net
+  tflags SPF_SOFTFAIL		net
+  tflags SPF_HELO_NEUTRAL       net
+  tflags SPF_HELO_FAIL		net
+  tflags SPF_HELO_SOFTFAIL	net
+  header USER_IN_SPF_WELCOMELIST eval:check_for_spf_welcomelist_from()
+  tflags USER_IN_SPF_WELCOMELIST userconf nice noautolearn net
+  header USER_IN_DEF_SPF_WL	eval:check_for_def_spf_welcomelist_from()
+  tflags USER_IN_DEF_SPF_WL	userconf nice noautolearn net
+  meta USER_IN_SPF_WHITELIST	(USER_IN_SPF_WELCOMELIST)
+  tflags USER_IN_SPF_WHITELIST	userconf nice noautolearn net
   score SPF_FAIL 0.001
   score SPF_HELO_FAIL 0.001
   score SPF_HELO_NEUTRAL 0.001
@@ -30,31 +52,31 @@ tstlocalrules ("
 ");
 
 %patterns = (
-  q{ SPF_HELO_PASS }, 'helo_pass',
-  q{ SPF_PASS }, 'pass',
+  q{ -0.0 SPF_HELO_PASS }, 'helo_pass',
+  q{ -0.0 SPF_PASS }, 'pass',
 );
 
 sarun ("-t < data/nice/spf1", \&patterns_run_cb);
 ok_all_patterns();
 
 %patterns = (
-  q{ SPF_NEUTRAL }, 'neutral',
-  q{ SPF_HELO_NEUTRAL }, 'helo_neutral',
+  q{ 0.0 SPF_NEUTRAL }, 'neutral',
+  q{ 0.0 SPF_HELO_NEUTRAL }, 'helo_neutral',
 );
 
 sarun ("-t < data/spam/spf1", \&patterns_run_cb);
 ok_all_patterns();
 
 %patterns = (
-  q{ SPF_SOFTFAIL }, 'softfail',
-  q{ SPF_HELO_SOFTFAIL }, 'helo_softfail',
+  q{ 0.0 SPF_SOFTFAIL }, 'softfail',
+  q{ 0.0 SPF_HELO_SOFTFAIL }, 'helo_softfail',
 );
 
 sarun ("-t < data/spam/spf2", \&patterns_run_cb);
 ok_all_patterns();
 %patterns = (
-  q{ SPF_FAIL }, 'fail',
-  q{ SPF_HELO_FAIL }, 'helo_fail',
+  q{ 0.0 SPF_FAIL }, 'fail',
+  q{ 0.0 SPF_HELO_FAIL }, 'helo_fail',
 );
 
 sarun ("-t < data/spam/spf3", \&patterns_run_cb);
@@ -73,8 +95,8 @@ tstprefs("
 ");
 
 %patterns = (
-  q{ SPF_HELO_PASS }, 'helo_pass',
-  q{ SPF_PASS }, 'pass',
+  q{ -0.0 SPF_HELO_PASS }, 'helo_pass',
+  q{ -0.0 SPF_PASS }, 'pass',
 );
 
 sarun ("-t < data/nice/spf2", \&patterns_run_cb);
@@ -92,8 +114,8 @@ tstprefs("
 ");
 
 %patterns = (
-  q{ SPF_HELO_PASS }, 'helo_pass',
-  q{ SPF_PASS }, 'pass',
+  q{ -0.0 SPF_HELO_PASS }, 'helo_pass',
+  q{ -0.0 SPF_PASS }, 'pass',
 );
 
 sarun ("-t < data/nice/spf2", \&patterns_run_cb);
@@ -113,8 +135,8 @@ tstprefs("
 ");
 
 %patterns = (
-  q{ SPF_HELO_NEUTRAL }, 'helo_neutral',
-  q{ SPF_NEUTRAL }, 'neutral',
+  q{ 0.0 SPF_HELO_NEUTRAL }, 'helo_neutral',
+  q{ 0.0 SPF_NEUTRAL }, 'neutral',
 );
 
 if (0) {
@@ -137,8 +159,8 @@ tstprefs("
 ");
 
 %patterns = (
-  q{ SPF_HELO_PASS }, 'helo_pass',
-  q{ SPF_PASS }, 'pass',
+  q{ -0.0 SPF_HELO_PASS }, 'helo_pass',
+  q{ -0.0 SPF_PASS }, 'pass',
 );
 
 sarun ("-t < data/nice/spf2", \&patterns_run_cb);
@@ -157,8 +179,8 @@ tstprefs("
 ");
 
 %patterns = (
-  q{ SPF_HELO_PASS }, 'helo_pass',
-  q{ SPF_PASS }, 'pass',
+  q{ -0.0 SPF_HELO_PASS }, 'helo_pass',
+  q{ -0.0 SPF_PASS }, 'pass',
 );
 
 sarun ("-t < data/nice/spf2", \&patterns_run_cb);
@@ -205,8 +227,8 @@ tstprefs("
 
 %anti_patterns = ();
 %patterns = (
-  q{ SPF_HELO_PASS }, 'helo_pass',
-  q{ SPF_PASS }, 'pass',
+  q{ -0.0 SPF_HELO_PASS }, 'helo_pass',
+  q{ -0.0 SPF_PASS }, 'pass',
 );
 
 sarun ("-t < data/nice/spf2", \&patterns_run_cb);
@@ -226,8 +248,8 @@ tstprefs("
 
 %anti_patterns = ();
 %patterns = (
-  q{ SPF_HELO_PASS }, 'helo_pass',
-  q{ SPF_PASS }, 'pass',
+  q{ -0.0 SPF_HELO_PASS }, 'helo_pass',
+  q{ -0.0 SPF_PASS }, 'pass',
 );
 
 sarun ("-t < data/nice/spf3", \&patterns_run_cb);
@@ -247,8 +269,8 @@ tstprefs("
 
 %anti_patterns = ();
 %patterns = (
-  q{ SPF_HELO_FAIL }, 'helo_fail',
-  q{ SPF_FAIL }, 'fail',
+  q{ 0.0 SPF_HELO_FAIL }, 'helo_fail',
+  q{ 0.0 SPF_FAIL }, 'fail',
 );
 
 sarun ("-t < data/nice/spf3", \&patterns_run_cb);
@@ -268,8 +290,8 @@ tstprefs("
 
 %anti_patterns = ();
 %patterns = (
-  q{ SPF_HELO_SOFTFAIL }, 'helo_softfail',
-  q{ SPF_SOFTFAIL }, 'softfail',
+  q{ 0.0 SPF_HELO_SOFTFAIL }, 'helo_softfail',
+  q{ 0.0 SPF_SOFTFAIL }, 'softfail',
 );
 
 sarun ("-t < data/nice/spf3", \&patterns_run_cb);
@@ -289,8 +311,8 @@ tstprefs("
 
 %anti_patterns = ();
 %patterns = (
-  q{ SPF_HELO_NEUTRAL }, 'helo_neutral',
-  q{ SPF_NEUTRAL }, 'neutral',
+  q{ 0.0 SPF_HELO_NEUTRAL }, 'helo_neutral',
+  q{ 0.0 SPF_NEUTRAL }, 'neutral',
 );
 
 sarun ("-t < data/nice/spf3", \&patterns_run_cb);
@@ -305,10 +327,10 @@ tstprefs("
 ");
 
 %patterns = (
-  q{ SPF_HELO_PASS }, 'helo_pass',
-  q{ SPF_PASS }, 'pass',
-  q{ USER_IN_SPF_WELCOMELIST }, 'spf_whitelist',
-  q{ USER_IN_DEF_SPF_WL }, 'default_spf_whitelist',
+  q{ -0.0 SPF_HELO_PASS }, 'helo_pass',
+  q{ -0.0 SPF_PASS }, 'pass',
+  q{ -0.0 USER_IN_SPF_WELCOMELIST }, 'spf_whitelist',
+  q{ -0.0 USER_IN_DEF_SPF_WL }, 'default_spf_whitelist',
 );
 
 sarun ("-t < data/nice/spf1", \&patterns_run_cb);
@@ -323,8 +345,8 @@ tstprefs("
 ");
 
 %patterns = (
-  q{ SPF_HELO_PASS }, 'helo_pass',
-  q{ SPF_PASS }, 'pass',
+  q{ -0.0 SPF_HELO_PASS }, 'helo_pass',
+  q{ -0.0 SPF_PASS }, 'pass',
 );
 
 %anti_patterns = (
@@ -348,10 +370,10 @@ tstprefs("
 ");
 
 %patterns = (
-  q{ SPF_HELO_PASS }, 'helo_pass',
-  q{ SPF_PASS }, 'pass',
-  q{ USER_IN_SPF_WELCOMELIST }, 'spf_whitelist',
-  q{ USER_IN_DEF_SPF_WL }, 'default_spf_whitelist',
+  q{ -0.0 SPF_HELO_PASS }, 'helo_pass',
+  q{ -0.0 SPF_PASS }, 'pass',
+  q{ -0.0 USER_IN_SPF_WELCOMELIST }, 'spf_whitelist',
+  q{ -0.0 USER_IN_DEF_SPF_WL }, 'default_spf_whitelist',
 );
 
 sarun ("-t < data/nice/spf1", \&patterns_run_cb);
@@ -371,8 +393,8 @@ tstprefs("
 
 %anti_patterns = ();
 %patterns = (
-  q{ SPF_HELO_PASS }, 'helo_pass',
-  q{ SPF_PASS }, 'pass',
+  q{ -0.0 SPF_HELO_PASS }, 'helo_pass',
+  q{ -0.0 SPF_PASS }, 'pass',
 );
 
 sarun ("-t < data/nice/spf3-received-spf", \&patterns_run_cb);
@@ -402,8 +424,8 @@ tstprefs("
 
 %anti_patterns = ();
 %patterns = (
-  q{ SPF_HELO_FAIL }, 'helo_fail_ignore_header',
-  q{ SPF_FAIL }, 'fail_ignore_header',
+  q{ 0.0 SPF_HELO_FAIL }, 'helo_fail_ignore_header',
+  q{ 0.0 SPF_FAIL }, 'fail_ignore_header',
 );
 
 sarun ("-t < data/nice/spf3-received-spf", \&patterns_run_cb);
@@ -426,8 +448,8 @@ tstprefs("
 
 %anti_patterns = ();
 %patterns = (
-  q{ SPF_HELO_SOFTFAIL }, 'helo_softfail_from_header',
-  q{ SPF_NEUTRAL }, 'neutral_from_header',
+  q{ 0.0 SPF_HELO_SOFTFAIL }, 'helo_softfail_from_header',
+  q{ 0.0 SPF_NEUTRAL }, 'neutral_from_header',
 );
 
 sarun ("-t < data/nice/spf3-received-spf", \&patterns_run_cb);
@@ -451,8 +473,8 @@ tstprefs("
 
 %anti_patterns = ();
 %patterns = (
-  q{ SPF_HELO_SOFTFAIL }, 'helo_softfail_from_header',
-  q{ SPF_FAIL }, 'fail_from_header',
+  q{ 0.0 SPF_HELO_SOFTFAIL }, 'helo_softfail_from_header',
+  q{ 0.0 SPF_FAIL }, 'fail_from_header',
 );
 
 sarun ("-t < data/nice/spf3-received-spf", \&patterns_run_cb);
@@ -475,8 +497,8 @@ tstprefs("
 ");
 
 %patterns = (
-  q{ SPF_HELO_PASS }, 'helo_pass',
-  q{ SPF_PASS }, 'pass',
+  q{ -0.0 SPF_HELO_PASS }, 'helo_pass',
+  q{ -0.0 SPF_PASS }, 'pass',
 );
 
 %anti_patterns = (

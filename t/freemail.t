@@ -36,15 +36,15 @@ tstlocalrules (q{
 });
 
 %patterns = (
-  q{ 3.3 FREEMAIL_FROM }, 'FREEMAIL_FROM',
+  q{ 3.3 FREEMAIL_FROM }, '',
 );
 %anti_patterns = (
   # No Reply-To or body
-  q{ 3.3 FREEMAIL_REPLYTO }, 'FREEMAIL_REPLYTO',
-  q{ 3.3 FREEMAIL_REPLYXX }, 'FREEMAIL_REPLYXX',
-  q{ 3.3 FREEMAIL_ENVFROM_END_DIGIT }, 'FREEMAIL_ENVFROM_END_DIGIT',
-  q{ 3.3 FREEMAIL_REPLYTO_END_DIGIT }, 'FREEMAIL_REPLYTO_END_DIGIT',
-  q{ 3.3 FREEMAIL_HDR_REPLYTO }, 'FREEMAIL_HDR_REPLYTO',
+  q{ FREEMAIL_REPLYTO }, '',
+  q{ FREEMAIL_REPLYXX }, '',
+  q{ FREEMAIL_ENVFROM_END_DIGIT }, '',
+  q{ FREEMAIL_REPLYTO_END_DIGIT }, '',
+  q{ FREEMAIL_HDR_REPLYTO }, '',
 );
 
 ok sarun ("-L -t < data/spam/relayUS.eml", \&patterns_run_cb);
@@ -55,7 +55,7 @@ clear_pattern_counters();
 
 %patterns = ();
 %anti_patterns = (
-  q{ 3.3 FREEMAIL_FROM }, 'FREEMAIL_FROM',
+  q{ FREEMAIL_FROM }, '',
 );
 
 tstlocalrules (q{
@@ -71,12 +71,12 @@ ok_all_patterns();
 ## From and Reply-To different
 
 %patterns = (
-  q{ 3.3 FREEMAIL_FROM }, 'FREEMAIL_FROM',
-  q{ 3.3 FREEMAIL_REPLYTO }, 'FREEMAIL_REPLYTO',
-  q{ 3.3 FREEMAIL_REPLYXX }, 'FREEMAIL_REPLYXX',
-  q{ 3.3 FREEMAIL_ENVFROM_END_DIGIT }, 'FREEMAIL_ENVFROM_END_DIGIT',
-  q{ 3.3 FREEMAIL_REPLYTO_END_DIGIT }, 'FREEMAIL_REPLYTO_END_DIGIT',
-  q{ 3.3 FREEMAIL_HDR_REPLYTO }, 'FREEMAIL_HDR_REPLYTO',
+  q{ 3.3 FREEMAIL_FROM }, '',
+  q{ 3.3 FREEMAIL_REPLYTO }, '',
+  q{ 3.3 FREEMAIL_REPLYXX }, '',
+  q{ 3.3 FREEMAIL_ENVFROM_END_DIGIT }, '',
+  q{ 3.3 FREEMAIL_REPLYTO_END_DIGIT }, '',
+  q{ 3.3 FREEMAIL_HDR_REPLYTO }, '',
 );
 %anti_patterns = ();
 
@@ -101,10 +101,10 @@ ok_all_patterns();
 ## Multiple Reply-To values, no email on body
 
 %patterns = (
-  q{ 3.3 FREEMAIL_REPLYTO }, 'FREEMAIL_REPLYTO',
-  q{ 3.3 FREEMAIL_REPLYXX }, 'FREEMAIL_REPLYXX',
-  q{ 3.3 FREEMAIL_REPLYTO_END_DIGIT }, 'FREEMAIL_REPLYTO_END_DIGIT',
-  q{ 3.3 FREEMAIL_HDR_REPLYTO }, 'FREEMAIL_HDR_REPLYTO',
+  q{ 3.3 FREEMAIL_REPLYTO }, '',
+  q{ 3.3 FREEMAIL_REPLYXX }, '',
+  q{ 3.3 FREEMAIL_REPLYTO_END_DIGIT }, '',
+  q{ 3.3 FREEMAIL_HDR_REPLYTO }, '',
 );
 %anti_patterns = ();
 
@@ -125,7 +125,7 @@ ok_all_patterns();
 ## No Reply-To, another freemail in body
 
 %patterns = (
-  q{ 3.3 FREEMAIL_REPLYXX }, 'FREEMAIL_REPLYXX',
+  q{ 3.3 FREEMAIL_REPLYXX }, '',
 );
 %anti_patterns = ();
 

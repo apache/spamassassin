@@ -26,6 +26,7 @@ plan tests => $tests;
 
 if (HAS_DKIM_VERIFIER) {
   tstlocalrules(q{
+    full   DKIM_SIGNED           eval:check_dkim_signed()
     askdns  ASKDNS_DKIM_AUTHORDOMAIN  _AUTHORDOMAIN_.askdnstest.spamassassin.org. A /^127\.0\.0\.8$/
     askdns  ASKDNS_DKIM_DKIMDOMAIN  _DKIMDOMAIN_.askdnstest.spamassassin.org. A /^127\.0\.0\.8$/
     # Bug 7897 - test that meta rules depending on net rules hit

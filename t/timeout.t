@@ -13,11 +13,16 @@ require Mail::SpamAssassin::Timeout;
 
 # attempt to circumvent an advice not to mix alarm() with sleep();
 # interaction between alarms and sleeps is unspecified;
-# select() might be restarted on a signal
+# select() might be restarted on a signal.
+# Windows alarm emulation works with sleep, doesn't work with select() timeouts
 #
 sub mysleep($) {
   my($dt) = @_;
-  select(undef, undef, undef, 0.1)  for 1..int(10*$dt);
+  if ($RUNNING_ON_WINDOWS) {
+    sleep($dt);
+  } else {
+    select(undef, undef, undef, 0.1) for 1..int(10*$dt);
+  }
 }
 
 my($r,$t,$t1,$t2);

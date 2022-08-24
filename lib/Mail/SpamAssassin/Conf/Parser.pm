@@ -909,7 +909,10 @@ sub finish_parsing {
 
   while (my ($name, $text) = each %{$conf->{tests}}) {
     my $type = $conf->{test_types}->{$name};
-    my $priority = $conf->{priority}->{$name} || 0;
+
+    # Adjust priority -100 for net rules instead of default 0
+    my $priority = $conf->{priority}->{$name} ? $conf->{priority}->{$name} :
+        ($conf->{tflags}->{$name}||'') =~ /\bnet\b/ ? -100 : 0;
     $conf->{priorities}->{$priority}++;
 
     # eval type handling
@@ -1135,6 +1138,9 @@ sub compile_meta_rules {
   foreach my $name (keys %meta) {
     if (@{$rule_deps{$name}}) {
       $conf->{meta_dependencies}->{$name} = $rule_deps{$name};
+      foreach my $deprule (@{$rule_deps{$name}}) {
+        $conf->{meta_deprules}->{$deprule}->{$name} = 1;
+      }
     }
     if ($unsolved_metas{$name}) {
       $conf->{meta_tests}->{$name} = sub { 0 };
@@ -1152,7 +1158,9 @@ sub fix_priorities {
   my $conf = $self->{conf};
 
   return unless $conf->{meta_dependencies};    # order requirement
+
   my $pri = $conf->{priority};
+  my $tflags = $conf->{tflags};
 
   # sort into priority order, lowest first -- this way we ensure that if we
   # rearrange the pri of a rule early on, we cannot accidentally increase its
@@ -1167,8 +1175,14 @@ sub fix_priorities {
     foreach my $dep (@$deps) {
       my $deppri = $pri->{$dep};
       if (defined $deppri && $deppri > $basepri) {
-        dbg("rules: $rule (pri $basepri) requires $dep (pri $deppri): fixed");
-        $pri->{$dep} = $basepri;
+        if ($basepri < -100 && ($tflags->{$dep}||'') =~ /\bnet\b/) {
+          dbg("rules: $rule (pri $basepri) requires $dep (pri $deppri): fixed to -100 (net rule)");
+          $pri->{$dep} = -100;
+          $conf->{priorities}->{-100}++;
+        } else {
+          dbg("rules: $rule (pri $basepri) requires $dep (pri $deppri): fixed");
+          $pri->{$dep} = $basepri;
+        }
       }
     }
   }
@@ -1318,6 +1332,7 @@ sub add_test {
       $type == $Mail::SpamAssassin::Conf::TYPE_RAWBODY_TESTS ||
       $type == $Mail::SpamAssassin::Conf::TYPE_FULL_TESTS)
   {
+    $self->parse_captures($name, \$text);
     my ($rec, $err) = compile_regexp($text, 1, $ignore_amre);
     if (!$rec) {
       $self->lint_warn("config: invalid regexp for $name '$text': $err", $name);
@@ -1327,6 +1342,14 @@ sub add_test {
   }
   elsif ($type == $Mail::SpamAssassin::Conf::TYPE_HEAD_TESTS)
   {
+    # If redefining header test, clear out opt hashes so they don't leak to
+    # the new test.  There are separate hashes for options as it saves lots
+    # of memory (exists, neg, if-unset are rarely used).
+    if (exists $conf->{tests}->{$name}) {
+      delete $conf->{test_opt_exists}->{$name};
+      delete $conf->{test_opt_unset}->{$name};
+      delete $conf->{test_opt_neg}->{$name};
+    }
     local($1,$2,$3);
     # RFC 5322 section 3.6.8, ftext printable US-ASCII chars not including ":"
     # no re "strict";  # since perl 5.21.8: Ranges of ASCII printables...
@@ -1356,6 +1379,7 @@ sub add_test {
       if ($pat =~ s/\s+\[if-unset:\s+(.+)\]$//) {
         $conf->{test_opt_unset}->{$name} = $1;
       }
+      $self->parse_captures($name, \$pat);
       my ($rec, $err) = compile_regexp($pat, 1, $ignore_amre);
       if (!$rec) {
         $self->lint_warn("config: invalid regexp for $name '$pat': $err", $name);
@@ -1486,6 +1510,26 @@ sub is_meta_valid {
   $err =~ s/Illegal division by zero/division by zero possible/i;
   $self->lint_warn("config: invalid expression for rule $name: \"$rule\": $err\n", $name);
   return 0;
+}
+
+sub parse_captures {
+  my ($self, $name, $re) = @_;
+
+  # Check for named regex capture templates
+  if (index($$re, '%{') >= 0) {
+    local($1);
+    # Replace %{FOO} with %\{FOO\} so compile_regexp doesn't fail with unescaped left brace
+    while ($$re =~ s/(?<!\\)\%\{([A-Z][A-Z0-9]*(?:_[A-Z0-9]+)*(?:\([^\)\}]*\))?)\}/%\\{$1\\}/g) {
+      dbg("config: found named capture for rule $name: $1");
+      $self->{conf}->{capture_template_rules}->{$name}->{$1} = 1;
+    }
+  }
+  # Make rules with captures run before anything else
+  if ($$re =~ /\(\?P?[<'][A-Z]/) {
+    dbg("config: adjusting regex capture rule $name priority to -10000");
+    $self->{conf}->{priority}->{$name} = -10000;
+    $self->{conf}->{capture_rules}->{$name} = 1;
+  }
 }
 
 # Deprecated functions, leave just in case..

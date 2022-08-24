@@ -37,15 +37,15 @@ package Mail::SpamAssassin::Plugin::Pyzor;
 use Mail::SpamAssassin::Plugin;
 use Mail::SpamAssassin::Logger;
 use Mail::SpamAssassin::Timeout;
-use Mail::SpamAssassin::Util qw(untaint_var untaint_file_path
-                                proc_status_ok exit_status_str);
+use Mail::SpamAssassin::Util qw(untaint_var untaint_file_path am_running_on_windows
+                                proc_status_ok exit_status_str force_die);
 use strict;
 use warnings;
 # use bytes;
 use re 'taint';
 
 use Storable;
-use POSIX qw(PIPE_BUF WNOHANG _exit);
+use POSIX qw(PIPE_BUF WNOHANG);
 
 our @ISA = qw(Mail::SpamAssassin::Plugin);
 
@@ -330,7 +330,6 @@ sub check_pyzor {
   ## forking method
 
   $pms->{pyzor_rulename} = $pms->get_current_eval_rule_name();
-  $pms->rule_pending($pms->{pyzor_rulename}); # mark async
 
   # create socketpair for communication
   $pms->{pyzor_backchannel} = Mail::SpamAssassin::SubProcBackChannel->new();
@@ -356,9 +355,8 @@ sub check_pyzor {
     $SIG{PIPE} = 'IGNORE';
     $SIG{$_} = sub {
       eval { dbg("pyzor: child process $$ caught signal $_[0]"); };
-      _exit(6);  # avoid END and destructor processing
-      kill('KILL',$$);  # still kicking? die!
-      } foreach qw(INT HUP TERM TSTP QUIT USR1 USR2);
+      force_die(6);  # avoid END and destructor processing
+      } foreach am_running_on_windows()?qw(INT HUP TERM QUIT):qw(INT HUP TERM TSTP QUIT USR1 USR2);
     dbg("pyzor: child process $$ forked");
     $pms->{pyzor_backchannel}->setup_backchannel_child_post_fork();
     my @results = $self->pyzor_lookup($pms);
@@ -368,12 +366,12 @@ sub check_pyzor {
     };
     if ($@) {
       dbg("pyzor: child return value freeze failed: $@");
-      _exit(0); # avoid END and destructor processing
+      force_die(0); # avoid END and destructor processing
     }
     if (!syswrite($pms->{pyzor_backchannel}->{parent}, $backmsg)) {
       dbg("pyzor: child backchannel write failed: $!");
     }
-    _exit(0); # avoid END and destructor processing
+    force_die(0); # avoid END and destructor processing
   }
 
   $pms->{pyzor_pid} = $pid;
@@ -386,7 +384,7 @@ sub check_pyzor {
     return 0;
   };
 
-  return 0;
+  return; # return undef for async status
 }
 
 sub pyzor_lookup {
@@ -514,7 +512,7 @@ sub _check_forked_result {
   dbg("pyzor: child process $kid_pid finished, reading results");
 
   my $backmsg;
-  my $ret = sysread($pms->{pyzor_backchannel}->{latest_kid_fh}, $backmsg, PIPE_BUF);
+  my $ret = sysread($pms->{pyzor_backchannel}->{latest_kid_fh}, $backmsg, am_running_on_windows()?512:PIPE_BUF);
   if (!defined $ret || $ret == 0) {
     dbg("pyzor: could not read result from child: ".($ret == 0 ? 0 : $!));
     delete $pms->{pyzor_backchannel};
@@ -592,10 +590,10 @@ sub _check_result {
     if ($conf->{pyzor_fork}) {
       # forked needs to run got_hit()
       $pms->got_hit($pms->{pyzor_rulename}, "", ruletype => 'eval');
+      return 0;
     }
     return 1;
   }
-
   return 0;
 }
 

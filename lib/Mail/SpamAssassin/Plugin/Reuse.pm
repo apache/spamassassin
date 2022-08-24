@@ -198,6 +198,7 @@ sub check_start {
            "$stage");
         last;
       } else {
+        # Make sure rule is marked ready for meta rules
         $pms->rule_ready($rule);
       }
     }

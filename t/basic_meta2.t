@@ -5,20 +5,25 @@ use lib 't';
 use SATest; sa_t_init("basic_meta2");
 
 use Test::More;
-plan tests => 15;
+plan tests => 20;
 
 # ---------------------------------------------------------------------------
 
 %patterns = (
-  q{ TEST_FOO_1 }     => '',
-  q{ TEST_FOO_2 }     => '',
-  q{ TEST_FOO_3 }     => '',
-  q{ TEST_META_1 }    => '',
-  q{ TEST_META_3 }    => '',
-  q{ TEST_META_5 }    => '',
-  q{ TEST_META_7 }    => '',
-  q{ TEST_META_A }    => '',
-  q{ TEST_META_B }    => '',
+  q{ 1.0 TEST_FOO_1 }     => '',
+  q{ 1.0 TEST_FOO_2 }     => '',
+  q{ 1.0 TEST_FOO_3 }     => '',
+  q{ 1.0 TEST_META_1 }    => '',
+  q{ 1.0 TEST_META_3 }    => '',
+  q{ 1.0 TEST_META_5 }    => '',
+  q{ 1.0 TEST_META_7 }    => '',
+  q{ 1.0 TEST_META_A }    => '',
+  q{ 1.0 TEST_META_B }    => '',
+  q{ 1.0 TEST_META_C }    => '',
+  q{ 1.0 TEST_META_D }    => '',
+  q{ 1.0 TEST_META_E }    => '',
+  q{ 1.0 TEST_META_F }    => '',
+  q{ 1.0 TEST_META_G }    => '',
 );
 
 %anti_patterns = (
@@ -79,6 +84,21 @@ tstlocalrules (qq{
 
    # local_tests_only
    meta TEST_META_B NONEXISTINGRULE || local_tests_only
+
+   # complex metas with different priorities
+   body __BAR_5 /a/
+   priority __BAR_5 -1000
+   body __BAR_6 /b/
+   priority __BAR_6 0
+   body __BAR_7 /c/
+   priority __BAR_7 1000
+   meta TEST_META_C __BAR_5 && __BAR_6 && __BAR_7
+   meta TEST_META_D __BAR_5 && __BAR_6 && TEST_META_C
+   priority TEST_META_D -2000
+   meta TEST_META_E __BAR_6 && __BAR_7 && TEST_META_D
+   meta TEST_META_F __BAR_5 && __BAR_7 && TEST_META_E
+   priority TEST_META_F 2000
+   meta TEST_META_G TEST_META_C && TEST_META_D && TEST_META_E && TEST_META_F
 
 });
 

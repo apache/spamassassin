@@ -249,8 +249,8 @@ BEGIN {
     HEADER => sub {
       my $pms = shift;
       my $hdr = shift;
-      return if !$hdr;
-      $pms->get($hdr,undef);
+      return '' if !$hdr;
+      $pms->get($hdr, '');
     },
 
     TIMING => sub {
@@ -294,7 +294,6 @@ sub new {
     'subtest_names_hit' => [ ],
     'spamd_result_log_items' => [ ],
     'tests_already_hit' => { },
-    'tests_pending'     => { },
     'get_cache'         => { },
     'tag_data'          => { },
     'rule_errors'       => 0,
@@ -1596,16 +1595,15 @@ sub _replace_tags {
 
   # default to leaving the original string in place, if we cannot find
   # a tag for it (bug 4793)
-  local($1,$2,$3);
-  $text =~ s{(_(\w+?)(?:\((.*?)\))?_)}{
-        my $full = $1;
-        my $tag = $2;
+  local($1);
+  $text =~ s{_([A-Z][A-Z0-9]*(?:_[A-Z0-9]+)*(?:\(.*?\))?)_}{
+        my $tag = $1;
         my $result;
         if ($tag =~ /^ADDEDHEADER(?:HAM|SPAM|)\z/) {
           # Bug 6278: break infinite recursion through _get_added_headers and
           # _get_tag on an attempt to use such tag in add_header template
         } else {
-          $result = $self->get_tag_raw($tag,$3);
+          $result = $self->get_tag_raw($tag);
           if (!ref $result) {
             utf8::encode($result) if utf8::is_utf8($result);
           } elsif (ref $result eq 'ARRAY') {
@@ -1614,7 +1612,7 @@ sub _replace_tags {
             $result = join(' ', @values);
           }
         }
-        defined $result ? $result : $full;
+        defined $result ? $result : "_${tag}_";
       }ge;
 
   return $text;
@@ -1740,10 +1738,12 @@ sub report_unsatisfied_actions {
 
 =item $status->set_tag($tagname, $value)
 
-Set a template tag, as used in C<add_header>, report templates, etc.
-This API is intended for use by plugins.  Tag names will be converted
-to an all-uppercase representation internally.  Tag names must consist
-of ONLY alphanumeric characters.
+Set a template tag, as used in C<add_header>, report templates, etc.  This
+API is intended for use by plugins.  Tag names will be converted to an
+all-uppercase representation internally.  Tag names must consist only of
+[A-Z0-9_] characters and must not contain consecutive underscores.  Also the
+name must not start or end in an underscore, as that is the template tagging
+format.
 
 C<$value> can be a simple scalar (string or number), or a reference to an
 array, in which case the public method get_tag will join array elements
@@ -1753,7 +1753,7 @@ compatibility.
 C<$value> can also be a subroutine reference, which will be evaluated
 each time the template is expanded. The first argument passed by get_tag
 to a called subroutine will be a PerMsgStatus object (this module's object),
-followed by optional arguments provided a caller to get_tag.
+followed by optional arguments provided by a caller to get_tag.
 
 Note that perl supports closures, which means that variables set in the
 caller's scope can be accessed inside this C<sub>. For example:
@@ -1764,10 +1764,9 @@ caller's scope can be accessed inside this C<sub>. For example:
               return $text;
             });
 
-See C<Mail::SpamAssassin::Conf>'s C<TEMPLATE TAGS> section for more details
-on how template tags are used.
-
-C<undef> will be returned if a tag by that name has not been defined.
+See C<Mail::SpamAssassin::Conf>'s C<TEMPLATE TAGS> and C<CAPTURING TAGS
+USING REGEX NAMED CAPTURE GROUPS> sections for more details on how template
+tags are used.
 
 =cut
 
@@ -1783,9 +1782,11 @@ sub set_tag {
 
 Get the current value of a template tag, as used in C<add_header>, report
 templates, etc. This API is intended for use by plugins.  Tag names will be
-converted to an all-uppercase representation internally.  See
-C<Mail::SpamAssassin::Conf>'s C<TEMPLATE TAGS> section for more details on
-tags.
+converted to an all-uppercase representation internally.
+
+See C<Mail::SpamAssassin::Conf>'s C<TEMPLATE TAGS> and C<CAPTURING TAGS
+USING REGEX NAMED CAPTURE GROUPS> sections for more details on how template
+tags are used.
 
 C<undef> will be returned if a tag by that name has not been defined.
 
@@ -1796,9 +1797,9 @@ sub get_tag {
 
   return if !defined $tag;
 
-  # handle atleast HEADER(arg)
+  # handle TAGNAME(args) format
   local($1);
-  if ($tag =~ s/\(([a-zA-Z0-9:-]+)\)$//) {
+  if ($tag =~ s/\((.*?)\)$//) {
     @args = ($1);
   }
   $tag = uc $tag;
@@ -1832,9 +1833,9 @@ sub get_tag_raw {
 
   return if !defined $tag;
 
-  # handle atleast HEADER(arg)
+  # handle TAGNAME(args) format
   local($1);
-  if ($tag =~ s/\(([a-zA-Z0-9:-]+)\)$//) {
+  if ($tag =~ s/\((.*?)\)$//) {
     @args = ($1);
   }
 
@@ -3128,6 +3129,7 @@ sub got_hit {
     return;
   }
 
+  $self->rule_ready($rule, 1); # mark ready for metas
   $self->{tests_already_hit}->{$rule} = $already_hit + $value;
 
   # default ruletype, if not specified:
@@ -3168,48 +3170,37 @@ sub got_hit {
   return 1;
 }
 
-=item $status->rule_pending ($rulename)
+=item $status->rule_ready ($rulename [, $no_async])
 
-Register a pending rule.  Must be called from rules eval-function, if the
-result can arrive later than when exiting the function (async lookups).
+Mark an asynchronous rule ready, so it can be considered for meta rule
+evaluation.  Asynchronous rule is a rule whose eval-function returns undef,
+marking that it's not ready yet, expecting results later. 
+$status->rule_ready() must be called later to mark it ready, alternatively
+$status->got_hit() also does this.  If neither is called, then any meta rule
+that depends on this rule might not evaluate.
 
-$status->rule_done($rulename) or $status->got_hit(...) must be called when
-the result has arrived.  If these are not used, it can break depending meta
-rule evaluation.
-
-=cut
-
-sub rule_pending {
-  my ($self, $rule) = @_;
-
-  $self->{tests_pending}->{$rule} = 1;
-
-  if (exists $self->{tests_already_hit}->{$rule}) {
-    # Only clear result if not hit
-    if ($self->{tests_already_hit}->{$rule} == 0) {
-      delete $self->{tests_already_hit}->{$rule};
-    }
-  }
-}
-
-=item $status->rule_ready ($rulename)
-
-Mark a previously marked $status->rule_pending() rule ready.  Alternatively
-$status->got_hit() will also mark rule ready.  If these are not used, it can
-break depending meta rule evaluation.
+Optional boolean $no_async skips checking if there are pending async DNS
+lookups for the rule.
 
 =cut
 
 sub rule_ready {
-  my ($self, $rule) = @_;
+  my ($self, $rule, $no_async) = @_;
 
-  if ($self->get_pending_lookups($rule)) {
-    # Can't be ready if there are pending lookups, ignore for now.
-    # Final do_meta_tests() in Check.pm will allow pending anyway.
+  # Ready already?
+  return if exists $self->{tests_already_hit}->{$rule};
+
+  if (!$no_async && $self->get_async_pending_rules($rule)) {
+    # Can't be ready if there are pending DNS lookups, ignore for now.
     return;
   }
 
-  delete $self->{tests_pending}->{$rule};
+  # record rules that depend on this, so do_meta_tests will be run
+  foreach (keys %{$self->{conf}->{meta_deprules}->{$rule}}) {
+    $self->{meta_check_ready}->{$_} = 1;
+  }
+
+  # mark ready
   $self->{tests_already_hit}->{$rule} ||= 0;
 }
 
@@ -3645,6 +3636,19 @@ sub all_to_addrs {
 
 # http://www.cs.tut.fi/~jkorpela/headers.html is useful here, also
 # http://www.exim.org/pipermail/exim-users/Week-of-Mon-20001009/021672.html
+}
+
+###########################################################################
+
+# Save and tag regex named captures, $captures is ref to %- results
+sub set_captures {
+  my ($self, $captures) = @_;
+
+  foreach my $cname (keys %$captures) {
+    next unless $cname =~ /^[A-Z][A-Z0-9]*(?:_[A-Z0-9]+)*$/; # safety check
+    my @cvals = do { my %seen; grep { !$seen{$_}++ } @{$captures->{$cname}} };
+    $self->set_tag($cname, @cvals == 1 ? $cvals[0] : \@cvals);
+  }
 }
 
 ###########################################################################

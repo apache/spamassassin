@@ -9,8 +9,6 @@ $ENV{'TEST_PERL_TAINT'} = 'no';     # inhibit for this test
 use SATest; sa_t_init("sa_compile");
 
 use Config;
-use File::Basename;
-use File::Path qw/mkpath/;
 
 my $temp_binpath = $Config{sitebinexp};
 $temp_binpath =~ s|^\Q$Config{siteprefixexp}\E/||;
@@ -25,10 +23,10 @@ plan tests => 24;
 
 use Cwd;
 my $cwd = getcwd;
-my $builddir = "$cwd/$workdir/d.$testname/build";
-my $instbase = "$cwd/$workdir/d.$testname/inst";
-untaint_system("rm -rf $instbase $builddir");
-untaint_system("mkdir -p $instbase $builddir");
+my $builddir = untaint_var("$cwd/$workdir/d.$testname/build");
+my $instbase = untaint_var("$cwd/$workdir/d.$testname/inst");
+rmtree("$instbase", "$builddir", { safe => 1 });
+mkpath("$instbase", "$builddir", { error  => \my $err_list });
 
 untaint_system("cd .. && make tardist >/dev/null");
 $? == 0  or die "tardist failed: $?";
@@ -54,70 +52,68 @@ body FOO5 /金融機/
 body FOO6 /金融(?:xyz|機)/
 body FOO7 /\xe9\x87\x91\xe8\x9e\x8d\xe6\xa9\x9f/
 body FOO8 /.\x87(?:\x91|\x00)[\xe8\x00]\x9e\x8d\xe6\xa9\x9f/
+# Test that meta rules work for sa-compiled body rules
+# (loosely related to Bug 7987)
+meta META1 FOO1 && FOO2 && FOO3 && FOO4
+meta META2 FOO5 && FOO6 && FOO7 && FOO8
 ');
 
 # ensure we don't use compiled rules
-untaint_system("rm -rf $instdir/var/spamassassin/compiled");
+rmtree("$instdir/var/spamassassin/compiled", { safe => 1 });
 
 %patterns = (
-  '/ check: tests=FOO1,FOO2,FOO3,FOO4\n/', 'FOO',
+  qr/ check: tests=FOO1,FOO2,FOO3,FOO4,META1\n/, '',
 );
 %anti_patterns = (
-  '/ zoom: able to use /', '',
+  'zoom: able to use', '',
 );
-ok sarun ("-D all,rules-all -L -t --cf 'normalize_charset 1' < $cwd/data/spam/001 2>&1", \&patterns_run_cb);
+ok sarun ("-D check,zoom -L -t --cf 'normalize_charset 1' < $cwd/data/spam/001 2>&1", \&patterns_run_cb);
 ok_all_patterns();
-clear_pattern_counters();
-ok sarun ("-D all,rules-all -L -t --cf 'normalize_charset 0' < $cwd/data/spam/001 2>&1", \&patterns_run_cb);
+ok sarun ("-D check,zoom -L -t --cf 'normalize_charset 0' < $cwd/data/spam/001 2>&1", \&patterns_run_cb);
 ok_all_patterns();
-clear_pattern_counters();
+
 %patterns = (
-  '/ check: tests=FOO4,FOO5,FOO6,FOO7,FOO8\n/', 'FOO',
+  qr/ check: tests=FOO4,FOO5,FOO6,FOO7,FOO8,META2\n/, '',
 );
 %anti_patterns = (
-  '/ zoom: able to use /', '',
+  'zoom: able to use', '',
 );
-ok sarun ("-D all,rules-all -L -t --cf 'normalize_charset 1' < $cwd/data/spam/unicode1 2>&1", \&patterns_run_cb);
+ok sarun ("-D check,zoom -L -t --cf 'normalize_charset 1' < $cwd/data/spam/unicode1 2>&1", \&patterns_run_cb);
 ok_all_patterns();
-clear_pattern_counters();
-ok sarun ("-D all,rules-all -L -t --cf 'normalize_charset 0' < $cwd/data/spam/unicode1 2>&1", \&patterns_run_cb);
+ok sarun ("-D check,zoom -L -t --cf 'normalize_charset 0' < $cwd/data/spam/unicode1 2>&1", \&patterns_run_cb);
 ok_all_patterns();
-clear_pattern_counters();
 
 # -------------------------------------------------------------------
 
-untaint_system "rm -rf \$HOME/.spamassassin/sa-compile.cache"; # reset test
+rmtree( glob "~/.spamassassin/sa-compile.cache". { safe => 1 }); # reset test
 system_or_die "TMP=$instdir TMPDIR=$instdir $instdir/$temp_binpath/sa-compile --quiet -p $cwd/$workdir/user.cf --keep-tmps -D 2>$instdir/sa-compile.debug";  # --debug
 $scr = "$instdir/$temp_binpath/spamassassin";
 $scr_localrules_args = $scr_cf_args = "";      # use the default rules dir, from our "install"
 
 %patterns = (
-  q{ zoom: able to use 5/5 'body_0' compiled rules }, 'able-to-use',
-  '/ check: tests=FOO1,FOO2,FOO3,FOO4\n/', 'FOO',
+  ' zoom: able to use 5/5 \'body_0\' compiled rules ', '',
+  qr/ check: tests=FOO1,FOO2,FOO3,FOO4,META1\n/, '',
 );
 %anti_patterns = ();
-ok sarun ("-D all,rules-all -L -t --cf 'normalize_charset 1' < $cwd/data/spam/001 2>&1", \&patterns_run_cb);
+ok sarun ("-D check,zoom -L -t --cf 'normalize_charset 1' < $cwd/data/spam/001 2>&1", \&patterns_run_cb);
 ok_all_patterns();
-clear_pattern_counters();
-ok sarun ("-D all,rules-all -L -t --cf 'normalize_charset 0' < $cwd/data/spam/001 2>&1", \&patterns_run_cb);
+ok sarun ("-D check,zoom -L -t --cf 'normalize_charset 0' < $cwd/data/spam/001 2>&1", \&patterns_run_cb);
 ok_all_patterns();
-clear_pattern_counters();
+
 %patterns = (
-  q{ zoom: able to use 5/5 'body_0' compiled rules }, 'able-to-use',
-  '/ check: tests=FOO4,FOO5,FOO6,FOO7,FOO8\n/', 'FOO',
+  ' zoom: able to use 5/5 \'body_0\' compiled rules ', '',
+  qr/ check: tests=FOO4,FOO5,FOO6,FOO7,FOO8,META2\n/, '',
 );
 %anti_patterns = ();
-ok sarun ("-D all,rules-all -L -t --cf 'normalize_charset 1' < $cwd/data/spam/unicode1 2>&1", \&patterns_run_cb);
+ok sarun ("-D check,zoom -L -t --cf 'normalize_charset 1' < $cwd/data/spam/unicode1 2>&1", \&patterns_run_cb);
 ok_all_patterns();
-clear_pattern_counters();
-ok sarun ("-D all,rules-all -L -t --cf 'normalize_charset 0' < $cwd/data/spam/unicode1 2>&1", \&patterns_run_cb);
+ok sarun ("-D check,zoom -L -t --cf 'normalize_charset 0' < $cwd/data/spam/unicode1 2>&1", \&patterns_run_cb);
 ok_all_patterns();
-clear_pattern_counters();
 
 # -------------------------------------------------------------------
 
 # Cleanup after testing (todo, sa-compile should have option for userstatedir)
-untaint_system "rm -rf \$HOME/.spamassassin/sa-compile.cache";
+rmtree( glob "~/.spamassassin/sa-compile.cache". { safe => 1 }); # reset test
 
 # -------------------------------------------------------------------
 
@@ -139,7 +135,8 @@ sub re2c_version_new_enough {
 sub new_instdir {
   $instdir = untaint_var($instbase.".".(shift));
   print "\nsetting new instdir: $instdir\n";
-  untaint_system("rm -rf $instdir; mkdir $instdir");
+  rmtree("$instdir", { safe => 1 });
+  mkpath($instdir, { error => \my $listerrs });
 }
 
 sub run_makefile_pl {

@@ -10,6 +10,7 @@ use Mail::SpamAssassin;
 
 use Test::More;
 plan skip_all => "no mass check" unless (-e '../masses/mass-check');
+plan skip_all => "mass check script does not run on Windows" if $RUNNING_ON_WINDOWS;
 plan tests => 37;
 
 # Tests the following cases:
@@ -23,7 +24,7 @@ plan tests => 37;
 # - Rules defined only by "reuse" can have arbitrary scores and priorities set
 
 # Need all files under $localrules for mass-check
-foreach my $tainted (<$siterules/*.pre>) {
+foreach my $tainted (<$siterules/*.pre $siterules/languages>) {
   $tainted =~ /(.*)/;
   my $file = $1;
   copy ($file, "$localrules")
@@ -70,17 +71,17 @@ write_mail(0);
 ok_system("$perl_path -w ../masses/mass-check -c=$localrules --reuse --file $workdir/mail.txt > $workdir/noxss.out");
 
 %patterns = (
-  'BODY_RULE_1' => 'BODY_RULE_1',
-  'HEADER_RULE_1' => 'HEADER_RULE_1',
-  'META_RULE_1' => 'META_RULE_1'
+  'BODY_RULE_1' => '',
+  'HEADER_RULE_1' => '',
+  'META_RULE_1' => '',
 );
 %anti_patterns = (
-  'NEW_RULE' => 'NEW_RULE',
-  'OTHER_RULE' => 'OTHER_RULE',
-  'RENAMED_RULE' => 'RENAMED_RULE',
-  'NONEXISTANT_RULE' => 'NONEXISTANT_RULE',
-  'BODY_RULE_2' => 'BODY_RULE_2',
-  'SCORED_RULE' => 'SCORED_RULE'
+  'NEW_RULE' => '',
+  'OTHER_RULE' => '',
+  'RENAMED_RULE' => '',
+  'NONEXISTANT_RULE' => '',
+  'BODY_RULE_2' => '',
+  'SCORED_RULE' => '',
 );
 
 checkfile("$workdir/noxss.out", \&patterns_run_cb);
@@ -94,17 +95,17 @@ write_mail(1);
 ok_system("$perl_path -w ../masses/mass-check -c=$localrules --file $workdir/mail.txt > $workdir/noreuse.out");
 
 %patterns = (
-  'BODY_RULE_1' => 'BODY_RULE_1',
-  'HEADER_RULE_1' => 'HEADER_RULE_1',
-  'META_RULE_1' => 'META_RULE_1'
+  'BODY_RULE_1' => '',
+  'HEADER_RULE_1' => '',
+  'META_RULE_1' => '',
 );
 %anti_patterns = (
-  'NEW_RULE' => 'NEW_RULE',
-  'OTHER_RULE' => 'OTHER_RULE',
-  'RENAMED_RULE' => 'RENAMED_RULE',
-  'NONEXISTANT_RULE' => 'NONEXISTANT_RULE',
-  'BODY_RULE_2' => 'BODY_RULE_2',
-  'SCORED_RULE' => 'SCORED_RULE'
+  'NEW_RULE' => '',
+  'OTHER_RULE' => '',
+  'RENAMED_RULE' => '',
+  'NONEXISTANT_RULE' => '',
+  'BODY_RULE_2' => '',
+  'SCORED_RULE' => '',
 );
 checkfile("$workdir/noreuse.out", \&patterns_run_cb);
 ok_all_patterns();
@@ -115,18 +116,18 @@ ok_system("$perl_path -w ../masses/mass-check -c=$localrules --reuse --file $wor
 
 
 %patterns = (
-  'HEADER_RULE_1' => 'HEADER_RULE_1',
-  'BODY_RULE_2' => 'BODY_RULE_2',
-  'META_RULE_1' => 'META_RULE_1',
-  'NEW_RULE' => 'NEW_RULE',
-  'OTHER_RULE' => 'OTHER_RULE',
-  'RENAMED_RULE' => 'RENAMED_RULE',
-  'SCORED_RULE' => 'SCORED_RULE',
-  'Y 8' => 'score'
+  'HEADER_RULE_1' => '',
+  'BODY_RULE_2' => '',
+  'META_RULE_1' => '',
+  'NEW_RULE' => '',
+  'OTHER_RULE' => '',
+  'RENAMED_RULE' => '',
+  'SCORED_RULE' => '',
+  'Y 8' => '',
 );
 %anti_patterns = (
-  'BODY_RULE_1' => 'BODY_RULE_1',
-  'NONEXISTANT_RULE' => 'NONEXISTANT_RULE'
+  'BODY_RULE_1' => '',
+  'NONEXISTANT_RULE' => '',
 );
 
 checkfile("$workdir/reuse.out", \&patterns_run_cb);
@@ -153,13 +154,13 @@ write_mail(1);
 ok_system("$perl_path -w ../masses/mass-check -c=$localrules --reuse --file $workdir/mail.txt > $workdir/metareuse.out");
 
 %patterns = (
-  'META_RULE_2' => 'META_RULE_2',
-  'RULE_A' => 'RULE_A',
-  'RULE_B' => 'RULE_B',
+  'META_RULE_2' => '',
+  'RULE_A' => '',
+  'RULE_B' => '',
 );
 %anti_patterns = (
-  'META_RULE_1' => 'META_RULE_1',
-  'RULE_C' => 'RULE_C',
+  'META_RULE_1' => '',
+  'RULE_C' => '',
 );
 checkfile("$workdir/metareuse.out", \&patterns_run_cb);
 ok_all_patterns();

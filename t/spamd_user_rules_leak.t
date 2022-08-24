@@ -6,7 +6,7 @@ use SATest; sa_t_init("spamd_user_rules_leak");
 
 use Test::More;
 plan skip_all => 'Spamd tests disabled' if $SKIP_SPAMD_TESTS;
-plan tests => 28;
+plan tests => 20;
 
 # ---------------------------------------------------------------------------
 # If user A defines a user rule (when allow_user_rules is enabled) it affects
@@ -59,13 +59,13 @@ print OUT q{
 close OUT;
 
 %patterns = (
-  q{ 3.0 MYFOO }, 'MYFOO',
-  q{ 3.0 MYBODY }, 'MYBODY',
-  q{ 3.0 MYRAWBODY }, 'MYRAWBODY',
-  q{ 3.0 MYFULL }, 'MYFULL',
+  q{ 3.0 MYFOO }, '',
+  q{ 3.0 MYBODY }, '',
+  q{ 3.0 MYRAWBODY }, '',
+  q{ 3.0 MYFULL }, '',
 );
 %anti_patterns = (
-  q{  redefined at }, 'redefined_errors_in_spamd_log',
+  'redefined at', 'redefined_errors_in_spamd_log',
 );
 
 # use -m1 so all scans use the same child
@@ -75,17 +75,13 @@ ok_all_patterns();
 clear_pattern_counters();
 
 %patterns = (
-  q{ does not include a real name }, 'TEST_NOREALNAME',
+  q{ does not include a real name }, '',
 );
 %anti_patterns = (
-  q{ 1.0 MYFOO }, 'MYFOO',
-  q{ 1.0 MYBODY }, 'MYBODY',
-  q{ 1.0 MYRAWBODY }, 'MYRAWBODY',
-  q{ 1.0 MYFULL }, 'MYFULL',
-  q{ 3.0 MYFOO }, 'MYFOO',
-  q{ 3.0 MYBODY }, 'MYBODY',
-  q{ 3.0 MYRAWBODY }, 'MYRAWBODY',
-  q{ 3.0 MYFULL }, 'MYFULL',
+  qr/\d MYFOO /, '',
+  qr/\d MYBODY /, '',
+  qr/\d MYRAWBODY /, '',
+  qr/\d MYFULL /, '',
 );
 ok (spamcrun ("-u testuser2 < data/spam/009", \&patterns_run_cb));
 checkfile ($spamd_stderr, \&patterns_run_cb);
@@ -93,17 +89,13 @@ ok_all_patterns();
 clear_pattern_counters();
 
 %patterns = (
-  q{ does not include a real name }, 'TEST_NOREALNAME',
+  q{ does not include a real name }, '',
 );
 %anti_patterns = (
-  q{ 1.0 MYFOO }, 'MYFOO',
-  q{ 1.0 MYBODY }, 'MYBODY',
-  q{ 1.0 MYRAWBODY }, 'MYRAWBODY',
-  q{ 1.0 MYFULL }, 'MYFULL',
-  q{ 3.0 MYFOO }, 'MYFOO',
-  q{ 3.0 MYBODY }, 'MYBODY',
-  q{ 3.0 MYRAWBODY }, 'MYRAWBODY',
-  q{ 3.0 MYFULL }, 'MYFULL',
+  qr/\d MYFOO /, '',
+  qr/\d MYBODY /, '',
+  qr/\d MYRAWBODY /, '',
+  qr/\d MYFULL /, '',
 );
 ok (spamcrun ("-u testuser3 < data/spam/009", \&patterns_run_cb));
 ok (stop_spamd ());

@@ -389,7 +389,7 @@ sub detect_utf16 {
 	# avoid scan if BOM present
 	if( $data =~ /^(?:\xff\xfe|\xfe\xff)/ ) {
 		dbg( "message: detect_utf16: found BOM" );
-		return undef;	# let perl figure it out from the BOM
+		return;	# let perl figure it out from the BOM
 	}
 	
 	my @msg_h = unpack 'H' x length( $data ), $data;

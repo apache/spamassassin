@@ -69,7 +69,7 @@ sub multipart_alternative_difference_count {
   my ($self, $pms, $fulltext, $ratio, $minhtml) = @_;
   $self->_multipart_alternative_difference($pms) unless (exists $pms->{madiff});
   return 0 unless $pms->{madiff_html} > $minhtml;
-  return(($pms->{madiff_text} / $pms->{madiff_html}) > $ratio);
+  return (($pms->{madiff_text} / $pms->{madiff_html}) > $ratio);
 }
 
 sub _multipart_alternative_difference {
@@ -222,7 +222,7 @@ sub tvd_vertical_words {
   }
 
   dbg("eval: tvd_vertical_words value: $pms->{tvd_vertical_words} / min: $min / max: $max - value must be >= min and < max");
-  return 1 if ($pms->{tvd_vertical_words} >= $min && $pms->{tvd_vertical_words} < $max);
+  return ($pms->{tvd_vertical_words} >= $min && $pms->{tvd_vertical_words} < $max);
 }
 
 sub check_stock_info {
@@ -360,17 +360,17 @@ sub _plaintext_body_sig_ratio {
 
   # Find the last occurence of a signature delimiter and get the body and
   # signature lengths.
-                                  # Bug 7980 - (^|.*\n) is super slow here
-  my ($len_b, $len_s) = map { length } $text =~ /(.*\n)-- ?\r?\n(.*?)$/s;
 
-  if (!defined $len_b) {
-      # No sig marker? Double check if whole body is signature
-      $len_b = 0;
-      ($len_s) = map { length } $text =~ /^-- ?\r?\n(.*?)$/s;
-      if (!defined $len_s) {     # no sig marker, all body
-          $len_b = length $text;
-          $len_s = 0;
-      }
+  my $len_b = length($text);
+  my $len_s = 0;
+
+  while ($text =~ /^-- ?\r?$/mg) {
+
+    # ignore decoy marker at the end
+    next if ( length($text) - $+[0] <= 4 );
+
+    $len_b = $-[0];
+    $len_s = length($text) - $+[0];
   }
 
   $pms->{plaintext_body_sig_ratio}->{body_length} = $len_b;

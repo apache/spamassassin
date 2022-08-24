@@ -30,9 +30,10 @@ records published by the domain owners in DNS to fight email address
 forgery and make it easier to identify spams.
 
 It's recommended to use MTA filter (pypolicyd-spf / spf-engine etc), so this
-plugin can reuse the Received-SPF header results as is.  Otherwise
-throughput could suffer, DNS lookups done by this plugin are not
+plugin can reuse the Received-SPF and/or Authentication-Results header results as is.
+Otherwise throughput could suffer, DNS lookups done by this plugin are not
 asynchronous.
+Those headers will also help when SpamAssassin is not able to correctly detect EnvelopeFrom.
 
 =cut
 
@@ -76,6 +77,7 @@ sub new {
   $self->register_eval_rule ("check_for_spf_whitelist_from", $Mail::SpamAssassin::Conf::TYPE_HEAD_EVALS); # removed in 4.1
   $self->register_eval_rule ("check_for_def_spf_welcomelist_from", $Mail::SpamAssassin::Conf::TYPE_HEAD_EVALS);
   $self->register_eval_rule ("check_for_def_spf_whitelist_from", $Mail::SpamAssassin::Conf::TYPE_HEAD_EVALS); # removed in 4.1
+  $self->register_eval_rule ("check_spf_skipped_noenvfrom", $Mail::SpamAssassin::Conf::TYPE_HEAD_EVALS);
 
   $self->set_config($mailsaobject->{conf});
 
@@ -255,9 +257,17 @@ working downwards until results are successfully parsed.
 
 Adds capability check for "if can()" for check_for_spf_permerror, check_for_spf_temperror, check_for_spf_helo_permerror and check_for_spf_helo_permerror
 
-=cut 
+=cut
 
 sub has_check_for_spf_errors { 1 }
+
+=item has_check_spf_skipped_noenvfrom
+
+Adds capability check for "if can()" for check_spf_skipped_noenvfrom
+
+=cut
+
+sub has_check_spf_skipped_noenvfrom { 1 }
 
 sub parsed_metadata {
   my ($self, $opts) = @_;
@@ -271,19 +281,19 @@ sub parsed_metadata {
 sub check_for_spf_pass {
   my ($self, $scanner) = @_;
   $self->_check_spf ($scanner, 0) unless $scanner->{spf_checked};
-  $scanner->{spf_pass};
+  return $scanner->{spf_pass} ? 1 : 0;
 }
 
 sub check_for_spf_neutral {
   my ($self, $scanner) = @_;
   $self->_check_spf ($scanner, 0) unless $scanner->{spf_checked};
-  $scanner->{spf_neutral};
+  return $scanner->{spf_neutral} ? 1 : 0;
 }
 
 sub check_for_spf_none {
   my ($self, $scanner) = @_;
   $self->_check_spf ($scanner, 0) unless $scanner->{spf_checked};
-  $scanner->{spf_none};
+  return $scanner->{spf_none} ? 1 : 0;
 }
 
 sub check_for_spf_fail {
@@ -292,43 +302,43 @@ sub check_for_spf_fail {
   if ($scanner->{spf_failure_comment}) {
     $scanner->test_log ($scanner->{spf_failure_comment});
   }
-  $scanner->{spf_fail};
+  return $scanner->{spf_fail} ? 1 : 0;
 }
 
 sub check_for_spf_softfail {
   my ($self, $scanner) = @_;
   $self->_check_spf ($scanner, 0) unless $scanner->{spf_checked};
-  $scanner->{spf_softfail};
+  return $scanner->{spf_softfail} ? 1 : 0;
 }
 
 sub check_for_spf_permerror {
   my ($self, $scanner) = @_;
   $self->_check_spf ($scanner, 0) unless $scanner->{spf_checked};
-  $scanner->{spf_permerror};
+  return $scanner->{spf_permerror} ? 1 : 0;
 }
 
 sub check_for_spf_temperror {
   my ($self, $scanner) = @_;
   $self->_check_spf ($scanner, 0) unless $scanner->{spf_checked};
-  $scanner->{spf_temperror};
+  return $scanner->{spf_temperror} ? 1 : 0;
 }
 
 sub check_for_spf_helo_pass {
   my ($self, $scanner) = @_;
   $self->_check_spf ($scanner, 1) unless $scanner->{spf_helo_checked};
-  $scanner->{spf_helo_pass};
+  return $scanner->{spf_helo_pass} ? 1 : 0;
 }
 
 sub check_for_spf_helo_neutral {
   my ($self, $scanner) = @_;
   $self->_check_spf ($scanner, 1) unless $scanner->{spf_helo_checked};
-  $scanner->{spf_helo_neutral};
+  return $scanner->{spf_helo_neutral} ? 1 : 0;
 }
 
 sub check_for_spf_helo_none {
   my ($self, $scanner) = @_;
   $self->_check_spf ($scanner, 1) unless $scanner->{spf_helo_checked};
-  $scanner->{spf_helo_none};
+  return $scanner->{spf_helo_none} ? 1 : 0;
 }
 
 sub check_for_spf_helo_fail {
@@ -337,38 +347,58 @@ sub check_for_spf_helo_fail {
   if ($scanner->{spf_helo_failure_comment}) {
     $scanner->test_log ($scanner->{spf_helo_failure_comment});
   }
-  $scanner->{spf_helo_fail};
+  return $scanner->{spf_helo_fail} ? 1 : 0;
 }
 
 sub check_for_spf_helo_softfail {
   my ($self, $scanner) = @_;
   $self->_check_spf ($scanner, 1) unless $scanner->{spf_helo_checked};
-  $scanner->{spf_helo_softfail};
+  return $scanner->{spf_helo_softfail} ? 1 : 0;
 }
 
 sub check_for_spf_helo_permerror {
   my ($self, $scanner) = @_;
   $self->_check_spf ($scanner, 1) unless $scanner->{spf_helo_checked};
-  $scanner->{spf_helo_permerror};
+  return $scanner->{spf_helo_permerror} ? 1 : 0;
 }
 
 sub check_for_spf_helo_temperror {
   my ($self, $scanner) = @_;
   $self->_check_spf ($scanner, 1) unless $scanner->{spf_helo_checked};
-  $scanner->{spf_helo_temperror};
+  return $scanner->{spf_helo_temperror} ? 1 : 0;
+}
+
+=over 4
+
+=item check_spf_skipped_noenvfrom
+
+Checks if SPF checks have been skipped because EnvelopeFrom cannot be determined.
+
+=back
+
+=cut
+
+sub check_spf_skipped_noenvfrom {
+  my ($self, $scanner) = @_;
+  $self->_check_spf ($scanner, 0) unless $scanner->{spf_checked};
+  if (!exists $scanner->{spf_sender}) {
+    return 1;
+  } else {
+    return 0;
+  }
 }
 
 sub check_for_spf_welcomelist_from {
   my ($self, $scanner) = @_;
   $self->_check_spf_welcomelist($scanner) unless $scanner->{spf_welcomelist_from_checked};
-  $scanner->{spf_welcomelist_from};
+  return $scanner->{spf_welcomelist_from} ? 1 : 0;
 }
 *check_for_spf_whitelist_from = \&check_for_spf_welcomelist_from; # removed in 4.1
 
 sub check_for_def_spf_welcomelist_from {
   my ($self, $scanner) = @_;
   $self->_check_def_spf_welcomelist($scanner) unless $scanner->{def_spf_welcomelist_from_checked};
-  $scanner->{def_spf_welcomelist_from};
+  return $scanner->{def_spf_welcomelist_from} ? 1 : 0;
 }
 *check_for_def_spf_whitelist_from = \&check_for_def_spf_welcomelist_from; # removed in 4.1
 

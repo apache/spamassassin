@@ -14,6 +14,12 @@ plan tests => 8;
 disable_compat "welcomelist_blocklist";
 
 tstlocalrules (q{
+  header USER_IN_WELCOMELIST		eval:check_from_in_welcomelist()
+  tflags USER_IN_WELCOMELIST		userconf nice noautolearn
+  meta USER_IN_WHITELIST		(USER_IN_WELCOMELIST)
+  tflags USER_IN_WHITELIST		userconf nice noautolearn
+  score USER_IN_WHITELIST		-100
+  score USER_IN_WELCOMELIST		-0.01
   body MYBODY /LOSE WEIGHT/
   score MYBODY 99
 });
@@ -34,8 +40,8 @@ print OUT '';
 close OUT;
 
 %patterns = (
-  q{ 99 MYBODY }, 'MYBODY',
-  q{-100 USER_IN_WHITELIST }, 'USER_IN_WHITELIST',
+  q{ 99 MYBODY }, '',
+  q{ -100 USER_IN_WHITELIST }, '',
 );
 %anti_patterns = (
 );
@@ -47,10 +53,10 @@ ok_all_patterns();
 clear_pattern_counters();
 
 %patterns = (
-  q{ 99 MYBODY }, 'MYBODY',
+  q{ 99 MYBODY }, '',
 );
 %anti_patterns = (
-  q{ 0 USER_IN_WHITELIST }, 'USER_IN_WHITELIST',
+  q{ -100 USER_IN_WHITELIST }, '',
 );
 ok (spamcrun ("-u testuser2 < data/spam/001", \&patterns_run_cb));
 checkfile ($spamd_stderr, \&patterns_run_cb);

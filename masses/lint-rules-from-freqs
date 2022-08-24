@@ -236,7 +236,7 @@ sub readrules {
       } elsif (/^(clear_report_template|clear_spamtrap_template|report|spamtrap|
                 clear_terse_report_template|terse_report|
                 required_score|ok_locales|ok_languages|test|lang|
-                spamphrase|whitelist_from|require_version|
+                spamphrase|(?:welcomelist|whitelist)_from|require_version|
 		clear_unsafe_report_template|unsafe_report|
 		(?:bayes_)?auto_learn_threshold_nonspam|(?:bayes_)?auto_learn_threshold_spam|
 		(?:bayes_)?auto_learn

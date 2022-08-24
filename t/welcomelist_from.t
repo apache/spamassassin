@@ -10,6 +10,12 @@ plan tests => 32;
 # ---------------------------------------------------------------------------
 
 tstprefs ("
+  header USER_IN_WELCOMELIST		eval:check_from_in_welcomelist()
+  tflags USER_IN_WELCOMELIST		userconf nice noautolearn
+  score USER_IN_WELCOMELIST		-100
+  header USER_IN_DEF_WELCOMELIST	eval:check_from_in_default_welcomelist()
+  tflags USER_IN_DEF_WELCOMELIST	userconf nice noautolearn
+  score USER_IN_DEF_WELCOMELIST		-15
   def_welcomelist_from_rcvd *\@paypal.com paypal.com
   def_welcomelist_from_rcvd *\@paypal.com ebay.com
   def_welcomelist_from_rcvd mumble\@example.com example.com
@@ -25,13 +31,13 @@ tstprefs ("
 
 # tests 1 - 4 does welcomelist_from work?
 %patterns = (
-  q{ USER_IN_WELCOMELIST }, 'w1'
+  q{ -100 USER_IN_WELCOMELIST }, '',
 );
 
 %anti_patterns = (
-  q{ FORGED_IN_WELCOMELIST }, 'a2',
-  q{ USER_IN_DEF_WELCOMELIST }, 'a3',
-  q{ FORGED_IN_DEF_WELCOMELIST }, 'a4'
+  q{ FORGED_IN_WELCOMELIST }, '',
+  q{ USER_IN_DEF_WELCOMELIST }, '',
+  q{ FORGED_IN_DEF_WELCOMELIST }, '',
 );
 sarun ("-L -t < data/nice/008", \&patterns_run_cb);
 ok_all_patterns();
@@ -45,13 +51,13 @@ sarun ("-L -t < data/nice/010", \&patterns_run_cb);
 ok_all_patterns();
 
 %patterns = (
-  q{ USER_IN_DEF_WELCOMELIST }, 'w5'
+  q{ -15 USER_IN_DEF_WELCOMELIST }, '',
 );
 
 %anti_patterns = (
-  q{ 0 USER_IN_WELCOMELIST }, 'a6',
-  q{ FORGED_IN_WELCOMELIST }, 'a7',
-  q{ FORGED_IN_DEF_WELCOMELIST }, 'a8'
+  q{ USER_IN_WELCOMELIST }, '',
+  q{ FORGED_IN_WELCOMELIST }, '',
+  q{ FORGED_IN_DEF_WELCOMELIST }, '',
 );
 
 # tests 13 - 16 does def_welcomelist_from_rcvd work?
@@ -65,10 +71,10 @@ ok_all_patterns();
 %patterns = ();
 
 %anti_patterns = (
-  q{ 0 USER_IN_WELCOMELIST }, 'a9',
-  q{ FORGED_IN_WELCOMELIST }, 'a10',
-  q{ USER_IN_DEF_WELCOMELIST }, 'a11',
-  q{ FORGED_IN_DEF_WELCOMELIST }, 'a12'
+  q{ USER_IN_WELCOMELIST }, '',
+  q{ FORGED_IN_WELCOMELIST }, '',
+  q{ USER_IN_DEF_WELCOMELIST }, '',
+  q{ FORGED_IN_DEF_WELCOMELIST }, '',
 );
 # tests 21 - 24 does welcomelist_allows_relays suppress the forged rule without
 #  putting the address on the welcomelist?

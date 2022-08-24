@@ -44,13 +44,14 @@ use Mail::SpamAssassin::Plugin;
 use Mail::SpamAssassin::Logger;
 use Mail::SpamAssassin::Timeout;
 use Mail::SpamAssassin::SubProcBackChannel;
+use Mail::SpamAssassin::Util qw(force_die am_running_on_windows);
 use strict;
 use warnings;
 # use bytes;
 use re 'taint';
 
 use Storable;
-use POSIX qw(PIPE_BUF WNOHANG _exit);
+use POSIX qw(PIPE_BUF WNOHANG);
 
 our @ISA = qw(Mail::SpamAssassin::Plugin);
 
@@ -443,7 +444,6 @@ sub check_razor2 {
   ## forking method
 
   $pms->{razor2_rulename} = $pms->get_current_eval_rule_name();
-  $pms->rule_pending($pms->{razor2_rulename}); # mark async
 
   # create socketpair for communication
   $pms->{razor2_backchannel} = Mail::SpamAssassin::SubProcBackChannel->new();
@@ -469,9 +469,8 @@ sub check_razor2 {
     $SIG{PIPE} = 'IGNORE';
     $SIG{$_} = sub {
       eval { dbg("razor2: child process $$ caught signal $_[0]"); };
-      _exit(6);  # avoid END and destructor processing
-      kill('KILL',$$);  # still kicking? die!
-      } foreach qw(INT HUP TERM TSTP QUIT USR1 USR2);
+      force_die(6);  # avoid END and destructor processing
+      } foreach am_running_on_windows()?qw(INT HUP TERM QUIT):qw(INT HUP TERM TSTP QUIT USR1 USR2);
     dbg("razor2: child process $$ forked");
     $pms->{razor2_backchannel}->setup_backchannel_child_post_fork();
     (undef, my @results) =
@@ -482,12 +481,12 @@ sub check_razor2 {
     };
     if ($@) {
       dbg("razor2: child return value freeze failed: $@");
-      _exit(0); # avoid END and destructor processing
+      force_die(0); # avoid END and destructor processing
     }
     if (!syswrite($pms->{razor2_backchannel}->{parent}, $backmsg)) {
       dbg("razor2: child backchannel write failed: $!");
     }
-    _exit(0); # avoid END and destructor processing
+    force_die(0); # avoid END and destructor processing
   }
 
   $pms->{razor2_pid} = $pid;
@@ -500,7 +499,7 @@ sub check_razor2 {
     return 0;
   };
 
-  return 0;
+  return; # return undef for async status
 }
 
 sub check_tick {
@@ -555,7 +554,7 @@ sub _check_forked_result {
   dbg("razor2: child process $kid_pid finished, reading results");
 
   my $backmsg;
-  my $ret = sysread($pms->{razor2_backchannel}->{latest_kid_fh}, $backmsg, PIPE_BUF);
+  my $ret = sysread($pms->{razor2_backchannel}->{latest_kid_fh}, $backmsg, am_running_on_windows()?512:PIPE_BUF);
   if (!defined $ret || $ret == 0) {
     dbg("razor2: could not read result from child: ".($ret == 0 ? 0 : $!));
     delete $pms->{razor2_backchannel};
@@ -636,8 +635,8 @@ sub check_razor2_range {
 
   # If Razor2 isn't available, or the general test is disabled, don't
   # continue.
-  return unless $self->{razor2_available};
-  return unless $self->{main}->{conf}->{use_razor2};
+  return 0 unless $self->{razor2_available};
+  return 0 unless $self->{main}->{conf}->{use_razor2};
 
   # Check if callback overriding rulename
   if (!defined $rulename) {
@@ -652,12 +651,11 @@ sub check_razor2_range {
   # If forked, call back later unless results are in
   if ($self->{main}->{conf}->{razor_fork}) {
     if (!defined $pms->{razor2_result}) {
-      $pms->rule_pending($rulename); # mark async
       dbg("razor2: delaying check_razor2_range call for $rulename");
       # array matches check_razor2_range() argument order
       push @{$pms->{razor2_range_callbacks}},
         [$engine, $min, $max, $rulename];
-      return 0;
+      return; # return undef for async status
     }
   } else {
     # If Razor2 hasn't been checked yet, go ahead and run it.

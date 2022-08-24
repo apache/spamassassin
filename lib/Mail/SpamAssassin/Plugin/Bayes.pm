@@ -174,6 +174,8 @@ our $IGNORED_HDRS = qr{(?: (?:X-)?Sender    # misc noise
 our $MARK_PRESENCE_ONLY_HDRS = qr{(?: X-Face
   |X-(?:Gnu-?PG|PGP|GPG)(?:-Key)?-Fingerprint
   |D(?:KIM|omainKey)-Signature
+  |X-Google-DKIM-Signature
+  |ARC-(?:Message-Signature|Seal)
   |Autocrypt
 )}ix;
 
@@ -1391,9 +1393,6 @@ sub _tokenize_headers {
 
   my %parsed;
 
-  my %user_ignore;
-  $user_ignore{lc $_} = 1 for @{$self->{main}->{conf}->{bayes_ignore_headers}};
-
   # get headers in array context
   my @hdrs;
   my @rcvdlines;
@@ -1421,7 +1420,7 @@ sub _tokenize_headers {
 
     # remove user-specified headers here, after Received, in case they
     # want to ignore that too
-    next if exists $user_ignore{lc $hdr};
+    next if exists $self->{conf}->{bayes_ignore_header}->{lc $hdr};
 
     # Prep the header value
     $val ||= '';

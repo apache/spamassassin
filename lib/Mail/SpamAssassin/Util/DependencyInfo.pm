@@ -34,6 +34,8 @@ use warnings;
 use re 'taint';
 use version 0.77;
 
+use Mail::SpamAssassin::Util;
+
 our ( $EXIT_STATUS, $WARNINGS );
 
 our @MODULES = (
@@ -168,6 +170,14 @@ our @OPTIONAL_MODULES = (
   Country code based filtering.',
 },
 {
+  module => 'IP::Country::Fast',
+  version => 0,
+  desc => 'Used by the RelayCountry plugin (not enabled by default) to
+  determine the domain country codes of each relay in the path of an email. 
+  Also used by the URILocalBL plugin (not enabled by default) to provide
+  Country code based filtering.',
+},
+{
   module => 'Razor2::Client::Agent',
   alt_name => 'Razor2',
   version => '2.61',
@@ -235,9 +245,17 @@ our @OPTIONAL_MODULES = (
   your database.',
 },
 {
+  module => 'DBD::SQLite',
+  version => 1.59,
+  desc => 'If you intend to use SpamAssassin with SQLite as the SQL database
+  backend for the DBI module, this is the DBD driver required. Version 1.59_01
+  or later is needed to provide SQLite 3.25.0 or later.',
+},
+{
   module => 'LWP::UserAgent',
   version => 0,
-  desc => 'The "sa-update" program can use this module to make HTTP requests.',
+  desc => 'The "sa-update" program can use this module to make HTTP requests.
+  Also used by DecodeShortURLs plugin.',
 },
 {
   module => 'Encode::Detect::Detector',
@@ -250,15 +268,22 @@ our @OPTIONAL_MODULES = (
 {
   module => 'Net::Patricia',
   version => 1.16,
-  desc => 'If this module is available, it will be used for IP address lookups
-  in tables internal_networks, trusted_networks, and msa_networks. Recommended
-  when a number of entries in these tables is large, i.e. in hundreds
-  or thousands. However, in case of overlapping (or conflicting) networks
-  in these tables, lookup results may differ as Net::Patricia finds a
-  tightest-matching entry, while a sequential NetAddr::IP search finds
-  a first-matching entry. So when overlapping network ranges are given,
-  specifying more specific subnets (longest netmask) first, followed by
-  wider subnets ensures predictable results.',
+  desc => 'If this module is available, it will be used for IP address
+  lookups in tables internal_networks, trusted_networks, msa_networks and
+  uri_local_cidr.  Recommended when a number of entries in these tables is
+  large, i.e.  in hundreds or thousands.  However, in case of overlapping
+  (or conflicting) networks in these tables, lookup results may differ as
+  Net::Patricia finds a tightest-matching entry, while a sequential
+  NetAddr::IP search finds a first-matching entry.  So when overlapping
+  network ranges are given, specifying more specific subnets (longest
+  netmask) first, followed by wider subnets ensures predictable results.',
+},
+{
+  module => 'Net::CIDR::Lite',
+  version => 0,
+  desc => 'If this module is available, then dash separated IP range format
+  "192.168.1.1-192.168.255.255" can be used for internal_networks,
+  trusted_networks, msa_networks and uri_local_cidr.',
 },
 {
   module => 'Net::DNS::Nameserver',
@@ -375,14 +400,6 @@ problems.
 sub debug_diagnostics {
   my $out = "diag: perl platform: $] $^O\n";
 
-# # this avoids an unsightly warning due to a shortcoming of Net::Ident;
-# # "Net::Ident::_export_hooks() called too early to check prototype at
-# # /usr/share/perl5/Net/Ident.pm line 29."   It only needs to be
-# # called here.
-# eval '
-#   sub Net::Ident::_export_hooks;
-# ';
-
   my $prefix = '';
   foreach my $moddef (@MODULES, 'optional', @OPTIONAL_MODULES) {
     if ($moddef eq 'optional') { $prefix = 'optional '; next; }
@@ -399,7 +416,10 @@ sub debug_diagnostics {
   return $out;
 }
 
+# When called from Makefile.PL use optional argument so it distinguishes between missing required modules
+# that CPAN will install before continuing, and missing required binaries that can't be fixed by CPAN install
 sub long_diagnostics {
+  my ($missing_modules_are_continuable) = @_;
   my $summary = "";
 
   print "checking module dependencies and their versions...\n";
@@ -411,6 +431,11 @@ sub long_diagnostics {
   }
   foreach my $moddef (@OPTIONAL_MODULES) {
     try_module(0, $moddef, \$summary);
+  }
+
+  if ($missing_modules_are_continuable) {
+    $WARNINGS += $EXIT_STATUS;
+    $EXIT_STATUS = 0;
   }
 
   print "checking binary dependencies and their versions...\n";
@@ -444,51 +469,20 @@ sub try_binary {
   my $required_version = $bindef->{version};
   my $recommended_version = $bindef->{recommended_min_version};
   my $errtype;
-  my ($command, $output);
 
-
-  # only viable on unix based systems, so exclude windows, etc. here
-  if ($^O =~ /^(mswin|dos|os2)/i) {
-    $$summref .= "Warning: Unable to test on this platform for the optional \"$bindef->{'binary'}\" binary\n";
-    $errtype = 'is unknown for this platform';
-  } else {
-    $command = "which $bindef->{'binary'} 2>&1";
-    #print "DEBUG: running $command\n";
-    $output = `$command`;
-
-    if (!defined $output || $output eq '') {
-      $installed = 0;
-    } elsif ($output =~ /which: no \Q$bindef->{'binary'}\E in/i) {
-      $installed = 0;
-    } else {
-      #COMMAND APPEARS TO EXIST
-      $command = $output;
-      chomp ($command);
-
-      $installed = 1;
-    }
-    #print "DEBUG: $command completed and output parsed\n";
-  }
-
-
-  if ($installed) {
-    #SANITIZE THE RETURNED COMMAND JUST IN CASE
-    $command =~ s/[^a-z0-9\/]//ig;
-
+  my $command = Mail::SpamAssassin::Util::find_executable_in_env_path($bindef->{'binary'});
+  if (defined $command) {
     #GET THE VERSION
-    $command .= " ";
     if (defined $bindef->{'version_check_params'}) {
-      $command .= $bindef->{'version_check_params'};
+      $command .= " ".$bindef->{'version_check_params'};
     }
-    $command .= " 2>&1";
 
     #print "DEBUG: running $command to check the version\n";
-    $output = `$command`;
+    my $output = `$command 2>&1`;
 
-    if (!defined $output) {
-      $installed = 0;
+    if (defined $output && $output ne '') {
+      $installed = 1;
 
-    } else {
       if (defined $bindef->{'version_check_regex'}) {
         $output =~ m/$bindef->{'version_check_regex'}/;
         $binary_version = $1;

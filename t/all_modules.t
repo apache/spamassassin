@@ -4,7 +4,7 @@ use lib '.'; use lib 't';
 use SATest; sa_t_init("all_modules");
 
 use Test::More;
-plan tests => 7;
+plan tests => 6;
 
 # ---------------------------------------------------------------------------
 
@@ -53,7 +53,6 @@ tstpre ("
   loadplugin Mail::SpamAssassin::Plugin::FromNameSpoof
   loadplugin Mail::SpamAssassin::Plugin::Phishing
   loadplugin Mail::SpamAssassin::Plugin::AuthRes
-  loadplugin Mail::SpamAssassin::Plugin::Esp
   loadplugin Mail::SpamAssassin::Plugin::ExtractText
   loadplugin Mail::SpamAssassin::Plugin::DecodeShortURLs
   loadplugin Mail::SpamAssassin::Plugin::DMARC
@@ -77,20 +76,19 @@ tstprefs("
             );
 
 %anti_patterns = (
-        q{ Insecure dependency }, 'tainted',
-        q{ Syntax error }, 'syntax',
-        q{ Use of uninitialized }, 'uninitialized',
-        q{ warn: }, 'warn',
-        q{ SpamAssassin failed to parse line }, 'parse',
-        '/ at .* line \d+/', 'at_line',
+        # sometimes trips on URIBL_BLOCKED, ignore..
+        # also ignore ResourceLimits/OLEVBMacro missing required modules
+        qr/ warn: (?![^\n]*(?:dns_block_rule|ResourceLimits not used|OLEVBMacro:.*required module))/, 'warn',
+        qr/Insecure dependency/i, 'tainted',
+        qr/Syntax error/i, 'syntax',
+        qr/Use of uninitialized/i, 'uninitialized',
+        qr/failed to parse/i, 'parse',
             );
 
 if (conf_bool('run_net_tests')) {
-    # sometimes trips on URIBL_BLOCKED, ignore..
-    # also ignore BSD::Resource, Mail::DMARC not installed
-    sarun ("-D -t < data/nice/001 2>&1 | grep -vE '(dns_block_rule|ResourceLimits not used)'", \&patterns_run_cb);
+    sarun ("-D -t < data/nice/001 2>&1", \&patterns_run_cb);
     ok_all_patterns();
 } else {
-    sarun ("-D -L -t < data/nice/001 2>&1 | grep -vE '(ResourceLimits not used)'", \&patterns_run_cb);
+    sarun ("-D -L -t < data/nice/001 2>&1", \&patterns_run_cb);
     ok_all_patterns();
 }

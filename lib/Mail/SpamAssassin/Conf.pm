@@ -856,7 +856,7 @@ e.g.
       my $listname = $1;  # corresponds to arg in check_uri_host_in_wblist()
       # note: must not factor out dereferencing, as otherwise
       # subhashes would spring up in a copy and be lost
-      $conf->{parser}->add_to_addrlist ($listname, split(/\s+/, $value));
+      $conf->{parser}->add_to_addrlist ($listname, split(/\s+/, $2));
     }
   });
 
@@ -1352,6 +1352,9 @@ all addresses in remaining octets (i.e. implied masklen is /8 or /16 or /24).
 If masklen is not specified, and there is not trailing dot, then just a single
 IP address specified is used, as if the masklen were C</32> with an IPv4
 address, or C</128> in case of an IPv6 address.
+
+If module Net::CIDR::Lite is installed, it's also possible to use dash
+separated IP range format (e.g. 192.168.1.1-192.168.255.255).
 
 If a network or host address is prefaced by a C<!> the matching network or
 host will be excluded from the list even if a less specific (shorter netmask
@@ -2243,7 +2246,7 @@ a spam-filtering ISP or mailing list, and that service adds
 new headers (as most of them do), these headers may provide
 inappropriate cues to the Bayesian classifier, allowing it
 to take a "short cut". To avoid this, list the headers using this
-setting.  Example:
+setting. Header matching is case-insensitive.  Example:
 
         bayes_ignore_header X-Upstream-Spamfilter
         bayes_ignore_header X-Upstream-SomethingElse
@@ -2252,14 +2255,15 @@ setting.  Example:
 
   push (@cmds, {
     setting => 'bayes_ignore_header',
-    default => [],
-    type => $CONF_TYPE_STRINGLIST,
+    type => $CONF_TYPE_HASH_KEY_VALUE,
     code => sub {
       my ($self, $key, $value, $line) = @_;
       if ($value eq '') {
         return $MISSING_REQUIRED_VALUE;
       }
-      push (@{$self->{bayes_ignore_headers}}, split(/\s+/, $value));
+      foreach (split(/\s+/, $value)) {
+        $self->{bayes_ignore_header}->{lc $_} = 1;
+      }
     }
   });
 
@@ -3638,6 +3642,45 @@ internally, and should not be used.
 
 =back
 
+=head2 CAPTURING TAGS USING REGEX NAMED CAPTURE GROUPS
+
+SpamAssassin 4.0 supports capturing template tags from regex rules.  The
+captured tags, along with other standard template tags, can be used in other
+rules as a matching string.  See B<TEMPLATE TAGS> section for more info on
+tags.
+
+Capturing can be done in any body/rawbody/header/uri/full rule that uses a
+regex for matching (not eval rules).  Standard Perl named capture group
+format C<(?E<lt>NAMEE<gt>pattern)> must be used, as described in
+L<https://perldoc.perl.org/perlre#(?%3CNAME%3Epattern)>.
+
+Example, capturing a tag named C<BODY_HELLO_NAME>:
+
+ body __HELLO_NAME /\bHello, (?<BODY_HELLO_NAME>\w+)\b/
+
+The tag can then be used in another rule for matching, using a %{TAGNAME}
+template.  This would search the captured name in From-header:
+
+ header HELLO_NAME_IN_FROM From =~ /\b%{BODY_HELLO_NAME}\b/i
+
+If any tag that a rule depends on is not found, then the rule is not run at
+all.  To prevent a literal %{NAME} string from being parsed as a template,
+it can be escaped with a backslash: \%{NAME}.
+
+Captured tags can also be used in reports and in other plugins like AskDNS,
+with the standard C<_BODY_HELLO_NAME_> notation.
+
+Note that at this time there is no automatic dependency tracking for rule
+running order.  All rules that use named capture groups are automatically
+set to priority -10000, so that the tags should always be ready for any
+normal rules to use.  When rule depends on a tag that might be set at later
+stage by a plugin for example, it's priority should be set manually to a
+higher value.
+
+=over 4
+
+=back
+
 =head1 ADMINISTRATOR SETTINGS
 
 These settings differ from the ones above, in that they are considered 'more
@@ -4760,7 +4803,9 @@ optional, and the default is shown below.
 If a tag reference uses the name of a tag which is not in this list or defined
 by a loaded plugin, the reference will be left intact and not replaced by any
 value.
-All template tag names should be restricted to the character set [A-Za-z0-9(,)].
+
+All template tag names must consist of only uppercase character set
+[A-Z0-9_] and not contain consecutive underscores (__).
 
 Additional, plugin specific, template tags can be found in the documentation for
 the following plugins:
@@ -4907,9 +4952,14 @@ sub new {
 
   # meta dependencies
   $self->{meta_dependencies} = {};
+  $self->{meta_deprules} = {};
 
   # map eval function names to rulenames
   $self->{eval_to_rule} = {};
+
+  # regex capture template rules
+  $self->{capture_rules} = {};
+  $self->{capture_template_rules} = {};
 
   # testing stuff
   $self->{regression_tests} = { };
@@ -4920,7 +4970,7 @@ sub new {
   $self->{headers_spam} = [ ];
   $self->{headers_ham} = [ ];
 
-  $self->{bayes_ignore_headers} = [ ];
+  $self->{bayes_ignore_header} = { };
   $self->{bayes_ignore_from} = { };
   $self->{bayes_ignore_to} = { };
 
@@ -5460,6 +5510,7 @@ sub feature_header_address_parser { 1 } # improved header address parsing using 
 sub feature_local_tests_only { 1 } # Config parser supports "if (local_tests_only)"
 sub feature_header_first_last { 1 } # Can actually use :first :last modifiers in rules
 sub feature_header_match_many { 1 } # Can actually match all :addr :name etc results, before only first one was used
+sub feature_capture_rules { 1 } # Can capture and use tags with regex in body/rawbody/full/uri/header rules # Bug 7992
 sub has_tflags_nosubject { 1 } # tflags nosubject
 sub has_tflags_nolog { 1 } # tflags nolog
 sub perl_min_version_5010000 { return $] >= 5.010000 }  # perl version check ("perl_version" not neatly backwards-compatible)
