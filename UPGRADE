@@ -1,815 +1,263 @@
-TEMPORARY NOTE: IN PREP FOR RELEASE, THIS IS MOVED TO 
-https://docs.google.com/document/d/1hIjJBlDVUse5C-Bl3wahh16iNVroDChpti84QVOvPcE/edit 
-TO MAKE EDITING EASIER AND COLLABORATIVE
-
 Note for Users Upgrading to SpamAssassin 4.0.0
 ----------------------------------------------
 
-- Esp plugin has been removed.
+Apache SpamAssassin 4.0.0 represents years of work by the project with
+numerous improvements, new rule types, and internal native handling
+of messages in international languages. We highly recommend looking
+through this file and all of the .pre files to evaluate your
+configuration thoroughly. Plugins have been added, removed, and
+improved throughout.
 
 - All rules, functions, command line options and modules that contain
-  "whitelist" or "blacklist" have been renamed to contain more racially
-  neutral "welcomelist" and "blocklist" terms.  Old names will continue work
-  as backwards compatibility atleast until 4.1 release.  If you have local
-  settings like scores or metas referring to old rule names, these should be
-  changed, after which "enable_compat welcomelist_blocklist" can be added in
-  init.pre.  See: https://wiki.apache.org/spamassassin/WelcomelistBlocklist
-  (Bug 7826)
+  "whitelist" or "blacklist" have been renamed to contain more
+  racially neutral "welcomelist" and "blocklist" terms. This allows
+  acronyms like WL and BL to remain the same. Previous options will
+  continue work at least until version 4.1.0 is released. If you have
+  local settings including scores or meta rules referring to old rule
+  names, these should be changed and "enable_compat
+  welcomelist_blocklist" added in init.pre. See:
+  https://wiki.apache.org/spamassassin/WelcomelistBlocklist (Bug 7826)
 
-- Setting normalize_charset is now enabled by default.  Note that rules
-  should not expect specific non-UTF8 or UTF8 encoding in body.  Matching is
-  done against raw bytes, which may vary depending on normalize_charset
-  setting and whether decoding to UTF8 was successful.
-  See: https://wiki.apache.org/spamassassin/WritingRulesAdvanced
+- Setting normalize_charset is now enabled by default. Note that rules
+  should not expect specific non-UTF8 or UTF8 encoding in
+  body. Matching is done against the raw data which may vary depending
+  on normalize_charset setting and whether decoding to UTF8 was
+  successful. See:
+  https://wiki.apache.org/spamassassin/WritingRulesAdvanced
 
-- IDN (Internationalized domain name) support, requires Net::LibIDN2 or
-  Net::LibIDN module.  New Util::idn_to_ascii() function.  (Bug 7215)
+- DKIM plugin has added support for ARC signature verification
 
-- Meta rules no longer use priority values, they are evaluated dynamically
-  when the rules they depend on are finished.  (Bug 7735)
+- The DecodeShortURL plugin has been added and decodes URIs from URL
+  shorteners that may be used to evade scanning
 
-- API: New $pms->rule_ready() function. Any asynchronous eval-function must
-  now return undef (instead of 0 or 1), if rule result is not ready when
-  exiting the function.  $pms->rule_ready($rulename) or $pms->got_hit(...)
-  must be called when the result has arrived.  If these are not used, it can
-  break depending meta rule evaluation.
+- Strings can now be captured from rules and later reused using the
+     special %{TAGNAME} syntax
 
-- Improved internal header address (From/To/Cc) parser, now also handles
-  multiple addresses.  Optional support for external Email::Address::XS
-  parser, which can handle nested comments and other oddities.
+- The Bayes stopwords, or noise words, are now configurable in order
+  to optimize Bayes usage for non-English languages. Stopwords for 16
+  foreign languages have been included. See 60_bayes_stopwords.cf in
+  the rules files. See Mail::SpamAssassin::Plugin::Bayes and the
+  bayes_stopword_languages option if you wish to use a different
+  stopword list. This is highly recommended if you are using Bayes and
+  you are processing messages in languages other than English.
 
-- Header :addr :name modifiers now returns all addresses.  :first :last
-  select only first (topmost) or last header to process, when there are
-  multiple headers with the same name (:addr and :name may still return
-  multiple values from a single header).
+- The OLEVBMacro plugin has been improved to identify more macros
+  while also extracting uris from the attachments for automatic
+  inclusion in RBL lookups
 
-- API: $pms->get() can and should now be called in list context.  Scalar
-  context continues to return multiple values newline separated, but this
-  should be considered deprecated.
+- Internationalized domain name (IDN) support has been added and
+  requires Net::LibIDN2 or Net::LibIDN module with a new
+  Util::idn_to_ascii() function. (Bug 7215)
 
-- New ExtractText plugin that extracts text from documents or images and feed it
-  into SpamAssassin
+- Meta rules no longer use priority values, they are evaluated
+  dynamically when the rules they depend on are finished. (Bug 7735)
 
-- New --forcemirror option added to sa-update to force rules download from a
-  specific mirror
+- API: New $pms->rule_pending() and $pms->rule_ready() functions are
+  now available.
 
-- New Esp plugin that checks spam coming from some Esp providers
+  $pms->rule_pending($rulename) must be called from rules
+  eval-function, if the result can arrive later than when exiting the
+  function (asynchronous lookups).
 
-- New nolog tflag added to hide info coming from rules in SpamAssassin reports
+  $pms->rule_ready($rulename) or $pms->got_hit(...) must be called
+  when the result has arrived. If these are not used, it can break
+  meta rule evaluation dependencies.
 
-- All log output (stderr, file, syslog) is now escaped properly,
-  \r \n \t \\, and control chars, DEL, UTF-8 sequences as \x{XX}.
-  Whitespace is not normalized anymore like in versions <4.0.
+- Improved internal header address (From/To/Cc) parser, now also
+  handles multiple addresses and includes optional support for
+  external Email::Address::XS parser, which can handle nested comments
+  and other oddities.
 
-- API: Logger::add() has new optional 'escape' parameter.
-  New Logger::escape_str() function.
+- Header :addr :name modifiers now return all addresses. Options of
+  :first :last select only first (topmost) or last header to process
+  when there are multiple headers with the same name. :addr and :name
+  may still return multiple values from a single header.
 
-- API: New $pms->add_uri_detail_list() function.  Also new uri_detail_list
-  types: unlinked, schemeless
+- API: $pms->get() can and should now be called in list
+  context. Scalar context continues to return multiple values newline
+  separated, but this should be considered deprecated.
 
-- Util::split_domain, trim_domain, is_domain_valid functions have new
-  optional argument ($is_ascii)
+- New ExtractText plugin that extracts text from documents or images
+  to feed the data into SpamAssassin for standard processing with
+  existing rules, URIs extracted from documents will fall into normal
+  RBL lookups.
+
+- New "nolog" tflag added to hide info coming from rules in
+  SpamAssassin reports
+
+- All log output (stderr, file, syslog) is now escaped properly for \r
+  \n \t \\, control chars, DEL, and UTF-8 sequences presented as
+  \x{XX}.  Whitespace is not normalized anymore like in versions prior
+  to 4.0.0.
+
+- API: Logger::add() has new optional 'escape' parameter.  New
+  Logger::escape_str() function.
+
+- API: New $pms->add_uri_detail_list() function. Also new
+  uri_detail_list types: unlinked, schemeless
+
+- Util::split_domain, trim_domain, and is_domain_valid functions have
+  a new optional argument ($is_ascii)
 
 - Header names support new :host :domain :ip :revip modifiers
 
 - AskDNS: tag HEADER(hdrname) supported to query any header content
   similarly to header rules
 
-- HashCash module and support has been removed completely, as it has been
-  long since deprecated
+- The HashCash module and support has been removed completely, as it
+  has been long since deprecated
 
-- URILocalBL: uri_block_cc/uri_block_cont support negation (Bug 7528)
+- URILocalBL: uri_block_cc/uri_block_cont now support negation (Bug
+  7528)
 
-- URILocalBL: IPv6 lookups for hosts, if supported by used database
+- URILocalBL: IPv6 lookups for hosts is now support, if provided by
+  your database
 
-- DNS (or other async) lookups are now only launched when priority -100 is
-  reached. This allows shortcircuiting at lower priority without sending
-  unneeded DNS queries. (Bug 5930)
+- DNS and other asynchronous lookups such as Pyzor and DCC are now
+  only launched when priority -100 is reached. This allows short
+  circuiting at a lower priority without sending unneeded DNS queries
+  and starting process forms. (Bug 5930)
 
-- API: New plugin callback method check_dnsbl (to launch network lookups at
-  priority -100), check_post_dnsbl (to harvest own network lookups)
+- API: New plugin method callback method check_dnsbl added to launch
+  network lookups at priority -100 and check_post_dnsbl to harvest own
+  network lookups
 
-- API: New plugin callback method check_cleanup (for cleaning up things..)
+- API: New plugin callback method check_cleanup for cleaning up
+  things...
 
-- FreeMail: new options freemail_import_welcomelist_auth,
+- FreeMail: new options freemail_import_welcomelist_auth and
   freemail_import_def_welcomelist_auth added (Bug 6451)
 
-- New internal Mail::SpamAssassin::GeoDB module that provides unified interface to
-  modules MaxMind::DB::Reader (GeoIP2), Geo::IP, IP::Country::DB_File, IP::Country::Fast.
-  Utilized by RelayCountry and URILocalBL. Settings geodb_module, geodb_options,
-  geodb_search_path. Deprecated settings country_db_type, country_db_path,
-  uri_country_db_path, uri_country_db_isp_path still work but print a warning to
-  migrate to geodb_module/options.
+- New internal Mail::SpamAssassin::GeoDB module that provides a
+  unified interface to modules MaxMind::DB::Reader (GeoIP2), Geo::IP,
+  IP::Country::DB_File, and IP::Country::Fast.
 
-- Razor2 razor_fork option added.  It will fork separate Razor2 process and
-  read in the results later asynchronously, increasing throughput.  When
-  this is used, rule priorities are automatically adjusted to -100.
+  This is utilized by RelayCountry and URILocalBL with settings
+  geodb_module, geodb_options, and geodb_search_path.
 
-- DCC check is now done asynchronously if using dccifd, improving throughput.
-  With dccifd, rule priorities are automatically adjusted to -100. 
-  Commercial reputation rules can be ignored with use_dcc_rep 0, to save few
-  CPU cycles.
+  Deprecated settings still work such as country_db_type,
+  country_db_path, uri_country_db_path, and uri_country_db_isp_path
+  but will print a warning to migrate to geodb_module/options.
 
-- Pyzor pyzor_fork option added. It will fork separate Pyzor process and
-  read in the results later asynchronously, increasing throughput. When
-  this is used, rule priorities are automatically adjusted to -100. Renamed
-  pyzor_max setting to pyzor_count_min.  Added pyzor_welcomelist_min and
-  pyzor_welcomelist_factor setting.  Also try to ignore "empty body" FPs.
+- Razor2 razor_fork option added to create separate Razor2 processes
+  and read in the results later asynchronously, increasing throughput,
+  and automatically adjusting rule priorities to -100.
+
+- DCC checks are now done asynchronously if using dccifd, improving
+  throughput.  With dccifd, rule priorities are automatically adjusted
+  to -100.  Commercial reputation rules can be ignored with the option
+  "use_dcc_rep 0" to save a few CPU cycles.
+
+- Pyzor pyzor_fork option added to create separate Pyzor processes and
+  read in the results later asynchronously, increasing throughput, and
+  automatically adjusting rule priorities to -100. Renamed pyzor_max
+  setting to pyzor_count_min. Added pyzor_welcomelist_min and
+  pyzor_welcomelist_factor setting. Also try to improve false
+  positives by ignoring "empty body" messages.
 
 - API: deprecated $pms->register_async_rule_start() and
-  $pms->register_async_rule_finish() calls (they can be left in code for
-  backwards compatibility).  Plugins should only use
-  $pms->bgsend_and_start_lookup() which handles required things
-  automatically (direct calls to bgsend or start_lookup should not be used). 
-  $pms->bgsend_and_start_lookup() should always contain $ent->{rulename} for
-  correct meta dependency handling.  Deprecated also start_lookup,
-  get_lookup, lookup_ns, harvest_until_rule_completes, is_rule_complete.
+  $pms->register_async_rule_finish() calls though left in for
+  backwards compatibility. Plugins should only use
+  $pms->bgsend_and_start_lookup(), which handles required things
+  Automatically. Direct calls to bgsend or start_lookup should not be
+  used.  $pms->bgsend_and_start_lookup() should always contain
+  $ent->{rulename} for correct meta dependency handling. Deprecated
+  start_lookup, get_lookup, lookup_ns, harvest_until_rule_completes,
+  and is_rule_complete.
 
-- SPF: Mail::SPF is now only supported.  Mail::SPF::Query use is deprecated,
-  along with settings do_not_use_mail_spf, do_not_use_mail_spf_query.  SPF
-  lookups are not done asyncronously, for best throughput one should use MTA
-  filter (pypolicyd-spf / spf-engine etc), from which generated Received-SPF
-  header can be parsed by SpamAssassin.
+- SPF: Mail::SPF is now the only supported perl module and
+  Mail::SPF::Query is deprecated along with the settings
+  do_not_use_mail_spf, and do_not_use_mail_spf_query. SPF lookups are
+  not done asynchronously so using an MTA filter such as pypolicyd-spf
+  or spf-engine can generate Received-SPF for SpamAssassin to parse.
 
-- "ALL" pseudo-header now returns decoded headers, so it's usage is consistent
-  with single header matching (:raw returns undecoded and folded like before).
+- "ALL" pseudo-header now returns decoded headers, so it's usage is
+  consistent with single header matching. Using the :raw option mimics
+  the previous behavior of with undecoded and folded headers.
 
 - New dns_block_rule option handles blocked DNSBLs (Bug 6728)
-
-- New AuthRes module to process Authentication-Results headers (unfinished,
-  Bug 6918)
 
 - ASN: Support GeoDB for ASN lookups (asn_use_geodb, asn_prefer_geodb,
   asn_use_dns).
 
-- ASN: Default sa-update ruleset doesn't make ASN lookups or header adds
-  anymore.  Configure desired methods (asn_use_geodb / asn_use_dns) and
-  add_header clauses manually, as described in plugin documentation.  Usage
-  of asn_use_geodb without DNS is recommended, unless ASNCIDR is needed.  Do
-  not use rules that check metadata X-ASN header! Only the new eval function
-  described in plugin manual works reliably: check_asn().
+- ASN: Default sa-update ruleset doesn't make ASN lookups or add
+  headers anymore. Configure desired methods, asn_use_geodb or
+  asn_use_dns, and add_header clauses manually as described in the
+  plugin documentation. Usage of asn_use_geodb without DNS is
+  recommended unless ASNCIDR is needed. Do not use rules that check
+  metadata X-ASN header! Only the new eval function check_asn()
+  described in plugin manual works reliably.
 
-- sa-update: New --score-multiplier, --score-limit options
+- sa-update: New --score-multiplier, --score-limit, and --forcemirror
+  options added.
+    #1 forcemirror: forces sa-update to use a specific mirror server,
+    #2 score-multiplier: adjust all scores from update channel by a
+     given multiplier to quickly level set scores to match your
+     preferred threshold
+    #3 score-limit adjusts all scores from update channel over a
+     specified limit to a new limit
 
-- New dns_options nov4, nov6 (must set nov6 if resolver is filtering AAAA
-  replies).
+- New dns_options "nov4" and "nov6" added.  IMPORTANT:; You must set
+  nov6 if your DNS resolver is filtering IPv6 AAAA replies.
 
-- API: Added Message::get_pristine_body_digest(), Message::get_msgid(),
-  Message::generate_msgid() functions, removed deprecated private
-  Plugin::Bayes::get_msgid() function.
+- API: Added Message::get_pristine_body_digest(),
+  Message::get_msgid(), and Message::generate_msgid()
+  functions. Removed deprecated private Plugin::Bayes::get_msgid()
+  function.
 
-- Bayes and TxRep seen (Message-ID tracking) hashing method changed.
-  No actions are required. If re-learning some old messages, they might
-  be learned twice. Old IDs should expire automatically.
+- Bayes and TxRep seen Message-ID tracking hashing method changed.  No
+  actions are required. If re-learning some old messages, they might
+  be learned twice but old IDs should expire automatically.
 
-- report_charset defaults now to UTF-8
+- report_charset defaults now to UTF-8.
 
-- Meta rules inherit net tflag from it's dependencies (Bug 7735)
+- Meta rules inherit net tflag setting from dependencies (Bug 7735)
 
-- BodyEval: plaintext_body_sig_ratio: eval rules for the (first text/plain
-  MIME part's) body and signature lengths and ratio
+- BodyEval: Added plaintext_body_sig_ratio eval rules for the first
+  text/plain MIME part's body and signature length ratio.
 
-- API: Now supports multiple calls of $pms->test_log() for rules.  Add
-  $pms->check_cleanup() to finalize tags/reports etc.  Deprecate internal
-  $pms->{test_log_msgs}, rename to $pms->{test_logs}.  Deprecate
-  $pms->clear_test_state(), not needed anymore.  $pms->test_log() accepts
-  $rulename as second argument.
+- API: Now supports multiple calls of $pms->test_log() for
+  rules. Added $pms->check_cleanup() to finalize tags, reports,
+  etc. Deprecated internal $pms->{test_log_msgs}, renamed to
+  $pms->{test_logs}. Deprecated $pms->clear_test_state() as it is not
+  needed anymore. $pms->test_log() now accepts $rulename as second
+  argument.
 
-- URIDNSBL: urirhsbl/urirhssub rules support "notrim" tflag, which
-  forces querying the full hostname, instead of trimmed domain.  This works
-  better if the specific uribl supports this mode. (Bug 7835)
+- URIDNSBL: urirhsbl/urirhssub rules support "notrim" tflag to force
+  querying the full hostname instead of just the domain. This works
+  best if the specific uribl supports this mode. (Bug 7835)
 
-- Removed deprecated --auth-ident and --ident-timeout options from spamd
+- Removed deprecated --auth-ident and --ident-timeout options from
+  spamd
 
-- MIMEHeader: support matching ALL header, tflags range, tflags concat
+- MIMEHeader: support matching ALL header, tflags range, and tflags
+  concat
 
 - Autolearn: add new tflags autolearn_header/autolearn_body. These can
-  force a rule to count as header or body points accordingly. (Bug 7907)
+  force a rule to count as header or body points accordingly. (Bug
+  7907)
 
-- SSL client certificate support for spamc/spamd.  New spamc options
-  --ssl-cert, --ssl-key, --ssl-ca-file, --ssl-ca-path.  New spamd options
-  --ssl-verify, --ssl-ca-file, --ssl-ca-path (Bug 7267)
+- SSL client certificate support for spamc/spamd is now easier. New
+  spamc options --ssl-cert, --ssl-key, --ssl-ca-file, and
+  --ssl-ca-path. New spamd options --ssl-verify, --ssl-ca-file, and
+  --ssl-ca-path (Bug 7267)
 
-- ArchiveIterator now uncompresses automatically all gzip, bzip2, xz, lz4,
-  lzip and lzo-compressed files (Bug 7598).  These apply to spamassassin
-  and sa-learn commands also.
+- ArchiveIterator now automatically uncompressed all gzip, bzip2, xz,
+  lz4, lzip, and lzo-compressed files (Bug 7598). These apply to
+  spamassassin and sa-learn commands also.
 
-- New DMARC policy check plugin
+- New DMARC policy check plugin.
 
-- New project maintained DecodeShortURLs plugin.  Note that it might not be
-  directly compatible with rules from the old third party plugin.  See
-  documentation for configuration and rule format.
+- New project maintained DecodeShortURLs plugin which may not be
+  directly compatible with rules from other third party plugins. See
+  The plugin documentation for configuration and rule format.
 
-- Installing module Net::CIDR::Lite allows to use dash separated IP range
-  format (e.g. 192.168.1.1-192.168.255.255) for NetSet tables
-  (internal_networks, trusted_networks, msa_networks, uri_local_cidr).
+- Installing module Net::CIDR::Lite allows the use of dash-separated
+  IP range format (e.g. 192.168.1.1-192.168.255.255) for NetSet tables
+  including internal_networks, trusted_networks, msa_networks, and
+  uri_local_cidr.
 
-- HashBL: New functions check_hashbl_tag, check_hashbl_attachments.
-  New sha256 option.
+- The HashBL plugin in 342.pre is now enabled by default.
 
-- spamd: New option --default-user (Bug 6995)
-
-Note for Users Upgrading to SpamAssassin 3.4.5
-----------------------------------------------
-
-- Spamassassin test suite can now run against the installed
-  SpamAssassin files (rather than those in the source directory)
-
-- unwelcomelist_auth now also removes def_welcomelist_auth entries
-
-- SPF: add unwelcomelist_from_spf to remove both welcomelist_from_spf and
-  def_welcomelist_from_spf entries
-
-- Default SQL schema for userpref.value changed from varchar(100) to
-  varchar(255), no need to modify unless you hit the limit. (Bug 7803)
-
-- URIDetail can now match full hostname with "host" key
-
-- BodyEval: plaintext_body_sig_ratio: eval rules for the (first text/plain
-  MIME part's) body and signature lengths and ratio
-
-Note for Users Upgrading to SpamAssassin 3.4.4
-----------------------------------------------
-
-- FromNameSpoof: fns_extrachars parameter default value has been increased to 50
-
-- nosubject and maxhits tflags now work correctly with sa-compile
-
-Note for Users Upgrading to SpamAssassin 3.4.3
-----------------------------------------------
-
-- New subjprefix keyword added, this can be used to add a prefix to
-  email Subject if the original email matches a particular rule
-
-- New Util::is_fqdn_valid() function to validate hostname (DNS name) format
-  (Bug 7736).  To check if a name contains valid TLD, it's still needed to
-  additionally use RegistryBoundaries::is_domain_valid()
-
-- New OLEVBMacro plugin to detect OLE Macro inside documents attached to emails,
-  this plugin requires Archive::Zip and IO::String Perl modules to work.
-
-- Due to the dangerous nature of sa-update --allowplugins option, it
-  now prints a warning that --reallyallowplugins is required to use it.
-  This is to make sure all the legacy installations and wiki guides etc
-  still using it needlessly get fixed.
-
-- TxRep and Awl plugins has been modified to be compatible 
-  with latest Postgresql versions.
-  You should upgrade your sql database running the following command:
-  MySQL:
-  "ALTER TABLE `txrep` CHANGE `count` `msgcount` INT(11) NOT NULL DEFAULT '0';"
-  "ALTER TABLE `awl` CHANGE `count` `msgcount` INT(11) NOT NULL DEFAULT '0';"
-  "ALTER TABLE `awl` ADD last_hit timestamp NOT NULL default CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP;"
-  PostgreSQL:
-  "ALTER TABLE txrep RENAME COLUMN count TO msgcount;"
-  "ALTER TABLE awl RENAME COLUMN count TO msgcount;"
-  "ALTER TABLE awl ADD last_hit timestamp NOT NULL default CURRENT_TIMESTAMP;"
-
-- body_part_scan_size 50000, rawbody_part_scan_size 500000 defaults added (Bug 6582)
-  These enable safer and faster scanning of large emails.
-
-- ALL pseudo-header now returns decoded headers, so it's usage is consistent
-  with single header matching (:raw returns undecoded and folded like before).
-
-- RegistryBoundaries did not load 20_aux_tlds.cf properly in older versions. 
-  Old hardcoded list is now removed and RB will print "no tlds defined, need
-  to run sa-update" unless it can find list from config files.
-
-- Deprecated functions: Parser::is_delimited_regexp_valid(),
-  Parser::is_regexp_valid(), Util::regexp_remove_delimiters(),
-  Util::make_qr().  These all are combined into new Util::compile_regexp().
-
-- DNSEval: add check_rbl_headers to check specific headers in rbl
-
-- DNSEval: add check_rbl_ns_from to check against an rbl for dns servers
-
-- HashBL: Add check_hashbl_bodyre, check_hashbl_emails, check_hashbl_uris,
-  hashbl_ignore
-
-- ASN: Support IPv6 with asn_lookup_ipv6 (Bug 7211)
-
-- sa-update: New option --httputil to force used download utility
-
-- Add rules_matching() expression to meta rules
-
-- Add tflags domains_only/ips_only to DNSEval.pm functions
-
-- RelayCountry: Added new metadata: X-Spam-Countries-External (_RELAYCOUNTRYEXT_),
-  X-Spam-Countries-Auth (_RELAYCOUNTRYAUTH_), X-Spam-Countries-All (_RELAYCOUNTRYALL_)
-
-- New tflag "nosubject" for 'body' rules, to stop matching the Subject
-  header which is part of the body text.
-
-Note for Users Upgrading to SpamAssassin 3.4.2
-----------------------------------------------
-
-- We now support SHA-512 and SHA-256 signatures for our rules updates.
-
-- We may stop producing SHA-1 signatures in the near future so upgrading
-to 3.4.2 is important.  sa-update no longer uses these signatures.
-
-See https://bz.apache.org/SpamAssassin/show_bug.cgi?id=7614
-
-New plugins
------------
-
-There are four new plugins added with this release:
-
-  Mail::SpamAssassin::Plugin::HashBL
-
-The HashBL plugin is the interface to The Email Blocklist (EBL).
-The EBL is intended to filter spam that is sent from IP addresses 
-and domains that cannot be blocked without causing significant 
-numbers of false positives.
-
-  Mail::SpamAssassin::Plugin::ResourceLimits
-
-This plugin leverages BSD::Resource to assure your spamd child processes
-do not exceed specified CPU or memory limit. If this happens, the child
-process will die. See the BSD::Resource for more details.
-
-  Mail::SpamAssassin::Plugin::FromNameSpoof
-
-This plugin allows for detection of the From:name field being used to mislead 
-recipients into thinking an email is from another address.  The man page 
-includes examples and we expect to put test rules for this plugin into 
-rulesrc soon!
-
-  Mail::SpamAssassin::Plugin::Phishing
-
-This plugin finds uris used in phishing campaigns detected by
-OpenPhish (https://openphish.com) or PhishTank (https://phishtank.com) feeds.
-
-These plugins are disabled by default. To enable, uncomment
-the loadplugin configuration options in file v342.pre, or add it to
-some local .pre file such as local.pre .
-
-Notable changes
----------------
-
-For security reasons SSLv3 support has been removed from spamc(1).
-
-GeoIP2 support has been added to RelayCountry and URILocalBL plugins due
-to GeoIP legacy api deprecations.
-
-New configuration options
--------------------------
-
-A new template tag _DKIMSELECTOR_ that maps to the DKIM selector (the 's' tag) 
-from valid signatures has been added.
-
-A 'uri_block_cont' option to URILocalBL plugin to score uris per continent has been added.
-Possible continent codes are:
-af, as, eu, na, oc, sa for Africa, Asia, Europe, North America, 
-Oceania and South America.
-
-The 'country_db_type' and 'country_db_path' options has been added to be able 
-to choose in RelayCountry plugin between GeoIP legacy 
-(discontinued from 04/01/2018), GeoIP2, IP::Country::Fast 
-and IP::Country::DB_File.
-GeoIP legacy is still the default option but it will be deprecated 
-in future releases.
-
-A config option 'uri_country_db_path' has been added to be able to choose 
-in URILocalBL plugin between GeoIP legacy and new GeoIP2 api.
-
-A config option 'resource_limit_cpu' (default: 0 or no limit) has been added
-to configure how many cpu cycles are allowed on a child process before it dies.
-
-A config option 'resource_limit_mem' (default: 0 or no limit) has been added
-to configure the maximum number of bytes of memory allowed both for 
-(virtual) address space bytes and resident set size.
-
-A new config option 'report_wrap_width' (default: 70) has been added
-to set the wrap width for description lines in the X-Spam-Report header.
-
-Notable Internal changes
-------------------------
-
-SpamAssassin can cope with new Net::DNS module versions.
-
-The "bytes" pragma has been remove from both core modules and plugins for
-better utf-8 compatibility, there has been also some other utf-8 related fixes.
-
-The spamc(1) client can now be build against OpenSSL 1.1.0.
-
-The test framework has been switched to Test::More module.
-
-Other updates
--------------
-
-A list of top-level domains in registrar boundaries was updated.
-
-
-Note for Users Upgrading to SpamAssassin 3.4.1
-----------------------------------------------
-
-- The TxRep plugin is now included and disabled by default for new installs.
-  To replace an existing AWL configuration with TxRep, follow the steps below:
-  - Disable AWL
-  - Enable TxRep
-  - Set txrep_factor equal to your previous AWL factor
-  - Set use_txrep to 1
-
-  For more detailed information and more configuration options, consult the
-  documentation in Mail::SpamAssassin::Plugin::TxRep.
-
-- The $VALID_TLDS_RE global in registrar boundaries is deprecated but kept for 
-  third-party plugin compatibility.  It will become increasingly out of date
-  and may be removed in a future release. 
-
-  See lib/Mail/SpamAssassin/Plugin/FreeMail.pm for an example of the new way
-  to obtain a valid list of TLDs, i.e. 
-
-    $self->{main}->{registryboundaries}->{valid_tlds_re} 
-
-- Mail::SpamAssassin::Util::RegistrarBoundaries is being replaced by 
-  Mail::SpamAssassin::RegistryBoundaries so that new TLDs can be updated via 
-  20_aux_tlds.cf delivered via sa-update.
-
-  ***3rd Party Plugin Authors, Please Note***
-  
-  The following functions will be removed in the next release after 3.4.1 
-  excepting any emergency break/fix releases immediately after 3.4.1:
-  
-  Mail::SpamAssassin::Util::RegistrarBoundaries::is_domain_valid 
-  Mail::SpamAssassin::Util::RegistrarBoundaries::trim_domain
-  Mail::SpamAssassin::Util::RegistrarBoundaries::split_domain 
-  Mail::SpamAssassin::Util::uri_to_domain 
-  
-  And the following variables will also be removed:
-  
-  Mail::SpamAssassin::Util::RegistrarBoundaries::US_STATES
-  Mail::SpamAssassin::Util::RegistrarBoundaries::THREE_LEVEL_DOMAINS
-  Mail::SpamAssassin::Util::RegistrarBoundaries::TWO_LEVEL_DOMAINS
-  Mail::SpamAssassin::Util::RegistrarBoundaries::VALID_TLDS_RE
-  Mail::SpamAssassin::Util::RegistrarBoundaries::VALID_TLDS
-  
-  
-  This change should only affect 3rd party plugin authors who will need to 
-  update their code to utilize Mail::SpamAssassin::RegistryBoundaries 
-  instead of the functions and variables in 
-  Mail::SpamAssassin::Util::RegistrarBoundaries and the function 
-  Mail::SpamAssassin::Util::uri_to_domain which are deprecated and will be 
-  removed.
-
-  For example, the $VALID_TLDS_RE global in registrar boundaries is 
-  deprecated but kept for third-party plugin compatibility.  It will become 
-  increasingly out of date and may be removed in a future release.
-
-  See lib/Mail/SpamAssassin/Plugin/FreeMail.pm for an example of the new way
-  to obtain a valid list of TLDs, i.e.
-
-    $self->{main}->{registryboundaries}->{valid_tlds_re}
-
-- It is now recommended that users uncomment "normalize_charset 1" in
-  local.cf. It will break rules that depend on messages being in non-UTF8
-  encodings, but going forward this will enable more robust unicode rules and
-  will eventually become the default.
-
-
-
-Note for Users Upgrading to SpamAssassin 3.4.0
-----------------------------------------------
-
-- When Bayes classification is in use and messages are 'learned' as spam
-  or ham and stored in a database, the Bayes plugin generates internal
-  message IDs of learned messages and stores them in a 'seen' database to
-  avoid re-learning duplicates and accidental un-learning messages that
-  were not previously learned. With changes in bug 5185, the calculation
-  of message IDs in a bayes 'seen' database has changed, so new code can
-  no longer associate new messages with those learned before the change.
-
-- Note that this change does not affect recognition of old tokens and the
-  classification algorithm, only duplicate detection and unlearning of old
-  messages is affected.
-
-- Because of this change, if you use Bayes and you are upgrading from a
-  version prior to 3.4.0, you may consider wiping your Bayes database
-  and starting fresh.
-
-- There is a new optional dependency on Net::Patricia to speed up lookups
-  on internal_networks, trusted_networks or msa_networks when these lists
-  contain a larger number of entries. Consider installing this module to
-  speed up classification.
-
-- The minimal required version of NetAddr::IP was bumped to 4.010
-
-- In addition to existing backends, the 3.4.0 introduces support for keeping
-  a Bayes database on a Redis server, either running locally, or accessed
-  over network. Similar to SQL backends, the database may be concurrently
-  used by several hosts running SpamAssassin.
-
-- For more detail on these and other changes, please see the Announcement
-  file at:
-   http://svn.apache.org/repos/asf/spamassassin/branches/3.4/build/announcements/3.4.0.txt
-
-Note for Users Upgrading to SpamAssassin 3.3.0
------------------------------------------------
-
-- Rules are no longer included with SpamAssassin "out of the box".  You will
-  need to immediately run "sa-update", or download the additional rules .tgz
-  package and run "sa-update --install" with it, to get a ruleset.
-
-- The BETA label has been taken off of the SpamAssassin SQL support.  Please
-  be aware that occasional changes may still be made to this area of the
-  code.  You should be sure to read this upgrade document each time you
-  install a new version to determine if any SQL updates need to be made to
-  your local installation.
-
-- The DKIM plugin is now enabled by default for new installs, if the perl
-  module Mail::DKIM is installed.  However, installation of SpamAssassin
-  will not overwrite existing .pre configuration files, so to use DKIM when
-  upgrading from a previous release that did not use DKIM, a directive:
-
-    loadplugin Mail::SpamAssassin::Plugin::DKIM
-
-  will need to be uncommented in file "v312.pre", or added to some
-  other .pre file, such as local.pre.
-
-
-Note for Users Upgrading to SpamAssassin 3.2.0
------------------------------------------------
-
-- The "127/8" network, including 127.0.0.1, is now always implicitly part of
-  "trusted_networks" and "internal_networks".  It's impossible to remove these
-  from the trusted/internal sets, since if you cannot trust the host where
-  SpamAssassin is running, you cannot trust SpamAssassin itself.  If you
-  previously had "trusted_networks" and "internal_networks" lines listing those
-  hosts, you should now remove them, otherwise a minor (non-lint-error) warning
-  will be output.
-
-- For ISPs -- version 3.2.0 now includes a new way to specify Mail Submission
-  Agents, relay hosts which accept mail from your own users and authenticates
-  them appropriately.  See the Mail::SpamAssassin::Conf manual page for the
-  "msa_networks" setting.
-
-
-Note for Users Upgrading to SpamAssassin 3.1.0
------------------------------------------------
-
-- A significant amount of core functionality has been moved into
-  plugins.  These include, AWL (auto-welcomelist), DCC, Pyzor, Razor2,
-  SpamCop reporting and TextCat.  For information on configuring these
-  plugins please refer to their individual documentation:
-  perldoc Mail::SpamAssassin::Plugin::* (ie AWL, DCC, etc)
-
-- There are now multiple files read to enable plugins in the
-  /etc/mail/spamassassin directory; previously only one, "init.pre" was
-  read.  Now both "init.pre", "v310.pre", and any other files ending
-  in ".pre" will be read.  As future releases are made, new plugins
-  will be added to new files named according to the release they're
-  added in.
-
-- Due to license restrictions the DCC and Razor2 plugins are disabled
-  by default.  We encourage you to read the appropriate license
-  yourself and decide if you are able to re-enable the plugins for
-  your site.
-
-- The use_auto_welcomelist config option has been moved to a user config
-  option, this allows individual users to turn on or off welcomelisting
-  regardless of what is set in the system config.  If you would like to
-  disable AWL (auto-welcomelist) on a site-wide basis, then you can comment
-  out the plugin in "v310.pre".
-
-- The bayes_auto_learn_threshold_* config options for bayes have moved
-  to a plugin.  In general the default should work just fine however
-  if you are interested in changing these values you should see:
-  perldoc Mail::SpamAssassin::Plugin::AutoLearnThreshold
-
-- The AWL support for NDBM_File databases has been dropped, due to a
-  bug in that package which renders it useless (bug 4353).  It appears
-  that SDBM_File, the package which will be used instead, is fully
-  compatible with NDBM however, so this should be unnoticeable.
-
-- The prefork algorithm for spamd has been changed.  In this version spamd
-  will attempt to keep a small number of "hot" child processes as busy as
-  possible, and keep any others as idle as possible, using something
-  similar to the Apache httpd server scaling algorithm. This reduces
-  memory usage and swapping. You can use the --round-robin switch for
-  spamd to disable this scaling algorithm, and the behaviour seen in the
-  3.0.x versions will be used instead, where all processes receive an
-  equal load and no scaling takes place.
-
-- As of 3.1.0, in addition to the generic BayesSQL support (via
-  Mail::SpamAssassin::BayesStore::SQL) usable by multiple database
-  drivers there is now specific support for MySQL 4.1+ and
-  PostgreSQL.  This support is based on non-standard features present
-  in both database servers that allow for various performance boosts.
-
-  If you were using the previous BayesSQL support with MySQL, and
-  already have MySQL 4.1+ installed you can begin using the new module
-  immediately by replacing the bayes_store_module line in your
-  configuration with:  Mail::SpamAssassin::BayesStore::MySQL
-
-  We do however recommend that you switch your MySQL tables over to
-  InnoDB for better data integrity and multi user support.  You can
-  most often do this via a simple ALTER TABLE command, refer to the
-  MySQL documentation for more information.
-
-  If you were previously using PostgreSQL for your bayes database then
-  we STRONGLY recommend switching to the PostgreSQL specific backend:
-  Mail::SpamAssassin::BayesStore::PgSQL
-  To switch to this backend you should first run sa-learn --backup to
-  make a backup of your existing data and then drop and recreate the
-  database following the instructions in sql/README.bayes.  Then you
-  can restore the database with sa-learn --restore.  If you have
-  multiple users then you will have to run --backup and --restore for
-  each user to fully restore the database.
-
-- See http://wiki.apache.org/spamassassin/UpgradeTo310 for a
-  supplementary list of upgrade notes.  It will be updated with any
-  upgrade notes not captured in this document.
-
-- Finally, this document is likely not complete.  Other configuration
-  options/arguments may have changed from older versions, etc.  It would
-  be good to double-check any custom configuration options to make sure
-  they're still valid.  This could be as simple as running "spamassassin
-  --lint", or more complex, as required by the environment.
-
-
-Note for Users Upgrading to SpamAssassin 3.0.x
-----------------------------------------------
-
-- The SpamAssassin 2.6x release series was the last set of releases to
-  officially support perl versions earlier than perl 5.6.1.  If you are
-  using an earlier version of perl, you will need to upgrade before you
-  can use the 3.0.0 version of SpamAssassin.  You will also want to make
-  sure that you have the appropriate versions of required and optional
-  modules as they may have changed from old versions.  The INSTALL
-  document has the modules and version requirements listed.
-
-- See http://wiki.apache.org/spamassassin/UpgradeTo300 for a
-  supplementary list of upgrade notes.  It will be updated with any
-  upgrade notes not captured in this document.
-
-- SpamAssassin 3.0.0 has a significantly different API (Application Program
-  Interface) from the 2.x series of code.  This means that if you use
-  SpamAssassin through a third-party utility (milter, etc,) you need to make
-  sure you have an updated version which supports 3.0.0.  See
-  http://wiki.apache.org/spamassassin/UpgradeTo300 for information about
-  third-party software.
-
-- The --auto-welcomelist, --welcomelist and -a options for "spamd" and
-  "spamassassin" to turn on the auto-welcomelist have been removed and
-  replaced by the "use_auto_welcomelist" configuration option which is
-  also now turned on by default.
-
-- The --virtual-config switch for spamd had to be dropped, due to licensing
-  issues.  It is replaced by the --virtual-config-dir switch.
-
-- The "rewrite_subject" and "subject_tag" configuration options were
-  deprecated and are now removed. Instead, using "rewrite_header Subject
-  [your desired setting]".  e.g.
-
-    rewrite_subject 1
-    subject_tag ****SPAM(_SCORE_)****
-
-  becomes
-
-    rewrite_header Subject ****SPAM(_SCORE_)****
-
-- The "sa-learn --rebuild" command has been deprecated; please use
-  "sa-learn --sync" instead.  The --rebuild option will remain temporarily
-  for backward compatibility.
-
-- The Bayesian storage modules have been completely re-written and now
-  include Berkeley DB (DBM) storage as well as SQL based storage (see
-  sql/README.bayes for more information).  In addition, a new format
-  has been introduced for the bayes database that stores tokens in fixed
-  length hashes (Bayes v3).  All DBM databases should be automatically
-  converted to this new format the first time they are opened for write.
-  You can manually perform the upgrade by running "sa-learn --sync"
-  from the command line.
-
-  Due to the database format change, you will want to do something like
-  this when upgrading:
-
-  - stop running spamassassin/spamd (ie: you don't want it to be running
-    during the upgrade)
-  - run "sa-learn --rebuild", this will sync your journal.  if you skip
-    this step, any data from the journal will be lost when the DB is
-    upgraded.
-  - upgrade SA to 3.0.0
-  - run "sa-learn --sync", which will cause the db format to be upgraded.
-    if you want to see what is going on, you can add the "-D" option.
-  - test the new database by running some sample mails through
-    SpamAssassin, and/or at least running "sa-learn --dump" to make sure
-    the data looks valid.
-  - start running spamassassin/spamd again
-
-  If, instead of uprading your Bayes database, you want to wipe it and
-  start fresh, you can run "sa-learn --clear" to safely remove your
-  Bayes database files.  If the --clear command issues an error then
-  you can simply delete the Bayes database files ("bayes_*") while SA
-  is not running; SpamAssassin will recreate them in the current
-  format when it runs.
-
-- "spamd" now has a default max-children setting of 5; no more than 5
-  child scanner processes will be run in parallel.  Previously, there was
-  no default limit unless you specified the "-m" switch when starting
-  spamd.
-
-- If you are using a UNIX machine with all database files on local disks,
-  and no sharing of those databases across NFS filesystems, you can use a
-  more efficient, but non-NFS-safe, locking mechanism.   Do this by adding
-  the line "lock_method flock" to the /etc/mail/spamassassin/local.cf
-  file. This is strongly recommended if you're not using NFS, as it is
-  much faster than the NFS-safe locker.
-
-- Please note that the use of the following commandline parameters for
-  spamassassin and spamd have been deprecated and may be removed in
-  upcoming versions of SpamAssassin.  Please discontinue usage of these
-  options:
-
-    in the 2.6x series:		--add-from, --pipe, -F, --stop-at-threshold,
-    				-S, -P (spamassassin only)
-    in the 3.0.x series:	--auto-whitelist, -a, --whitelist-factory, -M,
-    				--warning-from, -w, --log-to-mbox, -l
-
-- user_scores_sql_table is no longer supported.  If you need to use a table
-  name, other than the default, create a custom query using the
-  user_scores_sql_custom_query config option.
-
-- SpamAssassin runs in "taint mode" by default for improved security.
-  Certain third-party modules may be incompatible with taint mode.
-
-- 2.6x deprecated the use of the "check_bayes_db" script, and it
-  has been removed in 3.0.0.  Please see the sa-learn man/pod
-  documentation for more info.
-
-- Finally, this document is likely not complete.  Other configuration
-  options/arguments may have changed from older versions, etc.  It would
-  be good to double-check any custom configuration options to make sure
-  they're still valid.  This could be as simple as running "spamassassin
-  --lint", or more complex, as required by the environment.
-
-  An example: "require_version <version>" hasn't changed itself, but the
-  internal version representation is now "x.yyyzzz" instead of "x.yz"
-  which could cause issues if "require_version 3.00" is expected to work
-  (it won't, it needs to be "require_version 3.000000").
-
-
-Note for Users Upgrading from SpamAssassin 2.5x
------------------------------------------------
-
-- Due to major reliability shortcomings in the database support libraries
-  other than DB_File, we now require that the DB_File module be installed
-  to use SpamAssassin's Bayes rules.
-
-  SpamAssassin will still work without DB_File installed, but the Bayes
-  support will be disabled.
-
-  If you install DB_File and wish to import old Bayes database data, each
-  user with a Bayes db should run "sa-learn --import" to copy old entries
-  from the other formats into a new DB_File file.
-
-  Due to the database library change, and the change to the database
-  format itself, you will want to do something like this when upgrading:
-
-  - stop running spamassassin/spamd (ie: you don't want it to be running
-    during the upgrade)
-  - run "sa-learn --rebuild", this will sync your journal.  if you skip
-    this step, any data from the journal will be lost when the DB is
-    upgraded.
-  - install DB_File module if necessary
-  - upgrade SA to 3.0.0
-  - if you were using another database module previously, run "sa-learn
-    --import" to migrate the data into new DB_File files
-  - run "sa-learn --sync", which will cause the db format to be upgraded.
-    if you want to see what is going on, you can add the "-D" option.
-  - test the new database by running some sample mails through
-    SpamAssassin, and/or at least running "sa-learn --dump" to make sure
-    the data looks valid.
-  - start running spamassassin/spamd again
-
-  Obviously the steps will be different depending on your environment, but
-  you get the idea. :)
-
-
-Note For Users Upgrading From SpamAssassin 2.3x or 2.4x
--------------------------------------------------------
-
-- SpamAssassin no longer includes code to handle local mail delivery, as
-  it was not reliable enough, compared to procmail.  So now, if you relied
-  on spamassassin to write the mail into your mail folder, you'll have to
-  change your setup to use procmail as detailed below.  If you used
-  spamassassin to filter your mail and then something else wrote it into a
-  folder for you, then you should be fine.
-
-- Support for versions of the optional Mail::Audit module is no longer
-  included.
-
-- The default mode of tagging (which used to be ***SPAM*** in the subject
-  line) no longer takes place.  Instead the message is rewritten. If an
-  incoming message is tagged as spam, instead of modifying the original
-  message, SpamAssassin will create a new report message and attach the
-  original message as a message/rfc822 MIME part (ensuring the original
-  message is completely preserved and easier to recover).  If you do not
-  want to modify the body of incoming spam, use the "report_safe" option.
-  The "report_header" and "defang_mime" options have been removed as a
-  result.
 
 (end of UPGRADE)
-
-//vim:tw=74:

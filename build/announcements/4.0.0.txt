@@ -25,9 +25,9 @@ Important Notes
 —--------------
 
 *** On March 1, 2020, we stopped publishing rulesets with SHA-1
-  signatures. If you do not update to 3.4.2 or later, you will be stuck
-  at the last ruleset with SHA-1 signatures. Such an upgrade should be
-  to 3.4.6 to obtain the contained security fixes ***
+  signatures. If you do not update to 3.4.2 or later, you will be
+  stuck at the last ruleset with SHA-1 signatures. Such an upgrade
+  should be to 3.4.6 to obtain the contained security fixes ***
 
 *** Ongoing development on the 3.4 branch has ceased. All future
   releases and bug fixes will be on the 4.0 series, unless a new
@@ -39,8 +39,8 @@ Thanks
 
 Many thanks to the committers (see CREDITS file), contributors, rule
 testers, mass checkers, and code testers who have made this release
-possible. We would also like to thank cPanel for their continued support
-of new features.
+possible. We would also like to thank cPanel for their continued
+support of new features.
 
 Notable features:
 =================
@@ -54,9 +54,10 @@ There are three new plugins added with this release:
 
 #1 Mail::SpamAssassin::Plugin::ExtractText
 
-This plugin uses external tools to extract text from message parts, and
-then sets the text as the rendered part. All SpamAssassin rules that
-apply to the rendered part will run on the extracted text as well.
+This plugin uses external tools to extract text from message parts,
+and then sets the text as the rendered part. All SpamAssassin rules
+that apply to the rendered part will run on the extracted text as
+well.
 
 
 #2 Mail::SpamAssassin::Plugin::DMARC
@@ -69,10 +70,10 @@ SPF results.
 
 This plugin looks for URLs shortened by a list of URL shortening
 services. Upon finding a matching URL, plugin will send a HTTP request
-to the shortening service and retrieve the Location-header which points
-to the actual shortened URL. It then adds this URL to the list of URIs
-extracted by SpamAssassin which can then be accessed by uri rules and
-plugins such as URIDNSBL.
+to the shortening service and retrieve the Location-header which
+points to the actual shortened URL. It then adds this URL to the list
+of URIs extracted by SpamAssassin which can then be accessed by uri
+rules and plugins such as URIDNSBL.
 
 
 Removed plugin
@@ -90,8 +91,8 @@ This release includes fixes for the following:
      completed and significantly improved to include native UTF-8
      processing
 
-  - Bayes plugin has been improved to skip common words aka noise words
-     written in languages other than English
+  - Bayes plugin has been improved to skip common words aka noise
+     words written in languages other than English
 
   - OLEVBMacro plugin has been improved in order to detect more
      Microsoft Office macros and dangerous content. It has also been
@@ -102,10 +103,13 @@ This release includes fixes for the following:
      inside other rules
 
   - sa-update(1) tool has been improved with three new options:
+
     #1 forcemirror: forces sa-update to use a specific mirror server,
+
     #2 score-multiplier: adjust all scores from update channel by a
       given multiplier to quickly level set scores to match your
       preferred threshold
+
     #3 score-limit adjusts all scores from update channel over a
       specified limit to a new limit
 
@@ -130,9 +134,10 @@ This release includes fixes for the following:
 * Mail::SPF::Query use is deprecated, along with settings
   do_not_use_mail_spf, do_not_use_mail_spf_query.
 
- * SPF lookups are not done asynchronously and you may consider using an
-   SPF filter at the MTA level (pypolicyd-spf / spf-engine / etc) which
-   generates a Received-SPF header that can be parsed by SpamAssassin.
+ * SPF lookups are not done asynchronously and you may consider using
+   an SPF filter at the MTA level (pypolicyd-spf / spf-engine / etc)
+   which generates a Received-SPF header that can be parsed by
+   SpamAssassin.
 
  * The default sa-update ruleset doesn't make ASN lookups or header
    additions anymore.  Configure desired methods (asn_use_geodb /
@@ -154,12 +159,13 @@ New tflag "nolog" added to hide info coming from rules in SpamAssassin
 reports
 
 New dns_options "nov4" and "nov6" added.
-IMPORTANT:; You must set nov6 if your DNS resolver is filtering
-IPv6 AAAA replies.
+IMPORTANT:; You must set nov6 if your DNS resolver is filtering IPv6
+AAAA replies.
 
-Razor2 razor_fork option added. It will fork separate Razor2 process and
-read in the results later asynchronously, increasing throughput. When
-this is used, rule priorities are automatically adjusted to -100.
+Razor2 razor_fork option added. It will fork separate Razor2 process
+and read in the results later asynchronously, increasing
+throughput. When this is used, rule priorities are automatically
+adjusted to -100.
 
 Pyzor pyzor_fork option added. It will fork separate Pyzor process and
 read in the results later asynchronously, increasing throughput. When
@@ -174,12 +180,12 @@ SpamAssassin reports
 Notable Internal changes
 ------------------------
 
-Meta rules no longer use priority values, they are evaluated dynamically
-when the rules they depend on are finished
+Meta rules no longer use priority values, they are evaluated
+dynamically when the rules they depend on are finished
 
 DNS and other asynchronous lookups like DCC or Razor2 plugins are now
-launched when priority -100 is reached. This allows short circuiting at
-lower priority without sending unneeded DNS queries
+launched when priority -100 is reached. This allows short circuiting
+at lower priority without sending unneeded DNS queries
 
 New internal Mail::SpamAssassin::GeoDB module supporting RelayCountry
 and URILocalBL plugins provides a unified interface to Geographic IP
@@ -189,7 +195,8 @@ modules. These include:
     IP::Country::DB_File
     IP::Country::Fast.
 
-Bayes and TxRep Message-ID tracking now uses a different hashing method
+Bayes and TxRep Message-ID tracking now uses a different hashing
+method
 
 
 Other updates
@@ -203,16 +210,16 @@ Optimizations
 
 Apache SpamAssassin 4.0.0 represents years of work by the project with
 numerous improvements, new rule types, and internal native handling of
-messages in international languages. These three key optimizations will
-improve the efficiency of SpamAssassin:
+messages in international languages. These three key optimizations
+will improve the efficiency of SpamAssassin:
 
     DNS queries are now done asynchronously for overall speed
     improvements
 
     DCC checks can now use dccifd asynchronously for improved throughput
 
-    Pyzor and Razor fork use separate processes done asynchronously for
-    increased throughput
+    Pyzor and Razor fork use separate processes done asynchronously
+    for increased throughput
 
 
 Downloading and availability
@@ -224,9 +231,9 @@ https://spamassassin.apache.org/downloads.cgi
 
 [INSERT SHA256 and SHA512 HASHES OF FILES HERE AFTER RELEASE IS PREPARED]
 
-Note that the Rules files, aka *-rules-*.tgz, are only necessary if you
-cannot, or do not wish to, run "sa-update" after installation. Using
-sa-update will download the latest rules
+Note that the Rules files, aka *-rules-*.tgz, are only necessary if
+you cannot, or do not wish to, run "sa-update" after
+installation. Using sa-update will download the latest rules
 
 See the INSTALL and UPGRADE files in the distribution for important
 installation notes
@@ -236,8 +243,8 @@ GPG Verification Procedure
 --------------------------
 The release files also have a .asc accompanying them.  The file serves
 as an external GPG signature for the given release file.  The signing
-key is available via the keys.gnupg.net or keys.openpgp.org key servers,
-as well as https://www.apache.org/dist/spamassassin/KEYS
+key is available via the keys.gnupg.net or keys.openpgp.org key
+servers, as well as https://www.apache.org/dist/spamassassin/KEYS
 
 
 The following key is used to sign SA releases 3.3.0 and later:
@@ -264,9 +271,9 @@ file and run the following commands:
 
 Then verify that the key matches the signature.
 
-Note that older versions of gnupg may not be able to complete the steps
-above. Specifically, GnuPG v1.0.6, 1.0.7 & 1.2.6 failed while v1.4.11
-worked flawlessly
+Note that older versions of gnupg may not be able to complete the
+steps above. Specifically, GnuPG v1.0.6, 1.0.7 & 1.2.6 failed while
+v1.4.11 worked flawlessly
 
 See https://www.apache.org/info/verification.html for more information
 on verifying Apache releases
@@ -284,17 +291,17 @@ and text analysis, Bayesian filtering, DNS blocklists, collaborative
 filtering databases, and meta concepts to lower incorrect
 classification.
 
-Apache SpamAssassin uses a highly modular architecture that allows other
-technologies to be quickly incorporated as plugins to easily add or
-replace existing methods.
+Apache SpamAssassin uses a highly modular architecture that allows
+other technologies to be quickly incorporated as plugins to easily add
+or replace existing methods.
 
-Apache SpamAssassin typically runs on a server using either command line
-utilities or an API to classify email so a mail system can use the
-results before the message reaches mailboxes.
+Apache SpamAssassin typically runs on a server using either command
+line utilities or an API to classify email so a mail system can use
+the results before the message reaches mailboxes.
 
 Most of the Apache SpamAssassin is written in Perl natively supporting
-Unix, Linux, and macOS platforms and Microsoft Windows using Strawberry
-Perl.
+Unix, Linux, and macOS platforms and Microsoft Windows using
+Strawberry Perl.
 
 For more information, visit https://spamassassin.apache.org/
 
