@@ -832,6 +832,7 @@ sub check_dcc {
   return $pms->{dcc_result} if defined $pms->{dcc_result};
 
   $self->_launch_dcc($pms);
+  return if $pms->{dcc_async_start}; # return undef for async status
 
   if (!defined $pms->{dcc_x_result}) {
     $pms->{dcc_abort} = 1;
