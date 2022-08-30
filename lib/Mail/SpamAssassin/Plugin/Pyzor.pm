@@ -37,6 +37,7 @@ package Mail::SpamAssassin::Plugin::Pyzor;
 use Mail::SpamAssassin::Plugin;
 use Mail::SpamAssassin::Logger;
 use Mail::SpamAssassin::Timeout;
+use Mail::SpamAssassin::SubProcBackChannel;
 use Mail::SpamAssassin::Util qw(untaint_var untaint_file_path am_running_on_windows
                                 proc_status_ok exit_status_str force_die);
 use strict;
