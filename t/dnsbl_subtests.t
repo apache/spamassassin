@@ -10,10 +10,14 @@ use lib '.'; use lib 't';
 use SATest; sa_t_init("dnsbl_subtests");
 
 use vars qw(%patterns %anti_patterns);
-use Test::More tests => 46;
+use Test::More;
 
 use Errno qw(EADDRINUSE EACCES);
-use Net::DNS::Nameserver;
+
+use constant HAS_NET_DNS_NAMESERVER => eval { require Net::DNS::Nameserver; };
+plan skip_all => "Net::DNS::Nameserver in unavailable on this system" unless (HAS_NET_DNS_NAMESERVER);
+plan  tests => 46;
+
 use Mail::SpamAssassin;
 
 # Bug 5761 (no 127.0.0.1 in jail, use SPAMD_LOCALHOST if specified)

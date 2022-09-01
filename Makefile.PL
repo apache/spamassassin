@@ -400,12 +400,16 @@ $makefile{META_MERGE} = {
         'Encode::Detect::Detector' =>  0,
         'Net::Patricia' =>             1.16,
         'Net::CIDR::Lite' =>           0,
-        'Net::DNS::Nameserver' =>      0,
         'BSD::Resource' =>             0,
         'Archive::Zip' =>              0,
         'IO::String' =>                0,
         'Email::Address::XS' =>        0,
         'Mail::DMARC' =>               0,
+      },
+    },
+    test => {
+      recommends => {
+        'Net::DNS::Nameserver' =>      0,
       },
     },
   },
