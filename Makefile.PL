@@ -172,7 +172,6 @@ my %makefile = (
     },
 
     # be quite explicit about this; afaik CPAN.pm is sensible using this
-    # also see CURRENT_PM below
     'PREREQ_PM' => {
         'File::Spec'           => 0.8,           # older versions lack some routines we need
         'File::Copy'           => 2.02,          # this version is shipped with 5.005_03, the oldest version known to work
@@ -263,14 +262,6 @@ my %makefile = (
 my @FILES_THAT_MUST_EXIST = qw(
         rules/72_active.cf
     );
-
-# make sure certain optional modules are up-to-date if they are installed
-# also see PREREQ_PM above
-my %CURRENT_PM = (
-    'Net::DNS' => (RUNNING_ON_WINDOWS ? 0.46 : 0.34),
-    'Razor2::Client::Agent' => 2.40,
-);
-
 
 # All the $(*MAN1*) stuff is empty/zero if Perl was Configured with -Dman1dir=none;
 # however, support site/vendor man1 dirs (bug 5338)
