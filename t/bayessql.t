@@ -11,6 +11,7 @@ use constant HAS_DBI => eval { require DBI; }; # for our cleanup stuff
 use constant SQLITE => eval { require DBD::SQLite; DBD::SQLite->VERSION(1.59_01); };
 use constant SQL => conf_bool('run_bayes_sql_tests');
 
+plan skip_all => "Long running tests disabled" unless conf_bool('run_long_tests');
 plan skip_all => "DBI is unavailable on this system" unless (HAS_DBI);
 plan skip_all => "Bayes SQL tests are disabled or DBD::SQLite not found" unless (SQLITE || SQL);
 
@@ -24,8 +25,8 @@ diag "Note: If there is a failure it may be due to an incorrect SQL configuratio
 my ($dbconfig, $dbdsn, $dbusername, $dbpassword);
 
 if (SQLITE) {
-  # Try /dev/shm as it's likely memdisk, otherwise SQLite is sloow..
-  my $dbdir = tempdir("bayessql.XXXXXX", DIR => -w "/dev/shm" ? "/dev/shm" : "log");
+  # bug 8033 - Test is 7 times faster using /dev/shm but on some test machines it fails 
+  my $dbdir = tempdir("bayessql.XXXXXX", DIR => "log");
   die "FATAL: failed to create dbdir: $!" unless -d $dbdir;
   $dbdsn = "dbi:SQLite:dbname=$dbdir/bayes.db";
   $dbusername = "";
