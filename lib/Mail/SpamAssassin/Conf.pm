@@ -1902,7 +1902,7 @@ One would set I<nov6> if the resolver is filtering AAAA responses.  NOTE:
 these options only refer to I<resolving capabilies>, there is no other
 meaning like whether the IP address of resolver itself is IPv4 or IPv6.
 
-Option I<edns> (or I<edsn0>) may take a value which specifies a requestor's
+Option I<edns> (or I<edns0>) may take a value which specifies a requestor's
 acceptable UDP payload size according to EDNS0 specifications (RFC 6891,
 ex RFC 2671) e.g. I<edns=4096>. When EDNS0 is off (I<noedns> or I<edns=512>)
 a traditional implied UDP payload size is 512 bytes, which is also a minimum
