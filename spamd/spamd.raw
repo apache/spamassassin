@@ -3071,8 +3071,8 @@ sub serverstarted {
 }
 
 sub daemonize {
-  # removed bug 7594 # Pretty command line in ps
-    #$0 = join (' ', $ORIG_ARG0, @ORIG_ARGV) unless would_log("dbg");
+  # bug 8036 - ensure ps legacy name shows up as spamd even if command line call was perl path_to_spamd
+  $0 = 'spamd' unless would_log("dbg");
 
   # be a nice daemon and chdir to the root so we don't block any
   # unmount attempts
