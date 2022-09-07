@@ -25,15 +25,14 @@ diag "Note: If there is a failure it may be due to an incorrect SQL configuratio
 my ($dbconfig, $dbdsn, $dbusername, $dbpassword);
 
 if (SQLITE) {
-  # bug 8033 - Test is 7 times faster using /dev/shm but on some test machines it fails 
   my $dbdir = tempdir("bayessql.XXXXXX", DIR => "log");
   die "FATAL: failed to create dbdir: $!" unless -d $dbdir;
-  $dbdsn = "dbi:SQLite:dbname=$dbdir/bayes.db";
+  # Bug 8033 - undocumented extension to dsn format we added for this test
+  $dbdsn = "dbi:SQLite:dbname=$dbdir/bayes.db;synchronous=OFF";
   $dbusername = "";
   $dbpassword = "";
   my $dbh = DBI->connect($dbdsn,$dbusername,$dbpassword);
   $dbh->do("PRAGMA synchronous = OFF");
-  $dbh->do("PRAGMA cache_size = 10000");
   $dbh->do("
   CREATE TABLE bayes_expire (
     id int(11) NOT NULL default '0',

@@ -1676,6 +1676,13 @@ sub _connect_db {
     dbg("bayes: database connection established");
   }
 
+  # SQLite PRAGMA attributes - here for tests, see bug 8033
+  if ($self->{_dsn} =~ /^dbi:SQLite:.*?;(.+)/i) {
+    foreach my $attr (split(/;/, $1)) {
+      $dbh->do("PRAGMA $attr");
+    }
+  }
+  
   $self->{_dbh} = $dbh;
 
  return 1;
