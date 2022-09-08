@@ -9,6 +9,7 @@ plan skip_all => "Tests don't work on windows" if $RUNNING_ON_WINDOWS;
 plan skip_all => "UID nobody tests" if $SKIP_SETUID_NOBODY_TESTS;
 plan tests => 6;
 
+diag("NOTE: A rare single failure in this test may be a race condition in the test that can be ignored");
 # ---------------------------------------------------------------------------
 
 tstprefs ('
