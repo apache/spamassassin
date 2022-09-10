@@ -817,7 +817,14 @@ sub _set_macro_PERL_TAINT {
 sub _set_macro_PREPROCESS {
 
   return if get_macro('PREPROCESS');
-  set_macro('PREPROCESS', join(' ', macro_ref('PERL_BIN'), qq{build/preprocessor}));
+  # Bug 8038 - work around quirk of newer Extutils::MakeMaker on Windows with dmake
+  my $perl_bin = get_expanded_macro('FULLPERL');
+  if ($RUNNING_ON_WINDOWS and ($::Config{make} eq 'dmake') and ($perl_bin =~ /^([a-zA-Z]:)?\\"(.*)$/)) {
+    $perl_bin = "\"$1\\$2";
+  } else {
+    $perl_bin = macro_ref('PERL_BIN');
+  }
+  set_macro('PREPROCESS', join(' ', $perl_bin, qq{build/preprocessor}));
 }
 
 # This routine sets the value for CONFIGURE (spamc only).
