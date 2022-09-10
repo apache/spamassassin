@@ -165,11 +165,11 @@ Run "svn status" to ensure you're building/releasing from a pristine
 
      svn log https://svn.apache.org/repos/asf/spamassassin/tags/spamassassin_release_3_4_6 -v --stop-on-copy
 
-- Exclude some automated changes from the logs:
+- Exclude some automated and rule maintenance changes from the logs:
 
     cat Changes | perl -ne ' BEGIN{$/=("-"x72)."\n"}
     chomp; @ln=split/^/;
-    next if @ln==3 && $ln[2]=~/^\s*(updated scores for revision.*|promotions validated|auto-generated rules|)\s*$/;
+    next if @ln==3 && $ln[2]=~/^\s*(updated scores for revision.*|promotions validated|auto-generated rules|[Uu]pdate generated ruleset|)\s*$/;
     print "@ln$/"' > Changes.tmp
 
 - Word wrap the Changes file with something like 
