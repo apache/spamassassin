@@ -110,9 +110,6 @@ ALL_TRUSTED
 # tflags publish
 AMAZON_IMG_NOT_RCVD_AMZN
 
-# good enough
-APOSTROPHE_TOCC
-
 # tflags publish
 APP_DEVELOPMENT_FREEM
 
@@ -254,7 +251,7 @@ BITCOIN_YOUR_INFO
 # good enough
 BODY_SINGLE_URI
 
-# tflags publish
+# tflags net
 BODY_URI_ONLY
 
 # tflags publish
@@ -543,6 +540,9 @@ FROM_MISSP_FREEMAIL
 FROM_MISSP_MSFT
 
 # tflags net
+FROM_MISSP_REPLYTO
+
+# tflags net
 FROM_MISSP_SPF_FAIL
 
 # good enough
@@ -740,6 +740,9 @@ HAS_X_NO_RELAY
 # tflags publish
 HAS_X_OUTGOING_SPAM_STAT
 
+# tflags net
+HDRS_LCASE
+
 # good enough
 HDRS_LCASE_IMGONLY
 
@@ -843,6 +846,9 @@ JH_SPAMMY_PATTERN01
 JH_SPAMMY_PATTERN02
 
 # tflags net
+KHOP_FAKE_EBAY
+
+# tflags net
 KHOP_HELO_FCRDNS
 
 # tflags publish
@@ -887,11 +893,17 @@ MALWARE_PASSWORD
 # tflags publish
 MALW_ATTACH
 
+# tflags net
+MANY_HDRS_LCASE
+
 # tflags publish
 MANY_SPAN_IN_TEXT
 
 # good enough
 MANY_SUBDOM
+
+# tflags net
+MAY_BE_FORGED
 
 # tflags publish
 MILLION_HUNDRED
@@ -1031,9 +1043,6 @@ NUMBERONLY_BITCOIN_EXP
 # tflags publish
 OBFU_BITCOIN
 
-# good enough
-OBFU_JPG_ATTACH
-
 # tflags publish
 OBFU_JVSCR_ESC
 
@@ -1060,9 +1069,6 @@ PDS_DBL_URL_TNB_RUNON
 
 # tflags net
 PDS_FROM_2_EMAILS
-
-# good enough
-PDS_FROM_2_EMAILS_SHRTNER
 
 # tflags net
 PDS_HELO_SPF_FAIL
@@ -1562,7 +1568,7 @@ TARINGANET_IMG_NOT_RCVD_TN
 # tflags publish
 TEQF_USR_IMAGE
 
-# tflags net
+# tflags publish
 TEQF_USR_MSGID_HEX
 
 # tflags publish
@@ -1618,6 +1624,9 @@ TO_TOO_MANY_WFH_01
 
 # good enough
 TVD_RCVD_SPACE_BRACKET
+
+# tflags net
+TVD_SPACE_ENCODED
 
 # tflags net
 TVD_SPACE_RATIO_MINFP
@@ -1820,10 +1829,10 @@ URI_WPADMIN
 # tflags publish
 URI_WP_DIRINDEX
 
-# tflags publish
+# tflags net
 URI_WP_HACKED
 
-# tflags publish
+# tflags net
 URI_WP_HACKED_2
 
 # tflags publish
