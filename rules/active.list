@@ -467,7 +467,7 @@ FORGED_SPF_HELO
 # tflags net
 FORM_FRAUD
 
-# tflags publish
+# tflags net
 FORM_FRAUD_3
 
 # tflags publish
@@ -532,6 +532,9 @@ FROM_LOCAL_NOVOWEL
 
 # good enough
 FROM_MISSPACED
+
+# good enough
+FROM_MISSP_DYNIP
 
 # good enough
 FROM_MISSP_EH_MATCH
@@ -743,9 +746,6 @@ HAS_X_NO_RELAY
 # tflags publish
 HAS_X_OUTGOING_SPAM_STAT
 
-# tflags net
-HDRS_LCASE
-
 # good enough
 HDRS_LCASE_IMGONLY
 
@@ -827,7 +827,7 @@ HTML_OFF_PAGE
 # tflags publish
 HTML_SHRT_CMNT_OBFU_MANY
 
-# tflags publish
+# tflags net
 HTML_SINGLET_MANY
 
 # tflags net
@@ -847,6 +847,9 @@ JH_SPAMMY_PATTERN01
 
 # tflags publish
 JH_SPAMMY_PATTERN02
+
+# tflags net
+KHOP_FAKE_EBAY
 
 # tflags net
 KHOP_HELO_FCRDNS
@@ -1060,6 +1063,9 @@ PDS_BTC_NTLD
 
 # good enough
 PDS_DBL_URL_TNB_RUNON
+
+# tflags net
+PDS_FROM_2_EMAILS
 
 # tflags net
 PDS_HELO_SPF_FAIL
@@ -1437,9 +1443,6 @@ REPTO_419_FRAUD_YN
 REPTO_INFONUMSCOM
 
 # good enough
-SCC_BODY_URI_ONLY
-
-# good enough
 SCC_CANSPAM_2
 
 # tflags publish
@@ -1542,6 +1545,9 @@ SUBJECT_IN_WELCOMELIST
 SUBJ_BRKN_WORDNUMS
 
 # tflags net
+SUBJ_UNNEEDED_HTML
+
+# tflags net
 SURBL_BLOCKED
 
 # tflags publish
@@ -1598,9 +1604,6 @@ TO_NO_BRKTS_HTML_IMG
 # tflags publish
 TO_NO_BRKTS_HTML_ONLY
 
-# tflags net
-TO_NO_BRKTS_MSFT
-
 # tflags publish
 TO_NO_BRKTS_NORDNS_HTML
 
@@ -1614,7 +1617,10 @@ TO_TOO_MANY_WFH_01
 TVD_RCVD_SPACE_BRACKET
 
 # tflags net
-TVD_SUBJ_NUM_OBFU_MINFP
+TVD_SPACE_ENCODED
+
+# tflags net
+TVD_SPACE_RATIO_MINFP
 
 # good enough
 TVD_VISIT_PHARMA
@@ -1787,7 +1793,7 @@ URI_NOVOWEL
 # good enough
 URI_OBFU_DOM
 
-# tflags publish
+# tflags net
 URI_ONLY_MSGID_MALF
 
 # tflags publish
