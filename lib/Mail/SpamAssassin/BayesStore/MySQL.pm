@@ -644,7 +644,7 @@ sub tok_touch_all {
   my $sth = $self->{_dbh}->prepare($sql);
 
   unless (defined($sth)) {
-    dbg("bayes: tok_get_all: SQL error: ".$self->{_dbh}->errstr());
+    dbg("bayes: tok_touch_all: SQL error: ".$self->{_dbh}->errstr());
     $self->{_dbh}->rollback();
     return [];
   }
