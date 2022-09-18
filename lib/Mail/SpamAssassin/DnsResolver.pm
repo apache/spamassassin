@@ -900,6 +900,8 @@ sub poll_responses {
   return ($cnt, $cnt_cb);
 }
 
+use constant RECV_FLAGS => eval { MSG_DONTWAIT } || 0; # Not in Windows
+
 # Used to flush stale DNS responses, which we don't need to process
 sub flush_responses {
   my ($self) = @_;
@@ -912,17 +914,18 @@ sub flush_responses {
 
   my $packetsize = $self->{res}->udppacketsize;
   $packetsize = 512  if $packetsize < 512;  # just in case
-
+  $self->{sock}->blocking(0) unless(RECV_FLAGS);
   for (;;) {
     eval {  # use eval to catch alarm signal
       ($nfound, undef) = select($rout=$rin, undef, undef, 0);
       1;
     } or do {
-      return;
+	  last;
     };
-    return if !$nfound;
-    return if !$self->{sock}->recv(my $data, $packetsize+256, MSG_DONTWAIT);
+    last if !$nfound;
+    last if !$self->{sock}->recv(my $data, $packetsize+256, RECV_FLAGS);
   }
+  $self->{sock}->blocking(1) unless(RECV_FLAGS);
 }
 
 ###########################################################################
