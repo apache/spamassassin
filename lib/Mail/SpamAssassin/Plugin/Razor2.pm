@@ -106,15 +106,15 @@ Whether to use Razor2, if it is available.
 =item razor_fork (0|1)		(default: 1)
 
 Instead of running Razor2 synchronously, fork separate process for it and
-read the results in later (similar to async DNS lookups).  Increases
-throughput.
+read the results in later (similar to async DNS lookups). Increases
+throughput. Considered experimental on Windows, where default is 0.
 
 =cut
 
   push(@cmds, {
     setting => 'razor_fork',
     is_admin => 1,
-    default => 1,
+    default => am_running_on_windows()?0:1,
     type => $Mail::SpamAssassin::Conf::CONF_TYPE_NUMERIC,
   });
 

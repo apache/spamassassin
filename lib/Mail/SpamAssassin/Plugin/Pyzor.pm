@@ -100,14 +100,14 @@ Whether to use Pyzor, if it is available.
 
 Instead of running Pyzor synchronously, fork separate process for it and
 read the results in later (similar to async DNS lookups).  Increases
-throughput.
+throughput. Considered experimental on Windows, where default is 0.
 
 =cut
 
   push(@cmds, {
     setting => 'pyzor_fork',
     is_admin => 1,
-    default => 1,
+    default => am_running_on_windows()?0:1,
     type => $Mail::SpamAssassin::Conf::CONF_TYPE_NUMERIC,
   });
 
