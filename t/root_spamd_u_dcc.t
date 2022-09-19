@@ -40,6 +40,8 @@ q{ X-Spam-Level: **********}, 'stars',
 
 # run spamc as unpriv uid
 $spamc = "sudo -u nobody $spamc";
+# ensure it is writable by all
+chmod 01755, $workdir;
 
 $SIG{ALRM} = sub { stop_spamd(); die "timed out"; };
 alarm 60;

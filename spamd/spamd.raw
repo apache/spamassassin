@@ -1260,7 +1260,9 @@ setup_parent_sig_handlers();
 
 # should be done post-daemonize such that any files created by this
 # process are written with the right ownership and everything.
+seteuid_to_user();
 preload_modules_with_tmp_homedir();
+restore_euid();
 
 # this must be after preload_modules_with_tmp_homedir(), for bug 5606
 $spamtest->init_learner({
@@ -2555,6 +2557,38 @@ sub service_timeout {
 }
 
 ###########################################################################
+
+sub seteuid_to_user {
+  return if (am_running_on_windows() || $> != 0);
+  
+  my $suidto = $opt{'username'} || $opt{'default-user'};
+  my ($name, $pwd, $uid, $gid, $quota, $comment, $gcos, $suiddir, $etc) = getpwnam($suidto);
+
+  if (!defined $uid) {
+      die "spamd: seteuid_to_user (getpwnam) unable to find user: '$suidto'\n";
+  }
+
+  $) = (get_user_groups($uid));     # change eGID
+  $> = $uid;                        # change eUID
+  if ( !defined($uid) || ( $> != $uid and $> != ( $uid - 2**32 ) ) ) {
+    # make it fatal to avoid security breaches
+    die("spamd: fatal error: setuid to $suidto failed");
+  }
+}
+
+sub restore_euid {
+  return if (am_running_on_windows());
+  
+  if (($> != $<) && ($> != ($< - 2**32))) {
+    $) = "$( $(";    # change eGID
+    $> = $<;         # change eUID
+    # check again; ensure the change happened
+    if ($> != $< && ($> != ( $< - 2**32))) {
+      # make it fatal to avoid security breaches
+      die("spamd: return setuid failed");
+    }
+  }
+}
 
 sub handle_user_setuid_basic {
   my $username = shift;

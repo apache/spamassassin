@@ -26,6 +26,8 @@ plan tests => 11;
 
 # run spamc as unpriv uid
 $spamc = "sudo -u nobody $spamc";
+# ensure it is writable by all
+chmod 01755, $workdir;
 
 ok(start_spamd("-L -u nobody"));
 
