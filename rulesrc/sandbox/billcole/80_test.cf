@@ -67,6 +67,11 @@ header SCC_ISEMM_LID_1		X-Mailer-LID =~ /54,55,56,58,53/
 tflags SCC_ISEMM_LID_1		publish
 score SCC_ISEMM_LID_1		3.5
 
+describe SCC_ISEMM_LID_1A	Fingerprint of a particular spammer using an old spamware
+header SCC_ISEMM_LID_1A		X-Mailer-LID =~ /54,55,56,/
+tflags SCC_ISEMM_LID_1A		publish
+score SCC_ISEMM_LID_1A		3.5
+
 describe SCC_SPAMMER_ADDR_1	Fingerprint of a particular spammer
 body     SCC_SPAMMER_ADDR_1	/34 N Franklin/
 
