@@ -77,13 +77,6 @@ sub new {
   return $self;
 }
 
-# load triplets.txt into memory 
-sub compile_now_start {
-  my ($self) = @_;
-
-  $self->word_is_in_dictionary("aba");
-}
-
 sub check_for_fake_aol_relay_in_rcvd {
   my ($self, $pms) = @_;
   local ($_);
@@ -136,127 +129,9 @@ sub check_for_faraway_charset_in_headers {
   0;
 }
 
+# Deprecated (Bug 8051)
 sub check_for_unique_subject_id {
-  my ($self, $pms) = @_;
-  local ($_);
-  $_ = lc $pms->get('Subject');
-
-  my $id = 0;
-  if (/[-_\.\s]{7,}([-a-z0-9]{4,})$/m
-	|| /\s{10,}(?:\S\s)?(\S+)$/m
-	|| /\s{3,}[-:\#\(\[]+([-a-z0-9]{4,})[\]\)]+$/m
-	|| /\s{3,}[:\#\(\[]*([a-f0-9]{4,})[\]\)]*$/m
-	|| /\s{3,}[-:\#]([a-z0-9]{5,})$/m
-	|| /[\s._]{3,}([^0\s._]\d{3,})$/m
-	|| /[\s._]{3,}\[(\S+)\]$/m
-
-        # (7217vPhZ0-478TLdy5829qicU9-0@26) and similar
-        || /\(([-\w]{7,}\@\d+)\)$/m
-
-        # Seven or more digits at the end of a subject is almost certainly a id
-        || /\b(\d{7,})\s*$/m
-
-        # stuff at end of line after "!" or "?" is usually an id
-        || /[!\?]\s*(\d{4,}|\w+(-\w+)+)\s*$/m
-
-        # 9095IPZK7-095wsvp8715rJgY8-286-28 and similar
-	# excluding 'Re:', etc and the first word
-        || /(?:\w{2,3}:\s)?\w+\s+(\w{7,}-\w{7,}(-\w+)*)\s*$/m
-
-        # #30D7 and similar
-        || /\s#\s*([a-f0-9]{4,})\s*$/m
-     )
-  {
-    $id = $1;
-    # exempt online purchases
-    if ($id =~ /\d{5,}/
-	&& /(?:item|invoice|order|number|confirmation).{1,6}\Q$id\E\s*$/m)
-    {
-      $id = 0;
-    }
-
-    # for the "foo-bar-baz" case, otherwise it won't
-    # be found in the dict:
-    $id =~ s/-//;
-  }
-
-  return ($id && !$self->word_is_in_dictionary($id));
-}
-
-# word_is_in_dictionary()
-#
-# See if the word looks like an English word, by checking if each triplet
-# of letters it contains is one that can be found in the English language.
-# Does not include triplets only found in proper names, or in the Latin
-# and Greek terms that might be found in a larger dictionary
-
-my %triplets;
-my $triplets_loaded = 0;
-
-sub word_is_in_dictionary {
-  my ($self, $word) = @_;
-  local ($_);
-  local $/ = "\n";		# Ensure $/ is set appropriately
-
-  # $word =~ tr/A-Z/a-z/;	# already done by this stage
-  $word =~ s/^\s+//;
-  $word =~ s/\s+$//;
-
-  # If it contains a digit, dash, etc, it's not a valid word.
-  # Don't reject words like "can't" and "I'll"
-  return 0 if ($word =~ /[^a-z\']/);
-
-  # handle a few common "blah blah blah (comment)" styles
-  return 1 if ($word eq "ot");	# off-topic
-  return 1 if ($word =~ /(?:linux|nix|bsd)/); # not in most dicts
-  return 1 if ($word =~ /(?:whew|phew|attn|tha?nx)/);  # not in most dicts
-
-  my $word_len = length($word);
-
-  # Unique IDs probably aren't going to be only one or two letters long
-  return 1 if ($word_len < 3);
-
-  if (!$triplets_loaded) {
-    # take a copy to avoid modifying the real one
-    my @default_triplets_path = @Mail::SpamAssassin::default_rules_path;
-    s{$}{/triplets.txt}  for @default_triplets_path;
-    my $filename = $self->{main}->first_existing_path (@default_triplets_path);
-
-    if (!defined $filename) {
-      dbg("eval: failed to locate the triplets.txt file");
-      return 1;
-    }
-
-    local *TRIPLETS;
-    if (!open (TRIPLETS, "<$filename")) {
-      dbg("eval: failed to open '$filename', cannot check dictionary: $!");
-      return 1;
-    }
-    for($!=0; <TRIPLETS>; $!=0) {
-      chomp;
-      $triplets{$_} = 1;
-    }
-    defined $_ || $!==0  or
-      $!==EBADF ? dbg("eval: error reading from $filename: $!")
-                : die "error reading from $filename: $!";
-    close(TRIPLETS)  or die "error closing $filename: $!";
-
-    $triplets_loaded = 1;
-  } # if (!$triplets_loaded)
-
-
-  my $i;
-
-  for ($i = 0; $i < ($word_len - 2); $i++) {
-    my $triplet = substr($word, $i, 3);
-    if (!$triplets{$triplet}) {
-      dbg("eval: unique ID: letter triplet '$triplet' from word '$word' not valid");
-      return 0;
-    }
-  } # for ($i = 0; $i < ($word_len - 2); $i++)
-
-  # All letter triplets in word were found to be valid
-  return 1;
+  return 0;
 }
 
 # look for 8-bit and other illegal characters that should be MIME
