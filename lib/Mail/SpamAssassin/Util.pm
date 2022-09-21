@@ -1891,8 +1891,9 @@ sub setuid_to_euid {
   my $gids = get_user_groups($touid);
   my ( $pgid, $supgs ) = split (' ',$gids,2);
   defined $supgs or $supgs=$pgid;
-  if ($( != $pgid) {
-    # Gotta be root for any of this to work
+  my $prgid = 0 + $(; # bug 8043 - Only set rgid if it isn't already one of the euid's groups
+  if ( ($prgid == 0) or not (grep { $_ == $prgid } split(/ /, ${(}))) {
+    # setgid only works if euid is root, have to set that temporarily
     $> = 0;
     if ($> != 0) { warn("util: seteuid to 0 failed: $!"); }
     dbg("util: changing real primary gid from $( to $pgid and supplemental groups to $supgs to match effective uid $touid");
