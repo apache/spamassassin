@@ -1,4 +1,55 @@
 ------------------------------------------------------------------------
+r1904206 | sidney | 2022-09-22 09:53:19 +0000 (Thu, 22 Sep 2022) | 1 line
+ 
+ Bug 8050 - Fix global_state_dir on Windows
+------------------------------------------------------------------------
+r1904201 | sidney | 2022-09-21 20:38:43 +0000 (Wed, 21 Sep 2022) | 1 line
+ 
+ Bug 8043 - Don't try and fail to setgid to drop privs when spamd started 
+with a supplemental group without privs
+------------------------------------------------------------------------
+r1904166 | billcole | 2022-09-20 12:55:16 +0000 (Tue, 20 Sep 2022) | 1 
+line
+ 
+ adjusting to slight fingerprint change
+------------------------------------------------------------------------
+r1904165 | billcole | 2022-09-20 12:46:28 +0000 (Tue, 20 Sep 2022) | 1 
+line
+ 
+ adjusting to slight fingerprint change
+------------------------------------------------------------------------
+r1904155 | hege | 2022-09-20 05:19:30 +0000 (Tue, 20 Sep 2022) | 2 lines
+ 
+ Deprecate HeaderEval check_for_unique_subject_id(), 
+word_is_in_dictionary() functions (Bug 8051)
+ 
+------------------------------------------------------------------------
+r1904147 | sidney | 2022-09-19 12:57:56 +0000 (Mon, 19 Sep 2022) | 1 line
+ 
+ Bug 8045 - Drop privileges for the one-time initialization of plugins at 
+start of spamd
+------------------------------------------------------------------------
+r1904140 | sidney | 2022-09-18 23:52:24 +0000 (Sun, 18 Sep 2022) | 1 line
+ 
+ Bug 8048 - Make default for pyzor and raxor2 fork options 0 on Windows
+------------------------------------------------------------------------
+r1904139 | sidney | 2022-09-18 23:48:01 +0000 (Sun, 18 Sep 2022) | 1 line
+ 
+ Bug 8047 - work around MSG_DONTWAIT not existing on Windows
+------------------------------------------------------------------------
+r1904059 | hege | 2022-09-14 04:53:19 +0000 (Wed, 14 Sep 2022) | 2 lines
+ 
+ Trivial debug line typo fix
+ 
+------------------------------------------------------------------------
+r1903986 | sidney | 2022-09-10 20:10:55 +0000 (Sat, 10 Sep 2022) | 1 line
+ 
+ 4.0.0-rc2 RELEASED
+------------------------------------------------------------------------
+r1903975 | sidney | 2022-09-10 15:04:50 +0000 (Sat, 10 Sep 2022) | 1 line
+ 
+ preparing to release 4.0.0-rc2
+------------------------------------------------------------------------
 r1903966 | sidney | 2022-09-10 12:21:30 +0000 (Sat, 10 Sep 2022) | 1 line
  
  Minor edit to release build instructions documentation
