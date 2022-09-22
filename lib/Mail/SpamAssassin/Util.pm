@@ -85,6 +85,7 @@ use constant RUNNING_ON_WINDOWS => ($^O =~ /^(?:mswin|dos|os2)/i);
 # These are only defined as stubs on Windows (see bugs 6798 and 6470).
 BEGIN {
   if (RUNNING_ON_WINDOWS) {
+    require Win32;
     no warnings 'redefine';
 
     # See the section on $? at
@@ -1065,6 +1066,13 @@ sub _fake_getpwuid {
     '',			# shell,
     '',			# expire
   );
+}
+
+###########################################################################
+# Get a platform specific directory for application data
+# Just used for Windows for now
+sub common_application_data_directory {
+  return Win32::GetFolderPath(Win32::CSIDL_COMMON_APPDATA()) if (RUNNING_ON_WINDOWS);
 }
 
 ###########################################################################

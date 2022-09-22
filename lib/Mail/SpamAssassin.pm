@@ -1969,29 +1969,29 @@ sub get_and_create_userstate_dir {
 # used by dns_block_rule state files etc
 sub set_global_state_dir {
   my ($self) = @_;
-
-  my $prev = '';
-  if ($self->{home_dir_for_helpers}) {
-    my $dir = File::Spec->catdir($self->{home_dir_for_helpers}, ".spamassassin");
-    $self->test_global_state_dir($dir);
-    $prev = $dir;
+  # try home_dir_for_helpers
+  my $helper_dir = $self->{home_dir_for_helpers} || '';
+  if ($helper_dir) {
+    my $dir = File::Spec->catdir($helper_dir, ".spamassassin");
+    return if $self->test_global_state_dir($dir);
   }
-  if (!$self->{global_state_dir}) {
-    my $home = (Mail::SpamAssassin::Util::portable_getpwuid ($>))[7];
-    # home_dir_for_helpers default == home, skip if checked already..
-    if ($home && $home ne $prev) {
-      my $dir = File::Spec->catdir($home, ".spamassassin");
-      $self->test_global_state_dir($dir);
-    }
+  # try user home (if different from helper home)
+  my $home;
+  if (am_running_on_windows()) {
+    # Windows has a special folder for common appdata (Bug 8050)
+    $home = Mail::SpamAssassin::Util::common_application_data_directory();
+  } else {
+    $home = (Mail::SpamAssassin::Util::portable_getpwuid ($>))[7];
   }
-  if (!$self->{global_state_dir}) {
-    $self->test_global_state_dir($self->{LOCAL_STATE_DIR});
+  if ($home && $home ne $helper_dir) {
+    my $dir = File::Spec->catdir($home, ".spamassassin");
+    return if $self->test_global_state_dir($dir);
   }
-  if (!$self->{global_state_dir}) {
-    # fallback to userstate
-    $self->{global_state_dir} = $self->get_and_create_userstate_dir();
-    dbg("config: global_state_dir falled back to userstate_dir");
-  }
+  # try LOCAL_STATE_DIR
+  return if $self->test_global_state_dir($self->{LOCAL_STATE_DIR});
+  # fallback to userstate
+  $self->{global_state_dir} = $self->get_and_create_userstate_dir();
+  dbg("config: global_state_dir set to userstate_dir: $self->{global_state_dir}");
 }
 
 sub test_global_state_dir {
