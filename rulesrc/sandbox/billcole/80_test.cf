@@ -113,3 +113,37 @@ tflags		T_SCC_URL_NOTIONSITE  multiple maxhits=5
 describe	T_SCC_URL_CLOUDINARY  Has Cloudinary backend(?) URL
 uri		T_SCC_URL_CLOUDINARY  /https?:\/\/res.cloudinary.com/
 tflags		T_SCC_URL_CLOUDINARY  multiple maxhits=5
+
+describe	__SCC_HASHBUST_1	Innocent text seen a lot in  'hash-buster' text. 
+rawbody		__SCC_HASHBUST_1	/FACULT\x{C3}\x{89} D\x{E2}\x{80}\x{99}\x{C3}\x{89}DUCATION pour l\x{E2}\x{80}\x{99}ann\x{C3}\x{A9}e universitaire 2019 \/ 2020.$/im
+
+describe	__SCC_HASHBUST_2	Innocent text seen a lot in  'hash-buster' text. 
+rawbody		__SCC_HASHBUST_2	/AUTORISATION D\x{E2}\x{80}\x{99}INSCRIPTION$/im
+
+describe	__SCC_HASHBUST_3	Innocent text seen a lot in  'hash-buster' text. 
+rawbody		__SCC_HASHBUST_3	/Find out more about the application process, researching your destination/i
+
+describe	__SCC_HASHBUST_4	Innocent text seen a lot in  'hash-buster' text. 
+rawbody		__SCC_HASHBUST_4	/Subscription Expired Today/i
+
+describe	__SCC_HASHBUST_5	Pattern seen a lot in  'hash-buster' text. 
+rawbody		__SCC_HASHBUST_5	/(.(([a-z]{5,8}) ([a-z])){3,}\3\n){1,}/m
+
+
+describe	T_SCC_HB2	2 different hash-busters
+meta		T_SCC_HB2	\( __SCC_HASHBUST_1 + __SCC_HASHBUST_2 + __SCC_HASHBUST_3 + __SCC_HASHBUST_4 + __SCC_HASHBUST_5 \) == 2
+
+describe	T_SCC_HB3	3 different hash-busters
+meta		T_SCC_HB3	\( __SCC_HASHBUST_1 + __SCC_HASHBUST_2 + __SCC_HASHBUST_3 + __SCC_HASHBUST_4 + __SCC_HASHBUST_5 \) == 3
+
+describe	T_SCC_HB4	4 different hash-busters
+meta		T_SCC_HB4	\( __SCC_HASHBUST_1 + __SCC_HASHBUST_2 + __SCC_HASHBUST_3 + __SCC_HASHBUST_4 + __SCC_HASHBUST_5 \) == 4
+
+describe	T_SCC_HB5	5 different hash-busters
+meta		T_SCC_HB5	\( __SCC_HASHBUST_1 + __SCC_HASHBUST_2 + __SCC_HASHBUST_3 + __SCC_HASHBUST_4 + __SCC_HASHBUST_5 \) == 5
+
+describe	T_SCC_BOGUS_CTE_1	Bogus Content-Transfer-Encoding header
+mimeheader	T_SCC_BOGUS_CTE_1	Content-Transfer-Encoding =~ /^Hexa/i
+
+describe	T_SCC_CTMPP	Uncommon Content-Type
+mimeheader	T_SCC_CTMPP     Content-Type =~ /multipart\/parallel/	
