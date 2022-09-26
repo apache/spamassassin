@@ -147,3 +147,13 @@ mimeheader	T_SCC_BOGUS_CTE_1	Content-Transfer-Encoding =~ /^Hexa/i
 
 describe	T_SCC_CTMPP	Uncommon Content-Type
 mimeheader	T_SCC_CTMPP     Content-Type =~ /multipart\/parallel/	
+
+describe	__SCC_MIME_BOUNDARY2	Idiosyncratic boundary-like string
+rawbody		__SCC_MIME_BOUNDARY2	/^ *(----[[:alnum:]]{8};[[:alnum:]]{6}){2}$/m
+tflags		__SCC_MIME_BOUNDARY2	multiple maxhits=7
+
+
+describe	SCC_MIME_BOUNDARY2	Fake boundary-like string >5 times
+meta		SCC_MIME_BOUNDARY2	__SCC_MIME_BOUNDARY2 > 5
+
+
