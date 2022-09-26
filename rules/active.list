@@ -188,7 +188,7 @@ BITCOIN_IMGUR
 # good enough
 BITCOIN_MALF_HTML
 
-# tflags publish
+# tflags net
 BITCOIN_MALWARE
 
 # tflags publish
@@ -248,7 +248,7 @@ BITCOIN_XPRIO
 # tflags publish
 BITCOIN_YOUR_INFO
 
-# tflags publish
+# tflags net
 BODY_URI_ONLY
 
 # tflags publish
@@ -543,6 +543,9 @@ FROM_MISSP_FREEMAIL
 FROM_MISSP_MSFT
 
 # tflags net
+FROM_MISSP_REPLYTO
+
+# tflags net
 FROM_MISSP_SPF_FAIL
 
 # good enough
@@ -815,7 +818,7 @@ HTML_OFF_PAGE
 # tflags publish
 HTML_SHRT_CMNT_OBFU_MANY
 
-# tflags publish
+# tflags net
 HTML_SINGLET_MANY
 
 # good enough
@@ -840,9 +843,6 @@ JH_SPAMMY_PATTERN01
 JH_SPAMMY_PATTERN02
 
 # tflags net
-KHOP_FAKE_EBAY
-
-# tflags net
 KHOP_HELO_FCRDNS
 
 # tflags publish
@@ -853,6 +853,9 @@ LIST_PRTL_PUMPDUMP
 
 # tflags publish
 LIST_PRTL_SAME_USER
+
+# good enough
+LONGLN_LOW_CONTRAST
 
 # tflags publish
 LONG_HEX_URI
@@ -887,8 +890,14 @@ MALWARE_PASSWORD
 # tflags publish
 MALW_ATTACH
 
+# tflags net
+MANY_HDRS_LCASE
+
 # tflags publish
 MANY_SPAN_IN_TEXT
+
+# tflags net
+MAY_BE_FORGED
 
 # tflags publish
 MILLION_HUNDRED
@@ -1051,9 +1060,6 @@ PDS_BTC_NTLD
 
 # good enough
 PDS_DBL_URL_TNB_RUNON
-
-# tflags net
-PDS_FROM_2_EMAILS
 
 # tflags net
 PDS_HELO_SPF_FAIL
