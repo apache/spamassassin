@@ -51,14 +51,14 @@ BEGIN {
 
   $have_inet4 = eval {
     require IO::Socket::INET;
-    my $sock = IO::Socket::INET->new(LocalAddr => '0.0.0.0', Proto => 'udp');
+    my $sock = IO::Socket::INET->new(LocalAddr => '127.0.0.1', Proto => 'udp');
     $sock->close or die "error closing inet socket: $!"  if $sock;
     $sock ? 1 : undef;
   };
 
   $have_inet6 = eval {
     require IO::Socket::INET6;
-    my $sock = IO::Socket::INET6->new(LocalAddr => '::', Proto => 'udp');
+    my $sock = IO::Socket::INET6->new(LocalAddr => '::1', Proto => 'udp');
     $sock->close or die "error closing inet6 socket: $!"  if $sock;
     $sock ? 1 : undef;
   };
