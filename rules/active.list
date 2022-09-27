@@ -188,7 +188,7 @@ BITCOIN_IMGUR
 # good enough
 BITCOIN_MALF_HTML
 
-# tflags net
+# tflags publish
 BITCOIN_MALWARE
 
 # tflags publish
@@ -248,7 +248,7 @@ BITCOIN_XPRIO
 # tflags publish
 BITCOIN_YOUR_INFO
 
-# tflags net
+# tflags publish
 BODY_URI_ONLY
 
 # tflags publish
@@ -286,6 +286,9 @@ CN_B2B_SPAMMER
 
 # tflags publish
 COMMENT_GIBBERISH
+
+# tflags net
+COMPENSATION
 
 # tflags publish
 CONTENT_AFTER_HTML
@@ -740,6 +743,9 @@ HAS_X_NO_RELAY
 # tflags publish
 HAS_X_OUTGOING_SPAM_STAT
 
+# tflags net
+HDRS_LCASE
+
 # good enough
 HDRS_LCASE_IMGONLY
 
@@ -812,13 +818,16 @@ HTML_ENTITY_ASCII
 # tflags publish
 HTML_ENTITY_ASCII_TINY
 
+# good enough
+HTML_FONT_TINY_NORDNS
+
 # tflags publish
 HTML_OFF_PAGE
 
 # tflags publish
 HTML_SHRT_CMNT_OBFU_MANY
 
-# tflags net
+# tflags publish
 HTML_SINGLET_MANY
 
 # good enough
@@ -847,6 +856,9 @@ KHOP_HELO_FCRDNS
 
 # tflags publish
 LINKEDIN_IMG_NOT_RCVD_LNKN
+
+# good enough
+LIST_PARTIAL_SHORT_MSG
 
 # tflags publish
 LIST_PRTL_PUMPDUMP
@@ -890,14 +902,8 @@ MALWARE_PASSWORD
 # tflags publish
 MALW_ATTACH
 
-# tflags net
-MANY_HDRS_LCASE
-
 # tflags publish
 MANY_SPAN_IN_TEXT
-
-# tflags net
-MAY_BE_FORGED
 
 # tflags publish
 MILLION_HUNDRED
@@ -1056,10 +1062,10 @@ PDS_BTC_ID
 PDS_BTC_MSGID
 
 # good enough
-PDS_BTC_NTLD
-
-# good enough
 PDS_DBL_URL_TNB_RUNON
+
+# tflags net
+PDS_FROM_2_EMAILS
 
 # tflags net
 PDS_HELO_SPF_FAIL
@@ -1775,7 +1781,7 @@ URI_NOVOWEL
 # good enough
 URI_OBFU_DOM
 
-# tflags publish
+# tflags net
 URI_ONLY_MSGID_MALF
 
 # tflags publish
