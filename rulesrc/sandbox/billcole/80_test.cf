@@ -142,11 +142,15 @@ meta		T_SCC_HB4	\( __SCC_HASHBUST_1 + __SCC_HASHBUST_2 + __SCC_HASHBUST_3 + __SC
 describe	T_SCC_HB5	5 different hash-busters
 meta		T_SCC_HB5	\( __SCC_HASHBUST_1 + __SCC_HASHBUST_2 + __SCC_HASHBUST_3 + __SCC_HASHBUST_4 + __SCC_HASHBUST_5 \) == 5
 
+ifplugin Mail::SpamAssassin::Plugin::MIMEHeader
 describe	T_SCC_BOGUS_CTE_1	Bogus Content-Transfer-Encoding header
 mimeheader	T_SCC_BOGUS_CTE_1	Content-Transfer-Encoding =~ /^Hexa/i
+endif
 
+ifplugin Mail::SpamAssassin::Plugin::MIMEHeader
 describe	T_SCC_CTMPP	Uncommon Content-Type
 mimeheader	T_SCC_CTMPP     Content-Type =~ /multipart\/parallel/	
+endif
 
 describe	__SCC_MIME_BOUNDARY2	Idiosyncratic boundary-like string
 rawbody		__SCC_MIME_BOUNDARY2	/^ *(----[[:alnum:]]{8};[[:alnum:]]{6}){2}$/m
