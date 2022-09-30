@@ -464,7 +464,7 @@ FORGED_SPF_HELO
 # tflags publish
 FORM_FRAUD
 
-# tflags net
+# tflags publish
 FORM_FRAUD_3
 
 # tflags publish
@@ -680,9 +680,6 @@ GB_GOOGLE_OBFUR
 # tflags net
 GB_HASHBL_BTC
 
-# tflags publish
-GB_STORAGE_GOOGLE_EMAIL
-
 # good enough
 GB_URI_FLEEK_STO_HTM
 
@@ -736,9 +733,6 @@ HAS_X_NO_RELAY
 
 # tflags publish
 HAS_X_OUTGOING_SPAM_STAT
-
-# tflags net
-HDRS_LCASE
 
 # good enough
 HDRS_LCASE_IMGONLY
@@ -849,6 +843,9 @@ JH_SPAMMY_PATTERN01
 JH_SPAMMY_PATTERN02
 
 # tflags net
+KHOP_FAKE_EBAY
+
+# tflags net
 KHOP_HELO_FCRDNS
 
 # tflags publish
@@ -901,6 +898,9 @@ MALW_ATTACH
 
 # tflags publish
 MANY_SPAN_IN_TEXT
+
+# tflags net
+MAY_BE_FORGED
 
 # tflags publish
 MILLION_HUNDRED
@@ -967,6 +967,9 @@ MONEY_FRAUD_8
 
 # tflags publish
 MONEY_FREEMAIL_REPTO
+
+# good enough
+MONEY_FROM_41
 
 # good enough
 MONEY_FROM_MISSP
@@ -1078,6 +1081,9 @@ PDS_PHPEXP_BOT
 
 # good enough
 PDS_PHP_EVAL
+
+# good enough
+PDS_RDNS_DYNAMIC_FP
 
 # good enough
 PDS_SHORT_BOGUS_MSM_HDRS
@@ -1595,6 +1601,9 @@ TO_NO_BRKTS_HTML_IMG
 # tflags publish
 TO_NO_BRKTS_HTML_ONLY
 
+# tflags net
+TO_NO_BRKTS_MSFT
+
 # tflags publish
 TO_NO_BRKTS_NORDNS_HTML
 
@@ -1608,7 +1617,13 @@ TO_TOO_MANY_WFH_01
 TVD_APPROVED
 
 # good enough
+TVD_PH_BODY_META
+
+# good enough
 TVD_RCVD_SPACE_BRACKET
+
+# tflags net
+TVD_SPACE_RATIO_MINFP
 
 # good enough
 TVD_VISIT_PHARMA
@@ -1808,7 +1823,7 @@ URI_WPADMIN
 # tflags publish
 URI_WP_DIRINDEX
 
-# tflags publish
+# tflags net
 URI_WP_HACKED
 
 # tflags publish
