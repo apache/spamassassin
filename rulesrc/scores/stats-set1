@@ -1,23 +1,23 @@
 ##### WITH NEW RULES AND SCORES #####
 
 # SUMMARY for threshold 5.0:
-# Correctly non-spam: 317183  64.022%  (99.619% of non-spam corpus)
-# Correctly spam:     146887  29.649%  (82.973% of spam corpus)
-# False positives:      1214  0.245%  (0.381% of nonspam,  51055 weighted)
-# False negatives:     30142  6.084%  (17.027% of spam,  54442 weighted)
-# Average score for spam:  18.0    nonspam: -0.7
+# Correctly non-spam: 317181  64.022%  (99.618% of non-spam corpus)
+# Correctly spam:     146841  29.639%  (82.948% of spam corpus)
+# False positives:      1216  0.245%  (0.382% of nonspam,  51114 weighted)
+# False negatives:     30187  6.093%  (17.052% of spam,  54621 weighted)
+# Average score for spam:  17.9    nonspam: -0.8
 # Average for false-pos:   7.6  false-neg: 1.8
-# TOTAL:              495426  100.00%
+# TOTAL:              495425  100.00%
 
 Reading scores from "tmprules"...
 Reading per-message hit stat logs and scores...
 
 # SUMMARY for threshold 5.0:
-# Correctly non-spam:  39514  99.59%
-# Correctly spam:      18469  82.98%
-# False positives:       163  0.41%
-# False negatives:      3787  17.02%
-# TCR(l=50): 1.864455  SpamRecall: 82.984%  SpamPrec: 99.125%
+# Correctly non-spam:  39518  99.60%
+# Correctly spam:      18465  82.97%
+# False positives:       159  0.40%
+# False negatives:      3791  17.03%
+# TCR(l=50): 1.895580  SpamRecall: 82.966%  SpamPrec: 99.146%
 
 ##### WITHOUT NEW RULES AND SCORES #####
 Reading scores from "../rules-base"...
@@ -25,10 +25,10 @@ Reading per-message hit stat logs and scores...
 
 # SUMMARY for threshold 5.0:
 # Correctly non-spam: 317249  99.64%
-# Correctly spam:     120661  68.16%
+# Correctly spam:     120666  68.16%
 # False positives:      1148  0.36%
-# False negatives:     56368  31.84%
-# TCR(l=50): 1.556053  SpamRecall: 68.159%  SpamPrec: 99.058%
+# False negatives:     56362  31.84%
+# TCR(l=50): 1.556126  SpamRecall: 68.162%  SpamPrec: 99.058%
 Reading scores from "../rules-base"...
 Reading per-message hit stat logs and scores...
 
