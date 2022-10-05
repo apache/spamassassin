@@ -188,7 +188,7 @@ BITCOIN_IMGUR
 # good enough
 BITCOIN_MALF_HTML
 
-# tflags publish
+# tflags net
 BITCOIN_MALWARE
 
 # tflags publish
@@ -248,7 +248,7 @@ BITCOIN_XPRIO
 # tflags publish
 BITCOIN_YOUR_INFO
 
-# tflags publish
+# tflags net
 BODY_URI_ONLY
 
 # tflags publish
@@ -424,6 +424,9 @@ ENV_AND_HDR_SPF_MATCH
 
 # tflags publish
 FACEBOOK_IMG_NOT_RCVD_FB
+
+# good enough
+FAKE_REPLY_B
 
 # good enough
 FAKE_REPLY_C
@@ -821,7 +824,7 @@ HTML_OFF_PAGE
 # tflags publish
 HTML_SHRT_CMNT_OBFU_MANY
 
-# tflags publish
+# tflags net
 HTML_SINGLET_MANY
 
 # good enough
@@ -844,6 +847,9 @@ JH_SPAMMY_PATTERN01
 
 # tflags publish
 JH_SPAMMY_PATTERN02
+
+# tflags net
+KHOP_FAKE_EBAY
 
 # tflags net
 KHOP_HELO_FCRDNS
@@ -893,8 +899,14 @@ MALWARE_PASSWORD
 # tflags publish
 MALW_ATTACH
 
+# tflags net
+MANY_HDRS_LCASE
+
 # tflags publish
 MANY_SPAN_IN_TEXT
+
+# tflags net
+MAY_BE_FORGED
 
 # tflags publish
 MILLION_HUNDRED
@@ -1542,6 +1554,9 @@ SUBJECT_IN_WELCOMELIST
 SUBJ_BRKN_WORDNUMS
 
 # tflags net
+SUBJ_UNNEEDED_HTML
+
+# tflags net
 SURBL_BLOCKED
 
 # tflags publish
@@ -1609,6 +1624,9 @@ TVD_APPROVED
 
 # good enough
 TVD_RCVD_SPACE_BRACKET
+
+# tflags net
+TVD_SPACE_RATIO_MINFP
 
 # good enough
 TVD_VISIT_PHARMA
