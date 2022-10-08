@@ -59,8 +59,8 @@ tflags   ALL_INTERNAL	nice
 describe SCC_NEWBIE_HASBEENS	Abused gTLDs seen in spam from Google Apps.  
 header   SCC_NEWBIE_HASBEENS	X-Beenthere =~ /\.(today|online|monster)/
 
-describe  T_SCC_HTML_OBJOBJ	Contains an object
-rawbody   T_SCC_HTML_OBJOBJ	/< *object +\w{65,80} *>/
+describe  __SCC_HTML_OBJOBJ	Contains an object
+rawbody   __SCC_HTML_OBJOBJ	/< *object +\w{65,80} *>/
 
 describe SCC_ISEMM_LID_1	Fingerprint of a particular spammer using an old spamware
 header SCC_ISEMM_LID_1		X-Mailer-LID =~ /54,55,56,58,53/
@@ -94,8 +94,8 @@ describe SCC_SPAMMERMID4        Distinctive Message-Id
 header   SCC_SPAMMERMID4        Message-ID =~ /<[-_a-zA-Z0-9.]{43}\.[-_a-zA-Z0-9.]{43}\@[-a-z0-9]{4,30}\.co>/
 score    SCC_SPAMMERMID4        1
 
-describe T_SCC_ESP_RESY		From "Resy" which is known to emit spam
-body	T_SCC_ESP_RESY		/This marketing message was sent to you by Resy/
+describe __SCC_ESP_RESY		From "Resy" which is known to emit spam
+body	__SCC_ESP_RESY		/This marketing message was sent to you by Resy/
 
 
 # TESTING a few domains that are in our "suspicious" list but are known to have some good senders
@@ -114,6 +114,7 @@ describe	T_SCC_URL_CLOUDINARY  Has Cloudinary backend(?) URL
 uri		T_SCC_URL_CLOUDINARY  /https?:\/\/res.cloudinary.com/
 tflags		T_SCC_URL_CLOUDINARY  multiple maxhits=5
 
+# Lots of spam getting through at GMail with these... 
 describe	__SCC_HASHBUST_1	Innocent text seen a lot in  'hash-buster' text. 
 rawbody		__SCC_HASHBUST_1	/FACULT\x{C3}\x{89} D\x{E2}\x{80}\x{99}\x{C3}\x{89}DUCATION pour l\x{E2}\x{80}\x{99}ann\x{C3}\x{A9}e universitaire 2019 \/ 2020.$/im
 
@@ -130,26 +131,28 @@ describe	__SCC_HASHBUST_5	Pattern seen a lot in  'hash-buster' text.
 rawbody		__SCC_HASHBUST_5	/(.(([a-z]{5,8}) ([a-z])){3,}\3\n){1,}/m
 
 
-describe	T_SCC_HB2	2 different hash-busters
-meta		T_SCC_HB2	\( __SCC_HASHBUST_1 + __SCC_HASHBUST_2 + __SCC_HASHBUST_3 + __SCC_HASHBUST_4 + __SCC_HASHBUST_5 \) == 2
+describe	SCC_HB2	2 different hash-busters
+meta		SCC_HB2	\( __SCC_HASHBUST_1 + __SCC_HASHBUST_2 + __SCC_HASHBUST_3 + __SCC_HASHBUST_4 + __SCC_HASHBUST_5 \) == 2
 
-describe	T_SCC_HB3	3 different hash-busters
-meta		T_SCC_HB3	\( __SCC_HASHBUST_1 + __SCC_HASHBUST_2 + __SCC_HASHBUST_3 + __SCC_HASHBUST_4 + __SCC_HASHBUST_5 \) == 3
+describe	SCC_HB3	3 different hash-busters
+meta		SCC_HB3	\( __SCC_HASHBUST_1 + __SCC_HASHBUST_2 + __SCC_HASHBUST_3 + __SCC_HASHBUST_4 + __SCC_HASHBUST_5 \) == 3
 
-describe	T_SCC_HB4	4 different hash-busters
-meta		T_SCC_HB4	\( __SCC_HASHBUST_1 + __SCC_HASHBUST_2 + __SCC_HASHBUST_3 + __SCC_HASHBUST_4 + __SCC_HASHBUST_5 \) == 4
+describe	SCC_HB4	4 different hash-busters
+meta		SCC_HB4	\( __SCC_HASHBUST_1 + __SCC_HASHBUST_2 + __SCC_HASHBUST_3 + __SCC_HASHBUST_4 + __SCC_HASHBUST_5 \) == 4
 
-describe	T_SCC_HB5	5 different hash-busters
-meta		T_SCC_HB5	\( __SCC_HASHBUST_1 + __SCC_HASHBUST_2 + __SCC_HASHBUST_3 + __SCC_HASHBUST_4 + __SCC_HASHBUST_5 \) == 5
+describe	SCC_HB5	5 different hash-busters
+meta		SCC_HB5	\( __SCC_HASHBUST_1 + __SCC_HASHBUST_2 + __SCC_HASHBUST_3 + __SCC_HASHBUST_4 + __SCC_HASHBUST_5 \) == 5
 
 ifplugin Mail::SpamAssassin::Plugin::MIMEHeader
-describe	T_SCC_BOGUS_CTE_1	Bogus Content-Transfer-Encoding header
-mimeheader	T_SCC_BOGUS_CTE_1	Content-Transfer-Encoding =~ /^Hexa/i
+mimeheader	__SCC_BOGUS_CTE_1	Content-Transfer-Encoding =~ /^Hexa/i
+meta		SCC_BOGUS_CTE_1	__SCC_BOGUS_CTE_1
+describe	SCC_BOGUS_CTE_1	Bogus Content-Transfer-Encoding header
 endif
 
 ifplugin Mail::SpamAssassin::Plugin::MIMEHeader
-describe	T_SCC_CTMPP	Uncommon Content-Type
-mimeheader	T_SCC_CTMPP     Content-Type =~ /multipart\/parallel/	
+mimeheader	__SCC_CTMPP     Content-Type =~ /multipart\/parallel/	
+describe	SCC_CTMPP	Uncommon Content-Type
+meta		SCC_CTMPP	__SCC_CTMPP
 endif
 
 describe	__SCC_MIME_BOUNDARY2	Idiosyncratic boundary-like string
@@ -159,5 +162,4 @@ tflags		__SCC_MIME_BOUNDARY2	multiple maxhits=7
 
 describe	SCC_MIME_BOUNDARY2	Fake boundary-like string >5 times
 meta		SCC_MIME_BOUNDARY2	__SCC_MIME_BOUNDARY2 > 5
-
 
