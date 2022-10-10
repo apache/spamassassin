@@ -233,6 +233,8 @@ sub _check_async_queue {
 sub _check_dmarc {
   my ($self, $pms, $name) = @_;
 
+  return unless $pms->is_dns_available();
+
   # Load DMARC module
   if (!exists $self->{has_mail_dmarc}) {
     my $eval_stat;
