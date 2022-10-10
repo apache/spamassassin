@@ -1004,6 +1004,7 @@ sub _is_zip_file {
 sub _check_markers {
   my ($data) = @_;
 
+  # Check for Office 2003 markers
   if (index($data, $marker1) == 0) {
     if (index($data, $marker2) > -1) {
       dbg('Marker 1 & 2 found');
@@ -1013,8 +1014,10 @@ sub _check_markers {
       dbg('Marker 1 & 2a found');
       return 1;
     }
+    return 0;
   }
 
+  # Check for rtf markers
   if (index($data, $marker3) > -1) {
     dbg('Marker 3 found');
     return 1;
@@ -1030,6 +1033,7 @@ sub _check_markers {
     return 1;
   }
 
+  # Check for Office 2007 markers
   if (index($data, 'w:macrosPresent="yes"') > -1) {
     dbg('XML macros marker found');
     return 1;
