@@ -5,7 +5,10 @@ use lib 't';
 use SATest; sa_t_init("basic_meta2");
 
 use Test::More;
-plan tests => 20;
+
+# run many times to catch some random natured failures
+my $iterations = 5;
+plan tests => 23 * $iterations;
 
 # ---------------------------------------------------------------------------
 
@@ -24,6 +27,9 @@ plan tests => 20;
   q{ 1.0 TEST_META_E }    => '',
   q{ 1.0 TEST_META_F }    => '',
   q{ 1.0 TEST_META_G }    => '',
+  q{ 1.0 TEST_META_H }    => '',
+  q{ 1.0 TEST_META_I }    => '',
+  q{ 1.0 TEST_META_J }    => '',
 );
 
 %anti_patterns = (
@@ -54,7 +60,8 @@ tstlocalrules (qq{
    ## Unrun rule dependencies (Bug 7735)
    ##
 
-   # Non-existing rule
+   # Non-existing rule, considered "unrun" and will prevent dependent metas
+   #  from running (unless dual evaluation allows it)
    # Should not hit, meta is evaled twice: (!0) && (!1)
    meta TEST_META_2 !NONEXISTINGRULE
    # Should hit, meta is evaled twice: (!0 || 0) && (!1 || 1)
@@ -74,6 +81,14 @@ tstlocalrules (qq{
    meta TEST_META_6 !TEST_DISABLED2
    # Should hit
    meta TEST_META_7 !TEST_DISABLED2 || TEST_DISABLED2
+
+   # Other way of "disabling" a rule, with meta 0.  This will let dependent
+   # metas run fully, as the rule is considered run but not hitting.
+   meta TEST_DISABLED3 0
+   # Should hit
+   meta TEST_META_I !TEST_DISABLED3
+   # Should hit
+   meta TEST_META_J !TEST_DISABLED3 && __FOO_1
 
    # Should not hit
    meta TEST_META_8 __FOO_1 + NONEXISTINGRULE == 2
@@ -100,8 +115,16 @@ tstlocalrules (qq{
    priority TEST_META_F 2000
    meta TEST_META_G TEST_META_C && TEST_META_D && TEST_META_E && TEST_META_F
 
+   # metas without dependencies
+   meta __TEST_META_H1  6
+   meta __TEST_META_H2  2
+   meta __TEST_META_H3  1
+   meta TEST_META_H   (__TEST_META_H1 > 2) && (__TEST_META_H2 > 1) && __TEST_META_H3
+
 });
 
-sarun ("-L -t < data/nice/001 2>&1", \&patterns_run_cb);
-ok_all_patterns();
+for (1 .. $iterations) {
+  sarun ("-L -t < data/nice/001 2>&1", \&patterns_run_cb);
+  ok_all_patterns();
+}
 

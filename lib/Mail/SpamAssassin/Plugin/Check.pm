@@ -99,6 +99,10 @@ sub check_main {
   foreach my $rulename (keys %{$conf->{meta_tests}}) {
     $pms->{meta_pending}->{$rulename} = 1  if $conf->{scores}->{$rulename};
   }
+  # metas without dependencies are ready to be run
+  foreach my $rulename (keys %{$conf->{meta_nodeps}}) {
+    $pms->{meta_check_ready}->{$rulename} = 1;
+  }
 
   # Make sure priority -100 exists for launching DNS
   $conf->{priorities}->{-100} ||= 1 if $do_dns;

@@ -1136,20 +1136,22 @@ sub compile_meta_rules {
   }
 
   foreach my $name (keys %meta) {
+    if ($unsolved_metas{$name}) {
+      $conf->{meta_tests}->{$name} = sub { 0 };
+      $rule_deps{$name} = [ ];
+    }
     if (@{$rule_deps{$name}}) {
       $conf->{meta_dependencies}->{$name} = $rule_deps{$name};
       foreach my $deprule (@{$rule_deps{$name}}) {
         $conf->{meta_deprules}->{$deprule}->{$name} = 1;
       }
-    }
-    if ($unsolved_metas{$name}) {
-      $conf->{meta_tests}->{$name} = sub { 0 };
     } else {
-      # Compile meta sub
-      eval '$conf->{meta_tests}->{$name} = sub { '.$meta{$name}.'};';
-      # Paranoid check
-      die "rules: meta compilation failed for $name: '$meta{$name}': $@" if ($@);
+      $conf->{meta_nodeps}->{$name} = 1;
     }
+    # Compile meta sub
+    eval '$conf->{meta_tests}->{$name} = sub { '.$meta{$name}.'};';
+    # Paranoid check
+    die "rules: meta compilation failed for $name: '$meta{$name}': $@" if ($@);
   }
 }
 

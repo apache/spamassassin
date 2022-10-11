@@ -4953,6 +4953,7 @@ sub new {
   # meta dependencies
   $self->{meta_dependencies} = {};
   $self->{meta_deprules} = {};
+  $self->{meta_nodeps} = {};
 
   # map eval function names to rulenames
   $self->{eval_to_rule} = {};
