@@ -971,6 +971,12 @@ sub complete_ns_lookup {
       }
     }
   }
+
+  # Make sure all finished rules are marked ready.  If foreach block above
+  # launched new lookups, rule_ready() simply ignores them.
+  foreach my $rulename (@{$ent->{rulename}}) {
+    $pms->rule_ready($rulename);
+  }
 }
 
 # ---------------------------------------------------------------------------
@@ -1001,8 +1007,10 @@ sub complete_a_lookup {
     dbg("uridnsbl: complete_a_lookup aborted %s", $ent->{key});
     return;
   }
+
   dbg("uridnsbl: complete_a_lookup %s %s", $ent->{key},
     join(',', @{$ent->{rulename}}));
+
   my $j = 0;
   my @answer = $pkt->answer;
   foreach my $rr (@answer) {
@@ -1012,6 +1020,12 @@ sub complete_a_lookup {
     dbg("uridnsbl: complete_a_lookup got(%d) A for %s: %s",
         $j, $ent->{lookup}, $ip_address);
     $self->lookup_dnsbl_for_ip($pms, $ip_address, $ent);
+  }
+
+  # Make sure all finished rules are marked ready.  If foreach block above
+  # launched new lookups, rule_ready() simply ignores them.
+  foreach my $rulename (@{$ent->{rulename}}) {
+    $pms->rule_ready($rulename);
   }
 }
 
