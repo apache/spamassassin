@@ -18,6 +18,18 @@ improved throughout.
   welcomelist_blocklist" added in init.pre. See:
   https://wiki.apache.org/spamassassin/WelcomelistBlocklist (Bug 7826)
 
+- Meta rules no longer use priority values, they are evaluated
+  dynamically when the rules they depend on are finished. Note that if
+  a meta depends on non-existing rules or rules that do not finish
+  (timeout or other errors), the whole meta might not be evaluated.
+  (Bug 7735)
+
+- API: New $pms->rule_ready() function. Any asynchronous eval-function
+  must now return undef (instead of 0 or 1), if rule result is not
+  ready when exiting the function. $pms->rule_ready($rulename) or
+  $pms->got_hit(...) must be called when the result has arrived. If
+  these are not used, it can break depending meta rule evaluation.
+
 - Setting normalize_charset is now enabled by default. Note that rules
   should not expect specific non-UTF8 or UTF8 encoding in
   body. Matching is done against the raw data which may vary depending
@@ -48,20 +60,6 @@ improved throughout.
 - Internationalized domain name (IDN) support has been added and
   requires Net::LibIDN2 or Net::LibIDN module with a new
   Util::idn_to_ascii() function. (Bug 7215)
-
-- Meta rules no longer use priority values, they are evaluated
-  dynamically when the rules they depend on are finished. (Bug 7735)
-
-- API: New $pms->rule_pending() and $pms->rule_ready() functions are
-  now available.
-
-  $pms->rule_pending($rulename) must be called from rules
-  eval-function, if the result can arrive later than when exiting the
-  function (asynchronous lookups).
-
-  $pms->rule_ready($rulename) or $pms->got_hit(...) must be called
-  when the result has arrived. If these are not used, it can break
-  meta rule evaluation dependencies.
 
 - Improved internal header address (From/To/Cc) parser, now also
   handles multiple addresses and includes optional support for
