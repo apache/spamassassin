@@ -256,8 +256,13 @@ sub bgsend_and_start_lookup {
   $self->{rules_for_key}->{$key}{$_} = 1 foreach (@rulenames);
 
   if ($dns_query_info) {  # DNS query already underway or completed
+    if ($dns_query_info->{blocked}) {
+      dbg("async: blocked by %s: %s, rules: %s", $dns_query_info->{blocked},
+          $dnskey, join(", ", @rulenames));
+      return;
+    }
     my $id = $ent->{id} = $dns_query_info->{id};  # re-use existing query
-    return if !defined $id;  # presumably blocked, or other fatal failure
+    return if !defined $id;  # presumably some fatal failure
     my $id_tail = $id; $id_tail =~ s{^\d+/IN/}{};
     lc($id_tail) eq lc($dnskey)
       or info("async: unmatched id %s, key=%s", $id, $dnskey);
@@ -330,6 +335,7 @@ sub bgsend_and_start_lookup {
     if ($blocked) {
       dbg("async: blocked by %s: %s, rules: %s", $blocked_by, $dnskey,
           join(", ", @rulenames));
+      $dns_query_info->{blocked} = $blocked_by;
     } else {
       dbg("async: launching %s, rules: %s", $dnskey, join(", ", @rulenames));
       $id = $self->{main}->{resolver}->bgsend($domain, $type, $class, sub {
