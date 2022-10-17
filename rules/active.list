@@ -188,7 +188,7 @@ BITCOIN_IMGUR
 # good enough
 BITCOIN_MALF_HTML
 
-# tflags publish
+# tflags net
 BITCOIN_MALWARE
 
 # tflags publish
@@ -248,7 +248,7 @@ BITCOIN_XPRIO
 # tflags publish
 BITCOIN_YOUR_INFO
 
-# tflags publish
+# tflags net
 BODY_URI_ONLY
 
 # tflags publish
@@ -298,9 +298,6 @@ CORRUPT_FROM_LINE_IN_HDRS
 
 # tflags publish
 CTE_8BIT_MISMATCH
-
-# good enough
-DATE_IN_FUTURE_Q_PLUS
 
 # tflags publish
 DAY_I_EARNED
@@ -464,10 +461,10 @@ FONT_INVIS_POSTEXTRAS
 # tflags net
 FORGED_SPF_HELO
 
-# tflags publish
+# tflags net
 FORM_FRAUD
 
-# tflags publish
+# tflags net
 FORM_FRAUD_3
 
 # tflags publish
@@ -544,6 +541,9 @@ FROM_MISSP_FREEMAIL
 
 # good enough
 FROM_MISSP_MSFT
+
+# tflags net
+FROM_MISSP_REPLYTO
 
 # tflags net
 FROM_MISSP_SPF_FAIL
@@ -737,6 +737,9 @@ HAS_X_NO_RELAY
 # tflags publish
 HAS_X_OUTGOING_SPAM_STAT
 
+# tflags net
+HDRS_LCASE
+
 # tflags publish
 HDRS_MISSP
 
@@ -821,7 +824,7 @@ HTML_OFF_PAGE
 # tflags publish
 HTML_SHRT_CMNT_OBFU_MANY
 
-# tflags publish
+# tflags net
 HTML_SINGLET_MANY
 
 # good enough
@@ -844,6 +847,9 @@ JH_SPAMMY_PATTERN01
 
 # tflags publish
 JH_SPAMMY_PATTERN02
+
+# tflags net
+KHOP_FAKE_EBAY
 
 # tflags net
 KHOP_HELO_FCRDNS
@@ -1553,10 +1559,10 @@ TARINGANET_IMG_NOT_RCVD_TN
 # tflags publish
 TEQF_USR_IMAGE
 
-# tflags publish
+# tflags net
 TEQF_USR_MSGID_HEX
 
-# tflags publish
+# tflags net
 TEQF_USR_MSGID_MALF
 
 # tflags publish
@@ -1610,6 +1616,15 @@ TVD_APPROVED
 # good enough
 TVD_RCVD_SPACE_BRACKET
 
+# tflags net
+TVD_SPACE_ENCODED
+
+# tflags net
+TVD_SPACE_RATIO_MINFP
+
+# tflags net
+TVD_SUBJ_NUM_OBFU_MINFP
+
 # good enough
 TVD_VISIT_PHARMA
 
@@ -1636,9 +1651,6 @@ UNPARSEABLE_RELAY
 
 # tflags publish
 UNSUB_GOOG_FORM
-
-# good enough
-UPPERCASE_URI
 
 # tflags net
 URIBL_ABUSE_SURBL
@@ -1805,10 +1817,10 @@ URI_WPADMIN
 # tflags publish
 URI_WP_DIRINDEX
 
-# tflags publish
+# tflags net
 URI_WP_HACKED
 
-# tflags publish
+# tflags net
 URI_WP_HACKED_2
 
 # tflags publish
