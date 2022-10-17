@@ -130,18 +130,20 @@ rawbody		__SCC_HASHBUST_4	/Subscription Expired Today/i
 describe	__SCC_HASHBUST_5	Pattern seen a lot in  'hash-buster' text. 
 rawbody		__SCC_HASHBUST_5	/(.(([a-z]{5,8}) ([a-z])){3,}\3\n){1,}/m
 
+describe	SCC_HB_ANY	At least 1 hash-buster
+meta		SCC_HB_ANY	__SCC_HASHBUST_1 || __SCC_HASHBUST_2 || __SCC_HASHBUST_3 || __SCC_HASHBUST_4 || __SCC_HASHBUST_5
 
 describe	SCC_HB2	2 different hash-busters
-meta		SCC_HB2	\( __SCC_HASHBUST_1 + __SCC_HASHBUST_2 + __SCC_HASHBUST_3 + __SCC_HASHBUST_4 + __SCC_HASHBUST_5 \) == 2
+meta		SCC_HB2	( __SCC_HASHBUST_1 + __SCC_HASHBUST_2 + __SCC_HASHBUST_3 + __SCC_HASHBUST_4 + __SCC_HASHBUST_5 ) == 2
 
 describe	SCC_HB3	3 different hash-busters
-meta		SCC_HB3	\( __SCC_HASHBUST_1 + __SCC_HASHBUST_2 + __SCC_HASHBUST_3 + __SCC_HASHBUST_4 + __SCC_HASHBUST_5 \) == 3
+meta		SCC_HB3	( __SCC_HASHBUST_1 + __SCC_HASHBUST_2 + __SCC_HASHBUST_3 + __SCC_HASHBUST_4 + __SCC_HASHBUST_5 ) == 3
 
 describe	SCC_HB4	4 different hash-busters
-meta		SCC_HB4	\( __SCC_HASHBUST_1 + __SCC_HASHBUST_2 + __SCC_HASHBUST_3 + __SCC_HASHBUST_4 + __SCC_HASHBUST_5 \) == 4
+meta		SCC_HB4	( __SCC_HASHBUST_1 + __SCC_HASHBUST_2 + __SCC_HASHBUST_3 + __SCC_HASHBUST_4 + __SCC_HASHBUST_5 ) == 4
 
 describe	SCC_HB5	5 different hash-busters
-meta		SCC_HB5	\( __SCC_HASHBUST_1 + __SCC_HASHBUST_2 + __SCC_HASHBUST_3 + __SCC_HASHBUST_4 + __SCC_HASHBUST_5 \) == 5
+meta		SCC_HB5	( __SCC_HASHBUST_1 + __SCC_HASHBUST_2 + __SCC_HASHBUST_3 + __SCC_HASHBUST_4 + __SCC_HASHBUST_5 ) == 5
 
 ifplugin Mail::SpamAssassin::Plugin::MIMEHeader
 mimeheader	__SCC_BOGUS_CTE_1	Content-Transfer-Encoding =~ /^Hexa/i
