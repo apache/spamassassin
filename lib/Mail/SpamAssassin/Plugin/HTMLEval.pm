@@ -61,65 +61,88 @@ sub html_tag_balance {
   return 0 if $rawtag !~ /^([a-zA-Z0-9]+)$/;
   my $tag = $1;
 
-  return 0 unless exists $pms->{html}{inside}{$tag};
-
   return 0 if $rawexpr !~ /^([\<\>\=\!\-\+ 0-9]+)$/;
   my $expr = untaint_var($1);
 
-  $pms->{html}{inside}{$tag} =~ /^([\<\>\=\!\-\+ 0-9]+)$/;
-  my $val = untaint_var($1);
+  foreach my $html (@{$pms->{html_all}}) {
+    next unless exists $html->{inside}{$tag};
+    $html->{inside}{$tag} =~ /^([\<\>\=\!\-\+ 0-9]+)$/;
+    my $val = untaint_var($1);
+    return 1 if eval "\$val $expr";
+  }
 
-  return eval "\$val $expr";
+  return 0;
 }
 
 sub html_image_only {
   my ($self, $pms, undef, $min, $max) = @_;
 
-  return (exists $pms->{html}{inside}{img} &&
-	  exists $pms->{html}{length} &&
-	  $pms->{html}{length} > $min &&
-	  $pms->{html}{length} <= $max);
+  foreach my $html (@{$pms->{html_all}}) {
+    if (exists $html->{inside}{img} && exists $html->{length} &&
+        $html->{length} > $min && $html->{length} <= $max)
+    {
+      return 1;
+    }
+  }
+
+  return 0;
 }
 
 sub html_image_ratio {
   my ($self, $pms, undef, $min, $max) = @_;
 
-  return 0 unless (exists $pms->{html}{non_space_len} &&
-		   exists $pms->{html}{image_area} &&
-		   $pms->{html}{image_area} > 0);
-  my $ratio = $pms->{html}{non_space_len} / $pms->{html}{image_area};
-  return ($ratio > $min && $ratio <= $max);
+  foreach my $html (@{$pms->{html_all}}) {
+    next unless (exists $html->{non_space_len} &&
+                 exists $html->{image_area} &&
+                 $html->{image_area} > 0);
+    my $ratio = $html->{non_space_len} / $html->{image_area};
+    return 1 if $ratio > $min && $ratio <= $max;
+  }
+
+  return 0;
 }
 
 sub html_charset_faraway {
   my ($self, $pms) = @_;
 
-  return 0 unless exists $pms->{html}{charsets};
-
   my @locales = Mail::SpamAssassin::Util::get_my_locales($pms->{conf}->{ok_locales});
   return 0 if grep { $_ eq "all" } @locales;
 
-  my $okay = 0;
-  my $bad = 0;
-  for my $c (split(' ', $pms->{html}{charsets})) {
-    if (Mail::SpamAssassin::Locales::is_charset_ok_for_locales($c, @locales)) {
-      $okay++;
+  foreach my $html (@{$pms->{html_all}}) {
+    next unless exists $html->{charsets};
+    my $okay = 0;
+    my $bad = 0;
+    foreach my $c (split(/\s+/, $html->{charsets})) {
+      if (Mail::SpamAssassin::Locales::is_charset_ok_for_locales($c, @locales)) {
+        $okay++;
+      } else {
+        $bad++;
+      }
     }
-    else {
-      $bad++;
-    }
+    return 1 if $bad && $bad >= $okay;
   }
-  return ($bad && ($bad >= $okay));
+
+  return 0;
 }
 
 sub html_tag_exists {
   my ($self, $pms, undef, $tag) = @_;
-  return exists $pms->{html}{inside}{$tag};
+
+  foreach my $html (@{$pms->{html_all}}) {
+    return 1 if exists $html->{inside}{$tag};
+  }
+
+  return 0;
 }
 
 sub html_test {
   my ($self, $pms, undef, $test) = @_;
-  return $pms->{html}{$test} ? 1 : 0;
+
+  foreach my $html (@{$pms->{html_all}}) {
+    return 1 if $html->{$test};
+  }
+
+  return 0;
 }
 
 sub html_eval {
@@ -128,29 +151,38 @@ sub html_eval {
   return 0 if $rawexpr !~ /^([\<\>\=\!\-\+ 0-9]+)$/;
   my $expr = untaint_var($1);
 
-  # workaround bug 3320: weird perl bug where additional, very explicit
-  # untainting into a new var is required.
-  my $tainted = $pms->{html}{$test};
-  return 0 unless defined($tainted);
-  my $val = $tainted;
+  foreach my $html (@{$pms->{html_all}}) {
+    # workaround bug 3320: weird perl bug where additional, very explicit
+    # untainting into a new var is required.
+    my $tainted = $html->{$test};
+    next unless defined($tainted);
+    my $val = $tainted;
+    # just use the value in $val, don't copy it needlessly
+    return 1 if eval "\$val $expr";
+  }
 
-  # just use the value in $val, don't copy it needlessly
-  return eval "\$val $expr";
+  return 0;
 }
 
 sub html_text_match {
   my ($self, $pms, undef, $text, $regexp) = @_;
+
   my ($rec, $err) = compile_regexp($regexp, 0);
   if (!$rec) {
     warn "htmleval: html_text_match invalid regexp '$regexp': $err";
     return 0;
   }
-  foreach my $string (@{$pms->{html}{$text}}) {
-    next unless defined $string;
-    if ($string =~ $rec) {
-      return 1;
+
+  foreach my $html (@{$pms->{html_all}}) {
+    next unless ref($html->{$text}) eq 'ARRAY';
+    foreach my $string (@{$html->{$text}}) {
+      next unless defined $string;
+      if ($string =~ $rec) {
+        return 1;
+      }
     }
   }
+
   return 0;
 }
 
@@ -161,53 +193,73 @@ sub html_title_subject_ratio {
   if ($subject eq '') {
     return 0;
   }
-  my $max = 0;
-  for my $string (@{ $pms->{html}{title} }) {
-    if ($string) {
-      my $ratio = length($string) / length($subject);
-      $max = $ratio if $ratio > $max;
+
+  foreach my $html (@{$pms->{html_all}}) {
+    my $max = 0;
+    foreach my $string (@{$html->{title}}) {
+      if ($string) {
+        my $ratio_s = length($string) / length($subject);
+        $max = $ratio_s if $ratio_s > $max;
+      }
     }
+    return 1 if $max > $ratio;
   }
-  return $max > $ratio;
+
+  return 0;
 }
 
 sub html_text_not_match {
   my ($self, $pms, undef, $text, $regexp) = @_;
-  for my $string (@{ $pms->{html}{$text} }) {
-    if (defined $string && $string !~ /${regexp}/) {
-      return 1;
+
+  my ($rec, $err) = compile_regexp($regexp, 0);
+  if (!$rec) {
+    warn "htmleval: html_text_not_match invalid regexp '$regexp': $err";
+    return 0;
+  }
+
+  foreach my $html (@{$pms->{html_all}}) {
+    next unless ref($html->{$text}) eq 'ARRAY';
+    foreach my $string (@{$html->{$text}}) {
+      if (defined $string && $string !~ $rec) {
+        return 1;
+      }
     }
   }
+
   return 0;
 }
 
 sub html_range {
   my ($self, $pms, undef, $test, $min, $max) = @_;
 
-  return 0 unless exists $pms->{html}{$test};
+  foreach my $html (@{$pms->{html_all}}) {
+    next unless defined $html->{$test};
+    my $value = $html->{$test};
+    # not all perls understand what "inf" means, so we need to do
+    # non-numeric tests!  urg!
+    if (!defined $max || $max eq "inf") {
+      return 1 if $value > $min;
+    }
+    elsif ($value eq "inf") {
+      # $max < inf, so $value == inf means $value > $max
+      next;
+    }
+    else {
+      # if we get here everything should be a number
+      return 1 if $value > $min && $value <= $max;
+    }
+  }
 
-  $test = $pms->{html}{$test};
-
-  # not all perls understand what "inf" means, so we need to do
-  # non-numeric tests!  urg!
-  if (!defined $max || $max eq "inf") {
-    return ($test eq "inf") ? 1 : ($test > $min);
-  }
-  elsif ($test eq "inf") {
-    # $max < inf, so $test == inf means $test > $max
-    return 0;
-  }
-  else {
-    # if we get here everything should be a number
-    return ($test > $min && $test <= $max);
-  }
+  return 0;
 }
 
 sub check_iframe_src {
   my ($self, $pms) = @_;
 
-  foreach my $v ( values %{$pms->{html}->{uri_detail}} ) {
-    return 1 if $v->{types}->{iframe};
+  foreach my $html (@{$pms->{html_all}}) {
+    foreach my $v (values %{$html->{uri_detail}}) {
+      return 1 if $v->{types}->{iframe};
+    }
   }
 
   return 0;

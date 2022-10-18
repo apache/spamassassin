@@ -1303,6 +1303,7 @@ sub get_body_text_array_common {
       # text/plain rendered as html otherwise.
       if ($html_needs_setting && $type eq 'text/html') {
         $self->{metadata}->{html} = $p->{html_results};
+        push @{$self->{metadata}->{html_all}}, $p->{html_results};
       }
     }
   }

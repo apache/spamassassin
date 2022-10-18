@@ -2043,6 +2043,7 @@ sub extract_message_metadata {
     $self->get_decoded_stripped_body_text_array();
   }
   $self->{html} = $self->{msg}->{metadata}->{html};
+  $self->{html_all} = $self->{msg}->{metadata}->{html_all};
 
   # allow plugins to add more metadata, read the stuff that's there, etc.
   $self->{main}->call_plugins ("parsed_metadata", { permsgstatus => $self });
@@ -2788,18 +2789,20 @@ sub _process_html_uri_list {
   my ($self) = @_;
 
   # get URIs from HTML parsing
-  # use the metadata version since $self->{html} may not be setup
-  my $detail = $self->{msg}->{metadata}->{html}->{uri_detail} || { };
-  $self->{'uri_truncated'} = 1 if $self->{msg}->{metadata}->{html}->{uri_truncated};
+  # use the metadata version since $self->{html_all} may not be setup
+  foreach my $html (@{$self->{msg}->{metadata}->{html_all}}) {
+    my $detail = $html->{uri_detail} || { };
+    $self->{'uri_truncated'} = 1 if $html->{uri_truncated};
 
-  # canonicalize the HTML parsed URIs
-  while(my($uri, $info) = each %{ $detail }) {
-    if ($self->add_uri_detail_list($uri, $info->{types}, 'html', 0)) {
-      # Need also to copy and uniq anchor text
-      if (exists $info->{anchor_text}) {
-        my %seen;
-        foreach (grep { !$seen{$_}++ } @{$info->{anchor_text}}) {
-          push @{$self->{uri_detail_list}->{$uri}->{anchor_text}}, $_;
+    # canonicalize the HTML parsed URIs
+    while(my($uri, $info) = each %{ $detail }) {
+      if ($self->add_uri_detail_list($uri, $info->{types}, 'html', 0)) {
+        # Need also to copy and uniq anchor text
+        if (exists $info->{anchor_text}) {
+          my %seen;
+          foreach (grep { !$seen{$_}++ } @{$info->{anchor_text}}) {
+            push @{$self->{uri_detail_list}->{$uri}->{anchor_text}}, $_;
+          }
         }
       }
     }

@@ -47,39 +47,37 @@ sub new {
 # ("<" and ">" replaced with "[lt]" and "[gt]" to avoid Kaspersky Desktop AV
 # false positive ;)
 sub check_https_http_mismatch {
-  my ($self, $permsgstatus, undef, $minanchors, $maxanchors) = @_;
+  my ($self, $pms, undef, $minanchors, $maxanchors) = @_;
 
   $minanchors ||= 1;
 
-  if (!exists $permsgstatus->{chhm_hit}) {
-    $permsgstatus->{chhm_hit} = 0;
-    $permsgstatus->{chhm_anchors} = 0;
+  foreach my $html (@{$pms->{html_all}}) {
+    my $hit = 0;
+    my $anchors = 0;
+    foreach my $k (keys %{$html->{uri_detail}}) {
+      my $v = $html->{uri_detail}->{$k};
 
-    foreach my $k ( keys %{$permsgstatus->{html}->{uri_detail}} ) {
-      my %uri_detail = %{$permsgstatus->{html}->{uri_detail}};
-      my $v = ${uri_detail}{$k};
       # if the URI wasn't used for an anchor tag, or the anchor text didn't
       # exist, skip this.
-      next unless (exists $v->{anchor_text} && @{$v->{anchor_text}});
+      next unless exists $v->{anchor_text} && @{$v->{anchor_text}};
 
       my $uri;
       if ($k =~ m@^https?://([^/:?#]+)@i) {
         $uri = $1;
         # Skip IPs since there's another rule to catch that already
         if ($uri =~ IS_IP_ADDRESS) {
-          undef $uri;
+          $uri = undef;
           next;
         } 
         # want to compare whole hostnames instead of domains?
         # comment this next section to the blank line.
         $uri = $self->{main}->{registryboundaries}->trim_domain($uri);
         my $domain = $self->{main}->{registryboundaries}->uri_to_domain($uri);
-        undef $uri unless ($self->{main}->{registryboundaries}->is_domain_valid($domain));
+        $uri = undef  unless $self->{main}->{registryboundaries}->is_domain_valid($domain);
       }
-
       next unless $uri;
-      $permsgstatus->{chhm_anchors}++ if exists $v->{anchor_text};
 
+      $anchors++ if exists $v->{anchor_text};
       foreach (@{$v->{anchor_text}}) {
         if (m@https://([^\s/:?#]+)@i) {
           my $https = $1;
@@ -88,22 +86,23 @@ sub check_https_http_mismatch {
 	  # comment this next section to the blank line.
           if ($https !~ IS_IP_ADDRESS) {
 	    $https = $self->{main}->{registryboundaries}->trim_domain($https);
-            undef $https unless ($self->{main}->{registryboundaries}->is_domain_valid($https));
+            $https = undef  unless $self->{main}->{registryboundaries}->is_domain_valid($https);
           }
 	  next unless $https;
-
 	  dbg("https_http_mismatch: domains $uri -> $https");
-
 	  next if $uri eq $https;
-	  $permsgstatus->{chhm_hit} = 1;
+	  $hit = 1;
 	  last;
         }
       }
     }
-    dbg("https_http_mismatch: anchors ".$permsgstatus->{chhm_anchors});
+
+    dbg("https_http_mismatch: anchors $anchors");
+    return 1 if $hit && $anchors >= $minanchors &&
+                (!defined $maxanchors || $anchors < $maxanchors);
   }
 
-  return ( $permsgstatus->{chhm_hit} && $permsgstatus->{chhm_anchors} >= $minanchors && (defined $maxanchors && $permsgstatus->{chhm_anchors} < $maxanchors) );
+  return 0;
 }
 
 1;
