@@ -97,7 +97,8 @@ if can(Mail::SpamAssassin::Conf::feature_capture_rules)
 
   uri           __GB_CUSTOM_HTM_URI0    m|^https?://.{10,128}\.html?\#%{GB_TO_ADDR}|i
   uri           __GB_CUSTOM_HTM_URI1    m|^https?://.{10,64}\=https?://.{4,64}\#%{GB_TO_ADDR}|i
-  meta          GB_CUSTOM_HTM_URI       ( __GB_CUSTOM_HTM_URI0 || __GB_CUSTOM_HTM_URI1 )
+  uri           __GB_DRUPAL_URI         m|^https?://.{10,64}/default/files/(:?\@)?\#%{GB_TO_ADDR}|i
+  meta          GB_CUSTOM_HTM_URI       ( __GB_CUSTOM_HTM_URI0 || __GB_CUSTOM_HTM_URI1 || __GB_DRUPAL_URI )
   describe      GB_CUSTOM_HTM_URI       Custom html uri
   score         GB_CUSTOM_HTM_URI       1.500 # limit
   tflags        GB_CUSTOM_HTM_URI       publish
