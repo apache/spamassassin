@@ -77,12 +77,12 @@ BEGIN {
         map {
               my $pathdir = $_;
               $pathdir =~ s/\\*\z//;
-              my $abspathdir = File::Spec->canonpath(Cwd::realpath($pathdir));
+              my $abspathdir = File::Spec->canonpath(Cwd::realpath($pathdir)) if (-d $pathdir);
               if (defined $abspathdir) {
                 $abspathdir  =~ /^(.*)\z/s;
                 $abspathdir = $1; # untaint it
               }
-              ((defined $abspathdir) and (lc $pathdir eq lc $abspathdir) and (-d $abspathdir))?($abspathdir):()
+              ((defined $abspathdir) and (lc $pathdir eq lc $abspathdir))?($abspathdir):()
             }
           @pathdirs);
   }
@@ -151,12 +151,12 @@ sub sa_t_init {
     join(' -I', # filter for only dirs that are absolute paths that exist, then canonicalize them
       map {
             my $pathdir = $_;
-            my $canonpathdir = File::Spec->canonpath(Cwd::realpath($pathdir)) if (File::Spec->file_name_is_absolute($pathdir));
+            my $canonpathdir = File::Spec->canonpath(Cwd::realpath($pathdir)) if ((-d $pathdir) and File::Spec->file_name_is_absolute($pathdir));
             if (defined $canonpathdir) {
                $canonpathdir =~ /^(.*)\z/s;
                $canonpathdir = $1; # untaint it
             }
-            ((defined $canonpathdir) and (-d $canonpathdir))?($canonpathdir):()
+            ((defined $canonpathdir))?($canonpathdir):()
           }
          @pathdirs);
   $perl_cmd .= " -I$inc_opts" if ($inc_opts);
