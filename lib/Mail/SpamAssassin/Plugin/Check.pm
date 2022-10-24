@@ -58,6 +58,18 @@ sub check_main {
   # Make AsyncLoop wait launch_queue() for launching queries
   $pms->{async}->start_queue();
 
+  # initialize meta stuff
+  $pms->{meta_pending} = {};
+  foreach my $rulename (keys %{$conf->{meta_tests}}) {
+    $pms->{meta_pending}->{$rulename} = 1  if $conf->{scores}->{$rulename};
+  }
+  # metas without dependencies are ready to be run
+  foreach my $rulename (keys %{$conf->{meta_nodeps}}) {
+  dbg("check: meta_check_ready $rulename");
+    $pms->{meta_check_ready}->{$rulename} = 1;
+  }
+
+  # rule_hits API implemented in 3.3.0
   my $suppl_attrib = $pms->{msg}->{suppl_attrib};
   if (ref $suppl_attrib && ref $suppl_attrib->{rule_hits}) {
     my @caller_rule_hits = @{$suppl_attrib->{rule_hits}};
@@ -68,6 +80,8 @@ sub check_main {
          $ruletype, $tflags, $description) =
         @$caller_rule_hit{qw(rule area score defscore value
                              ruletype tflags descr)};
+      dbg("rules: ran rule_hits rule $rulename ======> got hit (%s)",
+          defined $value ? $value : '1');
       $pms->got_hit($rulename, $area,
                     !defined $score ? () : (score => $score),
                     !defined $defscore ? () : (defscore => $defscore),
@@ -75,6 +89,8 @@ sub check_main {
                     !defined $tflags ? () : (tflags => $tflags),
                     !defined $description ? () : (description => $description),
                     ruletype => $ruletype);
+      delete $pms->{meta_pending}->{$rulename};
+      delete $pms->{meta_check_ready}->{$rulename};
     }
   }
 
@@ -93,16 +109,6 @@ sub check_main {
   my $master_deadline = $pms->{master_deadline};
   dbg("check: check_main, time limit in %.3f s",
       $master_deadline - time)  if $master_deadline;
-
-  # initialize meta stuff
-  $pms->{meta_pending} = {};
-  foreach my $rulename (keys %{$conf->{meta_tests}}) {
-    $pms->{meta_pending}->{$rulename} = 1  if $conf->{scores}->{$rulename};
-  }
-  # metas without dependencies are ready to be run
-  foreach my $rulename (keys %{$conf->{meta_nodeps}}) {
-    $pms->{meta_check_ready}->{$rulename} = 1;
-  }
 
   # Make sure priority -100 exists for launching DNS
   $conf->{priorities}->{-100} ||= 1 if $do_dns;
@@ -214,6 +220,7 @@ sub check_main {
   $self->{main}->call_plugins ("check_cleanup", { permsgstatus => $pms });
 
   # final check for ready metas
+  $self->do_meta_tests($pms);
   $self->finish_meta_tests($pms);
 
   # check dns_block_rule (bug 6728)
@@ -277,7 +284,7 @@ sub do_meta_tests {
   my ($self, $pms, $priority) = @_;
 
   # Needed for Reuse to work, otherwise we don't care about priorities
-  if ($self->{main}->have_plugin('start_rules')) {
+  if (defined $priority && $self->{main}->have_plugin('start_rules')) {
     $self->{main}->call_plugins('start_rules', {
       permsgstatus => $pms,
       ruletype => 'meta',
@@ -304,7 +311,7 @@ RULE:
       }
     }
     # Metasubs look like ($_[1]->{$rulename}||($_[2]->{$rulename}?1:0)) ...
-    my $result = $mt->{$rulename}->($pms, $h, {});
+    my $result = $mt->{$rulename}->($pms, $h, {}) ? 1 : 0;
     if ($result) {
       dbg("rules: ran meta rule $rulename ======> got hit ($result)");
       $pms->got_hit($rulename, '', ruletype => 'meta', value => $result);
@@ -346,11 +353,11 @@ RULE:
       }
     }
     # Metasubs look like ($_[1]->{$rulename}||($_[2]->{$rulename}?1:0)) ...
-    my $result = $mt->{$rulename}->($pms, $h, {});
+    my $result = $mt->{$rulename}->($pms, $h, {}) ? 1 : 0;
     my $result2 = $result;
     if (%unrun) {
       # Evaluate all unrun rules as true using %unrun list
-      $result2 = $mt->{$rulename}->($pms, $h, \%unrun);
+      $result2 = $mt->{$rulename}->($pms, $h, \%unrun) ? 1 : 0;
     }
     # Evaluated second time with all unrun rules as true.  If result is not
     # the same, we can't safely finish the meta. (Bug 7735)
@@ -373,6 +380,7 @@ RULE:
   if ($would_log_rules_all) {
     foreach my $rulename (sort keys %{$pms->{conf}->{meta_tests}}) {
       next if !$pms->{conf}->{scores}->{$rulename};
+      next if exists $h->{$rulename};
       my %unrun;
       foreach my $deprule (@{$md->{$rulename}||[]}) {
         $unrun{$deprule} = 1  if !exists $h->{$deprule};

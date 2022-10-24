@@ -1140,7 +1140,14 @@ sub compile_meta_rules {
       $conf->{meta_tests}->{$name} = sub { 0 };
       $rule_deps{$name} = [ ];
     }
-    if (@{$rule_deps{$name}}) {
+    if ($meta{$name} eq '( ) ') {
+      # Bug 8061:
+      # meta FOOBAR () considered a rule declaration to support rule_hits API or
+      #  other dynamic rules, only evaluated at finish_meta_rules unless got_hit.
+      # Other style metas without dependencies will be evaluated immediately.
+      $meta{$name} = '0'; # Evaluating () would result in undef
+    }
+    elsif (@{$rule_deps{$name}}) {
       $conf->{meta_dependencies}->{$name} = $rule_deps{$name};
       foreach my $deprule (@{$rule_deps{$name}}) {
         $conf->{meta_deprules}->{$deprule}->{$name} = 1;
