@@ -381,6 +381,9 @@ DOS_DEREK_AUG08
 DOS_OE_TO_MX
 
 # good enough
+DOS_OE_TO_MX_IMAGE
+
+# good enough
 DOS_OUTLOOK_TO_MX
 
 # tflags publish
@@ -455,7 +458,7 @@ FONT_INVIS_POSTEXTRAS
 # tflags net
 FORGED_SPF_HELO
 
-# tflags net
+# tflags publish
 FORM_FRAUD
 
 # tflags publish
@@ -728,9 +731,6 @@ HAS_X_NO_RELAY
 # tflags publish
 HAS_X_OUTGOING_SPAM_STAT
 
-# tflags net
-HDRS_LCASE
-
 # tflags publish
 HDRS_MISSP
 
@@ -886,9 +886,6 @@ MALWARE_PASSWORD
 
 # tflags publish
 MALW_ATTACH
-
-# tflags net
-MANY_HDRS_LCASE
 
 # tflags publish
 MANY_SPAN_IN_TEXT
@@ -1050,6 +1047,9 @@ PDS_BTC_MSGID
 PDS_DBL_URL_TNB_RUNON
 
 # tflags net
+PDS_FROM_2_EMAILS
+
+# tflags net
 PDS_HELO_SPF_FAIL
 
 # good enough
@@ -1060,9 +1060,6 @@ PDS_NO_FULL_NAME_SPOOFED_URL
 
 # good enough
 PDS_OTHER_BAD_TLD
-
-# good enough
-PDS_PHPEXP_BOT
 
 # good enough
 PDS_PHP_EVAL
@@ -1591,6 +1588,9 @@ TVD_APPROVED
 
 # good enough
 TVD_RCVD_SPACE_BRACKET
+
+# tflags net
+TVD_SUBJ_NUM_OBFU_MINFP
 
 # good enough
 TVD_VISIT_PHARMA
