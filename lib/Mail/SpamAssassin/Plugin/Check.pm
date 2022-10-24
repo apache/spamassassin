@@ -311,7 +311,7 @@ RULE:
       }
     }
     # Metasubs look like ($_[1]->{$rulename}||($_[2]->{$rulename}?1:0)) ...
-    my $result = $mt->{$rulename}->($pms, $h, {}) ? 1 : 0;
+    my $result = $mt->{$rulename}->($pms, $h, {});
     if ($result) {
       dbg("rules: ran meta rule $rulename ======> got hit ($result)");
       $pms->got_hit($rulename, '', ruletype => 'meta', value => $result);
@@ -353,11 +353,11 @@ RULE:
       }
     }
     # Metasubs look like ($_[1]->{$rulename}||($_[2]->{$rulename}?1:0)) ...
-    my $result = $mt->{$rulename}->($pms, $h, {}) ? 1 : 0;
+    my $result = $mt->{$rulename}->($pms, $h, {});
     my $result2 = $result;
     if (%unrun) {
       # Evaluate all unrun rules as true using %unrun list
-      $result2 = $mt->{$rulename}->($pms, $h, \%unrun) ? 1 : 0;
+      $result2 = $mt->{$rulename}->($pms, $h, \%unrun);
     }
     # Evaluated second time with all unrun rules as true.  If result is not
     # the same, we can't safely finish the meta. (Bug 7735)
