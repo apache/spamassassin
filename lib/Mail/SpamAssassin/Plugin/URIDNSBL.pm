@@ -360,7 +360,7 @@ sub check_dnsbl {
   return if $conf->{skip_uribl_checks};
   return if !$pms->is_dns_available();
 
-  $pms->{uridnsbl_activerules} = { };
+  $pms->{uridnsbl_activerules} = [ ];
   $pms->{uridnsbl_hits} = { };
   $pms->{uridnsbl_seen_lookups} = { };
 
@@ -375,6 +375,7 @@ sub check_dnsbl {
 
   foreach my $rulename (keys %{$conf->{uridnsbls}}) {
     next if !$conf->{scores}->{$rulename};
+    push @{$pms->{uridnsbl_activerules}}, $rulename;
 
     my $rulecf = $conf->{uridnsbls}->{$rulename};
     my %tfl = map { ($_,1) } split(/\s+/, $conf->{tflags}->{$rulename}||'');
@@ -842,6 +843,8 @@ sub query_hosts_or_domains {
     keys %$nsreviprules,
   );
 
+  my %launched_rules;
+
   while (my($host,$domain) = each(%$hosthash_ref)) {
     $domain = lc $domain;  # just in case
     $host = lc $host;
@@ -867,11 +870,15 @@ sub query_hosts_or_domains {
       # but only if there are active reverse-IP-URIBL rules
       if (!$seen_lookups->{"NS:$domain"} && @nsrules > 0) {
         $seen_lookups->{"NS:$domain"} = 1;
-        $self->lookup_domain_ns($pms, $domain, \@nsrules);
+        if ($self->lookup_domain_ns($pms, $domain, \@nsrules)) {
+          $launched_rules{$_} = 1  foreach (@nsrules);
+        }
       }
       if (!$seen_lookups->{"A:$host"} && %$areviprules) {
         $seen_lookups->{"A:$host"} = 1;
-        $self->lookup_a_record($pms, $host, [keys %$areviprules]);
+        if ($self->lookup_a_record($pms, $host, [keys %$areviprules])) {
+          $launched_rules{$_} = 1  foreach (keys %$areviprules);
+        }
       }
       # Add domains_only rules to RHSBL checks
       push @rhsblrules, keys %$rhsbldomrules;
@@ -882,9 +889,16 @@ sub query_hosts_or_domains {
       my $rulecf = $conf->{uridnsbls}->{$rulename};
       # Check notrim tflag to query full hostname (Bug 7835)
       my $query = ($conf->{tflags}->{$rulename}||'') =~ /\bnotrim\b/ ? $host : $domain;
-      $self->lookup_single_dnsbl($pms, $query, $rulename,
-        $rulecf->{zone}, $rulecf->{type});
+      if ($self->lookup_single_dnsbl($pms, $query, $rulename,
+            $rulecf->{zone}, $rulecf->{type})) {
+        $launched_rules{$rulename} = 1;
+      }
     }
+  }
+
+  # mark any rule that was not used ready for metas
+  foreach my $rulename (@{$pms->{uridnsbl_activerules}}) {
+    $pms->rule_ready($rulename)  unless $launched_rules{$rulename};
   }
 }
 
