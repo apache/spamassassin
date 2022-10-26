@@ -16,9 +16,11 @@ should get 404:
 http://tinyurl.com/qqqxxxyyyzzz
 
 
-This used to have a blocked bit.ly link but bitly expires all blocked links
-so there is not a good regression test for it.
+This used to have a blocked bit.ly link but bitly expires all blocked links.
+This tests that any shortened link that redirects to the bit.ly blocked page will hit the rule
+If bit.ly ever changes the URL of the blocked link page, this test will still pass but
+the functionality will be broken for actual bit.ly blocked links
+Blocked link: https://sadecodetest.page.link/bitlyblocked
 
-# activity dot wps dot com
-https://kso.page.link/wps
-
+# should link to https spamassassin dot apache dot org slash news dot html
+https://sadecodetest.page.link/news

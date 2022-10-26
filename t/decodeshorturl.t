@@ -11,7 +11,7 @@ use constant HAS_DBD_SQLITE => eval { require DBD::SQLite; DBD::SQLite->VERSION(
 use constant SQLITE => (HAS_DBI && HAS_DBD_SQLITE);
 
 plan skip_all => "Net tests disabled"                unless conf_bool('run_net_tests');
-my $tests = 7;
+my $tests = 8;
 $tests += 4 if (SQLITE);
 plan tests => $tests;
 
@@ -33,7 +33,8 @@ body HAS_SHORT_REDIR            eval:short_url_redir()
 body SHORT_URL_CHAINED          eval:short_url_chained()
 body SHORT_URL_404		eval:short_url_404()
 body SHORT_URL_C404		eval:short_url_code('404')
-uri URI_PAGE_LINK		m,^http://activity\.wps\.com/,
+uri URI_BITLY_BLOCKED		m,^https://bitly\.com/a/blocked,
+uri URI_PAGE_LINK		m,^https://spamassassin\.apache\.org/news\.html,
 });
 
 ###
@@ -45,6 +46,7 @@ uri URI_PAGE_LINK		m,^http://activity\.wps\.com/,
    q{ 1.0 HAS_SHORT_REDIR } => '',
    q{ 1.0 SHORT_URL_404 } => '',
    q{ 1.0 SHORT_URL_C404 } => '',
+   q{ 1.0 URI_BITLY_BLOCKED } => '',
    q{ 1.0 URI_PAGE_LINK } => '',
 );
 sarun ("-t < data/spam/decodeshorturl/base.eml", \&patterns_run_cb);
