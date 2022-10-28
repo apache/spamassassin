@@ -597,13 +597,12 @@ sub pdf_is_empty_body {
   # check for cached result
   return 1 if $pms->{'pdfinfo'}->{"no_body_text"};
 
-  shift @$body;  # shift body array removes line #1 -> subject line.
-
   my $bytes = 0;
+  my $idx = 0;
   my $textlen = length(join('',@$body));
   foreach my $line (@$body) {
+    next if $idx++ == 0; # skip subject line
     next unless ($line =~ m/\S/);
-    next if ($line =~ m/^Subject/);
     $bytes += length($line);
   }
 
