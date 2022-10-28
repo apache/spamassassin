@@ -248,7 +248,7 @@ BITCOIN_YOUR_INFO
 # good enough
 BODY_EMAIL_419_FRAUD_GM
 
-# tflags publish
+# tflags net
 BODY_URI_ONLY
 
 # tflags publish
@@ -286,6 +286,9 @@ CN_B2B_SPAMMER
 
 # tflags publish
 COMMENT_GIBBERISH
+
+# tflags net
+COMPENSATION
 
 # tflags publish
 CONTENT_AFTER_HTML
@@ -467,7 +470,7 @@ FONT_INVIS_POSTEXTRAS
 # tflags net
 FORGED_SPF_HELO
 
-# tflags publish
+# tflags net
 FORM_FRAUD
 
 # tflags net
@@ -547,6 +550,9 @@ FROM_MISSP_FREEMAIL
 
 # good enough
 FROM_MISSP_MSFT
+
+# tflags net
+FROM_MISSP_REPLYTO
 
 # tflags net
 FROM_MISSP_SPF_FAIL
@@ -827,7 +833,7 @@ HTML_OFF_PAGE
 # tflags publish
 HTML_SHRT_CMNT_OBFU_MANY
 
-# tflags publish
+# tflags net
 HTML_SINGLET_MANY
 
 # good enough
@@ -838,6 +844,9 @@ HTML_TEXT_INVISIBLE_FONT
 
 # tflags publish
 HTML_TEXT_INVISIBLE_STYLE
+
+# good enough
+IMG_DIRECT_TO_MX
 
 # tflags publish
 IMG_ONLY_FM_DOM_INFO
@@ -850,6 +859,9 @@ JH_SPAMMY_PATTERN01
 
 # tflags publish
 JH_SPAMMY_PATTERN02
+
+# tflags net
+KHOP_FAKE_EBAY
 
 # tflags net
 KHOP_HELO_FCRDNS
@@ -865,9 +877,6 @@ LIST_PRTL_PUMPDUMP
 
 # tflags publish
 LIST_PRTL_SAME_USER
-
-# good enough
-LONGLN_LOW_CONTRAST
 
 # tflags publish
 LONG_HEX_URI
@@ -898,6 +907,9 @@ MALWARE_PASSWORD
 
 # tflags publish
 MALW_ATTACH
+
+# tflags net
+MANY_HDRS_LCASE
 
 # tflags publish
 MANY_SPAN_IN_TEXT
@@ -1475,6 +1487,9 @@ SHORTENER_SHORT_IMG
 # tflags publish
 SHORT_IMG_SUSP_NTLD
 
+# good enough
+SHORT_SHORTNER
+
 # tflags net
 SPF_FAIL
 
@@ -1537,6 +1552,9 @@ SUBJECT_IN_WELCOMELIST
 
 # tflags net
 SUBJ_BRKN_WORDNUMS
+
+# tflags net
+SUBJ_UNNEEDED_HTML
 
 # tflags net
 SURBL_BLOCKED
@@ -1608,10 +1626,13 @@ TO_NO_BRKTS_PCNT
 TO_TOO_MANY_WFH_01
 
 # good enough
-TVD_APPROVED
-
-# good enough
 TVD_RCVD_SPACE_BRACKET
+
+# tflags net
+TVD_SPACE_RATIO_MINFP
+
+# tflags net
+TVD_SUBJ_NUM_OBFU_MINFP
 
 # good enough
 TVD_VISIT_PHARMA
@@ -1778,7 +1799,7 @@ URI_MALWARE_SCMS
 # tflags userconf
 URI_NOVOWEL
 
-# tflags publish
+# tflags net
 URI_ONLY_MSGID_MALF
 
 # tflags publish
@@ -1805,7 +1826,7 @@ URI_WPADMIN
 # tflags publish
 URI_WP_DIRINDEX
 
-# tflags publish
+# tflags net
 URI_WP_HACKED
 
 # tflags publish
