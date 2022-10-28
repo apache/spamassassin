@@ -536,11 +536,11 @@ sub pdf_is_empty_body {
   return 0 unless $pms->{pdfinfo}->{count_pdf};
   $min ||= 0;  # default to 0 bytes
 
-  shift @$body;  # shift body array removes line #1 -> subject line.
   my $bytes = 0;
+  my $idx = 0;
   foreach my $line (@$body) {
+    next if $idx++ == 0; # skip subject line
     next unless $line =~ /\S/;
-    next if $line =~ /^Subject/;
     $bytes += length($line);
     # no hit if minimum already exceeded
     return 0 if $bytes > $min;
