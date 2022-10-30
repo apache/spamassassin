@@ -65,7 +65,6 @@ sub check_main {
   }
   # metas without dependencies are ready to be run
   foreach my $rulename (keys %{$conf->{meta_nodeps}}) {
-  dbg("check: meta_check_ready $rulename");
     $pms->{meta_check_ready}->{$rulename} = 1;
   }
 
