@@ -1078,8 +1078,7 @@ sub compile_meta_rules {
         # Will end up later in a compiled sub called from do_meta_tests:
         #  $_[0] = $pms
         #  $_[1] = $h ($pms->{tests_already_hit}),
-        #  $_[2] = hashref list of unrun rules
-        $meta{$name} .= "(\$_[1]->{'$token'}||(\$_[2]->{'$token'}?1:0)) ";
+        $meta{$name} .= "(\$_[1]->{'$token'}||0) ";
 
         if (!exists $conf->{test_types}->{$token}) {
           dbg("rules: meta test $name has undefined dependency '$token'");

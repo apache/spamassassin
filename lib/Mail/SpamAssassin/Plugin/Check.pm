@@ -309,8 +309,8 @@ RULE:
         next RULE;
       }
     }
-    # Metasubs look like ($_[1]->{$rulename}||($_[2]->{$rulename}?1:0)) ...
-    my $result = $mt->{$rulename}->($pms, $h, {});
+    # Metasubs look like ($_[1]->{$rulename}||0) ...
+    my $result = $mt->{$rulename}->($pms, $h);
     if ($result) {
       dbg("rules: ran meta rule $rulename ======> got hit ($result)");
       $pms->got_hit($rulename, '', ruletype => 'meta', value => $result);
@@ -335,34 +335,15 @@ sub finish_meta_tests {
   return if $self->{am_compiling}; # nothing to compile here
 
   my $mp = $pms->{meta_pending};
-  my $md = $pms->{conf}->{meta_dependencies};
   my $mt = $pms->{conf}->{meta_tests};
   my $h = $pms->{tests_already_hit};
   my $retry;
-  my %unrun;
 
 RULE:
   foreach my $rulename (keys %$mp) {
-    %unrun = ();
-    # Meta is not ready if some dependency has not run yet
-    foreach my $deprule (@{$md->{$rulename}||[]}) {
-      if (!exists $h->{$deprule}) {
-        # Record all unrun deps for second meta evaluation
-        $unrun{$deprule} = 1;
-      }
-    }
-    # Metasubs look like ($_[1]->{$rulename}||($_[2]->{$rulename}?1:0)) ...
-    my $result = $mt->{$rulename}->($pms, $h, {});
-    my $result2 = $result;
-    if (%unrun) {
-      # Evaluate all unrun rules as true using %unrun list
-      $result2 = $mt->{$rulename}->($pms, $h, \%unrun);
-    }
-    # Evaluated second time with all unrun rules as true.  If result is not
-    # the same, we can't safely finish the meta. (Bug 7735)
-    if ($result != $result2) {
-      next RULE;
-    } elsif ($result) {
+    # Metasubs look like ($_[1]->{$rulename}||0) ...
+    my $result = $mt->{$rulename}->($pms, $h);
+    if ($result) {
       dbg("rules: ran meta rule $rulename ======> got hit ($result)");
       $pms->got_hit($rulename, '', ruletype => 'meta', value => $result);
     } else {
@@ -375,21 +356,6 @@ RULE:
   }
 
   goto RULE if $retry--;
-
-  if ($would_log_rules_all) {
-    foreach my $rulename (sort keys %{$pms->{conf}->{meta_tests}}) {
-      next if !$pms->{conf}->{scores}->{$rulename};
-      next if exists $h->{$rulename};
-      my %unrun;
-      foreach my $deprule (@{$md->{$rulename}||[]}) {
-        $unrun{$deprule} = 1  if !exists $h->{$deprule};
-      }
-      if (%unrun) {
-        dbg("rules-all: unrun dependencies prevented meta $rulename from running: ".
-          join(', ', sort keys %unrun));
-      }
-    }
-  }
 }
 
 ###########################################################################

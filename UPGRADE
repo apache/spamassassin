@@ -19,10 +19,7 @@ improved throughout.
   https://wiki.apache.org/spamassassin/WelcomelistBlocklist (Bug 7826)
 
 - Meta rules no longer use priority values, they are evaluated
-  dynamically when the rules they depend on are finished. Note that if
-  a meta depends on non-existing rules or rules that do not finish
-  (timeout or other errors), the whole meta might not be evaluated.
-  (Bug 7735)
+  dynamically when the rules they depend on are finished. (Bug 7735)
 
 - API: New $pms->rule_ready() function. Any asynchronous eval-function
   must now return undef (instead of 0 or 1), if rule result is not

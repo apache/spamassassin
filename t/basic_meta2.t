@@ -17,9 +17,13 @@ plan tests => 23 * $iterations;
   q{ 1.0 TEST_FOO_2 }     => '',
   q{ 1.0 TEST_FOO_3 }     => '',
   q{ 1.0 TEST_META_1 }    => '',
+  q{ 1.0 TEST_META_2 }    => '',
   q{ 1.0 TEST_META_3 }    => '',
+  q{ 1.0 TEST_META_4 }    => '',
   q{ 1.0 TEST_META_5 }    => '',
+  q{ 1.0 TEST_META_6 }    => '',
   q{ 1.0 TEST_META_7 }    => '',
+  q{ 1.0 TEST_META_9 }    => '',
   q{ 1.0 TEST_META_A }    => '',
   q{ 1.0 TEST_META_B }    => '',
   q{ 1.0 TEST_META_C }    => '',
@@ -34,11 +38,7 @@ plan tests => 23 * $iterations;
 
 %anti_patterns = (
   q{ TEST_NEG_1 }     => '',
-  q{ TEST_META_2 }    => '',
-  q{ TEST_META_4 }    => '',
-  q{ TEST_META_6 }    => '',
   q{ TEST_META_8 }    => '',
-  q{ TEST_META_9 }    => '',
 );
 
 tstlocalrules (qq{
@@ -60,30 +60,27 @@ tstlocalrules (qq{
    ## Unrun rule dependencies (Bug 7735)
    ##
 
-   # Non-existing rule, considered "unrun" and will prevent dependent metas
-   #  from running (unless dual evaluation allows it)
-   # Should not hit, meta is evaled twice: (!0) && (!1)
+   # Non-existing rule, should hit as !0
    meta TEST_META_2 !NONEXISTINGRULE
-   # Should hit, meta is evaled twice: (!0 || 0) && (!1 || 1)
+   # Should hit as !0 || 0
    meta TEST_META_3 !NONEXISTINGRULE || NONEXISTINGRULE
 
    # Disabled rule, same as above
    body TEST_DISABLED /a/
    score TEST_DISABLED 0
-   # Should not hit
+   # Should hit as !0
    meta TEST_META_4 !TEST_DISABLED
-   # Should hit
+   # Should hit as !0 || 0
    meta TEST_META_5 !TEST_DISABLED || TEST_DISABLED
 
    # Unrun rule (due to local tests only), same as above
    askdns TEST_DISABLED2 spamassassin.org TXT /./
-   # Should not hit
+   # Should hit as !0
    meta TEST_META_6 !TEST_DISABLED2
-   # Should hit
+   # Should hit as !0 || 0
    meta TEST_META_7 !TEST_DISABLED2 || TEST_DISABLED2
 
-   # Other way of "disabling" a rule, with meta 0.  This will let dependent
-   # metas run fully, as the rule is considered run but not hitting.
+   # Other way of "disabling" a rule, with meta 0.
    meta TEST_DISABLED3 0
    # Should hit
    meta TEST_META_I !TEST_DISABLED3
@@ -92,9 +89,9 @@ tstlocalrules (qq{
 
    # Should not hit
    meta TEST_META_8 __FOO_1 + NONEXISTINGRULE == 2
-   # Should not hit
+   # Should hit as 1 + 0 + 1 == 2
    meta TEST_META_9 __FOO_1 + NONEXISTINGRULE + __FOO_2 == 2
-   # Should hit (both eval checks are true thanks to >1)
+   # Should hit as above
    meta TEST_META_A __FOO_1 + NONEXISTINGRULE + __FOO_2 > 1
 
    # local_tests_only

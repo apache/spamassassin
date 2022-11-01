@@ -10,7 +10,7 @@ plan skip_all => "Tests don't work on windows" if $RUNNING_ON_WINDOWS;
 plan skip_all => "Net tests disabled" unless conf_bool('run_net_tests');
 plan skip_all => "DCC tests disabled" unless conf_bool('run_dcc_tests');
 plan skip_all => "DCC executable not found in path" unless HAS_DCC;
-plan tests => 16;
+plan tests => 12;
 
 diag('Note: Failure may not be an SpamAssassin bug, as DCC tests can fail due to problems with the DCC servers.');
 
@@ -50,16 +50,5 @@ ok_all_patterns();
 ok sarun ("-t < data/spam/gtubedcc.eml 2>&1", \&patterns_run_cb);
 ok_all_patterns();
 ok sarun ("-t < data/spam/gtubedcc_crlf.eml 2>&1", \&patterns_run_cb);
-ok_all_patterns();
-
-# Local only, metas should not hit as no queries are made
-%patterns = (
-);
-%anti_patterns = (
-  q{ DCC_CHECK }, 'dcc',
-  q{ X_META_POS }, 'pos',
-  q{ X_META_NEG }, 'neg',
-);
-ok sarun ("-t -L < data/spam/gtubedcc.eml 2>&1", \&patterns_run_cb);
 ok_all_patterns();
 

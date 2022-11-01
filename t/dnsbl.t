@@ -9,7 +9,7 @@ plan skip_all => "Can't use Net::DNS Safely" unless can_use_net_dns_safely();
 
 # run many times to catch some random natured failures
 my $iterations = 5;
-plan tests => 22 * $iterations;
+plan tests => 21 * $iterations;
 
 # ---------------------------------------------------------------------------
 # bind configuration currently used to support this test
@@ -74,7 +74,6 @@ EOF
  ' 1.0 DNSBL_TXT_MISS '			=> '',
  ' 1.0 DNSBL_TEST_WHITELIST_MISS '	=> '',
  '14.35.17.212.untrusted.dnsbltest.spamassassin.org'		=> '',
- qr/rules-all: unrun dependencies [^\n]+ (?:__|META_)?DNSBL_/	=> '',
 );
 
 tstprefs("
@@ -154,8 +153,7 @@ priority DNSBL_TEST_RELAY 2000
 
 for (1 .. $iterations) {
   clear_localrules() if $_ == 3; # do some tests without any other rules to check meta bugs
-  # rules-all debug needed for unrun check
-  sarun ("-t -D rules-all < data/spam/dnsbl.eml 2>&1", \&patterns_run_cb);
+  sarun ("-t < data/spam/dnsbl.eml 2>&1", \&patterns_run_cb);
   ok_all_patterns();
 }
 
