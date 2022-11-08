@@ -316,7 +316,7 @@ RULE:
       $pms->got_hit($rulename, '', ruletype => 'meta', value => $result);
     } else {
       dbg("rules-all: ran meta rule $rulename, no hit") if $would_log_rules_all;
-      $h->{$rulename} = 0; # mark meta done
+      $pms->rule_ready($rulename, 1); # mark meta done
     }
     delete $mr->{$rulename};
     delete $mp->{$rulename};
