@@ -8,7 +8,7 @@ use Test::More;
 
 # run many times to catch some random natured failures
 my $iterations = 5;
-plan tests => 23 * $iterations;
+plan tests => 24 * $iterations;
 
 # ---------------------------------------------------------------------------
 
@@ -34,6 +34,7 @@ plan tests => 23 * $iterations;
   q{ 1.0 TEST_META_H }    => '',
   q{ 1.0 TEST_META_I }    => '',
   q{ 1.0 TEST_META_J }    => '',
+  q{ 1.0 TEST_META_K }    => '',
 );
 
 %anti_patterns = (
@@ -118,6 +119,9 @@ tstlocalrules (qq{
    meta __TEST_META_H3  1
    meta TEST_META_H   (__TEST_META_H1 > 2) && (__TEST_META_H2 > 1) && __TEST_META_H3
 
+   # bug 7735, comment 87
+   meta __TEST_META_K  (1 || TEST_DISABLED || TEST_DISABLED2 || TEST_DISABLED3)
+   meta TEST_META_K  __TEST_META_K
 });
 
 for (1 .. $iterations) {

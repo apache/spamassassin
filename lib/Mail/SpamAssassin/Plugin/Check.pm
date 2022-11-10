@@ -219,8 +219,7 @@ sub check_main {
   $self->{main}->call_plugins ("check_cleanup", { permsgstatus => $pms });
 
   # final check for ready metas
-  $self->do_meta_tests($pms);
-  $self->finish_meta_tests($pms);
+  $self->do_meta_tests($pms, undef, 1);
 
   # check dns_block_rule (bug 6728)
   # TODO No idea yet what would be the most logical place to do all these..
@@ -280,7 +279,7 @@ sub finish_tests {
 ###########################################################################
 
 sub do_meta_tests {
-  my ($self, $pms, $priority) = @_;
+  my ($self, $pms, $priority, $finish) = @_;
 
   # Needed for Reuse to work, otherwise we don't care about priorities
   if (defined $priority && $self->{main}->have_plugin('start_rules')) {
@@ -292,7 +291,7 @@ sub do_meta_tests {
   }
 
   return if $self->{am_compiling}; # nothing to compile here
-  return if !$pms->{meta_check_ready}; # nothing to check
+  return if !$finish && !$pms->{meta_check_ready}; # nothing to check
 
   my $mr = $pms->{meta_check_ready};
   my $mp = $pms->{meta_pending};
@@ -301,8 +300,20 @@ sub do_meta_tests {
   my $h = $pms->{tests_already_hit};
   my $retry;
 
+  # When finishing, first mark all unrun non-meta rules as finished,
+  # it will enable the next loop to finish everything properly
+  if ($finish) {
+    foreach my $rulename (keys %$mp) {
+      foreach my $deprule (@{$md->{$rulename}||[]}) {
+        if (!exists $mt->{$deprule}) {
+          $h->{$deprule} ||= 0;
+        }
+      }
+    }
+  }
+
 RULE:
-  foreach my $rulename (keys %$mr) {
+  foreach my $rulename ($finish ? keys %$mp : keys %$mr) {
     # Meta is not ready if some dependency has not run yet
     foreach my $deprule (@{$md->{$rulename}||[]}) {
       if (!exists $h->{$deprule}) {
@@ -327,35 +338,6 @@ RULE:
   goto RULE if $retry--;
 
   delete $pms->{meta_check_ready};
-}
-
-sub finish_meta_tests {
-  my ($self, $pms) = @_;
-
-  return if $self->{am_compiling}; # nothing to compile here
-
-  my $mp = $pms->{meta_pending};
-  my $mt = $pms->{conf}->{meta_tests};
-  my $h = $pms->{tests_already_hit};
-  my $retry;
-
-RULE:
-  foreach my $rulename (keys %$mp) {
-    # Metasubs look like ($_[1]->{$rulename}||0) ...
-    my $result = $mt->{$rulename}->($pms, $h);
-    if ($result) {
-      dbg("rules: ran meta rule $rulename ======> got hit ($result)");
-      $pms->got_hit($rulename, '', ruletype => 'meta', value => $result);
-    } else {
-      dbg("rules-all: ran meta rule $rulename, no hit") if $would_log_rules_all;
-      $h->{$rulename} = 0; # mark meta done
-    }
-    delete $mp->{$rulename};
-    # Reiterate all metas again, in case some meta depended on us
-    $retry = 1;
-  }
-
-  goto RULE if $retry--;
 }
 
 ###########################################################################
