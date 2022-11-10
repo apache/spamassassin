@@ -156,12 +156,14 @@ ifplugin Mail::SpamAssassin::Plugin::MIMEHeader
 mimeheader	__SCC_BOGUS_CTE_1	Content-Transfer-Encoding =~ /^Hexa/i
 meta		SCC_BOGUS_CTE_1	__SCC_BOGUS_CTE_1
 describe	SCC_BOGUS_CTE_1	Bogus Content-Transfer-Encoding header
+tflags		SCC_BOGUS_CTE_1 publish
 endif
 
 ifplugin Mail::SpamAssassin::Plugin::MIMEHeader
 mimeheader	__SCC_CTMPP     Content-Type =~ /multipart\/parallel/	
 describe	SCC_CTMPP	Uncommon Content-Type
 meta		SCC_CTMPP	__SCC_CTMPP
+tflags		SCC_CTMPP	publish
 endif
 
 describe	__SCC_MIME_BOUNDARY2	Idiosyncratic boundary-like string
