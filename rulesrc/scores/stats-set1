@@ -1,23 +1,23 @@
 ##### WITH NEW RULES AND SCORES #####
 
 # SUMMARY for threshold 5.0:
-# Correctly non-spam: 305162  64.686%  (99.413% of non-spam corpus)
-# Correctly spam:     131608  27.897%  (79.861% of spam corpus)
-# False positives:      1803  0.382%  (0.587% of nonspam,  79408 weighted)
-# False negatives:     33188  7.035%  (20.139% of spam,  57936 weighted)
-# Average score for spam:  15.3    nonspam: -0.3
-# Average for false-pos:   8.2  false-neg: 1.7
-# TOTAL:              471761  100.00%
+# Correctly non-spam: 305156  64.685%  (99.411% of non-spam corpus)
+# Correctly spam:     131565  27.888%  (79.836% of spam corpus)
+# False positives:      1809  0.383%  (0.589% of nonspam,  79592 weighted)
+# False negatives:     33230  7.044%  (20.164% of spam,  58227 weighted)
+# Average score for spam:  15.7    nonspam: -0.3
+# Average for false-pos:   8.2  false-neg: 1.8
+# TOTAL:              471760  100.00%
 
 Reading scores from "tmprules"...
 Reading per-message hit stat logs and scores...
 
 # SUMMARY for threshold 5.0:
-# Correctly non-spam:  38069  99.46%
-# Correctly spam:      16503  79.53%
-# False positives:       208  0.54%
-# False negatives:      4247  20.47%
-# TCR(l=50): 1.416672  SpamRecall: 79.533%  SpamPrec: 98.755%
+# Correctly non-spam:  38067  99.45%
+# Correctly spam:      16501  79.52%
+# False positives:       210  0.55%
+# False negatives:      4249  20.48%
+# TCR(l=50): 1.406875  SpamRecall: 79.523%  SpamPrec: 98.743%
 
 ##### WITHOUT NEW RULES AND SCORES #####
 Reading scores from "../rules-base"...
@@ -25,10 +25,10 @@ Reading per-message hit stat logs and scores...
 
 # SUMMARY for threshold 5.0:
 # Correctly non-spam: 305262  99.45%
-# Correctly spam:     117928  71.56%
+# Correctly spam:     117920  71.56%
 # False positives:      1703  0.55%
-# False negatives:     46868  28.44%
-# TCR(l=50): 1.248284  SpamRecall: 71.560%  SpamPrec: 98.576%
+# False negatives:     46875  28.44%
+# TCR(l=50): 1.248211  SpamRecall: 71.556%  SpamPrec: 98.576%
 Reading scores from "../rules-base"...
 Reading per-message hit stat logs and scores...
 
