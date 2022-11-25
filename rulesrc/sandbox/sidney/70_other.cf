@@ -1,5 +1,8 @@
 # sidney's test rules, if any go here.
 
-uri T_UPPERCASE_HTTP	/^(?=[hH][tT][tT][pP][sS]?:)(?:H|hT|htT|httP|httpS)/
-describe T_UPPERCASE_HTTP	URI with an uppercase character in the ScHeMe
-score T_UPPERCASE_HTTP 0.1
+# TESTING a few domains that are in our "suspicious" list but are known to have some good senders
+describe T_SCC_TLD_FUN From domain in *.fun 
+header   T_SCC_TLD_FUN From =~ /<[^ @]+@[^ @>]+\.fun>/
+
+describe T_SCC_TLD_SITE From domain in *.site 
+header   T_SCC_TLD_SITE From =~ /<[^ @]+@[^ @>]+\.site>/
