@@ -95,7 +95,7 @@ if can(Mail::SpamAssassin::Conf::feature_capture_rules)
   score         GB_STORAGE_GOOGLE_EMAIL 2.000 # limit
   tflags        GB_STORAGE_GOOGLE_EMAIL publish
 
-  uri           __GB_CUSTOM_HTM_URI0    m;^https?://.{10,128}(?:\.html?|\/)(?:\#|\?&e=)%{GB_TO_ADDR};i
+  uri           __GB_CUSTOM_HTM_URI0    m;^https?://.{10,128}(?:\.html?|\.php|\/)(?:\#|\?&e=)%{GB_TO_ADDR};i
   uri           __GB_CUSTOM_HTM_URI1    m|^https?://.{10,64}\=https?://.{4,64}\#%{GB_TO_ADDR}|i
   uri           __GB_CUSTOM_HTM_URI2    m;^https?://.{10,256}(?:\/\?)?(?:email=|wapp\#)%{GB_TO_ADDR};i
   uri           __GB_DRUPAL_URI         m|^https?://.{10,64}/default/files/(?:\@)?\#%{GB_TO_ADDR}|i
