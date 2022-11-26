@@ -290,6 +290,9 @@ CN_B2B_SPAMMER
 # tflags publish
 COMMENT_GIBBERISH
 
+# tflags net
+COMPENSATION
+
 # tflags publish
 CONTENT_AFTER_HTML
 
@@ -464,7 +467,7 @@ FONT_INVIS_POSTEXTRAS
 # tflags net
 FORGED_SPF_HELO
 
-# tflags publish
+# tflags net
 FORM_FRAUD
 
 # tflags publish
@@ -659,6 +662,9 @@ GAPPY_SALES_LEADS_FREEM
 # good enough
 GB_BITCOIN_CP
 
+# good enough
+GB_BITCOIN_NH
+
 # tflags publish
 GB_CUSTOM_HTM_URI
 
@@ -824,7 +830,7 @@ HTML_OFF_PAGE
 # tflags publish
 HTML_SHRT_CMNT_OBFU_MANY
 
-# tflags publish
+# tflags net
 HTML_SINGLET_MANY
 
 # good enough
@@ -847,6 +853,9 @@ JH_SPAMMY_PATTERN01
 
 # tflags publish
 JH_SPAMMY_PATTERN02
+
+# tflags net
+KHOP_FAKE_EBAY
 
 # tflags net
 KHOP_HELO_FCRDNS
@@ -893,8 +902,14 @@ MALWARE_PASSWORD
 # tflags publish
 MALW_ATTACH
 
+# tflags net
+MANY_HDRS_LCASE
+
 # tflags publish
 MANY_SPAN_IN_TEXT
+
+# tflags net
+MAY_BE_FORGED
 
 # tflags publish
 MILLION_HUNDRED
@@ -1064,7 +1079,7 @@ PDS_BTC_NTLD
 # good enough
 PDS_DBL_URL_TNB_RUNON
 
-# tflags net
+# good enough
 PDS_FROM_2_EMAILS
 
 # tflags net
@@ -1078,9 +1093,6 @@ PDS_NO_FULL_NAME_SPOOFED_URL
 
 # good enough
 PDS_OTHER_BAD_TLD
-
-# good enough
-PDS_PHP_EVAL
 
 # good enough
 PDS_RDNS_DYNAMIC_FP
@@ -1108,9 +1120,6 @@ PHP_NOVER_MUA
 
 # tflags publish
 PHP_ORIG_SCRIPT
-
-# good enough
-PHP_ORIG_SCRIPT_EVAL
 
 # tflags publish
 PHP_SCRIPT
@@ -1554,6 +1563,9 @@ SUBJ_ATTENTION
 SUBJ_BRKN_WORDNUMS
 
 # tflags net
+SUBJ_UNNEEDED_HTML
+
+# tflags net
 SURBL_BLOCKED
 
 # good enough
@@ -1628,8 +1640,11 @@ TVD_RCVD_SPACE_BRACKET
 # tflags net
 TVD_SPACE_ENCODED
 
-# good enough
+# tflags net
 TVD_SPACE_RATIO_MINFP
+
+# tflags net
+TVD_SUBJ_NUM_OBFU_MINFP
 
 # good enough
 TVD_VISIT_PHARMA
@@ -1799,7 +1814,7 @@ URI_NOVOWEL
 # good enough
 URI_OBFU_DOM
 
-# tflags publish
+# tflags net
 URI_ONLY_MSGID_MALF
 
 # tflags publish
@@ -1826,10 +1841,10 @@ URI_WPADMIN
 # tflags publish
 URI_WP_DIRINDEX
 
-# tflags publish
+# tflags net
 URI_WP_HACKED
 
-# tflags publish
+# tflags net
 URI_WP_HACKED_2
 
 # tflags publish
