@@ -467,10 +467,10 @@ FONT_INVIS_POSTEXTRAS
 # tflags net
 FORGED_SPF_HELO
 
-# tflags publish
+# tflags net
 FORM_FRAUD
 
-# tflags publish
+# tflags net
 FORM_FRAUD_3
 
 # tflags publish
@@ -711,6 +711,9 @@ GOOG_MALWARE_DNLD
 GOOG_REDIR_DOCUSIGN
 
 # good enough
+GOOG_REDIR_HTML_ONLY
+
+# good enough
 GOOG_REDIR_NORDNS
 
 # tflags publish
@@ -858,9 +861,6 @@ JH_SPAMMY_PATTERN01
 JH_SPAMMY_PATTERN02
 
 # tflags net
-KHOP_FAKE_EBAY
-
-# tflags net
 KHOP_HELO_FCRDNS
 
 # tflags publish
@@ -904,6 +904,9 @@ MALWARE_PASSWORD
 
 # tflags publish
 MALW_ATTACH
+
+# tflags net
+MANY_HDRS_LCASE
 
 # tflags publish
 MANY_SPAN_IN_TEXT
@@ -1079,7 +1082,7 @@ PDS_BTC_NTLD
 # good enough
 PDS_DBL_URL_TNB_RUNON
 
-# good enough
+# tflags net
 PDS_FROM_2_EMAILS
 
 # tflags net
@@ -1090,9 +1093,6 @@ PDS_NAKED_TO_NUMERO
 
 # good enough
 PDS_NO_FULL_NAME_SPOOFED_URL
-
-# good enough
-PDS_OTHER_BAD_TLD
 
 # good enough
 PDS_RDNS_DYNAMIC_FP
@@ -1586,7 +1586,7 @@ TEQF_USR_IMAGE
 # tflags publish
 TEQF_USR_MSGID_HEX
 
-# tflags publish
+# tflags net
 TEQF_USR_MSGID_MALF
 
 # tflags publish
@@ -1622,7 +1622,7 @@ TO_NO_BRKTS_HTML_IMG
 # tflags publish
 TO_NO_BRKTS_HTML_ONLY
 
-# good enough
+# tflags net
 TO_NO_BRKTS_MSFT
 
 # tflags publish
@@ -1637,14 +1637,11 @@ TO_TOO_MANY_WFH_01
 # good enough
 TVD_RCVD_SPACE_BRACKET
 
-# good enough
+# tflags net
 TVD_SPACE_ENCODED
 
 # tflags net
 TVD_SPACE_RATIO_MINFP
-
-# tflags net
-TVD_SUBJ_NUM_OBFU_MINFP
 
 # good enough
 TVD_VISIT_PHARMA
@@ -1814,7 +1811,7 @@ URI_NOVOWEL
 # good enough
 URI_OBFU_DOM
 
-# tflags net
+# tflags publish
 URI_ONLY_MSGID_MALF
 
 # tflags publish
@@ -1841,7 +1838,7 @@ URI_WPADMIN
 # tflags publish
 URI_WP_DIRINDEX
 
-# tflags publish
+# tflags net
 URI_WP_HACKED
 
 # tflags publish
