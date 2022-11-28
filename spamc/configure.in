@@ -47,7 +47,8 @@ dnl ----------------------------------------------------------------------
 
 AC_CACHE_CHECK([for SHUT_RD],
        shutrd, [
-                AC_TRY_COMPILE([#include <sys/types.h>
+                AC_TRY_COMPILE([#include <stdio.h>
+#include <sys/types.h>
 #include <sys/socket.h>],
                         [printf ("%d", SHUT_RD); return 0;],
                                         [shutrd=yes],
@@ -89,7 +90,8 @@ dnl ----------------------------------------------------------------------
 
 AC_CACHE_CHECK([for h_errno],
         herrno, [
-                AC_TRY_COMPILE([#include <netdb.h>],
+                AC_TRY_COMPILE([#include <stdio.h>
+#include <netdb.h>],
                         [printf ("%d", h_errno); return 0;],
                                         [herrno=yes],
                                         [herrno=no]),
