@@ -60,6 +60,7 @@ describe PERCENT_RANDOM		Message has a random macro in it
 
 # __MIME_ATTACHMENT defined in 20_html_tests.cf
 body __NONEMPTY_BODY	/\S/
+priority __NONEMPTY_BODY -2000 # Bug 8078
 meta EMPTY_MESSAGE	!__MIME_ATTACHMENT && !__NONEMPTY_BODY
 describe EMPTY_MESSAGE	Message appears to have no textual parts and no Subject: text
 

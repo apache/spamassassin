@@ -27,6 +27,7 @@
 require_version @@VERSION@@
 
 header __HAS_RCVD       exists:Received
+priority __HAS_RCVD     -2000 # Bug 8078
 meta NO_RECEIVED        (!__HAS_RCVD)
 tflags NO_RECEIVED      nice userconf
 describe NO_RECEIVED    Informational: message has no Received headers

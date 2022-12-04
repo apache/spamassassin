@@ -264,19 +264,23 @@ header NONEXISTENT_CHARSET	Content-Type =~ /charset=.?DEFAULT/
 describe NONEXISTENT_CHARSET	Character set doesn't exist
 
 header __HAS_MESSAGE_ID		exists:Message-Id
+priority __HAS_MESSAGE_ID	-2000 # Bug 8078
 meta MISSING_MID		!__HAS_MESSAGE_ID
 describe MISSING_MID            Missing Message-Id: header
 
 header __HAS_DATE		exists:Date
+priority __HAS_DATE		-2000 # Bug 8078
 meta MISSING_DATE		!__HAS_DATE
 describe MISSING_DATE           Missing Date: header
 
 header __HAS_SUBJECT		exists:Subject
+priority __HAS_SUBJECT		-2000 # Bug 8078
 meta MISSING_SUBJECT		!__HAS_SUBJECT
 describe MISSING_SUBJECT	Missing Subject: header
 
 # bug 6353
 header __HAS_FROM		exists:From
+priority __HAS_FROM		-2000 # Bug 8078
 meta MISSING_FROM		!__HAS_FROM
 describe MISSING_FROM		Missing From: header
 

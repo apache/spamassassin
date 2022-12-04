@@ -234,5 +234,6 @@ ifplugin Mail::SpamAssassin::Plugin::MIMEEval
 
 # __MIME_ATTACHMENT also used in 20_meta_tests.cf
 body __MIME_ATTACHMENT		eval:check_for_mime('mime_attachment')
+priority __MIME_ATTACHMENT	-2000 # Bug 8078
 
 endif
