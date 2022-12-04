@@ -63,7 +63,7 @@ body __NONEMPTY_BODY	/\S/
 tflags __NONEMPTY_BODY	nosubject
 priority __NONEMPTY_BODY -2000 # Bug 8078
 meta EMPTY_MESSAGE	!__MIME_ATTACHMENT && !__NONEMPTY_BODY
-describe EMPTY_MESSAGE	Message appears to have no textual parts and no Subject: text
+describe EMPTY_MESSAGE	Message appears to have no textual parts
 
 meta NO_HEADERS_MESSAGE (MISSING_DATE && MISSING_HEADERS && NO_RECEIVED && NO_RELAYS && MISSING_MID)
 describe NO_HEADERS_MESSAGE Message appears to be missing most RFC-822 headers
