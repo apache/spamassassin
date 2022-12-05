@@ -9,7 +9,7 @@ plan skip_all => "Can't use Net::DNS Safely"   unless can_use_net_dns_safely();
 
 # run many times to catch some random natured failures
 my $iterations = 5;
-plan tests => 12 * $iterations;
+plan tests => 13 * $iterations;
 
 # ---------------------------------------------------------------------------
 
@@ -17,6 +17,7 @@ plan tests => 12 * $iterations;
  q{ 1.0 X_HASHBL_EMAIL } => '',
  q{ 1.0 X_HASHBL_OSENDR } => '',
  q{ 1.0 X_HASHBL_BTC } => '',
+ q{ 1.0 X_HASHBL_NUM } => '',
  q{ 1.0 X_HASHBL_URI } => '',
  q{ 1.0 X_HASHBL_TAG } => '',
  q{ 1.0 META_HASHBL_EMAIL } => '',
@@ -47,6 +48,7 @@ userpart.hashbltest7.spamassassin.org
 host.domain.com.hashbltest7.spamassassin.org
 domain.com.hashbltest7.spamassassin.org
 2qlyngefopecg66lt6pwfpegjaajbzasuxs5vzgii2vfbonj6rua.hashbltest8.spamassassin.org
+11231234567.hashbltest9.spamassassin.org
 );
 
 sub check_queries {
@@ -96,6 +98,9 @@ tstlocalrules(q{
 
   body     X_HASHBL_BTC eval:check_hashbl_bodyre('hashbltest3.spamassassin.org', 'sha1/max=10/shuffle', '\b([13][a-km-zA-HJ-NP-Z1-9]{25,34})\b')
   tflags   X_HASHBL_BTC net
+
+  body     X_HASHBL_NUM eval:check_hashbl_bodyre('hashbltest9.spamassassin.org', 'raw/max=10/shuffle/num', '\b(?:\+)?(?:\s)?((?:[0-9]{1,2})?(?:\s)?[(]?[0-9]{3}[)]?[-\s\.]?[0-9]{3}[-\s\.]?[0-9]{4,6})\b', '127.0.0.2')
+  tflags   X_HASHBL_NUM net
 
   # Not supposed to hit, @valid_queries just checks that sha256 is calculated correctly
   body     X_HASHBL_SHA256 eval:check_hashbl_bodyre('hashbltest3.spamassassin.org', 'sha256/max=10/shuffle', '\b([13][a-km-zA-HJ-NP-Z1-9]{25,34})\b')
