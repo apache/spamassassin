@@ -281,6 +281,8 @@ sub finish_tests {
 sub do_meta_tests {
   my ($self, $pms, $priority, $finish) = @_;
 
+  return if $pms->{deadline_exceeded} || $pms->{shortcircuited};
+
   # Needed for Reuse to work, otherwise we don't care about priorities
   if (defined $priority && $self->{main}->have_plugin('start_rules')) {
     $self->{main}->call_plugins('start_rules', {
