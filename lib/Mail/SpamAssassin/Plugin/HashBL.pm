@@ -155,6 +155,10 @@ Optional DNS query type can be appended to list with /A (default) or /TXT.
 
 Default OPTS: sha1/max=10/shuffle
 
+Additional supported OPTS:
+
+  num      remove the chars from the match that are not numbers
+
 Optional subtest regexp to match DNS answer (default: '^127\.').
 
 =back
@@ -763,8 +767,11 @@ sub check_hashbl_bodyre {
       while ($body =~ /$re/gs) {
         next if !defined $1;
         my $match = $opts->{case} ? $1 : lc($1);
+        if($opts->{num}) {
+          $match =~ tr/0-9//cd;
+        }
         next if $seen{$match}++;
-        push @matches, $match;
+        push @matches, $match if $match ne '';
       }
     }
   } else {
@@ -772,8 +779,11 @@ sub check_hashbl_bodyre {
     while ($$bodyref =~ /$re/gs) {
       next if !defined $1;
       my $match = $opts->{case} ? $1 : lc($1);
+      if($opts->{num}) {
+        $match =~ tr/0-9//cd;
+      }
       next if $seen{$match}++;
-      push @matches, $match;
+      push @matches, $match if $match ne '';
     }
   }
 
@@ -1097,6 +1107,7 @@ sub _finish_query {
 
 # Version features
 sub has_hashbl_bodyre { 1 }
+sub has_hashbl_bodyre_num { 1 }
 sub has_hashbl_emails { 1 }
 sub has_hashbl_uris { 1 }
 sub has_hashbl_ignore { 1 }
