@@ -24,7 +24,8 @@ $spamc = "sudo -u nobody $spamc";
 unlink("$userstate/bayes_seen.dir");
 unlink("$userstate/bayes_toks.dir");
 
-# ensure it is writable by all
+# ensure it is readable/writeable by all
+diag "Test will fail if run in directory not accessible by 'nobody' as is typical for a home directory";
 chmod 01755, $workdir;
 chmod 01777, $userstate;
 

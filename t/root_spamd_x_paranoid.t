@@ -26,7 +26,8 @@ plan tests => 14;
 
 # run spamc as unpriv uid
 $spamc = "sudo -u nobody $spamc";
-# ensure it is writable by all
+# ensure it is readable by all
+diag "Test will fail if run in directory not accessible by 'nobody' as is typical for a home directory";
 chmod 01755, $workdir;
 
 ok(start_spamd("-L --create-prefs -x --paranoid"));

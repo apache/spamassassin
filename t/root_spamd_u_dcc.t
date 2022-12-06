@@ -40,7 +40,8 @@ q{ X-Spam-Level: **********}, 'stars',
 
 # run spamc as unpriv uid
 $spamc = "sudo -u nobody $spamc";
-# ensure it is writable by all
+# ensure it is readable by all
+diag "Test will fail if run in directory not accessible by 'nobody' as is typical for a home directory";
 chmod 01755, $workdir;
 
 $SIG{ALRM} = sub { stop_spamd(); die "timed out"; };
