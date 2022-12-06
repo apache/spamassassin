@@ -1,4 +1,313 @@
 ------------------------------------------------------------------------
+r1905814 | sidney | 2022-12-06 20:56:14 +0000 (Tue, 06 Dec 2022) | 1 line
+ 
+ Minor edit to release build instructions documentation
+------------------------------------------------------------------------
+r1905811 | sidney | 2022-12-06 20:19:59 +0000 (Tue, 06 Dec 2022) | 1 line
+ 
+ Bug 8056 - Add .gitattributes to MANIFEST.SKIP
+------------------------------------------------------------------------
+r1905809 | sidney | 2022-12-06 19:48:27 +0000 (Tue, 06 Dec 2022) | 1 line
+ 
+ Bug 8056 - add .gitattributes required for Windows test Github Actions 
+to work
+------------------------------------------------------------------------
+r1905808 | sidney | 2022-12-06 19:35:16 +0000 (Tue, 06 Dec 2022) | 1 line
+ 
+ Bug 8045 - Add warning to tests about directory permissions now required 
+for tests to pass
+------------------------------------------------------------------------
+r1905790 | sidney | 2022-12-06 11:05:53 +0000 (Tue, 06 Dec 2022) | 1 line
+ 
+ Bug 8056 - commit Github Actions that can be used in a fork of our 
+Github mirror to run regression tests on Github action runners
+------------------------------------------------------------------------
+r1905787 | sidney | 2022-12-06 08:31:13 +0000 (Tue, 06 Dec 2022) | 1 line
+ 
+ Bug 8084 - exclude new perlcritic policy for bareword dir handles
+------------------------------------------------------------------------
+r1905783 | sidney | 2022-12-06 01:07:53 +0000 (Tue, 06 Dec 2022) | 1 line
+ 
+ Bug 8083 - exclude Bangs::ProhibitDebuggingModules from perlcritic tests
+------------------------------------------------------------------------
+r1905778 | hege | 2022-12-05 19:15:26 +0000 (Mon, 05 Dec 2022) | 2 lines
+ 
+ Bug 8078 - Shortcircuiting does not work as expected
+ 
+------------------------------------------------------------------------
+r1905769 | gbechis | 2022-12-05 15:47:59 +0000 (Mon, 05 Dec 2022) | 2 
+lines
+ 
+ "num" hashbl config regression tests
+ 
+------------------------------------------------------------------------
+r1905766 | gbechis | 2022-12-05 15:23:04 +0000 (Mon, 05 Dec 2022) | 2 
+lines
+ 
+ add a "num" option to check_hashbl_bodyre that removes the chars from 
+the match that are not numbers
+ 
+------------------------------------------------------------------------
+r1905737 | hege | 2022-12-04 14:04:52 +0000 (Sun, 04 Dec 2022) | 2 lines
+ 
+ Fix EMPTY_MESSAGE description for nosubject
+ 
+------------------------------------------------------------------------
+r1905736 | hege | 2022-12-04 13:59:57 +0000 (Sun, 04 Dec 2022) | 2 lines
+ 
+ Use nosubject for __NONEMPTY_BODY
+ 
+------------------------------------------------------------------------
+r1905735 | hege | 2022-12-04 13:59:35 +0000 (Sun, 04 Dec 2022) | 2 lines
+ 
+ Clear out old tests
+ 
+------------------------------------------------------------------------
+r1905734 | hege | 2022-12-04 13:47:03 +0000 (Sun, 04 Dec 2022) | 2 lines
+ 
+ Bug 8078 - Shortcircuiting does not work as expected
+ 
+------------------------------------------------------------------------
+r1905576 | gbechis | 2022-11-28 16:13:19 +0000 (Mon, 28 Nov 2022) | 3 
+lines
+ 
+ include the appropriate headers to avoid spurious test failures
+ when "-Wimplicit-function-declaration" compiler option is used
+ 
+------------------------------------------------------------------------
+r1905566 | gbechis | 2022-11-28 08:34:04 +0000 (Mon, 28 Nov 2022) | 2 
+lines
+ 
+ update url shortener as well, spotted by hege@ thanks
+ 
+------------------------------------------------------------------------
+r1905564 | gbechis | 2022-11-28 07:59:10 +0000 (Mon, 28 Nov 2022) | 2 
+lines
+ 
+ add s.free.fr shortener
+ 
+------------------------------------------------------------------------
+r1905524 | gbechis | 2022-11-25 10:04:38 +0000 (Fri, 25 Nov 2022) | 2 
+lines
+ 
+ catch more samples
+ 
+------------------------------------------------------------------------
+r1905523 | gbechis | 2022-11-25 09:07:36 +0000 (Fri, 25 Nov 2022) | 2 
+lines
+ 
+ catch another uri
+ 
+------------------------------------------------------------------------
+r1905518 | sidney | 2022-11-25 04:03:09 +0000 (Fri, 25 Nov 2022) | 1 line
+ 
+ test from .fun and .site TLDs
+------------------------------------------------------------------------
+r1905425 | gbechis | 2022-11-21 09:06:27 +0000 (Mon, 21 Nov 2022) | 2 
+lines
+ 
+ catch more uris
+ 
+------------------------------------------------------------------------
+r1905377 | gbechis | 2022-11-18 11:40:26 +0000 (Fri, 18 Nov 2022) | 2 
+lines
+ 
+ match more uris
+ 
+------------------------------------------------------------------------
+r1905376 | gbechis | 2022-11-18 10:59:09 +0000 (Fri, 18 Nov 2022) | 2 
+lines
+ 
+ fix regexp
+ 
+------------------------------------------------------------------------
+r1905227 | billcole | 2022-11-10 22:04:16 +0000 (Thu, 10 Nov 2022) | 3 
+lines
+ 
+ Forcing publish of 2 extremely safe rules to see if that works to get 
+around promotion blockage
+ 
+ 
+------------------------------------------------------------------------
+r1905214 | hege | 2022-11-10 07:28:04 +0000 (Thu, 10 Nov 2022) | 2 lines
+ 
+ Bug 7735 - Meta rules need to handle missing/unrun dependencies
+ 
+------------------------------------------------------------------------
+r1905160 | hege | 2022-11-08 16:08:50 +0000 (Tue, 08 Nov 2022) | 2 lines
+ 
+ Bug 7735 - Meta rules need to handle missing/unrun dependencies
+ 
+------------------------------------------------------------------------
+r1904981 | hege | 2022-11-01 20:11:58 +0000 (Tue, 01 Nov 2022) | 3 lines
+ 
+ Bug 7735 - Meta rules need to handle missing/unrun dependencies
+ - revert to old logic
+ 
+------------------------------------------------------------------------
+r1904928 | hege | 2022-10-30 08:07:30 +0000 (Sun, 30 Oct 2022) | 2 lines
+ 
+ Remove accidentally committed unneeded debug line
+ 
+------------------------------------------------------------------------
+r1904893 | hege | 2022-10-28 05:35:52 +0000 (Fri, 28 Oct 2022) | 2 lines
+ 
+ Bug 8070 - PDFInfo pdf_is_empty_body() destroys body array
+ 
+------------------------------------------------------------------------
+r1904865 | hege | 2022-10-27 06:46:28 +0000 (Thu, 27 Oct 2022) | 2 lines
+ 
+ Adjust priority of GMD_PDF_EMPTY_BODY to work around Bug 8070
+ 
+------------------------------------------------------------------------
+r1904837 | sidney | 2022-10-26 03:35:50 +0000 (Wed, 26 Oct 2022) | 1 line
+ 
+ bug 8069 - Use shortened links that are under our control so test 
+remains stable
+------------------------------------------------------------------------
+r1904818 | sidney | 2022-10-24 22:20:56 +0000 (Mon, 24 Oct 2022) | 1 line
+ 
+ bug 8068 - Add a delay in the test to allow for some slow test systems
+------------------------------------------------------------------------
+r1904811 | hege | 2022-10-24 14:03:19 +0000 (Mon, 24 Oct 2022) | 2 lines
+ 
+ Bug 8062 - no URL makes uridnsbl rules "unrun"
+ 
+------------------------------------------------------------------------
+r1904798 | hege | 2022-10-24 08:10:13 +0000 (Mon, 24 Oct 2022) | 2 lines
+ 
+ Some extra test code slipped through in last commit, revert
+ 
+------------------------------------------------------------------------
+r1904797 | hege | 2022-10-24 07:59:32 +0000 (Mon, 24 Oct 2022) | 2 lines
+ 
+ Bug 8061 - Fix meta handling for $suppl_attrib->{rule_hits}
+ 
+------------------------------------------------------------------------
+r1904779 | sidney | 2022-10-22 12:46:14 +0000 (Sat, 22 Oct 2022) | 1 line
+ 
+ Bug 8066 - remove unnecessary svn:eol-style property from some files in 
+svn repository
+------------------------------------------------------------------------
+r1904751 | sidney | 2022-10-20 23:11:06 +0000 (Thu, 20 Oct 2022) | 1 line
+ 
+ Bug 8067 - Work around error thrown by Cwd::realpath on older Windows 
+perl when path does not exist
+------------------------------------------------------------------------
+r1904709 | billcole | 2022-10-20 01:27:03 +0000 (Thu, 20 Oct 2022) | 1 
+line
+ 
+ Yet another hashbust pattern
+------------------------------------------------------------------------
+r1904696 | gbechis | 2022-10-19 14:02:15 +0000 (Wed, 19 Oct 2022) | 2 
+lines
+ 
+ add a Drupal uri check
+ 
+------------------------------------------------------------------------
+r1904678 | hege | 2022-10-18 09:29:30 +0000 (Tue, 18 Oct 2022) | 2 lines
+ 
+ Update tlds
+ 
+------------------------------------------------------------------------
+r1904676 | hege | 2022-10-18 08:24:19 +0000 (Tue, 18 Oct 2022) | 2 lines
+ 
+ Bug 8063 - uri not detected if two text/html parts exist
+ 
+------------------------------------------------------------------------
+r1904671 | sidney | 2022-10-18 06:05:42 +0000 (Tue, 18 Oct 2022) | 1 line
+ 
+ Bug 8066 - remove unnecessary svn:eol-style property from some files in 
+svn repository
+------------------------------------------------------------------------
+r1904667 | billcole | 2022-10-17 21:41:36 +0000 (Mon, 17 Oct 2022) | 1 
+line
+ 
+ adjusting test rules
+------------------------------------------------------------------------
+r1904598 | hege | 2022-10-15 12:19:43 +0000 (Sat, 15 Oct 2022) | 3 lines
+ 
+ Add missing debug logging for all rules in blocked DNS query, previously 
+only first rule was logged.
+ (consider this safe and trivial enough to commit without voting)
+ 
+------------------------------------------------------------------------
+r1904597 | hege | 2022-10-15 12:06:15 +0000 (Sat, 15 Oct 2022) | 2 lines
+ 
+ Fix meta documentation
+ 
+------------------------------------------------------------------------
+r1904529 | hege | 2022-10-11 17:40:55 +0000 (Tue, 11 Oct 2022) | 2 lines
+ 
+ Bug 8060 - Fix meta handling for metas without dependencies
+ 
+------------------------------------------------------------------------
+r1904528 | hege | 2022-10-11 17:39:03 +0000 (Tue, 11 Oct 2022) | 2 lines
+ 
+ Bug 8059 - Fix meta handling for URIDNSBL NS/A lookups
+ 
+------------------------------------------------------------------------
+r1904484 | hege | 2022-10-10 09:29:48 +0000 (Mon, 10 Oct 2022) | 2 lines
+ 
+ Bug 8058 - DMARC makes DNS queries with local_tests_only
+ 
+------------------------------------------------------------------------
+r1904481 | gbechis | 2022-10-10 06:43:47 +0000 (Mon, 10 Oct 2022) | 3 
+lines
+ 
+ check for Office 2003 markers only when needed
+ bz #8055
+ 
+------------------------------------------------------------------------
+r1904466 | sidney | 2022-10-09 03:10:56 +0000 (Sun, 09 Oct 2022) | 1 line
+ 
+ bug 8027 - skip extracttext tests if executable found in path with space 
+to avoid test failure
+------------------------------------------------------------------------
+r1904448 | billcole | 2022-10-08 03:27:30 +0000 (Sat, 08 Oct 2022) | 1 
+line
+ 
+ de-testing some rules
+------------------------------------------------------------------------
+r1904368 | gbechis | 2022-10-03 06:30:32 +0000 (Mon, 03 Oct 2022) | 2 
+lines
+ 
+ add snip.ly
+ 
+------------------------------------------------------------------------
+r1904337 | billcole | 2022-09-29 18:25:59 +0000 (Thu, 29 Sep 2022) | 1 
+line
+ 
+ Intuit reported as spamming on Users ML
+------------------------------------------------------------------------
+r1904315 | billcole | 2022-09-28 02:49:06 +0000 (Wed, 28 Sep 2022) | 1 
+line
+ 
+ wrap  mimeheader rules in ifplugin.
+------------------------------------------------------------------------
+r1904311 | sidney | 2022-09-27 22:39:36 +0000 (Tue, 27 Sep 2022) | 1 line
+ 
+ Bug 8054 - Fix tests detection of existence of ipv4 and ipv6 local ip 
+addresses
+------------------------------------------------------------------------
+r1904286 | billcole | 2022-09-26 19:35:06 +0000 (Mon, 26 Sep 2022) | 1 
+line
+ 
+ It only looks like a boundary string.
+------------------------------------------------------------------------
+r1904253 | billcole | 2022-09-25 19:49:34 +0000 (Sun, 25 Sep 2022) | 1 
+line
+ 
+ Various new test rules: hashbust texts and MIME bogosity
+------------------------------------------------------------------------
+r1904221 | sidney | 2022-09-22 22:36:12 +0000 (Thu, 22 Sep 2022) | 1 line
+ 
+ 4.0.0-rc3 RELEASED
+------------------------------------------------------------------------
+r1904209 | sidney | 2022-09-22 12:52:26 +0000 (Thu, 22 Sep 2022) | 1 line
+ 
+ preparing to release 4.0.0-rc3
+------------------------------------------------------------------------
 r1904206 | sidney | 2022-09-22 09:53:19 +0000 (Thu, 22 Sep 2022) | 1 line
  
  Bug 8050 - Fix global_state_dir on Windows
