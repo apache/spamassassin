@@ -1,0 +1,37 @@
+name: 'Setup macOS for SpamAssassin build and test'
+description: 'Setup macOS runner for SapmAssassin build and test'
+runs:
+  using: 'composite'
+  steps:
+    - name: remove default user group membershipp in root group
+      run: |
+        sudo dseditgroup -o edit -d runner -t user wheel
+        echo "$HOME/.local/bin" >> $GITHUB_PATH
+      shell: bash
+
+    - name: install required homebrew apps and create links for some keg-only ones, remove brew perl
+      run: |
+        brew install coreutils python3 re2c openssl berkeley-db libmaxminddb
+        brew uninstall --formula perl || echo "ignore error if not installed"
+        ln -s /usr/local/opt/berkeley-db/include/* /usr/local/include/
+        ln -s /usr/local/opt/berkeley-db/lib/* /usr/local/lib/
+        ln -s /usr/local/opt/openssl/lib/libcrypto.*dylib /usr/local/lib/
+        ln -s /usr/local/opt/openssl/lib/libssl.*dylib /usr/local/lib/
+        ln -s /usr/local/opt/openssl/include/openssl /usr/local/include/openssl
+      shell: bash
+
+    - name: install some needed packages from source that aren't in homebrew
+      run: |
+        mkdir -p ~/tmp
+        cd ~/tmp
+        wget https://www.dcc-servers.net/dcc/source/dcc.tar.Z
+        tar xf dcc.tar.Z
+        cd dcc-*
+        ./configure --disable-server --disable-dccm --disable-dccifd
+        make
+        sudo make install
+
+        pip3 install git+https://github.com/SpamExperts/pyzor.git
+
+      shell: bash
+

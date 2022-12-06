@@ -1,0 +1,118 @@
+# based on https://perlmaven.com/setup-github-actions
+
+name: One Native runner CI
+
+on:
+    workflow_dispatch:
+      inputs:
+        runner:
+          description: 'Runner to use ubuntu-22.04 macos-latest or windows-latest'     
+          required: true
+          default: 'macos-latest'
+        perl:
+          description: 'Perl major version 5.xx xx even 14 - 34'  
+          required: true
+          default: '5.30'
+        make:
+          description: 'make command to use make gmake or dmake'  
+          required: true
+          default: 'make'
+jobs:
+  perl-job:
+    env:
+      PERL5LIB: ''
+      PERL_VERSION: ${{github.event.inputs.perl}}
+    runs-on: ${{github.event.inputs.runner}}
+    name: OS ${{github.event.inputs.runner}} Perl ${{github.event.inputs.perl}}
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Install requirements for Ubuntu
+      if: ${{ startsWith( github.event.inputs.runner, 'ubuntu-' )  }}
+      uses: ./.github/actions/setup_ubuntu_for_sa_test
+
+    - name: Install requirements for macOS
+      if: ${{ startsWith( github.event.inputs.runner, 'macos-' )  }}
+      uses: ./.github/actions/setup_macos_for_sa_test
+
+    - name: Set up perl windows
+      if: ${{ startsWith( github.event.inputs.runner, 'windows-' )  }}
+      uses: shogo82148/actions-setup-perl@v1
+      with:
+          perl-version: ${{ github.event.inputs.perl }}
+          distribution: ${{ ( startsWith( github.event.inputs.runner, 'windows-' ) && 'strawberry' ) || 'default' }}
+
+    - name: Set up perl macos
+      if: ${{ startsWith( github.event.inputs.runner, 'macos-' )  }}
+      run: |
+          # ensure that the default perl and some related formulae are not installed before installing our custom version
+          brew uninstall -q --formula perl cpanminus cpm 2&>1 || true
+          brew install "sidney/perl/perl@${PERL_VERSION}"
+          brew link "perl@${PERL_VERSION}"
+          hash -r
+          brew install -s cpanminus
+
+    - name: Set up perl ubuntu
+      if: ${{ startsWith( github.event.inputs.runner, 'ubuntu-' )  }}
+      run: |
+          # find the latest sub version of the requested perl version that plenv has available
+          perlversion=$(plenv install --list | grep -m 1 -o "${PERL_VERSION}..")
+          plenv install "$perlversion"
+          plenv global "$perlversion"
+          hash -r
+          perl -v
+          plenv install-cpanm
+
+    - name: Install dependencies and optional modules for full testing Ubuntu and macOS
+      if: ${{ !startsWith( github.event.inputs.runner, 'windows-' )  }}
+      uses: ./.github/actions/install_cpan_dependencies_for_sa
+
+    - name: Install dependencies and optional modules for full testing on Windows
+      if: ${{ startsWith( github.event.inputs.runner, 'windows-' )  }}
+      run: |
+          cpanm --notest Module::Install Archive::Zip BSD::Resource BerkeleyDB Compress::Zlib DBI DB_File Devel::Cycle Digest::SHA Digest::SHA1 Email::Address::XS Encode::Detect Encode::Detect::Detector Geo::IP GeoIP2 GeoIP2::Database::Reader Geography::Countries HTML::Parser HTTP::Cookies HTTP::Daemon HTTP::Date HTTP::Negotiate IO::Socket::INET6 IO::Socket::SSL IO::String IP::Country IP::Country::DB_File LWP::Protocol::https LWP::UserAgent Mail::DKIM Mail::DMARC::PurePerl Math::Int128 MaxMind::DB::Reader::XS Net::CIDR::Lite Net::DNS Net::DNS::Nameserver Net::LibIDN Net::LibIDN2 Net::Patricia Net::Works::Network NetAddr::IP Params::Validate Sys::Hostname::Long Test::Perl::Critic Test::Pod Test::Pod::Coverage WWW::RobotRules Text::Diff Perl::Critic::Policy::Bangs::ProhibitBitwiseOperators Perl::Critic::Policy::Bangs::ProhibitDebuggingModules List::MoreUtils Perl::Critic::Policy::Perlsecret Perl::Critic::Policy::Compatibility::ProhibitThreeArgumentOpen Perl::Critic::Policy::Lax::ProhibitStringyEval::ExceptForRequire Perl::Critic::Policy::ValuesAndExpressions::PreventSQLInjection Perl::Critic::Policy::ControlStructures::ProhibitReturnInDoBlock || echo "warn: errors installing cpan modules have been ignored"
+          cpanm Razor2::Client::Agent -n -v --install-args="DESTINSTALLSITESCRIPT=$HOME/.local/bin=$HOME/.local/bin" || echo "warn: errors installing Razor2::Client::Agent have been ignored"
+          cpanm Mail::SPF -n --install-args="--install_path sbin=$HOME/.local/bin" || echo "warn: errors installing Mail::SPF have been ignored"
+          cpanm --installdeps --notest .  || echo "warn: errors installing required cpan modules have been ignored"
+          echo "Finished step"
+
+    - name: Show content of log files on Windows
+      if: ${{ failure() && startsWith( github.event.inputs.runner, 'windows-' )  }}
+      run: cat C:/Users/runner/.cpanm/work/*/build.log
+
+    - name: Regular Tests Ubuntu
+      if: ${{ startsWith( github.event.inputs.runner, 'ubuntu-' )  }}
+      run: |
+          perl -v
+          perl -i -pe 's/run_(long_tests|net_tests|dcc_tests|sql_pref_tests|spamd_prefork_stress_test)=n/run_$1=y/' t/config.dist
+          perl Makefile.PL
+          ${{ github.event.inputs.make }} ENABLE_SSL=yes
+          ${{ github.event.inputs.make }} test
+
+    - name: Regular Tests macOS
+      if: ${{ startsWith( github.event.inputs.runner, 'macos-' )  }}
+      run: |
+          # This wouldn't be necessary if we could install arbitrary perl versions with homebrew, but perls we are using have an old berkeley db version
+          # maybe ok now. This checks if it is
+          perl -MIP::Country::DB_File -e 'my $foo; eval {$foo = IP::Country::DB_File->new("t/data/geodb/ipcc.db"); 1;}; if ($@) {my $err = $@; print "err is $@\n";}'
+          perl -i -pe 's/run_(long_tests|net_tests|dcc_tests|sql_pref_tests|spamd_prefork_stress_test)=n/run_$1=y/' t/config.dist
+          perl Makefile.PL
+          ${{ github.event.inputs.make }} ENABLE_SSL=yes
+          sudo -u runner ${{ github.event.inputs.make }} test
+
+    - name: Regular Tests Windows
+      if: ${{ startsWith( github.event.inputs.runner, 'windows-' )  }}
+      run: |
+          perl -i.bak -pe "s/run_(long_tests|net_tests|dcc_tests|sql_pref_tests|spamd_prefork_stress_test)=n/run_$1=y/" t/config.dist
+          perl Makefile.PL
+          ${{ github.event.inputs.make }}
+          ${{ github.event.inputs.make }} test
+      shell: cmd
+
+    - name: Publish logs as artifacts
+      if: ${{ failure() }}
+      uses: actions/upload-artifact@v3
+      with:
+        name: test_logs
+        path: t/log/*/d.*/*

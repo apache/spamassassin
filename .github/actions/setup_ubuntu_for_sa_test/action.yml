@@ -1,0 +1,113 @@
+name: 'Setup Ubunutu for SpamAssassin build and test'
+description: 'Setup Ubuntu runner for SapmAssassin build and test'
+runs:
+  using: 'composite'
+  steps:
+    - name: fix permission causing problem in perl taint mode
+      run: |
+          sudo chmod o-w /usr/local/bin
+      shell: bash
+
+    - name: free up disk space
+      run: |
+          df -H .
+          rm -f ~/.bash_profile   # github installs npm here and that messes up use of ~/.profile
+          sudo apt-get purge -y '~ndotnet-'
+          sudo apt-get autoremove -y
+          sudo apt-get clean
+          sudo rm -rf /usr/local/lib/android # will release about 10 GB if you don't need Android
+          sudo rm -rf /usr/share/dotnet # will release about 20GB if you don't need .NET
+          df -H .
+      shell: bash
+
+    - name: install required apt packages - perl ones get their prerequisites needed for plenv perl installs
+      run: |
+          sudo apt-get update
+          sudo apt-get upgrade -y
+          sudo apt-get install -y \
+           apt-utils \
+           build-essential \
+           curl \
+           wget \
+           cpanminus \
+           git \
+           pyzor \
+           razor \
+           subversion \
+           libdb-dev \
+           libdbi-dev \
+           libidn11-dev \
+           libidn2-dev \
+           libmaxminddb-dev \
+           libssl-dev \
+           zlib1g-dev \
+           poppler-utils \
+           tesseract-ocr \
+           libarchive-zip-perl \
+           libberkeleydb-perl \
+           libbsd-resource-perl \
+           libdigest-sha-perl \
+           libencode-detect-perl \
+           libgeo-ip-perl \
+           libgeoip2-perl \
+           libio-compress-perl \
+           libmail-dkim-perl \
+           libmail-spf-perl \
+           libnet-patricia-perl \
+           libfile-sharedir-install-perl \
+           libtext-diff-perl \
+           libtest-exception-perl \
+           libregexp-common-perl \
+           libxml-libxml-perl \
+           libtest-pod-coverage-perl \
+           libdbd-sqlite2-perl \
+           libdbd-sqlite3-perl \
+           libdevel-cycle-perl \
+           libgeography-countries-perl \
+           libtest-perl-critic-perl \
+           libdbix-simple-perl \
+           libemail-mime-perl \
+           libemail-sender-perl \
+           libnet-idn-encode-perl \
+           libtest-file-sharedir-perl \
+           libtest-output-perl \
+           libnet-imap-simple-perl \
+           libnet-smtps-perl
+      shell: bash
+
+    - name: install some needed packages from source
+      run: |
+        mkdir -p ~/tmp
+        cd ~/tmp
+
+        wget https://www.dcc-servers.net/dcc/source/dcc.tar.Z
+        tar xf dcc.tar.Z
+        cd dcc-*
+        ./configure --disable-server --disable-dccm --disable-dccifd
+        make
+        sudo make install
+
+        # re2c. Is there a good way of getting latest instead of hardcoding version?
+        cd ~/tmp
+        wget https://github.com/skvadrik/re2c/releases/download/3.0/re2c-3.0.tar.xz
+        tar xf re2c-3.0.tar.xz
+        cd re2c-3.0
+        ./configure
+        make
+        sudo make install
+
+        razor-admin -create
+        razor-admin -register
+
+      shell: bash
+
+    - name: install plenv
+      run: |
+        cd ~/
+        git clone https://github.com/tokuhirom/plenv.git ~/.plenv
+        git clone https://github.com/tokuhirom/Perl-Build.git ~/.plenv/plugins/perl-build/
+        echo "$HOME/.local/bin" >> $GITHUB_PATH
+        echo "$HOME/.plenv/bin" >> $GITHUB_PATH
+        echo "$HOME/.plenv/shims" >> $GITHUB_PATH
+        echo "PLENV_SHELL=bash"  >> $GITHUB_ENV
+      shell: bash
