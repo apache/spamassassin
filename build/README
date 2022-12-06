@@ -213,13 +213,17 @@ Run "svn status" to ensure you're building/releasing from a pristine
   information on how to set up to run the sawampersand test.
 
 - Run the tests that require sudo privileges. DO NOT run these on a machine that
-  runs a production copy of SpamAssassin.
+  runs a production copy of SpamAssassin. As a precaution these tests require that
+  you edit t/config.dist to set run_root_tests to y. Also, these tests run some
+  processes as user 'nobody' and must be run in a directory that is accessible. Typical
+  linux systems give no permissions for "other" on home directory trees. You will
+  have to change the permissions or run these tests from within a different directory.
 
     sudo make test TEST_FILES="t/root*.t"
 
 - Check in the updated Changes file, and SpamAssassin.pm.
 
-    svn commit -m "preparing to release X.Y.Z"
+    svn commit -m "preparing to release X.Y.Z" Changes lib/Mail/SpamAssassin.pm
 
   (If you are privately preparing a security release, and don't wish to
   perform commits to public SVN repos, you can defer this step until
