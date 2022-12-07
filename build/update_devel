@@ -46,21 +46,15 @@ gzip  -f9vc $DISTVNAME.tar > $DISTVNAME.tar.gz  || exit $?
 bzip2 -f9vc $DISTVNAME.tar > $DISTVNAME.tar.bz2 || exit $?
 zip   -rv - $DISTDNAME     > $DISTVNAME.zip     || exit $?
 
-#Adding information to run gpg-agent so a non-privileged user can sign - There should be a check to see if this is done
-gpg-agent --homedir $HOME/sabuildtools/sasigningkey --daemon --write-env-file "${HOME}/sabuildtools/sasigningkey/.gpg-agent-info"
-
 for ext in tar.bz2 tar.gz zip ; do
   cp $DISTVNAME.$ext $RELDIR
 
-  #NO LONGER SIGNING WITH SHA1 OR MD5
-  #perl build/md5sum.pl $DISTVNAME.$ext > $RELDIR/$DISTVNAME.$ext.md5  || exit $?
-  #perl build/sha1sum.pl $DISTVNAME.$ext > $RELDIR/$DISTVNAME.$ext.sha1 || exit $?
   perl build/sha256sum.pl $DISTVNAME.$ext > $RELDIR/$DISTVNAME.$ext.sha256 || exit $?
   perl build/sha512sum.pl $DISTVNAME.$ext > $RELDIR/$DISTVNAME.$ext.sha512 || exit $?
 
   rm -f $DISTVNAME.$ext.asc*
   if [ -d $HOME/sabuildtools/sasigningkey ]; then
-    gpg --homedir $HOME/sabuildtools/sasigningkey --detach-sign --sign --armor $DISTVNAME.$ext || exit $?
+    gpg --homedir $HOME/sabuildtools/sasigningkey --detach-sign --armor $DISTVNAME.$ext || exit $?
     mv $DISTVNAME.$ext.asc $RELDIR/$DISTVNAME.$ext.asc || exit $?
   fi
 
@@ -70,5 +64,4 @@ done
 test -f Makefile && make distclean
 rm -f $DISTVNAME.*
 
-#chgrp -R spamassassin $RELDIR
 ls -l $RELDIR
