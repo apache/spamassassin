@@ -61,7 +61,7 @@ Part 1 = main message headers. Part 2 = next part etc.
  range=-3   (match only first three parts, including main headers)
  range=2-3  (match only first two subparts)
 
-=items tflags NAME_OF_RULE concat
+=item tflags NAME_OF_RULE concat
 
 Concatenate all headers from all mime parts (possible range applied) into a
 single string for matching.  This allows matching headers across multiple
