@@ -343,9 +343,12 @@ sub _check_dmarc {
           $result->reason->[0]{comment} eq 'too many policies') {
       dbg("result: no policy available (too many policies)");
       $pms->{dmarc_policy} = 'no policy available';
+    } elsif ($result->result eq 'pass') {
+      dbg("result: pass");
+      $pms->{dmarc_policy} = $result->published->p;
     } elsif ($result->result ne 'none') {
       dbg("result: $result->{result}, disposition: $result->{disposition}, dkim: $result->{dkim}, spf: $result->{spf} (spf: $spf_status, spf_helo: $spf_helo_status)");
-      $pms->{dmarc_policy} = $result->published->p;
+      $pms->{dmarc_policy} = $result->disposition;
     } else {
       dbg("result: no policy available");
       $pms->{dmarc_policy} = 'no policy available';
