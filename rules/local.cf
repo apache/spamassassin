@@ -94,10 +94,10 @@ ifplugin Mail::SpamAssassin::Plugin::Shortcircuit
 # shortcircuit USER_IN_DEF_WELCOMELIST   on
 # shortcircuit USER_IN_ALL_SPAM_TO     on
 
-#   the opposite; blacklisted mails can also save CPU
+#   the opposite; blocklisted mails can also save CPU
 #
-# shortcircuit USER_IN_BLACKLIST       on
-# shortcircuit USER_IN_BLACKLIST_TO    on
+# shortcircuit USER_IN_BLOCKLIST       on
+# shortcircuit USER_IN_BLOCKLIST_TO    on
 
 #   if you have taken the time to correctly specify your "trusted_networks",
 #   this is another good way to save CPU
