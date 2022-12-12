@@ -191,7 +191,7 @@ BITCOIN_IMGUR
 # good enough
 BITCOIN_MALF_HTML
 
-# tflags publish
+# tflags net
 BITCOIN_MALWARE
 
 # tflags publish
@@ -251,7 +251,7 @@ BITCOIN_XPRIO
 # tflags publish
 BITCOIN_YOUR_INFO
 
-# tflags net
+# tflags publish
 BODY_URI_ONLY
 
 # tflags publish
@@ -464,7 +464,7 @@ FONT_INVIS_POSTEXTRAS
 # tflags net
 FORGED_SPF_HELO
 
-# tflags net
+# tflags publish
 FORM_FRAUD
 
 # tflags publish
@@ -746,9 +746,6 @@ HAS_X_NO_RELAY
 # tflags publish
 HAS_X_OUTGOING_SPAM_STAT
 
-# tflags net
-HDRS_LCASE
-
 # good enough
 HDRS_LCASE_IMGONLY
 
@@ -861,10 +858,10 @@ JH_SPAMMY_PATTERN01
 JH_SPAMMY_PATTERN02
 
 # tflags net
-KHOP_FAKE_EBAY
-
-# tflags net
 KHOP_HELO_FCRDNS
+
+# good enough
+KHOP_JS_OBFUSCATION
 
 # tflags publish
 LINKEDIN_IMG_NOT_RCVD_LNKN
@@ -911,14 +908,8 @@ MALWARE_PASSWORD
 # tflags publish
 MALW_ATTACH
 
-# tflags net
-MANY_HDRS_LCASE
-
 # tflags publish
 MANY_SPAN_IN_TEXT
-
-# tflags net
-MAY_BE_FORGED
 
 # tflags publish
 MILLION_HUNDRED
@@ -1091,7 +1082,7 @@ PDS_BTC_NTLD
 # good enough
 PDS_DBL_URL_TNB_RUNON
 
-# good enough
+# tflags net
 PDS_FROM_2_EMAILS
 
 # tflags net
@@ -1459,6 +1450,9 @@ REPTO_INFONUMSCOM
 
 # tflags publish
 SCC_BOGUS_CTE_1
+
+# good enough
+SCC_CANSPAM_1
 
 # good enough
 SCC_CANSPAM_2
