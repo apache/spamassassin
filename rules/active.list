@@ -191,7 +191,7 @@ BITCOIN_IMGUR
 # good enough
 BITCOIN_MALF_HTML
 
-# tflags net
+# tflags publish
 BITCOIN_MALWARE
 
 # tflags publish
@@ -289,6 +289,9 @@ CN_B2B_SPAMMER
 
 # tflags publish
 COMMENT_GIBBERISH
+
+# tflags net
+COMPENSATION
 
 # tflags publish
 CONTENT_AFTER_HTML
@@ -545,7 +548,7 @@ FROM_MISSP_FREEMAIL
 # good enough
 FROM_MISSP_MSFT
 
-# good enough
+# tflags net
 FROM_MISSP_REPLYTO
 
 # tflags net
@@ -911,6 +914,9 @@ MALW_ATTACH
 # tflags publish
 MANY_SPAN_IN_TEXT
 
+# tflags net
+MAY_BE_FORGED
+
 # tflags publish
 MILLION_HUNDRED
 
@@ -1082,7 +1088,7 @@ PDS_BTC_NTLD
 # good enough
 PDS_DBL_URL_TNB_RUNON
 
-# tflags net
+# good enough
 PDS_FROM_2_EMAILS
 
 # tflags net
@@ -1586,7 +1592,7 @@ TEQF_USR_IMAGE
 # tflags publish
 TEQF_USR_MSGID_HEX
 
-# tflags publish
+# tflags net
 TEQF_USR_MSGID_MALF
 
 # tflags publish
@@ -1640,14 +1646,11 @@ TVD_PH_BODY_META
 # good enough
 TVD_RCVD_SPACE_BRACKET
 
-# good enough
+# tflags net
 TVD_SPACE_ENCODED
 
-# good enough
+# tflags net
 TVD_SPACE_RATIO_MINFP
-
-# good enough
-TVD_VISIT_PHARMA
 
 # tflags publish
 TW_GIBBERISH_MANY
@@ -1841,7 +1844,7 @@ URI_WPADMIN
 # tflags publish
 URI_WP_DIRINDEX
 
-# tflags publish
+# tflags net
 URI_WP_HACKED
 
 # tflags publish
