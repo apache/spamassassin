@@ -229,6 +229,19 @@ Run "svn status" to ensure you're building/releasing from a pristine
   perform commits to public SVN repos, you can defer this step until
   later.)
 
+- If there are any issues to note, make sure to edit the UPGRADE file.
+  Every x.x.0 release at a minimum should include a section.
+
+- Check the README file for any items to change.
+
+- Review the CREDITS to update Committers - https://whimsy.apache.org/
+  can help with this.
+
+- Review the CREDITS to update Copyright
+
+- Review the Project Branding Report Checklist at
+  https://www.apache.org/foundation/marks/pmcs
+
 - SVN tag the release files.  This is done using "svn copy".
 
   - For a maintenance release (x.y.1, x.y.2):
@@ -295,7 +308,8 @@ Run "svn status" to ensure you're building/releasing from a pristine
   to ensure that the code in this build directory matches up using
   some other mechanism, since SVN is public.)
 
-- run "./build/update_stable" to build the tar.gz, tar.bz2 and zip files.
+- use the following commands to run build/update_stable to build
+  the tar.gz, tar.bz2 and zip files into ~/public_html/devel/
 
     NOTE: link rules, t.rules and rulesrc to a trunk checkout if needed!
 
@@ -305,9 +319,6 @@ Run "svn status" to ensure you're building/releasing from a pristine
     ln -s ~/usr/src/Mail-SpamAssassin/trunk/rulesrc
     ln -s ~/usr/src/Mail-SpamAssassin/trunk/t.rules
     ./build/update_stable
-
-  NOTE: running gpg-agent with the proper homedir is needed for
-  non-privileged users.
 
   The above places files in ~/public_html/devel/
 
@@ -324,19 +335,6 @@ Run "svn status" to ensure you're building/releasing from a pristine
 
   NOTE: Here's a quick example to concat the checksums:
         ls *3.4.2* | grep sha | xargs cat --
-
-- If there are any issues to note, make sure to edit the UPGRADE file.
-  Every x.x.0 release at a minimum should include a section.
-
-- Check the README file for any items to change.
-
-- Review the CREDITS to update Committers - https://whimsy.apache.org/
-  can help with this.
-
-- Review the CREDITS to update Copyright
-
-- Review the Project Branding Report Checklist at
-  https://www.apache.org/foundation/marks/pmcs
 
 - (for any rc, prerelease, or full release) Place the tarballs in a
   discreet location (discreet means not linked from the "downloads" page
