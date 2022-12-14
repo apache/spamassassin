@@ -229,7 +229,19 @@ Downloads are available from:
 
 https://spamassassin.apache.org/downloads.cgi
 
-[INSERT SHA256 and SHA512 HASHES OF FILES HERE AFTER RELEASE IS PREPARED]
+sha256sum of archive files:
+
+d9dd6c585dd365502def902e21947b17c60c856134502c327868ed2eb1f0f566  Mail-SpamAssassin-4.0.0.tar.bz2
+5096560e0514a11064fef2ecbc9e53c90fb7737fff8be58374b5504bfa2e56ed  Mail-SpamAssassin-4.0.0.tar.gz
+1eb979e521824d573afed1f251e7658f5f4445a6aaebec1022869316a15f5f2a  Mail-SpamAssassin-4.0.0.zip
+9aa12cb76b02089287ebaa240aca21197308a54033c77fc04ac71dc8acbe2597  Mail-SpamAssassin-rules-4.0.0.r1905925.tgz
+
+sha512sum of archive files:
+
+b6f5f5e5dd84a4de3644458505922cb4a11d0cbc574a67863293894b493f7a5072172e0b7db0bad9ca29bae2bb492e826fc4ecdf51e602b4b3edb1c11a048c26  Mail-SpamAssassin-4.0.0.tar.bz2
+a5bdd67240f47972459be5143e5bcc64425b840ea8a528b558db1ce9aebbc1469f6157d25eb2a7828c50953864109094064069ae0b3213314c10b317c0cf0692  Mail-SpamAssassin-4.0.0.tar.gz
+1bee82424a50ffa991b5a23e3d8f17564563aa2aec8681b932405f2614d783f952b473b79c2a24933d61131df16e2cc8654c7b0e0b3d9204676aa4c0c525bc99  Mail-SpamAssassin-4.0.0.zip
+fe9573053599027caa3b86587e0fe9afe2ea085fce9948e18e96e7cc45e9b37aa4dd98c9c9c5f1f64b57984d98a58b56ab755709b41d676e81b35b205b41a0f7  Mail-SpamAssassin-rules-4.0.0.r1905925.tgz
 
 Note that the Rules files, aka *-rules-*.tgz, are only necessary if
 you cannot, or do not wish to, run "sa-update" after
@@ -266,10 +278,11 @@ To verify a release file, download the file with the accompanying .asc
 file and run the following commands:
 
   gpg --verbose --keyserver keys.openpgp.org --recv-key FDE52F40F7D39814
-  gpg --verify Mail-SpamAssassin-3.4.6.tar.bz2.asc
+  gpg --verify Mail-SpamAssassin-4.0.0.tar.bz2.asc
   gpg --fingerprint FDE52F40F7D39814
 
-Then verify that the key matches the signature.
+Then confirm that the key description shown by --verify matches what
+is shown by --fingerprint.
 
 See https://www.apache.org/info/verification.html for more information
 on verifying Apache releases
