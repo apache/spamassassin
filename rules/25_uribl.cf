@@ -174,11 +174,12 @@ endif
 #tflags          URIBL_SC_SURBL  net notrim
 #reuse           URIBL_SC_SURBL
 
-urirhssub       URIBL_WS_SURBL  multi.surbl.org.        A   4
-body            URIBL_WS_SURBL  eval:check_uridnsbl('URIBL_WS_SURBL')
-describe        URIBL_WS_SURBL  Contains an URL listed in the WS SURBL blocklist
-tflags          URIBL_WS_SURBL  net notrim
-reuse           URIBL_WS_SURBL
+#REMOVED per bug 8093
+#urirhssub       URIBL_WS_SURBL  multi.surbl.org.        A   4
+#body            URIBL_WS_SURBL  eval:check_uridnsbl('URIBL_WS_SURBL')
+#describe        URIBL_WS_SURBL  Contains an URL listed in the WS SURBL blocklist
+#tflags          URIBL_WS_SURBL  net notrim
+#reuse           URIBL_WS_SURBL
 
 urirhssub       URIBL_PH_SURBL  multi.surbl.org.        A   8
 body            URIBL_PH_SURBL  eval:check_uridnsbl('URIBL_PH_SURBL')
