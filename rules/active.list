@@ -248,7 +248,7 @@ BITCOIN_XPRIO
 # tflags publish
 BITCOIN_YOUR_INFO
 
-# tflags publish
+# tflags net
 BODY_URI_ONLY
 
 # tflags publish
@@ -482,9 +482,6 @@ FREEM_FRNUM_UNICD_EMPTY
 # tflags publish
 FRNAME_IN_MSG_XPRIO_NO_SUB
 
-# good enough
-FROM_2_EMAILS_SHORT
-
 # tflags publish
 FROM_ADDR_WS
 
@@ -541,9 +538,6 @@ FROM_MISSP_SPF_FAIL
 
 # good enough
 FROM_MISSP_USER
-
-# good enough
-FROM_MULTI_NORDNS
 
 # tflags net
 FROM_NEWDOM_BTC
@@ -737,6 +731,9 @@ HAS_X_NO_RELAY
 # tflags publish
 HAS_X_OUTGOING_SPAM_STAT
 
+# tflags net
+HDRS_LCASE
+
 # good enough
 HDRS_LCASE_IMGONLY
 
@@ -846,9 +843,6 @@ JH_SPAMMY_PATTERN01
 JH_SPAMMY_PATTERN02
 
 # tflags net
-KHOP_FAKE_EBAY
-
-# tflags net
 KHOP_HELO_FCRDNS
 
 # good enough
@@ -895,6 +889,9 @@ MALWARE_PASSWORD
 
 # tflags publish
 MALW_ATTACH
+
+# tflags net
+MANY_HDRS_LCASE
 
 # tflags publish
 MANY_SPAN_IN_TEXT
@@ -1529,9 +1526,6 @@ SUBJECT_IN_BLOCKLIST
 # tflags userconf
 SUBJECT_IN_WELCOMELIST
 
-# good enough
-SUBJ_ATTENTION
-
 # tflags net
 SUBJ_BRKN_WORDNUMS
 
@@ -1592,7 +1586,7 @@ TO_NO_BRKTS_HTML_IMG
 # tflags publish
 TO_NO_BRKTS_HTML_ONLY
 
-# tflags net
+# good enough
 TO_NO_BRKTS_MSFT
 
 # tflags publish
@@ -1612,9 +1606,6 @@ TVD_IP_HEX
 
 # good enough
 TVD_RCVD_SPACE_BRACKET
-
-# tflags net
-TVD_SPACE_RATIO_MINFP
 
 # good enough
 TVD_VISIT_PHARMA
@@ -1777,9 +1768,6 @@ URI_MALWARE_SCMS
 
 # tflags userconf
 URI_NOVOWEL
-
-# good enough
-URI_OBFU_DOM
 
 # tflags net
 URI_ONLY_MSGID_MALF
