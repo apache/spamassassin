@@ -14,6 +14,8 @@ use Test::More;
 
 use Errno qw(EADDRINUSE EACCES);
 
+plan skip_all => "Net tests disabled" unless conf_bool('run_net_tests');
+
 use constant HAS_NET_DNS_NAMESERVER => eval { require Net::DNS::Nameserver; };
 plan skip_all => "Net::DNS::Nameserver in unavailable on this system" unless (HAS_NET_DNS_NAMESERVER);
 plan  tests => 46;
