@@ -1544,7 +1544,7 @@ Empty the list of msa networks.
     }
   });
 
-=item originating_ip_headers header ...   (default: X-Yahoo-Post-IP X-Originating-IP X-Apparently-From X-SenderIP)
+=item originating_ip_headers header ...   (default: none)
 
 A list of header field names from which an originating IP address can
 be obtained. For example, webmail servers may record a client IP address
@@ -1555,6 +1555,10 @@ are used in RBL checks where appropriate.
 
 Currently the IP addresses are not added into X-Spam-Relays-* header fields,
 but they may be in the future.
+
+A default list may be supplied via sa-update, use
+C<clear_originating_ip_headers> to clear and override the settings if
+needed.
 
 =cut
 
@@ -1577,7 +1581,8 @@ but they may be in the future.
 
 =item clear_originating_ip_headers
 
-Empty the list of 'originating IP address' header field names.
+Empty the list of 'originating IP address' header field names. Useful if
+you want to override the standard list supplied by sa-update.
 
 =cut
 
