@@ -4,14 +4,15 @@ use lib '.'; use lib 't';
 use SATest; sa_t_init("strip2");
 
 use Test::More;
+use constant HAS_TEXTDIFF => eval { require Text::Diff; };
 plan skip_all => 'Long running tests disabled' unless conf_bool('run_long_tests');
+plan skip_all => 'Need Text::Diff' unless HAS_TEXTDIFF;
 plan tests => 98;
 
 # ---------------------------------------------------------------------------
 
 use File::Copy;
 use File::Compare qw(compare_text);
-use Text::Diff;
 
 my @files = qw(
 	data/nice/crlf-endings
