@@ -198,10 +198,10 @@ my %makefile = (
         'ExtUtils::MakeMaker' => MIN_MAKEMAKER_VERSION,
     },
 
-    # The modules that are not core that are used in default tests
+    # The modules that are not core or that require a minimum version that are used in default tests
     'TEST_REQUIRES' => {
         'Devel::Cycle' => 0,
-        'Test::More'   => 0,
+        'Test::Simple' => 1.302067,
         'Text::Diff' => 0,
         'Perl::Critic::Policy::TestingAndDebugging::ProhibitNoStrict' => 0,
         'Perl::Critic::Policy::Perlsecret' => 0,
