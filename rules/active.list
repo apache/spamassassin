@@ -248,7 +248,7 @@ BITCOIN_XPRIO
 # tflags publish
 BITCOIN_YOUR_INFO
 
-# tflags publish
+# tflags net
 BODY_URI_ONLY
 
 # tflags publish
@@ -557,9 +557,6 @@ FROM_SUSPICIOUS_NTLD
 # tflags publish
 FROM_SUSPICIOUS_NTLD_FP
 
-# good enough
-FROM_WSP_TRAIL
-
 # tflags net
 FSL_BULK_SIG
 
@@ -725,6 +722,9 @@ HAS_X_NO_RELAY
 # tflags publish
 HAS_X_OUTGOING_SPAM_STAT
 
+# tflags net
+HDRS_LCASE
+
 # good enough
 HDRS_LCASE_IMGONLY
 
@@ -779,6 +779,9 @@ HK_RCVD_IP_MULTICAST
 # tflags publish
 HK_SCAM
 
+# good enough
+HK_WIN
+
 # tflags publish
 HOSTED_IMG_DIRECT_MX
 
@@ -812,6 +815,9 @@ HTML_SHRT_CMNT_OBFU_MANY
 # tflags publish
 HTML_SINGLET_MANY
 
+# good enough
+HTML_TAG_BALANCE_CENTER
+
 # tflags net
 HTML_TEXT_INVISIBLE_FONT
 
@@ -829,6 +835,9 @@ JH_SPAMMY_PATTERN01
 
 # tflags publish
 JH_SPAMMY_PATTERN02
+
+# tflags net
+KHOP_FAKE_EBAY
 
 # tflags net
 KHOP_HELO_FCRDNS
@@ -880,6 +889,9 @@ MANY_HDRS_LCASE
 
 # tflags publish
 MANY_SPAN_IN_TEXT
+
+# tflags net
+MAY_BE_FORGED
 
 # tflags publish
 MILLION_HUNDRED
@@ -1035,13 +1047,7 @@ PDS_BTC_ID
 PDS_BTC_MSGID
 
 # good enough
-PDS_BTC_NTLD
-
-# good enough
 PDS_DBL_URL_TNB_RUNON
-
-# tflags net
-PDS_FROM_2_EMAILS
 
 # tflags net
 PDS_HELO_SPF_FAIL
@@ -1512,6 +1518,9 @@ SUBJECT_IN_WELCOMELIST
 SUBJ_BRKN_WORDNUMS
 
 # tflags net
+SUBJ_UNNEEDED_HTML
+
+# tflags net
 SURBL_BLOCKED
 
 # good enough
@@ -1535,7 +1544,7 @@ TARINGANET_IMG_NOT_RCVD_TN
 # tflags publish
 TEQF_USR_IMAGE
 
-# tflags net
+# tflags publish
 TEQF_USR_MSGID_HEX
 
 # tflags publish
@@ -1565,16 +1574,13 @@ TO_IN_SUBJ
 # tflags publish
 TO_NAME_SUBJ_NO_RDNS
 
-# good enough
-TO_NO_BRKTS_FROM_MSSP
-
 # tflags publish
 TO_NO_BRKTS_HTML_IMG
 
 # tflags publish
 TO_NO_BRKTS_HTML_ONLY
 
-# good enough
+# tflags net
 TO_NO_BRKTS_MSFT
 
 # tflags publish
