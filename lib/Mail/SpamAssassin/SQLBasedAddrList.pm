@@ -307,7 +307,7 @@ sub add_score {
     my $sql = sprintf("INSERT INTO %s (%s) VALUES (%s)", $self->{tablename},
                       join(',', @fields),  join(',', ('?') x @fields));
     if ($self->{dsn} =~ /^DBI:(?:pg|SQLite)/i) {
-       $sql .= " ON CONFLICT (username, email, signedby, ip) DO UPDATE set msgcount = ?, totscore = totscore + ?";
+       $sql .= " ON CONFLICT (username, email, signedby, ip) DO UPDATE set msgcount = ?, totscore = " . $self->{tablename} . ".totscore + ?";
     } elsif ($self->{dsn} =~ /^DBI:(?:mysql|MariaDB)/i) {
        $sql .= " ON DUPLICATE KEY UPDATE msgcount = ?, totscore = totscore + ?";
     }
