@@ -850,21 +850,19 @@ sub recursive_lookup {
   # redirect back to the same host as chaining incorrectly.
   $pms->{short_url_chained} = 1 if $count;
 
-  # Check if we are being redirected to a local page
-  # Don't recurse in this case...
+  # Check if it is a redirection to a relative URI
+  # Make it an absolute URI and chain to it in that case
   if ($location !~ m{^[a-z]+://}i) {
     my $orig_location = $location;
     my $orig_short_url = $short_url;
     # Strip to..
     if (index($location, '/') == 0) {
-      $short_url =~ s{^([a-z]+://.*?)[/?#].*}{$1}; # ..absolute path
+      $short_url =~ s{^([a-z]+://.*?)[/?#].*}{$1}; # ..absolute path base is http://example.com
     } else {
-      $short_url =~ s{^([a-z]+://.*)/}{$1}; # ..relative path
+      $short_url =~ s{^([a-z]+://.*/)}{$1}; # ..relative path base is http://example.com/a/b/
     }
-    $location = "$short_url/$location";
-    dbg("looks like a local redirection: $orig_short_url => $location ($orig_location)");
-    $pms->add_uri_detail_list($location) if !$pms->{uri_detail_list}->{$location};
-    return;
+    $location = "$short_url$location";
+    dbg("looks like a redirection to a relative URI: $orig_short_url => $location ($orig_location)");
   }
 
   if (exists $been_here{$location}) {

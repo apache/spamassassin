@@ -11,7 +11,7 @@ use constant HAS_DBD_SQLITE => eval { require DBD::SQLite; DBD::SQLite->VERSION(
 use constant SQLITE => (HAS_DBI && HAS_DBD_SQLITE);
 
 plan skip_all => "Net tests disabled"                unless conf_bool('run_net_tests');
-my $tests = 8;
+my $tests = 9;
 $tests += 4 if (SQLITE);
 plan tests => $tests;
 
@@ -56,6 +56,9 @@ ok_all_patterns();
    q{ 1.0 SHORT_URL_CHAINED } => '',
 );
 sarun ("-t < data/spam/decodeshorturl/chain.eml", \&patterns_run_cb);
+ok_all_patterns();
+
+sarun ("-t < data/spam/decodeshorturl/doubleslash.eml", \&patterns_run_cb);
 ok_all_patterns();
 
 
