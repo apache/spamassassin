@@ -827,7 +827,7 @@ sub recursive_lookup {
       return;
     }
     $location = $response->headers->{location};
-    if ($self->{url_shortener_loginfo}) {
+    if ($conf->{url_shortener_loginfo}) {
       info("found $short_url => $location");
     } else {
       dbg("found $short_url => $location");
