@@ -1,0 +1,99 @@
+name: Setup PostgreSQL for Linux/macOS/Windows
+author: Sidney Markowitz based on version by Ihor Kalnytskyi
+description: Setup PostgreSQL for SpamAssassin testing
+runs:
+  using: composite
+  steps:
+    - name: Prerequisites
+      run: |
+        if [ "$RUNNER_OS" == "Linux" ]; then
+          echo "$(pg_config --bindir)" >> $GITHUB_PATH
+        elif [ "$RUNNER_OS" == "Windows" ]; then
+          echo "$PGBIN" >> $GITHUB_PATH
+          echo "PQ_LIB_DIR=$PGROOT\lib" >> $GITHUB_ENV
+        fi
+      shell: bash
+
+    - name: Setup and start PostgreSQL
+      run: |
+        export PGDATA="$RUNNER_TEMP/pgdata"
+        export PWFILE="$RUNNER_TEMP/pwfile"
+
+        # Unfortunately 'initdb' could only receive a password via file on disk
+        # or prompt to enter on. Prompting is not an option since we're running
+        # in non-interactive mode.
+        echo 'spamassassin' > $PWFILE
+
+        # There are couple of reasons why we need to create a new PostgreSQL
+        # database cluster. First and foremost, we have to create a superuser
+        # with provided credentials. Second, we want the PostgreSQL client
+        # applications [1] to be available for execution without
+        # run-from-another-user dances. Third, we want to make sure that
+        # settings are the same between operating systems and aren't changed by
+        # package vendors.
+        #
+        # [1] https://www.postgresql.org/docs/15/reference-client.html
+        initdb \
+          --username="spamassassin" \
+          --pwfile="$PWFILE" \
+          --auth="scram-sha-256" \
+          --encoding="UTF-8" \
+          --locale="en_US.UTF-8" \
+          --no-instructions
+
+        # Do not create unix sockets since they are created by default in the
+        # directory we have no permissions to (owned by system postgres user).
+        echo "unix_socket_directories = ''" >> "$PGDATA/postgresql.conf"
+        echo "port = 5432" >> "$PGDATA/postgresql.conf"
+        pg_ctl start
+
+        # Save required connection parameters for created superuser to the
+        # connection service file [1]. This allows using these connection
+        # parameters by setting 'PGSERVICE' environment variable or by
+        # requesting them via connection string.
+        #
+        # HOST is required for Linux/macOS because these OS-es default to unix
+        # sockets but we turned them off.
+        #
+        # PORT, USER, PASSWORD and DBNAME are required because they could be
+        # parametrized via action input parameters.
+        #
+        # [1] https://www.postgresql.org/docs/15/libpq-pgservice.html
+        cat <<EOF > "$PGDATA/pg_service.conf"
+        [spamassassin]
+        host=localhost
+        port=5432
+        user=spamassassin
+        password=spamassassin
+        dbname=spamassassin
+        EOF
+        echo "PGSERVICEFILE=$PGDATA/pg_service.conf" >> $GITHUB_ENV
+      shell: bash
+
+    - name: Setup PostgreSQL database
+      run: |
+        createdb -O "spamassassin" "spamassassin"
+        psql --username=spamassassin --host=localhost --port=5432 -d spamassassin -f sql/awl_pg.sql
+        psql --username=spamassassin --host=localhost --port=5432 -d spamassassin -f sql/bayes_pg.sql
+      env:
+        PGSERVICE: spamassassin
+        PGPASSWORD: spamassassin
+      shell: bash
+
+    - name: fixup strawberry perl postgres dll in case too old
+      if: ${{ startsWith( matrix.runner, 'windows-' )  }}
+      run: |
+        export TRG=$(dirname `which libpq__.dll`)
+        cp "$PGBIN/libpq.dll" "$TRG"
+        cd "$TRG"
+        pexports libpq.dll > libpq.def 
+        dlltool --dllname libpq.dll --def libpq.def --output-lib ..\lib\libpq.a
+        mv libpq__.dll libpq__.dll_BUP
+        mv libpq.dll libpq__.dll
+      shell: bash
+
+    - name: prepare test config for postgres
+      run: |
+          perl -i.bak -pe 's/^run_(awl_sql_tests|bayes_sql_tests)=n/run_$1=y/;s/^(user_awl|bayes_sql)_dsn=.*$/$1_dsn=dbi:Pg:dbname=spamassassin;host=localhost/;s/^(user_awl_sql_username|user_awl_sql_password|bayes_sql_username|bayes_sql_password)=.*$/$1=spamassassin/;s/^(bayes_store_module)=.*$/$1=Mail::SpamAssassin::BayesStore::PgSQL/' t/config.dist
+      shell: bash
+

@@ -5,6 +5,7 @@ runs:
   steps:
     - name: remove default user group membershipp in root group
       run: |
+        # Note this only takes effect in steps that run with sudo -u runner
         sudo dseditgroup -o edit -d runner -t user wheel
         echo "$HOME/.local/bin" >> $GITHUB_PATH
       shell: bash

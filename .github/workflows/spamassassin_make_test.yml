@@ -1,0 +1,105 @@
+name: SpamAssassin make test
+
+on:
+    workflow_dispatch:
+      inputs:
+        runners:
+          description: 'List of runners to use [ubuntu-latest, macos-latest, windows-latest]'
+          required: true
+          default: '["ubuntu-latest", "macos-latest", "windows-latest"]'
+        perls:
+          description: 'List of perl major versions 5.xx xx even 14 - 36'
+          required: true
+          default: '[ 36, 34, 32, 30, 28, 26, 24, 22, 20, 18, 16, 14 ]'
+        database:
+          description: 'Databases to use for awl and bayes SQL tests [none, postgres, mysql]'
+          required: true
+          default: '[ "none", "postgres", "mysql" ]'
+        tests:
+          description: 'tests to run when database none, leave empty or enter t/*.t to run all non-sql tests'
+          required: false
+          type: string
+jobs:
+  perl-job:
+    strategy:
+      fail-fast: false
+      matrix:
+        runner: ${{ fromJSON(github.event.inputs.runners) }}
+        perl: ${{ fromJSON(github.event.inputs.perls) }}
+        database: ${{ fromJSON(github.event.inputs.database) }}
+        exclude:
+          - runner: windows-latest
+            perl: 36
+          - runner: windows-2022
+            perl: 36
+          - runner: windows-2019
+            perl: 36
+          - runner: windows-latest
+            perl: 34
+          - runner: windows-2022
+            perl: 34
+          - runner: windows-2019
+            perl: 34
+    env:
+      PERL5LIB: ''
+      PERL_VERSION: 5.${{matrix.perl}}
+      MAKECMD: ${{ ( !startsWith( matrix.runner, 'windows-' ) && 'make') || ((matrix.perl > 24) && 'gmake') || 'dmake' }}
+    runs-on: ${{matrix.runner}}
+    defaults:
+      run:
+        shell: ${{ ( startsWith( matrix.runner, 'windows-' ) && 'cmd' ) || 'bash' }}
+    name: OS ${{matrix.runner}} Perl 5.${{matrix.perl}} DB ${{matrix.database}}
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Install requirements for Ubuntu
+      if: ${{ startsWith( matrix.runner, 'ubuntu-' )  }}
+      uses: ./.github/actions/setup_ubuntu_for_sa_test
+
+    - name: Install requirements for macOS
+      if: ${{ startsWith( matrix.runner, 'macos-' )  }}
+      uses: ./.github/actions/setup_macos_for_sa_test
+
+    - name: Set up perl
+      uses: shogo82148/actions-setup-perl@v1
+      id: perl
+      with:
+        perl-version: 5.${{ matrix.perl }}
+        distribution: ${{ ( startsWith( matrix.runner, 'windows-' ) && 'strawberry' ) || 'default' }}
+
+    - name: Set up postgres
+      if: ${{ matrix.database == 'postgres' }}
+      uses: ./.github/actions/postgres
+
+    - name: Set up mysql
+      if: ${{ matrix.database == 'mysql' }}
+      uses: ./.github/actions/mysql
+
+    - name: prepare test config
+      run: |
+          perl -i.bak -pe 's/^run_(long_tests|net_tests|dcc_tests|sql_pref_tests)=n/run_$1=y/' t/config.dist
+      shell: bash
+
+    - name: Cache CPAN Modules
+      uses: actions/cache@v3
+      with:
+        path: local
+        key: perl-${{ steps.perl.outputs.perl-hash }}
+
+    - name: Install dependencies and optional modules for full testing
+      uses: ./.github/actions/install_cpan_dependencies_for_sa
+
+    - name: Run Tests
+      run: |
+          perl Makefile.PL
+          ${{ env.MAKECMD }} ENABLE_SSL=yes
+          ${{ ( startsWith( matrix.runner, 'macos-' ) && 'sudo -u $USER' ) || '' }} ${{ env.MAKECMD }} test ${{ ((matrix.database != 'none') && 'TEST_FILES="t/*sql*.t"') || (github.event.inputs.tests && format('TEST_FILES="{0}"', github.event.inputs.tests)) }}
+
+    - name: Publish logs as artifacts
+      if: ${{ failure() }}
+      uses: actions/upload-artifact@v3
+      with:
+        name: test_logs
+        path: |
+          t/log
