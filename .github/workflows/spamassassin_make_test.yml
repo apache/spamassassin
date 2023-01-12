@@ -61,6 +61,10 @@ jobs:
       if: ${{ startsWith( matrix.runner, 'macos-' )  }}
       uses: ./.github/actions/setup_macos_for_sa_test
 
+    - name: Install requirements for Windows
+      if: ${{ startsWith( matrix.runner, 'windows-' )  }}
+      uses: ./.github/actions/setup_windows_for_sa_test
+
     - name: Set up perl
       uses: shogo82148/actions-setup-perl@v1
       id: perl
