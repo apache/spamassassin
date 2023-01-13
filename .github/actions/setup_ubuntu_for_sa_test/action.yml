@@ -12,7 +12,9 @@ runs:
       run: |
           df -H .
           rm -f ~/.bash_profile   # github installs npm here and that messes up use of ~/.profile
-          sudo apt-get purge -y '~ndotnet-'
+          sudo apt-get update
+          sudo apt-get autoremove -y '~ndotnet-'
+          sudo apt-get upgrade -y
           sudo apt-get autoremove -y
           sudo apt-get clean
           sudo rm -rf /usr/local/lib/android # will release about 10 GB if you don't need Android
@@ -22,8 +24,6 @@ runs:
 
     - name: install required apt packages - perl ones get their prerequisites needed for plenv perl installs
       run: |
-          sudo apt-get update
-          sudo apt-get upgrade -y
           sudo apt-get install -y \
            apt-utils \
            build-essential \
