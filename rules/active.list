@@ -185,7 +185,7 @@ BITCOIN_IMGUR
 # good enough
 BITCOIN_MALF_HTML
 
-# tflags net
+# tflags publish
 BITCOIN_MALWARE
 
 # tflags publish
@@ -245,7 +245,7 @@ BITCOIN_XPRIO
 # tflags publish
 BITCOIN_YOUR_INFO
 
-# tflags publish
+# tflags net
 BODY_URI_ONLY
 
 # tflags publish
@@ -455,7 +455,7 @@ FORGED_SPF_HELO
 # tflags net
 FORM_FRAUD
 
-# tflags net
+# tflags publish
 FORM_FRAUD_3
 
 # tflags publish
@@ -716,9 +716,6 @@ HAS_X_NO_RELAY
 # tflags publish
 HAS_X_OUTGOING_SPAM_STAT
 
-# tflags net
-HDRS_LCASE
-
 # tflags publish
 HDRS_MISSP
 
@@ -828,9 +825,6 @@ JH_SPAMMY_PATTERN01
 JH_SPAMMY_PATTERN02
 
 # tflags net
-KHOP_FAKE_EBAY
-
-# tflags net
 KHOP_HELO_FCRDNS
 
 # good enough
@@ -877,6 +871,9 @@ MANY_HDRS_LCASE
 
 # tflags publish
 MANY_SPAN_IN_TEXT
+
+# tflags net
+MAY_BE_FORGED
 
 # tflags publish
 MILLION_HUNDRED
@@ -1030,9 +1027,6 @@ PDS_BTC_MSGID
 
 # good enough
 PDS_DBL_URL_TNB_RUNON
-
-# good enough
-PDS_FROM_2_EMAILS
 
 # tflags net
 PDS_HELO_SPF_FAIL
@@ -1571,7 +1565,7 @@ TO_NO_BRKTS_HTML_IMG
 # tflags publish
 TO_NO_BRKTS_HTML_ONLY
 
-# good enough
+# tflags net
 TO_NO_BRKTS_MSFT
 
 # tflags publish
@@ -1597,6 +1591,9 @@ TVD_IP_OCT
 
 # good enough
 TVD_RCVD_SPACE_BRACKET
+
+# tflags net
+TVD_SPACE_RATIO_MINFP
 
 # good enough
 TVD_VISIT_PHARMA
@@ -1787,7 +1784,7 @@ URI_WPADMIN
 # tflags publish
 URI_WP_DIRINDEX
 
-# tflags net
+# tflags publish
 URI_WP_HACKED
 
 # tflags publish
