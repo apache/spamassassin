@@ -185,7 +185,7 @@ BITCOIN_IMGUR
 # good enough
 BITCOIN_MALF_HTML
 
-# tflags publish
+# tflags net
 BITCOIN_MALWARE
 
 # tflags publish
@@ -304,6 +304,9 @@ DEAR_BENEFICIARY
 
 # good enough
 DEAR_EMAIL_USER
+
+# good enough
+DEAR_WINNER
 
 # tflags net
 DIGEST_MULTIPLE
@@ -455,7 +458,7 @@ FORGED_SPF_HELO
 # tflags net
 FORM_FRAUD
 
-# tflags publish
+# tflags net
 FORM_FRAUD_3
 
 # tflags publish
@@ -527,14 +530,11 @@ FROM_MISSP_EH_MATCH
 # good enough
 FROM_MISSP_MSFT
 
-# good enough
+# tflags net
 FROM_MISSP_REPLYTO
 
 # tflags net
 FROM_MISSP_SPF_FAIL
-
-# good enough
-FROM_MISSP_USER
 
 # tflags net
 FROM_NEWDOM_BTC
@@ -716,6 +716,9 @@ HAS_X_NO_RELAY
 # tflags publish
 HAS_X_OUTGOING_SPAM_STAT
 
+# tflags net
+HDRS_LCASE
+
 # tflags publish
 HDRS_MISSP
 
@@ -800,7 +803,7 @@ HTML_OFF_PAGE
 # tflags publish
 HTML_SHRT_CMNT_OBFU_MANY
 
-# tflags net
+# tflags publish
 HTML_SINGLET_MANY
 
 # good enough
@@ -826,9 +829,6 @@ JH_SPAMMY_PATTERN02
 
 # tflags net
 KHOP_HELO_FCRDNS
-
-# good enough
-KHOP_JS_OBFUSCATION
 
 # tflags publish
 LINKEDIN_IMG_NOT_RCVD_LNKN
@@ -866,14 +866,8 @@ MALWARE_PASSWORD
 # tflags publish
 MALW_ATTACH
 
-# tflags net
-MANY_HDRS_LCASE
-
 # tflags publish
 MANY_SPAN_IN_TEXT
-
-# tflags net
-MAY_BE_FORGED
 
 # tflags publish
 MILLION_HUNDRED
@@ -1004,6 +998,9 @@ NSL_RCVD_FROM_USER
 # good enough
 NSL_RCVD_HELO_USER
 
+# good enough
+NUMBERONLY_BITCOIN_EXP
+
 # tflags publish
 OBFU_BITCOIN
 
@@ -1029,7 +1026,13 @@ PDS_BTC_MSGID
 PDS_DBL_URL_TNB_RUNON
 
 # tflags net
+PDS_FROM_2_EMAILS
+
+# tflags net
 PDS_HELO_SPF_FAIL
+
+# good enough
+PDS_NAKED_TO_NUMERO
 
 # good enough
 PDS_NO_FULL_NAME_SPOOFED_URL
@@ -1500,9 +1503,6 @@ SUBJECT_IN_WELCOMELIST
 SUBJ_BRKN_WORDNUMS
 
 # tflags net
-SUBJ_UNNEEDED_HTML
-
-# tflags net
 SURBL_BLOCKED
 
 # good enough
@@ -1593,7 +1593,7 @@ TVD_IP_OCT
 TVD_RCVD_SPACE_BRACKET
 
 # tflags net
-TVD_SPACE_RATIO_MINFP
+TVD_SPACE_ENCODED
 
 # good enough
 TVD_VISIT_PHARMA
@@ -1757,7 +1757,7 @@ URI_MALWARE_SCMS
 # tflags userconf
 URI_NOVOWEL
 
-# tflags net
+# tflags publish
 URI_ONLY_MSGID_MALF
 
 # tflags publish
@@ -1784,7 +1784,7 @@ URI_WPADMIN
 # tflags publish
 URI_WP_DIRINDEX
 
-# tflags publish
+# tflags net
 URI_WP_HACKED
 
 # tflags publish
