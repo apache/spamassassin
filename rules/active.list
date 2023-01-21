@@ -185,7 +185,7 @@ BITCOIN_IMGUR
 # good enough
 BITCOIN_MALF_HTML
 
-# tflags publish
+# tflags net
 BITCOIN_MALWARE
 
 # tflags publish
@@ -283,9 +283,6 @@ CN_B2B_SPAMMER
 
 # tflags publish
 COMMENT_GIBBERISH
-
-# tflags net
-COMPENSATION
 
 # tflags publish
 CONTENT_AFTER_HTML
@@ -533,6 +530,9 @@ FROM_MISSP_REPLYTO
 # tflags net
 FROM_MISSP_SPF_FAIL
 
+# good enough
+FROM_MULTI_NORDNS
+
 # tflags net
 FROM_NEWDOM_BTC
 
@@ -556,9 +556,6 @@ FROM_SUSPICIOUS_NTLD_FP
 
 # tflags net
 FSL_BULK_SIG
-
-# good enough
-FSL_CTYPE_WIN1251
 
 # good enough
 FSL_HELO_BARE_IP_1
@@ -713,6 +710,12 @@ HAS_X_NO_RELAY
 # tflags publish
 HAS_X_OUTGOING_SPAM_STAT
 
+# tflags net
+HDRS_LCASE
+
+# good enough
+HDRS_LCASE_IMGONLY
+
 # tflags publish
 HDRS_MISSP
 
@@ -863,8 +866,14 @@ MALWARE_PASSWORD
 # tflags publish
 MALW_ATTACH
 
+# tflags net
+MANY_HDRS_LCASE
+
 # tflags publish
 MANY_SPAN_IN_TEXT
+
+# tflags net
+MAY_BE_FORGED
 
 # tflags publish
 MILLION_HUNDRED
@@ -987,9 +996,6 @@ NO_RECEIVED
 NO_RELAYS
 
 # good enough
-NSL_RCVD_FROM_USER
-
-# good enough
 NSL_RCVD_HELO_USER
 
 # good enough
@@ -1019,7 +1025,7 @@ PDS_BTC_MSGID
 # good enough
 PDS_DBL_URL_TNB_RUNON
 
-# tflags net
+# good enough
 PDS_FROM_2_EMAILS
 
 # tflags net
@@ -1337,9 +1343,6 @@ RDNS_NUM_TLD_ATCHNX
 # tflags publish
 RDNS_NUM_TLD_XM
 
-# good enough
-REPLYTO_WITHOUT_TO_CC
-
 # tflags publish
 REPTO_419_FRAUD
 
@@ -1497,6 +1500,9 @@ SUBJECT_IN_WELCOMELIST
 SUBJ_BRKN_WORDNUMS
 
 # tflags net
+SUBJ_UNNEEDED_HTML
+
+# tflags net
 SURBL_BLOCKED
 
 # good enough
@@ -1558,6 +1564,9 @@ TO_NO_BRKTS_HTML_IMG
 
 # tflags publish
 TO_NO_BRKTS_HTML_ONLY
+
+# tflags net
+TO_NO_BRKTS_MSFT
 
 # tflags publish
 TO_NO_BRKTS_NORDNS_HTML
@@ -1754,7 +1763,7 @@ URI_MALWARE_SCMS
 # tflags userconf
 URI_NOVOWEL
 
-# tflags publish
+# tflags net
 URI_ONLY_MSGID_MALF
 
 # tflags publish
@@ -1784,7 +1793,7 @@ URI_WP_DIRINDEX
 # tflags net
 URI_WP_HACKED
 
-# tflags publish
+# tflags net
 URI_WP_HACKED_2
 
 # tflags publish
