@@ -185,7 +185,7 @@ BITCOIN_IMGUR
 # good enough
 BITCOIN_MALF_HTML
 
-# tflags publish
+# tflags net
 BITCOIN_MALWARE
 
 # tflags publish
@@ -869,6 +869,9 @@ MALWARE_PASSWORD
 # tflags publish
 MALW_ATTACH
 
+# tflags net
+MANY_HDRS_LCASE
+
 # tflags publish
 MANY_SPAN_IN_TEXT
 
@@ -943,6 +946,9 @@ MONEY_FRAUD_8
 
 # tflags publish
 MONEY_FREEMAIL_REPTO
+
+# good enough
+MONEY_FROM_41
 
 # tflags publish
 MSGID_DOLLARS_URI_IMG
@@ -1500,6 +1506,9 @@ SUBJECT_IN_WELCOMELIST
 SUBJ_BRKN_WORDNUMS
 
 # tflags net
+SUBJ_UNNEEDED_HTML
+
+# tflags net
 SURBL_BLOCKED
 
 # good enough
@@ -1562,6 +1571,9 @@ TO_NO_BRKTS_HTML_IMG
 # tflags publish
 TO_NO_BRKTS_HTML_ONLY
 
+# tflags net
+TO_NO_BRKTS_MSFT
+
 # tflags publish
 TO_NO_BRKTS_NORDNS_HTML
 
@@ -1588,6 +1600,9 @@ TVD_PH_BODY_META
 
 # good enough
 TVD_RCVD_SPACE_BRACKET
+
+# tflags net
+TVD_SPACE_ENCODED
 
 # tflags net
 TVD_SPACE_RATIO_MINFP
@@ -1787,7 +1802,7 @@ URI_WP_DIRINDEX
 # tflags net
 URI_WP_HACKED
 
-# tflags net
+# tflags publish
 URI_WP_HACKED_2
 
 # tflags publish
@@ -1858,9 +1873,6 @@ XPRIO
 
 # tflags publish
 XPRIO_SHORT_SUBJ
-
-# good enough
-XPRIO_URL_SHORTNER
 
 # good enough
 YOU_INHERIT
