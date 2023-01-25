@@ -245,7 +245,7 @@ BITCOIN_XPRIO
 # tflags publish
 BITCOIN_YOUR_INFO
 
-# tflags publish
+# tflags net
 BODY_URI_ONLY
 
 # tflags publish
@@ -283,9 +283,6 @@ CN_B2B_SPAMMER
 
 # tflags publish
 COMMENT_GIBBERISH
-
-# tflags net
-COMPENSATION
 
 # tflags publish
 CONTENT_AFTER_HTML
@@ -461,7 +458,7 @@ FORGED_SPF_HELO
 # tflags net
 FORM_FRAUD
 
-# tflags net
+# tflags publish
 FORM_FRAUD_3
 
 # tflags publish
@@ -526,9 +523,6 @@ FROM_LOCAL_NOVOWEL
 
 # good enough
 FROM_MISSP_EH_MATCH
-
-# tflags net
-FROM_MISSP_REPLYTO
 
 # tflags net
 FROM_MISSP_SPF_FAIL
@@ -713,6 +707,9 @@ HAS_X_NO_RELAY
 # tflags publish
 HAS_X_OUTGOING_SPAM_STAT
 
+# tflags net
+HDRS_LCASE
+
 # good enough
 HDRS_LCASE_IMGONLY
 
@@ -825,9 +822,6 @@ JH_SPAMMY_PATTERN01
 JH_SPAMMY_PATTERN02
 
 # tflags net
-KHOP_FAKE_EBAY
-
-# tflags net
 KHOP_HELO_FCRDNS
 
 # tflags publish
@@ -865,9 +859,6 @@ MALWARE_PASSWORD
 
 # tflags publish
 MALW_ATTACH
-
-# tflags net
-MANY_HDRS_LCASE
 
 # tflags publish
 MANY_SPAN_IN_TEXT
@@ -1036,6 +1027,9 @@ PDS_NAKED_TO_NUMERO
 
 # good enough
 PDS_NO_FULL_NAME_SPOOFED_URL
+
+# good enough
+PDS_PHPEXP_BOT
 
 # good enough
 PDS_PHP_EVAL
@@ -1388,14 +1382,8 @@ REPTO_419_FRAUD_YN
 # tflags publish
 REPTO_INFONUMSCOM
 
-# tflags publish
-SCC_BOGUS_CTE_1
-
 # good enough
 SCC_CANSPAM_1
-
-# tflags publish
-SCC_CTMPP
 
 # tflags publish
 SCC_ISEMM_LID_1
@@ -1432,9 +1420,6 @@ SHORTENER_SHORT_IMG
 
 # tflags publish
 SHORT_IMG_SUSP_NTLD
-
-# good enough
-SHORT_SHORTNER
 
 # tflags net
 SPF_FAIL
@@ -1500,9 +1485,6 @@ SUBJECT_IN_WELCOMELIST
 SUBJ_BRKN_WORDNUMS
 
 # tflags net
-SUBJ_UNNEEDED_HTML
-
-# tflags net
 SURBL_BLOCKED
 
 # good enough
@@ -1529,10 +1511,10 @@ TARINGANET_IMG_NOT_RCVD_TN
 # tflags publish
 TEQF_USR_IMAGE
 
-# tflags publish
+# tflags net
 TEQF_USR_MSGID_HEX
 
-# tflags publish
+# tflags net
 TEQF_USR_MSGID_MALF
 
 # tflags publish
@@ -1565,9 +1547,6 @@ TO_NO_BRKTS_HTML_IMG
 # tflags publish
 TO_NO_BRKTS_HTML_ONLY
 
-# tflags net
-TO_NO_BRKTS_MSFT
-
 # tflags publish
 TO_NO_BRKTS_NORDNS_HTML
 
@@ -1596,7 +1575,7 @@ TVD_PH_BODY_META
 TVD_RCVD_SPACE_BRACKET
 
 # tflags net
-TVD_SPACE_ENCODED
+TVD_SPACE_RATIO_MINFP
 
 # tflags net
 TVD_SUBJ_NUM_OBFU_MINFP
@@ -1793,7 +1772,7 @@ URI_WP_DIRINDEX
 # tflags net
 URI_WP_HACKED
 
-# tflags net
+# tflags publish
 URI_WP_HACKED_2
 
 # tflags publish
