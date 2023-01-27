@@ -185,7 +185,7 @@ BITCOIN_IMGUR
 # good enough
 BITCOIN_MALF_HTML
 
-# tflags publish
+# tflags net
 BITCOIN_MALWARE
 
 # tflags publish
@@ -455,10 +455,10 @@ FONT_INVIS_POSTEXTRAS
 # tflags net
 FORGED_SPF_HELO
 
-# tflags publish
+# tflags net
 FORM_FRAUD
 
-# tflags net
+# tflags publish
 FORM_FRAUD_3
 
 # tflags publish
@@ -707,6 +707,9 @@ HAS_X_NO_RELAY
 # tflags publish
 HAS_X_OUTGOING_SPAM_STAT
 
+# tflags net
+HDRS_LCASE
+
 # good enough
 HDRS_LCASE_IMGONLY
 
@@ -819,9 +822,6 @@ JH_SPAMMY_PATTERN01
 JH_SPAMMY_PATTERN02
 
 # tflags net
-KHOP_FAKE_EBAY
-
-# tflags net
 KHOP_HELO_FCRDNS
 
 # tflags publish
@@ -865,6 +865,9 @@ MANY_HDRS_LCASE
 
 # tflags publish
 MANY_SPAN_IN_TEXT
+
+# tflags net
+MAY_BE_FORGED
 
 # tflags publish
 MILLION_HUNDRED
@@ -1550,6 +1553,9 @@ TO_NO_BRKTS_HTML_IMG
 # tflags publish
 TO_NO_BRKTS_HTML_ONLY
 
+# tflags net
+TO_NO_BRKTS_MSFT
+
 # tflags publish
 TO_NO_BRKTS_NORDNS_HTML
 
@@ -1561,9 +1567,6 @@ TO_TOO_MANY_WFH_01
 
 # good enough
 TVD_ENHANCE
-
-# good enough
-TVD_GET_STOCK
 
 # good enough
 TVD_IP_HEX
@@ -1579,9 +1582,6 @@ TVD_RCVD_SPACE_BRACKET
 
 # tflags net
 TVD_SPACE_RATIO_MINFP
-
-# tflags net
-TVD_SUBJ_NUM_OBFU_MINFP
 
 # good enough
 TVD_VISIT_PHARMA
@@ -1745,7 +1745,7 @@ URI_MALWARE_SCMS
 # tflags userconf
 URI_NOVOWEL
 
-# tflags net
+# tflags publish
 URI_ONLY_MSGID_MALF
 
 # tflags publish
