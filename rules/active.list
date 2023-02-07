@@ -191,7 +191,7 @@ BITCOIN_IMGUR
 # good enough
 BITCOIN_MALF_HTML
 
-# tflags net
+# tflags publish
 BITCOIN_MALWARE
 
 # tflags publish
@@ -464,7 +464,7 @@ FORGED_SPF_HELO
 # tflags publish
 FORM_FRAUD
 
-# tflags net
+# tflags publish
 FORM_FRAUD_3
 
 # tflags publish
@@ -529,9 +529,6 @@ FROM_LOCAL_NOVOWEL
 
 # good enough
 FROM_MISSP_EH_MATCH
-
-# tflags net
-FROM_MISSP_REPLYTO
 
 # tflags net
 FROM_MISSP_SPF_FAIL
@@ -662,6 +659,9 @@ GB_GOOGLE_OBFUR
 # tflags net
 GB_HASHBL_BTC
 
+# tflags publish
+GB_STORAGE_GOOGLE_EMAIL
+
 # good enough
 GB_URI_FLEEK_STO_HTM
 
@@ -715,9 +715,6 @@ HAS_X_NO_RELAY
 
 # tflags publish
 HAS_X_OUTGOING_SPAM_STAT
-
-# tflags net
-HDRS_LCASE
 
 # good enough
 HDRS_LCASE_IMGONLY
@@ -826,9 +823,6 @@ JH_SPAMMY_PATTERN01
 
 # tflags publish
 JH_SPAMMY_PATTERN02
-
-# tflags net
-KHOP_FAKE_EBAY
 
 # tflags net
 KHOP_HELO_FCRDNS
@@ -1588,9 +1582,6 @@ TO_NO_BRKTS_PCNT
 
 # tflags publish
 TO_TOO_MANY_WFH_01
-
-# good enough
-TVD_ENHANCE
 
 # good enough
 TVD_IP_HEX
