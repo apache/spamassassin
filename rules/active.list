@@ -191,7 +191,7 @@ BITCOIN_IMGUR
 # good enough
 BITCOIN_MALF_HTML
 
-# tflags publish
+# tflags net
 BITCOIN_MALWARE
 
 # tflags publish
@@ -251,7 +251,7 @@ BITCOIN_XPRIO
 # tflags publish
 BITCOIN_YOUR_INFO
 
-# tflags publish
+# tflags net
 BODY_URI_ONLY
 
 # tflags publish
@@ -289,6 +289,9 @@ CN_B2B_SPAMMER
 
 # tflags publish
 COMMENT_GIBBERISH
+
+# tflags net
+COMPENSATION
 
 # tflags publish
 CONTENT_AFTER_HTML
@@ -425,6 +428,9 @@ ENV_AND_HDR_SPF_MATCH
 # tflags publish
 FACEBOOK_IMG_NOT_RCVD_FB
 
+# good enough
+FAKE_REPLY_C
+
 # tflags publish
 FBI_MONEY
 
@@ -464,7 +470,7 @@ FORGED_SPF_HELO
 # tflags publish
 FORM_FRAUD
 
-# tflags publish
+# tflags net
 FORM_FRAUD_3
 
 # tflags publish
@@ -638,6 +644,9 @@ FUZZY_WALLET
 # tflags publish
 GAPPY_SALES_LEADS_FREEM
 
+# good enough
+GB_BITCOIN_CP
+
 # tflags publish
 GB_CUSTOM_HTM_URI
 
@@ -716,6 +725,9 @@ HAS_X_NO_RELAY
 # tflags publish
 HAS_X_OUTGOING_SPAM_STAT
 
+# tflags net
+HDRS_LCASE
+
 # good enough
 HDRS_LCASE_IMGONLY
 
@@ -766,9 +778,6 @@ HK_RCVD_IP_MULTICAST
 
 # tflags publish
 HK_SCAM
-
-# good enough
-HK_WIN
 
 # tflags publish
 HOSTED_IMG_DIRECT_MX
@@ -865,6 +874,9 @@ MALWARE_PASSWORD
 
 # tflags publish
 MALW_ATTACH
+
+# tflags net
+MANY_HDRS_LCASE
 
 # tflags publish
 MANY_SPAN_IN_TEXT
@@ -1521,6 +1533,9 @@ SUBJ_ATTENTION
 SUBJ_BRKN_WORDNUMS
 
 # tflags net
+SUBJ_UNNEEDED_HTML
+
+# tflags net
 SURBL_BLOCKED
 
 # good enough
@@ -1535,13 +1550,13 @@ TAGSTAT_IMG_NOT_RCVD_TGST
 # tflags publish
 TARINGANET_IMG_NOT_RCVD_TN
 
-# tflags publish
+# tflags net
 TEQF_USR_IMAGE
 
-# tflags publish
+# tflags net
 TEQF_USR_MSGID_HEX
 
-# tflags publish
+# tflags net
 TEQF_USR_MSGID_MALF
 
 # tflags publish
@@ -1588,6 +1603,15 @@ TVD_IP_HEX
 
 # good enough
 TVD_IP_OCT
+
+# tflags net
+TVD_SPACE_ENCODED
+
+# tflags net
+TVD_SPACE_RATIO_MINFP
+
+# tflags net
+TVD_SUBJ_NUM_OBFU_MINFP
 
 # good enough
 TVD_VISIT_PHARMA
@@ -1778,7 +1802,7 @@ URI_WPADMIN
 # tflags publish
 URI_WP_DIRINDEX
 
-# tflags publish
+# tflags net
 URI_WP_HACKED
 
 # tflags publish
