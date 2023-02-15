@@ -191,7 +191,7 @@ BITCOIN_IMGUR
 # good enough
 BITCOIN_MALF_HTML
 
-# tflags publish
+# tflags net
 BITCOIN_MALWARE
 
 # tflags publish
@@ -251,7 +251,7 @@ BITCOIN_XPRIO
 # tflags publish
 BITCOIN_YOUR_INFO
 
-# tflags publish
+# tflags net
 BODY_URI_ONLY
 
 # tflags publish
@@ -289,6 +289,9 @@ CN_B2B_SPAMMER
 
 # tflags publish
 COMMENT_GIBBERISH
+
+# tflags net
+COMPENSATION
 
 # tflags publish
 CONTENT_AFTER_HTML
@@ -464,10 +467,10 @@ FONT_INVIS_POSTEXTRAS
 # tflags net
 FORGED_SPF_HELO
 
-# tflags publish
+# tflags net
 FORM_FRAUD
 
-# tflags publish
+# tflags net
 FORM_FRAUD_3
 
 # tflags publish
@@ -535,6 +538,9 @@ FROM_MISSP_DYNIP
 
 # good enough
 FROM_MISSP_EH_MATCH
+
+# tflags net
+FROM_MISSP_REPLYTO
 
 # tflags net
 FROM_MISSP_SPF_FAIL
@@ -728,6 +734,9 @@ HAS_X_NO_RELAY
 # tflags publish
 HAS_X_OUTGOING_SPAM_STAT
 
+# tflags net
+HDRS_LCASE
+
 # good enough
 HDRS_LCASE_IMGONLY
 
@@ -748,6 +757,9 @@ HEAD_LONG
 
 # good enough
 HELO_LOCALHOST
+
+# good enough
+HELO_MISC_IP
 
 # tflags publish
 HELO_NO_DOMAIN
@@ -778,6 +790,9 @@ HK_RCVD_IP_MULTICAST
 
 # tflags publish
 HK_SCAM
+
+# good enough
+HK_WIN
 
 # tflags publish
 HOSTED_IMG_DIRECT_MX
@@ -812,7 +827,7 @@ HTML_OFF_PAGE
 # tflags publish
 HTML_SHRT_CMNT_OBFU_MANY
 
-# tflags publish
+# tflags net
 HTML_SINGLET_MANY
 
 # good enough
@@ -835,6 +850,9 @@ JH_SPAMMY_PATTERN01
 
 # tflags publish
 JH_SPAMMY_PATTERN02
+
+# tflags net
+KHOP_FAKE_EBAY
 
 # tflags net
 KHOP_HELO_FCRDNS
@@ -881,8 +899,14 @@ MALWARE_PASSWORD
 # tflags publish
 MALW_ATTACH
 
+# tflags net
+MANY_HDRS_LCASE
+
 # tflags publish
 MANY_SPAN_IN_TEXT
+
+# tflags net
+MAY_BE_FORGED
 
 # tflags publish
 MILLION_HUNDRED
@@ -1050,9 +1074,6 @@ PDS_BTC_NTLD
 PDS_DBL_URL_TNB_RUNON
 
 # tflags net
-PDS_FROM_2_EMAILS
-
-# tflags net
 PDS_HELO_SPF_FAIL
 
 # good enough
@@ -1060,9 +1081,6 @@ PDS_NAKED_TO_NUMERO
 
 # good enough
 PDS_NO_FULL_NAME_SPOOFED_URL
-
-# good enough
-PDS_PHPEXP_BOT
 
 # good enough
 PDS_PHP_EVAL
@@ -1421,9 +1439,6 @@ RISK_FREE
 # tflags publish
 SCC_BOGUS_CTE_1
 
-# good enough
-SCC_CANSPAM_1
-
 # tflags publish
 SCC_CTMPP
 
@@ -1432,9 +1447,6 @@ SCC_ISEMM_LID_1
 
 # tflags publish
 SCC_ISEMM_LID_1B
-
-# good enough
-SCC_SPAMMER_ADDR_1
 
 # good enough
 SCC_SPAMMER_ADDR_2
@@ -1526,9 +1538,6 @@ STOCK_TIP
 # good enough
 STOX_BOUND_090909_B
 
-# good enough
-STY_INVIS_DIRECT
-
 # tflags userconf
 SUBJECT_IN_BLOCKLIST
 
@@ -1540,6 +1549,9 @@ SUBJ_ATTENTION
 
 # tflags net
 SUBJ_BRKN_WORDNUMS
+
+# tflags net
+SUBJ_UNNEEDED_HTML
 
 # tflags net
 SURBL_BLOCKED
@@ -1559,13 +1571,13 @@ TAGSTAT_IMG_NOT_RCVD_TGST
 # tflags publish
 TARINGANET_IMG_NOT_RCVD_TN
 
-# tflags publish
+# tflags net
 TEQF_USR_IMAGE
 
 # tflags publish
 TEQF_USR_MSGID_HEX
 
-# tflags publish
+# tflags net
 TEQF_USR_MSGID_MALF
 
 # tflags publish
@@ -1608,16 +1620,16 @@ TO_NO_BRKTS_PCNT
 TO_TOO_MANY_WFH_01
 
 # good enough
-TVD_IP_HEX
-
-# good enough
-TVD_IP_OCT
-
-# good enough
 TVD_PH_BODY_ACCOUNTS_PRE
 
-# good enough
-TVD_VISIT_PHARMA
+# tflags net
+TVD_SPACE_ENCODED
+
+# tflags net
+TVD_SPACE_RATIO_MINFP
+
+# tflags net
+TVD_SUBJ_NUM_OBFU_MINFP
 
 # tflags publish
 TW_GIBBERISH_MANY
@@ -1778,7 +1790,7 @@ URI_MALWARE_SCMS
 # tflags userconf
 URI_NOVOWEL
 
-# tflags publish
+# tflags net
 URI_ONLY_MSGID_MALF
 
 # tflags publish
