@@ -1,5 +1,45 @@
-# Last update: 5/19/2016-axb
+# Last update: 2/16/2023-axb
 # Set headers which may provide inappropriate AV/filter cues to the Bayesian classifier
+
+bayes_ignore_header ARC-Authentication-Results
+bayes_ignore_header ARC-Message-Signature
+bayes_ignore_header ARC-Seal
+bayes_ignore_header Authentication-Results
+bayes_ignore_header Autocrypt
+bayes_ignore_header IronPort-SDR
+bayes_ignore_header suggested_attachment_session_id
+bayes_ignore_header X-Brightmail-Tracker
+bayes_ignore_header X-Exchange-Antispam-Report-CFA-Test
+bayes_ignore_header X-Forefront-Antispam-Report
+bayes_ignore_header X-Forefront-Antispam-Report-Untrusted
+bayes_ignore_header X-Gm-Message-State
+bayes_ignore_header X-Google-DKIM-Signature
+bayes_ignore_header x-microsoft-antispam
+bayes_ignore_header X-Microsoft-Antispam-Message-Info
+bayes_ignore_header X-Microsoft-Antispam-Message-Info-Original
+bayes_ignore_header X-Microsoft-Antispam-Untrusted
+bayes_ignore_header X-Microsoft-Exchange-Diagnostics
+bayes_ignore_header x-ms-exchange-antispam-messagedata
+bayes_ignore_header x-ms-exchange-antispam-messagedata-0
+bayes_ignore_header x-ms-exchange-crosstenant-id
+bayes_ignore_header x-ms-exchange-crosstenant-network-message-id
+bayes_ignore_header x-ms-exchange-crosstenant-rms-persistedconsumerorg
+bayes_ignore_header X-MS-Exchange-CrossTenant-userprincipalname
+bayes_ignore_header x-ms-exchange-slblob-mailprops
+bayes_ignore_header x-ms-office365-filtering-correlation-id
+bayes_ignore_header X-MSFBL
+bayes_ignore_header X-Provags-ID
+bayes_ignore_header X-SG-EID
+bayes_ignore_header X-SG-ID
+bayes_ignore_header X-UI-Out-Filterresults
+bayes_ignore_header X-ClientProxiedBy
+bayes_ignore_header X-MS-Exchange-CrossTenant-FromEntityHeader
+bayes_ignore_header X-OriginatorOrg
+bayes_ignore_header X-MS-Exchange-CrossTenant-OriginalArrivalTime
+bayes_ignore_header X-MS-TrafficTypeDiagnostic
+bayes_ignore_header X-MS-Exchange-CrossTenant-AuthAs
+bayes_ignore_header X-MS-Exchange-Transport-CrossTenantHeadersStamped
+bayes_ignore_header X-MS-Exchange-CrossTenant-AuthSource
 bayes_ignore_header X-ACL-Warn
 bayes_ignore_header X-Alimail-AntiSpam
 bayes_ignore_header X-Amavis-Modified
