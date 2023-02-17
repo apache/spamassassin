@@ -191,7 +191,7 @@ BITCOIN_IMGUR
 # good enough
 BITCOIN_MALF_HTML
 
-# tflags net
+# tflags publish
 BITCOIN_MALWARE
 
 # tflags publish
@@ -251,7 +251,7 @@ BITCOIN_XPRIO
 # tflags publish
 BITCOIN_YOUR_INFO
 
-# tflags net
+# tflags publish
 BODY_URI_ONLY
 
 # tflags publish
@@ -289,6 +289,9 @@ CN_B2B_SPAMMER
 
 # tflags publish
 COMMENT_GIBBERISH
+
+# tflags net
+COMPENSATION
 
 # tflags publish
 CONTENT_AFTER_HTML
@@ -537,16 +540,10 @@ FROM_MISSP_DYNIP
 FROM_MISSP_EH_MATCH
 
 # tflags net
-FROM_MISSP_REPLYTO
-
-# tflags net
 FROM_MISSP_SPF_FAIL
 
 # good enough
 FROM_MISSP_TO_UNDISC
-
-# good enough
-FROM_MULTI_NORDNS
 
 # tflags net
 FROM_NEWDOM_BTC
@@ -821,7 +818,7 @@ HTML_OFF_PAGE
 # tflags publish
 HTML_SHRT_CMNT_OBFU_MANY
 
-# tflags net
+# tflags publish
 HTML_SINGLET_MANY
 
 # good enough
@@ -890,11 +887,11 @@ MALWARE_PASSWORD
 # tflags publish
 MALW_ATTACH
 
+# tflags net
+MANY_HDRS_LCASE
+
 # tflags publish
 MANY_SPAN_IN_TEXT
-
-# tflags net
-MAY_BE_FORGED
 
 # tflags publish
 MILLION_HUNDRED
@@ -1060,9 +1057,6 @@ PDS_BTC_NTLD
 
 # good enough
 PDS_DBL_URL_TNB_RUNON
-
-# tflags net
-PDS_FROM_2_EMAILS
 
 # tflags net
 PDS_HELO_SPF_FAIL
@@ -1542,13 +1536,7 @@ SUBJ_ATTENTION
 SUBJ_BRKN_WORDNUMS
 
 # tflags net
-SUBJ_UNNEEDED_HTML
-
-# tflags net
 SURBL_BLOCKED
-
-# good enough
-SUSP_UTF8_WORD_MANY
 
 # good enough
 SUSP_UTF8_WORD_SUBJ
@@ -1616,11 +1604,11 @@ TO_TOO_MANY_WFH_01
 # good enough
 TVD_PH_BODY_ACCOUNTS_PRE
 
-# tflags net
-TVD_SPACE_ENCODED
+# good enough
+TVD_SUBJ_APPR_LOAN
 
 # tflags net
-TVD_SPACE_RATIO_MINFP
+TVD_SUBJ_NUM_OBFU_MINFP
 
 # tflags publish
 TW_GIBBERISH_MANY
@@ -1781,7 +1769,7 @@ URI_MALWARE_SCMS
 # tflags userconf
 URI_NOVOWEL
 
-# tflags publish
+# tflags net
 URI_ONLY_MSGID_MALF
 
 # tflags publish
@@ -1808,7 +1796,7 @@ URI_WPADMIN
 # tflags publish
 URI_WP_DIRINDEX
 
-# tflags net
+# tflags publish
 URI_WP_HACKED
 
 # tflags publish
