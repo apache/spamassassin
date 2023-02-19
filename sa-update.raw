@@ -2056,6 +2056,19 @@ configuration, based on channels.  The default channel is
 I<updates.spamassassin.org>, which has updated rules since the previous
 release.
 
+NOTE: channel names are domain names, but DO NOT typically have any DNS
+records other than (maybe) NS records. There is a tree of records below that
+name which denote the SpamAssassin version and resolve that name to the 
+version number of the latest rules, e.g. to find the latest update
+version number for SpamAssassin v4.0.0:
+
+  $ host -t txt 0.0.4.updates.spamassassin.org 
+  0.0.4.updates.spamassassin.org is an alias for 3.3.3.updates.spamassassin.org.
+  3.3.3.updates.spamassassin.org descriptive text "1907730"
+
+That also illuminates the fact that the current ruleset is supposed to be 
+backward-compatible to v3.3.3. 
+
 Update archives are verified using GPG signatures by default.  If GPG is
 disabled (not recommended), file integrity is checked with SHA512 or SHA256
 checksums.
