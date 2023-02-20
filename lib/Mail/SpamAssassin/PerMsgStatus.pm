@@ -332,8 +332,8 @@ sub new {
   # in some circumstances
   my $tag_data_ref = $self->{tag_data};
   foreach (qw(SUMMARY REPORT SUBJPREFIX RBL)) { $tag_data_ref->{$_} = '' }
-  foreach (qw(AWL AWLMEAN AWLCOUNT AWLPRESCORE
-              DCCB DCCR DCCREP PYZOR DKIMIDENTITY DKIMDOMAIN DKIMSELECTOR
+  foreach (qw(ASN ASNCIDR AWL AWLMEAN AWLCOUNT AWLPRESCORE
+              DCCB DCCR EXTRACTTEXTFLAGS DCCREP PYZOR DKIMIDENTITY DKIMDOMAIN DKIMSELECTOR
               BAYESTC BAYESTCLEARNED BAYESTCSPAMMY BAYESTCHAMMY
               HAMMYTOKENS SPAMMYTOKENS TOKENSUMMARY)) {
     $tag_data_ref->{$_} = undef;  # exist, but undefined
