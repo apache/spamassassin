@@ -251,7 +251,7 @@ BITCOIN_XPRIO
 # tflags publish
 BITCOIN_YOUR_INFO
 
-# tflags net
+# tflags publish
 BODY_URI_ONLY
 
 # tflags publish
@@ -289,9 +289,6 @@ CN_B2B_SPAMMER
 
 # tflags publish
 COMMENT_GIBBERISH
-
-# tflags net
-COMPENSATION
 
 # tflags publish
 CONTENT_AFTER_HTML
@@ -464,7 +461,7 @@ FORGED_SPF_HELO
 # tflags publish
 FORM_FRAUD
 
-# tflags publish
+# tflags net
 FORM_FRAUD_3
 
 # tflags publish
@@ -487,9 +484,6 @@ FREEM_FRNUM_UNICD_EMPTY
 
 # tflags publish
 FRNAME_IN_MSG_XPRIO_NO_SUB
-
-# good enough
-FROM_2_EMAILS_SHORT
 
 # tflags publish
 FROM_ADDR_WS
@@ -529,9 +523,6 @@ FROM_LOCAL_NOVOWEL
 
 # good enough
 FROM_MISSP_EH_MATCH
-
-# tflags net
-FROM_MISSP_REPLYTO
 
 # tflags net
 FROM_MISSP_SPF_FAIL
@@ -722,9 +713,6 @@ HAS_X_NO_RELAY
 # tflags publish
 HAS_X_OUTGOING_SPAM_STAT
 
-# tflags net
-HDRS_LCASE
-
 # good enough
 HDRS_LCASE_IMGONLY
 
@@ -815,7 +803,7 @@ HTML_OFF_PAGE
 # tflags publish
 HTML_SHRT_CMNT_OBFU_MANY
 
-# tflags net
+# tflags publish
 HTML_SINGLET_MANY
 
 # good enough
@@ -838,9 +826,6 @@ JH_SPAMMY_PATTERN01
 
 # tflags publish
 JH_SPAMMY_PATTERN02
-
-# tflags net
-KHOP_FAKE_EBAY
 
 # tflags net
 KHOP_HELO_FCRDNS
@@ -883,6 +868,9 @@ MALWARE_PASSWORD
 
 # tflags publish
 MALW_ATTACH
+
+# tflags net
+MANY_HDRS_LCASE
 
 # tflags publish
 MANY_SPAN_IN_TEXT
@@ -955,9 +943,6 @@ MONEY_FRAUD_8
 
 # tflags publish
 MONEY_FREEMAIL_REPTO
-
-# good enough
-MONEY_FROM_41
 
 # tflags publish
 MSGID_DOLLARS_URI_IMG
@@ -1370,6 +1355,9 @@ RDNS_NUM_TLD_ATCHNX
 # tflags publish
 RDNS_NUM_TLD_XM
 
+# good enough
+REPLYTO_WITHOUT_TO_CC
+
 # tflags publish
 REPTO_419_FRAUD
 
@@ -1530,9 +1518,6 @@ SUBJ_ATTENTION
 SUBJ_BRKN_WORDNUMS
 
 # tflags net
-SUBJ_UNNEEDED_HTML
-
-# tflags net
 SURBL_BLOCKED
 
 # good enough
@@ -1586,9 +1571,6 @@ TO_NO_BRKTS_HTML_IMG
 # tflags publish
 TO_NO_BRKTS_HTML_ONLY
 
-# tflags net
-TO_NO_BRKTS_MSFT
-
 # tflags publish
 TO_NO_BRKTS_NORDNS_HTML
 
@@ -1599,19 +1581,13 @@ TO_NO_BRKTS_PCNT
 TO_TOO_MANY_WFH_01
 
 # good enough
+TVD_PH_7
+
+# good enough
 TVD_PH_BODY_ACCOUNTS_PRE
-
-# tflags net
-TVD_SPACE_ENCODED
-
-# tflags net
-TVD_SPACE_RATIO_MINFP
 
 # good enough
 TVD_SUBJ_APPR_LOAN
-
-# tflags net
-TVD_SUBJ_NUM_OBFU_MINFP
 
 # tflags publish
 TW_GIBBERISH_MANY
@@ -1772,7 +1748,7 @@ URI_MALWARE_SCMS
 # tflags userconf
 URI_NOVOWEL
 
-# tflags net
+# tflags publish
 URI_ONLY_MSGID_MALF
 
 # tflags publish
