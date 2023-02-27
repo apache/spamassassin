@@ -63,7 +63,7 @@ if (TESSERACT) {
 if (CAT) {
    tstprefs("
      extracttext_external  cat  ".CAT." {}
-     extracttext_use       cat  .txt .html .shtml .xhtml octet/stream
+     extracttext_use       cat  .txt
      extracttext_timeout 30 1
    ");
    %anti_patterns = ();
