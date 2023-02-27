@@ -203,9 +203,8 @@ sub sa_t_init {
   (-f "t/test_dir") && chdir("t");        # run from ..
   -f "test_dir"  or die "FATAL: not in test directory?\n";
 
-  unless (-d "log") {
-    mkdir ("log", 0755) or die ("Error creating log dir: $!");
-  }
+  mkdir ("log", 0755);
+  -d "log" or die "FATAL: failed to create log dir\n";
   chmod (0755, "log"); # set in case log already exists with wrong permissions
 
   if (!$RUNNING_ON_WINDOWS) {
