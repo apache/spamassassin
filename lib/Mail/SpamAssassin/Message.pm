@@ -759,6 +759,7 @@ sub finish {
     delete $part->{'invisible_rendered'};
     delete $part->{'type'};
     delete $part->{'rendered_type'};
+    delete $part->{'effective_type'};
 
     # if there are children nodes, add them to the queue of nodes to clean up
     if (exists $part->{'body_parts'}) {
@@ -1350,11 +1351,13 @@ sub get_decoded_body_text_array {
   my $scansize = $self->{rawbody_part_scan_size};
 
   # Find all parts which are leaves
-  my @parts = $self->find_parts(qr/^(?:text|message)\b/,1);
+  my @parts = $self->find_parts(qr/./,1);
   return $self->{text_decoded} unless @parts;
 
   # Go through each part
   for(my $pt = 0 ; $pt <= $#parts ; $pt++ ) {
+    # skip non-text parts (Bug 6439)
+    next unless $parts[$pt]->effective_type() =~ /^(?:text|message)\b/;
     # bug 4843: skip text/calendar parts since they're usually an attachment
     # and not displayed
     next if ($parts[$pt]->{'type'} eq 'text/calendar');
