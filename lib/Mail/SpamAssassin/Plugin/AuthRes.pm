@@ -52,11 +52,13 @@ our @ISA = qw(Mail::SpamAssassin::Plugin);
 # some others not in that list:
 #   dkim-atps=neutral
 my %method_result = (
+  'arc' => {'fail'=>1,'none'=>1,'pass'=>1},
   'auth' => {'fail'=>1,'none'=>1,'pass'=>1,'permerror'=>1,'temperror'=>1},
   'dkim' => {'fail'=>1,'neutral'=>1,'none'=>1,'pass'=>1,'permerror'=>1,'policy'=>1,'temperror'=>1},
   'dkim-adsp' => {'discard'=>1,'fail'=>1,'none'=>1,'nxdomain'=>1,'pass'=>1,'permerror'=>1,'temperror'=>1,'unknown'=>1},
   'dkim-atps' => {'fail'=>1,'none'=>1,'pass'=>1,'permerror'=>1,'temperror'=>1,'neutral'=>1},
   'dmarc' => {'fail'=>1,'none'=>1,'pass'=>1,'permerror'=>1,'temperror'=>1},
+  'dnswl' => {'none'=>1,'pass'=>1,'permerror'=>1,'temperror'=>1},
   'domainkeys' => {'fail'=>1,'neutral'=>1,'none'=>1,'permerror'=>1,'policy'=>1,'pass'=>1,'temperror'=>1},
   'iprev' => {'fail'=>1,'pass'=>1,'permerror'=>1,'temperror'=>1},
   'rrvs' => {'fail'=>1,'none'=>1,'pass'=>1,'permerror'=>1,'temperror'=>1,'unknown'=>1},
@@ -66,11 +68,13 @@ my %method_result = (
   'vbr' => {'fail'=>1,'none'=>1,'pass'=>1,'permerror'=>1,'temperror'=>1},
 );
 my %method_ptype_prop = (
+  'arc' => {'smtp' => {'remote_ip'=>1}, 'header' => {'oldest_pass'=>1}},
   'auth' => {'smtp' => {'auth'=>1,'mailfrom'=>1}},
-  'dkim' => {'header' => {'d'=>1,'i'=>1,'b'=>1}},
+  'dkim' => {'header' => {'d'=>1,'i'=>1,'b'=>1,'a'=>1,'s'=>1}},
   'dkim-adsp' => {'header' => {'from'=>1}},
   'dkim-atps' => {'header' => {'from'=>1}},
-  'dmarc' => {'header' => {'from'=>1}},
+  'dmarc' => {'header' => {'from'=>1}, 'policy' => {'dmarc'=>1}},
+  'dnswl' => {'dns' => {'zone'=>1,'sec'=>1}, 'policy' => {'ip'=>1,'txt'=>1}},
   'domainkeys' => {'header' => {'d'=>1,'from'=>1,'sender'=>1}},
   'iprev' => {'policy' => {'iprev'=>1}},
   'rrvs' => {'smtp' => {'rcptto'=>1}},
@@ -272,6 +276,12 @@ For checking result of methods, $pms-E<gt>{authres_result} is available:
 
 Can be used to check results.
 
+Reference of valid result methods and values:
+C<https://www.iana.org/assignments/email-auth/email-auth.xhtml>
+
+Additionally the result value of 'missing' can be used to check if there is
+no result at all.
+
   ifplugin Mail::SpamAssassin::Plugin::AuthRes
   ifplugin !(Mail::SpamAssassin::Plugin::SPF)
     header  SPF_PASS      eval:check_authres_result('spf', 'pass')
@@ -299,7 +309,8 @@ sub check_authres_result {
     return !defined($result) ? 1 : 0;
   }
 
-  return ($wanted_result eq $result);
+  return 0 unless defined $result;
+  return ($wanted_result eq $result) ? 1 : 0;
 }
 
 sub parsed_metadata {
