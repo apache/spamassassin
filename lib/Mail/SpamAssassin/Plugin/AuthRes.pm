@@ -467,7 +467,7 @@ sub parse_authres {
       my ($ptype, $property, $value);
 
       # ptype
-      if (!/\G(\w+)/gcs) {
+      if (!/\G([\w-]+)/gcs) {
         die("invalid ptype: ".substr($_,pos())."\n");
       }
       $ptype = lc($1);
@@ -483,7 +483,7 @@ sub parse_authres {
       skip_cfws();
 
       # property
-      if (!/\G(\w+)/gcs) {
+      if (!/\G([\w-]+)/gcs) {
         die("invalid property\n");
       }
       $property = lc($1);
