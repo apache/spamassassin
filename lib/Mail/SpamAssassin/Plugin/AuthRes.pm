@@ -68,7 +68,7 @@ my %method_result = (
   'vbr' => {'fail'=>1,'none'=>1,'pass'=>1,'permerror'=>1,'temperror'=>1},
 );
 my %method_ptype_prop = (
-  'arc' => {'smtp' => {'remote_ip'=>1}, 'header' => {'oldest_pass'=>1}},
+  'arc' => {'smtp' => {'remote-ip'=>1}, 'header' => {'oldest-pass'=>1}},
   'auth' => {'smtp' => {'auth'=>1,'mailfrom'=>1}},
   'dkim' => {'header' => {'d'=>1,'i'=>1,'b'=>1,'a'=>1,'s'=>1}},
   'dkim-adsp' => {'header' => {'from'=>1}},
