@@ -251,7 +251,10 @@ BITCOIN_XPRIO
 # tflags publish
 BITCOIN_YOUR_INFO
 
-# tflags net
+# good enough
+BODY_SINGLE_URI
+
+# tflags publish
 BODY_URI_ONLY
 
 # tflags publish
@@ -289,6 +292,9 @@ CN_B2B_SPAMMER
 
 # tflags publish
 COMMENT_GIBBERISH
+
+# tflags net
+COMPENSATION
 
 # tflags publish
 CONTENT_AFTER_HTML
@@ -458,7 +464,7 @@ FONT_INVIS_POSTEXTRAS
 # tflags net
 FORGED_SPF_HELO
 
-# tflags publish
+# tflags net
 FORM_FRAUD
 
 # tflags publish
@@ -526,6 +532,9 @@ FROM_MISSPACED
 
 # good enough
 FROM_MISSP_EH_MATCH
+
+# good enough
+FROM_MISSP_FREEMAIL
 
 # good enough
 FROM_MISSP_MSFT
@@ -824,7 +833,7 @@ HTML_OFF_PAGE
 # tflags publish
 HTML_SHRT_CMNT_OBFU_MANY
 
-# tflags net
+# tflags publish
 HTML_SINGLET_MANY
 
 # good enough
@@ -847,6 +856,9 @@ JH_SPAMMY_PATTERN01
 
 # tflags publish
 JH_SPAMMY_PATTERN02
+
+# tflags net
+KHOP_FAKE_EBAY
 
 # tflags net
 KHOP_HELO_FCRDNS
@@ -875,6 +887,9 @@ LOTS_OF_MONEY
 # good enough
 LOTTO_AGENT
 
+# good enough
+LOTTO_DEPT
+
 # tflags publish
 LUCRATIVE
 
@@ -890,11 +905,11 @@ MALWARE_PASSWORD
 # tflags publish
 MALW_ATTACH
 
+# tflags net
+MANY_HDRS_LCASE
+
 # tflags publish
 MANY_SPAN_IN_TEXT
-
-# tflags net
-MAY_BE_FORGED
 
 # tflags publish
 MILLION_HUNDRED
@@ -946,6 +961,9 @@ MONERO_PAY_ME
 
 # good enough
 MONEY_ATM_CARD
+
+# good enough
+MONEY_BARRISTER
 
 # good enough
 MONEY_FORM
@@ -1466,9 +1484,6 @@ SENDGRID_REDIR_PHISH
 # tflags publish
 SEO_SUSP_NTLD
 
-# good enough
-SERGIO_SUBJECT_VIAGRA01
-
 # tflags publish
 SHOPIFY_IMG_NOT_RCVD_SFY
 
@@ -1610,7 +1625,7 @@ TO_NO_BRKTS_HTML_IMG
 # tflags publish
 TO_NO_BRKTS_HTML_ONLY
 
-# tflags net
+# good enough
 TO_NO_BRKTS_MSFT
 
 # tflags publish
@@ -1628,14 +1643,8 @@ TVD_PH_7
 # good enough
 TVD_PH_BODY_ACCOUNTS_PRE
 
-# tflags net
-TVD_SPACE_ENCODED
-
 # good enough
 TVD_SUBJ_APPR_LOAN
-
-# tflags net
-TVD_SUBJ_NUM_OBFU_MINFP
 
 # tflags publish
 TW_GIBBERISH_MANY
@@ -1823,7 +1832,7 @@ URI_WPADMIN
 # tflags publish
 URI_WP_DIRINDEX
 
-# tflags net
+# tflags publish
 URI_WP_HACKED
 
 # tflags publish
