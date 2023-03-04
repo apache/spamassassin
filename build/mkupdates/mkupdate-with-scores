@@ -111,8 +111,9 @@ test_version() {
   make install
 
   ./sa-update --install $TMPDIR/${REVISION}.tar.gz 2>&1 || {
-    echo "FATAL: sa-update test failed for version $SA_VERSION (r$REVISION)"
-    exit $?
+    RV=$?
+    echo "FATAL: sa-update test failed for version $SA_VERSION (r$REVISION) [$RV]"
+    exit $RV
   }
 
   cd ..
@@ -186,7 +187,7 @@ make_rule_update_from_trunk() {
 copy_existing_update_for_reversion_testing() {
   cp "$UPDATEDIR/$REVERT_REVISION.tar.gz"* "$TMPDIR/" || {
     echo "Could not copy existing revision $REVERT_REVISION, to temporary testing directory, aborting!"
-    exit $EXIT
+    exit 1
   }
 }
 
