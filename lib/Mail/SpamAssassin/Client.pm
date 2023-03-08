@@ -594,7 +594,7 @@ sub _filter {
   if(defined $self->{max_size}) {
     $msg = substr($msg,0,$self->{max_size});
   }
-  $msgsize = length($msg.$EOL);
+  $msgsize = length($msg);
 
   print $remote "$command $PROTOVERSION$EOL";
   print $remote "Content-length: $msgsize$EOL";
