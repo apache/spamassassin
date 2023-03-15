@@ -486,29 +486,29 @@ describe       TINY_FLOAT         Has small-font floating HTML - text obfuscatio
 
 
 # endless requests on the users list...
-header         __TO_EQ_FROM_1       ALL =~ /\nFrom:\s+(?:[^\n<]{0,80}<)?([^\n\s>]+)>?\n(?:[^\n]{1,100}\n)*To:\s+(?:[^\n]{0,80}<)?\1[>,\s\n]/ism
-header         __TO_EQ_FROM_2       ALL =~ /\nTo:\s+(?:[^\n<]{0,80}<)?([^\n\s>]+)>?\n(?:[^\n]{1,100}\n)*From:\s+(?:[^\n]{0,80}<)?\1[>,\s\n]/ism
+header         __TO_EQ_FROM_1       ALL =~ /\nFrom:\s+(?:[^\n<]{0,80}<)?([^\n\s>]+)>?\n+(?:[^\n]{1,100}\n+)*To:\s+(?:[^\n]{0,80}<)?\1[>,\s\n]/ism
+header         __TO_EQ_FROM_2       ALL =~ /\nTo:\s+(?:[^\n<]{0,80}<)?([^\n\s>]+)>?\n+(?:[^\n]{1,100}\n+)*From:\s+(?:[^\n]{0,80}<)?\1[>,\s\n]/ism
 meta           __TO_EQ_FROM         (__TO_EQ_FROM_1 || __TO_EQ_FROM_2)
 describe       __TO_EQ_FROM         To: same as From:
 #tflags         __TO_EQ_FROM         publish
 
 # Suggested by Hans-Werner Friedemann on users list 09/30/2010
-header         __SUBJ_HAS_FROM_1    ALL =~ /\nFrom:\s+(?:[^\n<]{0,80}<)?([^\n\s>]+)>?\n(?:[^\n]{1,100}\n)*Subject:\s+[^\n]{0,100}\1[>,:\s\n]/ism
+header         __SUBJ_HAS_FROM_1    ALL =~ /\nFrom:\s+(?:[^\n<]{0,80}<)?([^\n\s>]+)>?\n+(?:[^\n]{1,100}\n+)*Subject:\s+[^\n]{0,100}\1[>,:\s\n]/ism
 meta           FROM_IN_TO_AND_SUBJ  (__TO_EQ_FROM && __SUBJ_HAS_FROM_1) && !__HAS_LIST_ID 
 describe       FROM_IN_TO_AND_SUBJ  From address is in To and Subject
 tflags         FROM_IN_TO_AND_SUBJ  publish
 
-header         __SUBJ_HAS_TO_1      ALL =~ /\nTo:\s+(?:[^\n<]{0,80}<)?([^\n\s>,]+)>?\n(?:[^\n]{1,200}\n)*Subject:\s+[^\n]{0,100}\1[^a-z0-9]/ism
-header         __SUBJ_HAS_TO_2      ALL =~ /\nReceived:[^\n]{0,200} for <?([^\n\s>;]+)>?;(?:[^\n]+\n)*Subject:\s+[^\n]{0,100}\1[^a-z0-9]/ism
-header         __SUBJ_HAS_TO_3      ALL =~ /\nSubject:(?=[^\n]{0,200}@)[^\n]{0,200}([a-z][a-z0-9_.]{3,80}@(?:[a-z0-9_]{1,80}\.){1,4}[a-z]{2,30})(?:[^\n]+\n)*To:\s+[^\n]{0,100}\1[^a-z0-9.]/ism
+header         __SUBJ_HAS_TO_1      ALL =~ /\nTo:\s+(?:[^\n<]{0,80}<)?([^\n\s>,]+)>?\n+(?:[^\n]{1,200}\n+)*Subject:\s+[^\n]{0,100}\1[^a-z0-9]/ism
+header         __SUBJ_HAS_TO_2      ALL =~ /\nReceived:[^\n]{0,200} for <?([^\n\s>;]+)>?;(?:[^\n]+\n+)*Subject:\s+[^\n]{0,100}\1[^a-z0-9]/ism
+header         __SUBJ_HAS_TO_3      ALL =~ /\nSubject:(?=[^\n]{0,200}@)[^\n]{0,200}([a-z][a-z0-9_.]{3,80}@(?:[a-z0-9_]{1,80}\.){1,4}[a-z]{2,30})(?:[^\n]+\n+)*To:\s+[^\n]{0,100}\1[^a-z0-9.]/ism
 meta           __TO_IN_SUBJ         (__SUBJ_HAS_TO_1 || __SUBJ_HAS_TO_2 || __SUBJ_HAS_TO_3)
 meta           TO_IN_SUBJ           __TO_IN_SUBJ && !__VIA_ML && !MISSING_MIMEOLE && !__THREAD_INDEX_GOOD && !__FSL_RELAY_GOOGLE && !__LCL__ENV_AND_HDR_FROM_MATCH && !__HS_SUBJ_RE_FW
 describe       TO_IN_SUBJ           To address is in Subject
 tflags         TO_IN_SUBJ           publish
 score          TO_IN_SUBJ           0.1
 
-header         __SUBJ_HAS_TOUSR_1   ALL =~ /\nTo:\s+(?:[^\n<]{0,80}<)?([^@\n\s>,]+)@[^\n\s>;]+>?\n(?:[^\n]{1,200}\n)*Subject:\s+[^\n]{0,100}\1[^a-z0-9]/ism
-header         __SUBJ_HAS_TOUSR_2   ALL =~ /\nReceived:[^\n]{0,200} for <?([^@\n\s>;]+)@[^\n\s>;]+>?;(?:[^\n]+\n)*Subject:\s+[^\n]{0,100}\1[^a-z0-9]/ism
+header         __SUBJ_HAS_TOUSR_1   ALL =~ /\nTo:\s+(?:[^\n<]{0,80}<)?([^@\n\s>,]+)@[^\n\s>;]+>?\n+(?:[^\n]{1,200}\n+)*Subject:\s+[^\n]{0,100}\1[^a-z0-9]/ism
+header         __SUBJ_HAS_TOUSR_2   ALL =~ /\nReceived:[^\n]{0,200} for <?([^@\n\s>;]+)@[^\n\s>;]+>?;(?:[^\n]+\n+)*Subject:\s+[^\n]{0,100}\1[^a-z0-9]/ism
 meta           __TOUSR_IN_SUBJ      (__SUBJ_HAS_TOUSR_1 || __SUBJ_HAS_TOUSR_2) && !__TO_IN_SUBJ
 
 header         __SUBJ_HAS_ANY_EMAIL Subject =~ /\b[a-z][a-z0-9_.+]+@(?:[a-z][-a-z0-9]+\.)+[a-z]{2,8}\b/i
@@ -544,8 +544,8 @@ endif
 # Paul Stead on SA list 11/2014
 # ++ not liked by perl 5.8.x
 if can(Mail::SpamAssassin::Conf::perl_min_version_5010000)
-  header     __PDS_TO_EQ_FROM_NAME_1  ALL =~ /\nTo:\s+(?:[^\n<]{0,80}<)?([^\n\s>]+)>?\n(?:[^\n]{1,100}\n)*From:\W+(\1)([^\n\w<]++<)?((?!\1)[^\n">]++)>?\n/ism
-  header     __PDS_TO_EQ_FROM_NAME_2  ALL =~ /\nFrom:\W+"([\w+.-]+\@[\w.-]+\.\w\w+)(?:[^\n\w<]{0,80}<)?((?!\1)[^\n">]++)>?\n(?:[^\n]{1,100}\n)*To:\s+(?:[^\n<]{0,80}<)?(\1)>?/ism
+  header     __PDS_TO_EQ_FROM_NAME_1  ALL =~ /\nTo:\s+(?:[^\n<]{0,80}<)?([^\n\s>]+)>?\n+(?:[^\n]{1,100}\n+)*From:\W+(\1)([^\n\w<]++<)?((?!\1)[^\n">]++)>?\n/ism
+  header     __PDS_TO_EQ_FROM_NAME_2  ALL =~ /\nFrom:\W+"([\w+.-]+\@[\w.-]+\.\w\w+)(?:[^\n\w<]{0,80}<)?((?!\1)[^\n">]++)>?\n+(?:[^\n]{1,100}\n+)*To:\s+(?:[^\n<]{0,80}<)?(\1)>?/ism
 
   meta       PDS_TO_EQ_FROM_NAME      (__PDS_TO_EQ_FROM_NAME_1 || __PDS_TO_EQ_FROM_NAME_2) && !__HAS_SENDER 
   describe   PDS_TO_EQ_FROM_NAME      From: name same as To: address
@@ -572,8 +572,8 @@ header         __FROM_ALL_NUMS      From:addr =~ /^\d+@/
 header         __TO_ALL_NUMS        To:addr =~ /^\d+@/
 meta           __FM_TO_ALL_NUMS     __FROM_ALL_NUMS && __TO_ALL_NUMS
 
-header         __TO_EQ_FROM_DOM_1   ALL =~ /\nFrom:\s+[^\n@]{0,80}@([^\n\s>]+)>?\n(?:[^\n]{1,100}\n)*To:\s+[^\n]+@\1[>,\s\n]/ism
-header         __TO_EQ_FROM_DOM_2   ALL =~ /\nTo:\s+[^\n@]{0,80}@([^\n\s>]+)>?\n(?:[^\n]{1,100}\n)*From:\s+[^\n]+@\1[>,\s\n]/ism
+header         __TO_EQ_FROM_DOM_1   ALL =~ /\nFrom:\s+[^\n@]{0,80}@([^\n\s>]+)>?\n+(?:[^\n]{1,100}\n+)*To:\s+[^\n]+@\1[>,\s\n]/ism
+header         __TO_EQ_FROM_DOM_2   ALL =~ /\nTo:\s+[^\n@]{0,80}@([^\n\s>]+)>?\n+(?:[^\n]{1,100}\n+)*From:\s+[^\n]+@\1[>,\s\n]/ism
 meta           __TO_EQ_FROM_DOM     (__TO_EQ_FROM_DOM_1 || __TO_EQ_FROM_DOM_2)
 describe       __TO_EQ_FROM_DOM     To: domain same as From: domain
 
@@ -2415,7 +2415,7 @@ score     HAS_X_NO_RELAY                2.500	# limit
 tflags    HAS_X_NO_RELAY                publish
 
 
-header    __DUP_SUSP_HDR                ALL =~ /\n(X-No-Relay)\s*:[ 	][^\n]{1,100}\n\1\s*:[ 	]/ism
+header    __DUP_SUSP_HDR                ALL =~ /\n(X-No-Relay)\s*:[ \t][^\n]{1,100}\n+\1\s*:[ \t]/ism
 meta      DUP_SUSP_HDR                  __DUP_SUSP_HDR
 describe  DUP_SUSP_HDR                  Duplicate suspicious message headers
 score     DUP_SUSP_HDR                  2.500	# limit
@@ -2664,7 +2664,7 @@ score     HACKED_PHP_URI                2.000     # limit
 #meta      __PUNCT_ODD_SPACING_MANY      __PUNCT_ODD_SPACING > 2
 
 # poor S/O - how is this in ham?
-#header    XMAILER_MANY                  ALL =~ /\nX-Mailer:(?:[^\n]+\n)+X-Mailer:/ism
+#header    XMAILER_MANY                  ALL =~ /\nX-Mailer:(?:[^\n]+\n+)+X-Mailer:/ism
 #describe  XMAILER_MANY                  Has multiple X-Mailer: headers
 
 body      __RAW_TOKEN_BODY              /\#(?:(?:First|Last)Name|Email)\#/i
@@ -3923,7 +3923,7 @@ uri        GOOG_REDIR_DOCUSIGN         m;://www\.google\.com/url\?.*q=https?://w
 describe   GOOG_REDIR_DOCUSIGN         Indirect docusign link, probable phishing
 tflags     GOOG_REDIR_DOCUSIGN         publish
 
-header     __LUNSUB_BEFORE_SUBJDT      ALL =~ /^List-unsubscribe: (?:[^\n]+\n){1,40}^(?:Subject|Date): /ism
+header     __LUNSUB_BEFORE_SUBJDT      ALL =~ /^List-unsubscribe: (?:[^\n]+\n+){1,40}^(?:Subject|Date): /ism
 header     __LUNSUB_BRKT_MALF          List-Unsubscribe =~ /<[^>]*$/
 
 header     REPTO_SPOTTY                Reply-To:addr =~ /^(?:[a-z]{1,3}\.){4,}[a-z]+\d+\@/i

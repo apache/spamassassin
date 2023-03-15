@@ -240,7 +240,7 @@ tflags JM_I_FEEL_LUCKY  publish     # low hitrate, but always a good sign
 
 # some auto-discovered header rules
 header JM_0800_GMT      Received =~ / \+0800 \(GMT\)$/
-header JM_GMT_RCVD      ALL =~ /0 \(GMT\)\nReceived: by 192\.168\./s
+header JM_GMT_RCVD      ALL =~ /0 \(GMT\)\n+Received: by 192\.168\./s
 
 header JM_EXIM_462  Received =~ /with smtp \(Exim 4.62 \(FreeBSD\)\)/
 
@@ -315,7 +315,7 @@ header __MSNBC_THREAD_INDEX     ALL =~ /\nthread-index: /s
 header __MSNBC_NOT_EXCH         X-MimeOLE =~ /^Produced By Microsoft Exchange/
 meta MSNBC_THREAD_INDEX (__MSNBC_THREAD_INDEX && !__MSNBC_NOT_EXCH)
 
-header MSNBC_HDR_ORDER          ALL =~ /\nContent-Transfer-Encoding: 7bit\nX-Mailer: Microsoft CDO for Windows 2000\nContent-Class: urn:content-classes:message\nImportance: normal\nPriority: normal\nX-MimeOLE: Produced By Microsoft MimeOLE V6.00.3790.3119\n/s
+header MSNBC_HDR_ORDER          ALL =~ /\nContent-Transfer-Encoding: 7bit\n+X-Mailer: Microsoft CDO for Windows 2000\n+Content-Class: urn:content-classes:message\n+Importance: normal\n+Priority: normal\n+X-MimeOLE: Produced By Microsoft MimeOLE V6.00.3790.3119\n/s
 header MSNBC_MESSAGEGUID        exists:messageGUID
 
 body JM_HOODIA      /Hoodia has been showned on/

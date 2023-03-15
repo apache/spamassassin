@@ -411,7 +411,7 @@ describe FROM_LOCAL_DIGITS	From: localpart has long digit sequence
 
 header __TOCC_EXISTS		exists:ToCc
 
-header X_PRIORITY_CC		ALL =~ /^X-Priority:[^\n]{0,80}^Cc:/msi
+header X_PRIORITY_CC		ALL =~ /^X-Priority:.*?^Cc:/msi
 describe X_PRIORITY_CC		Cc: after X-Priority: (bulk email fingerprint)
 
 # catch non-RFC2047 compliant messages

@@ -2,7 +2,7 @@ meta     PDS_BAD_THREAD_QP_64 __PDS_QP_64 && __HAS_THREAD_INDEX && !__THREAD_IND
 describe PDS_BAD_THREAD_QP_64 Bad thread header - short QP
 score    PDS_BAD_THREAD_QP_64 1.0
 
-header  __PDS_TO_BRAND_SUBJECT ALL =~ /^To:\s+<?[^\@]+\@([^\.]+)\.(?:[^\n]+\n)*^Subject: \"?\1\b/ism
+header  __PDS_TO_BRAND_SUBJECT ALL =~ /^To:\s+<?[^\@]+\@([^\.]+)\.(?:[^\n]+\n+)*^Subject: \"?\1\b/ism
 
 meta     PDS_BRAND_SUBJ_NAKED_TO __NAKED_TO && __PDS_TO_BRAND_SUBJECT && !MAILING_LIST_MULTI
 describe PDS_BRAND_SUBJ_NAKED_TO Subject starts with To: brand and naked To:
@@ -23,7 +23,7 @@ meta     PDS_RDNS_DYNAMIC_FP RDNS_DYNAMIC && !__PDS_RDNS_MTA
 score    PDS_RDNS_DYNAMIC_FP 0.01
 describe PDS_RDNS_DYNAMIC_FP RDNS_DYNAMIC with FP steps
 
-header   __PDS_FROM_NAME_TO_DOMAIN  ALL =~ /From: ["']?([a-z0-9\.-]+\.[0-9a-z\.-]+)["']? [^\n]+\nTo:[^\n]+\@\1/ism
+header   __PDS_FROM_NAME_TO_DOMAIN  ALL =~ /From: ["']?([a-z0-9\.-]+\.[0-9a-z\.-]+)["']? [^\n]+\n+To:[^\n]+\@\1/ism
 
 meta     PDS_SHORT_BOGUS_MSM_HDRS __PDS_HTML_LENGTH_1024 && __BOGUS_MSM_HDRS
 score    PDS_SHORT_BOGUS_MSM_HDRS 2.0
