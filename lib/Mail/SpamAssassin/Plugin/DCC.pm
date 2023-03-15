@@ -799,7 +799,7 @@ sub _launch_dcc {
     return;
   }
 
-  if ($pms->get('ALL-TRUSTED') =~ /^(X-DCC-[^:]*?-Metrics: .*)$/m) {
+  #if ($pms->get('ALL-TRUSTED') =~ /^(X-DCC-[^:]*?-Metrics: .*)$/m) {
     # short-circuit if there is already a X-DCC header with value of
     # "bulk" from an upstream DCC check
     # require "bulk" because then at least one body checksum will be "many"
@@ -807,7 +807,7 @@ sub _launch_dcc {
     #if ($1 =~ / bulk /) {
     #  return $self->check_dcc_result($pms, $1);
     #}
-  }
+  #}
 
   my $envelope = $pms->{relays_external}->[0];
 
