@@ -36,6 +36,9 @@ sub new_saobj {
 sub try {
   my ($try, $expect) = @_;
 
+  my $parser = $Mail::SpamAssassin::Util::header_address_parser == 1 ?
+    'internal' : 'Email::Address::XS';
+
   my $result;
   my @results = $pms->get($try);
   if (!@results) {
@@ -44,8 +47,28 @@ sub try {
     $result = join("\\n", @results);
   }
 
-  my $parser = $Mail::SpamAssassin::Util::header_address_parser == 1 ?
-    'internal' : 'Email::Address::XS';
+  # Verify that legacy non-list and new list context get() are the same
+  # non-list will return only first value which we compare
+  my $result2 = $pms->get($try, undef);
+  if (!defined $result2 && !defined $result) {
+    # Ok
+  }
+  elsif (defined $result2 && !defined $result) {
+    my $lr2 = $result2; $lr2 =~ s/\t/\\t/gs; $lr2 =~ s/\n/\\n/gs;
+    warn "try: $parser: '$try' get() context differs! list: undef non-list: '$lr2'\n";
+    return 0;
+  }
+  elsif (!defined $result2 && defined $result) {
+    my $lr = $results[0]; $lr =~ s/\t/\\t/gs; $lr =~ s/\n/\\n/gs;
+    warn "try: $parser: '$try' get() context differs! list: '$lr' non-list: undef\n";
+    return 0;
+  }
+  elsif ($result2 ne $results[0]) {
+    my $lr = $results[0]; $lr =~ s/\t/\\t/gs; $lr =~ s/\n/\\n/gs;
+    my $lr2 = $result2; $lr2 =~ s/\t/\\t/gs; $lr2 =~ s/\n/\\n/gs;
+    warn "try: $parser: '$try' get() context differs! list: '$lr' non-list: '$lr2'\n";
+    return 0;
+  }
 
   # Whitelist some differences
   if ($parser eq 'Email::Address::XS') {
