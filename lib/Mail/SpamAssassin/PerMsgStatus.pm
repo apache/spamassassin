@@ -2490,7 +2490,7 @@ sub get {
     if ($_[1] =~ /:(?:addr|name|host|domain|ip|revip)\b/ ||
         $_[1] eq 'EnvelopeFrom') {
       my $res = $found->[0];
-      $res =~ s/\n\z$//;
+      $res =~ s/\n\z//;
       return $res;
     } else {
       return join('', @$found);
