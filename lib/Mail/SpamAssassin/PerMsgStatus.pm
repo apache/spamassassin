@@ -2208,10 +2208,11 @@ headers.
 transaction that delivered this message, if this data has been made available
 by the SMTP server.
 
-=item C<MESSAGEID> is a symbol meaning all Message-Id's found in the message;
-some mailing list software moves the real 'Message-Id' to 'Resent-Message-Id'
-or 'X-Message-Id', then uses its own one in the 'Message-Id' header.  The value
-returned for this symbol is the text from all 3 headers, separated by newlines.
+=item C<MESSAGEID> is a symbol meaning all Message-Id's found in the
+message; some mailing list software moves the real 'Message-Id' to
+'Resent-Message-Id' or 'X-Message-Id' or 'X-Original-Message-ID', then uses
+its own one in the 'Message-Id' header.  The value returned for this symbol
+is the text from all 4 headers.
 
 =item C<X-Spam-Relays-Untrusted> is the generated metadata of untrusted relays
 the message has passed through
