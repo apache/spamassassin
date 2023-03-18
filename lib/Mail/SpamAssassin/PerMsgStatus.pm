@@ -2091,12 +2091,16 @@ sub get_decoded_stripped_body_text_array {
 
 =item $status->get (header_name [, default_value])
 
-Returns a message header, pseudo-header or a real name, email-address or
-some other parsed value set by modifiers.  C<header_name> is the name of a
-mail header, such as 'Subject', 'To', etc.
+Returns message headers, pseudo-headers, names, email-addresses or some
+other parsed values set by modifiers.  C<header_name> is the name of a mail
+header such as 'Subject', 'To' etc, or a pseudo/metadata-header like 'ALL',
+'X-Spam-Relays-Untrusted' etc.
 
-Should be called in list context since 4.0.  Will return list of headers
-content, or other values when modifiers used.
+Should be called in list context since SpamAssassin 4.0.  This supports
+returning multiple values for all header and modifier types.
+
+If called in scalar context (pre-4.0 style), only first value is returned
+for modifiers like C<:addr> or C<:name>.
 
 If C<default_value> is given, it will be used if the requested
 C<header_name> does not exist.  This is mainly useful when called in scalar
