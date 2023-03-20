@@ -593,7 +593,7 @@ sub initialise_url_shortener_cache {
       ");
       $self->{sth_delete} = $self->{dbh}->prepare("
         DELETE FROM short_url_cache
-        WHERE short_url ? = AND created < CAST(EXTRACT(epoch FROM NOW()) AS INT) - $conf->{url_shortener_cache_ttl}
+        WHERE short_url = ? AND created < CAST(EXTRACT(epoch FROM NOW()) AS INT) - $conf->{url_shortener_cache_ttl}
       ");
       $self->{sth_clean} = $self->{dbh}->prepare("
         DELETE FROM short_url_cache
