@@ -95,6 +95,10 @@ if can(Mail::SpamAssassin::Conf::feature_capture_rules)
   score         GB_STORAGE_GOOGLE_EMAIL 2.000 # limit
   tflags        GB_STORAGE_GOOGLE_EMAIL publish
 
+  uri           GB_YOUTUBE_EMAIL m|^https?://(?:www\.)?youtube\.com/attribution_link\?.{20,256}/%{GB_TO_ADDR}|i
+  describe      GB_YOUTUBE_EMAIL Youtube attribution links abuse
+  score         GB_YOUTUBE_EMAIL 2.000 # limit
+
   uri           __GB_CUSTOM_HTM_URI0    m;^https?://.{10,128}(?:\.html?|\.php|\/)(?:\#|\?&e=)%{GB_TO_ADDR};i
   uri           __GB_CUSTOM_HTM_URI1    m|^https?://.{10,64}\=https?://.{4,64}\#%{GB_TO_ADDR}|i
   uri           __GB_CUSTOM_HTM_URI2    m;^https?://.{10,256}(?:\/\?)?(?:email=|wapp\#)%{GB_TO_ADDR};i
