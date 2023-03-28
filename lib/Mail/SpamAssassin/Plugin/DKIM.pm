@@ -807,7 +807,7 @@ sub _check_dkim_signed_by {
 }
 
 sub _get_authors {
-  my ($self, $pms) = @_;
+  my ($self, $pms, $sig_type) = @_;
 
   # Note that RFC 5322 permits multiple addresses in the From header field,
   # and according to RFC 5617 such message has multiple authors and hence
@@ -820,8 +820,8 @@ sub _get_authors {
     # be tolerant, ignore trailing WSP after a domain name
     $author_domains{lc $1} = 1  if /\@([^\@]+?)[ \t]*\z/s;
   }
-  $pms->{dkim_author_addresses} = \@authors;       # list of full addresses
-  $pms->{dkim_author_domains} = \%author_domains;  # hash of their domains
+  $pms->{"${sig_type}_author_addresses"} = \@authors;       # list of full addresses
+  $pms->{"${sig_type}_author_domains"} = \%author_domains;  # hash of their domains
 }
 
 sub _check_dkim_signature {
@@ -908,7 +908,7 @@ sub _check_signature {
   my($self, $pms, $verifier, $type, $signatures) = @_;
 
   my $sig_type = lc $type;
-  $self->_get_authors($pms)  if !$pms->{"${sig_type}_author_addresses"};
+  $self->_get_authors($pms, $sig_type)  if !$pms->{"${sig_type}_author_addresses"};
 
   my(@valid_signatures);
   my $conf = $pms->{conf};
@@ -1003,7 +1003,7 @@ sub _check_valid_signature {
   my($self, $pms, $verifier, $type, $signatures) = @_;
 
   my $sig_type = lc $type;
-  $self->_get_authors($pms)  if !$pms->{"${sig_type}_author_addresses"};
+  $self->_get_authors($pms, $sig_type)  if !$pms->{"${sig_type}_author_addresses"};
 
   my(@valid_signatures);
   my $conf = $pms->{conf};
@@ -1143,7 +1143,7 @@ sub _check_dkim_adsp {
   $pms->{dkim_adsp} = {};  # a hash: author_domain => adsp
   my $practices_as_string = '';
 
-  $self->_get_authors($pms)  if !$pms->{dkim_author_addresses};
+  $self->_get_authors($pms, 'dkim')  if !$pms->{dkim_author_addresses};
 
   # collect only fully qualified domain names, allow '-', think of IDN
   my @author_domains = grep { /.\.[a-z-]{2,}\z/si }
@@ -1296,7 +1296,7 @@ sub _check_dkim_welcomelist {
 
   $pms->{welcomelist_checked} = 1;
 
-  $self->_get_authors($pms)  if !$pms->{dkim_author_addresses};
+  $self->_get_authors($pms, 'dkim')  if !$pms->{dkim_author_addresses};
 
   my $authors_str = join(", ", @{$pms->{dkim_author_addresses}});
   if ($authors_str eq '') {
