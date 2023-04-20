@@ -419,7 +419,9 @@ sub check_dnsbl {
   # 3: !a_empty
   # 4: parsed
   # 5: a_empty
-  while (my($uri, $info) = each %{$uris}) {
+  my %huris = %{$uris};
+  foreach my $uri (keys %huris) {
+    my $info = $huris{$uri};
     # we want to skip mailto: uris
     next if ($uri =~ /^mailto:/i);
 
