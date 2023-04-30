@@ -221,6 +221,7 @@ sub sa_t_init {
   # individual work directory to make parallel tests possible
   $workdir = tempdir("$tname.XXXXXX", DIR => "log");
   die "FATAL: failed to create workdir: $!" unless -d $workdir;
+  chmod (0755, $workdir); # sometimes tempdir() ignores umask
   $keep_workdir = 0;
   # $siterules contains all stock *.pre files
   $siterules = "$workdir/siterules";
