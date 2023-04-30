@@ -292,12 +292,14 @@ sub set_config {
 
   push(@cmds, {
     setting => 'extracttext_maxparts',
+    is_admin => 1,
     default => 10,
     type => $Mail::SpamAssassin::Conf::CONF_TYPE_NUMERIC,
   });
 
   push(@cmds, {
     setting => 'extracttext_timeout',
+    is_admin => 1,
     default => 5,
     type => $Mail::SpamAssassin::Conf::CONF_TYPE_NUMERIC,
     code => sub {
