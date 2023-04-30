@@ -79,7 +79,7 @@ sub set_config {
   my ($self, $conf) = @_;
   my @cmds;
 
-=head1 USER OPTIONS
+=head1 ADMINISTRATOR OPTIONS
 
 =over 4
 
@@ -178,12 +178,6 @@ For default setting this means: 50 reports requires 10 welcomelistings.
     default => 0.2,
     type => $Mail::SpamAssassin::Conf::CONF_TYPE_NUMERIC
   });
-
-=back
-
-=head1 ADMINISTRATOR OPTIONS
-
-=over 4
 
 =item pyzor_timeout n		(default: 5)
 

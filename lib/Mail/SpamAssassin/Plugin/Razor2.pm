@@ -32,7 +32,7 @@ input is validated through reputation assignments.
 
 See http://razor.sourceforge.net/ for more information about Razor.
 
-=head1 USER SETTINGS
+=head1 ADMINISTRATOR SETTINGS
 
 =over 4
 
@@ -117,12 +117,6 @@ throughput. Considered experimental on Windows, where default is 0.
     default => am_running_on_windows()?0:1,
     type => $Mail::SpamAssassin::Conf::CONF_TYPE_NUMERIC,
   });
-
-=back
-
-=head1 ADMINISTRATOR SETTINGS
-
-=over 4
 
 =item razor_timeout n		(default: 5)
 

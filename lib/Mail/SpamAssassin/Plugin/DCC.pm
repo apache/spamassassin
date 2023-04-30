@@ -128,7 +128,7 @@ sub set_config {
   my($self, $conf) = @_;
   my @cmds;
 
-=head1 USER OPTIONS
+=head1 ADMINISTRATOR OPTIONS
 
 =over 4
 
@@ -211,12 +211,6 @@ default is C<90>.
     default => 90,
     type => $Mail::SpamAssassin::Conf::CONF_TYPE_NUMERIC
   });
-
-=back
-
-=head1 ADMINISTRATOR OPTIONS
-
-=over 4
 
 =item dcc_timeout n		(default: 5)
 
