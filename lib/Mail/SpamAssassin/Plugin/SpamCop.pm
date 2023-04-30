@@ -81,7 +81,7 @@ sub set_config {
   my($self, $conf) = @_;
   my @cmds;
 
-=head1 USER OPTIONS
+=head1 USER SETTINGS
 
 =over 4
 

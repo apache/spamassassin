@@ -171,7 +171,7 @@ by a local or site-specific configuration or by C<user_prefs>.
 
 =back
 
-=head1 ADMINISTRATOR OPTIONS
+=head1 ADMINISTRATOR SETTINGS
 
 =over 4
 

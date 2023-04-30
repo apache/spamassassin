@@ -112,7 +112,7 @@ sub set_config {
   my ($self, $conf) = @_;
   my @cmds;
 
-=head1 ADMINISTRATOR OPTIONS
+=head1 ADMINISTRATOR SETTINGS
 
 =over
 
