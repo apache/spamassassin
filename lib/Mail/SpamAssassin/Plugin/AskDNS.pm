@@ -33,21 +33,7 @@ responses trickle in, filters them according to the requested DNS resource
 record type and optional subrule filtering expression, yielding a rule hit
 if a response meets filtering conditions.
 
-=head1 USER SETTINGS
-
-=over 4
-
-=item rbl_timeout t [t_min] [zone]		(default: 15 3)
-
-The rbl_timeout setting is common to all DNS querying rules (as implemented
-by other plugins). It can specify a DNS query timeout globally, or individually
-for each zone. When the zone parameter is specified, the settings affects DNS
-queries when their query domain equals the specified zone, or is its subdomain.
-See the C<Mail::SpamAssassin::Conf> POD for details on C<rbl_timeout>.
-
-=back
-
-=head1 RULE DEFINITIONS
+=head1 RULE DEFINITIONS AND PRIVILEGED SETTINGS
 
 =over 4
 
@@ -193,6 +179,11 @@ rcode indicates an error.  Example: [NXDOMAIN], or [FormErr,ServFail,4,5] .
 
 =back
 
+=head1 NOTES
+
+DNS timeout can be set with C<rbl_timeout> option.  See the
+C<Mail::SpamAssassin::Conf> POD for details on C<rbl_timeout>.
+
 =cut
 
 package Mail::SpamAssassin::Plugin::AskDNS;
@@ -309,7 +300,7 @@ sub set_config {
 
   push(@cmds, {
     setting => 'askdns',
-    is_admin => 1,
+    is_priv => 1,
     type => $Mail::SpamAssassin::Conf::CONF_TYPE_HASH_KEY_VALUE,
     code => sub {
       my($self, $key, $value, $line) = @_;
