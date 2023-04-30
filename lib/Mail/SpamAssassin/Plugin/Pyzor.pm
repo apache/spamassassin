@@ -79,7 +79,7 @@ sub set_config {
   my ($self, $conf) = @_;
   my @cmds;
 
-=head1 ADMINISTRATOR OPTIONS
+=head1 USER SETTINGS
 
 =over 4
 
@@ -91,24 +91,8 @@ Whether to use Pyzor, if it is available.
 
   push (@cmds, {
     setting => 'use_pyzor',
-    is_admin => 1,
     default => 1,
     type => $Mail::SpamAssassin::Conf::CONF_TYPE_BOOL
-  });
-
-=item pyzor_fork (0|1)		(default: 1)
-
-Instead of running Pyzor synchronously, fork separate process for it and
-read the results in later (similar to async DNS lookups).  Increases
-throughput. Considered experimental on Windows, where default is 0.
-
-=cut
-
-  push(@cmds, {
-    setting => 'pyzor_fork',
-    is_admin => 1,
-    default => am_running_on_windows()?0:1,
-    type => $Mail::SpamAssassin::Conf::CONF_TYPE_NUMERIC,
   });
 
 =item pyzor_count_min NUMBER	(default: 5)
@@ -124,7 +108,6 @@ set this to a relatively low value, e.g. C<5>.
 
   push (@cmds, {
     setting => 'pyzor_count_min',
-    is_admin => 1,
     default => 5,
     type => $Mail::SpamAssassin::Conf::CONF_TYPE_NUMERIC
   });
@@ -132,7 +115,6 @@ set this to a relatively low value, e.g. C<5>.
   # Deprecated setting, the name makes no sense!
   push (@cmds, {
     setting => 'pyzor_max',
-    is_admin => 1,
     type => $Mail::SpamAssassin::Conf::CONF_TYPE_NUMERIC,
     code => sub {
       my ($self, $key, $value, $line) = @_;
@@ -157,7 +139,6 @@ result.  Final decision is made by pyzor_welcomelist_factor.
   push (@cmds, {
     setting => 'pyzor_welcomelist_min',
     aliases => ['pyzor_whitelist_min'], # removed in 4.1
-    is_admin => 1,
     default => 10,
     type => $Mail::SpamAssassin::Conf::CONF_TYPE_NUMERIC
   });
@@ -174,9 +155,29 @@ For default setting this means: 50 reports requires 10 welcomelistings.
   push (@cmds, {
     setting => 'pyzor_welcomelist_factor',
     aliases => ['pyzor_whitelist_factor'], # removed in 4.1
-    is_admin => 1,
     default => 0.2,
     type => $Mail::SpamAssassin::Conf::CONF_TYPE_NUMERIC
+  });
+
+=back
+
+=head1 ADMINISTRATOR SETTINGS
+
+=over 4
+
+=item pyzor_fork (0|1)		(default: 1)
+
+Instead of running Pyzor synchronously, fork separate process for it and
+read the results in later (similar to async DNS lookups).  Increases
+throughput. Considered experimental on Windows, where default is 0.
+
+=cut
+
+  push(@cmds, {
+    setting => 'pyzor_fork',
+    is_admin => 1,
+    default => am_running_on_windows()?0:1,
+    type => $Mail::SpamAssassin::Conf::CONF_TYPE_NUMERIC,
   });
 
 =item pyzor_timeout n		(default: 5)
