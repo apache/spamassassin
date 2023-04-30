@@ -128,7 +128,7 @@ sub new {
   return $self;
 }
 
-=head1 PRIVILEGED SETTINGS
+=head1 USER SETTINGS
 
 =over 4
 
@@ -217,6 +217,8 @@ then only those are removed from list.
       }
     }
   });
+
+=head1 PRIVILEGED SETTINGS
 
 =over 4
 
@@ -328,6 +330,8 @@ See C<url_shortener_cache_autoclean> for database cleaning.
     default => 86400,
     type => $Mail::SpamAssassin::Conf::CONF_TYPE_NUMERIC
   });
+
+=head1 ADMINISTRATOR SETTINGS
 
 =over 4
 
