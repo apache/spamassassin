@@ -32,10 +32,6 @@ input is validated through reputation assignments.
 
 See http://razor.sourceforge.net/ for more information about Razor.
 
-=head1 ADMINISTRATOR SETTINGS
-
-=over 4
-
 =cut
 
 package Mail::SpamAssassin::Plugin::Razor2;
@@ -90,6 +86,10 @@ sub set_config {
   my ($self, $conf) = @_;
   my @cmds;
 
+=head1 USER SETTINGS
+
+=over 4
+
 =item use_razor2 (0|1)		(default: 1)
 
 Whether to use Razor2, if it is available.
@@ -98,10 +98,15 @@ Whether to use Razor2, if it is available.
 
   push(@cmds, {
     setting => 'use_razor2',
-    is_admin => 1,
     default => 1,
     type => $Mail::SpamAssassin::Conf::CONF_TYPE_NUMERIC,
   });
+
+=back
+
+=head1 ADMINISTRATOR SETTINGS
+
+=over 4
 
 =item razor_fork (0|1)		(default: 1)
 
