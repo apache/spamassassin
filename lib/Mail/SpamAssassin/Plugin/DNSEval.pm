@@ -141,6 +141,7 @@ sub set_config {
     my @cmds;
     push(@cmds, {
         setting => 'rbl_headers',
+        is_priv => 1,
         default => 'EnvelopeFrom,Reply-To,Disposition-Notification-To,X-WebmailclientIP,X-Source-IP',
         type => $Mail::SpamAssassin::Conf::CONF_TYPE_STRING,
         }
