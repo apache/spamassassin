@@ -286,7 +286,6 @@ sub set_config {
 
   push (@cmds, {
     setting => 'hashbl_ignore',
-    is_admin => 1,
     type => $Mail::SpamAssassin::Conf::CONF_TYPE_HASH_KEY_VALUE,
     default => {},
     code => sub {
@@ -302,7 +301,6 @@ sub set_config {
 
   push (@cmds, {
     setting => 'hashbl_email_domain_alias',
-    is_admin => 1,
     type => $Mail::SpamAssassin::Conf::CONF_TYPE_HASH_KEY_VALUE,
     default => {},
     code => sub {
@@ -323,7 +321,6 @@ sub set_config {
 
   push (@cmds, {
     setting => 'hashbl_email_regex',
-    is_admin => 1,
     type => $Mail::SpamAssassin::Conf::CONF_TYPE_STRING,
     # Some regexp tips courtesy of http://www.regular-expressions.info/email.html
     # full email regex v0.02
@@ -355,7 +352,6 @@ sub set_config {
   push (@cmds, {
     setting => 'hashbl_email_welcomelist',
     aliases => ['hashbl_email_whitelist'], # removed in 4.1
-    is_admin => 1,
     type => $Mail::SpamAssassin::Conf::CONF_TYPE_STRING,
     default => qr/(?i)
       ^(?:
