@@ -108,6 +108,7 @@ Store DMARC reports using Mail::DMARC::Store, mail-dmarc.ini must be configured 
 
   push(@cmds, {
     setting => 'dmarc_save_reports',
+    is_admin => 1,
     default => 0,
     type => $Mail::SpamAssassin::Conf::CONF_TYPE_BOOL,
   });
