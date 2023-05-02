@@ -41,7 +41,7 @@ BEGIN {                          # see comments in "spamassassin.raw" for doco
 
 sub usage {
   die "
-usage: sa-awl [--clean] [--min n] [dbfile]
+usage: sa-awl [--clean] [--dry-run] [--min n] [dbfile]
 ";
 }
 
@@ -51,10 +51,11 @@ use POSIX qw(locale_h setsid sigprocmask _exit);
 
 POSIX::setlocale(LC_TIME,'C');
 
-our ( $opt_clean, $opt_min, $opt_help );
+our ( $opt_clean, $opt_dryrun, $opt_min, $opt_help );
 
 GetOptions(
   'clean'		=> \$opt_clean,
+  'dry-run'		=> \$opt_dryrun,
   'min:i'		=> \$opt_min,
   'help'		=> \$opt_help
 ) or usage();
@@ -79,7 +80,7 @@ if ($#ARGV == -1) {
 }
 
 my %h;
-if ($opt_clean) {
+if ($opt_clean and not $opt_dryrun) {
   tie %h, "AnyDBM_File",$db, O_RDWR,0600
       or die "Cannot open r/w file $db: $!\n";
 } else {
@@ -87,11 +88,15 @@ if ($opt_clean) {
       or die "Cannot open file $db: $!\n";
 }
 
-if (!$opt_clean) {  # just pretend to be cleaning
+if (not $opt_clean or $opt_dryrun) {  # just pretend to be cleaning
   while (my($key, $count) = each %h) {
     next if $key =~ /totscore$/;
+    next if (($count >= $opt_min) and ($opt_dryrun and $opt_clean));
     my $totscore = $h{"$key|totscore"};
     next unless defined($totscore);
+    if($opt_dryrun and $opt_clean) {
+      printf("cleaning [dry-run]: ");
+    }
     printf("%8.1f %15s  --  %s\n",
 	   $totscore/$count, sprintf("(%.1f/%d)",$totscore,$count), $key);
   }
@@ -130,7 +135,7 @@ sa-awl - examine and manipulate SpamAssassin's auto-welcomelist db
 
 =head1 SYNOPSIS
 
-B<sa-awl> [--clean] [--min n] [dbfile]
+B<sa-awl> [--clean] [--dry-run] [--min n] [dbfile]
 
 =head1 DESCRIPTION
 
@@ -146,6 +151,12 @@ The default is C<$HOME/.spamassassin/auto-welcomelist>.
 =item --clean
 
 Clean out infrequently-used AWL entries.  The C<--min> switch can be
+used to select the threshold at which entries are kept or deleted.
+
+=item --dry-run
+
+When specified with th C<--clean> option it displays the infrequently-used AWL entries
+that will be deleted. The C<--min> switch can be
 used to select the threshold at which entries are kept or deleted.
 
 =item --min n
