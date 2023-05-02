@@ -1297,7 +1297,7 @@ sub check_senders_reputation {
   if ($self->{conf}->{txrep_track_messages}) {
     if ($msg_id) {
         my $msg_rep = $self->check_reputations($pms, 'MSG_ID', $msg_id, undef, $date, undef);
-        if (defined $msg_rep && $self->count()) {
+        if (defined $msg_rep && ($self->count() > 0)) {
             if (defined $self->{learning} && !defined $self->{forgetting}) {
                 # already learned, forget only if already learned (count>1), and relearn
                 # when only scanned (count=1), go ahead with normal rep scan
@@ -1466,7 +1466,7 @@ sub check_reputation {
     # TEMPLATE TAGS should match [A-Z] in their name
     # and "_" must be avoided
     $tag_id =~ s/_//g;
-    if (defined $found && $self->count()) {
+    if (defined $found && ($self->count() > 0)) {
         $meanrep = $self->total() / $self->count();
     }
     if ($self->{learning} && defined $msgscore) {
@@ -1482,7 +1482,7 @@ sub check_reputation {
         );
     } else {
         $self->{totalweight} += $weight;
-        if ($key eq 'MSG_ID' && $self->count() > 0) {
+        if ($key eq 'MSG_ID' && ($self->count() > 0)) {
             $delta = $self->total() / $self->count();
 	    $pms->set_tag('TXREP'.$tag_id,              sprintf("%2.1f", $delta));
         } elsif (defined $self->total()) {
@@ -1541,7 +1541,7 @@ sub check_reputation {
 #--------------------------------------------------------------------------
 
 ###########################################################################
-sub count {my $self=shift;  return (defined $self->{checker})? $self->{entry}->{msgcount}    : undef;}
+sub count {my $self=shift;  return (defined $self->{checker})? $self->{entry}->{msgcount} : 0;}
 sub total {my $self=shift;  return (defined $self->{checker})? $self->{entry}->{totscore} : undef;}
 ###########################################################################
 
@@ -1580,7 +1580,7 @@ sub add_score {
   $self->{entry}->{msgcount} ||= 0;
 
   # performing the dilution aging correction
-  if (defined $self->total() && defined $self->count() && defined $self->{txrep_dilution_factor}) {
+  if (defined $self->total() && defined $self->count() && $self->count() > 0 && defined $self->{txrep_dilution_factor}) {
     my $diluted_total =
         ($self->count() + 1) *
         ($self->{txrep_dilution_factor} * $self->total() + $score) /
