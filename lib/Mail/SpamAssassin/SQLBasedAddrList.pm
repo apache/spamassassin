@@ -298,7 +298,7 @@ sub add_score {
 
   { my @fields = qw(username email ip msgcount totscore);
     my @signedby;
-    if ($self->{_with_awl_signer}) {
+    if ($self->{_with_awl_signer} || (defined $signedby and $signedby =~ /^spf\-/)) {
       push(@fields, 'signedby');
       @signedby = !defined $signedby ? () : split(' ', lc $signedby);
       @signedby = ( '' )  if !@signedby;
@@ -320,7 +320,7 @@ sub add_score {
       return $entry;
     }
 
-    if (!$self->{_with_awl_signer}) {
+    if (!$self->{_with_awl_signer} && !(defined $signedby and $signedby =~ /^spf\-/)) {
       my $rc;
       if ($self->{dsn} =~ /^DBI:(?:pg|SQLite|mysql|MariaDB)/i) {
           $rc = $sth->execute(@args, $entry->{msgcount}, $score);
