@@ -1242,7 +1242,10 @@ sub check_senders_reputation {
   $self->{last_pms} = $self->{autolearn} = undef;
 
   # Cases where we would not be able to use TxRep
-  return 0 unless ($self->{conf}->{use_txrep});
+  if(not $self->{conf}->{use_txrep}) {
+    dbg("TxRep is disabled, quitting");
+    return 0;
+  }
   if ($self->{conf}->{use_auto_welcomelist}) {
     warn("TxRep: cannot run when Auto-Welcomelist is enabled. Please disable it!\n");
     return 0;
