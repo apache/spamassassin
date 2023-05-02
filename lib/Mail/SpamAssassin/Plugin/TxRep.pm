@@ -1348,9 +1348,16 @@ sub check_senders_reputation {
   );
 
   my $ip = $origip;
+  my $spf_domain;
   if ($signedby) {
     $ip       = undef;
     $domain   = $signedby;
+  } elsif ($pms->{spf_pass} && $self->{conf}->{txrep_spf} && defined $pms->{spf_sender}) {
+    $ip       = undef;
+    $spf_domain = $pms->{spf_sender};
+    $spf_domain =~ s/^.+@//;
+    $signedby   = 'spf-'.$spf_domain;
+    dbg("TxRep: email signed by spf domain $spf_domain");
   } elsif ($pms->{spf_pass} && $self->{conf}->{txrep_spf}) {
     $ip       = undef;
     $signedby = 'spf';
