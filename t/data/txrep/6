@@ -1,0 +1,64 @@
+Authentication-Results: mx.domain.tld;
+	dkim=pass (2048-bit key) header.d=gmail.com header.b="Nj89oe5i";
+	spf=pass (domain of spammer02@gmail.com designates 2607:f8b0:4864:20::f31 as permitted sender) smtp.mailfrom=spammer02@gmail.com;
+	spf=pass (domain of spammer02@gmail.com designates 2607:f8b0:4864:20::f31 as permitted sender) smtp.helo=mail-qv1-xf31.google.com;
+Received-SPF: pass (google.com: domain of bounce-166632601@bounce.spamdomain.com designates 2607:f8b0:4864:20::f31 as permitted sender) client-ip=2607:f8b0:4864:20::f31;
+Received: from mail-qv1-xf31.google.com (mail-qv1-xf31.google.com [IPv6:2607:f8b0:4864:20::f31])
+	(using TLSv1.3 with cipher TLS_AES_128_GCM_SHA256 (128/128 bits)
+	 key-exchange X25519 server-signature RSA-PSS (2048 bits) server-digest SHA256)
+	(No client certificate requested)
+	by mx.domain.tld (Postfix) with ESMTPS id 955141FBFE
+	for <user@domain.tld>; Sun, 12 Mar 2023 23:49:04 +0100 (CET)
+Received: by mail-qv1-xf31.google.com with SMTP id ks17so7218204qvb.6
+        for <user@domain.tld>; Sun, 12 Mar 2023 15:49:04 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20210112; t=1678661343;
+        h=to:subject:message-id:date:from:mime-version:from:to:cc:subject
+         :date:message-id:reply-to;
+        bh=ldudMzRxXT4oknEGGyxZqtdh0JisABtwUQVyz4m6zpM=;
+        b=Nj89oe5iQLXH4+HYTSP/XZF/HRHHQ+wVDinL9TCcf18SG+HOWVQg/bO9i0UAdex3Zq
+         2wZKYaFcb3anQ0l8fLOcxMIqRYg7Let+s4mHGA++H/dSoyM/N5QC9qtYFV/yoXTvTZhm
+         7rzP3HRQn0V4GsGO3bzhV7YGNndfrYsACE6ZIUXzFWiIn8vaNkU7zCJojEDgi/6QXxN/
+         o49kw0a1phYkGNfl+KBa9D1vxesEDHVO13f5fMlufUfxE37pjxyeQC09t8MOfpvj3VvG
+         045TNmv6wpwHdJcXVRzkFZxvDbAdyckgFLLTARfAji/Gy0MMTIMX6UEn1vsmqyyuxCL/
+         s+JQ==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112; t=1678661343;
+        h=to:subject:message-id:date:from:mime-version:x-gm-message-state
+         :from:to:cc:subject:date:message-id:reply-to;
+        bh=ldudMzRxXT4oknEGGyxZqtdh0JisABtwUQVyz4m6zpM=;
+        b=z1Z5IV0SRW0bXZHXN8THDavWh4f+Hu9e/fGxCrkMIxMeb5BaoRgL8hWXDv1TOcuSAK
+         rCIncijctvJrQ+UnPguxPrLXqlNXIyosx4YjsRO2E4NwQSyKJLmZhuV5RBJXYo+Jsm3f
+         FWrT43dJ+RBMNYb7R+Vav5xYn4qvj8C5aVI2Xoj1EO6B/bnLObsjVay605CNY1dX73kx
+         72+wK1Cq7tVIYBoSp5pVKCPDlDex9nHlUW4dKcIE9oEYLYjpjhluyWlcN0vvoHb29U/5
+         IoZXXOW1qo635s45Gp+KYSKCzMgyWPWYAIbF1gD7e+OEnToMQ3cmtabwyYu0QhAZWXM9
+         DRMQ==
+X-Gm-Message-State: AO0yUKXXyj6wFoUlwG7Tk6AEhQ6pIP8ZeHe4aTlLz+iR7CK3RJrtpI9U
+	mwtnPFTL3z9j85RrTWBs5+hPREr7tLPiK6w939o=
+X-Google-Smtp-Source: AK7set8mKSvE3H9i6QP0h2thW2PXTIBm+XYhXaJiK5Gxchh+hJO+cRv1YG/wgLILSAO6HkH2JE9iIMX6Q9zF9sizU40=
+X-Received: by 2002:ad4:4ae3:0:b0:56e:a203:5d1f with SMTP id
+ cp3-20020ad44ae3000000b0056ea2035d1fmr1459509qvb.5.1678661343355; Sun, 12 Mar
+ 2023 15:49:03 -0700 (PDT)
+MIME-Version: 1.0
+From: Spammer <spammer01@gmail.com>
+Date: Sun, 12 Mar 2023 22:45:24 +0000
+Message-ID: <CAE230DA2MWL3MB_seXWjUMmGaQKDe=Pm4gYbtvtyT1kQg5r4+w@mail.gmail.com>
+To: undisclosed-recipients:;
+Content-Type: multipart/alternative; boundary="00000000000011a7c405f6bbcd5c"
+Subject: [***SPAM***] Bonjour
+
+--00000000000011a7c405f6bbcd5c
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
+
+Test
+
+XJS*C4JDBQADN1.NSBN3*2IDNEN*GTUBE-STANDARD-ANTI-UBE-TEST-EMAIL*C.34X
+
+--00000000000011a7c405f6bbcd5c
+Content-Type: text/html; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
+
+<div dir=3D"ltr">Test</div>
+
+--00000000000011a7c405f6bbcd5c--
