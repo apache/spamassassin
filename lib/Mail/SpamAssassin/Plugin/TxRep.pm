@@ -1494,8 +1494,23 @@ sub check_reputation {
 	    $pms->set_tag('TXREP'.$tag_id,              sprintf("%2.1f", $delta));
         } elsif (defined $self->total()) {
             #Bug 7164 - $msgscore undefined
-            if (defined $msgscore) {
-              $delta = ($self->total() + $msgscore) / (1 + $self->count()) - $msgscore;
+            # in some cases we can have negative number
+            # even if both total and $msgscore are positive numbers
+            my $deltacheck;
+            my $skipmsgscore = 0;
+            if(defined $msgscore) {
+              $deltacheck = ($self->total() + $msgscore) / (1 + $self->count()) - $msgscore;
+              if(($self->total() > 0) && ($msgscore > 0) && ($deltacheck < 0)) {
+                $skipmsgscore = 1;
+              } elsif(($self->total() < 0) && ($msgscore < 0) && ($deltacheck > 0)) {
+                $skipmsgscore = 1;
+              }
+            }
+            if($skipmsgscore) {
+              dbg("TxRep: skipping msg score $msgscore when calculating delta");
+            }
+            if (defined $msgscore and not $skipmsgscore) {
+              $delta = $deltacheck;
             } else {
               $delta = ($self->total()) / (1 + $self->count());
             }
