@@ -1240,6 +1240,7 @@ sub check_senders_reputation {
 
   my $autolearn = defined $self->{autolearn};
   $self->{last_pms} = $self->{autolearn} = undef;
+  $self->{pms} = $pms;
 
   # Cases where we would not be able to use TxRep
   if(not $self->{conf}->{use_txrep}) {
@@ -1827,6 +1828,12 @@ sub pack_addr {
 
   if ( defined $origip) {$origip = $self->ip_to_awl_key($origip);}
   if (!defined $origip) {$origip = 'none';}
+  if ( $self->{conf}->{txrep_welcomelist_out} &&
+    defined $self->{pms}->{relays_internal} &&  @{$self->{pms}->{relays_internal}} &&
+    (!defined $self->{pms}->{relays_external} || !@{$self->{pms}->{relays_external}})
+    and $addr =~ /\@\w+\./) {
+      $origip = 'WELCOMELIST_OUT';
+  }
   return $addr . "|ip=" . $origip;
 }
 
