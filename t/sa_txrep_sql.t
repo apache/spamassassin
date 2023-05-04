@@ -13,11 +13,13 @@ use constant SQLITE => (HAS_DBI && HAS_DBD_SQLITE);
 use constant SQL => conf_bool('run_awl_sql_tests');
 
 plan skip_all => "Net tests disabled" unless conf_bool('run_net_tests');
-plan skip_all => "run_awl_sql_tests not enabled or DBI/SQLite not found" unless (SQLITE && SQL);
+plan skip_all => "run_awl_sql_tests not enabled or DBI/SQLite not found" unless (SQLITE || SQL);
 
 diag "Note: If there is a failure it may be due to an incorrect SQL configuration." if (SQL);
 
-plan tests => 2;
+my $tests = 2;
+$tests += 2 if (SQL);
+plan tests => $tests;
 
 # ---------------------------------------------------------------------------
 
@@ -63,6 +65,16 @@ if (SQLITE) {
     q{ 0.1 TXREP } => 'Score normalizing',
   );
 
+  %anti_patterns = %txrep_pattern0;
+  %patterns = ();
+  sarun ("-t < data/txrep/6", \&patterns_run_cb);
+  ok_all_patterns();
+  clear_pattern_counters();
+
+  %anti_patterns = ();
+  %patterns = %txrep_pattern0;
+  sarun ("-t < data/txrep/7", \&patterns_run_cb);
+  ok_all_patterns();
 }
 
 if(SQL) {
