@@ -8,6 +8,9 @@ plan skip_all => "Long running tests disabled" unless conf_bool('run_long_tests'
 plan tests => 8;
 
 # ---------------------------------------------------------------------------
+tstpre ("
+  loadplugin Mail::SpamAssassin::Plugin::AWL
+");
 
 my @locales = qw( de es fr it nl pl pl pt_BR );
 %patterns = ( qr/^/, 'anything', );

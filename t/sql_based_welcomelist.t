@@ -21,6 +21,10 @@ diag "Note: If there is a failure it may be due to an incorrect SQL configuratio
 
 sa_t_init("sql_based_welcomelist");
 
+tstpre("
+  loadplugin Mail::SpamAssassin::Plugin::AWL
+");
+
 # only use rules defined here in tstprefs()
 clear_localrules();
 

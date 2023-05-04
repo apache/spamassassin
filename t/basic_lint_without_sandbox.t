@@ -12,6 +12,10 @@ use Test::More tests => 3;
   qr/^/, 'anything',
 );
 
+tstpre ("
+  loadplugin Mail::SpamAssassin::Plugin::AWL
+");
+
 # override locale for this test!
 $ENV{'LANGUAGE'} = $ENV{'LC_ALL'} = 'C';
 

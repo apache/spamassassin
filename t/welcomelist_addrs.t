@@ -12,6 +12,9 @@ plan skip_all => 'Need DB_File for this test'  unless HAS_DB_FILE;
 plan tests => 35;
 
 # ---------------------------------------------------------------------------
+tstpre ("
+  loadplugin Mail::SpamAssassin::Plugin::AWL
+");
 
 tstprefs ("
   header AWL        eval:check_from_in_auto_welcomelist()

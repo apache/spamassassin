@@ -8,6 +8,10 @@ plan skip_all => "Tests don't work on windows" if $RUNNING_ON_WINDOWS;
 plan tests => 5;
 
 # ---------------------------------------------------------------------------
+tstpre ("
+  loadplugin Mail::SpamAssassin::Plugin::AWL
+");
+
 # bug 6173
 
 tstprefs ("

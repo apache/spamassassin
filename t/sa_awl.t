@@ -11,6 +11,10 @@ use Test::More tests => 1;
   q{ X-Spam-Status: Yes}, 'isspam',
 );
 
+tstpre ("
+  loadplugin Mail::SpamAssassin::Plugin::AWL
+");
+
 tstprefs ("
   auto_whitelist_path ./$userstate/awltest
   auto_whitelist_file_mode 0755

@@ -25,6 +25,10 @@ open(OLDERR, ">&STDERR") || die "Cannot copy STDERR file handle";
 # quiet "used only once" warnings
 1 if *OLDERR;
 
+tstpre ("
+  loadplugin Mail::SpamAssassin::Plugin::AWL
+");
+
 tstlocalrules ("
   clear_originating_ip_headers
   originating_ip_headers X-Yahoo-Post-IP X-Originating-IP X-Apparently-From

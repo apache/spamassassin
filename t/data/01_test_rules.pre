@@ -4,7 +4,6 @@ dns_query_restriction deny *
 dns_query_restriction allow spamassassin.org
 
 # Load selection of non-default plugins for all tests
-loadplugin Mail::SpamAssassin::Plugin::AWL
 loadplugin Mail::SpamAssassin::Plugin::RelayCountry
 loadplugin Mail::SpamAssassin::Plugin::DCC
 loadplugin Mail::SpamAssassin::Plugin::TextCat

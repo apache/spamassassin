@@ -11,6 +11,10 @@ plan tests => 32;
 
 disable_compat "welcomelist_blocklist";
 
+tstpre ("
+  loadplugin Mail::SpamAssassin::Plugin::AWL
+");
+
 tstprefs ("
   header USER_IN_WELCOMELIST		eval:check_from_in_welcomelist()
   tflags USER_IN_WELCOMELIST		userconf nice noautolearn

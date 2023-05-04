@@ -20,6 +20,10 @@ open (OUT, ">$workdir/awl");
 print OUT "file created to block AWL from working; AWL expects a dir";
 close OUT;
 
+tstpre ("
+  loadplugin Mail::SpamAssassin::Plugin::AWL
+");
+
 tstprefs ("
   auto_welcomelist_path ./$workdir/awl/this_lock_warning_is_ok
   auto_welcomelist_file_mode 0755

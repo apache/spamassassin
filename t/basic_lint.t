@@ -5,6 +5,10 @@ use SATest; sa_t_init("basic_lint");
 
 use Test::More;
 
+tstpre ("
+  loadplugin Mail::SpamAssassin::Plugin::AWL
+");
+
 @test_locales = qw(C);
 
 if (!$RUNNING_ON_WINDOWS) {
