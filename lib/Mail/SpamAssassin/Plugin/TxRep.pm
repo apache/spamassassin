@@ -1831,7 +1831,7 @@ sub pack_addr {
   if ( $self->{conf}->{txrep_welcomelist_out} &&
     defined $self->{pms}->{relays_internal} &&  @{$self->{pms}->{relays_internal}} &&
     (!defined $self->{pms}->{relays_external} || !@{$self->{pms}->{relays_external}})
-    and $addr =~ /\@\w+\./) {
+    and $addr =~ /(?:[^\s\@]+)\@(?:[^\s\@]+)/) {
       $origip = 'WELCOMELIST_OUT';
   }
   return $addr . "|ip=" . $origip;

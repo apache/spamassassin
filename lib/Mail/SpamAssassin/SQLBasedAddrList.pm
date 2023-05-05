@@ -204,7 +204,7 @@ sub get_addr_entry {
   my $sql;
   my $sth;
   my $rc;
-  if($self->{main}->{conf}->{txrep_welcomelist_out} and ($email =~ /\@\w+\./)) {
+  if($self->{main}->{conf}->{txrep_welcomelist_out} and ($email =~ /(?:[^\s\@]+)\@(?:[^\s\@]+)/)) {
     $sql = "SELECT msgcount, totscore FROM $self->{tablename} " .
             "WHERE username = ? AND email = ? AND ip = 'WELCOMELIST_OUT'";
     $sth = $self->{dbh}->prepare($sql);
@@ -329,7 +329,7 @@ sub add_score {
 
   { my @fields = qw(username email ip msgcount totscore);
     my @signedby;
-    if ($self->{_with_awl_signer} or (defined $signedby and $signedby =~ /^spf\-/) and not ($self->{main}->{conf}->{txrep_welcomelist_out} and ($email =~ /\@\w+\./)) ) {
+    if ($self->{_with_awl_signer} or (defined $signedby and $signedby =~ /^spf\-/) and not ($self->{main}->{conf}->{txrep_welcomelist_out} and ($email =~ /(?:[^\s\@]+)\@(?:[^\s\@]+)/)) ) {
       push(@fields, 'signedby');
       @signedby = !defined $signedby ? () : split(' ', lc $signedby);
       @signedby = ( '' )  if !@signedby;
