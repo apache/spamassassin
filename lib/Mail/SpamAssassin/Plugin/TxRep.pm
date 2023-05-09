@@ -897,6 +897,48 @@ some testing it could be likely at least slightly increased.
     }
   });
 
+=item B<txrep_report_details>
+
+  0 | 1 | 2             (default: 0)
+
+Add TxRep details to the rule's description in the message report or summary,
+similar to how RBL rules commonly are showing listed domains.
+
+If enabled (value 1) the identificators (From address bound to originating IP
+address fraction, From address alone, domain name bound to originating IP
+address fraction, originating IP address and HELO if available) used in
+calculating the sender's overall reputation are listed, including the
+originating IP address fraction (according to the mask settings) where
+applicable.
+
+If this option is set to 2, the listed identificators' individual mean
+reputation and count are reported in addition.
+
+Identificators and additional data will only be added to the description on a
+message's initial scan.  Re-processing a previously already scanned message
+will not list the individual idenficators and their respective reputation
+values used originally.
+
+This option is disabled by default for now, due to potential formatting issues
+caused by the number and length of additional description details.
+
+=cut
+
+  push (@cmds, {
+    setting     => 'txrep_report_details',
+    default     => 0,
+    type        => $Mail::SpamAssassin::Conf::CONF_TYPE_NUMERIC,
+    code        => sub {
+        my ($self, $key, $value, $line) = @_;
+
+        return $Mail::SpamAssassin::Conf::MISSING_REQUIRED_VALUE
+          if ($value eq '');
+        return $Mail::SpamAssassin::Conf::INVALID_VALUE
+          unless ($value =~ /^[012]$/);
+
+        $self->{txrep_report_details} = $value;
+    }
+  });
 
 =back
 
@@ -1532,6 +1574,26 @@ sub check_reputation {
             $delta              || 0,
             $id                 || 'none'
         );
+
+        if ($self->{conf}->{txrep_report_details}
+            && defined $id && defined $meanrep && $tag_id ne "MSGID") {
+
+            my $log = sprintf("%s: %s",
+                              $tag_id,
+                              (defined $ip) ? $id."|".$self->ip_to_awl_key($ip) : $id
+                );
+
+            if ($self->{conf}->{txrep_report_details} == 2) {
+                $log .= sprintf(", rep: %.2f, count: %d",
+                                $meanrep,
+                                $self->count() || 0
+                    );
+            }
+
+            $pms->test_log($log, "TXREP");
+            # dbg ("TxRep: test_log: $log");
+        }
+
     }
     $timer = $self->{main}->time_method('update_txrep_'.lc($key));
     if (defined $msgscore) {
