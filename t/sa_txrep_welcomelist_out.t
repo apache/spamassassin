@@ -17,11 +17,20 @@ plan skip_all => "run_awl_sql_tests not enabled or DBI/SQLite not found" unless 
 
 diag "Note: If there is a failure it may be due to an incorrect SQL configuration." if (SQL);
 
-my $tests = 8;
+my $tests = 0;
+$tests += 8 if (SQLITE);
 $tests += 8 if (SQL);
 plan tests => $tests;
 
 # ---------------------------------------------------------------------------
+
+%txrep_pattern0 = (
+  q{ -0.1 TXREP } => 'Score normalizing',
+);
+
+%txrep_pattern1 = (
+  q{ 0.1 TXREP } => 'Score normalizing',
+);
 
 tstpre ("
   loadplugin Mail::SpamAssassin::Plugin::TxRep
@@ -71,25 +80,15 @@ if (SQLITE) {
     user_awl_dsn dbi:SQLite:dbname=$workdir/txrep.db
   ");
 
-  %txrep_pattern0 = (
-    q{ -0.1 TXREP } => 'Score normalizing',
-  );
-
-  %txrep_pattern1 = (
-    q{ 0.1 TXREP } => 'Score normalizing',
-  );
-
   %anti_patterns = %txrep_pattern0;
   %patterns = ();
   sarun ("-t < data/txrep/8", \&patterns_run_cb);
   ok_all_patterns();
-  clear_pattern_counters();
 
   %anti_patterns = ();
   %patterns = %txrep_pattern0;
   sarun ("-t < data/txrep/9", \&patterns_run_cb);
   ok_all_patterns();
-  clear_pattern_counters();
 
   tstprefs ("
     use_txrep 1
@@ -108,13 +107,11 @@ if (SQLITE) {
   %patterns = ();
   sarun ("-t < data/txrep/8", \&patterns_run_cb);
   ok_all_patterns();
-  clear_pattern_counters();
 
   %anti_patterns = ();
   %patterns = %txrep_pattern1;
   sarun ("-t < data/txrep/9", \&patterns_run_cb);
   ok_all_patterns();
-  clear_pattern_counters();
 
   tstprefs ("
     use_txrep 1
@@ -133,13 +130,11 @@ if (SQLITE) {
   %patterns = ();
   sarun ("-t < data/txrep/8", \&patterns_run_cb);
   ok_all_patterns();
-  clear_pattern_counters();
 
   %anti_patterns = ();
   %patterns = %txrep_pattern1;
   sarun ("-t < data/txrep/9", \&patterns_run_cb);
   ok_all_patterns();
-   clear_pattern_counters();
 
   tstprefs ("
     use_txrep 1
@@ -158,28 +153,51 @@ if (SQLITE) {
   %patterns = ();
   sarun ("-t < data/txrep/8", \&patterns_run_cb);
   ok_all_patterns();
-  clear_pattern_counters();
 
   %anti_patterns = ();
   %patterns = %txrep_pattern0;
   sarun ("-t < data/txrep/9", \&patterns_run_cb);
   ok_all_patterns();
-  clear_pattern_counters();
 }
 
-if(SQL) {
+if (SQL) {
+  my $dbconfig = '';
+  foreach my $setting (qw(
+      user_awl_dsn
+      user_awl_sql_username
+      user_awl_sql_password
+      user_awl_sql_table
+      )) {
+    my $val = conf($setting);
+    $dbconfig .= "$setting $val\n" if $val;
+  }
+
+  my $testuser = 'tstusr.'.$$.time();
+  my $idx = 1;
+  tstprefs ("
+    use_txrep 1
+    txrep_factory Mail::SpamAssassin::SQLBasedAddrList
+    auto_welcomelist_distinguish_signed 1
+    txrep_welcomelist_out 1
+    clear_trusted_networks
+    clear_internal_networks
+    internal_networks 64.142.3.173
+    trusted_networks 64.142.3.173
+    $dbconfig
+    user_awl_sql_override_username $testuser-$idx
+  ");
+
   %anti_patterns = %txrep_pattern0;
   %patterns = ();
   sarun ("-t < data/txrep/8", \&patterns_run_cb);
   ok_all_patterns();
-  clear_pattern_counters();
 
   %anti_patterns = ();
   %patterns = %txrep_pattern0;
   sarun ("-t < data/txrep/9", \&patterns_run_cb);
   ok_all_patterns();
-  clear_pattern_counters();
 
+  $idx++;
   tstprefs ("
     use_txrep 1
     txrep_factory Mail::SpamAssassin::SQLBasedAddrList
@@ -189,22 +207,21 @@ if(SQL) {
     clear_internal_networks
     internal_networks 64.142.3.173
     trusted_networks 64.142.3.173
-    user_awl_dsn dbi:SQLite:dbname=$workdir/txrep.db
+    $dbconfig
+    user_awl_sql_override_username $testuser-$idx
   ");
 
-  create_db($workdir);
   %anti_patterns = %txrep_pattern1;
   %patterns = ();
   sarun ("-t < data/txrep/8", \&patterns_run_cb);
   ok_all_patterns();
-  clear_pattern_counters();
 
   %anti_patterns = ();
   %patterns = %txrep_pattern1;
   sarun ("-t < data/txrep/9", \&patterns_run_cb);
   ok_all_patterns();
-  clear_pattern_counters();
 
+  $idx++;
   tstprefs ("
     use_txrep 1
     txrep_factory Mail::SpamAssassin::SQLBasedAddrList
@@ -214,22 +231,21 @@ if(SQL) {
     clear_internal_networks
     internal_networks 64.142.3.173
     trusted_networks 64.142.3.173
-    user_awl_dsn dbi:SQLite:dbname=$workdir/txrep.db
+    $dbconfig
+    user_awl_sql_override_username $testuser-$idx
   ");
 
-  create_db($workdir);
   %anti_patterns = %txrep_pattern1;
   %patterns = ();
   sarun ("-t < data/txrep/8", \&patterns_run_cb);
   ok_all_patterns();
-  clear_pattern_counters();
 
   %anti_patterns = ();
   %patterns = %txrep_pattern1;
   sarun ("-t < data/txrep/9", \&patterns_run_cb);
   ok_all_patterns();
-   clear_pattern_counters();
 
+  $idx++;
   tstprefs ("
     use_txrep 1
     txrep_factory Mail::SpamAssassin::SQLBasedAddrList
@@ -239,15 +255,14 @@ if(SQL) {
     clear_internal_networks
     internal_networks 64.142.3.173
     trusted_networks 64.142.3.173
-    user_awl_dsn dbi:SQLite:dbname=$workdir/txrep.db
+    $dbconfig
+    user_awl_sql_override_username $testuser-$idx
   ");
 
-  create_db($workdir);
   %anti_patterns = %txrep_pattern0;
   %patterns = ();
   sarun ("-t < data/txrep/8", \&patterns_run_cb);
   ok_all_patterns();
-  clear_pattern_counters();
 
   %anti_patterns = ();
   %patterns = %txrep_pattern0;

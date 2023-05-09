@@ -17,11 +17,16 @@ plan skip_all => "run_awl_sql_tests not enabled or DBI/SQLite not found" unless 
 
 diag "Note: If there is a failure it may be due to an incorrect SQL configuration." if (SQL);
 
-my $tests = 2;
+my $tests = 0;
+$tests += 2 if (SQLITE);
 $tests += 2 if (SQL);
 plan tests => $tests;
 
 # ---------------------------------------------------------------------------
+
+%txrep_pattern0 = (
+  q{ 0.1 TXREP } => 'Score normalizing',
+);
 
 tstpre ("
   loadplugin Mail::SpamAssassin::Plugin::TxRep
@@ -61,15 +66,10 @@ if (SQLITE) {
     user_awl_dsn dbi:SQLite:dbname=$workdir/txrep.db
   ");
 
-  %txrep_pattern0 = (
-    q{ 0.1 TXREP } => 'Score normalizing',
-  );
-
   %anti_patterns = %txrep_pattern0;
   %patterns = ();
   sarun ("-t < data/txrep/6", \&patterns_run_cb);
   ok_all_patterns();
-  clear_pattern_counters();
 
   %anti_patterns = ();
   %patterns = %txrep_pattern0;
@@ -77,12 +77,32 @@ if (SQLITE) {
   ok_all_patterns();
 }
 
-if(SQL) {
+if (SQL) {
+  my $dbconfig = '';
+  foreach my $setting (qw(
+      user_awl_dsn
+      user_awl_sql_username
+      user_awl_sql_password
+      user_awl_sql_table
+      )) {
+    my $val = conf($setting);
+    $dbconfig .= "$setting $val\n" if $val;
+  }
+
+  my $testuser = 'tstusr.'.$$.'.'.time();
+
+  tstprefs ("
+    use_txrep 1
+    txrep_factory Mail::SpamAssassin::SQLBasedAddrList
+    auto_welcomelist_distinguish_signed 1
+    $dbconfig
+    user_awl_sql_override_username $testuser
+  ");
+
   %anti_patterns = %txrep_pattern0;
   %patterns = ();
   sarun ("-t < data/txrep/6", \&patterns_run_cb);
   ok_all_patterns();
-  clear_pattern_counters();
 
   %anti_patterns = ();
   %patterns = %txrep_pattern0;
