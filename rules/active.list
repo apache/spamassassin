@@ -188,7 +188,7 @@ BITCOIN_IMGUR
 # good enough
 BITCOIN_MALF_HTML
 
-# tflags net
+# tflags publish
 BITCOIN_MALWARE
 
 # tflags publish
@@ -254,7 +254,7 @@ BODY_SINGLE_URI
 # good enough
 BODY_SINGLE_WORD
 
-# tflags net
+# tflags publish
 BODY_URI_ONLY
 
 # tflags publish
@@ -293,7 +293,7 @@ CN_B2B_SPAMMER
 # tflags publish
 COMMENT_GIBBERISH
 
-# tflags net
+# good enough
 COMPENSATION
 
 # tflags publish
@@ -316,6 +316,9 @@ DAY_I_EARNED
 
 # good enough
 DEAR_BENEFICIARY
+
+# good enough
+DEAR_WINNER
 
 # tflags net
 DIGEST_MULTIPLE
@@ -476,10 +479,10 @@ FONT_INVIS_POSTEXTRAS
 # tflags net
 FORGED_SPF_HELO
 
-# tflags net
+# tflags publish
 FORM_FRAUD
 
-# tflags net
+# tflags publish
 FORM_FRAUD_3
 
 # tflags publish
@@ -554,7 +557,7 @@ FROM_MISSP_FREEMAIL
 # good enough
 FROM_MISSP_MSFT
 
-# tflags net
+# good enough
 FROM_MISSP_REPLYTO
 
 # tflags net
@@ -858,9 +861,6 @@ JH_SPAMMY_PATTERN01
 JH_SPAMMY_PATTERN02
 
 # tflags net
-KHOP_FAKE_EBAY
-
-# tflags net
 KHOP_HELO_FCRDNS
 
 # tflags publish
@@ -899,14 +899,8 @@ MALWARE_PASSWORD
 # tflags publish
 MALW_ATTACH
 
-# tflags net
-MANY_HDRS_LCASE
-
 # tflags publish
 MANY_SPAN_IN_TEXT
-
-# tflags net
-MAY_BE_FORGED
 
 # tflags publish
 MILLION_HUNDRED
@@ -1060,9 +1054,6 @@ PDS_BTC_ID
 
 # good enough
 PDS_BTC_MSGID
-
-# good enough
-PDS_BTC_NTLD
 
 # good enough
 PDS_DBL_URL_TNB_RUNON
@@ -1397,9 +1388,6 @@ RCVD_IN_ZEN_BLOCKED
 # tflags net
 RCVD_IN_ZEN_BLOCKED_OPENDNS
 
-# good enough
-RDNS_LOCALHOST
-
 # tflags publish
 RDNS_NUM_TLD_ATCHNX
 
@@ -1474,6 +1462,9 @@ SCC_ISEMM_LID_1A
 
 # tflags publish
 SCC_ISEMM_LID_1B
+
+# good enough
+SCC_NEWBIE_HASBEENS
 
 # tflags publish
 SCC_SPECIAL_GUID
@@ -1568,9 +1559,6 @@ SUBJECT_IN_BLOCKLIST
 # tflags userconf
 SUBJECT_IN_WELCOMELIST
 
-# good enough
-SUBJ_ATTENTION
-
 # tflags net
 SUBJ_BRKN_WORDNUMS
 
@@ -1592,10 +1580,10 @@ TAGSTAT_IMG_NOT_RCVD_TGST
 # tflags publish
 TARINGANET_IMG_NOT_RCVD_TN
 
-# tflags net
+# tflags publish
 TEQF_USR_IMAGE
 
-# tflags net
+# tflags publish
 TEQF_USR_MSGID_HEX
 
 # tflags publish
@@ -1617,16 +1605,7 @@ TONOM_EQ_TOLOC_SHRT_SHRTNER
 TO_EQ_FM_DIRECT_MX
 
 # tflags net
-TO_EQ_FM_DOM_HTML_IMG
-
-# tflags net
-TO_EQ_FM_DOM_HTML_ONLY
-
-# tflags net
 TO_EQ_FM_DOM_SPF_FAIL
-
-# tflags net
-TO_EQ_FM_HTML_ONLY
 
 # tflags net
 TO_EQ_FM_SPF_FAIL
@@ -1646,7 +1625,7 @@ TO_NO_BRKTS_HTML_IMG
 # tflags publish
 TO_NO_BRKTS_HTML_ONLY
 
-# tflags net
+# good enough
 TO_NO_BRKTS_MSFT
 
 # tflags publish
@@ -1670,14 +1649,14 @@ TVD_IP_HEX
 # good enough
 TVD_IP_SING_HEX
 
+# good enough
+TVD_PH_SUBJ_META
+
 # tflags net
 TVD_SPACE_ENCODED
 
-# tflags net
+# good enough
 TVD_SPACE_RATIO_MINFP
-
-# tflags net
-TVD_SUBJ_NUM_OBFU_MINFP
 
 # good enough
 TVD_VISIT_PHARMA
@@ -1793,9 +1772,6 @@ URI_ADOBESPARK
 # tflags publish
 URI_AZURE_CLOUDAPP
 
-# good enough
-URI_BUFFLY
-
 # tflags publish
 URI_DASHGOVEDU
 
@@ -1816,9 +1792,6 @@ URI_DQ_UNSUB
 
 # tflags publish
 URI_FIREBASEAPP
-
-# good enough
-URI_GIBB_NO_PROTO
 
 # tflags publish
 URI_GOOGLE_PROXY
@@ -1850,7 +1823,7 @@ URI_MALWARE_SCMS
 # tflags userconf
 URI_NOVOWEL
 
-# tflags net
+# tflags publish
 URI_ONLY_MSGID_MALF
 
 # tflags publish
@@ -1877,7 +1850,7 @@ URI_WPADMIN
 # tflags publish
 URI_WP_DIRINDEX
 
-# tflags net
+# tflags publish
 URI_WP_HACKED
 
 # tflags publish
@@ -1945,9 +1918,6 @@ XM_PHPMAILER_FORGED
 
 # tflags publish
 XM_RANDOM
-
-# good enough
-XM_RECPTID
 
 # tflags net
 XPRIO
