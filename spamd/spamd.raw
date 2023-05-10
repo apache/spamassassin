@@ -3294,7 +3294,7 @@ sub do_sighup_restart {
   chdir($ORIG_CWD)
     or die "spamd: restart failed: chdir failed: ${ORIG_CWD}: $!\n";
 
-  # Close GeoDB, Geo::IP leaks fds on restart (Bug 8090 c11)
+  # Close GeoDB, Geo::IP leaks fds on restart (Bug 8127)
   delete $spamtest->{geodb};
 
   # ensure we re-run spamd using the right perl interpreter, and
