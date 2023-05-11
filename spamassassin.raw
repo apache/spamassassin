@@ -182,6 +182,7 @@ GetOptions(
   'add-to-welcomelist|W'                    => \$opt{'add-to-welcomelist'},
   'add-to-blacklist'                        => \$opt{'add-to-blocklist'}, # removed in 4.1
   'add-to-whitelist'                        => \$opt{'add-to-welcomelist'}, # removed in 4.1
+  'username|u=s'                            => \$opt{'username'},
   'configpath|config-file|config-dir|c|C=s' => \$opt{'configpath'},
   'create-prefs!'                           => \$opt{'create-prefs'},
   'pre=s'                                   => \@{$opt{'pre'}},
@@ -265,6 +266,7 @@ my $spamtest = Mail::SpamAssassin->new(
     rules_filename      => $opt{'configpath'},
     site_rules_filename => $opt{'siteconfigpath'},
     userprefs_filename  => $opt{'prefspath'},
+    username            => $opt{'username'},
     force_ipv4          => $opt{'force_ipv4'},
     force_ipv6          => $opt{'force_ipv6'},
     local_tests_only    => $opt{'local'},

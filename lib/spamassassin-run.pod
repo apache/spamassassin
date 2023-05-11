@@ -59,6 +59,8 @@ Options:
  --add-addr-to-welcomelist=addr    Add addr to persistent address welcomelist
  --add-addr-to-blocklist=addr      Add addr to persistent address blocklist
  --remove-addr-from-welcomelist=addr Remove addr from persistent address list
+ -u username, --username=username  Override username taken from the runtime
+                                   environment, used with SQL
  -4 --ipv4only, --ipv4-only, --ipv4 Use IPv4, disable use of IPv6 for DNS etc.
  -6                                Use IPv6, disable use of IPv4 where possible
  --progress                        Print progress bar
@@ -218,6 +220,17 @@ Previously --remove-addr-from-whitelist which will work interchangeably until 4.
 Remove the named email address from a persistent address welcomelist.  Note that
 you must be running C<spamassassin> or C<spamd> with a persistent address
 list plugin enabled for this to work.
+
+=item B<-u> I<username>, B<--username>=I<username>
+
+If specified this username will override the username taken from the runtime
+environment.  You can use this option to specify users in a virtual user
+configuration when using SQL as the Bayes backend.
+
+NOTE: This option will not change to the given I<username>, it will only attempt
+to act on behalf of that user.  Because of this you will need to have proper
+permissions to be able to change files owned by I<username>.  In the case of SQL
+this generally is not a problem.
 
 =item B< --ipv4only>, B<--ipv4-only>, B<--ipv4>
 
