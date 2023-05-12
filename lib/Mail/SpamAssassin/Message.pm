@@ -1262,10 +1262,11 @@ sub get_body_text_array_common {
   # already been done.
   my $html_needs_setting = !exists $self->{metadata}->{html};
 
-  my $text = $method_name eq 'invisible_rendered' ? ''
+  my $subject = $method_name eq 'invisible_rendered' ? ''
                : ($self->get_header('subject') || "\n");
 
   # Go through each part
+  my $text = '';
   for (my $pt = 0 ; $pt <= $#parts ; $pt++ ) {
     my $p = $parts[$pt];
 
@@ -1317,7 +1318,8 @@ sub get_body_text_array_common {
   $text =~ tr/\x00/\n/;			# null => newline
 
   utf8::encode($text) if utf8::is_utf8($text);
-  my @textary = split_into_array_of_short_lines($text);
+  utf8::encode($subject) if utf8::is_utf8($subject);
+  my @textary = split_into_array_of_short_lines($subject.$text);
   $self->{$key} = \@textary;
 
   return $self->{$key};
