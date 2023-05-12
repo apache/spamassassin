@@ -317,9 +317,6 @@ DAY_I_EARNED
 # good enough
 DEAR_BENEFICIARY
 
-# good enough
-DEAR_WINNER
-
 # tflags net
 DIGEST_MULTIPLE
 
@@ -482,7 +479,7 @@ FORGED_SPF_HELO
 # tflags publish
 FORM_FRAUD
 
-# tflags net
+# tflags publish
 FORM_FRAUD_3
 
 # tflags publish
@@ -560,7 +557,7 @@ FROM_MISSP_FREEMAIL
 # good enough
 FROM_MISSP_MSFT
 
-# tflags net
+# good enough
 FROM_MISSP_REPLYTO
 
 # tflags net
@@ -598,9 +595,6 @@ FSL_BULK_SIG
 
 # good enough
 FSL_CTYPE_WIN1251
-
-# good enough
-FSL_HELO_BARE_IP_1
 
 # tflags publish
 FSL_NEW_HELO_USER
@@ -761,9 +755,6 @@ HAS_X_NO_RELAY
 # tflags publish
 HAS_X_OUTGOING_SPAM_STAT
 
-# tflags net
-HDRS_LCASE
-
 # tflags publish
 HDRS_MISSP
 
@@ -796,6 +787,9 @@ HK_LOTTO
 
 # good enough
 HK_NAME_DRUGS
+
+# good enough
+HK_NAME_FROM
 
 # good enough
 HK_NAME_MR_MRS
@@ -838,9 +832,6 @@ HTML_ENTITY_ASCII
 
 # tflags publish
 HTML_ENTITY_ASCII_TINY
-
-# good enough
-HTML_FONT_TINY_NORDNS
 
 # tflags publish
 HTML_OFF_PAGE
@@ -1062,6 +1053,9 @@ ODD_FREEM_REPTO
 PDS_BAD_THREAD_QP_64
 
 # good enough
+PDS_BRAND_SUBJ_NAKED_TO
+
+# good enough
 PDS_BTC_ID
 
 # good enough
@@ -1095,7 +1089,7 @@ PDS_HELO_SPF_FAIL
 PDS_NO_FULL_NAME_SPOOFED_URL
 
 # good enough
-PDS_PRO_TLD
+PDS_PHPEXP_BOT
 
 # good enough
 PDS_SHORTFWD_URISHRT
@@ -1132,9 +1126,6 @@ PHP_SCRIPT
 
 # tflags publish
 PHP_SCRIPT_MUA
-
-# good enough
-POSSIBLE_AMAZON_PHISH_02
 
 # tflags publish
 POSSIBLE_APPLE_PHISH_02
@@ -1650,19 +1641,7 @@ TO_TOO_MANY_WFH_01
 TR_JS_REDIRECTION_0
 
 # good enough
-TVD_DOLLARS_US
-
-# good enough
-TVD_IP_HEX
-
-# good enough
-TVD_IP_SING_HEX
-
-# good enough
 TVD_PH_SUBJ_META
-
-# good enough
-TVD_SPACE_ENCODED
 
 # good enough
 TVD_SPACE_RATIO_MINFP
