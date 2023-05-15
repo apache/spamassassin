@@ -1358,6 +1358,9 @@ sub check_senders_reputation {
                     $pms->got_hit("TXREP", "TXREP: ", ruletype => 'eval', score => sprintf("%0.3f", $delta));
                 }
                 dbg("TxRep: message %s already scanned, using old data; post-TxRep score: %0.3f", $msg_id, $pms->{score} || 'undef');
+                if (!defined $self->{txKeepStoreTied}) {
+                  $self->finish();
+                }
                 return 0;
             }
         }       # no stored reputation found, go ahead with normal rep scan
