@@ -44,7 +44,6 @@ package Mail::SpamAssassin::Plugin::SpamCop;
 use Mail::SpamAssassin::Plugin;
 use Mail::SpamAssassin::Logger;
 use Mail::SpamAssassin::Util qw(untaint_var);
-use IO::Socket;
 use strict;
 use warnings;
 # use bytes;
