@@ -22,8 +22,6 @@ use warnings;
 # use bytes;
 use re 'taint';
 
-use NetAddr::IP 4.000;
-
 use Mail::SpamAssassin::Plugin;
 use Mail::SpamAssassin::Logger;
 

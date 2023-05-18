@@ -75,10 +75,10 @@ use Fcntl;
 use Errno qw(ENOENT EACCES EEXIST);
 use POSIX qw(:sys_wait_h WIFEXITED WIFSIGNALED WIFSTOPPED WEXITSTATUS
              WTERMSIG WSTOPSIG);
+use NetAddr::IP 4.010;
 
 ###########################################################################
 
-use constant HAS_NETADDR_IP => eval { require NetAddr::IP; };
 use constant HAS_MIME_BASE64 => eval { require MIME::Base64; };
 use constant RUNNING_ON_WINDOWS => ($^O =~ /^(?:mswin|dos|os2)/i);
 
@@ -1190,8 +1190,6 @@ sub reverse_ip_address {
     $revip = "$4.$3.$2.$1";
   } elsif (index($ip, ':') == -1 || $ip !~ /^[0-9a-fA-F:.]{2,}\z/) {  # triage
     # obviously unrecognized syntax
-  } elsif (!HAS_NETADDR_IP || !NetAddr::IP->can('full6')) {  # since NetAddr::IP 4.010
-    info("util: sufficiently new NetAddr::IP not found, IPv6 not supported");
   } else {
     # looks like an IPv6 address, let NetAddr::IP check the details
     my $ip_obj = NetAddr::IP->new6($ip);
