@@ -599,7 +599,11 @@ sub new_dns_packet {
     my $udp_payload_size = $self->{conf}->{dns_options}->{edns};
     if ($udp_payload_size && $udp_payload_size > 512) {
       # dbg("dns: adding EDNS ext, UDP payload size %d", $udp_payload_size);
-      $packet->edns->size($udp_payload_size);
+      if ($packet->edns->can('udpsize')) { # since Net::DNS 1.38
+        $packet->edns->udpsize($udp_payload_size);
+      } else {
+        $packet->edns->size($udp_payload_size);
+      }
     }
   }
 
