@@ -56,7 +56,7 @@ endif
 #  wget https://data.iana.org/TLD/tlds-alpha-by-domain.txt -q -O - | grep -i '^xn--' | idn -u | tr '\n' ' ' | fold -w 80 -s | perl -pe 's/\s+$//; s/.*/util_rb_tld \L$_\n/'
 
 if can(Mail::SpamAssassin::Conf::feature_registryboundaries)
-# Updated 2022-10-18
+# Updated 2023-05-19
 util_rb_tld xn--11b4c3d xn--1ck2e1b xn--1qqw23a xn--2scrj9c xn--30rr7y xn--3bst00m
 util_rb_tld xn--3ds443g xn--3e0b707e xn--3hcrj9c xn--3pxu8k xn--42c2d9a xn--45br5cyl
 util_rb_tld xn--45brj9c xn--45q11c xn--4dbrk0ce xn--4gbrim xn--54b7fta0cc xn--55qw42g
@@ -70,30 +70,30 @@ util_rb_tld xn--fiq64b xn--fiqs8s xn--fiqz9s xn--fjq720a xn--flw351e xn--fpcrj9c
 util_rb_tld xn--fzc2c9e2c xn--fzys8d69uvgm xn--g2xx48c xn--gckr3f0f xn--gecrj9c xn--gk3at1e
 util_rb_tld xn--h2breg3eve xn--h2brj9c xn--h2brj9c8c xn--hxt814e xn--i1b6b1a6a2e
 util_rb_tld xn--imr513n xn--io0a7i xn--j1aef xn--j1amh xn--j6w193g xn--jlq480n2rg
-util_rb_tld xn--jlq61u9w7b xn--jvr189m xn--kcrx77d1x4a xn--kprw13d xn--kpry57d xn--kput3i
-util_rb_tld xn--l1acc xn--lgbbat1ad8j xn--mgb9awbf xn--mgba3a3ejt xn--mgba3a4f16a
-util_rb_tld xn--mgba7c0bbn0a xn--mgbaakc7dvf xn--mgbaam7a8h xn--mgbab2bd xn--mgbah1a3hjkrd
-util_rb_tld xn--mgbai9azgqp6j xn--mgbayh7gpa xn--mgbbh1a xn--mgbbh1a71e xn--mgbc0a9azcg
-util_rb_tld xn--mgbca7dzdo xn--mgbcpq6gpa1a xn--mgberp4a5d4ar xn--mgbgu82a xn--mgbi4ecexp
-util_rb_tld xn--mgbpl2fh xn--mgbt3dhd xn--mgbtx2b xn--mgbx4cd0ab xn--mix891f xn--mk1bu44c
-util_rb_tld xn--mxtq1m xn--ngbc5azd xn--ngbe9e0a xn--ngbrx xn--node xn--nqv7f
-util_rb_tld xn--nqv7fs00ema xn--nyqy26a xn--o3cw4h xn--ogbpf8fl xn--otu796d xn--p1acf
-util_rb_tld xn--p1ai xn--pgbs0dh xn--pssy2u xn--q7ce6a xn--q9jyb4c xn--qcka1pmc xn--qxa6a
-util_rb_tld xn--qxam xn--rhqv96g xn--rovu88b xn--rvc1e0am3e xn--s9brj9c xn--ses554g
-util_rb_tld xn--t60b56a xn--tckwe xn--tiq49xqyj xn--unup4y xn--vermgensberater-ctb
-util_rb_tld xn--vermgensberatung-pwb xn--vhquv xn--vuq861b xn--w4r85el8fhu5dnra xn--w4rs40l
-util_rb_tld xn--wgbh1c xn--wgbl6a xn--xhq521b xn--xkc2al3hye2a xn--xkc2dl3a5ee0h xn--y9a3aq
-util_rb_tld xn--yfro4i67o xn--ygbi2ammx xn--zfr164b
+util_rb_tld xn--jvr189m xn--kcrx77d1x4a xn--kprw13d xn--kpry57d xn--kput3i xn--l1acc
+util_rb_tld xn--lgbbat1ad8j xn--mgb9awbf xn--mgba3a3ejt xn--mgba3a4f16a xn--mgba7c0bbn0a
+util_rb_tld xn--mgbaakc7dvf xn--mgbaam7a8h xn--mgbab2bd xn--mgbah1a3hjkrd xn--mgbai9azgqp6j
+util_rb_tld xn--mgbayh7gpa xn--mgbbh1a xn--mgbbh1a71e xn--mgbc0a9azcg xn--mgbca7dzdo
+util_rb_tld xn--mgbcpq6gpa1a xn--mgberp4a5d4ar xn--mgbgu82a xn--mgbi4ecexp xn--mgbpl2fh
+util_rb_tld xn--mgbt3dhd xn--mgbtx2b xn--mgbx4cd0ab xn--mix891f xn--mk1bu44c xn--mxtq1m
+util_rb_tld xn--ngbc5azd xn--ngbe9e0a xn--ngbrx xn--node xn--nqv7f xn--nqv7fs00ema
+util_rb_tld xn--nyqy26a xn--o3cw4h xn--ogbpf8fl xn--otu796d xn--p1acf xn--p1ai xn--pgbs0dh
+util_rb_tld xn--pssy2u xn--q7ce6a xn--q9jyb4c xn--qcka1pmc xn--qxa6a xn--qxam xn--rhqv96g
+util_rb_tld xn--rovu88b xn--rvc1e0am3e xn--s9brj9c xn--ses554g xn--t60b56a xn--tckwe
+util_rb_tld xn--tiq49xqyj xn--unup4y xn--vermgensberater-ctb xn--vermgensberatung-pwb
+util_rb_tld xn--vhquv xn--vuq861b xn--w4r85el8fhu5dnra xn--w4rs40l xn--wgbh1c xn--wgbl6a
+util_rb_tld xn--xhq521b xn--xkc2al3hye2a xn--xkc2dl3a5ee0h xn--y9a3aq xn--yfro4i67o
+util_rb_tld xn--ygbi2ammx xn--zfr164b
 endif
 
 # Standard List
 # For an up to date list of TLDs that can be pasted into this block, run this command:
 #  wget https://data.iana.org/TLD/tlds-alpha-by-domain.txt -q -O - | tail -n+2 | grep -vi '^xn--' | tr '\n' ' ' | fold -w 80 -s | perl -pe 's/\s+$//; s/.*/util_rb_tld \L$_\n/'
 
-# Updated 2022-10-18
+# Updated 2023-05-19
 util_rb_tld aaa aarp abarth abb abbott abbvie abc able abogado abudhabi ac academy
-util_rb_tld accenture accountant accountants aco actor ad adac ads adult ae aeg aero aetna
-util_rb_tld af afl africa ag agakhan agency ai aig airbus airforce airtel akdn al alfaromeo
+util_rb_tld accenture accountant accountants aco actor ad ads adult ae aeg aero aetna af
+util_rb_tld afl africa ag agakhan agency ai aig airbus airforce airtel akdn al alfaromeo
 util_rb_tld alibaba alipay allfinanz allstate ally alsace alstom am amazon americanexpress
 util_rb_tld americanfamily amex amfam amica amsterdam analytics android anquan anz ao aol
 util_rb_tld apartments app apple aq aquarelle ar arab aramco archi army arpa art arte as
@@ -147,10 +147,10 @@ util_rb_tld koeln komatsu kosher kp kpmg kpn kr krd kred kuokgroup kw ky kyoto k
 util_rb_tld lacaixa lamborghini lamer lancaster lancia land landrover lanxess lasalle lat
 util_rb_tld latino latrobe law lawyer lb lc lds lease leclerc lefrak legal lego lexus lgbt
 util_rb_tld li lidl life lifeinsurance lifestyle lighting like lilly limited limo lincoln
-util_rb_tld linde link lipsy live living lk llc llp loan loans locker locus loft lol london
-util_rb_tld lotte lotto love lpl lplfinancial lr ls lt ltd ltda lu lundbeck luxe luxury lv
-util_rb_tld ly ma macys madrid maif maison makeup man management mango map market marketing
-util_rb_tld markets marriott marshalls maserati mattel mba mc mckinsey md me med media meet
+util_rb_tld link lipsy live living lk llc llp loan loans locker locus lol london lotte
+util_rb_tld lotto love lpl lplfinancial lr ls lt ltd ltda lu lundbeck luxe luxury lv ly ma
+util_rb_tld madrid maif maison makeup man management mango map market marketing markets
+util_rb_tld marriott marshalls maserati mattel mba mc mckinsey md me med media meet
 util_rb_tld melbourne meme memorial men menu merckmsd mg mh miami microsoft mil mini mint
 util_rb_tld mit mitsubishi mk ml mlb mls mm mma mn mo mobi mobile moda moe moi mom monash
 util_rb_tld money monster mormon mortgage moscow moto motorcycles mov movie mp mq mr ms msd
@@ -173,9 +173,9 @@ util_rb_tld room rs rsvp ru rugby ruhr run rw rwe ryukyu sa saarland safe safety
 util_rb_tld sale salon samsclub samsung sandvik sandvikcoromant sanofi sap sarl sas save
 util_rb_tld saxo sb sbi sbs sc sca scb schaeffler schmidt scholarships school schule
 util_rb_tld schwarz science scot sd se search seat secure security seek select sener
-util_rb_tld services ses seven sew sex sexy sfr sg sh shangrila sharp shaw shell shia
-util_rb_tld shiksha shoes shop shopping shouji show showtime si silk sina singles site sj
-util_rb_tld sk ski skin sky skype sl sling sm smart smile sn sncf so soccer social softbank
+util_rb_tld services seven sew sex sexy sfr sg sh shangrila sharp shaw shell shia shiksha
+util_rb_tld shoes shop shopping shouji show showtime si silk sina singles site sj sk ski
+util_rb_tld skin sky skype sl sling sm smart smile sn sncf so soccer social softbank
 util_rb_tld software sohu solar solutions song sony soy spa space sport spot sr srl ss st
 util_rb_tld stada staples star statebank statefarm stc stcgroup stockholm storage store
 util_rb_tld stream studio study style su sucks supplies supply support surf surgery suzuki
