@@ -99,9 +99,9 @@ if can(Mail::SpamAssassin::Conf::feature_capture_rules)
   describe      GB_YOUTUBE_EMAIL Youtube attribution links abuse
   score         GB_YOUTUBE_EMAIL 2.000 # limit
 
-  uri           __GB_CUSTOM_HTM_URI0    m;^https?://.{10,128}(?:\.html?|\.php|\/)(?:\#|\?&e=)%{GB_TO_ADDR};i
+  uri           __GB_CUSTOM_HTM_URI0    m;^https?://.{10,128}(?:\.html?|\.php|\/)?(?:\#|\?&e=)%{GB_TO_ADDR};i
   uri           __GB_CUSTOM_HTM_URI1    m|^https?://.{10,64}\=https?://.{4,64}\#%{GB_TO_ADDR}|i
-  uri           __GB_CUSTOM_HTM_URI2    m;^https?://.{10,256}(?:\/\?)?(?:email=|wapp\#)%{GB_TO_ADDR};i
+  uri           __GB_CUSTOM_HTM_URI2    m;^https?://.{10,256}(?:\/\?)?(?:(?<!blocker)email=|audit\#|wapp\#)%{GB_TO_ADDR};i
   uri           __GB_DRUPAL_URI         m|^https?://.{10,64}/default/files/(?:\@)?\#%{GB_TO_ADDR}|i
   meta          GB_CUSTOM_HTM_URI       ( __GB_CUSTOM_HTM_URI0 || __GB_CUSTOM_HTM_URI1 || __GB_CUSTOM_HTM_URI2 || __GB_DRUPAL_URI )
   describe      GB_CUSTOM_HTM_URI       Custom html uri
