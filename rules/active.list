@@ -770,7 +770,7 @@ HAS_X_NO_RELAY
 # tflags publish
 HAS_X_OUTGOING_SPAM_STAT
 
-# tflags net
+# good enough
 HDRS_LCASE
 
 # tflags publish
@@ -848,13 +848,16 @@ HTML_ENTITY_ASCII
 # tflags publish
 HTML_ENTITY_ASCII_TINY
 
+# good enough
+HTML_FONT_TINY_NORDNS
+
 # tflags publish
 HTML_OFF_PAGE
 
 # tflags publish
 HTML_SHRT_CMNT_OBFU_MANY
 
-# tflags net
+# tflags publish
 HTML_SINGLET_MANY
 
 # good enough
@@ -877,9 +880,6 @@ JH_SPAMMY_PATTERN01
 
 # tflags publish
 JH_SPAMMY_PATTERN02
-
-# tflags net
-KHOP_FAKE_EBAY
 
 # tflags net
 KHOP_HELO_FCRDNS
@@ -1508,6 +1508,9 @@ SCC_ISEMM_LID_1A
 # tflags publish
 SCC_ISEMM_LID_1B
 
+# good enough
+SCC_SPAMMER_ADDR_2
+
 # tflags publish
 SCC_SPECIAL_GUID
 
@@ -1643,9 +1646,6 @@ THIS_IS_ADV_SUSP_NTLD
 # tflags publish
 TONLINE_FAKE_DKIM
 
-# good enough
-TONOM_EQ_TOLOC_SHRT_SHRTNER
-
 # tflags publish
 TO_EQ_FM_DIRECT_MX
 
@@ -1654,6 +1654,9 @@ TO_EQ_FM_DOM_HTML_IMG
 
 # tflags net
 TO_EQ_FM_DOM_SPF_FAIL
+
+# tflags net
+TO_EQ_FM_HTML_ONLY
 
 # tflags net
 TO_EQ_FM_SPF_FAIL
@@ -1673,7 +1676,7 @@ TO_NO_BRKTS_HTML_IMG
 # tflags publish
 TO_NO_BRKTS_HTML_ONLY
 
-# tflags net
+# good enough
 TO_NO_BRKTS_MSFT
 
 # tflags publish
@@ -1699,9 +1702,6 @@ TVD_SPACE_ENCODED
 
 # good enough
 TVD_SPACE_RATIO_MINFP
-
-# tflags net
-TVD_SUBJ_NUM_OBFU_MINFP
 
 # good enough
 TVD_VISIT_PHARMA
