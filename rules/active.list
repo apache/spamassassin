@@ -191,7 +191,7 @@ BITCOIN_IMGUR
 # good enough
 BITCOIN_MALF_HTML
 
-# tflags net
+# tflags publish
 BITCOIN_MALWARE
 
 # tflags publish
@@ -296,7 +296,7 @@ CN_B2B_SPAMMER
 # tflags publish
 COMMENT_GIBBERISH
 
-# tflags net
+# good enough
 COMPENSATION
 
 # tflags publish
@@ -388,6 +388,9 @@ DMARC_REJECT
 
 # tflags publish
 DOS_ANAL_SPAM_MAILER
+
+# good enough
+DOS_BODY_HIGH_NO_MID
 
 # tflags net
 DOS_DEREK_AUG08
@@ -860,7 +863,7 @@ HTML_OFF_PAGE
 # tflags publish
 HTML_SHRT_CMNT_OBFU_MANY
 
-# tflags publish
+# tflags net
 HTML_SINGLET_MANY
 
 # good enough
@@ -883,6 +886,9 @@ JH_SPAMMY_PATTERN01
 
 # tflags publish
 JH_SPAMMY_PATTERN02
+
+# tflags net
+KHOP_FAKE_EBAY
 
 # tflags net
 KHOP_HELO_FCRDNS
@@ -934,9 +940,6 @@ MANY_HDRS_LCASE
 
 # tflags publish
 MANY_SPAN_IN_TEXT
-
-# tflags net
-MAY_BE_FORGED
 
 # tflags publish
 MILLION_HUNDRED
@@ -1106,7 +1109,7 @@ PDS_FRNOM_TODOM_DBL_URL
 # good enough
 PDS_FRNOM_TODOM_NAKED_TO
 
-# tflags net
+# good enough
 PDS_FROM_2_EMAILS
 
 # good enough
@@ -1120,6 +1123,9 @@ PDS_HELO_SPF_FAIL
 
 # good enough
 PDS_HP_HELO_NORDNS
+
+# good enough
+PDS_OTHER_BAD_TLD
 
 # good enough
 PDS_RDNS_DYNAMIC_FP
@@ -1611,6 +1617,9 @@ SUBJECT_IN_WELCOMELIST
 SUBJ_BRKN_WORDNUMS
 
 # tflags net
+SUBJ_UNNEEDED_HTML
+
+# tflags net
 SURBL_BLOCKED
 
 # good enough
@@ -1649,7 +1658,7 @@ TONLINE_FAKE_DKIM
 # tflags publish
 TO_EQ_FM_DIRECT_MX
 
-# good enough
+# tflags net
 TO_EQ_FM_DOM_HTML_IMG
 
 # tflags net
@@ -1657,6 +1666,9 @@ TO_EQ_FM_DOM_HTML_ONLY
 
 # tflags net
 TO_EQ_FM_DOM_SPF_FAIL
+
+# tflags net
+TO_EQ_FM_HTML_ONLY
 
 # tflags net
 TO_EQ_FM_SPF_FAIL
@@ -1703,7 +1715,7 @@ TVD_SPACE_ENCODED
 # good enough
 TVD_SPACE_ENC_FM_MIME
 
-# good enough
+# tflags net
 TVD_SPACE_RATIO_MINFP
 
 # good enough
