@@ -60,7 +60,7 @@ our @EXPORT_OK = qw(&local_tz &base64_decode &base64_encode &base32_encode
                   &parse_rfc822_date &idn_to_ascii &is_valid_utf_8
                   &get_user_groups &compile_regexp &qr_to_string
                   &is_fqdn_valid &parse_header_addresses &force_die
-                  &domain_to_search_list);
+                  &domain_to_search_list &get_part_details);
 
 our $AM_TAINTED;
 
@@ -2553,6 +2553,82 @@ sub parse_header_addresses {
   }
 
   return @results;
+}
+
+sub get_part_details {
+    my ($pms, $part, $prefer_contentdisposition) = @_;
+    #https://en.wikipedia.org/wiki/MIME#Content-Disposition
+    #https://github.com/mikel/mail/pull/464
+
+    my $ctt = $part->get_header('content-type');
+    return undef unless defined $ctt; ## no critic (ProhibitExplicitReturnUndef)
+
+    my $cte = lc($part->get_header('content-transfer-encoding') || '');
+    return undef unless ($cte =~ /^(?:base64|quoted\-printable)$/); ## no critic (ProhibitExplicitReturnUndef)
+
+    $ctt = _decode_part_header($part, $ctt || '');
+
+    my $name = '';
+    my $cttname = '';
+    my $ctdname = '';
+
+    if ($ctt =~ m/name\s*=\s*["']?([^"';]*)/is) {
+      $cttname = $1;
+      $cttname =~ s/\s+$//;
+    }
+
+    my $ctd = $part->get_header('content-disposition');
+    $ctd = _decode_part_header($part, $ctd || '');
+
+    if ($ctd =~ m/filename\s*=\s*["']?([^"';]*)/is) {
+      $ctdname = $1;
+      $ctdname =~ s/\s+$//;
+    }
+
+    if (lc $ctdname eq lc $cttname) {
+      $name = $ctdname;
+    } elsif ($ctdname eq '') {
+      $name = $cttname;
+    } elsif ($cttname eq '') {
+      $name = $ctdname;
+    } else {
+      if ((defined $ctdname) and $prefer_contentdisposition) {
+        $name = $ctdname;
+      } else {
+        $name = $cttname;
+      }
+    }
+
+    return $ctt, $ctd, $cte, $name;
+}
+
+sub _decode_part_header {
+  my($part, $header_field_body) = @_;
+
+  return '' unless defined $header_field_body && $header_field_body ne '';
+
+  # deal with folding and cream the newlines and such
+  $header_field_body =~ s/\n[ \t]+/\n /g;
+  $header_field_body =~ s/\015?\012//gs;
+
+  local($1,$2,$3);
+
+  # Multiple encoded sections must ignore the interim whitespace.
+  # To avoid possible FPs with (\s+(?==\?))?, look for the whole RE
+  # separated by whitespace.
+  1 while $header_field_body =~
+            s{ ( = \? [A-Za-z0-9_-]+ \? [bqBQ] \? [^?]* \? = ) \s+
+               ( = \? [A-Za-z0-9_-]+ \? [bqBQ] \? [^?]* \? = ) }
+             {$1$2}xsg;
+
+  # transcode properly encoded RFC 2047 substrings into UTF-8 octets,
+  # leave everything else unchanged as it is supposed to be UTF-8 (RFC 6532)
+  # or plain US-ASCII
+  $header_field_body =~
+    s{ (?: = \? ([A-Za-z0-9_-]+) \? ([bqBQ]) \? ([^?]*) \? = ) }
+     { $part->__decode_header($1, uc($2), $3) }xsge;
+
+  return $header_field_body;
 }
 
 # Check some basic parsing mistakes
