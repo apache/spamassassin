@@ -563,7 +563,7 @@ FROM_MISSP_FREEMAIL
 # good enough
 FROM_MISSP_MSFT
 
-# good enough
+# tflags net
 FROM_MISSP_REPLYTO
 
 # tflags net
@@ -863,7 +863,7 @@ HTML_OFF_PAGE
 # tflags publish
 HTML_SHRT_CMNT_OBFU_MANY
 
-# tflags net
+# tflags publish
 HTML_SINGLET_MANY
 
 # good enough
@@ -886,9 +886,6 @@ JH_SPAMMY_PATTERN01
 
 # tflags publish
 JH_SPAMMY_PATTERN02
-
-# tflags net
-KHOP_FAKE_EBAY
 
 # tflags net
 KHOP_HELO_FCRDNS
@@ -935,7 +932,7 @@ MALWARE_PASSWORD
 # tflags publish
 MALW_ATTACH
 
-# tflags net
+# good enough
 MANY_HDRS_LCASE
 
 # tflags publish
@@ -1109,7 +1106,7 @@ PDS_FRNOM_TODOM_DBL_URL
 # good enough
 PDS_FRNOM_TODOM_NAKED_TO
 
-# good enough
+# tflags net
 PDS_FROM_2_EMAILS
 
 # good enough
@@ -1613,6 +1610,9 @@ SUBJECT_IN_BLOCKLIST
 # tflags userconf
 SUBJECT_IN_WELCOMELIST
 
+# good enough
+SUBJ_ATTENTION
+
 # tflags net
 SUBJ_BRKN_WORDNUMS
 
@@ -1624,6 +1624,9 @@ SURBL_BLOCKED
 
 # good enough
 SUSP_UTF8_WORD_COMBO
+
+# good enough
+SUSP_UTF8_WORD_FROM
 
 # good enough
 SUSP_UTF8_WORD_SUBJ
@@ -1658,17 +1661,11 @@ TONLINE_FAKE_DKIM
 # tflags publish
 TO_EQ_FM_DIRECT_MX
 
-# tflags net
+# good enough
 TO_EQ_FM_DOM_HTML_IMG
 
 # tflags net
-TO_EQ_FM_DOM_HTML_ONLY
-
-# tflags net
 TO_EQ_FM_DOM_SPF_FAIL
-
-# tflags net
-TO_EQ_FM_HTML_ONLY
 
 # tflags net
 TO_EQ_FM_SPF_FAIL
@@ -1688,7 +1685,7 @@ TO_NO_BRKTS_HTML_IMG
 # tflags publish
 TO_NO_BRKTS_HTML_ONLY
 
-# tflags net
+# good enough
 TO_NO_BRKTS_MSFT
 
 # tflags publish
@@ -1715,8 +1712,11 @@ TVD_SPACE_ENCODED
 # good enough
 TVD_SPACE_ENC_FM_MIME
 
-# tflags net
+# good enough
 TVD_SPACE_RATIO_MINFP
+
+# tflags net
+TVD_SUBJ_NUM_OBFU_MINFP
 
 # good enough
 TVD_VISIT_PHARMA
