@@ -81,7 +81,7 @@ my %method_ptype_prop = (
   'rrvs' => {'smtp' => {'rcptto'=>1}},
   'sender-id' => {'header' => {'*'=>1}},
   'smime' => {'body' => {'smime-part'=>1,'smime-identifer'=>1,'smime-serial'=>1,'smime-issuer'=>1}},
-  'spf' => {'smtp' => {'mailfrom'=>1,'helo'=>1,'rcpttodomain'=>1}},
+  'spf' => {'smtp' => {'mailfrom'=>1,'mfrom'=>1,'helo'=>1,'rcpttodomain'=>1}},
   'vbr' => {'header' => {'md'=>1,'mv'=>1}},
 );
       
