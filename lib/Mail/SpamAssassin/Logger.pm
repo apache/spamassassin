@@ -293,6 +293,7 @@ sub _log {
   my ($level, $message, @args) = @_;
 
   utf8::encode($message)  if utf8::is_utf8($message); # handle as octets
+  foreach (@args) { utf8::encode($_)  if utf8::is_utf8($_); } # Bug 8138
 
   $message =~ s/^(?:[a-z0-9_-]*):\s*//i;
 
