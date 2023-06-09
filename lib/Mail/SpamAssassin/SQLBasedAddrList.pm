@@ -212,7 +212,6 @@ sub get_addr_entry {
       info("auto-welcomelist: sql-based get_addr_entry %s: SQL prepare error: %s",
          "$self->{_username}|$ip", $self->{dbh}->errstr);
     }
-    dbg("TxRep: $sql $self->{_username} $email");
     $rc = $sth->execute($self->{_username}, $email);
     my $cnt = 0;
     my $aryref;
