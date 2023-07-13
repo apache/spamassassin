@@ -131,6 +131,9 @@ ARC_VALID
 # good enough
 AXB_XMAILER_MIMEOLE_OL_024C2
 
+# good enough
+AXB_XM_FORGED_OL2600
+
 # tflags learn
 BAYES_00
 
@@ -257,7 +260,7 @@ BODY_SINGLE_URI
 # good enough
 BODY_SINGLE_WORD
 
-# tflags net
+# tflags publish
 BODY_URI_ONLY
 
 # tflags publish
@@ -473,7 +476,7 @@ FONT_INVIS_POSTEXTRAS
 # tflags net
 FORGED_SPF_HELO
 
-# tflags net
+# tflags publish
 FORM_FRAUD
 
 # tflags publish
@@ -845,9 +848,6 @@ HTML_SHRT_CMNT_OBFU_MANY
 # tflags publish
 HTML_SINGLET_MANY
 
-# good enough
-HTML_TAG_BALANCE_CENTER
-
 # tflags net
 HTML_TEXT_INVISIBLE_FONT
 
@@ -917,14 +917,11 @@ MALWARE_PASSWORD
 # tflags publish
 MALW_ATTACH
 
-# tflags net
+# good enough
 MANY_HDRS_LCASE
 
 # tflags publish
 MANY_SPAN_IN_TEXT
-
-# tflags net
-MAY_BE_FORGED
 
 # tflags publish
 MILLION_HUNDRED
@@ -1598,13 +1595,13 @@ TAGSTAT_IMG_NOT_RCVD_TGST
 # tflags publish
 TARINGANET_IMG_NOT_RCVD_TN
 
-# tflags net
+# tflags publish
 TEQF_USR_IMAGE
 
 # tflags publish
 TEQF_USR_MSGID_HEX
 
-# tflags net
+# tflags publish
 TEQF_USR_MSGID_MALF
 
 # tflags publish
@@ -1622,14 +1619,11 @@ TONOM_EQ_TOLOC_SHRT_SHRTNER
 # tflags publish
 TO_EQ_FM_DIRECT_MX
 
-# tflags net
+# good enough
 TO_EQ_FM_DOM_HTML_IMG
 
 # tflags net
 TO_EQ_FM_DOM_SPF_FAIL
-
-# tflags net
-TO_EQ_FM_HTML_ONLY
 
 # tflags net
 TO_EQ_FM_SPF_FAIL
@@ -1649,7 +1643,7 @@ TO_NO_BRKTS_HTML_IMG
 # tflags publish
 TO_NO_BRKTS_HTML_ONLY
 
-# tflags net
+# good enough
 TO_NO_BRKTS_MSFT
 
 # tflags publish
@@ -1667,14 +1661,11 @@ TVD_IP_HEX
 # good enough
 TVD_IP_SING_HEX
 
-# tflags net
+# good enough
 TVD_SPACE_ENCODED
 
 # good enough
 TVD_SPACE_RATIO_MINFP
-
-# tflags net
-TVD_SUBJ_NUM_OBFU_MINFP
 
 # good enough
 TVD_VISIT_PHARMA
@@ -1865,7 +1856,7 @@ URI_WPADMIN
 # tflags publish
 URI_WP_DIRINDEX
 
-# tflags net
+# tflags publish
 URI_WP_HACKED
 
 # tflags publish
@@ -1939,3 +1930,6 @@ XPRIO
 
 # tflags publish
 XPRIO_SHORT_SUBJ
+
+# good enough
+YOUR_PERMISSION
