@@ -191,7 +191,7 @@ BITCOIN_IMGUR
 # good enough
 BITCOIN_MALF_HTML
 
-# tflags net
+# tflags publish
 BITCOIN_MALWARE
 
 # tflags publish
@@ -299,7 +299,7 @@ CN_B2B_SPAMMER
 # tflags publish
 COMMENT_GIBBERISH
 
-# tflags net
+# good enough
 COMPENSATION
 
 # tflags publish
@@ -482,7 +482,7 @@ FONT_INVIS_POSTEXTRAS
 # tflags net
 FORGED_SPF_HELO
 
-# tflags net
+# tflags publish
 FORM_FRAUD
 
 # tflags publish
@@ -566,7 +566,7 @@ FROM_MISSP_FREEMAIL
 # good enough
 FROM_MISSP_MSFT
 
-# good enough
+# tflags net
 FROM_MISSP_REPLYTO
 
 # tflags net
@@ -598,9 +598,6 @@ FROM_SUSPICIOUS_NTLD_FP
 
 # good enough
 FROM_UNBAL1
-
-# good enough
-FROM_UNBAL2
 
 # good enough
 FROM_WSP_TRAIL
@@ -764,9 +761,6 @@ HAS_X_NO_RELAY
 # tflags publish
 HAS_X_OUTGOING_SPAM_STAT
 
-# tflags net
-HDRS_LCASE
-
 # tflags publish
 HDRS_MISSP
 
@@ -851,7 +845,7 @@ HTML_OFF_PAGE
 # tflags publish
 HTML_SHRT_CMNT_OBFU_MANY
 
-# tflags publish
+# tflags net
 HTML_SINGLET_MANY
 
 # tflags net
@@ -920,7 +914,7 @@ MALWARE_PASSWORD
 # tflags publish
 MALW_ATTACH
 
-# tflags net
+# good enough
 MANY_HDRS_LCASE
 
 # tflags publish
@@ -1094,6 +1088,9 @@ PDS_FRNOM_TODOM_DBL_URL
 # good enough
 PDS_FRNOM_TODOM_NAKED_TO
 
+# tflags net
+PDS_FROM_2_EMAILS
+
 # good enough
 PDS_FROM_NAME_TO_DOMAIN
 
@@ -1105,9 +1102,6 @@ PDS_HP_HELO_NORDNS
 
 # good enough
 PDS_TINYSUBJ_URISHRT
-
-# good enough
-PDS_TONAME_EQ_TOLOCAL_VSHORT
 
 # good enough
 PDS_TO_EQ_FROM_NAME
@@ -1499,9 +1493,6 @@ SERGIO_SUBJECT_VIAGRA01
 # tflags publish
 SHOPIFY_IMG_NOT_RCVD_SFY
 
-# good enough
-SHORTENED_URL_SRC
-
 # tflags publish
 SHORTENER_SHORT_IMG
 
@@ -1584,9 +1575,6 @@ SUBJ_BRKN_WORDNUMS
 SUBJ_BROKEN_WORD
 
 # tflags net
-SUBJ_UNNEEDED_HTML
-
-# tflags net
 SURBL_BLOCKED
 
 # good enough
@@ -1607,7 +1595,7 @@ TARINGANET_IMG_NOT_RCVD_TN
 # tflags publish
 TEQF_USR_IMAGE
 
-# tflags net
+# tflags publish
 TEQF_USR_MSGID_HEX
 
 # tflags publish
@@ -1655,7 +1643,7 @@ TO_NO_BRKTS_HTML_IMG
 # tflags publish
 TO_NO_BRKTS_HTML_ONLY
 
-# good enough
+# tflags net
 TO_NO_BRKTS_MSFT
 
 # tflags publish
@@ -1673,14 +1661,11 @@ TVD_IP_HEX
 # good enough
 TVD_IP_SING_HEX
 
-# good enough
+# tflags net
 TVD_SPACE_ENCODED
 
-# tflags net
+# good enough
 TVD_SPACE_RATIO_MINFP
-
-# tflags net
-TVD_SUBJ_NUM_OBFU_MINFP
 
 # good enough
 TVD_VISIT_PHARMA
@@ -1871,7 +1856,7 @@ URI_WPADMIN
 # tflags publish
 URI_WP_DIRINDEX
 
-# tflags publish
+# tflags net
 URI_WP_HACKED
 
 # tflags publish
@@ -1927,6 +1912,9 @@ WORD_INVIS
 
 # tflags publish
 WORD_INVIS_MANY
+
+# good enough
+XFER_LOTSA_MONEY
 
 # tflags publish
 XM_DIGITS_ONLY
