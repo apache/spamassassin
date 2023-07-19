@@ -255,6 +255,7 @@ sub _read_configfile {
 
 	# CSV: Date,Score,URL,IP
         @phstats_ln = split(/,/, $_);
+        next if (not defined $phstats_ln[1] or not defined $phstats_ln[2]);
         $phstats_ln[1] =~ s/\"//g;
         $phstats_ln[2] =~ s/\"//g;
 	if ( $conf->{phishing_phishstats_minscore} >= $phstats_ln[1] ) {
