@@ -4,7 +4,7 @@ use lib '.'; use lib 't';
 use SATest;
 use Test::More;
 
-sa_t_init("sa_txrep_sql");
+sa_t_init("sa_txrep_welcomelist_out");
 
 use constant HAS_DBI => eval { require DBI; };
 use constant HAS_DBD_SQLITE => eval { require DBD::SQLite; DBD::SQLite->VERSION(1.59_01); };
@@ -24,17 +24,44 @@ plan tests => $tests;
 
 # ---------------------------------------------------------------------------
 
+my $rules = q(
+    add_header all Status "_YESNO_, score=_SCORE_ required=_REQD_ tests=_TESTS_ autolearn=_AUTOLEARN_ version=_VERSION_"
+    # Needed for TXREP to run
+    header TXREP eval:check_senders_reputation()
+    priority TXREP 1000
+    # Fixed message scores to keep track of correct scoring
+    header   FORGED_GMAIL_RCVD  eval:check_for_forged_gmail_received_headers()
+
+    full     DKIM_SIGNED        eval:check_dkim_signed()
+    full     DKIM_VALID         eval:check_dkim_valid()
+    meta     DKIM_INVALID       DKIM_SIGNED && !DKIM_VALID
+    full     DKIM_VALID_AU      eval:check_dkim_valid_author_sig()
+    full     DKIM_VALID_EF      eval:check_dkim_valid_envelopefrom()
+    score    DKIM_SIGNED        0.1
+    score    DKIM_VALID         -0.1
+    score    DKIM_INVALID       0.1
+    score    DKIM_VALID_AU      -0.1
+    score    DKIM_VALID_EF      -0.1
+
+    header   ALL_TRUSTED        eval:check_all_trusted()
+    header   ALL_TRUSTED        -1.0
+);
+
+tstpre ("
+  loadplugin Mail::SpamAssassin::Plugin::TxRep
+  loadplugin Mail::SpamAssassin::Plugin::DKIM
+");
+
+# only use rules defined here in tstprefs()
+clear_localrules();
+
 %txrep_pattern0 = (
-  q{ -0.1 TXREP } => 'Score normalizing',
+  q{ -0.2 TXREP } => 'Score normalizing',
 );
 
 %txrep_pattern1 = (
   q{ 0.1 TXREP } => 'Score normalizing',
 );
-
-tstpre ("
-  loadplugin Mail::SpamAssassin::Plugin::TxRep
-");
 
 sub create_db {
   my $workdir = shift;
@@ -78,6 +105,7 @@ if (SQLITE) {
     internal_networks 64.142.3.173
     trusted_networks 64.142.3.173
     user_awl_dsn dbi:SQLite:dbname=$workdir/txrep.db
+    $rules
   ");
 
   %anti_patterns = %txrep_pattern0;
@@ -100,6 +128,7 @@ if (SQLITE) {
     internal_networks 64.142.3.173
     trusted_networks 64.142.3.173
     user_awl_dsn dbi:SQLite:dbname=$workdir/txrep.db
+    $rules
   ");
 
   create_db($workdir);
@@ -123,6 +152,7 @@ if (SQLITE) {
     internal_networks 64.142.3.173
     trusted_networks 64.142.3.173
     user_awl_dsn dbi:SQLite:dbname=$workdir/txrep.db
+    $rules
   ");
 
   create_db($workdir);
@@ -146,6 +176,7 @@ if (SQLITE) {
     internal_networks 64.142.3.173
     trusted_networks 64.142.3.173
     user_awl_dsn dbi:SQLite:dbname=$workdir/txrep.db
+    $rules
   ");
 
   create_db($workdir);
@@ -185,6 +216,7 @@ if (SQL) {
     trusted_networks 64.142.3.173
     $dbconfig
     user_awl_sql_override_username $testuser-$idx
+    $rules
   ");
 
   %anti_patterns = %txrep_pattern0;
@@ -209,6 +241,7 @@ if (SQL) {
     trusted_networks 64.142.3.173
     $dbconfig
     user_awl_sql_override_username $testuser-$idx
+    $rules
   ");
 
   %anti_patterns = %txrep_pattern1;
@@ -233,6 +266,7 @@ if (SQL) {
     trusted_networks 64.142.3.173
     $dbconfig
     user_awl_sql_override_username $testuser-$idx
+    $rules
   ");
 
   %anti_patterns = %txrep_pattern1;
@@ -257,6 +291,7 @@ if (SQL) {
     trusted_networks 64.142.3.173
     $dbconfig
     user_awl_sql_override_username $testuser-$idx
+    $rules
   ");
 
   %anti_patterns = %txrep_pattern0;
