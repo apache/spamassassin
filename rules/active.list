@@ -132,6 +132,9 @@ ARC_VALID
 AXB_XMAILER_MIMEOLE_OL_024C2
 
 # good enough
+AXB_XMAILER_MIMEOLE_OL_1ECD5
+
+# good enough
 AXB_XM_FORGED_OL2600
 
 # tflags learn
@@ -299,7 +302,7 @@ CN_B2B_SPAMMER
 # tflags publish
 COMMENT_GIBBERISH
 
-# good enough
+# tflags net
 COMPENSATION
 
 # tflags publish
@@ -563,7 +566,7 @@ FROM_MISSP_FREEMAIL
 # good enough
 FROM_MISSP_MSFT
 
-# tflags net
+# good enough
 FROM_MISSP_REPLYTO
 
 # tflags net
@@ -845,7 +848,7 @@ HTML_OFF_PAGE
 # tflags publish
 HTML_SHRT_CMNT_OBFU_MANY
 
-# tflags publish
+# tflags net
 HTML_SINGLET_MANY
 
 # good enough
@@ -922,6 +925,9 @@ MANY_HDRS_LCASE
 
 # tflags publish
 MANY_SPAN_IN_TEXT
+
+# tflags net
+MAY_BE_FORGED
 
 # tflags publish
 MILLION_HUNDRED
@@ -1397,9 +1403,6 @@ RCVD_IN_ZEN_BLOCKED
 # tflags net
 RCVD_IN_ZEN_BLOCKED_OPENDNS
 
-# good enough
-RDNS_LOCALHOST
-
 # tflags publish
 RDNS_NUM_TLD_ATCHNX
 
@@ -1459,6 +1462,9 @@ RISK_FREE
 
 # good enough
 SCC_BODY_SINGLE_WORD
+
+# good enough
+SCC_BODY_URI_ONLY
 
 # good enough
 SCC_CANSPAM_2
@@ -1562,9 +1568,6 @@ STATIC_XPRIO_OLE
 # tflags publish
 STOCK_TIP
 
-# good enough
-STOX_BOUND_090909_B
-
 # tflags userconf
 SUBJECT_IN_BLOCKLIST
 
@@ -1601,13 +1604,13 @@ TAGSTAT_IMG_NOT_RCVD_TGST
 # tflags publish
 TARINGANET_IMG_NOT_RCVD_TN
 
-# tflags net
+# tflags publish
 TEQF_USR_IMAGE
 
-# tflags net
+# tflags publish
 TEQF_USR_MSGID_HEX
 
-# tflags net
+# tflags publish
 TEQF_USR_MSGID_MALF
 
 # tflags publish
@@ -1625,7 +1628,7 @@ TONOM_EQ_TOLOC_SHRT_SHRTNER
 # tflags publish
 TO_EQ_FM_DIRECT_MX
 
-# tflags net
+# good enough
 TO_EQ_FM_DOM_HTML_IMG
 
 # tflags net
@@ -1655,7 +1658,7 @@ TO_NO_BRKTS_HTML_IMG
 # tflags publish
 TO_NO_BRKTS_HTML_ONLY
 
-# tflags net
+# good enough
 TO_NO_BRKTS_MSFT
 
 # tflags publish
@@ -1676,7 +1679,7 @@ TVD_IP_HEX
 # tflags net
 TVD_SPACE_ENCODED
 
-# good enough
+# tflags net
 TVD_SPACE_RATIO_MINFP
 
 # good enough
@@ -1868,7 +1871,7 @@ URI_WPADMIN
 # tflags publish
 URI_WP_DIRINDEX
 
-# tflags publish
+# tflags net
 URI_WP_HACKED
 
 # tflags publish
