@@ -57,6 +57,7 @@ our ($have_getaddrinfo_in_core, $have_getaddrinfo_legacy, $io_socket_module_name
 
 # don't force requirement on IO::Socket::IP or IO::Socket::INET6
 BEGIN {
+  require Socket;
   $have_getaddrinfo_in_core = eval {
     # The Socket module (1.94) bundled with Perl 5.14.* provides
     # new affordances for IPv6, including implementations of the
@@ -83,7 +84,6 @@ BEGIN {
     &NI_NUMERICHOST; &NI_NUMERICSERV; &NI_NAMEREQD; 1;
   };
 
-  require Socket;
   Socket->import(qw(:DEFAULT IPPROTO_TCP));
 
   &SOCK_STREAM; &IPPROTO_TCP; &SOMAXCONN; # enable inlining
