@@ -260,7 +260,7 @@ BODY_SINGLE_URI
 # good enough
 BODY_SINGLE_WORD
 
-# tflags publish
+# tflags net
 BODY_URI_ONLY
 
 # tflags publish
@@ -299,7 +299,7 @@ CN_B2B_SPAMMER
 # tflags publish
 COMMENT_GIBBERISH
 
-# good enough
+# tflags net
 COMPENSATION
 
 # tflags publish
@@ -848,7 +848,7 @@ HTML_OFF_PAGE
 # tflags publish
 HTML_SHRT_CMNT_OBFU_MANY
 
-# tflags publish
+# tflags net
 HTML_SINGLET_MANY
 
 # good enough
@@ -920,11 +920,14 @@ MALWARE_PASSWORD
 # tflags publish
 MALW_ATTACH
 
-# good enough
+# tflags net
 MANY_HDRS_LCASE
 
 # tflags publish
 MANY_SPAN_IN_TEXT
+
+# tflags net
+MAY_BE_FORGED
 
 # tflags publish
 MILLION_HUNDRED
@@ -1017,6 +1020,9 @@ MSM_PRIO_REPTO
 MSOE_MID_WRONG_CASE
 
 # good enough
+NAME_EMAIL_DIFF
+
+# good enough
 NA_DOLLARS
 
 # tflags publish
@@ -1075,6 +1081,9 @@ OBFU_UNSUB_UL
 
 # tflags publish
 ODD_FREEM_REPTO
+
+# good enough
+PDS_BAD_THREAD_QP_64
 
 # good enough
 PDS_BTC_ID
@@ -1406,6 +1415,9 @@ RCVD_IN_ZEN_BLOCKED
 # tflags net
 RCVD_IN_ZEN_BLOCKED_OPENDNS
 
+# good enough
+RDNS_LOCALHOST
+
 # tflags publish
 RDNS_NUM_TLD_ATCHNX
 
@@ -1587,6 +1599,9 @@ SUBJ_BRKN_WORDNUMS
 SUBJ_BROKEN_WORD
 
 # tflags net
+SUBJ_UNNEEDED_HTML
+
+# tflags net
 SURBL_BLOCKED
 
 # good enough
@@ -1630,6 +1645,9 @@ TO_EQ_FM_DIRECT_MX
 
 # good enough
 TO_EQ_FM_DOM_HTML_IMG
+
+# tflags net
+TO_EQ_FM_DOM_HTML_ONLY
 
 # tflags net
 TO_EQ_FM_DOM_SPF_FAIL
@@ -1676,7 +1694,7 @@ TVD_ENHANCE
 # good enough
 TVD_IP_HEX
 
-# good enough
+# tflags net
 TVD_SPACE_ENCODED
 
 # tflags net
