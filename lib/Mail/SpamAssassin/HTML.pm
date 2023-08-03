@@ -349,12 +349,17 @@ sub push_uri {
   my ($self, $type, $uri) = @_;
 
   $uri = $self->canon_uri($uri);
+  return if $uri eq '';
   utf8::encode($uri) if $self->{SA_encode_results};
 
-  my $target = target_uri($self->{base_href} || "", $uri);
-
-  # skip things like <iframe src="" ...>
-  $self->{uri}->{$uri}->{types}->{$type} = 1  if $uri ne '';
+  if ($uri =~ /^(?:data|mailto|file|cid|tel):/i) {
+    # No target handling required
+    $self->{uri}->{$uri}->{types}->{$type} = 1;
+  } else {
+    my $target = target_uri($self->{base_href} || "", $uri);
+    # skip things like <iframe src="" ...>
+    $self->{uri}->{$target}->{types}->{$type} = 1  if $target ne '';
+  }
 }
 
 sub canon_uri {
@@ -1255,7 +1260,7 @@ sub target_uri {
       $result .= "ftp:";
     }
   }
-  if ($t{authority}) {
+  if (defined $t{authority}) {
     $result .= "//" . $t{authority};
   }
   $result .= $t{path};
