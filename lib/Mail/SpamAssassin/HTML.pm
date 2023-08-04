@@ -515,6 +515,9 @@ sub text_style {
 	  if (/^\s*(background-)?color:\s*(.+?)\s*$/i) {
 	    my $whcolor = $1 ? 'bgcolor' : 'fgcolor';
 	    my $value = lc $2;
+	    # prevent parsing of the valid CSS3 property value as
+	    # 'invalid color' (Bug 7892)
+	    $value =~ s/\s+!important$//;
 
 	    if ($value =~ /rgb/) {
 	      $value =~ tr/0-9,//cd;
@@ -526,10 +529,6 @@ sub text_style {
             elsif ($value eq 'inherit') {
               # do nothing, just prevent parsing of the valid
               # CSS3 property value as 'invalid color' (Bug 7778)
-            }
-            elsif ($value eq '!important') {
-              # do nothing, just prevent parsing of the valid
-              # CSS3 property value as 'invalid color' (Bug 7892)
             }
 	    else {
 	      $new{$whcolor} = name_to_rgb($value);
