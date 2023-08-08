@@ -86,6 +86,34 @@ sub set_config {
   my ($self, $conf) = @_;
   my @cmds;
 
+=head1 DEPENDENCIES
+
+Razor2 requires the C<Razor2::Client::Agent> Perl module to be installed.
+
+=head1 RULE DEFINITIONS
+
+Razor2 calculates a signature for each part of a multipart message and then
+compares those signatures to a database of known spam signatures. The server returns a confidence
+value (0-100) for each part of the message. The part with the highest confidence value is used as the confidence value
+for the message.
+
+The following eval rules are provided by this plugin:
+
+ full   RULENAME   eval:check_razor2()
+
+    Returns true if the confidence value of the message is greater than or equal to `min_cf` as defined in
+    the Razor2 configuration file 'razor-agent.conf(1)'.
+
+ full   RULENAME   eval:check_razor2_range(<engine>,<min>,<max>)
+
+    <engine>  Engine number (4, 8 or '')
+    <min>     Minimum confidence value (0-100)
+    <max>     Maximum confidence value (0-100)
+
+    Returns true if the spam confidence value for the message is greater than or equal to <min> and
+    less than or equal to <max>. If <engine> is not specified, the engine with the highest
+    confidence value is used.
+
 =head1 USER SETTINGS
 
 =over 4
