@@ -128,6 +128,9 @@ ARC_VALID
 # good enough
 AXB_XMAILER_MIMEOLE_OL_024C2
 
+# good enough
+AXB_XM_FORGED_OL2600
+
 # tflags learn
 BAYES_00
 
@@ -185,7 +188,7 @@ BITCOIN_IMGUR
 # good enough
 BITCOIN_MALF_HTML
 
-# tflags publish
+# tflags net
 BITCOIN_MALWARE
 
 # tflags publish
@@ -304,6 +307,9 @@ DAY_I_EARNED
 
 # good enough
 DEAR_BENEFICIARY
+
+# good enough
+DEAR_WINNER
 
 # tflags net
 DIGEST_MULTIPLE
@@ -743,6 +749,9 @@ HAS_X_NO_RELAY
 # tflags publish
 HAS_X_OUTGOING_SPAM_STAT
 
+# tflags net
+HDRS_LCASE
+
 # tflags publish
 HDRS_MISSP
 
@@ -827,7 +836,7 @@ HTML_OFF_PAGE
 # tflags publish
 HTML_SHRT_CMNT_OBFU_MANY
 
-# tflags net
+# tflags publish
 HTML_SINGLET_MANY
 
 # good enough
@@ -952,9 +961,6 @@ MONERO_PAY_ME
 
 # good enough
 MONEY_ATM_CARD
-
-# good enough
-MONEY_FORM
 
 # good enough
 MONEY_FORM_SHORT
@@ -1102,6 +1108,9 @@ PDS_SHORTFWD_URISHRT_FP
 
 # good enough
 PDS_TINYSUBJ_URISHRT
+
+# good enough
+PDS_TONAME_EQ_TOLOCAL_FREEM_FORGE
 
 # good enough
 PDS_TO_EQ_FROM_NAME
@@ -1578,9 +1587,6 @@ SUBJ_BRKN_WORDNUMS
 SUBJ_BROKEN_WORD
 
 # tflags net
-SUBJ_UNNEEDED_HTML
-
-# tflags net
 SURBL_BLOCKED
 
 # good enough
@@ -1625,11 +1631,8 @@ TONOM_EQ_TOLOC_SHRT_SHRTNER
 # tflags publish
 TO_EQ_FM_DIRECT_MX
 
-# good enough
-TO_EQ_FM_DOM_HTML_IMG
-
 # tflags net
-TO_EQ_FM_DOM_HTML_ONLY
+TO_EQ_FM_DOM_HTML_IMG
 
 # tflags net
 TO_EQ_FM_DOM_SPF_FAIL
@@ -1670,10 +1673,10 @@ TT_MSGID_TRUNC
 # good enough
 TVD_IP_HEX
 
-# good enough
+# tflags net
 TVD_SPACE_ENCODED
 
-# tflags net
+# good enough
 TVD_SPACE_RATIO_MINFP
 
 # tflags net
@@ -1847,7 +1850,7 @@ URI_MALWARE_SCMS
 # tflags userconf
 URI_NOVOWEL
 
-# tflags publish
+# tflags net
 URI_ONLY_MSGID_MALF
 
 # tflags publish
