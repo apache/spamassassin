@@ -1687,6 +1687,12 @@ describe    STATIC_XPRIO_OLE     Static RDNS + X-Priority + MIMEOLE
 score       STATIC_XPRIO_OLE     2.000   # limit
 tflags      STATIC_XPRIO_OLE     publish
 
+meta        XPRIO_VISTA          __XPRIO_MINFP && __VISTA_MSGID
+describe    XPRIO_VISTA          X-Priority + old MSFT msgid format
+score       XPRIO_VISTA          2.500	# limit
+
+
+
 # Apparent good performance is an artifact of certain corpora's collection mechanism
 #meta        XPRIO_RPATH_NULL   (__XPRIO && __BOUNCE_RPATH_NULL) && !__HAS_ERRORS_TO && !__VIA_ML && !ANY_BOUNCE_MESSAGE && !__HAS_ORGANIZATION && !__RCD_RDNS_SMTP_MESSY && !__NOT_SPOOFED 
 #score       XPRIO_RPATH_NULL   2.500   # limit
@@ -2110,6 +2116,20 @@ meta           BITCOIN_OBFU_SUBJ    __BITCOIN_OBFU_SUBJ && !__128_ALNUM_URI
 describe       BITCOIN_OBFU_SUBJ    Bitcoin + obfuscated subject
 score          BITCOIN_OBFU_SUBJ    3.500	# limit
 tflags         BITCOIN_OBFU_SUBJ    publish
+
+meta           __BITCOIN_DIRECT     __BITCOIN && __DOS_DIRECT_TO_MX
+#meta           BITCOIN_DIRECT       __BITCOIN_DIRECT
+#describe       BITCOIN_DIRECT       Bitcoin + direct-to-MX
+#score          BITCOIN_DIRECT       3.500	# limit
+
+meta           __BITCOIN_TOEQFM     __BITCOIN && __TO_EQ_FROM 
+meta           BITCOIN_TOEQFM       __BITCOIN_TOEQFM
+describe       BITCOIN_TOEQFM       Bitcoin + To same as From
+score          BITCOIN_TOEQFM       3.500	# limit
+
+meta           BITCOIN_VISTA        __BITCOIN && __VISTA_MSGID
+describe       BITCOIN_VISTA        Bitcoin + old MSFT msgid format
+score          BITCOIN_VISTA        3.500	# limit
 
 
 # bitcoin obfuscation - tip o' the hat to Steve Zinski on the users list, with a little cleanup
@@ -4048,6 +4068,26 @@ tflags     REPTO_INFONUMSCOM           publish
 rawbody    __HREF_EMPTY                /href=""/
 rawbody    __SRC_EMPTY                 /src=""/
 
+# obsolete MSFT message-ID format
+meta        __VISTA_HELO_MISCIP        __VISTA_MSGID && __HELO_MISC_IP
+#meta        VISTA_HELO_MISCIP          __VISTA_HELO_MISCIP
+#describe    VISTA_HELO_MISCIP          Old MSFT msgid format + IP in HELO
+#score       VISTA_HELO_MISCIP          2.000	# limit
+
+meta        __VISTA_RELAY_IP           __VISTA_MSGID && __IP_IN_RELAY
+#meta        VISTA_RELAY_IP             __VISTA_RELAY_IP
+#describe    VISTA_RELAY_IP             Old MSFT msgid format + IP in relay hostname
+#score       VISTA_RELAY_IP             2.000	# limit
+
+meta        __VISTA_COST               __VISTA_MSGID && __FB_COST
+#meta        VISTA_COST                 __VISTA_COST
+#describe    VISTA_COST                 Old MSFT msgid format + "cost"
+#score       VISTA_COST                 2.000	# limit
+
+meta        __VISTA_TONOM_EQ_TOLOC     __VISTA_MSGID && __PDS_TONAME_EQ_TOLOCAL
+#meta        VISTA_TONOM_EQ_TOLOC       __VISTA_TONOM_EQ_TOLOC
+#describe    VISTA_TONOM_EQ_TOLOC       Old MSFT msgid format + To display name = username
+#score       VISTA_TONOM_EQ_TOLOC       2.000	# limit
 
 
 
