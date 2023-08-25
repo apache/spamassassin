@@ -4068,6 +4068,15 @@ tflags     REPTO_INFONUMSCOM           publish
 rawbody    __HREF_EMPTY                /href=""/
 rawbody    __SRC_EMPTY                 /src=""/
 
+meta       __HREF_EMPTY_XAUTHED        __HREF_EMPTY && __HAS_X_AUTHED_SENDER
+meta       __HREF_EMPTY_XANTIABUSE     __HREF_EMPTY && __HAS_X_ANTIABUSE
+meta       __HREF_EMPTY_NORDNS         __HREF_EMPTY && __RDNS_NONE
+meta       __HREF_EMPTY_PHPMAIL        __HREF_EMPTY && (__PHPMAILER_MUA || __XMAIL_PHPMAIL)
+
+meta       __SRC_EMPTY_FILENM_ATT      __SRC_EMPTY && __PART_STOCK_CD_F 
+
+
+
 # obsolete MSFT message-ID format
 meta        __VISTA_HELO_MISCIP        __VISTA_MSGID && __HELO_MISC_IP
 #meta        VISTA_HELO_MISCIP          __VISTA_HELO_MISCIP
