@@ -1687,9 +1687,11 @@ describe    STATIC_XPRIO_OLE     Static RDNS + X-Priority + MIMEOLE
 score       STATIC_XPRIO_OLE     2.000   # limit
 tflags      STATIC_XPRIO_OLE     publish
 
-meta        XPRIO_VISTA          __XPRIO_MINFP && __VISTA_MSGID
+meta        __XPRIO_VISTA        __XPRIO_MINFP && __VISTA_MSGID
+meta        XPRIO_VISTA          __XPRIO_VISTA && !MIMEOLE_DIRECT_TO_MX && !__BITCOIN
 describe    XPRIO_VISTA          X-Priority + old MSFT msgid format
 score       XPRIO_VISTA          2.500	# limit
+tflags      XPRIO_VISTA          publish
 
 
 
@@ -2127,9 +2129,10 @@ meta           BITCOIN_TOEQFM       __BITCOIN_TOEQFM
 describe       BITCOIN_TOEQFM       Bitcoin + To same as From
 score          BITCOIN_TOEQFM       3.500	# limit
 
-meta           BITCOIN_VISTA        __BITCOIN && __VISTA_MSGID
-describe       BITCOIN_VISTA        Bitcoin + old MSFT msgid format
-score          BITCOIN_VISTA        3.500	# limit
+# 1.000 S/O but min score is already 7 so not worthwhile
+#meta           BITCOIN_VISTA        __BITCOIN && __VISTA_MSGID
+#describe       BITCOIN_VISTA        Bitcoin + old MSFT msgid format
+#score          BITCOIN_VISTA        3.500	# limit
 
 
 # bitcoin obfuscation - tip o' the hat to Steve Zinski on the users list, with a little cleanup
@@ -4068,11 +4071,32 @@ tflags     REPTO_INFONUMSCOM           publish
 rawbody    __HREF_EMPTY                /href=""/
 rawbody    __SRC_EMPTY                 /src=""/
 
+# These don't match a lot of spam but it is all low-scoring
 meta       __HREF_EMPTY_XAUTHED        __HREF_EMPTY && __HAS_X_AUTHED_SENDER
-meta       __HREF_EMPTY_XANTIABUSE     __HREF_EMPTY && __HAS_X_ANTIABUSE
-meta       __HREF_EMPTY_NORDNS         __HREF_EMPTY && __RDNS_NONE
-meta       __HREF_EMPTY_PHPMAIL        __HREF_EMPTY && (__PHPMAILER_MUA || __XMAIL_PHPMAIL)
+meta       HREF_EMPTY_XAUTHED          __HREF_EMPTY_XAUTHED
+describe   HREF_EMPTY_XAUTHED          Empty href + X-Authenticated-Sender
+score      HREF_EMPTY_XAUTHED          2.500	# limit
+tflags     HREF_EMPTY_XAUTHED          publish
 
+meta       __HREF_EMPTY_XANTIABUSE     __HREF_EMPTY && __HAS_X_ANTIABUSE
+meta       HREF_EMPTY_XANTIABUSE       __HREF_EMPTY_XANTIABUSE
+describe   HREF_EMPTY_XANTIABUSE       Empty href + X-AntiAbuse
+score      HREF_EMPTY_XANTIABUSE       2.500	# limit
+tflags     HREF_EMPTY_XANTIABUSE       publish
+
+meta       __HREF_EMPTY_NORDNS         __HREF_EMPTY && __RDNS_NONE
+meta       HREF_EMPTY_NORDNS           __HREF_EMPTY_NORDNS
+describe   HREF_EMPTY_NORDNS           Empty href + no rDNS
+score      HREF_EMPTY_NORDNS           2.500	# limit
+tflags     HREF_EMPTY_NORDNS           publish
+
+meta       __HREF_EMPTY_PHPMAIL        __HREF_EMPTY && (__PHPMAILER_MUA || __XMAIL_PHPMAIL)
+meta       HREF_EMPTY_PHPMAIL          __HREF_EMPTY_PHPMAIL
+describe   HREF_EMPTY_PHPMAIL          Empty href + PHP Mailer
+score      HREF_EMPTY_PHPMAIL          2.500	# limit
+tflags     HREF_EMPTY_PHPMAIL          publish
+
+# not a lot of spam but most of it low-scoring
 meta       __SRC_EMPTY_FILENM_ATT      __SRC_EMPTY && __PART_STOCK_CD_F 
 
 
@@ -4089,14 +4113,21 @@ meta        __VISTA_RELAY_IP           __VISTA_MSGID && __IP_IN_RELAY
 #score       VISTA_RELAY_IP             2.000	# limit
 
 meta        __VISTA_COST               __VISTA_MSGID && __FB_COST
-#meta        VISTA_COST                 __VISTA_COST
-#describe    VISTA_COST                 Old MSFT msgid format + "cost"
-#score       VISTA_COST                 2.000	# limit
+meta        VISTA_COST                 __VISTA_COST
+describe    VISTA_COST                 Old MSFT msgid format + "cost"
+score       VISTA_COST                 2.500	# limit
+tflags      VISTA_COST                 publish
+
+meta        __VISTA_RDNS_SHRT          __VISTA_MSGID && __RDNS_SHORT
+#meta        VISTA_RDNS_SHRT            __VISTA_RDNS_SHRT
+#describe    VISTA_RDNS_SHRT            Old MSFT msgid format + short RDNS
+#score       VISTA_RDNS_SHRT            2.000	# limit
 
 meta        __VISTA_TONOM_EQ_TOLOC     __VISTA_MSGID && __PDS_TONAME_EQ_TOLOCAL
-#meta        VISTA_TONOM_EQ_TOLOC       __VISTA_TONOM_EQ_TOLOC
-#describe    VISTA_TONOM_EQ_TOLOC       Old MSFT msgid format + To display name = username
-#score       VISTA_TONOM_EQ_TOLOC       2.000	# limit
+meta        VISTA_TONOM_EQ_TOLOC       __VISTA_TONOM_EQ_TOLOC
+describe    VISTA_TONOM_EQ_TOLOC       Old MSFT msgid format + To display name = username
+score       VISTA_TONOM_EQ_TOLOC       2.500	# limit
+tflags      VISTA_TONOM_EQ_TOLOC       publish
 
 
 
