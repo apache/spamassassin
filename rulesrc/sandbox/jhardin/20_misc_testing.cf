@@ -1688,7 +1688,7 @@ score       STATIC_XPRIO_OLE     2.000   # limit
 tflags      STATIC_XPRIO_OLE     publish
 
 meta        __XPRIO_VISTA        __XPRIO_MINFP && __VISTA_MSGID
-meta        XPRIO_VISTA          __XPRIO_VISTA && !MIMEOLE_DIRECT_TO_MX && !__BITCOIN
+meta        XPRIO_VISTA          __XPRIO_VISTA && !__BITCOIN && !__TO_TOO_MANY
 describe    XPRIO_VISTA          X-Priority + old MSFT msgid format
 score       XPRIO_VISTA          2.500	# limit
 tflags      XPRIO_VISTA          publish
@@ -2129,10 +2129,9 @@ meta           BITCOIN_TOEQFM       __BITCOIN_TOEQFM
 describe       BITCOIN_TOEQFM       Bitcoin + To same as From
 score          BITCOIN_TOEQFM       3.500	# limit
 
-# 1.000 S/O but min score is already 7 so not worthwhile
-#meta           BITCOIN_VISTA        __BITCOIN && __VISTA_MSGID
-#describe       BITCOIN_VISTA        Bitcoin + old MSFT msgid format
-#score          BITCOIN_VISTA        3.500	# limit
+meta           BITCOIN_VISTA        __BITCOIN && __VISTA_MSGID
+describe       BITCOIN_VISTA        Bitcoin + old MSFT msgid format
+score          BITCOIN_VISTA        3.500	# limit
 
 
 # bitcoin obfuscation - tip o' the hat to Steve Zinski on the users list, with a little cleanup
@@ -4113,7 +4112,7 @@ meta        __VISTA_RELAY_IP           __VISTA_MSGID && __IP_IN_RELAY
 #score       VISTA_RELAY_IP             2.000	# limit
 
 meta        __VISTA_COST               __VISTA_MSGID && __FB_COST
-meta        VISTA_COST                 __VISTA_COST
+meta        VISTA_COST                 __VISTA_COST && !__DOS_HAS_LIST_UNSUB 
 describe    VISTA_COST                 Old MSFT msgid format + "cost"
 score       VISTA_COST                 2.500	# limit
 tflags      VISTA_COST                 publish
@@ -4124,7 +4123,7 @@ meta        __VISTA_RDNS_SHRT          __VISTA_MSGID && __RDNS_SHORT
 #score       VISTA_RDNS_SHRT            2.000	# limit
 
 meta        __VISTA_TONOM_EQ_TOLOC     __VISTA_MSGID && __PDS_TONAME_EQ_TOLOCAL
-meta        VISTA_TONOM_EQ_TOLOC       __VISTA_TONOM_EQ_TOLOC
+meta        VISTA_TONOM_EQ_TOLOC       __VISTA_TONOM_EQ_TOLOC && !__MSOE_MID_WRONG_CASE
 describe    VISTA_TONOM_EQ_TOLOC       Old MSFT msgid format + To display name = username
 score       VISTA_TONOM_EQ_TOLOC       2.500	# limit
 tflags      VISTA_TONOM_EQ_TOLOC       publish
