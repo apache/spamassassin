@@ -364,12 +364,17 @@ sub _check_dmarc {
       $old_arc_index = $spf_parse->{arc_index};
     }
 
-    my @arc_seals = sort { ( $a->{arc_verifier}{seals}{tags_by_name}{i}{value} // 0 ) <=> ( $b->{arc_verifier}{seals}{tags_by_name}{i}{value} // 0 ) } @{$pms->{arc_verifier}{seals}};
-    foreach my $seals ( @arc_seals ) {
-      if(exists($seals->{tags_by_name}{d}) and exists($pms->{arc_author_domains}->{$mfrom_domain})) {
-        dbg("Evaluate DMARC using AAR dkim information for index $seals->{tags_by_name}{i}{value}");
-        $dmarc->dkim(domain => $mfrom_domain, selector => $seals->{tags_by_name}{s}{value}, result => $seals->{verify_result});
-        last;
+    my @tmp_arc_seals;
+    my @arc_seals;
+    if(defined $pms->{arc_verifier}{seals}) {
+      @tmp_arc_seals = @{$pms->{arc_verifier}{seals}};
+      @arc_seals = sort { ( $a->{arc_verifier}{seals}{tags_by_name}{i}{value} // 0 ) <=> ( $b->{arc_verifier}{seals}{tags_by_name}{i}{value} // 0 ) } @tmp_arc_seals;
+      foreach my $seals ( @arc_seals ) {
+        if(exists($seals->{tags_by_name}{d}) and exists($pms->{arc_author_domains}->{$mfrom_domain})) {
+          dbg("Evaluate DMARC using AAR dkim information for index $seals->{tags_by_name}{i}{value}");
+          $dmarc->dkim(domain => $mfrom_domain, selector => $seals->{tags_by_name}{s}{value}, result => $seals->{verify_result});
+          last;
+        }
       }
     }
 
