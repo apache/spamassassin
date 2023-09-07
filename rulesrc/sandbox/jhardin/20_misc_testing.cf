@@ -4129,4 +4129,14 @@ score       VISTA_TONOM_EQ_TOLOC       2.500	# limit
 tflags      VISTA_TONOM_EQ_TOLOC       publish
 
 
+ifplugin Mail::SpamAssassin::Plugin::ReplaceTags
+  replace_tag    SHY                     (?:=ad|[\xc2][\xad]|[\xad]|&\#xad;|&\#173;|&shy;)
+  rawbody        __SHY_OBFU_PASSWORD     /p(?!assword)<SHY>{0,3}a<SHY>{0,3}s<SHY>{0,3}s<SHY>{0,3}w<SHY>{0,3}o<SHY>{0,3}r<SHY>{0,3}d/i
+  replace_rules  __SHY_OBFU_PASSWORD
+
+  rawbody        __SHY_OBFU_EXPIRE       /e(?!xpire)<SHY>{0,3}x<SHY>{0,3}p<SHY>{0,3}i<SHY>{0,3}r<SHY>{0,3}e/i
+  replace_rules  __SHY_OBFU_EXPIRE  
+endif
+
+
 
