@@ -3,7 +3,7 @@
 use lib '.'; use lib 't';
 use SATest; sa_t_init("shortcircuit");
 
-use Test::More tests => 18;
+use Test::More tests => 21;
 
 # ---------------------------------------------------------------------------
 
@@ -69,3 +69,13 @@ ok_all_patterns();
 ok (sarun ("-L -t < data/nice/001", \&patterns_run_cb));
 ok_all_patterns();
 
+%patterns = (
+  ' 0.0 SHORTCIRCUIT Not all rules were run', 'shortcircuit rule desc',
+);
+
+tstlocalrules ('
+  shortcircuit_max_spam_score 15
+');
+
+ok (sarun ("-L -t < data/spam/002", \&patterns_run_cb));
+ok_all_patterns();
