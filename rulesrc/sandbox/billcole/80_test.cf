@@ -174,3 +174,8 @@ tflags		__SCC_MIME_BOUNDARY2	multiple maxhits=7
 describe	SCC_MIME_BOUNDARY2	Fake boundary-like string >5 times
 meta		SCC_MIME_BOUNDARY2	__SCC_MIME_BOUNDARY2 > 5
 
+describe HTML_BADATTR Illegal char in HTML attribute name
+rawbody  HTML_BADATTR /<[a-z]{1,10}[^>]{1,80}\/(src|href)\=/
+score    HTML_BADATTR 1
+tflags   HTML_BADATTR publish
+
