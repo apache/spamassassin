@@ -260,7 +260,7 @@ BITCOIN_YOUR_INFO
 # good enough
 BODY_SINGLE_URI
 
-# tflags publish
+# tflags net
 BODY_URI_ONLY
 
 # tflags publish
@@ -299,7 +299,7 @@ CN_B2B_SPAMMER
 # tflags publish
 COMMENT_GIBBERISH
 
-# good enough
+# tflags net
 COMPENSATION
 
 # tflags publish
@@ -758,6 +758,9 @@ HAS_X_NO_RELAY
 # tflags publish
 HAS_X_OUTGOING_SPAM_STAT
 
+# tflags net
+HDRS_LCASE
+
 # tflags publish
 HDRS_MISSP
 
@@ -1099,6 +1102,9 @@ PDS_FRNOM_TODOM_DBL_URL
 
 # good enough
 PDS_FRNOM_TODOM_NAKED_TO
+
+# tflags net
+PDS_FROM_2_EMAILS
 
 # good enough
 PDS_FROM_NAME_TO_DOMAIN
@@ -1502,6 +1508,9 @@ SEO_SUSP_NTLD
 # tflags publish
 SHOPIFY_IMG_NOT_RCVD_SFY
 
+# good enough
+SHORTENED_URL_SRC
+
 # tflags publish
 SHORTENER_SHORT_IMG
 
@@ -1581,9 +1590,6 @@ SUBJ_ATTENTION
 SUBJ_BRKN_WORDNUMS
 
 # tflags net
-SUBJ_UNNEEDED_HTML
-
-# tflags net
 SURBL_BLOCKED
 
 # good enough
@@ -1607,7 +1613,7 @@ TARINGANET_IMG_NOT_RCVD_TN
 # tflags publish
 TEQF_USR_IMAGE
 
-# tflags publish
+# tflags net
 TEQF_USR_MSGID_HEX
 
 # tflags publish
@@ -1632,10 +1638,10 @@ TO_EQ_FM_DIRECT_MX
 TO_EQ_FM_DOM_HTML_IMG
 
 # tflags net
-TO_EQ_FM_DOM_SPF_FAIL
+TO_EQ_FM_DOM_HTML_ONLY
 
 # tflags net
-TO_EQ_FM_HTML_ONLY
+TO_EQ_FM_DOM_SPF_FAIL
 
 # tflags net
 TO_EQ_FM_SPF_FAIL
@@ -1655,7 +1661,7 @@ TO_NO_BRKTS_HTML_IMG
 # tflags publish
 TO_NO_BRKTS_HTML_ONLY
 
-# good enough
+# tflags net
 TO_NO_BRKTS_MSFT
 
 # tflags publish
@@ -1666,9 +1672,6 @@ TO_NO_BRKTS_PCNT
 
 # tflags publish
 TO_TOO_MANY_WFH_01
-
-# good enough
-TRANSFORM_LIFE
 
 # good enough
 TR_JS_REDIRECTION_2
@@ -1691,7 +1694,7 @@ TVD_RATWARE_MSGID_01
 # tflags net
 TVD_SPACE_ENCODED
 
-# tflags net
+# good enough
 TVD_SPACE_RATIO_MINFP
 
 # tflags net
