@@ -388,6 +388,13 @@ sub html_uri {
     }
   }
   elsif ($tag =~ /^(?:a|area|link)$/) {
+    while ( my ( $k, $v ) = each %$attr ) {
+      # read uris from bad formatted html as well
+      if($k =~ /\w{1,8}\/href/) {
+        delete($attr->{$k});
+        $attr->{href} = $v;
+      }
+    }
     if (defined $attr->{href}) {
       $self->push_uri($tag, $attr->{href});
     }
@@ -396,6 +403,13 @@ sub html_uri {
     }
   }
   elsif ($tag =~ /^(?:img|frame|iframe|embed|script|bgsound)$/) {
+    while ( my ( $k, $v ) = each %$attr ) {
+      # read uris from bad formatted html as well
+      if($k =~ /\w{1,8}\/src/) {
+        delete($attr->{$k});
+        $attr->{src} = $v;
+      }
+    }
     if (defined $attr->{src}) {
       $self->push_uri($tag, $attr->{src});
     }
