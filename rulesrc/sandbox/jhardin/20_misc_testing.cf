@@ -146,6 +146,11 @@ ifplugin Mail::SpamAssassin::Plugin::MIMEHeader
   mimeheader   __X_MSO_MT          Content-Type =~ m,\bapplication/x-mso\b,i
   meta         __ATTACH_MSO_MHTML  __TEXT_XML_MT && __MSO_THEME_MT && __X_MSO_MT
 
+  mimeheader   __CTE_BAS64         Content-Transfer-Encoding =~ /\bbas64\b/i
+  meta         CTE_BAS64           __CTE_BAS64
+  describe     CTE_BAS64           Malformated Content-Type-Encoding
+  score        CTE_BAS64           2.000	# limit
+  tflags       CTE_BAS64           publish
 
 else
   meta         __HTML_ATTACH_01    0
@@ -160,6 +165,7 @@ else
   meta         __MALW_ATTACH_02_02 0
   meta         __ISO_ATTACH        0
   meta         __ISO_ATTACH_MT     0
+  meta         __CTE_BAS64         0
 endif
 
 # general case of spample observation
