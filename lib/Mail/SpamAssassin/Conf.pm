@@ -2082,7 +2082,7 @@ home_dir_for_helpers/.spamassassin, $HOME/.spamassassin,
       my $rule = $1;
       foreach my $domain (split(/\s+/, lc($2))) {
         $domain =~ s/^\.//; $domain =~ s/\.\z//;  # strip dots
-        if ($domain !~ /^[a-z0-9.-]+$/) {
+        if ($domain !~ /^[a-z0-9_.-]+$/) {
           return $INVALID_VALUE;
         }
         # will end up in filename, do not allow / etc in above regex!
