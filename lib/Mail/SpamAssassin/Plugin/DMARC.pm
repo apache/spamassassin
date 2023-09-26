@@ -371,8 +371,12 @@ sub _check_dmarc {
       @arc_seals = sort { ( $a->{arc_verifier}{seals}{tags_by_name}{i}{value} // 0 ) <=> ( $b->{arc_verifier}{seals}{tags_by_name}{i}{value} // 0 ) } @tmp_arc_seals;
       foreach my $seals ( @arc_seals ) {
         if(exists($seals->{tags_by_name}{d}) and exists($pms->{arc_author_domains}->{$mfrom_domain})) {
-          dbg("Evaluate DMARC using AAR dkim information for index $seals->{tags_by_name}{i}{value}");
-          $dmarc->dkim(domain => $mfrom_domain, selector => $seals->{tags_by_name}{s}{value}, result => $seals->{verify_result});
+          dbg("Evaluate DMARC using AAR dkim information for index $seals->{tags_by_name}{i}{value} on domain $mfrom_domain and selector $seals->{tags_by_name}{s}{value}. Result is $seals->{verify_result}");
+          my $arc_result = $seals->{verify_result};
+          if($seals->{verify_result} eq 'invalid') {
+            $arc_result = 'permerror';
+          }
+          $dmarc->dkim(domain => $mfrom_domain, selector => $seals->{tags_by_name}{s}{value}, result => $arc_result);
           last;
         }
       }
