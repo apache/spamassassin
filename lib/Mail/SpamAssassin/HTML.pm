@@ -396,6 +396,12 @@ sub html_uri {
       }
     }
     if (defined $attr->{href}) {
+      # Remove the Unicode "replacement character" from the url
+      if (utf8::is_utf8($attr->{href})) {
+        $attr->{href} =~ s/\x{FEFF}//g;
+      } else {
+        $attr->{href} =~ s/\x{EF}\x{BB}\x{BF}//g;
+      }
       $self->push_uri($tag, $attr->{href});
     }
     if (defined $attr->{'data-saferedirecturl'}) {
