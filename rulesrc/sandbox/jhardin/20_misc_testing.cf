@@ -4144,5 +4144,7 @@ ifplugin Mail::SpamAssassin::Plugin::ReplaceTags
   replace_rules  __SHY_OBFU_EXPIRE  
 endif
 
+# Attempt to bypass URL parsing? Or just sloppy? See bug #8190
+rawbody     __HREF_BOM                 /href="(?:\xef\xbb\xbf|\xfe\xff)https?:\/\//i
 
 
