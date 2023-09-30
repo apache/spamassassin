@@ -3799,8 +3799,8 @@ describe   MIXED_IMG_CASE              Has img tag in mixed case
 score      MIXED_IMG_CASE              3.000	 # limit
 tflags     MIXED_IMG_CASE              publish
 
-rawbody    __MIXED_HREF_CASE_JH        /<[Aa](?i:rea)?\s+(?!HREF|href)[Hh][Rr][Ee][Ff]=/
-meta       MIXED_HREF_CASE             __MIXED_HREF_CASE_JH
+rawbody    __MIXED_HREF_CASE_JH        /<(?i:a(?:rea)?|img)\s+(?!HREF|href)[Hh][Rr][Ee][Ff]\s*=/
+meta       MIXED_HREF_CASE             __MIXED_HREF_CASE && !__LYRIS_EZLM_REMAILER && !__HAS_LIST_ID 
 describe   MIXED_HREF_CASE             Has href in mixed case
 score      MIXED_HREF_CASE             2.000	 # limit
 tflags     MIXED_HREF_CASE             publish
