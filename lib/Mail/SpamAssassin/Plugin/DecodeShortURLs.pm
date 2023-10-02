@@ -711,6 +711,7 @@ sub _check_shortener_uri {
   my $levels = $host =~ tr/.//;
   # No point looking at single level "xxx.yy" without a path
   return if $levels == 1 && !$has_path;
+
   if (exists $conf->{url_shortener}->{$host}) {
     return {
       'uri' => $uri,
