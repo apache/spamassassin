@@ -718,6 +718,18 @@ sub _check_shortener_uri {
     };
   }
   # if domain is a 3rd level domain check if there is a url shortener
+  # on the www domain
+  elsif($levels == 2 && $host =~ /^www\.([^.]+\.[^.]+)$/i) {
+    my $domain = $1;
+    if(($host eq "www.$domain") and exists $conf->{url_shortener}->{$domain}) {
+      dbg("Found internal www redirection for domain $domain");
+      return {
+        'uri' => $uri,
+        'method' => $conf->{url_shortener}->{$domain} == 1 ? 'head' : 'get',
+      };
+    }
+  }
+  # if domain is a 3rd level domain check if there is a url shortener
   # on the 2nd level tld
   elsif ($levels == 2 && $host =~ /^(?!www)[^.]+(\.[^.]+\.[^.]+)$/i &&
            exists $conf->{url_shortener}->{$1}) {
