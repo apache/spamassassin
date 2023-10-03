@@ -2564,7 +2564,7 @@ if can(Mail::SpamAssassin::Conf::feature_bug6558_free)
   meta      LONG_INVISIBLE_TEXT           __LONG_INVIS_DIV || (__LONG_STY_INVIS && !__UNSUB_LINK && !__RCD_RDNS_MTA_MESSY && !__USING_VERP1 && !__RCD_RDNS_MTA && !__RCD_RDNS_MTA_MESSY && !__MIME_QP && !__HAS_X_MAILER && !__REPTO_QUOTE && !__USING_VERP1 )
 
   meta      __STY_INVIS_DIRECT            __STY_INVIS && __DOS_DIRECT_TO_MX_UNTRUSTED 
-  meta      STY_INVIS_DIRECT              __STY_INVIS_DIRECT && !__L_BODY_8BITS && !__UNSUB_LINK && !__HDR_RCVD_AMAZON && !__TO___LOWER && !__PDS_DOUBLE_URL && !__MAIL_LINK 
+  meta      STY_INVIS_DIRECT              __STY_INVIS_DIRECT && !__L_BODY_8BITS && !__UNSUB_LINK && !__HDR_RCVD_AMAZON && !__TO___LOWER && !__PDS_DOUBLE_URL && !__MAIL_LINK && !__USING_VERP1 && !__HAS_X_ENTITY_ID && !__RCD_RDNS_SMTP_MESSY && !__RDNS_STATIC 
   describe  STY_INVIS_DIRECT              HTML hidden text + direct-to-MX
   score     STY_INVIS_DIRECT              2.500	# limit
 
