@@ -207,6 +207,8 @@ my %makefile = (
         'Perl::Critic::Policy::Perlsecret' => 0,
     },
 
+    'LICENSE' => 'apache_2_0',
+
     'dist' => {
         COMPRESS => 'gzip -9f',
         SUFFIX => '.gz',
@@ -349,10 +351,8 @@ $makefile{META_MERGE} = {
 
   'meta-spec' => {
     version => '2',
-    url     => 'http://search.cpan.org/perldoc?CPAN::Meta::Spec',
+    url     => 'https://metacpan.org/pod/CPAN::Meta::Spec',
   },
-
-  license => 'apache_2_0',
 
   resources => {
     license     => 'http://www.apache.org/licenses/LICENSE-2.0.html',
