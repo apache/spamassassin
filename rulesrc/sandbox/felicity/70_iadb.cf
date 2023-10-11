@@ -50,6 +50,8 @@
 # 127.3.100.10 	All mailing list mail is confirmed (double) opt-in
 # 127.3.100.100 	The only email which comes from this IP address is mailing list email, and that mailing list email is entirely confirmed (double) opt-in
 # 127.3.100.200	The only email which comes from this IP address is one-to-one or transactional email. No bulk email is sent from this IP address
+# 127.3.200.120	Legally mandated email – email from this IP address consists entirely of communications that are required by law
+# 127.3.200.130	Court-ordered email – email from this IP address consists entirely of communications that have been ordered by a court of law such as public notice of service or notifications of class action lawsuits to members of the class
 # 127.101.001.10	Complies with Michigan's Child Protection Email Address Registry law
 # 127.101.002.10 	Complies with Utah's Child Protection Email Address Registry law
 # 127.101.101.10	Has checked mailing lists against the Michigan Child Protective Registry within last 30 days
@@ -189,6 +191,16 @@ header RCVD_IN_IADB_OOO			eval:check_rbl_sub('iadb-firsttrusted', '127.3.100.200
 describe RCVD_IN_IADB_OOO		IADB: One-to-one/transactional email only
 tflags RCVD_IN_IADB_OOO			net nice
 reuse  RCVD_IN_IADB_OOO
+
+header RCVD_IN_IADB_LEG_MAND		eval:check_rbl_sub('iadb-firsttrusted', '127.3.200.120')
+describe RCVD_IN_IADB_LEG_MAND		IADB: Legally mandated email
+tflags RCVD_IN_IADB_LEG_MAND		net nice
+reuse  RCVD_IN_IADB_LEG_MAND
+
+header RCVD_IN_IADB_COURT		eval:check_rbl_sub('iadb-firsttrusted', '127.3.200.130')
+describe RCVD_IN_IADB_COURT		IADB: Court-ordered email
+tflags RCVD_IN_IADB_COURT		net nice
+reuse  RCVD_IN_IADB_COURT
 
 ###########################################################################
 
