@@ -263,7 +263,7 @@ BODY_EMAIL_419_FRAUD_GM
 # good enough
 BODY_SINGLE_URI
 
-# tflags publish
+# tflags net
 BODY_URI_ONLY
 
 # tflags publish
@@ -302,7 +302,7 @@ CN_B2B_SPAMMER
 # tflags publish
 COMMENT_GIBBERISH
 
-# good enough
+# tflags net
 COMPENSATION
 
 # tflags publish
@@ -485,10 +485,10 @@ FORGED_RELAY_MUA_TO_MX
 # tflags net
 FORGED_SPF_HELO
 
-# tflags publish
+# tflags net
 FORM_FRAUD
 
-# tflags publish
+# tflags net
 FORM_FRAUD_3
 
 # tflags publish
@@ -708,9 +708,6 @@ GB_GOOGLE_OBFUR
 GB_HASHBL_BTC
 
 # good enough
-GB_URI_FLEEK_STO_HTM
-
-# good enough
 GB_WEBFORM
 
 # tflags publish
@@ -863,7 +860,7 @@ HTML_OFF_PAGE
 # tflags publish
 HTML_SHRT_CMNT_OBFU_MANY
 
-# tflags publish
+# tflags net
 HTML_SINGLET_MANY
 
 # good enough
@@ -931,6 +928,9 @@ MALWARE_PASSWORD
 
 # tflags publish
 MALW_ATTACH
+
+# tflags net
+MANY_HDRS_LCASE
 
 # tflags publish
 MANY_SPAN_IN_TEXT
@@ -1003,9 +1003,6 @@ MONEY_FRAUD_8
 
 # tflags publish
 MONEY_FREEMAIL_REPTO
-
-# good enough
-MONEY_FROM_41
 
 # good enough
 MONEY_FROM_MISSP
@@ -1602,6 +1599,9 @@ SUBJ_ATTENTION
 SUBJ_BRKN_WORDNUMS
 
 # tflags net
+SUBJ_UNNEEDED_HTML
+
+# tflags net
 SURBL_BLOCKED
 
 # good enough
@@ -1622,13 +1622,13 @@ TAGSTAT_IMG_NOT_RCVD_TGST
 # tflags publish
 TARINGANET_IMG_NOT_RCVD_TN
 
-# tflags publish
+# tflags net
 TEQF_USR_IMAGE
 
-# tflags publish
+# tflags net
 TEQF_USR_MSGID_HEX
 
-# tflags publish
+# tflags net
 TEQF_USR_MSGID_MALF
 
 # good enough
@@ -1649,11 +1649,17 @@ TONOM_EQ_TOLOC_SHRT_SHRTNER
 # tflags publish
 TO_EQ_FM_DIRECT_MX
 
-# good enough
+# tflags net
 TO_EQ_FM_DOM_HTML_IMG
 
 # tflags net
+TO_EQ_FM_DOM_HTML_ONLY
+
+# tflags net
 TO_EQ_FM_DOM_SPF_FAIL
+
+# tflags net
+TO_EQ_FM_HTML_ONLY
 
 # tflags net
 TO_EQ_FM_SPF_FAIL
@@ -1673,7 +1679,7 @@ TO_NO_BRKTS_HTML_IMG
 # tflags publish
 TO_NO_BRKTS_HTML_ONLY
 
-# good enough
+# tflags net
 TO_NO_BRKTS_MSFT
 
 # tflags publish
@@ -1686,19 +1692,16 @@ TO_NO_BRKTS_PCNT
 TO_TOO_MANY_WFH_01
 
 # good enough
-TVD_IP_HEX
-
-# good enough
 TVD_LONG_WORD5
 
-# good enough
-TVD_RATWARE_MSGID_01
-
-# good enough
+# tflags net
 TVD_SPACE_ENCODED
 
-# good enough
+# tflags net
 TVD_SPACE_RATIO_MINFP
+
+# tflags net
+TVD_SUBJ_NUM_OBFU_MINFP
 
 # good enough
 TVD_VISIT_PHARMA
@@ -1868,7 +1871,7 @@ URI_MALWARE_SCMS
 # tflags userconf
 URI_NOVOWEL
 
-# tflags publish
+# tflags net
 URI_ONLY_MSGID_MALF
 
 # tflags publish
@@ -1895,10 +1898,10 @@ URI_WPADMIN
 # tflags publish
 URI_WP_DIRINDEX
 
-# tflags publish
+# tflags net
 URI_WP_HACKED
 
-# tflags publish
+# tflags net
 URI_WP_HACKED_2
 
 # tflags publish
