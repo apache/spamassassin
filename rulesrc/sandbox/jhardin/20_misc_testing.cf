@@ -500,12 +500,12 @@ describe       __TO_EQ_FROM         To: same as From:
 
 # Suggested by Hans-Werner Friedemann on users list 09/30/2010
 # improvement for 4.x+ from GBechis
-if (version >= 4.000000) && can(Mail::SpamAssassin::Conf::feature_capture_rules)
-    header        __GB_FROM_ADDR       From:addr =~ /(?<GB_FROM_ADDR>.*)/
-    header        __SUBJ_HAS_FROM_1    Subject =~ /%{GB_FROM_ADDR}/i
-else
+#if (version >= 4.000000) && can(Mail::SpamAssassin::Conf::feature_capture_rules)
+#    header        __GB_FROM_ADDR       From:addr =~ /(?<GB_FROM_ADDR>.*)/
+#    header        __SUBJ_HAS_FROM_1    Subject =~ /%{GB_FROM_ADDR}/i
+#else
     header        __SUBJ_HAS_FROM_1    ALL =~ /\nFrom: (?:[^\n<]{0,80}<)?([^\n\s>]+)>?\n+(?:[^\n]{1,100}\n+)*Subject: [^\n]{0,100}\1[>,:\s\n]/ism
-endif
+#endif
 meta           FROM_IN_TO_AND_SUBJ  (__TO_EQ_FROM && __SUBJ_HAS_FROM_1) && !__HAS_LIST_ID 
 describe       FROM_IN_TO_AND_SUBJ  From address is in To and Subject
 tflags         FROM_IN_TO_AND_SUBJ  publish
