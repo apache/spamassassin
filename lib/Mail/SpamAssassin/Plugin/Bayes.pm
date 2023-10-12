@@ -1785,7 +1785,10 @@ sub learner_new {
   }
 
   dbg("bayes: learner_new self=%s, bayes_store_module=%s", $self,$module);
-  undef $self->{store};  # DESTROYs previous object, if any
+  if ($self->{store}) {
+    $self->{store}->untie_db();
+    undef $self->{store};  # DESTROYs previous object, if any
+  }
   eval '
     require '.$module.';
     $store = '.$module.'->new($self);
