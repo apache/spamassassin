@@ -3132,6 +3132,11 @@ if can(Mail::SpamAssassin::Conf::feature_bug6558_free)
   score      UNICODE_OBFU_ZW            3.500	# limit
   tflags     UNICODE_OBFU_ZW            publish
 
+  meta       UNICODE_OBFU_ZW_MANY       __UNICODE_OBFU_ZW_10 && !__RCD_RDNS_MAIL_MESSY
+  describe   UNICODE_OBFU_ZW_MANY       Heavily obfuscating text with hidden characters
+  score      UNICODE_OBFU_ZW_MANY       3.000	# limit
+  tflags     UNICODE_OBFU_ZW_MANY       publish
+
   body       __UNICODE_OBFU_ASC         /[a-z0-9\s](?:\xd0[\xb0\xb5\xbe]|\xd1[\x80\x81])+[a-z0-9]{1,8}(?:\xd0[\xb0\xb5\xbe]|\xd1[\x80\x81])+[a-z0-9\s]/i
   tflags     __UNICODE_OBFU_ASC         multiple maxhits=10
   meta       __UNICODE_OBFU_ASC_MANY    __UNICODE_OBFU_ASC > 9
