@@ -247,6 +247,14 @@ Contains notes from the plugin.
 
 X-ExtractText-Flags: openxml_NoText
 
+=item X-ExtractText-Uris
+
+Tag: _EXTRACTTEXTURIS_
+
+Contains uris extracted from the plugin.
+
+X-ExtractText-Uris: https://spamassassin.apache.org
+
 =back
 
 =head3 Rules
@@ -593,12 +601,14 @@ sub _extract {
       push @{$coll->{flags}}, 'ActionURI';
       dbg("extracttext: ActionURI: $1");
       push @{$coll->{text}}, $text;
+      push @{$coll->{uris}}, $2;
     } elsif($text =~ /QR-Code\:(https?\:\/\/[^\s]*)/) {
       # zbarimg(1) prefixes the url with "QR-Code:" string
       my $qrurl = $1;
       push @{$coll->{flags}},'QR-Code';
       dbg("extracttext: QR-Code: $qrurl");
       push @{$coll->{text}}, $text;
+      push @{$coll->{uris}}, $qrurl;
     }
     if ($text =~ /NoText/) {
       push @{$coll->{flags}},'NoText';
@@ -669,6 +679,7 @@ sub post_message_parse {
     'chars'		=> 0,
     'words'		=> 0,
     'text'		=> [],
+    'uris'		=> [],
   );
 
   my $conf = $self->{main}->{conf};
@@ -702,6 +713,7 @@ sub post_message_parse {
   my @uniq_types = do { my %seen; grep { !$seen{$_}++ } @{$collect{types}} };
   my @uniq_ext   = do { my %seen; grep { !$seen{$_}++ } @{$collect{extensions}} };
   my @uniq_flags = do { my %seen; grep { !$seen{$_}++ } @{$collect{flags}} };
+  my @uniq_uris = do { my %seen; grep { !$seen{$_}++ } @{$collect{uris}} };
 
   $msg->put_metadata('X-ExtractText-Words', $collect{words});
   $msg->put_metadata('X-ExtractText-Chars', $collect{chars});
@@ -709,6 +721,7 @@ sub post_message_parse {
   $msg->put_metadata('X-ExtractText-Types', join(' ', @uniq_types));
   $msg->put_metadata('X-ExtractText-Extensions', join(' ', @uniq_ext));
   $msg->put_metadata('X-ExtractText-Flags', join(' ', @uniq_flags));
+  $msg->put_metadata('X-ExtractText-Uris', join(' ', @uniq_uris));
 
   return 1;
 }
@@ -717,7 +730,7 @@ sub parsed_metadata {
   my ($self, $opts) = @_;
   my $pms = $opts->{permsgstatus};
   my $msg = $pms->get_message();
-  foreach my $tag (('Words','Chars','Tools','Types','Extensions','Flags')) {
+  foreach my $tag (('Words','Chars','Tools','Types','Extensions','Flags','Uris')) {
     my $v = $msg->get_metadata("X-ExtractText-$tag");
     if (defined $v) {
       $pms->set_tag("ExtractText$tag", $v);
