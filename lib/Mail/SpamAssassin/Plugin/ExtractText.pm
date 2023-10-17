@@ -47,6 +47,10 @@ ifplugin Mail::SpamAssassin::Plugin::ExtractText
   extracttext_external  tesseract  {OMP_THREAD_LIMIT=1} /usr/bin/tesseract -c page_separator= {} -
   extracttext_use       tesseract  .jpg .png .bmp .tif .tiff image/(?:jpeg|png|x-ms-bmp|tiff)
 
+  # QR-code decoder
+  extracttext_external  zbar       /usr/bin/zbarimg -q -D {}
+  extracttext_use       zbar       .jpg .png .pdf image/(?:jpeg|png) application/pdf
+
   add_header   all          ExtractText-Flags _EXTRACTTEXTFLAGS_
   header       PDF_NO_TEXT  X-ExtractText-Flags =~ /\bpdftotext_NoText\b/
   describe     PDF_NO_TEXT  PDF without text
@@ -450,7 +454,7 @@ sub _extract_external {
 
     if (proc_status_ok($?, $errno)) {
       dbg("extracttext: [%s] (%s) finished successfully", $pid, $cmd[0]);
-    } elsif (proc_status_ok($?, $errno, 0, 1)) {  # sometimes it exits with 1
+    } elsif (proc_status_ok($?, $errno, 0, 1, 4)) {  # sometimes it exits with error 1 or 4
       dbg("extracttext: [%s] (%s) finished: %s", $pid, $cmd[0], exit_status_str($?, $errno));
     } else {
       info("extracttext: [%s] (%s) error: %s", $pid, $cmd[0], exit_status_str($?, $errno));
@@ -504,6 +508,8 @@ sub _extract_external {
     }
     elsif ($err_resp =~ /^\S+ is not a Word Document/) {
       # Ignore antiword
+    } elsif((($pipe_errno/256) eq 4) and ($cmd[0] =~ /zbarimg/)) {
+      # Ignore zbarimg
     }
     elsif (!$resp) {
       warn "extracttext: error (".($pipe_errno/256).") from $cmd[0]: $err_resp\n";
@@ -587,6 +593,12 @@ sub _extract {
       push @{$coll->{flags}}, 'ActionURI';
       dbg("extracttext: ActionURI: $1");
       push @{$coll->{text}}, $text;
+    } elsif($text =~ /QR-Code\:(https?\:\/\/[^\s]*)/) {
+      # zbarimg(1) prefixes the url with "QR-Code:" string
+      my $qrurl = $1;
+      push @{$coll->{flags}},'QR-Code';
+      dbg("extracttext: QR-Code: $qrurl");
+      push @{$coll->{text}}, $text;
     }
     if ($text =~ /NoText/) {
       push @{$coll->{flags}},'NoText';
@@ -618,6 +630,7 @@ sub _extract {
 #
 sub _check_extract {
   my ($self, $coll, $checked, $part, $decoded, $data, $type, $name) = @_;
+  my $ret = 0;
   return 0 unless (defined $type || defined $name);
   foreach my $match (@{$self->{match}}) {
     next unless $self->{tools}->{$match->{tool}};
@@ -632,9 +645,11 @@ sub _check_extract {
     }
     $checked->{$match->{tool}} = 1;
     # dbg("extracttext: coll: $coll, part: $part, type: $type, name: $name, data: $data, tool: $self->{tools}->{$match->{tool}}");
-    return 1 if $self->_extract($coll,$part,$type,$name,$data,$self->{tools}->{$match->{tool}});
+    if($self->_extract($coll,$part,$type,$name,$data,$self->{tools}->{$match->{tool}})) {
+      $ret = 1;
+    }
   }
-  return 0;
+  return $ret;
 }
 
 sub post_message_parse {
