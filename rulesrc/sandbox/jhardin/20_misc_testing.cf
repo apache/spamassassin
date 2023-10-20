@@ -4150,12 +4150,24 @@ ifplugin Mail::SpamAssassin::Plugin::ReplaceTags
   replace_tag    SHY                     (?:=ad|[\xc2][\xad]|[\xad]|&\#xad;|&\#173;|&shy;)
   rawbody        __SHY_OBFU_PASSWORD     /p(?!assword)<SHY>{0,3}a<SHY>{0,3}s<SHY>{0,3}s<SHY>{0,3}w<SHY>{0,3}o<SHY>{0,3}r<SHY>{0,3}d/i
   replace_rules  __SHY_OBFU_PASSWORD
+  meta           SHY_OBFU_PASSWORD       __SHY_OBFU_PASSWORD
+  describe       SHY_OBFU_PASSWORD       Obfuscation, probable phishing
+  score          SHY_OBFU_PASSWORD       4.000	# limit
+  tflags         SHY_OBFU_PASSWORD       publish
 
   rawbody        __SHY_OBFU_EXPIRE       /e(?!xpire)<SHY>{0,3}x<SHY>{0,3}p<SHY>{0,3}i<SHY>{0,3}r<SHY>{0,3}e/i
   replace_rules  __SHY_OBFU_EXPIRE  
+  meta           SHY_OBFU_EXPIRE         __SHY_OBFU_EXPIRE  
+  describe       SHY_OBFU_EXPIRE         Obfuscation, probable phishing
+  score          SHY_OBFU_EXPIRE         4.000	# limit
+  tflags         SHY_OBFU_EXPIRE         publish
 endif
 
 # Attempt to bypass URL parsing? Or just sloppy? See bug #8190
-rawbody     __HREF_BOM                 /href="(?:\xef\xbb\xbf|\xfe\xff)https?:\/\//i
+rawbody     __HREF_BOM                 m,href\s*=\s*"(?:\xef\xbb\xbf|\xfe\xff)+https?://,i
+
+uri        __URI_WEBMDSERVICE          m,/webmdservice/,i
+tflags     __URI_WEBMDSERVICE          multiple maxhits=10
+meta       __URI_WEBMDSERVICE_MANY     __URI_WEBMDSERVICE > 9
 
 
