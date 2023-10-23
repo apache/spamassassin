@@ -4167,7 +4167,7 @@ endif
 rawbody     __HREF_BOM                 m,href\s*=\s*"(?:\xef\xbb\xbf|\xfe\xff)+https?://,i
 
 uri        __URI_WEBMDSERVICE          m,/webmdservice/,i
-tflags     __URI_WEBMDSERVICE          multiple maxhits=10
-meta       __URI_WEBMDSERVICE_MANY     __URI_WEBMDSERVICE > 9
+tflags     __URI_WEBMDSERVICE          multiple maxhits=6
+meta       __URI_WEBMDSERVICE_MANY     __URI_WEBMDSERVICE > 5
 
 
