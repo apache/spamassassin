@@ -100,7 +100,7 @@ sub digest_payloads {
               $payload = $p->{'rendered'};
             }
 
-            utf8::upgrade($payload);
+            utf8::upgrade($payload) if defined $payload;
 
             if ( $subtype eq 'html' ) {
                 require Mail::SpamAssassin::Pyzor::Digest::StripHtml;
