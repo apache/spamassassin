@@ -188,7 +188,7 @@ BITCOIN_IMGUR
 # good enough
 BITCOIN_MALF_HTML
 
-# tflags net
+# tflags publish
 BITCOIN_MALWARE
 
 # tflags publish
@@ -254,6 +254,9 @@ BITCOIN_XPRIO
 # tflags publish
 BITCOIN_YOUR_INFO
 
+# good enough
+BODY_SINGLE_WORD
+
 # tflags net
 BODY_URI_ONLY
 
@@ -307,6 +310,9 @@ CORRUPT_FROM_LINE_IN_HDRS
 
 # tflags publish
 CTE_8BIT_MISMATCH
+
+# good enough
+DATE_IN_FUTURE_Q_PLUS
 
 # tflags publish
 DAY_I_EARNED
@@ -398,11 +404,11 @@ DOS_OE_TO_MX
 # good enough
 DOS_OUTLOOK_TO_MX
 
-# good enough
-DOS_RCVD_IP_TWICE_B
-
 # tflags publish
 DOTGOV_IMAGE
+
+# good enough
+DSN_NO_MIMEVERSION
 
 # tflags publish
 DX_TEXT_02
@@ -476,10 +482,10 @@ FONT_INVIS_POSTEXTRAS
 # tflags net
 FORGED_SPF_HELO
 
-# tflags publish
+# tflags net
 FORM_FRAUD
 
-# tflags publish
+# tflags net
 FORM_FRAUD_3
 
 # tflags publish
@@ -557,7 +563,7 @@ FROM_MISSP_FREEMAIL
 # good enough
 FROM_MISSP_MSFT
 
-# good enough
+# tflags net
 FROM_MISSP_REPLYTO
 
 # tflags net
@@ -595,6 +601,12 @@ FSL_BULK_SIG
 
 # good enough
 FSL_CTYPE_WIN1251
+
+# good enough
+FSL_HAS_TINYURL
+
+# good enough
+FSL_HELO_BARE_IP_1
 
 # tflags publish
 FSL_NEW_HELO_USER
@@ -694,6 +706,9 @@ GB_GOOGLE_OBFUR
 
 # tflags net
 GB_HASHBL_BTC
+
+# good enough
+GB_PAYPAL_IMG_NOT_RCVD_PAYP
 
 # good enough
 GB_WEBFORM
@@ -887,9 +902,6 @@ KHOP_HELO_FCRDNS
 # tflags publish
 LINKEDIN_IMG_NOT_RCVD_LNKN
 
-# good enough
-LIST_PARTIAL_SHORT_MSG
-
 # tflags publish
 LIST_PRTL_PUMPDUMP
 
@@ -934,6 +946,12 @@ MANY_HDRS_LCASE
 
 # tflags publish
 MANY_SPAN_IN_TEXT
+
+# good enough
+MANY_SUBDOM
+
+# tflags net
+MAY_BE_FORGED
 
 # tflags publish
 MILLION_HUNDRED
@@ -1089,16 +1107,10 @@ OBFU_UNSUB_UL
 ODD_FREEM_REPTO
 
 # good enough
-PDS_BAD_THREAD_QP_64
-
-# good enough
 PDS_BTC_ID
 
 # good enough
 PDS_BTC_MSGID
-
-# good enough
-PDS_DBL_URL_HELO_NODOM
 
 # good enough
 PDS_DBL_URL_TNB_RUNON
@@ -1111,6 +1123,9 @@ PDS_FRNOM_TODOM_DBL_URL
 
 # good enough
 PDS_FRNOM_TODOM_NAKED_TO
+
+# tflags net
+PDS_FROM_2_EMAILS
 
 # good enough
 PDS_FROM_NAME_TO_DOMAIN
@@ -1476,6 +1491,9 @@ REPTO_419_FRAUD_YN
 REPTO_INFONUMSCOM
 
 # good enough
+SCC_BODY_SINGLE_WORD
+
+# good enough
 SCC_CANSPAM_2
 
 # tflags publish
@@ -1610,10 +1628,10 @@ TARINGANET_IMG_NOT_RCVD_TN
 # tflags publish
 TEQF_USR_IMAGE
 
-# tflags publish
+# tflags net
 TEQF_USR_MSGID_HEX
 
-# tflags publish
+# tflags net
 TEQF_USR_MSGID_MALF
 
 # good enough
@@ -1639,9 +1657,6 @@ TO_EQ_FM_DOM_HTML_IMG
 
 # tflags net
 TO_EQ_FM_DOM_SPF_FAIL
-
-# tflags net
-TO_EQ_FM_HTML_ONLY
 
 # tflags net
 TO_EQ_FM_SPF_FAIL
@@ -1680,7 +1695,7 @@ TVD_APP_LOAN
 TVD_IP_HEX
 
 # good enough
-TVD_LONG_WORD5
+TVD_IP_OCT
 
 # good enough
 TVD_PH_7
@@ -1689,6 +1704,9 @@ TVD_PH_7
 TVD_PH_BODY_META
 
 # good enough
+TVD_PH_SUBJ_META
+
+# tflags net
 TVD_SPACE_ENCODED
 
 # tflags net
@@ -1865,7 +1883,7 @@ URI_MALWARE_SCMS
 # tflags userconf
 URI_NOVOWEL
 
-# tflags publish
+# tflags net
 URI_ONLY_MSGID_MALF
 
 # tflags publish
