@@ -188,7 +188,7 @@ BITCOIN_IMGUR
 # good enough
 BITCOIN_MALF_HTML
 
-# tflags publish
+# tflags net
 BITCOIN_MALWARE
 
 # tflags publish
@@ -296,7 +296,7 @@ CN_B2B_SPAMMER
 # tflags publish
 COMMENT_GIBBERISH
 
-# good enough
+# tflags net
 COMPENSATION
 
 # tflags publish
@@ -482,7 +482,7 @@ FONT_INVIS_POSTEXTRAS
 # tflags net
 FORGED_SPF_HELO
 
-# tflags net
+# tflags publish
 FORM_FRAUD
 
 # tflags net
@@ -563,7 +563,7 @@ FROM_MISSP_FREEMAIL
 # good enough
 FROM_MISSP_MSFT
 
-# tflags net
+# good enough
 FROM_MISSP_REPLYTO
 
 # tflags net
@@ -897,6 +897,9 @@ JH_SPAMMY_PATTERN01
 JH_SPAMMY_PATTERN02
 
 # tflags net
+KHOP_FAKE_EBAY
+
+# tflags net
 KHOP_HELO_FCRDNS
 
 # tflags publish
@@ -1123,9 +1126,6 @@ PDS_FRNOM_TODOM_DBL_URL
 
 # good enough
 PDS_FRNOM_TODOM_NAKED_TO
-
-# tflags net
-PDS_FROM_2_EMAILS
 
 # good enough
 PDS_FROM_NAME_TO_DOMAIN
@@ -1491,6 +1491,9 @@ REPTO_419_FRAUD_YN
 REPTO_INFONUMSCOM
 
 # good enough
+RISK_FREE
+
+# good enough
 SCC_BODY_SINGLE_WORD
 
 # good enough
@@ -1613,9 +1616,6 @@ SUBJ_UNNEEDED_HTML
 # tflags net
 SURBL_BLOCKED
 
-# good enough
-SUSP_UTF8_WORD_COMBO
-
 # tflags publish
 SYSADMIN
 
@@ -1625,13 +1625,13 @@ TAGSTAT_IMG_NOT_RCVD_TGST
 # tflags publish
 TARINGANET_IMG_NOT_RCVD_TN
 
-# tflags publish
+# tflags net
 TEQF_USR_IMAGE
 
-# tflags net
+# tflags publish
 TEQF_USR_MSGID_HEX
 
-# tflags net
+# tflags publish
 TEQF_USR_MSGID_MALF
 
 # good enough
@@ -1646,9 +1646,6 @@ THIS_IS_ADV_SUSP_NTLD
 # tflags publish
 TONLINE_FAKE_DKIM
 
-# good enough
-TONOM_EQ_TOLOC_SHRT_SHRTNER
-
 # tflags publish
 TO_EQ_FM_DIRECT_MX
 
@@ -1656,7 +1653,13 @@ TO_EQ_FM_DIRECT_MX
 TO_EQ_FM_DOM_HTML_IMG
 
 # tflags net
+TO_EQ_FM_DOM_HTML_ONLY
+
+# tflags net
 TO_EQ_FM_DOM_SPF_FAIL
+
+# tflags net
+TO_EQ_FM_HTML_ONLY
 
 # tflags net
 TO_EQ_FM_SPF_FAIL
@@ -1910,7 +1913,7 @@ URI_WPADMIN
 # tflags publish
 URI_WP_DIRINDEX
 
-# tflags publish
+# tflags net
 URI_WP_HACKED
 
 # tflags publish
