@@ -1934,10 +1934,32 @@ sub setuid_to_euid {
 
 # helper app command-line open
 sub helper_app_pipe_open {
+
+  my @cmdline;
+  my $startquote = 0;
+  my $ntok;
+  foreach my $tok ( @_ ) {
+   if(defined $tok && ($tok =~ /^\"/) && ($tok !~ /\"$/)) {
+     $startquote = 1;
+   }
+   if($startquote) {
+     $ntok .= " " if($tok !~ /^\"/);
+     $ntok =~ s/\"// if defined $ntok;
+     $ntok .= $tok;
+   }
+   if($startquote && defined $tok && ($tok =~ /\"$/)) {
+     $startquote = 0;
+     $ntok =~ s/\"// if defined $ntok;
+     push(@cmdline, $ntok);
+     undef $ntok;
+   } elsif(not $startquote) {
+     push(@cmdline, $tok);
+   }
+  }
   if (RUNNING_ON_WINDOWS) {
-    return helper_app_pipe_open_windows (@_);
+    return helper_app_pipe_open_windows (@cmdline);
   } else {
-    return helper_app_pipe_open_unix (@_);
+    return helper_app_pipe_open_unix (@cmdline);
   }
 }
 

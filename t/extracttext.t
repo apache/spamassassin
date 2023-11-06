@@ -5,9 +5,9 @@ use SATest; sa_t_init("extracttext");
 use Mail::SpamAssassin::Util;
 use Test::More;
 
-use constant PDFTOTEXT => eval { my $f = Mail::SpamAssassin::Util::find_executable_in_env_path('pdftotext'); ($f !~ /\s/)?$f:undef};
-use constant TESSERACT => eval { my $f = Mail::SpamAssassin::Util::find_executable_in_env_path('tesseract'); ($f !~ /\s/)?$f:undef};
-use constant CAT => eval { my $f = Mail::SpamAssassin::Util::find_executable_in_env_path('cat'); ($f !~ /\s/)?$f:undef};
+use constant PDFTOTEXT => eval { my $f = Mail::SpamAssassin::Util::find_executable_in_env_path('pdftotext'); ($f !~ /\s/)?$f:'"'.$f.'"'};
+use constant TESSERACT => eval { my $f = Mail::SpamAssassin::Util::find_executable_in_env_path('tesseract'); ($f !~ /\s/)?$f:'"'.$f.'"'};
+use constant CAT => eval { my $f = Mail::SpamAssassin::Util::find_executable_in_env_path('cat'); ($f !~ /\s/)?$f:'"'.$f.'"'};
 
 my $tests = 0;
 $tests += 2 if (PDFTOTEXT);
