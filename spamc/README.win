@@ -33,6 +33,10 @@ To build SpamAssassin you must have installed a Windows version of Perl
 and the modules that are listed as required in the general SpamAssassin
 documentation.
 
+Strawberry Perl provides a C compiler that is enough to build spamc.exe.
+If you want to use Microsoft Visual C++ instead, you should download
+Microsoft Visual C++ Toolkit from Microsoft website.
+
 Building spamc for Windows has been tested with Microsoft Visual C++ 6.0
 and with Microsoft Visual C++ Toolkit 2003. It will probably just work
 with any recent version of VC++. Some installation files would have to
@@ -73,7 +77,7 @@ by unpacking the source files into some directory, for example,
 /usr/local/src/spamassassin, then in a Cygwin bash shell
 
  cd /usr/local/src/spamassassin
- perl Makefile.PL
+ perl Makefile.PL BUILD_SPAMC=yes
  make
  make test
  make install
