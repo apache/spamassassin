@@ -4164,10 +4164,10 @@ ifplugin Mail::SpamAssassin::Plugin::ReplaceTags
 endif
 
 # Attempt to bypass URL parsing? Or just sloppy? See bug #8190
-rawbody     __HREF_BOM                 m,href\s*=\s*"(?:\xef\xbb\xbf|\xfe\xff)+https?://,i
+rawbody     __HREF_BOM                 m,href\s*=\s*"(?:[\xef][\xbb][\xbf]|[\xfe][\xff])+https?://,i
 
-uri        __URI_WEBMDSERVICE          m,/webmdservice/,i
-tflags     __URI_WEBMDSERVICE          multiple maxhits=6
-meta       __URI_WEBMDSERVICE_MANY     __URI_WEBMDSERVICE > 5
+#uri        __URI_WEBMDSERVICE          m,/webmdservice/,i
+#tflags     __URI_WEBMDSERVICE          multiple maxhits=6
+#meta       __URI_WEBMDSERVICE_MANY     __URI_WEBMDSERVICE > 5
 
 
