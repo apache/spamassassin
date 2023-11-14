@@ -40,7 +40,7 @@ Mail::SpamAssassin::Spamd::Apache2::AclRFC1413 - check spamd's client ident
 =head1 DESCRIPTION
 
 Queries remote ident server using mod_ident.so, saves result in
-C<$c->notes()>.
+C<$c-E<gt>notes()>.
 
 Returns C<Apache2::Const::FORBIDDEN> on failure.
 
@@ -125,7 +125,7 @@ Nothing.
 
 =head1 BUGS
 
-See <http://bugzilla.spamassassin.org/>
+See E<lt>http://bugzilla.spamassassin.org/E<gt>
 
 =head1 SEE ALSO
 

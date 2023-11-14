@@ -79,7 +79,7 @@ sub load_modules {		# static
 
 ###########################################################################
 
-=item $f->load ($username)
+=item $f-E<gt>load ($username)
 
 Read configuration parameters from LDAP server and parse scores from it.
 

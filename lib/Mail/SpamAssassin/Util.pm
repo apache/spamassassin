@@ -1390,7 +1390,7 @@ Touch or create a file.
 
 Possible args:
 
-create_exclusive => 1
+create_exclusive =E<gt> 1
   Create a new empty file safely, only if not existing before
 
 =cut

@@ -3479,12 +3479,12 @@ Print a brief help message, then exit without further action.
 
 Print version information, then exit without further action.
 
-=item B<-i> [I<ipaddress>[:<port>]], B<--listen>[=I<ipaddress>[:<port>]]
+=item B<-i> [I<ipaddress>[:E<lt>portE<gt>]], B<--listen>[=I<ipaddress>[:E<lt>portE<gt>]]
 
 Additional alias names for this option are --listen-ip and --ip-address.
 Tells spamd to listen on the specified IP address, defaults to a loopback
 interface, i.e. C<--listen localhost>).  If no value is specified after the
-switch, or if an asterisk '*' stands in place of an <ipaddress>, spamd will
+switch, or if an asterisk '*' stands in place of an E<lt>ipaddressE<gt>, spamd will
 listen on all interfaces - this is equivalent to address '0.0.0.0' for IPv4
 and to '::' for IPv6. You can also use a valid hostname which will make spamd
 listen on all addresses that a name resolves to. The option may be specified

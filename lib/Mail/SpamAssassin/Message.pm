@@ -572,8 +572,8 @@ sub get_pristine_body_digest {
 
 =item get_msgid()
 
-Returns Message-ID header for the message, with <> and surrounding
-whitespace removed. Returns undef, if nothing found between <>.
+Returns Message-ID header for the message, with E<lt>E<gt> and surrounding
+whitespace removed. Returns undef, if nothing found between E<lt>E<gt>.
 
 =cut
 

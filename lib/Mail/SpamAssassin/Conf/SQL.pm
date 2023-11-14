@@ -77,7 +77,7 @@ sub load_modules {		# static
 
 ###########################################################################
 
-=item $f->load ($username)
+=item $f-E<gt>load ($username)
 
 Read configuration parameters from SQL database and parse scores from it.
 

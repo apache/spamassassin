@@ -161,7 +161,7 @@ push @directives, {    # inherited
 
 =item C<SANew key "value">
 
-Additional arguments to C<Mail::SpamAssassin->new()>.  Refer to
+Additional arguments to C<Mail::SpamAssassin-E<gt>new()>.  Refer to
 C<Mail::SpamAssassin(3)>.
 
 =cut
@@ -559,7 +559,7 @@ C<@INC>, you can use something like:
 
 =head1 BUGS
 
-See <http://bugzilla.spamassassin.org/>.
+See E<lt>http://bugzilla.spamassassin.org/E<gt>.
 
 =head1 SEE ALSO
 

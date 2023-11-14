@@ -917,7 +917,7 @@ perform a similar procedure for each one of them.
 
 This will sync any outstanding journal entries
 
-=item sa-learn --backup > backup.txt
+=item sa-learn --backup E<gt> backup.txt
 
 This will save all your Bayes data to a plain text file.
 
@@ -945,7 +945,7 @@ Again, you need to do this for every database.
 
 =back
 
-If you are migrating to SQL you can make use of the -u <username>
+If you are migrating to SQL you can make use of the -u I<username>
 option in sa-learn to populate each user's database. Otherwise, you
 must run sa-learn as the user who database you are restoring.
 
@@ -1238,9 +1238,9 @@ or if all of the following are true (opportunistic):
 
 =item - bayes_auto_expire does not equal 0
 
-=item - the number of tokens in the DB is > 100,000
+=item - the number of tokens in the DB is E<gt> 100,000
 
-=item - the number of tokens in the DB is > bayes_expiry_max_db_size
+=item - the number of tokens in the DB is E<gt> bayes_expiry_max_db_size
 
 =item - there is at least a 12 hr difference between the oldest and newest token atimes
 
@@ -1276,7 +1276,7 @@ old_atime_delta * old_reduction_count / goal)
 
 =item - estimated new atime delta is < 12 hrs
 
-=item - the difference between the last reduction count and the goal reduction count is > 50%
+=item - the difference between the last reduction count and the goal reduction count is E<gt> 50%
 
 =back
 
