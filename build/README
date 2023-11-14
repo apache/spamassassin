@@ -40,7 +40,7 @@ If you are going to build a branch, checkout the branch. Then create the three s
 directories in trunk as exampled below.
 
   rm -rf ~/build.tmp
-  mkdir ~/build..tmp
+  mkdir ~/build.tmp
   cd ~/build.tmp
   svn co https://svn.apache.org/repos/asf/spamassassin/trunk
   ## the rest are only done if going to make a branch build instead of from trunk
@@ -146,7 +146,7 @@ Run "svn status" to ensure you're building/releasing from a pristine
 
   - For releases on the trunk (e.g. a .0 release):
 
-      TZ=UTC svn log -r HEAD:1567124 --non-interactive > Changes
+      TZ=UTC svn log -r HEAD:1906050 --non-interactive > Changes
 
     r497472 was the release of 3.2.0-pre1; r233108 was the start of 3.2.0,
     just after the 3.1.0 branch was created; r46030 was the start of the
@@ -154,7 +154,7 @@ Run "svn status" to ensure you're building/releasing from a pristine
     for the point you want to start at if different. I used r1149751 to
     produce the first 3.4.0-pre release, for example.  r1567124 is the
     3.4.0 release tag revision.  r1676613 is the 3.4.1 release tag
-    revision.
+    revision. r1906050 is the 4.0.0 release tag revision.
 
     To find the release tag revision, first get the tag name using the tags website, i.e.: 
       https://svn.apache.org/repos/asf/spamassassin/tags/
