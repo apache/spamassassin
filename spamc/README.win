@@ -95,7 +95,7 @@ Building the Windows version
 Unpack the SpamAssassin source tree into a different directory than you
 used for building the Cygwin version, for example C:\spamassassin\.
 
-Start up a Widows command shell. In the shell, set the environment
+Start up a Windows command shell. In the shell, set the environment
 variable SPAMD_HOST to be the host name or ip address of the spamd
 server to be used for testing. In this case you would use the command
 
@@ -106,9 +106,11 @@ environment variable SPAMD_PORT. To use SSL during the test,
 
  set SC_ARGS=-S
 
-Make sure that the environment is set up for running VC++. In VC++ 6.0
-there is a batch file created during installation that sets the
-environment. In a typical installation that would be found at
+If you want to build spamc using Microsoft VC++, make sure that
+the environment is set up for running VC++.
+In VC++ 6.0 there is a batch file created during installation that
+sets the environment.
+In a typical installation that would be found at
 
  "\Program Files\Microsoft Visual Studio\VC98\Bin\VCVARS32.BAT"
 
