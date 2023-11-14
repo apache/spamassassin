@@ -27,8 +27,8 @@ have been given a copy of the project's signing keys and the password to use the
 They are in the form of a tar file that you should unpack into a directory named ~/sabuildtools
 on the build machine. It contains a bin subdirectory that contains a symlink to /usr/bin/gpg
 which should be installed on the machine. The name ~/sabuildtools is hardcoded in the release
-packaging scripts, so be sure to place the files there. The packaging scripts will pronpt you
-for the password when it signs the final packages.
+packaging scripts, so be sure to place the files there.
+The packaging scripts will prompt you for the password when it signs the final packages.
 
 The build process:
 
