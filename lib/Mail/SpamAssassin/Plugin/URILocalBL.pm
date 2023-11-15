@@ -23,7 +23,7 @@ URILocalBL - blocklist URIs using local information (ISP names, address lists, a
 
 This plugin creates some new rule test types, such as "uri_block_cc",
 "uri_block_cidr", and "uri_block_isp".  These rules apply to the URIs
-found in the HTML portion of a message, i.e. <a href=...> markup.
+found in the HTML portion of a message, i.e. E<lt>a href=...E<gt> markup.
 
   loadplugin    Mail::SpamAssassin::Plugin::URILocalBL
 

@@ -360,7 +360,7 @@ sub DESTROY {
 
 ###########################################################################
 
-=item $status->check ()
+=item $status-E<gt>check ()
 
 Runs the SpamAssassin rules against the message pointed to by the object.
 
@@ -529,7 +529,7 @@ sub check_cleanup {
 
 ###########################################################################
 
-=item $status->learn()
+=item $status-E<gt>learn()
 
 After a mail message has been checked, this method can be called.  If the score
 is outside a certain range around the threshold, ie. if the message is judged
@@ -627,7 +627,7 @@ sub learn_timed {
   }
 }
 
-=item $score = $status->get_autolearn_points()
+=item $score = $status-E<gt>get_autolearn_points()
 
 Return the message's score as computed for auto-learning.  Certain tests are
 ignored:
@@ -650,7 +650,7 @@ sub get_autolearn_points {
   return $self->{autolearn_points};
 }
 
-=item $score = $status->get_head_only_points()
+=item $score = $status-E<gt>get_head_only_points()
 
 Return the message's score as computed for auto-learning, ignoring
 all rules except for header-based ones.
@@ -663,7 +663,7 @@ sub get_head_only_points {
   return $self->{head_only_points};
 }
 
-=item $score = $status->get_learned_points()
+=item $score = $status-E<gt>get_learned_points()
 
 Return the message's score as computed for auto-learning, ignoring
 all rules except for learning-based ones.
@@ -676,7 +676,7 @@ sub get_learned_points {
   return $self->{learned_points};
 }
 
-=item $score = $status->get_body_only_points()
+=item $score = $status-E<gt>get_body_only_points()
 
 Return the message's score as computed for auto-learning, ignoring
 all rules except for body-based ones.
@@ -689,7 +689,7 @@ sub get_body_only_points {
   return $self->{body_only_points};
 }
 
-=item $score = $status->get_autolearn_force_status()
+=item $score = $status-E<gt>get_autolearn_force_status()
 
 Return whether a message's score included any rules that are flagged as
 autolearn_force.
@@ -702,7 +702,7 @@ sub get_autolearn_force_status {
   return $self->{autolearn_force};
 }
 
-=item $rule_names = $status->get_autolearn_force_names()
+=item $rule_names = $status-E<gt>get_autolearn_force_names()
 
 Return a list of comma separated list of rule names if a message's
 score included any rules that are flagged as autolearn_force.
@@ -859,7 +859,7 @@ sub _get_autolearn_points {
 
 ###########################################################################
 
-=item $isspam = $status->is_spam ()
+=item $isspam = $status-E<gt>is_spam ()
 
 After a mail message has been checked, this method can be called.  It will
 return 1 for mail determined likely to be spam, 0 if it does not seem
@@ -875,7 +875,7 @@ sub is_spam {
 
 ###########################################################################
 
-=item $list = $status->get_names_of_tests_hit ()
+=item $list = $status-E<gt>get_names_of_tests_hit ()
 
 After a mail message has been checked, this method can be called. It will
 return a comma-separated string, listing all the symbolic test names
@@ -889,7 +889,7 @@ sub get_names_of_tests_hit {
   return join(',', sort @{$self->{test_names_hit}});
 }
 
-=item $list = $status->get_names_of_tests_hit_with_scores_hash ()
+=item $list = $status-E<gt>get_names_of_tests_hit_with_scores_hash ()
 
 After a mail message has been checked, this method can be called. It will
 return a pointer to a hash for rule & score pairs for all the symbolic
@@ -907,7 +907,7 @@ sub get_names_of_tests_hit_with_scores_hash {
   return \%testsscores;
 }
 
-=item $list = $status->get_names_of_tests_hit_with_scores ()
+=item $list = $status-E<gt>get_names_of_tests_hit_with_scores ()
 
 After a mail message has been checked, this method can be called. It will
 return a comma-separated string of rule=score pairs for all the symbolic
@@ -927,7 +927,7 @@ sub get_names_of_tests_hit_with_scores {
 
 ###########################################################################
 
-=item $list = $status->get_names_of_subtests_hit ()
+=item $list = $status-E<gt>get_names_of_subtests_hit ()
 
 After a mail message has been checked, this method can be called.  It will
 return a comma-separated string, listing all the symbolic test names of the
@@ -981,7 +981,7 @@ sub get_names_of_subtests_hit {
 
 ###########################################################################
 
-=item $num = $status->get_score ()
+=item $num = $status-E<gt>get_score ()
 
 After a mail message has been checked, this method can be called.  It will
 return the message's score.
@@ -1001,7 +1001,7 @@ sub get_hits {
 
 ###########################################################################
 
-=item $num = $status->get_required_score ()
+=item $num = $status-E<gt>get_required_score ()
 
 After a mail message has been checked, this method can be called.  It will
 return the score required for a mail to be considered spam.
@@ -1021,7 +1021,7 @@ sub get_required_hits {
 
 ###########################################################################
 
-=item $num = $status->get_autolearn_status ()
+=item $num = $status-E<gt>get_autolearn_status ()
 
 After a mail message has been checked, this method can be called.  It will
 return one of the following strings depending on whether the mail was
@@ -1045,7 +1045,7 @@ sub get_autolearn_status {
 
 ###########################################################################
 
-=item $report = $status->get_report ()
+=item $report = $status-E<gt>get_report ()
 
 Deliver a "spam report" on the checked mail message.  This contains details of
 how many spam detection rules it triggered.
@@ -1076,7 +1076,7 @@ sub get_report {
 
 ###########################################################################
 
-=item $preview = $status->get_content_preview ()
+=item $preview = $status-E<gt>get_content_preview ()
 
 Give a "preview" of the content.
 
@@ -1121,7 +1121,7 @@ sub get_content_preview {
 
 ###########################################################################
 
-=item $msg = $status->get_message()
+=item $msg = $status-E<gt>get_message()
 
 Return the object representing the message being scanned.
 
@@ -1134,7 +1134,7 @@ sub get_message {
 
 ###########################################################################
 
-=item $status->rewrite_mail ()
+=item $status-E<gt>rewrite_mail ()
 
 Rewrite the mail message.  This will at minimum add headers, and at
 maximum MIME-encapsulate the message text, to reflect its spam or not-spam
@@ -1625,7 +1625,7 @@ sub _replace_tags {
 
 # public API for plugins
 
-=item $status->action_depends_on_tags($tags, $code, @args)
+=item $status-E<gt>action_depends_on_tags($tags, $code, @args)
 
 Enqueue the supplied subroutine reference C<$code>, to become runnable when
 all the specified tags become available. The C<$tags> may be a simple
@@ -1739,7 +1739,7 @@ sub report_unsatisfied_actions {
   }
 }
 
-=item $status->set_tag($tagname, $value)
+=item $status-E<gt>set_tag($tagname, $value)
 
 Set a template tag, as used in C<add_header>, report templates, etc.  This
 API is intended for use by plugins.  Tag names will be converted to an
@@ -1781,7 +1781,7 @@ sub set_tag {
 
 # public API for plugins
 
-=item $string = $status->get_tag($tagname)
+=item $string = $status-E<gt>get_tag($tagname)
 
 Get the current value of a template tag, as used in C<add_header>, report
 templates, etc. This API is intended for use by plugins.  Tag names will be
@@ -1824,7 +1824,7 @@ sub get_tag {
   return $data;
 }
 
-=item $string = $status->get_tag_raw($tagname, @args)
+=item $string = $status-E<gt>get_tag_raw($tagname, @args)
 
 Similar to C<get_tag>, but keeps a tag name unchanged (does not uppercase it),
 and does not convert arrayref tag values into a single string.
@@ -1861,7 +1861,7 @@ sub get_tag_raw {
 
 # public API for plugins
 
-=item $status->set_spamd_result_item($subref)
+=item $status-E<gt>set_spamd_result_item($subref)
 
 Set an entry for the spamd result log line.  C<$subref> should be a code
 reference for a subroutine which will return a string in C<'name=VALUE'>
@@ -1934,7 +1934,7 @@ sub _get_tag_value_for_required_score {
 
 ###########################################################################
 
-=item $status->finish ()
+=item $status-E<gt>finish ()
 
 Indicate that this C<$status> object is finished with, and can be destroyed.
 
@@ -1973,7 +1973,7 @@ sub finish_tests {}
 
 ###########################################################################
 
-=item $name = $status->get_current_eval_rule_name()
+=item $name = $status-E<gt>get_current_eval_rule_name()
 
 Return the name of the currently-running eval rule.  C<undef> is
 returned if no eval rule is currently being run.  Useful for plugins
@@ -2054,7 +2054,7 @@ sub extract_message_metadata {
 
 ###########################################################################
 
-=item $status->get_decoded_body_text_array ()
+=item $status-E<gt>get_decoded_body_text_array ()
 
 Returns the message body, with B<base64> or B<quoted-printable> encodings
 decoded, and non-text parts or non-inline attachments stripped.
@@ -2070,7 +2070,7 @@ sub get_decoded_body_text_array {
   return $_[0]->{msg}->get_decoded_body_text_array();
 }
 
-=item $status->get_decoded_stripped_body_text_array ()
+=item $status-E<gt>get_decoded_stripped_body_text_array ()
 
 Returns the message body, decoded (as described in
 get_decoded_body_text_array()), with HTML rendered, and with whitespace
@@ -2092,7 +2092,7 @@ sub get_decoded_stripped_body_text_array {
 
 ###########################################################################
 
-=item $status->get (header_name [, default_value])
+=item $status-E<gt>get (header_name [, default_value])
 
 Returns message headers, pseudo-headers, names, email-addresses or some
 other parsed values set by modifiers.  C<header_name> is the name of a mail
@@ -2123,17 +2123,17 @@ result in "example@foo" (and "example@bar"):
 
 =item example@foo
 
-=item example@foo (Foo Blah), <example@bar>
+=item example@foo (Foo Blah), E<lt>example@barE<gt>
 
 =item example@foo, example@bar
 
 =item display: example@foo (Foo Blah), example@bar ;
 
-=item Foo Blah <example@foo>
+=item Foo Blah E<lt>example@fooE<gt>
 
-=item "Foo Blah" <example@foo>
+=item "Foo Blah" E<lt>example@fooE<gt>
 
-=item "'Foo Blah'" <example@foo>
+=item "'Foo Blah'" E<lt>example@fooE<gt>
 
 =back
 
@@ -2148,15 +2148,15 @@ stripped too, as it is often seen.
 
 =item example@foo (Foo Blah)
 
-=item example@foo (Foo Blah), "Bar Baz" <example@bar>
+=item example@foo (Foo Blah), "Bar Baz" E<lt>example@barI<gt>
 
 =item display: example@foo (Foo Blah), example@bar ;
 
-=item Foo Blah <example@foo>
+=item Foo Blah E<lt>example@fooE<gt>
 
-=item "Foo Blah" <example@foo>
+=item "Foo Blah" E<lt>example@fooE<gt>
 
-=item "'Foo Blah'" <example@foo>
+=item "'Foo Blah'" E<lt>example@fooE<gt>
 
 =back
 
@@ -2577,12 +2577,12 @@ sub _tbirdurire {
   return $self->{tbirdurire};
 }
 
-=item $status->get_uri_list ()
+=item $status-E<gt>get_uri_list ()
 
 Returns an array of all unique URIs found in the message.  It takes
 a combination of the URIs found in the rendered (decoded and HTML
 stripped) body and the URIs found when parsing the HTML in the message.
-Will also set $status->{uri_list} (the array as returned by this function).
+Will also set $status-E<gt>{uri_list} (the array as returned by this function).
 
 The returned array will include the "raw" URI as well as
 "slightly cooked" versions.  For example, the single URI
@@ -2622,13 +2622,13 @@ sub get_uri_list {
   return @{$self->{uri_list}};
 }
 
-=item $status->get_uri_detail_list ()
+=item $status-E<gt>get_uri_detail_list ()
 
 Returns a hash reference of all unique URIs found in the message and
 various data about where the URIs were found in the message.  It takes a
 combination of the URIs found in the rendered (decoded and HTML stripped)
 body and the URIs found when parsing the HTML in the message.  Will also
-set $status->{uri_detail_list} (the hash reference as returned by this
+set $status-E<gt>{uri_detail_list} (the hash reference as returned by this
 function).
 
 The hash format looks something like this:
@@ -2657,8 +2657,8 @@ linkifying (i.e. email address found in body without mailto:).
 C<cleaned> is an array of the raw and canonicalized version of the raw_uri
 (http://spamassassin.apache%2Eorg/, https://spamassassin.apache.org/).
 
-C<anchor_text> is an array of the anchor text (text between <a> and
-</a>), if any, which linked to the URI.
+C<anchor_text> is an array of the anchor text (text between E<lt>aE<gt> and
+E<lt>/aE<gt>), if any, which linked to the URI.
 
 C<domains> is a hash of the domains found in the canonicalized URIs.
 
@@ -2843,7 +2843,7 @@ sub _process_dkim_uri_list {
   }
 }
 
-=item $status->add_uri_detail_list ($raw_uri, $types, $source, $valid_domain)
+=item $status-E<gt>add_uri_detail_list ($raw_uri, $types, $source, $valid_domain)
 
 Adds values to internal uri_detail_list.  When used from Plugins, recommended
 to call from parsed_metadata (along with register_method_priority, -10) so
@@ -2852,10 +2852,10 @@ other Plugins calling get_uri_detail_list() will see it.
 C<raw_uri> is the URI to be added. The only required parameter.
 
 C<types> is an optional hash reference, contents are added to
-uri_detail_list->{types} (see get_uri_detail_list for known keys). 
+uri_detail_list-E<gt>{types} (see get_uri_detail_list for known keys). 
 I<parsed> is default is no hash given.  I<nocanon> does not run
 uri_list_canonicalize (no redirector, uri fixing).  I<noclean> skips adding
-uri_detail_list->{cleaned}, so it would not be used in "uri" rule checks,
+uri_detail_list-E<gt>{cleaned}, so it would not be used in "uri" rule checks,
 but domain/hosts would still be used for URIBL/RBL purposes.
 
 C<source> is an optional simple string, only used for debug logging purposes
@@ -2987,7 +2987,7 @@ ENDOFEVAL
 
 ###########################################################################
 
-=item $status->clear_test_state()
+=item $status-E<gt>clear_test_state()
 
 DEPRECATED, UNNEEDED SINCE 4.0
 
@@ -3045,7 +3045,7 @@ sub _wrap_desc {
 
 ###########################################################################
 
-=item $status->got_hit ($rulename, $desc_prepend [, name => value, ...])
+=item $status-E<gt>got_hit ($rulename, $desc_prepend [, name =E<gt> value, ...])
 
 Register a hit against a rule in the ruleset.
 
@@ -3058,37 +3058,37 @@ data:
 
 =over 4
 
-=item score => $num
+=item score =E<gt> $num
 
 Optional: the score to use for the rule hit.  If unspecified,
 the value from the C<Mail::SpamAssassin::Conf> object's C<{scores}>
 hash will be used (a configured score), and in its absence the
 C<defscore> option value.
 
-=item defscore => $num
+=item defscore =E<gt> $num
 
 Optional: the score to use for the rule hit if neither the
 option C<score> is provided, nor a configured score value is provided.
 
-=item value => $num
+=item value =E<gt> $num
 
 Optional: the value to assign to the rule; the default value is C<1>.
 I<tflags multiple> rules use values of greater than 1 to indicate
 multiple hits.  This value is accessible to meta rules.
 
-=item ruletype => $type
+=item ruletype =E<gt> $type
 
 Optional, but recommended: the rule type string.  This is used in the
 C<hit_rule> plugin call, called by this method.  If unset, I<'unknown'> is
 used.
 
-=item tflags => $string
+=item tflags =E<gt> $string
 
 Optional: a string, i.e. a space-separated list of additional tflags
-to be appended to an existing list of flags in $self->{conf}->{tflags},
+to be appended to an existing list of flags in $self-E<gt>{conf}-E<gt>{tflags},
 such as: "nice noautolearn multiple". No syntax checks are performed.
 
-=item description => $string
+=item description =E<gt> $string
 
 Optional: a custom rule description string.  This is used in the
 C<hit_rule> plugin call, called by this method. If unset, the static
@@ -3097,7 +3097,7 @@ description is used.
 =back
 
 Backward compatibility: the two mandatory arguments have been part of this API
-since SpamAssassin 2.x.  The optional I<name=<gt>value> pairs, however, are a
+since SpamAssassin 2.x. The optional C<name=E<gt>value> pairs, however, are a
 new addition in SpamAssassin 3.2.0.
 
 =cut
@@ -3181,13 +3181,13 @@ sub got_hit {
   return 1;
 }
 
-=item $status->rule_ready ($rulename [, $no_async])
+=item $status-E<gt>rule_ready ($rulename [, $no_async])
 
 Mark an asynchronous rule ready, so it can be considered for meta rule
 evaluation.  Asynchronous rule is a rule whose eval-function returns undef,
 marking that it's not ready yet, expecting results later. 
-$status->rule_ready() must be called later to mark it ready, alternatively
-$status->got_hit() also does this.  If neither is called, then any meta rule
+$status-E<gt>rule_ready() must be called later to mark it ready, alternatively
+$status-E<gt>got_hit() also does this.  If neither is called, then any meta rule
 that depends on this rule might not evaluate.
 
 Optional boolean $no_async skips checking if there are pending async DNS
@@ -3217,12 +3217,12 @@ sub rule_ready {
 
 ###########################################################################
 
-=item $status->test_log ($text [, $rulename])
+=item $status-E<gt>test_log ($text [, $rulename])
 
 Add $text log entry for a hit rule in final message REPORT/SUMMARY.
 
 Usually called just before got_hit(), to describe for example what URI the
-rule matched on.  Optional <$rulename> argument is recommended to make sure
+rule matched on.  Optional C<$rulename> argument is recommended to make sure
 log is written to correct rule.  If rulename is not provided,
 get_current_eval_rule_name() is used as fallback.
 
@@ -3439,7 +3439,7 @@ sub sa_die { Mail::SpamAssassin::sa_die(@_); }
 
 ###########################################################################
 
-=item $status->create_fulltext_tmpfile (fulltext_ref)
+=item $status-E<gt>create_fulltext_tmpfile (fulltext_ref)
 
 This function creates a temporary file containing the passed scalar
 reference data.  If no scalar is passed, full/pristine message text is
@@ -3488,9 +3488,9 @@ sub create_fulltext_tmpfile {
   return $tmpf;
 }
 
-=item $status->delete_fulltext_tmpfile (tmpfile)
+=item $status-E<gt>delete_fulltext_tmpfile (tmpfile)
 
-Will cleanup after a $status->create_fulltext_tmpfile() call.  Deletes the
+Will cleanup after a $status-E<gt>create_fulltext_tmpfile() call.  Deletes the
 temporary file and uncaches the filename.  Generally there no need to call
 this, PerMsgStatus destructor cleans up all tmpfiles.
 

@@ -103,7 +103,7 @@ sub new {
 
 ###########################################################################
 
-=item $meanscore = awl->check_address($addr, $originating_ip, $signedby);
+=item $meanscore = awl-E<gt>check_address($addr, $originating_ip, $signedby);
 
 This method will return the mean score of all messages associated with the
 given address, or undef if the address hasn't been seen before.
@@ -158,7 +158,7 @@ sub check_address {
 
 ###########################################################################
 
-=item awl->count();
+=item awl-E<gt>count();
 
 This method will return the count of messages used in determining the
 welcomelist correction.
@@ -173,7 +173,7 @@ sub count {
 
 ###########################################################################
 
-=item awl->add_score($score);
+=item awl-E<gt>add_score($score);
 
 This method will add half the score to the current entry.  Half the
 score is used, so that repeated use of the same From and IP address
@@ -198,7 +198,7 @@ sub add_score {
 
 ###########################################################################
 
-=item awl->add_known_good_address($addr);
+=item awl-E<gt>add_known_good_address($addr);
 
 This method will add a score of -100 to the given address -- effectively
 "bootstrapping" the address as being one that should be welcomelisted.
@@ -214,7 +214,7 @@ sub add_known_good_address {
 
 ###########################################################################
 
-=item awl->add_known_bad_address($addr);
+=item awl-E<gt>add_known_bad_address($addr);
 
 This method will add a score of 100 to the given address -- effectively
 "bootstrapping" the address as being one that should be blocklisted.

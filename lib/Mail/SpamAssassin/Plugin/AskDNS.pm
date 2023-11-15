@@ -159,7 +159,7 @@ delimited by a '-' specifies an IPv4 address range, and a pair of values
 delimited by a '/' specifies an IPv4 address followed by a bitmask. Again,
 this type of filtering expression is primarily intended with RR type-A
 DNS queries. The rule hits if the RR type matches, and the returned IP
-address falls within the specified range: (r >= n1 && r <= n2), or
+address falls within the specified range: (r E<gt>= n1 && r E<lt>= n2), or
 masked with a bitmask matches the specified value: (r & m) == (n & m) .
 
 As a shorthand notation, a single quad-dotted value is equivalent to

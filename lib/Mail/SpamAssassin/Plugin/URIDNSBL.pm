@@ -130,7 +130,7 @@ any of: decimal digits, 0x followed by up to 8 hexadecimal digits, or an IPv4
 address in quad-dot form. The 'A' records (IPv4 dotted address) as returned
 by DNSBLs lookups are converted into a numerical form (r) and checked against
 the specified sub-test as follows:
-for a range n1-n2 the following must be true: (r >= n1 && r <= n2);
+for a range n1-n2 the following must be true: (r E<gt>= n1 && r E<lt>= n3);
 for a n/m form the following must be true: (r & m) == (n & m);
 for a single value in quad-dot form the following must be true: r == n;
 for a single decimal or hex form the following must be true:
@@ -181,7 +181,7 @@ any of: decimal digits, 0x followed by up to 8 hexadecimal digits, or an IPv4
 address in quad-dot form. The 'A' records (IPv4 dotted address) as returned
 by DNSBLs lookups are converted into a numerical form (r) and checked against
 the specified sub-test as follows:
-for a range n1-n2 the following must be true: (r >= n1 && r <= n2);
+for a range n1-n2 the following must be true: (r E<gt>= n1 && r E<lt>= n2);
 for a n/m form the following must be true: (r & m) == (n & m);
 for a single value in quad-dot form the following must be true: r == n;
 for a single decimal or hex form the following must be true:
@@ -221,7 +221,7 @@ Specify a RHSBL-style domain-NS lookup, as above, with a sub-test.
 C<NAME_OF_RULE> is the name of the rule to be used, C<rhsbl_zone> is the zone
 to look up domain names in, and C<lookuptype> is the type of lookup (B<TXT> or
 B<A>).  C<subtest> is the sub-test to run against the returned data; see
-<urirhssub>.
+C<urirhssub>.
 
 Note that, as with C<urirhsbl>, you must also define a body-eval rule calling
 C<check_uridnsbl()> to use this.
@@ -246,7 +246,7 @@ Specify a RHSBL-style domain-NS lookup, as above, with a sub-test.
 C<NAME_OF_RULE> is the name of the rule to be used, C<rhsbl_zone> is the zone
 to look up domain names in, and C<lookuptype> is the type of lookup (B<TXT> or
 B<A>).  C<subtest> is the sub-test to run against the returned data; see
-<urirhssub>.
+C<urirhssub>.
 
 Note that, as with C<urirhsbl>, you must also define a body-eval rule calling
 C<check_uridnsbl()> to use this.

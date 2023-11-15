@@ -77,7 +77,7 @@ and C<result_sub> functions appropriately per message.
 
 ###########################################################################
 
-=item $item = Mail::SpamAssassin::ArchiveIterator->new( [ { opt => val, ... } ] )
+=item $item = Mail::SpamAssassin::ArchiveIterator-E<gt>new( [ { opt =E<gt> val, ... } ] )
 
 Constructs a new C<Mail::SpamAssassin::ArchiveIterator> object.  You may
 pass the following attribute-value pairs to the constructor.  The pairs are

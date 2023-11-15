@@ -55,7 +55,7 @@ our @ISA = qw();
 
 ###########################################################################
 
-=item $factory = PersistentAddrListSubclass->new();
+=item $factory = PersistentAddrListSubclass-E<gt>new();
 
 This creates a factory object, which SpamAssassin will call to create
 a new checker object for the persistent address list.
@@ -72,7 +72,7 @@ sub new {
 
 ###########################################################################
 
-=item my $addrlist = $factory->new_checker();
+=item my $addrlist = $factory-E<gt>new_checker();
 
 Create a new address-list checker object from the factory. Called by the
 SpamAssassin classes.
@@ -86,7 +86,7 @@ sub new_checker {
 
 ###########################################################################
 
-=item $entry = $addrlist->get_addr_entry ($addr);
+=item $entry = $addrlist-E<gt>get_addr_entry ($addr);
 
 Given an email address C<$addr>, return an entry object with the details of
 that address.
@@ -115,7 +115,7 @@ sub get_addr_entry {
 
 ###########################################################################
 
-=item $entry = $addrlist->add_score($entry, $score);
+=item $entry = $addrlist-E<gt>add_score($entry, $score);
 
 This method should add the given score to the welcomelist database for the
 given entry, and then return the new entry.
@@ -129,7 +129,7 @@ sub add_score {
 
 ###########################################################################
 
-=item $entry = $addrlist->remove_entry ($entry);
+=item $entry = $addrlist-E<gt>remove_entry ($entry);
 
 This method should remove the given entry from the welcomelist database.
 
@@ -142,7 +142,7 @@ sub remove_entry {
 
 ###########################################################################
 
-=item $entry = $addrlist->finish ();
+=item $entry = $addrlist-E<gt>finish ();
 
 Clean up, if necessary.  Called by SpamAssassin when it has finished
 checking, or adding to, the auto-welcomelist database.

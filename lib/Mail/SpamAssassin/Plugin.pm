@@ -108,7 +108,7 @@ our @ISA = qw();
 
 ###########################################################################
 
-=item $plugin = MyPluginClass->new ($mailsaobject)
+=item $plugin = MyPluginClass-E<gt>new ($mailsaobject)
 
 Constructor.  Plugins that need to register themselves will need to
 define their own; the default super-class constructor will work fine
@@ -149,7 +149,7 @@ sub new {
 # the object and determine if it's capable of calling the method anyway.
 # Nifty!
 
-=item $plugin->parse_config ( { options ... } )
+=item $plugin-E<gt>parse_config ( { options ... } )
 
 Parse a configuration line that hasn't already been handled.  C<options>
 is a reference to a hash containing these options:
@@ -195,7 +195,7 @@ That can be found as C<$plugin-E<gt>{main}-E<gt>{conf}>, or as "conf" in the
 C<$options> hash reference above.   By storing it on C<conf>, this allows
 per-user and system-wide configuration precedence to be dealt with correctly.
 
-=item $plugin->finish_parsing_start ( { options ... } )
+=item $plugin-E<gt>finish_parsing_start ( { options ... } )
 
 Signals that the system-wide configuration has been completely read,
 but internal data structures are not yet created. It is possible to
@@ -219,7 +219,7 @@ this plugin hook, if you modify the rules data structures in a
 third-party plugin, all bets are off until such time that an API is
 present for modifying that configuration data.
 
-=item $plugin->finish_parsing_end ( { options ... } )
+=item $plugin-E<gt>finish_parsing_end ( { options ... } )
 
 Signals that the system-wide configuration parsing has just finished, and
 SpamAssassin is nearly ready to check messages.
@@ -241,7 +241,7 @@ this plugin hook, if you modify the rules data structures in a
 third-party plugin, all bets are off until such time that an API is
 present for modifying that configuration data.
 
-=item $plugin->user_conf_parsing_start ( { options ... } )
+=item $plugin-E<gt>user_conf_parsing_start ( { options ... } )
 
 Signals that the per-user configuration has been completely read, but
 not converted to internal data structures. It is possible to use this
@@ -267,7 +267,7 @@ this plugin hook, if you modify the rules data structures in a
 third-party plugin, all bets are off until such time that an API is
 present for modifying that configuration data.
 
-=item $plugin->user_conf_parsing_end ( { options ... } )
+=item $plugin-E<gt>user_conf_parsing_end ( { options ... } )
 
 Signals that the per-user configuration parsing has just finished, and
 SpamAssassin is nearly ready to check messages.   If C<allow_user_rules> is
@@ -291,7 +291,7 @@ this plugin hook, if you modify the rules data structures in a
 third-party plugin, all bets are off until such time that an API is
 present for modifying that configuration data.
 
-=item $plugin->signal_user_changed ( { options ... } )
+=item $plugin-E<gt>signal_user_changed ( { options ... } )
 
 Signals that the current user has changed for a new one.
 
@@ -311,7 +311,7 @@ The new user's storage directory. (equivalent to C<~/.spamassassin>.)
 
 =back
 
-=item $plugin->services_authorized_for_username ( { options ... } )
+=item $plugin-E<gt>services_authorized_for_username ( { options ... } )
 
 Validates that a given username is authorized to use certain services.
 
@@ -344,7 +344,7 @@ data should be stored.
 
 =back
 
-=item $plugin->compile_now_start ( { options ... } )
+=item $plugin-E<gt>compile_now_start ( { options ... } )
 
 This is called at the beginning of Mail::SpamAssassin::compile_now() so
 plugins can do any necessary initialization for multi-process
@@ -362,7 +362,7 @@ The value of $keep_userstate option in compile_now().
 
 =back
 
-=item $plugin->compile_now_finish ( { options ... } )
+=item $plugin-E<gt>compile_now_finish ( { options ... } )
 
 This is called at the end of Mail::SpamAssassin::compile_now() so
 plugins can do any necessary initialization for multi-process
@@ -380,7 +380,7 @@ The value of $keep_userstate option in compile_now().
 
 =back
 
-=item $plugin->check_start ( { options ... } )
+=item $plugin-E<gt>check_start ( { options ... } )
 
 Signals that a message check operation is starting.
 
@@ -400,7 +400,7 @@ APIs on that object, too.  See C<Mail::SpamAssassin::PerMsgStatus> perldoc.
 
 =back
 
-=item $plugin->check_main ( { options ... } )
+=item $plugin-E<gt>check_main ( { options ... } )
 
 Signals that a message should be checked.  Note that implementations of
 this hook should return C<1>.
@@ -413,7 +413,7 @@ The C<Mail::SpamAssassin::PerMsgStatus> context object for this scan.
 
 =back
 
-=item $plugin->check_tick ( { options ... } )
+=item $plugin-E<gt>check_tick ( { options ... } )
 
 Called periodically during a message check operation.  A callback set for
 this method is a good place to run through an event loop dealing with
@@ -427,7 +427,7 @@ The C<Mail::SpamAssassin::PerMsgStatus> context object for this scan.
 
 =back
 
-=item $plugin->check_dnsbl ( { options ... } )
+=item $plugin-E<gt>check_dnsbl ( { options ... } )
 
 Called when DNSBL or other network lookups are being launched, implying
 current running priority of -100.  This is the place to start your own
@@ -441,7 +441,7 @@ The C<Mail::SpamAssassin::PerMsgStatus> context object for this scan.
 
 =back
 
-=item $plugin->check_post_dnsbl ( { options ... } )
+=item $plugin-E<gt>check_post_dnsbl ( { options ... } )
 
 Called after the DNSBL results have been harvested.  This is a good
 place to harvest your own asynchronously-started network lookups.
@@ -454,7 +454,7 @@ The C<Mail::SpamAssassin::PerMsgStatus> context object for this scan.
 
 =back
 
-=item $plugin->check_cleanup ( { options ... } )
+=item $plugin-E<gt>check_cleanup ( { options ... } )
 
 Called just before message check is finishing and before possible
 auto-learning.  This is guaranteed to be always called, unlike check_tick
@@ -469,7 +469,7 @@ The C<Mail::SpamAssassin::PerMsgStatus> context object for this scan.
 
 =back
 
-=item $plugin->check_post_learn ( { options ... } )
+=item $plugin-E<gt>check_post_learn ( { options ... } )
 
 Called after auto-learning may (or may not) have taken place.  If you
 wish to perform additional learning, whether or not auto-learning
@@ -483,7 +483,7 @@ The C<Mail::SpamAssassin::PerMsgStatus> context object for this scan.
 
 =back
 
-=item $plugin->check_end ( { options ... } )
+=item $plugin-E<gt>check_end ( { options ... } )
 
 Signals that a message check operation has just finished, and the
 results are about to be returned to the caller.
@@ -498,7 +498,7 @@ using the public APIs on this object.
 
 =back
 
-=item $plugin->finish_tests ( { options ... } )
+=item $plugin-E<gt>finish_tests ( { options ... } )
 
 Called via C<Mail::SpamAssassin::finish>.  This should clear up any tests that
 a plugin has added to the namespace.
@@ -521,7 +521,7 @@ data should be stored.
 
 See also the C<register_generated_rule_method> helper API, below.
 
-=item $plugin->extract_metadata ( { options ... } )
+=item $plugin-E<gt>extract_metadata ( { options ... } )
 
 Signals that a message is being mined for metadata.  Some plugins may wish
 to add their own metadata as well.
@@ -538,7 +538,7 @@ The C<Mail::SpamAssassin::PerMsgStatus> context object for this scan.
 
 =back
 
-=item $plugin->parsed_metadata ( { options ... } )
+=item $plugin-E<gt>parsed_metadata ( { options ... } )
 
 Signals that a message's metadata has been parsed, and can now be
 accessed by the plugin.
@@ -551,7 +551,7 @@ The C<Mail::SpamAssassin::PerMsgStatus> context object for this scan.
 
 =back
 
-=item $plugin->start_rules ( { options ... } )
+=item $plugin-E<gt>start_rules ( { options ... } )
 
 Called before testing a set of rules of a given type and priority.
 
@@ -571,7 +571,7 @@ The priority level of the rules about to be performed.
 
 =back
 
-=item $plugin->hit_rule ( { options ... } )
+=item $plugin-E<gt>hit_rule ( { options ... } )
 
 Called when a rule fires.
 
@@ -595,7 +595,7 @@ The rule's score in the active scoreset.
 
 =back
 
-=item $plugin->ran_rule ( { options ... } )
+=item $plugin-E<gt>ran_rule ( { options ... } )
 
 Called after a rule has been tested, whether or not it fired.  When the
 rule fires, the hit_rule callback is always called before this.
@@ -616,7 +616,7 @@ The name of the rule that was tested.
 
 =back
 
-=item $plugin->autolearn_discriminator ( { options ... } )
+=item $plugin-E<gt>autolearn_discriminator ( { options ... } )
 
 Control whether a just-scanned message should be learned as either
 spam or ham.   This method should return one of C<1> to learn
@@ -631,7 +631,7 @@ The C<Mail::SpamAssassin::PerMsgStatus> context object for this scan.
 
 =back
 
-=item $plugin->autolearn ( { options ... } )
+=item $plugin-E<gt>autolearn ( { options ... } )
 
 Signals that a message is about to be auto-learned as either ham or spam.
 
@@ -647,7 +647,7 @@ C<1> if the message is spam, C<0> if ham.
 
 =back
 
-=item $plugin->per_msg_finish ( { options ... } )
+=item $plugin-E<gt>per_msg_finish ( { options ... } )
 
 Signals that a C<Mail::SpamAssassin::PerMsgStatus> object is being
 destroyed, and any per-scan context held on that object by this
@@ -667,7 +667,7 @@ The C<Mail::SpamAssassin::PerMsgStatus> context object for this scan.
 =back
 
 
-=item $plugin->have_shortcircuited ( { options ... } )
+=item $plugin-E<gt>have_shortcircuited ( { options ... } )
 
 Has the current scan operation 'short-circuited'?  In other words, can
 further scanning be skipped, since the message is already definitively
@@ -684,7 +684,7 @@ The C<Mail::SpamAssassin::PerMsgStatus> context object for this scan.
 
 =back
 
-=item $plugin->bayes_learn ( { options ... } )
+=item $plugin-E<gt>bayes_learn ( { options ... } )
 
 Called at the end of a bayes learn operation.
 
@@ -709,7 +709,7 @@ are a single string containing the raw token value.  You can test for
 backward compatibility by checking to see if the value for a key is a
 reference to a perl HASH, for instance:
 
-if (ref($toksref->{$sometokenkey}) eq 'HASH') {...
+if (ref($toksref-E<gt>{$sometokenkey}) eq 'HASH') {...
 
 If it is, then you are using the old interface, otherwise you are using
 the current interface.
@@ -732,7 +732,7 @@ could not be determined.  In addition, if the receive date is more than
 
 =back
 
-=item $plugin->bayes_forget ( { options ... } )
+=item $plugin-E<gt>bayes_forget ( { options ... } )
 
 Called at the end of a bayes forget operation.
 
@@ -755,7 +755,7 @@ Generated message id of the message just forgotten.
 
 =back
 
-=item $plugin->bayes_scan ( { options ... } )
+=item $plugin-E<gt>bayes_scan ( { options ... } )
 
 Called at the end of a bayes scan operation.  NOTE: Will not be
 called in case of error or if the message is otherwise skipped.
@@ -797,7 +797,7 @@ this message.
 
 =back
 
-=item $plugin->plugin_report ( { options ... } )
+=item $plugin-E<gt>plugin_report ( { options ... } )
 
 Called if the message is to be reported as spam.  If the reporting system is
 available, the variable C<$options-E<gt>{report}-E<gt>report_available}> should
@@ -821,7 +821,7 @@ Reference to the original message object.
 
 =back
 
-=item $plugin->plugin_revoke ( { options ... } )
+=item $plugin-E<gt>plugin_revoke ( { options ... } )
 
 Called if the message is to be reported as ham (revokes a spam report). If the
 reporting system is available, the variable
@@ -846,7 +846,7 @@ Reference to the original message object.
 
 =back
 
-=item $plugin->welcomelist_address( { options ... } )
+=item $plugin-E<gt>welcomelist_address( { options ... } )
 
 Previously whitelist_address which will work interchangeably until 4.1.
 
@@ -865,7 +865,7 @@ Indicate if the call is being made from a command line interface.
 
 =back
 
-=item $plugin->blocklist_address( { options ... } )
+=item $plugin-E<gt>blocklist_address( { options ... } )
 
 Previously blacklist_address which will work interchangeably until 4.1.
 
@@ -884,7 +884,7 @@ Indicate if the call is being made from a command line interface.
 
 =back
 
-=item $plugin->remove_address( { options ... } )
+=item $plugin-E<gt>remove_address( { options ... } )
 
 Called when a request is made to remove an address to a
 persistent address list.
@@ -901,11 +901,11 @@ Indicate if the call is being made from a command line interface.
 
 =back
 
-=item $plugin->spamd_child_init ()
+=item $plugin-E<gt>spamd_child_init ()
 
 Called in each new child process when it starts up under spamd.
 
-=item $plugin->log_scan_result ( { options ... } )
+=item $plugin-E<gt>log_scan_result ( { options ... } )
 
 Called when spamd has completed scanning a message.  Currently,
 only spamd calls this API.
@@ -919,14 +919,14 @@ at B<https://wiki.apache.org/spamassassin/SpamdSyslogFormat>.
 
 =back
 
-=item $plugin->spamd_child_post_connection_close ()
+=item $plugin-E<gt>spamd_child_post_connection_close ()
 
 Called when child returns from handling a connection.
 
 If there was an accept failure, the child will die and this code will
 not be called.
 
-=item $plugin->finish ()
+=item $plugin-E<gt>finish ()
 
 Called when the C<Mail::SpamAssassin> object is destroyed.
 
@@ -937,13 +937,13 @@ sub finish {
   %{$self} = ();
 }
 
-=item $plugin->learner_new ()
+=item $plugin-E<gt>learner_new ()
 
 Used to support human-trained probabilistic classifiers like the BAYES_* ruleset.
 Called when a new C<Mail::SpamAssassin::Bayes> object has been created; typically
 when a new user's scan is about to start.
 
-=item $plugin->learn_message ()
+=item $plugin-E<gt>learn_message ()
 
 Train the classifier with a training message.
 
@@ -964,7 +964,7 @@ If it is C<undef>, one will be generated.  It should be unique to that message.
 
 =back
 
-=item $plugin->forget_message ()
+=item $plugin-E<gt>forget_message ()
 
 Tell the classifier to 'forget' its training about a specific message.
 
@@ -981,7 +981,7 @@ If it is C<undef>, one will be generated.  It should be unique to that message.
 
 =back
 
-=item $plugin->learner_sync ()
+=item $plugin-E<gt>learner_sync ()
 
 Tell the classifier to 'sync' any pending changes against the current 
 user's training database.  This is called by C<sa-learn --sync>.
@@ -989,7 +989,7 @@ user's training database.  This is called by C<sa-learn --sync>.
 If you do not need to implement these for your classifier, create an
 implementation that just contains C<return 1>.
 
-=item $plugin->learner_expire_old_training ()
+=item $plugin-E<gt>learner_expire_old_training ()
 
 Tell the classifier to perform infrequent, time-consuming cleanup of
 the current user's training database.  This is called by C<sa-learn
@@ -998,12 +998,12 @@ the current user's training database.  This is called by C<sa-learn
 If you do not need to implement these for your classifier, create an
 implementation that just contains C<return 1>.
 
-=item $plugin->learner_is_scan_available ()
+=item $plugin-E<gt>learner_is_scan_available ()
 
 Should return 1 if it is possible to use the current user's training data for
 a message-scan operation, or 0 otherwise.
 
-=item $plugin->learner_dump_database ()
+=item $plugin-E<gt>learner_dump_database ()
 
 Dump information about the current user's training data to C<stdout>.
 This is called by C<sa-learn --dump>.
@@ -1025,7 +1025,7 @@ subset of the tokens to dump.
 
 =back
 
-=item $plugin->learner_close ()
+=item $plugin-E<gt>learner_close ()
 
 Close any open databases.
 
@@ -1046,7 +1046,7 @@ to receive specific events, or control the callback chain behaviour.
 
 =over 4
 
-=item $plugin->register_eval_rule ($nameofevalsub, $ruletype)
+=item $plugin-E<gt>register_eval_rule ($nameofevalsub, $ruletype)
 
 Plugins that implement an eval test will need to call this, so that
 SpamAssassin calls into the object when that eval test is encountered.
@@ -1069,7 +1069,7 @@ sub register_eval_rule {
   $self->{main}->{conf}->register_eval_rule ($self, $nameofsub, $ruletype);
 }
 
-=item $plugin->register_generated_rule_method ($nameofsub)
+=item $plugin-E<gt>register_generated_rule_method ($nameofsub)
 
 In certain circumstances, plugins may find it useful to compile
 perl functions from the ruleset, on the fly.  It is important to
@@ -1093,7 +1093,7 @@ sub register_generated_rule_method {
         $nameofsub;
 }
 
-=item $plugin->register_method_priority($methodname, $priority)
+=item $plugin-E<gt>register_method_priority($methodname, $priority)
 
 Indicate that the method named C<$methodname> on the current object
 has a callback priority of C<$priority>.
@@ -1117,7 +1117,7 @@ sub register_method_priority {
   $self->{method_priority}->{$methname} = $pri;
 }
 
-=item $plugin->inhibit_further_callbacks()
+=item $plugin-E<gt>inhibit_further_callbacks()
 
 Tells the plugin handler to inhibit calling into other plugins in the plugin
 chain for the current callback.  Frequently used when parsing configuration
@@ -1145,7 +1145,7 @@ Output a debugging message C<$message>, if the SpamAssassin object is running
 with debugging turned on.
 
 I<NOTE:> This function is not available in the package namespace
-of general plugins and can't be called via $self->dbg().  If a
+of general plugins and can't be called via $self-E<gt>dbg().  If a
 plugin wishes to output debug information, it should call
 C<Mail::SpamAssassin::Plugin::dbg($msg)>.
 
@@ -1155,7 +1155,7 @@ Output an informational message C<$message>, if the SpamAssassin object
 is running with informational messages turned on.
 
 I<NOTE:> This function is not available in the package namespace
-of general plugins and can't be called via $self->info().  If a
+of general plugins and can't be called via $self-E<gt>info().  If a
 plugin wishes to output debug information, it should call
 C<Mail::SpamAssassin::Plugin::info($msg)>.
 

@@ -388,7 +388,7 @@ if ($^O eq 'freebsd') {
 
 =over 4
 
-=item $f->debug_diagnostics ()
+=item $f-E<gt>debug_diagnostics ()
 
 Output some diagnostic information, useful for debugging SpamAssassin
 problems.
