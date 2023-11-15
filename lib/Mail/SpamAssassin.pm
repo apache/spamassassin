@@ -853,7 +853,7 @@ sub signal_user_changed {
 		userstate_dir => $self->{userstate_dir},
 		user_dir => $self->{user_dir},
 	      });
-
+  undef $self->{cf_files_read};
   1;
 }
 
