@@ -15,12 +15,12 @@ tstpre ('
   loadplugin Mail::SpamAssassin::Plugin::Shortcircuit
 ');
 
-tstlocalrules ('
+my $rules = "
 
   header SHORTCIRCUIT             eval:check_shortcircuit()
   describe SHORTCIRCUIT           Not all rules were run, due to a shortcircuited rule
   tflags SHORTCIRCUIT             userconf noautolearn
-  add_header all Status "_YESNO_, score=_SCORE_ required=_REQD_ tests=_TESTS_ shortcircuit=_SCTYPE_ autolearn=_AUTOLEARN_ version=_VERSION_"
+  add_header all Status \"_YESNO_, score=_SCORE_ required=_REQD_ tests=_TESTS_ shortcircuit=_SCTYPE_ autolearn=_AUTOLEARN_ version=_VERSION_\"
 
   # hits spam/001
   body X_FOO            /Congratulations/
@@ -40,7 +40,11 @@ tstlocalrules ('
   header SC_HAM_001    X-Mailer =~ /Evolution/
   shortcircuit SC_HAM_001       ham
 
-');
+";
+
+tstlocalrules ("
+  $rules
+");
 
 %patterns = (
   ' 1.0 SC_PRI_SPAM_001 ', 'hit',
@@ -73,9 +77,10 @@ ok_all_patterns();
   ' 0.0 SHORTCIRCUIT Not all rules were run', 'shortcircuit rule desc',
 );
 
-tstlocalrules ('
+tstlocalrules ("
+  $rules
   shortcircuit_max_spam_score 15
-');
+");
 
 ok (sarun ("-L -t < data/spam/002", \&patterns_run_cb));
 ok_all_patterns();
