@@ -11,7 +11,7 @@ use constant HAS_DBD_SQLITE => eval { require DBD::SQLite; DBD::SQLite->VERSION(
 use constant SQLITE => (HAS_DBI && HAS_DBD_SQLITE);
 
 plan skip_all => "Net tests disabled"                unless conf_bool('run_net_tests');
-my $tests = 9;
+my $tests = 11;
 $tests += 4 if (SQLITE);
 plan tests => $tests;
 
@@ -61,7 +61,6 @@ ok_all_patterns();
 sarun ("-t < data/spam/decodeshorturl/doubleslash.eml", \&patterns_run_cb);
 ok_all_patterns();
 
-
 ###
 ### short_url() should hit even without network enabled
 ###
@@ -70,6 +69,16 @@ ok_all_patterns();
    q{ 1.0 HAS_SHORT_URL } => '',
 );
 sarun ("-t -L < data/spam/decodeshorturl/base.eml", \&patterns_run_cb);
+ok_all_patterns();
+
+%patterns = (
+   'https://tinyurl.com/jf8wv76t => https://spamassassin.apache.org/'
+);
+
+sarun ("-D DecodeShortURLs -t < data/spam/decodeshorturl/anchor.eml 2>&1", \&patterns_run_cb);
+ok_all_patterns();
+
+sarun ("-D DecodeShortURLs -t < data/spam/decodeshorturl/params.eml 2>&1", \&patterns_run_cb);
 ok_all_patterns();
 
 ###

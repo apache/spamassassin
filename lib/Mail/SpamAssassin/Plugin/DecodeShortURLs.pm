@@ -759,6 +759,8 @@ sub _check_short {
   my $uris = $pms->get_uri_detail_list();
   while (my($uri, $info) = each %{$uris}) {
     next unless $info->{domains} && $info->{cleaned};
+    # Remove anchors and parameters from shortened uris
+    $uri =~ s/(?:\#|\?).*//g;
     if (my $short_url_info = _check_shortener_uri($uri, $conf)) {
       $short_urls{$uri} = $short_url_info;
       last if scalar keys %short_urls >= $conf->{max_short_urls};
