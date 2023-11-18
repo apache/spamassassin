@@ -37,8 +37,17 @@ foreach $tainted (<$workdir/*/*.pre>) {
 unlink("$localrules/01_test_rules.cf");
 unlink("$localrules/99_test_default.cf");
 
-sarun ("--lint", \&patterns_run_cb);
-ok_all_patterns();
-sarun ("--lint --net", \&patterns_run_cb);
-ok_all_patterns();
+my $scoresfile  = "$localrules/50_scores.cf";
+
+# when running from the built tarball or make disttest, we will not have a full
+# rules dir -- therefore no 50_scores.cf,
+# so we can use that to tell if this is the case
+SKIP: {
+  skip( "Not on a repo checkout", 4 ) unless -f $scoresfile;
+
+  sarun ("--lint", \&patterns_run_cb);
+  ok_all_patterns();
+  sarun ("--lint --net", \&patterns_run_cb);
+  ok_all_patterns();
+}
 
