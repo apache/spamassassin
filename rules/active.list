@@ -188,7 +188,7 @@ BITCOIN_IMGUR
 # good enough
 BITCOIN_MALF_HTML
 
-# tflags net
+# tflags publish
 BITCOIN_MALWARE
 
 # tflags publish
@@ -479,7 +479,7 @@ FONT_INVIS_POSTEXTRAS
 # tflags net
 FORGED_SPF_HELO
 
-# tflags publish
+# tflags net
 FORM_FRAUD
 
 # tflags net
@@ -560,7 +560,7 @@ FROM_MISSP_FREEMAIL
 # good enough
 FROM_MISSP_MSFT
 
-# tflags net
+# good enough
 FROM_MISSP_REPLYTO
 
 # tflags net
@@ -872,7 +872,7 @@ HTML_OFF_PAGE
 # tflags publish
 HTML_SHRT_CMNT_OBFU_MANY
 
-# tflags publish
+# tflags net
 HTML_SINGLET_MANY
 
 # tflags net
@@ -892,6 +892,9 @@ JH_SPAMMY_PATTERN01
 
 # tflags publish
 JH_SPAMMY_PATTERN02
+
+# tflags net
+KHOP_FAKE_EBAY
 
 # tflags net
 KHOP_HELO_FCRDNS
@@ -941,11 +944,20 @@ MALWARE_PASSWORD
 # tflags publish
 MALW_ATTACH
 
+# tflags net
+MANY_HDRS_LCASE
+
 # tflags publish
 MANY_SPAN_IN_TEXT
 
 # good enough
 MANY_SUBDOM
+
+# tflags net
+MAY_BE_FORGED
+
+# good enough
+MILLION_EUR
 
 # tflags publish
 MILLION_HUNDRED
@@ -1027,9 +1039,6 @@ MSGID_DOLLARS_URI_IMG
 
 # tflags publish
 MSGID_HDR_MALF
-
-# good enough
-MSMAIL_PRI_ABNORMAL
 
 # tflags publish
 MSM_PRIO_REPTO
@@ -1113,6 +1122,9 @@ PDS_BTC_MSGID
 PDS_DBL_URL_TNB_RUNON
 
 # good enough
+PDS_EMPTYSUBJ_URISHRT
+
+# good enough
 PDS_FRNOM_TODOM_NAKED_TO
 
 # good enough
@@ -1126,6 +1138,9 @@ PDS_HP_HELO_NORDNS
 
 # good enough
 PDS_NAKED_TO_NUMERO
+
+# good enough
+PDS_TINYSUBJ_URISHRT
 
 # tflags publish
 PHISH_ATTACH
@@ -1596,6 +1611,9 @@ SUBJ_ATTENTION
 SUBJ_BRKN_WORDNUMS
 
 # tflags net
+SUBJ_UNNEEDED_HTML
+
+# tflags net
 SURBL_BLOCKED
 
 # good enough
@@ -1610,13 +1628,13 @@ TAGSTAT_IMG_NOT_RCVD_TGST
 # tflags publish
 TARINGANET_IMG_NOT_RCVD_TN
 
-# tflags publish
+# tflags net
 TEQF_USR_IMAGE
 
-# tflags publish
+# tflags net
 TEQF_USR_MSGID_HEX
 
-# tflags publish
+# tflags net
 TEQF_USR_MSGID_MALF
 
 # good enough
@@ -1638,7 +1656,16 @@ TONOM_EQ_TOLOC_SHRT_SHRTNER
 TO_EQ_FM_DIRECT_MX
 
 # tflags net
+TO_EQ_FM_DOM_HTML_IMG
+
+# tflags net
+TO_EQ_FM_DOM_HTML_ONLY
+
+# tflags net
 TO_EQ_FM_DOM_SPF_FAIL
+
+# tflags net
+TO_EQ_FM_HTML_ONLY
 
 # tflags net
 TO_EQ_FM_SPF_FAIL
@@ -1679,7 +1706,7 @@ TVD_IP_HEX
 # good enough
 TVD_IP_OCT
 
-# good enough
+# tflags net
 TVD_SPACE_ENCODED
 
 # good enough
@@ -1850,7 +1877,7 @@ URI_MALWARE_SCMS
 # tflags userconf
 URI_NOVOWEL
 
-# tflags publish
+# tflags net
 URI_ONLY_MSGID_MALF
 
 # tflags publish
