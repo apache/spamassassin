@@ -510,7 +510,7 @@ sub _create_connection {
   }
 
   unless ($remote) {
-    print "Failed to create connection to spamd daemon: $!\n";
+    warn "Failed to create connection to spamd daemon: $!\n";
     return;
   }
 
