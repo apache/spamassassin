@@ -200,9 +200,7 @@ my %makefile = (
 
     # The modules that are not core or that require a minimum version that are used in default tests
     'TEST_REQUIRES' => {
-        'Devel::Cycle' => 0,
         'Test::Simple' => 1.302067,
-        'Text::Diff' => 0,
         'Perl::Critic::Policy::TestingAndDebugging::ProhibitNoStrict' => 0,
         'Perl::Critic::Policy::Perlsecret' => 0,
     },
@@ -396,6 +394,8 @@ $makefile{META_MERGE} = {
         'IO::String' =>                0,
         'Email::Address::XS' =>        0,
         'Mail::DMARC' =>               0,
+        'Devel::Cycle' =>              0,
+        'Text::Diff' =>                0,
       },
     },
     test => {

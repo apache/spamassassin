@@ -323,6 +323,18 @@ our @OPTIONAL_MODULES = (
   version => 0,
   desc => 'Mail::DMARC is used by the optional DMARC plugin.',
 },
+{
+  module => 'Devel::Cycle',
+  version => 0,
+  desc => 'Devel::Cycle is used in make test in tests that will be harmelessly
+  skipped if it is not available',
+},
+{
+  module => 'Text::Diff',
+  version => 0,
+  desc => 'Text::Diff is used in make test in tests that will be harmelessly
+  skipped if it is not available',
+},
 );
 
 our @BINARIES = ();
