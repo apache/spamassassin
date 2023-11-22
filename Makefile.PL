@@ -196,6 +196,7 @@ my %makefile = (
 
     'CONFIGURE_REQUIRES' => {
         'ExtUtils::MakeMaker' => MIN_MAKEMAKER_VERSION,
+        'NetAddr::IP'          => 4.010, # used by Util which is used by DependencyInfo when Makefile.PL is run
     },
 
     # The modules that are not core or that require a minimum version that are used in default tests
