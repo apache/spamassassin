@@ -240,7 +240,7 @@ Run "svn status" to ensure you're building/releasing from a pristine
 - Review the CREDITS to update Copyright
 
 - Review the Project Branding Report Checklist at
-  https://www.apache.org/foundation/marks/pmcs
+  https://www.apache.org/foundation/marks/pmcs#checklist
 
 - SVN tag the release files.  This is done using "svn copy".
 
@@ -343,6 +343,8 @@ Run "svn status" to ensure you're building/releasing from a pristine
   SHA sums, and proposed release announcement mail to the dev list.  
 
     https://people.apache.org/~kmcgrail/devel/ qualifies as "discreet".
+
+  So is https://dist.apache.org/repos/dist/dev/spamassassin/
 
   Pre-releases and RCs require just lazy consensus -- ie. no objections.
 
@@ -473,7 +475,7 @@ Run "svn status" to ensure you're building/releasing from a pristine
 
   For full release builds, you need to publish using SVNPubSub.
  
-  This is a simple matter of committing the new artifacts and signature 
+  This is a simple matter of svn committing the new artifacts and signature 
   files to https://dist.apache.org/repos/dist/release/spamassassin/ once a
   release vote passes. 
 
