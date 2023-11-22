@@ -394,13 +394,13 @@ $makefile{META_MERGE} = {
         'IO::String' =>                0,
         'Email::Address::XS' =>        0,
         'Mail::DMARC' =>               0,
-        'Devel::Cycle' =>              0,
-        'Text::Diff' =>                0,
       },
     },
     test => {
       recommends => {
         'Net::DNS::Nameserver' =>      0,
+        'Devel::Cycle' =>              0,
+        'Text::Diff' =>                0,
       },
     },
   },
