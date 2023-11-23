@@ -13,8 +13,8 @@ use Test::More;
 plan skip_all => "Net tests disabled"          unless conf_bool('run_net_tests');
 plan skip_all => "Can't use Net::DNS Safely"   unless can_use_net_dns_safely();
 
-my $tests = 4;
-$tests += 3 if (HAS_DKIM_VERIFIER);
+my $tests = 3;
+$tests += 4 if (HAS_DKIM_VERIFIER);
 
 plan tests => $tests;
 
