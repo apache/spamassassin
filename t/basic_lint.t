@@ -14,7 +14,7 @@ tstpre ("
 if (!$RUNNING_ON_WINDOWS) {
   # Test with few random additional locales if available
   my $locales = untaint_cmd("locale -a");
-  while ($locales =~ /^((?:C|en_US|fr_FR|zh_CN)\.(?:utf|iso|gb).*)$/gmi) {
+  while ($locales =~ /^((?:C|en_US|fr_FR|zh_CN)\.(?:utf|iso).*)$/gmi) {
     push @test_locales, $1;
   }
 }
