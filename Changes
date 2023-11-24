@@ -1,4 +1,45 @@
 ------------------------------------------------------------------------
+r1914075 | sidney | 2023-11-23 23:00:36 +0000 (Thu, 23 Nov 2023) | 1 line
+ 
+ Bug 8197 Skip DNS resolver test on Windows with broken versions of 
+Net::DNS
+------------------------------------------------------------------------
+r1914066 | gbechis | 2023-11-23 08:33:21 +0000 (Thu, 23 Nov 2023) | 2 
+lines
+ 
+ fix tests when Mail::DKIM is not installed
+ 
+------------------------------------------------------------------------
+r1914064 | gbechis | 2023-11-23 07:36:08 +0000 (Thu, 23 Nov 2023) | 2 
+lines
+ 
+ Perl doesn't support locale encodings other then utf-8 and iso
+ 
+------------------------------------------------------------------------
+r1914036 | sidney | 2023-11-22 11:37:42 +0000 (Wed, 22 Nov 2023) | 1 line
+ 
+ bug 8196 Put NetAddrr::IP in configure-required to fix cpan install on 
+system without NetAddr::IP
+------------------------------------------------------------------------
+r1914031 | sidney | 2023-11-22 04:02:20 +0000 (Wed, 22 Nov 2023) | 1 line
+ 
+ bug 8195 Correction that makes no functional difference but is more 
+correct cosmetically
+------------------------------------------------------------------------
+r1914030 | sidney | 2023-11-22 03:27:53 +0000 (Wed, 22 Nov 2023) | 1 line
+ 
+ build doc minor wording tweaks
+------------------------------------------------------------------------
+r1914029 | sidney | 2023-11-22 03:24:14 +0000 (Wed, 22 Nov 2023) | 1 line
+ 
+ preparing to release 4.0.1-pre1
+------------------------------------------------------------------------
+r1914025 | gbechis | 2023-11-21 23:22:41 +0000 (Tue, 21 Nov 2023) | 2 
+lines
+ 
+ print warnings to STDERR
+ 
+------------------------------------------------------------------------
 r1913997 | sidney | 2023-11-21 04:10:39 +0000 (Tue, 21 Nov 2023) | 1 line
  
  bug 8195 Specify Text::Diff and Devel::Cycle as optional modules instead 
