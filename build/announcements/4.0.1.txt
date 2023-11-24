@@ -44,6 +44,13 @@ This release addresses the following issues:
 
   - Improved handling of URL shortener link redirects
 
+  - Improved TxRep locking management
+
+  - Added Mail::SpamAssassin::Plugin::AuthRes plugin to use Authentication-Results
+    header fields in other plugins
+
+  - Added a Pyzor Perl implementation
+
   - Perl crash when certain uri_detail rules processed some messages
     with UTF-8 characters
 
