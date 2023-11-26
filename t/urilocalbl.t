@@ -3,7 +3,7 @@
 use lib '.'; use lib 't';
 use SATest; sa_t_init("urilocalbl");
 
-$tests = 0;
+my $tests = 0;
 eval { require MaxMind::DB::Reader;   $tests += 8; $has{GEOIP2}  = 1 };
 eval { require Geo::IP;               $tests += 8; $has{GEOIP}   = 1 };
 eval {
