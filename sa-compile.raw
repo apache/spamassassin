@@ -255,7 +255,8 @@ sub compile_base_strings {
   die "secure_tmpdir failed" unless $dirpath && -w $dirpath;
 
   my $sudo = ($opt{sudo} ? 'sudo ' : '');
-
+  delete $ENV{'PERL_MM_OPT'};    # bug 8199
+  
   foreach my $ruletype (sort keys %{$conf->{base_orig}})
   {
     # create the bases.in file
