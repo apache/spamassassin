@@ -21,7 +21,7 @@ use constant HAS_BAD_WINDOWS_NET_DNS => eval {
   require Net::DNS;
   $RUNNING_ON_WINDOWS &&
     (version->parse(Net::DNS->VERSION) >= version->parse(1.38)) &&
-    (version->parse(Net::DNS->VERSION) <= version->parse(1.40));
+    (version->parse(Net::DNS->VERSION) < version->parse(1.41));
 };
 plan skip_all => "Net::DNS::Nameserver in unavailable on this system" unless (HAS_NET_DNS_NAMESERVER);
 plan skip_all => "Tests don't work on Windows with Net::DNS 1.38 to 1.40" if (HAS_BAD_WINDOWS_NET_DNS);
