@@ -97,6 +97,7 @@ if (SQLITE) {
   create_db($workdir);
   tstprefs ("
     use_txrep 1
+    txrep_factor 0.49
     txrep_factory Mail::SpamAssassin::SQLBasedAddrList
     auto_welcomelist_distinguish_signed 1
     txrep_welcomelist_out 1
@@ -168,6 +169,7 @@ if (SQLITE) {
 
   tstprefs ("
     use_txrep 1
+    txrep_factor 0.49
     txrep_factory Mail::SpamAssassin::SQLBasedAddrList
     auto_welcomelist_distinguish_signed 0
     txrep_welcomelist_out 1
@@ -207,6 +209,7 @@ if (SQL) {
   my $idx = 1;
   tstprefs ("
     use_txrep 1
+    txrep_factor 0.49
     txrep_factory Mail::SpamAssassin::SQLBasedAddrList
     auto_welcomelist_distinguish_signed 1
     txrep_welcomelist_out 1
@@ -282,6 +285,7 @@ if (SQL) {
   $idx++;
   tstprefs ("
     use_txrep 1
+    txrep_factor 0.49
     txrep_factory Mail::SpamAssassin::SQLBasedAddrList
     auto_welcomelist_distinguish_signed 0
     txrep_welcomelist_out 1
