@@ -9,7 +9,7 @@ plan skip_all => "Can't use Net::DNS Safely"   unless can_use_net_dns_safely();
 
 # run many times to catch some random natured failures
 my $iterations = 5;
-plan tests => 2 * $iterations + 1;
+plan tests => 13 * $iterations;
 
 # ---------------------------------------------------------------------------
 
@@ -141,12 +141,10 @@ tstlocalrules(q{
   priority X_HASHBL_URI 2000
 });
 
-my $iterations_passed = 0;
 for (1 .. $iterations) {
   clear_localrules() if $_ == 3; # do some tests without any other rules to check meta bugs
   ok sarun ("-t -D async,dns,HashBL < data/spam/hashbl 2>&1", \&patterns_run_cb);
   ok(check_queries());
-  $iterations_passed++ if ok_all_patterns(1);
+  ok_all_patterns();
 }
 
-ok($iterations_passed > 0, 'at least one test attempt passed');
