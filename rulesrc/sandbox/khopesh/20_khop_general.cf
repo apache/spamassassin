@@ -48,7 +48,7 @@ describe DEAR_NOBODY	Message contains Dear but with no name
 # 0.0138/0.0084 spam/ham, 0.620 s/o @ 20100424 net.  oof, score 1.25->0.001
 
 uri	 __FORGED_URL_DOM_1	m'https?://[^/?:\#]{0,99}\.(?:com|org|edu|net|gov|com?\.[a-z]{2})\.\w[^/?:\#\s]{4}'i
-rawbody	 __FORGED_URL_DOM_2	m'(^|\W)https?://[^/?:\#]{0,99}\.(?:com|org|edu|net|gov|com?\.[a-z]{2})\.\w[^/?:\#\s]{5}'i
+rawbody	 __FORGED_URL_DOM_2	m'(?:^|\W)https?://[^/?:\#]{0,99}\.(?:com|org|edu|net|gov|com?\.[a-z]{2})\.\w[^/?:\#\s]{5}'i
 meta	 FORGED_URL_DOM	__FORGED_URL_DOM_1 || __FORGED_URL_DOM_2
 describe FORGED_URL_DOM	Link domain has a TLD as a subdomain
 #score	 FORGED_URL_DOM	0.1	# 200904

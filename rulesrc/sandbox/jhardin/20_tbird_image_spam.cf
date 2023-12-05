@@ -8,7 +8,7 @@ ifplugin Mail::SpamAssassin::Plugin::MIMEHeader
   mimeheader __JPEG_ATTACH           Content-Type =~ /image\/jpe?g/i
 endif
 
-header     __MUA_TBIRD             User-Agent =~ /^Mozilla\/(.*) Thunderbird/
+header     __MUA_TBIRD             User-Agent =~ /^Mozilla\/.* Thunderbird/
 header     __MIME_BDRY_0D0D        Content-Type =~ /boundary="-{12}(?:0[1-9]){12}/
 
 meta       __FORGED_TBIRD_IMG      __MUA_TBIRD && __JPEG_ATTACH && __MIME_BDRY_0D0D
