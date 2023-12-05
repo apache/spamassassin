@@ -50,7 +50,7 @@ describe INVALID_MSGID		Message-Id is not valid, according to RFC 2822
 #header __MOZILLA_MUA		X-Mailer =~ /\bMozilla\b/
 header __MOZILLA_MUA            User-Agent =~ /^mozilla\b/i
 header __MOZILLA_MSGID		MESSAGEID =~ /^<(?:[a-f\d]{8}-(?:[a-f\d]{4}-){3}[a-f\d]{12}|[A-F\d]{8}\.[A-F1-9][A-F\d]{0,7})\@\S+>$/m
-meta FORGED_MUA_MOZILLA		(__MOZILLA_MUA && !__UNUSABLE_MSGID && !__MOZILLA_MSGID)
+meta FORGED_MUA_MOZILLA		(__MOZILLA_MUA && ! UNUSABLE_MSGID && ! __MOZILLA_MSGID)
 describe FORGED_MUA_MOZILLA	Forged mail pretending to be from Mozilla
 
 header __PC_RND_HEADER		ALL =~ /%RA?ND(?:OM)?(?:_|\b|[A-Z]{3})/i

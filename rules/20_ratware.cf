@@ -63,7 +63,11 @@ header __HAS_XORIGMSGID		X-Orig-Message-Id =~ /^<.+\@.+>$/m
 
 meta   __GROUPSIO_GATED		__GROUPSIO_MSGID && __HAS_XORIGMSGID
 
-meta __UNUSABLE_MSGID (__LYRIS_EZLM_REMAILER || __GATED_THROUGH_RCVD_REMOVER || __WACKY_SENDMAIL_VERSION || __IPLANET_MESSAGING_SERVER || __HOTMAIL_BAYDAV_MSGID || __SYMPATICO_MSGID && __GROUPSIO_GATED)
+#Outlook.com generates its own MIDs forcibly
+header __MCRSFT_MSGID		MESSAGEID =~ /^<[[:alnum:]]{30,45}@[^>]*\.(outlook|exchangelabs).com>$/im
+
+meta UNUSABLE_MSGID (__MCRSFT_MSGID || __LYRIS_EZLM_REMAILER || __GATED_THROUGH_RCVD_REMOVER || __WACKY_SENDMAIL_VERSION || __IPLANET_MESSAGING_SERVER || __HOTMAIL_BAYDAV_MSGID || __SYMPATICO_MSGID && __GROUPSIO_GATED)
+describe  UNUSABLE_MSGID Message-ID header not useful for certain tests
 
 ## now on to the forgery rules
 
