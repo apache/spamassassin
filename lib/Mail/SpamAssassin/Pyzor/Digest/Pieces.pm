@@ -35,7 +35,7 @@ Mail::SpamAssassin::Pyzor::Digest::Pieces
 
 This module houses backend logic for L<Mail::SpamAssassin::Pyzor::Digest>.
 
-It reimplements logic found in pyzor’s F<digest.py> module
+It reimplements logic found in pyzor's F<digest.py> module
 (L<https://github.com/SpamExperts/pyzor/blob/master/pyzor/digest.py>).
 
 =cut
@@ -68,10 +68,10 @@ a byte string or a character string (e.g., UTF-8 decoded).
 NB: RFC 2822 stipulates that message bodies should use CRLF
 line breaks, not plain LF (nor plain CR). 
 We will thus convert any plain CRs in a quoted-printable message
-body into CRLF. Python, though, doesn’t do this, so the output of
+body into CRLF. Python, though, doesn't do this, so the output of
 our implementation of C<digest_payloads()> diverges from that of the Python
-original. It doesn’t ultimately make a difference since the line-ending
-whitespace gets trimmed regardless, but it’s necessary to factor in when
+original. It doesn't ultimately make a difference since the line-ending
+whitespace gets trimmed regardless, but it's necessary to factor in when
 comparing the output of our implementation with the Python output.
 
 =cut
@@ -137,7 +137,7 @@ The above will leave C<$str> alone, but this:
 
     normalize($str);
 
-… will trim off the last two bytes from C<$str>.
+... will trim off the last two bytes from C<$str>.
 
 =cut
 
@@ -146,7 +146,7 @@ sub normalize {    ## no critic qw( Subroutines::RequireArgUnpacking )
     # NULs are bad, mm-kay?
     $_[0] =~ tr<\0><>d;
 
-    # NB: Python’s \s without re.UNICODE is the same as Perl’s \s
+    # NB: Python's \s without re.UNICODE is the same as Perl's \s
     # with the /a modifier.
     #
     # https://docs.python.org/2/library/re.html
@@ -161,12 +161,12 @@ sub normalize {    ## no critic qw( Subroutines::RequireArgUnpacking )
     # Python: re.compile(r'[a-z]+:\S+', re.IGNORECASE)
     $_[0] =~ s<[a-zA-Z]+ : \S+><>agx;
 
-    # (from digest.py …)
+    # (from digest.py ...)
     # Make sure we do the whitespace last because some of the previous
     # patterns rely on whitespace.
     $_[0] =~ tr< \x09-\x0d><>d;
 
-    # This is fun. digest.py’s normalize() does a non-UNICODE whitespace
+    # This is fun. digest.py's normalize() does a non-UNICODE whitespace
     # strip, then calls strip() on the string, which *will* strip Unicode
     # whitespace from the ends.
     $_[0] =~ s<\A\s+><>;
@@ -242,7 +242,7 @@ use constant _QUOTED_PRINTABLE_NAMES => (
     "quotedprintable",
 );
 
-# Make Encode::decode() ignore anything that doesn’t fit the
+# Make Encode::decode() ignore anything that doesn't fit the
 # given encoding.
 use constant _encode_check_ignore => q<>;
 
@@ -287,7 +287,7 @@ sub parse_content_type {
         $encoding = 'ascii';
     }
 
-    # Match Python .decode()’s 'ignore' behavior
+    # Match Python .decode()'s 'ignore' behavior
     $checkval ||= \&_encode_check_ignore;
 
     return ( $main, $sub, $encoding, $checkval );

@@ -73,7 +73,7 @@ of the status.
 =back
 
 (NB: There are additional standard response headers that are useful only for
-the protocol itself and thus are not part of this module’s returns.)
+the protocol itself and thus are not part of this module's returns.)
 
 =head2 Reliability
 

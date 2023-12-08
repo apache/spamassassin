@@ -37,14 +37,14 @@ Mail::SpamAssassin::Pyzor::Digest::StripHtml
 
 =head1 DESCRIPTION
 
-This module attempts to duplicate pyzor’s HTML-stripping logic.
+This module attempts to duplicate pyzor's HTML-stripping logic.
 
 =head1 ACCURACY
 
 This library cannot achieve 100%, bug-for-bug parity with pyzor
-because to do so would require duplicating Python’s own HTML parsing
-library. Since that library’s output has changed over time, and those
-changes in turn affect pyzor, it’s literally impossible to arrive at
+because to do so would require duplicating Python's own HTML parsing
+library. Since that library's output has changed over time, and those
+changes in turn affect pyzor, it's literally impossible to arrive at
 a single, fully-compatible reimplementation.
 
 That said, all known divergences between pyzor and this library involve
@@ -67,13 +67,13 @@ our $VERSION = '0.03';
 
 =head2 $stripped = strip( $HTML )
 
-Give it some HTML, and it’ll give back the stripped text.
+Give it some HTML, and it'll give back the stripped text.
 
 In B<general>, the stripping consists of removing tags as well as
 C<E<lt>scriptE<gt>> and C<E<lt>styleE<gt>> elements; however, it also
 removes HTML entities.
 
-This tries very hard to duplicate pyzor’s behavior with invalid HTML.
+This tries very hard to duplicate pyzor's behavior with invalid HTML.
 
 =cut
 
@@ -114,9 +114,9 @@ sub strip {
 
             return if !$accumulate;
 
-            # pyzor’s HTML parser discards HTML entities. On top of that,
-            # we need to match, as closely as possible, pyzor’s handling of
-            # invalid HTML entities … which is a function of Python’s
+            # pyzor's HTML parser discards HTML entities. On top of that,
+            # we need to match, as closely as possible, pyzor's handling of
+            # invalid HTML entities ... which is a function of Python's
             # standard HTML parsing library. This will probably never be
             # fully compatible with the pyzor, but we can get it close.
 
@@ -124,8 +124,8 @@ sub strip {
             #
             #   re.compile('&#(?:[0-9]+|[xX][0-9a-fA-F]+)[^0-9a-fA-F]')
             #
-            # The parsing loop then “backs up” one byte if the last
-            # character isn’t a “;”. We use a look-ahead assertion to
+            # The parsing loop then "backs up" one byte if the last
+            # character isn't a ";". We use a look-ahead assertion to
             # mimic that behavior.
             $copy =~ s<\&\# (?:[0-9]+ | [xX][0-9a-fA-F]+) (?: ; | \z | (?=[^0-9a-fA-F]) )>< >gx;
 
@@ -136,7 +136,7 @@ sub strip {
             # We again use a look-ahead assertion to mimic Python.
             $copy =~ s<\& [a-zA-Z] [-.a-zA-Z0-9]* (?: ; | \z | (?=[^a-zA-Z0-9]) )>< >gx;
 
-            # Python’s HTMLParser aborts its parsing loop when it encounters
+            # Python's HTMLParser aborts its parsing loop when it encounters
             # an invalid numeric reference.
             $copy =~ s<\&\#
                 (?:
@@ -151,7 +151,7 @@ sub strip {
                 ( -1 == index($1, ';') ) ? q<> : '&#'
             >exs;
 
-            # Python’s HTMLParser treats invalid entities as incomplete
+            # Python's HTMLParser treats invalid entities as incomplete
             $copy =~ s<(\&\#?)><$1 >gx;
 
             $copy =~ s<\A\s+><>;

@@ -55,12 +55,12 @@ our $VERSION = '0.03';
 =head2 $hex = get( $MSG )
 
 This takes an email message in raw MIME text format (i.e., as saved in the
-standard mbox format) and returns the message’s Pyzor digest in lower-case
+standard mbox format) and returns the message's Pyzor digest in lower-case
 hexadecimal.
 
 The output from this function should normally be identical to that of
-the C<pyzor> script’s C<digest> command. It is suitable for use in
-L<Mail::SpamAssassin::Pyzor::Client>’s request methods.
+the C<pyzor> script's C<digest> command. It is suitable for use in
+L<Mail::SpamAssassin::Pyzor::Client>'s request methods.
 
 =cut
 
