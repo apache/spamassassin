@@ -75,7 +75,9 @@ use Fcntl;
 use Errno qw(ENOENT EACCES EEXIST);
 use POSIX qw(:sys_wait_h WIFEXITED WIFSIGNALED WIFSTOPPED WEXITSTATUS
              WTERMSIG WSTOPSIG);
-use NetAddr::IP 4.010;
+
+# Lazy require, otherwise Makefile.PL fails if module not installed (Bug 8196)
+eval { require NetAddr::IP; };
 
 ###########################################################################
 
