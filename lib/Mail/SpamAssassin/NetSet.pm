@@ -23,6 +23,7 @@ use warnings;
 # use bytes;
 use re 'taint';
 use Time::HiRes qw(time);
+use NetAddr::IP 4.000;
 
 use Mail::SpamAssassin::Util;
 use Mail::SpamAssassin::Logger;

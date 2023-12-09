@@ -204,6 +204,7 @@ use warnings;
 # use bytes;
 use re 'taint';
 
+use NetAddr::IP 4.000;                          # qw(:upper);
 use Mail::SpamAssassin::Plugin;
 use Mail::SpamAssassin::Plugin::Bayes;
 use Mail::SpamAssassin::Util qw(untaint_var);
