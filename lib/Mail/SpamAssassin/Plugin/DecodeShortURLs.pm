@@ -91,7 +91,7 @@ use vars qw(@ISA);
 
 my $VERSION = 4.00;
 
-use constant HAS_LWP_USERAGENT => eval { require LWP::UserAgent; };
+use constant HAS_LWP_USERAGENT => eval { require LWP::UserAgent; require LWP::Protocol::https; };
 
 sub dbg { my $msg = shift; return Mail::SpamAssassin::Logger::dbg("DecodeShortURLs: $msg", @_); }
 sub info { my $msg = shift; return Mail::SpamAssassin::Logger::info("DecodeShortURLs: $msg", @_); }

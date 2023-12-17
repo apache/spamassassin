@@ -5,12 +5,14 @@ use SATest; sa_t_init("decodeshorturl");
 
 use Test::More;
 
+use constant HAS_LWP_USERAGENT => eval { require LWP::UserAgent; require LWP::Protocol::https; };
 use constant HAS_DBI => eval { require DBI; };
 use constant HAS_DBD_SQLITE => eval { require DBD::SQLite; DBD::SQLite->VERSION(1.59_01); };
 
 use constant SQLITE => (HAS_DBI && HAS_DBD_SQLITE);
 
 plan skip_all => "Net tests disabled"                unless conf_bool('run_net_tests');
+plan skip_all => "LWP::Protocol::https required to run this test" unless HAS_LWP_USERAGENT;
 my $tests = 11;
 $tests += 4 if (SQLITE);
 plan tests => $tests;

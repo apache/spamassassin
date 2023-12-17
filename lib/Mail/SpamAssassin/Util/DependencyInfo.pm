@@ -252,6 +252,12 @@ our @OPTIONAL_MODULES = (
   or later is needed to provide SQLite 3.25.0 or later.',
 },
 {
+  module => 'LWP::Protocol::https',
+  version => 0,
+  desc => 'The "sa-update" program can use this module to make HTTPS requests.
+  Also used by DecodeShortURLs plugin.',
+},
+{
   module => 'LWP::UserAgent',
   version => 0,
   desc => 'The "sa-update" program can use this module to make HTTP requests.

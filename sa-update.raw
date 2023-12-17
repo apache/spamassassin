@@ -100,6 +100,7 @@ BEGIN {
   
     $have_lwp = eval {
     require LWP::UserAgent;
+    require LWP::Protocol::https;
   };
 
   if (eval { require IO::Socket::IP }) {  # handles IPv6 and IPv4
