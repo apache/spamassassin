@@ -29,7 +29,7 @@ use warnings;
 
 =head1 NAME
 
-Mail::SpamAssassin::Pyzor::Digest
+Mail::SpamAssassin::Pyzor::Digest - Pyzor Digest module
 
 =head1 SYNOPSIS
 

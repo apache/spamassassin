@@ -29,7 +29,7 @@ use warnings;
 
 =head1 NAME
 
-Mail::SpamAssassin::Pyzor::Digest::StripHtml
+Mail::SpamAssassin::Pyzor::Digest::StripHtml - Pyzor HTML-stripping module
 
 =head1 SYNOPSIS
 
