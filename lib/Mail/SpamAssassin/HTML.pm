@@ -575,6 +575,10 @@ sub text_style {
               # do nothing, just prevent parsing of the valid
               # CSS3 property value as 'invalid color' (Bug 7778)
             }
+            elsif ($value eq 'transparent' && $whcolor eq 'bgcolor') {
+              # do nothing, just prevent parsing of the valid
+              # CSS3 property value as 'invalid color' (Bug 7892)
+            }
 	    else {
 	      $new{$whcolor} = name_to_rgb($value);
 	    }
