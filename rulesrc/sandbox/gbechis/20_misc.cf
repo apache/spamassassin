@@ -91,9 +91,9 @@ uri        GB_BING_REDIR                 m|^https?://bing.com/ck/a\?!&&p=.{32,12
 describe   GB_BING_REDIR                 Microsoft Bing redirector
 score      GB_BING_REDIR                 1.000 # limit
 
-uri        GB_YAND_REDIR                 m;^https?://[^/]*sba\.yandex\.net/redirect\?;i
-describe   GB_YAND_REDIR                 Yandex redirect used to obscure spamvertised website
-score      GB_YAND_REDIR                 1.000 # limit
+uri        GB_YANDEX_REDIR               m;^https?://[^/]*sba\.yandex\.net/redirect\?;i
+describe   GB_YANDEX_REDIR               Yandex redirect used to obscure spamvertised website
+score      GB_YANDEX_REDIR               1.000 # limit
 
 if (version >= 4.000000)
 if can(Mail::SpamAssassin::Conf::feature_capture_rules)
