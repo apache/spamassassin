@@ -305,7 +305,7 @@ CN_B2B_SPAMMER
 # tflags publish
 COMMENT_GIBBERISH
 
-# good enough
+# tflags net
 COMPENSATION
 
 # tflags publish
@@ -935,6 +935,9 @@ MALWARE_PASSWORD
 # tflags publish
 MALW_ATTACH
 
+# tflags net
+MANY_HDRS_LCASE
+
 # tflags publish
 MANY_SPAN_IN_TEXT
 
@@ -1092,9 +1095,6 @@ OBFU_UNSUB_UL
 ODD_FREEM_REPTO
 
 # good enough
-PDS_BAD_THREAD_QP_64
-
-# good enough
 PDS_BTC_ID
 
 # good enough
@@ -1129,6 +1129,9 @@ PDS_TINYSUBJ_URISHRT
 
 # good enough
 PDS_X_PHP_WELLKNOWN
+
+# good enough
+PDS_X_PHP_WP_EXP
 
 # tflags publish
 PHISH_ATTACH
@@ -1529,6 +1532,9 @@ SENDGRID_REDIR_PHISH
 # tflags publish
 SEO_SUSP_NTLD
 
+# good enough
+SERGIO_SUBJECT_PORN014
+
 # tflags publish
 SHOPIFY_IMG_NOT_RCVD_SFY
 
@@ -1620,7 +1626,13 @@ SUBJ_ATTENTION
 SUBJ_BRKN_WORDNUMS
 
 # tflags net
+SUBJ_UNNEEDED_HTML
+
+# tflags net
 SURBL_BLOCKED
+
+# good enough
+SUSP_UTF8_WORD_COMBO
 
 # good enough
 SUSP_UTF8_WORD_FROM
@@ -1637,7 +1649,7 @@ TARINGANET_IMG_NOT_RCVD_TN
 # tflags publish
 TEQF_USR_IMAGE
 
-# tflags publish
+# tflags net
 TEQF_USR_MSGID_HEX
 
 # tflags publish
@@ -1663,6 +1675,9 @@ TO_EQ_FM_DOM_HTML_IMG
 
 # tflags net
 TO_EQ_FM_DOM_SPF_FAIL
+
+# tflags net
+TO_EQ_FM_HTML_ONLY
 
 # tflags net
 TO_EQ_FM_SPF_FAIL
@@ -1711,6 +1726,9 @@ TVD_SPACE_ENCODED
 
 # good enough
 TVD_SPACE_RATIO_MINFP
+
+# tflags net
+TVD_SUBJ_NUM_OBFU_MINFP
 
 # tflags publish
 TW_GIBBERISH_MANY
