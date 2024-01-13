@@ -305,7 +305,7 @@ CN_B2B_SPAMMER
 # tflags publish
 COMMENT_GIBBERISH
 
-# good enough
+# tflags net
 COMPENSATION
 
 # tflags publish
@@ -482,7 +482,7 @@ FONT_INVIS_POSTEXTRAS
 # tflags net
 FORGED_SPF_HELO
 
-# tflags publish
+# tflags net
 FORM_FRAUD
 
 # tflags publish
@@ -563,7 +563,7 @@ FROM_MISSP_FREEMAIL
 # good enough
 FROM_MISSP_MSFT
 
-# good enough
+# tflags net
 FROM_MISSP_REPLYTO
 
 # tflags net
@@ -677,6 +677,9 @@ FUZZY_SAVINGS
 # tflags publish
 FUZZY_SECURITY
 
+# good enough
+FUZZY_SPRM
+
 # tflags publish
 FUZZY_UNSUBSCRIBE
 
@@ -709,9 +712,6 @@ GB_GOOGLE_OBFUR
 
 # tflags net
 GB_HASHBL_BTC
-
-# tflags publish
-GB_STORAGE_GOOGLE_EMAIL
 
 # tflags publish
 GOOGLE_DOCS_PHISH
@@ -763,6 +763,9 @@ HAS_X_NO_RELAY
 
 # tflags publish
 HAS_X_OUTGOING_SPAM_STAT
+
+# tflags net
+HDRS_LCASE
 
 # good enough
 HDRS_LCASE_IMGONLY
@@ -866,7 +869,7 @@ HTML_OFF_PAGE
 # tflags publish
 HTML_SHRT_CMNT_OBFU_MANY
 
-# tflags publish
+# tflags net
 HTML_SINGLET_MANY
 
 # tflags net
@@ -1111,6 +1114,9 @@ PDS_FRNOM_TODOM_DBL_URL
 
 # good enough
 PDS_FRNOM_TODOM_NAKED_TO
+
+# tflags net
+PDS_FROM_2_EMAILS
 
 # good enough
 PDS_FROM_NAME_TO_DOMAIN
@@ -1629,6 +1635,9 @@ SUBJ_ATTENTION
 SUBJ_BRKN_WORDNUMS
 
 # tflags net
+SUBJ_UNNEEDED_HTML
+
+# tflags net
 SURBL_BLOCKED
 
 # good enough
@@ -1670,11 +1679,17 @@ TONLINE_FAKE_DKIM
 # tflags publish
 TO_EQ_FM_DIRECT_MX
 
-# good enough
+# tflags net
 TO_EQ_FM_DOM_HTML_IMG
 
 # tflags net
+TO_EQ_FM_DOM_HTML_ONLY
+
+# tflags net
 TO_EQ_FM_DOM_SPF_FAIL
+
+# tflags net
+TO_EQ_FM_HTML_ONLY
 
 # tflags net
 TO_EQ_FM_SPF_FAIL
@@ -1694,7 +1709,7 @@ TO_NO_BRKTS_HTML_IMG
 # tflags publish
 TO_NO_BRKTS_HTML_ONLY
 
-# good enough
+# tflags net
 TO_NO_BRKTS_MSFT
 
 # tflags publish
@@ -1710,9 +1725,6 @@ TO_TOO_MANY_WFH_01
 TT_MSGID_TRUNC
 
 # good enough
-TVD_IP_HEX
-
-# good enough
 TVD_PH_BODY_ACCOUNTS_POST
 
 # good enough
@@ -1726,6 +1738,9 @@ TVD_SPACE_ENCODED
 
 # good enough
 TVD_SPACE_RATIO_MINFP
+
+# tflags net
+TVD_SUBJ_NUM_OBFU_MINFP
 
 # tflags publish
 TW_GIBBERISH_MANY
@@ -1987,9 +2002,6 @@ XFER_LOTSA_MONEY
 
 # tflags publish
 XM_DIGITS_ONLY
-
-# good enough
-XM_LIGHT_HEAVY
 
 # tflags publish
 XM_PHPMAILER_FORGED
