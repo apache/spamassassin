@@ -305,7 +305,7 @@ CN_B2B_SPAMMER
 # tflags publish
 COMMENT_GIBBERISH
 
-# tflags net
+# good enough
 COMPENSATION
 
 # tflags publish
@@ -482,7 +482,7 @@ FONT_INVIS_POSTEXTRAS
 # tflags net
 FORGED_SPF_HELO
 
-# tflags net
+# tflags publish
 FORM_FRAUD
 
 # tflags net
@@ -764,9 +764,6 @@ HAS_X_NO_RELAY
 # tflags publish
 HAS_X_OUTGOING_SPAM_STAT
 
-# tflags net
-HDRS_LCASE
-
 # good enough
 HDRS_LCASE_IMGONLY
 
@@ -940,9 +937,6 @@ MALWARE_PASSWORD
 
 # tflags publish
 MALW_ATTACH
-
-# tflags net
-MANY_HDRS_LCASE
 
 # tflags publish
 MANY_SPAN_IN_TEXT
@@ -1638,9 +1632,6 @@ SUBJ_ATTENTION
 SUBJ_BRKN_WORDNUMS
 
 # tflags net
-SUBJ_UNNEEDED_HTML
-
-# tflags net
 SURBL_BLOCKED
 
 # good enough
@@ -1658,10 +1649,10 @@ TAGSTAT_IMG_NOT_RCVD_TGST
 # tflags publish
 TARINGANET_IMG_NOT_RCVD_TN
 
-# tflags net
+# tflags publish
 TEQF_USR_IMAGE
 
-# tflags net
+# tflags publish
 TEQF_USR_MSGID_HEX
 
 # tflags publish
@@ -1937,7 +1928,7 @@ URI_WP_DIRINDEX
 # tflags net
 URI_WP_HACKED
 
-# tflags net
+# tflags publish
 URI_WP_HACKED_2
 
 # tflags publish
@@ -2014,9 +2005,6 @@ XM_RANDOM
 
 # good enough
 XM_RECPTID
-
-# good enough
-XM_UC_ONLY
 
 # tflags net
 XPRIO
