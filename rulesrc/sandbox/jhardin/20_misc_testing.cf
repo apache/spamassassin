@@ -2040,12 +2040,14 @@ ifplugin Mail::SpamAssassin::Plugin::ReplaceTags
   body          __FUZZY_MONERO      /(?=<M>)(?!monero)<M><O><N><E><R><O>/i
   replace_rules __FUZZY_MONERO
 
-  body          __FUZZY_WELLSFARGO_BODY  /(?=<W>)(?!Wells[-\s]?Fargo)<W><E><L><L><S>[-\s]?<F><A><R><G><O>/i
+  # obfu may have (r) (c) or TM glyph after "WELLS"
+  body          __FUZZY_WELLSFARGO_BODY  /(?=<W>)(?!Wells[-\s]?Fargo)<W><E><L><L><S>\S{0,2}[-\s]?<F><A><R><G><O>/i
   replace_rules __FUZZY_WELLSFARGO_BODY
-  header        __FUZZY_WELLSFARGO_FROM  From:name =~ /(?=<W>)(?!Wells[-\s]?Fargo)<W><E><L><L><S>[-\s]?<F><A><R><G><O>/i
+  header        __FUZZY_WELLSFARGO_FROM  From:name =~ /(?=<W>)(?!Wells[-\s]?Fargo)<W><E><L><L><S>\S{0,2}[-\s]?<F><A><R><G><O>/i
   replace_rules __FUZZY_WELLSFARGO_FROM
   meta          FUZZY_WELLSFARGO         __FUZZY_WELLSFARGO_BODY || __FUZZY_WELLSFARGO_FROM
   describe      FUZZY_WELLSFARGO         Obfuscated "Wells Fargo"
+  tflags        FUZZY_WELLSFARGO         publish
 
   body          __FUZZY_PORN        /(?=<P>)(?!pornograph?(?:y|i[ca]|er))<P><O><R><N><O><G><R><A><P><H>?(?:<Y>|<I><C>|<E><R>)/i
   replace_rules __FUZZY_PORN      
@@ -3376,9 +3378,10 @@ uri        __URI_IMG_FOTERCOM          m;://foter\.com/photos/.+\.(?:jpe?g|gif|p
 uri        __URI_IMG_GTRACING          m;://shopify\.gtracing\.com/img/.+\.(?:jpe?g|gif|png|webp);i
 uri        __URI_IMG_JOOMCDN           m;://img\.joomcdn\.net/.+\.(?:jpe?g|gif|png|webp);i
 uri        __URI_IMG_DHRESOURCE        m;://www\.dhresource\.com/.+\.(?:jpe?g|gif|png|webp);i
+uri        __URI_IMG_CWINDOWSNET       m;://[^.]{12,}\.(?:blob|web)\.core\.windows\.net/.+\.(?:jpe?g|gif|png|webp);i
 
 
-meta       __URI_HOSTED_IMG            ( __URI_IMG_EBAY || __URI_IMG_AMAZON || __URI_IMG_ALICDN || __URI_IMG_WALMART || __URI_IMG_NEWEGG || __URI_IMG_SHOPIFY || __URI_IMG_YTIMG || __URI_IMG_JOOMCDN || __URI_IMG_WISH || __URI_IMG_STATICBG || __URI_IMG_CHANNYPIC || __URI_IMG_TOPHATTER || __URI_IMG_GBTCDN || __URI_IMG_LINKEDIN || __URI_IMG_TUMBLR || __URI_IMG_TAGSTAT || __URI_IMG_FACEBOOK || __URI_IMG_TARINGANET || __URI_IMG_BEBEE || __URI_IMG_EFUSERASSETS || __URI_IMG_IMGBOX_THUMB || __URI_IMG_500PXORG || __URI_IMG_WIXMP || __URI_IMG_POSTIMGCC || __URI_IMG_GTRACING || __URI_IMG_JOOMCDN || __URI_IMG_DHRESOURCE )
+meta       __URI_HOSTED_IMG            ( __URI_IMG_EBAY || __URI_IMG_AMAZON || __URI_IMG_ALICDN || __URI_IMG_WALMART || __URI_IMG_NEWEGG || __URI_IMG_SHOPIFY || __URI_IMG_YTIMG || __URI_IMG_JOOMCDN || __URI_IMG_WISH || __URI_IMG_STATICBG || __URI_IMG_CHANNYPIC || __URI_IMG_TOPHATTER || __URI_IMG_GBTCDN || __URI_IMG_LINKEDIN || __URI_IMG_TUMBLR || __URI_IMG_TAGSTAT || __URI_IMG_FACEBOOK || __URI_IMG_TARINGANET || __URI_IMG_BEBEE || __URI_IMG_EFUSERASSETS || __URI_IMG_IMGBOX_THUMB || __URI_IMG_500PXORG || __URI_IMG_WIXMP || __URI_IMG_POSTIMGCC || __URI_IMG_GTRACING || __URI_IMG_JOOMCDN || __URI_IMG_DHRESOURCE || __URI_IMG_CWINDOWSNET)
 
 meta       __HOSTED_IMG_DQ_UNSUB       __URI_DQ_UNSUB && __URI_HOSTED_IMG
 meta       HOSTED_IMG_DQ_UNSUB         __HOSTED_IMG_DQ_UNSUB
@@ -3398,7 +3401,7 @@ score      HOSTED_IMG_FREEM            3.500	# limit
 describe   HOSTED_IMG_FREEM            Image hosted at large ecomm, CDN or hosting site or redirected, freemail from or reply-to
 tflags     HOSTED_IMG_FREEM            publish
 
-meta       __HOSTED_IMG_MULTI          ( __URI_IMG_EBAY + __URI_IMG_AMAZON + __URI_IMG_ALICDN + __URI_IMG_WALMART + __URI_IMG_NEWEGG + __URI_IMG_SHOPIFY + __URI_IMG_YTIMG + __URI_IMG_JOOMCDN + __URI_IMG_WISH + __URI_IMG_WP_REDIR + __URI_IMG_STATICBG + __URI_IMG_CHANNYPIC + __URI_IMG_TOPHATTER + __URI_IMG_GBTCDN + __URI_IMG_LINKEDIN + __URI_IMG_TUMBLR + __URI_IMG_TAGSTAT + __URI_IMG_FACEBOOK + __URI_IMG_TARINGANET + __URI_IMG_BEBEE + __URI_IMG_EFUSERASSETS + __URI_IMG_IMGBOX_THUMB + __URI_IMG_500PXORG + __URI_IMG_WIXMP + __URI_IMG_POSTIMGCC + __URI_IMG_GTRACING + __URI_IMG_JOOMCDN + __URI_IMG_DHRESOURCE) > 1
+meta       __HOSTED_IMG_MULTI          ( __URI_IMG_EBAY + __URI_IMG_AMAZON + __URI_IMG_ALICDN + __URI_IMG_WALMART + __URI_IMG_NEWEGG + __URI_IMG_SHOPIFY + __URI_IMG_YTIMG + __URI_IMG_JOOMCDN + __URI_IMG_WISH + __URI_IMG_WP_REDIR + __URI_IMG_STATICBG + __URI_IMG_CHANNYPIC + __URI_IMG_TOPHATTER + __URI_IMG_GBTCDN + __URI_IMG_LINKEDIN + __URI_IMG_TUMBLR + __URI_IMG_TAGSTAT + __URI_IMG_FACEBOOK + __URI_IMG_TARINGANET + __URI_IMG_BEBEE + __URI_IMG_EFUSERASSETS + __URI_IMG_IMGBOX_THUMB + __URI_IMG_500PXORG + __URI_IMG_WIXMP + __URI_IMG_POSTIMGCC + __URI_IMG_GTRACING + __URI_IMG_JOOMCDN + __URI_IMG_DHRESOURCE + __URI_IMG_CWINDOWSNET) > 1
 meta       HOSTED_IMG_MULTI            __HOSTED_IMG_MULTI && !__DKIM_EXISTS 
 score      HOSTED_IMG_MULTI            3.000	# limit
 describe   HOSTED_IMG_MULTI            Multiple images hosted at different large ecomm, CDN or hosting sites, free image sites, or redirected
@@ -3411,6 +3414,12 @@ meta       URI_IMG_WP_REDIR            __URI_IMG_WP_REDIR
 score      URI_IMG_WP_REDIR            3.000	# limit
 describe   URI_IMG_WP_REDIR            Image via WordPress "accelerator" proxy
 tflags     URI_IMG_WP_REDIR            publish
+
+meta       URI_IMG_CWINDOWSNET         __URI_IMG_CWINDOWSNET
+score      URI_IMG_CWINDOWSNET         3.500	# limit
+describe   URI_IMG_CWINDOWSNET         Non-MSFT image hosted by Microsoft Azure infra, likely phishing
+tflags     URI_IMG_CWINDOWSNET         publish
+
 
 #header     __BOGUS_MIME_VER_01         MIME-Version =~ /^(?!\s*1\.0).+/
 header     __BOGUS_MIME_VER_02         MIME-Version =~ /^(?!.*\b1\.0\b).+/
