@@ -2090,6 +2090,14 @@ ifplugin Mail::SpamAssassin::Plugin::ReplaceTags
   describe      FUZZY_OVERSTOCK     Obfuscated "overstock"
   tflags        FUZZY_OVERSTOCK     publish
 
+  body          __FUZZY_TRUSTWALLET_BODY  /(?=<T>)(?!Trust[-\s]?Wallet)<T><R><U><S><T>[-\s]*<W><A><L><L><E><T>/i
+  replace_rules __FUZZY_TRUSTWALLET_BODY
+  header        __FUZZY_TRUSTWALLET_FROM  From =~ /(?=<T>)(?!Trust[-\s]?Wallet)<T><R><U><S><T>[-\s]*<W><A><L><L><E><T>/i
+  replace_rules __FUZZY_TRUSTWALLET_FROM
+  meta          FUZZY_TRUSTWALLET   __FUZZY_TRUSTWALLET_BODY || __FUZZY_TRUSTWALLET_FROM
+  describe      FUZZY_TRUSTWALLET   Obfuscated "Trust Wallet", probable phishing
+  tflags        FUZZY_TRUSTWALLET   publish
+
 else
   meta          __FUZZY_MONERO      0
   body          __BITCOIN           /\bB[-\s]?i[-\s]?t[-\s]?c[-\s]?o[-\s]?i[-\s]?n\b/i
@@ -3417,7 +3425,7 @@ tflags     URI_IMG_WP_REDIR            publish
 
 meta       URI_IMG_CWINDOWSNET         __URI_IMG_CWINDOWSNET
 score      URI_IMG_CWINDOWSNET         3.500	# limit
-describe   URI_IMG_CWINDOWSNET         Non-MSFT image hosted by Microsoft Azure infra, likely phishing
+describe   URI_IMG_CWINDOWSNET         Non-MSFT image hosted by Microsoft Azure infra, possible phishing
 tflags     URI_IMG_CWINDOWSNET         publish
 
 
