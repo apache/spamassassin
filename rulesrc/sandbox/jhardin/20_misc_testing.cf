@@ -3423,7 +3423,7 @@ score      URI_IMG_WP_REDIR            3.000	# limit
 describe   URI_IMG_WP_REDIR            Image via WordPress "accelerator" proxy
 tflags     URI_IMG_WP_REDIR            publish
 
-meta       URI_IMG_CWINDOWSNET         __URI_IMG_CWINDOWSNET && !__RCD_RDNS_SMTP 
+meta       URI_IMG_CWINDOWSNET         __URI_IMG_CWINDOWSNET && !__RCD_RDNS_SMTP && !__REPTO_QUOTE 
 score      URI_IMG_CWINDOWSNET         3.500	# limit
 describe   URI_IMG_CWINDOWSNET         Non-MSFT image hosted by Microsoft Azure infra, possible phishing
 tflags     URI_IMG_CWINDOWSNET         publish
