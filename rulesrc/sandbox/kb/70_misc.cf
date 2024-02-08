@@ -103,7 +103,7 @@ meta   KB_RATWARE_BOUNDARY   __RATWARE_BOUND_A || __RATWARE_BOUND_B
 
 header THREAD_INDEX_HEX  Thread-Index =~ /^[a-z0-9]{30}/
 
-header __THREAD_INDEX_GOOD  Thread-Index =~ m,^A[a-z0-9][A-Za-z0-9+/]{27}(?:[A-Za-z0-9+/]{20})?(?:[AQgw]==|[A-Za-z0-9+/]{7}|[A-Za-z0-9+/]{13}[AEIMQUYcgkosw048]=)$,
+header __THREAD_INDEX_GOOD  Thread-Index =~ m,^A[A-Za-z0-9][A-Za-z0-9+/]{27}(?:[A-Za-z0-9+/]{20})?(?:[AQgw]==|[A-Za-z0-9+/]{7}|[A-Za-z0-9+/]{13}[AEIMQUYcgkosw048]=)$,
 
 header __HAS_THREAD_INDEX  exists:Thread-Index
 
