@@ -241,7 +241,7 @@ sub _check_for_forged_hotmail_received_headers {
                 { return; }
   if ($rcvd =~ /from \S*\.outbound\.protection\.outlook\.com \(\S+\.outbound\.protection\.outlook\.com[ \)]/ && $orig)
                 { return; }
-  if ($rcvd =~ /from \S*\.eurprd\d+\.prod\.outlook\.com \($IP_ADDRESS\)/ && $orig)
+  if ($rcvd =~ /from \S*\.(?:eur|nam)prd\d+\.prod\.outlook\.com \($IP_ADDRESS\)/ && $orig)
                 { return; }
   if ($rcvd =~ /from \S*\.hotmail.com \(\[$IP_ADDRESS\][ \):]/ && $ip)
                 { return; }
