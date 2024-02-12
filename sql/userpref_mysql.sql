@@ -5,4 +5,4 @@ CREATE TABLE userpref (
   prefid int(11) NOT NULL auto_increment,
   PRIMARY KEY  (prefid),
   KEY username (username)
-) TYPE=MyISAM;
+) ENGINE=InnoDB;
