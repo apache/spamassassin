@@ -114,6 +114,14 @@ describe	T_SCC_URL_CLOUDINARY  Has Cloudinary backend(?) URL
 uri		T_SCC_URL_CLOUDINARY  /https?:\/\/res.cloudinary.com/
 tflags		T_SCC_URL_CLOUDINARY  multiple maxhits=5
 
+#Very bad Feb 2024. We'll see if it lasts
+describe T_SCC_FROM_TLD_BEST From domain in *.best
+header   T_SCC_FROM_TLD_BEST From =~ /<[^ @]+@[^ @>]+\.best>/
+
+describe        T_SCC_URL_BEST  has a .best URL
+uri             T_SCC_URL_BEST  /https?:\/\/[^ ]*\.best/
+tflags          T_SCC_URL_BEST  multiple maxhits=5
+
 # Lots of spam getting through at GMail with these... 
 describe	__SCC_HASHBUST_1	Innocent text seen a lot in  'hash-buster' text. 
 rawbody		__SCC_HASHBUST_1	/FACULT\x{C3}\x{89} D\x{E2}\x{80}\x{99}\x{C3}\x{89}DUCATION pour l\x{E2}\x{80}\x{99}ann\x{C3}\x{A9}e universitaire 2019 \/ 2020.$/im
