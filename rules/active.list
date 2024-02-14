@@ -191,7 +191,7 @@ BITCOIN_EXTORT_02
 # tflags publish
 BITCOIN_IMGUR
 
-# tflags publish
+# tflags net
 BITCOIN_MALWARE
 
 # tflags publish
@@ -459,6 +459,9 @@ FBI_SPOOF
 FILL_THIS_FORM
 
 # good enough
+FILL_THIS_FORM_FRAUD_PHISH
+
+# good enough
 FILL_THIS_FORM_LONG
 
 # tflags publish
@@ -488,7 +491,7 @@ FORGED_SPF_HELO
 # tflags net
 FORM_FRAUD
 
-# tflags net
+# tflags publish
 FORM_FRAUD_3
 
 # tflags publish
@@ -566,7 +569,7 @@ FROM_MISSP_FREEMAIL
 # good enough
 FROM_MISSP_MSFT
 
-# good enough
+# tflags net
 FROM_MISSP_REPLYTO
 
 # tflags net
@@ -782,6 +785,9 @@ HAS_X_NO_RELAY
 # tflags publish
 HAS_X_OUTGOING_SPAM_STAT
 
+# tflags net
+HDRS_LCASE
+
 # good enough
 HDRS_LCASE_IMGONLY
 
@@ -887,7 +893,7 @@ HTML_OFF_PAGE
 # tflags publish
 HTML_SHRT_CMNT_OBFU_MANY
 
-# tflags net
+# tflags publish
 HTML_SINGLET_MANY
 
 # tflags net
@@ -1147,9 +1153,6 @@ PDS_FRNOM_TODOM_DBL_URL
 
 # good enough
 PDS_FRNOM_TODOM_NAKED_TO
-
-# tflags net
-PDS_FROM_2_EMAILS
 
 # good enough
 PDS_FROM_NAME_TO_DOMAIN
@@ -1569,9 +1572,6 @@ SENDGRID_REDIR_PHISH
 SEO_SUSP_NTLD
 
 # good enough
-SERGIO_SUBJECT_PORN014
-
-# good enough
 SHARE_50_50
 
 # tflags publish
@@ -1671,6 +1671,9 @@ SUBJ_ATTENTION
 SUBJ_BRKN_WORDNUMS
 
 # tflags net
+SUBJ_UNNEEDED_HTML
+
+# tflags net
 SURBL_BLOCKED
 
 # good enough
@@ -1706,11 +1709,8 @@ TONLINE_FAKE_DKIM
 # tflags publish
 TO_EQ_FM_DIRECT_MX
 
-# good enough
-TO_EQ_FM_DOM_HTML_IMG
-
 # tflags net
-TO_EQ_FM_DOM_HTML_ONLY
+TO_EQ_FM_DOM_HTML_IMG
 
 # tflags net
 TO_EQ_FM_DOM_SPF_FAIL
@@ -1752,13 +1752,7 @@ TO_TOO_MANY_WFH_01
 TT_MSGID_TRUNC
 
 # good enough
-TVD_GET_STOCK
-
-# good enough
 TVD_PH_BODY_ACCOUNTS_POST
-
-# good enough
-TVD_PH_BODY_META_ALL
 
 # good enough
 TVD_RCVD_SPACE_BRACKET
@@ -1937,7 +1931,7 @@ URI_MALWARE_SCMS
 # tflags userconf
 URI_NOVOWEL
 
-# tflags publish
+# tflags net
 URI_ONLY_MSGID_MALF
 
 # tflags publish
