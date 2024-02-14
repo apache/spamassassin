@@ -63,6 +63,9 @@ header __PLING_QUERY		Subject =~ /\?.*!|!.*\?/
 meta PLING_QUERY                (__PLING_QUERY && !__ISO_2022_JP_DELIM)
 describe PLING_QUERY		Subject has exclamation mark and question mark
 
+# A common spam idiosyncrasy 
+describe	FROMSPACE	Idiosyncratic "From" header format
+header		FROMSPACE	From:raw =~ /^\s?\"\s/
 
 
 
