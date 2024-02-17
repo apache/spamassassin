@@ -191,7 +191,7 @@ BITCOIN_EXTORT_02
 # tflags publish
 BITCOIN_IMGUR
 
-# tflags publish
+# tflags net
 BITCOIN_MALWARE
 
 # tflags publish
@@ -446,9 +446,6 @@ ENV_AND_HDR_SPF_MATCH
 # tflags publish
 FACEBOOK_IMG_NOT_RCVD_FB
 
-# good enough
-FAKE_REPLY_C
-
 # tflags publish
 FBI_MONEY
 
@@ -491,7 +488,7 @@ FORGED_SPF_HELO
 # tflags publish
 FORM_FRAUD
 
-# tflags net
+# tflags publish
 FORM_FRAUD_3
 
 # tflags publish
@@ -569,7 +566,7 @@ FROM_MISSP_MSFT
 # good enough
 FROM_MISSP_PHISH
 
-# tflags net
+# good enough
 FROM_MISSP_REPLYTO
 
 # tflags net
@@ -806,9 +803,6 @@ HEADER_FROM_DIFFERENT_DOMAINS
 # tflags userconf
 HEAD_LONG
 
-# good enough
-HELO_LOCALHOST
-
 # tflags publish
 HELO_NO_DOMAIN
 
@@ -841,9 +835,6 @@ HK_RCVD_IP_MULTICAST
 
 # tflags publish
 HK_SCAM
-
-# good enough
-HK_SPAMMY_FILENAME
 
 # tflags publish
 HOSTED_IMG_DIRECT_MX
@@ -1148,9 +1139,6 @@ PDS_FRNOM_TODOM_DBL_URL
 # good enough
 PDS_FRNOM_TODOM_NAKED_TO
 
-# tflags net
-PDS_FROM_2_EMAILS
-
 # good enough
 PDS_FROM_NAME_TO_DOMAIN
 
@@ -1174,9 +1162,6 @@ PDS_TINYSUBJ_URISHRT
 
 # good enough
 PDS_TONAME_EQ_TOLOCAL_HDRS_LCASE
-
-# good enough
-PDS_X_PHP_WELLKNOWN
 
 # tflags publish
 PHISH_ATTACH
@@ -1574,9 +1559,6 @@ SHARE_50_50
 # tflags publish
 SHOPIFY_IMG_NOT_RCVD_SFY
 
-# good enough
-SHORTENED_URL_SRC
-
 # tflags publish
 SHORTENER_SHORT_IMG
 
@@ -1707,9 +1689,6 @@ TO_EQ_FM_DIRECT_MX
 TO_EQ_FM_DOM_HTML_IMG
 
 # tflags net
-TO_EQ_FM_DOM_HTML_ONLY
-
-# tflags net
 TO_EQ_FM_DOM_SPF_FAIL
 
 # tflags net
@@ -1733,7 +1712,7 @@ TO_NO_BRKTS_HTML_IMG
 # tflags publish
 TO_NO_BRKTS_HTML_ONLY
 
-# good enough
+# tflags net
 TO_NO_BRKTS_MSFT
 
 # tflags publish
@@ -2032,9 +2011,6 @@ XM_RANDOM
 
 # good enough
 XM_RECPTID
-
-# good enough
-XM_UC_ONLY
 
 # tflags net
 XPRIO
