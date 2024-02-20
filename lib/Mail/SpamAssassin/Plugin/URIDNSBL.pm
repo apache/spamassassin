@@ -296,6 +296,10 @@ The maximum number of domains to look up.
 Include DKIM uris in lookups. This option is documented in
 Mail::SpamAssassin::Conf.
 
+=item uridnsbl_skip_mailto ( 0 / 1)	(default: 1)
+
+Skip mailto links on uris lookups.
+
 =back
 
 =head1 NOTES
@@ -423,7 +427,9 @@ sub check_dnsbl {
   foreach my $uri (keys %huris) {
     my $info = $huris{$uri};
     # we want to skip mailto: uris
-    next if ($uri =~ /^mailto:/i);
+    if ($conf->{uridnsbl_skip_mailto}) {
+      next if ($uri =~ /^mailto:/i);
+    }
 
     # no hosts/domains were found via this uri, so skip
     next unless ($info->{hosts});
@@ -557,6 +563,13 @@ sub set_config {
   push(@cmds, {
     setting => 'skip_uribl_checks',
     default => 0,
+    type => $Mail::SpamAssassin::Conf::CONF_TYPE_BOOL,
+  });
+
+  push(@cmds, {
+    setting => 'uridnsbl_skip_mailto',
+    is_admin => 1,
+    default => 1,
     type => $Mail::SpamAssassin::Conf::CONF_TYPE_BOOL,
   });
 
@@ -1189,5 +1202,6 @@ sub has_subtest_for_ranges { 1 }
 sub has_uridnsbl_for_a { 1 }  # uridnsbl rules recognize tflags 'a' and 'ns'
 sub has_uridnsbl_a_ns { 1 }  # has an actually working 'a' flag, unlike above :-(
 sub has_tflags_notrim { 1 }  # Bug 7835
+sub has_uridnsbl_skip_mailto { 1 }
 
 1;
