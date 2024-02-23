@@ -4188,4 +4188,6 @@ rawbody     __HREF_BOM                 m,href\s*=\s*"(?:[\xef][\xbb][\xbf]|[\xfe
 #tflags     __URI_WEBMDSERVICE          multiple maxhits=6
 #meta       __URI_WEBMDSERVICE_MANY     __URI_WEBMDSERVICE > 5
 
+uri         __HOSTED_CLOUDFLAREIPFS     m,://cloudflare-ipfs\.com/ipfs/,i
+
 
