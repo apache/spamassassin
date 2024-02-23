@@ -4188,6 +4188,10 @@ rawbody     __HREF_BOM                 m,href\s*=\s*"(?:[\xef][\xbb][\xbf]|[\xfe
 #tflags     __URI_WEBMDSERVICE          multiple maxhits=6
 #meta       __URI_WEBMDSERVICE_MANY     __URI_WEBMDSERVICE > 5
 
-uri         __HOSTED_CLOUDFLAREIPFS     m,://cloudflare-ipfs\.com/ipfs/,i
+uri         __URI_CLOUDFLAREIPFS       m,://cloudflare-ipfs\.com/ipfs/,i
+meta        URI_CLOUDFLAREIPFS         __URI_CLOUDFLAREIPFS
+describe    URI_CLOUDFLAREIPFS         References Interplanetary File System PtP content via CloudFlare, likely phishing
+score       URI_CLOUDFLAREIPFS         2.500	# limit
+tflags      URI_CLOUDFLAREIPFS         publish
 
 
