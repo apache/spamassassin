@@ -3599,10 +3599,11 @@ score      HTML_EMPTY_CELLS_MANY       1.500	# limit
 
 uri        __SENDGRID_REDIR            m,://u\d+\.ct\.sendgrid\.net/ls/click\?upn=,
 meta       __SENDGRID_REDIR_NOPHISH    __SENDGRID_REDIR && !__SENDGRID_REDIR_PHISH
-meta       SENDGRID_REDIR              __SENDGRID_REDIR_NOPHISH && !ALL_TRUSTED && !__HAS_ERRORS_TO && !__HAS_X_BEEN_THERE && !__HAS_X_MAILMAN_VERSION && !__STY_INVIS_MANY && !__HTML_SINGLET_10 && !__HAVE_BOUNCE_RELAYS 
-describe   SENDGRID_REDIR              Redirect URI via Sendgrid
-score      SENDGRID_REDIR              1.500	# limit
-tflags     SENDGRID_REDIR              publish
+# 03-2024 - S/O = 0.55, little better than flipping a coin. Retire for now.
+#meta       SENDGRID_REDIR              __SENDGRID_REDIR_NOPHISH && !ALL_TRUSTED && !__HAS_ERRORS_TO && !__HAS_X_BEEN_THERE && !__HAS_X_MAILMAN_VERSION && !__STY_INVIS_MANY && !__HTML_SINGLET_10 && !__HAVE_BOUNCE_RELAYS 
+#describe   SENDGRID_REDIR              Redirect URI via Sendgrid
+#score      SENDGRID_REDIR              1.500	# limit
+#tflags     SENDGRID_REDIR              publish
 
 meta       __SENDGRID_REDIR_PHISH      __SENDGRID_REDIR && ( __PDS_FROM_NAME_TO_DOMAIN || __FORGED_RELAY_MUA_TO_MX || __TO_IN_SUBJ )
 meta       SENDGRID_REDIR_PHISH        __SENDGRID_REDIR_PHISH
