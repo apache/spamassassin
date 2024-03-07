@@ -562,7 +562,7 @@ sub text_style {
 	    my $value = lc $2;
 	    # prevent parsing of the valid CSS3 property value as
 	    # 'invalid color' (Bug 7892)
-	    $value =~ s/\s+!important$//;
+	    $value =~ s/\s*!\s*important$//;
 
 	    if (index($value, 'rgb') >= 0) {
 	      $value =~ tr/0-9,//cd;
@@ -575,19 +575,41 @@ sub text_style {
               # do nothing, just prevent parsing of the valid
               # CSS3 property value as 'invalid color' (Bug 7778)
             }
-            elsif ($value eq 'transparent' && $whcolor eq 'bgcolor') {
-              # do nothing, just prevent parsing of the valid
-              # CSS3 property value as 'invalid color' (Bug 7892)
+            elsif ($value eq 'transparent') {
+              # keep for now, handle outside the loop (Bug 8205)
+              $new{$whcolor} = $value;
             }
 	    else {
 	      $new{$whcolor} = name_to_rgb($value);
 	    }
+	  }
+          elsif (/^\s*background:\s*(.+?)\s*$/) {
+            # parse CSS background property (Bug 8210)
+            my $layers = parse_css_background(lc($1));
+            # loop through values in the bottom layer and look for valid colors
+            for my $value (@{$layers->[-1]}) {
+              my $color = name_to_rgb($value);
+              if ($color ne 'invalid') {
+                $new{bgcolor} = $color;
+                last;
+              }
+            }
+
 	  }
 	  elsif (/^\s*([a-z_-]+)\s*:\s*(\S.*?)\s*$/i) {
 	    # "display: none", "visibility: hidden", etc.
 	    $new{'style_'.$1} = $2;
 	  }
 	}
+        # Handle transparent colors (Bug 8205)
+        if ($new{bgcolor} eq 'transparent') {
+          # replace with parent's bgcolor
+          $new{bgcolor} = $self->{text_style}[-1]->{bgcolor};
+        }
+        if ($new{fgcolor} eq 'transparent') {
+          # replace with current bgcolor
+          $new{fgcolor} = $new{bgcolor};
+        }
       }
       elsif ($name eq "bgcolor") {
 	# overwrite with hex value, $new{bgcolor} is set below
@@ -614,6 +636,92 @@ sub text_style {
       $self->close_tag($tag);
     }
   }
+}
+
+# Parses a CSS background property value.
+# Returns an arrayref of layers, each layer is an arrayref of values such as
+# [
+#   'rgb(255, 192, 0)',
+#   '35%',
+#   'url("../../media/examples/lizard.png")'
+# ]
+# https://developer.mozilla.org/en-US/docs/Web/CSS/background
+sub parse_css_background {
+  my ($background) = @_;
+
+  my @layers;
+  my @tokens;
+  my @stack;
+  my ($state,$token) = (0,'');
+  for (my $i=0;$i < length($background);$i++) {
+    my $ch = substr($background, $i, 1);
+    if ($state == 0) {
+      if ($ch eq ' ') {
+        push @tokens, $token if $token ne '';
+        $token = '';
+      } elsif ($ch eq '(') {
+        $token .= $ch;
+        push @stack, $state;
+        $state = 1;
+      } elsif ($ch eq '"') {
+        $token .= $ch;
+        push @stack, $state;
+        $state = 2;
+      } elsif ($ch eq q(')) {
+        $token .= $ch;
+        push @stack, $state;
+        $state = 3;
+      } elsif ($ch eq ',') {
+        push @tokens, $token if $token ne '';
+        $token = '';
+        push @layers, [ @tokens ];
+        @tokens = ();
+      } else {
+        $token .= $ch;
+      }
+    } elsif ($state == 1) {
+      if ($ch eq ')') {
+        $token .= $ch;
+        push @tokens, $token;
+        $token = '';
+        $state = pop @stack;
+      } elsif ($ch eq '"') {
+        $token .= $ch;
+        push(@stack, $state);
+        $state = 2;
+      } elsif ($ch eq q(')) {
+        $token .= $ch;
+        push(@stack, $state);
+        $state = 3;
+      } else {
+        $token .= $ch;
+      }
+    } elsif ($state == 2) {
+      if ($ch eq '"') {
+        $token .= $ch;
+        $state = pop @stack;
+      } else {
+        $token .= $ch;
+      }
+    } elsif ($state == 3) {
+      if ($ch eq q(')) {
+        $token .= $ch;
+        $state = pop @stack;
+      } else {
+        $token .= $ch;
+      }
+    }
+  }
+
+  if ($token ne '') {
+    push @tokens, $token;
+  }
+  if ( scalar @tokens > 0 ) {
+    push @layers, [ @tokens ];
+  }
+
+  return \@layers;
+
 }
 
 sub html_font_invisible {
