@@ -13,7 +13,7 @@ use Test::More;
 plan skip_all => "Net tests disabled"          unless conf_bool('run_net_tests');
 plan skip_all => "Can't use Net::DNS Safely"   unless can_use_net_dns_safely();
 
-my $tests = 3;
+my $tests = 6;
 $tests += 4 if (HAS_DKIM_VERIFIER);
 
 plan tests => $tests;
@@ -52,6 +52,17 @@ tstlocalrules(q{
 %patterns = (
   q{ ASKDNS_TXT_SPF } => 'ASKDNS_TXT_SPF',
   '[spamassassin.org TXT:v=spf1 -all]' => 'ASKDNS_TXT_SPF_LOG',
+);
+ok sarun ("-t -D < data/nice/001 2>&1", \&patterns_run_cb);
+ok_all_patterns();
+clear_pattern_counters();
+
+tstlocalrules(q{
+  askdns  ASKDNS_TXT_SPF2 txttcp.spamassassin.org TXT /^v=spf1 include:dnsbltest.spamassassin.org -all$/
+});
+%patterns = (
+  q{ ASKDNS_TXT_SPF2 } => 'ASKDNS_TXT_SPF2',
+  '[txttcp.spamassassin.org TXT:v=spf1]' => 'ASKDNS_TXT_SPF2_LOG',
 );
 ok sarun ("-t -D < data/nice/001 2>&1", \&patterns_run_cb);
 ok_all_patterns();

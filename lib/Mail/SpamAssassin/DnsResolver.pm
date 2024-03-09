@@ -837,6 +837,30 @@ sub poll_responses {
       info("dns: bad dns reply: %s", $eval_stat);
     };
 
+    # bug 8225 - Do TCP fallback when UDP reply packet is too long, by retrying using Net::DNS::Resolver bgsend and bgread
+    my ($id, $packet_id);
+    if ($packet && $packet->header) {
+      my $header = $packet->header;
+      $packet_id = $header->id;  # set these here in case we need to retry for TCP fallback
+      $id = $self->_packet_id($packet);  # which will change $packet to a different class object
+      if ($header->rcode eq 'NOERROR' && $header->tc) {
+        # Use original Resolver which can handle TCP fallback, but keep id from the custom packet
+        my (undef, $qclass, $qtype, $qname) = split('/', $id);
+        dbg("dns: TCP fallback retry with %s, %s, %s", $qname, $qtype, $qclass);
+        my $orig_resolver =  $self->{main}->{resolver}->get_resolver();
+        eval {
+          my $handle = $orig_resolver->bgsend($qname, $qtype, $qclass);
+          $packet = $orig_resolver->bgread($handle);
+        } or do {
+          undef $packet;
+          my $eval_stat = $@ ne '' ? $@ : "errno=$!";  chomp $eval_stat;
+          # resignal if alarm went off
+          die $eval_stat  if $eval_stat =~ /__alarm__ignore__\(.*\)/s;
+          info("dns: bad dns tcp fallback reply: %s", $eval_stat);
+        };
+      }
+    }
+
     if (!$packet) {
       # error already reported above
 #     my $dns_err = $self->{res}->errorstring;
@@ -848,9 +872,6 @@ sub poll_responses {
         info("dns: dns reply is missing a header section");
       } else {
         my $rcode = $header->rcode;
-        my $packet_id = $header->id;
-        my $id = $self->_packet_id($packet);
-
         if ($rcode eq 'NOERROR') {  # success
           # NOERROR, may or may not have answer records
           dbg("dns: dns reply %s is OK, %d answer records",
