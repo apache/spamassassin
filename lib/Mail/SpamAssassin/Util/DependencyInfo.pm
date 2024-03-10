@@ -53,7 +53,7 @@ our @MODULES = (
 },
 {
   module => 'Net::DNS',
-  version => '0.69',
+  version => '1.10',
   desc => 'Used for all DNS-based tests (SBL, XBL, SpamCop, DSBL, etc.),
   perform MX checks, and is also used when manually reporting spam to
   SpamCop.',
