@@ -335,6 +335,15 @@ if (Mail::SpamAssassin::Util::DependencyInfo::long_diagnostics(1) != 0) {
   exit 0;
 }
 
+if (Mail::SpamAssassin::Util::DependencyInfo::test_network_dns() != 0) {
+  # If Net::DNS is already installed this checks if this system succeeds on DNS
+  # queries to some of our test records. Testing here and aborting on failure
+  # prevents having many test failure reports on CPAN test machines with poorly configured networks
+  # while also preventing Spamassassin from being installed on such systems.
+  # To force installation without adequate DNS, don't install Net::DNS in the first place.
+  exit 0;
+}
+
 foreach my $file (@FILES_THAT_MUST_EXIST) {
   open (TOUCH, ">>$file") or die "cannot touch '$file'";
   close TOUCH;
