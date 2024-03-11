@@ -290,7 +290,7 @@ if ($opt{'lint'}) {
   # make sure we notice any write errors while flushing output buffer
   close STDOUT  or die "error closing STDOUT: $!";
   close STDIN   or die "error closing STDIN: $!";
-  exit $res ? 1 : 0;
+  exit($res ? 1 : 0);
 }
 
 if ($opt{'remove-addr-from-welcomelist'} ||
