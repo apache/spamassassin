@@ -748,7 +748,7 @@ sub start_spamd {
       last if ($spamd_pid);
     }
 
-    my $sleep = (int($wait++ / 4) + 1);
+    my $sleep = (int(($wait++) / 4) + 1);
     warn "spam_pid not found: Sleeping $sleep - Retry # $retries\n" if $retries && $retries < 20;
 
     sleep $sleep if $retries > 0;
