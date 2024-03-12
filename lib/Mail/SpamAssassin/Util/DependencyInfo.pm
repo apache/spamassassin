@@ -758,23 +758,4 @@ sub try_module {
   }
 }
 
-sub test_network_dns {
-  # This allows CPAN testing to abort early on inadequate networks
-  # If Net::DNS is not installed yet, this will get caught later in tests anyway
-  eval { require Net::DNS ; Net::DNS->VERSION("1.10"); 1 } || return 0;
-  my $test_failed = 0;
-  my $res = Net::DNS::Resolver->new();
-  foreach my $testname (@NETWORK_TESTS) {
-    my $reply = $res->send($testname->{name}, $testname->{type}, "IN");
-    if ( !($reply && (scalar($reply->answer) >= $testname->{min_answers})) ) {
-      print "\n", ("*" x 75), "\n";
-      printf("NOTE: DNS test failed, expected %d answers, for %s %s, reply received was:\n%s\n",
-             $testname->{min_answers}, $testname->{name}, $testname->{type}, $reply?($reply->string):'undef');
-      $test_failed++;
-    }
-  }
-  print "\nCorrect the network DNS configuration before installing SpamAssassin\n", ("*" x 75), "\n" if $test_failed;
-  return $test_failed;
-}
-
 1;
