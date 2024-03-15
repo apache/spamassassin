@@ -1,4 +1,325 @@
 ------------------------------------------------------------------------
+r1916262 | sidney | 2024-03-12 22:35:34 +0000 (Tue, 12 Mar 2024) | 1 line
+ 
+ Cosmetic fix to line that confused perl mode syntax highlighting in 
+emacs editor
+------------------------------------------------------------------------
+r1916250 | sidney | 2024-03-12 11:26:06 +0000 (Tue, 12 Mar 2024) | 1 line
+ 
+ bug 8227 - Revert addition of DNS test run durimg build
+------------------------------------------------------------------------
+r1916242 | sidney | 2024-03-11 23:37:22 +0000 (Mon, 11 Mar 2024) | 1 line
+ 
+ 8228 fix operator precedence error caught by perl 5.39 warning
+------------------------------------------------------------------------
+r1916223 | sidney | 2024-03-11 03:10:43 +0000 (Mon, 11 Mar 2024) | 1 line
+ 
+ bug 8227 - Add tests for proper DNS resolver setup during build/install
+------------------------------------------------------------------------
+r1916220 | sidney | 2024-03-10 23:21:12 +0000 (Sun, 10 Mar 2024) | 1 line
+ 
+ bug 8226 - Set min required Net::DNS version to 1.10
+------------------------------------------------------------------------
+r1916195 | sidney | 2024-03-09 10:38:28 +0000 (Sat, 09 Mar 2024) | 1 line
+ 
+ bug 8226 - Set min required Net::DNS version to 1.10
+------------------------------------------------------------------------
+r1916193 | sidney | 2024-03-09 05:09:26 +0000 (Sat, 09 Mar 2024) | 1 line
+ 
+ bug 8225 - Use Net::DNS::Resolver for TCP fallback for truncated DNS UDP 
+replies
+------------------------------------------------------------------------
+r1916171 | sidney | 2024-03-07 23:38:30 +0000 (Thu, 07 Mar 2024) | 1 line
+ 
+ bug 8210 Parse and recognize CSS background property
+------------------------------------------------------------------------
+r1916164 | gbechis | 2024-03-07 08:45:40 +0000 (Thu, 07 Mar 2024) | 3 
+lines
+ 
+ test with large TXT record replies
+ bz #8213
+ 
+------------------------------------------------------------------------
+r1916121 | gbechis | 2024-03-05 09:30:54 +0000 (Tue, 05 Mar 2024) | 3 
+lines
+ 
+ rebuild configure script with autoconf 2.71
+ bz #8204
+ 
+------------------------------------------------------------------------
+r1916112 | sidney | 2024-03-04 23:40:45 +0000 (Mon, 04 Mar 2024) | 1 line
+ 
+ Bug 8224 - Handle different API versions of Net::DNS::Nameserver in 
+dnsbl_subtests.t tests
+------------------------------------------------------------------------
+r1916084 | jhardin | 2024-03-02 23:10:43 +0000 (Sat, 02 Mar 2024) | 1 line
+ 
+ Bug 8221: Retire SENDGRID_REDIR, S/O has deteriorated to little better 
+than a coin toss.
+------------------------------------------------------------------------
+r1915972 | jhardin | 2024-02-23 16:10:05 +0000 (Fri, 23 Feb 2024) | 1 line
+ 
+ Promote rule to scored for publication
+------------------------------------------------------------------------
+r1915964 | jhardin | 2024-02-23 03:37:26 +0000 (Fri, 23 Feb 2024) | 1 line
+ 
+ Add URI rule for eval
+------------------------------------------------------------------------
+r1915918 | gbechis | 2024-02-21 11:18:52 +0000 (Wed, 21 Feb 2024) | 3 
+lines
+ 
+ Mail::SPF::Server dns_resolver option requires a Net::DNS::Resolver 
+object and not
+ a more complex structure
+ 
+------------------------------------------------------------------------
+r1915894 | gbechis | 2024-02-20 15:28:52 +0000 (Tue, 20 Feb 2024) | 2 
+lines
+ 
+ add an option to skip mailto links on uris lookups
+ 
+------------------------------------------------------------------------
+r1915887 | gbechis | 2024-02-20 09:14:31 +0000 (Tue, 20 Feb 2024) | 2 
+lines
+ 
+ added zohomail.com to Freemail providers
+ 
+------------------------------------------------------------------------
+r1915794 | billcole | 2024-02-14 15:49:12 +0000 (Wed, 14 Feb 2024) | 1 
+line
+ 
+ adding a test for .best tld, which is currently a spammer fave
+------------------------------------------------------------------------
+r1915793 | billcole | 2024-02-14 15:22:57 +0000 (Wed, 14 Feb 2024) | 1 
+line
+ 
+ moving very good rule from sandbox to core head tests
+------------------------------------------------------------------------
+r1915749 | gbechis | 2024-02-12 16:22:44 +0000 (Mon, 12 Feb 2024) | 3 
+lines
+ 
+ use new MySQL syntax
+ switch to InnoDB by default on userpref table as well
+ 
+------------------------------------------------------------------------
+r1915724 | jhardin | 2024-02-11 18:37:41 +0000 (Sun, 11 Feb 2024) | 1 line
+ 
+ FP Avoidance tuning
+------------------------------------------------------------------------
+r1915645 | gbechis | 2024-02-08 11:42:00 +0000 (Thu, 08 Feb 2024) | 2 
+lines
+ 
+ fix FORGED_HOTMAIL_RCVD2 after recent Microsoft changes
+ 
+------------------------------------------------------------------------
+r1915644 | gbechis | 2024-02-08 11:19:02 +0000 (Thu, 08 Feb 2024) | 3 
+lines
+ 
+ make the rule match on outlook.com email messages as well
+ maintainer timeout
+ 
+------------------------------------------------------------------------
+r1915630 | gbechis | 2024-02-07 21:16:06 +0000 (Wed, 07 Feb 2024) | 3 
+lines
+ 
+ avoid a FP
+ jhardin@: "feel free to commit"
+ 
+------------------------------------------------------------------------
+r1915553 | billcole | 2024-02-03 00:49:52 +0000 (Sat, 03 Feb 2024) | 1 
+line
+ 
+ Cleanup of T_ on RHS and whitespace alignment.
+------------------------------------------------------------------------
+r1915549 | billcole | 2024-02-02 16:37:19 +0000 (Fri, 02 Feb 2024) | 1 
+line
+ 
+ FP prevention for DMARC reports. Bug 8214
+------------------------------------------------------------------------
+r1915484 | jhardin | 2024-01-31 02:16:29 +0000 (Wed, 31 Jan 2024) | 1 line
+ 
+ FP Avoidance tuning
+------------------------------------------------------------------------
+r1915475 | gbechis | 2024-01-30 09:32:17 +0000 (Tue, 30 Jan 2024) | 2 
+lines
+ 
+ extract more URIs from pdf files
+ 
+------------------------------------------------------------------------
+r1915433 | jhardin | 2024-01-28 17:36:51 +0000 (Sun, 28 Jan 2024) | 1 line
+ 
+ FP Avoidance tuning
+------------------------------------------------------------------------
+r1915430 | jhardin | 2024-01-28 16:51:30 +0000 (Sun, 28 Jan 2024) | 1 line
+ 
+ "trust wallet" obfuscation, probable cryptocurrency phishing
+------------------------------------------------------------------------
+r1915356 | jhardin | 2024-01-21 19:37:45 +0000 (Sun, 21 Jan 2024) | 1 line
+ 
+ Azure infra being used to host phishing images. Tune "Wells Fargo" 
+obfuscation rules.
+------------------------------------------------------------------------
+r1915355 | jhardin | 2024-01-21 19:36:05 +0000 (Sun, 21 Jan 2024) | 1 line
+ 
+ Add some more obfus observed in phishing
+------------------------------------------------------------------------
+r1915164 | gbechis | 2024-01-09 17:35:36 +0000 (Tue, 09 Jan 2024) | 2 
+lines
+ 
+ Add dynamic-RDNS/HELO exclusion for dynamic-looking static MTA hostnames 
+from salesforce.com
+ 
+------------------------------------------------------------------------
+r1915138 | billcole | 2024-01-08 16:06:11 +0000 (Mon, 08 Jan 2024) | 1 
+line
+ 
+ T-Mobile does in fact generate signed spam
+------------------------------------------------------------------------
+r1915064 | gbechis | 2024-01-03 11:07:44 +0000 (Wed, 03 Jan 2024) | 2 
+lines
+ 
+ rename a rule
+ 
+------------------------------------------------------------------------
+r1915063 | gbechis | 2024-01-03 10:51:27 +0000 (Wed, 03 Jan 2024) | 3 
+lines
+ 
+ add rule to catch Yandex redirector
+ bz #8112
+ 
+------------------------------------------------------------------------
+r1915062 | gbechis | 2024-01-03 10:47:35 +0000 (Wed, 03 Jan 2024) | 2 
+lines
+ 
+ add an url shortener
+ 
+------------------------------------------------------------------------
+r1914863 | billcole | 2023-12-22 18:53:12 +0000 (Fri, 22 Dec 2023) | 1 
+line
+ 
+ Fix for bz#8205, by Kent Oyer
+------------------------------------------------------------------------
+r1914830 | gbechis | 2023-12-21 17:31:39 +0000 (Thu, 21 Dec 2023) | 2 
+lines
+ 
+ warning fix when building man page
+ 
+------------------------------------------------------------------------
+r1914735 | sidney | 2023-12-17 09:11:35 +0000 (Sun, 17 Dec 2023) | 1 line
+ 
+ Bug 8203 - Add LWP::Protocol::https as dependency where needed
+------------------------------------------------------------------------
+r1914567 | gbechis | 2023-12-12 13:30:34 +0000 (Tue, 12 Dec 2023) | 2 
+lines
+ 
+ additional 3tld domain
+ 
+------------------------------------------------------------------------
+r1914481 | sidney | 2023-12-09 12:12:54 +0000 (Sat, 09 Dec 2023) | 1 line
+ 
+ bug 8196 - Revert commits regarding NetAddr::IP that were not really 
+neccessary
+------------------------------------------------------------------------
+r1914452 | hege | 2023-12-08 07:37:26 +0000 (Fri, 08 Dec 2023) | 2 lines
+ 
+ Clean up unnecessary unicode characters
+ 
+------------------------------------------------------------------------
+r1914451 | hege | 2023-12-08 07:25:11 +0000 (Fri, 08 Dec 2023) | 2 lines
+ 
+ Lazy require NetAddr::IP, otherwise Makefile.PL can fail (Bug 8196)
+ 
+------------------------------------------------------------------------
+r1914416 | sidney | 2023-12-07 02:49:06 +0000 (Thu, 07 Dec 2023) | 1 line
+ 
+ Bug 8197 Skip DNS resolver test on Windows with Net::DNS 1.41, it's fix 
+has a different error
+------------------------------------------------------------------------
+r1914366 | billcole | 2023-12-05 15:35:03 +0000 (Tue, 05 Dec 2023) | 1 
+line
+ 
+ PROPER fix for bz8202
+------------------------------------------------------------------------
+r1914364 | hege | 2023-12-05 14:56:53 +0000 (Tue, 05 Dec 2023) | 2 lines
+ 
+ Fix unnecessary regexp captures from rules
+ 
+------------------------------------------------------------------------
+r1914363 | billcole | 2023-12-05 14:19:16 +0000 (Tue, 05 Dec 2023) | 1 
+line
+ 
+ revert r1914343
+------------------------------------------------------------------------
+r1914343 | billcole | 2023-12-05 01:47:25 +0000 (Tue, 05 Dec 2023) | 1 
+line
+ 
+ Additional exception for UNUSABLE_MSGID and hence FORGED_MUA_MOZILLA and 
+other metas. Bug 8202
+------------------------------------------------------------------------
+r1914293 | sidney | 2023-12-03 05:55:40 +0000 (Sun, 03 Dec 2023) | 1 line
+ 
+ bug 8201 Revert previous commit
+------------------------------------------------------------------------
+r1914291 | sidney | 2023-12-03 04:32:34 +0000 (Sun, 03 Dec 2023) | 1 line
+ 
+ bug 8201 Only fail some tests that retry network tests if all retries 
+have any errors
+------------------------------------------------------------------------
+r1914271 | sidney | 2023-12-01 19:16:58 +0000 (Fri, 01 Dec 2023) | 1 line
+ 
+ bug 8198 Adjust test cases with scores that rounded differently on 
+different platforms
+------------------------------------------------------------------------
+r1914179 | gbechis | 2023-11-28 14:10:48 +0000 (Tue, 28 Nov 2023) | 2 
+lines
+ 
+ skip tests on Windows if Net::DNS 1.40_* is present
+ 
+------------------------------------------------------------------------
+r1914143 | sidney | 2023-11-27 00:38:56 +0000 (Mon, 27 Nov 2023) | 1 line
+ 
+ bug 8891 ENV var PERL_MM_OPT conflicts with sa-compile
+------------------------------------------------------------------------
+r1914137 | sidney | 2023-11-26 11:36:39 +0000 (Sun, 26 Nov 2023) | 1 line
+ 
+ bug 8198 Fix warning from bad version check and skip tests that fail 
+under old versions of DKIM
+------------------------------------------------------------------------
+r1914136 | sidney | 2023-11-26 10:20:08 +0000 (Sun, 26 Nov 2023) | 1 line
+ 
+ Fixing missing my, no functional difference, but still wrong
+------------------------------------------------------------------------
+r1914132 | gbechis | 2023-11-26 08:56:49 +0000 (Sun, 26 Nov 2023) | 3 
+lines
+ 
+ ipcc.db file is a "Berkeley DB (Btree, version 9, little-endian)" file 
+and
+ cannot be opened by all platforms during tests
+ 
+------------------------------------------------------------------------
+r1914094 | sidney | 2023-11-24 20:12:00 +0000 (Fri, 24 Nov 2023) | 1 line
+ 
+ 4.0.1-pre1 RELEASED
+------------------------------------------------------------------------
+r1914088 | gbechis | 2023-11-24 14:07:45 +0000 (Fri, 24 Nov 2023) | 2 
+lines
+ 
+ mention more features developed after SpamAssassin 4.0.0 has been 
+released
+ 
+------------------------------------------------------------------------
+r1914085 | sidney | 2023-11-24 12:18:40 +0000 (Fri, 24 Nov 2023) | 1 line
+ 
+ Update release announcement in preparation for 4.0.1 release
+------------------------------------------------------------------------
+r1914077 | sidney | 2023-11-24 00:41:54 +0000 (Fri, 24 Nov 2023) | 1 line
+ 
+ update copyright
+------------------------------------------------------------------------
+r1914076 | sidney | 2023-11-24 00:39:55 +0000 (Fri, 24 Nov 2023) | 1 line
+ 
+ preparing to release 4.0.1-pre1
+------------------------------------------------------------------------
 r1914075 | sidney | 2023-11-23 23:00:36 +0000 (Thu, 23 Nov 2023) | 1 line
  
  Bug 8197 Skip DNS resolver test on Windows with broken versions of 
