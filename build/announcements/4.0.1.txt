@@ -34,13 +34,13 @@ Notable changes
 This release addresses the following issues:
 
   - Incompatibilities with some versions of perl and some perl modules
-     that have been released since the release of SpamAssassin 4.0.0
+    that have been released since the release of SpamAssassin 4.0.0
 
   - Problems using cpan to install SpamAssassin when certain required
     or optional modules are not already installed
 
   - Support for space characters in the path name of some executables
-     used by certain plugins
+    used by certain plugins
 
   - Improved handling of URL shortener link redirects
 
@@ -58,6 +58,8 @@ This release addresses the following issues:
 
   - Text or HTML content placed in octet-stream attachments by
     spammers to bypass SpamAssassin scanning
+
+  - Implemented TCP fallback for truncated DNS UDP replies
 
 * Spamc can now be built on a Windows platform as part of the gmake
   build procedure, using the compiler toolchain that is part of a
