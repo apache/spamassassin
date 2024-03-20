@@ -24,7 +24,7 @@ Mail::SpamAssassin::Timeout - safe, reliable timeouts in perl
     # non-timeout code...
 
     my $t = Mail::SpamAssassin::Timeout->new({ secs => 5, deadline => $when });
-    
+
     $t->run(sub {
         # code to run with a 5-second timeout...
     });

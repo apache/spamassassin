@@ -34,12 +34,12 @@ Mail::SpamAssassin::Plugin - SpamAssassin plugin base class
 
   sub new {
     my ($class, $mailsa) = @_;
-    
+
     # the usual perlobj boilerplate to create a subclass object
     $class = ref($class) || $class;
     my $self = $class->SUPER::new($mailsa);
     bless ($self, $class);
-   
+
     # then register an eval rule, if desired...
     $self->register_eval_rule ("check_for_foo");
 

@@ -3682,10 +3682,6 @@ normal rules to use.  When rule depends on a tag that might be set at later
 stage by a plugin for example, it's priority should be set manually to a
 higher value.
 
-=over 4
-
-=back
-
 =head1 ADMINISTRATOR SETTINGS
 
 These settings differ from the ones above, in that they are considered 'more

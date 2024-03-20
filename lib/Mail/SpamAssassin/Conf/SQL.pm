@@ -22,7 +22,7 @@ Mail::SpamAssassin::Conf::SQL - load SpamAssassin scores from SQL database
 =head1 SYNOPSIS
 
   (see Mail::SpamAssassin)
-  
+
 
 =head1 DESCRIPTION
 

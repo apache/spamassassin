@@ -26,7 +26,7 @@ loadplugin    Mail::SpamAssassin::Plugin::FromNameSpoof
 
  # From:name and From:addr do not match, matching depends on C<fns_check> setting
  header  __PLUGIN_FROMNAME_SPOOF  eval:check_fromname_spoof()
-  
+
  # From:name and From:addr do not match (same as above rule and C<fns_check 0>)
  header  __PLUGIN_FROMNAME_DIFFERENT  eval:check_fromname_different()
 
