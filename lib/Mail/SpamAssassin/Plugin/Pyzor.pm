@@ -647,7 +647,7 @@ sub _check_forked_result {
 sub _check_result {
   my ($self, $pms, $results) = @_;
 
-  if (!@$results) {
+  unless ((defined $results) && @$results) {
     dbg("pyzor: no response from server");
     return 0;
   }
