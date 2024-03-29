@@ -479,33 +479,24 @@ Run "svn status" to ensure you're building/releasing from a pristine
   files to https://dist.apache.org/repos/dist/release/spamassassin/ once a
   release vote passes. 
 
-  NOTE - Since it takes up to 24 hours for all the mirrors of dist.apache.org
-  to receive changes, for a full release upload the files immediately
-  when the 72 hour period for a successful PMC vote has completed, then
-  you can start preparing the various news and announcements that you can't
-  commit or send until 24 hours after the upload.
+  NOTE - In 2021 ASF replaced use of the mirror system for distributing
+  downloads with use of a global CDN. As a result, there is no longer a
+  delay after uploading files until the files are visible. If you are
+  used to the old system requiring you to wait 24 hours after uploading
+  before updating the download page om the web site and annouincing the
+  release, rejoice, you no longer need to.
   
-  [note: Symlinks may not work on all mirrors even though there may be 
-  documentation to the contrary.]
+  Publish tarballs by manipulating the repo on svn, which is at
+   https://dist.apache.org/repos/dist/release/spamassassin/
 
-  As documented at https://www.apache.org/dev/release.html, SpamAssassin
-  as of 2014-02-26 publishes tarballs by manipulating the repo on svn.
-
-  svn co https://dist.apache.org/repos/dist/release/spamassassin/ release
-
-  - Manipulate the files to add the new version artifacts to the source dir
-  - Remove tar-balls for now-obsolete versions from dist:
+  - svn checkout or update the repo
+  - Copy the new version artifact files to the source dir and svn add them
+  - svn delete the files for now-obsolete versions
 
     Only the most recent version of each supported release line should be
     stored.  The archives will auto update.  
     See https://www.apache.org/dev/release#archived.
-  - Commit 
-  - Wait 24 hours before you announce to allow mirrors to update
-
-  (NOTE: it may be better to wait a while before doing this; it appears to
-  take a while for the spamassassin.apache.org website mirror script to
-  run, so the old downloads page will stick around for a while before it's
-  safe to do so.)
+  - Commit
 
 - (for full release builds) Update the files in build/announcements/$vers.txt
   to insert the correct checksums for the files that were uploaded. This directory
@@ -518,24 +509,14 @@ Run "svn status" to ensure you're building/releasing from a pristine
 
     https://svn.apache.org/repos/asf/spamassassin/site
 
-  Previous versions of this README talked about using a timestamp in the
-  downloads.cgi links. However the instructions in
-  https://infra.apache.org/release-download-pages.html#less-than-24hr
-  say not to do that as a main website link. There is no need for a timestamp
-  once the mirrors have all updated. Also, if the old version that is obsoleted
-  by the new release is deleted as we are instructed to do, then not having
-  updated the website download pages will result in 404 links for all the
-  mirror sites that have already syncronized. It is probably fine to just wait
-  a few hours for a number of sites to sync, and then just accept the possibility
-  that there may be some people who try to download the new release and get a 404
-  then try the backup mirror site which will probably be the main one which
-  will work.
-
-- Update the "news.html" and the announcement on the home page.
+- Update the "news.html" and the announcement on the index.html home page.
 
 - Log on to: https://reporter.apache.org/addrelease.html?spamassassin
   and add your release data (version and date) to the database.
 
+- As long as you are editing and will be committing the web pages, check the
+  copyright date at the bottom of every *.html page.
+  
 - update the 'doc' tree in the SpamAssassin website 
 
   WARNING: edit 'build/update_website_docs' beforehand and set the "PERL"
@@ -582,7 +563,7 @@ Run "svn status" to ensure you're building/releasing from a pristine
         https://pause.perl.org/pause/authenquery?ACTION=share_perms
 
   select 3.1 ("Make someone else co-maintainer"), and ensure that the
-  other releasers (JMASON, DOS, FELICITY, others?) all have permissions as
+  other releasers all have permissions as
   'co-maintainer' on the full set of your listed modules in the
   "Mail::SpamAssassin::" namespace.
 
@@ -629,8 +610,6 @@ Run "svn status" to ensure you're building/releasing from a pristine
         https://issues.apache.org/SpamAssassin/editmilestones.cgi?product=Spamassassin
 
 - Update https://en.wikipedia.org/wiki/SpamAssassin
-
-
 
 
 -------------
