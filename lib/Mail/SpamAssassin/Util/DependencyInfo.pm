@@ -53,7 +53,7 @@ our @MODULES = (
 },
 {
   module => 'Net::DNS',
-  version => '0.69',
+  version => '1.10',
   desc => 'Used for all DNS-based tests (SBL, XBL, SpamCop, DSBL, etc.),
   perform MX checks, and is also used when manually reporting spam to
   SpamCop.',
@@ -252,6 +252,12 @@ our @OPTIONAL_MODULES = (
   or later is needed to provide SQLite 3.25.0 or later.',
 },
 {
+  module => 'LWP::Protocol::https',
+  version => 0,
+  desc => 'The "sa-update" program can use this module to make HTTPS requests.
+  Also used by DecodeShortURLs plugin.',
+},
+{
   module => 'LWP::UserAgent',
   version => 0,
   desc => 'The "sa-update" program can use this module to make HTTP requests.
@@ -323,6 +329,18 @@ our @OPTIONAL_MODULES = (
   version => 0,
   desc => 'Mail::DMARC is used by the optional DMARC plugin.',
 },
+{
+  module => 'Devel::Cycle',
+  version => 0,
+  desc => 'Devel::Cycle is used in make test in tests that will be harmelessly
+  skipped if it is not available',
+},
+{
+  module => 'Text::Diff',
+  version => 0,
+  desc => 'Text::Diff is used in make test in tests that will be harmelessly
+  skipped if it is not available',
+},
 );
 
 our @BINARIES = ();
@@ -382,13 +400,28 @@ if ($^O eq 'freebsd') {
   };
 }
 
+# The numbers being tested only have to be anything more than truncated packets will have
+# That allows some flexibility if the exact test records are changed in the future
+our @NETWORK_TESTS = (
+{
+  'name' => 'txttcp.spamassassin.org',
+  'type' => 'TXT',
+  'min_answers' => 10,
+},
+{
+  'name' => 'multihomed.dnsbltest.spamassassin.org',
+  'type' => 'A',
+  'min_answers' => 4,
+},
+);
+
 ###########################################################################
 
 =head1 METHODS
 
 =over 4
 
-=item $f->debug_diagnostics ()
+=item $f-E<gt>debug_diagnostics ()
 
 Output some diagnostic information, useful for debugging SpamAssassin
 problems.

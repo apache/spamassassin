@@ -15,10 +15,8 @@ enlist_addrlist (SUSP_NTLD) *@*.top
 enlist_addrlist (SUSP_NTLD) *@*.fun
 enlist_addrlist (SUSP_NTLD) *@*.life
 enlist_addrlist (SUSP_NTLD) *@*.review
-enlist_addrlist (SUSP_NTLD) *@*.xyz
 enlist_addrlist (SUSP_NTLD) *@*.bid
 enlist_addrlist (SUSP_NTLD) *@*.stream
-enlist_addrlist (SUSP_NTLD) *@*.site
 enlist_addrlist (SUSP_NTLD) *@*.gdn
 enlist_addrlist (SUSP_NTLD) *@*.click
 enlist_addrlist (SUSP_NTLD) *@*.world
@@ -38,10 +36,8 @@ enlist_uri_host (SUSP_URI_NTLD) top
 enlist_uri_host (SUSP_URI_NTLD) fun
 enlist_uri_host (SUSP_URI_NTLD) life
 enlist_uri_host (SUSP_URI_NTLD) review
-enlist_uri_host (SUSP_URI_NTLD) xyz
 enlist_uri_host (SUSP_URI_NTLD) bid
 enlist_uri_host (SUSP_URI_NTLD) stream
-enlist_uri_host (SUSP_URI_NTLD) site
 enlist_uri_host (SUSP_URI_NTLD) gdn
 enlist_uri_host (SUSP_URI_NTLD) click
 enlist_uri_host (SUSP_URI_NTLD) world
@@ -126,7 +122,7 @@ describe VPS_NO_NTLD vps[0-9] domain at a suspiscious TLD
 score    VPS_NO_NTLD 1.0 # limit
 reuse    VPS_NO_NTLD
 
-body     __PDS_OFFER_ONLY_AMERICA /This offer (?:is )?(?:only )?for (United States|USA)/i
+body     __PDS_OFFER_ONLY_AMERICA /This offer (?:is )?(?:only )?for (?:United States|USA)/i
 
 meta     OFFER_ONLY_AMERICA __FROM_ADDRLIST_SUSPNTLD && __PDS_OFFER_ONLY_AMERICA
 describe OFFER_ONLY_AMERICA Offer only available to US
@@ -138,7 +134,7 @@ meta     SENT_TO_EMAIL_ADDR __FROM_ADDRLIST_SUSPNTLD && __PDS_SENT_TO_EMAIL_ADDR
 describe SENT_TO_EMAIL_ADDR Email was sent to email address
 score    SENT_TO_EMAIL_ADDR 2.0 # limit
 
-body     __PDS_EXPIRATION_NOTICE /\bexpiration (notice|alert|date)\b/i
+body     __PDS_EXPIRATION_NOTICE /\bexpiration (?:notice|alert|date)\b/i
 
 meta     SUSPNTLD_EXPIRATION_EXTORT LOTS_OF_MONEY && __PDS_EXPIRATION_NOTICE && __FROM_ADDRLIST_SUSPNTLD
 describe SUSPNTLD_EXPIRATION_EXTORT Susp NTLD with an expiration notice and lotsa money

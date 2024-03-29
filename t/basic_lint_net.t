@@ -10,6 +10,10 @@ plan tests => 2;
 
 # ---------------------------------------------------------------------------
 
+tstpre ("
+  loadplugin Mail::SpamAssassin::Plugin::AWL
+");
+
 %patterns = (
   qr/^/, 'anything',
 );

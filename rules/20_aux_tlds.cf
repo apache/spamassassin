@@ -56,7 +56,7 @@ endif
 #  wget https://data.iana.org/TLD/tlds-alpha-by-domain.txt -q -O - | grep -i '^xn--' | idn -u | tr '\n' ' ' | fold -w 80 -s | perl -pe 's/\s+$//; s/.*/util_rb_tld \L$_\n/'
 
 if can(Mail::SpamAssassin::Conf::feature_registryboundaries)
-# Updated 2022-10-18
+# Updated 2023-11-17
 util_rb_tld xn--11b4c3d xn--1ck2e1b xn--1qqw23a xn--2scrj9c xn--30rr7y xn--3bst00m
 util_rb_tld xn--3ds443g xn--3e0b707e xn--3hcrj9c xn--3pxu8k xn--42c2d9a xn--45br5cyl
 util_rb_tld xn--45brj9c xn--45q11c xn--4dbrk0ce xn--4gbrim xn--54b7fta0cc xn--55qw42g
@@ -70,130 +70,128 @@ util_rb_tld xn--fiq64b xn--fiqs8s xn--fiqz9s xn--fjq720a xn--flw351e xn--fpcrj9c
 util_rb_tld xn--fzc2c9e2c xn--fzys8d69uvgm xn--g2xx48c xn--gckr3f0f xn--gecrj9c xn--gk3at1e
 util_rb_tld xn--h2breg3eve xn--h2brj9c xn--h2brj9c8c xn--hxt814e xn--i1b6b1a6a2e
 util_rb_tld xn--imr513n xn--io0a7i xn--j1aef xn--j1amh xn--j6w193g xn--jlq480n2rg
-util_rb_tld xn--jlq61u9w7b xn--jvr189m xn--kcrx77d1x4a xn--kprw13d xn--kpry57d xn--kput3i
-util_rb_tld xn--l1acc xn--lgbbat1ad8j xn--mgb9awbf xn--mgba3a3ejt xn--mgba3a4f16a
-util_rb_tld xn--mgba7c0bbn0a xn--mgbaakc7dvf xn--mgbaam7a8h xn--mgbab2bd xn--mgbah1a3hjkrd
-util_rb_tld xn--mgbai9azgqp6j xn--mgbayh7gpa xn--mgbbh1a xn--mgbbh1a71e xn--mgbc0a9azcg
-util_rb_tld xn--mgbca7dzdo xn--mgbcpq6gpa1a xn--mgberp4a5d4ar xn--mgbgu82a xn--mgbi4ecexp
-util_rb_tld xn--mgbpl2fh xn--mgbt3dhd xn--mgbtx2b xn--mgbx4cd0ab xn--mix891f xn--mk1bu44c
-util_rb_tld xn--mxtq1m xn--ngbc5azd xn--ngbe9e0a xn--ngbrx xn--node xn--nqv7f
-util_rb_tld xn--nqv7fs00ema xn--nyqy26a xn--o3cw4h xn--ogbpf8fl xn--otu796d xn--p1acf
-util_rb_tld xn--p1ai xn--pgbs0dh xn--pssy2u xn--q7ce6a xn--q9jyb4c xn--qcka1pmc xn--qxa6a
-util_rb_tld xn--qxam xn--rhqv96g xn--rovu88b xn--rvc1e0am3e xn--s9brj9c xn--ses554g
-util_rb_tld xn--t60b56a xn--tckwe xn--tiq49xqyj xn--unup4y xn--vermgensberater-ctb
-util_rb_tld xn--vermgensberatung-pwb xn--vhquv xn--vuq861b xn--w4r85el8fhu5dnra xn--w4rs40l
-util_rb_tld xn--wgbh1c xn--wgbl6a xn--xhq521b xn--xkc2al3hye2a xn--xkc2dl3a5ee0h xn--y9a3aq
-util_rb_tld xn--yfro4i67o xn--ygbi2ammx xn--zfr164b
+util_rb_tld xn--jvr189m xn--kcrx77d1x4a xn--kprw13d xn--kpry57d xn--kput3i xn--l1acc
+util_rb_tld xn--lgbbat1ad8j xn--mgb9awbf xn--mgba3a3ejt xn--mgba3a4f16a xn--mgba7c0bbn0a
+util_rb_tld xn--mgbaakc7dvf xn--mgbaam7a8h xn--mgbab2bd xn--mgbah1a3hjkrd xn--mgbai9azgqp6j
+util_rb_tld xn--mgbayh7gpa xn--mgbbh1a xn--mgbbh1a71e xn--mgbc0a9azcg xn--mgbca7dzdo
+util_rb_tld xn--mgbcpq6gpa1a xn--mgberp4a5d4ar xn--mgbgu82a xn--mgbi4ecexp xn--mgbpl2fh
+util_rb_tld xn--mgbt3dhd xn--mgbtx2b xn--mgbx4cd0ab xn--mix891f xn--mk1bu44c xn--mxtq1m
+util_rb_tld xn--ngbc5azd xn--ngbe9e0a xn--ngbrx xn--node xn--nqv7f xn--nqv7fs00ema
+util_rb_tld xn--nyqy26a xn--o3cw4h xn--ogbpf8fl xn--otu796d xn--p1acf xn--p1ai xn--pgbs0dh
+util_rb_tld xn--pssy2u xn--q7ce6a xn--q9jyb4c xn--qcka1pmc xn--qxa6a xn--qxam xn--rhqv96g
+util_rb_tld xn--rovu88b xn--rvc1e0am3e xn--s9brj9c xn--ses554g xn--t60b56a xn--tckwe
+util_rb_tld xn--tiq49xqyj xn--unup4y xn--vermgensberater-ctb xn--vermgensberatung-pwb
+util_rb_tld xn--vhquv xn--vuq861b xn--w4r85el8fhu5dnra xn--w4rs40l xn--wgbh1c xn--wgbl6a
+util_rb_tld xn--xhq521b xn--xkc2al3hye2a xn--xkc2dl3a5ee0h xn--y9a3aq xn--yfro4i67o
+util_rb_tld xn--ygbi2ammx xn--zfr164b
 endif
 
 # Standard List
 # For an up to date list of TLDs that can be pasted into this block, run this command:
 #  wget https://data.iana.org/TLD/tlds-alpha-by-domain.txt -q -O - | tail -n+2 | grep -vi '^xn--' | tr '\n' ' ' | fold -w 80 -s | perl -pe 's/\s+$//; s/.*/util_rb_tld \L$_\n/'
 
-# Updated 2022-10-18
-util_rb_tld aaa aarp abarth abb abbott abbvie abc able abogado abudhabi ac academy
-util_rb_tld accenture accountant accountants aco actor ad adac ads adult ae aeg aero aetna
-util_rb_tld af afl africa ag agakhan agency ai aig airbus airforce airtel akdn al alfaromeo
-util_rb_tld alibaba alipay allfinanz allstate ally alsace alstom am amazon americanexpress
-util_rb_tld americanfamily amex amfam amica amsterdam analytics android anquan anz ao aol
-util_rb_tld apartments app apple aq aquarelle ar arab aramco archi army arpa art arte as
-util_rb_tld asda asia associates at athleta attorney au auction audi audible audio auspost
-util_rb_tld author auto autos avianca aw aws ax axa az azure ba baby baidu banamex
-util_rb_tld bananarepublic band bank bar barcelona barclaycard barclays barefoot bargains
-util_rb_tld baseball basketball bauhaus bayern bb bbc bbt bbva bcg bcn bd be beats beauty
-util_rb_tld beer bentley berlin best bestbuy bet bf bg bh bharti bi bible bid bike bing
-util_rb_tld bingo bio biz bj black blackfriday blockbuster blog bloomberg blue bm bms bmw
-util_rb_tld bn bnpparibas bo boats boehringer bofa bom bond boo book booking bosch bostik
+# Updated 2023-11-17
+util_rb_tld aaa aarp abb abbott abbvie abc able abogado abudhabi ac academy accenture
+util_rb_tld accountant accountants aco actor ad ads adult ae aeg aero aetna af afl africa
+util_rb_tld ag agakhan agency ai aig airbus airforce airtel akdn al alibaba alipay
+util_rb_tld allfinanz allstate ally alsace alstom am amazon americanexpress americanfamily
+util_rb_tld amex amfam amica amsterdam analytics android anquan anz ao aol apartments app
+util_rb_tld apple aq aquarelle ar arab aramco archi army arpa art arte as asda asia
+util_rb_tld associates at athleta attorney au auction audi audible audio auspost author
+util_rb_tld auto autos avianca aw aws ax axa az azure ba baby baidu banamex bananarepublic
+util_rb_tld band bank bar barcelona barclaycard barclays barefoot bargains baseball
+util_rb_tld basketball bauhaus bayern bb bbc bbt bbva bcg bcn bd be beats beauty beer
+util_rb_tld bentley berlin best bestbuy bet bf bg bh bharti bi bible bid bike bing bingo
+util_rb_tld bio biz bj black blackfriday blockbuster blog bloomberg blue bm bms bmw bn
+util_rb_tld bnpparibas bo boats boehringer bofa bom bond boo book booking bosch bostik
 util_rb_tld boston bot boutique box br bradesco bridgestone broadway broker brother
 util_rb_tld brussels bs bt build builders business buy buzz bv bw by bz bzh ca cab cafe cal
 util_rb_tld call calvinklein cam camera camp canon capetown capital capitalone car caravan
 util_rb_tld cards care career careers cars casa case cash casino cat catering catholic cba
-util_rb_tld cbn cbre cbs cc cd center ceo cern cf cfa cfd cg ch chanel channel charity
-util_rb_tld chase chat cheap chintai christmas chrome church ci cipriani circle cisco
-util_rb_tld citadel citi citic city cityeats ck cl claims cleaning click clinic clinique
-util_rb_tld clothing cloud club clubmed cm cn co coach codes coffee college cologne com
-util_rb_tld comcast commbank community company compare computer comsec condos construction
-util_rb_tld consulting contact contractors cooking cookingchannel cool coop corsica country
-util_rb_tld coupon coupons courses cpa cr credit creditcard creditunion cricket crown crs
-util_rb_tld cruise cruises cu cuisinella cv cw cx cy cymru cyou cz dabur dad dance data
-util_rb_tld date dating datsun day dclk dds de deal dealer deals degree delivery dell
-util_rb_tld deloitte delta democrat dental dentist desi design dev dhl diamonds diet
-util_rb_tld digital direct directory discount discover dish diy dj dk dm dnp do docs doctor
-util_rb_tld dog domains dot download drive dtv dubai dunlop dupont durban dvag dvr dz earth
-util_rb_tld eat ec eco edeka edu education ee eg email emerck energy engineer engineering
-util_rb_tld enterprises epson equipment er ericsson erni es esq estate et etisalat eu
-util_rb_tld eurovision eus events exchange expert exposed express extraspace fage fail
-util_rb_tld fairwinds faith family fan fans farm farmers fashion fast fedex feedback
-util_rb_tld ferrari ferrero fi fiat fidelity fido film final finance financial fire
-util_rb_tld firestone firmdale fish fishing fit fitness fj fk flickr flights flir florist
-util_rb_tld flowers fly fm fo foo food foodnetwork football ford forex forsale forum
-util_rb_tld foundation fox fr free fresenius frl frogans frontdoor frontier ftr fujitsu fun
-util_rb_tld fund furniture futbol fyi ga gal gallery gallo gallup game games gap garden gay
-util_rb_tld gb gbiz gd gdn ge gea gent genting george gf gg ggee gh gi gift gifts gives
-util_rb_tld giving gl glass gle global globo gm gmail gmbh gmo gmx gn godaddy gold
-util_rb_tld goldpoint golf goo goodyear goog google gop got gov gp gq gr grainger graphics
-util_rb_tld gratis green gripe grocery group gs gt gu guardian gucci guge guide guitars
-util_rb_tld guru gw gy hair hamburg hangout haus hbo hdfc hdfcbank health healthcare help
-util_rb_tld helsinki here hermes hgtv hiphop hisamitsu hitachi hiv hk hkt hm hn hockey
-util_rb_tld holdings holiday homedepot homegoods homes homesense honda horse hospital host
-util_rb_tld hosting hot hoteles hotels hotmail house how hr hsbc ht hu hughes hyatt hyundai
-util_rb_tld ibm icbc ice icu id ie ieee ifm ikano il im imamat imdb immo immobilien in inc
-util_rb_tld industries infiniti info ing ink institute insurance insure int international
-util_rb_tld intuit investments io ipiranga iq ir irish is ismaili ist istanbul it itau itv
-util_rb_tld jaguar java jcb je jeep jetzt jewelry jio jll jm jmp jnj jo jobs joburg jot joy
-util_rb_tld jp jpmorgan jprs juegos juniper kaufen kddi ke kerryhotels kerrylogistics
-util_rb_tld kerryproperties kfh kg kh ki kia kids kim kinder kindle kitchen kiwi km kn
-util_rb_tld koeln komatsu kosher kp kpmg kpn kr krd kred kuokgroup kw ky kyoto kz la
-util_rb_tld lacaixa lamborghini lamer lancaster lancia land landrover lanxess lasalle lat
-util_rb_tld latino latrobe law lawyer lb lc lds lease leclerc lefrak legal lego lexus lgbt
-util_rb_tld li lidl life lifeinsurance lifestyle lighting like lilly limited limo lincoln
-util_rb_tld linde link lipsy live living lk llc llp loan loans locker locus loft lol london
+util_rb_tld cbn cbre cc cd center ceo cern cf cfa cfd cg ch chanel channel charity chase
+util_rb_tld chat cheap chintai christmas chrome church ci cipriani circle cisco citadel
+util_rb_tld citi citic city ck cl claims cleaning click clinic clinique clothing cloud club
+util_rb_tld clubmed cm cn co coach codes coffee college cologne com comcast commbank
+util_rb_tld community company compare computer comsec condos construction consulting
+util_rb_tld contact contractors cooking cool coop corsica country coupon coupons courses
+util_rb_tld cpa cr credit creditcard creditunion cricket crown crs cruise cruises cu
+util_rb_tld cuisinella cv cw cx cy cymru cyou cz dabur dad dance data date dating datsun
+util_rb_tld day dclk dds de deal dealer deals degree delivery dell deloitte delta democrat
+util_rb_tld dental dentist desi design dev dhl diamonds diet digital direct directory
+util_rb_tld discount discover dish diy dj dk dm dnp do docs doctor dog domains dot download
+util_rb_tld drive dtv dubai dunlop dupont durban dvag dvr dz earth eat ec eco edeka edu
+util_rb_tld education ee eg email emerck energy engineer engineering enterprises epson
+util_rb_tld equipment er ericsson erni es esq estate et etisalat eu eurovision eus events
+util_rb_tld exchange expert exposed express extraspace fage fail fairwinds faith family fan
+util_rb_tld fans farm farmers fashion fast fedex feedback ferrari ferrero fi fidelity fido
+util_rb_tld film final finance financial fire firestone firmdale fish fishing fit fitness
+util_rb_tld fj fk flickr flights flir florist flowers fly fm fo foo food football ford
+util_rb_tld forex forsale forum foundation fox fr free fresenius frl frogans frontier ftr
+util_rb_tld fujitsu fun fund furniture futbol fyi ga gal gallery gallo gallup game games
+util_rb_tld gap garden gay gb gbiz gd gdn ge gea gent genting george gf gg ggee gh gi gift
+util_rb_tld gifts gives giving gl glass gle global globo gm gmail gmbh gmo gmx gn godaddy
+util_rb_tld gold goldpoint golf goo goodyear goog google gop got gov gp gq gr grainger
+util_rb_tld graphics gratis green gripe grocery group gs gt gu guardian gucci guge guide
+util_rb_tld guitars guru gw gy hair hamburg hangout haus hbo hdfc hdfcbank health
+util_rb_tld healthcare help helsinki here hermes hiphop hisamitsu hitachi hiv hk hkt hm hn
+util_rb_tld hockey holdings holiday homedepot homegoods homes homesense honda horse
+util_rb_tld hospital host hosting hot hotels hotmail house how hr hsbc ht hu hughes hyatt
+util_rb_tld hyundai ibm icbc ice icu id ie ieee ifm ikano il im imamat imdb immo immobilien
+util_rb_tld in inc industries infiniti info ing ink institute insurance insure int
+util_rb_tld international intuit investments io ipiranga iq ir irish is ismaili ist
+util_rb_tld istanbul it itau itv jaguar java jcb je jeep jetzt jewelry jio jll jm jmp jnj
+util_rb_tld jo jobs joburg jot joy jp jpmorgan jprs juegos juniper kaufen kddi ke
+util_rb_tld kerryhotels kerrylogistics kerryproperties kfh kg kh ki kia kids kim kindle
+util_rb_tld kitchen kiwi km kn koeln komatsu kosher kp kpmg kpn kr krd kred kuokgroup kw ky
+util_rb_tld kyoto kz la lacaixa lamborghini lamer lancaster land landrover lanxess lasalle
+util_rb_tld lat latino latrobe law lawyer lb lc lds lease leclerc lefrak legal lego lexus
+util_rb_tld lgbt li lidl life lifeinsurance lifestyle lighting like lilly limited limo
+util_rb_tld lincoln link lipsy live living lk llc llp loan loans locker locus lol london
 util_rb_tld lotte lotto love lpl lplfinancial lr ls lt ltd ltda lu lundbeck luxe luxury lv
-util_rb_tld ly ma macys madrid maif maison makeup man management mango map market marketing
-util_rb_tld markets marriott marshalls maserati mattel mba mc mckinsey md me med media meet
+util_rb_tld ly ma madrid maif maison makeup man management mango map market marketing
+util_rb_tld markets marriott marshalls mattel mba mc mckinsey md me med media meet
 util_rb_tld melbourne meme memorial men menu merckmsd mg mh miami microsoft mil mini mint
 util_rb_tld mit mitsubishi mk ml mlb mls mm mma mn mo mobi mobile moda moe moi mom monash
 util_rb_tld money monster mormon mortgage moscow moto motorcycles mov movie mp mq mr ms msd
-util_rb_tld mt mtn mtr mu museum music mutual mv mw mx my mz na nab nagoya name natura navy
-util_rb_tld nba nc ne nec net netbank netflix network neustar new news next nextdirect
-util_rb_tld nexus nf nfl ng ngo nhk ni nico nike nikon ninja nissan nissay nl no nokia
-util_rb_tld northwesternmutual norton now nowruz nowtv np nr nra nrw ntt nu nyc nz obi
-util_rb_tld observer office okinawa olayan olayangroup oldnavy ollo om omega one ong onl
-util_rb_tld online ooo open oracle orange org organic origins osaka otsuka ott ovh pa page
-util_rb_tld panasonic paris pars partners parts party passagens pay pccw pe pet pf pfizer
-util_rb_tld pg ph pharmacy phd philips phone photo photography photos physio pics pictet
-util_rb_tld pictures pid pin ping pink pioneer pizza pk pl place play playstation plumbing
-util_rb_tld plus pm pn pnc pohl poker politie porn post pr pramerica praxi press prime pro
-util_rb_tld prod productions prof progressive promo properties property protection pru
-util_rb_tld prudential ps pt pub pw pwc py qa qpon quebec quest racing radio re read
-util_rb_tld realestate realtor realty recipes red redstone redumbrella rehab reise reisen
-util_rb_tld reit reliance ren rent rentals repair report republican rest restaurant review
-util_rb_tld reviews rexroth rich richardli ricoh ril rio rip ro rocher rocks rodeo rogers
-util_rb_tld room rs rsvp ru rugby ruhr run rw rwe ryukyu sa saarland safe safety sakura
-util_rb_tld sale salon samsclub samsung sandvik sandvikcoromant sanofi sap sarl sas save
-util_rb_tld saxo sb sbi sbs sc sca scb schaeffler schmidt scholarships school schule
-util_rb_tld schwarz science scot sd se search seat secure security seek select sener
-util_rb_tld services ses seven sew sex sexy sfr sg sh shangrila sharp shaw shell shia
-util_rb_tld shiksha shoes shop shopping shouji show showtime si silk sina singles site sj
-util_rb_tld sk ski skin sky skype sl sling sm smart smile sn sncf so soccer social softbank
-util_rb_tld software sohu solar solutions song sony soy spa space sport spot sr srl ss st
-util_rb_tld stada staples star statebank statefarm stc stcgroup stockholm storage store
-util_rb_tld stream studio study style su sucks supplies supply support surf surgery suzuki
-util_rb_tld sv swatch swiss sx sy sydney systems sz tab taipei talk taobao target
-util_rb_tld tatamotors tatar tattoo tax taxi tc tci td tdk team tech technology tel temasek
-util_rb_tld tennis teva tf tg th thd theater theatre tiaa tickets tienda tiffany tips tires
-util_rb_tld tirol tj tjmaxx tjx tk tkmaxx tl tm tmall tn to today tokyo tools top toray
-util_rb_tld toshiba total tours town toyota toys tr trade trading training travel
-util_rb_tld travelchannel travelers travelersinsurance trust trv tt tube tui tunes tushu tv
-util_rb_tld tvs tw tz ua ubank ubs ug uk unicom university uno uol ups us uy uz va
-util_rb_tld vacations vana vanguard vc ve vegas ventures verisign versicherung vet vg vi
-util_rb_tld viajes video vig viking villas vin vip virgin visa vision viva vivo vlaanderen
-util_rb_tld vn vodka volkswagen volvo vote voting voto voyage vu vuelos wales walmart
-util_rb_tld walter wang wanggou watch watches weather weatherchannel webcam weber website
-util_rb_tld wed wedding weibo weir wf whoswho wien wiki williamhill win windows wine
-util_rb_tld winners wme wolterskluwer woodside work works world wow ws wtc wtf xbox xerox
-util_rb_tld xfinity xihuan xin xxx xyz yachts yahoo yamaxun yandex ye yodobashi yoga
-util_rb_tld yokohama you youtube yt yun za zappos zara zero zip zm zone zuerich zw
+util_rb_tld mt mtn mtr mu museum music mv mw mx my mz na nab nagoya name natura navy nba nc
+util_rb_tld ne nec net netbank netflix network neustar new news next nextdirect nexus nf
+util_rb_tld nfl ng ngo nhk ni nico nike nikon ninja nissan nissay nl no nokia norton now
+util_rb_tld nowruz nowtv np nr nra nrw ntt nu nyc nz obi observer office okinawa olayan
+util_rb_tld olayangroup oldnavy ollo om omega one ong onl online ooo open oracle orange org
+util_rb_tld organic origins osaka otsuka ott ovh pa page panasonic paris pars partners
+util_rb_tld parts party pay pccw pe pet pf pfizer pg ph pharmacy phd philips phone photo
+util_rb_tld photography photos physio pics pictet pictures pid pin ping pink pioneer pizza
+util_rb_tld pk pl place play playstation plumbing plus pm pn pnc pohl poker politie porn
+util_rb_tld post pr pramerica praxi press prime pro prod productions prof progressive promo
+util_rb_tld properties property protection pru prudential ps pt pub pw pwc py qa qpon
+util_rb_tld quebec quest racing radio re read realestate realtor realty recipes red
+util_rb_tld redstone redumbrella rehab reise reisen reit reliance ren rent rentals repair
+util_rb_tld report republican rest restaurant review reviews rexroth rich richardli ricoh
+util_rb_tld ril rio rip ro rocks rodeo rogers room rs rsvp ru rugby ruhr run rw rwe ryukyu
+util_rb_tld sa saarland safe safety sakura sale salon samsclub samsung sandvik
+util_rb_tld sandvikcoromant sanofi sap sarl sas save saxo sb sbi sbs sc sca scb schaeffler
+util_rb_tld schmidt scholarships school schule schwarz science scot sd se search seat
+util_rb_tld secure security seek select sener services seven sew sex sexy sfr sg sh
+util_rb_tld shangrila sharp shaw shell shia shiksha shoes shop shopping shouji show si silk
+util_rb_tld sina singles site sj sk ski skin sky skype sl sling sm smart smile sn sncf so
+util_rb_tld soccer social softbank software sohu solar solutions song sony soy spa space
+util_rb_tld sport spot sr srl ss st stada staples star statebank statefarm stc stcgroup
+util_rb_tld stockholm storage store stream studio study style su sucks supplies supply
+util_rb_tld support surf surgery suzuki sv swatch swiss sx sy sydney systems sz tab taipei
+util_rb_tld talk taobao target tatamotors tatar tattoo tax taxi tc tci td tdk team tech
+util_rb_tld technology tel temasek tennis teva tf tg th thd theater theatre tiaa tickets
+util_rb_tld tienda tips tires tirol tj tjmaxx tjx tk tkmaxx tl tm tmall tn to today tokyo
+util_rb_tld tools top toray toshiba total tours town toyota toys tr trade trading training
+util_rb_tld travel travelers travelersinsurance trust trv tt tube tui tunes tushu tv tvs tw
+util_rb_tld tz ua ubank ubs ug uk unicom university uno uol ups us uy uz va vacations vana
+util_rb_tld vanguard vc ve vegas ventures verisign versicherung vet vg vi viajes video vig
+util_rb_tld viking villas vin vip virgin visa vision viva vivo vlaanderen vn vodka
+util_rb_tld volkswagen volvo vote voting voto voyage vu wales walmart walter wang wanggou
+util_rb_tld watch watches weather weatherchannel webcam weber website wed wedding weibo
+util_rb_tld weir wf whoswho wien wiki williamhill win windows wine winners wme
+util_rb_tld wolterskluwer woodside work works world wow ws wtc wtf xbox xerox xfinity
+util_rb_tld xihuan xin xxx xyz yachts yahoo yamaxun yandex ye yodobashi yoga yokohama you
+util_rb_tld youtube yt yun za zappos zara zero zip zm zone zuerich zw
 
 #
 # 2nd level TLD list
@@ -495,9 +493,17 @@ util_rb_2tld weebly.com
 util_rb_2tld ifrance.com
 util_rb_2tld jimdo.com
 util_rb_2tld kimsufi.com
-util_rb_2tld mail333.su
-util_rb_2tld pisem.su
+util_rb_2tld azerbaijan.su
+util_rb_2tld east-kazakhstan.su
+util_rb_2tld exnet.su
+util_rb_2tld georgia.su
+util_rb_2tld kalmykia.su
 util_rb_2tld mail15.su
+util_rb_2tld mail333.su
+util_rb_2tld mangyshlak.su
+util_rb_2tld nov.su
+util_rb_2tld pisem.su
+util_rb_2tld tashkent.su
 util_rb_2tld prserv.net
 util_rb_2tld angelfire.com
 util_rb_2tld 163.to
@@ -638,6 +644,8 @@ util_rb_2tld tumblr.com
 util_rb_2tld fileave.com
 util_rb_2tld de.tl
 util_rb_2tld co.com
+util_rb_2tld sendpul.se
+util_rb_2tld amplifyapp.com
 # Dyndns.com
 util_rb_2tld dyndns-at-home.com
 util_rb_2tld dyndns-at-work.com
@@ -740,6 +748,7 @@ util_rb_3tld no-ip.co.uk
 #
 util_rb_3tld mobile.web.tr
 util_rb_3tld ct.sendgrid.net
+util_rb_3tld on.fleek.co
 
 endif
 

@@ -3,10 +3,15 @@
 use lib '.'; use lib 't';
 use SATest; sa_t_init("urilocalbl");
 
-$tests = 0;
+my $tests = 0;
 eval { require MaxMind::DB::Reader;   $tests += 8; $has{GEOIP2}  = 1 };
 eval { require Geo::IP;               $tests += 8; $has{GEOIP}   = 1 };
-eval { require IP::Country::DB_File;  $tests += 8; $has{DB_FILE} = 1 };
+eval {
+  require IP::Country::DB_File;
+  IP::Country::DB_File->new('data/geodb/ipcc.db');
+  $tests += 8;
+  $has{DB_FILE} = 1;
+};
 eval { require IP::Country::Fast;     $tests += 8; $has{FAST}    = 1 };
 
 use Test::More;
@@ -158,7 +163,7 @@ if (defined $has{DB_FILE}) {
     warn "skipping DNS lookup tests (run_net_tests=n)\n";
   }
 } else {
-  warn "skipping IP::Country::DB_File tests (not installed)\n";
+  warn "skipping IP::Country::DB_File tests (not installed or ipcc.db file format not compatible)\n";
 }
 
 

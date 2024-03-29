@@ -117,7 +117,7 @@ if can(Mail::SpamAssassin::Plugin::DKIM::has_arc)
 
   full     ARC_VALID		eval:check_arc_valid()
   describe ARC_VALID		Message has a valid ARC signature
-  tflags   ARC_VALID		net
+  tflags   ARC_VALID		net nice
   reuse    ARC_VALID
 
   meta     ARC_INVALID		ARC_SIGNED && !ARC_VALID

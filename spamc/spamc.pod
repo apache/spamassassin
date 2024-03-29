@@ -124,9 +124,9 @@ Send log messages to stderr, instead of to the syslog.
 =item B<-L> I<learn type>, B<--learntype>=I<type>
 
 Send message to spamd for learning.  The C<learn type> can be either spam,
-ham or forget.  The exitcode for spamc will be set to 5 if the message
-was learned, or 6 if it was already learned, under a condition that
-a B<--no-safe-fallback> option is selected too.
+ham or forget.  The exitcode for spamc will be set to 0 if the message
+was learned or if it had already been learned. Non-zero exitcodes indicate an
+actual failure of some sort. 
 
 Note that the C<spamd> must run with the C<--allow-tell> option for
 this to work.
@@ -373,7 +373,7 @@ C<Mail::SpamAssassin>
 
 =head1 AUTHORS
 
-The SpamAssassin(tm) Project <https://spamassassin.apache.org/>
+The SpamAssassin(tm) Project E<lt>https://spamassassin.apache.org/E<gt>
 
 =head1 COPYRIGHT
 

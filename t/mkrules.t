@@ -2,7 +2,7 @@
 
 use lib '.'; use lib 't';
 use SATest; sa_t_init("mkrules");
-use Test::More;
+use Test::More 1.302067;
 plan tests => 97;
 use File::Copy;
 use File::Path;

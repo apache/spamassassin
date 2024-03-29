@@ -621,7 +621,7 @@ The following methods must be overloaded:
 
 Information about the client.
 
-=item C<new( spamtest => $sa_object, foo => 'bar', ... )>
+=item C<new( spamtest =E<gt> $sa_object, foo =E<gt> 'bar', ... )>
 
 Creates new object; C<shift && bless { @_ }>, basically.
 
@@ -632,7 +632,7 @@ chdir, set $ENV, etc.  Do not call this directly.
 
 =item C<read_body()>
 
-Read body from the client, run $self->spamtest->parse and store result
+Read body from the client, run $self-E<gt>spamtest-E<gt>parse and store result
 as the C<parsed> key.
 
 =item C<read_headers()>

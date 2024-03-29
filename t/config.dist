@@ -21,11 +21,7 @@ run_ipv6_dns_tests=n
 run_dcc_tests=n
 
 # ---------------------------------------------------------------------------
-# Run SQL-based user pref tests during 'make test' REQUIRES DBD::SQLite 1.59_01 or later
-run_sql_pref_tests=n
-
-# ---------------------------------------------------------------------------
-# Run SQL-based Auto-whitelist tests during 'make test'
+# Run SQL-based Auto-welcomelist tests during 'make test'
 # NOTE: AWL test is always run with DBD::SQLite when available, only enable
 # this when you want to additionally test for example MySQL or PostgresSQL
 # (for which database needs to be created manually and configured below).

@@ -1,0 +1,16 @@
+name: 'Setup Windows for SpamAssassin build and test'
+description: 'Setup Windows runner for SpamAssassin build and test'
+runs:
+  using: 'composite'
+  steps:
+    - name: install pyzor
+      run: |
+        python -m pip install "https://github.com/SpamExperts/pyzor/archive/refs/heads/master.zip"
+        export PYSCRIPT=`which pyzor`
+        export PYSCRIPTW=`cmd '/c where pyzor'`
+        export PYBINW=`cmd '/c where python'`
+        export PYBASE=$(dirname $PYBINW)
+        mkdir -p "$PYBASE/etc"
+        echo "@$PYBINW $PYSCRIPTW --homedir $PYBASE\etc\pyzor %1 %2 %3 %4 %5 %6 %7 %8 %9" > $PYSCRIPT.bat
+        cat "$PYSCRIPT.bat"
+      shell: bash

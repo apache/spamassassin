@@ -8,6 +8,9 @@ plan skip_all => 'Long running tests disabled' unless conf_bool('run_long_tests'
 plan tests => 32;
 
 # ---------------------------------------------------------------------------
+tstpre ("
+  loadplugin Mail::SpamAssassin::Plugin::AWL
+");
 
 tstprefs ("
   header USER_IN_WELCOMELIST		eval:check_from_in_welcomelist()

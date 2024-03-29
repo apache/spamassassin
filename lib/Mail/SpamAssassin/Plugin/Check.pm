@@ -666,11 +666,13 @@ sub do_head_tests {
     # setup the function to run the rules
     while(my($k,$v) = each %ordered) {
       my($hdrname, $def) = split(/\t/, $k, 2);
+      # get() might already include newlines, join accordingly (Bug 8121)
       $self->push_evalstr_prefix($pms, '
-        @harr = $self->get(q{'.$hdrname.'});
-        $hval = scalar(@harr) ? join("\n", @harr) : ' .
-                           (!defined($def) ? 'undef' :
-                              '$self->{conf}->{test_opt_unset}->{q{'.$def.'}}') . ';
+        if (scalar(@harr = $self->get(q{'.$hdrname.'}))) {
+          $hval = join($harr[0] =~ /\n\z/ ? "" : "\n", @harr);
+        } else {
+          $hval = '.(!defined($def) ? 'undef' :'$self->{conf}->{test_opt_unset}->{q{'.$def.'}}').'
+        }
       ');
       foreach my $rulename (@{$v}) {
           my $tc_ref = $testcode{$rulename};

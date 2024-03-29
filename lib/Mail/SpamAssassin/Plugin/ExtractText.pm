@@ -47,6 +47,10 @@ ifplugin Mail::SpamAssassin::Plugin::ExtractText
   extracttext_external  tesseract  {OMP_THREAD_LIMIT=1} /usr/bin/tesseract -c page_separator= {} -
   extracttext_use       tesseract  .jpg .png .bmp .tif .tiff image/(?:jpeg|png|x-ms-bmp|tiff)
 
+  # QR-code decoder
+  extracttext_external  zbar       /usr/bin/zbarimg -q -D {}
+  extracttext_use       zbar       .jpg .png .pdf image/(?:jpeg|png) application/pdf
+
   add_header   all          ExtractText-Flags _EXTRACTTEXTFLAGS_
   header       PDF_NO_TEXT  X-ExtractText-Flags =~ /\bpdftotext_NoText\b/
   describe     PDF_NO_TEXT  PDF without text
@@ -243,6 +247,14 @@ Contains notes from the plugin.
 
 X-ExtractText-Flags: openxml_NoText
 
+=item X-ExtractText-Uris
+
+Tag: _EXTRACTTEXTURIS_
+
+Contains uris extracted from the plugin.
+
+X-ExtractText-Uris: https://spamassassin.apache.org
+
 =back
 
 =head3 Rules
@@ -292,12 +304,14 @@ sub set_config {
 
   push(@cmds, {
     setting => 'extracttext_maxparts',
+    is_admin => 1,
     default => 10,
     type => $Mail::SpamAssassin::Conf::CONF_TYPE_NUMERIC,
   });
 
   push(@cmds, {
     setting => 'extracttext_timeout',
+    is_admin => 1,
     default => 5,
     type => $Mail::SpamAssassin::Conf::CONF_TYPE_NUMERIC,
     code => sub {
@@ -448,7 +462,7 @@ sub _extract_external {
 
     if (proc_status_ok($?, $errno)) {
       dbg("extracttext: [%s] (%s) finished successfully", $pid, $cmd[0]);
-    } elsif (proc_status_ok($?, $errno, 0, 1)) {  # sometimes it exits with 1
+    } elsif (proc_status_ok($?, $errno, 0, 1, 4)) {  # sometimes it exits with error 1 or 4
       dbg("extracttext: [%s] (%s) finished: %s", $pid, $cmd[0], exit_status_str($?, $errno));
     } else {
       info("extracttext: [%s] (%s) error: %s", $pid, $cmd[0], exit_status_str($?, $errno));
@@ -502,6 +516,8 @@ sub _extract_external {
     }
     elsif ($err_resp =~ /^\S+ is not a Word Document/) {
       # Ignore antiword
+    } elsif((($pipe_errno/256) eq 4) and ($cmd[0] =~ /zbarimg/)) {
+      # Ignore zbarimg
     }
     elsif (!$resp) {
       warn "extracttext: error (".($pipe_errno/256).") from $cmd[0]: $err_resp\n";
@@ -585,6 +601,14 @@ sub _extract {
       push @{$coll->{flags}}, 'ActionURI';
       dbg("extracttext: ActionURI: $1");
       push @{$coll->{text}}, $text;
+      push @{$coll->{uris}}, $2;
+    } elsif($text =~ /QR-Code\:([^\s]*)/) {
+      # zbarimg(1) prefixes the url with "QR-Code:" string
+      my $qrurl = $1;
+      push @{$coll->{flags}},'QR-Code';
+      dbg("extracttext: QR-Code: $qrurl");
+      push @{$coll->{text}}, $text;
+      push @{$coll->{uris}}, $qrurl;
     }
     if ($text =~ /NoText/) {
       push @{$coll->{flags}},'NoText';
@@ -616,6 +640,7 @@ sub _extract {
 #
 sub _check_extract {
   my ($self, $coll, $checked, $part, $decoded, $data, $type, $name) = @_;
+  my $ret = 0;
   return 0 unless (defined $type || defined $name);
   foreach my $match (@{$self->{match}}) {
     next unless $self->{tools}->{$match->{tool}};
@@ -630,9 +655,11 @@ sub _check_extract {
     }
     $checked->{$match->{tool}} = 1;
     # dbg("extracttext: coll: $coll, part: $part, type: $type, name: $name, data: $data, tool: $self->{tools}->{$match->{tool}}");
-    return 1 if $self->_extract($coll,$part,$type,$name,$data,$self->{tools}->{$match->{tool}});
+    if($self->_extract($coll,$part,$type,$name,$data,$self->{tools}->{$match->{tool}})) {
+      $ret = 1;
+    }
   }
-  return 0;
+  return $ret;
 }
 
 sub post_message_parse {
@@ -652,6 +679,7 @@ sub post_message_parse {
     'chars'		=> 0,
     'words'		=> 0,
     'text'		=> [],
+    'uris'		=> [],
   );
 
   my $conf = $self->{main}->{conf};
@@ -685,6 +713,7 @@ sub post_message_parse {
   my @uniq_types = do { my %seen; grep { !$seen{$_}++ } @{$collect{types}} };
   my @uniq_ext   = do { my %seen; grep { !$seen{$_}++ } @{$collect{extensions}} };
   my @uniq_flags = do { my %seen; grep { !$seen{$_}++ } @{$collect{flags}} };
+  my @uniq_uris = do { my %seen; grep { !$seen{$_}++ } @{$collect{uris}} };
 
   $msg->put_metadata('X-ExtractText-Words', $collect{words});
   $msg->put_metadata('X-ExtractText-Chars', $collect{chars});
@@ -692,6 +721,7 @@ sub post_message_parse {
   $msg->put_metadata('X-ExtractText-Types', join(' ', @uniq_types));
   $msg->put_metadata('X-ExtractText-Extensions', join(' ', @uniq_ext));
   $msg->put_metadata('X-ExtractText-Flags', join(' ', @uniq_flags));
+  $msg->put_metadata('X-ExtractText-Uris', join(' ', @uniq_uris));
 
   return 1;
 }
@@ -700,7 +730,7 @@ sub parsed_metadata {
   my ($self, $opts) = @_;
   my $pms = $opts->{permsgstatus};
   my $msg = $pms->get_message();
-  foreach my $tag (('Words','Chars','Tools','Types','Extensions','Flags')) {
+  foreach my $tag (('Words','Chars','Tools','Types','Extensions','Flags','Uris')) {
     my $v = $msg->get_metadata("X-ExtractText-$tag");
     if (defined $v) {
       $pms->set_tag("ExtractText$tag", $v);

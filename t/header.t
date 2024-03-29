@@ -2,7 +2,7 @@
 
 use lib '.'; use lib 't';
 use SATest; sa_t_init("header");
-use Test::More tests => 23;
+use Test::More tests => 26;
 
 # ---------------------------------------------------------------------------
 
@@ -35,6 +35,12 @@ tstprefs('
 
   # Meta should evaluate all
   meta TEST_META (TEST_EXISTS1 && TEST_UNSET2 && HEADER_FIRST1 && HEADER_LAST1 && HEADER_ALL1)
+
+  # ALL newlines (Bug 8121)
+  header TEST_ALL1 ALL =~ /\nTo: announce@ximian\.com\nContent-Type:/
+  # ALL selector
+  header TEST_ALL2 ALL-TRUSTED =~ /\nDelivered-To: jm@netnoteinc.com\nReceived:/
+  header TEST_ALL3 ALL-UNTRUSTED =~ /\nDelivered-To:/
 ');
 
 %patterns = (
@@ -44,6 +50,8 @@ tstprefs('
   q{ 1.0 HEADER_LAST1 }, '',
   q{ 1.0 HEADER_ALL1 }, '',
   q{ 1.0 TEST_META }, '',
+  q{ 1.0 TEST_ALL1 }, '',
+  q{ 1.0 TEST_ALL2 }, '',
 );
 %anti_patterns = (
   q{ TEST_EXISTS2 }, '',
@@ -52,6 +60,7 @@ tstprefs('
   q{ TEST_LEAK1 }, '',
   q{ TEST_LEAK2 }, '',
   q{ TEST_LEAK3 }, '',
+  q{ TEST_ALL3 }, '',
 );
 
 ok (sarun ("-L -t < data/nice/001", \&patterns_run_cb));

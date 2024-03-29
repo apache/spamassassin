@@ -1,0 +1,201 @@
+From: <your@apache.org address here>
+To: <your@apache.org address here>
+Bcc: users@spamassassin.apache.org, dev@spamassassin.apache.org, announce@spamassassin.apache.org, announce@apache.org
+Reply-to: dev@spamassassin.apache.org
+Subject: [ANNOUNCE] Apache SpamAssassin 4.0.1 available
+
+On behalf of the Apache SpamAssassin Project,
+I am pleased to announce version 4.0.1 is available.
+
+Release Notes -- Apache SpamAssassin -- Version 4.0.1
+
+
+Introduction
+------------
+
+Apache SpamAssassin 4.0.1 is a patch release that fixes issues that
+have surfaced since the release of 4.0.0. It provides compatability
+with the latest version of Perl, 5.38, which was released in July,
+2023, as well as with recent release versions of some required Perl
+modules.
+
+Many thanks to the committers (see CREDITS file), contributors, rule
+testers, mass checkers, and code testers who have made this release
+possible.
+
+Notable features:
+=================
+
+None noted.
+
+Notable changes
+---------------
+
+This release addresses the following issues:
+
+  - Incompatibilities with some versions of perl and some perl modules
+    that have been released since the release of SpamAssassin 4.0.0
+
+  - Problems using cpan to install SpamAssassin when certain required
+    or optional modules are not already installed
+
+  - Support for space characters in the path name of some executables
+    used by certain plugins
+
+  - Improved handling of URL shortener link redirects
+
+  - Improved TxRep locking management
+
+  - Added Mail::SpamAssassin::Plugin::AuthRes plugin to use Authentication-Results
+    header fields in other plugins
+
+  - Added a Pyzor Perl implementation
+
+  - Perl crash when certain uri_detail rules processed some messages
+    with UTF-8 characters
+
+  - Inconsistent handling of newlines in header rules
+
+  - Text or HTML content placed in octet-stream attachments by
+    spammers to bypass SpamAssassin scanning
+
+  - Implemented TCP fallback for truncated DNS UDP replies
+
+* Spamc can now be built on a Windows platform as part of the gmake
+  build procedure, using the compiler toolchain that is part of a
+  standard Strawberry Perl installation, with no need to install a
+  separate Visual Studio, msys, or mingw.
+
+The detailed list of all commits can be found in the Changes file.
+A detailed view of the issues as they were filed in the Bugzilla issue
+tracker can be seen at https://s.apache.org/7apqr
+
+New configuration options
+-------------------------
+
+None noted
+
+Notable Internal changes
+------------------------
+
+None noted
+
+Other updates
+-------------
+
+None noted.
+
+
+Optimizations
+-------------
+
+None noted
+
+Downloading and availability
+----------------------------
+
+Downloads are available from:
+
+https://spamassassin.apache.org/downloads.cgi
+
+sha256sum of archive files:
+
+
+TBD Mail-SpamAssassin-4.0.1.tar.bz2
+TBD Mail-SpamAssassin-4.0.1.tar.gz
+TBD Mail-SpamAssassin-4.0.1.zip
+TBD Mail-SpamAssassin-rules-4.0.1.rnnnnnn.tgz
+
+sha512sum of archive files:
+
+TBD  Mail-SpamAssassin-4.0.0.tar.bz2
+TBD  Mail-SpamAssassin-4.0.0.tar.gz
+TBD  Mail-SpamAssassin-4.0.0.zip
+TBD  Mail-SpamAssassin-rules-4.0.0.rnnnnnnn.tgz
+
+Note that the Rules files, aka *-rules-*.tgz, are only necessary if
+you cannot, or do not wish to, run "sa-update" after
+installation. Using sa-update will download the latest rules
+
+See the INSTALL and UPGRADE files in the distribution for important
+installation notes
+
+
+GPG Verification Procedure
+--------------------------
+The release files also have a .asc accompanying them.  The file serves
+as an external GPG signature for the given release file.  The signing
+key is available via the keys.gnupg.net or keys.openpgp.org key
+servers, as well as https://www.apache.org/dist/spamassassin/KEYS
+
+
+The following key is used to sign SA releases 3.3.0 and later:
+
+pub   4096R/F7D39814 2009-12-02
+      Key fingerprint = D809 9BC7 9E17 D7E4 9BC2  1E31 FDE5 2F40 F7D3 9814
+uid                  SpamAssassin Project Management Committee <private@spamassassin.apache.org>
+uid                  SpamAssassin Signing Key (Code Signing Key, replacement for 1024D/265FA05B) <dev@spamassassin.apache.org>
+sub   4096R/7B3265A5 2009-12-02
+
+The following key is used to sign rule updates:
+
+pub   4096R/5244EC45 2005-12-20
+      Key fingerprint = 5E54 1DC9 59CB 8BAC 7C78  DFDC 4056 A61A 5244 EC45
+uid                  updates.spamassassin.org Signing Key <release@spamassassin.org>
+sub   4096R/24F434CE 2005-12-20
+
+To verify a release file, download the file with the accompanying .asc
+file and run the following commands:
+
+  gpg --verbose --keyserver keys.openpgp.org --recv-key FDE52F40F7D39814
+  gpg --verify Mail-SpamAssassin-4.0.0.tar.bz2.asc
+  gpg --fingerprint FDE52F40F7D39814
+
+Then confirm that the key description shown by --verify matches what
+is shown by --fingerprint.
+
+See https://www.apache.org/info/verification.html for more information
+on verifying Apache releases
+
+
+About Apache SpamAssassin
+-------------------------
+
+Apache SpamAssassin is a mature, widely-deployed open source project
+that provides filtering to classify email to block spam, malware, and
+phishes.
+
+Apache SpamAssassin uses a variety of mechanisms including mail header
+and text analysis, Bayesian filtering, DNS blocklists, collaborative
+filtering databases, and meta concepts to lower incorrect
+classification.
+
+Apache SpamAssassin uses a highly modular architecture that allows
+other technologies to be quickly incorporated as plugins to easily add
+or replace existing methods.
+
+Apache SpamAssassin typically runs on a server using either command
+line utilities or an API to classify email so a mail system can use
+the results before the message reaches mailboxes.
+
+Most of the Apache SpamAssassin is written in Perl natively supporting
+Unix, Linux, and macOS platforms and Microsoft Windows using
+Strawberry Perl.
+
+For more information, visit https://spamassassin.apache.org/
+
+
+About The Apache Software Foundation
+------------------------------------
+
+Established in 1999, The Apache Software Foundation provides
+organizational, legal, and financial support for more than 100
+freely-available, collaboratively-developed Open Source projects. The
+pragmatic Apache License enables individual and commercial users to
+easily deploy Apache software; the Foundation's intellectual property
+framework limits the legal exposure of its 2,500+ contributors.
+
+For more information, visit https://www.apache.org/
+
+-- 
+[Your name, title, and email address here]

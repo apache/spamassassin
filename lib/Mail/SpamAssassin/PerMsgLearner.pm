@@ -157,7 +157,7 @@ sub forget {
 
 ###########################################################################
 
-=item $didlearn = $status->did_learn()
+=item $didlearn = $status-E<gt>did_learn()
 
 Returns C<1> if the message was learned from or forgotten successfully.
 
@@ -170,7 +170,7 @@ sub did_learn {
 
 ###########################################################################
 
-=item $status->finish()
+=item $status-E<gt>finish()
 
 Finish with the object.
 

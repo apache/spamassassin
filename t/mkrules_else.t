@@ -3,7 +3,7 @@
 
 use lib '.'; use lib 't';
 use SATest; sa_t_init("mkrules_else");
-use Test::More;
+use Test::More 1.302067;
 plan tests => 18;
 use File::Copy;
 use File::Path;

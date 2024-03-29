@@ -1,6 +1,6 @@
-header   __NUMBERONLY_TLD From:addr =~ /\@[0-9]{4,}(\.[a-z]{2,4})?\.[a-z]+$/i
+header   __NUMBERONLY_TLD From:addr =~ /\@[0-9]{4,}(?:\.[a-z]{2,4})?\.[a-z]+$/i
 
-header   __NUMBEREND_TLD From:addr =~ /\@[a-z]{2,}[0-9]{4,}(\.[a-z]{2,4})?\.[a-z]+$/i
+header   __NUMBEREND_TLD From:addr =~ /\@[a-z]{2,}[0-9]{4,}(?:\.[a-z]{2,4})?\.[a-z]+$/i
 
 meta     NUMBEREND_LINKBAIT __NUMBEREND_TLD && __LCL__KAM_BODY_LENGTH_LT_1024 && __BODY_URI_ONLY
 describe NUMBEREND_LINKBAIT Domain ends in a large number and very short body with link

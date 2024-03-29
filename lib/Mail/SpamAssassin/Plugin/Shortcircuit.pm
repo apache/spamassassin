@@ -211,6 +211,32 @@ for that rule.
     type => $Mail::SpamAssassin::Conf::CONF_TYPE_NUMERIC
   });
 
+=item shortcircuit_min_ham_score n.nn (default: undef)
+
+When shortcircuit_min_ham_score is set, SpamAssassin will stop processing when total score
+will be lower then this value.
+
+=cut
+
+  push (@cmds, {
+    setting => 'shortcircuit_min_ham_score',
+    default => undef,
+    type => $Mail::SpamAssassin::Conf::CONF_TYPE_NUMERIC
+  });
+
+=item shortcircuit_max_spam_score n.nn (default: undef)
+
+When shortcircuit_max_spam_score is set, SpamAssassin will stop processing when total score
+will be higher then this value.
+
+=cut
+
+  push (@cmds, {
+    setting => 'shortcircuit_max_spam_score',
+    default => undef,
+    type => $Mail::SpamAssassin::Conf::CONF_TYPE_NUMERIC
+  });
+
   $conf->{parser}->register_commands(\@cmds);
 }
 
@@ -233,17 +259,35 @@ sub hit_rule {
   my $scan = $params->{permsgstatus};
   my $rule = $params->{rulename};
 
+  my $conf = $scan->{conf};
+  my $score = $params->{score};
+
+  return if $scan->{shortcircuited};
+
   # don't s/c if we're linting
   return if ($self->{main}->{lint_rules});
 
   # don't s/c if we're in compile_now()
   return if ($self->{am_compiling});
 
+  if((defined $conf->{shortcircuit_min_ham_score} and ($scan->{score} < $conf->{shortcircuit_min_ham_score})) or
+    (defined $conf->{shortcircuit_max_spam_score} and ($scan->{score} > $conf->{shortcircuit_max_spam_score}))) {
+    $scan->{shortcircuited} = 1;
+
+    # bug 5256: if we short-circuit, don't do auto-learning
+    $scan->{disable_auto_learning} = 1;
+    $scan->{shortcircuit_type} = ($scan->{score} < 0 ? 'ham' : 'spam');
+    if($scan->{shortcircuit_type} eq 'ham') {
+      dbg("shortcircuit: s/c due to shortcircuit_min_ham_score $conf->{shortcircuit_min_ham_score}, total score is $scan->{score}");
+      $scan->got_hit('SHORTCIRCUIT', '', score => -0.001);
+    } elsif($scan->{shortcircuit_type} eq 'spam') {
+      dbg("shortcircuit: s/c due to shortcircuit_max_spam_score $conf->{shortcircuit_max_spam_score}, total score is $scan->{score}");
+      $scan->got_hit('SHORTCIRCUIT', '', score => 0.001);
+    }
+  }
+
   my $sctype = $scan->{conf}->{shortcircuit}->{$rule};
   return unless $sctype;
-
-  my $conf = $scan->{conf};
-  my $score = $params->{score};
 
   $scan->{shortcircuit_rule} = $rule;
   my $scscore;

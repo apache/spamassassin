@@ -1,0 +1,22 @@
+name: Setup MySQL for Linux/macOS/Windows
+author: Sidney Markowitz based on version by Ihor Kalnytskyi
+description: Setup MySQL for SpamAssassin testing
+runs:
+  using: composite
+  steps:
+    - uses: ankane/setup-mysql@v1
+      with:
+        database: spamassassin
+        mysql-version: ${{ ((runner.os == 'Windows') && '5.7') || '8.0' }}
+    - run: |
+        mysql -u root -h localhost -e "CREATE USER 'spamassassin'@'localhost' IDENTIFIED BY 'spamassassin'"
+        mysql -u root -h localhost -e "GRANT ALL PRIVILEGES ON *.* TO 'spamassassin'@'localhost'"
+        mysql -u root -h localhost -e "FLUSH PRIVILEGES"
+        mysql -u spamassassin -pspamassassin -h localhost -D spamassassin < sql/awl_mysql.sql
+        mysql -u spamassassin -pspamassassin -h localhost -D spamassassin < sql/bayes_mysql.sql
+      shell: bash
+
+    - name: prepare test config for MySQL
+      run: |
+          perl -i.bak -pe 's/^run_(awl_sql_tests|bayes_sql_tests)=n/run_$1=y/;s/^(user_awl|bayes_sql)_dsn=.*$/$1_dsn=dbi:mysql:database=spamassassin;host=localhost/;s/^(user_awl_sql_username|user_awl_sql_password|bayes_sql_username|bayes_sql_password)=.*$/$1=spamassassin/;s/^(bayes_store_module)=.*$/$1=Mail::SpamAssassin::BayesStore::MySQL/' t/config.dist
+      shell: bash

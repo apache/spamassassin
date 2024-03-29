@@ -78,7 +78,7 @@ Autonomous System Number (ASN) of the connecting IP address.
 =head1 DESCRIPTION
 
 This plugin uses DNS lookups to the services of an external DNS zone such
-as at C<http://www.routeviews.org/> to do the actual work. Please make
+as at C<https://www.routeviews.org/> to do the actual work. Please make
 sure that your use of the plugin does not overload their infrastructure -
 this generally means that B<you should not use this plugin in a
 high-volume environment> or that you should use a local mirror of the
@@ -111,6 +111,90 @@ through the I<asn_prefix> directive and may be set to an empty string.
 
 C<_ASNCIDR_> is not available with local GeoDB ASN lookups.
 
+=head1 USER SETTINGS
+
+=over 4
+
+=item clear_asn_lookups
+
+Removes all previously declared I<asn_lookup> or I<asn_lookup_ipv6> entries
+from the list of queries.
+
+=item asn_prefix 'prefix_string'       (default: 'AS')
+
+The string specified in the argument is prepended to each ASN when storing
+it as a tag. This prefix is rather redundant, but its default value 'AS'
+is kept for backward compatibility with versions of SpamAssassin earlier
+than 3.4.0. A sensible setting is an empty string. The argument may be (but
+need not be) enclosed in single or double quotes for clarity.
+
+=back
+
+=head1 RULE DEFINITIONS AND PRIVILEGED SETTINGS
+
+=over 4
+
+=item asn_lookup asn-zone.example.com [ _ASNTAG_ _ASNCIDRTAG_ ]
+
+Use this to lookup the ASN info in the specified zone for the first external
+IPv4 address and add the AS number to the first specified tag and routing info
+to the second specified tag.
+
+If no tags are specified the AS number will be added to the _ASN_ tag and the
+routing info will be added to the _ASNCIDR_ tag.  You must specify either none
+or both of the tag names.  Tag names must start and end with an underscore.
+
+If two or more I<asn_lookup>s use the same set of template tags, the results of
+their lookups will be appended to each other in the template tag values in no
+particular order.  Duplicate results will be omitted when combining results.
+In a similar fashion, you can also use the same template tag for both the AS
+number tag and the routing info tag.
+
+Examples:
+
+  asn_lookup asn.routeviews.org
+
+  asn_lookup asn.routeviews.org _ASN_ _ASNCIDR_
+  asn_lookup myview.example.com _MYASN_ _MYASNCIDR_
+
+  asn_lookup asn.routeviews.org _COMBINEDASN_ _COMBINEDASNCIDR_
+  asn_lookup myview.example.com _COMBINEDASN_ _COMBINEDASNCIDR_
+
+  asn_lookup in1tag.example.net _ASNDATA_ _ASNDATA_
+
+=item asn_lookup_ipv6 asn-zone6.example.com [_ASN_ _ASNCIDR_]
+
+Use specified zone for lookups of IPv6 addresses.  If zone supports both
+IPv4 and IPv6 queries, use both asn_lookup and asn_lookup_ipv6 for the same
+zone.
+
+=back
+
+=head1 ADMINISTRATOR SETTINGS
+
+=over 4
+
+=item asn_use_geodb ( 0 / 1 )          (default: 1)
+
+Use Mail::SpamAssassin::GeoDB module to lookup ASN numbers.  You need
+suitable supported module like GeoIP2 or GeoIP with ISP or ASN database
+installed (for example, add EditionIDs GeoLite2-ASN in GeoIP.conf for
+geoipupdate program).
+
+GeoDB can only set _ASN_ tag, it has no data for _ASNCIDR_.  If you need
+both, then set asn_prefer_geodb 0 so DNS rules are tried.
+
+=item asn_prefer_geodb ( 0 / 1 )       (default: 1)
+
+If set, DNS lookups (asn_lookup rules) will not be run if GeoDB successfully
+finds ASN. Set this to 0 to get _ASNCIDR_ even if GeoDB finds _ASN_.
+
+=item asn_use_dns ( 0 / 1 )            (default: 1)
+
+Set to 0 to never allow DNS queries.
+
+=back
+
 =head1 BAYES
 
 The bayes tokenizer will use ASN data for bayes calculations, and thus
@@ -120,7 +204,7 @@ been performed.
 
 =head1 SEE ALSO
 
-http://www.routeviews.org/ - all data regarding routing, ASNs, etc....
+https://www.routeviews.org/ - all data regarding routing, ASNs, etc....
 
 =cut
 
@@ -159,82 +243,9 @@ sub set_config {
   my ($self, $conf) = @_;
   my @cmds;
 
-=head1 ADMINISTRATOR SETTINGS
-
-=over 4
-
-=item asn_lookup asn-zone.example.com [ _ASNTAG_ _ASNCIDRTAG_ ]
-
-Use this to lookup the ASN info in the specified zone for the first external
-IPv4 address and add the AS number to the first specified tag and routing info
-to the second specified tag.
-
-If no tags are specified the AS number will be added to the _ASN_ tag and the
-routing info will be added to the _ASNCIDR_ tag.  You must specify either none
-or both of the tag names.  Tag names must start and end with an underscore.
-
-If two or more I<asn_lookup>s use the same set of template tags, the results of
-their lookups will be appended to each other in the template tag values in no
-particular order.  Duplicate results will be omitted when combining results.
-In a similar fashion, you can also use the same template tag for both the AS
-number tag and the routing info tag.
-
-Examples:
-
-  asn_lookup asn.routeviews.org
-
-  asn_lookup asn.routeviews.org _ASN_ _ASNCIDR_
-  asn_lookup myview.example.com _MYASN_ _MYASNCIDR_
-
-  asn_lookup asn.routeviews.org _COMBINEDASN_ _COMBINEDASNCIDR_
-  asn_lookup myview.example.com _COMBINEDASN_ _COMBINEDASNCIDR_
-
-  asn_lookup in1tag.example.net _ASNDATA_ _ASNDATA_
-
-=item asn_lookup_ipv6 asn-zone6.example.com [_ASN_ _ASNCIDR_]
-
-Use specified zone for lookups of IPv6 addresses.  If zone supports both
-IPv4 and IPv6 queries, use both asn_lookup and asn_lookup_ipv6 for the same
-zone.
-
-=item clear_asn_lookups
-
-Removes any previously declared I<asn_lookup> entries from a list of queries.
-
-=item asn_prefix 'prefix_string'       (default: 'AS')
-
-The string specified in the argument is prepended to each ASN when storing
-it as a tag. This prefix is rather redundant, but its default value 'AS'
-is kept for backward compatibility with versions of SpamAssassin earlier
-than 3.4.0. A sensible setting is an empty string. The argument may be (but
-need not be) enclosed in single or double quotes for clarity.
-
-=item asn_use_geodb ( 0 / 1 )          (default: 1)
-
-Use Mail::SpamAssassin::GeoDB module to lookup ASN numbers.  You need
-suitable supported module like GeoIP2 or GeoIP with ISP or ASN database
-installed (for example, add EditionIDs GeoLite2-ASN in GeoIP.conf for
-geoipupdate program).
-
-GeoDB can only set _ASN_ tag, it has no data for _ASNCIDR_.  If you need
-both, then set asn_prefer_geodb 0 so DNS rules are tried.
-
-=item asn_prefer_geodb ( 0 / 1 )       (default: 1)
-
-If set, DNS lookups (asn_lookup rules) will not be run if GeoDB successfully
-finds ASN. Set this to 0 to get _ASNCIDR_ even if GeoDB finds _ASN_.
-
-=item asn_use_dns ( 0 / 1 )            (default: 1)
-
-Set to 0 to never allow DNS queries.
-
-=back
-
-=cut
-
   push (@cmds, {
     setting => 'asn_lookup',
-    is_admin => 1,
+    is_priv => 1,
     code => sub {
       my ($conf, $key, $value, $line) = @_;
       unless (defined $value && $value !~ /^$/) {
@@ -254,7 +265,7 @@ Set to 0 to never allow DNS queries.
 
   push (@cmds, {
     setting => 'asn_lookup_ipv6',
-    is_admin => 1,
+    is_priv => 1,
     code => sub {
       my ($conf, $key, $value, $line) = @_;
       unless (defined $value && $value !~ /^$/) {
@@ -274,7 +285,6 @@ Set to 0 to never allow DNS queries.
 
   push (@cmds, {
     setting => 'clear_asn_lookups',
-    is_admin => 1,
     type => $Mail::SpamAssassin::Conf::CONF_TYPE_NOARGS,
     code => sub {
       my ($conf, $key, $value, $line) = @_;

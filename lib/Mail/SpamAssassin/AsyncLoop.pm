@@ -85,7 +85,7 @@ sub new {
 
 # ---------------------------------------------------------------------------
 
-=item $ent = $async->bgsend_and_start_lookup($name, $type, $class, $ent, $cb, %options)
+=item $ent = $async-E<gt>bgsend_and_start_lookup($name, $type, $class, $ent, $cb, %options)
 
 Launch async DNS lookups.  This is the only official method supported for
 plugins since version 4.0.0.  Do not use bgsend and start_lookup separately.
@@ -111,26 +111,26 @@ Deprecated, ignored, set as undef.
 
 =over 4
 
-=item $ent->{rulename} (required)
+=item $ent-E<gt>{rulename} (required)
 
 The rulename that started and/or depends on this query.  Required for rule
 dependencies to work correctly.  Can be a single rulename, or array of
 multiple rulenames.
 
-=item $ent->{type} (optional)
+=item $ent-E<gt>{type} (optional)
 
 A string, typically one word, used to describe the type of lookup in log
 messages, such as C<DNSBL>, C<URIBL-A>.  If not defined, default is value of
 $type.
 
-=item $ent->{zone} (optional)
+=item $ent-E<gt>{zone} (optional)
 
 A zone specification (typically a DNS zone name - e.g.  host, domain, or
 RBL) which may be used as a key to look up per-zone settings.  No semantics
 on this parameter is imposed by this module.  Currently used to fetch
 by-zone timeouts (from rbl_timeout setting).  Defaults to $name.
 
-=item $ent->{timeout_initial} (optional)
+=item $ent-E<gt>{timeout_initial} (optional)
 
 An initial value of elapsed time for which we are willing to wait for a
 response (time in seconds, floating point value is allowed). When elapsed
@@ -147,17 +147,17 @@ variable rbl_timeout.
 If a value of the timeout_initial parameter is below timeout_min, the initial
 timeout is set to timeout_min.
 
-=item $ent->{timeout_min} (optional)
+=item $ent-E<gt>{timeout_min} (optional)
 
 A lower bound (in seconds) to which the actual timeout approaches as the
 number of queries completed approaches the number of all queries started.
 Defaults to 0.2 * timeout_initial.
 
-=item $ent->{key}, $ent->{id} (deprecated)
+=item $ent-E<gt>{key}, $ent-E<gt>{id} (deprecated)
 
 Deprecated, ignored, automatically generated since 4.0.0.
 
-=item $ent->{YOUR_OWN_ITEM}
+=item $ent-E<gt>{YOUR_OWN_ITEM}
 
 Any other custom values/objects that you want to pass on to the answer
 callback.
@@ -166,10 +166,10 @@ callback.
 
 =item $cb (required)
 
-Callback function for answer, called as $cb->($ent, $pkt).  C<$ent> is the
+Callback function for answer, called as $cb-E<gt>($ent, $pkt).  C<$ent> is the
 same object that bgsend_and_start_lookup was called with.  C<$pkt> is the
 packet object for the response, Net::DNS:RR objects can be found from
-$pkt->answer.
+$pkt-E<gt>answer.
 
 =item %options (required)
 
@@ -386,7 +386,7 @@ sub bgsend_and_start_lookup {
 
 # ---------------------------------------------------------------------------
 
-=item $ent = $async->start_lookup($ent, $master_deadline)
+=item $ent = $async-E<gt>start_lookup($ent, $master_deadline)
 
 DIRECT USE DEPRECATED since 4.0.0, please use bgsend_and_start_lookup.
 
@@ -483,7 +483,7 @@ sub _start_lookup {
 
 # ---------------------------------------------------------------------------
 
-=item $ent = $async->get_lookup($key)
+=item $ent = $async-E<gt>get_lookup($key)
 
 DEPRECATED since 4.0.0. Do not use.
 
@@ -497,7 +497,7 @@ sub get_lookup {
 
 # ---------------------------------------------------------------------------
 
-=item $async->log_lookups_timing()
+=item $async-E<gt>log_lookups_timing()
 
 Log sorted timing for all completed lookups.
 
@@ -513,7 +513,7 @@ sub log_lookups_timing {
 
 # ---------------------------------------------------------------------------
 
-=item $alldone = $async->complete_lookups()
+=item $alldone = $async-E<gt>complete_lookups()
 
 Perform a poll of the pending lookups, to see if any are completed.
 Callbacks on completed queries will be called from poll_responses().
@@ -644,7 +644,7 @@ sub complete_lookups {
 
 # ---------------------------------------------------------------------------
 
-=item $async->abort_remaining_lookups()
+=item $async-E<gt>abort_remaining_lookups()
 
 Abort any remaining lookups.
 
@@ -712,21 +712,21 @@ sub abort_remaining_lookups {
 
 # ---------------------------------------------------------------------------
 
-=item $async->set_response_packet($id, $pkt, $key, $timestamp)
+=item $async-E<gt>set_response_packet($id, $pkt, $key, $timestamp)
 
 For internal use, do not call from plugins.
 
 Register a "response packet" for a given query.  C<$id> is the ID for the
 query, and must match the C<id> supplied in C<start_lookup()>. C<$pkt> is the
 packet object for the response. A parameter C<$key> identifies an entry in a
-hash %{$self->{pending_lookups}} where the object which spawned this query can
+hash %{$self-E<gt>{pending_lookups}} where the object which spawned this query can
 be found, and through which further information about the query is accessible.
 
 C<$pkt> may be undef, indicating that no response packet is available, but a
 query has completed (e.g. was aborted or dismissed) and is no longer "pending".
 
 The DNS resolver's response packet C<$pkt> will be made available to a callback
-subroutine through its argument as well as in C<$ent-<gt>{response_packet}>.
+subroutine through its argument as well as in C<$ent-E<gt>{response_packet}>.
 
 =cut
 
@@ -765,11 +765,11 @@ sub set_response_packet {
   1;
 }
 
-=item $async->report_id_complete($id,$key,$key,$timestamp)
+=item $async-E<gt>report_id_complete($id,$key,$key,$timestamp)
 
 DEPRECATED since 4.0.0. Do not use.
 
-Legacy. Equivalent to $self->set_response_packet($id,undef,$key,$timestamp),
+Legacy. Equivalent to $self-E<gt>set_response_packet($id,undef,$key,$timestamp),
 i.e. providing undef as a response packet. Register that a query has
 completed and is no longer "pending". C<$id> is the ID for the query,
 and must match the C<id> supplied in C<start_lookup()>.
@@ -786,7 +786,7 @@ sub report_id_complete {
 
 # ---------------------------------------------------------------------------
 
-=item $time = $async->last_poll_responses_time()
+=item $time = $async-E<gt>last_poll_responses_time()
 
 Get the time of the last call to C<poll_responses()> (which is called
 from C<complete_lookups()>.  If C<poll_responses()> was never called or

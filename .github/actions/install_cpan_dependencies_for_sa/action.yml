@@ -1,23 +1,52 @@
-name: 'Install CPAN modules for SpamAssassin build and test Linux and Mac'
+name: 'Install CPAN modules for SpamAssassin build and test'
 description: 'Assuming OS and perl already configured and installed, install from CPAN all modules needed for SpamAssassin build and test'
 runs:
   using: 'composite'
   steps:
-    - name: Install cpan modules
+    - name: Install cpan modules Linux and macOS
+      if: ${{ runner.os != 'Windows' }}
       run: |
-          #cpanm App::cpanoutdated -nq --install-args="--install_path sbin=$HOME/.local/bin"
-          #hash -r
-          cpanm -n Module::Install Archive::Zip BSD::Resource BerkeleyDB Compress::Zlib DBI DB_File Devel::Cycle Digest::SHA Digest::SHA1 Email::Address::XS Encode::Detect Encode::Detect::Detector Geo::IP GeoIP2 GeoIP2::Database::Reader Geography::Countries HTML::Parser HTTP::Cookies HTTP::Daemon HTTP::Date HTTP::Negotiate IO::Socket::INET6 IO::Socket::SSL IO::String IP::Country IP::Country::DB_File LWP::Protocol::https LWP::UserAgent Mail::DKIM Mail::DMARC::PurePerl Math::Int128 MaxMind::DB::Reader::XS Net::CIDR::Lite Net::DNS Net::DNS::Nameserver Net::LibIDN Net::LibIDN2 Net::Patricia Net::Works::Network NetAddr::IP Params::Validate Sys::Hostname::Long Test::Perl::Critic Test::Pod Test::Pod::Coverage WWW::RobotRules Text::Diff Perl::Critic::Policy::Bangs::ProhibitBitwiseOperators Perl::Critic::Policy::Bangs::ProhibitDebuggingModules List::MoreUtils Perl::Critic::Policy::Perlsecret Perl::Critic::Policy::Compatibility::ProhibitThreeArgumentOpen Perl::Critic::Policy::Lax::ProhibitStringyEval::ExceptForRequire Perl::Critic::Policy::ValuesAndExpressions::PreventSQLInjection Perl::Critic::Policy::ControlStructures::ProhibitReturnInDoBlock || echo "warn: errors installing cpan modules have been ignored"
+          cpanm -n Module::Install Archive::Zip BSD::Resource BerkeleyDB Compress::Zlib DBI DBD::mysql DBD::Pg DB_File Devel::Cycle Digest::SHA Digest::SHA1 Email::Address::XS Encode::Detect Encode::Detect::Detector Geo::IP GeoIP2 GeoIP2::Database::Reader Geography::Countries HTML::Parser HTTP::Cookies HTTP::Daemon HTTP::Date HTTP::Negotiate IO::Socket::INET6 IO::Socket::SSL IO::String IP::Country IP::Country::DB_File LWP::Protocol::https LWP::UserAgent Mail::DKIM Mail::DMARC::PurePerl Math::Int128 MaxMind::DB::Reader::XS Net::CIDR::Lite Net::DNS Net::DNS::Nameserver Net::LibIDN Net::LibIDN2 Net::Patricia Net::Works::Network NetAddr::IP Params::Validate Sys::Hostname::Long Test::Perl::Critic Test::Pod Test::Pod::Coverage WWW::RobotRules Text::Diff Perl::Critic::Policy::Bangs::ProhibitBitwiseOperators Perl::Critic::Policy::Bangs::ProhibitDebuggingModules List::MoreUtils Perl::Critic::Policy::Perlsecret Perl::Critic::Policy::Compatibility::ProhibitThreeArgumentOpen Perl::Critic::Policy::Lax::ProhibitStringyEval::ExceptForRequire Perl::Critic::Policy::ValuesAndExpressions::PreventSQLInjection Perl::Critic::Policy::ControlStructures::ProhibitReturnInDoBlock || echo "warn: errors installing cpan modules have been ignored"
           cpanm Razor2::Client::Agent -n --install-args="DESTINSTALLSITESCRIPT=$HOME/.local/bin" || echo "warn: errors installing Razor2::Client::Agent have been ignored"
           hash -r
           razor-admin --create
           razor-admin --register
           cpanm Mail::SPF -n --install-args="--install_path sbin=$HOME/.local/bin" || echo "warn: errors installing Mail::SPF have been ignored"
-          cpanm --installdeps --notest .  || echo "warn: errors installing required cpan modules have been ignored"
-          echo "Finished step"
+          cpanm --installdeps -n .  || echo "warn: errors installing required cpan modules have been ignored"
       shell: bash
 
     - name: Show content of log files on Linux and Mac
-      if: ${{ failure() }}
+      if: ${{ failure() && (runner.os != 'Windows') }}
       run: cat $HOME/.cpanm/work/*/build.log
       shell: bash
+
+    - name: Install dependencies and optional modules for full testing on Windows part 1
+      if: ${{ runner.os == 'Windows' }}
+      run: |
+        cpanm -n Module::Install Archive::Zip BSD::Resource BerkeleyDB Compress::Zlib DBI DBD::mysql DBD::Pg DB_File DB_File Devel::Cycle Digest::SHA Digest::SHA1 Email::Address::XS Encode::Detect Encode::Detect::Detector Geo::IP GeoIP2 GeoIP2::Database::Reader Geography::Countries HTML::Parser HTTP::Cookies HTTP::Daemon HTTP::Date HTTP::Negotiate IO::Socket::INET6 IO::Socket::SSL IO::String IP::Country IP::Country::DB_File LWP::Protocol::https LWP::UserAgent Mail::DKIM Mail::DMARC::PurePerl Math::Int128 MaxMind::DB::Reader::XS Net::CIDR::Lite Net::DNS Net::DNS::Nameserver Net::LibIDN Net::LibIDN2 Net::Patricia Net::Works::Network NetAddr::IP Params::Validate Sys::Hostname::Long Test::Perl::Critic Test::Pod Test::Pod::Coverage WWW::RobotRules Text::Diff Perl::Critic::Policy::Bangs::ProhibitBitwiseOperators Perl::Critic::Policy::Bangs::ProhibitDebuggingModules List::MoreUtils Perl::Critic::Policy::Perlsecret Perl::Critic::Policy::Compatibility::ProhibitThreeArgumentOpen Perl::Critic::Policy::Lax::ProhibitStringyEval::ExceptForRequire Perl::Critic::Policy::ValuesAndExpressions::PreventSQLInjection Perl::Critic::Policy::ControlStructures::ProhibitReturnInDoBlock || cmd /c "echo warn: errors installing cpan modules have been ignored"
+      shell: cmd
+
+    - name: Install dependencies and optional modules for full testing on Windows part 2
+      if: ${{ runner.os == 'Windows' }}
+      run: |
+        cpanm Razor2::Client::Agent-n --install-args="DESTINSTALLSITESCRIPT=local/bin" || cmd /c "echo warn: errors installing Razor2::Client::Agent have been ignored"
+        razor-admin --create
+        razor-admin --register
+      shell: cmd
+
+    - name: Install dependencies and optional modules for full testing on Windows part 3
+      if: ${{ runner.os == 'Windows' }}
+      run: |
+        cpanm Mail::SPF -n --install-args="--install_path sbin=local/bin" || cmd /c "echo warn: errors installing Mail::SPF have been ignored"
+      shell: cmd
+
+    - name: Install dependencies and optional modules for full testing on Windows part 4
+      if: ${{ runner.os == 'Windows' }}
+      run: |
+        cpanm --installdeps -n .  || cmd /c "echo warn: errors installing required cpan modules have been ignored"
+      shell: cmd
+
+    - name: Show content of log files on Windows
+      if: ${{ failure() && ( runner.os == 'Windows' )  }}
+      run: cat C:/Users/runner/.cpanm/work/*/build.log
+      shell: cmd

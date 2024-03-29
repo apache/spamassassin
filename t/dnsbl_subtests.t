@@ -14,8 +14,14 @@ use Test::More;
 
 use Errno qw(EADDRINUSE EACCES);
 
+plan skip_all => "Net tests disabled" unless conf_bool('run_net_tests');
+
 use constant HAS_NET_DNS_NAMESERVER => eval { require Net::DNS::Nameserver; };
+use constant HAS_NET_DNS_START_SERVER => eval { Net::DNS::Nameserver->can('start_server'); };
+use constant HAS_NET_DNS_STOP_SERVER => eval { Net::DNS::Nameserver->can('stop_server'); };
+use constant HAS_BAD_WINDOWS_NET_DNS => $RUNNING_ON_WINDOWS && HAS_NET_DNS_START_SERVER;
 plan skip_all => "Net::DNS::Nameserver in unavailable on this system" unless (HAS_NET_DNS_NAMESERVER);
+plan skip_all => "Tests don't work on Windows with recent versions of Net::DNS" if (HAS_BAD_WINDOWS_NET_DNS);
 plan  tests => 46;
 
 use Mail::SpamAssassin;
@@ -215,13 +221,30 @@ sub reply_handler {
   return ($rcode, \@ans, \@auth, \@add);
 }
 
+my ($ns, @pid);
+
 sub dns_server($$) {
   my($local_addr, $local_port) = @_;
-  my $ns = Net::DNS::Nameserver->new(
+  $ns = Net::DNS::Nameserver->new(
     LocalAddr => $local_addr, LocalPort => $local_port,
     ReplyHandler => \&reply_handler, Verbose => 0);
   $ns  or die "Cannot create a nameserver object";
-  $ns->main_loop;
+  if (HAS_NET_DNS_STOP_SERVER) {
+    $ns->start_server();
+  } elsif (HAS_NET_DNS_START_SERVER) {
+    @pid = $ns->start_server();
+  } else {
+    my $pid = fork();
+    defined $pid or die "Cannot fork: $!";
+    if (!$pid) {  # child
+      $ns->main_loop();
+      exit;
+    }
+    # parent
+    push @pid, $pid;
+    # print STDERR "Forked a DNS server process [$pid]\n";
+  }
+  sleep 1;
 }
 
 sub find_free_port($) {
@@ -309,16 +332,7 @@ if ($sock_tcp) {
 }
 
 # detach a DNS server process
-my $pid = fork();
-defined $pid or die "Cannot fork: $!";
-if (!$pid) {  # child
-  dns_server($dns_server_localaddr, $dns_server_localport);
-  exit;
-}
-
-# parent
-# print STDERR "Forked a DNS server process [$pid]\n";
-sleep 1;
+dns_server($dns_server_localaddr, $dns_server_localport);
 
 $spamassassin_obj = Mail::SpamAssassin->new({
   rules_filename      => $localrules,
@@ -353,28 +367,23 @@ test_samples(
 # X_URIBL_Y_FFD no longer hits intentionally (not in the 127.0.0.0/8 range),
 # see Bug 6803
 
-if ($pid) {
-  kill('TERM',$pid) or die "Cannot stop a DNS server [$pid]: $!";
-
-# Bug 7000: Seems like a DNS server process can't be terminated. [...]
-# Reason is "waitpid($pid,0)". If commented out, it does not hang.
-# There are no extra processes after end of this test.
-#
-# perlfunc: waitpid - waiting for a particular pid with FLAGS of 0 is
-# implemented everywhere
-#
-# perlport: (Win32) waitpid Can only be applied to process handles returned
-# for processes spawned using "system(1, ...)" or pseudo processes created
-# with "fork()".
-#
-# so ... waitpid($pid,0) should work on Windows, but it doesn't - nevermind:
-
-  waitpid($pid,0) unless $RUNNING_ON_WINDOWS;
-
-  undef $pid;
+if (HAS_NET_DNS_STOP_SERVER) {
+  if ($ns) {
+    $ns->stop_server();
+    undef $ns;
+  }
+} else {
+  if (@pid) {
+    kill('TERM',@pid) or die "Cannot stop a DNS server [@pid]: $!";
+    undef @pid;
+  }
 }
 
 END {
   $spamassassin_obj->finish  if $spamassassin_obj;
-  kill('KILL',$pid)  if $pid;  # ignoring status
+  if (HAS_NET_DNS_STOP_SERVER) {
+    $ns->stop_server()  if $ns;
+  } else {
+    kill('KILL',@pid)  if @pid;
+  }
 }

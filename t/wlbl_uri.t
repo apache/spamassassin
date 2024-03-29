@@ -4,6 +4,10 @@ use lib '.'; use lib 't';
 use SATest; sa_t_init("wlbl_uri");
 use Test::More tests => 12;
 
+tstpre ("
+  loadplugin Mail::SpamAssassin::Plugin::AWL
+");
+
 # copied from 60_welcome.cf
 # should do the right thing with the different disable/enable compat settings
 my $myrules = <<'END';

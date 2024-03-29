@@ -22,7 +22,7 @@ Mail::SpamAssassin::Conf::SQL - load SpamAssassin scores from SQL database
 =head1 SYNOPSIS
 
   (see Mail::SpamAssassin)
-  
+
 
 =head1 DESCRIPTION
 
@@ -77,7 +77,7 @@ sub load_modules {		# static
 
 ###########################################################################
 
-=item $f->load ($username)
+=item $f-E<gt>load ($username)
 
 Read configuration parameters from SQL database and parse scores from it.
 

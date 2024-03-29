@@ -1544,7 +1544,7 @@ Empty the list of msa networks.
     }
   });
 
-=item originating_ip_headers header ...   (default: X-Yahoo-Post-IP X-Originating-IP X-Apparently-From X-SenderIP)
+=item originating_ip_headers header ...   (default: none)
 
 A list of header field names from which an originating IP address can
 be obtained. For example, webmail servers may record a client IP address
@@ -1555,6 +1555,10 @@ are used in RBL checks where appropriate.
 
 Currently the IP addresses are not added into X-Spam-Relays-* header fields,
 but they may be in the future.
+
+A default list may be supplied via sa-update, use
+C<clear_originating_ip_headers> to clear and override the settings if
+needed.
 
 =cut
 
@@ -1577,7 +1581,8 @@ but they may be in the future.
 
 =item clear_originating_ip_headers
 
-Empty the list of 'originating IP address' header field names.
+Empty the list of 'originating IP address' header field names. Useful if
+you want to override the standard list supplied by sa-update.
 
 =cut
 
@@ -2077,7 +2082,7 @@ home_dir_for_helpers/.spamassassin, $HOME/.spamassassin,
       my $rule = $1;
       foreach my $domain (split(/\s+/, lc($2))) {
         $domain =~ s/^\.//; $domain =~ s/\.\z//;  # strip dots
-        if ($domain !~ /^[a-z0-9.-]+$/) {
+        if ($domain !~ /^[a-z0-9_.-]+$/) {
           return $INVALID_VALUE;
         }
         # will end up in filename, do not allow / etc in above regex!
@@ -3676,10 +3681,6 @@ set to priority -10000, so that the tags should always be ready for any
 normal rules to use.  When rule depends on a tag that might be set at later
 stage by a plugin for example, it's priority should be set manually to a
 higher value.
-
-=over 4
-
-=back
 
 =head1 ADMINISTRATOR SETTINGS
 

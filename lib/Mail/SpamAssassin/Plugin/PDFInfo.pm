@@ -328,9 +328,16 @@ sub _get_pdf_details {
     }
 
     # XXX some pdf have uris but are stored inside binary data
-    if (keys %uris < 20 && $line =~ /(?:\/S\s{0,2}\/URI\s{0,2}|^\s*)\/URI\s{0,2}( \( .*? (?<!\\) \) | < [^>]* > )/x) {
-      my $location = _parse_string($1);
+    if (keys %uris < 20 && $line =~ /(?:\/S\s{0,2}\/URI\s{0,2}|^\s*)\/URI\s{0,2}( \( .*? (?<!\\) \) | < [^>]* > )|\((https?:\/\/.{8,256})\)>>/x) {
+      my $location;
+      if (defined $1 and (index($1, '.') > 0)) {
+        $location = _parse_string($1);
+      }
+      if (not defined($location) or index($location, '.') <= 0) {
+        $location = _parse_string($2);
+      }
       next unless index($location, '.') > 0; # ignore some binary mess
+      next if $location =~ /\0/; # ignore urls with NUL characters
       if (!exists $uris{$location}) {
         $uris{$location} = 1;
         dbg("pdfinfo: found URI: $location");

@@ -41,7 +41,7 @@ disable something else for whatever reason... well, keep that in mind.
 
 Error messages are not unified.
 
-See <http://bugzilla.spamassassin.org/>
+See E<lt>http://bugzilla.spamassassin.org/E<gt>
 
 =head1 SEE ALSO
 

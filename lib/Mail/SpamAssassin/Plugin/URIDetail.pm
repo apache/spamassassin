@@ -47,7 +47,7 @@ C<cleaned> is a list including the raw URI and various cleaned
 versions of the raw URI (http://spamassassin.apache%2Eorg/,
 https://spamassassin.apache.org/).
 
-C<text> is the anchor text(s) (text between <a> and </a>) that
+C<text> is the anchor text(s) (text between E<lt>aE<gt> and E<lt>/aE<gt>) that
 linked to the raw URI.
 
 C<domain> is the domain(s) found in the cleaned URIs, as trimmed to
@@ -156,14 +156,13 @@ sub set_config {
 sub check_uri_detail {
   my ($self, $permsg) = @_;
 
+  my $test = $permsg->{current_rule_name}; 
+  my $rule = $permsg->{conf}->{uri_detail}->{$test};
+
   my %uri_detail = %{ $permsg->get_uri_detail_list() };
 
   while (my ($raw, $info) = each %uri_detail) {
-    my $test = $permsg->{current_rule_name}; 
-
-    dbg("uri: running $test\n");
-
-    my $rule = $permsg->{conf}->{uri_detail}->{$test};
+    dbg("uri: running uri_detail $test: $raw");
 
     if (exists $rule->{raw}) {
       my($op,$patt) = @{$rule->{raw}};
@@ -235,13 +234,7 @@ sub check_uri_detail {
       dbg("uri: host matched: '%s' %s /%s/", $match,$op,$patt);
     }
 
-    if (would_log('dbg', 'rules') > 1) {
-      dbg("uri: criteria for $test met");
-    }
-    
-    # reset hash
-    keys %uri_detail;
-
+    dbg("uri: all criteria for $test met - HIT");
     return 1;
   }
 

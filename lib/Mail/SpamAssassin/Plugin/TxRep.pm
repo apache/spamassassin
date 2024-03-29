@@ -897,6 +897,48 @@ some testing it could be likely at least slightly increased.
     }
   });
 
+=item B<txrep_report_details>
+
+  0 | 1 | 2             (default: 0)
+
+Add TxRep details to the rule's description in the message report or summary,
+similar to how RBL rules commonly are showing listed domains.
+
+If enabled (value 1) the identificators (From address bound to originating IP
+address fraction, From address alone, domain name bound to originating IP
+address fraction, originating IP address and HELO if available) used in
+calculating the sender's overall reputation are listed, including the
+originating IP address fraction (according to the mask settings) where
+applicable.
+
+If this option is set to 2, the listed identificators' individual mean
+reputation and count are reported in addition.
+
+Identificators and additional data will only be added to the description on a
+message's initial scan.  Re-processing a previously already scanned message
+will not list the individual idenficators and their respective reputation
+values used originally.
+
+This option is disabled by default for now, due to potential formatting issues
+caused by the number and length of additional description details.
+
+=cut
+
+  push (@cmds, {
+    setting     => 'txrep_report_details',
+    default     => 0,
+    type        => $Mail::SpamAssassin::Conf::CONF_TYPE_NUMERIC,
+    code        => sub {
+        my ($self, $key, $value, $line) = @_;
+
+        return $Mail::SpamAssassin::Conf::MISSING_REQUIRED_VALUE
+          if ($value eq '');
+        return $Mail::SpamAssassin::Conf::INVALID_VALUE
+          unless ($value =~ /^[012]$/);
+
+        $self->{txrep_report_details} = $value;
+    }
+  });
 
 =back
 
@@ -1240,9 +1282,13 @@ sub check_senders_reputation {
 
   my $autolearn = defined $self->{autolearn};
   $self->{last_pms} = $self->{autolearn} = undef;
+  $self->{pms} = $pms;
 
   # Cases where we would not be able to use TxRep
-  return 0 unless ($self->{conf}->{use_txrep});
+  if(not $self->{conf}->{use_txrep}) {
+    dbg("TxRep is disabled, quitting");
+    return 0;
+  }
   if ($self->{conf}->{use_auto_welcomelist}) {
     warn("TxRep: cannot run when Auto-Welcomelist is enabled. Please disable it!\n");
     return 0;
@@ -1294,7 +1340,7 @@ sub check_senders_reputation {
   if ($self->{conf}->{txrep_track_messages}) {
     if ($msg_id) {
         my $msg_rep = $self->check_reputations($pms, 'MSG_ID', $msg_id, undef, $date, undef);
-        if (defined $msg_rep && $self->count()) {
+        if (defined $msg_rep && ($self->count() > 0)) {
             if (defined $self->{learning} && !defined $self->{forgetting}) {
                 # already learned, forget only if already learned (count>1), and relearn
                 # when only scanned (count=1), go ahead with normal rep scan
@@ -1312,6 +1358,9 @@ sub check_senders_reputation {
                     $pms->got_hit("TXREP", "TXREP: ", ruletype => 'eval', score => sprintf("%0.3f", $delta));
                 }
                 dbg("TxRep: message %s already scanned, using old data; post-TxRep score: %0.3f", $msg_id, $pms->{score} || 'undef');
+                if (!defined $self->{txKeepStoreTied}) {
+                  $self->finish();
+                }
                 return 0;
             }
         }       # no stored reputation found, go ahead with normal rep scan
@@ -1345,9 +1394,16 @@ sub check_senders_reputation {
   );
 
   my $ip = $origip;
+  my $spf_domain;
   if ($signedby) {
     $ip       = undef;
     $domain   = $signedby;
+  } elsif ($pms->{spf_pass} && $self->{conf}->{txrep_spf} && defined $pms->{spf_sender}) {
+    $ip       = undef;
+    $spf_domain = $pms->{spf_sender};
+    $spf_domain =~ s/^.+@//;
+    $signedby   = 'spf-'.$spf_domain;
+    dbg("TxRep: email signed by spf domain $spf_domain");
   } elsif ($pms->{spf_pass} && $self->{conf}->{txrep_spf}) {
     $ip       = undef;
     $signedby = 'spf';
@@ -1463,7 +1519,7 @@ sub check_reputation {
     # TEMPLATE TAGS should match [A-Z] in their name
     # and "_" must be avoided
     $tag_id =~ s/_//g;
-    if (defined $found && $self->count()) {
+    if (defined $found && ($self->count() > 0)) {
         $meanrep = $self->total() / $self->count();
     }
     if ($self->{learning} && defined $msgscore) {
@@ -1479,13 +1535,28 @@ sub check_reputation {
         );
     } else {
         $self->{totalweight} += $weight;
-        if ($key eq 'MSG_ID' && $self->count() > 0) {
+        if ($key eq 'MSG_ID' && ($self->count() > 0)) {
             $delta = $self->total() / $self->count();
 	    $pms->set_tag('TXREP'.$tag_id,              sprintf("%2.1f", $delta));
         } elsif (defined $self->total()) {
             #Bug 7164 - $msgscore undefined
-            if (defined $msgscore) {
-              $delta = ($self->total() + $msgscore) / (1 + $self->count()) - $msgscore;
+            # in some cases we can have negative number
+            # even if both total and $msgscore are positive numbers
+            my $deltacheck;
+            my $skipmsgscore = 0;
+            if(defined $msgscore) {
+              $deltacheck = ($self->total() + $msgscore) / (1 + $self->count()) - $msgscore;
+              if(($self->total() > 0) && ($msgscore > 0) && ($deltacheck < 0)) {
+                $skipmsgscore = 1;
+              } elsif(($self->total() < 0) && ($msgscore < 0) && ($deltacheck > 0)) {
+                $skipmsgscore = 1;
+              }
+            }
+            if($skipmsgscore) {
+              dbg("TxRep: skipping msg score $msgscore when calculating delta");
+            }
+            if (defined $msgscore and not $skipmsgscore) {
+              $delta = $deltacheck;
             } else {
               $delta = ($self->total()) / (1 + $self->count());
             }
@@ -1506,6 +1577,26 @@ sub check_reputation {
             $delta              || 0,
             $id                 || 'none'
         );
+
+        if ($self->{conf}->{txrep_report_details}
+            && defined $id && defined $meanrep && $tag_id ne "MSGID") {
+
+            my $log = sprintf("%s: %s",
+                              $tag_id,
+                              (defined $ip) ? $id."|".$self->ip_to_awl_key($ip) : $id
+                );
+
+            if ($self->{conf}->{txrep_report_details} == 2) {
+                $log .= sprintf(", rep: %.2f, count: %d",
+                                $meanrep,
+                                $self->count() || 0
+                    );
+            }
+
+            $pms->test_log($log, "TXREP");
+            # dbg ("TxRep: test_log: $log");
+        }
+
     }
     $timer = $self->{main}->time_method('update_txrep_'.lc($key));
     if (defined $msgscore) {
@@ -1538,7 +1629,7 @@ sub check_reputation {
 #--------------------------------------------------------------------------
 
 ###########################################################################
-sub count {my $self=shift;  return (defined $self->{checker})? $self->{entry}->{msgcount}    : undef;}
+sub count {my $self=shift;  return (defined $self->{checker})? $self->{entry}->{msgcount} : 0;}
 sub total {my $self=shift;  return (defined $self->{checker})? $self->{entry}->{totscore} : undef;}
 ###########################################################################
 
@@ -1577,7 +1668,7 @@ sub add_score {
   $self->{entry}->{msgcount} ||= 0;
 
   # performing the dilution aging correction
-  if (defined $self->total() && defined $self->count() && defined $self->{txrep_dilution_factor}) {
+  if (defined $self->total() && defined $self->count() && $self->count() > 0 && defined $self->{txrep_dilution_factor}) {
     my $diluted_total =
         ($self->count() + 1) *
         ($self->{txrep_dilution_factor} * $self->total() + $score) /
@@ -1802,6 +1893,12 @@ sub pack_addr {
 
   if ( defined $origip) {$origip = $self->ip_to_awl_key($origip);}
   if (!defined $origip) {$origip = 'none';}
+  if ( $self->{conf}->{txrep_welcomelist_out} &&
+    defined $self->{pms}->{relays_internal} &&  @{$self->{pms}->{relays_internal}} &&
+    (!defined $self->{pms}->{relays_external} || !@{$self->{pms}->{relays_external}})
+    and $addr =~ /(?:[^\s\@]+)\@(?:[^\s\@]+)/) {
+      $origip = 'WELCOMELIST_OUT';
+  }
   return $addr . "|ip=" . $origip;
 }
 

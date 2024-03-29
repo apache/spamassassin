@@ -12,7 +12,9 @@ runs:
       run: |
           df -H .
           rm -f ~/.bash_profile   # github installs npm here and that messes up use of ~/.profile
-          sudo apt-get purge -y '~ndotnet-'
+          sudo apt-get update
+          sudo apt-get autoremove -y '~ndotnet-'
+          sudo apt-get upgrade -y
           sudo apt-get autoremove -y
           sudo apt-get clean
           sudo rm -rf /usr/local/lib/android # will release about 10 GB if you don't need Android
@@ -22,8 +24,6 @@ runs:
 
     - name: install required apt packages - perl ones get their prerequisites needed for plenv perl installs
       run: |
-          sudo apt-get update
-          sudo apt-get upgrade -y
           sudo apt-get install -y \
            apt-utils \
            build-essential \
@@ -46,6 +46,7 @@ runs:
            libarchive-zip-perl \
            libberkeleydb-perl \
            libbsd-resource-perl \
+           libdbd-pg-perl \
            libdigest-sha-perl \
            libencode-detect-perl \
            libgeo-ip-perl \
@@ -101,13 +102,25 @@ runs:
 
       shell: bash
 
-    - name: install plenv
-      run: |
-        cd ~/
-        git clone https://github.com/tokuhirom/plenv.git ~/.plenv
-        git clone https://github.com/tokuhirom/Perl-Build.git ~/.plenv/plugins/perl-build/
-        echo "$HOME/.local/bin" >> $GITHUB_PATH
-        echo "$HOME/.plenv/bin" >> $GITHUB_PATH
-        echo "$HOME/.plenv/shims" >> $GITHUB_PATH
-        echo "PLENV_SHELL=bash"  >> $GITHUB_ENV
-      shell: bash
+    #- name: setup postgres
+    #  run: |
+    #    sudo systemctl start postgresql.service
+    #    pg_isready
+    #    sudo -u postgres psql --command="CREATE USER spamassassin PASSWORD 'spamassassin'" --command="\du"
+    #    sudo -u postgres createdb --owner=spamassassin spamassassin
+    #    PGPASSWORD=spamassassin psql --username=spamassassin --host=localhost --list spamassassin
+    #    PGPASSWORD=spamassassin psql --username=spamassassin --host=localhost -d spamassassin -f sql/awl_pg.sql
+    #    PGPASSWORD=spamassassin psql --username=spamassassin --host=localhost -d spamassassin -f sql/bayes_pg.sql
+
+    #  shell: bash
+
+    #- name: install plenv
+    #  run: |
+    #    cd ~/
+    #    git clone https://github.com/tokuhirom/plenv.git ~/.plenv
+    #    git clone https://github.com/tokuhirom/Perl-Build.git ~/.plenv/plugins/perl-build/
+    #    echo "$HOME/.local/bin" >> $GITHUB_PATH
+    #    echo "$HOME/.plenv/bin" >> $GITHUB_PATH
+    #    echo "$HOME/.plenv/shims" >> $GITHUB_PATH
+    #    echo "PLENV_SHELL=bash"  >> $GITHUB_ENV
+    #  shell: bash

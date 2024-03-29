@@ -57,6 +57,7 @@ our ($have_getaddrinfo_in_core, $have_getaddrinfo_legacy, $io_socket_module_name
 
 # don't force requirement on IO::Socket::IP or IO::Socket::INET6
 BEGIN {
+  require Socket;
   $have_getaddrinfo_in_core = eval {
     # The Socket module (1.94) bundled with Perl 5.14.* provides
     # new affordances for IPv6, including implementations of the
@@ -83,7 +84,6 @@ BEGIN {
     &NI_NUMERICHOST; &NI_NUMERICSERV; &NI_NAMEREQD; 1;
   };
 
-  require Socket;
   Socket->import(qw(:DEFAULT IPPROTO_TCP));
 
   &SOCK_STREAM; &IPPROTO_TCP; &SOMAXCONN; # enable inlining
@@ -3294,6 +3294,9 @@ sub do_sighup_restart {
   chdir($ORIG_CWD)
     or die "spamd: restart failed: chdir failed: ${ORIG_CWD}: $!\n";
 
+  # Close GeoDB, Geo::IP leaks fds on restart (Bug 8127)
+  delete $spamtest->{geodb};
+
   # ensure we re-run spamd using the right perl interpreter, and
   # with the right switches (taint mode and warnings) (bug 5255)
   # Also need -I options (bug 8030) because there is no way
@@ -3476,12 +3479,12 @@ Print a brief help message, then exit without further action.
 
 Print version information, then exit without further action.
 
-=item B<-i> [I<ipaddress>[:<port>]], B<--listen>[=I<ipaddress>[:<port>]]
+=item B<-i> [I<ipaddress>[:E<lt>portE<gt>]], B<--listen>[=I<ipaddress>[:E<lt>portE<gt>]]
 
 Additional alias names for this option are --listen-ip and --ip-address.
 Tells spamd to listen on the specified IP address, defaults to a loopback
 interface, i.e. C<--listen localhost>).  If no value is specified after the
-switch, or if an asterisk '*' stands in place of an <ipaddress>, spamd will
+switch, or if an asterisk '*' stands in place of an E<lt>ipaddressE<gt>, spamd will
 listen on all interfaces - this is equivalent to address '0.0.0.0' for IPv4
 and to '::' for IPv6. You can also use a valid hostname which will make spamd
 listen on all addresses that a name resolves to. The option may be specified

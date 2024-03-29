@@ -141,6 +141,7 @@ sub set_config {
     my @cmds;
     push(@cmds, {
         setting => 'rbl_headers',
+        is_priv => 1,
         default => 'EnvelopeFrom,Reply-To,Disposition-Notification-To,X-WebmailclientIP,X-Source-IP',
         type => $Mail::SpamAssassin::Conf::CONF_TYPE_STRING,
         }
@@ -516,6 +517,7 @@ sub check_rbl_from_domain {
   return $self->_check_rbl_addresses($pms, $rule, $set, $rbl_server,
                                      $subtest, $pms->all_from_addrs_domains());
 }
+
 =over 4
 
 =item check_rbl_ns_from

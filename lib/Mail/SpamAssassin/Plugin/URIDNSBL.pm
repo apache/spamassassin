@@ -130,7 +130,7 @@ any of: decimal digits, 0x followed by up to 8 hexadecimal digits, or an IPv4
 address in quad-dot form. The 'A' records (IPv4 dotted address) as returned
 by DNSBLs lookups are converted into a numerical form (r) and checked against
 the specified sub-test as follows:
-for a range n1-n2 the following must be true: (r >= n1 && r <= n2);
+for a range n1-n2 the following must be true: (r E<gt>= n1 && r E<lt>= n3);
 for a n/m form the following must be true: (r & m) == (n & m);
 for a single value in quad-dot form the following must be true: r == n;
 for a single decimal or hex form the following must be true:
@@ -181,7 +181,7 @@ any of: decimal digits, 0x followed by up to 8 hexadecimal digits, or an IPv4
 address in quad-dot form. The 'A' records (IPv4 dotted address) as returned
 by DNSBLs lookups are converted into a numerical form (r) and checked against
 the specified sub-test as follows:
-for a range n1-n2 the following must be true: (r >= n1 && r <= n2);
+for a range n1-n2 the following must be true: (r E<gt>= n1 && r E<lt>= n2);
 for a n/m form the following must be true: (r & m) == (n & m);
 for a single value in quad-dot form the following must be true: r == n;
 for a single decimal or hex form the following must be true:
@@ -221,7 +221,7 @@ Specify a RHSBL-style domain-NS lookup, as above, with a sub-test.
 C<NAME_OF_RULE> is the name of the rule to be used, C<rhsbl_zone> is the zone
 to look up domain names in, and C<lookuptype> is the type of lookup (B<TXT> or
 B<A>).  C<subtest> is the sub-test to run against the returned data; see
-<urirhssub>.
+C<urirhssub>.
 
 Note that, as with C<urirhsbl>, you must also define a body-eval rule calling
 C<check_uridnsbl()> to use this.
@@ -246,7 +246,7 @@ Specify a RHSBL-style domain-NS lookup, as above, with a sub-test.
 C<NAME_OF_RULE> is the name of the rule to be used, C<rhsbl_zone> is the zone
 to look up domain names in, and C<lookuptype> is the type of lookup (B<TXT> or
 B<A>).  C<subtest> is the sub-test to run against the returned data; see
-<urirhssub>.
+C<urirhssub>.
 
 Note that, as with C<urirhsbl>, you must also define a body-eval rule calling
 C<check_uridnsbl()> to use this.
@@ -295,6 +295,10 @@ The maximum number of domains to look up.
 
 Include DKIM uris in lookups. This option is documented in
 Mail::SpamAssassin::Conf.
+
+=item uridnsbl_skip_mailto ( 0 / 1)	(default: 1)
+
+Skip mailto links on uris lookups.
 
 =back
 
@@ -419,9 +423,13 @@ sub check_dnsbl {
   # 3: !a_empty
   # 4: parsed
   # 5: a_empty
-  while (my($uri, $info) = each %{$uris}) {
+  my %huris = %{$uris};
+  foreach my $uri (keys %huris) {
+    my $info = $huris{$uri};
     # we want to skip mailto: uris
-    next if ($uri =~ /^mailto:/i);
+    if ($conf->{uridnsbl_skip_mailto}) {
+      next if ($uri =~ /^mailto:/i);
+    }
 
     # no hosts/domains were found via this uri, so skip
     next unless ($info->{hosts});
@@ -555,6 +563,13 @@ sub set_config {
   push(@cmds, {
     setting => 'skip_uribl_checks',
     default => 0,
+    type => $Mail::SpamAssassin::Conf::CONF_TYPE_BOOL,
+  });
+
+  push(@cmds, {
+    setting => 'uridnsbl_skip_mailto',
+    is_admin => 1,
+    default => 1,
     type => $Mail::SpamAssassin::Conf::CONF_TYPE_BOOL,
   });
 
@@ -1187,5 +1202,6 @@ sub has_subtest_for_ranges { 1 }
 sub has_uridnsbl_for_a { 1 }  # uridnsbl rules recognize tflags 'a' and 'ns'
 sub has_uridnsbl_a_ns { 1 }  # has an actually working 'a' flag, unlike above :-(
 sub has_tflags_notrim { 1 }  # Bug 7835
+sub has_uridnsbl_skip_mailto { 1 }
 
 1;

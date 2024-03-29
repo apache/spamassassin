@@ -7,7 +7,6 @@ use constant HAS_DBD_SQLITE => eval { require DBD::SQLite; DBD::SQLite->VERSION(
 
 use Test::More;
 plan skip_all => "Spamd tests disabled" if $SKIP_SPAMD_TESTS;
-plan skip_all => "SQL Pref tests disabled" unless conf_bool('run_sql_pref_tests');
 plan skip_all => "DBI is unavailble" unless HAS_DBI;
 plan skip_all => "SQLite is unavailble" unless HAS_DBD_SQLITE;
 plan tests => 32;

@@ -572,8 +572,8 @@ sub get_pristine_body_digest {
 
 =item get_msgid()
 
-Returns Message-ID header for the message, with <> and surrounding
-whitespace removed. Returns undef, if nothing found between <>.
+Returns Message-ID header for the message, with E<lt>E<gt> and surrounding
+whitespace removed. Returns undef, if nothing found between E<lt>E<gt>.
 
 =cut
 
@@ -759,6 +759,7 @@ sub finish {
     delete $part->{'invisible_rendered'};
     delete $part->{'type'};
     delete $part->{'rendered_type'};
+    delete $part->{'effective_type'};
 
     # if there are children nodes, add them to the queue of nodes to clean up
     if (exists $part->{'body_parts'}) {
@@ -1261,10 +1262,11 @@ sub get_body_text_array_common {
   # already been done.
   my $html_needs_setting = !exists $self->{metadata}->{html};
 
-  my $text = $method_name eq 'invisible_rendered' ? ''
+  my $subject = $method_name eq 'invisible_rendered' ? ''
                : ($self->get_header('subject') || "\n");
 
   # Go through each part
+  my $text = '';
   for (my $pt = 0 ; $pt <= $#parts ; $pt++ ) {
     my $p = $parts[$pt];
 
@@ -1316,7 +1318,8 @@ sub get_body_text_array_common {
   $text =~ tr/\x00/\n/;			# null => newline
 
   utf8::encode($text) if utf8::is_utf8($text);
-  my @textary = split_into_array_of_short_lines($text);
+  utf8::encode($subject) if utf8::is_utf8($subject);
+  my @textary = split_into_array_of_short_lines($subject.$text);
   $self->{$key} = \@textary;
 
   return $self->{$key};
@@ -1350,11 +1353,13 @@ sub get_decoded_body_text_array {
   my $scansize = $self->{rawbody_part_scan_size};
 
   # Find all parts which are leaves
-  my @parts = $self->find_parts(qr/^(?:text|message)\b/,1);
+  my @parts = $self->find_parts(qr/./,1);
   return $self->{text_decoded} unless @parts;
 
   # Go through each part
   for(my $pt = 0 ; $pt <= $#parts ; $pt++ ) {
+    # skip non-text parts (Bug 6439)
+    next unless $parts[$pt]->effective_type() =~ /^(?:text|message)\b/;
     # bug 4843: skip text/calendar parts since they're usually an attachment
     # and not displayed
     next if ($parts[$pt]->{'type'} eq 'text/calendar');

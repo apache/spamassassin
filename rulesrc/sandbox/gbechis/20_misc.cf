@@ -2,22 +2,22 @@
 # meta        GB_MALWARE_DROPBOX_JAR_URI	( __MALWARE_DROPBOX_JAR_URI && (HTML_SHORT_LINK_IMG_1 || HTML_SHORT_LINK_IMG_2 || HTML_SHORT_LINK_IMG_3) )
 # describe    GB_MALWARE_DROPBOX_JAR_URI Dropbox that forces user to download jar file
 
-uri         GB_GOOGLE_OBFUR	/^https:\/\/www\.google\.([a-z]{2,3})\/url\?sa=t\&rct=j\&q=\&esrc=s\&source=web\&cd=([0-9])*\&(cad=rja\&uact=([0-9]+)\&ved=.{1,50}\&)?url=https?:\/\/.{1,50}(&usg=.{1,50})?/
+uri         GB_GOOGLE_OBFUR	/^https:\/\/www\.google\.[a-z]{2,3}\/url\?sa=t\&rct=j\&q=\&esrc=s\&source=web\&cd=(?:[0-9])*\&(?:cad=rja\&uact=[0-9]+\&ved=.{1,50}\&)?url=https?:\/\/.{1,50}(?:&usg=.{1,50})?/
 describe    GB_GOOGLE_OBFUR	Obfuscate url through Google redirect
 score       GB_GOOGLE_OBFUR     0.75 # limit
 tflags      GB_GOOGLE_OBFUR     publish
 
-uri         GB_GOOGLE_OBFUS	/^https:\/\/www\.google\.([a-z]{2,3})\/search\?ei=.{1,50}\&gs_l=.{1,20}/
+uri         GB_GOOGLE_OBFUS	/^https:\/\/www\.google\.[a-z]{2,3}\/search\?ei=.{1,50}\&gs_l=.{1,20}/
 describe    GB_GOOGLE_OBFUS	Obfuscate url through Google search
 score       GB_GOOGLE_OBFUS     0.75 # limit
 #tflags      GB_GOOGLE_OBFUS     publish
 
-uri         GB_GOOGLE_OBFUQ	/^https:\/\/www\.google\.([a-z]{2,3})\/url\?q=.{1,50}\&sa=D&Xh=Gd&usg=/
+uri         GB_GOOGLE_OBFUQ	/^https:\/\/www\.google\.[a-z]{2,3}\/url\?q=.{1,50}\&sa=D&Xh=Gd&usg=/
 describe    GB_GOOGLE_OBFUQ	Obfuscate url through Google search
 score       GB_GOOGLE_OBFUQ     0.75 # limit
 #tflags      GB_GOOGLE_OBFUQ     publish
 
-uri         GB_GOOGLE_TRANSL    /^https?:\/\/.{10,64}\-ipfs\-.{2,8}\-\-ipfs\-io\.translate\.goog\/\?_x_tr_hp=/
+uri         GB_GOOGLE_TRANSL    /^https?:\/\/.{10,64}\-(?:ipfs|xn\-)\-.{2,20}\.translate\.goog\/.{4}\//
 describe    GB_GOOGLE_TRANSL    Obfuscate url through Google Translate
 score       GB_GOOGLE_TRANSL    0.75 # limit
 #tflags      GB_GOOGLE_TRANSL    publish
@@ -60,7 +60,7 @@ meta       GB_PAYPAL_IMG_NOT_RCVD_PAYP   __PAYPAL_IMG_NOT_RCVD_PAYP && !__HAS_ER
 describe   GB_PAYPAL_IMG_NOT_RCVD_PAYP   Paypal hosted image but message not from Paypal
 score      GB_PAYPAL_IMG_NOT_RCVD_PAYP   2.500    # limit
 
-uri        __SENDINBLUE_REDIR            m~://.{4,5}\.r\.a[a-z]?\.d\.sendibm[0-9]\.com/mk/([a-z]){2}/~
+uri        __SENDINBLUE_REDIR            m~://.{4,5}\.r\.a[a-z]?\.d\.sendibm[0-9]\.com/mk/(?:[a-z]){2}/~
 meta       SENDINBLUE_REDIR              __SENDINBLUE_REDIR && !MIME_HTML_MOSTLY && !__HAS_ERRORS_TO && !__HAS_X_BEEN_THERE && !__HAS_X_MAILMAN_VERSION
 describe   SENDINBLUE_REDIR              Redirect URI via Sendinblue
 score      SENDINBLUE_REDIR              2.000    # limit
@@ -72,7 +72,7 @@ describe   SENDINBLUE_REDIR_PHISH        Redirect URI via Sendinblue + phishing 
 score      SENDINBLUE_REDIR_PHISH        3.500    # limit
 # tflags     SENDINBLUE_REDIR_PHISH        publish
 
-header     __GB_FAKE_RF                  Subject =~ /(Fw|Re)\:{1,2}[\W+]/i
+header     __GB_FAKE_RF                  Subject =~ /(?:Fw|Re)\:{1,2}[\W+]/i
 meta       GB_FAKE_RF                    ( ! __THREADED && ! MAILING_LIST_MULTI && __GB_FAKE_RF )
 describe   GB_FAKE_RF                    Fake reply
 score      GB_FAKE_RF                    1.000 # limit
@@ -87,6 +87,14 @@ describe   GB_URI_FLEEK_STO_HTM          Html file stored on Fleek cloud
 score      GB_URI_FLEEK_STO_HTM          1.000 # limit
 tflags     GB_URI_FLEEK_STO_HTM          multiple maxhits=5
 
+uri        GB_BING_REDIR                 m|^https?://bing.com/ck/a\?!&&p=.{32,128}&ptn=\d+&|i
+describe   GB_BING_REDIR                 Microsoft Bing redirector
+score      GB_BING_REDIR                 1.000 # limit
+
+uri        GB_YANDEX_REDIR               m;^https?://[^/]*sba\.yandex\.net/redirect\?;i
+describe   GB_YANDEX_REDIR               Yandex redirect used to obscure spamvertised website
+score      GB_YANDEX_REDIR               1.000 # limit
+
 if (version >= 4.000000)
 if can(Mail::SpamAssassin::Conf::feature_capture_rules)
   header        __GB_TO_ADDR            To:addr =~ /(?<GB_TO_ADDR>.*)/
@@ -95,9 +103,13 @@ if can(Mail::SpamAssassin::Conf::feature_capture_rules)
   score         GB_STORAGE_GOOGLE_EMAIL 2.000 # limit
   tflags        GB_STORAGE_GOOGLE_EMAIL publish
 
-  uri           __GB_CUSTOM_HTM_URI0    m;^https?://.{10,128}(?:\.html?|\.php|\/)(?:\#|\?&e=)%{GB_TO_ADDR};i
+  uri           GB_YOUTUBE_EMAIL m|^https?://(?:www\.)?youtube\.com/attribution_link\?.{20,256}/%{GB_TO_ADDR}|i
+  describe      GB_YOUTUBE_EMAIL Youtube attribution links abuse
+  score         GB_YOUTUBE_EMAIL 2.000 # limit
+
+  uri           __GB_CUSTOM_HTM_URI0    m;^https?://.{10,128}(?:\.html?|\.php|\/)?(?:\#|\?&e=)%{GB_TO_ADDR};i
   uri           __GB_CUSTOM_HTM_URI1    m|^https?://.{10,64}\=https?://.{4,64}\#%{GB_TO_ADDR}|i
-  uri           __GB_CUSTOM_HTM_URI2    m;^https?://.{10,256}(?:\/\?)?(?:email=|wapp\#)%{GB_TO_ADDR};i
+  uri           __GB_CUSTOM_HTM_URI2    m;^https?://.{10,256}(?:\/\?)?(?:(?<!blocker)email=|audit\#|wapp\#)%{GB_TO_ADDR};i
   uri           __GB_DRUPAL_URI         m|^https?://.{10,64}/default/files/(?:\@)?\#%{GB_TO_ADDR}|i
   meta          GB_CUSTOM_HTM_URI       ( __GB_CUSTOM_HTM_URI0 || __GB_CUSTOM_HTM_URI1 || __GB_CUSTOM_HTM_URI2 || __GB_DRUPAL_URI )
   describe      GB_CUSTOM_HTM_URI       Custom html uri

@@ -6,7 +6,7 @@
 
 use lib '.'; use lib 't';
 use SATest; sa_t_init("utf8");
-use Test::More tests => 14;
+use Test::More tests => 20;
 
 # ---------------------------------------------------------------------------
 
@@ -51,5 +51,33 @@ tstprefs("
   normalize_charset 0
 ");
 ok (sarun ("-L -t < data/spam/unicode1", \&patterns_run_cb));
+ok_all_patterns();
+
+### Bug 8129
+
+$rules = '
+  header SUBJ_TEST Subject =~ /外贸客户开发/
+  body   BODY_TEST /外贸客户开发/
+';
+
+%patterns = (
+    q{ 1.0 SUBJ_TEST }, '',
+    q{ 1.0 BODY_TEST }, '',
+);
+
+# normalize_charset 1
+tstprefs("
+  $rules
+  normalize_charset 1
+");
+ok (sarun ("-L -t < data/spam/unicode2", \&patterns_run_cb));
+ok_all_patterns();
+
+# normalize_charset 0
+tstprefs("
+  $rules
+  normalize_charset 0
+");
+ok (sarun ("-L -t < data/spam/unicode2", \&patterns_run_cb));
 ok_all_patterns();
 

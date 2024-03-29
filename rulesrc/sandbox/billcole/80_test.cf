@@ -9,11 +9,11 @@ rawbody		__HAS_HREF	/^[^>].*?<a href=/im
 tflags		__HAS_HREF	multiple maxhits=100
 
 describe	__HAS_IMG_SRC_ONECASE	Has an img tag on a non-quoted line with consistent case
-rawbody		__HAS_IMG_SRC_ONECASE	/^[^>].*?<(img src|IMG SRC)=/m
+rawbody		__HAS_IMG_SRC_ONECASE	/^[^>].*?<(?:img src|IMG SRC)=/m
 tflags		__HAS_IMG_SRC_ONECASE	multiple maxhits=100
 
 describe	__HAS_HREF_ONECASE	Has an anchor tag with a href attribute in non-quoted line with consistent case
-rawbody		__HAS_HREF_ONECASE	/^[^>].*?<(a href|A HREF)=/m
+rawbody		__HAS_HREF_ONECASE	/^[^>].*?<(?:a href|A HREF)=/m
 tflags		__HAS_HREF_ONECASE	multiple maxhits=100
 
 describe	__MIXED_IMG_CASE	Has img tags with mixed-up cases in non-quoted lines
@@ -46,7 +46,7 @@ header    SCC_ODD_MUA  X-Mailer =~ /^X-Mailer: Microsoft Outlook 14.0$/
 
 
 describe  SCC_SPECIAL_GUID      Unique in a similar way
-rawbody   SCC_SPECIAL_GUID	/^([[:xdigit:]]{8})-([[:xdigit:]]{4})-([[:xdigit:]]{3})-\3-([[:xdigit:]]{12})$/m
+rawbody   SCC_SPECIAL_GUID	/^[[:xdigit:]]{8}-[[:xdigit:]]{4}-([[:xdigit:]]{3})-\1-[[:xdigit:]]{12}$/m
 tflags    SCC_SPECIAL_GUID	publish multiple maxhits=15
 
 describe __NO_EXTERNALS	No external relays
@@ -57,7 +57,7 @@ meta     ALL_INTERNAL	__NO_EXTERNALS && !NO_RELAYS
 tflags   ALL_INTERNAL	nice
 
 describe SCC_NEWBIE_HASBEENS	Abused gTLDs seen in spam from Google Apps.  
-header   SCC_NEWBIE_HASBEENS	X-Beenthere =~ /\.(today|online|monster)/
+header   SCC_NEWBIE_HASBEENS	X-Beenthere =~ /\.(?:today|online|monster)/
 
 describe  __SCC_HTML_OBJOBJ	Contains an object
 rawbody   __SCC_HTML_OBJOBJ	/< *object +\w{65,80} *>/
@@ -73,7 +73,7 @@ tflags SCC_ISEMM_LID_1A		publish
 score SCC_ISEMM_LID_1A		3.5
 
 describe SCC_ISEMM_LID_1B	Genericized spammer fingerprint
-header SCC_ISEMM_LID_1B		X-Mailer-LID =~ /([56][0-9],)+/
+header SCC_ISEMM_LID_1B		X-Mailer-LID =~ /(?:[56][0-9],)+/
 tflags SCC_ISEMM_LID_1B		publish
 score SCC_ISEMM_LID_1B		1.5
 
@@ -113,6 +113,14 @@ tflags		T_SCC_URL_NOTIONSITE  multiple maxhits=5
 describe	T_SCC_URL_CLOUDINARY  Has Cloudinary backend(?) URL
 uri		T_SCC_URL_CLOUDINARY  /https?:\/\/res.cloudinary.com/
 tflags		T_SCC_URL_CLOUDINARY  multiple maxhits=5
+
+#Very bad Feb 2024. We'll see if it lasts
+describe T_SCC_FROM_TLD_BEST From domain in *.best
+header   T_SCC_FROM_TLD_BEST From =~ /<[^ @]+@[^ @>]+\.best>/
+
+describe        T_SCC_URL_BEST  has a .best URL
+uri             T_SCC_URL_BEST  /https?:\/\/[^ ]*\.best/
+tflags          T_SCC_URL_BEST  multiple maxhits=5
 
 # Lots of spam getting through at GMail with these... 
 describe	__SCC_HASHBUST_1	Innocent text seen a lot in  'hash-buster' text. 
@@ -167,10 +175,15 @@ tflags		SCC_CTMPP	publish
 endif
 
 describe	__SCC_MIME_BOUNDARY2	Idiosyncratic boundary-like string
-rawbody		__SCC_MIME_BOUNDARY2	/^ *(----[[:alnum:]]{8};[[:alnum:]]{6}){2}$/m
+rawbody		__SCC_MIME_BOUNDARY2	/^ *(?:----[[:alnum:]]{8};[[:alnum:]]{6}){2}$/m
 tflags		__SCC_MIME_BOUNDARY2	multiple maxhits=7
 
 
 describe	SCC_MIME_BOUNDARY2	Fake boundary-like string >5 times
 meta		SCC_MIME_BOUNDARY2	__SCC_MIME_BOUNDARY2 > 5
+
+describe HTML_BADATTR Illegal char in HTML attribute name
+rawbody  HTML_BADATTR /<[a-z]{1,10}\s[^>]{1,80}\/(?:src|href)\s*\=/
+score    HTML_BADATTR 1
+tflags   HTML_BADATTR publish
 

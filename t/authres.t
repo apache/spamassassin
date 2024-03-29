@@ -25,9 +25,9 @@ tstprefs("
 %patterns = (
         'parsing Authentication-Results: authrestest1int', 'hdr1',
         'parsing Authentication-Results: authrestest2int', 'hdr2',
-        'parsing Authentication-Results: authrestest3int', 'hdr3',
+        'parsing authentication-Results: authrestest3int', 'hdr3',
         'parsing Authentication-Results: authrestest4int', 'hdr4',
-        'parsing Authentication-Results: authrestest5int', 'hdr5',
+        'parsing Authentication-RESULTS: authrestest5int', 'hdr5',
         'parsing Authentication-Results: authrestest6int', 'hdr6',
         'authres: results: dkim=pass dmarc=none spf=pass', 'results',
             );
@@ -58,9 +58,9 @@ tstprefs("
 %patterns = (
         'parsing Authentication-Results: authrestest1int', 'hdr1',
         'parsing Authentication-Results: authrestest2int', 'hdr2',
-        'parsing Authentication-Results: authrestest3int', 'hdr3',
+        'parsing authentication-Results: authrestest3int', 'hdr3',
         'parsing Authentication-Results: authrestest4int', 'hdr4',
-        'parsing Authentication-Results: authrestest5int', 'hdr5',
+        'parsing Authentication-RESULTS: authrestest5int', 'hdr5',
         'parsing Authentication-Results: authrestest6int', 'hdr6',
         'parsing Authentication-Results: authrestest7tru', 'hdr7',
         'authres: results: dkim=pass dmarc=none spf=pass', 'results',
@@ -92,9 +92,9 @@ tstprefs("
 %patterns = (
         'parsing Authentication-Results: authrestest1int', 'hdr1',
         'parsing Authentication-Results: authrestest2int', 'hdr2',
-        'parsing Authentication-Results: authrestest3int', 'hdr3',
+        'parsing authentication-Results: authrestest3int', 'hdr3',
         'parsing Authentication-Results: authrestest4int', 'hdr4',
-        'parsing Authentication-Results: authrestest5int', 'hdr5',
+        'parsing Authentication-RESULTS: authrestest5int', 'hdr5',
         'parsing Authentication-Results: authrestest6int', 'hdr6',
         'parsing Authentication-Results: authrestest7tru', 'hdr7',
         'parsing Authentication-Results: authrestest8ext', 'hdr8',

@@ -11,7 +11,7 @@ plan skip_all => "Net tests disabled" unless conf_bool('run_net_tests');
 plan skip_all => "Need Mail::SPF" unless HAS_MAILSPF;
 plan skip_all => "Can't use Net::DNS Safely" unless can_use_net_dns_safely();
 
-plan tests => 72;
+plan tests => 74;
 
 # ---------------------------------------------------------------------------
 
@@ -85,6 +85,13 @@ ok_all_patterns();
 sarun ("-t < data/spam/spf3", \&patterns_run_cb);
 ok_all_patterns();
 
+# check large TXT record - bz #8213
+%patterns = (
+  q{ -0.0 SPF_HELO_PASS }, 'helo_pass',
+  q{ -0.0 SPF_PASS }, 'pass',
+);
+sarun ("-t < data/nice/spf4", \&patterns_run_cb);
+ok_all_patterns();
 
 # Test using an assortment of trusted and internal network definitions
 

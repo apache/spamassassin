@@ -5,6 +5,9 @@ use SATest; sa_t_init("lint_nocreate_prefs");
 use Test::More tests => 2;
 
 # ---------------------------------------------------------------------------
+tstpre ("
+  loadplugin Mail::SpamAssassin::Plugin::AWL
+");
 
 %patterns = ( qr/^/, 'anything' );
 

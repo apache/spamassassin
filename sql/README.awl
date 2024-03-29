@@ -113,7 +113,7 @@ CREATE TABLE awl (
   totscore float NOT NULL default '0',
   signedby varchar(255) NOT NULL default '',
   PRIMARY KEY (username,email,signedby,ip)
-) TYPE=MyISAM;
+) ENGINE=InnoDB;
 
 
 For PostgreSQL, use the following:

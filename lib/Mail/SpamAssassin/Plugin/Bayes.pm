@@ -37,7 +37,7 @@ And the chi-square probability combiner as described here:
 
 The results are incorporated into SpamAssassin as the BAYES_* rules.
 
-=head1 ADMINISTRATOR SETTINGS
+=head1 USER SETTINGS
 
 =over 4
 
@@ -288,14 +288,12 @@ sub set_config {
   push(@cmds, {
     setting => 'bayes_max_token_length',
     default => MAX_TOKEN_LENGTH,
-    is_admin => 1,
     type => $Mail::SpamAssassin::Conf::CONF_TYPE_NUMERIC,
   });
 
   push(@cmds, {
     setting => 'bayes_stopword_languages',
     default => ['en'],
-    is_admin => 1,
     type => $Mail::SpamAssassin::Conf::CONF_TYPE_STRINGLIST,
     code => sub {
       my ($self, $key, $value, $line) = @_;
@@ -323,9 +321,6 @@ sub set_config {
 
 sub parse_config {
   my ($self, $opts) = @_;
-
-  # Ignore users's configuration lines
-  return 0 if $opts->{user_config};
 
   if ($opts->{key} =~ /^bayes_stopword_([a-z]{2})$/i) {
       $self->inhibit_further_callbacks();
@@ -1790,7 +1785,10 @@ sub learner_new {
   }
 
   dbg("bayes: learner_new self=%s, bayes_store_module=%s", $self,$module);
-  undef $self->{store};  # DESTROYs previous object, if any
+  if ($self->{store}) {
+    $self->{store}->untie_db();
+    undef $self->{store};  # DESTROYs previous object, if any
+  }
   eval '
     require '.$module.';
     $store = '.$module.'->new($self);

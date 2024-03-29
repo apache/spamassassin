@@ -87,7 +87,7 @@ use Time::HiRes qw(time);
 use Cwd;
 use Config;
 
-our $VERSION = "4.000000";      # update after release (same format as perl $])
+our $VERSION = "4.000001";      # update after release (same format as perl $])
 #our $IS_DEVEL_BUILD = 1;        # 1 for devel build 
 our $IS_DEVEL_BUILD = 0;        # 0 for release versions including rc & pre releases
 
@@ -173,7 +173,7 @@ our @default_userstate_dir = (
 
 ###########################################################################
 
-=item $t = Mail::SpamAssassin->new( { opt => val, ... } )
+=item $t = Mail::SpamAssassin-E<gt>new( { opt =E<gt> val, ... } )
 
 Constructs a new C<Mail::SpamAssassin> object.  You may pass a hash
 reference to the constructor which may contain the following attribute-
@@ -272,7 +272,7 @@ in advance that some information will not be needed by a caller.
 A value of the option can either be a string (a comma-delimited list of tag
 names), or a reference to a list of individual tag names. A caller may provide
 the list in advance, specifying his intention to later collect the information
-through $pms->get_tag() calls. If a name of a tag starts with a 'NO' (case
+through $pms-E<gt>get_tag() calls. If a name of a tag starts with a 'NO' (case
 insensitive), it shows that a caller will not be interested in such tag,
 although there is no guarantee it would save any resources, nor that a tag
 value will be empty. Currently no built-in tags start with 'NO'. A later
@@ -289,9 +289,9 @@ Not requesting it can save a millisecond or two - it mostly serves to
 illustrate the usage of need_tags.
 
 Example:
-  need_tags =>    'TIMING,noLANGUAGES,RELAYCOUNTRY,ASN,noASNCIDR',
+  need_tags =E<gt>    'TIMING,noLANGUAGES,RELAYCOUNTRY,ASN,noASNCIDR',
 or:
-  need_tags => [qw(TIMING noLANGUAGES RELAYCOUNTRY ASN noASNCIDR)],
+  need_tags =E<gt> [qw(TIMING noLANGUAGES RELAYCOUNTRY ASN noASNCIDR)],
 
 =item ignore_site_cf_files
 
@@ -561,7 +561,7 @@ sub parse {
 
 ###########################################################################
 
-=item $status = $f->check ($mail)
+=item $status = $f-E<gt>check ($mail)
 
 Check a mail, encapsulated in a C<Mail::SpamAssassin::Message> object,
 to determine if it is spam or not.
@@ -586,7 +586,7 @@ sub check {
   $pms;
 }
 
-=item $status = $f->check_message_text ($mailtext)
+=item $status = $f-E<gt>check_message_text ($mailtext)
 
 Check a mail, encapsulated in a plain string C<$mailtext>, to determine if it
 is spam or not.
@@ -612,7 +612,7 @@ sub check_message_text {
 
 ###########################################################################
 
-=item $status = $f->learn ($mail, $id, $isspam, $forget)
+=item $status = $f-E<gt>learn ($mail, $id, $isspam, $forget)
 
 Learn from a mail, encapsulated in a C<Mail::SpamAssassin::Message> object.
 
@@ -663,7 +663,7 @@ sub learn {
 
 ###########################################################################
 
-=item $f->init_learner ( [ { opt => val, ... } ] )
+=item $f-E<gt>init_learner ( [ { opt =E<gt> val, ... } ] )
 
 Initialise learning.  You may pass the following attribute-value pairs to this
 method.
@@ -735,7 +735,7 @@ sub init_learner {
 
 ###########################################################################
 
-=item $f->rebuild_learner_caches ({ opt => val })
+=item $f-E<gt>rebuild_learner_caches ({ opt =E<gt> val })
 
 Rebuild any cache databases; should be called after the learning process.
 Options include: C<verbose>, which will output diagnostics to C<stdout>
@@ -750,7 +750,7 @@ sub rebuild_learner_caches {
   1;
 }
 
-=item $f->finish_learner ()
+=item $f-E<gt>finish_learner ()
 
 Finish learning.
 
@@ -763,7 +763,7 @@ sub finish_learner {
   1;
 }
 
-=item $f->dump_bayes_db()
+=item $f-E<gt>dump_bayes_db()
 
 Dump the contents of the Bayes DB
 
@@ -774,7 +774,7 @@ sub dump_bayes_db {
   $self->{bayes_scanner}->dump_bayes_db(@opts) if $self->{bayes_scanner};
 }
 
-=item $f->signal_user_changed ( [ { opt => val, ... } ] )
+=item $f-E<gt>signal_user_changed ( [ { opt =E<gt> val, ... } ] )
 
 Signals that the current user has changed (possibly using C<setuid>), meaning
 that SpamAssassin should close any per-user databases it has open, and re-open
@@ -853,13 +853,13 @@ sub signal_user_changed {
 		userstate_dir => $self->{userstate_dir},
 		user_dir => $self->{user_dir},
 	      });
-
+  undef $self->{cf_files_read};
   1;
 }
 
 ###########################################################################
 
-=item $f->report_as_spam ($mail, $options)
+=item $f-E<gt>report_as_spam ($mail, $options)
 
 Report a mail, encapsulated in a C<Mail::SpamAssassin::Message> object, as
 human-verified spam.  This will submit the mail message to live,
@@ -912,7 +912,7 @@ sub report_as_spam {
 
 ###########################################################################
 
-=item $f->revoke_as_spam ($mail, $options)
+=item $f-E<gt>revoke_as_spam ($mail, $options)
 
 Revoke a mail, encapsulated in a C<Mail::SpamAssassin::Message> object, as
 human-verified ham (non-spam).  This will revoke the mail message from live,
@@ -952,7 +952,7 @@ sub revoke_as_spam {
 
 ###########################################################################
 
-=item $f->add_address_to_welcomelist ($addr, $cli_p)
+=item $f-E<gt>add_address_to_welcomelist ($addr, $cli_p)
 
 Previously add_address_to_whitelist which will work interchangeably until 4.1.
 
@@ -973,7 +973,7 @@ sub add_address_to_welcomelist {
 
 ###########################################################################
 
-=item $f->add_all_addresses_to_welcomelist ($mail, $cli_p)
+=item $f-E<gt>add_all_addresses_to_welcomelist ($mail, $cli_p)
 
 Previously add_all_addresses_to_whitelist which will work interchangeably until 4.1.
 
@@ -996,7 +996,7 @@ sub add_all_addresses_to_welcomelist {
 
 ###########################################################################
 
-=item $f->remove_address_from_welcomelist ($addr, $cli_p)
+=item $f-E<gt>remove_address_from_welcomelist ($addr, $cli_p)
 
 Previously remove_address_from_whitelist which will work interchangeably until 4.1.
 
@@ -1017,7 +1017,7 @@ sub remove_address_from_welcomelist {
 
 ###########################################################################
 
-=item $f->remove_all_addresses_from_welcomelist ($mail, $cli_p)
+=item $f-E<gt>remove_all_addresses_from_welcomelist ($mail, $cli_p)
 
 Previously remove_all_addresses_from_whitelist which will work interchangeably until 4.1.
 
@@ -1041,7 +1041,7 @@ sub remove_all_addresses_from_welcomelist {
 
 ###########################################################################
 
-=item $f->add_address_to_blocklist ($addr, $cli_p)
+=item $f-E<gt>add_address_to_blocklist ($addr, $cli_p)
 
 Previously add_address_to_blacklist which will work interchangeably until 4.1.
 
@@ -1061,7 +1061,7 @@ sub add_address_to_blocklist {
 
 ###########################################################################
 
-=item $f->add_all_addresses_to_blocklist ($mail, $cli_p)
+=item $f-E<gt>add_all_addresses_to_blocklist ($mail, $cli_p)
 
 Previously add_all_addresses_to_blacklist which will work interchangeably until 4.1.
 
@@ -1097,7 +1097,7 @@ sub add_all_addresses_to_blocklist {
 
 ###########################################################################
 
-=item $text = $f->remove_spamassassin_markup ($mail)
+=item $text = $f-E<gt>remove_spamassassin_markup ($mail)
 
 Returns the text of the message, with any SpamAssassin-added text (such
 as the report, or X-Spam-Status headers) stripped.
@@ -1249,7 +1249,7 @@ sub remove_spamassassin_markup {
 
 ###########################################################################
 
-=item $f->read_scoreonly_config ($filename)
+=item $f-E<gt>read_scoreonly_config ($filename)
 
 Read a configuration file and parse user preferences from it.
 
@@ -1292,7 +1292,7 @@ sub read_scoreonly_config {
 
 ###########################################################################
 
-=item $f->load_scoreonly_sql ($username)
+=item $f-E<gt>load_scoreonly_sql ($username)
 
 Read configuration parameters from SQL database and parse scores from it.  This
 will only take effect if the perl C<DBI> module is installed, and the
@@ -1318,7 +1318,7 @@ sub load_scoreonly_sql {
 
 ###########################################################################
 
-=item $f->load_scoreonly_ldap ($username)
+=item $f-E<gt>load_scoreonly_ldap ($username)
 
 Read configuration parameters from an LDAP server and parse scores from it.
 This will only take effect if the perl C<Net::LDAP> and C<URI> modules are
@@ -1343,7 +1343,7 @@ sub load_scoreonly_ldap {
 
 ###########################################################################
 
-=item $f->set_persistent_address_list_factory ($factoryobj)
+=item $f-E<gt>set_persistent_address_list_factory ($factoryobj)
 
 Set the persistent address list factory, used to create objects for the
 automatic welcomelist algorithm's persistent-storage back-end.  See
@@ -1359,7 +1359,7 @@ sub set_persistent_address_list_factory {
 
 ###########################################################################
 
-=item $f->compile_now ($use_user_prefs, $keep_userstate)
+=item $f-E<gt>compile_now ($use_user_prefs, $keep_userstate)
 
 Compile all patterns, load all configuration files, and load all
 possibly-required Perl modules.
@@ -1471,7 +1471,7 @@ sub compile_now {
 
 ###########################################################################
 
-=item $f->debug_diagnostics ()
+=item $f-E<gt>debug_diagnostics ()
 
 Output some diagnostic information, useful for debugging SpamAssassin
 problems.
@@ -1491,7 +1491,7 @@ sub debug_diagnostics {
 
 ###########################################################################
 
-=item $failed = $f->lint_rules ()
+=item $failed = $f-E<gt>lint_rules ()
 
 Syntax-check the current set of rules.  Returns the number of 
 syntax errors discovered, or 0 if the configuration is valid.
@@ -1536,7 +1536,7 @@ sub lint_rules {
 
 ###########################################################################
 
-=item $f->finish()
+=item $f-E<gt>finish()
 
 Destroy this object, so that it will be garbage-collected once it
 goes out of scope.  The object will no longer be usable after this
@@ -2017,7 +2017,7 @@ sub test_global_state_dir {
     return 0;
 }
 
-=item $fullpath = $f->find_rule_support_file ($filename)
+=item $fullpath = $f-E<gt>find_rule_support_file ($filename)
 
 Find a rule-support file, such as C<languages> or C<triplets.txt>,
 in the system-wide rules directory, and return its full path if
@@ -2048,7 +2048,7 @@ sub find_rule_support_file {
     map { my $p = $_; $p =~ s{$}{/$filename}; $p } @paths );
 }
 
-=item $f->create_default_prefs ($filename, $username [ , $userdir ] )
+=item $f-E<gt>create_default_prefs ($filename, $username [ , $userdir ] )
 
 Copy default preferences file into home directory for later use and
 modification, if it does not already exist and C<dont_copy_prefs> is
@@ -2374,7 +2374,7 @@ sub sa_die {
 
 ###########################################################################
 
-=item $f->copy_config ( [ $source ], [ $dest ] )
+=item $f-E<gt>copy_config ( [ $source ], [ $dest ] )
 
 Used for daemons to keep a persistent Mail::SpamAssassin object's
 configuration correct if switching between users.  Pass an associative
@@ -2425,7 +2425,7 @@ sub copy_config {
 
 ###########################################################################
 
-=item @plugins = $f->get_loaded_plugins_list ( )
+=item @plugins = $f-E<gt>get_loaded_plugins_list ( )
 
 Return the list of plugins currently loaded by this SpamAssassin object's
 configuration; each entry in the list is an object of type

@@ -32,10 +32,6 @@ input is validated through reputation assignments.
 
 See http://razor.sourceforge.net/ for more information about Razor.
 
-=head1 USER SETTINGS
-
-=over 4
-
 =cut
 
 package Mail::SpamAssassin::Plugin::Razor2;
@@ -90,6 +86,38 @@ sub set_config {
   my ($self, $conf) = @_;
   my @cmds;
 
+=head1 DEPENDENCIES
+
+Razor2 requires the C<Razor2::Client::Agent> Perl module to be installed.
+
+=head1 RULE DEFINITIONS
+
+Razor2 calculates a signature for each part of a multipart message and then
+compares those signatures to a database of known spam signatures. The server returns a confidence
+value (0-100) for each part of the message. The part with the highest confidence value is used as the confidence value
+for the message.
+
+The following eval rules are provided by this plugin:
+
+ full   RULENAME   eval:check_razor2()
+
+    Returns true if the confidence value of the message is greater than or equal to `min_cf` as defined in
+    the Razor2 configuration file 'razor-agent.conf(1)'.
+
+ full   RULENAME   eval:check_razor2_range(<engine>,<min>,<max>)
+
+    <engine>  Engine number (4, 8 or '')
+    <min>     Minimum confidence value (0-100)
+    <max>     Maximum confidence value (0-100)
+
+    Returns true if the spam confidence value for the message is greater than or equal to <min> and
+    less than or equal to <max>. If <engine> is not specified, the engine with the highest
+    confidence value is used.
+
+=head1 USER SETTINGS
+
+=over 4
+
 =item use_razor2 (0|1)		(default: 1)
 
 Whether to use Razor2, if it is available.
@@ -98,10 +126,15 @@ Whether to use Razor2, if it is available.
 
   push(@cmds, {
     setting => 'use_razor2',
-    is_admin => 1,
     default => 1,
     type => $Mail::SpamAssassin::Conf::CONF_TYPE_NUMERIC,
   });
+
+=back
+
+=head1 ADMINISTRATOR SETTINGS
+
+=over 4
 
 =item razor_fork (0|1)		(default: 1)
 
@@ -117,12 +150,6 @@ throughput. Considered experimental on Windows, where default is 0.
     default => am_running_on_windows()?0:1,
     type => $Mail::SpamAssassin::Conf::CONF_TYPE_NUMERIC,
   });
-
-=back
-
-=head1 ADMINISTRATOR SETTINGS
-
-=over 4
 
 =item razor_timeout n		(default: 5)
 

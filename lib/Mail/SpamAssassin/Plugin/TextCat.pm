@@ -99,7 +99,7 @@ sub set_config {
   my ($self, $conf) = @_;
   my @cmds;
 
-=head1 USER OPTIONS
+=head1 USER SETTINGS
 
 =over 4
 
@@ -629,6 +629,10 @@ sub check_language {
       }
     }
   }
+
+  my $rulename = $scan->get_current_eval_rule_name();
+  my $matched_languages = join(' ', @matches);
+  $scan->test_log("Languages detected: $matched_languages", $rulename);
 
   return 1;
 }

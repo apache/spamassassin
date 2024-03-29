@@ -63,13 +63,16 @@ header __PLING_QUERY		Subject =~ /\?.*!|!.*\?/
 meta PLING_QUERY                (__PLING_QUERY && !__ISO_2022_JP_DELIM)
 describe PLING_QUERY		Subject has exclamation mark and question mark
 
+# A common spam idiosyncrasy 
+describe	FROMSPACE	Idiosyncratic "From" header format
+header		FROMSPACE	From:raw =~ /^\s?\"\s/
 
 
 
 header MSGID_SPAM_CAPS		Message-ID =~ /^\s*<?[A-Z]+\@(?!(?:mailcity|whowhere)\.com)/
 describe MSGID_SPAM_CAPS	Spam tool Message-Id: (caps variant)
 
-header MSGID_SPAM_LETTERS	Message-Id =~ /<[a-z]{5,}\@(\S+\.)+\S+>/
+header MSGID_SPAM_LETTERS	Message-Id =~ /<[a-z]{5,}\@(?:\S+\.)+\S+>/
 describe MSGID_SPAM_LETTERS	Spam tool Message-Id: (letters variant)
 
 
@@ -411,7 +414,7 @@ describe FROM_LOCAL_DIGITS	From: localpart has long digit sequence
 
 header __TOCC_EXISTS		exists:ToCc
 
-header X_PRIORITY_CC		ALL =~ /^X-Priority:[^\n]{0,80}^Cc:/msi
+header X_PRIORITY_CC		ALL =~ /^X-Priority:.*?^Cc:/msi
 describe X_PRIORITY_CC		Cc: after X-Priority: (bulk email fingerprint)
 
 # catch non-RFC2047 compliant messages
@@ -421,11 +424,11 @@ header BAD_ENC_HEADER		ALL:raw =~ /=\?[^?\s]+\?[^?\s]\?\s*[^?]+\s(?!\?=)/
 describe BAD_ENC_HEADER		Message has bad MIME encoding in the header
 
 
-header __ML1  Precedence =~ m{\b(list|bulk)\b}i
+header __ML1  Precedence =~ m{\b(?:list|bulk)\b}i
 meta   __ML2  __HAS_LIST_ID
 header __ML3  exists:List-Post
 header __ML4  exists:Mailing-List
-header __ML5  Return-Path:addr =~ m{^([^\@]+-(request|bounces|admin|owner)|owner-[^\@]+)(\@|\z)}i
+header __ML5  Return-Path:addr =~ m{^(?:[^\@]+-(?:request|bounces|admin|owner)|owner-[^\@]+)(?:\@|\z)}i
 meta     __VIA_ML  __ML1 || __ML2 || __ML3 || __ML4 || __ML5
 describe __VIA_ML  Mail from a mailing list
 

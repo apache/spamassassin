@@ -686,6 +686,19 @@ sub _normalize {
   return $rv;
 }
 
+# Parse effective content type (Bug 6260, 6439)
+sub effective_type {
+  my ($self) = @_;
+  if (!exists $self->{'effective_type'}) {
+    if (($self->{'name'}||'') =~ /\.s?html?$/i) {
+      $self->{'effective_type'} = 'text/html';
+    } else {
+      $self->{'effective_type'} = $self->{'type'};
+    }
+  }
+  return $self->{'effective_type'};
+}
+
 =item rendered()
 
 rendered() takes the given text/* type MIME part, and attempts to
@@ -708,7 +721,7 @@ sub rendered {
   # Note: for bug 4843, make sure to skip text/calendar parts
   # we also want to skip things like text/x-vcard
   # text/x-aol is ignored here, but looks like text/html ...
-  my $type = lc $self->{'type'};
+  my $type = $self->effective_type();
   unless ($type eq 'text/plain' || $type eq 'text/html') {
     return (undef,undef);
   }

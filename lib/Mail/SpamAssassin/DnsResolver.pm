@@ -86,7 +86,7 @@ sub new {
 
 ###########################################################################
 
-=item $res->load_resolver()
+=item $res-E<gt>load_resolver()
 
 Load the C<Net::DNS::Resolver> object.  Returns 0 if Net::DNS cannot be used,
 1 if it is available.
@@ -185,7 +185,7 @@ sub load_resolver {
   return defined $self->{res};
 }
 
-=item $resolver = $res->get_resolver()
+=item $resolver = $res-E<gt>get_resolver()
 
 Return the C<Net::DNS::Resolver> object.
 
@@ -196,7 +196,7 @@ sub get_resolver {
   return $self->{res};
 }
 
-=item $res->configured_nameservers()
+=item $res-E<gt>configured_nameservers()
 
 Get a list of nameservers as configured by dns_server directives
 or as provided by Net::DNS, typically from /etc/resolv.conf
@@ -221,7 +221,7 @@ sub configured_nameservers {
   return @ns_addr_port;
 }
 
-=item $res->available_nameservers()
+=item $res-E<gt>available_nameservers()
 
 Get or set a list of currently available nameservers,
 which is typically a known-to-be-good subset of configured nameservers
@@ -346,7 +346,7 @@ sub pick_random_available_port {
   return $port_number;
 }
 
-=item $res->connect_sock()
+=item $res-E<gt>connect_sock()
 
 Re-connect to the first nameserver listed in C</etc/resolv.conf> or similar
 platform-dependent source, as provided by C<Net::DNS>.
@@ -477,7 +477,7 @@ sub connect_sock_if_reqd {
   $self->connect_sock() if !$self->{sock};
 }
 
-=item $res->get_sock()
+=item $res-E<gt>get_sock()
 
 Return the C<IO::Socket::INET> object used to communicate with
 the nameserver.
@@ -599,7 +599,11 @@ sub new_dns_packet {
     my $udp_payload_size = $self->{conf}->{dns_options}->{edns};
     if ($udp_payload_size && $udp_payload_size > 512) {
       # dbg("dns: adding EDNS ext, UDP payload size %d", $udp_payload_size);
-      $packet->edns->size($udp_payload_size);
+      if ($packet->edns->can('udpsize')) { # since Net::DNS 1.38
+        $packet->edns->udpsize($udp_payload_size);
+      } else {
+        $packet->edns->size($udp_payload_size);
+      }
     }
   }
 
@@ -651,7 +655,7 @@ sub _packet_id {
 
 ###########################################################################
 
-=item $id = $res->bgsend($domain, $type, $class, $cb)
+=item $id = $res-E<gt>bgsend($domain, $type, $class, $cb)
 
 DIRECT USE DISCOURAGED, please use bgsend_and_start_lookup in plugins.
 
@@ -734,7 +738,7 @@ sub bgsend {
 
 ###########################################################################
 
-=item $id = $res->bgread()
+=item $id = $res-E<gt>bgread()
 
 Similar to C<Net::DNS::Resolver::bgread>.  Reads a DNS packet from
 a supplied socket, decodes it, and returns a Net::DNS::Packet object
@@ -765,7 +769,7 @@ sub bgread {
 
 ###########################################################################
 
-=item $nfound = $res->poll_responses()
+=item $nfound = $res-E<gt>poll_responses()
 
 See if there are any C<bgsend> reply packets ready, and return
 the number of such packets delivered to their callbacks.
@@ -833,6 +837,30 @@ sub poll_responses {
       info("dns: bad dns reply: %s", $eval_stat);
     };
 
+    # bug 8225 - Do TCP fallback when UDP reply packet is too long, by retrying using Net::DNS::Resolver bgsend and bgread
+    my ($id, $packet_id);
+    if ($packet && $packet->header) {
+      my $header = $packet->header;
+      $packet_id = $header->id;  # set these here in case we need to retry for TCP fallback
+      $id = $self->_packet_id($packet);  # which will change $packet to a different class object
+      if ($header->rcode eq 'NOERROR' && $header->tc) {
+        # Use original Resolver which can handle TCP fallback, but keep id from the custom packet
+        my (undef, $qclass, $qtype, $qname) = split('/', $id);
+        dbg("dns: TCP fallback retry with %s, %s, %s", $qname, $qtype, $qclass);
+        my $orig_resolver =  $self->{main}->{resolver}->get_resolver();
+        eval {
+          my $handle = $orig_resolver->bgsend($qname, $qtype, $qclass);
+          $packet = $orig_resolver->bgread($handle);
+        } or do {
+          undef $packet;
+          my $eval_stat = $@ ne '' ? $@ : "errno=$!";  chomp $eval_stat;
+          # resignal if alarm went off
+          die $eval_stat  if $eval_stat =~ /__alarm__ignore__\(.*\)/s;
+          info("dns: bad dns tcp fallback reply: %s", $eval_stat);
+        };
+      }
+    }
+
     if (!$packet) {
       # error already reported above
 #     my $dns_err = $self->{res}->errorstring;
@@ -844,9 +872,6 @@ sub poll_responses {
         info("dns: dns reply is missing a header section");
       } else {
         my $rcode = $header->rcode;
-        my $packet_id = $header->id;
-        my $id = $self->_packet_id($packet);
-
         if ($rcode eq 'NOERROR') {  # success
           # NOERROR, may or may not have answer records
           dbg("dns: dns reply %s is OK, %d answer records",
@@ -930,7 +955,7 @@ sub flush_responses {
 
 ###########################################################################
 
-=item $res->bgabort()
+=item $res-E<gt>bgabort()
 
 Call this to release pending requests from memory, when aborting backgrounded
 requests, or when the scan is complete.
@@ -945,7 +970,7 @@ sub bgabort {
 
 ###########################################################################
 
-=item $packet = $res->send($name, $type, $class)
+=item $packet = $res-E<gt>send($name, $type, $class)
 
 Emulates C<Net::DNS::Resolver::send()>.
 
@@ -1002,12 +1027,12 @@ sub send {
 
 ###########################################################################
 
-=item $res->errorstring()
+=item $res-E<gt>errorstring()
 
 Little more than a stub for callers expecting this from C<Net::DNS::Resolver>.
 
-If called immediately after a call to $res->send this will return
-C<query timed out> if the $res->send DNS query timed out.  Otherwise 
+If called immediately after a call to $res-E<gt>send this will return
+C<query timed out> if the $res-E<gt>send DNS query timed out.  Otherwise 
 C<unknown error or no error> will be returned.
 
 No other errors are reported.
@@ -1022,7 +1047,7 @@ sub errorstring {
 
 ###########################################################################
 
-=item $res->finish_socket()
+=item $res-E<gt>finish_socket()
 
 Reset socket when done with it.
 
@@ -1039,7 +1064,7 @@ sub finish_socket {
 
 ###########################################################################
 
-=item $res->finish()
+=item $res-E<gt>finish()
 
 Clean up for destruction.
 

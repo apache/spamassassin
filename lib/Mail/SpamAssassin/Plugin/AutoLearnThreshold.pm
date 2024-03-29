@@ -77,7 +77,7 @@ sub set_config {
   my($self, $conf) = @_;
   my @cmds;
 
-=head1 USER OPTIONS
+=head1 USER SETTINGS
 
 The following configuration settings are used to control auto-learning:
 

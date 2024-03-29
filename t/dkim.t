@@ -10,15 +10,22 @@ use SATest; sa_t_init("dkim");
 
 use vars qw(%patterns %anti_patterns);
 
+my $tests = 258;
+my $version;
+
 use constant HAS_DKIM_VERIFIER => eval {
   require Mail::DKIM::Verifier;
-  version->parse(Mail::DKIM::Verifier->VERSION) >= version->parse(0.31);
+  $version = version->parse(Mail::DKIM::Verifier->VERSION);
+  $version >= version->parse(0.31);
 };
 
 use Test::More;
 plan skip_all => "Net tests disabled" unless conf_bool('run_net_tests');
 plan skip_all => "Needs Mail::DKIM::Verifier >= 0.31" unless HAS_DKIM_VERIFIER ;
-plan tests => 258;
+
+$tests -= 8 if $version < version->parse(0.37);
+$tests -= 16 if $version < version->parse(0.34);
+plan tests => $tests;
 
 use IO::File;
 use Mail::SpamAssassin;
@@ -123,7 +130,6 @@ $spamassassin_obj = Mail::SpamAssassin->new({
 ok($spamassassin_obj);
 $spamassassin_obj->compile_now;  # try to preloaded most modules
 
-my $version = Mail::DKIM::Verifier->VERSION;
 print "Using Mail::DKIM version $version\n";
 
 # mail samples test-pass* should all pass DKIM validation
@@ -132,7 +138,10 @@ local *DIR;
 opendir(DIR, $dirname) or die "Cannot open directory $dirname: $!";
 while (defined($fn = readdir(DIR))) {
   next  if $fn eq '.' || $fn eq '..';
+  # skip test cases that fail in older versions of Mail::DKIM
   next  if $fn !~ /^test-pass-\d*\.msg$/;
+  next if $version < version->parse(0.34) && $fn =~ /^test-pass-1[34]\.msg$/;
+  next if $version < version->parse(0.37) && $fn =~ /^test-pass-15\.msg$/;
   push(@test_filenames, "$dirname/$fn");
 }
 closedir(DIR) or die "Error closing directory $dirname: $!";
@@ -184,13 +193,6 @@ closedir(DIR) or die "Error closing directory $dirname: $!";
 test_samples(\@test_filenames, \@patt_antipatt_list);
 
 STDOUT->autoflush(1);
-if ($version < 0.34) {
-  print STDERR "\n\n*** Mail::DKIM $version, Tests 105, 109, 113, 117, 120 ".
-               "are expected to fail with versions older than 0.34\n\n";
-} elsif ($version < 0.37) {
-  print STDERR "\n\n*** Mail::DKIM $version, Test 120 ".
-               "is expected to fail with versions older than 0.36_5\n\n";
-}
 
 END {
   $spamassassin_obj->finish  if $spamassassin_obj;

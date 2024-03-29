@@ -377,7 +377,7 @@ NetSet
 
 =head1 BUGS
 
-See <http://bugzilla.spamassassin.org/>.
+See E<lt>http://bugzilla.spamassassin.org/E<gt>.
 
 =head1 SEE ALSO
 

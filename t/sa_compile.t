@@ -6,6 +6,8 @@
 
 use lib '.'; use lib 't';
 $ENV{'TEST_PERL_TAINT'} = 'no';     # inhibit for this test
+delete $ENV{'PERL_MM_OPT'};    #  bug 8891
+
 use SATest; sa_t_init("sa_compile");
 
 use Config;

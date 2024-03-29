@@ -203,9 +203,8 @@ sub sa_t_init {
   (-f "t/test_dir") && chdir("t");        # run from ..
   -f "test_dir"  or die "FATAL: not in test directory?\n";
 
-  unless (-d "log") {
-    mkdir ("log", 0755) or die ("Error creating log dir: $!");
-  }
+  mkdir ("log", 0755);
+  -d "log" or die "FATAL: failed to create log dir\n";
   chmod (0755, "log"); # set in case log already exists with wrong permissions
 
   if (!$RUNNING_ON_WINDOWS) {
@@ -222,6 +221,7 @@ sub sa_t_init {
   # individual work directory to make parallel tests possible
   $workdir = tempdir("$tname.XXXXXX", DIR => "log");
   die "FATAL: failed to create workdir: $!" unless -d $workdir;
+  chmod (0755, $workdir); # sometimes tempdir() ignores umask
   $keep_workdir = 0;
   # $siterules contains all stock *.pre files
   $siterules = "$workdir/siterules";
@@ -748,7 +748,7 @@ sub start_spamd {
       last if ($spamd_pid);
     }
 
-    my $sleep = (int($wait++ / 4) + 1);
+    my $sleep = (int(($wait++) / 4) + 1);
     warn "spam_pid not found: Sleeping $sleep - Retry # $retries\n" if $retries && $retries < 20;
 
     sleep $sleep if $retries > 0;

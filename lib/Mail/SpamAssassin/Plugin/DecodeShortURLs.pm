@@ -91,7 +91,7 @@ use vars qw(@ISA);
 
 my $VERSION = 4.00;
 
-use constant HAS_LWP_USERAGENT => eval { require LWP::UserAgent; };
+use constant HAS_LWP_USERAGENT => eval { require LWP::UserAgent; require LWP::Protocol::https; };
 
 sub dbg { my $msg = shift; return Mail::SpamAssassin::Logger::dbg("DecodeShortURLs: $msg", @_); }
 sub info { my $msg = shift; return Mail::SpamAssassin::Logger::info("DecodeShortURLs: $msg", @_); }
@@ -128,7 +128,7 @@ sub new {
   return $self;
 }
 
-=head1 PRIVILEGED SETTINGS
+=head1 USER SETTINGS
 
 =over 4
 
@@ -217,6 +217,8 @@ then only those are removed from list.
       }
     }
   });
+
+=head1 PRIVILEGED SETTINGS
 
 =over 4
 
@@ -328,6 +330,8 @@ See C<url_shortener_cache_autoclean> for database cleaning.
     default => 86400,
     type => $Mail::SpamAssassin::Conf::CONF_TYPE_NUMERIC
   });
+
+=head1 ADMINISTRATOR SETTINGS
 
 =over 4
 
@@ -593,7 +597,7 @@ sub initialise_url_shortener_cache {
       ");
       $self->{sth_delete} = $self->{dbh}->prepare("
         DELETE FROM short_url_cache
-        WHERE short_url ? = AND created < CAST(EXTRACT(epoch FROM NOW()) AS INT) - $conf->{url_shortener_cache_ttl}
+        WHERE short_url = ? AND created < CAST(EXTRACT(epoch FROM NOW()) AS INT) - $conf->{url_shortener_cache_ttl}
       ");
       $self->{sth_clean} = $self->{dbh}->prepare("
         DELETE FROM short_url_cache
@@ -707,11 +711,24 @@ sub _check_shortener_uri {
   my $levels = $host =~ tr/.//;
   # No point looking at single level "xxx.yy" without a path
   return if $levels == 1 && !$has_path;
+
   if (exists $conf->{url_shortener}->{$host}) {
     return {
       'uri' => $uri,
       'method' => $conf->{url_shortener}->{$host} == 1 ? 'head' : 'get',
     };
+  }
+  # if domain is a 3rd level domain check if there is a url shortener
+  # on the www domain
+  elsif($levels == 2 && $host =~ /^www\.([^.]+\.[^.]+)$/i) {
+    my $domain = $1;
+    if(($host eq "www.$domain") and exists $conf->{url_shortener}->{$domain}) {
+      dbg("Found internal www redirection for domain $domain");
+      return {
+        'uri' => $uri,
+        'method' => $conf->{url_shortener}->{$domain} == 1 ? 'head' : 'get',
+      };
+    }
   }
   # if domain is a 3rd level domain check if there is a url shortener
   # on the 2nd level tld
@@ -742,6 +759,8 @@ sub _check_short {
   my $uris = $pms->get_uri_detail_list();
   while (my($uri, $info) = each %{$uris}) {
     next unless $info->{domains} && $info->{cleaned};
+    # Remove anchors and parameters from shortened uris
+    $uri =~ s/(?:\#|\?).*//g;
     if (my $short_url_info = _check_shortener_uri($uri, $conf)) {
       $short_urls{$uri} = $short_url_info;
       last if scalar keys %short_urls >= $conf->{max_short_urls};
@@ -827,7 +846,7 @@ sub recursive_lookup {
       return;
     }
     $location = $response->headers->{location};
-    if ($self->{url_shortener_loginfo}) {
+    if ($conf->{url_shortener_loginfo}) {
       info("found $short_url => $location");
     } else {
       dbg("found $short_url => $location");
@@ -850,21 +869,19 @@ sub recursive_lookup {
   # redirect back to the same host as chaining incorrectly.
   $pms->{short_url_chained} = 1 if $count;
 
-  # Check if we are being redirected to a local page
-  # Don't recurse in this case...
+  # Check if it is a redirection to a relative URI
+  # Make it an absolute URI and chain to it in that case
   if ($location !~ m{^[a-z]+://}i) {
     my $orig_location = $location;
     my $orig_short_url = $short_url;
     # Strip to..
     if (index($location, '/') == 0) {
-      $short_url =~ s{^([a-z]+://.*?)[/?#].*}{$1}; # ..absolute path
+      $short_url =~ s{^([a-z]+://.*?)[/?#].*}{$1}; # ..absolute path base is http://example.com
     } else {
-      $short_url =~ s{^([a-z]+://.*)/}{$1}; # ..relative path
+      $short_url =~ s{^([a-z]+://.*/)}{$1}; # ..relative path base is http://example.com/a/b/
     }
-    $location = "$short_url/$location";
-    dbg("looks like a local redirection: $orig_short_url => $location ($orig_location)");
-    $pms->add_uri_detail_list($location) if !$pms->{uri_detail_list}->{$location};
-    return;
+    $location = "$short_url$location";
+    dbg("looks like a redirection to a relative URI: $orig_short_url => $location ($orig_location)");
   }
 
   if (exists $been_here{$location}) {

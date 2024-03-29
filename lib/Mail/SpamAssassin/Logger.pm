@@ -293,6 +293,7 @@ sub _log {
   my ($level, $message, @args) = @_;
 
   utf8::encode($message)  if utf8::is_utf8($message); # handle as octets
+  foreach (@args) { utf8::encode($_)  if utf8::is_utf8($_); } # Bug 8138
 
   $message =~ s/^(?:[a-z0-9_-]*):\s*//i;
 
@@ -304,7 +305,7 @@ sub _log {
   log_message(($level == INFO ? "info" : "dbg"), $message);
 }
 
-=item add(method => 'syslog', socket => $socket, facility => $facility, escape => $escape)
+=item add(method =E<gt> 'syslog', socket =E<gt> $socket, facility =E<gt> $facility, escape =E<gt> $escape)
 
 C<socket> is the type the syslog ("unix" or "inet").  C<facility> is the
 syslog facility (typically "mail").
@@ -317,12 +318,12 @@ output: backslashes change to \\ and non-ascii chars to \x{XX} or \x{XXXX}
 Escape value can be overridden with environment variable
 C<SA_LOGGER_ESCAPE>.
 
-=item add(method => 'file', filename => $file, escape => $escape)
+=item add(method =E<gt> 'file', filename =E<gt> $file, escape =E<gt> $escape)
 
 C<filename> is the name of the log file.  C<escape> works as described
 above.
 
-=item add(method => 'stderr', escape => $escape)
+=item add(method =E<gt> 'stderr', escape =E<gt> $escape)
 
 No options are needed for stderr logging, just don't close stderr first. 
 C<escape> works as described above.

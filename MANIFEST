@@ -123,6 +123,11 @@ lib/Mail/SpamAssassin/Plugin/WLBLEval.pm
 lib/Mail/SpamAssassin/Plugin/WelcomeListSubject.pm
 lib/Mail/SpamAssassin/PluginHandler.pm
 lib/Mail/SpamAssassin/Plugin/URILocalBL.pm
+lib/Mail/SpamAssassin/Pyzor/Client.pm
+lib/Mail/SpamAssassin/Pyzor/Digest/Pieces.pm
+lib/Mail/SpamAssassin/Pyzor/Digest/StripHtml.pm
+lib/Mail/SpamAssassin/Pyzor/Digest.pm
+lib/Mail/SpamAssassin/Pyzor.pm
 lib/Mail/SpamAssassin/RegistryBoundaries.pm
 lib/Mail/SpamAssassin/Reporter.pm
 lib/Mail/SpamAssassin/SQLBasedAddrList.pm
@@ -152,6 +157,7 @@ rules/v341.pre
 rules/v342.pre
 rules/v343.pre
 rules/v400.pre
+rules/v401.pre
 rules/20_aux_tlds.cf
 rules-extras/README.txt
 rules-extras/10_uridnsbl_skip_financial.cf
@@ -247,6 +253,7 @@ t/autolearn_force.t
 t/autolearn_force_fail.t
 t/basic_lint.t
 t/basic_lint_net.t
+t/basic_lint_without_plugins.t
 t/basic_lint_without_sandbox.t
 t/basic_meta.t
 t/basic_meta2.t
@@ -382,6 +389,7 @@ t/data/nice/orig_ip_hdr.eml
 t/data/nice/spf1
 t/data/nice/spf2
 t/data/nice/spf3
+t/data/nice/spf4
 t/data/nice/spf3-received-spf
 t/data/nice/spf4-received-spf-nofold
 t/data/nice/spf5-received-spf-crlf
@@ -418,9 +426,12 @@ t/data/spam/badmime3.txt
 t/data/spam/base64.txt
 t/data/spam/bsmtp
 t/data/spam/bsmtpnull
+t/data/spam/decodeshorturl/anchor.eml
 t/data/spam/decodeshorturl/base.eml
 t/data/spam/decodeshorturl/base2.eml
 t/data/spam/decodeshorturl/chain.eml
+t/data/spam/decodeshorturl/doubleslash.eml
+t/data/spam/decodeshorturl/params.eml
 t/data/spam/dmarc/nodmarc.eml
 t/data/spam/dmarc/noneko.eml
 t/data/spam/dmarc/quarko.eml
@@ -457,11 +468,22 @@ t/data/spam/spf1
 t/data/spam/spf2
 t/data/spam/spf3
 t/data/spam/unicode1
+t/data/spam/unicode2
 t/data/spam/urilocalbl_net.eml
 t/data/spamc_blank.cf
 t/data/taintcheckplugin.pm
 t/data/testplugin.pm
 t/data/testplugin2.pm
+t/data/txrep/0
+t/data/txrep/1
+t/data/txrep/2
+t/data/txrep/3
+t/data/txrep/4
+t/data/txrep/5
+t/data/txrep/6
+t/data/txrep/7
+t/data/txrep/8
+t/data/txrep/9
 t/data/validuserplugin.pm
 t/data/welcomelists/action.eff.org
 t/data/welcomelists/amazon_co_uk_ship
@@ -505,6 +527,7 @@ t/dkim.t
 t/dnsbl.t
 t/dnsbl_sc_meta.t
 t/dnsbl_subtests.t
+t/dnsplatform.t
 t/enable_compat.t
 t/extracttext.t
 t/freemail.t
@@ -519,6 +542,7 @@ t/hashbl.t
 t/html_colors.t
 t/html_obfu.t
 t/html_utf8.t
+t/html_visibility.t
 t/idn_dots.t
 t/if_can.t
 t/if_else.t
@@ -583,6 +607,9 @@ t/sa_awl.t
 t/sa_awl_welcome_block.t
 t/sa_check_spamd.t
 t/sa_compile.t
+t/sa_txrep.t
+t/sa_txrep_sql.t
+t/sa_txrep_welcomelist_out.t
 t/sha1.t
 t/shortcircuit.t
 t/shortcircuit_before_dns.t
@@ -658,6 +685,7 @@ t/uribl.t
 t/uribl_all_types.t
 t/uribl_domains_only.t
 t/uribl_ips_only.t
+t/uridetail.t
 t/urilocalbl.t
 t/utf8.t
 t/util_wrap.t

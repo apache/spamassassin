@@ -130,7 +130,7 @@ CREATE TABLE userpref (
   prefid int(11) NOT NULL auto_increment,
   PRIMARY KEY (prefid),
   INDEX (username)
-) TYPE=MyISAM;
+) ENGINE=InnoDB;
 
 For PostgreSQL, use the following command:
 

@@ -65,29 +65,6 @@ our $IS_DNS_AVAILABLE = undef;
 
 ###########################################################################
 
-BEGIN {
-  # some trickery. Load these modules right here, if possible; that way, if
-  # the module exists, we'll get it loaded now.  Very useful to avoid attempted
-  # loads later (which will happen).  If we do a fork(), we could wind up
-  # attempting to load these modules in *every* subprocess.
-  #
-# # We turn off strict and warnings, because Net::DNS and Razor both contain
-# # crud that -w complains about (perl 5.6.0).  Not that this seems to work,
-# # mind ;)
-# no strict;
-# local ($^W) = 0;
-
-  no warnings;
-  eval {
-    require MIME::Base64;
-  };
-  eval {
-    require IO::Socket::UNIX;
-  };
-};
-
-###########################################################################
-
 sub do_rbl_lookup {
   my ($self, $rule, $set, $type, $host, $subtest) = @_;
 

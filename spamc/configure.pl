@@ -88,19 +88,33 @@ else
 {
   # These are the defaults for the Makefile.
   my %env = (
-    CC             => 'cl',
+    CC             => 'gcc',
 
-    WINCFLAGS      => '/DWIN32 /W4',
-    SSLCFLAGS      => '/DSPAMC_SSL',
+    WINCFLAGS      => '',
+    SSLCFLAGS      => '-DSPAMC_SSL',
 
     SRCDIR         =>  $srcdir,
 
-    WINLIBS        => 'ws2_32.lib',
-    SSLLIBS        => 'ssleay32.lib libeay32.lib',
+    WINLIBS        => '-lws2_32 -o spamc.exe',
+    SSLLIBS        => '-lcrypto -lssl',
 
     SPAMC_FILES    => 'spamc.c getopt.c',
     LIBSPAMC_FILES => 'libspamc.c utils.c',
   );
+
+  my $cl_found = 0;
+  foreach my $path (File::Spec->path()) {
+    if( -x $path . '\cl.exe' ) {
+      $cl_found = 1;
+    }
+  }
+  if($cl_found) {
+    $env{'CC'}        = 'cl';
+    $env{'WINCFLAGS'} = '/DWIN32 /W4';
+    $env{'SSLCFLAGS'} = '/DSPAMC_SSL';
+    $env{'WINLIBS'}   = 'ws2_32.lib';
+    $env{'SSLLIBS'}   = 'ssleay32.lib libeay32.lib';
+  }
 
   # Enable SSL only if requested.
   if ($args{'enable-ssl'} and $args{'enable-ssl'} ne 'yes') {

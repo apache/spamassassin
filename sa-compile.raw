@@ -255,7 +255,8 @@ sub compile_base_strings {
   die "secure_tmpdir failed" unless $dirpath && -w $dirpath;
 
   my $sudo = ($opt{sudo} ? 'sudo ' : '');
-
+  delete $ENV{'PERL_MM_OPT'};    # bug 8199
+  
   foreach my $ruletype (sort keys %{$conf->{base_orig}})
   {
     # create the bases.in file
@@ -803,11 +804,11 @@ C<Mail::SpamAssassin::Plugin::Rule2XSBody>
 
 =head1 BUGS
 
-See <https://issues.apache.org/SpamAssassin/>
+See E<lt>https://issues.apache.org/SpamAssassin/E<gt>
 
 =head1 AUTHORS
 
-The Apache SpamAssassin(tm) Project <https://spamassassin.apache.org/>
+The Apache SpamAssassin(tm) Project E<lt>https://spamassassin.apache.org/E<gt>
 
 =head1 LICENSE AND COPYRIGHT
 

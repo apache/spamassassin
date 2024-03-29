@@ -63,7 +63,10 @@ header __HAS_XORIGMSGID		X-Orig-Message-Id =~ /^<.+\@.+>$/m
 
 meta   __GROUPSIO_GATED		__GROUPSIO_MSGID && __HAS_XORIGMSGID
 
-meta __UNUSABLE_MSGID (__LYRIS_EZLM_REMAILER || __GATED_THROUGH_RCVD_REMOVER || __WACKY_SENDMAIL_VERSION || __IPLANET_MESSAGING_SERVER || __HOTMAIL_BAYDAV_MSGID || __SYMPATICO_MSGID && __GROUPSIO_GATED)
+#bz8202
+header	__MCRSFT_MSGID	MESSAGEID =~ /^<[[:alnum:]]{30,45}@[^>]*\.(outlook|exchangelabs).com>$/im
+
+meta	__UNUSABLE_MSGID (__MCRSFT_MSGID || __LYRIS_EZLM_REMAILER || __GATED_THROUGH_RCVD_REMOVER || __WACKY_SENDMAIL_VERSION || __IPLANET_MESSAGING_SERVER || __HOTMAIL_BAYDAV_MSGID || __SYMPATICO_MSGID && __GROUPSIO_GATED)
 
 ## now on to the forgery rules
 
@@ -270,7 +273,7 @@ describe X_MESSAGE_INFO		Bulk email fingerprint (X-Message-Info) found
 
 # case-sensitive rule
 # only significant rules with no FPs, hit recently, on 2+ corpuses
-header HEADER_SPAM		ALL =~ /^(Alternate-Recipient|Antivirus|Approved|Delivery-Notification|Disclose-Recipients|Error-path|Language|Location|Mime-Subversion|Newsletter-ID|PID|Rot|UID|X-BounceTrace|X-CS-IP|X-Company-Address|X-Company-City|X-Company-Country|X-Company-State|X-Company-Zip|X-E(?:[Mm]ail)?|X-Encoding|X-Originating-Company|X-RMD-Text|X-SG4|X-SP-Track-ID|X-Webmail-Time|X-bounce-to):/m
+header HEADER_SPAM		ALL =~ /^(?:Alternate-Recipient|Antivirus|Approved|Delivery-Notification|Disclose-Recipients|Error-path|Language|Location|Mime-Subversion|Newsletter-ID|PID|Rot|UID|X-BounceTrace|X-CS-IP|X-Company-Address|X-Company-City|X-Company-Country|X-Company-State|X-Company-Zip|X-E(?:[Mm]ail)?|X-Encoding|X-Originating-Company|X-RMD-Text|X-SG4|X-SP-Track-ID|X-Webmail-Time|X-bounce-to):/m
 describe HEADER_SPAM		Bulk email fingerprint (header-based) found
 
 header RATWARE_RCVD_PF		Received =~ / \(Postfix\) with ESMTP id [^;]+\; \S+ \d+ \S+ \d+ \d+:\d+:\d+ \S+$/s

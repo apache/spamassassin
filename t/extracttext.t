@@ -5,9 +5,9 @@ use SATest; sa_t_init("extracttext");
 use Mail::SpamAssassin::Util;
 use Test::More;
 
-use constant PDFTOTEXT => eval { my $f = Mail::SpamAssassin::Util::find_executable_in_env_path('pdftotext'); ($f !~ /\s/)?$f:undef};
-use constant TESSERACT => eval { my $f = Mail::SpamAssassin::Util::find_executable_in_env_path('tesseract'); ($f !~ /\s/)?$f:undef};
-use constant CAT => eval { my $f = Mail::SpamAssassin::Util::find_executable_in_env_path('cat'); ($f !~ /\s/)?$f:undef};
+use constant PDFTOTEXT => eval { my $f = Mail::SpamAssassin::Util::find_executable_in_env_path('pdftotext'); ($f !~ /\s/)?$f:'"'.$f.'"'};
+use constant TESSERACT => eval { my $f = Mail::SpamAssassin::Util::find_executable_in_env_path('tesseract'); ($f !~ /\s/)?$f:'"'.$f.'"'};
+use constant CAT => eval { my $f = Mail::SpamAssassin::Util::find_executable_in_env_path('cat'); ($f !~ /\s/)?$f:'"'.$f.'"'};
 
 my $tests = 0;
 $tests += 2 if (PDFTOTEXT);
@@ -63,7 +63,7 @@ if (TESSERACT) {
 if (CAT) {
    tstprefs("
      extracttext_external  cat  ".CAT." {}
-     extracttext_use       cat  .txt .html .shtml .xhtml octet/stream
+     extracttext_use       cat  .txt
      extracttext_timeout 30 1
    ");
    %anti_patterns = ();

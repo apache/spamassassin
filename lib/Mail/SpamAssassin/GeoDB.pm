@@ -24,8 +24,8 @@ Plugins need to signal SA main package the modules they want loaded
 package Mail::SpamAssassin::Plugin::MyPlugin;
 sub new {
   ...
-  $self->{main}->{geodb_wanted}->{country} = 1;
-  $self->{main}->{geodb_wanted}->{isp} = 1;
+  $self-E<gt>{main}-E<gt>{geodb_wanted}-E<gt>{country} = 1;
+  $self-E<gt>{main}-E<gt>{geodb_wanted}-E<gt>{isp} = 1;
 )
 
 (internal stuff still subject to change)

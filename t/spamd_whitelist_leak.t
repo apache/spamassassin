@@ -9,6 +9,10 @@ plan skip_all => 'Spamd tests disabled.' if $SKIP_SPAMD_TESTS;
 plan tests => 8;
 
 # ---------------------------------------------------------------------------
+tstpre ("
+  loadplugin Mail::SpamAssassin::Plugin::AWL
+");
+
 # bug 6003
 
 disable_compat "welcomelist_blocklist";

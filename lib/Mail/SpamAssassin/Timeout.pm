@@ -24,7 +24,7 @@ Mail::SpamAssassin::Timeout - safe, reliable timeouts in perl
     # non-timeout code...
 
     my $t = Mail::SpamAssassin::Timeout->new({ secs => 5, deadline => $when });
-    
+
     $t->run(sub {
         # code to run with a 5-second timeout...
     });
@@ -65,18 +65,18 @@ our @ISA = qw();
 
 ###########################################################################
 
-=item my $t = Mail::SpamAssassin::Timeout->new({ ... options ... });
+=item my $t = Mail::SpamAssassin::Timeout-E<gt>new({ ... options ... });
 
 Constructor.  Options include:
 
 =over 4
 
-=item secs => $seconds
+=item secs =E<gt> $seconds
 
 time interval, in seconds. Optional; if neither C<secs> nor C<deadline> is
 specified, no timeouts will be applied.
 
-=item deadline => $unix_timestamp
+=item deadline =E<gt> $unix_timestamp
 
 Unix timestamp (seconds since epoch) when a timeout is reached in the latest.
 Optional; if neither B<secs> nor B<deadline> is specified, no timeouts will
@@ -108,7 +108,7 @@ sub new {
 
 ###########################################################################
 
-=item $t->run($coderef)
+=item $t-E<gt>run($coderef)
 
 Run a code reference within the currently-defined timeout.
 
@@ -116,7 +116,7 @@ The timeout is as defined by the B<secs> and B<deadline> parameters
 to the constructor.
 
 Returns whatever the subroutine returns, or C<undef> on timeout.
-If the timer times out, C<$t-<gt>timed_out()> will return C<1>.
+If the timer times out, C<$t-E<gt>timed_out()> will return C<1>.
 
 Time elapsed is not cumulative; multiple runs of C<run> will restart the
 timeout from scratch. On the other hand, nested timers do observe outer
@@ -125,9 +125,9 @@ established them, i.e. code running under an inner timer can not exceed
 the time limit established by an outer timer. When restarting an outer
 timer on return, elapsed time of a running code is taken into account.
 
-=item $t->run_and_catch($coderef)
+=item $t-E<gt>run_and_catch($coderef)
 
-Run a code reference, as per C<$t-<gt>run()>, but also catching any
+Run a code reference, as per C<$t-E<gt>run()>, but also catching any
 C<die()> calls within the code reference.
 
 Returns C<undef> if no C<die()> call was executed and C<$@> was unset, or the
@@ -291,7 +291,7 @@ sub _run {      # private
 
 ###########################################################################
 
-=item $t->timed_out()
+=item $t-E<gt>timed_out()
 
 Returns C<1> if the most recent code executed in C<run()> timed out, or
 C<undef> if it did not.
@@ -305,7 +305,7 @@ sub timed_out {
 
 ###########################################################################
 
-=item $t->reset()
+=item $t-E<gt>reset()
 
 If called within a C<run()> code reference, causes the current alarm timer
 to be restored to its original setting (useful after our alarm setting was

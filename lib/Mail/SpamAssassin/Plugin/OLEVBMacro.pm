@@ -81,7 +81,7 @@ use strict;
 use warnings;
 
 use Mail::SpamAssassin::Plugin;
-use Mail::SpamAssassin::Util qw(compile_regexp);
+use Mail::SpamAssassin::Util qw(compile_regexp get_part_details);
 
 use constant HAS_ARCHIVE_ZIP => eval { require Archive::Zip; };
 use constant HAS_IO_STRING => eval { require IO::String; };
@@ -550,7 +550,7 @@ sub _check_attachments {
   foreach my $part ($pms->{msg}->find_parts(qr/./, 1)) {
     next if $part->{type} =~ /$conf->{olemacro_skip_ctypes}/i;
 
-    my ($ctt, $ctd, $cte, $name) = _get_part_details($pms, $part);
+    my ($ctt, $ctd, $cte, $name) = get_part_details($pms, $part, $conf->{olemacro_prefer_contentdisposition});
     next unless defined $ctt;
     next if $name eq '';
 
@@ -769,53 +769,6 @@ sub _check_zip {
   }
 
   return 1;
-}
-
-sub _get_part_details {
-    my ($pms, $part) = @_;
-    #https://en.wikipedia.org/wiki/MIME#Content-Disposition
-    #https://github.com/mikel/mail/pull/464
-
-    my $ctt = $part->get_header('content-type');
-    return undef unless defined $ctt; ## no critic (ProhibitExplicitReturnUndef)
-
-    my $cte = lc($part->get_header('content-transfer-encoding') || '');
-    return undef unless ($cte =~ /^(?:base64|quoted\-printable)$/); ## no critic (ProhibitExplicitReturnUndef)
-
-    $ctt = _decode_part_header($part, $ctt || '');
-
-    my $name = '';
-    my $cttname = '';
-    my $ctdname = '';
-
-    if ($ctt =~ m/name\s*=\s*["']?([^"';]*)/is) {
-      $cttname = $1;
-      $cttname =~ s/\s+$//;
-    }
-
-    my $ctd = $part->get_header('content-disposition');
-    $ctd = _decode_part_header($part, $ctd || '');
-
-    if ($ctd =~ m/filename\s*=\s*["']?([^"';]*)/is) {
-      $ctdname = $1;
-      $ctdname =~ s/\s+$//;
-    }
-
-    if (lc $ctdname eq lc $cttname) {
-      $name = $ctdname;
-    } elsif ($ctdname eq '') {
-      $name = $cttname;
-    } elsif ($cttname eq '') {
-      $name = $ctdname;
-    } else {
-      if ($pms->{conf}->{olemacro_prefer_contentdisposition}) {
-        $name = $ctdname;
-      } else {
-        $name = $cttname;
-      }
-    }
-
-    return $ctt, $ctd, $cte, $name;
 }
 
 sub _open_zip_handle {
@@ -1091,35 +1044,6 @@ sub _check_ctype_xml {
 
 sub _zip_error_handler {
   1;
-}
-
-sub _decode_part_header {
-  my($part, $header_field_body) = @_;
-
-  return '' unless defined $header_field_body && $header_field_body ne '';
-
-  # deal with folding and cream the newlines and such
-  $header_field_body =~ s/\n[ \t]+/\n /g;
-  $header_field_body =~ s/\015?\012//gs;
-
-  local($1,$2,$3);
-
-  # Multiple encoded sections must ignore the interim whitespace.
-  # To avoid possible FPs with (\s+(?==\?))?, look for the whole RE
-  # separated by whitespace.
-  1 while $header_field_body =~
-            s{ ( = \? [A-Za-z0-9_-]+ \? [bqBQ] \? [^?]* \? = ) \s+
-               ( = \? [A-Za-z0-9_-]+ \? [bqBQ] \? [^?]* \? = ) }
-             {$1$2}xsg;
-
-  # transcode properly encoded RFC 2047 substrings into UTF-8 octets,
-  # leave everything else unchanged as it is supposed to be UTF-8 (RFC 6532)
-  # or plain US-ASCII
-  $header_field_body =~
-    s{ (?: = \? ([A-Za-z0-9_-]+) \? ([bqBQ]) \? ([^?]*) \? = ) }
-     { $part->__decode_header($1, uc($2), $3) }xsge;
-
-  return $header_field_body;
 }
 
 # Version features

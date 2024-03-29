@@ -175,12 +175,13 @@ my %makefile = (
     'PREREQ_PM' => {
         'File::Spec'           => 0.8,           # older versions lack some routines we need
         'File::Copy'           => 2.02,          # this version is shipped with 5.005_03, the oldest version known to work
+        'File::Temp'           => 0,             # core module, dependency not needed, here for testing purposes, see bug 8089
         'Pod::Usage'           => 1.10,          # all versions prior to this do seem to be buggy
         'HTML::Parser'         => 3.43,          # the HTML code is based on this parser, older versions have utf-8 bugs
         'Archive::Tar'         => 1.23,          # for sa-update
         'IO::Zlib'             => 1.04,          # for sa-update
         'Mail::DKIM'           => 0.31,
-        'Net::DNS'             => 0.69,
+        'Net::DNS'             => 1.10,
         'NetAddr::IP'          => 4.010,
         'Sys::Hostname'        => 0,
         'Time::HiRes'          => 0,
@@ -198,14 +199,14 @@ my %makefile = (
         'ExtUtils::MakeMaker' => MIN_MAKEMAKER_VERSION,
     },
 
-    # The modules that are not core that are used in default tests
+    # The modules that are not core or that require a minimum version that are used in default tests
     'TEST_REQUIRES' => {
-        'Devel::Cycle' => 0,
-        'Test::More'   => 0,
-        'Text::Diff' => 0,
+        'Test::Simple' => 1.302067,
         'Perl::Critic::Policy::TestingAndDebugging::ProhibitNoStrict' => 0,
         'Perl::Critic::Policy::Perlsecret' => 0,
     },
+
+    'LICENSE' => 'apache_2_0',
 
     'dist' => {
         COMPRESS => 'gzip -9f',
@@ -349,10 +350,8 @@ $makefile{META_MERGE} = {
 
   'meta-spec' => {
     version => '2',
-    url     => 'http://search.cpan.org/perldoc?CPAN::Meta::Spec',
+    url     => 'https://metacpan.org/pod/CPAN::Meta::Spec',
   },
-
-  license => 'apache_2_0',
 
   resources => {
     license     => 'http://www.apache.org/licenses/LICENSE-2.0.html',
@@ -387,7 +386,7 @@ $makefile{META_MERGE} = {
         'Mail::DKIM' =>                0.37,
         'DBI' =>                       0,
         'DBD::SQLite' =>               1.59_01,
-        'LWP::UserAgent' =>            0,
+        'LWP::Protocol::https' =>      0,
         'Encode::Detect::Detector' =>  0,
         'Net::Patricia' =>             1.16,
         'Net::CIDR::Lite' =>           0,
@@ -401,6 +400,8 @@ $makefile{META_MERGE} = {
     test => {
       recommends => {
         'Net::DNS::Nameserver' =>      0,
+        'Devel::Cycle' =>              0,
+        'Text::Diff' =>                0,
       },
     },
   },
@@ -1161,6 +1162,7 @@ conf__install:
 	$(PERL) -MFile::Copy -e "copy(q[rules/v342.pre], q[$(B_CONFDIR)/v342.pre]) unless -f q[$(B_CONFDIR)/v342.pre]"
 	$(PERL) -MFile::Copy -e "copy(q[rules/v343.pre], q[$(B_CONFDIR)/v343.pre]) unless -f q[$(B_CONFDIR)/v343.pre]"
 	$(PERL) -MFile::Copy -e "copy(q[rules/v400.pre], q[$(B_CONFDIR)/v400.pre]) unless -f q[$(B_CONFDIR)/v400.pre]"
+	$(PERL) -MFile::Copy -e "copy(q[rules/v401.pre], q[$(B_CONFDIR)/v401.pre]) unless -f q[$(B_CONFDIR)/v401.pre]"
 
 data__install:
 	-$(MKPATH) $(B_DATADIR)

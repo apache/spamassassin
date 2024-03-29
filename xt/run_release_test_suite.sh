@@ -12,9 +12,9 @@
 # The root* tests will be skipped because this script will not run as root
 # Use sudo make test TEST_FILES="t/root*.t" to run just those tests separately
 
-# All command line arguments passed to this script are pasased to the call to prove
+# All command line arguments passed to this script are passed to the call to prove(1)
 
-if [ "$(id -u)" -eq 0 ]; then echo Do ont run this as root; exit 1; fi
+if [ "$(id -u)" -eq 0 ]; then echo "Do not run this as root"; exit 1; fi
 
 # Remove -T option from user, because this script always adds it
 # Check for a verbose option and pass it to t.rules/run
