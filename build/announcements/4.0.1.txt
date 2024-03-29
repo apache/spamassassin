@@ -46,8 +46,8 @@ This release addresses the following issues:
 
   - Improved TxRep locking management
 
-  - Added Mail::SpamAssassin::Plugin::AuthRes plugin to use Authentication-Results
-    header fields in other plugins
+  - Added Mail::SpamAssassin::Plugin::AuthRes plugin to use
+    Authentication-Results header fields in other plugins
 
   - Added a Pyzor Perl implementation
 
@@ -100,18 +100,17 @@ https://spamassassin.apache.org/downloads.cgi
 
 sha256sum of archive files:
 
-
-TBD Mail-SpamAssassin-4.0.1.tar.bz2
-TBD Mail-SpamAssassin-4.0.1.tar.gz
-TBD Mail-SpamAssassin-4.0.1.zip
-TBD Mail-SpamAssassin-rules-4.0.1.rnnnnnn.tgz
+ 9775ed7559e83ec3e6c03edb2be8ffc7f15cc405fb13e85c148eb0bf191721a8 Mail-SpamAssassin-4.0.1.tar.bz2
+ 5c6bb222e18405f1a276816d04e1ffc5cc90785e1265714b4506c2b541d6d5e5 Mail-SpamAssassin-4.0.1.tar.gz
+ 728ffbc536fcb4f9bb07adfc72eeb706f8ff1257833bf0bf6c70ab2eea01de97 Mail-SpamAssassin-4.0.1.zip
+ 381eadfc7e513e5f735389b78173de5af471f3d06fe6ab8f129634a6644b4bf4 Mail-SpamAssassin-rules-4.0.1.r1916528.tgz
 
 sha512sum of archive files:
 
-TBD  Mail-SpamAssassin-4.0.0.tar.bz2
-TBD  Mail-SpamAssassin-4.0.0.tar.gz
-TBD  Mail-SpamAssassin-4.0.0.zip
-TBD  Mail-SpamAssassin-rules-4.0.0.rnnnnnnn.tgz
+ 66183e356b07d1049cf5598fc1e563e4aab580dfca04bf8ec37781dfb57ef568d33c6f6455076f54f940947f5a5dfefa7a08d233833deea5fe5ea18b669cd790   Mail-SpamAssassin-4.0.1.tar.bz2
+ 7ac2d789d8744dfe37f647013871e293de50cfcd792029956eb6cea8e51343aad135398bd91867c3c21a68e5fb6330bd6b38a04b794a24449a59287b46d4ac70   Mail-SpamAssassin-4.0.1.tar.gz
+ efed5a7ae2fb4f200c9f248d61bdda44a6e4103b4245b086c3b94f1880e5cee1f19a7b4d810d4553cc566208970052d4f26cc5512fa4a0e1d0d09d4fa54bdd15   Mail-SpamAssassin-4.0.1.zip
+ 7e6093c8514e1b18f3b47215dc97d51b7b70142ca2fe7242362c021bf770b2c1c1e99a8227d1c5b9b5d303e405ab9e6a7c67a60b5b03dcb6588bd68c733e2448   Mail-SpamAssassin-rules-4.0.1.r1916528.tgz
 
 Note that the Rules files, aka *-rules-*.tgz, are only necessary if
 you cannot, or do not wish to, run "sa-update" after
