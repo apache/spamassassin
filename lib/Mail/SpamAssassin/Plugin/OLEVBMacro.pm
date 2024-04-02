@@ -123,7 +123,7 @@ my $exe_marker2 = "URLDownloadToFileA";
 
 # CVE-2021-40444 marker
 my $mhtml_marker1 = "^MHTML:&#x48;&#x54;&#x50;&#x3a;&#x5c;&#x5c;&#x31;&";
-my $mhtml_marker2 = "^mhtml:https?://";
+my $mhtml_marker2 = "^(?:mhtml:https?://|file:///)";
 
 # this code burps an ugly message if it fails, but that's redirected elsewhere
 # AZ_OK is a constant exported by Archive::Zip
@@ -854,15 +854,14 @@ sub _check_macrotype_doc {
     foreach my $rl (@relations) {
       if ($rl =~ /Target=\"([^"]*)\".*?TargetMode=\"External\"/is) {
         my $uri = $1;
+        dbg("Found target uri: $uri");
         if ($uri =~ /(?:$mhtml_marker1|$mhtml_marker2)/i) {
-          dbg("Found target mhtml uri: $uri");
           if (keys %{$pms->{olemacro_mhtml_uri}} < 5) {
             $pms->{olemacro_mhtml_uri}{$uri} = 1;
           }
         }
         $uri =~ s/^mhtml://i;
         if ($uri =~ /^https?:\/\//i) {
-          dbg("Found target uri: $uri");
           if (!exists $pms->{olemacro_redirect_uri}{$uri}) {
             if (keys %{$pms->{olemacro_redirect_uri}} < 10) {
               $pms->add_uri_detail_list($uri);
