@@ -191,7 +191,7 @@ BITCOIN_EXTORT_02
 # tflags publish
 BITCOIN_IMGUR
 
-# tflags publish
+# tflags net
 BITCOIN_MALWARE
 
 # tflags publish
@@ -260,7 +260,7 @@ BITCOIN_YOUR_INFO
 # good enough
 BODY_SINGLE_URI
 
-# tflags publish
+# tflags net
 BODY_URI_ONLY
 
 # tflags publish
@@ -299,7 +299,7 @@ CN_B2B_SPAMMER
 # tflags publish
 COMMENT_GIBBERISH
 
-# good enough
+# tflags net
 COMPENSATION
 
 # tflags publish
@@ -482,10 +482,10 @@ FONT_INVIS_POSTEXTRAS
 # tflags net
 FORGED_SPF_HELO
 
-# tflags publish
+# tflags net
 FORM_FRAUD
 
-# tflags publish
+# tflags net
 FORM_FRAUD_3
 
 # tflags publish
@@ -563,7 +563,7 @@ FROM_MISSP_MSFT
 # good enough
 FROM_MISSP_PHISH
 
-# good enough
+# tflags net
 FROM_MISSP_REPLYTO
 
 # tflags net
@@ -906,6 +906,9 @@ JH_SPAMMY_PATTERN01
 JH_SPAMMY_PATTERN02
 
 # tflags net
+KHOP_FAKE_EBAY
+
+# tflags net
 KHOP_HELO_FCRDNS
 
 # good enough
@@ -958,6 +961,9 @@ MALWARE_PASSWORD
 
 # tflags publish
 MALW_ATTACH
+
+# tflags net
+MANY_HDRS_LCASE
 
 # tflags publish
 MANY_SPAN_IN_TEXT
@@ -1626,6 +1632,9 @@ SUBJ_ATTENTION
 SUBJ_BRKN_WORDNUMS
 
 # tflags net
+SUBJ_UNNEEDED_HTML
+
+# tflags net
 SURBL_BLOCKED
 
 # good enough
@@ -1670,11 +1679,17 @@ TONOM_EQ_TOLOC_SHRT_SHRTNER
 # tflags publish
 TO_EQ_FM_DIRECT_MX
 
-# good enough
+# tflags net
 TO_EQ_FM_DOM_HTML_IMG
 
 # tflags net
+TO_EQ_FM_DOM_HTML_ONLY
+
+# tflags net
 TO_EQ_FM_DOM_SPF_FAIL
+
+# tflags net
+TO_EQ_FM_HTML_ONLY
 
 # tflags net
 TO_EQ_FM_SPF_FAIL
@@ -1694,7 +1709,7 @@ TO_NO_BRKTS_HTML_IMG
 # tflags publish
 TO_NO_BRKTS_HTML_ONLY
 
-# good enough
+# tflags net
 TO_NO_BRKTS_MSFT
 
 # tflags publish
@@ -1712,16 +1727,13 @@ TVD_FROM_1
 # good enough
 TVD_PH_7
 
-# good enough
-TVD_PH_BODY_ACCOUNTS_PRE
-
-# good enough
+# tflags net
 TVD_SPACE_ENCODED
 
-# good enough
+# tflags net
 TVD_SPACE_RATIO_MINFP
 
-# good enough
+# tflags net
 TVD_SUBJ_NUM_OBFU_MINFP
 
 # tflags publish
@@ -1895,7 +1907,7 @@ URI_NOVOWEL
 # good enough
 URI_ONLY_LOW_CONTRAST
 
-# tflags publish
+# tflags net
 URI_ONLY_MSGID_MALF
 
 # tflags publish
