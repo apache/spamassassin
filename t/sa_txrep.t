@@ -88,7 +88,7 @@ tstprefs("
   txrep_weight_email 10
   $rules
 ");
-unlink("./$userstate/txreptest");
+unlink("./$userstate/txreptest", "./$userstate/txreptest.pag", "./$userstate/txreptest.dir");
 
 %txrep_pattern0 = (
   q{ 0.0 TXREP } => 'Score normalizing',
