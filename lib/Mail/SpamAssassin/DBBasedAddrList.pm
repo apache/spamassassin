@@ -165,11 +165,10 @@ sub remove_entry {
     # could be slow...
     my $mailaddr = $1;
 
-    while (my ($key, $value) = each %{$self->{accum}}) {
-      # regex will catch both key and key|totscore entries and delete them
-      if ($key =~ /^\Q${mailaddr}\E\|/) {
+    # regex will catch both key and key|totscore entries and delete them
+    # bug 8237 - Never use while my ($key, $value) (each %hash) to delete elements when using tied hashes
+    foreach my $key (grep {/^\Q${mailaddr}\E\|/} keys %{$self->{accum}}) {
         delete $self->{accum}->{$key};
-      }
     }
   }
 }
