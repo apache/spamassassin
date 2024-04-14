@@ -13,69 +13,6 @@ use constant MIN_MAKEMAKER_VERSION => 6.64;
 use constant RUNNING_ON_WINDOWS => ($^O =~ /^(mswin|dos|os2)/oi);
 use constant HAS_DBI => eval { require DBI; };
 
-my @ATT_KEYS = (
-  # PLEASE READ THE FILE 'PACKAGING' FOR INFORMATION ON THESE VARIABLES.
-  #
-  # (Current) EU::MMs make a difference between these three possible general
-  # install destinations. One can set INSTALLDIRS to 'perl', 'site' or
-  # 'vendor' to choose one explicitly (the default is 'site'). They have the
-  # following meaning:
-  #  * PERL:    Only essential modules shipped with Perl should be installed
-  #             there. Don't put Apache SpamAssassin there.
-  #  * SITE:    The default. Normal installations via CPAN or from the sources
-  #             should use these dirs.
-  #  * VENDOR:  A special set of paths for packaged (RPM, deb, portage, ...)
-  #             Perl modules. Not always (correctly) used but the intention
-  #             is to keep the system from overwriting the modules installed
-  #             by the user.
-  #
-  # See also
-  # <http://search.cpan.org/author/MSCHWERN/ExtUtils-MakeMaker-6.16/lib/ExtUtils/MakeMaker.pm#Default_Makefile_Behaviour>
-  # <http://www.debian.org/doc/packaging-manuals/perl-policy/ch-module_packages.html#s-vendor_dirs>
-  # <http://archive.develooper.com/perl5-porters@perl.org/msg94113.html>
-  # <https://bugzilla.redhat.com/bugzilla/show_bug.cgi?id=78053>
-  # <http://www.mail-archive.com/makemaker@perl.org/msg00779.html>
-  #
-  # The options SYSCONFDIR, DATADIR and CONFDIR all support those three
-  # possibilities. The '*' in the following comments refers to those.
-
-  'SYSCONFDIR',       # Overwrite all $*SYSCONFDIRs; normally determined
-  'PERLSYSCONFDIR',   # based on $*PREFIX.
-  'SITESYSCONFDIR',   #
-  'VENDORSYSCONFDIR', #
-
-  'DATADIR',          # Overwrite all INSTALL*DATAs; normally determined
-  'INSTALLDATA',      # based on $*PREFIX.
-  'INSTALLSITEDATA',  #
-  'INSTALLVENDORDATA',#
-
-  'CONFDIR',          # Overwrite all INSTALL*CONFs; normally determined
-  'INSTALLCONF',      # based on $*SYSCONFDIR.
-  'INSTALLSITECONF',  #
-  'INSTALLVENDORCONF',#
-
-  'DEFRULESDIR',      # A synonym for 'DATADIR'.
-  'LOCALRULESDIR',    # " "       "   'CONFDIR'.
-
-  'LOCALSTATEDIR',    # normally determined based on $*PREFIX.
-  'PERLLOCALSTATEDIR', 
-  'SITELOCALSTATEDIR', 
-  'VENDORLOCALSTATEDIR',
-
-  'RE2C_BIN',         # hard code the path for re2c if possible
-
-  'PERL_BIN',         # Sets the Perl interpreter used by the scripts.
-  'PERL_WARN',        # Can be used to disable warnings in the scripts
-  'PERL_TAINT',       # "   "  "    "  "    taint mode for the scripts (DON'T)
-
-
-  'BUILD_SPAMC'  ,    # Set to 'no' to skip build of spamc on Windows.
-  'BUILD_SPAMD',      # Set to 'no' to skip build of spamd on Windows.
-  'ENABLE_SSL',       # Set to 'yes' to build spamc with SSL support.
-  'CONTACT_ADDRESS',  # To not ask for the contact address, use this.
-);
-
-
 sub parse_arg {
   my($val, $name) = (@_);
   if ($val =~ /^($name)=["']?(.*?)["']?$/) {
