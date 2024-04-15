@@ -29,6 +29,14 @@ use vars qw($RUNNING_ON_WINDOWS $SSL_AVAILABLE
             $keep_workdir $mainpid $spamd_pidfile);
 
 my $sa_code_dir;
+
+# Simple version of untaint_var for internal use. Used in BEGIN block so define first
+sub untaint_var {
+    local($1);
+    $_[0] =~ /^(.*)\z/s;
+    return $1;
+}
+
 BEGIN {
   require Exporter;
   use vars qw(@ISA @EXPORT @EXPORT_OK);
@@ -75,12 +83,11 @@ BEGIN {
     $ENV{'PATH'} =
       join(';', # filter for only dirs that are canonical absolute paths that exist
         map {
-              my $pathdir = $_;
+              my $pathdir = untaint_var($_); # untaint to avoid bug 8089
               $pathdir =~ s/\\*\z//;
-              my $abspathdir = File::Spec->canonpath(Cwd::realpath($pathdir)) if (-d $pathdir);
+              my $abspathdir = Cwd::realpath($pathdir) if (File::Spec->file_name_is_absolute($pathdir) and (-d $pathdir));
               if (defined $abspathdir) {
-                $abspathdir  =~ /^(.*)\z/s;
-                $abspathdir = $1; # untaint it
+                $abspathdir  = untaint_var($abspathdir);
               }
               ((defined $abspathdir) and (lc $pathdir eq lc $abspathdir))?($abspathdir):()
             }
@@ -91,8 +98,7 @@ BEGIN {
   if (-e 't/test_dir') { $sa_code_dir = 'blib/lib'; }
   elsif (-e 'test_dir') { $sa_code_dir = '../blib/lib'; }
   else { die "FATAL: not in or below test directory?\n"; }
-  File::Spec->rel2abs($sa_code_dir) =~ /^(.*)\z/s;
-  $sa_code_dir = $1;
+  $sa_code_dir = untaint_var(File::Spec->rel2abs($sa_code_dir));
   if (not -d $sa_code_dir) {
     die "FATAL: not in expected directory relative to built code tree?\n";
   }
@@ -150,11 +156,10 @@ sub sa_t_init {
   my $inc_opts =
     join(' -I', # filter for only dirs that are absolute paths that exist, then canonicalize them
       map {
-            my $pathdir = $_;
-            my $canonpathdir = File::Spec->canonpath(Cwd::realpath($pathdir)) if ((-d $pathdir) and File::Spec->file_name_is_absolute($pathdir));
+            my $pathdir = untaint_var($_);  # untaint to avoid bug 8089
+            my $canonpathdir = Cwd::realpath($pathdir) if (File::Spec->file_name_is_absolute($pathdir) and (-d $pathdir));
             if (defined $canonpathdir) {
-               $canonpathdir =~ /^(.*)\z/s;
-               $canonpathdir = $1; # untaint it
+               $canonpathdir = untaint_var($canonpathdir);
             }
             ((defined $canonpathdir))?($canonpathdir):()
           }
@@ -282,17 +287,15 @@ sub sa_t_init {
                   (untaint_cmd("$spamc -V") =~ /with SSL support/) &&
                   (untaint_cmd("$spamd --version") =~ /with SSL support/);
 
-  for $tainted (<../rules/*.pm>, <../rules/*.pre>, <../rules/languages>) {
-    $tainted =~ /(.*)/;
-    my $file = $1;
+  for (<../rules/*.pm>, <../rules/*.pre>, <../rules/languages>) {
+    my $file = untaint_var($_);
     $base = basename $file;
     copy ($file, "$siterules/$base")
       or warn "cannot copy $file to $siterules/$base: $!";
   }
 
-  for $tainted (<../rules/*.cf>) {
-    $tainted =~ /(.*)/;
-    my $file = $1;
+  for (<../rules/*.cf>) {
+    my $file = untaint_var($_);
     $base = basename $file;
     copy ($file, "$localrules/$base")
       or warn "cannot copy $file to $localrules/$base: $!";
@@ -323,9 +326,8 @@ sub sa_t_init {
 # remove all rules - $localrules/*.cf
 # when you want to only use rules declared inside a specific *.t
 sub clear_localrules {
-  for $tainted (<$localrules/*.cf>) {
-    $tainted =~ /(.*)/;
-    my $file = $1;
+  for (<$localrules/*.cf>) {
+    my $file = untaint_var($_);
     # Keep some useful, should not contain any rules
     next if $file =~ /10_default_prefs.cf$/;
     next if $file =~ /20_aux_tlds.cf$/;
@@ -1219,13 +1221,6 @@ sub debug_array {
 
 sub test_number {
   return Test::More->builder->current_test;
-}
-
-# Simple version of untaint_var for internal use
-sub untaint_var {
-    local($1);
-    $_[0] =~ /^(.*)\z/s;
-    return $1;
 }
 
 # untainted system()
