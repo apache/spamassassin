@@ -38,6 +38,9 @@ DNSEVAL - look up URLs against DNS blocklists
 The DNSEval plugin queries dns to see if a domain or an ip address
 present on one of email's headers is on a particular rbl.
 
+Any host or its domain part matching uridnsbl_skip_domains is ignored
+by default.
+
 =cut
 
 package Mail::SpamAssassin::Plugin::DNSEval;
@@ -554,6 +557,15 @@ sub check_rbl_ns_from {
   my $ent = {
     rulename => $rule, zone => $domain, obj => $obj, type => "URI-NS",
   };
+  if (exists $pms->{conf}->{uridnsbl_skip_domains}->{lc $domain}) {
+    dbg("dnseval: query skipped, uridnsbl_skip_domains: $domain");
+    return 0;
+  }
+  my $dom = $pms->{main}->{registryboundaries}->trim_domain($domain);
+  if (exists $pms->{conf}->{uridnsbl_skip_domains}->{lc $dom}) {
+    dbg("dnseval: query skipped, uridnsbl_skip_domains: $domain");
+    return 0;
+  }
   # dig $dom ns
   my $ret = $pms->{async}->bgsend_and_start_lookup(
     $domain, 'NS', undef, $ent,
@@ -694,6 +706,15 @@ sub _check_rbl_addresses {
       next if ($pms->{conf}->{tflags}->{$rule}||'') =~ /\bips_only\b/;
       next unless is_fqdn_valid($host);
       next unless $pms->{main}->{registryboundaries}->is_domain_valid($host);
+      if (exists $pms->{conf}->{uridnsbl_skip_domains}->{lc $host}) {
+        dbg("dnseval: query skipped, uridnsbl_skip_domains: $host");
+        next;
+      }
+      my $dom = $pms->{main}->{registryboundaries}->trim_domain($host);
+      if (exists $pms->{conf}->{uridnsbl_skip_domains}->{lc $dom}) {
+        dbg("dnseval: query skipped, uridnsbl_skip_domains: $host");
+        next;
+      }
     }
     dbg("dnseval: checking [$host] / $rule / $set / $rbl_server");
     my $ret = $pms->do_rbl_lookup($rule, $set, 'A', "$host.$rbl_server", $subtest);
@@ -727,6 +748,15 @@ sub check_dns_sender {
   }
 
   $host = idn_to_ascii($host);
+  if (exists $pms->{conf}->{uridnsbl_skip_domains}->{lc $host}) {
+    dbg("dnseval: query skipped, uridnsbl_skip_domains: $host");
+    return 0;
+  }
+  my $dom = $pms->{main}->{registryboundaries}->trim_domain($host);
+  if (exists $pms->{conf}->{uridnsbl_skip_domains}->{lc $host}) {
+    dbg("dnseval: query skipped, uridnsbl_skip_domains: $host");
+    return 0;
+  }
   dbg("dnseval: checking A and MX for host $host");
 
   my $queries;
