@@ -47,11 +47,11 @@ if (HAS_DKIM_VERIFIER) {
 #
 
 tstlocalrules(q{
-  askdns  ASKDNS_TXT_SPF spamassassin.org TXT /^v=spf1 -all$/
+  askdns  ASKDNS_TXT_SPF askdnsspf.spamassassin.org TXT /^v=spf1 -all$/
 });
 %patterns = (
   q{ ASKDNS_TXT_SPF } => 'ASKDNS_TXT_SPF',
-  '[spamassassin.org TXT:v=spf1 -all]' => 'ASKDNS_TXT_SPF_LOG',
+  '[askdnsspf.spamassassin.org TXT:v=spf1]' => 'ASKDNS_TXT_SPF_LOG',
 );
 ok sarun ("-t -D < data/nice/001 2>&1", \&patterns_run_cb);
 ok_all_patterns();
