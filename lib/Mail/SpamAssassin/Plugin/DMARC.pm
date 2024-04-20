@@ -333,7 +333,7 @@ sub _check_dmarc {
     $dmarc_arc_verified = 1;
     # if DMARC fails retry by reading data from AAR headers
     # use Mail::SpamAssassin::Plugin::AuthRes if available to read ARC signature details
-    my @spf_parsed = sort { ( $a->{authres_parsed}{spf}{arc_index} // 0 ) <=> ( $b->{authres_parsed}{spf}{arc_index} // 0 ) } @{$pms->{authres_parsed}{spf}};
+    my @spf_parsed = sort { ( $a->{authres_parsed}{spf}{arc_index} // 0 ) <=> ( $b->{authres_parsed}{spf}{arc_index} // 0 ) } @{$pms->{authres_parsed}{spf} // []};
     my $old_arc_index = 0;
     foreach my $spf_parse ( @spf_parsed ) {
       last if not defined $spf_parse->{arc_index};
