@@ -299,7 +299,7 @@ CN_B2B_SPAMMER
 # tflags publish
 COMMENT_GIBBERISH
 
-# tflags net
+# good enough
 COMPENSATION
 
 # tflags publish
@@ -773,9 +773,6 @@ HAS_X_NO_RELAY
 # tflags publish
 HAS_X_OUTGOING_SPAM_STAT
 
-# tflags net
-HDRS_LCASE
-
 # good enough
 HDRS_LCASE_IMGONLY
 
@@ -1128,16 +1125,13 @@ OBFU_UNSUB_UL
 ODD_FREEM_REPTO
 
 # good enough
-PDS_BAD_THREAD_QP_64
-
-# good enough
-PDS_BRAND_SUBJ_NAKED_TO
-
-# good enough
 PDS_BTC_ID
 
 # good enough
 PDS_BTC_MSGID
+
+# good enough
+PDS_BTC_NTLD
 
 # good enough
 PDS_DBL_URL_TNB_RUNON
@@ -1686,9 +1680,6 @@ TO_EQ_FM_DOM_HTML_ONLY
 TO_EQ_FM_DOM_SPF_FAIL
 
 # tflags net
-TO_EQ_FM_HTML_ONLY
-
-# tflags net
 TO_EQ_FM_SPF_FAIL
 
 # tflags publish
@@ -1706,7 +1697,7 @@ TO_NO_BRKTS_HTML_IMG
 # tflags publish
 TO_NO_BRKTS_HTML_ONLY
 
-# good enough
+# tflags net
 TO_NO_BRKTS_MSFT
 
 # tflags publish
@@ -1724,7 +1715,7 @@ TVD_APPROVED
 # good enough
 TVD_PH_7
 
-# tflags net
+# good enough
 TVD_SPACE_ENCODED
 
 # tflags net
@@ -1902,6 +1893,9 @@ URI_MALWARE_SCMS
 URI_NOVOWEL
 
 # good enough
+URI_OBFU_TLD
+
+# good enough
 URI_ONLY_LOW_CONTRAST
 
 # tflags net
@@ -2014,6 +2008,9 @@ XM_DIGITS_ONLY
 
 # good enough
 XM_LIGHT_HEAVY
+
+# good enough
+XM_ONE_WORD
 
 # tflags publish
 XM_PHPMAILER_FORGED
