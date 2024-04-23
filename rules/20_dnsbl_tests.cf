@@ -208,26 +208,47 @@ reuse RCVD_IN_IADB_VOUCHED
 # Certified:
 # https://www.validity.com/resource-center/fact-sheet-certification/
 # (replaces RCVD_IN_BSP_TRUSTED, RCVD_IN_BSP_OTHER, RCVD_IN_SSC_TRUSTED_COI, RCVD_IN_RP_CERTIFIED)
-header RCVD_IN_VALIDITY_CERTIFIED     eval:check_rbl_txt('ssc-firsttrusted', 'sa-trusted.bondedsender.org.')
+header RCVD_IN_VALIDITY_CERTIFIED     eval:check_rbl('ssc-firsttrusted', 'sa-trusted.bondedsender.org.', '^127\.0\.0\.')
 describe RCVD_IN_VALIDITY_CERTIFIED   Sender in Validity Certification - Contact certification@validity.com
 tflags RCVD_IN_VALIDITY_CERTIFIED     net nice publish
 reuse RCVD_IN_VALIDITY_CERTIFIED      RCVD_IN_RP_CERTIFIED
 
+header RCVD_IN_VALIDITY_CERTIFIED_BLOCKED    eval:check_rbl('ssc-firsttrusted', 'sa-trusted.bondedsender.org.', '127.255.255.255')
+describe RCVD_IN_VALIDITY_CERTIFIED_BLOCKED  ADMINISTRATOR NOTICE: The query to Validity was blocked.  See https://knowledge.validity.com/hc/en-us/articles/20961730681243 for more information.
+tflags RCVD_IN_VALIDITY_CERTIFIED_BLOCKED    net publish
+reuse RCVD_IN_VALIDITY_CERTIFIED_BLOCKED     RCVD_IN_VALIDITY_CERTIFIED_BLOCKED
+
 # Safe:
 # https://www.validity.com/resource-center/fact-sheet-certification/
 # (replaces HABEAS_ACCREDITED_COI, HABEAS_ACCREDITED_SOI, HABEAS_CHECKED, RCVD_IN_RP_SAFE)
-header RCVD_IN_VALIDITY_SAFE     eval:check_rbl_txt('ssc-firsttrusted','sa-accredit.habeas.com.')
+header RCVD_IN_VALIDITY_SAFE     eval:check_rbl('ssc-firsttrusted', 'sa-accredit.habeas.com.', '^127\.0\.0\.')
 describe RCVD_IN_VALIDITY_SAFE   Sender in Validity Safe - Contact certification@validity.com
 tflags RCVD_IN_VALIDITY_SAFE     net nice publish
 reuse RCVD_IN_VALIDITY_SAFE      RCVD_IN_RP_SAFE
 
+header RCVD_IN_VALIDITY_SAFE_BLOCKED    eval:check_rbl('ssc-firsttrusted', 'sa-accredit.habeas.com.', '127.255.255.255')
+describe RCVD_IN_VALIDITY_SAFE_BLOCKED  ADMINISTRATOR NOTICE: The query to Validity was blocked.  See https://knowledge.validity.com/hc/en-us/articles/20961730681243 for more information.
+tflags RCVD_IN_VALIDITY_SAFE_BLOCKED    net publish
+reuse RCVD_IN_VALIDITY_SAFE_BLOCKED     RCVD_IN_VALIDITY_SAFE_BLOCKED
+
 # Validity RPBL (née Return Path Reputation Network Blacklist - RNBL):
 # https://www.senderscore.org/blocklistlookup/
 # (replaces RCVD_IN_RP_RNBL)
-header RCVD_IN_VALIDITY_RPBL     eval:check_rbl('rnbl-lastexternal','bl.score.senderscore.com.')
+header RCVD_IN_VALIDITY_RPBL     eval:check_rbl('rnbl-lastexternal', 'bl.score.senderscore.com.', '^127\.0\.0\.')
 describe RCVD_IN_VALIDITY_RPBL   Relay in Validity RPBL, https://senderscore.org/blocklistlookup/
 tflags RCVD_IN_VALIDITY_RPBL     net publish
 reuse RCVD_IN_VALIDITY_RPBL      RCVD_IN_RP_RNBL
+
+header RCVD_IN_VALIDITY_RPBL_BLOCKED    eval:check_rbl('rnbl-lastexternal', 'bl.score.senderscore.com.', '127.255.255.255')
+describe RCVD_IN_VALIDITY_RPBL_BLOCKED  ADMINISTRATOR NOTICE: The query to Validity was blocked.  See https://knowledge.validity.com/hc/en-us/articles/20961730681243 for more information.
+tflags RCVD_IN_VALIDITY_RPBL_BLOCKED    net publish
+reuse RCVD_IN_VALIDITY_RPBL_BLOCKED     RCVD_IN_VALIDITY_RPBL_BLOCKED
+
+if can(Mail::SpamAssassin::Conf::feature_dns_block_rule)
+dns_block_rule RCVD_IN_VALIDITY_CERTIFIED_BLOCKED sa-trusted.bondedsender.org
+dns_block_rule RCVD_IN_VALIDITY_SAFE_BLOCKED sa-accredit.habeas.com
+dns_block_rule RCVD_IN_VALIDITY_RPBL_BLOCKED bl.score.senderscore.com
+endif
 
 endif
 

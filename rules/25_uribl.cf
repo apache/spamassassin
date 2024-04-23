@@ -257,33 +257,6 @@ dns_block_rule URIBL_BLOCKED multi.uribl.com
 endif
 
 ###########################################################################
-## Validity
-
-urirhssub      VALIDITY_BLOCKED_CERTIFIED  sa-trusted.bondedsender.org.   A   127.255.255.255
-body           VALIDITY_BLOCKED_CERTIFIED  eval:check_uridnsbl('VALIDITY_BLOCKED_CERTIFIED')
-describe       VALIDITY_BLOCKED_CERTIFIED  ADMINISTRATOR NOTICE: The query to Validity was blocked.  https://knowledge.validity.com/hc/en-us/articles/20961730681243 for more information.
-tflags         VALIDITY_BLOCKED_CERTIFIED  net noautolearn
-reuse          VALIDITY_BLOCKED_CERTIFIED
-
-urirhssub      VALIDITY_BLOCKED_RPBL       bl.score.senderscore.com.   A   127.255.255.255
-body           VALIDITY_BLOCKED_RPBL       eval:check_uridnsbl('VALIDITY_BLOCKED_RPBL')
-describe       VALIDITY_BLOCKED_RPBL       ADMINISTRATOR NOTICE: The query to Validity was blocked.  See https://knowledge.validity.com/hc/en-us/articles/20961730681243 for more information.
-tflags         VALIDITY_BLOCKED_RPBL       net noautolearn
-reuse          VALIDITY_BLOCKED_RPBL
-
-urirhssub      VALIDITY_BLOCKED_SAFE       sa-accredit.habeas.com.   A   127.255.255.255
-body           VALIDITY_BLOCKED_SAFE       eval:check_uridnsbl('VALIDITY_BLOCKED_SAFE')
-describe       VALIDITY_BLOCKED_SAFE       ADMINISTRATOR NOTICE: The query to Validity was blocked.  See https://knowledge.validity.com/hc/en-us/articles/20961730681243 for more information.
-tflags         VALIDITY_BLOCKED_SAFE       net noautolearn
-reuse          VALIDITY_BLOCKED_SAFE
-
-if can(Mail::SpamAssassin::Conf::feature_dns_block_rule)
-dns_block_rule VALIDITY_BLOCKED_CERTIFIED sa-trusted.bondedsender.org
-dns_block_rule VALIDITY_BLOCKED_RPBL bl.score.senderscore.com
-dns_block_rule VALIDITY_BLOCKED_SAFE sa-accredit.habeas.com
-endif
-
-###########################################################################
 ## DOMAINS TO SKIP (KNOWN GOOD)
 
 # Linting
