@@ -2577,7 +2577,7 @@ if can(Mail::SpamAssassin::Conf::feature_bug6558_free)
   score     HTML_TEXT_INVISIBLE_STYLE     3.500   # limit
   tflags    HTML_TEXT_INVISIBLE_STYLE     publish
 
-  meta      __LONG_STY_INVIS              __STY_INVIS && __LONGLINE
+  meta      __LONG_STY_INVIS              __STY_INVIS_2 && __LONGLINE
   meta      LONG_INVISIBLE_TEXT           __LONG_INVIS_DIV || (__LONG_STY_INVIS && !__UNSUB_LINK && !__RCD_RDNS_MTA_MESSY && !__USING_VERP1 && !__RCD_RDNS_MTA && !__RCD_RDNS_MTA_MESSY && !__MIME_QP && !__HAS_X_MAILER && !__REPTO_QUOTE && !__USING_VERP1 )
 
   meta      __STY_INVIS_DIRECT            __STY_INVIS && __DOS_DIRECT_TO_MX_UNTRUSTED 
