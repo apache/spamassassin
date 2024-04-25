@@ -482,7 +482,7 @@ FONT_INVIS_POSTEXTRAS
 # tflags net
 FORGED_SPF_HELO
 
-# tflags net
+# tflags publish
 FORM_FRAUD
 
 # tflags publish
@@ -563,7 +563,7 @@ FROM_MISSP_MSFT
 # good enough
 FROM_MISSP_PHISH
 
-# tflags net
+# good enough
 FROM_MISSP_REPLYTO
 
 # tflags net
@@ -701,9 +701,6 @@ GAPPY_SALES_LEADS_FREEM
 # good enough
 GB_BITCOIN_CP
 
-# good enough
-GB_BITCOIN_NH
-
 # tflags publish
 GB_CUSTOM_HTM_URI
 
@@ -776,9 +773,6 @@ HAS_X_NO_RELAY
 # tflags publish
 HAS_X_OUTGOING_SPAM_STAT
 
-# tflags net
-HDRS_LCASE
-
 # good enough
 HDRS_LCASE_IMGONLY
 
@@ -835,6 +829,9 @@ HK_RCVD_IP_MULTICAST
 
 # tflags publish
 HK_SCAM
+
+# good enough
+HK_WIN
 
 # tflags publish
 HOSTED_IMG_DIRECT_MX
@@ -1153,6 +1150,9 @@ PDS_OTHER_BAD_TLD
 
 # good enough
 PDS_TONAME_EQ_TOLOCAL_FREEM_FORGE
+
+# good enough
+PDS_X_PHP_WELLKNOWN
 
 # tflags publish
 PHISH_ATTACH
@@ -1635,9 +1635,6 @@ SUBJ_ATTENTION
 SUBJ_BRKN_WORDNUMS
 
 # tflags net
-SUBJ_UNNEEDED_HTML
-
-# tflags net
 SURBL_BLOCKED
 
 # good enough
@@ -1679,14 +1676,11 @@ TONLINE_FAKE_DKIM
 # tflags publish
 TO_EQ_FM_DIRECT_MX
 
-# tflags net
+# good enough
 TO_EQ_FM_DOM_HTML_IMG
 
 # tflags net
 TO_EQ_FM_DOM_SPF_FAIL
-
-# tflags net
-TO_EQ_FM_HTML_ONLY
 
 # tflags net
 TO_EQ_FM_SPF_FAIL
@@ -1719,6 +1713,9 @@ TO_NO_BRKTS_PCNT
 TO_TOO_MANY_WFH_01
 
 # good enough
+TRANSFORM_LIFE
+
+# good enough
 TVD_APPROVED
 
 # good enough
@@ -1729,9 +1726,6 @@ TVD_SPACE_ENCODED
 
 # good enough
 TVD_SPACE_RATIO_MINFP
-
-# tflags net
-TVD_SUBJ_NUM_OBFU_MINFP
 
 # tflags publish
 TW_GIBBERISH_MANY
@@ -1934,7 +1928,7 @@ URI_WPADMIN
 # tflags publish
 URI_WP_DIRINDEX
 
-# tflags net
+# tflags publish
 URI_WP_HACKED
 
 # tflags publish
@@ -2020,6 +2014,9 @@ XM_RANDOM
 
 # good enough
 XM_RECPTID
+
+# good enough
+XM_UC_ONLY
 
 # tflags net
 XPRIO
