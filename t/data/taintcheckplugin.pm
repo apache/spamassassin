@@ -13,7 +13,6 @@ use Mail::SpamAssassin::Plugin;
 use Mail::SpamAssassin::Logger;
 use strict;
 use bytes;
-use Test;
 
 our @ISA = qw(Mail::SpamAssassin::Plugin);
 
