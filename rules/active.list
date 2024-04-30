@@ -878,11 +878,8 @@ HTML_OFF_PAGE
 # tflags publish
 HTML_SHRT_CMNT_OBFU_MANY
 
-# tflags publish
+# tflags net
 HTML_SINGLET_MANY
-
-# good enough
-HTML_TAG_BALANCE_CENTER
 
 # tflags net
 HTML_TEXT_INVISIBLE_FONT
@@ -901,6 +898,9 @@ JH_SPAMMY_PATTERN01
 
 # tflags publish
 JH_SPAMMY_PATTERN02
+
+# tflags net
+KHOP_FAKE_EBAY
 
 # tflags net
 KHOP_HELO_FCRDNS
@@ -1152,7 +1152,13 @@ PDS_HELO_SPF_FAIL
 PDS_HP_HELO_NORDNS
 
 # good enough
+PDS_NO_FULL_NAME_SPOOFED_URL
+
+# good enough
 PDS_OTHER_BAD_TLD
+
+# good enough
+PDS_SHORT_SPOOFED_URL
 
 # good enough
 PDS_TONAME_EQ_TOLOCAL_FREEM_FORGE
@@ -1644,6 +1650,9 @@ SUBJ_ATTENTION
 SUBJ_BRKN_WORDNUMS
 
 # tflags net
+SUBJ_UNNEEDED_HTML
+
+# tflags net
 SURBL_BLOCKED
 
 # good enough
@@ -1685,8 +1694,11 @@ TONLINE_FAKE_DKIM
 # tflags publish
 TO_EQ_FM_DIRECT_MX
 
-# good enough
+# tflags net
 TO_EQ_FM_DOM_HTML_IMG
+
+# tflags net
+TO_EQ_FM_DOM_HTML_ONLY
 
 # tflags net
 TO_EQ_FM_DOM_SPF_FAIL
@@ -1709,7 +1721,7 @@ TO_NO_BRKTS_HTML_IMG
 # tflags publish
 TO_NO_BRKTS_HTML_ONLY
 
-# good enough
+# tflags net
 TO_NO_BRKTS_MSFT
 
 # tflags publish
@@ -1730,11 +1742,14 @@ TVD_APPROVED
 # good enough
 TVD_PH_7
 
-# good enough
+# tflags net
 TVD_SPACE_ENCODED
 
 # good enough
 TVD_SPACE_RATIO_MINFP
+
+# tflags net
+TVD_SUBJ_NUM_OBFU_MINFP
 
 # tflags publish
 TW_GIBBERISH_MANY
@@ -1937,7 +1952,7 @@ URI_WPADMIN
 # tflags publish
 URI_WP_DIRINDEX
 
-# tflags publish
+# tflags net
 URI_WP_HACKED
 
 # tflags publish
