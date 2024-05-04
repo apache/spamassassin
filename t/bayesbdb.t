@@ -1,15 +1,18 @@
 #!/usr/bin/perl -T
 
 use File::Find qw(find);
+use POSIX;
 use lib '.'; use lib 't';
 use SATest; sa_t_init("bayesbdb");
 
 use constant HAS_BDB => eval { require BerkeleyDB };
+use constant FREEBSD_ARM64 => ($^O eq 'freebsd' and (POSIX::uname)[4] eq 'arm64');
 
 use Test::More;
 
 plan skip_all => "Long running tests disabled" unless conf_bool('run_long_tests');
 plan skip_all => "BerkeleyDB is unavailable" unless HAS_BDB;
+plan skip_all => "BerkeleyDB module has issues on ARM64 FreeBSD" if FREEBSD_ARM64;
 
 {
   no warnings 'once';
