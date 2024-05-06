@@ -15,10 +15,12 @@ use Config;
 my $temp_binpath = $Config{sitebinexp};
 $temp_binpath =~ s|^\Q$Config{siteprefixexp}\E/||;
 
+my $RE2C_BIN = get_re2c_bin_from_sa_compile();
+
 use Test::More;
 plan skip_all => "Long running tests disabled" unless conf_bool('run_long_tests');
 plan skip_all => "Tests don't work on windows" if $RUNNING_ON_WINDOWS;
-plan skip_all => "RE2C isn't new enough" unless re2c_version_new_enough();
+plan skip_all => "RE2C isn't new enough" unless re2c_version_new_enough($RE2C_BIN);
 plan tests => 24;
 
 # -------------------------------------------------------------------
@@ -38,7 +40,7 @@ system_or_die "cd $builddir && gunzip -cd $cwd/../$tarfile | tar xf -";
 system_or_die "cd $builddir && mv Mail-SpamAssassin-* x";
 
 &new_instdir("basic");
-&run_makefile_pl ("PREFIX=$instdir SYSCONFDIR=$instdir/etc DATADIR=$instdir/share/spamassassin LOCALSTATEDIR=$instdir/var/spamassassin CONFDIR=$instdir/etc/mail/spamassassin");
+&run_makefile_pl ("PREFIX=$instdir SYSCONFDIR=$instdir/etc DATADIR=$instdir/share/spamassassin LOCALSTATEDIR=$instdir/var/spamassassin CONFDIR=$instdir/etc/mail/spamassassin RE2C_BIN=$RE2C_BIN");
 
 # we now have an "installed" version we can run sa-compile with.  Ensure
 # sarun() will use it appropriately
@@ -119,10 +121,28 @@ rmtree( glob "~/.spamassassin/sa-compile.cache". { safe => 1 }); # reset test
 
 # -------------------------------------------------------------------
 
-sub re2c_version_new_enough {
-  #check if re2c exiss and if it is 0.12.0 or greater
+sub get_re2c_bin_from_sa_compile {
+  local($1);
+  my $sacompile;
+  if (-f 'sa-compile') {
+    $sa_compile = 'sa-compile';
+  } elsif (-f  '../sa-compile') {
+    $sa_compile = '../sa-compile';
+  } else {
+    return;
+  }
+  open (my $sac, "<", $sa_compile) || return;
+  while (<$sac>) {
+    return $1 if /^my \$RE2C_BIN\s*=\s*('[^']+')/;
+  }
+}
 
-  my $re2c_ver = untaint_cmd("re2c -V 2>&1");
+sub re2c_version_new_enough {
+  #check if re2c exists and if it is 0.12.0 or greater
+  my $re2c_bin = shift;
+  return unless($re2c_bin);
+
+  my $re2c_ver = untaint_cmd("$re2c_bin -V 2>&1");
   if (!defined $re2c_ver || $re2c_ver =~ /^$/) {
     print "re2c not found, or 're2c -V' not supported, skipping test\n";
     return;
