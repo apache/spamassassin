@@ -453,6 +453,9 @@ FBI_SPOOF
 FILL_THIS_FORM
 
 # good enough
+FILL_THIS_FORM_FRAUD_PHISH
+
+# good enough
 FILL_THIS_FORM_LOAN
 
 # good enough
@@ -482,7 +485,7 @@ FONT_INVIS_POSTEXTRAS
 # tflags net
 FORGED_SPF_HELO
 
-# tflags publish
+# tflags net
 FORM_FRAUD
 
 # tflags publish
@@ -595,6 +598,9 @@ FROM_SUSPICIOUS_NTLD_FP
 
 # good enough
 FROM_UNBAL2
+
+# good enough
+FROM_WSP_LEAD
 
 # good enough
 FROM_WSP_TRAIL
@@ -764,6 +770,9 @@ HAS_X_NO_RELAY
 # tflags publish
 HAS_X_OUTGOING_SPAM_STAT
 
+# tflags net
+HDRS_LCASE
+
 # good enough
 HDRS_LCASE_IMGONLY
 
@@ -872,7 +881,7 @@ HTML_OFF_PAGE
 # tflags publish
 HTML_SHRT_CMNT_OBFU_MANY
 
-# tflags publish
+# tflags net
 HTML_SINGLET_MANY
 
 # tflags net
@@ -946,9 +955,6 @@ MANY_SPAN_IN_TEXT
 
 # good enough
 MANY_SUBDOM
-
-# tflags net
-MAY_BE_FORGED
 
 # tflags publish
 MILLION_HUNDRED
@@ -1129,6 +1135,9 @@ PDS_FRNOM_TODOM_DBL_URL
 
 # good enough
 PDS_FRNOM_TODOM_NAKED_TO
+
+# tflags net
+PDS_FROM_2_EMAILS
 
 # good enough
 PDS_FROM_NAME_TO_DOMAIN
@@ -1641,6 +1650,9 @@ SUBJ_ATTENTION
 SUBJ_BRKN_WORDNUMS
 
 # tflags net
+SUBJ_UNNEEDED_HTML
+
+# tflags net
 SURBL_BLOCKED
 
 # good enough
@@ -1682,8 +1694,11 @@ TONLINE_FAKE_DKIM
 # tflags publish
 TO_EQ_FM_DIRECT_MX
 
-# tflags net
+# good enough
 TO_EQ_FM_DOM_HTML_IMG
+
+# tflags net
+TO_EQ_FM_DOM_HTML_ONLY
 
 # tflags net
 TO_EQ_FM_DOM_SPF_FAIL
@@ -1724,11 +1739,14 @@ TRANSFORM_LIFE
 # good enough
 TVD_APPROVED
 
-# good enough
+# tflags net
 TVD_SPACE_ENCODED
 
 # good enough
 TVD_SPACE_RATIO_MINFP
+
+# tflags net
+TVD_SUBJ_NUM_OBFU_MINFP
 
 # tflags publish
 TW_GIBBERISH_MANY
