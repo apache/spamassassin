@@ -260,7 +260,7 @@ BITCOIN_YOUR_INFO
 # good enough
 BODY_SINGLE_URI
 
-# tflags publish
+# tflags net
 BODY_URI_ONLY
 
 # tflags publish
@@ -299,7 +299,7 @@ CN_B2B_SPAMMER
 # tflags publish
 COMMENT_GIBBERISH
 
-# tflags net
+# good enough
 COMPENSATION
 
 # tflags publish
@@ -566,7 +566,7 @@ FROM_MISSP_MSFT
 # good enough
 FROM_MISSP_PHISH
 
-# good enough
+# tflags net
 FROM_MISSP_REPLYTO
 
 # tflags net
@@ -775,6 +775,9 @@ HAS_X_NO_RELAY
 
 # tflags publish
 HAS_X_OUTGOING_SPAM_STAT
+
+# tflags net
+HDRS_LCASE
 
 # good enough
 HDRS_LCASE_IMGONLY
@@ -1138,6 +1141,9 @@ PDS_FRNOM_TODOM_DBL_URL
 
 # good enough
 PDS_FRNOM_TODOM_NAKED_TO
+
+# tflags net
+PDS_FROM_2_EMAILS
 
 # good enough
 PDS_FROM_NAME_TO_DOMAIN
@@ -1644,6 +1650,9 @@ SUBJ_ATTENTION
 SUBJ_BRKN_WORDNUMS
 
 # tflags net
+SUBJ_UNNEEDED_HTML
+
+# tflags net
 SURBL_BLOCKED
 
 # good enough
@@ -1730,7 +1739,7 @@ TVD_APPROVED
 # good enough
 TVD_SPACE_ENCODED
 
-# good enough
+# tflags net
 TVD_SPACE_RATIO_MINFP
 
 # tflags publish
@@ -1934,7 +1943,7 @@ URI_WPADMIN
 # tflags publish
 URI_WP_DIRINDEX
 
-# tflags publish
+# tflags net
 URI_WP_HACKED
 
 # tflags publish
