@@ -688,6 +688,8 @@ URI:
       }
     }
     foreach my $uri (@{$info->{cleaned}}) {
+      # Remove anchors and parameters from uris
+      $uri =~ s/(?:\#|\?).*//g;
       # check url
       push @filtered_uris, $opts->{case} ? $uri : lc($uri);
     }
