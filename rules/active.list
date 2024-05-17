@@ -116,9 +116,6 @@ AMAZON_IMG_NOT_RCVD_AMZN
 # good enough
 APOSTROPHE_FROM
 
-# good enough
-APOSTROPHE_TOCC
-
 # tflags publish
 APP_DEVELOPMENT_FREEM
 
@@ -263,7 +260,7 @@ BITCOIN_YOUR_INFO
 # good enough
 BODY_SINGLE_URI
 
-# tflags publish
+# tflags net
 BODY_URI_ONLY
 
 # tflags publish
@@ -302,7 +299,7 @@ CN_B2B_SPAMMER
 # tflags publish
 COMMENT_GIBBERISH
 
-# good enough
+# tflags net
 COMPENSATION
 
 # tflags publish
@@ -488,10 +485,10 @@ FONT_INVIS_POSTEXTRAS
 # tflags net
 FORGED_SPF_HELO
 
-# tflags publish
+# tflags net
 FORM_FRAUD
 
-# tflags publish
+# tflags net
 FORM_FRAUD_3
 
 # tflags publish
@@ -569,7 +566,7 @@ FROM_MISSP_MSFT
 # good enough
 FROM_MISSP_PHISH
 
-# good enough
+# tflags net
 FROM_MISSP_REPLYTO
 
 # tflags net
@@ -776,6 +773,9 @@ HAS_X_NO_RELAY
 # tflags publish
 HAS_X_OUTGOING_SPAM_STAT
 
+# tflags net
+HDRS_LCASE
+
 # good enough
 HDRS_LCASE_IMGONLY
 
@@ -884,7 +884,7 @@ HTML_OFF_PAGE
 # tflags publish
 HTML_SHRT_CMNT_OBFU_MANY
 
-# tflags publish
+# tflags net
 HTML_SINGLET_MANY
 
 # tflags net
@@ -904,6 +904,9 @@ JH_SPAMMY_PATTERN01
 
 # tflags publish
 JH_SPAMMY_PATTERN02
+
+# tflags net
+KHOP_FAKE_EBAY
 
 # tflags net
 KHOP_HELO_FCRDNS
@@ -1138,9 +1141,6 @@ PDS_FRNOM_TODOM_DBL_URL
 
 # good enough
 PDS_FRNOM_TODOM_NAKED_TO
-
-# tflags net
-PDS_FROM_2_EMAILS
 
 # good enough
 PDS_FROM_NAME_TO_DOMAIN
@@ -1644,9 +1644,6 @@ SUBJ_ATTENTION
 SUBJ_BRKN_WORDNUMS
 
 # tflags net
-SUBJ_UNNEEDED_HTML
-
-# tflags net
 SURBL_BLOCKED
 
 # good enough
@@ -1689,6 +1686,12 @@ TONLINE_FAKE_DKIM
 TO_EQ_FM_DIRECT_MX
 
 # tflags net
+TO_EQ_FM_DOM_HTML_IMG
+
+# tflags net
+TO_EQ_FM_DOM_HTML_ONLY
+
+# tflags net
 TO_EQ_FM_DOM_SPF_FAIL
 
 # tflags net
@@ -1721,14 +1724,14 @@ TO_NO_BRKTS_PCNT
 # tflags publish
 TO_TOO_MANY_WFH_01
 
-# good enough
-TVD_APPROVED
-
-# good enough
+# tflags net
 TVD_SPACE_ENCODED
 
-# good enough
+# tflags net
 TVD_SPACE_RATIO_MINFP
+
+# tflags net
+TVD_SUBJ_NUM_OBFU_MINFP
 
 # tflags publish
 TW_GIBBERISH_MANY
@@ -1900,9 +1903,6 @@ URI_NOVOWEL
 
 # good enough
 URI_OBFU_TLD
-
-# good enough
-URI_ONLY_LOW_CONTRAST
 
 # tflags publish
 URI_ONLY_MSGID_MALF
