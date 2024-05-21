@@ -33,6 +33,9 @@ responses trickle in, filters them according to the requested DNS resource
 record type and optional subrule filtering expression, yielding a rule hit
 if a response meets filtering conditions.
 
+Any host or its domain part matching uridnsbl_skip_domains is ignored
+by default.
+
 =head1 RULE DEFINITIONS AND PRIVILEGED SETTINGS
 
 =over 4
@@ -415,6 +418,15 @@ sub launch_queries {
         foreach my $q (keys %q_iter) {
           # handle space separated multi-valued tags
           foreach my $val (@{$pms->{askdns_tag_cache}{$tag}}) {
+            if (exists $pms->{conf}->{uridnsbl_skip_domains}->{lc $val}) {
+              dbg("askdns: query skipped, uridnsbl_skip_domains: $val");
+              next;
+            }
+            my $dom = $pms->{main}->{registryboundaries}->trim_domain($val);
+            if (exists $pms->{conf}->{uridnsbl_skip_domains}->{lc $dom}) {
+              dbg("askdns: query skipped, uridnsbl_skip_domains: $val");
+              next;
+            }
             my $qtmp = $q;
             $qtmp =~ s/\Q_${tag}_\E/${val}/g;
             $q_iter_new{$qtmp} = 1;
