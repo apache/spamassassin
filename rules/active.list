@@ -173,9 +173,6 @@ BIGNUM_EMAILS_FREEM
 # tflags publish
 BIGNUM_EMAILS_MANY
 
-# good enough
-BILLION_OVERLAP
-
 # tflags publish
 BITCOIN_BOMB
 
@@ -260,7 +257,7 @@ BITCOIN_YOUR_INFO
 # good enough
 BODY_SINGLE_URI
 
-# tflags publish
+# tflags net
 BODY_URI_ONLY
 
 # tflags publish
@@ -485,7 +482,7 @@ FONT_INVIS_POSTEXTRAS
 # tflags net
 FORGED_SPF_HELO
 
-# tflags publish
+# tflags net
 FORM_FRAUD
 
 # tflags publish
@@ -566,7 +563,7 @@ FROM_MISSP_MSFT
 # good enough
 FROM_MISSP_PHISH
 
-# good enough
+# tflags net
 FROM_MISSP_REPLYTO
 
 # tflags net
@@ -601,6 +598,9 @@ FROM_SUSPICIOUS_NTLD
 
 # tflags publish
 FROM_SUSPICIOUS_NTLD_FP
+
+# good enough
+FROM_UNBAL1
 
 # good enough
 FROM_UNBAL2
@@ -773,9 +773,6 @@ HAS_X_NO_RELAY
 # tflags publish
 HAS_X_OUTGOING_SPAM_STAT
 
-# tflags net
-HDRS_LCASE
-
 # good enough
 HDRS_LCASE_IMGONLY
 
@@ -884,7 +881,7 @@ HTML_OFF_PAGE
 # tflags publish
 HTML_SHRT_CMNT_OBFU_MANY
 
-# tflags publish
+# tflags net
 HTML_SINGLET_MANY
 
 # tflags net
@@ -904,6 +901,9 @@ JH_SPAMMY_PATTERN01
 
 # tflags publish
 JH_SPAMMY_PATTERN02
+
+# tflags net
+KHOP_FAKE_EBAY
 
 # tflags net
 KHOP_HELO_FCRDNS
@@ -938,6 +938,9 @@ LOTTO_DEPT
 # tflags publish
 LUCRATIVE
 
+# good enough
+MALFORMED_FREEMAIL
+
 # tflags publish
 MALF_HTML_B64
 
@@ -949,6 +952,9 @@ MALWARE_PASSWORD
 
 # tflags publish
 MALW_ATTACH
+
+# tflags net
+MANY_HDRS_LCASE
 
 # tflags publish
 MANY_SPAN_IN_TEXT
@@ -1682,6 +1688,9 @@ TONLINE_FAKE_DKIM
 # tflags publish
 TO_EQ_FM_DIRECT_MX
 
+# good enough
+TO_EQ_FM_DOM_HTML_IMG
+
 # tflags net
 TO_EQ_FM_DOM_SPF_FAIL
 
@@ -1898,7 +1907,10 @@ URI_NOVOWEL
 # good enough
 URI_OBFU_TLD
 
-# tflags publish
+# good enough
+URI_ONLY_LOW_CONTRAST
+
+# tflags net
 URI_ONLY_MSGID_MALF
 
 # tflags publish
