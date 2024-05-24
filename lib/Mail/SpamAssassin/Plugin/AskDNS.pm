@@ -64,11 +64,13 @@ that tags cannot have parameters in parenthesis when used in askdns
 templates (exceptions found below).  Tag names may appear anywhere in the
 template - each queried DNS zone prescribes how a query should be formed.
 
-Special supported tag HEADER() can be used to query any header content,
-using same header names/modifiers that as header rules support.  For example
-_HEADER(Reply-To:addr:domain)_ can be used to query the trimmed domain part
-of Reply-To address.  See Mail::SpamAssassin::Conf documentation about
-header rules.
+Special supported tag HEADER() can be used to extract any mail header
+field content by specifying a header field name with optional modifiers
+as an argument, like what is supported by header rules.  For example
+_HEADER(Reply-To:addr:domain)_ can be used to extract a trimmed domain
+part of an address found in a Reply-To header field.
+See Mail::SpamAssassin::Conf documentation about header rules
+and their modifiers.
 
 A query template may contain any number of tag names including none,
 although in the most common anticipated scenario exactly one tag name would
