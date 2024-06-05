@@ -3,7 +3,7 @@
 use lib '.'; use lib 't';
 use SATest; sa_t_init("priorities_welcome_block");
 use strict;
-use Test::More tests => 10;
+use Test::More tests => 9;
 
 use Mail::SpamAssassin;
 
