@@ -39,63 +39,6 @@ ifplugin Mail::SpamAssassin::Plugin::DNSEval
 # DNSBLs do not return the A type (127.0.0.x) as part of the TXT reply.
 
 
-# ---------------------------------------------------------------------------
-# SORBS
-# transfers: both axfr and ixfr available
-# URL: http://www.dnsbl.sorbs.net/
-# pay-to-use: no
-# delist: $50 fee for RCVD_IN_SORBS_SPAM, others have free retest on request
-
-header __RCVD_IN_SORBS          eval:check_rbl('sorbs', 'dnsbl.sorbs.net.')
-describe __RCVD_IN_SORBS        SORBS: sender is listed in SORBS
-tflags __RCVD_IN_SORBS          net
-reuse  __RCVD_IN_SORBS
-
-header RCVD_IN_SORBS_HTTP       eval:check_rbl_sub('sorbs', '127.0.0.2')
-describe RCVD_IN_SORBS_HTTP     SORBS: sender is open HTTP proxy server
-tflags RCVD_IN_SORBS_HTTP       net
-reuse  RCVD_IN_SORBS_HTTP
-
-header RCVD_IN_SORBS_SOCKS      eval:check_rbl_sub('sorbs', '127.0.0.3')
-describe RCVD_IN_SORBS_SOCKS    SORBS: sender is open SOCKS proxy server
-tflags RCVD_IN_SORBS_SOCKS      net
-reuse  RCVD_IN_SORBS_SOCKS
-
-header RCVD_IN_SORBS_MISC       eval:check_rbl_sub('sorbs', '127.0.0.4')
-describe RCVD_IN_SORBS_MISC     SORBS: sender is open proxy server
-tflags RCVD_IN_SORBS_MISC       net
-reuse  RCVD_IN_SORBS_MISC
-
-header RCVD_IN_SORBS_SMTP       eval:check_rbl_sub('sorbs', '127.0.0.5')
-describe RCVD_IN_SORBS_SMTP     SORBS: sender is open SMTP relay
-tflags RCVD_IN_SORBS_SMTP       net
-reuse  RCVD_IN_SORBS_SMTP
-
-# delist: $50 fee
-#header RCVD_IN_SORBS_SPAM      eval:check_rbl_sub('sorbs', '127.0.0.6')
-#describe RCVD_IN_SORBS_SPAM    SORBS: sender is a spam source
-#tflags RCVD_IN_SORBS_SPAM      net
-#reuse  RCVD_IN_SORBS_SPAM      RCVD_IN_SORBS_SPAM
-
-header RCVD_IN_SORBS_WEB        eval:check_rbl_sub('sorbs', '127.0.0.7')
-describe RCVD_IN_SORBS_WEB      SORBS: sender is an abusable web server
-tflags RCVD_IN_SORBS_WEB        net
-reuse  RCVD_IN_SORBS_WEB
-
-header RCVD_IN_SORBS_BLOCK      eval:check_rbl_sub('sorbs', '127.0.0.8')
-describe RCVD_IN_SORBS_BLOCK    SORBS: sender demands to never be tested
-tflags RCVD_IN_SORBS_BLOCK      net
-reuse  RCVD_IN_SORBS_BLOCK
-
-header RCVD_IN_SORBS_ZOMBIE     eval:check_rbl_sub('sorbs', '127.0.0.9')
-describe RCVD_IN_SORBS_ZOMBIE   SORBS: sender is on a hijacked network
-tflags RCVD_IN_SORBS_ZOMBIE     net
-reuse  RCVD_IN_SORBS_ZOMBIE
-
-header RCVD_IN_SORBS_DUL        eval:check_rbl('sorbs-lastexternal', 'dnsbl.sorbs.net.', '127.0.0.10')
-describe RCVD_IN_SORBS_DUL      SORBS: sent directly from dynamic IP address
-tflags RCVD_IN_SORBS_DUL        net
-reuse  RCVD_IN_SORBS_DUL
 
 # ---------------------------------------------------------------------------
 # Spamhaus ZEN includes SBL+CSS+XBL+PBL
