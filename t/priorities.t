@@ -95,11 +95,7 @@ tstlocalrules (q{
 
   priority BAYES_99               -400
 
-  header XX_RCVD_IN_SORBS_SMTP     eval:check_rbl_sub('sorbs', '127.0.0.5')
-  tflags XX_RCVD_IN_SORBS_SMTP     net
-  score  XX_RCVD_IN_SORBS_SMTP     1
-
-  meta SC_URIBL_SURBL  (URIBL_BLACK && (URIBL_SC_SURBL || URIBL_JP_SURBL || URIBL_OB_SURBL ) && RCVD_IN_SORBS_SMTP)
+  meta SC_URIBL_SURBL  (URIBL_BLACK && (URIBL_SC_SURBL || URIBL_JP_SURBL || URIBL_OB_SURBL ))
   meta SC_URIBL_HASH   ((URIBL_BLACK || URIBL_SC_SURBL || URIBL_JP_SURBL || URIBL_OB_SURBL) && (RAZOR2_CHECK || DCC_CHECK || PYZOR_CHECK))
   meta SC_URIBL_SBL    ((URIBL_BLACK || URIBL_SC_SURBL || URIBL_JP_SURBL || URIBL_OB_SURBL) && URIBL_SBL)
   meta SC_URIBL_BAYES  ((URIBL_BLACK || URIBL_SC_SURBL || URIBL_JP_SURBL || URIBL_OB_SURBL) && BAYES_99)
@@ -143,7 +139,6 @@ ok assert_rule_pri 'SC_URIBL_SURBL', -530;
 ok assert_rule_pri 'SC_URIBL_HASH', -510;
 ok assert_rule_pri 'SC_URIBL_SBL', -510;
 ok assert_rule_pri 'SC_URIBL_BAYES', -510;
-ok assert_rule_pri 'XX_RCVD_IN_SORBS_SMTP', -530;
 
 # SC_URIBL_BAYES will have overridden its base priority setting
 ok assert_rule_pri 'BAYES_99', -510;

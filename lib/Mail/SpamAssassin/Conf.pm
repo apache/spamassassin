@@ -3086,7 +3086,7 @@ C<https://tools.ietf.org/html/rfc5735> as private.
 =item the 'set' argument
 
 This is used as a 'zone ID'.  If you want to look up a multiple-meaning zone
-like SORBS, you can then query the results from that zone using it;
+like Spamhaus Zen, you can then query the results from that zone using it;
 but all check_rbl_sub() calls must use that zone ID.
 
 Also, if more than one IP address gets a DNSBL hit for a particular rule, it
