@@ -1233,9 +1233,10 @@ header      SUBJ_ODD_CASE      ALL =~ /\n(?!(?:Subject:|SUBJECT:|subject:))(?i:s
 describe    SUBJ_ODD_CASE      Oddly mixed-case Subject: header
 
 
-# Somebody's resurrecting the dead 07/1012
-body        BILL_1618          /\bUnder Bills?.1618(?: Title III)? passed by the 105th U\.S\. Congress\b/i
+# Somebody's resurrecting the dead 07/1012 and 06/2024
+body        BILL_1618          /\bUnder Bill\s?s?.1618(?: Title III)? passed by the 105th U\.S\. Congress\b/i
 describe    BILL_1618          Mentions proposed US law supposedly permitting spamming
+tflags      BILL_1618          publish
 body        NOT_SPAM           /\b(?:(?:this (?:e?-?mail|message)|we) (?:is not|are not|cannot be considered) Spam|ESTE CORREO NO PUEDE SER CONSIDERADO (?:INTRUSIVO|spam)|Diese Nachricht ist KEIN SPAM)/i
 describe    NOT_SPAM           I'm not spam! Really! I'm not, I'm not, I'm not!
 tflags      NOT_SPAM           publish
