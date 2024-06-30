@@ -4192,4 +4192,10 @@ describe    URI_CLOUDFLAREIPFS         References Interplanetary File System PtP
 score       URI_CLOUDFLAREIPFS         2.500	# limit
 tflags      URI_CLOUDFLAREIPFS         publish
 
+uri         __URI_GOOGDRAWPREVIEW      m,://docs\.google\.com/drawings/d/[^/]*/preview,i
+meta        URI_GOOGDRAWPREVIEW        __URI_GOOGDRAWPREVIEW
+describe    URI_GOOGDRAWPREVIEW        Link to image at Google Docs, likely phishing obfuscation
+score       URI_GOOGDRAWPREVIEW        2.500	# limit
+tflags      URI_GOOGDRAWPREVIEW        publish
+
 
