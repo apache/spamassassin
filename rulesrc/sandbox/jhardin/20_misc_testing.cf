@@ -4189,13 +4189,21 @@ rawbody     __HREF_BOM                 m,href\s*=\s*"(?:[\xef][\xbb][\xbf]|[\xfe
 uri         __URI_CLOUDFLAREIPFS       m,://cloudflare-ipfs\.com/ipfs/,i
 meta        URI_CLOUDFLAREIPFS         __URI_CLOUDFLAREIPFS
 describe    URI_CLOUDFLAREIPFS         References Interplanetary File System PtP content via CloudFlare, likely phishing
-score       URI_CLOUDFLAREIPFS         2.500	# limit
+score       URI_CLOUDFLAREIPFS         3.000	# limit
 tflags      URI_CLOUDFLAREIPFS         publish
 
 uri         __URI_GOOGDRAWPREVIEW      m,://docs\.google\.com/drawings/d/[^/]*/preview,i
-meta        URI_GOOGDRAWPREVIEW        __URI_GOOGDRAWPREVIEW
+meta        URI_GOOGDRAWPREVIEW        __URI_GOOGDRAWPREVIEW && !__RCD_RDNS_SMTP 
 describe    URI_GOOGDRAWPREVIEW        Link to image at Google Docs, likely phishing obfuscation
-score       URI_GOOGDRAWPREVIEW        2.500	# limit
+score       URI_GOOGDRAWPREVIEW        3.000	# limit
 tflags      URI_GOOGDRAWPREVIEW        publish
+
+uri         __MAILJET_PILIPOP_REDIR    m,://redir\.pilipop\.com/lnk/,i
+meta        MAILJET_PILIPOP_REDIR      __MAILJET_PILIPOP_REDIR
+describe    MAILJET_PILIPOP_REDIR      Redirect via Mailjet service, possible phishing obfuscation
+score       MAILJET_PILIPOP_REDIR      1.000	# limit
+tflags      MAILJET_PILIPOP_REDIR      publish
+
+
 
 
