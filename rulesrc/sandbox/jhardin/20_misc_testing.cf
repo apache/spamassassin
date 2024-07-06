@@ -4198,6 +4198,14 @@ describe    URI_GOOGDRAWPREVIEW        Link to image at Google Docs, likely phis
 score       URI_GOOGDRAWPREVIEW        3.000	# limit
 tflags      URI_GOOGDRAWPREVIEW        publish
 
+# see if any combos work well
+meta        __GOOGDRAW_01              __URI_GOOGDRAWPREVIEW && __SUBSCRIPTION_INFO 
+meta        __GOOGDRAW_02              __URI_GOOGDRAWPREVIEW && __HTML_TAG_BALANCE_CENTER 
+meta        __GOOGDRAW_03              __URI_GOOGDRAWPREVIEW && __TO_NO_BRKTS_HTML_ONLY 
+meta        __GOOGDRAW_04              __URI_GOOGDRAWPREVIEW && __XM_VERY_LONG 
+meta        __GOOGDRAW_05              __URI_GOOGDRAWPREVIEW && __DOS_REF_TODAY 
+meta        __GOOGDRAW_06              __URI_GOOGDRAWPREVIEW && __RATWARE_0_TZ_DATE 
+
 uri         __MAILJET_PILIPOP_REDIR    m,://redir\.pilipop\.com/lnk/,i
 meta        MAILJET_PILIPOP_REDIR      __MAILJET_PILIPOP_REDIR
 describe    MAILJET_PILIPOP_REDIR      Redirect via Mailjet service, possible phishing obfuscation
