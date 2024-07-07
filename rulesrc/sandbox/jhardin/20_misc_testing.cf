@@ -4193,7 +4193,7 @@ score       URI_CLOUDFLAREIPFS         3.000	# limit
 tflags      URI_CLOUDFLAREIPFS         publish
 
 uri         __URI_GOOGDRAWPREVIEW      m,://docs\.google\.com/drawings/d/[^/]*/preview,i
-meta        URI_GOOGDRAWPREVIEW        __URI_GOOGDRAWPREVIEW && !__RCD_RDNS_SMTP 
+meta        URI_GOOGDRAWPREVIEW        __URI_GOOGDRAWPREVIEW && !__RCD_RDNS_SMTP && !__TVD_SPACE_RATIO
 describe    URI_GOOGDRAWPREVIEW        Link to image at Google Docs, likely phishing obfuscation
 score       URI_GOOGDRAWPREVIEW        3.000	# limit
 tflags      URI_GOOGDRAWPREVIEW        publish
