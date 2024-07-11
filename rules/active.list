@@ -200,7 +200,7 @@ BITCOIN_IMGUR
 # good enough
 BITCOIN_MALF_HTML
 
-# tflags publish
+# tflags net
 BITCOIN_MALWARE
 
 # tflags publish
@@ -266,7 +266,7 @@ BITCOIN_XPRIO
 # tflags publish
 BITCOIN_YOUR_INFO
 
-# tflags publish
+# tflags net
 BODY_URI_ONLY
 
 # tflags publish
@@ -770,6 +770,9 @@ HAS_X_NO_RELAY
 # tflags publish
 HAS_X_OUTGOING_SPAM_STAT
 
+# tflags net
+HDRS_LCASE
+
 # tflags publish
 HDRS_MISSP
 
@@ -897,6 +900,9 @@ JH_SPAMMY_PATTERN01
 JH_SPAMMY_PATTERN02
 
 # tflags net
+KHOP_FAKE_EBAY
+
+# tflags net
 KHOP_HELO_FCRDNS
 
 # tflags publish
@@ -919,6 +925,9 @@ LONG_INVISIBLE_TEXT
 
 # tflags publish
 LOTS_OF_MONEY
+
+# good enough
+LOTTERY_1
 
 # good enough
 LOTTO_AGENT
@@ -955,9 +964,6 @@ MANY_SPAN_IN_TEXT
 
 # good enough
 MANY_SUBDOM
-
-# tflags net
-MAY_BE_FORGED
 
 # good enough
 MILLION_EUR
@@ -1584,6 +1590,9 @@ SUBJ_ATTENTION
 SUBJ_BRKN_WORDNUMS
 
 # tflags net
+SUBJ_UNNEEDED_HTML
+
+# tflags net
 SURBL_BLOCKED
 
 # good enough
@@ -1607,7 +1616,7 @@ TEQF_USR_IMAGE
 # tflags publish
 TEQF_USR_MSGID_HEX
 
-# tflags publish
+# tflags net
 TEQF_USR_MSGID_MALF
 
 # good enough
@@ -1655,7 +1664,7 @@ TO_NO_BRKTS_HTML_IMG
 # tflags publish
 TO_NO_BRKTS_HTML_ONLY
 
-# good enough
+# tflags net
 TO_NO_BRKTS_MSFT
 
 # tflags publish
@@ -1668,9 +1677,12 @@ TO_NO_BRKTS_PCNT
 TO_TOO_MANY_WFH_01
 
 # good enough
+TVD_PH_SUBJ_META
+
+# tflags net
 TVD_SPACE_ENCODED
 
-# good enough
+# tflags net
 TVD_SPACE_RATIO_MINFP
 
 # tflags net
@@ -1874,7 +1886,7 @@ URI_WPADMIN
 # tflags publish
 URI_WP_DIRINDEX
 
-# tflags publish
+# tflags net
 URI_WP_HACKED
 
 # tflags publish
