@@ -601,7 +601,7 @@ sub _extract {
       push @{$coll->{flags}}, 'ActionURI';
       dbg("extracttext: ActionURI: $1");
       push @{$coll->{text}}, $text;
-      push @{$coll->{uris}}, $2;
+      push @{$coll->{uris}}, $1;
     } elsif($text =~ /QR-Code\:([^\s]*)/) {
       # zbarimg(1) prefixes the url with "QR-Code:" string
       my $qrurl = $1;
