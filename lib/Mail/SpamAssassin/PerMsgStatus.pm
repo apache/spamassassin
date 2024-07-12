@@ -3246,6 +3246,15 @@ sub get_envelope_from {
   # Cached?
   return $self->{envelopefrom} if exists $self->{envelopefrom};
 
+  my $suppl_attrib = $self->{msg}->{suppl_attrib};
+  if (exists($suppl_attrib->{return_path})) {
+    # Envelope information was provided by the caller
+    my $envf = $suppl_attrib->{return_path};
+    $envf = $1 if $envf =~ /^<(.*)>$/;  # strip '<' and '>' if present
+    dbg("message: using EnvelopeFrom provided by suppl_attrib: '%s'", $envf);
+    return $self->{envelopefrom} = $envf;
+  }
+
   # bug 2142:
   # Get the SMTP MAIL FROM:, aka. the "envelope sender", if our
   # calling app has helpfully marked up the source message

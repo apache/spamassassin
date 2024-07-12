@@ -506,17 +506,90 @@ supplementary attribute of the message, typically information that cannot
 be deduced from the message itself, or is hard to do so reliably, or would
 represent unnecessary work for SpamAssassin to obtain it. The argument will
 be stored to a Mail::SpamAssassin::Message object as 'suppl_attrib', thus
-made available to the rest of the code as well as to plugins. The exact list
-of attributes will evolve through time, any unknown attribute should be
-ignored. Possible examples are: SMTP envelope information, a flag indicating
-that a message as supplied by a caller was truncated due to size limit, an
-already verified list of DKIM signature objects, or perhaps a list of rule
-hits predetermined by a caller, which makes another possible way for a
-caller to provide meta information (instead of having to insert made-up
-header fields in order to pass information), or maybe just plain rule hits.
+made available to the rest of the code as well as to plugins. Possible
+attributes are:
 
-For more information, please see the C<Mail::SpamAssassin::Message>
-and C<Mail::SpamAssassin::Message::Node> POD.
+=over 4
+
+=item arc_signatures
+
+An array reference of ARC signatures. If this attribute is provided,
+SpamAssassin will not attempt to verify ARC signatures itself, but will use
+the provided signatures instead. This is useful when the caller has already
+verified the signatures and wants to avoid the overhead of verifying them
+again or if the message was truncated before being passed to SpamAssassin.
+
+=item body_size
+
+The original message body size. The caller may wish to provide this value
+if the message was truncated before being passed to SpamAssassin. The value
+will be stored as I<< $msg->{pristine_body_length} >> and used by an eval test
+C<check_body_length>
+
+=item dkim_signatures
+
+An array reference of DKIM signatures. If this attribute is provided,
+SpamAssassin will not attempt to verify DKIM signatures itself, but will use
+the provided signatures instead. This is useful when the caller has already
+verified the signatures and wants to avoid the overhead of verifying them
+again or if the message was truncated before being passed to SpamAssassin.
+
+=item master_deadline
+
+This attribute is used to set a limit on the time SpamAssassin is allowed to
+spend before retuning a result. The value is a floating point number
+representing the time in seconds since the epoch. See the C<time_limit>
+configuration option in L<Mail::SpamAssassin::Conf/MISCELLANEOUS OPTIONS>
+for more details.
+
+=item mimepart_digests
+
+An array reference of digest codes (e.g. SHA1) of each MIME part. The caller may wish
+to provide this value if the message was truncated before being passed to
+SpamAssassin.
+
+=item originating
+
+A boolean value that indicates whether the message originated from the
+local system or, likewise, an authenticated roaming user. If this is set to true,
+SpamAssassin will consider all relays as trusted.
+
+=item return_path
+
+This attribute is used to set the Envelope From address that is used by the
+C<EnvelopeFrom> pseudo-header and for various rules such as C<welcomelist_from>
+and SPF checking. If this attribute is not provided, SpamAssassin will attempt to
+determine the Envelope From address from the message headers. If the caller knows
+the Envelope From address, it can be provided here to avoid any ambiguity. If the
+address is surrounded by angle brackets, they will be stripped.
+
+=item rule_hits
+
+A array reference of rule hits. Each element is a hash reference with the
+following keys: 'rule', 'area', 'score', 'defscore', 'value', 'ruletype', 'tflags',
+'descr'. This is useful when the caller wants to include additional hits on the
+message that are not defined by SpamAssassin rules. For example, this can be used
+to include hits from external sources such as virus scanners or other spam filters.
+
+=back
+
+Example:
+
+    $msg = $sa->parse($message,0, {
+        body_size       => 24284293,
+        master_deadline => time() + 60,
+        return_path     => 'foo@example.com',
+        originating     => 0,
+        rule_hits       => {
+            rule   => '__TRUNCATED',
+            score  => -0.1,
+            area   => 'RAW: ',
+            tflags => 'nice',
+            descr  => "Message size truncated to 10485760 B" }
+    });
+
+If other attributes are provided, they will be silently ignored by SpamAssassin but
+will be available to plugins in C<< $msg->{suppl_attrib} >>.
 
 =cut
 
