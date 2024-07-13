@@ -4193,24 +4193,24 @@ score       URI_CLOUDFLAREIPFS         3.000	# limit
 tflags      URI_CLOUDFLAREIPFS         publish
 
 uri         __URI_GOOGDRAWPREVIEW      m,://docs\.google\.com/drawings/d/[^/]*/preview,i
-meta        URI_GOOGDRAWPREVIEW        __URI_GOOGDRAWPREVIEW && !__RCD_RDNS_SMTP && !__TVD_SPACE_RATIO
-describe    URI_GOOGDRAWPREVIEW        Link to image at Google Docs, likely phishing obfuscation
+meta        URI_GOOGDRAWPREVIEW_MINFP  __URI_GOOGDRAWPREVIEW && (__SUBSCRIPTION_INFO || __HTML_TAG_BALANCE_CENTER || __TO_NO_BRKTS_HTML_ONLY) && !__RCD_RDNS_SMTP && !__TVD_SPACE_RATIO
+describe    URI_GOOGDRAWPREVIEW_MINFP  Link to image at Google Docs, probable phishing
+score       URI_GOOGDRAWPREVIEW_MINFP  3.000	# limit
+tflags      URI_GOOGDRAWPREVIEW_MINFP  publish
+
+# Catch the less-obviously-spammy hits
+meta        URI_GOOGDRAWPREVIEW        __URI_GOOGDRAWPREVIEW && !URI_GOOGDRAWPREVIEW_MINFP && !__RCD_RDNS_SMTP && !__TVD_SPACE_RATIO
+describe    URI_GOOGDRAWPREVIEW        Link to image at Google Docs, possible phishing
 score       URI_GOOGDRAWPREVIEW        3.000	# limit
 tflags      URI_GOOGDRAWPREVIEW        publish
 
-# see if any combos work well
-meta        __GOOGDRAW_01              __URI_GOOGDRAWPREVIEW && __SUBSCRIPTION_INFO 
-meta        __GOOGDRAW_02              __URI_GOOGDRAWPREVIEW && __HTML_TAG_BALANCE_CENTER 
-meta        __GOOGDRAW_03              __URI_GOOGDRAWPREVIEW && __TO_NO_BRKTS_HTML_ONLY 
-meta        __GOOGDRAW_04              __URI_GOOGDRAWPREVIEW && __XM_VERY_LONG 
-meta        __GOOGDRAW_05              __URI_GOOGDRAWPREVIEW && __DOS_REF_TODAY 
-meta        __GOOGDRAW_06              __URI_GOOGDRAWPREVIEW && __RATWARE_0_TZ_DATE 
 
-uri         __MAILJET_PILIPOP_REDIR    m,://redir\.pilipop\.com/lnk/,i
-meta        MAILJET_PILIPOP_REDIR      __MAILJET_PILIPOP_REDIR
-describe    MAILJET_PILIPOP_REDIR      Redirect via Mailjet service, possible phishing obfuscation
-score       MAILJET_PILIPOP_REDIR      1.000	# limit
-tflags      MAILJET_PILIPOP_REDIR      publish
+# I'm the only one seeing this, I guess they are pretty good at squashing abuse
+#uri         __MAILJET_PILIPOP_REDIR    m,://redir\.pilipop\.com/lnk/,i
+#meta        MAILJET_PILIPOP_REDIR      __MAILJET_PILIPOP_REDIR
+#describe    MAILJET_PILIPOP_REDIR      Redirect via Mailjet service, possible phishing obfuscation
+#score       MAILJET_PILIPOP_REDIR      1.000	# limit
+#tflags      MAILJET_PILIPOP_REDIR      publish
 
 
 
