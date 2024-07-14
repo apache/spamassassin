@@ -4212,6 +4212,10 @@ tflags      URI_GOOGDRAWPREVIEW        publish
 #score       MAILJET_PILIPOP_REDIR      1.000	# limit
 #tflags      MAILJET_PILIPOP_REDIR      publish
 
+header      __TO_EQ_CC_1               ALL =~ /\nCc: (?:[^\n<]{0,80}<)?([^\n\s>]+)>?\n+(?:[^\n]{1,100}\n+)*To: (?:[^\n]{0,80}<)?\1[>,\s\n]/ism
+header      __TO_EQ_CC_2               ALL =~ /\nTo: (?:[^\n<]{0,80}<)?([^\n\s>]+)>?\n+(?:[^\n]{1,100}\n+)*Cc: (?:[^\n]{0,80}<)?\1[>,\s\n]/ism
+meta        __TO_EQ_CC                 (__TO_EQ_CC_1 || __TO_EQ_CC_2)
+describe    __TO_EQ_CC                 To: same as Cc:
 
 
 
