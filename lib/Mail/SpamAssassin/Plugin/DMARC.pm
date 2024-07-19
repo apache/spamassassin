@@ -343,7 +343,9 @@ sub _check_dmarc {
         my $mfrom_dom = $spf_parse->{properties}{smtp}{mailfrom};
         if($mfrom_dom =~ /\@(.*)/) {
           $mfrom_dom = $1;
-        }
+        } else {
+	  $mfrom_dom = $mfrom_domain
+	}
         $dmarc->spf([
           {
             scope  => 'mfrom',
