@@ -334,7 +334,11 @@ sub _get_pdf_details {
         $location = _parse_string($1);
       }
       if (not defined($location) or index($location, '.') <= 0) {
-        $location = _parse_string($2);
+	if(defined $2) {
+          $location = _parse_string($2);
+        } else {
+	  next;
+	}
       }
       next unless index($location, '.') > 0; # ignore some binary mess
       next if $location =~ /\0/; # ignore urls with NUL characters
