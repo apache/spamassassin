@@ -795,6 +795,20 @@ sub _check_macrotype_doc {
 
   return if !defined $data || $data eq '';
 
+  # check uris in rtf file
+  if(_is_rtf_file($name, $data)) {
+    # do not read the whole file, it might be huge
+    my $tdata = substr($data, 0, 200000);
+    foreach (split(/\n/, $tdata)) {
+      if(/HYPERLINK "(.*)"/) {
+        my $uri = $1;
+        dbg("Found uri $uri in file $name");
+        $pms->add_uri_detail_list($uri);
+      } 
+    } 
+  }
+
+  # return if the file is not a zip file
   return unless _is_zip_file($name, $data);
   my $zip = _open_zip_handle($data);
   return unless $zip;
@@ -947,6 +961,16 @@ sub _is_zip_file {
   my ($name, $data) = @_;
 
   if (index($data, 'PK') == 0 || $name =~ /\.zip$/i) {
+    return 1;
+  }
+
+  return 0;
+}
+
+sub _is_rtf_file {
+  my ($name, $data) = @_;
+
+  if (index($data, '{\rtf1') == 0 || $name =~ /\.rtf$/i) {
     return 1;
   }
 
