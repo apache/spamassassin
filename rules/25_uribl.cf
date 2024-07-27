@@ -213,6 +213,25 @@ describe        URIBL_ABUSE_SURBL  Contains an URL listed in the ABUSE SURBL blo
 tflags          URIBL_ABUSE_SURBL  net notrim
 reuse           URIBL_ABUSE_SURBL
 
+# New datasets Bug #8134
+# DM - Disposable mail domains
+urirhssub       URIBL_DM_SURBL  multi.surbl.org.        A   4
+body            URIBL_DM_SURBL  eval:check_uridnsbl('URIBL_DM_SURBL')
+describe        URIBL_DM_SURBL  Contains an URL listed in the DM SURBL blocklist
+tflags          URIBL_DM_SURBL  net notrim
+reuse           URIBL_DM_SURBL
+
+#CT - Click tracker domains
+# This list contains domains used for tracking clicks in emails.
+# We only list domains used by senders that send emails to mailboxes
+# without confirmed opt-in (e.g. emails also sent to spamtraps).
+
+urirhssub       URIBL_CT_SURBL  multi.surbl.org.        A   32
+body            URIBL_CT_SURBL  eval:check_uridnsbl('URIBL_CT_SURBL')
+describe        URIBL_CT_SURBL  Contains an URL listed in the CT SURBL blocklist
+tflags          URIBL_CT_SURBL  net notrim
+reuse           URIBL_CT_SURBL
+
 #SURBL BLOCK RULES - Bit 1 means your DNS has been blocked and this rule should be triggered to notify you.
 urirhssub       SURBL_BLOCKED   multi.surbl.org.        A   1
 body            SURBL_BLOCKED   eval:check_uridnsbl('SURBL_BLOCKED')
