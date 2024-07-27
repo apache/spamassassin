@@ -220,6 +220,11 @@ describe        SURBL_BLOCKED   ADMINISTRATOR NOTICE: The query to SURBL was blo
 tflags          SURBL_BLOCKED   net noautolearn notrim
 reuse           SURBL_BLOCKED
 
+# Header BL Bug #8136
+header         URIBL_MULTI_SURBL_HEADERS	eval:check_hashbl_emails('multi.surbl.org', 'raw/max=10/shuffle/host', 'ALLFROM/Reply-To', '^127\.0\.0\.\d+$')
+priority       URIBL_MULTI_SURBL_HEADERS       	-100
+describe       URIBL_MULTI_SURBL_HEADERS       	Domain found in surbl multi for from or reply-to 
+
 if can(Mail::SpamAssassin::Conf::feature_dns_block_rule)
 dns_block_rule SURBL_BLOCKED multi.surbl.org
 endif
