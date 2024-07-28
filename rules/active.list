@@ -299,6 +299,9 @@ CN_B2B_SPAMMER
 # tflags publish
 COMMENT_GIBBERISH
 
+# tflags net
+COMPENSATION
+
 # tflags publish
 CONTENT_AFTER_HTML
 
@@ -488,7 +491,7 @@ FONT_INVIS_POSTEXTRAS
 # tflags net
 FORGED_SPF_HELO
 
-# tflags publish
+# tflags net
 FORM_FRAUD
 
 # tflags net
@@ -569,7 +572,7 @@ FROM_MISSP_MSFT
 # good enough
 FROM_MISSP_PHISH
 
-# good enough
+# tflags net
 FROM_MISSP_REPLYTO
 
 # tflags net
@@ -950,14 +953,14 @@ MALWARE_PASSWORD
 # tflags publish
 MALW_ATTACH
 
+# tflags net
+MANY_HDRS_LCASE
+
 # tflags publish
 MANY_SPAN_IN_TEXT
 
 # good enough
 MANY_SUBDOM
-
-# tflags net
-MAY_BE_FORGED
 
 # good enough
 MILLION_EUR
@@ -1120,9 +1123,6 @@ PDS_BTC_NTLD
 
 # good enough
 PDS_DBL_URL_TNB_RUNON
-
-# tflags net
-PDS_FROM_2_EMAILS
 
 # tflags net
 PDS_HELO_SPF_FAIL
@@ -1623,10 +1623,10 @@ TO_EQ_FM_DIRECT_MX
 TO_EQ_FM_DOM_HTML_IMG
 
 # tflags net
-TO_EQ_FM_DOM_SPF_FAIL
+TO_EQ_FM_DOM_HTML_ONLY
 
 # tflags net
-TO_EQ_FM_HTML_ONLY
+TO_EQ_FM_DOM_SPF_FAIL
 
 # tflags net
 TO_EQ_FM_SPF_FAIL
@@ -1658,11 +1658,14 @@ TO_NO_BRKTS_PCNT
 # tflags publish
 TO_TOO_MANY_WFH_01
 
-# good enough
+# tflags net
 TVD_SPACE_ENCODED
 
 # tflags net
 TVD_SPACE_RATIO_MINFP
+
+# tflags net
+TVD_SUBJ_NUM_OBFU_MINFP
 
 # tflags publish
 TW_GIBBERISH_MANY
