@@ -299,6 +299,9 @@ CN_B2B_SPAMMER
 # tflags publish
 COMMENT_GIBBERISH
 
+# tflags net
+COMPENSATION
+
 # tflags publish
 CONTENT_AFTER_HTML
 
@@ -488,7 +491,7 @@ FONT_INVIS_POSTEXTRAS
 # tflags net
 FORGED_SPF_HELO
 
-# tflags publish
+# tflags net
 FORM_FRAUD
 
 # tflags net
@@ -897,6 +900,9 @@ JH_SPAMMY_PATTERN01
 JH_SPAMMY_PATTERN02
 
 # tflags net
+KHOP_FAKE_EBAY
+
+# tflags net
 KHOP_HELO_FCRDNS
 
 # tflags publish
@@ -1120,9 +1126,6 @@ PDS_BTC_NTLD
 
 # good enough
 PDS_DBL_URL_TNB_RUNON
-
-# tflags net
-PDS_FROM_2_EMAILS
 
 # tflags net
 PDS_HELO_SPF_FAIL
@@ -1601,7 +1604,7 @@ TARINGANET_IMG_NOT_RCVD_TN
 # tflags publish
 TEQF_USR_IMAGE
 
-# tflags publish
+# tflags net
 TEQF_USR_MSGID_HEX
 
 # tflags net
@@ -1649,9 +1652,6 @@ TO_NO_BRKTS_HTML_IMG
 # tflags publish
 TO_NO_BRKTS_HTML_ONLY
 
-# tflags net
-TO_NO_BRKTS_MSFT
-
 # tflags publish
 TO_NO_BRKTS_NORDNS_HTML
 
@@ -1661,7 +1661,7 @@ TO_NO_BRKTS_PCNT
 # tflags publish
 TO_TOO_MANY_WFH_01
 
-# tflags net
+# good enough
 TVD_SPACE_ENCODED
 
 # tflags net
@@ -1827,6 +1827,9 @@ URI_GOOGLE_PROXY
 URI_GOOG_STO_SPAMMY
 
 # tflags publish
+URI_GOOG_STO_SUBD_SPAMMY
+
+# tflags publish
 URI_HEX_IP
 
 # tflags userconf
@@ -1877,7 +1880,7 @@ URI_WPADMIN
 # tflags publish
 URI_WP_DIRINDEX
 
-# tflags net
+# tflags publish
 URI_WP_HACKED
 
 # tflags publish
