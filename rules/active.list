@@ -257,7 +257,7 @@ BITCOIN_XPRIO
 # tflags publish
 BITCOIN_YOUR_INFO
 
-# tflags publish
+# tflags net
 BODY_URI_ONLY
 
 # tflags publish
@@ -1110,6 +1110,9 @@ PDS_BTC_NTLD
 PDS_DBL_URL_TNB_RUNON
 
 # tflags net
+PDS_FROM_2_EMAILS
+
+# tflags net
 PDS_HELO_SPF_FAIL
 
 # good enough
@@ -1448,9 +1451,6 @@ REPTO_419_FRAUD_YJ
 # tflags publish
 REPTO_419_FRAUD_YN
 
-# good enough
-RISK_FREE
-
 # tflags publish
 SCC_BOGUS_CTE_1
 
@@ -1556,9 +1556,6 @@ STATIC_XPRIO_OLE
 # tflags publish
 STOCK_TIP
 
-# good enough
-STOX_BOUND_090909_B
-
 # tflags userconf
 SUBJECT_IN_BLOCKLIST
 
@@ -1608,6 +1605,12 @@ TONLINE_FAKE_DKIM
 TO_EQ_FM_DIRECT_MX
 
 # tflags net
+TO_EQ_FM_DOM_HTML_IMG
+
+# tflags net
+TO_EQ_FM_DOM_HTML_ONLY
+
+# tflags net
 TO_EQ_FM_DOM_SPF_FAIL
 
 # tflags net
@@ -1640,8 +1643,11 @@ TO_TOO_MANY_WFH_01
 # tflags net
 TVD_SPACE_ENCODED
 
-# tflags net
+# good enough
 TVD_SPACE_RATIO_MINFP
+
+# tflags net
+TVD_SUBJ_NUM_OBFU_MINFP
 
 # tflags publish
 TW_GIBBERISH_MANY
@@ -1853,7 +1859,7 @@ URI_WPADMIN
 # tflags publish
 URI_WP_DIRINDEX
 
-# tflags publish
+# tflags net
 URI_WP_HACKED
 
 # tflags publish
