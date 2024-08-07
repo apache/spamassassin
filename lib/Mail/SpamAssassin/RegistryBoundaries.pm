@@ -109,6 +109,7 @@ sub split_domain {
     $domain = lc $domain;
   } else {
     # convert to ascii, handles Unicode dot normalization also
+    $domain = _strip_user_pass($domain);  
     $domain = idn_to_ascii($domain);
   }
 
@@ -222,6 +223,7 @@ sub is_domain_valid {
     $dom = lc $dom;
   } else {
     # convert to ascii, handles Unicode dot normalization also
+    $dom = _strip_user_pass($dom);  
     $dom = idn_to_ascii($dom);
   }
 
@@ -254,14 +256,9 @@ sub uri_to_domain {
     return unless $uri =~ s/.*@//;	# drop username or abort
   } else {
     $uri =~ s{^[a-z]+:/{0,2}}{}gs;	# drop the protocol
-    # strip path, CGI params, fragment.  note: bug 4213 shows that "&" should
-    # *not* be likewise stripped here -- it's permitted in hostnames by
-    # some common MUAs!
-    $uri =~ s{[/?#].*}{}gs;              
-    $uri =~ s{^[^/]*\@}{}gs;		# drop username/passwd
-    $uri =~ s{:\d*$}{}gs;		# port, bug 4191: sometimes the # is missing
+    $uri = _strip_user_pass($uri);
   }
-
+  
   # skip undecoded URIs if the encoded bits shouldn't be.
   # we'll see the decoded version as well.  see url_encode()
   return if $uri =~ /\%(?:2[1-9a-f]|[3-6][0-9a-f]|7[0-9a-e])/;
@@ -281,6 +278,22 @@ sub uri_to_domain {
   
   # optionally return unstripped host name
   return !wantarray ? $domain : ($domain, $host);
+}
+
+sub _strip_user_pass {
+  my $uri = shift;
+
+  if ($uri =~ s/^mailto://i) { # handle mailto: specially
+     return $uri                   # drop parameters ?subject= etc
+  } else {
+    # strip path, CGI params, fragment.  note: bug 4213 shows that "&" should
+    # *not* be likewise stripped here -- it's permitted in hostnames by
+    # some common MUAs!
+    $uri =~ s{[/?#].*}{}gs;              
+    $uri =~ s{^[^/]*\@}{}gs;            # drop username/passwd
+    $uri =~ s{:\d*$}{}gs;               # port, bug 4191: sometimes the # is missing
+    return $uri;
+  }
 }
 
 1;

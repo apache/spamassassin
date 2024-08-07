@@ -493,7 +493,7 @@ sub _normalize {
   # Try first as UTF-8 ignoring declaring?
   my $tried_utf8;
   if ($cnt_8bits && !$insist_on_declared_charset) {
-    if (eval { $rv = $enc_utf8->decode($_[0], 1|8); defined $rv }) {
+    if (eval { $rv = $enc_utf8->decode($_[0], Encode::FB_CROAK | Encode::LEAVE_SRC); defined $rv }) {
       dbg("message: decoded as charset UTF-8, declared %s",
         $charset_declared);
       return $_[0]  if !$return_decoded;
@@ -523,7 +523,7 @@ sub _normalize {
 
     my $decoder = detect_utf16( $_[0] );
     if (defined $decoder) {
-      if (eval { $rv = $decoder->decode($_[0], 1|8); defined $rv }) {
+      if (eval { $rv = $decoder->decode($_[0], Encode::FB_CROAK | Encode::LEAVE_SRC); defined $rv }) {
         dbg("message: decoded as charset %s, declared %s",
           $decoder->name, $charset_declared);
         utf8::encode($rv) if !$return_decoded;
@@ -574,12 +574,9 @@ sub _normalize {
       dbg("message: failed decoding, no decoder for a declared charset %s",
           $chset);
     }
-    elsif ($tried_utf8 && $chset eq 'UTF-8') {
-      # was already tried initially, no point doing again
-    }
     else {
-      my $check_flags = Encode::LEAVE_SRC;  # 0x0008
-      $check_flags |= Encode::FB_CROAK  unless $insist_on_declared_charset;
+      my $check_flags = Encode::LEAVE_SRC;
+      $check_flags |= Encode::FB_CROAK  unless $insist_on_declared_charset || ($tried_utf8 && $chset eq 'UTF-8');
       my $err = '';
       if (eval { $rv = $decoder->decode($_[0], $check_flags); defined $rv }) {
         dbg("message: decoded as charset %s, declared %s",
@@ -616,7 +613,7 @@ sub _normalize {
     # NBSP (A0) and SHY (AD) are at the same position in ISO-8859-* too
     # consider also: AE (r), 80 Euro
     my $err = '';
-    eval { $rv = $enc_w1252->decode($_[0], 1|8) };  # FB_CROAK | LEAVE_SRC
+    eval { $rv = $enc_w1252->decode($_[0], Encode::FB_CROAK | Encode::LEAVE_SRC) };
     if ($@) {
       $err = $@; $err =~ s/\s+/ /gs; $err =~ s/(.*) at .*/$1/;
       $err = " ($err)";
@@ -649,7 +646,7 @@ sub _normalize {
             $charset_detected);
       } else {
         my $err = '';
-        eval { $rv = $decoder->decode($_[0], 1|8) };  # FB_CROAK | LEAVE_SRC
+        eval { $rv = $decoder->decode($_[0], Encode::FB_CROAK | Encode::LEAVE_SRC) };
         if ($@) {
           $err = $@; $err =~ s/\s+/ /gs; $err =~ s/(.*) at .*/$1/;
           $err = " ($err)";
@@ -760,7 +757,7 @@ sub rendered {
       } else { # non-ASCII, try UTF-8
         my $rv;
         # with some luck input can be interpreted as UTF-8
-        if (eval { $rv = $enc_utf8->decode($text, 1|8); defined $rv }) {
+        if (eval { $rv = $enc_utf8->decode($text, Encode::FB_CROAK | Encode::LEAVE_SRC); defined $rv }) {
           $text = $rv;  # decoded to perl characters
           $character_semantics = 1;  # $text will be in characters
           dbg("message: decoded as charset UTF-8, declared %s", $charset);
@@ -822,7 +819,7 @@ sub rendered {
       if ($text =~ tr/\x00-\x7F//c) {  # non-ASCII, try UTF-8
         my $rv;
         # with some luck input can be interpreted as UTF-8
-        if (eval { $rv = $enc_utf8->decode($text, 1|8); defined $rv }) {
+        if (eval { $rv = $enc_utf8->decode($text, Encode::FB_CROAK | Encode::LEAVE_SRC); defined $rv }) {
           $text = $rv;  # decoded to perl characters
           dbg("message: decoded as charset UTF-8, declared %s", $charset);
         } else {
