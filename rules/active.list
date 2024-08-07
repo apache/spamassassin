@@ -134,6 +134,9 @@ ARC_VALID
 # good enough
 AXB_XMAILER_MIMEOLE_OL_024C2
 
+# good enough
+AXB_X_FF_SEZ_S
+
 # tflags learn
 BAYES_00
 
@@ -407,9 +410,6 @@ DOTGOV_IMAGE
 # good enough
 DSN_NO_MIMEVERSION
 
-# good enough
-DUP_SUSP_HDR
-
 # tflags publish
 DX_TEXT_02
 
@@ -442,9 +442,6 @@ FACEBOOK_IMG_NOT_RCVD_FB
 
 # good enough
 FAKE_REPLY_A1
-
-# good enough
-FAKE_REPLY_B
 
 # good enough
 FAKE_REPLY_C
@@ -569,7 +566,7 @@ FROM_MISSP_MSFT
 # good enough
 FROM_MISSP_PHISH
 
-# good enough
+# tflags net
 FROM_MISSP_REPLYTO
 
 # tflags net
@@ -770,9 +767,6 @@ HAS_X_NO_RELAY
 # tflags publish
 HAS_X_OUTGOING_SPAM_STAT
 
-# tflags net
-HDRS_LCASE
-
 # tflags publish
 HDRS_MISSP
 
@@ -900,6 +894,9 @@ JH_SPAMMY_PATTERN01
 JH_SPAMMY_PATTERN02
 
 # tflags net
+KHOP_FAKE_EBAY
+
+# tflags net
 KHOP_HELO_FCRDNS
 
 # tflags publish
@@ -950,20 +947,11 @@ MALWARE_PASSWORD
 # tflags publish
 MALW_ATTACH
 
-# tflags net
-MANY_HDRS_LCASE
-
 # tflags publish
 MANY_SPAN_IN_TEXT
 
-# good enough
-MANY_SUBDOM
-
 # tflags net
 MAY_BE_FORGED
-
-# good enough
-MILLION_EUR
 
 # tflags publish
 MILLION_HUNDRED
@@ -1094,6 +1082,9 @@ NSL_RCVD_FROM_USER
 # good enough
 NSL_RCVD_HELO_USER
 
+# good enough
+NULL_IN_BODY
+
 # tflags publish
 OBFU_BITCOIN
 
@@ -1123,9 +1114,6 @@ PDS_BTC_NTLD
 
 # good enough
 PDS_DBL_URL_TNB_RUNON
-
-# tflags net
-PDS_FROM_2_EMAILS
 
 # tflags net
 PDS_HELO_SPF_FAIL
@@ -1590,6 +1578,9 @@ SUBJ_UNNEEDED_HTML
 SURBL_BLOCKED
 
 # good enough
+SUSP_UTF8_WORD_COMBO
+
+# good enough
 SUSP_UTF8_WORD_FROM
 
 # tflags publish
@@ -1626,6 +1617,9 @@ TONOM_EQ_TOLOC_SHRT_SHRTNER
 TO_EQ_FM_DIRECT_MX
 
 # tflags net
+TO_EQ_FM_DOM_HTML_IMG
+
+# tflags net
 TO_EQ_FM_DOM_HTML_ONLY
 
 # tflags net
@@ -1652,9 +1646,6 @@ TO_NO_BRKTS_HTML_IMG
 # tflags publish
 TO_NO_BRKTS_HTML_ONLY
 
-# tflags net
-TO_NO_BRKTS_MSFT
-
 # tflags publish
 TO_NO_BRKTS_NORDNS_HTML
 
@@ -1667,7 +1658,7 @@ TO_TOO_MANY_WFH_01
 # tflags net
 TVD_SPACE_ENCODED
 
-# good enough
+# tflags net
 TVD_SPACE_RATIO_MINFP
 
 # tflags net
@@ -1883,10 +1874,10 @@ URI_WPADMIN
 # tflags publish
 URI_WP_DIRINDEX
 
-# tflags publish
+# tflags net
 URI_WP_HACKED
 
-# tflags publish
+# tflags net
 URI_WP_HACKED_2
 
 # tflags publish
