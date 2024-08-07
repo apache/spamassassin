@@ -526,7 +526,7 @@ sub _normalize {
       if (eval { $rv = $decoder->decode($_[0], 1|8); defined $rv }) {
         dbg("message: decoded as charset %s, declared %s",
           $decoder->name, $charset_declared);
-        return $_[0]  if !$return_decoded;
+        utf8::encode($rv) if !$return_decoded;
         $rv .= $data_taint;  # carry taintedness over, avoid Encode bug
         return $rv;  # decoded
       } else {
