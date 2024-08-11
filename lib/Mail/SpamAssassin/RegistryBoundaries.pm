@@ -260,7 +260,7 @@ sub uri_to_domain {
   }
   
   # skip undecoded URIs if the encoded bits shouldn't be.
-  # we'll see the decoded version as well.  see url_encode()
+  # we'll see the decoded version as well.  see url_decode()
   return if $uri =~ /\%(?:2[1-9a-f]|[3-6][0-9a-f]|7[0-9a-e])/;
 
   my $host = idn_to_ascii($uri);  # unstripped/full domain name

@@ -36,6 +36,7 @@ use strict;
 use warnings;
 use re 'taint';
 
+use Encode qw();
 use Mail::SpamAssassin;
 use Mail::SpamAssassin::Constants qw(:sa);
 use Mail::SpamAssassin::HTML;
@@ -43,9 +44,8 @@ use Mail::SpamAssassin::Logger;
 
 our($enc_utf8, $enc_w1252, $have_encode_detector);
 BEGIN {
-  eval { require Encode }
-    and do { $enc_utf8  = Encode::find_encoding('UTF-8');
-             $enc_w1252 = Encode::find_encoding('Windows-1252') };
+  $enc_utf8  = Encode::find_encoding('UTF-8');
+  $enc_w1252 = Encode::find_encoding('Windows-1252');
   eval { require Encode::Detect::Detector }
     and do { $have_encode_detector = 1 };
 };

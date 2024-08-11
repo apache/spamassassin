@@ -138,6 +138,10 @@ $have_libidn||$have_libidn2
           "internationalized domain names with U-labels will not be recognized!");
 
 ###########################################################################
+our($enc_utf8);
+BEGIN {
+  $enc_utf8  = Encode::find_encoding('UTF-8');
+};
 
 # find an executable in the current $PATH (or whatever for that platform)
 {
@@ -1321,38 +1325,13 @@ sub parse_content_type {
 
 ###########################################################################
 
-sub url_encode {
+sub url_decode {
   my ($url) = @_;
-  my (@characters) = split(/(\%[0-9a-fA-F]{2})/, $url);
-  my (@unencoded);
-  my (@encoded);
-
-  foreach (@characters) {
-    # escaped character set ...
-    if (/\%[0-9a-fA-F]{2}/) {
-      # IF it is in the range of 0x00-0x20 or 0x7f-0xff
-      #    or it is one of  "<", ">", """, "#", "%",
-      #                     ";", "/", "?", ":", "@", "=" or "&"
-      # THEN preserve its encoding
-      unless (/(20|7f|[0189a-fA-F][0-9a-fA-F])/i) {
-	s/\%([2-7][0-9a-fA-F])/sprintf "%c", hex($1)/e;
-	push(@unencoded, $_);
-      }
-    }
-    # other stuff
-    else {
-      # no re "strict";  # since perl 5.21.8
-      # 0x00-0x20, 0x7f-0xff, ", %, <, >
-      s/([\000-\040\177-\377\042\045\074\076])
-	  /push(@encoded, $1) && sprintf "%%%02x", unpack("C",$1)/egx;
-    }
-  }
-  if (wantarray) {
-    return(join("", @characters), join("", @unencoded), join("", @encoded));
-  }
-  else {
-    return join("", @characters);
-  }
+  return $url unless ($url =~ /\%[0-9a-fA-F]{2}/);
+  utf8::encode($url) if utf8::is_utf8($url);
+  $url =~ s/%([0-9A-Fa-f]{2})/chr(hex($1))/eg;
+  $url = $enc_utf8->decode($url);
+  return $url;
 }
 
 ###########################################################################
@@ -1633,7 +1612,7 @@ sub uri_list_canonicalize {
     # important parts of the URL may be encoded (such as the
     # scheme). (bug 4213)
     if ($nuri =~ /%[0-9a-fA-F]{2}/) {
-      $nuri = Mail::SpamAssassin::Util::url_encode($nuri);
+      $nuri = Mail::SpamAssassin::Util::url_decode($nuri);
     }
 
     # www.foo.biz -> http://www.foo.biz

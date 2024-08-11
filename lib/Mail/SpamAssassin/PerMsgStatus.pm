@@ -2779,7 +2779,7 @@ sub _process_text_uri_list {
 
       if ($uri =~ /^mailto:/i) {
         # MUAs linkify and urldecode mailto:foo%40bar%2Fcom
-        $uri = Mail::SpamAssassin::Util::url_encode($uri) if $uri =~ /\%[0-9a-f]{2}/i;
+        $uri = Mail::SpamAssassin::Util::url_decode($uri) if $uri =~ /\%[0-9a-f]{2}/i;
         # Skip unless @ found after decoding, then check tld is valid
         next unless $uri =~ /\@([^?&>]*)/;
         my $host = $1; $host =~ s/(?:\%20)+$//; # strip trailing %20 from host
