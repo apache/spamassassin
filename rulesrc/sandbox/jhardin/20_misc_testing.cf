@@ -3383,15 +3383,17 @@ uri        __URI_IMG_FOTERCOM          m;://foter\.com/photos/.+\.(?:jpe?g|gif|p
 uri        __URI_IMG_GTRACING          m;://shopify\.gtracing\.com/img/.+\.(?:jpe?g|gif|png|webp);i
 uri        __URI_IMG_JOOMCDN           m;://img\.joomcdn\.net/.+\.(?:jpe?g|gif|png|webp);i
 uri        __URI_IMG_DHRESOURCE        m;://www\.dhresource\.com/.+\.(?:jpe?g|gif|png|webp);i
+uri        __URI_IMG_LEAADPERSONS      m;://www\.leaadpersons\.com/biz/.+\.(?:jpe?g|gif|png|webp);i
+uri        __URI_IMG_SENSILOEDPER      m;://www\.sensiloedper\.com/bizgstorage/.+\.(?:jpe?g|gif|png|webp);i
 uri        __URI_IMG_CWINDOWSNET       m;://[^.]{12,}\.(?:blob|web)\.core\.windows\.net/.+\.(?:jpe?g|gif|png|webp);i
 
 
-meta       __URI_HOSTED_IMG            ( __URI_IMG_EBAY || __URI_IMG_AMAZON || __URI_IMG_ALICDN || __URI_IMG_WALMART || __URI_IMG_NEWEGG || __URI_IMG_SHOPIFY || __URI_IMG_YTIMG || __URI_IMG_JOOMCDN || __URI_IMG_WISH || __URI_IMG_STATICBG || __URI_IMG_CHANNYPIC || __URI_IMG_TOPHATTER || __URI_IMG_GBTCDN || __URI_IMG_LINKEDIN || __URI_IMG_TUMBLR || __URI_IMG_TAGSTAT || __URI_IMG_FACEBOOK || __URI_IMG_TARINGANET || __URI_IMG_BEBEE || __URI_IMG_EFUSERASSETS || __URI_IMG_IMGBOX_THUMB || __URI_IMG_500PXORG || __URI_IMG_WIXMP || __URI_IMG_POSTIMGCC || __URI_IMG_GTRACING || __URI_IMG_JOOMCDN || __URI_IMG_DHRESOURCE || __URI_IMG_CWINDOWSNET)
+meta       __URI_HOSTED_IMG            ( __URI_IMG_EBAY || __URI_IMG_AMAZON || __URI_IMG_ALICDN || __URI_IMG_WALMART || __URI_IMG_NEWEGG || __URI_IMG_SHOPIFY || __URI_IMG_YTIMG || __URI_IMG_JOOMCDN || __URI_IMG_WISH || __URI_IMG_STATICBG || __URI_IMG_CHANNYPIC || __URI_IMG_TOPHATTER || __URI_IMG_GBTCDN || __URI_IMG_LINKEDIN || __URI_IMG_TUMBLR || __URI_IMG_TAGSTAT || __URI_IMG_FACEBOOK || __URI_IMG_TARINGANET || __URI_IMG_BEBEE || __URI_IMG_EFUSERASSETS || __URI_IMG_IMGBOX_THUMB || __URI_IMG_500PXORG || __URI_IMG_WIXMP || __URI_IMG_POSTIMGCC || __URI_IMG_GTRACING || __URI_IMG_JOOMCDN || __URI_IMG_DHRESOURCE || __URI_IMG_CWINDOWSNET || __URI_IMG_LEAADPERSONS || __URI_IMG_SENSILOEDPER)
 
 meta       __HOSTED_IMG_DQ_UNSUB       __URI_DQ_UNSUB && __URI_HOSTED_IMG
 meta       HOSTED_IMG_DQ_UNSUB         __HOSTED_IMG_DQ_UNSUB
 score      HOSTED_IMG_DQ_UNSUB         3.500	# limit
-describe   HOSTED_IMG_DQ_UNSUB         Image hosted at large ecomm site, IP addr unsub link
+describe   HOSTED_IMG_DQ_UNSUB         Image hosted at large ecomm, CDN or hosting site, IP addr unsub link
 tflags     HOSTED_IMG_DQ_UNSUB         publish
 
 meta       __HOSTED_IMG_DIRECT_MX      __DOS_DIRECT_TO_MX && __URI_HOSTED_IMG
