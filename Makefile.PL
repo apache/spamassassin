@@ -112,7 +112,6 @@ my %makefile = (
     'PREREQ_PM' => {
         'File::Spec'           => 0.8,           # older versions lack some routines we need
         'File::Copy'           => 2.02,          # this version is shipped with 5.005_03, the oldest version known to work
-        'File::Temp'           => 0,             # core module, dependency not needed, here for testing purposes, see bug 8089
         'Pod::Usage'           => 1.10,          # all versions prior to this do seem to be buggy
         'HTML::Parser'         => 3.43,          # the HTML code is based on this parser, older versions have utf-8 bugs
         'Archive::Tar'         => 1.23,          # for sa-update
@@ -139,8 +138,6 @@ my %makefile = (
     # The modules that are not core or that require a minimum version that are used in default tests
     'TEST_REQUIRES' => {
         'Test::Simple' => 1.302067,
-        'Perl::Critic::Policy::TestingAndDebugging::ProhibitNoStrict' => 0,
-        'Perl::Critic::Policy::Perlsecret' => 0,
     },
 
     'LICENSE' => 'apache_2_0',
