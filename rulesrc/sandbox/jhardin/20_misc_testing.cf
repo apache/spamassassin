@@ -2095,6 +2095,16 @@ ifplugin Mail::SpamAssassin::Plugin::ReplaceTags
   describe      FUZZY_TRUSTWALLET   Obfuscated "Trust Wallet", probable phishing
   tflags        FUZZY_TRUSTWALLET   publish
 
+  body          FUZZY_TRUMP         /(?:^|\W)(?=<T>)(?!trump)<T><R><U><M><P>(?:$|\W)/i
+  replace_rules FUZZY_TRUMP    
+  describe      FUZZY_TRUMP         Obfuscated "Trump"
+  tflags        FUZZY_TRUMP         publish
+
+  body          FUZZY_HARRIS        /(?:^|\W)(?=<H>)(?!harris)<H><A><R><R><I><S>(?:$|\W)/i
+  replace_rules FUZZY_HARRIS   
+  describe      FUZZY_HARRIS        Obfuscated "Harris"
+  tflags        FUZZY_HARRIS        publish
+
 else
   meta          __FUZZY_MONERO      0
   body          __BITCOIN           /\bB[-\s]?i[-\s]?t[-\s]?c[-\s]?o[-\s]?i[-\s]?n\b/i
