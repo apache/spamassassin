@@ -4198,6 +4198,12 @@ rawbody     __HREF_BOM                 m,href\s*=\s*"(?:[\xef][\xbb][\xbf]|[\xfe
 #tflags     __URI_WEBMDSERVICE          multiple maxhits=6
 #meta       __URI_WEBMDSERVICE_MANY     __URI_WEBMDSERVICE > 5
 
+uri         __URI_IPFSIO               m,://ipfs\.io/ipfs/,i
+meta        URI_IPFSIO                 __URI_IPFSIO
+describe    URI_IPFSIO                 References Interplanetary File System PtP content via ipfs.io, likely phishing
+score       URI_IPFSIO                 3.000	# limit
+tflags      URI_IPFSIO                 publish
+
 uri         __URI_CLOUDFLAREIPFS       m,://cloudflare-ipfs\.com/ipfs/,i
 meta        URI_CLOUDFLAREIPFS         __URI_CLOUDFLAREIPFS
 describe    URI_CLOUDFLAREIPFS         References Interplanetary File System PtP content via CloudFlare, likely phishing
