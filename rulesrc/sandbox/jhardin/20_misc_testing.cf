@@ -3588,7 +3588,7 @@ describe   SUSP_UTF8_WORD_COMBO        Words using only suspicious UTF-8 charact
 score      SUSP_UTF8_WORD_COMBO        3.000	# limit
 
 header     __4BYTE_UTF8_WORD_SUBJ      Subject =~ /(?:\xf0\x9d[\x90-\x9f][\x80-\xbf]){3,10}/
-meta       SUSP_UTF8_WORD_SUBJ         __4BYTE_UTF8_WORD_SUBJ
+meta       SUSP_UTF8_WORD_SUBJ         __4BYTE_UTF8_WORD_SUBJ && !__SUBJECT_ENCODED_QP 
 describe   SUSP_UTF8_WORD_SUBJ         Word in Subject using only suspicious UTF-8 characters
 score      SUSP_UTF8_WORD_SUBJ         2.000	# limit
 
