@@ -873,7 +873,9 @@ header          CAN_SPAM_HDR            CAN-SPAM_Compliant =~ /./
 header          RPT_SPAM_HDR            Report-SPAM =~ /./
 
 
-#header          LONG_FROM               From =~ /<[^<@]{40,}\w\@/
+# From: "'Home Depot'" <info-zua@untdstatdropromuniflamtiontutIdGbvf.com>
+header          __FROM_LONG_USER        From:addr =~ /[^@]{30}\w\@/
+header          __FROM_LONG_DOM         From:addr =~ /\@[^.]{30}/
 
 
 #if can(Mail::SpamAssassin::Conf::feature_bug6558_free)
