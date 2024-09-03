@@ -757,7 +757,8 @@ sub _check_short {
   # Sort short URLs into hash to de-dup them
   my %short_urls;
   my $uris = $pms->get_uri_detail_list();
-  while (my($uri, $info) = each %{$uris}) {
+  foreach my $uri (keys %$uris) {
+    my $info = $uris->{$uri};
     next unless $info->{domains} && $info->{cleaned};
     # Remove anchors and parameters from shortened uris
     $uri =~ s/(?:\#|\?).*//g;
