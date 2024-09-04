@@ -877,6 +877,16 @@ header          RPT_SPAM_HDR            Report-SPAM =~ /./
 header          __FROM_LONG_USER        From:addr =~ /[^@]{30}\w\@/
 header          __FROM_LONG_DOM         From:addr =~ /\@[^.]{30}/
 
+meta            FROM_LONG_DOM_MINFP     __FROM_LONG_DOM && !__RCD_RDNS_MAIL_MESSY && !__ENV_AND_HDR_FROM_MATCH 
+describe        FROM_LONG_DOM_MINFP     Absurdly long From domain name, suspicious relays
+score           FROM_LONG_DOM_MINFP     2.500	# limit
+tflags          FROM_LONG_DOM_MINFP     publish
+
+meta            FROM_LONG_DOM           __FROM_LONG_DOM && !FROM_LONG_DOM_MINFP
+describe        FROM_LONG_DOM           Absurdly long From domain name
+score           FROM_LONG_DOM           1.500	# limit
+tflags          FROM_LONG_DOM           publish
+
 
 #if can(Mail::SpamAssassin::Conf::feature_bug6558_free)
 #  body            __MANY_RECORDS_1        /\s[A-Z][a-z]{1,30}s(?:\sDatabase)?[-:\s]{2,5}(?i:1\smillion\s|\d[\d,.]{1,8}[Kk]?\s(?i:thousand\s|million\s)?)(?i:total\s|full\sdata\s)?(?i:email|record)s/
@@ -4211,6 +4221,12 @@ meta        URI_CLOUDFLAREIPFS         __URI_CLOUDFLAREIPFS
 describe    URI_CLOUDFLAREIPFS         References Interplanetary File System PtP content via CloudFlare, likely phishing
 score       URI_CLOUDFLAREIPFS         3.000	# limit
 tflags      URI_CLOUDFLAREIPFS         publish
+
+uri         __URI_DWEBIPFS             m;://[^.]{50,}\.ipfs\.dweb\.link/;i
+meta        URI_DWEBIPFS               __URI_DWEBIPFS
+describe    URI_DWEBIPFS               References Interplanetary File System PtP content via dweb.link, likely phishing
+score       URI_DWEBIPFS               3.000	# limit
+tflags      URI_DWEBIPFS               publish
 
 uri         __URI_GOOGDRAWPREVIEW      m,://docs\.google\.com/drawings/d/[^/]*/preview,i
 meta        URI_GOOGDRAWPREVIEW_MINFP  __URI_GOOGDRAWPREVIEW && (__SUBSCRIPTION_INFO || __HTML_TAG_BALANCE_CENTER || __TO_NO_BRKTS_HTML_ONLY) && !__RCD_RDNS_SMTP && !__TVD_SPACE_RATIO
