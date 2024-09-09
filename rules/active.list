@@ -266,7 +266,7 @@ BITCOIN_XPRIO
 # tflags publish
 BITCOIN_YOUR_INFO
 
-# tflags publish
+# tflags net
 BODY_URI_ONLY
 
 # tflags publish
@@ -485,7 +485,7 @@ FORGED_SPF_HELO
 # tflags net
 FORM_FRAUD
 
-# tflags publish
+# tflags net
 FORM_FRAUD_3
 
 # tflags publish
@@ -569,7 +569,7 @@ FROM_MISSP_MSFT
 # good enough
 FROM_MISSP_PHISH
 
-# good enough
+# tflags net
 FROM_MISSP_REPLYTO
 
 # tflags net
@@ -776,6 +776,9 @@ HAS_X_NO_RELAY
 # tflags publish
 HAS_X_OUTGOING_SPAM_STAT
 
+# tflags net
+HDRS_LCASE
+
 # tflags publish
 HDRS_MISSP
 
@@ -959,6 +962,9 @@ MANY_SPAN_IN_TEXT
 # good enough
 MANY_SUBDOM
 
+# tflags net
+MAY_BE_FORGED
+
 # tflags publish
 MILLION_HUNDRED
 
@@ -1110,10 +1116,16 @@ PDS_BTC_ID
 PDS_BTC_MSGID
 
 # good enough
+PDS_BTC_NTLD
+
+# good enough
 PDS_EMPTYSUBJ_URISHRT
 
 # good enough
 PDS_FRNOM_TODOM_NAKED_TO
+
+# tflags net
+PDS_FROM_2_EMAILS
 
 # good enough
 PDS_FROM_NAME_TO_DOMAIN
@@ -1581,6 +1593,9 @@ SUBJ_BRKN_WORDNUMS
 SUBJ_LACKS_WORDS
 
 # tflags net
+SUBJ_UNNEEDED_HTML
+
+# tflags net
 SURBL_BLOCKED
 
 # good enough
@@ -1629,6 +1644,9 @@ TO_EQ_FM_DIRECT_MX
 TO_EQ_FM_DOM_SPF_FAIL
 
 # tflags net
+TO_EQ_FM_HTML_ONLY
+
+# tflags net
 TO_EQ_FM_SPF_FAIL
 
 # tflags publish
@@ -1646,7 +1664,7 @@ TO_NO_BRKTS_HTML_IMG
 # tflags publish
 TO_NO_BRKTS_HTML_ONLY
 
-# good enough
+# tflags net
 TO_NO_BRKTS_MSFT
 
 # tflags publish
@@ -1670,7 +1688,7 @@ TVD_PH_FR5
 # good enough
 TVD_RCVD_SPACE_BRACKET
 
-# tflags net
+# good enough
 TVD_SPACE_ENCODED
 
 # good enough
@@ -1901,7 +1919,7 @@ URI_WPADMIN
 # tflags publish
 URI_WP_DIRINDEX
 
-# tflags publish
+# tflags net
 URI_WP_HACKED
 
 # tflags publish
