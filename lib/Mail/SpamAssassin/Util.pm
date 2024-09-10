@@ -1329,6 +1329,8 @@ sub url_decode {
   my ($url) = @_;
   return $url unless ($url =~ /\%[0-9a-fA-F]{2}/);
   utf8::encode($url) if utf8::is_utf8($url);
+  # decode %25 into % before doing the actual decoding
+  $url =~ s/%25/%/g;
   $url =~ s/%([0-9A-Fa-f]{2})/chr(hex($1))/eg;
   $url = $enc_utf8->decode($url);
   return $url;
