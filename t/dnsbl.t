@@ -139,6 +139,9 @@ header DNSBL_RHS	eval:check_rbl_from_host('r', 'dnsbltest.spamassassin.org.')
 describe DNSBL_RHS	DNSBL RHS match
 tflags DNSBL_RHS	net
 
+# Allow DNSBL_RHS to hit
+clear_uridnsbl_skip_domain example.com
+
 # Bug 7897 - test that meta rules depending on net rules hit
 meta META_DNSBL_A DNSBL_TEST_DYNAMIC
 # It also needs to hit even if priority is lower than dnsbl (-100)
