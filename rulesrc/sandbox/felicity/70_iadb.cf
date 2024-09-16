@@ -23,20 +23,19 @@
 #
 ###########################################################################
 
-# via: http://isipp.com/iadbcodes.php
+# via: https://www.isipp.com/for-isps/about-the-codes/list-of-codes/
 
 # 127.0.0.1 	Listed in IADB
 # 127.0.0.2 	Listed in IADB (Alternate to 127.0.0.1)
 # 127.0.1.255 	Vouched listing*
-# 127.0.2.1 	Participates in Email Deliverability Database (EDDB)
-# 127.0.2.2 	Is a member of the Email Processing Industry Alliance (EPIA)
 # 127.2.255.1 	Publishes SPF record
 # 127.2.255.2 	Publishes Microsoft "Sender I.D." record
 # 127.2.255.3 	Publishes Domain Keys record
 # 127.2.255.4 	Publishes rDNS
-# 127.2.255.101 	Participates in Habeas program
+# 127.2.255.5 	Publishes DMARC
+# 127.2.255.101 	Participates in Habeas program (deprecated)
 # 127.2.255.102 	Participates in Ironport's Bonded Sender program
-# 127.2.255.103 	Is a GoodMail certified sender
+# 127.2.255.103 	Is a GoodMail certified sender (deprecated)
 # 127.3.100.0 	Has absolutely no mailing controls in place
 # 127.3.100.1 	Scrapes addresses, pure opt-out only
 # 127.3.100.2 	Accepts unverified sign-ups such as through web page
@@ -48,16 +47,23 @@
 # 127.3.100.8 	All mailing list mail is at least opt-in, and has confirmed (double) opt-in mechanism available, used less than 50% of the time
 # 127.3.100.9 	All mailing list mail is at least opt-in, and has confirmed (double) opt-in mechanism available, used more than 50% of the time
 # 127.3.100.10 	All mailing list mail is confirmed (double) opt-in
-# 127.3.100.100 	The only email which comes from this IP address is mailing list email, and that mailing list email is entirely confirmed (double) opt-in
+# 127.3.100.100 The only email which comes from this IP address is mailing list email, and that mailing list email is entirely confirmed (double) opt-in
 # 127.3.100.200	The only email which comes from this IP address is one-to-one or transactional email. No bulk email is sent from this IP address
+# 127.3.100.211 Mail coming from this IP address has been sent through a social networking service
+# 127.3.100.212 Mail coming from this IP address has been sent through a service which provides email open and read tracking services
+# 127.3.100.213 The email sent from this IP address comes from an ecard, e-invitation, or similar e-correspondence service, and consists of ecards, e-invitations, or similar e-correspondence initiated by the service’s users.
+# 127.3.100.214 The email sent from this IP address has been sent through an Email Service Provider (ESP)
+# 127.3.200.100 Is a non-profit organization
+# 127.3.200.110 Sends out email on behalf of non-profit organizations
 # 127.3.200.120	Legally mandated email – email from this IP address consists entirely of communications that are required by law
 # 127.3.200.130	Court-ordered email – email from this IP address consists entirely of communications that have been ordered by a court of law such as public notice of service or notifications of class action lawsuits to members of the class
-# 127.101.001.10	Complies with Michigan's Child Protection Email Address Registry law
-# 127.101.002.10 	Complies with Utah's Child Protection Email Address Registry law
-# 127.101.101.10	Has checked mailing lists against the Michigan Child Protective Registry within last 30 days
-# 127.101.102.10	Has checked mailing lists against the Utah Child Protective Registry within last 30 days
-# 127.101.201.10	This IP address sends no material which falls under the Michigan Child Protective Registry law
-# 127.101.202.10	This IP address sends no material which falls under the Utah Child Protective Registry law
+# 127.3.200.255 Services the emergency alert or first-responder sector – email from this IP address consists of time-critical urgent or emergency communications
+# 127.101.001.10	Complies with Michigan's Child Protection Email Address Registry law (deprecated)
+# 127.101.002.10 	Complies with Utah's Child Protection Email Address Registry law (deprecated)
+# 127.101.101.10	Has checked mailing lists against the Michigan Child Protective Registry within last 30 days (deprecated)
+# 127.101.102.10	Has checked mailing lists against the Utah Child Protective Registry within last 30 days (deprecated)
+# 127.101.201.10	This IP address sends no material which falls under the Michigan Child Protective Registry law (deprecated)
+# 127.101.202.10	This IP address sends no material which falls under the Utah Child Protective Registry law (deprecated)
 
 ###########################################################################
 
@@ -80,16 +86,6 @@ reuse  RCVD_IN_IADB_LISTED
 
 ###########################################################################
 
-header RCVD_IN_IADB_EDDB		eval:check_rbl_sub('iadb-firsttrusted', '127.0.2.1')
-describe RCVD_IN_IADB_EDDB		IADB: Participates in Email Deliverability Database
-tflags RCVD_IN_IADB_EDDB		net nice
-reuse  RCVD_IN_IADB_EDDB
-
-header RCVD_IN_IADB_EPIA		eval:check_rbl_sub('iadb-firsttrusted', '127.0.2.2')
-describe RCVD_IN_IADB_EPIA		IADB: Member of Email Processing Industry Alliance
-tflags RCVD_IN_IADB_EPIA		net nice
-reuse  RCVD_IN_IADB_EPIA
-
 header RCVD_IN_IADB_SPF			eval:check_rbl_sub('iadb-firsttrusted', '127.2.255.1')
 describe RCVD_IN_IADB_SPF		IADB: Sender publishes SPF record
 tflags RCVD_IN_IADB_SPF			net nice
@@ -110,6 +106,11 @@ describe RCVD_IN_IADB_RDNS		IADB: Sender has reverse DNS record
 tflags RCVD_IN_IADB_RDNS		net nice
 reuse  RCVD_IN_IADB_RDNS
 
+header RCVD_IN_IADB_DMARC               eval:check_rbl_sub('iadb-firsttrusted', '127.2.255.5')
+describe RCVD_IN_IADB_DMARC             IADB: Sender has DMARC record
+tflags RCVD_IN_IADB_DMARC               net nice
+reuse  RCVD_IN_IADB_DMARC
+
 # we already check for this
 #header RCVD_IN_IADB_HABEAS		eval:check_rbl_sub('iadb-firsttrusted', '127.2.255.101')
 #describe RCVD_IN_IADB_HABEAS		IADB: Sender participates in Habeas program
@@ -120,10 +121,11 @@ reuse  RCVD_IN_IADB_RDNS
 #describe RCVD_IN_AIDB_BONDEDSENDER	IADB: Sender participates in Bonded Sender program
 #tflags RCVD_IN_IADB_BONDEDSENDER	net nice
 
-header RCVD_IN_IADB_GOODMAIL		eval:check_rbl_sub('iadb-firsttrusted', '127.2.255.103')
-describe RCVD_IN_IADB_GOODMAIL		IADB: Sender has been certified by GoodMail
-tflags RCVD_IN_IADB_GOODMAIL 		net nice
-reuse  RCVD_IN_IADB_GOODMAIL
+# deprecated
+#header RCVD_IN_IADB_GOODMAIL		eval:check_rbl_sub('iadb-firsttrusted', '127.2.255.103')
+#describe RCVD_IN_IADB_GOODMAIL		IADB: Sender has been certified by GoodMail
+#tflags RCVD_IN_IADB_GOODMAIL 		net nice
+#reuse  RCVD_IN_IADB_GOODMAIL
 
 ###########################################################################
 
@@ -192,6 +194,36 @@ describe RCVD_IN_IADB_OOO		IADB: One-to-one/transactional email only
 tflags RCVD_IN_IADB_OOO			net nice
 reuse  RCVD_IN_IADB_OOO
 
+header RCVD_IN_IADB_SOCIAL		eval:check_rbl_sub('iadb-firsttrusted', '127.3.100.211')
+describe RCVD_IN_IADB_SOCIAL		IADB: social networking service email
+tflags RCVD_IN_IADB_SOCIAL		net nice
+reuse  RCVD_IN_IADB_SOCIAL
+
+header RCVD_IN_IADB_TRACK		eval:check_rbl_sub('iadb-firsttrusted', '127.3.100.212')
+describe RCVD_IN_IADB_TRACK		IADB: email with open and read tracking services
+tflags RCVD_IN_IADB_TRACK		net nice
+reuse  RCVD_IN_IADB_TRACK
+
+header RCVD_IN_IADB_ECARD		eval:check_rbl_sub('iadb-firsttrusted', '127.3.100.213')
+describe RCVD_IN_IADB_ECARD		IADB: ecard, e-invitation, or similar e-correspondence service
+tflags RCVD_IN_IADB_ECARD		net nice
+reuse  RCVD_IN_IADB_ECARD
+
+header RCVD_IN_IADB_ESP			eval:check_rbl_sub('iadb-firsttrusted', '127.3.100.214')
+describe RCVD_IN_IADB_ESP		IADB: Email Service Provider (ESP)
+tflags RCVD_IN_IADB_ESP			net nice
+reuse  RCVD_IN_IADB_ESP
+
+header RCVD_IN_IADB_LEG_NPROFIT		eval:check_rbl_sub('iadb-firsttrusted', '127.3.200.100')
+describe RCVD_IN_IADB_LEG_NPROFIT	IADB: email sent from a non-profit organization
+tflags RCVD_IN_IADB_LEG_NPROFIT		net nice
+reuse  RCVD_IN_IADB_LEG_NPROFIT
+
+header RCVD_IN_IADB_LEG_BNPROFIT	eval:check_rbl_sub('iadb-firsttrusted', '127.3.200.110')
+describe RCVD_IN_IADB_LEG_BNPROFIT	IADB: email sent on behalf of a non-profit organization
+tflags RCVD_IN_IADB_LEG_BNPROFIT	net nice
+reuse  RCVD_IN_IADB_LEG_BNPROFIT
+
 header RCVD_IN_IADB_LEG_MAND		eval:check_rbl_sub('iadb-firsttrusted', '127.3.200.120')
 describe RCVD_IN_IADB_LEG_MAND		IADB: Legally mandated email
 tflags RCVD_IN_IADB_LEG_MAND		net nice
@@ -201,6 +233,11 @@ header RCVD_IN_IADB_COURT		eval:check_rbl_sub('iadb-firsttrusted', '127.3.200.13
 describe RCVD_IN_IADB_COURT		IADB: Court-ordered email
 tflags RCVD_IN_IADB_COURT		net nice
 reuse  RCVD_IN_IADB_COURT
+
+header RCVD_IN_IADB_URG			eval:check_rbl_sub('iadb-firsttrusted', '127.3.200.255')
+describe RCVD_IN_IADB_URG		IADB: time-critical urgent or emergency communications
+tflags RCVD_IN_IADB_URG			net nice
+reuse  RCVD_IN_IADB_URG
 
 ###########################################################################
 
@@ -214,24 +251,28 @@ describe RCVD_IN_IADB_UT_CPEAR		IADB: Complies with Utah's CPEAR law
 tflags RCVD_IN_IADB_UT_CPEAR		net nice
 reuse  RCVD_IN_IADB_UT_CPEAR
 
-header RCVD_IN_IADB_MI_CPR_30		eval:check_rbl_sub('iadb-firsttrusted', '127.101.101.10')
-describe RCVD_IN_IADB_MI_CPR_30		IADB: Checked lists against Michigan's CPR within 30 days
-tflags RCVD_IN_IADB_MI_CPR_30		net nice
-reuse  RCVD_IN_IADB_MI_CPR_30
+# deprecated
+# header RCVD_IN_IADB_MI_CPR_30		eval:check_rbl_sub('iadb-firsttrusted', '127.101.101.10')
+# describe RCVD_IN_IADB_MI_CPR_30		IADB: Checked lists against Michigan's CPR within 30 days
+# tflags RCVD_IN_IADB_MI_CPR_30		net nice
+# reuse  RCVD_IN_IADB_MI_CPR_30
 
-header RCVD_IN_IADB_UT_CPR_30		eval:check_rbl_sub('iadb-firsttrusted', '127.101.102.10')
-describe RCVD_IN_IADB_UT_CPR_30		IADB: Checked lists against Utah's CPR within 30 days
-tflags RCVD_IN_IADB_UT_CPR_30		net nice
-reuse  RCVD_IN_IADB_UT_CPR_30
+# deprecated
+# header RCVD_IN_IADB_UT_CPR_30		eval:check_rbl_sub('iadb-firsttrusted', '127.101.102.10')
+# describe RCVD_IN_IADB_UT_CPR_30		IADB: Checked lists against Utah's CPR within 30 days
+# tflags RCVD_IN_IADB_UT_CPR_30		net nice
+# reuse  RCVD_IN_IADB_UT_CPR_30
 
-header RCVD_IN_IADB_MI_CPR_MAT		eval:check_rbl_sub('iadb-firsttrusted', '127.101.201.10')
-describe RCVD_IN_IADB_MI_CPR_MAT	IADB: Sends no material under Michigan's CPR
-tflags RCVD_IN_IADB_MI_CPR_MAT		net nice
-reuse  RCVD_IN_IADB_MI_CPR_MAT
+# deprecated
+# header RCVD_IN_IADB_MI_CPR_MAT		eval:check_rbl_sub('iadb-firsttrusted', '127.101.201.10')
+# describe RCVD_IN_IADB_MI_CPR_MAT	IADB: Sends no material under Michigan's CPR
+# tflags RCVD_IN_IADB_MI_CPR_MAT		net nice
+# reuse  RCVD_IN_IADB_MI_CPR_MAT
 
-header RCVD_IN_IADB_UT_CPR_MAT		eval:check_rbl_sub('iadb-firsttrusted', '127.101.202.10')
-describe RCVD_IN_IADB_UT_CPR_MAT	IADB: Sends no material under Utah's CPR
-tflags RCVD_IN_IADB_UT_CPR_MAT		net nice
-reuse  RCVD_IN_IADB_UT_CPR_MAT
+# deprecated
+# header RCVD_IN_IADB_UT_CPR_MAT		eval:check_rbl_sub('iadb-firsttrusted', '127.101.202.10')
+# describe RCVD_IN_IADB_UT_CPR_MAT	IADB: Sends no material under Utah's CPR
+# tflags RCVD_IN_IADB_UT_CPR_MAT		net nice
+# reuse  RCVD_IN_IADB_UT_CPR_MAT
 
 endif
