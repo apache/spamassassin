@@ -124,8 +124,11 @@ For existing public email blocklist, see: http://msbl.org/ebl.html
 
 Default regex for matching and capturing emails can be overridden with
 C<hashbl_email_regex>.  Likewise, the default welcomelist can be changed with
-C<hashbl_email_welcomelist>.  Only change if you know what you are doing, see
-plugin source code for the defaults.  Example: hashbl_email_regex \S+@\S+.com
+C<hashbl_email_welcomelist>.  Only change if you know what you are doing,
+the default welcomelist includes abuse@, support@, sales@, info@, helpdesk@,
+contact@, kontakt@, postmaster@, hostmaster@, domainmaster@ and few more;
+See plugin source code for more info about the defaults.
+C<hashbl_email_regex> example: hashbl_email_regex \S+@\S+.com
 
 =back
 
