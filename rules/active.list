@@ -263,7 +263,7 @@ BITCOIN_YOUR_INFO
 # good enough
 BODY_EMAIL_419_FRAUD_GM
 
-# tflags publish
+# tflags net
 BODY_URI_ONLY
 
 # tflags publish
@@ -485,7 +485,7 @@ FONT_INVIS_POSTEXTRAS
 # tflags net
 FORGED_SPF_HELO
 
-# tflags publish
+# tflags net
 FORM_FRAUD
 
 # tflags net
@@ -785,6 +785,9 @@ HAS_X_NO_RELAY
 # tflags publish
 HAS_X_OUTGOING_SPAM_STAT
 
+# tflags net
+HDRS_LCASE
+
 # tflags publish
 HDRS_MISSP
 
@@ -881,7 +884,7 @@ HTML_OFF_PAGE
 # tflags publish
 HTML_SHRT_CMNT_OBFU_MANY
 
-# tflags publish
+# tflags net
 HTML_SINGLET_MANY
 
 # tflags net
@@ -901,6 +904,9 @@ JH_SPAMMY_PATTERN01
 
 # tflags publish
 JH_SPAMMY_PATTERN02
+
+# tflags net
+KHOP_FAKE_EBAY
 
 # tflags net
 KHOP_HELO_FCRDNS
@@ -950,11 +956,17 @@ MALWARE_PASSWORD
 # tflags publish
 MALW_ATTACH
 
+# tflags net
+MANY_HDRS_LCASE
+
 # tflags publish
 MANY_SPAN_IN_TEXT
 
 # good enough
 MANY_SUBDOM
+
+# tflags net
+MAY_BE_FORGED
 
 # tflags publish
 MILLION_HUNDRED
@@ -1109,6 +1121,9 @@ PDS_BTC_MSGID
 # good enough
 PDS_FRNOM_TODOM_NAKED_TO
 
+# tflags net
+PDS_FROM_2_EMAILS
+
 # good enough
 PDS_FROM_NAME_TO_DOMAIN
 
@@ -1233,6 +1248,9 @@ RCVD_IN_IADB_COURT
 RCVD_IN_IADB_DK
 
 # tflags net
+RCVD_IN_IADB_DMARC
+
+# tflags net
 RCVD_IN_IADB_DOPTIN
 
 # tflags net
@@ -1246,6 +1264,9 @@ RCVD_IN_IADB_EDDB
 
 # tflags net
 RCVD_IN_IADB_EPIA
+
+# tflags net
+RCVD_IN_IADB_ESP
 
 # tflags net
 RCVD_IN_IADB_GOODMAIL
@@ -1303,6 +1324,9 @@ RCVD_IN_IADB_UNVERIFIED_1
 
 # tflags net
 RCVD_IN_IADB_UNVERIFIED_2
+
+# tflags net
+RCVD_IN_IADB_URG
 
 # tflags net
 RCVD_IN_IADB_UT_CPEAR
@@ -1581,6 +1605,9 @@ SUBJ_BRKN_WORDNUMS
 SUBJ_LACKS_WORDS
 
 # tflags net
+SUBJ_UNNEEDED_HTML
+
+# tflags net
 SURBL_BLOCKED
 
 # good enough
@@ -1626,7 +1653,13 @@ TO_EQ_FM_DIRECT_MX
 TO_EQ_FM_DOM_HTML_IMG
 
 # tflags net
+TO_EQ_FM_DOM_HTML_ONLY
+
+# tflags net
 TO_EQ_FM_DOM_SPF_FAIL
+
+# tflags net
+TO_EQ_FM_HTML_ONLY
 
 # tflags net
 TO_EQ_FM_SPF_FAIL
@@ -1670,10 +1703,10 @@ TVD_PH_FR5
 # good enough
 TVD_RCVD_SPACE_BRACKET
 
-# good enough
+# tflags net
 TVD_SPACE_ENCODED
 
-# good enough
+# tflags net
 TVD_SPACE_RATIO_MINFP
 
 # tflags net
