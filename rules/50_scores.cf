@@ -524,15 +524,15 @@ score RCVD_IN_VALIDITY_CERTIFIED_BLOCKED 0 0.001 0 0.001
 score RCVD_IN_VALIDITY_SAFE 0.0 -2.0 0.0 -2.0
 score RCVD_IN_VALIDITY_SAFE_BLOCKED 0 0.001 0 0.001
 
-# DNSWL is a commercial service that requires payment for servers over 100K queries daily.
+# DNSWL is a commercial service that requires payment for servers over 10K queries monthly.
 # Unfortunately, they will return true answers for DNS servers they consider abusive so
 # SA Admins must enable these rules manually.
 #
-score RCVD_IN_DNSWL_NONE 0 -0.0001 0 -0.0001
-score RCVD_IN_DNSWL_LOW 0 -0.7 0 -0.7
-score RCVD_IN_DNSWL_MED 0 -2.3 0 -2.3
-score RCVD_IN_DNSWL_HI 0 -5 0 -5
-score RCVD_IN_DNSWL_BLOCKED 0 0.001 0 0.001
+score RCVD_IN_DNSWL_NONE 0    # -0.0001 0 -0.0001
+score RCVD_IN_DNSWL_LOW 0     # -0.7 0 -0.7
+score RCVD_IN_DNSWL_MED 0     # -2.3 0 -2.3
+score RCVD_IN_DNSWL_HI 0      # -5 0 -5
+score RCVD_IN_DNSWL_BLOCKED 0 # 0.001 0 0.001
 
 # IADB
 score RCVD_IN_IADB_VOUCHED 0 -2.2 0 -2.2
