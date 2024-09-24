@@ -299,7 +299,7 @@ CN_B2B_SPAMMER
 # tflags publish
 COMMENT_GIBBERISH
 
-# tflags net
+# good enough
 COMPENSATION
 
 # tflags publish
@@ -485,10 +485,10 @@ FONT_INVIS_POSTEXTRAS
 # tflags net
 FORGED_SPF_HELO
 
-# tflags net
+# tflags publish
 FORM_FRAUD
 
-# tflags net
+# tflags publish
 FORM_FRAUD_3
 
 # tflags publish
@@ -572,7 +572,7 @@ FROM_MISSP_MSFT
 # good enough
 FROM_MISSP_PHISH
 
-# tflags net
+# good enough
 FROM_MISSP_REPLYTO
 
 # tflags net
@@ -785,9 +785,6 @@ HAS_X_NO_RELAY
 # tflags publish
 HAS_X_OUTGOING_SPAM_STAT
 
-# tflags net
-HDRS_LCASE
-
 # tflags publish
 HDRS_MISSP
 
@@ -884,7 +881,7 @@ HTML_OFF_PAGE
 # tflags publish
 HTML_SHRT_CMNT_OBFU_MANY
 
-# tflags net
+# tflags publish
 HTML_SINGLET_MANY
 
 # tflags net
@@ -904,9 +901,6 @@ JH_SPAMMY_PATTERN01
 
 # tflags publish
 JH_SPAMMY_PATTERN02
-
-# tflags net
-KHOP_FAKE_EBAY
 
 # tflags net
 KHOP_HELO_FCRDNS
@@ -961,6 +955,9 @@ MANY_SPAN_IN_TEXT
 
 # good enough
 MANY_SUBDOM
+
+# good enough
+MILLION_EUR
 
 # tflags publish
 MILLION_HUNDRED
@@ -1590,9 +1587,6 @@ SUBJ_BRKN_WORDNUMS
 SUBJ_LACKS_WORDS
 
 # tflags net
-SUBJ_UNNEEDED_HTML
-
-# tflags net
 SURBL_BLOCKED
 
 # good enough
@@ -1635,12 +1629,6 @@ TONLINE_FAKE_DKIM
 TO_EQ_FM_DIRECT_MX
 
 # tflags net
-TO_EQ_FM_DOM_HTML_IMG
-
-# tflags net
-TO_EQ_FM_DOM_HTML_ONLY
-
-# tflags net
 TO_EQ_FM_DOM_SPF_FAIL
 
 # tflags net
@@ -1661,7 +1649,7 @@ TO_NO_BRKTS_HTML_IMG
 # tflags publish
 TO_NO_BRKTS_HTML_ONLY
 
-# tflags net
+# good enough
 TO_NO_BRKTS_MSFT
 
 # tflags publish
@@ -1690,9 +1678,6 @@ TVD_SPACE_ENCODED
 
 # good enough
 TVD_SPACE_RATIO_MINFP
-
-# tflags net
-TVD_SUBJ_NUM_OBFU_MINFP
 
 # tflags publish
 TW_GIBBERISH_MANY
@@ -1916,7 +1901,7 @@ URI_WPADMIN
 # tflags publish
 URI_WP_DIRINDEX
 
-# tflags net
+# tflags publish
 URI_WP_HACKED
 
 # tflags publish
