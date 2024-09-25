@@ -1679,9 +1679,9 @@ meta        __XPRIO_MINFP      __XPRIO && !__CT_ENCRYPTED && !ALL_TRUSTED && !__
 
 ifplugin Mail::SpamAssassin::Plugin::DKIM
   ifplugin Mail::SpamAssassin::Plugin::SPF
-    meta    XPRIO              __XPRIO_MINFP && !DKIM_SIGNED && !DKIM_VALID && !DKIM_VALID_AU && !RCVD_IN_DNSWL_NONE && !SPF_PASS 
+    meta    XPRIO              __XPRIO_MINFP && !DKIM_SIGNED && !DKIM_VALID && !DKIM_VALID_AU && !SPF_PASS # && !RCVD_IN_DNSWL_NONE
   else
-    meta    XPRIO              __XPRIO_MINFP && !DKIM_SIGNED && !DKIM_VALID && !DKIM_VALID_AU && !RCVD_IN_DNSWL_NONE 
+    meta    XPRIO              __XPRIO_MINFP && !DKIM_SIGNED && !DKIM_VALID && !DKIM_VALID_AU # && !RCVD_IN_DNSWL_NONE 
   endif
   tflags    XPRIO              net
 else
@@ -2550,12 +2550,12 @@ score     TEQF_USR_POLITE               2.000	# limit
 meta      __MSGID_HEX_MALF              __MSGID_NOFQDN2 && __MSGID_OK_HEX
 
 meta      __URI_ONLY_MSGID_MALF         __BODY_URI_ONLY && __MSGID_NOFQDN2
-#ifplugin Mail::SpamAssassin::Plugin::DNSEval
-  meta      URI_ONLY_MSGID_MALF           __URI_ONLY_MSGID_MALF && !__RP_MATCHES_RCVD && !__URI_MAILTO && !__NOT_SPOOFED && !__DKIM_EXISTS && !__MSGID_JAVAMAIL && !__HAS_REPLY_TO && !RCVD_IN_DNSWL_LOW
-  tflags    URI_ONLY_MSGID_MALF           net
-#else
+# #ifplugin Mail::SpamAssassin::Plugin::DNSEval
+#  meta      URI_ONLY_MSGID_MALF           __URI_ONLY_MSGID_MALF && !__RP_MATCHES_RCVD && !__URI_MAILTO && !__NOT_SPOOFED && !__DKIM_EXISTS && !__MSGID_JAVAMAIL && !__HAS_REPLY_TO && !RCVD_IN_DNSWL_LOW
+#  tflags    URI_ONLY_MSGID_MALF           net
+# #else
   meta      URI_ONLY_MSGID_MALF           __URI_ONLY_MSGID_MALF && !__RP_MATCHES_RCVD && !__URI_MAILTO && !__NOT_SPOOFED && !__DKIM_EXISTS && !__MSGID_JAVAMAIL && !__HAS_REPLY_TO
-#endif
+# #endif
 describe  URI_ONLY_MSGID_MALF           URI only + malformed message ID
 score     URI_ONLY_MSGID_MALF           2.000	# limit
 tflags    URI_ONLY_MSGID_MALF           publish
