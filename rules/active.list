@@ -194,7 +194,7 @@ BITCOIN_EXTORT_02
 # tflags publish
 BITCOIN_IMGUR
 
-# tflags publish
+# tflags net
 BITCOIN_MALWARE
 
 # tflags publish
@@ -488,7 +488,7 @@ FORGED_SPF_HELO
 # tflags publish
 FORM_FRAUD
 
-# tflags publish
+# tflags net
 FORM_FRAUD_3
 
 # tflags publish
@@ -572,11 +572,14 @@ FROM_MISSP_MSFT
 # good enough
 FROM_MISSP_PHISH
 
-# good enough
+# tflags net
 FROM_MISSP_REPLYTO
 
 # tflags net
 FROM_MISSP_SPF_FAIL
+
+# good enough
+FROM_MISSP_TO_UNDISC
 
 # good enough
 FROM_MISSP_USER
@@ -735,9 +738,6 @@ GB_GOOGLE_OBFUR
 GB_HASHBL_BTC
 
 # tflags publish
-GB_STORAGE_GOOGLE_EMAIL
-
-# tflags publish
 GOOGLE_DOCS_PHISH
 
 # tflags publish
@@ -784,6 +784,9 @@ HAS_X_NO_RELAY
 
 # tflags publish
 HAS_X_OUTGOING_SPAM_STAT
+
+# tflags net
+HDRS_LCASE
 
 # tflags publish
 HDRS_MISSP
@@ -881,7 +884,7 @@ HTML_OFF_PAGE
 # tflags publish
 HTML_SHRT_CMNT_OBFU_MANY
 
-# tflags publish
+# tflags net
 HTML_SINGLET_MANY
 
 # tflags net
@@ -903,7 +906,7 @@ JH_SPAMMY_PATTERN01
 JH_SPAMMY_PATTERN02
 
 # tflags net
-KHOP_HELO_FCRDNS
+KHOP_FAKE_EBAY
 
 # tflags publish
 LINKEDIN_IMG_NOT_RCVD_LNKN
@@ -949,6 +952,9 @@ MALWARE_PASSWORD
 
 # tflags publish
 MALW_ATTACH
+
+# tflags net
+MANY_HDRS_LCASE
 
 # tflags publish
 MANY_SPAN_IN_TEXT
@@ -1108,12 +1114,6 @@ PDS_BTC_ID
 
 # good enough
 PDS_BTC_MSGID
-
-# good enough
-PDS_FRNOM_TODOM_NAKED_TO
-
-# good enough
-PDS_FROM_NAME_TO_DOMAIN
 
 # tflags net
 PDS_HELO_SPF_FAIL
@@ -1566,6 +1566,9 @@ SUBJ_BRKN_WORDNUMS
 SUBJ_LACKS_WORDS
 
 # tflags net
+SUBJ_UNNEEDED_HTML
+
+# tflags net
 SURBL_BLOCKED
 
 # good enough
@@ -1608,7 +1611,16 @@ TONLINE_FAKE_DKIM
 TO_EQ_FM_DIRECT_MX
 
 # tflags net
+TO_EQ_FM_DOM_HTML_IMG
+
+# tflags net
+TO_EQ_FM_DOM_HTML_ONLY
+
+# tflags net
 TO_EQ_FM_DOM_SPF_FAIL
+
+# tflags net
+TO_EQ_FM_HTML_ONLY
 
 # tflags net
 TO_EQ_FM_SPF_FAIL
@@ -1628,7 +1640,7 @@ TO_NO_BRKTS_HTML_IMG
 # tflags publish
 TO_NO_BRKTS_HTML_ONLY
 
-# good enough
+# tflags net
 TO_NO_BRKTS_MSFT
 
 # tflags publish
@@ -1652,8 +1664,11 @@ TVD_RCVD_SPACE_BRACKET
 # good enough
 TVD_SPACE_ENCODED
 
-# good enough
+# tflags net
 TVD_SPACE_RATIO_MINFP
+
+# tflags net
+TVD_SUBJ_NUM_OBFU_MINFP
 
 # tflags publish
 TW_GIBBERISH_MANY
@@ -1847,10 +1862,7 @@ URI_MALWARE_SCMS
 # tflags userconf
 URI_NOVOWEL
 
-# good enough
-URI_ONLY_LOW_CONTRAST
-
-# tflags publish
+# tflags net
 URI_ONLY_MSGID_MALF
 
 # tflags publish
