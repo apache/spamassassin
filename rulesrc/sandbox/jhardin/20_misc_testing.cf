@@ -4187,15 +4187,16 @@ tflags      VISTA_TONOM_EQ_TOLOC       publish
 
 
 ifplugin Mail::SpamAssassin::Plugin::ReplaceTags
-  replace_tag    SHY                     (?:=ad|[\xc2][\xad]|[\xad]|&\#xad;|&\#173;|&shy;)
-  rawbody        __SHY_OBFU_PASSWORD     /p(?!assword)<SHY>{0,3}a<SHY>{0,3}s<SHY>{0,3}s<SHY>{0,3}w<SHY>{0,3}o<SHY>{0,3}r<SHY>{0,3}d/i
+  # add RTL codes to soft hyphen, neither is normally displayed bt useful for obfuscation
+  replace_tag    SHY                     (?:=ad|[\xc2][\xad]|[\xad]|&\#xad;|&\#173;|&shy;|\x{E2}\x{80}\x{8F})
+  rawbody        __SHY_OBFU_PASSWORD     /p(?!assword)<SHY>{0,6}a<SHY>{0,6}s<SHY>{0,6}s<SHY>{0,6}w<SHY>{0,6}o<SHY>{0,6}r<SHY>{0,6}d/i
   replace_rules  __SHY_OBFU_PASSWORD
   meta           SHY_OBFU_PASSWORD       __SHY_OBFU_PASSWORD
   describe       SHY_OBFU_PASSWORD       Obfuscation, probable phishing
   score          SHY_OBFU_PASSWORD       4.000	# limit
   tflags         SHY_OBFU_PASSWORD       publish
 
-  rawbody        __SHY_OBFU_EXPIRE       /e(?!xpire)<SHY>{0,3}x<SHY>{0,3}p<SHY>{0,3}i<SHY>{0,3}r<SHY>{0,3}e/i
+  rawbody        __SHY_OBFU_EXPIRE       /e(?!xpire)<SHY>{0,6}x<SHY>{0,6}p<SHY>{0,6}i<SHY>{0,6}r<SHY>{0,6}e/i
   replace_rules  __SHY_OBFU_EXPIRE  
   meta           SHY_OBFU_EXPIRE         __SHY_OBFU_EXPIRE  
   describe       SHY_OBFU_EXPIRE         Obfuscation, probable phishing
@@ -4215,6 +4216,12 @@ meta        URI_IPFSIO                 __URI_IPFSIO
 describe    URI_IPFSIO                 References Interplanetary File System PtP content via ipfs.io, likely phishing
 score       URI_IPFSIO                 3.500	# limit
 tflags      URI_IPFSIO                 publish
+
+uri         __URI_INFURAIPFSIO         m,://(?:[^@/]+@)?(?:[^.]+\.)?infura-ipfs\.io/ipfs/,i
+meta        URI_INFURAIPFSIO           __URI_INFURAIPFSIO
+describe    URI_INFURAIPFSIO           References Interplanetary File System PtP content via infura-ipfs.io, likely phishing
+score       URI_INFURAIPFSIO           3.500	# limit
+tflags      URI_INFURAIPFSIO           publish
 
 uri         __URI_CLOUDFLAREIPFS       m,://(?:[^@/]+@)?cloudflare-ipfs\.com/ipfs/,i
 meta        URI_CLOUDFLAREIPFS         __URI_CLOUDFLAREIPFS
@@ -4253,8 +4260,9 @@ header      __TO_EQ_CC_2               ALL =~ /\nTo: (?:[^\n<]{0,80}<)?([^\n\s>]
 meta        __TO_EQ_CC                 (__TO_EQ_CC_1 || __TO_EQ_CC_2)
 describe    __TO_EQ_CC                 To: same as Cc:
 
-# Seen in phishing; may be other similar variants: U202B, U202E
+# Seen in phishing as variant of __SHY_OBFU_PASSWORD; may be other similar variants: U202B, U202E
 body        __UNICODE_RTL_OBFU         /\w(?:\x{E2}\x{80}\x{8F}){2,}\w/
 tflags      __UNICODE_RTL_OBFU         multiple maxhits=10
+meta        __UNICODE_RTL_OBFU_SOME    __UNICODE_RTL_OBFU > 4 && __UNICODE_RTL_OBFU <= 9
 meta        __UNICODE_RTL_OBFU_MANY    __UNICODE_RTL_OBFU > 9
 
