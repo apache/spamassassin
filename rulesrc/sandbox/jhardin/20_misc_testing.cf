@@ -4210,28 +4210,28 @@ rawbody     __HREF_BOM                 m,href\s*=\s*"(?:[\xef][\xbb][\xbf]|[\xfe
 #tflags     __URI_WEBMDSERVICE          multiple maxhits=6
 #meta       __URI_WEBMDSERVICE_MANY     __URI_WEBMDSERVICE > 5
 
-uri         __URI_IPFSIO               m,://ipfs\.io/ipfs/,i
+uri         __URI_IPFSIO               m,://(?:[^@/]+@)?ipfs\.io/ipfs/,i
 meta        URI_IPFSIO                 __URI_IPFSIO
 describe    URI_IPFSIO                 References Interplanetary File System PtP content via ipfs.io, likely phishing
-score       URI_IPFSIO                 3.000	# limit
+score       URI_IPFSIO                 3.500	# limit
 tflags      URI_IPFSIO                 publish
 
-uri         __URI_CLOUDFLAREIPFS       m,://cloudflare-ipfs\.com/ipfs/,i
+uri         __URI_CLOUDFLAREIPFS       m,://(?:[^@/]+@)?cloudflare-ipfs\.com/ipfs/,i
 meta        URI_CLOUDFLAREIPFS         __URI_CLOUDFLAREIPFS
 describe    URI_CLOUDFLAREIPFS         References Interplanetary File System PtP content via CloudFlare, likely phishing
-score       URI_CLOUDFLAREIPFS         3.000	# limit
+score       URI_CLOUDFLAREIPFS         3.500	# limit
 tflags      URI_CLOUDFLAREIPFS         publish
 
 uri         __URI_DWEBIPFS             m;://[^.]{50,}\.ipfs\.dweb\.link/;i
 meta        URI_DWEBIPFS               __URI_DWEBIPFS
 describe    URI_DWEBIPFS               References Interplanetary File System PtP content via dweb.link, likely phishing
-score       URI_DWEBIPFS               3.000	# limit
+score       URI_DWEBIPFS               3.500	# limit
 tflags      URI_DWEBIPFS               publish
 
 uri         __URI_GOOGDRAWPREVIEW      m,://docs\.google\.com/drawings/d/[^/]*/preview,i
 meta        URI_GOOGDRAWPREVIEW_MINFP  __URI_GOOGDRAWPREVIEW && (__SUBSCRIPTION_INFO || __HTML_TAG_BALANCE_CENTER || __TO_NO_BRKTS_HTML_ONLY) && !__RCD_RDNS_SMTP && !__TVD_SPACE_RATIO
 describe    URI_GOOGDRAWPREVIEW_MINFP  Link to image at Google Docs, probable phishing
-score       URI_GOOGDRAWPREVIEW_MINFP  3.000	# limit
+score       URI_GOOGDRAWPREVIEW_MINFP  3.500	# limit
 tflags      URI_GOOGDRAWPREVIEW_MINFP  publish
 
 # Catch the less-obviously-spammy hits
@@ -4253,5 +4253,8 @@ header      __TO_EQ_CC_2               ALL =~ /\nTo: (?:[^\n<]{0,80}<)?([^\n\s>]
 meta        __TO_EQ_CC                 (__TO_EQ_CC_1 || __TO_EQ_CC_2)
 describe    __TO_EQ_CC                 To: same as Cc:
 
-
+# Seen in phishing; may be other similar variants: U202B, U202E
+body        __UNICODE_RTL_OBFU         /\w(?:\x{E2}\x{80}\x{8F}){2,}\w/
+tflags      __UNICODE_RTL_OBFU         multiple maxhits=10
+meta        __UNICODE_RTL_OBFU_MANY    __UNICODE_RTL_OBFU > 9
 
