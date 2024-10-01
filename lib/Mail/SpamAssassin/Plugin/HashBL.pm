@@ -125,9 +125,8 @@ For existing public email blocklist, see: http://msbl.org/ebl.html
 Default regex for matching and capturing emails can be overridden with
 C<hashbl_email_regex>.  Likewise, the default welcomelist can be changed with
 C<hashbl_email_welcomelist>.  Only change if you know what you are doing,
-the default welcomelist includes abuse@, support@, sales@, info@, helpdesk@,
-contact@, kontakt@, postmaster@, hostmaster@, domainmaster@ and few more;
-See plugin source code for more info about the defaults.
+the default welcomelist includes abuse@, postmaster@, hostmaster@, domainmaster@
+and few more; see plugin source code for more info about the defaults.
 C<hashbl_email_regex> example: hashbl_email_regex \S+@\S+.com
 
 =back
@@ -358,7 +357,7 @@ sub set_config {
     type => $Mail::SpamAssassin::Conf::CONF_TYPE_STRING,
     default => qr/(?i)
       ^(?:
-          abuse|support|sales|info|helpdesk|contact|kontakt
+        abuse
         | (?:post|host|domain)master
         | undisclosed.*                     # yahoo.com etc(?)
         | request-[a-f0-9]{16}              # live.com
