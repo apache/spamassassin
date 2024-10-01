@@ -2,13 +2,22 @@
 Note for Users Upgrading to SpamAssassin 4.0.2
 ----------------------------------------------
 
+- New Mail::SpamAssassin::Plugin::Redirectors plugin
+  This plugin looks for URLs redirected by a list of URL redirector
+  services. Upon finding a matching URL, plugin will send a HTTP
+  request to the redirector service and retrieve the Location-header
+  which points to the actual redirected URL.
+  It then adds this URL to the list of URIs extracted by SpamAssassin
+  which can then be accessed by uri rules and plugins
+  such as URIDNSBL.
+
+- HashBL plugin no longer ignores support@, sales@, info@, helpdesk@,
+  contact@ and kontakt@ email addresses by default.
+
 - Phishstats.info domain is back online;
   "phishing_phishstats_feed" and "phishing_phishstats_minscore"
   options have been restored on Mail::SpamAssassin::Plugin::Phishing
   plugin.
-
-- HashBL plugin no longer ignores support@, sales@, info@, helpdesk@,
-  contact@ and kontakt@ email addresses by default.
 
 Note for Users Upgrading to SpamAssassin 4.0.1
 ----------------------------------------------
