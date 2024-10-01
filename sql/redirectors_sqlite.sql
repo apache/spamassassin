@@ -1,0 +1,2 @@
+-- Manual database creation for SQLite is not necessary,
+-- Redirectors plugin will create and clean database automatically.
