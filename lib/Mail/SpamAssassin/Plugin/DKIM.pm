@@ -1300,7 +1300,7 @@ sub _check_dkim_welcomelist {
 
   my $authors_str = join(", ", @{$pms->{dkim_author_addresses}});
   if ($authors_str eq '') {
-    dbg("dkim: check_dkim_weclomelist: could not find author address");
+    dbg("dkim: check_dkim_welcomelist: could not find author address");
     return;
   }
 
