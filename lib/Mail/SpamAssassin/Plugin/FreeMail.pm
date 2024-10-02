@@ -109,7 +109,7 @@ our @ISA = qw(Mail::SpamAssassin::Plugin);
 # default email welcomelist
 our $email_welcomelist = qr/
   ^(?:
-      abuse|support|sales|info|helpdesk|contact|kontakt
+    abuse
     | (?:post|host|domain)master
     | undisclosed.*			# yahoo.com etc(?)
     | request-[a-f0-9]{16}		# live.com
