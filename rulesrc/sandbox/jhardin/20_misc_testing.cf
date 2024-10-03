@@ -1827,6 +1827,7 @@ describe    CANT_SEE_AD       You really want to see our spam.
 score       CANT_SEE_AD       2.500	# limit
 tflags      CANT_SEE_AD       publish
 
+uri         __IMG_S3_AWS      m;https://(?:[a-z0-9-]+)\.s3\.amazonaws\.com/uploads/[^./]{1,256}\.(?:jpe?g|gif|png|webp);i
 uri         __128_HEX_URI     m,/[0-9a-f]{128},
 #tflags      __128_HEX_URI     multiple maxhits=2
 #uri         __192_HEX_URI     m,/[0-9a-f]{192},
@@ -1834,7 +1835,7 @@ uri         __128_HEX_URI     m,/[0-9a-f]{128},
 #uri         __384_HEX_URI     m,/[0-9a-f]{384},
 #meta        __128_HEX_URI_SGL __128_HEX_URI == 1
 #meta        __128_HEX_URI_MLT __128_HEX_URI > 1
-meta        LONG_HEX_URI      __128_HEX_URI && !__LCL__KAM_BODY_LENGTH_LT_1024
+meta        LONG_HEX_URI      __128_HEX_URI && !__LCL__KAM_BODY_LENGTH_LT_1024 && !__IMG_S3_AWS
 describe    LONG_HEX_URI      Very long purely hexadecimal URI
 score       LONG_HEX_URI      3.000	# limit
 tflags      LONG_HEX_URI      publish
