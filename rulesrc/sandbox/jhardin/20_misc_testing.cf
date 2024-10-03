@@ -121,8 +121,8 @@ ifplugin Mail::SpamAssassin::Plugin::MIMEHeader
   mimeheader   __MALW_ATTACH_01_01 Content-Disposition =~ /\bfilename(?:="?[^"]+|\*(?:\d+\*)?=(?:UTF-8'')?\S+)\.SettingContent-ms\b/i
   mimeheader   __MALW_ATTACH_01_02 Content-Type =~ /\bname="?[^"]+\.SettingContent-ms\b/i
   # others
-  mimeheader   __MALW_ATTACH_02_01 Content-Disposition =~ /\bfilename(?:="?[^"]*|\*(?:\d+\*)?=(?:UTF-8'')?\S*)(?:invoice|statement|payment(?: advice)?|(?:[.,_]|%C2%B7|[\xc2][\xb7])(?:pdf|img|png|gif|jpe?g))\.(?:ace|zip|rar|r17|[7g]?z|iso)[";$]/i
-  mimeheader   __MALW_ATTACH_02_02 Content-Type =~ /\bname="?[^"]*(?:invoice|statement|payment(?: advice)?|(?:[.,_]|[\xc2][\xb7])(?:pdf|img|png|gif|jpe?g))\.(?:ace|zip|rar|r17|[7g]?z|iso)[";$]/i
+  mimeheader   __MALW_ATTACH_02_01 Content-Disposition =~ /\bfilename(?:="?[^"]*|\*(?:\d+\*)?=(?:UTF-8'')?\S*)(?:invoice|statement|payment(?: advice)?|(?:[.,_]|%C2%B7|[\xc2][\xb7])(?:pdf|img|png|gif|jpe?g|webp))\.(?:ace|zip|rar|r17|[7g]?z|iso)[";$]/i
+  mimeheader   __MALW_ATTACH_02_02 Content-Type =~ /\bname="?[^"]*(?:invoice|statement|payment(?: advice)?|(?:[.,_]|[\xc2][\xb7])(?:pdf|img|png|gif|jpe?g|webp))\.(?:ace|zip|rar|r17|[7g]?z|iso)[";$]/i
   meta         __MALW_ATTACH       __MALW_ATTACH_01_01 || __MALW_ATTACH_01_02 || __MALW_ATTACH_02_01 || __MALW_ATTACH_02_02
   meta         MALW_ATTACH         __MALW_ATTACH && !__HAS_THREAD_INDEX 
   describe     MALW_ATTACH         Attachment filename suspicious, probable malware exploit
@@ -445,7 +445,7 @@ describe       AD_COMPLAINTS       Complain about this spam
 #tflags         MISQ_HTML           nopublish
 
 # observed in bank phishing 09/2009
-uri            WIKI_IMG            m,^https?://[^/]+wiki[mp]edia\.org/.+\.(?:png|gif|jpe?g),i
+uri            WIKI_IMG            m,^https?://[^/]+wiki[mp]edia\.org/.+\.(?:png|gif|jpe?g|webp),i
 describe       WIKI_IMG            Image from wikipedia
 
 # observed in spam 09/2009
@@ -1642,9 +1642,9 @@ describe    URI_WPADMIN        WordPress login/admin URI, possible phishing
 tflags      URI_WPADMIN        publish
 
 uri         __URI_WPCONTENT    m,/wp-content/.*\.(?:php|html?)\b,i
-uri         __URI_WPCONTENT_L  m,/wp-content/.*\.(?:(?!gif|jpg|png|bmp|ico|eot|pdf|svg)[a-z]{3}|(?!jpeg)[a-z]{4})\b,i
+uri         __URI_WPCONTENT_L  m,/wp-content/.*\.(?:(?!gif|jpg|png|bmp|ico|eot|pdf|svg|webp)[a-z]{3}|(?!jpeg)[a-z]{4})\b,i
 uri         __URI_WPINCLUDES   m,/wp-includes/.*\.(?:php|html?)\b,i
-uri         __URI_WPINCLUDES_L m,/wp-includes/.*\.(?:(?!gif|jpg|png|bmp|ico|eot|pdf|svg)[a-z]{3}|(?!jpeg)[a-z]{4})\b,i
+uri         __URI_WPINCLUDES_L m,/wp-includes/.*\.(?:(?!gif|jpg|png|bmp|ico|eot|pdf|svg|webp)[a-z]{3}|(?!jpeg)[a-z]{4})\b,i
 #uri         __URI_WP_WHITELIST m,/wp-content/plugins/civicrm/,i
 meta        URI_WP_HACKED      (__URI_WPCONTENT || __URI_WPINCLUDES) && !__VIA_ML && !__HAS_ERRORS_TO && !__RCD_RDNS_SMTP && !__THREADED && !ALL_TRUSTED && !__NOT_SPOOFED 
 describe    URI_WP_HACKED      URI for compromised WordPress site, possible malware
@@ -1658,7 +1658,7 @@ score       URI_WP_DIRINDEX    3.500   # limit
 tflags      URI_WP_DIRINDEX    publish
 
 # this has some overlap with URI_WP_HACKED
-uri         __PS_TEST_LOC_WP   m;/(?:wp-content/plugins|wp-content/themes|wp-includes|modules/mod_wdbanners|includes/|google_recommends|mt-static|data/module)/.{1,128}(?!\.gif|\.jpg|\.png|\.bmp|\.ico|\.pdf|\.svg)[^?]{4}(?:\?[^?]{1,5})?$;i
+uri         __PS_TEST_LOC_WP   m;/(?:wp-content/plugins|wp-content/themes|wp-includes|modules/mod_wdbanners|includes/|google_recommends|mt-static|data/module)/.{1,128}(?!\.gif|\.jpg|\.png|\.bmp|\.ico|\.pdf|\.svg|\.webp)[^?]{4}(?:\?[^?]{1,5})?$;i
 meta        URI_WP_HACKED_2    (__PS_TEST_LOC_WP && !URI_WP_HACKED) && !__HAS_LIST_ID && !__THREADED && !__USING_VERP1 
 describe    URI_WP_HACKED_2    URI for compromised WordPress site, possible malware
 score       URI_WP_HACKED_2    2.500   # limit
@@ -1841,13 +1841,13 @@ score       LONG_HEX_URI      3.000	# limit
 tflags      LONG_HEX_URI      publish
 
 uri         __128_LC_URI        m;[/?][a-z]{128,}$;
-uri         __128_LC_IMG        m;/[a-z]{128,}/\w+\.(?:png|gif|jpe?g)$;
+uri         __128_LC_IMG        m;/[a-z]{128,}/\w+\.(?:png|gif|jpe?g|webp)$;
 uri         __128_ALNUM_URI     m;[/?][0-9a-z]{128,}$;i
-uri         __128_ALNUM_IMG     m;/[0-9a-z]{128,}/\w+\.(?:png|gif|jpe?g)$;i
+uri         __128_ALNUM_IMG     m;/[0-9a-z]{128,}/\w+\.(?:png|gif|jpe?g|webp)$;i
 uri         __64_ANY_URI        m;[/?]\w{64,}$;i
-uri         __64_ANY_IMG        m;/\w{64,}/\w+\.(?:png|gif|jpe?g)$;i
+uri         __64_ANY_IMG        m;/\w{64,}/\w+\.(?:png|gif|jpe?g|webp)$;i
 uri         __45_ALNUM_URI      m;[/?][0-9a-z]{45,}$;i
-uri         __45_ALNUM_IMG      m;/[0-9a-z]{45,}/\w+\.(?:png|gif|jpe?g)$;i
+uri         __45_ALNUM_IMG      m;/[0-9a-z]{45,}/\w+\.(?:png|gif|jpe?g|webp)$;i
 meta        __128_LC_URI_IMG    __128_LC_URI && __128_LC_IMG
 meta        __128_ALNUM_URI_O   __128_ALNUM_URI && !__128_LC_URI
 meta        __128_ALNUM_IMG_O   __128_ALNUM_IMG && !__128_LC_IMG
@@ -2493,18 +2493,18 @@ score     GOOG_MALWARE_DNLD             5.000   # limit
 tflags    GOOG_MALWARE_DNLD             publish
 
 uri       __GOOG_REDIR                  m;^https?://[^/]*\.google\.com/url\?;i
-uri       __GOOG_REDIR_IMG              m;^https?://[^/]*\.google\.com/url\?(?:[^&]+\&)*q=https?://.*\.(?:png|gif|jpe?g)(?=$|\?|\&);i
+uri       __GOOG_REDIR_IMG              m;^https?://[^/]*\.google\.com/url\?(?:[^&]+\&)*q=https?://.*\.(?:png|gif|jpe?g|webp)(?=$|\?|\&);i
 tflags    __GOOG_REDIR_IMG              multiple
 uri       __GOOG_REDIR_HTML             m;^https?://[^/]*\.google\.com/url\?(?:[^&]+\&)*q=https?://.*\.html?(?=$|\?|\&);i
 uri       __GOOG_REDIR_ARCHV            m;^https?://[^/]*\.google\.com/url\?(?:[^&]+\&)*q=https?://.*\.(?:ace|zip|7z|rar)(?=$|\?|\&);i
 
-uri       __GOOG_PROXY_IMG              m;^https?://[^.]+\.googleusercontent\.com/proxy/.*\.(?:png|gif|jpe?g)(?=$|\?|\&);i
+uri       __GOOG_PROXY_IMG              m;^https?://[^.]+\.googleusercontent\.com/proxy/.*\.(?:png|gif|jpe?g|webp)(?=$|\?|\&);i
 tflags    __GOOG_PROXY_IMG              multiple
 uri       __GOOG_PROXY_HTML             m;^https?://[^.]+\.googleusercontent\.com/proxy/.*\.html?(?=$|\?|\&);i
 uri       __GOOG_PROXY_ARCHV            m;^https?://[^.]+\.googleusercontent\.com/proxy/.*\.(?:ace|zip|7z|rar)(?=$|\?|\&);i
 
 uri       __DDG_REDIR                   m;^https?://(?:proxy|external-content)\.duckduckgo\.com/iu/\?(?:[^&]+\&)*u=https?://;i
-uri       __DDG_REDIR_IMG               m;^https?://(?:proxy|external-content)\.duckduckgo\.com/iu/\?(?:[^&]+\&)*u=https?://.*\.(?:png|gif|jpe?g)(?=$|\?|\&);i
+uri       __DDG_REDIR_IMG               m;^https?://(?:proxy|external-content)\.duckduckgo\.com/iu/\?(?:[^&]+\&)*u=https?://.*\.(?:png|gif|jpe?g|webp)(?=$|\?|\&);i
 tflags    __DDG_REDIR_IMG               multiple
 uri       __DDG_REDIR_HTML              m;^https?://(?:proxy|external-content)\.duckduckgo\.com/iu/\?(?:[^&]+\&)*u=https?://.*\.html?(?=$|\?|\&);i
 uri       __DDG_REDIR_ARCHV             m;^https?://(?:proxy|external-content)\.duckduckgo\.com/iu/\?(?:[^&]+\&)*u=https?://.*\.(?:ace|zip|7z|rar)(?=$|\?|\&);i
@@ -3241,7 +3241,7 @@ rawbody    __AC_LARGE_INDENT           /text-indent\s*:\s*[-]?[0-9]{3,}(?:em|p[t
 
 uri        __AC_POSTHTMLEXTRAS         /(?:main[0-9]?|mian|start(?:page)?|info(?:page|source|center)?|(?:one|view)?(?:site|source)(?:view|[0-9])?|(?:hub|file)one|index(?:[0-9]|page)?|mediafile|userlink|faction1)[.,]html?\/\w{2,}\b/i
 
-uri        __AC_POSTIMGEXTRAS          /(?:(?:main|external|hosted|new|file)?(?:im(?:g|age)?|user|one)s?-?(?:view(?:er)?|file|map|finder|portal|hub|online)?s?|library|media(?:source|-?files?)?|main|png|view|begin|file|port|space|webpics|host)(?:[-]?(?:[0-9]|one|two|three|four|five|six|seven|eight|nine))?[.,](?:jpe?g|png|gif)\/\w{2,}\b/i
+uri        __AC_POSTIMGEXTRAS          /(?:(?:main|external|hosted|new|file)?(?:im(?:g|age)?|user|one)s?-?(?:view(?:er)?|file|map|finder|portal|hub|online)?s?|library|media(?:source|-?files?)?|main|png|view|begin|file|port|space|webpics|host)(?:[-]?(?:[0-9]|one|two|three|four|five|six|seven|eight|nine))?[.,](?:jpe?g|png|gif|webp)\/\w{2,}\b/i
 
 meta       __AC_POST_EXTRAS            (__AC_POSTHTMLEXTRAS || __AC_POSTIMGEXTRAS)
 meta       AC_POST_EXTRAS              __AC_POST_EXTRAS && !__URI_MAILTO && !__HAS_LIST_ID 
@@ -3439,7 +3439,7 @@ tflags     HOSTED_IMG_MULTI            publish
 
 
 # WordPress "image accelerator" - abused for obfuscating hosted spamvertised product images
-uri        __URI_IMG_WP_REDIR          m;://i[02]\.wp\.com/.*\.(?:jpe?g|gif|png)$;i
+uri        __URI_IMG_WP_REDIR          m;://i[02]\.wp\.com/.*\.(?:jpe?g|gif|png|webp)$;i
 meta       URI_IMG_WP_REDIR            __URI_IMG_WP_REDIR
 score      URI_IMG_WP_REDIR            3.000	# limit
 describe   URI_IMG_WP_REDIR            Image via WordPress "accelerator" proxy
@@ -3653,7 +3653,7 @@ tflags     URI_DASHGOVEDU              publish
 # Apparent use of content hosted at storage.googleapis.com
 # (mapped images and HTML landing pages for the imagemap URIs)
 # to avoid URIBL hits
-uri        __URI_GOOG_STO_IMG         m,^https?://(?:[^./]+.)?(?:firebase)?storage\.googleapis\.com/.*\.(?:png|jpe?g|gif)$,i
+uri        __URI_GOOG_STO_IMG         m,^https?://(?:[^./]+.)?(?:firebase)?storage\.googleapis\.com/.*\.(?:png|jpe?g|gif|webp)$,i
 tflags     __URI_GOOG_STO_IMG         multiple maxhits=5
 
 uri        __URI_GOOG_STO_HTML        m,^https?://(?:[^./]+.)?(?:firebase)?storage\.googleapis\.com/.*\.html?(?:$|\?),i
@@ -3904,7 +3904,7 @@ header     __REPTO_MISSPACED           ALL:raw =~ /^Reply-To:\S/ism
 
 # content+respond+unsub texts as free hosted images
 # spammer response: now only two hosted images
-uri        __IMGUR_IMG                 m,^https?://(?:[^.]+\.)?imgur\.com/[a-z0-9]{7}\.(?:png|gif|jpe?g)$,i
+uri        __IMGUR_IMG                 m,^https?://(?:[^.]+\.)?imgur\.com/[a-z0-9]{7}\.(?:png|gif|jpe?g|webp)$,i
 tflags     __IMGUR_IMG                 multiple maxhits=4
 meta       __IMGUR_IMG_2               __IMGUR_IMG == 2
 meta       __IMGUR_IMG_3               __IMGUR_IMG == 3
