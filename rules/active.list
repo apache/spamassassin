@@ -194,7 +194,10 @@ BITCOIN_EXTORT_02
 # tflags publish
 BITCOIN_IMGUR
 
-# tflags net
+# good enough
+BITCOIN_MALF_HTML
+
+# tflags publish
 BITCOIN_MALWARE
 
 # tflags publish
@@ -263,7 +266,7 @@ BITCOIN_YOUR_INFO
 # good enough
 BODY_EMAIL_419_FRAUD_GM
 
-# tflags publish
+# tflags net
 BODY_URI_ONLY
 
 # tflags publish
@@ -788,6 +791,9 @@ HAS_X_NO_RELAY
 # tflags publish
 HAS_X_OUTGOING_SPAM_STAT
 
+# tflags net
+HDRS_LCASE
+
 # tflags publish
 HDRS_MISSP
 
@@ -884,7 +890,7 @@ HTML_OFF_PAGE
 # tflags publish
 HTML_SHRT_CMNT_OBFU_MANY
 
-# tflags publish
+# tflags net
 HTML_SINGLET_MANY
 
 # tflags net
@@ -906,7 +912,7 @@ JH_SPAMMY_PATTERN01
 JH_SPAMMY_PATTERN02
 
 # tflags net
-KHOP_FAKE_EBAY
+KHOP_HELO_FCRDNS
 
 # tflags publish
 LINKEDIN_IMG_NOT_RCVD_LNKN
@@ -1590,6 +1596,9 @@ SUBJ_BRKN_WORDNUMS
 SUBJ_LACKS_WORDS
 
 # tflags net
+SUBJ_UNNEEDED_HTML
+
+# tflags net
 SURBL_BLOCKED
 
 # good enough
@@ -1635,6 +1644,9 @@ TO_EQ_FM_DIRECT_MX
 TO_EQ_FM_DOM_HTML_IMG
 
 # tflags net
+TO_EQ_FM_DOM_HTML_ONLY
+
+# tflags net
 TO_EQ_FM_DOM_SPF_FAIL
 
 # tflags net
@@ -1676,7 +1688,7 @@ TVD_RCVD_SPACE_BRACKET
 # good enough
 TVD_SPACE_ENCODED
 
-# tflags net
+# good enough
 TVD_SPACE_RATIO_MINFP
 
 # tflags net
@@ -1880,7 +1892,7 @@ URI_MALWARE_SCMS
 # tflags userconf
 URI_NOVOWEL
 
-# tflags publish
+# tflags net
 URI_ONLY_MSGID_MALF
 
 # tflags publish
