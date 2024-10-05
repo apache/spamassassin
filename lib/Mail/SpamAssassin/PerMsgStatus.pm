@@ -2807,6 +2807,11 @@ sub _process_html_uri_list {
       if ($self->add_uri_detail_list($uri, $info->{types}, 'html', 0)) {
         # Need also to copy and uniq anchor text
         if (exists $info->{anchor_text}) {
+          # Bug 8268: Collapse whitespace
+          for (@{$info->{anchor_text}}) {
+            s/^\s+|\s+$//g;
+            s/\s+/ /g;
+          }
           my %seen;
           foreach (grep { !$seen{$_}++ } @{$info->{anchor_text}}) {
             push @{$self->{uri_detail_list}->{$uri}->{anchor_text}}, $_;
