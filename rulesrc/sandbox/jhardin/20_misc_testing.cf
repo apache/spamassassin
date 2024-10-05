@@ -4266,4 +4266,16 @@ body        __UNICODE_RTL_OBFU         /\w(?:\x{E2}\x{80}\x{8F}){2,}\w/
 tflags      __UNICODE_RTL_OBFU         multiple maxhits=10
 meta        __UNICODE_RTL_OBFU_SOME    __UNICODE_RTL_OBFU > 4 && __UNICODE_RTL_OBFU <= 9
 meta        __UNICODE_RTL_OBFU_MANY    __UNICODE_RTL_OBFU > 9
+meta        UNICODE_RTL_OBFU           __UNICODE_RTL_OBFU
+describe    UNICODE_RTL_OBFU           Word obfuscation using Unicode right-to-left markers
+score       UNICODE_RTL_OBFU           1.500	# limit
+tflags      UNICODE_RTL_OBFU           publish
+
+uri         __URI_NOCODEFORM           m;://nocodeform\.io/f/;i
+meta        URI_NOCODEFORM             __URI_NOCODEFORM
+score       URI_NOCODEFORM             1.500	# limit
+describe    URI_NOCODEFORM             Uses nocodeform.io, possible phishing
+tflags      URI_NOCODEFORM             publish
+
+
 
