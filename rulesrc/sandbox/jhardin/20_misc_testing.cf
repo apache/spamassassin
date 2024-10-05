@@ -1679,9 +1679,9 @@ meta        __XPRIO_MINFP      __XPRIO && !__CT_ENCRYPTED && !ALL_TRUSTED && !__
 
 ifplugin Mail::SpamAssassin::Plugin::DKIM
   ifplugin Mail::SpamAssassin::Plugin::SPF
-    meta    XPRIO              __XPRIO_MINFP && !DKIM_SIGNED && !DKIM_VALID && !DKIM_VALID_AU && !SPF_PASS # && !RCVD_IN_DNSWL_NONE
+    meta    XPRIO              __XPRIO_MINFP && !DKIM_SIGNED && !DKIM_VALID && !DKIM_VALID_AU && !SPF_PASS && !RCVD_IN_DNSWL_NONE
   else
-    meta    XPRIO              __XPRIO_MINFP && !DKIM_SIGNED && !DKIM_VALID && !DKIM_VALID_AU # && !RCVD_IN_DNSWL_NONE 
+    meta    XPRIO              __XPRIO_MINFP && !DKIM_SIGNED && !DKIM_VALID && !DKIM_VALID_AU && !RCVD_IN_DNSWL_NONE 
   endif
   tflags    XPRIO              net
 else
