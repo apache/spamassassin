@@ -197,7 +197,7 @@ BITCOIN_IMGUR
 # good enough
 BITCOIN_MALF_HTML
 
-# tflags publish
+# tflags net
 BITCOIN_MALWARE
 
 # tflags publish
@@ -488,10 +488,10 @@ FONT_INVIS_POSTEXTRAS
 # tflags net
 FORGED_SPF_HELO
 
-# tflags publish
+# tflags net
 FORM_FRAUD
 
-# tflags publish
+# tflags net
 FORM_FRAUD_3
 
 # tflags publish
@@ -887,7 +887,7 @@ HTML_OFF_PAGE
 # tflags publish
 HTML_SHRT_CMNT_OBFU_MANY
 
-# tflags publish
+# tflags net
 HTML_SINGLET_MANY
 
 # tflags net
@@ -955,6 +955,9 @@ MALWARE_PASSWORD
 
 # tflags publish
 MALW_ATTACH
+
+# tflags net
+MANY_HDRS_LCASE
 
 # tflags publish
 MANY_SPAN_IN_TEXT
@@ -1629,9 +1632,6 @@ TO_EQ_FM_DOM_HTML_IMG
 TO_EQ_FM_DOM_SPF_FAIL
 
 # tflags net
-TO_EQ_FM_HTML_ONLY
-
-# tflags net
 TO_EQ_FM_SPF_FAIL
 
 # tflags publish
@@ -1649,7 +1649,7 @@ TO_NO_BRKTS_HTML_IMG
 # tflags publish
 TO_NO_BRKTS_HTML_ONLY
 
-# good enough
+# tflags net
 TO_NO_BRKTS_MSFT
 
 # tflags publish
@@ -1667,11 +1667,14 @@ TVD_INCREASE_SIZE
 # good enough
 TVD_RCVD_SPACE_BRACKET
 
-# good enough
+# tflags net
 TVD_SPACE_ENCODED
 
 # good enough
 TVD_SPACE_RATIO_MINFP
+
+# tflags net
+TVD_SUBJ_NUM_OBFU_MINFP
 
 # tflags publish
 TW_GIBBERISH_MANY
@@ -1693,6 +1696,9 @@ UNICODE_OBFU_ZW
 
 # tflags publish
 UNICODE_OBFU_ZW_MANY
+
+# tflags publish
+UNICODE_RTL_OBFU
 
 # tflags userconf
 UNPARSEABLE_RELAY
@@ -1868,10 +1874,13 @@ URI_MALWARE_BH
 # tflags publish
 URI_MALWARE_SCMS
 
+# tflags publish
+URI_NOCODEFORM
+
 # tflags userconf
 URI_NOVOWEL
 
-# tflags publish
+# tflags net
 URI_ONLY_MSGID_MALF
 
 # tflags publish
@@ -1898,7 +1907,7 @@ URI_WPADMIN
 # tflags publish
 URI_WP_DIRINDEX
 
-# tflags net
+# tflags publish
 URI_WP_HACKED
 
 # tflags publish
