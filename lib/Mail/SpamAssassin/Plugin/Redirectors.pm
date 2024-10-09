@@ -741,11 +741,20 @@ sub _check_redirector_uri {
       'uri' => $uri,
       'method' => $conf->{url_redirector}->{$1} == 1 ? 'head' : 'get',
     };
+  }
+  elsif ($host =~ /(\.[a-z0-9_]+\.[a-z]+)$/i &&
+           exists $conf->{url_redirector}->{$1}) {
+    return {
+      'uri' => $uri,
+      'method' => $conf->{url_redirector}->{$1} == 1 ? 'head' : 'get',
+    };
   } elsif ($newuri = _check_querystring($params, $conf)) {
     return {
       'uri' => $newuri,
       'method' => 'head',
     };
+  } else {
+    dbg("No explicit redirector host found for $host");
   }
   return;
 }
@@ -866,6 +875,7 @@ sub recursive_lookup {
       dbg("URL is not a redirect: $redir_url = ".$response->status_line);
       my $rcode = $response->code;
       if ($rcode =~ /^\d{3}$/) {
+        return if $redir_url !~ /([^.]+\.[^.]+)/;
         $pms->{"redir_url_$rcode"} = 1;
         # Update cache
         $self->cache_add($redir_url, $rcode);
