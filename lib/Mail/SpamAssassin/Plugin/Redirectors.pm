@@ -875,11 +875,11 @@ sub recursive_lookup {
       dbg("URL is not a redirect: $redir_url = ".$response->status_line);
       my $rcode = $response->code;
       if ($rcode =~ /^\d{3}$/) {
-        return if $redir_url !~ /([^.]+\.[^.]+)/;
         $pms->{"redir_url_$rcode"} = 1;
         # Update cache
         $self->cache_add($redir_url, $rcode);
-	# add uri to uri_detail_list
+        # add uri to uri_detail_list if the url is valid
+        return if $redir_url !~ /([^.]+\.[^.]+)/;
         $pms->add_uri_detail_list($redir_url) if !$pms->{uri_detail_list}->{$redir_url};
       }
       return;
