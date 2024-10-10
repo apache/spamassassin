@@ -128,6 +128,7 @@ lib/Mail/SpamAssassin/Pyzor/Digest/Pieces.pm
 lib/Mail/SpamAssassin/Pyzor/Digest/StripHtml.pm
 lib/Mail/SpamAssassin/Pyzor/Digest.pm
 lib/Mail/SpamAssassin/Pyzor.pm
+lib/Mail/SpamAssassin/Redirectors.pm
 lib/Mail/SpamAssassin/RegistryBoundaries.pm
 lib/Mail/SpamAssassin/Reporter.pm
 lib/Mail/SpamAssassin/SQLBasedAddrList.pm
@@ -158,6 +159,7 @@ rules/v342.pre
 rules/v343.pre
 rules/v400.pre
 rules/v401.pre
+rules/v402.pre
 rules/20_aux_tlds.cf
 rules-extras/README.txt
 rules-extras/10_uridnsbl_skip_financial.cf
@@ -463,6 +465,8 @@ t/data/spam/phishing_openphish.eml
 t/data/spam/phishing_phishtank.eml
 t/data/spam/pyzor
 t/data/spam/razor2
+t/data/spam/redirectors/base.eml
+t/data/spam/redirectors/base2.eml
 t/data/spam/relayUS.eml
 t/data/spam/spf1
 t/data/spam/spf2
