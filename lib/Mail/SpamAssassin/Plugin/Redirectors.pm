@@ -742,7 +742,7 @@ sub _check_redirector_uri {
       'method' => $conf->{url_redirector}->{$1} == 1 ? 'head' : 'get',
     };
   }
-  elsif ($host =~ /(\.[a-z0-9_]+\.[a-z]+)$/i &&
+  elsif ($host =~ /(\.[a-z0-9_]+(?:\.[a-z0-9_]+)?\.[a-z]+)$/i &&
            exists $conf->{url_redirector}->{$1}) {
     return {
       'uri' => $uri,
@@ -870,6 +870,11 @@ sub recursive_lookup {
   } else {
     # Not cached; do lookup
     my $method = $redir_url_info->{method};
+    # run the http check only if the url is valid
+    if($redir_url !~ /([^.]+\.[^.]+)/) {
+      dbg("URL $redir_url is not valid, skipping http check");
+      return;
+    }
     my $response = $ua->$method($redir_url);
     if (!$response->is_redirect) {
       dbg("URL is not a redirect: $redir_url = ".$response->status_line);
@@ -878,8 +883,6 @@ sub recursive_lookup {
         $pms->{"redir_url_$rcode"} = 1;
         # Update cache
         $self->cache_add($redir_url, $rcode);
-        # add uri to uri_detail_list if the url is valid
-        return if $redir_url !~ /([^.]+\.[^.]+)/;
         $pms->add_uri_detail_list($redir_url) if !$pms->{uri_detail_list}->{$redir_url};
       }
       return;
