@@ -66,6 +66,34 @@ Example rule to look for suspicious "https" links:
 
 Regular expressions should be delimited by slashes.
 
+Negating matches is supported in SpamAssassin 4.0.2 or higher by prefixing the key with an exclamation mark.
+
+Example rule to look for links where the text contains "id.me" but the host is not "id.me":
+
+  uri_detail FAKE_ID_ME   text =~ /\bid\.me\b/  !host =~ /^id\.me$/
+
+The difference between '!key =~ ...' and 'key !~ ...' is due to the fact that keys can contain multiple values.
+'!key =~ ...' will be true if none of the values match the regex, while 'key !~ ...' will be true if any of the values
+do not match the regex.
+
+For example, consider the following data structure:
+
+  {
+    host => {
+      'id.me' => 1,
+      'example.com' => 1,
+    },
+    text => [
+      'Login to ID.me'
+    ]
+  }
+
+The rule 'host !~ /^id\.me$/' would be true, because 'example.com' does not match the regex.
+The rule '!host =~ /^id\.me$/' would be false, because it is the logical negation of 'host =~ /^id\.me$/'
+which is true because 'id.me' matches the regex.
+
+There must not be any whitespace between the key and the negation operator.
+
 =cut
 
 package Mail::SpamAssassin::Plugin::URIDetail;
@@ -117,12 +145,13 @@ sub set_config {
       my $added_criteria = 0;
 
       # if this matches a regex, it strips slashes  
-      while ($def =~ m{\b(\w+)\b\s*([\=\!]\~)\s*((?:/.*?/|m(\W).*?\4)[imsx]*)(?=\s|$)}g) {
+      while ($def =~ m{\s*([!\w]+)\b\s*([\=\!]\~)\s*((?:/.*?/|m(\W).*?\4)[imsx]*)(?=\s|$)}g) {
 	my $target = $1;
 	my $op = $2;
 	my $pattern = $3;
+        my $neg = 0;
 
-	if ($target !~ /^(?:raw|type|cleaned|text|domain|host)$/) {
+	if ($target !~ /^!?(?:raw|type|cleaned|text|domain|host)$/) {
 	    return $Mail::SpamAssassin::Conf::INVALID_VALUE;
 	}
 
@@ -133,8 +162,12 @@ sub set_config {
 	}
 
 	dbg("config: uri_detail adding ($target $op /$rec/) to $name");
+        if ($target =~ /^!(.*)/) {
+          $target = $1;
+          $neg = 1;
+        }
         $conf->{parser}->{conf}->{uri_detail}->{$name}->{$target} =
-          [$op, $rec];
+          [$op, $rec, $neg];
 	$added_criteria = 1;
       }
 
@@ -165,73 +198,99 @@ sub check_uri_detail {
     dbg("uri: running uri_detail $test: $raw");
 
     if (exists $rule->{raw}) {
-      my($op,$patt) = @{$rule->{raw}};
+      my($op,$patt,$neg) = @{$rule->{raw}};
+      my $match = 0;
       if ( ($op eq '=~' && $raw =~ $patt) ||
            ($op eq '!~' && $raw !~ $patt) ) {
-        dbg("uri: raw matched: '%s' %s /%s/", $raw,$op,$patt);
-      } else {
-        next;
+        $match = 1;
       }
+      $match = 1-$match if $neg;
+      next unless $match;
     }
 
     if (exists $rule->{type}) {
       next unless $info->{types};
-      my($op,$patt) = @{$rule->{type}};
+      my($op,$patt,$neg) = @{$rule->{type}};
       my $match;
       for my $text (keys %{ $info->{types} }) {
         if ( ($op eq '=~' && $text =~ $patt) ||
              ($op eq '!~' && $text !~ $patt) ) { $match = $text; last }
       }
-      next unless defined $match;
-      dbg("uri: type matched: '%s' %s /%s/", $match,$op,$patt);
+      if ( $neg ) {
+        next if defined $match;
+        dbg("uri: type negative matched: %s /%s/", $op,$patt);
+      } else {
+        next unless defined $match;
+        dbg("uri: type matched: '%s' %s /%s/", $match,$op,$patt);
+      }
     }
 
     if (exists $rule->{cleaned}) {
       next unless $info->{cleaned};
-      my($op,$patt) = @{$rule->{cleaned}};
+      my($op,$patt,$neg) = @{$rule->{cleaned}};
       my $match;
       for my $text (@{ $info->{cleaned} }) {
         if ( ($op eq '=~' && $text =~ $patt) ||
              ($op eq '!~' && $text !~ $patt) ) { $match = $text; last }
       }
-      next unless defined $match;
-      dbg("uri: cleaned matched: '%s' %s /%s/", $match,$op,$patt);
+      if ( $neg ) {
+        next if defined $match;
+        dbg("uri: cleaned negative matched: %s /%s/", $op,$patt);
+      } else {
+        next unless defined $match;
+        dbg("uri: cleaned matched: '%s' %s /%s/", $match,$op,$patt);
+      }
     }
 
     if (exists $rule->{text}) {
       next unless $info->{anchor_text};
-      my($op,$patt) = @{$rule->{text}};
+      my($op,$patt,$neg) = @{$rule->{text}};
       my $match;
       for my $text (@{ $info->{anchor_text} }) {
         if ( ($op eq '=~' && $text =~ $patt) ||
              ($op eq '!~' && $text !~ $patt) ) { $match = $text; last }
       }
-      next unless defined $match;
-      dbg("uri: text matched: '%s' %s /%s/", $match,$op,$patt);
+      if ( $neg ) {
+        next if defined $match;
+        dbg("uri: text negative matched: %s /%s/", $op,$patt);
+      } else {
+        next unless defined $match;
+        dbg("uri: text matched: '%s' %s /%s/", $match,$op,$patt);
+      }
     }
 
     if (exists $rule->{domain}) {
       next unless $info->{domains};
-      my($op,$patt) = @{$rule->{domain}};
+      my($op,$patt,$neg) = @{$rule->{domain}};
       my $match;
       for my $text (keys %{ $info->{domains} }) {
         if ( ($op eq '=~' && $text =~ $patt) ||
              ($op eq '!~' && $text !~ $patt) ) { $match = $text; last }
       }
-      next unless defined $match;
-      dbg("uri: domain matched: '%s' %s /%s/", $match,$op,$patt);
+      if ( $neg ) {
+        next if defined $match;
+        dbg("uri: domain negative matched: %s /%s/", $op,$patt);
+      } else {
+        next unless defined $match;
+        dbg("uri: domain matched: '%s' %s /%s/", $match,$op,$patt);
+      }
     }
 
     if (exists $rule->{host}) {
       next unless $info->{hosts};
-      my($op,$patt) = @{$rule->{host}};
+      my($op,$patt,$neg) = @{$rule->{host}};
       my $match;
       for my $text (keys %{ $info->{hosts} }) {
         if ( ($op eq '=~' && $text =~ $patt) ||
              ($op eq '!~' && $text !~ $patt) ) { $match = $text; last }
       }
-      next unless defined $match;
-      dbg("uri: host matched: '%s' %s /%s/", $match,$op,$patt);
+      if ( $neg ) {
+        next if defined $match;
+        dbg("uri: host negative matched: %s /%s/", $op,$patt);
+      } else {
+        next unless defined $match;
+        dbg("uri: host matched: '%s' %s /%s/", $match, $op, $patt);
+      }
     }
 
     dbg("uri: all criteria for $test met - HIT");
@@ -244,5 +303,7 @@ sub check_uri_detail {
 # ---------------------------------------------------------------------------
 
 sub has_host_key { 1 } # can match with "host" key
+
+sub has_uridetail_negate { 1 } # Negating matches (Bug 8283)
 
 1;
