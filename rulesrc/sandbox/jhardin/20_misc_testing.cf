@@ -4236,6 +4236,19 @@ describe    URI_DWEBIPFS               References Interplanetary File System PtP
 score       URI_DWEBIPFS               3.500	# limit
 tflags      URI_DWEBIPFS               publish
 
+uri         __URI_FLKIPFSXYZIPFS       m;://[^.]{50,}\.ipfs\.flk-ipfs\.xyz/;i
+meta        URI_FLKIPFSXYZIPFS         __URI_FLKIPFSXYZIPFS
+describe    URI_FLKIPFSXYZIPFS         References Interplanetary File System PtP content via flk-ipfs.xyz, likely phishing
+score       URI_FLKIPFSXYZIPFS         3.500	# limit
+tflags      URI_FLKIPFSXYZIPFS         publish
+
+meta        __URI_IPFS                 __URI_IPFSIO || __URI_INFURAIPFSIO || __URI_CLOUDFLAREIPFS || __URI_DWEBIPFS || __URI_FLKIPFSXYZIPFS
+meta        URI_IPFS                   __URI_IPFS
+describe    URI_IPFS                   References Interplanetary File System PtP content, probable phishing
+score       URI_IPFS                   3.500	#limit
+tflags      URI_IPFS                   publish
+
+
 uri         __URI_GOOGDRAWPREVIEW      m,://docs\.google\.com/drawings/d/[^/]*/preview,i
 meta        URI_GOOGDRAWPREVIEW_MINFP  __URI_GOOGDRAWPREVIEW && (__SUBSCRIPTION_INFO || __HTML_TAG_BALANCE_CENTER || __TO_NO_BRKTS_HTML_ONLY) && !__RCD_RDNS_SMTP && !__TVD_SPACE_RATIO
 describe    URI_GOOGDRAWPREVIEW_MINFP  Link to image at Google Docs, probable phishing
