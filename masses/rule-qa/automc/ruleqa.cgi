@@ -268,7 +268,7 @@ sub show_view {
   my ($self) = @_;
 
   if ($self->{q}->param('mclog')) {
-    $self->show_mclog($self->{q}->param('mclog'));
+    $self->show_mclog(scalar $self->{q}->param('mclog'));
   }
 
   my $graph = $self->{q}->param('graph');
