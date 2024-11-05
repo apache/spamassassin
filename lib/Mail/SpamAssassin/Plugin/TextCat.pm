@@ -548,7 +548,7 @@ sub extract_metadata {
 
   my $msg = $opts->{msg};
 
-  my $body = $msg->get_rendered_body_text_array();
+  my $body = $msg->get_visible_rendered_body_text_array();
   $body = join("\n", @{$body});
 
   # Strip subject prefixes, enhances results
