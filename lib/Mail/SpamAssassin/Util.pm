@@ -1608,7 +1608,8 @@ sub uri_list_canonicalize {
     $nuri =~ tr{\\}{/};
 
     # http:www.foo.biz -> http://www.foo.biz
-    $nuri =~ s{^(https?:)/{0,2}}{$1//}i;
+    # http://///www.foo.biz -> http://www.foo.biz (Bug 8288)
+    $nuri =~ s{^(https?:)/*}{$1//}i;
 
     # *always* make a dup with all %-encoding decoded, since
     # important parts of the URL may be encoded (such as the

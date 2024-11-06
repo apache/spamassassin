@@ -163,12 +163,15 @@ sub try_canon {
 ok(try_canon([
    'http:www.spamassassin.org',
    'http:/www.spamassassin.org',
+   'http:///www.example.org',
    "ht\rtp:/\r/www.exa\rmple.com",
    ], [
    'http://www.spamassassin.org',
    'http:www.spamassassin.org',
    'http:/www.spamassassin.org',
    'http://www.example.com',
+   'http:///www.example.org',
+   'http://www.example.org',
    ]));
 
 # Try a simple redirector.  Should return the redirector and the URI
