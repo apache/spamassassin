@@ -4212,31 +4212,32 @@ rawbody     __HREF_BOM                 m,href\s*=\s*"(?:[\xef][\xbb][\xbf]|[\xfe
 #tflags     __URI_WEBMDSERVICE          multiple maxhits=6
 #meta       __URI_WEBMDSERVICE_MANY     __URI_WEBMDSERVICE > 5
 
-uri         __URI_IPFSIO               m,://(?:[^@/]+@)?ipfs\.io/ipfs/,i
+# No protocol or colon to deal with loose redirectors (web.mmac.org)
+uri         __URI_IPFSIO               m,//(?:[^@/]+@)?ipfs\.io/ipfs/,i
 meta        URI_IPFSIO                 __URI_IPFSIO
 describe    URI_IPFSIO                 References Interplanetary File System PtP content via ipfs.io, likely phishing
 score       URI_IPFSIO                 3.500	# limit
 tflags      URI_IPFSIO                 publish
 
-uri         __URI_INFURAIPFSIO         m,://(?:[^@/]+@)?(?:[^.]+\.)?infura-ipfs\.io/ipfs/,i
+uri         __URI_INFURAIPFSIO         m,//(?:[^@/]+@)?(?:[^.]+\.)?infura-ipfs\.io/ipfs/,i
 meta        URI_INFURAIPFSIO           __URI_INFURAIPFSIO
 describe    URI_INFURAIPFSIO           References Interplanetary File System PtP content via infura-ipfs.io, likely phishing
 score       URI_INFURAIPFSIO           3.500	# limit
 tflags      URI_INFURAIPFSIO           publish
 
-uri         __URI_CLOUDFLAREIPFS       m,://(?:[^@/]+@)?cloudflare-ipfs\.com/ipfs/,i
+uri         __URI_CLOUDFLAREIPFS       m,//(?:[^@/]+@)?cloudflare-ipfs\.com/ipfs/,i
 meta        URI_CLOUDFLAREIPFS         __URI_CLOUDFLAREIPFS
 describe    URI_CLOUDFLAREIPFS         References Interplanetary File System PtP content via CloudFlare, likely phishing
 score       URI_CLOUDFLAREIPFS         3.500	# limit
 tflags      URI_CLOUDFLAREIPFS         publish
 
-uri         __URI_DWEBIPFS             m;://[^.]{50,}\.ipfs\.dweb\.link/;i
+uri         __URI_DWEBIPFS             m;//[^.]{50,}\.ipfs\.dweb\.link/;i
 meta        URI_DWEBIPFS               __URI_DWEBIPFS
 describe    URI_DWEBIPFS               References Interplanetary File System PtP content via dweb.link, likely phishing
 score       URI_DWEBIPFS               3.500	# limit
 tflags      URI_DWEBIPFS               publish
 
-uri         __URI_FLKIPFSXYZIPFS       m;://[^.]{50,}\.ipfs\.flk-ipfs\.xyz/;i
+uri         __URI_FLKIPFSXYZIPFS       m;//[^.]{50,}\.ipfs\.flk-ipfs\.xyz/;i
 meta        URI_FLKIPFSXYZIPFS         __URI_FLKIPFSXYZIPFS
 describe    URI_FLKIPFSXYZIPFS         References Interplanetary File System PtP content via flk-ipfs.xyz, likely phishing
 score       URI_FLKIPFSXYZIPFS         3.500	# limit
@@ -4298,5 +4299,9 @@ score       URI_EXCESS_SLASHES         2.500
 describe    URI_EXCESS_SLASHES         Too many slashes in URI, possible attempt to bypass spam filtering
 tflags      URI_EXCESS_SLASHES         publish
 
-
+# New redirector observed in phishing
+# https://web.mmac.org/cwt/external/wcpages/referral.aspx?ReferralType=W&ProfileID=94027&ListingID=11005&CategoryID=721&SubCategoryID=0&url=//ipfs.io/ipfs/QmexFb1XEJqDuDSyBDm3Fa4t3n29gPpEHw39duPsyX5iyf#user@example.com
+# Unfortunately the protocol is omitted so URI rules that expect a full URI with protocol may not hit the extracted URI
+# NOT capturing the "//" we can't deal with that properly, it blocks adding the domain to BL checks
+redirector_pattern                     m;^https?://web\.mmac\.org/.*[?&]url=//(.+)$;
 
