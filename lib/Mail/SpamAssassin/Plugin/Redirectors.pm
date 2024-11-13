@@ -720,17 +720,17 @@ sub _check_redirector_uri {
   # on the www domain
   elsif($levels == 2 && $host =~ /^www\.([^.]+\.[^.]+)$/i) {
     my $domain = $1;
+    if ($newuri = _check_querystring($params, $conf)) {
+      return {
+        'uri' => $newuri,
+        'method' => 'head',
+      };
+    }
     if(($host eq "www.$domain") and exists $conf->{url_redirector}->{$domain}) {
       dbg("Found internal www redirection for domain $domain");
       return {
         'uri' => $uri,
         'method' => $conf->{url_redirector}->{$domain} == 1 ? 'head' : 'get',
-      };
-    }
-    if ($newuri = _check_querystring($params, $conf)) {
-      return {
-        'uri' => $newuri,
-        'method' => 'head',
       };
     }
   }
@@ -767,7 +767,7 @@ sub _check_querystring {
   my $rreg = $conf->{url_redirector_params};
 
   # Check parameters regexp and https:// in the querystring
-  if (($params =~ /$rreg/gis) or ($params =~ /(?:\/|\_)https?:\/\/(.*)/)) {
+  if (($params =~ /$rreg/gis) or ($params =~ /(?:\/|\_|\=)https?:\/\/(.*)/)) {
     dbg("Found redirection with path $params");
     my $newuri = $1;
     if($newuri !~ /^http/) {
