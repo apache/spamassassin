@@ -473,10 +473,10 @@ FONT_INVIS_POSTEXTRAS
 # tflags net
 FORGED_SPF_HELO
 
-# tflags publish
+# tflags net
 FORM_FRAUD
 
-# tflags net
+# tflags publish
 FORM_FRAUD_3
 
 # tflags publish
@@ -872,7 +872,7 @@ HTML_OFF_PAGE
 # tflags publish
 HTML_SHRT_CMNT_OBFU_MANY
 
-# tflags net
+# tflags publish
 HTML_SINGLET_MANY
 
 # good enough
@@ -955,6 +955,9 @@ MALWARE_PASSWORD
 
 # tflags publish
 MALW_ATTACH
+
+# tflags net
+MANY_HDRS_LCASE
 
 # tflags publish
 MANY_SPAN_IN_TEXT
@@ -1245,9 +1248,6 @@ RCVD_IN_DNSWL_MED
 RCVD_IN_DNSWL_NONE
 
 # tflags net
-RCVD_IN_IADB_COURT
-
-# tflags net
 RCVD_IN_IADB_DK
 
 # tflags net
@@ -1273,9 +1273,6 @@ RCVD_IN_IADB_ESP
 
 # tflags net
 RCVD_IN_IADB_GOODMAIL
-
-# tflags net
-RCVD_IN_IADB_LEG_MAND
 
 # tflags net
 RCVD_IN_IADB_LISTED
@@ -1327,9 +1324,6 @@ RCVD_IN_IADB_UNVERIFIED_1
 
 # tflags net
 RCVD_IN_IADB_UNVERIFIED_2
-
-# tflags net
-RCVD_IN_IADB_URG
 
 # tflags net
 RCVD_IN_IADB_UT_CPEAR
@@ -1605,9 +1599,6 @@ SUBJ_ATTENTION
 SUBJ_BRKN_WORDNUMS
 
 # tflags net
-SUBJ_UNNEEDED_HTML
-
-# tflags net
 SURBL_BLOCKED
 
 # good enough
@@ -1631,7 +1622,7 @@ TARINGANET_IMG_NOT_RCVD_TN
 # tflags publish
 TEQF_USR_IMAGE
 
-# tflags publish
+# tflags net
 TEQF_USR_MSGID_HEX
 
 # tflags publish
@@ -1653,10 +1644,10 @@ TONLINE_FAKE_DKIM
 TO_EQ_FM_DIRECT_MX
 
 # tflags net
-TO_EQ_FM_DOM_HTML_ONLY
+TO_EQ_FM_DOM_SPF_FAIL
 
 # tflags net
-TO_EQ_FM_DOM_SPF_FAIL
+TO_EQ_FM_HTML_ONLY
 
 # tflags net
 TO_EQ_FM_SPF_FAIL
@@ -1673,7 +1664,7 @@ TO_NO_BRKTS_HTML_IMG
 # tflags publish
 TO_NO_BRKTS_HTML_ONLY
 
-# good enough
+# tflags net
 TO_NO_BRKTS_MSFT
 
 # tflags publish
@@ -1688,7 +1679,7 @@ TO_TOO_MANY_WFH_01
 # good enough
 TVD_QUAL_MEDS
 
-# tflags net
+# good enough
 TVD_SPACE_ENCODED
 
 # tflags net
@@ -1898,7 +1889,7 @@ URI_NOCODEFORM
 # tflags userconf
 URI_NOVOWEL
 
-# tflags publish
+# tflags net
 URI_ONLY_MSGID_MALF
 
 # tflags publish
