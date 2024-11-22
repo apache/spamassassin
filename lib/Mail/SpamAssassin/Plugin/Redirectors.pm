@@ -70,7 +70,7 @@ modify the parsed URI list prior to normal uri rules or the URIDNSBL plugin.
 package Mail::SpamAssassin::Plugin::Redirectors;
 
 use Mail::SpamAssassin::Plugin;
-use Mail::SpamAssassin::Util;
+use Mail::SpamAssassin::Util qw(idn_to_ascii);
 use strict;
 use warnings;
 
@@ -695,7 +695,7 @@ sub _check_redirector_uri {
     (?::\d+)?		# Possible port
     (.*)?		# Some path wanted
     }ix;
-  my $host = lc $1;
+  my $host = lc idn_to_ascii($1);
   my $has_path = defined $2;
   my $levels = $host =~ tr/.//;
   # No point looking at single level "xxx.yy" without a path
