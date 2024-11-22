@@ -720,17 +720,16 @@ sub _check_redirector_uri {
   # on the www domain
   elsif($levels == 2 && $host =~ /^www\.([^.]+\.[^.]+)$/i) {
     my $domain = $1;
-    if ($newuri = _check_querystring($params, $conf)) {
-      return {
-        'uri' => $newuri,
-        'method' => 'head',
-      };
-    }
     if(($host eq "www.$domain") and exists $conf->{url_redirector}->{$domain}) {
       dbg("Found internal www redirection for domain $domain");
       return {
         'uri' => $uri,
         'method' => $conf->{url_redirector}->{$domain} == 1 ? 'head' : 'get',
+      };
+    } elsif ($newuri = _check_querystring($params, $conf)) {
+      return {
+        'uri' => $newuri,
+        'method' => 'head',
       };
     }
   }
@@ -744,15 +743,19 @@ sub _check_redirector_uri {
     };
   }
   elsif ($host =~ /(\.[a-z0-9_]+(?:\.[a-z0-9_]+)?\.[a-z]+)$/i &&
-           exists $conf->{url_redirector}->{$1}) {
+    exists $conf->{url_redirector}->{$1}) {
     return {
       'uri' => $uri,
       'method' => $conf->{url_redirector}->{$1} == 1 ? 'head' : 'get',
     };
   } elsif ($newuri = _check_querystring($params, $conf)) {
+    my $nhost = $newuri;
+    if($nhost =~ /https?:\/\/(.*)/) {
+      $nhost = $1;
+    }
     return {
       'uri' => $newuri,
-      'method' => 'head',
+      'method' => (exists($conf->{url_redirector}->{$nhost}) && ($conf->{url_redirector}->{$nhost} == 1)) ? 'head' : 'get',
     };
   } else {
     dbg("No explicit redirector host found for $host");
