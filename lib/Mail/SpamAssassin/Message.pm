@@ -1267,6 +1267,7 @@ sub get_body_text_array_common {
 
   # Go through each part
   my $text = '';
+  my $cdisp;
   for (my $pt = 0 ; $pt <= $#parts ; $pt++ ) {
     my $p = $parts[$pt];
 
@@ -1276,6 +1277,14 @@ sub get_body_text_array_common {
     my($type, $rnd) = $p->$method_name();  # decode this part
     # Only text/* types are rendered ...
     if (defined $rnd) {
+      # Skip text attachments that are not considered part of the email body
+      $cdisp = $p->{'headers'}->{'content-disposition'}[0];
+      if(($method_name ne 'invisible_rendered') and (defined $cdisp and ($cdisp =~ /^attachment;/))) {
+        dbg("$method_name: Skipping text attachment with content-disposition \"$cdisp\"");
+        undef $cdisp;
+        next;
+      }
+      undef $cdisp;
       # Truncate to body_part_scan_size
       if ($scansize && length($rnd) > $scansize) {
         # Try truncating at boundary, nearest 1k block is fine
