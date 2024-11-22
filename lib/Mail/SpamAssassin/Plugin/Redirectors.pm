@@ -720,7 +720,7 @@ sub _check_redirector_uri {
   # on the www domain
   elsif($levels == 2 && $host =~ /^www\.([^.]+\.[^.]+)$/i) {
     my $domain = $1;
-    if(($host eq "www.$domain") and exists $conf->{url_redirector}->{$domain}) {
+    if(exists $conf->{url_redirector}->{$domain}) {
       dbg("Found internal www redirection for domain $domain");
       return {
         'uri' => $uri,
