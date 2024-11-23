@@ -482,7 +482,7 @@ FORGED_SPF_HELO
 # tflags net
 FORM_FRAUD
 
-# tflags publish
+# tflags net
 FORM_FRAUD_3
 
 # tflags publish
@@ -875,7 +875,7 @@ HTML_OFF_PAGE
 # tflags publish
 HTML_SHRT_CMNT_OBFU_MANY
 
-# tflags net
+# tflags publish
 HTML_SINGLET_MANY
 
 # good enough
@@ -1138,6 +1138,9 @@ PDS_FRNOM_TODOM_DBL_URL
 
 # good enough
 PDS_FRNOM_TODOM_NAKED_TO
+
+# tflags net
+PDS_FROM_2_EMAILS
 
 # good enough
 PDS_FROM_NAME_TO_DOMAIN
@@ -1613,7 +1616,7 @@ TARINGANET_IMG_NOT_RCVD_TN
 # tflags publish
 TEQF_USR_IMAGE
 
-# tflags net
+# tflags publish
 TEQF_USR_MSGID_HEX
 
 # tflags publish
@@ -1636,6 +1639,9 @@ TO_EQ_FM_DIRECT_MX
 
 # tflags net
 TO_EQ_FM_DOM_HTML_IMG
+
+# tflags net
+TO_EQ_FM_DOM_HTML_ONLY
 
 # tflags net
 TO_EQ_FM_DOM_SPF_FAIL
@@ -1676,6 +1682,12 @@ TO_TOO_MANY_WFH_01
 # tflags net
 TVD_SPACE_ENCODED
 
+# tflags net
+TVD_SPACE_RATIO_MINFP
+
+# tflags net
+TVD_SUBJ_NUM_OBFU_MINFP
+
 # tflags publish
 TW_GIBBERISH_MANY
 
@@ -1705,6 +1717,9 @@ UNPARSEABLE_RELAY
 
 # tflags publish
 UNSUB_GOOG_FORM
+
+# good enough
+UPPERCASE_URI
 
 # tflags net
 URIBL_ABUSE_SURBL
@@ -1907,7 +1922,7 @@ URI_WPADMIN
 # tflags publish
 URI_WP_DIRINDEX
 
-# tflags publish
+# tflags net
 URI_WP_HACKED
 
 # tflags publish
