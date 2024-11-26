@@ -118,3 +118,9 @@ if can(Mail::SpamAssassin::Conf::feature_capture_rules)
 
 endif
 endif
+
+header            __GB_ONMICROSOFT_RF         Resent-from =~ /\@.{2,32}\.onmicrosoft\.com/i
+header            __GB_FROM_MICROSOFT         From:addr =~ /\@microsoft\.com/
+meta              GB_FAKE_SIGNED_MICROSOFT    ( __GB_FROM_MICROSOFT && ( __GB_ONMICROSOFT_RF && !__AUTOREPLY_ASU ) && DKIM_VALID_AU )
+describe          GB_FAKE_SIGNED_MICROSOFT    Fake Microsoft signed emails
+score             GB_FAKE_SIGNED_MICROSOFT    2.500 # limit
