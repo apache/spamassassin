@@ -277,6 +277,7 @@ my $VERSION = 0.001;
 use File::Basename;
 
 use Mail::SpamAssassin::Logger;
+use Mail::SpamAssassin::Plugin;
 use Mail::SpamAssassin::Util qw (compile_regexp untaint_var untaint_file_path
   proc_status_ok exit_status_str);
 
