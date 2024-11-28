@@ -736,6 +736,9 @@ sub parsed_metadata {
     if (defined $v) {
       $pms->set_tag("ExtractText$tag", $v);
       dbg("extracttext: tag: $tag $v");
+      if($tag eq 'Uris') {
+        map { $pms->add_uri_detail_list($_) } split(/ /, $v);
+      }
     }
   }
   return 1;
