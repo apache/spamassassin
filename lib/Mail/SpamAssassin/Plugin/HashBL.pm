@@ -582,17 +582,14 @@ sub check_hashbl_emails {
       next;
     }
     my ($username, $domain) = ($email =~ /(.*)\@(.*)/);
-    # Don't check uridnsbl_skip_domains when explicit acl is used
-    if (!defined $acl) {
-      if (exists $conf->{uridnsbl_skip_domains}->{lc $domain}) {
-        dbg("query skipped, uridnsbl_skip_domains: $email");
-        next;
-      }
-      my $dom = $pms->{main}->{registryboundaries}->trim_domain($domain);
-      if (exists $conf->{uridnsbl_skip_domains}->{lc $dom}) {
-        dbg("query skipped, uridnsbl_skip_domains: $email");
-        next;
-      }
+    if (exists $conf->{uridnsbl_skip_domains}->{lc $domain}) {
+      dbg("query skipped, uridnsbl_skip_domains: $email");
+      next;
+    }
+    my $dom = $pms->{main}->{registryboundaries}->trim_domain($domain);
+    if (exists $conf->{uridnsbl_skip_domains}->{lc $dom}) {
+      dbg("query skipped, uridnsbl_skip_domains: $email");
+      next;
     }
     $username =~ tr/.//d if $opts->{nodot};
     $username =~ s/\+.*// if $opts->{notag};
