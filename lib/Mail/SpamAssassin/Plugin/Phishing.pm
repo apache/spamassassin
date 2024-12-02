@@ -137,7 +137,7 @@ Absolute path of the downloaded PhishTank datafeed.
 
 If this option is set uri parameters will not be take into consideration
 when parsing the phishing uris datafeed.
-If this option is enabled and the url without parameters is "generic"
+If this option is enabled and the url without parameters has no subdirectories
 (like https://www.kisa.link/url_redirector.php?url=...) the url will be
 skipped.
 
@@ -200,9 +200,11 @@ sub _read_configfile {
         #lines that start with pound are comments
         next if(/^\s*\#/);
         $stripped_cluri = $_;
-	if ( $conf->{phishing_uri_noparam} eq 1 ) {
+	my $dcnt = $stripped_cluri =~ tr/\///;
+	if ( ($conf->{phishing_uri_noparam} eq 1) && ($dcnt >= 3) && ($stripped_cluri =~ /\?/) ) {
           $stripped_cluri =~ s/\?.*//;
 	}
+	$stripped_cluri =~ s/\=$//;
         my $phishdomain = $self->{main}->{registryboundaries}->uri_to_domain($_);
         if ( defined $phishdomain ) {
           push @{$self->{PHISHING}->{$stripped_cluri}->{phishdomain}}, $phishdomain;
@@ -228,9 +230,11 @@ sub _read_configfile {
         @phtank_ln = split(/,/, $_);
         $phtank_ln[1] =~ s/\"//g;
         $stripped_cluri = $phtank_ln[1];
-	if ( $conf->{phishing_uri_noparam} eq 1 ) {
+	my $dcnt = $stripped_cluri =~ tr/\///;
+	if ( ($conf->{phishing_uri_noparam} eq 1) && ($dcnt >= 3) && ($stripped_cluri =~ /\?/) ) {
           $stripped_cluri =~ s/\?.*//;
 	}
+	$stripped_cluri =~ s/\=$//;
         my $phishdomain = $self->{main}->{registryboundaries}->uri_to_domain($phtank_ln[1]);
         if ( defined $phishdomain ) {
           push @{$self->{PHISHING}->{$stripped_cluri}->{phishdomain}}, $phishdomain;
@@ -262,9 +266,11 @@ sub _read_configfile {
 	  next;
 	}
         $stripped_cluri = $phstats_ln[2];
-	if ( $conf->{phishing_uri_noparam} eq 1 ) {
+	my $dcnt = $stripped_cluri =~ tr/\///;
+	if ( ($conf->{phishing_uri_noparam} eq 1) && ($dcnt >= 3) && ($stripped_cluri =~ /\?/) ) {
           $stripped_cluri =~ s/\?.*//;
 	}
+	$stripped_cluri =~ s/\=$//;
         my $phishdomain = $self->{main}->{registryboundaries}->uri_to_domain($phstats_ln[2]);
         if ( defined $phishdomain ) {
           push @{$self->{PHISHING}->{$stripped_cluri}->{phishdomain}}, $phishdomain;
@@ -298,27 +304,25 @@ sub check_phishing {
     next unless ($info->{hosts});
     if (($info->{types}->{a}) || ($info->{types}->{parsed})) {
       # check url
-      foreach my $cluri (@{$info->{cleaned}}) {
-        $stripped_cluri = $cluri;
-	if( $self->{main}->{conf}->{phishing_uri_noparam} eq 1 ) {
-          $stripped_cluri =~ s/\?.*//;
-          $dcnt = $stripped_cluri =~ tr/\///;
-	}
-	# If uri without parameters are considered, skip too short uris
-	# like https://www.google.com/url?sa=t&url=http://badsite.com
-        if( ($self->{main}->{conf}->{phishing_uri_noparam} eq 1) && ($dcnt <= 3) ) {
-          next;
-        }
-        if ( exists $self->{PHISHING}->{$stripped_cluri} ) {
-          $domain = $self->{main}->{registryboundaries}->uri_to_domain($cluri);
-          $feedname = $self->{PHISHING}->{$stripped_cluri}->{phishinfo}->{$domain}[0];
-          dbg("HIT! $domain [$stripped_cluri] found in $feedname feed");
-          $pms->test_log("$feedname ($domain)", $rulename);
-          return 1;
-        }
+      $stripped_cluri = $uri;
+      if( $self->{main}->{conf}->{phishing_uri_noparam} eq 1 ) {
+        $stripped_cluri =~ s/\?.*//;
+	$dcnt = $stripped_cluri =~ tr/\///;
+      }
+      # If uri without parameters are considered, skip too short uris
+      # like https://www.google.com/url?sa=t&url=http://badsite.com
+      if( ($self->{main}->{conf}->{phishing_uri_noparam} eq 1) && ($dcnt <= 3) && ($uri =~ /\?/) ) {
+        next;
+      }
+      if ( exists $self->{PHISHING}->{$stripped_cluri} ) {
+        $domain = $self->{main}->{registryboundaries}->uri_to_domain($uri);
+        $feedname = $self->{PHISHING}->{$stripped_cluri}->{phishinfo}->{$domain}[0];
+        dbg("HIT! $domain [$stripped_cluri] found in $feedname feed");
+        $pms->test_log("$feedname ($domain)", $rulename);
+        return 1;
       }
     }
-   }
+  }
   return 0;
 }
 

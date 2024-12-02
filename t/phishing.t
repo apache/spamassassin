@@ -4,10 +4,9 @@ use lib '.'; use lib 't';
 use SATest; sa_t_init("phishing");
 
 use Test::More;
-plan tests => 2;
+plan tests => 4;
 
-tstprefs("
-
+my $conf = <<'END';
   loadplugin Mail::SpamAssassin::Plugin::Phishing
 
   phishing_openphish_feed data/phishing/openphish-feed.txt
@@ -15,7 +14,10 @@ tstprefs("
 
   body     URI_PHISHING   eval:check_phishing()
   describe URI_PHISHING   Url match phishing in feed
+END
 
+tstprefs("
+	$conf
 ");
 
 %patterns_openphish = (
@@ -29,9 +31,19 @@ tstprefs("
 %patterns = %patterns_openphish;
 sarun ("-L -t < data/spam/phishing_openphish.eml", \&patterns_run_cb);
 ok_all_patterns();
-clear_pattern_counters();
 
 %patterns = %patterns_phishtank;
 sarun ("-L -t < data/spam/phishing_phishtank.eml", \&patterns_run_cb);
 ok_all_patterns();
 
+tstprefs(
+	$conf . "phishing_uri_noparam 1"
+);
+
+%patterns = %patterns_openphish;
+sarun ("-L -t < data/spam/phishing_openphish.eml", \&patterns_run_cb);
+ok_all_patterns();
+
+%patterns = %patterns_phishtank;
+sarun ("-L -t < data/spam/phishing_phishtank.eml", \&patterns_run_cb);
+ok_all_patterns();
