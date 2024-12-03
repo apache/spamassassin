@@ -733,6 +733,21 @@ sub _check_redirector_uri {
       };
     }
   }
+  elsif($levels == 3 && $host =~ /^www\.([^.]+\.[^.]+\.[^.]+)$/i) {
+    my $domain = $1;
+    if(exists $conf->{url_redirector}->{$domain}) {
+      dbg("Found internal www redirection for domain $domain");
+      return {
+        'uri' => $uri,
+        'method' => $conf->{url_redirector}->{$domain} == 1 ? 'head' : 'get',
+      };
+    } elsif ($newuri = _check_querystring($params, $conf)) {
+      return {
+        'uri' => $newuri,
+        'method' => 'head',
+      };
+    }
+  }
   # if domain is a 3rd level domain check if there is a url redirector
   # on the 2nd level tld
   elsif ($levels == 2 && $host =~ /^(?!www)[^.]+(\.[^.]+\.[^.]+)$/i &&
