@@ -293,7 +293,7 @@ CN_B2B_SPAMMER
 # tflags publish
 COMMENT_GIBBERISH
 
-# tflags net
+# good enough
 COMPENSATION
 
 # tflags publish
@@ -482,7 +482,7 @@ FORGED_SPF_HELO
 # tflags net
 FORM_FRAUD
 
-# tflags net
+# tflags publish
 FORM_FRAUD_3
 
 # tflags publish
@@ -563,7 +563,7 @@ FROM_MISSP_MSFT
 # good enough
 FROM_MISSP_PHISH
 
-# tflags net
+# good enough
 FROM_MISSP_REPLYTO
 
 # tflags net
@@ -734,9 +734,6 @@ GOOG_MALWARE_DNLD
 # tflags publish
 GOOG_REDIR_DOCUSIGN
 
-# good enough
-GOOG_REDIR_NORDNS
-
 # tflags publish
 GOOG_REDIR_SHORT
 
@@ -767,7 +764,7 @@ HAS_X_NO_RELAY
 # tflags publish
 HAS_X_OUTGOING_SPAM_STAT
 
-# tflags net
+# good enough
 HDRS_LCASE
 
 # tflags publish
@@ -897,9 +894,6 @@ JH_SPAMMY_PATTERN01
 JH_SPAMMY_PATTERN02
 
 # tflags net
-KHOP_FAKE_EBAY
-
-# tflags net
 KHOP_HELO_FCRDNS
 
 # tflags publish
@@ -949,9 +943,6 @@ MALWARE_PASSWORD
 
 # tflags publish
 MALW_ATTACH
-
-# tflags net
-MANY_HDRS_LCASE
 
 # tflags publish
 MANY_SPAN_IN_TEXT
@@ -1126,6 +1117,9 @@ PDS_FRNOM_TODOM_DBL_URL
 
 # good enough
 PDS_FRNOM_TODOM_NAKED_TO
+
+# tflags net
+PDS_FROM_2_EMAILS
 
 # good enough
 PDS_FROM_NAME_TO_DOMAIN
@@ -1565,14 +1559,8 @@ SUBJECT_IN_BLOCKLIST
 # tflags userconf
 SUBJECT_IN_WELCOMELIST
 
-# good enough
-SUBJ_ATTENTION
-
 # tflags net
 SUBJ_BRKN_WORDNUMS
-
-# tflags net
-SUBJ_UNNEEDED_HTML
 
 # tflags net
 SURBL_BLOCKED
@@ -1598,14 +1586,11 @@ TARINGANET_IMG_NOT_RCVD_TN
 # tflags net
 TEQF_USR_IMAGE
 
-# tflags publish
+# tflags net
 TEQF_USR_MSGID_HEX
 
 # tflags publish
 TEQF_USR_MSGID_MALF
-
-# good enough
-TEQF_USR_POLITE
 
 # tflags publish
 THIS_AD
@@ -1649,7 +1634,7 @@ TO_NO_BRKTS_HTML_IMG
 # tflags publish
 TO_NO_BRKTS_HTML_ONLY
 
-# tflags net
+# good enough
 TO_NO_BRKTS_MSFT
 
 # tflags publish
@@ -1661,10 +1646,13 @@ TO_NO_BRKTS_PCNT
 # tflags publish
 TO_TOO_MANY_WFH_01
 
+# good enough
+TVD_RCVD_SPACE_BRACKET
+
 # tflags net
 TVD_SPACE_ENCODED
 
-# tflags net
+# good enough
 TVD_SPACE_RATIO_MINFP
 
 # tflags net
@@ -1901,10 +1889,10 @@ URI_WPADMIN
 # tflags publish
 URI_WP_DIRINDEX
 
-# tflags net
+# tflags publish
 URI_WP_HACKED
 
-# tflags net
+# tflags publish
 URI_WP_HACKED_2
 
 # tflags publish
