@@ -31,6 +31,9 @@ Redirectors - Check for redirected URLs
   body REDIR_URL_CHAINED      eval:redir_url_chained()
   describe REDIR_URL_CHAINED  Message has redirected URL chained to other redirectors
 
+  body REDIR_URL_CHAINED_DOM      eval:redir_url_chained_domain()
+  describe REDIR_URL_CHAINED_DOM  Message has redirected URL chained to another redirector on the same domain
+
   body REDIR_URL_MAXCHAIN     eval:redir_url_maxchain()
   describe REDIR_URL_MAXCHAIN Message has redirected URL that causes too many redirections
 
@@ -107,6 +110,7 @@ sub new {
   $self->register_eval_rule('redir_url_404', $Mail::SpamAssassin::Conf::TYPE_BODY_EVALS);
   $self->register_eval_rule('redir_url_code', $Mail::SpamAssassin::Conf::TYPE_BODY_EVALS);
   $self->register_eval_rule('redir_url_chained', $Mail::SpamAssassin::Conf::TYPE_BODY_EVALS);
+  $self->register_eval_rule('redir_url_chained_domain', $Mail::SpamAssassin::Conf::TYPE_BODY_EVALS);
   $self->register_eval_rule('redir_url_maxchain', $Mail::SpamAssassin::Conf::TYPE_BODY_EVALS);
   $self->register_eval_rule('redir_url_loop', $Mail::SpamAssassin::Conf::TYPE_BODY_EVALS);
 
@@ -660,6 +664,15 @@ sub redir_url_chained {
   return $pms->{redir_url_chained} ? 1 : 0;
 }
 
+sub redir_url_chained_domain {
+  my ($self, $pms) = @_;
+
+  # Make sure checks are run
+  $self->_check_redir($pms);
+
+  return $pms->{redir_url_chained_domain} ? 1 : 0;
+}
+
 sub redir_url_maxchain {
   my ($self, $pms) = @_;
 
@@ -948,12 +961,18 @@ sub recursive_lookup {
     dbg("looks like a redirection to a relative URI: $orig_redir_url => $location ($orig_location)");
   }
 
+  my $domain = $self->{main}->{registryboundaries}->uri_to_domain($location);
+  if (exists $been_here{$domain}) {
+    dbg("Chained redirector that uses the same domain found: $domain");
+    $pms->{redir_url_chained_domain} = 1;
+  }
   if (exists $been_here{$location}) {
     # Loop detected
     dbg("error: loop detected: $location");
     $pms->{redir_url_loop} = 1;
     return;
   }
+  $been_here{$domain} = 1;
   $been_here{$location} = 1;
   $pms->add_uri_detail_list($location) if !$pms->{uri_detail_list}->{$location};
 
