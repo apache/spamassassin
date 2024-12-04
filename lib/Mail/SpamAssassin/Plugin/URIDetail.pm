@@ -209,12 +209,16 @@ sub check_uri_detail {
     }
 
     if (exists $rule->{type}) {
-      next unless $info->{types};
       my($op,$patt,$neg) = @{$rule->{type}};
       my $match;
-      for my $text (keys %{ $info->{types} }) {
-        if ( ($op eq '=~' && $text =~ $patt) ||
-             ($op eq '!~' && $text !~ $patt) ) { $match = $text; last }
+      if ( $info->{types} ) {
+        for my $text (keys %{$info->{types}}) {
+          if (($op eq '=~' && $text =~ $patt) ||
+              ($op eq '!~' && $text !~ $patt)) {
+            $match = $text;
+            last
+          }
+        }
       }
       if ( $neg ) {
         next if defined $match;
@@ -226,12 +230,16 @@ sub check_uri_detail {
     }
 
     if (exists $rule->{cleaned}) {
-      next unless $info->{cleaned};
       my($op,$patt,$neg) = @{$rule->{cleaned}};
       my $match;
-      for my $text (@{ $info->{cleaned} }) {
-        if ( ($op eq '=~' && $text =~ $patt) ||
-             ($op eq '!~' && $text !~ $patt) ) { $match = $text; last }
+      if ( $info->{cleaned} ) {
+        for my $text (@{$info->{cleaned}}) {
+          if (($op eq '=~' && $text =~ $patt) ||
+              ($op eq '!~' && $text !~ $patt)) {
+            $match = $text;
+            last
+          }
+        }
       }
       if ( $neg ) {
         next if defined $match;
@@ -243,12 +251,16 @@ sub check_uri_detail {
     }
 
     if (exists $rule->{text}) {
-      next unless $info->{anchor_text};
       my($op,$patt,$neg) = @{$rule->{text}};
       my $match;
-      for my $text (@{ $info->{anchor_text} }) {
-        if ( ($op eq '=~' && $text =~ $patt) ||
-             ($op eq '!~' && $text !~ $patt) ) { $match = $text; last }
+      if ( $info->{anchor_text} ) {
+        for my $text (@{$info->{anchor_text}}) {
+          if (($op eq '=~' && $text =~ $patt) ||
+              ($op eq '!~' && $text !~ $patt)) {
+            $match = $text;
+            last
+          }
+        }
       }
       if ( $neg ) {
         next if defined $match;
@@ -260,12 +272,13 @@ sub check_uri_detail {
     }
 
     if (exists $rule->{domain}) {
-      next unless $info->{domains};
       my($op,$patt,$neg) = @{$rule->{domain}};
       my $match;
-      for my $text (keys %{ $info->{domains} }) {
-        if ( ($op eq '=~' && $text =~ $patt) ||
-             ($op eq '!~' && $text !~ $patt) ) { $match = $text; last }
+      if ( $info->{domains} ) {
+        for my $text (keys %{ $info->{domains} }) {
+          if ( ($op eq '=~' && $text =~ $patt) ||
+              ($op eq '!~' && $text !~ $patt) ) { $match = $text; last }
+        }
       }
       if ( $neg ) {
         next if defined $match;
@@ -277,12 +290,16 @@ sub check_uri_detail {
     }
 
     if (exists $rule->{host}) {
-      next unless $info->{hosts};
       my($op,$patt,$neg) = @{$rule->{host}};
       my $match;
-      for my $text (keys %{ $info->{hosts} }) {
-        if ( ($op eq '=~' && $text =~ $patt) ||
-             ($op eq '!~' && $text !~ $patt) ) { $match = $text; last }
+      if ( $info->{hosts} ) {
+        for my $text (keys %{$info->{hosts}}) {
+          if (($op eq '=~' && $text =~ $patt) ||
+              ($op eq '!~' && $text !~ $patt)) {
+            $match = $text;
+            last
+          }
+        }
       }
       if ( $neg ) {
         next if defined $match;
