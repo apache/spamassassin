@@ -1027,4 +1027,13 @@ sub cache_get {
   return;
 }
 
+# Version features
+sub has_redir_url { 1 }
+sub has_redir_url_redir { 1 }
+sub has_redir_url_404 { 1 }
+sub has_redir_url_chained { 1 }
+sub has_redir_url_chained_domain { 1 }
+sub has_redir_url_maxchain { 1 }
+sub has_redir_url_loop { 1 }
+
 1;
