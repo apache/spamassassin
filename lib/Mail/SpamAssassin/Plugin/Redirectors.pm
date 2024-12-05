@@ -961,9 +961,9 @@ sub recursive_lookup {
     dbg("looks like a redirection to a relative URI: $orig_redir_url => $location ($orig_location)");
   }
 
-  my $domain = $self->{main}->{registryboundaries}->uri_to_domain($location);
-  if (exists $been_here{$domain}) {
-    dbg("Chained redirector that uses the same domain found: $domain");
+  my ($domain, $host) = $self->{main}->{registryboundaries}->uri_to_domain($location);
+  if (exists $been_here{$host}) {
+    dbg("Chained redirector that uses the same hostname $host found for location $location");
     $pms->{redir_url_chained_domain} = 1;
   }
   if (exists $been_here{$location}) {
@@ -972,7 +972,7 @@ sub recursive_lookup {
     $pms->{redir_url_loop} = 1;
     return;
   }
-  $been_here{$domain} = 1;
+  $been_here{$host} = 1;
   $been_here{$location} = 1;
   $pms->add_uri_detail_list($location) if !$pms->{uri_detail_list}->{$location};
 
