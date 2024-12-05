@@ -913,6 +913,11 @@ sub recursive_lookup {
       my $rcode = $response->code;
       if ($rcode =~ /^\d{3}$/) {
         $pms->{"redir_url_$rcode"} = 1;
+        if($rcode eq 500) {
+	  if($response->headers->{'client-warning'} eq 'Internal response') {
+	    dbg("Connection timeout checking $redir_url");
+	  }
+        }
         # Update cache
         $self->cache_add($redir_url, $rcode);
         $pms->add_uri_detail_list($redir_url) if !$pms->{uri_detail_list}->{$redir_url};
