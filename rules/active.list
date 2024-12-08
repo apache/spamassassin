@@ -188,7 +188,7 @@ BITCOIN_EXTORT_02
 # tflags publish
 BITCOIN_IMGUR
 
-# tflags net
+# tflags publish
 BITCOIN_MALWARE
 
 # tflags publish
@@ -563,7 +563,7 @@ FROM_MISSP_MSFT
 # good enough
 FROM_MISSP_PHISH
 
-# tflags net
+# good enough
 FROM_MISSP_REPLYTO
 
 # tflags net
@@ -953,9 +953,6 @@ MANY_SPAN_IN_TEXT
 # good enough
 MANY_SUBDOM
 
-# tflags net
-MAY_BE_FORGED
-
 # tflags publish
 MILLION_HUNDRED
 
@@ -1120,9 +1117,6 @@ PDS_FRNOM_TODOM_DBL_URL
 
 # good enough
 PDS_FRNOM_TODOM_NAKED_TO
-
-# tflags net
-PDS_FROM_2_EMAILS
 
 # good enough
 PDS_FROM_NAME_TO_DOMAIN
@@ -1572,9 +1566,6 @@ SUBJECT_IN_WELCOMELIST
 SUBJ_BRKN_WORDNUMS
 
 # tflags net
-SUBJ_UNNEEDED_HTML
-
-# tflags net
 SURBL_BLOCKED
 
 # good enough
@@ -1623,13 +1614,7 @@ TO_EQ_FM_DIRECT_MX
 TO_EQ_FM_DOM_HTML_IMG
 
 # tflags net
-TO_EQ_FM_DOM_HTML_ONLY
-
-# tflags net
 TO_EQ_FM_DOM_SPF_FAIL
-
-# tflags net
-TO_EQ_FM_HTML_ONLY
 
 # tflags net
 TO_EQ_FM_SPF_FAIL
@@ -1669,6 +1654,9 @@ TVD_SPACE_ENCODED
 
 # good enough
 TVD_SPACE_RATIO_MINFP
+
+# tflags net
+TVD_SUBJ_NUM_OBFU_MINFP
 
 # tflags publish
 TW_GIBBERISH_MANY
@@ -1901,7 +1889,7 @@ URI_WPADMIN
 # tflags publish
 URI_WP_DIRINDEX
 
-# tflags net
+# tflags publish
 URI_WP_HACKED
 
 # tflags publish
