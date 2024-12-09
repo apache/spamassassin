@@ -112,7 +112,7 @@ This plugin helps detected spam using attached PDF files
 
   pdf_match_fuzzy_md5()
 
-     body RULENAME  eval:pdf_match_md5(<string>)
+     body RULENAME  eval:pdf_match_fuzzy_md5(<string>)
         string: 32-byte md5 hex - see ruleset for obtaining the fuzzy md5
 
   pdf_match_details()
