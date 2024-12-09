@@ -89,6 +89,12 @@ This plugin helps detected spam using attached PDF files
         min: required, message contains at least x images in pdf attachments.
         max: optional, if specified, must not contain more than x pdf images
 
+  pdf_uri_count()
+
+     body RULENAME  eval:pdf_uri_count(<min>,[max])
+        min: required, message contains at least x uris in pdf attachments.
+        max: optional, if specified, must not contain more than x pdf uris
+
   pdf_pixel_coverage()
 
      body RULENAME  eval:pdf_pixel_coverage(<min>,[max])
@@ -183,6 +189,7 @@ sub new {
 
   $self->register_eval_rule ("pdf_count", $Mail::SpamAssassin::Conf::TYPE_BODY_EVALS);
   $self->register_eval_rule ("pdf_image_count", $Mail::SpamAssassin::Conf::TYPE_BODY_EVALS);
+  $self->register_eval_rule ("pdf_uri_count", $Mail::SpamAssassin::Conf::TYPE_BODY_EVALS);
   $self->register_eval_rule ("pdf_pixel_coverage", $Mail::SpamAssassin::Conf::TYPE_BODY_EVALS);
   $self->register_eval_rule ("pdf_image_size_exact", $Mail::SpamAssassin::Conf::TYPE_BODY_EVALS);
   $self->register_eval_rule ("pdf_image_size_range", $Mail::SpamAssassin::Conf::TYPE_BODY_EVALS);
@@ -209,6 +216,7 @@ sub parsed_metadata {
   # initialize
   $pms->{pdfinfo}->{count_pdf} = 0;
   $pms->{pdfinfo}->{count_pdf_images} = 0;
+  $pms->{pdfinfo}->{count_pdf_uris} = 0;
 
   my @parts = $pms->{msg}->find_parts(qr@^(image|application)/(pdf|octet\-stream)$@, 1);
   my $part_count = scalar @parts;
@@ -232,6 +240,7 @@ sub parsed_metadata {
 
   _set_tag($pms, 'PDFCOUNT',  $pms->{pdfinfo}->{count_pdf});
   _set_tag($pms, 'PDFIMGCOUNT', $pms->{pdfinfo}->{count_pdf_images});
+  _set_tag($pms, 'PDFURICOUNT', $pms->{pdfinfo}->{count_pdf_uris});
 }
 
 sub _get_pdf_details {
@@ -345,6 +354,7 @@ sub _get_pdf_details {
       if (!exists $uris{$location}) {
         $uris{$location} = 1;
         dbg("pdfinfo: found URI: $location");
+        $pms->{pdfinfo}->{count_pdf_uris}++;
         $pms->add_uri_detail_list($location);
       }
     }
@@ -516,6 +526,12 @@ sub pdf_image_count {
   my ($self, $pms, $body, $min, $max) = @_;
 
   return _result_check($min, $max, $pms->{pdfinfo}->{count_pdf_images});
+}
+
+sub pdf_uri_count {
+  my ($self, $pms, $body, $min, $max) = @_;
+
+  return _result_check($min, $max, $pms->{pdfinfo}->{count_pdf_uris});
 }
 
 sub pdf_pixel_coverage {
