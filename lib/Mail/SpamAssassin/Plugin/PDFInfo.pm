@@ -655,4 +655,20 @@ sub _result_check {
   return 1;
 }
 
+# Version features
+sub has_pdf_named { 1 }
+sub has_pdf_name_regex { 1 }
+sub has_pdf_is_encrypted { 1 }
+sub has_pdf_count { 1 }
+sub has_pdf_image_count { 1 }
+sub has_pdf_uri_count { 1 }
+sub has_pdf_pixel_coverage { 1 }
+sub has_pdf_image_to_text_ratio { 1 }
+sub has_pdf_is_empty_body { 1 }
+sub has_pdf_image_size_exact { 1 }
+sub has_pdf_image_size_range { 1 }
+sub has_pdf_match_md5 { 1 }
+sub has_pdf_match_fuzzy_md5 { 1 }
+sub has_pdf_match_details { 1 }
+
 1;
