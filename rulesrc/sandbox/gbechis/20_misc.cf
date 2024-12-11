@@ -124,3 +124,7 @@ header            __GB_FROM_MICROSOFT         From:addr =~ /\@microsoft\.com/
 meta              GB_FAKE_SIGNED_MICROSOFT    ( __GB_FROM_MICROSOFT && ( __GB_ONMICROSOFT_RF && !__AUTOREPLY_ASU ) && DKIM_VALID_AU )
 describe          GB_FAKE_SIGNED_MICROSOFT    Fake Microsoft signed emails
 score             GB_FAKE_SIGNED_MICROSOFT    2.500 # limit
+
+uri               GB_GOOGLE_AMP               /https?:\/\/(?:www\.)?google\..{2,6}\/amp\/.{3,128}/i
+describe          GB_GOOGLE_AMP               Google Amp abused service
+score             GB_GOOGLE_AMP               0.5 # limit
