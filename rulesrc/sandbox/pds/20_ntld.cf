@@ -27,6 +27,7 @@ enlist_addrlist (SUSP_NTLD) *@*.buzz
 enlist_addrlist (SUSP_NTLD) *@*.trade
 enlist_addrlist (SUSP_NTLD) *@*.cyou
 enlist_addrlist (SUSP_NTLD) *@*.vip
+enlist_addrlist (SUSP_NTLD) *@*.xyz
 
 enlist_uri_host (SUSP_URI_NTLD) icu
 enlist_uri_host (SUSP_URI_NTLD) online
@@ -48,6 +49,7 @@ enlist_uri_host (SUSP_URI_NTLD) buzz
 enlist_uri_host (SUSP_URI_NTLD) trade
 enlist_uri_host (SUSP_URI_NTLD) cyou
 enlist_uri_host (SUSP_URI_NTLD) vip
+enlist_uri_host (SUSP_URI_NTLD) xyz
 
 enlist_uri_host (SUSP_URI_NTLD_PRO) pro
 header   PDS_PRO_TLD eval:check_uri_host_listed('SUSP_URI_NTLD_PRO')
@@ -92,7 +94,7 @@ score    GOOGLE_DRIVE_REPLY_BAD_NTLD 1.0 # limit
 reuse    GOOGLE_DRIVE_REPLY_BAD_NTLD
 
 body     __PDS_SEO1 /(?:top|first page|1st) (?:(?:results|rank(?:ing)?) )?(?:in|of|on) (?:Google|MSN|Yahoo|Bing)|rank number one|top page rank|guarantee you 1st|link.building/i
-body     __PDS_SEO2 /losing your (?:[a-z]+ )?(?:rank(?:ing)?|results)|rank well on [a-z]+\b/i
+body     __PDS_SEO2 /(?:losing your|your website) (?:[a-z]+ )?(?:rank(?:ing)?|results)|rank well on [a-z]+\b/i
 
 meta     SEO_SUSP_NTLD __FROM_ADDRLIST_SUSPNTLD && (__PDS_SEO1 + __PDS_SEO2 >= 1)
 tflags   SEO_SUSP_NTLD publish
