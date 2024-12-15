@@ -290,7 +290,7 @@ CN_B2B_SPAMMER
 # tflags publish
 COMMENT_GIBBERISH
 
-# good enough
+# tflags net
 COMPENSATION
 
 # tflags publish
@@ -479,7 +479,7 @@ FORGED_SPF_HELO
 # tflags net
 FORM_FRAUD
 
-# tflags publish
+# tflags net
 FORM_FRAUD_3
 
 # tflags publish
@@ -694,6 +694,9 @@ GB_CUSTOM_HTM_URI
 
 # tflags publish
 GB_FAKE_RF_SHORT
+
+# tflags net
+GB_FAKE_SIGNED_MICROSOFT
 
 # tflags publish
 GB_FORGED_MUA_POSTFIX
@@ -943,6 +946,9 @@ MANY_SPAN_IN_TEXT
 
 # good enough
 MANY_SUBDOM
+
+# tflags net
+MAY_BE_FORGED
 
 # tflags publish
 MILLION_HUNDRED
@@ -1239,6 +1245,9 @@ RCVD_IN_DNSWL_MED
 RCVD_IN_DNSWL_NONE
 
 # tflags net
+RCVD_IN_IADB_COURT
+
+# tflags net
 RCVD_IN_IADB_DK
 
 # tflags net
@@ -1264,6 +1273,9 @@ RCVD_IN_IADB_ESP
 
 # tflags net
 RCVD_IN_IADB_GOODMAIL
+
+# tflags net
+RCVD_IN_IADB_LEG_MAND
 
 # tflags net
 RCVD_IN_IADB_LISTED
@@ -1315,6 +1327,9 @@ RCVD_IN_IADB_UNVERIFIED_1
 
 # tflags net
 RCVD_IN_IADB_UNVERIFIED_2
+
+# tflags net
+RCVD_IN_IADB_URG
 
 # tflags net
 RCVD_IN_IADB_UT_CPEAR
@@ -1607,10 +1622,10 @@ TAGSTAT_IMG_NOT_RCVD_TGST
 # tflags publish
 TARINGANET_IMG_NOT_RCVD_TN
 
-# tflags publish
+# tflags net
 TEQF_USR_IMAGE
 
-# tflags publish
+# tflags net
 TEQF_USR_MSGID_HEX
 
 # tflags publish
@@ -1632,6 +1647,9 @@ TO_EQ_FM_DIRECT_MX
 TO_EQ_FM_DOM_HTML_IMG
 
 # tflags net
+TO_EQ_FM_DOM_HTML_ONLY
+
+# tflags net
 TO_EQ_FM_DOM_SPF_FAIL
 
 # tflags net
@@ -1649,7 +1667,7 @@ TO_NO_BRKTS_HTML_IMG
 # tflags publish
 TO_NO_BRKTS_HTML_ONLY
 
-# good enough
+# tflags net
 TO_NO_BRKTS_MSFT
 
 # tflags publish
@@ -1669,9 +1687,6 @@ TVD_SPACE_ENCODED
 
 # tflags net
 TVD_SPACE_RATIO_MINFP
-
-# tflags net
-TVD_SUBJ_NUM_OBFU_MINFP
 
 # tflags publish
 TW_GIBBERISH_MANY
@@ -1877,7 +1892,7 @@ URI_MALWARE_SCMS
 # tflags userconf
 URI_NOVOWEL
 
-# tflags publish
+# tflags net
 URI_ONLY_MSGID_MALF
 
 # tflags publish
@@ -1904,10 +1919,10 @@ URI_WPADMIN
 # tflags publish
 URI_WP_DIRINDEX
 
-# tflags publish
+# tflags net
 URI_WP_HACKED
 
-# tflags publish
+# tflags net
 URI_WP_HACKED_2
 
 # tflags publish
