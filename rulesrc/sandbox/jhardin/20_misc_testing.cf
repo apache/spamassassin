@@ -1596,6 +1596,7 @@ tflags      FOUND_YOU          publish
 body        __ADMITS_SPAM     /\bth(?:e[- ]+above|is)(?:\?+s|[- ]+is)[- ]+(?:intended[- ]+as[- ]+)?an?[- ]+(?:e-?mail[- ]+)?[a@]dvert[i1l]sement\b/i
 meta        ADMITS_SPAM       __ADMITS_SPAM && !__FROM_LOWER && !__MSGID_JAVAMAIL && !__HAS_CAMPAIGNID && !__STY_INVIS_2 && !__LYRIS_EZLM_REMAILER && !__RCD_RDNS_OB 
 describe    ADMITS_SPAM       Admits this is an ad
+score       ADMITS_SPAM       2.000	# limit
 tflags      ADMITS_SPAM       publish
 
 #body        __OBFU_ADVERT     /\badvert[1l]sement\b/i
