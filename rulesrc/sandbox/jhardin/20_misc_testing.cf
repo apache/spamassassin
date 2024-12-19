@@ -4006,6 +4006,15 @@ uri        GOOG_REDIR_DOCUSIGN         m;://www\.google\.com/url\?.*q=https?://w
 describe   GOOG_REDIR_DOCUSIGN         Indirect docusign link, probable phishing
 tflags     GOOG_REDIR_DOCUSIGN         publish
 
+header     __FROM_NAME_DOCUSIGN        From:name =~ /\bDocuSign\b/
+body       __BODY_DOCUSIGN             /\bDocuSign\b/
+
+meta       __DOCUSIGN_GLITCHME         __URI_GLITCHME && (__FROM_NAME_DOCUSIGN || __BODY_DOCUSIGN)
+meta       DOCUSIGN_GLITCHME           __DOCUSIGN_GLITCHME
+describe   DOCUSIGN_GLITCHME           DocuSign with a glitch.me URI, probable phishing
+score      DOCUSIGN_GLITCHME           2.500	# limit
+tflags     DOCUSIGN_GLITCHME           publish
+
 header     __LUNSUB_BEFORE_SUBJDT      ALL =~ /^List-unsubscribe: (?:[^\n]+\n+){1,40}^(?:Subject|Date): /ism
 header     __LUNSUB_BRKT_MALF          List-Unsubscribe =~ /<[^>]*$/
 
@@ -4278,6 +4287,11 @@ describe    URI_IPFS                   References Interplanetary File System PtP
 score       URI_IPFS                   3.500	#limit
 tflags      URI_IPFS                   publish
 
+uri         __URI_GLITCHME             m;//[^.]{50,}\.glitch\.me/;i
+meta        URI_GLITCHME               __URI_GLITCHME
+describe    URI_GLITCHME               References glitch.me content, possible phishing
+score       URI_GLITCHME               1.500	#limit
+tflags      URI_GLITCHME               publish
 
 uri         __URI_GOOGDRAWPREVIEW      m,://docs\.google\.com/drawings/d/[^/]*/preview,i
 meta        URI_GOOGDRAWPREVIEW_MINFP  __URI_GOOGDRAWPREVIEW && (__SUBSCRIPTION_INFO || __HTML_TAG_BALANCE_CENTER || __TO_NO_BRKTS_HTML_ONLY) && !__RCD_RDNS_SMTP && !__TVD_SPACE_RATIO
