@@ -1,11 +1,11 @@
 
-uri-detail    MXG_EMAIL_FRAG  raw =~ /^http.*\#[a-zA-Z0-9](?:[a-zA-Z0-9\+\_\=\.\-]*[a-zA-Z0-9])?@(?:[a-z0-9_](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z0-9][a-z0-9-]{0,61}[a-z0-9]/i domain !~ /^typeform\.com$/
-score         MXG_EMAIL_FRAG  0.1
-describe      MXG_EMAIL_FRAG  URI with email in fragment
+# uri-detail    MXG_EMAIL_FRAG  raw =~ /^http.*\#[a-zA-Z0-9](?:[a-zA-Z0-9\+\_\=\.\-]*[a-zA-Z0-9])?@(?:[a-z0-9_](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z0-9][a-z0-9-]{0,61}[a-z0-9]/i domain !~ /^typeform\.com$/
+# score         MXG_EMAIL_FRAG  0.1
+# describe      MXG_EMAIL_FRAG  URI with email in fragment
 
-uri-detail    MXG_BING_REDIR_SUSP  raw =~ /^https?:\/\/(www\.)?bing\.com(:443)?\/ck\//i text =~ /\b(cache|documents?|messages?|now|password|preview|refill|refuel|review|update|verify|view)\b/i
-score         MXG_BING_REDIR_SUSP  0.1
-describe      MXG_BING_REDIR_SUSP  Suspicious Bing redirect
+# uri-detail    MXG_BING_REDIR_SUSP  raw =~ /^https?:\/\/(www\.)?bing\.com(:443)?\/ck\//i text =~ /\b(cache|documents?|messages?|now|password|preview|refill|refuel|review|update|verify|view)\b/i
+# score         MXG_BING_REDIR_SUSP  0.1
+# describe      MXG_BING_REDIR_SUSP  Suspicious Bing redirect
 
 header        __MXG_SPOOFED_DOCUSIGN01  From:name =~ /docusign/i
 header        __MXG_SPOOFED_DOCUSIGN02  Received =~ /\bdocusign\.(com|net)\s/i
@@ -41,15 +41,15 @@ meta          __MXG_PHONE_OBFU  __MXG_PHONE_OBFU01 && !__MXG_HAS_PHONE
 score         __MXG_PHONE_OBFU  0.1
 describe      __MXG_PHONE_OBFU  Attempt to obfuscate a phone number
 
-meta          MXG_LOWER_HDR_SPAM  (FREEMAIL_FROM || (__FROM_RUNON && __MXG_UNSUB_LINK)) && __MXG_LOWER_HDR
-score         MXG_LOWER_HDR_SPAM  0.1
-describe      MXG_LOWER_HDR_SPAM  Lower case header spam
+# meta          MXG_LOWER_HDR_SPAM  (FREEMAIL_FROM || (__FROM_RUNON && __MXG_UNSUB_LINK)) && __MXG_LOWER_HDR
+# score         MXG_LOWER_HDR_SPAM  0.1
+# describe      MXG_LOWER_HDR_SPAM  Lower case header spam
 
-uri-detail    __MXG_UNSUB_LINK01  text =~ /unsubscribe|opt[\s-]out/i
-uri           __MXG_UNSUB_LINK02  /\b(?:unsub|opt(?:ing)?.?out)\b/i
-rawbody       __MXG_UNSUB_LINK03  /click here<\/a> to unsubscribe/i
-meta          __MXG_UNSUB_LINK  __MXG_UNSUB_LINK01 || __MXG_UNSUB_LINK02 || __MXG_UNSUB_LINK03
-describe      __MXG_UNSUB_LINK  Contains an unsubscribe link
+# uri-detail    __MXG_UNSUB_LINK01  text =~ /unsubscribe|opt[\s-]out/i
+# uri           __MXG_UNSUB_LINK02  /\b(?:unsub|opt(?:ing)?.?out)\b/i
+# rawbody       __MXG_UNSUB_LINK03  /click here<\/a> to unsubscribe/i
+# meta          __MXG_UNSUB_LINK  __MXG_UNSUB_LINK01 || __MXG_UNSUB_LINK02 || __MXG_UNSUB_LINK03
+# describe      __MXG_UNSUB_LINK  Contains an unsubscribe link
 
 header        __MXG_LOWER_HDR  ALL:raw =~ /^(from|to|subject):\s/m
 score         __MXG_LOWER_HDR  0.1
