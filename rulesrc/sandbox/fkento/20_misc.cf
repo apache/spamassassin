@@ -13,11 +13,6 @@ meta          MXG_SPOOFED_DOCUSIGN  __MXG_SPOOFED_DOCUSIGN01 && !__MXG_SPOOFED_D
 score         MXG_SPOOFED_DOCUSIGN  0.1
 describe      MXG_SPOOFED_DOCUSIGN  Docusign spoofing
 
-uri           __MXG_GOOGLE_FOREIGN_REDIR01  /https?:\/\/(www\.)?google\.(com?\.)?\w\w(?<!ca|uk|za|%{MXG_FROM_TLD})\/(url|amp)/i
-meta          MXG_GOOGLE_FOREIGN_REDIR  __MXG_GOOGLE_FOREIGN_REDIR01 && !__MXG_NOT_ENGLISH
-score         MXG_GOOGLE_FOREIGN_REDIR  0.1
-describe      MXG_GOOGLE_FOREIGN_REDIR  Foreign Google redirect
-
 header        __MXG_NOT_ENGLISH  X-Languages =~ /^(?!en)\w+/
 score         __MXG_NOT_ENGLISH  0.1
 describe      __MXG_NOT_ENGLISH  Not English
@@ -38,16 +33,16 @@ body         __MXG_HAS_PHONE03  /\b0?(?:\d{1}\)? \d{4} \d{4}|\d{3} \d{3} \d{3})\
 uri           __MXG_HAS_PHONE04  /tel:/
 body         __MXG_HAS_PHONE05  /\+1([\W_]*[0-9]){10}(?![\W_]*[0-9])/
 meta          __MXG_HAS_PHONE  __MXG_HAS_PHONE01 || __MXG_HAS_PHONE02 || __MXG_HAS_PHONE03 || __MXG_HAS_PHONE04 || __MXG_HAS_PHONE05
-score         __MXG_HAS_PHONE  0.001
+score         __MXG_HAS_PHONE  0.1
 describe      __MXG_HAS_PHONE  Has a phone number
 
-body         __T_MXG_PHONE_OBFU01  /\b[1I]?[\dOIl]{3}[^a-zA-Z0-9]+[\dOIl]{3}[^a-zA-Z0-9]+[\dOIl]{4}\b/
-meta          T_MXG_PHONE_OBFU  __T_MXG_PHONE_OBFU01 && !__MXG_HAS_PHONE
-score         T_MXG_PHONE_OBFU  0.001
-describe      T_MXG_PHONE_OBFU  Attempt to obfuscate a phone number
+body         __MXG_PHONE_OBFU01  /\b[1I]?[\dOIl]{3}[^a-zA-Z0-9]+[\dOIl]{3}[^a-zA-Z0-9]+[\dOIl]{4}\b/
+meta          __MXG_PHONE_OBFU  __MXG_PHONE_OBFU01 && !__MXG_HAS_PHONE
+score         __MXG_PHONE_OBFU  0.1
+describe      __MXG_PHONE_OBFU  Attempt to obfuscate a phone number
 
 meta          MXG_LOWER_HDR_SPAM  (FREEMAIL_FROM || (__FROM_RUNON && __MXG_UNSUB_LINK)) && __MXG_LOWER_HDR
-score         MXG_LOWER_HDR_SPAM  0.001
+score         MXG_LOWER_HDR_SPAM  0.1
 describe      MXG_LOWER_HDR_SPAM  Lower case header spam
 
 uri-detail    __MXG_UNSUB_LINK01  text =~ /unsubscribe|opt[\s-]out/i
@@ -57,5 +52,5 @@ meta          __MXG_UNSUB_LINK  __MXG_UNSUB_LINK01 || __MXG_UNSUB_LINK02 || __MX
 describe      __MXG_UNSUB_LINK  Contains an unsubscribe link
 
 header        __MXG_LOWER_HDR  ALL:raw =~ /^(from|to|subject):\s/m
-score         __MXG_LOWER_HDR  0.001
+score         __MXG_LOWER_HDR  0.1
 describe      __MXG_LOWER_HDR  lower case header
