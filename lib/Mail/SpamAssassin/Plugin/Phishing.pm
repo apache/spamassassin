@@ -32,6 +32,7 @@ Mail::SpamAssassin::Plugin::Phishing - check uris against phishing feed
     phishing_openphish_feed /etc/mail/spamassassin/openphish-feed.txt
     phishing_phishtank_feed /etc/mail/spamassassin/phishtank-feed.csv
     phishing_phishstats_feed /etc/mail/spamassassin/phishstats-feed.csv
+    phishing_phishing_database_feed /etc/mail/spamassassin/phishing-database-feed.csv
     body     URI_PHISHING      eval:check_phishing()
     describe URI_PHISHING      Url match phishing in feed
   endif
@@ -50,6 +51,9 @@ To avoid download limits a registration is required.
 
 The PhishStats feed is updated every 90 minutes and can be downloaded from
 https://phishstats.info/phish_score.csv.
+
+The Phishing Database feed is updated every few hours and can be downloaded from
+https://phish.co.za/latest/phishing-links-ACTIVE.txt
 
 =cut
 
@@ -178,6 +182,29 @@ from PhishStats datafeed.
 =back
 
 =cut
+    push(@cmds, {
+        setting => 'phishing_phishing_database_feed',
+        is_admin => 1,
+        type => $Mail::SpamAssassin::Conf::CONF_TYPE_STRING,
+        }
+    );
+
+=over 4
+
+=item phishing_phishing_database_feed
+
+Absolute path of the downloaded Phishing Database datafeed.
+
+=back
+
+=cut
+
+=head1 ADMIN PREFERENCES
+
+The following options can be used in site-wide (C<local.cf>)
+configuration files to customize how the module handles phishing uris
+
+=cut
     $conf->{parser}->register_commands(\@cmds);
 }
 
@@ -284,6 +311,30 @@ sub _read_configfile {
     close(F) or die "error closing config file: $!";
   }
 
+  if ( defined($conf->{phishing_phishing_database_feed}) && ( -f $conf->{phishing_phishing_database_feed} ) ) {
+    open(F, '<', $conf->{phishing_phishing_database_feed});
+    for ($!=0; <F>; $!=0) {
+        chomp;
+        #lines that start with pound are comments
+        next if(/^\s*\#/);
+        $stripped_cluri = $_;
+	my $dcnt = $stripped_cluri =~ tr/\///;
+	if ( ($conf->{phishing_uri_noparam} eq 1) && ($dcnt >= 3) && ($stripped_cluri =~ /\?/) ) {
+          $stripped_cluri =~ s/\?.*//;
+	}
+	$stripped_cluri =~ s/\=$//;
+        my $phishdomain = $self->{main}->{registryboundaries}->uri_to_domain($_);
+        if ( defined $phishdomain ) {
+          push @{$self->{PHISHING}->{$stripped_cluri}->{phishdomain}}, $phishdomain;
+          push @{$self->{PHISHING}->{$stripped_cluri}->{phishinfo}->{$phishdomain}}, "PhishingDatabase";
+        }
+    }
+
+    defined $_ || $!==0  or
+      $!==EBADF ? dbg("PHISHING: error reading config file: $!")
+                : die "error reading config file: $!";
+    close(F) or die "error closing config file: $!";
+  }
 }
 
 sub check_phishing {
