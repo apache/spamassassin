@@ -84,7 +84,7 @@ modify the parsed URI list prior to normal uri rules or the URIDNSBL plugin.
 package Mail::SpamAssassin::Plugin::DecodeShortURLs;
 
 use Mail::SpamAssassin::Plugin;
-use Mail::SpamAssassin::Util qw(idn_to_ascii);
+use Mail::SpamAssassin::Util qw(idn_to_ascii is_fqdn_valid);
 use strict;
 use warnings;
 
@@ -739,7 +739,10 @@ sub _check_shortener_uri {
     (?::\d+)?		# Possible port
     (.*?\w)?		# Some path wanted
     }ix;
-  my $host = lc idn_to_ascii($1);
+  my $host = lc $1;
+  if(is_fqdn_valid($host)) {
+    $host = idn_to_ascii($host);
+  }
   my $has_path = defined $2;
   my $levels = $host =~ tr/.//;
   # No point looking at single level "xxx.yy" without a path
