@@ -2401,7 +2401,7 @@ meta           URI_DQ_UNSUB     __URI_DQ_UNSUB
 describe       URI_DQ_UNSUB     IP-address unsubscribe URI
 tflags         URI_DQ_UNSUB     publish
 
-uri            __URI_GOOGLE_PROXY     m;^https?://[^.]+\.googleusercontent\.com/proxy/;i
+uri            __URI_GOOGLE_PROXY     m;^https?://(?:[^/]+\.)?googleusercontent\.com/proxy/;i
 meta           URI_GOOGLE_PROXY       __URI_GOOGLE_PROXY && !__FSL_RELAY_GOOGLE && !__TO___LOWER && !__MSGID_OK_HEX && !__HAS_CAMPAIGNID 
 describe       URI_GOOGLE_PROXY       Accessing a blacklisted URI or obscuring source of phish via Google proxy?
 tflags         URI_GOOGLE_PROXY       publish
@@ -2487,22 +2487,22 @@ describe  DUP_SUSP_HDR                  Duplicate suspicious message headers
 score     DUP_SUSP_HDR                  2.500	# limit
 
 # seen 10/2014: "https://www.google.com/url?q=https://copy.com/ApbFn2848pQm/ShippingInvoice_6974.PDF.scr?download=1&sa=D&sntz=1&usg=AFQjCNGhvWhljnujQlP85tA6YUsddfuJow"
-uri       __GOOG_MALWARE_DNLD           m;^https?://[^/]*\.google\.com/[^?]*url\?.*[\?&/]download;i
+uri       __GOOG_MALWARE_DNLD           m;^https?://(?:[^/]*\.)?google\.(?:com|(?:com?\.)?[a-z][a-z])/[^?]*url\?.*[\?&/]download;i
 meta      GOOG_MALWARE_DNLD             __GOOG_MALWARE_DNLD
 describe  GOOG_MALWARE_DNLD             File download via Google - Malware?
 score     GOOG_MALWARE_DNLD             5.000   # limit
 tflags    GOOG_MALWARE_DNLD             publish
 
-uri       __GOOG_REDIR                  m;^https?://[^/]*\.google\.com/url\?;i
-uri       __GOOG_REDIR_IMG              m;^https?://[^/]*\.google\.com/url\?(?:[^&]+\&)*q=https?://.*\.(?:png|gif|jpe?g|webp)(?=$|\?|\&);i
+uri       __GOOG_REDIR                  m;^https?://(?:[^/]+\.)?google\.(?:com|(?:com?\.)?[a-z][a-z])/url\?;i
+uri       __GOOG_REDIR_IMG              m;^https?://(?:[^/]+\.)?google\.(?:com|(?:com?\.)?[a-z][a-z])/url\?(?:[^&]+\&)*q=https?://.*\.(?:png|gif|jpe?g|webp)(?=$|\?|\&);i
 tflags    __GOOG_REDIR_IMG              multiple
-uri       __GOOG_REDIR_HTML             m;^https?://[^/]*\.google\.com/url\?(?:[^&]+\&)*q=https?://.*\.html?(?=$|\?|\&);i
-uri       __GOOG_REDIR_ARCHV            m;^https?://[^/]*\.google\.com/url\?(?:[^&]+\&)*q=https?://.*\.(?:ace|zip|7z|rar)(?=$|\?|\&);i
+uri       __GOOG_REDIR_HTML             m;^https?://(?:[^/]+\.)?google\.(?:com|(?:com?\.)?[a-z][a-z])/url\?(?:[^&]+\&)*q=https?://.*\.html?(?=$|\?|\&);i
+uri       __GOOG_REDIR_ARCHV            m;^https?://(?:[^/]+\.)?google\.(?:com|(?:com?\.)?[a-z][a-z])/url\?(?:[^&]+\&)*q=https?://.*\.(?:ace|zip|7z|rar)(?=$|\?|\&);i
 
-uri       __GOOG_PROXY_IMG              m;^https?://[^.]+\.googleusercontent\.com/proxy/.*\.(?:png|gif|jpe?g|webp)(?=$|\?|\&);i
+uri       __GOOG_PROXY_IMG              m;^https?://(?:[^/]+\.)?googleusercontent\.com/proxy/.*\.(?:png|gif|jpe?g|webp)(?=$|\?|\&);i
 tflags    __GOOG_PROXY_IMG              multiple
-uri       __GOOG_PROXY_HTML             m;^https?://[^.]+\.googleusercontent\.com/proxy/.*\.html?(?=$|\?|\&);i
-uri       __GOOG_PROXY_ARCHV            m;^https?://[^.]+\.googleusercontent\.com/proxy/.*\.(?:ace|zip|7z|rar)(?=$|\?|\&);i
+uri       __GOOG_PROXY_HTML             m;^https?://(?:[^/]+\.)?googleusercontent\.com/proxy/.*\.html?(?=$|\?|\&);i
+uri       __GOOG_PROXY_ARCHV            m;^https?://(?:[^/]+\.)?googleusercontent\.com/proxy/.*\.(?:ace|zip|7z|rar)(?=$|\?|\&);i
 
 uri       __DDG_REDIR                   m;^https?://(?:proxy|external-content)\.duckduckgo\.com/iu/\?(?:[^&]+\&)*u=https?://;i
 uri       __DDG_REDIR_IMG               m;^https?://(?:proxy|external-content)\.duckduckgo\.com/iu/\?(?:[^&]+\&)*u=https?://.*\.(?:png|gif|jpe?g|webp)(?=$|\?|\&);i
@@ -4002,7 +4002,7 @@ score      CONTENT_AFTER_HTML_WEAK     1.500	# limit
 tflags     CONTENT_AFTER_HTML_WEAK     publish
 
 # High S/O but rare - ahead of the curve?
-uri        GOOG_REDIR_DOCUSIGN         m;://www\.google\.com/url\?.*q=https?://www\.docusign\.com/;i
+uri        GOOG_REDIR_DOCUSIGN         m;://(?:[^/]+\.)?google\.(?:com|(?:com?\.)?[a-z][a-z])/url\?.*q=https?://www\.docusign\.com/;i
 describe   GOOG_REDIR_DOCUSIGN         Indirect docusign link, probable phishing
 tflags     GOOG_REDIR_DOCUSIGN         publish
 
