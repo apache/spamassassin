@@ -26,6 +26,7 @@ dns_query_restriction allow google.com
 dns_query_restriction allow disq.us
 
 clear_url_redirector
+url_redirector_get google.com
 
 body HAS_REDIR_URL              eval:redir_url()
 body REDIR_URL_404              eval:redir_url_404()
@@ -53,12 +54,13 @@ ok_all_patterns();
 if (SQLITE) {
 
 tstprefs("
-dns_query_restriction allow google.com
+clear_url_redirector
+url_redirector_get google.com
 
 url_redirector_cache_type dbi
 url_redirector_cache_dsn dbi:SQLite:dbname=$workdir/Redirectors.db
 
-body HAS_REDIR_URL              eval:redirector_url()
+body HAS_REDIR_URL              eval:redir_url()
 describe HAS_REDIR_URL          Message contains one or more redirected URLs
 ");
 
