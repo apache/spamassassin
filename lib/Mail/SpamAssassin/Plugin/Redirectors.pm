@@ -73,7 +73,7 @@ modify the parsed URI list prior to normal uri rules or the URIDNSBL plugin.
 package Mail::SpamAssassin::Plugin::Redirectors;
 
 use Mail::SpamAssassin::Plugin;
-use Mail::SpamAssassin::Util qw(idn_to_ascii);
+use Mail::SpamAssassin::Util qw(compile_regexp idn_to_ascii);
 use strict;
 use warnings;
 
