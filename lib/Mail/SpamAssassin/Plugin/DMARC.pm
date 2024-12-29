@@ -328,7 +328,7 @@ sub _check_dmarc {
   }
 
   my $dmarc_arc_verified = 0;
-  if (($result->result ne 'pass') and (ref($pms->{arc_verifier}) and ($pms->{arc_verifier}->result))) {
+  if (($result->result ne 'pass') and (ref($pms->{arc_verifier}) and ($pms->{arc_verifier}->result eq 'pass'))) {
     undef $result;
     $dmarc_arc_verified = 1;
     # if DMARC fails retry by reading data from AAR headers
@@ -385,6 +385,10 @@ sub _check_dmarc {
     }
 
     eval { $result = $dmarc->validate(); };
+    if ($@) {
+      dbg("error while validating domain $mfrom_domain: $@");
+      return;
+    }
   }
 
   # Report that DMARC failed but it has been overridden because of AAR headers
