@@ -2567,13 +2567,32 @@ tflags    URI_ONLY_MSGID_MALF           publish
 meta      GOOG_REDIR_SHORT              __GOOG_REDIR && __LCL__KAM_BODY_LENGTH_LT_512 
 describe  GOOG_REDIR_SHORT              Google redirect to obscure spamvertised website + short message
 tflags    GOOG_REDIR_SHORT              publish
+score     GOOG_REDIR_SHORT              1.500	# limit
 
-meta      GOOG_REDIR_NORDNS             __GOOG_REDIR && RDNS_NONE
+meta      GOOG_REDIR_NORDNS             __GOOG_REDIR && RDNS_NONE && !__MXG_HAS_PHONE04 && !__RELAY_THRU_WWW 
 describe  GOOG_REDIR_NORDNS             Google redirect to obscure spamvertised website + no rDNS
+tflags    GOOG_REDIR_NORDNS             publish
+score     GOOG_REDIR_NORDNS             1.500	# limit
 
-meta      GOOG_REDIR_HTML_ONLY          (__GOOG_REDIR && MIME_HTML_ONLY) && !RDNS_NONE && !__LCL__KAM_BODY_LENGTH_LT_512
+meta      GOOG_REDIR_NOTRDNS            __GOOG_REDIR && __HELO_NOT_RDNS 
+describe  GOOG_REDIR_NOTRDNS            Google redirect to obscure spamvertised website + HELO is not rDNS
+tflags    GOOG_REDIR_NOTRDNS            publish
+score     GOOG_REDIR_NOTRDNS            1.500	# limit
+
+meta      GOOG_REDIR_HTML_ONLY          (__GOOG_REDIR && MIME_HTML_ONLY) # && !RDNS_NONE && !__LCL__KAM_BODY_LENGTH_LT_512
 describe  GOOG_REDIR_HTML_ONLY          Google redirect to obscure spamvertised website + HTML only
-score     GOOG_REDIR_HTML_ONLY          2.000	# limit
+tflags    GOOG_REDIR_HTML_ONLY          publish
+score     GOOG_REDIR_HTML_ONLY          1.500	# limit
+
+meta      GOOG_REDIR_STATICRDNS         __GOOG_REDIR && __BUG6919_RDNS_STATIC 
+describe  GOOG_REDIR_STATICRDNS         Google redirect to obscure spamvertised website + static rDNS
+tflags    GOOG_REDIR_STATICRDNS         publish
+score     GOOG_REDIR_STATICRDNS         1.500	# limit
+
+meta      GOOG_REDIR_FRAUD              __GOOG_REDIR && __FRAUD 
+describe  GOOG_REDIR_FRAUD              Google redirect to obscure spamvertised website + fraud keywords
+tflags    GOOG_REDIR_FRAUD              publish
+score     GOOG_REDIR_FRAUD              1.500	# limit
 
 rawbody   __LONG_INVIS_DIV              /<div\s+style\s*=\s*"(?:(?<!-)visibility\s*:\s*hidden|display\s*:\s*none)\s*">[^<\s]{1400}/i
 
