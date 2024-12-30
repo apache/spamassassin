@@ -227,11 +227,6 @@ sub _read_configfile {
         #lines that start with pound are comments
         next if(/^\s*\#/);
         $stripped_cluri = $_;
-	my $dcnt = $stripped_cluri =~ tr/\///;
-	if ( ($conf->{phishing_uri_noparam} eq 1) && ($dcnt >= 3) && ($stripped_cluri =~ /\?/) ) {
-          $stripped_cluri =~ s/\?.*//;
-	}
-	$stripped_cluri =~ s/\=$//;
         my $phishdomain = $self->{main}->{registryboundaries}->uri_to_domain($_);
         if ( defined $phishdomain ) {
           push @{$self->{PHISHING}->{$stripped_cluri}->{phishdomain}}, $phishdomain;
@@ -257,11 +252,6 @@ sub _read_configfile {
         @phtank_ln = split(/,/, $_);
         $phtank_ln[1] =~ s/\"//g;
         $stripped_cluri = $phtank_ln[1];
-	my $dcnt = $stripped_cluri =~ tr/\///;
-	if ( ($conf->{phishing_uri_noparam} eq 1) && ($dcnt >= 3) && ($stripped_cluri =~ /\?/) ) {
-          $stripped_cluri =~ s/\?.*//;
-	}
-	$stripped_cluri =~ s/\=$//;
         my $phishdomain = $self->{main}->{registryboundaries}->uri_to_domain($phtank_ln[1]);
         if ( defined $phishdomain ) {
           push @{$self->{PHISHING}->{$stripped_cluri}->{phishdomain}}, $phishdomain;
@@ -293,11 +283,6 @@ sub _read_configfile {
 	  next;
 	}
         $stripped_cluri = $phstats_ln[2];
-	my $dcnt = $stripped_cluri =~ tr/\///;
-	if ( ($conf->{phishing_uri_noparam} eq 1) && ($dcnt >= 3) && ($stripped_cluri =~ /\?/) ) {
-          $stripped_cluri =~ s/\?.*//;
-	}
-	$stripped_cluri =~ s/\=$//;
         my $phishdomain = $self->{main}->{registryboundaries}->uri_to_domain($phstats_ln[2]);
         if ( defined $phishdomain ) {
           push @{$self->{PHISHING}->{$stripped_cluri}->{phishdomain}}, $phishdomain;
@@ -318,11 +303,6 @@ sub _read_configfile {
         #lines that start with pound are comments
         next if(/^\s*\#/);
         $stripped_cluri = $_;
-	my $dcnt = $stripped_cluri =~ tr/\///;
-	if ( ($conf->{phishing_uri_noparam} eq 1) && ($dcnt >= 3) && ($stripped_cluri =~ /\?/) ) {
-          $stripped_cluri =~ s/\?.*//;
-	}
-	$stripped_cluri =~ s/\=$//;
         my $phishdomain = $self->{main}->{registryboundaries}->uri_to_domain($_);
         if ( defined $phishdomain ) {
           push @{$self->{PHISHING}->{$stripped_cluri}->{phishdomain}}, $phishdomain;
