@@ -194,7 +194,7 @@ BITCOIN_IMGUR
 # good enough
 BITCOIN_MALF_HTML
 
-# tflags net
+# tflags publish
 BITCOIN_MALWARE
 
 # tflags publish
@@ -295,9 +295,6 @@ CN_B2B_SPAMMER
 
 # tflags publish
 COMMENT_GIBBERISH
-
-# tflags net
-COMPENSATION
 
 # tflags publish
 CONTENT_AFTER_HTML
@@ -485,7 +482,7 @@ FONT_INVIS_POSTEXTRAS
 # tflags net
 FORGED_SPF_HELO
 
-# tflags net
+# tflags publish
 FORM_FRAUD
 
 # tflags net
@@ -744,6 +741,12 @@ GOOG_MALWARE_DNLD
 GOOG_REDIR_DOCUSIGN
 
 # tflags publish
+GOOG_REDIR_HTML_ONLY
+
+# tflags publish
+GOOG_REDIR_NORDNS
+
+# tflags publish
 GOOG_REDIR_SHORT
 
 # tflags publish
@@ -959,17 +962,11 @@ MALWARE_PASSWORD
 # tflags publish
 MALW_ATTACH
 
-# tflags net
-MANY_HDRS_LCASE
-
 # tflags publish
 MANY_SPAN_IN_TEXT
 
 # good enough
 MANY_SUBDOM
-
-# tflags net
-MAY_BE_FORGED
 
 # tflags publish
 MILLION_HUNDRED
@@ -1144,6 +1141,9 @@ PDS_FRNOM_TODOM_DBL_URL
 
 # good enough
 PDS_FRNOM_TODOM_NAKED_TO
+
+# tflags net
+PDS_FROM_2_EMAILS
 
 # good enough
 PDS_FROM_NAME_TO_DOMAIN
@@ -1526,6 +1526,9 @@ SEO_SUSP_NTLD
 # good enough
 SERGIO_SUBJECT_PORN011
 
+# good enough
+SERGIO_SUBJECT_VIAGRA01
+
 # tflags publish
 SHOPIFY_IMG_NOT_RCVD_SFY
 
@@ -1608,6 +1611,9 @@ SUBJECT_IN_WELCOMELIST
 SUBJ_BRKN_WORDNUMS
 
 # tflags net
+SUBJ_UNNEEDED_HTML
+
+# tflags net
 SURBL_BLOCKED
 
 # good enough
@@ -1643,6 +1649,9 @@ THIS_AD
 # tflags publish
 THIS_IS_ADV_SUSP_NTLD
 
+# good enough
+TINY_FLOAT
+
 # tflags publish
 TONLINE_FAKE_DKIM
 
@@ -1653,10 +1662,10 @@ TO_EQ_FM_DIRECT_MX
 TO_EQ_FM_DOM_HTML_IMG
 
 # tflags net
-TO_EQ_FM_DOM_SPF_FAIL
+TO_EQ_FM_DOM_HTML_ONLY
 
 # tflags net
-TO_EQ_FM_HTML_ONLY
+TO_EQ_FM_DOM_SPF_FAIL
 
 # tflags net
 TO_EQ_FM_SPF_FAIL
@@ -1673,7 +1682,7 @@ TO_NO_BRKTS_HTML_IMG
 # tflags publish
 TO_NO_BRKTS_HTML_ONLY
 
-# tflags net
+# good enough
 TO_NO_BRKTS_MSFT
 
 # tflags publish
@@ -1691,7 +1700,7 @@ TVD_PH_FR5
 # good enough
 TVD_RCVD_SPACE_BRACKET
 
-# good enough
+# tflags net
 TVD_SPACE_ENCODED
 
 # tflags net
@@ -1907,7 +1916,7 @@ URI_MALWARE_SCMS
 # tflags userconf
 URI_NOVOWEL
 
-# tflags net
+# tflags publish
 URI_ONLY_MSGID_MALF
 
 # tflags publish
@@ -1934,7 +1943,7 @@ URI_WPADMIN
 # tflags publish
 URI_WP_DIRINDEX
 
-# tflags publish
+# tflags net
 URI_WP_HACKED
 
 # tflags publish
