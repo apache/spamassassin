@@ -194,7 +194,7 @@ BITCOIN_IMGUR
 # good enough
 BITCOIN_MALF_HTML
 
-# tflags publish
+# tflags net
 BITCOIN_MALWARE
 
 # tflags publish
@@ -404,6 +404,9 @@ DOS_OE_TO_MX
 # good enough
 DOS_OUTLOOK_TO_MX
 
+# good enough
+DOS_RCVD_IP_TWICE_C
+
 # tflags publish
 DOTGOV_IMAGE
 
@@ -482,7 +485,7 @@ FONT_INVIS_POSTEXTRAS
 # tflags net
 FORGED_SPF_HELO
 
-# tflags publish
+# tflags net
 FORM_FRAUD
 
 # tflags net
@@ -560,7 +563,7 @@ FROM_MISSP_MSFT
 # good enough
 FROM_MISSP_PHISH
 
-# good enough
+# tflags net
 FROM_MISSP_REPLYTO
 
 # tflags net
@@ -741,13 +744,22 @@ GOOG_MALWARE_DNLD
 GOOG_REDIR_DOCUSIGN
 
 # tflags publish
+GOOG_REDIR_FRAUD
+
+# tflags publish
 GOOG_REDIR_HTML_ONLY
 
 # tflags publish
 GOOG_REDIR_NORDNS
 
 # tflags publish
+GOOG_REDIR_NOTRDNS
+
+# tflags publish
 GOOG_REDIR_SHORT
+
+# tflags publish
+GOOG_REDIR_STATICRDNS
 
 # tflags publish
 GOOG_STO_EMAIL_PHISH
@@ -906,9 +918,6 @@ JH_SPAMMY_PATTERN01
 JH_SPAMMY_PATTERN02
 
 # tflags net
-KHOP_FAKE_EBAY
-
-# tflags net
 KHOP_HELO_FCRDNS
 
 # tflags publish
@@ -967,6 +976,9 @@ MANY_SPAN_IN_TEXT
 
 # good enough
 MANY_SUBDOM
+
+# tflags net
+MAY_BE_FORGED
 
 # tflags publish
 MILLION_HUNDRED
@@ -1142,9 +1154,6 @@ PDS_FRNOM_TODOM_DBL_URL
 # good enough
 PDS_FRNOM_TODOM_NAKED_TO
 
-# tflags net
-PDS_FROM_2_EMAILS
-
 # good enough
 PDS_FROM_NAME_TO_DOMAIN
 
@@ -1156,6 +1165,9 @@ PDS_OTHER_BAD_TLD
 
 # good enough
 PDS_PRO_TLD
+
+# good enough
+PHISHING_FREEMAIL
 
 # tflags publish
 PHISH_ATTACH
@@ -1611,9 +1623,6 @@ SUBJECT_IN_WELCOMELIST
 SUBJ_BRKN_WORDNUMS
 
 # tflags net
-SUBJ_UNNEEDED_HTML
-
-# tflags net
 SURBL_BLOCKED
 
 # good enough
@@ -1662,9 +1671,6 @@ TO_EQ_FM_DIRECT_MX
 TO_EQ_FM_DOM_HTML_IMG
 
 # tflags net
-TO_EQ_FM_DOM_HTML_ONLY
-
-# tflags net
 TO_EQ_FM_DOM_SPF_FAIL
 
 # tflags net
@@ -1682,7 +1688,7 @@ TO_NO_BRKTS_HTML_IMG
 # tflags publish
 TO_NO_BRKTS_HTML_ONLY
 
-# good enough
+# tflags net
 TO_NO_BRKTS_MSFT
 
 # tflags publish
@@ -1705,9 +1711,6 @@ TVD_SPACE_ENCODED
 
 # tflags net
 TVD_SPACE_RATIO_MINFP
-
-# tflags net
-TVD_SUBJ_NUM_OBFU_MINFP
 
 # tflags publish
 TW_GIBBERISH_MANY
@@ -1943,7 +1946,7 @@ URI_WPADMIN
 # tflags publish
 URI_WP_DIRINDEX
 
-# tflags net
+# tflags publish
 URI_WP_HACKED
 
 # tflags publish
