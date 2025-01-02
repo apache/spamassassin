@@ -709,6 +709,10 @@ sub _check_redirector_uri {
     (.*)?		# Some path wanted
     }ix;
   my $host = lc $1;
+  # return early if host is not valid
+  if($host =~ /\=|\&|\?/) {
+    return;
+  }
   if(is_fqdn_valid($host)) {
     $host = idn_to_ascii($host);
   }
@@ -906,7 +910,7 @@ sub recursive_lookup {
     # Not cached; do lookup
     my $method = $redir_url_info->{method};
     # run the http check only if the url is valid
-    if($redir_url !~ /([^.]+\.[^.]+)/) {
+    if($redir_url !~ /^(?:https?:\/\/)?(?:[A-Za-z0-9-]{1,63}\.)+[A-Za-z0-9-]{2,63}/) {
       dbg("URL $redir_url is not valid, skipping http check");
       return;
     }
