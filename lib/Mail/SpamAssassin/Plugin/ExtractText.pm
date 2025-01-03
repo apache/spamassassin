@@ -623,7 +623,7 @@ sub _extract {
     # $coll->{words} += scalar @{[split(/\W+/s,$text)]} - 1;  # old perl hack
 
     dbg("extracttext: rendering text for type $type with $tool->{name}");
-    $part->set_rendered($text);
+    $part->set_rendered($text, $type);
   }
 
   if (@types) {

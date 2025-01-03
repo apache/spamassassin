@@ -1278,7 +1278,7 @@ sub get_body_text_array_common {
     if (defined $rnd) {
       # Skip text attachments that are not considered part of the email body
       my $cdisp = $p->{'headers'}->{'content-disposition'}[0];
-      if(($method_name ne 'invisible_rendered') and (defined $cdisp and ($cdisp =~ /^attachment;/))) {
+      if(($method_name ne 'invisible_rendered') and (defined $cdisp and ($cdisp =~ /^attachment;/) and ($type =~ /text\//))) {
         dbg("$method_name: Skipping text attachment with content-disposition \"$cdisp\"");
         next;
       }
