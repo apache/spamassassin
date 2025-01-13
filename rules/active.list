@@ -479,10 +479,10 @@ FONT_INVIS_POSTEXTRAS
 # tflags net
 FORGED_SPF_HELO
 
-# tflags net
+# tflags publish
 FORM_FRAUD
 
-# tflags net
+# tflags publish
 FORM_FRAUD_3
 
 # tflags publish
@@ -866,7 +866,7 @@ HTML_OFF_PAGE
 # tflags publish
 HTML_SHRT_CMNT_OBFU_MANY
 
-# tflags publish
+# tflags net
 HTML_SINGLET_MANY
 
 # good enough
@@ -1114,6 +1114,9 @@ PDS_FRNOM_TODOM_DBL_URL
 
 # good enough
 PDS_FRNOM_TODOM_NAKED_TO
+
+# tflags net
+PDS_FROM_2_EMAILS
 
 # good enough
 PDS_FROM_NAME_TO_DOMAIN
@@ -1500,9 +1503,6 @@ SENDGRID_REDIR_PHISH
 SEO_SUSP_NTLD
 
 # good enough
-SERGIO_SUBJECT_PORN011
-
-# good enough
 SERGIO_SUBJECT_VIAGRA01
 
 # tflags publish
@@ -1593,6 +1593,9 @@ SURBL_BLOCKED
 SUSP_UTF8_WORD_COMBO
 
 # good enough
+SUSP_UTF8_WORD_FROM
+
+# good enough
 SUSP_UTF8_WORD_SUBJ
 
 # tflags publish
@@ -1632,6 +1635,9 @@ TO_EQ_FM_DIRECT_MX
 TO_EQ_FM_DOM_SPF_FAIL
 
 # tflags net
+TO_EQ_FM_HTML_ONLY
+
+# tflags net
 TO_EQ_FM_SPF_FAIL
 
 # tflags publish
@@ -1661,8 +1667,11 @@ TO_TOO_MANY_WFH_01
 # good enough
 TVD_PH_FR5
 
-# good enough
+# tflags net
 TVD_SPACE_RATIO_MINFP
+
+# tflags net
+TVD_SUBJ_NUM_OBFU_MINFP
 
 # tflags publish
 TW_GIBBERISH_MANY
@@ -1693,9 +1702,6 @@ UNPARSEABLE_RELAY
 
 # tflags publish
 UNSUB_GOOG_FORM
-
-# good enough
-UPPERCASE_URI
 
 # tflags net
 URIBL_ABUSE_SURBL
@@ -1865,13 +1871,16 @@ URI_IPFSIO
 # tflags publish
 URI_LONG_REPEAT
 
+# good enough
+URI_MALWARE_BH
+
 # tflags publish
 URI_MALWARE_SCMS
 
 # tflags userconf
 URI_NOVOWEL
 
-# tflags publish
+# tflags net
 URI_ONLY_MSGID_MALF
 
 # tflags publish
