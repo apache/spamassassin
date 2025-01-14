@@ -227,18 +227,7 @@ sub _read_configfile {
         chomp;
         #lines that start with pound are comments
         next if(/^\s*\#/);
-        $stripped_cluri = $_;
-        if( $phishing_uri_noparam eq 1 && $stripped_cluri =~ s/\?.*// ) {
-            # If uri without parameters are considered, skip too short uris
-            # like https://www.google.com/url?sa=t&url=http://badsite.com
-            my $dcnt = $stripped_cluri =~ tr/\///;
-            next if $dcnt <= 3;
-        }
-        my $phishdomain = $self->{main}->{registryboundaries}->uri_to_domain($_);
-        if ( defined $phishdomain ) {
-          push @{$self->{PHISHING}->{$stripped_cluri}->{phishdomain}}, $phishdomain;
-          push @{$self->{PHISHING}->{$stripped_cluri}->{phishinfo}->{$phishdomain}}, "OpenPhish";
-        }
+        $self->_add_uri($_, "OpenPhish");
     }
 
     defined $_ || $!==0  or
@@ -257,19 +246,7 @@ sub _read_configfile {
         next if(/^\s*\#/);
 
         @phtank_ln = split(/,/, $_);
-        $phtank_ln[1] =~ s/\"//g;
-        $stripped_cluri = $phtank_ln[1];
-        if( $phishing_uri_noparam eq 1 && $stripped_cluri =~ s/\?.*// ) {
-            # If uri without parameters are considered, skip too short uris
-            # like https://www.google.com/url?sa=t&url=http://badsite.com
-            my $dcnt = $stripped_cluri =~ tr/\///;
-            next if $dcnt <= 3;
-        }
-        my $phishdomain = $self->{main}->{registryboundaries}->uri_to_domain($phtank_ln[1]);
-        if ( defined $phishdomain ) {
-          push @{$self->{PHISHING}->{$stripped_cluri}->{phishdomain}}, $phishdomain;
-          push @{$self->{PHISHING}->{$stripped_cluri}->{phishinfo}->{$phishdomain}}, "PhishTank";
-        }
+        $self->_add_uri($phtank_ln[1], "PhishTank");
     }
 
     defined $_ || $!==0  or
@@ -295,18 +272,7 @@ sub _read_configfile {
 	if ( $conf->{phishing_phishstats_minscore} >= $phstats_ln[1] ) {
 	  next;
 	}
-        $stripped_cluri = $phstats_ln[2];
-        if( $phishing_uri_noparam eq 1 && $stripped_cluri =~ s/\?.*// ) {
-            # If uri without parameters are considered, skip too short uris
-            # like https://www.google.com/url?sa=t&url=http://badsite.com
-            my $dcnt = $stripped_cluri =~ tr/\///;
-            next if $dcnt <= 3;
-        }
-        my $phishdomain = $self->{main}->{registryboundaries}->uri_to_domain($phstats_ln[2]);
-        if ( defined $phishdomain ) {
-          push @{$self->{PHISHING}->{$stripped_cluri}->{phishdomain}}, $phishdomain;
-          push @{$self->{PHISHING}->{$stripped_cluri}->{phishinfo}->{$phishdomain}}, "PhishStats";
-        }
+        $self->_add_uri($phstats_ln[2], "PhishStats");
     }
 
     defined $_ || $!==0  or
@@ -321,18 +287,7 @@ sub _read_configfile {
         chomp;
         #lines that start with pound are comments
         next if(/^\s*\#/);
-        $stripped_cluri = $_;
-        if( $phishing_uri_noparam && $stripped_cluri =~ s/\?.*// ) {
-            # If uri without parameters are considered, skip too short uris
-            # like https://www.google.com/url?sa=t&url=http://badsite.com
-            my $dcnt = $stripped_cluri =~ tr/\///;
-            next if $dcnt <= 3;
-        }
-        my $phishdomain = $self->{main}->{registryboundaries}->uri_to_domain($_);
-        if ( defined $phishdomain ) {
-          push @{$self->{PHISHING}->{$stripped_cluri}->{phishdomain}}, $phishdomain;
-          push @{$self->{PHISHING}->{$stripped_cluri}->{phishinfo}->{$phishdomain}}, "PhishingDatabase";
-        }
+        $self->_add_uri($_, "PhishingDatabase");
     }
 
     defined $_ || $!==0  or
@@ -340,6 +295,24 @@ sub _read_configfile {
                 : die "error reading config file: $!";
     close(F) or die "error closing config file: $!";
   }
+}
+
+sub _add_uri {
+    my ($self, $uri, $feedname) = @_;
+
+    my $phishdomain = $self->{main}->{registryboundaries}->uri_to_domain($uri);
+    return unless defined $phishdomain;
+
+    if( $self->{main}->{conf}->{phishing_uri_noparam} eq 1 && $uri =~ s/\?.*// ) {
+        # If uri without parameters are considered, skip too short uris
+        # like https://www.google.com/url?sa=t&url=http://badsite.com
+        my $dcnt = $uri =~ tr/\///;
+        return if $dcnt <= 3;
+    }
+
+    push @{$self->{PHISHING}->{$uri}->{phishdomain}}, $phishdomain;
+    push @{$self->{PHISHING}->{$uri}->{phishinfo}->{$phishdomain}}, $feedname;
+
 }
 
 sub check_phishing {
