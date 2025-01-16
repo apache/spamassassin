@@ -1860,9 +1860,9 @@ meta        __45_ALNUM_URI_O    __45_ALNUM_URI && !__64_ANY_URI && !__128_ALNUM_
 meta        __45_ALNUM_IMG_O    __45_ALNUM_IMG && !__64_ANY_IMG && !__128_ALNUM_IMG && !__128_LC_IMG
 meta        __45_ALNUM_URI_IMG  __45_ALNUM_URI_O && __45_ALNUM_IMG_O
 
-meta        LONG_IMG_URI        __45_ALNUM_IMG && !ALL_TRUSTED && !__HAS_ERRORS_TO 
+meta        LONG_IMG_URI        __45_ALNUM_IMG && !ALL_TRUSTED && !__HAS_ERRORS_TO && !__HDR_RCVD_PAYPAL
 describe    LONG_IMG_URI        Image URI with very long path component - web bug?
-score       LONG_IMG_URI        3.000	# limit
+score       LONG_IMG_URI        2.500	# limit
 tflags      LONG_IMG_URI        publish
 
 
