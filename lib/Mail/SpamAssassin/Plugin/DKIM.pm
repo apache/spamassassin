@@ -742,18 +742,10 @@ sub _dkim_load_modules {
              "minimal version 0.31, suggested upgrade to 0.37 or later!");
       }
       if (version->parse($version) >= version->parse(0.40)) {
-        my $edns = $self->{main}->{conf}->{dns_options}->{edns};
-        if ($edns && $edns >= 1024) {
-          # Let Mail::DKIM use our interface to Net::DNS::Resolver.
-          # Only do so if EDNS0 provides a reasonably-sized UDP payload size,
-          # as our interface does not provide a DNS fallback to TCP, unlike
-          # the Net::DNS::Resolver::send which does provide it.
-          # See also Bug 7265 regarding a choice of a resolver.
-          # my $res = $self->{main}->{resolver}->get_resolver;
-          my $res = $self->{main}->{resolver};
-          dbg("dkim: providing our own resolver: %s", ref $res);
-          Mail::DKIM::DNS::resolver($res);
-        }
+        # Let Mail::DKIM use our interface to Net::DNS::Resolver.
+        my $res = $self->{main}->{resolver};
+        dbg("dkim: providing our own resolver: %s", ref $res);
+        Mail::DKIM::DNS::resolver($res);
       }
       $self->{service_available} = 1;
 
