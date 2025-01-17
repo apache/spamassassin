@@ -257,6 +257,9 @@ BITCOIN_XPRIO
 # tflags publish
 BITCOIN_YOUR_INFO
 
+# good enough
+BODY_SINGLE_URI
+
 # tflags publish
 BODY_URI_ONLY
 
@@ -293,7 +296,7 @@ CN_B2B_SPAMMER
 # tflags publish
 COMMENT_GIBBERISH
 
-# tflags net
+# good enough
 COMPENSATION
 
 # tflags publish
@@ -307,9 +310,6 @@ CORRUPT_FROM_LINE_IN_HDRS
 
 # tflags publish
 CTE_8BIT_MISMATCH
-
-# good enough
-DATE_IN_FUTURE_Q_PLUS
 
 # tflags publish
 DAY_I_EARNED
@@ -479,10 +479,10 @@ FONT_INVIS_POSTEXTRAS
 # tflags net
 FORGED_SPF_HELO
 
-# tflags net
+# tflags publish
 FORM_FRAUD
 
-# tflags net
+# tflags publish
 FORM_FRAUD_3
 
 # tflags publish
@@ -782,6 +782,9 @@ HAS_X_NO_RELAY
 # tflags publish
 HAS_X_OUTGOING_SPAM_STAT
 
+# tflags net
+HDRS_LCASE
+
 # tflags publish
 HDRS_MISSP
 
@@ -805,6 +808,9 @@ HEXHASH_WORD
 
 # tflags publish
 HK_CTE_RAW
+
+# good enough
+HK_NAME_DRUGS
 
 # good enough
 HK_NAME_FM_MR_MRS
@@ -869,13 +875,16 @@ HTML_ENTITY_ASCII
 # tflags publish
 HTML_ENTITY_ASCII_TINY
 
+# good enough
+HTML_FONT_TINY_NORDNS
+
 # tflags publish
 HTML_OFF_PAGE
 
 # tflags publish
 HTML_SHRT_CMNT_OBFU_MANY
 
-# tflags net
+# tflags publish
 HTML_SINGLET_MANY
 
 # good enough
@@ -1129,15 +1138,6 @@ PDS_DBL_URL_LINKBAIT
 
 # good enough
 PDS_FRNOM_TODOM_DBL_URL
-
-# good enough
-PDS_FRNOM_TODOM_NAKED_TO
-
-# tflags net
-PDS_FROM_2_EMAILS
-
-# good enough
-PDS_FROM_NAME_TO_DOMAIN
 
 # tflags net
 PDS_HELO_SPF_FAIL
@@ -1608,9 +1608,6 @@ SUBJ_ATTENTION
 SUBJ_BRKN_WORDNUMS
 
 # tflags net
-SUBJ_UNNEEDED_HTML
-
-# tflags net
 SURBL_BLOCKED
 
 # good enough
@@ -1659,9 +1656,6 @@ TO_EQ_FM_DIRECT_MX
 TO_EQ_FM_DOM_SPF_FAIL
 
 # tflags net
-TO_EQ_FM_HTML_ONLY
-
-# tflags net
 TO_EQ_FM_SPF_FAIL
 
 # tflags publish
@@ -1696,9 +1690,6 @@ TVD_SPACE_ENCODED
 
 # good enough
 TVD_SPACE_RATIO_MINFP
-
-# tflags net
-TVD_SUBJ_NUM_OBFU_MINFP
 
 # tflags publish
 TW_GIBBERISH_MANY
@@ -1934,7 +1925,7 @@ URI_WPADMIN
 # tflags publish
 URI_WP_DIRINDEX
 
-# tflags net
+# tflags publish
 URI_WP_HACKED
 
 # tflags publish
