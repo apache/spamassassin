@@ -857,9 +857,10 @@ sub parse_body {
       # If it's not multipart, go ahead and just deal with it.
       $self->_parse_normal($toparse);
 
+      my $type = $msg->effective_type();
       # bug 5041: process message/*, but exclude message/partial content types
-      if (index($msg->{'type'}, 'message/') == 0 &&
-          $msg->{'type'} ne 'message/partial' && $subparse > 0)
+      if (index($type, 'message/') == 0 &&
+          $type ne 'message/partial' && $subparse > 0)
       {
         # Just decode the part, but we don't need the resulting string here.
         $msg->decode(0);
@@ -875,7 +876,7 @@ sub parse_body {
         # bug 5051, bug 3748: check $msg->{decoded}: sometimes message/* parts
         # have no content, and we get stuck waiting for STDIN, which is bad. :(
 
-        if (($msg->{'type'} eq 'message/rfc822' || $msg->{'type'} eq 'message/global') &&
+        if (($type eq 'message/rfc822' || $type eq 'message/global') &&
             defined $msg->{'decoded'} && $msg->{'decoded'} ne '')
         {
 	  # Ok, so this part is still semi-recursive, since M::SA::Message
@@ -1197,8 +1198,9 @@ sub _parse_normal {
   # ahead and write the part data out to a temp file -- why keep sucking
   # up RAM with something we're not going to use?
   #
-  unless ($msg->{'type'} eq 'text/plain' || $msg->{'type'} eq 'text/html' ||
-          index($msg->{'type'}, 'message/') == 0) {
+  my $type = $msg->effective_type();
+  unless ($type eq 'text/plain' || $type eq 'text/html' ||
+          index($type, 'message/') == 0) {
     my($filepath, $fh);
     eval {
       ($filepath, $fh) = Mail::SpamAssassin::Util::secure_tmpfile();  1;

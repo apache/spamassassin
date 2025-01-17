@@ -50,6 +50,14 @@ BEGIN {
     and do { $have_encode_detector = 1 };
 };
 
+# Map of file extensions to MIME types
+my %file_type_map = (
+    'eml'   => 'message/rfc822',
+    'htm'   => 'text/html',
+    'html'  => 'text/html',
+    'shtml' => 'text/html',
+);
+
 =item new()
 
 Generates an empty Node object and returns it.  Typically only called
@@ -687,8 +695,11 @@ sub _normalize {
 sub effective_type {
   my ($self) = @_;
   if (!exists $self->{'effective_type'}) {
-    if (($self->{'name'}||'') =~ /\.s?html?$/i) {
-      $self->{'effective_type'} = 'text/html';
+    my $name = $self->{'name'} // '';
+    my $ext;
+    $ext = lc $1 if $name =~ /\.([^.]+)$/;
+    if ( defined $ext && exists $file_type_map{$ext} ) {
+      $self->{'effective_type'} = $file_type_map{$ext};
     } else {
       $self->{'effective_type'} = $self->{'type'};
     }
