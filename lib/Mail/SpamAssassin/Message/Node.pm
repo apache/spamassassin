@@ -58,6 +58,11 @@ my %file_type_map = (
     'shtml' => 'text/html',
 );
 
+# Map of MIME type aliases
+my %mime_type_map = (
+    'text/x-amp-html' => 'text/html',
+);
+
 =item new()
 
 Generates an empty Node object and returns it.  Typically only called
@@ -700,6 +705,8 @@ sub effective_type {
     $ext = lc $1 if $name =~ /\.([^.]+)$/;
     if ( defined $ext && exists $file_type_map{$ext} ) {
       $self->{'effective_type'} = $file_type_map{$ext};
+    } elsif ( exists $mime_type_map{$self->{'type'}} ) {
+      $self->{'effective_type'} = $mime_type_map{$self->{'type'}};
     } else {
       $self->{'effective_type'} = $self->{'type'};
     }

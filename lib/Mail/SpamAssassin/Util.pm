@@ -1306,7 +1306,7 @@ sub parse_content_type {
   # list of known bad/non-plain formats, do likewise.
   $missing = 1 if !$ct; # flag missing content-type
   if (!$ct ||
-        ($ct =~ /^text\b/ && $ct !~ /^text\/(?:x-vcard|calendar|html)$/))
+      $ct =~ /^text\b(?!\/(?:x-vcard|calendar|html|x-amp-html)$)/)
   {
     $ct = "text/plain";
   }
