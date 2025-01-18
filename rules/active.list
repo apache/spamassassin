@@ -675,9 +675,6 @@ FUZZY_SAVINGS
 FUZZY_SECURITY
 
 # tflags publish
-FUZZY_TRUMP
-
-# tflags publish
 FUZZY_TRUSTWALLET
 
 # tflags publish
@@ -782,7 +779,7 @@ HAS_X_NO_RELAY
 # tflags publish
 HAS_X_OUTGOING_SPAM_STAT
 
-# tflags net
+# good enough
 HDRS_LCASE
 
 # tflags publish
@@ -874,9 +871,6 @@ HTML_ENTITY_ASCII
 
 # tflags publish
 HTML_ENTITY_ASCII_TINY
-
-# good enough
-HTML_FONT_TINY_NORDNS
 
 # tflags publish
 HTML_OFF_PAGE
@@ -970,9 +964,6 @@ MANY_SPAN_IN_TEXT
 
 # good enough
 MANY_SUBDOM
-
-# tflags net
-MAY_BE_FORGED
 
 # tflags publish
 MILLION_HUNDRED
@@ -1138,6 +1129,9 @@ PDS_DBL_URL_LINKBAIT
 
 # good enough
 PDS_FRNOM_TODOM_DBL_URL
+
+# tflags net
+PDS_FROM_2_EMAILS
 
 # tflags net
 PDS_HELO_SPF_FAIL
@@ -1500,9 +1494,6 @@ RISK_FREE
 SCC_BOGUS_CTE_1
 
 # tflags publish
-SCC_CTMPP
-
-# tflags publish
 SCC_ISEMM_LID_1
 
 # tflags publish
@@ -1608,6 +1599,9 @@ SUBJ_ATTENTION
 SUBJ_BRKN_WORDNUMS
 
 # tflags net
+SUBJ_UNNEEDED_HTML
+
+# tflags net
 SURBL_BLOCKED
 
 # good enough
@@ -1651,6 +1645,9 @@ TONLINE_FAKE_DKIM
 
 # tflags publish
 TO_EQ_FM_DIRECT_MX
+
+# tflags net
+TO_EQ_FM_DOM_HTML_IMG
 
 # tflags net
 TO_EQ_FM_DOM_SPF_FAIL
