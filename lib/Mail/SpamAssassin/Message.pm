@@ -1183,14 +1183,15 @@ sub _parse_normal {
   }
   $msg->{'charset'} = $ct[2];
 
-  # attempt to figure out a name for this attachment if there is one ...
-  my $disp = $msg->header('content-disposition') || '';
-  if ($disp =~ /name=\s*"?([^";]+)"?/i) {
-    $msg->{'name'} = $1;
+  # parse content-disposition header
+  if ( my $disp = $msg->header('content-disposition') ) {
+    $disp = Mail::SpamAssassin::Header::ParameterHeader->new($disp);
+    $msg->{'disposition'} = $disp->value();
+    $msg->{'name'} = $disp->parameter('filename');
   }
-  elsif ($ct[3]) {
-    $msg->{'name'} = $ct[3];
-  }
+  # if the content-disposition header doesn't have a filename, try to get
+  # the filename from the content-type header
+  $msg->{'name'} = $ct[3] unless defined $msg->{'name'};
 
   $msg->{'boundary'} = $boundary;
 

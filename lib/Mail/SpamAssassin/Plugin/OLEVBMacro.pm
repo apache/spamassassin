@@ -248,7 +248,7 @@ prepare for more CPU overhead.
 
 =item olemacro_prefer_contentdisposition ( 0 | 1 ) (default: 1)
 
-Choose if the content-disposition header filename be preferred if ambiguity is encountered whilst trying to get filename.
+DEPRECATED: This option is deprecated and will be removed in a future release.
 
 =back
 
@@ -550,9 +550,8 @@ sub _check_attachments {
   foreach my $part ($pms->{msg}->find_parts(qr/./, 1)) {
     next if $part->{type} =~ /$conf->{olemacro_skip_ctypes}/i;
 
-    my ($ctt, $ctd, $cte, $name) = get_part_details($pms, $part, $conf->{olemacro_prefer_contentdisposition});
-    next unless defined $ctt;
-    next if $name eq '';
+    my $name = $part->{name};
+    next unless defined $name;
 
     if ($name =~ /$conf->{olemacro_skip_exts}/i) {
       dbg("Skipping file \"$name\" (olemacro_skip_exts)");

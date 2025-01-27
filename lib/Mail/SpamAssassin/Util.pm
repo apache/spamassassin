@@ -46,6 +46,7 @@ use warnings;
 use re 'taint';
 
 use Mail::SpamAssassin::Logger;
+use Mail::SpamAssassin::Header::ParameterHeader;
 
 use version 0.77;
 use Exporter ();
@@ -1245,59 +1246,11 @@ sub parse_content_type {
   my $missing; # flag missing content-type, even though we force it text/plain
   my $ct = $_[-1] || do { $missing = 1; 'text/plain; charset=us-ascii' };
 
-  # This could be made a bit more rigid ...
-  # the actual ABNF, BTW (RFC 1521, section 7.2.1):
-  # boundary := 0*69<bchars> bcharsnospace
-  # bchars := bcharsnospace / " "
-  # bcharsnospace :=    DIGIT / ALPHA / "'" / "(" / ")" / "+" /"_"
-  #               / "," / "-" / "." / "/" / ":" / "=" / "?"
-  #
-  # The boundary may be surrounded by double quotes.
-  # "the boundary parameter, which consists of 1 to 70 characters from
-  # a set of characters known to be very robust through email gateways,
-  # and NOT ending with white space.  (If a boundary appears to end with
-  # white space, the white space must be presumed to have been added by
-  # a gateway, and must be deleted.)"
-  #
-  # In practice:
-  # - MUAs accept whitespace before and after the "=" character
-  # - only an opening double quote seems to be needed
-  # - non-quoted boundaries should be followed by space, ";", or end of line
-  # - blank boundaries seem to not work
-  #
-  my($boundary) = $ct =~ m!\bboundary\s*=\s*("[^"]+|[^\s";]+(?=[\s;]|$))!i;
-
-  # remove double-quotes in boundary (should only be at start and end)
-  #
-  $boundary =~ tr/"//d if defined $boundary;
-
-  # Parse out the charset and name, if they exist.
-  #
-  my($charset) = $ct =~ /\bcharset\s*=\s*["']?(.*?)["']?(?:;|$)/i;
-  my($name) = $ct =~ /\b(?:file)?name\s*=\s*["']?(.*?)["']?(?:;|$)/i;
-
-  # RFC 2231 section 3: Parameter Value Continuations
-  # support continuations for name values
-  #
-  if (!$name && $ct =~ /\b(?:file)?name\*0\s*=/i) {
-
-    my @name;
-    $name[$1] = $2
-      while ($ct =~ /\b(?:file)?name\*(\d+)\s*=\s*["']?(.*?)["']?(?:;|$)/ig);
-
-    $name = join "", grep defined, @name;
-  }
-
-  # Get the actual MIME type out ...
-  # Note: the header content may not be whitespace unfolded, so make sure the
-  # REs do /s when appropriate.
-  # correct:
-  # Content-type: text/plain; charset=us-ascii
-  # missing a semi-colon, CT shouldn't have whitespace anyway:
-  # Content-type: text/plain charset=us-ascii
-  #
-  $ct =~ s/^\s+//;				# strip leading whitespace
-  $ct =~ s/;.*$//s;				# strip everything after first ';'
+  my $header = Mail::SpamAssassin::Header::ParameterHeader->new($ct);
+  my $boundary = $header->parameter('boundary');
+  my $charset = $header->parameter('charset');
+  my $name = $header->parameter('name');
+  $ct = $header->value();
   $ct =~ s@^([^/]+(?:/[^/\s]*)?).*$@$1@s;	# only something/something ...
   $ct = lc $ct;
 
@@ -2559,82 +2512,6 @@ sub parse_header_addresses {
   }
 
   return @results;
-}
-
-sub get_part_details {
-    my ($pms, $part, $prefer_contentdisposition) = @_;
-    #https://en.wikipedia.org/wiki/MIME#Content-Disposition
-    #https://github.com/mikel/mail/pull/464
-
-    my $ctt = $part->get_header('content-type');
-    return undef unless defined $ctt; ## no critic (ProhibitExplicitReturnUndef)
-
-    my $cte = lc($part->get_header('content-transfer-encoding') || '');
-    return undef unless ($cte =~ /^(?:base64|quoted\-printable)$/); ## no critic (ProhibitExplicitReturnUndef)
-
-    $ctt = _decode_part_header($part, $ctt || '');
-
-    my $name = '';
-    my $cttname = '';
-    my $ctdname = '';
-
-    if ($ctt =~ m/name\s*=\s*["']?([^"';]*)/is) {
-      $cttname = $1;
-      $cttname =~ s/\s+$//;
-    }
-
-    my $ctd = $part->get_header('content-disposition');
-    $ctd = _decode_part_header($part, $ctd || '');
-
-    if ($ctd =~ m/filename\s*=\s*["']?([^"';]*)/is) {
-      $ctdname = $1;
-      $ctdname =~ s/\s+$//;
-    }
-
-    if (lc $ctdname eq lc $cttname) {
-      $name = $ctdname;
-    } elsif ($ctdname eq '') {
-      $name = $cttname;
-    } elsif ($cttname eq '') {
-      $name = $ctdname;
-    } else {
-      if ((defined $ctdname) and $prefer_contentdisposition) {
-        $name = $ctdname;
-      } else {
-        $name = $cttname;
-      }
-    }
-
-    return $ctt, $ctd, $cte, $name;
-}
-
-sub _decode_part_header {
-  my($part, $header_field_body) = @_;
-
-  return '' unless defined $header_field_body && $header_field_body ne '';
-
-  # deal with folding and cream the newlines and such
-  $header_field_body =~ s/\n[ \t]+/\n /g;
-  $header_field_body =~ s/\015?\012//gs;
-
-  local($1,$2,$3);
-
-  # Multiple encoded sections must ignore the interim whitespace.
-  # To avoid possible FPs with (\s+(?==\?))?, look for the whole RE
-  # separated by whitespace.
-  1 while $header_field_body =~
-            s{ ( = \? [A-Za-z0-9_-]+ \? [bqBQ] \? [^?]* \? = ) \s+
-               ( = \? [A-Za-z0-9_-]+ \? [bqBQ] \? [^?]* \? = ) }
-             {$1$2}xsg;
-
-  # transcode properly encoded RFC 2047 substrings into UTF-8 octets,
-  # leave everything else unchanged as it is supposed to be UTF-8 (RFC 6532)
-  # or plain US-ASCII
-  $header_field_body =~
-    s{ (?: = \? ([A-Za-z0-9_-]+) \? ([bqBQ]) \? ([^?]*) \? = ) }
-     { $part->__decode_header($1, uc($2), $3) }xsge;
-
-  return $header_field_body;
 }
 
 # Check some basic parsing mistakes
