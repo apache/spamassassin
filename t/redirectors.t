@@ -72,7 +72,7 @@ ok_all_patterns();
 
 my $dbh = DBI->connect("dbi:SQLite:dbname=$workdir/Redirectors.db","","");
 my @row = $dbh->selectrow_array("SELECT target_url FROM redir_url_cache WHERE redir_url = 'https://www.google.com/amp/spamassassin.apache.org/news.html'");
-is($row[0], 'http://spamassassin.apache.org/news.html');
+is($row[0], 'https://www.google.com/url?q=http://spamassassin.apache.org/news.html');
 
 # Check another email to cleanup old entries from database
 sarun ("-t < data/spam/redirectors/base2.eml", \&patterns_run_cb);
