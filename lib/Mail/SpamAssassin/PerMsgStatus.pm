@@ -2811,6 +2811,7 @@ sub _process_html_uri_list {
           for (@{$info->{anchor_text}}) {
             s/^\s+|\s+$//g;
             s/\s+/ /g;
+            utf8::encode($_) if utf8::is_utf8($_);  # Bug 8310: UTF-8 encode anchor_text
           }
           my %seen;
           foreach (grep { !$seen{$_}++ } @{$info->{anchor_text}}) {
