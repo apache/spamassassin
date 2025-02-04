@@ -113,6 +113,8 @@ my $marker2a = "\x01\x00\x4f\x00\x6c\x00\x65\x00\x31\x00\x30\x00\x4e\x00\x61\x00
 my $marker3 = "\x5c\x6f\x62\x6a\x65\x6d\x62";
 my $marker4 = "\x5c\x6f\x62\x6a\x64\x61\x74";
 my $marker5 = "\x5c\x20\x6f\x62\x6a\x64\x61\x74";
+# CVE-2025-21298
+my $marker6 = '{\rtf1{\object\objhtml\objw1\objh1\objupdate\rsltpict{\*\objclass ';
 # Excel .xlsx encrypted package, thanks to Dan Bagwell for the sample
 my $encrypted_marker = "\x45\x00\x6e\x00\x63\x00\x72\x00\x79\x00\x70\x00\x74\x00\x65\x00\x64\x00\x50\x00\x61\x00\x63\x00\x6b\x00\x61\x00\x67\x00\x65";
 # Excel .xls marker present only on unencrypted files
@@ -993,18 +995,28 @@ sub _check_markers {
   }
 
   # Check for rtf markers
+  my $rtf_marker = 0;
   if (index($data, $marker3) > -1) {
     dbg('Marker 3 found');
-    return 1;
+    $rtf_marker++;
   }
 
   if (index($data, $marker4) > -1) {
     dbg('Marker 4 found');
-    return 1;
+    $rtf_marker++;
   }
 
   if (index($data, $marker5) > -1) {
     dbg('Marker 5 found');
+    $rtf_marker++;
+  }
+
+  if (index($data, $marker6) > -1) {
+    dbg('CVE 2025-21298 marker found');
+    $rtf_marker++;
+  }
+  
+  if($rtf_marker > 1) {
     return 1;
   }
 
