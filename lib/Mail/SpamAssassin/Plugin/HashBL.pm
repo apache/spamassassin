@@ -63,13 +63,14 @@ This plugin supports multiple types of hashed or unhashed DNS blocklist queries.
 
 =item Common OPTS that apply to all functions:
 
-  raw      no hashing, query as is (can break if value is not valid DNS label)
-  md5      hash query with MD5
-  sha1     hash query with SHA1
-  sha256   hash query with Base32 encoded SHA256
-  case     keep case before hashing, default is to lowercase
-  max=x	   maximum number of queries (defaults to 10 if not specified)
-  shuffle  if max exceeded, random shuffle queries before truncating to limit
+  raw          no hashing, query as is (can break if value is not valid DNS label)
+  md5          hash query with MD5
+  sha1         hash query with SHA1
+  sha256       hash query with Base32 encoded SHA256
+  case         keep case before hashing, default is to lowercase
+  max=x	       maximum number of queries (defaults to 10 if not specified)
+  shuffle      if max exceeded, random shuffle queries before truncating to limit
+  alldomains   do not ignore domains listed in uridnsbl_skip_domains
 
 Multiple options can be separated with slash.
 
@@ -582,14 +583,16 @@ sub check_hashbl_emails {
       next;
     }
     my ($username, $domain) = ($email =~ /(.*)\@(.*)/);
-    if (exists $conf->{uridnsbl_skip_domains}->{lc $domain}) {
-      dbg("query skipped, uridnsbl_skip_domains: $email");
-      next;
-    }
-    my $dom = $pms->{main}->{registryboundaries}->trim_domain($domain);
-    if (exists $conf->{uridnsbl_skip_domains}->{lc $dom}) {
-      dbg("query skipped, uridnsbl_skip_domains: $email");
-      next;
+    if(not defined $opts->{alldomains}) {
+      if (exists $conf->{uridnsbl_skip_domains}->{lc $domain}) {
+        dbg("query skipped, uridnsbl_skip_domains: $email");
+        next;
+      }
+      my $dom = $pms->{main}->{registryboundaries}->trim_domain($domain);
+      if (exists $conf->{uridnsbl_skip_domains}->{lc $dom}) {
+        dbg("query skipped, uridnsbl_skip_domains: $email");
+        next;
+      }
     }
     $username =~ tr/.//d if $opts->{nodot};
     $username =~ s/\+.*// if $opts->{notag};
@@ -679,11 +682,13 @@ URI:
     next unless $info->{cleaned};
     next unless $info->{types}->{a} || $info->{types}->{parsed};
     foreach my $host (keys %{$info->{hosts}}) {
-      if (exists $conf->{uridnsbl_skip_domains}->{$host} ||
+      if(not defined $opts->{alldomains}) {
+        if (exists $conf->{uridnsbl_skip_domains}->{$host} ||
           exists $conf->{uridnsbl_skip_domains}->{$info->{hosts}->{$host}})
-      {
-        dbg("query skipped, uridnsbl_skip_domains: $uri");
-        next URI;
+        {
+          dbg("query skipped, uridnsbl_skip_domains: $uri");
+          next URI;
+        }
       }
     }
     foreach my $uri (@{$info->{cleaned}}) {
@@ -902,13 +907,15 @@ sub _check_hashbl_tag {
       }
       my $domain;
       if ($fqdn_valid) {
-        $domain = $pms->{main}->{registryboundaries}->trim_domain($value);
-        if (exists $conf->{uridnsbl_skip_domains}->{lc $value} ||
-            exists $conf->{uridnsbl_skip_domains}->{lc $domain})
-        {
-          dbg("query skipped, uridnsbl_skip_domains: $value");
-          $value = undef;
-          next;
+        if(not defined $opts->{alldomains}) {
+          $domain = $pms->{main}->{registryboundaries}->trim_domain($value);
+          if (exists $conf->{uridnsbl_skip_domains}->{lc $value} ||
+              exists $conf->{uridnsbl_skip_domains}->{lc $domain})
+          {
+            dbg("query skipped, uridnsbl_skip_domains: $value");
+            $value = undef;
+            next;
+	  }
         }
       }
       if ($opts->{tld} && !$pms->{main}->{registryboundaries}->is_domain_valid($value)) {
@@ -1116,5 +1123,6 @@ sub has_hashbl_sha256 { 1 }
 sub has_hashbl_attachments { 1 }
 sub has_hashbl_email_domain { 1 } # user/host/domain option for emails
 sub has_hashbl_email_domain_alias { 1 } # hashbl_email_domain_alias
+sub has_hashbl_alldomains { 1 }
 
 1;
