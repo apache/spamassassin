@@ -40,5 +40,9 @@ describe      __MXG_NOT_ENGLISH  Not English
 header        __MXG_FROM_TLD  From:addr =~ /\.(?<MXG_FROM_TLD>(?:\w+|com?\.)?\w{2})$/i
 describe      __MXG_FROM_TLD  Capture From TLD
 
-
+header        __MXG_THREAD_INDEX_BAD01  exists:Thread-Index
+header        __MXG_THREAD_INDEX_BAD02  Thread-Index =~ /^A[A-Za-z0-9+\/=]{31,}/
+meta          MXG_THREAD_INDEX_BAD  __MXG_THREAD_INDEX_BAD01 && !__MXG_THREAD_INDEX_BAD02
+score         MXG_THREAD_INDEX_BAD  0.001
+describe      MXG_THREAD_INDEX_BAD  Invalid Thread-Index header
 
