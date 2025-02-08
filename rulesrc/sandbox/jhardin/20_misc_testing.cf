@@ -4176,10 +4176,15 @@ describe   POSSIBLE_PAYPAL_PHISH_05    Claims to be from paypal, about an error 
 tflags     POSSIBLE_PAYPAL_PHISH_05    publish
 score      POSSIBLE_PAYPAL_PHISH_05    1.500	# limit
 
-meta       PAYPAL_PHISH_06      (__HDR_RCVD_PAYPAL && __HDR_RCVD_OUTLOOK_HELO && __MXG_PHONE_OBFU01)
-describe   PAYPAL_PHISH_06      Mail passed through both paypal and MSFT infrastructure, has obfuscated phone number; VERY high fraud probability
+meta       PAYPAL_PHISH_06      (__HDR_RCVD_PAYPAL && __HDR_RCVD_OUTLOOK_HELO && __MXG_PHONE_OBFU)
+describe   PAYPAL_PHISH_06      Paypal mail passed through both paypal and MSFT infrastructure, has obfuscated phone number; VERY high fraud probability
 tflags     PAYPAL_PHISH_06      publish
 score      PAYPAL_PHISH_06      4.000	# limit
+
+meta       PAYPAL_PHISH_07      (__HDR_RCVD_PAYPAL && __HDR_RCVD_OUTLOOK_HELO && !__MXG_PHONE_OBFU)
+describe   PAYPAL_PHISH_07      Paypal mail passed through both paypal and MSFT infrastructure; high fraud probability
+tflags     PAYPAL_PHISH_07      publish
+score      PAYPAL_PHISH_07      4.000	# limit
 
 
 header     __FROM_ADDR_GMAIL           From:addr =~ /\@gmail\.com>?$/i
