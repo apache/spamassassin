@@ -296,9 +296,6 @@ CN_B2B_SPAMMER
 # tflags publish
 COMMENT_GIBBERISH
 
-# tflags net
-COMPENSATION
-
 # tflags publish
 CONTENT_AFTER_HTML
 
@@ -482,10 +479,10 @@ FONT_INVIS_POSTEXTRAS
 # tflags net
 FORGED_SPF_HELO
 
-# tflags net
+# tflags publish
 FORM_FRAUD
 
-# tflags net
+# tflags publish
 FORM_FRAUD_3
 
 # tflags publish
@@ -962,6 +959,9 @@ MANY_SPAN_IN_TEXT
 # good enough
 MANY_SUBDOM
 
+# tflags net
+MAY_BE_FORGED
+
 # tflags publish
 MILLION_HUNDRED
 
@@ -1112,6 +1112,9 @@ ODD_FREEM_REPTO
 # tflags publish
 PAYPAL_PHISH_06
 
+# tflags publish
+PAYPAL_PHISH_07
+
 # good enough
 PDS_BAD_THREAD_QP_64
 
@@ -1123,9 +1126,6 @@ PDS_BTC_MSGID
 
 # good enough
 PDS_FRNOM_TODOM_DBL_URL
-
-# tflags net
-PDS_FROM_2_EMAILS
 
 # tflags net
 PDS_HELO_SPF_FAIL
@@ -1635,9 +1635,6 @@ TONLINE_FAKE_DKIM
 TO_EQ_FM_DIRECT_MX
 
 # tflags net
-TO_EQ_FM_DOM_HTML_IMG
-
-# tflags net
 TO_EQ_FM_DOM_HTML_ONLY
 
 # tflags net
@@ -1937,10 +1934,10 @@ URI_WPADMIN
 # tflags publish
 URI_WP_DIRINDEX
 
-# tflags net
+# tflags publish
 URI_WP_HACKED
 
-# tflags net
+# tflags publish
 URI_WP_HACKED_2
 
 # tflags publish
