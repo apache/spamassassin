@@ -3310,6 +3310,7 @@ uri        __URI_IMG_AMAZON            m,://[^/?]+\.(?:ssl-)?(?:images|media)-am
 uri        __URI_PRODUCT_AMAZON        m,://www\.amazon\.(?:com|co\.uk|[a-z][a-z])/dp/[a-z0-9]{10}/,i
 header     __FROM_NAME_AMAZONCOM       From:name =~ /\bamazon\.com\b/i
 
+header     __HDR_RCVD_OUTLOOK          X-Spam-Relays-External =~ /\srdns=[^.]+\.outbound\.protection\.outlook\.com\s/
 header     __HDR_RCVD_OUTLOOK_HELO     X-Spam-Relays-External =~ /\shelo=[^.]+\.outbound\.protection\.outlook\.com\s/
 
 # price alert site that leverages Amazon, avoid FPs
@@ -4185,6 +4186,22 @@ meta       PAYPAL_PHISH_07      (__HDR_RCVD_PAYPAL && __HDR_RCVD_OUTLOOK_HELO &&
 describe   PAYPAL_PHISH_07      Paypal mail passed through both paypal and MSFT infrastructure; high fraud probability
 tflags     PAYPAL_PHISH_07      publish
 score      PAYPAL_PHISH_07      4.000	# limit
+
+#header     __HDR_RCVD_ZELLEPAY    X-Spam-Relays-External =~ /\srdns=\S+\.zellepay\.com\s/
+header     __FROM_ADDR_ZELLEPAY   From:addr =~ /\bzellepay\.com\b/i
+
+body       __ZELLE_PHISH_PHONE    /\b1[- ]?\(888\)[- ]?504-0771\b/
+body       __REQUEST_REFUND       /\b(?:for a refund|recover your funds)\b/
+
+meta       ZELLEPAY_PHISH_01      (__FROM_ADDR_ZELLEPAY && __HDR_RCVD_OUTLOOK_HELO && __MXG_PHONE_OBFU)
+describe   ZELLEPAY_PHISH_01      ZellePay mail received via MS Outlook infrastructure, has obfuscated phone number; VERY high fraud probability
+tflags     ZELLEPAY_PHISH_01      publish
+score      ZELLEPAY_PHISH_01      4.000	# limit
+
+meta       ZELLEPAY_PHISH_02      (__FROM_ADDR_ZELLEPAY && __HDR_RCVD_OUTLOOK_HELO && !__MXG_PHONE_OBFU && __ZELLE_PHISH_PHONE && __REQUEST_REFUND)
+describe   ZELLEPAY_PHISH_02      ZellePay mail received via MS Outlook infrastructure; high fraud probability
+tflags     ZELLEPAY_PHISH_02      publish
+score      ZELLEPAY_PHISH_02      3.000	# limit
 
 
 header     __FROM_ADDR_GMAIL           From:addr =~ /\@gmail\.com>?$/i
