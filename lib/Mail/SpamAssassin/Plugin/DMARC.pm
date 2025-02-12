@@ -391,6 +391,10 @@ sub _check_dmarc {
     }
   }
 
+  if($result->published->can('stringify')) {
+    dbg("Found DMARC record \"" . $result->published->stringify . "\" for domain $mfrom_domain");
+  }
+
   # Report that DMARC failed but it has been overridden because of AAR headers
   if(ref($pms->{arc_verifier}) and ($pms->{arc_verifier}->result) and ($dmarc_arc_verified)) {
     $result->reason->[0]{type} = 'local_policy';
