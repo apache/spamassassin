@@ -3292,7 +3292,7 @@ header     __HDR_RCVD_APPLE            X-Spam-Relays-External =~ /\srdns=\S+\.ap
 header     __FROM_NAME_APPLECOM        From:name =~ /\bapple\.com\b/i
 
 header     __HDR_RCVD_PAYPAL           X-Spam-Relays-External =~ /\srdns=\S+\.paypal\.com\s/
-header     __FROM_NAME_PAYPALCOM       From:name =~ /\bpaypal\.com\b/i
+header     __FROM_NAME_PAYPALCOM       From:name =~ /\bpaypal\.(?:com|co\.uk)\b/i
 
 header     __HDR_RCVD_EBAY             X-Spam-Relays-External =~ /\srdns=\S+\.ebay\.com\s/
 uri        __URI_IMG_EBAY              m,://[^/?]+\.ebayimg\.com/,i
@@ -4153,14 +4153,15 @@ describe   POSSIBLE_PAYPAL_PHISH_01    Claims to be from paypal but has non-payp
 tflags     POSSIBLE_PAYPAL_PHISH_01    publish
 
 # Paypal now apparently using MSFT Outlook or other non-PP infra, so this hits legit PayPal messaging - S/O very low
-meta       POSSIBLE_PAYPAL_PHISH_02    (__FROM_NAME_PAYPALCOM && !__HDR_RCVD_PAYPAL)
+meta       POSSIBLE_PAYPAL_PHISH_02    (__FROM_NAME_PAYPALCOM && !__HDR_RCVD_PAYPAL && !(__PAYPAL_SPF || __PAYPAL_DKIM))
 describe   POSSIBLE_PAYPAL_PHISH_02    Claims to be from paypal but not processed by any paypal MTA
 tflags     POSSIBLE_PAYPAL_PHISH_02    publish
-score      POSSIBLE_PAYPAL_PHISH_02    1.500	# limit
+score      POSSIBLE_PAYPAL_PHISH_02    2.500	# limit
 
+# they apparently wised up and are now BCC'ing the victim
 header     __TO_ONMICROSOFTCOM         To:addr =~ /\@\w+\.onmicrosoft\.com>?$/i
-meta       POSSIBLE_PAYPAL_PHISH_03    (__FROM_NAME_PAYPALCOM && __TO_ONMICROSOFTCOM)
-describe   POSSIBLE_PAYPAL_PHISH_03    Claims to be from paypal, sent to Microsoft365 domain - likely fraud if you don't use MSFT365!
+meta       POSSIBLE_PAYPAL_PHISH_03    (__FROM_NAME_PAYPALCOM && __TO_ONMICROSOFTCOM && !__HDR_RCVD_PAYPAL)
+describe   POSSIBLE_PAYPAL_PHISH_03    Claims to be from paypal but not from paypal MTA, sent to Microsoft365 domain - likely fraud if you don't use MSFT365!
 tflags     POSSIBLE_PAYPAL_PHISH_03    publish
 score      POSSIBLE_PAYPAL_PHISH_03    2.500	# limit
 
@@ -4187,18 +4188,49 @@ describe   PAYPAL_PHISH_07      Paypal mail passed through both paypal and MSFT 
 tflags     PAYPAL_PHISH_07      publish
 score      PAYPAL_PHISH_07      4.000	# limit
 
+header     __PAYPAL_SPF_VIA_OUTLOOK    Received-SPF =~ /Pass \(protection\.outlook\.com: domain of paypal.(?:com|co\.uk) designates [\d+\.]+ as permitted sender\)/
+header     __PAYPAL_SPF         Received-SPF =~ /Pass \([\w\.]+: domain of paypal.(?:com|co\.uk) designates [\d\.]+ as permitted sender\)/
+header     __PAYPAL_DKIM        DKIM-Signature =~ /v=1; a=rsa-sha256; d=paypal.(?:com|co\.uk); .* i=\@paypal.(?:com|co\.uk);/
+
+meta       PAYPAL_PHISH_08      (__FROM_NAME_PAYPALCOM && !__HDR_RCVD_PAYPAL && __PAYPAL_SPF_VIA_OUTLOOK && __HDR_RCVD_OUTLOOK_HELO && __MXG_PHONE_OBFU)
+describe   PAYPAL_PHISH_08      Paypal mail passed through both paypal and MSFT infrastructure, has obfuscated phone number; VERY high fraud probability
+tflags     PAYPAL_PHISH_08      publish
+score      PAYPAL_PHISH_08      4.000	# limit
+
+meta       PAYPAL_PHISH_09      (__FROM_NAME_PAYPALCOM && !__HDR_RCVD_PAYPAL && __PAYPAL_SPF_VIA_OUTLOOK && __HDR_RCVD_OUTLOOK_HELO && !__MXG_PHONE_OBFU)
+describe   PAYPAL_PHISH_09      Paypal mail passed through both paypal and MSFT infrastructure; high fraud probability
+tflags     PAYPAL_PHISH_09      publish
+score      PAYPAL_PHISH_09      3.500	# limit
+
+meta       POSSIBLE_PAYPAL_PHISH_10    (__FROM_NAME_PAYPALCOM && !__HDR_RCVD_PAYPAL && (__PAYPAL_SPF || __PAYPAL_DKIM) && !PAYPAL_PHISH_08 && !PAYPAL_PHISH_09)
+describe   POSSIBLE_PAYPAL_PHISH_10    Claims to be from paypal but not processed by any paypal MTA, yet has paypal authentication headers
+tflags     POSSIBLE_PAYPAL_PHISH_10    publish
+score      POSSIBLE_PAYPAL_PHISH_10    1.500	# limit
+
+meta       POSSIBLE_PAYPAL_PHISH_11    (__FROM_NAME_PAYPALCOM && !__HDR_RCVD_PAYPAL && (__PAYPAL_SPF || __PAYPAL_DKIM) && __REQUEST_REFUND)
+describe   POSSIBLE_PAYPAL_PHISH_11    Claims to be from paypal but not processed by any paypal MTA, suggests requesting a refund; high fraud probability
+tflags     POSSIBLE_PAYPAL_PHISH_11    publish
+score      POSSIBLE_PAYPAL_PHISH_11    1.500	# limit
+
+meta       POSSIBLE_PAYPAL_PHISH_12    (__FROM_NAME_PAYPALCOM && !__HDR_RCVD_PAYPAL && (__PAYPAL_SPF || __PAYPAL_DKIM) && __PHISH_PHONE)
+describe   POSSIBLE_PAYPAL_PHISH_12    Claims to be from paypal but not processed by any paypal MTA, has phishing phone number; high fraud probability
+tflags     POSSIBLE_PAYPAL_PHISH_12    publish
+score      POSSIBLE_PAYPAL_PHISH_12    1.500	# limit
+
+
+
 #header     __HDR_RCVD_ZELLEPAY    X-Spam-Relays-External =~ /\srdns=\S+\.zellepay\.com\s/
 header     __FROM_ADDR_ZELLEPAY   From:addr =~ /\bzellepay\.com\b/i
 
-body       __ZELLE_PHISH_PHONE    /\b1[- ]?\(888\)[- ]?504-0771\b/
-body       __REQUEST_REFUND       /\b(?:for a refund|recover your funds)\b/
+body       __PHISH_PHONE          /\b(?:1[- ]?)?\(?8(?:88|33)\)?[- ]?(?:504-0771|221-1161|567-2096|929-3081)\b/
+body       __REQUEST_REFUND       /\b(?:for a refund|recover your funds|request a refund)\b/
 
 meta       ZELLEPAY_PHISH_01      (__FROM_ADDR_ZELLEPAY && __HDR_RCVD_OUTLOOK_HELO && __MXG_PHONE_OBFU)
 describe   ZELLEPAY_PHISH_01      ZellePay mail received via MS Outlook infrastructure, has obfuscated phone number; VERY high fraud probability
 tflags     ZELLEPAY_PHISH_01      publish
 score      ZELLEPAY_PHISH_01      4.000	# limit
 
-meta       ZELLEPAY_PHISH_02      (__FROM_ADDR_ZELLEPAY && __HDR_RCVD_OUTLOOK_HELO && !__MXG_PHONE_OBFU && __ZELLE_PHISH_PHONE && __REQUEST_REFUND)
+meta       ZELLEPAY_PHISH_02      (__FROM_ADDR_ZELLEPAY && __HDR_RCVD_OUTLOOK_HELO && !__MXG_PHONE_OBFU && __PHISH_PHONE && __REQUEST_REFUND)
 describe   ZELLEPAY_PHISH_02      ZellePay mail received via MS Outlook infrastructure; high fraud probability
 tflags     ZELLEPAY_PHISH_02      publish
 score      ZELLEPAY_PHISH_02      3.000	# limit
