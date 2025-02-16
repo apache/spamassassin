@@ -485,7 +485,7 @@ FORGED_SPF_HELO
 # tflags publish
 FORM_FRAUD
 
-# tflags publish
+# tflags net
 FORM_FRAUD_3
 
 # tflags publish
@@ -881,7 +881,7 @@ HTML_OFF_PAGE
 # tflags publish
 HTML_SHRT_CMNT_OBFU_MANY
 
-# tflags net
+# tflags publish
 HTML_SINGLET_MANY
 
 # good enough
@@ -955,6 +955,9 @@ MALWARE_PASSWORD
 
 # tflags publish
 MALW_ATTACH
+
+# tflags net
+MANY_HDRS_LCASE
 
 # tflags publish
 MANY_SPAN_IN_TEXT
@@ -1613,13 +1616,13 @@ TAGSTAT_IMG_NOT_RCVD_TGST
 # tflags publish
 TARINGANET_IMG_NOT_RCVD_TN
 
-# tflags publish
+# tflags net
 TEQF_USR_IMAGE
 
 # tflags publish
 TEQF_USR_MSGID_HEX
 
-# tflags net
+# tflags publish
 TEQF_USR_MSGID_MALF
 
 # good enough
@@ -1636,6 +1639,9 @@ TONLINE_FAKE_DKIM
 
 # tflags publish
 TO_EQ_FM_DIRECT_MX
+
+# tflags net
+TO_EQ_FM_DOM_HTML_IMG
 
 # tflags net
 TO_EQ_FM_DOM_HTML_ONLY
@@ -1685,7 +1691,7 @@ TVD_LONG_WORD5
 # good enough
 TVD_SPACE_ENCODED
 
-# tflags net
+# good enough
 TVD_SPACE_RATIO_MINFP
 
 # good enough
@@ -1931,7 +1937,7 @@ URI_WPADMIN
 # tflags publish
 URI_WP_DIRINDEX
 
-# tflags publish
+# tflags net
 URI_WP_HACKED
 
 # tflags publish
