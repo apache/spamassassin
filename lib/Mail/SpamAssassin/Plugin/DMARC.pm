@@ -391,7 +391,7 @@ sub _check_dmarc {
     }
   }
 
-  if($result->published->can('stringify')) {
+  if(defined $result and ($result->result ne 'none') and ($result->published->can('stringify'))) {
     dbg("Found DMARC record \"" . $result->published->stringify . "\" for domain $mfrom_domain");
   }
 
