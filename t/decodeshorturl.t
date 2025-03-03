@@ -28,7 +28,7 @@ dns_query_restriction allow tinyurl.com
 clear_url_shortener
 url_shortener tinyurl.com
 url_shortener .page.link
-url_shortener_get bit.ly
+url_shortener bit.ly
 
 body HAS_SHORT_URL              eval:short_url()
 body HAS_SHORT_REDIR            eval:short_url_redir()
