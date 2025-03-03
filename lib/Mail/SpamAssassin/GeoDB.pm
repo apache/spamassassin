@@ -71,7 +71,8 @@ my %geoip2_default_files = (
   'country' => ['GeoIP2-Country.mmdb','GeoLite2-Country.mmdb',
                 'dbip-country.mmdb','dbip-country-lite.mmdb'],
   'isp' => ['GeoIP2-ISP.mmdb','GeoLite2-ISP.mmdb'],
-  'asn' => ['GeoIP2-ASN.mmdb','GeoLite2-ASN.mmdb'],
+  'asn' => ['GeoIP2-ASN.mmdb','GeoLite2-ASN.mmdb',
+            'dbip-asn-lite.mmdb'],
 );
 
 my %country_to_continent = (
