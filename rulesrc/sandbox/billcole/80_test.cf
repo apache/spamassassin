@@ -190,3 +190,8 @@ tflags   HTML_BADATTR publish
 describe T_LINKED_SCRAPE	Claims to have scraped LinkedIN
 body	 T_LINKED_SCRAPE	/I came across your profile on LinkedIn/
 tflags	 T_LINKED_SCRAPE	publish
+
+describe	T_SCC_WEIRDATTR	idiosyncratic DIV id or class name
+rawbody		T_SCC_WEIRDATTR	/DIV (id|class)=v1v1v1v1v1v1v1v1v1v1v/
+tflags		T_SCC_WEIRDATTR	multiple 
+
