@@ -257,8 +257,12 @@ sub sa_t_init {
   $salearn_test_args = "";
   $set_user_prefs = 0;
   $default_cf_lines = "
-    bayes_path ./$userstate/bayes
-    auto_welcomelist_path ./$userstate/auto-welcomelist
+    ifplugin Mail::SpamAssassin::Plugin::Bayes
+      bayes_path ./$userstate/bayes
+    endif
+    ifplugin Mail::SpamAssassin::Plugin::AWL
+      auto_welcomelist_path ./$userstate/auto-welcomelist
+    endif
   ";
 
   read_config();
