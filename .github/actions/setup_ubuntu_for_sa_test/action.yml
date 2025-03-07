@@ -72,7 +72,8 @@ runs:
            libtest-file-sharedir-perl \
            libtest-output-perl \
            libnet-imap-simple-perl \
-           libnet-smtps-perl
+           libnet-smtps-perl \
+           libnsl-dev
       shell: bash
 
     - name: install some needed packages from source

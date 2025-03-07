@@ -11,7 +11,7 @@ runs:
           hash -r
           razor-admin --create
           razor-admin --register
-          cpanm Mail::SPF -n --install-args="--install_path sbin=$HOME/.local/bin" || echo "warn: errors installing Mail::SPF have been ignored"
+          cpanm Mail::SPF -n || echo "warn: errors installing Mail::SPF have been ignored"
           cpanm --installdeps -n .  || echo "warn: errors installing required cpan modules have been ignored"
       shell: bash
 
