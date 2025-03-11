@@ -19,7 +19,9 @@
 
 Mail::SpamAssassin::GeoDB - unified interface for geoip modules
 
-Plugins need to signal SA main package the modules they want loaded
+Plugins need to signal SA main package the modules they want loaded,
+supported modules are C<GeoIP2>, C<Geo::IP>, C<IP::Country::DB_File>
+and C<IP::Country::Fast>.
 
 package Mail::SpamAssassin::Plugin::MyPlugin;
 sub new {
