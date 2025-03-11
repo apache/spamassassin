@@ -1793,9 +1793,10 @@ sub get_daterev_masscheck_description {
           href="!drhref!"><strong>
             <span class="dr">$dr</span>
           </strong></a> $isvishtml
-      </p><p>
+      </p>
+      <p>
         <em><span class="mcsubmitters">$submitters</span></em>
-        $mds_as_text</x>
+        $mds_as_text
       </p>
       <!-- <span class="mctype">$meta->{type}</span> -->
       <!-- <span class="mcwasnet">$net</span> -->
