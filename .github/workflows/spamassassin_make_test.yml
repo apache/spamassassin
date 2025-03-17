@@ -8,9 +8,9 @@ on:
           required: true
           default: '["ubuntu-latest", "macos-latest", "windows-latest"]'
         perls:
-          description: 'List of perl major versions 5.xx xx even 14 - 36'
+          description: 'List of perl major versions 5.xx xx even 14 - 40'
           required: true
-          default: '[ 36, 34, 32, 30, 28, 26, 24, 22, 20, 18, 16, 14 ]'
+          default: '[ 40, 38, 36, 34, 32, 30, 28, 26, 24, 22, 20, 18, 16, 14 ]'
         database:
           description: 'Databases to use for awl and bayes SQL tests [none, postgres, mysql]'
           required: true
