@@ -345,6 +345,11 @@ sub _get_pdf_details {
       if (not defined($location) or index($location, '.') <= 0) {
 	if(defined $2) {
           $location = _parse_string($2);
+        } elsif(defined $1) {
+          $location = $1;
+          local $1;
+          $location =~ s/\\([0-3]?[0-7]{1,2})/chr(oct($1))/ge;
+          $location = _parse_string($location);
         } else {
 	  next;
 	}
