@@ -131,6 +131,18 @@ This plugin helps detected spam using attached PDF files
 
      body RULENAME eval:pdf_is_encrypted()
 
+  pdf_has_form()
+
+     body RULENAME eval:pdf_has_form()
+
+  pdf_has_script()
+
+     body RULENAME eval:pdf_has_script()
+
+  pdf_has_auto_script()
+
+     body RULENAME eval:pdf_has_auto_script()
+
   pdf_is_empty_body()
 
      body RULENAME eval:pdf_is_empty_body(<bytes>)
@@ -200,6 +212,9 @@ sub new {
   $self->register_eval_rule ("pdf_match_fuzzy_md5", $Mail::SpamAssassin::Conf::TYPE_BODY_EVALS);
   $self->register_eval_rule ("pdf_match_details", $Mail::SpamAssassin::Conf::TYPE_BODY_EVALS);
   $self->register_eval_rule ("pdf_is_encrypted", $Mail::SpamAssassin::Conf::TYPE_BODY_EVALS);
+  $self->register_eval_rule ("pdf_has_form", $Mail::SpamAssassin::Conf::TYPE_BODY_EVALS);
+  $self->register_eval_rule ("pdf_has_script", $Mail::SpamAssassin::Conf::TYPE_BODY_EVALS);
+  $self->register_eval_rule ("pdf_has_auto_script", $Mail::SpamAssassin::Conf::TYPE_BODY_EVALS);
   $self->register_eval_rule ("pdf_is_empty_body", $Mail::SpamAssassin::Conf::TYPE_BODY_EVALS);
 
   # lower priority for add_uri_detail_list to work
@@ -272,6 +287,9 @@ sub _get_pdf_details {
   my $no_more_fuzzy = 0;
   my $got_image = 0;
   my $encrypted = 0;
+  my $has_form = 0;
+  my $has_script = 0;
+  my $has_auto_script = 0;
   my %uris;
 
   while ($data =~ /([^\n]+)/g) {
@@ -291,6 +309,26 @@ sub _get_pdf_details {
     if (!$encrypted && index($line, '/Encrypt') == 0) {
       # store encrypted flag.
       $encrypted = $pms->{pdfinfo}->{encrypted} = 1;
+    }
+
+    # Detect if the PDF file has an embedded form
+    if (!$has_form && index($line, '/AcroForm') == 0) {
+      # PDF has a Form.
+      $has_form = $pms->{pdfinfo}->{has_form} = 1;
+    }
+
+    # Detect if the PDF file has Javascript code that can optionally be started automatically
+    if (!$has_script && index($line, '/JS') == 0) {
+      # PDF has Javascript code.
+      $has_script = $pms->{pdfinfo}->{has_script} = 1;
+    }
+    if (!$has_auto_script && index($line, '/AA') == 0) {
+      $has_auto_script++;
+    } elsif (!$has_auto_script && index($line, '/OpenAction') == 0) {
+      $has_auto_script++;
+    }
+    if($has_auto_script and $has_script) {
+      $pms->{pdfinfo}->{has_auto_script} = 1;
     }
 
     # From a v1.3 pdf
@@ -521,6 +559,24 @@ sub pdf_is_encrypted {
   return $pms->{pdfinfo}->{encrypted} ? 1 : 0;
 }
 
+sub pdf_has_form {
+  my ($self, $pms, $body) = @_;
+
+  return $pms->{pdfinfo}->{has_form} ? 1 : 0;
+}
+
+sub pdf_has_script {
+  my ($self, $pms, $body) = @_;
+
+  return $pms->{pdfinfo}->{has_script} ? 1 : 0;
+}
+
+sub pdf_has_auto_script {
+  my ($self, $pms, $body) = @_;
+
+  return $pms->{pdfinfo}->{has_auto_script} ? 1 : 0;
+}
+
 sub pdf_count {
   my ($self, $pms, $body, $min, $max) = @_;
 
@@ -675,5 +731,8 @@ sub has_pdf_image_size_range { 1 }
 sub has_pdf_match_md5 { 1 }
 sub has_pdf_match_fuzzy_md5 { 1 }
 sub has_pdf_match_details { 1 }
+sub has_pdf_has_form { 1 }
+sub has_pdf_has_script { 1 }
+sub has_pdf_has_auto_script { 1 }
 
 1;
