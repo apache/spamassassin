@@ -194,7 +194,7 @@ BITCOIN_IMGUR
 # good enough
 BITCOIN_MALF_HTML
 
-# tflags net
+# tflags publish
 BITCOIN_MALWARE
 
 # tflags publish
@@ -485,7 +485,7 @@ FORGED_SPF_HELO
 # tflags publish
 FORM_FRAUD
 
-# tflags net
+# tflags publish
 FORM_FRAUD_3
 
 # tflags publish
@@ -897,9 +897,6 @@ JH_SPAMMY_PATTERN01
 JH_SPAMMY_PATTERN02
 
 # tflags net
-KHOP_FAKE_EBAY
-
-# tflags net
 KHOP_HELO_FCRDNS
 
 # good enough
@@ -1039,9 +1036,6 @@ MONEY_FREEMAIL_REPTO
 
 # good enough
 MONEY_FROM_41
-
-# good enough
-MONEY_FROM_MISSP
 
 # good enough
 MONEY_NOHTML
@@ -1470,6 +1464,9 @@ RDNS_NUM_TLD_ATCHNX
 RDNS_NUM_TLD_XM
 
 # good enough
+READY_TO_SHIP
+
+# good enough
 REPLYTO_WITHOUT_TO_CC
 
 # tflags publish
@@ -1519,6 +1516,9 @@ REPTO_INFONUMSCOM
 
 # tflags publish
 SCC_BOGUS_CTE_1
+
+# tflags publish
+SCC_CTMPP
 
 # tflags publish
 SCC_ISEMM_LID_1
@@ -1677,9 +1677,6 @@ TO_EQ_FM_DOM_HTML_IMG
 TO_EQ_FM_DOM_SPF_FAIL
 
 # tflags net
-TO_EQ_FM_HTML_ONLY
-
-# tflags net
 TO_EQ_FM_SPF_FAIL
 
 # tflags publish
@@ -1694,7 +1691,7 @@ TO_NO_BRKTS_HTML_IMG
 # tflags publish
 TO_NO_BRKTS_HTML_ONLY
 
-# tflags net
+# good enough
 TO_NO_BRKTS_MSFT
 
 # tflags publish
@@ -1714,9 +1711,6 @@ TVD_SPACE_ENCODED
 
 # good enough
 TVD_SPACE_RATIO_MINFP
-
-# tflags net
-TVD_SUBJ_NUM_OBFU_MINFP
 
 # tflags publish
 TW_GIBBERISH_MANY
@@ -1931,7 +1925,7 @@ URI_MALWARE_SCMS
 # tflags userconf
 URI_NOVOWEL
 
-# tflags net
+# tflags publish
 URI_ONLY_MSGID_MALF
 
 # tflags publish
@@ -1958,10 +1952,10 @@ URI_WPADMIN
 # tflags publish
 URI_WP_DIRINDEX
 
-# tflags net
+# tflags publish
 URI_WP_HACKED
 
-# tflags net
+# tflags publish
 URI_WP_HACKED_2
 
 # tflags publish
