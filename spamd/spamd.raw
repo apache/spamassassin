@@ -2788,7 +2788,9 @@ sub handle_virtual_config_dir {
     }
 
     # Log that the default configuration is being used for a user.
-    info("spamd: using default config for $username: $prefsfile");
+    if (-f $prefsfile) {
+      info("spamd: using default config for $username: $prefsfile");
+    }
   }
 
   if ( -f $prefsfile ) {
