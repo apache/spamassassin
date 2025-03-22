@@ -6,6 +6,7 @@ use SATest; sa_t_init("relaycountry");
 my $tests = 0;
 my %has;
 eval { require MaxMind::DB::Reader;   $tests += 2; $has{GEOIP2}  = 1 };
+eval { require IP::Geolocation::MMDB; $tests += 2; $has{IPMMDB}  = 1 };
 eval { require Geo::IP;               $tests += 2; $has{GEOIP}   = 1 };
 eval { require IP::Country::Fast;     $tests += 2; $has{FAST}    = 1 };
 eval { require IP::Country::DB_File;
@@ -26,22 +27,29 @@ tstpre ("
   loadplugin Mail::SpamAssassin::Plugin::RelayCountry
 ");
 
-if (defined $has{GEOIP2}) {
-  tstprefs ("
-    geodb_module GeoIP2
-    geodb_search_path data/geodb
-    add_header all Relay-Country _RELAYCOUNTRY_
-  ");
-  # Check for country of gmail.com mail server
-  %patterns = (
-    q{ X-Spam-Relay-Country: US }, '',
-  );
-  ok sarun ("-L -t < data/spam/relayUS.eml", \&patterns_run_cb);
-  ok_all_patterns();
-  clear_pattern_counters();
-}
-else {
-  diag "skipping MaxMind::DB::Reader (GeoIP2) tests (not installed)\n";
+my @geoip2_readers = (
+    ['GEOIP2', 'MaxMind::DB::Reader',   'GeoIP2'],
+    ['IPMMDB', 'IP::Geolocation::MMDB', 'IP::Geolocation::MMDB'],
+);
+for my $reader (@geoip2_readers) {
+  my ($geoip2, $reader_class, $geodb_module) = @{$reader};
+  if (defined $has{$geoip2}) {
+    tstprefs ("
+      geodb_module $geodb_module
+      geodb_search_path data/geodb
+      add_header all Relay-Country _RELAYCOUNTRY_
+    ");
+    # Check for country of gmail.com mail server
+    %patterns = (
+      q{ X-Spam-Relay-Country: US }, '',
+    );
+    ok sarun ("-L -t < data/spam/relayUS.eml", \&patterns_run_cb);
+    ok_all_patterns();
+    clear_pattern_counters();
+  }
+  else {
+    diag "skipping $reader_class (GeoIP2) tests (not installed)\n";
+  }
 }
 
 

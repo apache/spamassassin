@@ -309,6 +309,7 @@ $makefile{META_MERGE} = {
         'Mail::SPF' =>                 0,
         'MaxMind::DB::Reader' =>       0,
         'MaxMind::DB::Reader::XS' =>   0,
+        'IP::Geolocation:MMDB' =>      0,
         'Geo::IP' =>                   0,
         'IP::Country::DB_File' =>      0,
         'IP::Country::Fast' =>         0,

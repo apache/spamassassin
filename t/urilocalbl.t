@@ -5,6 +5,7 @@ use SATest; sa_t_init("urilocalbl");
 
 my $tests = 0;
 eval { require MaxMind::DB::Reader;   $tests += 8; $has{GEOIP2}  = 1 };
+eval { require IP::Geolocation::MMDB; $tests += 8; $has{IPMMDB}  = 1 };
 eval { require Geo::IP;               $tests += 8; $has{GEOIP}   = 1 };
 eval {
   require IP::Country::DB_File;
@@ -24,6 +25,7 @@ $ipv6 = $net && conf_bool('run_ipv6_dns_tests');
 
 $tests *= 2 if $net;
 $tests += 1 if $ipv6 && defined $has{GEOIP2};
+$tests += 1 if $ipv6 && defined $has{IPMMDB};
 $tests += 1 if $ipv6 && defined $has{DB_FILE};
 
 plan tests => $tests;
@@ -80,35 +82,42 @@ my $rules_ipv6 = "
   describe X_URIBL_CIDR4 uri is our TestIP4
 ";
 
-if (defined $has{GEOIP2}) {
-  my $lrules = "
-    geodb_module GeoIP2
-    geodb_search_path data/geodb
-    $rules
-  ";
-  tstlocalrules ($lrules);
-  %patterns = %patterns_ipv4;
-  ok sarun ("-L -t < data/spam/relayUS.eml", \&patterns_run_cb);
-  ok_all_patterns();
-  clear_pattern_counters();
-
-  if ($net) {
-    $lrules .= $rules_ipv6 if $ipv6;
+my @geoip2_readers = (
+    ['GEOIP2', 'MaxMind::DB::Reader',   'GeoIP2'],
+    ['IPMMDB', 'IP::Geolocation::MMDB', 'IP::Geolocation::MMDB'],
+);
+for my $reader (@geoip2_readers) {
+  my ($geoip2, $reader_class, $geodb_module) = @{$reader};
+  if (defined $has{$geoip2}) {
+    my $lrules = "
+      geodb_module $geodb_module
+      geodb_search_path data/geodb
+      $rules
+    ";
     tstlocalrules ($lrules);
-    if ($ipv6) {
-      %patterns = (%patterns_ipv4, %patterns_ipv6);
-    } else {
-      %patterns = %patterns_ipv4;
-      warn "skipping IPv6 DNS lookup tests (run_ipv6_dns_tests=n)\n";
-    }
-    ok sarun ("-t < data/spam/urilocalbl_net.eml", \&patterns_run_cb);
+    %patterns = %patterns_ipv4;
+    ok sarun ("-L -t < data/spam/relayUS.eml", \&patterns_run_cb);
     ok_all_patterns();
     clear_pattern_counters();
+
+    if ($net) {
+      $lrules .= $rules_ipv6 if $ipv6;
+      tstlocalrules ($lrules);
+      if ($ipv6) {
+        %patterns = (%patterns_ipv4, %patterns_ipv6);
+      } else {
+        %patterns = %patterns_ipv4;
+        warn "skipping IPv6 DNS lookup tests (run_ipv6_dns_tests=n)\n";
+      }
+      ok sarun ("-t < data/spam/urilocalbl_net.eml", \&patterns_run_cb);
+      ok_all_patterns();
+      clear_pattern_counters();
+    } else {
+      warn "skipping DNS lookup tests (run_net_tests=n)\n";
+    }
   } else {
-    warn "skipping DNS lookup tests (run_net_tests=n)\n";
+    warn "skipping $reader_class (GeoIP2) tests (not installed)\n";
   }
-} else {
-  warn "skipping MaxMind::DB::Reader (GeoIP2) tests (not installed)\n";
 }
 
 

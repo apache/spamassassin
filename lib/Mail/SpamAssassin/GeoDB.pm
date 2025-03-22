@@ -153,7 +153,7 @@ sub init_database {
   my ($db, $dbapi, $loaded);
 
   ## GeoIP2
-  if (!$db && (!$geodb_opts->{module} || $geodb_opts->{module} eq 'geoip2')) {
+  if (!$db && (!$geodb_opts->{module} || $geodb_opts->{module} =~ /^geoip2/)) {
     ($db, $dbapi) = $self->load_geoip2($geodb_opts);
     $loaded = 'geoip2' if $db;
   }
@@ -214,18 +214,38 @@ sub load_geoip2 {
   my ($self, $geodb_opts) = @_;
   my ($db, $dbapi, $ok);
 
-  # Warn about fatal errors if this module was specifically requested
-  my $errwarn = ($geodb_opts->{module}||'') eq 'geoip2';
+  my $module = $geodb_opts->{module} || '';
 
-  eval {
-    require MaxMind::DB::Reader;
-  } or do {
-    my $err = $@;
-    $err =~ s/ at .*//s;
-    $err = "geodb: MaxMind::DB::Reader (GeoIP2) module load failed: $err";
-    $errwarn ? warn("$err\n") : dbg($err);
-    return (undef, undef);
-  };
+  # Warn about fatal errors if this module was specifically requested
+  my $errwarn = $module =~ /^geoip2/;
+
+  my $reader_class;
+  if ($module eq '' || $module eq 'geoip2') {
+    eval {
+      require MaxMind::DB::Reader;
+      $reader_class = 'MaxMind::DB::Reader';
+    } or do {
+      my $err = $@;
+      $err =~ s/ at .*//s;
+      $err = "geodb: MaxMind::DB::Reader (GeoIP2) module load failed: $err";
+      $errwarn ? warn("$err\n") : dbg($err);
+      if ($module eq 'geoip2') {
+        return (undef, undef);
+      }
+    }
+  }
+  if (!defined $reader_class) {
+    eval {
+      require IP::Geolocation::MMDB;
+      $reader_class = 'IP::Geolocation::MMDB';
+    } or do {
+      my $err = $@;
+      $err =~ s/ at .*//s;
+      $err = "geodb: IP::Geolocation::MMDB (GeoIP2) module load failed: $err";
+      $errwarn ? warn("$err\n") : dbg($err);
+      return (undef, undef);
+    };
+  }
 
   my %path;
   foreach my $dbtype (@geoip_types) {
@@ -258,7 +278,7 @@ sub load_geoip2 {
 
     if (defined $path{$dbtype}) {
       eval {
-        $db->{$dbtype} = MaxMind::DB::Reader->new(
+        $db->{$dbtype} = $reader_class->new(
           file => $path{$dbtype},
         );
         die "unknown error" unless $db->{$dbtype};

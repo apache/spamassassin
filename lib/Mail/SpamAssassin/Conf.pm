@@ -4351,6 +4351,7 @@ If not specified, all supported ones are tried in this order:
 Plugins can override this internally if required.
 
  MaxMind::DB::Reader  (same as GeoIP2::Database::Reader)
+ IP::Geolocation::MMDB
  Geo::IP
  IP::Country::DB_File  (not used unless geodb_options path set)
  IP::Country::Fast
@@ -4368,6 +4369,8 @@ Plugins can override this internally if required.
       if ($value eq 'maxmind::db::reader' ||
             $value eq 'geoip2::database::reader' || $value eq 'geoip2') {
         $self->{geodb}->{module} = 'geoip2';
+      } elsif ($value eq 'ip::geolocation::mmdb') {
+        $self->{geodb}->{module} = 'geoip2-mmdb';
       } elsif ($value eq 'geo::ip' || $value eq 'geoip') {
         $self->{geodb}->{module} = 'geoip';
       } elsif ($value eq 'ip::country::db_file' || $value eq 'db_file') {

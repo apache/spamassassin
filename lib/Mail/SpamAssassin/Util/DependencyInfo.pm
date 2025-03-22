@@ -154,6 +154,15 @@ our @OPTIONAL_MODULES = (
   used by RelayCountry / URILocalBL plugins.',
 },
 {
+  module => 'IP::Geolocation::MMDB',
+  version => 0,
+  desc => 'Fast alternative to the deprecated MaxMind::DB::Reader modules.
+  Used by the RelayCountry plugin (not enabled by default) to
+  determine the domain country codes of each relay in the path of an email.
+  Also used by the URILocalBL plugin (not enabled by default) to provide ISP
+  and Country code based filtering.',
+},
+{
   module => 'Geo::IP',
   version => 0,
   desc => 'Used by the RelayCountry plugin (not enabled by default) to
