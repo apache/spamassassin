@@ -65,7 +65,7 @@ tstpre ("
 clear_localrules();
 
 %txrep_pattern0 = (
-  q{ 98 TXREP } => 'Score normalizing',
+  q{ 250 TXREP } => 'Score normalizing',
 );
 if (SQLITE) {
   my $db = "$workdir/txrep.db";

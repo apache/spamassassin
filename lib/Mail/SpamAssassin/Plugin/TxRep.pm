@@ -1482,7 +1482,7 @@ sub check_reputation {
   my ($self, $storage, $pms, $key, $id, $ip, $signedby, $msgscore) = @_;
 
   my $delta  = 0;
-  my $weight = ($key eq 'MSG_ID') ? 1 : $pms->{main}->{conf}->{'txrep_weight_'.lc($key)};
+  my $weight = ($key eq 'MSG_ID') ? 1 : $self->{conf}->{'txrep_weight_'.lc($key)};
 
 #  {
 #    #Bug 7164, trying to find out reason for these: _WARN: Use of uninitialized value $msgscore in addition (+) at /usr/share/perl5/vendor_perl/Mail/SpamAssassin/Plugin/TxRep.pm line 1415.

@@ -226,7 +226,7 @@ sub get_addr_entry {
       $cnt++;
     }
     $sth->finish();
-    return $entry if $rc;
+    return $entry if ($rc and ($cnt > 0));
   }
   undef $sth;
   undef $rc;
@@ -333,7 +333,7 @@ sub add_score {
       @signedby = !defined $signedby ? () : split(' ', lc $signedby);
       @signedby = ( '' )  if !@signedby;
     }
-    my @args = ($self->{_username}, $email, $ip, 1, $score);
+    my @args = ($self->{_username}, $email, $ip, $entry->{msgcount}, $score);
     my $sql = sprintf("INSERT INTO %s (%s) VALUES (%s)", $self->{tablename},
                       join(',', @fields),  join(',', ('?') x @fields));
     if ($self->{dsn} =~ /^DBI:(?:pg|SQLite)/i) {
