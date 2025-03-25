@@ -457,7 +457,7 @@ sub _get_emails {
         $email = $username.'@'.$domain;
       }
       next if $seen{$email}++;
-      next if defined $acl && $acl ne 'all' && !$self->{hashbl_acl}{$acl}{$domain};
+      next if defined $acl && !$self->{hashbl_acl}{$acl}{$domain};
       push @emails, $email;
     }
   }
