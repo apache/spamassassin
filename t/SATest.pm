@@ -89,6 +89,8 @@ BEGIN {
               if (defined $abspathdir) {
                 $abspathdir  = untaint_var($abspathdir);
               }
+              # Fix slashes to correctly compare path
+              $pathdir =~ s;\\;/;g;
               ((defined $abspathdir) and (lc $pathdir eq lc $abspathdir))?($abspathdir):()
             }
           @pathdirs);
