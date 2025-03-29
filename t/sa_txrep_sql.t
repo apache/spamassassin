@@ -139,11 +139,11 @@ if (SQL) {
 
   %anti_patterns = %txrep_pattern0;
   %patterns = ();
-  sarun ("-t -D all < data/txrep/6 2>/tmp/2_6", \&patterns_run_cb);
+  sarun ("-t < data/txrep/6", \&patterns_run_cb);
   ok_all_patterns();
 
   %anti_patterns = ();
   %patterns = %txrep_pattern0;
-  sarun ("-t -D all < data/txrep/7 2>/tmp/2_7", \&patterns_run_cb);
+  sarun ("-t < data/txrep/7", \&patterns_run_cb);
   ok_all_patterns();
 }
