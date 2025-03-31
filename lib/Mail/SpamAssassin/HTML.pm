@@ -53,7 +53,7 @@ my %tricks = map {; $_ => 1 }
 
 # elements that change text style
 my %elements_text_style = map {; $_ => 1 }
-  qw( body font table tr th td big small basefont marquee span p div a ),
+  qw( body font table tr th td big small basefont marquee span p div a strong em b i sup sub ),
 ;
 
 # elements that insert whitespace
@@ -86,6 +86,14 @@ $ok_attributes{span}{$_} = 1 for qw( style );
 $ok_attributes{p}{$_} = 1 for qw( style );
 $ok_attributes{div}{$_} = 1 for qw( style );
 $ok_attributes{a}{$_} = 1 for qw( style );
+$ok_attributes{strong}{$_} = 1 for qw( style );
+$ok_attributes{em}{$_} = 1 for qw( style );
+$ok_attributes{b}{$_} = 1 for qw( style );
+$ok_attributes{i}{$_} = 1 for qw( style );
+$ok_attributes{big}{$_} = 1 for qw( style );
+$ok_attributes{small}{$_} = 1 for qw( style );
+$ok_attributes{sup}{$_} = 1 for qw( style );
+$ok_attributes{sub}{$_} = 1 for qw( style );
 
 sub new {
   my ($class, $character_semantics_input, $character_semantics_output) = @_;
@@ -528,13 +536,9 @@ sub text_style {
     # big and small tags
     if ($tag eq "big") {
       $new{size} += 1;
-      push @{ $self->{text_style} }, \%new;
-      return;
     }
     if ($tag eq "small") {
       $new{size} -= 1;
-      push @{ $self->{text_style} }, \%new;
-      return;
     }
 
     # tag attributes

@@ -102,6 +102,46 @@ my @tests = (
         visibility         => 'invisible',
         font_invalid_color => 0,
     },
+    {
+        html               => '<strong style="display: none;">X</strong>',
+        visibility         => 'invisible',
+        font_invalid_color => 0,
+    },
+    {
+        html               => '<em style="display: none;">X</em>',
+        visibility         => 'invisible',
+        font_invalid_color => 0,
+    },
+    {
+        html               => '<b style="display: none;">X</b>',
+        visibility         => 'invisible',
+        font_invalid_color => 0,
+    },
+    {
+        html               => '<i style="display: none;">X</i>',
+        visibility         => 'invisible',
+        font_invalid_color => 0,
+    },
+    {
+        html               => '<big style="display: none;">X</big>',
+        visibility         => 'invisible',
+        font_invalid_color => 0,
+    },
+    {
+        html               => '<small style="display: none;">X</small>',
+        visibility         => 'invisible',
+        font_invalid_color => 0,
+    },
+    {
+        html               => '<sup style="display: none;">X</sup>',
+        visibility         => 'invisible',
+        font_invalid_color => 0,
+    },
+    {
+        html               => '<sub style="display: none;">X</sub>',
+        visibility         => 'invisible',
+        font_invalid_color => 0,
+    },
 );
 
 plan tests => scalar @tests * 2;
