@@ -623,7 +623,7 @@ See above.
 
 =item blocklist_to user@example.com
 
-Previously blacklist_auth which will work interchangeably until 4.1.
+Previously blacklist_to which will work interchangeably until 4.1.
 
 If the given address appears as a recipient in the message headers
 (Resent-To, To, Cc, obvious envelope recipient, etc.) the mail will
