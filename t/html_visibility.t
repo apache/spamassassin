@@ -142,6 +142,21 @@ my @tests = (
         visibility         => 'invisible',
         font_invalid_color => 0,
     },
+    {
+        html               => '<span style="color: currentColor;">X</span>',
+        visibility         => 'visible',
+        font_invalid_color => 0,
+    },
+    {
+        html               => '<span style="background-color: currentColor;">X</span>',
+        visibility         => 'invisible',
+        font_invalid_color => 0,
+    },
+    {
+        html               => '<span style="background: currentColor;">X</span>',
+        visibility         => 'invisible',
+        font_invalid_color => 0,
+    },
 );
 
 plan tests => scalar @tests * 2;

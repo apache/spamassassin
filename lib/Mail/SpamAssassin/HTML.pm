@@ -580,7 +580,10 @@ sub text_style {
             my $whcolor = $1 ? 'bgcolor' : 'fgcolor';
             my $value = lc($2);
 
-            if ($value ne 'inherit') {
+            if ($value eq 'currentcolor') {
+              # inherit color from parent foreground
+              $new{$whcolor} = $self->{text_style}[-1]->{fgcolor};
+            } elsif ($value ne 'inherit') {
               eval {
                 $new{$whcolor} = Mail::SpamAssassin::HTML::Color->new($value);
                 1;
@@ -594,6 +597,11 @@ sub text_style {
             my $layers = parse_css_background($1);
             # loop through values in the bottom layer and look for valid colors
             for my $value (@{$layers->[-1]}) {
+              if (lc($value) eq 'currentcolor') {
+                # inherit color from parent foreground
+                $new{bgcolor} = $self->{text_style}[-1]->{fgcolor};
+                last;
+              }
               my $color = eval { Mail::SpamAssassin::HTML::Color->new($value) };
               if (defined $color) {
                 $new{bgcolor} = $color;
