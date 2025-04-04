@@ -121,9 +121,9 @@ are provided as a space-separated list, although this behaviour may change.
 C<Mail::DKIM> Mail::SpamAssassin::Plugin(3)
 
   http://dkimproxy.sourceforge.net/
-  https://tools.ietf.org/rfc/rfc4871.txt
-  https://tools.ietf.org/rfc/rfc4870.txt
-  https://tools.ietf.org/rfc/rfc5617.txt
+  https://www.rfc-editor.org/rfc/rfc4871
+  https://www.rfc-editor.org/rfc/rfc4870
+  https://www.rfc-editor.org/rfc/rfc5617
   https://datatracker.ietf.org/group/dkim/about/
 
 =cut

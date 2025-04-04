@@ -75,9 +75,9 @@ use constant DUMP_BACKUP => 8;
 # 
 # sources:
 #   IANA  = <https://www.iana.org/numbers>,
-#   5735  = <https://tools.ietf.org/html/rfc5735>
-#   6598  = <https://tools.ietf.org/html/rfc6598>
-#   4193  = <https://tools.ietf.org/html/rfc4193>
+#   5735  = <https://www.rfc-editor.org/rfc/rfc5735>
+#   6598  = <https://www.rfc-editor.org/rfc/rfc6598>
+#   4193  = <https://www.rfc-editor.org/rfc/rfc4193>
 #   CYMRU = <https://www.team-cymru.com/bogon-reference.html>
 #
 # This includes:

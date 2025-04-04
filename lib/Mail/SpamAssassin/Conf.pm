@@ -3081,7 +3081,7 @@ zone.  There's a few things to note:
 Duplicated IPs are only queried once and reserved IPs are not queried.
 Private IPs are those listed in
 C<https://www.iana.org/assignments/ipv4-address-space>, or
-C<https://tools.ietf.org/html/rfc5735> as private.
+C<https://www.rfc-editor.org/rfc/rfc5735> as private.
 
 =item the 'set' argument
 
