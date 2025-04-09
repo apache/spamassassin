@@ -53,7 +53,7 @@ my %tricks = map {; $_ => 1 }
 
 # elements that change text style
 my %elements_text_style = map {; $_ => 1 }
-  qw( body font table tr th td big small basefont marquee span p div a strong em b i sup sub ),
+  qw( body font table tr th td big small marquee span p div a strong em b i sup sub ),
 ;
 
 # elements that insert whitespace
@@ -74,7 +74,6 @@ my %elements_uri = map {; $_ => 1 }
 
 # permitted element attributes
 my %ok_attributes;
-$ok_attributes{basefont}{$_} = 1 for qw( color face size );
 $ok_attributes{body}{$_} = 1 for qw( text bgcolor link alink vlink background );
 $ok_attributes{font}{$_} = 1 for qw( color face size );
 $ok_attributes{marquee}{$_} = 1 for qw( bgcolor background );
@@ -94,6 +93,20 @@ $ok_attributes{big}{$_} = 1 for qw( style );
 $ok_attributes{small}{$_} = 1 for qw( style );
 $ok_attributes{sup}{$_} = 1 for qw( style );
 $ok_attributes{sub}{$_} = 1 for qw( style );
+
+# Map font "size" attribute to font size in pixels
+my @font_size_map = (undef, 10, 13, 16, 18, 24, 32, 48);
+
+# Map font-size keyword to font size in pixels
+my %font_keyword_map = (
+  'xx-small' => 9,
+  'x-small' => 10,
+  'small' => 13,
+  'medium' => 16,
+  'large' => 18,
+  'x-large' => 24,
+  'xx-large' => 32,
+);
 
 sub new {
   my ($class, $character_semantics_input, $character_semantics_output) = @_;
@@ -122,11 +135,10 @@ sub html_start {
   $self->put_results(html => 1);
 
   # initial display attributes
-  $self->{basefont} = 3;
   my %default = (tag => "default",
 		 fgcolor => Mail::SpamAssassin::HTML::Color->new("black"),
 		 bgcolor => Mail::SpamAssassin::HTML::Color->new("white"),
-		 size => $self->{basefont});
+		 font_size => 16);
   push @{ $self->{text_style} }, \%default;
 }
 
@@ -229,8 +241,8 @@ sub parse {
 
   $self->{image_area} = 0;
   $self->{title_index} = -1;
-  $self->{max_size} = 3;	# start at default size
-  $self->{min_size} = 3;	# start at default size
+  $self->{max_size} = 16;	# start at default size
+  $self->{min_size} = 16;	# start at default size
   $self->{closed_html} = 0;
   $self->{closed_body} = 0;
   $self->{closed_extra} = 0;
@@ -516,14 +528,6 @@ sub text_style {
       # TODO: skip if we've already seen body
     }
 
-    # change basefont (only change size)
-    if ($tag eq "basefont" &&
-	exists $attr->{size} && $attr->{size} =~ /^\s*(\d+)/)
-    {
-      $self->{basefont} = $1;
-      return;
-    }
-
     # close elements with optional end tags
     $self->close_table_tag($tag) if ($tag eq "td" || $tag eq "tr");
 
@@ -535,10 +539,10 @@ sub text_style {
 
     # big and small tags
     if ($tag eq "big") {
-      $new{size} += 1;
+      $new{font_size} *= 1.2;
     }
     if ($tag eq "small") {
-      $new{size} -= 1;
+      $new{font_size} /= 1.2;
     }
 
     # tag attributes
@@ -562,13 +566,26 @@ sub text_style {
         }
       }
       elsif ($name eq "size") {
+        my $size;
 	if ($attr->{size} =~ /^\s*([+-]\d+)/) {
 	  # relative font size
-	  $new{size} = $self->{basefont} + $1;
+          $size = 3 + $1;
 	}
 	elsif ($attr->{size} =~ /^\s*(\d+)/) {
 	  # absolute font size
-	  $new{size} = $1;
+	  $size = $1;
+        }
+        if (defined($size)) {
+          if ($size < 1) {
+            $size = 1;
+            $self->put_results(font_invalid_size => 1);
+          } elsif ($size > 7) {
+            $size = 7;
+            $self->put_results(font_invalid_size => 1);
+          }
+          $new{font_size} = $font_size_map[$size];
+        } else {
+          $self->put_results(font_invalid_size => 1);
         }
       }
       elsif ($name eq 'style') {
@@ -609,6 +626,14 @@ sub text_style {
               }
             }
 	  }
+          elsif (/^\s*font-size:\s*(.+?)\s*$/i) {
+            eval {
+              $new{font_size} = $self->parse_font_size($1);
+              1;
+            } or do {
+              $self->put_results(font_invalid_size => 1);
+            }
+          }
 	  elsif (/^\s*([a-z_-]+)\s*:\s*(\S.*?)\s*$/i) {
 	    # "display: none", "visibility: hidden", etc.
 	    $new{'style_'.lc($1)} = lc($2);
@@ -626,11 +651,11 @@ sub text_style {
       # blend new text color with new background color
       $new{fgcolor}->blend($new{bgcolor});
 
-      if ($new{size} > $self->{max_size}) {
-	$self->{max_size} = $new{size};
+      if ($new{font_size} > $self->{max_size}) {
+	$self->{max_size} = $new{font_size};
       }
-      elsif ($new{size} < $self->{min_size}) {
-	$self->{min_size} = $new{size};
+      elsif ($new{font_size} < $self->{min_size}) {
+	$self->{min_size} = $new{font_size};
       }
     }
     push @{ $self->{text_style} }, \%new;
@@ -730,17 +755,66 @@ sub parse_css_background {
 
 }
 
+# Parses a font-size value.
+# Returns the size in pixels.
+sub parse_font_size {
+  my $self = shift;
+  my $size = lc(shift);
+
+  $size =~ s/^\s+|\s+$//g; # trim whitespace
+
+  if ($size =~ /^([\d.]+)\s*(px|pt|r?em|ex|%)?$/) {
+    my $value = $1;
+    my $unit = $2 // 'px';
+    if ($unit eq 'px') {
+      return $value;
+    }
+    elsif ($unit eq 'pt') {
+      return $value * 1.33;
+    }
+    elsif ($unit eq 'em') {
+      return $value * $self->{text_style}[-1]->{font_size};
+    }
+    elsif ($unit eq 'rem') {
+      return $value * 16;
+    }
+    elsif ($unit eq 'ex') {
+      return $value * 7;
+    }
+    elsif ($unit eq '%') {
+      return $value / 100 * $self->{text_style}[-1]->{font_size};
+    }
+  }
+  elsif (exists($font_keyword_map{$size})) {
+    return $font_keyword_map{lc $size};
+  }
+  elsif ($size eq 'larger') {
+    return $self->{text_style}[-1]->{font_size} * 1.2;
+  }
+  elsif ($size eq 'smaller') {
+    return $self->{text_style}[-1]->{font_size} / 1.2;
+  }
+  elsif ($size eq 'inherit') {
+    return $self->{text_style}[-1]->{font_size};
+  }
+  elsif ($size eq 'initial') {
+    return 16;
+  }
+
+  die "Invalid font size: $size";
+}
+
 sub html_font_invisible {
   my ($self, $text) = @_;
 
   my $fg = $self->{text_style}[-1]->{fgcolor};
   my $bg = $self->{text_style}[-1]->{bgcolor};
-  my $size = $self->{text_style}[-1]->{size};
+  my $font_size = $self->{text_style}[-1]->{'font_size'};
   my $display = $self->{text_style}[-1]->{style_display};
   my $visibility = $self->{text_style}[-1]->{style_visibility};
 
   # size too small
-  if ($size <= 1) {
+  if ($font_size < 8) {
     return 1;
   }
 

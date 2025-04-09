@@ -89,7 +89,7 @@ my @tests = (
     },
     {
         html               => '<font size="1">X</font>',
-        visibility         => 'invisible',
+        visibility         => 'visible',
         font_invalid_color => 0,
     },
     {
@@ -140,6 +140,41 @@ my @tests = (
     {
         html               => '<sub style="display: none;">X</sub>',
         visibility         => 'invisible',
+        font_invalid_color => 0,
+    },
+    {
+        html               => '<span style="font-size: 0px;">X</span>',
+        visibility         => 'invisible',
+        font_invalid_color => 0,
+    },
+    {
+        html               => '<span style="font-size: 0">X</span>',
+        visibility         => 'invisible',
+        font_invalid_color => 0,
+    },
+    {
+        html               => '<span style="font-size: 1 em;">X</span>',
+        visibility         => 'visible',
+        font_invalid_color => 0,
+    },
+    {
+        html               => '<span style="font-size: 10pt;">X</span>',
+        visibility         => 'visible',
+        font_invalid_color => 0,
+    },
+    {
+        html               => '<span style="font-size: 1pt;">X</span>',
+        visibility         => 'invisible',
+        font_invalid_color => 0,
+    },
+    {
+        html               => '<span style="font-size: 10%;">X</span>',
+        visibility         => 'invisible',
+        font_invalid_color => 0,
+    },
+    {
+        html               => '<div style="font-size: 0"><span style="font-size: initial">X</span></div>',
+        visibility         => 'visible',
         font_invalid_color => 0,
     },
     {
