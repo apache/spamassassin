@@ -2539,7 +2539,7 @@ sa-update(1)
 
 =head1 BUGS
 
-See E<lt>https://issues.apache.org/SpamAssassin/E<gt>
+See E<lt>https://bz.apache.org/SpamAssassin/E<gt>
 
 =head1 AUTHORS
 

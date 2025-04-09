@@ -23,7 +23,7 @@
 #
 ###########################################################################
 
-#TESTING OF RULES FOR https://issues.apache.org/SpamAssassin/show_bug.cgi?id=6487
+#TESTING OF RULES FOR https://bz.apache.org/SpamAssassin/show_bug.cgi?id=6487
 
 #rule that excludes the dotted-quad HELOs caught by rule __FSL_HELO_BARE_IP_2
 header 		CK_HELO_DYNAMIC_SPLIT_IP 	X-Spam-Relays-Untrusted =~ /^[^\]]+helo=(?!(?:\d+\.){4})\d+[^\d\s]+\d+[^\d\s]\d+[^\d\s]\d+[^\d\s]/i

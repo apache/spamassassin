@@ -1264,6 +1264,6 @@ Mail::SpamAssassin::PerMsgStatus(3)
 
 https://wiki.apache.org/spamassassin/PluginWritingTips
 
-https://issues.apache.org/SpamAssassin/show_bug.cgi?id=2163
+https://bz.apache.org/SpamAssassin/show_bug.cgi?id=2163
 
 =cut

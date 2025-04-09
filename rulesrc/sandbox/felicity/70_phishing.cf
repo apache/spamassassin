@@ -104,7 +104,7 @@ endif
 
 # Look at subjects for phishing
 
-# 2011-07-01 Changed by KAM - https://issues.apache.org/SpamAssassin/show_bug.cgi?id=6579
+# 2011-07-01 Changed by KAM - https://bz.apache.org/SpamAssassin/show_bug.cgi?id=6579
 
 #Changed to Sub Rules
 header __TVD_PH_SUBJ_ACCOUNTS_PRE	Subject =~ /\baccounts? (?:[a-z_,-]+ )*?(?:record[a-z]*|suspen[a-z]+|notif(?:y|ication)|security|updated?|verifications?|confirm[a-z]+)\b/i

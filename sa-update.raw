@@ -291,7 +291,7 @@ else {
 
 
 # check only disabled gpg
-# https://issues.apache.org/SpamAssassin/show_bug.cgi?id=5854
+# https://bz.apache.org/SpamAssassin/show_bug.cgi?id=5854
 if ( defined $opt{'checkonly'}) {
   $GPG_ENABLED=0;
   dbg("gpg: Disabling gpg requirement due to checkonly flag.");
@@ -2287,7 +2287,7 @@ C<Mail::SpamAssassin>
 
 =head1 BUGS
 
-See E<lt>https://issues.apache.org/SpamAssassin/E<gt>
+See E<lt>https://bz.apache.org/SpamAssassin/E<gt>
 
 =head1 AUTHORS
 

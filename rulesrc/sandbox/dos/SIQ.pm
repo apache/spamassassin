@@ -1062,7 +1062,7 @@ sub _parse_response {
 
 # dos: copied (with s/SPF/SIQ/) from my patch for SA bug 4661 -- the current
 # SPF code does it wrong for non-trivial cases
-# http://issues.apache.org/SpamAssassin/attachment.cgi?id=3241&action=view
+# http://bz.apache.org/SpamAssassin/attachment.cgi?id=3241&action=view
 # this really needs to get into Received.pm itself
 sub _get_relay {
   my ($self, $scanner) = @_;

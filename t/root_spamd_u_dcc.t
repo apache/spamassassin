@@ -1,6 +1,6 @@
 #!/usr/bin/perl -T
 #
-# test for http://issues.apache.org/SpamAssassin/show_bug.cgi?id=5574#c12 .
+# test for http://bz.apache.org/SpamAssassin/show_bug.cgi?id=5574#c12 .
 
 use lib '.'; use lib 't';
 use SATest; sa_t_init("root_spamd_u_dcc");

@@ -555,11 +555,11 @@ Run "svn status" to ensure you're building/releasing from a pristine
 
 - Add the new version to the Bugzilla versions list:
 
-        https://issues.apache.org/SpamAssassin/editversions.cgi?product=Spamassassin&action=add
+        https://bz.apache.org/SpamAssassin/editversions.cgi?product=Spamassassin&action=add
 
 - Add a milestone for the next version to the Bugzilla milestones list:
 
-        https://issues.apache.org/SpamAssassin/editmilestones.cgi?action=add&product=Spamassassin
+        https://bz.apache.org/SpamAssassin/editmilestones.cgi?action=add&product=Spamassassin
         (use a sortkey of "0")
 
 - Confirm with SpamAssassin SysAdmins group that we are ready in DNS for
@@ -578,7 +578,7 @@ Run "svn status" to ensure you're building/releasing from a pristine
 
 - Change the sortkey for the previous release's milestone from "0" to "10":
 
-        https://issues.apache.org/SpamAssassin/editmilestones.cgi?product=Spamassassin
+        https://bz.apache.org/SpamAssassin/editmilestones.cgi?product=Spamassassin
 
 - Update https://en.wikipedia.org/wiki/SpamAssassin
 

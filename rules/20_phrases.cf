@@ -154,7 +154,7 @@ describe OBSCURED_EMAIL		Message seems to contain rot13ed address
 body BANG_OPRAH      		/\boprah!/i
 describe BANG_OPRAH      	Talks about Oprah with an exclamation!
 
-#adding boundary checks: https://issues.apache.org/SpamAssassin/show_bug.cgi?id=6870
+#adding boundary checks: https://bz.apache.org/SpamAssassin/show_bug.cgi?id=6870
 body ACT_NOW_CAPS               /\bA(?i:ct) N(?i:ow)\b/
 describe ACT_NOW_CAPS		Talks about 'acting now' with capitals
 

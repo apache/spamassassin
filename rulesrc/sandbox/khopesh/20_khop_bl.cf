@@ -82,7 +82,7 @@
 ## http://www.intra2net.com/en/support/antispam/blacklist.php_dnsbl=RCVD_IN_NIX_SPAM.html
 ## Since this is run by Heise and already decently advertised, I don't anticipate
 ## problems testing here.  Flagged 'nopublish' to keep it in testing for now.
-## https://issues.apache.org/SpamAssassin/show_bug.cgi?id=6529
+## https://bz.apache.org/SpamAssassin/show_bug.cgi?id=6529
 ## "reuse" flag because this DNSBL only keeps IP's for 12 hours, testing older mail is
 ## not useful.  It must rely on tagging during delivery.
 #header  RCVD_IN_NIX_SPAM       eval:check_rbl('nix-spam-lastexternal','ix.dnsbl.manitu.net.')

@@ -290,7 +290,7 @@ $makefile{META_MERGE} = {
   resources => {
     license     => 'http://www.apache.org/licenses/LICENSE-2.0.html',
     homepage    => 'https://spamassassin.apache.org/',
-    bugtracker  => 'https://issues.apache.org/SpamAssassin/',
+    bugtracker  => 'https://bz.apache.org/SpamAssassin/',
     repository  => { 
 			url=>'http://svn.apache.org/repos/asf/spamassassin/',
 			type=>'svn'
@@ -451,7 +451,7 @@ sub macro_ref {
 # If it is omitted, the value set in the current EU::MM instance is used.
 sub macro_def {
   my($name, $val) = (@_, undef);
-  my $MUST_NOT_HAPPEN = "THIS MUST NOT HAPPEN. PLEASE REPORT A BUG VIA <https://issues.apache.org/SpamAssassin/>";
+  my $MUST_NOT_HAPPEN = "THIS MUST NOT HAPPEN. PLEASE REPORT A BUG VIA <https://bz.apache.org/SpamAssassin/>";
   die $MUST_NOT_HAPPEN  unless defined $name;
   die $MUST_NOT_HAPPEN  unless defined $EQ;
   $val = $SELF->{$name} unless defined $val;
