@@ -195,6 +195,7 @@ sub check_uri_detail {
   my %uri_detail = %{ $permsg->get_uri_detail_list() };
 
   while (my ($raw, $info) = each %uri_detail) {
+    next if $info->{types}->{unlinked};
     dbg("uri: running uri_detail $test: $raw");
 
     if (exists $rule->{raw}) {
