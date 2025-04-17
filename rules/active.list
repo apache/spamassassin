@@ -194,7 +194,7 @@ BITCOIN_IMGUR
 # good enough
 BITCOIN_MALF_HTML
 
-# tflags publish
+# tflags net
 BITCOIN_MALWARE
 
 # tflags publish
@@ -263,7 +263,7 @@ BITCOIN_YOUR_INFO
 # good enough
 BODY_EMAIL_419_FRAUD_GM_LOOSE
 
-# tflags publish
+# tflags net
 BODY_URI_ONLY
 
 # tflags publish
@@ -298,6 +298,9 @@ CN_B2B_SPAMMER
 
 # tflags publish
 COMMENT_GIBBERISH
+
+# tflags net
+COMPENSATION
 
 # tflags publish
 CONTENT_AFTER_HTML
@@ -449,6 +452,9 @@ FBI_SPOOF
 # tflags publish
 FILL_THIS_FORM
 
+# good enough
+FILL_THIS_FORM_LONG
+
 # tflags publish
 FONT_INVIS_DIRECT
 
@@ -559,9 +565,6 @@ FROM_MISSP_TO_UNDISC
 
 # good enough
 FROM_MISSP_USER
-
-# good enough
-FROM_MULTI_NORDNS
 
 # tflags net
 FROM_NEWDOM_BTC
@@ -705,6 +708,9 @@ GB_GOOGLE_OBFUR
 GB_HASHBL_BTC
 
 # tflags publish
+GB_STORAGE_GOOGLE_EMAIL
+
+# tflags publish
 GOOGLE_DOCS_PHISH
 
 # tflags publish
@@ -767,7 +773,7 @@ HAS_X_NO_RELAY
 # tflags publish
 HAS_X_OUTGOING_SPAM_STAT
 
-# good enough
+# tflags net
 HDRS_LCASE
 
 # tflags publish
@@ -860,7 +866,7 @@ HTML_OFF_PAGE
 # tflags publish
 HTML_SHRT_CMNT_OBFU_MANY
 
-# tflags net
+# tflags publish
 HTML_SINGLET_MANY
 
 # tflags net
@@ -946,6 +952,9 @@ MANY_SPAN_IN_TEXT
 
 # good enough
 MANY_SUBDOM
+
+# tflags net
+MAY_BE_FORGED
 
 # good enough
 MILLION_EUR
@@ -1121,7 +1130,7 @@ PDS_FRNOM_TODOM_DBL_URL
 # good enough
 PDS_FRNOM_TODOM_NAKED_TO
 
-# tflags net
+# good enough
 PDS_FROM_2_EMAILS
 
 # good enough
@@ -1481,9 +1490,6 @@ REPTO_419_FRAUD_YJ
 # tflags publish
 REPTO_419_FRAUD_YN
 
-# tflags publish
-REPTO_INFONUMSCOM
-
 # good enough
 RISK_FREE
 
@@ -1650,6 +1656,9 @@ TO_EQ_FM_DIRECT_MX
 TO_EQ_FM_DOM_HTML_IMG
 
 # tflags net
+TO_EQ_FM_DOM_HTML_ONLY
+
+# tflags net
 TO_EQ_FM_DOM_SPF_FAIL
 
 # tflags net
@@ -1682,7 +1691,7 @@ TO_TOO_MANY_WFH_01
 # good enough
 TRANSFORM_LIFE
 
-# good enough
+# tflags net
 TVD_SPACE_ENCODED
 
 # good enough
@@ -1898,7 +1907,7 @@ URI_MALWARE_SCMS
 # tflags userconf
 URI_NOVOWEL
 
-# tflags publish
+# tflags net
 URI_ONLY_MSGID_MALF
 
 # tflags publish
