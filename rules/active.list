@@ -197,7 +197,7 @@ BITCOIN_IMGUR
 # good enough
 BITCOIN_MALF_HTML
 
-# tflags net
+# tflags publish
 BITCOIN_MALWARE
 
 # tflags publish
@@ -563,7 +563,7 @@ FROM_MISSP_FREEMAIL
 # good enough
 FROM_MISSP_MSFT
 
-# tflags net
+# good enough
 FROM_MISSP_REPLYTO
 
 # tflags net
@@ -881,7 +881,7 @@ HTML_OFF_PAGE
 # tflags publish
 HTML_SHRT_CMNT_OBFU_MANY
 
-# tflags publish
+# tflags net
 HTML_SINGLET_MANY
 
 # tflags net
@@ -958,6 +958,9 @@ MALWARE_PASSWORD
 
 # tflags publish
 MALW_ATTACH
+
+# tflags net
+MANY_HDRS_LCASE
 
 # tflags publish
 MANY_SPAN_IN_TEXT
@@ -1118,6 +1121,9 @@ OBFU_UNSUB_UL
 # tflags publish
 ODD_FREEM_REPTO
 
+# good enough
+ORDER_TODAY
+
 # tflags publish
 PAYPAL_PHISH_07
 
@@ -1135,6 +1141,9 @@ PDS_FRNOM_TODOM_DBL_URL
 
 # good enough
 PDS_FRNOM_TODOM_NAKED_TO
+
+# tflags net
+PDS_FROM_2_EMAILS
 
 # good enough
 PDS_FROM_NAME_TO_DOMAIN
@@ -1631,7 +1640,7 @@ TARINGANET_IMG_NOT_RCVD_TN
 # tflags publish
 TEQF_USR_IMAGE
 
-# tflags net
+# tflags publish
 TEQF_USR_MSGID_HEX
 
 # tflags net
@@ -1651,9 +1660,6 @@ TONLINE_FAKE_DKIM
 
 # tflags publish
 TO_EQ_FM_DIRECT_MX
-
-# tflags net
-TO_EQ_FM_DOM_HTML_IMG
 
 # tflags net
 TO_EQ_FM_DOM_HTML_ONLY
@@ -1697,11 +1703,8 @@ TRANSFORM_LIFE
 # tflags net
 TVD_SPACE_ENCODED
 
-# tflags net
+# good enough
 TVD_SPACE_RATIO_MINFP
-
-# tflags net
-TVD_SUBJ_NUM_OBFU_MINFP
 
 # tflags publish
 TW_GIBBERISH_MANY
@@ -1913,7 +1916,7 @@ URI_MALWARE_SCMS
 # tflags userconf
 URI_NOVOWEL
 
-# tflags publish
+# tflags net
 URI_ONLY_MSGID_MALF
 
 # tflags publish
