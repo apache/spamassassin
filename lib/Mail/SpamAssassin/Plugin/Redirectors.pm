@@ -65,8 +65,10 @@ documented in L<SYNOPSIS> section.
 
 =head1 NOTES
 
-This plugin runs at the check_dnsbl hook (priority -100) so that it may
+This plugin runs before priority 0 so that it may
 modify the parsed URI list prior to normal uri rules or the URIDNSBL plugin.
+It should run before DecodeShortURLs plugin so that redirected short uris are also
+checked.
 
 =cut
 
@@ -105,7 +107,8 @@ sub new {
   }
 
   $self->set_config($mailsaobject->{conf});
-  $self->register_method_priority ('check_dnsbl', -10);
+  # run at priority -15 so that redirected short uris can also be checked
+  $self->register_method_priority ('check_dnsbl', -15);
   $self->register_eval_rule('redir_url', $Mail::SpamAssassin::Conf::TYPE_BODY_EVALS);
   $self->register_eval_rule('redir_url_404', $Mail::SpamAssassin::Conf::TYPE_BODY_EVALS);
   $self->register_eval_rule('redir_url_code', $Mail::SpamAssassin::Conf::TYPE_BODY_EVALS);
