@@ -702,8 +702,6 @@ sub _check_redirector_uri {
   local($1,$2);
   # normalize uri
   $uri = Mail::SpamAssassin::Util::url_decode($uri);
-  # remove anchors
-  $uri =~ s/\#.{1,32}//g;
   return 0 unless $uri =~ m{^
     https?://		# Only http
     (?:[^\@/?#]*\@)?	# Ignore user:pass@
