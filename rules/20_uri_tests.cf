@@ -101,7 +101,7 @@ describe SPOOF_NET2COM 	URI contains ".net" or ".org", then ".com"
 uri URI_HEX		m%^https?://[^/?&\#]*\b(?![0-9a-f]{0,12}[a-f]{3})[0-9a-f]{6,}\b%i
 describe URI_HEX	URI hostname has long hexadecimal sequence
 
-uri URI_NOVOWEL		m%^https?://[^/?&\#]*[bcdfgjklmnpqrstvwxz]{7}%i
+uri URI_NOVOWEL		m%^https?://[^/?&\#]*[bcdfgjklmnpqrstvwxz]{7}(?!.{8,32}awstrack\.me).{8,32}%i
 describe URI_NOVOWEL	URI hostname has long non-vowel sequence
 tflags URI_NOVOWEL      userconf     # lock scores low
 
