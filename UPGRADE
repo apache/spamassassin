@@ -2,6 +2,9 @@
 Note for Users Upgrading to SpamAssassin 4.0.2
 ----------------------------------------------
 
+- Internal Mail::SpamAssassin::GeoDB module now also supports
+  IP::Geolocation::MMDB Perl module.
+
 - New Mail::SpamAssassin::Plugin::Redirectors plugin
   This plugin looks for URLs redirected by a list of URL redirector
   services. Upon finding a matching URL, plugin will send a HTTP
