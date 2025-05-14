@@ -2921,7 +2921,7 @@ sub add_uri_detail_list {
         return if not defined $ans->cname;
         if(not exists $self->{dns_cname_cache}{$host}) {
           $self->{dns_cname_cache}{$host} = $ans->cname;
-          dbg("dns: found CNAME " . $ans->cname);
+          dbg("dns: found CNAME " . $ans->cname . " for host $host");
           my $cname_types = { %{$types} };
           $cname_types->{unlinked} = 1;
           $cname_types->{noclean} = 1;
