@@ -51,6 +51,7 @@ cp ../rules/20_aux_tlds.cf $tmpdir/rules
 cp ../rules/23_bayes.cf $tmpdir/rules
 cp ../rules/50_scores.cf $tmpdir/rules
 cp ../rules/*.pre $tmpdir/rules         # ensure we have plugins
+cp $testdir/*.pre $tmpdir/rules 2>/dev/null
 cp $testdir/*.cf $tmpdir/rules 2>/dev/null
 
 # tell SpamAssassin to use this path for DBs

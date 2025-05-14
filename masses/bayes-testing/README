@@ -9,7 +9,7 @@ using our spam and non-spam corpuses.  Maybe you could check something in?
 If you're testing Bayes, or collating results on a change to the algorithms,
 please try to stick to these guidelines:
 
-  - train with at least 1000 spam and 1000 ham messages
+  - train with at least 2000 spam and 2000 ham messages
 
   - try to use at least as many ham as spam mails.
 
@@ -68,6 +68,12 @@ each one.
 I then edited the "Bayes.pm" files in the testdirs to enable whatever tweaks
 I wanted to test.  "base" remains the same as current SVN, however, so
 it acts as a baseline.
+
+If you need to test different copy the "lib" directory structure into "testdir":
+ex: mkdir -p testdir/relaycountry/lib/Mail/SpamAssassin/Plugin/ &&
+    cp $SADIR/lib/Mail/SpamAssassin/Plugin/RelayCountry.pm \
+    testdir/relaycountry/lib/Mail/SpamAssassin/Plugin/
+If you need additional rules you can copy .cf and .pre files into testdir.
 
 Finally I run the driver script:
 
