@@ -1086,6 +1086,7 @@ sub remove_address_from_welcomelist {
   $self->call_plugins("remove_address", { address => $addr,
                                           cli_p => $cli_p });
 }
+*remove_address_from_blocklist = \&remove_address_from_welcomelist;
 *remove_address_from_whitelist = \&remove_address_from_welcomelist; # removed in 4.1
 
 ###########################################################################

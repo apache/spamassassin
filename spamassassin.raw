@@ -201,6 +201,7 @@ GetOptions(
   'mbx'                                     => sub { $opt{'format'} = 'mbx'; },
   'prefspath|prefs-file|p=s'                => \$opt{'prefspath'},
   'remove-addr-from-welcomelist=s'          => \$opt{'remove-addr-from-welcomelist'},
+  'remove-addr-from-blocklist=s'            => \$opt{'remove-addr-from-blocklist'},
   'remove-from-welcomelist|R'               => \$opt{'remove-from-welcomelist'},
   'remove-addr-from-whitelist=s'            => \$opt{'remove-addr-from-welcomelist'}, # removed in 4.1
   'remove-from-whitelist'                   => \$opt{'remove-from-welcomelist'}, # removed in 4.1
@@ -294,6 +295,7 @@ if ($opt{'lint'}) {
 }
 
 if ($opt{'remove-addr-from-welcomelist'} ||
+    $opt{'remove-addr-from-blocklist'} ||
     $opt{'add-addr-to-welcomelist'} ||
     $opt{'add-addr-to-blocklist'})
 {
@@ -307,6 +309,9 @@ if ($opt{'remove-addr-from-welcomelist'} ||
   }
   elsif ( $opt{'add-addr-to-blocklist'} ) {
     $spamtest->add_address_to_blocklist($opt{'add-addr-to-blocklist'}, 1);
+  }
+  elsif ( $opt{'remove-addr-from-blocklist'} ) {
+    $spamtest->remove_address_from_blocklist($opt{'remove-addr-from-blocklist'}, 1);
   }
   else {
     die "spamassassin: oops! unhandled welcomelist operation";

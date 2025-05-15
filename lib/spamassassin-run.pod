@@ -58,7 +58,8 @@ Options:
                                    persistent address list
  --add-addr-to-welcomelist=addr    Add addr to persistent address welcomelist
  --add-addr-to-blocklist=addr      Add addr to persistent address blocklist
- --remove-addr-from-welcomelist=addr Remove addr from persistent address list
+ --remove-addr-from-welcomelist=addr Remove addr from persistent address welcomelist
+ --remove-addr-from-blocklist=addr Remove addr from persistent address blocklist
  -u username, --username=username  Override username taken from the runtime
                                    environment, used with SQL
  -4 --ipv4only, --ipv4-only, --ipv4 Use IPv4, disable use of IPv6 for DNS etc.
@@ -218,6 +219,12 @@ plugin enabled for this to work.
 Previously --remove-addr-from-whitelist which will work interchangeably until 4.1.
 
 Remove the named email address from a persistent address welcomelist.  Note that
+you must be running C<spamassassin> or C<spamd> with a persistent address
+list plugin enabled for this to work.
+
+=item B<--remove-addr-from-blocklist>
+
+Remove the named email address from a persistent address blocklist.  Note that
 you must be running C<spamassassin> or C<spamd> with a persistent address
 list plugin enabled for this to work.
 
