@@ -832,7 +832,7 @@ sub show_mclog {
     s/,mid=<.*>,/,mid=<REMOVED_BY_RULEQA>,/gs;
 
     print;
-    last if ++$lines >= 100;
+    last if ++$lines >= 50;
   }
 
   close GZ;
