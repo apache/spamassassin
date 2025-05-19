@@ -40,3 +40,4 @@ echo "Submitted by: $AUTHORS" >> clog
 echo >> clog
 echo "Github: closes #${PR}" >> clog
 
+echo "Github commit message can be found on \"clog\" file"
