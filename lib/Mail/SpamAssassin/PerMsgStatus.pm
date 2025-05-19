@@ -2925,6 +2925,7 @@ sub add_uri_detail_list {
           my $cname_types = { %{$types} };
           $cname_types->{unlinked} = 1;
           $cname_types->{noclean} = 1;
+          $self->{uri_cnames}{$ans->cname} = $host;
           $self->add_uri_detail_list($ans->cname, $cname_types, $source, 1);
 	}
       }

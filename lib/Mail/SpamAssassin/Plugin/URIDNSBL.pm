@@ -302,6 +302,20 @@ Skip mailto links on uris lookups.
 
 =back
 
+=head1 TAGS
+
+The following tags are added to the set, available for use in reports,
+header fields, other plugins, etc.:
+
+  _URIHOSTS_
+    Hosts extracted from URIs;
+
+  _URIDOMAINS_
+    Domains extracted from URIs;
+
+  _URICNAMES_
+    Dns CNAMEs of hosts extracted from URIs;
+
 =head1 NOTES
 
 The C<uridnsbl_timeout> option has been obsoleted by the C<rbl_timeout>
@@ -508,6 +522,8 @@ sub check_dnsbl {
   my @dnames = do { my %seen; grep { !$seen{$_}++ } sort values %hostlist };
   $pms->set_tag('URIDOMAINS',
                 @dnames == 1 ? $dnames[0] : \@dnames);
+  my @cnames = do { my %seen; grep { !$seen{$_}++ } sort keys %{$pms->{uri_cnames}} };
+  $pms->set_tag('URICNAMES', join(' ', @cnames));
 
   # and query
   $self->query_hosts_or_domains($pms, \%hostlist);
