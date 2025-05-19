@@ -52,10 +52,20 @@ BEGIN {
 
 # Map of file extensions to MIME types
 my %file_type_map = (
+    'bmp'   => 'image/bmp',
     'eml'   => 'message/rfc822',
+    'gif'   => 'image/gif',
     'htm'   => 'text/html',
     'html'  => 'text/html',
+    'jfif'  => 'image/jpeg',
+    'jpeg'  => 'image/jpeg',
+    'jpg'   => 'image/jpeg',
+    'png'   => 'image/png',
     'shtml' => 'text/html',
+    'svg'   => 'image/svg+xml',
+    'tif'   => 'image/tiff',
+    'tiff'  => 'image/tiff',
+    'webp'  => 'image/webp',
 );
 
 # Map of MIME type aliases
