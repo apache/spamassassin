@@ -911,7 +911,7 @@ sub recursive_lookup {
     # Not cached; do lookup
     my $method = $redir_url_info->{method};
     # run the http check only if the url is valid
-    if($redir_url !~ /^(?:https?:\/\/)?(?:[A-Za-z0-9-]{1,63}\.)+[A-Za-z0-9-]{2,63}/) {
+    if($redir_url !~ /^(?:https?:\/\/)?(?:.{1,128}\@)?(?:[A-Za-z0-9-]{1,63}\.)+[A-Za-z0-9-]{2,63}/) {
       dbg("URL $redir_url is not valid, skipping http check");
       return;
     }
