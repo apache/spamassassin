@@ -300,6 +300,8 @@ sub _read_configfile {
 sub _add_uri {
     my ($self, $uri, $feedname) = @_;
 
+    return unless defined $uri;
+
     my $phishdomain = $self->{main}->{registryboundaries}->uri_to_domain($uri);
     return unless defined $phishdomain;
 
@@ -331,6 +333,7 @@ sub check_phishing {
 
     # no hosts/domains were found via this uri, so skip
     next unless ($info->{hosts});
+    next unless ($uri);
     if (($info->{types}->{a}) || ($info->{types}->{parsed})) {
       # check url
       $stripped_cluri = $uri;
