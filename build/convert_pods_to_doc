@@ -8,8 +8,10 @@ foreach (@ARGV) {
   s,^(lib|spamd|spamc)/|\.(pod|pm)$,,g;
   tr,/,_,;
 
+  my $title = $_;
+  $title =~ s/_/::/g;
   # convert to HTML: doc/foo.html
-  pod2html ("--infile=$in", "--outfile=doc/$_.html", "--css=/assets/style.css");
+  pod2html ("--infile=$in", "--outfile=doc/$_.html", "--css=/assets/style.css", "--title=$title");
 
   # and to text: doc/foo.txt
   my $parser = Pod::Text->new ();
