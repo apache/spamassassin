@@ -1,0 +1,199 @@
+Description: Remove SORBS DNSBLs following shutdown
+ The SORBS DNS blocklists have been retired as reported at
+ https://bz.apache.org/SpamAssassin/show_bug.cgi?id=8256  This change removes
+ them from the spamassassin static ruleset in order to avoid any undefined
+ behavior as they shut down.
+Origin: upstream
+Applied-Upstream: https://svn.apache.org/viewvc?view=revision&revision=1918166
+---
+This patch header follows DEP-3: http://dep.debian.net/deps/dep3/
+Index: spamassassin/rules/20_dnsbl_tests.cf
+===================================================================
+--- spamassassin.orig/rules/20_dnsbl_tests.cf
++++ spamassassin/rules/20_dnsbl_tests.cf
+@@ -39,63 +39,6 @@ ifplugin Mail::SpamAssassin::Plugin::DNS
+ # DNSBLs do not return the A type (127.0.0.x) as part of the TXT reply.
+ 
+ 
+-# ---------------------------------------------------------------------------
+-# SORBS
+-# transfers: both axfr and ixfr available
+-# URL: http://www.dnsbl.sorbs.net/
+-# pay-to-use: no
+-# delist: $50 fee for RCVD_IN_SORBS_SPAM, others have free retest on request
+-
+-header __RCVD_IN_SORBS          eval:check_rbl('sorbs', 'dnsbl.sorbs.net.')
+-describe __RCVD_IN_SORBS        SORBS: sender is listed in SORBS
+-tflags __RCVD_IN_SORBS          net
+-reuse  __RCVD_IN_SORBS
+-
+-header RCVD_IN_SORBS_HTTP       eval:check_rbl_sub('sorbs', '127.0.0.2')
+-describe RCVD_IN_SORBS_HTTP     SORBS: sender is open HTTP proxy server
+-tflags RCVD_IN_SORBS_HTTP       net
+-reuse  RCVD_IN_SORBS_HTTP
+-
+-header RCVD_IN_SORBS_SOCKS      eval:check_rbl_sub('sorbs', '127.0.0.3')
+-describe RCVD_IN_SORBS_SOCKS    SORBS: sender is open SOCKS proxy server
+-tflags RCVD_IN_SORBS_SOCKS      net
+-reuse  RCVD_IN_SORBS_SOCKS
+-
+-header RCVD_IN_SORBS_MISC       eval:check_rbl_sub('sorbs', '127.0.0.4')
+-describe RCVD_IN_SORBS_MISC     SORBS: sender is open proxy server
+-tflags RCVD_IN_SORBS_MISC       net
+-reuse  RCVD_IN_SORBS_MISC
+-
+-header RCVD_IN_SORBS_SMTP       eval:check_rbl_sub('sorbs', '127.0.0.5')
+-describe RCVD_IN_SORBS_SMTP     SORBS: sender is open SMTP relay
+-tflags RCVD_IN_SORBS_SMTP       net
+-reuse  RCVD_IN_SORBS_SMTP
+-
+-# delist: $50 fee
+-#header RCVD_IN_SORBS_SPAM      eval:check_rbl_sub('sorbs', '127.0.0.6')
+-#describe RCVD_IN_SORBS_SPAM    SORBS: sender is a spam source
+-#tflags RCVD_IN_SORBS_SPAM      net
+-#reuse  RCVD_IN_SORBS_SPAM      RCVD_IN_SORBS_SPAM
+-
+-header RCVD_IN_SORBS_WEB        eval:check_rbl_sub('sorbs', '127.0.0.7')
+-describe RCVD_IN_SORBS_WEB      SORBS: sender is an abusable web server
+-tflags RCVD_IN_SORBS_WEB        net
+-reuse  RCVD_IN_SORBS_WEB
+-
+-header RCVD_IN_SORBS_BLOCK      eval:check_rbl_sub('sorbs', '127.0.0.8')
+-describe RCVD_IN_SORBS_BLOCK    SORBS: sender demands to never be tested
+-tflags RCVD_IN_SORBS_BLOCK      net
+-reuse  RCVD_IN_SORBS_BLOCK
+-
+-header RCVD_IN_SORBS_ZOMBIE     eval:check_rbl_sub('sorbs', '127.0.0.9')
+-describe RCVD_IN_SORBS_ZOMBIE   SORBS: sender is on a hijacked network
+-tflags RCVD_IN_SORBS_ZOMBIE     net
+-reuse  RCVD_IN_SORBS_ZOMBIE
+-
+-header RCVD_IN_SORBS_DUL        eval:check_rbl('sorbs-lastexternal', 'dnsbl.sorbs.net.', '127.0.0.10')
+-describe RCVD_IN_SORBS_DUL      SORBS: sent directly from dynamic IP address
+-tflags RCVD_IN_SORBS_DUL        net
+-reuse  RCVD_IN_SORBS_DUL
+ 
+ # ---------------------------------------------------------------------------
+ # Spamhaus ZEN includes SBL+CSS+XBL+PBL
+Index: spamassassin/rules/30_text_de.cf
+===================================================================
+--- spamassassin.orig/rules/30_text_de.cf
++++ spamassassin/rules/30_text_de.cf
+@@ -77,15 +77,6 @@ lang de describe EMAIL_ROT13 Eventuell R
+ lang de describe BLANK_LINES_80_90 Nachrichtentext besteht zu 80-90% aus Leerzeilen
+ lang de describe LONGWORDS Eine Reihe von langen Wörtern hintereinander
+ lang de describe ALL_TRUSTED Nachricht wurde nur über vertrauenswürdige Rechner weitergeleitet
+-lang de describe __RCVD_IN_SORBS SORBS: Senderechner in Liste von dnsbl.sorbs.net
+-lang de describe RCVD_IN_SORBS_HTTP SORBS: Senderechner als "open HTTP proxy" gemeldet
+-lang de describe RCVD_IN_SORBS_MISC SORBS: Senderechner als "open proxy" gemeldet
+-lang de describe RCVD_IN_SORBS_SMTP SORBS: Senderechner ist ein ungesicherter Mail-Server
+-lang de describe RCVD_IN_SORBS_SOCKS SORBS: Senderechner als "open SOCKS proxy" gemeldet
+-lang de describe RCVD_IN_SORBS_WEB SORBS: Senderechner ist ein ungesicherter WWW-Server
+-lang de describe RCVD_IN_SORBS_BLOCK SORBS: Senderechner verweigert Tests
+-lang de describe RCVD_IN_SORBS_ZOMBIE SORBS: Senderechner in Liste "entführter" Adressblöcke
+-lang de describe RCVD_IN_SORBS_DUL SORBS: Senderechner nur temporär mit Internet verbunden
+ lang de describe RCVD_IN_SBL Transportiert via Rechner in SBL-Liste (https://www.spamhaus.org/sbl/)
+ lang de describe RCVD_IN_XBL Transportiert via Rechner in XBL-Liste (https://www.spamhaus.org/xbl/)
+ lang de describe RCVD_IN_BL_SPAMCOP_NET Transportiert via Rechner in Liste von www.spamcop.net
+Index: spamassassin/rules/30_text_fr.cf
+===================================================================
+--- spamassassin.orig/rules/30_text_fr.cf
++++ spamassassin/rules/30_text_fr.cf
+@@ -213,19 +213,11 @@ lang fr describe RATWARE_OE_MALFORMED	En
+ lang fr describe RCVD_AM_PM		En-tête Received: falsifié (AM/PM)
+ lang fr describe RCVD_FAKE_HELO_DOTCOM  En-tête Received contient nom d'hôte falsifié dans le HELO
+ lang fr describe RCVD_IN_BL_SPAMCOP_NET	Relais listé dans http://spamcop.net/bl.shtml
+-lang fr describe RCVD_IN_SORBS_DUL	Envoyé directement depuis une adresse IP dynamique
+ lang fr describe RCVD_IN_MAPS_DUL	Relais listé dans DUL, http://www.mail-abuse.org/dul/
+ lang fr describe RCVD_IN_MAPS_NML	Relais listé dans NML, http://www.mail-abuse.org/nml/
+ lang fr describe RCVD_IN_MAPS_RBL	Relais listé dans RBL, http://www.mail-abuse.org/rbl/
+ lang fr describe RCVD_IN_MAPS_RSS	Relais listé dans RSS, http://www.mail-abuse.org/rss/
+ lang fr describe RCVD_IN_SBL		Relais listé dans https://www.spamhaus.org/sbl/
+-lang fr describe RCVD_IN_SORBS_BLOCK	SORBS: Relais refusant d'être testé par SORBS
+-lang fr describe RCVD_IN_SORBS_HTTP	SORBS: Envoyé par un proxy HTTP ouvert
+-lang fr describe RCVD_IN_SORBS_MISC	SORBS: Envoyé par un proxy ouvert
+-lang fr describe RCVD_IN_SORBS_SMTP	SORBS: Envoyé par un relais SMTP ouvert
+-lang fr describe RCVD_IN_SORBS_SOCKS	SORBS: Envoyé par un proxy SOCKS ouvert
+-lang fr describe RCVD_IN_SORBS_WEB	SORBS: Envoyé depuis un serveur web vulnérable
+-lang fr describe RCVD_IN_SORBS_ZOMBIE	SORBS: Envoyé depuis un réseau IP piraté
+ lang fr describe REFINANCE_NOW          Offre de refinancement immobilier
+ lang fr describe REFINANCE_YOUR_HOME	Offre de refinancement immobilier
+ lang fr describe SORTED_RECIPS		La liste des destinataires est triée par ordre alphabétique
+Index: spamassassin/rules/30_text_nl.cf
+===================================================================
+--- spamassassin.orig/rules/30_text_nl.cf
++++ spamassassin/rules/30_text_nl.cf
+@@ -64,15 +64,6 @@ lang nl describe MPART_ALT_DIFF
+ lang nl describe CHARSET_FARAWAY                 Karakterset wijst op vreemde taal
+ lang nl describe EMAIL_ROT13                     Body bevat een ROT13-versleuteld emailadres
+ lang nl describe BLANK_LINES_80_90               Bericht bestaat voor 80-90% uit witregels
+-lang nl describe __RCVD_IN_SORBS                 SORBS: verzender is gevonden in SORBS
+-lang nl describe RCVD_IN_SORBS_HTTP              SORBS: verzender is een open HTTP proxy server
+-lang nl describe RCVD_IN_SORBS_MISC              SORBS: verzender is een open proxy server
+-lang nl describe RCVD_IN_SORBS_SMTP              SORBS: verzender is een open SMTP relay
+-lang nl describe RCVD_IN_SORBS_SOCKS             SORBS: verzender is een open SOCKS proxy server
+-lang nl describe RCVD_IN_SORBS_WEB               SORBS: verzender is een misbruikbare web server
+-lang nl describe RCVD_IN_SORBS_BLOCK             SORBS: verzender weigert getest te worden
+-lang nl describe RCVD_IN_SORBS_ZOMBIE            SORBS: verzender is een gekaapt netwerk
+-lang nl describe RCVD_IN_SORBS_DUL               SORBS: bericht is direct verstuurd vanaf een dynamisch IP adres
+ lang nl describe RCVD_IN_SBL                     Ontvangen via een relay die gevonden is in Spamhaus SBL
+ lang nl describe RCVD_IN_XBL                     Ontvangen via een relay die gevonden is in Spamhaus XBL
+ lang nl describe RCVD_IN_BL_SPAMCOP_NET          Ontvangen via een relay die gevonden is in bl.spamcop.net
+Index: spamassassin/rules/30_text_pl.cf
+===================================================================
+--- spamassassin.orig/rules/30_text_pl.cf
++++ spamassassin/rules/30_text_pl.cf
+@@ -204,13 +204,6 @@ lang pl describe RCVD_IN_MAPS_NML	"open
+ lang pl describe RCVD_IN_MAPS_RBL	"open relay" wed³ug RBL, http://www.mail-abuse.org/rbl/
+ lang pl describe RCVD_IN_MAPS_RSS	"open relay" wed³ug RSS, http://www.mail-abuse.org/rss/
+ lang pl describe RCVD_IN_SBL		Otrzymano przez relay listowany w Spamhaus Block List
+-lang pl describe RCVD_IN_SORBS_BLOCK	SORBS: nadawca nie pozwala siê testowaæ
+-lang pl describe RCVD_IN_SORBS_HTTP	SORBS: nadawca jest otwartym serwerem HTTP
+-lang pl describe RCVD_IN_SORBS_MISC	SORBS: nadawca jest otwartym serwerem proxy
+-lang pl describe RCVD_IN_SORBS_SMTP	SORBS: nadawca posiada otwarty serwer (Open Relay)
+-lang pl describe RCVD_IN_SORBS_SOCKS	SORBS: nadawca jest otwartym serwerem SOCKS proxy
+-lang pl describe RCVD_IN_SORBS_WEB	SORBS: nadawca posiada nadu¿ywany serwer WWW
+-lang pl describe RCVD_IN_SORBS_ZOMBIE	SORBS: nadawca jest z sieci bez kontroli
+ lang pl describe REFINANCE_NOW		Refinansowanie domów
+ lang pl describe REFINANCE_YOUR_HOME	Refinansowanie domów
+ lang pl describe SORTED_RECIPS		Lista odbiorców posortowana wed³ug adresu
+Index: spamassassin/rules/30_text_pt_br.cf
+===================================================================
+--- spamassassin.orig/rules/30_text_pt_br.cf
++++ spamassassin/rules/30_text_pt_br.cf
+@@ -97,15 +97,6 @@ lang pt_BR describe ALL_TRUSTED Mensagem
+ lang pt_BR describe NO_RELAYS Informação: mensagem não foi recebida via SMTP
+ 
+ # 20_dnsbl_tests.cf
+-lang pt_BR describe __RCVD_IN_SORBS Recebida por um relay listado em SORBS
+-lang pt_BR describe RCVD_IN_SORBS_HTTP SORBS: remetente é um proxy HTTP aberto
+-lang pt_BR describe RCVD_IN_SORBS_SOCKS SORBS: remetente é um proxy SOCKS aberto
+-lang pt_BR describe RCVD_IN_SORBS_MISC SORBS: remetente é um proxy aberto
+-lang pt_BR describe RCVD_IN_SORBS_SMTP SORBS: remetente é um relay SMTP aberto
+-lang pt_BR describe RCVD_IN_SORBS_WEB SORBS: remetente é um servidor web explorável
+-lang pt_BR describe RCVD_IN_SORBS_BLOCK SORBS: remetente requer que não seja testado
+-lang pt_BR describe RCVD_IN_SORBS_ZOMBIE SORBS: remetente está em uma rede comprometida
+-lang pt_BR describe RCVD_IN_SORBS_DUL SORBS: mensagem enviada a partir de um IP dinâmico
+ lang pt_BR describe __RCVD_IN_ZEN Recebida por um relay listado em Spamhaus Zen
+ lang pt_BR describe RCVD_IN_SBL Recebida por um relay listado em Spamhaus SBL
+ lang pt_BR describe RCVD_IN_XBL Recebida por um relay listado em Spamhaus XBL
+Index: spamassassin/rules/50_scores.cf
+===================================================================
+--- spamassassin.orig/rules/50_scores.cf
++++ spamassassin/rules/50_scores.cf
+@@ -504,15 +504,6 @@ score RCVD_IN_IADB_UT_CPEAR 0 # n=0 n=1
+ score RCVD_IN_IADB_UT_CPR_30 0 # n=0 n=1 n=2 n=3
+ score RCVD_IN_IADB_UT_CPR_MAT 0 -0.095 0 -0.001 # n=0 n=1 n=2
+ score RCVD_IN_SBL 0 2.596 0 0.141 # n=0 n=2
+-score RCVD_IN_SORBS_BLOCK 0 # n=0 n=1 n=2 n=3
+-score RCVD_IN_SORBS_DUL 0 0.001 0 0.001 # n=0 n=2
+-score RCVD_IN_SORBS_HTTP 0 2.499 0 0.001 # n=0 n=2
+-score RCVD_IN_SORBS_MISC 0 # n=0 n=1 n=2 n=3
+-score RCVD_IN_SORBS_SMTP 0 # n=0 n=1 n=2 n=3
+-score RCVD_IN_SORBS_SOCKS 0 2.443 0 1.927 # n=0 n=2
+-#score RCVD_IN_SORBS_SPAM 0 0.5 0 0.5
+-score RCVD_IN_SORBS_WEB  0 1.5 0 1.5
+-score RCVD_IN_SORBS_ZOMBIE 0 # n=0 n=1 n=2 n=3
+ score RCVD_IN_XBL 0 0.724 0 0.375 # n=0 n=2
+ score RCVD_IN_PBL 0 3.558 0 3.335 # n=0 n=2
+ score RCVD_IN_SBL_CSS 0 3.558 0 3.335 # n=0 n=2

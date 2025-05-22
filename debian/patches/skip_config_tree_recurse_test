@@ -1,0 +1,32 @@
+Description: Skip config_tree_recurse test
+
+ The default behavior of File::Find will automatically untaint directories with
+ "safe" names.  The '~' (tilde) character is not considered a safe name.
+ Because Debian source package names use '~' to denote pre-release versions, the
+ test will fail with a message similar to the following:
+ .
+ t/config_tree_recurse.t ........... _get_cf_pre_files_in_dir error: directory /home/admin/spamassassin-3.4.3~rc6+1/t/log/localrules.tmp is still tainted at /usr/share/perl/5.30/File/Find.pm line 558. at ../lib/Mail/SpamAssassin.pm line 2096.
+ .
+ The solution to this is either to modify lib/Mail/SpamAssassin.pm to consider
+ '~' a safe character, or skip the test altogether.  Because the former would
+ impact all installations, and the latter is limited to test coverage, we will
+ skip the test.
+Author: Noah Meyerhans <noahm@debian.org>
+Forwarded: not-needed
+---
+This patch header follows DEP-3: http://dep.debian.net/deps/dep3/
+Index: spamassassin/t/config_tree_recurse.t
+===================================================================
+--- spamassassin.orig/t/config_tree_recurse.t
++++ spamassassin/t/config_tree_recurse.t
+@@ -2,7 +2,9 @@
+ 
+ use lib '.'; use lib 't';
+ use SATest; sa_t_init("config_tree_recurse.t");
+-use Test::More tests => 4;
++use Test::More;
++plan skip_all => "not running this test right now...";
++plan tests => 4;
+ 
+ # ---------------------------------------------------------------------------
+ 

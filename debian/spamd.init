@@ -1,0 +1,94 @@
+#! /bin/sh
+
+### BEGIN INIT INFO
+# Provides:       spamassassin
+# Required-Start: $remote_fs
+# Required-Stop:  $remote_fs
+# Should-Start:   $network $syslog
+# Default-Start:  2 3 4 5
+# Default-Stop:   0 1 6
+### END INIT INFO
+
+# Spamd init script
+# June 2002
+# Duncan Findlay
+
+# Based on skeleton by Miquel van Smoorenburg and Ian Murdock
+
+PATH=/sbin:/bin:/usr/sbin:/usr/bin
+DAEMON=/usr/sbin/spamd
+NAME=spamd
+SNAME=spamassassin
+DESC="SpamAssassin Mail Filter Daemon"
+PIDFILE="/run/$NAME.pid"
+
+export TMPDIR=/tmp
+# Apparently people have trouble if this isn't explicitly set...
+
+# Defaults - don't touch, edit /etc/default/spamassassin
+OPTIONS=""
+NICE=
+
+. /lib/lsb/init-functions
+
+test -f /etc/default/spamd && . /etc/default/spamd
+
+DOPTIONS="-d --pidfile=$PIDFILE"
+
+# Note: check_enabled should go away as soon as possible after the
+# next stable release to complete the transition away from using
+# ENABLED=1 in /etc/default/spamassassin
+check_enabled() {
+    if [ "$ENABLED" = "0" ]; then
+	echo "$DESC: disabled, see /etc/default/spamassassin"
+	exit 0
+    fi
+}
+
+test -f $DAEMON || exit 0
+
+set -e
+
+case "$1" in
+  start)
+	check_enabled
+	echo -n "Starting $DESC: "
+	start-stop-daemon --start --pidfile $PIDFILE --name $NAME \
+	    $NICE --oknodo --startas $DAEMON -- $OPTIONS $DOPTIONS
+	echo "$NAME."
+	;;
+
+  stop)
+	echo -n "Stopping $DESC: "
+	start-stop-daemon --stop --pidfile $PIDFILE --name $NAME --oknodo
+	echo "$NAME."
+	;;
+
+  reload|force-reload)
+	check_enabled
+	echo -n "Reloading $DESC: "
+	start-stop-daemon --stop --pidfile $PIDFILE --signal HUP --name $NAME
+	echo "$NAME."
+	;;
+
+  restart)
+	check_enabled
+	echo -n "Restarting $DESC: "
+	start-stop-daemon --stop --pidfile $PIDFILE --name $NAME \
+	    --retry 5 --oknodo
+	start-stop-daemon --start --pidfile $PIDFILE --name $NAME \
+	    $NICE --oknodo --startas $DAEMON -- $OPTIONS $DOPTIONS
+
+	echo "$NAME."
+	;;
+  status)
+        status_of_proc -p $PIDFILE $DAEMON $NAME && exit 0 || exit $?
+        ;;
+  *)
+	N=/etc/init.d/$SNAME
+	echo "Usage: $N {start|stop|restart|reload|force-reload|status}" >&2
+	exit 1
+	;;
+esac
+
+exit 0

@@ -1,0 +1,10 @@
+#!/bin/sh
+
+set -e
+
+#DEBHELPER#
+
+if [ "$1" = "triggered" ] && [ "$2" = "perl-major-upgrade" ]; then
+    echo "OK, restarting spamd due to trigger"
+    invoke-rc.d spamd restart
+fi

@@ -1,0 +1,51 @@
+#!/bin/sh
+
+set -e
+
+umask 022
+output_dir="/var/lib/spamassassin/compiled"
+
+sa_compile() {
+    OWNER=$(stat -c '%U' /var/lib/spamassassin)
+    GROUP=$(stat -c '%G' /var/lib/spamassassin)
+    if [ -x /usr/bin/re2c -a -x /usr/bin/sa-compile ]; then
+        echo "Running sa-compile (may take a long time)"
+        if [ -d "$output_dir" ]; then
+            rm -rf "$output_dir"
+        fi
+
+        env -i LANG="$LANG" PATH="$PATH" http_proxy="$http_proxy" \
+            OWNER="$OWNER" GROUP="$GROUP" \
+            runuser -u "$OWNER" --group "$GROUP" -- \
+            /usr/bin/sa-compile --quiet
+        # Fixup perms -- group and other should be able to
+        # read and execute, but never write.  Works around
+        # sa-compile's failure to obey umask.
+        if [ -d "$output_dir" ]; then
+            runuser -u $OWNER -- \
+                chmod -R go-w,go+rX "$output_dir"
+        fi
+        if command -v invoke-rc.d >/dev/null 2>&1; then
+            invoke-rc.d --quiet spamd status > /dev/null && \
+              invoke-rc.d spamd reload > /dev/null 2>&1 || true
+        else
+            /etc/init.d/spamd reload > /dev/null 2>&1 || true
+        fi
+    fi
+}
+
+if [ "$1" = "configure" ]; then
+    sa_compile
+fi
+
+if [ "$1" = "triggered" ] && [ "$2" = "perl-major-upgrade" ]; then
+    sa_compile
+fi
+
+#DEBHELPER#
+
+# Local variables:
+# mode: shell-script
+# tab-width: 4
+# indent-tabs-mode: nil
+# end:

@@ -1,0 +1,23 @@
+# /etc/default/spamd
+# Duncan Findlay
+
+# WARNING: please read README.spamd before using.
+# There may be security risks.
+
+# Options
+# See man spamd for possible options. The -d option is automatically added.
+
+# SpamAssassin uses a preforking model, so be careful! You need to
+# make sure --max-children is not set to anything higher than 5,
+# unless you know what you're doing.
+
+OPTIONS="--create-prefs --max-children 5 --helper-home-dir"
+
+# Pid file
+# Where should spamd write its PID to file? If you use the -u or
+# --username option above, this needs to be writable by that user.
+# Note that this setting is not used when spamd is managed by systemd
+PIDFILE="/run/spamd.pid"
+
+# Set nice level of spamd
+#NICE="--nicelevel 15"

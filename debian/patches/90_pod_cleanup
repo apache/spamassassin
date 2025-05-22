@@ -1,0 +1,72 @@
+Index: spamassassin/lib/Mail/SpamAssassin/Conf.pm
+===================================================================
+--- spamassassin.orig/lib/Mail/SpamAssassin/Conf.pm
++++ spamassassin/lib/Mail/SpamAssassin/Conf.pm
+@@ -4078,7 +4078,7 @@ This option gives the password used by t
+ 
+ Whether to call the services_authorized_for_username plugin hook in BayesSQL.
+ If the hook does not determine that the user is allowed to use bayes or is
+-invalid then then database will not be initialized.
++invalid then the database will not be initialized.
+ 
+ NOTE: By default the user is considered invalid until a plugin returns
+ a true value.  If you enable this, but do not have a proper plugin
+Index: spamassassin/lib/Mail/SpamAssassin/Plugin/MIMEEval.pm
+===================================================================
+--- spamassassin.orig/lib/Mail/SpamAssassin/Plugin/MIMEEval.pm
++++ spamassassin/lib/Mail/SpamAssassin/Plugin/MIMEEval.pm
+@@ -17,7 +17,7 @@
+ 
+ =head1 NAME
+ 
+-MIMEEval - perform various tests against MIME structure and body
++Mail::SpamAssassin::Plugin::MIMEEval - perform various tests against MIME structure and body
+ 
+ =head1 SYNOPSIS
+ 
+@@ -176,6 +176,31 @@ sub check_for_faraway_charset {
+   0;
+ }
+ 
++=item check_for_mime
++
++Check for various MIME properties.
++
++Use in rules such as:
++
++  rawbody MIME_BASE64      eval:check_for_mime('mime_base64_count')
++  describe MIME_BASE64     Includes a base64 attachment
++
++  mime_base64_count
++  mime_base64_encoded_text
++  mime_body_html_count
++  mime_body_text_count
++  mime_faraway_charset
++  mime_missing_boundary
++  mime_multipart_alternative
++  mime_multipart_ratio
++  mime_qp_count
++  mime_qp_long_line
++  mime_qp_ratio
++  mime_ascii_text_illegal
++  mime_text_unicode_ratio
++
++=cut
++
+ sub check_for_mime {
+   my ($self, $pms, undef, $test) = @_;
+ 
+@@ -196,7 +221,12 @@ sub check_for_mime_html {
+   return ($pms->{mime_body_html_count} > 0);
+ }
+ 
+-# HTML without some other type of MIME text part
++=item check_for_mime_html_only
++
++Check for messages containing only text/html body parts
++
++=cut
++
+ sub check_for_mime_html_only {
+   my ($self, $pms) = @_;
+ 

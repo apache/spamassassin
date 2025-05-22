@@ -1,0 +1,30 @@
+[Unit]
+Description=Perl-based spam filter using text analysis
+After=network-online.target
+
+[Service]
+Type=simple
+PIDFile=/run/spamd.pid
+EnvironmentFile=-/etc/default/spamd
+ExecStart=/usr/sbin/spamd --pidfile=/run/spamd.pid $OPTIONS
+ExecReload=/bin/kill -HUP $MAINPID
+StandardOutput=null
+StandardError=null
+Restart=always
+
+ProtectSystem=full
+PrivateTmp=true
+PrivateDevices=true
+ProtectHostname=true
+ProtectClock=true
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectKernelLogs=true
+ProtectControlGroups=true
+RestrictNamespaces=true
+LockPersonality=true
+RestrictRealtime=true
+RestrictSUIDSGID=true
+
+[Install]
+WantedBy=multi-user.target

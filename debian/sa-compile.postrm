@@ -1,0 +1,12 @@
+#!/bin/sh
+
+set -e 
+
+#DEBHELPER#
+
+if [ "$1" = "remove" ]; then
+# Remove the compiled rules and restart spamd to complete unloading of
+# Mail::SpamAssassin::Plugin::Rule2XSBody
+    rm -Rf /var/lib/spamassassin/compiled
+    invoke-rc.d spamd restart
+fi

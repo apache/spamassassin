@@ -1,0 +1,43 @@
+ \" To the extent possible under law, Noah Meyerhans has waived all
+ \" copyright and related or neighboring rights to this work. This work
+ \" is published from: United States.
+.TH SPAMASSASSIN-MAINT 8
+.SH NAME
+spamassassin-maint \- perform spamassassin maintenance tasks
+.SH DESCRIPTION
+spamassassin-maint performs periodic spamassassin maintainance, including executing
+.B sa-update
+and
+.B sa-compile.
+It is typically executed via the
+spamassassin-maintenance.timer timer or cron.
+
+spamassassin-maint takes no options
+
+.SH "RETURN VALUE"
+The program generates no output and exits with a zero status if
+successful.  If unsuccessful, it prints the output of
+.B spamassassin --lint
+and exits with a nonzero status.
+.SH FILES
+.br
+.nf
+.\" set tabstop to longest possible filename, plus a wee bit
+.ta \w'/usr/lib/perl/getopts.pl   'u
+\fI/etc/spamassassin/\fR	Sitewide spamassassin configuration
+\fI/etc/default/spamassassin\fR	environment for this and other spamassassin programs
+\fI/var/lib/spamassassin/\fR	Directory containing downloaded updates and compiled spamassassin rules
+.SH AUTHOR
+spamassassin-maint was written for Debian by Noah Meyerhans <noahm@debian.org>
+.SH HISTORY
+Much of the content of spamassassin-maint originated with
+spamassassin's daily cron script, originally written by Duncan Findlay
+<duncf@debian.org> and subsequently modified by Noah Meyerhans
+<noahm@debian.org>.  It was converted to a standalone program to
+facilitate its use outside of cron.
+.SH "SEE ALSO"
+.\" Always quote multiple words for .SH
+.BR spamassassin (1),
+.BR spamd (8),
+.BR sa-compile (1),
+.BR sa-update (1).

@@ -1,0 +1,25 @@
+[Unit]
+Description=Daily spamassassin rule refresh
+Documentation=man:sa-update(8)
+ConditionACPower=true
+After=network.target network-online.target systemd-networkd.service NetworkManager.service connman.service
+
+[Service]
+Type=oneshot
+ExecStart=/usr/sbin/spamassassin-maint
+
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/var/lib/spamassassin
+PrivateTmp=true
+PrivateDevices=true
+ProtectHostname=true
+ProtectClock=true
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectKernelLogs=true
+ProtectControlGroups=true
+RestrictNamespaces=true
+LockPersonality=true
+RestrictRealtime=true
+RestrictSUIDSGID=true

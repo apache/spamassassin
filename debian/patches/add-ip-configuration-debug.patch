@@ -1,0 +1,41 @@
+Description: Add some debug output to tests
+ Tests are failing on Debian buildd hosts with IPv6-only network configuration.
+ However, I've been unable to reproduce this outside the buildd environment.
+ Adding some debugging output to try to collect more details.
+ .
+ This patch can be dropped when the sitution is resolved.
+Forwarded: not-needed
+Index: spamassassin/t/SATest.pm
+===================================================================
+--- spamassassin.orig/t/SATest.pm
++++ spamassassin/t/SATest.pm
+@@ -53,6 +53,8 @@ BEGIN {
+     require IO::Socket::INET;
+     my $sock = IO::Socket::INET->new(LocalAddr => '127.0.0.1', Proto => 'udp');
+     $sock->close or die "error closing inet socket: $!"  if $sock;
++    my $msg = $sock ? "true" : "false";
++    print STDERR "IP-DEBUG: have_inet4 returning $msg\n";
+     $sock ? 1 : undef;
+   };
+ 
+@@ -60,6 +62,8 @@ BEGIN {
+     require IO::Socket::INET6;
+     my $sock = IO::Socket::INET6->new(LocalAddr => '::1', Proto => 'udp');
+     $sock->close or die "error closing inet6 socket: $!"  if $sock;
++    my $msg = $sock ? "true" : "false";
++    print STDERR "IP-DEBUG: have_inet6 returning $msg\n";
+     $sock ? 1 : undef;
+   };
+ 
+@@ -185,9 +189,11 @@ sub sa_t_init {
+   $spamdlocalhost = $ENV{'SPAMD_LOCALHOST'};
+   if (!$spamdlocalhost) {
+     $spamdlocalhost = $have_inet4 || !$have_inet6 ? '127.0.0.1' : '::1';
++    print STDERR "IP-DEBUG: Set spamdlocalhost to " . $spamdlocalhost . "\n";
+   }
+   $spamdhost = $ENV{'SPAMD_HOST'};
+   $spamdhost ||= $spamdlocalhost;
++  print STDERR "IP-DEBUG: Set spamdhost to $spamdhost\n";
+ 
+   # optimisation -- don't setup spamd test parameters unless we're
+   # not skipping all spamd tests and this particular test is called

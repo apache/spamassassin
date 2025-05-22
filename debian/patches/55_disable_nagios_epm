@@ -1,0 +1,14 @@
+Index: spamassassin-3.3.2/sa-check_spamd.raw
+===================================================================
+--- spamassassin-3.3.2.orig/sa-check_spamd.raw	2011-06-06 16:59:19.000000000 -0700
++++ spamassassin-3.3.2/sa-check_spamd.raw	2012-06-11 00:31:13.000000000 -0700
+@@ -1,4 +1,9 @@
+ #!/usr/bin/perl -w
++#
++# Inform the Nagios embedded perl interpreter that this script is
++# incompatible. http://bugs.debian.org/598573
++# nagios: -epn
++#
+ 
+ ########################################################################
+ #

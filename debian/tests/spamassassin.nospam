@@ -1,0 +1,16 @@
+#!/bin/bash
+#----------------------------
+# Testing spamassassin nospam
+#----------------------------
+set -e
+
+input=/usr/share/doc/spamassassin/examples/sample-nonspam.txt
+
+# should exit with zero status if the input is not spam
+if spamassassin --local --no-create-prefs --exit-code < "$input" > /dev/null 2>&1; then
+    echo "OK"
+    exit 0
+else
+    echo "ERROR: POINTS SHOULD BE ZERO"
+    exit 1
+fi
