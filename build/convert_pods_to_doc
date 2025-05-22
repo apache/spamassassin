@@ -9,7 +9,7 @@ foreach (@ARGV) {
   tr,/,_,;
 
   # convert to HTML: doc/foo.html
-  pod2html ("--infile=$in", "--outfile=doc/$_.html");
+  pod2html ("--infile=$in", "--outfile=doc/$_.html", "--css=/assets/style.css");
 
   # and to text: doc/foo.txt
   my $parser = Pod::Text->new ();
