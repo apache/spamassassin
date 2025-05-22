@@ -2,26 +2,37 @@ Source: spamassassin
 Section: mail
 Priority: optional
 Maintainer: Noah Meyerhans <noahm@debian.org>
-Uploaders: Jesus Climent <jesus.climent@hispalinux.es>
-Build-Depends: debhelper (>= 7), perl, libssl-dev,
- libhtml-parser-perl (>= 3.24), libnet-dns-perl (>= 0.34), libnetaddr-ip-perl
-Standards-Version: 3.9.2
-Homepage: http://www.spamassassin.org/
-Vcs-Svn: svn://svn.debian.org/svn/collab-maint/deb-maint/spamassassin/trunk
-Vcs-Browser: http://svn.debian.org/viewsvn/collab-maint/deb-maint/spamassassin/trunk/
+Build-Depends: debhelper-compat (= 13),
+	       perl,
+	       libssl-dev,
+	       libhtml-parser-perl,
+	       libnetaddr-ip-perl,
+	       libnet-dns-perl <!nocheck>,
+	       libberkeleydb-perl <!nocheck>,
+	       netbase <!nocheck>,
+	       libdbi-perl <!nocheck>,
+	       libdbd-mysql-perl <!nocheck>,
+	       libbsd-resource-perl <!nocheck>,
+	       libio-string-perl <!nocheck>,
+	       libtext-diff-perl <!nocheck>
+Rules-Requires-Root: no
+Standards-Version: 4.6.0
+Homepage: https://www.spamassassin.org/
+Vcs-Git: https://salsa.debian.org/debian/spamassassin.git
+Vcs-Browser: https://salsa.debian.org/debian/spamassassin
 
 Package: spamassassin
 Architecture: all
-Conflicts: spamass-milter (<< 0.2.0-7), gotmail (<= 0.8.1-1)
-Depends: perl (>= 5.8.0), libhtml-parser-perl (>= 3.43),
- libsocket6-perl, libsys-hostname-long-perl, libarchive-tar-perl, 
- libwww-perl, libnet-dns-perl (>= 0.34), libnetaddr-ip-perl,
- perl-modules (>= 5.10) | libio-zlib-perl (>= 1.04), ${misc:Depends}
-Recommends: spamc (>= 2.30), libmail-spf-perl,
- re2c, libsys-syslog-perl, gnupg, gcc, libc6-dev, make, libio-socket-inet6-perl
-Suggests: razor (>= 2.361-2),
- libnet-ident-perl, libio-socket-ssl-perl, libdbi-perl, pyzor,
- libcompress-zlib-perl, libmail-dkim-perl
+Multi-Arch: foreign
+Depends: perl, libhtml-parser-perl, libsocket6-perl, adduser,
+ libsys-hostname-long-perl, libarchive-tar-perl, libnet-dns-perl,
+ libnetaddr-ip-perl, libhttp-date-perl, libmail-dkim-perl,
+ libio-string-perl, libwww-perl | curl | w3m, ${misc:Depends}
+Recommends: spamc, sa-compile (= ${source:Version}), libmail-spf-perl,
+ libsys-syslog-perl, gnupg, libbsd-resource-perl, libmail-dmarc-perl
+Suggests: razor, libio-socket-ssl-perl, libdbi-perl, pyzor,
+ libcompress-zlib-perl, libencode-detect-perl,
+ libgeoip2-perl, libnet-patricia-perl
 Provides: libmail-spamassassin-perl
 Description: Perl-based spam filter using text analysis
  SpamAssassin is a very powerful and fully configurable spam filter
@@ -30,19 +41,19 @@ Description: Perl-based spam filter using text analysis
  designed to be called from a user's .procmail or .forward file, but
  can also be integrated into a Mail Transport Agent (MTA).
  .
- Included in this package is a daemonized form of spamassassin (spamd)
- which communicates with its client (spamc) via TCP, to reduce the
- overhead of loading perl with each message. To take advantage of
- this, you must install the spamc package.
+ If you use spamassassin on a moderately high-volume mail server, you
+ may which to consider installing the spamc and spamd packages, which
+ provide a daemonized variant of spamassassin that avoids the need to
+ start a full perl runtime for each message processed.
 
 Package: spamc
 Architecture: any
+Multi-Arch: foreign
 Depends: ${shlibs:Depends}, ${misc:Depends}
-Suggests: spamassassin
-Conflicts: spamassassin (<< 2.30-2)
+Recommends: spamd
 Description: Client for SpamAssassin spam filtering daemon
  spamc is the client to communicate with spamd, the daemonized form of
- SpamAssassin (see the spamassassin package). It is written in C for
+ SpamAssassin (see the spamd package). It is written in C for
  maximum speed and minimum loading overhead.
  .
  spamc is quite useful for integrating spamassassin into an MTA or
@@ -51,3 +62,28 @@ Description: Client for SpamAssassin spam filtering daemon
  This package is useless unless you have spamassassin installed,
  either on this machine or another local machine (i.e. a mail server).
 
+Package: sa-compile
+Architecture: all
+Multi-Arch: foreign
+Enhances: spamassassin
+Depends: spamassassin (= ${source:Version}), re2c, gcc, libc6-dev, make, ${misc:Depends}
+Description: Tools for compiling SpamAssassin rules into C
+ sa-compile uses "re2c" to compile the site-wide parts of the
+ SpamAssassin ruleset into C code for more efficient processing by
+ spamd or spamassassin.
+
+Package: spamd
+Architecture: all
+Multi-Arch: foreign
+Pre-Depends: ${misc:Pre-Depends}
+Depends: spamassassin (= ${source:Version}),
+	 init-system-helpers (>= 1.51),
+	 ${shlibs:Depends}, ${misc:Depends}
+Recommends: systemd | rsyslog | system-log-daemon
+Replaces: spamassassin (<< 4.0.0~0.0svn1883440-2)
+Breaks: spamassassin (<< 4.0.0~0.0svn1883440-2)
+Description: Server for SpamAssassin spam filtering daemon
+ spamd is a daemonized spamassassin process. Intended to be used with
+ the spamc client, the persistent nature of the spamd server allows it
+ to avoid the overhead of instantiating the perl for each processed
+ message.

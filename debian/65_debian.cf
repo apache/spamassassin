@@ -25,3 +25,10 @@ header 	 __CRON_HEADER		X-Cron-Env =~ /./
 meta	 D_SENT_BY_CRON		__CRON_FROM && __CRON_HEADER
 score 	 D_SENT_BY_CRON		-5.0
 describe D_SENT_BY_CRON		Sent by Cron Daemon
+
+# As documented in https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=861671,
+# the bb.barracudacentral.org blacklist requires users to register, making it
+# unsuitable for use in the default configuration. If you've registered your
+# use of this blacklist, remove the following line in order to re-activate
+# this service:
+score RCVD_IN_BRBL_LASTEXT 0

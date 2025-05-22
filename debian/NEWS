@@ -1,3 +1,54 @@
+spamassassin (4.0.0-2) unstable; urgency=medium
+
+  spamd now enables a number of hardening flags in the systemd service.
+  Among these settings is ProtectSystem=full, which runs spamd in a
+  private kernel mount namespace into which a number of system paths are
+  mounted read-only.  This does not impact spamd's operation in the
+  default configuration, but if you've configured spamd such that it
+  relies on the ability to write to locations under nonstandard
+  locations, such as /usr, you may need to adjust the hardening flags to
+  permit write access to this location.
+
+  For additional details, see SANDBOXING in systemd.exec(5).
+
+ -- Noah Meyerhans <noahm@debian.org>  Sat, 31 Dec 2022 20:05:33 -0800
+
+spamassassin (4.0.0~0.0svn1883440-2) experimental; urgency=medium
+
+  The spamd service is now distributed in a dedicated spamd binary package.
+  The spamassassin package declares a Recommends relationship on the spamd
+  package, which means it will be installed in the default apt configuration.
+
+  If you do not wish to run the spamd service, you should simply remove the
+  spamd package.
+
+  NOTE: If you are upgrading from earlier spamassassin versions and have made
+  customizations to the spamd configuration in  /etc/default/spamassassin, by
+  providing systemd drop-in unit configuration, or by editing
+  /etc/init.d/spamassassin, you will need to migrate your changes to
+  /etc/default/spamd or a spamd drop-in directory.
+
+ -- Noah Meyerhans <noahm@debian.org>  Sun, 29 Nov 2020 14:47:37 -0800
+
+spamassassin (3.4.2-1) unstable; urgency=medium
+
+  Prior to version 3.4.2-1, spamd could be enabled by setting ENABLED=1 in
+  /etc/default/spamassassin. This pattern is discouraged Debian, is not
+  supported by the systemd unit file, and is considered
+  deprecated. Instead, please use the update-rc.d command, invoked for
+  example as "update-rc.d spamassassin enable", to enable the spamd
+  service.
+
+ -- Noah Meyerhans <noahm@debian.org>  Sun, 23 Sep 2018 17:06:30 -0700
+
+spamassassin (3.3.2-8) unstable; urgency=low
+
+  As of spamassassin 3.3.2-8, sa-compile has been split into its own
+  package. If you want to use sa-compile to increase spamassassin's
+  efficiency and throughput, you'll need to install it explicitly.
+
+ -- Noah Meyerhans <noahm@debian.org>  Sun, 09 Feb 2014 14:45:30 -0800
+
 spamassassin (3.3.1-2) unstable; urgency=low
 
   This version of spamassassin introduces a change in behavior when

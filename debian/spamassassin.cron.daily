@@ -1,85 +1,50 @@
 #!/bin/sh
 
-# Duncan Findlay
-# duncf@debian.org
+# Copyright 2007,2008 Duncan Findlay <duncf@debian.org>
+# Copyright 2008-2019 Noah Meyerhans <noahm@debian.org>
 
-# Daily cronjob for SpamAssassin updates. This isn't pretty but it
-# should do the job.
+# This script does not do anything by default.  If you are using systemd,
+# invoke "systemctl enable --now spamassassin-maintenance.timer" to enable
+# spamassassin's daily maintenance systemd timer.  If you are not using
+# systemd, or otherwise prefer to use cron for daily maintenance, set CRON=1
+# in /etc/cron.daily/spamassassin
 
 CRON=0
 
 test -f /etc/default/spamassassin && . /etc/default/spamassassin
 
 test -x /usr/bin/sa-update || exit 0
-test -x /etc/init.d/spamassassin || exit 0
+command -v gpg > /dev/null || exit 0
 
 if [ "$CRON" = "0" ] ; then
     exit 0
 fi
 
-# If there's a problem with the ruleset or configs, print the output
-# of spamassassin --lint (which will typically get emailed to root)
-# and abort.
-die_with_lint() {
-    spamassassin --lint -D 2>&1
-    exit 1
-}
+# If the systemd timer is active, there's nothing else for us to do:
+if [ -d /run/systemd/system ] && \
+       systemctl is-enabled --quiet spamassassin-maintenance.timer; then
+    exit 0
+fi
 
-do_compile() {
-# Compile, if rules have previously been compiled, and it's possible
-    if [ -x /usr/bin/re2c -a -x /usr/bin/sa-compile \
-        -a -d /var/lib/spamassassin/compiled ]; then
-        sa-compile --quiet
-        # Fixup perms -- group and other should be able to
-        # read and execute, but never write.  Works around
-        # sa-compile's failure to obey umask.
-	if [ -d /var/lib/spamassassin ]; then
-	    chmod -R go-w,go+rX /var/lib/spamassassin/
-	fi
-    fi
-}
+# If we're running under systemd, and we reach this point, then we can
+# safely convert to the timer.  If you'd rather run the daily
+# maintenance task from cron, even if systemd is present, then create
+# a file named /etc/spamassassin/skip-timer-conversion to avoid
+# running this conversion.
+if [ -d /run/systemd/system ] && [ ! -e /etc/spamassassin/skip-timer-conversion ]; then
+    echo "Converting /etc/cron.daily/spamassassin to systemd timer" |
+	logger -p mail.notice
+    systemctl enable spamassassin-maintenance.timer
+    systemctl start spamassassin-maintenance.service
+    exit 0
+fi
 
-# Tell a running spamd to reload its configs and rules.
-reload() {
-    # Reload
-    if which invoke-rc.d >/dev/null 2>&1; then
-	invoke-rc.d spamassassin reload > /dev/null
-    else
-	/etc/init.d/spamassassin reload > /dev/null
-    fi
-    if [ -d /etc/spamassassin/sa-update-hooks.d ]; then
-        run-parts --lsbsysinit /etc/spamassassin/sa-update-hooks.d
-    fi
-}
+# Sleep for up to 3600 seconds if not running interactively
+if [ ! -t 0 ]; then
+    RANGE=3600
+    number=`od -vAn -N2 -tu4 < /dev/urandom`
+    number=`expr $number "%" $RANGE`
+    sleep $number
+fi
 
-# Sleep for up to 3600 seconds
-RANGE=3600
-number=`od -vAn -N2 -tu4 < /dev/urandom`
-number=`expr $number "%" $RANGE`
-sleep $number
-
-
-# Update
-umask 022
-sa-update
-
-case $? in
-    0)
-        # got updates!
-        spamassassin --lint || die_with_lint
-        do_compile
-	reload
-        ;;
-    1)
-        # no updates
-        exit 0
-        ;;
-    2)
-        # lint failed!
-        die_with_lint
-        ;;
-    *)
-        echo "sa-update failed for unknown reasons" 1>&2
-        ;;
-esac
-
+exec /usr/sbin/spamassassin-maint

@@ -1,35 +1,47 @@
 
 READ "UPGRADE" IF YOU ARE UPGRADING FROM A PREVIOUS VERSION
 
-Cron job
---------
+sa-update
+---------
 
 There is a cron job in /etc/cron.daily/spamassassin that will
 automatically run sa-update and reload spamd every day if it is
 enabled. To enable this script, edit
-/etc/default/spamassassin. sa-update, when run as root, downloads the
-latest set of rules distributed by upstream to a directory under
-/var/lib/spamassassin. This script will work correctly with sa-compile
-(see below).
+/etc/default/spamassassin. sa-update will store the latest set of
+rules distributed by upstream to a directory under
+/var/lib/spamassassin. If sa-compile is installed, the rule updates
+will be automatically compiled after download (see below).
+
+Note that sa-update requires gnupg in order to function. Because the
+sa-update functionality is optional, the gnupg package is listed as a
+"Recommends" for spamassassin, not "Depends", and it is possible to
+install spamassassin without having gnupg installed. If you install
+spamassassin without gnupg and later want to enable sa-update, you
+should execute `dpkg-reconfigure spamassassin` after installation. Note
+that in the future it's likely that gnupg will become a hard dependency.
+
+Note that sa-update should not run as root, but as the debian-spamd
+user. Running as root will result in incorrect and potentially
+dangerous file ownership and permission. In general the included cron
+script is the recommended way to run this program.
 
 sa-compile
 ----------
 
-This package now includes a new plugin to greatly improve the
-performance of SpamAssassin by compiling a ruleset using re2c. Please
-read the "sa-compile" manpage for more information. To enable this
-enhancement, you will need to uncomment a line in
-/etc/spamassassin/v320.pre and make sure the following packages are
-installed:
+As of 3.3.2-8, sa-compile is now distributed in a separate package. If
+you wish to compile your spamassassin rules for improved efficiency
+and throughput, you can run sa-compile manually as "su debian-spamd -c
+sa-compile". If you have enabled the daily cron job (see above), then
+sa-compile will be automatically run whenever new rule updates are
+installed.
 
- aptitude install re2c libc6-dev gcc make
+Please see the sa-compile man page and
+Mail::SpamAssassin::Plugin::Rule2XSBody perldoc for more details.
 
-The "compiled" ruleset is used whenever possible to speed spamassassin
-up. If you disable or change a rule in the configuration, the compiled
-version will no longer be used. If you create or change a rule, you
-will want to run sa-compile to generate the compiled version to
-improve performance, but if you don't you will simply use the
-un-compiled version.
+Note that sa-compile should not run as root, but as the debian-spamd
+user. Running as root will result in incorrect and potentially
+dangerous file ownership and permission. In general the included cron
+script is the recommended way to run this program.
 
 Trusted Networks
 ----------------
@@ -64,9 +76,11 @@ Configuring spamd
 
 spamd, the daemonized form of spamassassin, is generally the preferred
 way of running spamassassin. Please read man spamd and README.spamd
-for more information. Init scripts are provided with this package in
-/etc/init.d/spamassassin. To change the command line options, please
-edit /etc/default/spamassassin.
+for more information. Spamd is disabled by default on Debian
+installations. To enable it, use "systemctl enable spamassassin" on
+systems using systemd, or "update-rc.d spamassassin enable" for systems
+using other init systems. To change the command
+line options, please edit /etc/default/spamassassin.
 
 If you intend to use Bayes sitewide, it is recommended that you set up
 an SQL-based Bayes storage module. (You may also want to store scores
@@ -76,6 +90,9 @@ and other prefences in SQL too.) Please read the documentation in
 Please note that SQL storage is not very private -- anyone that has
 access to the database can read and write it freely, meaning users
 could corrupt other users' Bayes databases.
+
+Please note that the --auth-ident option does not work with pidentd or
+gidentd. See http://bugs.debian.org/278030 for more information.
 
 Poor Performance
 ----------------
@@ -152,4 +169,4 @@ Some users have reported difficulty running spamd with an IPv6
 listening address. As a work around, please ensure you have
 libio-socket-inet6-perl installed.
 
- -- Duncan Findlay <duncf@debian.org>, Mon, 21 May 2007 23:53:57 -0400
+ -- Noah Meyerhans <noahm@debian.org>, Sun, 12 Oct 2014 18:00:22 -0700

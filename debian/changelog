@@ -1,6 +1,707 @@
+spamassassin (4.0.1-3) unstable; urgency=medium
+
+  * Incorporate upstream fix for PDFInfo.pm uninitialized value warnings
+    (Closes: #1091683)
+  * clean up build-deps and set !nocheck where appropriate (Closes: #952698)
+  * spamd: drop system-log-daemon to Recommends (Closes: #1072032)
+  * prime the sa-update rule path with the packaged rules (Closes: #739489)
+  * Remove obsolete spamassassin preinst script
+  * cosmetic: whitespace fixes in maintainer scripts
+
+ -- Noah Meyerhans <noahm@debian.org>  Thu, 09 Jan 2025 13:32:43 -0500
+
+spamassassin (4.0.1-2) unstable; urgency=medium
+
+  * Remove rules referencing the defunct SORBS DNSBLs (Closes: #1072663)
+
+ -- Noah Meyerhans <noahm@debian.org>  Mon, 10 Jun 2024 11:00:26 -0700
+
+spamassassin (4.0.1-1) unstable; urgency=medium
+
+  * Fix systemd detection in cron script (Closes: #1067007)
+  * New upstream release
+
+ -- Noah Meyerhans <noahm@debian.org>  Mon, 01 Apr 2024 22:43:34 -0700
+
+spamassassin (4.0.1~rc1-1) unstable; urgency=medium
+
+  * New upstream release snapshot
+
+ -- Noah Meyerhans <noahm@debian.org>  Wed, 20 Mar 2024 09:23:21 -0700
+
+spamassassin (4.0.1~pre1-1) unstable; urgency=medium
+
+  * New upstream pre-release snapshot (Closes: #1039459)
+  * Remove a bashism in spamassassin-maint.sh
+  * spamassassin-maint.sh: minor shell improvements
+  * Refresh patch 10_change_config_paths
+  * spamassassin-maint.sh: Run sa-update-hooks regardless of whether spamd
+    is running (Closes: #1059744)
+  * Remove patches that have been incorporated upstream
+
+ -- Noah Meyerhans <noahm@debian.org>  Sat, 20 Jan 2024 18:39:17 -0800
+
+spamassassin (4.0.0-9) unstable; urgency=medium
+
+  * Run sa-update-hooks regardless of whether spamd is running (Closes: 1059744)
+  * Be more explicit about exit codes in spamassassin-maint.sh
+
+ -- Noah Meyerhans <noahm@debian.org>  Mon, 01 Jan 2024 09:34:51 -0800
+
+spamassassin (4.0.0-8) unstable; urgency=medium
+
+  * Drop reference to obsolete syslog.target in spamd.service
+  * Import upstream patch for bug 1056001 (Closes: #1056001)
+  * autopkgtest: give spamd time to set its cmd name
+
+ -- Noah Meyerhans <noahm@debian.org>  Sun, 19 Nov 2023 12:08:09 -0800
+
+spamassassin (4.0.0-7) unstable; urgency=medium
+
+  * Import upstream fix for DnsResolver.pm method deprecation warnings
+    (Closes: #1041759)
+  * spamassassin-maintenance: reload spamd only if it's running
+    (Closes: #1028030)
+  * sa-update: Import upstream fix to usage of deprecated function
+    (Closes: #1039960)
+  * Drop dependency on obsolete package lsb-base
+
+ -- Noah Meyerhans <noahm@debian.org>  Tue, 25 Jul 2023 09:23:47 -0700
+
+spamassassin (4.0.0-6) unstable; urgency=medium
+
+  * No change. This adds a new version to resolve the situation introduced
+    when locally built binary .deb files were inadvertently included with
+    the 4.0.0-5 upload.
+
+ -- Noah Meyerhans <noahm@debian.org>  Sun, 30 Apr 2023 09:16:27 -0700
+
+spamassassin (4.0.0-5) unstable; urgency=medium
+
+  * Update spamd.service to order after network-online.target (Closes: #1034347)
+
+ -- Noah Meyerhans <noahm@debian.org>  Sun, 16 Apr 2023 13:28:05 -0700
+
+spamassassin (4.0.0-4) unstable; urgency=medium
+
+  * Revert "drop unused params from Makefile.PL"
+  * Fix test for Socket module and drop libio-socket-inet6-perl
+  * Disable AI_ADDRCONFIG when passing IPv4 literals to getaddrinfo
+    (Closes: #1027925)
+
+ -- Noah Meyerhans <noahm@debian.org>  Fri, 06 Jan 2023 13:05:09 -0800
+
+spamassassin (4.0.0-3) unstable; urgency=medium
+
+  * drop unused params from Makefile.PL
+  * Add debug output for ipv6-only test failures
+
+ -- Noah Meyerhans <noahm@debian.org>  Wed, 04 Jan 2023 08:59:45 -0800
+
+spamassassin (4.0.0-2) unstable; urgency=medium
+
+  * fix typo in spamd.default (Closes: #1027307)
+  * move pid file to /run when running under sysvinit
+  * Update NEWS to document spamd sandboxing settings (Closes: #1024444)
+  * spamassassin: Add libmail-dmarc-perl to Recommends
+
+ -- Noah Meyerhans <noahm@debian.org>  Tue, 03 Jan 2023 17:09:07 -0800
+
+spamassassin (4.0.0-1) unstable; urgency=medium
+
+  * New upstream release
+  * Drop obsolete patches that have been incorporated upstream
+
+ -- Noah Meyerhans <noahm@debian.org>  Sat, 17 Dec 2022 08:41:25 -0800
+
+spamassassin (4.0.0~rc4-1) unstable; urgency=medium
+
+  * New upstream pre-release snapshot
+    - Drop patch fix__tests_with_ipv6-only, integrated upstream.
+  * Suppress lintian national-encoding warnings from encoding-specific files
+  * Fix a pod error upstream
+
+ -- Noah Meyerhans <noahm@debian.org>  Wed, 07 Dec 2022 21:22:57 -0800
+
+spamassassin (4.0.0~rc3-3) unstable; urgency=medium
+
+  * Enable hardening flags in systemd units
+  * Update spamd init script to load /etc/default/spamd (Closes: #1020859)
+
+ -- Noah Meyerhans <noahm@debian.org>  Sun, 02 Oct 2022 10:39:27 -0700
+
+spamassassin (4.0.0~rc3-2) unstable; urgency=medium
+
+  * Fix test execution in IPv6-only environments
+
+ -- Noah Meyerhans <noahm@debian.org>  Sat, 24 Sep 2022 20:41:03 -0700
+
+spamassassin (4.0.0~rc3-1) unstable; urgency=medium
+
+  * New upstream release candidate
+
+ -- Noah Meyerhans <noahm@debian.org>  Thu, 22 Sep 2022 10:55:12 -0700
+
+spamassassin (4.0.0~rc2-2) unstable; urgency=medium
+
+  * Fix autopkgtest failure
+
+ -- Noah Meyerhans <noahm@debian.org>  Sun, 11 Sep 2022 17:56:13 -0700
+
+spamassassin (4.0.0~rc2-1) unstable; urgency=medium
+
+  * New upstream release candidate.
+  * Preserve CRON=1 setting from /etc/default/spamassassin when migrating
+    to systemd timers
+
+ -- Noah Meyerhans <noahm@debian.org>  Sun, 11 Sep 2022 09:48:52 -0700
+
+spamassassin (4.0.0~rc1+take2-2) experimental; urgency=medium
+
+  [ Andreas Metzler ]
+  * [lintian] Drop trailing whitespace in  debian/rules
+  * Use dh sequencer
+  * Use Rules-Requires-Root: no
+  * Implement Debian CPPFLAGS
+  * Set DEB_BUILD_MAINT_OPTIONS := hardening=+all
+  * Drop superfluous code from rules
+  * Use debhelper v13 compat mode
+  * Declare compatibility with Standards-Version: 4.6.0
+  * Also respect CPPFLAGS and LDFLAGS during testsuite run
+  * Point dh_autoreconf at directory containing autoconf code.
+
+ -- Noah Meyerhans <noahm@debian.org>  Sat, 10 Sep 2022 09:56:25 -0700
+
+spamassassin (4.0.0~rc1+take2-1) experimental; urgency=medium
+
+  * New upstream snapshot. Upstream re-pointed the 4.0.0-rc1 tag at svn
+    revision 1903702 after previously having tagged an RC1 prematurely.
+  * Add libtext-diff-perl to build-depends to support tests
+
+ -- Noah Meyerhans <noahm@debian.org>  Fri, 26 Aug 2022 22:51:29 -0700
+
+spamassassin (4.0.0~rc1+pre1-1) experimental; urgency=medium
+
+  * Upstream pre-release snapshot. This is formally 4.0.0-pre1 upstream,
+    but due to their prematurely released rc1, we've had to concoct a
+    custom upstream version string.
+
+ -- Noah Meyerhans <noahm@debian.org>  Thu, 05 May 2022 08:57:02 -0700
+
+spamassassin (4.0.0~rc1-1) experimental; urgency=medium
+
+  * Upstream release candidate
+
+ -- Noah Meyerhans <noahm@debian.org>  Sat, 30 Apr 2022 09:07:59 -0700
+
+spamassassin (4.0.0~0.0svn1900273-1) experimental; urgency=medium
+
+  * New upstream snapshot (Closes: #1009979)
+
+ -- Noah Meyerhans <noahm@debian.org>  Fri, 22 Apr 2022 14:46:11 -0700
+
+spamassassin (4.0.0~0.0svn1899920-1) experimental; urgency=medium
+
+  * New upstream snapshot
+  * Add libio-string-perl to (Build-)Depends (Closes: #1006890)
+  * Support passing https_proxy to sa-update if set (Closes: #1004489)
+
+ -- Noah Meyerhans <noahm@debian.org>  Sun, 17 Apr 2022 07:48:21 -0700
+
+spamassassin (4.0.0~0.0svn1896439-1) experimental; urgency=medium
+
+  * New upstream snapshot
+
+ -- Noah Meyerhans <noahm@debian.org>  Tue, 28 Dec 2021 11:46:22 -0800
+
+spamassassin (4.0.0~0.0svn1894153-1) experimental; urgency=medium
+
+  * update README.source
+  * d/control: remove duplicate entreies
+  * d/watch: update version, don't run uupdate
+  * Fix utf-8 encoding of lib/Mail/SpamAssassin/Util.pm
+  * New upstream snapshot
+
+ -- Noah Meyerhans <noahm@debian.org>  Wed, 13 Oct 2021 14:28:01 -0700
+
+spamassassin (4.0.0~0.0svn1892135-1) experimental; urgency=medium
+
+  * New upstream snapshot
+
+ -- Noah Meyerhans <noahm@debian.org>  Mon, 09 Aug 2021 10:40:38 -0700
+
+spamassassin (4.0.0~0.0svn1890446-2) experimental; urgency=medium
+
+  * Try harder to avoid pathname limits when running tests in buildd/CI
+    environments
+
+ -- Noah Meyerhans <noahm@debian.org>  Fri, 04 Jun 2021 08:33:43 -0700
+
+spamassassin (4.0.0~0.0svn1890446-1) experimental; urgency=medium
+
+  * New upstream snapshot
+  * Work around test failures due to excessively long socket path names
+    when running under GitLab CI environments.
+
+ -- Noah Meyerhans <noahm@debian.org>  Thu, 03 Jun 2021 17:16:24 -0700
+
+spamassassin (4.0.0~0.0svn1886510-1) experimental; urgency=medium
+
+  * New upstream snapshot
+
+ -- Noah Meyerhans <noahm@debian.org>  Tue, 16 Feb 2021 09:40:40 -0800
+
+spamassassin (4.0.0~0.0svn1885032-2) experimental; urgency=medium
+
+  * Don't try to stop spamassassin in preinst
+
+ -- Noah Meyerhans <noahm@debian.org>  Sun, 03 Jan 2021 11:48:13 -0800
+
+spamassassin (4.0.0~0.0svn1885032-1) experimental; urgency=medium
+
+  * New upstream snapshot
+
+ -- Noah Meyerhans <noahm@debian.org>  Sat, 02 Jan 2021 08:56:21 -0800
+
+spamassassin (4.0.0~0.0svn1883449-1) experimental; urgency=medium
+
+  * New upstream snapshot
+
+ -- Noah Meyerhans <noahm@debian.org>  Thu, 03 Dec 2020 10:24:01 -0800
+
+spamassassin (4.0.0~0.0svn1883440-2) experimental; urgency=medium
+
+  * Split spamd into a separate package, Recommended by spamassassin.
+  * replace start-stop-daemon with runuser in postinst scripts
+  * sa-compile: update lintian overrides
+  * d/rules: Remove generated rules during clean
+  * spamassassin: move cleanup steps to postrm
+
+ -- Noah Meyerhans <noahm@debian.org>  Mon, 30 Nov 2020 11:23:29 -0800
+
+spamassassin (4.0.0~0.0svn1883440-1) experimental; urgency=medium
+
+  * New upstream snapshot
+
+ -- Noah Meyerhans <noahm@debian.org>  Sun, 15 Nov 2020 06:04:03 -0800
+
+spamassassin (4.0.0~0.0svn1879217-2) experimental; urgency=medium
+
+  * Update python dependencies to support the python2 removal effort
+    (Closes: #967039)
+
+ -- Noah Meyerhans <noahm@debian.org>  Mon, 03 Aug 2020 15:58:43 -0700
+
+spamassassin (4.0.0~0.0svn1879217-1) experimental; urgency=medium
+
+  * Introduce a systemd timer in place of the daily cron job.  The cron
+    job will still be used if systemd is not in use.
+  * New upstream snapshot
+  * Configure systemd service as a "simple" service, not a "forking" service.
+
+ -- Noah Meyerhans <noahm@debian.org>  Thu, 16 Apr 2020 14:41:49 -0700
+
+spamassassin (3.4.6-1) unstable; urgency=medium
+
+  [ Noah Meyerhans ]
+  * New upstream release
+  * Import fix for upstream bug 7848
+
+  [ Guillem Jover ]
+  * Finish partial removal of ENABLED handling (Closes: #947086)
+
+ -- Noah Meyerhans <noahm@debian.org>  Sat, 29 May 2021 21:26:45 -0700
+
+spamassassin (3.4.5~pre1-4) unstable; urgency=medium
+
+  [ Roel van Meer ]
+  * postinst: Fix perms only if dir exists (Closes: #977957)
+
+  [ Noah Meyerhans ]
+  * Import upstream bug fix patches from the 3.4 release branch
+
+ -- Noah Meyerhans <noahm@debian.org>  Thu, 15 Apr 2021 11:30:25 -0700
+
+spamassassin (3.4.5~pre1-3) unstable; urgency=medium
+
+  * Remove all python related dependencies from our autopkgtest suite to
+    actually unblock the python2 removal.
+    (Closes: #967039)
+
+ -- Noah Meyerhans <noahm@debian.org>  Mon, 03 Aug 2020 22:29:50 -0700
+
+spamassassin (3.4.5~pre1-2) unstable; urgency=medium
+
+  * Update python dependencies to support the python2 removal effort
+    (Closes: #967039)
+  * Import a number of bug fixes from upstream's 3.4 branch that haven't yet
+    made it into a pre-release snapshot
+
+ -- Noah Meyerhans <noahm@debian.org>  Mon, 03 Aug 2020 15:44:52 -0700
+
+spamassassin (3.4.5~pre1-1) unstable; urgency=medium
+
+  * New upstream pre-release snapshot
+  * Drop debian/patches/update-spamd-ssl-tests, which has been obviated by
+    upstream changes
+  * Fix warnings caused by numeric comparisons with non-numeric module version
+  * Update Homepage in debian/control (Closes: #964060)
+
+ -- Noah Meyerhans <noahm@debian.org>  Fri, 17 Jul 2020 09:25:33 -0700
+
+spamassassin (3.4.4-1) unstable; urgency=medium
+
+  * New upstream release.
+
+ -- Noah Meyerhans <noahm@debian.org>  Thu, 30 Jan 2020 11:47:40 -0800
+
+spamassassin (3.4.4~rc1-1) unstable; urgency=medium
+
+  * When creating the debian-spamd user, set its shell to /usr/sbin/nologin
+    (Closes: 920394, 918506)
+  * New upstream release candidate fixes security issues:
+    - CVE-2020-1930: Arbitrary code execution via malicious rules files
+    - CVE-2020-1931: Arbitrary code execution via malicious rules files
+
+ -- Noah Meyerhans <noahm@debian.org>  Mon, 20 Jan 2020 17:31:41 -0800
+
+spamassassin (3.4.3-1) unstable; urgency=medium
+
+  [ Debian Janitor ]
+  * Use secure URI in debian/watch.
+  * Bump debhelper from old 9 to 12.
+  * Set debhelper-compat version in Build-Depends.
+
+  [ Noah Meyerhans ]
+  * New upstream release.
+
+ -- Noah Meyerhans <noahm@debian.org>  Thu, 12 Dec 2019 10:40:56 -0800
+
+spamassassin (3.4.3~rc7-1) unstable; urgency=medium
+
+  * Don't install sandbox rules or .pre files in /usr/share/spamassassin.
+  * New upstream release candidate.
+
+ -- Noah Meyerhans <noahm@debian.org>  Mon, 25 Nov 2019 10:53:07 -0800
+
+spamassassin (3.4.3~rc6+1-1) unstable; urgency=medium
+
+  * Repack the upstream rc6 snapshot, including missing components that are not
+    included in upstream's subversion tag.
+
+ -- Noah Meyerhans <noahm@debian.org>  Fri, 15 Nov 2019 07:02:22 -0800
+
+spamassassin (3.4.3~rc6-1) unstable; urgency=medium
+
+  * New upstream release. (Closes: 878569)
+  * Incorporate upstream security fixes:
+    - CVE-2018-11805: Malicious rules files, possibly retrieved
+      automatically via sa-update, can run arbitrary commands.
+    - CVE-2019-12420: A message can be crafted in a way to use excessive
+      resources, resulting in a denial of service.
+  * Clarify location of "site-specific" configuration in spamassassin man page.
+    (Closes: 426031)
+
+ -- Noah Meyerhans <noahm@debian.org>  Tue, 12 Nov 2019 10:47:49 -0800
+
+spamassassin (3.4.2-2) unstable; urgency=medium
+
+  [ Ondřej Nový ]
+  * d/changelog: Remove trailing whitespaces
+  * d/control: Remove trailing whitespaces
+  * d/control: Remove XS-Testsuite field, not needed anymore
+
+  [ Noah Meyerhans ]
+  * Add libbsd-resource-perl to Suggests (Closes: 910434)
+  * Update debhelper build-dep to 11.1 to support the
+    dh_installinit --no-enable feature.
+  * Fix severity of some spamd logs. (Closes: 913571)
+  * Import upstream fix for "Not a HASH reference at
+    /usr/share/perl5/Mail/SpamAssassin/Plugin/FromNameSpoof.pm"
+    (Closes: 910435)
+  * Remove /var/lib/spamassassin/compiled during sa-compile upgrades.
+  * Move spamd pid file to from /var/run to /run
+  * Apply upstream fix for Mail::SpamAssassin::Plugin::ASN reports wrong
+    ASN for IPv6 (Closes: 918130)
+
+ -- Noah Meyerhans <noahm@debian.org>  Fri, 18 Oct 2019 11:22:48 -0700
+
+spamassassin (3.4.2-1) unstable; urgency=medium
+
+  * New upstream release fixes multiple security vulnerabilities
+    - CVE-2017-15705: Denial of service issue in which certain unclosed
+      tags in emails cause markup to be handled incorrectly leading to
+      scan timeouts. (Closes: 908969)
+    - CVE-2016-1238: Unsafe usage of "." in @INC in a configuration
+      script.
+    - CVE-2018-11780: potential Remote Code Execution bug with the
+      PDFInfo plugin. (Closes: 908970)
+    - CVE-2018-11781: local user code injection in the meta rule syntax.
+      (Closes: 908971)
+    - BayesStore: bayes_expire table grows, remove_running_expire_tok not
+      called (Closes: 883775)
+    - Fix use of uninitialized variable warning in PDFInfo.pm
+      (Closes: 865924)
+    - Fix "failed to parse plugin" error in
+      Mail::SpamAssassin::Plugin::URILocalBL (Closes: 891041)
+  * Don't recursively chown /var/lib/spamassassin during postinst.
+    (Closes: 889501)
+  * Reload spamd after compiling rules in sa-compile.postinst.
+  * Preserve locally set ENABLED=1 setting from /etc/default/spamassassin
+    when installing on systemd-based systems. (Closes: 884163, 858457)
+  * Update SysV init script to cope with upstream's change to $0.
+  * Remove compiled rules upon removal of the sa-compile package.
+  * Ensure that /var/lib/spamassassin/compiled doesn't change modes with
+    the cron job's execution. (Closes: 890650)
+  * Update standards version to 4.2.1
+  * Create /var/lib/spamassassin via dpkg, rather than the postinst.
+    (Closes: 891833)
+
+ -- Noah Meyerhans <noahm@debian.org>  Sun, 30 Sep 2018 23:44:58 -0700
+
+spamassassin (3.4.1-8) unstable; urgency=medium
+
+  * Fix inappropriate invocation of invoke-rc.d in cron script.
+    (Closes: 865514)
+  * Update systemd unit dependencies to include network and syslog.
+    (Closes: 864810)
+  * Migrate packaging to git, finally.
+  * Apply upstream patch to fix regex error leading to warnings in perl
+    5.26+ (Closes: 869408)
+  * Add Multi-Arch: foreign headers to package definitions (Closes:
+    #850454)
+  * Update standards version to 4.1.0.0
+  * Remove references to the obsolete syslog.target dependency in the
+    systemd service file.
+  * Clarify the use of the perl-major-upgrade dpkg trigger.
+  * Fix spamd service manage on upgrades. (Closes: #865356)
+
+ -- Noah Meyerhans <noahm@debian.org>  Sat, 09 Sep 2017 22:37:20 -0700
+
+spamassassin (3.4.1-7) unstable; urgency=medium
+
+  * Ensure that spamd doesn't automatically start upon initial
+    installation.
+  * Disable bb.barracudacentral.org (RCVD_IN_BRBL_LASTEXT), as
+    it requires users to register. (Closes: #861671)
+  * Update the systemd unit file to use the same pid file as was
+    used in the sysvinit script. (Closes: #808804)
+  * Update spamassassin docs to remove outdated gpg version
+    compatibility note. (Closes: #853913)
+
+ -- Noah Meyerhans <noahm@debian.org>  Thu, 11 May 2017 19:45:36 -0700
+
+spamassassin (3.4.1-6) unstable; urgency=medium
+
+  * Import upstream fix for spamassassin bug 7226: Enhance whitelist_from_dkim
+    to let it accept signing subdomains
+  * Import upstream fix for spamassassin bug 7212: Warning of uninitialized
+    value in
+    Mail::SpamAssassin::PerMsgStatus::get_names_of_tests_hit_with_scores()
+  * Add libgeo-ip-perl to Suggests for
+    Mail::SpamAssassin::Plugin::URILocalBL (Closes: #841960)
+  * Add libnet-patricia-perl to Suggests
+  * Documentation updates
+  * Promote libmail-dkim-perl to Depends (Closes: #675540)
+  * Add missing dependency on lsb-base (>= 3.0-6)
+  * Correct an error in debian/watch
+  * Fix an error in -stamp file management in debian/rules.
+  * Pass CPPFLAGS to gcc when building spamc
+  * Allow building against OpenSSL 1.1.0 (Closes: #828552)
+  * Acknowledge 3.4.1-5.1 NMU (Closes: #839704)
+  * Support passing http_proxy to sa-update if set (Closes: #805009).
+  * Run test suite during build (Closes: #784023).
+  * Update to debhelper compatibility version 9
+
+ -- Noah Meyerhans <noahm@debian.org>  Sun, 30 Oct 2016 09:39:27 -0700
+
+spamassassin (3.4.1-5.1) unstable; urgency=medium
+
+  * Non-maintainer upload.
+  * Fix uninitialized values in URIDNSBL.pm with Net::DNS 1.01
+    (Closes: #760277)
+
+ -- Peter Colberg <peter@colberg.org>  Thu, 29 Sep 2016 23:04:25 -0400
+
+spamassassin (3.4.1-5) unstable; urgency=medium
+
+  * Fix "FTBFS with '.' removed from perl's @INC" with patch from
+    Dominic Hargreaves <dom@earth.li> (Closes: #835494)
+  * Fix "fails to install: error: gpg required but not found!" by
+    making gpg usage optional. (Closes: #831872)
+
+ -- Noah Meyerhans <noahm@debian.org>  Mon, 29 Aug 2016 14:14:31 -0700
+
+spamassassin (3.4.1-4) unstable; urgency=medium
+
+  * Import upstream fix for DnsResolver.pm regression. (Closes: #821385)
+  * Bump standards version to 3.9.8
+
+ -- Noah Meyerhans <noahm@debian.org>  Fri, 22 Apr 2016 10:35:05 -0700
+
+spamassassin (3.4.1-3) unstable; urgency=medium
+
+  * Don't try to reload the spamd configuring in cron.daily if spamd
+    isn't actually running. (Closes: #774380)
+  * Add libhttp-date-perl to spamassassin's Depends. (Closes: #801472)
+  * Disable SSLv3 support for network communication between spamc and
+    spamd and let IO::Socket::SSL choose the TLS version.
+  * Fix debian/watch to not pick up rules archive updates.
+
+ -- Noah Meyerhans <noahm@debian.org>  Sun, 08 Nov 2015 16:12:40 -0800
+
+spamassassin (3.4.1-2) unstable; urgency=medium
+
+  * Clean up a bunch of dependencies; drop versioned deps going back
+    to old-oldstable and remove dependency on perl-modules.
+    (Closes: #788073)
+  * POD documentation fixes.
+  * Suggest libencode-detect-perl (Closes: #563293)
+
+ -- Noah Meyerhans <noahm@debian.org>  Mon, 08 Jun 2015 10:16:00 -0700
+
+spamassassin (3.4.1-1) unstable; urgency=medium
+
+  * New upstream release.
+
+ -- Noah Meyerhans <noahm@debian.org>  Wed, 29 Apr 2015 22:09:45 -0700
+
+spamassassin (3.4.0-6) unstable; urgency=medium
+
+  * Remove references to ahbl.org DNSBL, which has ceased operation.
+    (Closes: #774768)
+
+ -- Noah Meyerhans <noahm@debian.org>  Sat, 31 Jan 2015 10:53:22 -0800
+
+spamassassin (3.4.0-5) unstable; urgency=medium
+
+  * Import upstream fix for perl_version warnings (Closes: 771408)
+
+ -- Noah Meyerhans <noahm@debian.org>  Sat, 29 Nov 2014 11:48:48 -0800
+
+spamassassin (3.4.0-4) unstable; urgency=low
+
+  * Improve detection of Net::DNS versions. (Closes: 766718)
+
+ -- Noah Meyerhans <noahm@debian.org>  Sat, 22 Nov 2014 16:59:09 -0800
+
+spamassassin (3.4.0-3) unstable; urgency=low
+
+  * Fix regression that caused the --quiet option to be dropped
+    from sa-compile in 3.4.0-2. (Closes: 756402)
+  * Update comments in /etc/default/spamassassin to clarify
+    systemd integration with spamd (Closes: 764438)
+  * Fix spamassassin's handling of the perl-major-upgrade trigger to
+    ensure that spamd is restarted upon perl upgrade.
+  * Fix the init script such that 'restart' and 'stop' aren't broken if
+    the perl binary is replaced on the filesystem. (Closes: 759652)
+  * Fix missing python dependency for autopkgtests (Closes: 740171)
+
+ -- Noah Meyerhans <noahm@debian.org>  Mon, 13 Oct 2014 20:12:03 -0700
+
+spamassassin (3.4.0-2) unstable; urgency=low
+
+  * Install a systemd unit file. (Closes: 716887)
+  * Use env+start-stop-daemon instead of su in cron jobs.
+  * Skip the random pause in cron.daily if running interactively.
+  * Apply upstream patch to support new Net::DNS interface.
+    (Closes: 752542)
+  * Use dpkg-buildflags instead of the deprecated hardening-wrapper
+
+ -- Noah Meyerhans <noahm@debian.org>  Tue, 24 Jun 2014 23:44:30 -0700
+
+spamassassin (3.4.0-1) unstable; urgency=low
+
+  * New upstream version! (Closes: 738963, 738872, 738867)
+  * Scrub the environment when switching to the debian-spamd user in
+    postinst and cron.daily. (Closes: 738951)
+  * Enhancements to postinst to better manage ownership of
+    /var/lib/spamassassin, via Iain Lane <iain.lane@canonical.com>
+    (Closes: 738974)
+
+ -- Noah Meyerhans <noahm@debian.org>  Fri, 14 Feb 2014 22:45:15 -0800
+
+spamassassin (3.3.2-8) unstable; urgency=low
+
+  * Split sa-compile into a separate package. (Closes: 455084)
+  * Return an lsb-compliant exit code from /etc/init.d/spamassassin status
+    even if we're disabled in /etc/default/spamassassin. (Closes: 716691)
+  * Remove Jesus Climent <jesus.climent@hispalinux.es> from Uploaders.
+  * Bump standards version to 3.9.5 (no changes)
+
+ -- Noah Meyerhans <noahm@debian.org>  Sun, 09 Feb 2014 15:44:35 -0800
+
+spamassassin (3.3.2-7) unstable; urgency=low
+
+  * Incorporate upstream's fix for syntax warnings when running
+    under perl 5.18 (Closes: #721565)
+  * Bump standards version to 3.9.4 (no changes)
+  * Incorporate Ubuntu's dep-8 autopkgtests. (Closes: 710881)
+
+ -- Noah Meyerhans <noahm@debian.org>  Sun, 22 Sep 2013 14:44:37 -0700
+
+spamassassin (3.3.2-6.1) unstable; urgency=low
+
+  * Non-maintainer upload.
+  * Fix "FTBFS with perl 5.18: POD failure":
+    add patch 97_bug720499-pod-5.18 from Damyan Ivanov: fix POD errors with
+    perl 5.18
+    (Closes: #720499)
+
+ -- gregor herrmann <gregoa@debian.org>  Fri, 30 Aug 2013 17:48:37 +0200
+
+spamassassin (3.3.2-6) unstable; urgency=low
+
+  * Remove tests referring to NJABL, which has shut down as of March 1, 2013.
+    (Closes: #702839)
+
+ -- Noah Meyerhans <noahm@debian.org>  Mon, 11 Mar 2013 22:33:26 -0700
+
+spamassassin (3.3.2-5) unstable; urgency=low
+
+  * Import upstream's fix for a crash in SIGCHLD handler (Closes: #694504)
+
+ -- Noah Meyerhans <noahm@debian.org>  Mon, 28 Jan 2013 21:51:58 -0800
+
+spamassassin (3.3.2-4) unstable; urgency=low
+
+  * Incorporate upstream's fix for a bug where malformed multipart MIME
+    messages would bypass URIBL rules. (Closes: #684709)
+  * Update standards version to 3.9.3 (no changes)
+
+ -- Noah Meyerhans <noahm@debian.org>  Mon, 13 Aug 2012 21:37:11 -0700
+
+spamassassin (3.3.2-3.2) unstable; urgency=low
+
+  * Non-maintainer upload.
+  * debian/spamassassin.postinst: Create /var/lib/spamassassin.
+    Closes: #684373.
+
+ -- Bart Martens <bartm@debian.org>  Sat, 11 Aug 2012 17:29:42 +0000
+
+spamassassin (3.3.2-3.1) unstable; urgency=low
+
+  * Non-maintainer upload.
+  * move GPG.KEY out of /usr/share/doc per §12.3(Closes: #683431)
+
+ -- Shawn Landden <shawnlandden@gmail.com>  Sat, 04 Aug 2012 16:20:46 +0000
+
+spamassassin (3.3.2-3) unstable; urgency=low
+
+  * Run sa-update and sa-compile as a non-root user.
+    (Closes: 623861, 504154)
+  * Store the default gpg keyring in /var/lib/spamassassin
+  * Pod cleanup (Closes: 521064)
+  * Note sa-check_spamd's incompatibility with Nagios EPM (Closes: 598573)
+  * Adjust perms on /var/lib/spamassassin/compiled after running sa-compile
+    in the cron.daily, not on all of /var/lib/spamassassin
+  * Set CFLAGS and LDFLAGS using dpkg-buildflags (Closes: 674016)
+
+ -- Noah Meyerhans <noahm@debian.org>  Thu, 14 Jun 2012 23:00:01 -0700
+
 spamassassin (3.3.2-2) unstable; urgency=low
 
-  * Remove dependencies on libdigest-sha1-perl, since it's being 
+  * Remove dependencies on libdigest-sha1-perl, since it's being
     removed from Debian. (Closes: #629612)
 
  -- Noah Meyerhans <noahm@debian.org>  Thu, 18 Aug 2011 17:07:05 -0700
@@ -60,7 +761,7 @@ spamassassin (3.2.5-7) unstable; urgency=high
 
   * Fix a bunch of spelling errors in spamassassin documentation.
   * Add ${misc:Depends} to spamassassin Depends.
-  * Fix FH_DATE_PAST_20XX so dates in 2010 aren't considered "grossly 
+  * Fix FH_DATE_PAST_20XX so dates in 2010 aren't considered "grossly
     in the future"
 
  -- Noah Meyerhans <noahm@debian.org>  Fri, 01 Jan 2010 12:51:32 -0500
@@ -69,7 +770,7 @@ spamassassin (3.2.5-6) unstable; urgency=low
 
   * Fix call to "make install" in debian/rules to handle changes to
     ExtUtils::MakeMaker in perl. (Closes: #549726)
-  * Fix Makefile.PL so DESTDIR actually works when provided on the 
+  * Fix Makefile.PL so DESTDIR actually works when provided on the
     "make install" commandline.
   * Updated to standards compliance 3.8.3, dropping versioned build-dep on
     perl (>= 5.6.0)
@@ -227,7 +928,7 @@ spamassassin (3.2.0-1) unstable; urgency=low
     performance if enabled (Closes: #394939)
     - Fix ordering of lines in sa-update generated files (Closes: #413978)
     - Fix parsing of Exim received headers (Closes: #357696)
-    - Stop requiring Crypt::OpenSSL::Bignum with DKIM (Closes: #400437)  
+    - Stop requiring Crypt::OpenSSL::Bignum with DKIM (Closes: #400437)
     - Better handling of trusted_networks (Closes: #290927)
     - More robust prefork mechanism for spamd (multiple bugs fixed)
     (Closes: #336236, #396500, #341055)
@@ -247,7 +948,7 @@ spamassassin (3.2.0-1) unstable; urgency=low
     #408472)
   * Stop pointing to the README for mail stream integration help in README.Debian (Closes:
     #374714)
-  * Remove reference to libnet-dns-perl now that it's required in README.Debian (Closes: #319478) 
+  * Remove reference to libnet-dns-perl now that it's required in README.Debian (Closes: #319478)
  -- Duncan Findlay <duncf@debian.org>  Mon, 21 May 2007 10:08:17 -0400
 
 spamassassin (3.1.7-2) unstable; urgency=high
@@ -288,7 +989,7 @@ spamassassin (3.1.3-1) unstable; urgency=high
   * New upstream release
     - Fixes spamd --vpopmail/--paranoid remote command execution bug. This
     has been assigned CVE-2006-2447.
-  
+
  -- Duncan Findlay <duncf@debian.org>  Sun,  4 Jun 2006 18:24:05 -0400
 
 spamassassin (3.1.2-1) unstable; urgency=low
@@ -317,7 +1018,7 @@ spamassassin (3.1.1-1) unstable; urgency=low
   * Drop logcheck files -- these should/will be in the logcheck-database package. (See bug #)
   * Move libnet-dns-perl back to a Recommends:. The loud warnings should
     have been silenced upstream.
-  
+
  -- Duncan Findlay <duncf@debian.org>  Wed,  9 Nov 2005 16:55:03 -0500
 
 spamassassin (3.1.0a-2) unstable; urgency=low
@@ -446,7 +1147,7 @@ spamassassin (3.0.2-1) unstable; urgency=low
   * Updated README.Debian to explain issues with performance and spamd
     (Closes: #279981)
   * Updated watch file to handle the apache.org layout better. (Closes: #281468)
-	
+
  -- Duncan Findlay <duncf@debian.org>  Sat,  1 Jan 2005 15:29:19 -0500
 
 spamassassin (3.0.1-1) unstable; urgency=low
@@ -488,7 +1189,7 @@ spamassassin (3.0.0-1) unstable; urgency=low
     - Document --home-helper-dir option in SYNOPSIS (Closes: #265887)
     - More documentation fixes: --user-config is on by default (Closes: #263845, #263846)
     - Doc: Typo "on" -> "or" (Closes: #271865)
-	
+
   * Changed /etc/default/spamassassin to be more verbose (Closes: #265518)
   * Got rid of spamassassin-tools since it was more pain than it was worth.
 
@@ -606,11 +1307,11 @@ spamassassin (2.99pre3.0.0svn20040525-1) experimental; urgency=low
       Split ok_languages zh into zh.gb2312, zh.big5 (Closes: #224116)
       Put all error output on one fd for spamc (Closes: #197879)
       man Mail::SpamAssassin::Conf clearer about raw headers (Closes: #236431)
-	
+
   * Converted packaging to use dpatch in order to allow for easier
     creation of SVN packages (Because Daniel Quinlan has been bugging
     me to do figure out a better system!)
-	
+
   * Improved debian specific rules in 65_debian.cf (Closes: #237995, #240983)
   * Changed dependencies for 3.0.0. Now suggest pyzor (Closes: #242456)
   * Fixed logcheck files for whitespace (Closes: #243820)
@@ -636,10 +1337,10 @@ spamassassin (2.61-2) unstable; urgency=low
   * Improve copyright file in response to mail from Peter Palfrader
     <weasel@debian.org> to debian-devel-announce
   * Drop versioned libhtml-parser-perl -- it was incorrect. (Closes: #224933)
-	
+
   * Added patch from Colin Watson / Marc Haber to ease backports. (Closes: #224237)
   * Added patch from Francesco Potorti <pot@gnu.org> to allow setting of spamd's nice level (Closes: #224369)
-	
+
  -- Duncan Findlay <duncf@debian.org>  Sun, 28 Dec 2003 16:46:53 -0500
 
 spamassassin (2.61-1) unstable; urgency=low
@@ -738,7 +1439,7 @@ spamassassin (2.59pre2.60cvs20030619-1) experimental; urgency=low
   * Fixed spamc's manpage to refer to spamd(8) not spamd(1) (Closes: #197880)
   * Added doc on integrating spamassassin sitewide with Exim3 from
     John Girash <girash@skyron.harvard.edu> (Closes: #196706)
-  * Added example configuration for gnus from Andreas Kneib 
+  * Added example configuration for gnus from Andreas Kneib
     <Andreas.Kneib@t-online.de> (Closes: #196557)
   * Noted the perl5.6->perl5.8 upgrade bug in README.Debian
 
@@ -827,7 +1528,7 @@ spamassassin (2.50-1) unstable; urgency=low
       Closes: #179641, #166567, #180115, #180117, #164367, #161067,
       #165428, #165731, #170881, #154812, #163179, #164960, #161696,
       #163297, #163328
-	
+
   * Added rules/STATISTICS.txt to /usr/share/doc/spamassassin (Closes: #179799)
 
  -- Duncan Findlay <duncf@debian.org>  Wed, 26 Feb 2003 22:58:58 -0500
