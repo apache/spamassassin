@@ -1,6 +1,0 @@
-#!/bin/bash
-
-DIRNAME=`dirname $0`
-
-echo "[Removing bayes database]"
-mysql -usauser -psapasswd spamassassin < $DIRNAME/delete.sql

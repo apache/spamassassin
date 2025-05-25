@@ -1,7 +1,0 @@
-#ifplugin Mail::SpamAssassin::Plugin::HTMLEval
-## Check comment lengths
-#body __HTML_COMMENT_10000 eval:html_text_match('comment', '(?s)^(?=.{10000})')
-#body __HTML_COMMENT_20000 eval:html_text_match('comment', '(?s)^(?=.{20000})')
-#body __HTML_COMMENT_30000 eval:html_text_match('comment', '(?s)^(?=.{30000})')
-#body __HTML_COMMENT_50000 eval:html_text_match('comment', '(?s)^(?=(?:.{25000}){2})')
-#endif

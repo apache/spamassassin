@@ -1,6 +1,0 @@
-#!/bin/bash
-
-DIRNAME=`dirname $0`
-
-echo "[Determining tables size for MySQL tables]"
-mysql -usauser -psapasswd spamassassin < $DIRNAME/show_table_status.sql

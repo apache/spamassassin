@@ -1,9 +1,0 @@
-#!/bin/bash
-
-BAYESPATH=$1/dbdir/bayes
-
-mkdir -p $(dirname $BAYESPATH)
-
-echo "[Replacing BAYESPATH in $1/site/local.cf file]"
-sed -i -e "s:@@BAYESPATH@@:$BAYESPATH:" $1/site/local.cf
-
