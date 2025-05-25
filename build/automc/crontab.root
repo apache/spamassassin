@@ -1,8 +1,0 @@
-# Crontab lines for root's crontab.
-#
-# stupid log cycling
-1 1 * * 1 mv /var/apache2/logs/error_log /var/apache2/logs/error_log.1 ; touch /var/apache2/logs/error_log ; chmod 644 /var/apache2/logs/error_log ; mv /var/apache2/logs/access_log /var/apache2/logs/access_log.1 ; touch /var/apache2/logs/access_log ; chmod 644 /var/apache2/logs/access_log ; apachectl restart
-#
-# compression of old ruleqa data; it'll be unzipped on the fly by the UI, but it saves
-# a lot of disk space this way
-2 2 * * 2 /export/home/svn-trunk/build/automc/gzip_old_ruleqa_data
