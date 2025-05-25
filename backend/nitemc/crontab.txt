@@ -1,8 +1,0 @@
-# sudo crontab -e release:
-
-# Remember, we're in UTC here ...
-50 8 * * 0-5 /export/home/svn-trunk/backend/nitemc/corpora_runs >> /home/corpus-rsync/corpus/nightly-versions.txt
-53 8 * * 0-5 /export/home/svn-trunk/backend/nitemc/extract_to_rsync_dir nightly /home/corpus-rsync/corpus/nightly-versions.txt > $HOME/extract.log 2>&1
-50 8 * * 6 /export/home/svn-trunk/backend/nitemc/corpora_runs >> /home/corpus-rsync/corpus/weekly-versions.txt
-53 8 * * 6 /export/home/svn-trunk/backend/nitemc/extract_to_rsync_dir weekly /home/corpus-rsync/corpus/weekly-versions.txt > $HOME/extract.log 2>&1
-

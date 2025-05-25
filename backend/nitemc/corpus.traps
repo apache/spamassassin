@@ -1,8 +1,0 @@
-opts_weekly="--net -j 8 --reuse --cache --cachedir=/tmpfs/aicache_nightly --restart=500 ham:detect:/export/home/bbmass/uploadedcorpora/traps/ham/* --after="-15552000" --tail=50000 spam:detect:/export/home/bbmass/uploadedcorpora/doc/spam/*"
-opts_nightly=" --reuse --cache --cachedir=/tmpfs/aicache_nightly --restart=500 ham:detect:/export/home/bbmass/uploadedcorpora/traps/ham/* --after="-15552000" --tail=50000 spam:detect:/export/home/bbmass/uploadedcorpora/doc/spam/*"
-tmp=$HOME/tmp
-tree=$HOME/svn
-prefs_weekly=$HOME/user_prefs.weekly
-prefs_nightly=$HOME/user_prefs.nightly
-username=bb-traps
-password=__RSYNC_PASSWORD__
