@@ -266,7 +266,7 @@ BITCOIN_YOUR_INFO
 # good enough
 BODY_EMAIL_419_FRAUD_GM_LOOSE
 
-# tflags publish
+# tflags net
 BODY_URI_ONLY
 
 # tflags publish
@@ -443,9 +443,6 @@ ENVFROM_GOOG_TRIX
 # tflags net
 ENV_AND_HDR_SPF_MATCH
 
-# good enough
-EXCUSE_24
-
 # tflags publish
 FACEBOOK_IMG_NOT_RCVD_FB
 
@@ -485,10 +482,10 @@ FONT_INVIS_POSTEXTRAS
 # tflags net
 FORGED_SPF_HELO
 
-# tflags publish
+# tflags net
 FORM_FRAUD
 
-# tflags publish
+# tflags net
 FORM_FRAUD_3
 
 # tflags publish
@@ -887,7 +884,7 @@ HTML_OFF_PAGE
 # tflags publish
 HTML_SHRT_CMNT_OBFU_MANY
 
-# tflags publish
+# tflags net
 HTML_SINGLET_MANY
 
 # tflags net
@@ -1059,6 +1056,9 @@ MSGID_MULTIPLE_AT
 MSM_PRIO_REPTO
 
 # good enough
+MSOE_MID_WRONG_CASE
+
+# good enough
 NA_DOLLARS
 
 # tflags publish
@@ -1138,6 +1138,9 @@ PDS_FRNOM_TODOM_DBL_URL
 
 # good enough
 PDS_FRNOM_TODOM_NAKED_TO
+
+# tflags net
+PDS_FROM_2_EMAILS
 
 # good enough
 PDS_FROM_NAME_TO_DOMAIN
@@ -1644,6 +1647,9 @@ TONLINE_FAKE_DKIM
 TO_EQ_FM_DIRECT_MX
 
 # tflags net
+TO_EQ_FM_DOM_HTML_IMG
+
+# tflags net
 TO_EQ_FM_DOM_HTML_ONLY
 
 # tflags net
@@ -1681,6 +1687,9 @@ TVD_SPACE_ENCODED
 
 # good enough
 TVD_SPACE_RATIO_MINFP
+
+# tflags net
+TVD_SUBJ_NUM_OBFU_MINFP
 
 # tflags publish
 TW_GIBBERISH_MANY
