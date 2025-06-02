@@ -2,9 +2,6 @@
 # active ruleset list, automatically generated from https://ruleqa.spamassassin.org/
 # with results from: last-net: net-ena-week0 net-ena-week1 net-ena-week4 net-giovanni-ham net-giovanni-spam net-grenier net-jhardin net-llanga net-mmiroslaw-mails-ham net-mmiroslaw-mails-spam net-spamsponge net-tsz-corpus net-whyscream; day 1: ena-week0 ena-week1 ena-week2 ena-week3 ena-week4 giovanni-ham giovanni-spam grenier jhardin llanga mmiroslaw-mails-ham mmiroslaw-mails-spam spamsponge tsz-corpus whyscream; day 2: ena-week0 ena-week1 ena-week2 ena-week3 ena-week4 giovanni-ham giovanni-spam grenier jhardin llanga mmiroslaw-mails-ham mmiroslaw-mails-spam spamsponge tsz-corpus whyscream; day 3: ena-week0 ena-week1 ena-week2 ena-week3 ena-week4 giovanni-ham giovanni-spam grenier jhardin llanga mmiroslaw-mails-ham mmiroslaw-mails-spam spamsponge tsz-corpus whyscream; day 4: ena-week0 ena-week1 ena-week2 ena-week3 ena-week4 giovanni-ham giovanni-spam grenier jhardin llanga mmiroslaw-mails-ham mmiroslaw-mails-spam spamsponge tsz-corpus whyscream; day 5: ena-week0 ena-week1 ena-week2 ena-week3 ena-week4 giovanni-ham giovanni-spam grenier jhardin llanga mmiroslaw-mails-ham mmiroslaw-mails-spam spamsponge tsz-corpus whyscream
 
-# good enough
-ACCT_PHISHING_MANY
-
 # tflags publish
 AC_BR_BONANZA
 
@@ -485,7 +482,7 @@ FONT_INVIS_POSTEXTRAS
 # tflags net
 FORGED_SPF_HELO
 
-# tflags publish
+# tflags net
 FORM_FRAUD
 
 # tflags net
@@ -560,7 +557,7 @@ FROM_MISSP_FREEMAIL
 # good enough
 FROM_MISSP_MSFT
 
-# tflags net
+# good enough
 FROM_MISSP_REPLYTO
 
 # tflags net
@@ -692,9 +689,6 @@ FUZZY_WALLET
 # tflags publish
 FUZZY_WELLSFARGO
 
-# good enough
-GAPPY_HTML
-
 # tflags publish
 GAPPY_SALES_LEADS_FREEM
 
@@ -785,7 +779,7 @@ HAS_X_NO_RELAY
 # tflags publish
 HAS_X_OUTGOING_SPAM_STAT
 
-# tflags net
+# good enough
 HDRS_LCASE
 
 # good enough
@@ -967,9 +961,6 @@ MALWARE_PASSWORD
 
 # tflags publish
 MALW_ATTACH
-
-# tflags net
-MANY_HDRS_LCASE
 
 # tflags publish
 MANY_SPAN_IN_TEXT
@@ -1617,9 +1608,6 @@ SUBJECT_IN_WELCOMELIST
 SUBJ_BRKN_WORDNUMS
 
 # tflags net
-SUBJ_UNNEEDED_HTML
-
-# tflags net
 SURBL_BLOCKED
 
 # good enough
@@ -1662,13 +1650,13 @@ TONLINE_FAKE_DKIM
 TO_EQ_FM_DIRECT_MX
 
 # tflags net
-TO_EQ_FM_DOM_HTML_IMG
-
-# tflags net
 TO_EQ_FM_DOM_HTML_ONLY
 
 # tflags net
 TO_EQ_FM_DOM_SPF_FAIL
+
+# tflags net
+TO_EQ_FM_HTML_ONLY
 
 # tflags net
 TO_EQ_FM_SPF_FAIL
@@ -1697,7 +1685,7 @@ TO_NO_BRKTS_PCNT
 # tflags publish
 TO_TOO_MANY_WFH_01
 
-# tflags net
+# good enough
 TVD_SPACE_ENCODED
 
 # tflags net
@@ -1943,7 +1931,7 @@ URI_WPADMIN
 # tflags publish
 URI_WP_DIRINDEX
 
-# tflags publish
+# tflags net
 URI_WP_HACKED
 
 # tflags publish
