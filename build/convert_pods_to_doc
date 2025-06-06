@@ -3,6 +3,36 @@
 use Pod::Html;
 use Pod::Text ();
 
+my $header = <<EOF;
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>Apache SpamAssassin documentation</title>
+<link rel="stylesheet" href="/assets/docs.css" type="text/css" />
+<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+</head>
+
+<body>
+
+<h2>Mail::SpamAssassin - Spam detector and markup engine</h2>
+<pre>
+EOF
+
+my $footer = <<EOF;
+</pre>
+<h1 id="AUTHORS">AUTHORS</h1>
+<p>The SpamAssassin(tm) Project &lt;https://spamassassin.apache.org/&gt;</p>
+
+<h1 id="COPYRIGHT">COPYRIGHT</h1>
+<p>SpamAssassin is distributed under the Apache License, Version 2.0, as described in the file <code>LICENSE</code> included with the distribution.</p>
+
+</body>
+
+</html>
+EOF
+
+open my $idx, '>', 'doc/index.html' or die "Cannot write to index file";
+print $idx $header;
 foreach (@ARGV) {
   $in = $_;
   s,^(lib|spamd|spamc)/|\.(pod|pm)$,,g;
@@ -11,9 +41,12 @@ foreach (@ARGV) {
   my $title = $_;
   $title =~ s/_/::/g;
   # convert to HTML: doc/foo.html
-  pod2html ("--infile=$in", "--outfile=doc/$_.html", "--css=/assets/style.css", "--title=$title");
+  pod2html ("--infile=$in", "--outfile=doc/$_.html", "--css=/assets/docs.css", "--title=$title");
+  print $idx "<a href=$_.html>$title</a>\n";
 
   # and to text: doc/foo.txt
   my $parser = Pod::Text->new ();
   $parser->parse_from_file ($in, "doc/$_.txt");
 }
+print $idx $footer;
+close $idx;
