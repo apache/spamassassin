@@ -162,6 +162,10 @@ Additional supported OPTS:
 
   num      remove the chars from the match that are not numbers
 
+  replace  if a regexp contains replace tags, replace the match of the regexp with the first option
+           of the regexp, ex. +1 8O8.l23.4567 will be changed to +1 808.123.4567
+           For the subsitution to work, replace tags must contain only single chars.
+
 Optional subtest regexp to match DNS answer (default: '^127\.').
 
 =back
@@ -239,7 +243,7 @@ use strict;
 use warnings;
 use re 'taint';
 
-my $VERSION = 0.101;
+my $VERSION = 0.102;
 
 use Digest::MD5 qw(md5_hex);
 use Digest::SHA qw(sha1_hex sha256);
@@ -740,6 +744,23 @@ sub check_hashbl_bodyre {
     warn "HashBL: $rulename missing body regex\n";
     return 0;
   }
+
+  my $conf = $pms->{conf};
+  dbg("using regexp $re");
+  my $orig_re = $re;
+  my $replaced_regexp = 0;
+
+  # replace regexp matches only if requested
+  if(exists $conf->{plugins_loaded}{'Mail::SpamAssassin::Plugin::ReplaceTags'}) {
+    if(exists($conf->{replace_rules}->{$rulename})) {
+      $re = Mail::SpamAssassin::Plugin::ReplaceTags->replace_regexp($re, $conf);
+      if(defined $re and ($orig_re ne $re)) {
+        dbg("regexp $orig_re replaced with $re");
+        $replaced_regexp = 1;
+      }
+    }
+  }
+
   my ($rec, $err) = compile_regexp($re, 0);
   if (!$rec) {
     warn "HashBL: $rulename invalid body regex: $@\n";
@@ -769,6 +790,12 @@ sub check_hashbl_bodyre {
       while ($body =~ /$re/gs) {
         next if !defined $1;
         my $match = $opts->{case} ? $1 : lc($1);
+        # Check if ReplaceTags plugin is enabled
+        if(exists $conf->{plugins_loaded}{'Mail::SpamAssassin::Plugin::ReplaceTags'}) {
+          if($replaced_regexp and $opts->{replace}) {
+            $match = Mail::SpamAssassin::Plugin::ReplaceTags->replace_result($orig_re, $match, $conf);
+          }
+        }
         if($opts->{num}) {
           $match =~ tr/0-9//cd;
         }
@@ -781,6 +808,12 @@ sub check_hashbl_bodyre {
     while ($$bodyref =~ /$re/gs) {
       next if !defined $1;
       my $match = $opts->{case} ? $1 : lc($1);
+      # Check if ReplaceTags plugin is enabled
+      if(exists $conf->{plugins_loaded}{'Mail::SpamAssassin::Plugin::ReplaceTags'}) {
+        if($replaced_regexp and $opts->{replace}) {
+          $match = Mail::SpamAssassin::Plugin::ReplaceTags->replace_result($orig_re, $match, $conf);
+        }
+      }
       if($opts->{num}) {
         $match =~ tr/0-9//cd;
       }
@@ -1112,6 +1145,7 @@ sub _finish_query {
 # Version features
 sub has_hashbl_bodyre { 1 }
 sub has_hashbl_bodyre_num { 1 }
+sub has_hashbl_bodyre_replace { 1 }
 sub has_hashbl_emails { 1 }
 sub has_hashbl_uris { 1 }
 sub has_hashbl_ignore { 1 }

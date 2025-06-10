@@ -83,15 +83,132 @@ sub finish_parsing_start {
   return 1;
 }
 
+sub replace_regexp {
+  my ($self, $re, $conf) = @_;
+
+  my $passes = 0;
+  my $doagain;
+  my $start = $conf->{replace_start};
+  my $end = $conf->{replace_end};
+
+  do {
+    my $pre_name;
+    my $post_name;
+    my $inter_name;
+    $doagain = 0;
+
+    # get modifier tags
+    if ($re =~ s/${start}pre (.+?)${end}//) {
+      $pre_name = $1;
+    }
+    if ($re =~ s/${start}post (.+?)${end}//) {
+      $post_name = $1;
+    }
+    if ($re =~ s/${start}inter (.+?)${end}//) {
+      $inter_name = $1;
+    }
+
+    # this will produce an array of tags to be replaced
+    # for two adjacent tags, an element of "" will be between the two
+    my @re = split(/(<[^<>]+>)/, $re);
+
+    if ($pre_name) {
+      my $pre = $conf->{replace_pre}->{$pre_name};
+      if ($pre) {
+        s{($start.+?$end)}{$pre$1}  for @re;
+      }
+    }
+    if ($post_name) {
+      my $post = $conf->{replace_post}->{$post_name};
+      if ($post) {
+        s{($start.+?$end)}{$1$post}g  for @re;
+      }
+    }
+    if ($inter_name) {
+      my $inter = $conf->{replace_inter}->{$inter_name};
+      if ($inter) {
+        s{^$}{$inter}  for @re;
+      }
+    }
+    for (my $i = 0; $i < @re; $i++) {
+      if ($re[$i] =~ m|$start(.+?)$end|g) {
+        my $tag_name = $1;
+        # if the tag exists, replace it with the corresponding phrase
+        if ($tag_name) {
+          my $replacement = $conf->{replace_tag}->{$tag_name};
+          if ($replacement) {
+            $re[$i] =~ s|$start$tag_name$end|$replacement|g;
+            $doagain = 1 if !$doagain && $replacement =~ /<[^>]+>/;
+          }
+        }
+      }
+    }
+
+    $re = join('', @re);
+
+    $passes++;
+  } while $doagain && $passes <= 5;
+  return $re;
+}
+
+sub replace_result {
+  my ($self, $re, $match, $conf) = @_;
+
+  my $pre_name;
+  my $post_name;
+  my $inter_name;
+  my $start = $conf->{replace_start};
+  my $end = $conf->{replace_end};
+
+  my @re = split(/(<[^<>]+>)/, $re);
+
+  if ($pre_name) {
+    my $pre = $conf->{replace_pre}->{$pre_name};
+    if ($pre) {
+      s{($start.+?$end)}{$pre$1}  for @re;
+    }
+  }
+  if ($post_name) {
+    my $post = $conf->{replace_post}->{$post_name};
+    if ($post) {
+      s{($start.+?$end)}{$1$post}g  for @re;
+    }
+  }
+  if ($inter_name) {
+    my $inter = $conf->{replace_inter}->{$inter_name};
+    if ($inter) {
+      s{^$}{$inter}  for @re;
+    }
+  }
+  for (my $i = 0; $i < @re; $i++) {
+    if ($re[$i] =~ m|$start(.+?)$end|g) {
+      my $tag_name = $1;
+      # if the tag exists, replace it with the corresponding phrase
+      if ($tag_name) {
+        my $replacement = $conf->{replace_tag}->{$tag_name};
+        if (defined $replacement) {
+          if($replacement =~ /^\(\?\:(.{1})/) {
+            my $subst = $1;
+            my ($rec, $err) = compile_regexp($replacement, 0);
+            if(!$rec) {
+              dbg("Invalid regexp $replacement");
+              return;
+            }
+            $match =~ s/$rec/$subst/g;
+          }
+        }
+      }
+    }
+  }
+  return $match;
+}
+
 sub finish_parsing_end {
   my ($self, $opts) = @_;
 
   dbg("replacetags: replacing tags");
 
   my $conf = $opts->{conf};
-  my $start = $conf->{replace_start};
-  my $end = $conf->{replace_end};
-
   foreach my $rule (keys %{$conf->{replace_rules}}) {
     # process rules only once, mark to replace_rules_done,
     # do NOT delete $conf->{replace_rules}, it's used by BodyRuleExtractor
@@ -99,76 +216,19 @@ sub finish_parsing_end {
     $self->{replace_rules_done}->{$rule} = 1;
 
     if (!exists $conf->{test_qrs}->{$rule}) {
-      dbg("replacetags: replace requested for non-existing or incompatible rule: $rule\n");
+      # HashBL rules will substitute "replace_tag" on a different code path
+      dbg("replacetags: replace requested for non-existing or incompatible/HashBL rule: $rule\n");
       next;
     }
 
     my $re = qr_to_string($conf->{test_qrs}->{$rule});
     next unless defined $re;
+
     my $origre = $re;
 
-    my $passes = 0;
-    my $doagain;
+    $re = $self->replace_regexp($re, $conf);
 
-    do {
-      my $pre_name;
-      my $post_name;
-      my $inter_name;
-      $doagain = 0;
-
-      # get modifier tags
-      if ($re =~ s/${start}pre (.+?)${end}//) {
-        $pre_name = $1;
-      }
-      if ($re =~ s/${start}post (.+?)${end}//) {
-        $post_name = $1;
-      }
-      if ($re =~ s/${start}inter (.+?)${end}//) {
-        $inter_name = $1;
-      }
-
-      # this will produce an array of tags to be replaced
-      # for two adjacent tags, an element of "" will be between the two
-      my @re = split(/(<[^<>]+>)/, $re);
-
-      if ($pre_name) {
-        my $pre = $conf->{replace_pre}->{$pre_name};
-        if ($pre) {
-          s{($start.+?$end)}{$pre$1}  for @re;
-        }
-      }
-      if ($post_name) {
-        my $post = $conf->{replace_post}->{$post_name};
-        if ($post) {
-          s{($start.+?$end)}{$1$post}g  for @re;
-        }
-      }
-      if ($inter_name) {
-        my $inter = $conf->{replace_inter}->{$inter_name};
-        if ($inter) {
-          s{^$}{$inter}  for @re;
-        }
-      }
-      for (my $i = 0; $i < @re; $i++) {
-        if ($re[$i] =~ m|$start(.+?)$end|g) {
-          my $tag_name = $1;
-          # if the tag exists, replace it with the corresponding phrase
-          if ($tag_name) {
-            my $replacement = $conf->{replace_tag}->{$tag_name};
-            if ($replacement) {
-              $re[$i] =~ s|$start$tag_name$end|$replacement|g;
-              $doagain = 1 if !$doagain && $replacement =~ /<[^>]+>/;
-            }
-          }
-        }
-      }
-
-      $re = join('', @re);
-
-      $passes++;
-    } while $doagain && $passes <= 5;
-
-    if ($re ne $origre) {
+    if (defined $re and ($re ne $origre)) {
       # do the actual replacement
       my ($rec, $err) = compile_regexp($re, 0);
       if (!$rec) {
