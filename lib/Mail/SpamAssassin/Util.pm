@@ -34,6 +34,8 @@ NOTE: Utility functions should not be changing global variables such
 as $_, $1, $2, ... $/, etc. unless explicitly documented.  If these
 variables are in use by these functions, they should be localized.
 
+=head1 METHODS
+
 =over 4
 
 =cut
@@ -334,6 +336,16 @@ sub untaint_hostname {
   }
 }
 
+=item C<untaint_var($var)>
+
+This sub takes a scalar or a reference to an array, hash, scalar or another
+reference and recursively untaints all its values (and keys if it's a
+reference to a hash).
+It will return the untainted value if requested but to avoid unnecessary copying,
+the return value should be ignored when working on lists.
+
+=cut
+
 # This sub takes a scalar or a reference to an array, hash, scalar or another
 # reference and recursively untaints all its values (and keys if it's a
 # reference to a hash). It should be used with caution as blindly untainting
@@ -410,11 +422,16 @@ sub taint_var {
 
 ###########################################################################
 
-# Check for full hostname / FQDN / DNS name validity.  IP addresses must be
-# validated with other functions like Constants::IP_ADDRESS.  Does not check
-# for valid TLD, use $self->{main}->{registryboundaries}->is_domain_valid()
-# additionally for that.  If $is_ascii given and true, skip idn_to_ascii()
-# conversion.
+=item C<is_fqdn_valid($host)>
+
+Check for full hostname / FQDN / DNS name validity.  IP addresses must be
+validated with other functions like Constants::IP_ADDRESS.  Does not check
+for valid TLD, use $self->{main}->{registryboundaries}->is_domain_valid()
+additionally for that.  If $is_ascii given and true, skip idn_to_ascii()
+conversion.
+
+=cut
+
 sub is_fqdn_valid {
   my ($host, $is_ascii) = @_;
   return if !defined $host;
@@ -458,9 +475,13 @@ sub is_fqdn_valid {
 
 ###########################################################################
 
-# returns true if the provided string of octets represents a syntactically
-# valid UTF-8 string, otherwise a false is returned
-#
+=item C<is_valid_utf8($str)>
+
+The sub returns true if the provided string of octets represents a syntactically
+valid UTF-8 string, otherwise a false is returned.
+
+=cut
+
 sub is_valid_utf_8 {
 # my $octets = $_[0];
   return undef if !defined $_[0]; ## no critic (ProhibitExplicitReturnUndef)
@@ -495,12 +516,16 @@ sub is_valid_utf_8 {
                   \xF4 [\x80-\x8F] [\x80-\xBF]{2} )* \z/xs ? 1 : 0;
 }
 
-# Given an international domain name with U-labels (UTF-8 or Unicode chars)
-# converts it to ASCII-compatible encoding (ACE).  If the argument is in
-# ASCII (or is an invalid IDN), returns it lowercased but otherwise unchanged.
-# The result is always in octets (utf8 flag off) even if the argument was in
-# Unicode characters.
-#
+=item C<idn_to_ascii($domain)>
+
+Given an international domain name with U-labels (UTF-8 or Unicode chars)
+converts it to ASCII-compatible encoding (ACE).  If the argument is in
+ASCII (or is an invalid IDN), returns it lowercased but otherwise unchanged.
+The result is always in octets (utf8 flag off) even if the argument was in
+Unicode characters.
+
+=cut
+
 #my $idn_cache = {};
 sub idn_to_ascii {
   no bytes;  # make sure there is no 'use bytes' in effect
@@ -592,10 +617,14 @@ sub idn_to_ascii {
 
 ###########################################################################
 
-# map process termination status number to an informative string, and
-# append optional message (dual-valued errno or a string or a number),
-# returning the resulting string
-#
+=item C<exit_status_str($stat, $errno)>
+
+map process termination status number to an informative string, and
+append optional message (dual-valued errno or a string or a number),
+returning the resulting string
+
+=cut
+
 sub exit_status_str {
   my($stat,$errno) = @_;
   my $str;
@@ -620,10 +649,14 @@ sub exit_status_str {
 }
 
 ###########################################################################
+ 
+=item C<proc_status_ok($exit_status, $errno, @success)>
 
-# check errno to be 0 and a process exit status to be in the list of success
-# status codes, returning true if both are ok, and false otherwise
-#
+check errno to be 0 and a process exit status to be in the list of success
+status codes, returning true if both are ok, and false otherwise.
+
+=cut
+
 sub proc_status_ok {
   my($exit_status,$errno,@success) = @_;
   my $ok = 0;
@@ -716,6 +749,14 @@ sub local_tz {
   $LOCALTZ = sprintf("%+.2d%.2d", $z/60, $z%60);
   return $LOCALTZ;
 }
+
+=item C<parse_rfc822_date($date)>
+
+Parses an RFC 2822 formatted date string and returns a Unix timestamp.
+Takes a date to parse as input and returns a Unix timestamp (seconds since epoch)
+if the date can be parsed, or undef on failure.
+
+=cut
 
 sub parse_rfc822_date {
   my ($date) = @_;
@@ -839,6 +880,12 @@ sub parse_rfc822_date {
 
   return $time;
 }
+
+=item C<time_to_rfc822_date($timestamp)>
+
+Converts a Unix timestamp and returns an RFC 2822 formatted date string.
+
+=cut
 
 sub time_to_rfc822_date {
   my($time) = @_;
@@ -983,6 +1030,13 @@ sub base64_decode {
   return $out;
 }
 
+=item C<qp_decode($str)>
+
+Decodes a string that has been encoded using the Quoted-Printable
+content transfer encoding.
+
+=cut
+
 sub qp_decode {
   my $str = $_[0];
 
@@ -1081,6 +1135,12 @@ sub common_application_data_directory {
 }
 
 ###########################################################################
+
+=item C<extract_ipv4_addr_from_string($str)>
+
+Given a string, extract an IPv4 address from it.
+
+=cut
 
 # Given a string, extract an IPv4 address from it.  Required, since
 # we currently have no way to portably unmarshal an IPv4 address from
@@ -1181,11 +1241,15 @@ sub ips_match_in_24_mask {
 
 ###########################################################################
 
-# Given a quad-dotted IPv4 address or an IPv6 address, reverses the order
-# of its bytes (IPv4) or nibbles (IPv6), joins them with dots, producing
-# a string suitable for reverse DNS lookups. Returns undef in case of a
-# syntactically invalid IP address.
-#
+=item C<reverse_ip_address($ip)>
+
+Given a quad-dotted IPv4 address or an IPv6 address, reverses the order
+of its bytes (IPv4) or nibbles (IPv6), joins them with dots, producing
+a string suitable for reverse DNS lookups. Returns undef in case of a
+syntactically invalid IP address.
+
+=cut
+
 sub reverse_ip_address {
   my ($ip) = @_;
 
@@ -1291,7 +1355,7 @@ sub url_decode {
 
 ###########################################################################
 
-=item $module = first_available_module (@module_list)
+=item C<first_available_module(@module_list)>
 
 Return the name of the first module that can be successfully loaded with
 C<require> from the list.  Returns C<undef> if none are available.
@@ -1320,7 +1384,7 @@ sub first_available_module {
 
 ###########################################################################
 
-=item touch_file(file, { args });
+=item C<touch_file($file, $args)>
 
 Touch or create a file.
 
@@ -1368,10 +1432,11 @@ sub pseudo_random_string {
 
 ###########################################################################
 
-=item my ($filepath, $filehandle) = secure_tmpfile();
+=item C<secure_tmpfile()>
 
 Generates a filename for a temporary file, opens it exclusively and
-securely, and returns a filehandle to the open file (opened O_RDWR).
+securely, and returns a filehandle to the open file (opened O_RDWR)
+and it filename.
 
 If it cannot open a file after 20 tries, it returns C<undef>.
 
@@ -1428,7 +1493,7 @@ sub secure_tmpfile {
   return ($reportfile, $tmpfh);
 }
 
-=item my ($dirpath) = secure_tmpdir();
+=item C<secure_tmpdir()>
 
 Generates a directory for temporary files.  Creates it securely and
 returns the path to the directory.
@@ -2078,6 +2143,12 @@ if ($] >= 5.016) {
 } else {
   eval '$qr_sa = sub { return qr/$_[0]/; }';
 }
+
+=item C<compile_regexp($re, $strip_delimiters, $ignore_always_matching)>
+
+Compiles a regular expression pattern for efficient and safe use within SpamAssassin.
+
+=cut
 
 # returns ($compiled_re, $error)
 # if any errors, $compiled_re = undef, $error has string
