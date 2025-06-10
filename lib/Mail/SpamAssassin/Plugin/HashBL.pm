@@ -750,8 +750,11 @@ sub check_hashbl_bodyre {
   my $orig_re = $re;
   my $replaced_regexp = 0;
 
+  # Parse opts, defaults
+  $opts = _parse_opts($opts || 'sha1/max=10/shuffle');
+
   # replace regexp matches only if requested
-  if(exists $conf->{plugins_loaded}{'Mail::SpamAssassin::Plugin::ReplaceTags'}) {
+  if(exists $conf->{plugins_loaded}{'Mail::SpamAssassin::Plugin::ReplaceTags'} and $opts->{replace}) {
     if(exists($conf->{replace_rules}->{$rulename})) {
       $re = Mail::SpamAssassin::Plugin::ReplaceTags->replace_regexp($re, $conf);
       if(defined $re and ($orig_re ne $re)) {
@@ -776,9 +779,6 @@ sub check_hashbl_bodyre {
     }
     $subtest = $rec;
   }
-
-  # Parse opts, defaults
-  $opts = _parse_opts($opts || 'sha1/max=10/shuffle');
 
   # Search body
   my @matches;
