@@ -446,6 +446,10 @@ sub is_fqdn_valid {
 
   # remove trailing dots
   $host =~ s/\.+\z//;
+  # skip if $host as two or more consecutive dots
+  if(index($host, '..') != -1) {
+    return;
+  }
 
   # max total length 253
   return if length($host) > 253;
