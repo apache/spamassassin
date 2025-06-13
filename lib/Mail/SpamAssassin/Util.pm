@@ -1668,7 +1668,7 @@ sub uri_list_canonicalize {
     }
 
     # deal with weird hostname parts, remove user/pass, etc.
-    if ($nuri =~ m{^(https?://)([^\@/?#]*\@)?([^/?#:]+)((?::(\d*))?.*)$}i) {
+    if ($nuri =~ m{^(https?://)([^\@/?#]*\@)?([^/?&#:]+)((?::(\d*))?.*)$}i) {
       my($proto, $host, $rest) = ($1,$3,$4);
       my $auth = defined $2 ? $2 : '';
       my $port = defined $5 ? $5 : '';

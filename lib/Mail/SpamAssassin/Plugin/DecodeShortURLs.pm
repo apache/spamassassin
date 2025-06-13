@@ -735,7 +735,7 @@ sub _check_shortener_uri {
   return 0 unless $uri =~ m{^
     https?://		# Only http
     (?:[^\@/?#]*\@)?	# Ignore user:pass@
-    ([^/?#:]+)		# (Capture hostname)
+    ([^/?&#:]+)		# (Capture hostname)
     (?::\d+)?		# Possible port
     (.*?\w)?		# Some path wanted
     }ix;

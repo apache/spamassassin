@@ -705,7 +705,7 @@ sub _check_redirector_uri {
   return 0 unless $uri =~ m{^
     https?://		# Only http
     (?:[^\@/?#]*\@)?	# Ignore user:pass@
-    ([^/?#:]+)		# (Capture hostname)
+    ([^/?&#:]+)		# (Capture hostname)
     (?::\d+)?		# Possible port
     (.*)?		# Some path wanted
     }ix;

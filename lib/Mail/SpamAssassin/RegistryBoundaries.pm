@@ -263,7 +263,10 @@ sub uri_to_domain {
   # we'll see the decoded version as well.  see url_decode()
   return if $uri =~ /\%(?:2[1-9a-f]|[3-6][0-9a-f]|7[0-9a-e])/;
 
-  my $host = idn_to_ascii($uri);  # unstripped/full domain name
+  my $nuri = $uri;
+  # cleanup URIs from parameters
+  $nuri =~ s/(?:\?|\&|\#).*//;
+  my $host = idn_to_ascii($nuri);  # unstripped/full domain name
   my $domain = $host;
 
   # keep IPs intact
