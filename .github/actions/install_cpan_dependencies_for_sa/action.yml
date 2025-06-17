@@ -29,7 +29,7 @@ runs:
     - name: Install dependencies and optional modules for full testing on Windows part 2
       if: ${{ runner.os == 'Windows' }}
       run: |
-        cpanm Razor2::Client::Agent-n --install-args="DESTINSTALLSITESCRIPT=local/bin" || cmd /c "echo warn: errors installing Razor2::Client::Agent have been ignored"
+        cpanm Razor2::Client::Agent -n --install-args="DESTINSTALLSITESCRIPT=local/bin" || cmd /c "echo warn: errors installing Razor2::Client::Agent have been ignored"
         razor-admin --create
         razor-admin --register
       shell: cmd
@@ -37,7 +37,7 @@ runs:
     - name: Install dependencies and optional modules for full testing on Windows part 3
       if: ${{ runner.os == 'Windows' }}
       run: |
-        cpanm Mail::SPF -n --install-args="--install_path sbin=local/bin" || cmd /c "echo warn: errors installing Mail::SPF have been ignored"
+        cpanm Mail::SPF -n --install-args="sbin=local/bin" || cmd /c "echo warn: errors installing Mail::SPF have been ignored"
       shell: cmd
 
     - name: Install dependencies and optional modules for full testing on Windows part 4
