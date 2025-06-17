@@ -8,6 +8,7 @@ use Test::More;
 use Mail::SpamAssassin;
 
 use constant HAS_DBI => eval { require DBI; }; # for our cleanup stuff
+use constant HAS_REDIS => eval { require Redis; }; # Redis tests
 use constant SQLITE => eval { require DBD::SQLite; DBD::SQLite->VERSION(1.59_01); };
 use constant SQL => conf_bool('run_bayes_sql_tests');
 
@@ -20,7 +21,7 @@ $tests += 59 if (SQLITE);
 $tests += 59 if (SQL);
 plan tests => $tests;
 
-diag "Note: If there is a failure it may be due to an incorrect SQL configuration." if (SQL);
+diag "Note: If there is a failure it may be due to an incorrect SQL/Redis configuration." if (SQL);
 
 my ($dbconfig, $dbdsn, $dbusername, $dbpassword);
 
@@ -179,7 +180,12 @@ $learner = $sa->call_plugins("learner_get_implementation");
 
 ok($sa->{bayes_scanner});
 
-ok(!$learner->{store}->tie_db_writable());
+# This test cannot work with Redis storage
+if($dbdsn !~ /database=/ and HAS_REDIS) {
+  ok(!$learner->{store}->tie_db_writable());
+} else {
+  ok(1); # skip the test
+}
 
 $sa->finish_learner();
 
@@ -485,31 +491,64 @@ sub count_files {
 sub database_clear_p {
   my ($username, $userid) = @_;
 
-  my $dbh = DBI->connect($dbdsn,$dbusername,$dbpassword);
+  if($dbdsn =~ /dbi:/) {
+    my $dbh = DBI->connect($dbdsn,$dbusername,$dbpassword);
 
-  if (!defined($dbh)) {
-    return 0;
+    if (!defined($dbh)) {
+      return 0;
+    }
+
+    my @row_ary;
+
+    my $sql = "SELECT count(*) from bayes_vars where username = ?";
+    @row_ary = $dbh->selectrow_array($sql, undef, $username);
+    return 0 if ($row_ary[0] != 0);
+
+    $sql = "SELECT count(*) from bayes_token where id = ?";
+    @row_ary = $dbh->selectrow_array($sql, undef, $userid);
+    return 0 if ($row_ary[0] != 0);
+
+    $sql = "SELECT count(*) from bayes_seen where id = ?";
+    @row_ary = $dbh->selectrow_array($sql, undef, $userid);
+    return 0 if ($row_ary[0] != 0);
+
+    $sql = "SELECT count(*) from bayes_expire where id = ?";
+    @row_ary = $dbh->selectrow_array($sql, undef, $userid);
+    return 0 if ($row_ary[0] != 0);
+
+    $dbh->disconnect();
+  } elsif($dbdsn =~ /database=/ and HAS_REDIS) {
+    my %conf = ();
+    foreach (split(';', $dbdsn)) {
+      my ($a, $b) = split(/=/, $_, 2);
+      if (!defined $b) {
+        warn("bayes: invalid bayes_sql_dsn config\n");
+        return;
+      } elsif ($a eq 'database') {
+        $conf{'database'} = $b;
+      } elsif ($a eq 'password') {
+        $conf{'password'} = $b;
+      } else {
+        $conf{$a} = $b eq 'undef' ? undef : untaint_var($b);
+      }
+    }
+    my $redis;
+    if($dbdsn =~ /password=/) {
+      $redis = Redis->new(
+                  server => $conf{'server'},
+                  password => $conf{'password'},
+               );
+    } else {
+      $redis = Redis->new(
+                  server => $conf{'server'},
+               );
+    }
+    $redis->select($conf{'database'});
+    my @keys = $redis->keys('*');
+    my $count = scalar @keys;
+    return 0 if ($count != 0);
+    $redis->quit();
   }
-
-  my @row_ary;
-
-  my $sql = "SELECT count(*) from bayes_vars where username = ?";
-  @row_ary = $dbh->selectrow_array($sql, undef, $username);
-  return 0 if ($row_ary[0] != 0);
-
-  $sql = "SELECT count(*) from bayes_token where id = ?";
-  @row_ary = $dbh->selectrow_array($sql, undef, $userid);
-  return 0 if ($row_ary[0] != 0);
-
-  $sql = "SELECT count(*) from bayes_seen where id = ?";
-  @row_ary = $dbh->selectrow_array($sql, undef, $userid);
-  return 0 if ($row_ary[0] != 0);
-
-  $sql = "SELECT count(*) from bayes_expire where id = ?";
-  @row_ary = $dbh->selectrow_array($sql, undef, $userid);
-  return 0 if ($row_ary[0] != 0);
-
-  $dbh->disconnect();
 
   return 1;
 }

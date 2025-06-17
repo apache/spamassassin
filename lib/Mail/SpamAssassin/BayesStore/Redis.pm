@@ -182,6 +182,8 @@ sub new {
   $self->{connected} = 0;
   $self->{is_officially_open} = 0;
   $self->{is_writable} = 0;
+  # store a fake _userid, needed for regression tests
+  $self->{_userid} = $self->{db_id};
 
   $self->{timer} = Mail::SpamAssassin::Timeout->new({
     secs => $self->{conf}->{redis_timeout} || 10
@@ -982,10 +984,11 @@ could causes the database to be inconsistent for the given user.
 sub clear_database {
   my($self) = @_;
 
-  # TODO
-  warn("bayes: note: assuming the database is empty; ".
-       "to manually clear a database: redis-cli -n <db-ind> FLUSHDB\n");
-
+  my $r = $self->{redis};
+  $r->call('FLUSHDB');
+  my $keys = $r->call('KEYS', '*');
+  my $count = scalar @$keys;
+  return 0 if ($count != 0);
   return 1;
 }
 

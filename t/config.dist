@@ -23,8 +23,9 @@ run_dcc_tests=n
 # ---------------------------------------------------------------------------
 # Run SQL-based Auto-welcomelist tests during 'make test'
 # NOTE: AWL test is always run with DBD::SQLite when available, only enable
-# this when you want to additionally test for example MySQL or PostgresSQL
-# (for which database needs to be created manually and configured below).
+# this when you want to additionally test for example MySQL, PostgresSQL
+# or Redis (for SQL databases, database needs to be created manually
+# and configured below).
 run_awl_sql_tests=n
 
 # SQL AWL DSN
