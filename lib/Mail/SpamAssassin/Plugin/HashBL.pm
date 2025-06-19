@@ -843,10 +843,6 @@ sub check_hashbl_bodyre {
 
   my $queries;
   foreach my $match (@matches) {
-    if(not Mail::SpamAssassin::Util::is_fqdn_valid($match, 1)) {
-      dbg("$rulename: skipped invalid dns query on domain $match");
-      next;
-    }
     my $ret = $self->_submit_query($pms, $rulename, $match, $list, $opts, $subtest);
     $queries++ if defined $ret;
   }
