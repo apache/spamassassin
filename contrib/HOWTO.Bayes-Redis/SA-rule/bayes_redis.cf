@@ -1,9 +1,7 @@
+# Updated by Jan Smutný 2025-06-03
 # Updated-Axb 2014-08-20
 # This goes in /etc/mail/spamassassin
 
-
-# You'll need to set IP to your Redis server's IP
-# Redis-server-ip:Redis server listening port
 # <@LICENSE>
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
@@ -26,18 +24,54 @@
 # Tell SA to use Bayes/Redis backend
 bayes_store_module  Mail::SpamAssassin::BayesStore::Redis
 
-
-# Redis bayes_sql_dsn DSN values, semicolon-delimited:
-#  server={redis.server.ip.addr}[:port]
-#  database={redis_db_id}
-#  password={redis_db_passwd}
 #
-# NOTE: In this example, we're not using Redis authentication assuming
-# the Redis server/port will not be reachable from the "outside".
-# See Redis docs for authentication syntax
+# Redis Bayes Configuration
+#
+# This new version supports separate read and write servers for better scalability
+# and high availability. You can configure multiple read servers for load balancing
+# and failover, while maintaining a single write server for data consistency.
+#
 
-bayes_sql_dsn  server=192.168.1.2:6379;database=0
+#
+# New Configuration Method (Recommended)
+#
+# For production environments with Redis replication, use separate read/write servers:
 
+# Multiple read servers (Redis replicas) - comma-separated list
+# SpamAssassin will automatically fail over to the next server if one becomes unavailable
+bayes_redis_read_servers   server=192.168.1.3;port=6379,server=192.168.1.4;port=6379
+
+# Single write server (Redis primary) - ensures data consistency
+bayes_redis_write_server   server=192.168.1.2;port=6379
+
+# Redis database number to use (default: 0)
+bayes_redis_database       0
+
+# Redis authentication password (if required)
+# bayes_redis_password       your_redis_password
+
+# Key prefix for namespacing (useful when sharing Redis with other applications)
+# bayes_redis_prefix         bayes:
+
+#
+# Alternative: Single Server Configuration
+#
+# For simple deployments with a single Redis server, use the same server for both:
+# bayes_redis_read_servers   server=192.168.1.2;port=6379
+# bayes_redis_write_server   server=192.168.1.2;port=6379
+
+#
+# Legacy Configuration Method (Still Supported)
+#
+# For backward compatibility, you can still use the old DSN format:
+# bayes_sql_dsn  server=192.168.1.2:6379;database=0;password=your_password
+#
+# NOTE: If both new and legacy configurations are present, the new configuration
+# parameters will take precedence.
+
+#
+# Bayes Configuration
+#
 use_bayes 1
 use_bayes_rules 1
 

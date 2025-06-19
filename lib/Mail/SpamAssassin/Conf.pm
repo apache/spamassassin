@@ -4097,6 +4097,84 @@ bayes_sql_override_username config option.
     type => $CONF_TYPE_BOOL,
   });
 
+=item bayes_redis_read_servers host=hostname1;port=port1,host=hostname2;port=port2,...
+
+Used for BayesStore::Redis storage implementation.
+Specifies a comma-separated list of Redis servers to use for read operations. Each server
+can have its own connection parameters specified with semicolon-separated key=value pairs.
+Multiple read servers provide high availability through automatic failover.
+Example: host=redis1.example.com;port=6379,host=redis2.example.com;port=6379
+
+=cut
+
+  push (@cmds, {
+    setting => 'bayes_redis_read_servers',
+    is_admin => 1,
+    default => '',
+    type => $CONF_TYPE_STRING,
+  });
+
+=item bayes_redis_write_server host=hostname;port=port;...
+
+Used for BayesStore::Redis storage implementation.
+Specifies the Redis server to use for write operations with semicolon-separated
+key=value connection parameters. Only a single write server is supported to
+ensure data consistency.
+Example: host=master.example.com;port=6379
+
+=cut
+
+  push (@cmds, {
+    setting => 'bayes_redis_write_server',
+    is_admin => 1,
+    default => '',
+    type => $CONF_TYPE_STRING,
+  });
+
+=item bayes_redis_database n
+
+Used for BayesStore::Redis storage implementation.
+Specifies the Redis database number to use (default: 0).
+
+=cut
+
+  push (@cmds, {
+    setting => 'bayes_redis_database',
+    is_admin => 1,
+    default => 0,
+    type => $CONF_TYPE_NUMERIC,
+  });
+
+=item bayes_redis_password password
+
+Used for BayesStore::Redis storage implementation.
+Specifies the password to use for Redis authentication.
+
+=cut
+
+  push (@cmds, {
+    setting => 'bayes_redis_password',
+    is_admin => 1,
+    default => '',
+    type => $CONF_TYPE_STRING,
+  });
+
+=item bayes_redis_prefix prefix
+
+Used for BayesStore::Redis storage implementation.
+Specifies a prefix to use for all Redis keys. This allows multiple SpamAssassin
+instances to share the same Redis database without key collisions.
+Example: bayes:user1:
+
+=cut
+
+  push (@cmds, {
+    setting => 'bayes_redis_prefix',
+    is_admin => 1,
+    default => '',
+    type => $CONF_TYPE_STRING,
+  });
+
 =item user_scores_dsn DBI:databasetype:databasename:hostname:port
 
 If you load user scores from an SQL database, this will set the DSN

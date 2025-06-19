@@ -181,7 +181,7 @@ $learner = $sa->call_plugins("learner_get_implementation");
 ok($sa->{bayes_scanner});
 
 # This test cannot work with Redis storage
-if($dbdsn !~ /database=/ and HAS_REDIS) {
+if($dbdsn !~ /server=/ and HAS_REDIS) {
   ok(!$learner->{store}->tie_db_writable());
 } else {
   ok(1); # skip the test
@@ -517,7 +517,7 @@ sub database_clear_p {
     return 0 if ($row_ary[0] != 0);
 
     $dbh->disconnect();
-  } elsif($dbdsn =~ /database=/ and HAS_REDIS) {
+  } elsif($dbdsn =~ /server=/ and HAS_REDIS) {
     my %conf = ();
     foreach (split(';', $dbdsn)) {
       my ($a, $b) = split(/=/, $_, 2);
@@ -543,10 +543,13 @@ sub database_clear_p {
                   server => $conf{'server'},
                );
     }
-    $redis->select($conf{'database'});
+    if(defined($conf{'database'})) {
+      $redis->select($conf{'database'});
+    }
     my @keys = $redis->keys('*');
     my $count = scalar @keys;
-    return 0 if ($count != 0);
+    # 4 keys are needed for the version records
+    return 0 if ($count != 4);
     $redis->quit();
   }
 
