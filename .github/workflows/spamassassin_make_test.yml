@@ -29,17 +29,29 @@ jobs:
         database: ${{ fromJSON(github.event.inputs.database) }}
         exclude:
           - runner: windows-latest
-            perl: 36
+            perl: 14
           - runner: windows-2022
-            perl: 36
+            perl: 14
           - runner: windows-2025
-            perl: 36
+            perl: 14
           - runner: windows-latest
-            perl: 34
+            perl: 16
           - runner: windows-2022
-            perl: 34
+            perl: 16
           - runner: windows-2025
-            perl: 34
+            perl: 16
+          - runner: windows-latest
+            perl: 18
+          - runner: windows-2022
+            perl: 18
+          - runner: windows-2025
+            perl: 18
+          - runner: windows-latest
+            perl: 20
+          - runner: windows-2022
+            perl: 20
+          - runner: windows-2025
+            perl: 20
     env:
       PERL5LIB: ''
       PERL_VERSION: 5.${{matrix.perl}}
