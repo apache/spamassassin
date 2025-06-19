@@ -7,7 +7,7 @@ runs:
     - uses: ankane/setup-mysql@v1
       with:
         database: spamassassin
-        mysql-version: ${{ ((runner.os == 'Windows') && '5.7') || '8.0' }}
+        mysql-version: 8.0
     - run: |
         mysql -u root -h localhost -e "CREATE USER 'spamassassin'@'localhost' IDENTIFIED BY 'spamassassin'"
         mysql -u root -h localhost -e "GRANT ALL PRIVILEGES ON *.* TO 'spamassassin'@'localhost'"
