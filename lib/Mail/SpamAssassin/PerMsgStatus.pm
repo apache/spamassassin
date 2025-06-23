@@ -480,10 +480,12 @@ sub check_cleanup {
     my $area = $test_logs->{$rule}->{area} || '';
     my $desc = $test_logs->{$rule}->{desc} || '';
 
-    if ($score >= 10 || $score <= -10) {
-      $score = sprintf("%4.0f", $score);
-    } else {
-      $score = sprintf("%4.1f", $score);
+    if(defined $score) {
+      if ($score >= 10 || $score <= -10) {
+        $score = sprintf("%4.0f", $score);
+      } else {
+        $score = sprintf("%4.1f", $score);
+      }
     }
 
     my $terse = '';
