@@ -392,7 +392,7 @@ sub _check_dmarc {
   }
 
   if(defined $result and ($result->result ne 'none') and ($result->published->can('stringify'))) {
-    dbg("Found DMARC record \"" . $result->published->stringify . "\" for domain $mfrom_domain");
+    dbg("Evaluated DMARC record \"" . $result->published->stringify . "\" for domain $mfrom_domain");
   }
 
   # Report that DMARC failed but it has been overridden because of AAR headers
