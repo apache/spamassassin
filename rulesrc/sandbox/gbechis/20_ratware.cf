@@ -7,3 +7,8 @@ meta	     GB_FORGED_MUA_POSTFIX	( __FORGED_MUA_POSTFIX0 || __FORGED_MUA_POSTFIX1
 describe     GB_FORGED_MUA_POSTFIX	Forged Postfix mua headers
 tflags       GB_FORGED_MUA_POSTFIX      publish
 score	     GB_FORGED_MUA_POSTFIX	2.0 # limit
+
+header       __GB_FROM_METAMASK         From:name =~ /^M\x{E2}\x{81}\x{A4}e\x{E2}\x{81}\x{A4}t\x{E2}\x{81}\x{A4}a\x{E2}\x{81}\x{A4}M\x{E2}\x{81}\x{A4}a\x{E2}\x{81}\x{A4}s\x{E2}\x{81}\x{A4}k\x{E2}\x{81}\x{A4} \x{F0}/
+meta         GB_FROM_METAMASK           ( __GB_FROM_METAMASK && KHOP_HELO_FCRDNS && TO_NO_BRKTS_HTML_ONLY )
+describe     GB_FROM_METAMASK           Metamask spam
+score        GB_FROM_METAMASK           2.0 # limit
