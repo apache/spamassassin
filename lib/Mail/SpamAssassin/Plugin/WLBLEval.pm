@@ -15,6 +15,99 @@
 # limitations under the License.
 # </@LICENSE>
 
+=head1 NAME
+
+Mail::SpamAssassin::Plugin::WLBLEval - SpamAssassin plugin for blocklist and welcomelist evaluation
+
+=head1 SYNOPSIS
+
+  loadplugin Mail::SpamAssassin::Plugin::WLBLEval
+
+  # In your rules:
+  header   FROM_IN_BLOCKLIST   eval:check_from_in_blocklist()
+  header   TO_IN_WELCOMELIST   eval:check_to_in_welcomelist()
+
+=head1 DESCRIPTION
+
+This plugin provides functions for blocklists and welcomelists for sender and recipient addresses, as well as URI host lists.
+It supports matching by address, domain, and relay information.
+
+=head1 METHODS
+
+=over 4
+
+=item check_from_in_blocklist()
+
+Checks if the sender address is in the blocklist.
+
+=item check_to_in_blocklist()
+
+Checks if the recipient address is in the blocklist.
+
+=item check_to_in_welcomelist()
+
+Checks if the recipient address is in the welcomelist.
+
+=item check_to_in_more_spam()
+
+Checks if the recipient address is in the more_spam_to list.
+
+=item check_to_in_all_spam()
+
+Checks if the recipient address is in the all_spam_to list.
+
+=item check_from_in_list($list)
+
+Checks if the sender address is in the specified list.
+
+=item check_replyto_in_list($list)
+
+Checks if the Reply-To address is in the specified list.
+
+=item check_wb_list($params)
+
+Checks if an address is in a welcomelist or blocklist, based on parameters.
+
+=item check_to_in_list($list)
+
+Checks if the recipient address is in the specified list.
+
+=item check_from_in_welcomelist()
+
+Checks if the sender address is in the welcomelist.
+
+=item check_forged_in_welcomelist()
+
+Checks if the sender address is forged with respect to the welcomelist.
+
+=item check_from_in_default_welcomelist()
+
+Checks if the sender address is in the default welcomelist.
+
+=item check_forged_in_default_welcomelist()
+
+Checks if the sender address is forged with respect to the default welcomelist.
+
+=item check_mailfrom_matches_rcvd()
+
+Checks if the envelope sender domain matches the relay domain.
+
+=item check_uri_host_in_blocklist()
+
+Checks if any URI host is in the blocklist.
+
+=item check_uri_host_in_welcomelist()
+
+Checks if any URI host is in the welcomelist.
+
+=item check_uri_host_listed($subname)
+
+Checks if any URI host is listed in the specified list.
+
+=back
+
+=cut
+
 package Mail::SpamAssassin::Plugin::WLBLEval;
 
 use strict;
