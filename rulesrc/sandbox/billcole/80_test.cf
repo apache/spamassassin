@@ -207,9 +207,9 @@ meta		SCC_META_ODDDIV8	SCC_HTML_ODDDIV8 > 10
 score	     	SCC_META_ODDDIV8	2 #limit
 
 describe	SCC_HEAD_XMP_QI	XMP header identifying quadient inspire
-header		SCC_HEAD_XMP_QI	/X-Mailer-Platform: Quadient Inspire/
+header		SCC_HEAD_XMP_QI	X-Mailer-Platform =~ /Quadient Inspire/
 score		SCC_HEAD_XMP_QI	2
 
 describe	SCC_HEAD_XMP_ANY	Any X-Mailer-Platform header
-header		SCC_HEAD_XMP_ANY	/X-Mailer-Platform:/
+header		SCC_HEAD_XMP_ANY	exists:X-Mailer-Platform
 score		SCC_HEAD_XMP_ANY	1
