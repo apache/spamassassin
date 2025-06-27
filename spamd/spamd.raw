@@ -1107,6 +1107,7 @@ sub server_sock_setup_inet {
         SSL_server      => 1,
         SSL_key_file    => $opt{'server-key'},
         SSL_cert_file   => $opt{'server-cert'},
+        SSL_on_peer_shutdown => sub { return 0 },
       ));
       my $ssl_mode;
       if ($opt{'ssl-verify'}) {
