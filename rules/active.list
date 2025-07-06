@@ -194,7 +194,7 @@ BITCOIN_IMGUR
 # good enough
 BITCOIN_MALF_HTML
 
-# tflags net
+# tflags publish
 BITCOIN_MALWARE
 
 # tflags publish
@@ -299,7 +299,7 @@ CN_B2B_SPAMMER
 # tflags publish
 COMMENT_GIBBERISH
 
-# tflags net
+# good enough
 COMPENSATION
 
 # tflags publish
@@ -491,7 +491,7 @@ FORGED_SPF_HELO
 # tflags publish
 FORM_FRAUD
 
-# tflags net
+# tflags publish
 FORM_FRAUD_3
 
 # tflags publish
@@ -710,6 +710,9 @@ GB_FREEMAIL_DISPTO
 # tflags publish
 GB_FREEMAIL_DISPTO_NOTFREEM
 
+# tflags net
+GB_FROM_METAMASK
+
 # tflags publish
 GB_GOOGLE_OBFUR
 
@@ -779,7 +782,7 @@ HAS_X_NO_RELAY
 # tflags publish
 HAS_X_OUTGOING_SPAM_STAT
 
-# good enough
+# tflags net
 HDRS_LCASE
 
 # tflags publish
@@ -903,9 +906,6 @@ JH_SPAMMY_PATTERN01
 JH_SPAMMY_PATTERN02
 
 # tflags net
-KHOP_FAKE_EBAY
-
-# tflags net
 KHOP_HELO_FCRDNS
 
 # tflags publish
@@ -958,9 +958,6 @@ MALW_ATTACH
 
 # tflags publish
 MANY_SPAN_IN_TEXT
-
-# tflags net
-MAY_BE_FORGED
 
 # tflags publish
 MILLION_HUNDRED
@@ -1266,6 +1263,9 @@ RCVD_IN_DNSWL_MED
 RCVD_IN_DNSWL_NONE
 
 # tflags net
+RCVD_IN_IADB_COURT
+
+# tflags net
 RCVD_IN_IADB_DK
 
 # tflags net
@@ -1291,6 +1291,9 @@ RCVD_IN_IADB_ESP
 
 # tflags net
 RCVD_IN_IADB_GOODMAIL
+
+# tflags net
+RCVD_IN_IADB_LEG_MAND
 
 # tflags net
 RCVD_IN_IADB_LISTED
@@ -1342,6 +1345,9 @@ RCVD_IN_IADB_UNVERIFIED_1
 
 # tflags net
 RCVD_IN_IADB_UNVERIFIED_2
+
+# tflags net
+RCVD_IN_IADB_URG
 
 # tflags net
 RCVD_IN_IADB_UT_CPEAR
@@ -1599,6 +1605,9 @@ SUBJECT_IN_WELCOMELIST
 SUBJ_BRKN_WORDNUMS
 
 # tflags net
+SUBJ_UNNEEDED_HTML
+
+# tflags net
 SURBL_BLOCKED
 
 # good enough
@@ -1616,13 +1625,13 @@ TAGSTAT_IMG_NOT_RCVD_TGST
 # tflags publish
 TARINGANET_IMG_NOT_RCVD_TN
 
-# tflags net
+# tflags publish
 TEQF_USR_IMAGE
 
 # tflags publish
 TEQF_USR_MSGID_HEX
 
-# tflags net
+# tflags publish
 TEQF_USR_MSGID_MALF
 
 # good enough
@@ -1639,12 +1648,6 @@ TONLINE_FAKE_DKIM
 
 # tflags publish
 TO_EQ_FM_DIRECT_MX
-
-# tflags net
-TO_EQ_FM_DOM_HTML_IMG
-
-# tflags net
-TO_EQ_FM_DOM_HTML_ONLY
 
 # tflags net
 TO_EQ_FM_DOM_SPF_FAIL
@@ -1664,7 +1667,7 @@ TO_NO_BRKTS_HTML_IMG
 # tflags publish
 TO_NO_BRKTS_HTML_ONLY
 
-# tflags net
+# good enough
 TO_NO_BRKTS_MSFT
 
 # tflags publish
@@ -1919,7 +1922,7 @@ URI_WPADMIN
 # tflags publish
 URI_WP_DIRINDEX
 
-# tflags net
+# tflags publish
 URI_WP_HACKED
 
 # tflags publish
