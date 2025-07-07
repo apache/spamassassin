@@ -204,32 +204,6 @@ sub get_addr_entry {
   my $sql;
   my $sth;
   my $rc;
-  if($self->{main}->{conf}->{txrep_welcomelist_out} and ($email =~ /(?:[^\s\@]+)\@(?:[^\s\@]+)/)) {
-    $sql = "SELECT msgcount, totscore FROM $self->{tablename} " .
-            "WHERE username = ? AND email = ? AND ip = 'WELCOMELIST_OUT'";
-    $sth = $self->{dbh}->prepare($sql);
-    unless (defined($sth)) {
-      info("auto-welcomelist: sql-based get_addr_entry %s: SQL prepare error: %s",
-         "$self->{_username}|$ip", $self->{dbh}->errstr);
-    }
-    $rc = $sth->execute($self->{_username}, $email);
-    my $cnt = 0;
-    my $aryref;
-    # how to combine data if there are several entries (like signed by
-    # an author domain and by a remailer)?  for now just take an average
-    while ( defined($aryref = $sth->fetchrow_arrayref()) ) {
-      if (defined $entry->{msgcount} && defined $aryref->[1]) {
-        $entry->{msgcount} = $aryref->[0];
-        $entry->{totscore} = $aryref->[1];
-      }
-      $entry->{exists_p} = 1;
-      $cnt++;
-    }
-    $sth->finish();
-    return $entry if $rc;
-  }
-  undef $sth;
-  undef $rc;
 
   $sql = "SELECT msgcount, totscore FROM $self->{tablename} " .
             "WHERE username = ? AND email = ?";
@@ -328,7 +302,7 @@ sub add_score {
 
   { my @fields = qw(username email ip msgcount totscore);
     my @signedby;
-    if ($self->{_with_awl_signer} or (defined $signedby and $signedby =~ /^spf\-/) and not ($self->{main}->{conf}->{txrep_welcomelist_out} and ($email =~ /(?:[^\s\@]+)\@(?:[^\s\@]+)/)) ) {
+    if ($self->{_with_awl_signer} || (defined $signedby and $signedby =~ /^spf\-/)) {
       push(@fields, 'signedby');
       @signedby = !defined $signedby ? () : split(' ', lc $signedby);
       @signedby = ( '' )  if !@signedby;

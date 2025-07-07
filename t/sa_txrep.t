@@ -7,7 +7,7 @@ use Test::More;
 
 my @dbmods = grep eval "require $_", ('DB_File', 'GDBM_File', 'SDBM_File');
 plan skip_all => "No db module is available" unless @dbmods;
-plan tests => 8 * @dbmods;
+plan tests => 9 * @dbmods;
 
 # ---------------------------------------------------------------------------
 
@@ -57,6 +57,10 @@ my $rules = q(
   q{ -36 TXREP } => 'Score normalizing',
 );
 
+%txrep_pattern3b = (
+  q{ -1.0 TXREP } => 'Score normalizing',
+);
+
 tstpre ("
   loadplugin Mail::SpamAssassin::Plugin::TxRep
 ");
@@ -74,7 +78,7 @@ foreach my $dbmodule (@dbmods) {
   auto_welcomelist_file_mode 0755
   auto_welcomelist_db_modules $dbmodule
   $rules
-");
+  ");
   unlink("./$userstate/txreptest", "./$userstate/txreptest.pag", "./$userstate/txreptest.dir", "./$userstate/txreptest.mutex");
 
   %patterns = ();
@@ -108,12 +112,13 @@ foreach my $dbmodule (@dbmods) {
 
   tstprefs("
   use_txrep 1
+  txrep_min_score undef
   auto_welcomelist_path ./$userstate/txreptest
   auto_welcomelist_file_mode 0755
   auto_welcomelist_db_modules $dbmodule
   txrep_weight_email 10
   $rules
-");
+  ");
   unlink("./$userstate/txreptest", "./$userstate/txreptest.pag", "./$userstate/txreptest.dir", "./$userstate/txreptest.mutex");
 
   %patterns = ();
@@ -140,6 +145,21 @@ foreach my $dbmodule (@dbmods) {
   clear_pattern_counters();
 
   %patterns = %txrep_pattern3a;
+  %anti_patterns = ();
+  sarun ("-L -t < data/txrep/5", \&patterns_run_cb);
+  ok_all_patterns();
+
+  tstprefs("
+  use_txrep 1
+  txrep_min_score -1.0
+  auto_welcomelist_path ./$userstate/txreptest
+  auto_welcomelist_file_mode 0755
+  auto_welcomelist_db_modules $dbmodule
+  txrep_weight_email 10
+  $rules
+  ");
+
+  %patterns = %txrep_pattern3b;
   %anti_patterns = ();
   sarun ("-L -t < data/txrep/5", \&patterns_run_cb);
   ok_all_patterns();
