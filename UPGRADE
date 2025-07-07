@@ -2,6 +2,14 @@
 Note for Users Upgrading to SpamAssassin 4.0.2
 ----------------------------------------------
 
+- TxRep data when using a SQL backend might be wrong because of
+  a bug in SpamAssassin 4.0.1, TxRep score can be limited with new
+  txrep_min_score and txrep_max_score configuration options
+  or you can remove email entries from TxRep database.
+
+- Redis replication is now supported, Redis connection parameters
+  are splitted between read_only and read_write. Old syntax is still supported.
+
 - Internal Mail::SpamAssassin::GeoDB module now also supports
   IP::Geolocation::MMDB Perl module.
 
