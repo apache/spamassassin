@@ -920,24 +920,42 @@ sub recursive_lookup {
       dbg("URL is not a redirect: $redir_url = ".$response->status_line);
       my $rcode = $response->code;
       if ($rcode =~ /^\d{3}$/) {
-        $pms->{"redir_url_$rcode"} = 1;
         if($rcode eq 500) {
 	  if($response->headers->{'client-warning'} eq 'Internal response') {
 	    dbg("Connection timeout checking $redir_url");
 	  }
+        } elsif($rcode eq 200) {
+	  if((defined $response->content) and ($response->content =~ /http-equiv=["']?refresh["']?.*?content=["']?(\d+);url=((?:https?:\/\/)?[^"'\/\\]+)["']?/i)) {
+	    my $delay = $1;
+	    $location = $2;
+	    if($delay eq 0) {
+	      $rcode = 301;
+	    } elsif ($delay > 0) {
+	      $rcode = 302;
+	    }
+	    dbg("Found a meta http-equiv redirector, changing http response code from " . $response->code . " to $rcode");
+	  }
+	} else {
+          $pms->{"redir_url_$rcode"} = 1;
+          # Update cache
+          $self->cache_add($redir_url, $rcode);
+          $pms->add_uri_detail_list($redir_url) if !$pms->{uri_detail_list}->{$redir_url};
         }
-        # Update cache
-        $self->cache_add($redir_url, $rcode);
-        $pms->add_uri_detail_list($redir_url) if !$pms->{uri_detail_list}->{$redir_url};
       }
-      return;
+      if($rcode !~ /^30[12]/) {
+        return;
+      }
     }
-    $location = $response->headers->{location};
-    if($redir_url ne $location) {
-      if ($conf->{url_redirector_loginfo}) {
-        info("found $redir_url => $location");
-      } else {
-        dbg("found $redir_url => $location");
+
+    # if redirection has been done using http-equiv meta tag, location http header will not be available
+    if(exists $response->headers->{location}) {
+      $location = $response->headers->{location};
+      if($redir_url ne $location) {
+        if ($conf->{url_redirector_loginfo}) {
+          info("found $redir_url => $location");
+        } else {
+          dbg("found $redir_url => $location");
+        }
       }
     }
   }
