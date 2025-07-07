@@ -76,8 +76,9 @@ documented in L<SYNOPSIS> section.
 
 =head1 NOTES
 
-This plugin runs at the check_dnsbl hook (priority -100) so that it may
-modify the parsed URI list prior to normal uri rules or the URIDNSBL plugin.
+This plugin runs at priority -10 so that it may
+modify the parsed URI list prior to normal uri rules or the URIDNSBL plugin
+but after the Redirector plugin.
 
 =cut
 
