@@ -925,7 +925,7 @@ sub recursive_lookup {
 	    dbg("Connection timeout checking $redir_url");
 	  }
         } elsif($rcode eq 200) {
-	  if((defined $response->content) and ($response->content =~ /http-equiv=["']?refresh["']?.*?content=["']?(\d+);\s+url=((?:https?:\/\/)?[^"'\/\\]+)["']?/i)) {
+	  if((defined $response->content) and ($response->content =~ /http-equiv=["']?refresh["']?.{1,64}?content=["']?(\d+);\s+url=((?:https?:\/\/)?[^"'\/\\]+)["']?/is)) {
 	    my $delay = $1;
 	    $location = $2;
 	    if($delay eq 0) {
