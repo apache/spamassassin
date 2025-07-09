@@ -345,9 +345,8 @@ Run "svn status" to ensure you're building/releasing from a pristine
   [VOTE] Release of X.Y.Z - vote will close on XXXday, MONTH DD, YYYY HH:MM UTC
   and have the mail call for a 72 hour vote for release.
 
-    https://people.apache.org/~kmcgrail/devel/ qualifies as "discreet".
-
-  So is https://dist.apache.org/repos/dist/dev/spamassassin/
+  https://dist.apache.org/repos/dist/dev/spamassassin/
+  qualifies as "discreet".
 
   Pre-release and RC don't need votes if only announced to the dev list.
 
@@ -434,9 +433,7 @@ Run "svn status" to ensure you're building/releasing from a pristine
   ASF bylaws prohibit the distribution of files claiming to be
   releases from the website, without 3 PMC +1 votes, so you need to
   make it clear that this is an unofficial "test build" by placing it
-  in your public_html dir:
-
-        https://people.apache.org/~kmcgrail/devel/ for example
+  in project's dist.apache.org subdir:
 
   NOTE: It's also feasible that you could publish via SVNPubSub as noted 
   below but using the SVN repository at:
