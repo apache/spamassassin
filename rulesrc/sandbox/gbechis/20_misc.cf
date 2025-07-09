@@ -129,6 +129,6 @@ uri               GB_GOOGLE_AMP               /https?:\/\/(?:www\.)?google\..{2,
 describe          GB_GOOGLE_AMP               Google Amp abused service
 score             GB_GOOGLE_AMP               0.5 # limit
 
-header            GB_SUBJ_ICONS               Subject =~ /\x{E2}\x{9C}\x{85}|\x{F0}\x{9F}\x{9A}\x{A8}|\x{F0}\x{9F}\x{8E}\x{89}|\x{E2}\x{9A}\x{A0}\x{EF}\x{B8}\x{8F}/
+header            GB_SUBJ_ICONS               Subject =~ /\x{E2}\x{9C}\x{85}|\x{E2}\x{80}\x{93}|\x{F0}\x{9F}\x{9A}\x{A8}|\x{F0}\x{9F}\x{8E}\x{89}|\x{F0}\x{9F}\x{8E}\x{81}|\x{E2}\x{9A}\x{A0}\x{EF}\x{B8}\x{8F}/
 describe          GB_SUBJ_ICONS               Spammy icons in subject
 score             GB_SUBJ_ICONS               1.000 # limit
