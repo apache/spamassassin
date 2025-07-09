@@ -1108,8 +1108,6 @@ Used by the SQLBasedAddrList storage implementation.
 
 The table name where reputation is to be stored in, for the above DSN.
 
-=back
-
 =cut
 
   push (@cmds, {
@@ -1124,8 +1122,6 @@ The table name where reputation is to be stored in, for the above DSN.
  (default: undef)
 
 Minimum TxRep score, used to limit TxRep score adjustements.
-
-=back
 
 =cut
 
