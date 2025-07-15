@@ -1642,11 +1642,18 @@ sub uri_list_canonicalize {
 
     # www.foo.biz -> http://www.foo.biz
     # unschemed URIs: assume default of "http://" as most MUAs do
+    my $schemed = 1;
     if ($nuri !~ /^[-_a-z0-9]+:/i) {
+      my $dom;
+      if(defined $rb) {
+        $dom = $rb->uri_to_domain($nuri);
+      }
       if ($nuri =~ /^ftp\./) {
 	$nuri =~ s{^}{ftp://}g;
       }
-      else {
+      elsif(not defined $dom or (defined $dom and $dom !~ /\./)) {
+	$schemed = 0;
+      } else {
 	$nuri =~ s{^}{http://}g;
       }
     }
@@ -1663,7 +1670,7 @@ sub uri_list_canonicalize {
     $nuri =~ s/\&\#(?:x2e|12290|x3002|65294|xff0e|65377|xff61);/./gi;
 
     # put the new URI on the new list if it's different
-    if ($nuri ne $uri) {
+    if ($nuri ne $uri and $schemed eq 1) {
       push(@nuris, $nuri);
     }
 
@@ -1793,7 +1800,7 @@ sub uri_list_canonicalize {
              $nhost ne 'localhost' && $port eq '80' &&
              $nhost =~ /^(?:www\.)?([^.]+)$/) {
         # Do not add .com to already valid schemelessly parsed domains (Bug 7891)
-        unless (defined $rb && $rb->is_domain_valid($nhost)) {
+        unless ((defined $schemed && $schemed eq 0) || (defined $rb && $rb->is_domain_valid($nhost))) {
           push(@nuris, join('', $proto, 'www.', $1, '.com', $rest));
         }
       }
