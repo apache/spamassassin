@@ -8,7 +8,7 @@ use SATest; sa_t_init("uri");
 use constant HAS_LIBIDN => eval { require Net::LibIDN; };
 use constant HAS_LIBIDN2 => eval { require Net::LibIDN2; };
 
-my $tests = 104;
+my $tests = 105;
 $tests += 7 if (HAS_LIBIDN);
 $tests += 7 if (HAS_LIBIDN2);
 
@@ -49,6 +49,7 @@ ok ($urimap{'http://66.92.69.224/'});
 ok ($urimap{'http://spamassassin.org'});
 ok (!$urimap{'CUMSLUTS.'});
 ok (!$urimap{'CUMSLUTS..VIRGIN'});
+ok (!$urimap{'http://www.background.com'});
 
 ##############################################
 
