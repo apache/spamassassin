@@ -141,17 +141,17 @@ my @test_distance = (
     {
         color1 => 'lightsteelblue',
         color2 => 'lightslategray',
-        distance => 44.8676815367142,
+        distance => 44.8677,
     },
     {
         color1 => 'lightgoldenrodyellow',
         color2 => 'papayawhip',
-        distance => 7.94164469112035,
+        distance => 7.9416,
     },
     {
         color1 => 'turquoise',
         color2 => 'violet',
-        distance => 76.7648406707133,
+        distance => 76.7648,
     },
     {
         color1 => 'darkolivegreen',
@@ -197,7 +197,10 @@ foreach my $test (@test_distance) {
   my $html_color1 = Mail::SpamAssassin::HTML::Color->new($color1);
   my $html_color2 = Mail::SpamAssassin::HTML::Color->new($color2);
 
-  is($html_color1->distance($html_color2), $distance, "Distance between $color1 and $color2 is $distance");
+  # Bug 8338: Round to 4 decimal places to avoid floating point precision issues
+  my $result = sprintf("%.4f",$html_color1->distance($html_color2)) + 0;
+
+  is($result, $distance, "Distance between $color1 and $color2 is $distance");
 }
 
 foreach my $test (@test_blend) {
