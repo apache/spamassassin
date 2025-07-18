@@ -58,7 +58,7 @@ Run "svn status" to ensure you're building/releasing from a pristine
     cd [checkedoutdir]
     svn status
 
-  The output should be blank or look like this:
+  The output should be blank or look like this (if you are on a branch):
 
   ?       rules
   ?       rulesrc
@@ -124,12 +124,6 @@ Run "svn status" to ensure you're building/releasing from a pristine
   NOTE: If you do not use a fresh checkout, you may miss recent entries if
   you also did development on the same checkout.  Use a fresh checkout
   when making your builds to avoid this issue.
-
-  NOTE: The very old version of SVN that is included with CentOS 7
-  produces a different format of log than current versions of SVN.
-  There is no reason to create the Changes file on a CentOS 7 machine
-  rather than do the following steps with a newer version of SVN and
-  commit the Changes file, then check it out on the build machine.
 
   MAKE CERTAIN THIS IS RUN IN THE ROOT OF YOUR CHECKOUT!
 
