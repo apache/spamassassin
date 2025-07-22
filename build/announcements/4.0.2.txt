@@ -1,0 +1,191 @@
+From: <your@apache.org address here>
+To: <your@apache.org address here>
+Bcc: users@spamassassin.apache.org, dev@spamassassin.apache.org, announce@spamassassin.apache.org, announce@apache.org
+Reply-to: dev@spamassassin.apache.org
+Subject: [ANNOUNCE] Apache SpamAssassin 4.0.2 available
+
+On behalf of the Apache SpamAssassin Project,
+I am pleased to announce version 4.0.2 is available.
+
+Release Notes -- Apache SpamAssassin -- Version 4.0.2
+
+
+Introduction
+------------
+
+Apache SpamAssassin 4.0.2 is a patch release that fixes issues that
+have surfaced since the release of 4.0.1. It provides compatibility
+with the latest version of Perl, 5.42, which was released in July,
+2025, as well as with recent release versions of some required Perl
+modules.
+
+Many thanks to the committers (see CREDITS file), contributors, rule
+testers, mass checkers, and code testers who have made this release
+possible.
+
+Notable features:
+=================
+
+None noted.
+
+Notable changes
+---------------
+
+This release addresses the following issues:
+
+  - TxRep data when using a SQL backend might be wrong because of
+  a bug in SpamAssassin 4.0.1, TxRep score can be limited with new
+  txrep_min_score and txrep_max_score configuration options
+  or you can remove email entries from TxRep database.
+
+  - Redis replication is now supported, Redis connection parameters
+  are splitted between read_only and read_write. Old syntax is still supported.
+
+  - Internal Mail::SpamAssassin::GeoDB module now also supports
+  IP::Geolocation::MMDB Perl module.
+
+  - Improved detection of MIME headers
+
+  - Improved parsing of CSS color values
+
+  - Added "replace_rules" support to Mail::SpamAssassin::Plugin::HashBL
+
+  - CNAME dns records are resolved and domains added to "uri_detail_list"
+
+  - New Mail::SpamAssassin::Plugin::Redirectors plugin
+  This plugin looks for URLs redirected by a list of URL redirector
+  services.
+
+The detailed list of all commits can be found in the Changes file.
+A detailed view of the issues as they were filed in the Bugzilla issue
+tracker can be seen at https://s.apache.org/9er4g
+
+New configuration options
+-------------------------
+
+txrep_min_score and txrep_max_score configurations have been added to TxRep plugin
+in order to limit score assigned by the plugin.
+
+Notable Internal changes
+------------------------
+
+None noted
+
+Other updates
+-------------
+
+None noted.
+
+
+Optimizations
+-------------
+
+None noted
+
+Downloading and availability
+----------------------------
+
+Downloads are available from:
+
+https://spamassassin.apache.org/downloads.html
+
+sha256sum of archive files:
+
+ 9625514b51766d4afe08be2eee90e539c6514e9cfdf657910a555227e9b73ebf  Mail-SpamAssassin-4.0.2-rc1.tar.bz2
+ 45e82836f388b2913a406da3815d801f37dc6963de9d0b8fcec15d99b7475ae5  Mail-SpamAssassin-4.0.2-rc1.tar.gz
+ 39b464d875cba0982c2b4fc6622a71287d806a8fc330adb908ead8feb18109ad  Mail-SpamAssassin-4.0.2-rc1.zip
+ 4084080116aca1a0f565605485b10e3ccbd868ff4d6afa7a796e40c79e698e24  Mail-SpamAssassin-rules-4.0.2-rc1.r1927357.tgz
+
+sha512sum of archive files:
+
+ a32f670e9f491a0400aada9baed3fc39a34a3c803d5c3d5e24a46df9ea79b53929df16da1924b0e684a3af7222afcf99d8265af503cf6e12073618891b11b662  Mail-SpamAssassin-4.0.2-rc1.tar.bz2
+ 0d5c22d4bb6a1c52a44ecb3754fef302367939d78b1fa22ab4823d58af9d2ef529cff83bff337d6f8c0209cc2d385113769551ccb4122ef8f3403b7bc238b58e  Mail-SpamAssassin-4.0.2-rc1.tar.gz
+ 128d8e3747fd8c55e49a34569132eb4b8f9adb1c9a4f1846ccdb2ac770a5a3576d1d494a9b111475e1170dfe38ae0349db5cfd3473a4ec08ce8bc0e92bbf4238  Mail-SpamAssassin-4.0.2-rc1.zip
+ ef56fff48b295101574c049bec4512601777b89a190bf8796e08fea7084773034971d8ae1847ed10f71a9a4f8fd16aa14457b252ee6b0473526989480d5774fa  Mail-SpamAssassin-rules-4.0.2-rc1.r1927357.tgz
+
+Note that the Rules files, aka *-rules-*.tgz, are only necessary if
+you cannot, or do not wish to, run "sa-update" after
+installation. Using sa-update will download the latest rules
+
+See the INSTALL and UPGRADE files in the distribution for important
+installation notes
+
+
+GPG Verification Procedure
+--------------------------
+The release files also have a .asc accompanying them.  The file serves
+as an external GPG signature for the given release file.  The signing
+key is available via the keys.gnupg.net or keys.openpgp.org key
+servers, as well as https://www.apache.org/dist/spamassassin/KEYS
+
+
+The following key is used to sign SA releases 3.3.0 and later:
+
+pub   4096R/F7D39814 2009-12-02
+      Key fingerprint = D809 9BC7 9E17 D7E4 9BC2  1E31 FDE5 2F40 F7D3 9814
+uid                  SpamAssassin Project Management Committee <private@spamassassin.apache.org>
+uid                  SpamAssassin Signing Key (Code Signing Key, replacement for 1024D/265FA05B) <dev@spamassassin.apache.org>
+sub   4096R/7B3265A5 2009-12-02
+
+The following key is used to sign rule updates:
+
+pub   4096R/5244EC45 2005-12-20
+      Key fingerprint = 5E54 1DC9 59CB 8BAC 7C78  DFDC 4056 A61A 5244 EC45
+uid                  updates.spamassassin.org Signing Key <release@spamassassin.org>
+sub   4096R/24F434CE 2005-12-20
+
+To verify a release file, download the file with the accompanying .asc
+file and run the following commands:
+
+  gpg --verbose --keyserver keys.openpgp.org --recv-key FDE52F40F7D39814
+  gpg --verify Mail-SpamAssassin-4.0.0.tar.bz2.asc
+  gpg --fingerprint FDE52F40F7D39814
+
+Then confirm that the key description shown by --verify matches what
+is shown by --fingerprint.
+
+See https://www.apache.org/info/verification.html for more information
+on verifying Apache releases
+
+
+About Apache SpamAssassin
+-------------------------
+
+Apache SpamAssassin is a mature, widely-deployed open source project
+that provides filtering to classify email to block spam, malware, and
+phishes.
+
+Apache SpamAssassin uses a variety of mechanisms including mail header
+and text analysis, Bayesian filtering, DNS blocklists, collaborative
+filtering databases, and meta concepts to lower incorrect
+classification.
+
+Apache SpamAssassin uses a highly modular architecture that allows
+other technologies to be quickly incorporated as plugins to easily add
+or replace existing methods.
+
+Apache SpamAssassin typically runs on a server using either command
+line utilities or an API to classify email so a mail system can use
+the results before the message reaches mailboxes.
+
+Most of the Apache SpamAssassin is written in Perl natively supporting
+Unix, Linux, and macOS platforms and Microsoft Windows using
+Strawberry Perl.
+
+For more information, visit https://spamassassin.apache.org/
+
+
+About The Apache Software Foundation
+------------------------------------
+
+Established in 1999, The Apache Software Foundation provides
+organizational, legal, and financial support for more than 100
+freely-available, collaboratively-developed Open Source projects. The
+pragmatic Apache License enables individual and commercial users to
+easily deploy Apache software; the Foundation's intellectual property
+framework limits the legal exposure of its 2,500+ contributors.
+
+For more information, visit https://www.apache.org/
+
+-- 
+[Your name, title, and email address here]

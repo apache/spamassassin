@@ -1,1419 +1,1876 @@
 ------------------------------------------------------------------------
-r1916488 | sidney | 2024-03-23 03:37:50 +0000 (Sat, 23 Mar 2024) | 1 line
- 
- Bug 8089 - Add explicit dependency on File::Temp so CPAN test reports 
-show version. Has no other effect on build or running
-------------------------------------------------------------------------
-r1916444 | gbechis | 2024-03-20 13:45:29 +0000 (Wed, 20 Mar 2024) | 2 
+r1927355 | gbechis | 2025-07-21 07:16:28 +0000 (Mon, 21 Jul 2025) | 2 
 lines
  
- podchecker(1) fixes
+ METAMASK rule update
  
 ------------------------------------------------------------------------
-r1916435 | sidney | 2024-03-20 03:15:08 +0000 (Wed, 20 Mar 2024) | 1 line
- 
- bug 8231 - run perl pyzor tests even when python pyzor not installed. 
-Also fix dbg message when pyzor crashes
-------------------------------------------------------------------------
-r1916406 | sidney | 2024-03-19 02:05:49 +0000 (Tue, 19 Mar 2024) | 1 line
- 
- update copyright, revert credit change
-------------------------------------------------------------------------
-r1916376 | billcole | 2024-03-17 21:17:01 +0000 (Sun, 17 Mar 2024) | 1 
-line
- 
- adding Kent Oyer credit, fixing contact address for credits
-------------------------------------------------------------------------
-r1916374 | sidney | 2024-03-17 20:46:54 +0000 (Sun, 17 Mar 2024) | 1 line
- 
- bug 8229 - remove run_sql_pref_tests config option, run if possible
-------------------------------------------------------------------------
-r1916373 | sidney | 2024-03-17 20:30:38 +0000 (Sun, 17 Mar 2024) | 1 line
- 
- 4.0.1-rc1 RELEASED
-------------------------------------------------------------------------
-r1916372 | gbechis | 2024-03-17 20:20:27 +0000 (Sun, 17 Mar 2024) | 2 
+r1927316 | gbechis | 2025-07-18 16:12:05 +0000 (Fri, 18 Jul 2025) | 2 
 lines
  
- mention TCP fallback changes, fix spaces
+ Clarify a line, remove info about the now unsupported CentOS7
  
 ------------------------------------------------------------------------
-r1916368 | axb | 2024-03-17 17:38:53 +0000 (Sun, 17 Mar 2024) | 1 line
- 
- moved Alex Broens from PMC to Commiter list
-------------------------------------------------------------------------
-r1916334 | sidney | 2024-03-15 12:21:56 +0000 (Fri, 15 Mar 2024) | 1 line
- 
- preparing to release 4.0.1-rc1
-------------------------------------------------------------------------
-r1916333 | gbechis | 2024-03-15 11:11:01 +0000 (Fri, 15 Mar 2024) | 2 
+r1927315 | gbechis | 2025-07-18 15:45:27 +0000 (Fri, 18 Jul 2025) | 2 
 lines
  
- fix regexp not to match cmcbride@ and similar email addresses
+ publish GB_METAMASK rule
  
 ------------------------------------------------------------------------
-r1916262 | sidney | 2024-03-12 22:35:34 +0000 (Tue, 12 Mar 2024) | 1 line
+r1927310 | fkento | 2025-07-18 14:30:04 +0000 (Fri, 18 Jul 2025) | 1 line
  
- Cosmetic fix to line that confused perl mode syntax highlighting in 
-emacs editor
+ Bug 8338: Round to 4 decimal places to avoid floating point precision 
+issues
 ------------------------------------------------------------------------
-r1916250 | sidney | 2024-03-12 11:26:06 +0000 (Tue, 12 Mar 2024) | 1 line
- 
- bug 8227 - Revert addition of DNS test run durimg build
-------------------------------------------------------------------------
-r1916242 | sidney | 2024-03-11 23:37:22 +0000 (Mon, 11 Mar 2024) | 1 line
- 
- 8228 fix operator precedence error caught by perl 5.39 warning
-------------------------------------------------------------------------
-r1916223 | sidney | 2024-03-11 03:10:43 +0000 (Mon, 11 Mar 2024) | 1 line
- 
- bug 8227 - Add tests for proper DNS resolver setup during build/install
-------------------------------------------------------------------------
-r1916220 | sidney | 2024-03-10 23:21:12 +0000 (Sun, 10 Mar 2024) | 1 line
- 
- bug 8226 - Set min required Net::DNS version to 1.10
-------------------------------------------------------------------------
-r1916195 | sidney | 2024-03-09 10:38:28 +0000 (Sat, 09 Mar 2024) | 1 line
- 
- bug 8226 - Set min required Net::DNS version to 1.10
-------------------------------------------------------------------------
-r1916193 | sidney | 2024-03-09 05:09:26 +0000 (Sat, 09 Mar 2024) | 1 line
- 
- bug 8225 - Use Net::DNS::Resolver for TCP fallback for truncated DNS UDP 
-replies
-------------------------------------------------------------------------
-r1916171 | sidney | 2024-03-07 23:38:30 +0000 (Thu, 07 Mar 2024) | 1 line
- 
- bug 8210 Parse and recognize CSS background property
-------------------------------------------------------------------------
-r1916164 | gbechis | 2024-03-07 08:45:40 +0000 (Thu, 07 Mar 2024) | 3 
+r1927261 | gbechis | 2025-07-16 06:54:18 +0000 (Wed, 16 Jul 2025) | 3 
 lines
  
- test with large TXT record replies
- bz #8213
+ html tags attributes should not be parsed as uris,
+ add a regression test for bz #8206
  
 ------------------------------------------------------------------------
-r1916121 | gbechis | 2024-03-05 09:30:54 +0000 (Tue, 05 Mar 2024) | 3 
+r1927237 | gbechis | 2025-07-15 07:16:24 +0000 (Tue, 15 Jul 2025) | 3 
 lines
  
- rebuild configure script with autoconf 2.71
- bz #8204
+ do not add invalid html attribute to domains list
+ bz #8206
  
 ------------------------------------------------------------------------
-r1916112 | sidney | 2024-03-04 23:40:45 +0000 (Mon, 04 Mar 2024) | 1 line
- 
- Bug 8224 - Handle different API versions of Net::DNS::Nameserver in 
-dnsbl_subtests.t tests
-------------------------------------------------------------------------
-r1916084 | jhardin | 2024-03-02 23:10:43 +0000 (Sat, 02 Mar 2024) | 1 line
- 
- Bug 8221: Retire SENDGRID_REDIR, S/O has deteriorated to little better 
-than a coin toss.
-------------------------------------------------------------------------
-r1915972 | jhardin | 2024-02-23 16:10:05 +0000 (Fri, 23 Feb 2024) | 1 line
- 
- Promote rule to scored for publication
-------------------------------------------------------------------------
-r1915964 | jhardin | 2024-02-23 03:37:26 +0000 (Fri, 23 Feb 2024) | 1 line
- 
- Add URI rule for eval
-------------------------------------------------------------------------
-r1915918 | gbechis | 2024-02-21 11:18:52 +0000 (Wed, 21 Feb 2024) | 3 
+r1927091 | gbechis | 2025-07-09 14:05:52 +0000 (Wed, 09 Jul 2025) | 2 
 lines
  
- Mail::SPF::Server dns_resolver option requires a Net::DNS::Resolver 
-object and not
- a more complex structure
+ people.apache.org has been deprecated months ago
  
 ------------------------------------------------------------------------
-r1915894 | gbechis | 2024-02-20 15:28:52 +0000 (Tue, 20 Feb 2024) | 2 
+r1927085 | gbechis | 2025-07-09 08:10:58 +0000 (Wed, 09 Jul 2025) | 2 
 lines
  
- add an option to skip mailto links on uris lookups
+ man page fixes
  
 ------------------------------------------------------------------------
-r1915887 | gbechis | 2024-02-20 09:14:31 +0000 (Tue, 20 Feb 2024) | 2 
+r1927083 | gbechis | 2025-07-09 06:42:40 +0000 (Wed, 09 Jul 2025) | 2 
 lines
  
- added zohomail.com to Freemail providers
+ improve rule to match more spammy icons in Subject
  
 ------------------------------------------------------------------------
-r1915794 | billcole | 2024-02-14 15:49:12 +0000 (Wed, 14 Feb 2024) | 1 
-line
- 
- adding a test for .best tld, which is currently a spammer fave
-------------------------------------------------------------------------
-r1915793 | billcole | 2024-02-14 15:22:57 +0000 (Wed, 14 Feb 2024) | 1 
-line
- 
- moving very good rule from sandbox to core head tests
-------------------------------------------------------------------------
-r1915749 | gbechis | 2024-02-12 16:22:44 +0000 (Mon, 12 Feb 2024) | 3 
+r1927076 | gbechis | 2025-07-08 14:27:51 +0000 (Tue, 08 Jul 2025) | 2 
 lines
  
- use new MySQL syntax
- switch to InnoDB by default on userpref table as well
+ add a 2tld
  
 ------------------------------------------------------------------------
-r1915724 | jhardin | 2024-02-11 18:37:41 +0000 (Sun, 11 Feb 2024) | 1 line
- 
- FP Avoidance tuning
-------------------------------------------------------------------------
-r1915645 | gbechis | 2024-02-08 11:42:00 +0000 (Thu, 08 Feb 2024) | 2 
+r1927071 | gbechis | 2025-07-08 07:18:06 +0000 (Tue, 08 Jul 2025) | 2 
 lines
  
- fix FORGED_HOTMAIL_RCVD2 after recent Microsoft changes
+ match spammy icons on email subjects
  
 ------------------------------------------------------------------------
-r1915644 | gbechis | 2024-02-08 11:19:02 +0000 (Thu, 08 Feb 2024) | 3 
+r1927070 | gbechis | 2025-07-08 07:05:39 +0000 (Tue, 08 Jul 2025) | 2 
 lines
  
- make the rule match on outlook.com email messages as well
- maintainer timeout
+ improve regexp matches
  
 ------------------------------------------------------------------------
-r1915630 | gbechis | 2024-02-07 21:16:06 +0000 (Wed, 07 Feb 2024) | 3 
+r1927064 | gbechis | 2025-07-07 21:25:50 +0000 (Mon, 07 Jul 2025) | 2 
 lines
  
- avoid a FP
- jhardin@: "feel free to commit"
+ better regexp to match more http-equiv tags
  
 ------------------------------------------------------------------------
-r1915553 | billcole | 2024-02-03 00:49:52 +0000 (Sat, 03 Feb 2024) | 1 
-line
- 
- Cleanup of T_ on RHS and whitespace alignment.
-------------------------------------------------------------------------
-r1915549 | billcole | 2024-02-02 16:37:19 +0000 (Fri, 02 Feb 2024) | 1 
-line
- 
- FP prevention for DMARC reports. Bug 8214
-------------------------------------------------------------------------
-r1915484 | jhardin | 2024-01-31 02:16:29 +0000 (Wed, 31 Jan 2024) | 1 line
- 
- FP Avoidance tuning
-------------------------------------------------------------------------
-r1915475 | gbechis | 2024-01-30 09:32:17 +0000 (Tue, 30 Jan 2024) | 2 
+r1927063 | gbechis | 2025-07-07 21:21:01 +0000 (Mon, 07 Jul 2025) | 2 
 lines
  
- extract more URIs from pdf files
+ handle redirectors that are using "http-equiv" html meta tag
  
 ------------------------------------------------------------------------
-r1915433 | jhardin | 2024-01-28 17:36:51 +0000 (Sun, 28 Jan 2024) | 1 line
- 
- FP Avoidance tuning
-------------------------------------------------------------------------
-r1915430 | jhardin | 2024-01-28 16:51:30 +0000 (Sun, 28 Jan 2024) | 1 line
- 
- "trust wallet" obfuscation, probable cryptocurrency phishing
-------------------------------------------------------------------------
-r1915356 | jhardin | 2024-01-21 19:37:45 +0000 (Sun, 21 Jan 2024) | 1 line
- 
- Azure infra being used to host phishing images. Tune "Wells Fargo" 
-obfuscation rules.
-------------------------------------------------------------------------
-r1915355 | jhardin | 2024-01-21 19:36:05 +0000 (Sun, 21 Jan 2024) | 1 line
- 
- Add some more obfus observed in phishing
-------------------------------------------------------------------------
-r1915164 | gbechis | 2024-01-09 17:35:36 +0000 (Tue, 09 Jan 2024) | 2 
-lines
- 
- Add dynamic-RDNS/HELO exclusion for dynamic-looking static MTA hostnames 
-from salesforce.com
- 
-------------------------------------------------------------------------
-r1915138 | billcole | 2024-01-08 16:06:11 +0000 (Mon, 08 Jan 2024) | 1 
-line
- 
- T-Mobile does in fact generate signed spam
-------------------------------------------------------------------------
-r1915064 | gbechis | 2024-01-03 11:07:44 +0000 (Wed, 03 Jan 2024) | 2 
-lines
- 
- rename a rule
- 
-------------------------------------------------------------------------
-r1915063 | gbechis | 2024-01-03 10:51:27 +0000 (Wed, 03 Jan 2024) | 3 
-lines
- 
- add rule to catch Yandex redirector
- bz #8112
- 
-------------------------------------------------------------------------
-r1915062 | gbechis | 2024-01-03 10:47:35 +0000 (Wed, 03 Jan 2024) | 2 
+r1927060 | gbechis | 2025-07-07 16:15:18 +0000 (Mon, 07 Jul 2025) | 2 
 lines
  
  add an url shortener
  
 ------------------------------------------------------------------------
-r1914863 | billcole | 2023-12-22 18:53:12 +0000 (Fri, 22 Dec 2023) | 1 
+r1927059 | gbechis | 2025-07-07 16:05:08 +0000 (Mon, 07 Jul 2025) | 2 
+lines
+ 
+ explain why we run at priority -10 in this case
+ 
+------------------------------------------------------------------------
+r1927053 | gbechis | 2025-07-07 14:27:54 +0000 (Mon, 07 Jul 2025) | 2 
+lines
+ 
+ mention latest changes
+ 
+------------------------------------------------------------------------
+r1927052 | gbechis | 2025-07-07 14:22:39 +0000 (Mon, 07 Jul 2025) | 5 
+lines
+ 
+ correctly increase TxRep msgcount for email addresses records
+ add txrep_min_score and txrep_max_score configurations in order to limit
+ TxRep scores.
+ fix #8236
+ 
+------------------------------------------------------------------------
+r1927051 | gbechis | 2025-07-07 13:36:04 +0000 (Mon, 07 Jul 2025) | 2 
+lines
+ 
+ add more 2tlds
+ 
+------------------------------------------------------------------------
+r1926777 | billcole | 2025-06-27 21:00:37 +0000 (Fri, 27 Jun 2025) | 1 
 line
  
- Fix for bz#8205, by Kent Oyer
+ typo fix
 ------------------------------------------------------------------------
-r1914830 | gbechis | 2023-12-21 17:31:39 +0000 (Thu, 21 Dec 2023) | 2 
+r1926754 | gbechis | 2025-06-27 14:37:35 +0000 (Fri, 27 Jun 2025) | 2 
 lines
  
- warning fix when building man page
+ mention 4.0.1 revision number
  
 ------------------------------------------------------------------------
-r1914735 | sidney | 2023-12-17 09:11:35 +0000 (Sun, 17 Dec 2023) | 1 line
- 
- Bug 8203 - Add LWP::Protocol::https as dependency where needed
-------------------------------------------------------------------------
-r1914567 | gbechis | 2023-12-12 13:30:34 +0000 (Tue, 12 Dec 2023) | 2 
-lines
- 
- additional 3tld domain
- 
-------------------------------------------------------------------------
-r1914481 | sidney | 2023-12-09 12:12:54 +0000 (Sat, 09 Dec 2023) | 1 line
- 
- bug 8196 - Revert commits regarding NetAddr::IP that were not really 
-neccessary
-------------------------------------------------------------------------
-r1914452 | hege | 2023-12-08 07:37:26 +0000 (Fri, 08 Dec 2023) | 2 lines
- 
- Clean up unnecessary unicode characters
- 
-------------------------------------------------------------------------
-r1914451 | hege | 2023-12-08 07:25:11 +0000 (Fri, 08 Dec 2023) | 2 lines
- 
- Lazy require NetAddr::IP, otherwise Makefile.PL can fail (Bug 8196)
- 
-------------------------------------------------------------------------
-r1914416 | sidney | 2023-12-07 02:49:06 +0000 (Thu, 07 Dec 2023) | 1 line
- 
- Bug 8197 Skip DNS resolver test on Windows with Net::DNS 1.41, it's fix 
-has a different error
-------------------------------------------------------------------------
-r1914366 | billcole | 2023-12-05 15:35:03 +0000 (Tue, 05 Dec 2023) | 1 
+r1926753 | billcole | 2025-06-27 14:02:39 +0000 (Fri, 27 Jun 2025) | 1 
 line
  
- PROPER fix for bz8202
+ syntax error fix
 ------------------------------------------------------------------------
-r1914364 | hege | 2023-12-05 14:56:53 +0000 (Tue, 05 Dec 2023) | 2 lines
+r1926749 | gbechis | 2025-06-27 07:57:15 +0000 (Fri, 27 Jun 2025) | 3 
+lines
  
- Fix unnecessary regexp captures from rules
+ Explicitly handle one-sided SSL shutdown
+ bz #8336
  
 ------------------------------------------------------------------------
-r1914363 | billcole | 2023-12-05 14:19:16 +0000 (Tue, 05 Dec 2023) | 1 
+r1926708 | billcole | 2025-06-24 23:03:33 +0000 (Tue, 24 Jun 2025) | 1 
 line
  
- revert r1914343
+ add rule descriptions
 ------------------------------------------------------------------------
-r1914343 | billcole | 2023-12-05 01:47:25 +0000 (Tue, 05 Dec 2023) | 1 
+r1926698 | gbechis | 2025-06-24 13:16:29 +0000 (Tue, 24 Jun 2025) | 3 
+lines
+ 
+ 
+ document WLBLEval methods
+ 
+------------------------------------------------------------------------
+r1926688 | billcole | 2025-06-24 12:49:47 +0000 (Tue, 24 Jun 2025) | 1 
 line
  
- Additional exception for UNUSABLE_MSGID and hence FORGED_MUA_MOZILLA and 
-other metas. Bug 8202
+ fix ODDDIV8 and add fingerprint
 ------------------------------------------------------------------------
-r1914293 | sidney | 2023-12-03 05:55:40 +0000 (Sun, 03 Dec 2023) | 1 line
- 
- bug 8201 Revert previous commit
-------------------------------------------------------------------------
-r1914291 | sidney | 2023-12-03 04:32:34 +0000 (Sun, 03 Dec 2023) | 1 line
- 
- bug 8201 Only fail some tests that retry network tests if all retries 
-have any errors
-------------------------------------------------------------------------
-r1914271 | sidney | 2023-12-01 19:16:58 +0000 (Fri, 01 Dec 2023) | 1 line
- 
- bug 8198 Adjust test cases with scores that rounded differently on 
-different platforms
-------------------------------------------------------------------------
-r1914179 | gbechis | 2023-11-28 14:10:48 +0000 (Tue, 28 Nov 2023) | 2 
+r1926666 | gbechis | 2025-06-23 16:33:16 +0000 (Mon, 23 Jun 2025) | 2 
 lines
  
- skip tests on Windows if Net::DNS 1.40_* is present
+ Metamask test rule
  
 ------------------------------------------------------------------------
-r1914143 | sidney | 2023-11-27 00:38:56 +0000 (Mon, 27 Nov 2023) | 1 line
+r1926664 | gbechis | 2025-06-23 13:51:52 +0000 (Mon, 23 Jun 2025) | 1 line
  
- bug 8891 ENV var PERL_MM_OPT conflicts with sa-compile
+ silence a warning
 ------------------------------------------------------------------------
-r1914137 | sidney | 2023-11-26 11:36:39 +0000 (Sun, 26 Nov 2023) | 1 line
- 
- bug 8198 Fix warning from bad version check and skip tests that fail 
-under old versions of DKIM
-------------------------------------------------------------------------
-r1914136 | sidney | 2023-11-26 10:20:08 +0000 (Sun, 26 Nov 2023) | 1 line
- 
- Fixing missing my, no functional difference, but still wrong
-------------------------------------------------------------------------
-r1914132 | gbechis | 2023-11-26 08:56:49 +0000 (Sun, 26 Nov 2023) | 3 
+r1926658 | gbechis | 2025-06-23 08:34:34 +0000 (Mon, 23 Jun 2025) | 2 
 lines
  
- ipcc.db file is a "Berkeley DB (Btree, version 9, little-endian)" file 
-and
- cannot be opened by all platforms during tests
+ add another abused redirector
  
 ------------------------------------------------------------------------
-r1914094 | sidney | 2023-11-24 20:12:00 +0000 (Fri, 24 Nov 2023) | 1 line
- 
- 4.0.1-pre1 RELEASED
-------------------------------------------------------------------------
-r1914088 | gbechis | 2023-11-24 14:07:45 +0000 (Fri, 24 Nov 2023) | 2 
+r1926656 | gbechis | 2025-06-23 08:26:47 +0000 (Mon, 23 Jun 2025) | 2 
 lines
  
- mention more features developed after SpamAssassin 4.0.0 has been 
-released
+ add a redirector
  
 ------------------------------------------------------------------------
-r1914085 | sidney | 2023-11-24 12:18:40 +0000 (Fri, 24 Nov 2023) | 1 line
- 
- Update release announcement in preparation for 4.0.1 release
-------------------------------------------------------------------------
-r1914077 | sidney | 2023-11-24 00:41:54 +0000 (Fri, 24 Nov 2023) | 1 line
- 
- update copyright
-------------------------------------------------------------------------
-r1914076 | sidney | 2023-11-24 00:39:55 +0000 (Fri, 24 Nov 2023) | 1 line
- 
- preparing to release 4.0.1-pre1
-------------------------------------------------------------------------
-r1914075 | sidney | 2023-11-23 23:00:36 +0000 (Thu, 23 Nov 2023) | 1 line
- 
- Bug 8197 Skip DNS resolver test on Windows with broken versions of 
-Net::DNS
-------------------------------------------------------------------------
-r1914066 | gbechis | 2023-11-23 08:33:21 +0000 (Thu, 23 Nov 2023) | 2 
+r1926655 | gbechis | 2025-06-23 08:02:46 +0000 (Mon, 23 Jun 2025) | 2 
 lines
  
- fix tests when Mail::DKIM is not installed
+ more clear debug message
  
 ------------------------------------------------------------------------
-r1914064 | gbechis | 2023-11-23 07:36:08 +0000 (Thu, 23 Nov 2023) | 2 
+r1926586 | gbechis | 2025-06-19 16:16:49 +0000 (Thu, 19 Jun 2025) | 2 
 lines
  
- Perl doesn't support locale encodings other then utf-8 and iso
+ add more 2tlds
  
 ------------------------------------------------------------------------
-r1914036 | sidney | 2023-11-22 11:37:42 +0000 (Wed, 22 Nov 2023) | 1 line
- 
- bug 8196 Put NetAddrr::IP in configure-required to fix cpan install on 
-system without NetAddr::IP
-------------------------------------------------------------------------
-r1914031 | sidney | 2023-11-22 04:02:20 +0000 (Wed, 22 Nov 2023) | 1 line
- 
- bug 8195 Correction that makes no functional difference but is more 
-correct cosmetically
-------------------------------------------------------------------------
-r1914030 | sidney | 2023-11-22 03:27:53 +0000 (Wed, 22 Nov 2023) | 1 line
- 
- build doc minor wording tweaks
-------------------------------------------------------------------------
-r1914029 | sidney | 2023-11-22 03:24:14 +0000 (Wed, 22 Nov 2023) | 1 line
- 
- preparing to release 4.0.1-pre1
-------------------------------------------------------------------------
-r1914025 | gbechis | 2023-11-21 23:22:41 +0000 (Tue, 21 Nov 2023) | 2 
+r1926581 | gbechis | 2025-06-19 10:43:40 +0000 (Thu, 19 Jun 2025) | 5 
 lines
  
- print warnings to STDERR
+ add support for Redis replication, Redis connection parameters
+ are splitted between read_only and read_write. Old syntax is still 
+supported.
+ From Jan Smutný with tweaks by me.
+ bz #8331
  
 ------------------------------------------------------------------------
-r1913997 | sidney | 2023-11-21 04:10:39 +0000 (Tue, 21 Nov 2023) | 1 line
- 
- bug 8195 Specify Text::Diff and Devel::Cycle as optional modules instead 
-of required
-------------------------------------------------------------------------
-r1913985 | sidney | 2023-11-20 14:59:46 +0000 (Mon, 20 Nov 2023) | 1 line
- 
- Update version number to 4.0.1, was mistakenly not done after 4.0.0 
-release
-------------------------------------------------------------------------
-r1913910 | gbechis | 2023-11-18 11:22:56 +0000 (Sat, 18 Nov 2023) | 2 
+r1926580 | gbechis | 2025-06-19 10:35:31 +0000 (Thu, 19 Jun 2025) | 3 
 lines
  
- skip test during disttest
+ disable Github Actions on Windows with Perl < 5.22 since cpanm(1) cannot 
+download
+ Perl modules because of unsupported TLS certificate chain
  
 ------------------------------------------------------------------------
-r1913888 | gbechis | 2023-11-17 17:36:56 +0000 (Fri, 17 Nov 2023) | 2 
+r1926579 | gbechis | 2025-06-19 09:13:20 +0000 (Thu, 19 Jun 2025) | 2 
+lines
+ 
+ MySQL 5.7 is no more supported by Github Actions
+ 
+------------------------------------------------------------------------
+r1926574 | gbechis | 2025-06-19 08:00:35 +0000 (Thu, 19 Jun 2025) | 2 
+lines
+ 
+ partial revert of r1926353, HashBL queries might contain non fqdn strings
+ 
+------------------------------------------------------------------------
+r1926573 | gbechis | 2025-06-19 07:49:45 +0000 (Thu, 19 Jun 2025) | 2 
+lines
+ 
+ partial revert of r1926383, fixes uri.t, URI cleanup done in 
+Redirectors.pm is enough
+ 
+------------------------------------------------------------------------
+r1926522 | gbechis | 2025-06-17 23:19:26 +0000 (Tue, 17 Jun 2025) | 1 line
+ 
+ Do not try to build CPAN modules not compatible with Windows, reorder 
+modules in order to have more chances to build them
+------------------------------------------------------------------------
+r1926521 | gbechis | 2025-06-17 22:54:44 +0000 (Tue, 17 Jun 2025) | 1 line
+ 
+ Improve Windows tests
+------------------------------------------------------------------------
+r1926505 | gbechis | 2025-06-17 15:20:44 +0000 (Tue, 17 Jun 2025) | 6 
+lines
+ 
+ remove Windows 2019 runners, add Windows 2025
+ 
+ Submitted by: Giovanni <g.bechis@snb.it>
+ 
+ Github: closes #17
+ 
+------------------------------------------------------------------------
+r1926500 | gbechis | 2025-06-17 09:02:14 +0000 (Tue, 17 Jun 2025) | 2 
+lines
+ 
+ add regression tests for Redis BayesStore
+ 
+------------------------------------------------------------------------
+r1926393 | gbechis | 2025-06-13 16:21:06 +0000 (Fri, 13 Jun 2025) | 2 
+lines
+ 
+ better query string match
+ 
+------------------------------------------------------------------------
+r1926383 | gbechis | 2025-06-13 08:33:21 +0000 (Fri, 13 Jun 2025) | 4 
+lines
+ 
+ clenaup URLs parameters before running idn_to_ascii,
+ silence some "idn_to_ascii: conversion to ACE failed" warnings
+ spotted by Ruud van den Hout
+ 
+------------------------------------------------------------------------
+r1926361 | gbechis | 2025-06-11 15:42:23 +0000 (Wed, 11 Jun 2025) | 2 
+lines
+ 
+ match on more Google translate abused uris
+ 
+------------------------------------------------------------------------
+r1926359 | gbechis | 2025-06-11 14:52:09 +0000 (Wed, 11 Jun 2025) | 2 
+lines
+ 
+ skip domain if it has two or more consecutive dots, the uri is not 
+linked on MUAs
+ 
+------------------------------------------------------------------------
+r1926358 | gbechis | 2025-06-11 14:09:01 +0000 (Wed, 11 Jun 2025) | 2 
+lines
+ 
+ skip invalid rbl uris
+ 
+------------------------------------------------------------------------
+r1926357 | gbechis | 2025-06-11 14:03:36 +0000 (Wed, 11 Jun 2025) | 2 
+lines
+ 
+ fix rule when replace is enabled, spotted by Ruud van den Hout
+ 
+------------------------------------------------------------------------
+r1926341 | gbechis | 2025-06-10 14:49:23 +0000 (Tue, 10 Jun 2025) | 3 
+lines
+ 
+ 
+ document more Mail::SpamAssassin::Util functions
+ 
+------------------------------------------------------------------------
+r1926310 | gbechis | 2025-06-10 08:04:01 +0000 (Tue, 10 Jun 2025) | 2 
+lines
+ 
+ use replace_rules in check_hashbl_bodyre if available
+ 
+------------------------------------------------------------------------
+r1926309 | gbechis | 2025-06-10 08:02:44 +0000 (Tue, 10 Jun 2025) | 2 
+lines
+ 
+ try to replace tags only when needed
+ 
+------------------------------------------------------------------------
+r1926307 | gbechis | 2025-06-10 07:35:09 +0000 (Tue, 10 Jun 2025) | 3 
+lines
+ 
+ use replacetags from HashBL plugin, by enabling the new "replace" option 
+in "check_hashbl_bodyre",
+ tags in the regexp will be replaced with the original char
+ 
+------------------------------------------------------------------------
+r1926183 | billcole | 2025-06-06 15:20:47 +0000 (Fri, 06 Jun 2025) | 1 
+line
+ 
+ typos
+------------------------------------------------------------------------
+r1926179 | billcole | 2025-06-06 14:03:36 +0000 (Fri, 06 Jun 2025) | 1 
+line
+ 
+ testing a locally useful rule that I actually hate.
+------------------------------------------------------------------------
+r1926177 | gbechis | 2025-06-06 13:46:31 +0000 (Fri, 06 Jun 2025) | 2 
+lines
+ 
+ generate an index file and use new css
+ 
+------------------------------------------------------------------------
+r1926024 | jhardin | 2025-05-31 22:44:50 +0000 (Sat, 31 May 2025) | 1 line
+ 
+ Aviod URI_TRY_3LD FP on Slack invites
+------------------------------------------------------------------------
+r1925994 | gbechis | 2025-05-30 18:10:33 +0000 (Fri, 30 May 2025) | 2 
+lines
+ 
+ ignore URI* tags if empty
+ 
+------------------------------------------------------------------------
+r1925856 | gbechis | 2025-05-27 07:28:16 +0000 (Tue, 27 May 2025) | 2 
+lines
+ 
+ spam PR, close #16
+ 
+------------------------------------------------------------------------
+r1925826 | gbechis | 2025-05-26 14:36:20 +0000 (Mon, 26 May 2025) | 2 
+lines
+ 
+ invalid PR, fix #15
+ 
+------------------------------------------------------------------------
+r1925809 | sidney | 2025-05-26 08:31:56 +0000 (Mon, 26 May 2025) | 1 line
+ 
+ Close spam PR. This closes #14
+------------------------------------------------------------------------
+r1925754 | gbechis | 2025-05-22 19:39:42 +0000 (Thu, 22 May 2025) | 2 
+lines
+ 
+ set a title to the resulting html page
+ 
+------------------------------------------------------------------------
+r1925753 | gbechis | 2025-05-22 19:25:59 +0000 (Thu, 22 May 2025) | 2 
+lines
+ 
+ use a common css file for docs.
+ 
+------------------------------------------------------------------------
+r1925746 | gbechis | 2025-05-22 16:36:51 +0000 (Thu, 22 May 2025) | 2 
+lines
+ 
+ more debian files
+ 
+------------------------------------------------------------------------
+r1925745 | gbechis | 2025-05-22 16:22:44 +0000 (Thu, 22 May 2025) | 2 
+lines
+ 
+ sync debian deb packaging with latest version
+ 
+------------------------------------------------------------------------
+r1925720 | gbechis | 2025-05-20 14:02:48 +0000 (Tue, 20 May 2025) | 2 
+lines
+ 
+ add an url shortener
+ 
+------------------------------------------------------------------------
+r1925719 | gbechis | 2025-05-20 13:59:47 +0000 (Tue, 20 May 2025) | 2 
+lines
+ 
+ match more URIs
+ 
+------------------------------------------------------------------------
+r1925716 | gbechis | 2025-05-20 10:08:05 +0000 (Tue, 20 May 2025) | 3 
+lines
+ 
+ check that feed is correctly formatted and an uri is available
+ fix from Kirill A. Korinsky, bz #8333
+ 
+------------------------------------------------------------------------
+r1925708 | fkento | 2025-05-19 22:25:56 +0000 (Mon, 19 May 2025) | 1 line
+ 
+ Add common image MIME types
+------------------------------------------------------------------------
+r1925697 | gbechis | 2025-05-19 15:47:09 +0000 (Mon, 19 May 2025) | 2 
+lines
+ 
+ add a tag for CNAMEs extracted from uris
+ 
+------------------------------------------------------------------------
+r1925696 | gbechis | 2025-05-19 14:26:52 +0000 (Mon, 19 May 2025) | 8 
+lines
+ 
+ Import a slightly modified version of 
+https://svn.apache.org/viewvc/httpd/dev-tools/trunk/github/apply_trunk_pr.
+sh?view=log
+ to easily close Github PRs
+ display where the commit message file is located
+ 
+ Submitted by: Giovanni <giovanni@paclan.it>
+ 
+ Github: closes #13
+ 
+------------------------------------------------------------------------
+r1925562 | gbechis | 2025-05-15 10:37:37 +0000 (Thu, 15 May 2025) | 2 
+lines
+ 
+ add remove-addr-from-blocklist option
+ 
+------------------------------------------------------------------------
+r1925560 | gbechis | 2025-05-15 07:34:42 +0000 (Thu, 15 May 2025) | 2 
+lines
+ 
+ Limit show_mclog to 50 matches to limit resource usage
+ 
+------------------------------------------------------------------------
+r1925549 | gbechis | 2025-05-14 08:40:27 +0000 (Wed, 14 May 2025) | 2 
+lines
+ 
+ improve dbg logging
+ 
+------------------------------------------------------------------------
+r1925547 | gbechis | 2025-05-14 07:55:41 +0000 (Wed, 14 May 2025) | 2 
+lines
+ 
+ improve Bayes 10-fold CV documentation
+ 
+------------------------------------------------------------------------
+r1925541 | gbechis | 2025-05-13 20:57:04 +0000 (Tue, 13 May 2025) | 2 
+lines
+ 
+ add URL redirector rules to default location
+ 
+------------------------------------------------------------------------
+r1925540 | gbechis | 2025-05-13 20:45:16 +0000 (Tue, 13 May 2025) | 2 
+lines
+ 
+ unbreak
+ 
+------------------------------------------------------------------------
+r1925517 | billcole | 2025-05-12 17:57:20 +0000 (Mon, 12 May 2025) | 1 
+line
+ 
+ disable Validity by default, leave rules
+------------------------------------------------------------------------
+r1925475 | gbechis | 2025-05-09 10:23:14 +0000 (Fri, 09 May 2025) | 2 
+lines
+ 
+ add url redirector rules
+ 
+------------------------------------------------------------------------
+r1925474 | gbechis | 2025-05-09 08:59:08 +0000 (Fri, 09 May 2025) | 2 
+lines
+ 
+ mention Mail::SpamAssassin::GeoDB improvements
+ 
+------------------------------------------------------------------------
+r1925418 | gbechis | 2025-05-05 16:03:20 +0000 (Mon, 05 May 2025) | 2 
+lines
+ 
+ exclude awstrack.me from URI_NOVOWEL due to FPs
+ 
+------------------------------------------------------------------------
+r1925416 | gbechis | 2025-05-05 14:36:44 +0000 (Mon, 05 May 2025) | 2 
+lines
+ 
+ disable GB_FREEM_FROM_NOT_REPLY rule, it's not doing what it should
+ 
+------------------------------------------------------------------------
+r1925415 | gbechis | 2025-05-05 13:11:15 +0000 (Mon, 05 May 2025) | 2 
+lines
+ 
+ ignore 10-fold CV directories
+ 
+------------------------------------------------------------------------
+r1925414 | gbechis | 2025-05-05 13:08:06 +0000 (Mon, 05 May 2025) | 2 
+lines
+ 
+ add sprl.in and regen __URL_SHORTENER rule
+ 
+------------------------------------------------------------------------
+r1925361 | gbechis | 2025-05-02 10:17:58 +0000 (Fri, 02 May 2025) | 2 
+lines
+ 
+ add more 2TLDs
+ 
+------------------------------------------------------------------------
+r1925360 | gbechis | 2025-05-02 10:12:27 +0000 (Fri, 02 May 2025) | 2 
+lines
+ 
+ do not remove anchors on redirectors, they might be needed (at least for 
+bing[.]com redirector)
+ 
+------------------------------------------------------------------------
+r1925337 | gbechis | 2025-04-30 13:15:24 +0000 (Wed, 30 Apr 2025) | 2 
+lines
+ 
+ run at priority -15 so that redirected short uris can also be checked
+ 
+------------------------------------------------------------------------
+r1925332 | gbechis | 2025-04-30 10:29:16 +0000 (Wed, 30 Apr 2025) | 2 
+lines
+ 
+ ignore x-forefront-antispam-report header, few improvements from 10FCV 
+tests 
+ 
+------------------------------------------------------------------------
+r1925318 | gbechis | 2025-04-29 06:39:15 +0000 (Tue, 29 Apr 2025) | 2 
+lines
+ 
+ add an url shortener
+ 
+------------------------------------------------------------------------
+r1925125 | gbechis | 2025-04-17 07:16:52 +0000 (Thu, 17 Apr 2025) | 3 
+lines
+ 
+ CommuniGate Pro has been rebranded into CommuniGate SPEC
+ bz #8329
+ 
+------------------------------------------------------------------------
+r1925100 | gbechis | 2025-04-15 21:47:06 +0000 (Tue, 15 Apr 2025) | 2 
+lines
+ 
+ push to "add_uri_detail_list" CNAME records as well
+ 
+------------------------------------------------------------------------
+r1925097 | gbechis | 2025-04-15 16:25:35 +0000 (Tue, 15 Apr 2025) | 2 
+lines
+ 
+ tweak __GB_FAKE_RF rule
+ 
+------------------------------------------------------------------------
+r1925081 | gbechis | 2025-04-14 13:09:17 +0000 (Mon, 14 Apr 2025) | 2 
+lines
+ 
+ do not run URIDetail checks on uris that are not linkified by MUAs
+ 
+------------------------------------------------------------------------
+r1925020 | billcole | 2025-04-11 14:18:50 +0000 (Fri, 11 Apr 2025) | 1 
+line
+ 
+ really fix rule
+------------------------------------------------------------------------
+r1925019 | billcole | 2025-04-11 14:12:00 +0000 (Fri, 11 Apr 2025) | 1 
+line
+ 
+ fix rule
+------------------------------------------------------------------------
+r1925018 | billcole | 2025-04-11 13:57:05 +0000 (Fri, 11 Apr 2025) | 1 
+line
+ 
+ Sniping the e-bike spammers
+------------------------------------------------------------------------
+r1924977 | fkento | 2025-04-09 21:22:15 +0000 (Wed, 09 Apr 2025) | 8 lines
+ 
+ * Remove obsolete <basefont> tag
+ 
+ * Add support for CSS font-size property
+ 
+ * Maintain support for deprecated HTML <font> "size" attribute
+ 
+ 
+ 
+------------------------------------------------------------------------
+r1924963 | gbechis | 2025-04-09 15:37:29 +0000 (Wed, 09 Apr 2025) | 2 
+lines
+ 
+ change issues.apache.org links to bz.apache.org
+ 
+------------------------------------------------------------------------
+r1924894 | gbechis | 2025-04-07 09:37:26 +0000 (Mon, 07 Apr 2025) | 2 
+lines
+ 
+ Wordpress[.]com sends signed spam
+ 
+------------------------------------------------------------------------
+r1924817 | jhardin | 2025-04-05 17:46:26 +0000 (Sat, 05 Apr 2025) | 1 line
+ 
+ Add 3TLD cloud.z.com, hosting provider seen in phishing.
+------------------------------------------------------------------------
+r1924777 | gbechis | 2025-04-04 16:34:11 +0000 (Fri, 04 Apr 2025) | 2 
+lines
+ 
+ Update to use rfc-editor.org URLs
+ 
+------------------------------------------------------------------------
+r1924732 | fkento | 2025-04-01 19:51:38 +0000 (Tue, 01 Apr 2025) | 1 line
+ 
+ Handle CSS currentcolor keyword
+------------------------------------------------------------------------
+r1924718 | billcole | 2025-03-31 21:21:12 +0000 (Mon, 31 Mar 2025) | 1 
+line
+ 
+ Fixed typo BZ#8327
+------------------------------------------------------------------------
+r1924703 | fkento | 2025-03-31 02:54:55 +0000 (Mon, 31 Mar 2025) | 1 line
+ 
+ Add to elements that change text style
+------------------------------------------------------------------------
+r1924687 | gbechis | 2025-03-29 08:17:38 +0000 (Sat, 29 Mar 2025) | 2 
+lines
+ 
+ remove debug leftovers
+ 
+------------------------------------------------------------------------
+r1924682 | gbechis | 2025-03-28 14:32:13 +0000 (Fri, 28 Mar 2025) | 2 
+lines
+ 
+ revert r1924602
+ 
+------------------------------------------------------------------------
+r1924651 | gbechis | 2025-03-27 08:20:35 +0000 (Thu, 27 Mar 2025) | 2 
+lines
+ 
+ fix tests on Windows
+ 
+------------------------------------------------------------------------
+r1924638 | gbechis | 2025-03-26 16:18:09 +0000 (Wed, 26 Mar 2025) | 2 
+lines
+ 
+ add a commonly used redirector parameter
+ 
+------------------------------------------------------------------------
+r1924602 | gbechis | 2025-03-25 21:28:53 +0000 (Tue, 25 Mar 2025) | 3 
+lines
+ 
+ increase msgcount for email entries
+ bz #8236
+ 
+------------------------------------------------------------------------
+r1924600 | gbechis | 2025-03-25 20:59:14 +0000 (Tue, 25 Mar 2025) | 3 
+lines
+ 
+ honor exemptions to all acls
+ bz #8322
+ 
+------------------------------------------------------------------------
+r1924527 | gbechis | 2025-03-22 16:32:21 +0000 (Sat, 22 Mar 2025) | 3 
+lines
+ 
+ log message when --virtual-config-dir is set only if the file exists
+ bz #8326
+ 
+------------------------------------------------------------------------
+r1924526 | gbechis | 2025-03-22 16:14:04 +0000 (Sat, 22 Mar 2025) | 3 
+lines
+ 
+ add support to IP::Geolocation::MMDB to GeoDB module
+ from Andreas Vögele
+ 
+------------------------------------------------------------------------
+r1924503 | gbechis | 2025-03-20 16:42:53 +0000 (Thu, 20 Mar 2025) | 2 
+lines
+ 
+ detect if the PDF file has a form or Javascript code
+ 
+------------------------------------------------------------------------
+r1924502 | gbechis | 2025-03-20 15:45:05 +0000 (Thu, 20 Mar 2025) | 2 
+lines
+ 
+ extract more uris from pdf files
+ 
+------------------------------------------------------------------------
+r1924462 | axb | 2025-03-19 08:06:55 +0000 (Wed, 19 Mar 2025) | 1 line
+ 
+ undo test commit
+------------------------------------------------------------------------
+r1924461 | axb | 2025-03-19 08:06:23 +0000 (Wed, 19 Mar 2025) | 1 line
+ 
+ test commit
+------------------------------------------------------------------------
+r1924429 | gbechis | 2025-03-17 08:31:34 +0000 (Mon, 17 Mar 2025) | 2 
+lines
+ 
+ add more 2TLDs and 3TLDs
+ 
+------------------------------------------------------------------------
+r1924427 | gbechis | 2025-03-17 08:05:05 +0000 (Mon, 17 Mar 2025) | 2 
+lines
+ 
+ sort TLDs
+ 
+------------------------------------------------------------------------
+r1924426 | gbechis | 2025-03-17 07:46:37 +0000 (Mon, 17 Mar 2025) | 3 
+lines
+ 
+ fix GitHub actions on MacOSX
+ from Andreas Vögele, bz #8321
+ 
+------------------------------------------------------------------------
+r1924425 | gbechis | 2025-03-17 07:33:38 +0000 (Mon, 17 Mar 2025) | 2 
+lines
+ 
+ enable tests on new Perl versions
+ 
+------------------------------------------------------------------------
+r1924406 | gbechis | 2025-03-15 15:22:17 +0000 (Sat, 15 Mar 2025) | 2 
+lines
+ 
+ sort
+ 
+------------------------------------------------------------------------
+r1924389 | sidney | 2025-03-14 09:40:20 +0000 (Fri, 14 Mar 2025) | 1 line
+ 
+ Henrik K to PMC emeritus
+------------------------------------------------------------------------
+r1924326 | jhardin | 2025-03-12 01:12:30 +0000 (Wed, 12 Mar 2025) | 1 line
+ 
+ Add 2tld staticrun.app observed in phishing
+------------------------------------------------------------------------
+r1924320 | gbechis | 2025-03-11 23:12:50 +0000 (Tue, 11 Mar 2025) | 2 
+lines
+ 
+ remove wrong closing tag
+ 
+------------------------------------------------------------------------
+r1924300 | gbechis | 2025-03-11 15:56:23 +0000 (Tue, 11 Mar 2025) | 2 
+lines
+ 
+ add zoom.us 2tld, recently abused in spam campaigns
+ 
+------------------------------------------------------------------------
+r1924284 | gbechis | 2025-03-11 07:48:02 +0000 (Tue, 11 Mar 2025) | 2 
+lines
+ 
+ list supported Perl modules
+ 
+------------------------------------------------------------------------
+r1924218 | gbechis | 2025-03-07 21:45:28 +0000 (Fri, 07 Mar 2025) | 3 
+lines
+ 
+ fix Linux Perl modules install
+ bz #8321
+ 
+------------------------------------------------------------------------
+r1924187 | billcole | 2025-03-05 18:36:24 +0000 (Wed, 05 Mar 2025) | 1 
+line
+ 
+ testing a new rule
+------------------------------------------------------------------------
+r1924178 | gbechis | 2025-03-05 07:54:45 +0000 (Wed, 05 Mar 2025) | 2 
+lines
+ 
+ prevent a warning during regression tests
+ 
+------------------------------------------------------------------------
+r1924155 | gbechis | 2025-03-03 21:00:11 +0000 (Mon, 03 Mar 2025) | 2 
+lines
+ 
+ revert r1924152
+ 
+------------------------------------------------------------------------
+r1924153 | gbechis | 2025-03-03 18:09:30 +0000 (Mon, 03 Mar 2025) | 3 
+lines
+ 
+ use HEAD requests for bit.ly, otherwise url chained are not detected 
+because the
+ shortener service is considering chaining redirectors as harmful
+ 
+------------------------------------------------------------------------
+r1924152 | gbechis | 2025-03-03 18:01:01 +0000 (Mon, 03 Mar 2025) | 2 
+lines
+ 
+ make sure $result->published is defined before using it
+ 
+------------------------------------------------------------------------
+r1924150 | gbechis | 2025-03-03 14:49:11 +0000 (Mon, 03 Mar 2025) | 3 
+lines
+ 
+ search for dbip-asn-lite.mmdb as well
+ from  Andreas Vögele, bz #8320
+ 
+------------------------------------------------------------------------
+r1924149 | gbechis | 2025-03-03 14:44:36 +0000 (Mon, 03 Mar 2025) | 3 
+lines
+ 
+ do not try to access published policies if there is no DMARC policy
+ bz #8319
+ 
+------------------------------------------------------------------------
+r1924135 | billcole | 2025-03-02 15:24:32 +0000 (Sun, 02 Mar 2025) | 1 
+line
+ 
+ Updating .github files, closing BZ#8316 and BZ#8317, thanks to  Andreas 
+Vögele <andreas@andreasvoegele.com>
+------------------------------------------------------------------------
+r1924131 | sidney | 2025-03-02 06:41:05 +0000 (Sun, 02 Mar 2025) | 1 line
+ 
+ Change status Michael Parker to emeritus PMC; Add Kent Oyer to PMC list 
+as should have done earlier
+------------------------------------------------------------------------
+r1923843 | jhardin | 2025-02-15 17:36:34 +0000 (Sat, 15 Feb 2025) | 1 line
+ 
+ Remove actual legit paypal phone number from phish list
+------------------------------------------------------------------------
+r1923842 | jhardin | 2025-02-15 17:29:47 +0000 (Sat, 15 Feb 2025) | 1 line
+ 
+ Add another phone number observed in Paypal phish
+------------------------------------------------------------------------
+r1923823 | jhardin | 2025-02-15 02:13:47 +0000 (Sat, 15 Feb 2025) | 1 line
+ 
+ Add and tune Paypal phishing rules
+------------------------------------------------------------------------
+r1923814 | billcole | 2025-02-14 16:13:49 +0000 (Fri, 14 Feb 2025) | 1 
+line
+ 
+ Fix bug 8312
+------------------------------------------------------------------------
+r1923756 | gbechis | 2025-02-12 11:24:49 +0000 (Wed, 12 Feb 2025) | 2 
+lines
+ 
+ log the DMARC policy if available
+ 
+------------------------------------------------------------------------
+r1923716 | jhardin | 2025-02-11 04:10:55 +0000 (Tue, 11 Feb 2025) | 1 line
+ 
+ The paypal phishers are now hitting zellepay too.
+------------------------------------------------------------------------
+r1923673 | jhardin | 2025-02-08 20:06:52 +0000 (Sat, 08 Feb 2025) | 1 line
+ 
+ Paypal phishing rule tuning
+------------------------------------------------------------------------
+r1923613 | billcole | 2025-02-06 15:36:35 +0000 (Thu, 06 Feb 2025) | 1 
+line
+ 
+ remove Paypal ccTLD domains from welcomelist
+------------------------------------------------------------------------
+r1923612 | gbechis | 2025-02-06 14:17:47 +0000 (Thu, 06 Feb 2025) | 3 
+lines
+ 
+ add alldomains option to Mail::SpamAssassin::Plugin::HashBL
+ to ignore uridnsbl_skip_domains global option with some rbl
+ 
+------------------------------------------------------------------------
+r1923606 | fkento | 2025-02-06 08:00:51 +0000 (Thu, 06 Feb 2025) | 1 line
+ 
+ Test rule for Thread-Index
+------------------------------------------------------------------------
+r1923599 | fkento | 2025-02-06 04:53:38 +0000 (Thu, 06 Feb 2025) | 1 line
+ 
+ Update sandbox rules
+------------------------------------------------------------------------
+r1923581 | jhardin | 2025-02-05 02:16:52 +0000 (Wed, 05 Feb 2025) | 1 line
+ 
+ Add high-confidence paypal scam rule
+------------------------------------------------------------------------
+r1923576 | gbechis | 2025-02-04 21:59:28 +0000 (Tue, 04 Feb 2025) | 2 
+lines
+ 
+ sync MANIFEST
+ 
+------------------------------------------------------------------------
+r1923575 | gbechis | 2025-02-04 21:55:18 +0000 (Tue, 04 Feb 2025) | 2 
+lines
+ 
+ detect CVE-2025-21298
+ 
+------------------------------------------------------------------------
+r1923528 | fkento | 2025-02-03 16:59:55 +0000 (Mon, 03 Feb 2025) | 1 line
+ 
+ Bug 8310: Added test case
+------------------------------------------------------------------------
+r1923527 | fkento | 2025-02-03 16:27:59 +0000 (Mon, 03 Feb 2025) | 1 line
+ 
+ Bug 8310: UTF-8 encode anchor_text
+------------------------------------------------------------------------
+r1923431 | gbechis | 2025-01-28 23:11:10 +0000 (Tue, 28 Jan 2025) | 2 
+lines
+ 
+ fix test after Google Amp behavior change
+ 
+------------------------------------------------------------------------
+r1923424 | fkento | 2025-01-28 16:15:27 +0000 (Tue, 28 Jan 2025) | 1 line
+ 
+ Bug 8307: Add missing files
+------------------------------------------------------------------------
+r1923406 | fkento | 2025-01-27 18:24:14 +0000 (Mon, 27 Jan 2025) | 1 line
+ 
+ Bug 8307: Add dedicated class for parsing headers
+------------------------------------------------------------------------
+r1923404 | gbechis | 2025-01-27 17:24:17 +0000 (Mon, 27 Jan 2025) | 2 
+lines
+ 
+ add to freemail and 2tld another abused Google service
+ 
+------------------------------------------------------------------------
+r1923314 | gbechis | 2025-01-22 10:25:58 +0000 (Wed, 22 Jan 2025) | 3 
+lines
+ 
+ add a parameter to regexp
+ sync man page with code
+ 
+------------------------------------------------------------------------
+r1923305 | gbechis | 2025-01-21 21:46:21 +0000 (Tue, 21 Jan 2025) | 1 line
+ 
+ typo
+------------------------------------------------------------------------
+r1923241 | jhardin | 2025-01-19 21:34:12 +0000 (Sun, 19 Jan 2025) | 1 line
+ 
+ Set explicit score for RCVD_IN_MSPIKE_H2
+------------------------------------------------------------------------
+r1923191 | fkento | 2025-01-17 21:31:54 +0000 (Fri, 17 Jan 2025) | 1 line
+ 
+ Treat text/x-amp-html parts as text/html
+------------------------------------------------------------------------
+r1923179 | fkento | 2025-01-17 00:25:40 +0000 (Fri, 17 Jan 2025) | 1 line
+ 
+ Treat .eml files as message/rfc822
+------------------------------------------------------------------------
+r1923176 | fkento | 2025-01-16 21:56:50 +0000 (Thu, 16 Jan 2025) | 1 line
+ 
+ Use custom resolver, which supports TCP fallback since 4.0.1
+------------------------------------------------------------------------
+r1923161 | jhardin | 2025-01-16 04:01:54 +0000 (Thu, 16 Jan 2025) | 1 line
+ 
+ FP Avoidance tuning for LONG_IMG_URI, reduce score limit a bit - hits on 
+legit paypal messages?
+------------------------------------------------------------------------
+r1923158 | fkento | 2025-01-15 22:25:42 +0000 (Wed, 15 Jan 2025) | 1 line
+ 
+ Bug 8262: Process ARC independently from DKIM
+------------------------------------------------------------------------
+r1923136 | fkento | 2025-01-15 00:11:01 +0000 (Wed, 15 Jan 2025) | 1 line
+ 
+ Eliminate arc_author_domains because it's the same as dkim_author_domains
+------------------------------------------------------------------------
+r1923131 | fkento | 2025-01-14 14:26:52 +0000 (Tue, 14 Jan 2025) | 1 line
+ 
+ Use underscore in uri_detail
+------------------------------------------------------------------------
+r1923130 | fkento | 2025-01-14 12:59:50 +0000 (Tue, 14 Jan 2025) | 1 line
+ 
+ Allow uri-detail rules in sandbox
+------------------------------------------------------------------------
+r1923129 | fkento | 2025-01-14 12:57:22 +0000 (Tue, 14 Jan 2025) | 1 line
+ 
+ Simplify code
+------------------------------------------------------------------------
+r1923114 | fkento | 2025-01-14 01:20:38 +0000 (Tue, 14 Jan 2025) | 1 line
+ 
+ Fix bug with phishing_uri_noparam
+------------------------------------------------------------------------
+r1923085 | jhardin | 2025-01-12 01:09:50 +0000 (Sun, 12 Jan 2025) | 1 line
+ 
+ Tune "new product" spam rules
+------------------------------------------------------------------------
+r1923084 | jhardin | 2025-01-12 00:40:47 +0000 (Sun, 12 Jan 2025) | 1 line
+ 
+ Reduce score limit of MONEY_FREEMAIL_REPTO due to FP report
+------------------------------------------------------------------------
+r1923010 | axb | 2025-01-09 07:58:11 +0000 (Thu, 09 Jan 2025) | 1 line
+ 
+ removed  vodafone.* which is causiing FPs 
+------------------------------------------------------------------------
+r1922893 | jhardin | 2025-01-04 23:48:07 +0000 (Sat, 04 Jan 2025) | 1 line
+ 
+ Add 3tld host.secureserver.net, observed in phishing.
+------------------------------------------------------------------------
+r1922865 | gbechis | 2025-01-03 16:30:32 +0000 (Fri, 03 Jan 2025) | 2 
+lines
+ 
+ set the correct type in set_rendered and skip only text attachments
+ 
+------------------------------------------------------------------------
+r1922850 | hege | 2025-01-03 07:19:48 +0000 (Fri, 03 Jan 2025) | 2 lines
+ 
+ Update util_rb_tld lists
+ 
+------------------------------------------------------------------------
+r1922843 | jhardin | 2025-01-03 02:33:32 +0000 (Fri, 03 Jan 2025) | 1 line
+ 
+ Add 2tld myshopify.com, used for Shopify merchant websites. Observed in 
+phishing.
+------------------------------------------------------------------------
+r1922841 | gbechis | 2025-01-02 15:20:49 +0000 (Thu, 02 Jan 2025) | 3 
+lines
+ 
+ skip http checks if domains are not valid
+ bz #8302
+ 
+------------------------------------------------------------------------
+r1922785 | jhardin | 2024-12-30 21:24:45 +0000 (Mon, 30 Dec 2024) | 1 line
+ 
+ Google redirects - new scored meta rules for eval and FP Avoidance tuning
+------------------------------------------------------------------------
+r1922765 | gbechis | 2024-12-30 10:34:27 +0000 (Mon, 30 Dec 2024) | 2 
+lines
+ 
+ check if uri has parameters only once
+ 
+------------------------------------------------------------------------
+r1922757 | jhardin | 2024-12-29 23:11:17 +0000 (Sun, 29 Dec 2024) | 1 line
+ 
+ Improve __GOOG_REDIR and related: subdomain is optional, accept other 
+TLDs (e.g. google.es and google.co.uk)
+------------------------------------------------------------------------
+r1922749 | gbechis | 2024-12-29 16:33:28 +0000 (Sun, 29 Dec 2024) | 3 
+lines
+ 
+ run idn_to_ascii only on hosts
+ bz #8302
+ 
+------------------------------------------------------------------------
+r1922748 | gbechis | 2024-12-29 16:32:07 +0000 (Sun, 29 Dec 2024) | 2 
+lines
+ 
+ fix tests
+ 
+------------------------------------------------------------------------
+r1922744 | gbechis | 2024-12-29 15:52:04 +0000 (Sun, 29 Dec 2024) | 3 
+lines
+ 
+ compile_regexp is used in the code
+ bz #8301
+ 
+------------------------------------------------------------------------
+r1922739 | fkento | 2024-12-29 13:32:54 +0000 (Sun, 29 Dec 2024) | 1 line
+ 
+ Bug 8300: Can't call method 'reason' on an undefined value
+------------------------------------------------------------------------
+r1922722 | jhardin | 2024-12-28 22:38:16 +0000 (Sat, 28 Dec 2024) | 1 line
+ 
+ Add domain observed in phishing
+------------------------------------------------------------------------
+r1922611 | gbechis | 2024-12-20 13:42:27 +0000 (Fri, 20 Dec 2024) | 3 
+lines
+ 
+ add support for Phishing Database feed
+ bz #8299
+ 
+------------------------------------------------------------------------
+r1922594 | gbechis | 2024-12-19 07:52:16 +0000 (Thu, 19 Dec 2024) | 2 
+lines
+ 
+ comment rules that breaks the build
+ 
+------------------------------------------------------------------------
+r1922593 | fkento | 2024-12-19 04:23:11 +0000 (Thu, 19 Dec 2024) | 1 line
+ 
+ Fix broken regex
+------------------------------------------------------------------------
+r1922589 | jhardin | 2024-12-19 02:31:29 +0000 (Thu, 19 Dec 2024) | 1 line
+ 
+ Add some glitch.me phishing rules
+------------------------------------------------------------------------
+r1922570 | jhardin | 2024-12-18 01:29:06 +0000 (Wed, 18 Dec 2024) | 1 line
+ 
+ Set score limit
+------------------------------------------------------------------------
+r1922544 | fkento | 2024-12-16 23:03:42 +0000 (Mon, 16 Dec 2024) | 1 line
+ 
+ Add some rules for testing
+------------------------------------------------------------------------
+r1922482 | jhardin | 2024-12-14 01:25:35 +0000 (Sat, 14 Dec 2024) | 1 line
+ 
+ Freshen "Please purchase our new product!" rules
+------------------------------------------------------------------------
+r1922480 | jhardin | 2024-12-14 00:40:02 +0000 (Sat, 14 Dec 2024) | 1 line
+ 
+ Add .xyz to suspicious TLDs. Broaden SEO match text a bit. Thanks to 
+Kirill A. Korinsky
+------------------------------------------------------------------------
+r1922479 | jhardin | 2024-12-14 00:33:09 +0000 (Sat, 14 Dec 2024) | 1 line
+ 
+ Another LOTSA_MONEY tweak
+------------------------------------------------------------------------
+r1922478 | jhardin | 2024-12-14 00:25:35 +0000 (Sat, 14 Dec 2024) | 1 line
+ 
+ LOTSA_MONEY recognize Unicode Euro symbol
+------------------------------------------------------------------------
+r1922455 | gbechis | 2024-12-12 14:13:15 +0000 (Thu, 12 Dec 2024) | 3 
+lines
+ 
+ add kakao[.]com to freemail providers
+ bz #8291
+ 
+------------------------------------------------------------------------
+r1922428 | gbechis | 2024-12-11 10:11:06 +0000 (Wed, 11 Dec 2024) | 2 
+lines
+ 
+ check for Google Amp uris
+ 
+------------------------------------------------------------------------
+r1922394 | gbechis | 2024-12-09 09:22:46 +0000 (Mon, 09 Dec 2024) | 2 
+lines
+ 
+ add version features
+ 
+------------------------------------------------------------------------
+r1922393 | gbechis | 2024-12-09 09:19:29 +0000 (Mon, 09 Dec 2024) | 2 
+lines
+ 
+ add pdf_uri_count sub
+ 
+------------------------------------------------------------------------
+r1922392 | gbechis | 2024-12-09 08:54:50 +0000 (Mon, 09 Dec 2024) | 1 line
+ 
+ typo
+------------------------------------------------------------------------
+r1922353 | jhardin | 2024-12-06 20:37:12 +0000 (Fri, 06 Dec 2024) | 1 line
+ 
+ Try to detect recent PayPal fraud spams. The fraudsters are using the 
+legit PP infra so FP risk is fairly high.
+------------------------------------------------------------------------
+r1922325 | gbechis | 2024-12-05 16:57:40 +0000 (Thu, 05 Dec 2024) | 2 
+lines
+ 
+ add a "connection timeout" debug line
+ 
+------------------------------------------------------------------------
+r1922324 | gbechis | 2024-12-05 16:05:07 +0000 (Thu, 05 Dec 2024) | 2 
 lines
  
  fix regression tests
  
 ------------------------------------------------------------------------
-r1913887 | gbechis | 2023-11-17 17:08:39 +0000 (Fri, 17 Nov 2023) | 2 
+r1922314 | gbechis | 2024-12-05 09:11:16 +0000 (Thu, 05 Dec 2024) | 2 
 lines
  
- update domains
+ match on hostname to prevent FPs on "www" redirections
  
 ------------------------------------------------------------------------
-r1913886 | gbechis | 2023-11-17 14:31:52 +0000 (Fri, 17 Nov 2023) | 2 
+r1922301 | fkento | 2024-12-04 16:02:20 +0000 (Wed, 04 Dec 2024) | 1 line
+ 
+ Allow negative match to hit when no data
+------------------------------------------------------------------------
+r1922291 | gbechis | 2024-12-04 08:50:18 +0000 (Wed, 04 Dec 2024) | 2 
 lines
  
- group additional url shorteners
+ add version features
  
 ------------------------------------------------------------------------
-r1913880 | gbechis | 2023-11-17 08:40:31 +0000 (Fri, 17 Nov 2023) | 2 
+r1922290 | gbechis | 2024-12-04 08:41:46 +0000 (Wed, 04 Dec 2024) | 2 
 lines
  
- Remove anchors and parameters from shortened uris
+ Check for chained redirectors that uses the same domain
  
 ------------------------------------------------------------------------
-r1913871 | jhardin | 2023-11-17 01:38:58 +0000 (Fri, 17 Nov 2023) | 1 line
- 
- FP exclusion and reduce score limit for __AC_FROM_MANY_DOTS
-------------------------------------------------------------------------
-r1913817 | gbechis | 2023-11-15 22:59:44 +0000 (Wed, 15 Nov 2023) | 2 
+r1922277 | gbechis | 2024-12-03 09:32:11 +0000 (Tue, 03 Dec 2024) | 2 
 lines
  
- typos
+ match 3tld domains as well
  
 ------------------------------------------------------------------------
-r1913814 | gbechis | 2023-11-15 22:05:57 +0000 (Wed, 15 Nov 2023) | 2 
+r1922259 | gbechis | 2024-12-02 11:44:49 +0000 (Mon, 02 Dec 2024) | 3 
 lines
  
- more podlint(1) fixes
+ fix phishing_uri_noparam option
+ bz #8292
  
 ------------------------------------------------------------------------
-r1913804 | gbechis | 2023-11-15 14:23:44 +0000 (Wed, 15 Nov 2023) | 3 
+r1922258 | gbechis | 2024-12-02 10:39:40 +0000 (Mon, 02 Dec 2024) | 3 
 lines
  
- basic regression tests for URIDetail plugin
- bz #5957
+ always honor uridnsbl_skip_domains
+ bz #8282
  
 ------------------------------------------------------------------------
-r1913803 | gbechis | 2023-11-15 14:04:03 +0000 (Wed, 15 Nov 2023) | 2 
+r1922194 | axb | 2024-11-28 14:16:41 +0000 (Thu, 28 Nov 2024) | 1 line
+ 
+ test - ignore
+------------------------------------------------------------------------
+r1922190 | gbechis | 2024-11-28 10:54:25 +0000 (Thu, 28 Nov 2024) | 2 
 lines
  
- reread included conf files when a user configuration file changes
+ add extracted uris to uri_detail_list
  
 ------------------------------------------------------------------------
-r1913792 | jhardin | 2023-11-15 02:51:04 +0000 (Wed, 15 Nov 2023) | 1 line
- 
- Can't get capture version of __SUBJ_HAS_FROM_1 to ever hit in masscheck
-------------------------------------------------------------------------
-r1913789 | gbechis | 2023-11-14 23:38:05 +0000 (Tue, 14 Nov 2023) | 2 
-lines
- 
- podlint(1) fixes
- 
-------------------------------------------------------------------------
-r1913784 | gbechis | 2023-11-14 22:51:48 +0000 (Tue, 14 Nov 2023) | 2 
-lines
- 
- typo, documentation fixes
- 
-------------------------------------------------------------------------
-r1913783 | gbechis | 2023-11-14 22:31:10 +0000 (Tue, 14 Nov 2023) | 2 
-lines
- 
- typo
- 
-------------------------------------------------------------------------
-r1913782 | gbechis | 2023-11-14 22:01:14 +0000 (Tue, 14 Nov 2023) | 2 
-lines
- 
- fix typo, add SpamAssassin 4.0.0 revision
- 
-------------------------------------------------------------------------
-r1913736 | jhardin | 2023-11-12 18:58:17 +0000 (Sun, 12 Nov 2023) | 1 line
- 
- Try to simplify the "if" and see if that's why masscheck isn't seeing 
-anything
-------------------------------------------------------------------------
-r1913723 | jhardin | 2023-11-11 20:43:26 +0000 (Sat, 11 Nov 2023) | 1 line
- 
- Disable 4.x-capture version of __SUBJ_HAS_FROM_1 until the reason for no 
-hits in masscheck is understood
-------------------------------------------------------------------------
-r1913722 | jhardin | 2023-11-11 20:33:16 +0000 (Sat, 11 Nov 2023) | 1 line
- 
- more rule tweaking
-------------------------------------------------------------------------
-r1913677 | billcole | 2023-11-08 14:42:50 +0000 (Wed, 08 Nov 2023) | 1 
-line
- 
- Correcting documentation error for spamc. BZ#6069
-------------------------------------------------------------------------
-r1913611 | gbechis | 2023-11-06 08:27:01 +0000 (Mon, 06 Nov 2023) | 4 
-lines
- 
- make it possible to run external programs if the path contains spaces
- and it's sorrounded by double quotes.
- bz #8057
- 
-------------------------------------------------------------------------
-r1913610 | gbechis | 2023-11-06 08:23:53 +0000 (Mon, 06 Nov 2023) | 5 
-lines
- 
- make spamc(1) build on Windows only with Strawberry Perl tools.
- If Microsoft Windows Toolkit is installed, spamc.exe will be built
- with Microsoft toolchain.
- bz #8053
- 
-------------------------------------------------------------------------
-r1913498 | gbechis | 2023-11-01 14:38:42 +0000 (Wed, 01 Nov 2023) | 3 
-lines
- 
- overwrite symlinks instead of failing
- fixes MacOS tests with updated OpenSSL packages
- 
-------------------------------------------------------------------------
-r1913468 | gbechis | 2023-10-31 16:35:01 +0000 (Tue, 31 Oct 2023) | 2 
-lines
- 
- check Microsoft Bing redirector abuse
- 
-------------------------------------------------------------------------
-r1913344 | gbechis | 2023-10-26 11:06:21 +0000 (Thu, 26 Oct 2023) | 2 
-lines
- 
- all ExtratText tags might not be present
- 
-------------------------------------------------------------------------
-r1913317 | gbechis | 2023-10-25 10:35:40 +0000 (Wed, 25 Oct 2023) | 2 
-lines
- 
- store in the tag all content, not only http urls
- 
-------------------------------------------------------------------------
-r1913314 | gbechis | 2023-10-25 08:17:28 +0000 (Wed, 25 Oct 2023) | 3 
+r1922189 | gbechis | 2024-11-28 10:18:19 +0000 (Thu, 28 Nov 2024) | 2 
 lines
  
  avoid a warning
- spotted by Ruud van den Hout
  
 ------------------------------------------------------------------------
-r1913222 | jhardin | 2023-10-23 05:26:41 +0000 (Mon, 23 Oct 2023) | 1 line
- 
- tweak rule
-------------------------------------------------------------------------
-r1913131 | jhardin | 2023-10-20 02:05:27 +0000 (Fri, 20 Oct 2023) | 1 line
- 
- Push SHY_OBFU rules, RE cleanup, add rule for eval
-------------------------------------------------------------------------
-r1913069 | gbechis | 2023-10-17 16:25:18 +0000 (Tue, 17 Oct 2023) | 2 
+r1922104 | gbechis | 2024-11-26 07:23:56 +0000 (Tue, 26 Nov 2024) | 2 
 lines
  
- add a tag that contains uris extracted from the plugin
+ add a rule for evaluation to catch fake Microsoft signed emails
  
 ------------------------------------------------------------------------
-r1913048 | gbechis | 2023-10-17 09:36:26 +0000 (Tue, 17 Oct 2023) | 2 
+r1922029 | gbechis | 2024-11-22 17:23:09 +0000 (Fri, 22 Nov 2024) | 3 
 lines
  
- extract urls from QR-codes using zbar
+ remove a check no more useful
+ spotted by fkento@, thanks
  
 ------------------------------------------------------------------------
-r1912995 | gbechis | 2023-10-16 07:33:17 +0000 (Mon, 16 Oct 2023) | 2 
+r1922028 | gbechis | 2024-11-22 16:36:13 +0000 (Fri, 22 Nov 2024) | 2 
 lines
  
- publish new IADB rules
+ always convert domains to ASCII
  
 ------------------------------------------------------------------------
-r1912985 | jhardin | 2023-10-15 20:49:25 +0000 (Sun, 15 Oct 2023) | 1 line
+r1922027 | gbechis | 2024-11-22 15:59:18 +0000 (Fri, 22 Nov 2024) | 3 
+lines
  
- Restore 4.x __SUBJ_HAS_FROM_1
-------------------------------------------------------------------------
-r1912925 | jhardin | 2023-10-13 02:24:30 +0000 (Fri, 13 Oct 2023) | 1 line
+ always use the correct http method
+ prefer configured redirectors when searching for urls
  
- Add another ZW obfu rule
 ------------------------------------------------------------------------
-r1912923 | billcole | 2023-10-12 18:35:54 +0000 (Thu, 12 Oct 2023) | 1 
+r1922021 | gbechis | 2024-11-22 14:07:25 +0000 (Fri, 22 Nov 2024) | 2 
+lines
+ 
+ simplify code, spotted by hege@, thanks
+ 
+------------------------------------------------------------------------
+r1922016 | gbechis | 2024-11-22 11:45:36 +0000 (Fri, 22 Nov 2024) | 2 
+lines
+ 
+ Skip text attachments that are not considered part of the email body
+ 
+------------------------------------------------------------------------
+r1921873 | gbechis | 2024-11-13 08:29:45 +0000 (Wed, 13 Nov 2024) | 2 
+lines
+ 
+ catch more Google redirectors
+ 
+------------------------------------------------------------------------
+r1921821 | jhardin | 2024-11-08 17:14:45 +0000 (Fri, 08 Nov 2024) | 1 line
+ 
+ Add new redirector observed in IPFS phishing; tweak IPFS rules to better 
+match similar redirector patterns.
+------------------------------------------------------------------------
+r1921809 | gbechis | 2024-11-07 13:55:24 +0000 (Thu, 07 Nov 2024) | 2 
+lines
+ 
+ Paypal[.]com is sending fake invoices spam
+ 
+------------------------------------------------------------------------
+r1921799 | fkento | 2024-11-06 17:44:42 +0000 (Wed, 06 Nov 2024) | 1 line
+ 
+ Bug 8288: canonicalize URIs with more than two slashes after scheme
+------------------------------------------------------------------------
+r1921798 | jhardin | 2024-11-06 15:44:55 +0000 (Wed, 06 Nov 2024) | 1 line
+ 
+ Bug 8288 exploit rule appears to perform well; FP tune, score and 
+publish.
+------------------------------------------------------------------------
+r1921797 | jhardin | 2024-11-06 15:36:57 +0000 (Wed, 06 Nov 2024) | 1 line
+ 
+ Add 2TLD glitch.me, free hosting observed in phishing
+------------------------------------------------------------------------
+r1921791 | jhardin | 2024-11-06 01:59:41 +0000 (Wed, 06 Nov 2024) | 1 line
+ 
+ Add rule to detect attempt to exploit Bug 8288
+------------------------------------------------------------------------
+r1921782 | fkento | 2024-11-05 16:13:46 +0000 (Tue, 05 Nov 2024) | 1 line
+ 
+ Bug 8286: TextCat: Ignore invisible text
+------------------------------------------------------------------------
+r1921763 | billcole | 2024-11-03 22:16:34 +0000 (Sun, 03 Nov 2024) | 1 
 line
  
- trued up welcome/white discrepancy
+ fixing a production warning about how CGI::param is called
 ------------------------------------------------------------------------
-r1912921 | billcole | 2023-10-12 14:53:21 +0000 (Thu, 12 Oct 2023) | 1 
+r1921759 | jhardin | 2024-11-03 18:20:53 +0000 (Sun, 03 Nov 2024) | 1 line
+ 
+ Add 3tld hosted.phplist.com
+------------------------------------------------------------------------
+r1921745 | fkento | 2024-11-02 01:16:47 +0000 (Sat, 02 Nov 2024) | 1 line
+ 
+ Bug 8285: Improve CSS Color Handling
+------------------------------------------------------------------------
+r1921709 | gbechis | 2024-10-31 08:25:07 +0000 (Thu, 31 Oct 2024) | 2 
+lines
+ 
+ Docusign generates signed spam
+ 
+------------------------------------------------------------------------
+r1921622 | gbechis | 2024-10-28 16:39:35 +0000 (Mon, 28 Oct 2024) | 2 
+lines
+ 
+ remove trailing slash from the shortened uri
+ 
+------------------------------------------------------------------------
+r1921621 | gbechis | 2024-10-28 16:12:55 +0000 (Mon, 28 Oct 2024) | 2 
+lines
+ 
+ match more uris
+ 
+------------------------------------------------------------------------
+r1921615 | gbechis | 2024-10-28 08:16:13 +0000 (Mon, 28 Oct 2024) | 2 
+lines
+ 
+ sync
+ 
+------------------------------------------------------------------------
+r1921614 | gbechis | 2024-10-28 08:07:19 +0000 (Mon, 28 Oct 2024) | 2 
+lines
+ 
+ include what we use
+ 
+------------------------------------------------------------------------
+r1921527 | gbechis | 2024-10-24 07:21:10 +0000 (Thu, 24 Oct 2024) | 4 
+lines
+ 
+ make it possible to set a per-shortener user-agent in order
+ to catch more shortened uris.
+ bz #8110
+ 
+------------------------------------------------------------------------
+r1921516 | jhardin | 2024-10-24 01:05:51 +0000 (Thu, 24 Oct 2024) | 1 line
+ 
+ Add another Interplanetary Filesystem domain observed in phishing. Add a 
+meta for scoring on any such domain.
+------------------------------------------------------------------------
+r1921502 | gbechis | 2024-10-23 06:43:05 +0000 (Wed, 23 Oct 2024) | 2 
+lines
+ 
+ remove non existent file
+ 
+------------------------------------------------------------------------
+r1921469 | fkento | 2024-10-21 20:43:18 +0000 (Mon, 21 Oct 2024) | 1 line
+ 
+ Bug 8283: Negating matches in URIDetail.pm
+------------------------------------------------------------------------
+r1921386 | gbechis | 2024-10-17 15:22:10 +0000 (Thu, 17 Oct 2024) | 2 
+lines
+ 
+ improve redirectors detection, exit early on invalid uris
+ 
+------------------------------------------------------------------------
+r1921385 | gbechis | 2024-10-17 14:47:10 +0000 (Thu, 17 Oct 2024) | 2 
+lines
+ 
+ another Blogspot domain
+ 
+------------------------------------------------------------------------
+r1921384 | jhardin | 2024-10-17 14:34:08 +0000 (Thu, 17 Oct 2024) | 1 line
+ 
+ Add an Interplanetary File System 3TLD, seen in phishing.
+------------------------------------------------------------------------
+r1921377 | gbechis | 2024-10-17 08:39:39 +0000 (Thu, 17 Oct 2024) | 2 
+lines
+ 
+ more Blogspot domains
+ 
+------------------------------------------------------------------------
+r1921376 | gbechis | 2024-10-17 08:36:16 +0000 (Thu, 17 Oct 2024) | 2 
+lines
+ 
+ add missing Blogspot tlds
+ 
+------------------------------------------------------------------------
+r1921362 | jhardin | 2024-10-16 15:03:03 +0000 (Wed, 16 Oct 2024) | 1 line
+ 
+ Add 3tld for spammed URIs like 
+https://1319021590-hk.callback.cloudses.com/api/...
+------------------------------------------------------------------------
+r1921292 | axb | 2024-10-13 14:17:49 +0000 (Sun, 13 Oct 2024) | 1 line
+ 
+ removed test string
+------------------------------------------------------------------------
+r1921233 | gbechis | 2024-10-10 09:26:49 +0000 (Thu, 10 Oct 2024) | 2 
+lines
+ 
+ add missing file to MANIFEST
+ 
+------------------------------------------------------------------------
+r1921232 | gbechis | 2024-10-10 09:13:51 +0000 (Thu, 10 Oct 2024) | 2 
+lines
+ 
+ sync MANIFEST and install v402.pre file
+ 
+------------------------------------------------------------------------
+r1921215 | gbechis | 2024-10-09 17:48:21 +0000 (Wed, 09 Oct 2024) | 2 
+lines
+ 
+ cache all uris
+ 
+------------------------------------------------------------------------
+r1921213 | gbechis | 2024-10-09 17:17:03 +0000 (Wed, 09 Oct 2024) | 2 
+lines
+ 
+ match redirectors on all subdomains, skip wrong uris
+ 
+------------------------------------------------------------------------
+r1921173 | gbechis | 2024-10-08 06:50:37 +0000 (Tue, 08 Oct 2024) | 2 
+lines
+ 
+ add mail.uk domains
+ 
+------------------------------------------------------------------------
+r1921137 | jhardin | 2024-10-05 17:00:53 +0000 (Sat, 05 Oct 2024) | 1 line
+ 
+ Revert revision#1920889 for bug#8193 - DSWL rules restored, at least 
+temporarily.
+------------------------------------------------------------------------
+r1921136 | jhardin | 2024-10-05 16:53:42 +0000 (Sat, 05 Oct 2024) | 1 line
+ 
+ Expose UNICODE_RTL_OBFU for scoring. Add a rule for a form-hosting 
+website observed in phishing.
+------------------------------------------------------------------------
+r1921124 | fkento | 2024-10-05 02:57:17 +0000 (Sat, 05 Oct 2024) | 1 line
+ 
+ Bug 8268 - Trim whitespace from anchor text
+------------------------------------------------------------------------
+r1921091 | jhardin | 2024-10-03 03:14:12 +0000 (Thu, 03 Oct 2024) | 1 line
+ 
+ Add .webp file extension to some image rules that were missing it.
+------------------------------------------------------------------------
+r1921088 | jhardin | 2024-10-03 02:16:24 +0000 (Thu, 03 Oct 2024) | 1 line
+ 
+ LONG_HEX_URI FP avoidance
+------------------------------------------------------------------------
+r1921084 | gbechis | 2024-10-02 13:59:13 +0000 (Wed, 02 Oct 2024) | 3 
+lines
+ 
+ do not welcomelist by default support@, sales@,
+ info@, helpdesk@, contact@ and kontakt@ Freemail addresses
+ 
+------------------------------------------------------------------------
+r1921083 | gbechis | 2024-10-02 13:49:29 +0000 (Wed, 02 Oct 2024) | 1 line
+ 
+ typo
+------------------------------------------------------------------------
+r1921072 | gbechis | 2024-10-01 14:40:44 +0000 (Tue, 01 Oct 2024) | 2 
+lines
+ 
+ mention new plugin
+ 
+------------------------------------------------------------------------
+r1921071 | gbechis | 2024-10-01 14:36:25 +0000 (Tue, 01 Oct 2024) | 7 
+lines
+ 
+ add Mail::SpamAssassin::Plugin::Redirectors plugin
+ This plugin looks for URLs redirected by a list of URL redirector 
+services.
+ Upon finding a matching URL, plugin will send a HTTP request to the 
+redirector service and retrieve
+ the Location-header which points to the actual redirected URL.
+ It then adds this URL to the list of URIs extracted by SpamAssassin 
+which can then be accessed by uri rules and
+ plugins such as URIDNSBL.
+ 
+------------------------------------------------------------------------
+r1921070 | gbechis | 2024-10-01 14:26:15 +0000 (Tue, 01 Oct 2024) | 2 
+lines
+ 
+ mention latest changes
+ 
+------------------------------------------------------------------------
+r1921069 | gbechis | 2024-10-01 14:24:51 +0000 (Tue, 01 Oct 2024) | 4 
+lines
+ 
+ do not ignore support@, sales@, info@, helpdesk@, contact@ and kontakt@
+ email addresses by default
+ bz #8209
+ 
+------------------------------------------------------------------------
+r1921008 | sidney | 2024-09-28 15:46:16 +0000 (Sat, 28 Sep 2024) | 1 line
+ 
+ Bug 8193 - Re-enable DNSWL rules in rules update
+------------------------------------------------------------------------
+r1920994 | gbechis | 2024-09-27 15:34:51 +0000 (Fri, 27 Sep 2024) | 2 
+lines
+ 
+ Hubspotstarter generates signed spam
+ 
+------------------------------------------------------------------------
+r1920991 | jhardin | 2024-09-27 14:57:31 +0000 (Fri, 27 Sep 2024) | 1 line
+ 
+ Tune phishing OBFU rules. Add another IPFS provider I missed before.
+------------------------------------------------------------------------
+r1920966 | jhardin | 2024-09-27 01:04:36 +0000 (Fri, 27 Sep 2024) | 1 line
+ 
+ Tune IPFS rules and add new rule for eval based on observed phish.
+------------------------------------------------------------------------
+r1920889 | jhardin | 2024-09-25 01:03:11 +0000 (Wed, 25 Sep 2024) | 1 line
+ 
+ bug 8193 - fix fallout from removing default DNSWL rules
+------------------------------------------------------------------------
+r1920888 | jhardin | 2024-09-25 00:56:52 +0000 (Wed, 25 Sep 2024) | 1 line
+ 
+ Clean up fallout from DNSWL rules no longer being installed by default - 
+BUG#8193
+------------------------------------------------------------------------
+r1920886 | sidney | 2024-09-24 21:20:56 +0000 (Tue, 24 Sep 2024) | 1 line
+ 
+ bug 8193 - Delete dnswl.org rules for sending wrong results for overuse
+------------------------------------------------------------------------
+r1920882 | billcole | 2024-09-24 15:42:00 +0000 (Tue, 24 Sep 2024) | 1 
 line
  
- usssa appears to have a SendGrid account that they've lost control of.
+ corrected error in comment
 ------------------------------------------------------------------------
-r1912913 | gbechis | 2023-10-12 06:43:37 +0000 (Thu, 12 Oct 2023) | 2 
+r1920862 | billcole | 2024-09-23 16:35:50 +0000 (Mon, 23 Sep 2024) | 1 
+line
+ 
+ Disable DNSWL rules as they had been doumented to have been
+------------------------------------------------------------------------
+r1920734 | gbechis | 2024-09-17 08:38:24 +0000 (Tue, 17 Sep 2024) | 2 
 lines
  
- disconnect the database before destroying the object
+ publish correct IADB rules
  
 ------------------------------------------------------------------------
-r1912905 | jhardin | 2023-10-11 14:57:38 +0000 (Wed, 11 Oct 2023) | 1 line
- 
- 4.0 version of __SUBJ_HAS_FROM_1 doesn't work in masscheck? Commenting 
-out temporarily for analysis.
-------------------------------------------------------------------------
-r1912889 | gbechis | 2023-10-11 07:30:15 +0000 (Wed, 11 Oct 2023) | 3 
+r1920709 | gbechis | 2024-09-16 09:28:40 +0000 (Mon, 16 Sep 2024) | 2 
 lines
  
- add new IADB rbl endpoints
- diff looks ok to felicity@
+ remove inactive endpoints, deprecate some rules and add new ones
  
 ------------------------------------------------------------------------
-r1912882 | jhardin | 2023-10-11 03:12:41 +0000 (Wed, 11 Oct 2023) | 1 line
- 
- Fix FPs from not relying on normalization of ALL pseudo-header. Add 4.x 
-optimization for __SUBJ_HAS_FROM_1
-------------------------------------------------------------------------
-r1912726 | gbechis | 2023-10-04 06:59:30 +0000 (Wed, 04 Oct 2023) | 2 
+r1920708 | gbechis | 2024-09-16 08:50:18 +0000 (Mon, 16 Sep 2024) | 2 
 lines
  
- correctly list license in MYMETA files
+ add more info to man page about hashbl_email_welcomelist defaults
  
 ------------------------------------------------------------------------
-r1912702 | jhardin | 2023-10-03 02:10:12 +0000 (Tue, 03 Oct 2023) | 1 line
+r1920620 | hege | 2024-09-14 09:47:38 +0000 (Sat, 14 Sep 2024) | 2 lines
+ 
+ Fix URIBL_RHS test, broken since Revision 1917016
+ 
+------------------------------------------------------------------------
+r1920539 | gbechis | 2024-09-10 09:15:27 +0000 (Tue, 10 Sep 2024) | 2 
+lines
+ 
+ decode %25 into % before doing the actual decoding
+ 
+------------------------------------------------------------------------
+r1920446 | jhardin | 2024-09-04 00:05:34 +0000 (Wed, 04 Sep 2024) | 1 line
+ 
+ Observed IPFS phishing via dweb.link, add rule. Add scored 
+long-from-domain rules.
+------------------------------------------------------------------------
+r1920434 | gbechis | 2024-09-03 14:10:07 +0000 (Tue, 03 Sep 2024) | 2 
+lines
+ 
+ prevent a "Use of each() on hash after insertion without resetting hash 
+iterator" warning
+ 
+------------------------------------------------------------------------
+r1920374 | jhardin | 2024-09-01 22:22:54 +0000 (Sun, 01 Sep 2024) | 1 line
+ 
+ Some FROM-length subrules for evaluation
+------------------------------------------------------------------------
+r1920260 | jhardin | 2024-08-29 01:59:19 +0000 (Thu, 29 Aug 2024) | 1 line
+ 
+ Add v.gd shortener, observed
+------------------------------------------------------------------------
+r1920258 | jhardin | 2024-08-28 22:39:09 +0000 (Wed, 28 Aug 2024) | 1 line
+ 
+ FP avoidance tuning
+------------------------------------------------------------------------
+r1920235 | jhardin | 2024-08-27 19:10:34 +0000 (Tue, 27 Aug 2024) | 1 line
+ 
+ Add another Interplanetary Filesystem provider being used to host 
+phishing content
+------------------------------------------------------------------------
+r1920234 | jhardin | 2024-08-27 19:10:05 +0000 (Tue, 27 Aug 2024) | 1 line
+ 
+ Recognize space-obfuscated "USD" and "GBP"
+------------------------------------------------------------------------
+r1920143 | jhardin | 2024-08-23 01:10:15 +0000 (Fri, 23 Aug 2024) | 1 line
+ 
+ FP avoidance
+------------------------------------------------------------------------
+r1920010 | jhardin | 2024-08-19 03:39:13 +0000 (Mon, 19 Aug 2024) | 1 line
+ 
+ Add fuzzy rules for current high-profile political names
+------------------------------------------------------------------------
+r1919931 | billcole | 2024-08-16 15:39:01 +0000 (Fri, 16 Aug 2024) | 1 
+line
+ 
+ Test rule for common false plea
+------------------------------------------------------------------------
+r1919859 | gbechis | 2024-08-13 13:50:28 +0000 (Tue, 13 Aug 2024) | 2 
+lines
+ 
+ sync MANIFEST
+ 
+------------------------------------------------------------------------
+r1919846 | sidney | 2024-08-13 07:29:31 +0000 (Tue, 13 Aug 2024) | 1 line
+ 
+ bug 8251 - make Perl::Critic an optional module for testing
+------------------------------------------------------------------------
+r1919839 | jhardin | 2024-08-13 01:37:07 +0000 (Tue, 13 Aug 2024) | 1 line
+ 
+ Add a couple of image hosting sites observed in spam.
+------------------------------------------------------------------------
+r1919812 | sidney | 2024-08-11 13:53:46 +0000 (Sun, 11 Aug 2024) | 1 line
+ 
+ bug 8272 - handle url-encoded utf-8 chars in URIs in HTML
+------------------------------------------------------------------------
+r1919710 | sidney | 2024-08-07 05:28:56 +0000 (Wed, 07 Aug 2024) | 1 line
+ 
+ bug 8272 - sometimes allow decoding as utf-8 with errors, strip 
+user:pass@ in IDN decoding of URL
+------------------------------------------------------------------------
+r1919708 | sidney | 2024-08-07 03:25:01 +0000 (Wed, 07 Aug 2024) | 1 line
+ 
+ bug 8274 in utf-16 header base64 being returned when encoded chars 
+expected
+------------------------------------------------------------------------
+r1919612 | gbechis | 2024-08-01 07:13:59 +0000 (Thu, 01 Aug 2024) | 2 
+lines
+ 
+ add *.rr.com to Freemail providers
+ 
+------------------------------------------------------------------------
+r1919603 | gbechis | 2024-07-31 13:00:38 +0000 (Wed, 31 Jul 2024) | 3 
+lines
+ 
+ update Bayes Russian stopwords
+ bz #8271
+ 
+------------------------------------------------------------------------
+r1919588 | jhardin | 2024-07-30 01:30:36 +0000 (Tue, 30 Jul 2024) | 1 line
+ 
+ Tune generic google storage rule overlap exclusions
+------------------------------------------------------------------------
+r1919584 | billcole | 2024-07-29 12:49:25 +0000 (Mon, 29 Jul 2024) | 1 
+line
+ 
+ wrap URIBL_MULTI_SURBL_HEADERS definition in conditional to maintain 
+backwared compatibility
+------------------------------------------------------------------------
+r1919583 | billcole | 2024-07-29 12:47:12 +0000 (Mon, 29 Jul 2024) | 1 
+line
+ 
+ LinkedIn  scraping rule
+------------------------------------------------------------------------
+r1919574 | jhardin | 2024-07-29 03:25:11 +0000 (Mon, 29 Jul 2024) | 1 line
+ 
+ FONT_INVNS FP tuning. Google storage also uses subdomains.
+------------------------------------------------------------------------
+r1919556 | billcole | 2024-07-27 20:48:23 +0000 (Sat, 27 Jul 2024) | 1 
+line
+ 
+ Bug #8134 new SURBL datasets
+------------------------------------------------------------------------
+r1919554 | billcole | 2024-07-27 19:16:58 +0000 (Sat, 27 Jul 2024) | 1 
+line
+ 
+ Added rules for SURBL Headers BL
+------------------------------------------------------------------------
+r1919451 | gbechis | 2024-07-22 08:31:01 +0000 (Mon, 22 Jul 2024) | 2 
+lines
+ 
+ extract URIs from rtf files
+ 
+------------------------------------------------------------------------
+r1919365 | gbechis | 2024-07-19 09:53:44 +0000 (Fri, 19 Jul 2024) | 2 
+lines
+ 
+ avoid some warnings if the regexp doesn't match
+ 
+------------------------------------------------------------------------
+r1919361 | gbechis | 2024-07-19 07:34:20 +0000 (Fri, 19 Jul 2024) | 2 
+lines
+ 
+ use domain from spf headers if domain from AAR headers cannot be found
+ 
+------------------------------------------------------------------------
+r1919224 | jhardin | 2024-07-14 18:17:13 +0000 (Sun, 14 Jul 2024) | 1 line
+ 
+ Add To: == CC: rule for evaluation per users list request
+------------------------------------------------------------------------
+r1919202 | jhardin | 2024-07-13 19:46:26 +0000 (Sat, 13 Jul 2024) | 1 line
+ 
+ GOOGDRAWPREVIEW tuning.
+------------------------------------------------------------------------
+r1919159 | fkento | 2024-07-12 04:38:58 +0000 (Fri, 12 Jul 2024) | 1 line
+ 
+ Bug 8267 - Fix uri regex in ExtractText.pm
+------------------------------------------------------------------------
+r1919157 | fkento | 2024-07-12 03:49:30 +0000 (Fri, 12 Jul 2024) | 1 line
+ 
+ Bug 8249 - Implement suppl_attrib 'return_path' and improve documentation
+------------------------------------------------------------------------
+r1919000 | jhardin | 2024-07-07 19:26:05 +0000 (Sun, 07 Jul 2024) | 1 line
  
  FP Avoidance tuning
 ------------------------------------------------------------------------
-r1912695 | gbechis | 2023-10-02 16:05:29 +0000 (Mon, 02 Oct 2023) | 2 
-lines
+r1918975 | jhardin | 2024-07-06 17:48:29 +0000 (Sat, 06 Jul 2024) | 1 line
  
- sync with ASF r1912694
- 
+ Evaluate some google draw metas
 ------------------------------------------------------------------------
-r1912694 | gbechis | 2023-10-02 16:03:53 +0000 (Mon, 02 Oct 2023) | 2 
-lines
+r1918936 | jhardin | 2024-07-05 14:54:31 +0000 (Fri, 05 Jul 2024) | 1 line
  
- check for redirections from $urlshortener to www.$urlshortener
- 
+ Add another phishing redir rule for eval, boost some other phishing 
+redir score limits
 ------------------------------------------------------------------------
-r1912617 | jhardin | 2023-09-30 00:41:42 +0000 (Sat, 30 Sep 2023) | 1 line
+r1918756 | jhardin | 2024-06-30 04:37:00 +0000 (Sun, 30 Jun 2024) | 1 line
  
- rule and FP avoidance tuning
+ Add rule for phishing redirect via google docs image
 ------------------------------------------------------------------------
-r1912591 | jhardin | 2023-09-29 02:49:07 +0000 (Fri, 29 Sep 2023) | 1 line
+r1918726 | axb | 2024-06-28 06:12:39 +0000 (Fri, 28 Jun 2024) | 1 line
  
- Add rule to check for attempt to exploit bug #8190
+ added 111.com
 ------------------------------------------------------------------------
-r1912573 | gbechis | 2023-09-28 09:20:59 +0000 (Thu, 28 Sep 2023) | 3 
-lines
+r1918278 | jhardin | 2024-06-12 14:44:50 +0000 (Wed, 12 Jun 2024) | 1 line
  
- Remove the Unicode "replacement character" from the url
- bz #8190
- 
+ "Bill 1618" disclaimers showing up again.
 ------------------------------------------------------------------------
-r1912566 | hege | 2023-09-28 04:17:04 +0000 (Thu, 28 Sep 2023) | 2 lines
- 
- Try to let masscheck run
- 
-------------------------------------------------------------------------
-r1912553 | gbechis | 2023-09-26 20:52:25 +0000 (Tue, 26 Sep 2023) | 2 
-lines
- 
- add a shortener
- 
-------------------------------------------------------------------------
-r1912551 | gbechis | 2023-09-26 13:40:52 +0000 (Tue, 26 Sep 2023) | 2 
-lines
- 
- 'invalid' is not a correct DKIM result code, change it to 'permerror'
- 
-------------------------------------------------------------------------
-r1912526 | hege | 2023-09-24 12:19:06 +0000 (Sun, 24 Sep 2023) | 2 lines
- 
- Bug 8188 - dns_block_rule does not accept underscore in domain
- 
-------------------------------------------------------------------------
-r1912472 | jhardin | 2023-09-22 02:23:45 +0000 (Fri, 22 Sep 2023) | 1 line
- 
- Add rule for eval
-------------------------------------------------------------------------
-r1912414 | gbechis | 2023-09-19 15:44:46 +0000 (Tue, 19 Sep 2023) | 3 
-lines
- 
- read uris from bad formatted html as well
- bz 8186
- 
-------------------------------------------------------------------------
-r1912377 | billcole | 2023-09-17 19:03:21 +0000 (Sun, 17 Sep 2023) | 1 
+r1918168 | billcole | 2024-06-05 14:19:38 +0000 (Wed, 05 Jun 2024) | 1 
 line
  
- Update weird ATTR rule from JH suggestion
+ correcting test counts
 ------------------------------------------------------------------------
-r1912326 | billcole | 2023-09-15 13:00:54 +0000 (Fri, 15 Sep 2023) | 1 
+r1918167 | billcole | 2024-06-05 12:47:50 +0000 (Wed, 05 Jun 2024) | 1 
 line
  
- HTML illegal character in attribute name rule
+ SORBS is shutting down BZ#8246
 ------------------------------------------------------------------------
-r1912314 | gbechis | 2023-09-14 14:13:37 +0000 (Thu, 14 Sep 2023) | 2 
-lines
- 
- additional 2tld domain
- 
-------------------------------------------------------------------------
-r1912304 | gbechis | 2023-09-14 09:39:53 +0000 (Thu, 14 Sep 2023) | 2 
-lines
- 
- add another 2tld domain
- 
-------------------------------------------------------------------------
-r1912292 | gbechis | 2023-09-13 16:03:48 +0000 (Wed, 13 Sep 2023) | 2 
-lines
- 
- add some .su 2tld
- 
-------------------------------------------------------------------------
-r1912289 | gbechis | 2023-09-13 13:42:43 +0000 (Wed, 13 Sep 2023) | 3 
-lines
- 
- add "shortcircuit_min_ham_score" and "shortcircuit_max_spam_score" 
-configurations
- in order to stop processing the email when total score reaches a 
-determined value
- 
-------------------------------------------------------------------------
-r1912261 | gbechis | 2023-09-12 07:33:49 +0000 (Tue, 12 Sep 2023) | 2 
-lines
- 
- add an url shortener
- 
-------------------------------------------------------------------------
-r1912178 | gbechis | 2023-09-08 07:01:45 +0000 (Fri, 08 Sep 2023) | 2 
-lines
- 
- add new freemail provider
- 
-------------------------------------------------------------------------
-r1912152 | jhardin | 2023-09-07 01:44:19 +0000 (Thu, 07 Sep 2023) | 1 line
- 
- Add phishing obfuscation rule for eval
-------------------------------------------------------------------------
-r1912075 | gbechis | 2023-09-04 09:36:11 +0000 (Mon, 04 Sep 2023) | 2 
-lines
- 
- avoid a warning
- 
-------------------------------------------------------------------------
-r1912038 | gbechis | 2023-09-01 09:59:21 +0000 (Fri, 01 Sep 2023) | 2 
-lines
- 
- add a new url shortener seen on the wild
- 
-------------------------------------------------------------------------
-r1911935 | jhardin | 2023-08-26 18:40:23 +0000 (Sat, 26 Aug 2023) | 1 line
- 
- Rule tuning
-------------------------------------------------------------------------
-r1911923 | jhardin | 2023-08-26 01:55:20 +0000 (Sat, 26 Aug 2023) | 1 line
- 
- Push some rules
-------------------------------------------------------------------------
-r1911902 | jhardin | 2023-08-25 01:54:39 +0000 (Fri, 25 Aug 2023) | 1 line
- 
- More metas for evaluation
-------------------------------------------------------------------------
-r1911895 | jhardin | 2023-08-24 15:13:12 +0000 (Thu, 24 Aug 2023) | 1 line
- 
- Add some rules for evaluation
-------------------------------------------------------------------------
-r1911882 | jhardin | 2023-08-24 01:28:50 +0000 (Thu, 24 Aug 2023) | 1 line
- 
- Testing a suggestion from Benny on the users list
-------------------------------------------------------------------------
-r1911538 | gbechis | 2023-08-08 09:29:10 +0000 (Tue, 08 Aug 2023) | 3 
-lines
- 
- improve documentation
- bz 8151
- 
-------------------------------------------------------------------------
-r1911441 | hege | 2023-08-04 15:21:59 +0000 (Fri, 04 Aug 2023) | 2 lines
- 
- Bug 7892 - T_KAM_HTML_FONT_INVALID false positive for "<color> 
-!important"
- 
-------------------------------------------------------------------------
-r1911421 | hege | 2023-08-03 09:43:08 +0000 (Thu, 03 Aug 2023) | 2 lines
- 
- Bug 8152 - base href not handled properly
- 
-------------------------------------------------------------------------
-r1911328 | billcole | 2023-07-28 15:49:33 +0000 (Fri, 28 Jul 2023) | 1 
+r1918166 | billcole | 2024-06-05 12:35:44 +0000 (Wed, 05 Jun 2024) | 1 
 line
  
- Bug 8150 fix: move require line earlier
+ SORBS is shutting down BZ#8246
 ------------------------------------------------------------------------
-r1911272 | gbechis | 2023-07-25 15:21:09 +0000 (Tue, 25 Jul 2023) | 3 
-lines
- 
- unbreak tests
- only use rules defined in test files
- 
-------------------------------------------------------------------------
-r1911262 | gbechis | 2023-07-25 08:49:36 +0000 (Tue, 25 Jul 2023) | 3 
-lines
- 
- remove phishstats.info related options
- domain has expired and no new domain has been launched
- 
-------------------------------------------------------------------------
-r1911169 | gbechis | 2023-07-21 10:05:37 +0000 (Fri, 21 Jul 2023) | 3 
-lines
- 
- update last_hit field
- bz #8144
- 
-------------------------------------------------------------------------
-r1911124 | gbechis | 2023-07-19 07:31:29 +0000 (Wed, 19 Jul 2023) | 2 
-lines
- 
- avoid a warning
- 
-------------------------------------------------------------------------
-r1910959 | gbechis | 2023-07-13 09:48:49 +0000 (Thu, 13 Jul 2023) | 2 
-lines
- 
- Add a Pyzor Perl implementation, disabled by default
- 
-------------------------------------------------------------------------
-r1910636 | gbechis | 2023-06-27 15:10:53 +0000 (Tue, 27 Jun 2023) | 3 
-lines
- 
- match more html attachments
- with improvements by jhardin@
- 
-------------------------------------------------------------------------
-r1910601 | hege | 2023-06-25 17:54:44 +0000 (Sun, 25 Jun 2023) | 2 lines
- 
- Bug 8140 - sa-update uses deprecated method rdatastr
- 
-------------------------------------------------------------------------
-r1910366 | gbechis | 2023-06-12 10:19:06 +0000 (Mon, 12 Jun 2023) | 2 
-lines
- 
- ignore urls with NUL characters
- 
-------------------------------------------------------------------------
-r1910318 | gbechis | 2023-06-09 07:36:33 +0000 (Fri, 09 Jun 2023) | 2 
-lines
- 
- remove a debug statement
- 
-------------------------------------------------------------------------
-r1910294 | hege | 2023-06-08 07:23:41 +0000 (Thu, 08 Jun 2023) | 2 lines
- 
- Clean up code and improve logging
- 
-------------------------------------------------------------------------
-r1910293 | hege | 2023-06-08 07:14:29 +0000 (Thu, 08 Jun 2023) | 2 lines
- 
- Bug 8138 - URIDetail ends spamassassin run on specific anchor text
- 
-------------------------------------------------------------------------
-r1910239 | gbechis | 2023-06-05 13:49:10 +0000 (Mon, 05 Jun 2023) | 2 
-lines
- 
- improve regexp after Google uris changes
- 
-------------------------------------------------------------------------
-r1910234 | hege | 2023-06-05 05:29:50 +0000 (Mon, 05 Jun 2023) | 2 lines
- 
- Add spf/smtp.mfrom
- 
-------------------------------------------------------------------------
-r1910147 | gbechis | 2023-05-31 13:11:16 +0000 (Wed, 31 May 2023) | 2 
-lines
- 
- move get_part_details() to Util so it can be used by other plugins
- 
-------------------------------------------------------------------------
-r1910021 | billcole | 2023-05-23 16:29:16 +0000 (Tue, 23 May 2023) | 1 
+r1917943 | mmartinec | 2024-05-24 13:40:52 +0000 (Fri, 24 May 2024) | 1 
 line
  
- Phish reported on user list from/via ZenDesk
+ AskDNS docs: re-worded a paragraph
 ------------------------------------------------------------------------
-r1910014 | gbechis | 2023-05-23 07:50:45 +0000 (Tue, 23 May 2023) | 2 
-lines
- 
- better regexps
- 
-------------------------------------------------------------------------
-r1909931 | hege | 2023-05-19 11:10:43 +0000 (Fri, 19 May 2023) | 2 lines
- 
- Update TLDs
- 
-------------------------------------------------------------------------
-r1909912 | hege | 2023-05-18 16:44:29 +0000 (Thu, 18 May 2023) | 2 lines
- 
- Remove useless "use IO::Socket"
- 
-------------------------------------------------------------------------
-r1909911 | hege | 2023-05-18 16:43:07 +0000 (Thu, 18 May 2023) | 2 lines
- 
- Remove useless module preloading
- 
-------------------------------------------------------------------------
-r1909910 | hege | 2023-05-18 16:23:26 +0000 (Thu, 18 May 2023) | 2 lines
- 
- $packet->edns->size deprecated in Net::DNS 1.38
- 
-------------------------------------------------------------------------
-r1909909 | hege | 2023-05-18 16:05:28 +0000 (Thu, 18 May 2023) | 2 lines
- 
- Remove redundant "use NetAddr::IP", it's always loaded via Util.pm
- 
-------------------------------------------------------------------------
-r1909836 | gbechis | 2023-05-15 14:26:03 +0000 (Mon, 15 May 2023) | 2 
-lines
- 
- release lock after scanning an already scanned message
- 
-------------------------------------------------------------------------
-r1909764 | hege | 2023-05-12 04:47:57 +0000 (Fri, 12 May 2023) | 2 lines
- 
- Bug 8129 - Subject gets UTF-8 encoded twice in some circumstances
- 
-------------------------------------------------------------------------
-r1909738 | hege | 2023-05-11 05:40:55 +0000 (Thu, 11 May 2023) | 2 lines
- 
- Add -u / --username option to spamassassin (Bug 8126)
- 
-------------------------------------------------------------------------
-r1909727 | hege | 2023-05-10 18:21:03 +0000 (Wed, 10 May 2023) | 2 lines
- 
- Fix bug number
- 
-------------------------------------------------------------------------
-r1909726 | hege | 2023-05-10 18:14:26 +0000 (Wed, 10 May 2023) | 2 lines
- 
- Bug 8127 - Geo::IP leaking fds on spamd restart
- 
-------------------------------------------------------------------------
-r1909694 | hege | 2023-05-09 05:43:40 +0000 (Tue, 09 May 2023) | 2 lines
- 
- Fix txrep sql tests
- 
-------------------------------------------------------------------------
-r1909689 | kb | 2023-05-09 00:09:11 +0000 (Tue, 09 May 2023) | 4 lines
- 
- bug 7179: txrep_report_details option to add TxRep details to the rule's
- description in the message report or summary.
- 
- 
-------------------------------------------------------------------------
-r1909622 | gbechis | 2023-05-05 07:19:33 +0000 (Fri, 05 May 2023) | 2 
-lines
- 
- better regexp, spotted by hege@, thanks
- 
-------------------------------------------------------------------------
-r1909613 | gbechis | 2023-05-04 18:09:35 +0000 (Thu, 04 May 2023) | 2 
-lines
- 
- enable more tests
- 
-------------------------------------------------------------------------
-r1909611 | gbechis | 2023-05-04 16:57:34 +0000 (Thu, 04 May 2023) | 2 
-lines
- 
- missed in previous
- 
-------------------------------------------------------------------------
-r1909610 | gbechis | 2023-05-04 16:42:35 +0000 (Thu, 04 May 2023) | 3 
-lines
- 
- TxRep regression tests
- bz #7173
- 
-------------------------------------------------------------------------
-r1909609 | gbechis | 2023-05-04 16:16:43 +0000 (Thu, 04 May 2023) | 4 
-lines
- 
- make "txrep_welcomelist_out" work when
- "auto_welcomelist_distinguish_signed" is set
- bz #7269
- 
-------------------------------------------------------------------------
-r1909608 | gbechis | 2023-05-04 16:14:33 +0000 (Thu, 04 May 2023) | 4 
-lines
- 
- do not consider messages with delta of the opposite sign of the score
- and of the old txrep score
- bz #7943
- 
-------------------------------------------------------------------------
-r1909562 | gbechis | 2023-05-02 09:49:42 +0000 (Tue, 02 May 2023) | 3 
-lines
- 
- missed in previous
- bz #7764
- 
-------------------------------------------------------------------------
-r1909557 | gbechis | 2023-05-02 08:35:57 +0000 (Tue, 02 May 2023) | 3 
-lines
- 
- save the spf domain in the signedby field if available
- bz #7764
- 
-------------------------------------------------------------------------
-r1909556 | gbechis | 2023-05-02 08:28:44 +0000 (Tue, 02 May 2023) | 3 
-lines
- 
- initialize $count to 0 to prevent some warnings
- bz #7787
- 
-------------------------------------------------------------------------
-r1909555 | gbechis | 2023-05-02 08:20:46 +0000 (Tue, 02 May 2023) | 2 
-lines
- 
- add a debug warning if txrep is loaded but disabled
- 
-------------------------------------------------------------------------
-r1909554 | gbechis | 2023-05-02 08:17:57 +0000 (Tue, 02 May 2023) | 3 
-lines
- 
- add a --dry-run option to check which entries will be cleaned
- before removing records
- 
-------------------------------------------------------------------------
-r1909512 | hege | 2023-04-30 15:25:11 +0000 (Sun, 30 Apr 2023) | 2 lines
- 
- Make sure workdir has open permissions
- 
-------------------------------------------------------------------------
-r1909506 | hege | 2023-04-30 12:53:34 +0000 (Sun, 30 Apr 2023) | 2 lines
- 
- Fix documentation headers
- 
-------------------------------------------------------------------------
-r1909505 | hege | 2023-04-30 12:52:33 +0000 (Sun, 30 Apr 2023) | 2 lines
- 
- Unify documentation, "xxx OPTIONS" -> "xxx SETTINGS"
- 
-------------------------------------------------------------------------
-r1909504 | hege | 2023-04-30 12:43:47 +0000 (Sun, 30 Apr 2023) | 2 lines
- 
- Set is_admin for extracttext_maxparts, extracttext_timeout
- 
-------------------------------------------------------------------------
-r1909503 | hege | 2023-04-30 12:38:17 +0000 (Sun, 30 Apr 2023) | 2 lines
- 
- Set is_priv for rbl_headers
- 
-------------------------------------------------------------------------
-r1909502 | hege | 2023-04-30 12:36:54 +0000 (Sun, 30 Apr 2023) | 2 lines
- 
- Set is_admin for dmarc_save_reports
- 
-------------------------------------------------------------------------
-r1909501 | hege | 2023-04-30 12:34:22 +0000 (Sun, 30 Apr 2023) | 2 lines
- 
- Remove is_admin from: hashbl_ignore, hashbl_email_domain_alias, 
-hashbl_email_regex, hashbl_email_welcomelist
- 
-------------------------------------------------------------------------
-r1909500 | hege | 2023-04-30 12:29:46 +0000 (Sun, 30 Apr 2023) | 2 lines
- 
- Remove is_admin from: use_razor2
- 
-------------------------------------------------------------------------
-r1909499 | hege | 2023-04-30 12:29:39 +0000 (Sun, 30 Apr 2023) | 2 lines
- 
- Remove is_admin from: use_pyzor, pyzor_count_min, pyzor_welcomelist_min, 
-pyzor_welcomelist_factor
- 
-------------------------------------------------------------------------
-r1909498 | hege | 2023-04-30 12:29:33 +0000 (Sun, 30 Apr 2023) | 2 lines
- 
- Remove is_admin from: use_dcc, use_dcc_rep, dcc_body_max, dcc_fuz1_max, 
-dcc_fuz2_max, dcc_rep_percent
- 
-------------------------------------------------------------------------
-r1909497 | hege | 2023-04-30 12:10:03 +0000 (Sun, 30 Apr 2023) | 2 lines
- 
- Remove is_admin from bayes_max_token_length and bayes_stopwords, should 
-be safe for user to configure.
- 
-------------------------------------------------------------------------
-r1909496 | hege | 2023-04-30 12:05:31 +0000 (Sun, 30 Apr 2023) | 2 lines
- 
- Change 'asn_lookup' to is_priv from is_admin, as it's similar to 
-'uridnsbl' etc. Unify some documentation.
- 
-------------------------------------------------------------------------
-r1909495 | hege | 2023-04-30 11:52:08 +0000 (Sun, 30 Apr 2023) | 2 lines
- 
- Change 'askdns' from is_admin to is_priv as it's similar to 'uridnsbl' 
-etc. Remove duplicate rbl_timeout documentation, just provide a pointer.
- 
-------------------------------------------------------------------------
-r1909494 | hege | 2023-04-30 10:12:40 +0000 (Sun, 30 Apr 2023) | 2 lines
- 
- Fix documentation, there is no user options for DCC/Pyzor/Razor2, only 
-administrator
- 
-------------------------------------------------------------------------
-r1909274 | gbechis | 2023-04-20 10:49:12 +0000 (Thu, 20 Apr 2023) | 4 
-lines
- 
- avoid a "Use of each() on hash after insertion
- without resetting hash iterator results in
- undefined behavior" warning
- 
-------------------------------------------------------------------------
-r1908962 | gbechis | 2023-04-04 15:08:24 +0000 (Tue, 04 Apr 2023) | 2 
-lines
- 
- display detected languages in SpamAssassin report
- 
-------------------------------------------------------------------------
-r1908961 | gbechis | 2023-04-04 15:07:33 +0000 (Tue, 04 Apr 2023) | 2 
-lines
- 
- install v401.pre
- 
-------------------------------------------------------------------------
-r1908779 | gbechis | 2023-03-29 14:17:43 +0000 (Wed, 29 Mar 2023) | 3 
-lines
- 
- If Mail::SpamAssassin::Plugin::AuthRes is available and DMARC fails, 
-re-evaluate DMARC policies
- accordingly
- 
-------------------------------------------------------------------------
-r1908767 | gbechis | 2023-03-28 13:55:49 +0000 (Tue, 28 Mar 2023) | 2 
-lines
- 
- save author_domains in both DKIM and ARC case
- 
-------------------------------------------------------------------------
-r1908745 | gbechis | 2023-03-27 08:28:48 +0000 (Mon, 27 Mar 2023) | 2 
-lines
- 
- Catch Youtube links abuse
- 
-------------------------------------------------------------------------
-r1908549 | gbechis | 2023-03-20 07:53:49 +0000 (Mon, 20 Mar 2023) | 2 
-lines
- 
- fix sql syntax, from Benny Pedersen
- 
-------------------------------------------------------------------------
-r1908505 | gbechis | 2023-03-18 17:05:31 +0000 (Sat, 18 Mar 2023) | 2 
-lines
- 
- regexp fix
- 
-------------------------------------------------------------------------
-r1908504 | gbechis | 2023-03-18 16:37:37 +0000 (Sat, 18 Mar 2023) | 2 
-lines
- 
- catch more Google translate obfuscated uris
- 
-------------------------------------------------------------------------
-r1908474 | hege | 2023-03-18 09:26:28 +0000 (Sat, 18 Mar 2023) | 2 lines
- 
- Document missing X-Original-Message-ID in MESSAGEID
- 
-------------------------------------------------------------------------
-r1908473 | hege | 2023-03-18 09:06:56 +0000 (Sat, 18 Mar 2023) | 2 lines
- 
- Test list and non-list get() difference
- 
-------------------------------------------------------------------------
-r1908472 | hege | 2023-03-18 09:00:56 +0000 (Sat, 18 Mar 2023) | 2 lines
- 
- Bug 8121 - header rules with keyword all not working
- 
-------------------------------------------------------------------------
-r1908468 | hege | 2023-03-18 06:20:08 +0000 (Sat, 18 Mar 2023) | 2 lines
- 
- Remove redundant $ from regex
- 
-------------------------------------------------------------------------
-r1908422 | hege | 2023-03-15 17:28:07 +0000 (Wed, 15 Mar 2023) | 2 lines
- 
- Comment out useless empty if-clause
- 
-------------------------------------------------------------------------
-r1908421 | hege | 2023-03-15 17:21:14 +0000 (Wed, 15 Mar 2023) | 2 lines
- 
- Allow mass checks to run with current lacking spam (80k -> 60k)
- 
-------------------------------------------------------------------------
-r1908419 | hege | 2023-03-15 17:11:05 +0000 (Wed, 15 Mar 2023) | 2 lines
- 
- Fix header ALL rules (Bug 8121)
- 
-------------------------------------------------------------------------
-r1908319 | hege | 2023-03-12 10:52:54 +0000 (Sun, 12 Mar 2023) | 2 lines
- 
- Improve parsing and logging
- 
-------------------------------------------------------------------------
-r1908180 | gbechis | 2023-03-08 00:06:31 +0000 (Wed, 08 Mar 2023) | 2 
-lines
- 
- fix DKIM checks when using Mail::SpamAssassin::Client
- 
-------------------------------------------------------------------------
-r1908041 | hege | 2023-03-04 06:38:03 +0000 (Sat, 04 Mar 2023) | 2 lines
- 
- Fix exit values
- 
-------------------------------------------------------------------------
-r1907969 | hege | 2023-03-02 11:49:53 +0000 (Thu, 02 Mar 2023) | 2 lines
- 
- Allow hyphen in pname and property
- 
-------------------------------------------------------------------------
-r1907968 | hege | 2023-03-02 11:42:19 +0000 (Thu, 02 Mar 2023) | 2 lines
- 
- Fix value typos
- 
-------------------------------------------------------------------------
-r1907938 | hege | 2023-03-01 18:18:25 +0000 (Wed, 01 Mar 2023) | 2 lines
- 
- Update methods/values and fix uninitialized $result warning
- 
-------------------------------------------------------------------------
-r1907911 | hege | 2023-02-28 10:29:33 +0000 (Tue, 28 Feb 2023) | 2 lines
- 
- Bug 6260 - text attachments are not scanned if the MIME type is 
-APPLICATION/OCTET-STREAM
- 
-------------------------------------------------------------------------
-r1907898 | hege | 2023-02-27 18:38:29 +0000 (Mon, 27 Feb 2023) | 2 lines
- 
- Prevent mkdir race condition from parallel tests
- 
-------------------------------------------------------------------------
-r1907897 | hege | 2023-02-27 18:12:28 +0000 (Mon, 27 Feb 2023) | 2 lines
- 
- Fix misleading test, can't extract raw html as decoded
- 
-------------------------------------------------------------------------
-r1907855 | gbechis | 2023-02-24 17:06:02 +0000 (Fri, 24 Feb 2023) | 2 
-lines
- 
- new url shortener
- 
-------------------------------------------------------------------------
-r1907793 | gbechis | 2023-02-21 22:48:47 +0000 (Tue, 21 Feb 2023) | 2 
-lines
- 
- add app.link shortener
- 
-------------------------------------------------------------------------
-r1907776 | gbechis | 2023-02-20 16:35:43 +0000 (Mon, 20 Feb 2023) | 3 
-lines
- 
- ignore ASN, ASNCIDR and EXTRACTTEXTFLAGS tags when empty
- fix bz #8046
- 
-------------------------------------------------------------------------
-r1907763 | billcole | 2023-02-19 20:01:14 +0000 (Sun, 19 Feb 2023) | 1 
+r1917907 | mmartinec | 2024-05-22 14:58:41 +0000 (Wed, 22 May 2024) | 1 
 line
  
- Documenting the FAQ regarding updates being a zone cut, not a name
+ AskDNS docs: quad-dotted -> dotted-quad
 ------------------------------------------------------------------------
-r1907699 | axb | 2023-02-16 13:55:55 +0000 (Thu, 16 Feb 2023) | 1 line
+r1917855 | gbechis | 2024-05-21 15:15:44 +0000 (Tue, 21 May 2024) | 2 
+lines
  
- added a number of headers as per Henrik K.
-------------------------------------------------------------------------
-r1907574 | hege | 2023-02-11 06:26:32 +0000 (Sat, 11 Feb 2023) | 2 lines
- 
- Fix typo
+ honor uridnsbl_skip_domain in AskDNS plugin
  
 ------------------------------------------------------------------------
-r1907241 | billcole | 2023-02-03 15:06:16 +0000 (Fri, 03 Feb 2023) | 1 
+r1917691 | gbechis | 2024-05-13 07:46:44 +0000 (Mon, 13 May 2024) | 2 
+lines
+ 
+ Remove anchors and parameters from uris before running the dns query
+ 
+------------------------------------------------------------------------
+r1917531 | sidney | 2024-05-06 08:20:08 +0000 (Mon, 06 May 2024) | 1 line
+ 
+ bug 8254 - fix sa-compile test to work with Makefile.PL RE2C_BIN option
+------------------------------------------------------------------------
+r1917490 | sidney | 2024-05-04 06:21:52 +0000 (Sat, 04 May 2024) | 1 line
+ 
+ Bug 8253 - make test more robust against low memory on test machine
+------------------------------------------------------------------------
+r1917487 | sidney | 2024-05-04 04:06:02 +0000 (Sat, 04 May 2024) | 1 line
+ 
+ bug 8252 - skip bayesbdb.t on FreeBSD arm64
+------------------------------------------------------------------------
+r1917441 | gbechis | 2024-04-30 21:33:16 +0000 (Tue, 30 Apr 2024) | 3 
+lines
+ 
+ avoid a __URI_TRY_3LD Fp
+ looks ok to jhardin@
+ 
+------------------------------------------------------------------------
+r1917349 | sidney | 2024-04-26 10:06:28 +0000 (Fri, 26 Apr 2024) | 1 line
+ 
+ bug 8250 - Remove unnecessary use Test;
+------------------------------------------------------------------------
+r1917281 | gbechis | 2024-04-23 13:12:44 +0000 (Tue, 23 Apr 2024) | 3 
+lines
+ 
+ correctly handle dns queries in RCVD_IN_VALIDITY_*_BLOCKED rules.
+ From Validity Inc.
+ 
+------------------------------------------------------------------------
+r1917279 | gbechis | 2024-04-23 10:25:09 +0000 (Tue, 23 Apr 2024) | 3 
+lines
+ 
+ prevent a FP
+ no objections from jhardin@
+ 
+------------------------------------------------------------------------
+r1917179 | sidney | 2024-04-20 09:07:07 +0000 (Sat, 20 Apr 2024) | 1 line
+ 
+ bug 8245 - fix undefined value error in DMARC in perl 5.16 and 5.18
+------------------------------------------------------------------------
+r1917027 | sidney | 2024-04-16 10:31:45 +0000 (Tue, 16 Apr 2024) | 1 line
+ 
+ bug 8240 - fix test by using a test subdomain that will not be changed
+------------------------------------------------------------------------
+r1917016 | gbechis | 2024-04-16 09:32:28 +0000 (Tue, 16 Apr 2024) | 3 
+lines
+ 
+ Honor uridnsbl_skip_domain in DNSEval
+ bz #8234
+ 
+------------------------------------------------------------------------
+r1917007 | sidney | 2024-04-16 02:28:01 +0000 (Tue, 16 Apr 2024) | 1 line
+ 
+ bug 8241 - test using all of the supportd db modules that are available
+------------------------------------------------------------------------
+r1917005 | sidney | 2024-04-15 23:01:12 +0000 (Mon, 15 Apr 2024) | 1 line
+ 
+ bug 8089 - avoid triggering an obscure perl bug on some systems
+------------------------------------------------------------------------
+r1916991 | sidney | 2024-04-14 22:04:29 +0000 (Sun, 14 Apr 2024) | 1 line
+ 
+ Bug 8239 remove dead obsolete code from Makefile.PL
+------------------------------------------------------------------------
+r1916986 | sidney | 2024-04-14 17:28:38 +0000 (Sun, 14 Apr 2024) | 1 line
+ 
+ bug 8237 - properly delete elements of tied hash
+------------------------------------------------------------------------
+r1916985 | sidney | 2024-04-14 17:00:33 +0000 (Sun, 14 Apr 2024) | 1 line
+ 
+ bug 8238 delete SDBM_File files during cleanuo in test
+------------------------------------------------------------------------
+r1916942 | billcole | 2024-04-12 21:01:09 +0000 (Fri, 12 Apr 2024) | 1 
 line
  
- Test rule QA scores indicate that xyz and site are no longer consistent 
-indicators of spam
+ Microsoft sends spam
 ------------------------------------------------------------------------
-r1907134 | gbechis | 2023-01-31 09:25:33 +0000 (Tue, 31 Jan 2023) | 3 
+r1916884 | gbechis | 2024-04-09 14:52:50 +0000 (Tue, 09 Apr 2024) | 2 
 lines
  
- ARC_VALID should have a "nice" tflag
- bz #8103
+ add VALIDITY_BLOCKED_* rules that will hit when dns queries will be 
+limited
  
 ------------------------------------------------------------------------
-r1907133 | gbechis | 2023-01-31 09:23:04 +0000 (Tue, 31 Jan 2023) | 2 
+r1916751 | gbechis | 2024-04-02 14:48:30 +0000 (Tue, 02 Apr 2024) | 2 
 lines
  
- spam messages from sympatico.ca are on the wild
+ restore phishstats feed
  
 ------------------------------------------------------------------------
-r1906646 | sidney | 2023-01-13 02:43:37 +0000 (Fri, 13 Jan 2023) | 1 line
- 
- Big 8056 - Fix problem with our setup of Ubuntu runner when apt repo has 
-some newer entries than runner image
-------------------------------------------------------------------------
-r1906628 | sidney | 2023-01-12 06:31:56 +0000 (Thu, 12 Jan 2023) | 1 line
- 
- Bug 8056 - Add install of pyzor to macOS and Windows test runners on 
-GitHub
-------------------------------------------------------------------------
-r1906589 | sidney | 2023-01-11 01:03:33 +0000 (Wed, 11 Jan 2023) | 1 line
- 
- Bug 8041 - Add a report step to pyzor test and use a GTUBE test case 
-with lines that pyzor uses in digest
-------------------------------------------------------------------------
-r1906505 | hege | 2023-01-09 14:42:54 +0000 (Mon, 09 Jan 2023) | 2 lines
- 
- Add missing t/data/spam/decodeshorturl/doubleslash.eml
- 
-------------------------------------------------------------------------
-r1906485 | sidney | 2023-01-09 11:53:09 +0000 (Mon, 09 Jan 2023) | 1 line
- 
- Bug 8056 - Update actions tests for SpamAssassin
-------------------------------------------------------------------------
-r1906472 | sidney | 2023-01-08 21:19:13 +0000 (Sun, 08 Jan 2023) | 1 line
- 
- Bug 8101 - Fix handling of malformed URLs that are resolved by server 
-using redirect to relative URI
-------------------------------------------------------------------------
-r1906471 | sidney | 2023-01-08 21:09:42 +0000 (Sun, 08 Jan 2023) | 1 line
- 
- Bug 8102 - Fix typo logging info for non-cached hit
-------------------------------------------------------------------------
-r1906450 | sidney | 2023-01-07 20:58:46 +0000 (Sat, 07 Jan 2023) | 1 line
- 
- Bug 8098 - fix ON CONFLICT ambiguous column error in Postgres upsert
-------------------------------------------------------------------------
-r1906355 | sidney | 2023-01-03 15:47:25 +0000 (Tue, 03 Jan 2023) | 1 line
- 
- Bug 8097 - specify minimum version Test::Simple and Test::More for 
-mkrules tests
-------------------------------------------------------------------------
-r1906268 | kmcgrail | 2022-12-30 03:57:39 +0000 (Fri, 30 Dec 2022) | 1 
-line
- 
- Noting that HashBL plugin was enabled by default in 4.0.0 despite being 
-in the v342.pre file
-------------------------------------------------------------------------
-r1906247 | hege | 2022-12-28 15:17:00 +0000 (Wed, 28 Dec 2022) | 2 lines
- 
- Add lint test without plugins. For Benny :-)
- 
-------------------------------------------------------------------------
-r1906233 | billcole | 2022-12-27 20:44:25 +0000 (Tue, 27 Dec 2022) | 2 
+r1916735 | gbechis | 2024-04-02 07:43:56 +0000 (Tue, 02 Apr 2024) | 2 
 lines
  
- Fix for bug #8096
+ catch more malware in Office Documents
  
 ------------------------------------------------------------------------
-r1906229 | hege | 2022-12-27 15:52:29 +0000 (Tue, 27 Dec 2022) | 2 lines
+r1916640 | sidney | 2024-03-29 21:40:10 +0000 (Fri, 29 Mar 2024) | 1 line
  
- There is no default setting for originating_ip_headers. Document 
-sa-update.
- 
+ Update build/release document to remove obsolete sections and update 
+based on last release experience, correct typos
 ------------------------------------------------------------------------
-r1906214 | gbechis | 2022-12-26 10:23:45 +0000 (Mon, 26 Dec 2022) | 2 
-lines
+r1916632 | sidney | 2024-03-29 14:24:12 +0000 (Fri, 29 Mar 2024) | 1 line
  
- dnsbl_subtests should not run if network tests are disabled
- 
+ fix mispelling. change download URL as per recent change on website
 ------------------------------------------------------------------------
-r1906145 | kmcgrail | 2022-12-21 17:42:52 +0000 (Wed, 21 Dec 2022) | 1 
-line
+r1916630 | sidney | 2024-03-29 13:39:11 +0000 (Fri, 29 Mar 2024) | 1 line
  
- Bug 8093 to remove URIBL_WS_SURBL
+ Remove mention of 24 hr wait after uploading, there is no longer a 
+mirror propagation delay
 ------------------------------------------------------------------------
-r1906063 | sidney | 2022-12-17 20:56:42 +0000 (Sat, 17 Dec 2022) | 1 line
+r1916617 | sidney | 2024-03-29 10:41:20 +0000 (Fri, 29 Mar 2024) | 1 line
  
- Remove redundant test that does same as the mkdir -p option that is 
-already there. Remove redundant mkdir that only produced error message. 
-Update vers to current
+ 4.0.2 devel cycle started
 ------------------------------------------------------------------------
-r1906062 | sidney | 2022-12-17 20:54:47 +0000 (Sat, 17 Dec 2022) | 1 line
+r1916616 | sidney | 2024-03-29 10:37:51 +0000 (Fri, 29 Mar 2024) | 1 line
  
- Fix Subject to meet Announce@apache.org moderation requirements. Add 
-greeting and signature as per their guidelines
-------------------------------------------------------------------------
-r1906050 | sidney | 2022-12-17 09:18:28 +0000 (Sat, 17 Dec 2022) | 1 line
- 
- 4.0.0 RELEASED
+ 4.0.1 RELEASED
 ------------------------------------------------------------------------
