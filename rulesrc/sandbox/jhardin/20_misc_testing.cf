@@ -4428,13 +4428,21 @@ tflags      URI_EXCESS_SLASHES         publish
 # New redirector observed in phishing
 # https://web.mmac.org/cwt/external/wcpages/referral.aspx?ReferralType=W&ProfileID=94027&ListingID=11005&CategoryID=721&SubCategoryID=0&url=//ipfs.io/ipfs/QmexFb1XEJqDuDSyBDm3Fa4t3n29gPpEHw39duPsyX5iyf#user@example.com
 # Unfortunately the protocol is omitted so URI rules that expect a full URI with protocol may not hit the extracted URI
-# NOT capturing the "//" we can't deal with that properly, it blocks adding the domain to BL checks
+# NOT capturing the "//" - we can't deal with that properly, it blocks adding the domain to BL checks
 redirector_pattern                     m;^https?://web\.mmac\.org/.*[?&]url=//(.+)$;
 
-# Lot of .CN phishing of .JP lately
+# Lots of .CN phishing of .JP lately
 uri        __URI_DOTJP                 m;^https?://(?:[^./]+\.)+jp/;i
-uri        __URI_DOTCN_LOGIN           m;^https?://(?:[^./]+\.){2,}cn/[^/]*login[^/]*/;i 
+uri        __URI_DOTCN_LOGIN           m;^https?://(?:[^./]{4,}\.){2,}cn/[^/]*login[^/]*/;i 
 meta       CN_PHISH_JP_01              __URI_DOTJP && __URI_DOTCN_LOGIN
 score      CN_PHISH_JP_01              2.500
 describe   CN_PHISH_JP_01              Apparent Chinese phishing of Japanese target
+tflags     CN_PHISH_JP_01              publish
+
+meta       URI_DOTCN_LOGIN             __URI_DOTCN_LOGIN && !CN_PHISH_JP_01
+score      URI_DOTCN_LOGIN             1.500
+describe   URI_DOTCN_LOGIN             Login page in .cn subdomain - possible Chinese phishing
+tflags     URI_DOTCN_LOGIN             publish
+
+
 
