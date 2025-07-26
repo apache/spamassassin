@@ -11,7 +11,10 @@ score	     GB_FORGED_MUA_POSTFIX	2.0 # limit
 header       __GB_FROM_METAMASK0        From =~ /^M\x{E2}\x{81}\x{A4}e\x{E2}\x{81}\x{A4}t\x{E2}\x{81}\x{A4}a\x{E2}\x{81}\x{A4}M\x{E2}\x{81}\x{A4}a\x{E2}\x{81}\x{A4}s\x{E2}\x{81}\x{A4}k\x{E2}\x{81}\x{A4} \x{F0}/
 header       __GB_FROM_METAMASK1        From =~ /Met\x{D0}\x{B0}M\x{D0}\x{B0}sk/i
 meta         __GB_FROM_METAMASK         ( __GB_FROM_METAMASK0 + __GB_FROM_METAMASK1 >= 1 )
-meta         GB_FROM_METAMASK           ( __GB_FROM_METAMASK && ( ( KHOP_HELO_FCRDNS && TO_NO_BRKTS_HTML_ONLY ) || FUZZY_WALLET ) )
-describe     GB_FROM_METAMASK           Metamask spam
-score        GB_FROM_METAMASK           2.0 # limit
-tflags       GB_FROM_METAMASK           publish
+
+ifplugin Mail::SpamAssassin::Plugin::ReplaceTags
+  meta         GB_FROM_METAMASK           ( __GB_FROM_METAMASK && ( ( KHOP_HELO_FCRDNS && TO_NO_BRKTS_HTML_ONLY ) || FUZZY_WALLET ) )
+  describe     GB_FROM_METAMASK           Metamask spam
+  score        GB_FROM_METAMASK           2.0 # limit
+  tflags       GB_FROM_METAMASK           publish
+endif
