@@ -4431,3 +4431,10 @@ tflags      URI_EXCESS_SLASHES         publish
 # NOT capturing the "//" we can't deal with that properly, it blocks adding the domain to BL checks
 redirector_pattern                     m;^https?://web\.mmac\.org/.*[?&]url=//(.+)$;
 
+# Lot of .CN phishing of .JP lately
+uri        __URI_DOTJP                 m;^https?://(?:[^./]+\.)+jp/;i
+uri        __URI_DOTCN_LOGIN           m;^https?://(?:[^./]+\.){2,}cn/[^/]*login[^/]*/;i 
+meta       CN_PHISH_JP_01              __URI_DOTJP && __URI_DOTCN_LOGIN
+score      CN_PHISH_JP_01              2.500
+describe   CN_PHISH_JP_01              Apparent Chinese phishing of Japanese target
+
