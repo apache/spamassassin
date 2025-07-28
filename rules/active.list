@@ -194,7 +194,7 @@ BITCOIN_EXTORT_02
 # tflags publish
 BITCOIN_IMGUR
 
-# tflags publish
+# tflags net
 BITCOIN_MALWARE
 
 # tflags publish
@@ -292,6 +292,9 @@ CHARSET_FARAWAY_HEADER
 
 # tflags publish
 CN_B2B_SPAMMER
+
+# tflags publish
+CN_PHISH_JP_01
 
 # tflags publish
 COMMENT_GIBBERISH
@@ -442,9 +445,6 @@ FACEBOOK_IMG_NOT_RCVD_FB
 
 # good enough
 FAKE_REPLY_A1
-
-# good enough
-FAKE_REPLY_B
 
 # good enough
 FAKE_REPLY_C
@@ -600,9 +600,6 @@ FROM_SUSPICIOUS_NTLD_FP
 FROM_UNBAL1
 
 # good enough
-FROM_WSP_LEAD
-
-# good enough
 FROM_WSP_TRAIL
 
 # tflags net
@@ -710,7 +707,7 @@ GB_FREEMAIL_DISPTO
 # tflags publish
 GB_FREEMAIL_DISPTO_NOTFREEM
 
-# tflags publish
+# tflags net
 GB_FROM_METAMASK
 
 # tflags publish
@@ -881,7 +878,7 @@ HTML_OFF_PAGE
 # tflags publish
 HTML_SHRT_CMNT_OBFU_MANY
 
-# tflags publish
+# tflags net
 HTML_SINGLET_MANY
 
 # tflags net
@@ -904,6 +901,9 @@ JH_SPAMMY_PATTERN01
 
 # tflags publish
 JH_SPAMMY_PATTERN02
+
+# tflags net
+KHOP_FAKE_EBAY
 
 # tflags net
 KHOP_HELO_FCRDNS
@@ -958,6 +958,9 @@ MALWARE_PASSWORD
 
 # tflags publish
 MALW_ATTACH
+
+# tflags net
+MANY_HDRS_LCASE
 
 # tflags publish
 MANY_SPAN_IN_TEXT
@@ -1135,6 +1138,9 @@ PDS_BTC_MSGID
 
 # good enough
 PDS_FRNOM_TODOM_NAKED_TO
+
+# tflags net
+PDS_FROM_2_EMAILS
 
 # good enough
 PDS_FROM_NAME_TO_DOMAIN
@@ -1668,6 +1674,9 @@ TO_EQ_FM_DOM_HTML_ONLY
 TO_EQ_FM_DOM_SPF_FAIL
 
 # tflags net
+TO_EQ_FM_HTML_ONLY
+
+# tflags net
 TO_EQ_FM_SPF_FAIL
 
 # tflags publish
@@ -1699,6 +1708,9 @@ TVD_LONG_WORD5
 
 # tflags net
 TVD_SPACE_ENCODED
+
+# tflags net
+TVD_SPACE_RATIO_MINFP
 
 # tflags net
 TVD_SUBJ_NUM_OBFU_MINFP
@@ -1837,6 +1849,9 @@ URI_DASHGOVEDU
 
 # tflags publish
 URI_DATA
+
+# tflags publish
+URI_DOTCN_LOGIN
 
 # tflags publish
 URI_DOTEDU
