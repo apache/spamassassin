@@ -194,7 +194,7 @@ BITCOIN_EXTORT_02
 # tflags publish
 BITCOIN_IMGUR
 
-# tflags publish
+# tflags net
 BITCOIN_MALWARE
 
 # tflags publish
@@ -260,7 +260,7 @@ BITCOIN_XPRIO
 # tflags publish
 BITCOIN_YOUR_INFO
 
-# tflags publish
+# tflags net
 BODY_URI_ONLY
 
 # tflags publish
@@ -299,7 +299,7 @@ CN_PHISH_JP_01
 # tflags publish
 COMMENT_GIBBERISH
 
-# good enough
+# tflags net
 COMPENSATION
 
 # tflags publish
@@ -482,7 +482,7 @@ FONT_INVIS_POSTEXTRAS
 # tflags net
 FORGED_SPF_HELO
 
-# tflags publish
+# tflags net
 FORM_FRAUD
 
 # tflags publish
@@ -560,7 +560,7 @@ FROM_MISSP_MSFT
 # good enough
 FROM_MISSP_PHISH
 
-# good enough
+# tflags net
 FROM_MISSP_REPLYTO
 
 # tflags net
@@ -571,6 +571,9 @@ FROM_MISSP_TO_UNDISC
 
 # good enough
 FROM_MISSP_USER
+
+# good enough
+FROM_MISSP_XPRIO
 
 # tflags net
 FROM_NEWDOM_BTC
@@ -704,7 +707,7 @@ GB_FREEMAIL_DISPTO
 # tflags publish
 GB_FREEMAIL_DISPTO_NOTFREEM
 
-# tflags net
+# tflags publish
 GB_FROM_METAMASK
 
 # tflags publish
@@ -776,7 +779,7 @@ HAS_X_NO_RELAY
 # tflags publish
 HAS_X_OUTGOING_SPAM_STAT
 
-# good enough
+# tflags net
 HDRS_LCASE
 
 # tflags publish
@@ -959,6 +962,9 @@ MANY_SPAN_IN_TEXT
 # good enough
 MANY_SUBDOM
 
+# tflags net
+MAY_BE_FORGED
+
 # tflags publish
 MILLION_HUNDRED
 
@@ -1046,9 +1052,6 @@ MSM_PRIO_REPTO
 # good enough
 MSOE_MID_WRONG_CASE
 
-# good enough
-MXG_EMAIL_FRAG
-
 # tflags publish
 NEWEGG_IMG_NOT_RCVD_NEGG
 
@@ -1123,9 +1126,6 @@ PDS_BTC_MSGID
 
 # good enough
 PDS_FRNOM_TODOM_NAKED_TO
-
-# tflags net
-PDS_FROM_2_EMAILS
 
 # good enough
 PDS_FROM_NAME_TO_DOMAIN
@@ -1605,6 +1605,9 @@ SUBJ_BRKN_WORDNUMS
 SUBJ_BROKEN_WORD
 
 # tflags net
+SUBJ_UNNEEDED_HTML
+
+# tflags net
 SURBL_BLOCKED
 
 # good enough
@@ -1647,7 +1650,13 @@ TONLINE_FAKE_DKIM
 TO_EQ_FM_DIRECT_MX
 
 # tflags net
+TO_EQ_FM_DOM_HTML_ONLY
+
+# tflags net
 TO_EQ_FM_DOM_SPF_FAIL
+
+# tflags net
+TO_EQ_FM_HTML_ONLY
 
 # tflags net
 TO_EQ_FM_SPF_FAIL
@@ -1679,8 +1688,11 @@ TO_TOO_MANY_WFH_01
 # good enough
 TVD_LONG_WORD5
 
-# good enough
+# tflags net
 TVD_SPACE_ENCODED
+
+# tflags net
+TVD_SPACE_RATIO_MINFP
 
 # tflags publish
 TW_GIBBERISH_MANY
