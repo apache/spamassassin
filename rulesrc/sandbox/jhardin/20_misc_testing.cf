@@ -877,7 +877,7 @@ header          RPT_SPAM_HDR            Report-SPAM =~ /./
 header          __FROM_LONG_USER        From:addr =~ /[^@]{30}\w\@/
 header          __FROM_LONG_DOM         From:addr =~ /\@[^.]{30}/
 
-meta            FROM_LONG_DOM_MINFP     __FROM_LONG_DOM && !__RCD_RDNS_MAIL_MESSY && !__ENV_AND_HDR_FROM_MATCH 
+meta            FROM_LONG_DOM_MINFP     __FROM_LONG_DOM && !__RCD_RDNS_MAIL_MESSY && !__ENV_AND_HDR_FROM_MATCH && !__HTML_FONT_TINY_NORDNS 
 describe        FROM_LONG_DOM_MINFP     Absurdly long From domain name, suspicious relays
 score           FROM_LONG_DOM_MINFP     2.500	# limit
 tflags          FROM_LONG_DOM_MINFP     publish
