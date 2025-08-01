@@ -4445,4 +4445,8 @@ describe   URI_DOTCN_LOGIN             Login page in .cn subdomain - possible Ch
 tflags     URI_DOTCN_LOGIN             publish
 
 
+# seen in phishing emails for captured data exfil
+uri        __TELEGRAM_MESSAGE          m;^https?://api\.telegram\.org/bot[^/]+/sendMessage;i
+
+
 
