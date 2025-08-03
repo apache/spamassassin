@@ -4160,6 +4160,7 @@ score      POSSIBLE_PAYPAL_PHISH_02    2.500	# limit
 
 # they apparently wised up and are now BCC'ing the victim
 header     __TO_ONMICROSOFTCOM         To:addr =~ /\@\w+\.onmicrosoft\.com>?$/i
+header     __REPTO_ONMICROSOFTCOM      Reply-To:addr =~ /\@\w+\.onmicrosoft\.com>?$/i
 meta       POSSIBLE_PAYPAL_PHISH_03    (__FROM_NAME_PAYPALCOM && __TO_ONMICROSOFTCOM && !__HDR_RCVD_PAYPAL)
 describe   POSSIBLE_PAYPAL_PHISH_03    Claims to be from paypal but not from paypal MTA, sent to Microsoft365 domain - likely fraud if you don't use MSFT365!
 tflags     POSSIBLE_PAYPAL_PHISH_03    publish
@@ -4448,5 +4449,10 @@ tflags     URI_DOTCN_LOGIN             publish
 # seen in phishing emails for captured data exfil
 uri        __TELEGRAM_MESSAGE          m;^https?://api\.telegram\.org/bot[^/]+/sendMessage;i
 
+# spam/phishing from google, collector at msft (Philip Prindeville)
+meta       __PP_CROSSTALK              __REPTO_ONMICROSOFTCOM && __FSL_RELAY_GOOGLE
+
+# likely useless by itself, but it might help metas
+header     __PP_GOOGLE_MAESTRO         EnvelopeFrom =~ /\@maestro\.bounces\.google\.com$/
 
 
