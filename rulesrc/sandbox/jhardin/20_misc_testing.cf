@@ -4420,8 +4420,8 @@ tflags      URI_NOCODEFORM             publish
 
 # Look for exploits of Bug 8288 - seems fairly common
 rawbody     __URI_EXCESS_SLASHES       m;https?:///+;i
-meta        URI_EXCESS_SLASHES         __URI_EXCESS_SLASHES && !__RCD_RDNS_MAIL_MESSY 
-score       URI_EXCESS_SLASHES         2.500
+meta        URI_EXCESS_SLASHES         __URI_EXCESS_SLASHES && __BUG6919_RDNS_GENERIC 
+score       URI_EXCESS_SLASHES         3.000
 describe    URI_EXCESS_SLASHES         Too many slashes in URI, possible attempt to bypass spam filtering
 tflags      URI_EXCESS_SLASHES         publish
 
