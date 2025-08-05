@@ -13,7 +13,7 @@ header       __GB_FROM_METAMASK1        From =~ /Met\x{D0}\x{B0}M\x{D0}\x{B0}sk/
 meta         __GB_FROM_METAMASK         ( __GB_FROM_METAMASK0 + __GB_FROM_METAMASK1 >= 1 )
 
 ifplugin Mail::SpamAssassin::Plugin::ReplaceTags
-  meta         GB_FROM_METAMASK           ( __GB_FROM_METAMASK && ( ( KHOP_HELO_FCRDNS && TO_NO_BRKTS_HTML_ONLY ) || FUZZY_WALLET ) )
+  meta         GB_FROM_METAMASK           ( __GB_FROM_METAMASK && ( ( KHOP_HELO_FCRDNS && TO_NO_BRKTS_HTML_ONLY ) || FUZZY_WALLET || FUZZY_SECURITY ) )
   describe     GB_FROM_METAMASK           Metamask spam
   score        GB_FROM_METAMASK           2.0 # limit
   tflags       GB_FROM_METAMASK           publish
