@@ -4436,12 +4436,12 @@ redirector_pattern                     m;^https?://web\.mmac\.org/.*[?&]url=//(.
 uri        __URI_DOTJP                 m;^https?://(?:[^./]+\.)+jp/;i
 uri        __URI_DOTCN_LOGIN           m;^https?://(?:[^./]{4,}\.){2,}cn/[^/]*login[^/]*/;i 
 meta       CN_PHISH_JP_01              __URI_DOTJP && __URI_DOTCN_LOGIN
-score      CN_PHISH_JP_01              2.500
+score      CN_PHISH_JP_01              2.500	# limit
 describe   CN_PHISH_JP_01              Apparent Chinese phishing of Japanese target
 tflags     CN_PHISH_JP_01              publish
 
 meta       URI_DOTCN_LOGIN             __URI_DOTCN_LOGIN && !CN_PHISH_JP_01
-score      URI_DOTCN_LOGIN             1.500
+score      URI_DOTCN_LOGIN             1.500	# limit
 describe   URI_DOTCN_LOGIN             Login page in .cn subdomain - possible Chinese phishing
 tflags     URI_DOTCN_LOGIN             publish
 
@@ -4450,7 +4450,12 @@ tflags     URI_DOTCN_LOGIN             publish
 uri        __TELEGRAM_MESSAGE          m;^https?://api\.telegram\.org/bot[^/]+/sendMessage;i
 
 # spam/phishing from google, collector at msft (Philip Prindeville)
-meta       __PP_CROSSTALK              __REPTO_ONMICROSOFTCOM && __FSL_RELAY_GOOGLE
+meta       __PP_CROSSTALK_G_M          __REPTO_ONMICROSOFTCOM && __FSL_RELAY_GOOGLE
+meta       PP_CROSSTALK_GOOG_MSFT      __PP_CROSSTALK_G_M
+score      PP_CROSSTALK_GOOG_MSFT      2.500	# limit
+describe   PP_CROSSTALK_GOOG_MSFT      MTA GOOG but Repto MSFT - possible phishing
+tflags     PP_CROSSTALK_GOOG_MSFT      publish
+
 
 # likely useless by itself, but it might help metas
 header     __PP_GOOGLE_MAESTRO         EnvelopeFrom =~ /\@maestro\.bounces\.google\.com$/
