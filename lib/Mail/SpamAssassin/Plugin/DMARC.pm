@@ -69,6 +69,7 @@ my $VERSION = 0.2;
 
 use Mail::SpamAssassin;
 use Mail::SpamAssassin::Plugin;
+use Mail::SpamAssassin::Util qw(is_fqdn_valid);
 
 our @ISA = qw(Mail::SpamAssassin::Plugin);
 
@@ -273,6 +274,10 @@ sub _check_dmarc {
     $mfrom_domain = ($pms->get('From:first:addr:domain'))[0];
     return if !defined $mfrom_domain;
     dbg("EnvelopeFrom header not found, using From");
+  }
+  if(!is_fqdn_valid($mfrom_domain)) {
+    dbg("Invalid domain name $mfrom_domain");
+    return;
   }
 
   my $spf_status = 'none';

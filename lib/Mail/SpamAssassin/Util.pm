@@ -2635,6 +2635,7 @@ sub _parse_header_addresses {
     my $comment = defined $5 ? $5 : undef;
 
     my ($user, $host, $invalid);
+    $invalid = 0;
 
     # Check relaxed <> capture
     if (defined $2) {
@@ -2642,7 +2643,7 @@ sub _parse_header_addresses {
       $address =~ s/\((?:|(?:[^()\\]++|\\.)*+)\)//gs;
       # Validate as somewhat email looking
       if ($address !~ /^$header_address_mailre$/) {
-        $address = undef;
+        $invalid = 1;
       }
     }
 
@@ -2670,6 +2671,7 @@ sub _parse_header_addresses {
         }
       }
       $phrase = $newphrase;
+      $phrase =~ s/^\s+|\s+\z//gs; # Trim whitespace
 
       # If we only have phrase which looks email, swap when valid
       # Check all in one if, either swap or don't
@@ -2710,7 +2712,7 @@ sub _parse_header_addresses {
       ($user, $host) = ($2, $3);
     }
 
-    $invalid = !defined $host || !is_fqdn_valid(idn_to_ascii($host), 1);
+    $invalid = 1 if !defined $host || !is_fqdn_valid(idn_to_ascii($host), 1);
     push @results, {
       'phrase' => $phrase,
       'user' => $user,
