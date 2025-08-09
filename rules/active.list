@@ -299,7 +299,7 @@ CN_PHISH_JP_01
 # tflags publish
 COMMENT_GIBBERISH
 
-# good enough
+# tflags net
 COMPENSATION
 
 # tflags publish
@@ -557,7 +557,7 @@ FROM_MISSP_MSFT
 # good enough
 FROM_MISSP_PHISH
 
-# good enough
+# tflags net
 FROM_MISSP_REPLYTO
 
 # tflags net
@@ -704,7 +704,7 @@ GB_FREEMAIL_DISPTO
 # tflags publish
 GB_FREEMAIL_DISPTO_NOTFREEM
 
-# tflags net
+# tflags publish
 GB_FROM_METAMASK
 
 # tflags publish
@@ -875,7 +875,7 @@ HTML_OFF_PAGE
 # tflags publish
 HTML_SHRT_CMNT_OBFU_MANY
 
-# tflags publish
+# tflags net
 HTML_SINGLET_MANY
 
 # tflags net
@@ -949,6 +949,9 @@ MALWARE_PASSWORD
 
 # tflags publish
 MALW_ATTACH
+
+# tflags net
+MANY_HDRS_LCASE
 
 # tflags publish
 MANY_SPAN_IN_TEXT
@@ -1118,6 +1121,9 @@ PDS_BTC_MSGID
 # good enough
 PDS_FRNOM_TODOM_NAKED_TO
 
+# tflags net
+PDS_FROM_2_EMAILS
+
 # good enough
 PDS_FROM_NAME_TO_DOMAIN
 
@@ -1126,6 +1132,9 @@ PDS_HELO_SPF_FAIL
 
 # good enough
 PDS_NAKED_TO_NUMERO
+
+# good enough
+PDS_NO_FULL_NAME_SPOOFED_URL
 
 # good enough
 PDS_OTHER_BAD_TLD
@@ -1138,9 +1147,6 @@ PDS_SHORT_SPOOFED_URL
 
 # good enough
 PDS_TONAME_EQ_TOLOCAL_FREEM_FORGE
-
-# good enough
-PDS_TO_EQ_FROM_NAME
 
 # tflags publish
 PHISH_ATTACH
@@ -1180,6 +1186,9 @@ POSSIBLE_PAYPAL_PHISH_04
 
 # tflags publish
 POSSIBLE_PAYPAL_PHISH_10
+
+# tflags publish
+PP_CROSSTALK_GOOG_MSFT
 
 # tflags publish
 PP_MIME_FAKE_ASCII_TEXT
@@ -1596,9 +1605,6 @@ SUBJ_ATTENTION
 SUBJ_BRKN_WORDNUMS
 
 # tflags net
-SUBJ_UNNEEDED_HTML
-
-# tflags net
 SURBL_BLOCKED
 
 # good enough
@@ -1658,7 +1664,7 @@ TO_NO_BRKTS_HTML_IMG
 # tflags publish
 TO_NO_BRKTS_HTML_ONLY
 
-# good enough
+# tflags net
 TO_NO_BRKTS_MSFT
 
 # tflags publish
@@ -1673,7 +1679,7 @@ TO_TOO_MANY_WFH_01
 # good enough
 TVD_LONG_WORD5
 
-# good enough
+# tflags net
 TVD_SPACE_ENCODED
 
 # tflags publish
