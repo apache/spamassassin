@@ -2908,39 +2908,41 @@ sub add_uri_detail_list {
       $hosts{$host} = $domain;
     }
 
-    # XXX we cannot call bgsend_and_start_lookup,
-    # otherwise get_uri_detail_list() might not
-    # return domains extracted from CNAME dns queries
-    # in time
-    my $orig_resolver =  $self->{main}->{resolver}->get_resolver();
-    my $pkt;
-    eval {
-      return if not defined $host;
-      my $handle = $orig_resolver->bgsend($host, 'CNAME');
-      $pkt = $orig_resolver->bgread($handle);
-      return if !$pkt; # aborted / timed out
-      my @answ = $pkt->answer;
-      foreach my $ans ( @answ ) {
-        return if not defined $ans->cname;
-        if(not exists $self->{dns_cname_cache}{$host}) {
-          $self->{dns_cname_cache}{$host} = $ans->cname;
-          dbg("dns: found CNAME " . $ans->cname . " for host $host");
-          my $cname_types = { %{$types} };
-          $cname_types->{unlinked} = 1;
-          $cname_types->{noclean} = 1;
-          $self->{uri_cnames}{$ans->cname} = $host;
-          $self->add_uri_detail_list($ans->cname, $cname_types, $source, 1);
-	}
-      }
-    } or do {
-      undef $pkt;
-      if($@) {
-        my $eval_stat = $@ ne '' ? $@ : "errno=$!";  chomp $eval_stat;
-        # resignal if alarm went off
-        die $eval_stat  if $eval_stat =~ /__alarm__ignore__\(.*\)/s;
-        info("dns: bad dns reply: %s", $eval_stat);
-      }
-    };
+    if($self->is_dns_available()) {
+      # XXX we cannot call bgsend_and_start_lookup,
+      # otherwise get_uri_detail_list() might not
+      # return domains extracted from CNAME dns queries
+      # in time
+      my $orig_resolver =  $self->{main}->{resolver}->get_resolver();
+      my $pkt;
+      eval {
+        return if not defined $host;
+        my $handle = $orig_resolver->bgsend($host, 'CNAME');
+        $pkt = $orig_resolver->bgread($handle);
+        return if !$pkt; # aborted / timed out
+        my @answ = $pkt->answer;
+        foreach my $ans ( @answ ) {
+          return if not defined $ans->cname;
+          if(not exists $self->{dns_cname_cache}{$host}) {
+            $self->{dns_cname_cache}{$host} = $ans->cname;
+            dbg("dns: found CNAME " . $ans->cname . " for host $host");
+            my $cname_types = { %{$types} };
+            $cname_types->{unlinked} = 1;
+            $cname_types->{noclean} = 1;
+            $self->{uri_cnames}{$ans->cname} = $host;
+            $self->add_uri_detail_list($ans->cname, $cname_types, $source, 1);
+	  }
+        }
+      } or do {
+        undef $pkt;
+        if($@) {
+          my $eval_stat = $@ ne '' ? $@ : "errno=$!";  chomp $eval_stat;
+          # resignal if alarm went off
+          die $eval_stat  if $eval_stat =~ /__alarm__ignore__\(.*\)/s;
+          info("dns: bad dns reply: %s", $eval_stat);
+        }
+      };
+    }
   }
 
   # Bail out if no good uri found
