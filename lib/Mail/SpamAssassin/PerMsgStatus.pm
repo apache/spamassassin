@@ -2377,6 +2377,7 @@ sub _get {
       # Note: parse_header_addresses always called with raw undecoded value
       # Skip invalid addresses here
       my @addrs = parse_header_addresses($line);
+      push @{$self->{address_details}->{$request_lc}}, @addrs; # Bug 8342: save for later
       if (@addrs) {
         if ($getaddr) {
           foreach my $addr (@addrs) {

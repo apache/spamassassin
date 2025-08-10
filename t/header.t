@@ -2,7 +2,7 @@
 
 use lib '.'; use lib 't';
 use SATest; sa_t_init("header");
-use Test::More tests => 26;
+use Test::More tests => 38;
 
 # ---------------------------------------------------------------------------
 
@@ -64,6 +64,54 @@ tstprefs('
 );
 
 ok (sarun ("-L -t < data/nice/001", \&patterns_run_cb));
+ok_all_patterns();
+
+##########################################
+
+tstprefs('
+  # Check for invalid header parsing (Bug 8342)
+
+  header INVALID_FROM eval:check_invalid_from()
+  score INVALID_FROM 2.0
+
+  header INVALID_SENDER eval:check_invalid_sender()
+  score INVALID_SENDER 2.0
+
+  header INVALID_REPLY eval:check_invalid_replyto()
+  score INVALID_REPLY 2.0
+');
+
+%patterns = (
+    q{ 2.0 INVALID_FROM }, 'INVALID_FROM',
+);
+%anti_patterns = (
+    q{ 2.0 INVALID_REPLY }, 'INVALID_REPLY',
+    q{ 2.0 INVALID_SENDER }, 'INVALID_SENDER',
+);
+
+ok (sarun ("-L -t < data/spam/invalid_from", \&patterns_run_cb));
+ok_all_patterns();
+
+%patterns = (
+    q{ 2.0 INVALID_SENDER }, 'INVALID_SENDER',
+);
+%anti_patterns = (
+    q{ 2.0 INVALID_FROM }, 'INVALID_FROM',
+    q{ 2.0 INVALID_REPLY }, 'INVALID_REPLY',
+);
+
+ok (sarun ("-L -t < data/spam/invalid_sender", \&patterns_run_cb));
+ok_all_patterns();
+
+%patterns = (
+    q{ 2.0 INVALID_REPLY }, 'INVALID_REPLY',
+);
+%anti_patterns = (
+    q{ 2.0 INVALID_FROM }, 'INVALID_FROM',
+    q{ 2.0 INVALID_SENDER }, 'INVALID_SENDER',
+);
+
+ok (sarun ("-L -t < data/spam/invalid_replyto", \&patterns_run_cb));
 ok_all_patterns();
 
 ##########################################

@@ -34,6 +34,21 @@ our @ISA = qw(Mail::SpamAssassin::Plugin);
 
 my $IP_ADDRESS = IP_ADDRESS;
 
+=head1 NAME
+
+Mail::SpamAssassin::Plugin::HeaderEval - Plugin for evaluating header fields.
+
+=head1 SYNOPSIS
+
+  use Mail::SpamAssassin::Plugin::HeaderEval;
+
+=head1 DESCRIPTION
+
+The C<Mail::SpamAssassin::Plugin::HeaderEval> module provides functionality
+for evaluating email header fields against certain criteria in SpamAssassin.
+
+=cut
+
 # constructor: register the eval rule
 sub new {
   my $class = shift;
@@ -73,9 +88,22 @@ sub new {
   $self->register_eval_rule("gated_through_received_hdr_remover", $Mail::SpamAssassin::Conf::TYPE_HEAD_EVALS);
   $self->register_eval_rule("received_within_months", $Mail::SpamAssassin::Conf::TYPE_HEAD_EVALS);
   $self->register_eval_rule("check_equal_from_domains", $Mail::SpamAssassin::Conf::TYPE_HEAD_EVALS);
+  $self->register_eval_rule("check_invalid_from", $Mail::SpamAssassin::Conf::TYPE_HEAD_EVALS);
+  $self->register_eval_rule("check_invalid_sender", $Mail::SpamAssassin::Conf::TYPE_HEAD_EVALS);
+  $self->register_eval_rule("check_invalid_replyto", $Mail::SpamAssassin::Conf::TYPE_HEAD_EVALS);
 
   return $self;
 }
+
+=over 4
+
+=item check_for_fake_aol_relay_in_rcvd
+
+Check if a relay present in Received header is a forged AOL header.
+
+=back
+
+=cut
 
 sub check_for_fake_aol_relay_in_rcvd {
   my ($self, $pms) = @_;
@@ -133,6 +161,16 @@ sub check_for_faraway_charset_in_headers {
 sub check_for_unique_subject_id {
   return 0;
 }
+
+=over 4
+
+=item check_illegal_chars
+
+Check for 8-bit and other illegal characters that should be MIME encoded
+
+=back
+
+=cut
 
 # look for 8-bit and other illegal characters that should be MIME
 # encoded, these might want to exempt languages that do not use
@@ -261,12 +299,32 @@ sub _check_for_forged_hotmail_received_headers {
   }
 }
 
+=over 4
+
+=item check_for_forged_hotmail_received_headers
+
+Check for forged Hotmail received headers
+
+=back
+
+=cut
+
 # FORGED_HOTMAIL_RCVD
 sub check_for_forged_hotmail_received_headers {
   my ($self, $pms) = @_;
   $self->_check_for_forged_hotmail_received_headers($pms);
   return $pms->{hotmail_addr_with_forged_hotmail_received};
 }
+
+=over 4
+
+=item check_for_no_forged_hotmail_received_headers
+
+Check for semi-forged Hotmail received headers
+
+=back
+
+=cut
 
 # SEMIFORGED_HOTMAIL_RCVD
 sub check_for_no_hotmail_received_headers {
@@ -343,6 +401,16 @@ sub check_for_msn_groups_headers {
 
 ###########################################################################
 
+=over 4
+
+=item check_for_forged_eudoramail_received_headers
+
+Check for forged Eudora mail received headers
+
+=back
+
+=cut
+
 sub check_for_forged_eudoramail_received_headers {
   my ($self, $pms) = @_;
 
@@ -371,6 +439,16 @@ sub check_for_forged_eudoramail_received_headers {
 }
 
 ###########################################################################
+
+=over 4
+
+=item check_for_forged_yahoo_received_headers
+
+Check for forged Yahoo received headers
+
+=back
+
+=cut
 
 sub check_for_forged_yahoo_received_headers {
   my ($self, $pms) = @_;
@@ -429,6 +507,16 @@ sub check_for_forged_yahoo_received_headers {
   return 1;
 }
 
+=over 4
+
+=item check_for_forged_juno_received_headers
+
+Check for forged Juno received headers
+
+=back
+
+=cut
+
 sub check_for_forged_juno_received_headers {
   my ($self, $pms) = @_;
 
@@ -460,6 +548,16 @@ sub check_for_forged_juno_received_headers {
   return 0;   
 }
 
+=over 4
+
+=item check_for_forged_gmail_received_headers
+
+Check for forged Gmail received headers
+
+=back
+
+=cut
+
 sub check_for_forged_gmail_received_headers {
   my ($self, $pms) = @_;
   use constant GOOGLE_MESSAGE_STATE_LENGTH_MIN => 60;
@@ -487,11 +585,31 @@ sub check_for_forged_gmail_received_headers {
   return 1;
 }
 
+=over 4
+
+=item check_for_matching_env_and_hdr_from
+
+Check if EnvelopeFrom and From headers match
+
+=back
+
+=cut
+
 sub check_for_matching_env_and_hdr_from {
   my ($self, $pms) =@_;
   # two blank headers match so don't bother checking
   return (lc $pms->get('EnvelopeFrom:addr') eq lc $pms->get('From:addr'));
 }
+
+=over 4
+
+=item sorted_recipients
+
+Check if recipients are sorted
+
+=back
+
+=cut
 
 sub sorted_recipients {
   my ($self, $pms) = @_;
@@ -501,6 +619,16 @@ sub sorted_recipients {
   }
   return $pms->{tocc_sorted};
 }
+
+=over 4
+
+=item similar_recipients
+
+Check if recipients are similar
+
+=back
+
+=cut
 
 sub similar_recipients {
   my ($self, $pms, $min, $max) = @_;
@@ -562,6 +690,16 @@ sub _check_recipients {
     $pms->{tocc_similar} = $hits / $combinations;
   }
 }
+
+=over 4
+
+=item check_for_missing_to_header
+
+Check if To: header is missing
+
+=back
+
+=cut
 
 sub check_for_missing_to_header {
   my ($self, $pms) = @_;
@@ -800,6 +938,15 @@ sub _check_date_diff {
   $pms->{date_diff} = $diffs[0];
 }
 
+=over 4
+
+=item subject_is_all_caps
+
+Check if Subject: header is all uppercase
+
+=back
+
+=cut
 
 sub subject_is_all_caps {
    my ($self, $pms) = @_;
@@ -823,6 +970,16 @@ sub subject_is_all_caps {
 
    return length($subject) && ($subject eq uc($subject));
 }
+
+=over 4
+
+=item check_for_to_in_subject
+
+Check if To: header value is present in the email Subject
+
+=back
+
+=cut
 
 sub check_for_to_in_subject {
   my ($self, $pms, $test) = @_;
@@ -852,6 +1009,16 @@ sub check_for_to_in_subject {
   return 0;
 }
 
+=over 4
+
+=item check_outlook_message_id
+
+Check if Message-ID header has been generated by Microsoft Outlook
+
+=back
+
+=cut
+
 sub check_outlook_message_id {
   my ($self, $pms) = @_;
   local ($_);
@@ -879,6 +1046,16 @@ sub check_outlook_message_id {
 
   return (abs($diff) >= $fudge);
 }
+
+=over 4
+
+=item check_messageid_not_usable
+
+Check for invalid Message-ID header
+
+=back
+
+=cut
 
 sub check_messageid_not_usable {
   my ($self, $pms) = @_;
@@ -985,6 +1162,69 @@ sub check_equal_from_domains {
   return 0;
 }
 
+###########################################################################
+
+=over 4
+
+=item check_invalid_from
+
+Check if From: address is not valid
+
+=back
+
+=cut
+
+sub check_invalid_from {
+  my ($self, $pms) = @_;
+
+  unless (defined $pms->{invalid_from_addr}) {
+    $pms->get('From:addr'); # parse From:addr
+    $pms->{invalid_from_addr} = grep { $_->{invalid} } @{$pms->{address_details}{'from'} || []};
+  }
+
+  return $pms->{invalid_from_addr} ? 1 : 0;
+}
+
+=over 4
+
+=item check_invalid_sender
+
+Check if Sender header address is not valid
+
+=back
+
+=cut
+
+sub check_invalid_sender {
+  my ($self, $pms) = @_;
+
+  unless (defined $pms->{invalid_sender_addr}) {
+    $pms->get('Sender:addr'); # parse Sender:addr
+    $pms->{invalid_sender_addr} = grep {$_->{invalid}} @{$pms->{address_details}{'sender'} || []};
+  }
+
+  return $pms->{invalid_sender_addr} ? 1 : 0;
+}
+=over 4
+
+=item check_invalid_replyto
+
+Check if Reply-To header address is not valid
+
+=back
+
+=cut
+
+sub check_invalid_replyto {
+  my ($self, $pms) = @_;
+
+  unless (defined $pms->{invalid_replyto_addr}) {
+    $pms->get('Reply-To:addr'); # parse Reply-To:addr
+    $pms->{invalid_replyto_addr} = grep {$_->{invalid}} @{$pms->{address_details}{'reply-to'} || []};
+  }
+
+  return $pms->{invalid_replyto_addr} ? 1 : 0;
+}
 
 ###########################################################################
 
@@ -994,5 +1234,9 @@ sub dbg2 {
     dbg(@_);
   }
 }
+
+sub has_check_invalid_from { 1 }
+sub has_check_invalid_sender { 1 }
+sub has_check_invalid_replyto { 1 }
 
 1;
