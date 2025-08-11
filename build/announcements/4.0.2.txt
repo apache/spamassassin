@@ -33,6 +33,8 @@ Notable changes
 
 This release addresses the following issues:
 
+  - Add subs to HeaderEval plugin to detect invalid address headers
+
   - TxRep data when using a SQL backend might be wrong because of
   a bug in SpamAssassin 4.0.1, TxRep score can be limited with new
   txrep_min_score and txrep_max_score configuration options
@@ -55,6 +57,8 @@ This release addresses the following issues:
   - New Mail::SpamAssassin::Plugin::Redirectors plugin
   This plugin looks for URLs redirected by a list of URL redirector
   services.
+
+  - improved handling of IDN domains
 
 The detailed list of all commits can be found in the Changes file.
 A detailed view of the issues as they were filed in the Bugzilla issue
