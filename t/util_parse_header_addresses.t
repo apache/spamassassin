@@ -8,6 +8,11 @@ use Test::More;
 use strict;
 require Mail::SpamAssassin::Util;
 
+use constant HAS_IDN => eval { require Net::LibIDN; };
+use constant HAS_IDN2 => eval { require Net::LibIDN2; };
+
+plan skip_all => "Net::LibIDN or Net::LibIDN2 is required for this test to pass" unless (HAS_IDN || HAS_IDN2);
+
 my @data = (
     {
         in  => 'companyname <"no reply"@example.com>',
