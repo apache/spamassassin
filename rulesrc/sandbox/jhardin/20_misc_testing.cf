@@ -4436,7 +4436,7 @@ redirector_pattern                     m;^https?://web\.mmac\.org/.*[?&]url=//(.
 uri        __URI_DOTJP                 m;^https?://(?:[^./]+\.)+jp/;i
 uri        __URI_DOTCN_LOGIN           m;^https?://(?:[^./]{4,}\.){2,}cn/[^/]*login[^/]*/;i 
 meta       CN_PHISH_JP_01              __URI_DOTJP && __URI_DOTCN_LOGIN
-score      CN_PHISH_JP_01              2.500	# limit
+score      CN_PHISH_JP_01              3.000	# limit
 describe   CN_PHISH_JP_01              Apparent Chinese phishing of Japanese target
 tflags     CN_PHISH_JP_01              publish
 
@@ -4444,6 +4444,10 @@ meta       URI_DOTCN_LOGIN             __URI_DOTCN_LOGIN && !CN_PHISH_JP_01
 score      URI_DOTCN_LOGIN             1.500	# limit
 describe   URI_DOTCN_LOGIN             Login page in .cn subdomain - possible Chinese phishing
 tflags     URI_DOTCN_LOGIN             publish
+
+ifplugin Mail::SpamAssassin::Plugin::URIDetail
+  uri_detail   __URI_DOTCN_SPOOF       text =~ m;^https?://(?:[^./]+\.)+(?!cn/)[^/]+/;i domain =~ /\.cn$/i
+endif  
 
 
 # seen in phishing emails for captured data exfil
