@@ -396,7 +396,7 @@ sub _check_dmarc {
     }
   }
 
-  if(defined $result and ($result->result ne 'none') and ($result->published->can('stringify'))) {
+  if(defined $result and ($result->result ne 'none') and (defined $result->{published}) and ($result->published->can('stringify'))) {
     dbg("Evaluated DMARC record \"" . $result->published->stringify . "\" for domain $mfrom_domain");
   }
 
