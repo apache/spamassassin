@@ -4459,9 +4459,9 @@ score      CN_PHISH_JP_03              2.500	# limit
 describe   CN_PHISH_JP_03              JP "invoice" + .cn URL - possible Chinese phishing
 tflags     CN_PHISH_JP_03              publish
 
-body       __JP_PAYMENT                /\xE3\x81\x8A\xE6\x94\xAF\xE6\x89\x95\xE3\x81\x84/
+body       __JP_PAYMENT                /\xE6\x94\xAF\xE6\x89\x95\xE3\x81\x84/
 
-meta       CN_PHISH_JP_04              __CN_URL && __JP_PAYMENT
+meta       CN_PHISH_JP_04              __CN_URL && __JP_PAYMENT && __DOS_RELAYED_EXT 
 score      CN_PHISH_JP_04              2.500	# limit
 describe   CN_PHISH_JP_04              JP "payment" + .cn URL - possible Chinese phishing
 tflags     CN_PHISH_JP_04              publish
@@ -4477,8 +4477,8 @@ tflags     CN_PHISH_JP_05              publish
 ifplugin Mail::SpamAssassin::Plugin::URIDetail
   uri_detail   __URI_DOTCN_SPOOF       text =~ m;^https?://(?:[^./]+\.)+(?!cn/)[^/]+/;i domain =~ /\.cn$/i
   meta         URI_DOTCN_SPOOF         __URI_DOTCN_SPOOF
-  score        URI_DOTCN_SPOOF         2.500	# limit
-  describe     URI_DOTCN_SPOOF         .CN TLD for non-.CN visible URL - possible Chinese phishing
+  score        URI_DOTCN_SPOOF         3.000	# limit
+  describe     URI_DOTCN_SPOOF         .CN TLD for non-.CN visible URL - likely Chinese phishing
   tflags       URI_DOTCN_SPOOF         publish
 endif  
 
