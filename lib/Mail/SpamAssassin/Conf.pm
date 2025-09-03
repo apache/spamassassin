@@ -2108,6 +2108,19 @@ dns_block_rule query blockage will last this many seconds.
     type => $CONF_TYPE_NUMERIC,
   });
 
+=item dns_max_cname_cache n   (default: 10 entries)
+
+When we find CNAMEs of uris, limit the cache to 10 entries
+and stop processing CNAMEs to limit resource usage.
+
+=cut
+
+  push (@cmds, {
+    setting => 'dns_max_cname_cache',
+    default => 10,
+    type => $CONF_TYPE_NUMERIC,
+  });
+
 =back
 
 =head2 LEARNING OPTIONS

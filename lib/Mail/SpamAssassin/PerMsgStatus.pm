@@ -2909,7 +2909,8 @@ sub add_uri_detail_list {
       $hosts{$host} = $domain;
     }
 
-    if($self->is_dns_available()) {
+    my $dns_max_cname_cache = $self->{main}->{conf}->{dns_max_cname_cache};
+    if($self->is_dns_available() and (not defined $self->{dns_cname_cache} or scalar %{$self->{dns_cname_cache}} < $dns_max_cname_cache)) {
       # XXX we cannot call bgsend_and_start_lookup,
       # otherwise get_uri_detail_list() might not
       # return domains extracted from CNAME dns queries
