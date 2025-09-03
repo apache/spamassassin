@@ -5610,6 +5610,7 @@ sub feature_capture_rules { 1 } # Can capture and use tags with regex in body/ra
 sub has_tflags_nosubject { 1 } # tflags nosubject
 sub has_tflags_nolog { 1 } # tflags nolog
 sub perl_min_version_5010000 { return $] >= 5.010000 }  # perl version check ("perl_version" not neatly backwards-compatible)
+sub has_dns_max_cname_cache { 1 } # supports 'dns_max_cname_cache' option
 
 ###########################################################################
 
