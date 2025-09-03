@@ -2918,10 +2918,14 @@ sub add_uri_detail_list {
       my $pkt;
       eval {
         return if not defined $host;
+        return if exists $self->{dns_cname_cache}{$host};
         my $handle = $orig_resolver->bgsend($host, 'CNAME');
         $pkt = $orig_resolver->bgread($handle);
         return if !$pkt; # aborted / timed out
         my @answ = $pkt->answer;
+        # Set an invalid value in the cache, it will be overwritten later
+        # if a CNAME is present
+        $self->{dns_cname_cache}{$host} = 'invalid';
         foreach my $ans ( @answ ) {
           return if not defined $ans->cname;
           if(not exists $self->{dns_cname_cache}{$host}) {
