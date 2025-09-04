@@ -180,13 +180,13 @@ tstprefs ("
 # our own checking callback and keep using the existing ok_all_patterns call
 %patterns = ( 1 => 'Acted on message' );
 
-ok(salearnrun("--spam data/spam", \&check_examined));
+ok(salearnrun("-L --spam data/spam", \&check_examined));
 ok_all_patterns();
 
-ok(salearnrun("--ham data/nice", \&check_examined));
+ok(salearnrun("-L --ham data/nice", \&check_examined));
 ok_all_patterns();
 
-ok(salearnrun("--ham data/welcomelists", \&check_examined));
+ok(salearnrun("-L --ham data/welcomelists", \&check_examined));
 ok_all_patterns();
 
 %patterns = ( 'non-token data: bayes db version' => 'db version' );
