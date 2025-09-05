@@ -4,12 +4,17 @@
 # The real root cause is obscure, so we test for the bug not the Perl version.
 
 use strict;
+use warnings;
+
 use lib '.'; use lib 't';
 use SATest; sa_t_init("uri_list");
-use Test::More tests=> 12;
 use Mail::SpamAssassin::Util;
-use warnings;
 use Cwd;
+
+use Test::More;
+plan skip_all => "Net tests disabled"          unless conf_bool('run_net_tests');
+plan skip_all => "Can't use Net::DNS Safely"   unless can_use_net_dns_safely();
+plan tests=> 12;
 
 my $twoplus = <<'EOT';
 Message-ID: <clean.1010101@x.com>
