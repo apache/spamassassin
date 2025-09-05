@@ -211,7 +211,7 @@ The http GET method will be used to check those domains.
 
 =over 4
 
-=item url_redirector_params regexp (default: (?:adurl|af_web_dp|cm_destination|continue|destination|destURL|h|l|login|location|p1|pval|r|redir|redirect|redirectTo|return|returnUrl|referer|service|target|tid|u|url)=(.*))
+=item url_redirector_params regexp (default: (?:adurl|af_web_dp|cm_destination|continue|destination|destURL|goto|h|l|login|location|p1|pval|r|redir|redirect|redirectTo|return|returnUrl|referer|service|target|tid|u|url)=(.*))
 
 Regexp used to parse uri parameters in order to detect redirectors and to get redirected domains.
 The regexp must match only the redirected domain.
@@ -222,7 +222,7 @@ The regexp must match only the redirected domain.
 
   push(@cmds, {
     setting => 'url_redirector_params',
-    default => qr/(?:adurl|af_web_dp|cm_destination|continue|destination|destURL|h|l|login|location|p1|pval|r|redir|redirect|redirectTo|ret_url|return|returnUrl|referer|service|target|tid|u|url)=(.*)/,
+    default => qr/(?:adurl|af_web_dp|cm_destination|continue|destination|destURL|goto|h|l|login|location|p1|pval|r|redir|redirect|redirectTo|ret_url|return|returnUrl|referer|service|target|tid|u|url)=(.*)/,
     type => $Mail::SpamAssassin::Conf::CONF_TYPE_STRING,
     code => sub {
       my ($self, $key, $value, $line) = @_;
@@ -806,7 +806,7 @@ sub _check_querystring {
   my $rreg = $conf->{url_redirector_params};
 
   # Check parameters regexp and https:// in the querystring
-  if (($params =~ /(?:\?|\&)$rreg/gis) or ($params =~ /(?:\/|\_|\=)https?:\/\/(.*)/)) {
+  if (($params =~ /(?:\?|\&)$rreg/gis) or ($params =~ /(?:\/|\_|\=)(?:https?:)?\/\/(.*)/)) {
     dbg("Found redirection with path $params");
     my $newuri = $1;
     if($newuri !~ /^http/) {
