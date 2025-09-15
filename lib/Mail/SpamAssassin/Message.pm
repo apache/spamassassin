@@ -1368,7 +1368,7 @@ sub get_decoded_body_text_array {
   # Go through each part
   for(my $pt = 0 ; $pt <= $#parts ; $pt++ ) {
     # skip non-text parts (Bug 6439)
-    next unless $parts[$pt]->effective_type() =~ /^(?:text|message)\b/;
+    next unless $parts[$pt]->effective_type() =~ /^(?:text|message|image\/svg\+xml)\b/;
     # bug 4843: skip text/calendar parts since they're usually an attachment
     # and not displayed
     next if ($parts[$pt]->{'type'} eq 'text/calendar');

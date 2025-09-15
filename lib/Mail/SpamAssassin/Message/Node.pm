@@ -747,7 +747,7 @@ sub rendered {
   # we also want to skip things like text/x-vcard
   # text/x-aol is ignored here, but looks like text/html ...
   my $type = $self->effective_type();
-  unless ($type eq 'text/plain' || $type eq 'text/html') {
+  unless ($type eq 'text/plain' || $type eq 'text/html' || $type eq 'image/svg+xml') {
     return (undef,undef);
   }
 
@@ -761,7 +761,7 @@ sub rendered {
   }
 
   # render text/html always
-  if ($text ne '' && $type eq 'text/html')
+  if ($text ne '' && $type ne 'text/plain' )
   {
     $self->{rendered_type} = 'text/html';
 
