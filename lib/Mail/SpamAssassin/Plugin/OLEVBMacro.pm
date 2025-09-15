@@ -81,7 +81,7 @@ use strict;
 use warnings;
 
 use Mail::SpamAssassin::Plugin;
-use Mail::SpamAssassin::Util qw(compile_regexp get_part_details);
+use Mail::SpamAssassin::Util qw(compile_regexp);
 
 use constant HAS_ARCHIVE_ZIP => eval { require Archive::Zip; };
 use constant HAS_IO_STRING => eval { require IO::String; };
