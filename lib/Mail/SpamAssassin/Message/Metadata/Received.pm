@@ -406,7 +406,7 @@ sub parse_received_line {
   # with HTTPS is used by Horde adjusts the Received header to say "HTTPS" when
   # a connection is made over HTTPS
   # IANA registry: https://www.iana.org/assignments/mail-parameters/mail-parameters.xhtml
-  if (/ by / && / with ((?:ES|L|UTF8S|UTF8L)MTPS?A|ASMTP|HTTP[SU]?)(?: |;|$)/i) {
+  if (/ by / && / with .{0,64}((?:ES|L|UTF8S|UTF8L)MTPS?A|ASMTP|HTTP[SU]?)(?: |;|$)/i) {
     $auth = $1;
   }
   # GMail should use ESMTPSA to indicate that it is in fact authenticated,
