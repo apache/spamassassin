@@ -4430,7 +4430,7 @@ tflags      URI_EXCESS_SLASHES         publish
 # https://web.mmac.org/cwt/external/wcpages/referral.aspx?ReferralType=W&ProfileID=94027&ListingID=11005&CategoryID=721&SubCategoryID=0&url=//ipfs.io/ipfs/QmexFb1XEJqDuDSyBDm3Fa4t3n29gPpEHw39duPsyX5iyf#user@example.com
 # Unfortunately the protocol is omitted so URI rules that expect a full URI with protocol may not hit the extracted URI
 # NOT capturing the "//" - we can't deal with that properly, it blocks adding the domain to BL checks
-redirector_pattern                     m;^https?://web\.mmac\.org/.*[?&]url=//(.+)$;
+redirector_pattern                     m;^https?://web\.mmac\.org/.*[?&]url=//(.+)$;i
 
 # Lots of .CN phishing of .JP lately
 uri        __URI_DOTJP                 m;^https?://(?:[^./]+\.)+jp/;i
@@ -4498,8 +4498,8 @@ tflags     PP_CROSSTALK_GOOG_MSFT      publish
 header     __PP_GOOGLE_MAESTRO         EnvelopeFrom =~ /\@maestro\.bounces\.google\.com$/
 
 # observed in phishing
-redirector_pattern                     m;^https?://secure\.adnxs\.com/.*[?&]redir=(.+);
-redirector_pattern                     m;^https?://shopper\.digidip\.net/.*[?&]url=(.+);
+redirector_pattern                     m;^https?://secure\.adnxs\.com/.*[?&]redir=(.+);i
+redirector_pattern                     m;^https?://shopper\.digidip\.net/.*[?&]url=(.+);i
 
 
 
