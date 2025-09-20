@@ -4497,4 +4497,9 @@ tflags     PP_CROSSTALK_GOOG_MSFT      publish
 # likely useless by itself, but it might help metas
 header     __PP_GOOGLE_MAESTRO         EnvelopeFrom =~ /\@maestro\.bounces\.google\.com$/
 
+# observed in phishing
+redirector_pattern                     m;^https?://secure\.adnxs\.com/.*[?&]redir=(.+);
+redirector_pattern                     m;^https?://shopper\.digidip\.net/.*[?&]url=(.+);
+
+
 
