@@ -4502,4 +4502,9 @@ redirector_pattern                     m;^https?://secure\.adnxs\.com/.*[?&]redi
 redirector_pattern                     m;^https?://shopper\.digidip\.net/.*[?&]url=(.+);i
 
 
+# npm phishing?
+header     __FROM_NPMJS_SPOOF          From:addr =~ /\@(?:[^.]+\.)*npmjs(?!\.com$|\.org$)[^\.]*\.[^\.>]+>?$/i
+
+
+
 
