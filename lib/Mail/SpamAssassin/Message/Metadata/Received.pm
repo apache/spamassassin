@@ -858,6 +858,24 @@ sub parse_received_line {
       goto enough;
     }
 
+    # Let's try to support a few qmailish formats in one;
+    # http://bz.apache.org/SpamAssassin/show_bug.cgi?id=2744#c14 :
+    # Received: from unknown (HELO feux01a-isp) (213.199.4.210) by totor.bouissou.net with SMTP; 1 Nov 2003 07:05:19 -0000 
+    # Received: from adsl-207-213-27-129.dsl.lsan03.pacbell.net (HELO merlin.net.au) (Owner50@207.213.27.129) by totor.bouissou.net with SMTP; 10 Nov 2003 06:30:34 -0000 
+    if (/^(\S+) \((?:HELO|EHLO) ([^\)]*)\) \((\S*@)?\[?(${IP_ADDRESS})\]?\).* by (\S+) /)
+    {
+      $mta_looked_up_dns = 1;
+      $rdns = $1; 
+      $helo = $2; 
+      $ident = (defined $3) ? $3 : '';
+      $ip = $4; 
+      $by = $5;
+      if ($ident) { 
+        $ident =~ s/\@$//; 
+      }
+      goto enough;
+    }
+
     # Received: from mail.sxptt.zj.cn ([218.0.185.24]) by dogma.slashnull.org
     # (8.11.6/8.11.6) with ESMTP id h2FH0Zx11330 for <webmaster@efi.ie>;
     # Sat, 15 Mar 2003 17:00:41 GMT
@@ -909,24 +927,6 @@ sub parse_received_line {
     if (/with (?:POP3|IMAP)/) {
       $self->found_pop_fetcher_sig();
       return 0;		# skip mail fetcher handovers
-    }
-
-    # Let's try to support a few qmailish formats in one;
-    # http://bz.apache.org/SpamAssassin/show_bug.cgi?id=2744#c14 :
-    # Received: from unknown (HELO feux01a-isp) (213.199.4.210) by totor.bouissou.net with SMTP; 1 Nov 2003 07:05:19 -0000 
-    # Received: from adsl-207-213-27-129.dsl.lsan03.pacbell.net (HELO merlin.net.au) (Owner50@207.213.27.129) by totor.bouissou.net with SMTP; 10 Nov 2003 06:30:34 -0000 
-    if (/^(\S+) \((?:HELO|EHLO) ([^\)]*)\) \((\S*@)?\[?(${IP_ADDRESS})\]?\).* by (\S+) /)
-    {
-      $mta_looked_up_dns = 1;
-      $rdns = $1; 
-      $helo = $2; 
-      $ident = (defined $3) ? $3 : '';
-      $ip = $4; 
-      $by = $5;
-      if ($ident) { 
-        $ident =~ s/\@$//; 
-      }
-      goto enough;
     }
 
     # Received: from x1-6-00-04-bd-d2-e0-a3.k317.webspeed.dk (benelli@80.167.158.170) by totor.bouissou.net with SMTP; 5 Nov 2003 23:18:42 -0000

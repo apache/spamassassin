@@ -2,7 +2,7 @@
 
 use lib '.'; use lib 't';
 use SATest; sa_t_init("rcvd_parser");
-use Test::More tests => 148;
+use Test::More tests => 149;
 use strict;
 
 # format is:
@@ -452,6 +452,8 @@ my %data = (
   '[ ip=143.166.226.16 rdns= helo= by=www.penguintowne.org ident= envfrom= id= auth=HTTP msa=0 ]',
 
   'from unknown (HELO [216.10.132.55]) (accounting@example.com@216.10.132.55) by mail.example.com with  (SSL TLSv1.3 TLS_AES_128_GCM_SHA256 encrypted) SMTPSESMTPSA (a296348e-8bfe-11f0-9b0a-6b3a2ad3fd80); Sun, 07 Sep 2025 10:23:41 -0500' => '[ ip=216.10.132.55 rdns= helo=!216.10.132.55! by=mail.example.com ident=accounting@example.com envfrom= id= auth=ESMTPSA msa=0 ]',
+
+  'from mta.example.com (HELO [192.168.1.35]) (a@example.com@1.2.3.4) by mta.example.com with  (TLS_AES_128_GCM_SHA256 encrypted) ESMTPSA (4090c222-9a4a-11f0-88a6-c3acd4c5d78d) ; Sun, 07 Sep 2025 10:23:41 -0500' => '[ ip=1.2.3.4 rdns=mta.example.com helo=!192.168.1.35! by=mta.example.com ident=a@example.com envfrom= id= auth=ESMTPSA msa=0 ]',
 
   #ADDED PER Bug 6783
   'from 67.85.219.192 (NaSMail authenticated user john.doe) by webmail.example.com with HTTP; Fri, 30 Mar 2012 12:39:58 +0100 (BST)' => 
