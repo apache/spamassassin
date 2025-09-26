@@ -1027,6 +1027,7 @@ sub _check_valid_signature {
 
   my(@valid_signatures);
   my $conf = $pms->{conf};
+  my @arc_sig;
   # DKIM signatures check
   if ($pms->{"${sig_type}_signatures_ready"}) {
     my $sig_result_supported;
@@ -1053,6 +1054,12 @@ sub _check_valid_signature {
           $signature->{_spamassassin_key_size} = $key_size; # stash it for later
           $info .= " WEAK($key_size)"  if $key_size < $minimum_key_bits;
         }
+      }
+      if($type eq 'ARC') {
+        my %arc;
+        $arc{prefix} = $signature->prefix;
+        $arc{valid} = $valid;
+        push(@arc_sig, \%arc);
       }
       push(@valid_signatures, $signature)  if $valid && !$expired;
 
@@ -1127,7 +1134,33 @@ sub _check_valid_signature {
                     @selector_list == 1 ? $selector_list[0] : \@selector_list);
       } elsif ($type eq 'ARC') {
         $pms->{arc_signed} = 1;
-        $pms->{arc_valid} = 1;
+        my $arc_seal_valid = 0;
+        my $arc_message_valid = 0;
+        my $arc_message_found = 0;
+        # All ARC-Seals signatures and the most recent ARC-Message-Signature must be valid
+        foreach my $arc ( @arc_sig ) {
+          if($arc->{prefix} eq 'ARC-Message-Signature:') {
+            next if $arc_message_found;
+            if($arc->{valid}) {
+              $arc_message_valid = 1;
+              dbg("dkim: valid ARC-Message-Signature signature");
+            } else {
+              dbg("dkim: invalid ARC-Message-Signature signature");
+            }
+            $arc_message_found = 1;
+          }
+          if(($arc->{prefix} eq 'ARC-Seal:') and $arc->{valid}) {
+            $arc_seal_valid = 1;
+            dbg("dkim: valid ARC-Seal signature");
+          } elsif(($arc->{prefix} eq 'ARC-Seal:') and not $arc->{valid}) {
+            $arc_seal_valid = 0;
+            dbg("dkim: invalid ARC-Seal signature");
+            last;
+          }
+        }
+        if($arc_message_valid and $arc_seal_valid) {
+          $pms->{arc_valid} = 1;
+        }
       }
       # let the result stand out more clearly in the log, use uppercase
       my $sig = $valid_signatures[0];
