@@ -197,7 +197,7 @@ BITCOIN_IMGUR
 # good enough
 BITCOIN_MALF_HTML
 
-# tflags publish
+# tflags net
 BITCOIN_MALWARE
 
 # tflags publish
@@ -509,10 +509,10 @@ FONT_INVIS_POSTEXTRAS
 # tflags net
 FORGED_SPF_HELO
 
-# tflags publish
+# tflags net
 FORM_FRAUD
 
-# tflags publish
+# tflags net
 FORM_FRAUD_3
 
 # tflags publish
@@ -584,7 +584,7 @@ FROM_MISSP_FREEMAIL
 # good enough
 FROM_MISSP_MSFT
 
-# tflags net
+# good enough
 FROM_MISSP_REPLYTO
 
 # tflags net
@@ -702,6 +702,9 @@ FUZZY_SAVINGS
 FUZZY_SECURITY
 
 # tflags publish
+FUZZY_TRUMP
+
+# tflags publish
 FUZZY_TRUSTWALLET
 
 # tflags publish
@@ -803,7 +806,7 @@ HAS_X_NO_RELAY
 # tflags publish
 HAS_X_OUTGOING_SPAM_STAT
 
-# good enough
+# tflags net
 HDRS_LCASE
 
 # tflags publish
@@ -899,7 +902,7 @@ HTML_OFF_PAGE
 # tflags publish
 HTML_SHRT_CMNT_OBFU_MANY
 
-# tflags publish
+# tflags net
 HTML_SINGLET_MANY
 
 # tflags net
@@ -974,11 +977,17 @@ MALWARE_PASSWORD
 # tflags publish
 MALW_ATTACH
 
+# tflags net
+MANY_HDRS_LCASE
+
 # tflags publish
 MANY_SPAN_IN_TEXT
 
 # good enough
 MANY_SUBDOM
+
+# tflags net
+MAY_BE_FORGED
 
 # good enough
 MILLION_EUR
@@ -1146,12 +1155,9 @@ PDS_BTC_ID
 PDS_BTC_MSGID
 
 # good enough
-PDS_FRNOM_TODOM_DBL_URL
-
-# good enough
 PDS_FRNOM_TODOM_NAKED_TO
 
-# tflags net
+# good enough
 PDS_FROM_2_EMAILS
 
 # good enough
@@ -1679,7 +1685,7 @@ TO_EQ_FM_DOM_SPF_FAIL
 # good enough
 TO_EQ_FM_HTML_DIRECT
 
-# good enough
+# tflags net
 TO_EQ_FM_HTML_ONLY
 
 # tflags net
@@ -1718,14 +1724,14 @@ TVD_PH_REC
 # good enough
 TVD_RCVD_SPACE_BRACKET
 
-# tflags net
+# good enough
 TVD_SPACE_ENCODED
-
-# tflags net
-TVD_SPACE_RATIO_MINFP
 
 # good enough
 TVD_SUBJ_ACC_NUM
+
+# tflags net
+TVD_SUBJ_NUM_OBFU_MINFP
 
 # tflags publish
 TW_GIBBERISH_MANY
@@ -1970,7 +1976,7 @@ URI_WPADMIN
 # tflags publish
 URI_WP_DIRINDEX
 
-# tflags publish
+# tflags net
 URI_WP_HACKED
 
 # tflags publish
