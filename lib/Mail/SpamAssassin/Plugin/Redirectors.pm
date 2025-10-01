@@ -982,6 +982,11 @@ sub recursive_lookup {
   # Check if it is a redirection to a relative URI
   # Make it an absolute URI and chain to it in that case
   if ($location !~ m{^[a-z]+://}i) {
+    # return early if the new url has an unsupported protocol
+    if($location =~ /^(ftp|mailto|tel):/) {
+      dbg("Unsupported protocol scheme \"$1:\"");
+      return;
+    }
     my $orig_location = $location;
     my $orig_redir_url = $redir_url;
     # Strip to..
