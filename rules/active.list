@@ -272,7 +272,7 @@ BODY_EMAIL_419_FRAUD_GM_LOOSE
 # good enough
 BODY_SINGLE_URI
 
-# tflags publish
+# tflags net
 BODY_URI_ONLY
 
 # tflags publish
@@ -319,6 +319,9 @@ CN_PHISH_JP_04
 
 # tflags publish
 COMMENT_GIBBERISH
+
+# good enough
+COMPENSATION
 
 # tflags publish
 CONTENT_AFTER_HTML
@@ -428,6 +431,9 @@ DOS_OE_TO_MX
 # good enough
 DOS_OUTLOOK_TO_MX
 
+# good enough
+DOS_RCVD_IP_TWICE_C
+
 # tflags publish
 DOTGOV_IMAGE
 
@@ -506,10 +512,10 @@ FONT_INVIS_POSTEXTRAS
 # tflags net
 FORGED_SPF_HELO
 
-# tflags publish
+# tflags net
 FORM_FRAUD
 
-# tflags publish
+# tflags net
 FORM_FRAUD_3
 
 # tflags publish
@@ -1151,9 +1157,6 @@ PDS_BTC_MSGID
 # good enough
 PDS_FRNOM_TODOM_NAKED_TO
 
-# tflags net
-PDS_FROM_2_EMAILS
-
 # good enough
 PDS_FROM_NAME_TO_DOMAIN
 
@@ -1610,6 +1613,9 @@ STATIC_XPRIO_OLE
 # tflags publish
 STOCK_TIP
 
+# good enough
+STOX_BOUND_090909_B
+
 # tflags userconf
 SUBJECT_IN_BLOCKLIST
 
@@ -1664,7 +1670,7 @@ TO_EQ_FM_DIRECT_MX
 # good enough
 TO_EQ_FM_DOM_HTML_IMG
 
-# good enough
+# tflags net
 TO_EQ_FM_DOM_HTML_ONLY
 
 # tflags net
@@ -1691,7 +1697,7 @@ TO_NO_BRKTS_HTML_IMG
 # tflags publish
 TO_NO_BRKTS_HTML_ONLY
 
-# tflags net
+# good enough
 TO_NO_BRKTS_MSFT
 
 # tflags publish
@@ -1931,9 +1937,6 @@ URI_MALWARE_SCMS
 # tflags userconf
 URI_NOVOWEL
 
-# good enough
-URI_OBFU_DOM
-
 # tflags publish
 URI_ONLY_MSGID_MALF
 
@@ -1948,6 +1951,9 @@ URI_PHISH
 
 # tflags publish
 URI_PHP_REDIR
+
+# tflags publish
+URI_SNIP_LY
 
 # tflags publish
 URI_TRY_3LD
