@@ -1,0 +1,17 @@
+RewriteEngine On
+  
+  # Broken URI patterns seen from scraper bots
+  RewriteRule /20.*sa-vm.*	/ [F,NC]
+
+  # Requie a CORRECT local referer for costly tasks
+  RewriteCond "%{HTTP_REFERER}" "^$" [OR]
+  RewriteCond "%{HTTP_REFERER}" "sa-vm.apache.org" [NC,OR]
+  RewriteCond "%{HTTP_REFERER}" "bbmass.spamassassin.org" [NC,OR]
+  RewriteCond "%{HTTP_REFERER}" "rsync.spamassassin.org" [NC,OR]
+  RewriteCond "%{HTTP_REFERER}" "buildbot.spamassassin.org" [NC]
+  RewriteRule /20.*(detail|mclog).*$   /   [F,NC]
+
+  # Rude Bot UA
+  RewriteCond "%{HTTP_USER_AGENT}" "Thinkbot" [NC]
+  RewriteRule ".*"  "/" [F]
+
