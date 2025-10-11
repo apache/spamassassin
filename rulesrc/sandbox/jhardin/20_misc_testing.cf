@@ -2014,7 +2014,7 @@ ifplugin Mail::SpamAssassin::Plugin::ReplaceTags
   describe      FUZZY_IMPORTANT     Obfuscated "important"
   tflags        FUZZY_IMPORTANT     publish
 
-  body          FUZZY_SECURITY      /(?=<S>)(?!security)(?!seguridad)(?!s\xc3\xa9curit\xc3\xa9)<S><E>(?:<C>|<G>)<U><R><I>(?:<T><Y>|<D><A><D>)/i
+  body          FUZZY_SECURITY      /(?=<S>)(?!security)(?!seguridad)(?!s\xc3[\x89\xa9]curit\xc3[\x89\xa9])<S><E>(?:<C>|<G>)<U><R><I>(?:<T><Y>|<D><A><D>)/i
   replace_rules FUZZY_SECURITY
   describe      FUZZY_SECURITY      Obfuscated "security"
   tflags        FUZZY_SECURITY      publish
