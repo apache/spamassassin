@@ -2928,16 +2928,18 @@ sub add_uri_detail_list {
         # if a CNAME is present
         $self->{dns_cname_cache}{$host} = 'invalid';
         foreach my $ans ( @answ ) {
-          return if not defined $ans->cname;
-          if(not exists $self->{dns_cname_cache}{$host}) {
-            $self->{dns_cname_cache}{$host} = $ans->cname;
-            dbg("dns: found CNAME " . $ans->cname . " for host $host");
-            my $cname_types = { %{$types} };
-            $cname_types->{unlinked} = 1;
-            $cname_types->{noclean} = 1;
-            $self->{uri_cnames}{$ans->cname} = $host;
-            $self->add_uri_detail_list($ans->cname, $cname_types, $source, 1);
-	  }
+          if($ans->can("cname")) {
+            return if not defined $ans->cname;
+            if(not exists $self->{dns_cname_cache}{$host}) {
+              $self->{dns_cname_cache}{$host} = $ans->cname;
+              dbg("dns: found CNAME " . $ans->cname . " for host $host");
+              my $cname_types = { %{$types} };
+              $cname_types->{unlinked} = 1;
+              $cname_types->{noclean} = 1;
+              $self->{uri_cnames}{$ans->cname} = $host;
+              $self->add_uri_detail_list($ans->cname, $cname_types, $source, 1);
+            }
+          }
         }
       } or do {
         undef $pkt;
