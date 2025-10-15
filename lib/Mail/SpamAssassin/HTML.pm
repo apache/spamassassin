@@ -125,6 +125,7 @@ sub new {
   $self->{SA_character_semantics_input} = $character_semantics_input;
   $self->{SA_encode_results} =
     $character_semantics_input && !$character_semantics_output;
+  $self->{anchor_refs} = [];
   $self;
 }
 
@@ -343,6 +344,7 @@ sub html_tag {
     }
     # end tags
     else {
+      pop(@{ $self->{anchor_refs} }) if $tag eq "a";
       $self->{closed_html} = 1 if $tag eq "html";
       $self->{closed_body} = 1 if $tag eq "body";
     }
@@ -859,9 +861,7 @@ sub html_tests {
     }
   }
   if ($tag eq "img" && exists $self->{inside}{a} && $self->{inside}{a} > 0) {
-    my $uri = $self->{anchor_last};
-    utf8::encode($uri) if $self->{SA_encode_results};
-    $self->{uri}->{$uri}->{anchor_text}->[-1] .= "<img>\n";
+    $$_ .= "<img>\n" for (@{$self->{anchor_refs}});
     $self->{anchor}->[-1] .= "<img>\n";
   }
 
@@ -896,11 +896,13 @@ sub html_tests {
 
   # special text delimiters - <a> and <title>
   if ($tag eq "a") {
-    my $uri = $self->{anchor_last} =
+    my $uri =
       (exists $attr->{href} ? $self->canon_uri($attr->{href}) : "");
     utf8::encode($uri) if $self->{SA_encode_results};
     push(@{$self->{uri}->{$uri}->{anchor_text}}, '');
     push(@{$self->{anchor}}, '');
+    # keep track of nested anchors (max depth 10)
+    push(@{$self->{anchor_refs}}, \($self->{uri}->{$uri}->{anchor_text}->[-1])) if @{$self->{anchor_refs}} < 10;
   }
   if ($tag eq "title") {
     $self->{title_index}++;
@@ -977,10 +979,7 @@ sub html_text {
 
   # text that is part of body and also stored separately
   if (exists $self->{inside}{a} && $self->{inside}{a} > 0) {
-    # this doesn't worry about nested anchors
-    my $uri = $self->{anchor_last};
-    utf8::encode($uri) if $self->{SA_encode_results};
-    $self->{uri}->{$uri}->{anchor_text}->[-1] .= $text;
+    $$_ .= $text for (@{$self->{anchor_refs}});
     $self->{anchor}->[-1] .= $text;
   }
   if (exists $self->{inside}{title} && $self->{inside}{title} > 0) {
