@@ -999,6 +999,18 @@ sub recursive_lookup {
     dbg("looks like a redirection to a relative URI: $orig_redir_url => $location ($orig_location)");
   }
 
+  # remove duplicated parameters in order to better catch loops
+  my %paramseen;
+  my $denorm_location = $location;
+  my ($hostpart, $querystring) = split /\?/, $location, 2;
+  my @params = split /&|%26/, $querystring;
+  my @unique_params = grep { !$paramseen{$_}++ } @params;
+  my $nquerystring = join '&', @unique_params;
+  $location = $hostpart . '?' . $nquerystring;
+  if($denorm_location ne $location) {
+    dbg("Normalizing redirector parameters from $denorm_location to $location"); 
+  }
+
   my ($domain, $host) = $self->{main}->{registryboundaries}->uri_to_domain($location);
   if (exists $been_here{$host}) {
     dbg("Chained redirector that uses the same hostname $host found for location $location");
