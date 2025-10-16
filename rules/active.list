@@ -197,7 +197,7 @@ BITCOIN_IMGUR
 # good enough
 BITCOIN_MALF_HTML
 
-# tflags net
+# tflags publish
 BITCOIN_MALWARE
 
 # tflags publish
@@ -272,7 +272,7 @@ BODY_SINGLE_URI
 # good enough
 BODY_SINGLE_WORD
 
-# tflags publish
+# tflags net
 BODY_URI_ONLY
 
 # tflags publish
@@ -489,6 +489,9 @@ FBI_SPOOF
 FILL_THIS_FORM
 
 # good enough
+FILL_THIS_FORM_LOAN
+
+# good enough
 FILL_THIS_FORM_LONG
 
 # tflags publish
@@ -518,7 +521,7 @@ FORGED_RELAY_MUA_TO_MX
 # tflags net
 FORGED_SPF_HELO
 
-# tflags net
+# tflags publish
 FORM_FRAUD
 
 # tflags publish
@@ -596,7 +599,7 @@ FROM_MISSP_MSFT
 # good enough
 FROM_MISSP_PHISH
 
-# tflags net
+# good enough
 FROM_MISSP_REPLYTO
 
 # tflags net
@@ -821,7 +824,7 @@ HAS_X_NO_RELAY
 # tflags publish
 HAS_X_OUTGOING_SPAM_STAT
 
-# tflags net
+# good enough
 HDRS_LCASE
 
 # tflags publish
@@ -853,6 +856,9 @@ HK_LOTTO
 
 # good enough
 HK_NAME_FM_MR_MRS
+
+# good enough
+HK_NAME_FROM
 
 # good enough
 HK_NAME_MR_MRS
@@ -942,9 +948,6 @@ JH_SPAMMY_PATTERN01
 JH_SPAMMY_PATTERN02
 
 # tflags net
-KHOP_FAKE_EBAY
-
-# tflags net
 KHOP_HELO_FCRDNS
 
 # tflags publish
@@ -979,9 +982,6 @@ LOTTO_DEPT
 
 # tflags publish
 LUCRATIVE
-
-# good enough
-MALFORMED_FREEMAIL
 
 # tflags publish
 MALF_HTML_B64
@@ -1170,10 +1170,16 @@ PDS_BTC_ID
 PDS_BTC_MSGID
 
 # good enough
+PDS_BTC_NTLD
+
+# good enough
 PDS_FRNOM_TODOM_DBL_URL
 
 # good enough
 PDS_FRNOM_TODOM_NAKED_TO
+
+# tflags net
+PDS_FROM_2_EMAILS
 
 # good enough
 PDS_FROM_NAME_TO_DOMAIN
@@ -1216,6 +1222,9 @@ POSSIBLE_APPLE_PHISH_02
 
 # tflags publish
 POSSIBLE_EBAY_PHISH_02
+
+# good enough
+POSSIBLE_GMAIL_PHISHER
 
 # tflags publish
 POSSIBLE_PAYPAL_PHISH_01
@@ -1539,9 +1548,6 @@ SCC_CTMPP
 SCC_ISEMM_LID_1
 
 # tflags publish
-SCC_ISEMM_LID_1A
-
-# tflags publish
 SCC_ISEMM_LID_1B
 
 # good enough
@@ -1676,7 +1682,7 @@ TARINGANET_IMG_NOT_RCVD_TN
 # tflags net
 TEQF_USR_IMAGE
 
-# tflags publish
+# tflags net
 TEQF_USR_MSGID_HEX
 
 # tflags net
@@ -1697,10 +1703,10 @@ TONLINE_FAKE_DKIM
 # tflags publish
 TO_EQ_FM_DIRECT_MX
 
-# tflags net
+# good enough
 TO_EQ_FM_DOM_HTML_IMG
 
-# tflags net
+# good enough
 TO_EQ_FM_DOM_HTML_ONLY
 
 # tflags net
@@ -1727,7 +1733,7 @@ TO_NO_BRKTS_HTML_IMG
 # tflags publish
 TO_NO_BRKTS_HTML_ONLY
 
-# good enough
+# tflags net
 TO_NO_BRKTS_MSFT
 
 # tflags publish
@@ -1745,11 +1751,8 @@ TVD_PH_SUBJ_META
 # good enough
 TVD_RCVD_SPACE_BRACKET
 
-# good enough
-TVD_SPACE_ENCODED
-
 # tflags net
-TVD_SPACE_RATIO_MINFP
+TVD_SPACE_ENCODED
 
 # good enough
 TVD_SUBJ_ACC_NUM
@@ -2000,7 +2003,7 @@ URI_WPADMIN
 # tflags publish
 URI_WP_DIRINDEX
 
-# tflags net
+# tflags publish
 URI_WP_HACKED
 
 # tflags publish
