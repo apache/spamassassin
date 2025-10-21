@@ -197,7 +197,7 @@ BITCOIN_IMGUR
 # good enough
 BITCOIN_MALF_HTML
 
-# tflags net
+# tflags publish
 BITCOIN_MALWARE
 
 # tflags publish
@@ -317,7 +317,7 @@ CN_PHISH_JP_04
 # tflags publish
 COMMENT_GIBBERISH
 
-# tflags net
+# good enough
 COMPENSATION
 
 # tflags publish
@@ -815,9 +815,6 @@ HAS_X_NO_RELAY
 # tflags publish
 HAS_X_OUTGOING_SPAM_STAT
 
-# tflags net
-HDRS_LCASE
-
 # tflags publish
 HDRS_MISSP
 
@@ -917,7 +914,7 @@ HTML_OFF_PAGE
 # tflags publish
 HTML_SHRT_CMNT_OBFU_MANY
 
-# tflags net
+# tflags publish
 HTML_SINGLET_MANY
 
 # tflags net
@@ -940,9 +937,6 @@ JH_SPAMMY_PATTERN01
 
 # tflags publish
 JH_SPAMMY_PATTERN02
-
-# tflags net
-KHOP_FAKE_EBAY
 
 # tflags net
 KHOP_HELO_FCRDNS
@@ -1144,6 +1138,9 @@ NSL_RCVD_HELO_USER
 
 # tflags publish
 OBFU_BITCOIN
+
+# good enough
+OBFU_HTML_ATTACH
 
 # tflags publish
 OBFU_JVSCR_ESC
@@ -1646,9 +1643,6 @@ STATIC_XPRIO_OLE
 # tflags publish
 STOCK_TIP
 
-# good enough
-STOX_BOUND_090909_B
-
 # tflags userconf
 SUBJECT_IN_BLOCKLIST
 
@@ -1660,6 +1654,9 @@ SUBJ_ATTENTION
 
 # tflags net
 SUBJ_BRKN_WORDNUMS
+
+# good enough
+SUBJ_ODD_CASE
 
 # tflags net
 SURBL_BLOCKED
@@ -1709,7 +1706,7 @@ TO_EQ_FM_DIRECT_MX
 # tflags net
 TO_EQ_FM_DOM_HTML_IMG
 
-# tflags net
+# good enough
 TO_EQ_FM_DOM_HTML_ONLY
 
 # tflags net
@@ -1754,16 +1751,13 @@ TVD_PH_SUBJ_META
 # good enough
 TVD_RCVD_SPACE_BRACKET
 
-# tflags net
+# good enough
 TVD_SPACE_ENCODED
-
-# tflags net
-TVD_SPACE_RATIO_MINFP
 
 # good enough
 TVD_SUBJ_ACC_NUM
 
-# good enough
+# tflags net
 TVD_SUBJ_NUM_OBFU_MINFP
 
 # tflags publish
@@ -1786,9 +1780,6 @@ UNICODE_OBFU_ZW
 
 # tflags publish
 UNICODE_OBFU_ZW_MANY
-
-# tflags publish
-UNICODE_RTL_OBFU
 
 # tflags userconf
 UNPARSEABLE_RELAY
@@ -1979,7 +1970,7 @@ URI_MALWARE_SCMS
 # tflags userconf
 URI_NOVOWEL
 
-# tflags net
+# tflags publish
 URI_ONLY_MSGID_MALF
 
 # tflags publish
@@ -2009,10 +2000,10 @@ URI_WPADMIN
 # tflags publish
 URI_WP_DIRINDEX
 
-# tflags net
+# tflags publish
 URI_WP_HACKED
 
-# tflags net
+# tflags publish
 URI_WP_HACKED_2
 
 # tflags publish
