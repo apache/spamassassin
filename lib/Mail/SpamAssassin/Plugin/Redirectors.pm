@@ -939,7 +939,7 @@ sub _check_redir {
     }
     # Selenium might break when setting timeout
     eval {
-      $ua->set_timeout('page load', $conf->{url_redirector_timeout} * 1000);
+      $ua->set_timeout('implicit', $conf->{url_redirector_timeout} * 1000);
     };
     if($@) {
       dbg("Error setting timeout to $conf->{url_redirector_timeout}");
