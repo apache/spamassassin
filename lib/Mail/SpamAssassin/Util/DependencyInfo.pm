@@ -339,6 +339,11 @@ our @OPTIONAL_MODULES = (
   desc => 'Mail::DMARC is used by the optional DMARC plugin.',
 },
 {
+  module => 'Selenium::Remote::Driver',
+  version => 0,
+  desc => 'Selenium::Remote::Driver can be used by the optional Redirectors plugin',
+},
+{
   module => 'Devel::Cycle',
   version => 0,
   desc => 'Devel::Cycle is used in make test in tests that will be harmelessly

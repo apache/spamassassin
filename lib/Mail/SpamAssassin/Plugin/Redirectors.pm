@@ -85,6 +85,7 @@ use vars qw(@ISA);
 my $VERSION = 4.02;
 
 use constant HAS_LWP_USERAGENT => eval { require LWP::UserAgent; require LWP::Protocol::https; };
+use constant HAS_SELENIUM => eval { require Selenium::Remote::Driver; };
 
 sub dbg { my $msg = shift; return Mail::SpamAssassin::Logger::dbg("Redirectors: $msg", @_); }
 sub info { my $msg = shift; return Mail::SpamAssassin::Logger::info("Redirectors: $msg", @_); }
@@ -156,6 +157,60 @@ sub set_config {
         $self->{url_redirector}->{lc $domain} = 1; # 1 == head
       }
     }
+  });
+
+=over 4
+
+=item url_redirector_use_selenium (default: 0)
+
+Use Selenium Chrome driver instead of LWP to access web pages.
+Due to how Selenium works, C<redir_url_code()> and C<redir_url_404> subs will not work.
+Selenium supports only GET requests, even if C<url_redirector> is configured
+to use HEAD requests, GET requests will be sent.
+
+=back
+
+=cut
+
+  push (@cmds, {
+    setting => 'url_redirector_use_selenium',
+    default => 0,
+    is_priv => 1,
+    type => $Mail::SpamAssassin::Conf::CONF_TYPE_BOOL
+  });
+
+=over 4
+
+=item url_redirector_selenium_host (default: 127.0.0.1)
+
+Set Selenium host to use.
+
+=back
+
+=cut
+
+  push (@cmds, {
+    setting => 'url_redirector_selenium_host',
+    default => '127.0.0.1',
+    is_priv => 1,
+    type => $Mail::SpamAssassin::Conf::CONF_TYPE_STRING
+  });
+
+=over 4
+
+=item url_redirector_selenium_port (default: 4444)
+
+Set Selenium port to use.
+
+=back
+
+=cut
+
+  push (@cmds, {
+    setting => 'url_redirector_selenium_port',
+    default => 4444,
+    is_priv => 1,
+    type => $Mail::SpamAssassin::Conf::CONF_TYPE_NUMERIC
   });
 
 =over 4
@@ -854,13 +909,50 @@ sub _check_redir {
   # Initialize cache
   $self->initialise_url_redirector_cache($conf);
 
+  if($conf->{url_redirector_use_selenium} and not HAS_SELENIUM) {
+    dbg("url_redirector_use_selenium setting enabled but Selenium::Remote::Driver Perl module not installed, LWP will be used instead");
+  }
+
+  my $ua;
+  if($conf->{url_redirector_use_selenium} and HAS_SELENIUM) {
+    $ua = Selenium::Remote::Driver->new('remote_server_addr' => $conf->{url_redirector_selenium_host},
+	                                'port' => $conf->{url_redirector_selenium_port},
+					'auto_close' => 0,
+					'session_id' => $self->{selenium_session_id},
+	                                'browser_name' =>'chrome',
+                                           'extra_capabilities' => {
+                                               'goog:chromeOptions' => {
+                                                   'args'  => [
+                                                       'headless',
+                                                       'incognito',
+						       'user-agent=' . $conf->{url_redirector_user_agent}
+                                                   ]
+                                               }
+                                           });
+    $ua->{ua}->{max_redirect} = $conf->{max_redir_url_redirections};
+    if(not defined $self->{selenium_session_id}) {
+      $self->{selenium_session_id} = $ua->{session_id};
+      dbg("Connecting to Selenium server with session id " . $self->{selenium_session_id});
+    } else {
+      $ua->session_id($self->{selenium_session_id});
+      dbg("Reusing Selenium session id " . $self->{selenium_session_id});
+    }
+    # Selenium might break when setting timeout
+    eval {
+      $ua->set_timeout('page load', $conf->{url_redirector_timeout} * 1000);
+    };
+    if($@) {
+      dbg("Error setting timeout to $conf->{url_redirector_timeout}");
+    }
+  } else {
   # Initialize LWP
-  my $ua = LWP::UserAgent->new(
-    'agent' => $conf->{url_redirector_user_agent},
-    'max_redirect' => 0,
-    'timeout' => $conf->{url_redirector_timeout},
-  );
-  $ua->env_proxy;
+    $ua = LWP::UserAgent->new(
+      'agent' => $conf->{url_redirector_user_agent},
+      'max_redirect' => 0,
+      'timeout' => $conf->{url_redirector_timeout},
+    );
+    $ua->env_proxy;
+  }
 
   # Launch HTTP requests
   foreach my $uri (keys %redir_urls) {
@@ -917,46 +1009,83 @@ sub recursive_lookup {
       dbg("URL $redir_url is not valid, skipping http check");
       return;
     }
-    my $response = $ua->$method($redir_url);
-    if (!$response->is_redirect) {
-      dbg("URL is not a redirect: $redir_url = ".$response->status_line);
-      my $rcode = $response->code;
-      if ($rcode =~ /^\d{3}$/) {
-        if($rcode eq 500) {
-	  if($response->headers->{'client-warning'} eq 'Internal response') {
-	    dbg("Connection timeout checking $redir_url");
-	  }
-        } elsif($rcode eq 200) {
-	  if((defined $response->content) and ($response->content =~ /http-equiv=["']?refresh["']?.{1,64}?content=["']?(\d+);\s+url=((?:https?:\/\/)?[^"'\/\\]+)["']?/is)) {
-	    my $delay = $1;
-	    $location = $2;
-	    if($delay eq 0) {
-	      $rcode = 301;
-	    } elsif ($delay > 0) {
-	      $rcode = 302;
-	    }
-	    dbg("Found a meta http-equiv redirector, changing http response code from " . $response->code . " to $rcode");
-	  }
-	} else {
-          $pms->{"redir_url_$rcode"} = 1;
-          # Update cache
-          $self->cache_add($redir_url, $rcode);
-          $pms->add_uri_detail_list($redir_url) if !$pms->{uri_detail_list}->{$redir_url};
+
+    if($conf->{url_redirector_use_selenium}) {
+      my $rcode;
+      my $newurl = '';
+      # Selenium doesn't support HEAD requests
+      if($method eq 'head') {
+        dbg("HEAD requests are not supported in Selenium, sending a GET request");
+      }
+      eval {
+	$ua->get($redir_url);
+      };
+      if($@) {
+        # Error in Selenium request
+	dbg("Error in Selenium request reading url $redir_url, error $@");
+	return;
+      } else {
+        $newurl = $ua->get_current_url();
+        if($newurl ne $redir_url) {
+          # url has changes, assume it's a redirect 301
+          $rcode = 301;
+        } else {
+          $rcode = 200;
+          dbg("URL is not a redirect: $redir_url = ".$rcode);
         }
       }
+      $location = $newurl;
+      $pms->{"redir_url_$rcode"} = 1;
+      # Update cache
+      $self->cache_add($redir_url, $rcode);
+      $pms->add_uri_detail_list($redir_url) if !$pms->{uri_detail_list}->{$redir_url};
       if($rcode !~ /^30[12]/) {
+        # Calling quit prevents session_id from beeing reused
+        # $ua->quit();
         return;
       }
-    }
+    } else {
+      my $response = $ua->$method($redir_url);
+      if (!$response->is_redirect) {
+        dbg("URL is not a redirect: $redir_url = ".$response->status_line);
+        my $rcode = $response->code;
+        if ($rcode =~ /^\d{3}$/) {
+          if($rcode eq 500) {
+	    if($response->headers->{'client-warning'} eq 'Internal response') {
+	      dbg("Connection timeout checking $redir_url");
+	    }
+          } elsif($rcode eq 200) {
+	    if((defined $response->content) and ($response->content =~ /http-equiv=["']?refresh["']?.{1,64}?content=["']?(\d+);\s+url=((?:https?:\/\/)?[^"'\/\\]+)["']?/is)) {
+	      my $delay = $1;
+	      $location = $2;
+	      if($delay eq 0) {
+	        $rcode = 301;
+	      } elsif ($delay > 0) {
+	        $rcode = 302;
+	      }
+	      dbg("Found a meta http-equiv redirector, changing http response code from " . $response->code . " to $rcode");
+	    }
+	  } else {
+            $pms->{"redir_url_$rcode"} = 1;
+            # Update cache
+            $self->cache_add($redir_url, $rcode);
+            $pms->add_uri_detail_list($redir_url) if !$pms->{uri_detail_list}->{$redir_url};
+          }
+        }
+        if($rcode !~ /^30[12]/) {
+          return;
+        }
+      }
 
-    # if redirection has been done using http-equiv meta tag, location http header will not be available
-    if(exists $response->headers->{location}) {
-      $location = $response->headers->{location};
-      if($redir_url ne $location) {
-        if ($conf->{url_redirector_loginfo}) {
-          info("found $redir_url => $location");
-        } else {
-          dbg("found $redir_url => $location");
+      # if redirection has been done using http-equiv meta tag, location http header will not be available
+      if(exists $response->headers->{location}) {
+        $location = $response->headers->{location};
+        if($redir_url ne $location) {
+          if ($conf->{url_redirector_loginfo}) {
+            info("found $redir_url => $location");
+          } else {
+            dbg("found $redir_url => $location");
+          }
         }
       }
     }
@@ -1087,5 +1216,6 @@ sub has_redir_url_chained { 1 }
 sub has_redir_url_chained_domain { 1 }
 sub has_redir_url_maxchain { 1 }
 sub has_redir_url_loop { 1 }
+sub has_selenium_support { 1 }
 
 1;
