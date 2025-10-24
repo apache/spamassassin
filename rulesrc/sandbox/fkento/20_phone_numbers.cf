@@ -6,7 +6,7 @@ body          __MXG_HAS_PHONE05  /\+1([\W_]*[0-9]){10}(?![\W_]*[0-9])/
 meta          __MXG_HAS_PHONE  __MXG_HAS_PHONE01 || __MXG_HAS_PHONE02 || __MXG_HAS_PHONE03 || __MXG_HAS_PHONE04 || __MXG_HAS_PHONE05
 describe      __MXG_HAS_PHONE  Has a phone number
 
-body          __MXG_PHONE_OBFU  /(?!(1\W*)?\d{3}\W+\d{3}\W+\d{4})\b([1I][^a-zA-Z0-9]*)?[\dOIl]{3}[^a-zA-Z0-9]+[\dOIl]{3}[^a-zA-Z0-9]+[\dOIl]{4}\b/
+body          __MXG_PHONE_OBFU  /(?!(1\W*)?\d{3}\W+\d{3}[a-zA-Z0-9-_]+\d{4})\b([1I][^a-zA-Z0-9]*)?[\dOIl]{3}[^a-zA-Z0-9]+[\dOIl]{3}[^a-zA-Z0-9]+[\dOIl]{4}\b/
 describe      __MXG_PHONE_OBFU  Has an obfuscated phone number
 
 meta          MXG_PHONE_OBFU_ONLY  __MXG_PHONE_OBFU && !__MXG_HAS_PHONE
