@@ -4480,6 +4480,13 @@ score      CN_PHISH_JP_06              2.500	# limit
 describe   CN_PHISH_JP_06              JP "mastercard" + .cn URL - possible Chinese phishing
 tflags     CN_PHISH_JP_06              publish
 
+body       __JP_UPDATE_PAYMENT_INFO    /\xE6\xB1\xBA\xE6\xB8\x88\xE6\x83\x85\xE5\xA0\xB1\xE3\x81\xAE\xE6\x9B\xB4\xE6\x96\xB0/
+
+meta       CN_PHISH_JP_07              __CN_URL && __JP_UPDATE_PAYMENT_INFO
+score      CN_PHISH_JP_07              2.500	# limit
+describe   CN_PHISH_JP_07              JP "update payment information" + .cn URL - possible Chinese phishing
+tflags     CN_PHISH_JP_07              publish
+
 
 
 ifplugin Mail::SpamAssassin::Plugin::URIDetail
