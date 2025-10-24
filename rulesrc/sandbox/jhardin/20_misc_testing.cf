@@ -4473,6 +4473,14 @@ score      CN_PHISH_JP_05              2.500	# limit
 describe   CN_PHISH_JP_05              JP "authentication" + .cn URL - possible Chinese phishing
 tflags     CN_PHISH_JP_05              publish
 
+body       __JP_MASTERCARD             /\xE3\x83\x9E\xE3\x82\xB9\xE3\x82\xBF\xE3\x83\xBC\xE3\x82\xAB\xE3\x83\xBC\xE3\x83\x89/
+
+meta       CN_PHISH_JP_06              __CN_URL && __JP_MASTERCARD
+score      CN_PHISH_JP_06              2.500	# limit
+describe   CN_PHISH_JP_06              JP "mastercard" + .cn URL - possible Chinese phishing
+tflags     CN_PHISH_JP_06              publish
+
+
 
 ifplugin Mail::SpamAssassin::Plugin::URIDetail
   uri_detail   __URI_DOTCN_SPOOF       text =~ m;^https?://(?:[^./]+\.)+(?!cn/)[^/]+/;i domain =~ /\.cn$/i
