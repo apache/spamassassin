@@ -114,6 +114,9 @@ score AD_PREFS               0.250
 #score LONG_HEX_URI           (0) 0.001 (0) 0.001
 #score FROM_PAYPAL_SPOOF      (0) 0.001 (0) 0.001
 
+# jhardin
+# strong phishing indicator but masscheck scores it low?
+score URI_GOOGDRAWPREVIEW_MINFP 3.000
 
 # jhardin
 # Don't joe-job a SA dev's wife
