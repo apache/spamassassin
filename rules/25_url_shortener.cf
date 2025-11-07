@@ -11,9 +11,9 @@
 # The ASF licenses this file to you under the Apache License, Version 2.0
 # (the "License"); you may not use this file except in compliance with
 # the License.  You may obtain a copy of the License at:
-# 
+#
 #     http://www.apache.org/licenses/LICENSE-2.0
-# 
+#
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -294,6 +294,7 @@ url_shortener han.gl
 url_shortener lukora.cz
 url_shortener shorturl.asia
 url_shortener m2.do
+url_shortener rebrand.ly
 
 # GET method required for some services, keep the same services in url_shortener also
 if can(Mail::SpamAssassin::Plugin::DecodeShortURLs::has_get)
