@@ -428,12 +428,12 @@ describe       EMPTY_RVW_ATTCH      Please review attached document, empty messa
 
 body           __END_FUTURE_EMAILS /\b(?:end|stop(?! receiving these (?:alerts|emails))|cease|discontinue|removed?|(?:do(?! not wish to receive [\w\s]{0,20}emails)|would|you(?:'d)?) (?:not (?:wish|want|like|desire)|(?:prefer|wish|want|like|desire) not) to|exclude yourself|fore?go)[- ](?:get |receiv(?:ing|e) |or |(?:a-z{1,30} ){0,4}from )?(?:these|our|(?:any )?(?:future|further)) (?:(?:e|ad)?-?m(?:ail(?:ing)?|es+[age]{3})|alert|PSA|marketing|notice)[- ]?(?:ad|update)?s?\b/i
 ifplugin Mail::SpamAssassin::Plugin::DKIM
-  meta         END_FUTURE_EMAILS   __END_FUTURE_EMAILS && !__SUBJECT_ENCODED_B64 && !__HDRS_LCASE && !__HDRS_LCASE_KNOWN && !__TO___LOWER && !__DKIM_DEPENDABLE && !DKIM_SIGNED
+  meta         END_FUTURE_EMAILS   __END_FUTURE_EMAILS && !__SUBJECT_ENCODED_B64 && !__HDRS_LCASE && !__HDRS_LCASE_KNOWN && !__TO___LOWER && !__HAS_XM_LID && !__DKIM_DEPENDABLE && !DKIM_SIGNED
 else
-  meta         END_FUTURE_EMAILS   __END_FUTURE_EMAILS && !__SUBJECT_ENCODED_B64 && !__HDRS_LCASE && !__HDRS_LCASE_KNOWN && !__TO___LOWER
+  meta         END_FUTURE_EMAILS   __END_FUTURE_EMAILS && !__SUBJECT_ENCODED_B64 && !__HDRS_LCASE && !__HDRS_LCASE_KNOWN && !__TO___LOWER && !__HAS_XM_LID
 endif
 describe       END_FUTURE_EMAILS   Spammy unsubscribe
-score          END_FUTURE_EMAILS   2.500	# limit
+score          END_FUTURE_EMAILS   2.000	# limit
 
 
 body           AD_COMPLAINTS       /\bcomplaints about this ad+\b/i
