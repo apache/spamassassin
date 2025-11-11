@@ -63,7 +63,7 @@ our @EXPORT_OK = qw(&local_tz &base64_decode &base64_encode &base32_encode
                   &parse_rfc822_date &idn_to_ascii &is_valid_utf_8
                   &get_user_groups &compile_regexp &qr_to_string
                   &is_fqdn_valid &parse_header_addresses &force_die
-                  &domain_to_search_list &get_part_details);
+                  &domain_to_search_list);
 
 our $AM_TAINTED;
 
