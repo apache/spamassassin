@@ -266,7 +266,7 @@ BITCOIN_YOUR_INFO
 # good enough
 BODY_SINGLE_WORD
 
-# tflags net
+# tflags publish
 BODY_URI_ONLY
 
 # tflags publish
@@ -424,9 +424,6 @@ DOS_OE_TO_MX
 
 # good enough
 DOS_OE_TO_MX_IMAGE
-
-# good enough
-DOS_OUTLOOK_TO_MX
 
 # good enough
 DOS_OUTLOOK_TO_MX_IMAGE
@@ -602,7 +599,7 @@ FROM_MISSP_MSFT
 # good enough
 FROM_MISSP_PHISH
 
-# good enough
+# tflags net
 FROM_MISSP_REPLYTO
 
 # tflags net
@@ -929,7 +926,7 @@ HTML_OFF_PAGE
 # tflags publish
 HTML_SHRT_CMNT_OBFU_MANY
 
-# tflags publish
+# tflags net
 HTML_SINGLET_MANY
 
 # tflags net
@@ -959,9 +956,6 @@ KHOP_FAKE_EBAY
 # tflags net
 KHOP_HELO_FCRDNS
 
-# good enough
-LEADING_MANUFACTURER
-
 # tflags publish
 LINKEDIN_IMG_NOT_RCVD_LNKN
 
@@ -970,9 +964,6 @@ LIST_PRTL_PUMPDUMP
 
 # tflags publish
 LIST_PRTL_SAME_USER
-
-# good enough
-LONGLN_LOW_CONTRAST
 
 # tflags publish
 LONG_HEX_URI
@@ -1006,6 +997,9 @@ MALWARE_PASSWORD
 
 # tflags publish
 MALW_ATTACH
+
+# tflags net
+MANY_HDRS_LCASE
 
 # tflags publish
 MANY_SPAN_IN_TEXT
@@ -1184,7 +1178,7 @@ PDS_BTC_ID
 # good enough
 PDS_BTC_MSGID
 
-# good enough
+# tflags net
 PDS_FROM_2_EMAILS
 
 # tflags net
@@ -1198,6 +1192,9 @@ PDS_OTHER_BAD_TLD
 
 # good enough
 PDS_PHPE_URISHORTENER
+
+# good enough
+PDS_PHP_EVAL
 
 # good enough
 PDS_TONAME_EQ_TOLOCAL_FREEM_FORGE
@@ -1216,6 +1213,9 @@ PHP_NOVER_MUA
 
 # tflags publish
 PHP_ORIG_SCRIPT
+
+# good enough
+PHP_ORIG_SCRIPT_EVAL
 
 # tflags publish
 PHP_SCRIPT
@@ -1680,9 +1680,6 @@ SUBJ_BRKN_WORDNUMS
 SUBJ_ODD_CASE
 
 # tflags net
-SUBJ_UNNEEDED_HTML
-
-# tflags net
 SURBL_BLOCKED
 
 # good enough
@@ -1706,7 +1703,7 @@ TEQF_USR_IMAGE
 # tflags publish
 TEQF_USR_MSGID_HEX
 
-# tflags net
+# tflags publish
 TEQF_USR_MSGID_MALF
 
 # good enough
@@ -1727,7 +1724,7 @@ TO_EQ_FM_DIRECT_MX
 # tflags net
 TO_EQ_FM_DOM_HTML_IMG
 
-# good enough
+# tflags net
 TO_EQ_FM_DOM_HTML_ONLY
 
 # tflags net
@@ -1754,7 +1751,7 @@ TO_NO_BRKTS_HTML_IMG
 # tflags publish
 TO_NO_BRKTS_HTML_ONLY
 
-# good enough
+# tflags net
 TO_NO_BRKTS_MSFT
 
 # tflags publish
@@ -1771,9 +1768,6 @@ TVD_FW_GRAPHIC_ID2
 
 # tflags net
 TVD_SPACE_ENCODED
-
-# tflags net
-TVD_SPACE_RATIO_MINFP
 
 # good enough
 TVD_SUBJ_ACC_NUM
@@ -1988,7 +1982,7 @@ URI_MALWARE_SCMS
 # tflags userconf
 URI_NOVOWEL
 
-# tflags net
+# tflags publish
 URI_ONLY_MSGID_MALF
 
 # tflags publish
