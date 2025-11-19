@@ -263,9 +263,6 @@ BITCOIN_XPRIO
 # tflags publish
 BITCOIN_YOUR_INFO
 
-# good enough
-BODY_SINGLE_WORD
-
 # tflags publish
 BODY_URI_ONLY
 
@@ -600,9 +597,6 @@ FROM_MISSP_MSFT
 FROM_MISSP_PHISH
 
 # tflags net
-FROM_MISSP_REPLYTO
-
-# tflags net
 FROM_MISSP_SPF_FAIL
 
 # good enough
@@ -821,7 +815,7 @@ HAS_X_NO_RELAY
 # tflags publish
 HAS_X_OUTGOING_SPAM_STAT
 
-# tflags net
+# good enough
 HDRS_LCASE
 
 # good enough
@@ -860,9 +854,6 @@ HK_NAME_FM_MR_MRS
 # good enough
 HK_NAME_FROM
 
-# good enough
-HK_NAME_MR_MRS
-
 # tflags publish
 HK_RANDOM_ENVFROM
 
@@ -877,9 +868,6 @@ HK_RCVD_IP_MULTICAST
 
 # tflags publish
 HK_SCAM
-
-# good enough
-HK_WIN
 
 # tflags publish
 HOSTED_IMG_DIRECT_MX
@@ -926,7 +914,7 @@ HTML_OFF_PAGE
 # tflags publish
 HTML_SHRT_CMNT_OBFU_MANY
 
-# tflags net
+# tflags publish
 HTML_SINGLET_MANY
 
 # tflags net
@@ -949,9 +937,6 @@ JH_SPAMMY_PATTERN01
 
 # tflags publish
 JH_SPAMMY_PATTERN02
-
-# tflags net
-KHOP_FAKE_EBAY
 
 # tflags net
 KHOP_HELO_FCRDNS
@@ -998,17 +983,11 @@ MALWARE_PASSWORD
 # tflags publish
 MALW_ATTACH
 
-# tflags net
-MANY_HDRS_LCASE
-
 # tflags publish
 MANY_SPAN_IN_TEXT
 
 # good enough
 MANY_SUBDOM
-
-# tflags net
-MAY_BE_FORGED
 
 # tflags publish
 MILLION_HUNDRED
@@ -1081,9 +1060,6 @@ MONEY_FREEMAIL_REPTO
 
 # good enough
 MONEY_FROM_41
-
-# good enough
-MONEY_FROM_MISSP
 
 # good enough
 MONEY_NOHTML
@@ -1724,7 +1700,7 @@ TO_EQ_FM_DIRECT_MX
 # tflags net
 TO_EQ_FM_DOM_HTML_IMG
 
-# tflags net
+# good enough
 TO_EQ_FM_DOM_HTML_ONLY
 
 # tflags net
@@ -1733,7 +1709,7 @@ TO_EQ_FM_DOM_SPF_FAIL
 # good enough
 TO_EQ_FM_HTML_DIRECT
 
-# tflags net
+# good enough
 TO_EQ_FM_HTML_ONLY
 
 # tflags net
@@ -1751,7 +1727,7 @@ TO_NO_BRKTS_HTML_IMG
 # tflags publish
 TO_NO_BRKTS_HTML_ONLY
 
-# tflags net
+# good enough
 TO_NO_BRKTS_MSFT
 
 # tflags publish
@@ -1766,7 +1742,7 @@ TO_TOO_MANY_WFH_01
 # good enough
 TVD_FW_GRAPHIC_ID2
 
-# tflags net
+# good enough
 TVD_SPACE_ENCODED
 
 # good enough
@@ -1968,6 +1944,9 @@ URI_IMG_CWINDOWSNET
 URI_IMG_WP_REDIR
 
 # tflags publish
+URI_INFURAIPFSIO
+
+# tflags publish
 URI_IPFS
 
 # tflags publish
@@ -2012,7 +1991,7 @@ URI_WPADMIN
 # tflags publish
 URI_WP_DIRINDEX
 
-# tflags net
+# tflags publish
 URI_WP_HACKED
 
 # tflags publish
