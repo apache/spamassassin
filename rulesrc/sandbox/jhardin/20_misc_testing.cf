@@ -4359,13 +4359,20 @@ describe    URI_DWEBIPFS               References Interplanetary File System PtP
 score       URI_DWEBIPFS               3.500	# limit
 tflags      URI_DWEBIPFS               publish
 
+uri         __URI_W3SIPFS1             m;//[^.]{50,}\.ipfs\.w3s\.link/;i
+uri         __URI_W3SIPFS2             m;//w3s\.link/ipfs/[^/?]{50};i
+meta        URI_W3SIPFS                __URI_W3SIPFS1 || __URI_W3SIPFS2
+describe    URI_W3SIPFS                References Interplanetary File System PtP content via w3s.link, likely phishing
+score       URI_W3SIPFS                3.500	# limit
+tflags      URI_W3SIPFS                publish
+
 uri         __URI_FLKIPFSXYZIPFS       m;//[^.]{50,}\.ipfs\.flk-ipfs\.xyz/;i
 meta        URI_FLKIPFSXYZIPFS         __URI_FLKIPFSXYZIPFS
 describe    URI_FLKIPFSXYZIPFS         References Interplanetary File System PtP content via flk-ipfs.xyz, likely phishing
 score       URI_FLKIPFSXYZIPFS         3.500	# limit
 tflags      URI_FLKIPFSXYZIPFS         publish
 
-meta        __URI_IPFS                 __URI_IPFSIO || __URI_INFURAIPFSIO || __URI_CLOUDFLAREIPFS || __URI_DWEBIPFS || __URI_FLKIPFSXYZIPFS
+meta        __URI_IPFS                 __URI_IPFSIO || __URI_INFURAIPFSIO || __URI_CLOUDFLAREIPFS || __URI_DWEBIPFS || __URI_FLKIPFSXYZIPFS || __URI_W3SIPFS1 || __URI_W3SIPFS2
 meta        URI_IPFS                   __URI_IPFS
 describe    URI_IPFS                   References Interplanetary File System PtP content, probable phishing
 score       URI_IPFS                   3.500	#limit
