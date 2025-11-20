@@ -263,7 +263,7 @@ BITCOIN_XPRIO
 # tflags publish
 BITCOIN_YOUR_INFO
 
-# tflags publish
+# tflags net
 BODY_URI_ONLY
 
 # tflags publish
@@ -518,7 +518,7 @@ FORGED_SPF_HELO
 # tflags publish
 FORM_FRAUD
 
-# tflags net
+# tflags publish
 FORM_FRAUD_3
 
 # tflags publish
@@ -597,6 +597,9 @@ FROM_MISSP_MSFT
 FROM_MISSP_PHISH
 
 # tflags net
+FROM_MISSP_REPLYTO
+
+# tflags net
 FROM_MISSP_SPF_FAIL
 
 # good enough
@@ -628,9 +631,6 @@ FROM_SUSPICIOUS_NTLD
 
 # tflags publish
 FROM_SUSPICIOUS_NTLD_FP
-
-# good enough
-FROM_UNBAL2
 
 # good enough
 FROM_WSP_TRAIL
@@ -914,7 +914,7 @@ HTML_OFF_PAGE
 # tflags publish
 HTML_SHRT_CMNT_OBFU_MANY
 
-# tflags publish
+# tflags net
 HTML_SINGLET_MANY
 
 # tflags net
@@ -1154,7 +1154,7 @@ PDS_BTC_ID
 # good enough
 PDS_BTC_MSGID
 
-# tflags net
+# good enough
 PDS_FROM_2_EMAILS
 
 # tflags net
@@ -1652,9 +1652,6 @@ SUBJ_ATTENTION
 # tflags net
 SUBJ_BRKN_WORDNUMS
 
-# good enough
-SUBJ_ODD_CASE
-
 # tflags net
 SURBL_BLOCKED
 
@@ -1673,10 +1670,10 @@ TAGSTAT_IMG_NOT_RCVD_TGST
 # tflags publish
 TARINGANET_IMG_NOT_RCVD_TN
 
-# tflags publish
+# tflags net
 TEQF_USR_IMAGE
 
-# tflags publish
+# tflags net
 TEQF_USR_MSGID_HEX
 
 # tflags publish
@@ -1697,10 +1694,10 @@ TONLINE_FAKE_DKIM
 # tflags publish
 TO_EQ_FM_DIRECT_MX
 
-# tflags net
+# good enough
 TO_EQ_FM_DOM_HTML_IMG
 
-# good enough
+# tflags net
 TO_EQ_FM_DOM_HTML_ONLY
 
 # tflags net
@@ -1727,7 +1724,7 @@ TO_NO_BRKTS_HTML_IMG
 # tflags publish
 TO_NO_BRKTS_HTML_ONLY
 
-# good enough
+# tflags net
 TO_NO_BRKTS_MSFT
 
 # tflags publish
@@ -1745,10 +1742,13 @@ TVD_FW_GRAPHIC_ID2
 # good enough
 TVD_SPACE_ENCODED
 
+# tflags net
+TVD_SPACE_RATIO_MINFP
+
 # good enough
 TVD_SUBJ_ACC_NUM
 
-# tflags net
+# good enough
 TVD_SUBJ_NUM_OBFU_MINFP
 
 # tflags publish
