@@ -197,7 +197,7 @@ BITCOIN_IMGUR
 # good enough
 BITCOIN_MALF_HTML
 
-# tflags net
+# tflags publish
 BITCOIN_MALWARE
 
 # tflags publish
@@ -263,7 +263,7 @@ BITCOIN_XPRIO
 # tflags publish
 BITCOIN_YOUR_INFO
 
-# tflags net
+# tflags publish
 BODY_URI_ONLY
 
 # tflags publish
@@ -515,10 +515,10 @@ FORGED_RELAY_MUA_TO_MX
 # tflags net
 FORGED_SPF_HELO
 
-# tflags net
+# tflags publish
 FORM_FRAUD
 
-# tflags net
+# tflags publish
 FORM_FRAUD_3
 
 # tflags publish
@@ -595,9 +595,6 @@ FROM_MISSP_MSFT
 
 # good enough
 FROM_MISSP_PHISH
-
-# tflags net
-FROM_MISSP_REPLYTO
 
 # tflags net
 FROM_MISSP_SPF_FAIL
@@ -914,7 +911,7 @@ HTML_OFF_PAGE
 # tflags publish
 HTML_SHRT_CMNT_OBFU_MANY
 
-# tflags net
+# tflags publish
 HTML_SINGLET_MANY
 
 # tflags net
@@ -1659,9 +1656,6 @@ SUBJ_ATTENTION
 SUBJ_BRKN_WORDNUMS
 
 # tflags net
-SUBJ_UNNEEDED_HTML
-
-# tflags net
 SURBL_BLOCKED
 
 # good enough
@@ -1703,10 +1697,10 @@ TONLINE_FAKE_DKIM
 # tflags publish
 TO_EQ_FM_DIRECT_MX
 
-# tflags net
+# good enough
 TO_EQ_FM_DOM_HTML_IMG
 
-# tflags net
+# good enough
 TO_EQ_FM_DOM_HTML_ONLY
 
 # tflags net
@@ -1715,7 +1709,7 @@ TO_EQ_FM_DOM_SPF_FAIL
 # good enough
 TO_EQ_FM_HTML_DIRECT
 
-# tflags net
+# good enough
 TO_EQ_FM_HTML_ONLY
 
 # tflags net
@@ -1733,7 +1727,7 @@ TO_NO_BRKTS_HTML_IMG
 # tflags publish
 TO_NO_BRKTS_HTML_ONLY
 
-# tflags net
+# good enough
 TO_NO_BRKTS_MSFT
 
 # tflags publish
@@ -1748,13 +1742,13 @@ TO_TOO_MANY_WFH_01
 # good enough
 TVD_FW_GRAPHIC_ID2
 
-# tflags net
+# good enough
 TVD_SPACE_ENCODED
 
 # good enough
 TVD_SUBJ_ACC_NUM
 
-# tflags net
+# good enough
 TVD_SUBJ_NUM_OBFU_MINFP
 
 # tflags publish
@@ -1967,7 +1961,7 @@ URI_MALWARE_SCMS
 # tflags userconf
 URI_NOVOWEL
 
-# tflags net
+# tflags publish
 URI_ONLY_MSGID_MALF
 
 # tflags publish
@@ -2000,10 +1994,10 @@ URI_WPADMIN
 # tflags publish
 URI_WP_DIRINDEX
 
-# tflags net
+# tflags publish
 URI_WP_HACKED
 
-# tflags net
+# tflags publish
 URI_WP_HACKED_2
 
 # tflags publish
