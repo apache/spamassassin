@@ -942,7 +942,7 @@ sub _check_redir {
       $ua->set_timeout('implicit', $conf->{url_redirector_timeout} * 1000);
     };
     if($@) {
-      dbg("Error setting timeout to $conf->{url_redirector_timeout}");
+      dbg("Error setting timeout to $conf->{url_redirector_timeout}: $@");
     }
   } else {
   # Initialize LWP
