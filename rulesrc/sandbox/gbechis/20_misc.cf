@@ -136,3 +136,7 @@ score             GB_SUBJ_ICONS               1.000 # limit
 header            GB_FAKE_LISTUNSUB           List-Unsubscribe =~ /https?\:\/\/127\.0\.0\.1\/unsubscribe\?email\=/
 describe          GB_FAKE_LISTUNSUB           Fake List-Unsubscribe header
 score             GB_FAKE_LISTUNSUB           1.5 # limit
+
+uri               GB_MS_OBFUURI               /^https?:\/\/.{5,32}\/(?:%20){3,32}\@.{5,128}/
+describe          GB_MS_OBFUURI               Obfuscated URL
+score             GB_MS_OBFUURI               2.0 # limit
