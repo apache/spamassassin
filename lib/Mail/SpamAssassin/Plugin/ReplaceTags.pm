@@ -187,8 +187,15 @@ sub replace_result {
       if ($tag_name) {
         my $replacement = $conf->{replace_tag}->{$tag_name};
         if (defined $replacement) {
-          if($replacement =~ /^\(\?\:(.{1})/) {
+          if($replacement =~ /^\(\?\:(.{1,2})/) {
             my $subst = $1;
+	    # if the char that we need to substitute is escaped, remove the escape char
+	    # otherwise take the first char
+	    if($subst =~ /\\(.)/) {
+	      $subst = $1;
+	    } else {
+	      $subst = substr($subst, 0, 1);
+	    }
             my ($rec, $err) = compile_regexp($replacement, 0);
             if(!$rec) {
               dbg("Invalid regexp $replacement");
