@@ -512,7 +512,7 @@ FONT_INVIS_POSTEXTRAS
 # tflags net
 FORGED_SPF_HELO
 
-# tflags publish
+# tflags net
 FORM_FRAUD
 
 # tflags net
@@ -592,6 +592,9 @@ FROM_MISSP_MSFT
 
 # good enough
 FROM_MISSP_PHISH
+
+# tflags net
+FROM_MISSP_REPLYTO
 
 # tflags net
 FROM_MISSP_SPF_FAIL
@@ -845,9 +848,6 @@ HK_CTE_RAW
 # good enough
 HK_NAME_FM_MR_MRS
 
-# good enough
-HK_NAME_FROM
-
 # tflags publish
 HK_RANDOM_ENVFROM
 
@@ -933,6 +933,9 @@ JH_SPAMMY_PATTERN01
 JH_SPAMMY_PATTERN02
 
 # tflags net
+KHOP_FAKE_EBAY
+
+# tflags net
 KHOP_HELO_FCRDNS
 
 # tflags publish
@@ -976,6 +979,9 @@ MALWARE_PASSWORD
 
 # tflags publish
 MALW_ATTACH
+
+# tflags net
+MANY_HDRS_LCASE
 
 # tflags publish
 MANY_SPAN_IN_TEXT
@@ -1133,9 +1139,6 @@ OBFU_UNSUB_UL
 # tflags publish
 ODD_FREEM_REPTO
 
-# good enough
-PART_CID_STOCK
-
 # tflags publish
 PAYPAL_PHISH_06
 
@@ -1168,6 +1171,9 @@ PDS_PHPE_URISHORTENER
 
 # good enough
 PDS_PHP_EVAL
+
+# good enough
+PDS_SHORT_SPOOFED_URL
 
 # good enough
 PDS_TONAME_EQ_TOLOCAL_FREEM_FORGE
@@ -1619,9 +1625,6 @@ STATIC_XPRIO_OLE
 # tflags publish
 STOCK_TIP
 
-# good enough
-STOX_BOUND_090909_B
-
 # tflags userconf
 SUBJECT_IN_BLOCKLIST
 
@@ -1655,7 +1658,7 @@ TARINGANET_IMG_NOT_RCVD_TN
 # tflags publish
 TEQF_USR_IMAGE
 
-# tflags publish
+# tflags net
 TEQF_USR_MSGID_HEX
 
 # tflags publish
@@ -1753,9 +1756,6 @@ UNICODE_OBFU_ZW
 
 # tflags publish
 UNICODE_OBFU_ZW_MANY
-
-# tflags publish
-UNICODE_RTL_OBFU
 
 # tflags userconf
 UNPARSEABLE_RELAY
@@ -1979,7 +1979,7 @@ URI_WP_DIRINDEX
 # tflags net
 URI_WP_HACKED
 
-# tflags net
+# tflags publish
 URI_WP_HACKED_2
 
 # tflags publish
