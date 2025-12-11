@@ -197,7 +197,7 @@ BITCOIN_IMGUR
 # good enough
 BITCOIN_MALF_HTML
 
-# tflags net
+# tflags publish
 BITCOIN_MALWARE
 
 # tflags publish
@@ -269,7 +269,7 @@ BODY_EMAIL_419_FRAUD_GM_LOOSE
 # good enough
 BODY_SINGLE_WORD
 
-# tflags net
+# tflags publish
 BODY_URI_ONLY
 
 # tflags publish
@@ -512,10 +512,10 @@ FONT_INVIS_POSTEXTRAS
 # tflags net
 FORGED_SPF_HELO
 
-# tflags net
+# tflags publish
 FORM_FRAUD
 
-# tflags net
+# tflags publish
 FORM_FRAUD_3
 
 # tflags publish
@@ -585,6 +585,9 @@ FROM_LONG_DOM
 FROM_LONG_DOM_MINFP
 
 # good enough
+FROM_MISSP_DYNIP
+
+# good enough
 FROM_MISSP_FREEMAIL
 
 # good enough
@@ -592,9 +595,6 @@ FROM_MISSP_MSFT
 
 # good enough
 FROM_MISSP_PHISH
-
-# tflags net
-FROM_MISSP_REPLYTO
 
 # tflags net
 FROM_MISSP_SPF_FAIL
@@ -818,7 +818,7 @@ HAS_X_NO_RELAY
 # tflags publish
 HAS_X_OUTGOING_SPAM_STAT
 
-# tflags net
+# good enough
 HDRS_LCASE
 
 # tflags publish
@@ -908,7 +908,7 @@ HTML_OFF_PAGE
 # tflags publish
 HTML_SHRT_CMNT_OBFU_MANY
 
-# tflags net
+# tflags publish
 HTML_SINGLET_MANY
 
 # tflags net
@@ -931,9 +931,6 @@ JH_SPAMMY_PATTERN01
 
 # tflags publish
 JH_SPAMMY_PATTERN02
-
-# tflags net
-KHOP_FAKE_EBAY
 
 # tflags net
 KHOP_HELO_FCRDNS
@@ -980,14 +977,8 @@ MALWARE_PASSWORD
 # tflags publish
 MALW_ATTACH
 
-# tflags net
-MANY_HDRS_LCASE
-
 # tflags publish
 MANY_SPAN_IN_TEXT
-
-# tflags net
-MAY_BE_FORGED
 
 # good enough
 MILLION_EUR
@@ -1550,9 +1541,6 @@ SENDGRID_REDIR_PHISH
 # tflags publish
 SEO_SUSP_NTLD
 
-# good enough
-SERGIO_SUBJECT_VIAGRA01
-
 # tflags publish
 SHOPIFY_IMG_NOT_RCVD_SFY
 
@@ -1658,7 +1646,7 @@ TARINGANET_IMG_NOT_RCVD_TN
 # tflags publish
 TEQF_USR_IMAGE
 
-# tflags net
+# tflags publish
 TEQF_USR_MSGID_HEX
 
 # tflags publish
@@ -1682,7 +1670,7 @@ TO_EQ_FM_DIRECT_MX
 # tflags net
 TO_EQ_FM_DOM_HTML_IMG
 
-# tflags net
+# good enough
 TO_EQ_FM_DOM_HTML_ONLY
 
 # tflags net
@@ -1712,7 +1700,7 @@ TO_NO_BRKTS_HTML_IMG
 # tflags publish
 TO_NO_BRKTS_HTML_ONLY
 
-# tflags net
+# good enough
 TO_NO_BRKTS_MSFT
 
 # tflags publish
@@ -1724,7 +1712,7 @@ TO_NO_BRKTS_PCNT
 # tflags publish
 TO_TOO_MANY_WFH_01
 
-# tflags net
+# good enough
 TVD_SPACE_ENCODED
 
 # tflags net
@@ -1732,9 +1720,6 @@ TVD_SPACE_RATIO_MINFP
 
 # good enough
 TVD_SUBJ_ACC_NUM
-
-# tflags net
-TVD_SUBJ_NUM_OBFU_MINFP
 
 # tflags publish
 TW_GIBBERISH_MANY
@@ -1976,7 +1961,7 @@ URI_WPADMIN
 # tflags publish
 URI_WP_DIRINDEX
 
-# tflags net
+# tflags publish
 URI_WP_HACKED
 
 # tflags publish
@@ -2035,9 +2020,6 @@ WALMART_IMG_NOT_RCVD_WAL
 
 # good enough
 WANT_TO_ORDER
-
-# good enough
-WIKI_IMG
 
 # tflags publish
 WORD_INVIS
