@@ -197,7 +197,7 @@ BITCOIN_IMGUR
 # good enough
 BITCOIN_MALF_HTML
 
-# tflags publish
+# tflags net
 BITCOIN_MALWARE
 
 # tflags publish
@@ -818,7 +818,7 @@ HAS_X_NO_RELAY
 # tflags publish
 HAS_X_OUTGOING_SPAM_STAT
 
-# good enough
+# tflags net
 HDRS_LCASE
 
 # tflags publish
@@ -908,7 +908,7 @@ HTML_OFF_PAGE
 # tflags publish
 HTML_SHRT_CMNT_OBFU_MANY
 
-# tflags publish
+# tflags net
 HTML_SINGLET_MANY
 
 # tflags net
@@ -931,6 +931,9 @@ JH_SPAMMY_PATTERN01
 
 # tflags publish
 JH_SPAMMY_PATTERN02
+
+# tflags net
+KHOP_FAKE_EBAY
 
 # tflags net
 KHOP_HELO_FCRDNS
@@ -979,6 +982,9 @@ MALW_ATTACH
 
 # tflags publish
 MANY_SPAN_IN_TEXT
+
+# tflags net
+MAY_BE_FORGED
 
 # good enough
 MILLION_EUR
@@ -1148,7 +1154,7 @@ PDS_BTC_MSGID
 # good enough
 PDS_DBL_URL_LINKBAIT
 
-# good enough
+# tflags net
 PDS_FROM_2_EMAILS
 
 # tflags net
@@ -1508,9 +1514,6 @@ REPTO_419_FRAUD_YN
 # good enough
 RISK_FREE
 
-# tflags publish
-SCC_BOGUS_CTE_1
-
 # good enough
 SCC_CANSPAM_2
 
@@ -1543,9 +1546,6 @@ SEO_SUSP_NTLD
 
 # tflags publish
 SHOPIFY_IMG_NOT_RCVD_SFY
-
-# good enough
-SHORTENED_URL_HREF
 
 # tflags publish
 SHORTENER_SHORT_IMG
@@ -1626,9 +1626,6 @@ SUBJ_ATTENTION
 SUBJ_BRKN_WORDNUMS
 
 # tflags net
-SUBJ_UNNEEDED_HTML
-
-# tflags net
 SURBL_BLOCKED
 
 # good enough
@@ -1670,7 +1667,7 @@ TO_EQ_FM_DIRECT_MX
 # tflags net
 TO_EQ_FM_DOM_HTML_IMG
 
-# good enough
+# tflags net
 TO_EQ_FM_DOM_HTML_ONLY
 
 # tflags net
@@ -1741,6 +1738,9 @@ UNICODE_OBFU_ZW
 
 # tflags publish
 UNICODE_OBFU_ZW_MANY
+
+# tflags publish
+UNICODE_RTL_OBFU
 
 # tflags userconf
 UNPARSEABLE_RELAY
@@ -1931,7 +1931,7 @@ URI_MALWARE_SCMS
 # tflags userconf
 URI_NOVOWEL
 
-# tflags net
+# tflags publish
 URI_ONLY_MSGID_MALF
 
 # tflags publish
