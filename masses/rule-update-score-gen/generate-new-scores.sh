@@ -166,9 +166,9 @@ echo >> scores-set$SCORESET
 rm -rf trunk-new-rules-set$SCORESET
 
 set -x
-svn co -r $REVISION http://svn.apache.org/repos/asf/spamassassin/trunk trunk-new-rules-set$SCORESET || exit $?
-svn co http://svn.apache.org/repos/asf/spamassassin/tags/spamassassin_release_3_3_0/rules trunk-new-rules-set$SCORESET/rules-base || exit $?
-svn co http://svn.apache.org/repos/asf/spamassassin/trunk/rules trunk-new-rules-set$SCORESET/rules-current || exit $?
+svn co -r $REVISION https://svn.apache.org/repos/asf/spamassassin/trunk trunk-new-rules-set$SCORESET || exit $?
+svn co https://svn.apache.org/repos/asf/spamassassin/tags/spamassassin_release_3_3_0/rules trunk-new-rules-set$SCORESET/rules-base || exit $?
+svn co https://svn.apache.org/repos/asf/spamassassin/trunk/rules trunk-new-rules-set$SCORESET/rules-current || exit $?
 
 svn up -r $REVISION trunk-new-rules-set${SCORESET}/rulesrc/ || exit $?
 

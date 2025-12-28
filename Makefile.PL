@@ -292,7 +292,7 @@ $makefile{META_MERGE} = {
     homepage    => 'https://spamassassin.apache.org/',
     bugtracker  => 'https://bz.apache.org/SpamAssassin/',
     repository  => { 
-			url=>'http://svn.apache.org/repos/asf/spamassassin/',
+			url=>'https://svn.apache.org/repos/asf/spamassassin/',
 			type=>'svn'
 		   },
     MailingList => 'http://wiki.apache.org/spamassassin/MailingLists',

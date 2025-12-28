@@ -38,7 +38,7 @@ use File::Basename;
 use File::Path qw(remove_tree);
 
 use constant {
-    SVNROOT => q(http://svn.apache.org/repos/asf/spamassassin),
+    SVNROOT => q(https://svn.apache.org/repos/asf/spamassassin),
     ORIGDIR => q(../orig),
 };
 

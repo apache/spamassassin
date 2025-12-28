@@ -12,9 +12,9 @@ export HOME PERL TMPDIR
 (
   cd /export/home/nitemc
   rm -rf svn
-  svn co http://svn.apache.org/repos/asf/spamassassin/trunk svn ||
-    svn co http://svn.apache.org/repos/asf/spamassassin/trunk svn ||
-    svn co http://svn.apache.org/repos/asf/spamassassin/trunk svn
+  svn co https://svn.apache.org/repos/asf/spamassassin/trunk svn ||
+    svn co https://svn.apache.org/repos/asf/spamassassin/trunk svn ||
+    svn co https://svn.apache.org/repos/asf/spamassassin/trunk svn
 
 ) < /dev/null
 
