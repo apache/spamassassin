@@ -215,5 +215,5 @@ header		SCC_HEAD_XMP_ANY	exists:X-Mailer-Platform
 score		SCC_HEAD_XMP_ANY	1
 
 describe	GMAIL_NOREPLY	A no-reply adress that Google does not use
-header		GMAIL_NOREPLY	From: .*no-reply\@gmail.com
+header		GMAIL_NOREPLY	From =~ .*no-reply\@gmail.com
 score		GMAIL_NOREPLY	1
