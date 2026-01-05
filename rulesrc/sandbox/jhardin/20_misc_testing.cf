@@ -2039,7 +2039,7 @@ ifplugin Mail::SpamAssassin::Plugin::ReplaceTags
   body          __BITCOIN           /<B>[-\s]?<I>[-\s]?<T>[-\s]?<C>[-\s]?<O>[-\s]?<I>[-\s]?<N>/i
   replace_rules __BITCOIN   
 
-  body          FUZZY_WALLET        /(?=<W>)(?!wallet)<W><A><L><L><E><T>/i
+  body          FUZZY_WALLET        /(?=<W>)(?!(?:v|w)allet)<W><A><L><L><E><T>/i
   replace_rules FUZZY_WALLET    
   describe      FUZZY_WALLET        Obfuscated "Wallet"
   tflags        FUZZY_WALLET        publish
