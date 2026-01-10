@@ -3353,9 +3353,15 @@ header     __HDR_RCVD_SHOPIFY          X-Spam-Relays-External =~ /\srdns=\S+\.sh
 header     __HDR_ENVFROM_SHOPIFY       X-Spam-Relays-External =~ /\shelo=\S+\.mailer\.shopify\.com\s(?:[^\]\s]+\s)*envfrom=\S+\.shopifyemail\.com\s/
 uri        __URI_IMG_SHOPIFY           m,://cdn\.shopify\.com/.+\.(?:jpe?g|gif|png|webp),i
 
+# Klaviyo marketing email provider
+header     __HDR_RCVD_KLAVIYOMAIL      X-Spam-Relays-External =~ /\srdns=\S+\.klaviyomail\.com\s/
+# Merchant apparently MAY rebrand the MTA DNS so need to also check for the presence of apparent Klaviyo-custom headers
+header     __HDR_CSTM_KLAVIYO          ALL =~ /^X-Kmail-(?:Account|Message|Ops):/sm
+
 meta       __SHOPIFY_IMG_NOT_RCVD_SFY  __URI_IMG_SHOPIFY && !__HDR_RCVD_SHOPIFY && !__HDR_ENVFROM_SHOPIFY
-meta       SHOPIFY_IMG_NOT_RCVD_SFY    __SHOPIFY_IMG_NOT_RCVD_SFY && !MIME_QP_LONG_LINE && !__RCD_RDNS_MTA_MESSY && !__AC_UNSUB_URI && !__HAS_CAMPAIGNID && !__HAS_SENDER && !__HAS_ORGANIZATION && !__RCD_RDNS_OB && !__DOS_LINK 
-score      SHOPIFY_IMG_NOT_RCVD_SFY    2.500	# limit
+# Klaviyo is Shopify's preferred/recommended marketing email partner, likely to see lots of marketing emails with Shopify images from them
+meta       SHOPIFY_IMG_NOT_RCVD_SFY    __SHOPIFY_IMG_NOT_RCVD_SFY && !__HDR_RCVD_KLAVIYOMAIL && !__HDR_CSTM_KLAVIYO && !MIME_QP_LONG_LINE && !__RCD_RDNS_MTA_MESSY && !__AC_UNSUB_URI && !__HAS_CAMPAIGNID && !__HAS_SENDER && !__HAS_ORGANIZATION && !__RCD_RDNS_OB && !__DOS_LINK 
+score      SHOPIFY_IMG_NOT_RCVD_SFY    2.000	# limit
 describe   SHOPIFY_IMG_NOT_RCVD_SFY    Shopify hosted image but message not from Shopify
 tflags     SHOPIFY_IMG_NOT_RCVD_SFY    publish
 
