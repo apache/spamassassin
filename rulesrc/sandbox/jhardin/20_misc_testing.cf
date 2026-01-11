@@ -4137,12 +4137,17 @@ meta       ADULT_DATING_COMPANY        __ADULTDATINGCOMPANY_BODY || __ADULTDATIN
 score      ADULT_DATING_COMPANY        10.000	# limit
 tflags     ADULT_DATING_COMPANY        publish
 
+body       __AMAZON_PRIME_MEMBERSHIP   /\bYour (?:Amazon )?Prime Membership\b/
 
 body       CHINA_MANUFACTURER          /\bWe are China located manufacture/i
 score      CHINA_MANUFACTURER          2.500	# limit
 
 meta       POSSIBLE_AMAZON_PHISH_01    (__FROM_NAME_AMAZONCOM && __NAME_EMAIL_DIFF)
 meta       POSSIBLE_AMAZON_PHISH_02    (__FROM_NAME_AMAZONCOM && !__HDR_RCVD_AMAZON && !__HDR_RCVD_AMAZON_HELO)
+meta       POSSIBLE_AMAZON_PHISH_03    (__AMAZON_PRIME_MEMBERSHIP && __URI_GOOGDRAWPREVIEW)
+describe   POSSIBLE_AMAZON_PHISH_03    Amazon Prime phishing via Google Draw
+score      POSSIBLE_AMAZON_PHISH_03    3.500	# limit
+tflags     POSSIBLE_AMAZON_PHISH_03    publish
 
 meta       POSSIBLE_EBAY_PHISH_01      (__FROM_NAME_EBAYCOM && __NAME_EMAIL_DIFF)
 meta       POSSIBLE_EBAY_PHISH_02      (__FROM_NAME_EBAYCOM && !__HDR_RCVD_EBAY)
