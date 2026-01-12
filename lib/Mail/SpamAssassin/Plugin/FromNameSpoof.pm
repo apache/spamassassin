@@ -465,10 +465,13 @@ sub _check_fromnamespoof {
   }
 
   # Check Reply-To related
-  my $replyto_addr = lc $pms->get('Reply-To:addr');
-  if ($fromname_addr eq $replyto_addr) {
-    dbg("From-name addr is same as Reply-To addr: $fromname_addr");
-    $pms->{fromname_equals_replyto} = 1;
+  my @replyto_addr = lc $pms->get('Reply-To:addr');
+  foreach my $replyto ( @replyto_addr ) {
+    if ($fromname_addr eq $replyto) {
+      dbg("From-name addr is same as Reply-To addr: $fromname_addr");
+      $pms->{fromname_equals_replyto} = 1;
+      last;
+    }
   }
 
   # Check To related
