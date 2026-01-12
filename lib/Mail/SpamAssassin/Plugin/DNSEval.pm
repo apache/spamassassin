@@ -471,11 +471,14 @@ sub check_rbl_headers {
 
   my $queries;
   foreach my $rbl_headers (@env_hdr) {
-    my $addr = $pms->get($rbl_headers.':addr', undef);
-    if ( defined $addr && $addr =~ /\@([^\@\s]+)/ ) {
-      my $ret = $self->_check_rbl_addresses($pms, $rule, $set, $rbl_server,
-                                            $subtest, $addr);
-      $queries++ if defined $ret;
+    # some headers might contain more email addresses
+    my @addr = $pms->get($rbl_headers.':addr', undef);
+    if ( defined $addr[0] && $addr[0] =~ /\@([^\@\s]+)/ ) {
+      foreach my $emailaddr ( @addr ) {
+        my $ret = $self->_check_rbl_addresses($pms, $rule, $set, $rbl_server,
+                                            $subtest, $emailaddr);
+        $queries++ if defined $ret;
+      }
     } else {
       my $unsplitted_host = $pms->get($rbl_headers);
       chomp($unsplitted_host);

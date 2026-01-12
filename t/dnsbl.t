@@ -9,7 +9,7 @@ plan skip_all => "Can't use Net::DNS Safely" unless can_use_net_dns_safely();
 
 # run many times to catch some random natured failures
 my $iterations = 5;
-plan tests => 21 * $iterations;
+plan tests => 22 * $iterations;
 
 # ---------------------------------------------------------------------------
 # bind configuration currently used to support this test
@@ -64,6 +64,7 @@ EOF
  ' 1.0 DNSBL_TXT_TOP '		=> '',
  ' 1.0 DNSBL_TXT_RE '		=> '',
  ' 1.0 DNSBL_RHS '		=> '',
+ ' 1.0 DNSBL_HEADERS '		=> '',
  ' 1.0 META_DNSBL_A '		=> '',
  ' 1.0 META_DNSBL_B '		=> '',
  ' 1.0 META_DNSBL_C '		=> '',
@@ -138,6 +139,10 @@ tflags DNSBL_TXT_MISS	net
 header DNSBL_RHS	eval:check_rbl_from_host('r', 'dnsbltest.spamassassin.org.')
 describe DNSBL_RHS	DNSBL RHS match
 tflags DNSBL_RHS	net
+
+header DNSBL_HEADERS	eval:check_rbl_headers('r', 'dnsbltest.spamassassin.org.')
+describe DNSBL_HEADERS	DNSBL HEADERS match
+tflags DNSBL_HEADERS	net
 
 # Allow DNSBL_RHS to hit
 clear_uridnsbl_skip_domain example.com
