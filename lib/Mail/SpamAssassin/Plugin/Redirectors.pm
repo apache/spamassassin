@@ -1131,9 +1131,9 @@ sub recursive_lookup {
   # remove duplicated parameters in order to better catch loops
   my %paramseen;
   my $denorm_location = $location;
-  my ($hostpart, $querystring) = split /\?/, $location, 2;
+  my ($hostpart, $querystring) = split /\?|&amp;|&/, $location, 2;
   if(defined $querystring) {
-    my @params = split /&|%26/, $querystring;
+    my @params = split /&amp;|&|%26/, $querystring;
     my @unique_params = grep { !$paramseen{$_}++ } @params;
     my $nquerystring = join '&', @unique_params;
     $location = $hostpart . '?' . $nquerystring;
