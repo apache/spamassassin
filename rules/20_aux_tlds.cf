@@ -941,3 +941,42 @@ util_rb_3tld us-central-1.ionoscloud.com
 
 
 endif
+
+if can(Mail::SpamAssassin::Conf::has_util_rb_4tld)
+  util_rb_4tld s3.us-east-1.amazonaws.com
+  util_rb_4tld s3.us-east-2.amazonaws.com
+  util_rb_4tld s3.us-west-1.amazonaws.com
+  util_rb_4tld s3.us-west-2.amazonaws.com
+  util_rb_4tld s3.af-south-1.amazonaws.com
+  util_rb_4tld s3.ap-east-1.amazonaws.com
+  util_rb_4tld s3.ap-east-2.amazonaws.com
+  util_rb_4tld s3.ap-south-1.amazonaws.com
+  util_rb_4tld s3.ap-south-2.amazonaws.com
+  util_rb_4tld s3.ap-southeast-1.amazonaws.com
+  util_rb_4tld s3.ap-southeast-2.amazonaws.com
+  util_rb_4tld s3.ap-southeast-3.amazonaws.com
+  util_rb_4tld s3.ap-southeast-4.amazonaws.com
+  util_rb_4tld s3.ap-southeast-5.amazonaws.com
+  util_rb_4tld s3.ap-southeast-6.amazonaws.com
+  util_rb_4tld s3.ap-southeast-7.amazonaws.com
+  util_rb_4tld s3.ap-nordeast-1.amazonaws.com
+  util_rb_4tld s3.ap-nordeast-2.amazonaws.com
+  util_rb_4tld s3.ap-nordeast-3.amazonaws.com
+  util_rb_4tld s3.ca-central-1.amazonaws.com
+  util_rb_4tld s3.ca-west-1.amazonaws.com
+  util_rb_4tld s3.eu-central-1.amazonaws.com
+  util_rb_4tld s3.eu-central-2.amazonaws.com
+  util_rb_4tld s3.eu-west-1.amazonaws.com
+  util_rb_4tld s3.eu-west-2.amazonaws.com
+  util_rb_4tld s3.eu-west-3.amazonaws.com
+  util_rb_4tld s3.eu-south-1.amazonaws.com
+  util_rb_4tld s3.eu-south-2.amazonaws.com
+  util_rb_4tld s3.eu-north-1.amazonaws.com
+  util_rb_4tld s3.il-central-1.amazonaws.com
+  util_rb_4tld s3.mx-central-1.amazonaws.com
+  util_rb_4tld s3.me-south-1.amazonaws.com
+  util_rb_4tld s3.me-central-1.amazonaws.com
+  util_rb_4tld s3.sa-east-1.amazonaws.com
+  util_rb_4tld s3.us-gov-east-1.amazonaws.com
+  util_rb_4tld s3.us-gov-west-1.amazonaws.com
+endif

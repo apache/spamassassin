@@ -8,7 +8,7 @@ use SATest; sa_t_init("uri");
 use constant HAS_LIBIDN => eval { require Net::LibIDN; };
 use constant HAS_LIBIDN2 => eval { require Net::LibIDN2; };
 
-my $tests = 105;
+my $tests = 106;
 $tests += 7 if (HAS_LIBIDN);
 $tests += 7 if (HAS_LIBIDN2);
 
@@ -23,6 +23,7 @@ use Mail::SpamAssassin::Util;
 tstlocalrules ("
   util_rb_2tld live.com
   util_rb_3tld three.3ldlive.com
+  util_rb_4tld four.three.3ldlive.com
 ");
 
 # initialize SpamAssassin
@@ -379,5 +380,6 @@ ok(try($base, "http:g", "http://a/b/c/g"));
 ok(try_domains('WWW.LIVE.com', 'www.live.com'));
 ok(try_domains('WWW.foo.LIVE.com', 'foo.live.com'));
 ok(try_domains('WWW.three.3ldLIVE.com', 'www.three.3ldlive.com'));
+ok(try_domains('WWW.four.three.3ldLIVE.com', 'www.four.three.3ldlive.com'));
 ok(try_domains('WWW.foo.basicLIVE.com', 'basiclive.com'));
 

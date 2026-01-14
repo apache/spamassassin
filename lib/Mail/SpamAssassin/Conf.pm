@@ -3941,6 +3941,32 @@ Unicode labels encoded as UTF-8 octets.
     }
   });
 
+=item util_rb_4tld 4tld1.some.other.tld 4tld2.another.other.tld ...
+
+This option maintains list of valid 4th-level TLDs in the RegistryBoundaries
+code.  4TLDs can include things like domain.s3.us-east-2.amazonaws.com, etc.  International
+domain names may be specified in ASCII-compatible encoding (ACE), or with
+Unicode labels encoded as UTF-8 octets.
+
+=cut
+
+  push (@cmds, {
+    setting => 'util_rb_4tld',
+    is_admin => 1,
+    code => sub {
+      my ($self, $key, $value, $line) = @_;
+      unless (defined $value && $value !~ /^$/) {
+	return $MISSING_REQUIRED_VALUE;
+      }
+      unless ($value =~ /^[^\s.]+\.[^\s.]+\.[^\s.]+\.[^\s.]+(?:\s+[^\s.]+\.[^\s.]+\.[^\s.]+\.[^\s.]+)*$/) {
+	return $INVALID_VALUE;
+      }
+      foreach (split(/\s+/, $value)) {
+        $self->{four_level_domains}{idn_to_ascii($_)} = 1;
+      }
+    }
+  });
+
 =item clear_util_rb
 
 Empty internal list of valid TLDs (including 2nd and 3rd level) which
@@ -3960,6 +3986,7 @@ standard lists supplied by sa-update.
       undef $self->{valid_tlds};
       undef $self->{two_level_domains};
       undef $self->{three_level_domains};
+      undef $self->{four_level_domains};
       dbg("config: cleared tld lists");
     }
   });
@@ -5611,6 +5638,7 @@ sub has_tflags_nosubject { 1 } # tflags nosubject
 sub has_tflags_nolog { 1 } # tflags nolog
 sub perl_min_version_5010000 { return $] >= 5.010000 }  # perl version check ("perl_version" not neatly backwards-compatible)
 sub has_dns_max_cname_cache { 1 } # supports 'dns_max_cname_cache' option
+sub has_util_rb_4tld { 1 } # supports 'util_rb_4tld' option
 
 ###########################################################################
 

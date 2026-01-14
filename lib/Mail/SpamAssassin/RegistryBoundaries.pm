@@ -157,7 +157,11 @@ sub split_domain {
           # "Fire-Dept.CI.Los-Angeles.CA.US"
           # "<school-name>.PVT.K12.<state>.US"
           last if ($US_STATES{$domparts[2]});
-        }
+        } else {
+          my $temp = join(".", @domparts);
+          # International domain names in ASCII-compatible encoding (ACE)
+          last if ($self->{conf}->{four_level_domains}{$temp});
+	}
       }
       push(@hostname, shift @domparts);
     }
