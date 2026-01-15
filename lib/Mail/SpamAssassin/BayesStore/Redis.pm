@@ -287,8 +287,12 @@ sub new {
   }
 
   # Override with specific settings if provided
-  $self->{db_id} = $bconf->{bayes_redis_database} if defined $bconf->{bayes_redis_database};
-  $self->{password} = $bconf->{bayes_redis_password} if defined $bconf->{bayes_redis_password};
+  if (defined $bconf->{bayes_redis_database} and ($bconf->{bayes_redis_database} =~ /\d+/)) {
+    $self->{db_id} = $bconf->{bayes_redis_database} 
+  }
+  if (defined $bconf->{bayes_redis_password} and ($bconf->{bayes_redis_password} ne "")) {
+    $self->{password} = $bconf->{bayes_redis_password};
+  }
 
   if (!$bconf->{bayes_auto_expire}) {
     $self->{expire_token} = $self->{expire_seen} = undef;
