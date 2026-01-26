@@ -1030,8 +1030,15 @@ sub recursive_lookup {
           # url has changes, assume it's a redirect 301
           $rcode = 301;
         } else {
-          $rcode = 200;
-          dbg("URL is not a redirect: $redir_url = ".$rcode);
+	  # try to find hard-coded redirectors
+	  if ($redir_url =~ /\/(https?:\/\/.{4,256})/) {
+            $rcode = 301;
+	    $newurl = $1;
+	    dbg("Found $1 in hard-coded redirector");
+          } else {
+            $rcode = 200;
+            dbg("URL is not a redirect: $redir_url = ".$rcode);
+	  }
         }
       }
       $location = $newurl;
