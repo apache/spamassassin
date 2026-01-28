@@ -755,8 +755,11 @@ sub _check_redirector_uri {
   my $newuri;
 
   local($1,$2);
-  # normalize uri
-  $uri = Mail::SpamAssassin::Util::url_decode($uri);
+  # normalize uri only if it doesn't contain more explicit redirects
+  # encoded as parameters
+  if($uri !~ /https?%3A%2F%2F/) {
+    $uri = Mail::SpamAssassin::Util::url_decode($uri);
+  }
   return 0 unless $uri =~ m{^
     https?://		# Only http
     (?:[^\@/?#]*\@)?	# Ignore user:pass@
@@ -915,7 +918,8 @@ sub _check_redir {
 
   my $ua;
   if($conf->{url_redirector_use_selenium} and HAS_SELENIUM) {
-    $ua = Selenium::Remote::Driver->new('remote_server_addr' => $conf->{url_redirector_selenium_host},
+    eval {
+      $ua = Selenium::Remote::Driver->new('remote_server_addr' => $conf->{url_redirector_selenium_host},
 	                                'port' => $conf->{url_redirector_selenium_port},
 					'auto_close' => 0,
 					'session_id' => $self->{selenium_session_id},
@@ -929,6 +933,11 @@ sub _check_redir {
                                                    ]
                                                }
                                            });
+    };
+    if($@) {
+      dbg("Error connetting to Selenium server: $@");
+      return;
+    }
     $ua->{ua}->{max_redirect} = $conf->{max_redir_url_redirections};
     if(not defined $self->{selenium_session_id}) {
       $self->{selenium_session_id} = $ua->{session_id};
@@ -1053,6 +1062,7 @@ sub recursive_lookup {
       }
     } else {
       my $response = $ua->$method($redir_url);
+      my $http_equiv = 0;
       if (!$response->is_redirect) {
         dbg("URL is not a redirect: $redir_url = ".$response->status_line);
         my $rcode = $response->code;
@@ -1062,7 +1072,8 @@ sub recursive_lookup {
 	      dbg("Connection timeout checking $redir_url");
 	    }
           } elsif($rcode eq 200) {
-	    if((defined $response->content) and ($response->content =~ /http-equiv=["']?refresh["']?.{1,64}?content=["']?(\d+);\s+url=((?:https?:\/\/)?[^"'\/\\]+)["']?/is)) {
+	    if((defined $response->content) and ($response->content =~ /http-equiv=["']?refresh["']?.{1,64}?content=["']?(\d+);\s+url=["']?((?:https?:\/\/)?[^"'\\]+(?:\/[^"'\\]{8,256})?)["']?/is)) {
+	      $http_equiv = 1;
 	      my $delay = $1;
 	      $location = $2;
 	      if($delay eq 0) {
@@ -1085,8 +1096,8 @@ sub recursive_lookup {
       }
 
       # if redirection has been done using http-equiv meta tag, location http header will not be available
-      if(exists $response->headers->{location}) {
-        $location = $response->headers->{location};
+      if((exists $response->headers->{location}) or $http_equiv) {
+        $location = $response->headers->{location} if not $http_equiv;
         if($redir_url ne $location) {
           if ($conf->{url_redirector_loginfo}) {
             info("found $redir_url => $location");
