@@ -305,9 +305,6 @@ CN_PHISH_JP_07
 # tflags publish
 COMMENT_GIBBERISH
 
-# tflags net
-COMPENSATION
-
 # tflags publish
 CONTENT_AFTER_HTML
 
@@ -482,7 +479,7 @@ FORGED_SPF_HELO
 # tflags publish
 FORM_FRAUD
 
-# tflags net
+# tflags publish
 FORM_FRAUD_3
 
 # tflags publish
@@ -605,9 +602,6 @@ FROM_UNBAL2
 # good enough
 FROM_WSP_LEAD
 
-# good enough
-FROM_WSP_TRAIL
-
 # tflags net
 FSL_BULK_SIG
 
@@ -719,7 +713,7 @@ GB_FREEMAIL_DISPTO
 # tflags publish
 GB_FREEMAIL_DISPTO_NOTFREEM
 
-# tflags net
+# tflags publish
 GB_FROM_METAMASK
 
 # tflags publish
@@ -791,7 +785,7 @@ HAS_X_NO_RELAY
 # tflags publish
 HAS_X_OUTGOING_SPAM_STAT
 
-# tflags net
+# good enough
 HDRS_LCASE
 
 # tflags publish
@@ -884,7 +878,7 @@ HTML_OFF_PAGE
 # tflags publish
 HTML_SHRT_CMNT_OBFU_MANY
 
-# tflags net
+# tflags publish
 HTML_SINGLET_MANY
 
 # good enough
@@ -970,9 +964,6 @@ MAY_BE_FORGED
 
 # tflags publish
 MILLION_HUNDRED
-
-# good enough
-MILLION_USD
 
 # tflags publish
 MIMEOLE_DIRECT_TO_MX
@@ -1599,9 +1590,6 @@ SUBJ_ATTENTION
 SUBJ_BRKN_WORDNUMS
 
 # tflags net
-SUBJ_UNNEEDED_HTML
-
-# tflags net
 SURBL_BLOCKED
 
 # good enough
@@ -1642,6 +1630,9 @@ TONLINE_FAKE_DKIM
 
 # tflags publish
 TO_EQ_FM_DIRECT_MX
+
+# tflags net
+TO_EQ_FM_DOM_HTML_IMG
 
 # good enough
 TO_EQ_FM_DOM_HTML_ONLY
@@ -1688,16 +1679,13 @@ TT_MSGID_TRUNC
 # good enough
 TVD_PH_FR5
 
-# tflags net
+# good enough
 TVD_SPACE_ENCODED
-
-# tflags net
-TVD_SPACE_RATIO_MINFP
 
 # good enough
 TVD_SUBJ_ACC_NUM
 
-# good enough
+# tflags net
 TVD_SUBJ_NUM_OBFU_MINFP
 
 # tflags publish
@@ -1940,7 +1928,7 @@ URI_WPADMIN
 # tflags publish
 URI_WP_DIRINDEX
 
-# tflags net
+# tflags publish
 URI_WP_HACKED
 
 # tflags publish
