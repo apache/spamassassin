@@ -858,6 +858,13 @@ sub parse_received_line {
       goto enough;
     }
 
+    # cold-email.sendkit-mail.com (static.25.190.130.94.clients.your-server.de. [94.130.190.25]) by smtp.gmail.com with ESMTPSA id 2adb3069b0e04-59e0748994bsm1467533e87.36.2026.01.29.16.59.37 for <test@example.org> (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256); Thu, 29 Jan 2026 16:59:38 -0800 (PST)
+    if (/^(\S+) \((\S+) \[(${IP_ADDRESS})\]\) by (\S+) /) {
+      $mta_looked_up_dns = 1;
+      $helo = $1; $rdns = $2; $ip = $3; $by = $4;
+      goto enough;
+    }
+
     # Let's try to support a few qmailish formats in one;
     # http://bz.apache.org/SpamAssassin/show_bug.cgi?id=2744#c14 :
     # Received: from unknown (HELO feux01a-isp) (213.199.4.210) by totor.bouissou.net with SMTP; 1 Nov 2003 07:05:19 -0000 
