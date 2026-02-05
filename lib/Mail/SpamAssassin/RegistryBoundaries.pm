@@ -32,6 +32,8 @@ use re 'taint';
 
 our @ISA = qw();
 
+use Socket qw(inet_ntoa);
+
 use Mail::SpamAssassin::Logger;
 use Mail::SpamAssassin::Util qw(idn_to_ascii is_fqdn_valid);
 use Mail::SpamAssassin::Constants qw(:ip);
@@ -275,12 +277,20 @@ sub uri_to_domain {
 
   # keep IPs intact
   if ($host !~ IS_IP_ADDRESS) {
-    # check that it's a valid hostname/fqdn
-    return unless is_fqdn_valid($host, 1);
-    # ignore invalid TLDs
-    return unless $self->is_domain_valid($host, 1);
-    # get rid of hostname part of domain, understanding delegation
-    $domain = $self->trim_domain($host, 1);
+    # if the host is an octal number try to convert it into an ip address
+    if($host =~ /^0[0-7]+$/) {
+      my $ip = inet_ntoa(pack("N", oct($host)));
+      if($ip =~ IS_IP_ADDRESS) {
+        $host = $ip;
+      }
+    } else {
+      # check that it's a valid hostname/fqdn
+      return unless is_fqdn_valid($host, 1);
+      # ignore invalid TLDs
+      return unless $self->is_domain_valid($host, 1);
+      # get rid of hostname part of domain, understanding delegation
+      $domain = $self->trim_domain($host, 1);
+    }
   }
   
   # optionally return unstripped host name
