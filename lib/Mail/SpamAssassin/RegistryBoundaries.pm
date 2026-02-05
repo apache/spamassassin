@@ -282,6 +282,9 @@ sub uri_to_domain {
       my $ip = inet_ntoa(pack("N", oct($host)));
       if($ip =~ IS_IP_ADDRESS) {
         $host = $ip;
+      } else {
+        # $host cannot be a valid domain, return early
+        return;
       }
     } else {
       # check that it's a valid hostname/fqdn
