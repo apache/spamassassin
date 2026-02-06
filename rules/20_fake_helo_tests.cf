@@ -43,8 +43,11 @@ header __HELO_STATIC_COMCAST X-Spam-Relays-External =~ /^[^\]]+ helo=\d{1,3}-\d{
 # smtp-0f95944d4245d0b2c.core1.sfdc-58ktaz.mta.salesforce.com
 header __HELO_STATIC_SALESFORCE X-Spam-Relays-External =~ /^[^\]]+ helo=smtp\-\w+\.core\d\.sfdc\-\w+\.mta\.salesforce\.com\s[^\]]+ auth= /i
 
+# v5207.v5d85c8f2.use4.send.mailgun.net
+header __HELO_STATIC_MAILGUN X-Spam-Relays-External =~ /^[^\]]+ helo=v\d+\.v\w+\.use\d\.send\.mailgun\.net\s[^\]]+ auth= /i
+
 describe HELO_STATIC_HOST Relay HELO'd using static hostname
-meta HELO_STATIC_HOST (__HELO_STATIC_ROGERS || __HELO_STATIC_SENDGRID || __HELO_STATIC_COMCAST || __HELO_STATIC_SALESFORCE)
+meta HELO_STATIC_HOST (__HELO_STATIC_ROGERS || __HELO_STATIC_SENDGRID || __HELO_STATIC_COMCAST || __HELO_STATIC_SALESFORCE || __HELO_STATIC_MAILGUN)
 
 # ---------------------------------------------------------------------------
 
