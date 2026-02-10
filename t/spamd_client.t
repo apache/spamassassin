@@ -7,6 +7,7 @@ use constant HAS_SDBM_FILE => eval { require SDBM_File; };
 
 use Test::More;
 plan skip_all => "Spamd tests disabled" if $SKIP_SPAMD_TESTS;
+plan skip_all => "UID nobody tests" if $SKIP_SETUID_NOBODY_TESTS;
 plan skip_all => "Long running tests disabled" unless conf_bool('run_long_tests');
 
 diag "\nIf test fails 'connection reset by peer', may be low memory on test machine";

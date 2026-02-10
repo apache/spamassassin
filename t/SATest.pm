@@ -273,7 +273,7 @@ sub sa_t_init {
   if ($> == 0) {
     $tmp_dir_mode = 0777;
     umask 022;  # ensure correct permissions on files and dirs created here
-    # Bug 5529 initial fix: For now don't run a test as root if it has a problem resuting from setuid nobody
+    # Bug 5529 initial fix: For now don't run a test as root if it has a problem resulting from setuid nobody
     # FIXME: Eventually we can actually test setuid nobody and accessing ./log to make this test more fine grained
     #  and we can create an accessible temp dir that some of the tests can use. But for now just skip those tests.
     $SKIP_SETUID_NOBODY_TESTS = 1;
