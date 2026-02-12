@@ -3753,7 +3753,7 @@ e.g.
   push (@cmds, {
     setting => 'empty_tags',
     is_admin => 1,
-    default => undef,
+    default => '',
     type => $CONF_TYPE_STRING,
   });
 
