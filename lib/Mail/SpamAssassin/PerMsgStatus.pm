@@ -342,6 +342,9 @@ sub new {
               URIDOMAINS URICNAMES)) {
     $tag_data_ref->{$_} = undef;  # exist, but undefined
   }
+  foreach (split(' ', $self->{conf}->{empty_tags})) {
+    $tag_data_ref->{$_} = undef;  # exist, but undefined
+  }
 
   bless ($self, $class);
   $self;

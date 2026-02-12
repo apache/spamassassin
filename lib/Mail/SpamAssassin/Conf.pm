@@ -3738,6 +3738,25 @@ e.g.
     }
   });
 
+=item empty_tags string
+
+This is a list of tags that might be undefined because they are set by 3rd party plugins.
+Setting this configuration will prevent those tags from being set with an invalid value
+if they are not defined.
+
+e.g.
+
+  empty_tags mytag1 mytag2
+
+=cut
+
+  push (@cmds, {
+    setting => 'empty_tags',
+    is_admin => 1,
+    default => undef,
+    type => $CONF_TYPE_STRING,
+  });
+
 =item test SYMBOLIC_TEST_NAME (ok|fail) Some string to test against
 
 Define a regression testing string. You can have more than one regression test
