@@ -2,7 +2,7 @@
 
 use lib '.'; use lib 't';
 use SATest; sa_t_init("rcvd_parser");
-use Test::More tests => 149;
+use Test::More tests => 150;
 use strict;
 
 # format is:
@@ -470,6 +470,9 @@ my %data = (
   #Bug 7213
   'from mail1-backend.DDDD.com (LHLO mail2-backend.DDDD.com) (10.2.2.20) by mail3-backend.DDDD.com with LMTP; Thu, 18 Jun 2015 16:50:56 -0700 (PDT)' =>
   '[ ip=10.2.2.20 rdns=mail1-backend.DDDD.com helo=mail2-backend.DDDD.com by=mail3-backend.DDDD.com ident= envfrom= id= auth= msa=0 ]',
+
+  'from cold-email.sendkit-mail.com (static.25.190.130.94.clients.your-server.de. [94.130.190.25]) by smtp.gmail.com with ESMTPSA id 2adb3069b0e04-59e0748994bsm1467533e87.36.2026.01.29.16.59.37 for <test@example.org> (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256); Thu, 29 Jan 2026 16:59:38 -0800 (PST)' =>
+  '[ ip=94.130.190.25 rdns=static.25.190.130.94.clients.your-server.de helo=cold-email.sendkit-mail.com by=smtp.gmail.com ident= envfrom= id=2adb3069b0e04-59e0748994bsm1467533e87.36.2026.01.29.16.59.37 auth=ESMTPSA msa=0 ]',
 
 );
 
