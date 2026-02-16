@@ -22,11 +22,6 @@ ifplugin Mail::SpamAssassin::Plugin::URIDetail
     describe      MXG_LOWER_HDR_SPAM  Lower case header spam
 endif
 
-uri           __MXG_GOOGLE_FOREIGN_REDIR01  /https?:\/\/(www\.)?google\.(com?\.)?\w\w(?<!ca|uk|za)(?<!%{MXG_FROM_TLD})\/(url|amp)/i
-meta          MXG_GOOGLE_FOREIGN_REDIR  __MXG_GOOGLE_FOREIGN_REDIR01 && !__MXG_NOT_ENGLISH
-score         MXG_GOOGLE_FOREIGN_REDIR  5.000
-describe      MXG_GOOGLE_FOREIGN_REDIR  Foreign Google redirect
-
 header        __MXG_SPOOFED_DOCUSIGN01  From:name =~ /docusign/i
 header        __MXG_SPOOFED_DOCUSIGN02  Received =~ /\bdocusign\.(com|net)\s/i
 meta          MXG_SPOOFED_DOCUSIGN  __MXG_SPOOFED_DOCUSIGN01 && !__MXG_SPOOFED_DOCUSIGN02 && !__VIA_ML
@@ -36,9 +31,6 @@ describe      MXG_SPOOFED_DOCUSIGN  Docusign spoofing
 header        __MXG_NOT_ENGLISH  X-Languages =~ /^(?!en)\w+/
 score         __MXG_NOT_ENGLISH  0.1
 describe      __MXG_NOT_ENGLISH  Not English
-
-header        __MXG_FROM_TLD  From:addr =~ /\.(?<MXG_FROM_TLD>(?:\w+|com?\.)?\w{2})$/i
-describe      __MXG_FROM_TLD  Capture From TLD
 
 header        __MXG_THREAD_INDEX_BAD01  exists:Thread-Index
 header        __MXG_THREAD_INDEX_BAD02  Thread-Index =~ /^A[A-Za-z0-9+\/=]{31,}/
