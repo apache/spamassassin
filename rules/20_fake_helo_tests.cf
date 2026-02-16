@@ -46,8 +46,11 @@ header __HELO_STATIC_SALESFORCE X-Spam-Relays-External =~ /^[^\]]+ helo=smtp\-\w
 # v5207.v5d85c8f2.use4.send.mailgun.net
 header __HELO_STATIC_MAILGUN X-Spam-Relays-External =~ /^[^\]]+ helo=v\d+\.v\w+\.\w+\.send\.mailgun\.net\s[^\]]+ auth= /i
 
+# out162-62-57-137.mail.qq.com
+header __HELO_STATIC_QQ X-Spam-Relays-External =~ /^[^\]]+ helo=out\d+\-\d+\-\d+\-\d+\.mail\.qq\.com\s[^\]]+ auth= /i
+
 describe HELO_STATIC_HOST Relay HELO'd using static hostname
-meta HELO_STATIC_HOST (__HELO_STATIC_ROGERS || __HELO_STATIC_SENDGRID || __HELO_STATIC_COMCAST || __HELO_STATIC_SALESFORCE || __HELO_STATIC_MAILGUN)
+meta HELO_STATIC_HOST (__HELO_STATIC_ROGERS || __HELO_STATIC_SENDGRID || __HELO_STATIC_COMCAST || __HELO_STATIC_SALESFORCE || __HELO_STATIC_MAILGUN || __HELO_STATIC_QQ)
 
 # ---------------------------------------------------------------------------
 
