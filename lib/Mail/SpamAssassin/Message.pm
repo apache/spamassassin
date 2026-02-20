@@ -615,6 +615,8 @@ sub generate_msgid {
 
 =item extract_message_metadata($permsgstatus)
 
+Extracts message metadata from the email, it's called once per message
+
 =cut
 
 sub extract_message_metadata {
@@ -631,6 +633,8 @@ sub extract_message_metadata {
 
 =item $str = get_metadata($hdr)
 
+Returns an item from the metadata structure.
+
 =cut
 
 sub get_metadata {
@@ -646,6 +650,8 @@ sub get_metadata {
 
 =item put_metadata($hdr, $text)
 
+Inserts an item into the metadata structure.
+
 =cut
 
 sub put_metadata {
@@ -659,6 +665,8 @@ sub put_metadata {
 
 =item delete_metadata($hdr)
 
+Removes an item from the metadata structure.
+
 =cut
 
 sub delete_metadata {
@@ -670,6 +678,8 @@ sub delete_metadata {
 }
 
 =item $str = get_all_metadata()
+
+Returns all metadata as a string if in scalar context, otherwise as an array.
 
 =cut
 
