@@ -95,7 +95,7 @@ sub log_message {
     $msg =~ tr/\x09\x20\x00-\x1f/  _/s;
   }
 
-  my($nwrite) = syswrite(STDERR, sprintf("%s[%d] %s: %s%s",
+  my($nwrite) = syswrite(*STDERR, sprintf("%s[%d] %s: %s%s",
                                          $timestamp, $$, $level, $msg, $eol));
   defined $nwrite  or warn "error writing to log file: $!";
 }
