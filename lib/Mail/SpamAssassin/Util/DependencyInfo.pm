@@ -355,6 +355,11 @@ our @OPTIONAL_MODULES = (
   desc => 'Text::Diff is used in make test in tests that will be harmelessly
   skipped if it is not available',
 },
+{
+  module => 'AI::FANN',
+  version => 0,
+  desc => 'AI::FANN is used by optional NeuralNetwork plugin',
+},
 );
 
 our @BINARIES = ();

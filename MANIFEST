@@ -99,6 +99,7 @@ lib/Mail/SpamAssassin/Plugin/HeaderEval.pm
 lib/Mail/SpamAssassin/Plugin/ImageInfo.pm
 lib/Mail/SpamAssassin/Plugin/MIMEEval.pm
 lib/Mail/SpamAssassin/Plugin/MIMEHeader.pm
+lib/Mail/SpamAssassin/Plugin/NeuralNetwork.pm
 lib/Mail/SpamAssassin/Plugin/OLEVBMacro.pm
 lib/Mail/SpamAssassin/Plugin/OneLineBodyRuleType.pm
 lib/Mail/SpamAssassin/Plugin/Phishing.pm
@@ -163,6 +164,7 @@ rules/v343.pre
 rules/v400.pre
 rules/v401.pre
 rules/v402.pre
+rules/v403.pre
 rules/20_aux_tlds.cf
 rules-extras/README.txt
 rules-extras/10_uridnsbl_skip_financial.cf
@@ -242,6 +244,8 @@ sql/bayes_pg.sql
 sql/decodeshorturl_mysql.sql
 sql/decodeshorturl_pg.sql
 sql/decodeshorturl_sqlite.sql
+sql/neural_mysql.sql
+sql/neural_pg.sql
 sql/redirectors_mysql.sql
 sql/redirectors_pg.sql
 sql/redirectors_sqlite.sql
@@ -576,6 +580,7 @@ t/mimeparse.t
 t/missing_hb_separator.t
 t/mkrules.t
 t/mkrules_else.t
+t/neuralnetwork.t
 t/nonspam.t
 t/olevbmacro.t
 t/originating_ip_hdr.t
