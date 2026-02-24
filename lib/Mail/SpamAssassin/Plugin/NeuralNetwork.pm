@@ -699,20 +699,93 @@ sub check_neuralnetwork_ham {
   return $pms->{neuralnetwork_ham};
 }
 
-# Helper: ensure vector matches expected size by padding/truncating
-sub _adjust_vector_size {
-  my ($vec, $expected) = @_;
-  return unless defined $vec && defined $expected && $expected >= 0;
-  my @v = @$vec;
-  my $len = scalar @v;
-  if ($len < $expected) {
-    dbg("Adjusting input vector: padding from $len to $expected");
-    push @v, (0) x ($expected - $len);
-  } elsif ($len > $expected) {
-    dbg("Adjusting input vector: truncating from $len to $expected");
-    $#v = $expected - 1;
+# Retrain the model from vocabulary statistics when vocab size has changed.
+sub _retrain_from_vocabulary {
+  my ($self, $conf, $nn_data_dir, $vocab_size) = @_;
+
+  return unless defined $nn_data_dir && $vocab_size > 0;
+
+  my $learning_rate = $conf->{neuralnetwork_learning_rate};
+  my $momentum = $conf->{neuralnetwork_momentum};
+  my $train_epochs = $conf->{neuralnetwork_train_epochs};
+  my $train_algorithm = $conf->{neuralnetwork_train_algorithm};
+
+  my %vocabulary;
+  if (defined $conf->{neuralnetwork_dsn} && $self->{dbh}) {
+    my $vocab_ref = $self->_load_vocabulary_from_sql($self->{main}->{username});
+    %vocabulary = %{$vocab_ref} if ref($vocab_ref) eq 'HASH';
   }
-  return \@v;
+  if (!keys %{$vocabulary{terms} || {}}) {
+    my $vocab_path = File::Spec->catfile($nn_data_dir, 'vocabulary-' . lc($self->{main}->{username}) . '.data');
+    if (-f $vocab_path) {
+      eval {
+        my $ref = retrieve($vocab_path);
+        %vocabulary = %{$ref} if ref $ref eq 'HASH';
+        1;
+      } or do {
+        info("Failed to load vocabulary for retraining: " . ($@ || 'unknown'));
+        return;
+      };
+    }
+  }
+
+  my $terms = $vocabulary{terms} || {};
+  return unless scalar keys %{$terms};
+
+  my @vocab_keys = sort keys %{$terms};
+  my $actual_size = scalar @vocab_keys;
+  return unless $actual_size == $vocab_size;
+
+  # Build synthetic spam and ham TF-IDF vectors from vocabulary statistics
+  my $N = $vocabulary{_doc_count} || 1;
+  my (@spam_vec, @ham_vec);
+  for my $i (0 .. $#vocab_keys) {
+    my $w = $vocab_keys[$i];
+    my $td = $terms->{$w};
+    my $df = $td->{docs} || 0;
+    my $idf = log(($N + 1) / ($df + 1)) + 1;
+    my $spam_freq = $td->{spam} || 0;
+    my $ham_freq  = $td->{ham} || 0;
+    my $total = $spam_freq + $ham_freq || 1;
+    $spam_vec[$i] = ($spam_freq / $total) * $idf;
+    $ham_vec[$i]  = ($ham_freq / $total) * $idf;
+  }
+
+  # L2-normalize both vectors
+  for my $vec (\@spam_vec, \@ham_vec) {
+    my $norm = 0;
+    $norm += $_ * $_ for @$vec;
+    $norm = sqrt($norm) || 1;
+    @$vec = map { $_ / $norm } @$vec;
+  }
+
+  # Create and train new network
+  my $num_hidden = int(sqrt($vocab_size)) || 1;
+  my $network = AI::FANN->new_standard($vocab_size, $num_hidden, 1);
+  $network->hidden_activation_function(FANN_SIGMOID_STEPWISE);
+  $network->output_activation_function(FANN_SIGMOID_STEPWISE);
+  $network->learning_rate($learning_rate);
+  $network->learning_momentum($momentum);
+  $network->training_algorithm($train_algorithm);
+
+  for my $e (1 .. $train_epochs) {
+    eval { $network->train(\@spam_vec, [1]); 1 } or dbg("Retrain spam step failed: " . ($@ || 'unknown'));
+    eval { $network->train(\@ham_vec,  [0]); 1 } or dbg("Retrain ham step failed: " . ($@ || 'unknown'));
+  }
+
+  my $dataset_path = File::Spec->catfile($nn_data_dir, 'fann-' . lc($self->{main}->{username}) . '.model');
+  eval {
+    $network->save($dataset_path) or die "save failed";
+    1;
+  } and do {
+    $self->{neural_model} = $network;
+    info("Model retrained from vocabulary statistics and saved (inputs: $vocab_size)");
+  } or do {
+    info("Failed to save retrained model: " . ($@ || 'unknown'));
+    return;
+  };
+
+  return $network;
 }
 
 sub _check_neuralnetwork {
@@ -778,12 +851,11 @@ sub _check_neuralnetwork {
 
   my $expected_size = $network->num_inputs();
   if (scalar(@$input_vector) != $expected_size) {
-    dbg("Prediction vector size mismatch. Got ".scalar(@$input_vector).", expected ".$expected_size.". Adjusting vector.");
-    $input_vector = _adjust_vector_size($input_vector, $expected_size);
-    # If adjustment failed for some reason, abort
-    unless (defined $input_vector && scalar(@$input_vector) == $expected_size) {
+    dbg("Vocabulary size changed (got ".scalar(@$input_vector).", model expects ".$expected_size."), retraining model");
+    $network = $self->_retrain_from_vocabulary($conf, $nn_data_dir, $vocab_size);
+    unless (defined $network) {
       $pms->{neuralnetwork_prediction} = undef;
-      info("Adjusted vector invalid, skipping prediction.");
+      info("Model retraining failed, skipping prediction");
       return;
     }
   }
