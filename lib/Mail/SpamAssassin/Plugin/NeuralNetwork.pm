@@ -453,17 +453,8 @@ sub _text_to_features {
         $vocabulary{_ham_count} += $local_doc_increment;
       }
 
-      # Prune vocabulary if needed: keep top VOCAB_CAP by total count
-      my $terms_count = scalar keys %{ $vocabulary{terms} };
-      if ($terms_count > $vocab_cap) {
-        my @top = sort { ($vocabulary{terms}{$b}{total}||0) <=> ($vocabulary{terms}{$a}{total}||0) } keys %{ $vocabulary{terms} };
-        my %pruned;
-        for my $i (0 .. $vocab_cap-1) {
-          last unless defined $top[$i];
-          $pruned{$top[$i]} = $vocabulary{terms}{$top[$i]};
-        }
-        $vocabulary{terms} = \%pruned;
-      }
+      # Prune vocabulary if needed
+      $self->_prune_vocabulary(\%vocabulary, $vocab_cap);
 
       my $vocab_path;
       if (defined $conf->{neuralnetwork_dsn} && $self && $self->{dbh}) {
@@ -697,6 +688,40 @@ sub check_neuralnetwork_ham {
   
   _check_neuralnetwork($self, $pms);
   return $pms->{neuralnetwork_ham};
+}
+
+# Prune vocabulary to keep only the top $vocab_cap terms by total count
+sub _prune_vocabulary {
+  my ($self, $vocabulary, $vocab_cap) = @_;
+
+  my $terms = $vocabulary->{terms} || {};
+  my $terms_count = scalar keys %{$terms};
+  return () unless $terms_count > $vocab_cap;
+
+  my @top = sort { ($terms->{$b}{total}||0) <=> ($terms->{$a}{total}||0) } keys %{$terms};
+  my %kept;
+  for my $i (0 .. $vocab_cap-1) {
+    last unless defined $top[$i];
+    $kept{$top[$i]} = $terms->{$top[$i]};
+  }
+  my @pruned = grep { !exists $kept{$_} } keys %{$terms};
+  $vocabulary->{terms} = \%kept;
+
+  if (@pruned && ($self->{main}->{conf}->{neuralnetwork_dsn} =~ /^dbi:/i)) {
+    eval {
+      my $user = $self->{main}->{username};
+      my $placeholders = join(',', ('?') x scalar(@pruned));
+      my $del_sql = "DELETE FROM neural_vocabulary WHERE username = ? AND keyword IN ($placeholders)";
+      my $sth_del = $self->{dbh}->prepare($del_sql);
+      $sth_del->execute($user, @pruned);
+      dbg("Deleted " . scalar(@pruned) . " terms for user: $user");
+      1;
+    } or do {
+      dbg("Failed to delete terms: " . ($@ || 'unknown'));
+    };
+  }
+  dbg("Pruned vocabulary from $terms_count to $vocab_cap terms");
+  return @pruned;
 }
 
 # Retrain the model from vocabulary statistics when vocab size has changed.
@@ -1145,18 +1170,8 @@ sub _load_vocabulary_from_sql {
 
     dbg("Loaded $count vocabulary terms from SQL for user: $lc_user");
 
-    # Prune vocabulary if needed: keep top VOCAB_CAP by total count
-    my $terms_count = scalar keys %{ $vocabulary{terms} };
-    if ($terms_count > $vocab_cap) {
-      my @top = sort { ($vocabulary{terms}{$b}{total}||0) <=> ($vocabulary{terms}{$a}{total}||0) } keys %{ $vocabulary{terms} };
-      my %pruned;
-      for my $i (0 .. $vocab_cap-1) {
-        last unless defined $top[$i];
-        $pruned{$top[$i]} = $vocabulary{terms}{$top[$i]};
-      }
-      $vocabulary{terms} = \%pruned;
-      dbg("Pruned in-memory vocabulary from $terms_count to $vocab_cap terms for user: $lc_user");
-    }
+    # Prune vocabulary if needed
+    $self->_prune_vocabulary(\%vocabulary, $vocab_cap);
     1;
   } or do {
     my $err = $@ || 'unknown';
