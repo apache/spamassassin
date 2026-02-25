@@ -599,9 +599,14 @@ sub learn_message {
   if(defined $self->{neural_model} && $self->{neural_model}->num_inputs() == $num_input) {
     $network = $self->{neural_model};
   } else {
-    $network = AI::FANN->new_standard($num_input, $num_hidden_neurons, $num_output_neurons);
-    $network->hidden_activation_function(FANN_SIGMOID_STEPWISE);
-    $network->output_activation_function(FANN_SIGMOID_STEPWISE);
+    # Vocabulary size changed, retrain from vocabulary statistics
+    $network = $self->_retrain_from_vocabulary($self->{main}->{conf}, $nn_data_dir, $num_input);
+    if (!defined $network) {
+      # No vocabulary stats available yet, create a fresh network
+      $network = AI::FANN->new_standard($num_input, $num_hidden_neurons, $num_output_neurons);
+      $network->hidden_activation_function(FANN_SIGMOID_STEPWISE);
+      $network->output_activation_function(FANN_SIGMOID_STEPWISE);
+    }
   }
   $network->learning_rate($learning_rate);
   $network->learning_momentum($momentum);
