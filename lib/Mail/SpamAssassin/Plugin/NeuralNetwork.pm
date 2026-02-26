@@ -757,6 +757,22 @@ sub _prune_vocabulary {
   return @pruned;
 }
 
+# Sub to ensure vector matches expected size
+sub _adjust_vector_size {
+  my ($vec, $expected) = @_;
+  return unless defined $vec && defined $expected && $expected >= 0;
+  my @v = @$vec;
+  my $len = scalar @v;
+  if ($len < $expected) {
+    dbg("Adjusting input vector: padding from $len to $expected");
+    push @v, (0) x ($expected - $len);
+  } elsif ($len > $expected) {
+    dbg("Adjusting input vector: truncating from $len to $expected");
+    $#v = $expected - 1;
+  }
+  return \@v;
+}
+
 # Create a baseline model from vocabulary statistics when vocab size has changed.
 sub _retrain_from_vocabulary {
   my ($self, $conf, $nn_data_dir, $vocab_size) = @_;
@@ -905,11 +921,11 @@ sub _check_neuralnetwork {
 
   my $expected_size = $network->num_inputs();
   if (scalar(@$input_vector) != $expected_size) {
-    dbg("Vocabulary size changed (got ".scalar(@$input_vector).", model expects ".$expected_size."), using baseline model for prediction");
-    $network = $self->_retrain_from_vocabulary($conf, $nn_data_dir, $vocab_size);
-    unless (defined $network) {
+    dbg("Vocabulary size changed (got ".scalar(@$input_vector).", model expects ".$expected_size."), adjusting input vector");
+    $input_vector = _adjust_vector_size($input_vector, $expected_size);
+    unless (defined $input_vector && scalar(@$input_vector) == $expected_size) {
       $pms->{neuralnetwork_prediction} = undef;
-      info("Model retraining failed, skipping prediction");
+      info("Adjusted vector invalid, skipping prediction");
       return;
     }
   }
