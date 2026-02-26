@@ -757,7 +757,7 @@ sub _prune_vocabulary {
   return @pruned;
 }
 
-# Retrain the model from vocabulary statistics when vocab size has changed.
+# Create a baseline model from vocabulary statistics when vocab size has changed.
 sub _retrain_from_vocabulary {
   my ($self, $conf, $nn_data_dir, $vocab_size) = @_;
 
@@ -830,19 +830,6 @@ sub _retrain_from_vocabulary {
     eval { $network->train(\@spam_vec, [1]); 1 } or dbg("Retrain spam step failed: " . ($@ || 'unknown'));
     eval { $network->train(\@ham_vec,  [0]); 1 } or dbg("Retrain ham step failed: " . ($@ || 'unknown'));
   }
-
-  my $dataset_path = File::Spec->catfile($nn_data_dir, 'fann-' . lc($self->{main}->{username}) . '.model');
-  eval {
-    $network->save($dataset_path) or die "save failed";
-    1;
-  } and do {
-    $self->{neural_model} = $network;
-    $self->{_neural_model_load_time} = time();
-    info("Model retrained from vocabulary statistics and saved (inputs: $vocab_size)");
-  } or do {
-    info("Failed to save retrained model: " . ($@ || 'unknown'));
-    return;
-  };
 
   return $network;
 }
@@ -918,7 +905,7 @@ sub _check_neuralnetwork {
 
   my $expected_size = $network->num_inputs();
   if (scalar(@$input_vector) != $expected_size) {
-    dbg("Vocabulary size changed (got ".scalar(@$input_vector).", model expects ".$expected_size."), retraining model");
+    dbg("Vocabulary size changed (got ".scalar(@$input_vector).", model expects ".$expected_size."), using baseline model for prediction");
     $network = $self->_retrain_from_vocabulary($conf, $nn_data_dir, $vocab_size);
     unless (defined $network) {
       $pms->{neuralnetwork_prediction} = undef;
