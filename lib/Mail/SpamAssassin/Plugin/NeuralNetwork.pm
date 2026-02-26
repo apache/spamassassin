@@ -92,6 +92,11 @@ Maximum token length considered when building the vocabulary and feature vectors
 
 Maximum number of vocabulary terms to retain; least-frequent terms are pruned when exceeded.
 
+=item neuralnetwork_cache_ttl n (default: 300)
+
+Time-to-live in seconds for the in-memory vocabulary and model caches
+Set to 0 to disable caching.
+
 =item neuralnetwork_min_spam_count n (default: 100)
 
 Minimum number of spam messages in the vocabulary required to enable prediction.
@@ -197,6 +202,12 @@ SQLite.
     setting => 'neuralnetwork_vocab_cap',
     is_admin => 1,
     default => 10000,
+    type => $Mail::SpamAssassin::Conf::CONF_TYPE_NUMERIC,
+  });
+  push(@cmds, {
+    setting => 'neuralnetwork_cache_ttl',
+    is_admin => 1,
+    default => 300,
     type => $Mail::SpamAssassin::Conf::CONF_TYPE_NUMERIC,
   });
   push(@cmds, {
@@ -323,6 +334,7 @@ sub finish_parsing_end {
   if (-f $dataset_path) {
     eval {
       $self->{neural_model} = AI::FANN->new_from_file($dataset_path);
+      $self->{_neural_model_load_time} = time();
       1;
     } or do {
       my $err = $@ || 'unknown';
@@ -595,6 +607,21 @@ sub learn_message {
   my $num_hidden_neurons = int(sqrt($num_input)) || 1;
   my $num_output_neurons = 1;
 
+  # Reload model from disk if cache has expired
+  my $ttl = $self->{main}->{conf}->{neuralnetwork_cache_ttl} || 0;
+  my $model_age = defined $self->{_neural_model_load_time} ? time() - $self->{_neural_model_load_time} : undef;
+  if (defined $model_age && $ttl > 0 && $model_age >= $ttl && -f $dataset_path) {
+    dbg("Model cache expired (age: ${model_age}s, ttl: ${ttl}s), reloading before training");
+    eval {
+      $self->{neural_model} = AI::FANN->new_from_file($dataset_path);
+      $self->{_neural_model_load_time} = time();
+      1;
+    } or do {
+      dbg("Failed to reload model: " . ($@ || 'unknown'));
+      undef $self->{neural_model};
+    };
+  }
+
   my $network;
   if(defined $self->{neural_model} && $self->{neural_model}->num_inputs() == $num_input) {
     $network = $self->{neural_model};
@@ -635,6 +662,7 @@ sub learn_message {
   } and do {
     dbg("Model saved to '$dataset_path' (input:$num_input)");
     $self->{neural_model} = $network;
+    $self->{_neural_model_load_time} = time();
 
     # Record message as learned to prevent re-learning
     if (defined $msg) {
@@ -809,6 +837,7 @@ sub _retrain_from_vocabulary {
     1;
   } and do {
     $self->{neural_model} = $network;
+    $self->{_neural_model_load_time} = time();
     info("Model retrained from vocabulary statistics and saved (inputs: $vocab_size)");
   } or do {
     info("Failed to save retrained model: " . ($@ || 'unknown'));
@@ -868,9 +897,17 @@ sub _check_neuralnetwork {
     return;
   }
 
-  if (!defined $self->{neural_model}) {
+  my $ttl = $conf->{neuralnetwork_cache_ttl} || 0;
+  my $model_age = defined $self->{_neural_model_load_time} ? time() - $self->{_neural_model_load_time} : undef;
+  my $model_expired = defined $model_age && $ttl > 0 && $model_age >= $ttl;
+
+  if (!defined $self->{neural_model} || $model_expired) {
+    if ($model_expired) {
+      dbg("Model cache expired (age: ${model_age}s, ttl: ${ttl}s), reloading");
+    }
     eval {
       $self->{neural_model} = AI::FANN->new_from_file($dataset_path);
+      $self->{_neural_model_load_time} = time();
       1;
     } or do {
       dbg("Failed to load model for prediction: " . ($@ || 'unknown'));
@@ -1110,9 +1147,9 @@ sub _save_vocabulary_to_sql {
     dbg("Saved $count vocabulary terms to SQL for user: $username");
 
     # Invalidate cache for this user
-    my $lc_user = lc($username);
     if (defined $self->{_vocab_cache}) {
-      delete $self->{_vocab_cache}{$lc_user};
+      delete $self->{_vocab_cache}{$username};
+      delete $self->{_vocab_cache_time}{$username};
     }
     1;
   } or do {
@@ -1132,10 +1169,16 @@ sub _load_vocabulary_from_sql {
     $self->{_vocab_cache} = {};
   }
 
-  my $lc_user = lc($username);
-  if (exists $self->{_vocab_cache}{$lc_user}) {
-    dbg("Using cached vocabulary for user: $lc_user");
-    return $self->{_vocab_cache}{$lc_user};
+  my $ttl = $self->{main}->{conf}->{neuralnetwork_cache_ttl} || 0;
+  if ($ttl > 0 && exists $self->{_vocab_cache}{$username}) {
+    my $age = time() - ($self->{_vocab_cache_time}{$username} || 0);
+    if ($age < $ttl) {
+      dbg("Using cached vocabulary for user: $username (age: ${age}s, ttl: ${ttl}s)");
+      return $self->{_vocab_cache}{$username};
+    }
+    dbg("Vocabulary cache expired for user: $username (age: ${age}s, ttl: ${ttl}s)");
+    delete $self->{_vocab_cache}{$username};
+    delete $self->{_vocab_cache_time}{$username};
   }
 
   my %vocabulary = (
@@ -1154,7 +1197,7 @@ sub _load_vocabulary_from_sql {
       FROM neural_vocabulary
       WHERE username = ?
     ");
-    $sth->execute($lc_user);
+    $sth->execute($username);
 
     my $rows = $sth->fetchall_arrayref();
     my $count = 0;
@@ -1173,7 +1216,7 @@ sub _load_vocabulary_from_sql {
       $count++;
     }
 
-    dbg("Loaded $count vocabulary terms from SQL for user: $lc_user");
+    dbg("Loaded $count vocabulary terms from SQL for user: $username");
 
     # Prune vocabulary if needed
     $self->_prune_vocabulary(\%vocabulary, $vocab_cap);
@@ -1183,8 +1226,9 @@ sub _load_vocabulary_from_sql {
     dbg("Failed to load vocabulary from SQL: $err");
   };
 
-  # Cache the vocabulary
+  # Cache the vocabulary with timestamp
   $self->{_vocab_cache}{$username} = \%vocabulary;
+  $self->{_vocab_cache_time}{$username} = time();
   return \%vocabulary;
 }
 
