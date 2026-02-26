@@ -29,6 +29,13 @@ Mail::SpamAssassin::Plugin::NeuralNetwork - check messages using Fast Artificial
 
 This plugin checks emails using Neural Network algorithm.
 
+=head1 CAVEATS
+
+The SpamAssassin learning subsystem routes all training through the Bayes
+scanner infrastructure.  As a result, C<Mail::SpamAssassin::Plugin::Bayes>
+must be loaded and C<use_bayes 1> must be set for this plugin's training to
+be triggered.
+
 =cut
 
 package Mail::SpamAssassin::Plugin::NeuralNetwork;
