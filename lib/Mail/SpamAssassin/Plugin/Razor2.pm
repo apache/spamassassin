@@ -366,7 +366,7 @@ sub razor2_access {
 
   if ($err) {
     chomp $err;
-    if ($err =~ /(?:could not connect|network is unreachable)/) {
+    if ($err =~ /(?:could not connect|network is unreachable|Connection reset by peer)/) {
       # make this a dbg(); SpamAssassin will still continue,
       # but without Razor checking.  otherwise there may be
       # DSNs and errors in syslog etc., yuck
