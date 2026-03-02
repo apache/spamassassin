@@ -44,7 +44,7 @@ use strict;
 use warnings;
 use re 'taint';
 
-my $VERSION = 0.2;
+my $VERSION = 0.3;
 
 use AI::FANN qw(:all);
 use Storable qw(store retrieve);
@@ -147,7 +147,7 @@ scan, and launches the auto-learn process, message is autolearned as spam/ham
 in the same way as during the manual learning.
 Value 0 at this option disables the auto-learn process for this plugin.
 
-=item neuralnetwork_dsn		(default: none)
+=item neuralnetwork_dsn                (default: none)
 
 The DBI dsn of the database to use.
 
@@ -265,7 +265,7 @@ SQLite.
     default => FANN_TRAIN_RPROP,
     code        => sub {
         my ($self, $key, $value, $line) = @_;
-	my %algorithm_map = (
+        my %algorithm_map = (
             'FANN_TRAIN_QUICKPROP'    => FANN_TRAIN_QUICKPROP,
             'FANN_TRAIN_RPROP'        => FANN_TRAIN_RPROP,
             'FANN_TRAIN_BATCH'        => FANN_TRAIN_BATCH,
@@ -646,11 +646,47 @@ sub learn_message {
   $network->learning_momentum($momentum);
   $network->training_algorithm($train_algorithm);
 
-  # Use multiple-epoch incremental training for each feature vector to increase learning effect
-  my $epochs = $train_epochs;
-  for my $e (1 .. $epochs) {
+  # Load the current corpus counts so we can compute how skewed the training
+  # history is.
+  my %vocab_for_balance;
+  if (defined $conf->{neuralnetwork_dsn} && $self->{dbh}) {
+    my $vocab_ref = $self->_load_vocabulary_from_sql($self->{main}->{username});
+    %vocab_for_balance = %{$vocab_ref} if ref($vocab_ref) eq 'HASH';
+  }
+  if (!keys %{$vocab_for_balance{terms} || {}}) {
+    my $vocab_path = File::Spec->catfile($nn_data_dir, 'vocabulary-' . lc($self->{main}->{username}) . '.data');
+    if (-f $vocab_path) {
+      eval {
+        my $ref = retrieve($vocab_path);
+        %vocab_for_balance = %{$ref} if ref $ref eq 'HASH';
+        1;
+      } or do {
+        dbg("Could not load vocabulary for balance check: " . ($@ || 'unknown'));
+      };
+    }
+  }
+  my $spam_docs = $vocab_for_balance{_spam_count} || 1;
+  my $ham_docs  = $vocab_for_balance{_ham_count}  || 1;
+
+  # class_weight > 1 means this message belongs to the minority class and
+  # should be trained harder; < 1 means it belongs to the majority class.
+  my $class_weight;
+  if ($isspam) {
+    $class_weight = $ham_docs / $spam_docs;   # < 1 when spam dominates
+  } else {
+    $class_weight = $spam_docs / $ham_docs;   # < 1 when ham dominates
+  }
+  $class_weight = 0.5 if $class_weight < 0.5;
+  $class_weight = 5.0 if $class_weight > 5.0;
+
+  my $weighted_epochs = int($train_epochs * $class_weight) || 1;
+  dbg("Incremental training: weighted_epochs=$weighted_epochs " .
+      "(base=$train_epochs, class_weight=$class_weight, " .
+      "spam_docs=$spam_docs, ham_docs=$ham_docs, isspam=$isspam)");
+
+  for my $e (1 .. $weighted_epochs) {
     for my $i (0 .. $#$feature_vectors) {
-      my $input = $feature_vectors->[$i];
+      my $input  = $feature_vectors->[$i];
       my $output = [$labels[$i] ? 1 : 0];
       eval { $network->train($input, $output); 1 } or dbg("Training step failed: " . ($@ || 'unknown'));
     }
@@ -718,14 +754,14 @@ sub forget_message {
 
 sub check_neuralnetwork_spam {
   my ($self, $pms) = @_;
-  
+
   _check_neuralnetwork($self, $pms);
   return $pms->{neuralnetwork_spam};
 }
 
 sub check_neuralnetwork_ham {
   my ($self, $pms) = @_;
-  
+
   _check_neuralnetwork($self, $pms);
   return $pms->{neuralnetwork_ham};
 }
@@ -786,9 +822,9 @@ sub _retrain_from_vocabulary {
 
   return unless defined $nn_data_dir && $vocab_size > 0;
 
-  my $learning_rate = $conf->{neuralnetwork_learning_rate};
-  my $momentum = $conf->{neuralnetwork_momentum};
-  my $train_epochs = $conf->{neuralnetwork_train_epochs};
+  my $learning_rate   = $conf->{neuralnetwork_learning_rate};
+  my $momentum        = $conf->{neuralnetwork_momentum};
+  my $train_epochs    = $conf->{neuralnetwork_train_epochs};
   my $train_algorithm = $conf->{neuralnetwork_train_algorithm};
 
   my %vocabulary;
@@ -817,19 +853,23 @@ sub _retrain_from_vocabulary {
   my $actual_size = scalar @vocab_keys;
   return unless $actual_size == $vocab_size;
 
-  # Build synthetic spam and ham TF-IDF vectors from vocabulary statistics
-  my $N = $vocabulary{_doc_count} || 1;
+  # Build synthetic spam and ham TF-IDF vectors normalised by class
+  # document count.
+  my $N         = $vocabulary{_doc_count} || 1;
+  my $spam_docs = $vocabulary{_spam_count} || 1;
+  my $ham_docs  = $vocabulary{_ham_count}  || 1;
+
   my (@spam_vec, @ham_vec);
   for my $i (0 .. $#vocab_keys) {
-    my $w = $vocab_keys[$i];
+    my $w  = $vocab_keys[$i];
     my $td = $terms->{$w};
-    my $df = $td->{docs} || 0;
-    my $idf = log(($N + 1) / ($df + 1)) + 1;
-    my $spam_freq = $td->{spam} || 0;
-    my $ham_freq  = $td->{ham} || 0;
-    my $total = $spam_freq + $ham_freq || 1;
-    $spam_vec[$i] = ($spam_freq / $total) * $idf;
-    $ham_vec[$i]  = ($ham_freq / $total) * $idf;
+    my $df         = $td->{docs}  || 0;
+    my $spam_freq  = $td->{spam}  || 0;
+    my $ham_freq   = $td->{ham}   || 0;
+    my $idf        = log(($N + 1) / ($df + 1)) + 1;
+
+    $spam_vec[$i] = ($spam_freq / $spam_docs) * $idf;
+    $ham_vec[$i]  = ($ham_freq  / $ham_docs)  * $idf;
   }
 
   # L2-normalize both vectors
@@ -839,6 +879,18 @@ sub _retrain_from_vocabulary {
     $norm = sqrt($norm) || 1;
     @$vec = map { $_ / $norm } @$vec;
   }
+
+  my $spam_reps = 1;
+  my $ham_reps  = 1;
+  if ($spam_docs > $ham_docs) {
+    $ham_reps = int($spam_docs / $ham_docs + 0.5) || 1;
+    $ham_reps = 10 if $ham_reps > 10;
+  } elsif ($ham_docs > $spam_docs) {
+    $spam_reps = int($ham_docs / $spam_docs + 0.5) || 1;
+    $spam_reps = 10 if $spam_reps > 10;
+  }
+  dbg("Retraining from vocabulary: spam_docs=$spam_docs, ham_docs=$ham_docs, " .
+      "spam_reps=$spam_reps, ham_reps=$ham_reps, epochs=$train_epochs");
 
   # Create and train new network
   my $num_hidden = int(sqrt($vocab_size)) || 1;
@@ -850,8 +902,12 @@ sub _retrain_from_vocabulary {
   $network->training_algorithm($train_algorithm);
 
   for my $e (1 .. $train_epochs) {
-    eval { $network->train(\@spam_vec, [1]); 1 } or dbg("Retrain spam step failed: " . ($@ || 'unknown'));
-    eval { $network->train(\@ham_vec,  [0]); 1 } or dbg("Retrain ham step failed: " . ($@ || 'unknown'));
+    for (1 .. $spam_reps) {
+      eval { $network->train(\@spam_vec, [1]); 1 } or dbg("Retrain spam step failed: " . ($@ || 'unknown'));
+    }
+    for (1 .. $ham_reps) {
+      eval { $network->train(\@ham_vec,  [0]); 1 } or dbg("Retrain ham step failed: " . ($@ || 'unknown'));
+    }
   }
 
   return $network;
@@ -969,7 +1025,7 @@ sub _init_sql_connection {
   return if $self->{dbh};
   return if !$conf->{neuralnetwork_dsn};
 
-  my $dsn = $conf->{neuralnetwork_dsn};
+  my $dsn      = $conf->{neuralnetwork_dsn};
   my $username = $conf->{neuralnetwork_username} || '';
   my $password = $conf->{neuralnetwork_password} || '';
 
@@ -1039,7 +1095,7 @@ sub _save_msgid_to_neural_seen {
     # Flag: 'S' for spam, 'H' for ham
     my $flag = $isspam ? 'S' : 'H';
     my $username = lc($self->{main}->{username}) || 'default';
- 
+
     # Use INSERT IGNORE to avoid duplicate key errors
     my $insert_sql;
 
@@ -1147,9 +1203,9 @@ sub _save_vocabulary_to_sql {
         lc($username),
         $keyword,
         $term_data->{total} || 0,
-        $term_data->{docs} || 0,
-        $term_data->{spam} || 0,
-        $term_data->{ham} || 0
+        $term_data->{docs}  || 0,
+        $term_data->{spam}  || 0,
+        $term_data->{ham}   || 0
       );
       $count++;
     }
@@ -1216,12 +1272,12 @@ sub _load_vocabulary_from_sql {
       my ($keyword, $total, $docs, $spam, $ham) = @{$row};
       $vocabulary{terms}{$keyword} = {
         total => $total,
-        docs => $docs,
-        spam => $spam,
-        ham => $ham
+        docs  => $docs,
+        spam  => $spam,
+        ham   => $ham
       };
-      $vocabulary{_doc_count}++ if($docs eq 1);
-      $vocabulary{_ham_count}++ if($ham eq 1);
+      $vocabulary{_doc_count}++  if($docs eq 1);
+      $vocabulary{_ham_count}++  if($ham  eq 1);
       $vocabulary{_spam_count}++ if($spam eq 1);
       $count++;
     }
