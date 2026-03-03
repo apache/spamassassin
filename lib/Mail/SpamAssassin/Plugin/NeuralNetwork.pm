@@ -633,13 +633,33 @@ sub learn_message {
   if(defined $self->{neural_model} && $self->{neural_model}->num_inputs() == $num_input) {
     $network = $self->{neural_model};
   } else {
-    # Vocabulary size changed, retrain from vocabulary statistics
-    $network = $self->_retrain_from_vocabulary($self->{main}->{conf}, $nn_data_dir, $num_input);
-    if (!defined $network) {
-      # No vocabulary stats available yet, create a fresh network
-      $network = AI::FANN->new_standard($num_input, $num_hidden_neurons, $num_output_neurons);
-      $network->hidden_activation_function(FANN_SIGMOID_STEPWISE);
-      $network->output_activation_function(FANN_SIGMOID_STEPWISE);
+    # Try to load the existing model from disk if not already in memory
+    my $existing_network = $self->{neural_model};
+    if (!defined $existing_network && -f $dataset_path) {
+      eval {
+        $existing_network = AI::FANN->new_from_file($dataset_path);
+        1;
+      } or do {
+        dbg("Failed to load existing model for size check: " . ($@ || 'unknown'));
+      };
+    }
+
+    if (defined $existing_network) {
+      # Vocabulary grew: preserve the trained model by adjusting the training vectors
+      my $model_size = $existing_network->num_inputs();
+      dbg("Vocabulary size changed ($num_input vs model $model_size), adjusting training vectors");
+      $feature_vectors = [ map { _adjust_vector_size($_, $model_size) } @$feature_vectors ];
+      $num_input = $model_size;
+      $network = $existing_network;
+    } else {
+      # No existing model: create a baseline from vocabulary statistics
+      $network = $self->_retrain_from_vocabulary($self->{main}->{conf}, $nn_data_dir, $num_input);
+      if (!defined $network) {
+        # No vocabulary stats available yet, create a fresh network
+        $network = AI::FANN->new_standard($num_input, $num_hidden_neurons, $num_output_neurons);
+        $network->hidden_activation_function(FANN_SIGMOID_STEPWISE);
+        $network->output_activation_function(FANN_SIGMOID_STEPWISE);
+      }
     }
   }
   $network->learning_rate($learning_rate);
