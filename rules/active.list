@@ -305,7 +305,7 @@ CN_PHISH_JP_07
 # tflags publish
 COMMENT_GIBBERISH
 
-# good enough
+# tflags net
 COMPENSATION
 
 # tflags publish
@@ -566,7 +566,7 @@ FROM_MISSP_FREEMAIL
 # good enough
 FROM_MISSP_MSFT
 
-# good enough
+# tflags net
 FROM_MISSP_REPLYTO
 
 # tflags net
@@ -607,6 +607,9 @@ FROM_UNBAL1
 
 # good enough
 FROM_UNBAL2
+
+# good enough
+FROM_WSP_LEAD
 
 # tflags net
 FSL_BULK_SIG
@@ -962,6 +965,9 @@ MANY_HDRS_LCASE
 # tflags publish
 MANY_SPAN_IN_TEXT
 
+# tflags net
+MAY_BE_FORGED
+
 # tflags publish
 MILLION_HUNDRED
 
@@ -1006,9 +1012,6 @@ MONERO_MALWARE
 
 # tflags publish
 MONERO_PAY_ME
-
-# good enough
-MONEY_ATM_CARD
 
 # good enough
 MONEY_FORM
@@ -1130,7 +1133,7 @@ PDS_FRNOM_TODOM_DBL_URL
 # good enough
 PDS_FRNOM_TODOM_NAKED_TO
 
-# good enough
+# tflags net
 PDS_FROM_2_EMAILS
 
 # good enough
@@ -1195,6 +1198,9 @@ POSSIBLE_PAYPAL_PHISH_01
 
 # tflags publish
 POSSIBLE_PAYPAL_PHISH_02
+
+# good enough
+POSTCARD_09
 
 # tflags publish
 PP_MIME_FAKE_ASCII_TEXT
@@ -1622,7 +1628,7 @@ TEQF_USR_IMAGE
 # tflags publish
 TEQF_USR_MSGID_HEX
 
-# tflags net
+# tflags publish
 TEQF_USR_MSGID_MALF
 
 # good enough
@@ -1643,7 +1649,7 @@ TO_EQ_FM_DIRECT_MX
 # tflags net
 TO_EQ_FM_DOM_HTML_IMG
 
-# good enough
+# tflags net
 TO_EQ_FM_DOM_HTML_ONLY
 
 # tflags net
@@ -1663,9 +1669,6 @@ TO_IN_SUBJ
 
 # tflags publish
 TO_NAME_SUBJ_NO_RDNS
-
-# good enough
-TO_NO_BRKTS_DYNIP
 
 # good enough
 TO_NO_BRKTS_FROM_MSSP
@@ -1698,7 +1701,7 @@ TVD_DOLLARS_US
 TVD_FROM_1
 
 # good enough
-TVD_PH_1
+TVD_PH_REC
 
 # tflags net
 TVD_SPACE_ENCODED
@@ -1706,7 +1709,7 @@ TVD_SPACE_ENCODED
 # good enough
 TVD_SPACE_RATIO_MINFP
 
-# good enough
+# tflags net
 TVD_SUBJ_NUM_OBFU_MINFP
 
 # tflags publish
@@ -1958,7 +1961,7 @@ URI_WP_DIRINDEX
 # tflags net
 URI_WP_HACKED
 
-# tflags net
+# tflags publish
 URI_WP_HACKED_2
 
 # tflags publish
