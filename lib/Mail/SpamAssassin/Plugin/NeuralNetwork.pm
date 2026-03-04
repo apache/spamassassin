@@ -177,6 +177,11 @@ SQLite.
 The password that should be used to connect to the database.  Not used for
 SQLite.
 
+=item neuralnetwork_min_vocab_hits n (default: 10)
+
+Minimum number of tokens in the email that must exist in the vocabulary for
+prediction to run.
+
 =back
 
 =cut
@@ -306,6 +311,12 @@ SQLite.
     is_admin => 1,
     default => '',
     type => $Mail::SpamAssassin::Conf::CONF_TYPE_STRING,
+  });
+  push(@cmds, {
+    setting => 'neuralnetwork_min_vocab_hits',
+    is_admin => 1,
+    default => 10,
+    type => $Mail::SpamAssassin::Conf::CONF_TYPE_NUMERIC,
   });
 
   $conf->{parser}->register_commands(\@cmds);
@@ -525,7 +536,9 @@ sub _text_to_features {
       $norm = sqrt($norm) || 1;
       @vec = map { $_ / $norm } @vec;
 
-      push @feature_vectors, \@vec;
+      # Count how many vocabulary positions are non-zero (vocab hit count)
+      my $hits = scalar grep { $_ != 0 } @vec;
+      push @feature_vectors, { vec => \@vec, hits => $hits };
     }
 
     return \@feature_vectors, $vocab_size;
@@ -606,7 +619,7 @@ sub learn_message {
 
   return unless $feature_vectors && @$feature_vectors;
 
-  my $num_input = scalar(@{$feature_vectors->[0]});
+  my $num_input = scalar(@{$feature_vectors->[0]{vec}});
   if ($num_input == 0) {
     dbg("No valid features found in message, skipping learning");
     return;
@@ -648,7 +661,7 @@ sub learn_message {
       # Vocabulary grew: preserve the trained model by adjusting the training vectors
       my $model_size = $existing_network->num_inputs();
       dbg("Vocabulary size changed ($num_input vs model $model_size), adjusting training vectors");
-      $feature_vectors = [ map { _adjust_vector_size($_, $model_size) } @$feature_vectors ];
+      $feature_vectors = [ map { { vec => _adjust_vector_size($_->{vec}, $model_size), hits => $_->{hits} } } @$feature_vectors ];
       $num_input = $model_size;
       $network = $existing_network;
     } else {
@@ -706,14 +719,14 @@ sub learn_message {
 
   for my $e (1 .. $weighted_epochs) {
     for my $i (0 .. $#$feature_vectors) {
-      my $input  = $feature_vectors->[$i];
+      my $input  = $feature_vectors->[$i]{vec};
       my $output = [$labels[$i] ? 1 : 0];
       eval { $network->train($input, $output); 1 } or dbg("Training step failed: " . ($@ || 'unknown'));
     }
   }
 
   if (scalar(@$feature_vectors) == 1) {
-    my $pred_after = eval { $network->run($feature_vectors->[0]) };
+    my $pred_after = eval { $network->run($feature_vectors->[0]{vec}) };
     $pred_after = ref($pred_after) ? $pred_after->[0] : $pred_after;
     dbg("Prediction after learning: " . (defined $pred_after ? $pred_after : 'undef'));
   }
@@ -974,7 +987,15 @@ sub _check_neuralnetwork {
     dbg("Not enough tokens found");
     return;
   }
-  my $input_vector = $feature_vectors->[0];
+
+  my $min_hits = $conf->{neuralnetwork_min_vocab_hits};
+  my $hits     = $feature_vectors->[0]{hits};
+  if ($hits < $min_hits) {
+    $pms->{neuralnetwork_prediction} = undef;
+    dbg("Too few vocabulary hits ($hits < $min_hits), skipping prediction");
+    return;
+  }
+  my $input_vector = $feature_vectors->[0]{vec};
 
   my $dataset_path = File::Spec->catfile($nn_data_dir, 'fann-' . lc($self->{main}->{username}) . '.model');
   if(not -f $dataset_path) {
