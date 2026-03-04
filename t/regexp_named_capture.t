@@ -5,7 +5,7 @@ use lib 't';
 use SATest; sa_t_init("regexp_named_capture");
 
 use Test::More;
-plan tests => 14;
+plan tests => 16;
 
 # ---------------------------------------------------------------------------
 
@@ -43,6 +43,29 @@ tstlocalrules (q{
 
    # Should not hit
    body TEST_CAPTURE_8 m,www\.\%{TESTCAP1}\.,i
+});
+
+sarun ("-D check,config -L -t < data/nice/001 2>&1", \&patterns_run_cb);
+ok_all_patterns();
+
+clear_pattern_counters();
+
+%patterns = (
+  q{ 1.0 TEST_CAPTURE_UNDEF_ALT } => '',
+);
+%anti_patterns = (
+  q{ 1.0 TEST_CAPTURE_UNDEF_ONLY } => '',
+);
+
+tstlocalrules (q{
+   # Capture from non-existent header, tag will be undefined
+   header __CAP_NOEXIST X-Nonexistent-Header =~ /@(?<TESTCAP_UNDEF>\w+)/
+
+   # Alternation with undefined tag: should still match "Evolution"
+   body TEST_CAPTURE_UNDEF_ALT /(?:%{TESTCAP_UNDEF}|Evolution)/
+
+   # Only undefined tag, no alternation: should not match
+   body TEST_CAPTURE_UNDEF_ONLY /%{TESTCAP_UNDEF}/
 });
 
 sarun ("-D check,config -L -t < data/nice/001 2>&1", \&patterns_run_cb);

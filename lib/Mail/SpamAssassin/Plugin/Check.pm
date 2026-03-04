@@ -1392,18 +1392,20 @@ sub capture_rules_replace {
             q{'.$rulename.'}, $cname, $test_qr);
     ';
   }
+  # bz 8360, instead of disabling the entire rule, change the part of the regexp that doesn't match to
+  # a different regexp that will never match (without capture tags)
   $code .= '
         } else {
+          my $cval = "(?!)";
+          $test_qr =~ s/(?<!\\\\)\\%\\\\\\{\Q${cname}\E\\\\\\}/$cval/gs;
   ';
   if ($would_log_rules_all) {
     $code .= '
-          dbg("rules-all: not running rule %s, dependent tag not defined: %s",
+          dbg("rules-all: dependent tag not defined on rule %s, using empty alternation: %s",
             q{'.$rulename.'}, $cname);
     ';
   }
   $code .= '
-          $test_qr = undef;
-          last;
         }
       }
       if ($test_qr) {
