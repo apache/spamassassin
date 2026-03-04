@@ -661,7 +661,7 @@ sub learn_message {
       # Vocabulary grew: preserve the trained model by adjusting the training vectors
       my $model_size = $existing_network->num_inputs();
       dbg("Vocabulary size changed ($num_input vs model $model_size), adjusting training vectors");
-      $feature_vectors = [ map { { vec => _adjust_vector_size($_->{vec}, $model_size), hits => $_->{hits} } } @$feature_vectors ];
+      $feature_vectors = [ map { my $v = _adjust_vector_size($_->{vec}, $model_size); { vec => $v, hits => scalar grep { $_ != 0 } @$v } } @$feature_vectors ];
       $num_input = $model_size;
       $network = $existing_network;
     } else {
