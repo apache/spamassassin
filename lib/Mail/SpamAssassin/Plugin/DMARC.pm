@@ -268,6 +268,7 @@ sub _check_dmarc {
   my $from_addr = ($pms->get('From:first:addr'))[0];
   return if not defined $from_addr;
   return if index($from_addr, '@') == -1;
+  my $from_domain = ($pms->get('From:first:addr:host'))[0];
 
   my $mfrom_domain = ($pms->get('EnvelopeFrom:first:addr:host'))[0];
   if (!defined $mfrom_domain) {
@@ -333,19 +334,20 @@ sub _check_dmarc {
   }
 
   my $dmarc_arc_verified = 0;
+  my $mfrom_dom = $mfrom_domain;
   if (($result->result ne 'pass') and (ref($pms->{arc_verifier}) and ($pms->{arc_verifier}->result eq 'pass'))) {
     undef $result;
     $dmarc_arc_verified = 1;
     # if DMARC fails retry by reading data from AAR headers
     # use Mail::SpamAssassin::Plugin::AuthRes if available to read ARC signature details
-    my @spf_parsed = sort { ( $a->{authres_parsed}{spf}{arc_index} // 0 ) <=> ( $b->{authres_parsed}{spf}{arc_index} // 0 ) } @{$pms->{authres_parsed}{spf} // []};
+    my @spf_parsed = sort { ( $a->{arc_index} // 0 ) <=> ( $b->{arc_index} // 0 ) } @{$pms->{authres_parsed}{spf} // []};
     my $old_arc_index = 0;
     foreach my $spf_parse ( @spf_parsed ) {
       last if not defined $spf_parse->{arc_index};
       last if $old_arc_index > $spf_parse->{arc_index};
       dbg("Evaluate DMARC using AAR spf information for index $spf_parse->{arc_index}");
       if(exists $spf_parse->{properties}{smtp}{mailfrom}) {
-        my $mfrom_dom = $spf_parse->{properties}{smtp}{mailfrom};
+        $mfrom_dom = $spf_parse->{properties}{smtp}{mailfrom};
         if($mfrom_dom =~ /\@(.*)/) {
           $mfrom_dom = $1;
         } else {
@@ -375,7 +377,7 @@ sub _check_dmarc {
     my @arc_seals;
     if(defined $pms->{arc_verifier}{seals}) {
       @tmp_arc_seals = @{$pms->{arc_verifier}{seals}};
-      @arc_seals = sort { ( $a->{arc_verifier}{seals}{tags_by_name}{i}{value} // 0 ) <=> ( $b->{arc_verifier}{seals}{tags_by_name}{i}{value} // 0 ) } @tmp_arc_seals;
+      @arc_seals = sort { ( $a->{tags_by_name}{i}{value} // 0 ) <=> ( $b->{tags_by_name}{i}{value} // 0 ) } @tmp_arc_seals;
       foreach my $seals ( @arc_seals ) {
         if(exists($seals->{tags_by_name}{d}) and exists($pms->{arc_author_domains}->{$mfrom_domain})) {
           dbg("Evaluate DMARC using AAR dkim information for index $seals->{tags_by_name}{i}{value} on domain $mfrom_domain and selector $seals->{tags_by_name}{s}{value}. Result is $seals->{verify_result}");
@@ -391,13 +393,13 @@ sub _check_dmarc {
 
     eval { $result = $dmarc->validate(); };
     if ($@) {
-      dbg("error while validating domain $mfrom_domain: $@");
+      dbg("error while validating domain $mfrom_dom: $@");
       return;
     }
   }
 
   if(defined $result and ($result->result ne 'none') and (defined $result->{published}) and ($result->published->can('stringify'))) {
-    dbg("Evaluated DMARC record \"" . $result->published->stringify . "\" for domain $mfrom_domain");
+    dbg("Evaluated DMARC record \"" . $result->published->stringify . "\" for domain $from_domain");
   }
 
   # Report that DMARC failed but it has been overridden because of AAR headers
@@ -411,7 +413,7 @@ sub _check_dmarc {
         $cnt++;
       }
     }
-    if($cnt gt 1) {
+    if($cnt > 1) {
       $result->reason->[0]{comment} .= " remote-ip[1]=$lasthop->{ip}";
     }
   }
