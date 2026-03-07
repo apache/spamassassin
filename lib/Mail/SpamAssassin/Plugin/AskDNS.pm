@@ -34,7 +34,11 @@ record type and optional subrule filtering expression, yielding a rule hit
 if a response meets filtering conditions.
 
 Any host or its domain part matching uridnsbl_skip_domains is ignored
-by default.
+by default.  To bypass this check for specific rules, use the C<noskip>
+tflag:
+
+  askdns   MY_RULE  _AUTHORDOMAIN_.dbl.example.com  A  127.0.1.2
+  tflags   MY_RULE  noskip
 
 =head1 RULE DEFINITIONS AND PRIVILEGED SETTINGS
 
@@ -398,9 +402,11 @@ sub launch_queries {
 
   my $arule = $pms->{conf}->{askdns}{$rulename};
   my $query_tmpl = $arule->{query};
+  my $noskip = ($pms->{conf}->{tflags}->{$rulename}||'') =~ /\bnoskip\b/;
   my $queries;
   if (@$tags) {
-    if (!exists $pms->{askdns_qtmpl_cache}{$query_tmpl}) {
+    my $cache_key = $noskip ? "noskip\x00$query_tmpl" : $query_tmpl;
+    if (!exists $pms->{askdns_qtmpl_cache}{$cache_key}) {
       # replace tags in query template
       # iterate through each tag, replacing list of strings as we go
       my %q_iter = ( "$query_tmpl" => 1 );
@@ -420,14 +426,16 @@ sub launch_queries {
         foreach my $q (keys %q_iter) {
           # handle space separated multi-valued tags
           foreach my $val (@{$pms->{askdns_tag_cache}{$tag}}) {
-            if (exists $pms->{conf}->{uridnsbl_skip_domains}->{lc $val}) {
-              dbg("askdns: query skipped, uridnsbl_skip_domains: $val");
-              next;
-            }
-            my $dom = $pms->{main}->{registryboundaries}->trim_domain($val);
-            if (exists $pms->{conf}->{uridnsbl_skip_domains}->{lc $dom}) {
-              dbg("askdns: query skipped, uridnsbl_skip_domains: $val");
-              next;
+            if (!$noskip) {
+              if (exists $pms->{conf}->{uridnsbl_skip_domains}->{lc $val}) {
+                dbg("askdns: query skipped, uridnsbl_skip_domains: $val");
+                next;
+              }
+              my $dom = $pms->{main}->{registryboundaries}->trim_domain($val);
+              if (exists $pms->{conf}->{uridnsbl_skip_domains}->{lc $dom}) {
+                dbg("askdns: query skipped, uridnsbl_skip_domains: $val");
+                next;
+              }
             }
             my $qtmp = $q;
             $qtmp =~ s/\Q_${tag}_\E/${val}/g;
@@ -439,9 +447,9 @@ sub launch_queries {
       # cache idn'd queries
       my @q_arr;
       push @q_arr, idn_to_ascii($_) foreach (keys %q_iter);
-      $pms->{askdns_qtmpl_cache}{$query_tmpl} = \@q_arr;
+      $pms->{askdns_qtmpl_cache}{$cache_key} = \@q_arr;
     }
-    $queries = $pms->{askdns_qtmpl_cache}{$query_tmpl};
+    $queries = $pms->{askdns_qtmpl_cache}{$cache_key};
   } else {
     push @$queries, idn_to_ascii($query_tmpl);
   }
