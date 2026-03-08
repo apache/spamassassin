@@ -12,5 +12,7 @@ CREATE TABLE neural_vocabulary (
   docs_count int(11) NOT NULL DEFAULT '0',
   spam_count int(11) NOT NULL DEFAULT '0',
   ham_count int(11) NOT NULL DEFAULT '0',
-  PRIMARY KEY neural_vocab_idx1 (username, keyword)
+  model_position int(11) DEFAULT NULL,
+  PRIMARY KEY neural_vocab_idx1 (username, keyword),
+  KEY neural_vocab_model_pos_idx (username, model_position)
 ) ENGINE=InnoDB;

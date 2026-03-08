@@ -30,6 +30,7 @@ tstprefs("
   neuralnetwork_data_dir	$userstate/NN
   neuralnetwork_min_spam_count	0
   neuralnetwork_min_ham_count	0
+  neuralnetwork_min_vocab_hits  5
 
   body		NN_SPAM		eval:check_neuralnetwork_spam()
   describe	NN_SPAM		Email considered as spam by Neural Network
