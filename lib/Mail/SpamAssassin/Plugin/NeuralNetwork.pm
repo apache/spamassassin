@@ -627,6 +627,26 @@ sub learn_message {
     return;
   };
 
+  # Always reload model from disk after acquiring the lock so we train on the
+  # latest state saved by any other spamd child.
+  if (-f $dataset_path) {
+    eval {
+      $self->{neural_model} = AI::FANN->new_from_file($dataset_path);
+      $self->{_neural_model_load_time} = time();
+      1;
+    } or do {
+      dbg("Failed to reload model after lock: " . ($@ || 'unknown'));
+    };
+  } else {
+    undef $self->{neural_model};
+  }
+  # Invalidate vocabulary cache
+  if (defined $self->{_vocab_cache}) {
+    my $username = $self->{main}->{username};
+    delete $self->{_vocab_cache}{$username};
+    delete $self->{_vocab_cache_time}{$username};
+  }
+
   # Update the vocabulary
   my $update_vocab = 1;
 
