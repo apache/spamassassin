@@ -615,23 +615,6 @@ sub learn_message {
   my @email_texts = map { $_->{text} } @training_data;
   my @labels = map { $_->{label} } @training_data;
 
-  # Update the vocabulary
-  my $update_vocab = 1;
-
-  # Convert email text to numerical feature vectors
-  my ($feature_vectors, $vocab_size, $vocab_keys_ref) = _text_to_features($self, $self->{main}->{conf}, $nn_data_dir, $update_vocab, $isspam, undef, @email_texts);
-
-  return unless $feature_vectors && @$feature_vectors;
-
-  my $num_input = scalar(@{$feature_vectors->[0]{vec}});
-  if ($num_input == 0) {
-    dbg("No valid features found in message, skipping learning");
-    return;
-  }
-  my $num_hidden_neurons = int(sqrt($num_input)) || 1;
-  my $num_output_neurons = 1;
-
-  # Reload model from disk if cache has expired
   my $lock_path = $dataset_path . '.lock';
   $lock_path = Mail::SpamAssassin::Util::untaint_file_path($lock_path);
   open(my $lock_fh, '>', $lock_path) or do {
@@ -643,6 +626,26 @@ sub learn_message {
     close($lock_fh);
     return;
   };
+
+  # Update the vocabulary
+  my $update_vocab = 1;
+
+  # Convert email text to numerical feature vectors
+  my ($feature_vectors, $vocab_size, $vocab_keys_ref) = _text_to_features($self, $self->{main}->{conf}, $nn_data_dir, $update_vocab, $isspam, undef, @email_texts);
+
+  unless ($feature_vectors && @$feature_vectors) {
+    close($lock_fh);
+    return;
+  }
+
+  my $num_input = scalar(@{$feature_vectors->[0]{vec}});
+  if ($num_input == 0) {
+    dbg("No valid features found in message, skipping learning");
+    close($lock_fh);
+    return;
+  }
+  my $num_hidden_neurons = int(sqrt($num_input)) || 1;
+  my $num_output_neurons = 1;
 
   my $network;
   if(defined $self->{neural_model} && $self->{neural_model}->num_inputs() == $num_input) {
@@ -1280,7 +1283,7 @@ sub _save_vocabulary_to_sql {
     my $count = 0;
 
     $self->{dbh}->begin_work();
-    foreach my $keyword (keys %{$terms}) {
+    foreach my $keyword (sort keys %{$terms}) {
       my $term_data = $terms->{$keyword};
       $sth_upsert->execute(
         lc($username),
