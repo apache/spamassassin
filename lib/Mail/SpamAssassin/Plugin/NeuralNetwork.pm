@@ -137,6 +137,11 @@ Number of training epochs to perform when learning a single message.
 
 Algorithm used by Fann neural network used when training, might increase speed depending on the data volume.
 
+=item neuralnetwork_lock_timeout n (default: 10)
+
+Maximum number of seconds to wait for the exclusive training lock before giving up and skipping the learn operation.
+Set to 0 to wait indefinitely.
+
 =item neuralnetwork_stopwords words (default: "the and for with that this from there their have be not but you your")
 
 Space-separated list of stopwords to ignore when tokenizing text.
@@ -282,6 +287,12 @@ prediction to run.
         }
         $self->{neuralnetwork_train_algorithm} = $algorithm_map{$value};
     },
+    type => $Mail::SpamAssassin::Conf::CONF_TYPE_NUMERIC,
+  });
+  push(@cmds, {
+    setting => 'neuralnetwork_lock_timeout',
+    is_admin => 1,
+    default => 30,
     type => $Mail::SpamAssassin::Conf::CONF_TYPE_NUMERIC,
   });
   push(@cmds, {
@@ -615,27 +626,14 @@ sub learn_message {
   my @email_texts = map { $_->{text} } @training_data;
   my @labels = map { $_->{label} } @training_data;
 
-  my $lock_path = $dataset_path . '.lock';
-  $lock_path = Mail::SpamAssassin::Util::untaint_file_path($lock_path);
-  open(my $lock_fh, '>', $lock_path) or do {
-    info("Cannot open lock file '$lock_path': $!");
-    return;
-  };
-  flock($lock_fh, LOCK_EX) or do {
-    info("Cannot acquire lock on '$lock_path': $!");
-    close($lock_fh);
-    return;
-  };
 
-  # Always reload model from disk after acquiring the lock so we train on the
-  # latest state saved by any other spamd child.
   if (-f $dataset_path) {
     eval {
       $self->{neural_model} = AI::FANN->new_from_file($dataset_path);
       $self->{_neural_model_load_time} = time();
       1;
     } or do {
-      dbg("Failed to reload model after lock: " . ($@ || 'unknown'));
+      dbg("Failed to load model before training: " . ($@ || 'unknown'));
     };
   } else {
     undef $self->{neural_model};
@@ -654,14 +652,12 @@ sub learn_message {
   my ($feature_vectors, $vocab_size, $vocab_keys_ref) = _text_to_features($self, $self->{main}->{conf}, $nn_data_dir, $update_vocab, $isspam, undef, @email_texts);
 
   unless ($feature_vectors && @$feature_vectors) {
-    close($lock_fh);
     return;
   }
 
   my $num_input = scalar(@{$feature_vectors->[0]{vec}});
   if ($num_input == 0) {
     dbg("No valid features found in message, skipping learning");
-    close($lock_fh);
     return;
   }
   my $num_hidden_neurons = int(sqrt($num_input)) || 1;
@@ -774,6 +770,32 @@ sub learn_message {
     my $pred_after = eval { $network->run($feature_vectors->[0]{vec}) };
     $pred_after = ref($pred_after) ? $pred_after->[0] : $pred_after;
     dbg("Prediction after learning: " . (defined $pred_after ? $pred_after : 'undef'));
+  }
+
+  my $lock_path = $dataset_path . '.lock';
+  $lock_path = Mail::SpamAssassin::Util::untaint_file_path($lock_path);
+  open(my $lock_fh, '>', $lock_path) or do {
+    info("Cannot open lock file '$lock_path': $!");
+    return;
+  };
+  my $lock_timeout = $conf->{neuralnetwork_lock_timeout};
+  my $locked = 0;
+  if ($lock_timeout) {
+    my $deadline = time() + $lock_timeout;
+    do {
+      if (flock($lock_fh, LOCK_EX | LOCK_NB)) {
+        $locked = 1;
+      } else {
+        select(undef, undef, undef, 0.5);
+      }
+    } until ($locked || time() >= $deadline);
+  } else {
+    $locked = flock($lock_fh, LOCK_EX);
+  }
+  unless ($locked) {
+    info("Cannot acquire write lock after ${lock_timeout}s, skipping save");
+    close($lock_fh);
+    return;
   }
 
   # Save the model
@@ -1136,7 +1158,7 @@ sub _init_sql_connection {
   eval {
     local $SIG{'__DIE__'};
     require DBI;
-    $self->{dbh} = DBI->connect_cached(
+    $self->{dbh} = DBI->connect(
       $dsn,
       $username,
       $password,
