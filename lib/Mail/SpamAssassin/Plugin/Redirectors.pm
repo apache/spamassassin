@@ -864,7 +864,7 @@ sub _check_querystring {
   my $rreg = $conf->{url_redirector_params};
 
   # Check parameters regexp and https:// in the querystring
-  if (($params =~ /(?:\?|\&)$rreg/gis) or ($params =~ /(?:\/|\_|\=)(?:https?:)?\/\/(.*)/)) {
+  if (($params =~ /(?:\?|\&)$rreg/gis) or ($params =~ /(?:\/|\_|\=)((?:https?:)?\/\/.*)/)) {
     dbg("Found redirection with path $params");
     my $newuri = $1;
     if($newuri !~ /^http/) {
