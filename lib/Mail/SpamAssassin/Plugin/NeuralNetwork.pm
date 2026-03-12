@@ -571,6 +571,8 @@ sub learn_message {
   my $train_algorithm = $conf->{neuralnetwork_train_algorithm};
   my @training_data;
   my $autolearn = defined $self->{autolearn};
+  my $last_pms  = $self->{last_pms};
+  $self->{last_pms} = $self->{autolearn} = undef;
 
   my $msgid = $msg->get_msgid();
   $msgid //= $msg->generate_msgid();
@@ -587,11 +589,10 @@ sub learn_message {
   }
 
   dbg("learning a message");
-  my $pms = ($self->{last_pms})? $self->{last_pms} : Mail::SpamAssassin::PerMsgStatus->new($self->{main}, $params->{msg});
+  my $pms = ($last_pms && defined $last_pms->{main}) ? $last_pms : Mail::SpamAssassin::PerMsgStatus->new($self->{main}, $params->{msg});
   if (!defined $pms->{relays_internal} && !defined $pms->{relays_external}) {
     $pms->extract_message_metadata();
   }
-  $self->{last_pms} = $self->{autolearn} = undef;
   $self->{pms} = $pms;
 
   my $nn_data_dir = $self->{main}->{conf}->{neuralnetwork_data_dir};
@@ -1162,7 +1163,7 @@ sub _init_sql_connection {
       $dsn,
       $username,
       $password,
-      {RaiseError => 1, PrintError => 0, InactiveDestroy => 1, AutoCommit => 1}
+      {RaiseError => 1, PrintError => 0, InactiveDestroy => 1, AutoCommit => 0}
     );
     $self->_create_vocabulary_table();
     dbg("SQL connection initialized for vocabulary storage");
@@ -1290,7 +1291,7 @@ sub _save_vocabulary_to_sql {
   my ($self, $vocabulary, $username) = @_;
   return unless $self->{dbh} && defined $vocabulary && ref($vocabulary) eq 'HASH';
 
-  $username ||= $self->{main}->{username};
+  $username //= $self->{main}->{username};
 
   eval {
     my $terms = $vocabulary->{terms} || {};
@@ -1358,7 +1359,7 @@ sub _load_vocabulary_from_sql {
   my ($self, $username) = @_;
   return {} unless $self->{dbh};
 
-  $username ||= $self->{main}->{username};
+  $username //= $self->{main}->{username};
 
   # Check cache first to avoid repeated database queries
   if (!defined $self->{_vocab_cache}) {
@@ -1432,7 +1433,7 @@ sub _save_model_vocab_to_sql {
   my ($self, $vocab_keys_ref, $username) = @_;
   return unless $self->{dbh} && defined $vocab_keys_ref;
 
-  $username ||= $self->{main}->{username};
+  $username //= $self->{main}->{username};
 
   eval {
     $self->{dbh}->begin_work();
@@ -1459,7 +1460,7 @@ sub _load_model_vocab_from_sql {
   my ($self, $username) = @_;
   return undef unless $self->{dbh};
 
-  $username ||= $self->{main}->{username};
+  $username //= $self->{main}->{username};
 
   my $vocab_ref;
   eval {
