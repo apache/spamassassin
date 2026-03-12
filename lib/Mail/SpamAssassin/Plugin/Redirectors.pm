@@ -1062,6 +1062,8 @@ sub recursive_lookup {
       }
     } else {
       my $response = $ua->$method($redir_url);
+      return if not defined $response;
+
       my $http_equiv = 0;
       if (!$response->is_redirect) {
         dbg("URL is not a redirect: $redir_url = ".$response->status_line);
