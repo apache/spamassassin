@@ -51,6 +51,7 @@ lib/Mail/SpamAssassin/Dns.pm
 lib/Mail/SpamAssassin/DnsResolver.pm
 lib/Mail/SpamAssassin/GeoDB.pm
 lib/Mail/SpamAssassin/Header.pm
+lib/Mail/SpamAssassin/Header/AuthenticationResults.pm
 lib/Mail/SpamAssassin/Header/ParameterHeader.pm
 lib/Mail/SpamAssassin/HTML.pm
 lib/Mail/SpamAssassin/HTML/Color.pm
@@ -260,7 +261,9 @@ t/SATest.pl
 t/SATest.pm
 t/all_modules.t
 t/askdns.t
+t/authentication_results.t
 t/authres.t
+t/authres_parser.t
 t/autolearn.t
 t/autolearn_force.t
 t/autolearn_force_fail.t
@@ -370,6 +373,16 @@ t/data/nice/014
 t/data/nice/015
 t/data/nice/016
 t/data/nice/authres
+t/data/nice/authres_basic
+t/data/nice/authres_comments
+t/data/nice/authres_errors
+t/data/nice/authres_none
+t/data/nice/authres_props
+t/data/nice/authres_quoted
+t/data/nice/authres_quoted_eq
+t/data/nice/authres_realworld
+t/data/nice/authres_reason
+t/data/nice/authres_version
 t/data/nice/base64.txt
 t/data/nice/crlf-endings
 t/data/nice/dkim/AddedVtag_07

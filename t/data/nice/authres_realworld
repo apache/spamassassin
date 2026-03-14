@@ -1,0 +1,20 @@
+From test@example.com  Wed May 16 00:40:34 2001
+Return-Path: <test@example.com>
+Received: from mail.example.com (mail.example.com [212.17.35.15]) by
+    mx.example.com (Postfix) with ESMTP id AAAAAA for
+    <user@example.com>; Tue, 15 May 2001 23:40:33 +0000
+Authentication-Results: mail.example.net;
+    arc=pass (as.1.microsoft.com=pass, ams.1.microsoft.com=pass) smtp.remote-ip=2a01:0111:f403:c111:0000:0000:0000:0009;
+    dkim=pass (2048-bit rsa key sha256) header.d=example.org header.i=@example.org header.b=QruneRbB header.a=rsa-sha256 header.s=selector1;
+    dmarc=pass policy.published-domain-policy=reject policy.applied-disposition=none policy.evaluated-disposition=none (p=reject,d=none,d.eval=none) policy.policy-from=p header.from=example.org;
+    spf=pass smtp.mailfrom=Andrew.Madrigal@example.org smtp.helo=DM5PR21CU001.outbound.protection.outlook.com;
+    x-tls=pass smtp.version=TLSv1.3 smtp.cipher=TLS_AES_256_GCM_SHA384 smtp.bits=256
+From: Test User <test@example.com>
+To: user@example.com
+Content-Type: text/plain
+Date: 15 May 2001 17:31:22 -0400
+Message-Id: <test-authres-realworld@example.com>
+MIME-Version: 1.0
+Subject: authres real-world header test
+
+This is a test message with a real-world Authentication-Results header.

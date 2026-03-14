@@ -1,0 +1,17 @@
+From test@example.com  Wed May 16 00:40:34 2001
+Return-Path: <test@example.com>
+Received: from mail.example.com (mail.example.com [212.17.35.15]) by
+    mx.example.com (Postfix) with ESMTP id AAAAAA for
+    <user@example.com>; Tue, 15 May 2001 23:40:33 +0000
+Authentication-Results: authserv.example.com;
+    dkim=pass header.d=example.org header.i=@example.org header.b=abcdef header.a=rsa-sha256 header.s=selector1;
+    spf=pass smtp.mailfrom=bounce@example.org smtp.helo=mail.example.org
+From: Test User <test@example.com>
+To: user@example.com
+Content-Type: text/plain
+Date: 15 May 2001 17:31:22 -0400
+Message-Id: <test-authres-props@example.com>
+MIME-Version: 1.0
+Subject: authres properties parsing test
+
+This is a test message for AuthRes properties parsing.
