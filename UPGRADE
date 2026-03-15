@@ -1,6 +1,13 @@
 Note for Users Upgrading to SpamAssassin 4.0.3
 ----------------------------------------------
 
+- Mail::SpamAssassin::Plugin::SPF no longer parses Authentication-Results
+  headers directly. It now uses results from
+  Mail::SpamAssassin::Plugin::AuthRes if available, falling back to
+  Received-SPF headers, then DNS lookups as a last resort. Users that
+  previously relied on the SPF plugin to parse Authentication-Results
+  headers will need to enable the AuthRes plugin (v401.pre).
+
 - New Mail::SpamAssassin::Plugin::NeuralNetwork
   This plugin checks messages using Fast Artificial Neural Network library.
 

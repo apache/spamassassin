@@ -29,11 +29,15 @@ This plugin checks a message against Sender Policy Framework (SPF)
 records published by the domain owners in DNS to fight email address
 forgery and make it easier to identify spams.
 
+SPF results are obtained using the following priority:
+
+1. Results from the AuthRes plugin (if loaded and SPF results available)
+2. Received-SPF headers from internal hosts
+3. DNS lookups via Mail::SPF (last resort)
+
 It's recommended to use MTA filter (pypolicyd-spf / spf-engine etc), so this
-plugin can reuse the Received-SPF and/or Authentication-Results header results as is.
-Otherwise throughput could suffer, DNS lookups done by this plugin are not
-asynchronous.
-Those headers will also help when SpamAssassin is not able to correctly detect EnvelopeFrom.
+plugin can reuse existing results.  Otherwise throughput could suffer, DNS
+lookups done by this plugin are not asynchronous.
 
 =cut
 
@@ -407,9 +411,51 @@ sub _check_spf {
 
   my $timer = $self->{main}->time_method("check_spf");
 
-  # we can re-use results from any *INTERNAL* Received-SPF header in the message...
+  # Try to re-use SPF results from the AuthRes plugin if available.
+  # This is the preferred source since AuthRes already handles trusted
+  # header filtering and proper RFC 8601 parsing.
+  if ($scanner->{authres_parsed} && $scanner->{authres_parsed}{spf}
+      && @{$scanner->{authres_parsed}{spf}}
+      && !$scanner->{checked_for_spf_authres})
+  {
+    $scanner->{checked_for_spf_authres} = 1;
+    dbg("spf: checking for AuthRes plugin SPF results");
+
+    foreach my $spf_result (@{$scanner->{authres_parsed}{spf}}) {
+      my $result = lc($spf_result->{result} || '');
+      next unless $result =~ /^(pass|neutral|(?:soft)?fail|(?:temp|perm)error|none)$/;
+      $result = 'fail' if $result eq 'hardfail';  # RFC 5451 permits this
+
+      # determine identity from smtp properties
+      my $identity = '';  # assume mfrom if we can't tell
+      my $props = $spf_result->{properties} || {};
+      if ($props->{smtp}) {
+        if (exists $props->{smtp}{helo} && !exists $props->{smtp}{mailfrom}
+            && !exists $props->{smtp}{mfrom})
+        {
+          next if $scanner->{spf_helo_checked};
+          $identity = 'helo_';
+        } else {
+          next if $scanner->{spf_checked};
+        }
+      } else {
+        next if $scanner->{spf_checked};
+      }
+
+      $self->_set_spf_result($scanner, $identity, $result);
+      dbg("spf: re-using %s result from AuthRes plugin: %s",
+          ($identity ? 'helo' : 'mfrom'), $result);
+
+      return if ($scanner->{spf_checked} && $scanner->{spf_helo_checked});
+    }
+    # return if we've found the one we're being asked to get
+    return if ( ($ishelo && $scanner->{spf_helo_checked}) ||
+                (!$ishelo && $scanner->{spf_checked}) );
+  }
+
+  # Next, try re-using results from any *INTERNAL* Received-SPF header...
   # we can't use results from trusted but external hosts since (i) spf checks are
-  # supposed to be done "on the domain boundary", (ii) even if an external header 
+  # supposed to be done "on the domain boundary", (ii) even if an external header
   # has a result that matches what we would get, the check was probably done on a
   # different envelope (like the apache.org list servers checking the ORCPT and
   # then using a new envelope to send the mail from the list) and (iii) if the
@@ -437,22 +483,7 @@ sub _check_spf {
       if ($hdr =~ /^received-spf:/i) {
 	dbg("spf: found a Received-SPF header added by an internal host: $hdr");
 
-	# old version:
-	# Received-SPF: pass (herse.apache.org: domain of spamassassin@dostech.ca
-	# 	designates 69.61.78.188 as permitted sender)
-
-	# new version:
-	# Received-SPF: pass (dostech.ca: 69.61.78.188 is authorized to use
-	# 	'spamassassin@dostech.ca' in 'mfrom' identity (mechanism 'mx' matched))
-	# 	receiver=FC5-VPC; identity=mfrom; envelope-from="spamassassin@dostech.ca";
-	# 	helo=smtp.dostech.net; client-ip=69.61.78.188
-
-	# Received-SPF: pass (dostech.ca: 69.61.78.188 is authorized to use 'dostech.ca'
-	# 	in 'helo' identity (mechanism 'mx' matched)) receiver=FC5-VPC; identity=helo;
-	# 	helo=dostech.ca; client-ip=69.61.78.188
-
 	# http://www.openspf.org/RFC_4408#header-field
-	# wtf - for some reason something is sticking an extra space between the header name and field value
 	if ($hdr =~ /^received-spf:\s*(pass|neutral|(?:soft)?fail|(?:temp|perm)error|none)\b(?:.*\bidentity=(\S+?);?\b)?/i) {
 	  my $result = lc($1);
 
@@ -473,19 +504,7 @@ sub _check_spf {
 	    next if $scanner->{spf_checked};
 	  }
 
-	  # we'd set these if we actually did the check
-	  $scanner->{"spf_${identity}checked"} = 1;
-	  $scanner->{"spf_${identity}pass"} = 0;
-	  $scanner->{"spf_${identity}neutral"} = 0;
-	  $scanner->{"spf_${identity}none"} = 0;
-	  $scanner->{"spf_${identity}fail"} = 0;
-	  $scanner->{"spf_${identity}softfail"} = 0;
-	  $scanner->{"spf_${identity}temperror"} = 0;
-	  $scanner->{"spf_${identity}permerror"} = 0;
-	  $scanner->{"spf_${identity}failure_comment"} = undef;
-
-	  # and the result
-	  $scanner->{"spf_${identity}${result}"} = 1;
+	  $self->_set_spf_result($scanner, $identity, $result);
 	  dbg("spf: re-using %s result from Received-SPF header: %s",
               ($identity ? 'helo' : 'mfrom'), $result);
 
@@ -495,57 +514,6 @@ sub _check_spf {
 	} else {
 	  dbg("spf: could not parse result from existing Received-SPF header");
 	}
-
-      } elsif ($hdr =~ /^(?:Arc\-)?Authentication-Results:.*;\s*SPF\s*=\s*([^;]*)/i) {
-        dbg("spf: found an Authentication-Results header added by an internal host: $hdr");
-
-        # RFC 5451 header parser - added by D. Stussy 2010-09-09:
-        # Authentication-Results: mail.example.com; SPF=none smtp.mailfrom=example.org (comment)
-
-        my $tmphdr = $1;
-        if ($tmphdr =~ /^(pass|neutral|(?:hard|soft)?fail|(?:temp|perm)error|none)(?:[^;]*?\bsmtp\.(\S+)\s*=[^;]+)?/i) {
-          my $result = lc($1);
-          $result = 'fail'  if $result eq 'hardfail';  # RFC5451 permits this
-
-          my $identity = '';    # we assume it's a mfrom check if we can't tell otherwise
-          if (defined $2) {
-            $identity = lc($2);
-            if ($identity eq 'mfrom' || $identity eq 'mailfrom') {
-              next if $scanner->{spf_checked};
-              $identity = '';
-            } elsif ($identity eq 'helo') {
-              next if $scanner->{spf_helo_checked};
-              $identity = 'helo_';
-            } else {
-              dbg("spf: found unknown identity value, cannot use: $identity");
-              next;     # try the next Authentication-Results header, if any
-            }
-          } else {
-            next if $scanner->{spf_checked};
-          }
-
-          # we'd set these if we actually did the check
-          $scanner->{"spf_${identity}checked"} = 1;
-          $scanner->{"spf_${identity}pass"} = 0;
-          $scanner->{"spf_${identity}neutral"} = 0;
-          $scanner->{"spf_${identity}none"} = 0;
-          $scanner->{"spf_${identity}fail"} = 0;
-          $scanner->{"spf_${identity}softfail"} = 0;
-          $scanner->{"spf_${identity}temperror"} = 0;
-          $scanner->{"spf_${identity}permerror"} = 0;
-          $scanner->{"spf_${identity}failure_comment"} = undef;
-
-          # and the result
-          $scanner->{"spf_${identity}${result}"} = 1;
-          dbg("spf: re-using %s result from Authentication-Results header: %s",
-               ($identity ? 'helo' : 'mfrom'), $result);
-
-          # if we've got *both* the mfrom and helo results we're done
-          return if ($scanner->{spf_checked} && $scanner->{spf_helo_checked});
-
-        } else {
-          dbg("spf: could not parse result from existing Authentication-Results header");
-        }
       }
     }
     # we can return if we've found the one we're being asked to get
@@ -743,6 +711,21 @@ sub _check_spf {
   } else {
     dbg("spf: query for $scanner->{spf_sender}/$ip/$helo: result: $result, comment: $comment, text: $text");
   }
+}
+
+sub _set_spf_result {
+  my ($self, $scanner, $identity, $result) = @_;
+
+  $scanner->{"spf_${identity}checked"} = 1;
+  $scanner->{"spf_${identity}pass"} = 0;
+  $scanner->{"spf_${identity}neutral"} = 0;
+  $scanner->{"spf_${identity}none"} = 0;
+  $scanner->{"spf_${identity}fail"} = 0;
+  $scanner->{"spf_${identity}softfail"} = 0;
+  $scanner->{"spf_${identity}temperror"} = 0;
+  $scanner->{"spf_${identity}permerror"} = 0;
+  $scanner->{"spf_${identity}failure_comment"} = undef;
+  $scanner->{"spf_${identity}${result}"} = 1;
 }
 
 sub _get_sender {
