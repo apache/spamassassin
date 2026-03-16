@@ -12,7 +12,7 @@ use Test::More tests => 9;
   'registered myTestPlugin',	'registered',
   'myTestPlugin eval test called', 'test_called',
   'myTestPlugin finishing',	'plugin_finished',
-  'test: plugins loaded: Mail::SpamAssassin::Plugin::ASN=HASH', 'plugins_loaded',
+  'test: plugins loaded: Mail::SpamAssassin::Plugin::ARC=HASH', 'plugins_loaded',
   'myTestPlugin=HASH',		'plugins_loaded2',
 );
 

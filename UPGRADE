@@ -1,6 +1,18 @@
 Note for Users Upgrading to SpamAssassin 4.0.3
 ----------------------------------------------
 
+- ARC (Authenticated Received Chain) verification has been separated from
+  the DKIM plugin into its own plugin: Mail::SpamAssassin::Plugin::ARC.
+  It is loaded by default from v403.pre.
+
+  To use ARC authentication results as a DMARC fallback, you must
+  configure at least one trusted ARC sealer domain:
+
+    arc_trusted_sealers google.com microsoft.com yahoo.com
+
+  Without this setting, ARC signatures are verified but
+  ARC-Authentication-Results headers are not parsed.
+
 - Mail::SpamAssassin::Plugin::SPF no longer parses Authentication-Results
   headers directly. It now uses results from
   Mail::SpamAssassin::Plugin::AuthRes if available, falling back to

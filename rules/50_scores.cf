@@ -734,7 +734,7 @@ if (version >= 3.004002)
 score DKIM_VALID_EF -0.1
 endif
 
-if can(Mail::SpamAssassin::Plugin::DKIM::has_arc)
+ifplugin Mail::SpamAssassin::Plugin::ARC
   score ARC_SIGNED 0.001
   score ARC_VALID -0.1
   score ARC_INVALID 0.1

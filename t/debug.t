@@ -11,7 +11,7 @@ plan tests => 3;
 
 # list of known debug facilities
 my %facility = map( ($_, 1),
-  qw( accessdb archive-iterator async auto-welcomelist bayes check config daemon
+  qw( accessdb arc archive-iterator async auto-welcomelist bayes check config daemon
       dcc dkim askdns dns dnseval eval generic https_http_mismatch facility FreeMail
       ident ignore info ldap learn locker log logger markup HashBL
       message metadata mimeheader netset plugin prefork progress pyzor razor2

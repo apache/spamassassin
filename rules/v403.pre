@@ -16,6 +16,12 @@
 # added to new files, named according to the release they're added in.
 ###########################################################################
 
+# ARC - perform ARC (Authenticated Received Chain) verification
+#
+# Mail::DKIM version 0.50 or later required for use.
+#
+loadplugin Mail::SpamAssassin::Plugin::ARC
+
 # NeuralNetwork - Experimental plugin that checks emails using Neural Network algorithm
 #
 # loadplugin Mail::SpamAssassin::Plugin::NeuralNetwork

@@ -333,88 +333,21 @@ sub _check_dmarc {
     return;
   }
 
-  my $dmarc_arc_verified = 0;
-  my $mfrom_dom = $mfrom_domain;
-  if (($result->result ne 'pass') and (ref($pms->{arc_verifier}) and ($pms->{arc_verifier}->result eq 'pass'))) {
-    undef $result;
-    $dmarc_arc_verified = 1;
-    # if DMARC fails retry by reading data from AAR headers
-    # use Mail::SpamAssassin::Plugin::AuthRes if available to read ARC signature details
-    my @spf_parsed = sort { ( $a->{arc_index} // 0 ) <=> ( $b->{arc_index} // 0 ) } @{$pms->{authres_parsed}{spf} // []};
-    my $old_arc_index = 0;
-    foreach my $spf_parse ( @spf_parsed ) {
-      last if not defined $spf_parse->{arc_index};
-      last if $old_arc_index > $spf_parse->{arc_index};
-      dbg("Evaluate DMARC using AAR spf information for index $spf_parse->{arc_index}");
-      if(exists $spf_parse->{properties}{smtp}{mailfrom}) {
-        $mfrom_dom = $spf_parse->{properties}{smtp}{mailfrom};
-        if($mfrom_dom =~ /\@(.*)/) {
-          $mfrom_dom = $1;
-        } else {
-	  $mfrom_dom = $mfrom_domain
-	}
-        $dmarc->spf([
-          {
-            scope  => 'mfrom',
-            domain => $mfrom_dom,
-            result => $spf_parse->{result},
-          }
-        ]);
-      }
-      if(exists $spf_parse->{properties}{smtp}{helo}) {
-        $dmarc->spf([
-          {
-            scope  => 'helo',
-            domain => $spf_parse->{properties}{smtp}{helo},
-            result => $spf_parse->{result},
-          }
-        ]);
-      }
-      $old_arc_index = $spf_parse->{arc_index};
-    }
-
-    my @tmp_arc_seals;
-    my @arc_seals;
-    if(defined $pms->{arc_verifier}{seals}) {
-      @tmp_arc_seals = @{$pms->{arc_verifier}{seals}};
-      @arc_seals = sort { ( $a->{tags_by_name}{i}{value} // 0 ) <=> ( $b->{tags_by_name}{i}{value} // 0 ) } @tmp_arc_seals;
-      foreach my $seals ( @arc_seals ) {
-        if(exists($seals->{tags_by_name}{d}) and exists($pms->{arc_author_domains}->{$mfrom_domain})) {
-          dbg("Evaluate DMARC using AAR dkim information for index $seals->{tags_by_name}{i}{value} on domain $mfrom_domain and selector $seals->{tags_by_name}{s}{value}. Result is $seals->{verify_result}");
-          my $arc_result = $seals->{verify_result};
-          if($seals->{verify_result} eq 'invalid') {
-            $arc_result = 'permerror';
-          }
-          $dmarc->dkim(domain => $mfrom_domain, selector => $seals->{tags_by_name}{s}{value}, result => $arc_result);
-          last;
-        }
-      }
-    }
-
-    eval { $result = $dmarc->validate(); };
-    if ($@) {
-      dbg("error while validating domain $mfrom_dom: $@");
-      return;
-    }
-  }
-
-  if(defined $result and ($result->result ne 'none') and (defined $result->{published}) and ($result->published->can('stringify'))) {
+  if (defined $result and ($result->result ne 'none') and (defined $result->{published}) and ($result->published->can('stringify'))) {
     dbg("Evaluated DMARC record \"" . $result->published->stringify . "\" for domain $from_domain");
   }
 
-  # Report that DMARC failed but it has been overridden because of AAR headers
-  if(ref($pms->{arc_verifier}) and ($pms->{arc_verifier}->result) and ($dmarc_arc_verified)) {
-    $result->reason->[0]{type} = 'local_policy';
-    $result->reason->[0]{comment} = "arc=" . $pms->{arc_verifier}->result;
-    my $cnt = 1;
-    foreach my $seals ( @{$pms->{arc_verifier}{seals}} ) {
-      if(exists($seals->{tags_by_name}{d}) and exists($seals->{tags_by_name}{s})) {
-        $result->reason->[0]{comment} .= " as[$cnt].d=$seals->{tags_by_name}{d}{value} as[$cnt].s=$seals->{tags_by_name}{s}{value}";
-        $cnt++;
-      }
-    }
-    if($cnt > 1) {
-      $result->reason->[0]{comment} .= " remote-ip[1]=$lasthop->{ip}";
+  # If DMARC fails, check for a dmarc=pass in trusted ARC-Authentication-Results
+  if ($result->result ne 'pass' && $pms->{arc_auth_results}) {
+    foreach my $aar (@{$pms->{arc_auth_results}}) {
+      my $dmarc_aar = $aar->{results}{dmarc};
+      next if !$dmarc_aar || $dmarc_aar->{result} ne 'pass';
+      dbg("DMARC overridden by trusted ARC AAR i=%s: dmarc=%s",
+          $aar->{arc_index}, $dmarc_aar->{result});
+      $result->{result} = 'pass';
+      $result->reason->[0]{type} = 'local_policy';
+      $result->reason->[0]{comment} = "arc=pass (trusted ARC sealer)";
+      last;
     }
   }
 

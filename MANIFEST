@@ -51,6 +51,7 @@ lib/Mail/SpamAssassin/Dns.pm
 lib/Mail/SpamAssassin/DnsResolver.pm
 lib/Mail/SpamAssassin/GeoDB.pm
 lib/Mail/SpamAssassin/Header.pm
+lib/Mail/SpamAssassin/Header/ArcAuthenticationResults.pm
 lib/Mail/SpamAssassin/Header/AuthenticationResults.pm
 lib/Mail/SpamAssassin/Header/ParameterHeader.pm
 lib/Mail/SpamAssassin/HTML.pm
@@ -85,6 +86,7 @@ lib/Mail/SpamAssassin/Plugin/Bayes.pm
 lib/Mail/SpamAssassin/Plugin/BodyEval.pm
 lib/Mail/SpamAssassin/Plugin/BodyRuleBaseExtractor.pm
 lib/Mail/SpamAssassin/Plugin/Check.pm
+lib/Mail/SpamAssassin/Plugin/ARC.pm
 lib/Mail/SpamAssassin/Plugin/DCC.pm
 lib/Mail/SpamAssassin/Plugin/DecodeShortURLs.pm
 lib/Mail/SpamAssassin/Plugin/DKIM.pm
@@ -294,11 +296,12 @@ t/cpp_comments_in_spamc.t
 t/cross_user_config_leak.t
 t/dmarc.t
 t/arc.t
+t/arc_authentication_results.t
 t/data/01_test_rules.cf
 t/data/01_test_rules.pre
 t/data/Dumpheaders.pm
-t/data/dkim/arc/ok01.eml
-t/data/dkim/arc/ko01.eml
+t/data/arc/ko01.eml
+t/data/arc/ok01.eml
 t/data/dkim/test-adsp-11.msg
 t/data/dkim/test-adsp-12.msg
 t/data/dkim/test-adsp-13.msg
