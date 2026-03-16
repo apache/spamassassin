@@ -275,15 +275,6 @@ sub _check_signature {
 
     @$signatures = $verifier->UNIVERSAL::can("signatures") ?
                                $verifier->signatures : $verifier->signature;
-    if (would_log("dbg","arc")) {
-      foreach my $signature (@$signatures) {
-        dbg("arc: ARC signature d=%s",
-          map(!defined $_ ? '(undef)' : $_,
-            $signature->domain
-          )
-        );
-      }
-    }
   });
   if ($timer->timed_out()) {
     dbg("arc: public key lookup or verification timed out after %s s",
@@ -329,8 +320,8 @@ sub _check_arc_valid_signature {
 
       if (would_log("dbg","arc")) {
         my $d = $signature->domain;
-        dbg("arc: %s ARC, d=%s, s=%s, a=%s, c=%s, %s",
-          $info,
+        dbg("arc: %s i=%s %s d=%s, s=%s, a=%s, c=%s, %s",
+          $info, $signature->instance, $signature->prefix,
           map(!defined $_ ? '(undef)' : $_,
             $d, $signature->selector,
             $signature->algorithm, scalar($signature->canonicalization),
@@ -348,21 +339,16 @@ sub _check_arc_valid_signature {
       foreach my $arc ( @arc_sig ) {
         if ($arc->{prefix} eq 'ARC-Message-Signature:') {
           next if $arc_message_found;
-          if ($arc->{valid}) {
-            $arc_message_valid = 1;
-            dbg("arc: valid ARC-Message-Signature signature");
-          } else {
-            dbg("arc: invalid ARC-Message-Signature signature");
-          }
+          $arc_message_valid = 1 if $arc->{valid};
           $arc_message_found = 1;
         }
-        if (($arc->{prefix} eq 'ARC-Seal:') and $arc->{valid}) {
-          $arc_seal_valid = 1;
-          dbg("arc: valid ARC-Seal signature");
-        } elsif (($arc->{prefix} eq 'ARC-Seal:') and not $arc->{valid}) {
-          $arc_seal_valid = 0;
-          dbg("arc: invalid ARC-Seal signature");
-          last;
+        if ($arc->{prefix} eq 'ARC-Seal:') {
+          if ($arc->{valid}) {
+            $arc_seal_valid = 1;
+          } else {
+            $arc_seal_valid = 0;
+            last;
+          }
         }
       }
       if ($arc_message_valid and $arc_seal_valid) {
