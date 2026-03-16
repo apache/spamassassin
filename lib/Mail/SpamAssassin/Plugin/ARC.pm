@@ -277,9 +277,9 @@ sub _check_signature {
                                $verifier->signatures : $verifier->signature;
     if (would_log("dbg","arc")) {
       foreach my $signature (@$signatures) {
-        dbg("arc: ARC signature i=%s d=%s",
+        dbg("arc: ARC signature d=%s",
           map(!defined $_ ? '(undef)' : $_,
-            $signature->identity, $signature->domain
+            $signature->domain
           )
         );
       }
@@ -328,12 +328,11 @@ sub _check_arc_valid_signature {
       push(@valid_signatures, $signature) if $valid && !$expired;
 
       if (would_log("dbg","arc")) {
-        my ($d) = (defined $signature->identity) ? $signature->identity =~ /\@(\S+)/ : ($signature->domain);
-        $d = defined $d ? lc $d : undef;
-        dbg("arc: %s ARC, i=%s, d=%s, s=%s, a=%s, c=%s, %s",
+        my $d = $signature->domain;
+        dbg("arc: %s ARC, d=%s, s=%s, a=%s, c=%s, %s",
           $info,
           map(!defined $_ ? '(undef)' : $_,
-            $signature->identity, $d, $signature->selector,
+            $d, $signature->selector,
             $signature->algorithm, scalar($signature->canonicalization),
             $signature->result),
         );
