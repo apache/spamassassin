@@ -90,6 +90,13 @@ Mail::DKIM.
 It requires the C<Mail::DKIM> CPAN module to operate. Many thanks to Jason Long
 for that module.
 
+If the B<AuthRes> plugin is enabled and has parsed DKIM results from
+Authentication-Results headers, this plugin will re-use those results
+instead of performing its own verification.  Caller-supplied signature
+objects (via C<suppl_attrib>) still take precedence over AuthRes results,
+and if no AuthRes results are available the plugin falls back to its own
+Mail::DKIM-based verification.
+
 =head1 TAGS
 
 The following tags are added to the set, available for use in reports,
@@ -819,6 +826,9 @@ sub _check_dkim_signature {
   if ($pms->{dkim_signatures_ready}) {
     # signatures already available and verified
     _check_valid_signature($self, $pms, \@signatures);
+  } elsif (_check_dkim_from_authres($self, $pms, \@signatures)) {
+    # re-used DKIM results from AuthRes plugin
+    _check_valid_signature($self, $pms, \@signatures);
   } elsif (!$pms->is_dns_available()) {
     dbg("dkim: signature verification disabled, DNS resolving not available");
   } elsif (!$self->_dkim_load_modules()) {
@@ -829,6 +839,66 @@ sub _check_dkim_signature {
     my $verifier = Mail::DKIM::Verifier->new;
     _check_signature($self, $pms, $verifier, \@signatures);
   }
+}
+
+sub _check_dkim_from_authres {
+  my ($self, $pms, $signatures) = @_;
+
+  return 0 if !$pms->{authres_parsed} || !$pms->{authres_parsed}{dkim}
+              || !@{$pms->{authres_parsed}{dkim}};
+  return 0 if !$self->_dkim_load_modules();
+
+  dbg("dkim: checking for AuthRes plugin DKIM results");
+
+  foreach my $dkim_result (@{$pms->{authres_parsed}{dkim}}) {
+    my $result = lc($dkim_result->{result} || '');
+    next unless $result =~ /^(pass|fail|neutral|none|policy|temperror|permerror)$/;
+
+    my $props = $dkim_result->{properties}{header} || {};
+    my $domain = $props->{d};
+    my $identity = $props->{i};
+    my $selector = $props->{s} || 'unknown';
+    my $algorithm = $props->{a};
+
+    # derive domain from identity if d= not provided
+    if (!defined $domain && defined $identity) {
+      ($domain) = $identity =~ /\@([^\@]+)\z/s;
+    }
+    next if !defined $domain;
+
+    my $sig = Mail::DKIM::Signature->new(
+      Domain   => $domain,
+      Selector => $selector,
+      (defined $identity  ? (Identity  => $identity)  : ()),
+      (defined $algorithm ? (Algorithm => $algorithm)  : ()),
+    );
+
+    if ($result eq 'temperror') {
+      $sig->result('fail', 'SERVFAIL');
+    } else {
+      $sig->result($result);
+    }
+
+    # trust upstream key verification for pass results,
+    # set a large key size to satisfy dkim_minimum_key_bits checks
+    if ($result eq 'pass') {
+      $sig->{_spamassassin_key_size} = 65536;
+    }
+
+    # prevent get_public_key() from attempting a DNS lookup
+    $sig->{public_key_query} = 0;
+
+    push @$signatures, $sig;
+  }
+
+  if (@$signatures) {
+    $pms->{dkim_signatures_ready} = 1;
+    $pms->{dkim_signatures_dependable} = 1;
+    dbg("dkim: re-using %d DKIM result(s) from AuthRes plugin",
+        scalar(@$signatures));
+    return 1;
+  }
+  return 0;
 }
 
 sub _check_signature {
@@ -938,6 +1008,8 @@ sub _check_valid_signature {
         if ($key_size) {
           $signature->{_spamassassin_key_size} = $key_size; # stash it for later
           $info .= " WEAK($key_size)"  if $key_size < $minimum_key_bits;
+        } elsif ($signature->{_spamassassin_key_size}) {
+          $key_size = $signature->{_spamassassin_key_size}; # e.g. from AuthRes
         }
       }
       push(@valid_signatures, $signature)  if $valid && !$expired;

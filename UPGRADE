@@ -20,6 +20,12 @@ Note for Users Upgrading to SpamAssassin 4.0.3
   previously relied on the SPF plugin to parse Authentication-Results
   headers will need to enable the AuthRes plugin (v401.pre).
 
+- Mail::SpamAssassin::Plugin::DKIM now re-uses DKIM results from the
+  AuthRes plugin if available, avoiding redundant signature verification.
+  Caller-supplied signature objects (via suppl_attrib) still take
+  precedence, and the plugin falls back to its own Mail::DKIM-based
+  verification when no AuthRes results are available.
+
 - New Mail::SpamAssassin::Plugin::NeuralNetwork
   This plugin checks messages using Fast Artificial Neural Network library.
 
