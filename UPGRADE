@@ -13,6 +13,12 @@ Note for Users Upgrading to SpamAssassin 4.0.3
   Without this setting, ARC signatures are verified but
   ARC-Authentication-Results headers are not parsed.
 
+- Mail::SpamAssassin::Plugin::ARC re-uses ARC results from the
+  AuthRes plugin if available, avoiding redundant cryptographic
+  verification with Mail::DKIM.  If no AuthRes results are available,
+  the plugin falls back to its own Mail::DKIM::ARC::Verifier-based
+  verification as before.
+
 - Mail::SpamAssassin::Plugin::SPF no longer parses Authentication-Results
   headers directly. It now uses results from
   Mail::SpamAssassin::Plugin::AuthRes if available, falling back to

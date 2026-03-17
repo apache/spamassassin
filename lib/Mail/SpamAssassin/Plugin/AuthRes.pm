@@ -59,7 +59,7 @@ sub new {
   $self->set_config($mailsa->{conf});
 
   # process first as other plugins might depend on us
-  $self->register_method_priority("parsed_metadata", -10);
+  $self->register_method_priority("parsed_metadata", -20);
 
   $self->register_eval_rule("check_authres_result", $Mail::SpamAssassin::Conf::TYPE_HEAD_EVALS);
 

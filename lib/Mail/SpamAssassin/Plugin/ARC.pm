@@ -32,8 +32,11 @@ Mail::SpamAssassin::Plugin::ARC - perform ARC verification tests
 This SpamAssassin plugin implements ARC (Authenticated Received Chain)
 verification as described by RFC 8617.
 
-It requires the C<Mail::DKIM> CPAN module version 0.50 or later to operate,
-specifically the C<Mail::DKIM::ARC::Verifier> module.
+If the C<AuthRes> plugin is loaded and has parsed C<arc=> results from
+Authentication-Results headers, those results will be re-used and native
+verification is skipped.  Otherwise, the plugin performs its own
+cryptographic verification using the C<Mail::DKIM::ARC::Verifier> module
+(version 0.50 or later required).
 
 =head1 SEE ALSO
 
@@ -69,8 +72,9 @@ sub new {
   $self->register_eval_rule("check_arc_valid", $Mail::SpamAssassin::Conf::TYPE_FULL_EVALS);
   $self->register_eval_rule("check_arc_trusted", $Mail::SpamAssassin::Conf::TYPE_FULL_EVALS);
 
-  # run before DKIM, SPF, DMARC so arc_auth_results is available
-  $self->register_method_priority("parsed_metadata", -20);
+  # run after AuthRes (-20) so we can re-use arc= results,
+  # but before DKIM, SPF, DMARC (0) so arc_auth_results is available
+  $self->register_method_priority("parsed_metadata", -10);
 
   $self->set_config($mailsaobject->{conf});
 
@@ -165,6 +169,8 @@ sub parsed_metadata {
 
   if ($pms->{arc_signatures_ready}) {
     $self->_check_arc_valid_signature($pms, \@arc_signatures);
+  } elsif ($self->_check_arc_from_authres($pms)) {
+    # re-used ARC results from AuthRes plugin
   } elsif (!$pms->is_dns_available()) {
     dbg("arc: signature verification disabled, DNS resolving not available");
   } elsif (!$self->_arc_load_modules()) {
@@ -202,6 +208,34 @@ sub check_arc_valid {
 sub check_arc_trusted {
   my ($self, $pms) = @_;
   return $pms->{arc_auth_results} ? 1 : 0;
+}
+
+sub _check_arc_from_authres {
+  my ($self, $pms) = @_;
+
+  return 0 if !$pms->{authres_parsed} || !$pms->{authres_parsed}{arc}
+              || !@{$pms->{authres_parsed}{arc}};
+
+  dbg("arc: checking for AuthRes plugin ARC results");
+
+  foreach my $arc_result (@{$pms->{authres_parsed}{arc}}) {
+    my $result = lc($arc_result->{result} || '');
+    next unless $result =~ /^(pass|fail|none)$/;
+
+    dbg("arc: re-using result from AuthRes plugin: %s", $result);
+
+    if ($result eq 'pass') {
+      $pms->{arc_signed} = 1;
+      $pms->{arc_valid} = 1;
+      $self->_parse_trusted_aar_from_headers($pms);
+    } elsif ($result eq 'fail') {
+      $pms->{arc_signed} = 1;
+    }
+
+    return 1;
+  }
+
+  return 0;
 }
 
 # ---------------------------------------------------------------------------
@@ -395,6 +429,38 @@ sub _parse_trusted_aar {
   }
   return if !%trusted_indices;
 
+  $self->_parse_aar_by_trusted_indices($pms, \%trusted_indices);
+}
+
+sub _parse_trusted_aar_from_headers {
+  my ($self, $pms) = @_;
+
+  my $trusted = $pms->{conf}->{arc_trusted_sealers};
+  return if !$trusted || !%$trusted;
+
+  # Build set of ARC instance indices from ARC-Seal headers
+  my %trusted_indices;
+  my @seals = $pms->{msg}->get_pristine_header('ARC-Seal');
+  foreach my $seal (@seals) {
+    chomp $seal;
+    my ($i) = $seal =~ /\bi\s*=\s*(\d+)/;
+    my ($d) = $seal =~ /\bd\s*=\s*([^\s;]+)/;
+    next if !defined $d || !defined $i;
+    if ($trusted->{lc $d}) {
+      $trusted_indices{$i} = 1;
+      dbg("arc: seal i=%s d=%s is trusted", $i, $d);
+    } else {
+      dbg("arc: seal i=%s d=%s is not trusted", $i, $d);
+    }
+  }
+  return if !%trusted_indices;
+
+  $self->_parse_aar_by_trusted_indices($pms, \%trusted_indices);
+}
+
+sub _parse_aar_by_trusted_indices {
+  my ($self, $pms, $trusted_indices) = @_;
+
   # Parse ARC-Authentication-Results headers from trusted sealers
   my @aar = $pms->{msg}->get_pristine_header('ARC-Authentication-Results');
   return if !@aar;
@@ -417,7 +483,7 @@ sub _parse_trusted_aar {
       next;
     }
 
-    if (!$trusted_indices{$arc_index}) {
+    if (!$trusted_indices->{$arc_index}) {
       dbg("arc: AAR i=%s not from trusted sealer, skipping", $arc_index);
       next;
     }
