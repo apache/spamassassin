@@ -57,6 +57,14 @@ Mail::SpamAssassin::Plugin::DMARC - check DMARC policy
 This plugin checks if emails match DMARC policy, the plugin needs both DKIM
 and SPF plugins enabled.
 
+If the AuthRes plugin is loaded and has parsed a DMARC result from an
+Authentication-Results header, that result will be used instead of
+performing a local DMARC check with Mail::DMARC::PurePerl.  Both the
+result and the published domain policy must be present in the
+Authentication-Results header (via the C<policy.published-domain-policy>
+property).  If either is missing, the plugin falls back to its own
+Mail::DMARC::PurePerl-based validation.
+
 =cut
 
 package Mail::SpamAssassin::Plugin::DMARC;
@@ -235,6 +243,14 @@ sub _check_async_queue {
 sub _check_dmarc {
   my ($self, $pms, $name) = @_;
 
+  return if $pms->{dmarc_checked};
+  $pms->{dmarc_checked} = 1;
+
+  # Use AuthRes results if available (AuthRes plugin parsed A-R headers)
+  if ($pms->{authres_result} && defined $pms->{authres_result}{dmarc}) {
+    return if $self->_check_dmarc_authres($pms);
+  }
+
   return unless $pms->is_dns_available();
 
   # Load DMARC module
@@ -256,8 +272,6 @@ sub _check_dmarc {
   }
 
   return if !$self->{has_mail_dmarc};
-  return if $pms->{dmarc_checked};
-  $pms->{dmarc_checked} = 1;
 
   my $lasthop = $pms->{relays_external}->[0];
   if (!defined $lasthop) {
@@ -337,21 +351,14 @@ sub _check_dmarc {
     dbg("Evaluated DMARC record \"" . $result->published->stringify . "\" for domain $from_domain");
   }
 
-  # If DMARC fails, check for a dmarc=pass in trusted ARC-Authentication-Results
-  if ($result->result ne 'pass' && $pms->{arc_auth_results}) {
-    foreach my $aar (@{$pms->{arc_auth_results}}) {
-      my $dmarc_aar = $aar->{results}{dmarc};
-      next if !$dmarc_aar || $dmarc_aar->{result} ne 'pass';
-      dbg("DMARC overridden by trusted ARC AAR i=%s: dmarc=%s",
-          $aar->{arc_index}, $dmarc_aar->{result});
-      $result->{result} = 'pass';
-      $result->reason->[0]{type} = 'local_policy';
-      $result->reason->[0]{comment} = "arc=pass (trusted ARC sealer)";
-      last;
-    }
+  $pms->{dmarc_result} = $result->result;
+  if ($self->_check_arc_override($pms)) {
+    $result->{result} = 'pass';
+    $result->reason->[0]{type} = 'local_policy';
+    $result->reason->[0]{comment} = "arc=pass (trusted ARC sealer)";
   }
 
-  if (defined($pms->{dmarc_result} = $result->result)) {
+  if (defined $pms->{dmarc_result}) {
     if ($pms->{conf}->{dmarc_save_reports}) {
       my $rua = eval { $result->published()->rua(); };
       if (defined $rua && index($rua, 'mailto:') >= 0) {
@@ -380,6 +387,60 @@ sub _check_dmarc {
     }
   }
 }
+
+sub _check_dmarc_authres {
+  my ($self, $pms) = @_;
+
+  my $result = $pms->{authres_result}{dmarc};
+
+  my $policy;
+  if ($result eq 'none') {
+    # dmarc=none means no DMARC record published, no policy to look up
+    $policy = 'no policy available';
+  } else {
+    # Try to get policy from A-R header properties
+    foreach my $parsed (@{$pms->{authres_parsed}{dmarc} || []}) {
+      my $props = $parsed->{properties} || {};
+      if ($props->{policy}) {
+        # policy.published-domain-policy (e.g. Mail::Milter::Authentication)
+        $policy = $props->{policy}{'published-domain-policy'};
+        last if defined $policy;
+      }
+    }
+  }
+
+  if (!defined $policy) {
+    # No policy in A-R header, fall back to Mail::DMARC::PurePerl
+    dbg("A-R header has no policy properties, falling back to local check");
+    return 0;
+  }
+
+  $pms->{dmarc_result} = $result;
+  $pms->{dmarc_policy} = lc($policy);
+  dbg("using Authentication-Results: result=%s, policy=%s", $result, $pms->{dmarc_policy});
+
+  $self->_check_arc_override($pms);
+  return 1;
+}
+
+sub _check_arc_override {
+  my ($self, $pms) = @_;
+
+  return if !defined $pms->{dmarc_result} || $pms->{dmarc_result} eq 'pass';
+  return unless $pms->{arc_auth_results};
+
+  foreach my $aar (@{$pms->{arc_auth_results}}) {
+    my $dmarc_aar = $aar->{results}{dmarc};
+    next if !$dmarc_aar || $dmarc_aar->{result} ne 'pass';
+    dbg("DMARC overridden by trusted ARC AAR i=%s: dmarc=%s",
+        $aar->{arc_index}, $dmarc_aar->{result});
+    $pms->{dmarc_result} = 'pass';
+    return 1;
+  }
+
+  return 0;
+}
+
 
 1;
 

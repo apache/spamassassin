@@ -26,6 +26,13 @@ Note for Users Upgrading to SpamAssassin 4.0.3
   precedence, and the plugin falls back to its own Mail::DKIM-based
   verification when no AuthRes results are available.
 
+- Mail::SpamAssassin::Plugin::DMARC now uses DMARC results from the
+  AuthRes plugin if available, avoiding redundant validation with
+  Mail::DMARC::PurePerl. Both the result and the published domain policy
+  must be present in the Authentication-Results header for this to apply.
+  If no AuthRes results are available or the policy is missing, the plugin
+  falls back to its own Mail::DMARC::PurePerl-based validation as before.
+
 - New Mail::SpamAssassin::Plugin::NeuralNetwork
   This plugin checks messages using Fast Artificial Neural Network library.
 
