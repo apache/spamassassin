@@ -697,6 +697,63 @@ domains are hopefully rare, and ask for this kind of treatment anyway.
     type        => $Mail::SpamAssassin::Conf::CONF_TYPE_BOOL
   });
 
+=over 4
+
+=item txrep_skip_domain domain1 domain2 ...
+
+Specify a domain, or a number of domains, which should be skipped for the
+TxRep checks.
+
+TxRep check will be skipped if the domain is present in From, EnvelopeFrom headers or helo.
+
+=back
+
+=over 4
+
+=item clear_txrep_skip_domain [domain1 domain2 ...]
+
+If no argument is given, then clears the entire list of domains declared
+by I<txrep_skip_domain> configuration directives so far. Any subsequent
+I<txrep_skip_domain> directives will start creating a new list of skip
+domains.
+
+When given a list of domains as arguments, only the specified domains
+are removed from the list of skipped domains.
+
+=back
+
+=cut
+
+  push (@cmds, {
+    setting => 'txrep_skip_domain',
+    default => {},
+    type => $Mail::SpamAssassin::Conf::CONF_TYPE_HASH_KEY_VALUE,
+    code => sub {
+      my ($self, $key, $value, $line) = @_;
+      if ($value =~ /^$/) {
+        return $Mail::SpamAssassin::Conf::MISSING_REQUIRED_VALUE;
+      }
+      foreach my $domain (split(/\s+/, $value)) {
+        $self->{txrep_skip_domains}->{lc $domain} = 1;
+      }
+    }
+  });
+
+  push (@cmds, {
+    setting => 'clear_txrep_skip_domain',
+    type => $Mail::SpamAssassin::Conf::CONF_TYPE_HASH_KEY_VALUE,
+    code => sub {
+      my ($self, $key, $value, $line) = @_;
+      if (!defined $value || $value eq '') {
+        # clear the entire list
+        $self->{txrep_skip_domains} = {};
+      } else {
+        foreach my $domain (split(/\s+/, $value)) {
+          delete $self->{txrep_skip_domains}->{lc $domain};
+        }
+      }
+    }
+  });
 
 =head2 REPUTATION WEIGHTS
 
@@ -1332,6 +1389,8 @@ sub check_senders_reputation {
     return 0;
   }
 
+  my $skip_domains = $self->{conf}->{txrep_skip_domains} || {};
+
   my $delta    = 0;
   my $timer    = $self->{main}->time_method("total_txrep");
   my $msgscore = (defined $self->{learning})? $self->{learning} : $pms->get_autolearn_points();
@@ -1356,6 +1415,18 @@ sub check_senders_reputation {
             $rly->{helo} !~ /^\Q$from\E$/i ) {
 	    $helo   = $rly->{helo};
 	}
+
+        (my $fromdomain = lc $pms->get('From:addr')) =~ s/^.+@//;
+        (my $envfromdomain = lc $pms->get('EnvelopeFrom:addr')) =~ s/^.+@//;
+        my $helo_skip = defined $helo && grep { $helo eq $_ || $helo =~ /\.\Q$_\E$/i } keys %{$skip_domains};
+        my $skip_matched = exists $skip_domains->{$fromdomain}    ? $fromdomain    :
+                           exists $skip_domains->{$envfromdomain} ? $envfromdomain :
+                           $helo_skip                             ? $helo          : undef;
+        if(defined $skip_matched) {
+          dbg("TxRep: domain $skip_matched has TxRep disabled, quitting");
+          return 0;
+        }
+
 	# use only trusted ID, but use the first untrusted IP (if available) (AWL bug 6908)
 	# at low spam scores (<2) ignore trusted/untrusted
 	# set IP to 127.0.0.1 for any internal IP, so that it can be distinguished from none (AWL bug 6357)
@@ -1391,7 +1462,8 @@ sub check_senders_reputation {
 		      dbg("TxRep: $delta score is higher then maximum allowed TxRep score, score adjusted to $self->{conf}->{txrep_max_score}"); 
 		      $delta = $self->{conf}->{txrep_max_score};
 		    }
-                    $pms->got_hit("TXREP", "TXREP: ", ruletype => 'eval', score => sprintf("%0.3f", $delta));
+                    my $rulename = $pms->get_current_eval_rule_name();
+                    $pms->got_hit($rulename, "TXREP: ", ruletype => 'eval', score => sprintf("%0.3f", $delta));
                 }
                 dbg("TxRep: message %s already scanned, using old data; post-TxRep score: %0.3f", $msg_id, $pms->{score} || 'undef');
                 if (!defined $self->{txKeepStoreTied}) {
@@ -1475,7 +1547,8 @@ sub check_senders_reputation {
         dbg("TxRep: $delta score is higher then maximum allowed TxRep score, score adjusted to $self->{conf}->{txrep_max_score}"); 
         $delta = $self->{conf}->{txrep_max_score};
       }
-      $pms->got_hit("TXREP", "TXREP: ", ruletype => 'eval', score => sprintf("%0.3f", $delta));
+      my $rulename = $pms->get_current_eval_rule_name();
+      $pms->got_hit($rulename, "TXREP: ", ruletype => 'eval', score => sprintf("%0.3f", $delta));
     }
     $msgscore += $delta;
     if (defined $pms->{score}) {
@@ -1636,7 +1709,8 @@ sub check_reputation {
                     );
             }
 
-            $pms->test_log($log, "TXREP");
+            my $rulename = $pms->get_current_eval_rule_name();
+            $pms->test_log($log, $rulename);
             # dbg ("TxRep: test_log: $log");
         }
 
