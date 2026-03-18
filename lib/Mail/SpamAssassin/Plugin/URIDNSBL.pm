@@ -967,7 +967,7 @@ sub complete_ns_lookup {
 
   my $nsrhsblrules = $pms->{uridnsbl_active_rules_nsrhsbl};
   my $fullnsrhsblrules = $pms->{uridnsbl_active_rules_fullnsrhsbl};
-  my $areviprules = $pms->{uridnsbl_active_rules_arevipbl};
+  my $nsreviprules = $pms->{uridnsbl_active_rules_nsrevipbl};
   my $seen_lookups = $pms->{uridnsbl_seen_lookups};
 
   my $j = 0;
@@ -998,7 +998,7 @@ sub complete_ns_lookup {
       else {
         if (!$seen_lookups->{"A:$nsmatch"}) {
           $seen_lookups->{"A:$nsmatch"} = 1;
-          $self->lookup_a_record($pms, $nsmatch, [keys %$areviprules]);
+          $self->lookup_a_record($pms, $nsmatch, [keys %$nsreviprules]);
         }
         $nsrhblstr = $self->{main}->{registryboundaries}->trim_domain($nsmatch);
       }
