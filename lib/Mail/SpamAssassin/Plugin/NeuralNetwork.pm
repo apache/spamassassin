@@ -44,7 +44,7 @@ use strict;
 use warnings;
 use re 'taint';
 
-my $VERSION = 0.5.1;
+my $VERSION = 0.6.2;
 
 use AI::FANN qw(:all);
 use Storable qw(store retrieve);
@@ -59,6 +59,56 @@ our @ISA = qw(Mail::SpamAssassin::Plugin);
 
 sub dbg { my $msg = shift; Mail::SpamAssassin::Logger::dbg("NeuralNetwork: $msg", @_); }
 sub info { my $msg = shift; Mail::SpamAssassin::Logger::info("NeuralNetwork: $msg", @_); }
+
+sub _flock {
+  my ($self, $lock_path, $lock_type, $timeout) = @_;
+
+  if($lock_type != LOCK_EX && $lock_type != LOCK_SH) {
+    info("Invalid lock type $lock_type");
+    return;
+  }
+  $lock_path = Mail::SpamAssassin::Util::untaint_file_path($lock_path);
+
+  # Close idle cached lock file handles every 300s
+  my $now = time();
+  for my $path (keys %{$self->{_lock_fh} // {}}) {
+    my $last = $self->{_lock_fh_time}{$path} // 0;
+    if ($now - $last >= 300) {
+      close(delete $self->{_lock_fh}{$path});
+      delete $self->{_lock_fh_time}{$path};
+      dbg("Closed idle lock fd for '$path'");
+    }
+  }
+
+  # Cache the open file handle for this lock path.
+  if (!defined $self->{_lock_fh}{$lock_path} ||
+      !defined fileno($self->{_lock_fh}{$lock_path})) {
+    my $fh;
+    open($fh, '>>', $lock_path) or do {
+      dbg("Cannot open lock file '$lock_path': $!");
+      return undef;
+    };
+    $self->{_lock_fh}{$lock_path} = $fh;
+  }
+  my $fh = $self->{_lock_fh}{$lock_path};
+  $self->{_lock_fh_time}{$lock_path} = $now;
+
+  my $locked = 0;
+  if ($timeout) {
+    my $deadline = time() + $timeout;
+    do {
+      $locked = 1 if flock($fh, $lock_type | LOCK_NB);
+      select(undef, undef, undef, 0.1) unless $locked;
+    } until ($locked || time() >= $deadline);
+  } else {
+    $locked = flock($fh, $lock_type);
+  }
+  unless ($locked) {
+    dbg("Cannot acquire lock on '$lock_path' after ${timeout}s, proceeding unlocked");
+    return undef;
+  }
+  return $fh;
+}
 
 sub new {
   my ($class, $mailsa) = @_;
@@ -292,7 +342,7 @@ prediction to run.
   push(@cmds, {
     setting => 'neuralnetwork_lock_timeout',
     is_admin => 1,
-    default => 30,
+    default => 10,
     type => $Mail::SpamAssassin::Conf::CONF_TYPE_NUMERIC,
   });
   push(@cmds, {
@@ -363,6 +413,8 @@ sub finish_parsing_end {
   my $dataset_path = File::Spec->catfile($nn_data_dir, 'fann-' . lc($self->{main}->{username}) . '.model');
   $dataset_path = Mail::SpamAssassin::Util::untaint_file_path($dataset_path);
   if (-f $dataset_path) {
+    my $lock_path = $dataset_path . '.lock';
+    my $lock_fh = $self->_flock($lock_path, LOCK_SH, $self->{main}->{conf}->{neuralnetwork_lock_timeout});
     eval {
       $self->{neural_model} = AI::FANN->new_from_file($dataset_path);
       $self->{_neural_model_load_time} = time();
@@ -371,6 +423,7 @@ sub finish_parsing_end {
       my $err = $@ || 'unknown';
       info("Failed to load neural model from $dataset_path: $err");
     };
+    flock($lock_fh, LOCK_UN) if $lock_fh;
   }
 }
 
@@ -406,17 +459,41 @@ sub _text_to_features {
 
     # If not loaded from SQL, try loading from file
     if (!keys %{$vocabulary{terms} || {}}) {
-      my $vocab_path = File::Spec->catfile($nn_data_dir, 'vocabulary-' . lc($self->{main}->{username}) . '.data');
-      if(-f $vocab_path) {
-        eval {
-          my $ref = retrieve($vocab_path);
-          if (ref $ref eq 'HASH') {
-            %vocabulary = %{$ref};
-          }
-          1;
-        } or do {
-          warn("Failed to retrieve vocabulary from $vocab_path: " . ($@ || 'unknown'));
-        };
+      my $username = lc($self->{main}->{username});
+      my $ttl = $conf->{neuralnetwork_cache_ttl} || 0;
+
+      # Check file-based vocabulary cache
+      if (!$train && $ttl > 0 && defined $self->{_file_vocab_cache}{$username}) {
+        my $age = time() - ($self->{_file_vocab_cache_time}{$username} || 0);
+        if ($age < $ttl) {
+          dbg("Using cached file vocabulary for user: $username (age: ${age}s, ttl: ${ttl}s)");
+          %vocabulary = %{$self->{_file_vocab_cache}{$username}};
+        } else {
+          dbg("File vocabulary cache expired for user: $username (age: ${age}s, ttl: ${ttl}s)");
+          delete $self->{_file_vocab_cache}{$username};
+          delete $self->{_file_vocab_cache_time}{$username};
+        }
+      }
+
+      # Load from file if not cached
+      if (!keys %{$vocabulary{terms} || {}}) {
+        my $vocab_path = File::Spec->catfile($nn_data_dir, 'vocabulary-' . $username . '.data');
+        if(-f $vocab_path) {
+          eval {
+            my $ref = retrieve($vocab_path);
+            if (ref $ref eq 'HASH') {
+              %vocabulary = %{$ref};
+            }
+            1;
+          } or do {
+            warn("Failed to retrieve vocabulary from $vocab_path: " . ($@ || 'unknown'));
+          };
+        }
+        # Populate cache after successful load
+        if (!$train && $ttl > 0 && keys %{$vocabulary{terms} || {}}) {
+          $self->{_file_vocab_cache}{$username} = \%vocabulary;
+          $self->{_file_vocab_cache_time}{$username} = time();
+        }
       }
     }
 
@@ -511,7 +588,16 @@ sub _text_to_features {
         } or do {
           warn("Failed to store vocabulary to $vocab_path: " . ($@ || 'unknown'));
         };
+        # Keep file-based cache in sync with the freshly saved vocabulary
+        my $ttl = $conf->{neuralnetwork_cache_ttl} || 0;
+        if ($ttl > 0) {
+          my $username = lc($self->{main}->{username});
+          $self->{_file_vocab_cache}{$username} = \%vocabulary;
+          $self->{_file_vocab_cache_time}{$username} = time();
+        }
       }
+      # learn_message cache
+      $self->{_last_train_vocab} = \%vocabulary if $self;
     }
 
     # Build vocabulary index
@@ -593,8 +679,6 @@ sub learn_message {
   if (!defined $pms->{relays_internal} && !defined $pms->{relays_external}) {
     $pms->extract_message_metadata();
   }
-  $self->{pms} = $pms;
-
   my $nn_data_dir = $self->{main}->{conf}->{neuralnetwork_data_dir};
   unless (defined $nn_data_dir) {
     dbg("neuralnetwork_data_dir not set");
@@ -628,7 +712,9 @@ sub learn_message {
   my @labels = map { $_->{label} } @training_data;
 
 
-  if (-f $dataset_path) {
+  if (!defined $self->{neural_model} && -f $dataset_path) {
+    my $lock_path = $dataset_path . '.lock';
+    my $rlock_fh = $self->_flock($lock_path, LOCK_SH, $self->{main}->{conf}->{neuralnetwork_lock_timeout});
     eval {
       $self->{neural_model} = AI::FANN->new_from_file($dataset_path);
       $self->{_neural_model_load_time} = time();
@@ -636,7 +722,8 @@ sub learn_message {
     } or do {
       dbg("Failed to load model before training: " . ($@ || 'unknown'));
     };
-  } else {
+    flock($rlock_fh, LOCK_UN) if $rlock_fh;
+  } elsif (!-f $dataset_path) {
     undef $self->{neural_model};
   }
   # Invalidate vocabulary cache
@@ -671,12 +758,15 @@ sub learn_message {
     # Try to load the existing model from disk if not already in memory
     my $existing_network = $self->{neural_model};
     if (!defined $existing_network && -f $dataset_path) {
+      my $lock_path = $dataset_path . '.lock';
+      my $rlock_fh = $self->_flock($lock_path, LOCK_SH, $self->{main}->{conf}->{neuralnetwork_lock_timeout});
       eval {
         $existing_network = AI::FANN->new_from_file($dataset_path);
         1;
       } or do {
         dbg("Failed to load existing model for size check: " . ($@ || 'unknown'));
       };
+      flock($rlock_fh, LOCK_UN) if $rlock_fh;
     }
 
     if (defined $existing_network) {
@@ -711,7 +801,9 @@ sub learn_message {
   # Load the current corpus counts so we can compute how skewed the training
   # history is.
   my %vocab_for_balance;
-  if (defined $conf->{neuralnetwork_dsn} && $self->{dbh}) {
+  if (ref $self->{_last_train_vocab} eq 'HASH') {
+    %vocab_for_balance = %{delete $self->{_last_train_vocab}};
+  } elsif (defined $conf->{neuralnetwork_dsn} && $self->{dbh}) {
     my $vocab_ref = $self->_load_vocabulary_from_sql($self->{main}->{username});
     %vocab_for_balance = %{$vocab_ref} if ref($vocab_ref) eq 'HASH';
   }
@@ -774,55 +866,38 @@ sub learn_message {
   }
 
   my $lock_path = $dataset_path . '.lock';
-  $lock_path = Mail::SpamAssassin::Util::untaint_file_path($lock_path);
-  open(my $lock_fh, '>', $lock_path) or do {
-    info("Cannot open lock file '$lock_path': $!");
-    return;
-  };
-  my $lock_timeout = $conf->{neuralnetwork_lock_timeout};
-  my $locked = 0;
-  if ($lock_timeout) {
-    my $deadline = time() + $lock_timeout;
-    do {
-      if (flock($lock_fh, LOCK_EX | LOCK_NB)) {
-        $locked = 1;
-      } else {
-        select(undef, undef, undef, 0.5);
-      }
-    } until ($locked || time() >= $deadline);
-  } else {
-    $locked = flock($lock_fh, LOCK_EX);
-  }
-  unless ($locked) {
-    info("Cannot acquire write lock after ${lock_timeout}s, skipping save");
-    close($lock_fh);
+  my $lock_fh = $self->_flock($lock_path, LOCK_EX, $conf->{neuralnetwork_lock_timeout});
+  unless ($lock_fh) {
     return;
   }
 
   # Save the model
+  my $model_saved = 0;
   eval {
     $network->save($dataset_path) or die "model save failed";
+    $model_saved = 1;
+    1;
+  } or do {
+    info("Cannot save model to '$dataset_path' (" . ($@ || 'unknown') . ")");
+  };
+  flock($lock_fh, LOCK_UN);
+
+  if ($model_saved) {
+    dbg("Model saved to '$dataset_path' (input:$num_input)");
+    $self->{neural_model} = $network;
+    $self->{_neural_model_load_time} = time();
+
     if (defined $self->{main}->{conf}->{neuralnetwork_dsn} && $self->{dbh}) {
       $self->_save_model_vocab_to_sql($vocab_keys_ref);
     } else {
       $self->_save_model_vocab($vocab_keys_ref, $nn_data_dir);
     }
-    1;
-  } and do {
-    dbg("Model saved to '$dataset_path' (input:$num_input)");
-    $self->{neural_model} = $network;
-    $self->{_neural_model_load_time} = time();
 
-    # Record message as learned to prevent re-learning
-    if (defined $msg) {
-      if (defined $msgid && length($msgid) > 0) {
-        $self->_save_msgid_to_neural_seen($msgid, $isspam);
-      }
+    # Record message as learned to prevent re-learning.
+    if (defined $msg && defined $msgid && length($msgid) > 0) {
+      $self->_save_msgid_to_neural_seen($msgid, $isspam);
     }
-  } or do {
-    info("Cannot save model to '$dataset_path' (" . ($@ || 'unknown') . ")");
-  };
-  close($lock_fh);
+  }
   return;
 }
 
@@ -873,7 +948,8 @@ sub check_neuralnetwork_ham {
   return $pms->{neuralnetwork_ham};
 }
 
-# Prune vocabulary to keep only the top $vocab_cap terms by total count
+# Prune vocabulary to keep only the top $vocab_cap terms, balanced between
+# spam and ham terms.
 sub _prune_vocabulary {
   my ($self, $vocabulary, $vocab_cap) = @_;
 
@@ -881,16 +957,26 @@ sub _prune_vocabulary {
   my $terms_count = scalar keys %{$terms};
   return () unless $terms_count > $vocab_cap;
 
-  my @top = sort { ($terms->{$b}{total}||0) <=> ($terms->{$a}{total}||0) } keys %{$terms};
+  my $half = int($vocab_cap / 2);
+
   my %kept;
-  for my $i (0 .. $vocab_cap-1) {
-    last unless defined $top[$i];
-    $kept{$top[$i]} = $terms->{$top[$i]};
+  for my $w (sort { ($terms->{$b}{spam}||0) <=> ($terms->{$a}{spam}||0) } keys %{$terms}) {
+    last if scalar keys %kept >= $half;
+    $kept{$w} = $terms->{$w};
+  }
+  for my $w (sort { ($terms->{$b}{ham}||0) <=> ($terms->{$a}{ham}||0) } keys %{$terms}) {
+    last if scalar keys %kept >= $vocab_cap;
+    $kept{$w} = $terms->{$w};
+  }
+  # Fill any remaining slots
+  for my $w (sort { ($terms->{$b}{total}||0) <=> ($terms->{$a}{total}||0) } keys %{$terms}) {
+    last if scalar keys %kept >= $vocab_cap;
+    $kept{$w} = $terms->{$w};
   }
   my @pruned = grep { !exists $kept{$_} } keys %{$terms};
   $vocabulary->{terms} = \%kept;
 
-  if (@pruned && ($self->{main}->{conf}->{neuralnetwork_dsn} =~ /^dbi:/i)) {
+  if (@pruned && defined $self->{main}->{conf}->{neuralnetwork_dsn} && ($self->{main}->{conf}->{neuralnetwork_dsn} =~ /^dbi:/i)) {
     eval {
       my $user = $self->{main}->{username};
       my $placeholders = join(',', ('?') x scalar(@pruned));
@@ -992,7 +1078,8 @@ sub _retrain_from_vocabulary {
 
   my ($spam_vec_ref, $ham_vec_ref) = _build_class_tfidf_vectors(\%vocabulary, \@vocab_keys);
   return unless $spam_vec_ref;
-  my (@spam_vec, @ham_vec) = (@$spam_vec_ref, @$ham_vec_ref);
+  my @spam_vec = @$spam_vec_ref;
+  my @ham_vec  = @$ham_vec_ref;
 
   my $spam_reps = 1;
   my $ham_reps  = 1;
@@ -1097,14 +1184,18 @@ sub _check_neuralnetwork {
     if ($model_expired) {
       dbg("Model cache expired (age: ${model_age}s, ttl: ${ttl}s), reloading");
     }
+    my $lock_path = $dataset_path . '.lock';
+    my $rlock_fh = $self->_flock($lock_path, LOCK_SH, $conf->{neuralnetwork_lock_timeout});
     eval {
       $self->{neural_model} = AI::FANN->new_from_file($dataset_path);
       $self->{_neural_model_load_time} = time();
       1;
     } or do {
       dbg("Failed to load model for prediction: " . ($@ || 'unknown'));
+      flock($rlock_fh, LOCK_UN) if $rlock_fh;
       return;
     };
+    flock($rlock_fh, LOCK_UN) if $rlock_fh;
   }
   my $network = $self->{neural_model};
 
@@ -1163,7 +1254,7 @@ sub _init_sql_connection {
       $dsn,
       $username,
       $password,
-      {RaiseError => 1, PrintError => 0, InactiveDestroy => 1, AutoCommit => 0}
+      {RaiseError => 1, PrintError => 0, InactiveDestroy => 1, AutoCommit => 1}
     );
     $self->_create_vocabulary_table();
     dbg("SQL connection initialized for vocabulary storage");
@@ -1233,11 +1324,18 @@ sub _save_msgid_to_neural_seen {
         INSERT IGNORE INTO neural_seen (username, msgid, flag)
         VALUES (?, ?, ?)
       ";
-    } else {
-      # PostgreSQL/SQLite: Try insert, ignore if duplicate
+    } elsif ($self->{main}->{conf}->{neuralnetwork_dsn} =~ /^dbi:SQLite/i) {
+      # SQLite
       $insert_sql = "
         INSERT OR IGNORE INTO neural_seen (username, msgid, flag)
         VALUES (?, ?, ?)
+      ";
+    } else {
+      # PostgreSQL
+      $insert_sql = "
+        INSERT INTO neural_seen (username, msgid, flag)
+        VALUES (?, ?, ?)
+        ON CONFLICT (username, msgid) DO NOTHING
       ";
     }
 
@@ -1264,6 +1362,7 @@ sub _is_msgid_in_neural_seen {
     return;
   }
 
+  my $found = 0;
   eval {
     my $username = lc($self->{main}->{username}) || 'default';
 
@@ -1274,17 +1373,14 @@ sub _is_msgid_in_neural_seen {
     $sth->execute($username, $msgid);
     my $rows = $sth->fetchall_arrayref();
 
-    if(scalar @$rows > 0) {
-      # Message $msgid found
-      return 1;
-    }
+    $found = 1 if scalar @$rows > 0;
+    1;
   } or do {
     if($@) {
       dbg("Failed to find message ID on neural_seen: $@");
-    } else {
-      return 0;
     }
   };
+  return $found;
 }
 
 sub _save_vocabulary_to_sql {
@@ -1407,13 +1503,26 @@ sub _load_vocabulary_from_sql {
         spam  => $spam,
         ham   => $ham
       };
-      $vocabulary{_doc_count}++  if($docs eq 1);
-      $vocabulary{_ham_count}++  if($ham  eq 1);
-      $vocabulary{_spam_count}++ if($spam eq 1);
       $count++;
     }
 
-    dbg("Loaded $count vocabulary terms from SQL for user: $username");
+    my $meta_sth = $self->{dbh}->prepare("
+      SELECT COUNT(*),
+             SUM(CASE WHEN flag = 'S' THEN 1 ELSE 0 END),
+             SUM(CASE WHEN flag = 'H' THEN 1 ELSE 0 END)
+      FROM neural_seen
+      WHERE username = ?
+    ");
+    $meta_sth->execute($username);
+    my $meta = $meta_sth->fetchrow_arrayref();
+    if ($meta) {
+      $vocabulary{_doc_count}  = $meta->[0] || 0;
+      $vocabulary{_spam_count} = $meta->[1] || 0;
+      $vocabulary{_ham_count}  = $meta->[2] || 0;
+    }
+
+    dbg("Loaded $count vocabulary terms from SQL for user: $username " .
+        "(spam_docs=$vocabulary{_spam_count}, ham_docs=$vocabulary{_ham_count})");
 
     # Prune vocabulary if needed
     $self->_prune_vocabulary(\%vocabulary, $vocab_cap);
@@ -1498,21 +1607,32 @@ sub _save_model_vocab {
 
 sub _load_model_vocab {
   my ($self, $nn_data_dir) = @_;
+
+  my $model_t = $self->{_neural_model_load_time} || 0;
+  if (defined $self->{_model_vocab_cache}
+      && ($self->{_model_vocab_cache_t} || 0) >= $model_t) {
+    return $self->{_model_vocab_cache};
+  }
+
+  my $vocab_ref;
   if (defined $self->{main}->{conf}->{neuralnetwork_dsn} && $self->{dbh}) {
-    return $self->_load_model_vocab_from_sql();
+    $vocab_ref = $self->_load_model_vocab_from_sql();
   } else {
     my $vocab_path = $self->_model_vocab_path($nn_data_dir);
     $vocab_path = Mail::SpamAssassin::Util::untaint_file_path($vocab_path);
-    return undef unless -f $vocab_path;
-    my $vocab_ref;
-    eval {
-      $vocab_ref = retrieve($vocab_path);
-      1;
-    } or do {
-      dbg("Failed to load model vocabulary from file: " . ($@ || 'unknown'));
-    };
-    return $vocab_ref;
+    if (-f $vocab_path) {
+      eval {
+        $vocab_ref = retrieve($vocab_path);
+        1;
+      } or do {
+        dbg("Failed to load model vocabulary from file: " . ($@ || 'unknown'));
+      };
+    }
   }
+
+  $self->{_model_vocab_cache}   = $vocab_ref;
+  $self->{_model_vocab_cache_t} = time();
+  return $vocab_ref;
 }
 
 1;
