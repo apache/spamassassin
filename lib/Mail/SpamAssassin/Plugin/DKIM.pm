@@ -1003,13 +1003,15 @@ sub _check_valid_signature {
       }
       my $key_size;
       if ($valid && !$expired && $minimum_key_bits) {
-        $key_size = eval { my $pk = $signature->get_public_key;
-                           $pk && $pk->cork && $pk->cork->size * 8 };
-        if ($key_size) {
-          $signature->{_spamassassin_key_size} = $key_size; # stash it for later
-          $info .= " WEAK($key_size)"  if $key_size < $minimum_key_bits;
-        } elsif ($signature->{_spamassassin_key_size}) {
+        if ($signature->{_spamassassin_key_size}) {
           $key_size = $signature->{_spamassassin_key_size}; # e.g. from AuthRes
+        } else {
+          $key_size = eval { my $pk = $signature->get_public_key;
+                             $pk && $pk->cork && $pk->cork->size * 8 };
+          if ($key_size) {
+            $signature->{_spamassassin_key_size} = $key_size; # stash it for later
+            $info .= " WEAK($key_size)"  if $key_size < $minimum_key_bits;
+          }
         }
       }
       push(@valid_signatures, $signature)  if $valid && !$expired;
