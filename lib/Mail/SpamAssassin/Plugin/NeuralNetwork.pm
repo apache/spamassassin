@@ -110,8 +110,9 @@ sub _flock {
   return $fh;
 }
 
-sub DESTROY {
-  my ($self) = @_;
+sub finish {
+  my $self = shift;
+
   if(defined $self->{_lock_fh}) {
     for my $path (keys %{$self->{_lock_fh}}) {
       close(delete $self->{_lock_fh}{$path});
