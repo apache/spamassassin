@@ -4,7 +4,7 @@
 # Phone numbers appearing in order/payment confirmation scam spam
 # ("call our support if this was not you" -- the call is the goal)
 #
-# Generated: 2026-03-17 02:25:02 PDT
+# Generated: 2026-03-20 18:04:15 PDT
 #
 # Optionally uses Mail::SpamAssassin::Plugin::ReplaceTags for digit/separator
 # obfuscation coverage.  If the plugin is not available, plain-regex fallbacks
@@ -62,9 +62,9 @@ replace_rules __PHONESCAM_983_220
 
 #---------------------------------------------------------------------------
 # 970-303-xxxx  (fake PayPal/Apple order confirmations; calendar spam delivery)
-# Observed: 2135 2184 2319 2457 2563 2645
+# Observed: 2135 2184 2319 2451 2457 2563 2645
 #---------------------------------------------------------------------------
-body __PHONESCAM_970_303  /(?:\+?<I><PSEP>)?\(?97<O>\)?<PSEP>3<O>3<PSEP>(?:2<I>35|2<I>84|23<I>9|2457|2563|2645)/
+body __PHONESCAM_970_303  /(?:\+?<I><PSEP>)?\(?97<O>\)?<PSEP>3<O>3<PSEP>(?:2<I>35|2<I>84|23<I>9|245<I>|2457|2563|2645)/
 replace_rules __PHONESCAM_970_303
 
 #---------------------------------------------------------------------------
@@ -119,7 +119,7 @@ body __PHONESCAM_983_ANY  /(?:\+?[1lI|][-. _]?)?\(?983\)?[-. _]?[2-9]\d\d[-. _]?
 
 body __PHONESCAM_983_220  /(?:\+?[1lI|][-. _]?)?\(?983\)?[-. _]?22[0oO][-. _]?(?:2[0oO]6[1lI|]|2[0oO]8[1lI|]|2[0oO]86|2[1lI|]58|2[1lI|]69|2356|2386|24[0oO]7|24[1lI|]8|25[1lI|][23]|253[1lI|]|2548|2552|257[1lI|]|258[68]|2623|2632|2795|2848|285[37])/
 
-body __PHONESCAM_970_303  /(?:\+?[1lI|][-. _]?)?\(?97[0oO]\)?[-. _]?3[0oO]3[-. _]?(?:2[1lI|]35|2[1lI|]84|23[1lI|]9|2457|2563|2645)/
+body __PHONESCAM_970_303  /(?:\+?[1lI|][-. _]?)?\(?97[0oO]\)?[-. _]?3[0oO]3[-. _]?(?:2[1lI|]35|2[1lI|]84|23[1lI|]9|245[1lI|]|2457|2563|2645)/
 
 body __PHONESCAM_865_209  /(?:\+?[1lI|][-. _]?)?\(?865\)?[-. _]?2[0oO]9[-. _]?(?:[0oO][1lI|]64|[0oO]22[1lI|])/
 
