@@ -3809,7 +3809,34 @@ Like body_part_scan_size, for "rawbody" type rules.
     default => 500000,
     type => $CONF_TYPE_NUMERIC,
   });
-  
+
+=item multipart_alternative_preferred_part (default: empty)
+
+Specifies which part of a multipart/alternative section to prefer for
+rendered body text.  Valid values are C<text/html> and C<text/plain>.
+When set, only the preferred part type will be used from
+multipart/alternative sections, skipping the other alternative.  When
+empty (the default), all parts are included as before.
+
+=cut
+
+  push (@cmds, {
+    setting => 'multipart_alternative_preferred_part',
+    default => '',
+    type => $CONF_TYPE_STRING,
+    code => sub {
+      my ($self, $key, $value, $line) = @_;
+      unless (defined $value && $value !~ /^$/) {
+        return $MISSING_REQUIRED_VALUE;
+      }
+      if ($value eq 'text/html' || $value eq 'text/plain') {
+        $self->{multipart_alternative_preferred_part} = $value;
+      } else {
+        return $INVALID_VALUE;
+      }
+    }
+  });
+
 =item rbl_timeout t [t_min] [zone]		(default: 15 3)
 
 All DNS queries are made at the beginning of a check and we try to read

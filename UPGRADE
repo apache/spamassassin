@@ -44,6 +44,12 @@ Note for Users Upgrading to SpamAssassin 4.0.3
   If no AuthRes results are available or the policy is missing, the plugin
   falls back to its own Mail::DMARC::PurePerl-based validation as before.
 
+- New configuration option: multipart_alternative_preferred_part
+  When set to "text/html" or "text/plain", only the preferred part type
+  from multipart/alternative sections will be used for rendered body text,
+  skipping the other alternative. By default this is unset and all parts
+  are included as before.
+
 - New Mail::SpamAssassin::Plugin::NeuralNetwork
   This plugin checks messages using Fast Artificial Neural Network library.
 

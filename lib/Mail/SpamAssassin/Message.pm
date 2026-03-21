@@ -120,6 +120,7 @@ sub new {
   $self->{suppl_attrib} = $opts->{'suppl_attrib'};
   $self->{body_part_scan_size} = $opts->{'body_part_scan_size'} || 0;
   $self->{rawbody_part_scan_size} = $opts->{'rawbody_part_scan_size'} || 0;
+  $self->{multipart_alternative_preferred_part} = $opts->{'multipart_alternative_preferred_part'} || '';
 
   if ($self->{suppl_attrib}) {  # caller-provided additional information
     # pristine_body_length is currently used by an eval test check_body_length
@@ -735,6 +736,7 @@ sub finish {
   delete $self->{'normalize'};
   delete $self->{'body_part_scan_size'};
   delete $self->{'rawbody_part_scan_size'};
+  delete $self->{'multipart_alternative_preferred_part'};
   delete $self->{'pristine_msg'};
   delete $self->{'pristine_body'};
   delete $self->{'pristine_headers'};
@@ -1254,6 +1256,18 @@ sub get_mimepart_digests {
 
 # ---------------------------------------------------------------------------
 
+# Search children/descendants of a node for a leaf part matching $type.
+# Returns the part if found, undef otherwise.
+sub _find_part_by_type {
+  my ($node, $type) = @_;
+  my @q = @{$node->{'body_parts'} || []};
+  while (my $n = shift @q) {
+    return $n if $n->is_leaf() && $n->{'type'} eq $type;
+    push @q, @{$n->{'body_parts'}} if !$n->is_leaf();
+  }
+  return undef;
+}
+
 # common code for get_rendered_body_text_array,
 # get_visible_rendered_body_text_array, get_invisible_rendered_body_text_array
 #
@@ -1266,10 +1280,7 @@ sub get_body_text_array_common {
   $self->{$key} = [];
 
   my $scansize = $self->{body_part_scan_size};
-
-  # Find all parts which are leaves
-  my @parts = $self->find_parts(qr/./,1);
-  return $self->{$key} unless @parts;
+  my $preferred_alt = $self->{multipart_alternative_preferred_part};
 
   # the html metadata may have already been set, so let's not bother if it's
   # already been done.
@@ -1278,13 +1289,25 @@ sub get_body_text_array_common {
   my $subject = $method_name eq 'invisible_rendered' ? ''
                : ($self->get_header('subject') || "\n");
 
-  # Go through each part
+  # Walk the MIME tree using a queue.  For multipart/alternative nodes,
+  # if a preferred part type is set and found, enqueue only that part
+  # instead of all children (skipping the other alternative).
+  my @queue = ($self);
   my $text = '';
-  for (my $pt = 0 ; $pt <= $#parts ; $pt++ ) {
-    my $p = $parts[$pt];
-
-    # put a blank line between parts ...
-    $text .= "\n"  if $text ne '';
+  while (my $p = shift @queue) {
+    if (!$p->is_leaf()) {
+      if ($preferred_alt && $p->{'type'} eq 'multipart/alternative') {
+        my $preferred_part = _find_part_by_type($p, $preferred_alt);
+        if ($preferred_part) {
+          unshift @queue, $preferred_part;
+        } else {
+          unshift @queue, @{$p->{'body_parts'}};
+        }
+      } else {
+        unshift @queue, @{$p->{'body_parts'}};
+      }
+      next;
+    }
 
     my($type, $rnd) = $p->$method_name();  # decode this part
     # Only text/* types are rendered ...
@@ -1314,6 +1337,9 @@ sub get_body_text_array_common {
           }
         }
       }
+
+      # put a blank line between parts ...
+      $text .= "\n"  if $text ne '';
 
       # Add to rendered text
       $text .= $rnd;
