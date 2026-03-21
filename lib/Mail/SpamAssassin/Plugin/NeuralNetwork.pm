@@ -48,7 +48,6 @@ my $VERSION = 0.6.3;
 
 use AI::FANN qw(:all);
 use Storable qw(store retrieve);
-use Fcntl qw(:flock);
 use File::Spec;
 
 use Mail::SpamAssassin;
@@ -60,65 +59,9 @@ our @ISA = qw(Mail::SpamAssassin::Plugin);
 sub dbg { my $msg = shift; Mail::SpamAssassin::Logger::dbg("NeuralNetwork: $msg", @_); }
 sub info { my $msg = shift; Mail::SpamAssassin::Logger::info("NeuralNetwork: $msg", @_); }
 
-sub _flock {
-  my ($self, $lock_path, $lock_type, $timeout) = @_;
-
-  if($lock_type != LOCK_EX && $lock_type != LOCK_SH) {
-    info("Invalid lock type $lock_type");
-    return;
-  }
-  $lock_path = Mail::SpamAssassin::Util::untaint_file_path($lock_path);
-
-  # Close idle cached lock file handles every 300s
-  my $now = time();
-  for my $path (keys %{$self->{_lock_fh} // {}}) {
-    my $last = $self->{_lock_fh_time}{$path} // 0;
-    if ($now - $last >= 300) {
-      close(delete $self->{_lock_fh}{$path});
-      delete $self->{_lock_fh_time}{$path};
-      dbg("Closed idle lock fd for '$path'");
-    }
-  }
-
-  # Cache the open file handle for this lock path.
-  if (!defined $self->{_lock_fh}{$lock_path} ||
-      !defined fileno($self->{_lock_fh}{$lock_path})) {
-    my $fh;
-    open($fh, '>>', $lock_path) or do {
-      dbg("Cannot open lock file '$lock_path': $!");
-      return undef;
-    };
-    $self->{_lock_fh}{$lock_path} = $fh;
-  }
-  my $fh = $self->{_lock_fh}{$lock_path};
-  $self->{_lock_fh_time}{$lock_path} = $now;
-
-  my $locked = 0;
-  if ($timeout) {
-    my $deadline = time() + $timeout;
-    do {
-      $locked = 1 if flock($fh, $lock_type | LOCK_NB);
-      select(undef, undef, undef, 0.1) unless $locked;
-    } until ($locked || time() >= $deadline);
-  } else {
-    $locked = flock($fh, $lock_type);
-  }
-  unless ($locked) {
-    dbg("Cannot acquire lock on '$lock_path' after ${timeout}s, proceeding unlocked");
-    return undef;
-  }
-  return $fh;
-}
-
 sub finish {
   my $self = shift;
 
-  if(defined $self->{_lock_fh}) {
-    for my $path (keys %{$self->{_lock_fh}}) {
-      close(delete $self->{_lock_fh}{$path});
-    }
-  }
-  delete $self->{_lock_fh_time} if defined $self->{_lock_fh_time};
   if ($self->{dbh}) {
     $self->{dbh}->disconnect();
     undef $self->{dbh};
@@ -428,8 +371,6 @@ sub finish_parsing_end {
   my $dataset_path = File::Spec->catfile($nn_data_dir, 'fann-' . lc($self->{main}->{username}) . '.model');
   $dataset_path = Mail::SpamAssassin::Util::untaint_file_path($dataset_path);
   if (-f $dataset_path) {
-    my $lock_path = $dataset_path . '.lock';
-    my $lock_fh = $self->_flock($lock_path, LOCK_SH, $self->{main}->{conf}->{neuralnetwork_lock_timeout});
     eval {
       $self->{neural_model} = AI::FANN->new_from_file($dataset_path);
       $self->{_neural_model_load_time} = time();
@@ -438,7 +379,6 @@ sub finish_parsing_end {
       my $err = $@ || 'unknown';
       info("Failed to load neural model from $dataset_path: $err");
     };
-    flock($lock_fh, LOCK_UN) if $lock_fh;
   }
 }
 
@@ -721,6 +661,7 @@ sub learn_message {
   }
 
   my $dataset_path = File::Spec->catfile($nn_data_dir, 'fann-' . lc($self->{main}->{username}) . '.model');
+  $dataset_path = Mail::SpamAssassin::Util::untaint_file_path($dataset_path);
 
   # Extract the text and labels
   my @email_texts = map { $_->{text} } @training_data;
@@ -728,8 +669,6 @@ sub learn_message {
 
 
   if (!defined $self->{neural_model} && -f $dataset_path) {
-    my $lock_path = $dataset_path . '.lock';
-    my $rlock_fh = $self->_flock($lock_path, LOCK_SH, $self->{main}->{conf}->{neuralnetwork_lock_timeout});
     eval {
       $self->{neural_model} = AI::FANN->new_from_file($dataset_path);
       $self->{_neural_model_load_time} = time();
@@ -737,7 +676,6 @@ sub learn_message {
     } or do {
       dbg("Failed to load model before training: " . ($@ || 'unknown'));
     };
-    flock($rlock_fh, LOCK_UN) if $rlock_fh;
   } elsif (!-f $dataset_path) {
     undef $self->{neural_model};
   }
@@ -773,15 +711,12 @@ sub learn_message {
     # Try to load the existing model from disk if not already in memory
     my $existing_network = $self->{neural_model};
     if (!defined $existing_network && -f $dataset_path) {
-      my $lock_path = $dataset_path . '.lock';
-      my $rlock_fh = $self->_flock($lock_path, LOCK_SH, $self->{main}->{conf}->{neuralnetwork_lock_timeout});
       eval {
         $existing_network = AI::FANN->new_from_file($dataset_path);
         1;
       } or do {
         dbg("Failed to load existing model for size check: " . ($@ || 'unknown'));
       };
-      flock($rlock_fh, LOCK_UN) if $rlock_fh;
     }
 
     if (defined $existing_network) {
@@ -880,9 +815,9 @@ sub learn_message {
     dbg("Prediction after learning: " . (defined $pred_after ? $pred_after : 'undef'));
   }
 
-  my $lock_path = $dataset_path . '.lock';
-  my $lock_fh = $self->_flock($lock_path, LOCK_EX, $conf->{neuralnetwork_lock_timeout});
-  unless ($lock_fh) {
+  my $locker = $self->{main}->{locker};
+  unless ($locker->safe_lock($dataset_path, $conf->{neuralnetwork_lock_timeout})) {
+    dbg("Cannot acquire lock on '$dataset_path', proceeding without saving");
     return;
   }
 
@@ -895,7 +830,7 @@ sub learn_message {
   } or do {
     info("Cannot save model to '$dataset_path' (" . ($@ || 'unknown') . ")");
   };
-  flock($lock_fh, LOCK_UN);
+  $locker->safe_unlock($dataset_path);
 
   if ($model_saved) {
     dbg("Model saved to '$dataset_path' (input:$num_input)");
@@ -1199,18 +1134,14 @@ sub _check_neuralnetwork {
     if ($model_expired) {
       dbg("Model cache expired (age: ${model_age}s, ttl: ${ttl}s), reloading");
     }
-    my $lock_path = $dataset_path . '.lock';
-    my $rlock_fh = $self->_flock($lock_path, LOCK_SH, $conf->{neuralnetwork_lock_timeout});
     eval {
       $self->{neural_model} = AI::FANN->new_from_file($dataset_path);
       $self->{_neural_model_load_time} = time();
       1;
     } or do {
       dbg("Failed to load model for prediction: " . ($@ || 'unknown'));
-      flock($rlock_fh, LOCK_UN) if $rlock_fh;
       return;
     };
-    flock($rlock_fh, LOCK_UN) if $rlock_fh;
   }
   my $network = $self->{neural_model};
 
