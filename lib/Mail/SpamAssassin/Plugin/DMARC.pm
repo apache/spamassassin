@@ -159,6 +159,7 @@ sub check_dmarc_pass {
   my $result = sub {
     defined $pms->{dmarc_result} &&
       $pms->{dmarc_result} eq 'pass' &&
+      defined $pms->{dmarc_policy} &&
       $pms->{dmarc_policy} ne 'no policy available';
   };
 
@@ -171,6 +172,7 @@ sub check_dmarc_reject {
   my $result = sub {
     defined $pms->{dmarc_result} &&
       $pms->{dmarc_result} eq 'fail' &&
+      defined $pms->{dmarc_policy} &&
       $pms->{dmarc_policy} eq 'reject';
   };
 
@@ -183,6 +185,7 @@ sub check_dmarc_quarantine {
   my $result = sub {
     defined $pms->{dmarc_result} &&
       $pms->{dmarc_result} eq 'fail' &&
+      defined $pms->{dmarc_policy} &&
       $pms->{dmarc_policy} eq 'quarantine';
   };
 
@@ -195,6 +198,7 @@ sub check_dmarc_none {
   my $result = sub {
     defined $pms->{dmarc_result} &&
       $pms->{dmarc_result} eq 'fail' &&
+      defined $pms->{dmarc_policy} &&
       $pms->{dmarc_policy} eq 'none';
   };
 
@@ -206,6 +210,7 @@ sub check_dmarc_missing {
 
   my $result = sub {
     defined $pms->{dmarc_result} &&
+      defined $pms->{dmarc_policy} &&
       $pms->{dmarc_policy} eq 'no policy available';
   };
 
@@ -356,34 +361,42 @@ sub _check_dmarc {
     $result->{result} = 'pass';
     $result->reason->[0]{type} = 'local_policy';
     $result->reason->[0]{comment} = "arc=pass (trusted ARC sealer)";
-  }
-
-  if (defined $pms->{dmarc_result}) {
-    if ($pms->{conf}->{dmarc_save_reports}) {
-      my $rua = eval { $result->published()->rua(); };
-      if (defined $rua && index($rua, 'mailto:') >= 0) {
-        eval { $dmarc->save_aggregate(); };
-        if ($@) {
-          info("report could not be saved: $@");
-        } else {
-          dbg("report will be sent to $rua");
-        }
-      }
-    }
-
+    # ARC override changed result to pass, set policy from original
+    # disposition and skip normal policy lookup which would fail
+    $pms->{dmarc_policy} = $result->disposition || 'no policy available';
+    dbg("result: pass (ARC override), original policy: $pms->{dmarc_policy}");
+  } elsif (defined $pms->{dmarc_result}) {
     if (defined $result->reason->[0]{comment} &&
           $result->reason->[0]{comment} eq 'too many policies') {
       dbg("result: no policy available (too many policies)");
       $pms->{dmarc_policy} = 'no policy available';
     } elsif ($result->result eq 'pass') {
       dbg("result: pass");
-      $pms->{dmarc_policy} = $result->published->p;
+      my $policy = eval { $result->published->p };
+      if (!defined $policy) {
+        dbg("result: pass but no published policy available");
+        $pms->{dmarc_policy} = 'no policy available';
+        return;
+      }
+      $pms->{dmarc_policy} = $policy;
     } elsif ($result->result ne 'none') {
       dbg("result: $result->{result}, disposition: $result->{disposition}, dkim: $result->{dkim}, spf: $result->{spf} (spf: $spf_status, spf_helo: $spf_helo_status)");
       $pms->{dmarc_policy} = $result->disposition;
     } else {
       dbg("result: no policy available");
       $pms->{dmarc_policy} = 'no policy available';
+    }
+  }
+
+  if (defined $pms->{dmarc_result} && $pms->{conf}->{dmarc_save_reports}) {
+    my $rua = eval { $result->published()->rua(); };
+    if (defined $rua && index($rua, 'mailto:') >= 0) {
+      eval { $dmarc->save_aggregate(); };
+      if ($@) {
+        info("report could not be saved: $@");
+      } else {
+        dbg("report will be sent to $rua");
+      }
     }
   }
 }
