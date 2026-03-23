@@ -1282,6 +1282,9 @@ sub get_body_text_array_common {
   my $scansize = $self->{body_part_scan_size};
   my $preferred_alt = $self->{multipart_alternative_preferred_part};
 
+  # Ensure the MIME tree has been parsed
+  $self->parse_body() if exists $self->{'parse_queue'};
+
   # the html metadata may have already been set, so let's not bother if it's
   # already been done.
   my $html_needs_setting = !exists $self->{metadata}->{html};
