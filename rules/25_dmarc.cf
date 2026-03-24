@@ -58,5 +58,17 @@ priority DMARC_MISSING 500
 tflags DMARC_MISSING net
 reuse DMARC_MISSING
 
+header DMARC_PERMERROR eval:check_dmarc_permerror()
+describe DMARC_PERMERROR DMARC permanent error
+priority DMARC_PERMERROR 500
+tflags DMARC_PERMERROR net
+reuse DMARC_PERMERROR
+
+header DMARC_TEMPERROR eval:check_dmarc_temperror()
+describe DMARC_TEMPERROR DMARC temporary error
+priority DMARC_TEMPERROR 500
+tflags DMARC_TEMPERROR net
+reuse DMARC_TEMPERROR
+
 endif
 

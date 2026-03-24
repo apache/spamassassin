@@ -50,6 +50,16 @@ Mail::SpamAssassin::Plugin::DMARC - check DMARC policy
     describe DMARC_MISSING Missing DMARC policy
     tflags DMARC_MISSING net
     score DMARC_MISSING 0.001
+
+    header DMARC_PERMERROR eval:check_dmarc_permerror()
+    describe DMARC_PERMERROR DMARC permanent error
+    tflags DMARC_PERMERROR net
+    score DMARC_PERMERROR 0.001
+
+    header DMARC_TEMPERROR eval:check_dmarc_temperror()
+    describe DMARC_TEMPERROR DMARC temporary error
+    tflags DMARC_TEMPERROR net
+    score DMARC_TEMPERROR 0.001
   endif
 
 =head1 DESCRIPTION
@@ -97,6 +107,8 @@ sub new {
   $self->register_eval_rule("check_dmarc_quarantine", $Mail::SpamAssassin::Conf::TYPE_HEAD_EVALS);
   $self->register_eval_rule("check_dmarc_none", $Mail::SpamAssassin::Conf::TYPE_HEAD_EVALS);
   $self->register_eval_rule("check_dmarc_missing", $Mail::SpamAssassin::Conf::TYPE_HEAD_EVALS);
+  $self->register_eval_rule("check_dmarc_permerror", $Mail::SpamAssassin::Conf::TYPE_HEAD_EVALS);
+  $self->register_eval_rule("check_dmarc_temperror", $Mail::SpamAssassin::Conf::TYPE_HEAD_EVALS);
 
   return $self;
 }
@@ -212,6 +224,28 @@ sub check_dmarc_missing {
     defined $pms->{dmarc_result} &&
       defined $pms->{dmarc_policy} &&
       $pms->{dmarc_policy} eq 'no policy available';
+  };
+
+  return $self->_check_eval($pms, $result);
+}
+
+sub check_dmarc_permerror {
+  my ($self, $pms, $name) = @_;
+
+  my $result = sub {
+    defined $pms->{dmarc_result} &&
+      $pms->{dmarc_result} eq 'permerror';
+  };
+
+  return $self->_check_eval($pms, $result);
+}
+
+sub check_dmarc_temperror {
+  my ($self, $pms, $name) = @_;
+
+  my $result = sub {
+    defined $pms->{dmarc_result} &&
+      $pms->{dmarc_result} eq 'temperror';
   };
 
   return $self->_check_eval($pms, $result);
@@ -368,8 +402,9 @@ sub _check_dmarc {
   } elsif (defined $pms->{dmarc_result}) {
     if (defined $result->reason->[0]{comment} &&
           $result->reason->[0]{comment} eq 'too many policies') {
-      dbg("result: no policy available (too many policies)");
-      $pms->{dmarc_policy} = 'no policy available';
+      dbg("result: permerror (too many policies)");
+      $pms->{dmarc_result} = 'permerror';
+      $pms->{dmarc_policy} = 'permerror';
     } elsif ($result->result eq 'pass') {
       dbg("result: pass");
       my $policy = eval { $result->published->p };
@@ -410,6 +445,12 @@ sub _check_dmarc_authres {
   if ($result eq 'none') {
     # dmarc=none means no DMARC record published, no policy to look up
     $policy = 'no policy available';
+  } elsif ($result eq 'permerror' || $result eq 'temperror') {
+    # error results are terminal, no point in falling back to local check
+    $pms->{dmarc_result} = $result;
+    $pms->{dmarc_policy} = $result;
+    dbg("using Authentication-Results: result=%s", $result);
+    return 1;
   } else {
     # Try to get policy from A-R header properties
     foreach my $parsed (@{$pms->{authres_parsed}{dmarc} || []}) {
