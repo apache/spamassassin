@@ -495,6 +495,8 @@ sub _check_arc_override {
   return 0;
 }
 
+# Version features
+sub has_dmarc_errors { 1 }
 
 1;
 
