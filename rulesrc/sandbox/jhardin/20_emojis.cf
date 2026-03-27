@@ -1,0 +1,17 @@
+# emoji rules
+# jhardin
+
+ifplugin Mail::SpamAssassin::Plugin::ReplaceTags
+
+  header         __EMOJI_FROM_NAME        From:name =~ /<EMOJI>/
+  replace_rules  __EMOJI_FROM_NAME
+  tflags         __EMOJI_FROM_NAME        multiple maxhits=10
+
+  header         __EMOJI_SUBJ             Subject =~ /<EMOJI>/
+  replace_rules  __EMOJI_SUBJ
+  tflags         __EMOJI_SUBJ             multiple maxhits=10
+
+  meta           __MANY_EMOJI_FROM_NAME   __EMOJI_FROM_NAME > 4
+  meta           __MANY_EMOJI_SUBJ        __EMOJI_SUBJ > 4
+
+endif
