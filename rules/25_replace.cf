@@ -75,6 +75,15 @@ replace_tag	8	(?:[8]|[\xef][\xbc][\x98]|[\xe2](?:[\x81][\xb8]|[\x82][\x88]|[\x91
 replace_tag	9	(?:9|(?-i:[qg])|[\xef][\xbc][\x99]|[\xe2](?:[\x81][\xb9]|[\x82][\x89]|[\x91][\xa8\xbc]|[\x93][\xbd]|[\x9d][\xbe])|[\xf0][\x9d][\x9f][\x97\xa1\xab\xb5\xbf])
 # <DIGIT>: ⁰-⁹ ₀-₉ ①-⑨ ⑴-⑼ ⓪⓵-⓽⓿ ❶-❾ ➀-➈ ➊-➒ 🄋🄌 ０-９ 𝟎-𝟿
 replace_tag	DIGIT	(?:[0-9]|[\xc2][\xb2\xb3\xb9]|[\xef][\xbc][\x90-\x99]|[\xe2](?:[\x81][\xb0\xb4-\xb9]|[\x82][\x80-\x89]|[\x91][\xa0-\xa8\xb4-\xbc]|[\x93][\xaa\xb5-\xbd\xbf]|[\x9d][\xb6-\xbe])|[\xf0][\x9d][\x9f][\x8e-\xbf])
+# <EMOJI>: U+2600-U+27BF (Misc Symbols + Dingbats) and main 4-byte emoji blocks
+# (U+1F300-U+1F6FF Misc/Pictographs/Transport, U+1F900-U+1FAFF Supplemental/Extended-A)
+# Omitted 3-byte scattered (~50 codepoints): ‼⁉™ℹ ↔↕↖↗↘↙↩↪ ⌚⌛⌨
+#   ⏏⏩-⏳⏸-⏺ Ⓜ ▪▫▶ ◀◻-◾ ⤴⤵ ⬅⬆⬇⬛⬜⭐⭕ 〰〽㊗㊙
+# Omitted 4-byte gap U+1F700-U+1F8FF (Alchemical, Geometric, Chess, Supplemental Arrows-C)
+replace_tag	EMOJI	(?:[\xe2][\x98-\x9e][\x80-\xbf]|[\xf0][\x9f](?:[\x8c-\x9b]|[\xa4-\xaa])[\x80-\xbf])
+# <EMOJI_BROAD>: EMOJI plus scattered 3-byte BMP emoji and closed 4-byte gap
+# (gap U+1F700-U+1F8FF folds in Alchemical/Geometric/Chess/Arrows-C — not true emoji but harmless)
+replace_tag	EMOJI_BROAD	(?:[\xe2](?:[\x80][\xbc]|[\x81][\x89]|[\x84][\xa2\xb9]|[\x86][\x94-\x99\xa9\xaa]|[\x8c][\x9a\x9b\xa8]|[\x8f][\x8f\xa9-\xb3\xb8-\xba]|[\x93][\x82]|[\x96][\xaa\xab\xb6]|[\x97][\x80\xbb-\xbe]|[\x98-\x9e][\x80-\xbf]|[\xa4][\xb4\xb5]|[\xac][\x85-\x87\x9b\x9c]|[\xad][\x90\x95])|[\xe3](?:[\x80][\xb0\xbd]|[\x8a][\x97\x99])|[\xf0][\x9f][\x8c-\xaa][\x80-\xbf])
 replace_tag	IMG	(?:jpe?g|gif|png)
 replace_tag	SP	[\s\d_*\$\%(),.:;?!}{\[\]|\/?^\#~\xa1`'+-]
 replace_tag	WS	(?:=?\s|[\xe2](?:[\x80][\x80\x81\x82\x83\x84\x85\x86\x87\x88\x89\x8a\x8b\x8c\x8d\xaf]|[\x81][\x9f])|&(?:\#(?:8(?:19[2-9]|20[0-5]|239|287)|160|xa0)|(?:e[nm]|nb|thin)sp);)
