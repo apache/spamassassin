@@ -4549,6 +4549,8 @@ tflags     URI_SNIP_LY                 publish
 # URL obfuscation observed in phishing
 uri        __URI_ABOUT_OBFU            m;^about:https?://;i
 
-
+# Google Drive files that are opened or previewed by third-party apps (e.g., apps integrated via the Google Drive API or Workspace Marketplace)
+# Observed in scam to retrieve PDF icon
+uri        __URI_D3P_GUC               m;^https://drive-thirdparty\.googleusercontent\.com/;i
 
 
