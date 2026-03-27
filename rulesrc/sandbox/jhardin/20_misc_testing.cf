@@ -4439,8 +4439,8 @@ tflags      URI_NOCODEFORM             publish
 
 # Look for exploits of Bug 8288 - seems fairly common
 rawbody     __URI_EXCESS_SLASHES       m;https?:///+;i
-meta        URI_EXCESS_SLASHES         __URI_EXCESS_SLASHES && __BUG6919_RDNS_GENERIC 
-score       URI_EXCESS_SLASHES         3.000
+meta        URI_EXCESS_SLASHES         __URI_EXCESS_SLASHES && __CTYPE_MULTIPART_ANY  
+score       URI_EXCESS_SLASHES         2.500
 describe    URI_EXCESS_SLASHES         Too many slashes in URI, possible attempt to bypass spam filtering
 tflags      URI_EXCESS_SLASHES         publish
 
@@ -4518,6 +4518,11 @@ endif
 
 # seen in phishing emails for captured data exfil
 uri        __TELEGRAM_MESSAGE          m;^https?://api\.telegram\.org/bot[^/]+/sendMessage;i
+meta       TELEGRAM_MESSAGE            __TELEGRAM_MESSAGE
+score      TELEGRAM_MESSAGE            2.500	# limit
+describe   TELEGRAM_MESSAGE            Sent a Telegram message, probable phishing exfil
+tflags     TELEGRAM_MESSAGE            publish
+
 
 # spam/phishing from google, collector at msft (Philip Prindeville)
 meta       __PP_CROSSTALK_G_M          __REPTO_ONMICROSOFTCOM && __FSL_RELAY_GOOGLE
