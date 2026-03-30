@@ -105,6 +105,9 @@ header   T_SCC_TLD_ONLINE From =~ /<[^ @]+@[^ @>]+\.online>/
 describe T_SCC_TLD_XYZ From domain in *.xyz
 header   T_SCC_TLD_XYZ From =~ /<[^ @]+@[^ @>]+\.xyz>/
 
+describe T_SCC_TLD_WORLD From domain in *.world
+header   T_SCC_TLD_WORLD From =~ /<[^ @]+@[^ @>]+\.world>/
+
 describe	T_SCC_URL_NOTIONSITE  has a notion.site URL
 uri		T_SCC_URL_NOTIONSITE  /https?:\/\/[^ ]*\.notion.site/
 tflags		T_SCC_URL_NOTIONSITE  multiple maxhits=5
