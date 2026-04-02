@@ -1,0 +1,11 @@
+# Generated: 2026-04-01
+
+# Mailchimp campaigns using Microsoft brand names (outlook/hotmail) as list-manage subdomains
+# Normal Mailchimp uses the sender's own brand; using outlook/hotmail is impersonation
+header     __MC_MSFT_LU               List-Unsubscribe =~ /\b(?:outlook|hotmail)\.[a-z0-9]+\.list-manage\.com/i
+uri        __MC_MSFT_URI              m;\b(?:outlook|hotmail)\.[a-z0-9]+\.list-manage\.com;i
+meta       __MC_MSFT_LISTMGR          __MC_MSFT_LU || __MC_MSFT_URI
+meta       MC_MSFT_LISTMGR            __MC_MSFT_LISTMGR
+describe   MC_MSFT_LISTMGR            Mailchimp campaign uses Microsoft brand as list-manage subdomain
+score      MC_MSFT_LISTMGR            2.500	# limit
+tflags     MC_MSFT_LISTMGR            publish
