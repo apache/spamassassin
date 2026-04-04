@@ -33,6 +33,8 @@ responses trickle in, filters them according to the requested DNS resource
 record type and optional subrule filtering expression, yielding a rule hit
 if a response meets filtering conditions.
 
+Setting C<skip_uribl_checks> to 1 will disable AskDNS queries.
+
 Any host or its domain part matching uridnsbl_skip_domains is ignored
 by default.  To bypass this check for specific rules, use the C<noskip>
 tflag:
@@ -370,6 +372,7 @@ sub check_dnsbl {
   my $pms = $opts->{permsgstatus};
   my $conf = $pms->{conf};
 
+  return if $conf->{skip_uribl_checks};
   return if !$pms->is_dns_available();
 
   # walk through all collected askdns rules, obtain tag values whenever
