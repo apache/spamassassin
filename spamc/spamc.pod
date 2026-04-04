@@ -216,6 +216,15 @@ directories to verify the server certificate.  The server certificate must
 be signed by one of these Certificate Authorities.  See the man page for
 B<IO::Socket::SSL> for additional details.
 
+=item B<-D>, B<--ssl-debug>
+
+If spamc was built with SSL support, log SSL state information to stderr
+at each stage of the connection: the negotiated protocol version and cipher
+after the handshake, the byte counts and SSL state string for each write,
+and the SSL error code and state on any read failure.  Useful for diagnosing
+TLS connection problems, particularly with TLS 1.3.  Requires B<-l> to
+direct log output to stderr.
+
 =item B<-t> I<timeout>, B<--timeout>=I<timeout>
 
 Set the timeout for spamc-to-spamd communications (default: 600, 0 disables).
