@@ -3762,6 +3762,20 @@ connections from specified test networks and from localhost.
 
 In absence of the B<-A> option, connections are only accepted from
 IP address 127.0.0.1 or ::1, i.e. from localhost on a loopback interface.
+To allow connections from any address, use B<-A 0.0.0.0/0> for IPv4 and
+B<-A ::/0> for IPv6.  Do not do this unless spamd is on a private network
+and/or protected by an OS-level firewall.
+
+If you add external addresses to B<-A> in order to listen on non-loopback
+interfaces, you must also explicitly include C<127.0.0.1> and/or C<::1> in
+the list if you still want to allow local connections; the default is
+replaced, not extended.
+
+Note that the allowed-IP list is global across all listening sockets — there
+is no per-socket access control.  A source address permitted by B<-A> may
+connect to any socket spamd is listening on, regardless of which interface
+that socket is bound to.  For tighter control, firewall rules at the OS level
+can be used alongside B<-A> as a belt-and-suspenders measure.
 
 =item B<-D> [I<area,...>], B<--debug> [I<area,...>]
 
