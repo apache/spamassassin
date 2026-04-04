@@ -810,17 +810,17 @@ my @listen_socket_specs = @{$opt{'listen-sockets'}};
 }
 
 # supply a default socket (loopback IP address) if none specified
-if (!@listen_socket_specs) {
-  if (defined $opt{'ssl-port'}) {
-    # --ssl-port with no -i: implement the documented behaviour of creating
-    # both a plain-TCP listener on --port and an SSL listener on --ssl-port.
-    # Previously the code only created a single SSL socket (on --ssl-port),
-    # silently discarding the plain-TCP port that the man page promised.
-    push(@listen_socket_specs, 'localhost');      # plain TCP on --port
-    push(@listen_socket_specs, 'ssl:localhost');  # SSL on --ssl-port
-  } else {
-    push(@listen_socket_specs, 'localhost');
-  }
+push(@listen_socket_specs, 'localhost')  if !@listen_socket_specs;
+
+# When --ssl-port is set and no spec uses an explicit ssl: prefix, the user
+# has explicitly requested both a plain-TCP port and an SSL port.  Expand
+# each address spec into a plain/SSL pair so that both listeners are created
+# on every requested address.  The port assignment logic below will use
+# --port for the plain socket and --ssl-port for the SSL one.
+# This applies whether the addresses came from -i or from the localhost
+# default above.
+if (defined $opt{'ssl-port'} && !grep { m{^ssl:}i } @listen_socket_specs) {
+  @listen_socket_specs = map { ($_, "ssl:$_") } @listen_socket_specs;
 }
 
 # Detect whether any socket spec uses an explicit "ssl:" prefix.  When the
@@ -3913,11 +3913,19 @@ directory must be hashed in the usual manner (see B<c_rehash>(1)).
 
 =item B<--ssl-port>=I<port>
 
-Specifies the port number for SSL connections.  Implies B<--ssl>.  When no
-B<-i> / B<--listen> options are given, spamd listens for plain-TCP
-connections on B<--port> and for SSL connections on B<--ssl-port>
-simultaneously.  When B<-i> options are present, B<--ssl-port> acts only as a
-default port for C<ssl:>-prefixed B<-i> specs that omit a port number.
+Specifies the port number for SSL connections.  Implies B<--ssl>.  When
+B<-i> / B<--listen> options are given without explicit C<ssl:> prefixes,
+each address is expanded into a plain-TCP listener on B<--port> and an SSL
+listener on B<--ssl-port>, matching the no-B<-i> behaviour.
+
+If you intend to accept SSL connections from non-local clients you should
+think carefully about which addresses each listener is bound to.  Use
+explicit C<ssl:> prefixes on B<-i> arguments if you need independent control
+over the address bindings for the plain-TCP and SSL sockets.  For example,
+C<-i ssl:*:11784 -i *:11783> listens on all interfaces for both SSL and
+plain-TCP, while C<-i ssl:*:11784 -i localhost:11783> accepts SSL connections
+from any host but restricts plain-TCP to local connections only, avoiding SSL
+overhead for processes on the same machine.
 
 =item B<--server-key> I<keyfile>
 
