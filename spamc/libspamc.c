@@ -1547,17 +1547,19 @@ int message_filter(struct transport *tp, const char *username,
                 failureval = EX_IOERR;
                 goto failure;
             }
-            if (flags & SPAMC_DEBUG_SSL) {
-                libspamc_log(flags, LOG_DEBUG,
-                             "SSL_write: sending body (%d bytes), state=%s",
-                             towrite_len, SSL_state_string_long(ssl));
-            }
-            rc = _ssl_write_with_retry(ssl, towrite_buf, towrite_len, flags);
-            if (rc <= 0) {
-                libspamc_log(flags, LOG_ERR, "SSL write failed: error=%d state=%s",
-                             SSL_get_error(ssl, rc), SSL_state_string_long(ssl));
-                failureval = EX_IOERR;
-                goto failure;
+            if (towrite_len > 0) {
+                if (flags & SPAMC_DEBUG_SSL) {
+                    libspamc_log(flags, LOG_DEBUG,
+                                 "SSL_write: sending body (%d bytes), state=%s",
+                                 towrite_len, SSL_state_string_long(ssl));
+                }
+                rc = _ssl_write_with_retry(ssl, towrite_buf, towrite_len, flags);
+                if (rc <= 0) {
+                    libspamc_log(flags, LOG_ERR, "SSL write failed: error=%d state=%s",
+                                 SSL_get_error(ssl, rc), SSL_state_string_long(ssl));
+                    failureval = EX_IOERR;
+                    goto failure;
+                }
             }
             SSL_shutdown(ssl);
             shutdown(sock, SHUT_WR);
