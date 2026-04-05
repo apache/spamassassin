@@ -3525,6 +3525,12 @@ global --port (and --ssl-port) setting. An IPv6 addresses should be enclosed
 in square brackets, e.g. [::1]:783. For compatibility square brackets on an
 IPv6 address may be omitted if a port number specification is also omitted.
 
+Note that listening on non-loopback addresses does not automatically permit
+connections from those addresses.  The B<-A> / B<--allowed-ips> option
+controls which source addresses may connect, and defaults to localhost only
+(127.0.0.1 and ::1).  If you listen on external interfaces you must add the
+appropriate addresses to B<-A> explicitly.
+
 =item B<-p> I<port>, B<--port>=I<port>
 
 Optionally specifies the port number for the server to listen on (default: 783).
