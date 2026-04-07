@@ -414,17 +414,24 @@ sub _parse_trusted_aar {
   my $verifier = $pms->{arc_verifier};
   return if !ref($verifier) || !defined $verifier->{seals};
 
-  # Build set of ARC instance indices with trusted seal domains
+  # Walk the chain from newest to oldest.  Trust the contiguous run of
+  # trusted sealers at the top of the chain; as soon as we hit an
+  # untrusted hop, anything older than it cannot be trusted either.
+  # $verifier->{seals} is indexed by ARC instance number.
+  my $seals = $verifier->{seals};
   my %trusted_indices;
-  foreach my $seal (@{$verifier->{seals}}) {
+  for (my $i = $#$seals; $i >= 1; $i--) {
+    my $seal = $seals->[$i];
+    next if !defined $seal;
     my $d = $seal->{tags_by_name}{d}{value};
-    my $i = $seal->{tags_by_name}{i}{value};
-    next if !defined $d || !defined $i;
-    if ($trusted->{lc $d}) {
+    next if !defined $d;
+    $d = lc $d;
+    if ($trusted->{$d}) {
       $trusted_indices{$i} = 1;
       dbg("arc: seal i=%s d=%s is trusted", $i, $d);
     } else {
-      dbg("arc: seal i=%s d=%s is not trusted", $i, $d);
+      dbg("arc: seal i=%s d=%s is not trusted, stopping chain walk", $i, $d);
+      last;
     }
   }
   return if !%trusted_indices;
@@ -438,19 +445,29 @@ sub _parse_trusted_aar_from_headers {
   my $trusted = $pms->{conf}->{arc_trusted_sealers};
   return if !$trusted || !%$trusted;
 
-  # Build set of ARC instance indices from ARC-Seal headers
-  my %trusted_indices;
+  # Collect ARC-Seal domains by instance index
+  my %seal_domain;
   my @seals = $pms->{msg}->get_pristine_header('ARC-Seal');
   foreach my $seal (@seals) {
     chomp $seal;
     my ($i) = $seal =~ /\bi\s*=\s*(\d+)/;
     my ($d) = $seal =~ /\bd\s*=\s*([^\s;]+)/;
     next if !defined $d || !defined $i;
-    if ($trusted->{lc $d}) {
+    $seal_domain{$i} = lc $d;
+  }
+
+  # Walk the chain from newest to oldest.  Trust the contiguous run of
+  # trusted sealers at the top of the chain; as soon as we hit an
+  # untrusted hop, anything older than it cannot be trusted either.
+  my %trusted_indices;
+  foreach my $i (sort { $b <=> $a } keys %seal_domain) {
+    my $d = $seal_domain{$i};
+    if ($trusted->{$d}) {
       $trusted_indices{$i} = 1;
       dbg("arc: seal i=%s d=%s is trusted", $i, $d);
     } else {
-      dbg("arc: seal i=%s d=%s is not trusted", $i, $d);
+      dbg("arc: seal i=%s d=%s is not trusted, stopping chain walk", $i, $d);
+      last;
     }
   }
   return if !%trusted_indices;
