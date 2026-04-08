@@ -44,11 +44,12 @@ use strict;
 use warnings;
 use re 'taint';
 
-my $VERSION = 0.6.3;
+my $VERSION = 0.7.3;
 
 use AI::FANN qw(:all);
 use Storable qw(store retrieve);
 use File::Spec;
+use File::Temp ();
 
 use Mail::SpamAssassin;
 use Mail::SpamAssassin::Plugin;
@@ -63,7 +64,11 @@ sub finish {
   my $self = shift;
 
   if ($self->{dbh}) {
-    $self->{dbh}->disconnect();
+    if (($self->{_dbh_pid} || 0) == $$) {
+      $self->{dbh}->disconnect();
+    } else {
+      $self->{dbh}->{InactiveDestroy} = 1;
+    }
     undef $self->{dbh};
   }
 }
@@ -149,6 +154,10 @@ Algorithm used by Fann neural network used when training, might increase speed d
 
 Maximum number of seconds to wait for the exclusive training lock before giving up and skipping the learn operation.
 Set to 0 to wait indefinitely.
+
+=item neuralnetwork_rprop_delta_max n (default: 0.5)
+
+Delta value to apply to RPROP training replay loop.
 
 =item neuralnetwork_stopwords words (default: "the and for with that this from there their have be not but you your")
 
@@ -296,6 +305,12 @@ prediction to run.
         $self->{neuralnetwork_train_algorithm} = $algorithm_map{$value};
     },
     type => $Mail::SpamAssassin::Conf::CONF_TYPE_NUMERIC,
+  });
+  push(@cmds, {
+    setting  => 'neuralnetwork_rprop_delta_max',
+    is_admin => 1,
+    default  => 0.5,
+    type     => $Mail::SpamAssassin::Conf::CONF_TYPE_NUMERIC,
   });
   push(@cmds, {
     setting => 'neuralnetwork_lock_timeout',
@@ -460,7 +475,7 @@ sub _text_to_features {
     # Ensure we have enough spam and ham examples in the vocabulary
     my $min_spam = $conf->{neuralnetwork_min_spam_count};
     my $min_ham  = $conf->{neuralnetwork_min_ham_count};
-    if (!$train) {
+    if ($train == 0) {
       if ( ($vocabulary{_spam_count} < $min_spam) || ($vocabulary{_ham_count} < $min_ham) ) {
         dbg("Insufficient spam/ham data for prediction: spam=".$vocabulary{_spam_count}.", ham=".$vocabulary{_ham_count});
         return ([], 0);
@@ -470,31 +485,12 @@ sub _text_to_features {
     # tokenize helper
     my $tokenize = sub {
       my ($text) = @_;
-      return () unless defined $text;
-      $text = lc $text;
-      # Strip subject prefixes, enhances results
-      $text =~ s/^(?:[a-z]{2,12}:\s*){1,10}//i;
-
-      # Strip anything that looks like url or email, enhances results
-      $text =~ s/https?(?:\:\/\/|:&#x2F;&#x2F;|%3A%2F%2F)\S{1,1024}/ /gs;
-      $text =~ s/\S{1,64}?\@[a-zA-Z]\S{1,128}/ /gs;
-      $text =~ s/\bwww\.\S{1,128}/ /gs;
-      # Remove extra chars
-      $text =~ s/\-{2,}//g;
-      # Remove tokens that could be a date
-      $text =~ s/\b\d+(?:\-|\/)\d+(?:\-|\/)\d+\b//g;
-      # replace HTML entities and punctuation with spaces
-      $text =~ s/&[a-z#0-9]+;/ /g;
-      $text =~ s{[^\p{L}\p{N}\-]}{ }g;
-      my @tokens = grep { length($_) >= $min_word_len && length($_) <= $max_word_len } split /\s+/, $text;
-      @tokens = grep { $_ !~ /^\d+$/ } @tokens;         # drop pure numbers
-      @tokens = grep { !$stopwords_ref->{$_} } @tokens;     # drop stopwords
-      return @tokens;
+      return $self->_tokenize_text($conf, $text);
     };
 
     # When training, build per-document term sets to update doc counts
     my $local_doc_increment = 0;
-    if ($train) {
+    if ($train == 1) {
       foreach my $email_text (@emails) {
         next unless defined $email_text;
         my @tokens = $tokenize->($email_text);
@@ -605,6 +601,7 @@ sub learn_message {
   my $isspam = $params->{isspam};
   my $msg = $params->{msg};
   my $conf = $self->{main}->{conf};
+  $self->_init_sql_connection($conf) if defined $conf->{neuralnetwork_dsn};
   my $min_text_len = $conf->{neuralnetwork_min_text_len};
   my $learning_rate = $conf->{neuralnetwork_learning_rate};
   my $momentum = $conf->{neuralnetwork_momentum};
@@ -663,6 +660,12 @@ sub learn_message {
   my $dataset_path = File::Spec->catfile($nn_data_dir, 'fann-' . lc($self->{main}->{username}) . '.model');
   $dataset_path = Mail::SpamAssassin::Util::untaint_file_path($dataset_path);
 
+  my $locker = $self->{main}->{locker};
+  unless ($locker->safe_lock($dataset_path, $conf->{neuralnetwork_lock_timeout})) {
+    dbg("Cannot acquire lock on '$dataset_path', skipping learning");
+    return;
+  }
+
   # Extract the text and labels
   my @email_texts = map { $_->{text} } @training_data;
   my @labels = map { $_->{label} } @training_data;
@@ -693,12 +696,14 @@ sub learn_message {
   my ($feature_vectors, $vocab_size, $vocab_keys_ref) = _text_to_features($self, $self->{main}->{conf}, $nn_data_dir, $update_vocab, $isspam, undef, @email_texts);
 
   unless ($feature_vectors && @$feature_vectors) {
+    $locker->safe_unlock($dataset_path);
     return;
   }
 
   my $num_input = scalar(@{$feature_vectors->[0]{vec}});
   if ($num_input == 0) {
     dbg("No valid features found in message, skipping learning");
+    $locker->safe_unlock($dataset_path);
     return;
   }
   my $num_hidden_neurons = int(sqrt($num_input)) || 1;
@@ -725,11 +730,12 @@ sub learn_message {
       dbg("Vocabulary size changed ($num_input vs model $model_size), rebuilding training vectors with model vocabulary");
       my $stored_vocab_ref = $self->_load_model_vocab($nn_data_dir);
       if (defined $stored_vocab_ref && scalar(@$stored_vocab_ref) == $model_size) {
-        ($feature_vectors, undef) = _text_to_features($self, $self->{main}->{conf}, $nn_data_dir, 0, undef, $stored_vocab_ref, @email_texts);
+        ($feature_vectors, undef) = _text_to_features($self, $self->{main}->{conf}, $nn_data_dir, 2, undef, $stored_vocab_ref, @email_texts);
         $vocab_keys_ref = $stored_vocab_ref;
       } else {
         dbg("Model vocabulary file not found or mismatched, falling back to vector adjustment");
         $feature_vectors = [ map { my $v = _adjust_vector_size($_->{vec}, $model_size); { vec => $v, hits => scalar grep { $_ != 0 } @$v } } @$feature_vectors ];
+        $vocab_keys_ref = undef;
       }
       $num_input = $model_size;
       $network = $existing_network;
@@ -747,6 +753,9 @@ sub learn_message {
   $network->learning_rate($learning_rate);
   $network->learning_momentum($momentum);
   $network->training_algorithm($train_algorithm);
+  if ($train_algorithm == FANN_TRAIN_RPROP) {
+    $network->rprop_delta_max($conf->{neuralnetwork_rprop_delta_max});
+  }
 
   # Load the current corpus counts so we can compute how skewed the training
   # history is.
@@ -797,16 +806,42 @@ sub learn_message {
     }
   }
 
-  # Train once on vocabulary-derived representative spam/ham
-  # vectors.
-  if (keys %{$vocab_for_balance{terms} || {}} && defined $vocab_keys_ref) {
+  # Dynamic replay algorithm
+  if (   $train_algorithm == FANN_TRAIN_RPROP
+      && defined $vocab_keys_ref
+      && scalar(@$vocab_keys_ref) == $num_input
+      && $spam_docs > 1 && $ham_docs > 1) {
+
     my ($svec, $hvec) = _build_class_tfidf_vectors(\%vocab_for_balance, $vocab_keys_ref);
-    if ($svec) {
-      eval { $network->train($svec, [1]); 1 } or dbg("Replay spam step failed: " . ($@ || 'unknown'));
-      eval { $network->train($hvec, [0]); 1 } or dbg("Replay ham step failed: " . ($@ || 'unknown'));
-      dbg("Replay: spam_docs=" . ($vocab_for_balance{_spam_count} || 1) .
-          ", ham_docs=" . ($vocab_for_balance{_ham_count} || 1));
+
+    if ($svec && $hvec) {
+      # Use grep in scalar context: returns count of non-zero elements.
+      my $svec_ok = grep { $_ != 0 } @$svec;
+      my $hvec_ok = grep { $_ != 0 } @$hvec;
+
+      if ($svec_ok && $hvec_ok) {
+        my $replay_cycles = int(sqrt($weighted_epochs / 10.0) + 0.5) || 1;
+        $replay_cycles = 6 if $replay_cycles > 6;
+
+        if ($isspam) {
+          for (1 .. $replay_cycles) {
+            eval { $network->train($hvec, [0]); 1 } or dbg("Replay ham step failed: "  . ($@ || 'unknown'));
+            eval { $network->train($svec, [1]); 1 } or dbg("Replay spam step failed: " . ($@ || 'unknown'));
+          }
+        } else {
+          for (1 .. $replay_cycles) {
+            eval { $network->train($svec, [1]); 1 } or dbg("Replay spam step failed: " . ($@ || 'unknown'));
+            eval { $network->train($hvec, [0]); 1 } or dbg("Replay ham step failed: "  . ($@ || 'unknown'));
+          }
+        }
+        dbg("RPROP replay: $replay_cycles cycle(s) after $weighted_epochs epoch(s) " .
+            "(isspam=$isspam, spam_docs=$spam_docs, ham_docs=$ham_docs)");
+      } else {
+        dbg("Skipping RPROP replay: degenerate vectors (svec_ok=$svec_ok, hvec_ok=$hvec_ok)");
+      }
     }
+  } elsif ($train_algorithm == FANN_TRAIN_RPROP && !defined $vocab_keys_ref) {
+    dbg("Skipping RPROP replay: vocab_keys unavailable");
   }
 
   if (scalar(@$feature_vectors) == 1) {
@@ -815,20 +850,31 @@ sub learn_message {
     dbg("Prediction after learning: " . (defined $pred_after ? $pred_after : 'undef'));
   }
 
-  my $locker = $self->{main}->{locker};
-  unless ($locker->safe_lock($dataset_path, $conf->{neuralnetwork_lock_timeout})) {
-    dbg("Cannot acquire lock on '$dataset_path', proceeding without saving");
-    return;
-  }
-
-  # Save the model
+  # Save the model atomically
   my $model_saved = 0;
+  my $tmp_path;
   eval {
-    $network->save($dataset_path) or die "model save failed";
+    my ($vol, $dir, undef) = File::Spec->splitpath($dataset_path);
+    my $tmp_dir = File::Spec->catpath($vol, $dir, '');
+    (undef, $tmp_path) = File::Temp::tempfile(
+      'fann-XXXXXX',
+      DIR    => $tmp_dir,
+      SUFFIX => '.tmp',
+      UNLINK => 0,
+    );
+    $network->save($tmp_path) or die "model save to temp '$tmp_path' failed";
+    rename($tmp_path, $dataset_path)
+      or die "atomic rename '$tmp_path' -> '$dataset_path' failed: $!";
+    $tmp_path = undef;
     $model_saved = 1;
     1;
   } or do {
-    info("Cannot save model to '$dataset_path' (" . ($@ || 'unknown') . ")");
+    my $err = $@ || 'unknown';
+    info("Cannot save model to '$dataset_path' ($err)");
+    if (defined $tmp_path && -f $tmp_path) {
+      unlink($tmp_path)
+        or info("Cannot remove temp model file '$tmp_path': $!");
+    }
   };
   $locker->safe_unlock($dataset_path);
 
@@ -848,36 +894,108 @@ sub learn_message {
       $self->_save_msgid_to_neural_seen($msgid, $isspam);
     }
   }
-  return;
+  return $model_saved;
 }
 
 sub forget_message {
   my ($self, $params) = @_;
+  my $conf = $self->{main}->{conf};
+  $self->_init_sql_connection($conf) if defined $conf->{neuralnetwork_dsn};
 
   my $username = $self->{main}->{username};
   my $msg = $params->{msg};
   my $msgid = $msg->get_msgid();
   $msgid //= $msg->generate_msgid();
 
-  if($self->_is_msgid_in_neural_seen($msgid)) {
-    dbg("Message $msgid found in neural_seen, forgetting");
+  my $flag = $self->_is_msgid_in_neural_seen($msgid);
+  if ($flag) {
+    dbg("Message $msgid found in neural_seen (flag=$flag), forgetting");
     $self->{forgetting} = 1;
-    my $del_sql;
 
-    if ($self->{main}->{conf}->{neuralnetwork_dsn} =~ /^dbi:/i) {
-      $del_sql = "
-        DELETE FROM neural_seen
-        WHERE username = ? AND msgid = ?
-      ";
-    } else {
+    unless ($self->{main}->{conf}->{neuralnetwork_dsn} =~ /^dbi:/i) {
       dbg("It's not possible to forget a message if neuralnetwork_dsn has not been configured");
       return;
     }
+
+    # Decrement vocabulary counts for tokens in this message
+    my $text = $msg->get_visible_rendered_body_text_array();
+    $text = join("\n", @{$text}) if defined $text;
+
+    if (defined $text && length($text) > 0) {
+      my @tokens = $self->_tokenize_text($conf, $text);
+      if (@tokens) {
+        my %token_total;
+        foreach my $t (@tokens) {
+          $token_total{$t}++;
+        }
+
+        my $is_spam = ($flag eq 'S') ? 1 : 0;
+        eval {
+          $self->{dbh}->begin_work();
+
+          my $update_sql = "
+            UPDATE neural_vocabulary
+            SET total_count = CASE WHEN total_count > ? THEN total_count - ? ELSE 0 END,
+                docs_count  = CASE WHEN docs_count > 0 THEN docs_count - 1 ELSE 0 END,
+                spam_count  = CASE WHEN spam_count > ? THEN spam_count - ? ELSE 0 END,
+                ham_count   = CASE WHEN ham_count > ? THEN ham_count - ? ELSE 0 END
+            WHERE username = ? AND keyword = ?
+          ";
+          my $sth_update = $self->{dbh}->prepare($update_sql);
+
+          foreach my $t (keys %token_total) {
+            my $spam_dec = $is_spam ? 1 : 0;
+            my $ham_dec  = $is_spam ? 0 : 1;
+            $sth_update->execute(
+              $token_total{$t}, $token_total{$t},  # total_count
+              $spam_dec, $spam_dec,                  # spam_count
+              $ham_dec, $ham_dec,                     # ham_count
+              lc($username), $t
+            );
+          }
+
+          # Remove unused terms
+          my $cleanup_sql = "
+            DELETE FROM neural_vocabulary
+            WHERE username = ?
+              AND total_count = 0 AND docs_count = 0
+              AND spam_count = 0 AND ham_count = 0
+          ";
+          my $sth_cleanup = $self->{dbh}->prepare($cleanup_sql);
+          $sth_cleanup->execute(lc($username));
+
+          $self->{dbh}->commit();
+          dbg("Decremented vocabulary counts for message $msgid");
+          1;
+        } or do {
+          my $err = $@ || 'unknown';
+          eval { $self->{dbh}->rollback() if !$self->{dbh}{AutoCommit} };
+          dbg("Failed to decrement vocabulary during forget: $err");
+        };
+      }
+    }
+
+    my $del_sql = "
+      DELETE FROM neural_seen
+      WHERE username = ? AND msgid = ?
+    ";
     my $sth = $self->{dbh}->prepare($del_sql);
-    if(not $sth->execute($username, $msgid)) {
+    if (not $sth->execute($username, $msgid)) {
       info("Error forgetting message $msgid");
       return 0;
     }
+
+    # Invalidate vocabulary cache
+    my $lc_user = lc($username);
+    if (defined $self->{_vocab_cache}) {
+      delete $self->{_vocab_cache}{$lc_user};
+      delete $self->{_vocab_cache_time}{$lc_user};
+    }
+    if (defined $self->{_file_vocab_cache}) {
+      delete $self->{_file_vocab_cache}{$lc_user};
+      delete $self->{_file_vocab_cache_time}{$lc_user};
+    }
+
     $self->{forgetting} = undef;
     return 1;
   }
@@ -969,18 +1087,22 @@ sub _build_class_tfidf_vectors {
   my $spam_docs = $vocabulary->{_spam_count} || 1;
   my $ham_docs  = $vocabulary->{_ham_count}  || 1;
 
-  my (@spam_vec, @ham_vec);
+  my @spam_vec = (0) x scalar(@$vocab_keys);
+  my @ham_vec = (0) x scalar(@$vocab_keys);
+
   for my $i (0 .. $#$vocab_keys) {
     my $w   = $vocab_keys->[$i];
     my $td  = $terms->{$w} // {};
-    my $idf = log(($N + 1) / (($td->{docs} || 0) + 1)) + 1;
-    $spam_vec[$i] = (($td->{spam} || 0) / $spam_docs) * $idf;
-    $ham_vec[$i]  = (($td->{ham}  || 0) / $ham_docs)  * $idf;
+    my $idf       = log(($N + 1) / (($td->{docs} || 0) + 1)) + 1;
+    my $spam_rate = ($td->{spam} || 0) / $spam_docs;
+    my $ham_rate  = ($td->{ham}  || 0) / $ham_docs;
+    $spam_vec[$i] = ($spam_rate > $ham_rate) ? ($spam_rate - $ham_rate) * $idf : 0;
+    $ham_vec[$i]  = ($ham_rate > $spam_rate) ? ($ham_rate - $spam_rate) * $idf : 0;
   }
 
   for my $vec (\@spam_vec, \@ham_vec) {
-    my $norm = sqrt(do { my $s = 0; $s += $_ * $_ for @$vec; $s }) || 1;
-    @$vec = map { $_ / $norm } @$vec;
+    my $norm = sqrt(do { my $s = 0; $s += ($_ // 0) ** 2 for @$vec; $s }) || 1;
+    @$vec = map { ($_ // 0) / $norm } @$vec;
   }
 
   return (\@spam_vec, \@ham_vec);
@@ -1051,13 +1173,19 @@ sub _retrain_from_vocabulary {
   $network->learning_rate($learning_rate);
   $network->learning_momentum($momentum);
   $network->training_algorithm($train_algorithm);
+  if ($train_algorithm == FANN_TRAIN_RPROP) {
+    $network->rprop_delta_max($conf->{neuralnetwork_rprop_delta_max});
+  }
 
   for my $e (1 .. $train_epochs) {
-    for (1 .. $spam_reps) {
-      eval { $network->train(\@spam_vec, [1]); 1 } or dbg("Retrain spam step failed: " . ($@ || 'unknown'));
-    }
-    for (1 .. $ham_reps) {
-      eval { $network->train(\@ham_vec,  [0]); 1 } or dbg("Retrain ham step failed: " . ($@ || 'unknown'));
+    if ($spam_docs >= $ham_docs) {
+      # Spam-dominant: ham first, spam last so RPROP state ends spam-biased
+      eval { $network->train(\@ham_vec,  [0]); 1 } or dbg("Retrain ham step failed: "  . ($@ || 'unknown')) for (1 .. $ham_reps);
+      eval { $network->train(\@spam_vec, [1]); 1 } or dbg("Retrain spam step failed: " . ($@ || 'unknown')) for (1 .. $spam_reps);
+    } else {
+      # Ham-dominant: spam first, ham last so RPROP state ends ham-biased
+      eval { $network->train(\@spam_vec, [1]); 1 } or dbg("Retrain spam step failed: " . ($@ || 'unknown')) for (1 .. $spam_reps);
+      eval { $network->train(\@ham_vec,  [0]); 1 } or dbg("Retrain ham step failed: "  . ($@ || 'unknown')) for (1 .. $ham_reps);
     }
   }
 
@@ -1075,6 +1203,7 @@ sub _check_neuralnetwork {
   }
 
   my $conf = $self->{main}->{conf};
+  $self->_init_sql_connection($conf) if defined $conf->{neuralnetwork_dsn};
   my $min_text_len = $conf->{neuralnetwork_min_text_len};
   my $spam_threshold = $conf->{neuralnetwork_spam_threshold};
   my $ham_threshold  = $conf->{neuralnetwork_ham_threshold};
@@ -1186,6 +1315,13 @@ sub _check_neuralnetwork {
 
 sub _init_sql_connection {
   my ($self, $conf) = @_;
+
+  # Reconnect in each child process to prevent SQL protocol state corruption
+  if ($self->{dbh} && ($self->{_dbh_pid} || 0) != $$) {
+    $self->{dbh}->{InactiveDestroy} = 1;
+    undef $self->{dbh};
+  }
+
   return if $self->{dbh};
   return if !$conf->{neuralnetwork_dsn};
 
@@ -1202,8 +1338,9 @@ sub _init_sql_connection {
       $password,
       {RaiseError => 1, PrintError => 0, InactiveDestroy => 1, AutoCommit => 1}
     );
+    $self->{_dbh_pid} = $$;
     $self->_create_vocabulary_table();
-    dbg("SQL connection initialized for vocabulary storage");
+    dbg("SQL connection initialized for vocabulary storage (pid $$)");
     1;
   } or do {
     my $err = $@ || 'unknown';
@@ -1308,7 +1445,7 @@ sub _is_msgid_in_neural_seen {
     return;
   }
 
-  my $found = 0;
+  my $type;
   eval {
     my $username = lc($self->{main}->{username}) || 'default';
 
@@ -1317,16 +1454,16 @@ sub _is_msgid_in_neural_seen {
       ";
     my $sth = $self->{dbh}->prepare($select_sql);
     $sth->execute($username, $msgid);
-    my $rows = $sth->fetchall_arrayref();
+    my $row = $sth->fetchrow_arrayref();
 
-    $found = 1 if scalar @$rows > 0;
+    $type = $row->[0] if $row;
     1;
   } or do {
     if($@) {
       dbg("Failed to find message ID on neural_seen: $@");
     }
   };
-  return $found;
+  return $type;
 }
 
 sub _save_vocabulary_to_sql {
@@ -1395,6 +1532,34 @@ sub _save_vocabulary_to_sql {
     eval { $self->{dbh}->rollback() if !$self->{dbh}{AutoCommit} };
     dbg("Failed to save vocabulary to SQL: $err");
   };
+}
+
+sub _tokenize_text {
+  my ($self, $conf, $text) = @_;
+  return () unless defined $text;
+
+  my $min_word_len = $conf->{neuralnetwork_min_word_len};
+  my $max_word_len = $conf->{neuralnetwork_max_word_len};
+  my %stopwords = map { lc($_) => 1 } split /\s+/, $conf->{neuralnetwork_stopwords};
+
+  $text = lc $text;
+  # Strip subject prefixes, enhances results
+  $text =~ s/^(?:[a-z]{2,12}:\s*){1,10}//i;
+  # Strip anything that looks like url or email, enhances results
+  $text =~ s/https?(?:\:\/\/|:&#x2F;&#x2F;|%3A%2F%2F)\S{1,1024}/ /gs;
+  $text =~ s/\S{1,64}?\@[a-zA-Z]\S{1,128}/ /gs;
+  $text =~ s/\bwww\.\S{1,128}/ /gs;
+  # Remove extra chars
+  $text =~ s/\-{2,}//g;
+  # Remove tokens that could be a date
+  $text =~ s/\b\d+(?:\-|\/)\d+(?:\-|\/)\d+\b//g;
+  # replace HTML entities and punctuation with spaces
+  $text =~ s/&[a-z#0-9]+;/ /g;
+  $text =~ s{[^\p{L}\p{N}\-]}{ }g;
+  my @tokens = grep { length($_) >= $min_word_len && length($_) <= $max_word_len } split /\s+/, $text;
+  @tokens = grep { $_ !~ /^\d+$/ } @tokens;         # drop pure numbers
+  @tokens = grep { !$stopwords{$_} } @tokens;        # drop stopwords
+  return @tokens;
 }
 
 sub _load_vocabulary_from_sql {
@@ -1542,6 +1707,7 @@ sub _model_vocab_path {
 
 sub _save_model_vocab {
   my ($self, $vocab_keys_ref, $nn_data_dir) = @_;
+  return unless defined $vocab_keys_ref;
   my $vocab_path = $self->_model_vocab_path($nn_data_dir);
   $vocab_path = Mail::SpamAssassin::Util::untaint_file_path($vocab_path);
   eval {
