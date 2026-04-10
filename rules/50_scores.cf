@@ -525,6 +525,11 @@ score RCVD_IN_VALIDITY_RPBL 0
 #score RCVD_IN_VALIDITY_CERTIFIED_BLOCKED  0.001
 #score RCVD_IN_VALIDITY_RPBL_BLOCKED 0.001
 
+# Apparently necessary even with base rules set to zero
+score RCVD_IN_VALIDITY_SAFE_BLOCKED 0
+score RCVD_IN_VALIDITY_CERTIFIED_BLOCKED  0
+score RCVD_IN_VALIDITY_RPBL_BLOCKED 0
+
 # DNSWL is a "free for most" service that requires subscriptions for servers making over 100K queries daily.
 #
 score RCVD_IN_DNSWL_NONE 0 -0.0001 0 -0.0001
