@@ -608,29 +608,6 @@ else
   meta           __TO_EQ_FM_DOM_SPF_FAIL  0
 endif
 
-
-# Evaluate Validity (née ReturnPath) and blacklist collisions
-#meta           __VALIDITY_SAFE_BRBL             RCVD_IN_VALIDITY_SAFE && RCVD_IN_BRBL_LASTEXT
-#meta           __VALIDITY_CERTIFIED_BRBL        RCVD_IN_VALIDITY_CERTIFIED && RCVD_IN_BRBL_LASTEXT
-#tflags         __VALIDITY_SAFE_BRBL             net nopublish
-#tflags         __VALIDITY_CERTIFIED_BRBL        net nopublish
-meta           __VALIDITY_SAFE_ZEN              RCVD_IN_VALIDITY_SAFE && __RCVD_IN_ZEN
-meta           __VALIDITY_CERTIFIED_ZEN         RCVD_IN_VALIDITY_CERTIFIED && __RCVD_IN_ZEN
-tflags         __VALIDITY_SAFE_ZEN              net nopublish
-tflags         __VALIDITY_CERTIFIED_ZEN         net nopublish
-meta           __VALIDITY_SAFE_XBL              RCVD_IN_VALIDITY_SAFE && RCVD_IN_XBL
-meta           __VALIDITY_CERTIFIED_XBL         RCVD_IN_VALIDITY_CERTIFIED && RCVD_IN_XBL
-tflags         __VALIDITY_SAFE_XBL              net nopublish
-tflags         __VALIDITY_CERTIFIED_XBL         net nopublish
-meta           __VALIDITY_SAFE_PSBL             RCVD_IN_VALIDITY_SAFE && RCVD_IN_PSBL
-meta           __VALIDITY_CERTIFIED_PSBL        RCVD_IN_VALIDITY_CERTIFIED && RCVD_IN_PSBL
-tflags         __VALIDITY_SAFE_PSBL             net nopublish
-tflags         __VALIDITY_CERTIFIED_PSBL        net nopublish
-#meta           __VALIDITY_SAFE_ANBREP_L3        RCVD_IN_VALIDITY_SAFE && RCVD_IN_ANBREP_L3
-#meta           __VALIDITY_CERTIFIED_ANBREP_L3   RCVD_IN_VALIDITY_CERTIFIED && RCVD_IN_ANBREP_L3
-#tflags         __VALIDITY_SAFE_ANBREP_L3        net nopublish
-#tflags         __VALIDITY_CERTIFIED_ANBREP_L3   net nopublish
-
 # a URI in the From comment text, to bypass URIBL checks
 # simplistic URI format for now
 header         __FROM_URI_1               From =~ /[^\@]www[.\s][^\s"<\@]+[.\s](?:com|net|info|biz|org|\w\w)\b.*["<]/i
