@@ -4,7 +4,7 @@
 # Phone numbers appearing in order/payment confirmation scam spam
 # ("call our support if this was not you" -- the call is the goal)
 #
-# Generated: 2026-04-09 20:31:17 PDT
+# Generated: 2026-04-12 12:28:33 PDT
 #
 # Optionally uses Mail::SpamAssassin::Plugin::ReplaceTags for digit/separator
 # obfuscation coverage.  If the plugin is not available, plain-regex fallbacks
@@ -117,6 +117,15 @@ replace_rules __PHONESCAM_859_204
 #---------------------------------------------------------------------------
 body __PHONESCAM_MISC  /(?<![0-9=])(?![0-9]{10})(?:\+?<1><PSEP>)?(?:(?:\(<8><ZERO><1>\)|<8><ZERO><1>)<PSEP>(?:<3><ZERO><6><PSEP><9><5><1><2>|<3><4><6><PSEP><6><ZERO><8><8>)|(?:\(<8><ZERO><2>\)|<8><ZERO><2>)<PSEP>(?:<2><1><ZERO><PSEP><7><4><3><6>|<3><4><6><PSEP><3><1><5><3>)|(?:\(<8><ZERO><3>\)|<8><ZERO><3>)<PSEP><2><1><ZERO><PSEP><5><ZERO><6><3>|(?:\(<8><ZERO><5>\)|<8><ZERO><5>)<PSEP><5><ZERO><7><PSEP><3><8><ZERO><4>|(?:\(<8><3><3>\)|<8><3><3>)<PSEP><3><7><9><PSEP><ZERO><7><8><1>|(?:\(<8><4><3>\)|<8><4><3>)<PSEP><2><ZERO><ZERO><PSEP><1><ZERO><3><9>|(?:\(<8><5><9>\)|<8><5><9>)<PSEP><2><2><2><PSEP><1><1><6><2>|(?:\(<8><6><5>\)|<8><6><5>)<PSEP>(?:<2><3><2><PSEP><3><3><2><3>|<2><8><3><PSEP><4><9><8><7>|<3><3><ZERO><PSEP><4><5><8><9>))(?![0-9=])/
 replace_rules __PHONESCAM_MISC
+
+#---------------------------------------------------------------------------
+# Generic NANP obfuscation detector
+# Matches any NANP-format number that uses digit/separator obfuscation.
+# Negative lookahead excludes clean plain-ASCII numbers so only obfuscated
+# forms (letter substitutions, unicode variants, odd separators) fire.
+#---------------------------------------------------------------------------
+body __PHONE_NANP_OBFU  /(?<![0-9=])(?![0-9a-zA-Z]{9,})(?!\+?1?[-. ]?(?:\([2-9]\d\d\)|[2-9]\d\d)[-. ]?[2-9]\d\d[-. ]?\d{4})(?:\+?<1><PSEP>)?(?:\(<D29><DIGIT><DIGIT>\)|<D29><DIGIT><DIGIT>)<PSEP><D29><DIGIT><DIGIT><PSEP><DIGIT>{4}(?![0-9=])/
+replace_rules __PHONE_NANP_OBFU
 
 else  # Mail::SpamAssassin::Plugin::ReplaceTags not available -- plain fallbacks
 
