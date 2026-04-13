@@ -812,6 +812,22 @@ my @listen_socket_specs = @{$opt{'listen-sockets'}};
 # supply a default socket (loopback IP address) if none specified
 push(@listen_socket_specs, 'localhost')  if !@listen_socket_specs;
 
+# When --ssl-port is set and no spec uses an explicit ssl: prefix, the user
+# has explicitly requested both a plain-TCP port and an SSL port.  Expand
+# each address spec into a plain/SSL pair so that both listeners are created
+# on every requested address.  The port assignment logic below will use
+# --port for the plain socket and --ssl-port for the SSL one.
+# This applies whether the addresses came from -i or from the localhost
+# default above.
+if (defined $opt{'ssl-port'} && !grep { m{^ssl:}i } @listen_socket_specs) {
+  @listen_socket_specs = map { ($_, "ssl:$_") } @listen_socket_specs;
+}
+
+# Detect whether any socket spec uses an explicit "ssl:" prefix.
+# The legacy single-socket --ssl behaviour is preserved when
+# no spec carries an explicit "ssl:" prefix.
+my $has_explicit_ssl_spec = grep { m{^ssl:}i } @listen_socket_specs;
+
 for (@listen_socket_specs) {
   my $socket_specs = $_;
 
@@ -839,7 +855,14 @@ for (@listen_socket_specs) {
                (?: : ( [a-z0-9-]* ) )? \z }xsi) {
     my($proto,$addr,$port) = ($1, $2||$3||$4||$5, $6);
     $addr = 'localhost'  if !defined $addr;
-    $proto = 'ssl'  if defined $opt{'ssl'} || defined $opt{'ssl-port'};
+    # Apply the global --ssl / --ssl-port default only when the user has NOT
+    # used explicit "ssl:" prefixes anywhere in their -i specs.  If any spec
+    # carries an explicit "ssl:" prefix the user is doing per-socket SSL
+    # control.
+    # When no spec uses the prefix the legacy behaviour is
+    # preserved: --ssl (or anything that implies it) makes all sockets SSL.
+    $proto = 'ssl'  if !$has_explicit_ssl_spec && !defined $proto
+                       && (defined $opt{'ssl'} || defined $opt{'ssl-port'});
     $proto = !defined($proto) ? '' : lc($proto);
     $port = $opt{'ssl-port'}  if !defined $port && $proto eq 'ssl';
     $port = $opt{'port'}      if !defined $port || $port eq '';
@@ -3497,15 +3520,21 @@ global --port (and --ssl-port) setting. An IPv6 addresses should be enclosed
 in square brackets, e.g. [::1]:783. For compatibility square brackets on an
 IPv6 address may be omitted if a port number specification is also omitted.
 
+Note that listening on non-loopback addresses does not automatically permit
+connections from those addresses.  The B<-A> / B<--allowed-ips> option
+controls which source addresses may connect, and defaults to localhost only
+(127.0.0.1 and ::1).
+
 =item B<-p> I<port>, B<--port>=I<port>
 
 Optionally specifies the port number for the server to listen on (default: 783).
 
-If the B<--ssl> switch is used, and B<--ssl-port> is not supplied, then this
-port will be used to accept SSL connections instead of unencrypted connections.
-If the B<--ssl> switch is used, and B<--ssl-port> is set, then unencrypted
-connections will be accepted on the B<--port> at the same time as encrypted
-connections are accepted at B<--ssl-port>.
+If the B<--ssl> switch is used without B<--ssl-port>, this port accepts SSL
+connections instead of unencrypted connections. If B<--ssl-port> is also set
+(which itself implies B<--ssl>), then unencrypted connections are accepted on
+B<--port> and encrypted connections are accepted on B<--ssl-port>
+simultaneously.  Use B<-i> / B<--listen> with an C<ssl:> prefix for finer
+control over which addresses and ports carry SSL vs plain-TCP traffic.
 
 =item B<-q>, B<--sql-config>
 
@@ -3733,6 +3762,8 @@ connections from specified test networks and from localhost.
 
 In absence of the B<-A> option, connections are only accepted from
 IP address 127.0.0.1 or ::1, i.e. from localhost on a loopback interface.
+Allowed-IP list is global across all listening sockets, there
+is no per-socket access control.
 
 =item B<-D> [I<area,...>], B<--debug> [I<area,...>]
 
@@ -3853,16 +3884,22 @@ home directory instead.
 Accept only SSL connections on the associated port.
 The B<IO::Socket::SSL> perl module must be installed.
 
-If the B<--ssl> switch is used, and B<--ssl-port> is not supplied, then
-B<--port> port will be used to accept SSL connections instead of unencrypted
-connections.  If the B<--ssl> switch is used, and B<--ssl-port> is set, then
-unencrypted connections will be accepted on the B<--port>, at the same time as
-encrypted connections are accepted at B<--ssl-port>.
+When used without B<-i> / B<--listen> and without B<--ssl-port>, the single
+default listener (B<--port>) is converted to SSL.  When used together with
+B<--ssl-port> (which also implies B<--ssl>), two default listeners are
+created: a plain-TCP listener on B<--port> and an SSL listener on
+B<--ssl-port>.  When B<-i> / B<--listen> options are present, B<--ssl> has no
+effect on individual sockets, use the C<ssl:> prefix on B<-i> arguments
+instead (e.g. C<-i ssl:*:784 -i *:783>).
 
 =item B<--ssl-verify>
 
-Implies B<--ssl>.  Request a client certificate and verify the certificate. 
+Implies B<--ssl>.  Request a client certificate and verify the certificate.
 Requires B<--ssl-ca-file> or B<--ssl-ca-path>.
+
+Note that verification is limited to confirming the certificate is signed by
+the specified CA.  Hostname (CN) matching and CRL checking are not performed,
+as spamd has no options to configure either.
 
 =item B<--ssl-ca-file>=I<cafile>
 
@@ -3873,23 +3910,26 @@ be signed by this certificate.
 =item B<--ssl-ca-path>=I<capath>
 
 Implies B<--ssl-verify>.  Use the Certificate Authority certificate files in
-the specified set of directories to verify the client certificate.  The
-client certificate must be signed by one of these Certificate Authorities. 
-See the man page for B<IO::Socket::SSL> for additional details.
+the specified directory to verify the client certificate. The client
+certificate must be signed by one of these Certificate Authorities.  The
+directory must be hashed in the usual manner (see B<c_rehash>(1)).
 
 =item B<--ssl-port>=I<port>
 
-Optionally specifies the port number for the server to listen on for
-SSL connections (default: whatever --port uses).  See B<--ssl> for
-more details.
+Specifies the port number for SSL connections, implies B<--ssl>.
+When B<-i> / B<--listen> options are given without explicit C<ssl:> prefixes,
+each address is expanded into a plain-TCP listener on B<--port> and an SSL
+listener on B<--ssl-port>, matching the no-B<-i> behaviour.
 
 =item B<--server-key> I<keyfile>
 
-Specify the SSL key file to use for SSL connections.
+Specify the SSL key file to use for SSL connections.  Defaults to
+F<@@LOCAL_RULES_DIR@@/certs/server-key.pem>.
 
 =item B<--server-cert> I<certfile>
 
-Specify the SSL certificate file to use for SSL connections.
+Specify the SSL certificate file to use for SSL connections.  Defaults to
+F<@@LOCAL_RULES_DIR@@/certs/server-cert.pem>.
 
 =item B<--socketpath> I<pathname>
 
