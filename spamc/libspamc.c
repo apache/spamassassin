@@ -714,10 +714,39 @@ static int _try_ssl_connect(SSL_CTX *ctx, struct transport *tp,
     if (ssl_rtn != 1) {
 	int ssl_err = SSL_get_error(ssl, ssl_rtn);
 	libspamc_log(flags, LOG_ERR,
-		     "SSL_connect error: %s", _ssl_err_as_string());
+		     "SSL_connect error: %d %s", ssl_err, _ssl_err_as_string());
 	return EX_UNAVAILABLE;
     }
+    if (flags & SPAMC_DEBUG) {
+	libspamc_log(flags, LOG_DEBUG,
+		     "SSL connected: version=%s cipher=%s state=%s",
+		     SSL_get_version(ssl), SSL_get_cipher(ssl),
+		     SSL_state_string_long(ssl));
+    }
     return EX_OK;
+}
+
+static int _ssl_write_with_retry(SSL *ssl, const void *buf, int len,
+				 int flags)
+{
+    int rc;
+    int ssl_err;
+    do {
+	rc = SSL_write(ssl, buf, len);
+	if (rc > 0) {
+	    if (flags & SPAMC_DEBUG) {
+		libspamc_log(flags, LOG_DEBUG, "SSL_write: wrote %d bytes", rc);
+	    }
+	    return rc;
+	}
+	ssl_err = SSL_get_error(ssl, rc);
+	if (flags & SPAMC_DEBUG) {
+	    libspamc_log(flags, LOG_DEBUG,
+			"SSL_write: rc=%d ssl_err=%d state=%s",
+			rc, ssl_err, SSL_state_string_long(ssl));
+	}
+    } while (ssl_err == SSL_ERROR_WANT_READ || ssl_err == SSL_ERROR_WANT_WRITE);
+    return rc;
 }
 #endif
 
@@ -1009,6 +1038,15 @@ _spamc_read_full_line(struct message *m, int flags, SSL * ssl, int sock,
     for (len = 0; len < bufsiz - 1; len++) {
 	if (flags & SPAMC_USE_SSL) {
 	    bytesread = ssl_timeout_read(ssl, buf + len, 1);
+	    if (bytesread <= 0 && (flags & SPAMC_DEBUG)) {
+#ifdef SPAMC_SSL
+		libspamc_log(flags, LOG_DEBUG,
+			     "ssl_timeout_read: returned %d, ssl_err=%d, "
+			     "errno=%d, state=%s",
+			     bytesread, SSL_get_error(ssl, bytesread),
+			     errno, SSL_state_string_long(ssl));
+#endif
+	    }
 	}
 	else {
 	    bytesread = fd_timeout_read(sock, 0, buf + len, 1);
@@ -1497,19 +1535,31 @@ int message_filter(struct transport *tp, const char *username,
         /* Send to spamd */
         if (flags & SPAMC_USE_SSL) {
 #ifdef SPAMC_SSL
-            rc = SSL_write(ssl, buf, len);
+            if (flags & SPAMC_DEBUG) {
+                libspamc_log(flags, LOG_DEBUG,
+                             "SSL_write: sending header (%d bytes), state=%s",
+                             len, SSL_state_string_long(ssl));
+            }
+            rc = _ssl_write_with_retry(ssl, buf, len, flags);
             if (rc <= 0) {
-                libspamc_log(flags, LOG_ERR, "SSL write failed (%d)",
-                             SSL_get_error(ssl, rc));
+                libspamc_log(flags, LOG_ERR, "SSL write failed: error=%d state=%s",
+                             SSL_get_error(ssl, rc), SSL_state_string_long(ssl));
                 failureval = EX_IOERR;
                 goto failure;
             }
-            rc = SSL_write(ssl, towrite_buf, towrite_len);
-            if (rc <= 0) {
-                libspamc_log(flags, LOG_ERR, "SSL write failed (%d)",
-                             SSL_get_error(ssl, rc));
-                failureval = EX_IOERR;
-                goto failure;
+            if (towrite_len > 0) {
+                if (flags & SPAMC_DEBUG) {
+                    libspamc_log(flags, LOG_DEBUG,
+                                 "SSL_write: sending body (%d bytes), state=%s",
+                                 towrite_len, SSL_state_string_long(ssl));
+                }
+                rc = _ssl_write_with_retry(ssl, towrite_buf, towrite_len, flags);
+                if (rc <= 0) {
+                    libspamc_log(flags, LOG_ERR, "SSL write failed: error=%d state=%s",
+                                 SSL_get_error(ssl, rc), SSL_state_string_long(ssl));
+                    failureval = EX_IOERR;
+                    goto failure;
+                }
             }
             SSL_shutdown(ssl);
             shutdown(sock, SHUT_WR);

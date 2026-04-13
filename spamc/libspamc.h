@@ -142,6 +142,9 @@
 /* April 2022, add SSL client certificate support, bug 7267 */
 #define SPAMC_CLIENT_SSL_CERT (1<<12)
 
+/* April 2026, add spamc(1) log debug support */
+#define SPAMC_DEBUG           (1<<11)
+
 #define SPAMC_MESSAGE_CLASS_SPAM 1
 #define SPAMC_MESSAGE_CLASS_HAM  2
 

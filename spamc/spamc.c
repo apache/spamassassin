@@ -150,6 +150,7 @@ print_usage(void)
     usg("  --ssl-key key       Specify an SSL client key PEM file.\n");
     usg("  --ssl-ca-file file  Specify the location of the CA PEM file.\n");
     usg("  --ssl-ca-path path  Specify a directory containin CA files.\n");
+    usg("  -D, --debug         Print debugging messages\n");
 #endif
 #ifndef _WIN32
     usg("  -U, --socket path   Connect to spamd via UNIX domain sockets.\n");
@@ -239,9 +240,9 @@ read_args(int argc, char **argv,
           struct transport *ptrn)
 {
 #ifndef _WIN32
-    const char *opts = "-BcrR46d:e:fyp:n:t:s:u:L:C:xXzSHU:ElhVKF:0:1:2";
+    const char *opts = "-BcrR46d:e:fyp:n:t:s:u:L:C:xXzSHU:ElhVKDF:0:1:2";
 #else
-    const char *opts = "-BcrR46d:fyp:n:t:s:u:L:C:xXzSHElhVKF:0:1:2";
+    const char *opts = "-BcrR46d:fyp:n:t:s:u:L:C:xXzSHElhVKDF:0:1:2";
 #endif
     int opt;
     int ret = EX_OK;
@@ -282,6 +283,7 @@ read_args(int argc, char **argv,
        { "help", no_argument, 0, 'h' },
        { "version", no_argument, 0, 'V' },
        { "compress", no_argument, 0, 'z' },
+       { "debug", no_argument, 0, 'D' },
        { 0, 0, 0, 0} /* last element _must_ be all zeroes */
     };
     
@@ -342,6 +344,11 @@ read_args(int argc, char **argv,
             case 'K':
             {
                 flags |= SPAMC_PING;
+                break;
+            }
+            case 'D':
+            {
+                flags |= SPAMC_DEBUG;
                 break;
             }
             case 'l':

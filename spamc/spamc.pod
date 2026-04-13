@@ -168,6 +168,11 @@ The maximum message size is 256 MB.
 The size is specified in bytes, as a positive integer greater than 0.
 For example, B<-s 500000>. 
 
+=item B<-D>, B<--debug>
+
+Produce debugging output, if spamc was built with SSL support, log SSL state information to stderr
+at each stage of the connection. Requires B<-l> to direct log output to stderr.
+
 =item B<--connect-retries>=I<retries>
 
 Retry connecting to spamd I<retries> times.  The default is 3 times.
