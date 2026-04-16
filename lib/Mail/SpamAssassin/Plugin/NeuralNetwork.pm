@@ -794,9 +794,14 @@ sub learn_message {
   $class_weight = 2.0 if $class_weight > 2.0;
 
   my $weighted_epochs = int($train_epochs * $class_weight) || 1;
+  # Scale epochs down for large vocabularies to keep per-message training time
+  # roughly constant.
+  if ($num_input > 1000) {
+    $weighted_epochs = int($weighted_epochs * 1000 / $num_input) || 1;
+  }
   dbg("Incremental training: weighted_epochs=$weighted_epochs " .
       "(base=$train_epochs, class_weight=$class_weight, " .
-      "spam_docs=$spam_docs, ham_docs=$ham_docs, isspam=$isspam)");
+      "spam_docs=$spam_docs, ham_docs=$ham_docs, isspam=$isspam, num_input=$num_input)");
 
   for my $e (1 .. $weighted_epochs) {
     for my $i (0 .. $#$feature_vectors) {
@@ -1025,7 +1030,10 @@ sub _prune_vocabulary {
   my $terms_count = scalar keys %{$terms};
   return () unless $terms_count > $vocab_cap;
 
-  my $half = int($vocab_cap / 2);
+  # Prune to 90% of cap so the vocabulary has room to grow before the next
+  # prune is triggered.
+  my $prune_target = int($vocab_cap * 0.9) || 1;
+  my $half = int($prune_target / 2);
 
   my %kept;
   for my $w (sort { ($terms->{$b}{spam}||0) <=> ($terms->{$a}{spam}||0) } keys %{$terms}) {
@@ -1033,12 +1041,12 @@ sub _prune_vocabulary {
     $kept{$w} = $terms->{$w};
   }
   for my $w (sort { ($terms->{$b}{ham}||0) <=> ($terms->{$a}{ham}||0) } keys %{$terms}) {
-    last if scalar keys %kept >= $vocab_cap;
+    last if scalar keys %kept >= $prune_target;
     $kept{$w} = $terms->{$w};
   }
   # Fill any remaining slots
   for my $w (sort { ($terms->{$b}{total}||0) <=> ($terms->{$a}{total}||0) } keys %{$terms}) {
-    last if scalar keys %kept >= $vocab_cap;
+    last if scalar keys %kept >= $prune_target;
     $kept{$w} = $terms->{$w};
   }
   my @pruned = grep { !exists $kept{$_} } keys %{$terms};
@@ -1057,7 +1065,7 @@ sub _prune_vocabulary {
       dbg("Failed to delete terms: " . ($@ || 'unknown'));
     };
   }
-  dbg("Pruned vocabulary from $terms_count to $vocab_cap terms");
+  dbg("Pruned vocabulary from $terms_count to $prune_target terms (cap: $vocab_cap)");
   return @pruned;
 }
 
