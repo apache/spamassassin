@@ -815,6 +815,7 @@ sub html_font_invisible {
   my $display = $self->{text_style}[-1]->{style_display};
   my $visibility = $self->{text_style}[-1]->{style_visibility};
   my $transform = $self->{text_style}[-1]->{style_transform};
+  my $position = $self->{text_style}[-1]->{style_position};
 
   # size too small
   if ($font_size < 8) {
@@ -837,6 +838,19 @@ sub html_font_invisible {
   }
   if ($transform && $transform =~ /\bscale\(\s*[^,)]+,\s*0(?:\.0+)?(?:%|[a-z]+)?\s*\)/i) {
     return 1;
+  }
+
+  # <div style="position: absolute; left: -9999px"> — element positioned far off-screen
+  # Only left/top are reliable: negative bottom pushes down (scrollable),
+  # negative right pushes past the right edge (may be visible on wide viewports)
+  if ($position && $position =~ /^(?:absolute|fixed)\b/i) {
+    for my $prop (qw( style_left style_top )) {
+      my $val = $self->{text_style}[-1]->{$prop};
+      next unless defined $val;
+      if ($val =~ /^\s*(-\d+(?:\.\d+)?)\s*(?:px|pt|em|rem|ex|%)?\s*$/i) {
+        return 1 if $1 <= -1000;
+      }
+    }
   }
 
   # low-contrast text

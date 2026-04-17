@@ -237,6 +237,36 @@ my @tests = (
         visibility         => 'visible',
         font_invalid_color => 0,
     },
+    {
+        html               => '<div style="position: absolute; left: -9999px">X</div>',
+        visibility         => 'invisible',
+        font_invalid_color => 0,
+    },
+    {
+        html               => '<div style="position:absolute;left:-9999px">X</div>',
+        visibility         => 'invisible',
+        font_invalid_color => 0,
+    },
+    {
+        html               => '<div style="POSITION: ABSOLUTE; LEFT: -9999PX">X</div>',
+        visibility         => 'invisible',
+        font_invalid_color => 0,
+    },
+    {
+        html               => '<div style="position: fixed; top: -9999px">X</div>',
+        visibility         => 'invisible',
+        font_invalid_color => 0,
+    },
+    {
+        html               => '<div style="position: absolute; left: -50px">X</div>',
+        visibility         => 'visible',
+        font_invalid_color => 0,
+    },
+    {
+        html               => '<div style="position: absolute; left: 50px">X</div>',
+        visibility         => 'visible',
+        font_invalid_color => 0,
+    },
 );
 
 plan tests => scalar @tests * 2;
