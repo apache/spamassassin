@@ -4054,7 +4054,7 @@ tflags     XM_DIGITS_ONLY              publish
 header     __XM_QBOXMAIL               X-Mailer =~ /qboxmail/i
 
 
-meta       XM_RANDOM                   __XM_RANDOM && !__STY_INVIS_3 && !__HAS_IN_REPLY_TO && !__XM_UC_ONLY && !__XM_ASPQMAIL && !__XM_VERY_LONG
+meta       XM_RANDOM                   __XM_RANDOM && !__STY_INVIS_3 && !__HAS_IN_REPLY_TO && !__XM_UC_ONLY && !__XM_ASPQMAIL && !__XM_VERY_LONG && !__XM_SQLANYW
 describe   XM_RANDOM                   X-Mailer apparently random
 score      XM_RANDOM                   2.500	# limit
 tflags     XM_RANDOM                   publish
