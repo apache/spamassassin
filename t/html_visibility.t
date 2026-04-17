@@ -192,6 +192,51 @@ my @tests = (
         visibility         => 'invisible',
         font_invalid_color => 0,
     },
+    {
+        html               => '<div style="transform: scale(0)">X</div>',
+        visibility         => 'invisible',
+        font_invalid_color => 0,
+    },
+    {
+        html               => '<div style="transform: scale(0, 1)">X</div>',
+        visibility         => 'invisible',
+        font_invalid_color => 0,
+    },
+    {
+        html               => '<div style="transform: scale(1, 0)">X</div>',
+        visibility         => 'invisible',
+        font_invalid_color => 0,
+    },
+    {
+        html               => '<div style="transform: scaleX(0)">X</div>',
+        visibility         => 'invisible',
+        font_invalid_color => 0,
+    },
+    {
+        html               => '<div style="transform: scaleY(0)">X</div>',
+        visibility         => 'invisible',
+        font_invalid_color => 0,
+    },
+    {
+        html               => '<div style="TRANSFORM: SCALE(0)">X</div>',
+        visibility         => 'invisible',
+        font_invalid_color => 0,
+    },
+    {
+        html               => '<div style="transform: scale(0.0)">X</div>',
+        visibility         => 'invisible',
+        font_invalid_color => 0,
+    },
+    {
+        html               => '<div style="transform: scale(1)">X</div>',
+        visibility         => 'visible',
+        font_invalid_color => 0,
+    },
+    {
+        html               => '<div style="transform: scale(0.5)">X</div>',
+        visibility         => 'visible',
+        font_invalid_color => 0,
+    },
 );
 
 plan tests => scalar @tests * 2;

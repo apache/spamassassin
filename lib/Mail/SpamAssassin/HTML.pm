@@ -814,6 +814,7 @@ sub html_font_invisible {
   my $font_size = $self->{text_style}[-1]->{'font_size'};
   my $display = $self->{text_style}[-1]->{style_display};
   my $visibility = $self->{text_style}[-1]->{style_visibility};
+  my $transform = $self->{text_style}[-1]->{style_transform};
 
   # size too small
   if ($font_size < 8) {
@@ -827,6 +828,14 @@ sub html_font_invisible {
 
   # <span style="visibility: hidden">
   if ($visibility && lc $visibility eq 'hidden') {
+    return 1;
+  }
+
+  # <span style="transform: scale(0)"> — any axis scaled to 0 collapses the element
+  if ($transform && $transform =~ /\bscale[xy]?\(\s*0(?:\.0+)?(?:%|[a-z]+)?\s*(?:[,\s]\s*[^)]*)?\)/i) {
+    return 1;
+  }
+  if ($transform && $transform =~ /\bscale\(\s*[^,)]+,\s*0(?:\.0+)?(?:%|[a-z]+)?\s*\)/i) {
     return 1;
   }
 
