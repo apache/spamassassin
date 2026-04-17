@@ -4514,7 +4514,9 @@ header     __PP_GOOGLE_MAESTRO         EnvelopeFrom =~ /\@maestro\.bounces\.goog
 
 # observed in phishing
 redirector_pattern                     m;^https?://secure\.adnxs\.com/.*[?&]redir=(.+);i
-redirector_pattern                     m;^https?://shopper\.digidip\.net/.*[?&]url=(.+);i
+# digidip has multiple redirector subdomains
+#redirector_pattern                     m;^https?://shopper\.digidip\.net/.*[?&]url=(.+);i
+redirector_pattern                     m;^https?://[^.]+\.digidip\.net/.*[?&]url=(.+);i
 
 
 # npm phishing?
