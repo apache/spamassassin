@@ -4038,6 +4038,7 @@ header     __XM_LIGHT_HEAVY            X-Mailer =~ /\b(?:light|(?<!::)lite|stand
 header     __XM_VERY_LONG              X-Mailer =~ /.{50}/
 
 header     __XM_SMART_SEND             X-Mailer =~ /^Smart_Send(?:_\d+)+$/
+header     __XM_SQLANYW                X-Mailer =~ /^SQL Anywhere/
 header     __XM_CHEETAHMAILER          X-Mailer =~ /^CheetahMailer$/
 header     __XM_XYZMAILER              X-Mailer =~ /^XyzMailer$/
 header     __XM_DMDROID                X-Mailer =~ /^dmDroid$/
