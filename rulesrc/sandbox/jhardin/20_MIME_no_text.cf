@@ -5,9 +5,6 @@
 # These should be generally useful to other rules as well
 
 header  __CTYPE_MULTIPART_ANY Content-Type =~ /multipart\/\w+/i
-header  __PHP_MUA_1           X-Mailer =~ /^PHP\s?v?\/?\d\./
-header  __PHP_MUA_2           X-Mailer =~ /^PHP\d$/
-meta    __PHP_MUA             __PHP_MUA_1 || __PHP_MUA_2
 
 ifplugin Mail::SpamAssassin::Plugin::MIMEHeader
   mimeheader  __ANY_TEXT_ATTACH Content-Type =~ /text\/\w+/i
@@ -18,7 +15,7 @@ ifplugin Mail::SpamAssassin::Plugin::MIMEHeader
   describe    MIME_NO_TEXT      No (properly identified) text body parts
   tflags      MIME_NO_TEXT      publish
 
-  meta        MIME_PHP_NO_TEXT  (MIME_NO_TEXT && __PHP_MUA)
+  meta        MIME_PHP_NO_TEXT  (MIME_NO_TEXT && __XM_PHP)
   #score       MIME_PHP_NO_TEXT  2.00
   describe    MIME_PHP_NO_TEXT  No text body parts, X-Mailer: PHP
 else

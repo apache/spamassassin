@@ -1,0 +1,119 @@
+
+# exists tests
+header     __HAS_XM_LID                exists:X-Mailer-LID
+header     __HAS_XM_RECPTID            exists:X-Mailer-RecptId
+header     __HAS_XM_SID                exists:X-Mailer-SID
+header     __HAS_XM_SENTBY             exists:X-Mailer-Sent-By
+
+# exists metas
+meta       __XMSID                     __HAS_XM_SID && !__CTYPE_MULTIPART_MIXED 
+meta       __XMSID_SONLY               __HAS_XM_SID && (INVALID_MSGID || __XPRIO || __HAS_X_MAILER)
+
+meta       XM_RECPTID                  __HAS_XM_RECPTID && !__TAG_EXISTS_SCRIPT && !__REPLYTO_NOREPLY && !__ENVFROM_AMAZONSES && !__DOS_DIRECT_TO_MX && !__FRAUD_PTX 
+describe   XM_RECPTID                  Has spammy message header
+score      XM_RECPTID                  3.000	# limit
+
+
+# known x-mailer values
+header     __XM_SMART_SEND             X-Mailer =~ /^Smart_Send(?:_\d+)+$/
+header     __XM_SQLANYW                X-Mailer =~ /^SQL Anywhere/
+header     __XM_CHEETAHMAILER          X-Mailer =~ /^CheetahMailer$/
+header     __XM_XYZMAILER              X-Mailer =~ /^XyzMailer$/
+header     __XM_DMDROID                X-Mailer =~ /^dmDroid$/
+header     __XM_DRUPAL                 X-Mailer =~ /^Drupal$/
+header     __XM_ASPQMAIL               X-Mailer =~ /^AspQMail/
+header     __XM_MSWINLIVE              X-Mailer =~ /^Microsoft Windows Live Mail \d+\.\d+\.\d+\.\d+/
+header     __XM_IPADMAIL               X-Mailer =~ /^iPad Mail \([0-9A-F]{4,8}\)/
+header     __XM_IPHONEMAIL             X-Mailer =~ /^iPhone Mail \([0-9A-F]{4,8}\)/
+header     __XM_YAMAIL                 X-Mailer =~ /^Yamail/
+header     __XM_QBOXMAIL               X-Mailer =~ /qboxmail/i
+header     __XM_PHP_V1                 X-Mailer =~ /^PHP\s?v?\/?\d\./
+header     __XM_PHP_V2                 X-Mailer =~ /^PHP\d$/
+meta       __XM_PHP                    __XM_PHP_V1 || __XM_PHP_V2
+header     __XM_PHP_NOVER              X-Mailer =~ /^PHP$/
+header     __XM_PHPMAILER              X-Mailer =~ /^PHPMailer\b/
+header     __XM_MTLANDROID             X-Mailer =~ /\bMotorola android mail \d+\.\d/
+header     __XM_XEROXWORKCTR           X-Mailer =~ /^WorkCentre \D?\d[\d\.]\d+/
+header     __XM_AMADEUSMS              X-Mailer =~ /^Amadeus Messaging Server/
+header     __XM_FLASHMAIL              X-Mailer =~ /^NetEase Flash Mail \d/
+
+# don't break rules using the old names
+meta       __PHP_NOVER_MUA             __XM_PHP_NOVER
+meta       __PHPMAILER_MUA             __XM_PHPMAILER
+meta       __MTLANDROID_MUA            __XM_MTLANDROID
+meta       __XEROXWORKCTR_MUA          __XM_XEROXWORKCTR
+meta       __AMADEUSMS_MUA             __XM_AMADEUSMS
+meta       __FLASHMAIL_MUA             __XM_FLASHMAIL
+meta       __PHP_MUA_1                 __XM_PHP_V1
+meta       __PHP_MUA_2                 __XM_PHP_V2
+meta       __PHP_MUA                   __XM_PHP
+
+# from spample on users list 7/20/2011
+header      __XM_PHPMAILER_FORGED  X-Mailer =~ /PHPMailer\s.*version\D+$/
+
+# from spample on users list 7/24/2011
+header      __XM_EC_MESSENGER      X-Mailer =~ /\beC-Messenger\b/
+
+
+# x-mailer patterns
+header     __XM_ONE_WORD               X-Mailer =~ /^\s*\w+\s*$/
+header     __XM_ONE_WORD_UNKNOWN       X-Mailer =~ /^\s*(?!php|msgsend|send(?:html|inblue|mail)|liveagent|(?:cheetah|xyz|swift|power)mailer|dmdroid|codeigniter|peppered|host(?:odo|edsimply)|smart_send_\d|postfix|contactlab|communigator|magnews|(?:as2|manta|be|mikatiminge|web)mail|edelivery|sellware|WHMCS$|CR$|EMS$|SM[EF]$|ACEM$|RMM\d?|EOW\d|FM$|ZIMACS$|oempro\d|typo\d|drupal|mail(?:eon|ingwork|er|spring|force)|onlineoffice|oscommerce|redmine|m1mailmessage_v\d)\w+\s*$/i
+header     __XM_ALNUM_STARTS_DIGIT     X-Mailer =~ /^\s*\d+[\s\d]*[^\s\d]/
+header     __XM_DIGITS_ONLY            X-Mailer =~ /^\s*\d+\s*$/
+header     __XM_UC_ONLY                X-Mailer =~ /^[^a-z]+$/
+header     __XM_UC_ONLY_UNKNOWN        X-Mailer =~ /^(?!SM[EF]$|ACEM$|CR$|PHP(?:BB)?[\/\d.]*$|EMS$|TYPO\d$|WHMCS$|RMM\d?$|GURU$|SMTP(?:\sCLIENT)?$|ZIMACS$|EOW\d|FM$|EDMAIL\sR[\d.]+$|HPPWS)[^a-z]+$/
+header     __XM_LC_ONLY                X-Mailer =~ /^[^A-Z]+$/
+header     __XM_LC_ONLY_UNKNOWN        X-Mailer =~ /^(?!php|mailer$|sendhtml$)[^A-Z]+$/
+header     __XM_RANDOM                 X-Mailer =~ /q(?!(?:q|box|i\s)?mail|\d|[-\w]*=+;)[^u]/i
+header     __XM_LIGHT_HEAVY            X-Mailer =~ /\b(?:light|(?<!::)lite|standard|business|pro(?:fessional)?|educational|personal)\b/i
+header     __XM_VERY_LONG              X-Mailer =~ /.{50}/
+
+# scored
+
+# from spample on users list 7/20/2011
+meta        XM_PHPMAILER_FORGED    __XM_PHPMAILER_FORGED
+describe    XM_PHPMAILER_FORGED    Apparently forged header
+tflags      XM_PHPMAILER_FORGED    publish
+
+# from spample on users list 7/24/2011
+#meta        XM_EC_MESSENGER        __XM_EC_MESSENGER
+#describe    XM_EC_MESSENGER        eC-Messenger bulk mail service
+
+meta       XM_DIGITS_ONLY              __XM_DIGITS_ONLY
+describe   XM_DIGITS_ONLY              X-Mailer malformed
+score      XM_DIGITS_ONLY              3.000	# limit
+tflags     XM_DIGITS_ONLY              publish
+
+meta       XM_UC_ONLY                  __XM_UC_ONLY_UNKNOWN && !__STY_INVIS_MANY && !__HAS_X_REF && !__RCVD_DOTGOV_EXT && !__XM_RANDOM && !__HDRS_LCASE_KNOWN && !__HAS_THREAD_INDEX && !__HAS_X_LOOP 
+describe   XM_UC_ONLY                  X-Mailer all uppercase
+score      XM_UC_ONLY                  2.500	# limit
+
+meta       XM_ONE_WORD                 __XM_ONE_WORD_UNKNOWN && !__L_CTE_7BIT && !__HAS_X_MAILING_LIST 
+describe   XM_ONE_WORD                 X-Mailer only one word
+score      XM_ONE_WORD                 2.000	# limit
+
+meta       XM_LIGHT_HEAVY              __XM_LIGHT_HEAVY && !__HAS_X_BEEN_THERE 
+describe   XM_LIGHT_HEAVY              Special edition of a MUA
+score      XM_LIGHT_HEAVY              2.500	# limit
+
+meta       XM_LONG_DUP_TO              __XM_VERY_LONG && __DUPLICATE_HEADER_TO 
+
+
+ifplugin Mail::SpamAssassin::Plugin::DKIM
+  meta    PHP_NOVER_MUA       __PHP_NOVER_MUA && !__DKIM_DEPENDABLE && !__TO_NO_BRKTS_HTML_ONLY && !__MSGID_OK_DIGITS && !__UPPERCASE_25_50 && !__RP_MATCHES_RCVD && !__GIF_ATTACH
+else
+  meta    PHP_NOVER_MUA       __PHP_NOVER_MUA && !__TO_NO_BRKTS_HTML_ONLY && !__MSGID_OK_DIGITS && !__UPPERCASE_25_50 && !__RP_MATCHES_RCVD && !__GIF_ATTACH
+endif
+describe  PHP_NOVER_MUA       Mail from PHP with no version number
+score     PHP_NOVER_MUA       3.000	# limit
+tflags    PHP_NOVER_MUA       publish
+
+
+# When adding FP exclusions: list XM exclusions _first_, then masscheck-based non-XM FP Avoidance exclusions.
+# Please do not add XM exclusions on the end. They are much more tightly bound than exclusions based on "no spam hits" in ruleqa.
+meta       XM_RANDOM                   __XM_RANDOM && !__XM_UC_ONLY && !__XM_VERY_LONG && !__XM_ASPQMAIL && !__XM_SQLANYW && !__STY_INVIS_3 && !__HAS_IN_REPLY_TO
+describe   XM_RANDOM                   X-Mailer apparently random
+score      XM_RANDOM                   2.500	# limit
+tflags     XM_RANDOM                   publish
+
+
