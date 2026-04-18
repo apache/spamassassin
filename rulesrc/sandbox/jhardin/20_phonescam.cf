@@ -4,7 +4,7 @@
 # Phone numbers appearing in order/payment confirmation scam spam
 # ("call our support if this was not you" -- the call is the goal)
 #
-# Generated: 2026-04-12 12:28:33 PDT
+# Generated: 2026-04-18 11:14:53 PDT
 #
 # Optionally uses Mail::SpamAssassin::Plugin::ReplaceTags for digit/separator
 # obfuscation coverage.  If the plugin is not available, plain-regex fallbacks
@@ -14,6 +14,7 @@
 #   983-220-xxxx  Generic fake invoice/billing (area code 983 is UNASSIGNED in NANP)
 #   970-303-xxxx  Fake PayPal/Apple order confirmations (calendar spam delivery)
 #   865-xxx-xxxx  Fake Norton LifeLock / Geek Squad renewals (multiple exchanges)
+#   813-776-xxxx  Geek Squad fake invoices (DocuSign / housecallpro delivery)
 #   812-266-xxxx  Fake Microsoft account security alerts
 #   838-209-xxxx  Generic fake invoice (adjacent numbers in pool)
 #   859-204-xxxx  Geek Squad fake renewals
@@ -94,6 +95,13 @@ body __PHONESCAM_812_266  /(?<![0-9=])(?![0-9]{10})(?:\+?<1><PSEP>)?(?:\(<8><1><
 replace_rules __PHONESCAM_812_266
 
 #---------------------------------------------------------------------------
+# 813-776-xxxx  (Geek Squad fake invoices; DocuSign / housecallpro delivery)
+# Observed: 1400 1410
+#---------------------------------------------------------------------------
+body __PHONESCAM_813_776  /(?<![0-9=])(?![0-9]{10})(?:\+?<1><PSEP>)?(?:\(<8><1><3>\)|<8><1><3>)<PSEP><7><7><6><PSEP><1><4>(?:<ZERO>|<1>)<ZERO>(?![0-9=])/
+replace_rules __PHONESCAM_813_776
+
+#---------------------------------------------------------------------------
 # 838-209-xxxx  (generic fake invoice; adjacent pool numbers)
 # Observed: 0187 0188
 #---------------------------------------------------------------------------
@@ -112,10 +120,11 @@ replace_rules __PHONESCAM_859_204
 # 801-306-9512  801-346-6088
 # 802-210-7436  802-346-3153
 # 803-210-5063  805-507-3804
-# 833-379-0781  843-200-1039
+# 818-453-1583
+# 833-379-0781  838-900-8510  843-200-1039
 # 859-222-1162  865-232-3323  865-283-4987  865-330-4589
 #---------------------------------------------------------------------------
-body __PHONESCAM_MISC  /(?<![0-9=])(?![0-9]{10})(?:\+?<1><PSEP>)?(?:(?:\(<8><ZERO><1>\)|<8><ZERO><1>)<PSEP>(?:<3><ZERO><6><PSEP><9><5><1><2>|<3><4><6><PSEP><6><ZERO><8><8>)|(?:\(<8><ZERO><2>\)|<8><ZERO><2>)<PSEP>(?:<2><1><ZERO><PSEP><7><4><3><6>|<3><4><6><PSEP><3><1><5><3>)|(?:\(<8><ZERO><3>\)|<8><ZERO><3>)<PSEP><2><1><ZERO><PSEP><5><ZERO><6><3>|(?:\(<8><ZERO><5>\)|<8><ZERO><5>)<PSEP><5><ZERO><7><PSEP><3><8><ZERO><4>|(?:\(<8><3><3>\)|<8><3><3>)<PSEP><3><7><9><PSEP><ZERO><7><8><1>|(?:\(<8><4><3>\)|<8><4><3>)<PSEP><2><ZERO><ZERO><PSEP><1><ZERO><3><9>|(?:\(<8><5><9>\)|<8><5><9>)<PSEP><2><2><2><PSEP><1><1><6><2>|(?:\(<8><6><5>\)|<8><6><5>)<PSEP>(?:<2><3><2><PSEP><3><3><2><3>|<2><8><3><PSEP><4><9><8><7>|<3><3><ZERO><PSEP><4><5><8><9>))(?![0-9=])/
+body __PHONESCAM_MISC  /(?<![0-9=])(?![0-9]{10})(?:\+?<1><PSEP>)?(?:(?:\(<8><ZERO><1>\)|<8><ZERO><1>)<PSEP>(?:<3><ZERO><6><PSEP><9><5><1><2>|<3><4><6><PSEP><6><ZERO><8><8>)|(?:\(<8><ZERO><2>\)|<8><ZERO><2>)<PSEP>(?:<2><1><ZERO><PSEP><7><4><3><6>|<3><4><6><PSEP><3><1><5><3>)|(?:\(<8><ZERO><3>\)|<8><ZERO><3>)<PSEP><2><1><ZERO><PSEP><5><ZERO><6><3>|(?:\(<8><ZERO><5>\)|<8><ZERO><5>)<PSEP><5><ZERO><7><PSEP><3><8><ZERO><4>|(?:\(<8><1><8>\)|<8><1><8>)<PSEP><4><5><3><PSEP><1><5><8><3>|(?:\(<8><3><3>\)|<8><3><3>)<PSEP><3><7><9><PSEP><ZERO><7><8><1>|(?:\(<8><3><8>\)|<8><3><8>)<PSEP><9><ZERO><ZERO><PSEP><8><5><1><ZERO>|(?:\(<8><4><3>\)|<8><4><3>)<PSEP><2><ZERO><ZERO><PSEP><1><ZERO><3><9>|(?:\(<8><5><9>\)|<8><5><9>)<PSEP><2><2><2><PSEP><1><1><6><2>|(?:\(<8><6><5>\)|<8><6><5>)<PSEP>(?:<2><3><2><PSEP><3><3><2><3>|<2><8><3><PSEP><4><9><8><7>|<3><3><ZERO><PSEP><4><5><8><9>))(?![0-9=])/
 replace_rules __PHONESCAM_MISC
 
 #---------------------------------------------------------------------------
@@ -141,18 +150,20 @@ body __PHONESCAM_865_223  /(?<![0-9=])(?![0-9]{10})(?:\+?[1lI|][-. _]?)?(?:\(865
 
 body __PHONESCAM_812_266  /(?<![0-9=])(?![0-9]{10})(?:\+?[1lI|][-. _]?)?(?:\(8[1lI|]2\)|8[1lI|]2)[-. _]?266[-. _]?(?:[1lI|]5[1lI|][0oO]|[1lI|]89[0oO])(?![0-9=])/
 
+body __PHONESCAM_813_776  /(?<![0-9=])(?![0-9]{10})(?:\+?[1lI|][-. _]?)?(?:\(8[1lI|]3\)|8[1lI|]3)[-. _]?776[-. _]?[1lI|]4(?:[0oO]|[1lI|])[0oO](?![0-9=])/
+
 body __PHONESCAM_838_209  /(?<![0-9=])(?![0-9]{10})(?:\+?[1lI|][-. _]?)?(?:\(838\)|838)[-. _]?2[0oO]9[-. _]?[0oO][1lI|]8[78](?![0-9=])/
 
 body __PHONESCAM_859_204  /(?<![0-9=])(?![0-9]{10})(?:\+?[1lI|][-. _]?)?(?:\(859\)|859)[-. _]?2[0oO]4[-. _]?(?:698[0oO]|6984)(?![0-9=])/
 
-body __PHONESCAM_MISC  /(?<![0-9=])(?![0-9]{10})(?:\+?[1lI|][-. _]?)?(?:(?:\(8[0oO][1lI|]\)|8[0oO][1lI|])[-. _]?(?:3[0oO]6[-. _]?95[1lI|]2|346[-. _]?6[0oO]88)|(?:\(8[0oO]2\)|8[0oO]2)[-. _]?(?:2[1lI|][0oO][-. _]?7436|346[-. _]?3[1lI|]53)|(?:\(8[0oO]3\)|8[0oO]3)[-. _]?2[1lI|][0oO][-. _]?5[0oO]63|(?:\(8[0oO]5\)|8[0oO]5)[-. _]?5[0oO]7[-. _]?38[0oO]4|(?:\(833\)|833)[-. _]?379[-. _]?[0oO]78[1lI|]|(?:\(843\)|843)[-. _]?2[0oO][0oO][-. _]?[1lI|][0oO]39|(?:\(859\)|859)[-. _]?222[-. _]?[1lI|][1lI|]62|(?:\(865\)|865)[-. _]?(?:232[-. _]?3323|283[-. _]?4987|33[0oO][-. _]?4589))(?![0-9=])/
+body __PHONESCAM_MISC  /(?<![0-9=])(?![0-9]{10})(?:\+?[1lI|][-. _]?)?(?:(?:\(8[0oO][1lI|]\)|8[0oO][1lI|])[-. _]?(?:3[0oO]6[-. _]?95[1lI|]2|346[-. _]?6[0oO]88)|(?:\(8[0oO]2\)|8[0oO]2)[-. _]?(?:2[1lI|][0oO][-. _]?7436|346[-. _]?3[1lI|]53)|(?:\(8[0oO]3\)|8[0oO]3)[-. _]?2[1lI|][0oO][-. _]?5[0oO]63|(?:\(8[0oO]5\)|8[0oO]5)[-. _]?5[0oO]7[-. _]?38[0oO]4|(?:\(8[1lI|]8\)|8[1lI|]8)[-. _]?453[-. _]?[1lI|]583|(?:\(833\)|833)[-. _]?379[-. _]?[0oO]78[1lI|]|(?:\(838\)|838)[-. _]?9[0oO][0oO][-. _]?85[1lI|][0oO]|(?:\(843\)|843)[-. _]?2[0oO][0oO][-. _]?[1lI|][0oO]39|(?:\(859\)|859)[-. _]?222[-. _]?[1lI|][1lI|]62|(?:\(865\)|865)[-. _]?(?:232[-. _]?3323|283[-. _]?4987|33[0oO][-. _]?4589))(?![0-9=])/
 
 endif  # Mail::SpamAssassin::Plugin::ReplaceTags
 
 #---------------------------------------------------------------------------
 # Combined unscored OR meta -- reference this in scored rules and exclusions
 #---------------------------------------------------------------------------
-meta __PHONESCAM_ALL  __PHONESCAM_983_220 || __PHONESCAM_970_303 || __PHONESCAM_865_209 || __PHONESCAM_865_223 || __PHONESCAM_812_266 || __PHONESCAM_838_209 || __PHONESCAM_859_204 || __PHONESCAM_MISC
+meta __PHONESCAM_ALL  __PHONESCAM_983_220 || __PHONESCAM_970_303 || __PHONESCAM_865_209 || __PHONESCAM_865_223 || __PHONESCAM_812_266 || __PHONESCAM_813_776 || __PHONESCAM_838_209 || __PHONESCAM_859_204 || __PHONESCAM_MISC
 
 # AC 983 novel: unassigned AC but not a confirmed-observed number
 meta __PHONESCAM_983_NOVEL  __PHONESCAM_983_ANY && !__PHONESCAM_983_220
