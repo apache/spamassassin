@@ -4,7 +4,7 @@
 # Phone numbers appearing in order/payment confirmation scam spam
 # ("call our support if this was not you" -- the call is the goal)
 #
-# Generated: 2026-04-18 11:14:53 PDT
+# Generated: 2026-04-19 10:56:57 PDT
 #
 # Optionally uses Mail::SpamAssassin::Plugin::ReplaceTags for digit/separator
 # obfuscation coverage.  If the plugin is not available, plain-regex fallbacks
@@ -130,10 +130,11 @@ replace_rules __PHONESCAM_MISC
 #---------------------------------------------------------------------------
 # Generic NANP obfuscation detector
 # Matches any NANP-format number that uses digit/separator obfuscation.
+# Lookbehind excludes matches mid-word (e.g. "call 904-xxx" where 'l' is <1>).
 # Negative lookahead excludes clean plain-ASCII numbers so only obfuscated
 # forms (letter substitutions, unicode variants, odd separators) fire.
 #---------------------------------------------------------------------------
-body __PHONE_NANP_OBFU  /(?<![0-9=])(?![0-9a-zA-Z]{9,})(?!\+?1?[-. ]?(?:\([2-9]\d\d\)|[2-9]\d\d)[-. ]?[2-9]\d\d[-. ]?\d{4})(?:\+?<1><PSEP>)?(?:\(<D29><DIGIT><DIGIT>\)|<D29><DIGIT><DIGIT>)<PSEP><D29><DIGIT><DIGIT><PSEP><DIGIT>{4}(?![0-9=])/
+body __PHONE_NANP_OBFU  /(?<![0-9=a-zA-Z])(?![0-9a-zA-Z]{9,})(?!\+?1?[-. ]?(?:\([2-9]\d\d\)|[2-9]\d\d)[-. ]?[2-9]\d\d[-. ]?\d{4})(?:\+?<1><PSEP>)?(?:\(<D29><DIGIT><DIGIT>\)|<D29><DIGIT><DIGIT>)<PSEP><D29><DIGIT><DIGIT><PSEP><DIGIT>{4}(?![0-9=])/
 replace_rules __PHONE_NANP_OBFU
 
 else  # Mail::SpamAssassin::Plugin::ReplaceTags not available -- plain fallbacks
