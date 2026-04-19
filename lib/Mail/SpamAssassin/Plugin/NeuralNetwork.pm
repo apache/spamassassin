@@ -44,7 +44,7 @@ use strict;
 use warnings;
 use re 'taint';
 
-my $VERSION = 0.7.3;
+my $VERSION = 0.8;
 
 use AI::FANN qw(:all);
 use Storable qw(store retrieve);
@@ -706,7 +706,13 @@ sub learn_message {
     $locker->safe_unlock($dataset_path);
     return;
   }
-  my $num_hidden_neurons = int(sqrt($num_input)) || 1;
+  # Two-layer hidden sizing: layer1 ~10% of inputs (clamped 32..512),
+  # layer2 half of layer1 (min 16).
+  my $num_hidden1 = int($num_input / 10);
+  $num_hidden1 = 512 if $num_hidden1 > 512;
+  $num_hidden1 = 32  if $num_hidden1 < 32;
+  my $num_hidden2 = int($num_hidden1 / 2);
+  $num_hidden2 = 16  if $num_hidden2 < 16;
   my $num_output_neurons = 1;
 
   my $network;
@@ -744,9 +750,10 @@ sub learn_message {
       $network = $self->_retrain_from_vocabulary($self->{main}->{conf}, $nn_data_dir, $num_input);
       if (!defined $network) {
         # No vocabulary stats available yet, create a fresh network
-        $network = AI::FANN->new_standard($num_input, $num_hidden_neurons, $num_output_neurons);
-        $network->hidden_activation_function(FANN_SIGMOID_STEPWISE);
-        $network->output_activation_function(FANN_SIGMOID_STEPWISE);
+        $network = AI::FANN->new_standard($num_input, $num_hidden1, $num_hidden2, $num_output_neurons);
+        my $act_fn = ($train_algorithm == FANN_TRAIN_RPROP) ? FANN_SIGMOID_STEPWISE : FANN_SIGMOID;
+        $network->hidden_activation_function($act_fn);
+        $network->output_activation_function($act_fn);
       }
     }
   }
@@ -825,8 +832,8 @@ sub learn_message {
       my $hvec_ok = grep { $_ != 0 } @$hvec;
 
       if ($svec_ok && $hvec_ok) {
-        my $replay_cycles = int(sqrt($weighted_epochs / 10.0) + 0.5) || 1;
-        $replay_cycles = 6 if $replay_cycles > 6;
+        my $replay_cycles = int(sqrt($weighted_epochs / 5.0) + 0.5) || 1;
+        $replay_cycles = 12 if $replay_cycles > 12;
 
         if ($isspam) {
           for (1 .. $replay_cycles) {
@@ -1021,8 +1028,21 @@ sub check_neuralnetwork_ham {
   return $pms->{neuralnetwork_ham};
 }
 
-# Prune vocabulary to keep only the top $vocab_cap terms, balanced between
-# spam and ham terms.
+# Compute chi-squared score measuring how discriminative a vocabulary term
+# is between spam and ham.  Returns 0 when there is insufficient data.
+sub _chi2_score {
+  my ($spam, $ham, $total_spam, $total_ham) = @_;
+  my $total = $total_spam + $total_ham;
+  return 0 unless $total > 0;
+  my $total_spam_noterm = $total_spam - $spam;
+  my $total_ham_noterm = $total_ham  - $ham;
+  my $denom = ($spam+$ham) * ($total - $spam - $ham) * $total_spam * $total_ham;
+  return 0 unless $denom > 0;
+  return ($total * ($spam*$total_ham_noterm - $ham*$total_spam_noterm)**2) / $denom;
+}
+
+# Prune vocabulary to keep only the top $vocab_cap terms ranked by chi-squared
+# discriminativeness score, ensuring the most class-separating terms are kept.
 sub _prune_vocabulary {
   my ($self, $vocabulary, $vocab_cap) = @_;
 
@@ -1033,19 +1053,22 @@ sub _prune_vocabulary {
   # Prune to 90% of cap so the vocabulary has room to grow before the next
   # prune is triggered.
   my $prune_target = int($vocab_cap * 0.9) || 1;
-  my $half = int($prune_target / 2);
+
+  my $spam_docs = $vocabulary->{_spam_count} || 1;
+  my $ham_docs  = $vocabulary->{_ham_count}  || 1;
+
+  # Score every term by chi-squared discriminativeness and keep the best
+  my %scores;
+  for my $w (keys %{$terms}) {
+    $scores{$w} = _chi2_score(
+      $terms->{$w}{spam} || 0,
+      $terms->{$w}{ham}  || 0,
+      $spam_docs, $ham_docs
+    );
+  }
 
   my %kept;
-  for my $w (sort { ($terms->{$b}{spam}||0) <=> ($terms->{$a}{spam}||0) } keys %{$terms}) {
-    last if scalar keys %kept >= $half;
-    $kept{$w} = $terms->{$w};
-  }
-  for my $w (sort { ($terms->{$b}{ham}||0) <=> ($terms->{$a}{ham}||0) } keys %{$terms}) {
-    last if scalar keys %kept >= $prune_target;
-    $kept{$w} = $terms->{$w};
-  }
-  # Fill any remaining slots
-  for my $w (sort { ($terms->{$b}{total}||0) <=> ($terms->{$a}{total}||0) } keys %{$terms}) {
+  for my $w (sort { $scores{$b} <=> $scores{$a} } keys %{$terms}) {
     last if scalar keys %kept >= $prune_target;
     $kept{$w} = $terms->{$w};
   }
@@ -1174,10 +1197,15 @@ sub _retrain_from_vocabulary {
       "spam_reps=$spam_reps, ham_reps=$ham_reps, epochs=$train_epochs");
 
   # Create and train new network
-  my $num_hidden = int(sqrt($vocab_size)) || 1;
-  my $network = AI::FANN->new_standard($vocab_size, $num_hidden, 1);
-  $network->hidden_activation_function(FANN_SIGMOID_STEPWISE);
-  $network->output_activation_function(FANN_SIGMOID_STEPWISE);
+  my $num_hidden1 = int($vocab_size / 10);
+  $num_hidden1 = 512 if $num_hidden1 > 512;
+  $num_hidden1 = 32  if $num_hidden1 < 32;
+  my $num_hidden2 = int($num_hidden1 / 2);
+  $num_hidden2 = 16  if $num_hidden2 < 16;
+  my $network = AI::FANN->new_standard($vocab_size, $num_hidden1, $num_hidden2, 1);
+  my $act_fn = ($train_algorithm == FANN_TRAIN_RPROP) ? FANN_SIGMOID_STEPWISE : FANN_SIGMOID;
+  $network->hidden_activation_function($act_fn);
+  $network->output_activation_function($act_fn);
   $network->learning_rate($learning_rate);
   $network->learning_momentum($momentum);
   $network->training_algorithm($train_algorithm);
