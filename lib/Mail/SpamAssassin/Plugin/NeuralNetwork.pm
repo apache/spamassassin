@@ -1628,9 +1628,6 @@ sub _load_vocabulary_from_sql {
     _ham_count => 0
   );
 
-  my $conf = $self->{main}->{conf};
-  my $vocab_cap = $conf->{neuralnetwork_vocab_cap};
-
   eval {
     my $sth = $self->{dbh}->prepare("
       SELECT keyword, total_count, docs_count, spam_count, ham_count
@@ -1670,9 +1667,6 @@ sub _load_vocabulary_from_sql {
 
     dbg("Loaded $count vocabulary terms from SQL for user: $username " .
         "(spam_docs=$vocabulary{_spam_count}, ham_docs=$vocabulary{_ham_count})");
-
-    # Prune vocabulary if needed
-    $self->_prune_vocabulary(\%vocabulary, $vocab_cap);
     1;
   } or do {
     my $err = $@ || 'unknown';
