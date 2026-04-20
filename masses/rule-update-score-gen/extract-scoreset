@@ -1,0 +1,56 @@
+#!/usr/bin/perl
+
+# <@LICENSE>
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.
+# The ASF licenses this file to you under the Apache License, Version 2.0
+# (the "License"); you may not use this file except in compliance with
+# the License.  You may obtain a copy of the License at:
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# </@LICENSE>
+
+=head1 NAME
+
+extract-scoreset - extract one scoreset column from 72_scores.cf
+
+=head1 SYNOPSIS
+
+  extract-scoreset 72_scores.cf <0|1|2|3>
+
+=head1 DESCRIPTION
+
+Reads a scores file in the format produced by merge-scoresets (four
+space-separated score values per rule) and emits C<score RULENAME VALUE>
+lines for the requested scoreset column.
+
+Used by do-nightly-rescore-example.sh to produce per-set fallback scores
+from the existing SVN scores when a scoring run fails.
+
+=cut
+
+use strict;
+use warnings;
+
+my ($file, $set) = @ARGV;
+die "usage: extract-scoreset <72_scores.cf> <0|1|2|3>\n"
+    unless defined $file && defined $set && $set =~ /^[0-3]$/;
+
+open(my $fh, '<', $file) or die "Cannot open $file: $!\n";
+while (<$fh>) {
+    next unless /^score\s+(\S+)\s+(.*)/;
+    my ($name, $rest) = ($1, $2);
+    $rest =~ s/\s*#.*//;
+    my @scores = split(' ', $rest);
+    die "$file line $.: expected 4 score values for '$name', got " . scalar(@scores) . ": $_"
+        unless @scores == 4;
+    printf "score %s %s\n", $name, $scores[$set];
+}
+close $fh;

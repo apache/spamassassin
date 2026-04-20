@@ -43,6 +43,9 @@ if (defined $active_rule_set) {
 
 for (my $i = 0; $i < 4; $i++) {
   next if (defined $active_rule_set && $i == $active_rule_set);
+  if (!-f "scores-set$i") {
+    die "scores-set$i not found and no fallback was generated; aborting merge.\n";
+  }
   open (SCORES, "scores-set$i") or die "Cannot open scores-set$i: $!";
   while(<SCORES>) {
     next unless /^score (\S+)\s+(-?[\d.]+)\b/;
