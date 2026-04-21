@@ -22,7 +22,7 @@ use Time::HiRes qw(time);
 
 use Mail::SpamAssassin::Plugin;
 use Mail::SpamAssassin::Logger;
-use Mail::SpamAssassin::Util qw(untaint_var);
+use Mail::SpamAssassin::Util qw(untaint_var compile_regexp);
 use Mail::SpamAssassin::Timeout;
 use Mail::SpamAssassin::Constants qw(:sa);
 
@@ -699,7 +699,7 @@ sub do_head_tests {
                 $whlast = 'last if ++$hits >= '.untaint_var($1).';';
               }
             }
-            $expr = '$hval '.$op.' /$test_qr/'.$matchg.'op';
+            $expr = '$hval '.$op.' /$test_qr/'.$matchg.'p';
           }
 
           # Make sure rule is marked ready for meta rules
@@ -774,7 +774,7 @@ sub do_body_tests {
       $sub .= '
         pos $l = 0;
         '.$self->hash_line_for_rule($pms, $rulename).'
-        while ($l =~ /$test_qr/gop) {
+        while ($l =~ /$test_qr/gp) {
           '.$self->capture_plugin_code().'
           $self->got_hit(q{'.$rulename.'}, "BODY: ", ruletype => "body");
           '. $self->hit_rule_plugin_code($pms, $rulename, "body", "") . '
@@ -796,7 +796,7 @@ sub do_body_tests {
       }
       $sub .= '
         '.$self->hash_line_for_rule($pms, $rulename).'
-        if ($l =~ /$test_qr/op) {
+        if ($l =~ /$test_qr/p) {
           '.$self->capture_plugin_code().'
           $self->got_hit(q{'.$rulename.'}, "BODY: ", ruletype => "body");
           '. $self->hit_rule_plugin_code($pms, $rulename, "body", "last") .'
@@ -852,7 +852,7 @@ sub do_uri_tests {
       uri_'.$loopid.': foreach my $l (@_) {
         pos $l = 0;
         '.$self->hash_line_for_rule($pms, $rulename).'
-        while ($l =~ /$test_qr/gop) {
+        while ($l =~ /$test_qr/gp) {
            '.$self->capture_plugin_code().'
            $self->got_hit(q{'.$rulename.'}, "URI: ", ruletype => "uri");
            '. $self->hit_rule_plugin_code($pms, $rulename, "uri", "") . '
@@ -864,7 +864,7 @@ sub do_uri_tests {
       $sub .= '
       foreach my $l (@_) {
         '.$self->hash_line_for_rule($pms, $rulename).'
-          if ($l =~ /$test_qr/op) {
+          if ($l =~ /$test_qr/p) {
            '.$self->capture_plugin_code().'
            $self->got_hit(q{'.$rulename.'}, "URI: ", ruletype => "uri");
            '. $self->hit_rule_plugin_code($pms, $rulename, "uri", "last") .'
@@ -918,7 +918,7 @@ sub do_rawbody_tests {
       rawbody_'.$loopid.': foreach my $l (@_) {
         pos $l = 0;
         '.$self->hash_line_for_rule($pms, $rulename).'
-        while ($l =~ /$test_qr/gop) {
+        while ($l =~ /$test_qr/gp) {
            '.$self->capture_plugin_code().'
            $self->got_hit(q{'.$rulename.'}, "RAW: ", ruletype => "rawbody");
            '. $self->hit_rule_plugin_code($pms, $rulename, "rawbody", "") . '
@@ -931,7 +931,7 @@ sub do_rawbody_tests {
       $sub .= '
       foreach my $l (@_) {
         '.$self->hash_line_for_rule($pms, $rulename).'
-        if ($l =~ /$test_qr/op) {
+        if ($l =~ /$test_qr/p) {
            '.$self->capture_plugin_code().'
            $self->got_hit(q{'.$rulename.'}, "RAW: ", ruletype => "rawbody");
            '. $self->hit_rule_plugin_code($pms, $rulename, "rawbody", "last") . '
@@ -1376,37 +1376,42 @@ sub capture_rules_replace {
 
   return '{' unless exists $conf->{capture_template_rules}->{$rulename};
 
-  # Replace all named capture templates in regex, format %{CAPTURE_NAME}
-  # Note that backquotes must be double escaped in $test_qr
+  # Per-message: substitute %{CAPTURE_NAME} placeholders in the original
+  # regex template string (with unescaped braces), then compile it.
   my $code = '
-      foreach my $cname (keys %{$self->{conf}->{capture_template_rules}->{q{'.$rulename.'}}}) {
-        my $valref = $self->get_tag_raw($cname);
-        my @vals = grep { defined $_ && $_ ne "" } (ref $valref ? @$valref : $valref);
-        if (@vals) {
-          my $cval = "(?:".join("|", map { quotemeta($_) } @vals).")";
-          $test_qr =~ s/(?<!\\\\)\\%\\\\\\{\Q${cname}\E\\\\\\}/$cval/gs;
+      {
+        my $tmpl = $self->{conf}->{capture_template_strings}->{q{'.$rulename.'}};
+        foreach my $cname (keys %{$self->{conf}->{capture_template_rules}->{q{'.$rulename.'}}}) {
+          my $valref = $self->get_tag_raw($cname);
+          my @vals = grep { defined $_ && $_ ne "" } (ref $valref ? @$valref : $valref);
+          if (@vals) {
+            my $cval = "(?:".join("|", map { quotemeta($_) } @vals).")";
+            $tmpl =~ s/(?<!\\\\)%\\{\\Q$cname\\E\\}/$cval/g;
   ';
   if ($would_log_rules_all) {
     $code .= '
-          dbg("rules-all: replaced regex capture template: %s, %s, %s",
-            q{'.$rulename.'}, $cname, $test_qr);
+            dbg("rules-all: replaced regex capture template: %s, %s, %s",
+            q{'.$rulename.'}, $cname, $tmpl);
     ';
   }
   # bz 8360, instead of disabling the entire rule, change the part of the regexp that doesn't match to
   # a different regexp that will never match (without capture tags)
   $code .= '
-        } else {
-          my $cval = "(?!)";
-          $test_qr =~ s/(?<!\\\\)\\%\\\\\\{\Q${cname}\E\\\\\\}/$cval/gs;
+          } else {
+            my $cval = "(?!)";
+            $tmpl =~ s/(?<!\\\\)%\\{\\Q$cname\\E\\}/$cval/g;
   ';
   if ($would_log_rules_all) {
     $code .= '
-          dbg("rules-all: dependent tag not defined on rule %s, using empty alternation: %s",
-            q{'.$rulename.'}, $cname);
+            dbg("rules-all: dependent tag not defined on rule %s, using empty alternation: %s",
+              q{'.$rulename.'}, $cname);
     ';
   }
   $code .= '
+          }
         }
+        my ($compiled_re) = Mail::SpamAssassin::Util::compile_regexp($tmpl, 1);
+        $test_qr = $compiled_re;
       }
       if ($test_qr) {
   ';

@@ -5129,6 +5129,7 @@ sub new {
   # regex capture template rules
   $self->{capture_rules} = {};
   $self->{capture_template_rules} = {};
+  $self->{capture_template_strings} = {};
 
   # testing stuff
   $self->{regression_tests} = { };
