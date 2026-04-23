@@ -1528,7 +1528,7 @@ sub parse_captures {
     local($1);
     my $template = $$re;  # save original before %{FOO} -> %\{FOO\} escaping
     # Replace %{FOO} with %\{FOO\} so compile_regexp doesn't fail with unescaped left brace
-    while ($$re =~ s/(?<!\\)\%\{([A-Z][A-Z0-9]*(?:_[A-Z0-9]+)*(?:\([^\)\}]*\))?)\}/%\\{$1\\}/g) {
+    while ($$re =~ s/(?<!\\)\%\{([A-Z][A-Z0-9]*(?:_[A-Z0-9]+)*(?:\([^\)\}]*\))?)\}/%\\{$1\\}/) {
       dbg("config: found named capture for rule $name: $1");
       $self->{conf}->{capture_template_rules}->{$name}->{$1} = 1;
     }
