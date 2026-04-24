@@ -4449,3 +4449,15 @@ uri        __URI_ABOUT_OBFU            m;^about:https?://;i
 uri        __URI_D3P_GUC               m;^https://drive-thirdparty\.googleusercontent\.com/;i
 
 
+body       __PMP_TRAINING              /\bPMP(?:&reg;)?[-\s]+(?i:train|exam|certifi|boot camp)/
+tflags     __PMP_TRAINING              multiple maxhits=6
+
+body       __BARETAG_UNSUB             /\[UNSUBSCRIBE_LINK\]/
+
+meta       __PMP_SPAM                  __PMP_TRAINING > 5 && __BARETAG_UNSUB
+meta       PMP_SPAM                    __PMP_SPAM
+describe   PMP_SPAM                    PMP training spam
+score      PMP_SPAM                    2.500	# limit
+tflags     PMP_SPAM                    publish
+
+
