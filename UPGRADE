@@ -1,6 +1,9 @@
 Note for Users Upgrading to SpamAssassin 4.0.3
 ----------------------------------------------
 
+- Hashbl can now query FuzzyHash rbls using check_hashbl_bodyfuzzy() 
+  in order to detect emails similar to known spam messages.
+
 - TxRep now supports the txrep_skip_domain option in order to completely
   skip TxRep processing for some domains.
   The domain name is checked on From and EnvelopeFrom fields as well as
