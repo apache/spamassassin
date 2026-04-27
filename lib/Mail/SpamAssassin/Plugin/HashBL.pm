@@ -55,6 +55,15 @@ HashBL - query hashed (and unhashed) DNS blocklists
   # Query the tag value as is from a DNSBL
   header   HASHBL_TAG eval:check_hashbl_tag('idbl.example.invalid/A', 'raw', 'XSOMEID', '^127\.')
 
+  # Fuzzy body hash lookup
+  # Issues exactly 4 DNS TXT lookups.  Each TXT response carries the digest
+  # of the indexed string; similarity is verified locally via zorder_compare().
+  # sim_threshold sets the required similarity percentage.
+  #
+  body     HASHBL_FUZZY eval:check_hashbl_bodyfuzzy('fbl.example.invalid/TXT', 'sim_threshold=90')
+  describe HASHBL_FUZZY Message body is similar to a known spam template
+  tflags   HASHBL_FUZZY net
+
 =head1 DESCRIPTION
 
 This plugin supports multiple types of hashed or unhashed DNS blocklist queries.
@@ -225,6 +234,37 @@ Specific mime types can be skipped with C<hashbl_ignore>.  For example
 
 =over 4
 
+=item body RULE check_hashbl_bodyfuzzy('bl.example.invalid/TXT', 'OPTS')
+
+Computes a 32-bit MinHash signature of the full message body, splits it
+into 4 LSH bands of 8 bits each, and issues exactly B<4 DNS TXT lookups>
+of the form:
+
+  fz2BVV.<list>  IN  TXT  "<8-char-digest>"
+
+where C<fz2> is the algorithm+version prefix, C<B> is the band index (0-3),
+and C<VV> is the 8-bit band value in hex.
+
+Each TXT response carries the 8-char hex digest of the indexed string.
+The rule fires when C<zorder_compare(query_digest, stored_digest)> meets
+the configured C<sim_threshold>.
+
+Supported OPTS:
+
+  sim_threshold=N      integer 50-100, similarity % required to fire (default: 95)
+
+Example rules at different thresholds:
+
+  # Near-identical bodies only
+  body FUZZ_100 eval:check_hashbl_bodyfuzzy('fbl.example.invalid/TXT', 'sim_threshold=100')
+
+  # Near-duplicates (~90%+ token overlap)
+  body FUZZ_90  eval:check_hashbl_bodyfuzzy('fbl.example.invalid/TXT', 'sim_threshold=90')
+
+=back
+
+=over 4
+
 =item hashbl_ignore value [value...]
 
 Skip any type of query, if either the hash or original value (email for
@@ -250,6 +290,7 @@ use Digest::SHA qw(sha1_hex sha256);
 
 use Mail::SpamAssassin::Plugin;
 use Mail::SpamAssassin::Constants qw(:ip);
+use Mail::SpamAssassin::FuzzyHash::ZOrder qw(zorder_digest zorder_body_band_labels zorder_compare);
 use Mail::SpamAssassin::Util qw(compile_regexp is_fqdn_valid reverse_ip_address
                                 base32_encode);
 
@@ -278,6 +319,7 @@ sub new {
     'check_hashbl_bodyre' => $Mail::SpamAssassin::Conf::TYPE_BODY_EVALS,
     'check_hashbl_tag' => $Mail::SpamAssassin::Conf::TYPE_HEAD_EVALS,
     'check_hashbl_attachments' => $Mail::SpamAssassin::Conf::TYPE_BODY_EVALS,
+    'check_hashbl_bodyfuzzy'  => $Mail::SpamAssassin::Conf::TYPE_BODY_EVALS,
   };
   while (my ($func, $type) = each %{$self->{evalfuncs}}) {
     $self->register_eval_rule($func, $type);
@@ -1066,6 +1108,218 @@ sub check_hashbl_attachments {
   return; # return undef for async status
 }
 
+=head2 check_hashbl_bodyfuzzy($list, $opts_str, $subtest)
+
+Issues exactly B<4> async DNS TXT lookups for the message body using the
+ZOrder MinHash+LSH scheme (4 bands x 8 bits, 32-bit digest).
+
+Each TXT response carries the 8-char hex digest of the indexed string.
+Similarity is verified locally: C<zorder_compare(query_digest, stored_digest)>
+must be >= C<sim_threshold> for the rule to fire.
+
+=cut
+
+sub check_hashbl_bodyfuzzy {
+  my ($self, $pms, $bodyref, $list, $opts_str, $subtest) = @_;
+
+  return 0 if !$self->{hashbl_available};
+  return 0 if !$pms->is_dns_available();
+
+  my $rulename = $pms->get_current_eval_rule_name();
+
+  if (!defined $list) {
+    warn "HashBL: $rulename blocklist argument missing\n";
+    return 0;
+  }
+
+  my $opts = _parse_opts($opts_str || 'sim_threshold=95');
+
+  # Validate sim_threshold: must be an integer in a useful range
+  my $sim_threshold = int($opts->{sim_threshold});
+  if ($sim_threshold < 50 || $sim_threshold > 100) {
+    warn "HashBL: $rulename sim_threshold=$sim_threshold out of range (50-100)\n";
+    return;
+  }
+
+  my $body_text;
+  if (ref $bodyref eq 'ARRAY')  {
+    $body_text = join(' ', @$bodyref)
+  } elsif (ref $bodyref eq 'SCALAR') {
+    $body_text = $$bodyref
+  } else {
+    $body_text = $bodyref // '';
+  }
+
+  if (length($body_text) < 64) {
+    dbg("$rulename: body too short, skipping");
+    return 0;
+  }
+
+  my ($list_domain, $qtype) = split(m{/}, $list, 2);
+  $qtype = uc($qtype || 'TXT');
+  $qtype = 'TXT' if $qtype eq '';
+  if ($qtype ne 'TXT') {
+    dbg("$rulename: warning - fuzzyhash lookups are TXT; got $qtype");
+  }
+
+  my @labels  = Mail::SpamAssassin::FuzzyHash::ZOrder::zorder_body_band_labels($body_text);
+  my $qdigest = Mail::SpamAssassin::FuzzyHash::ZOrder::zorder_digest($body_text);
+
+  dbg("$rulename: body qdigest=$qdigest sim_threshold=$sim_threshold%% list=$list_domain");
+  dbg("$rulename: band labels: " . join(', ', @labels));
+
+  my $state_key = "hashbl_fuzzy:$rulename";
+  $pms->{$state_key} ||= {
+    pending       => scalar(@labels),
+    query_digest  => $qdigest,
+    sim_threshold => $sim_threshold,
+    fired         => 0,
+    best_sim      => 0,
+    best_stored   => undef,
+  };
+  my $state = $pms->{$state_key};
+
+  # Register in per-message fuzzy tracker for cross-rule highest-sim selection
+  $pms->{hashbl_fuzzy_tracker} ||= {};
+  $pms->{hashbl_fuzzy_tracker}{$rulename} = $state_key;
+
+  my $launched = 0;
+  for my $label (@labels) {
+    my $host = "$label.$list_domain";
+    my $key  = "hashbl_fuzzy:$qtype:$host";
+
+    dbg("$rulename: querying $host");
+
+    my $ent = {
+      rulename => $rulename,
+      type     => 'HASHBL-FUZZY-TXT',
+      zone     => $list_domain,
+      key      => $key,
+    };
+
+    $ent = $pms->{async}->bgsend_and_start_lookup(
+      $host, $qtype, undef, $ent,
+      sub {
+        my ($ent2, $pkt) = @_;
+        $self->_finish_fuzzy_lookup($pms, $ent2, $pkt, $subtest, $state_key);
+      },
+      master_deadline => $pms->{master_deadline},
+    );
+
+    $launched++ if defined $ent;
+  }
+
+  if (!$launched) {
+    dbg("$rulename: no queries launched");
+    return 0;
+  }
+  return;
+}
+
+sub _finish_fuzzy_lookup {
+  my ($self, $pms, $ent, $pkt, $subtest, $state_key) = @_;
+
+  my $rulename = $ent->{rulename};
+  my $state    = $pms->{$state_key};
+  return unless $state;
+
+  $state->{pending}--;
+
+  if ($pkt) {
+    foreach my $answer ($pkt->answer) {
+      next unless $answer && $answer->type eq 'TXT';
+      next if $state->{fired};
+
+      my $rdatastr = $answer->rdstring;
+      $rdatastr =~ s/^"|"$//g;
+      $rdatastr =~ s/^\s+|\s+$//g;
+
+      # TXT format: "<8-char-digest>" or "<digest>:<annotation>"
+      my ($stored_digest) = split(/:/, $rdatastr, 2);
+      next unless defined $stored_digest
+               && length($stored_digest) == 8
+               && $stored_digest =~ /^[0-9a-f]{8}$/i;
+
+      if (defined $subtest && $rdatastr !~ /$subtest/) {
+        dbg("$rulename: fuzzy TXT '$rdatastr' did not match subtest /$subtest/");
+        next;
+      }
+
+      $stored_digest = lc $stored_digest;
+
+      # Local similarity verification, uses all 32 bits of both digests.
+      # Corroboration here is semantic (bit-level agreement across the full
+      # MinHash signature).
+      my $sim = eval {
+        Mail::SpamAssassin::FuzzyHash::ZOrder::zorder_compare($state->{query_digest}, $stored_digest)
+      };
+      if ($@) {
+        dbg("$rulename: zorder_compare error: $@");
+        next;
+      }
+
+      my $sim_threshold = $state->{sim_threshold};
+
+      dbg("$rulename: fuzzy candidate - stored=$stored_digest "
+          . "sim=$sim% (threshold=$sim_threshold%)");
+
+      if ($sim >= $sim_threshold && $sim > $state->{best_sim}) {
+        $state->{best_sim}    = $sim;
+        $state->{best_stored} = $stored_digest;
+      }
+    }
+  }
+
+  # When this rule's lookups are all done, check if all fuzzy rules are done
+  if ($state->{pending} <= 0) {
+    $self->_resolve_fuzzy_rules($pms);
+  }
+}
+
+sub _resolve_fuzzy_rules {
+  my ($self, $pms) = @_;
+  my $tracker = $pms->{hashbl_fuzzy_tracker};
+  return unless $tracker;
+
+  # Check if all registered fuzzy rules have completed their lookups
+  for my $state_key (values %$tracker) {
+    my $state = $pms->{$state_key};
+    return if $state && $state->{pending} > 0;
+  }
+
+  # All done, find the rule with the highest sim_threshold that matched
+  my ($best_rule, $best_threshold) = (undef, 0);
+  while (my ($rulename, $state_key) = each %$tracker) {
+    my $state = $pms->{$state_key};
+    next unless $state && defined $state->{best_stored};
+    if ($state->{sim_threshold} > $best_threshold) {
+      $best_threshold = $state->{sim_threshold};
+      $best_rule      = $rulename;
+    }
+  }
+
+  # Fire only the most restrictive rule, mark all others ready
+  while (my ($rulename, $state_key) = each %$tracker) {
+    my $state = $pms->{$state_key};
+    next if $state->{fired};
+    if (defined $best_rule && $rulename eq $best_rule) {
+      $state->{fired} = 1;
+      dbg("$rulename: best fuzzy match sim=$state->{best_sim}%");
+      $pms->rule_ready($rulename);
+      $pms->test_log("sim=$state->{best_sim}%", $rulename);
+      $pms->got_hit($rulename, "HashBL-Fuzzy: ",
+        ruletype => 'body',
+      );
+    } else {
+      dbg("$rulename: no fuzzy match (best match was " . ($best_rule // 'none') . ")");
+      $pms->rule_ready($rulename);
+    }
+  }
+
+  # Prevent re-processing
+  delete $pms->{hashbl_fuzzy_tracker};
+}
+
 sub _hash {
   my ($self, $opts, $value) = @_;
 
@@ -1158,5 +1412,6 @@ sub has_hashbl_attachments { 1 }
 sub has_hashbl_email_domain { 1 } # user/host/domain option for emails
 sub has_hashbl_email_domain_alias { 1 } # hashbl_email_domain_alias
 sub has_hashbl_alldomains { 1 }
+sub has_hashbl_fuzzyhash { 1 }
 
 1;

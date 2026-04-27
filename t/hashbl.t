@@ -9,7 +9,7 @@ plan skip_all => "Can't use Net::DNS Safely"   unless can_use_net_dns_safely();
 
 # run many times to catch some random natured failures
 my $iterations = 5;
-plan tests => 14 * $iterations;
+plan tests => 17 * $iterations;
 
 # ---------------------------------------------------------------------------
 
@@ -24,9 +24,12 @@ plan tests => 14 * $iterations;
  q{ 1.0 META_HASHBL_EMAIL } => '',
  q{ 1.0 META_HASHBL_BTC } => '',
  q{ 1.0 META_HASHBL_URI } => '',
+ q{ 1.0 X_HASHBL_FUZZY_STRICT } => '',
+ q{ 1.0 META_HASHBL_FUZZY } => '',
 );
 %anti_patterns = (
  q{ 1.0 X_HASHBL_SHA256 } => '',
+ q{ 1.0 X_HASHBL_FUZZY_LAX } => '',
  q{ warn: } => '',
 );
 
@@ -50,6 +53,10 @@ host.domain.com.hashbltest7.spamassassin.org
 domain.com.hashbltest7.spamassassin.org
 2qlyngefopecg66lt6pwfpegjaajbzasuxs5vzgii2vfbonj6rua.hashbltest8.spamassassin.org
 11231234567.hashbltest9.spamassassin.org
+fz20d9.hashbltest10.spamassassin.org
+fz2142.hashbltest10.spamassassin.org
+fz220b.hashbltest10.spamassassin.org
+fz2337.hashbltest10.spamassassin.org
 );
 
 sub check_queries {
@@ -62,7 +69,7 @@ sub check_queries {
   while (<WL>) {
     my $line = $_;
     print STDERR $line if $line =~ /warn:/;
-    while ($line =~ m,([^\s/]+\.hashbltest\d\.spamassassin\.org)\b,g) {
+    while ($line =~ m,([^\s/]+\.hashbltest\d+\.spamassassin\.org)\b,g) {
       my $query = $1;
       if (!grep { $query eq $_ } @valid_queries) {
         $invalid{$query}++;
@@ -150,9 +157,17 @@ tstlocalrules(q{
   header   X_HASHBL_ALIAS_NODOT eval:check_hashbl_emails('hashbltest8.spamassassin.org', 'sha256/nodot', 'body', '^127\.', 'domaincom')
   tflags   X_HASHBL_ALIAS_NODOT net
 
+  # check_hashbl_bodyfuzzy
+  body   X_HASHBL_FUZZY_STRICT eval:check_hashbl_bodyfuzzy('hashbltest10.spamassassin.org', 'sim_threshold=95')
+  tflags X_HASHBL_FUZZY_STRICT net
+
+  body   X_HASHBL_FUZZY_LAX eval:check_hashbl_bodyfuzzy('hashbltest10.spamassassin.org', 'sim_threshold=85')
+  tflags X_HASHBL_FUZZY_LAX net
+
   # Bug 7897 - test that meta rules depending on net rules hit
   meta META_HASHBL_EMAIL X_HASHBL_EMAIL
   # It also needs to hit even if priority is lower than dnsbl (-100)
+  meta META_HASHBL_FUZZY X_HASHBL_FUZZY_STRICT
   meta META_HASHBL_BTC X_HASHBL_BTC
   priority META_HASHBL_BTC -500
   # Or super high
