@@ -44,7 +44,7 @@ use strict;
 use warnings;
 use re 'taint';
 
-my $VERSION = 0.8;
+my $VERSION = 0.8.1;
 
 use AI::FANN qw(:all);
 use Storable qw(store retrieve);
@@ -524,7 +524,6 @@ sub _text_to_features {
         $vocabulary{_ham_count} += $local_doc_increment;
       }
 
-      # Prune vocabulary if needed
       $self->_prune_vocabulary(\%vocabulary, $vocab_cap);
 
       my $vocab_path;
@@ -865,6 +864,7 @@ sub learn_message {
   # Save the model atomically
   my $model_saved = 0;
   my $tmp_path;
+  my $file_mode = 0666 & ~umask();
   eval {
     my ($vol, $dir, undef) = File::Spec->splitpath($dataset_path);
     my $tmp_dir = File::Spec->catpath($vol, $dir, '');
@@ -874,6 +874,7 @@ sub learn_message {
       SUFFIX => '.tmp',
       UNLINK => 0,
     );
+    chmod($file_mode, $tmp_path) or info("chmod $file_mode on '$tmp_path' failed: $!");
     $network->save($tmp_path) or die "model save to temp '$tmp_path' failed";
     rename($tmp_path, $dataset_path)
       or die "atomic rename '$tmp_path' -> '$dataset_path' failed: $!";
@@ -1299,14 +1300,61 @@ sub _check_neuralnetwork {
     if ($model_expired) {
       dbg("Model cache expired (age: ${model_age}s, ttl: ${ttl}s), reloading");
     }
+
+    my $locker = $self->{main}->{locker};
+    my $got_lock = 0;
+    eval {
+      $got_lock = $locker->safe_lock($dataset_path,
+        $self->{main}->{conf}->{neuralnetwork_lock_timeout});
+      1;
+    };
+
+    my $file_mode = 0666 & ~umask();
     eval {
       $self->{neural_model} = AI::FANN->new_from_file($dataset_path);
       $self->{_neural_model_load_time} = time();
       1;
     } or do {
-      dbg("Failed to load model for prediction: " . ($@ || 'unknown'));
-      return;
+      my $err = $@ || 'unknown';
+      my @stat = stat($dataset_path);
+      my $fsize = @stat ? $stat[7] : 'N/A';
+      dbg("Failed to load model for prediction: $err "
+        . "(path=$dataset_path, size=${fsize}B), attempting vocabulary rebuild");
+
+      # rebuild an in-memory model from vocabulary statistics
+      undef $self->{neural_model};
+      my $rebuilt = eval {
+        $self->_retrain_from_vocabulary($conf, $nn_data_dir,
+          $feature_vectors->[0] ? scalar(@{$feature_vectors->[0]{vec}}) : 0);
+      };
+      if ($rebuilt) {
+        dbg("Vocabulary rebuild succeeded");
+        $self->{neural_model} = $rebuilt;
+        $self->{_neural_model_load_time} = time();
+        # Persist the rebuilt model
+        eval {
+          my ($vol, $dir) = File::Spec->splitpath($dataset_path);
+          my $tmp_dir = File::Spec->catpath($vol, $dir, '');
+          my (undef, $tmp_path) = File::Temp::tempfile(
+            'fann-XXXXXX', DIR => $tmp_dir, SUFFIX => '.tmp', UNLINK => 0);
+          chmod($file_mode, $tmp_path) or info("chmod $file_mode on '$tmp_path' failed: $!");  
+          if ($rebuilt->save($tmp_path)) {
+            rename($tmp_path, $dataset_path)
+              or die "rename failed: $!";
+            dbg("Persisted rebuilt model to '$dataset_path'");
+          } else {
+            unlink $tmp_path;
+          }
+          1;
+        } or dbg("Could not persist rebuilt model: " . ($@ || 'unknown'));
+      } else {
+        dbg("Vocabulary rebuild failed");
+        $locker->safe_unlock($dataset_path) if $got_lock;
+        return;
+      }
     };
+
+    $locker->safe_unlock($dataset_path) if $got_lock;
   }
   my $network = $self->{neural_model};
 
