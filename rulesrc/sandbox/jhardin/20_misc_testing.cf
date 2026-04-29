@@ -73,8 +73,10 @@ ifplugin Mail::SpamAssassin::Plugin::MIMEHeader
   meta         HTML_ATTACH         __HTML_ATTACH_01 || __HTML_ATTACH_02
   describe     HTML_ATTACH         HTML attachment to bypass scanning?
 
-  mimeheader   OBFU_HTML_ATTACH    Content-Type =~ m,\bapplication/octet-stream\b.+\.[a-z]?html?\b,i
+  mimeheader   __OBFU_HTML_ATTACH  Content-Type =~ m,\bapplication/octet-stream\b.+\.[a-z]?html?\b,i
+  meta         OBFU_HTML_ATTACH    __OBFU_HTML_ATTACH && !__DOS_LINK 
   describe     OBFU_HTML_ATTACH    HTML attachment with non-text MIME type
+  tflags       OBFU_HTML_ATTACH    publish
 
   mimeheader   OBFU_TEXT_ATTACH    Content-Type =~ m,\bapplication/octet-stream\b.+\.txt\b,i
   describe     OBFU_TEXT_ATTACH    Text attachment with non-text MIME type
@@ -97,7 +99,7 @@ ifplugin Mail::SpamAssassin::Plugin::MIMEHeader
   describe     OBFU_GIF_ATTACH     GIF attachment with generic MIME type
   #score        OBFU_GIF_ATTACH     1.50
 
-  meta         OBFU_ATTACH_MISSP   __FROM_RUNON && (OBFU_HTML_ATTACH || OBFU_TEXT_ATTACH || OBFU_DOC_ATTACH || OBFU_PDF_ATTACH || OBFU_JPG_ATTACH || OBFU_GIF_ATTACH)
+  meta         OBFU_ATTACH_MISSP   __FROM_RUNON && (__OBFU_HTML_ATTACH || OBFU_TEXT_ATTACH || OBFU_DOC_ATTACH || OBFU_PDF_ATTACH || OBFU_JPG_ATTACH || OBFU_GIF_ATTACH)
   describe     OBFU_ATTACH_MISSP   Obfuscated attachment type and misspaced From
 
 #  mimeheader   ECMSNGR_MH          X-ecm-part-format =~ /./
@@ -4460,4 +4462,7 @@ describe   PMP_SPAM                    PMP training spam
 score      PMP_SPAM                    2.500	# limit
 tflags     PMP_SPAM                    publish
 
+ifplugin Mail::SpamAssassin::Plugin::MIMEHeader
+  mimeheader   __OBFU_HTML_ATTACH_RECHNUNG    Content-Type =~ m,\bapplication/octet-stream\b.+rechnung.*\.[a-z]?html?\b,i
+endif
 
