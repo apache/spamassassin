@@ -1,0 +1,2 @@
+-- Manual database creation for SQLite is not necessary,
+-- ExtractText plugin will create and clean database automatically.

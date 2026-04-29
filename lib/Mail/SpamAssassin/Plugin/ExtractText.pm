@@ -275,6 +275,7 @@ use re 'taint';
 my $VERSION = 0.001;
 
 use File::Basename;
+use Digest::MD5 qw(md5_hex);
 
 use Mail::SpamAssassin::Logger;
 use Mail::SpamAssassin::Plugin;
@@ -327,6 +328,139 @@ sub set_config {
       $self->{extracttext_timeout} = $1;
       $self->{extracttext_timeout_total} = $2;
     }
+  });
+
+=head1 ADMINISTRATOR SETTINGS
+
+=over 4
+
+=item extracttext_cache_type     (default: none)
+
+The cache type that is being utilized.  Currently only supported value is
+C<dbi> that implies C<extracttext_cache_dsn> is a DBI connect string.
+DBI module is required.
+
+Example:
+extracttext_cache_type dbi
+
+=back
+
+=cut
+
+  push (@cmds, {
+    setting => 'extracttext_cache_type',
+    default => '',
+    is_priv => 1,
+    type => $Mail::SpamAssassin::Conf::CONF_TYPE_STRING
+  });
+
+=over 4
+
+=item extracttext_cache_dsn		(default: none)
+
+The DBI dsn of the database to use.
+
+For SQLite, the database will be created automatically if it does not
+already exist, the supplied path and file must be read/writable by the
+user running spamassassin or spamd.
+
+For MySQL/MariaDB or PostgreSQL, see sql-directory for database table
+creation clauses.
+
+You will need to have the proper DBI module for your database.  For example
+DBD::SQLite, DBD::mysql, DBD::MariaDB or DBD::Pg.
+
+Minimum required SQLite version is 3.24.0 (available from DBD::SQLite 1.59_01).
+
+Examples:
+
+ extracttext_cache_dsn dbi:SQLite:dbname=/var/lib/spamassassin/ExtractText.db
+
+=back
+
+=cut
+
+  push (@cmds, {
+    setting => 'extracttext_cache_dsn',
+    default => '',
+    is_priv => 1,
+    type => $Mail::SpamAssassin::Conf::CONF_TYPE_STRING
+  });
+
+=over 4
+
+=item extracttext_cache_username  (default: none)
+
+The username that should be used to connect to the database.  Not used for
+SQLite.
+
+=back
+
+=cut
+
+  push (@cmds, {
+    setting => 'extracttext_cache_username',
+    default => '',
+    is_priv => 1,
+    type => $Mail::SpamAssassin::Conf::CONF_TYPE_STRING
+  });
+
+=over 4
+
+=item extracttext_cache_password  (default: none)
+
+The password that should be used to connect to the database.  Not used for
+SQLite.
+
+=back
+
+=cut
+
+  push (@cmds, {
+    setting => 'extracttext_cache_password',
+    default => '',
+    is_priv => 1,
+    type => $Mail::SpamAssassin::Conf::CONF_TYPE_STRING
+  });
+
+=over 4
+
+=item extracttext_cache_ttl		(default: 86400)
+
+The length of time a cache entry will be valid for in seconds.
+Default is 86400 (1 day).
+
+See C<extracttext_cache_autoclean> for database cleaning.
+
+=back
+
+=cut
+
+  push (@cmds, {
+    setting => 'extracttext_cache_ttl',
+    is_admin => 1,
+    default => 86400,
+    type => $Mail::SpamAssassin::Conf::CONF_TYPE_NUMERIC
+  });
+
+=item extracttext_cache_autoclean	(default: 1000)
+
+Automatically purge old entries from database.  Value describes a random run
+chance of 1/x.  The default value of 1000 means that cleaning is run
+approximately once for every 1000 messages processed.  Value of 1 would mean
+database is cleaned every time a message is processed.
+
+Set 0 to disable automatic cleaning and to do it manually.
+
+=back
+
+=cut
+
+  push (@cmds, {
+    setting => 'extracttext_cache_autoclean',
+    is_admin => 1,
+    default => 1000,
+    type => $Mail::SpamAssassin::Conf::CONF_TYPE_NUMERIC
   });
 
   $conf->{parser}->register_commands(\@cmds);
@@ -409,6 +543,203 @@ sub parse_config {
   }
 
   return 0;
+}
+
+sub initialise_extracttext_cache {
+  my ($self, $conf) = @_;
+
+  return if $self->{dbh};
+  return if !$conf->{extracttext_cache_type};
+
+  if (!$conf->{extracttext_cache_dsn}) {
+    warn "ExtractText: invalid cache configuration\n";
+    return;
+  }
+
+  ##
+  ## SQLite
+  ##
+  if ($conf->{extracttext_cache_type} =~ /^(?:dbi|sqlite)$/i
+      && $conf->{extracttext_cache_dsn} =~ /^dbi:SQLite/)
+  {
+    eval {
+      local $SIG{'__DIE__'};
+      require DBI;
+      require DBD::SQLite;
+      DBD::SQLite->VERSION(1.59_01); # Required for ON CONFLICT
+      $self->{dbh} = DBI->connect_cached(
+        $conf->{extracttext_cache_dsn}, '', '',
+        {RaiseError => 1, PrintError => 0, InactiveDestroy => 1, AutoCommit => 1}
+      );
+      $self->{dbh}->do("
+        CREATE TABLE IF NOT EXISTS extracttext_cache (
+          file_hash   TEXT PRIMARY KEY NOT NULL,
+          file_name   TEXT NOT NULL,
+          file_text   TEXT NOT NULL,
+          hits        INTEGER NOT NULL DEFAULT 1,
+          created     INTEGER NOT NULL,
+          modified    INTEGER NOT NULL
+        )
+      ");
+      # Maintaining index for cleaning is likely more expensive than occasional full table scan
+      #$self->{dbh}->do("
+      #  CREATE INDEX IF NOT EXISTS extracttext_modified
+      #    ON extracttext_cache(created)
+      #");
+      $self->{sth_insert} = $self->{dbh}->prepare("
+        INSERT INTO extracttext_cache (file_hash, file_name, file_text, created, modified)
+        VALUES (?,?,?,strftime('%s','now'),strftime('%s','now'))
+        ON CONFLICT(file_hash) DO UPDATE
+          SET file_text = excluded.file_text,
+              modified = excluded.modified,
+              hits = hits + 1
+      ");
+      $self->{sth_select} = $self->{dbh}->prepare("
+        SELECT file_text FROM extracttext_cache
+        WHERE file_hash = ?
+      ");
+      $self->{sth_delete} = $self->{dbh}->prepare("
+        DELETE FROM extracttext_cache
+        WHERE file_hash = ? AND created < strftime('%s','now') - $conf->{extracttext_cache_ttl}
+      ");
+      $self->{sth_clean} = $self->{dbh}->prepare("
+        DELETE FROM extracttext_cache
+        WHERE created < strftime('%s','now') - $conf->{extracttext_cache_ttl}
+      ");
+    };
+  }
+  ##
+  ## MySQL/MariaDB
+  ##
+  elsif (lc $conf->{extracttext_cache_type} eq 'dbi'
+      && $conf->{extracttext_cache_dsn} =~ /^dbi:(?:mysql|MariaDB)/i)
+  {
+    eval {
+      local $SIG{'__DIE__'};
+      require DBI;
+      $self->{dbh} = DBI->connect_cached(
+        $conf->{extracttext_cache_dsn},
+        $conf->{extracttext_cache_username},
+        $conf->{extracttext_cache_password},
+        {RaiseError => 1, PrintError => 0, InactiveDestroy => 1, AutoCommit => 1}
+      );
+      $self->{sth_insert} = $self->{dbh}->prepare("
+        INSERT INTO extracttext_cache (file_hash, file_name, file_text, created, modified)
+        VALUES (?,?,?,UNIX_TIMESTAMP(),UNIX_TIMESTAMP())
+        ON DUPLICATE KEY UPDATE
+          file_text = VALUES(file_text),
+          modified = VALUES(modified),
+          hits = hits + 1
+      ");
+      $self->{sth_select} = $self->{dbh}->prepare("
+        SELECT file_text FROM extracttext_cache
+        WHERE file_hash = ?
+      ");
+      $self->{sth_delete} = $self->{dbh}->prepare("
+        DELETE FROM extracttext_cache
+        WHERE file_hash = ? AND created < UNIX_TIMESTAMP() - $conf->{extracttext_cache_ttl}
+      ");
+      $self->{sth_clean} = $self->{dbh}->prepare("
+        DELETE FROM extracttext_cache
+        WHERE created < UNIX_TIMESTAMP() - $conf->{extracttext_cache_ttl}
+      ");
+    };
+  }
+  ##
+  ## PostgreSQL
+  ##
+  elsif (lc $conf->{extracttext_cache_type} eq 'dbi'
+      && $conf->{extracttext_cache_dsn} =~ /^dbi:Pg/i)
+  {
+    eval {
+      local $SIG{'__DIE__'};
+      require DBI;
+      $self->{dbh} = DBI->connect_cached(
+        $conf->{extracttext_cache_dsn},
+        $conf->{extracttext_cache_username},
+        $conf->{extracttext_cache_password},
+        {RaiseError => 1, PrintError => 0, InactiveDestroy => 1, AutoCommit => 1}
+      );
+      $self->{sth_insert} = $self->{dbh}->prepare("
+        INSERT INTO extracttext_cache (file_hash, file_name, file_text, created, modified)
+        VALUES (?,?,?,CAST(EXTRACT(epoch FROM NOW()) AS INT),CAST(EXTRACT(epoch FROM NOW()) AS INT))
+        ON CONFLICT (file_hash) DO UPDATE SET
+          file_text = EXCLUDED.file_text,
+          modified = EXCLUDED.modified,
+          hits = extracttext_cache.hits + 1
+      ");
+      $self->{sth_select} = $self->{dbh}->prepare("
+        SELECT file_text FROM extracttext_cache
+        WHERE file_hash = ?
+      ");
+      $self->{sth_delete} = $self->{dbh}->prepare("
+        DELETE FROM extracttext_cache
+        WHERE file_hash = ? AND created < CAST(EXTRACT(epoch FROM NOW()) AS INT) - $conf->{extracttext_cache_ttl}
+      ");
+      $self->{sth_clean} = $self->{dbh}->prepare("
+        DELETE FROM extracttext_cache
+        WHERE created < CAST(EXTRACT(epoch FROM NOW()) AS INT) - $conf->{extracttext_cache_ttl}
+      ");
+    };
+  } else {
+    warn "ExtractText: invalid cache configuration\n";
+    return;
+  }
+
+  if ($@ || !$self->{sth_clean}) {
+    warn "ExtractText: cache connect failed: $@\n";
+    undef $self->{dbh};
+    undef $self->{sth_insert};
+    undef $self->{sth_select};
+    undef $self->{sth_delete};
+    undef $self->{sth_clean};
+  }
+}
+
+sub cache_add {
+  my ($self, $file_hash, $file_name, $file_text) = @_;
+
+  return if !$self->{dbh};
+
+  # check values and return
+  return if length($file_hash) > 256 || length($file_text) > 512;
+
+  # Upsert
+  eval { $self->{sth_insert}->execute($file_hash, $file_name, $file_text); };
+  if ($@) {
+    dbg("extracttext: could not add to cache: $@");
+  }
+
+  return;
+}
+
+sub cache_get {
+  my ($self, $key) = @_;
+
+  return if !$self->{dbh};
+
+  # Make sure expired entries are gone.  Just a quick check for primary key,
+  # not that expensive.
+  eval { $self->{sth_delete}->execute($key); };
+  if ($@) {
+    dbg("extracttext: cache delete failed: $@");
+    return;
+  }
+
+  # Now try to get it (don't bother parsing if something was deleted above,
+  # it would be rare event anyway)
+  eval { $self->{sth_select}->execute($key); };
+  if ($@) {
+    dbg("extracttext: cache get failed: $@");
+    return;
+  }
+
+  my @row = $self->{sth_select}->fetchrow_array();
+  if (@row) {
+    return $row[0];
+  }
+
+  return;
 }
 
 # Extract 'text' via running an external command.
@@ -580,9 +911,20 @@ sub _extract {
   };
   my @fexts;
   my @types;
+  my ($ok, $text);
 
   my @tools = ($tool->{name});
-  my ($ok, $text) = $self->_extract_object($object,$tool);
+  my $ndata = $part->decode;
+  my $file_name = $part->{'name'};
+  my $file_hash = md5_hex($ndata);
+  $text = $self->cache_get($file_hash);
+  if (defined $text) {
+    dbg("extracttext: text read from cached file \"$file_name\"");
+    $ok = 1;
+  } else {
+    ($ok, $text) = $self->_extract_object($object,$tool);
+    $self->cache_add($file_hash, $file_name, $text);
+  }
 
   # when url+text, script never returns to this point from _extract_object above
   #
@@ -644,9 +986,14 @@ sub _extract {
 # check attachment type and match with the right tool
 #
 sub _check_extract {
-  my ($self, $coll, $checked, $part, $decoded, $data, $type, $name) = @_;
+  my ($self, $conf, $coll, $checked, $part, $decoded, $data, $type, $name) = @_;
   my $ret = 0;
+
   return 0 unless (defined $type || defined $name);
+
+  # Initialize cache
+  $self->initialise_extracttext_cache($conf);
+
   foreach my $match (@{$self->{match}}) {
     next unless $self->{tools}->{$match->{tool}};
     next if $checked->{$match->{tool}};
@@ -659,6 +1006,7 @@ sub _check_extract {
       next;
     }
     $checked->{$match->{tool}} = 1;
+
     # dbg("extracttext: coll: $coll, part: $part, type: $type, name: $name, data: $data, tool: $self->{tools}->{$match->{tool}}");
     if($self->_extract($coll,$part,$type,$name,$data,$self->{tools}->{$match->{tool}})) {
       $ret = 1;
@@ -709,7 +1057,7 @@ sub post_message_parse {
     my $typ = $part->{type};
     my $nam = $part->{name};
     my $dec = 1;
-    next if $self->_check_extract(\%collect,\%checked,$part,\$dec,\$dat,$typ,$nam);
+    next if $self->_check_extract($conf, \%collect,\%checked,$part,\$dec,\$dat,$typ,$nam);
   }
 
   return 1 unless @{$collect{tools}};
@@ -727,6 +1075,15 @@ sub post_message_parse {
   $msg->put_metadata('X-ExtractText-Extensions', join(' ', @uniq_ext));
   $msg->put_metadata('X-ExtractText-Flags', join(' ', @uniq_flags));
   $msg->put_metadata('X-ExtractText-Uris', join(' ', @uniq_uris));
+
+  # Automatically purge old entries
+  if ($self->{dbh} && $conf->{extracttext_cache_autoclean}
+      && rand() < 1/$conf->{extracttext_cache_autoclean})
+  {
+    dbg("extracttext: cleaning stale cache entries");
+    eval { $self->{sth_clean}->execute(); };
+    if ($@) { dbg("extracttext: cache cleaning failed: $@"); }
+  }
 
   return 1;
 }
@@ -747,5 +1104,8 @@ sub parsed_metadata {
   }
   return 1;
 }
+
+# Version features
+sub has_extracttext_cache { 1 }
 
 1;
