@@ -1,6 +1,9 @@
 Note for Users Upgrading to SpamAssassin 4.0.3
 ----------------------------------------------
 
+- Mail::SpamAssassin::Plugin::ExtractText now has the possibility
+  to cache results in order to speedup attachment processing.
+
 - Hashbl can now query FuzzyHash rbls using check_hashbl_bodyfuzzy() 
   in order to detect emails similar to known spam messages.
 
