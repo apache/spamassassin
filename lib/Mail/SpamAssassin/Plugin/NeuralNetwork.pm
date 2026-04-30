@@ -44,7 +44,7 @@ use strict;
 use warnings;
 use re 'taint';
 
-my $VERSION = 0.8.1;
+my $VERSION = 0.8.2;
 
 use AI::FANN qw(:all);
 use Storable qw(store retrieve);
@@ -126,11 +126,11 @@ Minimum number of spam messages in the vocabulary required to enable prediction.
 
 Minimum number of ham messages in the vocabulary required to enable prediction.
 
-=item neuralnetwork_spam_threshold f (default: 0.8)
+=item neuralnetwork_spam_threshold f (default: 0.6)
 
 Prediction values above this threshold are considered spam.
 
-=item neuralnetwork_ham_threshold f (default: 0.2)
+=item neuralnetwork_ham_threshold f (default: 0.4)
 
 Prediction values below this threshold are considered ham.
 
@@ -260,13 +260,13 @@ prediction to run.
   push(@cmds, {
     setting => 'neuralnetwork_spam_threshold',
     is_admin => 1,
-    default => 0.8,
+    default => 0.6,
     type => $Mail::SpamAssassin::Conf::CONF_TYPE_NUMERIC,
   });
   push(@cmds, {
     setting => 'neuralnetwork_ham_threshold',
     is_admin => 1,
-    default => 0.2,
+    default => 0.4,
     type => $Mail::SpamAssassin::Conf::CONF_TYPE_NUMERIC,
   });
   push(@cmds, {
@@ -397,16 +397,12 @@ sub finish_parsing_end {
   }
 }
 
-# Converts a list of raw text strings into a list of
+# Converts a list of pre-tokenised messages into a list of
 # numerical feature vectors (dense arrays), suitable for Neural Networks training.
 sub _text_to_features {
-    my ($self, $conf, $nn_data_dir, $train, $label, $target_vocab_ref, @emails) = @_;
+    my ($self, $conf, $nn_data_dir, $train, $label, $target_vocab_ref, @token_lists) = @_;
 
-    my $min_word_len = $conf->{neuralnetwork_min_word_len};
-    my $max_word_len = $conf->{neuralnetwork_max_word_len};
     my $vocab_cap    = $conf->{neuralnetwork_vocab_cap};
-    my %stopwords    = map { lc($_) => 1 } split /\s+/, $conf->{neuralnetwork_stopwords};
-    my $stopwords_ref = \%stopwords;
 
     return unless defined $nn_data_dir;
     $nn_data_dir = Mail::SpamAssassin::Util::untaint_file_path($nn_data_dir);
@@ -482,19 +478,12 @@ sub _text_to_features {
       }
     }
 
-    # tokenize helper
-    my $tokenize = sub {
-      my ($text) = @_;
-      return $self->_tokenize_text($conf, $text);
-    };
-
     # When training, build per-document term sets to update doc counts
     my $local_doc_increment = 0;
     if ($train == 1) {
-      foreach my $email_text (@emails) {
-        next unless defined $email_text;
-        my @tokens = $tokenize->($email_text);
-        next unless @tokens;
+      foreach my $tok_ref (@token_lists) {
+        next unless ref($tok_ref) eq 'ARRAY' && @$tok_ref;
+        my @tokens = @$tok_ref;
         $local_doc_increment++;
 
         # count doc-level presence once per unique token
@@ -568,9 +557,9 @@ sub _text_to_features {
 
     # Create TF-IDF vectors and L2-normalize
     my @feature_vectors;
-    foreach my $email_text (@emails) {
-      next unless defined $email_text;
-      my @tokens = $tokenize->($email_text);
+    foreach my $tok_ref (@token_lists) {
+      next unless ref($tok_ref) eq 'ARRAY';
+      my @tokens = @$tok_ref;
       my %tf;
       $tf{$_}++ for @tokens;
       # Build raw tf-idf vector
@@ -647,13 +636,15 @@ sub learn_message {
   }
 
   if(defined $msg) {
-    my $text =  $msg->get_visible_rendered_body_text_array();
-    $text = join("\n", @{$text});
-    if (!defined $text || length($text) < $min_text_len) {
+    my $vis_arr = $msg->get_visible_rendered_body_text_array();
+    my $vis_text = (ref $vis_arr eq 'ARRAY') ? join("\n", @$vis_arr)
+                  : (defined $vis_arr ? $vis_arr : '');
+    if (length($vis_text) < $min_text_len) {
       dbg("Not enough text, skipping neural network processing");
       return;
     }
-    push(@training_data, { label => $isspam, text => $text } );
+    my $tokens_ref = $self->_extract_features_from_message($conf, $msg);
+    push(@training_data, { label => $isspam, tokens => $tokens_ref } );
   }
 
   my $dataset_path = File::Spec->catfile($nn_data_dir, 'fann-' . lc($self->{main}->{username}) . '.model');
@@ -665,8 +656,8 @@ sub learn_message {
     return;
   }
 
-  # Extract the text and labels
-  my @email_texts = map { $_->{text} } @training_data;
+  # Extract the per-message token lists and labels
+  my @email_token_lists = map { $_->{tokens} } @training_data;
   my @labels = map { $_->{label} } @training_data;
 
 
@@ -691,8 +682,8 @@ sub learn_message {
   # Update the vocabulary
   my $update_vocab = 1;
 
-  # Convert email text to numerical feature vectors
-  my ($feature_vectors, $vocab_size, $vocab_keys_ref) = _text_to_features($self, $self->{main}->{conf}, $nn_data_dir, $update_vocab, $isspam, undef, @email_texts);
+  # Convert per-message token lists to numerical feature vectors
+  my ($feature_vectors, $vocab_size, $vocab_keys_ref) = _text_to_features($self, $self->{main}->{conf}, $nn_data_dir, $update_vocab, $isspam, undef, @email_token_lists);
 
   unless ($feature_vectors && @$feature_vectors) {
     $locker->safe_unlock($dataset_path);
@@ -735,17 +726,16 @@ sub learn_message {
       dbg("Vocabulary size changed ($num_input vs model $model_size), rebuilding training vectors with model vocabulary");
       my $stored_vocab_ref = $self->_load_model_vocab($nn_data_dir);
       if (defined $stored_vocab_ref && scalar(@$stored_vocab_ref) == $model_size) {
-        ($feature_vectors, undef) = _text_to_features($self, $self->{main}->{conf}, $nn_data_dir, 2, undef, $stored_vocab_ref, @email_texts);
+        ($feature_vectors, undef) = _text_to_features($self, $self->{main}->{conf}, $nn_data_dir, 2, undef, $stored_vocab_ref, @email_token_lists);
         $vocab_keys_ref = $stored_vocab_ref;
+        $num_input = $model_size;
+        $network = $existing_network;
       } else {
-        dbg("Model vocabulary file not found or mismatched, falling back to vector adjustment");
-        $feature_vectors = [ map { my $v = _adjust_vector_size($_->{vec}, $model_size); { vec => $v, hits => scalar grep { $_ != 0 } @$v } } @$feature_vectors ];
-        $vocab_keys_ref = undef;
+        dbg("Model vocabulary mismatch, rebuilding model with current vocabulary ($num_input terms)");
       }
-      $num_input = $model_size;
-      $network = $existing_network;
-    } else {
-      # No existing model: create a baseline from vocabulary statistics
+    }
+    unless (defined $network) {
+      # No existing model or inconsistent model, create a baseline from vocabulary
       $network = $self->_retrain_from_vocabulary($self->{main}->{conf}, $nn_data_dir, $num_input);
       if (!defined $network) {
         # No vocabulary stats available yet, create a fresh network
@@ -796,8 +786,8 @@ sub learn_message {
   } else {
     $class_weight = $spam_docs / $ham_docs;   # < 1 when ham dominates
   }
-  $class_weight = 0.5 if $class_weight < 0.5;
-  $class_weight = 2.0 if $class_weight > 2.0;
+  $class_weight = 0.25 if $class_weight < 0.25;
+  $class_weight = 4.0  if $class_weight > 4.0;
 
   my $weighted_epochs = int($train_epochs * $class_weight) || 1;
   # Scale epochs down for large vocabularies to keep per-message training time
@@ -833,14 +823,13 @@ sub learn_message {
       if ($svec_ok && $hvec_ok) {
         my $replay_cycles = int(sqrt($weighted_epochs / 5.0) + 0.5) || 1;
         $replay_cycles = 12 if $replay_cycles > 12;
-
-        if ($isspam) {
-          for (1 .. $replay_cycles) {
+        # Alternate the order of (own, opposite) across cycles so the
+        # very last gradient step is not locked to the message's class.
+        for my $i (1 .. $replay_cycles) {
+          if ($i % 2 == ($isspam ? 1 : 0)) {
             eval { $network->train($hvec, [0]); 1 } or dbg("Replay ham step failed: "  . ($@ || 'unknown'));
             eval { $network->train($svec, [1]); 1 } or dbg("Replay spam step failed: " . ($@ || 'unknown'));
-          }
-        } else {
-          for (1 .. $replay_cycles) {
+          } else {
             eval { $network->train($svec, [1]); 1 } or dbg("Replay spam step failed: " . ($@ || 'unknown'));
             eval { $network->train($hvec, [0]); 1 } or dbg("Replay ham step failed: "  . ($@ || 'unknown'));
           }
@@ -876,6 +865,14 @@ sub learn_message {
     );
     chmod($file_mode, $tmp_path) or info("chmod $file_mode on '$tmp_path' failed: $!");
     $network->save($tmp_path) or die "model save to temp '$tmp_path' failed";
+
+    if (defined $self->{main}->{conf}->{neuralnetwork_dsn} && $self->{dbh}) {
+      $self->_save_model_vocab_to_sql($vocab_keys_ref);
+    } else {
+      $self->_save_model_vocab($vocab_keys_ref, $nn_data_dir);
+    }
+    delete $self->{_model_vocab_cache};
+    delete $self->{_model_vocab_cache_t};
     rename($tmp_path, $dataset_path)
       or die "atomic rename '$tmp_path' -> '$dataset_path' failed: $!";
     $tmp_path = undef;
@@ -895,12 +892,6 @@ sub learn_message {
     dbg("Model saved to '$dataset_path' (input:$num_input)");
     $self->{neural_model} = $network;
     $self->{_neural_model_load_time} = time();
-
-    if (defined $self->{main}->{conf}->{neuralnetwork_dsn} && $self->{dbh}) {
-      $self->_save_model_vocab_to_sql($vocab_keys_ref);
-    } else {
-      $self->_save_model_vocab($vocab_keys_ref, $nn_data_dir);
-    }
 
     # Record message as learned to prevent re-learning.
     if (defined $msg && defined $msgid && length($msgid) > 0) {
@@ -931,14 +922,12 @@ sub forget_message {
     }
 
     # Decrement vocabulary counts for tokens in this message
-    my $text = $msg->get_visible_rendered_body_text_array();
-    $text = join("\n", @{$text}) if defined $text;
+    my $tokens_ref = $self->_extract_features_from_message($conf, $msg);
 
-    if (defined $text && length($text) > 0) {
-      my @tokens = $self->_tokenize_text($conf, $text);
-      if (@tokens) {
+    my $deleted_count = 0;
+    if (ref $tokens_ref eq 'ARRAY' && @$tokens_ref) {
         my %token_total;
-        foreach my $t (@tokens) {
+        foreach my $t (@$tokens_ref) {
           $token_total{$t}++;
         }
 
@@ -976,6 +965,7 @@ sub forget_message {
           ";
           my $sth_cleanup = $self->{dbh}->prepare($cleanup_sql);
           $sth_cleanup->execute(lc($username));
+          $deleted_count = $sth_cleanup->rows();
 
           $self->{dbh}->commit();
           dbg("Decremented vocabulary counts for message $msgid");
@@ -985,7 +975,6 @@ sub forget_message {
           eval { $self->{dbh}->rollback() if !$self->{dbh}{AutoCommit} };
           dbg("Failed to decrement vocabulary during forget: $err");
         };
-      }
     }
 
     my $del_sql = "
@@ -1007,6 +996,54 @@ sub forget_message {
     if (defined $self->{_file_vocab_cache}) {
       delete $self->{_file_vocab_cache}{$lc_user};
       delete $self->{_file_vocab_cache_time}{$lc_user};
+    }
+
+    # Vocabulary terms were removed, retrain so the model stays consistent
+    if ($deleted_count > 0) {
+      my $nn_data_dir  = Mail::SpamAssassin::Util::untaint_file_path($conf->{neuralnetwork_data_dir});
+      my $dataset_path = File::Spec->catfile($nn_data_dir, 'fann-' . $lc_user . '.model');
+      if (-d $nn_data_dir && -f $dataset_path) {
+        my $full_vocab_ref  = $self->_load_vocabulary_from_sql($username);
+        my $full_terms      = ref($full_vocab_ref) eq 'HASH' ? ($full_vocab_ref->{terms} || {}) : {};
+        my $full_vocab_size = scalar keys %$full_terms;
+        if ($full_vocab_size > 0) {
+          my $locker   = $self->{main}->{locker};
+          my $got_lock = eval { $locker->safe_lock($dataset_path, $conf->{neuralnetwork_lock_timeout}); 1 };
+          my $rebuilt  = eval { $self->_retrain_from_vocabulary($conf, $nn_data_dir, $full_vocab_size) };
+          if ($rebuilt) {
+            my $file_mode = 0666 & ~umask();
+            eval {
+              my ($vol, $dir) = File::Spec->splitpath($dataset_path);
+              my $tmp_dir = File::Spec->catpath($vol, $dir, '');
+              my (undef, $tmp_path) = File::Temp::tempfile(
+                'fann-XXXXXX', DIR => $tmp_dir, SUFFIX => '.tmp', UNLINK => 0);
+              chmod($file_mode, $tmp_path) or info("chmod $file_mode on '$tmp_path' failed: $!");
+              if ($rebuilt->save($tmp_path)) {
+                rename($tmp_path, $dataset_path) or die "rename failed: $!";
+              } else {
+                unlink $tmp_path;
+                die "save failed";
+              }
+              1;
+            } or do {
+              info("NeuralNetwork: Could not persist retrained model after forget: " . ($@ || 'unknown'));
+            };
+            my $new_vocab_keys = [ sort keys %$full_terms ];
+            if (defined $conf->{neuralnetwork_dsn} && $self->{dbh}) {
+              $self->_save_model_vocab_to_sql($new_vocab_keys);
+            } else {
+              $self->_save_model_vocab($new_vocab_keys, $nn_data_dir);
+            }
+            $self->{neural_model}            = $rebuilt;
+            $self->{_neural_model_load_time} = time();
+            delete $self->{_model_vocab_cache};
+            info("NeuralNetwork: Retrained model with $full_vocab_size vocabulary terms after forget");
+          } else {
+            dbg("NeuralNetwork: Retrain after forget failed");
+          }
+          $locker->safe_unlock($dataset_path) if $got_lock;
+        }
+      }
     }
 
     $self->{forgetting} = undef;
@@ -1245,13 +1282,15 @@ sub _check_neuralnetwork {
   my $spam_threshold = $conf->{neuralnetwork_spam_threshold};
   my $ham_threshold  = $conf->{neuralnetwork_ham_threshold};
 
-  my $email_to_predict = $msg->get_visible_rendered_body_text_array();
-  $email_to_predict = join("\n", @{$email_to_predict});
-  if(!defined $email_to_predict || length($email_to_predict) < $min_text_len) {
+  my $vis_arr = $msg->get_visible_rendered_body_text_array();
+  my $vis_text = (ref $vis_arr eq 'ARRAY') ? join("\n", @$vis_arr)
+                : (defined $vis_arr ? $vis_arr : '');
+  if (length($vis_text) < $min_text_len) {
     $pms->{neuralnetwork_prediction} = undef;
-    dbg("Too short email text $email_to_predict");
+    dbg("Too short email text");
     return;
   }
+  my $tokens_ref = $self->_extract_features_from_message($conf, $msg);
 
   my $nn_data_dir = $self->{main}->{conf}->{neuralnetwork_data_dir};
   $nn_data_dir = Mail::SpamAssassin::Util::untaint_file_path($nn_data_dir);
@@ -1268,37 +1307,18 @@ sub _check_neuralnetwork {
     return;
   }
 
-  # Load the vocabulary the model was trained on so the feature vector dimensions
-  # are always aligned with the model, regardless of subsequent vocabulary growth.
-  my $stored_vocab_ref = $self->_load_model_vocab($nn_data_dir);
-
-  # Do not update the vocabulary
-  my $update_vocab = 0;
-
-  # Convert email to feature vector using the model's vocabulary
-  my ($feature_vectors, $vocab_size) = _text_to_features($self, $conf, $nn_data_dir, $update_vocab, undef, $stored_vocab_ref, $email_to_predict);
-  unless ($feature_vectors && @$feature_vectors) {
-    $pms->{neuralnetwork_prediction} = undef;
-    dbg("Not enough tokens found");
-    return;
-  }
-
-  my $min_hits = $conf->{neuralnetwork_min_vocab_hits};
-  my $hits     = $feature_vectors->[0]{hits};
-  if ($hits < $min_hits) {
-    $pms->{neuralnetwork_prediction} = undef;
-    dbg("Too few vocabulary hits ($hits < $min_hits), skipping prediction");
-    return;
-  }
-  my $input_vector = $feature_vectors->[0]{vec};
-
+  # Reload model if it has expired or the file has changed since last load
   my $ttl = $conf->{neuralnetwork_cache_ttl} || 0;
   my $model_age = defined $self->{_neural_model_load_time} ? time() - $self->{_neural_model_load_time} : undef;
   my $model_expired = defined $model_age && $ttl > 0 && $model_age >= $ttl;
+  my $model_mtime   = (stat($dataset_path))[9] // 0;
+  my $model_changed = $model_mtime > ($self->{_neural_model_load_time} // 0);
 
-  if (!defined $self->{neural_model} || $model_expired) {
+  if (!defined $self->{neural_model} || $model_expired || $model_changed) {
     if ($model_expired) {
       dbg("Model cache expired (age: ${model_age}s, ttl: ${ttl}s), reloading");
+    } elsif ($model_changed) {
+      dbg("Model file changed on disk, reloading");
     }
 
     my $locker = $self->{main}->{locker};
@@ -1323,9 +1343,11 @@ sub _check_neuralnetwork {
 
       # rebuild an in-memory model from vocabulary statistics
       undef $self->{neural_model};
+      my $rebuild_vocab_ref  = $self->_load_model_vocab($nn_data_dir);
+      my $rebuild_vocab_size = (defined $rebuild_vocab_ref && @$rebuild_vocab_ref)
+        ? scalar(@$rebuild_vocab_ref) : 0;
       my $rebuilt = eval {
-        $self->_retrain_from_vocabulary($conf, $nn_data_dir,
-          $feature_vectors->[0] ? scalar(@{$feature_vectors->[0]{vec}}) : 0);
+        $self->_retrain_from_vocabulary($conf, $nn_data_dir, $rebuild_vocab_size);
       };
       if ($rebuilt) {
         dbg("Vocabulary rebuild succeeded");
@@ -1337,7 +1359,7 @@ sub _check_neuralnetwork {
           my $tmp_dir = File::Spec->catpath($vol, $dir, '');
           my (undef, $tmp_path) = File::Temp::tempfile(
             'fann-XXXXXX', DIR => $tmp_dir, SUFFIX => '.tmp', UNLINK => 0);
-          chmod($file_mode, $tmp_path) or info("chmod $file_mode on '$tmp_path' failed: $!");  
+          chmod($file_mode, $tmp_path) or info("chmod $file_mode on '$tmp_path' failed: $!");
           if ($rebuilt->save($tmp_path)) {
             rename($tmp_path, $dataset_path)
               or die "rename failed: $!";
@@ -1357,6 +1379,28 @@ sub _check_neuralnetwork {
     $locker->safe_unlock($dataset_path) if $got_lock;
   }
   my $network = $self->{neural_model};
+
+  my $stored_vocab_ref = $self->_load_model_vocab($nn_data_dir);
+
+  # Do not update the vocabulary
+  my $update_vocab = 0;
+
+  # Convert email to feature vector using the model's vocabulary
+  my ($feature_vectors, $vocab_size) = _text_to_features($self, $conf, $nn_data_dir, $update_vocab, undef, $stored_vocab_ref, $tokens_ref);
+  unless ($feature_vectors && @$feature_vectors) {
+    $pms->{neuralnetwork_prediction} = undef;
+    dbg("Not enough tokens found");
+    return;
+  }
+
+  my $min_hits = $conf->{neuralnetwork_min_vocab_hits};
+  my $hits     = $feature_vectors->[0]{hits};
+  if ($hits < $min_hits) {
+    $pms->{neuralnetwork_prediction} = undef;
+    dbg("Too few vocabulary hits ($hits < $min_hits), skipping prediction");
+    return;
+  }
+  my $input_vector = $feature_vectors->[0]{vec};
 
   my $expected_size = $network->num_inputs();
   if (scalar(@$input_vector) != $expected_size) {
@@ -1616,6 +1660,123 @@ sub _save_vocabulary_to_sql {
     eval { $self->{dbh}->rollback() if !$self->{dbh}{AutoCommit} };
     dbg("Failed to save vocabulary to SQL: $err");
   };
+}
+
+# Header whitelist used by _extract_features_from_message
+my %_NN_HEADER_PREFIX = (
+  'Subject'      => 'H*sub:',
+  'From'         => 'H*frm:',
+  'Reply-To'     => 'H*rpt:',
+  'Return-Path'  => 'H*rpa:',
+  'To'           => 'H*to:',
+  'Cc'           => 'H*cc:',
+  'Content-Type' => 'H*ct:',
+  'Message-Id'   => 'H*mid:',
+);
+
+sub _tokenize_header_value {
+  my ($prefix, $value) = @_;
+  return () unless defined $value && length $value;
+
+  $value = lc $value;
+  $value =~ s/[\r\n]+/ /g;
+  $value =~ s/"//g;
+  # Keep alphanumerics, dots, @ and dashes inside tokens
+  $value =~ s/[^\p{L}\p{N}\.\@\-_]+/ /g;
+
+  my @out;
+  for my $p (split /\s+/, $value) {
+    my $len = length $p;
+    next if $len < 2 || $len > 80;
+    push @out, $prefix . $p;
+  }
+  return @out;
+}
+
+sub _tokenize_uri {
+  my ($uri) = @_;
+  return () unless defined $uri && length $uri;
+
+  $uri = lc $uri;
+  my @out;
+  my $capped = length($uri) > 80 ? substr($uri, 0, 80) : $uri;
+  push @out, 'U*:' . $capped;
+
+  if ($uri =~ m{(?:[a-z][a-z0-9+\-.]*:)?//([^/\s\?\#]+)}) {
+    my $host = $1;
+    $host =~ s/^[^\@]*\@//;  # strip user-info
+    $host =~ s/:\d+$//;       # strip port
+    if (length $host) {
+      push @out, 'D*:' . $host;
+      if ($host =~ /([^.]+\.[^.]+)$/) {
+        push @out, 'D*:' . $1;
+      }
+    }
+  }
+  return @out;
+}
+
+sub _extract_uris_from_msg {
+  my ($msg) = @_;
+  return () unless defined $msg;
+  my $body = eval { $msg->get_pristine_body() };
+  return () unless defined $body;
+  $body = join("\n", @$body) if ref $body eq 'ARRAY';
+  my @uris;
+  while ($body =~ m{((?:https?|ftp)://[^\s<>"'()\[\]\\]+)}gi) {
+    my $u = $1;
+    $u =~ s/[\.,;:!?]+$//;
+    push @uris, $u if length $u;
+  }
+  return @uris;
+}
+
+# Build a flat list of prefixed tokens drawn from the visible body, the
+# invisible (HTML-hidden) body, a small whitelist of headers, the URIs in
+# the message, and the MIME-part digests.
+sub _extract_features_from_message {
+  my ($self, $conf, $msg) = @_;
+  my @tokens;
+  return \@tokens unless defined $msg;
+
+  my $vis_arr = $msg->get_visible_rendered_body_text_array();
+  if (ref $vis_arr eq 'ARRAY' && @$vis_arr) {
+    push @tokens, $self->_tokenize_text($conf, join("\n", @$vis_arr));
+  }
+
+  my $inv_arr = eval { $msg->get_invisible_rendered_body_text_array() };
+  if (ref $inv_arr eq 'ARRAY' && @$inv_arr) {
+    my @inv_tok = $self->_tokenize_text($conf, join("\n", @$inv_arr));
+    push @tokens, map { 'I*:' . $_ } @inv_tok;
+  }
+
+  for my $h (sort keys %_NN_HEADER_PREFIX) {
+    my $val = eval { $msg->get_pristine_header($h) };
+    next unless defined $val;
+    push @tokens, _tokenize_header_value($_NN_HEADER_PREFIX{$h}, $val);
+  }
+
+  my $rcv = eval { $msg->get_pristine_header('Received') };
+  if (defined $rcv && length $rcv) {
+    my @lines = split /\n(?!\s)/, $rcv;
+    push @tokens, _tokenize_header_value('H*rcv:', $lines[-1]) if @lines;
+  }
+
+  for my $u (_extract_uris_from_msg($msg)) {
+    push @tokens, _tokenize_uri($u);
+  }
+
+  my $mp = eval { $msg->get_mimepart_digests() };
+  if (ref $mp eq 'ARRAY') {
+    for my $d (@$mp) {
+      next unless defined $d && length $d;
+      my $t = lc $d;
+      $t = substr($t, 0, 80) if length $t > 80;
+      push @tokens, 'M*:' . $t;
+    }
+  }
+
+  return \@tokens;
 }
 
 sub _tokenize_text {
