@@ -44,7 +44,7 @@ use strict;
 use warnings;
 use re 'taint';
 
-my $VERSION = 0.8.2;
+my $VERSION = 0.8.3;
 
 use AI::FANN qw(:all);
 use Storable qw(store retrieve);
@@ -83,6 +83,7 @@ sub new {
   $self->set_config($mailsa->{conf});
   $self->register_eval_rule("check_neuralnetwork_spam", $Mail::SpamAssassin::Conf::TYPE_BODY_EVALS);
   $self->register_eval_rule("check_neuralnetwork_ham", $Mail::SpamAssassin::Conf::TYPE_BODY_EVALS);
+  $self->register_eval_rule("check_neuralnetwork", $Mail::SpamAssassin::Conf::TYPE_BODY_EVALS);
 
   return $self;
 }
@@ -204,6 +205,44 @@ SQLite.
 
 Minimum number of tokens in the email that must exist in the vocabulary for
 prediction to run.
+
+=back
+
+=head1 EVAL RULES
+
+=over 4
+
+=item check_neuralnetwork_spam()
+
+Body eval rule. Returns true when the neural network prediction score exceeds
+C<neuralnetwork_spam_threshold> (default 0.6). Used by the built-in C<NN_SPAM>
+rule (score +1.0).
+
+=item check_neuralnetwork_ham()
+
+Body eval rule. Returns true when the neural network prediction score is below
+C<neuralnetwork_ham_threshold> (default 0.4). Used by the built-in C<NN_HAM>
+rule (score -1.0).
+
+=item check_neuralnetwork(low, high)
+
+Body eval rule accepting two optional floating-point arguments. Returns true
+when the raw prediction score falls within the inclusive range C<[low, high]>.
+Defaults: C<low = 0.0>, C<high = 1.0>.
+
+Use this rule to define finer-grained confidence tiers.
+
+  body      NN_CONFIDENT_SPAM  eval:check_neuralnetwork(0.75, 1.0)
+  describe  NN_CONFIDENT_SPAM  Email classified as spam with high confidence by Neural Network
+  score     NN_CONFIDENT_SPAM  2.0
+
+  body      NN_PROBABLE_SPAM   eval:check_neuralnetwork(0.55, 0.75)
+  describe  NN_PROBABLE_SPAM   Email classified as probable spam by Neural Network
+  score     NN_PROBABLE_SPAM   1.0
+
+  body      NN_PROBABLE_HAM    eval:check_neuralnetwork(0.0, 0.4)
+  describe  NN_PROBABLE_HAM    Email classified as ham by Neural Network
+  score     NN_PROBABLE_HAM    -1.0
 
 =back
 
@@ -474,7 +513,7 @@ sub _text_to_features {
     if ($train == 0) {
       if ( ($vocabulary{_spam_count} < $min_spam) || ($vocabulary{_ham_count} < $min_ham) ) {
         dbg("Insufficient spam/ham data for prediction: spam=".$vocabulary{_spam_count}.", ham=".$vocabulary{_ham_count});
-        return ([], 0);
+        return ([], 0, []);
       }
     }
 
@@ -696,6 +735,24 @@ sub learn_message {
     $locker->safe_unlock($dataset_path);
     return;
   }
+  # Defer model creation until minimum training corpus is built
+  unless (defined $self->{neural_model}) {
+    my $min_spam = $conf->{neuralnetwork_min_spam_count};
+    my $min_ham  = $conf->{neuralnetwork_min_ham_count};
+    my $vocab = $self->{_last_train_vocab} // {};
+    my $sc = $vocab->{_spam_count} || 0;
+    my $hc = $vocab->{_ham_count}  || 0;
+    if ($sc < $min_spam || $hc < $min_ham) {
+      dbg("Deferring model creation: spam=$sc/$min_spam ham=$hc/$min_ham (vocabulary updated)");
+      # Record message as learned to prevent re-learning.
+      if (defined $msg && defined $msgid && length($msgid) > 0) {
+        $self->_save_msgid_to_neural_seen($msgid, $isspam);
+      }
+      $locker->safe_unlock($dataset_path);
+      return 0;
+    }
+  }
+
   # Two-layer hidden sizing: layer1 ~10% of inputs (clamped 32..512),
   # layer2 half of layer1 (min 16).
   my $num_hidden1 = int($num_input / 10);
@@ -1066,6 +1123,15 @@ sub check_neuralnetwork_ham {
   return $pms->{neuralnetwork_ham};
 }
 
+sub check_neuralnetwork {
+  my ($self, $pms, $low, $high) = @_;
+
+  _check_neuralnetwork($self, $pms);
+  my $pred = $pms->{neuralnetwork_prediction};
+  return 0 unless defined $pred;
+  return ($pred >= $low && $pred <= $high) ? 1 : 0;
+}
+
 # Compute chi-squared score measuring how discriminative a vocabulary term
 # is between spam and ham.  Returns 0 when there is insufficient data.
 sub _chi2_score {
@@ -1314,6 +1380,9 @@ sub _check_neuralnetwork {
   my $model_mtime   = (stat($dataset_path))[9] // 0;
   my $model_changed = $model_mtime > ($self->{_neural_model_load_time} // 0);
 
+  my $locker = $self->{main}->{locker};
+  my $network;
+
   if (!defined $self->{neural_model} || $model_expired || $model_changed) {
     if ($model_expired) {
       dbg("Model cache expired (age: ${model_age}s, ttl: ${ttl}s), reloading");
@@ -1321,7 +1390,6 @@ sub _check_neuralnetwork {
       dbg("Model file changed on disk, reloading");
     }
 
-    my $locker = $self->{main}->{locker};
     my $got_lock = 0;
     eval {
       $got_lock = $locker->safe_lock($dataset_path,
@@ -1331,7 +1399,8 @@ sub _check_neuralnetwork {
 
     my $file_mode = 0666 & ~umask();
     eval {
-      $self->{neural_model} = AI::FANN->new_from_file($dataset_path);
+      my $loaded = AI::FANN->new_from_file($dataset_path);
+      $self->{neural_model}           = $loaded;
       $self->{_neural_model_load_time} = time();
       1;
     } or do {
@@ -1376,9 +1445,15 @@ sub _check_neuralnetwork {
       }
     };
 
+    $network = $self->{neural_model};
     $locker->safe_unlock($dataset_path) if $got_lock;
+  } else {
+    my $got_snap_lock = 0;
+    eval { $got_snap_lock = $locker->safe_lock($dataset_path,
+        $self->{main}->{conf}->{neuralnetwork_lock_timeout}); 1 };
+    $network = $self->{neural_model};
+    $locker->safe_unlock($dataset_path) if $got_snap_lock;
   }
-  my $network = $self->{neural_model};
 
   my $stored_vocab_ref = $self->_load_model_vocab($nn_data_dir);
 
@@ -1779,6 +1854,33 @@ sub _extract_features_from_message {
   return \@tokens;
 }
 
+my %_HTML_ENTITIES = (
+  # core XML/HTML escapes
+  amp   => '&',   lt    => '<',   gt    => '>',
+  quot  => '"',   apos  => "'",   nbsp  => ' ',
+  # symbols
+  euro  => 'eur', pound => 'gbp', yen   => 'jpy',
+  cent  => 'cent', curren => ' ',
+  # dashes and quotation marks
+  mdash => '-',   ndash => '-',   minus => '-',   horbar => '-',
+  laquo => ' ',   raquo => ' ',
+  ldquo => '"',   rdquo => '"',   bdquo => '"',
+  lsquo => "'",   rsquo => "'",   sbquo => "'",
+  # other punctuation / typography
+  hellip => '...',
+  # accented letters
+  agrave => 'a',  aacute => 'a',  acirc  => 'a',  atilde => 'a',
+  auml   => 'a',  aring  => 'a',  aelig  => 'ae',
+  egrave => 'e',  eacute => 'e',  ecirc  => 'e',  euml   => 'e',
+  igrave => 'i',  iacute => 'i',  icirc  => 'i',  iuml   => 'i',
+  ograve => 'o',  oacute => 'o',  ocirc  => 'o',  otilde => 'o',
+  ouml   => 'o',  oslash => 'o',  oelig  => 'oe',
+  ugrave => 'u',  uacute => 'u',  ucirc  => 'u',  uuml   => 'u',
+  yacute => 'y',  yuml   => 'y',
+  ntilde => 'n',  ccedil => 'c',  szlig  => 'ss',
+  eth    => 'd',  thorn  => 'th',
+);
+
 sub _tokenize_text {
   my ($self, $conf, $text) = @_;
   return () unless defined $text;
@@ -1798,8 +1900,11 @@ sub _tokenize_text {
   $text =~ s/\-{2,}//g;
   # Remove tokens that could be a date
   $text =~ s/\b\d+(?:\-|\/)\d+(?:\-|\/)\d+\b//g;
-  # replace HTML entities and punctuation with spaces
-  $text =~ s/&[a-z#0-9]+;/ /g;
+  # Decode HTML entities to their text equivalents, then strip residue
+  $text =~ s/&([a-zA-Z]+);/exists $_HTML_ENTITIES{lc $1} ? $_HTML_ENTITIES{lc $1} : ' '/ge;
+  $text =~ s/&#x([0-9a-fA-F]{1,6});/chr(hex($1))/ge;
+  $text =~ s/&#([0-9]{1,7});/chr($1)/ge;
+  $text =~ s/&/ /g;
   $text =~ s{[^\p{L}\p{N}\-]}{ }g;
   my @tokens = grep { length($_) >= $min_word_len && length($_) <= $max_word_len } split /\s+/, $text;
   @tokens = grep { $_ !~ /^\d+$/ } @tokens;         # drop pure numbers
@@ -1900,11 +2005,19 @@ sub _save_model_vocab_to_sql {
       "UPDATE neural_vocabulary SET model_position = NULL WHERE username = ?",
       undef, lc($username)
     );
-    my $sth = $self->{dbh}->prepare(
-      "UPDATE neural_vocabulary SET model_position = ? WHERE username = ? AND keyword = ?"
-    );
+    my $upsert_sql;
+    if ($self->{main}->{conf}->{neuralnetwork_dsn} =~ /^dbi:(?:mysql|MariaDB)/i) {
+      $upsert_sql = "INSERT INTO neural_vocabulary (username, keyword, model_position)
+                     VALUES (?, ?, ?)
+                     ON DUPLICATE KEY UPDATE model_position = VALUES(model_position)";
+    } else {
+      $upsert_sql = "INSERT INTO neural_vocabulary (username, keyword, model_position)
+                     VALUES (?, ?, ?)
+                     ON CONFLICT (username, keyword) DO UPDATE SET model_position = excluded.model_position";
+    }
+    my $sth = $self->{dbh}->prepare($upsert_sql);
     for my $i (0 .. $#$vocab_keys_ref) {
-      $sth->execute($i, lc($username), $vocab_keys_ref->[$i]);
+      $sth->execute(lc($username), $vocab_keys_ref->[$i], $i);
     }
     $self->{dbh}->commit();
     dbg("Saved model vocabulary (" . scalar(@$vocab_keys_ref) . " terms) to SQL for user: $username");
@@ -1960,10 +2073,10 @@ sub _save_model_vocab {
 sub _load_model_vocab {
   my ($self, $nn_data_dir) = @_;
 
-  my $model_t = $self->{_neural_model_load_time} || 0;
-  if (defined $self->{_model_vocab_cache}
-      && ($self->{_model_vocab_cache_t} || 0) >= $model_t) {
-    return $self->{_model_vocab_cache};
+  my $ttl = $self->{main}->{conf}->{neuralnetwork_cache_ttl} || 0;
+  if ($ttl > 0 && defined $self->{_model_vocab_cache}) {
+    my $age = time() - ($self->{_model_vocab_cache_t} || 0);
+    return $self->{_model_vocab_cache} if $age < $ttl;
   }
 
   my $vocab_ref;
