@@ -3140,6 +3140,7 @@ if can(Mail::SpamAssassin::Conf::feature_bug6558_free)
   meta       ZW_OBFU_FROMTOSUBJ         __UNICODE_OBFU_ZW && FROM_IN_TO_AND_SUBJ 
   describe   ZW_OBFU_FROMTOSUBJ         Obfuscated text + from in to and subject
   score      ZW_OBFU_FROMTOSUBJ         2.000	# limit
+  tflags     ZW_OBFU_FROMTOSUBJ         publish
 
   meta       ZW_OBFU_FREEM              __UNICODE_OBFU_ZW && __freemail_hdr_replyto 
   describe   ZW_OBFU_FREEM              Obfuscated text + freemail
