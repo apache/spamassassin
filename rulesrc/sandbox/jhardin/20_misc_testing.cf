@@ -4466,3 +4466,6 @@ ifplugin Mail::SpamAssassin::Plugin::MIMEHeader
   mimeheader   __OBFU_HTML_ATTACH_RECHNUNG    Content-Type =~ m,\bapplication/octet-stream\b.+rechnung.*\.[a-z]?html?\b,i
 endif
 
+body       __RI_ZWNJ_OBFU              /[a-z0-9"'\s](?:\xf0\x9f\x87[\xa6-\xbf]\xe2\x80\x8c){2,}/i
+tflags     __RI_ZWNJ_OBFU              multiple maxhits=6
+
