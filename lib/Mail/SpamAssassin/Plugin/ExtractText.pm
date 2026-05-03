@@ -443,6 +443,8 @@ See C<extracttext_cache_autoclean> for database cleaning.
     type => $Mail::SpamAssassin::Conf::CONF_TYPE_NUMERIC
   });
 
+=over 4
+
 =item extracttext_cache_autoclean	(default: 1000)
 
 Automatically purge old entries from database.  Value describes a random run
