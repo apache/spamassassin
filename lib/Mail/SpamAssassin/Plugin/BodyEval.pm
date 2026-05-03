@@ -50,6 +50,8 @@ sub new {
   $self->register_eval_rule("plaintext_sig_length", $Mail::SpamAssassin::Conf::TYPE_BODY_EVALS);
   $self->register_eval_rule("plaintext_body_sig_ratio", $Mail::SpamAssassin::Conf::TYPE_BODY_EVALS);
 
+  $self->register_eval_rule("vertical_whitespace", $Mail::SpamAssassin::Conf::TYPE_BODY_EVALS);
+
   return $self;
 }
 
@@ -381,6 +383,76 @@ sub _plaintext_body_sig_ratio {
   return 1;
 }
 
+# Count the maximum run of consecutive blank lines in the message's primary
+# visible text part.
+#
+# Argument:
+#   $min - minimum run length (inclusive) required for the rule to fire
+#
+# Returns 1 if the longest run of blank lines is >= $min, else 0.
+#
+# Example rule:
+#   body  __VERTICAL_WHITESPACE_10  eval:vertical_whitespace('10')
+#
+sub vertical_whitespace {
+  my ($self, $pms, undef, $min) = @_;
+
+  unless (exists($pms->{vertical_whitespace})) {
+    my $vertical_whitespace = 0;
+
+    # Walk the top-level body to find the first eligible text part, mimicking
+    # what an MUA would display. Skip named parts (attachments) and do not
+    # descend into non-multipart containers like message/rfc822.
+    my $preferred_alt = $pms->{conf}->{multipart_alternative_preferred_part};
+    my $part;
+    my @queue = ($pms->{msg});
+    while (my $p = shift @queue) {
+      # Named parts are attachments regardless of type
+      next if defined $p->{name};
+
+      my $type = $p->{'type'} || '';
+      if ($type eq 'text/plain' || $type eq 'text/html') {
+        $part = $p;
+        last;
+      }
+      if ($type eq 'multipart/alternative') {
+        if ($preferred_alt) {
+          my $pref = Mail::SpamAssassin::Message::_find_part_by_type(
+            $p, $preferred_alt);
+          if ($pref) { $part = $pref; last; }
+        }
+        unshift @queue, @{$p->{'body_parts'} || []};
+        next;
+      }
+      if (index($type, 'multipart/') == 0) {
+        unshift @queue, @{$p->{'body_parts'} || []};
+        next;
+      }
+      # any other type: skip, do not descend
+    }
+
+    if ($part) {
+      # Get the rendered text of the part (visible only)
+      my (undef, $text) = $part->visible_rendered();
+      # Count the max number of consecutive blank lines
+      my $counter = 0;
+      for (split(/^/m, $text)) {
+        if (/^\s*$/) {
+          $counter++;
+        } else {
+          $vertical_whitespace = $counter if $counter > $vertical_whitespace;
+          $counter = 0;
+        }
+        # print STDERR $counter.": \"$_\"\n";
+      }
+      $vertical_whitespace = $counter if $counter > $vertical_whitespace;
+    }
+    $pms->{vertical_whitespace} = $vertical_whitespace;
+    dbg("eval: vertical_whitespace: $vertical_whitespace");
+  }
+
+  return $pms->{vertical_whitespace} >= $min;
+}
 
 # ---------------------------------------------------------------------------
 
@@ -389,5 +461,7 @@ sub _plaintext_body_sig_ratio {
 sub has_check_body_length { 1 }
 
 sub has_plaintext_body_sig_ratio { 1 }
+
+sub has_vertical_whitespace { 1 }
 
 1;

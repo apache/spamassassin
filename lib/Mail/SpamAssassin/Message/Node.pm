@@ -828,7 +828,8 @@ sub rendered {
           $space, length $self->{rendered},
           $character_semantics ? '' : ', octets!?');
     } else {
-      $space = $self->{rendered} =~ tr/ \t\n\r\x0b//;
+      my $str = $self->{rendered};
+      $space = $str =~ tr/ \t\n\r\x0b//;
       dbg("message: spaces (octets) in HTML: %d out of %d%s",
           $space, length $self->{rendered},
           $character_semantics ? ', chars!?' : '');

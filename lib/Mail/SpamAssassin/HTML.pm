@@ -59,7 +59,7 @@ my %elements_text_style = map {; $_ => 1 }
 # elements that insert whitespace
 my %elements_whitespace = map {; $_ => 1 }
   qw( br div li th td dt dd p hr blockquote pre embed listing plaintext xmp title 
-    h1 h2 h3 h4 h5 h6 ),
+    h1 h2 h3 h4 h5 h6 tr),
 ;
 
 # elements that push URIs
@@ -218,22 +218,39 @@ sub get_rendered_text {
   my $self = shift;
   my %options = @_;
 
-  return join('', @{ $self->{text} }) unless %options;
+  my $text = '';
+  if (%options) {
+    my $mask;
+    while (my ($k, $v) = each %options) {
+      next if !defined $self->{"text_$k"};
+      if (!defined $mask) {
+        $mask |= $v ? $self->{"text_$k"} : ~ $self->{"text_$k"};
+      }
+      else {
+        $mask &= $v ? $self->{"text_$k"} : ~ $self->{"text_$k"};
+      }
+    }
 
-  my $mask;
-  while (my ($k, $v) = each %options) {
-    next if !defined $self->{"text_$k"};
-    if (!defined $mask) {
-      $mask |= $v ? $self->{"text_$k"} : ~ $self->{"text_$k"};
-    }
-    else {
-      $mask &= $v ? $self->{"text_$k"} : ~ $self->{"text_$k"};
-    }
+    my $i = 0;
+    for (@{ $self->{text} }) { $text .= $_ if vec($mask, $i++, 1); }
+  } else {
+    $text = join('', @{$self->{text}});
   }
 
-  my $text = '';
-  my $i = 0;
-  for (@{ $self->{text} }) { $text .= $_ if vec($mask, $i++, 1); }
+  $text =~ s/^[ \x{00}]+|[ \x{00}]+$//g;       # Remove spaces and nulls from beginning and end of string
+  $text =~ s/ +/ /g;                           # Collapse spaces
+  $text =~ s/ ?(\x{00} ?)+/\n\n/g;             # Collapse nulls (include neighboring spaces)
+
+  # Convert non-breaking spaces to spaces
+  if ( $self->{SA_character_semantics_input} ) {
+    # Unicode NBSP
+    $text =~ s/\xa0/ /g;
+  } else {
+    # UTF-8 NBSP
+    $text =~ s/\xc2\xa0/ /g;
+  }
+  $text =~ s/ ?\n ?/\n/g;                      # Remove spaces around newlines
+  $text =~ s/^ +| +$//g;                       # Remove spaces from beginning and end of string
   return $text;
 }
 
@@ -257,11 +274,14 @@ sub parse {
   # NOTE: HTML::Parser can cope with: <?xml pis>, <? with space>, so we
   # don't need to fix them here.
 
-  # # (outdated claim) HTML::Parser converts &nbsp; into a question mark ("?")
-  # # for some reason, so convert them to spaces.  Confirmed in 3.31, at least.
-  # ... Actually it doesn't, it is correctly converted into Unicode NBSP,
-  # nevertheless it does not hurt to treat it as a space.
-  $text =~ s/&nbsp;/ /g;
+  # # # (outdated claim) HTML::Parser converts &nbsp; into a question mark ("?")
+  # # # for some reason, so convert them to spaces.  Confirmed in 3.31, at least.
+  # # ... Actually it doesn't, it is correctly converted into Unicode NBSP,
+  # # nevertheless it does not hurt to treat it as a space.
+  # Actually it does hurt. Because <p> </p> is not the same as <p>&nbsp;</p>
+  # when calculating vertical whitespace. So don't do this here. We'll do it
+  # at the very end in get_rendered_text.
+  # $text =~ s/&nbsp;/ /g;
 
   # bug 4695: we want "<br/>" to be treated the same as "<br>", and
   # the HTML::Parser API won't do it for us
@@ -347,6 +367,11 @@ sub html_tag {
       pop(@{ $self->{anchor_refs} }) if $tag eq "a";
       $self->{closed_html} = 1 if $tag eq "html";
       $self->{closed_body} = 1 if $tag eq "body";
+      # If we're closing a block element && previous tag was a <br>, convert it to a non-breaking space
+      # This is a hackish way to prevent adding vertical whitespace while making sure the element is non-empty
+      if (exists $elements_whitespace{$tag} && defined(my $br = $self->{br})) {
+        $self->{text}->[$br] = $self->{SA_character_semantics_input} ? "\x{a0}" : "\xc2\xa0";
+      }
     }
   }
 }
@@ -355,14 +380,15 @@ sub html_whitespace {
   my ($self, $tag) = @_;
 
   # ordered by frequency of tag groups, note: whitespace is always "visible"
-  if ($tag eq "br" || $tag eq "div") {
+  if ($tag eq "br") {
     $self->display_text("\n", whitespace => 1);
+    $self->{br} = $#{ $self->{text} };
   }
   elsif ($tag =~ /^(?:li|t[hd]|d[td]|embed|h\d)$/) {
     $self->display_text(" ", whitespace => 1);
   }
-  elsif ($tag =~ /^(?:p|hr|blockquote|pre|listing|plaintext|xmp|title)$/) {
-    $self->display_text("\n\n", whitespace => 1);
+  elsif ($tag =~ /^(?:div|p|hr|blockquote|pre|listing|plaintext|xmp|title|tr)$/) {
+    $self->display_text("\x{00}", whitespace => 1);
   }
 }
 
@@ -954,30 +980,11 @@ sub display_text {
     $display{invisible} = 0;
   }
 
-  if ($display{whitespace}) {
-    # trim trailing whitespace from previous element if it was not whitespace
-    # and it was not invisible
-    if (@{ $self->{text} } &&
-	(!defined $self->{text_whitespace} ||
-	 !vec($self->{text_whitespace}, $#{$self->{text}}, 1)) &&
-	(!defined $self->{text_invisible} ||
-	 !vec($self->{text_invisible}, $#{$self->{text}}, 1)))
-    {
-      $self->{text}->[-1] =~ s/ $//;
-    }
+  unless ($display{whitespace}) {
+    $text =~ s/[ \t\n\r\f\x0b]+/ /gs;
+    $self->{br} = undef unless $text eq ' ';
   }
-  else {
-    # NBSP:  UTF-8: C2 A0, ISO-8859-*: A0
-    $text =~ s/[ \t\n\r\f\x0b]+|\xc2\xa0/ /gs;
-    # trim leading whitespace if previous element was whitespace 
-    # and current element is not invisible
-    if (@{ $self->{text} } && !$display{invisible} &&
-	defined $self->{text_whitespace} &&
-	vec($self->{text_whitespace}, $#{$self->{text}}, 1))
-    {
-      $text =~ s/^ //;
-    }
-  }
+
   push @{ $self->{text} }, $text;
   while (my ($k, $v) = each %display) {
     my $textvar = "text_".$k;
