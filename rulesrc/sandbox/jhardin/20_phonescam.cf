@@ -43,7 +43,8 @@
 
 ifplugin Mail::SpamAssassin::Plugin::ReplaceTags
 
-replace_tag PSEP  [-. _\/\s]?
+replace_tag PSEP     [-. _\/\s]?
+replace_tag PSEP_NS  [-. _\s]?
 
 # D29: any single digit 2-9 with common unicode lookalikes (NANP NXX first-digit)
 # <DIGIT> (any digit 0-9) is defined globally in 25_replace.cf
@@ -145,7 +146,7 @@ replace_rules __PHONESCAM_MISC
 # Lookahead uses [1lI|]? for the optional country code to match all <1>
 # substitutes (e.g. "| 555.555.1212" where '|' is a formatting character).
 #---------------------------------------------------------------------------
-body __PHONE_NANP_OBFU  /(?<![0-9=a-zA-Z])(?![0-9a-zA-Z]{9,})(?!\+?[1lI|]?[-. _\s]?(?:\([2-9]\d\d\)|[2-9]\d\d)[-. ]?[2-9]\d\d[-. ]?\d{4})(?:\+?<1><PSEP>)?(?:\(<D29><DIGIT><DIGIT>\)|<D29><DIGIT><DIGIT>)<PSEP><D29><DIGIT><DIGIT><PSEP><DIGIT>{4}(?![0-9=])/
+body __PHONE_NANP_OBFU  /(?<![0-9=a-zA-Z])(?![0-9a-zA-Z]{9,})(?!\+?[1lI|]?[-. _\s]?(?:\([2-9]\d\d\)|[2-9]\d\d)[-. ]?[2-9]\d\d[-. ]?\d{4})(?:\+?<1><PSEP>)?(?:\(<D29><DIGIT><DIGIT>\)|<D29><DIGIT><DIGIT>)<PSEP_NS><D29><DIGIT><DIGIT><PSEP><DIGIT>{4}(?![0-9=])/
 replace_rules __PHONE_NANP_OBFU
 
 else  # Mail::SpamAssassin::Plugin::ReplaceTags not available -- plain fallbacks
