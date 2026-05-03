@@ -1,0 +1,11 @@
+ifplugin Mail::SpamAssassin::Plugin::BodyEval
+  if can(Mail::SpamAssassin::Plugin::BodyEval::has_vertical_whitespace)
+
+    body        __VERTICAL_SPACE_50   eval:vertical_whitespace(50)
+    describe    __VERTICAL_SPACE_50   50+ lines of vertical whitespace
+
+    body        __VERTICAL_SPACE_80   eval:vertical_whitespace(80)
+    describe    __VERTICAL_SPACE_80   80+ lines of vertical whitespace
+
+  endif
+endif
