@@ -1124,7 +1124,7 @@ sub check_neuralnetwork_ham {
 }
 
 sub check_neuralnetwork {
-  my ($self, $pms, $low, $high) = @_;
+  my ($self, $pms, $body, $low, $high) = @_;
 
   _check_neuralnetwork($self, $pms);
   my $pred = $pms->{neuralnetwork_prediction};
