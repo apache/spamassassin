@@ -704,6 +704,7 @@ sub cache_add {
   return if !$self->{dbh};
 
   # check values and return
+  return if not defined $file_text;
   return if length($file_hash) > 256 || length($file_text) > 512;
 
   # Upsert
