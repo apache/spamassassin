@@ -238,7 +238,7 @@ sub _check_mime_header {
     $pms->{mime_qp_count}++;
   }
 
-  if ($cd && index($cd, 'attachment') >= 0) {
+  if ($cd && $cd =~ /^\s*attachment\b/) {
     $pms->{mime_attachment}++;
   }
 
