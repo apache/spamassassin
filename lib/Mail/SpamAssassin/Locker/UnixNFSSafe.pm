@@ -80,45 +80,57 @@ sub safe_lock {
   LTMP->autoflush(1);
   dbg("locker: safe_lock: created $lock_tmp");
 
-  for (my $retries = 0; $retries < $max_retries * 2; $retries++) {
-    if ($retries > 0) { $self->jittery_half_second_sleep(); }
-    print LTMP "$hname.$$\n"  or warn "Error writing to $lock_tmp: $!";
-    dbg("locker: safe_lock: trying to get lock on $path with $retries retries");
-    if (link($lock_tmp, $lock_file)) {
-      dbg("locker: safe_lock: link to $lock_file: link ok");
-      $is_locked = 1;
-      last;
+  # Wrap the retry loop in eval so an alarm/die during the wait does
+  # not leak the temp lock file.
+  my $err;
+  eval {
+    for (my $retries = 0; $retries < $max_retries * 2; $retries++) {
+      if ($retries > 0) { $self->jittery_half_second_sleep(); }
+      print LTMP "$hname.$$\n"  or warn "Error writing to $lock_tmp: $!";
+      dbg("locker: safe_lock: trying to get lock on $path with $retries retries");
+      if (link($lock_tmp, $lock_file)) {
+        dbg("locker: safe_lock: link to $lock_file: link ok");
+        $is_locked = 1;
+        last;
+      }
+      # if lock exists, it's already likely locked, no point complaining here
+      unless ($!{EEXIST}) {
+        warn "locker: creating link $lock_file to $lock_tmp failed: '$!'";
+      }
+      # link _may_ return false even if the link _is_ created
+      @stat = lstat($lock_tmp);
+      @stat  or warn "locker: error accessing $lock_tmp: $!";
+      if (defined $stat[3] && $stat[3] > 1) {
+        dbg("locker: safe_lock: link to $lock_file: stat ok");
+        $is_locked = 1;
+        last;
+      }
+      # check age of lockfile ctime
+      my $now = ($#stat < 11 ? undef : $stat[10]);
+      @stat = lstat($lock_file);
+      @stat  or warn "locker: error accessing $lock_file: $!";
+      my $lock_age = ($#stat < 11 ? undef : $stat[10]);
+      if (defined($lock_age) && defined($now) && ($now - $lock_age) > LOCK_MAX_AGE)
+      {
+        # we got a stale lock, break it
+        dbg("locker: safe_lock: breaking stale $lock_file: age=" .
+            (defined $lock_age ? $lock_age : "undef") . " now=$now");
+        unlink($lock_file)
+          or warn "locker: safe_lock: unlink of lock file $lock_file failed: $!\n";
+      }
     }
-    # if lock exists, it's already likely locked, no point complaining here
-    unless ($!{EEXIST}) {
-      warn "locker: creating link $lock_file to $lock_tmp failed: '$!'";
-    }
-    # link _may_ return false even if the link _is_ created
-    @stat = lstat($lock_tmp);
-    @stat  or warn "locker: error accessing $lock_tmp: $!";
-    if (defined $stat[3] && $stat[3] > 1) {
-      dbg("locker: safe_lock: link to $lock_file: stat ok");
-      $is_locked = 1;
-      last;
-    }
-    # check age of lockfile ctime
-    my $now = ($#stat < 11 ? undef : $stat[10]);
-    @stat = lstat($lock_file);
-    @stat  or warn "locker: error accessing $lock_file: $!";
-    my $lock_age = ($#stat < 11 ? undef : $stat[10]);
-    if (defined($lock_age) && defined($now) && ($now - $lock_age) > LOCK_MAX_AGE)
-    {
-      # we got a stale lock, break it
-      dbg("locker: safe_lock: breaking stale $lock_file: age=" .
-	  (defined $lock_age ? $lock_age : "undef") . " now=$now");
-      unlink($lock_file)
-        or warn "locker: safe_lock: unlink of lock file $lock_file failed: $!\n";
-    }
+    1;
+  } or do {
+    $err = $@ || 'unknown error in safe_lock retry loop';
+  };
+
+  close LTMP;
+  unless (unlink($lock_tmp)) {
+    warn "locker: safe_lock: unlink of temp lock $lock_tmp failed: $!\n"
+      unless defined $err;
   }
 
-  close LTMP  or die "error closing $lock_tmp: $!";
-  unlink($lock_tmp)
-    or warn "locker: safe_lock: unlink of temp lock $lock_tmp failed: $!\n";
+  die $err if defined $err;
 
   # record this for safe unlocking
   if ($is_locked) {
