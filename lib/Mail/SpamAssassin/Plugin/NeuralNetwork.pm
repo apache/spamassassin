@@ -44,7 +44,7 @@ use strict;
 use warnings;
 use re 'taint';
 
-my $VERSION = 0.8.3;
+my $VERSION = 0.8.4;
 
 use AI::FANN qw(:all);
 use Storable qw(store retrieve);
@@ -744,11 +744,11 @@ sub learn_message {
     my $hc = $vocab->{_ham_count}  || 0;
     if ($sc < $min_spam || $hc < $min_ham) {
       dbg("Deferring model creation: spam=$sc/$min_spam ham=$hc/$min_ham (vocabulary updated)");
+      $locker->safe_unlock($dataset_path);
       # Record message as learned to prevent re-learning.
       if (defined $msg && defined $msgid && length($msgid) > 0) {
         $self->_save_msgid_to_neural_seen($msgid, $isspam);
       }
-      $locker->safe_unlock($dataset_path);
       return 0;
     }
   }
@@ -810,28 +810,8 @@ sub learn_message {
     $network->rprop_delta_max($conf->{neuralnetwork_rprop_delta_max});
   }
 
-  # Load the current corpus counts so we can compute how skewed the training
-  # history is.
-  my %vocab_for_balance;
-  if (ref $self->{_last_train_vocab} eq 'HASH') {
-    %vocab_for_balance = %{delete $self->{_last_train_vocab}};
-  } elsif (defined $conf->{neuralnetwork_dsn} && $self->{dbh}) {
-    my $vocab_ref = $self->_load_vocabulary_from_sql($self->{main}->{username});
-    %vocab_for_balance = %{$vocab_ref} if ref($vocab_ref) eq 'HASH';
-  }
-  if (!keys %{$vocab_for_balance{terms} || {}}) {
-    my $vocab_path = File::Spec->catfile($nn_data_dir, 'vocabulary-' . lc($self->{main}->{username}) . '.data');
-    $vocab_path = Mail::SpamAssassin::Util::untaint_file_path($vocab_path);
-    if (-f $vocab_path) {
-      eval {
-        my $ref = retrieve($vocab_path);
-        %vocab_for_balance = %{$ref} if ref $ref eq 'HASH';
-        1;
-      } or do {
-        dbg("Could not load vocabulary for balance check: " . ($@ || 'unknown'));
-      };
-    }
-  }
+  # reuse the cached vocabulary for class-balance accounting
+  my %vocab_for_balance = %{ delete $self->{_last_train_vocab} || {} };
   my $spam_docs = $vocab_for_balance{_spam_count} || 1;
   my $ham_docs  = $vocab_for_balance{_ham_count}  || 1;
 
@@ -856,6 +836,24 @@ sub learn_message {
       "(base=$train_epochs, class_weight=$class_weight, " .
       "spam_docs=$spam_docs, ham_docs=$ham_docs, isspam=$isspam, num_input=$num_input)");
 
+  my ($svec, $hvec);
+  my $replay_eligible =
+       ($train_algorithm == FANN_TRAIN_RPROP)
+    && defined $vocab_keys_ref
+    && scalar(@$vocab_keys_ref) == $num_input
+    && $spam_docs > 1 && $ham_docs > 1;
+  if ($replay_eligible) {
+    ($svec, $hvec) = _build_class_tfidf_vectors(\%vocab_for_balance, $vocab_keys_ref);
+  } elsif ($train_algorithm == FANN_TRAIN_RPROP && !defined $vocab_keys_ref) {
+    dbg("Skipping RPROP replay: vocab_keys unavailable");
+  }
+
+  # drop the lock and re-acquire it later
+  my $locked_num_input      = $num_input;
+  my $locked_vocab_keys_ref = $vocab_keys_ref;
+  my $lock1_mtime           = (stat($dataset_path))[9];
+  $locker->safe_unlock($dataset_path);
+
   for my $e (1 .. $weighted_epochs) {
     for my $i (0 .. $#$feature_vectors) {
       my $input  = $feature_vectors->[$i]{vec};
@@ -865,46 +863,48 @@ sub learn_message {
   }
 
   # Dynamic replay algorithm
-  if (   $train_algorithm == FANN_TRAIN_RPROP
-      && defined $vocab_keys_ref
-      && scalar(@$vocab_keys_ref) == $num_input
-      && $spam_docs > 1 && $ham_docs > 1) {
+  if ($replay_eligible && $svec && $hvec) {
+    # Use grep in scalar context: returns count of non-zero elements.
+    my $svec_ok = grep { $_ != 0 } @$svec;
+    my $hvec_ok = grep { $_ != 0 } @$hvec;
 
-    my ($svec, $hvec) = _build_class_tfidf_vectors(\%vocab_for_balance, $vocab_keys_ref);
-
-    if ($svec && $hvec) {
-      # Use grep in scalar context: returns count of non-zero elements.
-      my $svec_ok = grep { $_ != 0 } @$svec;
-      my $hvec_ok = grep { $_ != 0 } @$hvec;
-
-      if ($svec_ok && $hvec_ok) {
-        my $replay_cycles = int(sqrt($weighted_epochs / 5.0) + 0.5) || 1;
-        $replay_cycles = 12 if $replay_cycles > 12;
-        # Alternate the order of (own, opposite) across cycles so the
-        # very last gradient step is not locked to the message's class.
-        for my $i (1 .. $replay_cycles) {
-          if ($i % 2 == ($isspam ? 1 : 0)) {
-            eval { $network->train($hvec, [0]); 1 } or dbg("Replay ham step failed: "  . ($@ || 'unknown'));
-            eval { $network->train($svec, [1]); 1 } or dbg("Replay spam step failed: " . ($@ || 'unknown'));
-          } else {
-            eval { $network->train($svec, [1]); 1 } or dbg("Replay spam step failed: " . ($@ || 'unknown'));
-            eval { $network->train($hvec, [0]); 1 } or dbg("Replay ham step failed: "  . ($@ || 'unknown'));
-          }
+    if ($svec_ok && $hvec_ok) {
+      my $replay_cycles = int(sqrt($weighted_epochs / 5.0) + 0.5) || 1;
+      $replay_cycles = 12 if $replay_cycles > 12;
+      # Alternate the order of (own, opposite) across cycles so the
+      # very last gradient step is not locked to the message's class.
+      for my $i (1 .. $replay_cycles) {
+        if ($i % 2 == ($isspam ? 1 : 0)) {
+          eval { $network->train($hvec, [0]); 1 } or dbg("Replay ham step failed: "  . ($@ || 'unknown'));
+          eval { $network->train($svec, [1]); 1 } or dbg("Replay spam step failed: " . ($@ || 'unknown'));
+        } else {
+          eval { $network->train($svec, [1]); 1 } or dbg("Replay spam step failed: " . ($@ || 'unknown'));
+          eval { $network->train($hvec, [0]); 1 } or dbg("Replay ham step failed: "  . ($@ || 'unknown'));
         }
-        dbg("RPROP replay: $replay_cycles cycle(s) after $weighted_epochs epoch(s) " .
-            "(isspam=$isspam, spam_docs=$spam_docs, ham_docs=$ham_docs)");
-      } else {
-        dbg("Skipping RPROP replay: degenerate vectors (svec_ok=$svec_ok, hvec_ok=$hvec_ok)");
       }
+      dbg("RPROP replay: $replay_cycles cycle(s) after $weighted_epochs epoch(s) " .
+          "(isspam=$isspam, spam_docs=$spam_docs, ham_docs=$ham_docs)");
+    } else {
+      dbg("Skipping RPROP replay: degenerate vectors (svec_ok=$svec_ok, hvec_ok=$hvec_ok)");
     }
-  } elsif ($train_algorithm == FANN_TRAIN_RPROP && !defined $vocab_keys_ref) {
-    dbg("Skipping RPROP replay: vocab_keys unavailable");
   }
 
   if (scalar(@$feature_vectors) == 1) {
     my $pred_after = eval { $network->run($feature_vectors->[0]{vec}) };
     $pred_after = ref($pred_after) ? $pred_after->[0] : $pred_after;
     dbg("Prediction after learning: " . (defined $pred_after ? $pred_after : 'undef'));
+  }
+
+  # re-acquire the lock briefly to save the model
+  unless ($locker->safe_lock($dataset_path, $conf->{neuralnetwork_lock_timeout})) {
+    info("Cannot re-acquire lock on '$dataset_path' for model save; skipping persistence (vocabulary already updated)");
+    return 0;
+  }
+
+  # Log if we are going to overwrite the model
+  my $current_mtime = (stat($dataset_path))[9] // 0;
+  if (defined $lock1_mtime && $current_mtime > $lock1_mtime) {
+    info("on-disk model changed during training; overwriting");
   }
 
   # Save the model atomically
@@ -920,13 +920,14 @@ sub learn_message {
       SUFFIX => '.tmp',
       UNLINK => 0,
     );
+    $tmp_path = Mail::SpamAssassin::Util::untaint_file_path($tmp_path);
     chmod($file_mode, $tmp_path) or info("chmod $file_mode on '$tmp_path' failed: $!");
     $network->save($tmp_path) or die "model save to temp '$tmp_path' failed";
 
     if (defined $self->{main}->{conf}->{neuralnetwork_dsn} && $self->{dbh}) {
-      $self->_save_model_vocab_to_sql($vocab_keys_ref);
+      $self->_save_model_vocab_to_sql($locked_vocab_keys_ref);
     } else {
-      $self->_save_model_vocab($vocab_keys_ref, $nn_data_dir);
+      $self->_save_model_vocab($locked_vocab_keys_ref, $nn_data_dir);
     }
     delete $self->{_model_vocab_cache};
     delete $self->{_model_vocab_cache_t};
@@ -946,7 +947,7 @@ sub learn_message {
   $locker->safe_unlock($dataset_path);
 
   if ($model_saved) {
-    dbg("Model saved to '$dataset_path' (input:$num_input)");
+    dbg("Model saved to '$dataset_path' (input:$locked_num_input)");
     $self->{neural_model} = $network;
     $self->{_neural_model_load_time} = time();
 
@@ -1065,7 +1066,8 @@ sub forget_message {
         my $full_vocab_size = scalar keys %$full_terms;
         if ($full_vocab_size > 0) {
           my $locker   = $self->{main}->{locker};
-          my $got_lock = eval { $locker->safe_lock($dataset_path, $conf->{neuralnetwork_lock_timeout}); 1 };
+          my $got_lock = 0;
+          eval { $got_lock = $locker->safe_lock($dataset_path, $conf->{neuralnetwork_lock_timeout}); 1 };
           my $rebuilt  = eval { $self->_retrain_from_vocabulary($conf, $nn_data_dir, $full_vocab_size) };
           if ($rebuilt) {
             my $file_mode = 0666 & ~umask();
@@ -1074,6 +1076,7 @@ sub forget_message {
               my $tmp_dir = File::Spec->catpath($vol, $dir, '');
               my (undef, $tmp_path) = File::Temp::tempfile(
                 'fann-XXXXXX', DIR => $tmp_dir, SUFFIX => '.tmp', UNLINK => 0);
+              $tmp_path = Mail::SpamAssassin::Util::untaint_file_path($tmp_path);
               chmod($file_mode, $tmp_path) or info("chmod $file_mode on '$tmp_path' failed: $!");
               if ($rebuilt->save($tmp_path)) {
                 rename($tmp_path, $dataset_path) or die "rename failed: $!";
@@ -1428,6 +1431,7 @@ sub _check_neuralnetwork {
           my $tmp_dir = File::Spec->catpath($vol, $dir, '');
           my (undef, $tmp_path) = File::Temp::tempfile(
             'fann-XXXXXX', DIR => $tmp_dir, SUFFIX => '.tmp', UNLINK => 0);
+          $tmp_path = Mail::SpamAssassin::Util::untaint_file_path($tmp_path);
           chmod($file_mode, $tmp_path) or info("chmod $file_mode on '$tmp_path' failed: $!");
           if ($rebuilt->save($tmp_path)) {
             rename($tmp_path, $dataset_path)
@@ -1448,11 +1452,7 @@ sub _check_neuralnetwork {
     $network = $self->{neural_model};
     $locker->safe_unlock($dataset_path) if $got_lock;
   } else {
-    my $got_snap_lock = 0;
-    eval { $got_snap_lock = $locker->safe_lock($dataset_path,
-        $self->{main}->{conf}->{neuralnetwork_lock_timeout}); 1 };
     $network = $self->{neural_model};
-    $locker->safe_unlock($dataset_path) if $got_snap_lock;
   }
 
   my $stored_vocab_ref = $self->_load_model_vocab($nn_data_dir);
