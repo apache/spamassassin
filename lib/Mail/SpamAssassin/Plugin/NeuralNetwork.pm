@@ -44,7 +44,7 @@ use strict;
 use warnings;
 use re 'taint';
 
-my $VERSION = 0.9.0;
+my $VERSION = 0.9.1;
 
 use AI::FANN qw(:all);
 use Storable qw(store retrieve);
@@ -730,12 +730,14 @@ unless ($locker->safe_lock($dataset_path, $conf->{neuralnetwork_lock_timeout})) 
   my ($feature_vectors, $vocab_size, $vocab_keys_ref) = _text_to_features($self, $self->{main}->{conf}, $nn_data_dir, $update_vocab, $isspam, undef, @email_token_lists);
 
   unless ($feature_vectors && @$feature_vectors) {
+    $locker->safe_unlock($dataset_path);
     return;
   }
 
   my $num_input = scalar(@{$feature_vectors->[0]{vec}});
   if ($num_input == 0) {
     dbg("No valid features found in message, skipping learning");
+    $locker->safe_unlock($dataset_path);
     return;
   }
   # Defer model creation until minimum training corpus is built
@@ -751,6 +753,7 @@ unless ($locker->safe_lock($dataset_path, $conf->{neuralnetwork_lock_timeout})) 
       if (defined $msg && defined $msgid && length($msgid) > 0) {
         $self->_save_msgid_to_neural_seen($msgid, $isspam);
       }
+      $locker->safe_unlock($dataset_path);
       return 0;
     }
   }
@@ -916,7 +919,7 @@ unless ($locker->safe_lock($dataset_path, $conf->{neuralnetwork_lock_timeout})) 
     dbg("Prediction after learning: " . (defined $pred_after ? $pred_after : 'undef'));
   }
 
-  # Pre-stage the FANN model to a temp file BEFORE acquiring the lock.
+  # Pre-stage the FANN model to a temp file while holding the lock.
   my $tmp_path;
   my $file_mode = 0666 & ~umask();
   my $prestage_ok = eval {
@@ -940,14 +943,7 @@ unless ($locker->safe_lock($dataset_path, $conf->{neuralnetwork_lock_timeout})) 
       unlink($tmp_path)
         or info("Cannot remove temp model file '$tmp_path': $!");
     }
-    return 0;
-  }
-
-  # Re-acquire the lock briefly to commit.
-  unless ($locker->safe_lock($dataset_path, $conf->{neuralnetwork_lock_timeout})) {
-    info("Cannot re-acquire lock on '$dataset_path' for model save; skipping persistence (vocabulary already updated)");
-    unlink($tmp_path)
-      or info("Cannot remove temp model file '$tmp_path': $!") if -f $tmp_path;
+    $locker->safe_unlock($dataset_path);
     return 0;
   }
 
