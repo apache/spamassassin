@@ -44,7 +44,7 @@ use strict;
 use warnings;
 use re 'taint';
 
-my $VERSION = 0.9.1;
+my $VERSION = 0.9.2;
 
 use AI::FANN qw(:all);
 use Storable qw(store retrieve);
@@ -797,12 +797,24 @@ unless ($locker->safe_lock($dataset_path, $conf->{neuralnetwork_lock_timeout})) 
         $num_input = $model_size;
         $network = $existing_network;
       } else {
-        # Model and vocab files are inconsistent, discard the stale network and fall through to
-        # a fresh one.
-        my $stored_size = defined $stored_vocab_ref ? scalar(@$stored_vocab_ref) : 0;
-        info("Model/vocab mismatch (stored=$stored_size vs model=$model_size inputs); " .
-             "discarding stale model, starting fresh network");
-        undef $existing_network;
+        my $stored_size  = defined $stored_vocab_ref ? scalar(@$stored_vocab_ref) : 0;
+        my $growth_ratio = ($model_size > 0) ? abs($num_input - $model_size) / $model_size : 1;
+        if ($growth_ratio < 0.10) {
+          # Vocab changed by less than 10%: preserve existing weights by adapting feature
+          # vectors to the old model's input size rather than discarding a trained network.
+          dbg("Vocab/model size mismatch (new=$num_input vs model=$model_size, " .
+              sprintf("%.1f", $growth_ratio * 100) . "% change); " .
+              "adapting feature vectors to preserve existing model");
+          for my $fv (@$feature_vectors) {
+            $fv->{vec} = _adjust_vector_size($fv->{vec}, $model_size);
+          }
+          $num_input = $model_size;
+          $network   = $existing_network;
+        } else {
+          info("Model/vocab mismatch (stored=$stored_size vs model=$model_size inputs); " .
+               "discarding stale model, starting fresh network");
+          undef $existing_network;
+        }
       }
     }
     unless (defined $network) {
@@ -1346,10 +1358,10 @@ sub _retrain_from_vocabulary {
   my $spam_reps = 1;
   my $ham_reps  = 1;
   if ($spam_docs > $ham_docs) {
-    $ham_reps = int($spam_docs / $ham_docs + 0.5) || 1;
+    $ham_reps = int(($spam_docs + $ham_docs - 1) / $ham_docs) || 1;
     $ham_reps = 10 if $ham_reps > 10;
   } elsif ($ham_docs > $spam_docs) {
-    $spam_reps = int($ham_docs / $spam_docs + 0.5) || 1;
+    $spam_reps = int(($ham_docs + $spam_docs - 1) / $spam_docs) || 1;
     $spam_reps = 10 if $spam_reps > 10;
   }
   dbg("Retraining from vocabulary: spam_docs=$spam_docs, ham_docs=$ham_docs, " .
