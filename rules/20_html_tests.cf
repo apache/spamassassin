@@ -105,15 +105,21 @@ describe HTML_EMBEDS		HTML with embedded plugin object
 body HTML_EXTRA_CLOSE		eval:html_range('closed_extra_ratio', '0.09', 'inf')
 describe HTML_EXTRA_CLOSE	HTML contains far too many close tags
 
+if (version < 4.000000)
+  body HTML_FONT_SIZE_LARGE	eval:html_range('max_size', '5', '6')
+  describe HTML_FONT_SIZE_LARGE	HTML font size is large
 
+  body HTML_FONT_SIZE_HUGE	eval:html_range('max_size', '6', 'inf')
+  describe HTML_FONT_SIZE_HUGE	HTML font size is huge
+endif
 
-body HTML_FONT_SIZE_LARGE	eval:html_range('max_size', '5', '6')
-describe HTML_FONT_SIZE_LARGE	HTML font size is large
+if (version >= 4.000000)
+  body HTML_FONT_SIZE_LARGE	eval:html_range('max_size', '18', '24')
+  describe HTML_FONT_SIZE_LARGE	HTML font size is large
 
-body HTML_FONT_SIZE_HUGE	eval:html_range('max_size', '6', 'inf')
-describe HTML_FONT_SIZE_HUGE	HTML font size is huge
-
-
+  body HTML_FONT_SIZE_HUGE	eval:html_range('max_size', '24', 'inf')
+  describe HTML_FONT_SIZE_HUGE	HTML font size is huge
+endif
 
 
 body HTML_FONT_LOW_CONTRAST	eval:html_test('font_low_contrast')
