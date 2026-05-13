@@ -191,10 +191,7 @@ BITCOIN_EXTORT_02
 # tflags publish
 BITCOIN_IMGUR
 
-# good enough
-BITCOIN_MALF_HTML
-
-# tflags publish
+# tflags net
 BITCOIN_MALWARE
 
 # tflags publish
@@ -260,7 +257,7 @@ BITCOIN_YOUR_INFO
 # good enough
 BODY_SINGLE_URI
 
-# tflags publish
+# tflags net
 BODY_URI_ONLY
 
 # tflags publish
@@ -314,7 +311,7 @@ CN_PHISH_JP_07
 # tflags publish
 COMMENT_GIBBERISH
 
-# good enough
+# tflags net
 COMPENSATION
 
 # tflags publish
@@ -512,7 +509,7 @@ FORGED_RELAY_MUA_TO_MX
 # tflags net
 FORGED_SPF_HELO
 
-# tflags publish
+# tflags net
 FORM_FRAUD
 
 # tflags net
@@ -596,7 +593,7 @@ FROM_MISSP_FREEMAIL
 # good enough
 FROM_MISSP_MSFT
 
-# good enough
+# tflags net
 FROM_MISSP_REPLYTO
 
 # tflags net
@@ -758,7 +755,7 @@ GB_FREEMAIL_DISPTO
 # tflags publish
 GB_FREEMAIL_DISPTO_NOTFREEM
 
-# tflags publish
+# tflags net
 GB_FROM_METAMASK
 
 # tflags publish
@@ -833,7 +830,7 @@ HAS_X_NO_RELAY
 # tflags publish
 HAS_X_OUTGOING_SPAM_STAT
 
-# good enough
+# tflags net
 HDRS_LCASE
 
 # tflags publish
@@ -935,7 +932,7 @@ HTML_OFF_PAGE
 # tflags publish
 HTML_SHRT_CMNT_OBFU_MANY
 
-# tflags publish
+# tflags net
 HTML_SINGLET_MANY
 
 # good enough
@@ -961,6 +958,9 @@ JH_SPAMMY_PATTERN01
 
 # tflags publish
 JH_SPAMMY_PATTERN02
+
+# tflags net
+KHOP_FAKE_EBAY
 
 # tflags net
 KHOP_HELO_FCRDNS
@@ -1009,6 +1009,9 @@ MALW_ATTACH
 
 # tflags publish
 MANY_SPAN_IN_TEXT
+
+# tflags net
+MAY_BE_FORGED
 
 # tflags publish
 MC_MSFT_LISTMGR
@@ -1709,7 +1712,7 @@ TO_EQ_FM_DIRECT_MX
 # tflags net
 TO_EQ_FM_DOM_HTML_IMG
 
-# good enough
+# tflags net
 TO_EQ_FM_DOM_HTML_ONLY
 
 # tflags net
@@ -1718,7 +1721,7 @@ TO_EQ_FM_DOM_SPF_FAIL
 # good enough
 TO_EQ_FM_HTML_DIRECT
 
-# tflags net
+# good enough
 TO_EQ_FM_HTML_ONLY
 
 # tflags net
@@ -1754,10 +1757,10 @@ TO_TOO_MANY_WFH_01
 # good enough
 TVD_PH_SUBJ_META1
 
-# good enough
+# tflags net
 TVD_SPACE_ENCODED
 
-# good enough
+# tflags net
 TVD_SPACE_RATIO_MINFP
 
 # tflags publish
@@ -1994,10 +1997,10 @@ URI_WPADMIN
 # tflags publish
 URI_WP_DIRINDEX
 
-# tflags publish
+# tflags net
 URI_WP_HACKED
 
-# tflags publish
+# tflags net
 URI_WP_HACKED_2
 
 # tflags publish
