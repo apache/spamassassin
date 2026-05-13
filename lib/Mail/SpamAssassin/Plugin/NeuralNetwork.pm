@@ -44,7 +44,7 @@ use strict;
 use warnings;
 use re 'taint';
 
-my $VERSION = 0.9.2;
+my $VERSION = 0.10.1;
 
 use AI::FANN qw(:all);
 use Storable qw(store retrieve);
@@ -798,8 +798,8 @@ unless ($locker->safe_lock($dataset_path, $conf->{neuralnetwork_lock_timeout})) 
         $network = $existing_network;
       } else {
         my $stored_size  = defined $stored_vocab_ref ? scalar(@$stored_vocab_ref) : 0;
-        my $growth_ratio = ($model_size > 0) ? abs($num_input - $model_size) / $model_size : 1;
-        if ($growth_ratio < 0.10) {
+        my $growth_ratio = ($model_size > 0) ? ($num_input - $model_size) / $model_size : 1;
+        if ($growth_ratio > 0 && $growth_ratio < 0.10) {
           # Vocab changed by less than 10%: preserve existing weights by adapting feature
           # vectors to the old model's input size rather than discarding a trained network.
           dbg("Vocab/model size mismatch (new=$num_input vs model=$model_size, " .
@@ -855,25 +855,24 @@ unless ($locker->safe_lock($dataset_path, $conf->{neuralnetwork_lock_timeout})) 
   my $ham_docs  = $raw_ham  || 1;
 
   # class_weight > 1 means this message belongs to the minority class and
-  # should be trained harder; < 1 means it belongs to the majority class.
+  # should be trained harder. learn_message is always called with one
+  # message and represents an explicit correction, so never train less
+  # than the configured baseline regardless of class balance.
   my $class_weight;
   if ($isspam) {
-    $class_weight = $ham_docs / $spam_docs;   # < 1 when spam dominates
+    $class_weight = $ham_docs / $spam_docs;
   } else {
-    $class_weight = $spam_docs / $ham_docs;   # < 1 when ham dominates
+    $class_weight = $spam_docs / $ham_docs;
   }
-  $class_weight = 0.25 if $class_weight < 0.25;
-  $class_weight = 4.0  if $class_weight > 4.0;
+  $class_weight = 1.0 if $class_weight < 1.0;
+  $class_weight = 4.0 if $class_weight > 4.0;
 
   my $weighted_epochs = int($train_epochs * $class_weight) || 1;
-  # Scale epochs down for large vocabularies to keep per-message training time
-  # roughly constant.
-  if ($num_input > 1000) {
-    $weighted_epochs = int($weighted_epochs * 1000 / $num_input) || 1;
-  }
+
   dbg("Incremental training: weighted_epochs=$weighted_epochs " .
       "(base=$train_epochs, class_weight=$class_weight, " .
-      "spam_docs=$spam_docs, ham_docs=$ham_docs, isspam=$isspam, num_input=$num_input)");
+      "spam_docs=$spam_docs, ham_docs=$ham_docs, isspam=$isspam, " .
+      "num_input=$num_input)");
 
   my ($svec, $hvec);
   my $replay_eligible =
@@ -890,25 +889,22 @@ unless ($locker->safe_lock($dataset_path, $conf->{neuralnetwork_lock_timeout})) 
   my $locked_num_input      = $num_input;
   my $locked_vocab_keys_ref = $vocab_keys_ref;
 
-  for my $e (1 .. $weighted_epochs) {
-    for my $i (0 .. $#$feature_vectors) {
-      my $input  = $feature_vectors->[$i]{vec};
-      my $output = [$labels[$i] ? 1 : 0];
-      eval { $network->train($input, $output); 1 } or dbg("Training step failed: " . ($@ || 'unknown'));
-    }
-  }
-
-  # Dynamic replay algorithm
+  # Dynamic replay algorithm. Runs BEFORE the message training loop so the
+  # message training is the last thing the network sees, and the early-
+  # stopped prediction is preserved into the saved model. Replay here
+  # corrects drift accumulated from previous learns.
   if ($replay_eligible && $svec && $hvec) {
     # Use grep in scalar context: returns count of non-zero elements.
     my $svec_ok = grep { $_ != 0 } @$svec;
     my $hvec_ok = grep { $_ != 0 } @$hvec;
 
     if ($svec_ok && $hvec_ok) {
-      my $replay_cycles = int(sqrt($weighted_epochs / 5.0) + 0.5) || 1;
+      my $replay_cycles = int(sqrt($weighted_epochs / 5.0) + 0.5);
+      $replay_cycles = 3  if $replay_cycles < 3;
       $replay_cycles = 12 if $replay_cycles > 12;
-      # Alternate the order of (own, opposite) across cycles so the
-      # very last gradient step is not locked to the message's class.
+      # Alternate (own, opposite) order across cycles so RPROP sees mixed
+      # gradient directions; this contracts step sizes before the message
+      # training that follows.
       for my $i (1 .. $replay_cycles) {
         if ($i % 2 == ($isspam ? 1 : 0)) {
           eval { $network->train($hvec, [0]); 1 } or dbg("Replay ham step failed: "  . ($@ || 'unknown'));
@@ -918,10 +914,35 @@ unless ($locker->safe_lock($dataset_path, $conf->{neuralnetwork_lock_timeout})) 
           eval { $network->train($hvec, [0]); 1 } or dbg("Replay ham step failed: "  . ($@ || 'unknown'));
         }
       }
-      dbg("RPROP replay: $replay_cycles cycle(s) after $weighted_epochs epoch(s) " .
+      dbg("RPROP replay: $replay_cycles cycle(s) before $weighted_epochs epoch(s) " .
           "(isspam=$isspam, spam_docs=$spam_docs, ham_docs=$ham_docs)");
     } else {
       dbg("Skipping RPROP replay: degenerate vectors (svec_ok=$svec_ok, hvec_ok=$hvec_ok)");
+    }
+  }
+
+  # Early-stop margin: we stop a touch past the configured threshold so
+  # subsequent learns drifting the boundary don't immediately flip the
+  # classification of this message.
+  my $early_stop_margin = 0.1;
+  my $spam_stop = $conf->{neuralnetwork_spam_threshold} + $early_stop_margin;
+  my $ham_stop  = $conf->{neuralnetwork_ham_threshold}  - $early_stop_margin;
+  my $check_interval = int($weighted_epochs / 8) || 1;
+  for my $e (1 .. $weighted_epochs) {
+    for my $i (0 .. $#$feature_vectors) {
+      my $input  = $feature_vectors->[$i]{vec};
+      my $output = [$labels[$i] ? 1 : 0];
+      eval { $network->train($input, $output); 1 } or dbg("Training step failed: " . ($@ || 'unknown'));
+    }
+    if ($e % $check_interval == 0 && scalar(@$feature_vectors) == 1) {
+      my $pred = eval { $network->run($feature_vectors->[0]{vec}) };
+      $pred = ref($pred) ? $pred->[0] : $pred;
+      if (defined $pred &&
+          (($isspam && $pred > $spam_stop) || (!$isspam && $pred < $ham_stop))) {
+        dbg("Early stop after $e/$weighted_epochs epochs " .
+            "(pred=$pred, isspam=$isspam, spam_stop=$spam_stop, ham_stop=$ham_stop)");
+        last;
+      }
     }
   }
 
@@ -966,7 +987,11 @@ unless ($locker->safe_lock($dataset_path, $conf->{neuralnetwork_lock_timeout})) 
 
   my $model_saved = 0;
   eval {
-    if (defined $self->{main}->{conf}->{neuralnetwork_dsn} && $self->{dbh}) {
+    if (!defined $locked_vocab_keys_ref || scalar(@$locked_vocab_keys_ref) != $locked_num_input) {
+      dbg("Skipping model vocab save: key count (" .
+          (defined $locked_vocab_keys_ref ? scalar(@$locked_vocab_keys_ref) : 'undef') .
+          ") != num_input ($locked_num_input)");
+    } elsif (defined $self->{main}->{conf}->{neuralnetwork_dsn} && $self->{dbh}) {
       $self->_save_model_vocab_to_sql($locked_vocab_keys_ref)
         or info("WARNING: model saved but vocab SQL write failed; " .
                 "model/vocab are now inconsistent and a full rebuild will " .
