@@ -266,6 +266,62 @@ The http GET method will be used to check those domains.
 
 =over 4
 
+=item url_skip_redirect_to  domain [domain...]     (default: none)
+
+Domains that, when found as a redirect destination, should cause the redirect
+chain to stop immediately. Useful to break loops caused by consent or gateway
+pages that redirect back into the chain.
+
+Example:
+
+ url_skip_redirect_to consent.google.com
+
+=back
+
+=cut
+
+  push (@cmds, {
+    setting => 'url_skip_redirect_to',
+    default => {},
+    type => $Mail::SpamAssassin::Conf::CONF_TYPE_HASH_KEY_VALUE,
+    code => sub {
+      my ($self, $key, $value, $line) = @_;
+      if ($value eq '') {
+        return $Mail::SpamAssassin::Conf::MISSING_REQUIRED_VALUE;
+      }
+      foreach my $domain (split(/\s+/, $value)) {
+        $self->{url_skip_redirect_to}->{lc $domain} = 1;
+      }
+    }
+  });
+
+=over 4
+
+=item clear_url_skip_redirect_to  [domain] [domain...]
+
+Clear configured url_skip_redirect_to domains. If domains are specified,
+only those are removed from the list.
+
+=back
+
+=cut
+
+  push (@cmds, {
+    setting => 'clear_url_skip_redirect_to',
+    code => sub {
+      my ($self, $key, $value, $line) = @_;
+      if ($value eq '') {
+        $self->{url_skip_redirect_to} = {};
+      } else {
+        foreach my $domain (split(/\s+/, $value)) {
+          delete $self->{url_skip_redirect_to}->{lc $domain};
+        }
+      }
+    }
+  });
+
+=over 4
+
 =item url_redirector_params regexp (default: (?:adurl|af_web_dp|cm_destination|continue|destination|destURL|goto|h|l|login|location|p1|pval|r|redir|redirect|redirectTo|return|returnUrl|referer|service|target|tid|u|url)=(.*))
 
 Regexp used to parse uri parameters in order to detect redirectors and to get redirected domains.
@@ -1175,6 +1231,13 @@ sub recursive_lookup {
   }
   $been_here{$host} = 1;
   $been_here{$location} = 1;
+
+  # Exit early if destination domain is configured to skip
+  if (exists $conf->{url_skip_redirect_to}->{$host}) {
+    dbg("Stopping redirect chain: destination domain $host is in url_skip_redirect_to ($location)");
+    return;
+  }
+
   $pms->add_uri_detail_list($location) if !$pms->{uri_detail_list}->{$location};
 
   # Check for recursion
@@ -1237,5 +1300,6 @@ sub has_redir_url_chained_domain { 1 }
 sub has_redir_url_maxchain { 1 }
 sub has_redir_url_loop { 1 }
 sub has_selenium_support { 1 }
+sub has_url_skip_redirect_to { 1 }
 
 1;
