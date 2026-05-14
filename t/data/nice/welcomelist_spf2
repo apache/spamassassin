@@ -1,0 +1,16 @@
+Return-Path: <contact@example.org>
+Received: from internal-mta.example.net (internal-mta.example.net [65.214.43.158]) by gateway.example.net (Postfix) with ESMTP id E1F2A3B4 for <jm@example.net>; Mon, 1 Jan 2024 00:00:02 +0000 (GMT)
+Received: from edge-mta.example.net (edge-mta.example.net [64.142.3.173]) by internal-mta.example.net (Postfix) with ESMTP id E5F6A7B8 for <jm@example.net>; Mon, 1 Jan 2024 00:00:01 +0000 (GMT)
+Received-SPF: pass (example.org: 198.51.100.7 is authorized to use 'contact@example.org' in 'mfrom' identity) receiver=edge-mta.example.net; identity=mfrom; envelope-from="contact@example.org"; helo=mail.example.org; client-ip=198.51.100.7
+Received: from mail.example.org (mail.example.org [198.51.100.7]) by edge-mta.example.net (Postfix) with ESMTPS id E9F0A1B2 for <jm@example.net>; Mon, 1 Jan 2024 00:00:00 +0000 (GMT)
+Message-ID: <welcomelist-spf-test2@example.org>
+Date: Mon, 1 Jan 2024 00:00:00 +0000
+From: contact@example.org
+To: jm@example.net
+Subject: Hello
+MIME-Version: 1.0
+Content-Type: text/plain; charset="us-ascii"
+
+Test fixture for SPF welcomelist rules. The sender domain (example.org)
+is NOT on the shipped default welcomelist. SPF result is pre-staged via
+the Received-SPF header above so the test does not need live DNS.

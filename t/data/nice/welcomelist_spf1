@@ -1,0 +1,17 @@
+Return-Path: <newsletter@example.com>
+Received: from internal-mta.example.net (internal-mta.example.net [65.214.43.158]) by gateway.example.net (Postfix) with ESMTP id A1B2C3D4 for <jm@example.net>; Mon, 1 Jan 2024 00:00:02 +0000 (GMT)
+Received: from edge-mta.example.net (edge-mta.example.net [64.142.3.173]) by internal-mta.example.net (Postfix) with ESMTP id A5B6C7D8 for <jm@example.net>; Mon, 1 Jan 2024 00:00:01 +0000 (GMT)
+Received-SPF: pass (example.com: 192.0.2.5 is authorized to use 'newsletter@example.com' in 'mfrom' identity) receiver=edge-mta.example.net; identity=mfrom; envelope-from="newsletter@example.com"; helo=mail.example.com; client-ip=192.0.2.5
+Received: from mail.example.com (mail.example.com [192.0.2.5]) by edge-mta.example.net (Postfix) with ESMTPS id A9B0C1D2 for <jm@example.net>; Mon, 1 Jan 2024 00:00:00 +0000 (GMT)
+Message-ID: <welcomelist-spf-test1@example.com>
+Date: Mon, 1 Jan 2024 00:00:00 +0000
+From: newsletter@example.com
+To: jm@example.net
+Subject: Today's newsletter
+MIME-Version: 1.0
+Content-Type: text/plain; charset="us-ascii"
+
+Test fixture for SPF welcomelist rules. The sender domain (example.com)
+is on the synthetic default welcomelist declared by the test. The SPF
+result is pre-staged via the Received-SPF header above so the test does
+not need live DNS.
