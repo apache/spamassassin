@@ -433,7 +433,8 @@ describe       AD_COMPLAINTS       Complain about this spam
 #tflags         MISQ_HTML           nopublish
 
 # observed in bank phishing 09/2009
-uri            WIKI_IMG            m,^https?://[^/]+wiki[mp]edia\.org/.+\.(?:png|gif|jpe?g|webp),i
+uri            __WIKI_IMG          m,^https?://[^/]+wiki[mp]edia\.org/.+\.(?:png|gif|jpe?g|webp),i
+meta           WIKI_IMG            __WIKI_IMG && !__RCD_RDNS_MTA 
 describe       WIKI_IMG            Image from wikipedia
 score          WIKI_IMG            2.500 # limit
 
