@@ -435,6 +435,7 @@ describe       AD_COMPLAINTS       Complain about this spam
 # observed in bank phishing 09/2009
 uri            WIKI_IMG            m,^https?://[^/]+wiki[mp]edia\.org/.+\.(?:png|gif|jpe?g|webp),i
 describe       WIKI_IMG            Image from wikipedia
+score          WIKI_IMG            2.500 # limit
 
 # observed in spam 09/2009
 header         SUBJ_RE_CLNCLN      Subject =~ /^\s*RE::/
