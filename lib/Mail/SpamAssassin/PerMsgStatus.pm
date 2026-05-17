@@ -3582,32 +3582,24 @@ sub all_from_addrs {
 
   if (exists $self->{all_from_addrs}) { return @{$self->{all_from_addrs}}; }
 
-  my @addrs;
-
-  # Resent- headers take priority, if present. see bug 672
-  my @resent = $self->get('Resent-From:first:addr');
-  if (@resent) {
-    @addrs = @resent;
-  }
-  else {
-    # bug 2292: Used to use find_all_addrs_in_line() with the same headers,
-    # but the would catch addresses in comments which caused FNs for things
-    # like welcomelist_from.  Since all of these are From headers, there
-    # should only be 1 address in each anyway (not exactly true, RFC 2822
-    # allows multiple addresses in a From header field)
-    # *** since 4.0 all addresses are returned from Header correctly ***
-    # bug 3366: some addresses come in as 'foo@bar...', which is invalid.
-    # so deal with the multiple periods.
-    # TODO: 4.0 need :first:addr here ? Why check so many headers ?
-    ## no critic
-    @addrs = map { tr/././s; $_ } grep { $_ ne '' }
-      ($self->get('From:addr'),            # std
-       $self->get('Envelope-Sender:addr'), # qmail: new-inject(1)
-       $self->get('Resent-Sender:addr'),   # procmailrc manpage
-       $self->get('X-Envelope-From:addr'), # procmailrc manpage
-       $self->get('EnvelopeFrom:addr'));   # SMTP envelope
-    # http://www.cs.tut.fi/~jkorpela/headers.html is useful here
-  }
+  # bug 2292: Used to use find_all_addrs_in_line() with the same headers,
+  # but the would catch addresses in comments which caused FNs for things
+  # like welcomelist_from.  Since all of these are From headers, there
+  # should only be 1 address in each anyway (not exactly true, RFC 2822
+  # allows multiple addresses in a From header field)
+  # *** since 4.0 all addresses are returned from Header correctly ***
+  # bug 3366: some addresses come in as 'foo@bar...', which is invalid.
+  # so deal with the multiple periods.
+  # TODO: 4.0 need :first:addr here ? Why check so many headers ?
+  ## no critic
+  my @addrs = map { tr/././s; $_ } grep { $_ ne '' }
+    ($self->get('From:addr'),            # std
+     $self->get('Envelope-Sender:addr'), # qmail: new-inject(1)
+     $self->get('Resent-From:first:addr'), # add Resent-From (bug 8394)
+     $self->get('Resent-Sender:addr'),   # procmailrc manpage
+     $self->get('X-Envelope-From:addr'), # procmailrc manpage
+     $self->get('EnvelopeFrom:addr'));   # SMTP envelope
+  # http://www.cs.tut.fi/~jkorpela/headers.html is useful here
 
   # Remove duplicate addresses
   my %addrs = map { $_ => 1 } @addrs;
@@ -3660,48 +3652,41 @@ sub all_to_addrs {
 
   if (exists $self->{all_to_addrs}) { return @{$self->{all_to_addrs}}; }
 
-  my @addrs;
-
-  # Resent- headers take priority, if present. see bug 672
-  my @resent = ( $self->get('Resent-To:first:addr'),
-                 $self->get('Resent-Cc:first:addr') );
-  if (@resent) {
-    @addrs = @resent;
-  } else {
-    # OK, a fetchmail trick: try to find the recipient address from
-    # the most recent 3 Received lines.  This is required for sendmail,
-    # since it does not add a helpful header like exim, qmail
-    # or Postfix do.
-    #
-    my @rcvd = ($self->get('Received'))[0 .. 2];
-    my @rcvdaddrs;
-    foreach my $line (@rcvd) {
-      next unless defined $line;
-      if ($line =~ / for <?(\S+\@(\S+?))>?;/) {
-        if (is_fqdn_valid(idn_to_ascii($2), 1)) {
-          push @rcvdaddrs, $1;
-        }
+  # OK, a fetchmail trick: try to find the recipient address from
+  # the most recent 3 Received lines.  This is required for sendmail,
+  # since it does not add a helpful header like exim, qmail
+  # or Postfix do.
+  #
+  my @rcvd = ($self->get('Received'))[0 .. 2];
+  my @rcvdaddrs;
+  foreach my $line (@rcvd) {
+    next unless defined $line;
+    if ($line =~ / for <?(\S+\@(\S+?))>?;/) {
+      if (is_fqdn_valid(idn_to_ascii($2), 1)) {
+        push @rcvdaddrs, $1;
       }
     }
-
-    # TODO: 4.0 use :first:addr ? Why so many headers ?
-    @addrs = (
-      @rcvdaddrs,
-      $self->get('To:addr'),                   # std
-      $self->get('Apparently-To:addr'),        # sendmail, from envelope
-      $self->get('Delivered-To:addr'),         # Postfix, poss qmail
-      $self->get('Envelope-Recipients:addr'),  # qmail: new-inject(1)
-      $self->get('Apparently-Resent-To:addr'), # procmailrc manpage
-      $self->get('X-Envelope-To:addr'),        # procmailrc manpage
-      $self->get('Envelope-To:addr'),          # exim
-      $self->get('X-Delivered-To:addr'),       # procmail quick start
-      $self->get('X-Original-To:addr'),        # procmail quick start
-      $self->get('X-Rcpt-To:addr'),            # procmail quick start
-      $self->get('X-Real-To:addr'),            # procmail quick start
-      $self->get('Cc:addr'));                  # std
-    # those are taken from various sources; thanks to Nancy McGough, who
-    # noted some in <http://www.ii.com/internet/robots/procmail/qs/#envelope>
   }
+
+  # TODO: 4.0 use :first:addr ? Why so many headers ?
+  my @addrs = (
+    @rcvdaddrs,
+    $self->get('To:addr'),                   # std
+    $self->get('Apparently-To:addr'),        # sendmail, from envelope
+    $self->get('Delivered-To:addr'),         # Postfix, poss qmail
+    $self->get('Envelope-Recipients:addr'),  # qmail: new-inject(1)
+    $self->get('Apparently-Resent-To:addr'), # procmailrc manpage
+    $self->get('Resent-To:first:addr'),      # add Resent-To (bug 8394)
+    $self->get('Resent-Cc:first:addr'),      # add Resent-Cc (bug 8394)
+    $self->get('X-Envelope-To:addr'),        # procmailrc manpage
+    $self->get('Envelope-To:addr'),          # exim
+    $self->get('X-Delivered-To:addr'),       # procmail quick start
+    $self->get('X-Original-To:addr'),        # procmail quick start
+    $self->get('X-Rcpt-To:addr'),            # procmail quick start
+    $self->get('X-Real-To:addr'),            # procmail quick start
+    $self->get('Cc:addr'));                  # std
+  # those are taken from various sources; thanks to Nancy McGough, who
+  # noted some in <http://www.ii.com/internet/robots/procmail/qs/#envelope>
 
   my %seen;
   my @result = grep { !$seen{$_}++ } @addrs;
