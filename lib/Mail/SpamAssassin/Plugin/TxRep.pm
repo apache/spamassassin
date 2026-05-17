@@ -1383,12 +1383,6 @@ sub check_senders_reputation {
     dbg("TxRep: autolearning disabled, no more reputation adjusting, quitting");
     return 0;
   }
-  my @from = $pms->all_from_addrs();
-  if (@from && $from[0] eq 'ignore@compiling.spamassassin.taint.org') {
-    dbg("TxRep: no scan in lint mode, quitting");
-    return 0;
-  }
-
   my $skip_domains = $self->{conf}->{txrep_skip_domains} || {};
 
   my $delta    = 0;
@@ -1399,6 +1393,10 @@ sub check_senders_reputation {
 
   my $from   = lc $pms->get('From:addr') || $pms->get('EnvelopeFrom:addr');
   return 0 unless $from =~ /\S/;
+  if ($from eq 'ignore@compiling.spamassassin.taint.org') {
+    dbg("TxRep: no scan in lint mode, quitting");
+    return 0;
+  }
   my $domain = $from;
   $domain =~ s/^.+@//;
 
