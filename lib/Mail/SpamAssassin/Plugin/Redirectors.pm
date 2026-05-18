@@ -1085,6 +1085,7 @@ sub _check_redir {
 
   # Launch HTTP requests
   foreach my $uri (keys %redir_urls) {
+    $redir_urls{$uri}->{source_info} = $pms->{uri_detail_list}->{$uri};
     $self->recursive_lookup($redir_urls{$uri}, $pms, $ua);
   }
 
@@ -1123,7 +1124,7 @@ sub recursive_lookup {
     if ($location =~ /^\d{3}$/) {
       $pms->{"redir_url_$location"} = 1;
       # add uri to uri_detail_list
-      $pms->add_uri_detail_list($redir_url) if !$pms->{uri_detail_list}->{$redir_url};
+      _add_redirect_uri($pms, $redir_url, $redir_url_info->{source_info});
       # Update cache
       $self->cache_add($redir_url, $location);
       return;
@@ -1174,7 +1175,7 @@ sub recursive_lookup {
       $pms->{"redir_url_$rcode"} = 1;
       # Update cache
       $self->cache_add($redir_url, $rcode);
-      $pms->add_uri_detail_list($redir_url) if !$pms->{uri_detail_list}->{$redir_url};
+      _add_redirect_uri($pms, $redir_url, $redir_url_info->{source_info});
       if($rcode !~ /^30[12]/) {
         # Calling quit prevents session_id from beeing reused
         # $ua->quit();
@@ -1209,7 +1210,7 @@ sub recursive_lookup {
             $pms->{"redir_url_$rcode"} = 1;
             # Update cache
             $self->cache_add($redir_url, $rcode);
-            $pms->add_uri_detail_list($redir_url) if !$pms->{uri_detail_list}->{$redir_url};
+            _add_redirect_uri($pms, $redir_url, $redir_url_info->{source_info});
           }
         }
         if($rcode !~ /^30[12]/) {
@@ -1302,13 +1303,36 @@ sub recursive_lookup {
     return;
   }
 
-  $pms->add_uri_detail_list($location) if !$pms->{uri_detail_list}->{$location};
+  _add_redirect_uri($pms, $location, $redir_url_info->{source_info});
 
   # Check for recursion
-  if (my $redir_url_info = _check_redirector_uri($location, $conf)) {
+  if (my $new_redir_url_info = _check_redirector_uri($location, $conf)) {
+    # Propagate the original source info through the chain so types and
+    # anchor_text from the message-level URI keep getting merged in.
+    $new_redir_url_info->{source_info} = $redir_url_info->{source_info};
     # Recurse...
-    $self->recursive_lookup($redir_url_info, $pms, $ua, %been_here);
+    $self->recursive_lookup($new_redir_url_info, $pms, $ua, %been_here);
   }
+}
+
+sub _add_redirect_uri {
+  my ($pms, $uri, $src) = @_;
+
+  my %types = $src && $src->{types} ? %{$src->{types}} : ();
+  $types{redirect} = 1;
+
+  my $added = $pms->add_uri_detail_list($uri, \%types);
+
+  if ($src && $src->{anchor_text} && @{$src->{anchor_text}}) {
+    my $dst = $pms->{uri_detail_list}->{$uri} ||= {};
+    my %seen;
+    $seen{$_}++ for @{$dst->{anchor_text} || []};
+    foreach my $at (@{$src->{anchor_text}}) {
+      push @{$dst->{anchor_text}}, $at unless $seen{$at}++;
+    }
+  }
+
+  return $added;
 }
 
 sub cache_add {

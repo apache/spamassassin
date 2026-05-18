@@ -41,7 +41,10 @@ C<raw> is the raw URI prior to any cleaning
 
 C<type> is the tag(s) which referenced the raw_uri.  I<parsed> is a
 faked type which specifies that the raw_uri was parsed from the
-rendered text.
+rendered text.  I<redirect> is a faked type which specifies that the
+raw_uri was discovered by following a URL redirector (see the
+Redirectors plugin); the tag(s) from the originating URI are also
+preserved on the redirected entry.
 
 C<cleaned> is a list including the raw URI and various cleaned
 versions of the raw URI (http://spamassassin.apache%2Eorg/,
