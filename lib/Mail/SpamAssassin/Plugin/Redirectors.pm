@@ -125,16 +125,46 @@ sub new {
 
 =over 4
 
-=item url_redirector  domain [domain...]     (default: none)
+=item url_redirector  domain[/path] [domain[/path]...]     (default: none)
 
-Domains that should be considered as an URL redirector.  If the domain begins
-with a '.', 3rd level tld of the main domain will be checked.
-The 3rd level starting with www with always be checked for every 2tld.
+Domains that should be considered as a URL redirector.
+
+Domain matching:
+
+=over 4
+
+=item *
+
+A bare domain (e.g. C<bing.com>) matches that exact host and also C<www.bing.com>.
+
+=item *
+
+A leading dot (e.g. C<.sendgrid.com>) matches any subdomain of the domain,
+to any depth. It does NOT match the bare domain itself; to match both, also
+list the bare domain (C<sendgrid.com>).
+
+=back
+
+An optional C</path> may follow the domain to restrict matching to URLs whose
+path begins with that string and ends at a path-segment boundary. C</tr/op> matches
+C</tr/op>, C</tr/op/foo>, and C</tr/op?x=1>, but NOT C</tr/open> — the
+configured prefix is treated as one or more whole path segments. Append a
+trailing slash (C</tr/op/>) to require at least one more segment after it
+(matches C</tr/op/foo> but not bare C</tr/op>). Multiple entries for the
+same domain are additive (allowlist); a URL is followed if it matches any
+entry.
+
+A bare-domain entry without a path is equivalent to C<domain/>, which matches
+any path.
 
 Example:
 
  url_redirector bing.com
  url_redirector .sendgrid.com
+ url_redirector .sendibt2.com/tr/cl/
+
+The last line follows C<https://x.y.sendibt2.com/tr/cl/abc> but not
+C<https://x.y.sendibt2.com/tr/op/abc>.
 
 =back
 
@@ -153,8 +183,8 @@ sub set_config {
       if ($value eq '') {
         return $Mail::SpamAssassin::Conf::MISSING_REQUIRED_VALUE;
       }
-      foreach my $domain (split(/\s+/, $value)) {
-        $self->{url_redirector}->{lc $domain} = 1; # 1 == head
+      foreach my $token (split(/\s+/, $value)) {
+        _add_redirector_entry($self, $token, 'head');
       }
     }
   });
@@ -215,11 +245,16 @@ Set Selenium port to use.
 
 =over 4
 
-=item clear_url_redirector  [domain] [domain...]
+=item clear_url_redirector  [domain[/path]] [domain[/path]...]
 
 Clear configured url_redirector domains, for example to
-override default settings from an update channel.  If domains are specified,
-then only those are removed from list.
+override default settings from an update channel.  If no arguments are given,
+all entries are cleared. If domains are specified, only those are removed.
+
+When an entry includes a C</path>, only that path is removed from the
+domain's allowlist; the domain entry itself is dropped only when its path
+list becomes empty. Use C<domain/> to remove the "match any path" entry
+added by a bare-domain configuration.
 
 =back
 
@@ -230,10 +265,11 @@ then only those are removed from list.
     code => sub {
       my ($self, $key, $value, $line) = @_;
       if ($value eq '') {
-        $self->{url_redirector} = {};
+        $self->{url_redirector_exact} = {};
+        $self->{url_redirector_suffix} = {};
       } else {
-        foreach my $domain (split(/\s+/, $value)) {
-          delete $self->{url_redirector}->{lc $domain};
+        foreach my $token (split(/\s+/, $value)) {
+          _clear_redirector_entry($self, $token);
         }
       }
     }
@@ -241,11 +277,13 @@ then only those are removed from list.
 
 =over 4
 
-=item url_redirector_get  domain [domain...]     (default: none)
+=item url_redirector_get  domain[/path] [domain[/path]...]     (default: none)
 
-Domains that should be considered as an URL redirector.  If the domain begins
-with a '.', 3rd level tld of the main domain will be checked.
-The http GET method will be used to check those domains.
+Domains that should be considered as an URL redirector, accessed using the
+HTTP GET method instead of HEAD. Syntax and matching rules are the same as
+C<url_redirector>: a bare domain matches that host and C<www.>, a leading
+dot matches the domain and any subdomain, and an optional C</path> prefix
+restricts the match.
 
 =back
 
@@ -258,8 +296,8 @@ The http GET method will be used to check those domains.
       if ($value eq '') {
         return $Mail::SpamAssassin::Conf::MISSING_REQUIRED_VALUE;
       }
-      foreach my $domain (split(/\s+/, $value)) {
-        $self->{url_redirector}->{lc $domain} = 2; # 2 == get
+      foreach my $token (split(/\s+/, $value)) {
+        _add_redirector_entry($self, $token, 'get');
       }
     }
   });
@@ -805,10 +843,80 @@ sub redir_url_loop {
   return $pms->{redir_url_loop} ? 1 : 0;
 }
 
+sub _add_redirector_entry {
+  my ($conf, $token, $method) = @_;
+
+  $token = lc $token;
+  my ($domspec, $path) = split(/\//, $token, 2);
+  $path = defined $path ? '/' . $path : '/';
+
+  my $is_suffix = ($domspec =~ s/^\.//) ? 1 : 0;
+  return unless length $domspec;
+
+  my $bucket = $is_suffix ? 'url_redirector_suffix' : 'url_redirector_exact';
+  my $entry = $conf->{$bucket}->{$domspec} ||= { method => $method, paths => [] };
+  $entry->{method} = $method;
+  push @{$entry->{paths}}, $path unless grep { $_ eq $path } @{$entry->{paths}};
+}
+
+sub _clear_redirector_entry {
+  my ($conf, $token) = @_;
+
+  $token = lc $token;
+  my $has_path = ($token =~ /\//) ? 1 : 0;
+  my ($domspec, $path) = split(/\//, $token, 2);
+  $path = '/' . (defined $path ? $path : '');
+
+  my $bucket = ($domspec =~ s/^\.//) ? 'url_redirector_suffix' : 'url_redirector_exact';
+  return unless length $domspec;
+
+  if (!$has_path) {
+    delete $conf->{$bucket}->{$domspec};
+    return;
+  }
+  my $entry = $conf->{$bucket}->{$domspec} or return;
+  @{$entry->{paths}} = grep { $_ ne $path } @{$entry->{paths}};
+  delete $conf->{$bucket}->{$domspec} unless @{$entry->{paths}};
+}
+
+sub _entry_match_path {
+  my ($entry, $path) = @_;
+  for my $p (@{$entry->{paths}}) {
+    next unless index($path, $p) == 0;
+    # Require a boundary after the configured prefix so /tr/op does not
+    # match /tr/open. A trailing '/' in the configured prefix supplies
+    # its own boundary; otherwise the next char must be end-of-string
+    # or '/'. ('?' and '#' have already been stripped from $path.)
+    return 1 if substr($p, -1) eq '/'
+             || length($path) == length($p)
+             || substr($path, length($p), 1) eq '/';
+  }
+  return 0;
+}
+
+sub _lookup_redirector {
+  my ($conf, $host, $path) = @_;
+
+  if (my $e = $conf->{url_redirector_exact}->{$host}) {
+    return $e if _entry_match_path($e, $path);
+  }
+  if ($host =~ /^www\.(.+)$/) {
+    if (my $e = $conf->{url_redirector_exact}->{$1}) {
+      return $e if _entry_match_path($e, $path);
+    }
+  }
+  my $h = $host;
+  while ($h =~ s/^[^.]+\.//) {
+    last unless $h =~ /\./;
+    if (my $e = $conf->{url_redirector_suffix}->{$h}) {
+      return $e if _entry_match_path($e, $path);
+    }
+  }
+  return;
+}
+
 sub _check_redirector_uri {
   my ($uri, $conf) = @_;
-
-  my $newuri;
 
   local($1,$2);
   # normalize uri only if it doesn't contain more explicit redirects
@@ -824,6 +932,7 @@ sub _check_redirector_uri {
     (.*)?		# Some path wanted
     }ix;
   my $host = lc $1;
+  my $rest = defined $2 ? $2 : '';
   # return early if host is not valid
   if($host =~ /\=|\&|\?/) {
     return;
@@ -831,85 +940,40 @@ sub _check_redirector_uri {
   if(is_fqdn_valid($host)) {
     $host = idn_to_ascii($host);
   }
-  my $has_path = defined $2;
+  my $has_path = length $rest ? 1 : 0;
   my $levels = $host =~ tr/.//;
   # No point looking at single level "xxx.yy" without a path
   return if $levels == 1 && !$has_path;
 
-  my $params = $2;
-  if($has_path and defined $params and (length($params) > 2)) {
-    dbg("Found url with host $host and querystring $params");
-  }
   return if $uri !~ /([^.]+\.[^.]+)/;
   # skip wrongly parsed uris
   return if $uri =~ /^([a-z0-9]+?)\@/;
 
-  if (exists $conf->{url_redirector}->{$host}) {
-    dbg("Found redirection for host $host");
-    return {
-      'uri' => $uri,
-      'method' => $conf->{url_redirector}->{$host} == 1 ? 'head' : 'get',
-    };
+  # Split path from querystring/fragment so query content can't sneak past
+  # the path-prefix test.
+  my ($path, $query) = ($rest, '');
+  if ($path =~ /^([^?#]*)(.*)$/) {
+    ($path, $query) = ($1, $2);
   }
-  # if domain is a 3rd level domain check if there is a url redirector
-  # on the www domain
-  elsif($levels == 2 && $host =~ /^www\.([^.]+\.[^.]+)$/i) {
-    my $domain = $1;
-    if(exists $conf->{url_redirector}->{$domain}) {
-      dbg("Found internal www redirection for domain $domain");
-      return {
-        'uri' => $uri,
-        'method' => $conf->{url_redirector}->{$domain} == 1 ? 'head' : 'get',
-      };
-    } elsif ($newuri = _check_querystring($params, $conf)) {
-      return {
-        'uri' => $newuri,
-        'method' => 'head',
-      };
-    }
+  $path = '/' unless length $path;
+
+  if (my $e = _lookup_redirector($conf, $host, $path)) {
+    dbg("Found redirection for host $host path $path");
+    return { uri => $uri, method => $e->{method} };
   }
-  elsif($levels == 3 && $host =~ /^www\.([^.]+\.[^.]+\.[^.]+)$/i) {
-    my $domain = $1;
-    if(exists $conf->{url_redirector}->{$domain}) {
-      dbg("Found internal www redirection for domain $domain");
-      return {
-        'uri' => $uri,
-        'method' => $conf->{url_redirector}->{$domain} == 1 ? 'head' : 'get',
-      };
-    } elsif ($newuri = _check_querystring($params, $conf)) {
-      return {
-        'uri' => $newuri,
-        'method' => 'head',
-      };
-    }
-  }
-  # if domain is a 3rd level domain check if there is a url redirector
-  # on the 2nd level tld
-  elsif ($levels == 2 && $host =~ /^(?!www)[^.]+(\.[^.]+\.[^.]+)$/i &&
-           exists $conf->{url_redirector}->{$1}) {
-    return {
-      'uri' => $uri,
-      'method' => $conf->{url_redirector}->{$1} == 1 ? 'head' : 'get',
-    };
-  }
-  elsif ($host =~ /(\.[a-z0-9_]+(?:\.[a-z0-9_]+)?\.[a-z]+)$/i &&
-    exists $conf->{url_redirector}->{$1}) {
-    return {
-      'uri' => $uri,
-      'method' => $conf->{url_redirector}->{$1} == 1 ? 'head' : 'get',
-    };
-  } elsif ($newuri = _check_querystring($params, $conf)) {
+
+  if (my $newuri = _check_querystring($rest, $conf)) {
     my $nhost = $newuri;
-    if($nhost =~ /https?:\/\/(.*)/) {
-      $nhost = $1;
-    }
+    $nhost = $1 if $nhost =~ m{^https?://([^/?#:]+)};
+    $nhost = lc $nhost;
+    my $ne = _lookup_redirector($conf, $nhost, '/');
     return {
-      'uri' => $newuri,
-      'method' => (exists($conf->{url_redirector}->{$nhost}) && ($conf->{url_redirector}->{$nhost} == 1)) ? 'head' : 'get',
+      uri => $newuri,
+      method => $ne ? $ne->{method} : 'get',
     };
-  } else {
-    dbg("No explicit redirector host found for $host");
   }
+
+  dbg("No explicit redirector host found for $host path $path");
   return;
 }
 
@@ -1301,5 +1365,6 @@ sub has_redir_url_maxchain { 1 }
 sub has_redir_url_loop { 1 }
 sub has_selenium_support { 1 }
 sub has_url_skip_redirect_to { 1 }
+sub has_url_redirector_path { 1 } # path-prefix syntax in url_redirector / url_redirector_get
 
 1;

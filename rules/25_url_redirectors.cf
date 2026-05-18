@@ -124,6 +124,9 @@ url_redirector_get share.google
 url_redirector_get shared.outlook.inky.com
 url_redirector_get t.nypost.com
 
-# generic list of likely active services
+if can(Mail::SpamAssassin::Plugin::Redirectors::has_url_redirector_path)
+    clear_url_redirector .awstrack.me
+    url_redirector .awstrack.me/L0/
+endif
 
 endif
