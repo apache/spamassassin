@@ -56,6 +56,7 @@ url_redirector .awstrack.me
 url_redirector .benchurl.com
 url_redirector .blob.core.windows.net
 url_redirector .cc.rs6.net
+url_redirector .ct.sendgrid.net
 url_redirector .exactag.com
 url_redirector .hosted.phplist.com
 url_redirector .href.li
@@ -88,7 +89,7 @@ url_redirector tracemail.enima.online
 url_redirector tracking.skandha.edu.in
 url_redirector trackingservice.monday.com
 url_redirector trk.thesiden.com
-url_redirector_get .pstmrk.it
+url_redirector urldefense.proofpoint.com
 url_redirector_get .defend.egress.com
 url_redirector_get .protection.sophos.com
 url_redirector_get .trustyshopping.su
@@ -123,10 +124,27 @@ url_redirector_get main.plieo.eu
 url_redirector_get share.google
 url_redirector_get shared.outlook.inky.com
 url_redirector_get t.nypost.com
+url_redirector_get track.pstmrk.it
 
 if can(Mail::SpamAssassin::Plugin::Redirectors::has_url_redirector_path)
     clear_url_redirector .awstrack.me
     url_redirector .awstrack.me/L0/
+
+    clear_url_redirector .exactag.com
+    url_redirector .exactag.com/cl.aspx
+
+    clear_url_redirector .cc.rs6.net
+    url_redirector .cc.rs6.net/tn.jsp
+
+    clear_url_redirector mandrillapp.com
+    url_redirector mandrillapp.com/track/click
+
+    url_redirector .list-manage.com/track/click
+    url_redirector substack.com/redirect/
+    url_redirector go.pardot.com/e/
+
+    url_redirector_get .sendibt2.com/tr/cl/
+
 endif
 
 endif
