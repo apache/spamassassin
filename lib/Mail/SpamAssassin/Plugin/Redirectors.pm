@@ -147,7 +147,7 @@ list the bare domain (C<sendgrid.com>).
 
 An optional C</path> may follow the domain to restrict matching to URLs whose
 path begins with that string and ends at a path-segment boundary. C</tr/op> matches
-C</tr/op>, C</tr/op/foo>, and C</tr/op?x=1>, but NOT C</tr/open> — the
+C</tr/op>, C</tr/op/foo>, and C</tr/op?x=1>, but NOT C</tr/open> -- the
 configured prefix is treated as one or more whole path segments. Append a
 trailing slash (C</tr/op/>) to require at least one more segment after it
 (matches C</tr/op/foo> but not bare C</tr/op>). Multiple entries for the
@@ -915,7 +915,10 @@ sub _lookup_redirector {
   return;
 }
 
-sub _check_redirector_uri {
+# Parse a URI, validate it, and split into (normalized_uri, host, path, rest).
+# Returns empty list if the URI is unusable. Shared by _is_configured_redirector
+# and _extract_embedded_uri so both apply the same validity rules.
+sub _parse_uri {
   my ($uri, $conf) = @_;
 
   local($1,$2);
@@ -924,7 +927,7 @@ sub _check_redirector_uri {
   if($uri !~ /https?%3A%2F%2F/) {
     $uri = Mail::SpamAssassin::Util::url_decode($uri);
   }
-  return 0 unless $uri =~ m{^
+  return unless $uri =~ m{^
     https?://		# Only http
     (?:[^\@/?#]*\@)?	# Ignore user:pass@
     ([^/?#:]+)		# (Capture hostname)
@@ -933,7 +936,6 @@ sub _check_redirector_uri {
     }ix;
   my $host = lc $1;
   my $rest = defined $2 ? $2 : '';
-  # return early if host is not valid
   if($host =~ /\=|\&|\?/) {
     return;
   }
@@ -942,95 +944,54 @@ sub _check_redirector_uri {
   }
   my $has_path = length $rest ? 1 : 0;
   my $levels = $host =~ tr/.//;
-  # No point looking at single level "xxx.yy" without a path
   return if $levels == 1 && !$has_path;
-
   return if $uri !~ /([^.]+\.[^.]+)/;
-  # skip wrongly parsed uris
   return if $uri =~ /^([a-z0-9]+?)\@/;
 
-  # Split path from querystring/fragment so query content can't sneak past
-  # the path-prefix test.
-  my ($path, $query) = ($rest, '');
-  if ($path =~ /^([^?#]*)(.*)$/) {
-    ($path, $query) = ($1, $2);
-  }
+  my $path = $rest;
+  $path = $1 if $path =~ /^([^?#]*)/;
   $path = '/' unless length $path;
+
+  return ($uri, $host, $path, $rest);
+}
+
+# Returns the redirector entry ({method, paths}) if $uri's host+path matches
+# a configured url_redirector / url_redirector_get, else undef.
+sub _is_configured_redirector {
+  my ($uri, $conf) = @_;
+
+  my ($nuri, $host, $path) = _parse_uri($uri, $conf);
+  return unless defined $nuri;
 
   if (my $e = _lookup_redirector($conf, $host, $path)) {
     dbg("Found redirection for host $host path $path");
-    return { uri => $uri, method => $e->{method} };
+    return $e;
   }
-
-  if (my $newuri = _check_querystring($rest, $conf)) {
-    my $nhost = $newuri;
-    $nhost = $1 if $nhost =~ m{^https?://([^/?#:]+)};
-    $nhost = lc $nhost;
-    my $ne = _lookup_redirector($conf, $nhost, '/');
-    return {
-      uri => $newuri,
-      method => $ne ? $ne->{method} : 'get',
-    };
-  }
-
-  dbg("No explicit redirector host found for $host path $path");
   return;
 }
 
-sub _check_querystring {
-  my ($params, $conf) = @_;
+# Returns a URI extracted from $uri's querystring/path (via the
+# url_redirector_params regex or a bare embedded //URL), else undef.
+# Does NOT check whether the extracted URI's host is configured.
+sub _extract_embedded_uri {
+  my ($uri, $conf) = @_;
 
-  # Redirector params regexp
+  my (undef, undef, undef, $rest) = _parse_uri($uri, $conf);
+  return unless defined $rest;
+
   my $rreg = $conf->{url_redirector_params};
-
-  # Check parameters regexp and https:// in the querystring
-  if (($params =~ /(?:\?|\&)$rreg/gis) or ($params =~ /(?:\/|\_|\=)((?:https?:)?\/\/.*)/)) {
-    dbg("Found redirection with path $params");
+  local($1);
+  if (($rest =~ /(?:\?|\&)$rreg/gis) || ($rest =~ /(?:\/|\_|\=)((?:https?:)?\/\/.*)/)) {
     my $newuri = $1;
-    if($newuri !~ /^http/) {
-      $newuri = 'http://' . $newuri;
-    }
+    dbg("Found embedded uri $newuri in $uri");
+    $newuri = 'http://' . $newuri if $newuri !~ /^http/;
     return $newuri;
   }
   return;
 }
 
-sub check_dnsbl {
-  my ($self, $opts) = @_;
-
-  $self->_check_redir($opts->{permsgstatus});
-}
-
-sub _check_redir {
-  my ($self, $pms) = @_;
-
-  return if $pms->{redir_url_checked}++;
-  my $conf = $pms->{conf};
-
-  # Sort redirected URLs into hash to de-dup them
-  my %redir_urls;
-  my $uris = $pms->get_uri_detail_list();
-  foreach my $uri (keys %{$uris}) {
-    my $info = $uris->{$uri};
-    next unless $info->{domains} && $info->{cleaned};
-    if (my $redir_url_info = _check_redirector_uri($uri, $conf)) {
-      $redir_urls{$uri} = $redir_url_info;
-      last if scalar keys %redir_urls >= $conf->{max_redir_urls};
-    }
-  }
-
-  # Bail out if no redirector was found
-  return unless %redir_urls;
-
-  # Mark that a URL redirector was found
-  $pms->{redir_url} = 1;
-
-  # Bail out if network lookups not enabled or max_redir_urls 0
-  return if $self->{net_disabled};
-  return if !$conf->{max_redir_urls};
-
-  # Initialize cache
-  $self->initialise_url_redirector_cache($conf);
+sub _make_ua {
+  my ($self, $conf) = @_;
 
   if($conf->{url_redirector_use_selenium} and not HAS_SELENIUM) {
     dbg("url_redirector_use_selenium setting enabled but Selenium::Remote::Driver Perl module not installed, LWP will be used instead");
@@ -1066,7 +1027,6 @@ sub _check_redir {
       $ua->session_id($self->{selenium_session_id});
       dbg("Reusing Selenium session id " . $self->{selenium_session_id});
     }
-    # Selenium might break when setting timeout
     eval {
       $ua->set_timeout('implicit', $conf->{url_redirector_timeout} * 1000);
     };
@@ -1074,7 +1034,6 @@ sub _check_redir {
       dbg("Error setting timeout to $conf->{url_redirector_timeout}: $@");
     }
   } else {
-  # Initialize LWP
     $ua = LWP::UserAgent->new(
       'agent' => $conf->{url_redirector_user_agent},
       'max_redirect' => 0,
@@ -1082,57 +1041,32 @@ sub _check_redir {
     );
     $ua->env_proxy;
   }
-
-  # Launch HTTP requests
-  foreach my $uri (keys %redir_urls) {
-    $redir_urls{$uri}->{source_info} = $pms->{uri_detail_list}->{$uri};
-    $self->recursive_lookup($redir_urls{$uri}, $pms, $ua);
-  }
-
-  # Automatically purge old entries
-  if ($self->{dbh} && $conf->{url_redirector_cache_autoclean}
-      && rand() < 1/$conf->{url_redirector_cache_autoclean})
-  {
-    dbg("cleaning stale cache entries");
-    eval { $self->{sth_clean}->execute(); };
-    if ($@) { dbg("cache cleaning failed: $@"); }
-  }
+  return $ua;
 }
 
-sub recursive_lookup {
-  my ($self, $redir_url_info, $pms, $ua, %been_here) = @_;
+# Perform an HTTP request for $uri using $method (LWP) or Selenium.
+# Returns the absolute, normalized Location URL on a usable redirect,
+# or undef otherwise. Sets redir_url_<rcode> flags on $pms and writes
+# the cache.
+sub _do_http {
+  my ($self, $uri, $method, $pms, $ua) = @_;
   my $conf = $pms->{conf};
 
-  my $count = scalar keys %been_here;
-  dbg("redirection count $count") if $count;
-  if ($count >= $conf->{max_redir_url_redirections}) {
-    dbg("found more than $conf->{max_redir_url_redirections} redirections");
-    # Fire test
-    $pms->{redir_url_maxchain} = 1;
-    return;
-  }
-
-  my $redir_url = $redir_url_info->{uri};
+  my $redir_url = $uri;
   my $location;
+
   if (defined($location = $self->cache_get($redir_url))) {
     if ($conf->{url_redirector_loginfo}) {
       info("found cached $redir_url => $location");
     } else {
       dbg("found cached $redir_url => $location");
     }
-    # Cached http code?
     if ($location =~ /^\d{3}$/) {
       $pms->{"redir_url_$location"} = 1;
-      # add uri to uri_detail_list
-      _add_redirect_uri($pms, $redir_url, $redir_url_info->{source_info});
-      # Update cache
       $self->cache_add($redir_url, $location);
       return;
     }
   } else {
-    # Not cached; do lookup
-    my $method = $redir_url_info->{method};
-    # run the http check only if the url is valid
     # remove additional slashes after http://
     $redir_url =~ s|^(https?):\/{3,8}|$1://|;
     if($redir_url !~ /^(?:https?:\/\/)?(?:.{1,128}\@)?(?:[A-Za-z0-9-]{1,63}\.)+[A-Za-z0-9-]{2,63}/) {
@@ -1143,7 +1077,6 @@ sub recursive_lookup {
     if($conf->{url_redirector_use_selenium}) {
       my $rcode;
       my $newurl = '';
-      # Selenium doesn't support HEAD requests
       if($method eq 'head') {
         dbg("HEAD requests are not supported in Selenium, sending a GET request");
       }
@@ -1151,16 +1084,13 @@ sub recursive_lookup {
 	$ua->get($redir_url);
       };
       if($@) {
-        # Error in Selenium request
 	dbg("Error in Selenium request reading url $redir_url, error $@");
 	return;
       } else {
         $newurl = $ua->get_current_url();
         if($newurl ne $redir_url) {
-          # url has changes, assume it's a redirect 301
           $rcode = 301;
         } else {
-	  # try to find hard-coded redirectors
 	  if ($redir_url =~ /\/(https?:\/\/.{4,256})/) {
             $rcode = 301;
 	    $newurl = $1;
@@ -1173,12 +1103,8 @@ sub recursive_lookup {
       }
       $location = $newurl;
       $pms->{"redir_url_$rcode"} = 1;
-      # Update cache
       $self->cache_add($redir_url, $rcode);
-      _add_redirect_uri($pms, $redir_url, $redir_url_info->{source_info});
       if($rcode !~ /^30[12]/) {
-        # Calling quit prevents session_id from beeing reused
-        # $ua->quit();
         return;
       }
     } else {
@@ -1208,9 +1134,7 @@ sub recursive_lookup {
 	    }
 	  } else {
             $pms->{"redir_url_$rcode"} = 1;
-            # Update cache
             $self->cache_add($redir_url, $rcode);
-            _add_redirect_uri($pms, $redir_url, $redir_url_info->{source_info});
           }
         }
         if($rcode !~ /^30[12]/) {
@@ -1218,7 +1142,6 @@ sub recursive_lookup {
         }
       }
 
-      # if redirection has been done using http-equiv meta tag, location http header will not be available
       if((exists $response->headers->{location}) or $http_equiv) {
         $location = $response->headers->{location} if not $http_equiv;
         if($redir_url ne $location) {
@@ -1232,44 +1155,28 @@ sub recursive_lookup {
     }
   }
 
-  # Update cache
+  return unless defined $location;
+
   $self->cache_add($redir_url, $location);
 
-  # Bail out if $redir_url redirects to itself
-  if ($redir_url eq $location) {
-    dbg("URL redirects to itself");
-    $pms->{redir_url_loop} = 1;
-    return;
-  }
-
-  # At this point we have a valid redirection and new URL in $response
-  $pms->{redir_url_redir} = 1;
-
-  # Set chained here otherwise we might mark a disabled page or
-  # redirect back to the same host as chaining incorrectly.
-  $pms->{redir_url_chained} = 1 if $count;
-
-  # Check if it is a redirection to a relative URI
-  # Make it an absolute URI and chain to it in that case
+  # Resolve relative Location header to absolute.
   if ($location !~ m{^[a-z]+://}i) {
-    # return early if the new url has an unsupported protocol
     if($location =~ /^(ftp|mailto|tel):/) {
       dbg("Unsupported protocol scheme \"$1:\"");
       return;
     }
     my $orig_location = $location;
-    my $orig_redir_url = $redir_url;
-    # Strip to..
+    my $base = $redir_url;
     if (index($location, '/') == 0) {
-      $redir_url =~ s{^([a-z]+://.*?)[/?#].*}{$1}; # ..absolute path base is http://example.com
+      $base =~ s{^([a-z]+://.*?)[/?#].*}{$1};
     } else {
-      $redir_url =~ s{^([a-z]+://.*/)}{$1}; # ..relative path base is http://example.com/a/b/
+      $base =~ s{^([a-z]+://.*/)}{$1};
     }
-    $location = "$redir_url$location";
-    dbg("looks like a redirection to a relative URI: $orig_redir_url => $location ($orig_location)");
+    $location = "$base$location";
+    dbg("looks like a redirection to a relative URI: $redir_url => $location ($orig_location)");
   }
 
-  # remove duplicated parameters in order to better catch loops
+  # Normalize: drop duplicated parameters.
   my %paramseen;
   my $denorm_location = $location;
   my ($hostpart, $querystring) = split /\?|&amp;|&/, $location, 2;
@@ -1279,39 +1186,117 @@ sub recursive_lookup {
     my $nquerystring = join '&', @unique_params;
     $location = $hostpart . '?' . $nquerystring;
     if($denorm_location ne $location) {
-      dbg("Normalizing redirector parameters from $denorm_location to $location"); 
+      dbg("Normalizing redirector parameters from $denorm_location to $location");
     }
   }
 
-  my ($domain, $host) = $self->{main}->{registryboundaries}->uri_to_domain($location);
-  if (exists $been_here{$host}) {
-    dbg("Chained redirector that uses the same hostname $host found for location $location");
-    $pms->{redir_url_chained_domain} = 1;
-  }
-  if (exists $been_here{$location}) {
-    # Loop detected
-    dbg("error: loop detected: $location");
+  return $location;
+}
+
+# Recursive chain walker. Stops cleanly when neither
+# _is_configured_redirector nor _extract_embedded_uri matches. HTTP
+# requests are gated on _is_configured_redirector returning truthy.
+sub _walk_redirects {
+  my ($self, $uri, $src_info, $pms, $ua, $depth, $been_here) = @_;
+  my $conf = $pms->{conf};
+
+  if (exists $been_here->{"uri:$uri"}) {
+    dbg("error: loop detected: $uri");
     $pms->{redir_url_loop} = 1;
     return;
   }
-  $been_here{$host} = 1;
-  $been_here{$location} = 1;
-
-  # Exit early if destination domain is configured to skip
-  if (exists $conf->{url_skip_redirect_to}->{$host}) {
-    dbg("Stopping redirect chain: destination domain $host is in url_skip_redirect_to ($location)");
+  if ($depth >= $conf->{max_redir_url_redirections}) {
+    dbg("found more than $conf->{max_redir_url_redirections} redirections");
+    $pms->{redir_url_maxchain} = 1;
     return;
   }
+  $been_here->{"uri:$uri"} = 1;
 
-  _add_redirect_uri($pms, $location, $redir_url_info->{source_info});
+  if (my $rentry = _is_configured_redirector($uri, $conf)) {
+    $pms->{redir_url} = 1;
+    $pms->{redir_url_chained} = 1 if $depth > 0;
 
-  # Check for recursion
-  if (my $new_redir_url_info = _check_redirector_uri($location, $conf)) {
-    # Propagate the original source info through the chain so types and
-    # anchor_text from the message-level URI keep getting merged in.
-    $new_redir_url_info->{source_info} = $redir_url_info->{source_info};
-    # Recurse...
-    $self->recursive_lookup($new_redir_url_info, $pms, $ua, %been_here);
+    my (undef, $host) = $self->{main}->{registryboundaries}->uri_to_domain($uri);
+    if (defined $host) {
+      if ($depth > 0 && exists $been_here->{"host:$host"}) {
+        dbg("Chained redirector that uses the same hostname $host found for $uri");
+        $pms->{redir_url_chained_domain} = 1;
+      }
+      $been_here->{"host:$host"} = 1;
+    }
+
+    return if $self->{net_disabled};
+    return if !$conf->{max_redir_urls};
+    return if !defined $ua;
+
+    # Seed cap: max_redir_urls counts initial (depth 0) redirector URIs.
+    if ($depth == 0) {
+      return if ++$pms->{redir_seed_count} > $conf->{max_redir_urls};
+    }
+
+    my $location = $self->_do_http($uri, $rentry->{method}, $pms, $ua);
+    return unless defined $location;
+
+    if ($uri eq $location) {
+      dbg("URL redirects to itself");
+      $pms->{redir_url_loop} = 1;
+      return;
+    }
+
+    my (undef, $loc_host) = $self->{main}->{registryboundaries}->uri_to_domain($location);
+    if (defined $loc_host && exists $conf->{url_skip_redirect_to}->{$loc_host}) {
+      dbg("Stopping redirect chain: destination domain $loc_host is in url_skip_redirect_to ($location)");
+      return;
+    }
+
+    _add_redirect_uri($pms, $location, $src_info);
+    $pms->{redir_url_redir} = 1;
+
+    return $self->_walk_redirects($location, $src_info, $pms, $ua, $depth + 1, $been_here);
+  }
+
+  if (my $embedded = _extract_embedded_uri($uri, $conf)) {
+    _add_redirect_uri($pms, $embedded, $src_info);
+    return $self->_walk_redirects($embedded, $src_info, $pms, $ua, $depth + 1, $been_here);
+  }
+
+  return;
+}
+
+sub check_dnsbl {
+  my ($self, $opts) = @_;
+
+  $self->_check_redir($opts->{permsgstatus});
+}
+
+sub _check_redir {
+  my ($self, $pms) = @_;
+
+  return if $pms->{redir_url_checked}++;
+  my $conf = $pms->{conf};
+
+  $self->initialise_url_redirector_cache($conf);
+
+  # Build UA only if it could be used. _walk_redirects accepts undef $ua
+  # and still recurses through embedded URIs (no HTTP needed).
+  my $ua;
+  if (!$self->{net_disabled} && $conf->{max_redir_urls}) {
+    $ua = $self->_make_ua($conf);
+  }
+
+  my $uris = $pms->get_uri_detail_list();
+  foreach my $uri (keys %{$uris}) {
+    my $info = $uris->{$uri};
+    next unless $info->{domains} && $info->{cleaned};
+    $self->_walk_redirects($uri, $info, $pms, $ua, 0, {});
+  }
+
+  if ($self->{dbh} && $conf->{url_redirector_cache_autoclean}
+      && rand() < 1/$conf->{url_redirector_cache_autoclean})
+  {
+    dbg("cleaning stale cache entries");
+    eval { $self->{sth_clean}->execute(); };
+    if ($@) { dbg("cache cleaning failed: $@"); }
   }
 }
 

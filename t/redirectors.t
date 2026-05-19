@@ -24,16 +24,16 @@ loadplugin Mail::SpamAssassin::Plugin::Redirectors
 ");
 
 tstprefs(q{
-dns_query_restriction allow google.com
-dns_query_restriction allow disq.us
+dns_query_restriction allow apache.org
 
 clear_url_redirector
-url_redirector_get google.com
+url_redirector_get spamassassin.apache.org
+url_redirector_get community.apache.org
 
 body HAS_REDIR_URL              eval:redir_url()
 body REDIR_URL_404              eval:redir_url_404()
 body REDIR_URL_C404             eval:redir_url_code('404')
-uri URI_PAGE_LINK		m,^http://spamassassin\.apache\.org/news\.html,
+uri URI_PAGE_LINK		m,^https://spamassassin\.apache\.org/full/4\.0\.x/$,
 });
 
 ###
@@ -57,7 +57,7 @@ if (SQLITE) {
 
 tstprefs("
 clear_url_redirector
-url_redirector_get google.com
+url_redirector_get spamassassin.apache.org
 
 url_redirector_cache_type dbi
 url_redirector_cache_dsn dbi:SQLite:dbname=$workdir/Redirectors.db
@@ -73,30 +73,29 @@ sarun ("-t < data/spam/redirectors/base.eml", \&patterns_run_cb);
 ok_all_patterns();
 
 my $dbh = DBI->connect("dbi:SQLite:dbname=$workdir/Redirectors.db","","");
-my @row = $dbh->selectrow_array("SELECT target_url FROM redir_url_cache WHERE redir_url = 'https://www.google.com/amp/spamassassin.apache.org/news.html'");
-is($row[0], 'https://www.google.com/url?q=http://spamassassin.apache.org/news.html');
+my @row = $dbh->selectrow_array("SELECT target_url FROM redir_url_cache WHERE redir_url = 'https://spamassassin.apache.org/full/4.0.x'");
+is($row[0], 'https://spamassassin.apache.org/full/4.0.x/');
 
 # Check another email to cleanup old entries from database
 sarun ("-t < data/spam/redirectors/base2.eml", \&patterns_run_cb);
 ok_all_patterns();
 
 $dbh = DBI->connect("dbi:SQLite:dbname=$workdir/Redirectors.db","","");
-@row = $dbh->selectrow_array("SELECT target_url FROM redir_url_cache WHERE redir_url = 'https://www.google.com/amp/spamassassin.apache.org/news.html'");
-isnt($row[0], 'https://spamassassin.apache.org/news.html');
+@row = $dbh->selectrow_array("SELECT target_url FROM redir_url_cache WHERE redir_url = 'https://spamassassin.apache.org/full/4.0.x'");
+isnt($row[0], 'https://spamassassin.apache.org/full/');
 
 }
 
 if(HAS_SELENIUM) {
 tstprefs(q{
-dns_query_restriction allow google.com
-dns_query_restriction allow disq.us
+dns_query_restriction allow apache.org
 
 clear_url_redirector
-url_redirector_get google.com
+url_redirector_get spamassassin.apache.org
 url_redirector_use_selenium 1
 
 body HAS_REDIR_URL              eval:redir_url()
-uri URI_PAGE_LINK		m,^http://spamassassin\.apache\.org/news\.html,
+uri URI_PAGE_LINK		m,^https://spamassassin\.apache\.org/full/4\.0\.x/$,
 });
 %patterns = (
    q{ 1.0 HAS_REDIR_URL } => '',

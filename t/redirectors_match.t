@@ -57,7 +57,7 @@ plan tests => scalar(@cases) + 4;
 for my $c (@cases) {
   my ($uri, $expect_method, $desc) = @$c;
   my $conf = make_conf();
-  my $r = Mail::SpamAssassin::Plugin::Redirectors::_check_redirector_uri($uri, $conf);
+  my $r = Mail::SpamAssassin::Plugin::Redirectors::_is_configured_redirector($uri, $conf);
   if (defined $expect_method) {
     is(($r ? $r->{method} : undef), $expect_method, $desc);
   } else {
@@ -72,13 +72,13 @@ for my $c (@cases) {
   Mail::SpamAssassin::Plugin::Redirectors::_add_redirector_entry($conf, '.sendibt2.com/tr/click/', 'get');
 
   Mail::SpamAssassin::Plugin::Redirectors::_clear_redirector_entry($conf, '.sendibt2.com/tr/cl/');
-  ok(!Mail::SpamAssassin::Plugin::Redirectors::_check_redirector_uri('https://x.sendibt2.com/tr/cl/a', $conf),
+  ok(!Mail::SpamAssassin::Plugin::Redirectors::_is_configured_redirector('https://x.sendibt2.com/tr/cl/a', $conf),
      'clear removes /tr/cl/ path');
-  ok( Mail::SpamAssassin::Plugin::Redirectors::_check_redirector_uri('https://x.sendibt2.com/tr/click/a', $conf),
+  ok( Mail::SpamAssassin::Plugin::Redirectors::_is_configured_redirector('https://x.sendibt2.com/tr/click/a', $conf),
      'clear leaves /tr/click/ path');
 
   Mail::SpamAssassin::Plugin::Redirectors::_clear_redirector_entry($conf, '.sendibt2.com/tr/click/');
-  ok(!Mail::SpamAssassin::Plugin::Redirectors::_check_redirector_uri('https://x.sendibt2.com/tr/click/a', $conf),
+  ok(!Mail::SpamAssassin::Plugin::Redirectors::_is_configured_redirector('https://x.sendibt2.com/tr/click/a', $conf),
      'clear removes last path');
   ok(!exists $conf->{url_redirector_suffix}->{'sendibt2.com'},
      'host entry dropped when paths empty');
