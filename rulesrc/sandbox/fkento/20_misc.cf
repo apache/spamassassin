@@ -38,3 +38,8 @@ meta          MXG_THREAD_INDEX_BAD  __MXG_THREAD_INDEX_BAD01 && !__MXG_THREAD_IN
 score         MXG_THREAD_INDEX_BAD  0.001
 describe      MXG_THREAD_INDEX_BAD  Invalid Thread-Index header
 
+uri           FKO_GOOGLE_LUCKY  /^https?:\/\/(?:www\.)?google(?:\.[a-z]{2,3}){1,2}\/search\/?\?(?:.*&)?btnI=/i
+describe      FKO_GOOGLE_LUCKY  Google "I'm feeling lucky" search
+
+uri           FKO_DDG_DUCKY  /^https?:\/\/(?:www\.)?duckduckgo\.com\/?\?(?:.*&)?q=!ducky/i
+describe      FKO_DDG_DUCKY  DuckDuckGo "I'm feeling ducky" search
