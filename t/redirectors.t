@@ -91,7 +91,7 @@ tstprefs(q{
 dns_query_restriction allow apache.org
 
 clear_url_redirector
-url_redirector_get spamassassin.apache.org
+url_redirector_selenium spamassassin.apache.org
 url_redirector_use_selenium 1
 
 body HAS_REDIR_URL              eval:redir_url()

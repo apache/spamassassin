@@ -197,10 +197,21 @@ sub set_config {
 
 =item url_redirector_use_selenium (default: 0)
 
-Use Selenium Chrome driver instead of LWP to access web pages.
-Due to how Selenium works, C<redir_url_code()> and C<redir_url_404> subs will not work.
-Selenium supports only GET requests, even if C<url_redirector> is configured
-to use HEAD requests, GET requests will be sent.
+Enables the Selenium subsystem. When set to 1, hosts listed in
+C<url_redirector_selenium> are fetched using Selenium (headless Chrome).
+When 0 (the default), those hosts are skipped entirely -- there is no
+fallback to LWP, because hosts only belong in C<url_redirector_selenium>
+if their redirects cannot be discovered via LWP (e.g., JavaScript-driven
+redirects).
+
+This is a runtime kill switch: an operator can disable the Selenium
+subsystem without editing the host allowlist. While it is off, those
+hosts are simply not probed -- C<redir_url()> still fires for them so
+detection rules continue to work.
+
+Due to how Selenium works, C<redir_url_code()> and C<redir_url_404> subs
+will not fire for hosts handled by Selenium; Selenium reports only
+"redirected" (301) or "not a redirect" (200), not real HTTP status codes.
 
 =back
 
@@ -302,6 +313,45 @@ restricts the match.
       }
       foreach my $token (split(/\s+/, $value)) {
         _add_redirector_entry($self, $token, 'get');
+      }
+    }
+  });
+
+=over 4
+
+=item url_redirector_selenium  domain[/path] [domain[/path]...]     (default: none)
+
+Domains that should be fetched using Selenium (headless Chrome) instead of
+LWP. Use this only for hosts whose redirects are NOT discoverable via
+LWP, such as JavaScript-driven redirects. Syntax and matching rules are
+the same as C<url_redirector>.
+
+Selenium executes JavaScript on the destination and always sends GET,
+which has weaker safety properties than the LWP path; reserve this list
+for hosts that genuinely require browser-driven redirect unwrapping.
+
+If the same host appears in both C<url_redirector_selenium> and
+C<url_redirector>/C<url_redirector_get>, the directive parsed last sets
+the method, and a warning is emitted.
+
+The Selenium subsystem is gated by C<url_redirector_use_selenium>. When
+that flag is off, hosts in this list are skipped entirely (there is no
+fallback to LWP, since these hosts wouldn't yield useful results via
+LWP).
+
+=back
+
+=cut
+
+  push (@cmds, {
+    setting => 'url_redirector_selenium',
+    code => sub {
+      my ($self, $key, $value, $line) = @_;
+      if ($value eq '') {
+        return $Mail::SpamAssassin::Conf::MISSING_REQUIRED_VALUE;
+      }
+      foreach my $token (split(/\s+/, $value)) {
+        _add_redirector_entry($self, $token, 'selenium');
       }
     }
   });
@@ -858,6 +908,11 @@ sub _add_redirector_entry {
   return unless length $domspec;
 
   my $bucket = $is_suffix ? 'url_redirector_suffix' : 'url_redirector_exact';
+  my $existing = $conf->{$bucket}->{$domspec};
+  if ($existing && $existing->{method} ne $method) {
+    my $display = ($is_suffix ? '.' : '') . $domspec;
+    warn "redirectors: $display already registered with method '$existing->{method}'; overriding with '$method'\n";
+  }
   my $entry = $conf->{$bucket}->{$domspec} ||= { method => $method, paths => [] };
   $entry->{method} = $method;
   push @{$entry->{paths}}, $path unless grep { $_ eq $path } @{$entry->{paths}};
@@ -994,58 +1049,66 @@ sub _extract_embedded_uri {
   return;
 }
 
-sub _make_ua {
-  my ($self, $conf) = @_;
+sub _get_lwp_ua {
+  my ($self, $pms) = @_;
+  return $pms->{redir_lwp_ua} if exists $pms->{redir_lwp_ua};
 
-  if($conf->{url_redirector_use_selenium} and not HAS_SELENIUM) {
-    dbg("url_redirector_use_selenium setting enabled but Selenium::Remote::Driver Perl module not installed, LWP will be used instead");
+  my $conf = $pms->{conf};
+  my $ua = LWP::UserAgent->new(
+    'agent'        => $conf->{url_redirector_user_agent},
+    'max_redirect' => 0,
+    'timeout'      => $conf->{url_redirector_timeout},
+  );
+  $ua->env_proxy;
+  return $pms->{redir_lwp_ua} = $ua;
+}
+
+sub _get_selenium_ua {
+  my ($self, $pms) = @_;
+  return $pms->{redir_selenium_ua} if exists $pms->{redir_selenium_ua};
+
+  my $conf = $pms->{conf};
+  if (not HAS_SELENIUM) {
+    dbg("url_redirector_use_selenium enabled but Selenium::Remote::Driver Perl module not installed");
+    return $pms->{redir_selenium_ua} = undef;
   }
 
   my $ua;
-  if($conf->{url_redirector_use_selenium} and HAS_SELENIUM) {
-    eval {
-      $ua = Selenium::Remote::Driver->new('remote_server_addr' => $conf->{url_redirector_selenium_host},
-	                                'port' => $conf->{url_redirector_selenium_port},
-					'auto_close' => 0,
-					'session_id' => $self->{selenium_session_id},
-	                                'browser_name' =>'chrome',
-                                           'extra_capabilities' => {
-                                               'goog:chromeOptions' => {
-                                                   'args'  => [
-                                                       'headless',
-                                                       'incognito',
-						       'user-agent=' . $conf->{url_redirector_user_agent}
-                                                   ]
-                                               }
-                                           });
-    };
-    if($@) {
-      dbg("Error connetting to Selenium server: $@");
-      return;
-    }
-    $ua->{ua}->{max_redirect} = $conf->{max_redir_url_redirections};
-    if(not defined $self->{selenium_session_id}) {
-      $self->{selenium_session_id} = $ua->{session_id};
-      dbg("Connecting to Selenium server with session id " . $self->{selenium_session_id});
-    } else {
-      $ua->session_id($self->{selenium_session_id});
-      dbg("Reusing Selenium session id " . $self->{selenium_session_id});
-    }
-    eval {
-      $ua->set_timeout('implicit', $conf->{url_redirector_timeout} * 1000);
-    };
-    if($@) {
-      dbg("Error setting timeout to $conf->{url_redirector_timeout}: $@");
-    }
-  } else {
-    $ua = LWP::UserAgent->new(
-      'agent' => $conf->{url_redirector_user_agent},
-      'max_redirect' => 0,
-      'timeout' => $conf->{url_redirector_timeout},
-    );
-    $ua->env_proxy;
+  eval {
+    $ua = Selenium::Remote::Driver->new('remote_server_addr' => $conf->{url_redirector_selenium_host},
+                                        'port' => $conf->{url_redirector_selenium_port},
+                                        'auto_close' => 0,
+                                        'session_id' => $self->{selenium_session_id},
+                                        'browser_name' =>'chrome',
+                                        'extra_capabilities' => {
+                                            'goog:chromeOptions' => {
+                                                'args'  => [
+                                                    'headless',
+                                                    'incognito',
+                                                    'user-agent=' . $conf->{url_redirector_user_agent}
+                                                ]
+                                            }
+                                        });
+  };
+  if($@) {
+    dbg("Error connecting to Selenium server: $@");
+    return $pms->{redir_selenium_ua} = undef;
   }
-  return $ua;
+  $ua->{ua}->{max_redirect} = $conf->{max_redir_url_redirections};
+  if(not defined $self->{selenium_session_id}) {
+    $self->{selenium_session_id} = $ua->{session_id};
+    dbg("Connecting to Selenium server with session id " . $self->{selenium_session_id});
+  } else {
+    $ua->session_id($self->{selenium_session_id});
+    dbg("Reusing Selenium session id " . $self->{selenium_session_id});
+  }
+  eval {
+    $ua->set_timeout('implicit', $conf->{url_redirector_timeout} * 1000);
+  };
+  if($@) {
+    dbg("Error setting timeout to $conf->{url_redirector_timeout}: $@");
+  }
+  return $pms->{redir_selenium_ua} = $ua;
 }
 
 # Perform an HTTP request for $uri using $method (LWP) or Selenium.
@@ -1053,7 +1116,7 @@ sub _make_ua {
 # or undef otherwise. Sets redir_url_<rcode> flags on $pms and writes
 # the cache.
 sub _do_http {
-  my ($self, $uri, $method, $pms, $ua) = @_;
+  my ($self, $uri, $method, $pms) = @_;
   my $conf = $pms->{conf};
 
   my $redir_url = $uri;
@@ -1078,12 +1141,12 @@ sub _do_http {
       return;
     }
 
-    if($conf->{url_redirector_use_selenium}) {
+    if($method eq 'selenium') {
+      my $ua = $self->_get_selenium_ua($pms);
+      return unless defined $ua;
+
       my $rcode;
       my $newurl = '';
-      if($method eq 'head') {
-        dbg("HEAD requests are not supported in Selenium, sending a GET request");
-      }
       eval {
 	$ua->get($redir_url);
       };
@@ -1112,6 +1175,7 @@ sub _do_http {
         return;
       }
     } else {
+      my $ua = $self->_get_lwp_ua($pms);
       my $response = $ua->$method($redir_url);
       return if not defined $response;
 
@@ -1201,7 +1265,7 @@ sub _do_http {
 # _is_configured_redirector nor _extract_embedded_uri matches. HTTP
 # requests are gated on _is_configured_redirector returning truthy.
 sub _walk_redirects {
-  my ($self, $uri, $src_info, $pms, $ua, $depth, $been_here) = @_;
+  my ($self, $uri, $src_info, $pms, $depth, $been_here) = @_;
   my $conf = $pms->{conf};
 
   if (exists $been_here->{"uri:$uri"}) {
@@ -1216,7 +1280,20 @@ sub _walk_redirects {
   }
   $been_here->{"uri:$uri"} = 1;
 
-  if (my $rentry = _is_configured_redirector($uri, $conf)) {
+  my $rentry = _is_configured_redirector($uri, $conf);
+
+  # Selenium method requires url_redirector_use_selenium=1. If the subsystem
+  # is off, skip the HTTP lookup but still set redir_url so the message-level
+  # detection rule fires (matches the max_redir_urls=0 semantics: "found a
+  # redirector but didn't probe it"). Fall through to embedded-URI extraction
+  # in case the URL also carries a querystring redirect.
+  if ($rentry && $rentry->{method} eq 'selenium' && !$conf->{url_redirector_use_selenium}) {
+    dbg("$uri matches url_redirector_selenium but url_redirector_use_selenium=0, skipping http lookup");
+    $pms->{redir_url} = 1;
+    $rentry = undef;
+  }
+
+  if ($rentry) {
     $pms->{redir_url} = 1;
     $pms->{redir_url_chained} = 1 if $depth > 0;
 
@@ -1231,14 +1308,13 @@ sub _walk_redirects {
 
     return if $self->{net_disabled};
     return if !$conf->{max_redir_urls};
-    return if !defined $ua;
 
     # Seed cap: max_redir_urls counts initial (depth 0) redirector URIs.
     if ($depth == 0) {
       return if ++$pms->{redir_seed_count} > $conf->{max_redir_urls};
     }
 
-    my $location = $self->_do_http($uri, $rentry->{method}, $pms, $ua);
+    my $location = $self->_do_http($uri, $rentry->{method}, $pms);
     return unless defined $location;
 
     if ($uri eq $location) {
@@ -1256,12 +1332,12 @@ sub _walk_redirects {
     _add_redirect_uri($pms, $location, $src_info);
     $pms->{redir_url_valid} = 1;
 
-    return $self->_walk_redirects($location, $src_info, $pms, $ua, $depth + 1, $been_here);
+    return $self->_walk_redirects($location, $src_info, $pms, $depth + 1, $been_here);
   }
 
   if (my $embedded = _extract_embedded_uri($uri, $conf)) {
     _add_redirect_uri($pms, $embedded, $src_info);
-    return $self->_walk_redirects($embedded, $src_info, $pms, $ua, $depth + 1, $been_here);
+    return $self->_walk_redirects($embedded, $src_info, $pms, $depth + 1, $been_here);
   }
 
   return;
@@ -1281,18 +1357,14 @@ sub _check_redir {
 
   $self->initialise_url_redirector_cache($conf);
 
-  # Build UA only if it could be used. _walk_redirects accepts undef $ua
-  # and still recurses through embedded URIs (no HTTP needed).
-  my $ua;
-  if (!$self->{net_disabled} && $conf->{max_redir_urls}) {
-    $ua = $self->_make_ua($conf);
-  }
-
+  # UAs are built lazily inside _do_http and cached on $pms. No upfront
+  # construction here -- a message with only embedded-URI matches and no
+  # HTTP-eligible URIs will not create a UA at all.
   my $uris = $pms->get_uri_detail_list();
   foreach my $uri (keys %{$uris}) {
     my $info = $uris->{$uri};
     next unless $info->{domains} && $info->{cleaned};
-    $self->_walk_redirects($uri, $info, $pms, $ua, 0, {});
+    $self->_walk_redirects($uri, $info, $pms, 0, {});
   }
 
   if ($self->{dbh} && $conf->{url_redirector_cache_autoclean}
@@ -1377,6 +1449,7 @@ sub has_redir_url_chained_domain { 1 }
 sub has_redir_url_maxchain { 1 }
 sub has_redir_url_loop { 1 }
 sub has_selenium_support { 1 }
+sub has_url_redirector_selenium { 1 }
 sub has_url_skip_redirect_to { 1 }
 sub has_url_redirector_path { 1 } # path-prefix syntax in url_redirector / url_redirector_get
 
