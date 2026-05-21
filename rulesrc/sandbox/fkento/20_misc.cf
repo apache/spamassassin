@@ -43,3 +43,9 @@ describe      FKO_GOOGLE_LUCKY  Google "I'm feeling lucky" search
 
 uri           FKO_DDG_DUCKY  /^https?:\/\/(?:www\.)?duckduckgo\.com\/?\?(?:.*&)?q=!ducky/i
 describe      FKO_DDG_DUCKY  DuckDuckGo "I'm feeling ducky" search
+
+uri           __FKO_MS_OAUTH_SILENT  /^https?:\/\/login\.microsoftonline\.com\/[^\/?\#]+\/oauth2\/(?:v2\.0\/)?authorize\?(?:[^"\s]*&)?prompt=none(?:&|$)/i
+uri           __FKO_MS_OAUTH_FAKE_URI  /^https?:\/\/login\.microsoftonline\.com\/[^\/?\#]+\/oauth2\/(?:v2\.0\/)?authorize\?(?:[^"\s]*&)?uri=https?(?::|%3A)/i
+meta          FKO_MS_OAUTH_REDIR_ABUSE  __FKO_MS_OAUTH_SILENT && __FKO_MS_OAUTH_FAKE_URI
+score         FKO_MS_OAUTH_REDIR_ABUSE  0.1
+describe      FKO_MS_OAUTH_REDIR_ABUSE  Microsoft OAuth authorize endpoint abused as a phishing redirector
