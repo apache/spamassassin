@@ -308,11 +308,6 @@ url_shortener rem.ax
 url_shortener we.tl
 url_shortener ap.lc
 
-# GET method required for some services, keep the same services in url_shortener also
-if can(Mail::SpamAssassin::Plugin::DecodeShortURLs::has_get)
-url_shortener_get bit.ly
-endif
-
 endif  # has_short_url_redir
 
 
