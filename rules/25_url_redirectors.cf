@@ -53,7 +53,6 @@ score REDIR_URL_LOOP            0.01
 url_redirector .allaincemh.com
 url_redirector .australia4wdrentals.com
 url_redirector .benchurl.com
-url_redirector .blob.core.windows.net
 url_redirector .ct.sendgrid.net
 url_redirector .hosted.phplist.com
 url_redirector .href.li
@@ -216,6 +215,16 @@ if can(Mail::SpamAssassin::Plugin::Redirectors::has_url_redirector_path)
     url_redirector_get google.se/url
     url_redirector_get google.tt/amp/s
     url_redirector_get google.tt/url
+endif
+
+#
+# Redirectors that rely on client-side mechanisms (e.g. JavaScript,
+# meta refresh tags, etc.) to resolve must be fetched via Selenium
+# rather than a simple HEAD or GET request. If Selenium support is
+# disabled or not available, these redirectors will be skipped.
+#
+if can(Mail::SpamAssassin::Plugin::Redirectors::has_url_redirector_selenium)
+    url_redirector_selenium .blob.core.windows.net
 endif
 
 endif
