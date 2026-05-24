@@ -1364,6 +1364,7 @@ sub _check_redir {
   foreach my $uri (keys %{$uris}) {
     my $info = $uris->{$uri};
     next unless $info->{domains} && $info->{cleaned};
+    next if $info->{types} && keys %{$info->{types}} == 1 && $info->{types}->{img};
     $self->_walk_redirects($uri, $info, $pms, 0, {});
   }
 
