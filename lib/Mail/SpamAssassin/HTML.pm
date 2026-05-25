@@ -418,6 +418,13 @@ sub canon_uri {
   $uri =~ s/^[\s\xA0]+//;
   $uri =~ s/[\s\xA0]+$//;
 
+  # ... and for http/https/ftp, also strip internal whitespace. Some mailers
+  # soft-wrap long href values by inserting CRLF+space mid-URL; MUAs strip
+  # that whitespace at click time, so match that behavior.
+  if ($uri =~ /^(?:https?|ftp):/i) {
+    $uri =~ s/[\s\xA0]+//g;
+  }
+
   # Make sure all the URIs are nice and short
   if (length $uri > MAX_URI_LENGTH) {
     $self->{'uri_truncated'} = 1;
