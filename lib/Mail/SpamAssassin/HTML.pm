@@ -161,6 +161,7 @@ sub html_end {
 
   $self->put_results(uri_detail => $self->{uri});
   $self->put_results(uri_truncated => $self->{uri_truncated});
+  $self->put_results(cids => $self->{cids});
 
   # final results scalars
   $self->put_results(image_area => $self->{image_area});
@@ -404,6 +405,9 @@ sub push_uri {
   if ($uri =~ /^(?:data|mailto|file|cid|tel):/i) {
     # No target handling required
     $self->{uri}->{$uri}->{types}->{$type} = 1;
+    if ($uri =~ /^cid:(.+)/i) {
+      push @{ $self->{cids} }, $1;
+    }
   } else {
     my $target = target_uri($self->{base_href} || "", $uri);
     # skip things like <iframe src="" ...>
