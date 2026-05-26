@@ -4472,3 +4472,7 @@ endif
 body       __RI_ZWNJ_OBFU              /[a-z0-9"'\s](?:\xf0\x9f\x87[\xa6-\xbf]\xe2\x80\x8c){2,}/i
 tflags     __RI_ZWNJ_OBFU              multiple maxhits=6
 
+# I hacked casinos! Buy lists from me via telegram!
+body       __CASINO_HKR_TGRAM_1        /Telegram (?:at )?\@(?:denisv9|emaildba)\b/i
+uri        __CASINO_HKR_TGRAM_2        m;^https://t\.me/(?:denisv9|emaildba)\b;i
+
