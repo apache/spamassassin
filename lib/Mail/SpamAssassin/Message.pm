@@ -1198,7 +1198,7 @@ sub _parse_normal {
   # parse content-disposition header
   if ( my $disp = $msg->header('content-disposition') ) {
     $disp = Mail::SpamAssassin::Header::ParameterHeader->new($disp);
-    $msg->{'disposition'} = $disp->value();
+    $msg->{'disposition'} = lc($disp->value());
     $msg->{'name'} = $disp->parameter('filename');
   }
   # if the content-disposition header doesn't have a filename, try to get
