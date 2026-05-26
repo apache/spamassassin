@@ -47,3 +47,7 @@ describe      FKO_DDG_DUCKY  DuckDuckGo "I'm feeling ducky" search
 uri           FKO_MS_OAUTH_SILENT  /^https?:\/\/login\.microsoftonline\.com\/[^\/?\#]+\/oauth2\/(?:v2\.0\/)?authorize\?(?:[^"\s]*&)?prompt=none(?:&|$)/i
 score         FKO_MS_OAUTH_SILENT  2.0
 describe      FKO_MS_OAUTH_SILENT  Microsoft OAuth authorize endpoint abused as a phishing redirector
+
+header        FKO_TO_NAME_DOM_REPEAT To:name =~ /^\s*([A-Z0-9._%+-]+)\@([A-Z0-9.-]+\.[A-Z]{2,})\s+(?:(?:www\.)?\2|\1\@\2)\s*$/i
+score         FKO_TO_NAME_DOM_REPEAT 0.1
+describe      FKO_TO_NAME_DOM_REPEAT To:name contains address and/or domain repeated
