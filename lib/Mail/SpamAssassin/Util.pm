@@ -2806,10 +2806,10 @@ sub _parse_header_addresses_xs {
       $phrase = $comment;
     }
 
-    # Use input as name if nothing found
-    if (!defined $phrase && !defined $address) {
-      $phrase = $str;
-    }
+    # Skip entries with neither phrase nor address — XS emits these for
+    # unparseable tails (e.g. a truncated address header), and copying the
+    # whole input into phrase here causes :name to return the entire header.
+    next if !defined $phrase && !defined $address;
 
     push @results, {
       'phrase' => $phrase,
