@@ -73,6 +73,7 @@ url_redirector .ittihad-institute.com
 url_redirector link.sowl.to
 url_redirector linklock.titanhq.com
 url_redirector links.e.shopmyexchange.com
+url_redirector longurl.webredirect.org
 url_redirector mccarthysearch.com
 url_redirector notifications.googleapis.com
 url_redirector secure-web.cisco.com
@@ -132,6 +133,7 @@ if can(Mail::SpamAssassin::Plugin::Redirectors::has_url_redirector_path)
     url_redirector f.premiumsend.net/emiu
     url_redirector links.iterable.com/s/c
     url_redirector mandrillapp.com/track/click
+    url_redirector namitjain.com/tools/url-lengthener/r
     url_redirector substack.com/redirect/
     url_redirector trk.klclick.com/ls/click
     url_redirector go.pardot.com/e/
@@ -244,6 +246,8 @@ if can(Mail::SpamAssassin::Plugin::Redirectors::has_url_redirector_path)
     url_redirector_get google.se/url
     url_redirector_get google.tt/amp/s
     url_redirector_get google.tt/url
+
+    url_redirector_get reallylong.link/rll
 endif
 
 #
@@ -254,6 +258,7 @@ endif
 #
 if can(Mail::SpamAssassin::Plugin::Redirectors::has_url_redirector_selenium)
     url_redirector_selenium .blob.core.windows.net
+    url_redirector_selenium uselesstools.jonfinger.com/r
 endif
 
 endif
