@@ -8,7 +8,9 @@ RewriteEngine On
   RewriteCond "%{HTTP_REFERER}" "sa-vm.apache.org" [NC,OR]
   RewriteCond "%{HTTP_REFERER}" "bbmass.spamassassin.org" [NC,OR]
   RewriteCond "%{HTTP_REFERER}" "rsync.spamassassin.org" [NC,OR]
-  RewriteCond "%{HTTP_REFERER}" "buildbot.spamassassin.org" [NC]
+  RewriteCond "%{HTTP_REFERER}" "buildbot.spamassassin.org" [NC,OR]
+  RewriteCond "%{HTTP_REFERER}" ".*\.*google.com" [NC,OR]
+  RewriteCond "%{HTTP_REFERER}" "socdirect.ru" [NC]
   RewriteRule /20.*(detail|mclog).*$   /   [F,NC]
 
   # Rude Bot UA

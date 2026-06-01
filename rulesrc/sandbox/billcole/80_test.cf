@@ -194,9 +194,9 @@ describe T_LINKED_SCRAPE	Claims to have scraped LinkedIN
 body	 T_LINKED_SCRAPE	/I came across your profile on LinkedIn/
 tflags	 T_LINKED_SCRAPE	publish
 
-describe	T_SCC_WEIRDATTR	idiosyncratic DIV id or class name
-rawbody		T_SCC_WEIRDATTR	/DIV (id|class)=v1v1v1v1v1v1v1v1v1v1v/
-tflags		T_SCC_WEIRDATTR	multiple 
+describe	SCC_WEIRDATTR	idiosyncratic DIV id or class name
+rawbody		SCC_WEIRDATTR	/DIV (id|class)=v1v1v1v1v1v1v1v1v1v1v/
+tflags		SCC_WEIRDATTR	multiple 
 
 describe 	T_SCC_EBIKE	E-bikes are apparently big with spammers... 
 body		T_SCC_EBIKE	/\be\-*bikes*\b/i
@@ -220,3 +220,7 @@ score		SCC_HEAD_XMP_ANY	1
 describe	GMAIL_NOREPLY	A no-reply adress that Google does not use
 header		GMAIL_NOREPLY	From =~ /.*no\-reply\@gmail\.com/
 score		GMAIL_NOREPLY	1
+
+describe	SCC_SPAMURL_1	An url seen in recurring spam for years. 
+uri		SCC_SPAMURL_1	/growthwebinars.com\/masterclass/
+score		SCC_SPAMURL_1	1
