@@ -3696,7 +3696,7 @@ header      __HDR_RCVD_TONLINEDE       X-Spam-Relays-External =~ /\srdns=\S+\.t-
 
 meta        TONLINE_FAKE_DKIM          __HDR_RCVD_TONLINEDE && __DKIM_EXISTS 
 describe    TONLINE_FAKE_DKIM          t-online.de doesn't do DKIM
-score       TONLINE_FAKE_DKIM          3.000	# limit
+score       TONLINE_FAKE_DKIM          1.500	# limit
 tflags      TONLINE_FAKE_DKIM          publish
 
 
