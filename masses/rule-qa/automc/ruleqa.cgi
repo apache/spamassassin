@@ -922,15 +922,19 @@ sub read_freqs_file {
     # is fresh?
     if (mtime($scache) >= mtime($file)) {
       return if $refresh; # just -refresh
+      my $cached;
       eval {
-        $self->{freqs} = thaw(decompress(readfile($scache)));
+        $cached = thaw(decompress(readfile($scache)));
       };
-      if ($@ || !defined $self->{freqs}) {
+      if ($@ || !defined $cached || !exists $cached->{data}{$key}) {
         warn "cache retrieve failed $scache: $@ $!";
         # remove bad file
         unlink($scache);
       }
       else {
+        $self->{freqs}{head}{$key} = $cached->{head}{$key};
+        $self->{freqs}{data}{$key} = $cached->{data}{$key};
+        $self->{freqs}{ordr}{$key} = $cached->{ordr}{$key};
         return;
       }
     }
@@ -1025,7 +1029,11 @@ sub read_freqs_file {
   if ($refresh && !-f $scache) {
     eval {
       open (OUT, ">$scache.$$") or die "open failed: $@";
-      print OUT compress(nfreeze(\%{$self->{freqs}}));
+      print OUT compress(nfreeze({
+          head => { $key => $self->{freqs}{head}{$key} },
+          data => { $key => $self->{freqs}{data}{$key} },
+          ordr => { $key => $self->{freqs}{ordr}{$key} },
+      }));
       close OUT;
     };
     if ($@ || !rename("$scache.$$", $scache)) {
