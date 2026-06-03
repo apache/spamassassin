@@ -38,7 +38,7 @@
 # ---------------------------------------------------------------------------
 
 use strict;  # make Test::Perl::Critic happy
-package Mail::SpamAssassin::Message::Metadata::Received; 1;
+package Mail::SpamAssassin::Message::Metadata::Received;
 
 package Mail::SpamAssassin::Message::Metadata;
 use strict;

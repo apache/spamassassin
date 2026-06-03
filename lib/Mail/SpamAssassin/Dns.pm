@@ -16,7 +16,7 @@
 # </@LICENSE>
 
 use strict;  # make Test::Perl::Critic happy
-package Mail::SpamAssassin::Dns; 1;
+package Mail::SpamAssassin::Dns;
 
 package Mail::SpamAssassin::PerMsgStatus;
 

@@ -20,7 +20,7 @@
 use strict;  # make Test::Perl::Critic happy
 
 # this package is a no-op; the real impl code is in another pkg.
-package Mail::SpamAssassin::Bayes::CombineNaiveBayes; 1;
+package Mail::SpamAssassin::Bayes::CombineNaiveBayes;
 
 # Force into another package, so our symbols will appear in that namespace with
 # no indirection, for speed.  Other combiners must do the same, since Bayes.pm
