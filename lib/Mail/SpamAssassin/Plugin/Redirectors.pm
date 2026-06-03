@@ -900,7 +900,6 @@ sub redir_url_loop {
 sub _add_redirector_entry {
   my ($conf, $token, $method) = @_;
 
-  $token = lc $token;
   my ($domspec, $path) = split(/\//, $token, 2);
   $path = defined $path ? '/' . $path : '/';
 

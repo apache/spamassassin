@@ -15,6 +15,7 @@ sub make_conf {
   Mail::SpamAssassin::Plugin::Redirectors::_add_redirector_entry($conf, '.r.af.d.sendibt2.com/tr/cl/', 'get');
   Mail::SpamAssassin::Plugin::Redirectors::_add_redirector_entry($conf, 'foo.example/tr/op/', 'head');
   Mail::SpamAssassin::Plugin::Redirectors::_add_redirector_entry($conf, 'bar.example/tr/op', 'head');
+  Mail::SpamAssassin::Plugin::Redirectors::_add_redirector_entry($conf, 'baz.example/FOO', 'head');
   Mail::SpamAssassin::Plugin::Redirectors::_add_redirector_entry($conf, 'js.example', 'selenium');
   Mail::SpamAssassin::Plugin::Redirectors::_add_redirector_entry($conf, '.spa.example', 'selenium');
   return $conf;
@@ -51,6 +52,9 @@ my @cases = (
   [ 'https://bar.example/tr/op#frag', 'head', 'no-trailing-slash matches with fragment' ],
   [ 'https://bar.example/tr/open',    undef,  'no-trailing-slash does NOT match /tr/open' ],
   [ 'https://bar.example/tr/opfoo',   undef,  'no-trailing-slash does NOT match /tr/opfoo' ],
+  
+  # Uppercase path
+  [ 'https://baz.example/FOO', 'head', 'uppercase path' ],
 
   # Selenium method round-trips through the entry.
   [ 'https://js.example/',           'selenium', 'selenium method on bare-domain entry' ],
