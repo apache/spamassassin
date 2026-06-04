@@ -1,9 +1,10 @@
 RewriteEngine On
-  
-  # Broken URI patterns seen from scraper bots
-  RewriteRule /20.*sa-vm.*	/ [F,NC]
 
-  # Requie a CORRECT local referer for costly tasks
+  # Broken URI patterns seen from scraper bots
+  RewriteRule /20.*sa-vm.*      / [F,NC]
+  RewriteRule "/.*\.php$"  "-" [F,NC]
+
+  # Require a CORRECT local referer for costly tasks
   RewriteCond "%{HTTP_REFERER}" "^$" [OR]
   RewriteCond "%{HTTP_REFERER}" "sa-vm.apache.org" [NC,OR]
   RewriteCond "%{HTTP_REFERER}" "bbmass.spamassassin.org" [NC,OR]
@@ -11,9 +12,8 @@ RewriteEngine On
   RewriteCond "%{HTTP_REFERER}" "buildbot.spamassassin.org" [NC,OR]
   RewriteCond "%{HTTP_REFERER}" ".*\.*google.com" [NC,OR]
   RewriteCond "%{HTTP_REFERER}" "socdirect.ru" [NC]
-  RewriteRule /20.*(detail|mclog).*$   /   [F,NC]
+  RewriteRule "/20.*(detail|mclog).*$"   "/"   [F,NC]
 
   # Rude Bot UA
   RewriteCond "%{HTTP_USER_AGENT}" "Thinkbot" [NC]
   RewriteRule ".*"  "/" [F]
-
