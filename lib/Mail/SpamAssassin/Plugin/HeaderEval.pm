@@ -197,6 +197,10 @@ sub check_illegal_chars {
   # (non-ASCII + C0 controls except TAB, NL, CR)
   my $illegal = $str =~ tr/\x00-\x08\x0b\x0c\x0e-\x1f\x7f-\xff//;
 
+  # bare CR or LF are illegal; only \r\n followed by a space is valid folding
+  (my $str_nofold = $str) =~ s/\r\n[ \t]//g;
+  $illegal += $str_nofold =~ tr/\x0a\x0d//;
+
   # minor exemptions for Subject
   if ($illegal > 0 && lc $header eq "subject:raw") {
     # only exempt a single cent sign, pound sign, or registered sign

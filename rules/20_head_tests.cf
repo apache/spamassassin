@@ -466,8 +466,9 @@ if (version >= 4.000000)
   header __SUBJ_ILLEGAL_CHARS	eval:check_illegal_chars('Subject','0.00','2')
   meta SUBJ_ILLEGAL_CHARS         (__SUBJ_ILLEGAL_CHARS && !__FROM_YAHOO_COM)
   header FROM_ILLEGAL_CHARS	eval:check_illegal_chars('From','0.20','2')
+  header REPLYTO_ILLEGAL_CHARS	eval:check_illegal_chars('Reply-To','0.020','2')
   header __HEAD_ILLEGAL_CHARS	eval:check_illegal_chars('ALL','0.010','2')
-  meta HEAD_ILLEGAL_CHARS	__HEAD_ILLEGAL_CHARS && !__SUBJ_ILLEGAL_CHARS && !FROM_ILLEGAL_CHARS
+  meta HEAD_ILLEGAL_CHARS	__HEAD_ILLEGAL_CHARS && !__SUBJ_ILLEGAL_CHARS && !FROM_ILLEGAL_CHARS && !REPLYTO_ILLEGAL_CHARS
 endif
 if (version < 4.000000)
   meta __SUBJ_ILLEGAL_CHARS 0
