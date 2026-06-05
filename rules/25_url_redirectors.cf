@@ -139,6 +139,7 @@ if can(Mail::SpamAssassin::Plugin::Redirectors::has_url_redirector_path)
     url_redirector go.pardot.com/e/
     url_redirector go.sparkpostmail.com/f/a
     url_redirector gr8.com/r
+    url_redirector links-2.govdelivery.com/CL0
 
     url_redirector_get .sendibt2.com/tr/cl/
     url_redirector_get .sendibt3.com/tr/cl/
@@ -246,6 +247,7 @@ if can(Mail::SpamAssassin::Plugin::Redirectors::has_url_redirector_path)
     url_redirector_get google.se/url
     url_redirector_get google.tt/amp/s
     url_redirector_get google.tt/url
+    url_redirector_get cse.google.com/url
 
     url_redirector_get reallylong.link/rll
 endif
