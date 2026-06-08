@@ -347,27 +347,27 @@ tstprefs ("
 %patterns = ( 1 => 'Acted on message' );
 
 $wanted_examined = count_files("data/spam");
-ok(salearnrun("-L --spam data/spam", \&check_examined));
+ok(salearnrun("-L --spam data/spam", \&check_examined_token));
 ok_all_patterns();
 
 $wanted_examined = count_files("data/nice");
-ok(salearnrun("-L --ham data/nice", \&check_examined));
+ok(salearnrun("-L --ham data/nice", \&check_examined_token));
 ok_all_patterns();
 
 $wanted_examined = count_files("data/welcomelists");
-ok(salearnrun("-L --ham data/welcomelists", \&check_examined));
+ok(salearnrun("-L --ham data/welcomelists", \&check_examined_token));
 ok_all_patterns();
 
 $wanted_examined = 3;
-ok(salearnrun("-L --ham --mbox data/nice.mbox", \&check_examined));
+ok(salearnrun("-L --ham --mbox data/nice.mbox", \&check_examined_token));
 ok_all_patterns();
 
 $wanted_examined = 3;
-ok(salearnrun("-L --ham --mbox < data/nice.mbox", \&check_examined));
+ok(salearnrun("-L --ham --mbox < data/nice.mbox", \&check_examined_token));
 ok_all_patterns();
 
 $wanted_examined = 3;
-ok(salearnrun("-L --forget --mbox data/nice.mbox", \&check_examined));
+ok(salearnrun("-L --forget --mbox data/nice.mbox", \&check_examined_token));
 ok_all_patterns();
 
 %patterns = ( 'non-token data: bayes db version' => 'db version' );
@@ -461,24 +461,6 @@ $sa->finish_learner();
 
 }
 #---------------------------------------------------------------------------
-
-sub check_examined {
-  local ($_);
-  my $string = shift;
-
-  if (defined $string) {
-    $_ = $string;
-  } else {
-    $_ = join ('', <IN>);
-  }
-
-  if ($_ =~ /(?:Forgot|Learned) tokens from \d+ message\(s\) \((\d+) message\(s\) examined\)/) {
-    #print STDERR "examined $1 messages\n";
-    if (defined $wanted_examined && $wanted_examined == $1) {
-      $found{'Acted on message'}++;
-    }
-  }
-}
 
 sub count_files {
   my $cnt = 0;

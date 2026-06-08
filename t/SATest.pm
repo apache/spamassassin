@@ -1247,6 +1247,25 @@ sub untaint_cmd {
     }
 }
 
+# check examined tokens
+sub check_examined_token {
+  local ($_);
+  my $string = shift;
+
+  if (defined $string) {
+    $_ = $string;
+  } else {
+    $_ = join ('', <IN>);
+  }
+
+  if ($_ =~ /(?:Forgot|Learned) tokens from \d+ message\(s\) \((\d+) message\(s\) examined\)/) {
+    #print STDERR "examined $1 messages\n";
+    if (defined $wanted_examined && $wanted_examined == $1) {
+      $found{'Acted on message'}++;
+    }
+  }
+}
+
 END {
   # Cleanup workdir (but not if inside forked process)
   if (defined $workdir && !$keep_workdir && $$ == $mainpid) {

@@ -12,24 +12,6 @@ use constant HAS_SQLITE => eval { require DBD::SQLite; 1 };
 
 plan tests => 18;
 
-sub check_examined {
-  local ($_);
-  my $string = shift;
-
-  if (defined $string) {
-    $_ = $string;
-  } else {
-    $_ = join ('', <IN>);
-  }
-
-  if ($_ =~ /(?:Forgot|Learned) tokens from \d+ message\(s\) \((\d+) message\(s\) examined\)/) {
-    #print STDERR "examined $1 messages\n";
-    if (defined $wanted_examined && $wanted_examined == $1) {
-      $found{'Acted on message'}++;
-    }
-  }
-}
-
 sub nn_reinit {
   my $extra = shift || '';
   rmtree("$userstate/NN") if -d "$userstate/NN";
@@ -55,8 +37,8 @@ sub nn_reinit {
 }
 
 nn_reinit();
-ok(salearnrun("-L --spam data/spam/001", \&check_examined));
-ok(salearnrun("-L --ham  data/nice/001", \&check_examined));
+ok(salearnrun("-L --spam data/spam/001", \&check_examined_token));
+ok(salearnrun("-L --ham  data/nice/001", \&check_examined_token));
 
 %patterns    = ( q{ 1.0 NN_SPAM }, '' );
 %anti_patterns = ( q{ -1.0 NN_HAM }, '' );
