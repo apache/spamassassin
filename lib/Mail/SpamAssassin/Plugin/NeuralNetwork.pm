@@ -44,12 +44,13 @@ use strict;
 use warnings;
 use re 'taint';
 
-my $VERSION = 0.10.1;
+my $VERSION = 0.11.1;
 
 use AI::FANN qw(:all);
 use Storable qw(store retrieve);
+use File::Copy qw(copy);
 use File::Spec;
-use File::Temp ();
+use Errno qw(EXDEV);
 
 use Mail::SpamAssassin;
 use Mail::SpamAssassin::Plugin;
@@ -64,11 +65,10 @@ sub finish {
   my $self = shift;
 
   if ($self->{dbh}) {
-    if (($self->{_dbh_pid} || 0) == $$) {
+    eval {
+      local $SIG{PIPE} = 'IGNORE';
       $self->{dbh}->disconnect();
-    } else {
-      $self->{dbh}->{InactiveDestroy} = 1;
-    }
+    };
     undef $self->{dbh};
   }
 }
@@ -93,6 +93,10 @@ sub set_config {
   my @cmds;
 
 =over 4
+
+=item use_neuralnetwork (0|1)          (default: 1)
+
+Whether to use Neural Network, if it is available.
 
 =item neuralnetwork_data_dir dirname (default: undef)
 
@@ -160,6 +164,13 @@ Set to 0 to wait indefinitely.
 
 Delta value to apply to RPROP training replay loop.
 
+=item neuralnetwork_retrain_interval n (default: 100)
+
+Number of successful learn_message calls between forced full retrains of the
+neural network from the persisted vocabulary. After each retrain the
+incrementally-trained network is replaced with the freshly rebuilt one.
+Set to 0 to disable periodic retraining and keep online learning only.
+
 =item neuralnetwork_stopwords words (default: "the and for with that this from there their have be not but you your")
 
 Space-separated list of stopwords to ignore when tokenizing text.
@@ -170,6 +181,14 @@ When SpamAssassin declares a message a clear spam or ham during the message
 scan, and launches the auto-learn process, message is autolearned as spam/ham
 in the same way as during the manual learning.
 Value 0 at this option disables the auto-learn process for this plugin.
+
+=item neuralnetwork_autolearn_vocab_only 0|1 (default 0)
+
+When set to 1 and auto-learn is enabled, autolearned messages
+update the vocabulary and training buffer but skip FANN model training and saving.
+This avoids slow I/O operations and temporary files during C<spamd>
+processing. The model is rebuilt from the accumulated vocabulary on the next
+manual C<sa-learn> run.
 
 =item neuralnetwork_dsn                (default: none)
 
@@ -215,14 +234,12 @@ prediction to run.
 =item check_neuralnetwork_spam()
 
 Body eval rule. Returns true when the neural network prediction score exceeds
-C<neuralnetwork_spam_threshold> (default 0.6). Used by the built-in C<NN_SPAM>
-rule (score +1.0).
+C<neuralnetwork_spam_threshold> (default 0.6).
 
 =item check_neuralnetwork_ham()
 
 Body eval rule. Returns true when the neural network prediction score is below
-C<neuralnetwork_ham_threshold> (default 0.4). Used by the built-in C<NN_HAM>
-rule (score -1.0).
+C<neuralnetwork_ham_threshold> (default 0.4).
 
 =item check_neuralnetwork(low, high)
 
@@ -248,6 +265,11 @@ Use this rule to define finer-grained confidence tiers.
 
 =cut
 
+  push(@cmds, {
+    setting => 'use_neuralnetwork',
+    default => 1,
+    type => $Mail::SpamAssassin::Conf::CONF_TYPE_BOOL,
+  });
   push(@cmds, {
     setting => 'neuralnetwork_data_dir',
     is_admin => 1,
@@ -352,6 +374,18 @@ Use this rule to define finer-grained confidence tiers.
     type     => $Mail::SpamAssassin::Conf::CONF_TYPE_NUMERIC,
   });
   push(@cmds, {
+    setting  => 'neuralnetwork_weight_prune_factor',
+    is_admin => 1,
+    default  => 0.5,
+    type     => $Mail::SpamAssassin::Conf::CONF_TYPE_NUMERIC,
+  });
+  push(@cmds, {
+    setting  => 'neuralnetwork_retrain_interval',
+    is_admin => 1,
+    default  => 100,
+    type     => $Mail::SpamAssassin::Conf::CONF_TYPE_NUMERIC,
+  });
+  push(@cmds, {
     setting => 'neuralnetwork_lock_timeout',
     is_admin => 1,
     default => 10,
@@ -365,6 +399,11 @@ Use this rule to define finer-grained confidence tiers.
   });
   push(@cmds, {
     setting => 'neuralnetwork_autolearn',
+    default => 0,
+    type => $Mail::SpamAssassin::Conf::CONF_TYPE_BOOL,
+  });
+  push(@cmds, {
+    setting => 'neuralnetwork_autolearn_vocab_only',
     default => 0,
     type => $Mail::SpamAssassin::Conf::CONF_TYPE_BOOL,
   });
@@ -407,6 +446,8 @@ sub finish_parsing_end {
   my ($self, $opts) = @_;
 
   my $conf = $self->{main}->{conf};
+  return unless $conf->{use_neuralnetwork};
+
   my $nn_data_dir = $conf->{neuralnetwork_data_dir};
 
   # Initialize SQL connection if configured
@@ -422,8 +463,7 @@ sub finish_parsing_end {
     return;
   }
 
-  my $dataset_path = File::Spec->catfile($nn_data_dir, 'fann-' . lc($self->{main}->{username}) . '.model');
-  $dataset_path = Mail::SpamAssassin::Util::untaint_file_path($dataset_path);
+  my $dataset_path = Mail::SpamAssassin::Util::untaint_file_path($self->_model_path($nn_data_dir));
   if (-f $dataset_path) {
     eval {
       $self->{neural_model} = AI::FANN->new_from_file($dataset_path);
@@ -452,67 +492,15 @@ sub _text_to_features {
     }
 
     # Read the vocabulary (format: { terms => {word => {total=>n,docs=>m,spam=>s,ham=>h}}, _doc_count => N, _spam_count => S, _ham_count => H })
-    my %vocabulary;
-
-    # Try loading from SQL first if configured
-    if (defined $conf->{neuralnetwork_dsn} && $self && $self->{dbh}) {
-      my $vocab_ref = $self->_load_vocabulary_from_sql($self->{main}->{username});
-      if (ref($vocab_ref) eq 'HASH' && scalar keys %{$vocab_ref->{terms} || {}}) {
-        %vocabulary = %{$vocab_ref};
-      }
-    }
-
-    # If not loaded from SQL, try loading from file
-    if (!keys %{$vocabulary{terms} || {}}) {
-      my $username = lc($self->{main}->{username});
-      my $ttl = $conf->{neuralnetwork_cache_ttl} || 0;
-
-      # Check file-based vocabulary cache
-      if (!$train && $ttl > 0 && defined $self->{_file_vocab_cache}{$username}) {
-        my $age = time() - ($self->{_file_vocab_cache_time}{$username} || 0);
-        if ($age < $ttl) {
-          dbg("Using cached file vocabulary for user: $username (age: ${age}s, ttl: ${ttl}s)");
-          %vocabulary = %{$self->{_file_vocab_cache}{$username}};
-        } else {
-          dbg("File vocabulary cache expired for user: $username (age: ${age}s, ttl: ${ttl}s)");
-          delete $self->{_file_vocab_cache}{$username};
-          delete $self->{_file_vocab_cache_time}{$username};
-        }
-      }
-
-      # Load from file if not cached
-      if (!keys %{$vocabulary{terms} || {}}) {
-        my $vocab_path = File::Spec->catfile($nn_data_dir, 'vocabulary-' . $username . '.data');
-        if(-f $vocab_path) {
-          eval {
-            my $ref = retrieve($vocab_path);
-            if (ref $ref eq 'HASH') {
-              %vocabulary = %{$ref};
-            }
-            1;
-          } or do {
-            warn("Failed to retrieve vocabulary from $vocab_path: " . ($@ || 'unknown'));
-          };
-        }
-        # Populate cache after successful load
-        if (!$train && $ttl > 0 && keys %{$vocabulary{terms} || {}}) {
-          $self->{_file_vocab_cache}{$username} = \%vocabulary;
-          $self->{_file_vocab_cache_time}{$username} = time();
-        }
-      }
-    }
-
-    $vocabulary{terms} ||= {};
-    $vocabulary{_doc_count} ||= 0;
-    $vocabulary{_spam_count} ||= 0;
-    $vocabulary{_ham_count} ||= 0;
+    my %vocabulary = %{ $self->_load_vocabulary($conf, $nn_data_dir, $train) };
 
     # Ensure we have enough spam and ham examples in the vocabulary
     my $min_spam = $conf->{neuralnetwork_min_spam_count};
     my $min_ham  = $conf->{neuralnetwork_min_ham_count};
+    my $username = lc($self->{main}->{username});
     if ($train == 0) {
       if ( ($vocabulary{_spam_count} < $min_spam) || ($vocabulary{_ham_count} < $min_ham) ) {
-        dbg("Insufficient spam/ham data for prediction: spam=".$vocabulary{_spam_count}.", ham=".$vocabulary{_ham_count});
+        dbg("Insufficient spam/ham data for prediction for user $username: spam=".$vocabulary{_spam_count}.", ham=".$vocabulary{_ham_count});
         return ([], 0, []);
       }
     }
@@ -561,7 +549,7 @@ sub _text_to_features {
 
       my $vocab_path;
       if (defined $conf->{neuralnetwork_dsn} && $self && $self->{dbh}) {
-        $self->_save_vocabulary_to_sql(\%term_deltas, $self->{main}->{username});
+        # SQL vocabulary is updated via training-buffer flush at retrain time
       } else {
         $vocab_path = File::Spec->catfile($nn_data_dir, 'vocabulary-' . lc($self->{main}->{username}) . '.data');
         $vocab_path = Mail::SpamAssassin::Util::untaint_file_path($vocab_path);
@@ -574,7 +562,6 @@ sub _text_to_features {
         # Keep file-based cache in sync with the freshly saved vocabulary
         my $ttl = $conf->{neuralnetwork_cache_ttl} || 0;
         if ($ttl > 0) {
-          my $username = lc($self->{main}->{username});
           $self->{_file_vocab_cache}{$username} = \%vocabulary;
           $self->{_file_vocab_cache_time}{$username} = time();
         }
@@ -633,6 +620,9 @@ sub learn_message {
   my $isspam = $params->{isspam};
   my $msg = $params->{msg};
   my $conf = $self->{main}->{conf};
+
+  return unless $conf->{use_neuralnetwork};
+
   $self->_init_sql_connection($conf) if defined $conf->{neuralnetwork_dsn};
   my $min_text_len = $conf->{neuralnetwork_min_text_len};
   my $learning_rate = $conf->{neuralnetwork_learning_rate};
@@ -644,13 +634,13 @@ sub learn_message {
   my $last_pms  = $self->{last_pms};
   $self->{last_pms} = $self->{autolearn} = undef;
 
-  my $msgid = $msg->get_msgid();
-  $msgid //= $msg->generate_msgid();
-
   if ($autolearn && !$conf->{neuralnetwork_autolearn}) {
     dbg("autolearning disabled, quitting");
     return 0;
   }
+
+  my $msgid = $msg->get_msgid();
+  $msgid //= $msg->generate_msgid();
 
   # do not relearn messages
   if($self->_is_msgid_in_neural_seen($msgid)) {
@@ -680,9 +670,7 @@ sub learn_message {
   }
 
   if(defined $msg) {
-    my $vis_arr = $msg->get_visible_rendered_body_text_array();
-    my $vis_text = (ref $vis_arr eq 'ARRAY') ? join("\n", @$vis_arr)
-                  : (defined $vis_arr ? $vis_arr : '');
+    my $vis_text = $self->_get_visible_text($msg);
     if (length($vis_text) < $min_text_len) {
       dbg("Not enough text, skipping neural network processing");
       return;
@@ -691,11 +679,10 @@ sub learn_message {
     push(@training_data, { label => $isspam, tokens => $tokens_ref } );
   }
 
-  my $dataset_path = File::Spec->catfile($nn_data_dir, 'fann-' . lc($self->{main}->{username}) . '.model');
-  $dataset_path = Mail::SpamAssassin::Util::untaint_file_path($dataset_path);
+  my $dataset_path = Mail::SpamAssassin::Util::untaint_file_path($self->_model_path($nn_data_dir));
 
   my $locker = $self->{main}->{locker};
-unless ($locker->safe_lock($dataset_path, $conf->{neuralnetwork_lock_timeout})) {
+  unless ($locker->safe_lock($dataset_path, $conf->{neuralnetwork_lock_timeout})) {
     dbg("Cannot acquire lock on '$dataset_path', skipping learning");
     return;
   }
@@ -703,7 +690,6 @@ unless ($locker->safe_lock($dataset_path, $conf->{neuralnetwork_lock_timeout})) 
   # Extract the per-message token lists and labels
   my @email_token_lists = map { $_->{tokens} } @training_data;
   my @labels = map { $_->{label} } @training_data;
-
 
   if (!defined $self->{neural_model} && -f $dataset_path) {
     eval {
@@ -718,7 +704,7 @@ unless ($locker->safe_lock($dataset_path, $conf->{neuralnetwork_lock_timeout})) 
   }
   # Invalidate vocabulary cache
   if (defined $self->{_vocab_cache}) {
-    my $username = $self->{main}->{username};
+    my $username = lc($self->{main}->{username});
     delete $self->{_vocab_cache}{$username};
     delete $self->{_vocab_cache_time}{$username};
   }
@@ -740,6 +726,21 @@ unless ($locker->safe_lock($dataset_path, $conf->{neuralnetwork_lock_timeout})) 
     $locker->safe_unlock($dataset_path);
     return;
   }
+
+  my ($buffer_spam_count, $buffer_ham_count, $rb_needs_retrain) =
+    $self->_push_to_training_buffer($conf, $nn_data_dir, \@email_token_lists, \@labels);
+
+  # defer model training if autolearning is enabled
+  # and `neuralnetwork_autolearn_vocab_only` is set, model training could be a slow task
+  if ($autolearn && $conf->{neuralnetwork_autolearn_vocab_only}) {
+    dbg("autolearn vocab-only mode: vocabulary updated, skipping model training");
+    if (defined $msg && defined $msgid && length($msgid) > 0) {
+      $self->_save_msgid_to_neural_seen($msgid, $isspam);
+    }
+    $locker->safe_unlock($dataset_path);
+    return 1;
+  }
+
   # Defer model creation until minimum training corpus is built
   unless (defined $self->{neural_model}) {
     my $min_spam = $conf->{neuralnetwork_min_spam_count};
@@ -762,84 +763,32 @@ unless ($locker->safe_lock($dataset_path, $conf->{neuralnetwork_lock_timeout})) 
   # another writer modified the model file while we were training.
   my $lock1_mtime = (stat($dataset_path))[9];
 
-  # Two-layer hidden sizing: layer1 ~10% of inputs (clamped 32..512),
-  # layer2 half of layer1 (min 16).
-  my $num_hidden1 = int($num_input / 10);
-  $num_hidden1 = 512 if $num_hidden1 > 512;
-  $num_hidden1 = 32  if $num_hidden1 < 32;
+  # Two-layer hidden sizing: layer1 ~0.25*sqrt(inputs), layer2 half of layer1.
+  my $num_hidden1 = int(sqrt($num_input) * 0.25 + 0.5);
+  $num_hidden1 = 4 if $num_hidden1 < 4;
   my $num_hidden2 = int($num_hidden1 / 2);
-  $num_hidden2 = 16  if $num_hidden2 < 16;
+  $num_hidden2 = 2 if $num_hidden2 < 2;
   my $num_output_neurons = 1;
 
-  my $network;
-  if(defined $self->{neural_model} && $self->{neural_model}->num_inputs() == $num_input) {
-    $network = $self->{neural_model};
-  } else {
-    # Try to load the existing model from disk if not already in memory
-    my $existing_network = $self->{neural_model};
-    if (!defined $existing_network && -f $dataset_path) {
-      eval {
-        $existing_network = AI::FANN->new_from_file($dataset_path);
-        1;
-      } or do {
-        dbg("Failed to load existing model for size check: " . ($@ || 'unknown'));
-      };
-    }
+  my ($network, $network_rebuilt) = $self->_get_or_create_network(
+    $conf, $nn_data_dir, $dataset_path,
+    $num_input, $num_hidden1, $num_hidden2, $num_output_neurons,
+    $buffer_spam_count, $buffer_ham_count, $train_algorithm);
 
-    if (defined $existing_network) {
-      # Vocabulary grew: rebuild training vectors using the model's original word -> index mapping
-      my $model_size = $existing_network->num_inputs();
-      dbg("Vocabulary size changed ($num_input vs model $model_size), rebuilding training vectors with model vocabulary");
-      my $stored_vocab_ref = $self->_load_model_vocab($nn_data_dir);
-      if (defined $stored_vocab_ref && scalar(@$stored_vocab_ref) == $model_size) {
-        ($feature_vectors, undef) = _text_to_features($self, $self->{main}->{conf}, $nn_data_dir, 2, undef, $stored_vocab_ref, @email_token_lists);
-        $vocab_keys_ref = $stored_vocab_ref;
-        $num_input = $model_size;
-        $network = $existing_network;
-      } else {
-        my $stored_size  = defined $stored_vocab_ref ? scalar(@$stored_vocab_ref) : 0;
-        my $growth_ratio = ($model_size > 0) ? ($num_input - $model_size) / $model_size : 1;
-        if ($growth_ratio > 0 && $growth_ratio < 0.10) {
-          # Vocab changed by less than 10%: preserve existing weights by adapting feature
-          # vectors to the old model's input size rather than discarding a trained network.
-          dbg("Vocab/model size mismatch (new=$num_input vs model=$model_size, " .
-              sprintf("%.1f", $growth_ratio * 100) . "% change); " .
-              "adapting feature vectors to preserve existing model");
-          for my $fv (@$feature_vectors) {
-            $fv->{vec} = _adjust_vector_size($fv->{vec}, $model_size);
-          }
-          $num_input = $model_size;
-          $network   = $existing_network;
-        } else {
-          info("Model/vocab mismatch (stored=$stored_size vs model=$model_size inputs); " .
-               "discarding stale model, starting fresh network");
-          undef $existing_network;
-        }
-      }
+  # When _retrain_from_vocabulary couldn't supply a balanced training set
+  # (training buffer one-sided) and no existing model is in memory or on disk,
+  # there is nothing meaningful to train or save. Persist the message-id so
+  # we don't reprocess this learn, release the lock, and return.
+  if (!defined $network) {
+    dbg("Skipping training and model save: training buffer too one-sided to " .
+        "build a balanced batch (spam=$buffer_spam_count, ham=$buffer_ham_count)");
+    if (defined $msg && defined $msgid && length($msgid) > 0) {
+      $self->_save_msgid_to_neural_seen($msgid, $isspam);
     }
-    unless (defined $network) {
-      # No existing model, or a consistency error cleared it above.
-      # If the vocabulary already has enough balanced data, build a baseline
-      # from it; otherwise start with a randomly-initialised network that will
-      # be shaped by subsequent incremental training.
-      my $vocab = $self->{_last_train_vocab} // {};
-      my $sc = $vocab->{_spam_count} || 0;
-      my $hc = $vocab->{_ham_count}  || 0;
-      my $min_spam = $self->{main}->{conf}->{neuralnetwork_min_spam_count};
-      my $min_ham  = $self->{main}->{conf}->{neuralnetwork_min_ham_count};
-      if ($sc >= $min_spam && $hc >= $min_ham) {
-        $network = $self->_retrain_from_vocabulary($self->{main}->{conf}, $nn_data_dir, $num_input);
-      }
-      if (!defined $network) {
-        # Vocabulary not yet balanced enough, or retrain returned undef.
-        # Create a blank network; it will learn through incremental training.
-        $network = AI::FANN->new_standard($num_input, $num_hidden1, $num_hidden2, $num_output_neurons);
-        my $act_fn = ($train_algorithm == FANN_TRAIN_RPROP) ? FANN_SIGMOID_STEPWISE : FANN_SIGMOID;
-        $network->hidden_activation_function($act_fn);
-        $network->output_activation_function($act_fn);
-      }
-    }
+    $locker->safe_unlock($dataset_path);
+    return 1;
   }
+
   $network->learning_rate($learning_rate);
   $network->learning_momentum($momentum);
   $network->training_algorithm($train_algorithm);
@@ -854,19 +803,25 @@ unless ($locker->safe_lock($dataset_path, $conf->{neuralnetwork_lock_timeout})) 
   my $spam_docs = $raw_spam || 1;
   my $ham_docs  = $raw_ham  || 1;
 
-  # class_weight > 1 means this message belongs to the minority class and
-  # should be trained harder. learn_message is always called with one
-  # message and represents an explicit correction, so never train less
-  # than the configured baseline regardless of class balance.
+  # For SQL-backed deployments, merge training buffer and retrain counter from the
+  # training buffer table
+  if (defined $conf->{neuralnetwork_dsn} && $self->{dbh}) {
+    my $meta = $self->_load_meta($conf);
+    $vocab_for_balance{_learns_since_retrain} = $meta->{_learns_since_retrain};
+    $vocab_for_balance{_tbuf}                 = $meta->{_tbuf};
+    dbg("SQL metadata loaded: learns_since_retrain=$meta->{_learns_since_retrain}, " .
+        "tbuf_spam=" . scalar(@{ $meta->{_tbuf}{spam} || [] }) .
+        " tbuf_ham=" . scalar(@{ $meta->{_tbuf}{ham}  || [] }));
+  }
+
   my $class_weight;
   if ($isspam) {
-    $class_weight = $ham_docs / $spam_docs;
+    $class_weight = ($spam_docs > 0) ? $ham_docs / $spam_docs : 1.0;
   } else {
-    $class_weight = $spam_docs / $ham_docs;
+    $class_weight = ($ham_docs > 0) ? $spam_docs / $ham_docs : 1.0;
   }
   $class_weight = 1.0 if $class_weight < 1.0;
   $class_weight = 4.0 if $class_weight > 4.0;
-
   my $weighted_epochs = int($train_epochs * $class_weight) || 1;
 
   dbg("Incremental training: weighted_epochs=$weighted_epochs " .
@@ -874,163 +829,36 @@ unless ($locker->safe_lock($dataset_path, $conf->{neuralnetwork_lock_timeout})) 
       "spam_docs=$spam_docs, ham_docs=$ham_docs, isspam=$isspam, " .
       "num_input=$num_input)");
 
-  my ($svec, $hvec);
-  my $replay_eligible =
-       ($train_algorithm == FANN_TRAIN_RPROP)
-    && defined $vocab_keys_ref
-    && scalar(@$vocab_keys_ref) == $num_input
-    && $raw_spam >= 1 && $raw_ham >= 1;
-  if ($replay_eligible) {
-    ($svec, $hvec) = _build_class_tfidf_vectors(\%vocab_for_balance, $vocab_keys_ref);
-  } elsif ($train_algorithm == FANN_TRAIN_RPROP && !defined $vocab_keys_ref) {
-    dbg("Skipping RPROP replay: vocab_keys unavailable");
-  }
-
   my $locked_num_input      = $num_input;
   my $locked_vocab_keys_ref = $vocab_keys_ref;
 
-  # Dynamic replay algorithm. Runs BEFORE the message training loop so the
-  # message training is the last thing the network sees, and the early-
-  # stopped prediction is preserved into the saved model. Replay here
-  # corrects drift accumulated from previous learns.
-  if ($replay_eligible && $svec && $hvec) {
-    # Use grep in scalar context: returns count of non-zero elements.
-    my $svec_ok = grep { $_ != 0 } @$svec;
-    my $hvec_ok = grep { $_ != 0 } @$hvec;
+  $self->_run_balanced_replay(
+    $network, $conf, $nn_data_dir, $feature_vectors,
+    $vocab_for_balance{_tbuf}, $locked_vocab_keys_ref, $locked_num_input,
+    $weighted_epochs, $network_rebuilt, $train_algorithm);
 
-    if ($svec_ok && $hvec_ok) {
-      my $replay_cycles = int(sqrt($weighted_epochs / 5.0) + 0.5);
-      $replay_cycles = 3  if $replay_cycles < 3;
-      $replay_cycles = 12 if $replay_cycles > 12;
-      # Alternate (own, opposite) order across cycles so RPROP sees mixed
-      # gradient directions; this contracts step sizes before the message
-      # training that follows.
-      for my $i (1 .. $replay_cycles) {
-        if ($i % 2 == ($isspam ? 1 : 0)) {
-          eval { $network->train($hvec, [0]); 1 } or dbg("Replay ham step failed: "  . ($@ || 'unknown'));
-          eval { $network->train($svec, [1]); 1 } or dbg("Replay spam step failed: " . ($@ || 'unknown'));
-        } else {
-          eval { $network->train($svec, [1]); 1 } or dbg("Replay spam step failed: " . ($@ || 'unknown'));
-          eval { $network->train($hvec, [0]); 1 } or dbg("Replay ham step failed: "  . ($@ || 'unknown'));
-        }
-      }
-      dbg("RPROP replay: $replay_cycles cycle(s) before $weighted_epochs epoch(s) " .
-          "(isspam=$isspam, spam_docs=$spam_docs, ham_docs=$ham_docs)");
-    } else {
-      dbg("Skipping RPROP replay: degenerate vectors (svec_ok=$svec_ok, hvec_ok=$hvec_ok)");
-    }
-  }
+  my $new_counter;
+  my $tbuf_after_retrain;
+  ($network, $locked_num_input, $locked_vocab_keys_ref, $new_counter, $tbuf_after_retrain) =
+    $self->_periodic_retrain_if_needed($conf, $nn_data_dir, $network,
+      $vocab_for_balance{_learns_since_retrain},
+      $locked_num_input, $locked_vocab_keys_ref, $rb_needs_retrain);
 
-  # Early-stop margin: we stop a touch past the configured threshold so
-  # subsequent learns drifting the boundary don't immediately flip the
-  # classification of this message.
-  my $early_stop_margin = 0.1;
-  my $spam_stop = $conf->{neuralnetwork_spam_threshold} + $early_stop_margin;
-  my $ham_stop  = $conf->{neuralnetwork_ham_threshold}  - $early_stop_margin;
-  my $check_interval = int($weighted_epochs / 8) || 1;
-  for my $e (1 .. $weighted_epochs) {
-    for my $i (0 .. $#$feature_vectors) {
-      my $input  = $feature_vectors->[$i]{vec};
-      my $output = [$labels[$i] ? 1 : 0];
-      eval { $network->train($input, $output); 1 } or dbg("Training step failed: " . ($@ || 'unknown'));
-    }
-    if ($e % $check_interval == 0 && scalar(@$feature_vectors) == 1) {
-      my $pred = eval { $network->run($feature_vectors->[0]{vec}) };
-      $pred = ref($pred) ? $pred->[0] : $pred;
-      if (defined $pred &&
-          (($isspam && $pred > $spam_stop) || (!$isspam && $pred < $ham_stop))) {
-        dbg("Early stop after $e/$weighted_epochs epochs " .
-            "(pred=$pred, isspam=$isspam, spam_stop=$spam_stop, ham_stop=$ham_stop)");
-        last;
-      }
-    }
-  }
+  # Use the cleared buffer returned by a successful retrain,
+  # or fall back to the current in-memory buffer.
+  my $tbuf_to_save = $tbuf_after_retrain // $vocab_for_balance{_tbuf};
+  $self->_save_meta($conf, $nn_data_dir, $new_counter, $tbuf_to_save);
 
-  if (scalar(@$feature_vectors) == 1) {
-    my $pred_after = eval { $network->run($feature_vectors->[0]{vec}) };
-    $pred_after = ref($pred_after) ? $pred_after->[0] : $pred_after;
-    dbg("Prediction after learning: " . (defined $pred_after ? $pred_after : 'undef'));
-  }
-
-  # Pre-stage the FANN model to a temp file while holding the lock.
-  my $tmp_path;
-  my $file_mode = 0666 & ~umask();
-  my $prestage_ok = eval {
-    my ($vol, $dir, undef) = File::Spec->splitpath($dataset_path);
-    my $tmp_dir = File::Spec->catpath($vol, $dir, '');
-    (undef, $tmp_path) = File::Temp::tempfile(
-      'fann-XXXXXX',
-      DIR    => $tmp_dir,
-      SUFFIX => '.tmp',
-      UNLINK => 0,
-    );
-    $tmp_path = Mail::SpamAssassin::Util::untaint_file_path($tmp_path);
-    chmod($file_mode, $tmp_path) or info("chmod $file_mode on '$tmp_path' failed: $!");
-    $network->save($tmp_path) or die "model save to temp '$tmp_path' failed";
-    1;
-  };
-  if (!$prestage_ok) {
-    my $err = $@ || 'unknown';
-    info("Cannot pre-stage model save to '$dataset_path' ($err)");
-    if (defined $tmp_path && -f $tmp_path) {
-      unlink($tmp_path)
-        or info("Cannot remove temp model file '$tmp_path': $!");
-    }
-    $locker->safe_unlock($dataset_path);
-    return 0;
-  }
-
-  my $current_mtime = (stat($dataset_path))[9] // 0;
-  if (defined $lock1_mtime && $current_mtime > $lock1_mtime) {
-    info("on-disk model changed during training; overwriting");
-  }
-
-  my $model_saved = 0;
-  eval {
-    if (!defined $locked_vocab_keys_ref || scalar(@$locked_vocab_keys_ref) != $locked_num_input) {
-      dbg("Skipping model vocab save: key count (" .
-          (defined $locked_vocab_keys_ref ? scalar(@$locked_vocab_keys_ref) : 'undef') .
-          ") != num_input ($locked_num_input)");
-    } elsif (defined $self->{main}->{conf}->{neuralnetwork_dsn} && $self->{dbh}) {
-      $self->_save_model_vocab_to_sql($locked_vocab_keys_ref)
-        or info("WARNING: model saved but vocab SQL write failed; " .
-                "model/vocab are now inconsistent and a full rebuild will " .
-                "occur on the next learn call");
-    } else {
-      $self->_save_model_vocab($locked_vocab_keys_ref, $nn_data_dir);
-      my $vocab_path = $self->_model_vocab_path($nn_data_dir);
-      unless (-f $vocab_path) {
-        info("WARNING: model saved but vocab file '$vocab_path' is missing; " .
-             "model/vocab are now inconsistent and a full rebuild will " .
-             "occur on the next learn call");
-      }
-    }
-    delete $self->{_model_vocab_cache};
-    delete $self->{_model_vocab_cache_t};
-    rename($tmp_path, $dataset_path)
-      or die "atomic rename '$tmp_path' -> '$dataset_path' failed: $!";
-    $tmp_path = undef;
-    $model_saved = 1;
-    1;
-  } or do {
-    my $err = $@ || 'unknown';
-    info("Cannot save model to '$dataset_path' ($err)");
-    if (defined $tmp_path && -f $tmp_path) {
-      unlink($tmp_path)
-        or info("Cannot remove temp model file '$tmp_path': $!");
-    }
-  };
-  $locker->safe_unlock($dataset_path);
+  my $model_saved = $self->_save_model_atomic(
+    $network, $dataset_path, $lock1_mtime,
+    $locked_vocab_keys_ref, $locked_num_input, $nn_data_dir, $locker);
 
   if ($model_saved) {
     dbg("Model saved to '$dataset_path' (input:$locked_num_input)");
-    $self->{neural_model} = $network;
+    $self->{neural_model}            = $network;
     $self->{_neural_model_load_time} = time();
-
-    # Record message as learned to prevent re-learning.
-    if (defined $msg && defined $msgid && length($msgid) > 0) {
-      $self->_save_msgid_to_neural_seen($msgid, $isspam);
-    }
+    $self->_save_msgid_to_neural_seen($msgid, $isspam)
+      if defined $msg && defined $msgid && length($msgid) > 0;
   }
   return $model_saved;
 }
@@ -1038,6 +866,9 @@ unless ($locker->safe_lock($dataset_path, $conf->{neuralnetwork_lock_timeout})) 
 sub forget_message {
   my ($self, $params) = @_;
   my $conf = $self->{main}->{conf};
+
+  return unless $conf->{use_neuralnetwork};
+
   $self->_init_sql_connection($conf) if defined $conf->{neuralnetwork_dsn};
 
   my $username = $self->{main}->{username};
@@ -1090,12 +921,16 @@ sub forget_message {
             );
           }
 
-          # Remove unused terms
+          # Remove unused terms, but keep rows still referenced by the
+          # trained model (model_position IS NOT NULL) so the FANN input
+          # ordering on disk stays consistent with SQL until the next
+          # retrain reclaims the slot.
           my $cleanup_sql = "
             DELETE FROM neural_vocabulary
             WHERE username = ?
               AND total_count = 0 AND docs_count = 0
               AND spam_count = 0 AND ham_count = 0
+              AND model_position IS NULL
           ";
           my $sth_cleanup = $self->{dbh}->prepare($cleanup_sql);
           $sth_cleanup->execute(lc($username));
@@ -1116,7 +951,7 @@ sub forget_message {
       WHERE username = ? AND msgid = ?
     ";
     my $sth = $self->{dbh}->prepare($del_sql);
-    if (not $sth->execute($username, $msgid)) {
+    if (not $sth->execute(lc($username), $msgid)) {
       info("Error forgetting message $msgid");
       return 0;
     }
@@ -1141,7 +976,7 @@ sub forget_message {
         my $full_terms      = ref($full_vocab_ref) eq 'HASH' ? ($full_vocab_ref->{terms} || {}) : {};
         my $full_vocab_size = scalar keys %$full_terms;
         if ($full_vocab_size > 0) {
-          my $rebuilt = eval { $self->_retrain_from_vocabulary($conf, $nn_data_dir, $full_vocab_size) };
+          my ($rebuilt) = eval { $self->_retrain_from_vocabulary($conf, $nn_data_dir, $full_vocab_size) };
           if (!$rebuilt) {
             dbg("NeuralNetwork: Retrain after forget failed: " . ($@ || 'undef'));
           } else {
@@ -1149,10 +984,9 @@ sub forget_message {
             my $tmp_path;
             my $file_mode = 0666 & ~umask();
             my $prestage_ok = eval {
-              my ($vol, $dir) = File::Spec->splitpath($dataset_path);
-              my $tmp_dir = File::Spec->catpath($vol, $dir, '');
-              (undef, $tmp_path) = File::Temp::tempfile(
-                'fann-XXXXXX', DIR => $tmp_dir, SUFFIX => '.tmp', UNLINK => 0);
+              ($tmp_path, my $tmp_fh) = Mail::SpamAssassin::Util::secure_tmpfile();
+              die "could not create temp file" unless defined $tmp_path;
+              close $tmp_fh;
               $tmp_path = Mail::SpamAssassin::Util::untaint_file_path($tmp_path);
               chmod($file_mode, $tmp_path) or info("chmod $file_mode on '$tmp_path' failed: $!");
               $rebuilt->save($tmp_path) or die "save failed";
@@ -1170,7 +1004,8 @@ sub forget_message {
                 unlink($tmp_path) if defined $tmp_path && -f $tmp_path;
               } else {
                 eval {
-                  rename($tmp_path, $dataset_path) or die "rename failed: $!";
+                  _rename_or_copy($tmp_path, $dataset_path)
+                    or die "rename/copy failed: $!";
                   $tmp_path = undef;
                   1;
                 } or do {
@@ -1225,7 +1060,7 @@ sub check_neuralnetwork {
 }
 
 # Compute chi-squared score measuring how discriminative a vocabulary term
-# is between spam and ham.  Returns 0 when there is insufficient data.
+# is between spam and ham. Returns 0 when there is insufficient data.
 sub _chi2_score {
   my ($spam, $ham, $total_spam, $total_ham) = @_;
   my $total = $total_spam + $total_ham;
@@ -1275,10 +1110,18 @@ sub _prune_vocabulary {
     eval {
       my $user = $self->{main}->{username};
       my $placeholders = join(',', ('?') x scalar(@pruned));
-      my $del_sql = "DELETE FROM neural_vocabulary WHERE username = ? AND keyword IN ($placeholders)";
+      # Skip rows still referenced by the trained model - deleting them
+      # would leave the FANN input vector smaller than num_inputs() and
+      # force prediction to zero-pad. Orphans get reclaimed at retrain.
+      my $del_sql = "DELETE FROM neural_vocabulary
+                     WHERE username = ?
+                       AND keyword IN ($placeholders)
+                       AND model_position IS NULL";
       my $sth_del = $self->{dbh}->prepare($del_sql);
-      $sth_del->execute($user, @pruned);
-      dbg("Deleted " . scalar(@pruned) . " terms for user: $user");
+      $sth_del->execute(lc($user), @pruned);
+      my $removed = $sth_del->rows();
+      $removed = 0 if !defined $removed || $removed < 0;
+      dbg("Deleted $removed terms for user: $user");
       1;
     } or do {
       dbg("Failed to delete terms: " . ($@ || 'unknown'));
@@ -1323,8 +1166,8 @@ sub _build_class_tfidf_vectors {
     my $idf       = log(($N + 1) / (($td->{docs} || 0) + 1)) + 1;
     my $spam_rate = ($td->{spam} || 0) / $spam_docs;
     my $ham_rate  = ($td->{ham}  || 0) / $ham_docs;
-    $spam_vec[$i] = $spam_rate * $idf;
-    $ham_vec[$i]  = $ham_rate  * $idf;
+    $spam_vec[$i] = ($spam_rate > $ham_rate) ? ($spam_rate - $ham_rate) * $idf : 0;
+    $ham_vec[$i]  = ($ham_rate > $spam_rate) ? ($ham_rate - $spam_rate) * $idf : 0;
   }
 
   for my $vec (\@spam_vec, \@ham_vec) {
@@ -1337,7 +1180,7 @@ sub _build_class_tfidf_vectors {
 
 # Create a baseline model from vocabulary statistics when vocab size has changed.
 sub _retrain_from_vocabulary {
-  my ($self, $conf, $nn_data_dir, $vocab_size) = @_;
+  my ($self, $conf, $nn_data_dir, $vocab_size, $restricted_keys_ref) = @_;
 
   return unless defined $nn_data_dir && $vocab_size > 0;
 
@@ -1368,81 +1211,257 @@ sub _retrain_from_vocabulary {
   my $terms = $vocabulary{terms} || {};
   return unless scalar keys %{$terms};
 
-  my @vocab_keys = sort keys %{$terms};
-  my $actual_size = scalar @vocab_keys;
-  return unless $actual_size == $vocab_size;
+  my @vocab_keys;
+  if (defined $restricted_keys_ref) {
+    @vocab_keys = @$restricted_keys_ref;
+    $vocab_size = scalar @vocab_keys;
+  } else {
+    @vocab_keys = sort keys %{$terms};
+    my $actual_size = scalar @vocab_keys;
+    return unless $actual_size == $vocab_size;
+  }
 
   my $spam_docs = $vocabulary{_spam_count} || 1;
   my $ham_docs  = $vocabulary{_ham_count}  || 1;
 
-  my ($spam_vec_ref, $ham_vec_ref) = _build_class_tfidf_vectors(\%vocabulary, \@vocab_keys);
-  return unless $spam_vec_ref;
-  my @spam_vec = @$spam_vec_ref;
-  my @ham_vec  = @$ham_vec_ref;
-
-  my $spam_reps = 1;
-  my $ham_reps  = 1;
-  if ($spam_docs > $ham_docs) {
-    $ham_reps = int(($spam_docs + $ham_docs - 1) / $ham_docs) || 1;
-    $ham_reps = 10 if $ham_reps > 10;
-  } elsif ($ham_docs > $spam_docs) {
-    $spam_reps = int(($ham_docs + $spam_docs - 1) / $spam_docs) || 1;
-    $spam_reps = 10 if $spam_reps > 10;
-  }
-  dbg("Retraining from vocabulary: spam_docs=$spam_docs, ham_docs=$ham_docs, " .
-      "spam_reps=$spam_reps, ham_reps=$ham_reps, epochs=$train_epochs");
-
-  # Create and train new network
-  my $num_hidden1 = int($vocab_size / 10);
-  $num_hidden1 = 512 if $num_hidden1 > 512;
-  $num_hidden1 = 32  if $num_hidden1 < 32;
-  my $num_hidden2 = int($num_hidden1 / 2);
-  $num_hidden2 = 16  if $num_hidden2 < 16;
-  my $network = AI::FANN->new_standard($vocab_size, $num_hidden1, $num_hidden2, 1);
-  my $act_fn = ($train_algorithm == FANN_TRAIN_RPROP) ? FANN_SIGMOID_STEPWISE : FANN_SIGMOID;
-  $network->hidden_activation_function($act_fn);
-  $network->output_activation_function($act_fn);
-  $network->learning_rate($learning_rate);
-  $network->learning_momentum($momentum);
-  $network->training_algorithm($train_algorithm);
-  if ($train_algorithm == FANN_TRAIN_RPROP) {
-    $network->rprop_delta_max($conf->{neuralnetwork_rprop_delta_max});
-  }
-
-  for my $e (1 .. $train_epochs) {
-    if ($spam_docs >= $ham_docs) {
-      # Spam-dominant: ham first, spam last so RPROP state ends spam-biased
-      eval { $network->train(\@ham_vec,  [0]); 1 } or dbg("Retrain ham step failed: "  . ($@ || 'unknown')) for (1 .. $ham_reps);
-      eval { $network->train(\@spam_vec, [1]); 1 } or dbg("Retrain spam step failed: " . ($@ || 'unknown')) for (1 .. $spam_reps);
-    } else {
-      # Ham-dominant: spam first, ham last so RPROP state ends ham-biased
-      eval { $network->train(\@spam_vec, [1]); 1 } or dbg("Retrain spam step failed: " . ($@ || 'unknown')) for (1 .. $spam_reps);
-      eval { $network->train(\@ham_vec,  [0]); 1 } or dbg("Retrain ham step failed: "  . ($@ || 'unknown')) for (1 .. $ham_reps);
+  # For SQL-backed deployments, _tbuf is not stored in neural_vocabulary.
+  if (defined $conf->{neuralnetwork_dsn} && $self->{dbh}) {
+    my $meta = $self->_load_meta($conf);
+    if (ref($meta->{_tbuf}) eq 'HASH') {
+      $vocabulary{_tbuf} = $meta->{_tbuf};
+      dbg("Training buffer loaded from SQL tables for batch retrain");
     }
   }
 
-  return $network;
+  dbg("Retraining from vocabulary: spam_docs=$spam_docs, ham_docs=$ham_docs, " .
+      "epochs=$train_epochs (no class-weight upweighting)");
+
+  # Build a class-balanced training batch from the training buffer. The buffer
+  # stores tokens (not vectors) so it survives vocabulary changes -- we
+  # re-vectorize against the current vocabulary every retrain.
+  #
+  # Balance via min(n_spam, n_ham): RPROP minimises MSE across the full
+  # batch, and on imbalanced data the optimal constant predictor sits at
+  # the class prior (e.g. 1/3 for a 2:1 ham-heavy mix), well below
+  # ham_threshold=0.4 -- so an unbalanced batch produces a ham-biased
+  # classifier even when discriminative features are available. Downsampling
+  # the majority restores the bias-free gradient.
+  #
+  # When one class is entirely absent from the buffer, no balanced batch
+  # exists at all. Return undef so the caller can skip model creation
+  # rather than fall back to a degenerate one-class fit.
+  my $buf_ref = $vocabulary{_tbuf};
+  unless (ref($buf_ref) eq 'HASH') {
+    dbg("Batch retrain skipped: training buffer is not available");
+    return;
+  }
+  my @spam_toks = map { $_->{tokens} } @{ $buf_ref->{spam} || [] };
+  my @ham_toks  = map { $_->{tokens} } @{ $buf_ref->{ham}  || [] };
+  my $n_spam = scalar @spam_toks;
+  my $n_ham  = scalar @ham_toks;
+  if ($n_spam == 0 || $n_ham == 0) {
+    dbg("Batch retrain skipped: training buffer is one-sided " .
+        "(spam=$n_spam, ham=$n_ham)");
+    return;
+  }
+
+  my $n_pc = $n_spam < $n_ham ? $n_spam : $n_ham;
+  my (@sub_spam, @sub_ham);
+  if ($n_pc >= 2) {
+    # Both classes have enough samples to balance cleanly; downsample the
+    # majority to match the minority so RPROP's batch MSE has no class-prior
+    # bias.
+    Mail::SpamAssassin::Util::fisher_yates_shuffle(\@spam_toks);
+    Mail::SpamAssassin::Util::fisher_yates_shuffle(\@ham_toks);
+    @sub_spam = @spam_toks[0 .. $n_pc - 1];
+    @sub_ham  = @ham_toks [0 .. $n_pc - 1];
+  } else {
+    # Minority has exactly 1 sample. Balancing to (1,1) leaves the network
+    # underdetermined; keep all available samples instead. The imbalance
+    # remaining is a 5:1 or 14:1 ratio at most, which biases the model but
+    # less severely than training on a 1:1 batch of just 2 examples. The
+    # imbalance self-corrects as the buffer fills and n_pc crosses 2.
+    @sub_spam = @spam_toks;
+    @sub_ham  = @ham_toks;
+  }
+  my $sub_n_spam = scalar @sub_spam;
+  my $sub_n_ham  = scalar @sub_ham;
+  my @batch_toks = (@sub_spam, @sub_ham);
+
+  my ($batch_vecs) = _text_to_features(
+    $self, $conf, $nn_data_dir, 2, undef, \@vocab_keys, @batch_toks);
+  unless (ref($batch_vecs) eq 'ARRAY' && scalar(@$batch_vecs) == $sub_n_spam + $sub_n_ham) {
+    dbg("Batch retrain skipped: vectorisation failed");
+    return;
+  }
+
+  my @balanced_minibatch;
+  for my $i (0 .. $#$batch_vecs) {
+    push @balanced_minibatch, {
+      vec   => $batch_vecs->[$i]{vec},
+      label => ($i < $sub_n_spam) ? 1 : 0,
+    };
+  }
+  dbg("Batch retrain: ${sub_n_spam} spam + ${sub_n_ham} ham " .
+      "(buffered: $n_spam spam, $n_ham ham; balanced=" .
+      ($n_pc >= 2 ? 'yes' : 'no, minority=1') . ")");
+
+  # Append class-prototype vectors as additional anchor samples. The
+  # prototypes are built from the vocabulary's full term-level spam/ham
+  # statistics; they encode the LONG-TERM class signature.
+  my ($spam_proto_ref, $ham_proto_ref) =
+    _build_class_tfidf_vectors(\%vocabulary, \@vocab_keys);
+  if ($spam_proto_ref && $ham_proto_ref) {
+    my $spam_nonzero = scalar grep { $_ != 0 } @$spam_proto_ref;
+    my $ham_nonzero  = scalar grep { $_ != 0 } @$ham_proto_ref;
+    if ($spam_nonzero > 0 || $ham_nonzero > 0) {
+      push @balanced_minibatch, { vec => $spam_proto_ref, label => 1 };
+      push @balanced_minibatch, { vec => $ham_proto_ref,  label => 0 };
+      dbg("Batch retrain: appended class-prototype anchors " .
+          "(spam_proto nonzeros=$spam_nonzero, ham_proto nonzeros=$ham_nonzero)");
+    }
+  }
+
+  # Two-layer hidden sizing: layer1 ~0.25*sqrt(vocab), layer2 half of layer1.
+  my $num_hidden1 = int(sqrt($vocab_size) * 0.25 + 0.5);
+  $num_hidden1 = 4 if $num_hidden1 < 4;
+  my $num_hidden2 = int($num_hidden1 / 2);
+  $num_hidden2 = 2 if $num_hidden2 < 2;
+  my $network = AI::FANN->new_standard($vocab_size, $num_hidden1, $num_hidden2, 1);
+  $network->learning_rate($learning_rate);
+  $network->learning_momentum($momentum);
+
+  # Always use full-batch RPROP for the retrain
+  $network->training_algorithm(FANN_TRAIN_RPROP);
+  $network->hidden_activation_function(FANN_SIGMOID);
+  $network->output_activation_function(FANN_SIGMOID);
+  $network->rprop_delta_max($conf->{neuralnetwork_rprop_delta_max});
+
+  # Build training dataset from the balanced training-buffer batch.
+  my (@td_inputs, @td_outputs);
+  for my $entry (@balanced_minibatch) {
+    push @td_inputs,  $entry->{vec};
+    push @td_outputs, [$entry->{label}];
+  }
+
+  my $n_td = scalar @td_inputs;
+  my $train_data = eval {
+    my $td = AI::FANN::TrainData->new_empty($n_td, $vocab_size, 1);
+    for my $i (0 .. $n_td - 1) {
+      $td->data($i, $td_inputs[$i], $td_outputs[$i]);
+    }
+    $td;
+  };
+  if (!defined $train_data) {
+    dbg("Failed to create TrainData for batch retrain: " . ($@ || 'unknown'));
+    return ($network, \@vocab_keys);
+  }
+
+  # RPROP epoch budget. Early stopping at MSE < 0.05 prevents RPROP from
+  # driving weights to extreme values on small training sets (saturation).
+  # A model reaching MSE 0.05 produces outputs in the [0.2, 0.8] range,
+  # well within the NN_SPAM (>0.6) and NN_HAM (<0.4) default detection thresholds.
+  my $batch_epochs = $train_epochs * 10;
+  $batch_epochs = 500 if $batch_epochs < 500;
+  my $target_mse  = 0.05;
+  my $actual_epochs = 0;
+  my $final_mse;
+  for my $e (1 .. $batch_epochs) {
+    my $mse = eval { $network->train_epoch($train_data) };
+    if (!defined $mse) {
+      dbg("Batch retrain epoch $e failed: " . ($@ || 'unknown'));
+      next;
+    }
+    $actual_epochs = $e;
+    $final_mse     = $mse;
+    last if $mse < $target_mse;
+  }
+  dbg("Batch retrain complete: $n_td sample(s), $actual_epochs epoch(s), " .
+      "final MSE=" . (defined $final_mse ? sprintf("%.4f", $final_mse) : 'undef'));
+
+  return ($network, \@vocab_keys);
+}
+
+# Rename $src to $dst atomically. Falls back to copy+unlink when rename(2)
+# fails with EXDEV (src and dst on different filesystems).
+sub _rename_or_copy {
+  my ($src, $dst) = @_;
+  return 1 if rename($src, $dst);
+  return 0 unless $! == EXDEV;
+  dbg("rename cross-device ($src -> $dst); falling back to copy+unlink");
+  return copy($src, $dst) && unlink($src);
+}
+
+# Returns indices of inputs whose L2 norm of outgoing weights to hidden-1
+# meets or exceeds $threshold. Reads weights via a temp FANN save file since
+# AI::FANN does not expose a direct weight-access API.
+sub _prune_inputs_by_weight_norm {
+  my ($network, $num_input, $num_hidden1, $threshold) = @_;
+
+  my ($tmpfile, $fh) = Mail::SpamAssassin::Util::secure_tmpfile();
+  unless (defined $tmpfile) {
+    dbg("_prune_inputs_by_weight_norm: could not create temp file");
+    return 0 .. $num_input - 1;
+  }
+  close $fh;
+  my $save_ok = eval { $network->save($tmpfile); 1 };
+  unless ($save_ok) {
+    dbg("_prune_inputs_by_weight_norm: save failed: " . ($@ || 'unknown'));
+    unlink $tmpfile;
+    return 0 .. $num_input - 1;
+  }
+
+  my $conn_line;
+  open(my $rfh, '<', $tmpfile) or do {
+    dbg("_prune_inputs_by_weight_norm: open failed: $!");
+    unlink $tmpfile;
+    return 0 .. $num_input - 1;
+  };
+  while (<$rfh>) { if (/^connections/) { $conn_line = $_; last } }
+  close $rfh;
+  unlink $tmpfile;
+
+  unless (defined $conn_line) {
+    dbg("_prune_inputs_by_weight_norm: no connections line in saved model");
+    return 0 .. $num_input - 1;
+  }
+
+  my @weights = ($conn_line =~ /\([^,]+,\s*([-+eE\d.]+)\)/g);
+  # Connections are grouped by destination hidden-1 neuron.
+  # Group h occupies positions h*(num_input+1) .. (h+1)*(num_input+1)-1.
+  # Position i within each group is weight from input i.
+  my @norms;
+  for my $i (0 .. $num_input - 1) {
+    my $sq = 0;
+    for my $h (0 .. $num_hidden1 - 1) {
+      my $w = $weights[$h * ($num_input + 1) + $i] // 0;
+      $sq += $w * $w;
+    }
+    $norms[$i] = sqrt($sq);
+  }
+
+  return grep { $norms[$_] >= $threshold } 0 .. $num_input - 1;
 }
 
 sub _check_neuralnetwork {
   my ($self, $pms) = @_;
 
+  my $conf = $self->{main}->{conf};
+  return unless $conf->{use_neuralnetwork};
   return 0 if (!$self->{main}->{conf}->{use_learner});
+  
   my $msg = $pms->{msg};
 
   if(exists $pms->{neuralnetwork_prediction}) {
     return;
   }
 
-  my $conf = $self->{main}->{conf};
   $self->_init_sql_connection($conf) if defined $conf->{neuralnetwork_dsn};
   my $min_text_len = $conf->{neuralnetwork_min_text_len};
   my $spam_threshold = $conf->{neuralnetwork_spam_threshold};
   my $ham_threshold  = $conf->{neuralnetwork_ham_threshold};
 
-  my $vis_arr = $msg->get_visible_rendered_body_text_array();
-  my $vis_text = (ref $vis_arr eq 'ARRAY') ? join("\n", @$vis_arr)
-                : (defined $vis_arr ? $vis_arr : '');
+  my $vis_text = $self->_get_visible_text($msg);
   if (length($vis_text) < $min_text_len) {
     $pms->{neuralnetwork_prediction} = undef;
     dbg("Too short email text");
@@ -1458,7 +1477,7 @@ sub _check_neuralnetwork {
     return;
   }
 
-  my $dataset_path = File::Spec->catfile($nn_data_dir, 'fann-' . lc($self->{main}->{username}) . '.model');
+  my $dataset_path = Mail::SpamAssassin::Util::untaint_file_path($self->_model_path($nn_data_dir));
   if(not -f $dataset_path) {
     $pms->{neuralnetwork_prediction} = undef;
     dbg("Can't predict without a trained model, $dataset_path cannot be read");
@@ -1485,16 +1504,33 @@ sub _check_neuralnetwork {
     my $file_mode = 0666 & ~umask();
 
     my $loaded = eval { AI::FANN->new_from_file($dataset_path) };
-    if ($loaded) {
+    if ($loaded && $loaded->num_outputs() == 1) {
+      my $mtest = $self->_load_model_vocab($nn_data_dir);
+      if (!defined $mtest || !@$mtest) {
+        dbg("Model vocab absent in SQL/file; discarding loaded model to force rebuild");
+        undef $loaded;
+      } elsif (scalar(@$mtest) != $loaded->num_inputs()) {
+        dbg("Model vocab size (" . scalar(@$mtest) . ") != model inputs (" .
+            $loaded->num_inputs() . "); discarding stale model to force rebuild");
+        undef $loaded;
+      }
+    }
+    if ($loaded && $loaded->num_outputs() == 1) {
       $self->{neural_model}            = $loaded;
       $self->{_neural_model_load_time} = time();
       $network = $loaded;
     } else {
       my $err = $@ || 'unknown';
-      my @stat = stat($dataset_path);
-      my $fsize = @stat ? $stat[7] : 'N/A';
-      dbg("Failed to load model for prediction: $err "
-        . "(path=$dataset_path, size=${fsize}B), attempting vocabulary rebuild");
+      if ($loaded) {
+        dbg("Loaded model has wrong output count (" . $loaded->num_outputs() .
+            "); discarding and rebuilding");
+        undef $loaded;
+      } else {
+        my @stat = stat($dataset_path);
+        my $fsize = @stat ? $stat[7] : 'N/A';
+        dbg("Failed to load model for prediction: $err "
+          . "(path=$dataset_path, size=${fsize}B), attempting vocabulary rebuild");
+      }
 
       undef $self->{neural_model};
 
@@ -1506,11 +1542,33 @@ sub _check_neuralnetwork {
         return;
       }
 
-      my $rebuilt;
+      my ($rebuilt, $rebuilt_keys);
       eval {
         my $vref = $self->_load_model_vocab($nn_data_dir);
-        my $vsz  = (defined $vref && @$vref) ? scalar(@$vref) : 0;
-        $rebuilt = $self->_retrain_from_vocabulary($conf, $nn_data_dir, $vsz);
+        my $vsz;
+        my $vsz_from_model_pos = 0;
+        if (defined $vref && @$vref) {
+          $vsz = scalar(@$vref);
+          $vsz_from_model_pos = 1;
+        } else {
+          my $cv    = $self->_load_vocabulary($conf, $nn_data_dir, 0);
+          my $terms = (ref($cv) eq 'HASH') ? ($cv->{terms} || {}) : {};
+          $vsz      = scalar keys %$terms;
+          dbg("Model vocab absent; rebuilding from current vocabulary ($vsz terms)");
+        }
+        ($rebuilt, $rebuilt_keys) = $self->_retrain_from_vocabulary($conf, $nn_data_dir, $vsz) if $vsz > 0;
+        # If the SQL vocabulary size has diverged from the stored model_position count
+        # (e.g. tokens removed/added since the last model save), _retrain_from_vocabulary
+        # returns undef because its size check fails. Retry with the actual current size.
+        if (!defined $rebuilt && $vsz_from_model_pos) {
+          my $cv    = $self->_load_vocabulary($conf, $nn_data_dir, 0);
+          my $terms = (ref($cv) eq 'HASH') ? ($cv->{terms} || {}) : {};
+          my $cur   = scalar keys %$terms;
+          if ($cur > 0 && $cur != $vsz) {
+            dbg("Retrying rebuild with current vocabulary size ($cur vs model_position $vsz)");
+            ($rebuilt, $rebuilt_keys) = $self->_retrain_from_vocabulary($conf, $nn_data_dir, $cur);
+          }
+        }
         1;
       } or dbg("Vocabulary rebuild failed: " . ($@ || 'unknown'));
 
@@ -1527,15 +1585,29 @@ sub _check_neuralnetwork {
       $self->{_neural_model_load_time} = time();
 
       eval {
-        my ($vol, $dir) = File::Spec->splitpath($dataset_path);
-        my $tmp_dir = File::Spec->catpath($vol, $dir, '');
-        my (undef, $tmp_path) = File::Temp::tempfile(
-          'fann-XXXXXX', DIR => $tmp_dir, SUFFIX => '.tmp', UNLINK => 0);
+        my ($tmp_path, $tmp_fh) = Mail::SpamAssassin::Util::secure_tmpfile();
+        die "could not create temp file" unless defined $tmp_path;
+        close $tmp_fh;
         $tmp_path = Mail::SpamAssassin::Util::untaint_file_path($tmp_path);
         chmod($file_mode, $tmp_path) or info("chmod $file_mode on '$tmp_path' failed: $!");
         if ($rebuilt->save($tmp_path)) {
-          rename($tmp_path, $dataset_path)
-            or die "rename failed: $!";
+          _rename_or_copy($tmp_path, $dataset_path)
+            or die "rename/copy failed: $!";
+          delete $self->{_model_vocab_cache};
+          delete $self->{_model_vocab_cache_t};
+          my @rkeys = ($rebuilt_keys && @$rebuilt_keys)
+              ? @$rebuilt_keys
+              : do {
+                  my $cv = $self->_load_vocabulary($conf, $nn_data_dir, 0);
+                  sort keys %{ (ref($cv) eq 'HASH' ? ($cv->{terms} || {}) : {}) };
+              };
+          if (@rkeys) {
+            if (defined $conf->{neuralnetwork_dsn} && $self->{dbh}) {
+              $self->_save_model_vocab_to_sql(\@rkeys);
+            } else {
+              $self->_save_model_vocab(\@rkeys, $nn_data_dir);
+            }
+          }
           dbg("Persisted rebuilt model to '$dataset_path'");
         } else {
           unlink $tmp_path;
@@ -1550,6 +1622,22 @@ sub _check_neuralnetwork {
   }
 
   my $stored_vocab_ref = $self->_load_model_vocab($nn_data_dir);
+
+  # Guard: model out of sync with SQL model_position (race condition or stale
+  # state from a rebuild that saved model_position with a different count).
+  # For long-running daemons: invalidate the in-memory cache so the next
+  # request reloads cleanly.  For one-shot invocations (spamassassin(1)):
+  # fall back to an undef stored_vocab_ref so _text_to_features uses the
+  # current SQL vocabulary; any remaining size difference is handled by
+  # _adjust_vector_size and we still produce a prediction.
+  if ($network && defined $stored_vocab_ref && @$stored_vocab_ref
+      && scalar(@$stored_vocab_ref) != $network->num_inputs()) {
+    dbg("Model/vocab inconsistency (vocab=" . scalar(@$stored_vocab_ref) .
+        ", model=" . $network->num_inputs() . "); invalidating model cache, using SQL vocabulary for this prediction");
+    undef $self->{neural_model};
+    undef $self->{_neural_model_load_time};
+    undef $stored_vocab_ref;
+  }
 
   # Do not update the vocabulary
   my $update_vocab = 0;
@@ -1615,7 +1703,10 @@ sub _init_sql_connection {
 
   # Reconnect in each child process to prevent SQL protocol state corruption
   if ($self->{dbh} && ($self->{_dbh_pid} || 0) != $$) {
-    $self->{dbh}->{InactiveDestroy} = 1;
+    eval {
+      local $SIG{PIPE} = 'IGNORE';
+      $self->{dbh}->disconnect();
+    };
     undef $self->{dbh};
   }
 
@@ -1629,12 +1720,17 @@ sub _init_sql_connection {
   eval {
     local $SIG{'__DIE__'};
     require DBI;
-    $self->{dbh} = DBI->connect(
-      $dsn,
-      $username,
-      $password,
-      {RaiseError => 1, PrintError => 0, InactiveDestroy => 1, AutoCommit => 1}
-    );
+    my %attrs = (RaiseError => 1, PrintError => 0, InactiveDestroy => 1, AutoCommit => 1);
+    # Enable 4-byte UTF-8 on MySQL/MariaDB so tokens with emoji or other
+    # multi-byte codepoints insert cleanly into the utf8mb4 schema columns.
+    if ($dsn =~ /^dbi:mysql/i) {
+      $attrs{mysql_enable_utf8mb4} = 1;
+    }
+    $self->{dbh} = DBI->connect($dsn, $username, $password, \%attrs);
+    # use SET NAMES in case the DSN or server default differs.
+    if ($dsn =~ /^dbi:(?:mysql)/i) {
+      eval { $self->{dbh}->do("SET NAMES 'utf8mb4'") };
+    }
     $self->{_dbh_pid} = $$;
     $self->_create_vocabulary_table();
     dbg("SQL connection initialized for vocabulary storage (pid $$)");
@@ -1672,6 +1768,25 @@ sub _create_vocabulary_table {
           UNIQUE (username, msgid)
         )
       ");
+      $self->{dbh}->do("
+        CREATE TABLE IF NOT EXISTS neural_vars (
+          username VARCHAR(200) NOT NULL DEFAULT '',
+          variable VARCHAR(30)  NOT NULL DEFAULT '',
+          value    VARCHAR(200) NOT NULL DEFAULT '',
+          PRIMARY KEY (username, variable)
+        )
+      ");
+      $self->{dbh}->do("
+        CREATE TABLE IF NOT EXISTS neural_training_buffer (
+          username VARCHAR(200) NOT NULL DEFAULT '',
+          class    VARCHAR(4)   NOT NULL CHECK (class IN ('spam', 'ham')),
+          slot     INTEGER      NOT NULL DEFAULT 0,
+          ts       INTEGER      NOT NULL DEFAULT 0,
+          token    VARCHAR(256) NOT NULL DEFAULT '',
+          count    INTEGER      NOT NULL DEFAULT 1,
+          PRIMARY KEY (username, class, slot, token)
+        )
+      ");
       dbg("Vocabulary tables created or already exist");
     }
     1;
@@ -1685,9 +1800,9 @@ sub _save_msgid_to_neural_seen {
   my ($self, $msgid, $isspam) = @_;
   return unless defined $msgid && length($msgid) > 0;
 
-  # Save to file-based neural_seen if no SQL configured
+  # XXX Save to file-based neural_seen if no SQL configured
   if (!defined $self->{main}->{conf}->{neuralnetwork_dsn} || !$self->{dbh}) {
-    return; # File-based storage could be added here if needed
+    return;
   }
 
   eval {
@@ -1695,11 +1810,10 @@ sub _save_msgid_to_neural_seen {
     my $flag = $isspam ? 'S' : 'H';
     my $username = lc($self->{main}->{username}) || 'default';
 
-    # Use INSERT IGNORE to avoid duplicate key errors
     my $insert_sql;
 
     if ($self->{main}->{conf}->{neuralnetwork_dsn} =~ /^dbi:(?:mysql|MariaDB)/i) {
-      # MySQL: INSERT IGNORE
+      # MySQL
       $insert_sql = "
         INSERT IGNORE INTO neural_seen (username, msgid, flag)
         VALUES (?, ?, ?)
@@ -1829,6 +1943,56 @@ sub _save_vocabulary_to_sql {
   };
 }
 
+# Aggregates training-buffer slot token arrays into vocabulary delta counts and
+# persists them via _save_vocabulary_to_sql. Does NOT delete SQL training-buffer
+# rows, rows will be deleted by the caller.
+sub _merge_slots_to_vocabulary {
+  my ($self, $slots_ref, $class) = @_;
+  return unless $self->{dbh} && ref($slots_ref) eq 'ARRAY' && @$slots_ref;
+  my %deltas;
+  for my $slot (@$slots_ref) {
+    my %seen;
+    for my $tok (@{ $slot->{tokens} || [] }) {
+      $deltas{$tok}{total} = ($deltas{$tok}{total} || 0) + 1;
+      $deltas{$tok}{docs}  = ($deltas{$tok}{docs}  || 0) + 1 unless $seen{$tok}++;
+      if ($class eq 'spam') { $deltas{$tok}{spam} = ($deltas{$tok}{spam} || 0) + 1 }
+      else                  { $deltas{$tok}{ham}  = ($deltas{$tok}{ham}  || 0) + 1 }
+    }
+  }
+  $self->_save_vocabulary_to_sql(\%deltas, $self->{main}->{username}) if %deltas;
+}
+
+# Merges both spam and ham training-buffer slots into neural_vocabulary.
+sub _flush_training_buffer {
+  my ($self, $tbuf) = @_;
+  return unless $self->{dbh} && ref($tbuf) eq 'HASH';
+  for my $class (qw(spam ham)) {
+    my $slots = $tbuf->{$class} || [];
+    $self->_merge_slots_to_vocabulary($slots, $class) if @$slots;
+  }
+}
+
+# Returns true if the SQL training buffer has enough staged tokens to warrant
+# a retrain (vocab_cap threshold reached).
+sub _training_buffer_flush_needed {
+  my ($self, $conf, $buf_state) = @_;
+  return 0 unless $self->{dbh};
+
+  my $vocab_cap = $conf->{neuralnetwork_vocab_cap};
+  my $distinct  = 0;
+  eval {
+    my $sth = $self->{dbh}->prepare(
+      "SELECT COUNT(DISTINCT token) FROM neural_training_buffer WHERE username=?"
+    );
+    $sth->execute(lc($self->{main}->{username}));
+    ($distinct) = $sth->fetchrow_array();
+    1;
+  } or dbg("Failed to count distinct training buffer tokens: " . ($@ || 'unknown'));
+  return 1 if $distinct >= $vocab_cap;
+
+  return 0;
+}
+
 # Header whitelist used by _extract_features_from_message
 my %_NN_HEADER_PREFIX = (
   'Subject'      => 'H*sub:',
@@ -1837,8 +2001,6 @@ my %_NN_HEADER_PREFIX = (
   'Return-Path'  => 'H*rpa:',
   'To'           => 'H*to:',
   'Cc'           => 'H*cc:',
-  'Content-Type' => 'H*ct:',
-  'Message-Id'   => 'H*mid:',
 );
 
 sub _tokenize_header_value {
@@ -1855,6 +2017,7 @@ sub _tokenize_header_value {
   for my $p (split /\s+/, $value) {
     my $len = length $p;
     next if $len < 2 || $len > 80;
+    next if $p =~ /^\-/;
     push @out, $prefix . $p;
   }
   return @out;
@@ -1922,12 +2085,6 @@ sub _extract_features_from_message {
     push @tokens, _tokenize_header_value($_NN_HEADER_PREFIX{$h}, $val);
   }
 
-  my $rcv = eval { $msg->get_pristine_header('Received') };
-  if (defined $rcv && length $rcv) {
-    my @lines = split /\n(?!\s)/, $rcv;
-    push @tokens, _tokenize_header_value('H*rcv:', $lines[-1]) if @lines;
-  }
-
   for my $u (_extract_uris_from_msg($pms)) {
     push @tokens, _tokenize_uri($u);
   }
@@ -1942,7 +2099,21 @@ sub _extract_features_from_message {
     }
   }
 
+  @tokens = grep { defined } map { _sanitize_token($_) } @tokens;
   return \@tokens;
+}
+
+# Canonicalize a token so its identity is stable across token sources and
+# survives a round-trip through a SQL keyword index.
+sub _sanitize_token {
+  my ($t) = @_;
+  return undef unless defined $t;
+  if (!utf8::is_utf8($t) && $t =~ /[^\x00-\x7f]/) {
+    require Encode;
+    $t = Encode::decode('UTF-8', $t, Encode::FB_DEFAULT());
+  }
+  $t =~ s/[\s\p{Cc}\p{Cf}\p{Zs}\p{Zl}\p{Zp}]//g;
+  return length($t) ? $t : undef;
 }
 
 my %_HTML_ENTITIES = (
@@ -2008,6 +2179,8 @@ sub _load_vocabulary_from_sql {
   return {} unless $self->{dbh};
 
   $username //= $self->{main}->{username};
+  # normalize the username to lowercase
+  $username = lc($username) if defined $username;
 
   # Check cache first to avoid repeated database queries
   if (!defined $self->{_vocab_cache}) {
@@ -2050,6 +2223,7 @@ sub _load_vocabulary_from_sql {
     1;
   } or do {
     dbg("Pre-check query failed: " . ($@ || 'unknown'));
+    undef $self->{dbh};
   };
 
   my $conf     = $self->{main}->{conf};
@@ -2093,6 +2267,7 @@ sub _load_vocabulary_from_sql {
   } or do {
     my $err = $@ || 'unknown';
     dbg("Failed to load vocabulary from SQL: $err");
+    undef $self->{dbh};
   };
 
   # Cache the vocabulary with timestamp
@@ -2125,10 +2300,30 @@ sub _save_model_vocab_to_sql {
     }
     my $sth = $self->{dbh}->prepare($upsert_sql);
     for my $i (0 .. $#$vocab_keys_ref) {
-      $sth->execute(lc($username), $vocab_keys_ref->[$i], $i);
+      my $kw = $vocab_keys_ref->[$i];
+      # Strip NUL bytes and truncate to the column's VARCHAR(255) limit so
+      # MySQL does not silently mangle the keyword and collide with another row.
+      $kw =~ s/\x00//g;
+      $kw = substr($kw, 0, 255) if length($kw) > 255;
+      $sth->execute(lc($username), $kw, $i);
     }
+    # Reap rows that forget_message / _prune_vocabulary left behind because
+    # they were still in the previous model. Now that we've rebuilt the
+    # model vocab, anything with model_position still NULL and all-zero
+    # counts is a true orphan.
+    my $reap_sth = $self->{dbh}->prepare(
+      "DELETE FROM neural_vocabulary
+       WHERE username = ?
+         AND model_position IS NULL
+         AND total_count = 0 AND docs_count = 0
+         AND spam_count = 0 AND ham_count = 0"
+    );
+    $reap_sth->execute(lc($username));
+    my $reaped = $reap_sth->rows();
+    $reaped = 0 if !defined $reaped || $reaped < 0;
     $self->{dbh}->commit();
-    dbg("Saved model vocabulary (" . scalar(@$vocab_keys_ref) . " terms) to SQL for user: $username");
+    dbg("Saved model vocabulary (" . scalar(@$vocab_keys_ref) . " terms) to SQL for user: $username" .
+        ($reaped ? " (reaped $reaped orphan terms)" : ""));
     1;
   } or do {
     my $err = $@ || 'unknown';
@@ -2156,6 +2351,7 @@ sub _load_model_vocab_from_sql {
     1;
   } or do {
     dbg("Failed to load model vocabulary from SQL: " . ($@ || 'unknown'));
+    undef $self->{dbh};
   };
   return $vocab_ref;
 }
@@ -2163,6 +2359,514 @@ sub _load_model_vocab_from_sql {
 sub _model_vocab_path {
   my ($self, $nn_data_dir) = @_;
   return File::Spec->catfile($nn_data_dir, 'model-vocab-' . lc($self->{main}->{username}) . '.data');
+}
+
+sub _model_path {
+  my ($self, $nn_data_dir) = @_;
+  return File::Spec->catfile($nn_data_dir, 'fann-' . lc($self->{main}->{username}) . '.model');
+}
+
+sub _get_visible_text {
+  my ($self, $msg) = @_;
+  my $arr = $msg->get_visible_rendered_body_text_array();
+  return (ref $arr eq 'ARRAY') ? join("\n", @$arr)
+       : (defined $arr ? $arr : '');
+}
+
+# Returns { _learns_since_retrain => N, _tbuf => { spam=>[], ham=>[] } }
+sub _load_meta {
+  my ($self, $conf) = @_;
+  if (defined $conf->{neuralnetwork_dsn} && $self->{dbh}) {
+    my $username = lc($self->{main}->{username});
+    my $counter  = 0;
+    my %buf      = (spam => [], ham => []);
+    eval {
+      my $sth = $self->{dbh}->prepare(
+        "SELECT value FROM neural_vars WHERE username=? AND variable=?"
+      );
+      $sth->execute($username, 'learns_since_retrain');
+      my $row = $sth->fetchrow_arrayref();
+      $counter = int($row->[0] // 0) if $row;
+
+      $sth = $self->{dbh}->prepare(
+        "SELECT class, slot, ts, token, count FROM neural_training_buffer WHERE username=? ORDER BY class, slot"
+      );
+      $sth->execute($username);
+      my %slots;
+      while (my ($class, $slot, $ts, $token, $count) = $sth->fetchrow_array()) {
+        $slots{$class}{$slot}{ts} //= $ts;
+        push @{ $slots{$class}{$slot}{tokens} }, ($token) x ($count // 1);
+      }
+      for my $class (qw(spam ham)) {
+        for my $slot (sort { $a <=> $b } keys %{ $slots{$class} || {} }) {
+          push @{ $buf{$class} },
+               { tokens => $slots{$class}{$slot}{tokens},
+                 ts     => $slots{$class}{$slot}{ts} };
+        }
+      }
+      1;
+    } or dbg("Failed to load SQL meta: " . ($@ || 'unknown'));
+    return { _learns_since_retrain => $counter, _tbuf => \%buf };
+  } else {
+    my $vocab = $self->{_last_train_vocab} // {};
+    my $tb = ref($vocab->{_tbuf}) eq 'HASH'
+      ? $vocab->{_tbuf} : { spam => [], ham => [] };
+    return { _learns_since_retrain => $vocab->{_learns_since_retrain} || 0,
+             _tbuf                 => $tb };
+  }
+}
+
+# Persists counter and training buffer to the appropriate backend store.
+sub _save_meta {
+  my ($self, $conf, $nn_data_dir, $counter, $tbuf) = @_;
+  $tbuf ||= { spam => [], ham => [] };
+  if (defined $conf->{neuralnetwork_dsn} && $self->{dbh}) {
+    my $username = lc($self->{main}->{username});
+    eval {
+      $self->{dbh}->begin_work();
+      my $driver = $self->{dbh}{Driver}{Name} // '';
+      if ($driver eq 'SQLite') {
+        $self->{dbh}->do(
+          "INSERT OR REPLACE INTO neural_vars (username, variable, value) VALUES (?,?,?)",
+          undef, $username, 'learns_since_retrain', "$counter"
+        );
+      } elsif ($driver =~ /^(mysql|MariaDB)/i) {
+        $self->{dbh}->do(
+          "REPLACE INTO neural_vars (username, variable, value) VALUES (?,?,?)",
+          undef, $username, 'learns_since_retrain', "$counter"
+        );
+      } else {
+        $self->{dbh}->do(
+          "INSERT INTO neural_vars (username, variable, value) VALUES (?,?,?)
+           ON CONFLICT (username, variable) DO UPDATE SET value=EXCLUDED.value",
+          undef, $username, 'learns_since_retrain', "$counter"
+        );
+      }
+      $self->{dbh}->do(
+        "DELETE FROM neural_training_buffer WHERE username=?", undef, $username
+      );
+      my $ins = $self->{dbh}->prepare(
+        "INSERT INTO neural_training_buffer (username, class, slot, ts, token, count) VALUES (?,?,?,?,?,?)"
+      );
+      for my $class (qw(spam ham)) {
+        my $slots = $tbuf->{$class} || [];
+        for my $i (0 .. $#$slots) {
+          my $entry = $slots->[$i];
+          my %counts;
+          $counts{$_}++ for @{ $entry->{tokens} || [] };
+          for my $tok (keys %counts) {
+            $ins->execute($username, $class, $i, $entry->{ts} // 0, $tok, $counts{$tok});
+          }
+        }
+      }
+      $self->{dbh}->commit();
+      dbg("SQL metadata persisted: learns_since_retrain=$counter " .
+          "tbuf_spam=" . scalar(@{ $tbuf->{spam} || [] }) .
+          " tbuf_ham=" . scalar(@{ $tbuf->{ham} || [] }));
+      1;
+    } or do {
+      my $err = $@ || 'unknown';
+      eval { $self->{dbh}->rollback() if !$self->{dbh}{AutoCommit} };
+      dbg("Failed to persist SQL metadata: $err");
+    };
+  } else {
+    eval {
+      my $username   = lc($self->{main}->{username});
+      my $vocab_path = File::Spec->catfile($nn_data_dir, 'vocabulary-' . $username . '.data');
+      $vocab_path    = Mail::SpamAssassin::Util::untaint_file_path($vocab_path);
+      if (-f $vocab_path) {
+        my $ref = retrieve($vocab_path);
+        if (ref $ref eq 'HASH') {
+          $ref->{_learns_since_retrain} = $counter;
+          $ref->{_tbuf} = $tbuf if ref($tbuf) eq 'HASH';
+          store($ref, $vocab_path) or die "store failed";
+          my $ttl = $conf->{neuralnetwork_cache_ttl} || 0;
+          if ($ttl > 0) {
+            $self->{_file_vocab_cache}{$username}      = $ref;
+            $self->{_file_vocab_cache_time}{$username} = time();
+          }
+        }
+      }
+      1;
+    } or dbg("Failed to persist learn counter / training buffer: " . ($@ || 'unknown'));
+  }
+}
+
+# Loads the training vocabulary from SQL or the file-backed store (with cache).
+# Returns a hashref with all default fields pre-populated.
+sub _load_vocabulary {
+  my ($self, $conf, $nn_data_dir, $train) = @_;
+  my %vocabulary;
+
+  if (defined $conf->{neuralnetwork_dsn} && $self && $self->{dbh}) {
+    my $vocab_ref = $self->_load_vocabulary_from_sql($self->{main}->{username});
+    if (ref($vocab_ref) eq 'HASH') {
+      if (scalar keys %{$vocab_ref->{terms} || {}}) {
+        %vocabulary = %{$vocab_ref};
+      } else {
+        # Insufficient terms but still capture class-count metadata.
+        $vocabulary{_spam_count} = $vocab_ref->{_spam_count} || 0;
+        $vocabulary{_ham_count}  = $vocab_ref->{_ham_count}  || 0;
+        $vocabulary{_doc_count}  = $vocab_ref->{_doc_count}  || 0;
+      }
+    }
+  }
+
+  if (!keys %{$vocabulary{terms} || {}}) {
+    my $username = lc($self->{main}->{username});
+    my $ttl      = $conf->{neuralnetwork_cache_ttl} || 0;
+
+    if (!$train && $ttl > 0 && defined $self->{_file_vocab_cache}{$username}) {
+      my $age = time() - ($self->{_file_vocab_cache_time}{$username} || 0);
+      if ($age < $ttl) {
+        dbg("Using cached file vocabulary for user: $username (age: ${age}s, ttl: ${ttl}s)");
+        %vocabulary = %{$self->{_file_vocab_cache}{$username}};
+      } else {
+        dbg("File vocabulary cache expired for user: $username (age: ${age}s, ttl: ${ttl}s)");
+        delete $self->{_file_vocab_cache}{$username};
+        delete $self->{_file_vocab_cache_time}{$username};
+      }
+    }
+
+    if (!keys %{$vocabulary{terms} || {}}) {
+      my $vocab_path = File::Spec->catfile($nn_data_dir, 'vocabulary-' . $username . '.data');
+      if (-f $vocab_path) {
+        eval {
+          my $ref = retrieve($vocab_path);
+          %vocabulary = %{$ref} if ref $ref eq 'HASH';
+          1;
+        } or warn("Failed to retrieve vocabulary from $vocab_path: " . ($@ || 'unknown'));
+      }
+      if (!$train && $ttl > 0 && keys %{$vocabulary{terms} || {}}) {
+        $self->{_file_vocab_cache}{$username}      = \%vocabulary;
+        $self->{_file_vocab_cache_time}{$username} = time();
+      }
+    }
+  }
+
+  $vocabulary{terms}                ||= {};
+  $vocabulary{_doc_count}           ||= 0;
+  $vocabulary{_spam_count}          ||= 0;
+  $vocabulary{_ham_count}           ||= 0;
+  $vocabulary{_learns_since_retrain} ||= 0;
+  $vocabulary{_tbuf}         ||= { spam => [], ham => [] };
+  $vocabulary{_tbuf}{spam}   ||= [];
+  $vocabulary{_tbuf}{ham}    ||= [];
+  return \%vocabulary;
+}
+
+sub _save_model_atomic {
+  my ($self, $network, $dataset_path, $lock1_mtime,
+      $locked_vocab_keys_ref, $locked_num_input, $nn_data_dir, $locker) = @_;
+
+  my $tmp_path;
+  my $file_mode   = 0666 & ~umask();
+  my $prestage_ok = eval {
+    ($tmp_path, my $tmp_fh) = Mail::SpamAssassin::Util::secure_tmpfile();
+    die "could not create temp file" unless defined $tmp_path;
+    close $tmp_fh;
+    $tmp_path = Mail::SpamAssassin::Util::untaint_file_path($tmp_path);
+    chmod($file_mode, $tmp_path) or info("chmod $file_mode on '$tmp_path' failed: $!");
+    $network->save($tmp_path) or die "model save to temp '$tmp_path' failed";
+    1;
+  };
+  if (!$prestage_ok) {
+    my $err = $@ || 'unknown';
+    info("Cannot pre-stage model save to '$dataset_path' ($err)");
+    if (defined $tmp_path && -f $tmp_path) {
+      unlink($tmp_path) or info("Cannot remove temp model file '$tmp_path': $!");
+    }
+    $locker->safe_unlock($dataset_path);
+    return 0;
+  }
+
+  my $current_mtime = (stat($dataset_path))[9] // 0;
+  info("on-disk model changed during training; overwriting")
+    if defined $lock1_mtime && $current_mtime > $lock1_mtime;
+
+  my $model_saved = 0;
+  eval {
+    delete $self->{_model_vocab_cache};
+    delete $self->{_model_vocab_cache_t};
+    _rename_or_copy($tmp_path, $dataset_path)
+      or die "atomic rename/copy '$tmp_path' -> '$dataset_path' failed: $!";
+    $tmp_path = undef;
+    if (!defined $locked_vocab_keys_ref || scalar(@$locked_vocab_keys_ref) != $locked_num_input) {
+      dbg("Skipping model vocab save: key count (" .
+          (defined $locked_vocab_keys_ref ? scalar(@$locked_vocab_keys_ref) : 'undef') .
+          ") != num_input ($locked_num_input)");
+    } elsif (defined $self->{main}->{conf}->{neuralnetwork_dsn} && $self->{dbh}) {
+      $self->_save_model_vocab_to_sql($locked_vocab_keys_ref)
+        or info("WARNING: model saved but vocab SQL write failed; " .
+                "model/vocab are now inconsistent and a full rebuild will " .
+                "occur on the next learn call");
+    } else {
+      $self->_save_model_vocab($locked_vocab_keys_ref, $nn_data_dir);
+      my $vocab_path = $self->_model_vocab_path($nn_data_dir);
+      unless (-f $vocab_path) {
+        info("WARNING: model saved but vocab file '$vocab_path' is missing; " .
+             "model/vocab are now inconsistent and a full rebuild will " .
+             "occur on the next learn call");
+      }
+    }
+    $model_saved = 1;
+    1;
+  } or do {
+    my $err = $@ || 'unknown';
+    info("Cannot save model to '$dataset_path' ($err)");
+    if (defined $tmp_path && -f $tmp_path) {
+      unlink($tmp_path) or info("Cannot remove temp model file '$tmp_path': $!");
+    }
+  };
+  $locker->safe_unlock($dataset_path);
+  return $model_saved;
+}
+
+sub _periodic_retrain_if_needed {
+  my ($self, $conf, $nn_data_dir, $network, $learns_since_retrain,
+      $locked_num_input, $locked_vocab_keys_ref, $force) = @_;
+
+  my $learn_count      = ($learns_since_retrain || 0) + 1;
+  my $retrain_interval = $conf->{neuralnetwork_retrain_interval};
+
+  if (!$force && ($retrain_interval <= 0 || $learn_count < $retrain_interval)) {
+    return ($network, $locked_num_input, $locked_vocab_keys_ref, $learn_count);
+  }
+
+  my $username           = lc($self->{main}->{username});
+  my $current_vocab_size = 0;
+  my @current_vocab_keys;
+  if (defined $conf->{neuralnetwork_dsn} && $self->{dbh}) {
+    # Flush training buffer into vocabulary so the retrain sees complete token stats.
+    # Buffer rows are kept intact for use as the training batch inside
+    # _retrain_from_vocabulary; they are deleted after all retrains complete.
+    my $meta = $self->_load_meta($conf);
+    $self->_flush_training_buffer($meta->{_tbuf})
+      if ref($meta->{_tbuf}) eq 'HASH';
+    my $vref = $self->_load_vocabulary_from_sql($username);
+    my $terms = ref($vref) eq 'HASH' ? ($vref->{terms} || {}) : {};
+    @current_vocab_keys = sort keys %$terms;
+    $current_vocab_size = scalar @current_vocab_keys;
+  } else {
+    my $vocab_path = File::Spec->catfile($nn_data_dir, 'vocabulary-' . $username . '.data');
+    $vocab_path    = Mail::SpamAssassin::Util::untaint_file_path($vocab_path);
+    if (-f $vocab_path) {
+      my $ref = eval { retrieve($vocab_path) };
+      if (ref($ref) eq 'HASH' && ref($ref->{terms}) eq 'HASH') {
+        @current_vocab_keys = sort keys %{$ref->{terms}};
+        $current_vocab_size = scalar @current_vocab_keys;
+      }
+    }
+  }
+
+  dbg("Periodic retrain triggered after $learn_count learn(s) " .
+      "(interval=$retrain_interval, current_vocab_size=$current_vocab_size)");
+
+  if ($current_vocab_size > 0) {
+    my ($fresh, $fresh_keys) = $self->_retrain_from_vocabulary($conf, $nn_data_dir, $current_vocab_size);
+    if (defined $fresh) {
+      my @actual_keys = ($fresh_keys && @$fresh_keys) ? @$fresh_keys : @current_vocab_keys;
+      my $actual_size = scalar @actual_keys;
+
+      my $prune_factor = $conf->{neuralnetwork_weight_prune_factor};
+      if ($prune_factor > 0) {
+        my $nh1 = int(sqrt($current_vocab_size) + 0.5);
+        $nh1 = 8 if $nh1 < 8;
+        my $init_norm    = sqrt($nh1 / $current_vocab_size);
+        my $prune_thresh = $prune_factor * $init_norm;
+        my @keep_idx     = _prune_inputs_by_weight_norm($fresh, $current_vocab_size, $nh1, $prune_thresh);
+        my $pruned       = $current_vocab_size - scalar @keep_idx;
+        dbg(sprintf("Periodic retrain weight-norm prune: thresh=%.4f pruned=%d/%d",
+            $prune_thresh, $pruned, $current_vocab_size));
+        if ($pruned > 0 && $pruned < $current_vocab_size) {
+          my @pruned_keys        = @current_vocab_keys[@keep_idx];
+          my ($pruned_fresh, $pruned_fresh_keys) = $self->_retrain_from_vocabulary(
+              $conf, $nn_data_dir, scalar @pruned_keys, \@pruned_keys);
+          if (defined $pruned_fresh) {
+            $fresh       = $pruned_fresh;
+            @actual_keys = ($pruned_fresh_keys && @$pruned_fresh_keys)
+                               ? @$pruned_fresh_keys : @pruned_keys;
+            $actual_size = scalar @actual_keys;
+            dbg("Pruned retrain complete: vocab=$actual_size (was $current_vocab_size)");
+          }
+        }
+      }
+
+      dbg("Periodic retrain succeeded: replaced online-trained network with batch retrain");
+      # Return an empty buffer so _save_meta starts a fresh training buffer;
+      # token data has been merged into vocabulary and used for training.
+      return ($fresh, $actual_size, \@actual_keys, 0, { spam => [], ham => [] });
+    }
+  }
+  dbg("Periodic retrain skipped: _retrain_from_vocabulary returned undef; " .
+      "counter not reset, will retry on next learn");
+  return ($network, $locked_num_input, $locked_vocab_keys_ref, $learn_count);
+}
+
+sub _run_balanced_replay {
+  my ($self, $network, $conf, $nn_data_dir, $feature_vectors,
+      $tbuf, $locked_vocab_keys_ref, $locked_num_input,
+      $weighted_epochs, $network_rebuilt, $train_algorithm) = @_;
+
+  $tbuf        ||= { spam => [], ham => [] };
+  $tbuf->{spam} ||= [];
+  $tbuf->{ham}  ||= [];
+
+  if ($train_algorithm == FANN_TRAIN_RPROP) {
+    $network->training_algorithm(FANN_TRAIN_INCREMENTAL);
+  }
+
+  my @replay_set;
+  if (defined $locked_vocab_keys_ref
+      && scalar(@$locked_vocab_keys_ref) == $locked_num_input) {
+    my @spam_buf_toks = map { $_->{tokens} } @{ $tbuf->{spam} };
+    my @ham_buf_toks  = map { $_->{tokens} } @{ $tbuf->{ham}  };
+    my $n_spam = scalar @spam_buf_toks;
+    my $n_ham  = scalar @ham_buf_toks;
+    if ($n_spam + $n_ham > 0) {
+      my ($buf_vecs) = _text_to_features(
+        $self, $conf, $nn_data_dir, 2, undef,
+        $locked_vocab_keys_ref, @spam_buf_toks, @ham_buf_toks);
+      if (ref($buf_vecs) eq 'ARRAY' && scalar(@$buf_vecs) == $n_spam + $n_ham) {
+        for my $i (0 .. $#$buf_vecs) {
+          push @replay_set, {
+            vec   => $buf_vecs->[$i]{vec},
+            label => ($i < $n_spam) ? 1 : 0,
+          };
+        }
+      }
+    }
+  }
+
+  my @spam_set    = grep { $_->{label} == 1 } @replay_set;
+  my @ham_set     = grep { $_->{label} == 0 } @replay_set;
+  my $n_per_class = scalar(@spam_set) < scalar(@ham_set)
+                    ? scalar(@spam_set) : scalar(@ham_set);
+
+  if ($network_rebuilt) {
+    dbg("Skipping SGD replay: network was rebuilt this learn (vocab grew); " .
+        "RPROP retrain already trained on training buffer (spam=" .
+        scalar(@spam_set) . ", ham=" . scalar(@ham_set) . ")");
+  } elsif ($n_per_class >= (int(($conf->{neuralnetwork_min_spam_count}) / 10) || 1)) {
+    my $K = $weighted_epochs < 1 ? 1 : $weighted_epochs;
+    for my $e (1 .. $K) {
+      Mail::SpamAssassin::Util::fisher_yates_shuffle(\@spam_set);
+      Mail::SpamAssassin::Util::fisher_yates_shuffle(\@ham_set);
+      my @epoch = (@spam_set[0 .. $n_per_class - 1],
+                   @ham_set [0 .. $n_per_class - 1]);
+      Mail::SpamAssassin::Util::fisher_yates_shuffle(\@epoch);
+      for my $entry (@epoch) {
+        eval { $network->train($entry->{vec}, [$entry->{label}]); 1 }
+          or dbg("Replay training step failed: " . ($@ || 'unknown'));
+      }
+    }
+    dbg("Balanced experience replay: $K epoch(s) of ${n_per_class}x2 sample(s) " .
+        "(buffer spam=" . scalar(@spam_set) . ", ham=" . scalar(@ham_set) . ")");
+  } else {
+    my $replay_min = int(($conf->{neuralnetwork_min_spam_count}) / 10) || 1;
+    dbg("Skipping SGD replay: training buffer too small or one-sided " .
+        "(spam=" . scalar(@spam_set) . ", ham=" . scalar(@ham_set) .
+        ", need>=$replay_min per class)");
+  }
+
+  if (scalar(@$feature_vectors) == 1) {
+    my $pred_after = eval { $network->run($feature_vectors->[0]{vec}) };
+    $pred_after = ref($pred_after) ? $pred_after->[0] : $pred_after;
+    dbg("Prediction after learning: " . (defined $pred_after ? $pred_after : 'undef'));
+  }
+}
+
+sub _get_or_create_network {
+  my ($self, $conf, $nn_data_dir, $dataset_path,
+      $num_input, $num_hidden1, $num_hidden2, $num_output_neurons,
+      $buffer_spam_count, $buffer_ham_count, $train_algorithm) = @_;
+
+  if (defined $self->{neural_model}
+      && $self->{neural_model}->num_inputs()  == $num_input
+      && $self->{neural_model}->num_outputs() == $num_output_neurons) {
+    return ($self->{neural_model}, 0);
+  }
+
+  my $existing_network = $self->{neural_model};
+  if (!defined $existing_network && -f $dataset_path) {
+    eval {
+      $existing_network = AI::FANN->new_from_file($dataset_path);
+      1;
+    } or dbg("Failed to load existing model for size check: " . ($@ || 'unknown'));
+  }
+  if (defined $existing_network) {
+    my $model_size    = $existing_network->num_inputs();
+    my $model_outputs = $existing_network->num_outputs();
+    if ($model_outputs != $num_output_neurons) {
+      dbg("Model output size mismatch (got $model_outputs, expected $num_output_neurons); " .
+          "discarding stale model");
+      undef $existing_network;
+    } elsif ($model_size != $num_input) {
+      dbg("Vocabulary size changed ($num_input vs model $model_size); " .
+          "discarding stale model so ring-buffer retrain uses the full vocabulary");
+      undef $existing_network;
+    } else {
+      # Saturation check: if the model outputs an identical value for an all-zeros
+      # and an all-ones input, all hidden units have saturated and the model is dead.
+      # Discard it so _retrain_from_vocabulary rebuilds with MSE early stopping.
+      my $zero_in = [(0) x $num_input];
+      my $ones_in = [(1) x $num_input];
+      my $r_zero  = eval { $existing_network->run($zero_in) } // [0.5];
+      my $r_ones  = eval { $existing_network->run($ones_in) } // [0.5];
+      my $diff    = abs(($r_zero->[0] // 0.5) - ($r_ones->[0] // 0.5));
+      if ($diff < 0.001) {
+        dbg("Model is saturated (output=" . ($r_zero->[0] // '?') .
+            " for zeros, " . ($r_ones->[0] // '?') . " for ones, diff=$diff); " .
+            "discarding and rebuilding");
+        undef $existing_network;
+      }
+    }
+  }
+
+  my $network;
+  my $vocab    = $self->{_last_train_vocab} // {};
+  my $sc       = $vocab->{_spam_count} || 0;
+  my $hc       = $vocab->{_ham_count}  || 0;
+  my $min_spam = $conf->{neuralnetwork_min_spam_count};
+  my $min_ham  = $conf->{neuralnetwork_min_ham_count};
+  if ($sc >= $min_spam && $hc >= $min_ham) {
+    ($network) = $self->_retrain_from_vocabulary($conf, $nn_data_dir, $num_input);
+  }
+  if (!defined $network && $buffer_spam_count > 0 && $buffer_ham_count > 0) {
+    # Blank-network fallback: logistic regression (no hidden layers) so that
+    # the model cannot collapse to constant output before vocab data accumulates.
+    my @layers = ($num_input, $num_output_neurons);
+    $network = AI::FANN->new_standard(@layers);
+    $network->output_activation_function(FANN_SIGMOID);
+  }
+  return ($network, 1);
+}
+
+sub _push_to_training_buffer {
+  my ($self, $conf, $nn_data_dir, $email_token_lists, $labels) = @_;
+
+  my $existing         = $self->_load_meta($conf);
+  my $existing_buf     = $existing->{_tbuf};
+  my $existing_counter = $existing->{_learns_since_retrain};
+
+  my %buf_state = (
+    spam => [ @{ $existing_buf->{spam} || [] } ],
+    ham  => [ @{ $existing_buf->{ham}  || [] } ],
+  );
+  for my $i (0 .. $#$email_token_lists) {
+    next unless ref($email_token_lists->[$i]) eq 'ARRAY' && @{$email_token_lists->[$i]};
+    my $key = $labels->[$i] ? 'spam' : 'ham';
+    push @{ $buf_state{$key} }, { tokens => [ @{$email_token_lists->[$i]} ], ts => time() };
+  }
+
+  $self->_save_meta($conf, $nn_data_dir, $existing_counter, \%buf_state);
+
+  # Keep the in-memory snapshot current so the delete below sees the new buffer.
+  $self->{_last_train_vocab}{_tbuf} = \%buf_state
+    if ref $self->{_last_train_vocab} eq 'HASH';
+
+  my $needs_retrain = $self->_training_buffer_flush_needed($conf, \%buf_state);
+  return (scalar @{ $buf_state{spam} }, scalar @{ $buf_state{ham} }, $needs_retrain);
 }
 
 sub _save_model_vocab {

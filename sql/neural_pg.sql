@@ -28,3 +28,19 @@ CREATE INDEX neural_vocabulary_keyword_idx ON neural_vocabulary(keyword);
 CREATE INDEX neural_vocabulary_spam_count_idx ON neural_vocabulary(spam_count DESC);
 CREATE INDEX neural_vocabulary_total_count_idx ON neural_vocabulary(total_count DESC);
 CREATE INDEX neural_vocabulary_model_position_idx ON neural_vocabulary(username, model_position);
+CREATE TABLE neural_vars (
+  username VARCHAR(200) NOT NULL DEFAULT '',
+  variable VARCHAR(30)  NOT NULL DEFAULT '',
+  value    VARCHAR(200) NOT NULL DEFAULT '',
+  PRIMARY KEY (username, variable)
+);
+
+CREATE TABLE neural_training_buffer (
+  username VARCHAR(200) NOT NULL DEFAULT '',
+  class    VARCHAR(4)   NOT NULL CHECK (class IN ('spam', 'ham')),
+  slot     INTEGER      NOT NULL DEFAULT 0,
+  ts       INTEGER      NOT NULL DEFAULT 0,
+  token    VARCHAR(256) NOT NULL DEFAULT '',
+  count    INTEGER      NOT NULL DEFAULT 1,
+  PRIMARY KEY (username, class, slot, token)
+);
