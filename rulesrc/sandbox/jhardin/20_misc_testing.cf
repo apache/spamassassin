@@ -4476,3 +4476,12 @@ tflags     __RI_ZWNJ_OBFU              multiple maxhits=6
 body       __CASINO_HKR_TGRAM_1        /Telegram (?:at )?\@(?:denisv9|emaildba)\b/i
 uri        __CASINO_HKR_TGRAM_2        m;^https://t\.me/(?:denisv9|emaildba)\b;i
 
+# free app/content hosting. replit.dev should never be seen in public as those are ephemeral dev instances
+# observed in phishing
+uri        __URI_REPLIT_DEV           m,^https?://(?:[^./]+\.)+replit\.dev/,i
+meta       URI_REPLIT_DEV             __URI_REPLIT_DEV
+score      URI_REPLIT_DEV             3.000 # limit
+describe   URI_REPLIT_DEV             replit.dev URL, likely phishing
+tflags     URI_REPLIT_DEV             publish
+
+
