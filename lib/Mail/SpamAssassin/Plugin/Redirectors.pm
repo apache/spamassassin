@@ -1053,6 +1053,12 @@ sub _get_lwp_ua {
   return $pms->{redir_lwp_ua} if exists $pms->{redir_lwp_ua};
 
   my $conf = $pms->{conf};
+  # prevent "500 Header line too long (limit is 8192)" error when accessing
+  # some websites
+  eval {
+    use LWP::Protocol::http;
+    push(@LWP::Protocol::http::EXTRA_SOCK_OPTS, MaxLineLength => 16*1024);
+  };
   my $ua = LWP::UserAgent->new(
     'agent'        => $conf->{url_redirector_user_agent},
     'max_redirect' => 0,
