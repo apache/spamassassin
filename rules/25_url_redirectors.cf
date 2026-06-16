@@ -145,6 +145,8 @@ if can(Mail::SpamAssassin::Plugin::Redirectors::has_url_redirector_path)
     url_redirector_get .sendibt3.com/tr/cl/
     url_redirector_get .tsp1-brevo.net/tr/cl
     url_redirector_get ctrk.klclick.com/l
+    url_redirector_get email.mg.msgsndr.biz/c
+    url_redirector_get email.mg.msgsndr.net/c
     url_redirector_get google.ae/amp/s
     url_redirector_get google.ae/url
     url_redirector_get google.al/amp/s
@@ -249,6 +251,7 @@ if can(Mail::SpamAssassin::Plugin::Redirectors::has_url_redirector_path)
     url_redirector_get google.tt/url
     url_redirector_get cse.google.com/url
 
+    url_redirector_get link.msgsndr.com/email-tracking
     url_redirector_get reallylong.link/rll
 endif
 
