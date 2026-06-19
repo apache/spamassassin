@@ -44,7 +44,7 @@ use strict;
 use warnings;
 use re 'taint';
 
-my $VERSION = 0.11.1;
+my $VERSION = 0.11.2;
 
 use AI::FANN qw(:all);
 use Storable qw(store retrieve);
@@ -847,7 +847,8 @@ sub learn_message {
   # Use the cleared buffer returned by a successful retrain,
   # or fall back to the current in-memory buffer.
   my $tbuf_to_save = $tbuf_after_retrain // $vocab_for_balance{_tbuf};
-  $self->_save_meta($conf, $nn_data_dir, $new_counter, $tbuf_to_save);
+  $self->_save_meta($conf, $nn_data_dir, $new_counter, $tbuf_to_save,
+      defined($tbuf_after_retrain));
 
   my $model_saved = $self->_save_model_atomic(
     $network, $dataset_path, $lock1_mtime,
@@ -2418,7 +2419,8 @@ sub _load_meta {
 
 # Persists counter and training buffer to the appropriate backend store.
 sub _save_meta {
-  my ($self, $conf, $nn_data_dir, $counter, $tbuf) = @_;
+  my ($self, $conf, $nn_data_dir, $counter, $tbuf, $buffer_dirty) = @_;
+  $buffer_dirty //= 1;
   $tbuf ||= { spam => [], ham => [] };
   if (defined $conf->{neuralnetwork_dsn} && $self->{dbh}) {
     my $username = lc($self->{main}->{username});
@@ -2442,25 +2444,27 @@ sub _save_meta {
           undef, $username, 'learns_since_retrain', "$counter"
         );
       }
-      $self->{dbh}->do(
-        "DELETE FROM neural_training_buffer WHERE username=?", undef, $username
-      );
-      my $ins = $self->{dbh}->prepare(
-        "INSERT INTO neural_training_buffer (username, class, slot, ts, token, count) VALUES (?,?,?,?,?,?)"
-      );
-      for my $class (qw(spam ham)) {
-        my $slots = $tbuf->{$class} || [];
-        for my $i (0 .. $#$slots) {
-          my $entry = $slots->[$i];
-          my %counts;
-          $counts{$_}++ for @{ $entry->{tokens} || [] };
-          for my $tok (keys %counts) {
-            $ins->execute($username, $class, $i, $entry->{ts} // 0, $tok, $counts{$tok});
+      if ($buffer_dirty) {
+        $self->{dbh}->do(
+          "DELETE FROM neural_training_buffer WHERE username=?", undef, $username
+        );
+        my $ins = $self->{dbh}->prepare(
+          "INSERT INTO neural_training_buffer (username, class, slot, ts, token, count) VALUES (?,?,?,?,?,?)"
+        );
+        for my $class (qw(spam ham)) {
+          my $slots = $tbuf->{$class} || [];
+          for my $i (0 .. $#$slots) {
+            my $entry = $slots->[$i];
+            my %counts;
+            $counts{$_}++ for @{ $entry->{tokens} || [] };
+            for my $tok (keys %counts) {
+              $ins->execute($username, $class, $i, $entry->{ts} // 0, $tok, $counts{$tok});
+            }
           }
         }
       }
       $self->{dbh}->commit();
-      dbg("SQL metadata persisted: learns_since_retrain=$counter " .
+      dbg("SQL metadata persisted: learns_since_retrain=$counter buffer_dirty=$buffer_dirty " .
           "tbuf_spam=" . scalar(@{ $tbuf->{spam} || [] }) .
           " tbuf_ham=" . scalar(@{ $tbuf->{ham} || [] }));
       1;
@@ -2844,6 +2848,46 @@ sub _get_or_create_network {
 
 sub _push_to_training_buffer {
   my ($self, $conf, $nn_data_dir, $email_token_lists, $labels) = @_;
+
+  if (defined $conf->{neuralnetwork_dsn} && $self->{dbh}) {
+    my $username = lc($self->{main}->{username});
+    for my $i (0 .. $#$email_token_lists) {
+      next unless ref($email_token_lists->[$i]) eq 'ARRAY' && @{$email_token_lists->[$i]};
+      my $class = $labels->[$i] ? 'spam' : 'ham';
+      eval {
+        my ($next_slot) = $self->{dbh}->selectrow_array(
+          "SELECT COALESCE(MAX(slot)+1, 0) FROM neural_training_buffer WHERE username=? AND class=?",
+          undef, $username, $class
+        );
+        my $ts = time();
+        my %counts;
+        $counts{$_}++ for @{$email_token_lists->[$i]};
+        my $ins = $self->{dbh}->prepare(
+          "INSERT INTO neural_training_buffer (username, class, slot, ts, token, count) VALUES (?,?,?,?,?,?)"
+        );
+        $self->{dbh}->begin_work();
+        for my $tok (keys %counts) {
+          $ins->execute($username, $class, $next_slot, $ts, $tok, $counts{$tok});
+        }
+        $self->{dbh}->commit();
+        1;
+      } or do {
+        my $err = $@ || 'unknown';
+        eval { $self->{dbh}->rollback() if !$self->{dbh}{AutoCommit} };
+        dbg("Failed to append training slot to SQL buffer: $err");
+      };
+    }
+    my ($spam_slots) = $self->{dbh}->selectrow_array(
+      "SELECT COUNT(DISTINCT slot) FROM neural_training_buffer WHERE username=? AND class='spam'",
+      undef, $username
+    );
+    my ($ham_slots) = $self->{dbh}->selectrow_array(
+      "SELECT COUNT(DISTINCT slot) FROM neural_training_buffer WHERE username=? AND class='ham'",
+      undef, $username
+    );
+    my $needs_retrain = $self->_training_buffer_flush_needed($conf, {});
+    return ($spam_slots // 0, $ham_slots // 0, $needs_retrain);
+  }
 
   my $existing         = $self->_load_meta($conf);
   my $existing_buf     = $existing->{_tbuf};
