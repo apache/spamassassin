@@ -2806,9 +2806,17 @@ sub _parse_header_addresses_xs {
       $phrase = $comment;
     }
 
-    # Skip entries with neither phrase nor address — XS emits these for
-    # unparseable tails (e.g. a truncated address header), and copying the
-    # whole input into phrase here causes :name to return the entire header.
+    # For malformed entries with no address, XS leaves a bare display token
+    # in user with no phrase (e.g. "Mr" from "Mr, Spam <spam@blah.com>", or
+    # "Foo" from a bare "Foo Blah"). Keep that token as the name. Gate on
+    # !defined $address so a normal address with no display name keeps :name
+    # undef instead of falling back to its localpart. (Earlier code copied
+    # the whole input into phrase here, leaking the entire header into :name.)
+    if (!defined $phrase && !defined $address && defined $user) {
+      $phrase = $user;
+    }
+
+    # Drop anything still empty (no phrase, no address).
     next if !defined $phrase && !defined $address;
 
     push @results, {

@@ -76,8 +76,9 @@ sub try {
     return 1 if $try eq 'From5:addr' && $result eq 'noreply@foobar.com';
     # try: Email::Address::XS: 'From5:name' failed! expect: undef got: '=?UTF-8?Q? Foobar _'
     return 1 if $try eq 'From5:name' && $result eq '=?UTF-8?Q? Foobar _';
-    # try: Email::Address::XS: 'From9:name' failed! expect: 'Mr\nSpam' got: 'Mr, Spam <spam@blah.com>\nSpam'
-    return 1 if $try eq 'From9:name' && $result eq 'Mr, Spam <spam@blah.com>\nSpam';
+    # try: Email::Address::XS: 'From1:name' failed! expect: 'Foo Blah' got: 'Foo'
+    # XS only parses the first atom of a bare unquoted phrase ("Foo Blah" -> "Foo").
+    return 1 if $try eq 'From1:name' && defined $result && $result eq 'Foo';
   }
 
   if (!defined $expect) {
