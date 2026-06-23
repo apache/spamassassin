@@ -4492,6 +4492,50 @@ the filesystem.
     }
   });
 
+=item handler_max_depth n               (default: 8)
+
+Maximum handler chain depth (guards against deeply nested archives).
+
+=item handler_max_parts n               (default: 1000)
+
+Maximum total synthetic parts produced per message.
+
+=item handler_max_bytes n               (default: 50000000)
+
+Total extracted-bytes budget across the handler chain for one message.
+
+=item handler_time_limit n              (default: 10)
+
+Per-invocation timeout, in seconds, for a single handler running on a single
+part.  The whole-pass budget is the existing scan-wide time limit, not a
+separate setting.
+
+=cut
+
+  push (@cmds, {
+    setting => 'handler_max_depth',
+    default => 8,
+    type => $CONF_TYPE_NUMERIC,
+  });
+
+  push (@cmds, {
+    setting => 'handler_max_parts',
+    default => 1000,
+    type => $CONF_TYPE_NUMERIC,
+  });
+
+  push (@cmds, {
+    setting => 'handler_max_bytes',
+    default => 50_000_000,
+    type => $CONF_TYPE_NUMERIC,
+  });
+
+  push (@cmds, {
+    setting => 'handler_time_limit',
+    default => 10,
+    type => $CONF_TYPE_NUMERIC,
+  });
+
 =item ignore_always_matching_regexps         (Default: 0)
 
 Ignore any rule which contains a regexp which always matches.
@@ -5475,6 +5519,41 @@ sub maybe_body_only { warn "Deprecated Conf::maybe_body_only() called"; }
 sub load_plugin {
   my ($self, $package, $path, $silent) = @_;
   $self->{main}->{plugins}->load_plugin($package, $path, $silent);
+}
+
+# Register a plugin method as the MIME-part handler for a content-type pattern.
+# Called via Mail::SpamAssassin::Plugin::register_handler.  $pattern is an exact
+# type ("image/jpeg") or a major-type glob ("image/*"); $method is the name of
+# the method to invoke on $obj for each matching part.
+sub register_handler {
+  my ($self, $obj, $pattern, $method) = @_;
+
+  unless (defined $pattern && $pattern =~ m{^[\w.+-]+/(?:[\w.+-]+|\*)$}) {
+    warn "handler: ignoring invalid handler pattern '".($pattern//'')."'\n";
+    return;
+  }
+  unless (defined $method && $method ne '') {
+    warn "handler: register_handler for $pattern requires a method name\n";
+    return;
+  }
+
+  my $key = lc $pattern;
+  if (exists $self->{handlers}->{$key}) {
+    warn "handler: overwriting handler for $pattern: " .
+         ref($self->{handlers}->{$key}->[0]) . " replaced by " . ref($obj) . "\n";
+  }
+  $self->{handlers}->{$key} = [ $obj, $method ];
+  dbg("handler: registered %s->%s for %s", ref $obj, $method, $pattern);
+}
+
+# Resolve the [handler_obj, method] pair for a content type, or undef.  Try the
+# exact type first, then fall back to the "<major>/*" glob
+sub get_handler_for_type {
+  my ($conf, $type) = @_;
+  $type = lc $type;
+  return $conf->{handlers}->{$type} if exists $conf->{handlers}->{$type};
+  (my $glob = $type) =~ s{/.*}{/*}s;     # "image/jpeg" -> "image/*"
+  return $conf->{handlers}->{$glob};
 }
 
 sub load_plugin_succeeded {

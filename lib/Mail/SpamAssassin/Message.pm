@@ -54,6 +54,7 @@ use Mail::SpamAssassin::Message::Node;
 use Mail::SpamAssassin::Message::Metadata;
 use Mail::SpamAssassin::Constants qw(:sa);
 use Mail::SpamAssassin::Logger;
+use Mail::SpamAssassin::Timeout;
 
 our @ISA = qw(Mail::SpamAssassin::Message::Node);
 
@@ -1268,6 +1269,117 @@ sub _find_part_by_type {
   return undef;
 }
 
+###########################################################################
+# MIME-part handler dispatch.
+#
+# apply_handlers() walks every part once, invokes the registered handler for
+# each part's content type, and recursively dispatches any synthetic child
+# parts the handler produces.  Handlers inject text via $node->set_rendered and
+# accumulate metadata on $pms; their only return value is an arrayref of
+# child-part specs ({ type, data, name }).  Synthetic children live in a
+# separate {handler_parts} array (never {body_parts}), so the MIME tree shape is
+# untouched -- only get_body_text_array_common reads {handler_parts}.
+
+sub apply_handlers {
+  my ($self, $permsgstatus) = @_;
+  return if $self->{handlers_applied}++;
+
+  my $conf = $permsgstatus->{conf};
+  return unless $conf->{handlers} && %{$conf->{handlers}};
+
+  $self->parse_body() if exists $self->{'parse_queue'};
+
+  my $ctx = {
+    permsgstatus => $permsgstatus,
+    bytes_budget => $conf->{handler_max_bytes} || 50_000_000,
+    parts_budget => $conf->{handler_max_parts} || 1000,
+    deadline     => $permsgstatus->{master_deadline},   # scan-wide; may be undef
+    part_secs    => $conf->{handler_time_limit} || 10,
+    max_depth    => $conf->{handler_max_depth} || 8,
+    seen         => {},   # content fingerprint -> seen (cycle/dedup guard)
+  };
+
+  # Seed the worklist with every parsed node (containers included).  Synthetic
+  # children are appended as they are produced, driving recursion.
+  my @work = map { [$_, 0] } $self->find_parts(qr/./, 0);
+
+  while (my $item = shift @work) {
+    my ($node, $depth) = @$item;
+    last if $ctx->{deadline} && time > $ctx->{deadline};   # undef => no cap
+    last if $ctx->{parts_budget} <= 0;
+    next if $depth > $ctx->{max_depth};
+
+    my $handler =
+      Mail::SpamAssassin::Conf::get_handler_for_type($conf, $node->effective_type);
+    next unless $handler;   # [ $plugin_obj, $methodname ]
+
+    my $parts = $self->_invoke_handler($handler, $node, $ctx);
+    next unless $parts && @$parts;
+
+    $self->_attach_parts($node, $parts, $ctx, \@work, $depth);
+  }
+}
+
+# Run one handler method under a timeout and eval, so a hung or dying handler
+# degrades to "no result" and never aborts the scan.  Side effects (set_rendered
+# on the node, writes to $pms) have already happened by the time it returns; the
+# only consumed return value is the child-parts arrayref.
+sub _invoke_handler {
+  my ($self, $handler, $node, $ctx) = @_;
+  my ($obj, $method) = @$handler;
+  my $pms = $ctx->{permsgstatus};
+  my $parts;
+  my $t = Mail::SpamAssassin::Timeout->new({ secs => $ctx->{part_secs} });
+  $t->run(sub {
+    eval { $parts = $obj->$method($node, $pms); 1 }
+      or dbg("handler: %s->%s died on %s: %s",
+             ref $obj, $method, $node->{type}, $@);
+  });
+  dbg("handler: %s->%s timed out on %s", ref $obj, $method, $node->{type})
+    if $t->timed_out;
+  return $parts;
+}
+
+# Build a Message::Node for each returned child-part spec, append it to the
+# part's own {handler_parts} array, and queue it for recursive dispatch.
+sub _attach_parts {
+  my ($self, $node, $parts, $ctx, $work, $depth) = @_;
+
+  for my $cp (@$parts) {
+    last if $ctx->{bytes_budget} <= 0;
+    next unless ref $cp eq 'HASH';
+    my $data = ref $cp->{data} ? ${$cp->{data}} : $cp->{data};
+    $ctx->{bytes_budget} -= length($data // '');
+
+    # content fingerprint: identical bytes can't loop forever, and identical
+    # repeated parts are processed once.  filename is deliberately excluded.
+    my $key = ($cp->{type} // '') . ':' . length($data // '')
+            . ':' . substr($data // '', 0, 64);
+    next if $ctx->{seen}{$key}++;
+
+    my $child = $self->_synth_node($cp);
+    push @{$node->{handler_parts}}, $child;   # separate array, ordered
+    $ctx->{parts_budget}--;
+    push @$work, [ $child, $depth + 1 ];      # drive recursion via worklist
+  }
+}
+
+# Turn a child-part spec into a real (leaf) Message::Node carrying its bytes
+# pre-decoded.
+sub _synth_node {
+  my ($self, $cp) = @_;
+  my $data = ref $cp->{data} ? ${$cp->{data}} : $cp->{data};
+  my $n = Mail::SpamAssassin::Message::Node->new({ normalize => $self->{normalize} });
+  $n->{type}      = $cp->{type};
+  $n->{name}      = $cp->{name} if defined $cp->{name};
+  $n->{synthetic} = 1;
+  $n->{decoded}   = $data;            # decode() returns this verbatim
+  $n->{raw}       = [ $data ];
+  return $n;
+}
+
+###########################################################################
+
 # common code for get_rendered_body_text_array,
 # get_visible_rendered_body_text_array, get_invisible_rendered_body_text_array
 #
@@ -1298,6 +1410,10 @@ sub get_body_text_array_common {
   my @queue = ($self);
   my $text = '';
   while (my $p = shift @queue) {
+    # Descend into handler-produced synthetic children. They render in document
+    # order, after this part's own text below.
+    my $hparts = $p->{'handler_parts'};
+
     if (!$p->is_leaf()) {
       if ($preferred_alt && $p->{'type'} eq 'multipart/alternative') {
         my $preferred_part = _find_part_by_type($p, $preferred_alt);
@@ -1309,8 +1425,11 @@ sub get_body_text_array_common {
       } else {
         unshift @queue, @{$p->{'body_parts'}};
       }
+      unshift @queue, @$hparts if $hparts;
       next;
     }
+
+    unshift @queue, @$hparts if $hparts;
 
     my($type, $rnd) = $p->$method_name();  # decode this part
     # Only text/* types are rendered ...

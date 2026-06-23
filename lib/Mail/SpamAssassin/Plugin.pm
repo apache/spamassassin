@@ -1069,6 +1069,29 @@ sub register_eval_rule {
   $self->{main}->{conf}->register_eval_rule ($self, $nameofsub, $ruletype);
 }
 
+=item $plugin-E<gt>register_handler ($mime_pattern, $nameofsub)
+
+Register one of this plugin's methods as the MIME-part handler for a
+content-type pattern.  C<$mime_pattern> is an exact type (C<image/jpeg>) or a
+major-type glob (C<image/*>); the most specific match wins.  C<$nameofsub> is
+the name of a method on this plugin that will be called as
+C<< $plugin->$nameofsub($node, $permsgstatus) >> for each matching MIME part,
+during message metadata extraction (before body rules run and before the URI
+list is frozen).
+
+The method may inject extracted text into the part with
+C<< $node->set_rendered($text, $type) >>, accumulate per-message findings on
+C<$permsgstatus>, and return an arrayref of synthetic child-part specs
+(C<< { type => ..., data => $bytes, name => ... } >>) which are dispatched
+recursively -- or C<undef>/C<[]> for none.
+
+=cut
+
+sub register_handler {
+  my ($self, $mime_pattern, $nameofsub) = @_;
+  $self->{main}->{conf}->register_handler ($self, $mime_pattern, $nameofsub);
+}
+
 =item $plugin-E<gt>register_generated_rule_method ($nameofsub)
 
 In certain circumstances, plugins may find it useful to compile
