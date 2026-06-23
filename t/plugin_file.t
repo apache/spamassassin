@@ -12,7 +12,9 @@ use Test::More tests => 9;
   'registered myTestPlugin',	'registered',
   'myTestPlugin eval test called', 'test_called',
   'myTestPlugin finishing',	'plugin_finished',
-  'test: plugins loaded: Mail::SpamAssassin::Plugin::ARC=HASH', 'plugins_loaded',
+  # the loaded-plugins line lists at least one stock plugin (order-independent,
+  # so adding/removing/reordering plugins doesn't break this).
+  qr/plugins loaded:.*\bMail::SpamAssassin::Plugin::\w+=HASH/, 'plugins_loaded',
   'myTestPlugin=HASH',		'plugins_loaded2',
 );
 
