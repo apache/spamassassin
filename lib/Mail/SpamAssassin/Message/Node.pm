@@ -62,6 +62,7 @@ my %file_type_map = (
     'jfif'  => 'image/jpeg',
     'jpeg'  => 'image/jpeg',
     'jpg'   => 'image/jpeg',
+    'pdf'   => 'application/pdf',
     'png'   => 'image/png',
     'shtml' => 'text/html',
     'svg'   => 'image/svg+xml',
@@ -72,7 +73,11 @@ my %file_type_map = (
 
 # Map of MIME type aliases
 my %mime_type_map = (
-    'text/x-amp-html' => 'text/html',
+    'text/x-amp-html'     => 'text/html',
+    'application/x-pdf'   => 'application/pdf',
+    'application/acrobat' => 'application/pdf',
+    'text/pdf'            => 'application/pdf',
+    'text/x-pdf'          => 'application/pdf',
 );
 
 =item new()
