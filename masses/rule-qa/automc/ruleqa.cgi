@@ -17,7 +17,12 @@ my $line = <LAF>;
 (my $one, my $five, my $fifteen, my $running, my $iowait) = split (' ', $line);
 
 if (($one > 2) || ($fifteen > 5)) {
-   my $page= q{<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN"
+   my $page= q{
+   
+   200
+   Connection: close
+   
+   <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN"
                     "https://www.w3.org/TR/html4/strict.dtd">
   <html xmlns="https://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
   <head><meta http-equiv="Content-type" content="text/html; charset=utf-8">
