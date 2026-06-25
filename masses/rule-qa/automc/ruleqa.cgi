@@ -1,4 +1,4 @@
-#!/usr/bin/perl
+#! /usr/bin/env perl
 my $automcdir = "/usr/local/spamassassin/automc/svn/masses/rule-qa/automc";
 
 ###!/usr/bin/perl
@@ -8,6 +8,33 @@ use strict;
 use warnings;
 
 my $PERL_INTERP = $^X;
+
+#----------------------------------------------
+# this is an emergency abuse preventer. 2026-06-25 billcole
+
+open LAF, "</proc/loadavg";
+my $line = <LAF>;
+(my $one, my $five, my $fifteen, my $running, my $iowait) = split (' ', $line);
+
+if (($one > 2) || ($fifteen > 5)) {
+   my $page= q{<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN"
+                    "https://www.w3.org/TR/html4/strict.dtd">
+  <html xmlns="https://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+  <head><meta http-equiv="Content-type" content="text/html; charset=utf-8">
+  <link rel="icon" href="https://spamassassin.apache.org/images/favicon.ico">
+  <title> SpamAssassin Rule QA IS OFFLINE</title>
+
+  <link href="https://ruleqa.spamassassin.org/ruleqa.css" rel="stylesheet" type="text/css">
+
+  </head><body>
+     <h1>SpamAssassin Rule QA is OFFLINE due to excessive load. </h1>
+  </body> </html> };
+  
+  print $page;
+  exit 0
+}
+#---------------------------------------------------
+
 
 our %FREQS_FILENAMES = (
     'DETAILS.age' => 'set 0, broken down by message age in weeks',
@@ -29,6 +56,10 @@ $self->ui_get_daterev();
 $self->ui_get_rules();
 $self->show_view();
 exit;
+
+
+
+
 
 # ---------------------------------------------------------------------------
 
