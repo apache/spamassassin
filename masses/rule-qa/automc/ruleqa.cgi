@@ -12,6 +12,7 @@ my $PERL_INTERP = $^X;
 #----------------------------------------------
 # this is an emergency abuse preventer. 2026-06-25 billcole
 
+my $eol = "\015\012"; # Use CRLF line ends for headers
 open LAF, "</proc/loadavg";
 my $line = <LAF>;
 (my $one, my $five, my $fifteen, my $running, my $iowait) = split (' ', $line);
@@ -20,7 +21,8 @@ if (($one > 2) || ($fifteen > 5)) {
    my $page= q{
    
    200
-   Connection: close
+   Connection: close$eol
+   Content-Type: text/html$eol$eol";
    
    <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN"
                     "https://www.w3.org/TR/html4/strict.dtd">
