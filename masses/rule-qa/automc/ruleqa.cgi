@@ -32,7 +32,7 @@ if (($one > 2) || ($fifteen > 5)) {
      <h1>SpamAssassin Rule QA is OFFLINE due to excessive load. </h1>
   </body> </html> };
   
-  print Content-Type: text/html$eol$eol$page;
+  print "Content-Type: text/html$eol$eol$page";
   exit 0
 }
 #---------------------------------------------------
