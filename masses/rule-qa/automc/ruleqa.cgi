@@ -19,8 +19,6 @@ my $line = <LAF>;
 
 if (($one > 2) || ($fifteen > 5)) {
    my $page= q{
-   
-   200
    Connection: close$eol
    Content-Type: text/html$eol$eol";
    
