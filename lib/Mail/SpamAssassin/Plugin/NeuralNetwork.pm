@@ -2108,7 +2108,7 @@ sub _extract_features_from_message {
 # survives a round-trip through a SQL keyword index.
 sub _sanitize_token {
   my ($t) = @_;
-  return undef unless defined $t;
+  return unless defined $t;
   if (!utf8::is_utf8($t) && $t =~ /[^\x00-\x7f]/) {
     require Encode;
     $t = Encode::decode('UTF-8', $t, Encode::FB_DEFAULT());
@@ -2335,7 +2335,7 @@ sub _save_model_vocab_to_sql {
 
 sub _load_model_vocab_from_sql {
   my ($self, $username) = @_;
-  return undef unless $self->{dbh};
+  return unless $self->{dbh};
 
   $username //= $self->{main}->{username};
 

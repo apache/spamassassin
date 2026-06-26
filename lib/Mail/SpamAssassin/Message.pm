@@ -1266,7 +1266,7 @@ sub _find_part_by_type {
     return $n if $n->is_leaf() && $n->{'type'} eq $type;
     push @q, @{$n->{'body_parts'}} if !$n->is_leaf();
   }
-  return undef;
+  return;
 }
 
 ###########################################################################
