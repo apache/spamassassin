@@ -300,7 +300,9 @@ sub parse {
       $skip_parsing = $lastcond->{skip_parsing};
       next;
     }
-    elsif ($key eq 'ifplugin') {
+    elsif ($key eq 'ifplugin' || $key eq 'ifhandler') {
+      # ifhandler is an alias for ifplugin: a handler is a Plugin subclass, so it
+      # is recorded in plugins_loaded and satisfied by the plugin() conditional.
       if ($value eq '') {
         $parse_error = "config: missing '$key' condition";
         goto failed_line;

@@ -19,10 +19,10 @@ package myTestHandler;
 use strict;
 use warnings;
 
-use Mail::SpamAssassin::Plugin;
+use Mail::SpamAssassin::Handler;
 use Mail::SpamAssassin::Logger;
 
-our @ISA = qw(Mail::SpamAssassin::Plugin);
+our @ISA = qw(Mail::SpamAssassin::Handler);
 
 sub new {
   my ($class, $main) = @_;

@@ -4492,6 +4492,68 @@ the filesystem.
     }
   });
 
+=item loadhandler Mail::SpamAssassin::Handler::ModuleName [/path/module.pm]
+
+Load a SpamAssassin MIME-part handler module.  A handler is a subclass of
+L<Mail::SpamAssassin::Handler> that registers itself for one or more content
+types with C<register_handler> and is invoked once per matching MIME part.
+
+The module name must be given in full; unlike a bare word it is not prefixed
+automatically.  C<ModuleName> and the optional C</path/module.pm> are otherwise
+interpreted exactly as for C<loadplugin>.
+
+=cut
+
+  push (@cmds, {
+    setting => 'loadhandler',
+    is_admin => 1,
+    code => sub {
+      my ($self, $key, $value, $line) = @_;
+      if ($value eq '') {
+        return $MISSING_REQUIRED_VALUE;
+      }
+      my ($package, $path);
+      local ($1,$2);
+      if ($value =~ /^((?:\w+::){0,10}\w+)(?:\s+(\S+\.pm))?$/i) {
+        ($package, $path) = ($1, $2);
+      } else {
+	return $INVALID_VALUE;
+      }
+      # A handler is a Mail::SpamAssassin::Plugin subclass, so loadhandler is an
+      # alias for loadplugin: load it through the same path.  Keeping a separate
+      # directive lets handler config stay decoupled from the loading mechanism
+      # in case the two diverge in future.
+      $self->load_plugin ($package, $path);
+    }
+  });
+
+=item tryhandler Mail::SpamAssassin::Handler::ModuleName [/path/module.pm]
+
+Same as C<loadhandler>, but silently ignored if the .pm file cannot be found in
+the filesystem.
+
+=cut
+
+  push (@cmds, {
+    setting => 'tryhandler',
+    is_admin => 1,
+    code => sub {
+      my ($self, $key, $value, $line) = @_;
+      if ($value eq '') {
+        return $MISSING_REQUIRED_VALUE;
+      }
+      my ($package, $path);
+      local ($1,$2);
+      if ($value =~ /^((?:\w+::){0,10}\w+)(?:\s+(\S+\.pm))?$/i) {
+        ($package, $path) = ($1, $2);
+      } else {
+	return $INVALID_VALUE;
+      }
+      # tryhandler is to loadhandler as tryplugin is to loadplugin: load silently.
+      $self->load_plugin ($package, $path, 1);
+    }
+  });
+
 =item handler_max_depth n               (default: 8)
 
 Maximum handler chain depth (guards against deeply nested archives).
@@ -4854,6 +4916,12 @@ For example:
 =item ifplugin PluginModuleName
 
 An alias for C<if plugin(PluginModuleName)>.
+
+=item ifhandler HandlerModuleName
+
+Include the configuration up to the matching C<endif> only if the named handler
+module has been loaded.  The counterpart of C<ifplugin> for handlers loaded with
+C<loadhandler>.
 
 =item else
 
@@ -5522,7 +5590,7 @@ sub load_plugin {
 }
 
 # Register a plugin method as the MIME-part handler for a content-type pattern.
-# Called via Mail::SpamAssassin::Plugin::register_handler.  $pattern is an exact
+# Called via Mail::SpamAssassin::Handler::register_handler.  $pattern is an exact
 # type ("image/jpeg") or a major-type glob ("image/*"); $method is the name of
 # the method to invoke on $obj for each matching part.
 sub register_handler {
