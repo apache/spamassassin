@@ -4481,7 +4481,10 @@ uri        __CASINO_HKR_TGRAM_2        m;^https://t\.me/(?:denisv9|emaildba)\b;i
 uri        __URI_REPLIT_DEV           m,^https?://(?:[^./]+\.)+replit\.dev/,i
 meta       URI_REPLIT_DEV             __URI_REPLIT_DEV
 score      URI_REPLIT_DEV             3.000 # limit
-describe   URI_REPLIT_DEV             replit.dev URL, likely phishing
+describe   URI_REPLIT_DEV             replit.dev URL, probably phishing
 tflags     URI_REPLIT_DEV             publish
+
+# observed in phishing
+redirector_pattern                    m;^https?://[^?]+/Jump_ExternalUrl\.php\?url=(.+);i
 
 
