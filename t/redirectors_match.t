@@ -63,8 +63,28 @@ my @cases = (
   [ 'https://app.spa.example/foo',   'selenium', 'selenium method on leading-dot subdomain' ],
 );
 
-# clear_url_redirector tests add 4 more checks
-plan tests => scalar(@cases) + 4;
+# A param value is only an embedded URI when it actually looks like one. A bare
+# token (referral code, label) must NOT be turned into a fabricated http://<token>.
+# Use a param list that includes the short params (r, redirect) that produced the
+# original Substack false positives, not just url/u.
+my $embedded_conf =
+  { url_redirector_params => qr/(?:url|u|r|redir|redirect)=(.*)/i };
+my @embedded = (
+  # [ uri, expected_extraction (undef = no embedded uri), desc ]
+  [ 'https://safe.example/?url=https://evil.com/path', 'https://evil.com/path',
+    'explicit scheme is extracted' ],
+  [ 'https://safe.example/?url=evil.com/landing', 'http://evil.com/landing',
+    'bare host.tld/path is extracted' ],
+  [ 'https://safe.example/?url=//evil.com/path', 'http:////evil.com/path',
+    'scheme-relative //host is extracted' ],
+  [ 'https://substack.com/signup?foo=bar&r=to8ex', undef,
+    'bare referral token (r=) is NOT an embedded uri' ],
+  [ 'https://open.substack.com/notes?utm_campaign=open-in-app&redirect=app-store-no-desktop', undef,
+    'bare hyphenated label (redirect=) is NOT an embedded uri' ],
+);
+
+# +1 no-capture-group check, +4 clear_url_redirector checks
+plan tests => scalar(@cases) + scalar(@embedded) + 1 + 4;
 
 for my $c (@cases) {
   my ($uri, $expect_method, $desc) = @$c;
@@ -75,6 +95,25 @@ for my $c (@cases) {
   } else {
     ok(!$r, $desc);
   }
+}
+
+for my $c (@embedded) {
+  my ($uri, $expect, $desc) = @$c;
+  my $r = Mail::SpamAssassin::Plugin::Redirectors::_extract_embedded_uri($uri, $embedded_conf);
+  if (defined $expect) {
+    is($r, $expect, $desc);
+  } else {
+    ok(!defined $r, $desc);
+  }
+}
+
+# A url_redirector_params regex with no capture group leaves $1 undefined; the
+# extractor must bail rather than fabricate a bare "http://".
+{
+  my $nocap_conf = { url_redirector_params => qr/(?:r|redirect)=[^&]+/i };
+  my $r = Mail::SpamAssassin::Plugin::Redirectors::_extract_embedded_uri(
+    'https://substack.com/signup?foo=bar&r=to8ex', $nocap_conf);
+  ok(!defined $r, 'no-capture-group param regex yields no embedded uri');
 }
 
 # clear_url_redirector behavior

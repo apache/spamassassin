@@ -1041,6 +1041,18 @@ sub _extract_embedded_uri {
   local($1);
   if (($rest =~ /(?:\?|\&)$rreg/gis) || ($rest =~ /(?:\/|\_|\=)((?:https?:)?\/\/.*)/)) {
     my $newuri = $1;
+    # A user-supplied url_redirector_params with no capture group leaves $1
+    # undefined here; without this guard we would fabricate a bare "http://".
+    return unless defined $newuri;
+    # The param value is only an embedded URI if it actually looks like one:
+    # an explicit/encoded scheme, a scheme-relative //host, or a bare
+    # host.tld/path. A bare token (referral code, label, etc.) is not a URI
+    # and must not be turned into a fabricated http://<token>.
+    unless ($newuri =~ m{^https?(?::|%3a)}i
+         || $newuri =~ m{^//}
+         || $newuri =~ m{^[^/?#\s]+\.[^/?#\s]+/}) {
+      return;
+    }
     dbg("Found embedded uri $newuri in $uri");
     $newuri = 'http://' . $newuri if $newuri !~ /^http/;
     return $newuri;
