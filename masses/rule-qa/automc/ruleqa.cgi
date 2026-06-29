@@ -17,7 +17,7 @@ open LAF, "</proc/loadavg";
 my $line = <LAF>;
 (my $one, my $five, my $fifteen, my $running, my $iowait) = split (' ', $line);
 
-if (($one > 2) || ($fifteen > 6)) {
+if ((($one > 2) || ($fifteen > 6)) && ($ENV{REMOTE_ADDR} ne "127.0.0.1") {
    my $page= q{   
    <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN"
                     "https://www.w3.org/TR/html4/strict.dtd">
@@ -29,7 +29,7 @@ if (($one > 2) || ($fifteen > 6)) {
   <link href="https://ruleqa.spamassassin.org/ruleqa.css" rel="stylesheet" type="text/css">
 
   </head><body>
-     <h1>SpamAssassin Rule QA is OFFLINE due to excessive load. </h1>
+     <h1>SpamAssassin Rule QA is OFFLINE due to excessive load. $ENV{REMOTE_ADDR} </h1>
   </body> </html> };
   
   print "Content-Type: text/html$eol$eol$page";
