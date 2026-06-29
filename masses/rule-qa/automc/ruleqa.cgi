@@ -17,7 +17,7 @@ open LAF, "</proc/loadavg";
 my $line = <LAF>;
 (my $one, my $five, my $fifteen, my $running, my $iowait) = split (' ', $line);
 
-if (($one > 3) || ($fifteen > 10)) {
+if (($one > 2) || ($fifteen > 6)) {
    my $page= q{   
    <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN"
                     "https://www.w3.org/TR/html4/strict.dtd">
