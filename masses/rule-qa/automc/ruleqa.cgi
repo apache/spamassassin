@@ -29,10 +29,11 @@ if ((($one > 2) || ($fifteen > 6)) && ($ENV{REMOTE_ADDR} ne "127.0.0.1")) {
   <link href="https://ruleqa.spamassassin.org/ruleqa.css" rel="stylesheet" type="text/css">
 
   </head><body>
-     <h1>SpamAssassin Rule QA is OFFLINE due to excessive load. $ENV{REMOTE_ADDR} </h1>
-  </body> </html> };
+     <h1>SpamAssassin Rule QA is OFFLINE due to excessive load. </h1> };
   
-  print "Content-Type: text/html$eol$eol$page";
+  print "Content-Type: text/html$eol$eol$page\n";
+  print "<br/> $ENV{REMOTE_ADDR} <br/> </body> </html>" ;
+
   exit 0
 }
 #---------------------------------------------------
