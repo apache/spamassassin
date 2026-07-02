@@ -1,0 +1,23 @@
+From: sender@example.com
+To: victim@example.com
+Subject: javascript attachment test
+Message-Id: <js-attach-test@example.com>
+Date: Tue, 10 Jun 2025 12:00:00 +0000
+MIME-Version: 1.0
+Content-Type: multipart/mixed; boundary="BOUND"
+
+--BOUND
+Content-Type: text/plain; charset=us-ascii
+
+ORIGINAL_BODY_MARKER
+
+--BOUND
+Content-Type: application/octet-stream; name="payload.js"
+Content-Disposition: attachment; filename="payload.js"
+
+var marker = "JSSENTINEL";
+eval(atob("YWxlcnQoMSk="));
+window.location = 'https://redirect.example/phish';
+var _p="LONGLINEBLOBAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
+
+--BOUND--

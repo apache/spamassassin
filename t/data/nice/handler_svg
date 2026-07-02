@@ -1,0 +1,25 @@
+From: sender@example.com
+To: victim@example.com
+Subject: svg handler test
+Message-Id: <svg-test@example.com>
+Date: Tue, 10 Jun 2025 12:00:00 +0000
+MIME-Version: 1.0
+Content-Type: multipart/mixed; boundary="BOUND"
+
+--BOUND
+Content-Type: text/plain; charset=us-ascii
+
+ORIGINAL_BODY_MARKER
+
+--BOUND
+Content-Type: image/svg+xml; name="invoice.svg"
+Content-Disposition: attachment; filename="invoice.svg"
+
+<svg xmlns="http://www.w3.org/2000/svg" width="600" height="400">
+  <text x="20" y="40">SVGSENTINEL</text>
+  <text x="20" y="80">Please view documents on docusign</text>
+  <a href="https://phish.example/secure">secure link</a>
+  <script>alert("SVGSCRIPT")</script>
+</svg>
+
+--BOUND--

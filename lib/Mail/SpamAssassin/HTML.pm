@@ -25,6 +25,7 @@ use warnings;
 use re 'taint';
 
 use HTML::Parser 3.43 ();
+use MIME::Base64 ();
 use Mail::SpamAssassin::Logger;
 use Mail::SpamAssassin::Constants qw(:sa);
 use Mail::SpamAssassin::Util qw(untaint_var);
@@ -163,6 +164,20 @@ sub html_end {
   $self->put_results(uri_truncated => $self->{uri_truncated});
   $self->put_results(cids => $self->{cids});
 
+  # Turn each buffered <script> body into a {type,data} pseudo-part and add it to
+  # data_parts, alongside the inline data: URIs collected by add_data_uri.  Both
+  # are "typed content the parser found that the framework should dispatch", so
+  # they share one list: the JavaScript handler picks up text/javascript, an
+  # image handler picks up image/*, application/ld+json goes nowhere, etc.
+  if (ref $self->{script_buf} eq 'HASH') {
+    for my $type (sort keys %{ $self->{script_buf} }) {
+      my $data = $self->{script_buf}{$type};
+      push @{ $self->{data_parts} }, { type => $type, data => $data }
+        if defined $data && length $data;
+    }
+  }
+  $self->put_results(data_parts => $self->{data_parts});
+
   # final results scalars
   $self->put_results(image_area => $self->{image_area});
   $self->put_results(length => $self->{length});
@@ -175,7 +190,6 @@ sub html_end {
 
   # final result arrays
   $self->put_results(comment => $self->{comment});
-  $self->put_results(script => $self->{script});
   $self->put_results(title => $self->{title});
 
   # final result hashes
@@ -362,6 +376,21 @@ sub html_tag {
     if ($num == 1) {
       $self->html_uri($tag, $attr) if exists $elements_uri{$tag};
       $self->html_tests($tag, $attr, $num);
+      # extract script (on*/javascript:) and inline data: URIs from any
+      # tag's attributes
+      $self->html_attributes($tag, $attr);
+      # Remember the declared type of the <script> we are entering, so its body
+      # (collected in html_text) is emitted as a sub-part of that type and the
+      # handler framework dispatches it correctly: text/javascript -> JavaScript
+      # handler; application/ld+json and other data types -> their own handler
+      # (or nowhere).  Per the HTML spec a missing/empty type (or "module") is
+      # JavaScript, for which text/javascript is the canonical type.
+      if ($tag eq 'script') {
+        my $st = lc($attr->{type} // '');
+        $st =~ s/^\s+|\s+$//g;
+        $self->{script_type} = ($st eq '' || $st eq 'module')
+                                 ? 'text/javascript' : $st;
+      }
     }
     # end tags
     else {
@@ -413,6 +442,43 @@ sub push_uri {
     # skip things like <iframe src="" ...>
     $self->{uri}->{$target}->{types}->{$type} = 1  if $target ne '';
   }
+}
+
+# Parse an inline "data:" URI (RFC 2397) and stash the decoded bytes and MIME
+# type so callers can build a pseudo MIME part for it.  Collects ANY declared
+# type -- the caller (Handler::HTML) emits each as a sub-part of that type, which
+# the framework dispatches to the right handler (image/* -> image handler,
+# text/html -> html handler, text/javascript -> JavaScript handler, ...).
+#   data:[<mediatype>][;base64],<data>
+sub add_data_uri {
+  my ($self, $uri) = @_;
+
+  $uri =~ s/^\s+//;
+  return unless $uri =~ /^data:([^,]*),(.*)$/is;
+  my ($meta, $data) = ($1, $2);
+
+  my $base64 = $meta =~ s/;\s*base64\s*$//i;
+  # mediatype is everything up to the first ';' (parameters discarded)
+  my ($type) = $meta =~ /^([^;]*)/;
+  $type = lc($type || 'text/plain');
+
+  if ($base64) {
+    # Strip whitespace some senders sprinkle into the base64 payload, then
+    # guard against an undecodable or absurdly large blob.
+    $data =~ tr/A-Za-z0-9+\/=//cd;
+    return if length($data) > 10_000_000;   # ~7.5 MB decoded ceiling
+    $data = untaint_var($data);
+    my $decoded = eval { require MIME::Base64; MIME::Base64::decode_base64($data) };
+    return if !defined $decoded || $decoded eq '';
+    $data = $decoded;
+  } else {
+    # URL-encoded (e.g. SVG); percent-decode
+    $data =~ s/%([0-9a-fA-F]{2})/chr(hex($1))/ge;
+    $data = untaint_var($data);
+    return if $data eq '';
+  }
+
+  push @{ $self->{data_parts} }, { type => $type, data => $data };
 }
 
 sub canon_uri {
@@ -477,6 +543,8 @@ sub html_uri {
       }
     }
     if (defined $attr->{src}) {
+      # Note: inline data: URIs (in src or any attribute) are collected
+      # uniformly by html_attributes() -> add_data_uri(); no special case here.
       $self->push_uri($tag, $attr->{src});
     }
   }
@@ -981,6 +1049,37 @@ sub html_tests {
   # todo: capture URI from meta refresh tag
 }
 
+# Inspect a start tag's attributes for content of interest.  Two kinds:
+#   - script vectors -> $self->{script_buf}{'text/javascript'}, alongside the
+#     bodies of real <script> elements:
+#       * on* event-handler attributes (onclick, onload, onerror, ...)
+#       * any attribute value starting with "javascript:" (the code after it)
+#     At eof all text/javascript buffer is folded into a single synthetic part
+#     (see finish()) that the framework dispatches to the JavaScript handler, so
+#     script rules see attribute JS and <script> bodies together.
+#   - inline data: URIs -> add_data_uri(), which stashes a {type,data} part so
+#     the caller can emit it as a sub-part of its declared type (image/*,
+#     text/html, text/javascript, ...).  NOT buffered as script, so binary
+#     payloads (e.g. data:image) never pollute the script stream.
+sub html_attributes {
+  my ($self, $tag, $attr) = @_;
+  return unless ref $attr eq 'HASH';
+
+  for my $name (keys %$attr) {
+    my $val = $attr->{$name};
+    next unless defined $val;
+    if ($name =~ /^on/i) {
+      $self->{script_buf}{'text/javascript'} .= $val . "\n";
+    }
+    elsif ($val =~ /^javascript:(.*)/is) {
+      $self->{script_buf}{'text/javascript'} .= $1 . "\n";
+    }
+    elsif ($val =~ /^\s*data:/i) {
+      $self->add_data_uri($val);
+    }
+  }
+}
+
 sub display_text {
   my $self = shift;
   my $text = shift;
@@ -1011,7 +1110,13 @@ sub html_text {
   # text that is not part of body
   if (exists $self->{inside}{script} && $self->{inside}{script} > 0)
   {
-    push @{ $self->{script} }, $text;
+    # Buffer the <script> body under its declared type (set in html_tag; default
+    # text/javascript).  At eof these are turned into {type,data} sub-parts (see
+    # the data_parts handling in finish()), which the framework dispatches -- JS
+    # to the JavaScript handler, application/ld+json etc. elsewhere.  The text is
+    # suppressed from the rendered body either way.
+    my $type = $self->{script_type} || 'text/javascript';
+    $self->{script_buf}{$type} .= $text;
     return;
   }
   if (exists $self->{inside}{style} && $self->{inside}{style} > 0) {

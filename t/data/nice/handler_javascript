@@ -1,0 +1,25 @@
+From: sender@example.com
+To: victim@example.com
+Subject: javascript handler test
+Message-Id: <js-test@example.com>
+Date: Tue, 10 Jun 2025 12:00:00 +0000
+MIME-Version: 1.0
+Content-Type: text/html; charset=us-ascii
+
+<html>
+<body>
+<p>ORIGINAL_BODY_MARKER</p>
+<script>
+var marker = "JSSENTINEL";
+var addr = "victim@example.com";
+document.write(atob("aGVsbG8="));
+var a=1,b=2;function f(x){return x+1}var c=[1,2,3].map(function(n){return n*2});window.foo=f(c[0]);for(var i=0;i<10;i++){c.push(i*b);}
+var _blob="BODYOBFUSCATIONAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
+</script>
+<a href="javascript:alert('JSURI_SENTINEL')">click</a>
+<img src="x" onerror="onErrorSentinel()">
+<script type="application/ld+json" id="ActionableMessageCardScript">
+{ "@type":"SignedAdaptiveCard", "signedAdaptiveCard":"eyJhbGciOiJSUzI1NiAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" }
+</script>
+</body>
+</html>

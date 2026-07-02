@@ -1,0 +1,25 @@
+From: sender@example.com
+To: victim@example.com
+Subject: archive handler test
+Message-Id: <archive-test@example.com>
+Date: Tue, 10 Jun 2025 12:00:00 +0000
+MIME-Version: 1.0
+Content-Type: multipart/mixed; boundary="BOUND"
+
+--BOUND
+Content-Type: text/plain; charset=us-ascii
+
+ORIGINAL_BODY_MARKER
+
+--BOUND
+Content-Type: application/octet-stream; name="payload.zip"
+Content-Transfer-Encoding: base64
+Content-Disposition: attachment; filename="payload.zip"
+
+UEsDBBQACAAIACq02VwAAAAAAAAAAAAAAAAIAAAAaW5uZXIuanMrSyxSqFCwVVD39PNzDfIKVrdW
+SC1LzNGo0LTmAgBQSwcIjorK8h4AAAAcAAAAUEsDBBQACAAIACq02VwAAAAAAAAAAAAAAAAKAAAA
+aW5uZXIuaHRtbLPJKMnNsbNJyk+ptPP083MN8gjx9bEpTi7KLCixK0ssUqi0VYeLewWrW9voQyVt
+9MGabPTBJnABAFBLBwidO97iOQAAAEkAAABQSwECFAMUAAgACAAqtNlcjorK8h4AAAAcAAAACAAA
+AAAAAAAAAAAApIEAAAAAaW5uZXIuanNQSwECFAMUAAgACAAqtNlcnTve4jkAAABJAAAACgAAAAAA
+AAAAAAAApIFUAAAAaW5uZXIuaHRtbFBLBQYAAAAAAgACAG4AAADFAAAAAAA=
+--BOUND--

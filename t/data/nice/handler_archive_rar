@@ -1,0 +1,23 @@
+From: sender@example.com
+To: victim@example.com
+Subject: archive handler test
+Message-Id: <archive-test@example.com>
+Date: Tue, 10 Jun 2025 12:00:00 +0000
+MIME-Version: 1.0
+Content-Type: multipart/mixed; boundary="BOUND"
+
+--BOUND
+Content-Type: text/plain; charset=us-ascii
+
+ORIGINAL_BODY_MARKER
+
+--BOUND
+Content-Type: application/vnd.rar; name="payload.rar"
+Content-Transfer-Encoding: base64
+Content-Disposition: attachment; filename="payload.rar"
+
+UmFyIRoHAQAzkrXlCgEFBgAFAQGAgAAgrrkkJgIDC5wABJwApIMCjorK8oAAAQhpbm5lci5qcwoD
+EyAPPmoLqeQ4dmFyIHggPSAnSU5ORVJKUyc7IGV2YWwoeCk7ChOTEQ8oAgMLyQAEyQCkgwKdO97i
+gAABCmlubmVyLmh0bWwKAxMgDz5qXcDmODxodG1sPjxib2R5PklOTkVSSFRNTDxzY3JpcHQ+dmFy
+IHk9J0lOTkVSSFRNTEpTJzs8L3NjcmlwdD48L2JvZHk+PC9odG1sPgodd1ZRAwUEAA==
+--BOUND--

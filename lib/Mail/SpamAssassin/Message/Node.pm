@@ -52,9 +52,12 @@ BEGIN {
 
 # Map of file extensions to MIME types
 my %file_type_map = (
+    '7z'    => 'application/x-7z-compressed',
     'bmp'   => 'image/bmp',
+    'bz2'   => 'application/x-bzip2',
     'eml'   => 'message/rfc822',
     'gif'   => 'image/gif',
+    'gz'    => 'application/gzip',
     'heic'  => 'image/heic',
     'heif'  => 'image/heif',
     'htm'   => 'text/html',
@@ -62,22 +65,58 @@ my %file_type_map = (
     'jfif'  => 'image/jpeg',
     'jpeg'  => 'image/jpeg',
     'jpg'   => 'image/jpeg',
+    'js'    => 'text/javascript',
     'pdf'   => 'application/pdf',
     'png'   => 'image/png',
+    'rar'   => 'application/vnd.rar',
     'shtml' => 'text/html',
     'svg'   => 'image/svg+xml',
+    'tar'   => 'application/x-tar',
+    'tbz'   => 'application/x-bzip2',
+    'tgz'   => 'application/gzip',
     'tif'   => 'image/tiff',
     'tiff'  => 'image/tiff',
     'webp'  => 'image/webp',
+    'zip'   => 'application/zip',
 );
 
 # Map of MIME type aliases
 my %mime_type_map = (
-    'text/x-amp-html'     => 'text/html',
-    'application/x-pdf'   => 'application/pdf',
-    'application/acrobat' => 'application/pdf',
-    'text/pdf'            => 'application/pdf',
-    'text/x-pdf'          => 'application/pdf',
+    'text/x-amp-html'            => 'text/html',
+    # PDF
+    'application/x-pdf'          => 'application/pdf',
+    'application/acrobat'        => 'application/pdf',
+    'text/pdf'                   => 'application/pdf',
+    'text/x-pdf'                 => 'application/pdf',
+    # JavaScript: text/javascript is canonical (the JavaScript handler's type).
+    'application/javascript'     => 'text/javascript',
+    'application/x-javascript'   => 'text/javascript',
+    'application/ecmascript'     => 'text/javascript',
+    'application/x-ecmascript'   => 'text/javascript',
+    'text/ecmascript'            => 'text/javascript',
+    'text/javascript1.0'         => 'text/javascript',
+    'text/javascript1.1'         => 'text/javascript',
+    'text/javascript1.2'         => 'text/javascript',
+    'text/jscript'               => 'text/javascript',
+    'text/livescript'            => 'text/javascript',
+    'text/x-javascript'          => 'text/javascript',
+    'text/x-ecmascript'          => 'text/javascript',
+    # JSON: application/json is canonical.  JSON-LD and the +json structured
+    # types are data, not script; aliasing them keeps a <script type=...> block
+    # of this kind out of the JavaScript handler (and ready for a JSON handler).
+    'application/ld+json'        => 'application/json',
+    'text/json'                  => 'application/json',
+    'text/x-json'                => 'application/json',
+    # Archive type aliases, normalised to the canonical type each handler
+    # registers (application/zip, application/vnd.rar, ...).
+    'application/x-zip'              => 'application/zip',
+    'application/x-zip-compressed'  => 'application/zip',
+    'application/x-rar'             => 'application/vnd.rar',
+    'application/x-rar-compressed'  => 'application/vnd.rar',
+    'application/x-7z'              => 'application/x-7z-compressed',
+    'application/x-gzip'            => 'application/gzip',
+    'application/x-gtar'            => 'application/x-tar',
+    'application/x-bzip'            => 'application/x-bzip2',
 );
 
 =item new()

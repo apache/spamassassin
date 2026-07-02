@@ -68,21 +68,66 @@ Note for Users Upgrading to SpamAssassin 4.0.3
   server in order to catch more redirectors that uses Javascript or
   other tricks.
 
-- New MIME-part handler framework. A handler is a subclass of the new
+- New MIME-part handler framework. A handler registers one of its
+  methods as the handler for a content-type pattern -- an exact type
+  such as "image/jpeg" or a major-type glob such as "image/*". During
+  message processing each matching MIME part is dispatched to its
+  handler, which can inject extracted text into the part and return
+  synthetic child parts that are dispatched recursively (for example a
+  nested archive or an embedded image). Dispatch is bounded by the new
+  handler_max_depth, handler_max_parts, handler_max_bytes, and
+  handler_time_limit options to guard against deeply nested or oversized
+  content. Handlers are loaded with the new loadhandler and tryhandler
+  directives, and a block of configuration can be made conditional on a
+  handler with ifhandler. A handler is a subclass of the new
   Mail::SpamAssassin::Handler class (itself a subclass of
-  Mail::SpamAssassin::Plugin) that registers one of its methods as the
-  handler for a content-type pattern -- an exact type such as
-  "image/jpeg" or a major-type glob such as "image/*" -- via
-  $self->register_handler(). During message processing, each matching
-  MIME part is dispatched to its handler, which can inject extracted
-  text into the part and return synthetic child parts that are
-  dispatched recursively (for example, nested archives or embedded
-  images). Dispatch is bounded by the new handler_max_depth,
-  handler_max_parts, handler_max_bytes, and handler_time_limit options
-  to guard against deeply nested or oversized content. Handlers are
-  loaded with the new loadhandler and tryhandler directives, and a
-  block of configuration can be made conditional on a handler with
-  ifhandler.
+  Mail::SpamAssassin::Plugin); see its documentation for the API.
+
+  Six handlers ship with this release. HTML, JavaScript and SVG are
+  loaded by default from v403.pre; Image, PDF and Archive are included
+  commented-out because they depend on external tools or non-core Perl
+  modules (see below).
+
+    * HTML (text/html) renders each HTML part and surfaces content that
+      has no MIME part of its own -- inline data: images and embedded
+      JavaScript -- as child parts for the image and JavaScript
+      handlers. Body script is inert and only surfaced when the HTML
+      part is itself an attachment.
+
+    * JavaScript (text/javascript) collects script text for the new
+      "script" rule type (like rawbody rules) and adds navigation/
+      redirect URLs (e.g. window.location = '...') to the URI detail
+      list with type "script". Provides the check_script_contains_recip_addr
+      eval.
+
+    * SVG (image/svg+xml) parses SVG attachments, exposing their text to
+      the new "svgtext" rule type (kept separate from HTML body text),
+      adding links to the URI detail list (type "svg"), and surfacing
+      embedded script for the JavaScript handler. Provides the
+      check_svg_text_ratio eval, which flags a mostly-text "image" by the
+      ratio of text words to graphics elements.
+
+    * Image (image/*) runs the tesseract OCR engine on image parts and
+      injects the recognised text into the body so ordinary body rules
+      can match it. Provides the new "imagetext" rule type and the
+      check_image_text_ratio eval, which flags a message whose body text
+      is mostly OCR'd from images. Requires the tesseract executable.
+
+    * PDF (application/pdf) parses each PDF with the new pure-Perl
+      Mail::SpamAssassin::PDF::Parser and exposes metadata (page/image/
+      link counts, ratios, encryption, JavaScript/OpenAction flags, etc.)
+      via pdf2_* eval rules and _PDF2*_ tags; URLs are added to the URI
+      detail list (type "pdf"), and embedded images can be extracted and
+      passed to the image handler for OCR. The pdf2_ prefix avoids
+      conflicting with the PDFInfo plugin. Decrypting encrypted PDFs
+      needs Crypt::RC4 and Crypt::Mode::CBC.
+
+    * Archive (application/zip, application/vnd.rar) opens zip and rar
+      attachments and returns the files inside as child parts, which the
+      framework re-dispatches to the other handlers by type. Provides the
+      check_archive_file_count eval. Zip uses the core IO::Uncompress::Unzip
+      module; rar shells out to the unrar executable (see
+      archive_unrar_path).
 
 Note for Users Upgrading to SpamAssassin 4.0.2
 ----------------------------------------------

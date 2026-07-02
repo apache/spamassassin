@@ -25,3 +25,53 @@ loadplugin Mail::SpamAssassin::Plugin::ARC
 # NeuralNetwork - Experimental plugin that checks emails using Neural Network algorithm
 #
 # loadplugin Mail::SpamAssassin::Plugin::NeuralNetwork
+
+# HTML Handler - render text/html parts and surface inline data such as
+# images and javascript for other handlers to process.
+#
+if can(Mail::SpamAssassin::Conf::feature_handlers)
+loadhandler Mail::SpamAssassin::Handler::HTML
+endif
+
+# JavaScript Handler - analyze JavaScript parts and match it with 'script' rules.
+#
+if can(Mail::SpamAssassin::Conf::feature_handlers)
+loadhandler Mail::SpamAssassin::Handler::JavaScript
+endif
+
+# SVG Handler - analyse image/svg+xml attachments: match SVG text with 'svgtext' rules,
+# and surface embedded script for the JavaScript handler.
+#
+if can(Mail::SpamAssassin::Conf::feature_handlers)
+loadhandler Mail::SpamAssassin::Handler::SVG
+endif
+
+# Image Handler - OCR image parts with tesseract so body rules can match text that is
+# hidden inside images.
+#
+# Requires the 'tesseract' executable.  Set image_tesseract_path if it is not on
+# the PATH.  Disabled by default; uncomment to enable.
+#
+if can(Mail::SpamAssassin::Conf::feature_handlers)
+# loadhandler Mail::SpamAssassin::Handler::Image
+endif
+
+# PDF - parse PDF attachments and expose their metadata (page/image/link counts,
+# encryption flags, and document details) to the pdf2_* eval rules,
+# and add URLs found inside the PDF to the URI detail list.
+#
+# Requires Crypt::RC4, Crypt::Mode::CBC and Convert::Ascii85.  Disabled by
+# default; uncomment to enable.
+#
+if can(Mail::SpamAssassin::Conf::feature_handlers)
+# loadhandler Mail::SpamAssassin::Handler::PDF
+endif
+
+# Archive - open archive attachments and surface the inner files as sub-parts
+# so the other handlers (HTML, JavaScript, PDF, Image) and body rules can inspect
+# them.  rar requires the 'unrar' executable (set archive_unrar_path if not on
+# PATH).  Disabled by default; uncomment to enable.
+#
+if can(Mail::SpamAssassin::Conf::feature_handlers)
+# loadhandler Mail::SpamAssassin::Handler::Archive
+endif

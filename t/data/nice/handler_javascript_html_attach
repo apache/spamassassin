@@ -1,0 +1,28 @@
+From: sender@example.com
+To: victim@example.com
+Subject: html attachment with script test
+Message-Id: <js-html-attach-test@example.com>
+Date: Tue, 10 Jun 2025 12:00:00 +0000
+MIME-Version: 1.0
+Content-Type: multipart/mixed; boundary="BOUND"
+
+--BOUND
+Content-Type: text/plain; charset=us-ascii
+
+ORIGINAL_BODY_MARKER
+
+--BOUND
+Content-Type: text/html; charset=us-ascii; name="page.html"
+Content-Disposition: attachment; filename="page.html"
+
+<html>
+<body>
+<p>attached page</p>
+<script>
+var marker = "JSSENTINEL";
+var _blob="ATTACHOBFUSCATIONAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
+</script>
+</body>
+</html>
+
+--BOUND--
