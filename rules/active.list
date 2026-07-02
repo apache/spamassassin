@@ -269,7 +269,7 @@ BODY_EMPTY
 # good enough
 BODY_SINGLE_WORD
 
-# tflags publish
+# tflags net
 BODY_URI_ONLY
 
 # tflags publish
@@ -326,7 +326,7 @@ CN_PHISH_JP_07
 # tflags publish
 COMMENT_GIBBERISH
 
-# good enough
+# tflags net
 COMPENSATION
 
 # tflags publish
@@ -524,7 +524,7 @@ FORGED_RELAY_MUA_TO_MX
 # tflags net
 FORGED_SPF_HELO
 
-# tflags publish
+# tflags net
 FORM_FRAUD
 
 # tflags net
@@ -767,7 +767,7 @@ GB_FREEMAIL_DISPTO
 # tflags publish
 GB_FREEMAIL_DISPTO_NOTFREEM
 
-# tflags net
+# tflags publish
 GB_FROM_METAMASK
 
 # tflags publish
@@ -944,7 +944,7 @@ HTML_OFF_PAGE
 # tflags publish
 HTML_SHRT_CMNT_OBFU_MANY
 
-# tflags publish
+# tflags net
 HTML_SINGLET_MANY
 
 # good enough
@@ -1027,9 +1027,6 @@ MANY_HDRS_LCASE
 
 # tflags publish
 MANY_SPAN_IN_TEXT
-
-# tflags net
-MAY_BE_FORGED
 
 # tflags publish
 MC_MSFT_LISTMGR
@@ -1249,9 +1246,6 @@ PDS_PHPEXP_BOT
 
 # good enough
 PDS_PHP_EVAL
-
-# good enough
-PDS_PRO_TLD
 
 # good enough
 PDS_RDNS_DYNAMIC_FP
@@ -1716,6 +1710,9 @@ SUBJ_OBFU_LOW_CNTRST
 SUBJ_ODD_CASE
 
 # tflags net
+SUBJ_UNNEEDED_HTML
+
+# tflags net
 SURBL_BLOCKED
 
 # good enough
@@ -1736,13 +1733,13 @@ TAGSTAT_IMG_NOT_RCVD_TGST
 # tflags publish
 TARINGANET_IMG_NOT_RCVD_TN
 
-# tflags publish
+# tflags net
 TEQF_USR_IMAGE
 
-# tflags publish
+# tflags net
 TEQF_USR_MSGID_HEX
 
-# tflags publish
+# tflags net
 TEQF_USR_MSGID_MALF
 
 # good enough
@@ -1760,7 +1757,7 @@ TONLINE_FAKE_DKIM
 # tflags publish
 TO_EQ_FM_DIRECT_MX
 
-# good enough
+# tflags net
 TO_EQ_FM_DOM_HTML_IMG
 
 # good enough
@@ -1772,7 +1769,7 @@ TO_EQ_FM_DOM_SPF_FAIL
 # good enough
 TO_EQ_FM_HTML_DIRECT
 
-# good enough
+# tflags net
 TO_EQ_FM_HTML_ONLY
 
 # tflags net
@@ -1796,7 +1793,7 @@ TO_NO_BRKTS_HTML_IMG
 # tflags publish
 TO_NO_BRKTS_HTML_ONLY
 
-# good enough
+# tflags net
 TO_NO_BRKTS_MSFT
 
 # tflags publish
@@ -1820,10 +1817,10 @@ TVD_PH_SUBJ_META1
 # tflags net
 TVD_SPACE_ENCODED
 
-# tflags net
+# good enough
 TVD_SPACE_RATIO_MINFP
 
-# tflags net
+# good enough
 TVD_SUBJ_NUM_OBFU_MINFP
 
 # tflags publish
