@@ -197,7 +197,7 @@ BITCOIN_EXTORT_02
 # tflags publish
 BITCOIN_IMGUR
 
-# tflags publish
+# tflags net
 BITCOIN_MALWARE
 
 # tflags publish
@@ -269,7 +269,7 @@ BODY_EMPTY
 # good enough
 BODY_SINGLE_WORD
 
-# tflags publish
+# tflags net
 BODY_URI_ONLY
 
 # tflags publish
@@ -431,6 +431,9 @@ DMARC_TEMPERROR
 # tflags publish
 DOS_ANAL_SPAM_MAILER
 
+# good enough
+DOS_BODY_HIGH_NO_MID
+
 # tflags net
 DOS_DEREK_AUG08
 
@@ -527,7 +530,7 @@ FORGED_RELAY_MUA_TO_MX
 # tflags net
 FORGED_SPF_HELO
 
-# tflags publish
+# tflags net
 FORM_FRAUD
 
 # tflags publish
@@ -611,7 +614,7 @@ FROM_MISSP_FREEMAIL
 # good enough
 FROM_MISSP_MSFT
 
-# good enough
+# tflags net
 FROM_MISSP_REPLYTO
 
 # tflags net
@@ -773,7 +776,7 @@ GB_FREEMAIL_DISPTO
 # tflags publish
 GB_FREEMAIL_DISPTO_NOTFREEM
 
-# tflags publish
+# tflags net
 GB_FROM_METAMASK
 
 # tflags publish
@@ -844,6 +847,9 @@ HAS_X_NO_RELAY
 
 # tflags publish
 HAS_X_OUTGOING_SPAM_STAT
+
+# tflags net
+HDRS_LCASE
 
 # tflags publish
 HDRS_MISSP
@@ -984,6 +990,9 @@ JH_SPAMMY_PATTERN02
 KHOP_DYNAMIC
 
 # tflags net
+KHOP_FAKE_EBAY
+
+# tflags net
 KHOP_HELO_FCRDNS
 
 # tflags publish
@@ -1030,6 +1039,9 @@ MALW_ATTACH
 
 # tflags publish
 MANY_SPAN_IN_TEXT
+
+# tflags net
+MAY_BE_FORGED
 
 # tflags publish
 MC_MSFT_LISTMGR
@@ -1220,7 +1232,7 @@ PDS_FRNOM_TODOM_DBL_URL
 # good enough
 PDS_FRNOM_TODOM_NAKED_TO
 
-# tflags net
+# good enough
 PDS_FROM_2_EMAILS
 
 # good enough
@@ -1719,6 +1731,9 @@ SUBJ_OBFU_LOW_CNTRST
 SUBJ_ODD_CASE
 
 # tflags net
+SUBJ_UNNEEDED_HTML
+
+# tflags net
 SURBL_BLOCKED
 
 # good enough
@@ -1763,7 +1778,7 @@ TONLINE_FAKE_DKIM
 # tflags publish
 TO_EQ_FM_DIRECT_MX
 
-# tflags net
+# good enough
 TO_EQ_FM_DOM_HTML_IMG
 
 # good enough
@@ -1775,7 +1790,7 @@ TO_EQ_FM_DOM_SPF_FAIL
 # good enough
 TO_EQ_FM_HTML_DIRECT
 
-# good enough
+# tflags net
 TO_EQ_FM_HTML_ONLY
 
 # tflags net
@@ -1799,7 +1814,7 @@ TO_NO_BRKTS_HTML_IMG
 # tflags publish
 TO_NO_BRKTS_HTML_ONLY
 
-# good enough
+# tflags net
 TO_NO_BRKTS_MSFT
 
 # tflags publish
@@ -1812,6 +1827,9 @@ TO_NO_BRKTS_PCNT
 TO_TOO_MANY_WFH_01
 
 # good enough
+TVD_PH_7
+
+# good enough
 TVD_PH_SEC
 
 # good enough
@@ -1820,10 +1838,10 @@ TVD_PH_SUBJ_META1
 # good enough
 TVD_SPACE_ENCODED
 
-# good enough
+# tflags net
 TVD_SPACE_RATIO_MINFP
 
-# good enough
+# tflags net
 TVD_SUBJ_NUM_OBFU_MINFP
 
 # tflags publish
@@ -2036,7 +2054,7 @@ URI_MALWARE_SCMS
 # tflags userconf
 URI_NOVOWEL
 
-# tflags publish
+# tflags net
 URI_ONLY_MSGID_MALF
 
 # tflags publish
