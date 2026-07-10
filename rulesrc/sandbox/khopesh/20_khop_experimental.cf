@@ -183,8 +183,9 @@ tflags	 __HOTMAIL_HELO 	nice
 
 # A blend of sidney's UPPERCASE_HTTP and jhardin's URI_UC for bug 6408
 # This one avoids Http: which I think is the biggest problem.
-uri	 UPPERCASE_URI	/^[^:A-Z]+[A-Z][a-zA-Z]*:/
+uri	 UPPERCASE_URI	m;^[^:A-Z]+[A-Z][a-zA-Z]*://;
 describe UPPERCASE_URI	Link protocol has unexpected mixed case
+score    UPPERCASE_URI	2.750	# limit
 
 
 # doesn't match enough, has a higher S/O than __GREYLISTING, therefore useless.
