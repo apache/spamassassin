@@ -1460,8 +1460,8 @@ sub get_body_text_array_common {
         }
       }
 
-      # put a blank line between parts ...
-      $text .= "\n"  if $text ne '';
+      # put a null between parts so they don't collapse together
+      $text .= "\x00"  if $text ne '';
 
       # Add to rendered text
       $text .= $rnd;
