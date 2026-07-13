@@ -1529,7 +1529,7 @@ sub get_decoded_body_text_array {
     next unless $parts[$pt]->effective_type() =~ /^(?:text|message|image\/svg\+xml)\b/;
     # bug 4843: skip text/calendar parts since they're usually an attachment
     # and not displayed
-    next if ($parts[$pt]->{'type'} eq 'text/calendar');
+    next if ($parts[$pt]->effective_type() eq 'text/calendar');
 
     my $rawbody = $parts[$pt]->decode();
     my $rawlen = length($rawbody);
