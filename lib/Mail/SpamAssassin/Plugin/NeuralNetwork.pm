@@ -44,9 +44,19 @@ use strict;
 use warnings;
 use re 'taint';
 
-my $VERSION = 0.11.2;
+my $VERSION = 0.11.3;
 
-use AI::FANN qw(:all);
+our $HAS_AI_FANN;
+BEGIN {
+  $HAS_AI_FANN = eval { require AI::FANN; AI::FANN->import(qw(:all)); 1 };
+  unless ($HAS_AI_FANN) {
+    # define no-op fallbacks so bareword constants below still compile
+    # under `use strict` when AI::FANN isn't installed
+    no strict 'refs';
+    *{$_} = sub () { 0 } for qw(FANN_SIGMOID FANN_TRAIN_BATCH
+      FANN_TRAIN_INCREMENTAL FANN_TRAIN_QUICKPROP FANN_TRAIN_RPROP);
+  }
+}
 use Storable qw(store retrieve);
 use File::Copy qw(copy);
 use File::Spec;
@@ -622,6 +632,10 @@ sub learn_message {
   my $conf = $self->{main}->{conf};
 
   return unless $conf->{use_neuralnetwork};
+  unless ($HAS_AI_FANN) {
+    dbg("AI::FANN is not installed, skipping training");
+    return 0;
+  }
 
   $self->_init_sql_connection($conf) if defined $conf->{neuralnetwork_dsn};
   my $min_text_len = $conf->{neuralnetwork_min_text_len};
@@ -869,6 +883,10 @@ sub forget_message {
   my $conf = $self->{main}->{conf};
 
   return unless $conf->{use_neuralnetwork};
+  unless ($HAS_AI_FANN) {
+    dbg("AI::FANN is not installed, skipping forget");
+    return 0;
+  }
 
   $self->_init_sql_connection($conf) if defined $conf->{neuralnetwork_dsn};
 
@@ -1450,7 +1468,11 @@ sub _check_neuralnetwork {
   my $conf = $self->{main}->{conf};
   return unless $conf->{use_neuralnetwork};
   return 0 if (!$self->{main}->{conf}->{use_learner});
-  
+  unless ($HAS_AI_FANN) {
+    dbg("AI::FANN is not installed, skipping check");
+    return 0;
+  }
+
   my $msg = $pms->{msg};
 
   if(exists $pms->{neuralnetwork_prediction}) {
