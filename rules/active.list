@@ -260,7 +260,7 @@ BITCOIN_XPRIO
 # tflags publish
 BITCOIN_YOUR_INFO
 
-# tflags publish
+# tflags net
 BODY_URI_ONLY
 
 # tflags publish
@@ -314,7 +314,7 @@ CN_PHISH_JP_07
 # tflags publish
 COMMENT_GIBBERISH
 
-# good enough
+# tflags net
 COMPENSATION
 
 # tflags publish
@@ -476,6 +476,9 @@ FBI_SPOOF
 # tflags publish
 FILL_THIS_FORM
 
+# good enough
+FILL_THIS_FORM_LONG
+
 # tflags publish
 FONT_INVIS_DIRECT
 
@@ -500,10 +503,10 @@ FONT_INVIS_POSTEXTRAS
 # tflags net
 FORGED_SPF_HELO
 
-# tflags publish
+# tflags net
 FORM_FRAUD
 
-# tflags publish
+# tflags net
 FORM_FRAUD_3
 
 # tflags publish
@@ -740,7 +743,7 @@ GB_FREEMAIL_DISPTO
 # tflags publish
 GB_FREEMAIL_DISPTO_NOTFREEM
 
-# tflags publish
+# tflags net
 GB_FROM_METAMASK
 
 # tflags publish
@@ -811,6 +814,9 @@ HAS_X_NO_RELAY
 
 # tflags publish
 HAS_X_OUTGOING_SPAM_STAT
+
+# tflags net
+HDRS_LCASE
 
 # tflags publish
 HDRS_MISSP
@@ -911,7 +917,7 @@ HTML_OFF_PAGE
 # tflags publish
 HTML_SHRT_CMNT_OBFU_MANY
 
-# tflags publish
+# tflags net
 HTML_SINGLET_MANY
 
 # good enough
@@ -980,7 +986,7 @@ MALW_ATTACH
 # tflags publish
 MANY_SPAN_IN_TEXT
 
-# good enough
+# tflags net
 MAY_BE_FORGED
 
 # tflags publish
@@ -1125,9 +1131,6 @@ NO_RELAYS
 NSL_RCVD_FROM_USER
 
 # good enough
-NSL_RCVD_HELO_USER
-
-# good enough
 NUMBERONLY_BITCOIN_EXP
 
 # tflags publish
@@ -1234,9 +1237,6 @@ POSSIBLE_PAYPAL_PHISH_01
 
 # tflags publish
 POSSIBLE_PAYPAL_PHISH_02
-
-# good enough
-POSTCARD_09
 
 # tflags publish
 PP_MIME_FAKE_ASCII_TEXT
@@ -1635,6 +1635,9 @@ SUBJECT_IN_WELCOMELIST
 SUBJ_BRKN_WORDNUMS
 
 # tflags net
+SUBJ_UNNEEDED_HTML
+
+# tflags net
 SURBL_BLOCKED
 
 # good enough
@@ -1649,7 +1652,7 @@ TAGSTAT_IMG_NOT_RCVD_TGST
 # tflags publish
 TARINGANET_IMG_NOT_RCVD_TN
 
-# tflags publish
+# tflags net
 TEQF_USR_IMAGE
 
 # tflags publish
@@ -1673,7 +1676,10 @@ TONLINE_FAKE_DKIM
 # tflags publish
 TO_EQ_FM_DIRECT_MX
 
-# good enough
+# tflags net
+TO_EQ_FM_DOM_HTML_IMG
+
+# tflags net
 TO_EQ_FM_DOM_HTML_ONLY
 
 # tflags net
@@ -1682,7 +1688,7 @@ TO_EQ_FM_DOM_SPF_FAIL
 # good enough
 TO_EQ_FM_HTML_DIRECT
 
-# good enough
+# tflags net
 TO_EQ_FM_HTML_ONLY
 
 # tflags net
@@ -1706,7 +1712,7 @@ TO_NO_BRKTS_HTML_IMG
 # tflags publish
 TO_NO_BRKTS_HTML_ONLY
 
-# good enough
+# tflags net
 TO_NO_BRKTS_MSFT
 
 # tflags publish
@@ -1726,6 +1732,9 @@ TVD_SPACE_ENCODED
 
 # good enough
 TVD_SPACE_RATIO_MINFP
+
+# tflags net
+TVD_SUBJ_NUM_OBFU_MINFP
 
 # tflags publish
 TW_GIBBERISH_MANY
@@ -1934,7 +1943,7 @@ URI_MALWARE_SCMS
 # tflags userconf
 URI_NOVOWEL
 
-# tflags publish
+# tflags net
 URI_ONLY_MSGID_MALF
 
 # tflags publish
@@ -1967,7 +1976,7 @@ URI_WP_DIRINDEX
 # tflags net
 URI_WP_HACKED
 
-# tflags net
+# tflags publish
 URI_WP_HACKED_2
 
 # tflags publish
