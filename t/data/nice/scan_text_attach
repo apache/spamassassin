@@ -1,0 +1,21 @@
+From: sender@example.com
+To: victim@example.com
+Subject: Direct Deposit Remittance Advice
+Message-ID: <scan-text-attach@example.com>
+MIME-Version: 1.0
+Content-Type: multipart/mixed; boundary="OUTER"
+
+--OUTER
+Content-Type: text/plain; charset="us-ascii"
+
+Please see the attached remittance advice.
+--OUTER
+Content-Type: text/html; name="Remittance Advice.html"
+Content-Disposition: attachment; filename="Remittance Advice.html"
+
+<html><body>
+<h1>Bank of America</h1>
+<p>UNIQUEPHISHMARKER open the attachment and follow the instructions.</p>
+<p style="display:none">UNIQUEHIDDENMARKER hidden stuffing</p>
+</body></html>
+--OUTER--

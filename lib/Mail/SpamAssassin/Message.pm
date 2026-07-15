@@ -122,6 +122,7 @@ sub new {
   $self->{body_part_scan_size} = $opts->{'body_part_scan_size'} || 0;
   $self->{rawbody_part_scan_size} = $opts->{'rawbody_part_scan_size'} || 0;
   $self->{multipart_alternative_preferred_part} = $opts->{'multipart_alternative_preferred_part'} || '';
+  $self->{scan_text_attachments} = $opts->{'scan_text_attachments'} || 0;
 
   if ($self->{suppl_attrib}) {  # caller-provided additional information
     # pristine_body_length is currently used by an eval test check_body_length
@@ -738,6 +739,7 @@ sub finish {
   delete $self->{'body_part_scan_size'};
   delete $self->{'rawbody_part_scan_size'};
   delete $self->{'multipart_alternative_preferred_part'};
+  delete $self->{'scan_text_attachments'};
   delete $self->{'pristine_msg'};
   delete $self->{'pristine_body'};
   delete $self->{'pristine_headers'};
@@ -1434,9 +1436,11 @@ sub get_body_text_array_common {
     my($type, $rnd) = $p->$method_name();  # decode this part
     # Only text/* types are rendered ...
     if (defined $rnd) {
-      # Skip text attachments that are not considered part of the email body
+      # Skip text attachments that are not considered part of the email body,
+      # unless scan_text_attachments is enabled (e.g. to catch phishing payloads
+      # delivered as attached text/html or text/plain files). 
       my $cdisp = $p->{'headers'}->{'content-disposition'}[0];
-      if(($method_name ne 'invisible_rendered') and (defined $cdisp and ($cdisp =~ /^attachment;/) and ($type =~ /text\//))) {
+      if(!$self->{scan_text_attachments} and (defined $cdisp and ($cdisp =~ /^attachment;/) and ($type =~ m{^text/(?:plain|html)$}))) {
         dbg("$method_name: Skipping text attachment with content-disposition \"$cdisp\"");
         next;
       }

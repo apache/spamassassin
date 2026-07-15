@@ -622,6 +622,7 @@ sub parse {
     body_part_scan_size=>$self->{conf}->{body_part_scan_size},
     rawbody_part_scan_size=>$self->{conf}->{rawbody_part_scan_size},
     multipart_alternative_preferred_part=>$self->{conf}->{multipart_alternative_preferred_part},
+    scan_text_attachments=>$self->{conf}->{scan_text_attachments},
     master_deadline=>$master_deadline, suppl_attrib=>$suppl_attrib });
 
   # bug 5069: The goal here is to get rendering plugins to do things

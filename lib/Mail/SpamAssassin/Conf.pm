@@ -3837,6 +3837,27 @@ empty (the default), all parts are included as before.
     }
   });
 
+=item scan_text_attachments               (default: 0 (off))
+
+By default, C<text/*> mime-parts marked with C<Content-Disposition: attachment>
+are excluded from the rendered body text that "body" rules run against, on the
+assumption that a genuine text attachment (a log file, an exported document)
+is not part of the message body.  However, phishing messages routinely deliver
+their payload as an attached C<text/html> (or C<text/plain>) file precisely to
+evade body scanning.
+
+When this option is enabled, text attachments are rendered and included in the
+body text like any other part, so body rules can inspect their content.
+
+=cut
+
+  push (@cmds, {
+    setting => 'scan_text_attachments',
+    is_admin => 1,
+    default => 0,
+    type => $CONF_TYPE_BOOL,
+  });
+
 =item rbl_timeout t [t_min] [zone]		(default: 15 3)
 
 All DNS queries are made at the beginning of a check and we try to read

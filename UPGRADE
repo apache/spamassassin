@@ -56,6 +56,13 @@ Note for Users Upgrading to SpamAssassin 4.0.3
   skipping the other alternative. By default this is unset and all parts
   are included as before.
 
+- New configuration option: scan_text_attachments
+  By default, text/plain and text/html parts marked with
+  "Content-Disposition: attachment" are excluded from the rendered body
+  text that "body" rules run against. When this option is enabled, such
+  attachments are rendered and included like any other part so body
+  rules can inspect them. Default is 0 (off) to match existing behaviour.
+
 - New Mail::SpamAssassin::Plugin::NeuralNetwork
   This plugin checks messages using Fast Artificial Neural Network library.
 
