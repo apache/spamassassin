@@ -241,6 +241,17 @@ sub lint_rule_text {
     loadplugin Mail::SpamAssassin::Plugin::URIDNSBL
     util_rb_tld com # skip "need to run sa-update" warn
     use_bayes 0
+
+    # Load the MIME-part handlers enabled in rules/v403.pre so that rules
+    # gated behind "ifhandler Mail::SpamAssassin::Handler::X" -- and the eval
+    # rules those handlers register -- lint cleanly.  Guarded by feature_handlers
+    # so older code without handler support still lints.
+    if can(Mail::SpamAssassin::Conf::feature_handlers)
+    loadhandler Mail::SpamAssassin::Handler::HTML
+    loadhandler Mail::SpamAssassin::Handler::JavaScript
+    loadhandler Mail::SpamAssassin::Handler::SVG
+    loadhandler Mail::SpamAssassin::Handler::ICS
+    endif
   };
 
   my $mailsa = Mail::SpamAssassin->new({
@@ -561,7 +572,7 @@ sub rule_file_compile {
       }
     }
     elsif (/^
-        (if|ifplugin)
+        (if|ifplugin|ifhandler)
         \s+(.*?)$
       /x)
     {
@@ -1192,6 +1203,10 @@ sub sed_renamed_rule_names {
 sub invert_conditional {
   my $cond = shift;
   if ($cond =~ /^ \s* ifplugin \s+(.*?)$ /x) {
+    return "if !plugin($1)\n";
+  } elsif ($cond =~ /^ \s* ifhandler \s+(.*?)$ /x) {
+    # a handler is a Plugin subclass, recorded in plugins_loaded, so it
+    # inverts through the plugin() conditional just like ifplugin
     return "if !plugin($1)\n";
   } elsif ($cond =~ /^ \s* if \s+(.*?)$ /x) {
     return "if !($1)\n";
