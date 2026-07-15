@@ -768,7 +768,12 @@ util_rb_2tld radio.am
 util_rb_2tld rbcmail.ru
 util_rb_2tld redirectme.net
 util_rb_2tld replit.app
+
+# This is aggressive
+# replit.dev has subdomains for server clusters but .dev is ephemeral development only so _presumed_ abusive
+# substitute the per-cluster 3TLDs if this is found to be too aggressive
 util_rb_2tld replit.dev
+
 util_rb_2tld republika.pl
 util_rb_2tld reservemeeting.co
 util_rb_2tld reviewwave.com
@@ -831,6 +836,7 @@ util_rb_2tld us.tc
 util_rb_2tld us.to
 util_rb_2tld vercel.app
 util_rb_2tld vv.cc
+util_rb_2tld wasmer.app	# free-tier app hosting, contact abuse@wasmer.io
 util_rb_2tld web.app
 util_rb_2tld webcindario.com
 util_rb_2tld web.com
@@ -987,6 +993,17 @@ util_rb_3tld eu-central-3.ionoscloud.com
 util_rb_3tld eu-central-4.ionoscloud.com
 util_rb_3tld eu-south-2.ionoscloud.com
 util_rb_3tld us-central-1.ionoscloud.com
+
+## replit compute/resource hosting, {GUID}.{cluster}.replit.dev
+## Only enable these if the replit.dev 2TLD above proves too aggressive!
+## DISABLE THAT if you enable these!
+#util_rb_3tld janeway.replit.dev
+#util_rb_3tld kirk.replit.dev
+#util_rb_3tld picard.replit.dev
+#util_rb_3tld pike.replit.dev
+#util_rb_3tld riker.replit.dev
+#util_rb_3tld spock.replit.dev
+#util_rb_3tld worf.replit.dev
 
 
 endif
