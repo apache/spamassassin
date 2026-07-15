@@ -1438,7 +1438,7 @@ sub get_body_text_array_common {
     if (defined $rnd) {
       # Skip text attachments that are not considered part of the email body,
       # unless scan_text_attachments is enabled (e.g. to catch phishing payloads
-      # delivered as attached text/html or text/plain files). 
+      # delivered as attached text/html or text/plain files).
       my $cdisp = $p->{'headers'}->{'content-disposition'}[0];
       if(!$self->{scan_text_attachments} and (defined $cdisp and ($cdisp =~ /^attachment;/) and ($type =~ m{^text/(?:plain|html)$}))) {
         dbg("$method_name: Skipping text attachment with content-disposition \"$cdisp\"");

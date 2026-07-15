@@ -1,0 +1,50 @@
+From: sender@example.com
+To: victim@example.com
+Subject: ics handler test
+Message-Id: <ics-test@example.com>
+Date: Tue, 10 Jun 2025 12:00:00 +0000
+MIME-Version: 1.0
+Content-Type: multipart/mixed; boundary="BOUND"
+
+--BOUND
+Content-Type: text/plain; charset=us-ascii
+
+ORIGINAL_BODY_MARKER
+
+--BOUND
+Content-Type: text/calendar; method=REQUEST; name="invite.ics"
+Content-Disposition: attachment; filename="invite.ics"
+
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Example//Invite//EN
+METHOD:REQUEST
+BEGIN:VEVENT
+UID:12345@example.com
+SUMMARY:ICSSENTINEL Please confirm your docusign invoice
+DESCRIPTION:Click the secure link to review the documents
+URL:https://phish.example/secure
+LOCATION:https://phish.example/room
+ATTENDEE;CN=A:mailto:a@example.com
+ATTENDEE;CN=B:mailto:b@example.com
+ATTACH;FMTTYPE=image/png;ENCODING=BASE64;VALUE=BINARY:iVBORw0KGgoAAAANSUhEUg==
+DTSTART:20250610T120005Z
+DTEND:20250610T130000Z
+END:VEVENT
+END:VCALENDAR
+
+--BOUND
+Content-Type: application/ics; name="invite.ics"
+Content-Transfer-Encoding: base64
+Content-Disposition: attachment; filename="invite.ics"
+
+QkVHSU46VkNBTEVOREFSDQpWRVJTSU9OOjIuMA0KUFJPRElEOi0vL0V4YW1wbGUvL0ludml0ZS8v
+RU4NCk1FVEhPRDpSRVFVRVNUDQpCRUdJTjpWRVZFTlQNClVJRDoxMjM0NUBleGFtcGxlLmNvbQ0K
+U1VNTUFSWTpJQ1NTRU5USU5FTCBQbGVhc2UgY29uZmlybSB5b3VyIGRvY3VzaWduIGludm9pY2UN
+CkRFU0NSSVBUSU9OOkNsaWNrIHRoZSBzZWN1cmUgbGluaw0KICB0byByZXZpZXcgdGhlIGRvY3Vt
+ZW50cw0KVVJMOmh0dHBzOi8vcGhpc2guZXhhbXBsZS9zZWN1cmUNCkxPQ0FUSU9OOmh0dHBzOi8v
+cGhpc2guZXhhbXBsZS9yb29tDQpBVFRFTkRFRTtDTj1BOm1haWx0bzphQGV4YW1wbGUuY29tDQpB
+VFRFTkRFRTtDTj1COm1haWx0bzpiQGV4YW1wbGUuY29tDQpEVFNUQVJUOjIwMjUwNjEwVDEyMDAw
+NVoNCkRURU5EOjIwMjUwNjEwVDEzMDAwMFoNCkVORDpWRVZFTlQNCkVORDpWQ0FMRU5EQVINCg==
+
+--BOUND--

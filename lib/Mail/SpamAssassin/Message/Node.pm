@@ -62,6 +62,7 @@ my %file_type_map = (
     'heif'  => 'image/heif',
     'htm'   => 'text/html',
     'html'  => 'text/html',
+    'ics'   => 'text/calendar',
     'jfif'  => 'image/jpeg',
     'jpeg'  => 'image/jpeg',
     'jpg'   => 'image/jpeg',
@@ -83,6 +84,9 @@ my %file_type_map = (
 # Map of MIME type aliases
 my %mime_type_map = (
     'text/x-amp-html'            => 'text/html',
+    # iCalendar: text/calendar is canonical (the ICS handler's type).
+    'application/ics'            => 'text/calendar',
+    'text/x-vcalendar'           => 'text/calendar',
     # PDF
     'application/x-pdf'          => 'application/pdf',
     'application/acrobat'        => 'application/pdf',

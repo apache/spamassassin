@@ -46,6 +46,15 @@ if can(Mail::SpamAssassin::Conf::feature_handlers)
 loadhandler Mail::SpamAssassin::Handler::SVG
 endif
 
+# ICS Handler - parse text/calendar (iCalendar) invites: match event SUMMARY/DESCRIPTION
+# text with 'icstext' rules, add URLs found in URL/ATTACH/LOCATION properties to the URI
+# detail list, and expose the check_ics_attendee_count / check_ics_random_start_time
+# eval rules.
+#
+if can(Mail::SpamAssassin::Conf::feature_handlers)
+loadhandler Mail::SpamAssassin::Handler::ICS
+endif
+
 # Image Handler - OCR image parts with tesseract so body rules can match text that is
 # hidden inside images.
 #

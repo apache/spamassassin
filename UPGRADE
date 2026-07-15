@@ -90,8 +90,8 @@ Note for Users Upgrading to SpamAssassin 4.0.3
   Mail::SpamAssassin::Handler class (itself a subclass of
   Mail::SpamAssassin::Plugin); see its documentation for the API.
 
-  Six handlers ship with this release. HTML, JavaScript and SVG are
-  loaded by default from v403.pre; Image, PDF and Archive are included
+  Seven handlers ship with this release. HTML, JavaScript, SVG and ICS
+  are loaded by default from v403.pre; Image, PDF and Archive are included
   commented-out because they depend on external tools or non-core Perl
   modules (see below).
 
@@ -113,6 +113,16 @@ Note for Users Upgrading to SpamAssassin 4.0.3
       embedded script for the JavaScript handler. Provides the
       check_svg_text_ratio eval, which flags a mostly-text "image" by the
       ratio of text words to graphics elements.
+
+    * ICS (text/calendar) parses iCalendar invites and renders each event's
+      SUMMARY and DESCRIPTION into the body so ordinary body rules can match
+      it (SpamAssassin otherwise skips text/calendar); the same text is also
+      exposed to the new "icstext" rule type, kept separate from the body.
+      Links in the URL, ATTACH and LOCATION properties are added to the URI
+      detail list (type "ics"). Provides the check_ics_attendee_count,
+      check_ics_random_start_time and check_ics_event_prop evals, the last of
+      which matches a regex against any event property (parameters included)
+      for hunting arbitrary or extension properties.
 
     * Image (image/*) runs the tesseract OCR engine on image parts and
       injects the recognised text into the body so ordinary body rules

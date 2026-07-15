@@ -63,6 +63,7 @@ lib/Mail/SpamAssassin/HTML.pm
 lib/Mail/SpamAssassin/HTML/Color.pm
 lib/Mail/SpamAssassin/Handler/Archive.pm
 lib/Mail/SpamAssassin/Handler/HTML.pm
+lib/Mail/SpamAssassin/Handler/ICS.pm
 lib/Mail/SpamAssassin/Handler/Image.pm
 lib/Mail/SpamAssassin/Handler/JavaScript.pm
 lib/Mail/SpamAssassin/Handler/SVG.pm
@@ -428,6 +429,7 @@ t/data/nice/handler_archive_octet
 t/data/nice/handler_archive_rar
 t/data/nice/handler_archive_zip
 t/data/nice/handler_html
+t/data/nice/handler_ics
 t/data/nice/handler_image
 t/data/nice/handler_image_heic
 t/data/nice/handler_image_octet
@@ -633,6 +635,7 @@ t/handler.t
 t/handler_aliases.t
 t/handler_archive.t
 t/handler_html.t
+t/handler_ics.t
 t/handler_image.t
 t/handler_image_heic.t
 t/handler_image_size.t
