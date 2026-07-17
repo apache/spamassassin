@@ -362,7 +362,13 @@ sub _check_dmarc {
       dbg("DKIM result for domain " . $signature->domain . ": " . $signature->result);
     }
   } else {
-    $dmarc->dkim($pms->{dkim_verifier}) if (ref($pms->{dkim_verifier}));
+    if (ref($pms->{dkim_verifier})) {
+      $dmarc->dkim($pms->{dkim_verifier});
+    } else {
+      # No DKIM signature/verifier available; record an explicit "none"
+      # result so save_aggregate() doesn't choke on an unset dkim field.
+      $dmarc->dkim([{ domain => '', result => 'none' }]);
+    }
   }
 
   my $result;
