@@ -417,12 +417,12 @@ sub check_timed {
   $self->{msg}->delete_header('X-Spam-.*');
 
   # Resident Mail::SpamAssassin code will possibly never change score
-  # sets, even if bayes becomes available.  So we should do a quick check
-  # to see if we should go from {0,1} to {2,3}.  We of course don't need
-  # to do this switch if we're already using bayes ... ;)
+  # sets, even if a learner (Bayes or NeuralNetwork) becomes available.  So
+  # we should do a quick check to see if we should go from {0,1} to {2,3}.
+  # We of course don't need to do this switch if we're already using one ... ;)
   my $set = $self->{conf}->get_score_set();
-  if (($set & 2) == 0 && $self->{main}->{bayes_scanner} && $self->{main}->{bayes_scanner}->is_scan_available() && $self->{conf}->{use_bayes_rules}) {
-    dbg("check: scoreset $set but bayes is available, switching scoresets");
+  if (($set & 2) == 0 && $self->{main}->learner_scoreset_active()) {
+    dbg("check: scoreset $set but a learner is available, switching scoresets");
     $self->{conf}->set_score_set ($set|2);
   }
   dbg("check: using scoreset $set in M:S:Pms"); 

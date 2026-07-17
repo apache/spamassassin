@@ -849,6 +849,37 @@ sub dump_bayes_db {
   $self->{bayes_scanner}->dump_bayes_db(@opts) if $self->{bayes_scanner};
 }
 
+=item $f-E<gt>dump_neuralnetwork_db()
+
+Dump the contents of the NeuralNetwork plugin's data/stats.
+
+=cut
+
+sub dump_neuralnetwork_db {
+  my($self, $magic, $toks, $regex) = @_;
+  return $self->call_plugins("neuralnetwork_dump_database",
+        { magic => $magic, toks => $toks, regex => $regex });
+}
+
+=item $f-E<gt>learner_scoreset_active()
+
+Returns true if a learner plugin, (Bayes and/or NeuralNetwork),  is enabled
+and has enough data to actively classify mail.
+
+=cut
+
+sub learner_scoreset_active {
+  my $self = shift;
+
+  return 1 if $self->{bayes_scanner} && $self->{bayes_scanner}->is_scan_available()
+              && $self->{conf}->{use_bayes_rules};
+
+  return 1 if $self->{conf}->{use_neuralnetwork}
+              && $self->call_plugins("neuralnetwork_is_scan_available");
+
+  return 0;
+}
+
 =item $f-E<gt>signal_user_changed ( [ { opt =E<gt> val, ... } ] )
 
 Signals that the current user has changed (possibly using C<setuid>), meaning
@@ -907,8 +938,11 @@ sub signal_user_changed {
   }
 
   # reopen bayes dbs for this user
+  # Note: this dispatcher object is shared by all learner plugins (Bayes and
+  # others), so it is gated on the generic use_learner switch, not use_bayes;
+  # each plugin's hooks are responsible for checking their own specific switch.
   $self->{bayes_scanner}->finish() if $self->{bayes_scanner};
-  if ($self->{conf}->{use_bayes}) {
+  if ($self->{conf}->{use_learner}) {
       require Mail::SpamAssassin::Bayes;
       $self->{bayes_scanner} = Mail::SpamAssassin::Bayes->new($self);
   } else {
@@ -919,7 +953,7 @@ sub signal_user_changed {
   $self->{'learn_to_journal'} = $self->{conf}->{bayes_learn_to_journal};
 
   $set |= 1 unless $self->{local_tests_only};
-  $set |= 2 if $self->{bayes_scanner} && $self->{bayes_scanner}->is_scan_available() && $self->{conf}->{use_bayes_rules};
+  $set |= 2 if $self->learner_scoreset_active();
 
   $self->{conf}->set_score_set ($set);
 
@@ -1878,8 +1912,9 @@ sub init {
     die "config: no rules were found!  Do you need to run 'sa-update'?\n";
   }
 
-  # Initialize the Bayes subsystem
-  if ($self->{conf}->{use_bayes}) {
+  # Initialize the learner subsystem dispatcher; shared by all learner
+  # plugins (Bayes and others).
+  if ($self->{conf}->{use_learner}) {
       require Mail::SpamAssassin::Bayes;
       $self->{bayes_scanner} = Mail::SpamAssassin::Bayes->new($self);
   }
@@ -1888,7 +1923,7 @@ sub init {
   # Figure out/set our initial scoreset
   my $set = 0;
   $set |= 1 unless $self->{local_tests_only};
-  $set |= 2 if $self->{bayes_scanner} && $self->{bayes_scanner}->is_scan_available() && $self->{conf}->{use_bayes_rules};
+  $set |= 2 if $self->learner_scoreset_active();
   $self->{conf}->set_score_set ($set);
 
   if ($self->{only_these_rules}) {

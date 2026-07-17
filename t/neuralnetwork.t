@@ -10,7 +10,7 @@ use Test::More;
 
 use constant HAS_SQLITE => eval { require DBD::SQLite; 1 };
 
-plan tests => 18;
+plan tests => 29;
 
 sub nn_reinit {
   my $extra = shift || '';
@@ -152,3 +152,43 @@ SKIP: {
   }
   is($correct_ham, 2, 'SQLite backend: all ham classified correctly');
 }
+
+# Verify NeuralNetwork training/classification works fully independent of
+# Bayes (use_bayes 0). Regression test for the bayes_scanner dispatcher
+# being gated on the generic use_learner switch instead of use_bayes --
+# previously, use_bayes 0 silently prevented learn_message/forget_message
+# from ever firing for ANY plugin, not just Bayes.
+
+nn_reinit("use_bayes 0");
+ok(salearnrun("-L --spam data/spam/001", \&check_examined_token));
+ok(salearnrun("-L --ham  data/nice/001", \&check_examined_token));
+
+%patterns    = ( q{ 1.0 NN_SPAM }, '' );
+%anti_patterns = ( q{ -1.0 NN_HAM }, '' );
+sarun("-L -t < data/spam/001", \&patterns_run_cb);
+ok_all_patterns();
+
+%patterns    = ( q{ -1.0 NN_HAM }, '' );
+%anti_patterns = ( q{ 1.0 NN_SPAM }, '' );
+sarun("-L -t < data/nice/001", \&patterns_run_cb);
+ok_all_patterns();
+
+# --dump --plugin NeuralNetwork must show NeuralNetwork stats, and plain
+# --dump (--plugin defaults to Bayes) must stay Bayes-only regardless of
+# whether the NeuralNetwork plugin is enabled.
+
+nn_reinit();
+salearnrun("--spam data/spam/001", undef);
+salearnrun("--ham  data/nice/001", undef);
+
+my $nn_dump_output = '';
+ok(salearnrun("--dump magic --plugin NeuralNetwork", sub { $nn_dump_output = join('', <IN>); }));
+like($nn_dump_output, qr/non-token data: neuralnetwork nspam/,
+     '--dump --plugin NeuralNetwork shows nspam stat');
+like($nn_dump_output, qr/non-token data: neuralnetwork nham/,
+     '--dump --plugin NeuralNetwork shows nham stat');
+
+my $bayes_dump_output = '';
+ok(salearnrun("--dump magic", sub { $bayes_dump_output = join('', <IN>); }));
+unlike($bayes_dump_output, qr/neuralnetwork/i,
+       '--dump defaults to Bayes-only, no neuralnetwork markers leak in');

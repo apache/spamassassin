@@ -206,11 +206,12 @@ for a test.
 
 If four valid scores are listed, then the score that is used depends
 on how SpamAssassin is being used. The first score is used when
-both Bayes and network tests are disabled (score set 0). The second
-score is used when Bayes is disabled, but network tests are enabled
-(score set 1). The third score is used when Bayes is enabled and
-network tests are disabled (score set 2). The fourth score is used
-when Bayes is enabled and network tests are enabled (score set 3).
+both a learner (Bayes and/or NeuralNetwork) and network tests are disabled
+(score set 0). The second score is used when no learner is active, but
+network tests are enabled (score set 1). The third score is used when a
+learner (Bayes and/or NeuralNetwork) is active and network tests are
+disabled (score set 2). The fourth score is used when a learner is active
+and network tests are enabled (score set 3).
 
 Setting a rule's score to 0 will disable that rule from running.
 

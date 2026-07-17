@@ -31,10 +31,11 @@ This plugin checks emails using Neural Network algorithm.
 
 =head1 CAVEATS
 
-The SpamAssassin learning subsystem routes all training through the Bayes
-scanner infrastructure.  As a result, C<Mail::SpamAssassin::Plugin::Bayes>
-must be loaded and C<use_bayes 1> must be set for this plugin's training to
-be triggered.
+Training, forgetting and prediction only require the generic C<use_learner 1>
+switch (on by default) and C<use_neuralnetwork 1>.
+
+C<sa-learn --dump --plugin NeuralNetwork> can be used to display this
+plugin's stats and vocabulary data.
 
 =cut
 
@@ -61,6 +62,7 @@ use Storable qw(store retrieve);
 use File::Copy qw(copy);
 use File::Spec;
 use Errno qw(EXDEV);
+use Encode qw(encode);
 
 use Mail::SpamAssassin;
 use Mail::SpamAssassin::Plugin;
@@ -1053,6 +1055,99 @@ sub forget_message {
     return 1;
   }
   return 0;
+}
+
+# Plugin hook, invoked via Mail::SpamAssassin::dump_neuralnetwork_db
+# (sa-learn's `--dump --plugin NeuralNetwork`). Deliberately a distinct
+# hook name from Bayes's "learner_dump_database" so plain `sa-learn --dump`
+# never picks this up.
+sub neuralnetwork_dump_database {
+  my ($self, $params) = @_;
+  my $conf = $self->{main}->{conf};
+
+  return 0 unless $conf->{use_neuralnetwork};
+
+  my $magic = $params->{magic};
+  my $toks  = $params->{toks};
+  my $regex = $params->{regex};
+
+  my $nn_data_dir = $conf->{neuralnetwork_data_dir};
+  unless (defined $nn_data_dir) {
+    dbg("neuralnetwork_data_dir not set, nothing to dump");
+    return 0;
+  }
+  $nn_data_dir = Mail::SpamAssassin::Util::untaint_file_path($nn_data_dir);
+  unless (-d $nn_data_dir) {
+    info("Cannot access directory $nn_data_dir");
+    return 0;
+  }
+
+  $self->_init_sql_connection($conf) if defined $conf->{neuralnetwork_dsn};
+
+  my $vocabulary = $self->_load_vocabulary($conf, $nn_data_dir, 0);
+  my $meta       = $self->_load_meta($conf);
+
+  my $template = '%3.3f %10u %10u %10u  %s'."\n";
+
+  if ($magic) {
+    printf($template, 0.0, 0, $vocabulary->{_spam_count}, 0,
+        'non-token data: neuralnetwork nspam') or die "Error writing: $!";
+    printf($template, 0.0, 0, $vocabulary->{_ham_count}, 0,
+        'non-token data: neuralnetwork nham') or die "Error writing: $!";
+    printf($template, 0.0, 0, $vocabulary->{_doc_count}, 0,
+        'non-token data: neuralnetwork ndocs') or die "Error writing: $!";
+    printf($template, 0.0, 0, scalar(keys %{$vocabulary->{terms}}), 0,
+        'non-token data: neuralnetwork nvocab') or die "Error writing: $!";
+    printf($template, 0.0, 0, $meta->{_learns_since_retrain}, 0,
+        'non-token data: neuralnetwork learns since retrain') or die "Error writing: $!";
+    printf($template, 0.0, 0, scalar(@{$meta->{_tbuf}{spam} || []}), 0,
+        'non-token data: neuralnetwork training buffer spam') or die "Error writing: $!";
+    printf($template, 0.0, 0, scalar(@{$meta->{_tbuf}{ham} || []}), 0,
+        'non-token data: neuralnetwork training buffer ham') or die "Error writing: $!";
+
+    my $dataset_path = Mail::SpamAssassin::Util::untaint_file_path($self->_model_path($nn_data_dir));
+    if ($HAS_AI_FANN && -f $dataset_path) {
+      my $mtime = (stat($dataset_path))[9] || 0;
+      my $inputs = eval { AI::FANN->new_from_file($dataset_path)->num_inputs() } || 0;
+      printf($template, 0.0, 0, $mtime, 0,
+          'non-token data: neuralnetwork model mtime') or die "Error writing: $!";
+      printf($template, 0.0, 0, $inputs, 0,
+          'non-token data: neuralnetwork model inputs') or die "Error writing: $!";
+    }
+  }
+
+  if ($toks) {
+    my $terms = $vocabulary->{terms} || {};
+    foreach my $term (sort keys %$terms) {
+      next if defined $regex && $term !~ /$regex/o;
+      my $t = $terms->{$term} || {};
+      my $out_term = utf8::is_utf8($term) ? encode('UTF-8', $term) : $term;
+      printf($template, 0.0, $t->{total} || 0, $t->{spam} || 0, $t->{docs} || 0,
+          $out_term) or die "Error writing: $!";
+    }
+  }
+
+  return 1;
+}
+
+# Plugin hook, invoked via Mail::SpamAssassin::learner_scoreset_active to
+# decide whether score sets 2/3 (the "learner enabled" scoresets) should be
+# used. True when this plugin is enabled and has a usable trained model for
+# the current user.
+sub neuralnetwork_is_scan_available {
+  my ($self, $params) = @_;
+  my $conf = $self->{main}->{conf};
+
+  return 0 unless $conf->{use_neuralnetwork};
+  return 0 unless $HAS_AI_FANN;
+
+  my $nn_data_dir = $conf->{neuralnetwork_data_dir};
+  return 0 unless defined $nn_data_dir;
+  $nn_data_dir = Mail::SpamAssassin::Util::untaint_file_path($nn_data_dir);
+  return 0 unless -d $nn_data_dir;
+
+  my $dataset_path = Mail::SpamAssassin::Util::untaint_file_path($self->_model_path($nn_data_dir));
+  return -f $dataset_path ? 1 : 0;
 }
 
 sub check_neuralnetwork_spam {

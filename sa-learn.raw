@@ -121,6 +121,7 @@ GetOptions(
   'version|V'       => \$opt{'version'},
 
   'dump:s' => \$opt{'dump'},
+  'plugin=s' => \$opt{'plugin'},
   'import' => \$opt{'import'},
 
   'backup'    => \$opt{'backup'},
@@ -151,6 +152,17 @@ if ( defined $opt{'version'} ) {
 # set debug areas, if any specified (only useful for command-line tools)
 if (defined $opt{'debug'}) {
   $opt{'debug'} ||= 'all';
+}
+
+# --plugin selects which classifier plugin --dump (and friends) operate on;
+# defaults to Bayes for backwards compatibility.
+$opt{'plugin'} = 'Bayes' unless defined $opt{'plugin'};
+if ($opt{'plugin'} =~ /^bayes$/i) {
+  $opt{'plugin'} = 'Bayes';
+} elsif ($opt{'plugin'} =~ /^neuralnetwork$/i) {
+  $opt{'plugin'} = 'NeuralNetwork';
+} else {
+  usage( 0, "Unknown --plugin '" . $opt{'plugin'} . "', must be Bayes or NeuralNetwork" );
 }
 
 if ( $opt{'force-expire'} ) {
@@ -207,9 +219,11 @@ if ( defined $bayes_override_path ) {
 }
 
 # These options require bayes_scanner, which requires "use_bayes 1", but
-# that's not necessary for these commands.
-if (defined $opt{'dump'} || defined $opt{'import'} || defined $opt{'clear'} ||
-    defined $opt{'backup'} || defined $opt{'restore'}) {
+# that's not necessary for these commands. --plugin NeuralNetwork redirects
+# --dump to the NeuralNetwork plugin instead, so it's excluded here.
+if (defined $opt{'import'} || defined $opt{'clear'} ||
+    defined $opt{'backup'} || defined $opt{'restore'} ||
+    (defined $opt{'dump'} && $opt{'plugin'} eq 'Bayes')) {
   $post_config .= "use_bayes 1\n";
 }
 
@@ -269,9 +283,21 @@ if ( defined $opt{'dump'} ) {
     exit 1;
   }
 
-  if (!$spamtest->dump_bayes_db( $magic, $toks, $opt{'regexp'}) ) {
+  # --plugin selects which plugin --dump displays data for; the
+  # NeuralNetwork plugin's own stats/vocabulary instead of the Bayes
+  # database.
+  if ($opt{'plugin'} eq 'NeuralNetwork' && !$spamtest->{conf}->{use_neuralnetwork}) {
     $spamtest->finish_learner();
-    die "ERROR: Bayes dump returned an error, please re-run with -D for more information\n";
+    die "ERROR: --plugin NeuralNetwork requires 'use_neuralnetwork 1' in the configuration\n";
+  }
+
+  my ( $dump_ok, $what ) = $opt{'plugin'} eq 'NeuralNetwork'
+    ? ( $spamtest->dump_neuralnetwork_db( $magic, $toks, $opt{'regexp'} ), 'NeuralNetwork' )
+    : ( $spamtest->dump_bayes_db( $magic, $toks, $opt{'regexp'} ), 'Bayes' );
+
+  if (!$dump_ok) {
+    $spamtest->finish_learner();
+    die "ERROR: $what dump returned an error, please re-run with -D for more information\n";
   }
 
   $spamtest->finish_learner();
@@ -279,6 +305,23 @@ if ( defined $opt{'dump'} ) {
   close STDOUT  or die "error closing STDOUT: $!";
   close STDIN   or die "error closing STDIN: $!";
   exit 0;
+}
+
+# --plugin only changes the behaviour of --dump; the NeuralNetwork plugin
+# has no equivalent of these Bayes-store-specific operations.
+if ($opt{'plugin'} eq 'NeuralNetwork' &&
+    (defined $opt{'import'} || defined $opt{'clear'} ||
+     defined $opt{'backup'} || defined $opt{'restore'})) {
+  $spamtest->finish_learner();
+  die "ERROR: --plugin NeuralNetwork is not supported together with --import, --clear, --backup or --restore\n";
+}
+
+# --import/--clear/--backup/--restore operate directly on the Bayes
+# on-disk store, so the Bayes plugin must actually be loaded for them.
+if ((defined $opt{'import'} || defined $opt{'clear'} || defined $opt{'backup'} ||
+     defined $opt{'restore'}) && !$spamtest->{bayes_scanner}->{store}) {
+  $spamtest->finish_learner();
+  die "ERROR: this command requires the Bayes plugin to be loaded and enabled\n";
 }
 
 if ( defined $opt{'import'} ) {
@@ -337,8 +380,8 @@ if (defined $opt{'restore'}) {
   exit 0;
 }
 
-if ( !$spamtest->{conf}->{use_bayes} ) {
-  warn "ERROR: configuration specifies 'use_bayes 0', sa-learn disabled\n";
+if ( !$spamtest->{conf}->{use_learner} ) {
+  warn "ERROR: configuration specifies 'use_learner 0', sa-learn disabled\n";
   exit 1;
 }
 
@@ -631,8 +674,12 @@ Options:
  --force-expire        Force a database sync and expiry run
  --dbpath <path>       Allows commandline override (in bayes_path form)
                        for where to read the Bayes DB from
- --dump [all|data|magic]  Display the contents of the Bayes database
-                       Takes optional argument for what to display
+ --dump [all|data|magic]  Display the contents of the selected plugin's
+                       database (see --plugin). Takes optional argument
+                       for what to display
+ --plugin <name>       Which plugin --dump displays data for: Bayes
+                       (default) or NeuralNetwork. Not supported with
+                       --import, --clear, --backup or --restore.
   --regexp <re>        For dump only, specifies which tokens to
                        dump based on a regular expression.
  -f file, --folders=file  Read list of files/directories from file
@@ -775,13 +822,25 @@ Allows a commandline override of the I<bayes_path> configuration option.
 
 =item B<--dump> I<option>
 
-Display the contents of the Bayes database.  Without an option or with
-the I<all> option, all magic tokens and data tokens will be displayed.
-I<magic> will only display magic tokens, and I<data> will only display
-the data tokens.
+Display the contents of the database of the plugin selected with
+B<--plugin> (Bayes by default). Without an option or with the I<all>
+option, all magic tokens and data tokens will be displayed. I<magic> will
+only display magic tokens, and I<data> will only display the data tokens.
 
 Can also use the B<--regexp> I<RE> option to specify which tokens to
 display based on a regular expression.
+
+=item B<--plugin> I<name>
+
+Selects which plugin's data B<--dump> displays: I<Bayes> (the default) or
+I<NeuralNetwork>. With I<NeuralNetwork>, I<magic> shows spam/ham/doc
+counts, vocabulary size and model info, and I<data> shows the vocabulary
+terms (requires C<use_neuralnetwork 1>).
+
+B<--plugin> only affects B<--dump>, and I<NeuralNetwork> is not supported
+together with B<--import>, B<--clear>, B<--backup> or B<--restore> -- the
+NeuralNetwork plugin has no equivalent of those Bayes-store-specific
+operations.
 
 =item B<--clear>
 
