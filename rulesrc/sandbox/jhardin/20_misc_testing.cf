@@ -2112,22 +2112,25 @@ meta           __BITCOIN_XPRIO      __XPRIO && (__BITCOIN || __BITCOIN_ID)
 meta           BITCOIN_XPRIO        __BITCOIN_XPRIO && !__ML1 && !__HAS_SENDER && !__DKIM_EXISTS && !__RCD_RDNS_MAIL_MESSY 
 describe       BITCOIN_XPRIO        Bitcoin + priority
 score          BITCOIN_XPRIO        2.500	# limit
+tflags         BITCOIN_XPRIO        publish
 
-meta           __BITCOIN_OBFU_SUBJ  __BITCOIN && __SUBJ_OBFU_PUNCT 
+meta           __BITCOIN_OBFU_SUBJ  (__BITCOIN || __BITCOIN_ID) && __SUBJ_OBFU_PUNCT 
 meta           BITCOIN_OBFU_SUBJ    __BITCOIN_OBFU_SUBJ && !__128_ALNUM_URI 
 describe       BITCOIN_OBFU_SUBJ    Bitcoin + obfuscated subject
 score          BITCOIN_OBFU_SUBJ    3.500	# limit
 tflags         BITCOIN_OBFU_SUBJ    publish
 
-meta           __BITCOIN_DIRECT     __BITCOIN && __DOS_DIRECT_TO_MX
-#meta           BITCOIN_DIRECT       __BITCOIN_DIRECT
-#describe       BITCOIN_DIRECT       Bitcoin + direct-to-MX
-#score          BITCOIN_DIRECT       3.500	# limit
+meta           __BITCOIN_DIRECT     (__BITCOIN || __BITCOIN_ID) && __DOS_DIRECT_TO_MX
+meta           BITCOIN_DIRECT       __BITCOIN_DIRECT
+describe       BITCOIN_DIRECT       Bitcoin + direct-to-MX
+score          BITCOIN_DIRECT       3.500	# limit
+tflags         BITCOIN_DIRECT       publish
 
-meta           __BITCOIN_TOEQFM     __BITCOIN && __TO_EQ_FROM 
+meta           __BITCOIN_TOEQFM     (__BITCOIN || __BITCOIN_ID) && __TO_EQ_FROM 
 meta           BITCOIN_TOEQFM       __BITCOIN_TOEQFM
 describe       BITCOIN_TOEQFM       Bitcoin + To same as From
 score          BITCOIN_TOEQFM       3.500	# limit
+tflags         BITCOIN_TOEQFM       publish
 
 meta           BITCOIN_VISTA        __BITCOIN && __VISTA_MSGID
 describe       BITCOIN_VISTA        Bitcoin + old MSFT msgid format
@@ -2189,10 +2192,10 @@ describe       BITCOIN_SPAM_06  BitCoin spam pattern 06
 score          BITCOIN_SPAM_06  1.500	# limit
 tflags         BITCOIN_SPAM_06  publish
 
-meta           __BITCOIN_SPAM_07  __BITCOIN_ID && __TO_EQ_FROM
-meta           BITCOIN_SPAM_07    __BITCOIN_SPAM_07 && !__DKIM_EXISTS 
+meta           __BITCOIN_SPAM_07  __BITCOIN_ID && __HELO_MISC_IP 
+meta           BITCOIN_SPAM_07    __BITCOIN_SPAM_07
 describe       BITCOIN_SPAM_07    BitCoin spam pattern 07
-score          BITCOIN_SPAM_07    3.500	# limit
+score          BITCOIN_SPAM_07    2.500	# limit
 tflags         BITCOIN_SPAM_07    publish
 
 meta           BITCOIN_SPAM_08  __BITCOIN_ID && __TO_IN_SUBJ 
