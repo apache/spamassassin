@@ -91,6 +91,26 @@ sub handle_html {
 
   my $results = $node->{html_results}  or return [];
 
+  # Harvest URIs the HTML parser found into the URI detail list (type 'html')
+  my $detail = $results->{uri_detail} || {};
+  $pms->{'uri_truncated'} = 1 if $results->{uri_truncated};
+  while (my ($uri, $info) = each %$detail) {
+    if ($pms->add_uri_detail_list($uri, $info->{types}, 'html', 0)) {
+      # Copy and uniq the anchor text, collapsing whitespace (Bug 8268/8310).
+      if (exists $info->{anchor_text}) {
+        for (@{$info->{anchor_text}}) {
+          s/^\s+|\s+$//g;
+          s/\s+/ /g;
+          utf8::encode($_) if utf8::is_utf8($_);
+        }
+        my %seen;
+        foreach (grep { !$seen{$_}++ } @{$info->{anchor_text}}) {
+          push @{$pms->{uri_detail_list}->{$uri}->{anchor_text}}, $_;
+        }
+      }
+    }
+  }
+
   my @parts;
 
   # Typed pseudo-parts the HTML parser extracted, each already a

@@ -2691,12 +2691,14 @@ sub get_uri_detail_list {
   }
   $self->{uri_detail_list_run} = 1;
 
+  # Ensure MIME-part handlers have run
+  $self->{msg}->apply_handlers($self);
+
   my $timer = $self->{main}->time_method("get_uri_detail_list");
 
   # process text parsed uris
   $self->_process_text_uri_list();
-  # process html uris
-  $self->_process_html_uri_list();
+  # HTML URIs were added by the HTML handler above (see apply_handlers).
   # process dkim uris
   $self->_process_dkim_uri_list();
 
@@ -2803,36 +2805,6 @@ sub _process_text_uri_list {
       dbg("uri: parsed uri from text ($rawtype): $uri") if $would_log_uri_all;
 
       $self->add_uri_detail_list($uri, $types, 'parsed', 1);
-    }
-  }
-}
-
-sub _process_html_uri_list {
-  my ($self) = @_;
-
-  # get URIs from HTML parsing
-  # use the metadata version since $self->{html_all} may not be setup
-  foreach my $html (@{$self->{msg}->{metadata}->{html_all}}) {
-    my $detail = $html->{uri_detail} || { };
-    $self->{'uri_truncated'} = 1 if $html->{uri_truncated};
-
-    # canonicalize the HTML parsed URIs
-    while(my($uri, $info) = each %{ $detail }) {
-      if ($self->add_uri_detail_list($uri, $info->{types}, 'html', 0)) {
-        # Need also to copy and uniq anchor text
-        if (exists $info->{anchor_text}) {
-          # Bug 8268: Collapse whitespace
-          for (@{$info->{anchor_text}}) {
-            s/^\s+|\s+$//g;
-            s/\s+/ /g;
-            utf8::encode($_) if utf8::is_utf8($_);  # Bug 8310: UTF-8 encode anchor_text
-          }
-          my %seen;
-          foreach (grep { !$seen{$_}++ } @{$info->{anchor_text}}) {
-            push @{$self->{uri_detail_list}->{$uri}->{anchor_text}}, $_;
-          }
-        }
-      }
     }
   }
 }
