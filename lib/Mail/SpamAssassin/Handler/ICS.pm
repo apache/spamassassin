@@ -42,7 +42,8 @@ round to C<:00>) -- see L</EVAL RULES>.
 
 =head1 RETURNS
 
-This handler returns no sub-parts (always an empty list).
+This handler returns one C<text/html> sub-part for each HTML-typed property found,
+or an empty list if there are none.
 
 =head1 ICS TEXT RULES
 
@@ -106,6 +107,10 @@ use Mail::SpamAssassin::Handler;
 use Mail::SpamAssassin::Logger qw(dbg would_log);
 use Mail::SpamAssassin::Util qw(compile_regexp untaint_var);
 
+# Regular expression to detect HTML
+my $HTML_TAG_RE = qr{</?(?:a|abbr|b|blockquote|br|div|em|font|h[1-6]|i|img|li|ol
+                       |p|span|strong|table|td|th|tr|u|ul)\b}xi;
+
 our @ISA = qw(Mail::SpamAssassin::Handler);
 
 sub log_dbg { Mail::SpamAssassin::Logger::dbg ("ics: @_"); }
@@ -164,11 +169,12 @@ sub set_config {
   $conf->{parser}->register_commands(\@cmds);
 }
 
-# handle_ics($node, $pms): parse one iCalendar part.  Collect SUMMARY/DESCRIPTION
-# text into $pms->{Handler}{ICS}{text}; add any URIs from URL/ATTACH/LOCATION to the
-# URI detail list (type 'ics'); accumulate the ATTENDEE count and derive the
-# "random start time" signal (DTSTART with non-zero seconds) across all parts.
-# Produces no child parts.
+# handle_ics($node, $pms): parse one iCalendar part.  Render its plain
+# SUMMARY/DESCRIPTION text into the node (set_rendered) for body rules; add any URIs
+# from URL/ATTACH/LOCATION to the URI detail list (type 'ics'); accumulate the
+# ATTENDEE count and props across all parts.  Stashes the node in {ICS}{nodes} (so
+# _get_ics_text can later gather its rendered text for icstext), and returns any
+# HTML property as a text/html child part for the HTML handler.
 sub handle_ics {
   my ($self, $node, $pms) = @_;
 
@@ -176,10 +182,10 @@ sub handle_ics {
   return [] unless defined $data && length $data;
 
   my $ics = $pms->{Handler}{ICS} ||= {
-    text        => [],
     event_count => 0,
     props       => {},
     seen        => {},
+    nodes       => [],   # every ICS part, for _get_ics_text to gather rendered text
   };
 
   # Parse the part into per-event records, then merge each event exactly once,
@@ -192,7 +198,7 @@ sub handle_ics {
   # exceptions) have distinct UIDs and are all counted.
   my $events = $self->_parse_ics($data);
 
-  my @node_text;   # SUMMARY/DESCRIPTION text from this node's (deduped) events
+  my %content;   # MIME type => [ values ] from this node's (deduped) events
 
   for my $ev ( @$events ) {
     # Fall back to a content fingerprint for events with no UID, so duplicate
@@ -200,15 +206,15 @@ sub handle_ics {
     # genuinely different UID-less events together.
     my $key = defined($ev->{uid}) && $ev->{uid} ne ''
       ? "uid:$ev->{uid}"
-      : 'fp:'.join("\x00", @{$ev->{text}}, map { $_->[0] } @{$ev->{uris}});
+      : 'fp:'.join("\x00", (map { @{ $ev->{content}{$_} } } sort keys %{ $ev->{content} }),
+                           map { $_->[0] } @{$ev->{uris}});
 
     if ($ics->{seen}{$key}++) {
       log_dbg("skipping duplicate event ($key): ".($node->{name} || '?'));
       next;
     }
 
-    push @{ $ics->{text} }, @{ $ev->{text} } if @{ $ev->{text} };
-    push @node_text,        @{ $ev->{text} } if @{ $ev->{text} };
+    push @{ $content{$_} }, @{ $ev->{content}{$_} } for keys %{ $ev->{content} };
 
     for my $u ( @{ $ev->{uris} } ) {
       my ($uri, $tag) = @$u;
@@ -224,23 +230,33 @@ sub handle_ics {
             .": ".($node->{name} || '?'));
   }
 
-  # Render this part's calendar text into the body so ordinary body rules can
-  # match it.
-  #
-  # Join the SUMMARY/DESCRIPTION values with a blank line: get_body_text_array_common
-  # collapses single newlines to spaces (only a blank line survives as a break), so a
-  # single "\n" here would run consecutive properties together into one line.
-  if (@node_text) {
-    $node->set_rendered(join("\n\n", @node_text)."\n", 'text/calendar');
+  # Render this part's plain text into the node so ordinary body rules can match it.
+  # Join the values with a blank line: get_body_text_array_common collapses single
+  # newlines to spaces (only a blank line survives as a break), so a single "\n"
+  # here would run consecutive properties together into one line.
+  my $plain = delete $content{'text/plain'};
+  if ($plain && @$plain) {
+    $node->set_rendered(join("\n\n", @$plain)."\n", 'text/calendar');
   }
 
-  return [];
+  # Stash every ICS part so _get_ics_text can gather rendered text from the node and
+  # all its sub-parts, whatever their type (see _get_ics_text).
+  push @{ $ics->{nodes} }, $node;
+
+  # Hand every remaining content type to its handler as a child part.
+  my @parts;
+  for my $type ( sort keys %content ) {
+    push @parts, { type => $type, data => $_ } for @{ $content{$type} };
+  }
+  return \@parts;
 }
 
 # _parse_ics($data): pure-Perl iCalendar parser.  Never dies (wrapped in eval);
 # returns an arrayref of per-event records, one per VEVENT, each:
-#   { uid => $uid, text => \@summary_description, uris => [ [uri, tag], ... ],
-#     props => { NAME => [ raw_line, ... ] } }.
+#   { uid => $uid, content => { MIME_type => [ value, ... ] },
+#     uris => [ [uri, tag], ... ], props => { NAME => [ raw_line, ... ] } }.
+# content holds the human-readable SUMMARY/DESCRIPTION/X-ALT-DESC values keyed by
+# type ('text/plain' or 'text/html').
 # props holds every property's raw (unfolded) content line keyed by upper-cased
 # name, for check_ics_event_prop to search (the "random start time" signal is
 # derived from the raw DTSTART line).  Returning per-event lets handle_ics dedupe
@@ -269,7 +285,7 @@ sub _parse_ics {
         my $comp = uc $val;
         push @stack, $comp;
         # Open a fresh event record when we enter a VEVENT.
-        $ev = { uid => undef, text => [], uris => [], props => {} }
+        $ev = { uid => undef, content => {}, uris => [], props => {} }
           if $comp eq 'VEVENT';
         next;
       }
@@ -295,9 +311,16 @@ sub _parse_ics {
       if ($name eq 'UID') {
         $ev->{uid} = $val if $val =~ /\S/;
       }
-      elsif ($name eq 'SUMMARY' || $name eq 'DESCRIPTION') {
+      elsif ($name eq 'SUMMARY') {
+          my $t = _unescape_text($val);
+          push @{ $ev->{content}{'text/plain'} }, $t if defined $t && $t =~ /\S/;
+      }
+      elsif ($name eq 'DESCRIPTION' || $name eq 'X-ALT-DESC') {
+        my $is_html = $params =~ /(?:^|;)\s*FMTTYPE\s*=\s*text\/html\b/i
+                      || $val =~ $HTML_TAG_RE;
+        my $type = $is_html ? 'text/html' : 'text/plain';
         my $t = _unescape_text($val);
-        push @{ $ev->{text} }, $t if defined $t && $t ne '';
+        push @{ $ev->{content}{$type} }, $t if defined $t && $t =~ /\S/;
       }
       elsif ($name eq 'URL') {
         push @{ $ev->{uris} }, [ $val, 'url' ] if $val =~ /\S/;
@@ -460,18 +483,43 @@ sub parsed_metadata {
   # Ensure the structure exists even when the message has no ICS parts, so the
   # eval rules can read the counters without autovivifying or dying.
   $pms->{Handler}{ICS} ||= {
-    text        => [],
     event_count => 0,
     props       => {},
     seen        => {},
+    nodes       => [],
   };
 
   $self->_run_icstext_rules($opts);
 }
 
+# The text array that icstext rules match, built lazily and cached: the rendered
+# text of every ICS part and all its sub-parts.  Called only from the compiled
+# _run_icstext_rules, so this work happens only when there is at least one icstext
+# rule.
 sub _get_ics_text {
   my ($self, $pms) = @_;
-  return ($pms->{Handler}{ICS} && $pms->{Handler}{ICS}{text}) || [];
+  my $ics = $pms->{Handler}{ICS} or return [];
+  return $ics->{text} if $ics->{text};   # cached
+
+  my @text;
+  for my $node ( @{ $ics->{nodes} || [] } ) {
+    _gather_rendered($node, \@text);
+  }
+  return $ics->{text} = \@text;
+}
+
+# Append the visible rendered text of $node and, recursively, all of its
+# handler-produced sub-parts to $out, one array element per non-blank line.
+# icstext matches line by line, so a multi-line render is split back into lines.
+sub _gather_rendered {
+  my ($node, $out) = @_;
+  my (undef, $text) = $node->rendered();   # ($type, $text)
+  if (defined $text) {
+    for my $line (split /\n/, $text) {
+      push @$out, $line if $line =~ /\S/;
+    }
+  }
+  _gather_rendered($_, $out) for @{ $node->{handler_parts} || [] };
 }
 
 # Eval rule: true if the total ATTENDEE count across all invites is in [min, max].

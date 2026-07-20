@@ -1,0 +1,24 @@
+From: sender@example.com
+To: victim@example.com
+Subject: ics html property test
+Message-Id: <ics-html-test@example.com>
+Date: Tue, 10 Jun 2025 12:00:00 +0000
+MIME-Version: 1.0
+Content-Type: text/calendar; method=REQUEST; name="invite.ics"
+Content-Disposition: attachment; filename="invite.ics"
+
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Example//Invite//EN
+METHOD:REQUEST
+BEGIN:VEVENT
+UID:html-1@example.com
+SUMMARY:Meeting invite
+DESCRIPTION:<p><a href="https://phish.example/hidden-in-html">Watch Live</a
+ ></p><p>Now it&#39\;s time to build ICSHTMLBODY.</p>
+X-ALT-DESC;FMTTYPE=text/html:<p><a href="https://phish.example/hidden-in-ht
+ ml">Watch Live</a></p><p>Now it&#39\;s time to build ICSHTMLBODY.</p>
+DTSTART:20250610T120000Z
+DTEND:20250610T130000Z
+END:VEVENT
+END:VCALENDAR
