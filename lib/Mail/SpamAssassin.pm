@@ -1661,6 +1661,25 @@ sub finish {
   $self->call_plugins("finish_tests", { conf => $self->{conf},
                                         main => $self });
 
+  # clean up eval-plugin glue (register_plugin_eval_glue()) and any
+  # plugin-registered generated rule methods (register_generated_rule_method()),
+  # left in place across all messages processed by this session -- see
+  # the comment in PerMsgStatus::finish() for why these aren't cleaned up
+  # per-message. register_plugin_eval_glue() pushes bare names (defined in
+  # the PerMsgStatus package); register_generated_rule_method() pushes
+  # fully-qualified ones -- qualify bare names here since, unlike
+  # PerMsgStatus::finish()'s original cleanup loop, this code doesn't run
+  # in the PerMsgStatus package itself.
+  { no strict 'refs';
+    foreach my $method (@Mail::SpamAssassin::PerMsgStatus::TEMPORARY_METHODS) {
+      my $fqname = $method =~ /::/ ? $method
+                 : "Mail::SpamAssassin::PerMsgStatus::$method";
+      undef &{$fqname} if defined &{$fqname};
+    }
+  }
+  @Mail::SpamAssassin::PerMsgStatus::TEMPORARY_METHODS = ();
+  %Mail::SpamAssassin::PerMsgStatus::TEMPORARY_EVAL_GLUE_METHODS = ();
+
   $self->{plugins}->finish(); delete $self->{plugins};
 
   if ($self->{bayes_scanner}) {
