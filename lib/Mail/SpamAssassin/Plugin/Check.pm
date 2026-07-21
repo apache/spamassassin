@@ -298,9 +298,9 @@ sub do_meta_tests {
   my $mr = $pms->{meta_check_ready};
   my $mp = $pms->{meta_pending};
   my $md = $pms->{conf}->{meta_dependencies};
+  my $mdr = $pms->{conf}->{meta_deprules};
   my $mt = $pms->{conf}->{meta_tests};
   my $h = $pms->{tests_already_hit};
-  my $retry;
 
   # When finishing, first mark all unrun non-meta rules as finished,
   # it will enable the next loop to finish everything properly
@@ -314,14 +314,31 @@ sub do_meta_tests {
     }
   }
 
-RULE:
-  foreach my $rulename ($finish ? keys %$mp : keys %$mr) {
+  # Work queue of metas worth (re)checking, seeded from meta_check_ready
+  # (or all pending metas when finishing). Running a meta can make other
+  # metas newly ready (a meta depending on it); rather than rescanning
+  # every pending/ready meta again on each such change (as a "goto RULE"
+  # restart would), push only the specific metas that depend on whatever
+  # just resolved, via the same meta_deprules reverse-dependency map
+  # PerMsgStatus::rule_ready() uses.
+  my @queue = $finish ? keys %$mp : keys %$mr;
+  my %queued; @queued{@queue} = ();
+
+  while (@queue) {
+    my $rulename = shift @queue;
+    delete $queued{$rulename};
+    next if exists $h->{$rulename};  # already resolved
+
     # Meta is not ready if some dependency has not run yet
+    my $ready = 1;
     foreach my $deprule (@{$md->{$rulename}||[]}) {
       if (!exists $h->{$deprule}) {
-        next RULE;
+        $ready = 0;
+        last;
       }
     }
+    next if !$ready;
+
     # Metasubs look like ($_[1]->{$rulename}||0) ...
     my $result = $mt->{$rulename}->($pms, $h);
     if ($result) {
@@ -333,11 +350,15 @@ RULE:
     }
     delete $mr->{$rulename};
     delete $mp->{$rulename};
-    # Reiterate all metas again, in case some meta depended on us
-    $retry = 1;
-  }
 
-  goto RULE if $retry--;
+    # $rulename just resolved (in %$h); queue only the metas that
+    # specifically depend on it, instead of every pending/ready meta.
+    foreach my $deprule (keys %{$mdr->{$rulename} || {}}) {
+      next if $queued{$deprule};
+      push @queue, $deprule;
+      $queued{$deprule} = 1;
+    }
+  }
 
   delete $pms->{meta_check_ready};
 }
