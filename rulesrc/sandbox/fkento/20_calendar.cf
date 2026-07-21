@@ -1,9 +1,12 @@
 if can(Mail::SpamAssassin::Conf::feature_handlers)
-ifhandler Mail::SpamAssassin::Handler::ICS
+
+# Note: must use `ifplugin` because SA < 4.0.3 doesn't understand `ifhandler`
+ifplugin Mail::SpamAssassin::Handler::ICS
 
 body          FKO_CAL_RAND_START  eval:check_ics_random_start_time()
 score         FKO_CAL_RAND_START  2.0  # limit
 describe      FKO_CAL_RAND_START  Calendar invite with random start time
 
 endif
+
 endif
