@@ -735,28 +735,46 @@ sub do_head_tests {
 sub do_body_tests {
   my ($self, $pms, $priority, $textary) = @_;
   my $loopid = 0;
+  my @mergeable;
 
   $self->run_generic_tests ($pms, $priority,
     consttype => $Mail::SpamAssassin::Conf::TYPE_BODY_TESTS,
     type => 'body',
     testhash => $pms->{conf}->{body_tests},
     args => [ @$textary ],
+    pre_loop_body => sub { @mergeable = (); },
+    post_loop_body => sub {
+      my ($self, $pms, $conf, %opts) = @_;
+      $self->add_merged_line_tests($pms, 'body', 'BODY: ', \@mergeable);
+    },
     loop_body => sub
   {
     my ($self, $pms, $conf, $rulename, $pat, %opts) = @_;
+
+    my $nosubject = ($conf->{tflags}->{$rulename}||'') =~ /\bnosubject\b/;
+    my $is_multiple = ($conf->{tflags}->{$rulename}||'') =~ /\bmultiple\b/;
+
+    # Simple (single-hit, non-templated) rules get merged into one shared
+    # loop by add_merged_line_tests() instead of each walking the full
+    # line array on its own -- see that function for why "multiple" and
+    # capture-template rules are excluded and kept as their own loop.
+    if (!$is_multiple && !exists $conf->{capture_template_rules}->{$rulename}) {
+      push @mergeable, { rulename => $rulename, nosubject => $nosubject };
+      return;
+    }
+
     my $sub = '';
     if ($would_log_rules_all) {
       $sub .= '
       dbg("rules-all: running body rule %s", q{'.$rulename.'});
       ';
     }
-    my $nosubject = ($conf->{tflags}->{$rulename}||'') =~ /\bnosubject\b/;
     if ($nosubject) {
       $sub .= '
       my $nosubj = 1;
       ';
     }
-    if (($conf->{tflags}->{$rulename}||'') =~ /\bmultiple\b/)
+    if ($is_multiple)
     {
       # support multiple matches
       $loopid++;
@@ -828,22 +846,35 @@ sub do_body_tests {
 sub do_uri_tests {
   my ($self, $pms, $priority, @uris) = @_;
   my $loopid = 0;
+  my @mergeable;
 
   $self->run_generic_tests ($pms, $priority,
     consttype => $Mail::SpamAssassin::Conf::TYPE_URI_TESTS,
     type => 'uri',
     testhash => $pms->{conf}->{uri_tests},
     args => [ @uris ],
+    pre_loop_body => sub { @mergeable = (); },
+    post_loop_body => sub {
+      my ($self, $pms, $conf, %opts) = @_;
+      $self->add_merged_line_tests($pms, 'uri', 'URI: ', \@mergeable);
+    },
     loop_body => sub
   {
     my ($self, $pms, $conf, $rulename, $pat, %opts) = @_;
+
+    my $is_multiple = ($conf->{tflags}->{$rulename}||'') =~ /\bmultiple\b/;
+    if (!$is_multiple && !exists $conf->{capture_template_rules}->{$rulename}) {
+      push @mergeable, { rulename => $rulename };
+      return;
+    }
+
     my $sub = '';
     if ($would_log_rules_all) {
       $sub .= '
       dbg("rules-all: running uri rule %s", q{'.$rulename.'});
       ';
     }
-    if (($conf->{tflags}->{$rulename}||'') =~ /\bmultiple\b/) {
+    if ($is_multiple) {
       $loopid++;
       my ($max) = $conf->{tflags}->{$rulename} =~ /\bmaxhits=(\d+)\b/;
       $max = untaint_var($max);
@@ -893,21 +924,34 @@ sub do_uri_tests {
 sub do_rawbody_tests {
   my ($self, $pms, $priority, $textary) = @_;
   my $loopid = 0;
+  my @mergeable;
   $self->run_generic_tests ($pms, $priority,
     consttype => $Mail::SpamAssassin::Conf::TYPE_RAWBODY_TESTS,
     type => 'rawbody',
     testhash => $pms->{conf}->{rawbody_tests},
     args => [ @$textary ],
+    pre_loop_body => sub { @mergeable = (); },
+    post_loop_body => sub {
+      my ($self, $pms, $conf, %opts) = @_;
+      $self->add_merged_line_tests($pms, 'rawbody', 'RAW: ', \@mergeable);
+    },
     loop_body => sub
   {
     my ($self, $pms, $conf, $rulename, $pat, %opts) = @_;
+
+    my $is_multiple = ($conf->{tflags}->{$rulename}||'') =~ /\bmultiple\b/;
+    if (!$is_multiple && !exists $conf->{capture_template_rules}->{$rulename}) {
+      push @mergeable, { rulename => $rulename };
+      return;
+    }
+
     my $sub = '';
     if ($would_log_rules_all) {
       $sub .= '
       dbg("rules-all: running rawbody rule %s", q{'.$rulename.'});
       ';
     }
-    if (($conf->{tflags}->{$rulename}||'') =~ /\bmultiple\b/)
+    if ($is_multiple)
     {
       # support multiple matches
       $loopid++;
@@ -1256,6 +1300,98 @@ EOT
       info("check: exceeded time limit in $method, skipping further tests");
       $pms->{deadline_exceeded} = 1;
     }
+  }
+}
+
+###########################################################################
+
+# Merge a batch of "simple" line-matching rules (no "multiple" tflag, no
+# regex capture template -- see callers) into a single shared foreach loop
+# over the line array, instead of each rule walking the full array in its
+# own private loop. Standalone rules (tflag multiple, or using capture
+# templates, which mutate the shared $test_qr variable per-rule and so
+# can't share a loop iteration with other rules) are left as their own
+# loop by the caller, unchanged.
+#
+# $rules is an arrayref of { rulename => ..., nosubject => 0|1 (body only) }.
+# Uses add_evalstr_corked() throughout (no size-triggered flush) since the
+# opened loop must not be split across compiled chunks; the caller's next
+# add_evalstr() call after this returns is a safe flush point.
+sub add_merged_line_tests {
+  my ($self, $pms, $ruletype, $hit_prefix, $rules) = @_;
+
+  return if !@$rules;
+
+  foreach my $r (@$rules) {
+    my $rulename = $r->{rulename};
+    $self->add_evalstr_corked($pms, '
+      if ($scoresptr->{q{'.$rulename.'}}) {
+        $self->rule_ready(q{'.$rulename.'}, 1);
+      }
+    ');
+  }
+
+  $self->add_evalstr_corked($pms, '
+    {
+      my %done;
+  ');
+  foreach my $r (@$rules) {
+    next if !$r->{nosubject};
+    $self->add_evalstr_corked($pms, '
+      my $nosubj_'.$r->{rulename}.' = 1;
+    ');
+  }
+  $self->add_evalstr_corked($pms, '
+      foreach my $l (@_) {
+  ');
+
+  foreach my $r (@$rules) {
+    my $rulename = $r->{rulename};
+    my $sub = '';
+    if ($would_log_rules_all) {
+      $sub .= '
+        dbg("rules-all: running '.$ruletype.' rule %s", q{'.$rulename.'});
+      ';
+    }
+    if ($r->{nosubject}) {
+      $sub .= '
+        if ($nosubj_'.$rulename.') { $nosubj_'.$rulename.' = 0; }
+        else {
+      ';
+    }
+    $sub .= '
+        '.$self->hash_line_for_rule($pms, $rulename).'
+        if ($l =~ /$qrptr->{q{'.$rulename.'}}/p) {
+          '.$self->capture_plugin_code().'
+          $self->got_hit(q{'.$rulename.'}, "'.$hit_prefix.'", ruletype => "'.$ruletype.'");
+          '.$self->hit_rule_plugin_code($pms, $rulename, $ruletype, '').'
+          $done{q{'.$rulename.'}} = 1;
+        }
+    ';
+    if ($r->{nosubject}) {
+      $sub .= '
+        }
+      ';
+    }
+    $self->add_evalstr_corked($pms, '
+        if (!$done{q{'.$rulename.'}} && $scoresptr->{q{'.$rulename.'}}) {
+          '.$sub.'
+        }
+    ');
+  }
+
+  $self->add_evalstr_corked($pms, '
+      }
+    }
+  ');
+
+  foreach my $r (@$rules) {
+    my $rulename = $r->{rulename};
+    $self->add_evalstr_corked($pms, '
+      if ($scoresptr->{q{'.$rulename.'}}) {
+        '.$self->ran_rule_plugin_code($rulename, $ruletype).'
+      }
+    ');
   }
 }
 
