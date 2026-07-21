@@ -1,5 +1,5 @@
 if can(Mail::SpamAssassin::Conf::feature_handlers)
-ifhandler Mail::SpamAssassin::Handler::ICS
+ifplugin Mail::SpamAssassin::Handler::ICS
 
 body          FKO_CAL_RAND_START  eval:check_ics_random_start_time()
 score         FKO_CAL_RAND_START  2.0  # limit
