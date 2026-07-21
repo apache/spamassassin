@@ -1535,7 +1535,10 @@ sub get_decoded_body_text_array {
     # and not displayed
     next if ($parts[$pt]->effective_type() eq 'text/calendar');
 
-    my $rawbody = $parts[$pt]->decode();
+    # Bound base64 decoding to the scan size (plus boundary slack for the
+    # truncate-at-boundary search below) so oversized base64-encoded parts
+    # aren't fully decoded just to be thrown away.
+    my $rawbody = $parts[$pt]->decode($scansize ? $scansize + 1024 : undef);
     my $rawlen = length($rawbody);
 
     # Truncate to rawbody_part_scan_size
