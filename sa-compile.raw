@@ -168,6 +168,10 @@ my $spamtest = Mail::SpamAssassin->new(
 # appropriate BodyRuleBaseExtractor settings for rule2xs usage
 $spamtest->{base_extract} = 1;
 $spamtest->{bases_must_be_casei} = 1;
+# NOTE: bases_can_use_alternations, bases_can_use_quantifiers, and
+# bases_can_use_char_classes are not currently read anywhere in
+# Mail::SpamAssassin::Plugin::BodyRuleBaseExtractor; setting them here
+# has no effect on extraction.
 $spamtest->{bases_can_use_alternations} = 0;
 $spamtest->{bases_can_use_quantifiers} = 0;
 $spamtest->{bases_can_use_char_classes} = 0;
