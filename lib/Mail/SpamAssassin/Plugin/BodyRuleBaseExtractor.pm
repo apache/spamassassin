@@ -521,9 +521,10 @@ sub extract_hints {
   my $lossy = 0;
   $mods =~ s/L// and $lossy++;
 
-  # if there are anchors, give up; we can't get much 
-  # faster than these anyway
-  die "anchors" if $rule =~ /^\(?(?:\^|\\A)/;
+  # die "anchors" if $rule =~ /^\(?(?:\^|\\A)/;
+  # just remove start-of-string anchors; they're slow so could gain
+  # from our speedup
+  $rule =~ s/^\(?(?:\^|\\A)// and $lossy++;
 
   # die "anchors" if $rule =~ /(?:\$|\\Z)\)?$/;
   # just remove end-of-string anchors; they're slow so could gain
