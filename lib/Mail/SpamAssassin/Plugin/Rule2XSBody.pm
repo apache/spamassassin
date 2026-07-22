@@ -113,10 +113,27 @@ sub setup_test_set_pri {
   $conf->{skip_body_rules}   ||= { };
   $conf->{need_one_line_sub} ||= { };
 
+  # cache the compiled scan() entry point once, instead of resolving it
+  # by symbolic string dereference on every line of every message
+  $self->{scan_fn}{$ruletype} = \&{$modname.'::scan'};
+
   my %longname;
+  my $hit_meta = ($self->{hit_meta}{$ruletype} = { });
   foreach my $nameandflags (keys %{$hasrules}) {
     my $name = $nameandflags; $name =~ s/,\[.*?\]$//;
     $longname{$name} = $nameandflags;
+
+    # precompute the per-hit metadata that run_body_fast_scan() would
+    # otherwise have to re-derive with regexps on every single hit:
+    # the plain rulename, whether the rule is a "lossless" (l=0) match,
+    # and whether it's flagged 'nosubject', all constant for the life
+    # of this compiled ruleset.
+    my $flags = ($nameandflags =~ /,\[(.*?)\]$/) ? $1 : '';
+    $hit_meta->{$nameandflags} = [
+      $name,
+      ($flags =~ /\bl=0/) ? 1 : 0,
+      (($conf->{tflags}->{$name}||'') =~ /\bnosubject\b/) ? 1 : 0,
+    ];
   }
 
   my $found = 0;
@@ -230,18 +247,32 @@ sub run_body_fast_scan {
   my $do_dbg = (would_log('dbg', 'zoom') > 1);
 
   my $scoresptr = $conf->{scores};
-  my $modname = "Mail::SpamAssassin::CompiledRegexps::".$ruletype;
+  my $scanfn = $self->{scan_fn}{$ruletype};
+  my $hit_meta = $self->{hit_meta}{$ruletype};
+  my $fncache = ($self->{fn_cache} ||= { });
+
+  # cache the lowercased body lines on the scanner (PerMsgStatus) object,
+  # since run_body_fast_scan() is called once per priority level that has
+  # zoomed rules, and each call re-scans the very same body lines.
+  # Unfortunately, calling lc() here seems to be the fastest way to
+  # support this and still work with UTF-8 ok, so do it once per message
+  # rather than once per priority level.
+  my $srclines = $params->{lines};
+  my $lc_cache = $scanner->{zoom_lc_lines};
+  if (!$lc_cache || $lc_cache->[0] != $srclines) {
+    $lc_cache = $scanner->{zoom_lc_lines} = [ $srclines, [ map { lc $_ } @{$srclines} ] ];
+  }
+  my $lclines = $lc_cache->[1];
 
   {
     no strict "refs";
-    my $lineidx;
-    foreach my $line (@{$params->{lines}})
+    my $lineidx = 0;
+    foreach my $lcline (@{$lclines})
     {
       $lineidx++;
+      my $line = $srclines->[$lineidx-1];  # original case, for real-regexp validation
 
-      # unfortunately, calling lc() here seems to be the fastest
-      # way to support this and still work with UTF-8 ok
-      my $results = &{$modname.'::scan'}(lc $line);
+      my $results = $scanfn->($lcline);
 
       my %alreadydone;
       foreach my $ruleandflags (@{$results})
@@ -250,21 +281,19 @@ sub run_body_fast_scan {
         next if exists $alreadydone{$ruleandflags};
         $alreadydone{$ruleandflags} = undef;
 
-        my $rulename = $ruleandflags;
-        my $flags = ($rulename =~ s/,\[(.*?)\]$//)?$1:'';
+        my $info = $hit_meta->{$ruleandflags} or next;
+        my ($rulename, $is_lossless, $nosubject) = @{$info};
 
         # ignore 0-scored rules, of course
         next unless $scoresptr->{$rulename};
 
         # skip first line if nosubject tflag
-        if ($lineidx == 1 && ($conf->{tflags}->{$rulename}||'') =~ /\bnosubject\b/) {
-          next;
-        }
+        next if $lineidx == 1 && $nosubject;
 
         # non-lossy rules; the re2c version matches exactly what
         # the perl regexp matches, so we don't need to perform
         # a validation match to follow up; it's a hit!
-        if ($flags =~ /\bl=0/) {
+        if ($is_lossless) {
           $scanner->got_hit($rulename, "BODY: ", ruletype => "one_line_body");
           # TODO: hit_rule_plugin_code? it's just debugging really
           next;
@@ -273,16 +302,21 @@ sub run_body_fast_scan {
 	# dbg("zoom: base found for $rulename: $line");
 	# }
 
-	my $fn = 'Mail::SpamAssassin::Plugin::Check::'.
-				$rulename.'_one_line_body_test';
-
-        # run the real regexp -- on this line alone.
-	# don't try this unless the fn exists; this can happen if the
+        # run the real regexp, on this line alone.
+	# Don't try this unless the fn exists; this can happen if the
 	# installed compiled-rules file contains details of rules
 	# that are not in our current ruleset (e.g. gets out of
-	# sync, or was compiled with extra rulesets installed)
-	if (defined &{$fn}) {
-	  if (!&{$fn} ($scanner, $line) && $do_dbg) {
+	# sync, or was compiled with extra rulesets installed).
+	# the coderef, once resolved (or confirmed absent), is cached for
+	# the rest of the process's lifetime.
+	my $fn = exists $fncache->{$rulename} ? $fncache->{$rulename}
+	       : ($fncache->{$rulename} =
+		    (defined &{'Mail::SpamAssassin::Plugin::Check::'.$rulename.'_one_line_body_test'})
+		      ? \&{'Mail::SpamAssassin::Plugin::Check::'.$rulename.'_one_line_body_test'}
+		      : undef);
+
+	if ($fn) {
+	  if (!$fn->($scanner, $line) && $do_dbg) {
 	    $self->{rule2xs_misses}->{$rulename}++;
 	  }
 	}
