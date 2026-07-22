@@ -322,7 +322,7 @@ sub do_meta_tests {
   # just resolved, via the same meta_deprules reverse-dependency map
   # PerMsgStatus::rule_ready() uses.
   my @queue = $finish ? keys %$mp : keys %$mr;
-  my %queued; @queued{@queue} = ();
+  my %queued; @queued{@queue} = (1) x @queue;
 
   while (@queue) {
     my $rulename = shift @queue;
