@@ -45,6 +45,7 @@ my @tests = (
     },
     {
         filename => 'data/pdf/rc4_40.pdf',
+        requires => ['Crypt::RC4'],
         expected => {
             'ClickArea' => 852, 'ClickRatio' => '0.18',
             'CreationDate' => 'D:20260624044120Z00\'00\'', 'Creator' => 'Pages',
@@ -59,6 +60,7 @@ my @tests = (
     },
     {
         filename => 'data/pdf/rc4_128.pdf',
+        requires => ['Crypt::RC4'],
         expected => {
             'ClickArea' => 852, 'ClickRatio' => '0.18',
             'CreationDate' => 'D:20260624044120Z00\'00\'', 'Creator' => 'Pages',
@@ -73,6 +75,7 @@ my @tests = (
     },
     {
         filename => 'data/pdf/aesv2.pdf',
+        requires => ['Crypt::RC4', 'Crypt::Mode::CBC', 'Digest::SHA'],
         expected => {
             'ClickArea' => 852, 'ClickRatio' => '0.18',
             'CreationDate' => 'D:20260624044120Z00\'00\'', 'Creator' => 'Pages',
@@ -87,6 +90,7 @@ my @tests = (
     },
     {
         filename => 'data/pdf/aesv3.pdf',
+        requires => ['Crypt::RC4', 'Crypt::Mode::CBC', 'Digest::SHA'],
         expected => {
             'ClickArea' => 852, 'ClickRatio' => '0.18',
             'CreationDate' => 'D:20260624044120Z00\'00\'', 'Creator' => 'Pages',
@@ -101,6 +105,7 @@ my @tests = (
     },
     {
         filename => 'data/pdf/aesv2_cleartext_meta.pdf',
+        requires => ['Crypt::RC4', 'Crypt::Mode::CBC', 'Digest::SHA'],
         expected => {
             'ClickArea' => 852, 'ClickRatio' => '0.18',
             'CreationDate' => 'D:20260624044120Z00\'00\'', 'Creator' => 'Pages',
@@ -115,6 +120,7 @@ my @tests = (
     },
     {
         filename => 'data/pdf/protected.pdf',
+        requires => ['Crypt::RC4', 'Crypt::Mode::CBC', 'Digest::SHA'],
         expected => {
             'ClickArea' => 0, 'Encrypted' => 1,
             'ImageArea' => 0, 'ImageCount' => 0, 'JavaScript' => 0,
@@ -136,6 +142,7 @@ my @tests = (
     },
     {
         filename => 'data/pdf/ascii85.pdf',
+        requires => ['Convert::Ascii85'],
         expected => {
             'ClickArea' => 0, 'ClickRatio' => '0.00',
             'Encrypted' => 0, 'ImageArea' => 20000, 'ImageCount' => 1,
@@ -210,15 +217,45 @@ my @tests = (
 plan tests => scalar(@tests);
 
 for my $test (@tests) {
+
+    # Some fixtures need optional CPAN modules to parse (encryption / ASCII85).
+    # Skip such fixtures on a minimal install rather than emitting confusing diffs.
+    if (my $missing = missing_modules($test->{requires})) {
+      SKIP: {
+            skip "$test->{filename}: requires $missing", 1;
+        }
+        next;
+    }
+
     my $context = Mail::SpamAssassin::PDF::Context::Info->new();
     my $pdf = Mail::SpamAssassin::PDF::Parser->new( context => $context );
 
     my $data = get_file_contents($test->{filename});
-    eval { $pdf->parse(\$data); 1 };
+    my $ok = eval { $pdf->parse(\$data); 1 };
+
+    if (!$ok) {
+        my $err = $@;
+        $err =~ s/\s+\z// if defined $err;
+        fail($test->{filename});
+        diag("parse() died: $err");
+        next;
+    }
 
     my $info = $context->get_info();
 
     is_deeply $info, $test->{expected}, $test->{filename};
+}
+
+# Return a comma-joined list of the modules in $required that cannot be loaded,
+# or undef if all are available (or none are required).
+sub missing_modules {
+    my $required = shift;
+    return undef unless $required && @$required;
+    my @missing = grep {
+        my $mod = $_;
+        !eval { (my $file = "$mod.pm") =~ s{::}{/}g; require $file; 1 };
+    } @$required;
+    return @missing ? join(', ', @missing) : undef;
 }
 
 sub get_file_contents {
