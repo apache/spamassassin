@@ -1282,11 +1282,32 @@ sub _find_part_by_type {
 # separate {handler_parts} array (never {body_parts}), so the MIME tree shape is
 # untouched -- only get_body_text_array_common reads {handler_parts}.
 
+# Set once per process by apply_handlers() below, so the missing-HTML-handler
+# warning fires at most once per run instead of once per scanned message.
+my $warned_no_html_handler;
+
 sub apply_handlers {
   my ($self, $permsgstatus) = @_;
   return if $self->{handlers_applied}++;
 
   my $conf = $permsgstatus->{conf};
+
+  # text/html parts only yield URIs (href/src/action/etc.) if a handler is
+  # registered for them; without one (missing "loadhandler
+  # Mail::SpamAssassin::Handler::HTML" in a .pre file), those URIs silently
+  # never reach get_uri_detail_list(), hiding them from url_redirector*,
+  # URIBL/URIDNSBL, and uri rules alike. Warn once so this doesn't go
+  # unnoticed.
+  if (!$warned_no_html_handler
+      && !Mail::SpamAssassin::Conf::get_handler_for_type($conf, 'text/html')
+      && $self->find_parts(qr/^text\/html$/, 1))
+  {
+    $warned_no_html_handler = 1;
+    warn "message: no MIME handler registered for text/html -- URIs in HTML ".
+         "links (href/src/action/etc.) will not be extracted; add ".
+         "'loadhandler Mail::SpamAssassin::Handler::HTML' to a .pre file\n";
+  }
+
   return unless $conf->{handlers} && %{$conf->{handlers}};
 
   $self->parse_body() if exists $self->{'parse_queue'};
