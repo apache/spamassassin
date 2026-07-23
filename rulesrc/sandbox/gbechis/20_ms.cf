@@ -1,0 +1,10 @@
+# real Microsoft authorize links only honor the
+# pre-registered "redirect_uri"; a "redirect_url" (or similar look-alike)
+# query parameter carrying an external URL is not a real OAuth2 parameter
+# and is a strong sign the link was built by a phishing kit riding on
+# Microsoft's domain reputation.
+uri      __GB_MSFT_OAUTH_AUTHORIZE   /^https?:\/\/login\.microsoftonline\.com\/[^\/?\#]+\/oauth2\/v2\.0\/authorize\?/i
+uri      __GB_MSFT_OAUTH_FAKE_REDIR  /[?&]redirect_url=https?(?::|%3a)/i
+meta     GB_MSFT_OAUTH_CONSENT_PHISH (__GB_MSFT_OAUTH_AUTHORIZE && __GB_MSFT_OAUTH_FAKE_REDIR)
+describe GB_MSFT_OAUTH_CONSENT_PHISH Message links to a Microsoft OAuth authorize URL carrying a spoofed non-standard redirect parameter
+score    GB_MSFT_OAUTH_CONSENT_PHISH 1.5 # limit

@@ -271,6 +271,7 @@ endif
 #
 if can(Mail::SpamAssassin::Plugin::Redirectors::has_url_redirector_selenium)
     url_redirector_selenium .blob.core.windows.net
+    url_redirector_selenium login.microsoftonline.com/common/oauth2/v2.0/authorize
     url_redirector_selenium uselesstools.jonfinger.com/r
 endif
 

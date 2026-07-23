@@ -1172,6 +1172,17 @@ sub _do_http {
 	return;
       } else {
         $newurl = $ua->get_current_url();
+        # get_current_url() right after ->get() only reflects the page that
+        # just finished loading, it does not wait for any client-side
+        # (JS/timer-driven) navigation that page goes on to trigger a few
+        # seconds later, poll for a bit before concluding this wasn't a redirect.
+        my $wait_secs = $conf->{url_redirector_timeout} || 5;
+        for (1 .. $wait_secs) {
+          last if $newurl ne $redir_url;
+          sleep 1;
+          my $polled = eval { $ua->get_current_url() };
+          $newurl = $polled if defined $polled;
+        }
         if($newurl ne $redir_url) {
           $rcode = 301;
         } else {
