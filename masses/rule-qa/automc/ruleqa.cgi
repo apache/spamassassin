@@ -9,6 +9,11 @@ use warnings;
 
 my $PERL_INTERP = $^X;
 
+# emergency abuse preventer: if true, only requests that actually invoke
+# pigz are subject to the load-based offline gate. If false, every request
+# is gated on load.
+use constant BLOCK_ONLY_ON_PIGZ => 1;
+
 our %FREQS_FILENAMES = (
     'DETAILS.age' => 'set 0, broken down by message age in weeks',
     'DETAILS.all' => 'set 0, broken down by contributor',
@@ -27,6 +32,10 @@ $self->ui_parse_url_base();
 $self->ui_get_url_switches();
 $self->ui_get_daterev();
 $self->ui_get_rules();
+if (!BLOCK_ONLY_ON_PIGZ && $self->is_overloaded) {
+  $self->print_offline_page();
+  exit 0;
+}
 $self->show_view();
 exit;
 
