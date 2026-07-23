@@ -360,6 +360,21 @@ our @OPTIONAL_MODULES = (
   version => 0,
   desc => 'AI::FANN is used by optional NeuralNetwork plugin',
 },
+{
+  module => 'Convert::Ascii85',
+  version => 0,
+  desc => 'Convert::Ascii85 can be used to decode ASCII85-filtered PDF streams',
+},
+{
+  module => 'Crypt::RC4',
+  version => 0,
+  desc => 'Crypt::RC4 can be used to decode decrypt encrypted PDFs',
+},
+{
+  module => 'Crypt::Mode::CBC',
+  version => 0,
+  desc => 'Crypt::Mode::CBC can be used to decode decrypt encrypted PDFs',
+},
 );
 
 our @BINARIES = ();
