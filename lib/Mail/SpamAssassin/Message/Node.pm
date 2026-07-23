@@ -450,7 +450,6 @@ sub decode {
 
 # Detect endianness of UTF-16 encoded data
 sub detect_utf16 {
-	my $data = $_[0];  # could not avoid copying large strings
 	my $utf16le_clues = 0;
 	my $utf16be_clues = 0;
 	my $sum_h_e = 0;
@@ -459,12 +458,21 @@ sub detect_utf16 {
 	my $sum_l_o = 0;
 	my $decoder = undef;
 
-	# avoid scan if BOM present
-	if( $data =~ /^(?:\xff\xfe|\xfe\xff)/ ) {
+	# A BOM already declares the encoding and endianness, so skip the heuristic
+	# scan and return the plain UTF-16 decoder, which consumes the BOM and picks
+	# the endianness from it.  Only the first two bytes matter, so test $_[0]
+	# directly rather than copying the (possibly multi-MB) body.
+	if( $_[0] =~ /^(?:\xff\xfe|\xfe\xff)/ ) {
 		dbg( "message: detect_utf16: found BOM" );
-		return;	# let perl figure it out from the BOM
+		return Encode::find_encoding("UTF-16");
 	}
-	
+
+	# The endianness heuristic below is statistical, so a bounded prefix gives the
+	# same verdict as the whole string while avoiding the unpack() of a large body
+	# into per-nibble arrays.  1024 is even, so the slice ends on a UTF-16 pair
+	# boundary.
+	my $data = substr($_[0], 0, 1024);
+
 	my @msg_h = unpack 'H' x length( $data ), $data;
 	my @msg_l = unpack 'h' x length( $data ), $data;
 
@@ -594,6 +602,10 @@ sub _normalize {
     # or declaring endianness as reported at:
     # https://bz.apache.org/SpamAssassin/show_bug.cgi?id=7252
 
+    # detect_utf16() sniffs the endianness of BOM-less UTF-16, and returns the
+    # BOM-aware UTF-16 decoder when a BOM is present.  (It returns undef only when
+    # the data does not look like UTF-16 at all, in which case we fall through to
+    # the guesswork below.)
     my $decoder = detect_utf16( $_[0] );
     if (defined $decoder) {
       if (eval { $rv = $decoder->decode($_[0], Encode::FB_CROAK | Encode::LEAVE_SRC); defined $rv }) {
