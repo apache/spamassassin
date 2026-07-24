@@ -1147,16 +1147,18 @@ sub html_text {
     # 1. using \w or [A-Za-z] instead of \S or non-punctuation
     # 2. exempting certain tags
     # no re "strict";  # since perl 5.21.8: Ranges of ASCII printables...
-    if ($text =~ /^[^\s\x21-\x2f\x3a-\x40\x5b-\x60\x7b-\x7e]/s &&
-	$self->{text}->[-1] =~ /[^\s\x21-\x2f\x3a-\x40\x5b-\x60\x7b-\x7e]\z/s)
+    # Bug 8404: \x00 is the paragraph-break marker pushed by html_whitespace() for block
+    # tags (div, p, ...).  It is not in \s, so it is included here explicitly;
+    if ($text =~ /^[^\s\x00\x21-\x2f\x3a-\x40\x5b-\x60\x7b-\x7e]/s &&
+	$self->{text}->[-1] =~ /[^\s\x00\x21-\x2f\x3a-\x40\x5b-\x60\x7b-\x7e]\z/s)
     {
       $self->{obfuscation}++;
     }
     if ($self->{text}->[-1] =~
-	/\b([^\s\x21-\x2f\x3a-\x40\x5b-\x60\x7b-\x7e]{1,7})\z/s)
+	/\b([^\s\x00\x21-\x2f\x3a-\x40\x5b-\x60\x7b-\x7e]{1,7})\z/s)
     {
       my $start = length($1);
-      if ($text =~ /^([^\s\x21-\x2f\x3a-\x40\x5b-\x60\x7b-\x7e]{1,7})\b/s) {
+      if ($text =~ /^([^\s\x00\x21-\x2f\x3a-\x40\x5b-\x60\x7b-\x7e]{1,7})\b/s) {
 	$self->{backhair}->{$start . "_" . length($1)}++;
       }
     }
