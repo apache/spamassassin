@@ -4490,4 +4490,7 @@ tflags     URI_REPLIT_DEV             publish
 # observed in phishing
 redirector_pattern                    m;^https?://[^?]+/Jump_ExternalUrl\.php\?url=(.+);i
 
+# abused in spam
+uri        __URI_RB_GY_REDIR          m,^https?://rb\.gy/,i
+
 
