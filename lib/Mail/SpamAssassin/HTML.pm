@@ -1147,18 +1147,38 @@ sub html_text {
     # 1. using \w or [A-Za-z] instead of \S or non-punctuation
     # 2. exempting certain tags
     # no re "strict";  # since perl 5.21.8: Ranges of ASCII printables...
-    # Bug 8404: \x00 is the paragraph-break marker pushed by html_whitespace() for block
-    # tags (div, p, ...).  It is not in \s, so it is included here explicitly;
-    if ($text =~ /^[^\s\x00\x21-\x2f\x3a-\x40\x5b-\x60\x7b-\x7e]/s &&
-	$self->{text}->[-1] =~ /[^\s\x00\x21-\x2f\x3a-\x40\x5b-\x60\x7b-\x7e]\z/s)
+    # Bug 8404: $wordchar excludes \s and ASCII punctuation but otherwise treats
+    # everything (incl. non-ASCII bytes) as a "word" character, so the synthetic
+    # marker bytes the parser inserts to represent whitespace/breaks would
+    # wrongly read as word content and make an ordinary block break look like a
+    # word split across a tag.  Exclude them from the class:
+    #   \x00   paragraph-break marker (html_whitespace, div/p/...)
+    #   \xa0   NBSP -- lone \x{a0} (char-semantics) or the trailing byte of
+    #          UTF-8 \xc2\xa0 (octet mode); NBSP renders as whitespace, and
+    #          html_tag() rewrites a <br> before a closing block to NBSP.
+    my $wordchar = qr/[^\s\x00\xa0\x21-\x2f\x3a-\x40\x5b-\x60\x7b-\x7e]/;
+
+    # \xa0 is also a legitimate byte in UTF-8 text -- it is the trailing byte of
+    # ~2000 letters (à=\xc3\xa0, Š=\xc5\xa0, 1400+ CJK) -- so excluding it from
+    # $wordchar would stop counting a word split right after one of those.  The
+    # anchors below add that back where it matters:
+    #   - leading (^): a run never *starts* with a bare \xa0 for a real letter
+    #     (that would be its lead byte, \xc2..\xf4), so just skip a leading UTF-8
+    #     NBSP with (?!\xc2\xa0).
+    #   - trailing (\z): a trailing \xa0 is ambiguous, so also accept an \xa0
+    #     that is the tail of a multibyte char (preceded by a UTF-8 continuation
+    #     or non-\xc2 lead byte); the NBSP forms (\xc2\xa0 / lone \x{a0}) are not.
+    my $lead  = qr/(?!\xc2\xa0)$wordchar/;
+    my $trail = qr/(?:$wordchar|(?<=[\x80-\xbf\xc3-\xf4])\xa0)/;
+
+    if ($text =~ /^$lead/s && $self->{text}->[-1] =~ /$trail\z/s)
     {
       $self->{obfuscation}++;
     }
-    if ($self->{text}->[-1] =~
-	/\b([^\s\x00\x21-\x2f\x3a-\x40\x5b-\x60\x7b-\x7e]{1,7})\z/s)
+    if ($self->{text}->[-1] =~ /\b($trail{1,7})\z/s)
     {
       my $start = length($1);
-      if ($text =~ /^([^\s\x00\x21-\x2f\x3a-\x40\x5b-\x60\x7b-\x7e]{1,7})\b/s) {
+      if ($text =~ /^($lead{1,7})\b/s) {
 	$self->{backhair}->{$start . "_" . length($1)}++;
       }
     }
