@@ -506,7 +506,7 @@ sub finish_parsing_start {
 sub initialise_url_shortener_cache {
   my ($self, $conf) = @_;
 
-  return if $self->{dbh};
+  return if $self->{dbh} && $self->{dbh_pid} && $self->{dbh_pid} == $$;
   return if !$conf->{url_shortener_cache_type};
 
   if (!$conf->{url_shortener_cache_dsn}) {
@@ -649,10 +649,13 @@ sub initialise_url_shortener_cache {
   if ($@ || !$self->{sth_clean}) {
     warn "DecodeShortURLs: cache connect failed: $@\n";
     undef $self->{dbh};
+    undef $self->{dbh_pid};
     undef $self->{sth_insert};
     undef $self->{sth_select};
     undef $self->{sth_delete};
     undef $self->{sth_clean};
+  } else {
+    $self->{dbh_pid} = $$;
   }
 }
 

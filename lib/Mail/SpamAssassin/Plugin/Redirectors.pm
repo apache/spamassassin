@@ -674,7 +674,7 @@ like a common browser.
 sub initialise_url_redirector_cache {
   my ($self, $conf) = @_;
 
-  return if $self->{dbh};
+  return if $self->{dbh} && $self->{dbh_pid} && $self->{dbh_pid} == $$;
   return if !$conf->{url_redirector_cache_type};
 
   if (!$conf->{url_redirector_cache_dsn}) {
@@ -817,10 +817,13 @@ sub initialise_url_redirector_cache {
   if ($@ || !$self->{sth_clean}) {
     warn "Redirectors: cache connect failed: $@\n";
     undef $self->{dbh};
+    undef $self->{dbh_pid};
     undef $self->{sth_insert};
     undef $self->{sth_select};
     undef $self->{sth_delete};
     undef $self->{sth_clean};
+  } else {
+    $self->{dbh_pid} = $$;
   }
 }
 

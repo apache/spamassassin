@@ -550,7 +550,7 @@ sub parse_config {
 sub initialise_extracttext_cache {
   my ($self, $conf) = @_;
 
-  return if $self->{dbh};
+  return if $self->{dbh} && $self->{dbh_pid} && $self->{dbh_pid} == $$;
   return if !$conf->{extracttext_cache_type};
 
   if (!$conf->{extracttext_cache_dsn}) {
@@ -691,10 +691,13 @@ sub initialise_extracttext_cache {
   if ($@ || !$self->{sth_clean}) {
     warn "ExtractText: cache connect failed: $@\n";
     undef $self->{dbh};
+    undef $self->{dbh_pid};
     undef $self->{sth_insert};
     undef $self->{sth_select};
     undef $self->{sth_delete};
     undef $self->{sth_clean};
+  } else {
+    $self->{dbh_pid} = $$;
   }
 }
 
