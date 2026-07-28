@@ -56,6 +56,7 @@ use re 'taint';
 use Errno qw(ENOENT);
 use Time::HiRes qw(time);
 use Encode;
+use IO::Select;
 
 use Mail::SpamAssassin::Constants qw(:sa :ip);
 use Mail::SpamAssassin::AsyncLoop;
@@ -2063,6 +2064,11 @@ sub extract_message_metadata {
 
   # allow plugins to add more metadata, read the stuff that's there, etc.
   $self->{main}->call_plugins ("parsed_metadata", { permsgstatus => $self });
+
+  # resolve any CNAME lookups queued by plugins that called
+  # add_uri_detail_list() directly above, in case get_uri_detail_list()
+  # never gets called for this message.
+  $self->_flush_pending_cname_lookups();
 }
 
 ###########################################################################
@@ -2702,6 +2708,10 @@ sub get_uri_detail_list {
   # process dkim uris
   $self->_process_dkim_uri_list();
 
+  # resolve any CNAME lookups queued above (and by any parsed_metadata
+  # plugins that called add_uri_detail_list() directly) concurrently
+  $self->_flush_pending_cname_lookups();
+
   return $self->{uri_detail_list};
 }
 
@@ -2892,45 +2902,22 @@ sub add_uri_detail_list {
     }
 
     my $dns_max_cname_cache = $self->{main}->{conf}->{dns_max_cname_cache};
-    if($self->is_dns_available() and ($dns_max_cname_cache > 0) and (not defined $self->{dns_cname_cache} or scalar %{$self->{dns_cname_cache}} < $dns_max_cname_cache)) {
-      # XXX we cannot call bgsend_and_start_lookup,
-      # otherwise get_uri_detail_list() might not
-      # return domains extracted from CNAME dns queries
-      # in time
-      my $orig_resolver =  $self->{main}->{resolver}->get_resolver();
-      my $pkt;
-      eval {
-        return if not defined $host;
-        return if exists $self->{dns_cname_cache}{$host};
-        my $handle = $orig_resolver->bgsend($host, 'CNAME');
-        $pkt = $orig_resolver->bgread($handle);
-        return if !$pkt; # aborted / timed out
-        my @answ = $pkt->answer;
-        # Set an invalid value in the cache, it will be overwritten later
-        # if a CNAME is present
-        $self->{dns_cname_cache}{$host} = 'invalid';
-        foreach my $ans ( @answ ) {
-          if($ans->can("cname")) {
-            return if not defined $ans->cname;
-            if(not exists $self->{dns_cname_cache}{$host}) {
-              $self->{dns_cname_cache}{$host} = $ans->cname;
-              dbg("dns: found CNAME " . $ans->cname . " for host $host");
-              my $cname_types = { %{$types} };
-              $cname_types->{unlinked} = 1;
-              $cname_types->{noclean} = 1;
-              $self->{uri_cnames}{$ans->cname} = $host;
-              $self->add_uri_detail_list($ans->cname, $cname_types, $source, 1);
-            }
-          }
-        }
-      } or do {
-        undef $pkt;
-        if($@) {
-          my $eval_stat = $@ ne '' ? $@ : "errno=$!";  chomp $eval_stat;
-          # resignal if alarm went off
-          die $eval_stat  if $eval_stat =~ /__alarm__ignore__\(.*\)/s;
-          info("dns: bad dns reply: %s", $eval_stat);
-        }
+    if (defined $host and $self->is_dns_available() and ($dns_max_cname_cache > 0)
+        and (not defined $self->{dns_cname_cache} or scalar %{$self->{dns_cname_cache}} < $dns_max_cname_cache)
+        and not exists $self->{dns_cname_cache}{$host})
+    {
+      # Queue the lookup instead of resolving inline (bgsend+bgread) so that
+      # many hosts discovered in the same message can be resolved
+      # concurrently. We still can't use bgsend_and_start_lookup/AsyncLoop
+      # here, since get_uri_detail_list() needs domains extracted from CNAME
+      # dns queries to be available by the time it returns. The queue is
+      # drained by _flush_pending_cname_lookups().
+      #
+      # Set an invalid value in the cache, to be overwritten later
+      # if a CNAME is present.
+      $self->{dns_cname_cache}{$host} = 'invalid';
+      push @{$self->{_pending_cname_lookups}}, {
+        host => $host, types => $types, source => $source,
       };
     }
   }
@@ -2960,6 +2947,96 @@ sub add_uri_detail_list {
   delete $self->{uri_list};
 
   return 1;
+}
+
+=item $status-E<gt>_flush_pending_cname_lookups ()
+
+Resolves all CNAME lookups queued by add_uri_detail_list() concurrently.
+Must be called before anything relies on C<uri_cnames>/C<dns_cname_cache>
+being complete (i.e. before get_uri_detail_list() returns, and 
+after parsed_metadata plugins have run).
+
+=cut
+
+sub _flush_pending_cname_lookups {
+  my ($self) = @_;
+
+  return unless $self->{_pending_cname_lookups} && @{$self->{_pending_cname_lookups}};
+
+  my $orig_resolver = $self->{main}->{resolver}->get_resolver();
+  return unless $orig_resolver;
+
+  my %pending_by_handle;  # handle => { host, types, source }
+  my $sel = IO::Select->new();
+
+  # dispatch every not-yet-sent entry (including ones queued by a CNAME
+  # answer we just processed to follow chains)
+  my $dispatch = sub {
+    while (my $item = shift @{$self->{_pending_cname_lookups}}) {
+      my $handle;
+      eval {
+        $handle = $orig_resolver->bgsend($item->{host}, 'CNAME');
+        1;
+      } or do {
+        my $eval_stat = $@ ne '' ? $@ : "errno=$!";  chomp $eval_stat;
+        die $eval_stat  if $eval_stat =~ /__alarm__ignore__\(.*\)/s;
+        info("dns: bad dns query for %s: %s", $item->{host}, $eval_stat);
+        undef $handle;
+      };
+      next unless $handle;
+      $pending_by_handle{$handle} = $item;
+      $sel->add($handle);
+    }
+  };
+  $dispatch->();
+
+  while ($sel->count) {
+    my @ready = $sel->can_read(10);  # overall check timeout
+                                     # is still enforced by master_deadline
+    if (!@ready) {
+      # timed out waiting, abandon anything
+      foreach my $handle ($sel->handles) {
+        $sel->remove($handle);
+        delete $pending_by_handle{$handle};
+      }
+      last;
+    }
+    foreach my $handle (@ready) {
+      $sel->remove($handle);
+      my $item = delete $pending_by_handle{$handle};
+      next unless $item;
+      my ($host, $types, $source) = @{$item}{qw(host types source)};
+
+      my $pkt;
+      eval {
+        $pkt = $orig_resolver->bgread($handle);
+        1;
+      } or do {
+        undef $pkt;
+        my $eval_stat = $@ ne '' ? $@ : "errno=$!";  chomp $eval_stat;
+        die $eval_stat  if $eval_stat =~ /__alarm__ignore__\(.*\)/s;
+        info("dns: bad dns reply: %s", $eval_stat);
+      };
+      next unless $pkt;  # aborted / timed out
+
+      foreach my $ans ($pkt->answer) {
+        next unless $ans->can("cname");
+        next unless defined $ans->cname;
+        # only take the first CNAME seen for this host
+        next if $self->{dns_cname_cache}{$host} ne 'invalid';
+        $self->{dns_cname_cache}{$host} = $ans->cname;
+        dbg("dns: found CNAME " . $ans->cname . " for host $host");
+        my $cname_types = { %{$types} };
+        $cname_types->{unlinked} = 1;
+        $cname_types->{noclean} = 1;
+        $self->{uri_cnames}{$ans->cname} = $host;
+        # may queue a further hop in a CNAME chain
+        $self->add_uri_detail_list($ans->cname, $cname_types, $source, 1);
+      }
+    }
+    # pick up anything a callback above just queued (chained CNAMEs)
+    $dispatch->();
+  }
 }
 
 ###########################################################################
