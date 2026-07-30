@@ -1263,6 +1263,13 @@ sub rewrite_report_safe {
   my $msgid = $self->{msg}->get_pristine_header('Message-Id');
   my $date = $self->{msg}->get_pristine_header("Date");
 
+  my $from_name = $self->{msg}->get_pristine_header_name("From");
+  my $to_name = $self->{msg}->get_pristine_header_name("To");
+  my $cc_name = $self->{msg}->get_pristine_header_name("Cc");
+  my $subject_name = $self->{msg}->get_pristine_header_name("Subject");
+  my $msgid_name = $self->{msg}->get_pristine_header_name('Message-Id');
+  my $date_name = $self->{msg}->get_pristine_header_name("Date");
+
   # It'd be nice to do this with a foreach loop, but with only three
   # possibilities right now, it's easier not to...
 
@@ -1295,12 +1302,12 @@ sub rewrite_report_safe {
   }
 
   # add report headers to message
-  $newmsg .= "From: $from" if defined $from;
-  $newmsg .= "To: $to" if defined $to;
-  $newmsg .= "Cc: $cc" if defined $cc;
-  $newmsg .= "Subject: $subject" if defined $subject;
-  $newmsg .= "Date: $date" if defined $date;
-  $newmsg .= "Message-Id: $msgid" if defined $msgid;
+  $newmsg .= "$from_name: $from" if defined $from;
+  $newmsg .= "$to_name: $to" if defined $to;
+  $newmsg .= "$cc_name: $cc" if defined $cc;
+  $newmsg .= "$subject_name: $subject" if defined $subject;
+  $newmsg .= "$date_name: $date" if defined $date;
+  $newmsg .= "$msgid_name: $msgid" if defined $msgid;
   $newmsg .= $self->_get_added_headers('headers_spam');
 
   if (defined $self->{conf}->{report_safe_copy_headers}) {

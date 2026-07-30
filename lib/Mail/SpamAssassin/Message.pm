@@ -496,6 +496,23 @@ sub get_pristine_header {
   }
 }
 
+=item get_pristine_header_name()
+
+Returns the header field name as it actually appears (case-wise) in the
+pristine headers of the message, for a given case-insensitive header name.
+If there are multiple occurrences, the last one is used, consistent with
+get_pristine_header(). If the header isn't found, the passed-in name is
+returned unchanged.
+
+=cut
+
+sub get_pristine_header_name {
+  my ($self, $hdr) = @_;
+
+  my(@names) = $self->{pristine_headers} =~ /^(\Q$hdr\E)[ \t]*:/smgi;
+  return @names ? $names[-1] : $hdr;
+}
+
 =item get_mbox_separator()
 
 Returns the mbox separator found in the message, or undef if there
