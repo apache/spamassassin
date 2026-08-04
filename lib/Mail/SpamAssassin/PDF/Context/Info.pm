@@ -6,6 +6,12 @@ use Encode qw(decode);
 
 our @ISA = qw(Mail::SpamAssassin::PDF::Context);
 
+# Default cap on the number of distinct URIs retained per PDF.  0 means no limit:
+# this layer imposes no policy of its own, so a caller using the parser directly
+# gets every URI in the document.  Callers that need a bound pass max_uris to
+# new() -- Mail::SpamAssassin::Handler::PDF does so from the pdf_max_uris setting.
+our $DEFAULT_MAX_URIS = 0;
+
 sub new {
     my $class = shift;
     my $self = $class->SUPER::new(@_);
@@ -25,6 +31,11 @@ sub new {
     # to extract the image bytes later (e.g. emit them as sub-parts).  Stored on
     # the context object, NOT in {info}, so get_info() output is unchanged.
     $self->{image_candidates} = [];
+
+    # Cap on the number of *distinct* URIs retained (see uri()).  0 disables the
+    # cap; undef means the caller did not specify one, so fall back to
+    # $DEFAULT_MAX_URIS (unlimited).
+    $self->{max_uris} = $DEFAULT_MAX_URIS unless defined $self->{max_uris};
 
     $self;
 }
@@ -93,10 +104,17 @@ sub draw_image {
 sub uri {
     my ($self,$location,$rect,$page) = @_;
 
-    $self->{info}->{uris}->{$location} = 1;
+    # Retain at most max_uris *distinct* URIs (0 = unlimited).
+    # LinkCount counts every link, so rules keyed on it stay accurate.
+    if ( !$self->{max_uris}
+         || keys(%{$self->{info}->{uris}}) < $self->{max_uris} ) {
+        $self->{info}->{uris}->{$location} = 1;
+    }
     $self->{info}->{LinkCount}++;
 
-    if ( defined($rect) ) {
+    # ClickArea is only accumulated for page 1, to stay consistent with
+    # PageArea (see page_begin).
+    if ( defined($rect) && defined($page->{page_number}) && $page->{page_number} == 1 ) {
         my ($x1,$y1,$x2,$y2) = @{$rect};
         if ( defined($page->{'/MediaBox'}) ) {
             # clip rectangle to media box

@@ -5,8 +5,8 @@ use Storable qw(dclone);
 use Carp;
 
 sub new {
-    my ($class) = @_;
-    my $self = bless {}, $class;
+    my ($class,%opts) = @_;
+    my $self = bless { %opts }, $class;
     $self->reset_state();
     $self;
 }

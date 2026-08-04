@@ -435,8 +435,14 @@ sub _parse_pages {
         # call page begin handler
         $process_page = $self->{context}->page_begin($node) if $self->{context}->can('page_begin');
 
+        # Annotations are parsed for every page, even when the context declines
+        # to process the page body.  Link annotations are where URIs live, and a
+        # phisher can put the link on any page; skipping them would hide the URI
+        # entirely.  This is cheap -- a dict lookup per annotation -- unlike the
+        # content stream rendering below.
+        $self->_parse_annotations($node->{'/Annots'},$node) if (defined($node->{'/Annots'}));
+
         if ( $process_page ) {
-            $self->_parse_annotations($node->{'/Annots'},$node) if (defined($node->{'/Annots'}));
             $node->{'/Resources'} = $self->_parse_resources($node->{'/Resources'}) if (defined($node->{'/Resources'}));
             $self->_parse_contents($node->{'/Contents'},$node) if (defined($node->{'/Contents'}));
 
@@ -564,32 +570,6 @@ sub _parse_contents {
             }
         }
     );
-
-    if ( $context->isa('Mail::SpamAssassin::PDF::Context::Image') ) {
-        $dispatch{re} = sub { $context->rectangle(@_) };
-        $dispatch{m}  = sub { $context->path_move(@_) };
-        $dispatch{l}  = sub { $context->path_line(@_) };
-        $dispatch{h}  = sub { $context->path_close() };
-        $dispatch{n}  = sub { $context->path_end() };
-        $dispatch{c}  = sub { $context->path_curve(@_) };
-        $dispatch{v}  = sub {
-            splice @_,0,0,undef,undef;
-            $context->path_curve(@_)
-        };
-        $dispatch{y}  = sub {
-            splice @_,2,0,undef,undef;
-            $context->path_curve(@_);
-        };
-        $dispatch{s}  = sub {
-            $context->path_close();
-            $context->path_draw(1,0);
-        };
-        $dispatch{S}    = sub { $context->path_draw(1,0) };
-        $dispatch{f}    = sub { $context->path_draw(0,'nonzero') };
-        $dispatch{'f*'} = sub { $context->path_draw(0,'evenodd') };
-        $dispatch{B}    = sub { $context->path_draw(1,'nonzero') };
-        $dispatch{'B*'} = sub { $context->path_draw(1,'evenodd') };
-    }
 
     # Contents can be one of the following:
     # 1. Reference to a content stream i.e. "35 0 R"

@@ -10,6 +10,8 @@
 #                         EncryptMetadata=false), all decrypted with a blank password
 #   protected           - non-blank password => Protected=1, all metrics zeroed
 #   multipage           - multi-page tree; page-1-only metrics
+#   link_page2          - /Link annotation only on page 2 (URI must still be seen)
+#   many_uris           - duplicate + distinct links; max_uris cap behaviour
 #   ascii85 / lzw       - ASCII85Decode / LZWDecode content-stream filters
 #   inline_image        - BI/ID/EI inline images, colour vs 1-bpc grayscale
 #   indirect_mediabox   - indirect /MediaBox reference + XObject image
@@ -134,10 +136,28 @@ my @tests = (
         expected => {
             'ClickArea' => 852, 'ClickRatio' => '0.18',
             'Encrypted' => 0, 'ImageArea' => 0, 'ImageCount' => 0,
-            'ImageRatio' => '0.00', 'JavaScript' => 0, 'LinkCount' => 1,
+            # LinkCount is 2: both pages carry a /Link annotation.  Annotations
+            # are parsed on every page (URIs can hide past page 1), while
+            # ClickArea stays page-1-only to match PageArea.
+            'ImageRatio' => '0.00', 'JavaScript' => 0, 'LinkCount' => 2,
             'OpenAction' => 0, 'PageArea' => 484704, 'PageCount' => 2,
             'Protected' => 0, 'Version' => '1.3',
             'uris' => { 'http://www.google.com' => 1 },
+        }
+    },
+    {
+        # Regression: the only /Link annotation is on page 2.  Annotations used
+        # to be parsed only when the context opted into processing the page, and
+        # Context::Info opts out for every page but the first, so this URI was
+        # silently dropped.  ClickArea stays 0 -- the link is not on page 1.
+        filename => 'data/pdf/link_page2.pdf',
+        expected => {
+            'ClickArea' => 0, 'ClickRatio' => '0.00',
+            'Encrypted' => 0, 'ImageArea' => 0, 'ImageCount' => 0,
+            'ImageRatio' => '0.00', 'JavaScript' => 0, 'LinkCount' => 1,
+            'OpenAction' => 0, 'PageArea' => 484704, 'PageCount' => 2,
+            'Protected' => 0, 'Version' => '1.4',
+            'uris' => { 'https://example.com/page2-only.html' => 1 },
         }
     },
     {
@@ -202,6 +222,40 @@ my @tests = (
         }
     },
     {
+        # 6 link annotations, 4 distinct URIs (the first is linked 3 times).
+        # No max_uris is passed, so the context applies no cap: every distinct
+        # URI is kept and the duplicates only show up in LinkCount.
+        filename => 'data/pdf/many_uris.pdf',
+        expected => {
+            'ClickArea' => 0, 'ClickRatio' => '0.00',
+            'Encrypted' => 0, 'ImageArea' => 0, 'ImageCount' => 0,
+            'ImageRatio' => '0.00', 'JavaScript' => 0, 'LinkCount' => 6,
+            'OpenAction' => 0, 'PageArea' => 484704, 'PageCount' => 1,
+            'Protected' => 0, 'Version' => '1.4',
+            'uris' => {
+                'https://a.example.test/' => 1, 'https://b.example.test/' => 1,
+                'https://c.example.test/' => 1, 'https://d.example.test/' => 1,
+            },
+        }
+    },
+    {
+        # Same fixture with max_uris=2: only the first 2 distinct URIs are kept.
+        # LinkCount still counts all 6 links, and the 3 duplicate links to
+        # a.example.test do not consume cap slots.
+        filename => 'data/pdf/many_uris.pdf',
+        max_uris => 2,
+        expected => {
+            'ClickArea' => 0, 'ClickRatio' => '0.00',
+            'Encrypted' => 0, 'ImageArea' => 0, 'ImageCount' => 0,
+            'ImageRatio' => '0.00', 'JavaScript' => 0, 'LinkCount' => 6,
+            'OpenAction' => 0, 'PageArea' => 484704, 'PageCount' => 1,
+            'Protected' => 0, 'Version' => '1.4',
+            'uris' => {
+                'https://a.example.test/' => 1, 'https://b.example.test/' => 1,
+            },
+        }
+    },
+    {
         filename => 'data/pdf/openaction_js.pdf',
         expected => {
             'ClickArea' => 0, 'ClickRatio' => '0.00',
@@ -227,7 +281,9 @@ for my $test (@tests) {
         next;
     }
 
-    my $context = Mail::SpamAssassin::PDF::Context::Info->new();
+    my $context = Mail::SpamAssassin::PDF::Context::Info->new(
+        defined($test->{max_uris}) ? (max_uris => $test->{max_uris}) : ()
+    );
     my $pdf = Mail::SpamAssassin::PDF::Parser->new( context => $context );
 
     my $data = get_file_contents($test->{filename});
@@ -243,7 +299,9 @@ for my $test (@tests) {
 
     my $info = $context->get_info();
 
-    is_deeply $info, $test->{expected}, $test->{filename};
+    my $name = $test->{filename};
+    $name .= " (max_uris=$test->{max_uris})" if defined $test->{max_uris};
+    is_deeply $info, $test->{expected}, $name;
 }
 
 # Return a comma-joined list of the modules in $required that cannot be loaded,

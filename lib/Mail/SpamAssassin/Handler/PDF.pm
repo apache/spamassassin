@@ -105,6 +105,14 @@ Extract at most N images per PDF, to bound the OCR work done downstream.
 Skip images larger than N pixels (width times height). Set to B<0> to
 disable the limit entirely and extract every image regardless of size.
 
+=item pdf_max_uris N    (default: 30)
+
+Retain at most N distinct URIs per PDF. Link annotations are read from every
+page, so a hostile PDF stuffed with links could otherwise flood the URI list
+and the URIBL lookups that follow. Additional links pointing at an
+already-seen URI do not count toward the limit, and the C<LinkCount> metric
+still counts every link. Set to B<0> to disable the limit entirely.
+
 =back
 
 =head1 EVAL RULES
@@ -256,9 +264,17 @@ use Mail::SpamAssassin::Timeout;
 use Mail::SpamAssassin::Util qw(compile_regexp untaint_var untaint_file_path
                                 proc_status_ok exit_status_str);
 use Mail::SpamAssassin::PDF::Parser;
+use Mail::SpamAssassin::PDF::Context::Info;
 use Compress::Zlib qw(compress crc32);
 
 our @ISA = qw(Mail::SpamAssassin::Handler);
+
+use constant DEFAULT_PDFTOTEXT_PATH   => '';
+use constant DEFAULT_TEXT_MAX_PAGES   => 4;
+use constant DEFAULT_EXTRACT_IMAGES   => 1;
+use constant DEFAULT_MAX_IMAGES       => 4;
+use constant DEFAULT_MAX_IMAGE_PIXELS => 25_000_000;
+use constant DEFAULT_MAX_URIS         => 30;
 
 sub log_dbg  { Mail::SpamAssassin::Logger::dbg ("pdfinfo2: @_"); }
 sub log_warn { Mail::SpamAssassin::Logger::log_message('warn', "pdfinfo2: @_"); }
@@ -315,7 +331,7 @@ sub set_config {
       # extraction is disabled (pdf2_word_count and pdftext rules then no-op).
       setting => 'pdf_pdftotext_path',
       is_admin => 1,
-      default => '',
+      default => DEFAULT_PDFTOTEXT_PATH,
       type => $Mail::SpamAssassin::Conf::CONF_TYPE_STRING,
     },
     {
@@ -323,7 +339,7 @@ sub set_config {
       # Bounds the work done on large documents and resists content stuffing.
       setting => 'pdf_text_max_pages',
       is_admin => 1,
-      default => 4,
+      default => DEFAULT_TEXT_MAX_PAGES,
       type => $Mail::SpamAssassin::Conf::CONF_TYPE_NUMERIC,
     },
     {
@@ -332,14 +348,25 @@ sub set_config {
       # default; set to 0 to disable.
       setting => 'pdf_extract_images',
       is_admin => 1,
-      default => 1,
+      default => DEFAULT_EXTRACT_IMAGES,
       type => $Mail::SpamAssassin::Conf::CONF_TYPE_BOOL,
     },
     {
       # Extract at most this many images per PDF (bounds OCR work downstream).
       setting => 'pdf_max_images',
       is_admin => 1,
-      default => 4,
+      default => DEFAULT_MAX_IMAGES,
+      type => $Mail::SpamAssassin::Conf::CONF_TYPE_NUMERIC,
+    },
+    {
+      # Retain at most this many *distinct* URIs per PDF.  Link annotations are
+      # parsed on every page, so a hostile PDF stuffed with links could otherwise
+      # flood the URI list and the URIBL lookups that follow.  Duplicate links to
+      # an already-seen URI do not count toward the cap, and LinkCount still
+      # counts every link.  Set to 0 to disable the limit entirely.
+      setting => 'pdf_max_uris',
+      is_admin => 1,
+      default => DEFAULT_MAX_URIS,
       type => $Mail::SpamAssassin::Conf::CONF_TYPE_NUMERIC,
     },
     {
@@ -350,7 +377,7 @@ sub set_config {
       # every image regardless of size).
       setting => 'pdf_max_image_pixels',
       is_admin => 1,
-      default => 25_000_000,
+      default => DEFAULT_MAX_IMAGE_PIXELS,
       type => $Mail::SpamAssassin::Conf::CONF_TYPE_NUMERIC,
     },
     {
@@ -427,7 +454,7 @@ sub _extract_text {
   return undef unless defined $bin;
 
   my $pages = $conf->{pdf_text_max_pages};
-  $pages = 4 unless defined $pages;
+  $pages = DEFAULT_TEXT_MAX_PAGES unless defined $pages;
   my $secs = $conf->{handler_time_limit} || 10;
 
   my ($tmp_file, $err_file, $pid, $resp, $errno);
@@ -627,7 +654,11 @@ sub handle_pdf {
 
   # Parse PDF.  The handler framework already bounds this call with a timeout,
   # so the parser does not need its own.
-  my $pdf = Mail::SpamAssassin::PDF::Parser->new();
+  my $context = Mail::SpamAssassin::PDF::Context::Info->new(
+    max_uris => defined($pms->{conf}->{pdf_max_uris})
+      ? $pms->{conf}->{pdf_max_uris} : DEFAULT_MAX_URIS,
+  );
+  my $pdf = Mail::SpamAssassin::PDF::Parser->new(context => $context);
   my $info = eval {
     $pdf->parse(\$data);
     $pdf->{context}->get_info();
@@ -697,9 +728,10 @@ sub handle_pdf {
   return [] if $info->{Protected};
   return [] unless $conf->{pdf_extract_images};
 
-  my $max_images = defined($conf->{pdf_max_images}) ? $conf->{pdf_max_images} : 4;
+  my $max_images = defined($conf->{pdf_max_images})
+    ? $conf->{pdf_max_images} : DEFAULT_MAX_IMAGES;
   my $max_pixels = defined($conf->{pdf_max_image_pixels})
-    ? $conf->{pdf_max_image_pixels} : 25_000_000;
+    ? $conf->{pdf_max_image_pixels} : DEFAULT_MAX_IMAGE_PIXELS;
 
   my $images = eval {
     $pdf->extract_images(max_images => $max_images, max_pixels => $max_pixels);
