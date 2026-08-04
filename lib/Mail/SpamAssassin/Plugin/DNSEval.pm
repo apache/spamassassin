@@ -207,7 +207,7 @@ sub parsed_metadata {
   return 1 if $self->{main}->{conf}->{skip_rbl_checks};
   return 1 if !$pms->is_dns_available();
 
-  # Process relaylists only once, not everytime in check_rbl_backend
+  # Process relaylists only once, not every time in check_rbl_backend
   #
   # ok, make a list of all the IPs in the untrusted set
   my @fullips = map { $_->{ip} } @{$pms->{relays_untrusted}};
@@ -220,7 +220,7 @@ sub parsed_metadata {
       } @{$pms->{relays_trusted}};
   push @fullexternal, @fullips; # add untrusted set too
   # Make sure a header significantly improves results before adding here
-  # X-Sender-Ip: could be worth using (very low occurence for me)
+  # X-Sender-Ip: could be worth using (very low occurrence for me)
   # X-Sender: has a very low bang-for-buck for me
   my @originating;
   foreach my $header (@{$pms->{conf}->{originating_ip_headers}}) {

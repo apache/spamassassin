@@ -465,7 +465,7 @@ Maximum depth of chained redirections that a short URL can generate.
 =item url_shortener_user_agent       (default: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/101.0.4951.67 Safari/537.36)
 
 Set default User-Agent header for HTTP requests.  Some services require it to look
-like a common browser. User-Agent can be overriden on a per url_shortener basis using
+like a common browser. User-Agent can be overridden on a per url_shortener basis using
 the C<url_shortener_ua> setting.
 
 =back

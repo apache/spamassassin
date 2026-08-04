@@ -86,7 +86,7 @@ header FREEMAIL_FROM eval:check_freemail_from(['regex'])
    to see if user ends in digit: check_freemail_from('\d@')
 
    If you use multiple check_freemail_from rules with regexes, remember
-   that they might hit different emails from different heades. To match
+   that they might hit different emails from different headers. To match
    a certain header only, use check_freemail_header.
 
 header FREEMAIL_HDRX eval:check_freemail_header('header' [, 'regex'])

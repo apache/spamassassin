@@ -164,8 +164,8 @@ This plugin helps detected spam using attached PDF files
   pdf_image_size_range()
 
      body RULENAME eval:pdf_image_size_range(<minh>,<minw>,[<maxh>],[<maxw>])
-        minh: image height is atleast minh
-        minw: image width is atleast minw
+        minh: image height is at least minh
+        minw: image width is at least minw
         maxh: (optional) image height is no more than maxh
         maxw: (optional) image width is no more than maxw
 

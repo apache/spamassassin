@@ -1905,7 +1905,7 @@ appear in configuration files multiple times, the last setting prevails.
 Option I<v4> declares resolver capable of returning IPv4 (A) records. 
 Option I<v6> declares resolver capable of returning IPv6 (AAAA) records. 
 One would set I<nov6> if the resolver is filtering AAAA responses.  NOTE:
-these options only refer to I<resolving capabilies>, there is no other
+these options only refer to I<resolving capabilities>, there is no other
 meaning like whether the IP address of resolver itself is IPv4 or IPv6.
 
 Option I<edns> (or I<edns0>) may take a value which specifies a requestor's
@@ -3615,7 +3615,7 @@ it is documented there.
 
 =item nolog
 
-This flag will hide (sensitive) rule informations from reports
+This flag will hide (sensitive) rule information from reports
 
 =back
 
@@ -3884,7 +3884,7 @@ for SpamAssassin to do - long evaluation of other rules may grant queries
 additional time.
 
 If a parameter 'zone' is specified (it must end with a letter, which
-distinguishes it from other numeric parametrs), then the setting only
+distinguishes it from other numeric parameters), then the setting only
 applies to DNS queries against the specified DNS domain (host, domain or
 RBL (sub)zone).  Matching is case-insensitive, the actual domain may be a
 subdomain of the specified zone.

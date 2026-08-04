@@ -2579,7 +2579,7 @@ sub _tbirdurire {
   my $tbirdenddelim = '><"`}\]{[|\s' . "\x1b\xa0";  # The \x1b as per bug 4522 # \xa0 (nbsp) added 7/2019
   my $nonASCII    = '\x80-\xff';
 
-  # schemeless uri start delimiter, combo of most punctuations and delims above
+  # schemeless uri start delimiter, combo of most punctuation and delims above
   my $scstartdelim = qr/[\!\"\#\$\&\'\(\)\*\+\,\/\:\;\<\=\>\?\@\[\\\]\^\`\{\|\}\~\s\x1b\xa0]/;
 
   # bug 7100: we allow a comma to delimit the end of an email address because it will never appear in a domain name, and
@@ -2746,7 +2746,7 @@ sub _process_text_uri_list {
       my $schost = $4;
       my $rawtype = defined $1 ? 'scheme' : defined $2 ? 'mail' : 'schemeless';
       $rawuri =~ s/(^[^(]*)\).*$/$1/;  # as per ThunderBird, ) is an end delimiter if there is no ( preceding it
-      $rawuri =~ s/[-~!@#^&*()_+=:;\'?,.]*$//; # remove trailing string of punctuations that TBird ignores
+      $rawuri =~ s/[-~!@#^&*()_+=:;\'?,.]*$//; # remove trailing string of punctuation that TBird ignores
 
       next if exists $seen{$rawuri};
       $seen{$rawuri} = 1;

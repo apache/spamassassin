@@ -120,7 +120,7 @@ our @OPTIONAL_MODULES = (
   version => 0,
   desc => "Newer version of the optional Net::LibIDN module.
   Provides mapping between Internationalized Domain Names (IDN) in
-  Unicode and ASCII-compatible encoding (ACE) for use in DNS and comparisions.
+  Unicode and ASCII-compatible encoding (ACE) for use in DNS and comparisons.
   The module is optional, but without it Unicode IDN names found in mail will
   not be suitable for DNS queries and welcome/blocklisting.",
 },
@@ -128,7 +128,7 @@ our @OPTIONAL_MODULES = (
   module => 'Net::LibIDN',
   version => 0,
   desc => "Provides mapping between Internationalized Domain Names (IDN) in
-  Unicode and ASCII-compatible encoding (ACE) for use in DNS and comparisions.
+  Unicode and ASCII-compatible encoding (ACE) for use in DNS and comparisons.
   The module is optional, but without it Unicode IDN names found in mail will
   not be suitable for DNS queries and welcome/blocklisting.",
 },
@@ -563,7 +563,7 @@ sub try_binary {
         $version_meets_recommended = test_version($binary_version, $recommended_version);
       }
     }
-    #print "DEBUG: $command completd and output parsed\n";
+    #print "DEBUG: $command completed and output parsed\n";
   }
 
   unless (defined $errtype) {

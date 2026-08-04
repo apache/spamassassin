@@ -173,7 +173,7 @@ Additional supported OPTS:
 
   replace  if a regexp contains replace tags, replace the match of the regexp with the first option
            of the regexp, ex. +1 8O8.l23.4567 will be changed to +1 808.123.4567
-           For the subsitution to work, replace tags must contain only single chars.
+           For the substitution to work, replace tags must contain only single chars.
 
 Optional subtest regexp to match DNS answer (default: '^127\.').
 

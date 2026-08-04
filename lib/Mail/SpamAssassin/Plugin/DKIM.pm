@@ -1131,7 +1131,7 @@ sub _check_dkim_adsp {
         $practices_as_string = 'valid a. d. signature';
 
       } elsif ($pms->{dkim_author_sig_tempfailed}->{$author_domain}) {
-        dbg("dkim: adsp ignored, tempfail varifying author domain signature");
+        dbg("dkim: adsp ignored, tempfail verifying author domain signature");
         $practices_as_string = 'pub key tempfailed, ignored';
 
       } elsif ($pms->{dkim_has_any_author_sig}->{$author_domain} &&

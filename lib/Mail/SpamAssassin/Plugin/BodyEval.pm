@@ -360,7 +360,7 @@ sub _plaintext_body_sig_ratio {
   # Decode if necessary, do not render or alter whitespace.
   my $text = $part->decode();
 
-  # Find the last occurence of a signature delimiter and get the body and
+  # Find the last occurrence of a signature delimiter and get the body and
   # signature lengths.
 
   my $len_b = length($text);

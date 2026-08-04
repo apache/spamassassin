@@ -331,7 +331,7 @@ sub _run {
       &{$self->{result_sub}}($class, $result, $date);
     }
   }
-  # Return success if atleast some files were processed through
+  # Return success if at least some files were processed through
   return $messages_run > 0;
 }
 

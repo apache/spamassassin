@@ -608,7 +608,7 @@ sub spamd_child_init {
   # Just in case the parent master process did not call prefork_init() above,
   # we try to silently renounce the use of existing cloned connection here.
   # As the prefork_init plugin callback has only been introduced in
-  # SpamAssassin 3.4.0, this situation can arrise in case of some third party
+  # SpamAssassin 3.4.0, this situation can arise in case of some third party
   # software (or a pre-3.4.0 version of spamd) is somehow using this plugin.
   # Better safe than sorry...
 

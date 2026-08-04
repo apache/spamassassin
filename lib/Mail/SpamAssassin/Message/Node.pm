@@ -1107,7 +1107,7 @@ sub _decode_header {
     # Bug 7307: to deal with the above, base64/QP decoding must be decoupled
     # from decoding a specified multi-byte character set into UTF-8.
     # A previous simpler code could not handle base64 fill bits correctly
-    # (merging of adjecent encoded sections before base64/QP decoding them).
+    # (merging of adjacent encoded sections before base64/QP decoding them).
 
     my @sections;  # array of pairs: [string, encoding]
     my $last_encoding = '';

@@ -90,7 +90,7 @@ will be analyzed
 
 Configure the timeout in seconds of external tool checks, per attachment.
 
-Second argument speficies maximum total time for all checks.
+Second argument specifies maximum total time for all checks.
 
 =back
 

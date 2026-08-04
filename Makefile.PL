@@ -386,7 +386,7 @@ sub init_MY_globals {
     VENDOR
   );
 
-  # Macro names follow this RE -- at least stricly enough for our purposes.
+  # Macro names follow this RE -- at least strictly enough for our purposes.
   $MACRO_RE = qr/[A-Z0-9_]+/;
   # Normally macros are assigned via FOO = bar. But the part with the equal
   # sign might differ from platform to platform. So we use this RE:

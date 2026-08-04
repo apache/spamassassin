@@ -55,7 +55,7 @@ from "whitelist" to "reputation" to avoid any confusion, since the result score 
 be adjusted in both directions.
 
 The TxRep plugin keeps track of the average SpamAssassin score for senders.
-Senders are tracked using multiple identificators, or their combinations: the  From:
+Senders are tracked using multiple identifiers, or their combinations: the  From:
 email address, the originating IP and/or an originating block of IPs, sender's domain
 name, the DKIM signature, and the HELO name. TxRep then uses the average score to reduce
 the variability in scoring from message to message, and modifies the final score by
@@ -133,11 +133,11 @@ within the block defined by the mask setting. Their score is difficult or someti
 impossible to track. Another disadvantage is, for example, at a spammer persistently
 sending spam from the same IP address, just under different email addresses. AWL will not
 find his previous scores, unless he reuses the same email address again. TxRep uses several
-identificators, and creates separate database entries for each of them. It tracks not only
+identifiers, and creates separate database entries for each of them. It tracks not only
 the email/IP address combination like AWL, but also the standalone email address (regardless
 of the originating IP), the standalone IP (regardless of email address used), the domain
 name of the email address, the DKIM signature, and the HELO name of the connecting PC. The
-influence of each individual identificator may be tuned up with the help of weight factors
+influence of each individual identifier may be tuned up with the help of weight factors
 described in the section L</REPUTATION WEIGHTS>.
 
 8. B<Message Tracking> - TxRep (optionally) keeps track of already scanned and/or learned
@@ -473,7 +473,7 @@ Previously txrep_whitelist_out which will work interchangeably until 4.1.
 When the value of this setting is greater than zero, recipients of messages sent from
 within the internal networks will be welcomelisted through improving their total reputation
 score with the number of points defined by this setting. Since the IP address and other
-sender identificators are not known when sending the email, only the reputation of the
+sender identifiers are not known when sending the email, only the reputation of the
 standalone email is being welcomelisted. The domain name is intentionally also left
 unaffected. The outbound welcomelisting can only work when SpamAssassin is set up to scan
 also outgoing email, when local users use the SMTP server for sending email, and when
@@ -961,14 +961,14 @@ some testing it could be likely at least slightly increased.
 Add TxRep details to the rule's description in the message report or summary,
 similar to how RBL rules commonly are showing listed domains.
 
-If enabled (value 1) the identificators (From address bound to originating IP
+If enabled (value 1) the identifiers (From address bound to originating IP
 address fraction, From address alone, domain name bound to originating IP
 address fraction, originating IP address and HELO if available) used in
 calculating the sender's overall reputation are listed, including the
 originating IP address fraction (according to the mask settings) where
 applicable.
 
-If this option is set to 2, the listed identificators' individual mean
+If this option is set to 2, the listed identifiers' individual mean
 reputation and count are reported in addition.
 
 Identificators and additional data will only be added to the description on a
@@ -1178,7 +1178,7 @@ The table name where reputation is to be stored in, for the above DSN.
 
  (default: undef)
 
-Minimum TxRep score, used to limit TxRep score adjustements.
+Minimum TxRep score, used to limit TxRep score adjustments.
 
 =cut
 
@@ -1193,7 +1193,7 @@ Minimum TxRep score, used to limit TxRep score adjustements.
 
  (default: undef)
 
-Maximum TxRep score, used to limit TxRep score adjustements.
+Maximum TxRep score, used to limit TxRep score adjustments.
 
 =back
 
@@ -1323,7 +1323,7 @@ sub remove_address    {my $self=shift; return $self->_fn_envelope(@_,undef, "rem
 
 =head1 REPUTATION LOGICS
 
-1. The most significant sender identificator is equally as at AWL, the
+1. The most significant sender identifier is equally as at AWL, the
    combination of the email address and the originating IP address, resp.
    its part defined by the IPv4 resp. IPv6 mask setting.
 
@@ -1406,7 +1406,7 @@ sub check_senders_reputation {
     my $trusteds = @{$pms->{relays_trusted}};
     foreach my $rly ( @{$pms->{relays_trusted}}, @{$pms->{relays_untrusted}} ) {
 	# Get the last found HELO, regardless of private/public or trusted/untrusted
-	# Avoiding a redundant duplicate entry if HELO is equal/similar to another identificator
+	# Avoiding a redundant duplicate entry if HELO is equal/similar to another identifier
 	if (defined $rly->{helo} &&
             $rly->{helo} !~ /^\[?\Q$rly->{ip}\E\]?$/ &&
             $rly->{helo} !~ /^\Q$domain\E$/i &&
@@ -2145,7 +2145,7 @@ halving so the disk space requirements, and the processing times of this plugin.
 2. You can disable all but one of the L<REPUTATION WEIGHTS>. The EMAIL_IP is
 the most specific option, so it is the most likely choice in such case, but you
 could base the reputation system on any of the remaining scores. Each of the
-enabled reputations adds a new entry to the database for each new identificator.
+enabled reputations adds a new entry to the database for each new identifier.
 So while for example the number of recorded and scored domains may be big, the
 number of stored IP addresses will be probably higher, and would require more
 space in the storage.

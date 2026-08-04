@@ -250,7 +250,7 @@ sub _run {      # private
 
   if (defined $eval_stat && $eval_stat =~ /__alarm__ignore__\Q($id)\E/) {
     $self->{timed_out} = 1;
-  # dbg("timed: %s cought: %s", $id, $eval_stat);
+  # dbg("timed: %s caught: %s", $id, $eval_stat);
   } elsif ($timedout) {
     # this happens occasionally; haven't figured out why. seems harmless
   # dbg("timed: %s timeout with empty eval status", $id);

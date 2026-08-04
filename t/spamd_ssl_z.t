@@ -7,7 +7,7 @@ use constant HAVE_ZLIB => eval { require Compress::Zlib; };
 
 use Test::More;
 plan skip_all => "Spamd tests disabled" if $SKIP_SPAMD_TESTS;
-plan skip_all => "SSL is unavailble" unless $SSL_AVAILABLE;
+plan skip_all => "SSL is unavailable" unless $SSL_AVAILABLE;
 plan skip_all => "ZLIB REQUIRED" unless HAVE_ZLIB;
 
 untaint_system("$spamc -z < /dev/null");

@@ -2606,7 +2606,7 @@ sub _valid_parsed_address {
 
 #
 # v0.1, improved internal parser, no support for comments in strange
-# places or nested comments, but handled a large corpus atleast 99% the
+# places or nested comments, but handled a large corpus at least 99% the
 # same as Email::Address::XS and in some cases even better (retains some
 # more name/addr info, even when not fully valid).
 #
@@ -2617,7 +2617,7 @@ sub _parse_header_addresses {
   # Clear trailing whitespace
   s/\s+\z//s;
 
-  # Strip away all escaped blackslashes, simplifies processing a lot
+  # Strip away all escaped backslashes, simplifies processing a lot
   s/\\\\//g;
 
   # Reduce group address
@@ -2752,7 +2752,7 @@ sub _parse_header_addresses {
 sub _parse_header_addresses_xs {
   my ($str) = @_;
 
-  # Strip away all escaped blackslashes, simplifies processing a lot
+  # Strip away all escaped backslashes, simplifies processing a lot
   $str =~ s/\\\\//g;
 
   my @results;

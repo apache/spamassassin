@@ -149,7 +149,7 @@ print_usage(void)
     usg("  --ssl-cert cert     Authenticate using SSL client certificate.\n");
     usg("  --ssl-key key       Specify an SSL client key PEM file.\n");
     usg("  --ssl-ca-file file  Specify the location of the CA PEM file.\n");
-    usg("  --ssl-ca-path path  Specify a directory containin CA files.\n");
+    usg("  --ssl-ca-path path  Specify a directory containing CA files.\n");
     usg("  -D, --debug         Print debugging messages\n");
 #endif
 #ifndef _WIN32

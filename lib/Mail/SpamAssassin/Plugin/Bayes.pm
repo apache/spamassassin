@@ -274,7 +274,7 @@ sub new {
   $self->{conf} = $main->{conf};
   $self->{use_ignores} = 1;
 
-  # Old default stopword list, need to have hardcoded one incase sa-update is not available
+  # Old default stopword list, need to have hardcoded one in case sa-update is not available
   $self->{bayes_stopword}{en} = qr/(?:a(?:ble|l(?:ready|l)|n[dy]|re)|b(?:ecause|oth)|c(?:an|ome)|e(?:ach|mail|ven)|f(?:ew|irst|or|rom)|give|h(?:a(?:ve|s)|ttp)|i(?:n(?:formation|to)|t\'s)|just|know|l(?:ike|o(?:ng|ok))|m(?:a(?:de|il(?:(?:ing|to))?|ke|ny)|o(?:re|st)|uch)|n(?:eed|o[tw]|umber)|o(?:ff|n(?:ly|e)|ut|wn)|p(?:eople|lace)|right|s(?:ame|ee|uch)|t(?:h(?:at|is|rough|e)|ime)|using|w(?:eb|h(?:ere|y)|ith(?:out)?|or(?:ld|k))|y(?:ears?|ou(?:(?:\'re|r))?))/;
 
   $self->set_config($self->{conf});

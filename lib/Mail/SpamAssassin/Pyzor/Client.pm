@@ -132,7 +132,7 @@ is C<anonymous>)
 is empty)
 
 =item * C<timeout> - The maximum time, in seconds, to wait for a response
-from the pyzor server (defeault is 3.5)
+from the pyzor server (default is 3.5)
 
 =back
 
