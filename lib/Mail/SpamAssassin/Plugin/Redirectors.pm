@@ -1216,8 +1216,12 @@ sub _do_http {
         my $rcode = $response->code;
         if ($rcode =~ /^\d{3}$/) {
           if($rcode eq 500) {
-	    if($response->headers->{'client-warning'} eq 'Internal response') {
-	      dbg("Connection timeout checking $redir_url");
+	    my $cw = $response->header('Client-Warning');
+	    if(defined $cw and $cw eq 'Internal response') {
+	      # LWP synthesized this 500 rather than receiving it from the
+	      # server, the reason may be a connection timeout, a DNS failure,
+	      # an oversized header, etc.  Report what it actually said.
+	      dbg("Client error checking $redir_url: ".$response->status_line);
 	    }
           } elsif($rcode eq 200) {
 	    if((defined $response->content) and ($response->content =~ /http-equiv=["']?refresh["']?.{1,64}?content=["']?(\d+);\s+url=["']?((?:https?:\/\/)?[^"'\\]+(?:\/[^"'\\]{8,256})?)["']?/is)) {
