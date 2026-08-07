@@ -250,8 +250,8 @@ sub uri_to_domain {
   my $uri = lc shift;
 
   # Javascript is not going to help us, so return.
-  # Likewise ignore cid, file
-  return if ($uri =~ /^(?:javascript|cid|file):/);
+  # Likewise ignore cid, file, data
+  return if ($uri =~ /^(?:javascript|cid|file|data):/);
 
   if ($uri =~ s/^mailto://) { # handle mailto: specially
     $uri =~ s/\?.*//;			# drop parameters ?subject= etc

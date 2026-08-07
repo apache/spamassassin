@@ -8,7 +8,7 @@ use SATest; sa_t_init("uri");
 use constant HAS_LIBIDN => eval { require Net::LibIDN; };
 use constant HAS_LIBIDN2 => eval { require Net::LibIDN2; };
 
-my $tests = 106;
+my $tests = 107;
 $tests += 7 if (HAS_LIBIDN);
 $tests += 7 if (HAS_LIBIDN2);
 
@@ -81,6 +81,7 @@ ok(try_domains('mailto:nobody@example.com', 'example.com'));
 ok(try_domains('mailto:nobody@example.com?subject=foo', 'example.com'));
 ok(try_domains('mailto:nobody', undef));
 ok(try_domains('cid:foobar.net', undef));
+ok(try_domains('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAAB', undef));
 ok(try_domains('http://66.92.69.221/', '66.92.69.221'));
 ok(try_domains('http://www.spamassassin.org:8080/lists.html', 'spamassassin.org'));
 ok(try_domains('http://www.spamassassin.org/lists.html#some_tag', 'spamassassin.org'));
