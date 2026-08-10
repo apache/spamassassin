@@ -4424,7 +4424,7 @@ tflags     CN_PHISH_JP_07              publish
 
 
 ifplugin Mail::SpamAssassin::Plugin::URIDetail
-  uri_detail   __URI_DOTCN_SPOOF       text =~ m;^https?://(?:[^./]+\.)+(?!cn/)[^/]+/;i domain =~ /\.cn$/i
+  uri_detail   __URI_DOTCN_SPOOF       text =~ m;^https?://(?:[^./]+\.)+(?!cn/)[^./]+/;i domain =~ /\.cn$/i
   meta         URI_DOTCN_SPOOF         __URI_DOTCN_SPOOF
   score        URI_DOTCN_SPOOF         3.000	# limit
   describe     URI_DOTCN_SPOOF         .CN TLD for non-.CN visible URL - likely Chinese phishing
