@@ -29,7 +29,7 @@ B<This plugin is deprecated.> All of its functionality (the C<url_shortener*>
 settings and the C<short_url*> eval rules) has been merged into
 L<Mail::SpamAssassin::Plugin::Redirectors>, which also gained the ability to
 follow a redirect chain that mixes shorteners and redirectors in either
-order -- there is no functional difference between the two, both are just
+order, there is no functional difference between the two, both are just
 a host whose HTTP response redirects elsewhere.
 
 This module remains only as a compatibility shim so that existing

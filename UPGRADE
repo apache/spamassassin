@@ -1,6 +1,13 @@
 Note for Users Upgrading to SpamAssassin 4.0.3
 ----------------------------------------------
 
+- Mail::SpamAssassin::Plugin::DecodeShortURLs has been merged into
+  Mail::SpamAssassin::Plugin::Redirectors and is now a deprecated
+  compatibility shim; all url_shortener*/short_url* settings and rules
+  still work as aliases of url_redirector*/redir_url*. Redirect chains
+  mixing shorteners and redirectors in any order are now followed
+  correctly, and query strings are no longer stripped before fetching.
+
 - Mail::SpamAssassin::Plugin::ExtractText now has the possibility
   to cache results in order to speedup attachment processing.
 
