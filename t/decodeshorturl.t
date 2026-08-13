@@ -77,10 +77,12 @@ ok_all_patterns();
    'https://tinyurl.com/jf8wv76t => https://spamassassin.apache.org/'
 );
 
-sarun ("-D DecodeShortURLs -t < data/spam/decodeshorturl/anchor.eml 2>&1", \&patterns_run_cb);
+# DecodeShortURLs is now a thin subclass of Redirectors; all logging (and
+# thus the -D facility name) happens under "Redirectors".
+sarun ("-D Redirectors -t < data/spam/decodeshorturl/anchor.eml 2>&1", \&patterns_run_cb);
 ok_all_patterns();
 
-sarun ("-D DecodeShortURLs -t < data/spam/decodeshorturl/params.eml 2>&1", \&patterns_run_cb);
+sarun ("-D Redirectors -t < data/spam/decodeshorturl/params.eml 2>&1", \&patterns_run_cb);
 ok_all_patterns();
 
 ###

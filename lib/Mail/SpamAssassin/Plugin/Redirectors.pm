@@ -5,9 +5,9 @@
 # The ASF licenses this file to you under the Apache License, Version 2.0
 # (the "License"); you may not use this file except in compliance with
 # the License.  You may obtain a copy of the License at:
-# 
+#
 #     http://www.apache.org/licenses/LICENSE-2.0
-# 
+#
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -17,13 +17,14 @@
 
 =head1 NAME
 
-Redirectors - Check for redirected URLs
+Redirectors - Check for redirected and shortened URLs
 
 =head1 SYNOPSIS
 
   loadplugin    Mail::SpamAssassin::Plugin::Redirectors
 
   url_redirector bing.com
+  url_shortener tinyurl.com
 
   body HAS_REDIR_URL          eval:redir_url()
   describe HAS_REDIR_URL      Message has one or more redirected URLs
@@ -46,32 +47,72 @@ Redirectors - Check for redirected URLs
   body REDIR_URL_404          eval:redir_url_code('404') # Can check any non-redirect HTTP code
   describe REDIR_URL_404      Message has redirected URL returning HTTP 404
 
+  body HAS_SHORT_URL          eval:short_url()
+  describe HAS_SHORT_URL      Message has one or more shortened URLs
+
+  body SHORT_URL_REDIR        eval:short_url_redir()
+  describe SHORT_URL_REDIR    Message has shortened URL that resulted in a valid redirection
+
+  body SHORT_URL_CHAINED      eval:short_url_chained()
+  describe SHORT_URL_CHAINED  Message has shortened URL chained to other shorteners
+
+  body SHORT_URL_MAXCHAIN     eval:short_url_maxchain()
+  describe SHORT_URL_MAXCHAIN Message has shortened URL that causes too many redirections
+
+  body SHORT_URL_LOOP         eval:short_url_loop()
+  describe SHORT_URL_LOOP     Message has short URL that loops back to itself
+
+  body SHORT_URL_200          eval:short_url_code('200') # Can check any non-redirect HTTP code
+  describe SHORT_URL_200      Message has shortened URL returning HTTP 200
+
+  body SHORT_URL_404          eval:short_url_code('404') # Can check any non-redirect HTTP code
+  describe SHORT_URL_404      Message has shortened URL returning HTTP 404
+
+  uri URI_TINYURL_BLOCKED      m,https://tinyurl\.com/app/nospam,
+  describe URI_TINYURL_BLOCKED Message contains a tinyurl that has been disabled due to abuse
+
+  uri URI_BITLY_BLOCKED       m,^https://bitly\.com/a/blocked,
+  describe URI_BITLY_BLOCKED  Message contains a bit.ly URL that has been disabled due to abuse
+
 =head1 DESCRIPTION
 
-This plugin looks for URLs redirected by a list of URL redirector services. 
-Upon finding a matching URL, plugin will send a HTTP request to the
-redirector service and retrieve the Location-header which points to the
-actual redirected URL.  It then adds this URL to the list of URIs extracted
-by SpamAssassin which can then be accessed by uri rules and plugins such as
-URIDNSBL.
+This plugin looks for URLs redirected or shortened by a list of URL
+redirector/shortener services.  Upon finding a matching URL, plugin will
+send a HTTP request to the service and retrieve the Location-header which
+points to the actual destination URL.  It then adds this URL to the list of
+URIs extracted by SpamAssassin which can then be accessed by uri rules and
+plugins such as URIDNSBL.
 
-This plugin will follow chained redirections, where a redirected URL redirects to
-another redirector.  Redirection depth limit can be set with
-C<max_redir_url_redirections>.
+This plugin will follow chained redirections, where a redirected or
+shortened URL leads to another redirector or shortener, in any combination
+and order -- for example a redirector that unwraps into a shortener, or a
+shortener that unwraps into a redirector.  Redirection depth limits can be
+set with C<max_redir_url_redirections> and C<max_short_url_redirections>.
 
-Maximum of C<max_redir_urls> redirected URLs are checked in a message (10 by
-default).  Setting it to 0 disables HTTP requests, allowing only redir_url()
-test to work and report found redirectors.
+Maximum of C<max_redir_urls> redirector URLs and C<max_short_urls> shortener
+URLs are checked in a message (10 each by default).  Setting either to 0
+disables HTTP requests for that category, allowing only the corresponding
+C<redir_url()>/C<short_url()> test to work and report found redirectors or
+shorteners.
 
-All supported rule types for checking redirector URLs and redirection status are
-documented in L<SYNOPSIS> section.
+All supported rule types for checking redirected/shortened URLs and
+redirection status are documented in L<SYNOPSIS> section.
 
 =head1 NOTES
 
-This plugin runs before priority 0 so that it may
-modify the parsed URI list prior to normal uri rules or the URIDNSBL plugin.
-It should run before DecodeShortURLs plugin so that redirected short uris are also
-checked.
+This plugin runs before priority 0 so that it may modify the parsed URI
+list prior to normal uri rules or the URIDNSBL plugin.
+
+Redirector and shortener matching share a single recursive walk over each
+URI's redirect chain, so every hop is checked against both C<url_redirector>
+and C<url_shortener> configuration regardless of which kind started the
+chain.
+
+=head1 ACKNOWLEDGEMENTS
+
+The url_shortener functionality was originally provided by a separate
+DecodeShortURLs plugin, functionality has been merged into this one;
+C<Mail::SpamAssassin::Plugin::DecodeShortURLs> is now a deprecated compatibility shim that loads this plugin.
 
 =cut
 
@@ -85,7 +126,7 @@ use warnings;
 use vars qw(@ISA);
 @ISA = qw(Mail::SpamAssassin::Plugin);
 
-my $VERSION = 4.02;
+my $VERSION = 4.03;
 
 use constant HAS_LWP_USERAGENT => eval { require LWP::UserAgent; require LWP::Protocol::https; };
 use constant HAS_SELENIUM => eval { require Selenium::Remote::Driver; };
@@ -111,7 +152,8 @@ sub new {
   }
 
   $self->set_config($mailsaobject->{conf});
-  # run at priority -15 so that redirected short uris can also be checked
+  # run at priority -15 so that redirected/shortened uris are always
+  # checked in a single pass, regardless of which kind of hop starts a chain
   $self->register_method_priority ('check_dnsbl', -15);
   $self->register_eval_rule('redir_url', $Mail::SpamAssassin::Conf::TYPE_BODY_EVALS);
   $self->register_eval_rule('redir_url_valid', $Mail::SpamAssassin::Conf::TYPE_BODY_EVALS);
@@ -121,6 +163,15 @@ sub new {
   $self->register_eval_rule('redir_url_chained_domain', $Mail::SpamAssassin::Conf::TYPE_BODY_EVALS);
   $self->register_eval_rule('redir_url_maxchain', $Mail::SpamAssassin::Conf::TYPE_BODY_EVALS);
   $self->register_eval_rule('redir_url_loop', $Mail::SpamAssassin::Conf::TYPE_BODY_EVALS);
+  $self->register_eval_rule('short_url', $Mail::SpamAssassin::Conf::TYPE_BODY_EVALS);
+  $self->register_eval_rule('short_url_redir', $Mail::SpamAssassin::Conf::TYPE_BODY_EVALS);
+  $self->register_eval_rule('short_url_200', $Mail::SpamAssassin::Conf::TYPE_BODY_EVALS);
+  $self->register_eval_rule('short_url_404', $Mail::SpamAssassin::Conf::TYPE_BODY_EVALS);
+  $self->register_eval_rule('short_url_code', $Mail::SpamAssassin::Conf::TYPE_BODY_EVALS);
+  $self->register_eval_rule('short_url_chained', $Mail::SpamAssassin::Conf::TYPE_BODY_EVALS);
+  $self->register_eval_rule('short_url_maxchain', $Mail::SpamAssassin::Conf::TYPE_BODY_EVALS);
+  $self->register_eval_rule('short_url_loop', $Mail::SpamAssassin::Conf::TYPE_BODY_EVALS);
+  $self->register_eval_rule('short_url_tests'); # for legacy DecodeShortURLs compatibility warning
 
   return $self;
 }
@@ -264,7 +315,8 @@ Set Selenium port to use.
 
 Clear configured url_redirector domains, for example to
 override default settings from an update channel.  If no arguments are given,
-all entries are cleared. If domains are specified, only those are removed.
+all redirector entries are cleared (url_shortener entries are untouched). If
+domains are specified, only those are removed.
 
 When an entry includes a C</path>, only that path is removed from the
 domain's allowlist; the domain entry itself is dropped only when its path
@@ -280,11 +332,10 @@ added by a bare-domain configuration.
     code => sub {
       my ($self, $key, $value, $line) = @_;
       if ($value eq '') {
-        $self->{url_redirector_exact} = {};
-        $self->{url_redirector_suffix} = {};
+        _clear_all_entries_by_class($self, 'redirector');
       } else {
         foreach my $token (split(/\s+/, $value)) {
-          _clear_redirector_entry($self, $token);
+          _clear_redirector_entry($self, $token, 'redirector');
         }
       }
     }
@@ -441,6 +492,123 @@ The regexp must match only the redirected domain.
     },
   });
 
+=over 4
+
+=item url_shortener  domain [domain...]     (default: none)
+
+Domains that should be considered as an URL shortener.  If the domain begins
+with a '.', any subdomain of the domain will be checked (see the leading-dot
+rule under C<url_redirector>).
+
+Example:
+
+ url_shortener tinyurl.com
+ url_shortener .page.link
+
+=back
+
+=cut
+
+  push (@cmds, {
+    setting => 'url_shortener',
+    default => {},
+    type => $Mail::SpamAssassin::Conf::CONF_TYPE_HASH_KEY_VALUE,
+    code => sub {
+      my ($self, $key, $value, $line) = @_;
+      if ($value eq '') {
+        return $Mail::SpamAssassin::Conf::MISSING_REQUIRED_VALUE;
+      }
+      foreach my $token (split(/\s+/, $value)) {
+        _add_redirector_entry($self, lc($token), 'head', 'shortener');
+      }
+    }
+  });
+
+=over 4
+
+=item url_shortener_get  domain [domain...]     (default: none)
+
+Alias to C<url_shortener>.  HTTP request will be done with GET method,
+instead of default HEAD.  Required for some services like bit.ly to return
+blocked URL correctly.
+
+Example:
+
+ url_shortener_get bit.ly
+
+=back
+
+=cut
+
+  push (@cmds, {
+    setting => 'url_shortener_get',
+    code => sub {
+      my ($self, $key, $value, $line) = @_;
+      if ($value eq '') {
+        return $Mail::SpamAssassin::Conf::MISSING_REQUIRED_VALUE;
+      }
+      foreach my $token (split(/\s+/, $value)) {
+        _add_redirector_entry($self, lc($token), 'get', 'shortener');
+      }
+    }
+  });
+
+=over 4
+
+=item url_shortener_custom_user_agent domain user-agent  (default: none)
+
+Custom HTTP user-agent to be used for specific domains,
+instead of the default specified in C<url_shortener_user_agent>.
+Required for some services like t.co to return blocked URL correctly.
+
+Example:
+
+ url_shortener_custom_user_agent t.co curl/8.6.0
+
+=back
+
+=cut
+
+  push (@cmds, {
+    setting => 'url_shortener_custom_user_agent',
+    code => sub {
+      my ($self, $key, $value, $line) = @_;
+      if ($value eq '') {
+        return $Mail::SpamAssassin::Conf::MISSING_REQUIRED_VALUE;
+      }
+      my @values = split(/\s+/, $value);
+      my $domain = shift(@values);
+      my $ua = join('', @values);
+      $self->{url_shortener_custom_ua}->{lc $domain} = $ua;
+    }
+  });
+
+=over 4
+
+=item clear_url_shortener  [domain] [domain...]
+
+Clear configured url_shortener and url_shortener_get domains, for example to
+override default settings from an update channel (url_redirector entries are
+untouched).  If domains are specified, then only those are removed from list.
+
+=back
+
+=cut
+
+  push (@cmds, {
+    setting => 'clear_url_shortener',
+    code => sub {
+      my ($self, $key, $value, $line) = @_;
+      if ($value eq '') {
+        _clear_all_entries_by_class($self, 'shortener');
+      } else {
+        foreach my $domain (split(/\s+/, $value)) {
+          _clear_redirector_entry($self, lc($domain), 'shortener');
+        }
+      }
+    }
+  });
+
 =head1 PRIVILEGED SETTINGS
 
 =over 4
@@ -549,6 +717,103 @@ See C<url_redirector_cache_autoclean> for database cleaning.
 
   push (@cmds, {
     setting => 'url_redirector_cache_ttl',
+    is_admin => 1,
+    default => 86400,
+    type => $Mail::SpamAssassin::Conf::CONF_TYPE_NUMERIC
+  });
+
+=over 4
+
+=item url_shortener_cache_type     (default: none)
+
+Same as C<url_redirector_cache_type>, for the (independent) shortener cache.
+
+Example:
+url_shortener_cache_type dbi
+
+=back
+
+=cut
+
+  push (@cmds, {
+    setting => 'url_shortener_cache_type',
+    default => '',
+    is_priv => 1,
+    type => $Mail::SpamAssassin::Conf::CONF_TYPE_STRING
+  });
+
+=over 4
+
+=item url_shortener_cache_dsn		(default: none)
+
+Same as C<url_redirector_cache_dsn>, for the (independent) shortener cache.
+
+Examples:
+
+ url_shortener_cache_dsn dbi:SQLite:dbname=/var/lib/spamassassin/DecodeShortURLs.db
+
+=back
+
+=cut
+
+  push (@cmds, {
+    setting => 'url_shortener_cache_dsn',
+    default => '',
+    is_priv => 1,
+    type => $Mail::SpamAssassin::Conf::CONF_TYPE_STRING
+  });
+
+=over 4
+
+=item url_shortener_cache_username  (default: none)
+
+The username that should be used to connect to the shortener cache database.
+Not used for SQLite.
+
+=back
+
+=cut
+
+  push (@cmds, {
+    setting => 'url_shortener_cache_username',
+    default => '',
+    is_priv => 1,
+    type => $Mail::SpamAssassin::Conf::CONF_TYPE_STRING
+  });
+
+=over 4
+
+=item url_shortener_cache_password  (default: none)
+
+The password that should be used to connect to the shortener cache database.
+Not used for SQLite.
+
+=back
+
+=cut
+
+  push (@cmds, {
+    setting => 'url_shortener_cache_password',
+    default => '',
+    is_priv => 1,
+    type => $Mail::SpamAssassin::Conf::CONF_TYPE_STRING
+  });
+
+=over 4
+
+=item url_shortener_cache_ttl		(default: 86400)
+
+The length of time a shortener cache entry will be valid for in seconds.
+Default is 86400 (1 day).
+
+See C<url_shortener_cache_autoclean> for database cleaning.
+
+=back
+
+=cut
+
+  push (@cmds, {
+    setting => 'url_shortener_cache_ttl',
     is_admin => 1,
     default => 86400,
     type => $Mail::SpamAssassin::Conf::CONF_TYPE_NUMERIC
@@ -668,13 +933,121 @@ like a common browser.
     type => $Mail::SpamAssassin::Conf::CONF_TYPE_STRING
   });
 
+=over 4
+
+=item url_shortener_cache_autoclean	(default: 1000)
+
+Same as C<url_redirector_cache_autoclean>, for the (independent) shortener cache.
+
+=back
+
+=cut
+
+  push (@cmds, {
+    setting => 'url_shortener_cache_autoclean',
+    is_admin => 1,
+    default => 1000,
+    type => $Mail::SpamAssassin::Conf::CONF_TYPE_NUMERIC
+  });
+
+=over 4
+
+=item url_shortener_loginfo           (default: 0 (off))
+
+If this option is enabled (set to 1), then short URLs and the decoded URLs will be logged with info priority.
+
+=back
+
+=cut
+
+  push (@cmds, {
+    setting => 'url_shortener_loginfo',
+    is_admin => 1,
+    default => 0,
+    type => $Mail::SpamAssassin::Conf::CONF_TYPE_BOOL
+  });
+
+=over 4
+
+=item url_shortener_timeout     (default: 5)
+
+Maximum time a short URL HTTP request can take, in seconds.
+
+=back
+
+=cut
+
+  push (@cmds, {
+    setting => 'url_shortener_timeout',
+    is_admin => 1,
+    default => 5,
+    type => $Mail::SpamAssassin::Conf::CONF_TYPE_NUMERIC
+  });
+
+=over 4
+
+=item max_short_urls                 (default: 10)
+
+Maximum amount of short URLs that will be looked up per message.  Chained
+redirections are not counted, only initial short URLs found.
+
+Setting it to 0 disables HTTP requests, allowing only short_url() test to
+work and report any found shortener URLs.
+
+=back
+
+=cut
+
+  push (@cmds, {
+    setting => 'max_short_urls',
+    is_admin => 1,
+    default => 10,
+    type => $Mail::SpamAssassin::Conf::CONF_TYPE_NUMERIC
+  });
+
+=over 4
+
+=item max_short_url_redirections     (default: 10)
+
+Maximum depth of chained redirections that a short URL can generate.
+
+=back
+
+=cut
+
+  push (@cmds, {
+    setting => 'max_short_url_redirections',
+    is_admin => 1,
+    default => 10,
+    type => $Mail::SpamAssassin::Conf::CONF_TYPE_NUMERIC
+  });
+
+=over 4
+
+=item url_shortener_user_agent       (default: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/101.0.4951.67 Safari/537.36)
+
+Set default User-Agent header for HTTP requests.  Some services require it to look
+like a common browser. User-Agent can be overriden on a per url_shortener basis using
+the C<url_shortener_custom_user_agent> setting.
+
+=back
+
+=cut
+
+  push (@cmds, {
+    setting => 'url_shortener_user_agent',
+    is_admin => 1,
+    default => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/101.0.4951.67 Safari/537.36',
+    type => $Mail::SpamAssassin::Conf::CONF_TYPE_STRING
+  });
+
   $conf->{parser}->register_commands(\@cmds);
 }
 
 sub initialise_url_redirector_cache {
   my ($self, $conf) = @_;
 
-  return if $self->{dbh} && $self->{dbh_pid} && $self->{dbh_pid} == $$;
+  return if $self->{dbh_redir} && $self->{dbh_redir_pid} && $self->{dbh_redir_pid} == $$;
   return if !$conf->{url_redirector_cache_type};
 
   if (!$conf->{url_redirector_cache_dsn}) {
@@ -684,7 +1057,7 @@ sub initialise_url_redirector_cache {
 
   ##
   ## SQLite
-  ## 
+  ##
   if ($conf->{url_redirector_cache_type} =~ /^(?:dbi|sqlite)$/i
       && $conf->{url_redirector_cache_dsn} =~ /^dbi:SQLite/)
   {
@@ -693,11 +1066,11 @@ sub initialise_url_redirector_cache {
       require DBI;
       require DBD::SQLite;
       DBD::SQLite->VERSION(1.59_01); # Required for ON CONFLICT
-      $self->{dbh} = DBI->connect_cached(
+      $self->{dbh_redir} = DBI->connect_cached(
         $conf->{url_redirector_cache_dsn}, '', '',
         {RaiseError => 1, PrintError => 0, InactiveDestroy => 1, AutoCommit => 1}
       );
-      $self->{dbh}->do("
+      $self->{dbh_redir}->do("
         CREATE TABLE IF NOT EXISTS redir_url_cache (
           redir_url   TEXT PRIMARY KEY NOT NULL,
           target_url  TEXT NOT NULL,
@@ -706,12 +1079,7 @@ sub initialise_url_redirector_cache {
           modified    INTEGER NOT NULL
         )
       ");
-      # Maintaining index for cleaning is likely more expensive than occasional full table scan
-      #$self->{dbh}->do("
-      #  CREATE INDEX IF NOT EXISTS redir_url_modified
-      #    ON redir_url_cache(created)
-      #");
-      $self->{sth_insert} = $self->{dbh}->prepare("
+      $self->{sth_insert_redir} = $self->{dbh_redir}->prepare("
         INSERT INTO redir_url_cache (redir_url, target_url, created, modified)
         VALUES (?,?,strftime('%s','now'),strftime('%s','now'))
         ON CONFLICT(redir_url) DO UPDATE
@@ -719,15 +1087,15 @@ sub initialise_url_redirector_cache {
               modified = excluded.modified,
               hits = hits + 1
       ");
-      $self->{sth_select} = $self->{dbh}->prepare("
+      $self->{sth_select_redir} = $self->{dbh_redir}->prepare("
         SELECT target_url FROM redir_url_cache
         WHERE redir_url = ?
       ");
-      $self->{sth_delete} = $self->{dbh}->prepare("
+      $self->{sth_delete_redir} = $self->{dbh_redir}->prepare("
         DELETE FROM redir_url_cache
         WHERE redir_url = ? AND created < strftime('%s','now') - $conf->{url_redirector_cache_ttl}
       ");
-      $self->{sth_clean} = $self->{dbh}->prepare("
+      $self->{sth_clean_redir} = $self->{dbh_redir}->prepare("
         DELETE FROM redir_url_cache
         WHERE created < strftime('%s','now') - $conf->{url_redirector_cache_ttl}
       ");
@@ -735,20 +1103,20 @@ sub initialise_url_redirector_cache {
   }
   ##
   ## MySQL/MariaDB
-  ## 
+  ##
   elsif (lc $conf->{url_redirector_cache_type} eq 'dbi'
       && $conf->{url_redirector_cache_dsn} =~ /^dbi:(?:mysql|MariaDB)/i)
   {
     eval {
       local $SIG{'__DIE__'};
       require DBI;
-      $self->{dbh} = DBI->connect_cached(
+      $self->{dbh_redir} = DBI->connect_cached(
         $conf->{url_redirector_cache_dsn},
         $conf->{url_redirector_cache_username},
         $conf->{url_redirector_cache_password},
         {RaiseError => 1, PrintError => 0, InactiveDestroy => 1, AutoCommit => 1}
       );
-      $self->{sth_insert} = $self->{dbh}->prepare("
+      $self->{sth_insert_redir} = $self->{dbh_redir}->prepare("
         INSERT INTO redir_url_cache (redir_url, target_url, created, modified)
         VALUES (?,?,UNIX_TIMESTAMP(),UNIX_TIMESTAMP())
         ON DUPLICATE KEY UPDATE
@@ -756,15 +1124,15 @@ sub initialise_url_redirector_cache {
           modified = VALUES(modified),
           hits = hits + 1
       ");
-      $self->{sth_select} = $self->{dbh}->prepare("
+      $self->{sth_select_redir} = $self->{dbh_redir}->prepare("
         SELECT target_url FROM redir_url_cache
         WHERE redir_url = ?
       ");
-      $self->{sth_delete} = $self->{dbh}->prepare("
+      $self->{sth_delete_redir} = $self->{dbh_redir}->prepare("
         DELETE FROM redir_url_cache
         WHERE redir_url = ? AND created < UNIX_TIMESTAMP() - $conf->{url_redirector_cache_ttl}
       ");
-      $self->{sth_clean} = $self->{dbh}->prepare("
+      $self->{sth_clean_redir} = $self->{dbh_redir}->prepare("
         DELETE FROM redir_url_cache
         WHERE created < UNIX_TIMESTAMP() - $conf->{url_redirector_cache_ttl}
       ");
@@ -772,20 +1140,20 @@ sub initialise_url_redirector_cache {
   }
   ##
   ## PostgreSQL
-  ## 
+  ##
   elsif (lc $conf->{url_redirector_cache_type} eq 'dbi'
       && $conf->{url_redirector_cache_dsn} =~ /^dbi:Pg/i)
   {
     eval {
       local $SIG{'__DIE__'};
       require DBI;
-      $self->{dbh} = DBI->connect_cached(
+      $self->{dbh_redir} = DBI->connect_cached(
         $conf->{url_redirector_cache_dsn},
         $conf->{url_redirector_cache_username},
         $conf->{url_redirector_cache_password},
         {RaiseError => 1, PrintError => 0, InactiveDestroy => 1, AutoCommit => 1}
       );
-      $self->{sth_insert} = $self->{dbh}->prepare("
+      $self->{sth_insert_redir} = $self->{dbh_redir}->prepare("
         INSERT INTO redir_url_cache (redir_url, target_url, created, modified)
         VALUES (?,?,CAST(EXTRACT(epoch FROM NOW()) AS INT),CAST(EXTRACT(epoch FROM NOW()) AS INT))
         ON CONFLICT (redir_url) DO UPDATE SET
@@ -793,15 +1161,15 @@ sub initialise_url_redirector_cache {
           modified = EXCLUDED.modified,
           hits = redir_url_cache.hits + 1
       ");
-      $self->{sth_select} = $self->{dbh}->prepare("
+      $self->{sth_select_redir} = $self->{dbh_redir}->prepare("
         SELECT target_url FROM redir_url_cache
         WHERE redir_url = ?
       ");
-      $self->{sth_delete} = $self->{dbh}->prepare("
+      $self->{sth_delete_redir} = $self->{dbh_redir}->prepare("
         DELETE FROM redir_url_cache
         WHERE redir_url = ? AND created < CAST(EXTRACT(epoch FROM NOW()) AS INT) - $conf->{url_redirector_cache_ttl}
       ");
-      $self->{sth_clean} = $self->{dbh}->prepare("
+      $self->{sth_clean_redir} = $self->{dbh_redir}->prepare("
         DELETE FROM redir_url_cache
         WHERE created < CAST(EXTRACT(epoch FROM NOW()) AS INT) - $conf->{url_redirector_cache_ttl}
       ");
@@ -814,23 +1182,173 @@ sub initialise_url_redirector_cache {
     return;
   }
 
-  if ($@ || !$self->{sth_clean}) {
+  if ($@ || !$self->{sth_clean_redir}) {
     warn "Redirectors: cache connect failed: $@\n";
-    undef $self->{dbh};
-    undef $self->{dbh_pid};
-    undef $self->{sth_insert};
-    undef $self->{sth_select};
-    undef $self->{sth_delete};
-    undef $self->{sth_clean};
+    undef $self->{dbh_redir};
+    undef $self->{dbh_redir_pid};
+    undef $self->{sth_insert_redir};
+    undef $self->{sth_select_redir};
+    undef $self->{sth_delete_redir};
+    undef $self->{sth_clean_redir};
   } else {
-    $self->{dbh_pid} = $$;
+    $self->{dbh_redir_pid} = $$;
+  }
+}
+
+sub initialise_url_shortener_cache {
+  my ($self, $conf) = @_;
+
+  return if $self->{dbh_short} && $self->{dbh_short_pid} && $self->{dbh_short_pid} == $$;
+  return if !$conf->{url_shortener_cache_type};
+
+  if (!$conf->{url_shortener_cache_dsn}) {
+    warn "Redirectors: invalid shortener cache configuration\n";
+    return;
+  }
+
+  ##
+  ## SQLite
+  ##
+  if ($conf->{url_shortener_cache_type} =~ /^(?:dbi|sqlite)$/i
+      && $conf->{url_shortener_cache_dsn} =~ /^dbi:SQLite/)
+  {
+    eval {
+      local $SIG{'__DIE__'};
+      require DBI;
+      require DBD::SQLite;
+      DBD::SQLite->VERSION(1.59_01); # Required for ON CONFLICT
+      $self->{dbh_short} = DBI->connect_cached(
+        $conf->{url_shortener_cache_dsn}, '', '',
+        {RaiseError => 1, PrintError => 0, InactiveDestroy => 1, AutoCommit => 1}
+      );
+      $self->{dbh_short}->do("
+        CREATE TABLE IF NOT EXISTS short_url_cache (
+          short_url   TEXT PRIMARY KEY NOT NULL,
+          decoded_url TEXT NOT NULL,
+          hits        INTEGER NOT NULL DEFAULT 1,
+          created     INTEGER NOT NULL,
+          modified    INTEGER NOT NULL
+        )
+      ");
+      $self->{sth_insert_short} = $self->{dbh_short}->prepare("
+        INSERT INTO short_url_cache (short_url, decoded_url, created, modified)
+        VALUES (?,?,strftime('%s','now'),strftime('%s','now'))
+        ON CONFLICT(short_url) DO UPDATE
+          SET decoded_url = excluded.decoded_url,
+              modified = excluded.modified,
+              hits = hits + 1
+      ");
+      $self->{sth_select_short} = $self->{dbh_short}->prepare("
+        SELECT decoded_url FROM short_url_cache
+        WHERE short_url = ?
+      ");
+      $self->{sth_delete_short} = $self->{dbh_short}->prepare("
+        DELETE FROM short_url_cache
+        WHERE short_url = ? AND created < strftime('%s','now') - $conf->{url_shortener_cache_ttl}
+      ");
+      $self->{sth_clean_short} = $self->{dbh_short}->prepare("
+        DELETE FROM short_url_cache
+        WHERE created < strftime('%s','now') - $conf->{url_shortener_cache_ttl}
+      ");
+    };
+  }
+  ##
+  ## MySQL/MariaDB
+  ##
+  elsif (lc $conf->{url_shortener_cache_type} eq 'dbi'
+      && $conf->{url_shortener_cache_dsn} =~ /^dbi:(?:mysql|MariaDB)/i)
+  {
+    eval {
+      local $SIG{'__DIE__'};
+      require DBI;
+      $self->{dbh_short} = DBI->connect_cached(
+        $conf->{url_shortener_cache_dsn},
+        $conf->{url_shortener_cache_username},
+        $conf->{url_shortener_cache_password},
+        {RaiseError => 1, PrintError => 0, InactiveDestroy => 1, AutoCommit => 1}
+      );
+      $self->{sth_insert_short} = $self->{dbh_short}->prepare("
+        INSERT INTO short_url_cache (short_url, decoded_url, created, modified)
+        VALUES (?,?,UNIX_TIMESTAMP(),UNIX_TIMESTAMP())
+        ON DUPLICATE KEY UPDATE
+          decoded_url = VALUES(decoded_url),
+          modified = VALUES(modified),
+          hits = hits + 1
+      ");
+      $self->{sth_select_short} = $self->{dbh_short}->prepare("
+        SELECT decoded_url FROM short_url_cache
+        WHERE short_url = ?
+      ");
+      $self->{sth_delete_short} = $self->{dbh_short}->prepare("
+        DELETE FROM short_url_cache
+        WHERE short_url = ? AND created < UNIX_TIMESTAMP() - $conf->{url_shortener_cache_ttl}
+      ");
+      $self->{sth_clean_short} = $self->{dbh_short}->prepare("
+        DELETE FROM short_url_cache
+        WHERE created < UNIX_TIMESTAMP() - $conf->{url_shortener_cache_ttl}
+      ");
+    };
+  }
+  ##
+  ## PostgreSQL
+  ##
+  elsif (lc $conf->{url_shortener_cache_type} eq 'dbi'
+      && $conf->{url_shortener_cache_dsn} =~ /^dbi:Pg/i)
+  {
+    eval {
+      local $SIG{'__DIE__'};
+      require DBI;
+      $self->{dbh_short} = DBI->connect_cached(
+        $conf->{url_shortener_cache_dsn},
+        $conf->{url_shortener_cache_username},
+        $conf->{url_shortener_cache_password},
+        {RaiseError => 1, PrintError => 0, InactiveDestroy => 1, AutoCommit => 1}
+      );
+      $self->{sth_insert_short} = $self->{dbh_short}->prepare("
+        INSERT INTO short_url_cache (short_url, decoded_url, created, modified)
+        VALUES (?,?,CAST(EXTRACT(epoch FROM NOW()) AS INT),CAST(EXTRACT(epoch FROM NOW()) AS INT))
+        ON CONFLICT (short_url) DO UPDATE SET
+          decoded_url = EXCLUDED.decoded_url,
+          modified = EXCLUDED.modified,
+          hits = short_url_cache.hits + 1
+      ");
+      $self->{sth_select_short} = $self->{dbh_short}->prepare("
+        SELECT decoded_url FROM short_url_cache
+        WHERE short_url = ?
+      ");
+      $self->{sth_delete_short} = $self->{dbh_short}->prepare("
+        DELETE FROM short_url_cache
+        WHERE short_url = ? AND created < CAST(EXTRACT(epoch FROM NOW()) AS INT) - $conf->{url_shortener_cache_ttl}
+      ");
+      $self->{sth_clean_short} = $self->{dbh_short}->prepare("
+        DELETE FROM short_url_cache
+        WHERE created < CAST(EXTRACT(epoch FROM NOW()) AS INT) - $conf->{url_shortener_cache_ttl}
+      ");
+    };
+  ##
+  ## ...
+  ##
+  } else {
+    warn "Redirectors: invalid shortener cache configuration\n";
+    return;
+  }
+
+  if ($@ || !$self->{sth_clean_short}) {
+    warn "Redirectors: shortener cache connect failed: $@\n";
+    undef $self->{dbh_short};
+    undef $self->{dbh_short_pid};
+    undef $self->{sth_insert_short};
+    undef $self->{sth_select_short};
+    undef $self->{sth_delete_short};
+    undef $self->{sth_clean_short};
+  } else {
+    $self->{dbh_short_pid} = $$;
   }
 }
 
 sub redir_url {
   my ($self, $pms) = @_;
 
-  # Make sure checks are run
   $self->_check_redir($pms);
 
   return $pms->{redir_url} ? 1 : 0;
@@ -839,7 +1357,6 @@ sub redir_url {
 sub redir_url_valid {
   my ($self, $pms) = @_;
 
-  # Make sure checks are run
   $self->_check_redir($pms);
 
   return $pms->{redir_url_valid} ? 1 : 0;
@@ -848,7 +1365,6 @@ sub redir_url_valid {
 sub redir_url_404 {
   my ($self, $pms) = @_;
 
-  # Make sure checks are run
   $self->_check_redir($pms);
 
   return $pms->{redir_url_404} ? 1 : 0;
@@ -857,7 +1373,6 @@ sub redir_url_404 {
 sub redir_url_code {
   my ($self, $pms, undef, $code) = @_;
 
-  # Make sure checks are run
   $self->_check_redir($pms);
 
   return 0 unless defined $code && $code =~ /^\d{3}$/;
@@ -867,7 +1382,6 @@ sub redir_url_code {
 sub redir_url_chained {
   my ($self, $pms) = @_;
 
-  # Make sure checks are run
   $self->_check_redir($pms);
 
   return $pms->{redir_url_chained} ? 1 : 0;
@@ -876,7 +1390,6 @@ sub redir_url_chained {
 sub redir_url_chained_domain {
   my ($self, $pms) = @_;
 
-  # Make sure checks are run
   $self->_check_redir($pms);
 
   return $pms->{redir_url_chained_domain} ? 1 : 0;
@@ -885,7 +1398,6 @@ sub redir_url_chained_domain {
 sub redir_url_maxchain {
   my ($self, $pms) = @_;
 
-  # Make sure checks are run
   $self->_check_redir($pms);
 
   return $pms->{redir_url_maxchain} ? 1 : 0;
@@ -894,14 +1406,98 @@ sub redir_url_maxchain {
 sub redir_url_loop {
   my ($self, $pms) = @_;
 
-  # Make sure checks are run
   $self->_check_redir($pms);
 
   return $pms->{redir_url_loop} ? 1 : 0;
 }
 
+sub short_url {
+  my ($self, $pms) = @_;
+
+  $self->_check_redir($pms);
+
+  return $pms->{short_url} ? 1 : 0;
+}
+
+sub short_url_redir {
+  my ($self, $pms) = @_;
+
+  $self->_check_redir($pms);
+
+  return $pms->{short_url_redir} ? 1 : 0;
+}
+
+sub short_url_200 {
+  my ($self, $pms) = @_;
+
+  $self->_check_redir($pms);
+
+  return $pms->{short_url_200} ? 1 : 0;
+}
+
+sub short_url_404 {
+  my ($self, $pms) = @_;
+
+  $self->_check_redir($pms);
+
+  return $pms->{short_url_404} ? 1 : 0;
+}
+
+sub short_url_code {
+  my ($self, $pms, undef, $code) = @_;
+
+  $self->_check_redir($pms);
+
+  return 0 unless defined $code && $code =~ /^\d{3}$/;
+  return $pms->{"short_url_$code"} ? 1 : 0;
+}
+
+sub short_url_chained {
+  my ($self, $pms) = @_;
+
+  $self->_check_redir($pms);
+
+  return $pms->{short_url_chained} ? 1 : 0;
+}
+
+sub short_url_maxchain {
+  my ($self, $pms) = @_;
+
+  $self->_check_redir($pms);
+
+  return $pms->{short_url_maxchain} ? 1 : 0;
+}
+
+sub short_url_loop {
+  my ($self, $pms) = @_;
+
+  $self->_check_redir($pms);
+
+  return $pms->{short_url_loop} ? 1 : 0;
+}
+
+sub short_url_tests {
+  # Legacy DecodeShortURLs compatibility warning done in finish_parsing_start
+  return 0;
+}
+
+sub finish_parsing_start {
+  my ($self, $opts) = @_;
+
+  if ($opts->{conf}->{eval_to_rule}->{short_url_tests}) {
+    warn "Redirectors: Legacy configuration format detected. ".
+         "Eval function short_url_tests() is no longer supported, ".
+         "please see documentation for the new rule format.\n";
+  }
+}
+
+# Add a host[/path] entry to the shared exact/suffix lookup buckets.
+# $kind is 'redirector' (default), 'selenium', or 'shortener'; it records
+# which legacy rule family (redir_url_* vs short_url_*) a hop matching this
+# entry belongs to.
 sub _add_redirector_entry {
-  my ($conf, $token, $method) = @_;
+  my ($conf, $token, $method, $kind) = @_;
+  $kind = 'redirector' unless defined $kind;
 
   my ($domspec, $path) = split(/\//, $token, 2);
   $path = defined $path ? '/' . $path : '/';
@@ -915,13 +1511,17 @@ sub _add_redirector_entry {
     my $display = ($is_suffix ? '.' : '') . $domspec;
     warn "redirectors: $display already registered with method '$existing->{method}'; overriding with '$method'\n";
   }
-  my $entry = $conf->{$bucket}->{$domspec} ||= { method => $method, paths => [] };
+  my $entry = $conf->{$bucket}->{$domspec} ||= { method => $method, paths => [], kind => $kind };
   $entry->{method} = $method;
+  $entry->{kind} = $kind;
   push @{$entry->{paths}}, $path unless grep { $_ eq $path } @{$entry->{paths}};
 }
 
+# $class is 'redirector' (matches kind ne 'shortener', i.e. redirector or
+# selenium) or 'shortener' (matches kind eq 'shortener'). Undef means no
+# kind filtering (back-compat for direct callers/tests predating the merge).
 sub _clear_redirector_entry {
-  my ($conf, $token) = @_;
+  my ($conf, $token, $class) = @_;
 
   $token = lc $token;
   my $has_path = ($token =~ /\//) ? 1 : 0;
@@ -931,13 +1531,34 @@ sub _clear_redirector_entry {
   my $bucket = ($domspec =~ s/^\.//) ? 'url_redirector_suffix' : 'url_redirector_exact';
   return unless length $domspec;
 
+  my $entry = $conf->{$bucket}->{$domspec} or return;
+  if (defined $class) {
+    my $matches = $class eq 'shortener' ? ($entry->{kind} eq 'shortener')
+                                         : ($entry->{kind} ne 'shortener');
+    return unless $matches;
+  }
+
   if (!$has_path) {
     delete $conf->{$bucket}->{$domspec};
     return;
   }
-  my $entry = $conf->{$bucket}->{$domspec} or return;
   @{$entry->{paths}} = grep { $_ ne $path } @{$entry->{paths}};
   delete $conf->{$bucket}->{$domspec} unless @{$entry->{paths}};
+}
+
+# Remove every entry of the given class ('redirector' or 'shortener') from
+# both lookup buckets. Used by clear_url_redirector/clear_url_shortener with
+# no arguments.
+sub _clear_all_entries_by_class {
+  my ($conf, $class) = @_;
+  for my $bucket (qw(url_redirector_exact url_redirector_suffix)) {
+    next unless $conf->{$bucket};
+    foreach my $dom (keys %{$conf->{$bucket}}) {
+      my $kind = $conf->{$bucket}->{$dom}->{kind};
+      my $matches = $class eq 'shortener' ? ($kind eq 'shortener') : ($kind ne 'shortener');
+      delete $conf->{$bucket}->{$dom} if $matches;
+    }
+  }
 }
 
 sub _entry_match_path {
@@ -1016,8 +1637,9 @@ sub _parse_uri {
   return ($uri, $host, $path, $rest);
 }
 
-# Returns the redirector entry ({method, paths}) if $uri's host+path matches
-# a configured url_redirector / url_redirector_get, else undef.
+# Returns the redirector entry ({method, paths, kind}) if $uri's host+path
+# matches a configured url_redirector / url_redirector_get / url_shortener*,
+# else undef.
 sub _is_configured_redirector {
   my ($uri, $conf) = @_;
 
@@ -1063,9 +1685,12 @@ sub _extract_embedded_uri {
   return;
 }
 
+# Lazily build (and cache on $pms) the LWP::UserAgent for $kind
+# ('redirector' or 'shortener'), each with its own default UA/timeout.
 sub _get_lwp_ua {
-  my ($self, $pms) = @_;
-  return $pms->{redir_lwp_ua} if exists $pms->{redir_lwp_ua};
+  my ($self, $pms, $kind) = @_;
+  my $slot = $kind eq 'shortener' ? 'short_lwp_ua' : 'redir_lwp_ua';
+  return $pms->{$slot} if exists $pms->{$slot};
 
   my $conf = $pms->{conf};
   # prevent "500 Header line too long (limit is 8192)" error when accessing
@@ -1074,13 +1699,16 @@ sub _get_lwp_ua {
     use LWP::Protocol::http;
     push(@LWP::Protocol::http::EXTRA_SOCK_OPTS, MaxLineLength => 16*1024);
   };
+  my ($agent, $timeout) = $kind eq 'shortener'
+    ? ($conf->{url_shortener_user_agent}, $conf->{url_shortener_timeout})
+    : ($conf->{url_redirector_user_agent}, $conf->{url_redirector_timeout});
   my $ua = LWP::UserAgent->new(
-    'agent'        => $conf->{url_redirector_user_agent},
+    'agent'        => $agent,
     'max_redirect' => 0,
-    'timeout'      => $conf->{url_redirector_timeout},
+    'timeout'      => $timeout,
   );
   $ua->env_proxy;
-  return $pms->{redir_lwp_ua} = $ua;
+  return $pms->{$slot} = $ua;
 }
 
 sub _get_selenium_ua {
@@ -1131,26 +1759,30 @@ sub _get_selenium_ua {
   return $pms->{redir_selenium_ua} = $ua;
 }
 
-# Perform an HTTP request for $uri using $method (LWP) or Selenium.
+# Perform an HTTP request for $uri using $method (LWP) or Selenium, for a
+# hop of the given $kind ('redirector'/'selenium' or 'shortener') -- this
+# selects the cache backend, UA/timeout settings, and status-code flag
+# prefix (redir_url_* vs short_url_*).
 # Returns the absolute, normalized Location URL on a usable redirect,
-# or undef otherwise. Sets redir_url_<rcode> flags on $pms and writes
+# or undef otherwise. Sets <prefix>_<rcode> flags on $pms and writes
 # the cache.
 sub _do_http {
-  my ($self, $uri, $method, $pms) = @_;
+  my ($self, $uri, $method, $pms, $kind) = @_;
   my $conf = $pms->{conf};
+  my $flag_prefix = $kind eq 'shortener' ? 'short_url' : 'redir_url';
 
   my $redir_url = $uri;
   my $location;
 
-  if (defined($location = $self->cache_get($redir_url))) {
-    if ($conf->{url_redirector_loginfo}) {
+  if (defined($location = $self->cache_get($kind, $redir_url))) {
+    if ($conf->{url_redirector_loginfo} || $conf->{url_shortener_loginfo}) {
       info("found cached $redir_url => $location");
     } else {
       dbg("found cached $redir_url => $location");
     }
     if ($location =~ /^\d{3}$/) {
-      $pms->{"redir_url_$location"} = 1;
-      $self->cache_add($redir_url, $location);
+      $pms->{"${flag_prefix}_$location"} = 1;
+      $self->cache_add($kind, $redir_url, $location);
       return;
     }
   } else {
@@ -1200,13 +1832,18 @@ sub _do_http {
         }
       }
       $location = $newurl;
-      $pms->{"redir_url_$rcode"} = 1;
-      $self->cache_add($redir_url, $rcode);
+      $pms->{"${flag_prefix}_$rcode"} = 1;
+      $self->cache_add($kind, $redir_url, $rcode);
       if($rcode !~ /^30[12]/) {
         return;
       }
     } else {
-      my $ua = $self->_get_lwp_ua($pms);
+      my $ua = $self->_get_lwp_ua($pms, $kind);
+      if ($kind eq 'shortener') {
+        my (undef, $host) = _parse_uri($redir_url, $conf);
+        my $custom_ua = defined $host ? $conf->{url_shortener_custom_ua}->{$host} : undef;
+        $ua->agent(defined $custom_ua ? $custom_ua : $conf->{url_shortener_user_agent});
+      }
       my $response = $ua->$method($redir_url);
       return if not defined $response;
 
@@ -1236,8 +1873,8 @@ sub _do_http {
 	      dbg("Found a meta http-equiv redirector, changing http response code from " . $response->code . " to $rcode");
 	    }
 	  } else {
-            $pms->{"redir_url_$rcode"} = 1;
-            $self->cache_add($redir_url, $rcode);
+            $pms->{"${flag_prefix}_$rcode"} = 1;
+            $self->cache_add($kind, $redir_url, $rcode);
           }
         }
         if($rcode !~ /^30[12]/) {
@@ -1248,7 +1885,7 @@ sub _do_http {
       if((exists $response->headers->{location}) or $http_equiv) {
         $location = $response->headers->{location} if not $http_equiv;
         if($redir_url ne $location) {
-          if ($conf->{url_redirector_loginfo}) {
+          if ($conf->{url_redirector_loginfo} || $conf->{url_shortener_loginfo}) {
             info("found $redir_url => $location");
           } else {
             dbg("found $redir_url => $location");
@@ -1260,7 +1897,7 @@ sub _do_http {
 
   return unless defined $location;
 
-  $self->cache_add($redir_url, $location);
+  $self->cache_add($kind, $redir_url, $location);
 
   # Resolve relative Location header to absolute.
   if ($location !~ m{^[a-z]+://}i) {
@@ -1299,6 +1936,17 @@ sub _do_http {
 # Recursive chain walker. Stops cleanly when neither
 # _is_configured_redirector nor _extract_embedded_uri matches. HTTP
 # requests are gated on _is_configured_redirector returning truthy.
+#
+# Both redirectors and shorteners flow through this single walk, so a hop
+# of either kind is checked at every depth, a redirector unwrapping into
+# a shortener (or vice versa) is followed either way. Detection
+# (redir_url/short_url) and HTTP status-code flags stay tied to the kind
+# of the entry that actually matched at that hop; chain-level flags
+# (chained/chained_domain/loop/valid-redirect) fire for both legacy rule
+# families together since they describe the shape of the chain as a
+# whole, not which kind produced it. Maxchain is checked against both
+# configured depth limits independently against the single shared depth
+# counter.
 sub _walk_redirects {
   my ($self, $uri, $src_info, $pms, $depth, $been_here) = @_;
   my $conf = $pms->{conf};
@@ -1306,11 +1954,15 @@ sub _walk_redirects {
   if (exists $been_here->{"uri:$uri"}) {
     dbg("error: loop detected: $uri");
     $pms->{redir_url_loop} = 1;
+    $pms->{short_url_loop} = 1;
     return;
   }
-  if ($depth >= $conf->{max_redir_url_redirections}) {
-    dbg("found more than $conf->{max_redir_url_redirections} redirections");
-    $pms->{redir_url_maxchain} = 1;
+  my $over_redir = $depth >= $conf->{max_redir_url_redirections};
+  my $over_short = $depth >= $conf->{max_short_url_redirections};
+  if ($over_redir || $over_short) {
+    dbg("found more than allowed chained redirections at depth $depth");
+    $pms->{redir_url_maxchain} = 1 if $over_redir;
+    $pms->{short_url_maxchain} = 1 if $over_short;
     return;
   }
   $been_here->{"uri:$uri"} = 1;
@@ -1322,15 +1974,20 @@ sub _walk_redirects {
   # detection rule fires (matches the max_redir_urls=0 semantics: "found a
   # redirector but didn't probe it"). Fall through to embedded-URI extraction
   # in case the URL also carries a querystring redirect.
-  if ($rentry && $rentry->{method} eq 'selenium' && !$conf->{url_redirector_use_selenium}) {
+  if ($rentry && $rentry->{kind} eq 'selenium' && !$conf->{url_redirector_use_selenium}) {
     dbg("$uri matches url_redirector_selenium but url_redirector_use_selenium=0, skipping http lookup");
     $pms->{redir_url} = 1;
     $rentry = undef;
   }
 
   if ($rentry) {
-    $pms->{redir_url} = 1;
-    $pms->{redir_url_chained} = 1 if $depth > 0;
+    my $kind = $rentry->{kind};
+    my $flag_prefix = $kind eq 'shortener' ? 'short_url' : 'redir_url';
+    $pms->{$flag_prefix} = 1;
+    if ($depth > 0) {
+      $pms->{redir_url_chained} = 1;
+      $pms->{short_url_chained} = 1;
+    }
 
     my (undef, $host) = $self->{main}->{registryboundaries}->uri_to_domain($uri);
     if (defined $host) {
@@ -1342,19 +1999,34 @@ sub _walk_redirects {
     }
 
     return if $self->{net_disabled};
-    return if !$conf->{max_redir_urls};
 
-    # Seed cap: max_redir_urls counts initial (depth 0) redirector URIs.
-    if ($depth == 0) {
-      return if ++$pms->{redir_seed_count} > $conf->{max_redir_urls};
+    if ($kind eq 'shortener') {
+      return if !$conf->{max_short_urls};
+      if ($depth == 0) {
+        return if ++$pms->{short_seed_count} > $conf->{max_short_urls};
+      }
+    } else {
+      return if !$conf->{max_redir_urls};
+      if ($depth == 0) {
+        return if ++$pms->{redir_seed_count} > $conf->{max_redir_urls};
+      }
     }
 
-    my $location = $self->_do_http($uri, $rentry->{method}, $pms);
+    # Shorteners historically strip anchors/query strings before fetching
+    # (their whole identity is the path token, and services often don't
+    # care about trailing #fragment/?query on the short link itself).
+    # Redirectors keep the query string intact, url_redirector_params
+    # needs it to extract embedded destination URIs.
+    my $fetch_uri = $uri;
+    $fetch_uri =~ s{/?[?#].*}{} if $kind eq 'shortener';
+
+    my $location = $self->_do_http($fetch_uri, $rentry->{method}, $pms, $kind);
     return unless defined $location;
 
-    if ($uri eq $location) {
+    if ($fetch_uri eq $location) {
       dbg("URL redirects to itself");
       $pms->{redir_url_loop} = 1;
+      $pms->{short_url_loop} = 1;
       return;
     }
 
@@ -1366,6 +2038,7 @@ sub _walk_redirects {
 
     _add_redirect_uri($pms, $location, $src_info);
     $pms->{redir_url_valid} = 1;
+    $pms->{short_url_redir} = 1;
 
     return $self->_walk_redirects($location, $src_info, $pms, $depth + 1, $been_here);
   }
@@ -1391,6 +2064,7 @@ sub _check_redir {
   my $conf = $pms->{conf};
 
   $self->initialise_url_redirector_cache($conf);
+  $self->initialise_url_shortener_cache($conf);
 
   # UAs are built lazily inside _do_http and cached on $pms. No upfront
   # construction here -- a message with only embedded-URI matches and no
@@ -1403,12 +2077,20 @@ sub _check_redir {
     $self->_walk_redirects($uri, $info, $pms, 0, {});
   }
 
-  if ($self->{dbh} && $conf->{url_redirector_cache_autoclean}
+  if ($self->{dbh_redir} && $conf->{url_redirector_cache_autoclean}
       && rand() < 1/$conf->{url_redirector_cache_autoclean})
   {
-    dbg("cleaning stale cache entries");
-    eval { $self->{sth_clean}->execute(); };
-    if ($@) { dbg("cache cleaning failed: $@"); }
+    dbg("cleaning stale redirector cache entries");
+    eval { $self->{sth_clean_redir}->execute(); };
+    if ($@) { dbg("redirector cache cleaning failed: $@"); }
+  }
+
+  if ($self->{dbh_short} && $conf->{url_shortener_cache_autoclean}
+      && rand() < 1/$conf->{url_shortener_cache_autoclean})
+  {
+    dbg("cleaning stale shortener cache entries");
+    eval { $self->{sth_clean_short}->execute(); };
+    if ($@) { dbg("shortener cache cleaning failed: $@"); }
   }
 }
 
@@ -1433,13 +2115,15 @@ sub _add_redirect_uri {
 }
 
 sub cache_add {
-  my ($self, $redir_url, $target_url) = @_;
+  my ($self, $kind, $key, $value) = @_;
 
-  return if !$self->{dbh};
-  return if length($redir_url) > 256 || length($target_url) > 512;
+  my $dbh = $kind eq 'shortener' ? $self->{dbh_short} : $self->{dbh_redir};
+  return if !$dbh;
+  return if length($key) > 256 || length($value) > 512;
 
+  my $sth = $kind eq 'shortener' ? $self->{sth_insert_short} : $self->{sth_insert_redir};
   # Upsert
-  eval { $self->{sth_insert}->execute($redir_url, $target_url); };
+  eval { $sth->execute($key, $value); };
   if ($@) {
     dbg("could not add to cache: $@");
   }
@@ -1448,13 +2132,15 @@ sub cache_add {
 }
 
 sub cache_get {
-  my ($self, $key) = @_;
+  my ($self, $kind, $key) = @_;
 
-  return if !$self->{dbh};
+  my $dbh = $kind eq 'shortener' ? $self->{dbh_short} : $self->{dbh_redir};
+  return if !$dbh;
 
+  my $sth_delete = $kind eq 'shortener' ? $self->{sth_delete_short} : $self->{sth_delete_redir};
   # Make sure expired entries are gone.  Just a quick check for primary key,
   # not that expensive.
-  eval { $self->{sth_delete}->execute($key); };
+  eval { $sth_delete->execute($key); };
   if ($@) {
     dbg("cache delete failed: $@");
     return;
@@ -1462,13 +2148,14 @@ sub cache_get {
 
   # Now try to get it (don't bother parsing if something was deleted above,
   # it would be rare event anyway)
-  eval { $self->{sth_select}->execute($key); };
+  my $sth_select = $kind eq 'shortener' ? $self->{sth_select_short} : $self->{sth_select_redir};
+  eval { $sth_select->execute($key); };
   if ($@) {
     dbg("cache get failed: $@");
     return;
   }
 
-  my @row = $self->{sth_select}->fetchrow_array();
+  my @row = $sth_select->fetchrow_array();
   if (@row) {
     return $row[0];
   }
@@ -1488,5 +2175,18 @@ sub has_selenium_support { 1 }
 sub has_url_redirector_selenium { 1 }
 sub has_url_skip_redirect_to { 1 }
 sub has_url_redirector_path { 1 } # path-prefix syntax in url_redirector / url_redirector_get
+sub has_short_url { 1 }
+sub has_autoclean { 1 }
+sub has_short_url_code { 1 }
+sub has_user_agent { 1 } # url_shortener_user_agent
+sub has_custom_user_agent { 1 } # url_shortener_custom_user_agent
+sub has_get { 1 } # url_shortener_get
+sub has_clear { 1 } # clear_url_shortener
+sub has_timeout { 1 } # url_shortener_timeout
+sub has_max_redirections { 1 } # max_short_url_redirections
+# short_url() will always hit if matching url_shortener was found, even
+# without HTTP requests.  To check if a valid HTTP redirection response was
+# seen, use short_url_redir().
+sub has_short_url_redir { 1 }
 
 1;
