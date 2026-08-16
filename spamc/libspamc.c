@@ -2049,13 +2049,89 @@ void transport_init(struct transport *tp)
 }
 
 /*
+* _ensure_rand_seeded()
+*
+*   always seed rand()
+*/
+static void _ensure_rand_seeded(void)
+{
+    static int rand_seeded = 0;
+
+    if (!rand_seeded) {
+        rand_seeded = 1;
+        srand(((unsigned int) getpid()) ^ ((unsigned int) time(NULL)) ^
+              ((unsigned int) (size_t) &rand_seeded));
+    }
+}
+
+/*
+* _random_below()
+*
+*	Return a uniformly-distributed random number in [0, bound).
+*/
+static unsigned int _random_below(unsigned int bound)
+{
+    unsigned int limit;
+    unsigned int r;
+
+    if (bound == 0)
+        return 0;
+
+    /* largest multiple of "bound" that is <= RAND_MAX+1 */
+    limit = ((unsigned int) RAND_MAX + 1u) - (((unsigned int) RAND_MAX + 1u) % bound);
+
+    do {
+        r = (unsigned int) rand();
+    } while (limit != 0 && r >= limit);
+
+    return r % bound;
+}
+
+#ifdef SPAMC_HAS_ADDRINFO
+/*
+* _randomize_addrinfo_chain()
+*
+*	A single hostname can resolve to several A/AAAA records,
+*   shuffle the ip addresses list too.
+*/
+static void _randomize_addrinfo_chain(struct addrinfo **head)
+{
+    struct addrinfo *nodes[TRANSPORT_MAX_HOSTS];
+    struct addrinfo *cur;
+    int count = 0;
+    int i;
+
+    if (head == NULL || *head == NULL)
+        return;
+
+    for (cur = *head; cur != NULL && count < TRANSPORT_MAX_HOSTS; cur = cur->ai_next)
+        nodes[count++] = cur;
+
+    if (count <= 1)
+        return;
+
+    for (i = count - 1; i > 0; i--) {
+        unsigned int j = _random_below((unsigned int) i + 1);
+        struct addrinfo *tmp = nodes[i];
+        nodes[i] = nodes[j];
+        nodes[j] = tmp;
+    }
+
+    for (i = 0; i < count - 1; i++) {
+        nodes[i]->ai_next = nodes[i + 1];
+    }
+    nodes[count - 1]->ai_next = NULL;
+
+    *head = nodes[0];
+}
+#endif
+
+/*
 * randomize_hosts()
 *
-*	Given the transport object that contains one or more IP addresses
-*	in this "hosts" list, rotate it by a random number of shifts to
-*	randomize them - this is a kind of load balancing. It's possible
-*	that the random number will be 0, which says not to touch. We don't
-*	do anything unless 
+*	Given the transport object that contains one or more hosts in this
+*	"hosts" list, shuffle it into a uniformly random order - this is a
+*	kind of load balancing.
 */
 
 static void _randomize_hosts(struct transport *tp)
@@ -2066,22 +2142,25 @@ static void _randomize_hosts(struct transport *tp)
     struct in_addr tmp;
 #endif
     int i;
-    int rnum;
 
     assert(tp != 0);
+
+    _ensure_rand_seeded();
+
+#ifdef SPAMC_HAS_ADDRINFO
+    for (i = 0; i < tp->nhosts; i++) {
+        _randomize_addrinfo_chain(&tp->hosts[i]);
+    }
+#endif
 
     if (tp->nhosts <= 1)
         return;
 
-    rnum = rand() % tp->nhosts;
-
-    while (rnum-- > 0) {
-        tmp = tp->hosts[0];
-
-        for (i = 1; i < tp->nhosts; i++)
-            tp->hosts[i - 1] = tp->hosts[i];
-
-        tp->hosts[i - 1] = tmp;
+    for (i = tp->nhosts - 1; i > 0; i--) {
+        unsigned int j = _random_below((unsigned int) i + 1);
+        tmp = tp->hosts[i];
+        tp->hosts[i] = tp->hosts[j];
+        tp->hosts[j] = tmp;
     }
 }
 
@@ -2326,13 +2405,14 @@ nexthost:
         
         /* QUASI-LOAD-BALANCING
          *
-         * If the user wants to do quasi load balancing, "rotate"
-         * the list by a random amount based on the current time.
-         * This may later be truncated to a single item. This is
-         * meaningful only if we have more than one host.
+         * If the user wants to do quasi load balancing, shuffle the
+         * host list into a random order. This may later be truncated
+         * to a single item. Note this is still meaningful with just one
+         * configured hostname: on addrinfo-capable builds it may still
+         * resolve to several IPs, whose order also gets shuffled.
 	 */
 
-        if ((flags & SPAMC_RANDOMIZE_HOSTS) && tp->nhosts > 1) {
+        if (flags & SPAMC_RANDOMIZE_HOSTS) {
             _randomize_hosts(tp);
         }
 
