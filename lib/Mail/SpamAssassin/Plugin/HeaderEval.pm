@@ -960,8 +960,8 @@ sub subject_is_all_caps {
    $subject =~ s/\s+$//;
    $subject =~ s/^(?:(?:Re|Fwd|Fw|Aw|Antwort|WG|SV|VB|VS|VL):\s*)+//i;  # Bug 6805
    return 0 if $subject !~ /\s/;	# don't match one word subjects
-   return 0 if (length $subject < 10);  # don't match short subjects
    $subject =~ s/[^a-zA-Z]//g;		# only look at letters
+   return 0 if (length $subject < 10);  # don't match short subjects
 
    # now, check to see if the subject is encoded using a non-ASCII charset.
    # If so, punt on this test to avoid FPs.  We just list the known charsets
