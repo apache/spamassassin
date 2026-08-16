@@ -211,7 +211,7 @@ sub seen_put {
   }
 
   dbg("bayes: seen ($msgid) put");
-  $self->{_dbh}->commit();
+  $self->{_dbh}->commit() unless $self->{_in_restore};
   return 1;
 }
 
@@ -1005,7 +1005,7 @@ sub _put_token {
 
   $sth->finish();
 
-  $self->{_dbh}->commit();
+  $self->{_dbh}->commit() unless $self->{_in_restore};
 
   return 1;
 }

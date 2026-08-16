@@ -1438,6 +1438,10 @@ sub restore_database {
     return 0;
   }
 
+  # suppress the per-row commit() done by _put_token()/seen_put() during a
+  # restore, so we can batch commits instead of fsyncing on every row
+  local $self->{_in_restore} = 1;
+
   my $token_count = 0;
   my $db_version;
   my $num_spam;
@@ -1473,6 +1477,7 @@ sub restore_database {
 
     if ($line_count % 1000 == 0) {
       print STDERR "." if ($showdots);
+      $self->{_dbh}->commit() if $self->{_dbh}->{AutoCommit} == 0;
     }
 
     if ($line =~ /^v\s+/) { # variable line
@@ -1580,6 +1585,8 @@ sub restore_database {
     $!==EBADF ? dbg("bayes: error reading dump file: $!")
               : die "error reading dump file: $!";
   close(DUMPFILE) or die "Can't close dump file: $!";
+
+  $self->{_dbh}->commit() if $self->{_dbh}->{AutoCommit} == 0;
 
   print STDERR "\n" if ($showdots);
 
