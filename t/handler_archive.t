@@ -42,8 +42,8 @@ sub find_bin {
 }
 my $unrar = find_bin('unrar');
 
-# 7 zip assertions, +3 octet-stream, +2 max-files, +(4 rar when unrar present)
-plan tests => 7 + 3 + 2 + ($unrar ? 4 : 0);
+# 7 zip assertions, +3 octet-stream, +2 max-files, +4 rar (only actually run when unrar present)
+plan tests => 7 + 3 + 2 + 4;
 
 tstpre ("
   loadhandler Mail::SpamAssassin::Handler::Archive
