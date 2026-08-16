@@ -369,6 +369,38 @@ sub DESTROY {
 
 Runs the SpamAssassin rules against the message pointed to by the object.
 
+This method performs the I<complete> scan of a message: it triggers the
+C<check_main> plugin hook (which runs all rules, calling C<got_hit()> as
+each one fires), computes the final score, determines the spam/ham verdict
+via C<is_spam()>, and finally triggers the C<check_end> plugin hook. Once
+C<check()> returns, the scan for this object is finished and its verdict is
+final.
+
+Do not call C<got_hit()>, or any other method that mutates the score or test
+state, after C<check()> has returned, it has no effect on the score,
+spam/ham status, or generated reports, since all of those were already
+computed before C<check_end> ran.
+
+If you need to feed additional hits into a scan, there are two supported
+ways to do so:
+
+=over 4
+
+=item * If the extra hits are known before the scan starts (e.g. verdicts
+from an external scanner), pass them via the C<rule_hits> key of the
+I<$suppl_attrib> argument to L<Mail::SpamAssassin/parse>. This is the
+mechanism used by amavisd-new. C<Mail::SpamAssassin::Plugin::Check> reads
+C<< $msg->{suppl_attrib}{rule_hits} >> during C<check_main> and calls
+C<got_hit()> on the caller's behalf, so the hits are still registered
+during the scan, just driven by caller-supplied data.
+
+=item * If the extra hits can only be determined while the scan is in
+progress, write a normal SpamAssassin plugin that hooks C<check_start> or
+C<check_main> (or implements an eval rule) and calls C<$pms-E<gt>got_hit(...)>
+from there, the same way built-in rule types do.
+
+=back
+
 =cut
 
 sub check {
@@ -3218,6 +3250,14 @@ description is used.
 Backward compatibility: the two mandatory arguments have been part of this API
 since SpamAssassin 2.x. The optional C<name=E<gt>value> pairs, however, are a
 new addition in SpamAssassin 3.2.0.
+
+This method is meant to be called only while a scan is in progress, from an
+eval rule, or from a plugin hooked into C<check_start> or C<check_main>, not
+after C<check()>/C<check_end> has already run for this status object; see
+L</"$status-E<gt>check ()">. To register hits that are known before the scan
+even starts (for example, verdicts from an external scanner such as amavisd-new
+uses), pass them via the C<rule_hits> key of the I<$suppl_attrib> argument to
+L<Mail::SpamAssassin/parse> instead of calling C<got_hit()> directly.
 
 =cut
 
