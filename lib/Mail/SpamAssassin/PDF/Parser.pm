@@ -782,8 +782,10 @@ sub _get_stream_data {
 #   'raw'         - fully decoded raw samples (Flate/LZW/ASCII85 chain completed); $bytes
 #                   are the raw samples, to be wrapped in an image header by the caller
 #   'jpeg'        - DCTDecode reached; $bytes are a complete JPEG file, usable as-is
-#   'unsupported' - reached a codec we can't undo and can't pass through (CCITTFax/JPX/
-#                   RunLength/etc.); $bytes is undef because the data so far is useless
+#   'tiff'        - CCITTFaxDecode reached; $bytes are a complete TIFF file wrapping the
+#                   still-encoded fax data, usable as-is
+#   'unsupported' - reached a codec we can't undo and can't pass through (JPX/RunLength/
+#                   etc.); $bytes is undef because the data so far is useless
 #                   (neither raw samples nor a standalone image file)
 # Returns () if the object isn't a readable stream.
 #
@@ -833,8 +835,29 @@ sub _get_image_data {
         } elsif ( $filter eq '/DCTDecode' ) {
             # Whatever we have so far is a complete JPEG file; return it as-is.
             return ('jpeg', $stream_data);
+        } elsif ( $filter eq '/CCITTFaxDecode' ) {
+            # Group 3/4 fax, the usual encoding for scanned documents.  Rather than
+            # decoding T.4/T.6 here, the still-encoded data is wrapped in a TIFF
+            # header, which image readers decode natively.  The codec parameters are
+            # not in the stream but in /DecodeParms, so the wrapping happens here
+            # while they are in hand; Columns/Rows fall back to the image dictionary.
+            $decodeParms = {} unless ref($decodeParms) eq 'HASH';
+            my %parms = (
+                K                => $self->_dereference($decodeParms->{'/K'})                // 0,
+                Columns          => $self->_dereference($decodeParms->{'/Columns'})          // 1728,
+                Rows             => $self->_dereference($decodeParms->{'/Rows'}),
+                BlackIs1         => $self->_dereference($decodeParms->{'/BlackIs1'})         // 0,
+                EncodedByteAlign => $self->_dereference($decodeParms->{'/EncodedByteAlign'}) // 0,
+            );
+            $parms{Rows} = $self->_dereference($stream_obj->{'/Height'})
+                unless defined $parms{Rows};
+            my $tiff = _ccitt_to_tiff($stream_data, \%parms);
+            # Parameters TIFF can't express (see _ccitt_to_tiff); wrapping anyway
+            # would decode to garbage.
+            return ('unsupported', undef) unless defined $tiff;
+            return ('tiff', $tiff);
         } else {
-            # CCITTFaxDecode, JPXDecode, RunLengthDecode, etc. - can't decode (yet)
+            # JPXDecode, RunLengthDecode, etc. - can't decode (yet)
             return ('unsupported', undef);
         }
     }
@@ -842,10 +865,87 @@ sub _get_image_data {
     return ('raw', $stream_data);
 }
 
+# _ccitt_to_tiff($bytes, $parms): wrap still-encoded CCITT fax data in a TIFF header.
+# The fax codecs carry no dimensions or polarity of their own -- those live in the
+# PDF's /DecodeParms -- so the bytes are useless to an image reader until described
+# by a container.  Emitting TIFF lets the reader's own fax decoder (libtiff, via
+# leptonica in tesseract) do the work rather than reimplementing T.4/T.6 here.
+#
+# Maps the PDF /K parameter onto the TIFF compression tag:
+#   K < 0   Group 4 / T.6           -> Compression 4
+#   K == 0  Group 3 1-D             -> Compression 3, T4Options bit0 clear
+#   K > 0   Group 3 mixed 1-D/2-D   -> Compression 3, T4Options bit0 set
+#
+# Returns the TIFF bytes, or undef if the parameters can't be expressed in TIFF.
+sub _ccitt_to_tiff {
+    my ($bytes, $parms) = @_;
+    $parms ||= {};
+
+    my $w = $parms->{Columns};
+    my $h = $parms->{Rows};
+    return undef unless defined($w) && defined($h) && $w > 0 && $h > 0;
+
+    my $k = $parms->{K} || 0;
+    my ($compression, $t4options);
+    if    ( $k < 0 )  { $compression = 4 }
+    elsif ( $k == 0 ) { $compression = 3; $t4options = 0 }
+    else              { $compression = 3; $t4options = 1 }
+
+    # EncodedByteAlign has no T.6 equivalent; libtiff only honours it for Group 3
+    # (T4Options bit 2).  A Group 4 stream that sets it can't be described in TIFF,
+    # so decline rather than hand over data that would decode to garbage.
+    if ( $parms->{EncodedByteAlign} ) {
+        return undef if $compression == 4;
+        $t4options |= 0x4;
+    }
+
+    # PDF BlackIs1 false (the default) means 0 = black, i.e. TIFF's WhiteIsZero.
+    my $photometric = $parms->{BlackIs1} ? 1 : 0;   # 1 = MinIsBlack, 0 = MinIsWhite
+
+    my @tags = (
+        [ 256, 4, $w            ],   # ImageWidth
+        [ 257, 4, $h            ],   # ImageLength
+        [ 258, 3, 1             ],   # BitsPerSample
+        [ 259, 3, $compression  ],   # Compression
+        [ 262, 3, $photometric  ],   # PhotometricInterpretation
+        [ 273, 4, 0             ],   # StripOffsets (patched below)
+        [ 277, 3, 1             ],   # SamplesPerPixel
+        [ 278, 4, $h            ],   # RowsPerStrip (single strip)
+        [ 279, 4, length $bytes ],   # StripByteCounts
+    );
+    push @tags, [ 292, 4, $t4options ] if defined $t4options;   # T4Options
+    @tags = sort { $a->[0] <=> $b->[0] } @tags;                 # TIFF requires ascending tags
+
+    # Little-endian TIFF: header (8) + entry count (2) + 12 per entry + next-IFD (4).
+    # All values here are scalars that fit in the 4-byte inline field, so there is
+    # no overflow area and the image data follows the IFD directly.
+    my $ifd_offset  = 8;
+    my $data_offset = $ifd_offset + 2 + 12 * scalar(@tags) + 4;
+    for my $t ( @tags ) {
+        $t->[2] = $data_offset if $t->[0] == 273;               # patch StripOffsets
+    }
+
+    my $tiff = "II\x2a\x00" . pack('V', $ifd_offset);
+    $tiff .= pack('v', scalar @tags);
+    for my $t ( @tags ) {
+        my ($tag, $type, $value) = @$t;
+        # Values shorter than 4 bytes sit left-justified in the value field; packing
+        # SHORT as 'vv' places it in the low half with the high half zeroed.
+        $tiff .= pack('vvV', $tag, $type, 1)
+               . ($type == 3 ? pack('vv', $value, 0) : pack('V', $value));
+    }
+    $tiff .= pack('V', 0);        # no next IFD
+    $tiff .= $bytes;
+
+    return $tiff;
+}
+
 #
 # Decode the XObject images collected during parsing into descriptors ready for the
 # caller to re-encode (e.g. as PNG/JPEG sub-parts).  Returns an arrayref of hashrefs:
-#   { format => 'raw'|'jpeg', bytes => $data, width, height, colorspace, bpc }
+#   { format => 'raw'|'jpeg'|'tiff', bytes => $data, width, height, colorspace, bpc }
+# 'jpeg' and 'tiff' bytes are complete image files, ready to use as-is; 'raw' bytes
+# are samples the caller wraps in an image header.
 # Honors caps:
 #   max_images - stop after this many usable images (default 4)
 #   max_pixels - skip images larger than this (width*height) (default 25_000_000;

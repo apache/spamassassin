@@ -489,6 +489,38 @@ sub _image_info {
     return ('bmp', ($w && $h) ? ($w, $h) : (undef, undef));
   }
 
+  # TIFF: "II\x2a\x00" (little-endian) or "MM\x00\x2a" (big-endian), then the
+  # offset of the first IFD.  Dimensions come from the ImageWidth (256) and
+  # ImageLength (257) tags, which may be SHORT or LONG.  Only the first IFD is
+  # read: a multi-page TIFF is measured by its first page, which is what an image
+  # reader shows and enough for the size gate.
+  if (substr($$dataref, 0, 4) eq "II\x2a\x00" ||
+      substr($$dataref, 0, 4) eq "MM\x00\x2a") {
+    my $le = substr($$dataref, 0, 2) eq 'II';
+    my $ifd = unpack($le ? 'V' : 'N', substr($$dataref, 4, 4));
+    my ($w, $h);
+    # Guard every read against a truncated or bogus offset; a malformed TIFF must
+    # fall through as a known type with unknown dimensions, not die.
+    if ($ifd >= 8 && $ifd + 2 <= $len) {
+      my $count = unpack($le ? 'v' : 'n', substr($$dataref, $ifd, 2));
+      $count = 512 if $count > 512;         # sanity cap on entries to walk
+      for my $i (0 .. $count - 1) {
+        my $e = $ifd + 2 + $i * 12;
+        last if $e + 12 > $len;
+        my ($tag, $type) = unpack($le ? 'vv' : 'nn', substr($$dataref, $e, 4));
+        next unless $tag == 256 || $tag == 257;
+        # SHORT (3) sits in the low half of the value field; LONG (4) fills it.
+        my $v = $type == 3 ? unpack($le ? 'v' : 'n', substr($$dataref, $e + 8, 2))
+              : $type == 4 ? unpack($le ? 'V' : 'N', substr($$dataref, $e + 8, 4))
+              : undef;
+        next unless defined $v;
+        $tag == 256 ? ($w = $v) : ($h = $v);
+        last if defined $w && defined $h;
+      }
+    }
+    return ('tiff', ($w && $h) ? ($w, $h) : (undef, undef));
+  }
+
   # ISO-BMFF / HEIF: bytes 4-7 are 'ftyp', bytes 8-11 a brand code.  Identified
   # for conversion; dimensions read from the converted PNG, not here.
   if (substr($$dataref, 4, 4) eq 'ftyp') {

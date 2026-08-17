@@ -39,9 +39,10 @@ PDFInfo plugin.
 
 The handler returns embedded images extracted from the PDF as sub-parts, each a
 C<< { type => '<mediatype>', data => $bytes } >> spec that the handler framework
-dispatches to the image handler (e.g. for OCR).  Images are emitted as either
-C<image/jpeg> (for streams already in JPEG form) or C<image/png> (raw image data
-re-wrapped as PNG).
+dispatches to the image handler (e.g. for OCR).  Images are emitted as
+C<image/jpeg> (for streams already in JPEG form), C<image/tiff> (for CCITT fax
+data, which is left encoded and wrapped in a TIFF header the image reader decodes
+natively), or C<image/png> (raw image data re-wrapped as PNG).
 
 This extraction is gated by the C<pdf_extract_images>, C<pdf_max_images>, and
 C<pdf_max_image_pixels> settings (see L</CONFIGURATION>), and is skipped entirely
@@ -536,6 +537,8 @@ sub _extract_text {
 # image can't be represented in a format the image handler reads.
 #
 #   format 'jpeg' - already a complete JPEG file, passed through as image/jpeg
+#   format 'tiff' - already a complete TIFF file (CCITT fax data wrapped by the
+#                   parser), passed through as image/tiff
 #   format 'raw'  - raw samples, wrapped into a PNG (image/png).  Only DeviceGray,
 #                   DeviceRGB (8bpc) and bilevel (1bpc) are handled; CMYK/Indexed/
 #                   array colorspaces are skipped.
@@ -544,10 +547,10 @@ sub _encode_image {
   my $bytes = $img->{bytes};
   return undef unless defined $bytes && length $bytes;
 
-  if ( ($img->{format} // '') eq 'jpeg' ) {
-    return { type => 'image/jpeg', data => $bytes };
-  }
-  return undef unless ($img->{format} // '') eq 'raw';
+  my $format = $img->{format} // '';
+  return { type => 'image/jpeg', data => $bytes } if $format eq 'jpeg';
+  return { type => 'image/tiff', data => $bytes } if $format eq 'tiff';
+  return undef unless $format eq 'raw';
 
   my $w   = $img->{width};
   my $h   = $img->{height};
