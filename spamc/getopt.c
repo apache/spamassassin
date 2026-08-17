@@ -107,7 +107,7 @@ spamc_getopt(int argc, char* const *argv, const char *optstr)
     static int optchr = 0;
     static int dash = 0; /* have already seen the - */
 
-    char *cp;
+    const char *cp;
 
     if (spamc_optreset)
         spamc_optreset = optchr = dash = 0;
@@ -190,7 +190,8 @@ spamc_getopt_long(int argc, char * const argv[],
 {
    static int optchr = 0;
    static int dash = 0;
-   char *cp, *longopt;
+   const char *cp;
+   char *longopt;
    char *bp, *opt = NULL;
    int i, longoptlen;;
 
@@ -258,7 +259,7 @@ spamc_getopt_long(int argc, char * const argv[],
             free(opt);
             return(longoptiserr(argc, argv, spamc_optind-1, OPTERRNF));
          }
-         if(((strncmp(longopt+2, longopts[i].name, longoptlen)) == 0) && (strlen(longopts[i].name) == longoptlen)) {
+         if(((strncmp(longopt+2, longopts[i].name, longoptlen)) == 0) && (strlen(longopts[i].name) == (size_t)longoptlen)) {
             *longindex = i;
             if(longopts[i].has_arg == required_argument) {
                if(((spamc_optind >= argc) || (!argv[spamc_optind]) || (argv[spamc_optind][0] == '-')) && 
