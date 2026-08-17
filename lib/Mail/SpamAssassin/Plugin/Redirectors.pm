@@ -277,6 +277,7 @@ added by a bare-domain configuration.
 
   push (@cmds, {
     setting => 'clear_url_redirector',
+    type => $Mail::SpamAssassin::Conf::CONF_TYPE_NOARGS,
     code => sub {
       my ($self, $key, $value, $line) = @_;
       if ($value eq '') {
@@ -306,6 +307,7 @@ restricts the match.
 
   push (@cmds, {
     setting => 'url_redirector_get',
+    type => $Mail::SpamAssassin::Conf::CONF_TYPE_HASH_KEY_VALUE,
     code => sub {
       my ($self, $key, $value, $line) = @_;
       if ($value eq '') {
@@ -345,6 +347,7 @@ LWP).
 
   push (@cmds, {
     setting => 'url_redirector_selenium',
+    type => $Mail::SpamAssassin::Conf::CONF_TYPE_HASH_KEY_VALUE,
     code => sub {
       my ($self, $key, $value, $line) = @_;
       if ($value eq '') {
@@ -400,6 +403,7 @@ only those are removed from the list.
 
   push (@cmds, {
     setting => 'clear_url_skip_redirect_to',
+    type => $Mail::SpamAssassin::Conf::CONF_TYPE_NOARGS,
     code => sub {
       my ($self, $key, $value, $line) = @_;
       if ($value eq '') {
