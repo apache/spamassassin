@@ -408,7 +408,7 @@ sub _resolve_binary {
   warn "image: $warn_msg\n" if defined $warn_msg;
   dbg("image: $label not found, related conversions disabled")
     if !defined $warn_msg;
-  return undef;
+  return;
 }
 
 # Identify an image's real type and pixel dimensions from its leading bytes.
@@ -617,7 +617,7 @@ sub _ocr {
       chomp(my $e = $err);
       info("image: tesseract error: %s", $e);
     }
-    return undef;
+    return;
   }
 
   return $resp;
@@ -634,7 +634,7 @@ sub _heif_to_png {
   my $convert = $self->_heif_convert($conf);
   if (!$convert) {
     dbg("image: cannot OCR HEIF, heif-convert not available");
-    return undef;
+    return;
   }
   my $secs = $conf->{handler_time_limit} || 10;
 
@@ -718,7 +718,7 @@ sub _heif_to_png {
       chomp(my $e = $err);
       info("image: heif-convert error: %s", $e);
     }
-    return undef;
+    return;
   }
 
   # Return a ref to the converted bytes (handle_image threads it on by ref).

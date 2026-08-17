@@ -643,7 +643,7 @@ sub _get_obj {
     my $core = $self->{core};
 
     # return undef for non-existent objects
-    return undef unless defined($ref) && defined($self->{xref}->{$ref});
+    return unless defined($ref) && defined($self->{xref}->{$ref});
 
     if ( !defined($self->{object_cache}->{$ref}) ) {
         my ($objnum,$gennum) = $ref =~ /^(\d+) (\d+) R$/;
@@ -883,7 +883,7 @@ sub _ccitt_to_tiff {
 
     my $w = $parms->{Columns};
     my $h = $parms->{Rows};
-    return undef unless defined($w) && defined($h) && $w > 0 && $h > 0;
+    return unless defined($w) && defined($h) && $w > 0 && $h > 0;
 
     my $k = $parms->{K} || 0;
     my ($compression, $t4options);
@@ -895,7 +895,7 @@ sub _ccitt_to_tiff {
     # (T4Options bit 2).  A Group 4 stream that sets it can't be described in TIFF,
     # so decline rather than hand over data that would decode to garbage.
     if ( $parms->{EncodedByteAlign} ) {
-        return undef if $compression == 4;
+        return if $compression == 4;
         $t4options |= 0x4;
     }
 

@@ -205,15 +205,15 @@ sub _basename {
 sub _zip_entry_count {
   my ($dataref) = @_;
   my $len = defined $$dataref ? length $$dataref : 0;
-  return undef if $len < 22;
+  return if $len < 22;
 
   # Search backwards for the EOCD signature within the comment window.  Scanning
   # a bounded tail (not the whole file) keeps this cheap on large archives.
   my $window = $len < 22 + 0xFFFF ? $len : 22 + 0xFFFF;
   my $tail   = substr($$dataref, $len - $window);
   my $pos    = rindex($tail, "PK\x05\x06");
-  return undef if $pos < 0;
-  return undef if $pos + 12 > length $tail;   # not enough bytes for the count field
+  return if $pos < 0;
+  return if $pos + 12 > length $tail;   # not enough bytes for the count field
 
   my $count = unpack('v', substr($tail, $pos + 10, 2));
 
@@ -464,7 +464,7 @@ sub _run_unrar {
       chomp(my $e = $err);
       log_warn("unrar error: $e");
     }
-    return undef;
+    return;
   }
 
   return $resp;
