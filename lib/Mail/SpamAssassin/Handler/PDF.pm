@@ -439,7 +439,7 @@ sub _resolve_binary {
     return $path;
   }
   log_dbg("$label not found, text extraction disabled (set pdf_pdftotext_path)");
-  return undef;
+  return;
 }
 
 # _extract_text($pms, $dataref): run pdftotext on the decoded PDF bytes and
@@ -452,7 +452,7 @@ sub _extract_text {
 
   my $conf = $pms->{conf} || $self->{main}->{conf};
   my $bin  = $self->_pdftotext($conf);
-  return undef unless defined $bin;
+  return unless defined $bin;
 
   my $pages = $conf->{pdf_text_max_pages};
   $pages = DEFAULT_TEXT_MAX_PAGES unless defined $pages;
@@ -525,7 +525,7 @@ sub _extract_text {
       chomp(my $e = $err);
       log_warn("pdftotext error: $e");
     }
-    return undef;
+    return;
   }
 
   return $resp;
@@ -545,20 +545,20 @@ sub _extract_text {
 sub _encode_image {
   my ($self, $img) = @_;
   my $bytes = $img->{bytes};
-  return undef unless defined $bytes && length $bytes;
+  return unless defined $bytes && length $bytes;
 
   my $format = $img->{format} // '';
   return { type => 'image/jpeg', data => $bytes } if $format eq 'jpeg';
   return { type => 'image/tiff', data => $bytes } if $format eq 'tiff';
-  return undef unless $format eq 'raw';
+  return unless $format eq 'raw';
 
   my $w   = $img->{width};
   my $h   = $img->{height};
   my $bpc = $img->{bpc};
   my $cs  = $img->{colorspace};
 
-  return undef unless defined($w) && defined($h) && $w > 0 && $h > 0;
-  return undef if ref($cs);            # Indexed/ICCBased/etc. arrays - skip
+  return unless defined($w) && defined($h) && $w > 0 && $h > 0;
+  return if ref($cs);            # Indexed/ICCBased/etc. arrays - skip
   $cs = '' unless defined($cs);
 
   my ($channels, $samples);
@@ -567,7 +567,7 @@ sub _encode_image {
     # Bilevel: expand 1 bit/pixel (row byte-aligned) to 8-bit gray.  PDF sample
     # 0 = black, so bit 0 -> 0x00, bit 1 -> 0xff.
     my $row_bytes = int(($w + 7) / 8);
-    return undef if length($bytes) < $row_bytes * $h;
+    return if length($bytes) < $row_bytes * $h;
     my $gray = '';
     for my $y (0 .. $h-1) {
       my $row = substr($bytes, $y * $row_bytes, $row_bytes);
@@ -577,22 +577,22 @@ sub _encode_image {
     ($channels, $samples) = (1, $gray);
   }
   elsif ( $cs =~ /rgb/i ) {
-    return undef unless !defined($bpc) || $bpc == 8;
-    return undef if length($bytes) < $w * $h * 3;
+    return unless !defined($bpc) || $bpc == 8;
+    return if length($bytes) < $w * $h * 3;
     ($channels, $samples) = (3, substr($bytes, 0, $w * $h * 3));
   }
   elsif ( $cs =~ /gray/i || $cs eq '' ) {
-    return undef unless !defined($bpc) || $bpc == 8;
-    return undef if length($bytes) < $w * $h;
+    return unless !defined($bpc) || $bpc == 8;
+    return if length($bytes) < $w * $h;
     ($channels, $samples) = (1, substr($bytes, 0, $w * $h));
   }
   else {
     # CMYK / Separation / unknown - skip
-    return undef;
+    return;
   }
 
   my $png = _raw_to_png($w, $h, $channels, $samples);
-  return undef unless defined $png;
+  return unless defined $png;
   return { type => 'image/png', data => $png };
 }
 
@@ -609,7 +609,7 @@ sub _raw_to_png {
   $raw .= "\x00" . substr($samples, $_ * $row_bytes, $row_bytes) for 0 .. $h-1;
 
   my $idat = compress($raw);
-  return undef unless defined $idat;
+  return unless defined $idat;
 
   my $png = "\x89PNG\x0d\x0a\x1a\x0a";
   $png .= _png_chunk('IHDR', pack('NNCCCCC', $w, $h, 8, $color_type, 0, 0, 0));

@@ -750,7 +750,7 @@ sub get_dbinfo {
 sub get_country {
   my ($self, $ip) = @_;
 
-  return undef if !defined $ip || $ip !~ /\S/; ## no critic (ProhibitExplicitReturnUndef)
+  return undef if !defined $ip || $ip !~ /\S/; ## no critic (ProhibitExplicitReturnUndef) - Bug 8409 - can't prove return; is safe here
 
   if ($ip =~ IS_IP_PRIVATE) {
     return '**';
@@ -766,14 +766,14 @@ sub get_country {
   } elsif ($self->{dbapi}->{country}) {
     return $self->_get('country',$ip)->{country} || 'XX';
   } else {
-    return undef; ## no critic (ProhibitExplicitReturnUndef)
+    return undef; ## no critic (ProhibitExplicitReturnUndef) - Bug 8409 - can't prove return; is safe here
   }
 }
 
 sub get_continent {
   my ($self, $ip) = @_;
 
-  return undef if !defined $ip || $ip !~ /\S/; ## no critic (ProhibitExplicitReturnUndef)
+  return undef if !defined $ip || $ip !~ /\S/; ## no critic (ProhibitExplicitReturnUndef) - Bug 8409 - can't prove return; is safe here
 
   # If it's already CC, use our own lookup table..
   if (length($ip) == 2) {
@@ -785,66 +785,66 @@ sub get_continent {
   } elsif ($self->{dbapi}->{country}) {
     return $self->_get('country',$ip)->{continent} || 'XX';
   } else {
-    return undef; ## no critic (ProhibitExplicitReturnUndef)
+    return undef; ## no critic (ProhibitExplicitReturnUndef) - Bug 8409 - can't prove return; is safe here
   }
 }
 
 sub get_isp {
   my ($self, $ip) = @_;
 
-  return undef if !defined $ip || $ip !~ /\S/; ## no critic (ProhibitExplicitReturnUndef)
+  return undef if !defined $ip || $ip !~ /\S/; ## no critic (ProhibitExplicitReturnUndef) - Bug 8409 - can't prove return; is safe here
 
   if ($self->{dbapi}->{isp}) {
     return $self->_get('isp',$ip)->{isp};
   } else {
-    return undef; ## no critic (ProhibitExplicitReturnUndef)
+    return undef; ## no critic (ProhibitExplicitReturnUndef) - Bug 8409 - can't prove return; is safe here
   }
 }
 
 sub get_isp_org {
   my ($self, $ip) = @_;
 
-  return undef if !defined $ip || $ip !~ /\S/; ## no critic (ProhibitExplicitReturnUndef)
+  return undef if !defined $ip || $ip !~ /\S/; ## no critic (ProhibitExplicitReturnUndef) - Bug 8409 - can't prove return; is safe here
 
   if ($self->{dbapi}->{isp}) {
     return $self->_get('isp',$ip)->{organization};
   } else {
-    return undef; ## no critic (ProhibitExplicitReturnUndef)
+    return undef; ## no critic (ProhibitExplicitReturnUndef) - Bug 8409 - can't prove return; is safe here
   }
 }
 
 sub get_asn {
   my ($self, $ip) = @_;
 
-  return undef if !defined $ip || $ip !~ /\S/; ## no critic (ProhibitExplicitReturnUndef)
+  return undef if !defined $ip || $ip !~ /\S/; ## no critic (ProhibitExplicitReturnUndef) - Bug 8409 - can't prove return; is safe here
 
   if ($self->{dbapi}->{asn}) {
     return $self->_get('asn',$ip)->{asn};
   } elsif ($self->{dbapi}->{isp}) {
     return $self->_get('isp',$ip)->{asn};
   } else {
-    return undef; ## no critic (ProhibitExplicitReturnUndef)
+    return undef; ## no critic (ProhibitExplicitReturnUndef) - Bug 8409 - can't prove return; is safe here
   }
 }
 
 sub get_asn_org {
   my ($self, $ip) = @_;
 
-  return undef if !defined $ip || $ip !~ /\S/; ## no critic (ProhibitExplicitReturnUndef)
+  return undef if !defined $ip || $ip !~ /\S/; ## no critic (ProhibitExplicitReturnUndef) - Bug 8409 - can't prove return; is safe here
 
   if ($self->{dbapi}->{asn}) {
     return $self->_get('asn',$ip)->{asn_organization};
   } elsif ($self->{dbapi}->{isp}) {
     return $self->_get('isp',$ip)->{asn_organization};
   } else {
-    return undef; ## no critic (ProhibitExplicitReturnUndef)
+    return undef; ## no critic (ProhibitExplicitReturnUndef) - Bug 8409 - can't prove return; is safe here
   }
 }
 
 sub get_all {
   my ($self, $ip) = @_;
 
-  return undef if !defined $ip || $ip !~ /\S/; ## no critic (ProhibitExplicitReturnUndef)
+  return undef if !defined $ip || $ip !~ /\S/; ## no critic (ProhibitExplicitReturnUndef) - Bug 8409 - can't prove return; is safe here
 
   my $all = {};
 
@@ -897,7 +897,7 @@ sub name_to_ip {
     return $ip;
   }
   dbg("geodb: failed to internally resolve $name");
-  return undef; ## no critic (ProhibitExplicitReturnUndef)
+  return undef; ## no critic (ProhibitExplicitReturnUndef) - Bug 8409 - can't prove return; is safe here
 }
 
 sub _get {
@@ -912,7 +912,7 @@ sub _get {
     if ($self->{dbapi}->{$type}) {
       $self->{cache}{$ip}{$type} = $self->{dbapi}->{$type}->($self,$ip);
     } else {
-      return undef; ## no critic (ProhibitExplicitReturnUndef)
+      return;
     }
   }
 
