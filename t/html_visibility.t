@@ -98,8 +98,36 @@ my @tests = (
         font_invalid_color => 0,
     },
     {
+        html               => '<font style="display: none">X</font>',
+        visibility         => 'invisible',
+        font_invalid_color => 0,
+    },
+    {
+        html               => '<font style="color: transparent">X</font>',
+        visibility         => 'invisible',
+        font_invalid_color => 0,
+    },
+    {
+        # CSS takes precedence over HTML attributes
+        html               => '<font color="red" style="color: transparent">X</font>',
+        visibility         => 'invisible',
+        font_invalid_color => 0,
+    },
+    {
+        # CSS takes precedence regardless of attribute order
+        html               => '<font style="color: red" color="transparent">X</font>',
+        visibility         => 'visible',
+        font_invalid_color => 0,
+    },
+    {
         html               => '<body bgcolor="black">X</body>',
         visibility         => 'invisible',
+        font_invalid_color => 0,
+    },
+    {
+        # CSS takes precedence over HTML attributes
+        html               => '<body bgcolor="black" style="background-color: white">X</body>',
+        visibility         => 'visible',
         font_invalid_color => 0,
     },
     {

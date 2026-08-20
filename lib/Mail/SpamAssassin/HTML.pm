@@ -75,8 +75,8 @@ my %elements_uri = map {; $_ => 1 }
 
 # permitted element attributes
 my %ok_attributes;
-$ok_attributes{body}{$_} = 1 for qw( text bgcolor link alink vlink background );
-$ok_attributes{font}{$_} = 1 for qw( color face size );
+$ok_attributes{body}{$_} = 1 for qw( text bgcolor link alink vlink background style );
+$ok_attributes{font}{$_} = 1 for qw( color face size style );
 $ok_attributes{marquee}{$_} = 1 for qw( bgcolor background );
 $ok_attributes{table}{$_} = 1 for qw( bgcolor style );
 $ok_attributes{td}{$_} = 1 for qw( bgcolor style );
@@ -653,7 +653,8 @@ sub text_style {
     }
 
     # tag attributes
-    for my $name (keys %$attr) {
+    # process 'style' last so CSS takes precedence over HTML attributes
+    for my $name (sort { ($a eq 'style') <=> ($b eq 'style') or $a cmp $b } keys %$attr) {
       next unless exists $ok_attributes{$tag}{$name};
       if ($name eq "text" || $name eq "color") {
 	# two different names for text color
