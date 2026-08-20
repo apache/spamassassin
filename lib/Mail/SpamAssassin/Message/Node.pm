@@ -872,8 +872,11 @@ sub rendered {
 
     # resulting HTML-decoded text is in perl characters (utf8 flag on)
     $self->{rendered} = $html->get_rendered_text();
-    $self->{visible_rendered} = $html->get_rendered_text(invisible => 0);
-    $self->{invisible_rendered} = $html->get_rendered_text(invisible => 1);
+    # visible_rendered/invisible_rendered are each a further full pass over
+    # the rendered text (mask + whitespace cleanup); defer computing them
+    # until visible_rendered()/invisible_rendered() are actually called,
+    # which many rulesets never need for a given part.
+    $self->{html_obj} = $html;
     $self->{html_results} = $html->get_results();
 
     # end-of-document result values that require looking at the text
@@ -962,6 +965,10 @@ Render and return the visible text in this part.
 sub visible_rendered {
   my ($self) = @_;
   $self->rendered();  # ignore return, we want just this:
+  if (!exists $self->{visible_rendered}) {
+    $self->{visible_rendered} = $self->{html_obj}
+      ? $self->{html_obj}->get_rendered_text(invisible => 0) : $self->{rendered};
+  }
   return ($self->{rendered_type}, $self->{visible_rendered});
 }
 
@@ -974,6 +981,10 @@ Render and return the invisible text in this part.
 sub invisible_rendered {
   my ($self) = @_;
   $self->rendered();  # ignore return, we want just this:
+  if (!exists $self->{invisible_rendered}) {
+    $self->{invisible_rendered} = $self->{html_obj}
+      ? $self->{html_obj}->get_rendered_text(invisible => 1) : '';
+  }
   return ($self->{rendered_type}, $self->{invisible_rendered});
 }
 

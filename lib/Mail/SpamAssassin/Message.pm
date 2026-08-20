@@ -789,6 +789,7 @@ sub finish {
     delete $part->{'rendered'};
     delete $part->{'visible_rendered'};
     delete $part->{'invisible_rendered'};
+    delete $part->{'html_obj'};
     delete $part->{'type'};
     delete $part->{'rendered_type'};
     delete $part->{'effective_type'};
