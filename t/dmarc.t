@@ -13,10 +13,16 @@ use constant HAS_DKIM_VERIFIER => eval {
   version->parse(Mail::DKIM::Verifier->VERSION) >= version->parse(0.31);
 };
 use constant HAS_MAILDMARC => eval { require Mail::DMARC::PurePerl; };
+use constant HAS_BUGGY_MAILDMARC => HAS_MAILDMARC && eval {
+  my $v = Mail::DMARC::PurePerl->VERSION;
+  $v eq '1.20260612' || $v eq '1.20260621';
+};
 
 plan skip_all => "Net tests disabled" unless conf_bool('run_net_tests');
 plan skip_all => "Needs Mail::SPF" unless HAS_MAILSPF;
 plan skip_all => "Needs Mail::DMARC::PurePerl" unless HAS_MAILDMARC;
+plan skip_all => "Mail::DMARC::PurePerl $Mail::DMARC::PurePerl::VERSION has a known exists_in_dns() bug (fixed after 1.20260621)"
+  if HAS_BUGGY_MAILDMARC;
 plan skip_all => "Needs Mail::DKIM::Verifier >= 0.31" unless HAS_DKIM_VERIFIER ;
 plan tests => 18;
 
