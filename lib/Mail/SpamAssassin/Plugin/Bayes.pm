@@ -1100,6 +1100,17 @@ sub get_body_from_msg {
   my $permsgstatus =
         Mail::SpamAssassin::PerMsgStatus->new($self->{main}, $msg);
   $msg->extract_message_metadata ($permsgstatus);
+  # Run the MIME-part handlers, so that the text they extract (PDF, OCR'd
+  # images, calendar invites) is part of what Bayes learns, the same text body
+  # rules match against.  _get_msgdata_from_permsgstatus() below already brings
+  # these about by way of get_uri_list(), but only as a side effect of wanting
+  # URIs; ask for them directly so the token stream does not quietly depend on
+  # that.  Idempotent, so the later call is a no-op.
+  # (Note extract_message_metadata() above is Message::, which does not run
+  # handlers; the PerMsgStatus:: method of the same name does, but also fires
+  # the parsed_metadata plugin callbacks -- DNS lookups the learn path has no
+  # use for.)
+  $msg->apply_handlers($permsgstatus);
   my $msgdata = $self->_get_msgdata_from_permsgstatus ($permsgstatus);
   $permsgstatus->finish();
 
