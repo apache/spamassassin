@@ -601,6 +601,13 @@ Examples:
 
  url_redirector_cache_dsn dbi:SQLite:dbname=/var/lib/spamassassin/Redirectors.db
 
+A config that still loads the deprecated C<DecodeShortURLs> plugin (rather
+than loading C<Redirectors> directly) keeps using that plugin's original
+C<short_url_cache> table/columns, so an existing cache built before the
+plugins were merged keeps working unchanged. Switching C<loadplugin> to
+C<Redirectors> starts a fresh C<redir_url_cache> table, as a one-time cost
+of migrating.
+
 =back
 
 =cut
@@ -1039,6 +1046,15 @@ sub initialise_url_redirector_cache {
     return;
   }
 
+  # The deprecated DecodeShortURLs plugin used table short_url_cache
+  # (columns short_url/decoded_url); keep using it for configs that still
+  # load that plugin, so their existing cache isn't silently abandoned
+  # in favor of the new, empty redir_url_cache table.
+  my $is_legacy_shim = ref($self) eq 'Mail::SpamAssassin::Plugin::DecodeShortURLs';
+  my $tbl     = $is_legacy_shim ? 'short_url_cache' : 'redir_url_cache';
+  my $key_col = $is_legacy_shim ? 'short_url'       : 'redir_url';
+  my $val_col = $is_legacy_shim ? 'decoded_url'      : 'target_url';
+
   ##
   ## SQLite
   ##
@@ -1055,32 +1071,32 @@ sub initialise_url_redirector_cache {
         {RaiseError => 1, PrintError => 0, InactiveDestroy => 1, AutoCommit => 1}
       );
       $self->{dbh}->do("
-        CREATE TABLE IF NOT EXISTS redir_url_cache (
-          redir_url   TEXT PRIMARY KEY NOT NULL,
-          target_url  TEXT NOT NULL,
+        CREATE TABLE IF NOT EXISTS $tbl (
+          $key_col   TEXT PRIMARY KEY NOT NULL,
+          $val_col  TEXT NOT NULL,
           hits        INTEGER NOT NULL DEFAULT 1,
           created     INTEGER NOT NULL,
           modified    INTEGER NOT NULL
         )
       ");
       $self->{sth_insert} = $self->{dbh}->prepare("
-        INSERT INTO redir_url_cache (redir_url, target_url, created, modified)
+        INSERT INTO $tbl ($key_col, $val_col, created, modified)
         VALUES (?,?,strftime('%s','now'),strftime('%s','now'))
-        ON CONFLICT(redir_url) DO UPDATE
-          SET target_url = excluded.target_url,
+        ON CONFLICT($key_col) DO UPDATE
+          SET $val_col = excluded.$val_col,
               modified = excluded.modified,
               hits = hits + 1
       ");
       $self->{sth_select} = $self->{dbh}->prepare("
-        SELECT target_url FROM redir_url_cache
-        WHERE redir_url = ?
+        SELECT $val_col FROM $tbl
+        WHERE $key_col = ?
       ");
       $self->{sth_delete} = $self->{dbh}->prepare("
-        DELETE FROM redir_url_cache
-        WHERE redir_url = ? AND created < strftime('%s','now') - $conf->{url_redirector_cache_ttl}
+        DELETE FROM $tbl
+        WHERE $key_col = ? AND created < strftime('%s','now') - $conf->{url_redirector_cache_ttl}
       ");
       $self->{sth_clean} = $self->{dbh}->prepare("
-        DELETE FROM redir_url_cache
+        DELETE FROM $tbl
         WHERE created < strftime('%s','now') - $conf->{url_redirector_cache_ttl}
       ");
     };
@@ -1101,23 +1117,23 @@ sub initialise_url_redirector_cache {
         {RaiseError => 1, PrintError => 0, InactiveDestroy => 1, AutoCommit => 1}
       );
       $self->{sth_insert} = $self->{dbh}->prepare("
-        INSERT INTO redir_url_cache (redir_url, target_url, created, modified)
+        INSERT INTO $tbl ($key_col, $val_col, created, modified)
         VALUES (?,?,UNIX_TIMESTAMP(),UNIX_TIMESTAMP())
         ON DUPLICATE KEY UPDATE
-          target_url = VALUES(target_url),
+          $val_col = VALUES($val_col),
           modified = VALUES(modified),
           hits = hits + 1
       ");
       $self->{sth_select} = $self->{dbh}->prepare("
-        SELECT target_url FROM redir_url_cache
-        WHERE redir_url = ?
+        SELECT $val_col FROM $tbl
+        WHERE $key_col = ?
       ");
       $self->{sth_delete} = $self->{dbh}->prepare("
-        DELETE FROM redir_url_cache
-        WHERE redir_url = ? AND created < UNIX_TIMESTAMP() - $conf->{url_redirector_cache_ttl}
+        DELETE FROM $tbl
+        WHERE $key_col = ? AND created < UNIX_TIMESTAMP() - $conf->{url_redirector_cache_ttl}
       ");
       $self->{sth_clean} = $self->{dbh}->prepare("
-        DELETE FROM redir_url_cache
+        DELETE FROM $tbl
         WHERE created < UNIX_TIMESTAMP() - $conf->{url_redirector_cache_ttl}
       ");
     };
@@ -1138,23 +1154,23 @@ sub initialise_url_redirector_cache {
         {RaiseError => 1, PrintError => 0, InactiveDestroy => 1, AutoCommit => 1}
       );
       $self->{sth_insert} = $self->{dbh}->prepare("
-        INSERT INTO redir_url_cache (redir_url, target_url, created, modified)
+        INSERT INTO $tbl ($key_col, $val_col, created, modified)
         VALUES (?,?,CAST(EXTRACT(epoch FROM NOW()) AS INT),CAST(EXTRACT(epoch FROM NOW()) AS INT))
-        ON CONFLICT (redir_url) DO UPDATE SET
-          target_url = EXCLUDED.target_url,
+        ON CONFLICT ($key_col) DO UPDATE SET
+          $val_col = EXCLUDED.$val_col,
           modified = EXCLUDED.modified,
-          hits = redir_url_cache.hits + 1
+          hits = $tbl.hits + 1
       ");
       $self->{sth_select} = $self->{dbh}->prepare("
-        SELECT target_url FROM redir_url_cache
-        WHERE redir_url = ?
+        SELECT $val_col FROM $tbl
+        WHERE $key_col = ?
       ");
       $self->{sth_delete} = $self->{dbh}->prepare("
-        DELETE FROM redir_url_cache
-        WHERE redir_url = ? AND created < CAST(EXTRACT(epoch FROM NOW()) AS INT) - $conf->{url_redirector_cache_ttl}
+        DELETE FROM $tbl
+        WHERE $key_col = ? AND created < CAST(EXTRACT(epoch FROM NOW()) AS INT) - $conf->{url_redirector_cache_ttl}
       ");
       $self->{sth_clean} = $self->{dbh}->prepare("
-        DELETE FROM redir_url_cache
+        DELETE FROM $tbl
         WHERE created < CAST(EXTRACT(epoch FROM NOW()) AS INT) - $conf->{url_redirector_cache_ttl}
       ");
     };
@@ -1273,11 +1289,27 @@ sub short_url_tests {
 
 sub finish_parsing_start {
   my ($self, $opts) = @_;
+  my $conf = $opts->{conf};
 
-  if ($opts->{conf}->{eval_to_rule}->{short_url_tests}) {
+  if ($conf->{eval_to_rule}->{short_url_tests}) {
     warn "Redirectors: Legacy configuration format detected. ".
          "Eval function short_url_tests() is no longer supported, ".
          "please see documentation for the new rule format.\n";
+  }
+
+  # finish_parsing_start runs once per loaded plugin instance,
+  # warn if both are loaded together.
+  if (!$conf->{_redirectors_dual_plugin_warned}
+      && $conf->{plugins_loaded}->{'Mail::SpamAssassin::Plugin::DecodeShortURLs'}
+      && $conf->{plugins_loaded}->{'Mail::SpamAssassin::Plugin::Redirectors'})
+  {
+    $conf->{_redirectors_dual_plugin_warned} = 1;
+    warn "Redirectors: both Mail::SpamAssassin::Plugin::DecodeShortURLs and ".
+         "Mail::SpamAssassin::Plugin::Redirectors are loaded. ".
+         "DecodeShortURLs is deprecated and merged into Redirectors; loading ".
+         "both is redundant and only one of them ends up actually checking ".
+         "and caching redirected URLs. Please load only ".
+         "Mail::SpamAssassin::Plugin::Redirectors.\n";
   }
 }
 

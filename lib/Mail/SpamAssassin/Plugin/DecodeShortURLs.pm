@@ -38,6 +38,11 @@ keep working unchanged. It loads C<Redirectors> and inherits all of its
 behavior. New configurations should load
 C<Mail::SpamAssassin::Plugin::Redirectors> directly instead.
 
+If caching is enabled, this shim keeps using the original
+C<short_url_cache> table/columns from before the plugins were merged, so
+an existing cache is not silently abandoned. Switching C<loadplugin> to
+C<Redirectors> starts a fresh C<redir_url_cache> table instead.
+
 =head1 ACKNOWLEDGEMENTS
 
 Original DecodeShortURLs plugin was developed by Steve Freegard.

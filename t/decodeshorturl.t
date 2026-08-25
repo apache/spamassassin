@@ -117,11 +117,10 @@ describe HAS_SHORT_URL          Message contains one or more shortened URLs
 sarun ("-t < data/spam/decodeshorturl/base.eml", \&patterns_run_cb);
 ok_all_patterns();
 
-# url_shortener_cache_* is a deprecated alias of url_redirector_cache_*;
-# there is only one cache table now (redir_url_cache), shared by
-# redirectors and shorteners alike.
+# DecodeShortURLs keeps using its original short_url_cache table/columns
+# existing caches built under the old plugin name keep working unchanged.
 my $dbh = DBI->connect("dbi:SQLite:dbname=$workdir/DecodeShortURLs.db","","");
-my @row = $dbh->selectrow_array("SELECT target_url FROM redir_url_cache WHERE redir_url = 'http://bit.ly/30yH6WK'");
+my @row = $dbh->selectrow_array("SELECT decoded_url FROM short_url_cache WHERE short_url = 'http://bit.ly/30yH6WK'");
 is($row[0], 'http://spamassassin.apache.org/');
 
 # Check another email to cleanup old entries from database
@@ -129,7 +128,7 @@ sarun ("-t < data/spam/decodeshorturl/base2.eml", \&patterns_run_cb);
 ok_all_patterns();
 
 $dbh = DBI->connect("dbi:SQLite:dbname=$workdir/DecodeShortURLs.db","","");
-@row = $dbh->selectrow_array("SELECT target_url FROM redir_url_cache WHERE redir_url = 'http://bit.ly/30yH6WK'");
+@row = $dbh->selectrow_array("SELECT decoded_url FROM short_url_cache WHERE short_url = 'http://bit.ly/30yH6WK'");
 isnt($row[0], 'https://spamassassin.apache.org/');
 
 }
