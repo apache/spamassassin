@@ -101,6 +101,21 @@ Note for Users Upgrading to SpamAssassin 4.0.3
       handlers. Body script is inert and only surfaced when the HTML
       part is itself an attachment.
 
+      IMPORTANT: this handler is now the only thing that renders HTML.
+      If it is not loaded, text/html parts are not parsed at all: body
+      rules and Bayes see no text from them, the html_* eval rules have
+      no results to test, and URIs in HTML links (href, src, action,
+      etc.) are never extracted -- so a mostly-HTML mail stream will
+      score far lower than it did before and spam will be missed. It is
+      loaded by default from v403.pre, so a stock install is unaffected.
+      Check for it if you upgrade over a v403.pre you have edited, or
+      keep an older copy of the file:
+
+        loadhandler Mail::SpamAssassin::Handler::HTML
+
+      SpamAssassin warns once per process when a message contains a
+      text/html part and no handler is registered for it.
+
     * JavaScript (text/javascript) collects script text for the new
       "script" rule type (like rawbody rules) and adds navigation/
       redirect URLs (e.g. window.location = '...') to the URI detail
