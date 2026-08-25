@@ -26,8 +26,9 @@ Mail::SpamAssassin::Handler::HTML - a MIME-part handler for text/html parts
 =head1 DESCRIPTION
 
 This handler registers as the MIME-part handler for C<text/html>.  It
-renders each HTML part by calling C<rendered()> on it -- which parses the HTML
-and caches the rendered text and C<html_results>.
+parses and renders each HTML part, publishing the rendered text back onto the
+part with C<set_rendered()> and caching the parser's findings in
+C<html_results>.
 
 =head1 RETURNS
 
@@ -61,6 +62,7 @@ use warnings;
 use re 'taint';
 
 use Mail::SpamAssassin::Handler;
+use Mail::SpamAssassin::HTML;
 use Mail::SpamAssassin::Logger;
 
 our @ISA = qw(Mail::SpamAssassin::Handler);
@@ -82,12 +84,10 @@ sub new {
 sub handle_html {
   my ($self, $node, $pms) = @_;
 
-  # The ultimate goal is to do the HTML rendering here in the handler, so that
-  # Mail::SpamAssassin::Message::Node::rendered() becomes a plain accessor for
-  # the cached result.  For now we just reuse the rendering code already in
-  # rendered(): it parses the HTML and caches the result (and html_results), so
-  # later lazy callers of rendered() get a cache hit.  Idempotent.
-  $node->rendered();
+  # Parse and render the HTML.  Idempotent: a part can reach the handler twice
+  # (identical content re-dispatched as a synthetic child), and re-parsing would
+  # just rebuild the same results, so skip straight to the harvest below.
+  $self->_render($node)  if !$node->{html_results};
 
   my $results = $node->{html_results}  or return [];
 
@@ -140,6 +140,76 @@ sub handle_html {
   }
 
   return \@parts;
+}
+
+# Parse one text/html part and publish what the parser produced onto the node:
+# the rendered text (all of it, plus the visible-only and invisible-only
+# streams) via set_rendered(), and the parser's findings in {html_results} for
+# the HTML eval rules.  Body rules, Bayes and the html_* rules all read these
+# back later; nothing here touches $pms.
+sub _render {
+  my ($self, $node) = @_;
+
+  # Length of the part's decoded bytes, before any charset transcoding -- the
+  # denominator of the html_length/text-length ratio below.
+  my $text_len = length($node->decode // '');
+
+  # An empty part has nothing to parse, but still renders as empty text rather
+  # than as "not rendered at all" -- callers counting text vs. HTML parts (e.g.
+  # BodyEval::check_for_mime_html) have always seen it, and skipping it here
+  # would silently drop it from those counts.
+  if (!$text_len) {
+    $node->set_rendered('', 'text/html');
+    return;
+  }
+
+  # Feed the parser characters where the charset lets us decode them, and tell
+  # it which it is getting: HTML::Parser handles either, but its utf8_mode (and
+  # our own NBSP and word-boundary handling) has to match the actual input.
+  my ($text, $character_semantics) = $node->decode_and_normalize();
+  return  if !defined $text || $text eq '';
+
+  # the 1 requires decoded HTML results to be in characters (utf8 flag on)
+  my $html = Mail::SpamAssassin::HTML->new($character_semantics, 1); # object
+
+  $html->parse($text);  # parse+render text
+
+  # resulting HTML-decoded text is in perl characters (utf8 flag on)
+  my $rendered = $html->get_rendered_text();
+  my $results  = $html->get_results();
+
+  # end-of-document result values that require looking at the text
+
+  # count the number of spaces in the rendered text
+  my $space;
+  if (utf8::is_utf8($rendered)) {
+    my $str = $rendered;
+    $str =~ s/\S+//g;  # delete non-whitespace Unicode characters
+    $space = length $str;  # count remaining Unicode space characters
+    undef $str;  # deallocate storage
+    dbg("message: spaces (Unicode) in HTML: %d out of %d%s",
+        $space, length $rendered,
+        $character_semantics ? '' : ', octets!?');
+  } else {
+    my $str = $rendered;
+    $space = $str =~ tr/ \t\n\r\x0b//;
+    dbg("message: spaces (octets) in HTML: %d out of %d%s",
+        $space, length $rendered,
+        $character_semantics ? ', chars!?' : '');
+  }
+  # we may want to add the count of other Unicode whitespace characters
+
+  $results->{html_length} = length $rendered;  # perl characters count
+  $results->{non_space_len} = $results->{html_length} - $space;
+  $results->{ratio} = ($text_len - $results->{html_length}) / $text_len;
+
+  $node->{html_results} = $results;
+  # Pass the type explicitly: an HTML part renders as text/html whatever its
+  # declared type was, and Message::get_body_text_array_common keys the
+  # {metadata}{html} bookkeeping off that.
+  $node->set_rendered($rendered, 'text/html',
+                      $html->get_rendered_text(invisible => 1),
+                      $html->get_rendered_text(invisible => 0));
 }
 
 1;

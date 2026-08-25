@@ -97,7 +97,10 @@ sub digest_payloads {
               $payload = $p->{'decoded'};
 	      $payload =~ s/\\'/\'/gx;
             } else {
-              $payload = $p->{'rendered'};
+              # rendered() rather than a raw {rendered} read: for a text/html
+              # part the text is put there by the HTML handler, and reading the
+              # key directly only works if that has already happened.
+              (undef, $payload) = $p->rendered();
             }
 
             utf8::upgrade($payload) if defined $payload;

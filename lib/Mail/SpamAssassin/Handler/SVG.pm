@@ -164,6 +164,14 @@ sub handle_svg {
 
   push @{ $pms->{Handler}{SVG}{text} }, @$text if @$text;
 
+  # Render the SVG's text into the node so ordinary body rules can match it.
+  # Node::rendered() renders text/plain only; every other type, this one
+  # included, gets its body text from whatever its handler publishes here.
+  # Use the part's own (image) type rather than the default text/plain, as
+  # Handler::Image does: get_body_text_array_common drops text/* parts that
+  # arrived as attachments, which is the common case for an SVG.
+  $node->set_rendered(join("\n", @$text), $node->effective_type)  if @$text;
+
   # Add links found in the SVG to the URI detail list, tagged 'svg' (so rules can
   # target links that hide inside an "image") plus the source element name (e.g.
   # 'a' for a clickable link, 'image' for an external image reference).

@@ -1309,24 +1309,9 @@ sub apply_handlers {
 
   my $conf = $permsgstatus->{conf};
 
-  # text/html parts only yield URIs (href/src/action/etc.) if a handler is
-  # registered for them; without one (missing "loadhandler
-  # Mail::SpamAssassin::Handler::HTML" in a .pre file), those URIs silently
-  # never reach get_uri_detail_list(), hiding them from url_redirector*,
-  # URIBL/URIDNSBL, and uri rules alike. Warn once so this doesn't go
-  # unnoticed.
-  if (!$warned_no_html_handler
-      && !Mail::SpamAssassin::Conf::get_handler_for_type($conf, 'text/html')
-      && $self->find_parts(qr/^text\/html$/, 1))
-  {
-    $warned_no_html_handler = 1;
-    warn "message: no MIME handler registered for text/html -- URIs in HTML ".
-         "links (href/src/action/etc.) will not be extracted; add ".
-         "'loadhandler Mail::SpamAssassin::Handler::HTML' to a .pre file\n";
-  }
-
-  return unless $conf->{handlers} && %{$conf->{handlers}};
-
+  # Note we walk the parts even with an empty handler registry: the loop is a
+  # no-op then, but it is also where the missing-text/html-handler warning
+  # below fires, and "no handlers at all" is exactly a case worth warning about.
   $self->parse_body() if exists $self->{'parse_queue'};
 
   my $ctx = {
@@ -1349,9 +1334,26 @@ sub apply_handlers {
     last if $ctx->{parts_budget} <= 0;
     next if $depth > $ctx->{max_depth};
 
-    my $handler =
-      Mail::SpamAssassin::Conf::get_handler_for_type($conf, $node->effective_type);
-    next unless $handler;   # [ $plugin_obj, $methodname ]
+    my $type = $node->effective_type;
+    my $handler = Mail::SpamAssassin::Conf::get_handler_for_type($conf, $type);
+    if (!$handler) {
+      # A text/html part is parsed by its handler and by nothing else: with none
+      # registered (missing "loadhandler Mail::SpamAssassin::Handler::HTML" in a
+      # .pre file) the part is never rendered at all -- no body text for body
+      # rules or Bayes, no html_results for the html_* eval rules, and no URIs
+      # from href/src/action reaching get_uri_detail_list(), hiding them from
+      # url_redirector*, URIBL/URIDNSBL and uri rules alike.  v403.pre loads the
+      # handler by default, so this normally only means an install whose lib/
+      # and rules/ are out of step.  Warn once so it doesn't go unnoticed.
+      if ($type eq 'text/html' && !$warned_no_html_handler) {
+        $warned_no_html_handler = 1;
+        warn "message: no MIME handler registered for text/html -- HTML parts ".
+             "will not be rendered: no body text, no html_* rule results, and ".
+             "no URIs from HTML links (href/src/action/etc.); add ".
+             "'loadhandler Mail::SpamAssassin::Handler::HTML' to a .pre file\n";
+      }
+      next;
+    }
 
     my $parts = $self->_invoke_handler($handler, $node, $ctx);
     next unless $parts && @$parts;
@@ -1512,7 +1514,7 @@ sub get_body_text_array_common {
       # right now, just use the last one.  we may need to give some priority
       # at some point, ie: use text/html rendered if it exists, or
       # text/plain rendered as html otherwise.
-      if ($html_needs_setting && $type eq 'text/html') {
+      if ($html_needs_setting && $type eq 'text/html' && $p->{html_results}) {
         $self->{metadata}->{html} = $p->{html_results};
         push @{$self->{metadata}->{html_all}}, $p->{html_results};
       }
