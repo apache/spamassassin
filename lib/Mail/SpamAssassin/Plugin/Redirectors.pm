@@ -1031,7 +1031,7 @@ itself a deprecated alias of that).
 sub initialise_url_redirector_cache {
   my ($self, $conf) = @_;
 
-  return if $self->{dbh_redir} && $self->{dbh_redir_pid} && $self->{dbh_redir_pid} == $$;
+  return if $self->{dbh} && $self->{dbh_pid} && $self->{dbh_pid} == $$;
   return if !$conf->{url_redirector_cache_type};
 
   if (!$conf->{url_redirector_cache_dsn}) {
@@ -1050,11 +1050,11 @@ sub initialise_url_redirector_cache {
       require DBI;
       require DBD::SQLite;
       DBD::SQLite->VERSION(1.59_01); # Required for ON CONFLICT
-      $self->{dbh_redir} = DBI->connect_cached(
+      $self->{dbh} = DBI->connect_cached(
         $conf->{url_redirector_cache_dsn}, '', '',
         {RaiseError => 1, PrintError => 0, InactiveDestroy => 1, AutoCommit => 1}
       );
-      $self->{dbh_redir}->do("
+      $self->{dbh}->do("
         CREATE TABLE IF NOT EXISTS redir_url_cache (
           redir_url   TEXT PRIMARY KEY NOT NULL,
           target_url  TEXT NOT NULL,
@@ -1063,7 +1063,7 @@ sub initialise_url_redirector_cache {
           modified    INTEGER NOT NULL
         )
       ");
-      $self->{sth_insert_redir} = $self->{dbh_redir}->prepare("
+      $self->{sth_insert} = $self->{dbh}->prepare("
         INSERT INTO redir_url_cache (redir_url, target_url, created, modified)
         VALUES (?,?,strftime('%s','now'),strftime('%s','now'))
         ON CONFLICT(redir_url) DO UPDATE
@@ -1071,15 +1071,15 @@ sub initialise_url_redirector_cache {
               modified = excluded.modified,
               hits = hits + 1
       ");
-      $self->{sth_select_redir} = $self->{dbh_redir}->prepare("
+      $self->{sth_select} = $self->{dbh}->prepare("
         SELECT target_url FROM redir_url_cache
         WHERE redir_url = ?
       ");
-      $self->{sth_delete_redir} = $self->{dbh_redir}->prepare("
+      $self->{sth_delete} = $self->{dbh}->prepare("
         DELETE FROM redir_url_cache
         WHERE redir_url = ? AND created < strftime('%s','now') - $conf->{url_redirector_cache_ttl}
       ");
-      $self->{sth_clean_redir} = $self->{dbh_redir}->prepare("
+      $self->{sth_clean} = $self->{dbh}->prepare("
         DELETE FROM redir_url_cache
         WHERE created < strftime('%s','now') - $conf->{url_redirector_cache_ttl}
       ");
@@ -1094,13 +1094,13 @@ sub initialise_url_redirector_cache {
     eval {
       local $SIG{'__DIE__'};
       require DBI;
-      $self->{dbh_redir} = DBI->connect_cached(
+      $self->{dbh} = DBI->connect_cached(
         $conf->{url_redirector_cache_dsn},
         $conf->{url_redirector_cache_username},
         $conf->{url_redirector_cache_password},
         {RaiseError => 1, PrintError => 0, InactiveDestroy => 1, AutoCommit => 1}
       );
-      $self->{sth_insert_redir} = $self->{dbh_redir}->prepare("
+      $self->{sth_insert} = $self->{dbh}->prepare("
         INSERT INTO redir_url_cache (redir_url, target_url, created, modified)
         VALUES (?,?,UNIX_TIMESTAMP(),UNIX_TIMESTAMP())
         ON DUPLICATE KEY UPDATE
@@ -1108,15 +1108,15 @@ sub initialise_url_redirector_cache {
           modified = VALUES(modified),
           hits = hits + 1
       ");
-      $self->{sth_select_redir} = $self->{dbh_redir}->prepare("
+      $self->{sth_select} = $self->{dbh}->prepare("
         SELECT target_url FROM redir_url_cache
         WHERE redir_url = ?
       ");
-      $self->{sth_delete_redir} = $self->{dbh_redir}->prepare("
+      $self->{sth_delete} = $self->{dbh}->prepare("
         DELETE FROM redir_url_cache
         WHERE redir_url = ? AND created < UNIX_TIMESTAMP() - $conf->{url_redirector_cache_ttl}
       ");
-      $self->{sth_clean_redir} = $self->{dbh_redir}->prepare("
+      $self->{sth_clean} = $self->{dbh}->prepare("
         DELETE FROM redir_url_cache
         WHERE created < UNIX_TIMESTAMP() - $conf->{url_redirector_cache_ttl}
       ");
@@ -1131,13 +1131,13 @@ sub initialise_url_redirector_cache {
     eval {
       local $SIG{'__DIE__'};
       require DBI;
-      $self->{dbh_redir} = DBI->connect_cached(
+      $self->{dbh} = DBI->connect_cached(
         $conf->{url_redirector_cache_dsn},
         $conf->{url_redirector_cache_username},
         $conf->{url_redirector_cache_password},
         {RaiseError => 1, PrintError => 0, InactiveDestroy => 1, AutoCommit => 1}
       );
-      $self->{sth_insert_redir} = $self->{dbh_redir}->prepare("
+      $self->{sth_insert} = $self->{dbh}->prepare("
         INSERT INTO redir_url_cache (redir_url, target_url, created, modified)
         VALUES (?,?,CAST(EXTRACT(epoch FROM NOW()) AS INT),CAST(EXTRACT(epoch FROM NOW()) AS INT))
         ON CONFLICT (redir_url) DO UPDATE SET
@@ -1145,15 +1145,15 @@ sub initialise_url_redirector_cache {
           modified = EXCLUDED.modified,
           hits = redir_url_cache.hits + 1
       ");
-      $self->{sth_select_redir} = $self->{dbh_redir}->prepare("
+      $self->{sth_select} = $self->{dbh}->prepare("
         SELECT target_url FROM redir_url_cache
         WHERE redir_url = ?
       ");
-      $self->{sth_delete_redir} = $self->{dbh_redir}->prepare("
+      $self->{sth_delete} = $self->{dbh}->prepare("
         DELETE FROM redir_url_cache
         WHERE redir_url = ? AND created < CAST(EXTRACT(epoch FROM NOW()) AS INT) - $conf->{url_redirector_cache_ttl}
       ");
-      $self->{sth_clean_redir} = $self->{dbh_redir}->prepare("
+      $self->{sth_clean} = $self->{dbh}->prepare("
         DELETE FROM redir_url_cache
         WHERE created < CAST(EXTRACT(epoch FROM NOW()) AS INT) - $conf->{url_redirector_cache_ttl}
       ");
@@ -1166,16 +1166,16 @@ sub initialise_url_redirector_cache {
     return;
   }
 
-  if ($@ || !$self->{sth_clean_redir}) {
+  if ($@ || !$self->{sth_clean}) {
     warn "Redirectors: cache connect failed: $@\n";
-    undef $self->{dbh_redir};
-    undef $self->{dbh_redir_pid};
-    undef $self->{sth_insert_redir};
-    undef $self->{sth_select_redir};
-    undef $self->{sth_delete_redir};
-    undef $self->{sth_clean_redir};
+    undef $self->{dbh};
+    undef $self->{dbh_pid};
+    undef $self->{sth_insert};
+    undef $self->{sth_select};
+    undef $self->{sth_delete};
+    undef $self->{sth_clean};
   } else {
-    $self->{dbh_redir_pid} = $$;
+    $self->{dbh_pid} = $$;
   }
 }
 
@@ -1807,11 +1807,11 @@ sub _check_redir {
     $self->_walk_redirects($uri, $info, $pms, 0, {});
   }
 
-  if ($self->{dbh_redir} && $conf->{url_redirector_cache_autoclean}
+  if ($self->{dbh} && $conf->{url_redirector_cache_autoclean}
       && rand() < 1/$conf->{url_redirector_cache_autoclean})
   {
     dbg("cleaning stale cache entries");
-    eval { $self->{sth_clean_redir}->execute(); };
+    eval { $self->{sth_clean}->execute(); };
     if ($@) { dbg("cache cleaning failed: $@"); }
   }
 }
@@ -1839,11 +1839,11 @@ sub _add_redirect_uri {
 sub cache_add {
   my ($self, $key, $value) = @_;
 
-  return if !$self->{dbh_redir};
+  return if !$self->{dbh};
   return if length($key) > 256 || length($value) > 512;
 
   # Upsert
-  eval { $self->{sth_insert_redir}->execute($key, $value); };
+  eval { $self->{sth_insert}->execute($key, $value); };
   if ($@) {
     dbg("could not add to cache: $@");
   }
@@ -1854,11 +1854,11 @@ sub cache_add {
 sub cache_get {
   my ($self, $key) = @_;
 
-  return if !$self->{dbh_redir};
+  return if !$self->{dbh};
 
   # Make sure expired entries are gone.  Just a quick check for primary key,
   # not that expensive.
-  eval { $self->{sth_delete_redir}->execute($key); };
+  eval { $self->{sth_delete}->execute($key); };
   if ($@) {
     dbg("cache delete failed: $@");
     return;
@@ -1866,13 +1866,13 @@ sub cache_get {
 
   # Now try to get it (don't bother parsing if something was deleted above,
   # it would be rare event anyway)
-  eval { $self->{sth_select_redir}->execute($key); };
+  eval { $self->{sth_select}->execute($key); };
   if ($@) {
     dbg("cache get failed: $@");
     return;
   }
 
-  my @row = $self->{sth_select_redir}->fetchrow_array();
+  my @row = $self->{sth_select}->fetchrow_array();
   if (@row) {
     return $row[0];
   }
