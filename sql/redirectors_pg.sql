@@ -4,7 +4,7 @@ CREATE TABLE redir_url_cache (
   hits INT NOT NULL DEFAULT 1,
   created INT NOT NULL,
   modified INT NOT NULL,
-  PRIMARY KEY (redirs_url)
+  PRIMARY KEY (redir_url)
 );
 -- Maintaining index for cleaning is likely more expensive than occasional full table scan
 -- ALTER TABLE redir_url_cache ADD INDEX redir_url_created (created);
