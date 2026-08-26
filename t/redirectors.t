@@ -8,7 +8,21 @@ use Test::More;
 use constant HAS_LWP_USERAGENT => eval { require LWP::UserAgent; require LWP::Protocol::https; };
 use constant HAS_DBI => eval { require DBI; };
 use constant HAS_DBD_SQLITE => eval { require DBD::SQLite; DBD::SQLite->VERSION(1.59_01); };
-use constant HAS_SELENIUM => eval { require Selenium::Remote::Driver; };
+
+# The Selenium::Remote::Driver module being installed doesn't mean a
+# WebDriver server is actually reachable; probe the default
+# url_redirector_selenium_host/port so this section is skipped cleanly
+# in environments without one running, instead of failing.
+use constant HAS_SELENIUM => eval { require Selenium::Remote::Driver } && eval {
+  require IO::Socket::INET;
+  my $sock = IO::Socket::INET->new(
+    PeerAddr => '127.0.0.1', PeerPort => 4444,
+    Proto => 'tcp', Timeout => 2,
+  );
+  my $ok = defined $sock;
+  $sock->close if $ok;
+  $ok;
+};
 
 use constant SQLITE => (HAS_DBI && HAS_DBD_SQLITE);
 
