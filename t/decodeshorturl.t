@@ -77,10 +77,18 @@ ok_all_patterns();
    'https://tinyurl.com/jf8wv76t => https://spamassassin.apache.org/'
 );
 
-sarun ("-D DecodeShortURLs -t < data/spam/decodeshorturl/anchor.eml 2>&1", \&patterns_run_cb);
+# DecodeShortURLs is now a thin subclass of Redirectors; all logging (and
+# thus the -D facility name) happens under "Redirectors".
+sarun ("-D Redirectors -t < data/spam/decodeshorturl/anchor.eml 2>&1", \&patterns_run_cb);
 ok_all_patterns();
 
-sarun ("-D DecodeShortURLs -t < data/spam/decodeshorturl/params.eml 2>&1", \&patterns_run_cb);
+# Query strings are not stripped before fetching a shortener (only
+# fragments are, since RFC 3986 defines them as client-side-only).
+%patterns = (
+   'https://tinyurl.com/jf8wv76t?p=1&q=2 => https://spamassassin.apache.org/?p=1&q=2'
+);
+
+sarun ("-D Redirectors -t < data/spam/decodeshorturl/params.eml 2>&1", \&patterns_run_cb);
 ok_all_patterns();
 
 ###
@@ -109,6 +117,8 @@ describe HAS_SHORT_URL          Message contains one or more shortened URLs
 sarun ("-t < data/spam/decodeshorturl/base.eml", \&patterns_run_cb);
 ok_all_patterns();
 
+# DecodeShortURLs keeps using its original short_url_cache table/columns
+# existing caches built under the old plugin name keep working unchanged.
 my $dbh = DBI->connect("dbi:SQLite:dbname=$workdir/DecodeShortURLs.db","","");
 my @row = $dbh->selectrow_array("SELECT decoded_url FROM short_url_cache WHERE short_url = 'http://bit.ly/30yH6WK'");
 is($row[0], 'http://spamassassin.apache.org/');
