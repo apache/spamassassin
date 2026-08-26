@@ -409,6 +409,15 @@ sub parse_received_line {
   if (/ by / && / with .{0,64}((?:ES|L|UTF8S|UTF8L)MTPS?A|ASMTP|HTTP[SU]?)(?: |;|$)/i) {
     $auth = $1;
   }
+
+  # Exim 4.99 and later can be configured to report a non-standard protocol
+  # when TLS is negotiated on connection rather than with STARTTLS. (It is
+  # mostly intended for logging purposes, but it bleeds through into headers.)
+  # Recognize this and treat as if using the standard protocol designator.
+  elsif (/ by / && / with ESSMTPA(?:\s|;|$)/i) {
+    $auth = 'esmtpsa';
+  }
+
   # GMail should use ESMTPSA to indicate that it is in fact authenticated,
   # but doesn't.
   elsif (/ by mx\.google\.com with ESMTPS id [a-z0-9]{1,4}sm[0-9]{2,9}[a-z]{3}\.[0-9]{1,3}\.[0-9]{4}\.(?:[0-6][0-9]\.){4}[0-6][0-9]/ && /\(version=([^ ]+) cipher=([^\)]+)\)/ ) {

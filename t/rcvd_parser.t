@@ -2,7 +2,7 @@
 
 use lib '.'; use lib 't';
 use SATest; sa_t_init("rcvd_parser");
-use Test::More tests => 150;
+use Test::More tests => 151;
 use strict;
 
 # format is:
@@ -473,6 +473,9 @@ my %data = (
 
   'from cold-email.sendkit-mail.com (static.25.190.130.94.clients.your-server.de. [94.130.190.25]) by smtp.gmail.com with ESMTPSA id 2adb3069b0e04-59e0748994bsm1467533e87.36.2026.01.29.16.59.37 for <test@example.org> (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256); Thu, 29 Jan 2026 16:59:38 -0800 (PST)' =>
   '[ ip=94.130.190.25 rdns=static.25.190.130.94.clients.your-server.de helo=cold-email.sendkit-mail.com by=smtp.gmail.com ident= envfrom= id=2adb3069b0e04-59e0748994bsm1467533e87.36.2026.01.29.16.59.37 auth=ESMTPSA msa=0 ]',
+
+  'from 192-0-2-1.isp.example ([192.0.2.1]:43502 helo=ehlo.thunderbird.net) by mail.customer.example with essmtpa  (TLS1.3) tls TLS_AES_128_GCM_SHA256 (Exim 4.99.1) (envelope-from <customer@customer.example>) id 1vfyfh-000000085oY-23Kr for mailbox@external.example; Wed, 14 Jan 2026 11:04:20 +0000' =>
+  '[ ip=192.0.2.1 rdns=192-0-2-1.isp.example helo=ehlo.thunderbird.net by=mail.customer.example ident= envfrom=customer@customer.example intl=0 id=1vfyfh-000000085oY-23Kr auth=esmtpsa msa=0 ]',
 
 );
 
