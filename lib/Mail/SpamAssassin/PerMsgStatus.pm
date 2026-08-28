@@ -2039,6 +2039,11 @@ sub extract_message_metadata {
   my ($self) = @_;
 
   my $timer = $self->{main}->time_method("extract_message_metadata");
+
+  # Run MIME-part handlers before anything can ask for body text.
+  # No-ops when no handlers are registered.
+  $self->{msg}->apply_handlers($self);
+
   $self->{msg}->extract_message_metadata($self);
 
   foreach my $item (qw(
@@ -2086,13 +2091,6 @@ sub extract_message_metadata {
   $self->set_tag('RELAYSINTERNAL',  $self->{relays_internal_str});
   $self->set_tag('RELAYSEXTERNAL',  $self->{relays_external_str});
   $self->set_tag('LANGUAGES', $self->{msg}->get_metadata("X-Languages"));
-
-  # Run MIME-part handlers (OCR, archive expansion, etc.) BEFORE the body text
-  # is assembled and cached below -- handler-injected text must be present when
-  # get_decoded_stripped_body_text_array() builds (and caches) the body array,
-  # and before the URI list is frozen by the first get_uri_detail_list().
-  # apply_handlers() itself no-ops when no handlers are registered.
-  $self->{msg}->apply_handlers($self);
 
   # This should happen before we get called, but just in case.
   if (!defined $self->{msg}->{metadata}->{html}) {
