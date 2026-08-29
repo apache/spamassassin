@@ -1401,7 +1401,7 @@ else
   meta      URI_PHISH      __URI_PHISH && !ALL_TRUSTED && !__UNSUB_LINK && !__TAG_EXISTS_CENTER && !__HAS_SENDER && !__CAN_HELP && !__VIA_ML && !__UPPERCASE_URI && !__HAS_CC && !__NUMBERS_IN_SUBJ && !__PCT_FOR_YOU && !__MOZILLA_MSGID && !__FB_COST && !__hk_bigmoney && !__HELO_HIGHPROFILE && !__RCD_RDNS_SMTP_MESSY && !__BUGGED_IMG && !__FB_TOUR && !__RCVD_DOTGOV_EXT 
 endif
 describe    URI_PHISH            Phishing using web form
-score       URI_PHISH            4.00   # limit
+score       URI_PHISH            2.50   # limit
 tflags      URI_PHISH            publish
 
 meta        SYSADMIN             __SYSADMIN && !ALL_TRUSTED && !__ANY_TEXT_ATTACH && !__DKIM_EXISTS && !__LCL__ENV_AND_HDR_FROM_MATCH && !__MSGID_OK_DIGITS 
