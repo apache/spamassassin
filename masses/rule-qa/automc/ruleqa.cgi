@@ -9,35 +9,10 @@ use warnings;
 
 my $PERL_INTERP = $^X;
 
-#----------------------------------------------
-# this is an emergency abuse preventer. 2026-06-25 billcole
-
-my $eol = "\015\012"; # Use CRLF line ends for headers
-open LAF, "</proc/loadavg";
-my $line = <LAF>;
-(my $one, my $five, my $fifteen, my $running, my $iowait) = split (' ', $line);
-
-if ((($one > 2) || ($fifteen > 6)) && ($ENV{REMOTE_ADDR} ne "127.0.0.1")) {
-   my $page= q{   
-   <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN"
-                    "https://www.w3.org/TR/html4/strict.dtd">
-  <html xmlns="https://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-  <head><meta http-equiv="Content-type" content="text/html; charset=utf-8">
-  <link rel="icon" href="https://spamassassin.apache.org/images/favicon.ico">
-  <title> SpamAssassin Rule QA IS OFFLINE</title>
-
-  <link href="https://ruleqa.spamassassin.org/ruleqa.css" rel="stylesheet" type="text/css">
-
-  </head><body>
-     <h1>SpamAssassin Rule QA is OFFLINE due to excessive load. </h1> };
-  
-  print "Content-Type: text/html$eol$eol$page\n";
-  print "<br/> $ENV{REMOTE_ADDR} <br/> </body> </html>" ;
-
-  exit 0
-}
-#---------------------------------------------------
-
+# emergency abuse preventer: if true, only requests that actually invoke
+# pigz are subject to the load-based offline gate. If false, every request
+# is gated on load.
+use constant BLOCK_ONLY_ON_PIGZ => 1;
 
 our %FREQS_FILENAMES = (
     'DETAILS.age' => 'set 0, broken down by message age in weeks',
@@ -57,6 +32,10 @@ $self->ui_parse_url_base();
 $self->ui_get_url_switches();
 $self->ui_get_daterev();
 $self->ui_get_rules();
+if (!BLOCK_ONLY_ON_PIGZ && $self->is_overloaded) {
+  $self->print_offline_page();
+  exit 0;
+}
 $self->show_view();
 exit;
 
@@ -296,6 +275,61 @@ sub ui_get_rules {
 }
 
 # ---------------------------------------------------------------------------
+# emergency abuse preventer. 2026-06-25 billcole; restricted to requests
+# that actually invoke pigz, 2026-07-23
+
+sub is_overloaded {
+  my ($self) = @_;
+  open (my $laf, "</proc/loadavg") or return 0;
+  my $line = <$laf>;
+  close $laf;
+  (my $one, my $five, my $fifteen, my $running, my $iowait) = split (' ', $line);
+  return ((($one > 2) || ($fifteen > 6)) && ($ENV{REMOTE_ADDR} ne "127.0.0.1"));
+}
+
+sub print_offline_page {
+  my ($self) = @_;
+  my $eol = "\015\012"; # Use CRLF line ends for headers
+  my $page= q{
+   <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN"
+                    "https://www.w3.org/TR/html4/strict.dtd">
+  <html xmlns="https://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+  <head><meta http-equiv="Content-type" content="text/html; charset=utf-8">
+  <link rel="icon" href="https://spamassassin.apache.org/images/favicon.ico">
+  <title> SpamAssassin Rule QA IS OFFLINE</title>
+
+  <link href="https://ruleqa.spamassassin.org/ruleqa.css" rel="stylesheet" type="text/css">
+
+  </head><body>
+     <h1>SpamAssassin Rule QA is OFFLINE due to excessive load. </h1> };
+
+  print "Content-Type: text/html$eol$eol$page\n";
+  print "<br/> $ENV{REMOTE_ADDR} <br/> </body> </html>" ;
+}
+
+# runs $coderef with STDOUT captured to a buffer, so that if $coderef dies
+# with "OVERLOAD_OFFLINE" (raised once we discover, mid-render, that a pigz
+# call is actually needed) we can discard the partially-rendered page and
+# substitute the offline page instead of sending a broken/duplicate response.
+sub render_with_overload_guard {
+  my ($self, $coderef) = @_;
+  my $buf = '';
+  open(my $bufh, '>', \$buf) or die "cannot open scalar filehandle: $!";
+  my $old = select($bufh);
+  print $self->{q}->header();
+  my $ok = eval { $coderef->(); 1 };
+  my $err = $@;
+  select($old);
+  close $bufh;
+  if (!$ok && $err =~ /^OVERLOAD_OFFLINE\b/) {
+    $self->print_offline_page();
+    return;
+  }
+  die $err if !$ok;
+  print $buf;
+}
+
+# ---------------------------------------------------------------------------
 # supported views
 
 sub show_view {
@@ -316,12 +350,10 @@ sub show_view {
   }
   elsif ($self->{q}->param('shortdatelist')) {
     $self->{s_shortdatelist} = 1;
-    print $self->{q}->header();
-    $self->show_default_view();
+    $self->render_with_overload_guard(sub { $self->show_default_view() });
   }
   else {
-    print $self->{q}->header();
-    $self->show_default_view();
+    $self->render_with_overload_guard(sub { $self->show_default_view() });
   }
 }
 
@@ -802,6 +834,8 @@ sub show_all_sets_for_daterev {
 sub graph_over_time {
   my ($self) = @_;
 
+  if ($self->is_overloaded) { $self->print_offline_page(); exit 0; }
+
   $self->{datadir} = $self->get_datadir_for_daterev($self->{daterev});
 
   # logs are named e.g.
@@ -826,6 +860,8 @@ sub graph_over_time {
 
 sub show_mclog {
   my ($self, $name) = @_;
+
+  if ($self->is_overloaded) { $self->print_offline_page(); exit 0; }
 
   print "Content-Type: text/plain\r\n\r\n";
 
@@ -980,6 +1016,7 @@ sub read_freqs_file {
 
   if ($file =~ /\.gz$/) {
     $file =~ s/'//gs;
+    if ($self->is_overloaded) { die "OVERLOAD_OFFLINE\n"; }
     if (!open (IN, "pigz -cd < '$file' |")) {
       warn "cannot read $file";
       return;
