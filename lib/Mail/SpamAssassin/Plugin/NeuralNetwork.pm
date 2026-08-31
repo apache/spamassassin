@@ -45,7 +45,7 @@ use strict;
 use warnings;
 use re 'taint';
 
-my $VERSION = 0.11.3;
+my $VERSION = 0.12;
 
 our $HAS_AI_FANN;
 BEGIN {
@@ -129,6 +129,9 @@ Maximum token length considered when building the vocabulary and feature vectors
 =item neuralnetwork_vocab_cap n (default: 10000)
 
 Maximum number of vocabulary terms to retain; least-frequent terms are pruned when exceeded.
+Because the trained network is (by default) fully connected, its on-disk model size grows
+roughly as C<vocab_cap^1.5>, so raising this value has a superlinear effect on C<.model> file
+size. Values above 50000 are rejected.
 
 =item neuralnetwork_cache_ttl n (default: 300)
 
@@ -310,6 +313,16 @@ Use this rule to define finer-grained confidence tiers.
     setting => 'neuralnetwork_vocab_cap',
     is_admin => 1,
     default => 10000,
+    code        => sub {
+        my ($self, $key, $value, $line) = @_;
+        if ($value !~ /^\d+$/) {
+          return $Mail::SpamAssassin::Conf::INVALID_VALUE;
+        }
+        if ($value > 50000) {
+          return $Mail::SpamAssassin::Conf::INVALID_VALUE;
+        }
+        $self->{neuralnetwork_vocab_cap} = $value;
+    },
     type => $Mail::SpamAssassin::Conf::CONF_TYPE_NUMERIC,
   });
   push(@cmds, {
@@ -971,9 +984,12 @@ sub forget_message {
       DELETE FROM neural_seen
       WHERE username = ? AND msgid = ?
     ";
-    my $sth = $self->{dbh}->prepare($del_sql);
-    if (not $sth->execute(lc($username), $msgid)) {
-      info("Error forgetting message $msgid");
+    my $del_ok = eval {
+      my $sth = $self->{dbh}->prepare($del_sql);
+      $sth->execute(lc($username), $msgid);
+    };
+    if (!$del_ok) {
+      info("Error forgetting message $msgid: " . ($@ || 'unknown'));
       return 0;
     }
 
@@ -1441,7 +1457,11 @@ sub _retrain_from_vocabulary {
   $num_hidden1 = 4 if $num_hidden1 < 4;
   my $num_hidden2 = int($num_hidden1 / 2);
   $num_hidden2 = 2 if $num_hidden2 < 2;
-  my $network = AI::FANN->new_standard($vocab_size, $num_hidden1, $num_hidden2, 1);
+  # Sparse rather than fully-connected: keeps the on-disk .model size from
+  # growing superlinearly with vocab_size (full connectivity would make the
+  # weight count roughly proportional to vocab_size^1.5).
+  my $connection_rate = 0.3;
+  my $network = AI::FANN->new_sparse($connection_rate, $vocab_size, $num_hidden1, $num_hidden2, 1);
   $network->learning_rate($learning_rate);
   $network->learning_momentum($momentum);
 
@@ -2059,6 +2079,48 @@ sub _save_vocabulary_to_sql {
     eval { $self->{dbh}->rollback() if !$self->{dbh}{AutoCommit} };
     dbg("Failed to save vocabulary to SQL: $err");
   };
+
+  $self->_prune_vocabulary_sql($username);
+}
+
+# Caps the SQL-backed vocabulary at neuralnetwork_vocab_cap rows per user,
+# keeping the highest total_count terms.
+sub _prune_vocabulary_sql {
+  my ($self, $username) = @_;
+  return unless $self->{dbh};
+  $username //= $self->{main}->{username};
+
+  my $vocab_cap = $self->{main}->{conf}->{neuralnetwork_vocab_cap};
+  return unless $vocab_cap && $vocab_cap > 0;
+
+  eval {
+    my $del_sql = "
+      DELETE FROM neural_vocabulary
+      WHERE username = ?
+        AND keyword NOT IN (
+          SELECT keyword FROM (
+            SELECT keyword FROM neural_vocabulary
+            WHERE username = ?
+            ORDER BY total_count DESC
+            LIMIT ?
+          ) AS keep_terms
+        )
+    ";
+    my $sth = $self->{dbh}->prepare($del_sql);
+    $sth->execute(lc($username), lc($username), $vocab_cap);
+    my $pruned = $sth->rows();
+    $pruned = 0 if !defined $pruned || $pruned < 0;
+    dbg("Pruned SQL vocabulary for user $username to $vocab_cap terms" .
+        ($pruned ? " (removed $pruned)" : ""));
+    if (defined $self->{_vocab_cache}) {
+      delete $self->{_vocab_cache}{$username};
+      delete $self->{_vocab_cache_time}{$username};
+    }
+    1;
+  } or do {
+    my $err = $@ || 'unknown';
+    dbg("Failed to prune SQL vocabulary: $err");
+  };
 }
 
 # Aggregates training-buffer slot token arrays into vocabulary delta counts and
@@ -2097,16 +2159,19 @@ sub _training_buffer_flush_needed {
   return 0 unless $self->{dbh};
 
   my $vocab_cap = $conf->{neuralnetwork_vocab_cap};
+  my $username  = lc($self->{main}->{username});
   my $distinct  = 0;
+  my $total     = 0;
   eval {
     my $sth = $self->{dbh}->prepare(
-      "SELECT COUNT(DISTINCT token) FROM neural_training_buffer WHERE username=?"
+      "SELECT COUNT(DISTINCT token), COUNT(*) FROM neural_training_buffer WHERE username=?"
     );
-    $sth->execute(lc($self->{main}->{username}));
-    ($distinct) = $sth->fetchrow_array();
+    $sth->execute($username);
+    ($distinct, $total) = $sth->fetchrow_array();
     1;
-  } or dbg("Failed to count distinct training buffer tokens: " . ($@ || 'unknown'));
+  } or dbg("Failed to count training buffer tokens: " . ($@ || 'unknown'));
   return 1 if $distinct >= $vocab_cap;
+  return 1 if $total >= $vocab_cap * 20;
 
   return 0;
 }
@@ -2994,14 +3059,21 @@ sub _push_to_training_buffer {
         dbg("Failed to append training slot to SQL buffer: $err");
       };
     }
-    my ($spam_slots) = $self->{dbh}->selectrow_array(
-      "SELECT COUNT(DISTINCT slot) FROM neural_training_buffer WHERE username=? AND class='spam'",
-      undef, $username
-    );
-    my ($ham_slots) = $self->{dbh}->selectrow_array(
-      "SELECT COUNT(DISTINCT slot) FROM neural_training_buffer WHERE username=? AND class='ham'",
-      undef, $username
-    );
+    my ($spam_slots, $ham_slots);
+    eval {
+      ($spam_slots) = $self->{dbh}->selectrow_array(
+        "SELECT COUNT(DISTINCT slot) FROM neural_training_buffer WHERE username=? AND class='spam'",
+        undef, $username
+      );
+      ($ham_slots) = $self->{dbh}->selectrow_array(
+        "SELECT COUNT(DISTINCT slot) FROM neural_training_buffer WHERE username=? AND class='ham'",
+        undef, $username
+      );
+      1;
+    } or do {
+      my $err = $@ || 'unknown';
+      dbg("Failed to count SQL training buffer slots: $err");
+    };
     my $needs_retrain = $self->_training_buffer_flush_needed($conf, {});
     return ($spam_slots // 0, $ham_slots // 0, $needs_retrain);
   }
