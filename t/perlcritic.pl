@@ -31,7 +31,7 @@ my $criticoptions = q{
 $criticoptions .= q{
 
   [Perlsecret]
-  allow_secrets = Venus
+  allow_secrets = Venus Goatse
 } if (eval { require Perl::Critic::Policy::Perlsecret; 1} );
 
 open RC, ">../t/log/perlcritic.rc"  or die "cannot create t/log/perlcritic.rc";
