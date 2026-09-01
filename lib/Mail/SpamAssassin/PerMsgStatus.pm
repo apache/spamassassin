@@ -2940,7 +2940,7 @@ sub add_uri_detail_list {
 
     my $dns_max_cname_cache = $self->{main}->{conf}->{dns_max_cname_cache};
     if (defined $host and $self->is_dns_available() and ($dns_max_cname_cache > 0)
-        and (not defined $self->{dns_cname_cache} or scalar %{$self->{dns_cname_cache}} < $dns_max_cname_cache)
+        and (not defined $self->{dns_cname_cache} or scalar keys %{$self->{dns_cname_cache}} < $dns_max_cname_cache)
         and not exists $self->{dns_cname_cache}{$host})
     {
       # Queue the lookup instead of resolving inline (bgsend+bgread) so that
