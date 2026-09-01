@@ -9,7 +9,9 @@ use Storable qw(retrieve);
 use Test::More;
 
 use constant HAS_SQLITE => eval { require DBD::SQLite; 1 };
+use constant HAS_AI_FANN => eval { require AI::FANN; 1 };
 
+plan skip_all => 'AI::FANN not installed' unless HAS_AI_FANN;
 plan tests => 29;
 
 sub nn_reinit {
