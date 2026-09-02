@@ -50,3 +50,10 @@ runs:
       if: ${{ failure() && ( runner.os == 'Windows' )  }}
       run: cat C:/Users/runner/.cpanm/work/*/build.log
       shell: cmd
+
+    - name: Install mail-dmarc.ini
+      run: |
+        mkdir -p etc
+        perl -MFile::ShareDir=dist_file -MFile::Copy=copy -e \
+          'copy(dist_file("Mail-DMARC","mail-dmarc.ini"), "etc/mail-dmarc.ini") or die $!'
+      shell: bash
