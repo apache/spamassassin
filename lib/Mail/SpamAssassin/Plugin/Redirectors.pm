@@ -1305,17 +1305,19 @@ sub finish_parsing_start {
 
   # finish_parsing_start runs once per loaded plugin instance,
   # warn if both are loaded together.
-  if (!$conf->{_redirectors_dual_plugin_warned}
-      && $conf->{plugins_loaded}->{'Mail::SpamAssassin::Plugin::DecodeShortURLs'}
-      && $conf->{plugins_loaded}->{'Mail::SpamAssassin::Plugin::Redirectors'})
-  {
-    $conf->{_redirectors_dual_plugin_warned} = 1;
-    warn "Redirectors: both Mail::SpamAssassin::Plugin::DecodeShortURLs and ".
-         "Mail::SpamAssassin::Plugin::Redirectors are loaded. ".
-         "DecodeShortURLs is deprecated and merged into Redirectors; loading ".
-         "both is redundant and only one of them ends up actually checking ".
-         "and caching redirected URLs. Please load only ".
-         "Mail::SpamAssassin::Plugin::Redirectors.\n";
+  if (!$conf->{_redirectors_dual_plugin_warned}) {
+    my @loaded = $conf->{main}->{plugins}->get_loaded_plugins_list();
+    my $has_decodeshorturls = grep { ref($_) eq 'Mail::SpamAssassin::Plugin::DecodeShortURLs' } @loaded;
+    my $has_redirectors = grep { ref($_) eq 'Mail::SpamAssassin::Plugin::Redirectors' } @loaded;
+    if ($has_decodeshorturls && $has_redirectors) {
+      $conf->{_redirectors_dual_plugin_warned} = 1;
+      warn "Redirectors: both Mail::SpamAssassin::Plugin::DecodeShortURLs and ".
+           "Mail::SpamAssassin::Plugin::Redirectors are loaded. ".
+           "DecodeShortURLs is deprecated and merged into Redirectors; loading ".
+           "both is redundant and only one of them ends up actually checking ".
+           "and caching redirected URLs. Please load only ".
+           "Mail::SpamAssassin::Plugin::Redirectors.\n";
+    }
   }
 }
 

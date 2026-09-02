@@ -28,7 +28,7 @@ use constant SQLITE => (HAS_DBI && HAS_DBD_SQLITE);
 
 plan skip_all => "Net tests disabled"                unless conf_bool('run_net_tests');
 plan skip_all => "LWP::Protocol::https required to run this test" unless HAS_LWP_USERAGENT;
-my $tests = 4;
+my $tests = 5;
 $tests += 4 if (SQLITE);
 $tests += 2 if (HAS_SELENIUM);
 plan tests => $tests;
@@ -48,6 +48,10 @@ body HAS_REDIR_URL              eval:redir_url()
 body REDIR_URL_404              eval:redir_url_404()
 body REDIR_URL_C404             eval:redir_url_code('404')
 uri URI_PAGE_LINK		m,^https://spamassassin\.apache\.org/full/4\.0\.x/$,
+
+ifplugin Mail::SpamAssassin::Plugin::DecodeShortURLs
+  body HAS_SHORT_URL              eval:short_url()
+endif
 });
 
 ###
@@ -61,6 +65,12 @@ uri URI_PAGE_LINK		m,^https://spamassassin\.apache\.org/full/4\.0\.x/$,
    q{ 1.0 URI_PAGE_LINK } => '',
 );
 sarun ("-t < data/spam/redirectors/base.eml", \&patterns_run_cb);
+ok_all_patterns();
+
+%patterns = (
+   q{ 1.0 HAS_SHORT_URL } => '',
+);
+sarun ("-t < data/spam/decodeshorturl/base.eml", \&patterns_run_cb);
 ok_all_patterns();
 
 ###

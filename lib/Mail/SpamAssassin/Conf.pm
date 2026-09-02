@@ -5646,9 +5646,21 @@ sub get_handler_for_type {
   return $conf->{handlers}->{$glob};
 }
 
+# Plugins that have been deprecated and merged into another plugin:
+# loading the replacement should also satisfy an "ifplugin"/"ifhandler"
+# check for the old, deprecated name, so existing configs/rulesets
+# written against the old name keep working after loadplugin is
+# switched to the replacement.
+our %PLUGIN_MERGE_ALIASES = (
+  'Mail::SpamAssassin::Plugin::Redirectors' => 'Mail::SpamAssassin::Plugin::DecodeShortURLs',
+);
+
 sub load_plugin_succeeded {
   my ($self, $plugin, $package, $path) = @_;
   $self->{plugins_loaded}->{$package} = 1;
+  if (my $deprecated = $PLUGIN_MERGE_ALIASES{$package}) {
+    $self->{plugins_loaded}->{$deprecated} = 1;
+  }
 }
 
 sub register_eval_rule {
