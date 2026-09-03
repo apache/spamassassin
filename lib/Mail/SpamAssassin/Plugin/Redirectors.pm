@@ -120,7 +120,8 @@ compatibility shim that loads this plugin.
 package Mail::SpamAssassin::Plugin::Redirectors;
 
 use Mail::SpamAssassin::Plugin;
-use Mail::SpamAssassin::Util qw(compile_regexp idn_to_ascii is_fqdn_valid);
+use Mail::SpamAssassin::Util qw(compile_regexp);
+use Mail::SpamAssassin::URI;
 use strict;
 use warnings;
 
@@ -499,7 +500,7 @@ only those are removed from the list.
 
 =over 4
 
-=item url_redirector_params regexp (default: (?:adurl|af_web_dp|cm_destination|continue|destination|destURL|goto|h|l|login|location|p1|pval|r|redir|redirect|redirectTo|return|returnUrl|referer|service|target|tid|u|url)=(.*))
+=item url_redirector_params regexp (default: (?:adurl|af_web_dp|cm_destination|continue|destination|destURL|goto|h|l|login|location|p1|pval|r|redir|redirect|redirectTo|ret_url|return|returnUrl|referer|service|target|tid|u|url)=(.*))
 
 Regexp used to parse uri parameters in order to detect redirectors and to get redirected domains.
 The regexp must match only the redirected domain.
@@ -1386,112 +1387,132 @@ sub _entry_match_path {
   return 0;
 }
 
+# Returns the redirector entry ({method, paths}) if the URI's host+path matches
+# a configured url_redirector / url_redirector_get / url_shortener*, else
+# undef.  Takes a Mail::SpamAssassin::URI.
+#
+# A bare-domain entry also matches its www. form; a leading-dot entry matches
+# any subdomain but not the domain itself.
 sub _lookup_redirector {
-  my ($conf, $host, $path) = @_;
+  my ($u, $conf) = @_;
 
+  # The scheme has to be checked here because no domain entry can express one,
+  # so an ftp://configured.example would otherwise match.  Everything else
+  # about the host the lookup below judges for itself.
+  return unless $u->is_http;
+
+  my $host = $u->host;
+  return unless defined $host && length $host;
+  # An empty path still addresses the root, which is what a bare-domain entry
+  # is configured as.
+  my $path = length $u->path ? $u->path : '/';
+
+  my $entry;
   if (my $e = $conf->{url_redirector_exact}->{$host}) {
-    return $e if _entry_match_path($e, $path);
+    $entry = $e if _entry_match_path($e, $path);
   }
-  if ($host =~ /^www\.(.+)$/) {
+  if (!$entry && $host =~ /^www\.(.+)$/) {
     if (my $e = $conf->{url_redirector_exact}->{$1}) {
-      return $e if _entry_match_path($e, $path);
+      $entry = $e if _entry_match_path($e, $path);
     }
   }
-  my $h = $host;
-  while ($h =~ s/^[^.]+\.//) {
-    last unless $h =~ /\./;
-    if (my $e = $conf->{url_redirector_suffix}->{$h}) {
-      return $e if _entry_match_path($e, $path);
+  if (!$entry) {
+    my $h = $host;
+    while ($h =~ s/^[^.]+\.//) {
+      last unless $h =~ /\./;
+      if (my $e = $conf->{url_redirector_suffix}->{$h}) {
+        $entry = $e, last if _entry_match_path($e, $path);
+      }
     }
   }
-  return;
+
+  return unless $entry;
+
+  dbg("Found redirection for host $host path $path");
+  return $entry;
 }
 
-# Parse a URI, validate it, and split into (normalized_uri, host, path, rest).
-# Returns empty list if the URI is unusable. Shared by _is_configured_redirector
-# and _extract_embedded_uri so both apply the same validity rules.
-sub _parse_uri {
-  my ($uri, $conf) = @_;
+# Repair and vet one candidate target, which has already been decoded.
+# Returns an absolute URI, or undef when the value is not one.
+sub _embedded_uri_candidate {
+  my ($value) = @_;
 
-  local($1,$2);
-  # normalize uri only if it doesn't contain more explicit redirects
-  # encoded as parameters
-  if($uri !~ /https?%3A%2F%2F/) {
-    $uri = Mail::SpamAssassin::Util::url_decode($uri);
-  }
-  return unless $uri =~ m{^
-    https?://		# Only http
-    (?:[^\@/?#]*\@)?	# Ignore user:pass@
-    ([^/?#:]+)		# (Capture hostname)
-    (?::\d+)?		# Possible port
-    (.*)?		# Some path wanted
-    }ix;
-  my $host = lc $1;
-  my $rest = defined $2 ? $2 : '';
-  if($host =~ /\=|\&|\?/) {
-    return;
-  }
-  if(is_fqdn_valid($host)) {
-    $host = idn_to_ascii($host);
-  }
-  my $has_path = length $rest ? 1 : 0;
-  my $levels = $host =~ tr/.//;
-  return if $levels == 1 && !$has_path;
-  return if $uri !~ /([^.]+\.[^.]+)/;
-  return if $uri =~ /^([a-z0-9]+?)\@/;
+  return unless defined $value && length $value;
 
-  my $path = $rest;
-  $path = $1 if $path =~ /^([^?#]*)/;
-  $path = '/' unless length $path;
+  # Collapse padded slash runs, "http:///host" and "//////host" alike.
+  local($1);
+  $value =~ s{^(https?:)/*}{$1//}i;
+  $value =~ s{^/{2,}}{//};
 
-  return ($uri, $host, $path, $rest);
+  # Only an embedded URI if it actually looks like one: an explicit scheme, a
+  # scheme-relative //host.tld, or a bare host.tld/path.  A bare token
+  # (referral code, label, etc.) is not a URI and must not be turned into a
+  # fabricated http://<token>, and a slash run with no dotted host after it
+  # ("//////common/oauth2") is not one either.  These stay anchored: a value
+  # that merely contains a URL somewhere inside it (a scope list, say) is not
+  # a redirect target.
+  return unless $value =~ m{^https?:}i
+             || $value =~ m{^//[^/?#\s]+\.[^/?#\s]+}
+             || $value =~ m{^[^/?#\s]+\.[^/?#\s]+/};
+
+  # Strip any scheme-relative leading slashes, then supply a scheme unless the
+  # value already carries one.  Test for the scheme's colon, not a bare "http"
+  # prefix: a host may legitimately start with "http" (httpbin.org).
+  $value =~ s{^/+}{};
+  $value = 'http://' . $value if $value !~ /^https?:/i;
+
+  return $value;
 }
 
-# Returns the redirector entry ({method, paths}) if $uri's host+path
-# matches a configured url_redirector / url_redirector_get / url_shortener*,
-# else undef.
-sub _is_configured_redirector {
-  my ($uri, $conf) = @_;
-
-  my ($nuri, $host, $path) = _parse_uri($uri, $conf);
-  return unless defined $nuri;
-
-  if (my $e = _lookup_redirector($conf, $host, $path)) {
-    dbg("Found redirection for host $host path $path");
-    return $e;
-  }
-  return;
-}
-
-# Returns a URI extracted from $uri's querystring/path (via the
-# url_redirector_params regex or a bare embedded //URL), else undef.
-# Does NOT check whether the extracted URI's host is configured.
+# Returns a URI extracted from the given Mail::SpamAssassin::URI's querystring
+# or path, else undef.  Does NOT check whether the extracted URI's host is
+# configured.
 sub _extract_embedded_uri {
-  my ($uri, $conf) = @_;
+  my ($u, $conf) = @_;
 
-  my (undef, undef, undef, $rest) = _parse_uri($uri, $conf);
-  return unless defined $rest;
+  # Only the path and the query are searched, so only they need to hold
+  # something.  A fragment does not count: it is stripped before fetching, so
+  # it is never part of what a server is asked for.  The host is not looked at
+  # at all -- an embedded URI is never taken from it.
+  return unless $u->is_http;
+  return unless length $u->path || defined $u->query;
 
   my $rreg = $conf->{url_redirector_params};
-  local($1);
-  if (($rest =~ /(?:\?|\&)$rreg/gis) || ($rest =~ /(?:\/|\_|\=)((?:https?:)?\/\/.*)/)) {
-    my $newuri = $1;
-    # A user-supplied url_redirector_params with no capture group leaves $1
-    # undefined here; without this guard we would fabricate a bare "http://".
-    return unless defined $newuri;
-    # The param value is only an embedded URI if it actually looks like one:
-    # an explicit/encoded scheme, a scheme-relative //host, or a bare
-    # host.tld/path. A bare token (referral code, label, etc.) is not a URI
-    # and must not be turned into a fabricated http://<token>.
-    unless ($newuri =~ m{^https?(?::|%3a)}i
-         || $newuri =~ m{^//}
-         || $newuri =~ m{^[^/?#\s]+\.[^/?#\s]+/}) {
-      return;
+  my @params = $u->params;
+
+  # A configured parameter name wins over any other, wherever it appears in
+  # the querystring.  url_redirector_params is documented as matching
+  # "name=value", so match that, and take the capture group when there is one:
+  # a regex can then pull the target out of a value that wraps it, such as
+  # "u=12345|https://evil.com/".  Without a capture group the whole value is
+  # the candidate, which is what a plain list of parameter names wants.
+  if (defined $rreg) {
+    foreach my $p (@params) {
+      next unless defined $p->{value};
+      local($1);
+      next unless "$p->{name}=$p->{value}" =~ /^(?:$rreg)/;
+      my $newuri = _embedded_uri_candidate(defined $1 ? $1 : $p->{value})
+        or next;
+      dbg("Found embedded uri $newuri in $u");
+      return $newuri;
     }
-    dbg("Found embedded uri $newuri in $uri");
-    $newuri = 'http://' . $newuri if $newuri !~ /^http/;
+  }
+
+  # Otherwise any parameter whose value is itself a URI.
+  foreach my $p (@params) {
+    my $newuri = _embedded_uri_candidate($p->{value}) or next;
+    dbg("Found embedded uri $newuri in $u");
     return $newuri;
   }
+
+  # Finally a target embedded in the path rather than in a parameter.
+  local($1);
+  if ($u->path =~ m{(?:/|_|=)((?:https?:)?//.*)$}) {
+    my $newuri = _embedded_uri_candidate($1) or return;
+    dbg("Found embedded uri $newuri in $u");
+    return $newuri;
+  }
+
   return;
 }
 
@@ -1565,7 +1586,8 @@ sub _get_selenium_ua {
   return $pms->{redir_selenium_ua} = $ua;
 }
 
-# Perform an HTTP request for $uri using $method (LWP) or Selenium.
+# Perform an HTTP request for $uri (a Mail::SpamAssassin::URI) using $method
+# (LWP) or Selenium.
 # Returns the absolute, normalized Location URL on a usable redirect,
 # or undef otherwise. Sets redir_url_<rcode> flags on $pms and writes
 # the cache.
@@ -1573,7 +1595,10 @@ sub _do_http {
   my ($self, $uri, $method, $pms) = @_;
   my $conf = $pms->{conf};
 
-  my $redir_url = $uri;
+  # The fragment is stripped before fetching: RFC 3986 defines it as
+  # client-side-only, so it is not part of what is requested, cached, or
+  # compared against the Location that comes back.
+  my $redir_url = $uri->without_fragment;
   my $location;
 
   if (defined($location = $self->cache_get($redir_url))) {
@@ -1589,7 +1614,7 @@ sub _do_http {
     }
   } else {
     # remove additional slashes after http://
-    $redir_url =~ s|^(https?):\/{3,8}|$1://|;
+    $redir_url =~ s{^(https?:)/*}{$1//}i;
     if($redir_url !~ /^(?:https?:\/\/)?(?:.{1,128}\@)?(?:[A-Za-z0-9-]{1,63}\.)+[A-Za-z0-9-]{2,63}/) {
       dbg("URL $redir_url is not valid, skipping http check");
       return;
@@ -1641,7 +1666,7 @@ sub _do_http {
       }
     } else {
       my $ua = $self->_get_lwp_ua($pms);
-      my (undef, $host) = _parse_uri($redir_url, $conf);
+      my $host = $uri->host;
       my $custom_ua = defined $host ? $conf->{url_redirector_custom_ua}->{$host} : undef;
       $ua->agent(defined $custom_ua ? $custom_ua : $conf->{url_redirector_user_agent});
       my $response = $ua->$method($redir_url);
@@ -1734,8 +1759,8 @@ sub _do_http {
 }
 
 # Recursive chain walker. Stops cleanly when neither
-# _is_configured_redirector nor _extract_embedded_uri matches. HTTP
-# requests are gated on _is_configured_redirector returning truthy.
+# _lookup_redirector nor _extract_embedded_uri matches. HTTP
+# requests are gated on _lookup_redirector returning an entry.
 #
 # There is no functional distinction between what used to be called a
 # "redirector" and a "shortener" -- both are just a configured host whose
@@ -1744,6 +1769,13 @@ sub _do_http {
 sub _walk_redirects {
   my ($self, $uri, $src_info, $pms, $depth, $been_here) = @_;
   my $conf = $pms->{conf};
+
+  # Accepts either a string or an already-parsed URI, so a caller that has one
+  # in hand does not pay to parse it twice.  Parsed once here and passed down:
+  # _lookup_redirector, _extract_embedded_uri and _do_http all need the same
+  # components.  $uri itself is only interpolated below, which an object does
+  # as the string it was built from.
+  my $u = ref $uri ? $uri : Mail::SpamAssassin::URI->new($uri);
 
   if (exists $been_here->{"uri:$uri"}) {
     dbg("error: loop detected: $uri");
@@ -1757,7 +1789,7 @@ sub _walk_redirects {
   }
   $been_here->{"uri:$uri"} = 1;
 
-  my $rentry = _is_configured_redirector($uri, $conf);
+  my $rentry = _lookup_redirector($u, $conf);
 
   # Selenium method requires url_redirector_use_selenium=1. If the subsystem
   # is off, skip the HTTP lookup but still set redir_url so the message-level
@@ -1774,7 +1806,9 @@ sub _walk_redirects {
     $pms->{redir_url} = 1;
     $pms->{redir_url_chained} = 1 if $depth > 0;
 
-    my (undef, $host) = $self->{main}->{registryboundaries}->uri_to_domain($uri);
+    # The parsed host, rather than uri_to_domain(): this only needs a stable
+    # identifier for "same host seen again", and the parser has one already.
+    my $host = $u->host;
     if (defined $host) {
       if ($depth > 0 && exists $been_here->{"host:$host"}) {
         dbg("Chained redirector that uses the same hostname $host found for $uri");
@@ -1789,20 +1823,20 @@ sub _walk_redirects {
       return if ++$pms->{redir_seed_count} > $conf->{max_redir_urls};
     }
 
-    # Strip the fragment before fetching, RFC 3986 defines it as
-    # client-side-only.
-    (my $fetch_uri = $uri) =~ s/#.*//;
-
-    my $location = $self->_do_http($fetch_uri, $rentry->{method}, $pms);
+    my $location = $self->_do_http($u, $rentry->{method}, $pms);
     return unless defined $location;
 
-    if ($fetch_uri eq $location) {
+    # Compare both sides without their fragments: _do_http fetched the
+    # stripped form, and a server may still echo a fragment back in Location.
+    # Two URIs that differ only there are the same request.
+    my $loc_uri = Mail::SpamAssassin::URI->new($location);
+    if ($u->without_fragment eq $loc_uri->without_fragment) {
       dbg("URL redirects to itself");
       $pms->{redir_url_loop} = 1;
       return;
     }
 
-    my (undef, $loc_host) = $self->{main}->{registryboundaries}->uri_to_domain($location);
+    my $loc_host = $loc_uri->host;
     if (defined $loc_host && exists $conf->{url_skip_redirect_to}->{$loc_host}) {
       dbg("Stopping redirect chain: destination domain $loc_host is in url_skip_redirect_to ($location)");
       return;
@@ -1811,10 +1845,10 @@ sub _walk_redirects {
     _add_redirect_uri($pms, $location, $src_info);
     $pms->{redir_url_valid} = 1;
 
-    return $self->_walk_redirects($location, $src_info, $pms, $depth + 1, $been_here);
+    return $self->_walk_redirects($loc_uri, $src_info, $pms, $depth + 1, $been_here);
   }
 
-  if (my $embedded = _extract_embedded_uri($uri, $conf)) {
+  if (my $embedded = _extract_embedded_uri($u, $conf)) {
     _add_redirect_uri($pms, $embedded, $src_info);
     return $self->_walk_redirects($embedded, $src_info, $pms, $depth + 1, $been_here);
   }
