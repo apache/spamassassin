@@ -1,0 +1,263 @@
+From: <your@apache.org address here>
+To: <your@apache.org address here>
+Bcc: users@spamassassin.apache.org, dev@spamassassin.apache.org, announce@spamassassin.apache.org, announce@apache.org
+Reply-to: dev@spamassassin.apache.org
+Subject: [ANNOUNCE] Apache SpamAssassin 4.0.3 available
+
+On behalf of the Apache SpamAssassin Project,
+I am pleased to announce version 4.0.3 is available.
+
+Release Notes -- Apache SpamAssassin -- Version 4.0.3
+
+
+Introduction
+------------
+
+Apache SpamAssassin 4.0.3 is a patch release that fixes issues that
+have surfaced since the release of 4.0.2, and also adds several new
+capabilities, including a new MIME-part handler framework, a new
+NeuralNetwork plugin, and improvements to URI redirector handling.
+
+Many thanks to the committers (see CREDITS file), contributors, rule
+testers, mass checkers, and code testers who have made this release
+possible.
+
+Notable features:
+=================
+
+  - New MIME-part handler framework (Mail::SpamAssassin::Handler::*):
+  HTML, JavaScript, SVG, Image (OCR via tesseract), PDF, and Archive
+  (zip/rar) handlers, plus a new pure-Perl PDF parser
+  (Mail::SpamAssassin::PDF). Adds new "script", "svgtext", "imagetext"
+  and "icstext" rule types.
+
+  - New ICS (text/calendar) handler, with check_ics_attendee_count,
+  check_ics_random_start_time and check_ics_event_prop eval rules.
+
+  - New Mail::SpamAssassin::Plugin::NeuralNetwork plugin, which scores
+  messages using the Fast Artificial Neural Network (FANN) library.
+  It adds a "sa-learn --plugin" option to dump its stats. This plugin is
+  marked experimental while development continues.
+
+  - New Mail::SpamAssassin::URI RFC 3986 URI parser class, now used
+  by the Redirectors plugin.
+
+  - The Redirectors plugin now replaces the DecodeShortURLs plugin,
+  which is deprecated. Redirectors also gained a Selenium-based
+  per-host redirector mode (url_redirector_selenium) and many new
+  redirector definitions.
+
+  - New FuzzyHash::ZOrder MinHash/LSH near-duplicate body detection,
+  integrated into the HashBL plugin via check_hashbl_bodyfuzzy().
+
+  - ARC checking has been split out of the DKIM plugin into its own
+  Mail::SpamAssassin::Plugin::ARC plugin.
+
+  - The AuthRes, ARC, DKIM, SPF and DMARC plugins now share parsed
+  Authentication-Results data instead of each re-parsing headers
+  independently, via a new Header::AuthenticationResults parser.
+
+Notable changes
+---------------
+
+This release addresses the following issues:
+
+  - Fixed spamc hang on TLS 1.3 connections due to post-handshake
+  messages; added a --debug parameter to spamc(1)
+
+  - Added check_dmarc_permerror and check_dmarc_temperror DMARC eval
+  rules; fixed various DMARC/ARC/DKIM undef warnings and NS query bugs
+
+  - Bayes: sort tokens in the MySQL store to prevent InnoDB deadlocks
+
+  - PDF handler: extract CCITT fax-encoded images (faxed/scanned
+  PDFs) by wrapping them in a TIFF header; link annotations are now
+  parsed on every page instead of just page 1, with a new
+  pdf_max_uris setting capping the number of URIs retained per PDF
+
+  - HTML rendering moved from Message::Node::rendered() into
+  Handler::HTML; SVG text now reaches body rules
+
+  - Fixed several false positives: HTML obfuscation-ratio counting
+  NBSP as a word character (bug 8404), UPPERCASE_URI format
+  matching, backwards FP-avoidance logic, and __URI_DOTCN_SPOOF
+
+  - Fixed BOM'd UTF-16 body decoding
+
+  - Subject length is now checked after stripping UTF-8 characters
+  (bug 5859); getaddrinfo() results are now randomized (bug 7046)
+
+  - Correctly parse Exim 4.99 received lines (bug 8365)
+
+  - Numerous new and updated redirector definitions, phishing-domain
+  rules, phone-scam-number rules, and score/FP tuning
+
+The detailed list of all commits can be found in the Changes file.
+A detailed view of the issues as they were filed in the Bugzilla issue
+tracker can be seen at https://s.apache.org/9er4g
+
+New configuration options
+-------------------------
+
+multipart_alternative_preferred_part allows choosing which part of a
+multipart/alternative message is scanned.
+
+pdf_max_uris caps the number of distinct URIs retained per PDF
+document (default 30, 0 disables).
+
+Notable Internal changes
+------------------------
+
+None noted
+
+Other updates
+-------------
+
+None noted.
+
+
+Optimizations
+-------------
+
+  - Meta-rule evaluation reworked to use a dependency-driven work
+  queue instead of a full-rescan retry, so resolving a meta only
+  re-checks the metas that actually depend on it
+
+  - CNAME resolution switched to a queue-based approach and its
+  cache is now limited to 10 entries by default (configurable via
+  dns_max_cname_cache), speeding up processing of messages with a
+  large number of URIs
+
+  - Eval-plugin glue methods are now cached for the process
+  lifetime instead of being recompiled on every message
+
+  - Redirectors: each URI is now parsed once and the parsed object
+  passed down the redirect chain, instead of being re-parsed at
+  every hop; the user-agent object is now built lazily and cached,
+  so messages with no HTTP-eligible URIs no longer construct one
+
+  - sa-learn --restore now commits every 1000 records instead of
+  one at a time, improving restore speed (bug 6710); Bayes
+  token-frequency lookups now cache only the values needed instead
+  of the whole freqs hash; the Bayes lock is now held for less time
+  during training, speeding up concurrent training
+
+  - Base64 decoding is now limited based on scan size, so an
+  oversized message is not fully decoded before being discarded
+
+  - Per-hit metadata for run_body_fast_scan() is now precomputed
+  instead of being re-derived with regexps on every hit
+
+  - The UTF-16 BOM/endianness heuristic is now bounded to a
+  1024-byte prefix instead of scanning the whole part
+
+  - General SQL query speedups, and added cache support to the
+  ExtractText plugin
+
+Downloading and availability
+----------------------------
+
+Downloads are available from:
+
+https://spamassassin.apache.org/downloads.html
+
+sha256sum of archive files:
+
+ 9625514b51766d4afe08be2eee90e539c6514e9cfdf657910a555227e9b73ebf  Mail-SpamAssassin-4.0.2-rc1.tar.bz2
+ 45e82836f388b2913a406da3815d801f37dc6963de9d0b8fcec15d99b7475ae5  Mail-SpamAssassin-4.0.2-rc1.tar.gz
+ 39b464d875cba0982c2b4fc6622a71287d806a8fc330adb908ead8feb18109ad  Mail-SpamAssassin-4.0.2-rc1.zip
+ 4084080116aca1a0f565605485b10e3ccbd868ff4d6afa7a796e40c79e698e24  Mail-SpamAssassin-rules-4.0.2-rc1.r1927357.tgz
+
+sha512sum of archive files:
+
+ a32f670e9f491a0400aada9baed3fc39a34a3c803d5c3d5e24a46df9ea79b53929df16da1924b0e684a3af7222afcf99d8265af503cf6e12073618891b11b662  Mail-SpamAssassin-4.0.2-rc1.tar.bz2
+ 0d5c22d4bb6a1c52a44ecb3754fef302367939d78b1fa22ab4823d58af9d2ef529cff83bff337d6f8c0209cc2d385113769551ccb4122ef8f3403b7bc238b58e  Mail-SpamAssassin-4.0.2-rc1.tar.gz
+ 128d8e3747fd8c55e49a34569132eb4b8f9adb1c9a4f1846ccdb2ac770a5a3576d1d494a9b111475e1170dfe38ae0349db5cfd3473a4ec08ce8bc0e92bbf4238  Mail-SpamAssassin-4.0.2-rc1.zip
+ ef56fff48b295101574c049bec4512601777b89a190bf8796e08fea7084773034971d8ae1847ed10f71a9a4f8fd16aa14457b252ee6b0473526989480d5774fa  Mail-SpamAssassin-rules-4.0.2-rc1.r1927357.tgz
+
+Note that the Rules files, aka *-rules-*.tgz, are only necessary if
+you cannot, or do not wish to, run "sa-update" after
+installation. Using sa-update will download the latest rules
+
+See the INSTALL and UPGRADE files in the distribution for important
+installation notes
+
+
+GPG Verification Procedure
+--------------------------
+The release files also have a .asc accompanying them.  The file serves
+as an external GPG signature for the given release file.  The signing
+key is available via the keys.gnupg.net or keys.openpgp.org key
+servers, as well as https://www.apache.org/dist/spamassassin/KEYS
+
+
+The following key is used to sign SA releases 3.3.0 and later:
+
+pub   4096R/F7D39814 2009-12-02
+      Key fingerprint = D809 9BC7 9E17 D7E4 9BC2  1E31 FDE5 2F40 F7D3 9814
+uid                  SpamAssassin Project Management Committee <private@spamassassin.apache.org>
+uid                  SpamAssassin Signing Key (Code Signing Key, replacement for 1024D/265FA05B) <dev@spamassassin.apache.org>
+sub   4096R/7B3265A5 2009-12-02
+
+The following key is used to sign rule updates:
+
+pub   4096R/5244EC45 2005-12-20
+      Key fingerprint = 5E54 1DC9 59CB 8BAC 7C78  DFDC 4056 A61A 5244 EC45
+uid                  updates.spamassassin.org Signing Key <release@spamassassin.org>
+sub   4096R/24F434CE 2005-12-20
+
+To verify a release file, download the file with the accompanying .asc
+file and run the following commands:
+
+  gpg --verbose --keyserver keys.openpgp.org --recv-key FDE52F40F7D39814
+  gpg --verify Mail-SpamAssassin-4.0.0.tar.bz2.asc
+  gpg --fingerprint FDE52F40F7D39814
+
+Then confirm that the key description shown by --verify matches what
+is shown by --fingerprint.
+
+See https://www.apache.org/info/verification.html for more information
+on verifying Apache releases
+
+
+About Apache SpamAssassin
+-------------------------
+
+Apache SpamAssassin is a mature, widely-deployed open source project
+that provides filtering to classify email to block spam, malware, and
+phishes.
+
+Apache SpamAssassin uses a variety of mechanisms including mail header
+and text analysis, Bayesian filtering, DNS blocklists, collaborative
+filtering databases, and meta concepts to lower incorrect
+classification.
+
+Apache SpamAssassin uses a highly modular architecture that allows
+other technologies to be quickly incorporated as plugins to easily add
+or replace existing methods.
+
+Apache SpamAssassin typically runs on a server using either command
+line utilities or an API to classify email so a mail system can use
+the results before the message reaches mailboxes.
+
+Most of the Apache SpamAssassin is written in Perl natively supporting
+Unix, Linux, and macOS platforms and Microsoft Windows using
+Strawberry Perl.
+
+For more information, visit https://spamassassin.apache.org/
+
+
+About The Apache Software Foundation
+------------------------------------
+
+Established in 1999, The Apache Software Foundation provides
+organizational, legal, and financial support for more than 100
+freely-available, collaboratively-developed Open Source projects. The
+pragmatic Apache License enables individual and commercial users to
+easily deploy Apache software; the Foundation's intellectual property
+framework limits the legal exposure of its 2,500+ contributors.
+
+For more information, visit https://www.apache.org/
+
+-- 
+[Your name, title, and email address here]
