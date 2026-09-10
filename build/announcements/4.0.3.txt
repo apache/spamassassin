@@ -26,13 +26,11 @@ Notable features:
 =================
 
   - New MIME-part handler framework (Mail::SpamAssassin::Handler::*):
-  HTML, JavaScript, SVG, Image (OCR via tesseract), PDF, and Archive
-  (zip/rar) handlers, plus a new pure-Perl PDF parser
-  (Mail::SpamAssassin::PDF). Adds new "script", "svgtext", "imagetext"
-  and "icstext" rule types.
-
-  - New ICS (text/calendar) handler, with check_ics_attendee_count,
-  check_ics_random_start_time and check_ics_event_prop eval rules.
+  HTML, JavaScript, SVG, Image (OCR via tesseract), PDF, ICS and
+  Archive (zip/rar) handlers, plus a new pure-Perl PDF parser
+  (Mail::SpamAssassin::PDF). Adds new "script", "svgtext", "imagetext",
+  "pdftext" and "icstext" rule types. Handlers can be nested to allow
+  scanning embedded content (e.g. images in PDFs, PDFs in ZIPs, etc.)
 
   - New Mail::SpamAssassin::Plugin::NeuralNetwork plugin, which scores
   messages using the Fast Artificial Neural Network (FANN) library.
@@ -70,11 +68,6 @@ This release addresses the following issues:
 
   - Bayes: sort tokens in the MySQL store to prevent InnoDB deadlocks
 
-  - PDF handler: extract CCITT fax-encoded images (faxed/scanned
-  PDFs) by wrapping them in a TIFF header; link annotations are now
-  parsed on every page instead of just page 1, with a new
-  pdf_max_uris setting capping the number of URIs retained per PDF
-
   - HTML rendering moved from Message::Node::rendered() into
   Handler::HTML; SVG text now reaches body rules
 
@@ -101,9 +94,6 @@ New configuration options
 
 multipart_alternative_preferred_part allows choosing which part of a
 multipart/alternative message is scanned.
-
-pdf_max_uris caps the number of distinct URIs retained per PDF
-document (default 30, 0 disables).
 
 Notable Internal changes
 ------------------------
