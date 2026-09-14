@@ -1819,7 +1819,8 @@ sub _walk_redirects {
 
     return if $self->{net_disabled};
     return if !$conf->{max_redir_urls};
-    if ($depth == 0) {
+    # count each non-duplicate URI that is or contains a redirector
+    if (!$been_here->{'seed:counted'}++) {
       return if ++$pms->{redir_seed_count} > $conf->{max_redir_urls};
     }
 
