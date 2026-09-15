@@ -28,7 +28,8 @@ use constant SQLITE => (HAS_DBI && HAS_DBD_SQLITE);
 
 plan skip_all => "Net tests disabled"                unless conf_bool('run_net_tests');
 plan skip_all => "LWP::Protocol::https required to run this test" unless HAS_LWP_USERAGENT;
-my $tests = 5;
+my $tests = 6;
+$tests += 3; # scheme-upgrade block
 $tests += 4 if (SQLITE);
 $tests += 2 if (HAS_SELENIUM);
 plan tests => $tests;
@@ -52,6 +53,10 @@ uri URI_PAGE_LINK		m,^https://spamassassin\.apache\.org/full/4\.0\.x/$,
 ifplugin Mail::SpamAssassin::Plugin::DecodeShortURLs
   body HAS_SHORT_URL              eval:short_url()
 endif
+
+if can(Mail::SpamAssassin::Plugin::DecodeShortURLs::has_short_url_redir)
+  body HAS_SHORT_URL_REDIR_CAN    eval:short_url()
+endif
 });
 
 ###
@@ -69,9 +74,37 @@ ok_all_patterns();
 
 %patterns = (
    q{ 1.0 HAS_SHORT_URL } => '',
+   q{ 1.0 HAS_SHORT_URL_REDIR_CAN } => '',
 );
 sarun ("-t < data/spam/decodeshorturl/base.eml", \&patterns_run_cb);
 ok_all_patterns();
+
+###
+### Plain http->https upgrade on the same host: followed, but not counted
+### as a redirect.
+###
+
+tstprefs(q{
+dns_query_restriction allow apache.org
+
+clear_url_redirector
+url_redirector apache.org
+
+body HAS_REDIR_URL              eval:redir_url()
+body REDIR_URL_VALID            eval:redir_url_valid()
+uri URI_APACHE_SCHEME_UPGRADE   m,^https://apache\.org/?$,
+});
+
+%patterns = (
+   q{ 1.0 HAS_REDIR_URL } => '',
+);
+%anti_patterns = (
+   q{ 1.0 REDIR_URL_VALID } => '',
+   q{ 1.0 URI_APACHE_SCHEME_UPGRADE } => '',
+);
+sarun ("-t < data/spam/redirectors/scheme_upgrade.eml", \&patterns_run_cb);
+ok_all_patterns();
+%anti_patterns = ();
 
 ###
 ### With SQLITE caching

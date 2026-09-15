@@ -1766,6 +1766,9 @@ sub _do_http {
 # "redirector" and a "shortener" -- both are just a configured host whose
 # response redirects elsewhere, and a hop of either origin is checked at
 # every depth, so a chain can freely mix them in any order.
+#
+# A plain http->https upgrade on the same host is followed transparently
+# rather than counted as a redirect.
 sub _walk_redirects {
   my ($self, $uri, $src_info, $pms, $depth, $been_here) = @_;
   my $conf = $pms->{conf};
@@ -1838,6 +1841,19 @@ sub _walk_redirects {
     }
 
     my $loc_host = $loc_uri->host;
+
+    # A plain http->https upgrade on the same host is not a meaningful redirect
+    # just follow it at the same depth so it doesn't count toward redir_url_valid/chained or trip
+    # redir_url_chained_domain when the https URL re-matches the same
+    # url_redirector entry.
+    if ($u->scheme eq 'http' && $loc_uri->scheme eq 'https'
+        && defined $host && defined $loc_host && $host eq $loc_host
+        && !$been_here->{"schemeupgrade:$host"}++)
+    {
+      dbg("http->https upgrade on same host $host, not counting as a redirect: $uri => $location");
+      return $self->_walk_redirects($loc_uri, $src_info, $pms, $depth, $been_here);
+    }
+
     if (defined $loc_host && exists $conf->{url_skip_redirect_to}->{$loc_host}) {
       dbg("Stopping redirect chain: destination domain $loc_host is in url_skip_redirect_to ($location)");
       return;
