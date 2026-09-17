@@ -8,10 +8,11 @@ use Test::More;
 # ---------------------------------------------------------------------------
 # Test Handler::Image's HEIF/HEIC support: an image part whose bytes are HEIC
 # but whose declared Content-Type is image/png (the spammer mislabel trick) is
-# detected by magic number, converted to PNG via heif-convert, and OCR'd.  The
+# detected by magic number, converted to PNG via heif-dec, and OCR'd.  The
 # rendered text "HEICSENTINEL" must reach body rules.
 #
-# Requires both tesseract and heif-convert; skip cleanly if either is missing.
+# Requires both tesseract and heif-dec (named heif-convert before libheif 1.18);
+# skip cleanly if either is missing.
 
 sub find_bin {
   my ($name) = @_;
@@ -23,10 +24,10 @@ sub find_bin {
 }
 
 my $tesseract = find_bin('tesseract');
-my $heif      = find_bin('heif-convert');
+my $heif      = find_bin("heif-dec") || find_bin("heif-convert");
 
 if (!$tesseract || !$heif) {
-  plan skip_all => "tesseract and heif-convert both required";
+  plan skip_all => "tesseract and heif-dec/heif-convert both required";
 }
 else {
   plan tests => 6;
@@ -35,7 +36,7 @@ else {
 tstpre ("
   loadhandler Mail::SpamAssassin::Handler::Image
   image_tesseract_path $tesseract
-  image_heif_convert_path $heif
+  image_heif_dec_path $heif
 ");
 
 tstlocalrules ('

@@ -59,7 +59,10 @@ endif
 # hidden inside images.
 #
 # Requires the 'tesseract' executable.  Set image_tesseract_path if it is not on
-# the PATH.  Disabled by default; uncomment to enable.
+# the PATH.  OCR of HEIF/HEIC images additionally needs 'heif-dec' (from
+# libheif; named 'heif-convert' before libheif 1.18) -- without it HEIF images
+# are skipped and every other image type is still OCR'd.  Both have substantial
+# recursive dependencies.  Disabled by default; uncomment to enable.
 #
 if can(Mail::SpamAssassin::Conf::feature_handlers)
 # loadhandler Mail::SpamAssassin::Handler::Image

@@ -150,7 +150,14 @@ Note for Users Upgrading to SpamAssassin 4.0.3
       injects the recognised text into the body so ordinary body rules
       can match it. Provides the new "imagetext" rule type and the
       check_image_text_ratio eval, which flags a message whose body text
-      is mostly OCR'd from images. Requires the tesseract executable.
+      is mostly OCR'd from images. Requires the tesseract executable
+      (see image_tesseract_path). OCR of HEIF/HEIC images additionally
+      requires the heif-dec executable from libheif -- named heif-convert
+      before libheif 1.18, and both names are accepted (see
+      image_heif_dec_path); without it, HEIF images are skipped and
+      all other image types are still OCR'd. Both tesseract and libheif
+      pull in substantial recursive dependencies, which is why this
+      handler is not enabled by default.
 
     * PDF (application/pdf) parses each PDF with the new pure-Perl
       Mail::SpamAssassin::PDF::Parser and exposes metadata (page/image/

@@ -71,11 +71,13 @@ warning, so C<--lint> never fails merely because the binary is absent.
 
 Language(s) passed to C<tesseract -l> (default C<eng>).
 
-=item image_heif_convert_path /path/to/heif-convert
+=item image_heif_dec_path /path/to/heif-dec
 
-Full path to C<heif-convert> (from libheif), used to convert HEIF/HEIC images
+Full path to C<heif-dec> (from libheif), used to convert HEIF/HEIC images
 to PNG before OCR, since tesseract cannot read HEIF natively.  If unset, the
-plugin looks for C<heif-convert> on the C<PATH>.  If it is unavailable, HEIF
+plugin looks for C<heif-dec> on the C<PATH>, then for C<heif-convert>, the name
+the tool carried before libheif 1.18 (some distributions still ship only one of
+the two).  If neither is available, HEIF
 images are skipped while all other image types are still OCR'd.  The real image
 type is detected from the file's leading bytes, not its declared Content-Type,
 so a HEIF image mislabelled as e.g. image/png is still handled.
@@ -145,7 +147,7 @@ sub set_config {
       type => $Mail::SpamAssassin::Conf::CONF_TYPE_STRING,
     },
     {
-      setting => 'image_heif_convert_path',
+      setting => 'image_heif_dec_path',
       is_admin => 1,
       default => '',
       type => $Mail::SpamAssassin::Conf::CONF_TYPE_STRING,
@@ -379,26 +381,33 @@ sub _tesseract {
   return $self->{tesseract};
 }
 
-# heif-convert turns HEIC/HEIF (which tesseract/leptonica can't read) into PNG.
-# Optional: if absent, HEIF images are simply skipped, everything else still
-# OCRs.  Resolved lazily and cached, like the tesseract path.
+# heif-dec turns HEIC/HEIF (which tesseract/leptonica can't read) into PNG.
+# The tool was named heif-convert before libheif 1.18 and is still installed
+# under that name on some platforms, so try the canonical name first and fall
+# back to the old one.  Optional: if absent, HEIF images are simply skipped,
+# everything else still OCRs.  Resolved lazily and cached, like tesseract.
 sub _heif_convert {
   my ($self, $conf) = @_;
   return $self->{heif_convert} if exists $self->{heif_convert};
   $self->{heif_convert} = $self->_resolve_binary(
-    'heif-convert', $conf->{image_heif_convert_path}, 'heif-convert', undef);
+    'heif-dec', $conf->{image_heif_dec_path},
+    ['heif-dec', 'heif-convert'], undef);
   return $self->{heif_convert};
 }
 
-# Resolve an external binary: explicit config path first, else search PATH.
-# Returns the untainted path or undef.  $warn_msg, if set, is warned once when
-# the binary is missing (used for the required tesseract; omitted for optional
-# converters, which fail quietly).
+# Resolve an external binary: explicit config path first, else search PATH for
+# each candidate name in turn (a tool may be renamed between releases, e.g.
+# heif-convert -> heif-dec).  Returns the untainted path or undef.  $warn_msg,
+# if set, is warned once when the binary is missing (used for the required
+# tesseract; omitted for optional converters, which fail quietly).
 sub _resolve_binary {
-  my ($self, $label, $cfg_path, $exe, $warn_msg) = @_;
+  my ($self, $label, $cfg_path, $exes, $warn_msg) = @_;
   my $path = $cfg_path;
   if (!defined $path || $path eq '') {
-    $path = Mail::SpamAssassin::Util::find_executable_in_env_path($exe);
+    for my $exe (ref $exes ? @$exes : $exes) {
+      $path = Mail::SpamAssassin::Util::find_executable_in_env_path($exe);
+      last if defined $path && -x $path;
+    }
   }
   if (defined $path && -x $path) {
     $path = untaint_file_path($path);
@@ -623,8 +632,8 @@ sub _ocr {
   return $resp;
 }
 
-# Convert HEIF/HEIC bytes to PNG with heif-convert.  Unlike tesseract,
-# heif-convert writes to an output FILE rather than stdout, so we run it to a
+# Convert HEIF/HEIC bytes to PNG with heif-dec.  Unlike tesseract,
+# heif-dec writes to an output FILE rather than stdout, so we run it to a
 # second temp file and read the PNG bytes back.  Returns the PNG bytes, or undef
 # if no converter is available or the conversion fails.
 sub _heif_to_png {
@@ -633,7 +642,7 @@ sub _heif_to_png {
   my $conf = $pms->{conf} || $self->{main}->{conf};
   my $convert = $self->_heif_convert($conf);
   if (!$convert) {
-    dbg("image: cannot OCR HEIF, heif-convert not available");
+    dbg("image: cannot OCR HEIF, heif-dec/heif-convert not available");
     return;
   }
   my $secs = $conf->{handler_time_limit} || 10;
@@ -652,16 +661,16 @@ sub _heif_to_png {
     $in_file or die "failed to create a temporary file\n";
     print $in_fh $$dataref;
     close($in_fh);
-    # heif-convert (libheif) infers the input format from the filename
+    # heif-dec (libheif) infers the input format from the filename
     # extension, and secure_tmpfile() produces extensionless names -- so give it
     # a .heic name (a rename within the same secure tmpdir keeps our ownership).
     my $heic_in = "$in_file.heic";
     rename($in_file, $heic_in) or die "cannot rename temp file: $!\n";
     $in_file = untaint_file_path($heic_in);
 
-    # heif-convert picks the OUTPUT format from the extension too, so name it
+    # heif-dec picks the OUTPUT format from the extension too, so name it
     # .png.  We made the file with secure_tmpfile() to reserve the name, then
-    # rename to add the extension (heif-convert overwrites it).
+    # rename to add the extension (heif-dec overwrites it).
     ($out_file, my $out_fh) = Mail::SpamAssassin::Util::secure_tmpfile();
     $out_file or die "failed to create a temporary file\n";
     close($out_fh);
@@ -686,7 +695,7 @@ sub _heif_to_png {
 
     $errno = 0;
     close HEIF_CONV or $errno = $!;
-    dbg("image: heif-convert [%s] finished: %s",
+    dbg("image: heif-dec [%s] finished: %s",
         $pid, exit_status_str($?, $errno));
   });
 
@@ -713,10 +722,10 @@ sub _heif_to_png {
 
   if ($err) {
     if ($timer->timed_out) {
-      dbg("image: heif-convert timed out after ${secs}s");
+      dbg("image: heif-dec timed out after ${secs}s");
     } else {
       chomp(my $e = $err);
-      info("image: heif-convert error: %s", $e);
+      info("image: heif-dec error: %s", $e);
     }
     return;
   }

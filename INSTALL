@@ -443,6 +443,52 @@ Examples of installing most recommended modules on popular distributions:
     perl-Email-Address-XS perl-Mail-DKIM perl-Mail-SPF perl-IO-Socket-IP
 
 
+Optional External Programs
+--------------------------
+
+Some optional plugins and MIME-part handlers shell out to external
+programs.  None of these are required to install or run SpamAssassin, and
+the plugins and handlers that use them are not enabled by default; each is
+needed only if you enable the corresponding feature.  Several of them have
+substantial recursive dependencies, so review what your package manager
+would pull in before installing them.
+
+  - gpg
+
+    Used by "sa-update" to verify the signatures on rule updates.  See
+    "sa-update --no-gpg" if you prefer to skip verification.
+
+  - curl, wget or fetch
+
+    Used by "sa-update" to download rule updates.  Only one is needed;
+    LWP::UserAgent is used as a fallback if none is found.
+
+  - re2c
+
+    Used by "sa-compile" to compile rules into a faster regexp matcher.
+
+  - tesseract, and heif-dec (from libheif)
+
+    Used by the optional Image handler (see v403.pre) to OCR text out of
+    image attachments.  tesseract is required by that handler; heif-dec is
+    needed only for HEIF/HEIC images, and without it those are skipped
+    while every other image type is still OCR'd.  heif-dec was named
+    heif-convert before libheif 1.18; both names are recognised, and the
+    path to either can be set with image_heif_dec_path.
+
+  - pdftotext (from poppler)
+
+    Used by the optional PDF handler (see v403.pre) to extract text from
+    PDF attachments; the PDF metadata checks are pure Perl and work
+    without it.  Also usable from the ExtractText plugin.
+
+  - unrar
+
+    Used by the optional Archive handler (see v403.pre) to open rar
+    attachments; zip archives are handled by the core IO::Uncompress::Unzip
+    module and need no external program.
+
+
 What Next?
 ----------
 

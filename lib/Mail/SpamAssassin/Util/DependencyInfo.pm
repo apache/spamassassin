@@ -421,6 +421,39 @@ our @OPTIONAL_BINARIES = (
 
   desc => 'The "re2c" program is used by sa-compile to compile rules 
   for regular expressions to speed up scanning.',
+},
+{
+  binary => 'tesseract',
+  version => '0',
+  version_check_params => '--version',
+  version_check_regex => 'tesseract ([\d\.]*)',
+  desc => 'The "tesseract" OCR engine is used by the optional Image handler
+  to read text out of image attachments.  The handler is not loaded by
+  default; see v403.pre.  Note that tesseract has substantial recursive
+  dependencies.',
+},
+{
+  binary => 'heif-dec',
+  version => '0',
+  desc => 'The "heif-dec" program (from libheif, named "heif-convert" before
+  libheif 1.18) lets the optional Image handler OCR HEIF/HEIC images, which
+  tesseract cannot read natively.  Without it those images are skipped and
+  all other image types are still OCR\'d.  Note that libheif has substantial
+  recursive dependencies.',
+},
+{
+  binary => 'pdftotext',
+  version => '0',
+  desc => 'The "pdftotext" program (from poppler) lets the optional PDF
+  handler extract text from PDF attachments; the PDF metadata checks are
+  pure Perl and work without it.  Also usable from the ExtractText plugin.',
+},
+{
+  binary => 'unrar',
+  version => '0',
+  desc => 'The "unrar" program lets the optional Archive handler open rar
+  attachments.  Zip archives need no external program.  The handler is not
+  loaded by default; see v403.pre.',
 }
 );
 
