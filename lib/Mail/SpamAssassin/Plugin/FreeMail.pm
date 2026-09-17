@@ -365,12 +365,16 @@ sub _parse_body {
         # have to do this way since get_uri_detail_list doesn't know what mails are inside <>
         my $body = $pms->get_decoded_stripped_body_text_array();
         BODY: foreach (@$body) {
+            # Bug 8415: Work on a copy: @$body is the message's cached rendered body
+            # array, so the strips below would otherwise destroy it for
+            # every rule that runs after us
+            my $line = $_;
             # strip urls with possible emails inside
-            s{<?https?://\S{0,255}(?:\@|%40)\S{0,255}}{ }gi;
+            $line =~ s{<?https?://\S{0,255}(?:\@|%40)\S{0,255}}{ }gi;
             # strip emails contained in <>, not mailto:
             # also strip ones followed by quote-like "wrote:" (but not fax: and tel: etc)
-            s{<?(?<!mailto:)$self->{email_regex}(?:>|\s{1,10}(?!(?:fa(?:x|csi)|tel|phone|e?-?mail))[a-z]{2,11}:)}{ }gi;
-            while (/$self->{email_regex}/g) {
+            $line =~ s{<?(?<!mailto:)$self->{email_regex}(?:>|\s{1,10}(?!(?:fa(?:x|csi)|tel|phone|e?-?mail))[a-z]{2,11}:)}{ }gi;
+            while ($line =~ /$self->{email_regex}/g) {
                 my $email = lc($1);
                 utf8::encode($email) if utf8::is_utf8($email); # chars to UTF-8
                 push(@body_emails, $email) unless $seen{$email};
