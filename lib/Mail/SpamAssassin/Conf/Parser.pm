@@ -643,6 +643,15 @@ sub cond_clause_can_or_has {
     my($module, $meth) = ($1, $2);
     return 1  if $module->can($meth) &&
                  ( $fn_name eq 'has' || &{$method}() );
+
+    # the module may be a deprecated name that was merged into a
+    # replacement plugin (see %PLUGIN_MERGE_ALIASES); if so, and the
+    # replacement was loaded instead, satisfy the check against it
+    my %merge_aliases = reverse %Mail::SpamAssassin::Conf::PLUGIN_MERGE_ALIASES;
+    if (my $replacement = $merge_aliases{$module}) {
+      return 1 if $replacement->can($meth) &&
+                   ( $fn_name eq 'has' || &{"${replacement}::$meth"}() );
+    }
   } else {
     my $msg = "config: bad 'if' line, cannot find '::' in $fn_name($method) ".
               "in $self->{currentfile} (line $self->{linenum}{$self->{currentfile}})";
