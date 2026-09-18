@@ -555,10 +555,14 @@ Example:
   };
   push (@cmds, {
     setting => 'url_redirector_custom_user_agent',
+    default => '',
+    type => $Mail::SpamAssassin::Conf::CONF_TYPE_STRING,
     code => $url_redirector_custom_user_agent_code,
   });
   push (@cmds, {
     setting => 'url_shortener_custom_user_agent',
+    default => '',
+    type => $Mail::SpamAssassin::Conf::CONF_TYPE_STRING,
     code => $url_redirector_custom_user_agent_code,
   });
 
@@ -696,7 +700,9 @@ shorteners alike).
 
   push (@cmds, {
     setting => 'url_shortener_cache_type',
+    default => '',
     is_priv => 1,
+    type => $Mail::SpamAssassin::Conf::CONF_TYPE_STRING,
     code => sub {
       my ($self, $key, $value, $line) = @_;
       $self->{url_redirector_cache_type} = $value;
@@ -715,7 +721,9 @@ Deprecated alias of C<url_redirector_cache_dsn>.
 
   push (@cmds, {
     setting => 'url_shortener_cache_dsn',
+    default => '',
     is_priv => 1,
+    type => $Mail::SpamAssassin::Conf::CONF_TYPE_STRING,
     code => sub {
       my ($self, $key, $value, $line) = @_;
       $self->{url_redirector_cache_dsn} = $value;
@@ -734,7 +742,9 @@ Deprecated alias of C<url_redirector_cache_username>.
 
   push (@cmds, {
     setting => 'url_shortener_cache_username',
+    default => '',
     is_priv => 1,
+    type => $Mail::SpamAssassin::Conf::CONF_TYPE_STRING,
     code => sub {
       my ($self, $key, $value, $line) = @_;
       $self->{url_redirector_cache_username} = $value;
@@ -753,7 +763,9 @@ Deprecated alias of C<url_redirector_cache_password>.
 
   push (@cmds, {
     setting => 'url_shortener_cache_password',
+    default => '',
     is_priv => 1,
+    type => $Mail::SpamAssassin::Conf::CONF_TYPE_STRING,
     code => sub {
       my ($self, $key, $value, $line) = @_;
       $self->{url_redirector_cache_password} = $value;
