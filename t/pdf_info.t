@@ -92,7 +92,7 @@ my @tests = (
     },
     {
         filename => 'data/pdf/aesv3.pdf',
-        requires => ['Crypt::RC4', 'Crypt::Mode::CBC', 'Digest::SHA'],
+        requires => ['Crypt::Mode::CBC', 'Digest::SHA'],
         expected => {
             'ClickArea' => 852, 'ClickRatio' => '0.18',
             'CreationDate' => 'D:20260624044120Z00\'00\'', 'Creator' => 'Pages',
@@ -122,7 +122,7 @@ my @tests = (
     },
     {
         filename => 'data/pdf/protected.pdf',
-        requires => ['Crypt::RC4', 'Crypt::Mode::CBC', 'Digest::SHA'],
+        requires => ['Crypt::Mode::CBC', 'Digest::SHA'],
         expected => {
             'ClickArea' => 0, 'Encrypted' => 1,
             'ImageArea' => 0, 'ImageCount' => 0, 'JavaScript' => 0,

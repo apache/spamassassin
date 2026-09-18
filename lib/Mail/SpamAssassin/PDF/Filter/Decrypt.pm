@@ -39,10 +39,13 @@ sub new {
         die "Encryption algorithm $v not implemented";
     }
 
-    # All supported encryption variants need RC4; V4/V5 (AES) also need
+    # V1/V2/V4 encryption variants need RC4; V5 is exclusively AES-256 (R5/R6)
+    # and never calls Crypt::RC4::RC4 anywhere in this module.  V4/V5 also need
     # Crypt::Mode::CBC, and R5/R6 need Digest::SHA.  Bail out clearly if a
     # required crypto module is missing rather than failing deep in decryption.
-    die "Crypt::RC4 module not available\n" unless HAS_CRYPT_RC4;
+    if ( $v == 1 || $v == 2 || $v == 4 ) {
+        die "Crypt::RC4 module not available\n" unless HAS_CRYPT_RC4;
+    }
     if ( $v == 4 || $v == 5 ) {
         die "Crypt::Mode::CBC module not available\n" unless HAS_CRYPT_MODE_CBC;
         die "Digest::SHA module not available\n" unless HAS_DIGEST_SHA;
