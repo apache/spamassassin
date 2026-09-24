@@ -291,6 +291,7 @@ sub _get_pdf_details {
   my $has_script = 0;
   my $has_auto_script = 0;
   my %uris;
+  my ($width, $height);
 
   while ($data =~ /([^\n]+)/g) {
     # dbg("pdfinfo: line=$1");
@@ -336,7 +337,6 @@ sub _get_pdf_details {
     # [12234] dbg: pdfinfo: line=/Width 630
     # [12234] dbg: pdfinfo: line=/Height 149
     if ($got_image) {
-      my ($width, $height);
       if ($line =~ /^(\d+)\s+\d+\s+\d+\s+(\d+)\s+\d+\s+\d+\s+cm$/) {
         $width = $1;
         $height = $2;
