@@ -27,7 +27,7 @@ use Test::More;
 #
 # The handler is pure Perl (no external binary), so this test runs everywhere.
 
-plan tests => 13;
+plan tests => 17;
 
 tstpre ("
   loadhandler Mail::SpamAssassin::Handler::HTML
@@ -101,4 +101,17 @@ ok_all_patterns();
   ' 1.0 JS_SENTINEL ',  'html_attach_script',
 );
 ok (sarun ("-L -t < data/nice/handler_javascript_html_attach", \&patterns_run_cb));
+ok_all_patterns();
+
+# --- HTML ATTACHMENT with inline SVG: on* handlers on non-HTML tags -----------
+# The attached page's only script is an onclick= on an SVG <rect> and an
+# onmouseover= on a made-up <foo> tag -- neither is a known HTML element, but
+# browsers run their handlers, so both must reach the JavaScript handler.
+%anti_patterns = ();
+%patterns = (
+  ' 1.0 JS_SENTINEL ',  'svg_rect_onclick',
+  ' 1.0 JS_ATOB ',      'svg_rect_atob',
+  ' 1.0 JS_ONERROR ',   'custom_tag_onmouseover',
+);
+ok (sarun ("-L -t < data/nice/handler_javascript_svg_attach", \&patterns_run_cb));
 ok_all_patterns();

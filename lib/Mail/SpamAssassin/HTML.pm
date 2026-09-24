@@ -363,6 +363,11 @@ sub html_tag {
     $self->{closed_extra}++;
   }
 
+  # extract script (on*/javascript:) and inline data: URIs from the attributes
+  # of every start tag, not just known elements: browsers fire on* handlers on
+  # any element, e.g. <rect onclick=...> inside an inline <svg>, or <foo onclick=...>
+  $self->html_attributes($tag, $attr) if $num == 1;
+
   return if $maybe_namespace;
 
   # ignore non-elements
@@ -376,9 +381,6 @@ sub html_tag {
     if ($num == 1) {
       $self->html_uri($tag, $attr) if exists $elements_uri{$tag};
       $self->html_tests($tag, $attr, $num);
-      # extract script (on*/javascript:) and inline data: URIs from any
-      # tag's attributes
-      $self->html_attributes($tag, $attr);
       # Remember the declared type of the <script> we are entering, so its body
       # (collected in html_text) is emitted as a sub-part of that type and the
       # handler framework dispatches it correctly: text/javascript -> JavaScript
@@ -1050,7 +1052,8 @@ sub html_tests {
   # todo: capture URI from meta refresh tag
 }
 
-# Inspect a start tag's attributes for content of interest.  Two kinds:
+# Inspect a start tag's attributes for content of interest.  Called for every
+# start tag, including ones not in %elements (SVG, custom tags).  Two kinds:
 #   - script vectors -> $self->{script_buf}{'text/javascript'}, alongside the
 #     bodies of real <script> elements:
 #       * on* event-handler attributes (onclick, onload, onerror, ...)

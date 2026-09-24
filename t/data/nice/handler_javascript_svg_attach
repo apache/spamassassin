@@ -1,0 +1,25 @@
+From: sender@example.com
+To: victim@example.com
+Subject: html attachment with inline svg script test
+Message-Id: <js-svg-attach-test@example.com>
+Date: Tue, 10 Jun 2025 12:00:00 +0000
+MIME-Version: 1.0
+Content-Type: multipart/mixed; boundary="BOUND"
+
+--BOUND
+Content-Type: text/plain; charset=us-ascii
+
+ORIGINAL_BODY_MARKER
+
+--BOUND
+Content-Type: application/octet-stream; name="fax.htm"
+Content-Disposition: attachment; filename="fax.htm"
+
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 400 640">
+  <text x="66" y="34">Security check</text>
+  <rect id="box" onclick="(function(){var s=&quot;JSSENTINEL&quot;;window.location.href=atob(s);})()" x="0" y="0" width="400" height="640" fill="transparent"/>
+</svg>
+<foo onmouseover="var e='onErrorSentinel';">custom tag</foo>
+
+--BOUND--
