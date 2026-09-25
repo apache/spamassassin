@@ -513,6 +513,8 @@ sub check_cleanup {
   my $scores = $self->{conf}->{scores};
   foreach my $rule (@{$self->{test_names_hit}}) {
     my $score = $scores->{$rule};
+    # a hit scored only by got_hit's defscore has no configured score
+    $score = $test_logs->{$rule}->{score}  if !defined $score;
     my $area = $test_logs->{$rule}->{area} || '';
     my $desc = $test_logs->{$rule}->{desc} || '';
 
@@ -3181,6 +3183,7 @@ sub _handle_hit {
     # Save for report processing
     $self->{test_logs}->{$rule}->{area} = $area;
     $self->{test_logs}->{$rule}->{desc} = $desc;
+    $self->{test_logs}->{$rule}->{score} = $score;
 }
 
 sub _wrap_desc {
