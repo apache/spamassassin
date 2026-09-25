@@ -1,0 +1,22 @@
+From: sender@example.com
+To: victim@example.com
+Subject: svg in windows-1251
+Message-Id: <handler_svg_cp1251@example.com>
+Date: Tue, 10 Jun 2025 12:00:00 +0000
+MIME-Version: 1.0
+Content-Type: multipart/mixed; boundary="BOUND"
+
+--BOUND
+Content-Type: text/plain; charset=us-ascii
+
+ORIGINAL_BODY_MARKER
+
+--BOUND
+Content-Type: image/svg+xml; charset=windows-1251; name="img.svg"
+Content-Disposition: attachment; filename="img.svg"
+Content-Transfer-Encoding: base64
+
+PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjx0ZXh0IHg9IjAiIHk9IjEw
+Ij5TVkdURVhUIM/w6OLl8jwvdGV4dD48L3N2Zz4K
+
+--BOUND--

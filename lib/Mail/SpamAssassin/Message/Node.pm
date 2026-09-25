@@ -487,8 +487,10 @@ sub decode_and_normalize {
     # Avoid unnecessary step of encoding-then-decoding by telling
     # subroutine _normalize() to return Unicode text.  See Bug 7133
     #
+    # Pass an undeclared charset through as undef, not us-ascii, so
+    # _normalize() can detect it (e.g. undeclared UTF-16).
     $character_semantics = 1;  # $text will be in characters
-    $text = _normalize($text, $charset, 1); # bytes to chars
+    $text = _normalize($text, $self->{charset}, 1); # bytes to chars
   } elsif ($charset =~ /^(?:US-ASCII|UTF-8)\z/i) {
     if ($text !~ tr/\x00-\x7F//c) {
       # all-ASCII, keep as octets (utf8 flag off)
@@ -519,67 +521,39 @@ sub decode_and_normalize {
   return ($text, $character_semantics);
 }
 
-# Detect endianness of UTF-16 encoded data
+# Detect UTF-16 and its byte order.  Returns an Encode decoder -- UTF-16 when
+# there is a BOM (it consumes the BOM and takes the byte order from it), or
+# UTF-16LE / UTF-16BE when the NUL bytes show the byte order -- or undef when
+# the data does not look like UTF-16.  Only the first 1024 bytes are examined.
 sub detect_utf16 {
-	my $utf16le_clues = 0;
-	my $utf16be_clues = 0;
-	my $sum_h_e = 0;
-	my $sum_h_o = 0;
-	my $sum_l_e = 0;
-	my $sum_l_o = 0;
-	my $decoder = undef;
-
-	# A BOM already declares the encoding and endianness, so skip the heuristic
-	# scan and return the plain UTF-16 decoder, which consumes the BOM and picks
-	# the endianness from it.  Only the first two bytes matter, so test $_[0]
-	# directly rather than copying the (possibly multi-MB) body.
 	if( $_[0] =~ /^(?:\xff\xfe|\xfe\xff)/ ) {
 		dbg( "message: detect_utf16: found BOM" );
 		return Encode::find_encoding("UTF-16");
 	}
 
-	# The endianness heuristic below is statistical, so a bounded prefix gives the
-	# same verdict as the whole string while avoiding the unpack() of a large body
-	# into per-nibble arrays.  1024 is even, so the slice ends on a UTF-16 pair
-	# boundary.
+	# In UTF-16 text that is mostly ASCII, the high byte of each code unit is
+	# NUL: the odd bytes in UTF-16LE, the even bytes in UTF-16BE.  Require NULs
+	# in at least a quarter of the code units at one offset and few at the
+	# other, so a stray NUL in 8-bit text (or binary noise) is not mistaken for
+	# UTF-16.  UTF-16 with little ASCII (e.g. CJK) and no BOM is not detected.
 	my $data = substr($_[0], 0, 1024);
-
-	my @msg_h = unpack 'H' x length( $data ), $data;
-	my @msg_l = unpack 'h' x length( $data ), $data;
-
-	for( my $i = 0; $i < length( $data ); $i+=2 ) {
-		my $check_char = sprintf( "%01X%01X %01X%01X", hex $msg_h[$i], hex $msg_l[$i], hex $msg_h[$i+1], hex $msg_l[$i+1] );
-		$sum_h_e += hex $msg_h[$i];
-		$sum_h_o += hex $msg_h[$i+1];
-		$sum_l_e += hex $msg_l[$i];
-		$sum_l_o += hex $msg_l[$i+1];
-		if (index($check_char, '20 00') >= 0) {
-			# UTF-16LE space char detected
-			$utf16le_clues++;
-		}
-		if (index($check_char, '00 20') >= 0) {
-			# UTF-16BE space char detected
-			$utf16be_clues++;
-		}
+	my $units = int(length($data) / 2);
+	my ($nul_even, $nul_odd) = (0, 0);
+	for my $i (0 .. $units - 1) {
+		$nul_even++ if substr($data, 2*$i, 1) eq "\x00";
+		$nul_odd++  if substr($data, 2*$i+1, 1) eq "\x00";
 	}
 
-	# If we have 4x as many non-null characters in the odd bytes, we're probably UTF-16LE
-	$utf16le_clues++ if( ($sum_h_e + $sum_l_e) > ($sum_h_o + $sum_l_o)*4 );
-
-	# If we have 4x as many non-null characters in the even bytes, we're probably UTF-16BE
-	$utf16be_clues++ if( ($sum_h_o + $sum_l_o)*4 > ($sum_h_e + $sum_l_e) );
-
-	if( $utf16le_clues > $utf16be_clues ) {
+	if( $units && $nul_odd*4 >= $units && $nul_even*4 <= $nul_odd ) {
 		dbg( "message: detect_utf16: UTF-16LE" );
-		$decoder = Encode::find_encoding("UTF-16LE");
-	} elsif( $utf16be_clues > $utf16le_clues ) {
-		dbg( "message: detect_utf16: UTF-16BE" );
-		$decoder = Encode::find_encoding("UTF-16BE");
-	} else {
-		dbg( "message: detect_utf16: Could not detect UTF-16 endianness" );
+		return Encode::find_encoding("UTF-16LE");
 	}
-
-	return $decoder;
+	if( $units && $nul_even*4 >= $units && $nul_odd*4 <= $nul_even ) {
+		dbg( "message: detect_utf16: UTF-16BE" );
+		return Encode::find_encoding("UTF-16BE");
+	}
+	dbg( "message: detect_utf16: not UTF-16" );
+	return undef;
 }
 
 # Look at a text scalar and determine whether it should be rendered
@@ -607,6 +581,11 @@ sub _normalize {
   my $charset_declared = $_[1];
   my $return_decoded = $_[2];  # true: Unicode characters, false: UTF-8 octets
   my $insist_on_declared_charset = $_[3];  # no FB_CROAK in Encode::decode
+
+  # The caller may have no declared charset (e.g. a handler-produced pseudo-part).
+  # Treat that as "unknown" -- an empty string that matches none of the charset-name
+  # patterns below -- rather than letting undef leak into every `=~` (which warns).
+  $charset_declared = '' unless defined $charset_declared;
 
   warn "message: _normalize() was given characters, expected bytes: $_[0]\n"
     if utf8::is_utf8($_[0]);
@@ -663,23 +642,28 @@ sub _normalize {
     }
   }
 
-  if ($charset_declared =~ /^(?:US-)?ASCII\z/i
-           && !$insist_on_declared_charset) {
-    # declared as US-ASCII but contains 8-bit characters, makes no sense
-    # to attempt decoding first as strict US-ASCII as we know it would fail
-
-  } elsif ($charset_declared =~ /^UTF[ -]?16/i) {
-    # Handle cases where spammers use UTF-16 encoding without including a BOM
-    # or declaring endianness as reported at:
-    # https://bz.apache.org/SpamAssassin/show_bug.cgi?id=7252
-
-    # detect_utf16() sniffs the endianness of BOM-less UTF-16, and returns the
-    # BOM-aware UTF-16 decoder when a BOM is present.  (It returns undef only when
-    # the data does not look like UTF-16 at all, in which case we fall through to
-    # the guesswork below.)
+  if ($charset_declared eq '' || $charset_declared =~ /^UTF[ -]?16/i) {
+    # Undeclared, or declared UTF-16: raw UTF-16 is full of NUL bytes that no
+    # text rule can match.  A BOM or the NUL pattern found by detect_utf16()
+    # wins over the label, since spammers use UTF-16 without a BOM or declared
+    # byte order (https://bz.apache.org/SpamAssassin/show_bug.cgi?id=7252).
+    # Failing that, a UTF-16 label is trusted: its byte order if it names one,
+    # else big-endian (RFC 2781).  Undeclared text that is not UTF-16 is left
+    # to the detection fallbacks below.
+    #
+    # With a BOM or the NUL pattern the data is known to be UTF-16, so decode
+    # leniently: a lone surrogate (legal in a JavaScript string, e.g. a pair
+    # split across two string literals) becomes U+FFFD instead of failing the
+    # whole part.  A label alone is weaker evidence, so that decode stays strict.
     my $decoder = detect_utf16( $_[0] );
+    my $check = Encode::FB_DEFAULT;
+    if (!defined $decoder && $charset_declared ne '') {
+      $decoder = Encode::find_encoding(
+                   $charset_declared =~ /LE\z/i ? 'UTF-16LE' : 'UTF-16BE');
+      $check = Encode::FB_CROAK;
+    }
     if (defined $decoder) {
-      if (eval { $rv = $decoder->decode($_[0], Encode::FB_CROAK | Encode::LEAVE_SRC); defined $rv }) {
+      if (eval { $rv = $decoder->decode($_[0], $check | Encode::LEAVE_SRC); defined $rv }) {
         dbg("message: decoded as charset %s, declared %s",
           $decoder->name, $charset_declared);
         utf8::encode($rv) if !$return_decoded;
@@ -695,6 +679,11 @@ sub _normalize {
           $decoder->name, $charset_declared, $err);
       }
     };
+  } elsif ($charset_declared =~ /^(?:US-)?ASCII\z/i
+           && !$insist_on_declared_charset) {
+    # declared as US-ASCII but contains 8-bit characters, makes no sense
+    # to attempt decoding first as strict US-ASCII as we know it would fail
+
   } else {
     # try decoding as a declared character set
 

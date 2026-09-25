@@ -1,0 +1,26 @@
+From: sender@example.com
+To: victim@example.com
+Subject: archive utf16 js test
+Message-Id: <archive-utf16-le_bom\@example.com>
+Date: Tue, 10 Jun 2025 12:00:00 +0000
+MIME-Version: 1.0
+Content-Type: multipart/mixed; boundary="BOUND"
+
+--BOUND
+Content-Type: text/plain; charset=us-ascii
+
+ORIGINAL_BODY_MARKER
+
+--BOUND
+Content-Type: application/zip; name="payload.zip"
+Content-Transfer-Encoding: base64
+Content-Disposition: attachment; filename="payload.zip"
+
+UEsDBBQACAAIANsC91wAAAAAAAAAAAAAAAAIAAAAaW5uZXIuanMNirEOQEAQBaf2FaKi1GhEeZIT
+0aAShciVuDi5z8fLZjfzdt73RjZuUiwHXnQRcWLHyUOQabSLcmBX14tyMmYmWkoqOkaNYdDH6hp6
++YKVmoQfUEsHCKrp1GxSAAAAYgAAAFBLAQIUAxQACAAIANsC91yq6dRsUgAAAGIAAAAIAAAAAAAA
+AAAAAACkgQAAAABpbm5lci5qc1BLBQYAAAAAAQABADYAAACIAAAAAABQSwMEFAAIAAgA2wL3XAAA
+AAAAAAAAAAAAAAoAAABpbm5lci5odG1ss0my8/Tzcw3yCPH1sdFPsuMCAFBLBwj4tLsOEwAAABEA
+AABQSwECFAMUAAgACADbAvdc+LS7DhMAAAARAAAACgAAAAAAAAAAAAAApIEAAAAAaW5uZXIuaHRt
+bFBLBQYAAAAAAQABADgAAABLAAAAAAA=
+--BOUND--

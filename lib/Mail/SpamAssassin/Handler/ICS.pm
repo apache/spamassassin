@@ -178,8 +178,9 @@ sub set_config {
 sub handle_ics {
   my ($self, $node, $pms) = @_;
 
-  my $data = $node->decode();
+  my ($data, $chars) = $node->decode_and_normalize();
   return [] unless defined $data && length $data;
+  utf8::encode($data) if $chars;
 
   my $ics = $pms->{Handler}{ICS} ||= {
     event_count => 0,

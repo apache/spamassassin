@@ -1,0 +1,23 @@
+From: sender@example.com
+To: victim@example.com
+Subject: ics in windows-1251
+Message-Id: <handler_ics_cp1251@example.com>
+Date: Tue, 10 Jun 2025 12:00:00 +0000
+MIME-Version: 1.0
+Content-Type: multipart/mixed; boundary="BOUND"
+
+--BOUND
+Content-Type: text/plain; charset=us-ascii
+
+ORIGINAL_BODY_MARKER
+
+--BOUND
+Content-Type: text/calendar; charset=windows-1251; method=REQUEST; name="invite.ics"
+Content-Disposition: attachment; filename="invite.ics"
+Content-Transfer-Encoding: base64
+
+QkVHSU46VkNBTEVOREFSDQpWRVJTSU9OOjIuMA0KTUVUSE9EOlJFUVVFU1QNCkJFR0lOOlZFVkVO
+VA0KVUlEOmNwMTI1MS10ZXN0QGV4YW1wbGUuY29tDQpTVU1NQVJZOklDU1RFWFQgz/Do4uXyDQpE
+VFNUQVJUOjIwMjUwNjEwVDEyMDAwMFoNCkVORDpWRVZFTlQNCkVORDpWQ0FMRU5EQVINCg==
+
+--BOUND--

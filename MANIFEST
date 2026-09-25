@@ -431,9 +431,12 @@ t/data/nice/dmarc/rejectok.eml
 t/data/nice/dmarc/strictrejectok.eml
 t/data/nice/handler_archive_octet
 t/data/nice/handler_archive_rar
+t/data/nice/handler_archive_utf16_bom
+t/data/nice/handler_archive_utf16_nobom
 t/data/nice/handler_archive_zip
 t/data/nice/handler_html
 t/data/nice/handler_ics
+t/data/nice/handler_ics_cp1251
 t/data/nice/handler_ics_html
 t/data/nice/handler_image
 t/data/nice/handler_image_heic
@@ -441,12 +444,17 @@ t/data/nice/handler_image_octet
 t/data/nice/handler_javascript
 t/data/nice/handler_javascript_attach
 t/data/nice/handler_javascript_html_attach
+t/data/nice/handler_javascript_html_utf8
 t/data/nice/handler_javascript_svg_attach
+t/data/nice/handler_javascript_utf16_attach
 t/data/nice/handler_pdf
 t/data/nice/handler_pdf_encrypted
 t/data/nice/handler_pdf_ocrimage
 t/data/nice/handler_pdf_octet
 t/data/nice/handler_svg
+t/data/nice/handler_svg_cp1251
+t/data/nice/handler_svg_entity
+t/data/nice/handler_svg_utf8
 t/data/nice/handler_textplain
 t/data/nice/mailman_message.txt
 t/data/nice/mime1
@@ -644,6 +652,7 @@ t/gtube.t
 t/handler.t
 t/handler_aliases.t
 t/handler_archive.t
+t/handler_decode_normalize.t
 t/handler_html.t
 t/handler_ics.t
 t/handler_image.t
@@ -651,6 +660,7 @@ t/handler_image_heic.t
 t/handler_image_size.t
 t/handler_image_text.t
 t/handler_javascript.t
+t/handler_javascript_utf16.t
 t/handler_pdf.t
 t/handler_svg.t
 t/header.t

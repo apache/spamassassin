@@ -141,8 +141,9 @@ sub set_config {
 sub handle_javascript {
   my ($self, $node, $pms) = @_;
 
-  my $js = $node->decode();
+  my ($js, $chars) = $node->decode_and_normalize();
   return [] unless defined $js && length $js;
+  utf8::encode($js) if $chars;
 
   push @{ $pms->{Handler}{JavaScript}{script_text} }, $js;
   log_dbg("collected ".length($js)." bytes of script from ".($node->{name} || $node->{type} || '?'));

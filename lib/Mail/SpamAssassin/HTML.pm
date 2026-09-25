@@ -172,6 +172,7 @@ sub html_end {
   if (ref $self->{script_buf} eq 'HASH') {
     for my $type (sort keys %{ $self->{script_buf} }) {
       my $data = $self->{script_buf}{$type};
+      utf8::encode($data) if utf8::is_utf8($data);  # child-part data is bytes
       push @{ $self->{data_parts} }, { type => $type, data => $data }
         if defined $data && length $data;
     }
@@ -474,7 +475,9 @@ sub add_data_uri {
     return if !defined $decoded || $decoded eq '';
     $data = $decoded;
   } else {
-    # URL-encoded (e.g. SVG); percent-decode
+    # URL-encoded (e.g. SVG); percent-decode.  Encode first so escaped bytes
+    # and literal (character-mode) text both end up as UTF-8 bytes.
+    utf8::encode($data) if utf8::is_utf8($data);
     $data =~ s/%([0-9a-fA-F]{2})/chr(hex($1))/ge;
     $data = untaint_var($data);
     return if $data eq '';

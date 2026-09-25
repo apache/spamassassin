@@ -157,10 +157,10 @@ sub set_config {
 sub handle_svg {
   my ($self, $node, $pms) = @_;
 
-  my $data = $node->decode();
+  my ($data, $chars) = $node->decode_and_normalize();
   return [] unless defined $data && length $data;
 
-  my ($text, $script, $uris, $graphics_count) = $self->_parse_svg($data);
+  my ($text, $script, $uris, $graphics_count) = $self->_parse_svg($data, $chars);
 
   push @{ $pms->{Handler}{SVG}{text} }, @$text if @$text;
 
@@ -202,8 +202,10 @@ sub handle_svg {
 #   - <script> text + javascript:/on* attrs    -> @script
 #   - http(s) URIs from link/ref attributes    -> @uris ([uri, source-tag] pairs)
 #   - number of graphics elements seen         -> $graphics_count
+# $chars says whether $data is perl characters or bytes; everything returned is
+# bytes.  Byte input is parsed in utf8_mode, which assumes it is UTF-8.
 sub _parse_svg {
-  my ($self, $data) = @_;
+  my ($self, $data, $chars) = @_;
 
   my @text;
   my @script;
@@ -256,6 +258,9 @@ sub _parse_svg {
       $in_script-- if lc($tag) eq 'script' && $in_script > 0;
     }, 'tagname' ],
   );
+  # With byte input, decode entities to UTF-8 bytes rather than characters, as
+  # Mail::SpamAssassin::HTML does.
+  $p->utf8_mode(1) if !$chars && $p->can('utf8_mode');
 
   eval {
     local $SIG{__WARN__} = sub {
@@ -268,6 +273,11 @@ sub _parse_svg {
     $p->parse("</script>") while $in_script > 0;
     $p->eof();
   };
+
+  if ($chars) {
+    utf8::encode($_) for @text, @script;
+    utf8::encode($_->[0]) for @uris;
+  }
 
   return (\@text, \@script, \@uris, $graphics_count);
 }
