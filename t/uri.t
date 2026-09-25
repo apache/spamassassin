@@ -8,7 +8,7 @@ use SATest; sa_t_init("uri");
 use constant HAS_LIBIDN => eval { require Net::LibIDN; };
 use constant HAS_LIBIDN2 => eval { require Net::LibIDN2; };
 
-my $tests = 107;
+my $tests = 111;
 $tests += 7 if (HAS_LIBIDN);
 $tests += 7 if (HAS_LIBIDN2);
 
@@ -299,6 +299,33 @@ ok(try_canon([
    ], [
    'http://0xcc.0x50.0x89.0xf/',
    'http://204.80.137.15/',
+       ]));
+
+# zero octets must survive leading-zero stripping
+ok(try_canon([
+   'http://127.0.0.1:8198/second',
+   ], [
+   'http://127.0.0.1:8198/second',
+       ]));
+
+ok(try_canon([
+   'http://10.0.0.0/x',
+   ], [
+   'http://10.0.0.0/x',
+       ]));
+
+ok(try_canon([
+   'http://0xcb.0x0.0x71.0xa/x',
+   ], [
+   'http://0xcb.0x0.0x71.0xa/x',
+   'http://203.0.113.10/x',
+       ]));
+
+ok(try_canon([
+   'http://0313.00.0161.012/x',
+   ], [
+   'http://0313.00.0161.012/x',
+   'http://203.0.113.10/x',
        ]));
 
 # Firefox like foo -> www.foo.com rewrite
