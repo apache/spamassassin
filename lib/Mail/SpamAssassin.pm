@@ -580,12 +580,12 @@ Example:
         master_deadline => time() + 60,
         return_path     => 'foo@example.com',
         originating     => 0,
-        rule_hits       => {
+        rule_hits       => [ {
             rule   => '__TRUNCATED',
             score  => -0.1,
             area   => 'RAW: ',
             tflags => 'nice',
-            descr  => "Message size truncated to 10485760 B" }
+            descr  => "Message size truncated to 10485760 B" } ]
     });
 
 If other attributes are provided, they will be silently ignored by SpamAssassin but
