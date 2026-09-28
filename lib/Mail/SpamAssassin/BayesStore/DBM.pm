@@ -1298,13 +1298,13 @@ sub _sync_journal_trapped {
 
       if (/^t (\d+) (.+)$/) { # Token timestamp update, cache resultant entries
 	my $tok = pack("H*",$2);
-	$tokens{$tok} = $1+0 if (!exists $tokens{$tok} || $1+0 > $tokens{$tok});
+	$tokens{$tok} = int($1) if (!exists $tokens{$tok} || int($1) > $tokens{$tok});
       } elsif (/^c (-?\d+) (-?\d+) (\d+) (.+)$/) { # Add/full token update
 	my $tok = pack("H*",$4);
-	$self->tok_sync_counters ($1+0, $2+0, $3+0, $tok);
+	$self->tok_sync_counters ( int($1), int($2), int($3), $tok);
 	$count++;
       } elsif (/^n (-?\d+) (-?\d+)$/) { # update ham/spam count
-	$self->tok_sync_nspam_nham ($1+0, $2+0);
+	$self->tok_sync_nspam_nham (int($1), int($2));
 	$count++;
       } elsif (/^m ([hsf]) (.+)$/) { # update msgid seen database
 	if ($1 eq "f") {

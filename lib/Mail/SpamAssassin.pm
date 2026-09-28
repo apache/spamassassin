@@ -1875,7 +1875,7 @@ sub init {
         # just use the last entry in the array as the default path.
         $fname ||= $self->sed_path($default_userprefs_path[-1]);
 
-        my $stat_errn = stat($fname) ? 0 : 0+$!;
+        my $stat_errn = stat($fname) ? 0 : int($!);
         if ($stat_errn == 0 && -f _) {
           # exists and is a regular file, nothing to do
         } elsif ($stat_errn == 0) {
@@ -1998,7 +1998,7 @@ sub _read_cf_pre {
   {
     dbg("config: using \"$path\" for $desc");
 
-    my $stat_errn = stat($path) ? 0 : 0+$!;
+    my $stat_errn = stat($path) ? 0 : int($!);
     if ($stat_errn == ENOENT) {
       # no file or directory
     } elsif ($stat_errn != 0) {
@@ -2078,7 +2078,7 @@ sub get_and_create_userstate_dir {
   # if this is not a dir, not readable, or we are unable to create the dir,
   # this is not (yet) a serious error; in fact, it's not even worth
   # a warning at all times, so use dbg().  see bug 6268
-  my $stat_errn = stat($fname) ? 0 : 0+$!;
+  my $stat_errn = stat($fname) ? 0 : int($!);
   if ($stat_errn == 0 && !-d _) {
     dbg("config: $fname exists but is not a directory");
   } elsif ($stat_errn != 0 && $stat_errn != ENOENT) {
@@ -2200,7 +2200,7 @@ sub create_default_prefs {
 #    warn "config: hooray! user_dirs don't match! '$userdir' vs '$self->{user_dir}'\n";
 #  }
 
-  my $stat_errn = stat($fname) ? 0 : 0+$!;
+  my $stat_errn = stat($fname) ? 0 : int($!);
   if ($stat_errn == 0) {
     # fine, it already exists
   } elsif ($stat_errn != ENOENT) {
@@ -2321,7 +2321,7 @@ sub first_existing_path {
   foreach my $p (@_) {
     $path = $self->sed_path ($p);
     if (defined $path) {
-      my($errn) = stat($path) ? 0 : 0+$!;
+      my($errn) = stat($path) ? 0 : int($!);
       if    ($errn == ENOENT) { }  # does not exist
       elsif ($errn) {  warn "config: path \"$path\" is inaccessible: $!\n" }
       else { return $path }

@@ -330,7 +330,7 @@ sub _generate_key {
 
     # step 4 Treat the value of the P entry as an unsigned 4-byte integer and pass these bytes to
     # the MD5 hash function, low-order byte first.
-    $md5->add(pack('V',$self->{'P'}+0));
+    $md5->add(pack('V',int($self->{'P'})));
 
     # step 5 Pass the first element of the file’s file identifier array
     $md5->add($self->{ID}) if defined($self->{ID});

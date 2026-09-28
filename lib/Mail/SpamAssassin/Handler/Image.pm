@@ -355,7 +355,8 @@ sub handle_image {
   $node->set_rendered($text, $node->effective_type);
   # Accumulate per-message OCR image and word counts (used by
   # check_image_text_ratio to spot a mostly-text "image").
-  my $word_count = () = $text =~ /\S+/g;
+  my $word_count = 0;
+  $word_count++ while $text =~ /\S+/g;
   $pms->{plugins}{Image}{ocr_image_count}++;
   $pms->{plugins}{Image}{ocr_word_count} += $word_count;
   # Stash the text for imagetext rules (see _run_imagetext_rules); one entry per
@@ -760,7 +761,9 @@ sub check_image_text_ratio {
   # handle_image injects the OCR text via set_rendered, it already includes the
   # image words -- so this is the total-body-word denominator.
   my $body_words = 0;
-  $body_words += () = $_ =~ /\S+/g for @$body;
+  foreach my $line (@$body) {
+    $body_words++ while $line =~ /\S+/g;
+  }
   return 0 unless $body_words;
 
   my $ratio = $image_words / $body_words;

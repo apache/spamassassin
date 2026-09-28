@@ -130,13 +130,13 @@ sub _response {
       }
 
     } elsif ($resp_type eq ':') {  # integer reply
-      push(@list, 0+$result);
+      push(@list, int($result));
 
     } elsif ($resp_type eq '+') {  # status reply
       push(@list, $result);
 
     } elsif ($resp_type eq '*') {  # multi-bulk reply
-      push(@list, $result < 0 ? undef : $self->_response(0+$result) );
+      push(@list, $result < 0 ? undef : $self->_response(int($result)) );
 
     } elsif ($resp_type eq '-') {  # error reply
       die "$result\n";

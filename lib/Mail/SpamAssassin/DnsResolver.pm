@@ -941,12 +941,12 @@ sub flush_responses {
   $packetsize = 512  if $packetsize < 512;  # just in case
   $self->{sock}->blocking(0) unless(RECV_FLAGS);
   for (;;) {
-    eval {  # use eval to catch alarm signal
+    # use eval to catch alarm signal
+    my $ok = eval {
       ($nfound, undef) = select($rout=$rin, undef, undef, 0);
       1;
-    } or do {
-	  last;
     };
+    last if !$ok;
     last if !$nfound;
     last if !$self->{sock}->recv(my $data, $packetsize+256, RECV_FLAGS);
   }

@@ -247,7 +247,7 @@ Try /var/dcc if that command fails.
 	return $Mail::SpamAssassin::Conf::MISSING_REQUIRED_VALUE;
       }
       $value = untaint_file_path($value);
-      my $stat_errn = stat($value) ? 0 : 0+$!;
+      my $stat_errn = stat($value) ? 0 : int($!);
       if ($stat_errn != 0 || !-d _) {
 	my $msg = $stat_errn == ENOENT ? "does not exist"
 		  : !-d _ ? "is not a directory" : "not accessible: $!";
@@ -426,7 +426,7 @@ sub ck_dir {
 
   $dir = untaint_file_path($dir);
   if (!stat($dir)) {
-    my $dir_errno = 0+$!;
+    my $dir_errno = int($!);
     if ($dir_errno == ENOENT) {
       dbg("dcc: $tgt $dir from $src does not exist");
     } else {
@@ -910,16 +910,16 @@ sub check_dcc_result {
 
   my %count = (body => 0, fuz1 => 0, fuz2 => 0, rep => 0);
   if ($x_dcc =~ /\bBody=(\d+)/) {
-    $count{body} = $1+0;
+    $count{body} = int($1);
   }
   if ($x_dcc =~ /\bFuz1=(\d+)/) {
-    $count{fuz1} = $1+0;
+    $count{fuz1} = int($1);
   }
   if ($x_dcc =~ /\bFuz2=(\d+)/) {
-    $count{fuz2} = $1+0;
+    $count{fuz2} = int($1);
   }
   if ($pms->{conf}->{use_dcc_rep} && $x_dcc =~ /\brep=(\d+)/) {
-    $count{rep}  = $1+0;
+    $count{rep}  = int($1);
     $dcc_rep = $count{rep};
     $pms->set_tag('DCCREP', $dcc_rep);
   }

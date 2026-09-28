@@ -665,8 +665,8 @@ sub _check_result {
     if ($res =~ /^\S+\t.*?\t(\d+)\t(\d+)\s*$/) {
       # until pyzor servers can sync their DBs,
       # sum counts obtained from all servers
-      $count += untaint_var($1)+0; # crazy but needs untainting
-      $count_wl += untaint_var($2)+0;
+      $count += untaint_var(int($1)); # crazy but needs untainting
+      $count_wl += untaint_var(int($2));
     } else {
       # warn on failures to parse
       info("pyzor: failure to parse response \"$res\"");

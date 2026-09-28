@@ -574,7 +574,7 @@ sub _scan_targets {
 
       if ($format eq 'detect') {
 	# detect the format
-        my $stat_errn = stat($location) ? 0 : 0+$!;
+        my $stat_errn = stat($location) ? 0 : int($!);
         if ($stat_errn != 0) {
           warn "archive-iterator: no access to $location: $!\n";
           next;
@@ -868,7 +868,7 @@ sub _scan_directory {
   $self->_create_cache('dir', $folder);
 
   foreach my $file (@files) {
-    my $stat_errn = stat($file) ? 0 : 0+$!;
+    my $stat_errn = stat($file) ? 0 : int($!);
     if ($stat_errn == ENOENT) {
       # no longer there?
       dbg("archive-iterator: no access to $file: $!");
@@ -916,7 +916,7 @@ sub _scan_file {
     unless (defined $AICache and $date = $AICache->check($mail)) {
       # silently skip directories/non-files; some folders may
       # contain extraneous dirs etc.
-      my $stat_errn = stat($mail) ? 0 : 0+$!;
+      my $stat_errn = stat($mail) ? 0 : int($!);
       if ($stat_errn != 0) {
         warn "archive-iterator: no access to $mail: $!";
         return;
@@ -962,7 +962,7 @@ sub _scan_mailbox {
   my ($self, $class, $folder, $bkfunc) = @_;
   my @files;
 
-  my $stat_errn = stat($folder) ? 0 : 0+$!;
+  my $stat_errn = stat($folder) ? 0 : int($!);
   if ($stat_errn == ENOENT) {
     # no longer there?
   }
@@ -982,7 +982,7 @@ sub _scan_mailbox {
     while ($_ = readdir(DIR)) {
       next if $_ eq '.' || $_ eq '..' || !/^[^\.]\S*$/;
       # hmmm, ignores folders with spaces in the name???
-      $stat_errn = stat("$folder/$_") ? 0 : 0+$!;
+      $stat_errn = stat("$folder/$_") ? 0 : int($!);
       if ($stat_errn == ENOENT) {
         # no longer there?
       }
@@ -1089,7 +1089,7 @@ sub _scan_mbx {
   my ($self, $class, $folder, $bkfunc) = @_;
   my (@files, $fp);
 
-  my $stat_errn = stat($folder) ? 0 : 0+$!;
+  my $stat_errn = stat($folder) ? 0 : int($!);
   if ($stat_errn == ENOENT) {
     # no longer there?
   }
@@ -1109,7 +1109,7 @@ sub _scan_mbx {
     while ($_ = readdir(DIR)) {
       next if $_ eq '.' || $_ eq '..' || !/^[^\.]\S*$/;
       # hmmm, ignores folders with spaces in the name???
-      $stat_errn = stat("$folder/$_") ? 0 : 0+$!;
+      $stat_errn = stat("$folder/$_") ? 0 : int($!);
       if ($stat_errn == ENOENT) {
         # no longer there?
       }

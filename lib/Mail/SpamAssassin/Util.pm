@@ -647,7 +647,7 @@ sub exit_status_str {
              $sig, $stat);
   }
   if (defined $errno) {  # deal with dual-valued and plain variables
-    $str .= ', '.$errno  if (0+$errno) != 0 || ($errno ne '' && $errno ne '0');
+    $str .= ', '.$errno  if (int($errno)) != 0 || ($errno ne '' && $errno ne '0');
   }
   return $str;
 }
@@ -2416,7 +2416,7 @@ sub avoid_db_file_locking_bug {
   # delete "__db.[DBNAME]" and "__db.[DBNAME].*"
   foreach my $tfile ($db_tmpfile, glob("$db_tmpfile.*")) {
     my $file = untaint_file_path($tfile);
-    my $stat_errn = stat($file) ? 0 : 0+$!;
+    my $stat_errn = stat($file) ? 0 : int($!);
     next if $stat_errn == ENOENT;
 
     dbg("util: Berkeley DB bug work-around: cleaning tmp file $file");

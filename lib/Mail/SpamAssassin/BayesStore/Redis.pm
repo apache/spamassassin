@@ -1068,7 +1068,7 @@ sub tok_get_all {
     }
     for my $j (0 .. $#$results) {
       my($s,$h) = @{$results->[$j]};
-      push(@values, [$_[$j], ($s||0)+0, ($h||0)+0, 0])  if $s || $h;
+      push(@values, [$_[$j], int($s||0), int($h||0), 0])  if $s || $h;
     }
   } else {  # have Lua
     # no need for cryptographical strength, just checking for protocol errors
@@ -1102,7 +1102,7 @@ sub tok_get_all {
     } else {
       for my $j (0 .. $#items) {
         my($s,$h) = split(m{/}, $items[$j], 2);
-        push(@values, [$_[$j], ($s||0)+0, ($h||0)+0, 0])  if $s || $h;
+        push(@values, [$_[$j], int($s||0), int($h||0), 0])  if $s || $h;
       }
     }
   }
@@ -1439,7 +1439,7 @@ sub dump_db_toks {
         # Strip key prefix for the token
         my $token = $keys->[$j];
         $token =~ s/$self->{key_prefix_tok_regex}//;
-        push(@tokensdata, [ $token, ($s||0)+0, ($h||0)+0 ])  if $s || $h;
+        push(@tokensdata, [ $token, int($s||0), int($h||0) ])  if $s || $h;
         $j++;
       }
 
@@ -1471,7 +1471,7 @@ sub dump_db_toks {
         my($s,$h) = split(m{/}, $items[$j], 2);
         my $token = $tokens[$j];
         $token =~ s/$self->{key_prefix_tok_regex}//;
-        push(@tokensdata, [ $token, ($s||0)+0, ($h||0)+0 ])  if $s || $h;
+        push(@tokensdata, [ $token, int($s||0), int($h||0) ])  if $s || $h;
       }
     }
 

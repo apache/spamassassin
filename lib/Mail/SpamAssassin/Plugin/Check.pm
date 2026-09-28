@@ -380,16 +380,17 @@ sub run_rbl_eval_tests {
     }
 
     my $result;
-    eval {
+    my $ok = eval {
       $result = $pms->$function($rulename, @{$test->[1]});  1;
-    } or do {
+    };
+    if (!$ok) {
       my $eval_stat = $@ ne '' ? $@ : "errno=$!";  chomp $eval_stat;
       die "rules: $eval_stat\n"  if index($eval_stat, '__alarm__ignore__') >= 0;
       warn "rules: failed to run $rulename RBL test, skipping:\n".
            "\t($eval_stat)\n";
       $pms->{rule_errors}++;
       next;
-    };
+    }
   }
 }
 

@@ -257,7 +257,7 @@ if ( defined $opt{'score-limit'} && $opt{'score-limit'} !~ /^\d+(?:\.\d+)?$/ ) {
 # reverse of it for the DNS query.  Handle x.yyyzzz as well as x.yz.
 my $SAVersion = $Mail::SpamAssassin::VERSION;
 if ($SAVersion =~ /^(\d+)\.(\d{3})(\d{3})$/) {
-  $SAVersion = join(".", $1+0, $2+0, $3+0);
+  $SAVersion = join(".", int($1), int($2), int($3));
 }
 elsif ($SAVersion =~ /^(\d)\.(\d)(\d)$/) {
   $SAVersion = "$1.$2.$3";
@@ -1237,7 +1237,7 @@ if ($UPDTmp) {
 # clear out the temp files if they still exist
 foreach ( $content_file, $UPDTmp ) {
   next unless defined $_;
-  my $stat_errn = stat($_) ? 0 : 0+$!;
+  my $stat_errn = stat($_) ? 0 : int($!);
   next if $stat_errn == ENOENT;
 
   if ($stat_errn != 0) {
@@ -1812,7 +1812,7 @@ sub check_mirror_af {
 
 sub print_version {
   printf("sa-update version %s\n  running on Perl version %s\n", $VERSION, 
-         join(".", map( 0+($_||0), ( $] =~ /(\d)\.(\d{3})(\d{3})?/ ))));
+         join(".", map( int($_||0), ( $] =~ /(\d)\.(\d{3})(\d{3})?/ ))));
 }
 
 ##############################################################################

@@ -116,7 +116,7 @@ my %resphash = (
 sub print_version {
   printf("SpamAssassin version %s\n  running on Perl version %s\n",
          Mail::SpamAssassin::Version(),
-         join(".", map( 0+($_||0), ($] =~ /(\d)\.(\d{3})(\d{3})?/ ))))
+         join(".", map( int($_||0), ($] =~ /(\d)\.(\d{3})(\d{3})?/ ))))
     or die "error writing: $!";
 }
 

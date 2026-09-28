@@ -1193,7 +1193,7 @@ the original mail into tagged messages.
         return $INVALID_VALUE;
       }
 
-      $self->{report_safe} = $value+0;
+      $self->{report_safe} = int($value);
       if (! $self->{report_safe} &&
           ! (grep { lc($_->[0]) eq "report" } @{$self->{headers_spam}}) ) {
         push(@{$self->{headers_spam}}, ["Report", "_REPORT_"]);
@@ -2899,7 +2899,7 @@ existing system rule from a C<user_prefs> file with C<spamd>.
         return $INVALID_VALUE;
       }
 
-      $self->{allow_user_rules} = $value+0;
+      $self->{allow_user_rules} = int($value);
       dbg("config: " . ($self->{allow_user_rules} ? "allowing":"not allowing") . " user rules!");
     }
   });
