@@ -1,0 +1,25 @@
+# Fake Facebook/Meta "new login" phishing
+# From display name claims Facebook/Meta brand, sender domain isn't theirs,
+# Reply-To points to a real facebook.com address to look legit.
+
+header   __GB_FROM_NAME_FB    From:name =~ /^\W*(?:facebook|meta(?:\s+(?:for\s+business|support|security|platforms))?)\b/i
+header   __GB_FROM_ADDR_FB    From:addr =~ /\@(?:[a-z0-9-]+\.)*(?:facebook(?:mail)?\.com|fb\.com|meta(?:mail)?\.com)$/i
+header   __GB_REPLYTO_ADDR_FB Reply-To:addr =~ /\@(?:[a-z0-9-]+\.)*(?:facebook(?:mail)?\.com|fb\.com|meta(?:mail)?\.com)$/i
+
+meta     GB_FROM_FB_FORGED    __GB_FROM_NAME_FB && !__GB_FROM_ADDR_FB
+describe GB_FROM_FB_FORGED    From name claims Facebook/Meta, sender domain is not theirs
+score    GB_FROM_FB_FORGED    2.0 # limit
+
+meta     GB_REPLYTO_FB_FORGED __GB_REPLYTO_ADDR_FB && !__GB_FROM_ADDR_FB
+describe GB_REPLYTO_FB_FORGED Reply-To is Facebook/Meta, From is not
+score    GB_REPLYTO_FB_FORGED 1.5 # limit
+
+# Phishing landing pages on Cloudflare Workers
+uri      __GB_URI_WORKERS_DEV m{^https?://[a-z0-9.-]+\.workers\.dev(?:[:/?]|$)}i
+
+# Body pretends to come from Facebook security team / Meta Platforms footer
+body     __GB_BODY_FB_SECURITY /\b(?:team di sicurezza di facebook|facebook security team|meta platforms,? inc)/i
+
+meta     GB_FB_PHISH          GB_FROM_FB_FORGED && (__GB_URI_WORKERS_DEV || __GB_BODY_FB_SECURITY || GB_REPLYTO_FB_FORGED)
+describe GB_FB_PHISH          Facebook/Meta impersonation phishing
+score    GB_FB_PHISH          2.0 # limit
