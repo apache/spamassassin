@@ -12,7 +12,7 @@ use warnings;
 my $debug = 0;
 
 use Test::More;
-plan tests => 128;
+plan tests => 134;
 use lib '../lib';
 
 # ---------------------------------------------------------------------------
@@ -396,6 +396,33 @@ try_extraction ('
     'nano superlattice technology:KAM_STOCKTIP15,[l=1]',
     'fooish bar:TEST1,[l=1]',
     'fooish bar:TEST2,[l=1]',
+
+]);
+
+# ---------------------------------------------------------------------------
+# top-level alternations compile to a bare TRIE-EXACT on newer perls;
+# optional chars and nested alternations inside a trie entry must not
+# be flattened into the base string
+
+try_extraction ('
+    body TRIE1 /accu-bid|plan\-?swift/i
+    body TRIE2 /need any estimating help|got any upcoming (drawing|take.?off)/i
+
+', {
+    base_extract => 1,
+    bases_must_be_casei => 1,
+    bases_can_use_alternations => 0,
+    bases_can_use_quantifiers => 0,
+    bases_can_use_char_classes => 0,
+    bases_split_out_alternations => 1
+}, [
+
+    'swift:TRIE1,[l=1]',
+    'got any upcoming drawing:TRIE2,[l=1]',
+    'got any upcoming take:TRIE2,[l=1]',
+],[
+
+    '-swift:TRIE1,[l=1]',
 
 ]);
 

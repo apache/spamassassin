@@ -801,8 +801,12 @@ sub unroll_branches {
 
   # this happens for /foo|bar/ instead of /(?:foo|bar)/ ; transform
   # it into the latter.  bit of a kludge to do this before the loop, but hey.
-  # note that it doesn't fix the CLOSE1/END ordering to be correct
-  if (scalar @ops > 1 && $ops[0]->[1] =~ /^BRANCH/) {
+  # note that it doesn't fix the CLOSE1/END ordering to be correct.
+  # newer perls compile /foo|bar/ to a bare TRIE-EXACT with no OPEN around
+  # it; without the wrapping, ops inside a trie entry (e.g. the optional
+  # "-" in /blue\-?beam|.../) would be deindented one level too far and
+  # treated as mandatory, and nested tries would be flattened.
+  if (scalar @ops > 1 && $ops[0]->[1] =~ /^(?:BRANCH|TRIE)/) {
     my @newops = ([ "", "OPEN1", "" ]);
     foreach my $op (@ops) {
       push @newops, [ "  ".$op->[0], $op->[1], $op->[2] ];
