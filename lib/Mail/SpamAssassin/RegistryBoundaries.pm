@@ -129,49 +129,37 @@ sub split_domain {
     my @domparts = split(/\./, $domain);
     my @hostname;
 
+    my $mld = $self->{conf}->{multi_level_domains};
+
     while (@domparts > 1) { # go until we find the TLD
-      if (@domparts == 2) {
-        # co.uk, etc.
-        my $temp = join(".", @domparts);
-        # International domain names in ASCII-compatible encoding (ACE)
-        last if ($self->{conf}->{two_level_domains}{$temp});
-      }
-      elsif (@domparts == 3) {
+      my $level = scalar @domparts;
+      if ($level == 3 && $domparts[2] eq 'us') {
         # http://www.neustar.us/policies/docs/rfc_1480.txt
-        # demon.co.uk
-        # esc.edu.ar
         # [^\.]+\.${US_STATES}\.us
-        if ($domparts[2] eq 'us') {
-          last if ($US_STATES{$domparts[1]});
-        }
-        else {
-          my $temp = join(".", @domparts);
-          # International domain names in ASCII-compatible encoding (ACE)
-          last if ($self->{conf}->{three_level_domains}{$temp});
-        }
+        last if ($US_STATES{$domparts[1]});
       }
-      elsif (@domparts == 4) {
-        if ($domparts[3] eq 'us' &&
-            (($domparts[0] eq 'pvt' && $domparts[1] eq 'k12') ||
-             ($domparts[0] =~ /^c[io]$/)))
-        {
-          # http://www.neustar.us/policies/docs/rfc_1480.txt
-          # "Fire-Dept.CI.Los-Angeles.CA.US"
-          # "<school-name>.PVT.K12.<state>.US"
-          last if ($US_STATES{$domparts[2]});
-        } else {
-          my $temp = join(".", @domparts);
-          # International domain names in ASCII-compatible encoding (ACE)
-          last if ($self->{conf}->{four_level_domains}{$temp});
-	}
+      elsif ($level == 4 && $domparts[3] eq 'us' &&
+             (($domparts[0] eq 'pvt' && $domparts[1] eq 'k12') ||
+              ($domparts[0] =~ /^c[io]$/)))
+      {
+        # http://www.neustar.us/policies/docs/rfc_1480.txt
+        # "Fire-Dept.CI.Los-Angeles.CA.US"
+        # "<school-name>.PVT.K12.<state>.US"
+        last if ($US_STATES{$domparts[2]});
+      }
+      elsif ($mld) {
+        # co.uk, demon.co.uk, domain.s3.us-east-2.amazonaws.com, etc.
+        # (util_rb_Ntld), International domain names in ASCII-compatible
+        # encoding (ACE)
+        last if ($mld->{join(".", @domparts)});
       }
       push(@hostname, shift @domparts);
     }
 
     # Look for a sub-delegated TLD
     # use @domparts to skip trying to match on TLDs that can't possibly
-    # match, but keep in mind that the hostname can be blank, so 4TLD needs 4,
-    # 3TLD needs 3, 2TLD needs 2 ...
+    # match, but keep in mind that the hostname can be blank, so an NTLD
+    # needs N labels ...
     #
     unshift @domparts, pop @hostname if @hostname;
     $domain = join(".", @domparts);

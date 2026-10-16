@@ -415,6 +415,11 @@ sub parse {
     }
 
     my $cmd = $lut->{$key};
+    # util_rb_3tld, util_rb_4tld, ... util_rb_Ntld are all handled by
+    # util_rb_2tld, which checks the level itself
+    if (!$cmd && $key =~ /^util_rb_\d+tld$/) {
+      $cmd = $lut->{util_rb_2tld};
+    }
 
     # we've either fallen through with no match, in which case this
     # if() will fail, or we have a match.
@@ -436,7 +441,8 @@ sub parse {
         }
       }
 
-      my $ret = &{$cmd->{code}} ($conf, $cmd->{setting}, $value, $line);
+      my $ret = &{$cmd->{code}} ($conf,
+                  (exists $lut->{$key} ? $cmd->{setting} : $key), $value, $line);
       next if !$ret;
 
       if ($ret eq $Mail::SpamAssassin::Conf::INVALID_VALUE) {
