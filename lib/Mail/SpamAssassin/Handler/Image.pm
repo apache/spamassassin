@@ -28,6 +28,12 @@ Mail::SpamAssassin::Handler::Image - A MIME-part handler for image/* parts
   body  IMAGE_TEXT_HEAVY  eval:check_image_text_ratio('0.75')
   describe IMAGE_TEXT_HEAVY  Most of the body text came from images
 
+  body  PHONE_IMAGE_PORTRAIT  eval:check_image_aspect_ratio('0.43', '0.59', '500000')
+  describe PHONE_IMAGE_PORTRAIT  Image has portrait phone-display proportions
+
+  body  SQUARE_IMAGE  eval:check_image_aspect_ratio('0.95', '1.05', '10000')
+  describe SQUARE_IMAGE  Image is roughly square
+
 =head1 DESCRIPTION
 
 A handler that registers itself as the MIME-part handler for C<image/*> parts,
@@ -126,6 +132,8 @@ sub new {
   # result.
   $self->register_handler('image/*', 'handle_image');
   $self->register_eval_rule('check_image_text_ratio',
+                            $Mail::SpamAssassin::Conf::TYPE_BODY_EVALS);
+  $self->register_eval_rule('check_image_aspect_ratio',
                             $Mail::SpamAssassin::Conf::TYPE_BODY_EVALS);
 
   return $self;
@@ -292,9 +300,6 @@ sub _get_image_text {
 sub handle_image {
   my ($self, $node, $pms) = @_;
 
-  my $tesseract = $self->_tesseract($pms->{conf});
-  return [] unless $tesseract;
-
   my $data = $node->decode;
   return [] unless defined $data && length $data;
 
@@ -303,9 +308,22 @@ sub handle_image {
   my $dataref = \$data;
 
   # Identify the real type and dimensions from the bytes (not the declared
-  # Content-Type, which spammers mislabel).  One parse feeds both the size gate
-  # and the HEIF check.
+  # Content-Type, which spammers mislabel).  One parse feeds the dimension
+  # record, the OCR size gate and the HEIF check.
   my ($type, $w, $h) = $self->_image_info($dataref);
+
+  # Record the dimensions for check_image_aspect_ratio.  Done before the OCR
+  # early-returns below so geometry rules work even when tesseract is absent or
+  # the image is too small/unreadable to OCR -- parsing the header costs nothing
+  # extra, we already did it.
+  if (defined $w && defined $h && $w > 0 && $h > 0) {
+    push @{$pms->{plugins}{Image}{dims}},
+         { type => $type, w => $w, h => $h };
+    dbg("image: %s is %dx%d pixels", $type // '?', $w, $h);
+  }
+
+  my $tesseract = $self->_tesseract($pms->{conf});
+  return [] unless $tesseract;
 
   # Type gate: only OCR bytes we positively identify as a raster format tesseract
   # can read.  An undef type means the bytes are not one of our known rasters --
@@ -770,6 +788,67 @@ sub check_image_text_ratio {
   dbg("image: text ratio %.3f (image_words=%d body_words=%d min=%s)",
       $ratio, $image_words, $body_words, $min_ratio);
   return ($ratio >= $min_ratio) ? 1 : 0;
+}
+
+=item check_image_aspect_ratio(MIN_RATIO [, MAX_RATIO [, MIN_PIXELS]])
+
+Eval rule: true if the message contains an image whose aspect ratio falls
+between MIN_RATIO and MAX_RATIO inclusive.  The ratio is C<width / height>, so
+it is orientation-sensitive: a value E<gt> 1 is landscape, E<lt> 1 is portrait,
+and 1 is square.  A 1170x2532 portrait phone screenshot measures 0.462, while
+the same image rotated to 2532x1170 measures 2.164 -- the two do not match the
+same rule.  Write one rule per orientation when you want both:
+
+  body   PHONE_IMAGE_PORTRAIT   eval:check_image_aspect_ratio('0.43', '0.59', '500000')
+  body   PHONE_IMAGE_LANDSCAPE  eval:check_image_aspect_ratio('1.7', '2.3', '500000')
+  meta   PHONE_IMAGE  PHONE_IMAGE_PORTRAIT || PHONE_IMAGE_LANDSCAPE
+
+MAX_RATIO defaults to no upper bound.  MIN_PIXELS, if given, requires the
+image's area (width * height) to be at least that many pixels, which can be
+used to exclude thin spacers, banners, tracking pixels, etc.
+
+Dimensions come from the image header for PNG, GIF, JPEG, WebP and BMP.  Images
+whose dimensions cannot be determined (notably HEIF, and truncated or corrupt
+headers) are not considered by this rule.
+
+Note that EXIF orientation is not read: a JPEG photo shot in portrait but
+stored as landscape with a rotation flag reports its I<stored> dimensions, so
+it measures as landscape here.  Screenshots are unaffected (they carry no
+rotation flag), but camera photos may land in the opposite orientation from how
+they display.
+
+=cut
+
+sub check_image_aspect_ratio {
+  my ($self, $pms, $body, $min_ratio, $max_ratio, $min_pixels) = @_;
+
+  return 0 unless defined $min_ratio && $min_ratio ne '';
+  my $dims = $pms->{plugins}{Image}{dims};
+  return 0 unless $dims && @$dims;
+
+  $max_ratio  = undef if defined $max_ratio  && $max_ratio  eq '';
+  $min_pixels = undef if defined $min_pixels && $min_pixels eq '';
+
+  foreach my $d (@$dims) {
+    my ($w, $h) = ($d->{w}, $d->{h});
+    next unless $w && $h;
+
+    my $area = $w * $h;
+    next if defined $min_pixels && $area < $min_pixels;
+
+    # Width over height, so portrait (<1) and landscape (>1) are distinguishable
+    # and each needs its own rule.
+    my $ratio = $w / $h;
+    next if $ratio < $min_ratio;
+    next if defined $max_ratio && $ratio > $max_ratio;
+
+    dbg("image: aspect ratio %.3f (%dx%d, %d px) matches %s..%s",
+        $ratio, $w, $h, $area, $min_ratio,
+        defined $max_ratio ? $max_ratio : 'inf');
+    return 1;
+  }
+
+  return 0;
 }
 
 =back
