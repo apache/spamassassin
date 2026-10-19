@@ -105,7 +105,8 @@ my %makefile = (
 	-DLOCAL_STATE_DIR="$(I_LOCALSTATEDIR)"',
 
     'macro' => {
-        DATAFILES => 'user_prefs.template languages sa-update-pubkey.txt'
+        DATAFILES => 'user_prefs.template languages sa-update-pubkey.txt',
+        DOCSFILES => 'docs/HOWTO.Bayes-Redis',
     },
 
     # be quite explicit about this; afaik CPAN.pm is sensible using this
@@ -694,6 +695,37 @@ sub _set_macro_CONFDIR {
   );
 }
 
+# This routine determines the correct INSTALLDOCS (aka DOCSDIR)
+# to use for the given repository.
+#
+# The first parameter must be one value from @REPOSITORIES.
+#
+# INSTALL*DOCS can be overwritten with:
+#   INSTALL*DOCS
+#   DOCSDIR
+# If none of those is specified, it will chose an FHS-compliant dir,
+# namely *PREFIX/share/doc/spamassassin.
+sub _set_macro_DOCSDIR {
+  my($repository) = (@_);
+
+  my($macro);
+  $macro = "INSTALL" . repository($repository) . "DOCS";
+
+  # Is this macro already set?
+  return if get_macro($macro);
+
+  # Is this macro supposed to be overwritten?
+  if (get_macro('DOCSDIR')) {
+    set_macro($macro, get_macro('DOCSDIR'));
+    return;
+  }
+
+  # Set the default value based on the corresponding PREFIX
+  set_macro($macro,
+    macro_ref("${repository}PREFIX") . '/share/doc/spamassassin'
+  );
+}
+
 # This routine determines the correct value for PERL_BIN.
 #
 # There are no parameters.
@@ -822,7 +854,7 @@ sub MY::install {
 
   foreach (@code) {
     # Add our install targets as a dependency to all top-level install targets
-    s/^(install(?:_[a-z]+)?\s*::?\s*.*)$/$1 conf__install data__install/;
+    s/^(install(?:_[a-z]+)?\s*::?\s*.*)$/$1 conf__install data__install docs__install/;
   }
 
   clean_MY_globals($self);
@@ -879,6 +911,7 @@ sub MY::constants {
       _set_macro_LOCALSTATEDIR($r);
       _set_macro_DATADIR($r);
       _set_macro_CONFDIR($r);
+      _set_macro_DOCSDIR($r);
     }
 
     # ... and add it to the Makefile.
@@ -896,7 +929,7 @@ sub MY::constants {
       push(@code, macro_def($r . 'LOCALSTATEDIR'));
     }
 
-    foreach my $m (qw(DATA CONF)) {
+    foreach my $m (qw(DATA CONF DOCS)) {
       foreach my $r (@REPOSITORIES) {
         my $macro = 'INSTALL' . repository($r) . $m;
         # The INSTALL* macros.
@@ -949,7 +982,7 @@ sub MY::constants {
     }
     # For the following we need bot the B_- and the I_-variants.  But the
     # SCRIPT macro is the same for all repositories.
-    foreach my $macro (qw(SCRIPT DATA CONF LIB)) {
+    foreach my $macro (qw(SCRIPT DATA CONF DOCS LIB)) {
       push(@code, macro_def('I_' . $macro . 'DIR',
                     macro_ref('INSTALL' . repository($repository, $macro eq 'SCRIPT') . $macro)));
 
@@ -1106,6 +1139,10 @@ data__install:
 	$(PERL) -e "map unlink, <$(B_DATADIR)/*>"
 	$(PREPROCESS) $(FIXVARS) -m$(PERM_RW) -Irules -O$(B_DATADIR) $(DATAFILES)
 	$(CHMOD) $(PERM_RWX) $(B_DATADIR)
+
+docs__install:
+	-$(MKPATH) $(B_DOCSDIR)
+	$(PERL) -MFile::Find -MFile::Copy -MFile::Path=mkpath -e 'find({ no_chdir => 1, wanted => sub { (my $$d = $$_) =~ s{^docs/?}{}; return unless length $$d; if (-d $$_) { mkpath(qq[$(B_DOCSDIR)/$$d]) } else { copy($$_, qq[$(B_DOCSDIR)/$$d]) or die qq[$$_: $$!\n]; chmod(oct(q[$(PERM_RW)]), qq[$(B_DOCSDIR)/$$d]) } } }, @ARGV)' $(DOCSFILES)
 
 text_html_doc: made-doc-stamp
 	$(NOOP)
