@@ -159,10 +159,22 @@ sub load_resolver {
       # our send/bgsend infrastructure but rely on Net::DNS::Resolver entirely
       my @ns_addr_port = $self->available_nameservers();
       local($1,$2);
-      # drop port numbers, Net::DNS::Resolver can't take them
-      @ns_addr_port = map(/^\[(.*)\]:(\d+)\z/ ? $1 : $_, @ns_addr_port);
-      dbg("dns: nameservers set to %s", join(', ', @ns_addr_port));
-      $res->nameservers(@ns_addr_port);
+      # Net::DNS::Resolver takes plain addresses and a single port for all
+      # of them, so use the first server's port and only the servers on it
+      my ($port, @ns_addr);
+      foreach (@ns_addr_port) {
+        my ($addr, $p) = /^\[(.*)\]:(\d+)\z/ ? ($1, $2) : ($_, 53);
+        $port = $p  if !defined $port;
+        push(@ns_addr, $addr)  if $p == $port;
+      }
+      if (@ns_addr < @ns_addr_port) {
+        dbg("dns: nameservers use different ports, Net::DNS::Resolver ".
+            "supports only one, using the servers on port %s", $port);
+      }
+      dbg("dns: nameservers set to %s", join(', ', @ns_addr));
+      $res->nameservers(@ns_addr);
+      $res->port(untaint_var($port));
+      dbg("dns: nameservers port set to %s", $port);
     }
     1;
   } or do {
@@ -767,6 +779,66 @@ sub bgread {
   return $answerpkt;
 }
 
+# Retry a query over TCP when the UDP reply was truncated, using
+# Net::DNS::Resolver bgsend and bgread.
+sub _tcp_fallback {
+  my ($self, $qname, $qtype, $qclass) = @_;
+
+  my $res = $self->{res};
+  return if !$res;
+
+  my ($addr, $port);
+  if ($self->{sock}) {
+    ($addr, $port) = ($self->{sock}->peerhost, $self->{sock}->peerport);
+  }
+  if (!defined $addr || !$port) {
+    my ($ns) = $self->available_nameservers();
+    local($1,$2);
+    ($addr, $port) = ($1, $2)  if defined $ns && $ns =~ /^\[(.*)\]:(\d+)\z/;
+  }
+  if (!defined $addr || !$port) {
+    info("dns: TCP fallback for %s/%s: no nameserver available", $qname, $qtype);
+    return;
+  }
+  ($addr, $port) = (untaint_var($addr), untaint_var($port));
+  dbg("dns: TCP fallback retry with %s, %s, %s via [%s]:%s",
+      $qname, $qtype, $qclass, $addr, $port);
+
+  my @saved_ns = $res->nameservers;
+  my ($saved_port, $saved_usevc) = ($res->port, $res->usevc);
+  $res->nameservers($addr);
+  $res->port($port);
+  $res->usevc(1);  # go straight to TCP, UDP would be truncated again
+
+  my ($packet, $eval_stat);
+  eval {
+    my $handle = $res->bgsend($qname, $qtype, $qclass);
+    $packet = $res->bgread($handle)  if $handle;
+    1;
+  } or do {
+    undef $packet;
+    $eval_stat = $@ ne '' ? $@ : "errno=$!";  chomp $eval_stat;
+  };
+  my $errstr = $res->errorstring;
+
+  $res->nameservers(@saved_ns);
+  $res->port($saved_port);
+  $res->usevc($saved_usevc);
+
+  if (defined $eval_stat) {
+    # resignal if alarm went off
+    die $eval_stat  if $eval_stat =~ /__alarm__ignore__\(.*\)/s;
+    info("dns: TCP fallback to [%s]:%s for %s/%s failed: %s",
+         $addr, $port, $qname, $qtype, $eval_stat);
+    return;
+  }
+  if (!$packet) {
+    info("dns: TCP fallback to [%s]:%s for %s/%s failed: %s",
+         $addr, $port, $qname, $qtype, $errstr || 'no reply');
+  }
+  return $packet;
+}
+
 ###########################################################################
 
 =item $nfound = $res-E<gt>poll_responses()
@@ -845,19 +917,8 @@ sub poll_responses {
       $id = $self->_packet_id($packet);  # which will change $packet to a different class object
       if ($header->rcode eq 'NOERROR' && $header->tc) {
         # Use original Resolver which can handle TCP fallback, but keep id from the custom packet
-        my (undef, $qclass, $qtype, $qname) = split('/', $id);
-        dbg("dns: TCP fallback retry with %s, %s, %s", $qname, $qtype, $qclass);
-        my $orig_resolver =  $self->{main}->{resolver}->get_resolver();
-        eval {
-          my $handle = $orig_resolver->bgsend($qname, $qtype, $qclass);
-          $packet = $orig_resolver->bgread($handle);
-        } or do {
-          undef $packet;
-          my $eval_stat = $@ ne '' ? $@ : "errno=$!";  chomp $eval_stat;
-          # resignal if alarm went off
-          die $eval_stat  if $eval_stat =~ /__alarm__ignore__\(.*\)/s;
-          info("dns: bad dns tcp fallback reply: %s", $eval_stat);
-        };
+        my (undef, $qclass, $qtype, $qname) = split('/', $id, 4);
+        $packet = $self->_tcp_fallback($qname, $qtype, $qclass);
       }
     }
 
