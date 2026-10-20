@@ -117,6 +117,11 @@ my @rule_types = ("body_tests", "uri_tests", "uri_evals",
                   "full_evals", "rawbody_tests", "rawbody_evals",
 		  "rbl_evals", "meta_tests");
 
+# DEPRECATED: compatibility aliases of $conf->{multi_level_domains}
+# (util_rb_Ntld), will be removed in a future release
+my @DEPRECATED_TLD_KEYS = qw(two_level_domains three_level_domains
+                             four_level_domains);
+
 # Map internal ruletype to descriptive ruletype string
 our %TYPE_AS_STRING = (
   $TYPE_HEAD_TESTS => 'header',
@@ -3959,10 +3964,29 @@ e.g. рф, ελ.
 
 =item util_rb_2tld 2tld-1.tld 2tld-2.tld ...
 
-This option maintains list of valid 2nd-level TLDs in the RegistryBoundaries
-code.  2TLDs include things like co.uk, fed.us, etc.  International domain
-names may be specified in ASCII-compatible encoding (ACE), or with Unicode
-labels encoded as UTF-8 octets.
+=item util_rb_3tld 3tld1.some.tld 3tld2.other.tld ...
+
+=item util_rb_4tld 4tld1.some.other.tld 4tld2.another.other.tld ...
+
+=item util_rb_Ntld domain1 domain2 ...
+
+These options maintain lists of valid N-level TLDs in the RegistryBoundaries
+code, where N is any integer of 2 or more (C<util_rb_2tld>, C<util_rb_3tld>,
+C<util_rb_4tld>, C<util_rb_5tld>, ...).  Every domain listed must have exactly
+N labels.
+
+2TLDs include things like co.uk, fed.us, etc.  3TLDs include things like
+demon.co.uk, plc.co.im, etc.  4TLDs can include things like
+domain.s3.us-east-2.amazonaws.com, etc.
+
+International domain names may be specified in ASCII-compatible encoding
+(ACE), or with Unicode labels encoded as UTF-8 octets.
+
+Note for plugin authors: all entries are stored in the
+C<$conf-E<gt>{multi_level_domains}> hash.  The old C<$conf-E<gt>{two_level_domains}>,
+C<$conf-E<gt>{three_level_domains}> and C<$conf-E<gt>{four_level_domains}>
+hashes are B<deprecated> aliases of C<multi_level_domains>, kept only for
+backward compatibility, and B<will be removed> in a future release.
 
 =cut
 
@@ -3971,73 +3995,33 @@ labels encoded as UTF-8 octets.
     is_admin => 1,
     code => sub {
       my ($self, $key, $value, $line) = @_;
+      # also called for util_rb_3tld, util_rb_4tld, ... (see Conf::Parser)
+      my ($level) = $key =~ /^util_rb_([1-9][0-9]*)tld$/;
+      unless (defined $level && $level >= 2) {
+        return $INVALID_VALUE;
+      }
       unless (defined $value && $value !~ /^$/) {
 	return $MISSING_REQUIRED_VALUE;
       }
-      unless ($value =~ /^[^\s.]+\.[^\s.]+(?:\s+[^\s.]+\.[^\s.]+)*$/) {
-	return $INVALID_VALUE;
+      my $labels = $level - 1;
+      my @domains = split(/\s+/, $value);
+      foreach (@domains) {
+        return $INVALID_VALUE unless /^[^\s.]+(?:\.[^\s.]+){$labels}$/;
       }
-      foreach (split(/\s+/, $value)) {
-        $self->{two_level_domains}{idn_to_ascii($_)} = 1;
+      foreach (@domains) {
+        $self->{multi_level_domains}{idn_to_ascii($_)} = 1;
       }
-    }
-  });
-
-=item util_rb_3tld 3tld1.some.tld 3tld2.other.tld ...
-
-This option maintains list of valid 3rd-level TLDs in the RegistryBoundaries
-code.  3TLDs include things like demon.co.uk, plc.co.im, etc.  International
-domain names may be specified in ASCII-compatible encoding (ACE), or with
-Unicode labels encoded as UTF-8 octets.
-
-=cut
-
-  push (@cmds, {
-    setting => 'util_rb_3tld',
-    is_admin => 1,
-    code => sub {
-      my ($self, $key, $value, $line) = @_;
-      unless (defined $value && $value !~ /^$/) {
-	return $MISSING_REQUIRED_VALUE;
-      }
-      unless ($value =~ /^[^\s.]+\.[^\s.]+\.[^\s.]+(?:\s+[^\s.]+\.[^\s.]+\.[^\s.]+)*$/) {
-	return $INVALID_VALUE;
-      }
-      foreach (split(/\s+/, $value)) {
-        $self->{three_level_domains}{idn_to_ascii($_)} = 1;
-      }
-    }
-  });
-
-=item util_rb_4tld 4tld1.some.other.tld 4tld2.another.other.tld ...
-
-This option maintains list of valid 4th-level TLDs in the RegistryBoundaries
-code.  4TLDs can include things like domain.s3.us-east-2.amazonaws.com, etc.  International
-domain names may be specified in ASCII-compatible encoding (ACE), or with
-Unicode labels encoded as UTF-8 octets.
-
-=cut
-
-  push (@cmds, {
-    setting => 'util_rb_4tld',
-    is_admin => 1,
-    code => sub {
-      my ($self, $key, $value, $line) = @_;
-      unless (defined $value && $value !~ /^$/) {
-	return $MISSING_REQUIRED_VALUE;
-      }
-      unless ($value =~ /^[^\s.]+\.[^\s.]+\.[^\s.]+\.[^\s.]+(?:\s+[^\s.]+\.[^\s.]+\.[^\s.]+\.[^\s.]+)*$/) {
-	return $INVALID_VALUE;
-      }
-      foreach (split(/\s+/, $value)) {
-        $self->{four_level_domains}{idn_to_ascii($_)} = 1;
-      }
+      # DEPRECATED: two_level_domains, three_level_domains and
+      # four_level_domains are kept only as compatibility aliases of
+      # multi_level_domains for third-party code and will be removed in
+      # a future release.  Use multi_level_domains instead.
+      $self->{$_} = $self->{multi_level_domains}  foreach @DEPRECATED_TLD_KEYS;
     }
   });
 
 =item clear_util_rb
 
-Empty internal list of valid TLDs (including 2nd and 3rd level) which
+Empty internal list of valid TLDs (including all multi-level ones) which
 RegistryBoundaries code uses.  Only useful if you want to override the
 standard lists supplied by sa-update.
 
@@ -4052,9 +4036,8 @@ standard lists supplied by sa-update.
         return $INVALID_VALUE;
       }
       undef $self->{valid_tlds};
-      undef $self->{two_level_domains};
-      undef $self->{three_level_domains};
-      undef $self->{four_level_domains};
+      undef $self->{multi_level_domains};
+      undef $self->{$_}  foreach @DEPRECATED_TLD_KEYS;
       dbg("config: cleared tld lists");
     }
   });
@@ -5796,6 +5779,12 @@ sub clone {
   # ensure we don't copy the path cache from the master
   delete $dest->{sed_path_cache};
 
+  # restore the deprecated aliases of multi_level_domains (copying above
+  # made them independent hashes)
+  if ($dest->{multi_level_domains}) {
+    $dest->{$_} = $dest->{multi_level_domains}  foreach @DEPRECATED_TLD_KEYS;
+  }
+
   return 1;
 }
 
@@ -5868,6 +5857,7 @@ sub has_tflags_nolog { 1 } # tflags nolog
 sub perl_min_version_5010000 { return $] >= 5.010000 }  # perl version check ("perl_version" not neatly backwards-compatible)
 sub has_dns_max_cname_cache { 1 } # supports 'dns_max_cname_cache' option
 sub has_util_rb_4tld { 1 } # supports 'util_rb_4tld' option
+sub has_util_rb_ntld { 1 } # supports 'util_rb_Ntld' options for any N >= 2
 
 ###########################################################################
 
