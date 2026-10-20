@@ -105,7 +105,6 @@ url_redirector_get search.app
 url_redirector_get share.google
 url_redirector_get shared.outlook.inky.com
 url_redirector_get t.nypost.com
-url_redirector_get tr.ee
 url_redirector_get track.pstmrk.it
 
 if can(Mail::SpamAssassin::Plugin::Redirectors::has_url_redirector_path)
@@ -220,8 +219,6 @@ if can(Mail::SpamAssassin::Plugin::Redirectors::has_url_redirector_path)
     url_redirector_get google.de/amp/s
     url_redirector_get google.de/url
     url_redirector_get google.es/amp/s
-    url_redirector_get google.es/amp/s
-    url_redirector_get google.es/url
     url_redirector_get google.es/url
     url_redirector_get google.fm/amp/s
     url_redirector_get google.fm/url
