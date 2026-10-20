@@ -553,7 +553,7 @@ sub detect_utf16 {
 		return Encode::find_encoding("UTF-16BE");
 	}
 	dbg( "message: detect_utf16: not UTF-16" );
-	return undef;
+	return;
 }
 
 # Look at a text scalar and determine whether it should be rendered
