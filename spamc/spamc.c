@@ -849,6 +849,7 @@ main(int argc, char *argv[])
     int out_fd = -1;
     int result = EX_SOFTWARE;
     int ret = EX_SOFTWARE;
+    int out_err = 0;
     int ret_conf = EX_SOFTWARE;
     int extratype = 0;
     int islearned = 0;
@@ -1064,6 +1065,15 @@ main(int argc, char *argv[])
 		    }
 		    goto finish;
 		}
+		else {
+		    /* the output is incomplete: do not dump the message
+		     * again and do not report success */
+		    libspamc_log(flags, LOG_ERR, "failed to write output: %s",
+				 strerror(errno));
+		    message_cleanup(&m);
+		    ret = EX_IOERR;
+		    goto finish;
+		}
 	    }
 	}
     }
@@ -1082,18 +1092,24 @@ main(int argc, char *argv[])
     else {
         if (flags & (SPAMC_CHECK_ONLY | SPAMC_REPORT | SPAMC_REPORT_IFSPAM)) {
             get_output_fd(&out_fd);
-            full_write(out_fd, 1, "0/0\n", 4);
+            if (full_write(out_fd, 1, "0/0\n", 4) != 4) {
+                out_err = 1;
+            }
         }
         else if (flags & SPAMC_SYMBOLS) {
             /* bug 4991: -y should only output a blank line on connection failure */
             get_output_fd(&out_fd);
-            full_write(out_fd, 1, "\n", 1);
+            if (full_write(out_fd, 1, "\n", 1) != 1) {
+                out_err = 1;
+            }
         }
         else {
             /* bug 5412: spamc -x should not output the message on error */
             if ((flags & SPAMC_SAFE_FALLBACK) || result == EX_TOOBIG) {
                 get_output_fd(&out_fd);
-                message_dump(STDIN_FILENO, out_fd, &m, flags);
+                if (message_dump(STDIN_FILENO, out_fd, &m, flags) != EX_OK) {
+                    out_err = 1;
+                }
             }
             /* else, do NOT get_output_fd() (bug 5478) */
         }
@@ -1112,6 +1128,11 @@ main(int argc, char *argv[])
         /* If -x and -X are used, change from EX_UNAVAILABLE TO EX_TEMPFAIL - bug 6717 */
 	if ((!(flags & SPAMC_SAFE_FALLBACK)) && (flags & SPAMC_UNAVAIL_TEMPFAIL) && (ret == EX_UNAVAILABLE)) {
 	    ret = EX_TEMPFAIL;
+	}
+
+	/* failing to write the output is never a success */
+	if (out_err) {
+	    ret = EX_IOERR;
 	}
     }
     

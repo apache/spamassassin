@@ -943,6 +943,7 @@ int message_read(int fd, int flags, struct message *m)
 long message_write(int fd, struct message *m)
 {
     long total = 0;
+    long written;
     off_t i, j;
     off_t jlimit;
     char buffer[1024];
@@ -975,6 +976,8 @@ long message_write(int fd, struct message *m)
 
     case MESSAGE_BSMTP:
 	total = full_write(fd, 1, m->pre, m->pre_len);
+	if (total < 0)
+	    return -1;
 	for (i = 0; i < m->out_len;) {
 	    jlimit = (off_t) (sizeof(buffer) / sizeof(*buffer) - 4);
 	    for (j = 0; i < (off_t) m->out_len && j < jlimit;) {
@@ -991,9 +994,15 @@ long message_write(int fd, struct message *m)
 		    buffer[j++] = m->out[i++];
 		}
 	    }
-	    total += full_write(fd, 1, buffer, j);
+	    written = full_write(fd, 1, buffer, j);
+	    if (written < 0)
+		return -1;
+	    total += written;
 	}
-	return total + full_write(fd, 1, m->post, m->post_len);
+	written = full_write(fd, 1, m->post, m->post_len);
+	if (written < 0)
+	    return -1;
+	return total + written;
 
     default:
 	libspamc_log(m->priv->flags, LOG_ERR, "Unknown message type %d", m->type);
@@ -1001,26 +1010,32 @@ long message_write(int fd, struct message *m)
     }
 }
 
-void message_dump(int in_fd, int out_fd, struct message *m, int flags)
+int message_dump(int in_fd, int out_fd, struct message *m, int flags)
 {
     char buf[8196];
     int bytes;
 
     if (m == NULL) {
 	libspamc_log(flags, LOG_ERR, "oops! message_dump called with NULL message");
-	return;
+	return EX_SOFTWARE;
     }
 
     if (m->type != MESSAGE_NONE) {
-	message_write(out_fd, m);
+	if (message_write(out_fd, m) < 0) {
+	    libspamc_log(flags, LOG_ERR, "message_dump: write failed: %s",
+		   strerror(errno));
+	    return EX_IOERR;
+	}
     }
 
     while ((bytes = full_read(in_fd, 1, buf, 8192, 8192)) > 0) {
 	if (bytes != full_write(out_fd, 1, buf, bytes)) {
-	    libspamc_log(flags, LOG_ERR, "oops! message_dump of %d returned different",
-		   bytes);
+	    libspamc_log(flags, LOG_ERR, "oops! message_dump of %d returned different: %s",
+		   bytes, strerror(errno));
+	    return EX_IOERR;
 	}
     }
+    return EX_OK;
 }
 
 static int
@@ -1736,8 +1751,11 @@ int message_process(struct transport *trans, char *username, int max_size,
     ret = message_filter(trans, username, flags, &m);
     if (ret != EX_OK)
         goto FAIL;
-    if (message_write(out_fd, &m) < 0)
-        goto FAIL;
+    if (message_write(out_fd, &m) < 0) {
+        /* output is broken: do not write the message again */
+        message_cleanup(&m);
+        return EX_IOERR;
+    }
     if (m.is_spam != EX_TOOBIG) {
         message_cleanup(&m);
         return m.is_spam;
@@ -1747,13 +1765,18 @@ int message_process(struct transport *trans, char *username, int max_size,
 
   FAIL:
     if (flags & SPAMC_CHECK_ONLY) {
-        full_write(out_fd, 1, "0/0\n", 4);
+        if (full_write(out_fd, 1, "0/0\n", 4) != 4) {
+            message_cleanup(&m);
+            return EX_IOERR;
+        }
         message_cleanup(&m);
         return EX_NOTSPAM;
     }
     else {
-        message_dump(in_fd, out_fd, &m, flags);
+        int dumpret = message_dump(in_fd, out_fd, &m, flags);
         message_cleanup(&m);
+        if (dumpret != EX_OK)
+            return dumpret;
         return ret;
     }
 }
