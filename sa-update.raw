@@ -1367,8 +1367,9 @@ sub taint_safe_archive_extract {
 
         # if --allowplugins is not specified, comment out
         # all loadplugin or tryplugin lines (and others that can load code)
+        # Match a leading "lang xx " which the parser strips.
         if ( !$opt{'allowplugins'} ) {
-          $content =~ s{^\s*(
+          $content =~ s{^\s*((?:lang[^\S\n]+\S+[^\S\n]+)?(?:
               loadplugin |
               tryplugin |
               \S+[-_]modules? |
@@ -1376,12 +1377,12 @@ sub taint_safe_archive_extract {
               dcc[-_](?:path|options) |
               pyzor[-_](?:path|options) |
               extracttext[-_]external
-            )\s}
+            ))\s}
             {#(commented by sa-update, no --allowplugins switch specified)# $1}gmxi;
         }
 
         # other stuff never allowed for safety
-        $content =~ s/^\s*(dns[-_]server)/#(commented by sa-update, not allowed)# $1/gmi;
+        $content =~ s/^\s*((?:lang[^\S\n]+\S+[^\S\n]+)?dns[-_]server)/#(commented by sa-update, not allowed)# $1/gmi;
 
         # adjust scores
         if ($opt{'score-multiplier'} || $opt{'score-limit'}) {
@@ -1420,7 +1421,7 @@ sub taint_safe_archive_extract {
           };
           # a score is a number, or a number in parentheses for a relative score
           my $value = qr/-?\d+(?:\.\d+)?|\(-?\d+(?:\.\d+)?\)/;
-          $content =~ s/^(\s*score\s+\w+\s+)($value(?:\s+$value)*)(.*)$
+          $content =~ s/^(\s*(?:lang[^\S\n]+\S+[^\S\n]+)?score\s+\w+\s+)($value(?:\s+$value)*)(.*)$
             /$adjust_score->($1,$2,$3)/igmex;
         }
       }
