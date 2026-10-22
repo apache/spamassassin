@@ -146,8 +146,10 @@ my @embedded = (
     'bare hyphenated label (redirect=) is NOT an embedded uri' ],
 );
 
-# +1 no-capture-group check, +4 clear_url_redirector checks
-plan tests => scalar(@cases) + scalar(@embedded) + 1 + 2 + 4;
+# +1 no-capture-group check, +4 clear_url_redirector checks, +4 restore checks,
+# +2 is_admin checks, +3 user preferences checks,
+# +13 url_redirector_selenium_resource checks
+plan tests => scalar(@cases) + scalar(@embedded) + 1 + 2 + 4 + 4 + 2 + 3 + 13;
 
 for my $c (@cases) {
   my ($uri, $expect_method, $desc) = @$c;
@@ -223,4 +225,117 @@ for my $c (@embedded) {
      'clear removes last path');
   ok(!exists $conf->{url_redirector_suffix}->{'multi.example'},
      'host entry dropped when paths empty');
+}
+
+# spamd saves the configuration once and restores it after each user's
+# preferences. A user's change to an existing entry must not reach the
+# saved copy. The user lines are parsed with full privileges, so this
+# checks the entries, not which settings a user may change.
+{
+  tstpre("loadplugin Mail::SpamAssassin::Plugin::Redirectors\n");
+  tstprefs(q{
+url_shortener restore-head.example
+url_redirector_selenium restore-sel.example/r
+url_redirector_get restore-path.example/a restore-path.example/b
+});
+  my $sa = create_saobj();
+  $sa->init(1);
+  my %saved;
+  $sa->copy_config(undef, \%saved);
+  {
+    local $SIG{__WARN__} = sub {};  # changing an entry's method warns
+    $sa->{conf}->parse_rules(q{
+url_redirector_selenium restore-head.example
+url_redirector restore-sel.example
+clear_url_redirector restore-path.example/a
+});
+  }
+  $sa->copy_config(\%saved, undef);
+
+  my $e = $sa->{conf}->{url_redirector_exact};
+  is($e->{'restore-head.example'}->{method}, 'head',
+     'restore undoes a changed method');
+  is($e->{'restore-sel.example'}->{method}, 'selenium',
+     'restore undoes a changed method on a path entry');
+  is(join(',', @{$e->{'restore-sel.example'}->{paths}}), '/r',
+     'restore undoes an added path');
+  is(join(',', @{$e->{'restore-path.example'}->{paths}}), '/a,/b',
+     'restore undoes a cleared path');
+  $sa->finish();
+}
+
+# Every setting the plugin registers is an administrator setting.
+{
+  package RedirectorsMatchParser;
+  sub new { bless { cmds => [] }, shift }
+  sub register_commands { push @{ $_[0]{cmds} }, @{ $_[1] } }
+}
+{
+  my $parser = RedirectorsMatchParser->new;
+  Mail::SpamAssassin::Plugin::Redirectors::set_config(undef, { parser => $parser });
+  my @cmds = @{ $parser->{cmds} };
+  ok(@cmds > 0, 'the plugin registers its settings');
+  is_deeply([ map { $_->{setting} } grep { !$_->{is_admin} } @cmds ], [],
+            'every Redirectors setting is is_admin');
+}
+
+# spamd reads a user's preferences in scores-only mode, which refuses
+# administrator settings.
+{
+  tstpre("loadplugin Mail::SpamAssassin::Plugin::Redirectors\n");
+  tstprefs(q{
+url_redirector admin-head.example
+url_redirector_selenium admin-sel.example
+});
+  my $sa = create_saobj();
+  $sa->init(1);
+  my $user_prefs = "$workdir/redirectors_user_prefs";
+  open(my $fh, '>', $user_prefs) or die "open $user_prefs: $!";
+  print $fh "required_score 7.5\n",
+            "url_redirector user-head.example\n",
+            "url_redirector_selenium user-sel.example\n",
+            "clear_url_redirector admin-head.example\n";
+  close $fh;
+  $sa->read_scoreonly_config($user_prefs);
+  my $e = $sa->{conf}->{url_redirector_exact};
+  is($sa->{conf}->{required_score}, '7.5', 'user preferences: an ordinary setting applies');
+  ok(!$e->{'user-head.example'} && !$e->{'user-sel.example'},
+     'user preferences: redirector entries are refused');
+  ok($e->{'admin-head.example'} && $e->{'admin-sel.example'},
+     'user preferences: clear_url_redirector is refused');
+  $sa->finish();
+}
+
+# url_redirector_selenium_resource takes exact host names, and its hosts
+# are not redirectors.
+{
+  tstpre("loadplugin Mail::SpamAssassin::Plugin::Redirectors\n");
+  # The shipped rules list resource hosts of their own.
+  tstprefs("clear_url_redirector_selenium_resource\nurl_redirector_selenium sel.example\n");
+  my $sa = create_saobj();
+  $sa->init(1);
+  my $conf = $sa->{conf};
+  my $res = sub { join(',', sort keys %{ $conf->{url_redirector_selenium_resource} || {} }) };
+  ok(Mail::SpamAssassin::Plugin::Redirectors->can('has_url_redirector_selenium_resource'),
+     'url_redirector_selenium_resource has a has_ sub');
+  for my $bad ('192.0.2.1', '0x7f.1', 'localhost', 'x.localhost', '.cdn.example',
+               'cdn.example/lib', '[2001:db8::1]', 'cdn.example 192.0.2.1') {
+    my $errors = $conf->{errors};
+    $conf->parse_rules("url_redirector_selenium_resource $bad\n");
+    ok($conf->{errors} > $errors && $res->() eq '',
+       "url_redirector_selenium_resource refuses '$bad'");
+  }
+  my $errors = $conf->{errors};
+  $conf->parse_rules("url_redirector_selenium_resource CDN.Example other.example third.example\n");
+  ok($conf->{errors} == $errors && $res->() eq 'cdn.example,other.example,third.example',
+     'url_redirector_selenium_resource takes host names, in lower case');
+  ok(!Mail::SpamAssassin::Plugin::Redirectors::_lookup_redirector(
+       Mail::SpamAssassin::URI->new('http://cdn.example/x'), $conf),
+     'a url_redirector_selenium_resource host is not a redirector');
+  $conf->parse_rules("clear_url_redirector_selenium_resource Other.Example\n");
+  is($res->(), 'cdn.example,third.example',
+     'clear_url_redirector_selenium_resource removes a named host');
+  $conf->parse_rules("clear_url_redirector_selenium_resource\n");
+  is($res->(), '', 'clear_url_redirector_selenium_resource with no host removes them all');
+  $sa->finish();
 }

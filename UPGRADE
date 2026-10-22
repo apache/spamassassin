@@ -8,6 +8,16 @@ Note for Users Upgrading to SpamAssassin 4.0.3
   mixing shorteners and redirectors in any order are now followed
   correctly, and query strings are no longer stripped before fetching.
 
+- All Mail::SpamAssassin::Plugin::Redirectors settings, including the
+  url_shortener* aliases, are now administrator settings, which spamd
+  does not accept in users' preferences (user_prefs files, SQL or
+  LDAP). In 4.0.2, users could set url_redirector, url_redirector_get,
+  clear_url_redirector, url_redirector_params, url_shortener,
+  url_shortener_get, clear_url_shortener and
+  url_shortener_custom_user_agent, and the url_redirector_cache_* and
+  url_shortener_cache_* settings with allow_user_rules. Move any of these
+  from users' preferences to the site configuration.
+
 - Mail::SpamAssassin::Plugin::ExtractText now has the possibility
   to cache results in order to speedup attachment processing.
 
@@ -80,7 +90,10 @@ Note for Users Upgrading to SpamAssassin 4.0.3
 
 - Mail::SpamAssassin::Plugin::Redirectors can connect to a Selenium
   server in order to catch more redirectors that uses Javascript or
-  other tricks.
+  other tricks. See the plugin's SECURITY CONSIDERATIONS section before
+  enabling it: a real JavaScript-executing browser is pointed at URLs
+  taken from untrusted mail, so the Selenium host should be isolated and
+  its outbound network access restricted.
 
 - New MIME-part handler framework. A handler registers one of its
   methods as the handler for a content-type pattern -- an exact type

@@ -280,12 +280,20 @@ endif
 # rather than a simple HEAD or GET request. If Selenium support is
 # disabled or not available, these redirectors will be skipped.
 #
-if can(Mail::SpamAssassin::Plugin::Redirectors::has_url_redirector_selenium)
-    url_redirector_selenium .blob.core.windows.net
+if can(Mail::SpamAssassin::Plugin::Redirectors::has_url_redirector_selenium_resource)
     url_redirector_selenium login.microsoftonline.com/common/oauth2/v2.0/authorize
     url_redirector_selenium login.microsoft.com/common/oauth2/v2.0/authorize
-    url_redirector_selenium stagesuccess.wpengine.com/themes
     url_redirector_selenium uselesstools.jonfinger.com/r
+endif
+
+#
+# Hosts that pages of the Selenium redirectors above load resources from.
+# The Microsoft OAuth pages need these to run the script that redirects.
+# List only hosts where senders cannot publish content, and only for a
+# redirector whose page needs them.
+#
+if can(Mail::SpamAssassin::Plugin::Redirectors::has_url_redirector_selenium_resource)
+    url_redirector_selenium_resource aadcdn.msftauth.net aadcdn.msauth.net login.live.com
 endif
 
 endif

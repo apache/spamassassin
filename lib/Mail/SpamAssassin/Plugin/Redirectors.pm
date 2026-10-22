@@ -83,6 +83,11 @@ points to the actual destination URL.  It then adds this URL to the list of
 URIs extracted by SpamAssassin which can then be accessed by uri rules and
 plugins such as URIDNSBL.
 
+For hosts listed with C<url_redirector> or C<url_redirector_get>, the
+request is made with Perl's LWP library (libwww-perl), without a browser.
+This documentation calls these two methods "LWP", in contrast to the
+Selenium browser used for hosts listed with C<url_redirector_selenium>.
+
 This plugin will follow chained redirections, where a redirected URL leads
 to another redirector, in any combination and order -- for example a
 redirector that unwraps into what used to be called a "shortener", or vice
@@ -108,6 +113,16 @@ status are documented in L<SYNOPSIS> section.
 This plugin runs before priority 0 so that it may modify the parsed URI
 list prior to normal uri rules or the URIDNSBL plugin.
 
+=head1 SECURITY CONSIDERATIONS
+
+When C<url_redirector_selenium_host> is set, the Selenium server runs a
+real browser that opens URLs chosen by the senders of incoming mail. Read
+F<Redirectors-Selenium-Security.pod> before setting it. The file is in the
+F<docs> directory of the SpamAssassin distribution, and C<make install>
+installs it in the documentation directory, by default
+F<PREFIX/share/doc/spamassassin>. To read it, run C<perldoc> with the
+file's path.
+
 =head1 ACKNOWLEDGEMENTS
 
 The url_shortener functionality was originally provided by a separate
@@ -120,8 +135,14 @@ compatibility shim that loads this plugin.
 package Mail::SpamAssassin::Plugin::Redirectors;
 
 use Mail::SpamAssassin::Plugin;
+use NetAddr::IP 4.000;
 use Mail::SpamAssassin::Util qw(compile_regexp);
 use Mail::SpamAssassin::URI;
+use Mail::SpamAssassin::Constants qw(:ip);
+use Mail::SpamAssassin::Timeout;
+use Time::HiRes ();
+use Scalar::Util qw(refaddr);
+use MIME::Base64 ();
 use strict;
 use warnings;
 
@@ -131,7 +152,7 @@ use vars qw(@ISA);
 my $VERSION = 4.10;
 
 use constant HAS_LWP_USERAGENT => eval { require LWP::UserAgent; require LWP::Protocol::https; };
-use constant HAS_SELENIUM => eval { require Selenium::Remote::Driver; };
+use constant HAS_SELENIUM => eval { require Selenium::Chrome; };
 
 sub dbg { my $msg = shift; return Mail::SpamAssassin::Logger::dbg("Redirectors: $msg", @_); }
 sub info { my $msg = shift; return Mail::SpamAssassin::Logger::info("Redirectors: $msg", @_); }
@@ -178,7 +199,60 @@ sub new {
   return $self;
 }
 
-=head1 USER SETTINGS
+use constant SELENIUM_QUIT_TIMEOUT => 5;
+
+# How long each WebDriver request made while a session is being created
+# may wait for the Selenium server, in seconds
+use constant SELENIUM_CREATE_TIMEOUT => 10;
+
+# Quit one Selenium session, bounding how long the quit may block.
+sub _quit_selenium_ua {
+  my ($self, $ua) = @_;
+  return unless defined $ua;
+  my $t = Mail::SpamAssassin::Timeout->new({ secs => SELENIUM_QUIT_TIMEOUT });
+  my $err = $t->run_and_catch(sub { $ua->quit() });
+  if ($t->timed_out()) {
+    dbg("Selenium session quit exceeded ${\ SELENIUM_QUIT_TIMEOUT}s and was "
+        . "abandoned; the session will be left for the Selenium server's own "
+        . "session timeout to reclaim");
+  } elsif (defined $err && $err =~ /child processing timeout/) {
+    (my $e = $err) =~ s/\s+/ /g;
+    $e =~ s/ \z//;
+    info("spamd child processing timeout reached while quitting the "
+         . "Selenium session; absorbed so the child carries on, and the "
+         . "session is left for the Selenium server's own session timeout "
+         . "to reclaim ($e)");
+  } elsif (defined $err && $err ne '') {
+    dbg("Error quitting Selenium session: $err");
+  }
+}
+
+sub per_msg_finish {
+  my ($self, $opts) = @_;
+  my $pms = $opts->{permsgstatus};
+  my $ua = $pms->{redir_selenium_ua};
+  my $leftover = delete $self->{redir_selenium_live_ua};
+
+  if (defined $leftover && !(defined $ua && refaddr($ua) == refaddr($leftover))) {
+    dbg("quitting a Selenium session that is not this message's own: left "
+        . "open by a previous message whose check() did not reach finish(), "
+        . "or a kept session set aside at a processing deadline");
+    $self->_quit_selenium_ua($leftover);
+  }
+
+  return unless defined $ua;
+  if ($pms->{conf}->{url_redirector_selenium_reuse_session}
+      && !$pms->{redir_deadline_abandoned}) {
+    $self->{redir_selenium_kept_ua} = $ua;
+    $self->{redir_selenium_kept_args} = $pms->{redir_selenium_args};
+    dbg("keeping Selenium session " . $ua->{session_id}
+        . " for the next message (url_redirector_selenium_reuse_session)");
+    return;
+  }
+  $self->_quit_selenium_ua($ua);
+}
+
+=head1 ADMINISTRATOR SETTINGS
 
 =over 4
 
@@ -253,12 +327,14 @@ sub set_config {
   };
   push (@cmds, {
     setting => 'url_redirector',
+    is_admin => 1,
     default => {},
     type => $Mail::SpamAssassin::Conf::CONF_TYPE_HASH_KEY_VALUE,
     code => $url_redirector_code,
   });
   push (@cmds, {
     setting => 'url_shortener',
+    is_admin => 1,
     default => {},
     type => $Mail::SpamAssassin::Conf::CONF_TYPE_HASH_KEY_VALUE,
     code => $url_redirector_code,
@@ -266,40 +342,16 @@ sub set_config {
 
 =over 4
 
-=item url_redirector_use_selenium (default: 0)
+=item url_redirector_selenium_host (default: none)
 
-Enables the Selenium subsystem. When set to 1, hosts listed in
-C<url_redirector_selenium> are fetched using Selenium (headless Chrome).
-When 0 (the default), those hosts are skipped entirely -- there is no
-fallback to LWP, because hosts only belong in C<url_redirector_selenium>
-if their redirects cannot be discovered via LWP (e.g., JavaScript-driven
-redirects).
+Set Selenium host to use. Hosts listed in C<url_redirector_selenium> are
+looked up only when this is set.
 
-This is a runtime kill switch: an operator can disable the Selenium
-subsystem without editing the host allowlist. While it is off, those
-hosts are simply not probed -- C<redir_url()> still fires for them so
-detection rules continue to work.
-
-Due to how Selenium works, C<redir_url_code()> and C<redir_url_404> subs
-will not fire for hosts handled by Selenium; Selenium reports only
-"redirected" (301) or "not a redirect" (200), not real HTTP status codes.
-
-=back
-
-=cut
-
-  push (@cmds, {
-    setting => 'url_redirector_use_selenium',
-    default => 0,
-    is_priv => 1,
-    type => $Mail::SpamAssassin::Conf::CONF_TYPE_BOOL
-  });
-
-=over 4
-
-=item url_redirector_selenium_host (default: 127.0.0.1)
-
-Set Selenium host to use.
+If the Selenium server does not answer when a session is created, each
+message that needs a Selenium lookup can be delayed by up to about 20
+seconds; if it answers but has no free session, by about 10.
+Allow the server at least one session for each SpamAssassin process that
+makes Selenium lookups.
 
 =back
 
@@ -307,8 +359,8 @@ Set Selenium host to use.
 
   push (@cmds, {
     setting => 'url_redirector_selenium_host',
-    default => '127.0.0.1',
-    is_priv => 1,
+    default => '',
+    is_admin => 1,
     type => $Mail::SpamAssassin::Conf::CONF_TYPE_STRING
   });
 
@@ -325,15 +377,134 @@ Set Selenium port to use.
   push (@cmds, {
     setting => 'url_redirector_selenium_port',
     default => 4444,
-    is_priv => 1,
+    is_admin => 1,
     type => $Mail::SpamAssassin::Conf::CONF_TYPE_NUMERIC
+  });
+
+=over 4
+
+=item url_redirector_selenium_reuse_session (0|1)  (default: 0)
+
+If set, the browser session used for a message is kept for the next message
+instead of being closed, so cookies, stored data and any page still running
+carry over between messages.
+This turns off the per-message isolation described under
+L</SECURITY CONSIDERATIONS>. Read that before enabling it.
+
+A kept session is closed if it does not answer when it is next needed, or
+if the message that needs it uses different browser settings; otherwise the
+Selenium server removes it when its session timeout expires.
+
+=back
+
+=cut
+
+  push (@cmds, {
+    setting => 'url_redirector_selenium_reuse_session',
+    default => 0,
+    is_admin => 1,
+    type => $Mail::SpamAssassin::Conf::CONF_TYPE_BOOL
+  });
+
+=over 4
+
+=item url_redirector_selenium_proxy scheme://host:port  (default: none)
+
+The proxy the Selenium browser uses for the listed hosts. The scheme
+is C<http>, C<https> or C<socks5>.
+An IPv6 host literal must be bracketed (C<[::1]>).
+The port is required.
+Only one proxy is accepted. A proxy list, the per-scheme form
+(C<http=host:port>) or C<direct://> is rejected, because it could let the
+browser bypass the proxy.
+
+The host is the proxy address as seen from the Selenium host or container,
+not from SpamAssassin's host.
+
+The browser's own host list applies with or without a proxy. A proxy
+configured as described in L</SECURITY CONSIDERATIONS> looks up each
+listed host name itself, refuses it if it resolves to an internal
+address, and logs requests by host name. Without a proxy, the
+firewall and resolver of the Selenium host must refuse internal
+addresses.
+
+=back
+
+=cut
+
+  push (@cmds, {
+    setting => 'url_redirector_selenium_proxy',
+    default => '',
+    is_admin => 1,
+    type => $Mail::SpamAssassin::Conf::CONF_TYPE_STRING,
+    code => sub {
+      my ($self, $key, $value, $line) = @_;
+      if (!defined $value || $value eq '') {
+        # Unset is allowed: Selenium then runs with no proxy.
+        $self->{url_redirector_selenium_proxy} = '';
+        return;
+      }
+
+      if ($value =~ m{^direct://?$}i) {
+        dbg("config: url_redirector_selenium_proxy: 'direct://' would silently disable the proxy; leave the setting unset instead of naming it");
+        return $Mail::SpamAssassin::Conf::INVALID_VALUE;
+      }
+
+      if ($value =~ /[;,=\s]/) {
+        dbg("config: url_redirector_selenium_proxy: '$value' invalid, a single proxy value cannot contain ';', ',', '=' or whitespace");
+        return $Mail::SpamAssassin::Conf::INVALID_VALUE;
+      }
+
+      my ($scheme, $host, $port) = $value =~ m{
+        ^ (https?|socks5) ://
+          ( \[ [^\]]* \] | [^/:\s]+ )
+          : ([0-9]{1,5})
+        $
+      }xi;
+      if (!defined $scheme || $port < 1 || $port > 65535) {
+        dbg("config: url_redirector_selenium_proxy: '$value' invalid, expected scheme://host:port with scheme http, https or socks5");
+        return $Mail::SpamAssassin::Conf::INVALID_VALUE;
+      }
+      $scheme = lc $scheme;
+
+      my ($host_valid, $unspecified);
+      if ($host =~ /^\[(.*)\]$/) {
+        my $inner = $1;
+        $host_valid = ($inner =~ /:/ && $inner !~ /^IPv6:/i
+                       && $inner =~ IS_IP_ADDRESS);
+        if ($host_valid) {
+          my $ip = NetAddr::IP->new($inner);
+          $unspecified = ($ip && $ip->short =~ /^::(?:ffff:0:0)?\z/i);
+        }
+      } elsif ($host =~ /^[0-9.]+$/) {
+        $host_valid = ($host =~ IS_IPV4_ADDRESS);
+        $unspecified = ($host eq '0.0.0.0');
+      } else {
+        $host_valid = ($host =~ m{
+            ^ [A-Za-z0-9] (?:[A-Za-z0-9-]{0,61}[A-Za-z0-9])?
+                (?:\. [A-Za-z0-9] (?:[A-Za-z0-9-]{0,61}[A-Za-z0-9])? )*
+            $
+          }x);
+      }
+      if (!$host_valid) {
+        dbg("config: url_redirector_selenium_proxy: '$value' invalid, expected scheme://host:port with scheme http, https or socks5");
+        return $Mail::SpamAssassin::Conf::INVALID_VALUE;
+      }
+      if ($unspecified) {
+        dbg("config: url_redirector_selenium_proxy: '$value' invalid, $host is an unspecified address, which a proxy listens on; give an address the browser can reach the proxy at");
+        return $Mail::SpamAssassin::Conf::INVALID_VALUE;
+      }
+
+      $self->{url_redirector_selenium_proxy} = "$scheme://$host:$port";
+    },
   });
 
 =over 4
 
 =item clear_url_redirector  [domain[/path]] [domain[/path]...]
 
-Clear configured url_redirector/url_shortener domains, for example to
+Clear domains configured with url_redirector, url_redirector_get or
+url_redirector_selenium (or their url_shortener aliases), for example to
 override default settings from an update channel.  If no arguments are given,
 all entries are cleared. If domains are specified, only those are removed.
 
@@ -358,11 +529,13 @@ added by a bare-domain configuration.
   };
   push (@cmds, {
     setting => 'clear_url_redirector',
+    is_admin => 1,
     type => $Mail::SpamAssassin::Conf::CONF_TYPE_NOARGS,
     code => $clear_url_redirector_code,
   });
   push (@cmds, {
     setting => 'clear_url_shortener',
+    is_admin => 1,
     type => $Mail::SpamAssassin::Conf::CONF_TYPE_NOARGS,
     code => $clear_url_redirector_code,
   });
@@ -374,8 +547,8 @@ added by a bare-domain configuration.
 Domains that should be considered as an URL redirector, accessed using the
 HTTP GET method instead of HEAD. Syntax and matching rules are the same as
 C<url_redirector>: a bare domain matches that host and C<www.>, a leading
-dot matches the domain and any subdomain, and an optional C</path> prefix
-restricts the match.
+dot matches any subdomain but not the domain itself, and an optional
+C</path> prefix restricts the match.
 
 =back
 
@@ -392,11 +565,13 @@ restricts the match.
   };
   push (@cmds, {
     setting => 'url_redirector_get',
+    is_admin => 1,
     type => $Mail::SpamAssassin::Conf::CONF_TYPE_HASH_KEY_VALUE,
     code => $url_redirector_get_code,
   });
   push (@cmds, {
     setting => 'url_shortener_get',
+    is_admin => 1,
     type => $Mail::SpamAssassin::Conf::CONF_TYPE_HASH_KEY_VALUE,
     code => $url_redirector_get_code,
   });
@@ -414,14 +589,33 @@ Selenium executes JavaScript on the destination and always sends GET,
 which has weaker safety properties than the LWP path; reserve this list
 for hosts that genuinely require browser-driven redirect unwrapping.
 
+The browser connects only to the hosts listed here and in
+C<url_redirector_selenium_resource>. Hosts listed here are matched as above
+except that paths play no part: a redirect or script that leads to another
+path on a listed host is followed, and one that leads to a host in neither
+list is not. Its URL is then recorded as the redirect target without the
+browser fetching it (see L</SECURITY CONSIDERATIONS>). A page that needs
+resources from hosts not listed, such as scripts from a content delivery
+network, loads without them, and a redirect that depends on them is not
+seen; list such hosts with C<url_redirector_selenium_resource>.
+Each time it creates a browser session, the plugin checks that the
+browser refuses an address outside this list. If it does not, the plugin
+closes the session and skips Selenium lookups, with one warning per
+process.
+
 If the same host appears in both C<url_redirector_selenium> and
 C<url_redirector>/C<url_redirector_get>, the directive parsed last sets
-the method, and a warning is emitted.
+the method for that host, including any paths listed for it under the
+other directive, and a warning is emitted.
 
-The Selenium subsystem is gated by C<url_redirector_use_selenium>. When
-that flag is off, hosts in this list are skipped entirely (there is no
-fallback to LWP, since these hosts wouldn't yield useful results via
-LWP).
+Hosts in this list are looked up only when C<url_redirector_selenium_host>
+is set. Until then they are skipped (there is no fallback to LWP, since
+these hosts wouldn't yield useful results via LWP), and C<redir_url()>
+still fires for them so detection rules continue to work.
+
+Due to how Selenium works, C<redir_url_code()> and C<redir_url_404> subs
+will not fire for hosts handled by Selenium; Selenium reports only
+"redirected" (301) or "not a redirect" (200), not real HTTP status codes.
 
 =back
 
@@ -429,6 +623,7 @@ LWP).
 
   push (@cmds, {
     setting => 'url_redirector_selenium',
+    is_admin => 1,
     type => $Mail::SpamAssassin::Conf::CONF_TYPE_HASH_KEY_VALUE,
     code => sub {
       my ($self, $key, $value, $line) = @_;
@@ -437,6 +632,79 @@ LWP).
       }
       foreach my $token (split(/\s+/, $value)) {
         _add_redirector_entry($self, $token, 'selenium');
+      }
+    }
+  });
+
+=over 4
+
+=item url_redirector_selenium_resource  host [host...]     (default: none)
+
+Hosts the Selenium browser may also fetch from, for pages on
+C<url_redirector_selenium> hosts that load scripts or other resources from
+another host. URLs on these hosts are not looked up.
+
+Each entry matches only that exact host, not its C<www.> form or other
+subdomains. IP addresses, paths, a leading dot and names under
+C<.localhost> are not accepted.
+
+List only hosts where senders cannot publish content, not a storage
+service or a package CDN. See L</SECURITY CONSIDERATIONS>.
+
+Example:
+
+ url_redirector_selenium_resource code.jquery.com
+
+=back
+
+=cut
+
+  push (@cmds, {
+    setting => 'url_redirector_selenium_resource',
+    is_admin => 1,
+    default => {},
+    type => $Mail::SpamAssassin::Conf::CONF_TYPE_HASH_KEY_VALUE,
+    code => sub {
+      my ($self, $key, $value, $line) = @_;
+      if ($value eq '') {
+        return $Mail::SpamAssassin::Conf::MISSING_REQUIRED_VALUE;
+      }
+      my @hosts = map { lc } split(/\s+/, $value);
+      foreach my $host (@hosts) {
+        if (!_is_resource_host($host)) {
+          dbg("config: url_redirector_selenium_resource: '$host' invalid, expected a host name such as code.jquery.com, without a path, leading dot or IP address, and not under .localhost");
+          return $Mail::SpamAssassin::Conf::INVALID_VALUE;
+        }
+      }
+      $self->{url_redirector_selenium_resource}->{$_} = 1 foreach @hosts;
+    }
+  });
+
+=over 4
+
+=item clear_url_redirector_selenium_resource  [host] [host...]
+
+Clear configured url_redirector_selenium_resource hosts, for example to
+override default settings from an update channel. If no arguments are
+given, all hosts are cleared. If hosts are specified, only those are
+removed.
+
+=back
+
+=cut
+
+  push (@cmds, {
+    setting => 'clear_url_redirector_selenium_resource',
+    is_admin => 1,
+    type => $Mail::SpamAssassin::Conf::CONF_TYPE_NOARGS,
+    code => sub {
+      my ($self, $key, $value, $line) = @_;
+      if ($value eq '') {
+        $self->{url_redirector_selenium_resource} = {};
+      } else {
+        foreach my $host (split(/\s+/, $value)) {
+          delete $self->{url_redirector_selenium_resource}->{lc $host};
+        }
       }
     }
   });
@@ -459,6 +727,7 @@ Example:
 
   push (@cmds, {
     setting => 'url_skip_redirect_to',
+    is_admin => 1,
     default => {},
     type => $Mail::SpamAssassin::Conf::CONF_TYPE_HASH_KEY_VALUE,
     code => sub {
@@ -485,6 +754,7 @@ only those are removed from the list.
 
   push (@cmds, {
     setting => 'clear_url_skip_redirect_to',
+    is_admin => 1,
     type => $Mail::SpamAssassin::Conf::CONF_TYPE_NOARGS,
     code => sub {
       my ($self, $key, $value, $line) = @_;
@@ -511,6 +781,7 @@ The regexp must match only the redirected domain.
 
   push(@cmds, {
     setting => 'url_redirector_params',
+    is_admin => 1,
     default => qr/(?:adurl|af_web_dp|cm_destination|continue|destination|destURL|goto|h|l|login|location|p1|pval|r|redir|redirect|redirectTo|ret_url|return|returnUrl|referer|service|target|tid|u|url)=(.*)/,
     type => $Mail::SpamAssassin::Conf::CONF_TYPE_STRING,
     code => sub {
@@ -555,18 +826,18 @@ Example:
   };
   push (@cmds, {
     setting => 'url_redirector_custom_user_agent',
+    is_admin => 1,
     default => '',
     type => $Mail::SpamAssassin::Conf::CONF_TYPE_STRING,
     code => $url_redirector_custom_user_agent_code,
   });
   push (@cmds, {
     setting => 'url_shortener_custom_user_agent',
+    is_admin => 1,
     default => '',
     type => $Mail::SpamAssassin::Conf::CONF_TYPE_STRING,
     code => $url_redirector_custom_user_agent_code,
   });
-
-=head1 PRIVILEGED SETTINGS
 
 =over 4
 
@@ -586,7 +857,7 @@ url_redirector_cache_type dbi
   push (@cmds, {
     setting => 'url_redirector_cache_type',
     default => '',
-    is_priv => 1,
+    is_admin => 1,
     type => $Mail::SpamAssassin::Conf::CONF_TYPE_STRING
   });
 
@@ -626,7 +897,7 @@ of migrating.
   push (@cmds, {
     setting => 'url_redirector_cache_dsn',
     default => '',
-    is_priv => 1,
+    is_admin => 1,
     type => $Mail::SpamAssassin::Conf::CONF_TYPE_STRING
   });
 
@@ -644,7 +915,7 @@ SQLite.
   push (@cmds, {
     setting => 'url_redirector_cache_username',
     default => '',
-    is_priv => 1,
+    is_admin => 1,
     type => $Mail::SpamAssassin::Conf::CONF_TYPE_STRING
   });
 
@@ -662,7 +933,7 @@ SQLite.
   push (@cmds, {
     setting => 'url_redirector_cache_password',
     default => '',
-    is_priv => 1,
+    is_admin => 1,
     type => $Mail::SpamAssassin::Conf::CONF_TYPE_STRING
   });
 
@@ -701,7 +972,7 @@ shorteners alike).
   push (@cmds, {
     setting => 'url_shortener_cache_type',
     default => '',
-    is_priv => 1,
+    is_admin => 1,
     type => $Mail::SpamAssassin::Conf::CONF_TYPE_STRING,
     code => sub {
       my ($self, $key, $value, $line) = @_;
@@ -722,7 +993,7 @@ Deprecated alias of C<url_redirector_cache_dsn>.
   push (@cmds, {
     setting => 'url_shortener_cache_dsn',
     default => '',
-    is_priv => 1,
+    is_admin => 1,
     type => $Mail::SpamAssassin::Conf::CONF_TYPE_STRING,
     code => sub {
       my ($self, $key, $value, $line) = @_;
@@ -743,7 +1014,7 @@ Deprecated alias of C<url_redirector_cache_username>.
   push (@cmds, {
     setting => 'url_shortener_cache_username',
     default => '',
-    is_priv => 1,
+    is_admin => 1,
     type => $Mail::SpamAssassin::Conf::CONF_TYPE_STRING,
     code => sub {
       my ($self, $key, $value, $line) = @_;
@@ -764,7 +1035,7 @@ Deprecated alias of C<url_redirector_cache_password>.
   push (@cmds, {
     setting => 'url_shortener_cache_password',
     default => '',
-    is_priv => 1,
+    is_admin => 1,
     type => $Mail::SpamAssassin::Conf::CONF_TYPE_STRING,
     code => sub {
       my ($self, $key, $value, $line) = @_;
@@ -795,8 +1066,6 @@ See C<url_redirector_cache_autoclean> for database cleaning.
       $self->{url_redirector_cache_ttl} = $value + 0;
     }
   });
-
-=head1 ADMINISTRATOR SETTINGS
 
 =over 4
 
@@ -880,6 +1149,9 @@ work and report any found redirector URLs.
 =item max_redir_url_redirections     (default: 10)
 
 Maximum depth of chained redirections that a redirector can generate.
+
+Redirection performed by the Selenium browser uses the browser's limits
+which look like a failed lookup if exceeded.
 
 =back
 
@@ -1350,9 +1622,10 @@ sub _add_redirector_entry {
     my $display = ($is_suffix ? '.' : '') . $domspec;
     warn "redirectors: $display already registered with method '$existing->{method}'; overriding with '$method'\n";
   }
-  my $entry = $conf->{$bucket}->{$domspec} ||= { method => $method, paths => [] };
-  $entry->{method} = $method;
-  push @{$entry->{paths}}, $path unless grep { $_ eq $path } @{$entry->{paths}};
+  # Store new entry to limit change to this scan
+  my @paths = $existing ? @{$existing->{paths}} : ();
+  push @paths, $path unless grep { $_ eq $path } @paths;
+  $conf->{$bucket}->{$domspec} = { method => $method, paths => \@paths };
 }
 
 sub _clear_redirector_entry {
@@ -1372,8 +1645,13 @@ sub _clear_redirector_entry {
     delete $conf->{$bucket}->{$domspec};
     return;
   }
-  @{$entry->{paths}} = grep { $_ ne $path } @{$entry->{paths}};
-  delete $conf->{$bucket}->{$domspec} unless @{$entry->{paths}};
+  # Store new entry to limit change to this scan
+  my @paths = grep { $_ ne $path } @{$entry->{paths}};
+  if (@paths) {
+    $conf->{$bucket}->{$domspec} = { method => $entry->{method}, paths => \@paths };
+  } else {
+    delete $conf->{$bucket}->{$domspec};
+  }
 }
 
 # Remove every entry from both lookup buckets. Used by
@@ -1550,52 +1828,354 @@ sub _get_lwp_ua {
   return $pms->{redir_lwp_ua} = $ua;
 }
 
+sub _selenium_deadline_reached {
+  my ($self, $err, $pms, $why) = @_;
+  return 0 unless defined $err && $err =~ /__alarm__ignore__/;
+  $pms->{redir_deadline_abandoned} = 1;
+  dbg($why);
+  return 1;
+}
+
+sub _selenium_allowed_hosts {
+  my ($conf) = @_;
+  my (%exact, %suffix);
+  for my $bucket ('url_redirector_exact', 'url_redirector_suffix') {
+    my $entries = $conf->{$bucket} || {};
+    for my $host (keys %$entries) {
+      next unless $entries->{$host}->{method} eq 'selenium';
+      my $h = lc $host;
+      if ($h !~ /^[a-z0-9_](?:[a-z0-9_-]*[a-z0-9_])?
+                  (?:\.[a-z0-9_](?:[a-z0-9_-]*[a-z0-9_])?)* \z/x) {
+        dbg("url_redirector_selenium host '$host' is not a plain host name "
+            . "or IPv4 address; the Selenium browser will not connect to it");
+        next;
+      }
+      if ($bucket eq 'url_redirector_exact') {
+        $exact{$h} = 1;
+        $exact{"www.$h"} = 1 unless $h =~ /^[0-9.]+\z/;
+      } elsif ($h =~ /\./) {
+        # _lookup_redirector never matches a suffix without a dot.
+        $suffix{".$h"} = 1;
+      }
+    }
+  }
+  # Checked by _is_resource_host when the configuration was parsed
+  $exact{$_} = 1 for keys %{ $conf->{url_redirector_selenium_resource} || {} };
+  return ([sort keys %exact], [sort keys %suffix]);
+}
+
+# An exact host name whose last label starts with a letter, so not an IP
+# address in any form a URL can give one. Chrome resolves names under
+# .localhost to a loopback address itself.
+sub _is_resource_host {
+  my ($host) = @_;
+  return $host =~ /^(?:[a-z0-9_](?:[a-z0-9_-]*[a-z0-9_])?\.)+
+                    [a-z](?:[a-z0-9-]*[a-z0-9])?\z/x
+      && $host !~ /\.localhost\z/;
+}
+
+sub _selenium_allowlist_args {
+  my ($conf) = @_;
+  my ($exact, $suffix) = _selenium_allowed_hosts($conf);
+  my $webrtc = '--webrtc-ip-handling-policy=disable_non_proxied_udp';
+
+  my $proxy = $conf->{url_redirector_selenium_proxy};
+  if (!length $proxy) {
+    return ('--host-resolver-rules=' . join(', ', 'MAP * ~NOTFOUND',
+              (map { "EXCLUDE $_" } @$exact),
+              (map { "EXCLUDE *$_" } @$suffix)),
+            $webrtc);
+  }
+
+  my ($scheme, $host, $port) = $proxy =~ m{^(https?|socks5)://(\[[^\]]+\]|[^:]+):(\d+)\z}
+    or return ('--host-resolver-rules=MAP * ~NOTFOUND', $webrtc);
+  $host = lc $host;
+  # Exempt only the proxy's address and port: Chrome matches a MAP
+  # pattern against host:port, with an IPv6 address in brackets.
+  my $rule_host = $host;
+  if ($rule_host =~ /^\[(.+)\]\z/) {
+    my $ip = NetAddr::IP->new($1);
+    $rule_host = '[' . ($ip ? lc $ip->short : $1) . ']';
+  }
+  my $route = { http => 'PROXY', https => 'HTTPS', socks5 => 'SOCKS5' }->{$scheme}
+              . " $host:$port";
+  my $pac = 'function FindProxyForURL(url, host) {'
+    . ' var exact = {' . join(', ', map { "\"$_\": 1" } @$exact) . '};'
+    . ' var suffix = [' . join(', ', map { "\"$_\"" } @$suffix) . '];'
+    . " if (Object.prototype.hasOwnProperty.call(exact, host)) return \"$route\";"
+    . ' for (var i = 0; i < suffix.length; i++) {'
+    . ' var s = suffix[i];'
+    . ' if (host.length > s.length && host.substring(host.length - s.length) == s)'
+    . " return \"$route\"; }"
+    . ' return "DIRECT"; }';
+  return ('--proxy-pac-url=data:application/x-ns-proxy-autoconfig;base64,'
+            . MIME::Base64::encode_base64($pac, ''),
+          "--host-resolver-rules=MAP $rule_host:$port $rule_host, MAP * ~NOTFOUND",
+          $webrtc);
+}
+
+sub _selenium_allowlist_check_url {
+  my (@args) = @_;
+  my %exempt;
+  for my $arg (@args) {
+    next unless $arg =~ /^--host-resolver-rules=(.*)\z/;
+    my $rules = $1;
+    $exempt{lc $_} = 1 for $rules =~ /EXCLUDE ([^,\s]+)/g;
+    $exempt{lc $_} = 1 for $rules =~ /MAP ([0-9.]+):\d+ /g;
+  }
+  my ($n) = grep { !$exempt{"127.0.0.$_"} } 2 .. 254;
+  return 'http://127.0.0.' . ($n // 2) . '/';
+}
+
 sub _get_selenium_ua {
   my ($self, $pms) = @_;
   return $pms->{redir_selenium_ua} if exists $pms->{redir_selenium_ua};
 
+  if (defined $self->{redir_selenium_live_ua}) {
+    dbg("quitting a Selenium session left open by a previous message whose "
+        . "check() did not reach finish()");
+    $self->_quit_selenium_ua(delete $self->{redir_selenium_live_ua});
+  }
+
   my $conf = $pms->{conf};
+
+  my @selenium_args = ('headless', 'incognito',
+                       'user-agent=' . $conf->{url_redirector_user_agent},
+                       _selenium_allowlist_args($conf));
+  $pms->{redir_selenium_args} = join("\n", @selenium_args);
+  if (defined $self->{redir_selenium_kept_ua}
+      && ($self->{redir_selenium_kept_args} // '') ne $pms->{redir_selenium_args}) {
+    dbg("kept Selenium session was created with other browser arguments "
+        . "and is discarded; this message's configuration differs");
+    $self->_quit_selenium_ua(delete $self->{redir_selenium_kept_ua});
+  }
+
+  if ($conf->{url_redirector_selenium_reuse_session}
+      && defined $self->{redir_selenium_kept_ua}) {
+    my $kept = delete $self->{redir_selenium_kept_ua};
+    if (eval { $kept->get_log('performance'); 1 }) {
+      dbg("reusing Selenium session " . $kept->{session_id});
+      $self->{redir_selenium_live_ua} = $kept;
+      return $pms->{redir_selenium_ua} = $kept;
+    }
+    my $kept_err = $@;
+    if ($self->_selenium_deadline_reached($kept_err, $pms,
+          "Selenium session reuse abandoned: a SpamAssassin processing "
+          . "deadline was reached while the kept session was being checked")) {
+      $self->{redir_selenium_live_ua} = $kept;
+      return $pms->{redir_selenium_ua} = undef;
+    }
+    $kept_err =~ s/\s+/ /g;
+    dbg("kept Selenium session did not answer and is discarded; creating a "
+        . "new one: $kept_err");
+    $self->_quit_selenium_ua($kept);
+  }
+
   if (not HAS_SELENIUM) {
-    dbg("url_redirector_use_selenium enabled but Selenium::Remote::Driver Perl module not installed");
+    dbg("url_redirector_selenium_host is set but Selenium::Chrome Perl module not installed");
     return $pms->{redir_selenium_ua} = undef;
   }
 
+  # If option set for one Selenium session per message, no session_id is passed in
+  #
+  my $wd_ua = LWP::UserAgent->new;
+  my $wd_timeout = $wd_ua->timeout;
+  $wd_ua->timeout(SELENIUM_CREATE_TIMEOUT);
   my $ua;
   eval {
-    $ua = Selenium::Remote::Driver->new('remote_server_addr' => $conf->{url_redirector_selenium_host},
+    $ua = Selenium::Chrome->new('remote_server_addr' => $conf->{url_redirector_selenium_host},
                                         'port' => $conf->{url_redirector_selenium_port},
+                                        'ua' => $wd_ua,
                                         'auto_close' => 0,
-                                        'session_id' => $self->{selenium_session_id},
                                         'browser_name' =>'chrome',
+                                        'wd_context_prefix' => '',
                                         'extra_capabilities' => {
+                                            'pageLoadStrategy' => 'eager',
                                             'goog:chromeOptions' => {
-                                                'args'  => [
-                                                    'headless',
-                                                    'incognito',
-                                                    'user-agent=' . $conf->{url_redirector_user_agent}
-                                                ]
+                                                'args'  => \@selenium_args
+                                            },
+                                            'goog:loggingPrefs' => {
+                                                'performance' => 'ALL'
                                             }
                                         });
   };
   if($@) {
-    dbg("Error connecting to Selenium server: $@");
+    my $new_err = $@;
+    if ($new_err =~ /__alarm__ignore__/
+        || ($pms->{master_deadline}
+            && Time::HiRes::time() >= $pms->{master_deadline})) {
+      $pms->{redir_deadline_abandoned} = 1;
+      dbg("Selenium session creation abandoned: a SpamAssassin processing "
+          . "deadline was reached while the session was being created; the "
+          . "Selenium client reported: $new_err");
+      return $pms->{redir_selenium_ua} = undef;
+    }
+    dbg("Error connecting to Selenium server: $new_err");
+    warn("Redirectors: a Selenium session could not be created at $conf->{url_redirector_selenium_host}:$conf->{url_redirector_selenium_port}; Selenium lookups are being skipped. Check url_redirector_selenium_host and url_redirector_selenium_port, that the server serves WebDriver at its root path, and that the server has a free session slot.\n")
+      unless $self->{selenium_warned_session_creation_failure}++;
     return $pms->{redir_selenium_ua} = undef;
   }
-  $ua->{ua}->{max_redirect} = $conf->{max_redir_url_redirections};
-  if(not defined $self->{selenium_session_id}) {
-    $self->{selenium_session_id} = $ua->{session_id};
-    dbg("Connecting to Selenium server with session id " . $self->{selenium_session_id});
-  } else {
-    $ua->session_id($self->{selenium_session_id});
-    dbg("Reusing Selenium session id " . $self->{selenium_session_id});
-  }
+  dbg("Connecting to Selenium server with session id " . $ua->{session_id});
+  $wd_ua->timeout($wd_timeout);
+  $self->{redir_selenium_live_ua} = $ua;
   eval {
-    $ua->set_timeout('implicit', $conf->{url_redirector_timeout} * 1000);
+    $ua->set_timeout('page load', ($conf->{url_redirector_timeout} || 5) * 1000);
   };
   if($@) {
-    dbg("Error setting timeout to $conf->{url_redirector_timeout}: $@");
+    my $timeout_err = $@;
+    return $pms->{redir_selenium_ua} = undef
+      if $self->_selenium_deadline_reached($timeout_err, $pms,
+           "Selenium session setup abandoned: a SpamAssassin processing "
+           . "deadline was reached while the session timeout was being set");
+    dbg("Error setting timeout to $conf->{url_redirector_timeout}: $timeout_err");
   }
-  return $pms->{redir_selenium_ua} = $ua;
+
+  # Chrome ignores a switch it does not recognise, so check that this
+  # session applies the host list before using it.
+  my $probe = _selenium_allowlist_check_url(@selenium_args);
+  my $probe_err = eval { $ua->get($probe); 1 } ? '' : $@;
+  return $pms->{redir_selenium_ua} = $ua
+    if $probe_err =~ /net::ERR_NAME_NOT_RESOLVED/;
+  return $pms->{redir_selenium_ua} = undef
+    if $self->_selenium_deadline_reached($probe_err, $pms,
+         "Selenium session check abandoned: a SpamAssassin processing "
+         . "deadline was reached while the new session was being checked");
+  $probe_err =~ s/\s+/ /g;
+  if ($probe_err eq '' || $probe_err =~ /net::ERR_/) {
+    dbg("Selenium browser did not refuse $probe, so it is not applying the "
+        . "url_redirector_selenium host list: "
+        . ($probe_err eq '' ? 'the page loaded' : $probe_err));
+    warn("Redirectors: the Selenium browser did not refuse an address outside url_redirector_selenium, so it is not applying the host list; Selenium lookups are being skipped. Check that the browser still supports the --host-resolver-rules switch.\n")
+      unless $self->{selenium_warned_allowlist_check}++;
+  } else {
+    dbg("Selenium session could not be checked, skipping this message's "
+        . "Selenium lookups: $probe_err");
+  }
+  $self->_quit_selenium_ua(delete $self->{redir_selenium_live_ua});
+  return $pms->{redir_selenium_ua} = undef;
+}
+
+# Did Chrome stop on it's redirect limit? How many HTTP redirects were followed?
+# Returns ($hit_ceiling, $redirects); $redirects is undef when it is not known.
+sub _selenium_redirect_summary {
+  my ($self, $ua, $redir_url) = @_;
+
+  my $entries = eval { $ua->get_log('performance') };
+  die $@ if $@ && $@ =~ /__alarm__ignore__/;
+  if ($@ || ref $entries ne 'ARRAY') {
+    my $why = $@ || 'no entries returned';
+    $why =~ s/\s+/ /g;
+    dbg("Selenium performance log could not be read after navigating to "
+        . "$redir_url; whether the browser stopped on its own redirect "
+        . "limit, and how many redirects it followed, is not known: $why");
+    return (0, undef, undef);
+  }
+
+  my ($nav_id, %failed, %redirects, %last_hop);
+  for my $entry (@$entries) {
+    my $raw = ref $entry eq 'HASH' ? $entry->{message} : undef;
+    next unless defined $raw
+             && $raw =~ /Network\.(?:requestWillBeSent|loadingFailed)/;
+    my $message = eval { JSON::decode_json($raw)->{message} };
+    next unless ref $message eq 'HASH' && defined $message->{method};
+    my $method = $message->{method};
+    my $params = ref $message->{params} eq 'HASH' ? $message->{params} : {};
+
+    if ($method eq 'Network.requestWillBeSent') {
+      next unless ($params->{type} // '') eq 'Document';
+      next unless defined $params->{requestId};
+      if ($params->{redirectResponse}) {
+        $redirects{ $params->{requestId} }++;
+        my $req = $params->{request};
+        $last_hop{ $params->{requestId} } = $req->{url}
+          if ref $req eq 'HASH' && defined $req->{url};
+        next;
+      }
+      $nav_id = $params->{requestId} unless defined $nav_id;
+    }
+    elsif ($method eq 'Network.loadingFailed') {
+      next unless ($params->{errorText} // '') =~ /ERR_TOO_MANY_REDIRECTS/;
+      $failed{ $params->{requestId} } = 1 if defined $params->{requestId};
+    }
+  }
+
+  return (0, undef, undef) unless defined $nav_id;
+  return (($failed{$nav_id} ? 1 : 0), ($redirects{$nav_id} || 0),
+          $last_hop{$nav_id});
+}
+
+sub _selenium_navigate {
+  my ($self, $ua, $redir_url, $pms) = @_;
+  my $conf = $pms->{conf};
+
+  if (!eval { $ua->get('about:blank'); $ua->get_log('performance'); 1 }) {
+    my $reset_err = $@;
+    die $reset_err if $reset_err =~ /__alarm__ignore__/;
+    $reset_err =~ s/\s+/ /g;
+    dbg("Selenium browser could not be reset before navigating to "
+        . "$redir_url; navigating without the reset: $reset_err");
+  }
+
+  if (!eval { $ua->get($redir_url); 1 }) {
+    my $get_err = $@;
+    die $get_err if $get_err =~ /__alarm__ignore__/;
+    dbg("Error in Selenium request reading url $redir_url, error $get_err");
+    my ($ceiling, $redirects, $last_hop) =
+      $self->_selenium_redirect_summary($ua, $redir_url);
+    return if $ceiling;
+    if (!defined $last_hop) {
+      if (length $conf->{url_redirector_selenium_proxy}
+          && !$self->{selenium_warned_proxy_failure}++) {
+        my $proxy_err = ($get_err =~ /net::ERR_PROXY_/)
+          ? ' the configured proxy may be unreachable;' : '';
+        warn("Redirectors: Selenium navigation failed with url_redirector_selenium_proxy configured;$proxy_err the lookup was abandoned, not retried direct.\n");
+      }
+      return;
+    }
+    dbg("Selenium navigation for $redir_url followed $redirects "
+        . "redirect(s) inside the browser before failing; recording the "
+        . "URL the last one led to: $last_hop");
+    return (301, $last_hop);
+  }
+
+  my ($ceiling, $redirects) = $self->_selenium_redirect_summary($ua, $redir_url);
+  if (defined $redirects) {
+    dbg("Selenium navigation for $redir_url followed $redirects "
+        . "redirect(s) inside the browser");
+  } else {
+    dbg("Selenium navigation for $redir_url: the number of redirects "
+        . "followed inside the browser is not known");
+  }
+  if ($ceiling) {
+    dbg("Selenium navigation for $redir_url stopped on the browser's "
+        . "own redirect limit, so the lookup is treated as failed "
+        . "rather than as a redirect to the last URL the browser "
+        . "fetched");
+    return;
+  }
+
+  my $newurl = $ua->get_current_url();
+  my $wait_secs = $conf->{url_redirector_timeout} || 5;
+  for (1 .. $wait_secs) {
+    last if $newurl ne $redir_url;
+    my $polled = eval { sleep 1; $ua->get_current_url() };
+    die $@ if $@ && $@ =~ /__alarm__ignore__/;
+    $newurl = $polled if defined $polled;
+  }
+  my $rcode;
+  if($newurl ne $redir_url) {
+    $rcode = 301;
+  } else {
+    if ($redir_url =~ /\/(https?:\/\/.{4,256})/) {
+      $rcode = 301;
+      $newurl = $1;
+      dbg("Found $1 in hard-coded redirector");
+    } else {
+      $rcode = 200;
+      dbg("URL is not a redirect: $redir_url = ".$rcode);
+    }
+  }
+  return ($rcode, $newurl);
 }
 
 # Perform an HTTP request for $uri (a Mail::SpamAssassin::URI) using $method
@@ -1636,42 +2216,19 @@ sub _do_http {
       my $ua = $self->_get_selenium_ua($pms);
       return unless defined $ua;
 
-      my $rcode;
-      my $newurl = '';
-      eval {
-	$ua->get($redir_url);
-      };
-      if($@) {
-	dbg("Error in Selenium request reading url $redir_url, error $@");
-	return;
-      } else {
-        $newurl = $ua->get_current_url();
-        # get_current_url() right after ->get() only reflects the page that
-        # just finished loading, it does not wait for any client-side
-        # (JS/timer-driven) navigation that page goes on to trigger a few
-        # seconds later, poll for a bit before concluding this wasn't a redirect.
-        my $wait_secs = $conf->{url_redirector_timeout} || 5;
-        for (1 .. $wait_secs) {
-          last if $newurl ne $redir_url;
-          sleep 1;
-          my $polled = eval { $ua->get_current_url() };
-          $newurl = $polled if defined $polled;
-        }
-        if($newurl ne $redir_url) {
-          $rcode = 301;
-        } else {
-	  if ($redir_url =~ /\/(https?:\/\/.{4,256})/) {
-            $rcode = 301;
-	    $newurl = $1;
-	    dbg("Found $1 in hard-coded redirector");
-          } else {
-            $rcode = 200;
-            dbg("URL is not a redirect: $redir_url = ".$rcode);
-	  }
-        }
+      my ($rcode, $newurl) =
+        eval { $self->_selenium_navigate($ua, $redir_url, $pms) };
+      if ($@) {
+        my $err = $@;
+        return if $self->_selenium_deadline_reached($err, $pms,
+          "Selenium navigation for $redir_url abandoned: a SpamAssassin "
+          . "processing deadline was reached during the navigation");
+        die $err;
       }
+      return unless defined $rcode;
       $location = $newurl;
-      $pms->{"redir_url_$rcode"} = 1;
+      $pms->{"redir_url_$rcode"} = 1
+        unless _is_https_upgrade($uri, Mail::SpamAssassin::URI->new($newurl));
       $self->cache_add($redir_url, $rcode);
       if($rcode !~ /^30[12]/) {
         return;
@@ -1770,6 +2327,14 @@ sub _do_http {
   return $location;
 }
 
+# A plain http->https on same host is not a redirect
+sub _is_https_upgrade {
+  my ($from, $to) = @_;
+  my ($host, $to_host) = ($from->host, $to->host);
+  return $from->scheme eq 'http' && $to->scheme eq 'https'
+    && defined $host && defined $to_host && $host eq $to_host;
+}
+
 # Recursive chain walker. Stops cleanly when neither
 # _lookup_redirector nor _extract_embedded_uri matches. HTTP
 # requests are gated on _lookup_redirector returning an entry.
@@ -1784,6 +2349,8 @@ sub _do_http {
 sub _walk_redirects {
   my ($self, $uri, $src_info, $pms, $depth, $been_here) = @_;
   my $conf = $pms->{conf};
+
+  return if $pms->{redir_deadline_abandoned};
 
   # Accepts either a string or an already-parsed URI, so a caller that has one
   # in hand does not pay to parse it twice.  Parsed once here and passed down:
@@ -1806,13 +2373,13 @@ sub _walk_redirects {
 
   my $rentry = _lookup_redirector($u, $conf);
 
-  # Selenium method requires url_redirector_use_selenium=1. If the subsystem
-  # is off, skip the HTTP lookup but still set redir_url so the message-level
+  # Selenium method requires url_redirector_selenium_host. If it is not set,
+  # skip the HTTP lookup but still set redir_url so the message-level
   # detection rule fires (matches the max_redir_urls=0 semantics: "found a
   # redirector but didn't probe it"). Fall through to embedded-URI extraction
   # in case the URL also carries a querystring redirect.
-  if ($rentry && $rentry->{method} eq 'selenium' && !$conf->{url_redirector_use_selenium}) {
-    dbg("$uri matches url_redirector_selenium but url_redirector_use_selenium=0, skipping http lookup");
+  if ($rentry && $rentry->{method} eq 'selenium' && !length $conf->{url_redirector_selenium_host}) {
+    dbg("$uri matches url_redirector_selenium but url_redirector_selenium_host is not set, skipping http lookup");
     $pms->{redir_url} = 1;
     $rentry = undef;
   }
@@ -1858,8 +2425,7 @@ sub _walk_redirects {
     # just follow it at the same depth so it doesn't count toward redir_url_valid/chained or trip
     # redir_url_chained_domain when the https URL re-matches the same
     # url_redirector entry.
-    if ($u->scheme eq 'http' && $loc_uri->scheme eq 'https'
-        && defined $host && defined $loc_host && $host eq $loc_host
+    if (_is_https_upgrade($u, $loc_uri)
         && !$been_here->{"schemeupgrade:$host"}++)
     {
       dbg("http->https upgrade on same host $host, not counting as a redirect: $uri => $location");
@@ -1915,6 +2481,11 @@ sub _check_redir {
   # HTTP-eligible URIs will not create a UA at all.
   my $uris = $pms->get_uri_detail_list();
   foreach my $uri (keys %{$uris}) {
+    if ($pms->{redir_deadline_abandoned}) {
+      dbg("a SpamAssassin processing deadline cut short one of this message's "
+          . "Selenium calls, skipping its remaining redirector URLs");
+      last;
+    }
     my $info = $uris->{$uri};
     next unless $info->{domains} && $info->{cleaned};
     next if $info->{types} && keys %{$info->{types}} == 1 && $info->{types}->{img};
@@ -2004,6 +2575,7 @@ sub has_redir_url_maxchain { 1 }
 sub has_redir_url_loop { 1 }
 sub has_selenium_support { 1 }
 sub has_url_redirector_selenium { 1 }
+sub has_url_redirector_selenium_resource { 1 }
 sub has_url_skip_redirect_to { 1 }
 sub has_url_redirector_path { 1 } # path-prefix syntax in url_redirector / url_redirector_get
 sub has_short_url { 1 }

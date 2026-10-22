@@ -106,7 +106,7 @@ my %makefile = (
 
     'macro' => {
         DATAFILES => 'user_prefs.template languages sa-update-pubkey.txt',
-        DOCSFILES => 'docs/HOWTO.Bayes-Redis',
+        DOCSFILES => 'docs/HOWTO.Bayes-Redis docs/Redirectors-Selenium-Security.pod',
     },
 
     # be quite explicit about this; afaik CPAN.pm is sensible using this

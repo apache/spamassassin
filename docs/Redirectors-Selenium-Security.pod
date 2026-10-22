@@ -1,0 +1,293 @@
+<@LICENSE>
+Licensed to the Apache Software Foundation (ASF) under one or more
+contributor license agreements.  See the NOTICE file distributed with
+this work for additional information regarding copyright ownership.
+The ASF licenses this file to you under the Apache License, Version 2.0
+(the "License"); you may not use this file except in compliance with
+the License.  You may obtain a copy of the License at:
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+</@LICENSE>
+
+=head1 NAME
+
+Redirectors-Selenium-Security - security considerations for the Selenium
+lookups of Mail::SpamAssassin::Plugin::Redirectors
+
+=head1 SECURITY CONSIDERATIONS
+
+When C<url_redirector_selenium_host> is set, the Selenium server runs a real
+browser that opens URLs chosen by the senders of incoming mail. The pages
+they lead to can redirect, navigate by script or meta refresh, and load
+images, frames and other resources. Their scripts run in the browser.
+Treat the browser as running untrusted code.
+
+Run the Selenium server and its browser as an unprivileged user, on a
+host or in a container that holds nothing of value. The browser must not
+be able to reach:
+
+=over 4
+
+=item *
+
+services on its own host, including the Selenium server's own API;
+
+=item *
+
+the SpamAssassin host;
+
+=item *
+
+cloud metadata services such as 169.254.169.254;
+
+=item *
+
+your internal networks, or any other address the IANA IPv4 and IPv6
+Special-Purpose Address Registries mark as not globally reachable.
+
+=back
+
+What the browser can reach depends on three things: the settings the
+plugin gives it; a proxy, if you configure one; and the firewall and
+resolver around the browser's host. Use one of two setups:
+
+=over 4
+
+=item *
+
+Recommended: a proxy with a policy like the one under L</The proxy>,
+and a firewall that lets the browser's host connect only to the proxy.
+
+=item *
+
+Without a proxy: a firewall and resolver that meet every requirement
+under L</"Running Selenium without a proxy">.
+
+=back
+
+C<url_redirector_selenium_host> has no default. Set it, and
+C<url_redirector_selenium_port>, to a Selenium server set up this way.
+
+=head2 The browser
+
+The plugin starts each browser session with settings that confine the
+browser to the hosts listed in C<url_redirector_selenium> and
+C<url_redirector_selenium_resource>, and checks that the browser refuses
+an address outside the lists. If it does not, the plugin
+skips Selenium lookups and logs a warning.
+When a redirect, script or meta refresh sends the browser to any other host,
+the browser does not fetch it, and the plugin records the URL it was sent
+to as the destination, as the C<url_redirector> and C<url_redirector_get>
+methods do. Images, scripts and other resources from other hosts are not
+loaded. The browser will not visit links that trigger an action when
+fetched, such as unsubscribe or confirmation links, unless they are on a
+listed host. The plugin also stops WebRTC from sending UDP outside a proxy.
+
+Each message gets its own browser session, which is closed when the
+message is finished, so nothing a page leaves in the browser reaches the
+next message's lookups. Setting C<url_redirector_selenium_reuse_session>
+(not recommended) turns this off.
+
+You do not configure the browser, but you should review the lists.
+The browser will load and run the pages of every host
+in C<url_redirector_selenium>. The shipped rules add entries, and sa-update
+can change them. List only redirector services whose pages are written
+by the service itself, not hosts where anyone can publish a page, such
+as object storage or web hosting. The limit is by host, so an entry with
+a path allows the whole host. Any of those pages can also make the
+browser fetch from the hosts in C<url_redirector_selenium_resource>,
+which should be hosts where senders cannot publish content.
+
+=head2 The proxy
+
+Set C<url_redirector_selenium_proxy> to the address at which the browser
+reaches the proxy, as seen from the Selenium host, not from the
+SpamAssassin host. The plugin sends only listed hosts to the proxy, and
+the browser refuses everything else itself. The proxy must refuse a
+listed host whose name resolves to an address that is not public, and
+should log requests by host name. If the proxy refuses the connection,
+refuses an https request, or does not answer, the lookup fails. If it
+refuses an http request with an error page, the URL is recorded as not
+redirecting.
+
+Do not use a stock F<squid.conf>. It is written for a proxy serving a
+local network, so it allows access to private addresses, and its
+C<http_access allow localhost> line lets a browser running on the proxy's
+own host bypass any rules after it. Replace all the stock C<http_access>
+lines with a policy that:
+
+=over 4
+
+=item *
+
+keeps the stock denies for unsafe ports, C<CONNECT> to non-SSL ports,
+and the cache manager;
+
+=item *
+
+denies every destination the IANA registries mark as not globally
+reachable, plus multicast (224.0.0.0/4 and ff00::/8) and the NAT64 form
+(under 64:ff9b::/96) and 6to4 form (under 2002::/16) of each denied IPv4
+range;
+
+=item *
+
+allows requests from the Selenium host and denies everything else.
+
+=back
+
+=head3 A sample policy for Squid
+
+Squid looks up the host name in each request itself, and refuses the
+request if any of the name's addresses is denied, which covers a listed
+name that resolves to an internal address. Replace every C<http_access>
+line in the stock F<squid.conf> with the lines below (the stock file
+already defines C<Safe_ports>, C<SSL_ports> and C<CONNECT>), and set
+C<sa_selenium> to the Selenium host's address as the proxy sees it.
+These lines work with any recent version of Squid.
+
+    # The Selenium host, as the proxy sees it
+    acl sa_selenium src 192.0.2.10
+
+    # Not globally reachable in the IANA IPv4 Special-Purpose Address
+    # Registry, plus multicast
+    acl sa_nonpublic dst 0.0.0.0/8 10.0.0.0/8 100.64.0.0/10 127.0.0.0/8
+    acl sa_nonpublic dst 169.254.0.0/16 172.16.0.0/12 192.0.0.0/24
+    acl sa_nonpublic dst 192.0.2.0/24 192.88.99.0/24 192.168.0.0/16
+    acl sa_nonpublic dst 198.18.0.0/15 198.51.100.0/24 203.0.113.0/24
+    acl sa_nonpublic dst 224.0.0.0/4 240.0.0.0/4
+
+    # Not globally reachable in the IANA IPv6 Special-Purpose Address
+    # Registry, plus multicast
+    acl sa_nonpublic dst ::/128 ::1/128 64:ff9b:1::/48 100::/64
+    acl sa_nonpublic dst 100:0:0:1::/64 2001::/23 2001:db8::/32 3fff::/20
+    acl sa_nonpublic dst 5f00::/16 fc00::/7 fe80::/10 ff00::/8
+
+    # The IPv4 ranges above in NAT64 form (64:ff9b::/96, RFC 6052)
+    acl sa_nonpublic dst 64:ff9b::/104 64:ff9b::a00:0/104
+    acl sa_nonpublic dst 64:ff9b::6440:0/106 64:ff9b::7f00:0/104
+    acl sa_nonpublic dst 64:ff9b::a9fe:0/112 64:ff9b::ac10:0/108
+    acl sa_nonpublic dst 64:ff9b::c000:0/120 64:ff9b::c000:200/120
+    acl sa_nonpublic dst 64:ff9b::c058:6300/120 64:ff9b::c0a8:0/112
+    acl sa_nonpublic dst 64:ff9b::c612:0/111 64:ff9b::c633:6400/120
+    acl sa_nonpublic dst 64:ff9b::cb00:7100/120 64:ff9b::e000:0/100
+    acl sa_nonpublic dst 64:ff9b::f000:0/100
+
+    # The IPv4 ranges above in 6to4 form (2002::/16, RFC 3056)
+    acl sa_nonpublic dst 2002::/24 2002:a00::/24 2002:6440::/26
+    acl sa_nonpublic dst 2002:7f00::/24 2002:a9fe::/32 2002:ac10::/28
+    acl sa_nonpublic dst 2002:c000::/40 2002:c000:200::/40
+    acl sa_nonpublic dst 2002:c058:6300::/40 2002:c0a8::/32
+    acl sa_nonpublic dst 2002:c612::/31 2002:c633:6400::/40
+    acl sa_nonpublic dst 2002:cb00:7100::/40 2002:e000::/20 2002:f000::/20
+
+    http_access deny !Safe_ports
+    http_access deny CONNECT !SSL_ports
+    http_access deny manager
+    http_access deny sa_nonpublic
+    http_access allow sa_selenium
+    http_access deny all
+
+    # Remove the headers Squid adds, which show destination sites
+    # that a proxy is in use and the Selenium host's address
+    request_header_access Via deny sa_selenium
+    request_header_access X-Forwarded-For deny sa_selenium
+    request_header_access Cache-Control deny sa_selenium
+
+Use a proxy, or a separate Squid instance, that serves only the Selenium
+hosts; with several, list them all in C<sa_selenium>. With these lines,
+Squid connects using the addresses it checked when the request arrived.
+A helper, URL rewriting or ICAP would make requests wait after the
+check, and if Squid's cached answer expires during the wait it connects
+to new addresses without checking them. Add anything else the browser
+must not reach, such as internal services on public addresses.
+
+The list leaves out the IPv6 registry's C<::ffff:0:0/96> (IPv4-mapped
+addresses): Squid treats it as covering every IPv4 address, so it would
+refuse all IPv4 destinations. An IPv4-mapped address in a URL is refused
+under the IPv4 range it maps to.
+
+The registries are at
+L<https://www.iana.org/assignments/iana-ipv4-special-registry/> and
+L<https://www.iana.org/assignments/iana-ipv6-special-registry/>. The OWASP
+Server Side Request Forgery Prevention Cheat Sheet gives them as the
+sources for a deny-list.
+
+=head2 The firewall and resolver
+
+Allow connections to the Selenium server's port only from the
+SpamAssassin hosts. The ChromeDriver security considerations, at
+L<https://developer.chrome.com/docs/chromedriver/security-considerations>,
+cover who can connect to the browser. This section covers where the
+browser can go.
+
+No firewall sees traffic that stays on the browser's own host, such as a
+connection to the loopback address inside a container. The browser's
+settings cover loopback and unspecified addresses given directly. A
+listed name that resolves to one is caught by the proxy or, without a
+proxy, by the resolver.
+
+When the browser runs in a container, its traffic does not pass the
+host's own outbound rules. With Docker, put rules in the C<DOCKER-USER>
+chain for traffic leaving the host, and in C<INPUT> for the host's own
+addresses, the container network's gateway included. Either alone leaves
+a gap.
+
+=head3 With a proxy
+
+Let the browser's host connect only to the proxy's port. If
+C<url_redirector_selenium_proxy> gives the proxy as an IP address, the
+browser needs no DNS, so the firewall can block DNS too. With Docker,
+give the Selenium container no working resolver, for example with
+C<--dns 127.0.0.1>. On a user-defined network, Docker's own resolver can
+otherwise answer for the container without passing the firewall.
+
+=head3 Running Selenium without a proxy
+
+Without a proxy, only the firewall and resolver check where a listed
+name leads. The setup is as safe for internal addresses as one with a
+proxy only if:
+
+=over 4
+
+=item 1.
+
+The firewall covers every path out of the browser's network, including
+to its own host's addresses.
+
+=item 2.
+
+It refuses every destination the IANA registries mark as not globally
+reachable, plus multicast and 64:ff9b::/96 (or the browser has no IPv6),
+and allows the rest on TCP ports 80 and 443 only.
+
+=item 3.
+
+It allows UDP only for DNS, and only to one resolver you choose.
+
+=item 4.
+
+The resolver refuses answers that point at internal addresses, with
+dnsmasq's C<--stop-dns-rebind> or with unbound's C<private-address>
+listing the internal ranges, including 127.0.0.0/8, ::1/128, 0.0.0.0/8,
+::/128 and ::ffff:0:0/96.
+
+=back
+
+Using a proxy gives you a log by host name. With a firewall that lets
+the browser reach only the proxy, it also keeps the browser off internal
+addresses beyond its own host even if a browser upgrade stops the plugin's
+settings from working.
+
+=head1 SEE ALSO
+
+L<Mail::SpamAssassin::Plugin::Redirectors>, which describes the settings
+named here.
+
+=cut
