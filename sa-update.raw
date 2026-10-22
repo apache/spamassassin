@@ -1359,28 +1359,29 @@ sub taint_safe_archive_extract {
     } else {
       my $content = $tar->get_content($file);
 
-      if ($outfname =~ /\.(?:pre|cf)$/) {
-        # replace macros in the update files if it's a .pre or .cf
+      {
         local($1);
+
+        # replace macros in the update files
         $content =~ s/\@\@([^\@]+)\@\@/$MACRO_VALUES{$1} || "\@\@$1\@\@"/ge;
 
-        # also, if --allowplugins is not specified, comment out
+        # if --allowplugins is not specified, comment out
         # all loadplugin or tryplugin lines (and others that can load code)
         if ( !$opt{'allowplugins'} ) {
           $content =~ s{^\s*(
               loadplugin |
               tryplugin |
-              \S+_modules? |
-              \S+_factory |
-              dcc_(?:path|options) |
-              pyzor_(?:path|options) |
-              extracttext_external
+              \S+[-_]modules? |
+              \S+[-_]factory |
+              dcc[-_](?:path|options) |
+              pyzor[-_](?:path|options) |
+              extracttext[-_]external
             )\s}
-            {#(commented by sa-update, no --allowplugins switch specified)# $1}gmx;
+            {#(commented by sa-update, no --allowplugins switch specified)# $1}gmxi;
         }
 
         # other stuff never allowed for safety
-        $content =~ s/^\s*(dns_server)/#(commented by sa-update, not allowed)# $1/gm;
+        $content =~ s/^\s*(dns[-_]server)/#(commented by sa-update, not allowed)# $1/gmi;
 
         # adjust scores
         if ($opt{'score-multiplier'} || $opt{'score-limit'}) {
