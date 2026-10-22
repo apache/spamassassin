@@ -1386,7 +1386,16 @@ sub taint_safe_archive_extract {
         # adjust scores
         if ($opt{'score-multiplier'} || $opt{'score-limit'}) {
           my $adjust_score = sub {
-            my @scores = split(/\s+/, $_[1]);
+            # If any score on the line is in parentheses, all are relative
+            my $values = $_[1];
+            my $relative = ($values =~ tr/()//d);
+            if ($relative && $opt{'score-limit'}) {
+              # relative score lines are commented out if --score-limit set
+              my ($start, $orig, $rest) = @_; # the match below resets $1..$3
+              my ($space, $line) = ($start =~ /^(\s*)(.*)$/s);
+              return $space."#(commented by sa-update, relative score with --score-limit)# ".$line.$orig.$rest;
+            }
+            my @scores = split(/\s+/, $values);
             my $touched = 0;
             foreach (@scores) {
               next if $_ == 0; # Can't adjust if zero..
@@ -1403,12 +1412,15 @@ sub taint_safe_archive_extract {
               }
             }
             if ($touched) {
+              @scores = map { "($_)" } @scores if $relative;
               return $_[0].join(' ', @scores)." #(score adjusted by sa-update, $_[1])#".$_[2];
             } else {
               return $_[0].$_[1].$_[2];
             }
           };
-          $content =~ s/^(\s*score\s+\w+\s+)(-?\d+(?:\.\d+)?(?:\s+-?\d+(?:\.\d+)?)*)(.*)$
+          # a score is a number, or a number in parentheses for a relative score
+          my $value = qr/-?\d+(?:\.\d+)?|\(-?\d+(?:\.\d+)?\)/;
+          $content =~ s/^(\s*score\s+\w+\s+)($value(?:\s+$value)*)(.*)$
             /$adjust_score->($1,$2,$3)/igmex;
         }
       }
@@ -2043,6 +2055,7 @@ Options:
   --score-limit x.x       Adjust all scores from update channel, limit
                           to given value (integer or float). Limiting
                           is done after possible multiply operation.
+                          Relative scores (n) are commented out.
   -D, --debug [area=n,...]  Print debugging messages
   -v, --verbose           Be verbose, like print updated channel names;
                           For more verbosity specify multiple times
