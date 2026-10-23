@@ -3811,6 +3811,38 @@ Like body_part_scan_size, for "rawbody" type rules.
     type => $CONF_TYPE_NUMERIC,
   });
 
+=item body_total_scan_size               (default: 100000)
+
+Whole-message scan size limit in bytes for "body" type rules, summed over
+all MIME parts after each part has been truncated to body_part_scan_size.
+The same limit applies to the body text used by Bayes and to URI
+extraction from that text.  When the parts together are larger than the
+limit, it is shared between them: parts smaller than an equal share are
+kept whole, and the larger parts are truncated to about equal lengths.
+Disabled with 0.
+
+=cut
+
+  push (@cmds, {
+    setting => 'body_total_scan_size',
+    is_admin => 1,
+    default => 100000,
+    type => $CONF_TYPE_NUMERIC,
+  });
+
+=item rawbody_total_scan_size               (default: 1000000)
+
+Like body_total_scan_size, for "rawbody" type rules.
+
+=cut
+
+  push (@cmds, {
+    setting => 'rawbody_total_scan_size',
+    is_admin => 1,
+    default => 1000000,
+    type => $CONF_TYPE_NUMERIC,
+  });
+
 =item multipart_alternative_preferred_part (default: empty)
 
 Specifies which part of a multipart/alternative section to prefer for

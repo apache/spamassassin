@@ -42,6 +42,16 @@ use Mail::SpamAssassin::Constants qw(:sa);
 use Mail::SpamAssassin::HTML;
 use Mail::SpamAssassin::Logger;
 
+# maximum number of header fields stored per MIME part
+use constant MAX_HEADER_FIELDS => 5000;
+# fields still stored beyond MAX_HEADER_FIELDS (at most this many of each)
+use constant MAX_ESSENTIAL_HEADER_FIELDS => 20;
+our %ESSENTIAL_HEADERS = map { $_ => 1 } qw(
+  content-type content-transfer-encoding content-disposition mime-version
+  from sender reply-to to cc subject date message-id return-path
+  list-id list-unsubscribe dkim-signature authentication-results
+);
+
 our($enc_utf8, $enc_w1252, $have_encode_detector);
 BEGIN {
   $enc_utf8  = Encode::find_encoding('UTF-8');
@@ -244,6 +254,17 @@ sub header {
   if (@_) {
     my $raw_value = shift;
     return unless defined $raw_value;
+
+    # Bound the number of stored header fields.  Excess fields are still
+    # in the pristine copy.  Fields that decide how the message is parsed
+    # and scored (MIME structure, originator, subject...) are still stored
+    # after the cap, a few of each.
+    if (@{ $self->{'header_order'} || [] } >= MAX_HEADER_FIELDS) {
+      $self->{'truncated_header'} = 1;
+      $self->{'too_many_header_fields'} = 1;
+      return unless $ESSENTIAL_HEADERS{$key} &&
+        @{ $self->{'headers'}->{$key} || [] } < MAX_ESSENTIAL_HEADER_FIELDS;
+    }
 
     push @{ $self->{'header_order'} }, $rawkey;
     if ( !exists $self->{'headers'}->{$key} ) {
@@ -1194,34 +1215,23 @@ sub get_all_headers {
 
   my @lines;
 
-  # precalculate destination positions based on order of appearance
-  my $i = 0;
-  my %locations;
-  for my $k (@{$self->{header_order}}) {
-    push(@{$locations{lc($k)}}, $i++);
-  }
-
-  # process headers in order of first appearance
-  my $header;
+  # Walk the fields in message order (linear).  The previous version sorted
+  # every distinct header name with a Perl comparator on each call, which is
+  # O(n log n) per call and dominated CPU for messages with many headers.
+  my(%values, %next);
   my $size = 0;
-  HEADER: for my $name (sort { $locations{$a}->[0] <=> $locations{$b}->[0] }
-			keys %locations)
-  {
-    # get all same-name headers and poke into correct position
-    my $positions = $locations{$name};
-    for my $contents ($self->get_header($name, $raw)) {
-      my $position = shift @{$positions};
-      $size += length($name) + length($contents) + 2;
-      if ($size > MAX_HEADER_LENGTH) {
-	$self->{'truncated_header'} = 1;
-	last HEADER;
-      }
-      $lines[$position] = $self->{header_order}->[$position].": ".$contents;
+  for my $rawname (@{$self->{header_order}}) {
+    my $name = lc $rawname;
+    my $vals = $values{$name} ||= [ $self->get_header($name, $raw) ];
+    my $contents = $vals->[ $next{$name}++ ];
+    next unless defined $contents;
+    $size += length($name) + length($contents) + 2;
+    if ($size > MAX_HEADER_LENGTH) {
+      $self->{'truncated_header'} = 1;
+      last;
     }
+    push @lines, $rawname.": ".$contents;
   }
-
-  # skip undefined lines if we truncated
-  @lines = grep { defined $_ } @lines if $self->{'truncated_header'};
 
   splice @lines, 0, 0, $self->{mbox_sep} if ( $include_mbox && exists $self->{mbox_sep} );
 

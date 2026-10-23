@@ -141,13 +141,42 @@ sub html_start {
 		 fgcolor => Mail::SpamAssassin::HTML::Color->new("black"),
 		 bgcolor => Mail::SpamAssassin::HTML::Color->new("white"),
 		 font_size => 16);
-  push @{ $self->{text_style} }, \%default;
+  $self->{text_style_count} = {};
+  $self->_push_text_style(\%default);
+}
+
+# The text_style stack can grow to one entry per open tag (hundreds of
+# thousands for a crafted message).  Keep a per-tag count of what is on the
+# stack so that "is this tag open?" is O(1) instead of a linear grep of the
+# whole stack for every <td>, <tr> and closing tag (which was O(n^2)).
+sub _push_text_style {
+  my ($self, $style) = @_;
+  push @{ $self->{text_style} }, $style;
+  $self->{text_style_count}{$style->{tag}}++;
+}
+
+sub _pop_text_style {
+  my ($self) = @_;
+  my $style = pop @{ $self->{text_style} };
+  $self->{text_style_count}{$style->{tag}}--  if $style;
+  return $style;
 }
 
 sub html_end {
   my ($self) = @_;
 
   delete $self->{text_style};
+  delete $self->{text_style_count};
+
+  # <a> start tags record anchor text under $self->{uri}->{HREF} after
+  # push_uri() has run, also for an href that push_uri() did not store
+  # because of MAX_URI_COUNT.  Drop such entries.
+  if ($self->{uri_count_truncated}) {
+    for my $u (keys %{$self->{uri}}) {
+      delete $self->{uri}->{$u}
+        if $u ne '' && !exists $self->{uri}->{$u}->{types};
+    }
+  }
 
   my @uri;
 
@@ -162,6 +191,7 @@ sub html_end {
 
   $self->put_results(uri_detail => $self->{uri});
   $self->put_results(uri_truncated => $self->{uri_truncated});
+  $self->put_results(uri_count_truncated => $self->{uri_count_truncated});
   $self->put_results(cids => $self->{cids});
 
   # Turn each buffered <script> body into a {type,data} pseudo-part and add it to
@@ -434,16 +464,26 @@ sub push_uri {
   return if $uri eq '';
   utf8::encode($uri) if $self->{SA_encode_results};
 
-  if ($uri =~ /^(?:data|mailto|file|cid|tel):/i) {
-    # No target handling required
-    $self->{uri}->{$uri}->{types}->{$type} = 1;
-    if ($uri =~ /^cid:(.+)/i) {
-      push @{ $self->{cids} }, $1;
-    }
-  } else {
-    my $target = target_uri($self->{base_href} || "", $uri);
+  my $target = $uri;
+  if ($uri !~ /^(?:data|mailto|file|cid|tel):/i) {
+    # No target handling required for the above
+    $target = target_uri($self->{base_href} || "", $uri);
     # skip things like <iframe src="" ...>
-    $self->{uri}->{$target}->{types}->{$type} = 1  if $target ne '';
+    return if $target eq '';
+  }
+
+  # bound the number of distinct URIs collected from one HTML part
+  # (count what is actually stored: the target, not the raw attribute)
+  if (!($self->{uri}->{$target} && exists $self->{uri}->{$target}->{types}) &&
+      ++$self->{uri_count} > MAX_URI_COUNT) {
+    $self->{uri_truncated} = 1;
+    $self->{uri_count_truncated} = 1;
+    return;
+  }
+
+  $self->{uri}->{$target}->{types}->{$type} = 1;
+  if ($uri =~ /^cid:(.+)/i) {
+    push @{ $self->{cids} }, $1;
   }
 }
 
@@ -599,14 +639,14 @@ sub close_table_tag {
   my ($self, $tag) = @_;
 
   # don't close if never opened
-  return unless grep { $_->{tag} eq $tag } @{ $self->{text_style} };
+  return unless $self->{text_style_count}{$tag};
 
   my $top;
   while (@{ $self->{text_style} } && ($top = $self->{text_style}[-1]->{tag})) {
     if (($tag eq "td" && ($top eq "font" || $top eq "td")) ||
 	($tag eq "tr" && $top =~ /^(?:font|td|tr)$/))
     {
-      pop @{ $self->{text_style} };
+      $self->_pop_text_style();
     }
     else {
       last;
@@ -618,11 +658,11 @@ sub close_tag {
   my ($self, $tag) = @_;
 
   # don't close if never opened
-  return if !grep { $_->{tag} eq $tag } @{ $self->{text_style} };
+  return if !$self->{text_style_count}{$tag};
 
   # close everything up to and including tag
-  while (my %current = %{ pop @{ $self->{text_style} } }) {
-    last if $current{tag} eq $tag;
+  while (my $current = $self->_pop_text_style()) {
+    last if $current->{tag} eq $tag;
   }
 }
 
@@ -771,7 +811,7 @@ sub text_style {
 	$self->{min_size} = $new{font_size};
       }
     }
-    push @{ $self->{text_style} }, \%new;
+    $self->_push_text_style(\%new);
   }
   # explicitly close a tag
   else {

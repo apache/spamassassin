@@ -94,6 +94,7 @@ sub handle_html {
   # Harvest URIs the HTML parser found into the URI detail list (type 'html')
   my $detail = $results->{uri_detail} || {};
   $pms->{'uri_truncated'} = 1 if $results->{uri_truncated};
+  $pms->{msg}->{'uri_count_truncated'} = 1 if $results->{uri_count_truncated};
   while (my ($uri, $info) = each %$detail) {
     if ($pms->add_uri_detail_list($uri, $info->{types}, 'html', 0)) {
       # Copy and uniq the anchor text, collapsing whitespace (Bug 8268/8310).

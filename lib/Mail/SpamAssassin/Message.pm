@@ -121,6 +121,8 @@ sub new {
   $self->{suppl_attrib} = $opts->{'suppl_attrib'};
   $self->{body_part_scan_size} = $opts->{'body_part_scan_size'} || 0;
   $self->{rawbody_part_scan_size} = $opts->{'rawbody_part_scan_size'} || 0;
+  $self->{body_total_scan_size} = $opts->{'body_total_scan_size'} || 0;
+  $self->{rawbody_total_scan_size} = $opts->{'rawbody_total_scan_size'} || 0;
   $self->{multipart_alternative_preferred_part} = $opts->{'multipart_alternative_preferred_part'} || '';
   $self->{scan_text_attachments} = $opts->{'scan_text_attachments'} || 0;
 
@@ -755,6 +757,8 @@ sub finish {
   delete $self->{'normalize'};
   delete $self->{'body_part_scan_size'};
   delete $self->{'rawbody_part_scan_size'};
+  delete $self->{'body_total_scan_size'};
+  delete $self->{'rawbody_total_scan_size'};
   delete $self->{'multipart_alternative_preferred_part'};
   delete $self->{'scan_text_attachments'};
   delete $self->{'pristine_msg'};
@@ -1070,6 +1074,11 @@ sub _parse_multipart {
 
       ($part_msg->{'type'}, my $p_boundary, undef, undef, my $ct_was_missing) =
           Mail::SpamAssassin::Util::parse_content_type($part_msg->header('content-type'));
+
+      # a MIME part hit the header field cap: make it visible to rules
+      # (check_msg_parse_flags looks at the message, not at the part)
+      $self->{'too_many_header_fields'} = 1
+        if $part_msg->{'too_many_header_fields'};
 
       # bug 5741: if ct was missing and parent == multipart/digest, then
       # type should be set as message/rfc822
@@ -1434,6 +1443,7 @@ sub get_body_text_array_common {
   $self->{$key} = [];
 
   my $scansize = $self->{body_part_scan_size};
+  my $totalsize = $self->{body_total_scan_size};
   my $preferred_alt = $self->{multipart_alternative_preferred_part};
 
   # Ensure the MIME tree has been parsed
@@ -1449,8 +1459,12 @@ sub get_body_text_array_common {
   # Walk the MIME tree using a queue.  For multipart/alternative nodes,
   # if a preferred part type is set and found, enqueue only that part
   # instead of all children (skipping the other alternative).
+  #
+  # Render all parts first, so that the HTML metadata (including the URIs)
+  # of every text/html part is collected.  Then share body_total_scan_size
+  # between the parts (see _share_total_scan_size).
   my @queue = ($self);
-  my $text = '';
+  my @rnd;  # text of each part, in message order
   while (my $p = shift @queue) {
     # Descend into handler-produced synthetic children. They render in document
     # order, after this part's own text below.
@@ -1504,11 +1518,7 @@ sub get_body_text_array_common {
         }
       }
 
-      # put a null between parts so they don't collapse together
-      $text .= "\x00"  if $text ne '';
-
-      # Add to rendered text
-      $text .= $rnd;
+      push @rnd, $rnd;
 
       # TVD - if there are multiple parts, what should we do?
       # right now, just use the last one.  we may need to give some priority
@@ -1519,6 +1529,19 @@ sub get_body_text_array_common {
         push @{$self->{metadata}->{html_all}}, $p->{html_results};
       }
     }
+  }
+
+  if (_share_total_scan_size(\@rnd, $totalsize)) {
+    dbg("$method_name: body_total_scan_size %d reached, truncating parts",
+        $totalsize);
+    $self->{'body_total_scan_size_exceeded'} = 1;
+  }
+
+  my $text = '';
+  foreach (@rnd) {
+    # put a null between parts so they don't collapse together
+    $text .= "\x00"  if $text ne '';
+    $text .= $_;
   }
 
   # whitespace handling (warning: small changes have large effects!)
@@ -1562,6 +1585,8 @@ sub get_decoded_body_text_array {
   $self->{text_decoded} = [ ];
 
   my $scansize = $self->{rawbody_part_scan_size};
+  my $totalsize = $self->{rawbody_total_scan_size};
+  my @raw;
 
   # Find all parts which are leaves
   my @parts = $self->find_parts(qr/./,1);
@@ -1608,11 +1633,45 @@ sub get_decoded_body_text_array {
       }
     }
 
-    push(@{$self->{text_decoded}},
-         split_into_array_of_short_paragraphs($rawbody));
+    push @raw, $rawbody;
   }
 
+  # Share rawbody_total_scan_size between the parts, like
+  # get_body_text_array_common() does for body_total_scan_size.
+  if (_share_total_scan_size(\@raw, $totalsize)) {
+    dbg("message: rawbody_total_scan_size %d reached, truncating parts",
+        $totalsize);
+    $self->{'rawbody_total_scan_size_exceeded'} = 1;
+  }
+  push(@{$self->{text_decoded}}, split_into_array_of_short_paragraphs($_))
+    for @raw;
+
   return $self->{text_decoded};
+}
+
+# Truncate the strings in @$parts (in place) so that their total length is
+# at most $totalsize, "water-filling": parts smaller than an equal share are
+# kept whole, the rest is split evenly between the larger parts.  Returns
+# true if anything was truncated.
+sub _share_total_scan_size {
+  my ($parts, $totalsize) = @_;
+
+  return 0 unless $totalsize;
+  my $sum = 0;
+  $sum += length($_) for @$parts;
+  return 0 if $sum <= $totalsize;
+
+  my @order = sort { length($parts->[$a]) <=> length($parts->[$b]) }
+                (0 .. $#$parts);
+  my $left = $totalsize;
+  my $n = @order;
+  for my $i (@order) {
+    my $share = int($left / $n);
+    substr($parts->[$i], $share) = ''  if length($parts->[$i]) > $share;
+    $left -= length($parts->[$i]);
+    $n--;
+  }
+  return 1;
 }
 
 # ---------------------------------------------------------------------------

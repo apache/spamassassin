@@ -2917,6 +2917,18 @@ sub add_uri_detail_list {
   my (%domains, %hosts, %cleaned);
   my $udl = $self->{uri_detail_list};
 
+  # bound the number of distinct URIs per message (text + all HTML parts)
+  if (!exists $udl->{$uri}) {
+    if (++$self->{uri_detail_count} > MAX_URI_COUNT) {
+      $self->{'uri_truncated'} = 1;
+      # separate flag (also on the message, for check_msg_parse_flags):
+      # URIs beyond the cap are not seen by uri rules and URIBL lookups
+      $self->{'uri_count_truncated'} = 1;
+      $self->{msg}->{'uri_count_truncated'} = 1;
+      return 0;
+    }
+  }
+
   dbg("uri: canonicalizing $source uri: $uri");
 
   my @uris;
@@ -3029,9 +3041,12 @@ sub _flush_pending_cname_lookups {
   };
   $dispatch->();
 
+  # The lookups are synchronous with respect to the message check: bound
+  # their total wall time, chained CNAMEs included.
+  my $cname_deadline = time + 2;
   while ($sel->count) {
-    my @ready = $sel->can_read(10);  # overall check timeout
-                                     # is still enforced by master_deadline
+    my $remaining = $cname_deadline - time;
+    my @ready = $remaining > 0 ? $sel->can_read($remaining) : ();
     if (!@ready) {
       # timed out waiting, abandon anything
       foreach my $handle ($sel->handles) {
