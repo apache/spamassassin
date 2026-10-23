@@ -114,6 +114,20 @@ Can be specified multiple times, additional entries are appended.
 
 =back
 
+=head1 ADMINISTRATOR SETTINGS
+
+=over 4
+
+=item arc_max_instances n             (default: 10)
+
+Highest ARC instance number (i=) that is verified, from 1 to 50.  A
+message with a higher instance number in its ARC header fields, or with
+an ARC-Seal or ARC-Message-Signature i= tag that is not a plain number,
+is not passed to Mail::DKIM, and its ARC signature is treated as not
+valid.
+
+=back
+
 =cut
 
   push(@cmds, {
@@ -135,6 +149,13 @@ Can be specified multiple times, additional entries are appended.
         $self->{arc_trusted_sealers}->{$domain} = 1;
       }
     }
+  });
+
+  push(@cmds, {
+    setting => 'arc_max_instances',
+    is_admin => 1,
+    default => 10,
+    type => $Mail::SpamAssassin::Conf::CONF_TYPE_NUMERIC,
   });
 
   $conf->{parser}->register_commands(\@cmds);
@@ -283,21 +304,36 @@ sub _check_signature {
   }
   $pms->{arc_verifier} = $verifier;
 
+  my $max_arc = $conf->{arc_max_instances};
+  $max_arc = 10  if !defined $max_arc || $max_arc !~ /^\d+$/ || $max_arc < 1;
+  $max_arc = 50  if $max_arc > 50;
+  # Mail::DKIM 1.20240124 and later also take this as the highest valid
+  # instance number
+  local $Mail::DKIM::ARC::Verifier::MAX_SIGNATURES_TO_PROCESS = $max_arc;
+
+  my $str = $pms->{msg}->get_pristine();
+  $str =~ s/\012/\015\012/gs  if $pms->{msg}->{line_ending} ne "\015\012";
+
+  # Mail::DKIM::ARC::Verifier uses the instance numbers in the header
+  # before it checks them, so check them here first
+  if (!_arc_instances_ok(\$str, $max_arc)) {
+    dbg("arc: ARC instance number not from 1 to arc_max_instances (%d), ".
+        "not verifying", $max_arc);
+    $pms->{arc_signed} = 1;
+    $pms->{arc_signatures_ready} = 1;
+    $pms->{arc_signatures_dependable} = 1;
+    return;
+  }
+
   eval {
-    my $str = $pms->{msg}->get_pristine();
-    if ($pms->{msg}->{line_ending} eq "\015\012") {
-      $verifier->PRINT($str);
-    } else {
-      $str =~ s/\012/\015\012/gs;
-      $verifier->PRINT($str);
-      undef $str;
-    }
+    $verifier->PRINT($str);
     1;
   } or do {
     my $eval_stat = $@ ne '' ? $@ : "errno=$!";  chomp $eval_stat;
     dbg("arc: verification failed, intercepted error: $eval_stat");
     return 0;
   };
+  undef $str;
 
   my $timeout = $conf->{arc_timeout};
   my $timer = Mail::SpamAssassin::Timeout->new(
@@ -323,6 +359,49 @@ sub _check_signature {
     $pms->{arc_signatures_dependable} = 1;
   }
   $self->_check_arc_valid_signature($pms, \@$signatures);
+}
+
+# Return false if the header of $$strref (with CRLF line endings, as it is
+# given to Mail::DKIM) has an ARC-Seal or ARC-Message-Signature field with
+# an i= tag that is not a number from 1 to $max, or, when there is such a
+# field, an "ARC-Authentication-Results: i=" number above $max in any
+# field (Mail::DKIM::ARC::Verifier looks for those in every field).  The
+# header is split into fields, and the fields named, the way
+# Mail::DKIM::MessageParser and Mail::DKIM::Common do it.
+sub _arc_instances_ok {
+  my($strref, $max) = @_;
+
+  my @fields;
+  pos($$strref) = 0;
+  while ($$strref =~ /\G(?!\015\012)(.+?\015\012)(?=[^ \t])/gcs) {
+    push @fields, $1;
+  }
+  # Mail::DKIM takes the rest of an unterminated header as one field
+  my $pos = pos($$strref) || 0;
+  push @fields, substr($$strref, $pos)
+    if $pos < length($$strref) && substr($$strref, $pos, 2) ne "\015\012";
+
+  my $arc_fields = 0;
+  foreach my $field (@fields) {
+    next if $field !~ /^([^:]+?)\s*:(.*)/s;
+    my($name, $value) = (lc $1, $2);
+    next if $name ne 'arc-seal' && $name ne 'arc-message-signature';
+    $arc_fields++;
+    foreach my $tag (split(/;/, $value, -1)) {
+      $tag =~ s/^\s+|\s+$//g;
+      my($tag_name, $tag_value) = split(/\s*=\s*/, $tag, 2);
+      next if !defined $tag_value || $tag_name ne 'i';
+      return 0 if $tag_value !~ /^\d+\z/ || $tag_value < 1 || $tag_value > $max;
+    }
+  }
+  return 1 if !$arc_fields;
+
+  foreach my $field (@fields) {
+    while ($field =~ /ARC-Authentication-Results:\s*i=(\d+)/gi) {
+      return 0 if $1 > $max;
+    }
+  }
+  return 1;
 }
 
 sub _check_arc_valid_signature {

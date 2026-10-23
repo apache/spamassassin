@@ -520,6 +520,13 @@ continues without the DKIM result. A numeric value is optionally suffixed
 by a time unit (s, m, h, d, w, indicating seconds (default), minutes, hours,
 days, weeks).
 
+=item dkim_max_signatures n             (default: 5)
+
+Maximum number of DKIM signatures that are verified per message, from 1
+to 50; further DKIM-Signature (and DomainKey-Signature) header fields are
+ignored.  When a message has more signatures than this, those of the
+author domain, or of a parent domain of it, are the first ones verified.
+
 =back
 
 =cut
@@ -529,6 +536,13 @@ days, weeks).
     is_admin => 1,
     default => 5,
     type => $Mail::SpamAssassin::Conf::CONF_TYPE_DURATION
+  });
+
+  push (@cmds, {
+    setting => 'dkim_max_signatures',
+    is_admin => 1,
+    default => 5,
+    type => $Mail::SpamAssassin::Conf::CONF_TYPE_NUMERIC
   });
 
   $conf->{parser}->register_commands(\@cmds);
@@ -901,6 +915,39 @@ sub _check_dkim_from_authres {
   return 0;
 }
 
+# With more signature fields than dkim_max_signatures, Mail::DKIM only
+# verifies the first (top-most) ones, and counts DomainKey-Signature fields
+# with DKIM-Signature fields.  The author domain's signature is usually the
+# bottom-most one, added first.  In that case only, move the signatures
+# whose d= is an author domain, or a parent domain of one, to the first
+# signature fields, so that they are among the ones verified.  Other fields
+# keep their place.
+sub _prefer_author_signatures {
+  my($pms, $str, $max) = @_;
+
+  $str =~ /\A(.*?\n)(\r?\n.*)\z/s  or return $str;
+  my($hdr, $rest) = ($1, $2);
+  my @f = ($hdr =~ /\G([^\n]*\n(?:[ \t][^\n]*\n)*)/g);
+  return $str  if join('', @f) ne $hdr;
+  my @si = grep { $f[$_] =~ /^(?:DKIM|DomainKey)-Signature\s*:/i } (0 .. $#f);
+  return $str  if @si <= $max;
+
+  my @authors = map { lc } keys %{$pms->{dkim_author_domains} || {}};
+  return $str  if !@authors;
+  my(@aligned, @other);
+  for my $i (@si) {
+    my $d = $f[$i] =~ /[;:\s]d[ \t\r\n]*=[ \t\r\n]*([^;\s]+)/i ? lc $1 : '';
+    my $al = $d ne '' && grep { $_ eq $d || substr($_, -length($d)-1) eq ".$d" } @authors;
+    push @{ $al ? \@aligned : \@other }, $f[$i];
+  }
+  return $str  if !@aligned;
+  dbg("dkim: %d signatures, more than dkim_max_signatures %d, verifying ".
+      "the %d author domain signature(s) first", scalar @si, $max, scalar @aligned);
+  my @new = (@aligned, @other);
+  $f[$_] = shift @new  for @si;
+  return join('', @f) . $rest;
+}
+
 sub _check_signature {
   my($self, $pms, $verifier, $signatures) = @_;
 
@@ -913,12 +960,22 @@ sub _check_signature {
     return;
   }
   $pms->{dkim_verifier} = $verifier;
+  # Bound the number of signatures Mail::DKIM collects while parsing the
+  # header, which bounds body hashing and key lookups.  Mail::DKIM stops
+  # adding signatures once it has more than MAX_SIGNATURES_TO_PROCESS
+  # (default 50).
+  my $max_sigs = $conf->{dkim_max_signatures};
+  $max_sigs = 5   if !defined $max_sigs || $max_sigs !~ /^\d+$/ || $max_sigs < 1;
+  $max_sigs = 50  if $max_sigs > 50;
+  local $Mail::DKIM::Verifier::MAX_SIGNATURES_TO_PROCESS = $max_sigs - 1;
+
   # feed content of a message into verifier, using \r\n endings,
   # required by Mail::DKIM API (see bug 5300)
   # note: bug 5179 comment 28: perl does silly things on non-Unix platforms
   # unless we use \015\012 instead of \r\n
   eval {
     my $str = $pms->{msg}->get_pristine();
+    $str = _prefer_author_signatures($pms, $str, $max_sigs);
     if ($pms->{msg}->{line_ending} eq "\015\012") {
       # message already CRLF, just feed it
       $verifier->PRINT($str);
