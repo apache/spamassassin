@@ -196,7 +196,8 @@ Run "svn status" to ensure you're building/releasing from a pristine
     an unpacked distribution tar, without the presence of rules files
     that are not in MANIFEST. To get the same testing for the root tests
     cd into the Mail-Spamassin* subdirectory that make disttest created and run
-      sudo make test TEST_FILES="t/spamd_root*"
+      echo 'run_root_tests=y' >>t/config && 
+      sudo make test TEST_FILES="t/root_spamd*"
     You can similarly cd into that directory to re-run tests such as dcc.t
     that can fail due to temporary problems accessing a remote server. 
 
