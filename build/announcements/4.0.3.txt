@@ -43,7 +43,9 @@ Notable features:
   - The Redirectors plugin now replaces the DecodeShortURLs plugin,
   which is deprecated. Redirectors also gained a Selenium-based
   per-host redirector mode (url_redirector_selenium) and many new
-  redirector definitions.
+  redirector definitions. Selenium mode can now use a remote Selenium
+  server, reuse sessions, go through a proxy and restrict fetched
+  resources per host; see docs/Redirectors-Selenium-Security.pod.
 
   - New FuzzyHash::ZOrder MinHash/LSH near-duplicate body detection,
   integrated into the HashBL plugin via check_hashbl_bodyfuzzy().
@@ -80,7 +82,22 @@ This release addresses the following issues:
   - Subject length is now checked after stripping UTF-8 characters
   (bug 5859); getaddrinfo() results are now randomized (bug 7046)
 
-  - Correctly parse Exim 4.99 received lines (bug 8365)
+  - FreeMail plugin no longer corrupts the cached rendered body seen
+  by later body rules
+
+  - HTML: on*, javascript: and data: attributes are now scanned on
+  every tag, catching script in e.g. inline SVG elements
+
+  - JavaScript, SVG and ICS handlers now get charset-normalized text
+  when normalize_charset is on
+
+  - PDF: fixed PDFInfo missing images with width/height on separate
+  lines
+
+  - TCP fallback for truncated DNS replies now uses the dns_server
+  port
+
+  - sa-compile(1) now compiles more rules
 
   - Numerous new and updated redirector definitions, phishing-domain
   rules, phone-scam-number rules, and score/FP tuning
@@ -94,6 +111,11 @@ New configuration options
 
 multipart_alternative_preferred_part allows choosing which part of a
 multipart/alternative message is scanned.
+
+url_redirector_selenium_host, url_redirector_selenium_port,
+url_redirector_selenium_reuse_session, url_redirector_selenium_proxy
+and url_redirector_selenium_resource configure the Selenium
+redirector mode.
 
 Notable Internal changes
 ------------------------
