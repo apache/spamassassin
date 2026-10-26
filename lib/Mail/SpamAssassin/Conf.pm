@@ -4281,7 +4281,6 @@ Specifies the Redis database number to use (default: 0).
   push (@cmds, {
     setting => 'bayes_redis_database',
     is_admin => 1,
-    default => 0,
     type => $CONF_TYPE_NUMERIC,
   });
 
