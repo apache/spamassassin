@@ -87,6 +87,7 @@ my $VERSION = 0.2;
 
 use Mail::SpamAssassin;
 use Mail::SpamAssassin::Plugin;
+use Mail::SpamAssassin::Timeout;
 use Mail::SpamAssassin::Util qw(is_fqdn_valid);
 
 our @ISA = qw(Mail::SpamAssassin::Plugin);
@@ -123,8 +124,6 @@ sub set_config {
 
 Store DMARC reports using Mail::DMARC::Store, mail-dmarc.ini must be configured to save and send DMARC reports.
 
-=back
-
 =cut
 
   push(@cmds, {
@@ -132,6 +131,24 @@ Store DMARC reports using Mail::DMARC::Store, mail-dmarc.ini must be configured 
     is_admin => 1,
     default => 0,
     type => $Mail::SpamAssassin::Conf::CONF_TYPE_BOOL,
+  });
+
+=item dmarc_timeout n (default: 10)
+
+How many seconds to wait for a DMARC check to complete, before scanning
+continues without the DMARC result. A numeric value is optionally suffixed
+by a time unit (s, m, h, d, w, indicating seconds (default), minutes, hours,
+days, weeks).
+
+=back
+
+=cut
+
+  push(@cmds, {
+    setting => 'dmarc_timeout',
+    is_admin => 1,
+    default => 10,
+    type => $Mail::SpamAssassin::Conf::CONF_TYPE_DURATION,
   });
 
   $conf->{parser}->register_commands(\@cmds);
@@ -351,6 +368,8 @@ sub _check_dmarc {
   elsif ($pms->{spf_helo_softfail})  { $spf_helo_status = 'softfail'; }
 
   my $dmarc = Mail::DMARC::PurePerl->new();
+  # use our Net::DNS::Resolver object, as for Mail::DKIM's ADSP lookups
+  $dmarc->set_resolver($self->{main}->{resolver}->get_resolver);
   $dmarc->source_ip($lasthop->{ip});
   $dmarc->header_from_raw($from_addr);
 
@@ -372,7 +391,10 @@ sub _check_dmarc {
   }
 
   my $result;
-  eval {
+  my $timeout = $pms->{conf}->{dmarc_timeout};
+  my $timer = Mail::SpamAssassin::Timeout->new(
+                { secs => $timeout, deadline => $pms->{master_deadline} });
+  my $err = $timer->run_and_catch(sub {
     $dmarc->spf([
       {
         scope  => 'mfrom',
@@ -386,9 +408,13 @@ sub _check_dmarc {
       },
     ]);
     $result = $dmarc->validate();
-  };
-  if ($@) {
-    dbg("error while evaluating domain $mfrom_domain: $@");
+  });
+  if ($timer->timed_out()) {
+    dbg("timed out after $timeout s evaluating domain $mfrom_domain");
+    return;
+  }
+  if ($err) {
+    dbg("error while evaluating domain $mfrom_domain: $err");
     return;
   }
 
