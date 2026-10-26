@@ -327,6 +327,9 @@ sub scan {
     "url_redirector_selenium 192.0.2.10",
     ($opt{proxy} ? "url_redirector_selenium_proxy $opt{proxy}" : ()),
     @{ $opt{prefs} || [] },
+    # starts the lookups before SELENIUM_LANDED, as check_dnsbl would
+    "body __SELENIUM_REDIR eval:redir_url()",
+    "tflags __SELENIUM_REDIR net",
     "uri SELENIUM_LANDED m{^" . quotemeta(LANDING_URL) . "\$}",
   ) . "\n");
 
