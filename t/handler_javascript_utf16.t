@@ -66,6 +66,6 @@ ok_all_patterns();
 %anti_patterns = (
   ' JS_UTF16 ', 'utf16_not_normalized_when_off',
 );
-ok (sarun ("-L -t --cf='normalize_charset 0' < data/nice/handler_archive_utf16_bom",
+ok (sarun ("-L -t --cf=\"normalize_charset 0\" < data/nice/handler_archive_utf16_bom",
            \&patterns_run_cb));
 ok_all_patterns();

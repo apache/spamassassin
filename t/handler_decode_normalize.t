@@ -62,7 +62,7 @@ ok_all_patterns();
 
 %patterns = ();
 %anti_patterns = ( ' JS_UTF16_ATTACH ', 'utf16_attachment_not_normalized_when_off' );
-ok (sarun ("-L -t --cf='normalize_charset 0' < data/nice/handler_javascript_utf16_attach",
+ok (sarun ("-L -t --cf=\"normalize_charset 0\" < data/nice/handler_javascript_utf16_attach",
            \&patterns_run_cb));
 ok_all_patterns();
 
@@ -88,7 +88,7 @@ ok_all_patterns();
 
 %patterns = ( ' 1.0 SVG_UTF8 ', 'svg_text_utf8_when_off' );
 %anti_patterns = ();
-ok (sarun ("-L -t --cf='normalize_charset 0' < data/nice/handler_svg_utf8",
+ok (sarun ("-L -t --cf=\"normalize_charset 0\" < data/nice/handler_svg_utf8",
            \&patterns_run_cb));
 ok_all_patterns();
 
@@ -96,7 +96,7 @@ ok_all_patterns();
 # Byte input: the handler sets utf8_mode so &#x4e2d; decodes to UTF-8 bytes.
 %patterns = ( ' 1.0 SVG_ENTITY ', 'svg_entity_utf8_when_off' );
 %anti_patterns = ();
-ok (sarun ("-L -t --cf='normalize_charset 0' < data/nice/handler_svg_entity",
+ok (sarun ("-L -t --cf=\"normalize_charset 0\" < data/nice/handler_svg_entity",
            \&patterns_run_cb));
 ok_all_patterns();
 

@@ -105,7 +105,7 @@ ok_all_patterns();
   local %anti_patterns = (
     'ARC_HTML ', 'maxfiles_second_member_skipped',
   );
-  ok (sarun ("-L -t --cf='archive_max_files 1' < data/nice/handler_archive_zip",
+  ok (sarun ("-L -t --cf=\"archive_max_files 1\" < data/nice/handler_archive_zip",
              \&patterns_run_cb));
   ok_all_patterns();
 }
