@@ -30,7 +30,8 @@ plan tests => 17 * $iterations;
 %anti_patterns = (
  q{ 1.0 X_HASHBL_SHA256 } => '',
  q{ 1.0 X_HASHBL_FUZZY_LAX } => '',
- q{ warn: } => '',
+ # ignore Mail::DMARC (2.20260724+) warning that no mail-dmarc.ini is installed
+ qr/ warn: (?! at \S+\/Plugin\/DMARC\.pm line)(?!no mail-dmarc\.ini found)/ => 'warn',
 );
 
 # Check from debug output log that nothing else than these were queried

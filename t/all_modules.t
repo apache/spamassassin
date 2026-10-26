@@ -77,8 +77,9 @@ tstprefs("
 
 %anti_patterns = (
         # sometimes trips on URIBL_BLOCKED, ignore..
-        # also ignore ResourceLimits/OLEVBMacro missing required modules
-        qr/ warn: (?![^\n]*(?:dns_block_rule|ResourceLimits not used|OLEVBMacro:.*required module))/, 'warn',
+        # also ignore ResourceLimits/OLEVBMacro missing required modules,
+        # and Mail::DMARC (2.20260724+) warning that no mail-dmarc.ini is installed
+        qr/ warn: (?! at \S+\/Plugin\/DMARC\.pm line)(?![^\n]*(?:dns_block_rule|ResourceLimits not used|OLEVBMacro:.*required module|no mail-dmarc\.ini found))/, 'warn',
         qr/Insecure dependency/i, 'tainted',
         qr/Syntax error/i, 'syntax',
         qr/Use of uninitialized/i, 'uninitialized',
