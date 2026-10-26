@@ -52,6 +52,13 @@ jobs:
             perl: 20
           - runner: windows-2025
             perl: 20
+          # Strawberry Perl has no MySQL client library to build DBD::mysql
+          - runner: windows-latest
+            database: mysql
+          - runner: windows-2022
+            database: mysql
+          - runner: windows-2025
+            database: mysql
     env:
       PERL5LIB: ''
       PERL_VERSION: 5.${{matrix.perl}}
