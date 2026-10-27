@@ -4412,7 +4412,7 @@ C<SELECT preference, value FROM _TABLE_ WHERE username = _USERNAME_ OR username 
 
 =item Use global and then domain level defaults:
 
-C<SELECT preference, value FROM _TABLE_ WHERE username = _USERNAME_ OR username = '@GLOBAL' OR username = '@~'||_DOMAIN_ ORDER BY username ASC>
+C<SELECT preference, value FROM _TABLE_ WHERE username = _USERNAME_ OR username = '@GLOBAL' OR username = CONCAT('@~', _DOMAIN_) ORDER BY username ASC>
 
 =item Maybe global prefs should override user prefs:
 
