@@ -102,6 +102,7 @@ sub load {
      # make sure we can see croak messages from DBI
      local $SIG{'__DIE__'} = sub { warn "$_[0]"; };
      require Net::LDAP;
+     require Net::LDAP::Util;
      require URI;
      load_with_ldap($self, $username, $url);
      1;
@@ -142,7 +143,8 @@ sub load_with_ldap {
   my $scheme = $uri->scheme;
   my %extn   = $uri->extensions; # unused
 
-  $filter =~ s/__USERNAME__/$username/g;
+  my $escaped_username = Net::LDAP::Util::escape_filter_value($username);
+  $filter =~ s/__USERNAME__/$escaped_username/g;
   dbg("ldap: host=$host, port=$port, base='$base', attr=${attr[0]}, scope=$scope, filter='$filter'");
 
   my $main = $self->{main};
