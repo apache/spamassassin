@@ -45,9 +45,12 @@ if (HAS_PYZOR) {
 if (HAS_PYZOR) {
   ok sarun ("--cf=\"pyzor_fork 0\" -t < data/spam/pyzor", \&patterns_run_cb);
   ok_all_patterns();
-  # Same with fork
-  ok sarun ("--cf=\"pyzor_fork 1\" -t < data/spam/pyzor", \&patterns_run_cb);
-  ok_all_patterns();
+  # Same with fork, which is not used on Windows
+  SKIP: {
+    skip "pyzor_fork is not used on Windows", 2 if $RUNNING_ON_WINDOWS;
+    ok sarun ("--cf=\"pyzor_fork 1\" -t < data/spam/pyzor", \&patterns_run_cb);
+    ok_all_patterns();
+  }
 }
 
 # Same with Perl
@@ -66,9 +69,12 @@ ok_all_patterns();
 if (HAS_PYZOR) {
   ok sarun ("-D pyzor --cf=\"pyzor_fork 0\" -t < data/nice/001 2>&1", \&patterns_run_cb);
   ok_all_patterns();
-  # same with fork
-  ok sarun ("-D pyzor --cf=\"pyzor_fork 1\" -t < data/nice/001 2>&1", \&patterns_run_cb);
-  ok_all_patterns();
+  # same with fork, which is not used on Windows
+  SKIP: {
+    skip "pyzor_fork is not used on Windows", 4 if $RUNNING_ON_WINDOWS;
+    ok sarun ("-D pyzor --cf=\"pyzor_fork 1\" -t < data/nice/001 2>&1", \&patterns_run_cb);
+    ok_all_patterns();
+  }
 }
 
 # same with Perl

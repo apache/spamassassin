@@ -58,17 +58,19 @@ tstpre ("
   loadplugin Mail::SpamAssassin::Plugin::DMARC
 ");
 
+# the razor and pyzor fork options are not used on Windows
+my $fork = $RUNNING_ON_WINDOWS ? 0 : 1;
 tstprefs("
   use_bayes 1
   spf_timeout 2
   use_razor2 1
   razor_timeout 2
-  razor_fork 1
+  razor_fork $fork
   use_dcc 1
   dcc_timeout 2
   use_pyzor 1
   pyzor_timeout 2
-  pyzor_fork 1
+  pyzor_fork $fork
 ");
 
 %patterns = (
