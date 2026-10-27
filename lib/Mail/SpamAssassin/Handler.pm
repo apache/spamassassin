@@ -56,7 +56,7 @@ with the C<loadhandler> / C<tryhandler> configuration directives, and a block of
 configuration can be made conditional on a handler with C<ifhandler>.
 
 Everything in L<Mail::SpamAssassin::Plugin> is available to handlers; only the
-handler-specific method below is added here.
+handler-specific methods below are added here.
 
 =cut
 
@@ -95,6 +95,34 @@ recursively -- or C<undef>/C<[]> for none.
 sub register_handler {
   my ($self, $mime_pattern, $nameofsub) = @_;
   $self->{main}->{conf}->register_handler ($self, $mime_pattern, $nameofsub);
+}
+
+=item $handler-E<gt>bytes_left ($permsgstatus)
+
+Returns how many bytes are left of the message's C<handler_max_bytes> budget.
+A handler that uncompresses or extracts data should stop once it has produced
+this many bytes, less the size of the child parts it is about to return.
+
+=cut
+
+sub bytes_left {
+  my ($self, $pms) = @_;
+  return $pms->{handler_bytes_left}
+           // ($pms->{conf}->{handler_max_bytes} || 50_000_000);
+}
+
+=item $handler-E<gt>spend_bytes ($permsgstatus, $n)
+
+Counts C<$n> bytes against the message's C<handler_max_bytes> budget.  The
+framework counts returned child parts itself; a handler calls this for data it
+produced but does not return, such as an archive member it discarded for being
+over the budget.
+
+=cut
+
+sub spend_bytes {
+  my ($self, $pms, $n) = @_;
+  $pms->{handler_bytes_left} = $self->bytes_left($pms) - $n;
 }
 
 =back

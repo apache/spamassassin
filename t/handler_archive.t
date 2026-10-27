@@ -5,6 +5,11 @@ use SATest; sa_t_init("handler_archive");
 
 use Test::More;
 
+use constant HAS_ARCHIVE_ZIP => eval { require Archive::Zip; };
+use constant HAS_IO_STRING => eval { require IO::String; };
+plan skip_all => 'Need Archive::Zip for this test' unless HAS_ARCHIVE_ZIP;
+plan skip_all => 'Need IO::String for this test' unless HAS_IO_STRING;
+
 # ---------------------------------------------------------------------------
 # End-to-end test of Mail::SpamAssassin::Handler::Archive.
 #
@@ -25,9 +30,9 @@ use Test::More;
 #
 # Each fixture under data/nice/ is an ordinary MIME message (100% ASCII) whose
 # attachment is a small zip/rar containing inner.js (sentinel INNERJS) and
-# inner.html (sentinel INNERHTML), base64-encoded.  The zip uses pure-Perl
-# extraction so those cases run everywhere; the rar case needs the 'unrar'
-# binary and is skipped cleanly when it is absent.
+# inner.html (sentinel INNERHTML), base64-encoded.  The test needs Archive::Zip
+# and IO::String; the rar case also needs the 'unrar' binary and is skipped
+# cleanly when it is absent.
 
 # Locate unrar the way handler_pdf.t locates pdftotext: SATest scrubs PATH to a
 # hermetic default, so also probe a few common install locations.

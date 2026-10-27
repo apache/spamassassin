@@ -45,9 +45,8 @@ archive declares (see L</EVAL RULES>).
 
 =item zip
 
-Extraction uses L<IO::Uncompress::Unzip>, which is part of the core Perl
-distribution.  It is loaded lazily; if it is somehow unavailable the handler
-still loads (with a warning at startup) and simply skips zip archives.
+Extraction uses L<Archive::Zip> and L<IO::String>.  If either is not installed,
+the handler still loads (with a warning at startup) and skips zip archives.
 
 =item rar
 
@@ -104,7 +103,9 @@ use Mail::SpamAssassin::Handler;
 use Mail::SpamAssassin::Logger qw(dbg would_log);
 use Mail::SpamAssassin::Timeout;
 use Mail::SpamAssassin::Util qw(untaint_var untaint_file_path
-                                proc_status_ok exit_status_str);
+                                proc_status_ok exit_status_str
+                                am_running_on_windows);
+use Mail::SpamAssassin::Util::Zip;
 
 our @ISA = qw(Mail::SpamAssassin::Handler);
 
@@ -112,11 +113,10 @@ our @ISA = qw(Mail::SpamAssassin::Handler);
 # default and the per-call-site fallback below.
 use constant DEFAULT_MAX_FILES => 2;
 
-# zip extraction uses the core IO::Uncompress::Unzip.  Load it lazily and guard
-# on the result, mirroring the optional-dependency idiom in Handler::PDF: the
-# handler still loads if it is missing, only zip archives are skipped.
-use constant HAS_UNZIP => eval { require IO::Uncompress::Unzip; 1 };
-BEGIN { IO::Uncompress::Unzip->import('$UnzipError') if HAS_UNZIP; }
+# a rar member name with these characters is not passed to unrar: see
+# Mail::SpamAssassin::Util::helper_app_pipe_open
+use constant UNSAFE_MEMBER_NAME =>
+  am_running_on_windows() ? qr/["&|<>^%!\x00-\x1f]/ : qr/"/;
 
 sub log_dbg  { Mail::SpamAssassin::Logger::dbg ("archive: @_"); }
 sub log_warn { Mail::SpamAssassin::Logger::log_message('warn', "archive: @_"); }
@@ -144,8 +144,10 @@ sub new {
 
   # Warn once at startup if the zip backend is unavailable, so zip archives are
   # knowingly skipped rather than silently ignored.
-  if (!HAS_UNZIP) {
-    log_warn("zip archives not supported, required module IO::Uncompress::Unzip missing");
+  if (!Mail::SpamAssassin::Util::Zip::HAS_ARCHIVE_ZIP
+      || !Mail::SpamAssassin::Util::Zip::HAS_IO_STRING) {
+    log_warn("zip archives not supported, required module Archive::Zip or ".
+             "IO::String missing");
   }
   # unrar is resolved lazily in handle_rar (like pdftotext in Handler::PDF).
 
@@ -243,11 +245,13 @@ sub _record_file_count {
 # handle_zip($node, $pms): extract up to archive_max_files files from a zip
 # attachment and return each as an application/octet-stream child part named with
 # the member's basename.  The framework re-dispatches each by effective_type.
-# Pure Perl (IO::Uncompress::Unzip); the framework already wraps this call in a
-# timeout, so no timeout is set here.
+# Members are listed from the central directory and uncompressed within the
+# message's byte budget; the framework already wraps this call in a timeout, so
+# no timeout is set here.
 sub handle_zip {
   my ($self, $node, $pms) = @_;
-  return [] unless HAS_UNZIP;
+  return [] unless Mail::SpamAssassin::Util::Zip::HAS_ARCHIVE_ZIP
+                   && Mail::SpamAssassin::Util::Zip::HAS_IO_STRING;
 
   my $data = $node->decode();
   return [] unless defined $data && length $data;
@@ -260,29 +264,32 @@ sub handle_zip {
   # only open the first archive_max_files members below.
   $self->_record_file_count($pms, _zip_entry_count(\$data));
 
-  my $u = IO::Uncompress::Unzip->new(\$data, MultiStream => 0);
-  if (!$u) {
-    log_dbg("failed to open zip: ".(defined $UnzipError ? $UnzipError : 'unknown error'));
+  my $zip = Mail::SpamAssassin::Util::Zip::open_zip(\$data);
+  if (!$zip) {
+    log_dbg("failed to open zip");
     return [];
   }
 
   my @parts;
-  my $status = 1;
-  while ($status > 0 && @parts < $max) {
-    my $hdr  = $u->getHeaderInfo();
-    my $name = _basename($hdr ? $hdr->{Name} : undef);
+  my $pending = 0;    # size of @parts, counted by the framework on return
+  foreach my $member ($zip->members()) {
+    last if @parts >= $max;
 
     # Skip directory entries (the framework would just see an empty part).
-    if ($name eq '' || ($hdr && defined $hdr->{Name} && $hdr->{Name} =~ m{/\z})) {
-      $status = $u->nextStream();
-      next;
-    }
+    next if $member->isDirectory();
+    my $name = _basename($member->fileName());
+    next if $name eq '';
 
-    my $content = '';
-    my ($buf, $n);
-    while (($n = $u->read($buf, 65536)) > 0) { $content .= $buf; }
-    if (!defined $n) {
-      log_dbg("error reading zip member $name: ".(defined $UnzipError ? $UnzipError : '?'));
+    my $limit = $self->bytes_left($pms) - $pending;
+    if ($limit <= 0) {
+      log_dbg("byte budget used up, not extracting zip member $name");
+      last;
+    }
+    my ($content, $produced) =
+      Mail::SpamAssassin::Util::Zip::member_contents($member, $limit);
+    if (!defined $content) {
+      $self->spend_bytes($pms, $produced);
+      log_dbg("zip member $name skipped: encrypted, unreadable or over budget");
     } elsif (length $content) {
       log_dbg("extracted zip member: $name (".length($content)." bytes)");
       push @parts, {
@@ -290,9 +297,8 @@ sub handle_zip {
         data => $content,
         name => $name,
       };
+      $pending += length $content;
     }
-
-    $status = $u->nextStream();
   }
 
   return \@parts;
@@ -333,20 +339,36 @@ sub handle_rar {
   # check_archive_file_count sees the true total of the archive.
   $self->_record_file_count($pms, scalar @members);
 
+  my @unsafe = grep { $_ =~ UNSAFE_MEMBER_NAME } @members;
+  log_dbg("rar members skipped, unsafe for the command line: @unsafe") if @unsafe;
+  @members = grep { $_ !~ UNSAFE_MEMBER_NAME } @members;
   splice(@members, $max) if @members > $max;
 
   my @parts;
+  my $pending = 0;    # size of @parts, counted by the framework on return
   for my $member (@members) {
-    my $bytes = $self->_unrar_extract($pms, $bin, $arc_file, $member);
-    next unless defined $bytes && length $bytes;
     my $name = _basename($member);
     next if $name eq '';
+    my $limit = $self->bytes_left($pms) - $pending;
+    if ($limit <= 0) {
+      log_dbg("byte budget used up, not extracting rar member $name");
+      last;
+    }
+    my ($bytes, $produced) =
+      $self->_unrar_extract($pms, $bin, $arc_file, $member, $limit);
+    if (!defined $bytes) {
+      $self->spend_bytes($pms, $produced);
+      log_dbg("rar member $name skipped: unreadable or over budget");
+      next;
+    }
+    next unless length $bytes;
     log_dbg("extracted rar member: $name (".length($bytes)." bytes)");
     push @parts, {
       type => 'application/octet-stream',
       data => $bytes,
       name => $name,
     };
+    $pending += length $bytes;
   }
 
   unlink($arc_file) if defined $arc_file;
@@ -380,7 +402,7 @@ sub _unrar {
 # archive order); empty on any failure.
 sub _unrar_list {
   my ($self, $pms, $bin, $arc_file) = @_;
-  my $out = $self->_run_unrar($pms, $bin, 'lb', '-p-', '--', $arc_file);
+  my ($out) = $self->_run_unrar($pms, undef, $bin, 'lb', '-p-', '--', $arc_file);
   return () unless defined $out;
   my @members = grep { length } map { chomp; $_ } split(/\n/, $out);
   return @members;
@@ -389,19 +411,22 @@ sub _unrar_list {
 # Extract one member to stdout: `unrar p -inul -p- <archive> <member>` prints the
 # file's bytes with no UI noise and never prompts for a password (so
 # password-protected members simply fail and are skipped).  Returns the bytes, or
-# undef on failure.
+# undef on failure or if they exceed $limit, and the number of bytes read.
 sub _unrar_extract {
-  my ($self, $pms, $bin, $arc_file, $member) = @_;
-  return $self->_run_unrar($pms, $bin, 'p', '-inul', '-p-', '--',
-                           $arc_file, $member);
+  my ($self, $pms, $bin, $arc_file, $member, $limit) = @_;
+  my ($out, $produced) = $self->_run_unrar($pms, $limit, $bin, 'p', '-inul',
+                                           '-p-', '--', $arc_file, $member);
+  return (undef, $produced) if !defined $out || $produced > $limit;
+  return ($out, $produced);
 }
 
 # Run unrar with the given args under a Timeout and return its stdout, or undef on
-# failure.  Mirrors Handler::PDF::_extract_text: a pipe open in helper-run-mode,
+# failure, and the number of bytes read.  Reading stops once it exceeds $limit,
+# if given.  Mirrors Handler::PDF::_extract_text: a pipe open in helper-run-mode,
 # the whole thing wrapped in a Mail::SpamAssassin::Timeout, with the stale child
 # reaped if the timer fires.
 sub _run_unrar {
-  my ($self, $pms, $bin, @args) = @_;
+  my ($self, $pms, $limit, $bin, @args) = @_;
 
   my $conf = $pms->{conf} || $self->{main}->{conf};
   my $secs = $conf->{handler_time_limit} || 10;
@@ -430,10 +455,14 @@ sub _run_unrar {
     binmode ARCHIVE_UNRAR;
     my ($inbuf, $nread);
     $resp = '';
-    while ($nread = read(ARCHIVE_UNRAR, $inbuf, 8192)) { $resp .= $inbuf }
+    while ($nread = read(ARCHIVE_UNRAR, $inbuf, 8192)) {
+      $resp .= $inbuf;
+      last if defined $limit && length($resp) > $limit;
+    }
     defined $nread or die "error reading from pipe: $!\n";
 
     $errno = 0;
+    kill('TERM', $pid) if defined $limit && length($resp) > $limit;
     close ARCHIVE_UNRAR or $errno = $!;
 
     if (proc_status_ok($?, $errno)) {
@@ -464,10 +493,10 @@ sub _run_unrar {
       chomp(my $e = $err);
       log_warn("unrar error: $e");
     }
-    return;
+    return (undef, length($resp // ''));
   }
 
-  return $resp;
+  return ($resp, length $resp);
 }
 
 # check_archive_file_count($pms, $min, $max): fire when any archive in the message

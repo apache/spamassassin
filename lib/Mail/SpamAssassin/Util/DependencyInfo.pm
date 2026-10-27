@@ -318,13 +318,13 @@ our @OPTIONAL_MODULES = (
   module => 'Archive::Zip',
   version => 0,
   desc => 'Archive::Zip provides an interface to ZIP archive files.
-  It is used by the optional OLEVBMacro Plugin.',
+  It is used by the optional OLEVBMacro Plugin and Archive handler.',
 },
 {
   module => 'IO::String',
   version => 0,
   desc => 'IO::String emulates file interface for in-core strings.
-  It is used by the optional OLEVBMacro Plugin.',
+  It is used by the optional OLEVBMacro Plugin and Archive handler.',
 },
 {
   module => 'Email::Address::XS',

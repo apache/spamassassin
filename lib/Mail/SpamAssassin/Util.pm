@@ -1946,6 +1946,8 @@ sub setuid_to_euid {
 }
 
 # helper app command-line open
+# On Windows the arguments are joined into one command line that runs through
+# the shell, so they must not include untrusted text.
 sub helper_app_pipe_open {
 
   my @cmdline;

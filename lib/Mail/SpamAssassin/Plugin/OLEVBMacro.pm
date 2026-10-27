@@ -82,19 +82,7 @@ use warnings;
 
 use Mail::SpamAssassin::Plugin;
 use Mail::SpamAssassin::Util qw(compile_regexp);
-
-use constant HAS_ARCHIVE_ZIP => eval { require Archive::Zip; };
-use constant HAS_IO_STRING => eval { require IO::String; };
-
-BEGIN
-{
-    eval{
-      Archive::Zip->import(qw( :ERROR_CODES :CONSTANTS ))
-    };
-    eval{
-      IO::String->import
-    };
-}
+use Mail::SpamAssassin::Util::Zip;
 
 use re 'taint';
 
@@ -127,11 +115,6 @@ my $exe_marker2 = "URLDownloadToFileA";
 my $mhtml_marker1 = "^MHTML:&#x48;&#x54;&#x50;&#x3a;&#x5c;&#x5c;&#x31;&";
 my $mhtml_marker2 = "^(?:mhtml:https?://|file:///)";
 
-# this code burps an ugly message if it fails, but that's redirected elsewhere
-# AZ_OK is a constant exported by Archive::Zip
-my $az_ok;
-eval '$az_ok = AZ_OK';
-
 # constructor: register the eval rule
 sub new {
   my $class = shift;
@@ -159,10 +142,10 @@ sub new {
   # lower priority for add_uri_detail_list to work
   $self->register_method_priority ("parsed_metadata", -1);
 
-  if (!HAS_ARCHIVE_ZIP) {
+  if (!Mail::SpamAssassin::Util::Zip::HAS_ARCHIVE_ZIP) {
     warn "OLEVBMacro: check_zip not supported, required module Archive::Zip missing\n";
   }
-  if (!HAS_IO_STRING) {
+  if (!Mail::SpamAssassin::Util::Zip::HAS_IO_STRING) {
     warn "OLEVBMacro: check_macrotype_doc not supported, required module IO::String missing\n";
   }
 
@@ -174,56 +157,6 @@ sub dbg { my $msg = shift; Mail::SpamAssassin::Plugin::dbg("OLEVBMacro: $msg", @
 sub set_config {
   my ($self, $conf) = @_;
   my @cmds = ();
-
-=over 4
-
-=item olemacro_num_mime (default: 5)
-
-Configure the maximum number of matching MIME parts (attachments) the plugin
-will scan.
-
-=back
-
-=cut
-
-  push(@cmds, {
-    setting => 'olemacro_num_mime',
-    default => 5,
-    type => $Mail::SpamAssassin::Conf::CONF_TYPE_NUMERIC,
-  });
-
-=over 4
-
-=item olemacro_num_zip (default: 8)
-
-Configure the maximum number of matching files inside the zip to scan.
-To disable zip scanning, set 0.
-
-=back
-
-=cut
-
-  push(@cmds, {
-    setting => 'olemacro_num_zip',
-    default => 8,
-    type => $Mail::SpamAssassin::Conf::CONF_TYPE_NUMERIC,
-  });
-
-=over 4
-
-=item olemacro_zip_depth (default: 2)
-
-Depth to recurse within zip files.
-
-=back
-
-=cut
-
-  push(@cmds, {
-    setting => 'olemacro_zip_depth',
-    default => 2,
-    type => $Mail::SpamAssassin::Conf::CONF_TYPE_NUMERIC,
-  });
 
 =over 4
 
@@ -260,23 +193,6 @@ DEPRECATED: This option is deprecated and will be removed in a future release.
     setting => 'olemacro_prefer_contentdisposition',
     default => 1,
     type => $Mail::SpamAssassin::Conf::CONF_TYPE_BOOL,
-  });
-
-=over 4
-
-=item olemacro_max_file (default: 1024000)
-
-Limit the amount of bytes that the plugin will decode and scan from the MIME
-objects (attachments).
-
-=back
-
-=cut
-
-  push(@cmds, {
-    setting => 'olemacro_max_file',
-    default => 1024000,
-    type => $Mail::SpamAssassin::Conf::CONF_TYPE_NUMERIC,
   });
 
 =over 4
@@ -454,6 +370,84 @@ download files from the Office document.
       }
       $self->{olemacro_download_marker} = $rec;
     },
+  });
+
+=head1 ADMINISTRATOR SETTINGS
+
+These settings can only be set by the administrator, not from a user's
+C<user_prefs> file.
+
+=cut
+
+=over 4
+
+=item olemacro_num_mime (default: 5)
+
+Configure the maximum number of matching MIME parts (attachments) the plugin
+will scan.
+
+=back
+
+=cut
+
+  push(@cmds, {
+    setting => 'olemacro_num_mime',
+    is_admin => 1,
+    default => 5,
+    type => $Mail::SpamAssassin::Conf::CONF_TYPE_NUMERIC,
+  });
+
+=over 4
+
+=item olemacro_num_zip (default: 8)
+
+Configure the maximum number of matching files inside the zip to scan.
+To disable zip scanning, set 0.
+
+=back
+
+=cut
+
+  push(@cmds, {
+    setting => 'olemacro_num_zip',
+    is_admin => 1,
+    default => 8,
+    type => $Mail::SpamAssassin::Conf::CONF_TYPE_NUMERIC,
+  });
+
+=over 4
+
+=item olemacro_zip_depth (default: 2)
+
+Depth to recurse within zip files.
+
+=back
+
+=cut
+
+  push(@cmds, {
+    setting => 'olemacro_zip_depth',
+    is_admin => 1,
+    default => 2,
+    type => $Mail::SpamAssassin::Conf::CONF_TYPE_NUMERIC,
+  });
+
+=over 4
+
+=item olemacro_max_file (default: 1024000)
+
+Limit the amount of bytes that the plugin will decode and scan from the MIME
+objects (attachments).
+
+=back
+
+=cut
+
+  push(@cmds, {
+    setting => 'olemacro_max_file',
+    is_admin => 1,
+    default => 1024000,
+    type => $Mail::SpamAssassin::Conf::CONF_TYPE_NUMERIC,
   });
 
   $conf->{parser}->register_commands(\@cmds);
@@ -693,8 +687,7 @@ sub _check_zip {
     if ($name =~ /\.csv$/i && $conf->{eval_to_rule}->{check_olemacro_csv}) {
       dbg("Checking zipped csv file \"$name\" for exploits");
       if (!defined $data) {
-        ($data, my $status) = $member->contents();
-        $data = undef  unless $status == $az_ok;
+        $data = _zip_member_contents($pms, $member);
       }
       _check_csv($pms, $name, $data) if defined $data;
     }
@@ -703,8 +696,7 @@ sub _check_zip {
     if ($name =~ /$conf->{olemacro_zips}/i) {
       dbg("Found zippy zip member \"$name\"");
       if (!defined $data) {
-        ($data, my $status) = $member->contents();
-        $data = undef  unless $status == $az_ok;
+        $data = _zip_member_contents($pms, $member);
       }
       _check_zip($pms, $name, $data, $depth) if defined $data;
     }
@@ -713,8 +705,7 @@ sub _check_zip {
       dbg("Found macrotype zip member \"$name\"");
       $pms->{olemacro_exists} = 1;
       if (!defined $data) {
-        ($data, my $status) = $member->contents();
-        $data = undef  unless $status == $az_ok;
+        $data = _zip_member_contents($pms, $member);
       }
       if (defined $data) {
         _check_encrypted_doc($pms, $name, $data);
@@ -726,8 +717,7 @@ sub _check_zip {
     elsif ($name =~ /$conf->{olemacro_exts}/i) {
       dbg("Found zip member \"$name\"");
       if (!defined $data) {
-        ($data, my $status) = $member->contents();
-        $data = undef  unless $status == $az_ok;
+        $data = _zip_member_contents($pms, $member);
       }
       if (defined $data) {
         _check_encrypted_doc($pms, $name, $data);
@@ -740,8 +730,7 @@ sub _check_zip {
     elsif ($conf->{olemacro_extended_scan}) {
       dbg("Extended scan for zip member \"$name\"");
       if (!defined $data) {
-        ($data, my $status) = $member->contents();
-        $data = undef  unless $status == $az_ok;
+        $data = _zip_member_contents($pms, $member);
       }
       if (defined $data) {
         my $renamed = 0;
@@ -772,22 +761,34 @@ sub _check_zip {
   return 1;
 }
 
-sub _open_zip_handle {
-  my ($data) = @_;
+# Uncompress a zip member within olemacro_max_file and the message total of
+# olemacro_max_file * olemacro_num_zip, counting every byte uncompressed
+sub _zip_member_contents {
+  my ($pms, $member) = @_;
 
-  return unless HAS_ARCHIVE_ZIP && HAS_IO_STRING;
-
-  # open our archive from raw data
-  my $SH = IO::String->new($data);
-  Archive::Zip::setErrorHandler(\&_zip_error_handler);
-  my $zip = Archive::Zip->new();
-  if ($zip->readFromFileHandle($SH) != $az_ok) {
-    dbg("cannot read zipfile");
-    # as we cannot read it its not a zip (or too big/corrupted)
-    # so skip processing.
+  my $max_file = $pms->{conf}->{olemacro_max_file};
+  my $left = $max_file * ($pms->{conf}->{olemacro_num_zip} || 1)
+             - ($pms->{olemacro_zip_bytes} || 0);
+  if ($left <= 0) {
+    dbg("Zip decompression limit reached, skipping \"%s\"", $member->fileName());
     return;
   }
 
+  my ($data, $produced) = Mail::SpamAssassin::Util::Zip::member_contents(
+                            $member, $max_file < $left ? $max_file : $left);
+  $pms->{olemacro_zip_bytes} += $produced;
+  dbg("Zip member \"%s\" too big or unreadable, skipping", $member->fileName())
+    unless defined $data;
+  return $data;
+}
+
+sub _open_zip_handle {
+  my ($data) = @_;
+
+  my $zip = Mail::SpamAssassin::Util::Zip::open_zip(\$data);
+  # as we cannot read it its not a zip (or too big/corrupted)
+  # so skip processing.
+  dbg("cannot read zipfile") unless defined $zip;
   return $zip;
 }
 
@@ -852,8 +853,8 @@ sub _check_macrotype_doc {
     dbg('Found [Content_Types].xml file');
     $is_doc = 1;
     if (!$pms->{olemacro_exists}) {
-      my ($data, $status) = $ctypesxml->contents();
-      if ($status == $az_ok && _check_ctype_xml($data)) {
+      my $data = _zip_member_contents($pms, $ctypesxml);
+      if (defined $data && _check_ctype_xml($data)) {
         $pms->{olemacro_exists} = 1;
       }
     }
@@ -862,8 +863,8 @@ sub _check_macrotype_doc {
   my @rels = $zip->membersMatching('.*\.rels');
   foreach my $rel (@rels) {
     dbg("Found \"".$rel->fileName."\" configuration file");
-    my ($data, $status) = $rel->contents();
-    next unless $status == $az_ok;
+    my $data = _zip_member_contents($pms, $rel);
+    next unless defined $data;
     my @relations = split(/Relationship\s/, $data);
     $is_doc = 1 if @relations;
     foreach my $rl (@relations) {
@@ -888,7 +889,7 @@ sub _check_macrotype_doc {
     }
   }
 
-  if ($olemacro_exists && _find_malice_bins($zip)) {
+  if ($olemacro_exists && _find_malice_bins($pms, $zip)) {
     $pms->{olemacro_malice} = 1;
   }
 
@@ -1033,13 +1034,13 @@ sub _check_markers {
 }
 
 sub _find_malice_bins {
-  my ($zip) = @_;
+  my ($pms, $zip) = @_;
 
   my @binfiles = $zip->membersMatching('.*\.bin');
 
   foreach my $member (@binfiles) {
-    my ($data, $status) = $member->contents();
-    next unless $status == $az_ok;
+    my $data = _zip_member_contents($pms, $member);
+    next unless defined $data;
     if (_check_malice($data)) {
       return 1;
     }
@@ -1074,10 +1075,6 @@ sub _check_ctype_xml {
     dbg('Excel macrosheet found');
     return 1;
   }
-}
-
-sub _zip_error_handler {
-  1;
 }
 
 # Version features

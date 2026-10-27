@@ -1323,9 +1323,12 @@ sub apply_handlers {
   # below fires, and "no handlers at all" is exactly a case worth warning about.
   $self->parse_body() if exists $self->{'parse_queue'};
 
+  # kept on $permsgstatus so that handlers can stop at it, see
+  # Mail::SpamAssassin::Handler::bytes_left
+  $permsgstatus->{handler_bytes_left} = $conf->{handler_max_bytes} || 50_000_000;
+
   my $ctx = {
     permsgstatus => $permsgstatus,
-    bytes_budget => $conf->{handler_max_bytes} || 50_000_000,
     parts_budget => $conf->{handler_max_parts} || 1000,
     deadline     => $permsgstatus->{master_deadline},   # scan-wide; may be undef
     part_secs    => $conf->{handler_time_limit} || 10,
@@ -1396,11 +1399,12 @@ sub _invoke_handler {
 sub _attach_parts {
   my ($self, $node, $parts, $ctx, $work, $depth) = @_;
 
+  my $pms = $ctx->{permsgstatus};
   for my $cp (@$parts) {
-    last if $ctx->{bytes_budget} <= 0;
+    last if $pms->{handler_bytes_left} <= 0;
     next unless ref $cp eq 'HASH';
     my $data = ref $cp->{data} ? ${$cp->{data}} : $cp->{data};
-    $ctx->{bytes_budget} -= length($data // '');
+    $pms->{handler_bytes_left} -= length($data // '');
 
     # content fingerprint: identical bytes can't loop forever, and identical
     # repeated parts are processed once.  filename is deliberately excluded.
