@@ -137,15 +137,15 @@ sub load_with_dbi {
      my $sql;
      if (defined($custom_query)) {
        $sql = $custom_query;
-       my $quoted_username = $dbh->quote($username);
-       my ($mailbox, $domain) = split('@', $username);
-       my $quoted_mailbox = $dbh->quote($mailbox);
-       my $quoted_domain = $dbh->quote($domain);
+       my ($mailbox, $domain) = split('@', $username, 2);
 
-       $sql =~ s/_USERNAME_/$quoted_username/g;
-       $sql =~ s/_TABLE_/$f_table/g;
-       $sql =~ s/_MAILBOX_/$quoted_mailbox/g;
-       $sql =~ s/_DOMAIN_/$quoted_domain/g;
+       my %placeholders = (
+         USERNAME => $dbh->quote($username),
+         TABLE    => $f_table,
+         MAILBOX  => $dbh->quote($mailbox),
+         DOMAIN   => $dbh->quote($domain),
+       );
+       $sql =~ s/_(USERNAME|TABLE|MAILBOX|DOMAIN)_/$placeholders{$1}/g;
      }
      else {
        $sql = "select $f_preference, $f_value  from $f_table where ". 
