@@ -2783,6 +2783,14 @@ sub handle_virtual_config_dir {
     my $domain    = '';
     if ( $safename =~ /^(.*)\@(.*)$/ ) { $localpart = $1; $domain = $2; }
 
+    foreach my $part ($safename, $localpart, $domain) {
+      if ( $part =~ /^\./ ) {
+        info("spamd: refusing invalid username for virtual config dir: '$username'");
+        $spamtest->signal_user_changed( { username => $username, user_dir => undef } );
+        return 1;
+      }
+    }
+
     # Do userdir lookup exim-style. 
     # If a config for the full address exists, use that one
     # else look for a domain default
