@@ -2216,6 +2216,11 @@ sub dotell {
     return 0;
   }
 
+  if ($hdrs->{set_local} && !defined $hdrs->{message_class}) {
+    protocol_error("(Set: local requires a Message-class header)");
+    return 0;
+  }
+
   if ($hdrs->{set_remote} && $hdrs->{remove_remote}) {
     protocol_error("Unable to set remote and remove remote in the same operation.");
     return 0;
@@ -2495,11 +2500,13 @@ sub got_clen_header {
 sub got_message_class_header {
   my ($hdrs, $header, $value) = @_;
 
-  unless (lc($value) ne 'spam' || lc($value) ne 'ham') {
+  my $class = lc($value);
+  $class =~ s/\s+$//;
+  unless ($class eq 'spam' || $class eq 'ham') {
     protocol_error("(Message-class header contains invalid class)");
     return 0;
   }
-  $hdrs->{message_class} = $value;
+  $hdrs->{message_class} = $class;
 
   return 1;
 }
