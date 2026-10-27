@@ -4401,6 +4401,10 @@ value may be null.
 
 The query must be one continuous line in order to parse correctly.
 
+A setting in a later row overrides the same setting in an earlier row, so the
+examples below order the rows with a CASE expression.  Ordering by username
+would depend on the database's collation.
+
 Here are several example queries, please note that these are broken up
 for easy reading, in your config it should be one continuous line.
 
@@ -4408,15 +4412,15 @@ for easy reading, in your config it should be one continuous line.
 
 =item Current default query:
 
-C<SELECT preference, value FROM _TABLE_ WHERE username = _USERNAME_ OR username = '@GLOBAL' ORDER BY username ASC>
+C<SELECT preference, value FROM _TABLE_ WHERE username = _USERNAME_ OR username = '@GLOBAL' ORDER BY CASE WHEN username = '@GLOBAL' THEN 0 ELSE 1 END>
 
 =item Use global and then domain level defaults:
 
-C<SELECT preference, value FROM _TABLE_ WHERE username = _USERNAME_ OR username = '@GLOBAL' OR username = CONCAT('@~', _DOMAIN_) ORDER BY username ASC>
+C<SELECT preference, value FROM _TABLE_ WHERE username = _USERNAME_ OR username = '@GLOBAL' OR username = CONCAT('@~', _DOMAIN_) ORDER BY CASE WHEN username = '@GLOBAL' THEN 0 WHEN username = CONCAT('@~', _DOMAIN_) THEN 1 ELSE 2 END>
 
 =item Maybe global prefs should override user prefs:
 
-C<SELECT preference, value FROM _TABLE_ WHERE username = _USERNAME_ OR username = '@GLOBAL' ORDER BY username DESC>
+C<SELECT preference, value FROM _TABLE_ WHERE username = _USERNAME_ OR username = '@GLOBAL' ORDER BY CASE WHEN username = '@GLOBAL' THEN 1 ELSE 0 END>
 
 =back
 

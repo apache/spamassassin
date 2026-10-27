@@ -148,9 +148,11 @@ sub load_with_dbi {
        $sql =~ s/_(USERNAME|TABLE|MAILBOX|DOMAIN)_/$placeholders{$1}/g;
      }
      else {
+       # @GLOBAL rows first, so user settings win whatever the collation
        $sql = "select $f_preference, $f_value  from $f_table where ". 
         "$f_username = ".$dbh->quote($username).
-        " or $f_username = '\@GLOBAL' order by $f_username asc";
+        " or $f_username = '\@GLOBAL'".
+        " order by case when $f_username = '\@GLOBAL' then 0 else 1 end";
      }
      dbg("config: Conf::SQL: executing SQL: $sql");
      my $sth = $dbh->prepare($sql);

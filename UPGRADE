@@ -35,6 +35,13 @@ Note for Users Upgrading to SpamAssassin 4.0.3
   The domain name is checked on From and EnvelopeFrom fields as well as
   on EHLO value.
 
+- SQL user preferences now read the @GLOBAL rows before the user's own
+  whatever the database's collation. With PostgreSQL and a language
+  collation such as en_US.UTF-8, users whose names sorted before "GLOBAL"
+  got the @GLOBAL value of a setting instead of their own. A custom
+  user_scores_sql_custom_query ending in ORDER BY username has the same
+  problem; see its documentation for examples.
+
 - ARC (Authenticated Received Chain) verification has been separated from
   the DKIM plugin into its own plugin: Mail::SpamAssassin::Plugin::ARC.
   It is loaded by default from v403.pre.
