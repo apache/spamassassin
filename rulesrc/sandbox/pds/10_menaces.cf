@@ -104,7 +104,7 @@ describe PDS_URI_HIDDEN_HELO_NO_DOMAIN Hidden URI, HELO not domain
 score    PDS_URI_HIDDEN_HELO_NO_DOMAIN 2.0
 reuse    PDS_URI_HIDDEN_HELO_NO_DOMAIN
 
-header   __PDS_TONAME_EQ_TOLOCAL To:raw =~ /^\s*['"]?([^'"]+)['"]? <?\1\@/
+header   __PDS_TONAME_EQ_TOLOCAL To:raw =~ /^(?>\s*)['"]?([^'"]{1,64})['"]? <?\1\@/
 
 meta     PDS_TONAME_EQ_TOLOCAL_HDRS_LCASE __PDS_TONAME_EQ_TOLOCAL && __HDRS_LCASE
 describe PDS_TONAME_EQ_TOLOCAL_HDRS_LCASE To: name matches everything in local email - LCASE headers
