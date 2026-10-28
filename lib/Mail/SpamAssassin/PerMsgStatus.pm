@@ -2148,6 +2148,22 @@ sub get_decoded_stripped_body_text_array {
   return $_[0]->{msg}->get_rendered_body_text_array();
 }
 
+=item $status-E<gt>get_decoded_stripped_body_text_array_one_alternative ()
+
+Like get_decoded_stripped_body_text_array(), but only one part of each
+multipart/alternative section is included: the type set by
+C<multipart_alternative_preferred_part>, or C<text/html> if that option is
+unset.
+
+This is the text used by 'body' rules with C<tflags multiple>, so that text
+repeated in the text/plain and text/html alternatives is counted only once.
+
+=cut
+
+sub get_decoded_stripped_body_text_array_one_alternative {
+  return $_[0]->{msg}->get_rendered_body_text_array_one_alternative();
+}
+
 ###########################################################################
 
 =item $status-E<gt>get (header_name [, default_value])

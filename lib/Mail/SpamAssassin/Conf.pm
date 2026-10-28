@@ -3562,6 +3562,12 @@ value in db.
 The test will be evaluated multiple times, for use with meta rules.
 Only affects header, body, rawbody, uri, and full tests.
 
+For B<body> rules, matches are counted in only one part of each
+multipart/alternative section (the type set by
+B<multipart_alternative_preferred_part>, or C<text/html> if that option is
+unset), so text repeated in both the text/plain and text/html alternatives
+is not counted twice.
+
 =item  maxhits=N
 
 If B<multiple> is specified, limit the number of hits found to N.
@@ -3850,6 +3856,10 @@ rendered body text.  Valid values are C<text/html> and C<text/plain>.
 When set, only the preferred part type will be used from
 multipart/alternative sections, skipping the other alternative.  When
 empty (the default), all parts are included as before.
+
+Body rules with C<tflags multiple> always use only one alternative, so that
+repeated text is not counted twice: the type set here, or C<text/html> when
+this option is empty.
 
 =cut
 
