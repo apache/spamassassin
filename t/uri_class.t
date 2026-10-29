@@ -81,7 +81,7 @@ my @scheme_tests = (
   { uri => '/relative',            is_http => 0 },
 );
 
-plan tests => 98;
+plan tests => 112;
 
 for my $t (@split_tests, @decode_tests) {
   my $u = Mail::SpamAssassin::URI->new($t->{uri});
@@ -154,17 +154,57 @@ for my $t (@scheme_tests) {
 }
 
 # ---------------------------------------------------------------------------
-# The fragment is client-side only, so it is dropped from the form used to
-# fetch, to key a cache, or to compare against a Location header.
+# http_url rebuilds the URI as the http(s) form a browser actually requests,
+# or returns undef when there is nothing to fetch. The host is canonicalized
+# (decoded, lowercased, IDN-folded); the userinfo and fragment are left out
+# because a client does not send either to the server; the path and query keep
+# their original percent-encoding.
 {
-  is(Mail::SpamAssassin::URI->new('https://h.com/a#frag')->without_fragment,
-     'https://h.com/a', 'without_fragment drops the fragment');
-  is(Mail::SpamAssassin::URI->new('https://h.com/a?x=1#f')->without_fragment,
-     'https://h.com/a?x=1', 'without_fragment keeps the query');
-  is(Mail::SpamAssassin::URI->new('https://h.com/a')->without_fragment,
-     'https://h.com/a', 'without_fragment is a no-op without one');
-  is(Mail::SpamAssassin::URI->new('https://h.com/a#')->without_fragment,
-     'https://h.com/a', 'without_fragment drops an empty fragment');
+  # userinfo is dropped (a browser does not send it preemptively)
+  is(Mail::SpamAssassin::URI->new('https://user@example.com/a')->http_url,
+     'https://example.com/a', 'http_url drops bare userinfo');
+  is(Mail::SpamAssassin::URI->new('https://user:pass@example.com/a')->http_url,
+     'https://example.com/a', 'http_url drops user:pass userinfo');
+  is(Mail::SpamAssassin::URI->new('https://zoom.us-join@short.example/4zHT')->http_url,
+     'https://short.example/4zHT', 'http_url drops a lookalike userinfo');
+
+  # fragment is dropped (client-side only)
+  is(Mail::SpamAssassin::URI->new('https://user@example.com/a#frag')->http_url,
+     'https://example.com/a', 'http_url drops userinfo and fragment together');
+  is(Mail::SpamAssassin::URI->new('https://example.com/a?x=1#f')->http_url,
+     'https://example.com/a?x=1', 'http_url drops the fragment but keeps the query');
+  is(Mail::SpamAssassin::URI->new('https://example.com/a#')->http_url,
+     'https://example.com/a', 'http_url drops an empty fragment');
+
+  # port, path and query are preserved; percent-encoding in path/query is kept
+  is(Mail::SpamAssassin::URI->new('https://user@example.com:8443/a?x=1#f')->http_url,
+     'https://example.com:8443/a?x=1', 'http_url keeps the port and query');
+  is(Mail::SpamAssassin::URI->new('https://example.com/a?x=1')->http_url,
+     'https://example.com/a?x=1', 'http_url is a no-op when there is nothing to strip');
+  is(Mail::SpamAssassin::URI->new('https://example.com/u@ser/p?to=a@b.example')->http_url,
+     'https://example.com/u@ser/p?to=a@b.example', 'http_url leaves an @ in the path or query alone');
+  is(Mail::SpamAssassin::URI->new('https://example.com/tr%2Fop?a%3Db')->http_url,
+     'https://example.com/tr%2Fop?a%3Db', 'http_url keeps path/query percent-encoding');
+
+  # host is canonicalized so the real host is fetched, not an obfuscated spelling
+  is(Mail::SpamAssassin::URI->new('https://EXAMPLE.COM/A')->http_url,
+     'https://example.com/A', 'http_url lowercases the host, not the path');
+  is(Mail::SpamAssassin::URI->new('https://exa%6dple.com/a')->http_url,
+     'https://example.com/a', 'http_url decodes a percent-encoded host');
+  is(Mail::SpamAssassin::URI->new('https://b%C3%BCcher.example/x')->http_url,
+     'https://xn--bcher-kva.example/x', 'http_url IDN-folds the host to its xn-- form');
+  is(Mail::SpamAssassin::URI->new('https://192.0.2.1:8443/a')->http_url,
+     'https://192.0.2.1:8443/a', 'http_url keeps an IPv4 literal and port');
+  is(Mail::SpamAssassin::URI->new('https://[2001:db8::1]:8443/a')->http_url,
+     'https://[2001:db8::1]:8443/a', 'http_url keeps a bracketed IPv6 literal and port');
+
+  # nothing to fetch -> undef
+  is(Mail::SpamAssassin::URI->new('https://host.example%2Fa/b')->http_url,
+     undef, 'http_url returns undef for an encoded-slash authority (no real host)');
+  is(Mail::SpamAssassin::URI->new('mailto:user@example.com')->http_url,
+     undef, 'http_url returns undef for a non-http URI');
+  is(Mail::SpamAssassin::URI->new('/relative/path')->http_url,
+     undef, 'http_url returns undef for a URI with no scheme or host');
 }
 
 # ---------------------------------------------------------------------------

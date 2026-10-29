@@ -1613,6 +1613,11 @@ sub _add_redirector_entry {
   my ($domspec, $path) = split(/\//, $token, 2);
   $path = defined $path ? '/' . $path : '/';
 
+  # The host is matched against Mail::SpamAssassin::URI->host, which is always
+  # lowercased, so store the domain lowercased too. The path is left as entered
+  # so it can be matched case-sensitively.
+  $domspec = lc $domspec;
+
   my $is_suffix = ($domspec =~ s/^\.//) ? 1 : 0;
   return unless length $domspec;
 
@@ -1631,9 +1636,11 @@ sub _add_redirector_entry {
 sub _clear_redirector_entry {
   my ($conf, $token) = @_;
 
-  $token = lc $token;
   my $has_path = ($token =~ /\//) ? 1 : 0;
   my ($domspec, $path) = split(/\//, $token, 2);
+  # Lowercase the domain to match how _add_redirector_entry stored it; the path
+  # is matched case-sensitively, so it is left as entered.
+  $domspec = lc $domspec;
   $path = '/' . (defined $path ? $path : '');
 
   my $bucket = ($domspec =~ s/^\.//) ? 'url_redirector_suffix' : 'url_redirector_exact';
@@ -2187,10 +2194,20 @@ sub _do_http {
   my ($self, $uri, $method, $pms) = @_;
   my $conf = $pms->{conf};
 
-  # The fragment is stripped before fetching: RFC 3986 defines it as
-  # client-side-only, so it is not part of what is requested, cached, or
-  # compared against the Location that comes back.
-  my $redir_url = $uri->without_fragment;
+  # Request the URL the way a browser does: rebuilt from its parts, with the
+  # host canonicalized and the userinfo and fragment left out. The userinfo
+  # ("user[:pass]@" before the host) is dropped because a browser does not send
+  # it preemptively -- it holds the credentials back until a server answers 401
+  # -- whereas LWP turns it into a preemptive "Authorization: Basic" header.
+  # Some shorteners (e.g. da.gd) answer any such request with 403 instead of the
+  # redirect, which a spammer exploits: "https://zoom.us-join@shortener/abc"
+  # looks like Zoom to a human and resolves in a browser, but 403s for a scanner
+  # that fetches it verbatim, hiding the real destination. http_url returns
+  # undef when there is nothing a client could fetch (a non-http scheme, or an
+  # unresolvable host), in which case there is no redirect to follow.
+  my $redir_url = $uri->http_url;
+  return unless defined $redir_url;
+
   my $location;
 
   if (defined($location = $self->cache_get($redir_url))) {
@@ -2409,11 +2426,15 @@ sub _walk_redirects {
     my $location = $self->_do_http($u, $rentry->{method}, $pms);
     return unless defined $location;
 
-    # Compare both sides without their fragments: _do_http fetched the
-    # stripped form, and a server may still echo a fragment back in Location.
-    # Two URIs that differ only there are the same request.
+    # Compare both sides as the form that was actually requested -- host
+    # canonicalized, userinfo and fragment excluded: _do_http fetched that
+    # form, and a server may still echo a fragment (or the userinfo) back in
+    # Location. Two URIs that differ only there are the same request. $u fetched
+    # successfully so its http_url is defined; a Location that has none is
+    # simply not the same request.
     my $loc_uri = Mail::SpamAssassin::URI->new($location);
-    if ($u->without_fragment eq $loc_uri->without_fragment) {
+    my $loc_http_url = $loc_uri->http_url;
+    if (defined $loc_http_url && $u->http_url eq $loc_http_url) {
       dbg("URL redirects to itself");
       $pms->{redir_url_loop} = 1;
       return;

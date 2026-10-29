@@ -19,6 +19,10 @@ sub make_conf {
   Mail::SpamAssassin::Plugin::Redirectors::_add_redirector_entry($conf, 'baz.example/FOO', 'head');
   Mail::SpamAssassin::Plugin::Redirectors::_add_redirector_entry($conf, 'js.example', 'selenium');
   Mail::SpamAssassin::Plugin::Redirectors::_add_redirector_entry($conf, '.spa.example', 'selenium');
+  # Mixed-case entries: the host is lowercased on add, so they match a
+  # (always-lowercased) URL host. The path stays case-sensitive.
+  Mail::SpamAssassin::Plugin::Redirectors::_add_redirector_entry($conf, 'Mixed.Example', 'head');
+  Mail::SpamAssassin::Plugin::Redirectors::_add_redirector_entry($conf, '.Dot.Mixed.Example', 'head');
   return $conf;
 }
 
@@ -68,6 +72,11 @@ my @cases = (
 
   # Uppercase path
   [ 'https://baz.example/FOO', 'head', 'uppercase path' ],
+
+  # A mixed-case entry is stored lowercased, so it matches the (lowercased) URL host.
+  [ 'https://mixed.example/a',       'head', 'mixed-case exact entry matches a lowercase host' ],
+  [ 'https://www.mixed.example/a',   'head', 'mixed-case exact entry matches its www form' ],
+  [ 'https://sub.dot.mixed.example/a', 'head', 'mixed-case leading-dot entry matches a subdomain' ],
 
   # Selenium method round-trips through the entry.
   [ 'https://js.example/',           'selenium', 'selenium method on bare-domain entry' ],
@@ -146,10 +155,10 @@ my @embedded = (
     'bare hyphenated label (redirect=) is NOT an embedded uri' ],
 );
 
-# +1 no-capture-group check, +4 clear_url_redirector checks, +4 restore checks,
+# +3 wrapper-param checks, +6 clear_url_redirector checks, +4 restore checks,
 # +2 is_admin checks, +3 user preferences checks,
 # +13 url_redirector_selenium_resource checks
-plan tests => scalar(@cases) + scalar(@embedded) + 1 + 2 + 4 + 4 + 2 + 3 + 13;
+plan tests => scalar(@cases) + scalar(@embedded) + 3 + 6 + 4 + 2 + 3 + 13;
 
 for my $c (@cases) {
   my ($uri, $expect_method, $desc) = @$c;
@@ -225,6 +234,24 @@ for my $c (@embedded) {
      'clear removes last path');
   ok(!exists $conf->{url_redirector_suffix}->{'multi.example'},
      'host entry dropped when paths empty');
+}
+
+# clear lowercases the domain (to match how it was stored) but keeps the path
+# case-sensitive, so a mixed-case domain with an uppercase path round-trips.
+{
+  my $conf = {};
+  Mail::SpamAssassin::Plugin::Redirectors::_add_redirector_entry($conf, 'Clr.Example/FOO', 'head');
+
+  Mail::SpamAssassin::Plugin::Redirectors::_clear_redirector_entry($conf, 'cLR.eXAMPLE/FOO');
+  ok(!exists $conf->{url_redirector_exact}->{'clr.example'},
+     'clear removes a mixed-case domain regardless of the domain case given');
+
+  # A differently-cased path must NOT clear the entry, since the path is
+  # matched case-sensitively.
+  Mail::SpamAssassin::Plugin::Redirectors::_add_redirector_entry($conf, 'Clr.Example/FOO', 'head');
+  Mail::SpamAssassin::Plugin::Redirectors::_clear_redirector_entry($conf, 'Clr.Example/foo');
+  ok(exists $conf->{url_redirector_exact}->{'clr.example'},
+     'clear does not remove a path that differs only in case');
 }
 
 # spamd saves the configuration once and restores it after each user's

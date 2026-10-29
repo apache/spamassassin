@@ -240,21 +240,55 @@ The port from the authority, or undef.
 
 sub port { my $s = shift; $s->_split_authority; return $s->{port}; }
 
-=item without_fragment()
+=item http_url()
 
-The URI as a string with any fragment removed.  RFC 3986 defines the fragment
-as client-side only, so this is the form to request from a server, to use as a
-cache key, or to compare against a Location header.
+The http(s) URL to request from a server, rebuilt from the URI's parts, or
+undef when there is nothing a client could request.
+
+The result is C<scheme://host[:port]path[?query]>, built from the canonical
+C<host> (decoded, lowercased and IDN-folded to its C<xn--> form, exactly as a
+browser resolves it), so an obfuscated spelling of the host is requested as the
+real one -- C<b%C3%BCcher.de> is fetched as C<xn--bcher-kva.de>, not as the
+raw octets LWP would otherwise try to resolve and fail on.  The path and query
+keep their original percent-encoding.
+
+Two things are deliberately left out, because neither reaches the server the
+way a browser sends the request: the fragment, which is client-side only (RFC
+3986); and the userinfo (the C<user[:pass]@> before the host), which a browser
+does not send preemptively -- it is held back until the server answers C<401>
+-- whereas an HTTP client library typically turns it into a preemptive
+C<Authorization: Basic> header that some servers reject.
+
+undef is returned when the URI is not http(s), or when its host is not a
+requestable name -- an encoded-slash authority such as C<host.example%2Fa>
+decodes to something no client would resolve, and a browser likewise refuses
+it rather than guessing a host and path from it.  A caller treats undef as
+"nothing to fetch".
+
+This is the form to request from a server, to use as a cache key, or to compare
+against a Location header.
 
 =cut
 
-sub without_fragment {
+sub http_url {
   my ($self) = @_;
 
-  return $self->{raw} unless defined $self->{fragment};
+  return unless $self->is_http;
 
-  my $s = $self->{raw};
-  $s =~ s/#.*//s;
+  my $host = $self->host;
+  return unless defined $host && length $host;
+
+  # The host has to be something a client would actually resolve. host() has
+  # already decoded and folded it, so a leftover "/" (from an encoded slash in
+  # the authority) or any other non-host junk means there is nothing to fetch;
+  # a browser refuses such a URL too. An IP literal is bracketed for IPv6.
+  return unless $host =~ /^\[[0-9A-Fa-f:.]+\]\z/
+             || Mail::SpamAssassin::Util::is_fqdn_valid($host);
+
+  my $s = $self->{scheme} . '://' . $host;
+  $s .= ':' . $self->{port} if defined $self->{port} && length $self->{port};
+  $s .= $self->{path};
+  $s .= '?' . $self->{query} if defined $self->{query};
 
   return $s;
 }
