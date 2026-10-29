@@ -745,7 +745,7 @@ sub text_style {
         $new{style} = $attr->{style};
 	my @parts = split(/;/, $new{style});
 	foreach (@parts) {
-          s/\s*!\s*important$//i; # Remove !important flag
+          s/(?<!\s)\s*+!\s*+important$//i; # Remove !important flag
           if (/^\s*(background-)?color:\s*(.+?)\s*$/i) {
             my $whcolor = $1 ? 'bgcolor' : 'fgcolor';
             my $value = lc($2);
@@ -1030,7 +1030,7 @@ sub html_tests {
     #  hirakakupro-w3
     # TODO: There's still the problem completely foreign unicode strings,
     # probably this rule should be deprecated.
-    if ($attr->{face} !~ /^\s*["'.]?[a-z ][a-z -]*[a-z]\d?["']?(?:,\s*["']?[a-z][a-z -]*[a-z]\d?["']?)*;?$/i) {
+    if ($attr->{face} !~ /^\s*+(?:["'.]?[a-z ]|(?<= ))[a-z -]*[a-z]\d?["']?(?:,\s*["']?[a-z][a-z -]*[a-z]\d?["']?)*;?$/i) {
       $self->put_results(font_face_bad => 1);
     }
   }

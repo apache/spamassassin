@@ -204,7 +204,7 @@ sub new {
         push @args, 1 if @args == 3;
         croak("Invalid number of arguments for RGB color") unless @args == 4;
         for (@args) {
-            croak("Invalid RGB value: $_") unless $_ =~ /^(?:none|[+-]?\d*\.?\d+%?)$/;
+            croak("Invalid RGB value: $_") unless $_ =~ /^(?:none|[+-]?(?:\d*+\.)?\d++%?)$/;
         }
         my ($r, $g, $b) = map {
             /^(.*)%$/ ? _round($1 * 255 / 100) : $_ + 0;
@@ -221,7 +221,7 @@ sub new {
         push @args, 1 if @args == 3;
         croak("Invalid number of arguments for HSL color") unless @args == 4;
         for (@args[1..3]) {
-            croak("Invalid HSL value: $_") unless $_ =~ /^(?:none|[+-]?\d*\.?\d+%?)$/;
+            croak("Invalid HSL value: $_") unless $_ =~ /^(?:none|[+-]?(?:\d*+\.)?\d++%?)$/;
         }
         my ($h, $s, $l, $a) = @args;
         $h = _parse_angle($h);
@@ -240,7 +240,7 @@ sub new {
         push @args, 1 if @args == 3;
         croak("Invalid number of arguments for HWB color") unless @args == 4;
         for (@args[1..3]) {
-            croak("Invalid HWB value: $_") unless $_ =~ /^(?:none|[+-]?\d*\.?\d+%?)$/;
+            croak("Invalid HWB value: $_") unless $_ =~ /^(?:none|[+-]?(?:\d*+\.)?\d++%?)$/;
         }
         my ($h, $wh, $bl, $a) = @args;
         $h = _parse_angle($h);
@@ -366,7 +366,7 @@ sub _hwb_to_rgb {
 sub _parse_angle {
     my ($angle) = @_;
 
-    croak("Invalid color angle: $angle") unless $angle =~ /^(?:none|[+-]?\d*\.?\d+(?:deg|grad|rad|turn)?)$/;
+    croak("Invalid color angle: $angle") unless $angle =~ /^(?:none|[+-]?(?:\d*+\.)?\d++(?:deg|grad|rad|turn)?)$/;
 
     $angle = $angle =~ s/deg$// ? $angle
         : $angle =~ s/grad$// ? $angle * 360 / 400
