@@ -4634,24 +4634,28 @@ separate setting.
   push (@cmds, {
     setting => 'handler_max_depth',
     default => 8,
+    is_admin => 1,
     type => $CONF_TYPE_NUMERIC,
   });
 
   push (@cmds, {
     setting => 'handler_max_parts',
     default => 1000,
+    is_admin => 1,
     type => $CONF_TYPE_NUMERIC,
   });
 
   push (@cmds, {
     setting => 'handler_max_bytes',
     default => 50_000_000,
+    is_admin => 1,
     type => $CONF_TYPE_NUMERIC,
   });
 
   push (@cmds, {
     setting => 'handler_time_limit',
     default => 10,
+    is_admin => 1,
     type => $CONF_TYPE_NUMERIC,
   });
 

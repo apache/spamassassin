@@ -83,6 +83,7 @@ public class (Mail::SpamAssassin::Client) new (\% $args)
 
 Description:
 This method creates a new Mail::SpamAssassin::Client object.
+It dies if the username contains a carriage return or line feed.
 
 =cut
 
@@ -103,6 +104,7 @@ sub new {
   }
 
   if (defined $args->{username}) {
+    die "username contains invalid characters" if $args->{username} =~ /[\r\n]/;
     $self->{username} = $args->{username};
   }
 

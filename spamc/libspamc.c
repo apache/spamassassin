@@ -1494,6 +1494,14 @@ int message_filter(struct transport *tp, const char *username,
     
         if (!(flags & SPAMC_PING)) {
           if (username != NULL) {
+              if (strpbrk(username, "\r\n") != NULL) {
+                  libspamc_log(flags, LOG_ERR, "username contains invalid characters");
+                  _use_msg_for_out(m);
+                  if (zlib_on) {
+                      _free_zlib_buffer(&zlib_buf, &zlib_bufsiz);
+                  }
+                  return EX_USAGE;
+              }
               if (strlen(username) + 8 >= (bufsiz - len)) {
                   _use_msg_for_out(m);
                   if (zlib_on) {
@@ -1886,6 +1894,11 @@ int message_tell(struct transport *tp, const char *username, int flags,
     }
 
     if (username != NULL) {
+	if (strpbrk(username, "\r\n") != NULL) {
+	    libspamc_log(flags, LOG_ERR, "username contains invalid characters");
+	    _use_msg_for_out(m);
+	    return EX_USAGE;
+	}
 	if (strlen(username) + 8 >= (bufsiz - len)) {
 	    _use_msg_for_out(m);
 	    return EX_OSERR;
