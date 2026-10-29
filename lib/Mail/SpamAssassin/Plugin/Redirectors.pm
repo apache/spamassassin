@@ -1804,7 +1804,7 @@ sub _extract_embedded_uri {
 
   # Finally a target embedded in the path rather than in a parameter.
   local($1);
-  if ($u->path =~ m{(?:/|_|=)((?:https?:)?//.*)$}) {
+  if ($u->path =~ m{(?:/|_|=)((?:https?:)?//.*)$}i) {
     my $newuri = _embedded_uri_candidate($1) or return;
     dbg("Found embedded uri $newuri in $u");
     return $newuri;
@@ -2173,7 +2173,7 @@ sub _selenium_navigate {
   if($newurl ne $redir_url) {
     $rcode = 301;
   } else {
-    if ($redir_url =~ /\/(https?:\/\/.{4,256})/) {
+    if ($redir_url =~ /\/(https?:\/\/.{4,256})/i) {
       $rcode = 301;
       $newurl = $1;
       dbg("Found $1 in hard-coded redirector");
@@ -2224,7 +2224,7 @@ sub _do_http {
   } else {
     # remove additional slashes after http://
     $redir_url =~ s{^(https?:)/*}{$1//}i;
-    if($redir_url !~ /^(?:https?:\/\/)?(?:.{1,128}\@)?(?:[A-Za-z0-9-]{1,63}\.)+[A-Za-z0-9-]{2,63}/) {
+    if($redir_url !~ /^(?:https?:\/\/)?(?:.{1,128}\@)?(?:[A-Za-z0-9-]{1,63}\.)+[A-Za-z0-9-]{2,63}/i) {
       dbg("URL $redir_url is not valid, skipping http check");
       return;
     }
