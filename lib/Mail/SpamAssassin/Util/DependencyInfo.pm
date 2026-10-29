@@ -321,12 +321,6 @@ our @OPTIONAL_MODULES = (
   It is used by the optional OLEVBMacro Plugin and Archive handler.',
 },
 {
-  module => 'IO::String',
-  version => 0,
-  desc => 'IO::String emulates file interface for in-core strings.
-  It is used by the optional OLEVBMacro Plugin and Archive handler.',
-},
-{
   module => 'Email::Address::XS',
   version => 0,
   desc => 'Email::Address::XS is used to parse email addresses from header

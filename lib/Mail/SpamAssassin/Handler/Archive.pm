@@ -45,8 +45,8 @@ archive declares (see L</EVAL RULES>).
 
 =item zip
 
-Extraction uses L<Archive::Zip> and L<IO::String>.  If either is not installed,
-the handler still loads (with a warning at startup) and skips zip archives.
+Extraction uses L<Archive::Zip>.  If it is not installed, the handler still
+loads (with a warning at startup) and skips zip archives.
 
 =item rar
 
@@ -144,10 +144,8 @@ sub new {
 
   # Warn once at startup if the zip backend is unavailable, so zip archives are
   # knowingly skipped rather than silently ignored.
-  if (!Mail::SpamAssassin::Util::Zip::HAS_ARCHIVE_ZIP
-      || !Mail::SpamAssassin::Util::Zip::HAS_IO_STRING) {
-    log_warn("zip archives not supported, required module Archive::Zip or ".
-             "IO::String missing");
+  if (!Mail::SpamAssassin::Util::Zip::HAS_ARCHIVE_ZIP) {
+    log_warn("zip archives not supported, required module Archive::Zip missing");
   }
   # unrar is resolved lazily in handle_rar (like pdftotext in Handler::PDF).
 
@@ -250,8 +248,7 @@ sub _record_file_count {
 # no timeout is set here.
 sub handle_zip {
   my ($self, $node, $pms) = @_;
-  return [] unless Mail::SpamAssassin::Util::Zip::HAS_ARCHIVE_ZIP
-                   && Mail::SpamAssassin::Util::Zip::HAS_IO_STRING;
+  return [] unless Mail::SpamAssassin::Util::Zip::HAS_ARCHIVE_ZIP;
 
   my $data = $node->decode();
   return [] unless defined $data && length $data;

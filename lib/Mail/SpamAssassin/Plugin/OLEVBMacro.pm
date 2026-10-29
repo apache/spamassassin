@@ -66,7 +66,7 @@ encrypted documents.
 
 =head1 REQUIREMENT
 
-This plugin requires Archive::Zip and IO::String perl modules.
+This plugin requires the Archive::Zip perl module.
 
 =head1 USER PREFERENCES
 
@@ -144,9 +144,6 @@ sub new {
 
   if (!Mail::SpamAssassin::Util::Zip::HAS_ARCHIVE_ZIP) {
     warn "OLEVBMacro: check_zip not supported, required module Archive::Zip missing\n";
-  }
-  if (!Mail::SpamAssassin::Util::Zip::HAS_IO_STRING) {
-    warn "OLEVBMacro: check_macrotype_doc not supported, required module IO::String missing\n";
   }
 
   return $self;

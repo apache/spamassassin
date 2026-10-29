@@ -328,7 +328,6 @@ $makefile{META_MERGE} = {
         'Net::CIDR::Lite' =>           0,
         'BSD::Resource' =>             0,
         'Archive::Zip' =>              0,
-        'IO::String' =>                0,
         'Email::Address::XS' =>        0,
         'Mail::DMARC' =>               0,
       },

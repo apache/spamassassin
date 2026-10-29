@@ -197,9 +197,8 @@ Note for Users Upgrading to SpamAssassin 4.0.3
     * Archive (application/zip, application/vnd.rar) opens zip and rar
       attachments and returns the files inside as child parts, which the
       framework re-dispatches to the other handlers by type. Provides the
-      check_archive_file_count eval. Zip uses the Archive::Zip and IO::String
-      modules; rar shells out to the unrar executable (see
-      archive_unrar_path).
+      check_archive_file_count eval. Zip uses the Archive::Zip module; rar
+      shells out to the unrar executable (see archive_unrar_path).
 
 Note for Users Upgrading to SpamAssassin 4.0.2
 ----------------------------------------------

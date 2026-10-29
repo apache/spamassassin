@@ -31,9 +31,9 @@ Mail::SpamAssassin::Util::Zip - read zip archives within a size limit
 
 =head1 DESCRIPTION
 
-Reads zip archives held in memory with L<Archive::Zip> and L<IO::String>,
-uncompressing members in small steps so that the output never goes far past the
-caller's limit.  The sizes declared in an archive are not trusted.
+Reads zip archives held in memory with L<Archive::Zip>, uncompressing members
+in small steps so that the output never goes far past the caller's limit.  The
+sizes declared in an archive are not trusted.
 
 Several zip archives joined end to end, a known way of hiding files from zip
 readers that show only the first or only the last, are all read.
@@ -49,7 +49,6 @@ use re 'taint';
 use Mail::SpamAssassin::Logger;
 
 use constant HAS_ARCHIVE_ZIP => eval { require Archive::Zip; 1 };
-use constant HAS_IO_STRING => eval { require IO::String; 1 };
 
 # 1 KB of deflated input uncompresses to at most about 1 MB
 use constant CHUNK_SIZE => 1024;
@@ -61,10 +60,10 @@ use constant MAX_ARCHIVES => 4;
 
 =item open_zip(\$data)
 
-Returns an object for the zip archives in C<$data>, or undef if Archive::Zip or
-IO::String is not installed or no zip archive can be read from the data.  Of
-joined archives, up to 4 are read from the start of the data, and the last one
-is always read.  C<$data> must not change while the object is in use.
+Returns an object for the zip archives in C<$data>, or undef if Archive::Zip is
+not installed or no zip archive can be read from the data.  Of joined archives,
+up to 4 are read from the start of the data, and the last one is always read.
+C<$data> must not change while the object is in use.
 
 The object's C<members>, C<memberNamed> and C<membersMatching> methods work as
 those of L<Archive::Zip> do, over all the archives read, in order.
@@ -73,7 +72,7 @@ those of L<Archive::Zip> do, over all the archives read, in order.
 
 sub open_zip {
   my ($dataref) = @_;
-  return unless HAS_ARCHIVE_ZIP && HAS_IO_STRING;
+  return unless HAS_ARCHIVE_ZIP;
 
   # an archive ends with its end of central directory record: a signature,
   # disk numbers, entry counts, the central directory's size and offset, and a
@@ -128,9 +127,13 @@ sub membersMatching {
 
 sub _read_zip {
   my ($dataref) = @_;
+  # read the archive straight from the in-memory scalar: an in-core filehandle
+  # (open ..., \$scalar) does what IO::String did, without the CPAN dependency.
+  open(my $fh, '<', $dataref) or return;
+  binmode $fh;
   my $old_handler = Archive::Zip::setErrorHandler(\&_zip_error);
   my $zip = Archive::Zip->new();
-  my $status = $zip->readFromFileHandle(IO::String->new($dataref));
+  my $status = $zip->readFromFileHandle($fh);
   Archive::Zip::setErrorHandler($old_handler);
   return unless $status == Archive::Zip::AZ_OK();
   return $zip;
