@@ -428,7 +428,7 @@ sub parse_received_line {
     $auth = $1;
   }
   # Sendmail, MDaemon, some webmail servers, and others
-  elsif (/authenticated/ && /^from .*?(?:\](?: \([^)]*\))?\)|\)\]) .*?\(.*?authenticated.*?\).*? by/) {
+  elsif (/authenticated/ && /^from (?>.*?(?:\](?: \([^)]*\))?\)|\)\]) )(?>.*?\()(?>.*?authenticated)(?>.*?\)).*? by/) {
     $auth = 'Sendmail';
   }
   # workaround for GMX, which authenticates users but does not indicate it properly - # SMTP version
