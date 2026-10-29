@@ -795,7 +795,7 @@ sub parse_received_line {
     #
     # bug 4813: make sure that the line doesn't have " id " after the
     # protocol since that's a sendmail line and not qmail ...
-    if (/^\S+( \((?:HELO|EHLO) \S*\))? \((\S+\@)?\[?${IP_ADDRESS}\]?\)( \(envelope-sender <\S+>\))? by \S+( \(.+\))* with (.* )?(SMTP|QMQP)(?! id )/ ) {
+    if (/^\S+( \((?:HELO|EHLO) \S*\))? \((\S+\@)?\[?${IP_ADDRESS}\]?\)( \(envelope-sender <\S+>\))? by \S+( \((?:[^()]|\([^()]*\))+\))* with (.* )?(SMTP|QMQP)(?! id )/ ) {
        if (/^(\S+) \((?:HELO|EHLO) ([^ \(\)]*)\) \((\S*)\@\[?(${IP_ADDRESS})\]?\)( \(envelope-sender <\S+>\))? by (\S+)/) {
          $rdns = $1; $helo = $2; $ident = $3; $ip = $4; $by = $6;
        }
