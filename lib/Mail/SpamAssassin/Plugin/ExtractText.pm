@@ -350,7 +350,7 @@ extracttext_cache_type dbi
   push (@cmds, {
     setting => 'extracttext_cache_type',
     default => '',
-    is_priv => 1,
+    is_admin => 1,
     type => $Mail::SpamAssassin::Conf::CONF_TYPE_STRING
   });
 
@@ -383,7 +383,7 @@ Examples:
   push (@cmds, {
     setting => 'extracttext_cache_dsn',
     default => '',
-    is_priv => 1,
+    is_admin => 1,
     type => $Mail::SpamAssassin::Conf::CONF_TYPE_STRING
   });
 
@@ -401,7 +401,7 @@ SQLite.
   push (@cmds, {
     setting => 'extracttext_cache_username',
     default => '',
-    is_priv => 1,
+    is_admin => 1,
     type => $Mail::SpamAssassin::Conf::CONF_TYPE_STRING
   });
 
@@ -419,7 +419,7 @@ SQLite.
   push (@cmds, {
     setting => 'extracttext_cache_password',
     default => '',
-    is_priv => 1,
+    is_admin => 1,
     type => $Mail::SpamAssassin::Conf::CONF_TYPE_STRING
   });
 
