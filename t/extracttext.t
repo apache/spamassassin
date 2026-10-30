@@ -83,9 +83,14 @@ if (CAT) {
 
 if (CAT && SQLITE) {
 
+# Use a .dat attachment (not a .txt one): a text-mapped extension would be
+# reclassified to text/plain and rendered as a body part, which ExtractText
+# skips -- so no external extraction would run and nothing would be cached.
+# application/octet-stream with an unmapped extension stays a leaf ExtractText
+# feeds to the external tool, which is what exercises the cache.
 tstprefs("
   extracttext_external  cat  ".CAT." {}
-  extracttext_use       cat  .txt
+  extracttext_use       cat  .dat
   extracttext_timeout 30 1
   extracttext_cache_type dbi
   extracttext_cache_dsn dbi:SQLite:dbname=$workdir/ExtractText.db
@@ -95,7 +100,7 @@ tstprefs("
 
 %anti_patterns = ();
 %patterns = %patterns_gtube;
-sarun ("-L -t < data/spam/extracttext/gtube_b64_oct.eml", \&patterns_run_cb);
+sarun ("-L -t < data/spam/extracttext/gtube_b64_dat.eml", \&patterns_run_cb);
 ok_all_patterns();
 clear_pattern_counters();
 
@@ -105,7 +110,7 @@ like($row[0], qr/GTUBE/, 'cache stores extracted text');
 
 # Second run must still match (text served from cache)
 %patterns = %patterns_gtube;
-sarun ("-L -t < data/spam/extracttext/gtube_b64_oct.eml", \&patterns_run_cb);
+sarun ("-L -t < data/spam/extracttext/gtube_b64_dat.eml", \&patterns_run_cb);
 ok_all_patterns();
 clear_pattern_counters();
 

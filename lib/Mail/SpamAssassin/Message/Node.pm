@@ -65,11 +65,17 @@ my %file_type_map = (
     '7z'    => 'application/x-7z-compressed',
     'bmp'   => 'image/bmp',
     'bz2'   => 'application/x-bzip2',
+    'doc'   => 'application/msword',
+    'docm'  => 'application/vnd.ms-word.document.macroEnabled.12',
+    'docx'  => 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+    'dotm'  => 'application/vnd.ms-word.template.macroEnabled.12',
+    'dotx'  => 'application/vnd.openxmlformats-officedocument.wordprocessingml.template',
     'eml'   => 'message/rfc822',
     'gif'   => 'image/gif',
     'gz'    => 'application/gzip',
     'heic'  => 'image/heic',
     'heif'  => 'image/heif',
+    'hta'   => 'text/html',
     'htm'   => 'text/html',
     'html'  => 'text/html',
     'ics'   => 'text/calendar',
@@ -77,8 +83,20 @@ my %file_type_map = (
     'jpeg'  => 'image/jpeg',
     'jpg'   => 'image/jpeg',
     'js'    => 'text/javascript',
+    'odp'   => 'application/vnd.oasis.opendocument.presentation',
+    'ods'   => 'application/vnd.oasis.opendocument.spreadsheet',
+    'odt'   => 'application/vnd.oasis.opendocument.text',
+    'ofd'   => 'application/ofd',
     'pdf'   => 'application/pdf',
+    'pkpass' => 'application/vnd.apple.pkpass',
     'png'   => 'image/png',
+    'potm'  => 'application/vnd.ms-powerpoint.template.macroEnabled.12',
+    'potx'  => 'application/vnd.openxmlformats-officedocument.presentationml.template',
+    'ppsm'  => 'application/vnd.ms-powerpoint.slideshow.macroEnabled.12',
+    'ppsx'  => 'application/vnd.openxmlformats-officedocument.presentationml.slideshow',
+    'ppt'   => 'application/vnd.ms-powerpoint',
+    'pptm'  => 'application/vnd.ms-powerpoint.presentation.macroEnabled.12',
+    'pptx'  => 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
     'rar'   => 'application/vnd.rar',
     'shtml' => 'text/html',
     'svg'   => 'image/svg+xml',
@@ -87,7 +105,14 @@ my %file_type_map = (
     'tgz'   => 'application/gzip',
     'tif'   => 'image/tiff',
     'tiff'  => 'image/tiff',
+    'txt'   => 'text/plain',
     'webp'  => 'image/webp',
+    'xls'   => 'application/vnd.ms-excel',
+    'xlsb'  => 'application/vnd.ms-excel.sheet.binary.macroEnabled.12',
+    'xlsm'  => 'application/vnd.ms-excel.sheet.macroEnabled.12',
+    'xlsx'  => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    'xltm'  => 'application/vnd.ms-excel.template.macroEnabled.12',
+    'xltx'  => 'application/vnd.openxmlformats-officedocument.spreadsheetml.template',
     'zip'   => 'application/zip',
 );
 
@@ -131,6 +156,19 @@ my %mime_type_map = (
     'application/x-gzip'            => 'application/gzip',
     'application/x-gtar'            => 'application/x-tar',
     'application/x-bzip'            => 'application/x-bzip2',
+);
+
+# Labels that are a kind of the container their magic bytes identify.  An
+# OOXML or ODF document is a zip, so zip magic confirms such a label rather
+# than contradicting it, and the part keeps its document type instead of going
+# to the archive handler.  That includes the legacy doc, xls and ppt: Office
+# opens an OOXML document saved under the old extension, and some software
+# produces them.
+my %magic_compatible = (
+    'application/zip' => { map { $file_type_map{$_} => 1 }
+                           qw(doc docm docx dotm dotx odp ods odt ofd pkpass
+                              potm potx ppsm ppsx ppt pptm pptx xls xlsb xlsm
+                              xlsx xltm xltx) },
 );
 
 =item new()
@@ -862,6 +900,27 @@ sub effective_type {
       $self->{'effective_type'} = $mime_type_map{$self->{'type'}};
     } else {
       $self->{'effective_type'} = $self->{'type'};
+    }
+
+    # Let the part's magic bytes overrule a label that isn't text, or an
+    # extension we don't know.  A text part is rendered as text by whatever
+    # opens it, whatever it starts with, so "GIF89a" ahead of a phishing page
+    # must not take it from the HTML handler; this also keeps message/* (the
+    # subparse decision) out of reach.  Anything else is opened by something
+    # that reads the bytes itself: WinRAR opens a RAR named ".bz2".  1024 bytes
+    # covers tar's "ustar" at 257 and a PDF header behind leading junk.
+    if (exists $self->{'raw'} &&
+        (defined $ext && !exists $file_type_map{$ext} ||
+         ($self->{'effective_type'} // '') !~ m{^(?:text|message)/|^image/svg\+xml$}))
+    {
+      my $head = $self->decode(1024);
+      my $magic = Mail::SpamAssassin::Util::content_type_from_magic(\$head);
+      if (defined $magic && $magic ne ($self->{'effective_type'} // '') &&
+          !$magic_compatible{$magic}{$self->{'effective_type'} // ''}) {
+        dbg("message: part content is %s, labelled %s (name '%s')",
+            $magic, $self->{'effective_type'} // '', $name);
+        $self->{'effective_type'} = $magic;
+      }
     }
   }
   return $self->{'effective_type'};
