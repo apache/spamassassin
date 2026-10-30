@@ -950,7 +950,8 @@ sub _prefer_author_signatures {
 
 # Return false if a header field of $$strref (with CRLF line endings, as it
 # is given to Mail::DKIM) has a run of more than 100 whitespace characters
-# before its first colon, which no legitimate field has.  The header is
+# before its first colon, or anywhere in a DKIM-Signature or
+# DomainKey-Signature field, which no legitimate field has.  The header is
 # split into fields the way Mail::DKIM::MessageParser does it.
 sub _header_whitespace_ok {
   my($strref) = @_;
@@ -969,6 +970,8 @@ sub _header_whitespace_ok {
     my $i = index($field, ':');
     next if $i < 1;
     return 0 if substr($field, 0, $i) =~ /\s{101}/;
+    return 0 if $field =~ /^(?:DKIM|DomainKey)-Signature\s*:/i &&
+                $field =~ /\s{101}/;
   }
   return 1;
 }
@@ -1003,8 +1006,8 @@ sub _check_signature {
   $str =~ s/\012/\015\012/gs  if $pms->{msg}->{line_ending} ne "\015\012";
 
   if (!_header_whitespace_ok(\$str)) {
-    dbg("dkim: header field name with a run of more than 100 whitespace ".
-        "characters, not verifying");
+    dbg("dkim: header field name or signature field with a run of more ".
+        "than 100 whitespace characters, not verifying");
     $pms->{dkim_signed} = 1  if defined $pms->{msg}->get_header('DKIM-Signature');
     $pms->{dkim_signatures_ready} = 1;
     $pms->{dkim_signatures_dependable} = 1;

@@ -315,8 +315,8 @@ sub _check_signature {
   $str =~ s/\012/\015\012/gs  if $pms->{msg}->{line_ending} ne "\015\012";
 
   if (!_header_whitespace_ok(\$str)) {
-    dbg("arc: header field name with a run of more than 100 whitespace ".
-        "characters, not verifying");
+    dbg("arc: header field name or signature field with a run of more ".
+        "than 100 whitespace characters, not verifying");
     $pms->{arc_signed} = 1  if defined $pms->{msg}->get_header('ARC-Seal');
     $pms->{arc_signatures_ready} = 1;
     $pms->{arc_signatures_dependable} = 1;
@@ -372,8 +372,9 @@ sub _check_signature {
 
 # Return false if a header field of $$strref (with CRLF line endings, as it
 # is given to Mail::DKIM) has a run of more than 100 whitespace characters
-# before its first colon, which no legitimate field has.  The header is
-# split into fields the way Mail::DKIM::MessageParser does it.
+# before its first colon, or anywhere in an ARC-Seal or ARC-Message-Signature
+# field, which no legitimate field has.  The header is split into fields the
+# way Mail::DKIM::MessageParser does it.
 sub _header_whitespace_ok {
   my($strref) = @_;
 
@@ -391,6 +392,8 @@ sub _header_whitespace_ok {
     my $i = index($field, ':');
     next if $i < 1;
     return 0 if substr($field, 0, $i) =~ /\s{101}/;
+    return 0 if $field =~ /^ARC-(?:Seal|Message-Signature)\s*:/i &&
+                $field =~ /\s{101}/;
   }
   return 1;
 }
@@ -422,9 +425,10 @@ sub _arc_instances_ok {
     next if $name ne 'arc-seal' && $name ne 'arc-message-signature';
     $arc_fields++;
     foreach my $tag (split(/;/, $value, -1)) {
-      $tag =~ s/^\s+|\s+$//g;
-      my($tag_name, $tag_value) = split(/\s*=\s*/, $tag, 2);
-      next if !defined $tag_value || $tag_name ne 'i';
+      $tag =~ s/^\s+//;  $tag =~ s/\s+$//;
+      my($tag_name, $tag_value) = split(/=/, $tag, 2);
+      next if !defined $tag_value || $tag_name !~ /^i\s*\z/;
+      $tag_value =~ s/^\s+//;
       return 0 if $tag_value !~ /^\d+\z/ || $tag_value < 1 || $tag_value > $max;
     }
   }
