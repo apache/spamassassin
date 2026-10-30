@@ -1034,6 +1034,114 @@ sub base64_decode {
   return $out;
 }
 
+###########################################################################
+
+# ISO-BMFF brands that denote a still image (HEIC/HEIF) rather than video.  The
+# 'ftyp' box at offset 4 is shared with MP4, QuickTime and AVIF, none of which
+# has a type any handler can do anything with, so the brand has to be checked
+# before an ISO-BMFF part is called an image.
+our $HEIC_BRAND_RE = qr/\A(?:heic|heix|hevc|hevx|heim|heis|hevm|hevs)\z/;
+our $HEIF_BRAND_RE = qr/\A(?:mif1|msf1|heif)\z/;
+
+=item C<content_type_from_magic($dataref)>
+
+Identify a MIME content type from the leading bytes of C<$$dataref>, which
+should be at least the first 1024 bytes of a decoded MIME part.  Takes a scalar
+reference so that a large part is not copied.
+
+Returns a canonical MIME type string, or undef when the bytes match no known
+signature.
+
+=cut
+
+sub content_type_from_magic {
+  my ($dataref) = @_;
+  return undef  if !defined $dataref || !defined $$dataref;
+
+  my $len = length $$dataref;
+  return undef  if $len < 8;
+
+  # Every test below either reads inside this prefix or checks a longer length
+  # of its own first.
+  my $head = substr($$dataref, 0, 8);
+
+  # --- archives ---------------------------------------------------------
+  # RAR v4 ("Rar!\x1a\x07\x00") and v5 ("Rar!\x1a\x07\x01\x00").
+  return 'application/vnd.rar'
+    if $head =~ /\ARar!\x1a\x07[\x00\x01]/;
+  # ZIP local file header, end of central directory, or spanning marker.  This
+  # also matches the zip-based formats (docx, xlsx, odt, jar); whether such a
+  # label stands is Message::Node::effective_type()'s call, not this one.
+  return 'application/zip'
+    if $head =~ /\APK[\x03\x05\x07][\x04\x06\x08]/;
+  return 'application/x-7z-compressed'
+    if substr($head, 0, 6) eq "7z\xbc\xaf\x27\x1c";
+  return 'application/gzip'
+    if substr($head, 0, 2) eq "\x1f\x8b";
+  return 'application/x-bzip2'
+    if $head =~ /\ABZh[1-9]/;
+
+  # --- images -----------------------------------------------------------
+  # Three bytes for JPEG, not two: this runs on arbitrary content, so the
+  # marker byte after SOI is worth having.  (Handler::Image::_image_info tests
+  # only two, which is right there -- by then the part is known to be an image.)
+  return 'image/jpeg'
+    if substr($head, 0, 3) eq "\xff\xd8\xff";
+  return 'image/png'
+    if $head eq "\x89PNG\x0d\x0a\x1a\x0a";
+  return 'image/gif'
+    if $head =~ /\AGIF8[79]a/;
+  return 'image/tiff'
+    if substr($head, 0, 4) eq "II\x2a\x00" ||
+       substr($head, 0, 4) eq "MM\x00\x2a";
+  return 'image/webp'
+    if $len >= 12 && substr($head, 0, 4) eq 'RIFF' &&
+       substr($$dataref, 8, 4) eq 'WEBP';
+
+  # BMP: "BM" alone is two ASCII bytes and would match any text starting "BMW",
+  # so the rest of the header is checked too -- the two reserved words are zero
+  # in every real BMP, the pixel-data offset is small, and the DIB header size
+  # is one of a fixed set.  That is specific enough that no random binary or
+  # text passed it in 400k trials.
+  if ($len >= 26 && substr($head, 0, 2) eq 'BM') {
+    my ($size, $r1, $r2, $off, $dib) = unpack('x2 V v v V V', $$dataref);
+    return 'image/bmp'
+      if !$r1 && !$r2 && $size >= $off && $off >= 26 && $off <= 4096 &&
+         ($dib == 12 || $dib == 40 || $dib == 52 || $dib == 56 ||
+          $dib == 64 || $dib == 108 || $dib == 124);
+  }
+
+  # ISO-BMFF: 'ftyp' at offset 4, brand at offset 8.  An unrecognised brand
+  # returns here rather than falling through: an MP4 must not go on to match
+  # something later in the table.
+  if ($len >= 12 && substr($head, 4, 4) eq 'ftyp') {
+    my $brand = substr($$dataref, 8, 4);
+    return 'image/heic'  if $brand =~ $HEIC_BRAND_RE;
+    return 'image/heif'  if $brand =~ $HEIF_BRAND_RE;
+    return undef;
+  }
+
+  # --- documents --------------------------------------------------------
+  # A PDF header need not sit at offset 0; readers scan for it and so does
+  # Plugin::PDFInfo, using the same 1024-byte window.  index() rather than a
+  # regex with a bounded quantifier: no backtracking on attacker-chosen bytes.
+  my $at = index(substr($$dataref, 0, 1024), '%PDF-');
+  return 'application/pdf'
+    if $at >= 0 && substr($$dataref, $at + 5, 3) =~ /\A\d\.\d/;
+
+  # --- tar, last --------------------------------------------------------
+  # tar has no signature at offset 0 at all, only "ustar" at 257, so it is
+  # tested after everything that does and only when the buffer really reaches
+  # that far.  Both the magic and the two version bytes after it are checked:
+  # POSIX writes "ustar\0" followed by "00", GNU writes "ustar  \0".  Five
+  # letters alone would match the word "ustar" if it happened to land on that
+  # byte boundary in ordinary content; all eight will not.
+  return 'application/x-tar'
+    if $len >= 265 && substr($$dataref, 257, 8) =~ /\A(?:ustar\x0000|ustar\x20\x20\x00)\z/;
+
+  return undef;
+}
+
 =item C<qp_decode($str)>
 
 Decodes a string that has been encoded using the Quoted-Printable

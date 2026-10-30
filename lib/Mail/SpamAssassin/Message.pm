@@ -1236,37 +1236,7 @@ sub _parse_normal {
 
   $msg->{'boundary'} = $boundary;
 
-  # If the part type is not one that we're likely to want to use, go
-  # ahead and write the part data out to a temp file -- why keep sucking
-  # up RAM with something we're not going to use?
-  #
-  my $type = $msg->effective_type();
-  unless ($type eq 'text/plain' || $type eq 'text/html' ||
-          index($type, 'message/') == 0) {
-    my($filepath, $fh);
-    eval {
-      ($filepath, $fh) = Mail::SpamAssassin::Util::secure_tmpfile();  1;
-    } or do {
-      my $eval_stat = $@ ne '' ? $@ : "errno=$!";  chomp $eval_stat;
-      info("message: failed to create a temp file: %s", $eval_stat);
-    };
-    if ($fh) {
-      # The temp file was created, add it to the list of pending deletions
-      # we cannot just delete immediately in the POSIX idiom, as this is
-      # unportable (to win32 at least)
-      push @{$self->{tmpfiles}}, $filepath;
-      dbg("message: storing a message part to file %s", $filepath);
-      $fh->print(@{$body})  or die "error writing to $filepath: $!";
-      $fh->flush  or die "error writing (flush) to $filepath: $!";
-      $msg->{'raw'} = $fh;
-    }
-  }
-
-  # if the part didn't get a temp file, go ahead and store the data in memory
-  if (!defined $msg->{'raw'}) {
-    dbg("message: storing a body to memory");
-    $msg->{'raw'} = $body;
-  }
+  $msg->{'raw'} = $body;
 }
 
 # ---------------------------------------------------------------------------
