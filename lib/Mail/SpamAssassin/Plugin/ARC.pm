@@ -323,6 +323,15 @@ sub _check_signature {
     return;
   }
 
+  if (!_header_size_ok(\$str)) {
+    dbg("arc: header over 5,000 fields or 512,000 bytes, or over 500 h= ".
+        "names, not verifying");
+    $pms->{arc_signed} = 1  if defined $pms->{msg}->get_header('ARC-Seal');
+    $pms->{arc_signatures_ready} = 1;
+    $pms->{arc_signatures_dependable} = 1;
+    return;
+  }
+
   # Mail::DKIM::ARC::Verifier uses the instance numbers in the header
   # before it checks them, so check them here first
   if (!_arc_instances_ok(\$str, $max_arc)) {
@@ -396,6 +405,43 @@ sub _header_whitespace_ok {
                 $field =~ /\s{101}/;
   }
   return 1;
+}
+
+# Return false if the header of $$strref (with CRLF line endings, as it is
+# given to Mail::DKIM) has more than 5,000 fields or 512,000 bytes (Gmail's
+# limits), or more than 500 h= names in its ARC-Message-Signature fields.
+# The header is split into fields, and the fields named, the way
+# Mail::DKIM::MessageParser and Mail::DKIM::Common do it.
+use constant MAX_HEADER_FIELDS => 5000;
+use constant MAX_HEADER_BYTES => 512000;
+use constant MAX_HLIST_NAMES => 500;
+
+sub _header_size_ok {
+  my($strref) = @_;
+
+  my @fields;
+  pos($$strref) = 0;
+  while ($$strref =~ /\G(?!\015\012)(.+?\015\012)(?=[^ \t])/gcs) {
+    push @fields, $1;
+  }
+  # Mail::DKIM takes the rest of an unterminated header as one field
+  my $pos = pos($$strref) || 0;
+  push @fields, substr($$strref, $pos)
+    if $pos < length($$strref) && substr($$strref, $pos, 2) ne "\015\012";
+  return 0 if @fields > MAX_HEADER_FIELDS;
+
+  my($names, $size) = (0, 0);
+  foreach my $field (@fields) {
+    $size += length $field;
+    next if $field !~ /^([^:]*[^\s:])\s*:(.*)/s ||
+            lc $1 ne 'arc-message-signature';
+    foreach my $tag (split(/;/, $2, -1)) {
+      my($tag_name, $tag_value) = split(/=/, $tag, 2);
+      $names += ($tag_value =~ tr/://) + 1
+        if defined $tag_value && $tag_name =~ /^\s*h\s*\z/;
+    }
+  }
+  return $size <= MAX_HEADER_BYTES && $names <= MAX_HLIST_NAMES;
 }
 
 # Return false if the header of $$strref (with CRLF line endings, as it is
