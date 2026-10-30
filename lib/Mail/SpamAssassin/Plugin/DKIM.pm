@@ -948,6 +948,31 @@ sub _prefer_author_signatures {
   return join('', @f) . $rest;
 }
 
+# Return false if a header field of $$strref (with CRLF line endings, as it
+# is given to Mail::DKIM) has a run of more than 100 whitespace characters
+# before its first colon, which no legitimate field has.  The header is
+# split into fields the way Mail::DKIM::MessageParser does it.
+sub _header_whitespace_ok {
+  my($strref) = @_;
+
+  my @fields;
+  pos($$strref) = 0;
+  while ($$strref =~ /\G(?!\015\012)(.+?\015\012)(?=[^ \t])/gcs) {
+    push @fields, $1;
+  }
+  # Mail::DKIM takes the rest of an unterminated header as one field
+  my $pos = pos($$strref) || 0;
+  push @fields, substr($$strref, $pos)
+    if $pos < length($$strref) && substr($$strref, $pos, 2) ne "\015\012";
+
+  foreach my $field (@fields) {
+    my $i = index($field, ':');
+    next if $i < 1;
+    return 0 if substr($field, 0, $i) =~ /\s{101}/;
+  }
+  return 1;
+}
+
 sub _check_signature {
   my($self, $pms, $verifier, $signatures) = @_;
 
@@ -959,7 +984,6 @@ sub _check_signature {
     dbg("dkim: cannot create Mail::DKIM::Verifier object");
     return;
   }
-  $pms->{dkim_verifier} = $verifier;
   # Bound the number of signatures Mail::DKIM collects while parsing the
   # header, which bounds body hashing and key lookups.  Mail::DKIM stops
   # adding signatures once it has more than MAX_SIGNATURES_TO_PROCESS
@@ -973,24 +997,30 @@ sub _check_signature {
   # required by Mail::DKIM API (see bug 5300)
   # note: bug 5179 comment 28: perl does silly things on non-Unix platforms
   # unless we use \015\012 instead of \r\n
+  my $str = $pms->{msg}->get_pristine();
+  $str = _prefer_author_signatures($pms, $str, $max_sigs);
+  # feeding large chunk to Mail::DKIM is _much_ faster than line-by-line
+  $str =~ s/\012/\015\012/gs  if $pms->{msg}->{line_ending} ne "\015\012";
+
+  if (!_header_whitespace_ok(\$str)) {
+    dbg("dkim: header field name with a run of more than 100 whitespace ".
+        "characters, not verifying");
+    $pms->{dkim_signed} = 1  if defined $pms->{msg}->get_header('DKIM-Signature');
+    $pms->{dkim_signatures_ready} = 1;
+    $pms->{dkim_signatures_dependable} = 1;
+    return;
+  }
+
+  $pms->{dkim_verifier} = $verifier;
   eval {
-    my $str = $pms->{msg}->get_pristine();
-    $str = _prefer_author_signatures($pms, $str, $max_sigs);
-    if ($pms->{msg}->{line_ending} eq "\015\012") {
-      # message already CRLF, just feed it
-      $verifier->PRINT($str);
-    } else {
-      # feeding large chunk to Mail::DKIM is _much_ faster than line-by-line
-      $str =~ s/\012/\015\012/gs; # LF -> CRLF
-      $verifier->PRINT($str);
-      undef $str;
-    }
+    $verifier->PRINT($str);
     1;
   } or do {  # intercept die() exceptions and render safe
     my $eval_stat = $@ ne '' ? $@ : "errno=$!";  chomp $eval_stat;
     dbg("dkim: verification failed, intercepted error: $eval_stat");
     return 0;           # cannot verify message
   };
+  undef $str;
 
   my $timeout = $conf->{dkim_timeout};
   my $timer = Mail::SpamAssassin::Timeout->new(

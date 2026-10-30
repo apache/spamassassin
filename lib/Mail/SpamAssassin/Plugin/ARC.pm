@@ -314,6 +314,15 @@ sub _check_signature {
   my $str = $pms->{msg}->get_pristine();
   $str =~ s/\012/\015\012/gs  if $pms->{msg}->{line_ending} ne "\015\012";
 
+  if (!_header_whitespace_ok(\$str)) {
+    dbg("arc: header field name with a run of more than 100 whitespace ".
+        "characters, not verifying");
+    $pms->{arc_signed} = 1  if defined $pms->{msg}->get_header('ARC-Seal');
+    $pms->{arc_signatures_ready} = 1;
+    $pms->{arc_signatures_dependable} = 1;
+    return;
+  }
+
   # Mail::DKIM::ARC::Verifier uses the instance numbers in the header
   # before it checks them, so check them here first
   if (!_arc_instances_ok(\$str, $max_arc)) {
@@ -361,6 +370,31 @@ sub _check_signature {
   $self->_check_arc_valid_signature($pms, \@$signatures);
 }
 
+# Return false if a header field of $$strref (with CRLF line endings, as it
+# is given to Mail::DKIM) has a run of more than 100 whitespace characters
+# before its first colon, which no legitimate field has.  The header is
+# split into fields the way Mail::DKIM::MessageParser does it.
+sub _header_whitespace_ok {
+  my($strref) = @_;
+
+  my @fields;
+  pos($$strref) = 0;
+  while ($$strref =~ /\G(?!\015\012)(.+?\015\012)(?=[^ \t])/gcs) {
+    push @fields, $1;
+  }
+  # Mail::DKIM takes the rest of an unterminated header as one field
+  my $pos = pos($$strref) || 0;
+  push @fields, substr($$strref, $pos)
+    if $pos < length($$strref) && substr($$strref, $pos, 2) ne "\015\012";
+
+  foreach my $field (@fields) {
+    my $i = index($field, ':');
+    next if $i < 1;
+    return 0 if substr($field, 0, $i) =~ /\s{101}/;
+  }
+  return 1;
+}
+
 # Return false if the header of $$strref (with CRLF line endings, as it is
 # given to Mail::DKIM) has an ARC-Seal or ARC-Message-Signature field with
 # an i= tag that is not a number from 1 to $max, or, when there is such a
@@ -383,7 +417,7 @@ sub _arc_instances_ok {
 
   my $arc_fields = 0;
   foreach my $field (@fields) {
-    next if $field !~ /^([^:]+?)\s*:(.*)/s;
+    next if $field !~ /^([^:]*[^\s:])\s*:(.*)/s;
     my($name, $value) = (lc $1, $2);
     next if $name ne 'arc-seal' && $name ne 'arc-message-signature';
     $arc_fields++;
