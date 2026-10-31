@@ -283,7 +283,7 @@ sub get_rendered_text {
     $text = join('', @{$self->{text}});
   }
 
-  $text =~ s/^[ \x{00}]+|[ \x{00}]+$//g;       # Remove spaces and nulls from beginning and end of string
+  $text =~ s/^[ \x{00}]+//; $text =~ s/[ \x{00}]+$//; # Remove spaces and nulls from beginning and end of string
   $text =~ s/ +/ /g;                           # Collapse spaces
   $text =~ s/ ?(\x{00} ?)+/\n\n/g;             # Collapse nulls (include neighboring spaces)
 
@@ -296,7 +296,7 @@ sub get_rendered_text {
     $text =~ s/\xc2\xa0/ /g;
   }
   $text =~ s/ ?\n ?/\n/g;                      # Remove spaces around newlines
-  $text =~ s/^ +| +$//g;                       # Remove spaces from beginning and end of string
+  $text =~ s/^ +//; $text =~ s/ +$//;          # Remove spaces from beginning and end of string
   return $text;
 }
 
@@ -420,7 +420,7 @@ sub html_tag {
       # JavaScript, for which text/javascript is the canonical type.
       if ($tag eq 'script') {
         my $st = lc($attr->{type} // '');
-        $st =~ s/^\s+|\s+$//g;
+        $st =~ s/^\s+//; $st =~ s/\s+$//;
         $self->{script_type} = ($st eq '' || $st eq 'module')
                                  ? 'text/javascript' : $st;
       }
@@ -745,6 +745,7 @@ sub text_style {
         $new{style} = $attr->{style};
 	my @parts = split(/;/, $new{style});
 	foreach (@parts) {
+          s/\s+/ /g;
           s/(?<!\s)\s*+!\s*+important$//i; # Remove !important flag
           if (/^\s*(background-)?color:\s*(.+?)\s*$/i) {
             my $whcolor = $1 ? 'bgcolor' : 'fgcolor';
@@ -765,6 +766,9 @@ sub text_style {
           elsif (/^\s*background:\s*(.+?)\s*$/i) {
             # parse CSS background property (Bug 8210)
             my $layers = parse_css_background($1);
+            # an empty value, or a bottom layer with more than 20 values,
+            # is not valid CSS
+            next if !@$layers || @{$layers->[-1]} > 20;
             # loop through values in the bottom layer and look for valid colors
             for my $value (@{$layers->[-1]}) {
               if (lc($value) eq 'currentcolor') {
@@ -914,7 +918,7 @@ sub parse_font_size {
   my $self = shift;
   my $size = lc(shift);
 
-  $size =~ s/^\s+|\s+$//g; # trim whitespace
+  $size =~ s/^\s+//; $size =~ s/\s+$//; # trim whitespace
 
   if ($size =~ /^([\d.]+)\s*(px|pt|r?em|ex|%)?$/) {
     my $value = $1;
@@ -984,10 +988,10 @@ sub html_font_invisible {
   }
 
   # <span style="transform: scale(0)"> — any axis scaled to 0 collapses the element
-  if ($transform && $transform =~ /\bscale[xy]?\(\s*0(?:\.0+)?(?:%|[a-z]+)?\s*(?:[,\s]\s*[^)]*)?\)/i) {
+  if ($transform && $transform =~ /\bscale[xy]?\(\s*0(?:\.0+)?(?:%|[a-z]+)?(?:[,\s][^)]*)?\)/i) {
     return 1;
   }
-  if ($transform && $transform =~ /\bscale\(\s*[^,)]+,\s*0(?:\.0+)?(?:%|[a-z]+)?\s*\)/i) {
+  if ($transform && $transform =~ /\bscale\([^,)]++,\s*0(?:\.0+)?(?:%|[a-z]+)?\s*\)/i) {
     return 1;
   }
 
@@ -998,7 +1002,7 @@ sub html_font_invisible {
     for my $prop (qw( style_left style_top )) {
       my $val = $self->{text_style}[-1]->{$prop};
       next unless defined $val;
-      if ($val =~ /^\s*(-\d+(?:\.\d+)?)\s*(?:px|pt|em|rem|ex|%)?\s*$/i) {
+      if ($val =~ /^\s*(-\d+(?:\.\d+)?)\s*+(?:px|pt|em|rem|ex|%)?\s*$/i) {
         return 1 if $1 <= -1000;
       }
     }

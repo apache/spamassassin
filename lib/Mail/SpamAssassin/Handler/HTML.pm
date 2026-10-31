@@ -100,7 +100,7 @@ sub handle_html {
       # Copy and uniq the anchor text, collapsing whitespace (Bug 8268/8310).
       if (exists $info->{anchor_text}) {
         for (@{$info->{anchor_text}}) {
-          s/^\s+|\s+$//g;
+          s/^\s+//; s/\s+$//;
           s/\s+/ /g;
           utf8::encode($_) if utf8::is_utf8($_);
         }

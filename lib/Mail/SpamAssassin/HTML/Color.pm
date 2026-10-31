@@ -173,7 +173,9 @@ sub new {
     bless $self, $class;
 
     croak("Color value is required") unless (defined $color);
-    $color =~ s/^\s+|\s+$//g;  # Trim whitespace
+    # Trim whitespace
+    $color =~ s/^\s+//;
+    $color =~ s/\s+$//;
     $color = lc($color);
 
     # If color is 'transparent', set all values to 0
