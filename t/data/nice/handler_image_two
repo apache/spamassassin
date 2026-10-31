@@ -1,0 +1,30 @@
+From: sender@example.com
+To: recipient@example.com
+Subject: image count test
+Message-Id: <img-count-test@example.com>
+Date: Tue, 10 Jun 2025 12:00:00 +0000
+MIME-Version: 1.0
+Content-Type: multipart/mixed; boundary="BOUND"
+
+--BOUND
+Content-Type: text/plain; charset=us-ascii
+
+Plain body with ORIGINAL_BODY_MARKER for sanity.
+
+--BOUND
+Content-Type: image/png; name="one.png"
+Content-Transfer-Encoding: base64
+Content-Disposition: inline; filename="one.png"
+
+iVBORw0KGgoAAAANSUhEUgAAAAIAAAACAQAAAABazTCJAAAADElEQVQI12M4wHAAAAMEAYHFO6Kp
+AAAAAElFTkSuQmCC
+
+--BOUND
+Content-Type: image/png; name="two.png"
+Content-Transfer-Encoding: base64
+Content-Disposition: inline; filename="two.png"
+
+iVBORw0KGgoAAAANSUhEUgAAAAMAAAADAQAAAAB+U4gSAAAAC0lEQVQI12NgAAEAAAYAAWb0yWwA
+AAAASUVORK5CYII=
+
+--BOUND--
