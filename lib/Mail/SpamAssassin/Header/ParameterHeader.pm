@@ -105,7 +105,7 @@ sub parameter {
 
 sub _parse {
     my ($self,$raw,$opts) = @_;
-    $raw =~ s/^\s+|\s+$//g;
+    $raw =~ s/^\s+//; $raw =~ s/\s+$//;
     return unless length $raw;
 
     _unfold_lines($raw);
@@ -144,7 +144,7 @@ sub _parse {
     # Parse tokens into key-value pairs.
     my $params;
     foreach my $token (@tokens) {
-        $token =~ s/^\s+|\s+$//g;
+        $token =~ s/^\s+//; $token =~ s/\s+$//;
         next unless length($token);
         my ($k,$v) = split(/\s*=\s*/,$token,2);
         if ( !defined($v) or !length($k) ) {

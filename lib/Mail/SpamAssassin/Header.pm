@@ -120,7 +120,7 @@ sub _remove_comments {
     return 0 unless $removed;
     # Remove extra whitespace left over by removing comments
     $output =~ s/\s+/ /g;
-    $output =~ s/^\s+|\s+$//g;
+    $output =~ s/^\s+//; $output =~ s/\s+$//;
     $_[0] = $output;
     return $removed;
 }
