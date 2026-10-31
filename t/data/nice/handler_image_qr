@@ -1,0 +1,27 @@
+From: sender@example.com
+To: recipient@example.com
+Subject: QR handler test
+Message-Id: <qr-test@example.com>
+Date: Tue, 10 Jun 2025 12:00:00 +0000
+MIME-Version: 1.0
+Content-Type: multipart/mixed; boundary="BOUND"
+
+--BOUND
+Content-Type: text/plain; charset=us-ascii
+
+Plain body with ORIGINAL_BODY_MARKER for sanity.
+
+--BOUND
+Content-Type: image/png; name="qr.png"
+Content-Transfer-Encoding: base64
+Content-Disposition: inline; filename="qr.png"
+
+iVBORw0KGgoAAAANSUhEUgAAAJQAAACUAQMAAABP8pKXAAAABlBMVEUAAAD///+l2Z/dAAAAAnRS
+TlP//8i138cAAAAJcEhZcwAACxIAAAsSAdLdfvwAAAEJSURBVEiJ7ZVLGoMgEINzg7n/LecGNAn1
+9blpDUvRov1dAMkQMO4NL/uHAajqapRfY8a+wKvma870lxBd88sKxouTXsY4AMSXMN7Vo9lfdHnK
+7NFsV98eMrVpUl3q6ikDC0g/iqpHzOiOuXwfC5imS0W7XeoLWMvwJmW/aRAxakAu63fPI8blUwiO
+cmgQMKk6VD7trRMzFjeXX3P3fDVIGOS4BB2FXYOAtVwqGaRUzBm8/mFNe+RMCeHqOe/LgCm/FGIK
+C1VSymw6x9F8t0xMGBwNgL+MnDljVUM4ajJicGTLdtf5EjaP5D6fMwkrVyRV7QXMWBYVtgxLmDxS
+hvkIPfn2lN3ay35nH4e89Kt0vb0TAAAAAElFTkSuQmCC
+
+--BOUND--
