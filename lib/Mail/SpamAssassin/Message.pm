@@ -1438,24 +1438,30 @@ sub _synth_node {
 # common code for get_rendered_body_text_array,
 # get_visible_rendered_body_text_array, get_invisible_rendered_body_text_array
 #
+# $preferred_override, if set, overrides multipart_alternative_preferred_part
+# and builds a separately cached variant array; the variant never sets the
+# html metadata, which belongs to the main array.
+#
 sub get_body_text_array_common {
-  my ($self, $method_name) = @_;
+  my ($self, $method_name, $preferred_override) = @_;
 
-  my $key = 'text_' . $method_name;
+  my $key = 'text_' . $method_name . ($preferred_override ? '_alt' : '');
   if (exists $self->{$key}) { return $self->{$key} }
 
   $self->{$key} = [];
 
   my $scansize = $self->{body_part_scan_size};
   my $totalsize = $self->{body_total_scan_size};
-  my $preferred_alt = $self->{multipart_alternative_preferred_part};
+  my $preferred_alt = $preferred_override ||
+                      $self->{multipart_alternative_preferred_part};
 
   # Ensure the MIME tree has been parsed
   $self->parse_body() if exists $self->{'parse_queue'};
 
   # the html metadata may have already been set, so let's not bother if it's
   # already been done.
-  my $html_needs_setting = !exists $self->{metadata}->{html};
+  my $html_needs_setting = !$preferred_override &&
+                           !exists $self->{metadata}->{html};
 
   my $subject = $method_name eq 'invisible_rendered' ? ''
                : ($self->get_header('subject') || "\n");
@@ -1578,6 +1584,37 @@ sub get_visible_rendered_body_text_array {
 sub get_invisible_rendered_body_text_array {
   my ($self) = @_;
   return $self->get_body_text_array_common('invisible_rendered');
+}
+
+# Rendered body text keeping only one part of each multipart/alternative
+# section: the multipart_alternative_preferred_part type, or text/html if
+# that option is unset.  Used by "multiple" body rules, so the same text in
+# the text/plain and text/html alternatives is not counted twice.
+sub get_rendered_body_text_array_one_alternative {
+  my ($self) = @_;
+
+  if ($self->{multipart_alternative_preferred_part} ||
+      !$self->_has_multipart_alternative()) {
+    return $self->get_body_text_array_common('rendered');
+  }
+  return $self->get_body_text_array_common('rendered', 'text/html');
+}
+
+sub _has_multipart_alternative {
+  my ($self) = @_;
+
+  return $self->{has_mp_alternative} if exists $self->{has_mp_alternative};
+
+  $self->parse_body() if exists $self->{'parse_queue'};
+
+  my @q = ($self);
+  while (my $n = shift @q) {
+    next if $n->is_leaf();
+    return $self->{has_mp_alternative} = 1
+      if ($n->{'type'}||'') eq 'multipart/alternative';
+    push @q, @{$n->{'body_parts'} || []};
+  }
+  return $self->{has_mp_alternative} = 0;
 }
 
 # ---------------------------------------------------------------------------
