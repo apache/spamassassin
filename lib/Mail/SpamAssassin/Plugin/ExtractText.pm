@@ -946,7 +946,7 @@ sub _extract {
     push @{$coll->{flags}}, 'NoText';
     push @{$coll->{text}}, 'NoText';
   } else {
-    if ($text =~ /<a(?:\s+[^>]+)?\s+href="([^">]*)"/) {
+    if ($text =~ /<a\s(?:[^>]*\s)?href="([^">]*)"/) {
       push @{$coll->{flags}}, 'ActionURI';
       dbg("extracttext: ActionURI: $1");
       push @{$coll->{text}}, $text;
