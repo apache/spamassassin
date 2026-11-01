@@ -436,7 +436,8 @@ sub vertical_whitespace {
       my (undef, $text) = $part->visible_rendered();
       # Count the max number of consecutive blank lines
       my $counter = 0;
-      for (split(/^/m, $text)) {
+      while ($text =~ /\G(?!\z)([^\n]*\n?)/g) {
+        local $_ = $1;
         if (/^\s*$/) {
           $counter++;
         } else {
