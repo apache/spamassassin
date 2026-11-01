@@ -28,6 +28,7 @@
 
 #include <stdarg.h>
 #include <stdlib.h>
+#include <limits.h>
 #include <assert.h>
 #include <stdio.h>
 #include <string.h>
@@ -1397,7 +1398,13 @@ int message_filter(struct transport *tp, const char *username,
 
     if (m->outbuf != NULL)
         free(m->outbuf);
+    /* spamd adds X-Spam-* fields and, for spam with rewrite_header, an
+     * X-Spam-Prev-* copy of every rewritten header line.  Those lines are
+     * the sender's, so the reply can be up to about twice the message:
+     * leave room for that (pages that are not written are not used). */
     m->priv->alloced_size = m->max_len + EXPANSION_ALLOWANCE + 1;
+    if (m->max_len <= (INT_MAX - EXPANSION_ALLOWANCE - 1) / 2)
+        m->priv->alloced_size += m->max_len;
     if ((m->outbuf = malloc(m->priv->alloced_size)) == NULL) {
 	failureval = EX_OSERR;
 	goto failure;
@@ -1693,7 +1700,13 @@ int message_filter(struct transport *tp, const char *username,
 
 
 	if ((int) len + (int) m->out_len > (m->priv->alloced_size - 1)) {
-	    failureval = EX_TOOBIG;
+	    /* Not EX_TOOBIG: that means "input over -s, pass it through
+	     * unscanned" and makes spamc exit 0 even with -x, so a reply that
+	     * outgrew the buffer delivered the message unscanned. */
+	    libspamc_log(flags, LOG_ERR,
+		   "spamd reply larger than %d bytes, not using it",
+		   m->priv->alloced_size - 1);
+	    failureval = EX_IOERR;
 	    goto failure;
 	}
 	m->out_len += len;
