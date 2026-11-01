@@ -1912,7 +1912,7 @@ sub parse_body {
 
 sub zlib_inflate_read {
   my ($client, $expected_length, $msglinesref) = @_;
-  my $out;
+  my $out = '';
   my $actual_length;
 
   eval {
@@ -1920,26 +1920,30 @@ sub zlib_inflate_read {
     my ($zlib, $status) = Compress::Zlib::inflateInit();
     if (!$zlib) { die "inflateInit failed: $status"; }
 
+    # spamc sends no message larger than SPAMC_MAX_MESSAGE_LEN
+    my $max_length = 256 * 1024 * 1024;
     my $red = 0;
-    my $buf;
 
-    # TODO: inflate in smaller buffers instead of at EOF
-    while (1) {
-      my $numbytes = $client->read($buf, (1024 * 64), $red);
+    # read up to Content-length bytes, inflating 1 KB at a time (at most
+    # about 1 MB of output each)
+    while ($status == Compress::Zlib::Z_OK() && $red < $expected_length) {
+      my $buf;
+      my $toread = $expected_length - $red;
+      $toread = 1024 if $toread > 1024;
+      my $numbytes = $client->read($buf, $toread);
       if (!defined $numbytes) {
         die "read of zlib data failed: $!";
-        return -1;
       }
       last if $numbytes == 0;
       $red += $numbytes;
+
+      (my $chunk, $status) = $zlib->inflate($buf);
+      $out .= $chunk if defined $chunk;
+      if (length($out) > $max_length) {
+        die "inflated message is larger than $max_length bytes\n";
+      }
     }
 
-    if ($red > $expected_length) {
-      warn "spamd: zlib read $red > expected_length $expected_length\n";
-      substr ($buf, $expected_length) = '';
-    }
-
-    ($out, $status) = $zlib->inflate($buf);
     if ($status != Compress::Zlib::Z_STREAM_END()) {
       die "failed to find end of zlib stream\n";
     }
