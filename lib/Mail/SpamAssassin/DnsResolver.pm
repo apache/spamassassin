@@ -1039,7 +1039,10 @@ This subroutine is a simple synchronous leftover from SpamAssassin version
 3.3 and does not participate in packet query caching and callback grouping
 as implemented by AsyncLoop::bgsend_and_start_lookup().  As such it should
 be avoided for mainstream usage.  Currently used through Mail::SPF::Server
-by the SPF plugin.
+by the SPF plugin, and through Mail::DKIM by the DKIM and ARC plugins.
+
+If C<$res-E<gt>{send_deadline}> is set to a Unix time, no query waits
+past it.
 
 =cut
 
@@ -1076,6 +1079,8 @@ sub send {
 
     my $now = time;
     my $deadline = $now + $timeout;
+    $deadline = $self->{send_deadline}
+      if defined $self->{send_deadline} && $self->{send_deadline} < $deadline;
 
     while (!$answerpkt_avail) {
       if ($now >= $deadline) { $self->{send_timed_out} = 1; last }

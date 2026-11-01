@@ -357,6 +357,15 @@ sub _check_signature {
   my $timer = Mail::SpamAssassin::Timeout->new(
                 { secs => $timeout, deadline => $pms->{master_deadline} });
 
+  # Mail::DKIM stops the timer while it waits for each key lookup, so give
+  # our resolver, which it uses for them, the same deadline
+  my $deadline = $pms->{master_deadline};
+  if ($timeout && $timeout > 0) {
+    my $t = Time::HiRes::time() + $timeout;
+    $deadline = $t  if !defined $deadline || $t < $deadline;
+  }
+  local $self->{main}->{resolver}->{send_deadline} = $deadline;
+
   my $err = $timer->run_and_catch(sub {
     dbg("arc: performing public ARC key lookup and signature verification");
     $verifier->CLOSE();
