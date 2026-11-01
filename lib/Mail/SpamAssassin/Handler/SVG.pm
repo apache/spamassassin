@@ -245,7 +245,7 @@ sub _parse_svg {
     text_h => [ sub {
       my ($dtext) = @_;
       return unless defined $dtext;
-      $dtext =~ s/^\s+|\s+$//g;
+      $dtext =~ s/^\s+//; $dtext =~ s/\s+$//;
       return if $dtext eq '';
       if ($in_script > 0) {
         push @script, $dtext;

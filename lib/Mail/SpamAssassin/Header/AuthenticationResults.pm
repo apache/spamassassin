@@ -105,7 +105,7 @@ sub method {
 sub _parse_authserv {
     my ($self) = @_;
     my $val = $self->value();
-    $val =~ s/^\s+|\s+$//g;
+    $val =~ s/^\s+//; $val =~ s/\s+$//;
     # Extract authserv-id: first token, optionally followed by version number
     if ($val =~ /^(\S+)(?:\s+(\d+))?\s*$/) {
         $self->{authserv_id} = lc($1);
@@ -144,7 +144,7 @@ sub _parse_method_value {
     $method =~ s{\s*/\s*\d+\s*$}{};
     $method = lc($method);
 
-    $val =~ s/^\s+|\s+$//g;
+    $val =~ s/^\s+//; $val =~ s/\s+$//;
     return () unless length $val;
 
     local $_ = $val;
