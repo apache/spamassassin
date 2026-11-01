@@ -1224,7 +1224,7 @@ sub parse_received_line {
     if (/^\S+ by \S+ \(.{0,100}\) with qmail-scanner/) {
       if (defined $envfrom) {
         $envfrom =~ s/^\s*<*//gs;
-        $envfrom =~ s/>*\s*$//gs;
+        $envfrom =~ s/(?<!>)>*+\s*+$//gs;
         $envfrom =~ s/[\s\000\#\[\]\(\)\<\>\|]/!/gs;
       }
       $self->{qmail_scanner_env_from} = $envfrom; # hack!
@@ -1398,7 +1398,7 @@ enough:
   $ident =~ s/$strip_chars/!/gs;
   if (defined $envfrom) {
     $envfrom =~ s/^\s*<*//gs;
-    $envfrom =~ s/>*\s*$//gs;
+    $envfrom =~ s/(?<!>)>*+\s*+$//gs;
     $envfrom =~ s/$strip_chars/!/gs;
   }
 
