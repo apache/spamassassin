@@ -99,13 +99,14 @@ https://wiki.apache.org/spamassassin/SingleUserUnixInstall
    the top of your .procmailrc file:
 
 :0fw: spamassassin.lock
+* < 512000
 | /home/user/bin/spamassassin
 
-   The above line filters all incoming mail through SpamAssassin and tags
-   probable spam with a unique header.  If you would prefer to have spam
-   blocked and saved to a file called "caughtspam" in your home directory,
-   instead of passed through and tagged, append this directly below the above
-   lines:
+   The above lines filter incoming mail smaller than 500 kB (512000 bytes)
+   through SpamAssassin and tag probable spam with a unique header.  If you
+   would prefer to have spam blocked and saved to a file called "caughtspam"
+   in your home directory, instead of passed through and tagged, append this
+   directly below the above lines:
 
 :0:
 * ^X-Spam-Status: Yes
