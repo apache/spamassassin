@@ -966,6 +966,8 @@ def_welcomelist_auth *@*.dailysteals.com
 def_welcomelist_auth *@*.testingmom.com
 def_welcomelist_auth *@*.ceramicartsnetwork.org
 def_welcomelist_auth *@*.verintefm.com
+def_welcomelist_auth *@account.wise.com
+def_welcomelist_auth noreply@wise.com
 
 endif # if can(Mail::SpamAssassin::Conf::feature_welcomelist_blocklist)
 
@@ -1899,6 +1901,8 @@ def_whitelist_auth *@*.dailysteals.com
 def_whitelist_auth *@*.testingmom.com
 def_whitelist_auth *@*.ceramicartsnetwork.org
 def_whitelist_auth *@*.verintefm.com
+def_whitelist_auth *@account.wise.com
+def_whitelist_auth noreply@wise.com
 
 endif # if !can(Mail::SpamAssassin::Conf::feature_welcomelist_blocklist)
 
