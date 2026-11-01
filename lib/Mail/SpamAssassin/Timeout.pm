@@ -186,7 +186,14 @@ sub _run {      # private
       $oldalarm = $oldalarm2 < 1 ? 1 : $oldalarm2;
     }
     $self->{end_time} = $start_time + $secs;  # needed by reset()
-    $handler = sub { $timedout = 1; die "__alarm__ignore__($id)\n" };
+    # Re-arm before dying: the die is often caught by an inner eval (the one
+    # around HTML::Parser::parse, around HTML::Color->new, call_plugins()...)
+    # and the code then carries on.  This timer has replaced the caller's
+    # alarm (spamd's --timeout-child), so without a re-arm nothing at all
+    # bounded the rest of the run: a 1.7 MB message kept a spamd child busy
+    # for 340 s with time_limit 25 and --timeout-child=40.  The alarm is
+    # disarmed below once the eval is left.
+    $handler = sub { $timedout = 1; alarm(1); die "__alarm__ignore__($id)\n" };
   }
 
   my($ret, $eval_stat);

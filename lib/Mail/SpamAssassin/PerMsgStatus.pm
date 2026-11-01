@@ -411,9 +411,21 @@ sub check {
   } else {
     my $t = Mail::SpamAssassin::Timeout->new({ deadline => $master_deadline });
     my $err = $t->run(sub { $self->check_timed(@_) });
-    if (time > $master_deadline && !$self->{deadline_exceeded}) {
+    if (($t->timed_out || time > $master_deadline) && !$self->{deadline_exceeded}) {
       info("check: exceeded time limit in pms check");
       $self->{deadline_exceeded} = 1;
+    }
+    # The deadline alarm can fire outside Check.pm's rule loop (Received
+    # parsing, MIME parsing, HTML rendering, plugin callbacks).  Its die is
+    # then caught by call_plugins() and check_main() returns early, so
+    # TIME_LIMIT_EXCEEDED was never recorded and the message came out as
+    # "score=0.0 tests=none": an aborted scan looked like clean mail.
+    if ($self->{deadline_exceeded} &&
+        !$self->{tests_already_hit}->{TIME_LIMIT_EXCEEDED}) {
+      $self->got_hit('TIME_LIMIT_EXCEEDED', '', defscore => 0.001,
+                     description => 'Exceeded time limit / deadline');
+      $self->{score} = (sprintf "%0.3f", $self->{score}) + 0;
+      $self->{is_spam} = $self->is_spam();
     }
   }
 }
