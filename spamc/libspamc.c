@@ -1591,7 +1591,9 @@ int message_filter(struct transport *tp, const char *username,
                     goto failure;
                 }
             }
-            SSL_shutdown(ssl);
+            /* spamd reads compressed input to EOF, so needs close_notify */
+            if (zlib_on)
+                SSL_shutdown(ssl);
             shutdown(sock, SHUT_WR);
 #endif
         }
@@ -1973,7 +1975,6 @@ int message_tell(struct transport *tp, const char *username, int flags,
             failureval = EX_IOERR;
             goto failure;
         }
-	SSL_shutdown(ssl);
 	shutdown(sock, SHUT_WR);
 #endif
     }

@@ -1845,6 +1845,13 @@ sub accept_a_conn {
   }
 
   # Close out our connection to the client ...
+  # Read input already sent, such as spamc's TLS close_notify: closing with
+  # unread input resets the connection, and a reply not yet sent is lost.
+  if ($client->isa('IO::Socket::SSL')) {
+    $client->blocking(0);
+    for (1 .. 8) { last unless $client->sysread(my $buf, 16384); }
+    $client->blocking(1);
+  }
   $client->close();
   return 1;
 }
