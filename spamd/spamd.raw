@@ -1966,10 +1966,11 @@ sub parse_msgids {
   my $rmsgid = $mail->get_pristine_header("Resent-Message-Id");
   foreach my $id ((\$msgid, \$rmsgid)) {
     if ( $$id ) {
+      $$id = substr($$id, 0, 1024)  if length($$id) > 1024;
       # no re "strict";  # since perl 5.21.8: Ranges of ASCII printables...
       while ( $$id =~ s/\([^\(\)]*\)// )
          { }                           # remove comments and
-      $$id =~ s/^\s+|\s+$//g;          # leading and trailing spaces
+      $$id =~ s/^\s+//; $$id =~ s/\s+$//;  # leading and trailing spaces
       $$id =~ s/\s+/ /g;               # collapse whitespaces
       $$id =~ s/^.*?<(.*?)>.*$/$1/;    # keep only the id itself
       $$id =~ s/[^\x21-\x7e]/?/g;      # replace all weird chars
