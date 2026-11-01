@@ -70,6 +70,13 @@ Timeout in seconds. If the PDF document takes longer than this to parse,
 the parser will die with an error. This is useful for preventing denial
 of service attacks.
 
+=item max_bytes
+
+Most bytes of stream data to decode. The output of each decoding filter, and
+each reuse of a decoded stream, counts towards it; parse() dies, and
+extract_images() skips the image, once the total is over it. bytes_decoded()
+returns the total. Unlimited if not given.
+
 =item debug
 
 Set the debugging level. Valid values are 'all', 'trace', 'xref', 'stream',
@@ -85,6 +92,7 @@ sub new {
     my $self = bless {
         context      => $opts{context} || Mail::SpamAssassin::PDF::Context::Info->new(),
         timeout      => $opts{timeout},
+        max_bytes    => $opts{max_bytes},
     }, $class;
 
     $debug = $opts{debug};
@@ -109,6 +117,7 @@ sub parse {
     $self->{pages} = [];
     $self->{is_encrypted} = 0;
     $self->{is_protected} = 0;
+    $self->{bytes_decoded} = 0;
 
 
     $self->{core} = Mail::SpamAssassin::PDF::Core->new($data);
@@ -174,11 +183,11 @@ sub parse {
         if ( $@ eq "__TIMEOUT__\n" ) {
             croak "Timeout limit exceeded";
         }
-        alarm(0);
+        alarm(0) if (defined($self->{timeout}));
         die $@;
     };
 
-    alarm(0);
+    alarm(0) if (defined($self->{timeout}));
 
 }
 
@@ -196,6 +205,10 @@ sub is_encrypted {
 
 sub is_protected {
     shift->{is_protected};
+}
+
+sub bytes_decoded {
+    shift->{bytes_decoded};
 }
 
 ###################
@@ -739,7 +752,10 @@ sub _get_stream_data {
     }
 
     # check for cached version
-    return $self->{stream_cache}->{$offset} if defined($self->{stream_cache}->{$offset});
+    if (defined($self->{stream_cache}->{$offset})) {
+        $self->_count_decoded($self->{stream_cache}->{$offset});
+        return $self->{stream_cache}->{$offset};
+    }
 
     $self->{core}->pos($offset);
     read($self->{core}->{fh},my $stream_data,$length);
@@ -755,20 +771,35 @@ sub _get_stream_data {
         $filter = $abbreviations{$filter} if defined($abbreviations{$filter});
         if ( $filter eq '/FlateDecode' ) {
             my $f = Mail::SpamAssassin::PDF::Filter::FlateDecode->new($decodeParms);
-            $stream_data = $f->decode($stream_data);
+            $stream_data = $f->decode($stream_data,$self->_decode_limit());
         } elsif ( $filter eq '/LZWDecode' ) {
             my $f = Mail::SpamAssassin::PDF::Filter::LZWDecode->new($decodeParms);
-            $stream_data = $f->decode($stream_data);
+            $stream_data = $f->decode($stream_data,$self->_decode_limit());
         } elsif ( $filter eq '/ASCII85Decode' ) {
             my $f = Mail::SpamAssassin::PDF::Filter::ASCII85Decode->new();
             $stream_data = $f->decode($stream_data);
         } else {
             die "Filter $filter not implemented";
         }
+        $self->_count_decoded($stream_data);
     }
 
     return $self->{stream_cache}->{$offset} = $stream_data;
 
+}
+
+# bytes a filter may produce before the total is over max_bytes
+sub _decode_limit {
+    my $self = shift;
+    return defined($self->{max_bytes}) ? $self->{max_bytes} - $self->{bytes_decoded} : undef;
+}
+
+# count stream data towards max_bytes
+sub _count_decoded {
+    my ($self,$data) = @_;
+    $self->{bytes_decoded} += length($data // '');
+    die "Stream data over max_bytes ($self->{max_bytes})\n"
+        if defined($self->{max_bytes}) && $self->{bytes_decoded} > $self->{max_bytes};
 }
 
 #
@@ -825,10 +856,10 @@ sub _get_image_data {
         $filter = $abbreviations{$filter} if defined($abbreviations{$filter});
         if ( $filter eq '/FlateDecode' ) {
             my $f = Mail::SpamAssassin::PDF::Filter::FlateDecode->new($decodeParms);
-            $stream_data = $f->decode($stream_data);
+            $stream_data = $f->decode($stream_data,$self->_decode_limit());
         } elsif ( $filter eq '/LZWDecode' ) {
             my $f = Mail::SpamAssassin::PDF::Filter::LZWDecode->new($decodeParms);
-            $stream_data = $f->decode($stream_data);
+            $stream_data = $f->decode($stream_data,$self->_decode_limit());
         } elsif ( $filter eq '/ASCII85Decode' ) {
             my $f = Mail::SpamAssassin::PDF::Filter::ASCII85Decode->new();
             $stream_data = $f->decode($stream_data);
@@ -860,6 +891,7 @@ sub _get_image_data {
             # JPXDecode, RunLengthDecode, etc. - can't decode (yet)
             return ('unsupported', undef);
         }
+        $self->_count_decoded($stream_data);
     }
 
     return ('raw', $stream_data);

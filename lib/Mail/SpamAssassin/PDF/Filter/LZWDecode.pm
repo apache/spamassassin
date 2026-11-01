@@ -18,7 +18,7 @@ sub new {
 }
 
 sub decode {
-    my ($self, $data) = @_;
+    my ($self, $data, $limit) = @_;
     my ($code, $result);
     my $partial_code = $self->{'partial_code'};
     my $partial_bits = $self->{'partial_bits'};
@@ -53,6 +53,8 @@ sub decode {
             $result .= $self->{'table'}[$self->{'next_code'}];
             $self->{'next_code'}++;
         }
+        # return early once the output is over $limit bytes
+        return $result if defined($limit) && length($result) > $limit;
         if ($early_change) {
             if ($self->{'next_code'} == (1 << $self->{'code_length'})
                 and $self->{'code_length'} < 12) {

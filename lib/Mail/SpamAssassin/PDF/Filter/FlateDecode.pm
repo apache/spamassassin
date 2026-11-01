@@ -18,11 +18,18 @@ sub new {
 }
 
 sub decode {
-    my ($self,$data) = @_;
+    my ($self,$data,$limit) = @_;
 
-    my $i = new Compress::Raw::Zlib::Inflate( -ConsumeInput => 0 );
+    # inflate 1 KB of input at a time (at most about 1 MB of output), returning
+    # early once the output is over $limit bytes
+    my $i = new Compress::Raw::Zlib::Inflate( -AppendOutput => 1 );
     my $uncompressed = '';
-    my $status = $i->inflate($data,$uncompressed);
+    my $status = Z_OK;
+    for( my $pos=0; $status == Z_OK && $pos<length($data); $pos+=1024 ) {
+        my $in = substr($data,$pos,1024);
+        $status = $i->inflate($in,$uncompressed);
+        return $uncompressed if defined($limit) && length($uncompressed) > $limit;
+    }
     unless ( $status == Z_OK || $status == Z_STREAM_END ) {
         die "Error inflating data: " . $i->msg;
     }
@@ -40,22 +47,25 @@ sub decode {
         my $columns = $self->{columns} + 1;
         my $length = length($data);
 
-        my @prior = (0) x ($columns-1);
-        for( my $i=0; $i<$length; $i+=$columns ) {
-            my @out;
-            my ($alg,@row) = unpack("x$i C$columns",$data);
+        die "Invalid Columns $self->{columns}" if $columns < 1;
 
-            if ( $alg == 2 ) {
-                # PNG "Up" Predictor
-                push(@out,($row[$_]+$prior[$_]) & 0xff) for (0..$#row)
-            } else {
-                die "PNG algorithm $alg not implemented";
+        my $prior;
+        for( my $i=0; $i<$length; $i+=$columns ) {
+            my $alg = ord(substr($data,$i,1));
+            die "PNG algorithm $alg not implemented" unless $alg == 2;
+
+            # PNG "Up" Predictor, 4096 bytes of the row at a time
+            my $row = substr($data,$i+1,$columns-1);
+            $prior //= "\0" x length($row);
+            my $up = '';
+            for( my $j=0; $j<length($row); $j+=4096 ) {
+                my @row = unpack('C*',substr($row,$j,4096));
+                my @prior = unpack('C*',substr($prior,$j,4096));
+                $up .= pack('C*',map { ($row[$_]+$prior[$_]) & 0xff } 0..$#row);
             }
 
-            $out .= pack('C*',@out);
-            # printf "i=$i prior=%s row=%s out=%s\n",join(',',@prior),join(',',@row),join(',',@out);
-
-            @prior = @out;
+            $out .= $up;
+            $prior = $up;
         }
 
     } else {

@@ -32,6 +32,10 @@ JavaScript/OpenAction flags, document details) to rules via the C<pdf2_*> eval
 rules and C<_PDF2*_> tags below.  URLs found inside the PDF are added to the
 URI detail list with type C<pdf>.
 
+Decoded PDF stream data counts against the message's C<handler_max_bytes>
+budget.  A PDF that decodes to more than is left of it is counted as a parse
+error, and an image that would go over it is not extracted.
+
 The C<pdf2_> prefix for tags and eval rules was chosen so as not to conflict with the
 PDFInfo plugin.
 
@@ -572,7 +576,7 @@ sub _encode_image {
     for my $y (0 .. $h-1) {
       my $row = substr($bytes, $y * $row_bytes, $row_bytes);
       my $bits = unpack('B*', $row);
-      $gray .= pack('C*', map { $_ ? 0xff : 0x00 } split //, substr($bits, 0, $w));
+      $gray .= substr($bits, 0, $w) =~ tr/01/\x00\xff/r;
     }
     ($channels, $samples) = (1, $gray);
   }
@@ -656,16 +660,19 @@ sub handle_pdf {
   return [] unless defined $data && length $data;
 
   # Parse PDF.  The handler framework already bounds this call with a timeout,
-  # so the parser does not need its own.
+  # so the parser does not need its own.  Decoded stream data is limited to
+  # what is left of handler_max_bytes.
   my $context = Mail::SpamAssassin::PDF::Context::Info->new(
     max_uris => defined($pms->{conf}->{pdf_max_uris})
       ? $pms->{conf}->{pdf_max_uris} : DEFAULT_MAX_URIS,
   );
-  my $pdf = Mail::SpamAssassin::PDF::Parser->new(context => $context);
+  my $pdf = Mail::SpamAssassin::PDF::Parser->new(context => $context,
+                                                 max_bytes => $self->bytes_left($pms));
   my $info = eval {
     $pdf->parse(\$data);
     $pdf->{context}->get_info();
   };
+  $self->spend_bytes($pms, $pdf->bytes_decoded());
   if ( !defined($info) ) {
     log_dbg($@);
     $pdfinfo->{errors}++;
@@ -736,9 +743,11 @@ sub handle_pdf {
   my $max_pixels = defined($conf->{pdf_max_image_pixels})
     ? $conf->{pdf_max_image_pixels} : DEFAULT_MAX_IMAGE_PIXELS;
 
+  my $decoded = $pdf->bytes_decoded();
   my $images = eval {
     $pdf->extract_images(max_images => $max_images, max_pixels => $max_pixels);
   };
+  $self->spend_bytes($pms, $pdf->bytes_decoded() - $decoded);
   if ( $@ ) {
     chomp(my $e = $@);
     log_dbg("image extraction failed: $e");
