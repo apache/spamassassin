@@ -1128,6 +1128,7 @@ sub server_sock_setup_inet {
       }
       %sockopt = (%sockopt, (
         SSL_server      => 1,
+        SSL_startHandshake => 0,  # done in accept_a_conn
         SSL_key_file    => $opt{'server-key'},
         SSL_cert_file   => $opt{'server-cert'},
         SSL_on_peer_shutdown => sub { return 0 },
@@ -1711,8 +1712,34 @@ sub accept_a_conn {
       peer_info_from_socket($client);
     $remote_hostaddr or die 'failed to obtain port and ip from socket';
 
+    my $peer = sprintf("%s [%s]:%s to port %d, fd %d",
+                       $remote_hostname, $remote_hostaddr, $remote_port,
+                       $local_port, $socket_info->{fd});
+    if (!ip_is_allowed($remote_hostaddr)) {
+      warn("spamd: unauthorized connection from $peer");
+      $client->close;
+      return 0;
+    }
+
     my $ssl_info = '';
     if ($client->isa('IO::Socket::SSL')) {
+      # handshake here, not in accept, so that timeout_tcp bounds it and a
+      # failure only closes this connection
+      my $ok = eval {
+        Mail::SpamAssassin::Util::trap_sigalrm_fully(sub {
+                              die "tcp timeout\n";
+                            });
+        alarm $timeout_tcp if ($timeout_tcp);
+        $client->accept_SSL();
+      };
+      alarm 0;
+      if (!$ok) {
+        my $err = $@ ? $@ : IO::Socket::SSL::errstr();
+        chomp $err;
+        info("spamd: SSL handshake failed, connection from $peer: $err");
+        $client->close;
+        return 0;
+      }
       $ssl_info = ', ';
       my $ssl_version = $client->get_sslversion();
       if (defined $ssl_version) {
@@ -1729,17 +1756,7 @@ sub accept_a_conn {
       $ssl_info .= $client->get_cipher();
     }
 
-    my $msg = sprintf("connection from %s [%s]:%s to port %d, fd %d%s",
-                      $remote_hostname, $remote_hostaddr, $remote_port,
-                      $local_port, $socket_info->{fd}, $ssl_info);
-    if (ip_is_allowed($remote_hostaddr)) {
-      info("spamd: $msg");
-    }
-    else {
-      warn("spamd: unauthorized $msg");
-      $client->close;
-      return 0;
-    }
+    info("spamd: connection from $peer$ssl_info");
   }
 
   local ($_);
