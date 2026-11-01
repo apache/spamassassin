@@ -1,0 +1,11 @@
+dn: olcDatabase=mdb,cn=config
+objectClass: olcDatabaseConfig
+objectClass: olcMdbConfig
+olcDatabase: mdb
+olcSuffix: o=stooges
+olcRootDN: cn=StoogeAdmin,o=stooges
+olcRootPW: secret1
+olcDbDirectory: /var/lib/ldap/stooges
+olcDbIndex: objectClass eq
+olcDbIndex: uid eq
+olcAccess: to * by * read

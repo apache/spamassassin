@@ -27,6 +27,6 @@ tstprefs ("
   user_scores_ldap_password secret1
 ");
 
-ok (sdrun ("-L --ldap-config", "-u curley < data/spam/001", \&patterns_run_cb));
+ok (sdrun ("-L --ldap-config -u $spamd_run_as_user", "-u curley < data/spam/001", \&patterns_run_cb));
 ok_all_patterns();
 
