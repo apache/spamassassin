@@ -2919,14 +2919,23 @@ sub add_uri_detail_list {
 
   # bound the number of distinct URIs per message (text + all HTML parts)
   if (!exists $udl->{$uri}) {
+    my $host = $uri =~ m{^[a-z][a-z0-9+.-]*://(?:[^/?#\@]*\@)?([^/?#:]+)}i
+                 ? lc $1 : undef;
     if (++$self->{uri_detail_count} > MAX_URI_COUNT) {
-      $self->{'uri_truncated'} = 1;
-      # separate flag (also on the message, for check_msg_parse_flags):
-      # URIs beyond the cap are not seen by uri rules and URIBL lookups
-      $self->{'uri_count_truncated'} = 1;
-      $self->{msg}->{'uri_count_truncated'} = 1;
-      return 0;
+      # Over the cap, still take the first URI of a host not seen yet (at
+      # most MAX_URI_COUNT/4 more), so that the one link that matters cannot
+      # be hidden behind MAX_URI_COUNT links to a single harmless host.
+      if (!defined $host || $self->{uri_hosts_seen}{$host} ||
+          ++$self->{uri_cap_extra_hosts} > MAX_URI_COUNT/4) {
+        $self->{'uri_truncated'} = 1;
+        # separate flag (also on the message, for check_msg_parse_flags):
+        # URIs beyond the cap are not seen by uri rules and URIBL lookups
+        $self->{'uri_count_truncated'} = 1;
+        $self->{msg}->{'uri_count_truncated'} = 1;
+        return 0;
+      }
     }
+    $self->{uri_hosts_seen}{$host} = 1  if defined $host;
   }
 
   dbg("uri: canonicalizing $source uri: $uri");

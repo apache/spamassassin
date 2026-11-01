@@ -474,11 +474,21 @@ sub push_uri {
 
   # bound the number of distinct URIs collected from one HTML part
   # (count what is actually stored: the target, not the raw attribute)
-  if (!($self->{uri}->{$target} && exists $self->{uri}->{$target}->{types}) &&
-      ++$self->{uri_count} > MAX_URI_COUNT) {
-    $self->{uri_truncated} = 1;
-    $self->{uri_count_truncated} = 1;
-    return;
+  if (!($self->{uri}->{$target} && exists $self->{uri}->{$target}->{types})) {
+    my $host = $target =~ m{^[a-z][a-z0-9+.-]*://(?:[^/?#\@]*\@)?([^/?#:]+)}i
+                 ? lc $1 : undef;
+    if (++$self->{uri_count} > MAX_URI_COUNT) {
+      # Over the cap, still take the first link to a host not seen yet (at
+      # most MAX_URI_COUNT/4 more): 2000 links to one harmless host must
+      # not hide the one that matters.
+      if (!defined $host || $self->{uri_hosts_seen}{$host} ||
+          ++$self->{uri_cap_extra_hosts} > MAX_URI_COUNT/4) {
+        $self->{uri_truncated} = 1;
+        $self->{uri_count_truncated} = 1;
+        return;
+      }
+    }
+    $self->{uri_hosts_seen}{$host} = 1  if defined $host;
   }
 
   $self->{uri}->{$target}->{types}->{$type} = 1;

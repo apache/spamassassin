@@ -84,7 +84,7 @@ C<spamassassin -d>, which only needs the pristine header and body which
 is always handled when the object is created.
 
 C<subparse> specifies how many MIME recursion levels should be parsed.
-Defaults to 20.
+Defaults to 100.
 
 =cut
 
@@ -105,9 +105,9 @@ sub new {
   my $normalize = $opts->{'normalize'} || 0;
 
   # Specifies whether or not to parse message/rfc822 parts into its own tree.
-  # If the # > 0, it'll subparse, otherwise it won't.  By default, do twenty
-  # levels deep.
-  my $subparse = defined $opts->{'subparse'} ? $opts->{'subparse'} : 20;
+  # If the # > 0, it'll subparse, otherwise it won't.  By default, do 100
+  # levels deep (bug 8481).
+  my $subparse = defined $opts->{'subparse'} ? $opts->{'subparse'} : 100;
 
   my $self = $class->SUPER::new({normalize=>$normalize});
 
@@ -1468,7 +1468,8 @@ sub get_body_text_array_common {
   # of every text/html part is collected.  Then share body_total_scan_size
   # between the parts (see _share_total_scan_size).
   my @queue = ($self);
-  my @rnd;  # text of each part, in message order
+  my @rnd;    # text of each part, in message order
+  my @shown;  # whether each part shows any text
   while (my $p = shift @queue) {
     # Descend into handler-produced synthetic children. They render in document
     # order, after this part's own text below.
@@ -1498,7 +1499,7 @@ sub get_body_text_array_common {
       # unless scan_text_attachments is enabled (e.g. to catch phishing payloads
       # delivered as attached text/html or text/plain files).
       my $cdisp = $p->{'headers'}->{'content-disposition'}[0];
-      if(!$self->{scan_text_attachments} and (defined $cdisp and ($cdisp =~ /^attachment;/) and ($type =~ m{^text/(?:plain|html)$}))) {
+      if(!$self->{scan_text_attachments} and (defined $cdisp and ($cdisp =~ /^\s*attachment\s*(?:;|$)/i) and ($type =~ m{^text/(?:plain|html)$}))) {
         dbg("$method_name: Skipping text attachment with content-disposition \"$cdisp\"");
         next;
       }
@@ -1523,6 +1524,7 @@ sub get_body_text_array_common {
       }
 
       push @rnd, $rnd;
+      push @shown, _shows_text($p);
 
       # TVD - if there are multiple parts, what should we do?
       # right now, just use the last one.  we may need to give some priority
@@ -1535,7 +1537,7 @@ sub get_body_text_array_common {
     }
   }
 
-  if (_share_total_scan_size(\@rnd, $totalsize)) {
+  if (_share_total_scan_size(\@rnd, $totalsize, \@shown)) {
     dbg("$method_name: body_total_scan_size %d reached, truncating parts",
         $totalsize);
     $self->{'body_total_scan_size_exceeded'} = 1;
@@ -1591,6 +1593,7 @@ sub get_decoded_body_text_array {
   my $scansize = $self->{rawbody_part_scan_size};
   my $totalsize = $self->{rawbody_total_scan_size};
   my @raw;
+  my @shown;
 
   # Find all parts which are leaves
   my @parts = $self->find_parts(qr/./,1);
@@ -1638,11 +1641,12 @@ sub get_decoded_body_text_array {
     }
 
     push @raw, $rawbody;
+    push @shown, _shows_text($parts[$pt]);
   }
 
   # Share rawbody_total_scan_size between the parts, like
   # get_body_text_array_common() does for body_total_scan_size.
-  if (_share_total_scan_size(\@raw, $totalsize)) {
+  if (_share_total_scan_size(\@raw, $totalsize, \@shown)) {
     dbg("message: rawbody_total_scan_size %d reached, truncating parts",
         $totalsize);
     $self->{'rawbody_total_scan_size_exceeded'} = 1;
@@ -1655,27 +1659,38 @@ sub get_decoded_body_text_array {
 
 # Truncate the strings in @$parts (in place) so that their total length is
 # at most $totalsize, "water-filling": parts smaller than an equal share are
-# kept whole, the rest is split evenly between the larger parts.  Returns
-# true if anything was truncated.
+# kept whole, the rest is split evenly between the larger parts.  Parts
+# that show text ($$shown[$i] true) share the limit first, and the others
+# share what is left, so that parts with only invisible text cannot crowd
+# out the text a reader sees.  Returns true if anything was truncated.
 sub _share_total_scan_size {
-  my ($parts, $totalsize) = @_;
+  my ($parts, $totalsize, $shown) = @_;
 
   return 0 unless $totalsize;
   my $sum = 0;
   $sum += length($_) for @$parts;
   return 0 if $sum <= $totalsize;
 
-  my @order = sort { length($parts->[$a]) <=> length($parts->[$b]) }
-                (0 .. $#$parts);
   my $left = $totalsize;
-  my $n = @order;
-  for my $i (@order) {
-    my $share = int($left / $n);
-    substr($parts->[$i], $share) = ''  if length($parts->[$i]) > $share;
-    $left -= length($parts->[$i]);
-    $n--;
+  for my $pass (1, 0) {
+    my @order = sort { length($parts->[$a]) <=> length($parts->[$b]) }
+                  grep { ($shown->[$_] ? 1 : 0) == $pass } (0 .. $#$parts);
+    my $n = @order;
+    for my $i (@order) {
+      my $share = int($left / $n);
+      substr($parts->[$i], $share) = ''  if length($parts->[$i]) > $share;
+      $left -= length($parts->[$i]);
+      $n--;
+    }
   }
   return 1;
+}
+
+# True if the part shows any text: its visible rendered text (all of its
+# rendered text unless its renderer tells hidden from shown) is not blank.
+sub _shows_text {
+  my ($p) = @_;
+  return !defined $p->{visible_rendered} || $p->{visible_rendered} =~ /\S/ ? 1 : 0;
 }
 
 # ---------------------------------------------------------------------------
