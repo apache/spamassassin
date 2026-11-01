@@ -147,6 +147,15 @@ tstlocalrules(q{
   describe X_HASHBL_ATT Message contains attachment found on attbl
   tflags   X_HASHBL_ATT net
 
+  # minsize/maxsize: attachment is 12753 bytes, so only first test must be
+  # queried; second and third lookups would show up as unwanted queries
+  body     X_HASHBL_ATT_SIZEOK eval:check_hashbl_attachments('hashbltest6.spamassassin.org/A', 'sha256/minsize=1000/maxsize=100000')
+  tflags   X_HASHBL_ATT_SIZEOK net
+  body     X_HASHBL_ATT_TOOBIG eval:check_hashbl_attachments('hashbltest6.spamassassin.org/A', 'sha256/maxsize=10000')
+  tflags   X_HASHBL_ATT_TOOBIG net
+  body     X_HASHBL_ATT_TOOSMALL eval:check_hashbl_attachments('hashbltest6.spamassassin.org/A', 'sha256/minsize=20000')
+  tflags   X_HASHBL_ATT_TOOSMALL net
+
   # email user/host/domain
   hashbl_acl_domacl host.domain.com
   header __X_HASHBL_UHD1 eval:check_hashbl_emails('hashbltest7.spamassassin.org', 'raw/user', 'body', '^', 'domacl')

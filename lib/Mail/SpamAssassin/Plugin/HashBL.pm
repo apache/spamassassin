@@ -1078,7 +1078,7 @@ sub check_hashbl_attachments {
       dbg("query skipped, size smaller than $opts->{minsize}");
       next;
     }
-    if ($opts->{maxsize} && $len > $opts->{minsize}) {
+    if ($opts->{maxsize} && $len > $opts->{maxsize}) {
       dbg("query skipped, size larger than $opts->{maxsize}");
       next;
     }
