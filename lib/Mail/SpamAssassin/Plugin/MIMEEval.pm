@@ -423,10 +423,15 @@ sub _check_attachments {
 	    $qp_count += $qp;
 	    # tabs and spaces at end of encoded line are okay.  Also, multiple
 	    # whitespace at the end of a line are OK, like ">=20=20=20=20=20=20".
-	    my ($trailing) = m/((?:=09|=20)+)\s*$/g;
-	    if ($trailing) {
-	      $qp_count -= (length($trailing) / 3);
+	    my $end = length($_);
+	    $end-- while $end > 0 && substr($_, $end - 1, 1) =~ /\s/;
+	    my $trailing = 0;
+	    while ($end >= 3) {
+	      my $t = substr($_, $end - 3, 3);
+	      last unless $t eq '=20' || $t eq '=09';
+	      $trailing++; $end -= 3;
 	    }
+	    $qp_count -= $trailing;
 	  }
         }
       }
