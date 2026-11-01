@@ -616,6 +616,7 @@ sub parse {
     dbg("config: time limit %.1f s", $master_deadline - $start_time);
   }
 
+  Mail::SpamAssassin::Util::clear_content_type_cache();
   my $msg = Mail::SpamAssassin::Message->new({
     message=>$message, parsenow=>$parsenow,
     normalize=>$self->{conf}->{normalize_charset},

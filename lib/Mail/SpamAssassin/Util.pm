@@ -1304,6 +1304,14 @@ sub decode_dns_question_entry {
 
 ###########################################################################
 
+my %ct_cache;  # parse_content_type() results, by raw header value
+
+# Empty the parse_content_type() cache.  Mail::SpamAssassin::parse() calls
+# this for each message, so the cache does not outlast the message.
+sub clear_content_type_cache {
+  %ct_cache = ();
+}
+
 sub parse_content_type {
   # This routine is typically called by passing a
   # get_header("content-type") which passes all content-type headers
@@ -1313,6 +1321,15 @@ sub parse_content_type {
   #
   my $missing; # flag missing content-type, even though we force it text/plain
   my $ct = $_[-1] || do { $missing = 1; 'text/plain; charset=us-ascii' };
+
+  # Each MIME part's Content-Type is parsed about five times (Message.pm,
+  # MIMEEval...), parse each value once per message.
+  my $cache_key;
+  if (!$missing) { ($cache_key = $ct) =~ s/^\s+//; $cache_key =~ s/\s+\z//; }
+  if (defined $cache_key && exists $ct_cache{$cache_key}) {
+    my @r = @{ $ct_cache{$cache_key} };
+    return wantarray ? @r : $r[0];
+  }
 
   my $header = Mail::SpamAssassin::Header::ParameterHeader->new($ct);
   my $boundary = $header->parameter('boundary');
@@ -1334,6 +1351,11 @@ sub parse_content_type {
 
   # strip inappropriate chars (bug 5399: after the text/plain fixup)
   $ct =~ tr/\000-\040\177-\377\042\050\051\054\072-\077\100\133-\135//d;
+
+  if (defined $cache_key) {
+    %ct_cache = ()  if keys %ct_cache >= 1000;
+    $ct_cache{$cache_key} = [ $ct, $boundary, $charset, $name, $missing ];
+  }
 
   # Now that the header has been parsed, return the requested information.
   # In scalar context, just the MIME type, in array context the
