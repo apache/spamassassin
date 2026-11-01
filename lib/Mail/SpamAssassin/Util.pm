@@ -2560,27 +2560,30 @@ our $header_address_mailre = qr/
 # Very relaxed internal parser
 # Only handles non-nested comments in some places
 our $header_address_re = qr/^
-  \s*
+  \s*+
   (?:
     # optional phrase, quoted or non-quoted
     (?:
-      ( (?: " (?:|(?:[^"\\]++|\\.)*+) " | [^",;<]++ )+ )
+      ( (?: " (?:[^"\\]++|\\.)*+ " | [^",;<]++ )+ )
       \s*
     )?
     # and enclosed email (or empty)
     # ... allow whitespace in localpart
-    < \s* ( [^>\@]* \S+ | \s* ) \s* >
+    < \s*+ ( [^>\@]*+ \S+ | (?: [^>\@\s]++ | \s++ (?=[^>\@\s]) )++ | ) \s* >
     # some output duplicate enclosures..
-    (?: \s* < \s* (?: (?: " (?:|(?:[^"\\]++|\\.)*+) " )? \S+ | \s* ) \s* > )*
+    (?: \s* < \s*+ (?: (?: " (?:[^"\\]++|\\.)*+ " )? \S+ | ) \s* > )*
   |
     # or standalone email or phrase
     (?:
       ( $header_address_mailre ) |
-      ( (?: " (?:|(?:[^"\\]++|\\.)*+) " | [^",;<]++ )+ )
+      ( (?: " (?:[^"\\]++|\\.)*+ " | [^",;<]++ )+ )
     )
+  |
+    # or nothing but whitespace before a separator
+    (?<=\s) (?= [,;] | \z )
   )
   # possible comment after (no nested support here)
-  (?: \s* \( ( (?:|(?:[^()\\]++|\\.)*+) ) \) )?
+  (?: \s* \( ( (?:[^()\\]++|\\.)*+ ) \) )?
   # Followed by comma (semi-colon sometimes) or finish
   \s* (?: [,;] | \z )
 /ix;
