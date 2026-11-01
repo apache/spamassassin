@@ -981,9 +981,14 @@ sub _parse_multipart {
 
   dbg("message: parsing multipart, got boundary: ".(defined $boundary ? $boundary : ''));
 
-  # NOTE: The MIME boundary REs here are very specific to be mostly RFC 1521
-  # compliant, but also allow possible malformations to still work.  Please
-  # see Bugzilla bug 3749 for more information before making any changes!
+  # NOTE: As RFC 2046 tells implementors, a line that starts with "--" and
+  # the boundary is a delimiter, whatever follows, and a close delimiter if
+  # "--" follows (one with more after it only if no delimiter follows).  A
+  # line of a nested multipart whose boundary starts with ours belongs to
+  # that multipart.  Please see Bugzilla bugs 3749, 4535 and 8479 for more
+  # information before making any changes!
+  my $dash_boundary = defined $boundary ? "--$boundary" : undef;
+  my $dash_len = defined $boundary ? length $dash_boundary : 0;
 
   # ignore preamble per RFC 1521, unless there's no boundary ...
   if ( defined $boundary ) {
@@ -992,10 +997,13 @@ sub _parse_multipart {
     for ($line=0; $line < $tmp_line; $line++) {
 #     dbg("message: multipart line $line: \"" . $body->[$line] . "\"");
       # specifically look for an opening boundary
-      if (substr($body->[$line],0,2) eq '--'  # triage
-          && $body->[$line] =~ /^--\Q$boundary\E\s*$/) {
+      if (substr($body->[$line], 0, $dash_len) eq $dash_boundary
+          && substr($body->[$line], $dash_len, 2) ne '--'
+          && ($boundary ne '' || substr($body->[$line], $dash_len) !~ /\S/)) {
 	# Make note that we found the opening boundary
 	$self->{mime_boundary_state}->{$boundary} = 1;
+	$self->{'mime_boundary_prefix_line'} = 1
+	  if substr($body->[$line], $dash_len) =~ /\S/;
 
 	# if the line after the opening boundary isn't a header, flag it.
 	# we need to make sure that there's actually another line though.
@@ -1023,16 +1031,41 @@ sub _parse_multipart {
   my $part_array;
   my $found_end_boundary;
   my $found_last_end_boundary;
+  my $inner_dash_boundary;
+  my $last_delimiter;
   my $partcnt = 0;
 
   my $line_count = @{$body};
   foreach ( @{$body} ) {
     # if we're on the last body line, or we find any boundary marker,
     # deal with the mime part;
-    # a triage before an unlikely-to-match regexp avoids a CPU hotspot
-    $found_end_boundary = defined $boundary && substr($_,0,2) eq '--'
-                          && /^--\Q$boundary\E(--)?\s*$/;
-    $found_last_end_boundary = $found_end_boundary && $1;
+    $found_end_boundary = defined $boundary
+                          && substr($_, 0, $dash_len) eq $dash_boundary;
+    $found_last_end_boundary = $found_end_boundary
+                               && substr($_, $dash_len, 2) eq '--';
+    if ($found_end_boundary
+        && substr($_, $dash_len + ($found_last_end_boundary ? 2 : 0)) =~ /\S/) {
+      # the boundary is a prefix of the line: a delimiter, unless the
+      # boundary is empty or the line belongs to a nested multipart whose
+      # boundary starts with ours
+      if ($boundary eq '' || (defined $inner_dash_boundary
+          && substr($_, 0, length $inner_dash_boundary) eq $inner_dash_boundary)) {
+        $found_end_boundary = $found_last_end_boundary = 0;
+      } else {
+        $self->{'mime_boundary_prefix_line'} = 1;
+        # such a close delimiter ends the multipart only if no delimiter
+        # follows, so that parts a parser without prefix matching shows
+        # are scanned too
+        if ($found_last_end_boundary) {
+          if (!defined $last_delimiter) {
+            $last_delimiter = $#{$body};
+            $last_delimiter--  while $last_delimiter >= 0
+              && substr($body->[$last_delimiter], 0, $dash_len) ne $dash_boundary;
+          }
+          $found_last_end_boundary = 0  if $last_delimiter > @{$body} - $line_count;
+        }
+      }
+    }
     if ($found_end_boundary && $nested_boundary) {
       $found_end_boundary = 0;
       $nested_boundary = 0 if ($found_last_end_boundary); # bug 7358 - handle one level of non-unique boundary string
@@ -1126,6 +1159,7 @@ sub _parse_multipart {
       $part_msg = Mail::SpamAssassin::Message::Node->new({ normalize=>$self->{normalize} });
       undef $part_array;
       undef $header;
+      undef $inner_dash_boundary;
 
       next;
     }
@@ -1150,11 +1184,16 @@ sub _parse_multipart {
         if ($header) {
           my ( $key, $value ) = split ( /:\s*/, $header, 2 );
           $part_msg->header( $key, $value );
-          if (defined $boundary && lc $key eq 'content-type') {
-	    my (undef, $nested_bound) = Mail::SpamAssassin::Util::parse_content_type($part_msg->header('content-type'));
-            if (defined $nested_bound && $nested_bound eq $boundary) {
-       	      $nested_boundary = 1;
-            }
+        }
+        # a nested multipart with our boundary (bug 7358), or with one that
+        # starts with ours
+        if (defined $boundary) {
+          my (undef, $nested_bound) = Mail::SpamAssassin::Util::parse_content_type($part_msg->header('content-type'));
+          if (defined $nested_bound && $nested_bound eq $boundary) {
+            $nested_boundary = 1;
+          } elsif (defined $nested_bound && $boundary ne ''
+                   && substr($nested_bound, 0, length $boundary) eq $boundary) {
+            $inner_dash_boundary = "--$nested_bound";
           }
         }
         $in_body = 1;
