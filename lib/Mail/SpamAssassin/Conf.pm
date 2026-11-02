@@ -2588,10 +2588,13 @@ nfssafe and flock are only available on UNIX, and win32 is only available
 on Windows.  By default, SpamAssassin will choose either nfssafe or
 win32 depending on the platform in use.
 
+This is an administrator setting (see L</ADMINISTRATOR SETTINGS>).
+
 =cut
 
   push (@cmds, {
     setting => 'lock_method',
+    is_admin => 1,
     default => '',
     type => $CONF_TYPE_STRING,
     code => sub {
