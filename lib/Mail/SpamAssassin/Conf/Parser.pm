@@ -1601,8 +1601,9 @@ sub add_to_addrlist_rcvd {
 
   $domain = lc $domain;
   $addr = lc $addr;
-  if ($conf->{$listname}->{$addr}) {
-    push @{$conf->{$listname}->{$addr}{domain}}, $domain;
+  if (my $old = $conf->{$listname}->{$addr}) {
+    # a new entry, not a change in place: spamd's saved config shares the old
+    $conf->{$listname}->{$addr} = { %$old, domain => [ @{$old->{domain}}, $domain ] };
   }
   else {
     my $re = $addr;
@@ -1656,7 +1657,8 @@ sub remove_from_addrlist_dkim {
     if (!@replacement) {  # nothing left, remove the entire addr entry
       delete($conf_lname->{$addr});
     } elsif (@replacement != @$domains_listref) {  # anything changed?
-      $conf_lname->{$addr}{domain} = \@replacement;
+      # a new entry, not a change in place: spamd's saved config shares the old
+      $conf_lname->{$addr} = { %{$conf_lname->{$addr}}, domain => \@replacement };
     }
   }
 }
