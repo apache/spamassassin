@@ -1658,10 +1658,13 @@ not host names.
 Since version 3.4.0 of SpamAssassin a default setting for option
 I<dns_available> is I<yes>. A default in older versions was I<test>.
 
+This is an administrator setting (see L</ADMINISTRATOR SETTINGS>).
+
 =cut
 
   push (@cmds, {
     setting => 'dns_available',
+    is_admin => 1,
     default => 'yes',
     type => $CONF_TYPE_STRING,
     code => sub {
@@ -1706,10 +1709,13 @@ by Net::DNS module, which typically obtains the list from /etc/resolv.conf,
 but this may be platform dependent. Please consult the Net::DNS::Resolver
 documentation for details.
 
+This is an administrator setting (see L</ADMINISTRATOR SETTINGS>).
+
 =cut
 
   push (@cmds, {
     setting => 'dns_server',
+    is_admin => 1,
     type => $CONF_TYPE_STRING,
     code => sub {
       my ($self, $key, $value, $line) = @_;
@@ -1780,6 +1786,8 @@ a need to adjust the ranges by site-specific directives.
 
 See also directives I<dns_local_ports_permit> and I<dns_local_ports_none>.
 
+This is an administrator setting (see L</ADMINISTRATOR SETTINGS>).
+
 =cut
 
   push (@cmds, {
@@ -1816,6 +1824,8 @@ Remove specified ports or ports ranges from the set of allowed port numbers
 that can be used as local port numbers when sending DNS queries to a resolver.
 
 Please see directive I<dns_local_ports_permit> for details.
+
+This is an administrator setting (see L</ADMINISTRATOR SETTINGS>).
 
 =cut
 
@@ -1861,6 +1871,8 @@ apply its ports randomization logic, but instead leaves the operating system
 to choose a suitable free local port number.
 
 See also directives I<dns_local_ports_permit> and I<dns_local_ports_avoid>.
+
+This is an administrator setting (see L</ADMINISTRATOR SETTINGS>).
 
 =cut
 
@@ -1944,10 +1956,13 @@ DNS servers - do not turn on if you see frequent info messages
 "dns: no callback for id:" in the log, or if RBL or URIDNS lookups
 do not work for no apparent reason.
 
+This is an administrator setting (see L</ADMINISTRATOR SETTINGS>).
+
 =cut
 
   push (@cmds, {
     setting => 'dns_options',
+    is_admin => 1,
     type => $CONF_TYPE_HASH_KEY_VALUE,
     # RFC 6891: A good compromise may be the use of an EDNS maximum payload size
     # of 4096 octets as a starting point.
@@ -2019,10 +2034,13 @@ Example:
   dns_query_restriction allow zen.spamhaus.org
   dns_query_restriction deny  spamhaus.org mailspike.net spamcop.net
 
+This is an administrator setting (see L</ADMINISTRATOR SETTINGS>).
+
 =cut
 
   push (@cmds, {
     setting => 'dns_query_restriction',
+    is_admin => 1,
     type => $CONF_TYPE_STRING,
     code => sub {
       my ($self, $key, $value, $line) = @_;
@@ -2069,6 +2087,8 @@ Block status is maintained across all processes by empty statefile named
 home_dir_for_helpers/.spamassassin, $HOME/.spamassassin,
 /var/lib/spamassassin (localstate), depending which is found and writable.
 
+This is an administrator setting (see L</ADMINISTRATOR SETTINGS>).
+
 =cut
 
   push (@cmds, {
@@ -2099,6 +2119,8 @@ home_dir_for_helpers/.spamassassin, $HOME/.spamassassin,
 =item dns_block_time   (default: 300)
 
 dns_block_rule query blockage will last this many seconds.
+
+This is an administrator setting (see L</ADMINISTRATOR SETTINGS>).
 
 =cut
 
