@@ -1366,17 +1366,23 @@ sub taint_safe_archive_extract {
         $content =~ s/\@\@([^\@]+)\@\@/$MACRO_VALUES{$1} || "\@\@$1\@\@"/ge;
 
         # if --allowplugins is not specified, comment out
-        # all loadplugin or tryplugin lines (and others that can load code)
+        # all loadplugin, tryplugin, loadhandler or tryhandler lines (and others
+        # that can load code or name a program to run)
         # Match a leading "lang xx " which the parser strips.
         if ( !$opt{'allowplugins'} ) {
           $content =~ s{^\s*((?:lang[^\S\n]+\S+[^\S\n]+)?(?:
               loadplugin |
               tryplugin |
+              loadhandler |
+              tryhandler |
               \S+[-_]modules? |
               \S+[-_]factory |
               dcc[-_](?:path|options) |
               pyzor[-_](?:path|options) |
-              extracttext[-_]external
+              extracttext[-_]external |
+              archive[-_]unrar[-_]path |
+              pdf[-_]pdftotext[-_]path |
+              image[-_](?:tesseract|heif[-_]dec)[-_]path
             ))\s}
             {#(commented by sa-update, no --allowplugins switch specified)# $1}gmxi;
         }
@@ -2150,8 +2156,8 @@ B<--channel> and B<--install> switches, e.g.:
 =item B<--allowplugins>
 
 Allow downloaded updates to activate plugins.  The default is not to
-activate plugins; any C<loadplugin> or C<tryplugin> lines will be commented
-in the downloaded update rules files.
+activate plugins; any C<loadplugin>, C<tryplugin>, C<loadhandler> or
+C<tryhandler> lines will be commented in the downloaded update rules files.
 
 You should never enable this for 3rd party update channels, since plugins
 can execute unrestricted code on your system, even possibly as root! This
