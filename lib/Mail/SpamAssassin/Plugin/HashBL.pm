@@ -432,6 +432,9 @@ sub set_config {
 sub parse_config {
   my ($self, $opt) = @_;
 
+  # not from user preferences: the acls are kept for the whole process
+  return 0 if $opt->{user_config};
+
   if ($opt->{key} =~ /^hashbl_acl_([a-z0-9]{1,32})$/i) {
     $self->inhibit_further_callbacks();
     return 1 unless $self->{hashbl_available};

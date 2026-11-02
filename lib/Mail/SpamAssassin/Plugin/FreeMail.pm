@@ -48,12 +48,16 @@ freemail_domains domain ...
    For example:
    freemail_domains hotmail.com hotmail.co.?? yahoo.* yahoo.*.*
 
+   This is an administrator setting, which spamd does not accept in
+   users' preferences.
+
 freemail_welcomelist email/domain ...
 
    Previously freemail_whitelist which will work interchangeably until 4.1.
 
    Emails or domains listed here are ignored (pretend they aren't
-   freemail). No wildcards!
+   freemail). No wildcards! This is an administrator setting, which spamd
+   does not accept in users' preferences.
 
 freemail_import_welcomelist_auth 1/0
 
@@ -224,6 +228,9 @@ sub set_config {
 
 sub parse_config {
     my ($self, $opts) = @_;
+
+    # not from user preferences: these lists are kept for the whole process
+    return 0 if $opts->{user_config};
 
     if ($opts->{key} eq "freemail_domains") {
         foreach my $temp (split(/\s+/, $opts->{value})) {

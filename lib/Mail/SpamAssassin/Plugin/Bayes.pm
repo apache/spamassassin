@@ -48,6 +48,7 @@ default stopwords regexp, tokens matching this regular expression will not
 be considered in bayes processing.
 
 Custom regular expressions for additional languages can be defined in C<local.cf>.
+spamd does not accept them in users' preferences.
 
 Custom regular expressions can be specified by using the C<bayes_stopword_lang>
 keyword like in the following example:
@@ -322,6 +323,9 @@ sub set_config {
 
 sub parse_config {
   my ($self, $opts) = @_;
+
+  # not from user preferences: the stopwords are kept for the whole process
+  return 0 if $opts->{user_config};
 
   if ($opts->{key} =~ /^bayes_stopword_([a-z]{2})$/i) {
       $self->inhibit_further_callbacks();
