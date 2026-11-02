@@ -2544,6 +2544,18 @@ sub _model_vocab_path {
   return File::Spec->catfile($nn_data_dir, 'model-vocab-' . lc($self->{main}->{username}) . '.data');
 }
 
+# the cached model and vocabulary are per user (spamd serves many in turn)
+sub signal_user_changed {
+  my ($self, $opts) = @_;
+  my $user = lc($opts->{username} // '');
+  return if defined $self->{_cache_user} && $self->{_cache_user} eq $user;
+  $self->{_cache_user} = $user;
+  undef $self->{neural_model};
+  undef $self->{_neural_model_load_time};
+  delete $self->{_model_vocab_cache};
+  delete $self->{_model_vocab_cache_t};
+}
+
 sub _model_path {
   my ($self, $nn_data_dir) = @_;
   return File::Spec->catfile($nn_data_dir, 'fann-' . lc($self->{main}->{username}) . '.model');
