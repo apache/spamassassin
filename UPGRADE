@@ -24,6 +24,17 @@ Note for Users Upgrading to SpamAssassin 4.0.3
   preferences. Move any of these from users' preferences to the site
   configuration.
 
+- dns_available, dns_server, dns_options, dns_query_restriction,
+  lock_method, bayes_sql_override_username, user_awl_sql_override_username
+  and spamcop_relayhost, and asn_lookup and asn_lookup_ipv6 (which needed
+  allow_user_rules), are now administrator settings, which spamd does not
+  accept in users' preferences (user_prefs files, SQL or LDAP, @GLOBAL
+  rows included). Nor does it accept freemail_domains,
+  freemail_welcomelist, hashbl_acl_* or bayes_stopword_* there. Move any
+  of these from users' preferences to the site configuration. Setting
+  bayes_sql_override_username or user_awl_sql_override_username in users'
+  preferences to group users' SQL data no longer works.
+
 - Mail::SpamAssassin::Plugin::ExtractText now has the possibility
   to cache results in order to speedup attachment processing.
 
