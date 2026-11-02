@@ -160,10 +160,14 @@ policies, you can specify a local SMTP relayhost to forward reports.
 Relayhost should be configured to not scan the report, for example by using
 a separate submission port.  SSL or authentication is not supported.
 
+This is an administrator setting, which spamd does not accept in users'
+preferences.
+
 =cut
 
   push (@cmds, {
     setting => 'spamcop_relayhost',
+    is_admin => 1,
     default => undef,
     type => $Mail::SpamAssassin::Conf::CONF_TYPE_STRING,
     code => sub {

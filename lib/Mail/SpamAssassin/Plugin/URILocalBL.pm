@@ -144,6 +144,14 @@ sub new {
   return $self;
 }
 
+# a copy of a rule's lists to change: spamd's saved config shares the old
+# XXX _rule_copy or deep copy functionality should be in Conf::clone
+sub _rule_copy {
+  my ($old) = @_;
+  return {} unless $old;
+  return { map { $_ => (ref $old->{$_} eq 'HASH' ? { %{$old->{$_}} } : $old->{$_}) } keys %$old };
+}
+
 sub set_config {
   my ($self, $conf) = @_;
   my @cmds;
@@ -160,6 +168,7 @@ sub set_config {
       }
       my $name = $1;
       my $args = $2;
+      $self->{urilocalbl}->{$name} = _rule_copy($self->{urilocalbl}->{$name});
       my @added;
 
       foreach my $cc (split(/\s+/, uc($args))) {
@@ -202,6 +211,7 @@ sub set_config {
       }
       my $name = $1;
       my $args = $2;
+      $self->{urilocalbl}->{$name} = _rule_copy($self->{urilocalbl}->{$name});
       my @added;
 
       foreach my $cc (split(/\s+/, uc($args))) {
@@ -244,6 +254,7 @@ sub set_config {
       }
       my $name = $1;
       my $args = $2;
+      $self->{urilocalbl}->{$name} = _rule_copy($self->{urilocalbl}->{$name});
       my @added;
 
       # gather up possibly quoted strings
@@ -278,6 +289,7 @@ sub set_config {
       }
       my $name = $1;
       my $args = $2;
+      $self->{urilocalbl}->{$name} = _rule_copy($self->{urilocalbl}->{$name});
 
       foreach my $addr (split(/\s+/, $args)) {
         if ($addr =~ m!^$IP_ADDRESS(?:/\d{1,3})?$!o) {
@@ -305,6 +317,7 @@ sub set_config {
       }
       my $name = $1;
       my $args = $2;
+      $self->{urilocalbl}->{$name} = _rule_copy($self->{urilocalbl}->{$name});
 
       foreach my $arg (split(/\s+/, $args)) {
         $self->{urilocalbl}->{$name}{exclusions}{lc($arg)} = 1;

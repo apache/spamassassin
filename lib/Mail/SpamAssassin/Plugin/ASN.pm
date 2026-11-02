@@ -130,7 +130,7 @@ need not be) enclosed in single or double quotes for clarity.
 
 =back
 
-=head1 RULE DEFINITIONS AND PRIVILEGED SETTINGS
+=head1 ADMINISTRATOR SETTINGS
 
 =over 4
 
@@ -167,12 +167,6 @@ Examples:
 Use specified zone for lookups of IPv6 addresses.  If zone supports both
 IPv4 and IPv6 queries, use both asn_lookup and asn_lookup_ipv6 for the same
 zone.
-
-=back
-
-=head1 ADMINISTRATOR SETTINGS
-
-=over 4
 
 =item asn_use_geodb ( 0 / 1 )          (default: 1)
 
@@ -245,7 +239,7 @@ sub set_config {
 
   push (@cmds, {
     setting => 'asn_lookup',
-    is_priv => 1,
+    is_admin => 1,
     code => sub {
       my ($conf, $key, $value, $line) = @_;
       unless (defined $value && $value !~ /^$/) {
@@ -265,7 +259,7 @@ sub set_config {
 
   push (@cmds, {
     setting => 'asn_lookup_ipv6',
-    is_priv => 1,
+    is_admin => 1,
     code => sub {
       my ($conf, $key, $value, $line) = @_;
       unless (defined $value && $value !~ /^$/) {
