@@ -230,10 +230,13 @@ If this option is set the SQLBasedAddrList module will override the set
 username with the value given.  This can be useful for implementing global
 or group based auto-welcomelist databases.
 
+This is an administrator setting (see L</ADMINISTRATOR SETTINGS>).
+
 =cut
 
   push (@cmds, {
 		setting => 'user_awl_sql_override_username',
+		is_admin => 1,
 		default => '',
 		type => $Mail::SpamAssassin::Conf::CONF_TYPE_STRING
 	       });

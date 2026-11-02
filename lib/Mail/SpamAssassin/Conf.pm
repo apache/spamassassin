@@ -2371,10 +2371,13 @@ If this options is set the BayesStore::SQL module will override the set
 username with the value given.  This could be useful for implementing global or
 group bayes databases.
 
+This is an administrator setting (see L</ADMINISTRATOR SETTINGS>).
+
 =cut
 
   push (@cmds, {
     setting => 'bayes_sql_override_username',
+    is_admin => 1,
     default => '',
     type => $CONF_TYPE_STRING,
   });

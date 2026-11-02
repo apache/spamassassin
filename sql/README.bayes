@@ -66,15 +66,15 @@ listening.
 
 For an example of connection to PostgreSQL, see the main README file.
 
-In addition to the global configuration directives there is a user
-preference:
+In addition to the global configuration directives there is this
+administrator setting (spamd does not accept it in users' preferences):
 
 bayes_sql_override_username	   someusername
 
 This directive, if used, will override the username used for storing
-data in the database.  This could be used to group users together to
-share bayesian filter data.  You can also use this config option to
-trick sa-learn to learn data as a specific user.
+data in the database.  Set in the site configuration, it makes all the
+users of that configuration share bayesian filter data.  You can also use
+this config option to trick sa-learn to learn data as a specific user.
 
 
 Requirements
