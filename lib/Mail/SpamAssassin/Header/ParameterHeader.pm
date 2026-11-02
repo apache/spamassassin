@@ -146,7 +146,8 @@ sub _parse {
     foreach my $token (@tokens) {
         $token =~ s/^\s+//; $token =~ s/\s+$//;
         next unless length($token);
-        my ($k,$v) = split(/\s*=\s*/,$token,2);
+        my ($k,$v) = split(/=/,$token,2);
+        $k =~ s/\s+$//; $v =~ s/^\s+// if defined $v;
         if ( !defined($v) or !length($k) ) {
             # No equals sign or no key. Treat as value.
             $self->{value} = $token unless length($self->{value});
