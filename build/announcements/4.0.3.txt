@@ -117,6 +117,11 @@ url_redirector_selenium_reuse_session, url_redirector_selenium_proxy
 and url_redirector_selenium_resource configure the Selenium
 redirector mode.
 
+extracttext_cache_type, extracttext_cache_dsn,
+extracttext_cache_username, extracttext_cache_password,
+extracttext_cache_ttl and extracttext_cache_autoclean configure
+caching of ExtractText results.
+
 Changed configuration options
 -----------------------------
 
@@ -126,8 +131,9 @@ dns_server, dns_options, dns_query_restriction, lock_method,
 bayes_sql_override_username, user_awl_sql_override_username,
 spamcop_relayhost, asn_lookup, asn_lookup_ipv6, freemail_domains,
 freemail_welcomelist, hashbl_acl_*, bayes_stopword_*,
-extracttext_cache_*, olemacro_max_file, olemacro_num_mime,
-olemacro_num_zip and olemacro_zip_depth.
+olemacro_max_file, olemacro_num_mime, olemacro_num_zip and
+olemacro_zip_depth. So are all Redirectors settings, including the
+url_shortener* aliases.
 
 Notable Internal changes
 ------------------------
