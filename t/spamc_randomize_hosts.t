@@ -34,6 +34,17 @@ print $fh <<'EOC';
 #include <stdio.h>
 #include <string.h>
 
+/* On platforms without getaddrinfo (e.g. Win32), struct transport holds
+ * an array of struct in_addr instead of struct addrinfo chains. */
+#ifdef SPAMC_HAS_ADDRINFO
+#define HAS_ADDRINFO 1
+#define HOST_TAG(h) ((int) (h)->ai_addrlen)
+#else
+#define HAS_ADDRINFO 0
+#define HOST_TAG(h) ((int) (h).s_addr)
+#endif
+
+#ifdef SPAMC_HAS_ADDRINFO
 static struct addrinfo *make_chain(int n, int tag_base) {
     struct addrinfo *head = NULL, *tail = NULL;
     int i;
@@ -57,6 +68,7 @@ static void chain_tags(struct addrinfo *a, int *out) {
     int i = 0;
     while (a) { out[i++] = (int) a->ai_addrlen; a = a->ai_next; }
 }
+#endif
 
 int main(void) {
     struct transport tp;
@@ -64,11 +76,14 @@ int main(void) {
     int perm_codes[6];
     int nperm_codes = 0;
     int chain_order_seen = 0;
+#ifdef SPAMC_HAS_ADDRINFO
     int orig_tags[3], cur_tags[3];
+#endif
     int nhosts_ok = 1, chainlen_ok = 1;
 
     memset(&tp, 0, sizeof(tp));
     tp.nhosts = 3;
+#ifdef SPAMC_HAS_ADDRINFO
     for (i = 0; i < 3; i++)
         tp.hosts[i] = make_chain(3, i * 10);
 
@@ -76,6 +91,10 @@ int main(void) {
         struct addrinfo *fresh = make_chain(3, 0);
         chain_tags(fresh, orig_tags);
     }
+#else
+    for (i = 0; i < 3; i++)
+        tp.hosts[i].s_addr = (unsigned long) (i * 10);
+#endif
 
     for (trial = 0; trial < 20000; trial++) {
         int idx[3], code, k, slot;
@@ -85,14 +104,16 @@ int main(void) {
         if (tp.nhosts != 3)
             nhosts_ok = 0;
 
+#ifdef SPAMC_HAS_ADDRINFO
         for (i = 0; i < 3; i++) {
             if (chain_len(tp.hosts[i]) != 3) {
                 chainlen_ok = 0;
             }
         }
+#endif
 
         for (i = 0; i < 3; i++) {
-            idx[i] = ((int) tp.hosts[i]->ai_addrlen) / 10;
+            idx[i] = HOST_TAG(tp.hosts[i]) / 10;
         }
 
         code = idx[0]*9 + idx[1]*3 + idx[2];
@@ -107,6 +128,7 @@ int main(void) {
             perm_codes[nperm_codes++] = code;
         }
 
+#ifdef SPAMC_HAS_ADDRINFO
         for (i = 0; i < 3; i++) {
             if (idx[i] == 0) {
                 chain_tags(tp.hosts[i], cur_tags);
@@ -116,8 +138,10 @@ int main(void) {
                 break;
             }
         }
+#endif
     }
 
+    printf("has_addrinfo=%d\n", HAS_ADDRINFO);
     printf("nhosts_unchanged=%d\n", nhosts_ok);
     printf("chainlen_unchanged=%d\n", chainlen_ok);
     printf("distinct_permutations=%d\n", nperm_codes);
@@ -128,8 +152,11 @@ int main(void) {
 EOC
 close $fh;
 
+my @libs = ('-lz');
+push @libs, '-lws2_32' if $^O eq 'MSWin32';
+
 my $build_status = untaint_system($cc, '-I', '../spamc', '-DHAVE_CONFIG_H',
-                                   '-o', $bin, $src, '../spamc/utils.c', '-lz');
+                                   '-o', $bin, $src, '../spamc/utils.c', @libs);
 
 ok(($build_status == 0), "compile randomize_hosts test harness")
   or diag("build of $src failed (status=$build_status)");
@@ -151,7 +178,12 @@ SKIP: {
      "all 3! top-level host orderings are reachable (not just a rotation)")
     or diag("harness output:\n$out");
 
-  ok($v{chain_order_varied},
-     "IPs within a single hostname's addrinfo chain are also randomized")
-    or diag("harness output:\n$out");
+  SKIP: {
+    skip "libspamc built without getaddrinfo support (no per-host IP chains)", 1
+      unless $v{has_addrinfo};
+
+    ok($v{chain_order_varied},
+       "IPs within a single hostname's addrinfo chain are also randomized")
+      or diag("harness output:\n$out");
+  }
 }
