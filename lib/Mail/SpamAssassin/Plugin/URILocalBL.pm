@@ -88,13 +88,14 @@ And to block all CIDR blocks registered to an ISP, one might use:
 
 Quote ISP names containing spaces.
 
-Lastly, if there's a country that you want to block but there's an explicit
-host you wish to exempt from that blocklist, you can use:
+Lastly, if there's a country that you want to block but there's a domain
+you wish to exempt from that blocklist, you can use:
 
-  uri_block_exclude TEST1 www.baidu.com
+  uri_block_exclude TEST1 baidu.com
 
-if you wish to exempt URL's referring to this host. The same syntax is
-applicable to CIDR and ISP blocks as well.
+to exempt URL's whose host is in that domain, such as www.baidu.com. An
+IP address in the list exempts URL's whose host is or resolves to that
+address. The same syntax is applicable to CIDR and ISP blocks as well.
 
 =head1 DEPENDENCIES
 
@@ -477,7 +478,7 @@ sub _check_host {
   foreach my $ip (@$addrs) {
     if (defined $ruleconf->{exclusions}{$ip}) {
       dbg("excluded $host, IP $ip matches");
-      return 1;
+      return 0;
     }
   }
 
