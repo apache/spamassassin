@@ -53,9 +53,11 @@ Notable features:
   - ARC checking has been split out of the DKIM plugin into its own
   Mail::SpamAssassin::Plugin::ARC plugin.
 
-  - The AuthRes, ARC, DKIM, SPF and DMARC plugins now share parsed
-  Authentication-Results data instead of each re-parsing headers
-  independently, via a new Header::AuthenticationResults parser.
+  - When the AuthRes plugin is loaded (it is not by default), the
+  DKIM, ARC, SPF and DMARC plugins use the results in trusted
+  Authentication-Results header fields, when present, instead of
+  doing their own checks. AuthRes now uses a new
+  Header::AuthenticationResults parser.
 
 Notable changes
 ---------------
@@ -66,7 +68,9 @@ This release addresses the following issues:
   messages; added a --debug parameter to spamc(1)
 
   - Added check_dmarc_permerror and check_dmarc_temperror DMARC eval
-  rules; fixed various DMARC/ARC/DKIM undef warnings and NS query bugs
+  rules; fixed DMARC undef warnings
+
+  - URIDNSBL: fixed nameserver (NS) lookups (bug 8374)
 
   - Bayes: sort tokens in the MySQL store to prevent InnoDB deadlocks
 
@@ -121,6 +125,8 @@ extracttext_cache_type, extracttext_cache_dsn,
 extracttext_cache_username, extracttext_cache_password,
 extracttext_cache_ttl and extracttext_cache_autoclean configure
 caching of ExtractText results.
+
+arc_trusted_sealers and arc_timeout configure the new ARC plugin.
 
 Changed configuration options
 -----------------------------
