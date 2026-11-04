@@ -281,6 +281,7 @@ endif
 # disabled or not available, these redirectors will be skipped.
 #
 if can(Mail::SpamAssassin::Plugin::Redirectors::has_url_redirector_selenium_resource)
+    url_redirector_selenium .hubspotlinksfree.com/Ctc
     url_redirector_selenium login.microsoftonline.com/common/oauth2/v2.0/authorize
     url_redirector_selenium login.microsoft.com/common/oauth2/v2.0/authorize
     url_redirector_selenium uselesstools.jonfinger.com/r
