@@ -35,9 +35,12 @@
 #ifdef _WIN32
 #define snprintf _snprintf
 #define vsnprintf _vsnprintf
+#ifndef strcasecmp
 #define strcasecmp stricmp
+#endif
 #define sleep Sleep
 #include <io.h>
+#include <process.h>
 #else
 #include <strings.h>
 #include <syslog.h>
@@ -575,15 +578,15 @@ static int _try_to_connect_tcp(const struct transport *tp, int *sockptr)
                   closesocket(mysock);
 
                   innocent = origerr == ECONNREFUSED && numloops+1 < tp->nhosts;
+#ifdef _WIN32
+                  libspamc_log(tp->flags, innocent ? LOG_DEBUG : LOG_ERR,
+                      "connect to spamd on %s failed, retrying (#%d of %d): %d",
+                      host, numloops+1, connect_retries, origerr);
+#else
                   libspamc_log(tp->flags, innocent ? LOG_DEBUG : LOG_ERR,
                       "connect to spamd on %s failed, retrying (#%d of %d): %s",
-                      host, numloops+1, connect_retries,
-#ifdef _WIN32
-                      origerr
-#else
-                      strerror(origerr)
+                      host, numloops+1, connect_retries, strerror(origerr));
 #endif
-                  );
 
             } else {
 #ifdef DO_CONNECT_DEBUG_SYSLOGS
