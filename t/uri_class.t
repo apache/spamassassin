@@ -191,8 +191,12 @@ for my $t (@scheme_tests) {
      'https://example.com/A', 'http_url lowercases the host, not the path');
   is(Mail::SpamAssassin::URI->new('https://exa%6dple.com/a')->http_url,
      'https://example.com/a', 'http_url decodes a percent-encoded host');
-  is(Mail::SpamAssassin::URI->new('https://b%C3%BCcher.example/x')->http_url,
-     'https://xn--bcher-kva.example/x', 'http_url IDN-folds the host to its xn-- form');
+  SKIP: {
+    skip 'Net::LibIDN or Net::LibIDN2 needed for IDN folding', 1
+      unless eval { require Net::LibIDN2; 1 } || eval { require Net::LibIDN; 1 };
+    is(Mail::SpamAssassin::URI->new('https://b%C3%BCcher.example/x')->http_url,
+       'https://xn--bcher-kva.example/x', 'http_url IDN-folds the host to its xn-- form');
+  }
   is(Mail::SpamAssassin::URI->new('https://192.0.2.1:8443/a')->http_url,
      'https://192.0.2.1:8443/a', 'http_url keeps an IPv4 literal and port');
   is(Mail::SpamAssassin::URI->new('https://[2001:db8::1]:8443/a')->http_url,
