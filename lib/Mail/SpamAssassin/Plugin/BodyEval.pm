@@ -400,40 +400,18 @@ sub vertical_whitespace {
   unless (exists($pms->{vertical_whitespace})) {
     my $vertical_whitespace = 0;
 
-    # Walk the top-level body to find the first eligible text part, mimicking
-    # what an MUA would display. Skip named parts (attachments) and do not
-    # descend into non-multipart containers like message/rfc822.
-    my $preferred_alt = $pms->{conf}->{multipart_alternative_preferred_part};
-    my $part;
-    my @queue = ($pms->{msg});
-    while (my $p = shift @queue) {
-      # Named parts are attachments regardless of type
-      next if defined $p->{name};
+    my $parts = $pms->{msg}->get_main_body_parts();
 
-      my $type = $p->{'type'} || '';
-      if ($type eq 'text/plain' || $type eq 'text/html') {
-        $part = $p;
-        last;
+    if (@$parts) {
+      # Get the rendered text of the displayed parts (visible only), joined in
+      # display order the way an MUA would show them.
+      my $text = '';
+      for my $part (@$parts) {
+        my (undef, $t) = $part->visible_rendered();
+        next unless defined $t;
+        $text .= "\n" if $text ne '';
+        $text .= $t;
       }
-      if ($type eq 'multipart/alternative') {
-        if ($preferred_alt) {
-          my $pref = Mail::SpamAssassin::Message::_find_part_by_type(
-            $p, $preferred_alt);
-          if ($pref) { $part = $pref; last; }
-        }
-        unshift @queue, @{$p->{'body_parts'} || []};
-        next;
-      }
-      if (index($type, 'multipart/') == 0) {
-        unshift @queue, @{$p->{'body_parts'} || []};
-        next;
-      }
-      # any other type: skip, do not descend
-    }
-
-    if ($part) {
-      # Get the rendered text of the part (visible only)
-      my (undef, $text) = $part->visible_rendered();
       # Count the max number of consecutive blank lines
       my $counter = 0;
       while ($text =~ /\G(?!\z)([^\n]*\n?)/g) {
