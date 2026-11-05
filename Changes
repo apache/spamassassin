@@ -1,4 +1,380 @@
 ------------------------------------------------------------------------
+r1940032 | gbechis | 2026-11-04 14:57:17 +0000 (Wed, 04 Nov 2026) | 2 
+lines
+ 
+ add a 2tld
+ 
+------------------------------------------------------------------------
+r1940028 | gbechis | 2026-11-04 14:17:48 +0000 (Wed, 04 Nov 2026) | 2 
+lines
+ 
+ add a 2tld
+ 
+------------------------------------------------------------------------
+r1940022 | gbechis | 2026-11-04 12:20:49 +0000 (Wed, 04 Nov 2026) | 2 
+lines
+ 
+ add a redirector
+ 
+------------------------------------------------------------------------
+r1940006 | gbechis | 2026-11-04 00:58:58 +0000 (Wed, 04 Nov 2026) | 2 
+lines
+ 
+ fix spamc(1) crash on Windows
+ 
+------------------------------------------------------------------------
+r1940003 | sidney | 2026-11-03 18:29:00 +0000 (Tue, 03 Nov 2026) | 1 line
+ 
+ various corrections and additions to announcement
+------------------------------------------------------------------------
+r1940002 | sidney | 2026-11-03 18:11:48 +0000 (Tue, 03 Nov 2026) | 1 line
+ 
+ move some items from Changed to New, add some to Changed
+------------------------------------------------------------------------
+r1940001 | gbechis | 2026-11-03 16:27:55 +0000 (Tue, 03 Nov 2026) | 1 line
+ 
+ skip test on Windows and on platforms that do not have getaddrinfo
+------------------------------------------------------------------------
+r1939990 | gbechis | 2026-11-03 07:30:00 +0000 (Tue, 03 Nov 2026) | 1 line
+ 
+ mention administrator settings
+------------------------------------------------------------------------
+r1939989 | gbechis | 2026-11-03 07:23:34 +0000 (Tue, 03 Nov 2026) | 1 line
+ 
+ rephrase a sentence
+------------------------------------------------------------------------
+r1939983 | sidney | 2026-11-03 00:12:44 +0000 (Tue, 03 Nov 2026) | 1 line
+ 
+ Bug 8505 - skip only the excluded host in URILocalBL, and correct the 
+uri_block_exclude example
+------------------------------------------------------------------------
+r1939977 | sidney | 2026-11-02 19:42:18 +0000 (Mon, 02 Nov 2026) | 1 line
+ 
+ list in UPGRADE the settings spamd no longer accepts in users' 
+preferences
+------------------------------------------------------------------------
+r1939976 | sidney | 2026-11-02 19:35:02 +0000 (Mon, 02 Nov 2026) | 1 line
+ 
+ faster MIME header parameter splitting
+------------------------------------------------------------------------
+r1939975 | sidney | 2026-11-02 19:32:11 +0000 (Mon, 02 Nov 2026) | 1 line
+ 
+ sa-update without --allowplugins also comments out handler and helper 
+program lines
+------------------------------------------------------------------------
+r1939974 | sidney | 2026-11-02 19:30:42 +0000 (Mon, 02 Nov 2026) | 1 line
+ 
+ keep the NeuralNetwork cached model per user
+------------------------------------------------------------------------
+r1939973 | sidney | 2026-11-02 19:28:58 +0000 (Mon, 02 Nov 2026) | 1 line
+ 
+ make asn_lookup and spamcop_relayhost admin-only, and copy URILocalBL 
+rule lists before changing them
+------------------------------------------------------------------------
+r1939972 | sidney | 2026-11-02 19:27:10 +0000 (Mon, 02 Nov 2026) | 1 line
+ 
+ make the FreeMail lists, HashBL acls and Bayes stopwords admin settings
+------------------------------------------------------------------------
+r1939971 | sidney | 2026-11-02 19:25:36 +0000 (Mon, 02 Nov 2026) | 1 line
+ 
+ copy welcomelist entries before adding domains to them
+------------------------------------------------------------------------
+r1939970 | sidney | 2026-11-02 19:23:57 +0000 (Mon, 02 Nov 2026) | 1 line
+ 
+ make the DNS settings admin-only
+------------------------------------------------------------------------
+r1939969 | sidney | 2026-11-02 19:22:20 +0000 (Mon, 02 Nov 2026) | 1 line
+ 
+ make the SQL override username settings admin-only
+------------------------------------------------------------------------
+r1939968 | sidney | 2026-11-02 19:20:32 +0000 (Mon, 02 Nov 2026) | 1 line
+ 
+ make lock_method an admin setting
+------------------------------------------------------------------------
+r1939966 | sidney | 2026-11-02 18:52:56 +0000 (Mon, 02 Nov 2026) | 1 line
+ 
+ Bug 8504 - fix the guard on URIBL_MULTI_SURBL_HEADERS so the rule loads
+------------------------------------------------------------------------
+r1939920 | sidney | 2026-11-01 19:35:22 +0000 (Sun, 01 Nov 2026) | 1 line
+ 
+ improve time limit handling
+------------------------------------------------------------------------
+r1939919 | sidney | 2026-11-01 19:33:45 +0000 (Sun, 01 Nov 2026) | 1 line
+ 
+ faster link matching in ExtractText
+------------------------------------------------------------------------
+r1939918 | sidney | 2026-11-01 19:31:43 +0000 (Sun, 01 Nov 2026) | 1 line
+ 
+ faster address header parsing
+------------------------------------------------------------------------
+r1939917 | sidney | 2026-11-01 19:29:36 +0000 (Sun, 01 Nov 2026) | 1 line
+ 
+ Bug 8450 - fix t/spamd_ldap.t and update the LDAP test setup for 
+cn=config
+------------------------------------------------------------------------
+r1939916 | sidney | 2026-11-01 19:26:47 +0000 (Sun, 01 Nov 2026) | 1 line
+ 
+ improve spamd SSL connection handling
+------------------------------------------------------------------------
+r1939915 | sidney | 2026-11-01 19:25:08 +0000 (Sun, 01 Nov 2026) | 1 line
+ 
+ Bug 8447 - fix lost spamd replies to spamc over SSL
+------------------------------------------------------------------------
+r1939914 | sidney | 2026-11-01 19:22:57 +0000 (Sun, 01 Nov 2026) | 1 line
+ 
+ improve spamc reply buffer handling
+------------------------------------------------------------------------
+r1939913 | sidney | 2026-11-01 18:49:04 +0000 (Sun, 01 Nov 2026) | 1 line
+ 
+ Bug 8491 - limit the inflated size of compressed spamd requests
+------------------------------------------------------------------------
+r1939912 | sidney | 2026-11-01 18:46:59 +0000 (Sun, 01 Nov 2026) | 1 line
+ 
+ improve Message-Id parsing in spamd
+------------------------------------------------------------------------
+r1939911 | sidney | 2026-11-01 18:45:16 +0000 (Sun, 01 Nov 2026) | 1 line
+ 
+ faster plain-text URI matching
+------------------------------------------------------------------------
+r1939910 | sidney | 2026-11-01 18:42:37 +0000 (Sun, 01 Nov 2026) | 1 line
+ 
+ faster QP trailing whitespace count in MIMEEval
+------------------------------------------------------------------------
+r1939909 | sidney | 2026-11-01 18:27:06 +0000 (Sun, 01 Nov 2026) | 1 line
+ 
+ Bug 8492 - reduce peak memory usage in vertical_whitespace handling
+------------------------------------------------------------------------
+r1939907 | sidney | 2026-11-01 18:24:20 +0000 (Sun, 01 Nov 2026) | 1 line
+ 
+ improved PDF stream decoding
+------------------------------------------------------------------------
+r1939904 | billcole | 2026-11-01 18:12:53 +0000 (Sun, 01 Nov 2026) | 1 
+line
+ 
+ add wise.com entries
+------------------------------------------------------------------------
+r1939903 | gbechis | 2026-11-01 18:11:24 +0000 (Sun, 01 Nov 2026) | 2 
+lines
+ 
+ skip text attachment with content-disposition
+ 
+------------------------------------------------------------------------
+r1939902 | gbechis | 2026-11-01 18:09:10 +0000 (Sun, 01 Nov 2026) | 2 
+lines
+ 
+ fix size check
+ 
+------------------------------------------------------------------------
+r1939871 | sidney | 2026-11-01 10:08:58 +0000 (Sun, 01 Nov 2026) | 1 line
+ 
+ add the procmailrc.example size condition to the INSTALL procmail recipe
+------------------------------------------------------------------------
+r1939863 | sidney | 2026-11-01 03:07:10 +0000 (Sun, 01 Nov 2026) | 1 line
+ 
+ faster trims in SVG and ARC
+------------------------------------------------------------------------
+r1939862 | sidney | 2026-11-01 03:02:24 +0000 (Sun, 01 Nov 2026) | 1 line
+ 
+ use caching to speed up Content-Type parsing
+------------------------------------------------------------------------
+r1939861 | sidney | 2026-11-01 02:56:53 +0000 (Sun, 01 Nov 2026) | 1 line
+ 
+ fix query timeout
+------------------------------------------------------------------------
+r1939860 | sidney | 2026-11-01 02:53:14 +0000 (Sun, 01 Nov 2026) | 1 line
+ 
+ improve MIME boundary parsing
+------------------------------------------------------------------------
+r1939859 | sidney | 2026-11-01 02:48:55 +0000 (Sun, 01 Nov 2026) | 1 line
+ 
+ improve some limit handling
+------------------------------------------------------------------------
+r1939857 | sidney | 2026-11-01 02:43:49 +0000 (Sun, 01 Nov 2026) | 1 line
+ 
+ improve header strip speed
+------------------------------------------------------------------------
+r1939813 | gbechis | 2026-10-31 15:30:02 +0000 (Sat, 31 Oct 2026) | 2 
+lines
+ 
+ improve headers parser
+ 
+------------------------------------------------------------------------
+r1939795 | sidney | 2026-10-31 14:14:51 +0000 (Sat, 31 Oct 2026) | 1 line
+ 
+ better trimming of css styles
+------------------------------------------------------------------------
+r1939764 | sidney | 2026-10-30 20:10:13 +0000 (Fri, 30 Oct 2026) | 1 line
+ 
+ make ExtractText cache settings admin-only, as documented
+------------------------------------------------------------------------
+r1939763 | sidney | 2026-10-30 20:06:01 +0000 (Fri, 30 Oct 2026) | 1 line
+ 
+ add header size limits for signature verification
+------------------------------------------------------------------------
+r1939762 | sidney | 2026-10-30 19:58:52 +0000 (Fri, 30 Oct 2026) | 1 line
+ 
+ check signature fields before verifying them, and simplify tag parsing
+------------------------------------------------------------------------
+r1939761 | sidney | 2026-10-30 19:56:40 +0000 (Fri, 30 Oct 2026) | 1 line
+ 
+ check header field names before verifying signatures
+------------------------------------------------------------------------
+r1939713 | gbechis | 2026-10-30 11:19:09 +0000 (Fri, 30 Oct 2026) | 2 
+lines
+ 
+ add a url shortener
+ 
+------------------------------------------------------------------------
+r1939676 | sidney | 2026-10-29 18:12:20 +0000 (Thu, 29 Oct 2026) | 1 line
+ 
+ case-insensitive schemes
+------------------------------------------------------------------------
+r1939674 | sidney | 2026-10-29 18:08:25 +0000 (Thu, 29 Oct 2026) | 1 line
+ 
+ improve user name cleaning and fix is_admin settings
+------------------------------------------------------------------------
+r1939645 | sidney | 2026-10-29 07:12:50 +0000 (Thu, 29 Oct 2026) | 1 line
+ 
+ update comment
+------------------------------------------------------------------------
+r1939642 | fkento | 2026-10-29 06:01:14 +0000 (Thu, 29 Oct 2026) | 1 line
+ 
+ Bug 8470: remvove dependency on non-core IO::String in Zip extraction
+------------------------------------------------------------------------
+r1939641 | sidney | 2026-10-29 05:49:59 +0000 (Thu, 29 Oct 2026) | 1 line
+ 
+ speed up regexes
+------------------------------------------------------------------------
+r1939640 | sidney | 2026-10-29 05:47:58 +0000 (Thu, 29 Oct 2026) | 1 line
+ 
+ speed up regex
+------------------------------------------------------------------------
+r1939639 | sidney | 2026-10-29 05:45:24 +0000 (Thu, 29 Oct 2026) | 1 line
+ 
+ speed up regex
+------------------------------------------------------------------------
+r1939638 | sidney | 2026-10-29 05:40:14 +0000 (Thu, 29 Oct 2026) | 1 line
+ 
+ tweak slow spots in  FILL_THIS_FORM_LONG
+------------------------------------------------------------------------
+r1939634 | fkento | 2026-10-29 05:17:10 +0000 (Thu, 29 Oct 2026) | 1 line
+ 
+ Bug 8471: Redirectors: some redirects are not resolved properly
+------------------------------------------------------------------------
+r1939622 | fkento | 2026-10-28 19:54:44 +0000 (Wed, 28 Oct 2026) | 1 line
+ 
+ Add a shortener
+------------------------------------------------------------------------
+r1939611 | sidney | 2026-10-28 09:37:35 +0000 (Wed, 28 Oct 2026) | 1 line
+ 
+ Fix slow regex
+------------------------------------------------------------------------
+r1939573 | sidney | 2026-10-27 20:27:49 +0000 (Tue, 27 Oct 2026) | 1 line
+ 
+ Bug 8463 - Order SQL user preference rows with CASE instead of by 
+username
+------------------------------------------------------------------------
+r1939572 | sidney | 2026-10-27 20:15:57 +0000 (Tue, 27 Oct 2026) | 1 line
+ 
+ New size-limited unzipping utility functions that other code now uses to 
+unzip and unrar
+------------------------------------------------------------------------
+r1939519 | sidney | 2026-10-27 11:47:09 +0000 (Tue, 27 Oct 2026) | 1 line
+ 
+ Bug 8462 - Make example in user_scores_sql_custom_query work more 
+generally
+------------------------------------------------------------------------
+r1939514 | gbechis | 2026-10-27 08:22:01 +0000 (Tue, 27 Oct 2026) | 3 
+lines
+ 
+ correctly check `Message-class` when learning
+ bz #8460
+ 
+------------------------------------------------------------------------
+r1939513 | gbechis | 2026-10-27 08:19:06 +0000 (Tue, 27 Oct 2026) | 2 
+lines
+ 
+ reject invalid user names
+ 
+------------------------------------------------------------------------
+r1939512 | gbechis | 2026-10-27 08:16:25 +0000 (Tue, 27 Oct 2026) | 2 
+lines
+ 
+ improve LDAP filter
+ 
+------------------------------------------------------------------------
+r1939511 | gbechis | 2026-10-27 08:14:06 +0000 (Tue, 27 Oct 2026) | 2 
+lines
+ 
+ sql parser optimization
+ 
+------------------------------------------------------------------------
+r1939507 | sidney | 2026-10-27 00:39:37 +0000 (Tue, 27 Oct 2026) | 1 line
+ 
+ Bug 8454 - Fix t/pyzor.t and t/all_modules.t fail on Windows
+------------------------------------------------------------------------
+r1939506 | sidney | 2026-10-27 00:35:13 +0000 (Tue, 27 Oct 2026) | 1 line
+ 
+ Bug 8453 - Fix GitHub Actions Windows runner setup for tests that use 
+pyzor
+------------------------------------------------------------------------
+r1939465 | sidney | 2026-10-26 08:51:24 +0000 (Mon, 26 Oct 2026) | 1 line
+ 
+ Bug 8455 - Remove MySQL from GitHub windows runner setup
+------------------------------------------------------------------------
+r1939463 | sidney | 2026-10-26 08:28:59 +0000 (Mon, 26 Oct 2026) | 1 line
+ 
+ Bug 8452 - Fix Windows command line quoting errors in three tests
+------------------------------------------------------------------------
+r1939462 | sidney | 2026-10-26 08:24:29 +0000 (Mon, 26 Oct 2026) | 1 line
+ 
+ Bug 8449 - fix DMARC-related failed tests in allmodules.t and hashbl.t
+------------------------------------------------------------------------
+r1939461 | sidney | 2026-10-26 08:19:38 +0000 (Mon, 26 Oct 2026) | 1 line
+ 
+ Bug 8448 - fix Redis Bayes legacy database setting
+------------------------------------------------------------------------
+r1939441 | sidney | 2026-10-26 00:53:22 +0000 (Mon, 26 Oct 2026) | 1 line
+ 
+ bug 8445 - make t/redirectors_selenium.t independent of shipped rules 
+files
+------------------------------------------------------------------------
+r1939440 | sidney | 2026-10-26 00:49:27 +0000 (Mon, 26 Oct 2026) | 1 line
+ 
+ bug 8444 - t/dmarc.t: handle Mail::DMARC 2.20260621 and 2.20260724 like 
+the other versions with the exists_in_dns bug
+------------------------------------------------------------------------
+r1939439 | sidney | 2026-10-26 00:45:44 +0000 (Mon, 26 Oct 2026) | 1 line
+ 
+ add dmarc_timeout setting and use SpamAssassin's resolver in the DMARC 
+plugin
+------------------------------------------------------------------------
+r1939420 | gbechis | 2026-10-24 19:22:36 +0000 (Sat, 24 Oct 2026) | 2 
+lines
+ 
+ fix Github actions, install dependencies and make copy not fatal
+ 
+------------------------------------------------------------------------
+r1939415 | gbechis | 2026-10-24 14:27:20 +0000 (Sat, 24 Oct 2026) | 1 line
+ 
+ 4.0.3-rc1 RELEASED
+------------------------------------------------------------------------
+r1939410 | gbechis | 2026-10-24 14:03:01 +0000 (Sat, 24 Oct 2026) | 1 line
+ 
+ preparing to release 4.0.3-rc1
+------------------------------------------------------------------------
+r1939407 | gbechis | 2026-10-24 13:54:51 +0000 (Sat, 24 Oct 2026) | 2 
+lines
+ 
+ more features available in 4.0.3 version
+ 
+------------------------------------------------------------------------
+r1939402 | gbechis | 2026-10-24 13:40:20 +0000 (Sat, 24 Oct 2026) | 2 
+lines
+ 
+ better describe how to run root tests
+ 
+------------------------------------------------------------------------
 r1939371 | sidney | 2026-10-23 22:47:31 +0000 (Fri, 23 Oct 2026) | 1 line
  
  add new DKIM and ARC settings
