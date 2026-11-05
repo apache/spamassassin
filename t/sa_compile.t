@@ -43,8 +43,10 @@ system_or_die "cd $builddir && mv Mail-SpamAssassin-* x";
 &run_makefile_pl ("PREFIX=$instdir SYSCONFDIR=$instdir/etc DATADIR=$instdir/share/spamassassin LOCALSTATEDIR=$instdir/var/spamassassin CONFDIR=$instdir/etc/mail/spamassassin RE2C_BIN=$RE2C_BIN");
 
 # we now have an "installed" version we can run sa-compile with.  Ensure
-# sarun() will use it appropriately
-$scr = "$instdir/$temp_binpath/spamassassin";
+# sarun() will use it appropriately.  The installed scripts have -T on the
+# #! line, so PERL5LIB is ignored; $perl_cmd passes it on as -I options.
+my $inst_perl = "$perl_cmd -T";
+$scr = "$inst_perl $instdir/$temp_binpath/spamassassin";
 $scr_localrules_args = $scr_cf_args = "";      # use the default rules dir, from our "install"
 
 &set_rules('
@@ -90,8 +92,8 @@ ok_all_patterns();
 # -------------------------------------------------------------------
 
 rmtree( glob "~/.spamassassin/sa-compile.cache". { safe => 1 }); # reset test
-system_or_die "TMP=$instdir TMPDIR=$instdir $instdir/$temp_binpath/sa-compile --quiet -p $cwd/$workdir/user.cf --keep-tmps -D 2>$instdir/sa-compile.debug";  # --debug
-$scr = "$instdir/$temp_binpath/spamassassin";
+system_or_die "TMP=$instdir TMPDIR=$instdir $inst_perl $instdir/$temp_binpath/sa-compile --quiet -p $cwd/$workdir/user.cf --keep-tmps -D 2>$instdir/sa-compile.debug";  # --debug
+$scr = "$inst_perl $instdir/$temp_binpath/spamassassin";
 $scr_localrules_args = $scr_cf_args = "";      # use the default rules dir, from our "install"
 
 %patterns = (
