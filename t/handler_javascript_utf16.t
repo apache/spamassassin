@@ -24,6 +24,8 @@ use Test::More;
 # body contains UTF16JSSENTINEL) and inner.html (INNERHTML).
 # ---------------------------------------------------------------------------
 
+use constant HAS_ARCHIVE_ZIP => eval { require Archive::Zip; };
+plan skip_all => "Need Archive::Zip for this test" unless HAS_ARCHIVE_ZIP;
 plan tests => 7;
 
 tstpre ("
