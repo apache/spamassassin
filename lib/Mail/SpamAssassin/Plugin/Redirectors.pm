@@ -1823,8 +1823,11 @@ sub _get_lwp_ua {
   # prevent "500 Header line too long (limit is 8192)" error when accessing
   # some websites
   eval {
-    use LWP::Protocol::http;
-    push(@LWP::Protocol::http::EXTRA_SOCK_OPTS, MaxLineLength => 16*1024);
+    # require, not use: a compile-time "use" would make the whole plugin
+    # fail to load when LWP is not installed, which eval cannot catch
+    require LWP::Protocol::http;
+    push(@LWP::Protocol::http::EXTRA_SOCK_OPTS, MaxLineLength => 16*1024)
+      unless grep { defined $_ && $_ eq q(MaxLineLength) } @LWP::Protocol::http::EXTRA_SOCK_OPTS;
   };
   my $ua = LWP::UserAgent->new(
     'agent'        => $conf->{url_redirector_user_agent},
