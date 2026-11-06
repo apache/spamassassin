@@ -152,7 +152,17 @@ int main(void) {
 EOC
 close $fh;
 
-my @libs = ('-lz');
+# Link against the same libraries spamc's configure detected (it records
+# each AC_CHECK_LIB hit as HAVE_LIBxxx in config.h): e.g. Solaris needs
+# -lsocket -lnsl for getaddrinfo/gai_strerror, while zlib may be absent
+# (libspamc only uses it under HAVE_LIBZ).
+my @libs;
+if (open(my $cfh, '<', '../spamc/config.h')) {
+  while (<$cfh>) {
+    push @libs, "-l\L$1" if /^\s*#\s*define\s+HAVE_LIB(SOCKET|NSL|INET|Z|DL)\b/;
+  }
+  close $cfh;
+}
 push @libs, '-lws2_32' if $^O eq 'MSWin32';
 
 my $build_status = untaint_system($cc, '-I', '../spamc', '-DHAVE_CONFIG_H',
