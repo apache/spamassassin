@@ -4,10 +4,14 @@ description: Setup MySQL for SpamAssassin testing
 runs:
   using: composite
   steps:
+    - name: remove the data directory made by Homebrew's mysql, which mysql@8.4 cannot start with
+      if: runner.os == 'macOS'
+      run: rm -rf /opt/homebrew/var/mysql
+      shell: bash
     - uses: ankane/setup-mysql@v1
       with:
         database: spamassassin
-        mysql-version: 8.0
+        mysql-version: 8.4
     - run: |
         mysql -u root -h localhost -e "CREATE USER 'spamassassin'@'localhost' IDENTIFIED BY 'spamassassin'"
         mysql -u root -h localhost -e "GRANT ALL PRIVILEGES ON *.* TO 'spamassassin'@'localhost'"
