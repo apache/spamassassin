@@ -676,15 +676,20 @@ sub _normalize {
     # leniently: a lone surrogate (legal in a JavaScript string, e.g. a pair
     # split across two string literals) becomes U+FFFD instead of failing the
     # whole part.  A label alone is weaker evidence, so that decode stays strict.
+    #
+    # The lenient check must be exactly FB_DEFAULT (0), without LEAVE_SRC:
+    # Encode::Unicode before Encode 2.99 (e.g. core Encode of perl <= 5.28)
+    # croaks on a malformed surrogate whenever check is non-zero, LEAVE_SRC
+    # included.  With check 0 Encode never modifies the source anyway.
     my $decoder = detect_utf16( $_[0] );
     my $check = Encode::FB_DEFAULT;
     if (!defined $decoder && $charset_declared ne '') {
       $decoder = Encode::find_encoding(
                    $charset_declared =~ /LE\z/i ? 'UTF-16LE' : 'UTF-16BE');
-      $check = Encode::FB_CROAK;
+      $check = Encode::FB_CROAK | Encode::LEAVE_SRC;
     }
     if (defined $decoder) {
-      if (eval { $rv = $decoder->decode($_[0], $check | Encode::LEAVE_SRC); defined $rv }) {
+      if (eval { $rv = $decoder->decode($_[0], $check); defined $rv }) {
         dbg("message: decoded as charset %s, declared %s",
           $decoder->name, $charset_declared);
         utf8::encode($rv) if !$return_decoded;
