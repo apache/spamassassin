@@ -2,6 +2,7 @@
 
 use lib '.'; use lib 't';
 use SATest; sa_t_init("handler_pdf");
+use Mail::SpamAssassin::Util;
 
 use Test::More;
 
@@ -28,9 +29,9 @@ use Test::More;
 # SATest scrubs PATH to a hermetic default that omits e.g. /opt/homebrew/bin, so
 # search both that PATH and a few common install locations, then pass the binary
 # to the handler explicitly via pdf_pdftotext_path.
-my $pdftotext;
-for my $dir (split(/:/, $ENV{PATH}),
-             qw(/usr/bin /usr/local/bin /opt/homebrew/bin /opt/local/bin)) {
+my $pdftotext = Mail::SpamAssassin::Util::find_executable_in_env_path('pdftotext');
+for my $dir (qw(/usr/bin /usr/local/bin /opt/homebrew/bin /opt/local/bin)) {
+  last if $pdftotext;
   my $cand = "$dir/pdftotext";
   if (-x $cand) { $pdftotext = $cand; last; }
 }
@@ -38,9 +39,9 @@ for my $dir (split(/:/, $ENV{PATH}),
 # Image-OCR-of-embedded-images test needs BOTH the image handler (a separate
 # plugin, only present once that branch is merged) and tesseract.  Detect both;
 # skip the block cleanly otherwise.
-my $tesseract;
-for my $dir (split(/:/, $ENV{PATH}),
-             qw(/usr/bin /usr/local/bin /opt/homebrew/bin /opt/local/bin)) {
+my $tesseract = Mail::SpamAssassin::Util::find_executable_in_env_path('tesseract');
+for my $dir (qw(/usr/bin /usr/local/bin /opt/homebrew/bin /opt/local/bin)) {
+  last if $tesseract;
   my $cand = "$dir/tesseract";
   if (-x $cand) { $tesseract = $cand; last; }
 }

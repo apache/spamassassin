@@ -137,7 +137,7 @@ sub start_fake_webdriver {
     $gone{$_} = 1 for keys %live;
     %live = ();
     fake_log_line({ event => 'sessions expired' });
-  };
+  } unless $RUNNING_ON_WINDOWS;
   while (1) {
     my $c = $listen->accept;
     unless ($c) { next if $!{EINTR}; last; }
@@ -252,7 +252,8 @@ sub read_request {
 
 sub stop_fake_webdriver {
   return unless $fake_pid;
-  kill 'TERM', $fake_pid;
+  # on Windows the fake is a thread, which TERM doesn't stop in accept()
+  kill $RUNNING_ON_WINDOWS ? 'KILL' : 'TERM', $fake_pid;
   waitpid($fake_pid, 0);
   undef $fake_pid;
 }
@@ -558,7 +559,8 @@ for my $case (
        'host list not applied: the warning says so');
 }
 
-{
+SKIP: {
+  skip "no SIGUSR1 to expire the fake's sessions on Windows", 5 if $RUNNING_ON_WINDOWS;
   my %r = scan(fake => { landing => { REDIR_URL() => LANDING_URL } },
                prefs => [ 'url_redirector_selenium_reuse_session 1' ],
                messages => [ [ REDIR_URL ], [ REDIR_URL ] ],
@@ -743,6 +745,8 @@ for my $case ([ 'by default', [], 5000 ],
 
 SKIP: {
   skip "long tests disabled", 3 unless conf_bool('run_long_tests');
+  skip "the deadline can't interrupt a blocked socket read on Windows", 3
+    if $RUNNING_ON_WINDOWS;
   my $time_limit = 3;
   my %r = scan(fake => { hang => 1 }, prefs => [ "time_limit $time_limit" ]);
   require Mail::SpamAssassin::Plugin::Redirectors;
@@ -784,6 +788,8 @@ SKIP: {
 
   SKIP: {
     skip "long tests disabled", 3 * @cases + 4 unless conf_bool('run_long_tests');
+    skip "the deadline can't interrupt a blocked socket read on Windows", 3 * @cases + 4
+      if $RUNNING_ON_WINDOWS;
     my @prefs = ("time_limit $time_limit", 'url_redirector_timeout 10');
 
     for my $case (@cases) {

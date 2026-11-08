@@ -2,6 +2,7 @@
 
 use lib '.'; use lib 't';
 use SATest; sa_t_init("handler_image");
+use Mail::SpamAssassin::Util;
 
 use Test::More;
 
@@ -18,9 +19,9 @@ use Test::More;
 # so search both that PATH and a few common install locations, then pass the
 # binary to the handler explicitly via image_tesseract_path.  Skip cleanly if
 # tesseract really isn't installed.
-my $tesseract;
-for my $dir (split(/:/, $ENV{PATH}),
-             qw(/usr/bin /usr/local/bin /opt/homebrew/bin /opt/local/bin)) {
+my $tesseract = Mail::SpamAssassin::Util::find_executable_in_env_path('tesseract');
+for my $dir (qw(/usr/bin /usr/local/bin /opt/homebrew/bin /opt/local/bin)) {
+  last if $tesseract;
   my $cand = "$dir/tesseract";
   if (-x $cand) { $tesseract = $cand; last; }
 }

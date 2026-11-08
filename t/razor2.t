@@ -33,9 +33,12 @@ tstprefs ("
 
 sarun ("-t < data/spam/razor2", \&patterns_run_cb);
 ok_all_patterns();
-# Same with fork
-sarun ("--cf='razor_fork 1' -t < data/spam/razor2", \&patterns_run_cb);
-ok_all_patterns();
+# Same with fork, which doesn't work on Windows
+SKIP: {
+  skip "razor_fork doesn't work on Windows", 1 if $RUNNING_ON_WINDOWS;
+  sarun ("--cf='razor_fork 1' -t < data/spam/razor2", \&patterns_run_cb);
+  ok_all_patterns();
+}
 
 #TESTING FOR HAM
 %patterns = (
@@ -49,6 +52,9 @@ ok_all_patterns();
 sarun ("-D razor2 -t < data/nice/001 2>&1", \&patterns_run_cb);
 ok_all_patterns();
 # same with fork
-sarun ("-D razor2 --cf='razor_fork 1' -t < data/nice/001 2>&1", \&patterns_run_cb);
-ok_all_patterns();
+SKIP: {
+  skip "razor_fork doesn't work on Windows", 3 if $RUNNING_ON_WINDOWS;
+  sarun ("-D razor2 --cf='razor_fork 1' -t < data/nice/001 2>&1", \&patterns_run_cb);
+  ok_all_patterns();
+}
 

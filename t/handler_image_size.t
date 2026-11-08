@@ -2,6 +2,7 @@
 
 use lib '.'; use lib 't';
 use SATest; sa_t_init("handler_image_size");
+use Mail::SpamAssassin::Util;
 
 use Test::More;
 
@@ -12,9 +13,9 @@ use Test::More;
 #   - min_width 100   -> image passes the gate   -> OCR runs (hits)
 # Requires tesseract; skip cleanly if not installed.
 
-my $tesseract;
-for my $dir (split(/:/, $ENV{PATH}),
-             qw(/usr/bin /usr/local/bin /opt/homebrew/bin /opt/local/bin)) {
+my $tesseract = Mail::SpamAssassin::Util::find_executable_in_env_path('tesseract');
+for my $dir (qw(/usr/bin /usr/local/bin /opt/homebrew/bin /opt/local/bin)) {
+  last if $tesseract;
   if (-x "$dir/tesseract") { $tesseract = "$dir/tesseract"; last; }
 }
 
