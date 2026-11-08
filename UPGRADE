@@ -192,9 +192,10 @@ Note for Users Upgrading to SpamAssassin 4.0.3
       requires the heif-dec executable from libheif -- named heif-convert
       before libheif 1.18, and both names are accepted (see
       image_heif_dec_path); without it, HEIF images are skipped and
-      all other image types are still OCR'd. Both tesseract and libheif
-      pull in substantial recursive dependencies, which is why this
-      handler is not enabled by default.
+      all other image types are still OCR'd. Fedora's libheif decodes
+      HEIC only with libheif-freeworld from RPM Fusion installed. Both
+      tesseract and libheif pull in substantial recursive dependencies,
+      which is why this handler is not enabled by default.
 
     * PDF (application/pdf) parses each PDF with the new pure-Perl
       Mail::SpamAssassin::PDF::Parser and exposes metadata (page/image/
@@ -209,7 +210,8 @@ Note for Users Upgrading to SpamAssassin 4.0.3
       attachments and returns the files inside as child parts, which the
       framework re-dispatches to the other handlers by type. Provides the
       check_archive_file_count eval. Zip uses the Archive::Zip module; rar
-      shells out to the unrar executable (see archive_unrar_path).
+      shells out to RARLAB's unrar or unrar-free 0.2.0 or later (see
+      archive_unrar_path).
 
 Note for Users Upgrading to SpamAssassin 4.0.2
 ----------------------------------------------

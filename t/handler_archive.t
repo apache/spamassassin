@@ -44,6 +44,9 @@ sub find_bin {
   return undef;
 }
 my $unrar = find_bin('unrar');
+# the handler uses only RARLAB's unrar and unrar-free 0.2.0 or later
+$unrar = undef if $unrar
+  && `"$unrar" -V 2>&1` !~ /Alexander Roshal|^unrar-free (?:0\.(?:[2-9]|\d\d)|[1-9])/m;
 
 # 7 zip assertions, +3 octet-stream, +2 max-files, +4 rar (only actually run when unrar present)
 plan tests => 7 + 3 + 2 + 4;
@@ -115,7 +118,7 @@ ok_all_patterns();
 
 # --- rar (only when unrar is available) -------------------------------------
 SKIP: {
-  skip("unrar not installed", 4) unless $unrar;
+  skip("no unrar that the handler uses", 4) unless $unrar;
 
   %patterns = (
     ' 1.0 ARC_JS ',     'rar_js_member',

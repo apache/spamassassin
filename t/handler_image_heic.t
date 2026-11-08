@@ -4,6 +4,7 @@ use lib '.'; use lib 't';
 use SATest; sa_t_init("handler_image_heic");
 
 use Test::More;
+use MIME::Base64 ();
 
 # ---------------------------------------------------------------------------
 # Test Handler::Image's HEIF/HEIC support: an image part whose bytes are HEIC
@@ -29,8 +30,25 @@ my $heif      = find_bin("heif-dec") || find_bin("heif-convert");
 if (!$tesseract || !$heif) {
   plan skip_all => "tesseract and heif-dec/heif-convert both required";
 }
+elsif (!heif_decodes()) {
+  plan skip_all => "heif-dec cannot decode HEIC (libheif has no HEVC decoder plugin)";
+}
 else {
   plan tests => 6;
+}
+
+# Without an HEVC decoder plugin (on Fedora, libheif-freeworld) heif-dec runs
+# but cannot convert HEIC.
+sub heif_decodes {
+  open(my $fh, '<', 'data/nice/handler_image_heic') or return 0;
+  my $msg = do { local $/; <$fh> };
+  my ($b64) = $msg =~ /Encoding: base64\r?\n.*?\r?\n\r?\n(.*?)\r?\n--/s;
+  open(my $out, '>', "$workdir/probe.heic") or return 0;
+  binmode $out;
+  print $out MIME::Base64::decode_base64($b64 // '');
+  close $out;
+  my $junk = `"$heif" -q 90 "$workdir/probe.heic" "$workdir/probe.png" 2>&1`;
+  return -s "$workdir/probe.png";
 }
 
 tstpre ("

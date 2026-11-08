@@ -50,9 +50,11 @@ loads (with a warning at startup) and skips zip archives.
 
 =item rar
 
-Extraction shells out to the C<unrar> executable.  Set C<archive_unrar_path> if
-it is not on the C<PATH>.  If it cannot be found, rar extraction is disabled with
-a debug message, so C<--lint> never fails merely because the binary is absent.
+Extraction shells out to the C<unrar> executable: RARLAB's, or unrar-free 0.2.0
+or later.  Set C<archive_unrar_path> if it is not on the C<PATH>.  If it cannot
+be found, rar extraction is disabled with a debug message, so C<--lint> never
+fails merely because the binary is absent.  Any other unrar disables rar
+extraction with a warning.
 
 =back
 
@@ -316,6 +318,7 @@ sub handle_rar {
 
   my $data = $node->decode();
   return [] unless defined $data && length $data;
+  return [] unless $self->_unrar_kind($pms, $bin);
 
   my $max = $conf->{archive_max_files} // DEFAULT_MAX_FILES;
 
@@ -330,11 +333,11 @@ sub handle_rar {
   close($arc_fh);
   $arc_file = untaint_file_path($arc_file);
 
-  my @members = $self->_unrar_list($pms, $bin, $arc_file);
+  my ($count, @members) = $self->_unrar_list($pms, $bin, $arc_file);
 
   # Record the full declared entry count before capping at archive_max_files, so
   # check_archive_file_count sees the true total of the archive.
-  $self->_record_file_count($pms, scalar @members);
+  $self->_record_file_count($pms, $count);
 
   my @unsafe = grep { $_ =~ UNSAFE_MEMBER_NAME } @members;
   log_dbg("rar members skipped, unsafe for the command line: @unsafe") if @unsafe;
@@ -394,15 +397,56 @@ sub _unrar {
   return $self->{unrar};
 }
 
+# Which unrar this is, asked once: 'rarlab', or 'free' for unrar-free 0.2.0 or
+# later (the first with a print command).  Anything else gets '', and rar
+# extraction is disabled.  Undef if unrar could not be run, to try again later.
+sub _unrar_kind {
+  my ($self, $pms, $bin) = @_;
+  return $self->{unrar_kind} if defined $self->{unrar_kind};
+  my ($out) = $self->_run_unrar($pms, undef, $bin, '-V');
+  return unless defined $out;
+  if ($out =~ /Alexander Roshal/) {
+    $self->{unrar_kind} = 'rarlab';
+  } elsif ($out =~ /^unrar-free (\d+)\.(\d+)/m && ($1 > 0 || $2 >= 2)) {
+    $self->{unrar_kind} = 'free';
+  } else {
+    log_warn("$bin is neither RARLAB's unrar nor unrar-free 0.2.0 or later, ".
+             "rar extraction disabled");
+    $self->{unrar_kind} = '';
+  }
+  return $self->{unrar_kind};
+}
+
 # List the member names of a rar archive: `unrar lb -p- <archive>` prints one
-# bare filename per line and never prompts for a password.  Returns the list (in
-# archive order); empty on any failure.
+# bare filename per line (CRLF on Windows) and never prompts for a password.
+# unrar-free, which Fedora and Debian install as unrar, has no lb.  Its l
+# listing has, between two lines of dashes, a line with a space and the name
+# and then a line with size, date and attributes for each member.  Returns the
+# number of members and the names to extract (in archive order); 0 on any
+# failure.
 sub _unrar_list {
   my ($self, $pms, $bin, $arc_file) = @_;
-  my ($out) = $self->_run_unrar($pms, undef, $bin, 'lb', '-p-', '--', $arc_file);
-  return () unless defined $out;
-  my @members = grep { length } map { chomp; $_ } split(/\n/, $out);
-  return @members;
+  my $free = $self->{unrar_kind} eq 'free';
+  my ($out) = $self->_run_unrar($pms, undef, $bin,
+                $free ? 'l' : 'lb', '-p-', '--', $arc_file);
+  return 0 unless defined $out;
+  my @lines = split(/\r?\n/, $out);
+  if (!$free) {
+    my @members = grep { length } @lines;
+    return (scalar @members, @members);
+  }
+
+  shift @lines while @lines && $lines[0] !~ /^-+$/;
+  shift @lines;
+  my ($count, @members) = (0);
+  while (@lines >= 2 && $lines[0] =~ /^ (.*)/s) {
+    my $name = $1;
+    $count++;
+    # directories and empty files have nothing to scan
+    push @members, $name if $lines[1] =~ /^\s*[1-9]/;
+    splice(@lines, 0, 2);
+  }
+  return ($count, @members);
 }
 
 # Extract one member to stdout: `unrar p -inul -p- <archive> <member>` prints the
