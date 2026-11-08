@@ -24,6 +24,8 @@ plan skip_all => 'Need Archive::Zip for this test' unless HAS_ARCHIVE_ZIP;
 #   * an inner *.html member is rendered into the body;
 #   * the same works when the zip is mislabelled application/octet-stream but
 #     named *.zip (Message::Node::effective_type maps it back);
+#   * a member with the same length and start as an earlier one, or the same
+#     content as an earlier member of another type, is not skipped;
 #   * archive_max_files caps how many members are extracted;
 #   * rar archives behave the same (only when 'unrar' is installed).
 #
@@ -51,8 +53,8 @@ my $unrar = find_bin('unrar');
 $unrar = undef if $unrar
   && `"$unrar" -V 2>&1` !~ /Alexander Roshal|^unrar-free (?:0\.(?:[2-9]|\d\d)|[1-9])/m;
 
-# 7 zip assertions, +3 octet-stream, +2 max-files, +4 rar (only actually run when unrar present)
-plan tests => 7 + 3 + 2 + 4;
+# 7 zip assertions, +3 octet-stream, +4 alike members, +2 max-files, +4 rar (only actually run when unrar present)
+plan tests => 7 + 3 + 4 + 2 + 4;
 
 tstpre ("
   loadhandler Mail::SpamAssassin::Handler::Archive
@@ -102,6 +104,20 @@ ok_all_patterns();
 );
 %anti_patterns = ();
 ok (sarun ("-L -t < data/nice/handler_archive_octet", \&patterns_run_cb));
+ok_all_patterns();
+
+# --- inner.js after a readme.txt of the same length and first 64 bytes ------
+%patterns = (
+  ' 1.0 ARC_JS ', 'alike_js_member',
+);
+ok (sarun ("-L -t < data/nice/handler_archive_dedup", \&patterns_run_cb));
+ok_all_patterns();
+
+# --- inner.js after a readme.txt with the same content ----------------------
+%patterns = (
+  ' 1.0 ARC_JS ', 'copy_js_member',
+);
+ok (sarun ("-L -t < data/nice/handler_archive_dedup_copy", \&patterns_run_cb));
 ok_all_patterns();
 
 # --- archive_max_files cap (extract only the first member) ------------------

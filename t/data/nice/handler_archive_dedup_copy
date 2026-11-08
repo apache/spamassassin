@@ -1,0 +1,24 @@
+From: sender@example.com
+To: victim@example.com
+Subject: archive handler test, a member that copies another
+Message-Id: <archive-dedup-copy-test@example.com>
+Date: Thu, 01 Jan 2026 12:00:00 +0000
+MIME-Version: 1.0
+Content-Type: multipart/mixed; boundary="BOUND"
+
+--BOUND
+Content-Type: text/plain; charset=us-ascii
+
+ORIGINAL_BODY_MARKER
+
+--BOUND
+Content-Type: application/zip; name="payload.zip"
+Content-Transfer-Encoding: base64
+Content-Disposition: attachment; filename="payload.zip"
+
+UEsDBBQAAAAIAAAAIVyOisryHgAAABwAAAAKAAAAcmVhZG1lLnR4dCtLLFKoULBVUPf083MN8gpW
+t1ZILUvM0ajQtOYCAFBLAwQUAAAACAAAACFcjorK8h4AAAAcAAAACAAAAGlubmVyLmpzK0ssUqhQ
+sFVQ9/Tzcw3yCla3VkgtS8zRqNC05gIAUEsBAhQDFAAAAAgAAAAhXI6KyvIeAAAAHAAAAAoAAAAA
+AAAAAAAAAKQBAAAAAHJlYWRtZS50eHRQSwECFAMUAAAACAAAACFcjorK8h4AAAAcAAAACAAAAAAA
+AAAAAAAApAFGAAAAaW5uZXIuanNQSwUGAAAAAAIAAgBuAAAAigAAAAAA
+--BOUND--

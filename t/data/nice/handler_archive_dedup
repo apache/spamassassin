@@ -1,0 +1,26 @@
+From: sender@example.com
+To: victim@example.com
+Subject: archive handler test, members that start alike
+Message-Id: <archive-dedup-test@example.com>
+Date: Thu, 01 Jan 2026 12:00:00 +0000
+MIME-Version: 1.0
+Content-Type: multipart/mixed; boundary="BOUND"
+
+--BOUND
+Content-Type: text/plain; charset=us-ascii
+
+ORIGINAL_BODY_MARKER
+
+--BOUND
+Content-Type: application/zip; name="payload.zip"
+Content-Transfer-Encoding: base64
+Content-Disposition: attachment; filename="payload.zip"
+
+UEsDBBQAAAAIAAAAIVx4OUR5UwAAAFwAAAAKAAAAcmVhZG1lLnR4dAXBOw7CMBRFwT6rOHVkKQ1K
+kd3YcIkt+SOeX0DsPjPbiv8G0Z65fEVTS7J5oM8VK1X99ByYsYl3sensD9LfNVk3YDHFV1OgD8+l
+n/jArk6WabkBUEsDBBQAAAAIAAAAIVz+xx6eXQAAAFwAAAAIAAAAaW5uZXIuanMFwbEOREAUQNHe
+V9zOEolmswVRbkGh4AseebskMytmxuDv95wyJ5wb4uZljYpVO6nzFbofYjD6+4alwItVPqvzgdeT
+6Q7qyUsgieK4aEjbvn8P3ZjWaBTzuLI6+QNQSwECFAMUAAAACAAAACFceDlEeVMAAABcAAAACgAA
+AAAAAAAAAAAApAEAAAAAcmVhZG1lLnR4dFBLAQIUAxQAAAAIAAAAIVz+xx6eXQAAAFwAAAAIAAAA
+AAAAAAAAAACkAXsAAABpbm5lci5qc1BLBQYAAAAAAgACAG4AAAD+AAAAAAA=
+--BOUND--

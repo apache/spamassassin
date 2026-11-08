@@ -1446,12 +1446,14 @@ sub _attach_parts {
     $pms->{handler_bytes_left} -= length($data // '');
 
     # content fingerprint: identical bytes can't loop forever, and identical
-    # repeated parts are processed once.  filename is deliberately excluded.
-    my $key = ($cp->{type} // '') . ':' . length($data // '')
-            . ':' . substr($data // '', 0, 64);
+    # repeated parts are processed once.  The filename itself is excluded, but
+    # the type it gives the part decides which handler sees it.
+    my $child = $self->_synth_node($cp);
+    my $bytes = $data // '';
+    utf8::encode($bytes) if utf8::is_utf8($bytes);
+    my $key = ($child->effective_type // '') . ':' . sha1_hex($bytes);
     next if $ctx->{seen}{$key}++;
 
-    my $child = $self->_synth_node($cp);
     push @{$node->{handler_parts}}, $child;   # separate array, ordered
     $ctx->{parts_budget}--;
     push @$work, [ $child, $depth + 1 ];      # drive recursion via worklist
