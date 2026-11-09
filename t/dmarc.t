@@ -22,9 +22,9 @@ use constant HAS_BUGGY_MAILDMARC => HAS_MAILDMARC && eval {
 plan skip_all => "Net tests disabled" unless conf_bool('run_net_tests');
 plan skip_all => "Needs Mail::SPF" unless HAS_MAILSPF;
 plan skip_all => "Needs Mail::DMARC::PurePerl" unless HAS_MAILDMARC;
-# the fix, in Mail::DMARC 2.20260827, needs Perl 5.34.3
+# the fix, in Mail::DMARC 2.20260827, needs Perl 5.36
 plan skip_all => "Mail::DMARC::PurePerl $Mail::DMARC::PurePerl::VERSION has a known exists_in_dns() bug"
-  if HAS_BUGGY_MAILDMARC && $] < 5.034003;
+  if HAS_BUGGY_MAILDMARC && $] < 5.036;
 plan skip_all => "Needs Mail::DKIM::Verifier >= 0.31" unless HAS_DKIM_VERIFIER ;
 if (HAS_BUGGY_MAILDMARC) {
   plan tests => 1;
