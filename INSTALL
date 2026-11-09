@@ -475,7 +475,10 @@ would pull in before installing them.
     needed only for HEIF/HEIC images, and without it those are skipped
     while every other image type is still OCR'd.  heif-dec was named
     heif-convert before libheif 1.18; both names are recognised, and the
-    path to either can be set with image_heif_dec_path.
+    path to either can be set with image_heif_dec_path.  HEIC images also
+    need libheif's HEVC decoder, which some distributions do not install
+    by default: on Ubuntu 24.04 install libheif-plugin-libde265, and on
+    Fedora libheif-freeworld (from RPM Fusion).
 
   - pdftotext (from poppler)
 
