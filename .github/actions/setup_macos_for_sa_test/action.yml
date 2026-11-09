@@ -26,6 +26,11 @@ runs:
         ln -sf /opt/homebrew/opt/berkeley-db/lib/* /usr/local/lib/
         ln -sf /opt/homebrew/lib/*.dylib /usr/local/lib/
         ln -sf /opt/homebrew/include/* /usr/local/include/
+        # so DB_File and BerkeleyDB link Homebrew's libdb with any MakeMaker
+        echo "DB_FILE_INCLUDE=/opt/homebrew/opt/berkeley-db/include" >> "$GITHUB_ENV"
+        echo "DB_FILE_LIB=/opt/homebrew/opt/berkeley-db/lib" >> "$GITHUB_ENV"
+        echo "BERKELEYDB_INCLUDE=/opt/homebrew/opt/berkeley-db/include" >> "$GITHUB_ENV"
+        echo "BERKELEYDB_LIB=/opt/homebrew/opt/berkeley-db/lib" >> "$GITHUB_ENV"
       shell: bash
 
     - name: install some needed packages from source that aren't in homebrew
