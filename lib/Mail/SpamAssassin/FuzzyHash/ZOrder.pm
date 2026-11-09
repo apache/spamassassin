@@ -110,11 +110,16 @@ sub _minhash {
   # encode each token back before hashing using md5()
   my @wh = map { my $w = $_; utf8::encode($w); unpack('N', substr(md5($w), 0, 4)) } @words;
 
+  # Untaint into new variables.  Tainted values must not reach the loop
+  # below: before Perl 5.18 its results would be wrong, and in later
+  # versions it runs two to three times slower.
+  my @clean = map { /\A(\d+)\z/ ? $1 + 0 : 0 } @wh;
+
   my @bits;
   for my $k (0 .. 31) {
     my $salt = $SALT[$k];
     my $min  = 0xFFFFFFFF;
-    for my $w (@wh) {
+    for my $w (@clean) {
       my $h = (($w ^ $salt) * C1) & 0xFFFFFFFF;
       $h ^= ($h >> 16);
       $h  = ($h  * C2) & 0xFFFFFFFF;
