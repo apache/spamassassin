@@ -52,13 +52,6 @@ jobs:
             perl: 20
           - runner: windows-2025
             perl: 20
-          # Strawberry Perl has no MySQL client library to build DBD::mysql
-          - runner: windows-latest
-            database: mysql
-          - runner: windows-2022
-            database: mysql
-          - runner: windows-2025
-            database: mysql
     env:
       PERL5LIB: ''
       PERL_VERSION: 5.${{matrix.perl}}
@@ -70,6 +63,12 @@ jobs:
     name: OS ${{matrix.runner}} Perl 5.${{matrix.perl}} DB ${{matrix.database}}
 
     steps:
+    # Perl 5.34's File::Find stops on the symlinks in build/pga/include in
+    # Makefile.PL's manifest check
+    - name: Check out symlinks as plain files on Windows
+      if: ${{ startsWith( matrix.runner, 'windows-' ) }}
+      run: git config --global core.symlinks false
+
     - uses: actions/checkout@v3
 
     - name: Install requirements for Ubuntu
@@ -101,7 +100,7 @@ jobs:
 
     - name: prepare test config
       run: |
-          perl -i.bak -pe 's/^run_(long_tests|net_tests|dcc_tests|sql_pref_tests)=n/run_$1=y/' t/config.dist
+          perl -i.bak -pe 's/^run_(long_tests|net_tests|ipv6_dns_tests|dcc_tests|sql_pref_tests)=n/run_$1=y/' t/config.dist
       shell: bash
 
     - name: Cache CPAN Modules
@@ -117,7 +116,7 @@ jobs:
       run: |
           perl Makefile.PL
           ${{ env.MAKECMD }} ENABLE_SSL=yes
-          ${{ ( startsWith( matrix.runner, 'macos-' ) && 'sudo -u $USER' ) || '' }} ${{ env.MAKECMD }} test ${{ ((matrix.database != 'none') && 'TEST_FILES="t/*sql*.t"') || (github.event.inputs.tests && format('TEST_FILES="{0}"', github.event.inputs.tests)) }}
+          ${{ ( startsWith( matrix.runner, 'macos-' ) && 'sudo -u $USER' ) || '' }} ${{ env.MAKECMD }} test ${{ ((matrix.database != 'none') && 'TEST_FILES="t/*sql*.t t/sa_txrep_welcomelist_out.t"') || (github.event.inputs.tests && format('TEST_FILES="{0}"', github.event.inputs.tests)) }}
 
     - name: Publish logs as artifacts
       if: ${{ failure() }}

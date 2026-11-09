@@ -14,3 +14,9 @@ runs:
         echo "@$PYBINW $PYSCRIPTW --homedir $PYBASE\etc\pyzor %1 %2 %3 %4 %5 %6 %7 %8 %9" > $PYSCRIPT.bat
         cat "$PYSCRIPT.bat"
       shell: bash
+
+    - name: install tesseract, unrar and pdftotext
+      run: |
+        choco install -y --no-progress tesseract unrar poppler || echo warn: errors installing tesseract, unrar or poppler have been ignored
+        echo C:\Program Files\Tesseract-OCR>>"%GITHUB_PATH%"
+      shell: cmd

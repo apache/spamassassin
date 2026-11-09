@@ -20,7 +20,29 @@ runs:
         mysql -u spamassassin -pspamassassin -h localhost -D spamassassin < sql/bayes_mysql.sql
       shell: bash
 
+    # Strawberry Perl has no MySQL client library. Build DBD::MariaDB against
+    # MSYS2's UCRT MariaDB Connector/C, which matches Strawberry 5.40 and later.
+    # DBD::MariaDB 1.24 doesn't link with a UCRT perl; the fix (perl5-dbi/
+    # DBD-MariaDB#237) isn't on CPAN yet, so build a pinned upstream commit.
+    - name: build DBD::MariaDB on Windows
+      if: runner.os == 'Windows'
+      run: |
+        if (-not $env:PERL_VERSION.StartsWith('5.4')) { Write-Output "no MySQL client for Strawberry Perl $env:PERL_VERSION; SQL tests use SQLite or skip"; exit 0 }
+        C:\msys64\usr\bin\pacman.exe -Sy --noconfirm --needed mingw-w64-ucrt-x86_64-libmariadbclient
+        if ($LASTEXITCODE) { exit 1 }
+        $env:PATH = "$env:PATH;C:\msys64\ucrt64\bin"
+        "PATH=$env:PATH" | Out-File -Append -Encoding utf8 $env:GITHUB_ENV
+        $env:DBD_MARIADB_CONFIG = 'skip'
+        $env:DBD_MARIADB_CFLAGS = '-IC:/msys64/ucrt64/include/mariadb'
+        $env:DBD_MARIADB_LIBS = '-LC:/msys64/ucrt64/lib -lmariadb'
+        cpanm -n https://github.com/perl5-dbi/DBD-MariaDB/archive/7f72ceb459b9e4870707b8d9eda59de55bd8476b.tar.gz
+        if ($LASTEXITCODE) { exit 1 }
+        "SA_MYSQL_DBD=MariaDB" | Out-File -Append -Encoding utf8 $env:GITHUB_ENV
+      shell: pwsh
+
     - name: prepare test config for MySQL
       run: |
-          perl -i.bak -pe 's/^run_(awl_sql_tests|bayes_sql_tests)=n/run_$1=y/;s/^(user_awl|bayes_sql)_dsn=.*$/$1_dsn=dbi:mysql:database=spamassassin;host=localhost/;s/^(user_awl_sql_username|user_awl_sql_password|bayes_sql_username|bayes_sql_password)=.*$/$1=spamassassin/;s/^(bayes_store_module)=.*$/$1=Mail::SpamAssassin::BayesStore::MySQL/' t/config.dist
+          if [ "$RUNNER_OS" = Windows ] && [ -z "$SA_MYSQL_DBD" ]; then exit 0; fi
+          export SA_MYSQL_DBD="${SA_MYSQL_DBD:-mysql}"
+          perl -i.bak -pe 's/^run_(awl_sql_tests|bayes_sql_tests)=n/run_$1=y/;s/^(user_awl|bayes_sql)_dsn=.*$/$1_dsn=dbi:$ENV{SA_MYSQL_DBD}:database=spamassassin;host=localhost/;s/^(user_awl_sql_username|user_awl_sql_password|bayes_sql_username|bayes_sql_password)=.*$/$1=spamassassin/;s/^(bayes_store_module)=.*$/$1=Mail::SpamAssassin::BayesStore::MySQL/' t/config.dist
       shell: bash
