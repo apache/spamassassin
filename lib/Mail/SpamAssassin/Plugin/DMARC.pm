@@ -368,8 +368,13 @@ sub _check_dmarc {
   elsif ($pms->{spf_helo_softfail})  { $spf_helo_status = 'softfail'; }
 
   my $dmarc = Mail::DMARC::PurePerl->new();
-  # use our Net::DNS::Resolver object, as for Mail::DKIM's ADSP lookups
-  $dmarc->set_resolver($self->{main}->{resolver}->get_resolver);
+  # our resolver's settings, but each lookup is resent after 1 s, 3 s in all
+  my $res = $self->{main}->{resolver}->get_resolver;
+  $dmarc->set_resolver(Net::DNS::Resolver->new(
+    nameservers => [$res->nameservers], port => $res->port,
+    force_v4 => $res->force_v4, udppacketsize => $res->udppacketsize,
+    tcp_timeout => $res->tcp_timeout, dnsrch => 0, defnames => 0,
+    retrans => 1, retry => 2));
   $dmarc->source_ip($lasthop->{ip});
   $dmarc->header_from_raw($from_addr);
 
