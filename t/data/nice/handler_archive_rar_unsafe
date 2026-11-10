@@ -1,0 +1,22 @@
+From: sender@example.com
+To: victim@example.com
+Subject: archive handler test
+Message-Id: <archive-test-rar-unsafe@example.com>
+Date: Tue, 10 Jun 2025 12:00:00 +0000
+MIME-Version: 1.0
+Content-Type: multipart/mixed; boundary="BOUND"
+
+--BOUND
+Content-Type: text/plain; charset=us-ascii
+
+ORIGINAL_BODY_MARKER
+
+--BOUND
+Content-Type: application/vnd.rar; name="payload.rar"
+Content-Transfer-Encoding: base64
+Content-Disposition: attachment; filename="payload.rar"
+
+UmFyIRoHAQDFGjMyAwEAAK3Tb1EXAgILBgsggCk3agEhKigAAAZ4InkuanN2YXIgcSA9IDA7CsL/
+ZKwWAgILBgsggCk3apw7whkAAAVAeC5qc3ZhciByID0gMDsKXQr4FBkCAhwGHCCAKTdqjorK8gAA
+CGlubmVyLmpzdmFyIHggPSAnSU5ORVJKUyc7IGV2YWwoeCk7ChmyOjUDBQAA
+--BOUND--

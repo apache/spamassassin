@@ -28,7 +28,9 @@ plan skip_all => 'Need Archive::Zip for this test' unless HAS_ARCHIVE_ZIP;
 #     content as an earlier member of another type, is not skipped;
 #   * archive_max_files caps how many members are extracted;
 #   * rar archives behave the same (only when 'unrar' is installed), including
-#     a member with the same name as an earlier one, or with a space in its name.
+#     a member with the same name as an earlier one, or with a space in its name;
+#   * rar member names unrar must not see are skipped before the
+#     archive_max_files cap.
 #
 # Each fixture under data/nice/ is an ordinary MIME message (100% ASCII) whose
 # attachment is a small zip/rar containing inner.js (sentinel INNERJS) and
@@ -54,8 +56,8 @@ my $unrar = find_bin('unrar');
 $unrar = undef if $unrar
   && `"$unrar" -V 2>&1` !~ /Alexander Roshal|^unrar-free (?:0\.(?:[2-9]|\d\d)|[1-9])/m;
 
-# 7 zip assertions, +3 octet-stream, +4 alike members, +2 max-files, +7 rar (only actually run when unrar present)
-plan tests => 7 + 3 + 4 + 2 + 7;
+# 7 zip assertions, +3 octet-stream, +4 alike members, +2 max-files, +7 rar, +3 unsafe rar names (only actually run when unrar present)
+plan tests => 7 + 3 + 4 + 2 + 7 + 3;
 
 tstpre ("
   loadhandler Mail::SpamAssassin::Handler::Archive
@@ -138,7 +140,7 @@ ok_all_patterns();
 
 # --- rar (only when unrar is available) -------------------------------------
 SKIP: {
-  skip("no unrar that the handler uses", 7) unless $unrar;
+  skip("no unrar that the handler uses", 10) unless $unrar;
 
   %patterns = (
     ' 1.0 ARC_JS ',     'rar_js_member',
@@ -155,5 +157,15 @@ SKIP: {
     ' 1.0 ARC_HTML ', 'rar_name_with_space_member',
   );
   ok (sarun ("-L -t < data/nice/handler_archive_rar_names", \&patterns_run_cb));
+  ok_all_patterns();
+
+  # the first two members are named x"y.js and @x.js, which unrar would read
+  # as a list file, so with a cap of one only inner.js is extracted
+  %patterns = (
+    ' 1.0 ARC_JS ',     'rar_unsafe_names_skipped',
+    ' 1.0 ARC_COUNT2 ', 'rar_unsafe_names_counted',
+  );
+  ok (sarun ("-L -t --cf=\"archive_max_files 1\" < data/nice/handler_archive_rar_unsafe",
+             \&patterns_run_cb));
   ok_all_patterns();
 }

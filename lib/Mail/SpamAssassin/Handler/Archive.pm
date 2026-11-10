@@ -115,10 +115,11 @@ our @ISA = qw(Mail::SpamAssassin::Handler);
 # default and the per-call-site fallback below.
 use constant DEFAULT_MAX_FILES => 2;
 
-# a rar member name with these characters is not passed to unrar: see
-# Mail::SpamAssassin::Util::helper_app_pipe_open
+# a rar member name with these characters (see
+# Mail::SpamAssassin::Util::helper_app_pipe_open), or starting with @, which
+# unrar reads as a list file, is not passed to unrar
 use constant UNSAFE_MEMBER_NAME =>
-  am_running_on_windows() ? qr/["&|<>^%!\x00-\x1f]/ : qr/"/;
+  am_running_on_windows() ? qr/^\@|["&|<>^%!\x00-\x1f]/ : qr/^\@|"/;
 
 sub log_dbg  { Mail::SpamAssassin::Logger::dbg ("archive: @_"); }
 sub log_warn { Mail::SpamAssassin::Logger::log_message('warn', "archive: @_"); }
