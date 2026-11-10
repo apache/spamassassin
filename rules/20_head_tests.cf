@@ -584,6 +584,9 @@ header MISSING_HB_SEP		eval:check_msg_parse_flags('missing_head_body_separator')
 describe MISSING_HB_SEP		Missing blank line between message header and body
 tflags MISSING_HB_SEP		userconf
 
+header HEADER_LIMIT_EXCEEDED	eval:check_msg_parse_flags('too_many_header_fields')
+describe HEADER_LIMIT_EXCEEDED	Message has too many header fields
+
 endif
 
 ###########################################################################
