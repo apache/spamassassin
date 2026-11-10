@@ -27,7 +27,8 @@ plan skip_all => 'Need Archive::Zip for this test' unless HAS_ARCHIVE_ZIP;
 #   * a member with the same length and start as an earlier one, or the same
 #     content as an earlier member of another type, is not skipped;
 #   * archive_max_files caps how many members are extracted;
-#   * rar archives behave the same (only when 'unrar' is installed).
+#   * rar archives behave the same (only when 'unrar' is installed), including
+#     a member with the same name as an earlier one, or with a space in its name.
 #
 # Each fixture under data/nice/ is an ordinary MIME message (100% ASCII) whose
 # attachment is a small zip/rar containing inner.js (sentinel INNERJS) and
@@ -53,8 +54,8 @@ my $unrar = find_bin('unrar');
 $unrar = undef if $unrar
   && `"$unrar" -V 2>&1` !~ /Alexander Roshal|^unrar-free (?:0\.(?:[2-9]|\d\d)|[1-9])/m;
 
-# 7 zip assertions, +3 octet-stream, +4 alike members, +2 max-files, +4 rar (only actually run when unrar present)
-plan tests => 7 + 3 + 4 + 2 + 4;
+# 7 zip assertions, +3 octet-stream, +4 alike members, +2 max-files, +7 rar (only actually run when unrar present)
+plan tests => 7 + 3 + 4 + 2 + 7;
 
 tstpre ("
   loadhandler Mail::SpamAssassin::Handler::Archive
@@ -137,7 +138,7 @@ ok_all_patterns();
 
 # --- rar (only when unrar is available) -------------------------------------
 SKIP: {
-  skip("no unrar that the handler uses", 4) unless $unrar;
+  skip("no unrar that the handler uses", 7) unless $unrar;
 
   %patterns = (
     ' 1.0 ARC_JS ',     'rar_js_member',
@@ -146,5 +147,13 @@ SKIP: {
   );
   %anti_patterns = ();
   ok (sarun ("-L -t < data/nice/handler_archive_rar", \&patterns_run_cb));
+  ok_all_patterns();
+
+  # a second inner.js after a harmless one, and "my inner.html"
+  %patterns = (
+    ' 1.0 ARC_JS ',   'rar_duplicate_name_member',
+    ' 1.0 ARC_HTML ', 'rar_name_with_space_member',
+  );
+  ok (sarun ("-L -t < data/nice/handler_archive_rar_names", \&patterns_run_cb));
   ok_all_patterns();
 }

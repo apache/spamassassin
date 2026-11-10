@@ -2003,15 +2003,19 @@ sub helper_app_pipe_open {
 sub helper_app_pipe_open_windows {
   my ($fh, $stdinfile, $duperr2out, @cmdline) = @_;
 
-  # use a traditional open(FOO, "cmd |")
-  $cmdline[0] = '"'.$cmdline[0].'"' if ($cmdline[0] !~ /^\".*\"$/);
+  # use a traditional open(FOO, "cmd |"), quoting the program and any
+  # argument with whitespace so that each element stays one argument
+  for my $i (0 .. $#cmdline) {
+    $cmdline[$i] = '"'.$cmdline[$i].'"'
+      if ($i == 0 || $cmdline[$i] =~ /\s/) && $cmdline[$i] !~ /^\".*\"$/;
+  }
   my $cmd = join(' ', @cmdline);
   if ($stdinfile) { $cmd .= qq/ < "$stdinfile"/; }
   if ($duperr2out) {
     # Support custom file target for STDERR, if ">file" specified
     # Caller must make sure the destination is safe and untainted
     if ($duperr2out =~ /^>/) {
-      $cmd .= " 2$duperr2out";
+      $cmd .= ' 2>"'.substr($duperr2out, 1).'"';
     } else {
       $cmd .= " 2>&1";
     }

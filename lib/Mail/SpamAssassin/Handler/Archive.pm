@@ -342,6 +342,10 @@ sub handle_rar {
   my @unsafe = grep { $_ =~ UNSAFE_MEMBER_NAME } @members;
   log_dbg("rar members skipped, unsafe for the command line: @unsafe") if @unsafe;
   @members = grep { $_ !~ UNSAFE_MEMBER_NAME } @members;
+  # one unrar p prints every member with a name, matched regardless of case
+  # on Windows, so ask for each name once
+  my %seen;
+  @members = grep { !$seen{am_running_on_windows() ? lc($_) : $_}++ } @members;
   splice(@members, $max) if @members > $max;
 
   my @parts;
@@ -451,12 +455,16 @@ sub _unrar_list {
 
 # Extract one member to stdout: `unrar p -inul -p- <archive> <member>` prints the
 # file's bytes with no UI noise and never prompts for a password (so
-# password-protected members simply fail and are skipped).  Returns the bytes, or
-# undef on failure or if they exceed $limit, and the number of bytes read.
+# password-protected members simply fail and are skipped).  RARLAB's unrar
+# prints only the first member with the name unless given a -r switch, and -r-
+# lifts that without searching for other archives; unrar-free prints them all.
+# Returns the bytes, or undef on failure or if they exceed $limit, and the
+# number of bytes read.
 sub _unrar_extract {
   my ($self, $pms, $bin, $arc_file, $member, $limit) = @_;
+  my @all = $self->{unrar_kind} eq 'rarlab' ? ('-r-') : ();
   my ($out, $produced) = $self->_run_unrar($pms, $limit, $bin, 'p', '-inul',
-                                           '-p-', '--', $arc_file, $member);
+                                           '-p-', @all, '--', $arc_file, $member);
   return (undef, $produced) if !defined $out || $produced > $limit;
   return ($out, $produced);
 }
