@@ -416,11 +416,7 @@ sub connect_sock {
       $lport = 0;
       dbg("dns: no configured local ports for DNS queries, letting OS choose");
     }
-    if ($attempts+1 > 50) {  # sanity check
-      warn "dns: could not create a DNS resolver socket in $attempts attempts\n";
-      $errno = 0;
-      last;
-    }
+    last if $attempts+1 > 50;  # sanity check
     dbg("dns: LocalAddr: [%s]:%d, name server: [%s]:%d, module %s",
         $srcaddr||'x', $lport,  $ns_addr, $ns_port,  $io_socket_module_name);
     my %args = (
@@ -444,6 +440,10 @@ sub connect_sock {
       if ($self->{conf}->{dns_available_portscount} > 100) {  # still abundant
         $self->disable_available_port($lport);
       }
+    } elsif ($lport) {
+      # $! can be overwritten before new() returns (Windows, IO::Socket::IP),
+      # so try another port; the attempts limit ends a persistent failure
+      dbg("dns: UDP port $lport: $errno, trying another port");
     } else {
       warn "dns: error creating a DNS resolver socket: $errno";
       goto no_sock;
