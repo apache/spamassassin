@@ -3,9 +3,14 @@
 use lib '.'; use lib 't';
 use SATest; sa_t_init("arc");
 
+use constant HAS_ARC_VERIFIER => eval {
+  require Mail::DKIM::ARC::Verifier;
+  version->parse(Mail::DKIM::ARC::Verifier->VERSION) >= version->parse(0.50);
+};
+
 use Test::More;
 plan skip_all => "Net tests disabled" unless conf_bool('run_net_tests');
-plan skip_all => "Needs Mail::DKIM::ARC::Verifier >= 0.50" unless HAS_DKIM_VERIFIER ;
+plan skip_all => "Needs Mail::DKIM::ARC::Verifier >= 0.50" unless HAS_ARC_VERIFIER;
 plan tests => 3;
 
 tstlocalrules (q{
