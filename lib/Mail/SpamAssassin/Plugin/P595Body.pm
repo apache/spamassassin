@@ -159,17 +159,15 @@ sub run_body_fast_scan {
 
       my %alreadydone;
       foreach my $rulename (@caught) {
-        {
-          next if not defined $rulename;
-          # only try each rule once per line
-          next if exists $alreadydone{$rulename};
-          $alreadydone{$rulename} = undef;
+        next if not defined $rulename;
+        # only try each rule once per line
+        next if exists $alreadydone{$rulename};
+        $alreadydone{$rulename} = undef;
 
-          # ignore 0-scored rules, of course
-          next unless $scoresptr->{$rulename};
+        # ignore 0-scored rules, of course
+        next unless $scoresptr->{$rulename};
 
-          $scanner->got_hit($rulename, "BODY: ", ruletype => "p595_body");
-        }
+        $scanner->got_hit($rulename, "BODY: ", ruletype => "p595_body");
       }
     }
     use strict "refs";

@@ -1146,8 +1146,8 @@ sub cleanup {
   my $write_failure = 0;
   my $original_point = tell OUT;
   $original_point >= 0  or die "Can't obtain file position: $!";
-  my $len;
-  do {
+  my $len = 0;
+  while ($len != $nbytes) {
     $len = syswrite (OUT, $self->{string_to_journal}, $nbytes);
 
     # argh, write failure, give up
@@ -1176,7 +1176,7 @@ sub cleanup {
       # if the fs is full, let's give the system a break
       sleep 1;
     }
-  } while ($len != $nbytes);
+  }
 
   if (!close OUT) {
     warn "bayes: cannot write to $path, bayes db update ignored\n";

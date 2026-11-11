@@ -22,7 +22,7 @@ sub decode {
 
     # inflate 1 KB of input at a time (at most about 1 MB of output), returning
     # early once the output is over $limit bytes
-    my $i = new Compress::Raw::Zlib::Inflate( -AppendOutput => 1 );
+    my $i = Compress::Raw::Zlib::Inflate->new( -AppendOutput => 1 );
     my $uncompressed = '';
     my $status = Z_OK;
     for( my $pos=0; $status == Z_OK && $pos<length($data); $pos+=1024 ) {

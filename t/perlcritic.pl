@@ -20,7 +20,7 @@ plan skip_all => "PerlCritic test cannot run in Taint mode" if (${^TAINT});
 my $criticoptions = q{
   severity = 5
   verbose = 9
-  exclude = ValuesAndExpressions::ProhibitLeadingZeros InputOutput::ProhibitBarewordDirHandles InputOutput::ProhibitBarewordFileHandles InputOutput::ProhibitTwoArgOpen BuiltinFunctions::ProhibitStringyEval InputOutput::ProhibitInteractiveTest Bangs::ProhibitBitwiseOperators Bangs::ProhibitDebuggingModules Compatibility::ProhibitThreeArgumentOpen Lax::ProhibitStringyEval::ExceptForRequire Lax::ProhibitLeadingZeros::ExceptChmod ValuesAndExpressions::PreventSQLInjection ControlStructures::ProhibitReturnInDoBlock ValuesAndExpressions::ProhibitAccessOfPrivateData Policy::OTRS::
+  exclude = ValuesAndExpressions::ProhibitLeadingZeros InputOutput::ProhibitBarewordDirHandles InputOutput::ProhibitBarewordFileHandles InputOutput::ProhibitTwoArgOpen BuiltinFunctions::ProhibitStringyEval InputOutput::ProhibitInteractiveTest Bangs::ProhibitBitwiseOperators Bangs::ProhibitDebuggingModules Compatibility::ProhibitThreeArgumentOpen Lax::ProhibitStringyEval::ExceptForRequire Lax::ProhibitLeadingZeros::ExceptChmod ValuesAndExpressions::PreventSQLInjection ControlStructures::ProhibitReturnInDoBlock ValuesAndExpressions::ProhibitAccessOfPrivateData Policy::OTRS:: ProhibitPipeOpen
 
   [TestingAndDebugging::ProhibitNoStrict]
   allow = refs
