@@ -8,13 +8,13 @@ use Test::More;
 # ---------------------------------------------------------------------------
 # UTF-16 -> UTF-8 normalization of a .js extracted from an archive.
 #
-# A .js file extracted from an archive is handed to the JavaScript handler as a
+# A .js file extracted from an archive is handed to the script handler as a
 # synthetic child part carrying its raw bytes.  When those bytes are UTF-16 (a
 # common malware trick -- a .js dropped inside a rar/zip), the handler must see
 # UTF-8 so 'script' regexes can match; otherwise every ASCII character is
 # interleaved with a NUL byte and no rule fires.
 #
-# The JavaScript handler reads the part with decode_and_normalize(), which
+# The script handler reads the part with decode_and_normalize(), which
 # detects undeclared UTF-16 (BOM'd or BOM-less) and transcodes it.  It is gated
 # on normalize_charset (default on); with it off, the raw bytes are left
 # untouched and the rule must NOT fire.
@@ -31,7 +31,7 @@ plan tests => 7;
 tstpre ("
   loadhandler Mail::SpamAssassin::Handler::Archive
   loadhandler Mail::SpamAssassin::Handler::HTML
-  loadhandler Mail::SpamAssassin::Handler::JavaScript
+  loadhandler Mail::SpamAssassin::Handler::Script
 ");
 
 tstlocalrules ('

@@ -33,14 +33,15 @@ if can(Mail::SpamAssassin::Conf::feature_handlers)
 loadhandler Mail::SpamAssassin::Handler::HTML
 endif
 
-# JavaScript Handler - analyze JavaScript parts and match it with 'script' rules.
+# Script Handler - analyze script parts (JavaScript and VBScript, e.g. .js
+# and .vbs attachments) and match them with 'script' rules.
 #
 if can(Mail::SpamAssassin::Conf::feature_handlers)
-loadhandler Mail::SpamAssassin::Handler::JavaScript
+loadhandler Mail::SpamAssassin::Handler::Script
 endif
 
 # SVG Handler - analyse image/svg+xml attachments: match SVG text with 'svgtext' rules,
-# and surface embedded script for the JavaScript handler.
+# and surface embedded script for the Script handler.
 #
 if can(Mail::SpamAssassin::Conf::feature_handlers)
 loadhandler Mail::SpamAssassin::Handler::SVG
@@ -80,7 +81,7 @@ if can(Mail::SpamAssassin::Conf::feature_handlers)
 endif
 
 # Archive - open archive attachments and surface the inner files as sub-parts
-# so the other handlers (HTML, JavaScript, PDF, Image) and body rules can inspect
+# so the other handlers (HTML, Script, PDF, Image) and body rules can inspect
 # them.  rar requires the 'unrar' executable (set archive_unrar_path if not on
 # PATH).  Disabled by default; uncomment to enable.
 #

@@ -14,7 +14,7 @@ use Test::More;
 #   * svgtext rules match the SVG text (and only the SVG, not HTML);
 #   * check_svg_text_ratio() fires (text words but no graphics elements);
 #   * the embedded <script> is surfaced as a text/javascript sub-part and the
-#     JavaScript handler's script rules match it.
+#     script handler's script rules match it.
 #
 # The handler is pure Perl (no external binary), so this test runs everywhere.
 
@@ -22,7 +22,7 @@ plan tests => 7;
 
 tstpre ("
   loadhandler Mail::SpamAssassin::Handler::SVG
-  loadhandler Mail::SpamAssassin::Handler::JavaScript
+  loadhandler Mail::SpamAssassin::Handler::Script
 ");
 
 tstlocalrules ('
@@ -40,7 +40,7 @@ tstlocalrules ('
 
   script  SVG_SCRIPT      /SVGSCRIPT/
   score   SVG_SCRIPT      1.0
-  describe SVG_SCRIPT     embedded SVG script reached the JavaScript handler
+  describe SVG_SCRIPT     embedded SVG script reached the script handler
 
   uri-detail SVG_LINK     type =~ /^svg$/  raw =~ /phish\.example/
   score   SVG_LINK        1.0

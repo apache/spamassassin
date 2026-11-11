@@ -1,0 +1,22 @@
+From: sender@example.com
+To: victim@example.com
+Subject: vbscript attachment test
+Message-Id: <vbs-attach-test@example.com>
+Date: Tue, 10 Jun 2025 12:00:00 +0000
+MIME-Version: 1.0
+Content-Type: multipart/mixed; boundary="BOUND"
+
+--BOUND
+Content-Type: text/plain; charset=us-ascii
+
+ORIGINAL_BODY_MARKER
+
+--BOUND
+Content-Type: application/octet-stream; name="payload.vbs"
+Content-Disposition: attachment; filename="payload.vbs"
+
+Dim marker : marker = "VBSSENTINEL"
+Set shell = CreateObject("WScript.Shell")
+shell.Run "cmd.exe /c whoami", 0, False
+
+--BOUND--

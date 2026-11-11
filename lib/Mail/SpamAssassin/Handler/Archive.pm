@@ -29,7 +29,7 @@ A MIME-part handler that opens C<zip> and C<rar> archive attachments, extracts a
 bounded number of the files inside, and returns each as a child part.  The
 handler framework then re-dispatches every extracted file by its
 C<effective_type> (filename extension first), so an C<inner.js> reaches the
-JavaScript handler, an C<inner.html> reaches the HTML handler, an C<inner.pdf>
+script handler, an C<inner.html> reaches the HTML handler, an C<inner.pdf>
 the PDF handler, an image the image handler, and a nested archive comes back to
 this handler -- all bounded by the framework's depth, part-count and byte
 budgets.

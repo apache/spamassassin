@@ -14,13 +14,13 @@ plan skip_all => 'Need Archive::Zip for this test' unless HAS_ARCHIVE_ZIP;
 #
 # The handler opens zip / rar attachments and returns each inner file as a
 # sub-part, which the framework re-dispatches by filename extension.  So an
-# inner *.js reaches the JavaScript handler and an inner *.html is rendered into
+# inner *.js reaches the script handler and an inner *.html is rendered into
 # the body.  (Note: a plain *.txt member is deliberately NOT surfaced as body
 # text -- only text/plain, text/html and message/* parts feed body rules, and
 # .txt is not in the file-type map -- so the fixtures use *.js and *.html.)
 #
 # We confirm:
-#   * an inner *.js member reaches the JavaScript handler ('script' rule);
+#   * an inner *.js member reaches the script handler ('script' rule);
 #   * an inner *.html member is rendered into the body;
 #   * the same works when the zip is mislabelled application/octet-stream but
 #     named *.zip (Message::Node::effective_type maps it back);
@@ -62,13 +62,13 @@ plan tests => 7 + 3 + 4 + 2 + 7 + 3;
 tstpre ("
   loadhandler Mail::SpamAssassin::Handler::Archive
   loadhandler Mail::SpamAssassin::Handler::HTML
-  loadhandler Mail::SpamAssassin::Handler::JavaScript
+  loadhandler Mail::SpamAssassin::Handler::Script
 " . (defined $unrar ? "  archive_unrar_path $unrar\n" : ""));
 
 tstlocalrules ('
   script ARC_JS         /INNERJS/
   score  ARC_JS         1.0
-  describe ARC_JS       an inner .js file reached the JavaScript handler
+  describe ARC_JS       an inner .js file reached the script handler
 
   body   ARC_HTML       /INNERHTML/
   score  ARC_HTML       1.0

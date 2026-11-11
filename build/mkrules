@@ -248,7 +248,7 @@ sub lint_rule_text {
     # so older code without handler support still lints.
     if can(Mail::SpamAssassin::Conf::feature_handlers)
     loadhandler Mail::SpamAssassin::Handler::HTML
-    loadhandler Mail::SpamAssassin::Handler::JavaScript
+    loadhandler Mail::SpamAssassin::Handler::Script
     loadhandler Mail::SpamAssassin::Handler::SVG
     loadhandler Mail::SpamAssassin::Handler::ICS
     endif

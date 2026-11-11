@@ -17,21 +17,25 @@
 
 =head1 NAME
 
-Mail::SpamAssassin::Handler::JavaScript - A MIME-part handler for C<text/javascript> parts
+Mail::SpamAssassin::Handler::Script - A MIME-part handler for C<text/javascript> and C<text/vbscript> parts
 
 =head1 SYNOPSIS
 
-  loadhandler  Mail::SpamAssassin::Handler::JavaScript
+  loadhandler  Mail::SpamAssassin::Handler::Script
 
   script  RULE_NAME  /pattern/modifiers
   script  RULE_NAME  eval:check_script_contains_recip_addr()
 
 =head1 DESCRIPTION
 
-A MIME-part handler for C<text/javascript> parts. As it consumes each JavaScript
-part: it collects the script text for C<script> rules (see L</SCRIPT RULES>) and
-adds any navigation/redirect URLs it finds (e.g. C<< window.location = '...' >>)
-to the URI detail list with type C<script>, so C<uri-detail> rules can target them.
+A MIME-part handler for script parts -- both C<text/javascript> and
+C<text/vbscript> (e.g. C<.js>, C<.vbs> and C<.vbe> attachments).  Both are
+collected into one script stream and matched by one C<script> rule type.
+
+As it consumes each script part: it collects the script text for C<script> rules
+(see L</SCRIPT RULES>) and adds any navigation/redirect URLs it finds (e.g.
+C<< window.location = '...' >>) to the URI detail list with type C<script>, so
+C<uri-detail> rules can target them.
 
 =head1 RETURNS
 
@@ -58,7 +62,7 @@ also reference an eval function:
 
 =cut
 
-package Mail::SpamAssassin::Handler::JavaScript;
+package Mail::SpamAssassin::Handler::Script;
 
 use strict;
 use warnings;
@@ -70,7 +74,7 @@ use Mail::SpamAssassin::Util qw(compile_regexp untaint_var);
 
 our @ISA = qw(Mail::SpamAssassin::Handler);
 
-sub log_dbg { Mail::SpamAssassin::Logger::dbg ("javascript: @_"); }
+sub log_dbg { Mail::SpamAssassin::Logger::dbg ("script: @_"); }
 
 sub new {
   my ($class, $mailsaobject) = @_;
@@ -81,10 +85,13 @@ sub new {
   $self->register_eval_rule("check_script_contains_recip_addr",
                             $Mail::SpamAssassin::Conf::TYPE_BODY_EVALS);
 
-  # Register as the handler for JavaScript parts.  text/javascript is the
-  # canonical type; the application/javascript et al. aliases and the .js
-  # filename map to it via Message::Node::effective_type (see Node.pm).
-  $self->register_handler('text/javascript', 'handle_javascript');
+  # Register as the handler for script parts.  text/javascript and
+  # text/vbscript are the canonical types; the application/javascript and
+  # application/vbscript et al. aliases and the .js/.vbs/.vbe filenames map to
+  # them via Message::Node::effective_type (see Node.pm).  Both feed the same
+  # script stream and the same 'script' rule type.
+  $self->register_handler('text/javascript', 'handle_script');
+  $self->register_handler('text/vbscript',   'handle_script');
 
   $self->set_config($mailsaobject->{conf});
 
@@ -98,7 +105,7 @@ sub set_config {
   push (@cmds, (
     {
       # script RULENAME /pattern/modifiers   (or  script RULENAME eval:func())
-      # Define a rule that matches against collected JavaScript.  Regex rules are
+      # Define a rule that matches against collected script text.  Regex rules are
       # compiled and stored; the match loop is built in finish_parsing_end.  An
       # eval: form just registers the named eval rule.
       setting => 'script',
@@ -120,7 +127,7 @@ sub set_config {
 
         my ($re, $err) = compile_regexp($pattern, 1);
         if (!$re) {
-          dbg("javascript: invalid script regexp for $name '$pattern': $err");
+          dbg("script: invalid script regexp for $name '$pattern': $err");
           return $Mail::SpamAssassin::Conf::INVALID_VALUE;
         }
 
@@ -134,21 +141,21 @@ sub set_config {
   $conf->{parser}->register_commands(\@cmds);
 }
 
-# handle_javascript($node, $pms): collect one part's JavaScript onto
-# $pms->{Handler}{JavaScript}{script_text} (one entry per part, document order),
+# handle_script($node, $pms): collect one part's script text onto
+# $pms->{Handler}{Script}{script_text} (one entry per part, document order),
 # and add any redirect URLs it navigates to (window.location = '...', etc.) to the
 # URI detail list.  Produces no child parts.
-sub handle_javascript {
+sub handle_script {
   my ($self, $node, $pms) = @_;
 
-  my ($js, $chars) = $node->decode_and_normalize();
-  return [] unless defined $js && length $js;
-  utf8::encode($js) if $chars;
+  my ($script, $chars) = $node->decode_and_normalize();
+  return [] unless defined $script && length $script;
+  utf8::encode($script) if $chars;
 
-  push @{ $pms->{Handler}{JavaScript}{script_text} }, $js;
-  log_dbg("collected ".length($js)." bytes of script from ".($node->{name} || $node->{type} || '?'));
+  push @{ $pms->{Handler}{Script}{script_text} }, $script;
+  log_dbg("collected ".length($script)." bytes of script from ".($node->{name} || $node->{type} || '?'));
 
-  $self->_extract_uris($js, $pms);
+  $self->_extract_uris($script, $pms);
 
   return [];
 }
@@ -166,13 +173,13 @@ sub handle_javascript {
 # in the script) to keep noise -- analytics beacons, commented URLs, library CDN
 # references -- out of the URI list.
 sub _extract_uris {
-  my ($self, $js, $pms) = @_;
+  my ($self, $script, $pms) = @_;
 
   my %seen;
   # (window|top|self|parent|document)?.location  followed by either an
   # assignment (= 'url' / .href = 'url') or a navigation call
   # (.replace('url') / .assign('url')), capturing the quoted http(s) URL.
-  while ( $js =~ m{
+  while ( $script =~ m{
         (?: \b (?: window | top | self | parent | document ) \s* \. \s* )?
         location
         \s*
@@ -185,7 +192,7 @@ sub _extract_uris {
     my $uri = $2;
     next if $seen{$uri}++;
     log_dbg("found redirect URI: $uri");
-    $pms->add_uri_detail_list($uri, { script => 1 }, 'JavaScript');
+    $pms->add_uri_detail_list($uri, { script => 1 }, 'Script');
   }
 }
 
@@ -202,7 +209,7 @@ sub finish_parsing_end {
   my $would_log = would_log('dbg');
 
   my $eval = <<'EOF';
-package Mail::SpamAssassin::Handler::JavaScript;
+package Mail::SpamAssassin::Handler::Script;
 
 sub _run_script_rules {
     my ($self, $opts) = @_;
@@ -262,7 +269,7 @@ EOF
   no warnings 'redefine';
   eval untaint_var($eval);
   if ($@) {
-    die("javascript: error compiling script rules: $@");
+    die("script: error compiling script rules: $@");
   }
 }
 
@@ -276,10 +283,10 @@ sub parsed_metadata {
 }
 
 # The text source for script rules and the eval rule: the per-part script text
-# collected by handle_javascript (in document order).
+# collected by handle_script (in document order).
 sub _get_script_text {
   my ($self, $pms) = @_;
-  return ($pms->{Handler}{JavaScript} && $pms->{Handler}{JavaScript}{script_text}) || [];
+  return ($pms->{Handler}{Script} && $pms->{Handler}{Script}{script_text}) || [];
 }
 
 # Eval rule: true if the recipient address appears in any collected script text.

@@ -6,14 +6,14 @@ use SATest; sa_t_init("handler_decode_normalize");
 use Test::More;
 
 # ---------------------------------------------------------------------------
-# Text handlers (HTML, JavaScript, SVG, ICS) read their part with
+# Text handlers (HTML, Script, SVG, ICS) read their part with
 # decode_and_normalize(), so they see UTF-8 whatever the part's charset, and
 # whether it is a real MIME part or a synthetic one.
 #
 #   - a UTF-16LE .js attached directly (no BOM, no charset) is detected as
 #     UTF-16 and transcoded; with normalize_charset 0 it is left alone
 #   - <script> in an HTML attachment, which the HTML handler parses as perl
-#     characters, is passed on to the JavaScript handler as UTF-8 bytes
+#     characters, is passed on to the script handler as UTF-8 bytes
 #   - SVG text declared windows-1251 is transcoded to UTF-8
 #   - SVG text declared UTF-8, with a numeric entity, is UTF-8 with
 #     normalize_charset on or off (declared UTF-8 is decoded even when off)
@@ -26,7 +26,7 @@ plan tests => 17;
 
 tstpre ("
   loadhandler Mail::SpamAssassin::Handler::HTML
-  loadhandler Mail::SpamAssassin::Handler::JavaScript
+  loadhandler Mail::SpamAssassin::Handler::Script
   loadhandler Mail::SpamAssassin::Handler::SVG
   loadhandler Mail::SpamAssassin::Handler::ICS
 ");

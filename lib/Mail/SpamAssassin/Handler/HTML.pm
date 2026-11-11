@@ -47,7 +47,7 @@ dispatched to any registered image handler.
 
 Embedded JavaScript -- both C<< <script> >> element bodies and attribute-level
 JS (C<on*> handlers, C<javascript:> URIs) -- returned as C<text/javascript>
-parts for the JavaScript handler.  Because script in a rendered message body is
+parts for the script handler.  Because script in a rendered message body is
 inert (no MUA executes it), these are surfaced B<only when the HTML part is
 itself an attachment>; body script is dropped.
 
@@ -120,17 +120,17 @@ sub handle_html {
   # html_tag / html_attributes).  Both <script> element bodies and attribute-level
   # JS (on* handlers, javascript: URIs) are buffered under text/javascript.  The
   # framework dispatches each by type (image/* -> image handler, text/html -> back
-  # to this handler, text/javascript -> JavaScript handler, application/ld+json ->
+  # to this handler, text/javascript -> script handler, application/ld+json ->
   # elsewhere or nowhere, ...).  This is how a <script type="application/ld+json">
-  # data block stays out of the JavaScript handler.
+  # data block stays out of the script handler.
   #
   # JavaScript in a *rendered message body* is inert -- no MUA executes <script>
-  # in displayed HTML -- so we do NOT surface body script to the JavaScript
+  # in displayed HTML -- so we do NOT surface body script to the script
   # handler at all.  Only script that lives in an attachment can actually run if
   # the user opens it, so we emit the text/javascript parts only when this HTML
   # part is itself an attachment (Content-Disposition: attachment, or it carries a
   # filename).  Script from a .js attachment or an archive member reaches the
-  # JavaScript handler by other dispatch paths and is unaffected by this gate.
+  # script handler by other dispatch paths and is unaffected by this gate.
   # Non-script parts (inline data: images, ld+json, ...) are always surfaced.
   my $is_attach = (defined $node->{disposition} && $node->{disposition} eq 'attachment')
                   || defined $node->{name};
