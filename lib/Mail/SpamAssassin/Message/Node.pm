@@ -87,6 +87,8 @@ my %file_type_map = (
     'tgz'   => 'application/gzip',
     'tif'   => 'image/tiff',
     'tiff'  => 'image/tiff',
+    'vbe'   => 'text/vbscript',
+    'vbs'   => 'text/vbscript',
     'webp'  => 'image/webp',
     'zip'   => 'application/zip',
 );
@@ -102,7 +104,7 @@ my %mime_type_map = (
     'application/acrobat'        => 'application/pdf',
     'text/pdf'                   => 'application/pdf',
     'text/x-pdf'                 => 'application/pdf',
-    # JavaScript: text/javascript is canonical (the JavaScript handler's type).
+    # JavaScript: text/javascript is canonical (a Script handler type).
     'application/javascript'     => 'text/javascript',
     'application/x-javascript'   => 'text/javascript',
     'application/ecmascript'     => 'text/javascript',
@@ -115,9 +117,15 @@ my %mime_type_map = (
     'text/livescript'            => 'text/javascript',
     'text/x-javascript'          => 'text/javascript',
     'text/x-ecmascript'          => 'text/javascript',
+    # VBScript: text/vbscript is canonical (a Script handler type).
+    'application/vbscript'       => 'text/vbscript',
+    'application/x-vbscript'     => 'text/vbscript',
+    'application/x-vbs'          => 'text/vbscript',
+    'text/x-vbscript'            => 'text/vbscript',
+    'text/vbs'                   => 'text/vbscript',
     # JSON: application/json is canonical.  JSON-LD and the +json structured
     # types are data, not script; aliasing them keeps a <script type=...> block
-    # of this kind out of the JavaScript handler (and ready for a JSON handler).
+    # of this kind out of the Script handler (and ready for a JSON handler).
     'application/ld+json'        => 'application/json',
     'text/json'                  => 'application/json',
     'text/x-json'                => 'application/json',

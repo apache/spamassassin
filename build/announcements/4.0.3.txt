@@ -26,11 +26,12 @@ Notable features:
 =================
 
   - New MIME-part handler framework (Mail::SpamAssassin::Handler::*):
-  HTML, JavaScript, SVG, Image (OCR via tesseract), PDF, ICS and
-  Archive (zip/rar) handlers, plus a new pure-Perl PDF parser
-  (Mail::SpamAssassin::PDF). Adds new "script", "svgtext", "imagetext",
-  "pdftext" and "icstext" rule types. Handlers can be nested to allow
-  scanning embedded content (e.g. images in PDFs, PDFs in ZIPs, etc.)
+  HTML, Script (JavaScript and VBScript), SVG, Image (OCR via
+  tesseract), PDF, ICS and Archive (zip/rar) handlers, plus a new
+  pure-Perl PDF parser (Mail::SpamAssassin::PDF). Adds new "script",
+  "svgtext", "imagetext", "pdftext" and "icstext" rule types. Handlers
+  can be nested to allow scanning embedded content (e.g. images in
+  PDFs, PDFs in ZIPs, etc.)
 
   - New Mail::SpamAssassin::Plugin::NeuralNetwork plugin, which scores
   messages using the Fast Artificial Neural Network (FANN) library.
@@ -92,7 +93,7 @@ This release addresses the following issues:
   - HTML: on*, javascript: and data: attributes are now scanned on
   every tag, catching script in e.g. inline SVG elements
 
-  - JavaScript, SVG and ICS handlers now get charset-normalized text
+  - Script, SVG and ICS handlers now get charset-normalized text
   when normalize_charset is on
 
   - PDF: fixed PDFInfo missing images with width/height on separate
@@ -140,6 +141,18 @@ freemail_welcomelist, hashbl_acl_*, bayes_stopword_*,
 olemacro_max_file, olemacro_num_mime, olemacro_num_zip and
 olemacro_zip_depth. So are all Redirectors settings, including the
 url_shortener* aliases.
+
+The JavaScript handler of the 4.0.3 release candidates is now the
+Script handler, which also handles VBScript. Installing SpamAssassin
+does not overwrite existing .pre configuration files, so if you
+installed a 4.0.3 release candidate, either delete v403.pre before
+installing 4.0.3, or change the line
+
+  loadhandler Mail::SpamAssassin::Handler::JavaScript
+
+in it to
+
+  loadhandler Mail::SpamAssassin::Handler::Script
 
 Notable Internal changes
 ------------------------

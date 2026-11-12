@@ -72,8 +72,8 @@ lib/Mail/SpamAssassin/Handler/Archive.pm
 lib/Mail/SpamAssassin/Handler/HTML.pm
 lib/Mail/SpamAssassin/Handler/ICS.pm
 lib/Mail/SpamAssassin/Handler/Image.pm
-lib/Mail/SpamAssassin/Handler/JavaScript.pm
 lib/Mail/SpamAssassin/Handler/SVG.pm
+lib/Mail/SpamAssassin/Handler/Script.pm
 lib/Mail/SpamAssassin/Locales.pm
 lib/Mail/SpamAssassin/Locker.pm
 lib/Mail/SpamAssassin/Locker/Flock.pm
@@ -468,6 +468,8 @@ t/data/nice/handler_svg_cp1251
 t/data/nice/handler_svg_entity
 t/data/nice/handler_svg_utf8
 t/data/nice/handler_textplain
+t/data/nice/handler_vbscript_alias
+t/data/nice/handler_vbscript_attach
 t/data/nice/mailman_message.txt
 t/data/nice/mime1
 t/data/nice/mime2

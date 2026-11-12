@@ -36,7 +36,7 @@ from HTML body text so the same word (e.g. "docusign") can be scored differently
 in an SVG than in ordinary HTML.
 
 Links found in the SVG are added to the URI detail list (type C<svg>), and any
-embedded JavaScript is surfaced for the JavaScript handler -- see L</RETURNS>.
+embedded JavaScript is surfaced for the script handler -- see L</RETURNS>.
 An SVG whose ratio of text words to graphics elements is high -- a mostly-text
 "image" -- is flagged via the C<check_svg_text_ratio()> eval rule (see
 L</EVAL RULES>).
@@ -45,8 +45,8 @@ L</EVAL RULES>).
 
 The handler returns any embedded JavaScript found in the SVG as a single
 C<< { type => 'text/javascript', data => $bytes } >> sub-part, which the handler
-framework dispatches to the JavaScript handler
-(L<Mail::SpamAssassin::Handler::JavaScript>).  The script bodies of C<< <script> >>
+framework dispatches to the script handler
+(L<Mail::SpamAssassin::Handler::Script>).  The script bodies of C<< <script> >>
 elements, C<javascript:> URIs, and C<on*> event-handler attributes are joined
 into that one part.  When the SVG contains no script, the handler returns an
 empty list.

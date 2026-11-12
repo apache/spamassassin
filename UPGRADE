@@ -147,16 +147,16 @@ Note for Users Upgrading to SpamAssassin 4.0.3
   Mail::SpamAssassin::Handler class (itself a subclass of
   Mail::SpamAssassin::Plugin); see its documentation for the API.
 
-  Seven handlers ship with this release. HTML, JavaScript, SVG and ICS
+  Seven handlers ship with this release. HTML, Script, SVG and ICS
   are loaded by default from v403.pre; Image, PDF and Archive are included
   commented-out because they depend on external tools or non-core Perl
   modules (see below).
 
     * HTML (text/html) renders each HTML part and surfaces content that
       has no MIME part of its own -- inline data: images and embedded
-      JavaScript -- as child parts for the image and JavaScript
-      handlers. Body script is inert and only surfaced when the HTML
-      part is itself an attachment.
+      script -- as child parts for the image and Script handlers. Body
+      script is inert and only surfaced when the HTML part is itself an
+      attachment.
 
       IMPORTANT: this handler is now the only thing that renders HTML.
       If it is not loaded, text/html parts are not parsed at all: body
@@ -173,16 +173,16 @@ Note for Users Upgrading to SpamAssassin 4.0.3
       SpamAssassin warns once per process when a message contains a
       text/html part and no handler is registered for it.
 
-    * JavaScript (text/javascript) collects script text for the new
-      "script" rule type (like rawbody rules) and adds navigation/
-      redirect URLs (e.g. window.location = '...') to the URI detail
-      list with type "script". Provides the check_script_contains_recip_addr
-      eval.
+    * Script (text/javascript, text/vbscript) collects JavaScript and
+      VBScript text for the new "script" rule type (like rawbody rules)
+      and adds navigation/redirect URLs (e.g. window.location = '...')
+      to the URI detail list with type "script". Provides the
+      check_script_contains_recip_addr eval.
 
     * SVG (image/svg+xml) parses SVG attachments, exposing their text to
       the new "svgtext" rule type (kept separate from HTML body text),
       adding links to the URI detail list (type "svg"), and surfacing
-      embedded script for the JavaScript handler. Provides the
+      embedded script for the Script handler. Provides the
       check_svg_text_ratio eval, which flags a mostly-text "image" by the
       ratio of text words to graphics elements.
 

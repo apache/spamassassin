@@ -197,7 +197,7 @@ sub html_end {
   # Turn each buffered <script> body into a {type,data} pseudo-part and add it to
   # data_parts, alongside the inline data: URIs collected by add_data_uri.  Both
   # are "typed content the parser found that the framework should dispatch", so
-  # they share one list: the JavaScript handler picks up text/javascript, an
+  # they share one list: the Script handler picks up text/javascript, an
   # image handler picks up image/*, application/ld+json goes nowhere, etc.
   if (ref $self->{script_buf} eq 'HASH') {
     for my $type (sort keys %{ $self->{script_buf} }) {
@@ -414,7 +414,7 @@ sub html_tag {
       $self->html_tests($tag, $attr, $num);
       # Remember the declared type of the <script> we are entering, so its body
       # (collected in html_text) is emitted as a sub-part of that type and the
-      # handler framework dispatches it correctly: text/javascript -> JavaScript
+      # handler framework dispatches it correctly: text/javascript -> Script
       # handler; application/ld+json and other data types -> their own handler
       # (or nowhere).  Per the HTML spec a missing/empty type (or "module") is
       # JavaScript, for which text/javascript is the canonical type.
@@ -501,7 +501,7 @@ sub push_uri {
 # type so callers can build a pseudo MIME part for it.  Collects ANY declared
 # type -- the caller (Handler::HTML) emits each as a sub-part of that type, which
 # the framework dispatches to the right handler (image/* -> image handler,
-# text/html -> html handler, text/javascript -> JavaScript handler, ...).
+# text/html -> html handler, text/javascript -> Script handler, ...).
 #   data:[<mediatype>][;base64],<data>
 sub add_data_uri {
   my ($self, $uri) = @_;
@@ -1116,7 +1116,7 @@ sub html_tests {
 #       * on* event-handler attributes (onclick, onload, onerror, ...)
 #       * any attribute value starting with "javascript:" (the code after it)
 #     At eof all text/javascript buffer is folded into a single synthetic part
-#     (see finish()) that the framework dispatches to the JavaScript handler, so
+#     (see finish()) that the framework dispatches to the Script handler, so
 #     script rules see attribute JS and <script> bodies together.
 #   - inline data: URIs -> add_data_uri(), which stashes a {type,data} part so
 #     the caller can emit it as a sub-part of its declared type (image/*,
@@ -1174,7 +1174,7 @@ sub html_text {
     # Buffer the <script> body under its declared type (set in html_tag; default
     # text/javascript).  At eof these are turned into {type,data} sub-parts (see
     # the data_parts handling in finish()), which the framework dispatches -- JS
-    # to the JavaScript handler, application/ld+json etc. elsewhere.  The text is
+    # to the Script handler, application/ld+json etc. elsewhere.  The text is
     # suppressed from the rendered body either way.
     my $type = $self->{script_type} || 'text/javascript';
     $self->{script_buf}{$type} .= $text;
