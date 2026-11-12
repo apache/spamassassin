@@ -6,8 +6,8 @@ use Mail::SpamAssassin::Util;
 
 use Test::More;
 
-use constant HAS_ARCHIVE_ZIP => eval { require Archive::Zip; };
-plan skip_all => 'Need Archive::Zip for this test' unless HAS_ARCHIVE_ZIP;
+use constant HAS_ARCHIVE_ZIP => eval { require Archive::Zip; Archive::Zip->VERSION(1.34); };
+plan skip_all => 'Need Archive::Zip 1.34 or later for this test' unless HAS_ARCHIVE_ZIP;
 
 # ---------------------------------------------------------------------------
 # End-to-end test of Mail::SpamAssassin::Handler::Archive.

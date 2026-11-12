@@ -66,7 +66,7 @@ encrypted documents.
 
 =head1 REQUIREMENT
 
-This plugin requires the Archive::Zip perl module.
+This plugin requires the Archive::Zip perl module, version 1.34 or later.
 
 =head1 USER PREFERENCES
 
@@ -143,7 +143,7 @@ sub new {
   $self->register_method_priority ("parsed_metadata", -1);
 
   if (!Mail::SpamAssassin::Util::Zip::HAS_ARCHIVE_ZIP) {
-    warn "OLEVBMacro: check_zip not supported, required module Archive::Zip missing\n";
+    warn "OLEVBMacro: check_zip not supported, required module Archive::Zip 1.34 or later not available\n";
   }
 
   return $self;

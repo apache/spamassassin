@@ -327,7 +327,7 @@ $makefile{META_MERGE} = {
         'Net::Patricia' =>             1.16,
         'Net::CIDR::Lite' =>           0,
         'BSD::Resource' =>             0,
-        'Archive::Zip' =>              0,
+        'Archive::Zip' =>              1.34,
         'Email::Address::XS' =>        0,
         'Mail::DMARC' =>               0,
       },

@@ -3,10 +3,10 @@
 use lib '.'; use lib 't';
 use SATest; sa_t_init("olevbmacro");
 
-use constant HAS_ARCHIVE_ZIP => eval { require Archive::Zip; };
+use constant HAS_ARCHIVE_ZIP => eval { require Archive::Zip; Archive::Zip->VERSION(1.34); };
 
 use Test::More;
-plan skip_all => 'Need Archive::Zip for this test' unless HAS_ARCHIVE_ZIP;
+plan skip_all => 'Need Archive::Zip 1.34 or later for this test' unless HAS_ARCHIVE_ZIP;
 plan tests => 12;
 
 tstlocalrules (q{

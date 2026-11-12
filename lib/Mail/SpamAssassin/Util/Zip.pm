@@ -31,9 +31,9 @@ Mail::SpamAssassin::Util::Zip - read zip archives within a size limit
 
 =head1 DESCRIPTION
 
-Reads zip archives held in memory with L<Archive::Zip>, uncompressing members
-in small steps so that the output never goes far past the caller's limit.  The
-sizes declared in an archive are not trusted.
+Reads zip archives held in memory with L<Archive::Zip> 1.34 or later,
+uncompressing members in small steps so that the output never goes far past the
+caller's limit.  The sizes declared in an archive are not trusted.
 
 Several zip archives joined end to end, a known way of hiding files from zip
 readers that show only the first or only the last, are all read.
@@ -48,7 +48,8 @@ use re 'taint';
 
 use Mail::SpamAssassin::Logger;
 
-use constant HAS_ARCHIVE_ZIP => eval { require Archive::Zip; 1 };
+use constant HAS_ARCHIVE_ZIP =>
+  eval { require Archive::Zip; Archive::Zip->VERSION(1.34); 1 };
 
 # 1 KB of deflated input uncompresses to at most about 1 MB
 use constant CHUNK_SIZE => 1024;
@@ -60,10 +61,10 @@ use constant MAX_ARCHIVES => 4;
 
 =item open_zip(\$data)
 
-Returns an object for the zip archives in C<$data>, or undef if Archive::Zip is
-not installed or no zip archive can be read from the data.  Of joined archives,
-up to 4 are read from the start of the data, and the last one is always read.
-C<$data> must not change while the object is in use.
+Returns an object for the zip archives in C<$data>, or undef if Archive::Zip
+1.34 or later is not installed or no zip archive can be read from the data.  Of
+joined archives, up to 4 are read from the start of the data, and the last one
+is always read.  C<$data> must not change while the object is in use.
 
 The object's C<members>, C<memberNamed> and C<membersMatching> methods work as
 those of L<Archive::Zip> do, over all the archives read, in order.

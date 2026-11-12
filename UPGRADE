@@ -24,6 +24,10 @@ Note for Users Upgrading to SpamAssassin 4.0.3
   preferences. Move any of these from users' preferences to the site
   configuration.
 
+- Mail::SpamAssassin::Plugin::OLEVBMacro no longer uses IO::String, and
+  needs Archive::Zip 1.34 or later to check zip files and Office Open XML
+  documents.
+
 - dns_available, dns_server, dns_options, dns_query_restriction,
   lock_method, bayes_sql_override_username, user_awl_sql_override_username,
   spamcop_relayhost, asn_lookup and asn_lookup_ipv6 (which needed
@@ -216,9 +220,9 @@ Note for Users Upgrading to SpamAssassin 4.0.3
     * Archive (application/zip, application/vnd.rar) opens zip and rar
       attachments and returns the files inside as child parts, which the
       framework re-dispatches to the other handlers by type. Provides the
-      check_archive_file_count eval. Zip uses the Archive::Zip module; rar
-      shells out to RARLAB's unrar or unrar-free 0.2.0 or later (see
-      archive_unrar_path).
+      check_archive_file_count eval. Zip uses the Archive::Zip module
+      (1.34 or later); rar shells out to RARLAB's unrar or unrar-free
+      0.2.0 or later (see archive_unrar_path).
 
 Note for Users Upgrading to SpamAssassin 4.0.2
 ----------------------------------------------
