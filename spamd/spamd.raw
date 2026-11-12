@@ -1448,7 +1448,7 @@ sub spawn {
       # use the POSIX functions to hide the platform specific workarounds 
       dbg("spamd: Privilege de-escalation from user $< and groups $(\n");
       my $togids = "$ugid ".get_user_groups($uuid);
-      if ($( ne $togids || $) ne $togids) {
+      if (!gids_match($(, $togids) || !gids_match($), $togids)) {
         $! = 0; POSIX::setgid($ugid);  # set effective and real gid
         if ($!) { warn("spamd: POSIX::setgid $ugid failed: $!\n"); }
         $! = 0; $( = $ugid;
@@ -2648,6 +2648,18 @@ sub restore_euid {
       die("spamd: return setuid failed");
     }
   }
+}
+
+# true if a gid list like $( or $) has the wanted first gid and the wanted
+# groups; the OS decides the order of the groups
+sub gids_match {
+  my ($have, $want) = @_;
+  my ($have_gid, @have) = split(' ', $have);
+  my ($want_gid, @want) = split(' ', $want);
+  return 0 if $have_gid != $want_gid;
+  my %have = map { $_ => 1 } $have_gid, @have;
+  my %want = map { $_ => 1 } $want_gid, @want;
+  return join(' ', sort keys %have) eq join(' ', sort keys %want);
 }
 
 sub handle_user_setuid_basic {
