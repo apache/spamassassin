@@ -313,7 +313,7 @@ sub print_version {
   printf("SpamAssassin Server version %s\n", Mail::SpamAssassin::Version());
   printf("  running on Perl %s\n",
          join(".", map( int($_||0), ($] =~ /(\d)\.(\d{3})(\d{3})?/) )));
-  eval { require IO::Socket::SSL; };
+  eval { require IO::Socket::SSL; IO::Socket::SSL->VERSION(1.994); };
   printf("  with SSL support (%s %s)\n", "IO::Socket::SSL", $IO::Socket::SSL::VERSION) unless ($@);
   eval { require Compress::Zlib; };
   printf("  with zlib support (%s %s)\n", "Compress::Zlib", $Compress::Zlib::VERSION) unless ($@);
@@ -1121,9 +1121,9 @@ sub server_sock_setup_inet {
                              && IO::Socket::IP->VERSION >= 0.09;
     if ($ssl) {
       if (!$have_ssl_module) {
-	eval { require IO::Socket::SSL; }
+	eval { require IO::Socket::SSL; IO::Socket::SSL->VERSION(1.994); }
 	or die "spamd: SSL encryption requested, ".
-	    "but IO::Socket::SSL is unavailable ($@)\n";
+	    "but IO::Socket::SSL 1.994 or later is unavailable ($@)\n";
 	$have_ssl_module = 1;
       }
       %sockopt = (%sockopt, (
@@ -3926,7 +3926,7 @@ home directory instead.
 =item B<--ssl>
 
 Accept only SSL connections on the associated port.
-The B<IO::Socket::SSL> perl module must be installed.
+The B<IO::Socket::SSL> perl module, version 1.994 or later, must be installed.
 
 When used without B<-i> / B<--listen> and without B<--ssl-port>, the single
 default listener (B<--port>) is converted to SSL.  When used together with

@@ -221,7 +221,7 @@ our @OPTIONAL_MODULES = (
 },
 {
   module => 'IO::Socket::SSL',
-  version => 1.76,
+  version => 1.994,
   desc => 'If you wish to use SSL encryption to communicate between spamc and
   spamd (the --ssl option to spamd), you need to install this
   module. (You will need the OpenSSL libraries and use the

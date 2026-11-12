@@ -372,7 +372,7 @@ is too low for them to be used.
     IPv6 will not be available.  Some plugins and underlying modules may
     also prefer IO::Socket::IP over IO::Socket::INET6.
 
-  - IO::Socket::SSL (from CPAN)
+  - IO::Socket::SSL >= 1.994 (from CPAN)
 
     If you wish to use SSL encryption to communicate between spamc and spamd
     (the --ssl option to spamd), you need to install this module.  (You will
