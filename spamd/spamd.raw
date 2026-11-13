@@ -1676,7 +1676,8 @@ sub accept_a_conn {
   }
 
   # Bah!
-  if ( !$client  || !defined $client->connected() ) {
+  if ( !$client ||
+       (!$client->isa('IO::Socket::UNIX') && !defined $client->connected()) ) {
 
     # this can happen when interrupted by SIGCHLD on Solaris,
     # perl 5.8.0, and some other platforms with -m.
