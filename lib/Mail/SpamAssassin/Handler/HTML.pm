@@ -64,6 +64,7 @@ use re 'taint';
 use Mail::SpamAssassin::Handler;
 use Mail::SpamAssassin::HTML;
 use Mail::SpamAssassin::Logger;
+use Mail::SpamAssassin::Message::Node;
 
 our @ISA = qw(Mail::SpamAssassin::Handler);
 
@@ -124,20 +125,24 @@ sub handle_html {
   # elsewhere or nowhere, ...).  This is how a <script type="application/ld+json">
   # data block stays out of the script handler.
   #
-  # JavaScript in a *rendered message body* is inert -- no MUA executes <script>
+  # Script in a *rendered message body* is inert -- no MUA executes <script>
   # in displayed HTML -- so we do NOT surface body script to the script
   # handler at all.  Only script that lives in an attachment can actually run if
-  # the user opens it, so we emit the text/javascript parts only when this HTML
-  # part is itself an attachment (Content-Disposition: attachment, or it carries a
-  # filename).  Script from a .js attachment or an archive member reaches the
+  # the user opens it, so we emit script parts (canonical type text/javascript or
+  # text/vbscript, whatever the declared type) only when this HTML part is itself
+  # an attachment (Content-Disposition: attachment, or it carries a filename).
+  # Script from a .js attachment or an archive member reaches the
   # script handler by other dispatch paths and is unaffected by this gate.
   # Non-script parts (inline data: images, ld+json, ...) are always surfaced.
   my $is_attach = (defined $node->{disposition} && $node->{disposition} eq 'attachment')
                   || defined $node->{name};
   my $data_parts = $results->{data_parts};
   if (ref $data_parts eq 'ARRAY') {
-    push @parts,
-      grep { $is_attach || ($_->{type} // '') ne 'text/javascript' } @$data_parts;
+    for my $dp (@$data_parts) {
+      my $type = Mail::SpamAssassin::Message::Node::canonical_type($dp->{type} // '');
+      next if !$is_attach && $type =~ m{^text/(?:javascript|vbscript)\z};
+      push @parts, $dp;
+    }
   }
 
   return \@parts;

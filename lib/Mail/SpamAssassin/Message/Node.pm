@@ -862,6 +862,12 @@ sub _normalize {
   return $rv;
 }
 
+# The canonical type for a MIME type, after the aliases in %mime_type_map
+sub canonical_type {
+  my ($type) = @_;
+  return $mime_type_map{$type} // $type;
+}
+
 # Parse effective content type (Bug 6260, 6439)
 sub effective_type {
   my ($self) = @_;
@@ -871,10 +877,8 @@ sub effective_type {
     $ext = lc $1 if $name =~ /\.([^.]+)$/;
     if ( defined $ext && exists $file_type_map{$ext} ) {
       $self->{'effective_type'} = $file_type_map{$ext};
-    } elsif ( exists $mime_type_map{$self->{'type'}} ) {
-      $self->{'effective_type'} = $mime_type_map{$self->{'type'}};
     } else {
-      $self->{'effective_type'} = $self->{'type'};
+      $self->{'effective_type'} = canonical_type($self->{'type'});
     }
   }
   return $self->{'effective_type'};
