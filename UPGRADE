@@ -1,6 +1,8 @@
 Note for Users Upgrading to SpamAssassin 4.0.3
 ----------------------------------------------
 
+- SpamAssassin now requires HTML::Parser 3.72 or later.
+
 - Mail::SpamAssassin::Plugin::DecodeShortURLs has been merged into
   Mail::SpamAssassin::Plugin::Redirectors and is now a deprecated
   compatibility shim; all url_shortener*/short_url* settings and rules

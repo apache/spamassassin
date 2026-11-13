@@ -47,7 +47,7 @@ our @MODULES = (
 },
 {
   'module' => 'HTML::Parser',
-  'version' => '3.43',
+  'version' => '3.72',
   'desc' => 'HTML is used for an ever-increasing amount of email so this dependency
   is unavoidable.  Run "perldoc -q html" for additional information.',
 },
