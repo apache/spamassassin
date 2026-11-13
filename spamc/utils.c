@@ -160,6 +160,8 @@ int ssl_timeout_read(SSL * ssl, void *buf, int nbytes)
 
 #ifdef SPAMC_SSL
 	nred = SSL_read(ssl, buf, nbytes);
+	if (nred < 0 && errno == EINTR)
+	    break;		/* interrupted by the timeout alarm */
 	if (nred < 0) ssl_err = SSL_get_error(ssl, nred);
 	if (nred < 0 && (errno == EWOULDBLOCK || ssl_err == SSL_ERROR_WANT_READ))
 	    continue;
