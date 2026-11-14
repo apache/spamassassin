@@ -128,6 +128,7 @@ lib/Mail/SpamAssassin/Plugin/HeaderEval.pm
 lib/Mail/SpamAssassin/Plugin/ImageInfo.pm
 lib/Mail/SpamAssassin/Plugin/MIMEEval.pm
 lib/Mail/SpamAssassin/Plugin/MIMEHeader.pm
+lib/Mail/SpamAssassin/Plugin/MainBody.pm
 lib/Mail/SpamAssassin/Plugin/NeuralNetwork.pm
 lib/Mail/SpamAssassin/Plugin/OLEVBMacro.pm
 lib/Mail/SpamAssassin/Plugin/OneLineBodyRuleType.pm
@@ -196,6 +197,7 @@ rules/v400.pre
 rules/v401.pre
 rules/v402.pre
 rules/v403.pre
+rules/v404.pre
 rules/20_aux_tlds.cf
 rules-extras/README.txt
 rules-extras/10_uridnsbl_skip_financial.cf
@@ -697,6 +699,7 @@ t/lang_pl_tests.t
 t/line_endings.t
 t/lint_nocreate_prefs.t
 t/local_tests_only.t
+t/main_body.t
 t/memory_cycles.t
 t/metadata.t
 t/mimeheader.t
