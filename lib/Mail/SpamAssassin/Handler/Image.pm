@@ -28,6 +28,21 @@ Mail::SpamAssassin::Handler::Image - A MIME-part handler for image/* parts
   body  IMAGE_TEXT_HEAVY  eval:check_image_text_ratio('0.75')
   describe IMAGE_TEXT_HEAVY  Most of the body text came from images
 
+  body  PHONE_IMAGE_PORTRAIT  eval:check_image_aspect_ratio('0.43', '0.59', '500000')
+  describe PHONE_IMAGE_PORTRAIT  Image has portrait phone-display proportions
+
+  body  SQUARE_IMAGE  eval:check_image_aspect_ratio('0.95', '1.05', '10000')
+  describe SQUARE_IMAGE  Image is roughly square
+
+  body  IMAGE_BIG  eval:check_image_pixel_count('1000000')
+  describe IMAGE_BIG  Message carries at least a megapixel of images
+
+  body  IMAGE_WORDY  eval:check_image_word_count('20')
+  describe IMAGE_WORDY  At least 20 words were OCR'd out of images
+
+  body  MANY_IMAGES  eval:check_image_count('5')
+  describe MANY_IMAGES  Message carries at least five image parts
+
 =head1 DESCRIPTION
 
 A handler that registers itself as the MIME-part handler for C<image/*> parts,
@@ -96,6 +111,43 @@ As C<image_ocr_min_width>, but for image height.  C<0> disables the check.  An
 image is skipped if it is below I<either> the minimum width I<or> the minimum
 height.
 
+=item image_zbarimg_path /path/to/zbarimg
+
+Full path to the C<zbarimg> executable (from the ZBar project), used to decode
+QR codes in images.  If unset, the plugin looks for C<zbarimg> on the C<PATH>.
+QR decoding is enabled by the presence of C<zbarimg>, exactly as OCR is enabled
+by C<tesseract>: if the binary cannot be found, QR decoding is silently skipped
+(OCR and the rest still run) and C<--lint> never fails merely because ZBar is
+not installed.  To turn QR decoding off, do not install ZBar (or leave
+C<zbarimg> off the C<PATH>).  On most systems C<zbarimg> comes from a C<zbar> /
+C<zbar-tools> package.
+
+A QR code almost always encodes a URL; any URL decoded from one is added to the
+message's URI list tagged with the type C<qr>, so it is checked by URIBLs and
+C<uri> rules like any other URL.  Match it with a C<uri_detail> rule:
+
+  uri_detail  HAS_QR_URI  type =~ /^qr$/
+  describe    HAS_QR_URI  Message contains a QR code encoding a URL
+
+=item image_qr_min_width N    (default: 80)
+
+=item image_qr_min_height N   (default: 80)
+
+Skip QR decoding for any image smaller than N pixels on the given axis.  A QR
+code that can hold a URL needs enough modules (and pixels per module) that a
+real one is not tiny, so this skips icons, spacers and tracking pixels without
+missing genuine codes.  Dimensions are read from the image header; when they
+cannot be determined the image is scanned anyway (fail open).  C<0> disables the
+check.
+
+=item image_qr_max_width N    (default: 4000)
+
+=item image_qr_max_height N   (default: 4000)
+
+Skip QR decoding for any image larger than N pixels on the given axis, bounding
+the work C<zbarimg> does on a single high-resolution image.  C<0> disables the
+upper limit.  As with the minimum, this fails open when dimensions are unknown.
+
 =back
 
 =cut
@@ -126,6 +178,14 @@ sub new {
   # result.
   $self->register_handler('image/*', 'handle_image');
   $self->register_eval_rule('check_image_text_ratio',
+                            $Mail::SpamAssassin::Conf::TYPE_BODY_EVALS);
+  $self->register_eval_rule('check_image_aspect_ratio',
+                            $Mail::SpamAssassin::Conf::TYPE_BODY_EVALS);
+  $self->register_eval_rule('check_image_pixel_count',
+                            $Mail::SpamAssassin::Conf::TYPE_BODY_EVALS);
+  $self->register_eval_rule('check_image_word_count',
+                            $Mail::SpamAssassin::Conf::TYPE_BODY_EVALS);
+  $self->register_eval_rule('check_image_count',
                             $Mail::SpamAssassin::Conf::TYPE_BODY_EVALS);
 
   return $self;
@@ -162,6 +222,36 @@ sub set_config {
       setting => 'image_ocr_min_height',
       is_admin => 1,
       default => 0,
+      type => $Mail::SpamAssassin::Conf::CONF_TYPE_NUMERIC,
+    },
+    {
+      setting => 'image_zbarimg_path',
+      is_admin => 1,
+      default => '',
+      type => $Mail::SpamAssassin::Conf::CONF_TYPE_STRING,
+    },
+    {
+      setting => 'image_qr_min_width',
+      is_admin => 1,
+      default => 80,
+      type => $Mail::SpamAssassin::Conf::CONF_TYPE_NUMERIC,
+    },
+    {
+      setting => 'image_qr_min_height',
+      is_admin => 1,
+      default => 80,
+      type => $Mail::SpamAssassin::Conf::CONF_TYPE_NUMERIC,
+    },
+    {
+      setting => 'image_qr_max_width',
+      is_admin => 1,
+      default => 4000,
+      type => $Mail::SpamAssassin::Conf::CONF_TYPE_NUMERIC,
+    },
+    {
+      setting => 'image_qr_max_height',
+      is_admin => 1,
+      default => 4000,
       type => $Mail::SpamAssassin::Conf::CONF_TYPE_NUMERIC,
     },
     {
@@ -292,31 +382,79 @@ sub _get_image_text {
 sub handle_image {
   my ($self, $node, $pms) = @_;
 
-  my $tesseract = $self->_tesseract($pms->{conf});
-  return [] unless $tesseract;
-
   my $data = $node->decode;
   return [] unless defined $data && length $data;
+
+  # Count every image part reaching the handler (used by check_image_count),
+  # before any type/size/OCR gate below -- the tally is a true total of image
+  # parts, independent of whether dimensions parse or OCR runs.
+  $pms->{plugins}{Image}{image_count}++;
 
   # The image bytes can be large, so pass them by reference throughout (avoids
   # copying the whole scalar into each helper's @_).
   my $dataref = \$data;
 
   # Identify the real type and dimensions from the bytes (not the declared
-  # Content-Type, which spammers mislabel).  One parse feeds both the size gate
-  # and the HEIF check.
+  # Content-Type, which spammers mislabel).  One parse feeds the dimension
+  # record, the OCR size gate and the HEIF check.
   my ($type, $w, $h) = $self->_image_info($dataref);
 
-  # Type gate: only OCR bytes we positively identify as a raster format tesseract
-  # can read.  An undef type means the bytes are not one of our known rasters --
-  # most importantly image/svg+xml (XML, not a bitmap), which reaches this
-  # image/* handler when no SVG handler is loaded, but also unknown or corrupt
-  # blobs.  Feeding any of those to tesseract is a wasted fork (and can emit junk
-  # text), so skip them.  ($w/$h may still be undef for a recognised type -- e.g.
-  # HEIF, whose dimensions come from the converted PNG -- so gate on $type only.)
+  # Record the dimensions for check_image_aspect_ratio.  Done before the OCR
+  # early-returns below so geometry rules work even when tesseract is absent or
+  # the image is too small/unreadable to OCR -- parsing the header costs nothing
+  # extra, we already did it.
+  if (defined $w && defined $h && $w > 0 && $h > 0) {
+    push @{$pms->{plugins}{Image}{dims}},
+         { type => $type, w => $w, h => $h };
+    dbg("image: %s is %dx%d pixels", $type // '?', $w, $h);
+  }
+
+  # Type gate: only process bytes we positively identify as a raster format our
+  # external tools (tesseract, zbarimg) can read.  An undef type means the bytes
+  # are not one of our known rasters -- most importantly image/svg+xml (XML, not
+  # a bitmap), which reaches this image/* handler when no SVG handler is loaded,
+  # but also unknown or corrupt blobs.  Feeding any of those to an image tool is
+  # a wasted fork (and can emit junk), so skip them here, once, for both QR and
+  # OCR.  ($w/$h may still be undef for a recognised type -- e.g. HEIF, whose
+  # dimensions come from the converted PNG -- so gate on $type only.)
   if (!defined $type) {
-    dbg("image: skipping OCR, unrecognised image format (type %s)",
+    dbg("image: skipping, unrecognised image format (type %s)",
         $node->{type} // '?');
+    return [];
+  }
+
+  # Work out which consumers will actually run before doing any shared work.
+  # QR decoding and OCR are independent -- a host may have zbarimg but not
+  # tesseract (or vice versa) -- so if neither is available there is nothing to
+  # do, and in particular no HEIF conversion to pay for.
+  my $zbarimg   = $self->_zbarimg($pms->{conf});
+  my $tesseract = $self->_tesseract($pms->{conf});
+  return [] unless $zbarimg || $tesseract;
+
+  # HEIF/HEIC must be converted to PNG before either tool can read it.
+  # _heif_to_png returns a ref to the converted bytes, which becomes the new
+  # source for both QR decoding and OCR.  Done once and shared.
+  if (($type // '') eq 'heif') {
+    my $pngref = $self->_heif_to_png($pms, $dataref);
+    return [] unless defined $pngref;   # no converter, or conversion failed
+    $dataref = $pngref;
+  }
+
+  # Both zbarimg and tesseract read the image from a file on the command line,
+  # so the bytes must land on disk.  Spill them to a single secure temp file
+  # ONCE here and hand the path to both tools, rather than each helper writing
+  # its own copy -- this halves the disk I/O (and the tmpfile churn) when QR and
+  # OCR both run on the same image.  handle_image owns the file and removes it.
+  my $img_file = $self->_spill_to_tmpfile($pms, $dataref);
+  return [] unless defined $img_file;
+
+  # QR decoding runs first and independently of tesseract.  Any URL found in a
+  # QR code is fed into the URI machinery so URIBL and uri rules see it -- this
+  # is the core anti-"quishing" value.
+  $self->_scan_qr($node, $pms, $img_file, $w, $h) if $zbarimg;
+
+  if (!$tesseract) {
+    unlink($img_file);
     return [];
   }
 
@@ -328,19 +466,13 @@ sub handle_image {
   if (($minw || $minh) && defined $w && defined $h) {
     if (($minw && $w < $minw) || ($minh && $h < $minh)) {
       dbg("image: skipping OCR, %dx%d below min %dx%d", $w, $h, $minw, $minh);
+      unlink($img_file);
       return [];
     }
   }
 
-  # HEIF/HEIC must be converted to PNG before tesseract.  _heif_to_png returns a
-  # ref to the converted bytes, which becomes the new source for OCR.
-  if (($type // '') eq 'heif') {
-    my $pngref = $self->_heif_to_png($pms, $dataref);
-    return [] unless defined $pngref;   # no converter, or conversion failed
-    $dataref = $pngref;
-  }
-
-  my $text = $self->_ocr($pms, $dataref, $node->{type});
+  my $text = $self->_ocr($pms, $img_file, $node->{type});
+  unlink($img_file);
   return [] unless defined $text;
 
   # Normalise: collapse the trailing whitespace tesseract emits.
@@ -396,6 +528,18 @@ sub _heif_convert {
   return $self->{heif_convert};
 }
 
+# zbarimg (from ZBar) decodes QR codes (and other barcodes) in an image.
+# Optional: if absent, QR decoding is simply skipped and everything else still
+# runs -- so --lint never fails merely because zbar is not installed.  Resolved
+# lazily and cached, like tesseract and heif-dec.
+sub _zbarimg {
+  my ($self, $conf) = @_;
+  return $self->{zbarimg} if exists $self->{zbarimg};
+  $self->{zbarimg} = $self->_resolve_binary(
+    'zbarimg', $conf->{image_zbarimg_path}, 'zbarimg', undef);
+  return $self->{zbarimg};
+}
+
 # Resolve an external binary: explicit config path first, else search PATH for
 # each candidate name in turn (a tool may be renamed between releases, e.g.
 # heif-convert -> heif-dec).  Returns the untainted path or undef.  $warn_msg,
@@ -419,6 +563,23 @@ sub _resolve_binary {
   dbg("image: $label not found, related conversions disabled")
     if !defined $warn_msg;
   return;
+}
+
+# Write the decoded image bytes to a single secure temp file and return its
+# untainted path (or undef on failure).  zbarimg and tesseract each read the
+# image from a file argument, so handle_image spills once here and passes the
+# path to both -- avoiding a second identical write when QR and OCR both run.
+# The caller owns the file and must unlink it.
+sub _spill_to_tmpfile {
+  my ($self, $pms, $dataref) = @_;
+  my ($tmp_file, $tmp_fh) = Mail::SpamAssassin::Util::secure_tmpfile();
+  if (!$tmp_file) {
+    dbg("image: failed to create a temporary file");
+    return;
+  }
+  print $tmp_fh $$dataref;
+  close($tmp_fh);
+  return untaint_file_path($tmp_file);
 }
 
 # Identify an image's real type and pixel dimensions from its leading bytes.
@@ -543,17 +704,18 @@ sub _image_info {
   return (undef, undef, undef);
 }
 
-# Run tesseract on the decoded image bytes, mirroring ExtractText's invocation:
-# write bytes to a secure temp file, run "tesseract <file> - -l <lang>", read the
-# recognised text from the pipe.  Returns the text, or undef on failure.
+# Run tesseract on the image file, mirroring ExtractText's invocation: run
+# "tesseract <file> - -l <lang>" and read the recognised text from the pipe.
+# $img_file is the shared temp file handle_image already wrote; this sub does
+# not create or remove it.  Returns the text, or undef on failure.
 sub _ocr {
-  my ($self, $pms, $dataref, $type) = @_;
+  my ($self, $pms, $img_file, $type) = @_;
 
   my $conf = $pms->{conf} || $self->{main}->{conf};
   my $lang = $conf->{image_ocr_lang} || 'eng';
   my $secs = $conf->{handler_time_limit} || 10;
 
-  my ($tmp_file, $err_file, $pid, $resp, $errno);
+  my ($err_file, $pid, $resp, $errno);
 
   Mail::SpamAssassin::PerMsgStatus::enter_helper_run_mode($pms);
 
@@ -566,19 +728,13 @@ sub _ocr {
   my $err = $timer->run_and_catch(sub {
     local $SIG{PIPE} = sub { die "__brokenpipe__ignore__\n" };
 
-    ($tmp_file, my $tmp_fh) = Mail::SpamAssassin::Util::secure_tmpfile();
-    $tmp_file or die "failed to create a temporary file\n";
-    print $tmp_fh $$dataref;
-    close($tmp_fh);
-    $tmp_file = untaint_file_path($tmp_file);
-
     ($err_file, my $err_fh) = Mail::SpamAssassin::Util::secure_tmpfile();
     $err_file or die "failed to create a temporary file\n";
     close($err_fh);
     $err_file = untaint_file_path($err_file);
 
     # tesseract <imagefile> <outputbase> ...; outputbase "-" means stdout.
-    my @cmd = ($self->{tesseract}, $tmp_file, '-',
+    my @cmd = ($self->{tesseract}, $img_file, '-',
                '-l', untaint_var($lang), '-c', 'page_separator=');
 
     $pid = Mail::SpamAssassin::Util::helper_app_pipe_open(
@@ -612,7 +768,7 @@ sub _ocr {
 
   Mail::SpamAssassin::PerMsgStatus::leave_helper_run_mode($pms);
 
-  unlink($tmp_file) if defined $tmp_file;
+  # The input image file is owned and removed by handle_image, not here.
   my $err_resp = (defined $err_file && -s $err_file) ?
     do { open(my $efh, '<', $err_file); local $/; my $e = <$efh>;
          close($efh); $e; } : '';
@@ -631,6 +787,143 @@ sub _ocr {
   }
 
   return $resp;
+}
+
+# Decode any QR codes in one image and feed URL payloads into the URI machinery.
+# The caller invokes this only when zbarimg is available; it applies a min/max
+# pixel size gate (QR codes carrying a URL are neither tiny nor need to be huge;
+# the max gate keeps a single high-res photo from making zbarimg chew through
+# millions of pixels).  $w/$h are the header dimensions already parsed by
+# handle_image; when unknown the size gate fails open.  $img_file is the shared
+# temp file handle_image wrote (and will remove).  Produces no return value.
+sub _scan_qr {
+  my ($self, $node, $pms, $img_file, $w, $h) = @_;
+
+  my $conf = $pms->{conf};
+
+  # Size gate.  Below the minimum a QR holding a URL cannot plausibly resolve;
+  # above the maximum we skip to bound decode cost.  Both fail open when the
+  # dimensions could not be read (so an unmeasurable format is still scanned).
+  my $minw = $conf->{image_qr_min_width}  || 0;
+  my $minh = $conf->{image_qr_min_height} || 0;
+  my $maxw = $conf->{image_qr_max_width}  || 0;
+  my $maxh = $conf->{image_qr_max_height} || 0;
+  if (defined $w && defined $h) {
+    if (($minw && $w < $minw) || ($minh && $h < $minh)) {
+      dbg("image: skipping QR, %dx%d below min %dx%d", $w, $h, $minw, $minh);
+      return;
+    }
+    if (($maxw && $w > $maxw) || ($maxh && $h > $maxh)) {
+      dbg("image: skipping QR, %dx%d above max %dx%d", $w, $h, $maxw, $maxh);
+      return;
+    }
+  }
+
+  my $payloads = $self->_qr_decode($pms, $img_file);
+  return unless $payloads && @$payloads;
+
+  foreach my $payload (@$payloads) {
+    # QR codes encode arbitrary text; only URLs are useful to the URI engine.
+    next unless $payload =~ m{^[a-z][a-z0-9+.-]*://}i;
+    $pms->add_uri_detail_list($payload, { qr => 1 }, 'QR');
+    dbg("image: QR decoded %s from %s", $payload, $node->{type} || '?');
+  }
+}
+
+# Run zbarimg on the decoded image bytes, mirroring _ocr's invocation: write the
+# bytes to a secure temp file, run "zbarimg -q -D <file>", read the decoded
+# symbols from the pipe.  Returns an arrayref of QR-code payloads (possibly
+# empty), or undef on error.
+#
+# zbarimg prints one line per symbol as "<SYMBOLOGY>:<data>", e.g.
+# "QR-Code:https://example.com/".  We keep only QR-Code lines.  Its exit status
+# is 4 when no barcode was found -- a normal outcome, not an error -- so 0 and 4
+# are both treated as success (see ExtractText.pm, which does the same).
+#
+# We feed zbarimg the raw image bytes.  A binarisation pre-pass (quantise to 2
+# colours, greyscale, contrast-stretch -- e.g. via Image::Magick) measurably
+# lifts the decode rate on heavily *noisy* QR images (observed ~2/5 -> 5/5 in
+# testing) and never hurts, but modern zbarimg decodes realistic degradations
+# (JPEG, downscale, low contrast, rotation, perspective) unaided, so the pre-pass
+# is deliberately omitted here to avoid a heavy optional dependency.  It is the
+# obvious lever if noisy-image recall ever proves insufficient in the field.
+sub _qr_decode {
+  my ($self, $pms, $img_file) = @_;
+
+  my $conf = $pms->{conf} || $self->{main}->{conf};
+  my $secs = $conf->{handler_time_limit} || 10;
+
+  my ($err_file, $pid, $resp, $errno);
+
+  Mail::SpamAssassin::PerMsgStatus::enter_helper_run_mode($pms);
+
+  my $timer = Mail::SpamAssassin::Timeout->new(
+    { secs => $secs, deadline => $pms->{master_deadline} });
+
+  my $err = $timer->run_and_catch(sub {
+    local $SIG{PIPE} = sub { die "__brokenpipe__ignore__\n" };
+
+    ($err_file, my $err_fh) = Mail::SpamAssassin::Util::secure_tmpfile();
+    $err_file or die "failed to create a temporary file\n";
+    close($err_fh);
+    $err_file = untaint_file_path($err_file);
+
+    # -q: quiet (no statistics); -D: do not display the image.
+    my @cmd = ($self->{zbarimg}, '-q', '-D', $img_file);
+
+    $pid = Mail::SpamAssassin::Util::helper_app_pipe_open(
+             *IMAGE_QR, undef, ">$err_file", @cmd);
+    $pid or die "$!\n";
+
+    my ($inbuf, $nread);
+    $resp = '';
+    while ($nread = read(IMAGE_QR, $inbuf, 8192)) { $resp .= $inbuf }
+    defined $nread or die "error reading from pipe: $!\n";
+
+    $errno = 0;
+    close IMAGE_QR or $errno = $!;
+
+    # Exit 0 = symbols found; exit 4 = no barcode found (both fine).
+    if (proc_status_ok($?, $errno, 0, 4)) {
+      dbg("image: zbarimg [%s] finished successfully", $pid);
+    } else {
+      dbg("image: zbarimg [%s] finished: %s",
+          $pid, exit_status_str($?, $errno));
+    }
+  });
+
+  # Reap a stale child if the timer fired mid-run.
+  if (defined(fileno(*IMAGE_QR))) {
+    if ($pid) {
+      kill('TERM', $pid)
+        and dbg("image: killed stale zbarimg [$pid]");
+    }
+    close IMAGE_QR or 1;
+  }
+
+  Mail::SpamAssassin::PerMsgStatus::leave_helper_run_mode($pms);
+
+  # The input image file is owned and removed by handle_image, not here.
+  unlink($err_file) if defined $err_file;
+
+  if ($err) {
+    if ($err =~ /__brokenpipe__ignore__/) {
+      dbg("image: zbarimg broken pipe, ignoring");
+    } elsif ($timer->timed_out) {
+      dbg("image: zbarimg timed out after ${secs}s");
+    } else {
+      chomp(my $e = $err);
+      info("image: zbarimg error: %s", $e);
+    }
+    return;
+  }
+
+  # zbarimg prefixes each decoded symbol with its symbology name; keep QR codes.
+  my @payloads;
+  foreach my $line (split /\r?\n/, $resp) {
+    push @payloads, $1 if $line =~ /^QR-Code:(.*)$/;
+  }
+  return \@payloads;
 }
 
 # Convert HEIF/HEIC bytes to PNG with heif-dec.  Unlike tesseract,
@@ -770,6 +1063,145 @@ sub check_image_text_ratio {
   dbg("image: text ratio %.3f (image_words=%d body_words=%d min=%s)",
       $ratio, $image_words, $body_words, $min_ratio);
   return ($ratio >= $min_ratio) ? 1 : 0;
+}
+
+=item check_image_aspect_ratio(MIN_RATIO [, MAX_RATIO [, MIN_PIXELS]])
+
+Eval rule: true if the message contains an image whose aspect ratio falls
+between MIN_RATIO and MAX_RATIO inclusive.  The ratio is C<width / height>, so
+it is orientation-sensitive: a value E<gt> 1 is landscape, E<lt> 1 is portrait,
+and 1 is square.  A 1170x2532 portrait phone screenshot measures 0.462, while
+the same image rotated to 2532x1170 measures 2.164 -- the two do not match the
+same rule.  Write one rule per orientation when you want both:
+
+  body   PHONE_IMAGE_PORTRAIT   eval:check_image_aspect_ratio('0.43', '0.59', '500000')
+  body   PHONE_IMAGE_LANDSCAPE  eval:check_image_aspect_ratio('1.7', '2.3', '500000')
+  meta   PHONE_IMAGE  PHONE_IMAGE_PORTRAIT || PHONE_IMAGE_LANDSCAPE
+
+MAX_RATIO defaults to no upper bound.  MIN_PIXELS, if given, requires the
+image's area (width * height) to be at least that many pixels, which can be
+used to exclude thin spacers, banners, tracking pixels, etc.
+
+Dimensions come from the image header for PNG, GIF, JPEG, WebP and BMP.  Images
+whose dimensions cannot be determined (notably HEIF, and truncated or corrupt
+headers) are not considered by this rule.
+
+Note that EXIF orientation is not read: a JPEG photo shot in portrait but
+stored as landscape with a rotation flag reports its I<stored> dimensions, so
+it measures as landscape here.  Screenshots are unaffected (they carry no
+rotation flag), but camera photos may land in the opposite orientation from how
+they display.
+
+=cut
+
+sub check_image_aspect_ratio {
+  my ($self, $pms, $body, $min_ratio, $max_ratio, $min_pixels) = @_;
+
+  return 0 unless defined $min_ratio && $min_ratio ne '';
+  my $dims = $pms->{plugins}{Image}{dims};
+  return 0 unless $dims && @$dims;
+
+  $max_ratio  = undef if defined $max_ratio  && $max_ratio  eq '';
+  $min_pixels = undef if defined $min_pixels && $min_pixels eq '';
+
+  foreach my $d (@$dims) {
+    my ($w, $h) = ($d->{w}, $d->{h});
+    next unless $w && $h;
+
+    my $area = $w * $h;
+    next if defined $min_pixels && $area < $min_pixels;
+
+    # Width over height, so portrait (<1) and landscape (>1) are distinguishable
+    # and each needs its own rule.
+    my $ratio = $w / $h;
+    next if $ratio < $min_ratio;
+    next if defined $max_ratio && $ratio > $max_ratio;
+
+    dbg("image: aspect ratio %.3f (%dx%d, %d px) matches %s..%s",
+        $ratio, $w, $h, $area, $min_ratio,
+        defined $max_ratio ? $max_ratio : 'inf');
+    return 1;
+  }
+
+  return 0;
+}
+
+=item check_image_pixel_count(MIN [, MAX])
+
+Eval rule: true if the sum of the pixel areas (width x height) of all the
+message's images is at least MIN and, if MAX is given, at most MAX.  Dimensions
+come from the image header for PNG, GIF, JPEG, WebP and BMP; an image whose
+dimensions cannot be read (notably HEIF, and truncated or corrupt headers) does
+not contribute to the total.  Both bounds are in pixels; MAX defaults to no
+upper limit.
+
+=cut
+
+sub check_image_pixel_count {
+  my ($self, $pms, $body, $min, $max) = @_;
+
+  # Sum the areas of every image whose dimensions handle_image recorded.  This
+  # reuses the same per-message {dims} list that check_image_aspect_ratio reads,
+  # so there is one source of image geometry.
+  my $dims = $pms->{plugins}{Image}{dims};
+  my $pixels = 0;
+  $pixels += $_->{w} * $_->{h} for @{$dims || []};
+
+  dbg("image: total pixel count %d (min=%s max=%s)",
+      $pixels, defined $min ? $min : '', defined $max ? $max : '');
+
+  return 0 unless $pixels;
+  return 0 if defined $min && $min ne '' && $pixels < $min;
+  return 0 if defined $max && $max ne '' && $pixels > $max;
+  return 1;
+}
+
+=item check_image_word_count(MIN [, MAX])
+
+Eval rule: true if the total number of words OCR'd from all the message's images
+is at least MIN and, if MAX is given, at most MAX.  This is the same word tally
+C<check_image_text_ratio> uses as its numerator, counted once per OCR'd image.
+Images that are not OCR'd (tesseract absent, unrecognised format, below the size
+gate) contribute no words.  MAX defaults to no upper limit.
+
+=cut
+
+sub check_image_word_count {
+  my ($self, $pms, $body, $min, $max) = @_;
+
+  my $words = $pms->{plugins}{Image}{ocr_word_count} || 0;
+
+  dbg("image: total OCR word count %d (min=%s max=%s)",
+      $words, defined $min ? $min : '', defined $max ? $max : '');
+
+  return 0 unless $words;
+  return 0 if defined $min && $min ne '' && $words < $min;
+  return 0 if defined $max && $max ne '' && $words > $max;
+  return 1;
+}
+
+=item check_image_count(MIN [, MAX])
+
+Eval rule: true if the number of image parts in the message is at least MIN and,
+if MAX is given, at most MAX.  Every C<image/*> part the handler decodes is
+counted, whether or not its dimensions could be read or its text OCR'd, so this
+is a plain count of images rather than of measurable or readable ones.  MAX
+defaults to no upper limit.
+
+=cut
+
+sub check_image_count {
+  my ($self, $pms, $body, $min, $max) = @_;
+
+  my $count = $pms->{plugins}{Image}{image_count} || 0;
+
+  dbg("image: total image count %d (min=%s max=%s)",
+      $count, defined $min ? $min : '', defined $max ? $max : '');
+
+  return 0 unless $count;
+  return 0 if defined $min && $min ne '' && $count < $min;
+  return 0 if defined $max && $max ne '' && $count > $max;
+  return 1;
 }
 
 =back
