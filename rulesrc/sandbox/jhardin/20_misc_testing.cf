@@ -1291,8 +1291,9 @@ score       UNSUB_GOOG_FORM      2.500	# limit
 tflags      UNSUB_GOOG_FORM      publish
 
 
-# another fill-a-form service
+# fill-a-form services, potential phishing sign
 uri         __FORMS_GLE              m;^https?://forms\.gle/[0-9a-z]{15,}$;i
+uri         __URI_JOTFORM            m;^https?://form\.jotform\.com/[0-9a-z]{10,};i
 
 # rotten S/O
 #meta        FORMS_GLE                __FORMS_GLE && !__HAS_X_BEEN_THERE && !__URI_DOTEDU && !__HAS_CAMPAIGN 
@@ -3690,6 +3691,12 @@ describe    GOOG_STO_EMAIL_PHISH       Possible phishing with google hosted cont
 score       GOOG_STO_EMAIL_PHISH       3.00	# limit
 tflags      GOOG_STO_EMAIL_PHISH       publish
 
+# observed in phishing (hosted redirect to avoid URIBLs), possibly hosting malware
+uri         __URI_GOOG_SHARE           m;^https?://share\.google/[a-z0-9]{10,};i
+meta        URI_GOOG_SHARE             __URI_GOOG_SHARE
+describe    URI_GOOG_SHARE             Possible phishing or malware content via Google Share
+score       URI_GOOG_SHARE             2.000	# limit
+tflags      URI_GOOG_SHARE             publish
 
 # download-a-file pitch, malware? 11/2020
 #header     CRAIGSLIST_DATING          Subject =~ /Sexy \w+ From Craigs?list/i
