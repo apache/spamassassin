@@ -10,8 +10,6 @@ plan skip_all => "Spamd tests disabled" if $SKIP_SPAMD_TESTS;
 plan skip_all => "UID nobody tests" if $SKIP_SETUID_NOBODY_TESTS;
 plan skip_all => "Long running tests disabled" unless conf_bool('run_long_tests');
 
-diag "\nIf test fails 'connection reset by peer', may be low memory on test machine";
-
 # TODO: These should be skips down in the code, not changing the test count.
 my $num_tests = 18;
 
@@ -38,9 +36,6 @@ ok($testmsg);
   q{ 1000 GTUBE }, 'gtube',
   'XJS*C4JDBQADN1.NSBN3*2IDNEN*GTUBE-STANDARD-ANTI-UBE-TEST-EMAIL*C.34X', 'gtube string',
 );
-
-# Bug 8253 - starting spamd after creating client object makes test failures
-# caused by low memory on test machine less likely.
 
 my $client = create_clientobj({
                                port => $spamdport,
