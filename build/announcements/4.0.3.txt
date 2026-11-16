@@ -109,7 +109,7 @@ This release addresses the following issues:
 
 The detailed list of all commits can be found in the Changes file.
 A detailed view of the issues as they were filed in the Bugzilla issue
-tracker can be seen at https://s.apache.org/9er4g
+tracker can be seen at https://s.apache.org/ymd77
 
 New configuration options
 -------------------------
@@ -157,7 +157,7 @@ in it to
 Notable Internal changes
 ------------------------
 
-None noted
+None noted.
 
 Other updates
 -------------
@@ -226,18 +226,18 @@ sha512sum of archive files:
 
 Note that the Rules files, aka *-rules-*.tgz, are only necessary if
 you cannot, or do not wish to, run "sa-update" after
-installation. Using sa-update will download the latest rules
+installation. Using sa-update will download the latest rules.
 
 See the INSTALL and UPGRADE files in the distribution for important
-installation notes
+installation notes.
 
 
 GPG Verification Procedure
 --------------------------
 The release files also have a .asc accompanying them.  The file serves
 as an external GPG signature for the given release file.  The signing
-key is available via the keys.gnupg.net or keys.openpgp.org key
-servers, as well as https://www.apache.org/dist/spamassassin/KEYS
+key is available via the keys.openpgp.org key server, as well as
+https://www.apache.org/dist/spamassassin/KEYS
 
 
 The following key is used to sign SA releases 3.3.0 and later:
@@ -259,14 +259,14 @@ To verify a release file, download the file with the accompanying .asc
 file and run the following commands:
 
   gpg --verbose --keyserver keys.openpgp.org --recv-key FDE52F40F7D39814
-  gpg --verify Mail-SpamAssassin-4.0.0.tar.bz2.asc
+  gpg --verify Mail-SpamAssassin-4.0.3.tar.bz2.asc
   gpg --fingerprint FDE52F40F7D39814
 
 Then confirm that the key description shown by --verify matches what
 is shown by --fingerprint.
 
 See https://www.apache.org/info/verification.html for more information
-on verifying Apache releases
+on verifying Apache releases.
 
 
 About Apache SpamAssassin
