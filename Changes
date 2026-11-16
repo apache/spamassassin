@@ -1,4 +1,197 @@
 ------------------------------------------------------------------------
+r1940347 | sidney | 2026-11-15 20:40:09 +0000 (Sun, 15 Nov 2026) | 1 line
+ 
+ remove obsolete log message and comment from test
+------------------------------------------------------------------------
+r1940346 | sidney | 2026-11-15 20:34:32 +0000 (Sun, 15 Nov 2026) | 1 line
+ 
+ Bug 8538 - end _filter() requests after Content-length bytes
+------------------------------------------------------------------------
+r1940330 | sidney | 2026-11-14 22:07:32 +0000 (Sat, 14 Nov 2026) | 1 line
+ 
+ Bug 8537 - check that the spamd test port is free before using it
+------------------------------------------------------------------------
+r1940322 | jhardin | 2026-11-14 19:49:38 +0000 (Sat, 14 Nov 2026) | 1 line
+ 
+ Add new rules for eval: google sharing (free hosted content, observed to 
+host redirects), jotform (public forms for phishing)
+------------------------------------------------------------------------
+r1940287 | sidney | 2026-11-13 17:58:41 +0000 (Fri, 13 Nov 2026) | 1 line
+ 
+ Bug 8535 - skip the connected() test for Unix-socket clients
+------------------------------------------------------------------------
+r1940271 | sidney | 2026-11-13 00:18:26 +0000 (Fri, 13 Nov 2026) | 1 line
+ 
+ Bug 8534 - make Handler::HTML's body-script test on the canonical type
+------------------------------------------------------------------------
+r1940270 | sidney | 2026-11-13 00:15:56 +0000 (Fri, 13 Nov 2026) | 1 line
+ 
+ Bug 8528 - require HTML::Parser 3.72 or later
+------------------------------------------------------------------------
+r1940269 | sidney | 2026-11-13 00:13:16 +0000 (Fri, 13 Nov 2026) | 1 line
+ 
+ Bug 8527 - make spamc stop reading when SSL_read is interrupted by the 
+alarm
+------------------------------------------------------------------------
+r1940268 | billcole | 2026-11-12 21:12:54 +0000 (Thu, 12 Nov 2026) | 1 
+line
+ 
+ add a rule to catch weird-for-email  HTML
+------------------------------------------------------------------------
+r1940266 | sidney | 2026-11-12 19:24:04 +0000 (Thu, 12 Nov 2026) | 6 lines
+ 
+ Bug 8532 - rename the JavaScript handler to Script and add VBScript 
+support
+ 
+ Submitted by: Kent Oyer
+ 
+ Github: closes #51
+ 
+------------------------------------------------------------------------
+r1940264 | sidney | 2026-11-12 18:06:42 +0000 (Thu, 12 Nov 2026) | 1 line
+ 
+ Bug 8533 - compare spamd -u group lists as sets, not strings
+------------------------------------------------------------------------
+r1940252 | sidney | 2026-11-12 10:44:38 +0000 (Thu, 12 Nov 2026) | 1 line
+ 
+ Bug 8525 - untaint the IV before calling Crypt::Mode::CBC
+------------------------------------------------------------------------
+r1940251 | sidney | 2026-11-12 10:41:15 +0000 (Thu, 12 Nov 2026) | 1 line
+ 
+ Bug 8526 - make spamd require IO::Socket::SSL 1.994 or later for --ssl
+------------------------------------------------------------------------
+r1940250 | sidney | 2026-11-12 10:32:15 +0000 (Thu, 12 Nov 2026) | 1 line
+ 
+ Bug 8523 - require Archive::Zip 1.34 for zip extraction
+------------------------------------------------------------------------
+r1940243 | sidney | 2026-11-11 21:50:31 +0000 (Wed, 11 Nov 2026) | 1 line
+ 
+ Bug 8529 - fix the code flagged by new perlcritic policies, and exclude 
+ProhibitPipeOpen
+------------------------------------------------------------------------
+r1940234 | gbechis | 2026-11-11 09:32:01 +0000 (Wed, 11 Nov 2026) | 1 line
+ 
+ add a redirector
+------------------------------------------------------------------------
+r1940227 | sidney | 2026-11-11 02:04:35 +0000 (Wed, 11 Nov 2026) | 1 line
+ 
+ Bug 8524 - fix missing constant in test file
+------------------------------------------------------------------------
+r1940225 | sidney | 2026-11-10 23:07:07 +0000 (Tue, 10 Nov 2026) | 1 line
+ 
+ Bug 8522 - fix t/dnsplatform.t when Net::DNS has no size(), and 
+INSTALL's minimum Net::DNS version
+------------------------------------------------------------------------
+r1940222 | sidney | 2026-11-10 18:10:54 +0000 (Tue, 10 Nov 2026) | 1 line
+ 
+ Bug 8521 - give DMARC lookups a resend and up to 3 seconds
+------------------------------------------------------------------------
+r1940220 | sidney | 2026-11-10 18:07:53 +0000 (Tue, 10 Nov 2026) | 1 line
+ 
+ Bug 8518 - try another local port after any bind failure
+------------------------------------------------------------------------
+r1940219 | sidney | 2026-11-10 18:04:05 +0000 (Tue, 10 Nov 2026) | 1 line
+ 
+ Handler::Archive: skip more rar member names
+------------------------------------------------------------------------
+r1940218 | sidney | 2026-11-10 18:00:06 +0000 (Tue, 10 Nov 2026) | 1 line
+ 
+ Bug 8513 - handle duplicate rar member names, and case and spaces on 
+Windows
+------------------------------------------------------------------------
+r1940217 | sidney | 2026-11-10 17:48:43 +0000 (Tue, 10 Nov 2026) | 1 line
+ 
+ Add informational rules for messages over the header field and URI limits
+------------------------------------------------------------------------
+r1940208 | sidney | 2026-11-09 21:44:10 +0000 (Mon, 09 Nov 2026) | 1 line
+ 
+ Bug 8516 - calculate fuzzy hash with untainted values
+------------------------------------------------------------------------
+r1940205 | sidney | 2026-11-09 19:16:15 +0000 (Mon, 09 Nov 2026) | 1 line
+ 
+ Add notes on DMARC DNS changes to UPGRADE doc file
+------------------------------------------------------------------------
+r1940196 | sidney | 2026-11-09 10:04:21 +0000 (Mon, 09 Nov 2026) | 1 line
+ 
+ Bug 8520 - point DB_File and BerkeleyDB at Homebrew's Berkeley DB in the 
+macOS CI jobs
+------------------------------------------------------------------------
+r1940195 | sidney | 2026-11-09 09:07:27 +0000 (Mon, 09 Nov 2026) | 1 line
+ 
+ Bug 8519 - correct an error in a test
+------------------------------------------------------------------------
+r1940192 | sidney | 2026-11-09 05:55:48 +0000 (Mon, 09 Nov 2026) | 1 line
+ 
+ Bug 8517 - Install what the skipped tests need in the GitHub Actions jobs
+------------------------------------------------------------------------
+r1940191 | sidney | 2026-11-09 05:22:26 +0000 (Mon, 09 Nov 2026) | 1 line
+ 
+ Note some required package installs for HEIC on Ubuntu 24.04 and Fedora
+------------------------------------------------------------------------
+r1940181 | sidney | 2026-11-08 18:41:10 +0000 (Sun, 08 Nov 2026) | 1 line
+ 
+ Bug 8512 - better dedup handling in archives
+------------------------------------------------------------------------
+r1940178 | sidney | 2026-11-08 12:30:52 +0000 (Sun, 08 Nov 2026) | 1 line
+ 
+ Bug 8514 - Fix tests to work on Windows, or skip what can't be fixed
+------------------------------------------------------------------------
+r1940174 | sidney | 2026-11-08 01:27:38 +0000 (Sun, 08 Nov 2026) | 1 line
+ 
+ Bug 8511 - Archive handler: support unrar-free 0.2.0 and later, and 
+unrar on Windows; skip HEIC tests when heif-dec cannot decode
+------------------------------------------------------------------------
+r1940154 | gbechis | 2026-11-07 14:49:10 +0000 (Sat, 07 Nov 2026) | 3 
+lines
+ 
+ fix utf16 check
+ bz #8509
+ 
+------------------------------------------------------------------------
+r1940104 | gbechis | 2026-11-06 12:22:05 +0000 (Fri, 06 Nov 2026) | 2 
+lines
+ 
+ fix build on non-Linux OS
+ 
+------------------------------------------------------------------------
+r1940100 | gbechis | 2026-11-06 07:42:28 +0000 (Fri, 06 Nov 2026) | 2 
+lines
+ 
+ make the plugin compile even when LWP is not installed
+ 
+------------------------------------------------------------------------
+r1940096 | sidney | 2026-11-06 03:53:07 +0000 (Fri, 06 Nov 2026) | 1 line
+ 
+ Update MySQL version specified to 8.4. Use public DNS for tests because 
+default doesn't accept large TXT records used in tests
+------------------------------------------------------------------------
+r1940094 | sidney | 2026-11-05 23:10:46 +0000 (Thu, 05 Nov 2026) | 1 line
+ 
+ Bug 8508 - fix t/sa_compile.t to work when required modules are only in 
+PERL5LIB
+------------------------------------------------------------------------
+r1940093 | gbechis | 2026-11-05 22:19:14 +0000 (Thu, 05 Nov 2026) | 1 line
+ 
+ skip test if Archive::Zip is not installed
+------------------------------------------------------------------------
+r1940092 | gbechis | 2026-11-05 22:17:36 +0000 (Thu, 05 Nov 2026) | 1 line
+ 
+ skip test if LibIDN is not installed
+------------------------------------------------------------------------
+r1940089 | gbechis | 2026-11-05 20:46:19 +0000 (Thu, 05 Nov 2026) | 1 line
+ 
+ Apache SpamAssassin 4.0.3-rc2 has been released
+------------------------------------------------------------------------
+r1940056 | gbechis | 2026-11-05 10:36:45 +0000 (Thu, 05 Nov 2026) | 1 line
+ 
+ preparing to release 4.0.3-rc2
+------------------------------------------------------------------------
+r1940053 | gbechis | 2026-11-05 07:57:38 +0000 (Thu, 05 Nov 2026) | 2 
+lines
+ 
+ add some info to run root tests
+ 
+------------------------------------------------------------------------
 r1940032 | gbechis | 2026-11-04 14:57:17 +0000 (Wed, 04 Nov 2026) | 2 
 lines
  
