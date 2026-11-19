@@ -44,7 +44,7 @@ describe PDS_HIDDEN_UK_BUSINESSLOAN UK's <word> rates for business loans
 score    PDS_HIDDEN_UK_BUSINESSLOAN 2.0 # limit
 reuse    PDS_HIDDEN_UK_BUSINESSLOAN
 
-uri  __PDS_DOUBLE_URL m;https?://[\S]+(?:\?|=)https?://[\S]+[\w]+$;
+uri  __PDS_DOUBLE_URL m;(?<!\S)(?>[\S]*?https?://)(?>[\S]+?(?:\?|=)https?://)[\S]+[\w]$;
 
 meta     PDS_FRNOM_TODOM_DBL_URL PDS_FROM_NAME_TO_DOMAIN && __PDS_DOUBLE_URL
 describe PDS_FRNOM_TODOM_DBL_URL From Name to domain, double URL
