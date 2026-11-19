@@ -1336,6 +1336,68 @@ sub _find_part_by_type {
   return;
 }
 
+# ---------------------------------------------------------------------------
+
+=item get_main_body_parts()
+
+Walk the body and return an arrayref of the C<Mail::SpamAssassin::Message::Node>
+leaves that an MUA would display as the message body, in display order.  These
+are the text parts rendered inline, as opposed to attachments.
+
+Named parts (attachments) are skipped.  For a multipart/alternative section the
+single part named by the C<multipart_alternative_preferred_part> configuration
+setting is chosen; when that setting is unset, text/html is preferred, falling
+back to text/plain.  Other multipart containers (e.g. multipart/mixed) are
+descended into and may contribute more than one part.  Any other leaf type is
+skipped.  The result is memoized on the message.
+
+=cut
+
+sub get_main_body_parts {
+  my ($self) = @_;
+
+  if (exists $self->{main_body_parts}) { return $self->{main_body_parts} }
+
+  # Ensure the MIME tree has been parsed
+  $self->parse_body() if exists $self->{'parse_queue'};
+
+  # Prefer the configured alternative part; default to text/html (falling back
+  # to text/plain) when no preference is set.
+  my $preferred_alt = $self->{multipart_alternative_preferred_part} || 'text/html';
+
+  my @parts;
+  my @queue = ($self);
+  while (my $p = shift @queue) {
+    # Named parts are attachments regardless of type
+    next if defined $p->{name};
+
+    my $type = $p->{'type'} || '';
+    if ($type eq 'text/plain' || $type eq 'text/html') {
+      # An inline text part the MUA would display; collect it and keep walking
+      # so sibling text parts (e.g. in a multipart/mixed) are gathered too.
+      push @parts, $p;
+      next;
+    }
+    if ($type eq 'multipart/alternative') {
+      my $pref = _find_part_by_type($p, $preferred_alt);
+      # If the preferred type is missing, fall back to text/plain before
+      # descending into the children in message order.
+      $pref = _find_part_by_type($p, 'text/plain')
+        if !$pref && $preferred_alt ne 'text/plain';
+      if ($pref) { push @parts, $pref; next; }
+      unshift @queue, @{$p->{'body_parts'} || []};
+      next;
+    }
+    if (index($type, 'multipart/') == 0) {
+      unshift @queue, @{$p->{'body_parts'} || []};
+      next;
+    }
+    # any other type: skip, do not descend
+  }
+
+  return $self->{main_body_parts} = \@parts;
+}
+
 ###########################################################################
 # MIME-part handler dispatch.
 #
@@ -1590,6 +1652,21 @@ sub get_body_text_array_common {
     $text .= $_;
   }
 
+  my @textary = _normalize_body_text($subject, $text);
+  $self->{$key} = \@textary;
+
+  return $self->{$key};
+}
+
+# ---------------------------------------------------------------------------
+
+# Apply the shared body-rule text normalization to a Subject and a body string
+# and split the result into the array of short lines that body-style rules
+# consume.  Shared by get_body_text_array_common() and get_main_body_text_array()
+# so the two stay in lock step.
+sub _normalize_body_text {
+  my ($subject, $text) = @_;
+
   # whitespace handling (warning: small changes have large effects!)
   $text =~ s/\n+\s*\n+/\x00/gs;		# double newlines => null
 # $text =~ tr/ \t\n\r\x0b\xa0/ /s;	# whitespace (incl. VT, NBSP) => space
@@ -1599,10 +1676,7 @@ sub get_body_text_array_common {
 
   utf8::encode($text) if utf8::is_utf8($text);
   utf8::encode($subject) if utf8::is_utf8($subject);
-  my @textary = split_into_array_of_short_lines($subject.$text);
-  $self->{$key} = \@textary;
-
-  return $self->{$key};
+  return split_into_array_of_short_lines($subject.$text);
 }
 
 # ---------------------------------------------------------------------------
@@ -1620,6 +1694,41 @@ sub get_visible_rendered_body_text_array {
 sub get_invisible_rendered_body_text_array {
   my ($self) = @_;
   return $self->get_body_text_array_common('invisible_rendered');
+}
+
+# ---------------------------------------------------------------------------
+
+=item get_main_body_text_array()
+
+Return the rendered text of the body parts an MUA would display (see
+L</get_main_body_parts()>) as an array of short lines, with the Subject header
+prepended, using the same whitespace normalization as the ordinary body-text
+accessors.  This is what C<main_body> rules match against.  Multiple parts (e.g.
+in a multipart/mixed) are concatenated in display order.  Returns the
+Subject-only array if no main body part is found.
+
+=cut
+
+sub get_main_body_text_array {
+  my ($self) = @_;
+
+  if (exists $self->{text_main_body}) { return $self->{text_main_body} }
+
+  my $subject = $self->get_header('subject') || "\n";
+
+  my $text = '';
+  foreach my $part (@{$self->get_main_body_parts()}) {
+    my(undef, $rnd) = $part->rendered();
+    next unless defined $rnd;
+    # put a null between parts so they don't collapse together
+    $text .= "\x00" if $text ne '';
+    $text .= $rnd;
+  }
+
+  my @textary = _normalize_body_text($subject, $text);
+  $self->{text_main_body} = \@textary;
+
+  return $self->{text_main_body};
 }
 
 # ---------------------------------------------------------------------------
