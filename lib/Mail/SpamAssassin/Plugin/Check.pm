@@ -763,6 +763,16 @@ sub do_body_tests {
     type => 'body',
     testhash => $pms->{conf}->{body_tests},
     args => [ @$textary ],
+    pre_loop_body => sub
+  {
+    my ($self, $pms, $conf, %opts) = @_;
+    # "multiple" rules count matches in only one part of each
+    # multipart/alternative section, so text repeated in the text/plain
+    # and text/html alternatives is not counted twice
+    $self->push_evalstr_prefix($pms, '
+      my $altary = $self->get_decoded_stripped_body_text_array_one_alternative();
+    ');
+  },
     loop_body => sub
   {
     my ($self, $pms, $conf, $rulename, $pat, %opts) = @_;
@@ -786,7 +796,7 @@ sub do_body_tests {
       $max = untaint_var($max);
       $sub .= '
       $hits = 0;
-      body_'.$loopid.': foreach my $l (@_) {
+      body_'.$loopid.': foreach my $l (@$altary) {
       ';
       if ($nosubject) {
         $sub .= '

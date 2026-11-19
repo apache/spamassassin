@@ -170,6 +170,12 @@ sub setup_test_set_pri {
       dbg "zoom: skipping rule $name, regex capture template";
       next;
     }
+    # ignore "multiple" rules: they scan a different body array (one
+    # part per multipart/alternative section), see do_body_tests
+    if (($conf->{tflags}->{$name}||'') =~ /\bmultiple\b/) {
+      dbg "zoom: skipping rule $name, multiple";
+      next;
+    }
 
     # we have the rule, and its regexp matches.  zero out the body
     # rule, so that the module can do the work instead
