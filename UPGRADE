@@ -1,3 +1,11 @@
+Note for Users Upgrading to SpamAssassin 4.0.4
+----------------------------------------------
+
+- util_rb_2tld, util_rb_3tld and util_rb_4tld have been generalized:
+  util_rb_Ntld is now accepted for any N >= 2 (util_rb_5tld, util_rb_6tld,
+  ...), DEPRECATED API aliases of $conf->{multi_level_domains} are kept
+  only for backward compatibility, and will be removed in a future release.
+
 Note for Users Upgrading to SpamAssassin 4.0.3
 ----------------------------------------------
 
