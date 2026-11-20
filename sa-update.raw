@@ -1377,6 +1377,7 @@ sub taint_safe_archive_extract {
               tryhandler |
               \S+[-_]modules? |
               \S+[-_]factory |
+              neuralnetwork[-_]data[-_]dir |
               dcc[-_](?:path|options) |
               pyzor[-_](?:path|options) |
               extracttext[-_]external |
