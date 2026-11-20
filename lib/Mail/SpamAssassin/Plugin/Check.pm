@@ -112,7 +112,8 @@ sub check_main {
   # Make sure priority -100 exists for launching DNS
   $conf->{priorities}->{-100} ||= 1 if $do_dns;
 
-  my @priorities = sort { $a <=> $b } keys %{$conf->{priorities}};
+  # only integer priorities: each is written into the names of compiled methods
+  my @priorities = sort { $a <=> $b } grep { /^-?\d+\z/ } keys %{$conf->{priorities}};
   foreach my $priority (@priorities) {
     # no need to run if there are no priorities at this level.  This can
     # happen in Conf.pm when we switch a rule from one priority to another
@@ -458,6 +459,11 @@ sub run_generic_tests {
     $self->add_evalstr($pms,
                        $self->start_rules_plugin_code($ruletype, $priority) );
     while (my($rulename, $test) = each %{$opts{testhash}->{$priority}}) {
+      # the name is written into the code compiled below: rule names only
+      if ($rulename !~ IS_RULENAME) {
+        dbg("rules: skipping $ruletype rule with invalid name: $rulename");
+        next;
+      }
       $opts{loop_body}->($self, $pms, $conf, $rulename, $test, %nopts);
     }
     if (defined $opts{post_loop_body}) {
@@ -688,6 +694,11 @@ sub do_head_tests {
     # setup the function to run the rules
     while(my($k,$v) = each %ordered) {
       my($hdrname, $def) = split(/\t/, $k, 2);
+      # written into the code below: only what add_test accepts
+      if ($hdrname !~ /^[\w.-]+(?::[a-z]+){0,2}\z/) {
+        dbg("rules: skipping header rules with invalid header name: $hdrname");
+        next;
+      }
       # get() might already include newlines, join accordingly (Bug 8121)
       $self->push_evalstr_prefix($pms, '
         if (scalar(@harr = $self->get(q{'.$hdrname.'}))) {
@@ -1163,6 +1174,11 @@ sub run_eval_tests {
     if (!$function) {
       warn "rules: no eval function defined for $rulename\n";
       $pms->{rule_errors}++;
+      next;
+    }
+    # both names are written into the code compiled below
+    if ($rulename !~ IS_RULENAME || $function !~ /^\w+\z/) {
+      dbg("rules: skipping eval rule with invalid name: $rulename $function");
       next;
     }
  

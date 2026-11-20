@@ -219,7 +219,7 @@ sub check_to_in_all_spam {
 
 sub check_from_in_list {
   my ($self, $pms, $list) = @_;
-  my $list_ref = $pms->{conf}->{$list};
+  my $list_ref = $pms->{conf}->{$pms->{conf}->addrlist_key($list)};
   unless (defined $list_ref) {
     warn "eval: could not find list $list";
     return 0;
@@ -236,7 +236,7 @@ sub check_from_in_list {
 
 sub check_replyto_in_list {
   my ($self, $pms, $list) = @_;
-  my $list_ref = $pms->{conf}->{$list};
+  my $list_ref = $pms->{conf}->{$pms->{conf}->addrlist_key($list)};
   unless (defined $list_ref) {
     warn "eval: could not find list $list";
     return 0;
@@ -273,7 +273,7 @@ sub check_wb_list {
 
 sub check_to_in_list {
   my ($self,$pms,$list) = @_;
-  my $list_ref = $pms->{conf}->{$list};
+  my $list_ref = $pms->{conf}->{$pms->{conf}->addrlist_key($list)};
   unless (defined $list_ref) {
     warn "eval: could not find list $list";
     return 0;

@@ -84,6 +84,8 @@ sub compile_now_start {
 sub setup_test_set {
   my ($self, $conf, $test_set, $ruletype) = @_;
   foreach my $pri (keys %{$test_set}) {
+    # only integer priorities: each is written into a module name below
+    next if $pri !~ /^-?\d+\z/;
     my $nicepri = $pri; $nicepri =~ s/-/neg/g;
     $self->setup_test_set_pri($conf, $test_set->{$pri}, $ruletype.'_'.$nicepri);
   }
