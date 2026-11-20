@@ -618,7 +618,8 @@ sub cond_clause_plugin_loaded {
 
 sub cond_clause_can {
   my ($self, $method) = @_;
-  if ($self->{currentfile} =~ q!\buser_prefs$! ) {
+  # user preferences (from a file, SQL or LDAP), or any file named user_prefs
+  if ($self->{scoresonly} || $self->{currentfile} =~ q!\buser_prefs$! ) {
     warn "config: 'if can $method' not available in user_prefs";
     return 0
   }
