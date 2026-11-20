@@ -934,6 +934,7 @@ sub parse_body {
 	  # now this is the sneaky bit ... steal the sub-message's parse_queue
 	  # and add it to ours.  then we'll handle the sub-message in our
 	  # normal loop and get all the glory.  muhaha.  :)
+	  $_->[4] = $toparse->[4]  for @{$msg_obj->{'parse_queue'}};
 	  push(@{$self->{'parse_queue'}}, @{$msg_obj->{'parse_queue'}});
 	  delete $msg_obj->{'parse_queue'};
 
@@ -970,8 +971,14 @@ to generate the tree.
 sub _parse_multipart {
   my($self, $toparse) = @_;
 
-  my ($msg, $boundary, $body, $subparse) = @{$toparse};
+  my ($msg, $boundary, $body, $subparse, $view) = @{$toparse};
   my $nested_boundary = 0;
+  $view ||= '';
+
+  # in the copy parsed as Dovecot does (see below), a boundary is cut to
+  # its first 80 bytes
+  $boundary = substr($boundary, 0, 80)
+    if $view eq 'dovecot' && defined $boundary;
 
   # we're not supposed to be a leaf, so prep ourselves
   $msg->{'body_parts'} = [];
@@ -989,6 +996,26 @@ sub _parse_multipart {
   # information before making any changes!
   my $dash_boundary = defined $boundary ? "--$boundary" : undef;
   my $dash_len = defined $boundary ? length $dash_boundary : 0;
+
+  # Dovecot keeps only the first 80 bytes of a boundary, so for a longer
+  # one it can find delimiters where this parse finds none, and takes the
+  # close delimiter for a delimiter.  If it would show other parts, keep a
+  # copy of the body to parse that way too, as an extra child of this part.
+  my $dovecot_body;
+  if ($view eq '' && $dash_len > 82) {
+    my $dash_80 = substr($dash_boundary, 0, 82);
+    my $last = $#{$body};
+    $last--  while $last >= 0 && $body->[$last] !~ /\S/;
+    for my $i (0 .. $last) {
+      next if substr($body->[$i], 0, 82) ne $dash_80;
+      if (substr($body->[$i], 0, $dash_len) ne $dash_boundary
+          || (substr($body->[$i], $dash_len, 2) eq '--' && $i < $last)) {
+        $dovecot_body = [ @{$body} ];
+        $view = 'whole';  # the copy covers the parts below this one
+        last;
+      }
+    }
+  }
 
   # ignore preamble per RFC 1521, unless there's no boundary ...
   if ( defined $boundary ) {
@@ -1130,7 +1157,7 @@ sub _parse_multipart {
       # we've created a new node object, so add it to the queue along with the
       # text that belongs to that part, then add the new part to the current
       # node to create the tree.
-      push(@{$self->{'parse_queue'}}, [ $part_msg, $p_boundary, $part_array, $subparse ]);
+      push(@{$self->{'parse_queue'}}, [ $part_msg, $p_boundary, $part_array, $subparse, $view ]);
       $msg->add_body_part($part_msg);
 
       if (defined $boundary) {
@@ -1219,6 +1246,13 @@ sub _parse_multipart {
       substr($_, 0, MAX_BODY_LINE_LENGTH) = '';
     }
     push ( @{$part_array}, $_ );
+  }
+
+  if ($dovecot_body) {
+    my $copy = Mail::SpamAssassin::Message::Node->new({ normalize=>$self->{normalize} });
+    $copy->{'type'} = $msg->{'type'};
+    $msg->add_body_part($copy);
+    push(@{$self->{'parse_queue'}}, [ $copy, $boundary, $dovecot_body, $subparse, 'dovecot' ]);
   }
 
   # Look for a message epilogue
