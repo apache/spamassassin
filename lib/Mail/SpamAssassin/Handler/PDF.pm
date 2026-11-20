@@ -264,6 +264,7 @@ use warnings;
 use re 'taint';
 
 use Mail::SpamAssassin::Handler;
+use Mail::SpamAssassin::Constants qw(RULENAME_RE IS_RULENAME);
 use Mail::SpamAssassin::Logger qw(dbg info would_log);
 use Mail::SpamAssassin::Timeout;
 use Mail::SpamAssassin::Util qw(compile_regexp untaint_var untaint_file_path
@@ -273,6 +274,8 @@ use Mail::SpamAssassin::PDF::Context::Info;
 use Compress::Zlib qw(compress crc32);
 
 our @ISA = qw(Mail::SpamAssassin::Handler);
+
+my $RULENAME_RE = RULENAME_RE;
 
 use constant DEFAULT_PDFTOTEXT_PATH   => '';
 use constant DEFAULT_TEXT_MAX_PAGES   => 4;
@@ -397,7 +400,7 @@ sub set_config {
       code => sub {
         my ($self, $key, $value, $line) = @_;
 
-        if ($value !~ /^(\S+)\s+(.+)$/) {
+        if ($value !~ /^(${RULENAME_RE})\s+(.+)$/) {
           return $Mail::SpamAssassin::Conf::INVALID_VALUE;
         }
         my ($name, $pattern) = ($1, $2);
@@ -814,6 +817,9 @@ sub finish_parsing_end {
 
   my $would_log = would_log('dbg');
 
+  # Rule names are handed to the generated code as data (@rule_names,
+  # indexed by $loopid) and never pasted into its source text.
+  my @rule_names;
   my $eval = <<'EOF';
 package Mail::SpamAssassin::Handler::PDF;
 
@@ -829,13 +835,20 @@ EOF
 
   my $loopid = 0;
   foreach my $name (keys %{$conf->{pdftext_rules}}) {
+    # defence in depth: only valid rule names, even though the name is
+    # passed to the generated code as data
+    if ($name !~ IS_RULENAME) {
+      dbg("pdfinfo2: skipping pdftext rule with invalid name: $name");
+      next;
+    }
     $loopid++;
+    $rule_names[$loopid] = $name;
     my $tflags = $conf->{tflags}->{$name} || '';
 
     my ($dbg_running_rule, $dbg_ran_rule) = ('', '');
     if ($would_log) {
-      $dbg_running_rule = qq(dbg("running rule $name"););
-      $dbg_ran_rule = qq(dbg(qq(ran rule $name ======> got hit "\$match")););
+      $dbg_running_rule = qq(dbg("running rule \$rule_names[$loopid]"););
+      $dbg_ran_rule = qq(dbg(qq(ran rule \$rule_names[$loopid] ======> got hit "\$match")););
     }
 
     my $ifwhile   = 'if';
@@ -856,13 +869,13 @@ EOF
 
     $eval .= <<"EOF";
     $dbg_running_rule
-    \$test_qr = \$pms->{conf}->{pdftext_rules}->{$name};
+    \$test_qr = \$pms->{conf}->{pdftext_rules}->{\$rule_names[$loopid]};
     $init_hits
     rule_$loopid: foreach my \$line (\@\$pdf_text) {
         $ifwhile ( \$line =~ /\$test_qr/$modifiers ) {
             my \$match = defined \${^MATCH} ? \${^MATCH} : '<negative match>';
             $dbg_ran_rule
-            \$pms->got_hit('$name', 'PDFTEXT: ', 'ruletype' => 'body');
+            \$pms->got_hit(\$rule_names[$loopid], 'PDFTEXT: ', 'ruletype' => 'body');
             $last
         }
     }
