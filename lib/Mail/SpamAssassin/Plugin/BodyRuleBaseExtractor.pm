@@ -552,13 +552,15 @@ sub extract_hints {
   open(my $tmpfh, '>'.$self->{tmpf})
     or die "error opening $self->{tmpf}: $!";
   binmode $tmpfh;
-  print $tmpfh "use bytes; m{" . $rule . "}" . $mods
+  # the rule is data after __DATA__, compiled at run time, never parsed as Perl
+  print $tmpfh "use bytes; my \$re = join('', <DATA>); my \$qr = qr/\$re/;\n",
+               "__DATA__\n", ($mods ne '' ? "(?$mods)" : ''), $rule
     or die "error writing to $self->{tmpf}: $!";
   close $tmpfh  or die "error closing $self->{tmpf}: $!";
 
   $self->{perl} = $self->get_perl()  if !exists $self->{perl};
   local *IN;
-  open (IN, "$self->{perl} -c -Mre=debug $self->{tmpf} 2>&1 |")
+  open (IN, "$self->{perl} -Mre=debug $self->{tmpf} 2>&1 |")
     or die "cannot run $self->{perl}: ".exit_status_str($?,$!);
 
   my($inbuf,$nread,$fullstr); $fullstr = '';
