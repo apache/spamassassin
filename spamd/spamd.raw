@@ -3304,7 +3304,7 @@ sub preload_modules_with_tmp_homedir {
 }
 
 # Keep calling syswrite until the entire buffer is written out
-# Retry if EAGAIN/EWOULDBLOCK or when partial buffer is written
+# Retry if EAGAIN/EWOULDBLOCK/EINTR; a partial write is progress, not a retry
 # Limit the number of retries to keep the execution time bounded
 sub syswrite_full_buffer {
   my ($sock, $buf, $numretries) = @_;
@@ -3312,30 +3312,38 @@ sub syswrite_full_buffer {
   my $length = length($buf);
   my $written = 0;
   my $try = 0;
+  my $err;
 
   while (($try < $numretries) && ($length > $written)) {
       my $nbytes = syswrite($sock, $buf, $length - $written, $written);
       if (!defined $nbytes) {
 	  unless ((exists &Errno::EAGAIN && $! == &Errno::EAGAIN)
-		  || (exists &Errno::EWOULDBLOCK && $! == &Errno::EWOULDBLOCK))
+		  || (exists &Errno::EWOULDBLOCK && $! == &Errno::EWOULDBLOCK)
+		  || (exists &Errno::EINTR && $! == &Errno::EINTR))
 	  {
 	      # an error that wasn't non-blocking I/O-related.  that's serious
-	      return;
+	      $err = "$!";
+	      last;
 	  }
 	  # errcode says to try again
+	  $try++;
       }
       else {
 
 	  if ($nbytes == 0) {
-	      return $written;  # return early if no error but nothing was written
+	      last;  # stop if no error but nothing was written
 	  }
 
 	  $written += $nbytes;
       }
-      $try++;
   }
 
-  return $written;      # it's complete, we can return
+  if ($written < $length) {
+      warn "spamd: reply not sent in full, $written of $length bytes written" .
+	   (defined $err ? ": $err" : "") . "\n";
+      return if defined $err;
+  }
+  return $written;
 }
 
 sub map_server_sockets {
