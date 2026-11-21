@@ -535,11 +535,12 @@ sub check_for_forged_juno_received_headers {
 
   if ($xorig ne '') {
     # New style Juno has no X-Originating-IP header, and other changes
-    if($rcvd !~ /from.*\b(?:juno|untd)\.com.*[\[\(]$IP_ADDRESS[\]\)].*by/
+    # (?>.*?X) takes the first X on the line and is not backtracked into
+    if($rcvd !~ /^(?>.*?from)(?>.*?\b(?:juno|untd)\.com)(?>.*?[\[\(]$IP_ADDRESS[\]\)]).*by/m
         && $rcvd !~ / cookie\.(?:juno|untd)\.com /) { return 1; }
     if(index($xmailer, 'Juno ') == -1) { return 1; }
   } else {
-    if($rcvd =~ /from.*\bmail\.com.*\[$IP_ADDRESS\].*by/) {
+    if($rcvd =~ /^(?>.*?from)(?>.*?\bmail\.com)(?>.*?\[$IP_ADDRESS\]).*by/m) {
       if($xmailer !~ /\bmail\.com/) { return 1; }
     } elsif($rcvd =~ /from (webmail\S+\.untd\.com) \(\1 \[$IP_ADDRESS\]\) by/) {
       if($xmailer !~ /^Webmail Version \d/) { return 1; }
