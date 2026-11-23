@@ -355,8 +355,8 @@ sub check_for_msn_groups_headers {
   if ($listname =~ /^notifications$/) {
     return 0 unless $pms->get('Message-Id') =~ /^<\S+\@$server>/;
   } else {
-    return 0 unless $pms->get('Message-Id') =~ /^<$listname-\S+\@groups\.msn\.com>/;
-    return 0 unless $pms->get('EnvelopeFrom:addr') =~ /$listname-bounce\@groups\.msn\.com/;
+    return 0 unless $pms->get('Message-Id') =~ /^<\Q$listname\E-\S+\@groups\.msn\.com>/;
+    return 0 unless $pms->get('EnvelopeFrom:addr') =~ /\Q$listname\E-bounce\@groups\.msn\.com/;
   }
   return 1;
 
