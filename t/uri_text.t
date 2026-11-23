@@ -5,7 +5,7 @@
 use strict;
 use lib '.'; use lib 't';
 use SATest; sa_t_init("uri_text");
-use Test::More tests => 168;
+use Test::More tests => 169;
 use Mail::SpamAssassin;
 use vars qw(%patterns %anti_patterns);
 
@@ -48,6 +48,15 @@ for my $anti_pattern (keys %anti_patterns) {
 if ($failures) {
   print "URIs found:\n$uris";
 }
+
+# a second object uses its own TLD list (Bug 8559)
+my $sa2 = create_saobj({
+    config_text => "util_rb_tld zzf\n",
+    dont_copy_prefs => 1,
+});
+$sa2->init(0);
+my $msg2 = Mail::SpamAssassin::PerMsgStatus->new($sa2, $sa2->parse("Subject: t\n\nexample.zzf\n"));
+ok(grep { $_ eq 'http://example.zzf' } $msg2->get_uri_list());
 
 # function to write test email
 sub write_mail {

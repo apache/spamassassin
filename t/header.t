@@ -2,7 +2,7 @@
 
 use lib '.'; use lib 't';
 use SATest; sa_t_init("header");
-use Test::More tests => 38;
+use Test::More tests => 40;
 
 # ---------------------------------------------------------------------------
 
@@ -151,4 +151,18 @@ tstprefs('
 
 ok (sarun ("-L -t < data/nice/006", \&patterns_run_cb));
 ok_all_patterns();
+
+##########################################
+
+# delete_header() uses each call's own pattern (Bug 8559)
+
+my $sa = create_saobj({ dont_copy_prefs => 1 });
+$sa->init(0);
+my $msg = $sa->parse("X-Spam-Relays-Trusted: x\nX-Spam-Relays-Untrusted: x\nX-Spam-Status: No\n\nbody\n");
+$msg->delete_header('X-Spam-Relays-Trusted');
+ok (!defined $msg->get_header('X-Spam-Relays-Trusted') && defined $msg->get_header('X-Spam-Relays-Untrusted'));
+$msg->delete_header('X-Spam-.*');
+ok (!defined $msg->get_header('X-Spam-Relays-Untrusted') && !defined $msg->get_header('X-Spam-Status'));
+$msg->finish();
+$sa->finish();
 

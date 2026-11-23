@@ -971,7 +971,7 @@ sub poll_responses {
           if ($id =~ m{^(\d+)/}) {
             my $dnsid = $1;  # the raw DNS packet id
             my @matches =
-              grep(m{^\Q$dnsid\E/}o, keys %{$self->{id_to_callback}});
+              grep(m{^\Q$dnsid\E/}, keys %{$self->{id_to_callback}});
             if (!@matches) {
               info("dns: no likely matching queries for id %s", $dnsid);
             } else {

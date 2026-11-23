@@ -2785,7 +2785,7 @@ sub _process_text_uri_list {
     local $_ = untaint_var($text);
 
     local($1,$2,$3);
-    while (/$tbirdurire/igo) {
+    while (/$tbirdurire/ig) {
       my $rawuri = $1||$2||$3;
       my $schost = $4;
       my $rawtype = defined $1 ? 'scheme' : defined $2 ? 'mail' : 'schemeless';

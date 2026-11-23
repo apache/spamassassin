@@ -1135,7 +1135,7 @@ sub neuralnetwork_dump_database {
   if ($toks) {
     my $terms = $vocabulary->{terms} || {};
     foreach my $term (sort keys %$terms) {
-      next if defined $regex && $term !~ /$regex/o;
+      next if defined $regex && $term !~ /$regex/;
       my $t = $terms->{$term} || {};
       my $out_term = utf8::is_utf8($term) ? encode('UTF-8', $term) : $term;
       printf($template, 0.0, $t->{total} || 0, $t->{spam} || 0, $t->{docs} || 0,

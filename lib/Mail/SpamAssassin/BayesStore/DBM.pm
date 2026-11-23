@@ -998,7 +998,7 @@ sub dump_db_toks {
 
   while (my ($tok, $tokvalue) = each %{$self->{db_toks}}) {
     next if ($tok =~ MAGIC_RE); # skip magic tokens
-    next if (defined $regex && $tok !~ /$regex/o);
+    next if (defined $regex && $tok !~ /$regex/);
 
     # We have the value already, so just unpack it.
     my ($ts, $th, $atime) = $self->tok_unpack ($tokvalue);

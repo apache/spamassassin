@@ -660,7 +660,7 @@ sub dump_tokens {
   $cursor or die "Couldn't get cursor: $BerkeleyDB::Error";
   my ($token, $value) = ("", "");
   while ($cursor->c_get($token, $value, $next) == 0) {
-    next if defined $regex && $token !~ /$regex/o;
+    next if defined $regex && $token !~ /$regex/;
     my($ts, $th, $atime) = _unpack_token($value);
     my $prob = $self->{bayes}->_compute_prob_for_token(
                                   $token, $vars[1], $vars[2], $ts, $th) || 0.5;

@@ -5503,13 +5503,13 @@ sub trim_rules {
     push(@all_rules, $self->get_rule_keys($rule_type));
   }
 
-  my @rules_to_keep = grep(/$rec/o, @all_rules);
+  my @rules_to_keep = grep(/$rec/, @all_rules);
 
   if (@rules_to_keep == 0) {
     die "config: trim_rules: all rules excluded, nothing to test\n";
   }
 
-  my @meta_tests    = grep(/$rec/o, $self->get_rule_keys('meta_tests'));
+  my @meta_tests    = grep(/$rec/, $self->get_rule_keys('meta_tests'));
   foreach my $meta (@meta_tests) {
     push(@rules_to_keep, $self->add_meta_depends($meta))
   }

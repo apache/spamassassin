@@ -1024,12 +1024,12 @@ Delete the specified header (decoded and raw) from the Node information.
 sub delete_header {
   my($self, $hdr) = @_;
 
-  foreach ( grep(/^${hdr}$/io, keys %{$self->{'headers'}}) ) {
+  foreach ( grep(/^${hdr}$/i, keys %{$self->{'headers'}}) ) {
     delete $self->{'headers'}->{$_};
     delete $self->{'raw_headers'}->{$_};
   }
   
-  my @neworder = grep(!/^${hdr}$/io, @{$self->{'header_order'}});
+  my @neworder = grep(!/^${hdr}$/i, @{$self->{'header_order'}});
   $self->{'header_order'} = \@neworder;
 }
 

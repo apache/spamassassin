@@ -38,7 +38,9 @@ Also separate functions to check various portions of message for freemails.
 
 freemail_domains domain ...
 
-   List of domains to be used in checks.
+   List of domains to be used in checks. Each freemail_domains line adds
+   to the default list, which sa-update installs and keeps up to date
+   with the rules.
 
    Regexp is not supported, but following wildcards work:
 
@@ -331,7 +333,7 @@ sub _is_freemail {
     foreach my $list ('welcomelist_auth','def_welcomelist_auth') {
         if ($pms->{conf}->{"freemail_import_$list"}) {
             foreach my $regexp (values %{$pms->{conf}->{$list}}) {
-                if ($email =~ /$regexp/o) {
+                if ($email =~ /$regexp/) {
                     dbg("welcomelisted email, $list: $email");
                     return 0;
                 }
@@ -464,7 +466,7 @@ sub check_freemail_header {
     foreach my $email (@emails) {    
         if ($self->_is_freemail($email, $pms)) {
             if (defined $re) {
-                next unless $email =~ /$re/o;
+                next unless $email =~ /$re/;
                 dbg("HIT! $email is freemail and matches regex");
             }
             else {
@@ -500,7 +502,7 @@ sub check_freemail_body {
 
     if (defined $re) {
         foreach my $email (keys %{$pms->{freemail_cache}{body}}) {
-            if ($email =~ /$re/o) {
+            if ($email =~ /$re/) {
                 dbg("HIT! email from body is freemail and matches regex: $email");
                 $self->_test_log($pms, $email, $rulename);
                 return 1;
@@ -548,7 +550,7 @@ sub check_freemail_from {
     foreach my $email (keys %from_addrs) {
         next unless $self->_is_freemail($email, $pms);
         if (defined $re) {
-            next unless $email =~ /$re/o;
+            next unless $email =~ /$re/;
             dbg("HIT! $email is freemail and matches regex");
         }
         else {
