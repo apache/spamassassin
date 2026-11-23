@@ -1344,7 +1344,7 @@ sub remove_spamassassin_markup {
     my($hdr, $name) = ($1,$2);
 
     # If the rewritten version doesn't exist, we should deal with it anyway...
-    unless ($hdrs =~ s/^$name[ \t]*.*\n(?:\s+\S.*\n)*/$hdr/m) {
+    unless ($hdrs =~ s/^\Q$name\E[ \t]*.*\n(?:\s+\S.*\n)*/$hdr/m) {
       $hdrs =~ s/\n\n/\n$hdr\n/;
     }
   }
