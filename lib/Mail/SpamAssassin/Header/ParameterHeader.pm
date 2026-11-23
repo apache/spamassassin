@@ -194,8 +194,13 @@ sub _process_rfc2231 {
         if (length $charset && $charset !~ /^(?:us-ascii|utf-8)$/i) {
             my $enc = find_encoding($charset);
             if (defined $enc) {
-                # Convert to UTF-8
-                $value = $utf8->encode($enc->decode($value));
+                # Convert to UTF-8 (Encode before 2.77 croaks on UTF-16 with no BOM)
+                my $converted = eval { $utf8->encode($enc->decode($value)) };
+                if (defined $converted) {
+                    $value = $converted;
+                } else {
+                    dbg("ParameterHeader: Cannot decode charset '$charset' in parameter '$key' value");
+                }
             } else {
                 dbg("ParameterHeader: Unknown charset '$charset' in parameter '$key' value");
             }
