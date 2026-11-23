@@ -1131,7 +1131,6 @@ sub run_eval_tests {
   # look these up once in advance to save repeated lookups in loop below
   my $evalhash = $conf->{$evalname}->{$priority};
   my $tflagsref = $conf->{tflags};
-  my $scoresref = $conf->{scores};
   my $eval_pluginsref = $conf->{eval_plugins};
   my $have_ran_rule = $self->{main}->have_plugin("ran_rule");
 
@@ -1167,9 +1166,6 @@ sub run_eval_tests {
       }
     }
  
-    # skip if score zeroed
-    next if !$scoresref->{$rulename};
-
     my $function = untaint_var($test->[0]); # was validated with \w+
     if (!$function) {
       warn "rules: no eval function defined for $rulename\n";
