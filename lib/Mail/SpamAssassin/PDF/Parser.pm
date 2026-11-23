@@ -125,7 +125,9 @@ sub parse {
     # Parse header
     $self->{version} = $self->{core}->get_version();
 
-    local $SIG{ALRM} = sub {die "__TIMEOUT__\n"};
+    # only for a timeout of its own: evals below can catch this die, and the
+    # caller's handler (Mail::SpamAssassin::Timeout) re-arms the alarm
+    local $SIG{ALRM} = sub {die "__TIMEOUT__\n"} if (defined($self->{timeout}));
     alarm($self->{timeout}) if (defined($self->{timeout}));
 
     eval {
@@ -276,6 +278,8 @@ sub _parse_xref_stream {
     my $template = 'H'.($xref->{'/W'}->[0]*2).'H'.($xref->{'/W'}->[1]*2).'H'.($xref->{'/W'}->[2]*2);
     my @index = defined($xref->{'/Index'}) ? @{$xref->{'/Index'}} : (0,$xref->{'/Size'});
     die "Odd number of elements in index while parsing xref stream" if (scalar(@index) % 2 != 0);
+    # entries of no width hold nothing, however many /Size or /Index count
+    @index = () if $width == 0;
 
     my $o = 0;
     for (my $i=0;$i<scalar(@index);$i+=2) {
@@ -692,7 +696,9 @@ sub _get_obj {
 
 sub _dereference {
     my ($self,$obj) = @_;
+    my %seen;
     while ( defined($obj) && !ref($obj) && $obj =~ /^\d+ \d+ R$/ ) {
+        die "Reference loop at object $obj" if $seen{$obj}++;
         $obj = $self->_get_obj($obj);
     }
     return $obj;
@@ -757,8 +763,7 @@ sub _get_stream_data {
         return $self->{stream_cache}->{$offset};
     }
 
-    $self->{core}->pos($offset);
-    read($self->{core}->{fh},my $stream_data,$length);
+    my $stream_data = $self->_read_stream($offset,$length);
     if (defined($self->{core}->{crypt})) {
         $self->{core}->{crypt}->set_current_object($stream_obj->{_objnum}, $stream_obj->{_gennum});
         $stream_data = $self->{core}->{crypt}->decrypt($stream_data);
@@ -802,6 +807,19 @@ sub _count_decoded {
         if defined($self->{max_bytes}) && $self->{bytes_decoded} > $self->{max_bytes};
 }
 
+# read the stream data at $offset; read() allocates the length it is given
+# before reading, so /Length from the file is cut to what the file holds
+sub _read_stream {
+    my ($self,$offset,$length) = @_;
+    my $fh = $self->{core}->{fh};
+    seek($fh,0,2);
+    my $left = tell($fh);
+    $self->{core}->pos($offset);
+    $left -= tell($fh);
+    read($fh,my $data,$length > $left ? $left : $length);
+    return $data;
+}
+
 #
 # Read image stream data for extraction purposes.
 #
@@ -843,8 +861,7 @@ sub _get_image_data {
 
     # Read and decrypt raw stream bytes (mirrors _get_stream_data, but uncached since
     # the result here is image-specific and not what other callers expect).
-    $self->{core}->pos($offset);
-    read($self->{core}->{fh},my $stream_data,$length);
+    my $stream_data = $self->_read_stream($offset,$length);
     if (defined($self->{core}->{crypt})) {
         $self->{core}->{crypt}->set_current_object($stream_obj->{_objnum}, $stream_obj->{_gennum});
         $stream_data = $self->{core}->{crypt}->decrypt($stream_data);

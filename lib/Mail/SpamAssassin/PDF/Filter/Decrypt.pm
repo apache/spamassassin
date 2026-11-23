@@ -39,6 +39,12 @@ sub new {
         die "Encryption algorithm $v not implemented";
     }
 
+    # key length in bits: 40 for V 1, 256 for V 5, otherwise a multiple of 8
+    # from 40 to 128; with any other the document cannot be decrypted
+    if ( $v == 2 || $v == 4 ) {
+        return unless $length =~ /^\d+$/ && $length >= 40 && $length <= 128 && $length % 8 == 0;
+    }
+
     # V1/V2/V4 encryption variants need RC4; V5 is exclusively AES-256 (R5/R6)
     # and never calls Crypt::RC4::RC4 anywhere in this module.  V4/V5 also need
     # Crypt::Mode::CBC, and R5/R6 need Digest::SHA.  Bail out clearly if a
@@ -64,7 +70,7 @@ sub new {
         V               => $v,
         ID              => $doc_id,
         EncryptMetadata => $encrypt_metadata,
-        keylength       => ($v == 1 ? 40 : $length),
+        keylength       => ($v == 1 ? 40 : $v == 5 ? 256 : $length),
     }, $class;
 
     if ( $v == 5 ) {
