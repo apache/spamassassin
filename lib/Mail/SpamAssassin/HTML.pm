@@ -804,6 +804,9 @@ sub text_style {
 	  elsif (/^\s*([a-z_-]+)\s*:\s*(\S.*?)\s*$/i) {
 	    # "display: none", "visibility: hidden", etc.
 	    $new{'style_'.lc($1)} = lc($2);
+	    # tested here, once, as html_font_invisible() runs for every text chunk
+	    $new{transform_hidden} = css_transform_hidden($new{style_transform})
+	      if lc($1) eq 'transform';
 	  }
 	}
       }
@@ -971,6 +974,18 @@ sub parse_font_size {
   die "Invalid font size: $size";
 }
 
+# Returns true if a CSS transform value scales an axis to 0.
+sub css_transform_hidden {
+  my ($transform) = @_;
+
+  # Linear time: no try may scan to the end of the value, so cut it after
+  # its last ")" and stop a first argument at "(".
+  $transform = substr($transform, 0, rindex($transform, ')') + 1);
+  return 1 if $transform =~ /\bscale[xy]?\(\s*0(?:\.0+)?(?:%|[a-z]+)?(?:[,\s][^)]*)?\)/i;
+  return 1 if $transform =~ /\bscale\([^,()]++,\s*0(?:\.0+)?(?:%|[a-z]+)?\s*\)/i;
+  return 0;
+}
+
 sub html_font_invisible {
   my ($self, $text) = @_;
 
@@ -979,7 +994,6 @@ sub html_font_invisible {
   my $font_size = $self->{text_style}[-1]->{'font_size'};
   my $display = $self->{text_style}[-1]->{style_display};
   my $visibility = $self->{text_style}[-1]->{style_visibility};
-  my $transform = $self->{text_style}[-1]->{style_transform};
   my $position = $self->{text_style}[-1]->{style_position};
 
   # size too small
@@ -998,10 +1012,7 @@ sub html_font_invisible {
   }
 
   # <span style="transform: scale(0)"> — any axis scaled to 0 collapses the element
-  if ($transform && $transform =~ /\bscale[xy]?\(\s*0(?:\.0+)?(?:%|[a-z]+)?(?:[,\s][^)]*)?\)/i) {
-    return 1;
-  }
-  if ($transform && $transform =~ /\bscale\([^,)]++,\s*0(?:\.0+)?(?:%|[a-z]+)?\s*\)/i) {
+  if ($self->{text_style}[-1]->{transform_hidden}) {
     return 1;
   }
 
