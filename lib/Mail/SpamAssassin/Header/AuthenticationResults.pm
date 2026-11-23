@@ -19,6 +19,7 @@ package Mail::SpamAssassin::Header::AuthenticationResults;
 use strict;
 use warnings FATAL => 'all';
 
+use Mail::SpamAssassin::Header;
 use Mail::SpamAssassin::Header::ParameterHeader;
 
 use parent qw(Mail::SpamAssassin::Header::ParameterHeader);
@@ -104,7 +105,15 @@ sub method {
 
 sub _parse_authserv {
     my ($self) = @_;
-    my $val = $self->value();
+    # The authserv-id is the first token of the field (RFC 8601); value()
+    # is the first token without "=" wherever it stands.  A field that
+    # starts with a name=value pair or with ";" has no authserv-id.
+    my $val = $self->raw() // '';
+    _unfold_lines($val);
+    _remove_comments($val);
+    _replace_char($val, ';', "\x{00}");
+    $val =~ s/\x{00}.*//s;
+    $val = '' if _replace_char($val, '=', "\x{00}");
     $val =~ s/^\s+//; $val =~ s/\s+$//;
     # Extract authserv-id: first token, optionally followed by version number
     if ($val =~ /^(\S+)(?:\s+(\d+))?\s*$/) {
