@@ -185,6 +185,14 @@ sub _run {      # private
     #     !$oldalarm ? '' : sprintf(", reported as %.3f s", $oldalarm));
       $oldalarm = $oldalarm2 < 1 ? 1 : $oldalarm2;
     }
+    # an alarm not set here counts as an outer timer only if something handles SIGALRM
+    if ($oldalarm && (!@expiration || !defined $expiration[0])) {
+      my $h = $SIG{ALRM};
+      if (!defined $h || $h eq '' || $h eq 'DEFAULT' || $h eq 'IGNORE') {
+        dbg("timed: %s ignoring an alarm with no handler, %s s left", $id, $oldalarm);
+        $oldalarm = 0;
+      }
+    }
     $self->{end_time} = $start_time + $secs;  # needed by reset()
     # Re-arm before dying: the die is often caught by an inner eval (the one
     # around HTML::Parser::parse, around HTML::Color->new, call_plugins()...)
@@ -218,6 +226,8 @@ sub _run {      # private
 
     } else {  # run under a timer specified with this call
       local $SIG{ALRM} = $handler;  # ensure closed scope here
+      # alarm(0) on leaving this block, before the local above is undone
+      my $disarm = bless [], 'Mail::SpamAssassin::Timeout::Disarm';
       my $isecs = int($secs);
       $isecs++  if $secs > int($isecs);  # ceiling
     # dbg("timed: %s alarm(%d)", $id, $isecs);
@@ -341,6 +351,8 @@ sub reset {
     alarm(2);  # mercifully grant two additional seconds
   }
 }
+
+sub Mail::SpamAssassin::Timeout::Disarm::DESTROY { alarm(0) }
 
 ###########################################################################
 
