@@ -207,7 +207,7 @@ sub add_cidr {
     # reasons to keep it for linting purposes, though, so don't start skipping
     # it until we have over 200 nets in our list
     if (scalar @{$self->{nets}} < 200) {
-      next if ($self->is_net_declared($ip4, $ip6, $exclude, 0));
+      next if ($self->_nets_contains_network($ip4, $ip6, $exclude, 0, $cidr_orig, 1));
     }
 
     # note: it appears a NetAddr::IP object takes up about 279 bytes
