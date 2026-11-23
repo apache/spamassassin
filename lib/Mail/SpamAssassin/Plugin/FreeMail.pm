@@ -119,7 +119,7 @@ our $email_welcomelist = qr/
     | request-[a-f0-9]{16}		# live.com
     | bounced?-				# yahoo.com etc
     | [a-f0-9]{8}(?:\.[a-f0-9]{8}|-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}) # gmail msgids?
-    | .+=.+=.+				# gmail forward
+    | .[^=\n]*=.[^=\n]*=.+		# gmail forward, .+=.+=.+ in linear time
   )\@
 /xi;
 
