@@ -1525,8 +1525,9 @@ sub spawn {
 
       # if we changed UID during processing, change back!
       if ($setuid_to_user && ($> != $<) && ($> != ($< - 2**32))) {
-        $) = "$( $(";    # change eGID
-        $> = $<;         # change eUID
+        $> = $<;           # change eUID
+        my $rgid = POSIX::getgid(); # works around Perl 5.16 taint mode bug getting $(
+        $) = "$rgid $rgid"; # change eGID and groups
 
         # check again; ensure the change happened
         if ($> != $< && ($> != ( $< - 2**32))) {
@@ -1885,7 +1886,7 @@ sub handle_setuid_to_user {
     my ($name, $pwd, $uid, $gid, $quota, $comment, $gcos, $dir, $etc) =
         getpwnam($opt{'default-user'});
   
-    $) = (get_user_groups($uid));       # eGID
+    $) = "$gid ".get_user_groups($uid); # eGID and groups
     $> = $uid;                          # eUID
     if (!defined($uid) || ($> != $uid and $> != ($uid - 2**32))) {
       die("spamd: setuid to $opt{'default-user'} failed");
@@ -2629,7 +2630,7 @@ sub seteuid_to_user {
       die "spamd: seteuid_to_user (getpwnam) unable to find user: '$suidto'\n";
   }
 
-  $) = (get_user_groups($uid));     # change eGID
+  $) = "$gid ".get_user_groups($uid); # change eGID and groups
   $> = $uid;                        # change eUID
   if ( !defined($uid) || ( $> != $uid and $> != ( $uid - 2**32 ) ) ) {
     # make it fatal to avoid security breaches
@@ -2641,8 +2642,9 @@ sub restore_euid {
   return if (am_running_on_windows());
   
   if (($> != $<) && ($> != ($< - 2**32))) {
-    $) = "$( $(";    # change eGID
-    $> = $<;         # change eUID
+    $> = $<;           # change eUID
+    my $rgid = POSIX::getgid(); # works around Perl 5.16 taint mode bug getting $(
+    $) = "$rgid $rgid"; # change eGID and groups
     # check again; ensure the change happened
     if ($> != $< && ($> != ( $< - 2**32))) {
       # make it fatal to avoid security breaches
@@ -2688,7 +2690,7 @@ sub handle_user_setuid_basic {
   }
 
   if ($setuid_to_user) {
-    $) = (get_user_groups($uid));     # change eGID
+    $) = "$gid ".get_user_groups($uid); # change eGID and groups
     $> = $uid;                        # change eUID
     if ( !defined($uid) || ( $> != $uid and $> != ( $uid - 2**32 ) ) ) {
       # make it fatal to avoid security breaches
@@ -2940,7 +2942,7 @@ sub handle_user_setuid_with_sql {
   }
 
   if ($setuid_to_user) {
-    $) = (get_user_groups($uid));     # change eGID
+    $) = "$gid ".get_user_groups($uid); # change eGID and groups
     $> = $uid;                        # change eUID
     if (!defined($uid) || ($> != $uid and $> != ($uid - 2**32))) {
       # make it fatal to avoid security breaches
@@ -2985,7 +2987,7 @@ sub handle_user_setuid_with_ldap {
   }
 
   if ($setuid_to_user) {
-    $) = (get_user_groups($uid));    # change eGID
+    $) = "$gid ".get_user_groups($uid); # change eGID and groups
     $> = $uid;           # change eUID
     if (!defined($uid) || ($> != $uid and $> != ($uid - 2**32))) {
       # make it fatal to avoid security breaches
