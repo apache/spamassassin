@@ -5,7 +5,7 @@ use SATest; sa_t_init("freemail");
 
 use Test::More;
 
-plan tests => 33;
+plan tests => 35;
 
 # ---------------------------------------------------------------------------
 
@@ -189,3 +189,22 @@ tstlocalrules (q{
 ok sarun ("-L -t < data/spam/freemail3", \&patterns_run_cb);
 ok_all_patterns();
 
+## mailto: links are matched with each object's own TLD list (Bug 8559)
+
+foreach my $tld ('aa1', 'aa2') {
+  my $rule = 'FM_' . uc($tld);
+  my $sa = create_saobj({
+    config_text => "loadplugin Mail::SpamAssassin::Plugin::Check\n"
+      . "loadplugin Mail::SpamAssassin::Plugin::FreeMail\n"
+      . "loadhandler Mail::SpamAssassin::Handler::HTML\n"
+      . "util_rb_tld $tld\nfreemail_domains mail.aa1 mail.aa2\n"
+      . "header $rule eval:check_freemail_body('\\.$tld\$')\nscore $rule 1\n",
+    dont_copy_prefs => 1,
+  });
+  $sa->init(0);
+  my $status = $sa->check($sa->parse("Content-Type: text/html\n\n"
+    . "<a href=\"mailto:joe\@mail.aa1\">1</a> <a href=\"mailto:joe\@mail.aa2\">2</a>\n"));
+  ok($status->get_names_of_tests_hit() =~ /\b$rule\b/);
+  $status->finish();
+  $sa->finish();
+}

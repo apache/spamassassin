@@ -128,7 +128,7 @@ sub do_one_line_body_tests {
       my $lref = \$line;
       pos $$lref = 0;
       '.$self->hash_line_for_rule($pms, $rulename).'
-      while ($$lref =~ /$qrptr->{q{'.$rulename.'}}/gop) {
+      while ($$lref =~ /$qrptr->{q{'.$rulename.'}}/gp) {
         $self->got_hit(q{'.$rulename.'}, "BODY: ", ruletype => "one_line_body");
         '. $self->hit_rule_plugin_code($pms, $rulename, "one_line_body", "") . '
         '. ($max? 'last if $hitsptr->{q{'.$rulename.'}} >= '.$max.';' : '') . '
@@ -138,7 +138,7 @@ sub do_one_line_body_tests {
     } else {
       $sub .= '
       '.$self->hash_line_for_rule($pms, $rulename).'
-      if ($line =~ /$qrptr->{q{'.$rulename.'}}/op) {
+      if ($line =~ /$qrptr->{q{'.$rulename.'}}/p) {
         $self->got_hit(q{'.$rulename.'}, "BODY: ", ruletype => "one_line_body");
         '. $self->hit_rule_plugin_code($pms, $rulename, "one_line_body", "return 1") . '
       }
