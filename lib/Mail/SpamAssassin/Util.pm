@@ -78,6 +78,7 @@ use Fcntl;
 use Errno qw(ENOENT EACCES EEXIST);
 use POSIX qw(:sys_wait_h WIFEXITED WIFSIGNALED WIFSTOPPED WEXITSTATUS
              WTERMSIG WSTOPSIG);
+use Mail::SpamAssassin::Constants qw(MAX_URI_NESTING);
 
 ###########################################################################
 
@@ -1588,14 +1589,17 @@ sub uri_list_canonicalize {
   my $redirector_patterns = shift;
 
   my @uris;
-  my $rb;
+  my ($rb, $nesting_cut);
   if (ref($_[0]) eq 'ARRAY') {
     # New call style:
     # - reference to array of redirector_patterns
     # - reference to array of URIs
     # - reference to $self->{main}->{registryboundaries}
+    # - optional reference to a scalar, set to 1 if nesting went
+    #   deeper than MAX_URI_NESTING levels
     @uris = @{$_[0]};
     $rb = $_[1];
+    $nesting_cut = $_[2];
   } else {
     # Old call style:
     # - reference to array of redirector_patterns
@@ -1605,7 +1609,17 @@ sub uri_list_canonicalize {
 
   # make sure we catch bad encoding tricks
   my @nuris;
+  # nested URIs are pushed onto @uris below, so the loop visits them one
+  # level after another; stop after MAX_URI_NESTING levels
+  my ($n, $level, $level_end) = (0, 0, scalar @uris);
   for my $uri (@uris) {
+    if ($n++ == $level_end) {
+      if (++$level > MAX_URI_NESTING) {
+        $$nesting_cut = 1 if ref $nesting_cut;
+        last;
+      }
+      $level_end = @uris;
+    }
     # sometimes we catch URLs on multiple lines
     $uri =~ s/\n//g;
 

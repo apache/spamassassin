@@ -2926,6 +2926,12 @@ sub add_uri_detail_list {
   $types = {'parsed' => 1} unless defined $types;
   $source ||= 'parsed';
 
+  # cut URIs from handlers and plugins as HTML.pm cuts its own
+  if (length($uri) > MAX_URI_LENGTH) {
+    $self->{'uri_truncated'} = 1;
+    $uri = substr($uri, 0, MAX_URI_LENGTH);
+  }
+
   my (%domains, %hosts, %cleaned);
   my $udl = $self->{uri_detail_list};
 
@@ -2956,7 +2962,14 @@ sub add_uri_detail_list {
   if ($types->{nocanon}) {
     push @uris, $uri;
   } else {
-    @uris = uri_list_canonicalize($self->{conf}->{redirector_patterns}, [$uri], $self->{main}->{registryboundaries});
+    my $nesting_cut;
+    @uris = uri_list_canonicalize($self->{conf}->{redirector_patterns}, [$uri],
+              $self->{main}->{registryboundaries}, \$nesting_cut);
+    if ($nesting_cut) {
+      # flags as for MAX_URI_COUNT, the message one for check_msg_parse_flags
+      $self->{'uri_truncated'} = 1;
+      $self->{msg}->{'uri_nesting_truncated'} = 1;
+    }
   }
   foreach my $cleanuri (@uris) {
     # Make sure all the URIs are nice and short

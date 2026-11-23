@@ -44,7 +44,8 @@ BEGIN {
 	MBX_SEPARATOR
 	MAX_BODY_LINE_LENGTH MAX_HEADER_KEY_LENGTH MAX_HEADER_VALUE_LENGTH
 	MAX_HEADER_LENGTH ARITH_EXPRESSION_LEXER AI_TIME_UNKNOWN
-	CHARSETS_LIKELY_TO_FP_AS_CAPS MAX_URI_LENGTH MAX_URI_COUNT RULENAME_RE IS_RULENAME
+	CHARSETS_LIKELY_TO_FP_AS_CAPS MAX_URI_LENGTH MAX_URI_COUNT MAX_URI_NESTING
+	RULENAME_RE IS_RULENAME
 	META_RULES_MATCHING_RE
   );
 
@@ -386,6 +387,10 @@ use constant MAX_URI_LENGTH => 8192;
 # maximum number of distinct URIs collected per HTML part and per message;
 # every URI is canonicalized and run through all uri rules and plugins
 use constant MAX_URI_COUNT => 2000;
+
+# maximum levels of URIs nested inside a URI (redirectors) that
+# uri_list_canonicalize follows
+use constant MAX_URI_NESTING => 10;
 
 # used for meta rules and "if" conditionals in Conf::Parser
 use constant ARITH_EXPRESSION_LEXER => qr/(?:

@@ -157,6 +157,9 @@ describe MIMEPART_LIMIT_EXCEEDED Message has too many MIME parts
 body URI_LIMIT_EXCEEDED		eval:check_msg_parse_flags('uri_count_truncated')
 describe URI_LIMIT_EXCEEDED	Message has too many URIs
 
+body URI_NESTING_EXCEEDED	eval:check_msg_parse_flags('uri_nesting_truncated')
+describe URI_NESTING_EXCEEDED	Message has too many levels of nested URIs
+
 endif
 
 ###########################################################################
