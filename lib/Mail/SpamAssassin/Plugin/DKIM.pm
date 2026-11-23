@@ -520,6 +520,9 @@ continues without the DKIM result. A numeric value is optionally suffixed
 by a time unit (s, m, h, d, w, indicating seconds (default), minutes, hours,
 days, weeks).
 
+The key lookups for the signatures of a message share one such time, and
+the ADSP lookups for its author domains another.
+
 =item dkim_max_signatures n             (default: 5)
 
 Maximum number of DKIM signatures that are verified per message, from 1
@@ -1261,6 +1264,17 @@ sub _check_dkim_adsp {
 
   } else {
 
+    # one dkim_timeout for the lookups of all author domains; Mail::DKIM
+    # stops the timer while it waits for each query, so give our resolver,
+    # which it uses for them, the same deadline
+    my $timeout = $pms->{conf}->{dkim_timeout};
+    my $deadline = $pms->{master_deadline};
+    if ($timeout && $timeout > 0) {
+      my $t = Time::HiRes::time() + $timeout;
+      $deadline = $t  if !defined $deadline || $t < $deadline;
+    }
+    local $self->{main}->{resolver}->{send_deadline} = $deadline;
+
     foreach my $author_domain (@author_domains) {
       my $adsp;
 
@@ -1322,13 +1336,18 @@ sub _check_dkim_adsp {
         } elsif (!$self->_dkim_load_modules()) {
           dbg("dkim: adsp not retrieved, module Mail::DKIM not available");
 
+        } elsif (defined $deadline && Time::HiRes::time() >= $deadline) {
+          # the lookups of earlier author domains used up the time
+          dbg("dkim: adsp not retrieved, no time left for domain %s",
+              $author_domain);
+          $pms->{msg}->{'dkim_adsp_truncated'} = 1;
+
         } else {  # do the ADSP DNS lookup
           my $timemethod = $self->{main}->time_method("check_dkim_adsp");
 
           my $practices;  # author domain signing practices object
-          my $timeout = $pms->{conf}->{dkim_timeout};
           my $timer = Mail::SpamAssassin::Timeout->new(
-                    { secs => $timeout, deadline => $pms->{master_deadline} });
+                    { secs => $timeout, deadline => $deadline });
           my $err = $timer->run_and_catch(sub {
             eval {
               if (Mail::DKIM::AuthorDomainPolicy->UNIVERSAL::can("fetch")) {

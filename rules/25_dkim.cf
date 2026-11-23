@@ -91,6 +91,11 @@ describe DKIM_ADSP_CUSTOM_HIGH	No valid author signature, adsp_override is CUSTO
 tflags   DKIM_ADSP_CUSTOM_HIGH	net userconf
 reuse    DKIM_ADSP_CUSTOM_HIGH
 
+ifplugin Mail::SpamAssassin::Plugin::MIMEEval
+body     DKIM_ADSP_LIMIT_EXCEEDED	eval:check_msg_parse_flags('dkim_adsp_truncated')
+describe DKIM_ADSP_LIMIT_EXCEEDED	Message has more author domains than ADSP lookups had time for
+endif
+
 full     __RESIGNER1     eval:check_dkim_valid('linkedin.com')
 tflags   __RESIGNER1     net
 reuse    __RESIGNER1
