@@ -167,7 +167,7 @@ sub parse {
                 $root->{'/OpenAction'} = $self->_dereference($root->{'/OpenAction'});
                 $self->{context}->open_action($root->{'/OpenAction'}) if $self->{context}->can('open_action');
                 debug('trace',"Calling _parse_action");
-                $self->_parse_action($root->{'/OpenAction'});
+                $self->_contain('open action', sub { $self->_parse_action($root->{'/OpenAction'}) });
             }
             if (defined($root->{'/AA'}) ) {
                 # Additional Actions
@@ -424,13 +424,24 @@ sub _parse_encrypt {
 
 }
 
+# Run $code. An error in it ends only that part of the document, unless it
+# is a timer or the byte limit, which end the parse.
+sub _contain {
+    my ($self,$what,$code) = @_;
+    return 1 if eval { $code->(); 1 };
+    die $@ if $@ =~ /__alarm__ignore__|^__TIMEOUT__$|over max_bytes/;
+    debug('trace',"$what skipped: $@");
+    return 0;
+}
+
 sub _parse_info {
     my ($self,$info) = @_;
     $info = $self->_dereference($info);
-    return unless defined($info);
+    return unless ref($info) eq 'HASH';
 
     foreach (keys %{$info}) {
         $info->{$_} = $self->_dereference($info->{$_});
+        next unless defined($info->{$_});
         _to_utf8($info->{$_});
     }
 
@@ -440,7 +451,7 @@ sub _parse_info {
 sub _parse_pages {
     my ($self,$node,$parent_node) = @_;
     $node = $self->_dereference($node);
-    return unless defined($node);
+    return unless ref($node) eq 'HASH';
 
     # a node listed twice in /Kids, or listing an ancestor, is read once
     return $node if ref($node) && $self->{visited}->{'page '.refaddr($node)}++;
@@ -461,7 +472,10 @@ sub _parse_pages {
 
     if ( $node->{'/Type'} eq '/Pages' ) {
         $node->{'/Kids'} = $self->_dereference($node->{'/Kids'});
-        $self->_parse_pages($_, $node) for (@{$node->{'/Kids'}});
+        return $node unless ref($node->{'/Kids'}) eq 'ARRAY';
+        for my $kid (@{$node->{'/Kids'}}) {
+            $self->_contain('page tree node', sub { $self->_parse_pages($kid, $node) });
+        }
     } elsif ( $node->{'/Type'} eq '/Page' ) {
         $node->{'/MediaBox'} = $self->_dereference($node->{'/MediaBox'});
         my $process_page = 1;
@@ -469,21 +483,27 @@ sub _parse_pages {
         $node->{page_number} = scalar(@{$self->{pages}});
 
         # call page begin handler
-        $process_page = $self->{context}->page_begin($node) if $self->{context}->can('page_begin');
+        $process_page = 0 unless $self->_contain('page', sub {
+            $process_page = $self->{context}->page_begin($node) if $self->{context}->can('page_begin');
+        });
 
         # Annotations are parsed for every page, even when the context declines
         # to process the page body.  Link annotations are where URIs live, and a
         # phisher can put the link on any page; skipping them would hide the URI
         # entirely.  This is cheap -- a dict lookup per annotation -- unlike the
         # content stream rendering below.
-        $self->_parse_annotations($node->{'/Annots'},$node) if (defined($node->{'/Annots'}));
+        $self->_contain('annotations', sub {
+            $self->_parse_annotations($node->{'/Annots'},$node);
+        }) if (defined($node->{'/Annots'}));
 
         if ( $process_page ) {
-            $node->{'/Resources'} = $self->_parse_resources($node->{'/Resources'}) if (defined($node->{'/Resources'}));
-            $self->_parse_contents($node->{'/Contents'},$node) if (defined($node->{'/Contents'}));
+            $self->_contain('page content', sub {
+                $node->{'/Resources'} = $self->_parse_resources($node->{'/Resources'}) if (defined($node->{'/Resources'}));
+                $self->_parse_contents($node->{'/Contents'},$node) if (defined($node->{'/Contents'}));
 
-            # call page end handler
-            $self->{context}->page_end($node) if $self->{context}->can('page_end');
+                # call page end handler
+                $self->{context}->page_end($node) if $self->{context}->can('page_end');
+            });
         }
 
     } else {
@@ -497,13 +517,16 @@ sub _parse_pages {
 sub _parse_annotations {
     my ($self,$annots,$page) = @_;
     $annots = $self->_dereference($annots);
-    return unless defined($annots);
+    return unless ref($annots) eq 'ARRAY';
 
     for my $ref (@$annots) {
-        my $annot = $self->_dereference($ref);
-        if ( defined($annot->{'/Subtype'}) && $annot->{'/Subtype'} eq '/Link' && defined($annot->{'/A'}) ) {
-            $self->_parse_action($annot->{'/A'},$annot->{'/Rect'},$page);
-        }
+        $self->_contain('annotation', sub {
+            my $annot = $self->_dereference($ref);
+            return unless ref($annot) eq 'HASH';
+            if ( defined($annot->{'/Subtype'}) && $annot->{'/Subtype'} eq '/Link' && defined($annot->{'/A'}) ) {
+                $self->_parse_action($annot->{'/A'},$annot->{'/Rect'},$page);
+            }
+        });
     }
 
 }
@@ -511,9 +534,10 @@ sub _parse_annotations {
 sub _parse_action {
     my ($self,$action,$rect,$page) = @_;
     $action = $self->_dereference($action);
-    return unless defined($action);
+    return unless ref($action) eq 'HASH';
+    my $type = $action->{'/S'} // '';
 
-    if ( $action->{'/S'} eq '/URI' ) {
+    if ( $type eq '/URI' ) {
         # /URI may be given as an indirect reference to a string object
         my $location = $self->_dereference($action->{'/URI'});
         if ( defined($location) ) {
@@ -524,12 +548,13 @@ sub _parse_action {
             }
             if ( $location =~ /^[a-z]+:/i ) {
                 $rect = $self->_dereference($rect);
-                $_ = $self->_dereference($_) for (@{$rect});
+                $rect = undef unless ref($rect) eq 'ARRAY';
+                $_ = $self->_dereference($_) for (@{$rect || []});
                 $self->{context}->uri($location,$rect,$page) if $self->{context}->can('uri');
             }
         }
     }
-    if ( $action->{'/S'} eq '/JavaScript' ) {
+    if ( $type eq '/JavaScript' ) {
         $self->{context}->javascript($action->{'/JS'}) if $self->{context}->can('javascript');
     }
 
@@ -549,9 +574,9 @@ sub _parse_action {
 sub _parse_resources {
     my ($self,$resources) = @_;
     $resources = $self->_dereference($resources);
-    return unless defined($resources);
+    return unless ref($resources) eq 'HASH';
     # read each resource dictionary once (form XObjects may point back)
-    return $resources if ref($resources) && $self->{visited}->{'resources '.refaddr($resources)}++;
+    return $resources if $self->{visited}->{'resources '.refaddr($resources)}++;
 
     $resources->{'/XObject'} = $self->_parse_xobject($resources->{'/XObject'}) if (defined($resources->{'/XObject'}));
     return $resources;
@@ -560,14 +585,17 @@ sub _parse_resources {
 sub _parse_xobject {
     my ($self,$xobject) = @_;
     $xobject = $self->_dereference($xobject);
-    return unless defined($xobject);
+    return unless ref($xobject) eq 'HASH';
 
     for my $name (keys %$xobject) {
         my $ref = $xobject->{$name};
         my $obj = $xobject->{$name} = $self->_dereference($ref);
-        if ( $obj->{'/Subtype'} eq '/Image' ) {
+        # skip malformed entries rather than abort the whole document
+        next unless ref($obj) eq 'HASH';
+        my $subtype = $obj->{'/Subtype'} // '';
+        if ( $subtype eq '/Image' ) {
             $obj->{'/ColorSpace'} = $self->_dereference($obj->{'/ColorSpace'});
-        } elsif ( $obj->{'/Subtype'} eq '/Form' ) {
+        } elsif ( $subtype eq '/Form' ) {
             $obj->{'/Resources'} = $self->_parse_resources($obj->{'/Resources'}) if (defined($obj->{'/Resources'}));
         }
     }
@@ -590,15 +618,17 @@ sub _parse_contents {
         Q  => sub { $context->restore_state() },
         cm => sub { $context->concat_matrix(@_) },
         Do => sub {
-            my $xobj = $resources->{'/XObject'}->{$_[0]};
-            unless (defined($xobj)) {
-                warn "XObject $_[0] not found: ";
+            my $xobjects = ref($resources) eq 'HASH' ? $resources->{'/XObject'} : undef;
+            my $xobj = ref($xobjects) eq 'HASH' && defined($_[0]) ? $xobjects->{$_[0]} : undef;
+            unless (ref($xobj) eq 'HASH') {
+                debug('trace','XObject '.($_[0] // '').' not found');
                 return;
             }
             $xobj->{_name} = $_[0];
-            if ( $xobj->{'/Subtype'} eq '/Image' ) {
+            my $subtype = $xobj->{'/Subtype'} // '';
+            if ( $subtype eq '/Image' ) {
                 $context->draw_image($xobj,$page) if $self->{context}->can('draw_image');
-            } elsif ( $xobj->{'/Subtype'} eq '/Form' ) {
+            } elsif ( $subtype eq '/Form' ) {
                 # skip a form drawn from its own content
                 my $form_id = refaddr($xobj);
                 if ( $self->{forms_active}->{$form_id} ) {
@@ -614,7 +644,7 @@ sub _parse_contents {
                 if (defined($xobj->{'/Matrix'})) {
                     my $matrix = $xobj->{'/Matrix'};
                     $matrix = $self->_dereference($matrix) if ref($matrix) ne 'ARRAY';
-                    $context->concat_matrix(@{$matrix});
+                    $context->concat_matrix(@{$matrix}) if ref($matrix) eq 'ARRAY';
                 }
                 $self->_parse_contents($xobj, $page, $xobj->{'/Resources'});
                 $context->restore_state();
@@ -658,12 +688,14 @@ sub _parse_contents {
             next;
         }
         if ( $token eq 'BI' ) {
-            my $image = $self->_parse_inline_image($core);
-            $context->draw_image($image,$page) if $self->{context}->can('draw_image');
+            $self->_contain('inline image', sub {
+                my $image = $self->_parse_inline_image($core);
+                $context->draw_image($image,$page) if $self->{context}->can('draw_image');
+            });
             next;
         }
         if ( defined($dispatch{$token}) ) {
-            $dispatch{$token}->(@params);
+            $self->_contain("operator $token", sub { $dispatch{$token}->(@params) });
         }
         @params = ();
     }

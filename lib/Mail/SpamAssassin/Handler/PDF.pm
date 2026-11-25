@@ -30,7 +30,8 @@ PDF with the pure-Perl L<Mail::SpamAssassin::PDF::Parser>, and exposes the
 extracted metadata (page, image and link counts, ratios, encryption flags,
 JavaScript/OpenAction flags, document details) to rules via the C<pdf2_*> eval
 rules and C<_PDF2*_> tags below.  URLs found inside the PDF are added to the
-URI detail list with type C<pdf>.
+URI detail list with type C<pdf>, also those found before an error ended the
+parse.
 
 Decoded PDF stream data counts against the message's C<handler_max_bytes>
 budget.  A PDF that decodes to more than is left of it is counted as a parse
@@ -676,6 +677,13 @@ sub handle_pdf {
     $pdf->{context}->get_info();
   };
   $self->spend_bytes($pms, $pdf->bytes_decoded());
+
+  # Add URI's, also those found before an error ended the parse
+  foreach my $location ( keys %{ $pdf->{context}->get_info()->{uris} }) {
+    log_dbg("found URI: $location");
+    $pms->add_uri_detail_list($location, { pdf => 1 }, 'PDFInfo2');
+  }
+
   if ( !defined($info) ) {
     log_dbg($@);
     $pdfinfo->{errors}++;
@@ -686,12 +694,6 @@ sub handle_pdf {
   log_dbg("document is password protected: $name") if $info->{Protected};
   _set_tag($pms, 'PDF2NAME', $name);
   $pdfinfo->{totals}->{FileCount}++;
-
-  # Add URI's
-  foreach my $location ( keys %{ $info->{uris} }) {
-    log_dbg("found URI: $location");
-    $pms->add_uri_detail_list($location, { pdf => 1 }, 'PDFInfo2');
-  }
 
   # Extract text with pdftotext (skip password-protected PDFs, which can't be
   # read without the password).  The text is injected into the body via
