@@ -503,16 +503,17 @@ sub _run_unrar {
     $pid or die "$!\n";
 
     binmode ARCHIVE_UNRAR;
-    my ($inbuf, $nread);
+    my ($inbuf, $nread, $over);
     $resp = '';
     while ($nread = read(ARCHIVE_UNRAR, $inbuf, 8192)) {
       $resp .= $inbuf;
-      last if defined $limit && length($resp) > $limit;
+      # a flag, since kill in a statement that reads $resp dies under -T
+      if (defined $limit && length($resp) > $limit) { $over = 1; last }
     }
     defined $nread or die "error reading from pipe: $!\n";
 
     $errno = 0;
-    kill('TERM', $pid) if defined $limit && length($resp) > $limit;
+    kill('TERM', $pid) if $over;
     close ARCHIVE_UNRAR or $errno = $!;
 
     if (proc_status_ok($?, $errno)) {
