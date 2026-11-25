@@ -33,9 +33,12 @@ rules and C<_PDF2*_> tags below.  URLs found inside the PDF are added to the
 URI detail list with type C<pdf>, also those found before an error ended the
 parse.
 
-Decoded PDF stream data counts against the message's C<handler_max_bytes>
-budget.  A PDF that decodes to more than is left of it is counted as a parse
-error, and an image that would go over it is not extracted.
+Decoded PDF stream data and the text read from C<pdftotext> count against the
+message's C<handler_max_bytes> budget.  A PDF that decodes to more than is left
+of it is counted as a parse error.  An image that would go over it is not
+extracted.  Text is read up to what is left of the budget and up to 1,000,000
+bytes for all the PDFs of a message.  C<pdftotext> is stopped there.  The
+message then gets the C<PDF_TEXT_LIMIT_EXCEEDED> rule.
 
 The C<pdf2_> prefix for tags and eval rules was chosen so as not to conflict with the
 PDFInfo plugin.
@@ -265,7 +268,7 @@ use warnings;
 use re 'taint';
 
 use Mail::SpamAssassin::Handler;
-use Mail::SpamAssassin::Constants qw(RULENAME_RE IS_RULENAME);
+use Mail::SpamAssassin::Constants qw(RULENAME_RE IS_RULENAME MAX_PDF_TEXT_LENGTH);
 use Mail::SpamAssassin::Logger qw(dbg info would_log);
 use Mail::SpamAssassin::Timeout;
 use Mail::SpamAssassin::Util qw(compile_regexp untaint_var untaint_file_path
@@ -462,11 +465,24 @@ sub _extract_text {
   my $bin  = $self->_pdftotext($conf);
   return unless defined $bin;
 
+  # what is left of the byte budget and of the message's text limit
+  my $pdfinfo = $pms->{Handler}{PDF};
+  my $limit = $self->bytes_left($pms);
+  my $text_left = MAX_PDF_TEXT_LENGTH - ($pdfinfo->{text_bytes} || 0);
+  if ($text_left < $limit) {
+    $limit = $text_left;
+    $pms->{msg}->{pdf_text_truncated} = 1 if $limit <= 0;
+  }
+  if ($limit <= 0) {
+    log_dbg("byte budget or text limit used up, not extracting text");
+    return;
+  }
+
   my $pages = $conf->{pdf_text_max_pages};
   $pages = DEFAULT_TEXT_MAX_PAGES unless defined $pages;
   my $secs = $conf->{handler_time_limit} || 10;
 
-  my ($tmp_file, $err_file, $pid, $resp, $errno);
+  my ($tmp_file, $err_file, $pid, $resp, $errno, $over);
 
   Mail::SpamAssassin::PerMsgStatus::enter_helper_run_mode($pms);
 
@@ -498,10 +514,15 @@ sub _extract_text {
 
     my ($inbuf, $nread);
     $resp = '';
-    while ($nread = read(PDF_TOTEXT, $inbuf, 8192)) { $resp .= $inbuf }
+    while ($nread = read(PDF_TOTEXT, $inbuf, 8192)) {
+      $resp .= $inbuf;
+      # a flag, since kill in a statement that reads $resp dies under -T
+      if (length($resp) > $limit) { $over = 1; last }
+    }
     defined $nread or die "error reading from pipe: $!\n";
 
     $errno = 0;
+    kill('TERM', $pid) if $over;
     close PDF_TOTEXT or $errno = $!;
 
     if (proc_status_ok($?, $errno)) {
@@ -524,6 +545,8 @@ sub _extract_text {
   unlink($tmp_file) if defined $tmp_file;
   unlink($err_file) if defined $err_file;
 
+  $self->spend_bytes($pms, length($resp // ''));
+
   if ($err) {
     if ($err =~ /__brokenpipe__ignore__/) {
       log_dbg("pdftotext broken pipe, ignoring");
@@ -535,6 +558,13 @@ sub _extract_text {
     }
     return;
   }
+
+  if ($over) {
+    log_dbg("pdftotext output cut to $limit bytes");
+    substr($resp, $limit) = '';
+    $pms->{msg}->{pdf_text_truncated} = 1;
+  }
+  $pdfinfo->{text_bytes} += length($resp);
 
   return $resp;
 }
