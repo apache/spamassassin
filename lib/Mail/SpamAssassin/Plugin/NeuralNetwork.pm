@@ -58,7 +58,7 @@ BEGIN {
       FANN_TRAIN_INCREMENTAL FANN_TRAIN_QUICKPROP FANN_TRAIN_RPROP);
   }
 }
-use Storable qw(store retrieve);
+use Storable qw(retrieve);
 use File::Copy qw(copy);
 use File::Spec;
 use Errno qw(EXDEV);
@@ -642,6 +642,20 @@ sub _text_to_features {
 
 sub learn_message {
   my ($self, $params) = @_;
+
+  # the model lock is released here whatever way the learn ends, so that a die
+  # during it, such as the time limit's, does not leave the model locked
+  my $ret;
+  my $ok = eval { $ret = $self->_learn_message($params); 1 };
+  my $err = $@;
+  my $locked = delete $self->{locked_file};
+  $self->{main}->{locker}->safe_unlock($locked) if defined $locked;
+  die $err unless $ok;
+  return $ret;
+}
+
+sub _learn_message {
+  my ($self, $params) = @_;
   my $isspam = $params->{isspam};
   my $msg = $params->{msg};
   my $conf = $self->{main}->{conf};
@@ -715,6 +729,7 @@ sub learn_message {
     dbg("Cannot acquire lock on '$dataset_path', skipping learning");
     return;
   }
+  $self->{locked_file} = $dataset_path;
 
   # Extract the per-message token lists and labels
   my @email_token_lists = map { $_->{tokens} } @training_data;
@@ -745,14 +760,12 @@ sub learn_message {
   my ($feature_vectors, $vocab_size, $vocab_keys_ref) = _text_to_features($self, $self->{main}->{conf}, $nn_data_dir, $update_vocab, $isspam, undef, @email_token_lists);
 
   unless ($feature_vectors && @$feature_vectors) {
-    $locker->safe_unlock($dataset_path);
     return;
   }
 
   my $num_input = scalar(@{$feature_vectors->[0]{vec}});
   if ($num_input == 0) {
     dbg("No valid features found in message, skipping learning");
-    $locker->safe_unlock($dataset_path);
     return;
   }
 
@@ -766,7 +779,6 @@ sub learn_message {
     if (defined $msg && defined $msgid && length($msgid) > 0) {
       $self->_save_msgid_to_neural_seen($msgid, $isspam);
     }
-    $locker->safe_unlock($dataset_path);
     return 1;
   }
 
@@ -783,7 +795,6 @@ sub learn_message {
       if (defined $msg && defined $msgid && length($msgid) > 0) {
         $self->_save_msgid_to_neural_seen($msgid, $isspam);
       }
-      $locker->safe_unlock($dataset_path);
       return 0;
     }
   }
@@ -814,7 +825,6 @@ sub learn_message {
     if (defined $msg && defined $msgid && length($msgid) > 0) {
       $self->_save_msgid_to_neural_seen($msgid, $isspam);
     }
-    $locker->safe_unlock($dataset_path);
     return 1;
   }
 
@@ -881,7 +891,7 @@ sub learn_message {
 
   my $model_saved = $self->_save_model_atomic(
     $network, $dataset_path, $lock1_mtime,
-    $locked_vocab_keys_ref, $locked_num_input, $nn_data_dir, $locker);
+    $locked_vocab_keys_ref, $locked_num_input, $nn_data_dir);
 
   if ($model_saved) {
     dbg("Model saved to '$dataset_path' (input:$locked_num_input)");
@@ -1518,6 +1528,19 @@ sub _retrain_from_vocabulary {
 
 # Rename $src to $dst atomically. Falls back to copy+unlink when rename(2)
 # fails with EXDEV (src and dst on different filesystems).
+# Storable's store() empties the file before it writes and removes the file
+# when the write dies, for example on the time limit.  This one writes a new
+# file beside the old one and renames it over the old one.
+sub store {
+  my ($ref, $path) = @_;
+  my $tmp = "$path.new.$$";
+  return 1 if eval { Storable::store($ref, $tmp) && rename($tmp, $path) };
+  my $err = $@;
+  unlink($tmp);
+  die $err if $err ne '';
+  return 0;
+}
+
 sub _rename_or_copy {
   my ($src, $dst) = @_;
   return 1 if rename($src, $dst);
@@ -2554,6 +2577,10 @@ sub signal_user_changed {
   undef $self->{_neural_model_load_time};
   delete $self->{_model_vocab_cache};
   delete $self->{_model_vocab_cache_t};
+  delete $self->{_vocab_cache};
+  delete $self->{_vocab_cache_time};
+  delete $self->{_file_vocab_cache};
+  delete $self->{_file_vocab_cache_time};
 }
 
 sub _model_path {
@@ -2755,7 +2782,7 @@ sub _load_vocabulary {
 
 sub _save_model_atomic {
   my ($self, $network, $dataset_path, $lock1_mtime,
-      $locked_vocab_keys_ref, $locked_num_input, $nn_data_dir, $locker) = @_;
+      $locked_vocab_keys_ref, $locked_num_input, $nn_data_dir) = @_;
 
   my $tmp_path;
   my $file_mode   = 0666 & ~umask();
@@ -2774,7 +2801,6 @@ sub _save_model_atomic {
     if (defined $tmp_path && -f $tmp_path) {
       unlink($tmp_path) or info("Cannot remove temp model file '$tmp_path': $!");
     }
-    $locker->safe_unlock($dataset_path);
     return 0;
   }
 
@@ -2816,7 +2842,6 @@ sub _save_model_atomic {
       unlink($tmp_path) or info("Cannot remove temp model file '$tmp_path': $!");
     }
   };
-  $locker->safe_unlock($dataset_path);
   return $model_saved;
 }
 
