@@ -27,8 +27,13 @@ use Mail::SpamAssassin::PDF::Filter::ASCII85Decode;
 use Mail::SpamAssassin::PDF::Filter::Decrypt;
 use Encode qw(from_to);
 use Carp;
+use Scalar::Util qw(refaddr);
 
 my $debug;  # debugging level
+
+# Form XObject draws followed in one document; a draw costs time whatever
+# the size of the form
+my $MAX_FORM_DRAWS = 1000;
 
 my %abbreviations = (
     '/BPC'  => '/BitsPerComponent',
@@ -118,6 +123,11 @@ sub parse {
     $self->{is_encrypted} = 0;
     $self->{is_protected} = 0;
     $self->{bytes_decoded} = 0;
+    # the object graph may share nodes or contain cycles: walk each node once
+    $self->{visited} = {};
+    $self->{xref_seen} = {};
+    $self->{forms_active} = {};
+    $self->{form_draws} = 0;
 
 
     $self->{core} = Mail::SpamAssassin::PDF::Core->new($data);
@@ -219,6 +229,12 @@ sub bytes_decoded {
 sub _parse_xref {
     my ($self,$pos) = @_;
     my $core = $self->{core};
+
+    # stop a /Prev chain that loops back
+    if ( defined($pos) && $self->{xref_seen}->{$pos}++ ) {
+        debug('xref',"xref section at offset $pos already parsed, /Prev loop ignored");
+        return 1;
+    }
 
     $core->pos($pos);
     my $token = eval { $core->get_token(); } // '';
@@ -426,6 +442,9 @@ sub _parse_pages {
     $node = $self->_dereference($node);
     return unless defined($node);
 
+    # a node listed twice in /Kids, or listing an ancestor, is read once
+    return $node if ref($node) && $self->{visited}->{'page '.refaddr($node)}++;
+
     # inherit properties
     $parent_node = {} unless defined($parent_node);
     for (qw(/MediaBox /Resources) ) {
@@ -515,6 +534,8 @@ sub _parse_action {
     }
 
     if ( defined($action->{'/Next'}) ) {
+        # follow each action's /Next once
+        return if ref($action) && $self->{visited}->{'next '.refaddr($action)}++;
         # can be array or dict
         if ( ref($action->{'/Next'}) eq 'ARRAY' ) {
             $self->_parse_action($_) for @{$action->{'/Next'}};
@@ -529,6 +550,8 @@ sub _parse_resources {
     my ($self,$resources) = @_;
     $resources = $self->_dereference($resources);
     return unless defined($resources);
+    # read each resource dictionary once (form XObjects may point back)
+    return $resources if ref($resources) && $self->{visited}->{'resources '.refaddr($resources)}++;
 
     $resources->{'/XObject'} = $self->_parse_xobject($resources->{'/XObject'}) if (defined($resources->{'/XObject'}));
     return $resources;
@@ -576,6 +599,17 @@ sub _parse_contents {
             if ( $xobj->{'/Subtype'} eq '/Image' ) {
                 $context->draw_image($xobj,$page) if $self->{context}->can('draw_image');
             } elsif ( $xobj->{'/Subtype'} eq '/Form' ) {
+                # skip a form drawn from its own content
+                my $form_id = refaddr($xobj);
+                if ( $self->{forms_active}->{$form_id} ) {
+                    debug('trace',"Form XObject $_[0] draws itself, skipped");
+                    return;
+                }
+                if ( ++$self->{form_draws} > $MAX_FORM_DRAWS ) {
+                    debug('trace',"Form XObject $_[0] not drawn, over $MAX_FORM_DRAWS draws");
+                    return;
+                }
+                local $self->{forms_active}->{$form_id} = 1;
                 $context->save_state();
                 if (defined($xobj->{'/Matrix'})) {
                     my $matrix = $xobj->{'/Matrix'};
