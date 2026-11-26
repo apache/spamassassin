@@ -801,8 +801,8 @@ sub text_style {
               $self->put_results(font_invalid_size => 1);
             }
           }
-	  elsif (/^\s*([a-z_-]+)\s*:\s*(\S.*?)\s*$/i) {
-	    # "display: none", "visibility: hidden", etc.
+	  elsif (/^\s*(display|visibility|position|left|top|transform)\s*:\s*(\S.*?)\s*$/i) {
+	    # only the properties that are read: each open tag inherits them
 	    $new{'style_'.lc($1)} = lc($2);
 	    # tested here, once, as html_font_invisible() runs for every text chunk
 	    $new{transform_hidden} = css_transform_hidden($new{style_transform})
