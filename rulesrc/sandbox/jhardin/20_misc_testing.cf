@@ -4496,7 +4496,7 @@ score      PMP_SPAM                    2.500	# limit
 tflags     PMP_SPAM                    publish
 
 ifplugin Mail::SpamAssassin::Plugin::MIMEHeader
-  mimeheader   __OBFU_HTML_ATTACH_RECHNUNG    Content-Type =~ m,\bapplication/octet-stream\b.+rechnung.*\.[a-z]?html?\b,i
+  mimeheader   __OBFU_HTML_ATTACH_RECHNUNG    Content-Type =~ m;\bapplication/octet-stream\b.{1,100}rechnung.{0,100}\.[a-z]?html?\b;i
 endif
 
 body       __RI_ZWNJ_OBFU              /[a-z0-9"'\s](?:\xf0\x9f\x87[\xa6-\xbf]\xe2\x80\x8c){2,}/i
