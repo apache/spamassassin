@@ -194,7 +194,7 @@ meta __CRBOUNCE_SI    (__CRBOUNCE_SI1 && __CRBOUNCE_SI2)
 
 # very frequent, using unrelated From lines; either spam or C/R, not yet
 # sure which
-header __CRBOUNCE_GETRESP Return-Path =~ /<bounce\S+\@\S+\.getresponse\.com>/
+header __CRBOUNCE_GETRESP Return-Path =~ /<bounce\S[^\s\@]*\@\S+\.getresponse\.com>/
 
 header __CRBOUNCE_TMDA  Message-Id =~ /\@\S+\-tmda\-confirm>$/
 header __CRBOUNCE_ASK   X-AskVersion =~ /\d/

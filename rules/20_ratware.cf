@@ -51,7 +51,7 @@ header __HOTMAIL_BAYDAV_MSGID		MESSAGEID =~ /^<[A-Z]{3}\d+-(?:DAV|SMTP)\d+[A-Z0-
 
 header __IPLANET_MESSAGING_SERVER Received =~ /iPlanet Messaging Server/
 
-header __LYRIS_EZLM_REMAILER  List-Unsubscribe =~ /<mailto:(?:leave-\S+|\S+-unsubscribe)\@\S+>$/
+header __LYRIS_EZLM_REMAILER  List-Unsubscribe =~ /<mailto:(?:leave-\S[^\s\@]*\@|(?>\S+?-unsubscribe\@))\S+>$/
 
 header __SYMPATICO_MSGID		MESSAGEID =~ /^<BAYC\d+-PASMTP\d+[A-Z0-9]{25}\@CEZ\.ICE>$/m
 
@@ -165,7 +165,7 @@ meta FORGED_THEBAT_HTML		(__THEBAT_MUA_V1 && MIME_HTML_ONLY)
 describe FORGED_THEBAT_HTML	The Bat! can't send HTML message only
 
 # bug 2513
-header __REPTO_QUOTE		Reply-To =~ /".*"\s*\</
+header __REPTO_QUOTE		Reply-To =~ /"[^"\n]*"\s*\</
 meta REPTO_QUOTE_AOL		__REPTO_QUOTE && __AOL_MUA
 describe REPTO_QUOTE_AOL	AOL doesn't do quoting like this
 

@@ -365,7 +365,7 @@ header MIME_BOUND_MANY_HEX	Content-Type =~ /boundary="[\da-f]{8}(?:-[\da-f]{4}){
 describe MIME_BOUND_MANY_HEX	Spam tool pattern in MIME boundary
 
 # note: the first alternation is anchored for speed
-header TO_MALFORMED             To !~ /(?:^|[^\S"])(?:(?:\"[^\"]+\"|\S+)\@\S+\.\S+|^\s*.+:\s*;|^\s*\"[^\"]+\":\s*;|^\s*\([^\)]*\)\s*$|<\S+(?:\!\S+){1,}>|^\s*$)/ [if-unset: unset@unset.unset]
+header TO_MALFORMED             To !~ /(?:^|[^\S"])(?:(?:\"[^\"]+\"|\S[^\s\@]*)\@\S+\.\S+|^\s*.+:\s*;|^\s*\"[^\"]+\":\s*;|^\s*\([^\)]*\)\s*$|<\S[^\s!]*\!\S+>|^\s*$)/ [if-unset: unset@unset.unset]
 describe TO_MALFORMED           To: has a malformed address
 
 header __CD                     exists:Content-Disposition
@@ -398,7 +398,7 @@ describe FAKE_OUTBLAZE_RCVD	Received header contains faked 'mr.outblaze.com'
 header UNCLOSED_BRACKET		ALL =~ /\[\d+\r?\n/s
 describe UNCLOSED_BRACKET	Headers contain an unclosed bracket
 
-header FROM_DOMAIN_NOVOWEL	From =~ /\@\S*[bcdfgjklmnpqrstvwxz]{7}/i
+header FROM_DOMAIN_NOVOWEL	From =~ /\@[^\s\@]*[bcdfgjklmnpqrstvwxz]{7}/i
 describe FROM_DOMAIN_NOVOWEL	From: domain has series of non-vowel letters
 tflags FROM_DOMAIN_NOVOWEL userconf     # lock scores low
 

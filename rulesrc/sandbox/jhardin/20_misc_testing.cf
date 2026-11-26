@@ -1114,7 +1114,7 @@ meta        SUBJ_BROKEN_WORDS      __SUBJ_BROKEN_WORD > 1 && !__RP_MATCHES_RCVD 
 describe    SUBJ_BROKEN_WORDS      Subject contains multiple odd word breaks
 
 # felicity TVD_SUBJ_NUM_OBFU as subrule
-header      __TVD_SUBJ_NUM_OBFU    Subject =~ /[a-z]{3,}\d+[a-z]{2,}/i
+header      __TVD_SUBJ_NUM_OBFU    Subject =~ /[a-z]{3}\d+[a-z]{2}/i
 meta        __SUBJ_BRKN_WORDNUMS   __SUBJ_BROKEN_WORD && __TVD_SUBJ_NUM_OBFU
 ifplugin Mail::SpamAssassin::Plugin::DKIM
   meta      SUBJ_BRKN_WORDNUMS     __SUBJ_BRKN_WORDNUMS && !DKIM_SIGNED && !__TO___LOWER
