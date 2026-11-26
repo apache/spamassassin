@@ -109,6 +109,8 @@ sub uri {
     if ( !$self->{max_uris}
          || keys(%{$self->{info}->{uris}}) < $self->{max_uris} ) {
         $self->{info}->{uris}->{$location} = 1;
+    } elsif ( !exists($self->{info}->{uris}->{$location}) ) {
+        $self->{uris_dropped} = 1;
     }
     $self->{info}->{LinkCount}++;
 

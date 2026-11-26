@@ -497,7 +497,13 @@ sub _get_string {
             croak "Unterminated string at offset ".tell($fh);
         }
         if ($esc) {
-            if ( defined($specials{$ch}) ) {
+            if ( $ch eq "\n" || $ch eq "\r" ) {
+                # a backslash at the end of a line joins the lines
+                if ( $ch eq "\r" ) {
+                    my $next = getc($fh);
+                    seek($fh, -1, 1) if defined($next) && $next ne "\n";
+                }
+            } elsif ( defined($specials{$ch}) ) {
                 $str .= $specials{$ch};
             } elsif ($ch =~ /[0-7]/) {
                 my $oct = $ch;
@@ -513,7 +519,7 @@ sub _get_string {
                 } else {
                     seek($fh, -1, 1);
                 }
-                $str .= chr(oct($oct));
+                $str .= chr(oct($oct) & 0xFF);
             } else {
                 $str .= $ch;
             }

@@ -174,8 +174,11 @@ sub parse {
 
             # Parse catalog
             my $root = $self->{trailer}->{'/Root'};
-            if (defined($root->{'/OpenAction'}) && ref($root->{'/OpenAction'}) eq 'HASH') {
+            # /OpenAction is usually given as a reference
+            $self->_contain('open action', sub {
                 $root->{'/OpenAction'} = $self->_dereference($root->{'/OpenAction'});
+            });
+            if (ref($root->{'/OpenAction'}) eq 'HASH') {
                 $self->{context}->open_action($root->{'/OpenAction'}) if $self->{context}->can('open_action');
                 debug('trace',"Calling _parse_action");
                 $self->_contain('open action', sub { $self->_parse_action($root->{'/OpenAction'}) });
@@ -555,6 +558,7 @@ sub _parse_action {
         # /URI may be given as an indirect reference to a string object
         my $location = $self->_dereference($action->{'/URI'});
         if ( defined($location) ) {
+            $location =~ s/^\s+//;
             if ( $location !~ /^[a-z]+:/i && $location =~ /^[^\s\/?#]+\.[^\s\/?#]+/ ) {
                 # Schemeless URI that looks like a hostname — most viewers
                 # treat these as http://, so normalize for downstream rules.

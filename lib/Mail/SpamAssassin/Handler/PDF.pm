@@ -120,7 +120,8 @@ Retain at most N distinct URIs per PDF. Link annotations are read from every
 page, so a hostile PDF stuffed with links could otherwise flood the URI list
 and the URIBL lookups that follow. Additional links pointing at an
 already-seen URI do not count toward the limit, and the C<LinkCount> metric
-still counts every link. Set to B<0> to disable the limit entirely.
+still counts every link. A message with a PDF that has more distinct URIs gets
+the C<URI_LIMIT_EXCEEDED> rule. Set to B<0> to disable the limit entirely.
 
 =back
 
@@ -713,6 +714,8 @@ sub handle_pdf {
     log_dbg("found URI: $location");
     $pms->add_uri_detail_list($location, { pdf => 1 }, 'PDFInfo2');
   }
+  # as when the message itself has too many URIs
+  $pms->{msg}->{uri_count_truncated} = 1 if $pdf->{context}->{uris_dropped};
 
   if ( !defined($info) ) {
     log_dbg($@);
