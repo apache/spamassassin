@@ -3,6 +3,9 @@ use strict;
 use warnings FATAL => 'all';
 use Carp;
 
+# Most elements read for one array, or keys and values for one dictionary
+my $MAX_ELEMENTS = 1000000;
+
 =head1 NAME
 
 Mail::SpamAssassin::PDF::Core - Core PDF parsing functions
@@ -575,6 +578,7 @@ sub _get_array {
         local $_ = $self->get_primitive();
         croak "Unexpected end of file" unless defined($_);
         last if $_ eq ']';
+        croak "Array too long" if @array >= $MAX_ELEMENTS;
         push(@array,$_);
     }
 
@@ -590,6 +594,7 @@ sub _get_dict {
         local $_ = $self->get_primitive();
         croak "Unexpected end of file" unless defined($_);
         last if $_ eq '>>';
+        croak "Dictionary too long" if @array >= $MAX_ELEMENTS;
         push(@array,$_);
     }
 

@@ -35,6 +35,11 @@ my $debug;  # debugging level
 # the size of the form
 my $MAX_FORM_DRAWS = 1000;
 
+# Operands kept for one content operator
+my $MAX_OPERANDS = 64;
+# Objects in one document: the largest object number the PDF specification allows
+my $MAX_OBJECTS = 8388607;
+
 my %abbreviations = (
     '/BPC'  => '/BitsPerComponent',
     '/CS'   => '/ColorSpace',
@@ -131,6 +136,12 @@ sub parse {
 
 
     $self->{core} = Mail::SpamAssassin::PDF::Core->new($data);
+
+    # an object takes at least a byte, so there are no more xref entries than
+    # bytes of data
+    seek($self->{core}->{fh},0,2);
+    $self->{xref_left} = tell($self->{core}->{fh});
+    $self->{xref_left} = $MAX_OBJECTS if $self->{xref_left} > $MAX_OBJECTS;
 
     # Parse header
     $self->{version} = $self->{core}->get_version();
@@ -265,6 +276,7 @@ sub _parse_xref {
             my $gen = $core->get_number();
             my $type = $core->get_primitive();
             next unless $type eq 'n';
+            die "Too many xref entries" if --$self->{xref_left} < 0;
             my $key = "$i $gen R";
             $self->{xref}->{$key} = $offset unless defined($self->{xref}->{$key});
         }
@@ -305,7 +317,9 @@ sub _parse_xref_stream {
             $o+=$width;
             if ( $type == 0 ) {
                 next;
-            } elsif ( $type == 1 ) {
+            }
+            die "Too many xref entries" if --$self->{xref_left} < 0;
+            if ( $type == 1 ) {
                 my ($offset,$gen) = @fields;
                 my $key = "$n $gen R";
                 $self->{xref}->{$key} = $offset unless defined($self->{xref}->{$key});
@@ -685,6 +699,7 @@ sub _parse_contents {
         debug('tokens',"$type: $token");
         if ( $type != Mail::SpamAssassin::PDF::Core::TYPE_OP ) {
             push(@params,$token);
+            shift(@params) if @params > $MAX_OPERANDS;
             next;
         }
         if ( $token eq 'BI' ) {
@@ -835,6 +850,8 @@ sub _get_stream_data {
         $stream_data = $self->{core}->{crypt}->decrypt($stream_data);
     }
     $self->{core}->assert_token('endstream');
+    # a stream with no filter counts as it is: many can share one part of the data
+    $self->_count_decoded($stream_data) unless @filters;
 
     for (my $i=0;$i<scalar(@filters);$i++) {
         my $filter = $self->_dereference($filters[$i]);
@@ -848,7 +865,7 @@ sub _get_stream_data {
             $stream_data = $f->decode($stream_data,$self->_decode_limit());
         } elsif ( $filter eq '/ASCII85Decode' ) {
             my $f = Mail::SpamAssassin::PDF::Filter::ASCII85Decode->new();
-            $stream_data = $f->decode($stream_data);
+            $stream_data = $f->decode($stream_data,$self->_decode_limit());
         } else {
             die "Filter $filter not implemented";
         }
@@ -945,7 +962,7 @@ sub _get_image_data {
             $stream_data = $f->decode($stream_data,$self->_decode_limit());
         } elsif ( $filter eq '/ASCII85Decode' ) {
             my $f = Mail::SpamAssassin::PDF::Filter::ASCII85Decode->new();
-            $stream_data = $f->decode($stream_data);
+            $stream_data = $f->decode($stream_data,$self->_decode_limit());
         } elsif ( $filter eq '/DCTDecode' ) {
             # Whatever we have so far is a complete JPEG file; return it as-is.
             return ('jpeg', $stream_data);
@@ -1085,6 +1102,8 @@ sub extract_images {
 
         my $w = $desc->{width}  || 0;
         my $h = $desc->{height} || 0;
+        # sizes are whole numbers
+        next if grep { !/^[0-9]+\z/ } $w, $h;
 
         if ( $max_pixels && $w && $h && ($w * $h) > $max_pixels ) {
             debug('image', "image $idx skipped: ${w}x${h} exceeds max_pixels=$max_pixels");
@@ -1093,6 +1112,8 @@ sub extract_images {
 
         my ($format, $bytes) = eval { $self->_get_image_data($desc->{dict}) };
         if ( $@ ) {
+            # a timer ends the extraction, not one image
+            die $@ if $@ =~ /__alarm__ignore__|^__TIMEOUT__$/;
             chomp(my $e = $@);
             debug('image', "image $idx decode error: $e");
             next;
@@ -1110,6 +1131,19 @@ sub extract_images {
     }
 
     return \@images;
+}
+
+# The parsed objects can refer to each other in a loop, which perl does not
+# free, so empty them when the parser goes.
+sub DESTROY {
+    my $self = shift;
+    for my $obj ( values %{$self->{object_cache} || {}} ) {
+        if ( ref($obj) eq 'HASH' ) {
+            %$obj = ();
+        } elsif ( ref($obj) eq 'ARRAY' ) {
+            @$obj = ();
+        }
+    }
 }
 
 # PDFDocEncoding mapping table from Adobe specs

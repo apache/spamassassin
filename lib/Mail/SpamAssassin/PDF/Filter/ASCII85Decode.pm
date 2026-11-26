@@ -15,9 +15,23 @@ sub new {
 }
 
 sub decode {
-    my ($self, $data) = @_;
+    my ($self, $data, $limit) = @_;
     die "Convert::Ascii85 module not available\n" unless HAS_CONVERT_ASCII85;
-    Convert::Ascii85::decode($data);
+
+    # Convert::Ascii85 makes a list of all the groups in its input, so give it
+    # whole groups of five characters, 64 KB of input at a time, returning
+    # early once the output is over $limit bytes
+    my ($out, $groups) = ('', '');
+    for( my $pos=0; $pos<length($data); $pos+=65536 ) {
+        my $in = substr($data,$pos,65536);
+        $in =~ tr[ \t\r\n\f][]d;
+        $in =~ s/z/!!!!!/g;
+        $in =~ s/y/+<VdL/g;
+        $groups .= $in;
+        $out .= Convert::Ascii85::decode(substr($groups,0,length($groups) - length($groups) % 5,''));
+        return $out if defined($limit) && length($out) > $limit;
+    }
+    return $out . Convert::Ascii85::decode($groups);
 }
 
 1;

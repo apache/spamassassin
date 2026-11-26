@@ -53,6 +53,8 @@ sub decode {
             $result .= $self->{'table'}[$self->{'next_code'}];
             $self->{'next_code'}++;
         }
+        # a full table gets no more entries; its last slot is used again
+        $self->{'next_code'} = 4096 if $self->{'next_code'} > 4096;
         # return early once the output is over $limit bytes
         return $result if defined($limit) && length($result) > $limit;
         if ($early_change) {

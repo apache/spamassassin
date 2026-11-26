@@ -4,6 +4,10 @@ use warnings FATAL => 'all';
 use Storable qw(dclone);
 use Carp;
 
+# Most graphics states saved at once. The PDF specification gives 28 as the
+# limit that a reader need support.
+my $MAX_SAVED_STATES = 64;
+
 sub new {
     my ($class,%opts) = @_;
     my $self = bless { %opts }, $class;
@@ -21,15 +25,25 @@ sub reset_state {
     };
 
     $self->{stack} = [];
+    $self->{unsaved} = 0;
 }
 
 sub save_state {
     my $self = shift;
+    # past the limit only count, so that restore_state stays in step
+    if ( @{$self->{stack}} >= $MAX_SAVED_STATES ) {
+        $self->{unsaved}++;
+        return;
+    }
     push(@{$self->{stack}},dclone $self->{gs});
 }
 
 sub restore_state {
     my $self = shift;
+    if ( $self->{unsaved} ) {
+        $self->{unsaved}--;
+        return;
+    }
     croak "Stack underflow" unless @{$self->{stack}};
     $self->{gs} = pop(@{$self->{stack}});
 }

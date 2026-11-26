@@ -47,7 +47,7 @@ sub decode {
         my $columns = $self->{columns} + 1;
         my $length = length($data);
 
-        die "Invalid Columns $self->{columns}" if $columns < 1;
+        die "Invalid Columns $self->{columns}" if $columns < 2;
 
         my $prior;
         for( my $i=0; $i<$length; $i+=$columns ) {
