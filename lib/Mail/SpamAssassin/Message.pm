@@ -962,6 +962,22 @@ sub parse_body {
   delete $self->{'parse_queue'};
 }
 
+# store a header field of a MIME part, cut to the lengths used for the header
+# of the message
+sub _part_header {
+  my ($self, $part_msg, $header) = @_;
+  my ($key, $value) = split(/:\s*/, $header, 2);
+  if (length($key) > MAX_HEADER_KEY_LENGTH) {
+    $key = substr($key, 0, MAX_HEADER_KEY_LENGTH);
+    $self->{'truncated_header'} = 1;
+  }
+  if (defined $value && length($value) > MAX_HEADER_VALUE_LENGTH) {
+    $value = substr($value, 0, MAX_HEADER_VALUE_LENGTH);
+    $self->{'truncated_header'} = 1;
+  }
+  $part_msg->header($key, $value);
+}
+
 =item _parse_multipart()
 
 Generate a root node, and for each child part call parse_body()
@@ -1196,10 +1212,7 @@ sub _parse_multipart {
       # s/\s+$//;   # bug 5127: don't clean this up (yet)
       # no re "strict";  # since perl 5.21.8: Ranges of ASCII printables...
       if (/^[\041-\071\073-\176]+[ \t]*:/) {
-        if ($header) {
-          my ( $key, $value ) = split ( /:\s*/, $header, 2 );
-          $part_msg->header( $key, $value );
-        }
+        $self->_part_header($part_msg, $header) if $header;
         $header = $_;
 	next;
       }
@@ -1209,10 +1222,7 @@ sub _parse_multipart {
 	next;
       }
       else {
-        if ($header) {
-          my ( $key, $value ) = split ( /:\s*/, $header, 2 );
-          $part_msg->header( $key, $value );
-        }
+        $self->_part_header($part_msg, $header) if $header;
         # a nested multipart with our boundary (bug 7358), or with one that
         # starts with ours
         if (defined $boundary) {
