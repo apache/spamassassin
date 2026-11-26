@@ -2385,9 +2385,19 @@ sub doskip_or_ping {
 
 ###########################################################################
 
+# a request with no user of its own gets the state spamd started with
+sub handle_default_user {
+  return unless $copy_config_p;
+  $spamtest->signal_user_changed(
+    { map { $_ => $msa_backup{$_} } 'username', 'user_dir', 'userstate_dir' } );
+}
+
 sub do_user_handling {
   if ($setuid_to_user && $> == 0) {
     handle_setuid_to_user();
+  }
+  elsif (!defined($current_user) && !$opt{'sql-config'} && !$opt{'ldap-config'}) {
+    handle_default_user();
   }
 
   if ( $opt{'sql-config'} && !defined($current_user) ) {
@@ -2686,6 +2696,7 @@ sub handle_user_setuid_basic {
       # services are down?  let's break out here to allow them to get
       # 'defaults' when we are not running paranoid
       info($errmsg);
+      handle_default_user() unless $setuid_to_user;
       return 0;
   }
 
@@ -2737,6 +2748,7 @@ sub handle_user_setuid_basic {
         # services are down?  let's break out here to allow them to get
         # 'defaults' when we are not running paranoid
         info($errmsg);
+        handle_default_user();
         return 0;
     }
   }
