@@ -4650,7 +4650,8 @@ Maximum handler chain depth (guards against deeply nested archives).
 
 =item handler_max_parts n               (default: 1000)
 
-Maximum total synthetic parts produced per message.
+Maximum total synthetic parts produced per message.  Parts beyond that number
+are left out.  The message then gets the C<HANDLER_PART_LIMIT_EXCEEDED> rule.
 
 =item handler_max_bytes n               (default: 50000000)
 

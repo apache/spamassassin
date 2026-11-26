@@ -1423,7 +1423,6 @@ sub apply_handlers {
   while (my $item = shift @work) {
     my ($node, $depth) = @$item;
     last if $ctx->{deadline} && time > $ctx->{deadline};   # undef => no cap
-    last if $ctx->{parts_budget} <= 0;
     next if $depth > $ctx->{max_depth};
 
     my $type = $node->effective_type;
@@ -1517,6 +1516,12 @@ sub _attach_parts {
     my $key = ($child->effective_type // '') . ':' . sha1_hex($bytes);
     next if $ctx->{seen}{$key}++;
 
+    # handler_max_parts is used up: this part and those after it are left out
+    if ($ctx->{parts_budget} <= 0) {
+      dbg("handler: handler_max_parts used up, parts left out");
+      $self->{handler_parts_truncated} = 1;
+      last;
+    }
     push @{$node->{handler_parts}}, $child;   # separate array, ordered
     $ctx->{parts_budget}--;
     push @$work, [ $child, $depth + 1 ];      # drive recursion via worklist

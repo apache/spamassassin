@@ -172,6 +172,9 @@ describe HANDLER_TIME_EXCEEDED	Message parts took too long to handle
 body HANDLER_TEXT_LIMIT_EXCEEDED	eval:check_msg_parse_flags('handler_text_truncated')
 describe HANDLER_TEXT_LIMIT_EXCEEDED	Text from an attachment was cut short
 
+body HANDLER_PART_LIMIT_EXCEEDED	eval:check_msg_parse_flags('handler_parts_truncated')
+describe HANDLER_PART_LIMIT_EXCEEDED	Message has too many extracted parts
+
 body ZIP_ENTRY_LIMIT_EXCEEDED	eval:check_msg_parse_flags('zip_entry_limit_exceeded')
 describe ZIP_ENTRY_LIMIT_EXCEEDED	Zip archive has too many entries to open
 
