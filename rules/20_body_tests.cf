@@ -163,6 +163,9 @@ describe URI_NESTING_EXCEEDED	Message has too many levels of nested URIs
 body PDF_TEXT_LIMIT_EXCEEDED	eval:check_msg_parse_flags('pdf_text_truncated')
 describe PDF_TEXT_LIMIT_EXCEEDED	Message has too much text in PDFs
 
+body IMAGE_PIXEL_LIMIT_EXCEEDED	eval:check_msg_parse_flags('image_pixel_limit_exceeded')
+describe IMAGE_PIXEL_LIMIT_EXCEEDED	Image too large for OCR, or of unknown size
+
 endif
 
 ###########################################################################

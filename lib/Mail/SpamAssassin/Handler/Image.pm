@@ -96,6 +96,20 @@ As C<image_ocr_min_width>, but for image height.  C<0> disables the check.  An
 image is skipped if it is below I<either> the minimum width I<or> the minimum
 height.
 
+=item image_ocr_max_pixels N   (default: 25000000)
+
+Skip OCR for any image larger than N pixels (width times height).
+The default, the same as C<pdf_max_image_pixels>, still admits a full-page A4 or
+Letter scan at 400 DPI.  C<0> disables the check.  Dimensions are read from the
+image data as for C<image_ocr_min_width>.  For a TIFF they are those of its
+largest page.  For a GIF they are the larger of its screen and its image.  A
+HEIF image is checked before conversion to PNG and again after it.
+
+While the check is on, an image whose dimensions cannot be determined is not
+OCR'd.  A message with an image that is not OCR'd for its size gets the
+C<IMAGE_PIXEL_LIMIT_EXCEEDED> rule.  A GIF with more than one image is never
+OCR'd, since tesseract does not read one.
+
 =back
 
 =cut
@@ -165,6 +179,12 @@ sub set_config {
       setting => 'image_ocr_min_height',
       is_admin => 1,
       default => 0,
+      type => $Mail::SpamAssassin::Conf::CONF_TYPE_NUMERIC,
+    },
+    {
+      setting => 'image_ocr_max_pixels',
+      is_admin => 1,
+      default => 25_000_000,
       type => $Mail::SpamAssassin::Conf::CONF_TYPE_NUMERIC,
     },
     {
@@ -324,9 +344,10 @@ sub handle_image {
   # can read.  An undef type means the bytes are not one of our known rasters --
   # most importantly image/svg+xml (XML, not a bitmap), which reaches this
   # image/* handler when no SVG handler is loaded, but also unknown or corrupt
-  # blobs.  Feeding any of those to tesseract is a wasted fork (and can emit junk
-  # text), so skip them.  ($w/$h may still be undef for a recognised type -- e.g.
-  # HEIF, whose dimensions come from the converted PNG -- so gate on $type only.)
+  # blobs and a GIF with more than one image.
+  # Feeding any of those to tesseract is a wasted fork (and can emit junk
+  # text), so skip them.  ($w/$h may still be undef for a recognised type, so
+  # gate on $type only.)
   if (!defined $type) {
     dbg("image: skipping OCR, unrecognised image format (type %s)",
         $node->{type} // '?');
@@ -344,6 +365,9 @@ sub handle_image {
       return [];
     }
   }
+  # ...and images too large to decode safely, or of unknown size (see
+  # _over_max_pixels).
+  return [] if $self->_over_max_pixels($pms, $w, $h);
 
   # HEIF/HEIC must be converted to PNG before tesseract.  _heif_to_png returns a
   # ref to the converted bytes, which becomes the new source for OCR.
@@ -351,6 +375,10 @@ sub handle_image {
     my $pngref = $self->_heif_to_png($pms, $dataref);
     return [] unless defined $pngref;   # no converter, or conversion failed
     $dataref = $pngref;
+    # The size read from the HEIF file is what the file declares.  This is
+    # the size of what the converter made of it.
+    my (undef, $pw, $ph) = $self->_image_info($dataref);
+    return [] if $self->_over_max_pixels($pms, $pw, $ph);
   }
 
   my $text = $self->_ocr($pms, $dataref, $node->{type});
@@ -379,6 +407,25 @@ sub handle_image {
       length $text, $word_count, $node->{type} || '?');
 
   return [];
+}
+
+# Pixel cap: true (after logging) if the image is larger than
+# image_ocr_max_pixels or its size is unknown.  The size that _image_info
+# reads and the size that tesseract decodes come from two readers of the same
+# bytes, so an image that _image_info cannot measure is not passed on.
+sub _over_max_pixels {
+  my ($self, $pms, $w, $h) = @_;
+  my $maxpx = $pms->{conf}->{image_ocr_max_pixels} || 0;
+  return 0 unless $maxpx > 0;
+  if (!defined $w || !defined $h) {
+    dbg("image: skipping OCR, size unknown");
+  } elsif ($w * $h > $maxpx) {
+    dbg("image: skipping OCR, %dx%d exceeds max %d pixels", $w, $h, $maxpx);
+  } else {
+    return 0;
+  }
+  $pms->{msg}->{image_pixel_limit_exceeded} = 1;
+  return 1;
 }
 
 # Resolve the tesseract binary lazily, on first use, and cache the result.
@@ -439,10 +486,12 @@ sub _resolve_binary {
 # routinely mismatched to dodge OCR, so we read the bytes directly.  Takes a
 # scalar ref to the (possibly large) bytes to avoid copying.  Returns
 # ($type, $width, $height):
-#   $type   - 'png'/'jpeg'/'gif'/'webp'/'bmp'/'heif', or undef if unrecognized.
-#   $width  - pixels, or undef if not parseable (HEIF, or a corrupt/truncated
-#   $height   header).  HEIF is identified for conversion but its dimensions are
-#             not read here (we OCR the converted PNG instead).
+#   $type   - 'png'/'jpeg'/'gif'/'webp'/'bmp'/'heif', or undef if unrecognized
+#             or a GIF with more than one image.
+#   $width  - pixels, or undef if not parseable (a corrupt/truncated header, a
+#   $height   TIFF with a page that cannot be measured).  For a TIFF they are
+#             those of the largest page, for a HEIF file those of the largest
+#             image it declares.
 # Byte offsets adapted from Plugin::ImageInfo; defensive throughout.
 sub _image_info {
   my ($self, $dataref) = @_;
@@ -455,10 +504,17 @@ sub _image_info {
     return ('png', ($w && $h) ? ($w, $h) : (undef, undef));
   }
 
-  # GIF: "GIF87a"/"GIF89a", then width/height as little-endian uint16.
+  # GIF: "GIF87a"/"GIF89a", then the screen's width/height as little-endian
+  # uint16.  The image that follows has a size of its own, which is what a
+  # decoder allocates, so take the larger of the two.
   if (substr($$dataref, 0, 6) =~ /^GIF8[79]a$/) {
     my ($w, $h) = unpack('vv', substr($$dataref, 6, 4));
-    return ('gif', ($w && $h) ? ($w, $h) : (undef, undef));
+    my ($iw, $ih, $more) = _gif_image_size($dataref);
+    # leptonica decodes every image of a GIF, then reads none of a file that
+    # has more than one
+    return (undef, undef, undef) if $more;
+    return ('gif', undef, undef) unless $w && $h && $iw && $ih;
+    return ('gif', $iw * $ih > $w * $h ? ($iw, $ih) : ($w, $h));
   }
 
   # JPEG: SOI (FFD8), then walk segments to a Start-Of-Frame marker, whose
@@ -466,6 +522,10 @@ sub _image_info {
   if (substr($$dataref, 0, 2) eq "\xFF\xD8") {
     my $pos = 2;
     while ($pos + 4 <= $len) {
+      # a marker may have any number of fill bytes (FF) in front of it
+      pos($$dataref) = $pos;
+      $pos = pos($$dataref) - 1 if $$dataref =~ /\G\xFF+/g;
+      pos($$dataref) = undef;
       my ($ff, $mark, $seg) = unpack('CCn', substr($$dataref, $pos, 4));
       last if $ff != 0xFF || $mark == 0xDA || $mark == 0xD9 || $seg < 2;
       if ( ($mark >= 0xC0 && $mark <= 0xC3) || ($mark >= 0xC5 && $mark <= 0xC7) ||
@@ -514,20 +574,24 @@ sub _image_info {
 
   # TIFF: "II\x2a\x00" (little-endian) or "MM\x00\x2a" (big-endian), then the
   # offset of the first IFD.  Dimensions come from the ImageWidth (256) and
-  # ImageLength (257) tags, which may be SHORT or LONG.  Only the first IFD is
-  # read: a multi-page TIFF is measured by its first page, which is what an image
-  # reader shows and enough for the size gate.
+  # ImageLength (257) tags, which may be SHORT or LONG.  Every IFD is read,
+  # since tesseract reads every page: the dimensions returned are those of the
+  # largest page.
   if (substr($$dataref, 0, 4) eq "II\x2a\x00" ||
       substr($$dataref, 0, 4) eq "MM\x00\x2a") {
     my $le = substr($$dataref, 0, 2) eq 'II';
     my $ifd = unpack($le ? 'V' : 'N', substr($$dataref, 4, 4));
-    my ($w, $h);
+    my ($w, $h, %seen);
     # Guard every read against a truncated or bogus offset; a malformed TIFF must
-    # fall through as a known type with unknown dimensions, not die.
-    if ($ifd >= 8 && $ifd + 2 <= $len) {
+    # fall through as a known type with unknown dimensions, not die.  So must
+    # one with a page that cannot be measured, with over 64 pages or with a
+    # loop in its chain of IFDs.
+    while ($ifd) {
+      return ('tiff', undef, undef)
+        if $ifd < 8 || $ifd + 2 > $len || $seen{$ifd}++ || scalar(keys %seen) > 64;
       my $count = unpack($le ? 'v' : 'n', substr($$dataref, $ifd, 2));
-      $count = 512 if $count > 512;         # sanity cap on entries to walk
-      for my $i (0 .. $count - 1) {
+      my ($pw, $ph);
+      for my $i (0 .. ($count > 512 ? 512 : $count) - 1) {   # sanity cap on entries to walk
         my $e = $ifd + 2 + $i * 12;
         last if $e + 12 > $len;
         my ($tag, $type) = unpack($le ? 'vv' : 'nn', substr($$dataref, $e, 4));
@@ -537,23 +601,72 @@ sub _image_info {
               : $type == 4 ? unpack($le ? 'V' : 'N', substr($$dataref, $e + 8, 4))
               : undef;
         next unless defined $v;
-        $tag == 256 ? ($w = $v) : ($h = $v);
-        last if defined $w && defined $h;
+        $tag == 256 ? ($pw = $v) : ($ph = $v);
+        last if defined $pw && defined $ph;
       }
+      return ('tiff', undef, undef) unless $pw && $ph;
+      ($w, $h) = ($pw, $ph) if !defined $w || $pw * $ph > $w * $h;
+      # the offset of the next IFD follows the entries; 0 ends the chain
+      my $next = $ifd + 2 + $count * 12;
+      $ifd = $next + 4 <= $len ? unpack($le ? 'V' : 'N', substr($$dataref, $next, 4)) : 0;
     }
     return ('tiff', ($w && $h) ? ($w, $h) : (undef, undef));
   }
 
   # ISO-BMFF / HEIF: bytes 4-7 are 'ftyp', bytes 8-11 a brand code.  Identified
-  # for conversion; dimensions read from the converted PNG, not here.
+  # for conversion.  Each image in the file declares its size in an 'ispe'
+  # property: version and flags (0), then width and height as big-endian
+  # uint32.  The dimensions returned are those of the largest.
   if (substr($$dataref, 4, 4) eq 'ftyp') {
     my $brand = substr($$dataref, 8, 4);
-    return ('heif', undef, undef)
-      if $brand =~ /^(?:heic|heix|hevc|hevx|heim|heis|hevm|hevs|
-                        mif1|msf1|heif)$/x;
+    if ($brand =~ /^(?:heic|heix|hevc|hevx|heim|heis|hevm|hevs|
+                       mif1|msf1|heif)$/x) {
+      my ($w, $h);
+      while ($$dataref =~ /ispe\0\0\0\0(.{8})/sg) {
+        my ($iw, $ih) = unpack('NN', $1);
+        ($w, $h) = ($iw, $ih) if !defined $w || $iw * $ih > $w * $h;
+      }
+      return ('heif', ($w && $h) ? ($w, $h) : (undef, undef));
+    }
   }
 
   return (undef, undef, undef);
+}
+
+# The width and height of a GIF's first image, then a true value if another
+# image follows it.  Nothing if the file has no image or does not parse.
+# Nothing either for a file of over a million data blocks: they hold up to
+# 255 bytes each.
+sub _gif_image_size {
+  my ($dataref) = @_;
+  my $len = length $$dataref;
+  my $blocks = 0;
+  my $flags = ord(substr($$dataref, 10, 1));
+  # header and screen descriptor, then the global colour table if there is one
+  my $pos = 13 + ($flags & 0x80 ? 3 * (2 << ($flags & 7)) : 0);
+  my ($w, $h);
+  while ($pos < $len) {
+    my $c = substr($$dataref, $pos, 1);
+    last if $c eq ';';                 # trailer
+    if ($c eq '!') {                   # extension: a label, then data blocks
+      $pos += 2;
+    } elsif ($c eq ',') {              # image descriptor
+      return ($w, $h, 1) if defined $w;
+      return if $pos + 10 > $len;
+      ($w, $h, my $f) = unpack('x5 v v C', substr($$dataref, $pos, 10));
+      # descriptor, local colour table if there is one, LZW code size
+      $pos += 10 + ($f & 0x80 ? 3 * (2 << ($f & 7)) : 0) + 1;
+    } else {
+      return;
+    }
+    # data blocks: a length byte and that many bytes each, ended by a length of 0
+    while ($pos < $len && (my $n = ord(substr($$dataref, $pos, 1)))) {
+      return if ++$blocks > 1_000_000;
+      $pos += 1 + $n;
+    }
+    $pos++;
+  }
+  return ($w, $h);
 }
 
 # Run tesseract on the decoded image bytes, mirroring ExtractText's invocation:
