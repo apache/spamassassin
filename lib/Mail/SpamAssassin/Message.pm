@@ -1501,6 +1501,17 @@ sub _attach_parts {
     # repeated parts are processed once.  The filename itself is excluded, but
     # the type it gives the part decides which handler sees it.
     my $child = $self->_synth_node($cp);
+    # a text part from a handler has no message size to bound it: keep
+    # rawbody_part_scan_size of it
+    my $max_text = $pms->{conf}->{rawbody_part_scan_size};
+    if ($max_text && length($data // '') > $max_text
+        && ($child->effective_type // '') =~ m{^(?:text/|image/svg\+xml\z)}) {
+      dbg("handler: %s part of %d bytes cut to %d",
+          $child->effective_type, length($data), $max_text);
+      $data = substr($data, 0, $max_text);
+      $child = $self->_synth_node({ %$cp, data => $data });
+      $self->{handler_text_truncated} = 1;
+    }
     my $bytes = $data // '';
     utf8::encode($bytes) if utf8::is_utf8($bytes);
     my $key = ($child->effective_type // '') . ':' . sha1_hex($bytes);

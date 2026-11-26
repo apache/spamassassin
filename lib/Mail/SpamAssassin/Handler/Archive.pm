@@ -37,7 +37,7 @@ budgets.
 The handler is intentionally thin: its main job is to make the archive's contents
 visible to the other handlers and to ordinary body rules.  It also provides one
 eval rule, C<check_archive_file_count>, for matching on the number of files an
-archive declares (see L</EVAL RULES>).
+archive holds (see L</EVAL RULES>).
 
 =head1 REQUIREMENTS
 
@@ -66,6 +66,9 @@ extraction with a warning.
 
 Extract at most N files from each archive.  Bounds the work done downstream and
 is a countermeasure against archives that pack a very large number of entries.
+A zip archive with more than 10,000 zip headers is not opened.  An archive has
+two or three headers for each of its files.  The message then gets the
+C<ZIP_ENTRY_LIMIT_EXCEEDED> rule.
 
 =item archive_unrar_path /path/to/unrar
 
@@ -80,12 +83,14 @@ on the C<PATH>.
 
 =item check_archive_file_count(min[, max])
 
-Fires when any archive in the message declares an entry count of at least C<min>
-(and, if C<max> is given and non-zero, at most C<max>).  The count is the
-archive's full declared total -- read from the zip End Of Central Directory
-record, or from C<unrar>'s member listing -- and is therefore independent of
-C<archive_max_files>: an archive that packs thousands of files but from which only
-four are extracted still reports its true size.  Useful for flagging archives that
+Fires when any archive in the message has an entry count of at least C<min>
+(and, if C<max> is given and non-zero, at most C<max>).  The count is of the
+entries read from a zip archive's directory, or from C<unrar>'s member listing.
+The number that a zip archive declares is not used, since it need not be true.
+The count is independent of C<archive_max_files>: an archive that packs
+thousands of files but from which only four are extracted still reports its
+true size.  A zip archive that is not opened because it has too many headers
+counts as having more than 10,000 entries.  Useful for flagging archives that
 pack an implausible number of entries.
 
   body  ARC_MANY_FILES   eval:check_archive_file_count(100)
@@ -101,6 +106,7 @@ use strict;
 use warnings;
 use re 'taint';
 
+use Mail::SpamAssassin::Constants qw(MAX_ZIP_HEADERS);
 use Mail::SpamAssassin::Handler;
 use Mail::SpamAssassin::Logger qw(dbg would_log);
 use Mail::SpamAssassin::Timeout;
@@ -138,8 +144,8 @@ sub new {
   $self->register_handler('application/vnd.rar', 'handle_rar');
 
   # check_archive_file_count(min[,max]) fires when any archive in the message
-  # declares an entry count in [min,max].  The count is the archive's full
-  # declared total (EOCD record for zip, member list for rar), independent of how
+  # has an entry count in [min,max].  The count is of the entries read
+  # (directory for zip, member list for rar), independent of how
   # many files archive_max_files actually extracts -- so it sees the true size of
   # an archive that packs far more entries than we open.
   $self->register_eval_rule('check_archive_file_count',
@@ -194,53 +200,13 @@ sub _basename {
   return $name;
 }
 
-# _zip_entry_count(\$data): return the number of files a zip declares, WITHOUT
-# decompressing anything, by reading the End Of Central Directory (EOCD) record.
-# The EOCD sits at the tail of the file: a 22-byte fixed record (signature
-# PK\x05\x06) optionally followed by an archive comment of up to 65535 bytes, so
-# it begins within the last 22+65535 bytes.  Its "total number of central
-# directory records" is a 2-byte little-endian field at offset +10.
-#
-# When that field is 0xFFFF the real count lives in the ZIP64 EOCD record
-# (signature PK\x06\x06), whose "total entries" is an 8-byte little-endian field
-# at offset +32; we read that when present.  Returns undef if no EOCD is found
-# (truncated or non-zip data).
-sub _zip_entry_count {
-  my ($dataref) = @_;
-  my $len = defined $$dataref ? length $$dataref : 0;
-  return if $len < 22;
-
-  # Search backwards for the EOCD signature within the comment window.  Scanning
-  # a bounded tail (not the whole file) keeps this cheap on large archives.
-  my $window = $len < 22 + 0xFFFF ? $len : 22 + 0xFFFF;
-  my $tail   = substr($$dataref, $len - $window);
-  my $pos    = rindex($tail, "PK\x05\x06");
-  return if $pos < 0;
-  return if $pos + 12 > length $tail;   # not enough bytes for the count field
-
-  my $count = unpack('v', substr($tail, $pos + 10, 2));
-
-  # 0xFFFF in the classic EOCD means "see the ZIP64 EOCD for the real count".
-  if ($count == 0xFFFF) {
-    my $z64 = rindex($tail, "PK\x06\x06");
-    if ($z64 >= 0 && $z64 + 40 <= length $tail) {
-      # 8-byte total-entries field; we only trust the low 32 bits (any archive
-      # with >4G entries is pathological and the value is signal enough as-is).
-      my ($lo, $hi) = unpack('VV', substr($tail, $z64 + 32, 8));
-      $count = $hi ? 0xFFFFFFFF : $lo;
-    }
-  }
-
-  return $count;
-}
-
-# Record an archive's declared entry count for check_archive_file_count.  One
+# Record an archive's entry count for check_archive_file_count.  One
 # entry per archive part in the message (a message may carry several).
 sub _record_file_count {
   my ($self, $pms, $count) = @_;
   return unless defined $count;
   push @{ $pms->{Handler}{Archive}{file_counts} }, $count;
-  log_dbg("archive declares $count entries");
+  log_dbg("archive has $count entries");
 }
 
 # handle_zip($node, $pms): extract up to archive_max_files files from a zip
@@ -259,20 +225,29 @@ sub handle_zip {
   my $conf = $pms->{conf} || $self->{main}->{conf};
   my $max  = $conf->{archive_max_files} // DEFAULT_MAX_FILES;
 
-  # Record the archive's full declared entry count (from the EOCD record) before
-  # extracting, so check_archive_file_count sees the true total even though we
-  # only open the first archive_max_files members below.
-  $self->_record_file_count($pms, _zip_entry_count(\$data));
+  if (Mail::SpamAssassin::Util::Zip::header_count(\$data, MAX_ZIP_HEADERS + 1)
+        > MAX_ZIP_HEADERS) {
+    log_dbg("zip has more than ".MAX_ZIP_HEADERS." headers, not opened");
+    $pms->{msg}->{zip_entry_limit_exceeded} = 1;
+    $self->_record_file_count($pms, MAX_ZIP_HEADERS + 1);
+    return [];
+  }
 
-  my $zip = Mail::SpamAssassin::Util::Zip::open_zip(\$data);
+  my $zip = Mail::SpamAssassin::Util::Zip::open_zip(\$data, MAX_ZIP_HEADERS);
   if (!$zip) {
     log_dbg("failed to open zip");
     return [];
   }
 
+  # Record the number of entries that were read, whatever number the archive
+  # declares, so check_archive_file_count sees the true total even though we
+  # only open the first archive_max_files members below.
+  my @members = $zip->members();
+  $self->_record_file_count($pms, scalar @members);
+
   my @parts;
   my $pending = 0;    # size of @parts, counted by the framework on return
-  foreach my $member ($zip->members()) {
+  foreach my $member (@members) {
     last if @parts >= $max;
 
     # Skip directory entries (the framework would just see an empty part).
@@ -551,7 +526,7 @@ sub _run_unrar {
 }
 
 # check_archive_file_count($pms, $min, $max): fire when any archive in the message
-# declares an entry count of at least $min (and, if $max is given and non-zero, at
+# has an entry count of at least $min (and, if $max is given and non-zero, at
 # most $max).  Reads the per-archive counts recorded by handle_zip / handle_rar.
 #
 # Registered as a body eval, so the harness calls it as

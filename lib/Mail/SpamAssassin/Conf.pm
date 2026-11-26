@@ -3831,6 +3831,10 @@ skip them completely. Disabled with 0.
 
 Like body_part_scan_size, for "rawbody" type rules.
 
+It is also the most that is kept of a text part that a handler returns, such
+as an HTML file from an archive.  A message with a part that was cut gets the
+C<HANDLER_TEXT_LIMIT_EXCEEDED> rule.
+
 =cut
 
   push (@cmds, {

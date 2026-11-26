@@ -59,12 +59,15 @@ use constant MAX_ARCHIVES => 4;
 
 =over 4
 
-=item open_zip(\$data)
+=item open_zip(\$data, $max_headers)
 
 Returns an object for the zip archives in C<$data>, or undef if Archive::Zip
 1.34 or later is not installed or no zip archive can be read from the data.  Of
 joined archives, up to 4 are read from the start of the data, and the last one
 is always read.  C<$data> must not change while the object is in use.
+
+With C<$max_headers>, no more Archive::Zip member objects than that are made.
+Data with more zip headers is not read: see C<header_count>.
 
 The object's C<members>, C<memberNamed> and C<membersMatching> methods work as
 those of L<Archive::Zip> do, over all the archives read, in order.
@@ -72,8 +75,16 @@ those of L<Archive::Zip> do, over all the archives read, in order.
 =cut
 
 sub open_zip {
-  my ($dataref) = @_;
+  my ($dataref, $max_headers) = @_;
   return unless HAS_ARCHIVE_ZIP;
+
+  # a read makes no more objects than the data has headers; $room is how many
+  # the reads before it may have made for the total to stay within the limit
+  my $room;
+  if (defined $max_headers) {
+    $room = $max_headers - header_count($dataref, $max_headers + 1);
+    return if $room < 0;
+  }
 
   # an archive ends with its end of central directory record: a signature,
   # disk numbers, entry counts, the central directory's size and offset, and a
@@ -95,10 +106,12 @@ sub open_zip {
     my $zip = _read_zip(\$prefix) or next;
     push @archives, $zip;
     $start = $sig + 22 + unpack('v', substr($$dataref, $sig + 20, 2));
+    last if defined $room && ($room -= $zip->numberOfMembers()) < 0;
   }
 
   # the last archive, read from the whole data as Archive::Zip finds it
-  if (rindex($$dataref, "PK\x05\x06") >= $start) {
+  if ((!defined $room || $room >= 0)
+      && rindex($$dataref, "PK\x05\x06") >= $start) {
     my $zip = _read_zip($dataref);
     push @archives, $zip if $zip;
   }
@@ -138,6 +151,27 @@ sub _read_zip {
   Archive::Zip::setErrorHandler($old_handler);
   return unless $status == Archive::Zip::AZ_OK();
   return $zip;
+}
+
+=item header_count(\$data, $stop)
+
+Returns the number of zip header signatures in C<$data>, counting up to
+C<$stop>.  Archive::Zip makes an object for each header that it reads on its
+way through a central directory.  It takes neither their number nor their kind
+from what the archive declares, so this count is what bounds the objects that
+opening the data can make.  An archive has two or three headers for each of its
+files.
+
+=cut
+
+sub header_count {
+  my ($dataref, $stop) = @_;
+  my $count = 0;
+  while ($$dataref =~ /PK(?:\x01\x02|\x03\x04|\x05\x06|\x06\x06|\x06\x07|\x07\x08)/g) {
+    last if ++$count >= $stop;
+  }
+  pos($$dataref) = undef;
+  return $count;
 }
 
 =item member_contents($member, $limit)

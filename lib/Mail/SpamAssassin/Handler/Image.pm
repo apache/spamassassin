@@ -124,6 +124,7 @@ use Mail::SpamAssassin::Handler;
 use Mail::SpamAssassin::Constants qw(RULENAME_RE IS_RULENAME);
 use Mail::SpamAssassin::Logger qw(dbg info would_log);
 use Mail::SpamAssassin::Timeout;
+use File::Basename ();
 use Mail::SpamAssassin::Util qw(untaint_var untaint_file_path
                                 proc_status_ok exit_status_str compile_regexp);
 
@@ -833,9 +834,23 @@ sub _heif_to_png {
 
   Mail::SpamAssassin::PerMsgStatus::leave_helper_run_mode($pms);
 
-  # Slurp the converted PNG if it was produced.
-  if (!$err && defined $out_file && -s $out_file) {
-    if (open(my $pfh, '<', $out_file)) {
+  # For an input with more than one image heif-dec leaves the named file
+  # empty and writes NAME-1.png, NAME-2.png and so on beside it.
+  my @numbered;
+  if (defined $out_file) {
+    my ($name, $dir) = File::Basename::fileparse($out_file, '.png');
+    if (opendir(my $dh, $dir)) {
+      @numbered = map { untaint_file_path($dir . $_) }
+                  sort grep { index($_, "$name-") == 0 } readdir($dh);
+      closedir($dh);
+    }
+  }
+
+  # Slurp the converted PNG if it was produced: the named file, else the first
+  # numbered one.
+  my ($png_file) = grep { -s $_ } grep { defined } $out_file, @numbered;
+  if (!$err && defined $png_file) {
+    if (open(my $pfh, '<', $png_file)) {
       binmode $pfh;
       local $/;
       $png = <$pfh>;
@@ -845,6 +860,7 @@ sub _heif_to_png {
 
   unlink($in_file)  if defined $in_file;
   unlink($out_file) if defined $out_file;
+  unlink(@numbered) if @numbered;
   unlink($err_file) if defined $err_file;
 
   if ($err) {
