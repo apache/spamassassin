@@ -32,13 +32,13 @@ describe FROM_UNBAL1	From with unbalanced angle brackets, '>' missing
 header   FROM_UNBAL2	From:raw =~ /^ [^<]* > /xm
 describe FROM_UNBAL2	From with unbalanced angle brackets, '<' missing
 
-header   FROM_WSP_TRAIL	From:raw =~ /< [^>]* \s > [^<>]* \z/xm
+header   FROM_WSP_TRAIL	From:raw =~ /< [^<>]* \s > [^<>]* \z/xm
 describe FROM_WSP_TRAIL	Trailing whitespace before '>' in From header field
 
-header   FROM_WSP_LEAD 	From:raw =~ /< \s+ [^>\s] [^>]* > [^<>]* \z/xm
+header   FROM_WSP_LEAD 	From:raw =~ /< \s+ [^>\s] (?: (?! < \s+ [^>\s] ) [^>] )* > [^<>]* \z/xm
 describe FROM_WSP_LEAD	Leading whitespace after '<' in From header field
 
-header   MSGID_WSP_TRAIL Message-ID:raw =~ /< [^>]* \s > [^<>]* \z/xm
+header   MSGID_WSP_TRAIL Message-ID:raw =~ /< [^<>]* \s > [^<>]* \z/xm
 describe MSGID_WSP_TRAIL Trailing whitespace before '>' in Message-ID header
 
 header   __MSGID_NOFQDN1  Message-ID =~ /<[^\@]*>/m

@@ -25,7 +25,7 @@
 
 #RULES DEMOTED FROM INCLUDED RULES FOR MASSCHECK
 
-header 		MSGID_MULTIPLE_AT	MESSAGEID =~ /<[^>]*\@[^>]*\@/
+header 		MSGID_MULTIPLE_AT	MESSAGEID =~ /<[^<>]*\@[^>]*\@/
 describe 	MSGID_MULTIPLE_AT	Message-ID contains multiple '@' characters
 score 		MSGID_MULTIPLE_AT	0.001
 

@@ -49,7 +49,7 @@ meta       __PHP_MUA_2                 __XM_PHP_V2
 meta       __PHP_MUA                   __XM_PHP
 
 # from spample on users list 7/20/2011
-header      __XM_PHPMAILER_FORGED  X-Mailer =~ /PHPMailer\s.*version\D+$/
+header      __XM_PHPMAILER_FORGED  X-Mailer =~ /PHPMailer\s(?>.*version)[^\d\n]*$/m
 
 # from spample on users list 7/24/2011
 header      __XM_EC_MESSENGER      X-Mailer =~ /\beC-Messenger\b/

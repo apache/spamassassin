@@ -54,7 +54,7 @@ header __FROM_ALL_NUMS		From:addr =~ /^(?:\d{1,9}|[02-9]\d{10}|\d{12,})@/
 header FROM_OFFERS		From:addr =~ /\@\S*offers(?![eo]n\b)/i
 describe FROM_OFFERS		From address is "at something-offers"
 
-header FROM_NO_USER		From =~ /(?:^\@|<\@| \@[^\)<]*$|<>)/ [if-unset: unset@unset.unset]
+header FROM_NO_USER		From =~ /(?:^\@|<\@| \@(?:(?! \@)[^\)<])*$|<>)/ [if-unset: unset@unset.unset]
 describe FROM_NO_USER		From: has no local-part before @ sign
 
 # also 100% valid
@@ -89,7 +89,7 @@ header __MSGID_RANDY		Message-ID =~ /<[a-z\d][a-z\d\$-]{10,29}[a-z\d]\@[a-z\d][a
 # heuristic to eliminate most good Message-ID formats
 header __MSGID_OK_HEX		Message-ID =~ /\b[a-f\d]{8}\b/
 header __MSGID_OK_DIGITS	Message-ID =~ /\d{10}/
-header __MSGID_OK_HOST		Message-ID =~ /\@(?:\D{2,}|(?:\d{1,3}\.){3}\d{1,3})>/
+header __MSGID_OK_HOST		Message-ID =~ /\@(?:\D{2}[^\d>\@]*[^\d>]{0,2}|(?:\d{1,3}\.){3}\d{1,3})>/
 meta MSGID_RANDY	(__MSGID_RANDY && !(__MSGID_OK_HEX || __MSGID_OK_DIGITS || __MSGID_OK_HOST))
 describe MSGID_RANDY		Message-Id has pattern used in spam
 
