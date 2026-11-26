@@ -1419,7 +1419,7 @@ uri         __URI_GOOG_MC        /(?!(?-i:[Gg]oogle))google/i
 rawbody     __HTML_FONT_TINY_01      /font-size:\s{0,5}[0-4]px;/i
 rawbody     __HTML_FONT_TINY_02      /<font\s[^>]{0,80}size\s*=\s*["']?-(?:[2-9]|[1-9]\d+)["']?[^>]{0,80}>/i
 rawbody     __HTML_FONT_TINY_03      /<font\s[^>]{0,80}size\s*=\s*["']?-\d+["']?[^>]{0,80}>/i
-rawbody     __AC_TINY_FONT           /(?:font-size)\s*:\s*[1-3]\s*(?:em|p[tx]|%)?(?:\s*!important)?\s*[";]/i
+rawbody     __AC_TINY_FONT           /(?:font-size)\s*+:\s*+[1-3]\s*+(?:(?:em|p[tx]|%)\s*+)?(?:!important\s*+)?[";]/i
 meta        __HTML_FONT_TINY_NORDNS  (__HTML_FONT_TINY_01 || __HTML_FONT_TINY_02 || __AC_TINY_FONT) && __RDNS_NONE 
 meta        HTML_FONT_TINY_NORDNS    __HTML_FONT_TINY_NORDNS && !__HAS_CID 
 describe    HTML_FONT_TINY_NORDNS    Font too small to read, no rDNS
@@ -2390,7 +2390,7 @@ tflags         URI_GOOGLE_PROXY       publish
 #meta           RPATH_NULL_CTCQ        __BOUNCE_RPATH_NULL && __CTYPE_CHARSET_QUOTED && !__VIA_ML && !__SUBJECT_ENCODED_QP && !ANY_BOUNCE_MESSAGE && !__DOS_HAS_LIST_UNSUB && !__TAG_EXISTS_STYLE && !__TAG_EXISTS_STYLE && !__HAS_THREAD_INDEX 
 #score          RPATH_NULL_CTCQ        2.000   # limit
 
-rawbody        __TENWORD_GIBBERISH    /^\s*(?:[a-z]+\s+){10}\.$/m
+rawbody        __TENWORD_GIBBERISH    /^\s*+(*SKIP)(?:[a-z]++\s++){10}\.$/m
 tflags         __TENWORD_GIBBERISH    multiple maxhits=21
 meta           TW_GIBBERISH_MANY      __TENWORD_GIBBERISH > 20
 describe       TW_GIBBERISH_MANY      Lots of gibberish text to spoof pattern matching filters
