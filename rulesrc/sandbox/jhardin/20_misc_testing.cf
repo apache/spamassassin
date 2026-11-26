@@ -274,14 +274,14 @@ describe       FROM_MISSP_DYNIP      From misspaced + dynamic rDNS
 
 
 # observed in spam 8/2009
-header         __MUA_EQ_ORG_1        ALL =~ /\nX-Mailer: ([^\n]+)\n.*Organization: \1\n/ism
-header         __MUA_EQ_ORG_2        ALL =~ /\nOrganization: ([^\n]+)\n.*X-Mailer: \1\n/ism
+header         __MUA_EQ_ORG_1        ALL =~ /\nX-Mailer: ([^\n]+)\n(?:[^\n]*\n){0,100}Organization: \1\n/ism
+header         __MUA_EQ_ORG_2        ALL =~ /\nOrganization: ([^\n]+)\n(?:[^\n]*\n){0,100}X-Mailer: \1\n/ism
 meta           MAILER_EQ_ORG         __MUA_EQ_ORG_1 || __MUA_EQ_ORG_2
 describe       MAILER_EQ_ORG         X-Mailer: same as Organization:
 #tflags         MAILER_EQ_ORG         publish
 
-header         __FROM_EQ_ORG_1       ALL =~ /\nFrom: "?([^\n]+)"? <[^>]+>\n.*Organization: \1\n/ism
-header         __FROM_EQ_ORG_2       ALL =~ /\nOrganization: ([^\n]+)\n.*From: "?\1"?/ism
+header         __FROM_EQ_ORG_1       ALL =~ /\nFrom: "?([^\n]+)"? <[^<>]+>\n(?:[^\n]*\n){0,100}Organization: \1\n/ism
+header         __FROM_EQ_ORG_2       ALL =~ /\nOrganization: ([^\n]+)\n(?:[^\n]*\n){0,100}From: "?\1"?/ism
 #meta           FROM_EQ_ORG           __FROM_EQ_ORG_1 || __FROM_EQ_ORG_2
 #describe       FROM_EQ_ORG           From: same as Organization:
 #tflags         FROM_EQ_ORG           publish
@@ -482,8 +482,8 @@ describe       TINY_FLOAT         Has small-font floating HTML - text obfuscatio
 
 
 # endless requests on the users list...
-header         __TO_EQ_FROM_1       ALL =~ /\nFrom: (?:[^\n<]{0,80}<)?([^\n\s>]+)>?\n+(?:[^\n]{1,100}\n+)*To: (?:[^\n]{0,80}<)?\1[>,\s\n]/ism
-header         __TO_EQ_FROM_2       ALL =~ /\nTo: (?:[^\n<]{0,80}<)?([^\n\s>]+)>?\n+(?:[^\n]{1,100}\n+)*From: (?:[^\n]{0,80}<)?\1[>,\s\n]/ism
+header         __TO_EQ_FROM_1       ALL =~ /\nFrom: (?:[^\n<]{0,80}<)?([^\n\s>]+)>?\n+(?:[^\n]{1,100}\n+){0,100}To: (?:[^\n]{0,80}<)?\1[>,\s\n]/ism
+header         __TO_EQ_FROM_2       ALL =~ /\nTo: (?:[^\n<]{0,80}<)?([^\n\s>]+)>?\n+(?:[^\n]{1,100}\n+){0,100}From: (?:[^\n]{0,80}<)?\1[>,\s\n]/ism
 meta           __TO_EQ_FROM         (__TO_EQ_FROM_1 || __TO_EQ_FROM_2)
 describe       __TO_EQ_FROM         To: same as From:
 #tflags         __TO_EQ_FROM         publish
@@ -495,23 +495,23 @@ describe       __TO_EQ_FROM         To: same as From:
 #    header        __GB_FROM_ADDR       From:addr =~ /(?<GB_FROM_ADDR>.*)/
 #    header        __SUBJ_HAS_FROM_1    Subject =~ /%{GB_FROM_ADDR}/i
 #else
-    header        __SUBJ_HAS_FROM_1    ALL =~ /\nFrom: (?:[^\n<]{0,80}<)?([^\n\s>]+)>?\n+(?:[^\n]{1,100}\n+)*Subject: [^\n]{0,100}\1[>,:\s\n]/ism
+    header        __SUBJ_HAS_FROM_1    ALL =~ /\nFrom: (?:[^\n<]{0,80}<)?([^\n\s>]+)>?\n+(?:[^\n]{1,100}\n+){0,100}Subject: [^\n]{0,100}\1[>,:\s\n]/ism
 #endif
 meta           FROM_IN_TO_AND_SUBJ  (__TO_EQ_FROM && __SUBJ_HAS_FROM_1) && !__HAS_LIST_ID 
 describe       FROM_IN_TO_AND_SUBJ  From address is in To and Subject
 tflags         FROM_IN_TO_AND_SUBJ  publish
 
-header         __SUBJ_HAS_TO_1      ALL =~ /\nTo: (?:[^\n<]{0,80}<)?([^\n\s>,]+)>?\n+(?:[^\n]{1,200}\n+)*Subject: [^\n]{0,100}\1[^a-z0-9]/ism
-header         __SUBJ_HAS_TO_2      ALL =~ /\nReceived:[^\n]{0,200} for <?([^\n\s>;]+)>?;(?:[^\n]+\n+)*Subject: [^\n]{0,100}\1[^a-z0-9]/ism
-header         __SUBJ_HAS_TO_3      ALL =~ /\nSubject:(?=[^\n]{0,200}@)[^\n]{0,200}([a-z][a-z0-9_.]{3,80}@(?:[a-z0-9_]{1,80}\.){1,4}[a-z]{2,30})(?:[^\n]+\n+)*To: [^\n]{0,100}\1[^a-z0-9.]/ism
+header         __SUBJ_HAS_TO_1      ALL =~ /\nTo: (?:[^\n<]{0,80}<)?([^\n\s>,]+)>?\n+(?:[^\n]{1,200}\n+){0,100}Subject: [^\n]{0,100}\1[^a-z0-9]/ism
+header         __SUBJ_HAS_TO_2      ALL =~ /\nReceived:[^\n]{0,200} for <?([^\n\s>;]+)>?;(?:[^\n]+\n+){0,100}Subject: [^\n]{0,100}\1[^a-z0-9]/ism
+header         __SUBJ_HAS_TO_3      ALL =~ /\nSubject:(?=[^\n]{0,200}@)[^\n]{0,200}([a-z][0-9_.]{0,77}[a-z0-9_.]{3}@(?:[a-z0-9_]{1,80}\.){1,4}[a-z]{2,30})(?:[^\n]+\n+){0,100}To: [^\n]{0,100}\1[^a-z0-9.]/ism
 meta           __TO_IN_SUBJ         (__SUBJ_HAS_TO_1 || __SUBJ_HAS_TO_2 || __SUBJ_HAS_TO_3)
 meta           TO_IN_SUBJ           __TO_IN_SUBJ && !__VIA_ML && !MISSING_MIMEOLE && !__THREAD_INDEX_GOOD && !__FSL_RELAY_GOOGLE && !__LCL__ENV_AND_HDR_FROM_MATCH && !__HS_SUBJ_RE_FW
 describe       TO_IN_SUBJ           To address is in Subject
 tflags         TO_IN_SUBJ           publish
 score          TO_IN_SUBJ           0.1
 
-header         __SUBJ_HAS_TOUSR_1   ALL =~ /\nTo: (?:[^\n<]{0,80}<)?([^@\n\s>,]+)@[^\n\s>;]+>?\n+(?:[^\n]{1,200}\n+)*Subject: [^\n]{0,100}\1[^a-z0-9]/ism
-header         __SUBJ_HAS_TOUSR_2   ALL =~ /\nReceived:[^\n]{0,200} for <?([^@\n\s>;]+)@[^\n\s>;]+>?;(?:[^\n]+\n+)*Subject: [^\n]{0,100}\1[^a-z0-9]/ism
+header         __SUBJ_HAS_TOUSR_1   ALL =~ /\nTo: (?:[^\n<]{0,80}<)?([^@\n\s>,]+)@[^\n\s>;]+>?\n+(?:[^\n]{1,200}\n+){0,100}Subject: [^\n]{0,100}\1[^a-z0-9]/ism
+header         __SUBJ_HAS_TOUSR_2   ALL =~ /\nReceived:[^\n]{0,200} for <?([^@\n\s>;]+)@[^\n\s>;]+>?;(?:[^\n]+\n+){0,100}Subject: [^\n]{0,100}\1[^a-z0-9]/ism
 meta           __TOUSR_IN_SUBJ      (__SUBJ_HAS_TOUSR_1 || __SUBJ_HAS_TOUSR_2) && !__TO_IN_SUBJ
 
 header         __SUBJ_HAS_ANY_EMAIL Subject =~ /\b[a-z][a-z0-9_.+]+@(?:[a-z][-a-z0-9]+\.)+[a-z]{2,8}\b/i
@@ -547,8 +547,8 @@ endif
 # Paul Stead on SA list 11/2014
 # ++ not liked by perl 5.8.x
 if can(Mail::SpamAssassin::Conf::perl_min_version_5010000)
-  header     __PDS_TO_EQ_FROM_NAME_1  ALL =~ /\nTo: (?:[^\n<]{0,80}<)?([^\n\s>]+)>?\n+(?:[^\n]{1,100}\n+)*From:\W+(\1)([^\n\w<]++<)?((?!\1)[^\n">]++)>?\n/ism
-  header     __PDS_TO_EQ_FROM_NAME_2  ALL =~ /\nFrom:\W+"([\w+.-]+\@[\w.-]+\.\w\w+)(?:[^\n\w<]{0,80}<)?((?!\1)[^\n">]++)>?\n+(?:[^\n]{1,100}\n+)*To: (?:[^\n<]{0,80}<)?(\1)>?/ism
+  header     __PDS_TO_EQ_FROM_NAME_1  ALL =~ /\nTo: (?:[^\n<]{0,80}<)?([^\n\s>]+)>?\n+(?:[^\n]{1,100}\n+){0,100}From:\W+(\1)([^\n\w<]++<)?((?!\1)[^\n">]++)>?\n/ism
+  header     __PDS_TO_EQ_FROM_NAME_2  ALL =~ /\nFrom:\W+(?>"([\w+.-]+\@[\w.-]+?\.\w\w+?)(?:[^\n\w<]{0,80}<)?((?!\1)[^\n">]++)>?\n+)(?:[^\n]{1,100}\n+){0,100}To: (?:[^\n<]{0,80}<)?(\1)>?/ism
 
   meta       PDS_TO_EQ_FROM_NAME      (__PDS_TO_EQ_FROM_NAME_1 || __PDS_TO_EQ_FROM_NAME_2) && !__HAS_SENDER 
   describe   PDS_TO_EQ_FROM_NAME      From: name same as To: address
@@ -575,8 +575,8 @@ header         __FROM_ALL_NUMS      From:addr =~ /^\d+@/
 header         __TO_ALL_NUMS        To:addr =~ /^\d+@/
 meta           __FM_TO_ALL_NUMS     __FROM_ALL_NUMS && __TO_ALL_NUMS
 
-header         __TO_EQ_FROM_DOM_1   ALL =~ /\nFrom: [^\n@]{0,80}@([^\n\s>]+)>?\n+(?:[^\n]{1,100}\n+)*To: [^\n]+@\1[>,\s\n]/ism
-header         __TO_EQ_FROM_DOM_2   ALL =~ /\nTo: [^\n@]{0,80}@([^\n\s>]+)>?\n+(?:[^\n]{1,100}\n+)*From: [^\n]+@\1[>,\s\n]/ism
+header         __TO_EQ_FROM_DOM_1   ALL =~ /\nFrom: [^\n@]{0,80}@([^\n\s>]+)>?\n+(?:[^\n]{1,100}\n+){0,100}To: [^\n]+@\1[>,\s\n]/ism
+header         __TO_EQ_FROM_DOM_2   ALL =~ /\nTo: [^\n@]{0,80}@([^\n\s>]+)>?\n+(?:[^\n]{1,100}\n+){0,100}From: [^\n]+@\1[>,\s\n]/ism
 meta           __TO_EQ_FROM_DOM     (__TO_EQ_FROM_DOM_1 || __TO_EQ_FROM_DOM_2)
 describe       __TO_EQ_FROM_DOM     To: domain same as From: domain
 
@@ -4338,8 +4338,8 @@ tflags      URI_GOOGDRAWPREVIEW        publish
 #score       MAILJET_PILIPOP_REDIR      1.000	# limit
 #tflags      MAILJET_PILIPOP_REDIR      publish
 
-header      __TO_EQ_CC_1               ALL =~ /\nCc: (?:[^\n<]{0,80}<)?([^\n\s>]+)>?\n+(?:[^\n]{1,100}\n+)*To: (?:[^\n]{0,80}<)?\1[>,\s\n]/ism
-header      __TO_EQ_CC_2               ALL =~ /\nTo: (?:[^\n<]{0,80}<)?([^\n\s>]+)>?\n+(?:[^\n]{1,100}\n+)*Cc: (?:[^\n]{0,80}<)?\1[>,\s\n]/ism
+header      __TO_EQ_CC_1               ALL =~ /\nCc: (?:[^\n<]{0,80}<)?([^\n\s>]+)>?\n+(?:[^\n]{1,100}\n+){0,100}To: (?:[^\n]{0,80}<)?\1[>,\s\n]/ism
+header      __TO_EQ_CC_2               ALL =~ /\nTo: (?:[^\n<]{0,80}<)?([^\n\s>]+)>?\n+(?:[^\n]{1,100}\n+){0,100}Cc: (?:[^\n]{0,80}<)?\1[>,\s\n]/ism
 meta        __TO_EQ_CC                 (__TO_EQ_CC_1 || __TO_EQ_CC_2)
 describe    __TO_EQ_CC                 To: same as Cc:
 
