@@ -70,7 +70,7 @@ endif
 
 # spams that are assembled from a Javascript array
 # look for the XOR op
-rawbody __JS_FROMCHARCODE       /String\.fromCharCode\s*\(\s*\S+\s*\[\s*\S+\s*\]\s*\^/
+rawbody __JS_FROMCHARCODE       /String\.fromCharCode\s*\(\s*(?:\S(?:[^\s\[]*+\[|\S++(?<=\[)|\S*+\s+\[)\s*\S+\s*\]\s*\^|\S*?(?=(?:String\.fromCharCode\(?)?(?!\S))(*SKIP)(*FAIL))/
 rawbody __JS_DOCWRITE           /document\.write/
 meta JS_FROMCHARCODE            (__JS_FROMCHARCODE && __JS_DOCWRITE)
 describe JS_FROMCHARCODE        Document is built from a Javascript charcode array
