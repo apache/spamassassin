@@ -237,7 +237,7 @@ our @OPTIONAL_MODULES = (
 },
 {
   module => 'Mail::DKIM',
-  version => '0.39',
+  version => '0.40',
   desc => 'If this module is installed and the DKIM plugin is enabled,
   SpamAssassin will perform DKIM signature verification when DKIM-Signature
   header fields are present in the message headers, and check ADSP rules
