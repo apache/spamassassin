@@ -722,11 +722,11 @@ sub _dkim_load_modules {
           $eval_stat);
     } else {
       my $version = Mail::DKIM::Verifier->VERSION;
-      if (version->parse($version) >= version->parse(0.31)) {
+      if (version->parse($version) >= version->parse(0.39)) {
         dbg("dkim: using Mail::DKIM version $version");
       } else {
         info("dkim: Mail::DKIM $version is older than the required ".
-             "minimal version 0.31, suggested upgrade to 0.37 or later!");
+             "minimal version 0.39, dkim_max_signatures has no effect");
       }
       if (version->parse($version) >= version->parse(0.40)) {
         # Let Mail::DKIM use our interface to Net::DNS::Resolver.

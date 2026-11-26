@@ -237,13 +237,12 @@ our @OPTIONAL_MODULES = (
 },
 {
   module => 'Mail::DKIM',
-  version => '0.31',
-  recommended_min_version => '0.37',
+  version => '0.39',
   desc => 'If this module is installed and the DKIM plugin is enabled,
   SpamAssassin will perform DKIM signature verification when DKIM-Signature
   header fields are present in the message headers, and check ADSP rules
   (e.g. anti-phishing) when a mail message does not contain a valid author
-  domain signature. Version 0.37 or later is needed to fully support ADSP.'
+  domain signature.'
 },
 {
   module => 'DBI',
