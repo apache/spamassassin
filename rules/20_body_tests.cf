@@ -166,6 +166,9 @@ describe PDF_TEXT_LIMIT_EXCEEDED	Message has too much text in PDFs
 body IMAGE_PIXEL_LIMIT_EXCEEDED	eval:check_msg_parse_flags('image_pixel_limit_exceeded')
 describe IMAGE_PIXEL_LIMIT_EXCEEDED	Image too large for OCR, or of unknown size
 
+body HANDLER_TIME_EXCEEDED	eval:check_msg_parse_flags('handler_time_exceeded')
+describe HANDLER_TIME_EXCEEDED	Message parts took too long to handle
+
 endif
 
 ###########################################################################

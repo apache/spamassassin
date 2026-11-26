@@ -55,6 +55,7 @@ use Mail::SpamAssassin::Message::Metadata;
 use Mail::SpamAssassin::Constants qw(:sa);
 use Mail::SpamAssassin::Logger;
 use Mail::SpamAssassin::Timeout;
+use Time::HiRes ();
 
 our @ISA = qw(Mail::SpamAssassin::Message::Node);
 
@@ -1405,13 +1406,19 @@ sub apply_handlers {
     parts_budget => $conf->{handler_max_parts} || 1000,
     deadline     => $permsgstatus->{master_deadline},   # scan-wide; may be undef
     part_secs    => $conf->{handler_time_limit} || 10,
+    secs_left    => $conf->{handler_max_time} || 30,   # for all the calls
     max_depth    => $conf->{handler_max_depth} || 8,
     seen         => {},   # content fingerprint -> seen (cycle/dedup guard)
   };
 
-  # Seed the worklist with every parsed node (containers included).  Synthetic
-  # children are appended as they are produced, driving recursion.
-  my @work = map { [$_, 0] } $self->find_parts(qr/./, 0);
+  # Seed the worklist with every parsed node (containers included), the text
+  # parts first: the time that other parts use up must not keep the text of
+  # the message from being rendered.  Synthetic children are appended as they
+  # are produced, driving recursion.
+  my @nodes = $self->find_parts(qr/./, 0);
+  my @work = map { [$_, 0] }
+    (grep { ($_->effective_type // '') =~ m{^text/} } @nodes),
+    (grep { ($_->effective_type // '') !~ m{^text/} } @nodes);
 
   while (my $item = shift @work) {
     my ($node, $depth) = @$item;
@@ -1440,6 +1447,13 @@ sub apply_handlers {
       next;
     }
 
+    # handler_max_time is used up: this part and those after it are not handled
+    if ($ctx->{secs_left} <= 0) {
+      dbg("handler: handler_max_time used up, parts from %s on not handled", $type);
+      $self->{handler_time_exceeded} = 1;
+      last;
+    }
+
     my $parts = $self->_invoke_handler($handler, $node, $ctx);
     next unless $parts && @$parts;
 
@@ -1456,12 +1470,16 @@ sub _invoke_handler {
   my ($obj, $method) = @$handler;
   my $pms = $ctx->{permsgstatus};
   my $parts;
-  my $t = Mail::SpamAssassin::Timeout->new({ secs => $ctx->{part_secs} });
+  my $secs = $ctx->{part_secs};
+  $secs = $ctx->{secs_left} if $ctx->{secs_left} < $secs;
+  my $start = Time::HiRes::time();
+  my $t = Mail::SpamAssassin::Timeout->new({ secs => $secs });
   $t->run(sub {
     eval { $parts = $obj->$method($node, $pms); 1 }
       or dbg("handler: %s->%s died on %s: %s",
              ref $obj, $method, $node->{type}, $@);
   });
+  $ctx->{secs_left} -= Time::HiRes::time() - $start;
   dbg("handler: %s->%s timed out on %s", ref $obj, $method, $node->{type})
     if $t->timed_out;
   return $parts;

@@ -4655,8 +4655,14 @@ Total extracted-bytes budget across the handler chain for one message.
 =item handler_time_limit n              (default: 10)
 
 Per-invocation timeout, in seconds, for a single handler running on a single
-part.  The whole-pass budget is the existing scan-wide time limit, not a
-separate setting.
+part.
+
+=item handler_max_time n                (default: 30)
+
+Total time, in seconds, for all the handler calls of one message.  The text
+parts of the message are handled first.  Once the time is used up the remaining
+parts are not handled.  The message then gets the C<HANDLER_TIME_EXCEEDED>
+rule.
 
 =cut
 
@@ -4684,6 +4690,13 @@ separate setting.
   push (@cmds, {
     setting => 'handler_time_limit',
     default => 10,
+    is_admin => 1,
+    type => $CONF_TYPE_NUMERIC,
+  });
+
+  push (@cmds, {
+    setting => 'handler_max_time',
+    default => 30,
     is_admin => 1,
     type => $CONF_TYPE_NUMERIC,
   });
