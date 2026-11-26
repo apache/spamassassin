@@ -114,6 +114,11 @@ Whether to use Neural Network, if it is available.
 
 Where NeuralNetwork plugin will store its data.
 
+Per-user files in this directory are named after the lowercased username.
+Every byte of the username other than C<a-z>, C<0-9> and C<< ._@~:,=+- >> is
+written as C<%XX> (uppercase hex), so each username maps to a single file name
+inside this directory.
+
 =item neuralnetwork_min_text_len n (default: 256)
 
 Minimum number of characters of visible text required to run prediction or learning on a message.
@@ -576,7 +581,7 @@ sub _text_to_features {
       if (defined $conf->{neuralnetwork_dsn} && $self && $self->{dbh}) {
         # SQL vocabulary is updated via training-buffer flush at retrain time
       } else {
-        $vocab_path = File::Spec->catfile($nn_data_dir, 'vocabulary-' . lc($self->{main}->{username}) . '.data');
+        $vocab_path = File::Spec->catfile($nn_data_dir, 'vocabulary-' . $self->_user_file_part() . '.data');
         $vocab_path = Mail::SpamAssassin::Util::untaint_file_path($vocab_path);
         eval {
           store(\%vocabulary, $vocab_path) or die "store failed";
@@ -1017,7 +1022,7 @@ sub forget_message {
     # Vocabulary terms were removed, retrain so the model stays consistent
     if ($deleted_count > 0) {
       my $nn_data_dir  = Mail::SpamAssassin::Util::untaint_file_path($conf->{neuralnetwork_data_dir});
-      my $dataset_path = File::Spec->catfile($nn_data_dir, 'fann-' . $lc_user . '.model');
+      my $dataset_path = $self->_model_path($nn_data_dir);
       if (-d $nn_data_dir && -f $dataset_path) {
         my $full_vocab_ref  = $self->_load_vocabulary_from_sql($username);
         my $full_terms      = ref($full_vocab_ref) eq 'HASH' ? ($full_vocab_ref->{terms} || {}) : {};
@@ -1335,7 +1340,7 @@ sub _retrain_from_vocabulary {
     %vocabulary = %{$vocab_ref} if ref($vocab_ref) eq 'HASH';
   }
   if (!keys %{$vocabulary{terms} || {}}) {
-    my $vocab_path = File::Spec->catfile($nn_data_dir, 'vocabulary-' . lc($self->{main}->{username}) . '.data');
+    my $vocab_path = File::Spec->catfile($nn_data_dir, 'vocabulary-' . $self->_user_file_part() . '.data');
     if (-f $vocab_path) {
       eval {
         my $ref = retrieve($vocab_path);
@@ -2562,9 +2567,22 @@ sub _load_model_vocab_from_sql {
   return $vocab_ref;
 }
 
+# Returns the lowercased username as a single file name component for the
+# per-user files in neuralnetwork_data_dir: every byte other than
+# [a-z0-9._@~:,=+-] is written as %XX, so '/' and '\' cannot leave the
+# directory and distinct usernames never share a file.  Names made only of
+# those characters keep the file names they had before.
+sub _user_file_part {
+  my ($self) = @_;
+  my $user = lc($self->{main}->{username} // '');
+  utf8::encode($user) if utf8::is_utf8($user);
+  $user =~ s/([^a-z0-9._\@~:,=+-])/sprintf('%%%02X', ord($1))/ge;
+  return $user;
+}
+
 sub _model_vocab_path {
   my ($self, $nn_data_dir) = @_;
-  return File::Spec->catfile($nn_data_dir, 'model-vocab-' . lc($self->{main}->{username}) . '.data');
+  return File::Spec->catfile($nn_data_dir, 'model-vocab-' . $self->_user_file_part() . '.data');
 }
 
 # the cached model and vocabulary are per user (spamd serves many in turn)
@@ -2585,7 +2603,7 @@ sub signal_user_changed {
 
 sub _model_path {
   my ($self, $nn_data_dir) = @_;
-  return File::Spec->catfile($nn_data_dir, 'fann-' . lc($self->{main}->{username}) . '.model');
+  return File::Spec->catfile($nn_data_dir, 'fann-' . $self->_user_file_part() . '.model');
 }
 
 sub _get_visible_text {
@@ -2697,7 +2715,7 @@ sub _save_meta {
   } else {
     eval {
       my $username   = lc($self->{main}->{username});
-      my $vocab_path = File::Spec->catfile($nn_data_dir, 'vocabulary-' . $username . '.data');
+      my $vocab_path = File::Spec->catfile($nn_data_dir, 'vocabulary-' . $self->_user_file_part() . '.data');
       $vocab_path    = Mail::SpamAssassin::Util::untaint_file_path($vocab_path);
       if (-f $vocab_path) {
         my $ref = retrieve($vocab_path);
@@ -2754,7 +2772,7 @@ sub _load_vocabulary {
     }
 
     if (!keys %{$vocabulary{terms} || {}}) {
-      my $vocab_path = File::Spec->catfile($nn_data_dir, 'vocabulary-' . $username . '.data');
+      my $vocab_path = File::Spec->catfile($nn_data_dir, 'vocabulary-' . $self->_user_file_part() . '.data');
       if (-f $vocab_path) {
         eval {
           my $ref = retrieve($vocab_path);
@@ -2871,7 +2889,7 @@ sub _periodic_retrain_if_needed {
     @current_vocab_keys = sort keys %$terms;
     $current_vocab_size = scalar @current_vocab_keys;
   } else {
-    my $vocab_path = File::Spec->catfile($nn_data_dir, 'vocabulary-' . $username . '.data');
+    my $vocab_path = File::Spec->catfile($nn_data_dir, 'vocabulary-' . $self->_user_file_part() . '.data');
     $vocab_path    = Mail::SpamAssassin::Util::untaint_file_path($vocab_path);
     if (-f $vocab_path) {
       my $ref = eval { retrieve($vocab_path) };
