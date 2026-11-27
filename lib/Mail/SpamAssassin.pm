@@ -617,6 +617,7 @@ sub parse {
   }
 
   Mail::SpamAssassin::Util::clear_content_type_cache();
+  Mail::SpamAssassin::Util::clear_charset_names();
   my $msg = Mail::SpamAssassin::Message->new({
     message=>$message, parsenow=>$parsenow,
     normalize=>$self->{conf}->{normalize_charset},

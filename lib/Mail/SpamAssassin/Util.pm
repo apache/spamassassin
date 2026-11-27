@@ -1305,6 +1305,32 @@ sub decode_dns_question_entry {
 
 ###########################################################################
 
+# Encode keeps every charset name it looks up until the process ends,
+# so a message gets at most this many distinct names looked up.
+use constant MAX_CHARSET_NAMES => 16;
+use constant MAX_CHARSET_NAME_LENGTH => 40;  # RFC 2978
+my %charset_names;  # find_charset_encoding() results, by lowercased name
+
+# Empty the find_charset_encoding() cache.  Mail::SpamAssassin::parse()
+# calls this for each message.
+sub clear_charset_names {
+  %charset_names = ();
+}
+
+# Encode::find_encoding() for a charset name declared in a message
+sub find_charset_encoding {
+  my $name = lc $_[0];
+  return $charset_names{$name} if exists $charset_names{$name};
+  if (length($name) > MAX_CHARSET_NAME_LENGTH ||
+      scalar(keys %charset_names) >= MAX_CHARSET_NAMES) {
+    dbg("util: charset name not looked up: %s", $name);
+    return;
+  }
+  return $charset_names{$name} = Encode::find_encoding($name);
+}
+
+###########################################################################
+
 my %ct_cache;  # parse_content_type() results, by raw header value
 
 # Empty the parse_content_type() cache.  Mail::SpamAssassin::parse() calls

@@ -21,6 +21,7 @@ use warnings FATAL => 'all';
 use Encode qw(find_encoding encode);
 
 use Mail::SpamAssassin::Logger;
+use Mail::SpamAssassin::Util ();
 use Mail::SpamAssassin::Header;
 
 use parent qw(Mail::SpamAssassin::Header);
@@ -192,7 +193,7 @@ sub _process_rfc2231 {
         my ($charset, $value) = ($1, $2);
         $value =~ s/%([0-9A-Fa-f]{2})/pack('C', hex($1))/eg;
         if (length $charset && $charset !~ /^(?:us-ascii|utf-8)$/i) {
-            my $enc = find_encoding($charset);
+            my $enc = Mail::SpamAssassin::Util::find_charset_encoding($charset);
             if (defined $enc) {
                 # Convert to UTF-8 (Encode before 2.77 croaks on UTF-16 with no BOM)
                 my $converted = eval { $utf8->encode($enc->decode($value)) };

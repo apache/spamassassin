@@ -742,7 +742,7 @@ sub _normalize {
       $chset = 'UTF-8'; $decoder = $enc_utf8;
     } else {
       $chset = $charset_declared;
-      $decoder = Encode::find_encoding($chset);
+      $decoder = Mail::SpamAssassin::Util::find_charset_encoding($chset);
       if (!$decoder && $chset =~ /^GB[ -]?18030(?:-20\d\d)?\z/i) {
         $decoder = Encode::find_encoding('GBK');  # a subset of GB18030
         dbg("message: no decoder for a declared charset %s, using GBK",
