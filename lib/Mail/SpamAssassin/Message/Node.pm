@@ -1152,6 +1152,8 @@ sub _decode_header {
       $decoded_result .=
         $encoding eq '' ? $sect->[0] : _normalize($sect->[0], $encoding, 0, 1);
     }
+    # a CR or LF decoded from an encoded word becomes a space
+    $decoded_result =~ s/[\015\012]+/ /g;
     $header_field_body = $decoded_result;
   }
 

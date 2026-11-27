@@ -14,7 +14,7 @@ use Mail::SpamAssassin;
 
 use constant HAS_EMAIL_ADDRESS_XS => eval { require Email::Address::XS; };
 
-my $tests = 52;
+my $tests = 53;
 $tests *= 2 if (HAS_EMAIL_ADDRESS_XS);
 plan tests => $tests;
 
@@ -133,6 +133,7 @@ Hdr1:    foo
 To_bug5201_a: =?ISO-2022-JP?B?GyRCQjw+ZRsoQiAbJEI1V0JlGyhC?= <jm@foo>
 To_bug5201_b: =?ISO-2022-JP?B?GyRCNiVHTyM3JSQlcyU1JSQlQCE8PnBKcxsoQg==?= <jm@foo>
 To_bug5201_c: "joe+foobar@example.com"
+Hdr2: =?utf-8?Q?foo=0Abar=0Dbaz=0D=0Aend?=
 From1: Foo Blah
 From2: <jm@foo>, "'Foo Blah'" <jm@bar>, =?utf-8?Q?'Baz Bl=C3=A4h'?= <baz@blaeh>
 From3: =?utf-8?Q?"B=C3=A4z=C3=A4=C3=A4_=28baz=40blah.?= =?utf-8?Q?com=29"?= <jm@foo>
@@ -187,6 +188,7 @@ ok(try('To13:addr', 'jm@foo'));
 ok(try('To13:name', 'Some User <"Some User"@bar>'));
 ok(try('Hdr1', "foo   bar baz\n"));
 ok(try('Hdr1:raw', "    foo  \n  bar\n\tbaz \n  \n"));
+ok(try('Hdr2', "foo bar baz end\n"));
 ok(try('To_bug5201_a:addr', 'jm@foo'));
 ok(try('To_bug5201_a:name', '村上 久代'));
 ok(try('To_bug5201_b:addr', 'jm@foo'));
