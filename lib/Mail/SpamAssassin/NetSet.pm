@@ -316,8 +316,11 @@ sub contains_ip {
     my $t0 = time;
     my ($ip4, $ip6);
     if ($ip =~ /^\d+\./) {
-      $ip4 = NetAddr::IP->new($ip);
-      $ip6 = $self->_convert_ipv4_cidr_to_ipv6($ip);
+      my $ipv4 = $ip;
+      $ipv4 = sprintf('%d.%d.%d.%d', $1,$2,$3,$4)  # strip leading zeroes
+        if $ip =~ /^(\d+)\.(\d+)\.(\d+)\.(\d+)\z/;
+      $ip4 = NetAddr::IP->new($ipv4);
+      $ip6 = $self->_convert_ipv4_cidr_to_ipv6($ipv4);
     } else {
       $ip6 = NetAddr::IP->new($ip);
     }
