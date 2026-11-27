@@ -1798,12 +1798,13 @@ sub accept_a_conn {
   if (/(PROCESS|CHECK|SYMBOLS|REPORT|HEADERS|REPORT_IFSPAM) SPAMC\/(.*)/) {
     my $method = $1;
     my $version = $2;
+    my %objs;
     eval {
       Mail::SpamAssassin::Util::trap_sigalrm_fully(sub {
                           die "child processing timeout";
                         });
       alarm $timeout_child if ($timeout_child);
-      check($method, $version, $start, $remote_hostname, $remote_hostaddr);
+      check(\%objs, $method, $version, $start, $remote_hostname, $remote_hostaddr);
     };
     alarm 0;
 
@@ -1813,6 +1814,8 @@ sub accept_a_conn {
       } else {
 	warn "spamd: $@";
       }
+      # the die skipped the finish() calls at the end of check()
+      $_->finish() for grep { defined } @objs{qw(status mail)};
       $client->close();
       return 0;
     }
@@ -1821,12 +1824,13 @@ sub accept_a_conn {
   elsif (/(TELL) SPAMC\/(.*)/) {
     my $method = $1;
     my $version = $2;
+    my %objs;
     eval {
       Mail::SpamAssassin::Util::trap_sigalrm_fully(sub {
 						     die "child processing timeout";
 						   });
       alarm $timeout_child if ($timeout_child);
-      dotell($method, $version, $start, $remote_hostname, $remote_hostaddr);
+      dotell(\%objs, $method, $version, $start, $remote_hostname, $remote_hostaddr);
     };
     alarm 0;
 
@@ -1836,6 +1840,8 @@ sub accept_a_conn {
       } else {
 	warn "spamd: $@";
       }
+      # the die skipped the finish() call at the end of dotell()
+      $objs{mail}->finish() if $objs{mail};
       $client->close();
       return 0;
     }
@@ -2012,7 +2018,7 @@ sub parse_msgids {
 }
 
 sub check {
-  my ( $method, $version, $start_time, $remote_hostname, $remote_hostaddr ) = @_;
+  my ( $objs, $method, $version, $start_time, $remote_hostname, $remote_hostaddr ) = @_;
   local ($_);
   my $expected_length;
   my $compress_zlib;
@@ -2043,6 +2049,7 @@ sub check {
   my ($mail, $actual_length) = parse_body($client, $expected_length,
                                           $compress_zlib, $start_time);
   return 0 unless defined($mail);       # error
+  $objs->{mail} = $mail;                # for the caller after a die
 
   if ($compress_zlib) {
     $expected_length = $actual_length;  # previously it was the gzipped length
@@ -2071,6 +2078,7 @@ sub check {
   # Go ahead and check the message
   $spamtest->init(1);
   my $status = Mail::SpamAssassin::PerMsgStatus->new($spamtest, $mail);
+  $objs->{status} = $status;
   $status->check();
 
   my $msg_score     =  &Mail::SpamAssassin::Util::get_tag_value_for_score($status->get_score, $status->get_required_score, $status->is_spam);
@@ -2222,7 +2230,7 @@ sub check {
 }
 
 sub dotell {
-  my ($method, $version, $start_time, $remote_hostname, $remote_hostaddr) = @_;
+  my ($objs, $method, $version, $start_time, $remote_hostname, $remote_hostaddr) = @_;
   local ($_);
 
   my $hdrs = {};
@@ -2275,6 +2283,7 @@ sub dotell {
     parse_body($client, $expected_length, $compress_zlib, $start_time);
 
   return 0 unless defined($mail);       # error
+  $objs->{mail} = $mail;                # for the caller after a die
 
   if ($compress_zlib) {
     $expected_length = $actual_length;  # previously it was the gzipped length
@@ -2283,7 +2292,7 @@ sub dotell {
   if ( $mail->get_header("X-Spam-Checker-Version") ) {
     my $new_mail = $spamtest->parse($spamtest->remove_spamassassin_markup($mail), 1);
     $mail->finish();
-    $mail = $new_mail;
+    $mail = $objs->{mail} = $new_mail;
   }
 
   # attempt to fetch the message ids
