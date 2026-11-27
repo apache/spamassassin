@@ -5,7 +5,7 @@ use SATest; sa_t_init("freemail");
 
 use Test::More;
 
-plan tests => 35;
+plan tests => 37;
 
 # ---------------------------------------------------------------------------
 
@@ -205,6 +205,26 @@ foreach my $tld ('aa1', 'aa2') {
   my $status = $sa->check($sa->parse("Content-Type: text/html\n\n"
     . "<a href=\"mailto:joe\@mail.aa1\">1</a> <a href=\"mailto:joe\@mail.aa2\">2</a>\n"));
   ok($status->get_names_of_tests_hit() =~ /\b$rule\b/);
+  $status->finish();
+  $sa->finish();
+}
+
+## A From address that is also a Reply-To address
+
+foreach my $case (['b', 0], ['d', 1]) {
+  my ($local, $hit) = @$case;
+  my $sa = create_saobj({
+    config_text => "loadplugin Mail::SpamAssassin::Plugin::Check\n"
+      . "loadplugin Mail::SpamAssassin::Plugin::FreeMail\n"
+      . "freemail_domains gmail.com\n"
+      . "header FM_REPLYTO eval:check_freemail_replyto('replyto')\n"
+      . "score FM_REPLYTO 1\n",
+    dont_copy_prefs => 1,
+  });
+  $sa->init(0);
+  my $status = $sa->check($sa->parse("From: a\@gmail.com, b\@gmail.com\n"
+    . "Reply-To: c\@example.com, $local\@gmail.com\n\nhello\n"));
+  is(($status->get_names_of_tests_hit() =~ /\bFM_REPLYTO\b/) ? 1 : 0, $hit);
   $status->finish();
   $sa->finish();
 }

@@ -599,9 +599,10 @@ sub check_freemail_replyto {
     my $from_is_fm = grep { $self->_is_freemail($_, $pms) } @from_addrs;
     my $replyto_is_fm = grep { $self->_is_freemail($_, $pms) } @replyto_addrs;
 
+    my %in_replyto = map { $_ => 1 } @replyto_addrs;
     my $from_not_in_replyto = 1;
     foreach my $from (@from_addrs) {
-        next unless grep { $_ eq $from } @replyto_addrs;
+        next unless $in_replyto{$from};
         $from_not_in_replyto = 0;
     }
 
